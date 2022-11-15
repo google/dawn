@@ -25,7 +25,6 @@
 #include "src/tint/ast/continue_statement.h"
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/external_texture.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/increment_decrement_statement.h"
@@ -2189,24 +2188,17 @@ Maybe<const ast::CaseSelector*> ParserImpl::case_selector() {
 // case_body
 //   :
 //   | statement case_body
-//   | FALLTHROUGH SEMICOLON
 Maybe<const ast::BlockStatement*> ParserImpl::case_body() {
     StatementList stmts;
     while (continue_parsing()) {
         Source source;
         if (match(Token::Type::kFallthrough, &source)) {
-            if (!expect("fallthrough statement", Token::Type::kSemicolon)) {
-                return Failure::kErrored;
-            }
-
-            deprecated(source,
-                       "fallthrough is set to be removed from WGSL. "
-                       "Case can accept multiple selectors if the existing case bodies are empty. "
-                       "(e.g. `case 1, 2, 3:`) "
-                       "`default` is a valid case selector value. (e.g. `case 1, default:`)");
-
-            stmts.Push(create<ast::FallthroughStatement>(source));
-            break;
+            return add_error(
+                source,
+                "fallthrough is not premitted in WGSL. "
+                "Case can accept multiple selectors if the existing case bodies are empty. "
+                "(e.g. `case 1, 2, 3:`) "
+                "`default` is a valid case selector value. (e.g. `case 1, default:`)");
         }
 
         auto stmt = statement();

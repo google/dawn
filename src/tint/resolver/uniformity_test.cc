@@ -3013,49 +3013,6 @@ fn foo() {
     RunTest(src, true);
 }
 
-TEST_F(UniformityAnalysisTest, Switch_NonUniformBreakInDifferentCase_Fallthrough) {
-    std::string src = R"(
-@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
-@group(0) @binding(0) var<uniform> condition : i32;
-
-fn foo() {
-  switch (condition) {
-    case 0: {
-      if (non_uniform == 42) {
-        break;
-      }
-      fallthrough;
-    }
-    case 42: {
-      workgroupBarrier();
-    }
-    default: {
-    }
-  }
-}
-)";
-
-    RunTest(src, false);
-    EXPECT_EQ(
-        error_,
-        R"(test:11:7 warning: use of deprecated language feature: fallthrough is set to be removed from WGSL. Case can accept multiple selectors if the existing case bodies are empty. (e.g. `case 1, 2, 3:`) `default` is a valid case selector value. (e.g. `case 1, default:`)
-      fallthrough;
-      ^^^^^^^^^^^
-
-test:14:7 warning: 'workgroupBarrier' must only be called from uniform control flow
-      workgroupBarrier();
-      ^^^^^^^^^^^^^^^^
-
-test:8:7 note: control flow depends on non-uniform value
-      if (non_uniform == 42) {
-      ^^
-
-test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
-      if (non_uniform == 42) {
-          ^^^^^^^^^^^
-)");
-}
-
 TEST_F(UniformityAnalysisTest, Switch_VarBecomesNonUniformInDifferentCase_WithBreak) {
     std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
@@ -3080,50 +3037,6 @@ fn foo() {
 )";
 
     RunTest(src, true);
-}
-
-TEST_F(UniformityAnalysisTest, Switch_VarBecomesNonUniformInDifferentCase_WithFallthrough) {
-    std::string src = R"(
-@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
-@group(0) @binding(0) var<uniform> condition : i32;
-
-fn foo() {
-  var x = 0;
-  switch (condition) {
-    case 0: {
-      x = non_uniform;
-      fallthrough;
-    }
-    case 42: {
-      if (x == 0) {
-        workgroupBarrier();
-      }
-    }
-    default: {
-    }
-  }
-}
-)";
-
-    RunTest(src, false);
-    EXPECT_EQ(
-        error_,
-        R"(test:10:7 warning: use of deprecated language feature: fallthrough is set to be removed from WGSL. Case can accept multiple selectors if the existing case bodies are empty. (e.g. `case 1, 2, 3:`) `default` is a valid case selector value. (e.g. `case 1, default:`)
-      fallthrough;
-      ^^^^^^^^^^^
-
-test:14:9 warning: 'workgroupBarrier' must only be called from uniform control flow
-        workgroupBarrier();
-        ^^^^^^^^^^^^^^^^
-
-test:13:7 note: control flow depends on non-uniform value
-      if (x == 0) {
-      ^^
-
-test:9:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
-      x = non_uniform;
-          ^^^^^^^^^^^
-)");
 }
 
 TEST_F(UniformityAnalysisTest, Switch_VarBecomesUniformInDifferentCase_WithBreak) {

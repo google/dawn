@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {
@@ -48,26 +47,6 @@ TEST_F(ParserImplTest, CaseBody_InvalidStatement) {
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
     EXPECT_EQ(e.value, nullptr);
-}
-
-TEST_F(ParserImplTest, CaseBody_Fallthrough) {
-    auto p = parser("fallthrough;");
-    auto e = p->case_body();
-    ASSERT_FALSE(p->has_error()) << p->error();
-    EXPECT_FALSE(e.errored);
-    EXPECT_TRUE(e.matched);
-    ASSERT_EQ(e->statements.Length(), 1u);
-    EXPECT_TRUE(e->statements[0]->Is<ast::FallthroughStatement>());
-}
-
-TEST_F(ParserImplTest, CaseBody_Fallthrough_MissingSemicolon) {
-    auto p = parser("fallthrough");
-    auto e = p->case_body();
-    EXPECT_TRUE(p->has_error());
-    EXPECT_TRUE(e.errored);
-    EXPECT_FALSE(e.matched);
-    EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:12: expected ';' for fallthrough statement");
 }
 
 }  // namespace

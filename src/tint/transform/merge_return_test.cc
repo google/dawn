@@ -688,7 +688,6 @@ fn foo() -> i32 {
         return 1;
       }
       bar = 6;
-      fallthrough;
     }
     case 2 {
       bar = 5;
@@ -726,7 +725,6 @@ fn foo() -> i32 {
         }
       }
       bar = 6;
-      fallthrough;
     }
     case 2: {
       bar = 5;

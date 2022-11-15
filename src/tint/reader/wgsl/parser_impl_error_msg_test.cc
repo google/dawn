@@ -1230,14 +1230,6 @@ fn f() { switch(1) { case 1: {
 )");
 }
 
-TEST_F(ParserImplErrorTest, SwitchStmtCaseFallthroughMissingSemicolon) {
-    EXPECT("fn f() { switch(1) { case 1: { fallthrough } case 2: {} } }",
-           R"(test.wgsl:1:44 error: expected ';' for fallthrough statement
-fn f() { switch(1) { case 1: { fallthrough } case 2: {} } }
-                                           ^
-)");
-}
-
 TEST_F(ParserImplErrorTest, VarStmtMissingSemicolon) {
     EXPECT("fn f() { var a : u32 }",
            R"(test.wgsl:1:22 error: expected ';' for variable declaration
