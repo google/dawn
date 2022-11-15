@@ -192,6 +192,7 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinCase{spv::BuiltIn::LocalInvocationIndex, true,
                     ast::BuiltinValue::kLocalInvocationIndex},
         BuiltinCase{spv::BuiltIn::GlobalInvocationId, true, ast::BuiltinValue::kGlobalInvocationId},
+        BuiltinCase{spv::BuiltIn::NumWorkgroups, true, ast::BuiltinValue::kNumWorkgroups},
         BuiltinCase{spv::BuiltIn::WorkgroupId, true, ast::BuiltinValue::kWorkgroupId},
         BuiltinCase{spv::BuiltIn::SampleId, true, ast::BuiltinValue::kSampleIndex},
         BuiltinCase{spv::BuiltIn::SampleMask, true, ast::BuiltinValue::kSampleMask}));
@@ -208,8 +209,6 @@ INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
                          testing::Values(BuiltinCase{static_cast<spv::BuiltIn>(9999), false,
                                                      ast::BuiltinValue::kUndefined},
                                          BuiltinCase{static_cast<spv::BuiltIn>(9999), false,
-                                                     ast::BuiltinValue::kUndefined},
-                                         BuiltinCase{spv::BuiltIn::NumWorkgroups, false,
                                                      ast::BuiltinValue::kUndefined}));
 
 // Dim

@@ -82,6 +82,8 @@ ast::BuiltinValue EnumConverter::ToBuiltin(spv::BuiltIn b) {
             return ast::BuiltinValue::kLocalInvocationIndex;
         case spv::BuiltIn::GlobalInvocationId:
             return ast::BuiltinValue::kGlobalInvocationId;
+        case spv::BuiltIn::NumWorkgroups:
+            return ast::BuiltinValue::kNumWorkgroups;
         case spv::BuiltIn::WorkgroupId:
             return ast::BuiltinValue::kWorkgroupId;
         case spv::BuiltIn::SampleId:
