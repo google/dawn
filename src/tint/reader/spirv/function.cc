@@ -25,7 +25,6 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/continue_statement.h"
 #include "src/tint/ast/discard_statement.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/return_statement.h"
@@ -2159,8 +2158,7 @@ bool FunctionEmitter::ClassifyCFGEdges() {
     // For each branch encountered, classify each edge (S,T) as:
     //    - a back-edge
     //    - a structured exit (specific ways of branching to enclosing construct)
-    //    - a normal (forward) edge, either natural control flow or a case
-    //    fallthrough
+    //    - a normal (forward) edge, either natural control flow or a case fallthrough
     //
     // If more than one block is targeted by a normal edge, then S must be a
     // structured header.
@@ -2194,11 +2192,10 @@ bool FunctionEmitter::ClassifyCFGEdges() {
         // There should only be one backedge per backedge block.
         uint32_t num_backedges = 0;
 
-        // Track destinations for normal forward edges, either kForward
-        // or kCaseFallThrough. These count toward the need
-        // to have a merge instruction.  We also track kIfBreak edges
-        // because when used with normal forward edges, we'll need
-        // to generate a flow guard variable.
+        // Track destinations for normal forward edges, either kForward or kCaseFallThrough.
+        // These count toward the need to have a merge instruction.  We also track kIfBreak edges
+        // because when used with normal forward edges, we'll need to generate a flow guard
+        // variable.
         utils::Vector<uint32_t, 4> normal_forward_edges;
         utils::Vector<uint32_t, 4> if_break_edges;
 
@@ -2375,6 +2372,12 @@ bool FunctionEmitter::ClassifyCFGEdges() {
                                                                                : "header ")
                                << dest_construct.begin_id << " (dominance rule violated)";
                     }
+                }
+
+                // Error on the fallthrough at the end in order to allow the better error messages
+                // from the above checks to happen.
+                if (edge_kind == EdgeKind::kCaseFallThrough) {
+                    return Fail() << "Fallthrough not permitted in WGSL";
                 }
             }  // end forward edge
         }      // end successor
@@ -3261,11 +3264,9 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
             // The fallthrough case is special because WGSL requires the fallthrough
             // statement to be last in the case clause.
             if (true_kind == EdgeKind::kCaseFallThrough) {
-                return EmitConditionalCaseFallThrough(block_info, cond, false_kind, *false_info,
-                                                      true);
+                return Fail() << "Fallthrough not supported in WGSL";
             } else if (false_kind == EdgeKind::kCaseFallThrough) {
-                return EmitConditionalCaseFallThrough(block_info, cond, true_kind, *true_info,
-                                                      false);
+                return Fail() << "Fallthrough not supported in WGSL";
             }
 
             // At this point, at most one edge is kForward or kIfBreak.
@@ -3304,7 +3305,7 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
 const ast::Statement* FunctionEmitter::MakeBranchDetailed(const BlockInfo& src_info,
                                                           const BlockInfo& dest_info,
                                                           bool forced,
-                                                          std::string* flow_guard_name_ptr) const {
+                                                          std::string* flow_guard_name_ptr) {
     auto kind = src_info.succ_edge.find(dest_info.id)->second;
     switch (kind) {
         case EdgeKind::kBack:
@@ -3367,8 +3368,10 @@ const ast::Statement* FunctionEmitter::MakeBranchDetailed(const BlockInfo& src_i
             // merge block is implicit.
             break;
         }
-        case EdgeKind::kCaseFallThrough:
-            return create<ast::FallthroughStatement>(Source{});
+        case EdgeKind::kCaseFallThrough: {
+            Fail() << "Fallthrough not supported in WGSL";
+            return nullptr;
+        }
         case EdgeKind::kForward:
             // Unconditional forward branch is implicit.
             break;
@@ -3396,45 +3399,6 @@ const ast::Statement* FunctionEmitter::MakeSimpleIf(const ast::Expression* condi
     auto* if_stmt = create<ast::IfStatement>(Source{}, condition, if_block, else_block);
 
     return if_stmt;
-}
-
-bool FunctionEmitter::EmitConditionalCaseFallThrough(const BlockInfo& src_info,
-                                                     const ast::Expression* cond,
-                                                     EdgeKind other_edge_kind,
-                                                     const BlockInfo& other_dest,
-                                                     bool fall_through_is_true_branch) {
-    // In WGSL, the fallthrough statement must come last in the case clause.
-    // So we'll emit an if statement for the other branch, and then emit
-    // the fallthrough.
-
-    // We have two distinct destinations. But we only get here if this
-    // is a normal terminator; in particular the source block is *not* the
-    // start of an if-selection.  So at most one branch is a kForward or
-    // kCaseFallThrough.
-    if (other_edge_kind == EdgeKind::kForward) {
-        return Fail() << "internal error: normal terminator OpBranchConditional has "
-                         "both forward and fallthrough edges";
-    }
-    if (other_edge_kind == EdgeKind::kIfBreak) {
-        return Fail() << "internal error: normal terminator OpBranchConditional has "
-                         "both IfBreak and fallthrough edges.  Violates nesting rule";
-    }
-    if (other_edge_kind == EdgeKind::kBack) {
-        return Fail() << "internal error: normal terminator OpBranchConditional has "
-                         "both backedge and fallthrough edges.  Violates nesting rule";
-    }
-    auto* other_branch = MakeForcedBranch(src_info, other_dest);
-    if (other_branch == nullptr) {
-        return Fail() << "internal error: expected a branch for edge-kind " << int(other_edge_kind);
-    }
-    if (fall_through_is_true_branch) {
-        AddStatement(MakeSimpleIf(cond, nullptr, other_branch));
-    } else {
-        AddStatement(MakeSimpleIf(cond, other_branch, nullptr));
-    }
-    AddStatement(create<ast::FallthroughStatement>(Source{}));
-
-    return success();
 }
 
 bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
