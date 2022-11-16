@@ -52,6 +52,7 @@ bool Service::RequiresDedicatedAllocation(const ExternalImageDescriptorVk* descr
             // for prefersDA.
             return dedicatedRequirements.prefersDedicatedAllocation;
     }
+    DAWN_UNREACHABLE();
 }
 
 }  // namespace dawn::native::vulkan::external_memory
