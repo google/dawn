@@ -69,7 +69,8 @@ void PrintHash(uint32_t hash) {
 }
 
 enum class Format {
-    kNone = -1,
+    kUnknown,
+    kNone,
     kSpirv,
     kSpvAsm,
     kWgsl,
@@ -118,7 +119,7 @@ struct Options {
 const char kUsage[] = R"(Usage: tint [options] <input-file>
 
  options:
-  --format <spirv|spvasm|wgsl|msl|hlsl>  -- Output format.
+  --format <spirv|spvasm|wgsl|msl|hlsl|none>  -- Output format.
                                If not provided, will be inferred from output
                                filename extension:
                                    .spvasm -> spvasm
@@ -193,7 +194,11 @@ Format parse_format(const std::string& fmt) {
     }
 #endif  // TINT_BUILD_GLSL_WRITER
 
-    return Format::kNone;
+    if (fmt == "none") {
+        return Format::kNone;
+    }
+
+    return Format::kUnknown;
 }
 
 #if TINT_BUILD_SPV_WRITER || TINT_BUILD_WGSL_WRITER || TINT_BUILD_MSL_WRITER || \
@@ -401,7 +406,7 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
             }
             opts->format = parse_format(args[i]);
 
-            if (opts->format == Format::kNone) {
+            if (opts->format == Format::kUnknown) {
                 std::cerr << "Unknown output format: " << args[i] << std::endl;
                 return false;
             }
@@ -1217,11 +1222,11 @@ int main(int argc, const char** argv) {
     }
 
     // Implement output format defaults.
-    if (options.format == Format::kNone) {
+    if (options.format == Format::kUnknown) {
         // Try inferring from filename.
         options.format = infer_format(options.output_file);
     }
-    if (options.format == Format::kNone) {
+    if (options.format == Format::kUnknown) {
         // Ultimately, default to SPIR-V assembly. That's nice for interactive use.
         options.format = Format::kSpvAsm;
     }
@@ -1484,6 +1489,8 @@ int main(int argc, const char** argv) {
             break;
         case Format::kGlsl:
             success = GenerateGlsl(program.get(), options);
+            break;
+        case Format::kNone:
             break;
         default:
             std::cerr << "Unknown output format specified" << std::endl;
