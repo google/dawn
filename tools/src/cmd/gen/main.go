@@ -75,10 +75,13 @@ optional flags:`)
 func run() error {
 	outputDir := ""
 	verbose := false
+	checkStale := false
 	flag.StringVar(&outputDir, "o", "", "custom output directory (optional)")
 	flag.BoolVar(&verbose, "verbose", false, "print verbose output")
+	flag.BoolVar(&checkStale, "check-stale", false, "don't emit anything, just check that files are up to date")
 	flag.Parse()
 
+	staleFiles := []string{}
 	projectRoot := fileutils.DawnRoot()
 
 	// Find clang-format
@@ -168,8 +171,22 @@ func run() error {
 			sb := strings.Builder{}
 			sb.WriteString(fmt.Sprintf(header, copyrightYear, filepath.ToSlash(relTmplPath)))
 			sb.WriteString(body)
-			content := sb.String()
-			return writeFileIfChanged(outPath, content, string(existing))
+			oldContent, newContent := string(existing), sb.String()
+
+			if oldContent != newContent {
+				if checkStale {
+					staleFiles = append(staleFiles, outPath)
+				} else {
+					if err := os.MkdirAll(filepath.Dir(outPath), 0777); err != nil {
+						return fmt.Errorf("failed to create directory for '%v': %w", outPath, err)
+					}
+					if err := ioutil.WriteFile(outPath, []byte(newContent), 0666); err != nil {
+						return fmt.Errorf("failed to write file '%v': %w", outPath, err)
+					}
+				}
+			}
+
+			return nil
 		}
 
 		// Write the content generated using the template and semantic info
@@ -194,6 +211,19 @@ func run() error {
 				return err
 			}
 		}
+	}
+
+	if len(staleFiles) > 0 {
+		fmt.Println(len(staleFiles), "files need regenerating:")
+		for _, path := range staleFiles {
+			if rel, err := filepath.Rel(projectRoot, path); err == nil {
+				fmt.Println(" •", rel)
+			} else {
+				fmt.Println(" •", path)
+			}
+		}
+		fmt.Println("Regenerate these files with: ./tools/run gen")
+		os.Exit(1)
 	}
 
 	return nil
@@ -266,20 +296,6 @@ func (g *genCache) permute(overload *sem.Overload) ([]gen.Permutation, error) {
 		}
 	}
 	return g.cached.permuter.Permute(overload)
-}
-
-// writes content to path if the file has changed
-func writeFileIfChanged(path, newContent, oldContent string) error {
-	if oldContent == newContent {
-		return nil // Not changed
-	}
-	if err := os.MkdirAll(filepath.Dir(path), 0777); err != nil {
-		return fmt.Errorf("failed to create directory for '%v': %w", path, err)
-	}
-	if err := ioutil.WriteFile(path, []byte(newContent), 0666); err != nil {
-		return fmt.Errorf("failed to write file '%v': %w", path, err)
-	}
-	return nil
 }
 
 var copyrightRegex = regexp.MustCompile(`// Copyright (\d+) The`)

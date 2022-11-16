@@ -127,8 +127,29 @@ def _NonInclusiveFileFilter(file):
     return file.LocalPath() not in filter_list
 
 
+def _CheckNoStaleGen(input_api, output_api):
+    results = []
+    try:
+        go = input_api.os_path.join(input_api.change.RepositoryRoot(), "tools",
+                                    "golang", "bin", "go")
+        if input_api.is_windows:
+            go += '.exe'
+        input_api.subprocess.check_call_out(
+            [go, "run", "tools/src/cmd/gen/main.go", "--check-stale"],
+            stdout=input_api.subprocess.PIPE,
+            stderr=input_api.subprocess.PIPE,
+            cwd=input_api.change.RepositoryRoot())
+    except input_api.subprocess.CalledProcessError as e:
+        if input_api.is_committing:
+            results.append(output_api.PresubmitError('%s' % (e, )))
+        else:
+            results.append(output_api.PresubmitPromptWarning('%s' % (e, )))
+    return results
+
+
 def _DoCommonChecks(input_api, output_api):
     results = []
+    results.extend(_CheckNoStaleGen(input_api, output_api))
     results.extend(
         input_api.canned_checks.CheckChangedLUCIConfigs(input_api, output_api))
 
