@@ -734,6 +734,41 @@ utils::Result<NumberT> ConstEval::Mul(NumberT a, NumberT b) {
 }
 
 template <typename NumberT>
+utils::Result<NumberT> ConstEval::Div(NumberT a, NumberT b) {
+    NumberT result;
+    if constexpr (IsAbstract<NumberT>) {
+        // Check for over/underflow for abstract values
+        if (auto r = CheckedDiv(a, b)) {
+            result = r->value;
+        } else {
+            AddError(OverflowErrorMessage(a, "/", b), *current_source);
+            return utils::Failure;
+        }
+    } else {
+        using T = UnwrapNumber<NumberT>;
+        auto divide_values = [](T lhs, T rhs) {
+            if constexpr (std::is_integral_v<T>) {
+                // For integers, lhs / 0 returns lhs
+                if (rhs == 0) {
+                    return lhs;
+                }
+
+                if constexpr (std::is_signed_v<T>) {
+                    // For signed integers, for lhs / -1, return lhs if lhs is the
+                    // most negative value
+                    if (rhs == -1 && lhs == std::numeric_limits<T>::min()) {
+                        return lhs;
+                    }
+                }
+            }
+            return lhs / rhs;
+        };
+        result = divide_values(a.value, b.value);
+    }
+    return result;
+}
+
+template <typename NumberT>
 utils::Result<NumberT> ConstEval::Dot2(NumberT a1, NumberT a2, NumberT b1, NumberT b2) {
     auto r1 = Mul(a1, b1);
     if (!r1) {
@@ -872,6 +907,15 @@ auto ConstEval::SubFunc(const sem::Type* elem_ty) {
 auto ConstEval::MulFunc(const sem::Type* elem_ty) {
     return [=](auto a1, auto a2) -> ImplResult {
         if (auto r = Mul(a1, a2)) {
+            return CreateElement(builder, elem_ty, r.Get());
+        }
+        return utils::Failure;
+    };
+}
+
+auto ConstEval::DivFunc(const sem::Type* elem_ty) {
+    return [=](auto a1, auto a2) -> ImplResult {
+        if (auto r = Div(a1, a2)) {
             return CreateElement(builder, elem_ty, r.Get());
         }
         return utils::Failure;
@@ -1366,42 +1410,9 @@ ConstEval::Result ConstEval::OpMultiplyMatMat(const sem::Type* ty,
 ConstEval::Result ConstEval::OpDivide(const sem::Type* ty,
                                       utils::VectorRef<const sem::Constant*> args,
                                       const Source& source) {
+    TINT_SCOPED_ASSIGNMENT(current_source, &source);
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
-        auto create = [&](auto i, auto j) -> ImplResult {
-            using NumberT = decltype(i);
-            NumberT result;
-            if constexpr (IsAbstract<NumberT>) {
-                // Check for over/underflow for abstract values
-                if (auto r = CheckedDiv(i, j)) {
-                    result = r->value;
-                } else {
-                    AddError(OverflowErrorMessage(i, "/", j), source);
-                    return utils::Failure;
-                }
-            } else {
-                using T = UnwrapNumber<NumberT>;
-                auto divide_values = [](T lhs, T rhs) {
-                    if constexpr (std::is_integral_v<T>) {
-                        // For integers, lhs / 0 returns lhs
-                        if (rhs == 0) {
-                            return lhs;
-                        }
-
-                        if constexpr (std::is_signed_v<T>) {
-                            // For signed integers, for lhs / -1, return lhs if lhs is the
-                            // most negative value
-                            if (rhs == -1 && lhs == std::numeric_limits<T>::min()) {
-                                return lhs;
-                            }
-                        }
-                    }
-                    return lhs / rhs;
-                };
-                result = divide_values(i.value, j.value);
-            }
-            return CreateElement(builder, c0->Type(), result);
-        };
-        return Dispatch_fia_fiu32_f16(create, c0, c1);
+        return Dispatch_fia_fiu32_f16(DivFunc(c0->Type()), c0, c1);
     };
 
     return TransformBinaryElements(builder, ty, transform, args[0], args[1]);
@@ -2397,6 +2408,59 @@ ConstEval::Result ConstEval::sinh(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0]);
 }
 
+ConstEval::Result ConstEval::smoothstep(const sem::Type* ty,
+                                        utils::VectorRef<const sem::Constant*> args,
+                                        const Source& source) {
+    TINT_SCOPED_ASSIGNMENT(current_source, &source);
+
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1,
+                         const sem::Constant* c2) {
+        auto create = [&](auto low, auto high, auto x) -> ImplResult {
+            using NumberT = decltype(low);
+
+            auto err = [&] {
+                AddNote("when calculating smoothstep", source);
+                return utils::Failure;
+            };
+
+            // t = clamp((x - low) / (high - low), 0.0, 1.0)
+            auto x_minus_low = Sub(x, low);
+            auto high_minus_low = Sub(high, low);
+            if (!x_minus_low || !high_minus_low) {
+                return err();
+            }
+
+            auto div = Div(x_minus_low.Get(), high_minus_low.Get());
+            if (!div) {
+                return err();
+            }
+
+            auto clamp = Clamp(div.Get(), NumberT(0), NumberT(1));
+            auto t = clamp.Get();
+
+            // result = t * t * (3.0 - 2.0 * t)
+            auto t_times_t = Mul(t, t);
+            auto t_times_2 = Mul(NumberT(2), t);
+            if (!t_times_t || !t_times_2) {
+                return err();
+            }
+
+            auto three_minus_t_times_2 = Sub(NumberT(3), t_times_2.Get());
+            if (!three_minus_t_times_2) {
+                return err();
+            }
+
+            auto result = Mul(t_times_t.Get(), three_minus_t_times_2.Get());
+            if (!result) {
+                return err();
+            }
+            return CreateElement(builder, c0->Type(), result.Get());
+        };
+        return Dispatch_fa_f32_f16(create, c0, c1, c2);
+    };
+    return TransformElements(builder, ty, transform, args[0], args[1], args[2]);
+}
+
 ConstEval::Result ConstEval::step(const sem::Type* ty,
                                   utils::VectorRef<const sem::Constant*> args,
                                   const Source&) {
@@ -2585,6 +2649,10 @@ void ConstEval::AddError(const std::string& msg, const Source& source) const {
 
 void ConstEval::AddWarning(const std::string& msg, const Source& source) const {
     builder.Diagnostics().add_warning(diag::System::Resolver, msg, source);
+}
+
+void ConstEval::AddNote(const std::string& msg, const Source& source) const {
+    builder.Diagnostics().add_note(diag::System::Resolver, msg, source);
 }
 
 }  // namespace tint::resolver

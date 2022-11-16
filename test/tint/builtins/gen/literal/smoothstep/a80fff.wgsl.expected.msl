@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void smoothstep_a80fff() {
+  float res = 0.5f;
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  smoothstep_a80fff();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  smoothstep_a80fff();
+  return;
+}
+
+kernel void compute_main() {
+  smoothstep_a80fff();
+  return;
+}
+

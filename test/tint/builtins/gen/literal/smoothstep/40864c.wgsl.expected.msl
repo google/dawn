@@ -2,7 +2,7 @@
 
 using namespace metal;
 void smoothstep_40864c() {
-  float4 res = smoothstep(float4(1.0f), float4(1.0f), float4(1.0f));
+  float4 res = float4(0.5f);
 }
 
 struct tint_symbol {

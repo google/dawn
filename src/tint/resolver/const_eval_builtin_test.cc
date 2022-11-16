@@ -1649,6 +1649,90 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               SinhCases<f16>()))));
 
 template <typename T>
+std::vector<Case> SmoothstepCases() {
+    return {
+        // t == 0
+        C({T(4), T(6), T(2)}, T(0)),
+        // t == 1
+        C({T(4), T(6), T(8)}, T(1)),
+        // t == .5
+        C({T(4), T(6), T(5)}, T(.5)),
+
+        // Vector tests
+        C({Vec(T(4), T(4)), Vec(T(6), T(6)), Vec(T(2), T(8))}, Vec(T(0), T(1))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Smoothstep,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kSmoothstep),
+                     testing::ValuesIn(Concat(SmoothstepCases<AFloat>(),  //
+                                              SmoothstepCases<f32>(),
+                                              SmoothstepCases<f16>()))));
+
+template <typename T>
+std::vector<Case> SmoothstepAFloatErrorCases() {
+    auto error_msg = [](auto a, const char* op, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, op, b) + R"(
+12:34 note: when calculating smoothstep)";
+    };
+
+    return {// `x - low` underflows
+            E({T::Highest(), T(1), T::Lowest()}, error_msg(T::Lowest(), "-", T::Highest())),
+            // `high - low` underflows
+            E({T::Highest(), T::Lowest(), T(0)}, error_msg(T::Lowest(), "-", T::Highest())),
+            // Divid by zero on `(x - low) / (high - low)`
+            E({T(0), T(0), T(0)}, error_msg(T(0), "/", T(0)))};
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    SmoothstepAFloatError,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kSmoothstep),
+                     testing::ValuesIn(SmoothstepAFloatErrorCases<AFloat>())));
+
+template <typename T>
+std::vector<Case> SmoothstepF16ErrorCases() {
+    auto error_msg = [](auto a, const char* op, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, op, b) + R"(
+12:34 note: when calculating smoothstep)";
+    };
+
+    return {// `x - low` underflows
+            E({T::Highest(), T(1), T::Lowest()}, error_msg(T::Lowest(), "-", T::Highest())),
+            // `high - low` underflows
+            E({T::Highest(), T::Lowest(), T(0)}, error_msg(T::Lowest(), "-", T::Highest())),
+            // Divid by zero on `(x - low) / (high - low)`
+            E({T(0), T(0), T(0)}, error_msg(T(0), "/", T(0)))};
+}
+// TODO(crbug.com/tint/1581): Enable when non-abstract math is checked.
+INSTANTIATE_TEST_SUITE_P(  //
+    DISABLED_SmoothstepF16Error,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kSmoothstep),
+                     testing::ValuesIn(SmoothstepF16ErrorCases<f16>())));
+
+template <typename T>
+std::vector<Case> SmoothstepF32ErrorCases() {
+    auto error_msg = [](auto a, const char* op, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, op, b) + R"(
+12:34 note: when calculating smoothstep)";
+    };
+
+    return {// `x - low` underflows
+            E({T::Highest(), T(1), T::Lowest()}, error_msg(T::Lowest(), "-", T::Highest())),
+            // `high - low` underflows
+            E({T::Highest(), T::Lowest(), T(0)}, error_msg(T::Lowest(), "-", T::Highest())),
+            // Divid by zero on `(x - low) / (high - low)`
+            E({T(0), T(0), T(0)}, error_msg(T(0), "/", T(0)))};
+}
+// TODO(crbug.com/tint/1581): Enable when non-abstract math is checked.
+INSTANTIATE_TEST_SUITE_P(  //
+    DISABLED_SmoothstepF32Error,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kSmoothstep),
+                     testing::ValuesIn(SmoothstepF32ErrorCases<f32>())));
+
+template <typename T>
 std::vector<Case> StepCases() {
     return {
         C({T(0), T(0)}, T(1.0)),

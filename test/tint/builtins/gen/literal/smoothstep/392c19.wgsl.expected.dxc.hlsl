@@ -1,5 +1,5 @@
 void smoothstep_392c19() {
-  float2 res = smoothstep((1.0f).xx, (1.0f).xx, (1.0f).xx);
+  float2 res = (0.5f).xx;
 }
 
 struct tint_symbol {

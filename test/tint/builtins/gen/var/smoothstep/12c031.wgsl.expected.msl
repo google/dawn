@@ -2,9 +2,9 @@
 
 using namespace metal;
 void smoothstep_12c031() {
-  half2 arg_0 = half2(1.0h);
-  half2 arg_1 = half2(1.0h);
-  half2 arg_2 = half2(1.0h);
+  half2 arg_0 = half2(2.0h);
+  half2 arg_1 = half2(4.0h);
+  half2 arg_2 = half2(3.0h);
   half2 res = smoothstep(arg_0, arg_1, arg_2);
 }
 

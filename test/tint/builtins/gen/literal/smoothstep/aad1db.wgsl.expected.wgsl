@@ -1,5 +1,5 @@
 fn smoothstep_aad1db() {
-  var res : vec3<f32> = smoothstep(vec3<f32>(1.0f), vec3<f32>(1.0f), vec3<f32>(1.0f));
+  var res : vec3<f32> = smoothstep(vec3<f32>(2.0f), vec3<f32>(4.0f), vec3<f32>(3.0f));
 }
 
 @vertex

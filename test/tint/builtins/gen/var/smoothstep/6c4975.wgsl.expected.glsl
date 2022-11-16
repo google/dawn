@@ -1,9 +1,9 @@
 #version 310 es
 
 void smoothstep_6c4975() {
-  float arg_0 = 1.0f;
-  float arg_1 = 1.0f;
-  float arg_2 = 1.0f;
+  float arg_0 = 2.0f;
+  float arg_1 = 4.0f;
+  float arg_2 = 3.0f;
   float res = smoothstep(arg_0, arg_1, arg_2);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void smoothstep_6c4975() {
-  float arg_0 = 1.0f;
-  float arg_1 = 1.0f;
-  float arg_2 = 1.0f;
+  float arg_0 = 2.0f;
+  float arg_1 = 4.0f;
+  float arg_2 = 3.0f;
   float res = smoothstep(arg_0, arg_1, arg_2);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void smoothstep_6c4975() {
-  float arg_0 = 1.0f;
-  float arg_1 = 1.0f;
-  float arg_2 = 1.0f;
+  float arg_0 = 2.0f;
+  float arg_1 = 4.0f;
+  float arg_2 = 3.0f;
   float res = smoothstep(arg_0, arg_1, arg_2);
 }
 

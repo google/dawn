@@ -23,9 +23,9 @@
 
 // fn smoothstep(f32, f32, f32) -> f32
 fn smoothstep_6c4975() {
-  var arg_0 = 1.f;
-  var arg_1 = 1.f;
-  var arg_2 = 1.f;
+  var arg_0 = 2.f;
+  var arg_1 = 4.f;
+  var arg_2 = 3.f;
   var res: f32 = smoothstep(arg_0, arg_1, arg_2);
 }
 

@@ -719,6 +719,15 @@ class ConstEval {
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
+    /// smoothstep builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result smoothstep(const sem::Type* ty,
+                      utils::VectorRef<const sem::Constant*> args,
+                      const Source& source);
+
     /// step builtin
     /// @param ty the expression type
     /// @param args the input arguments
@@ -825,6 +834,9 @@ class ConstEval {
     /// Adds the given warning message to the diagnostics
     void AddWarning(const std::string& msg, const Source& source) const;
 
+    /// Adds the given note message to the diagnostics
+    void AddNote(const std::string& msg, const Source& source) const;
+
     /// Adds two Number<T>s
     /// @param a the lhs number
     /// @param b the rhs number
@@ -845,6 +857,13 @@ class ConstEval {
     /// @returns the result number on success, or logs an error and returns Failure
     template <typename NumberT>
     utils::Result<NumberT> Mul(NumberT a, NumberT b);
+
+    /// Divides two Number<T>s
+    /// @param a the lhs number
+    /// @param b the rhs number
+    /// @returns the result number on success, or logs an error and returns Failure
+    template <typename NumberT>
+    utils::Result<NumberT> Div(NumberT a, NumberT b);
 
     /// Returns the dot product of (a1,a2) with (b1,b2)
     /// @param a1 component 1 of lhs vector
@@ -924,6 +943,12 @@ class ConstEval {
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
     auto MulFunc(const sem::Type* elem_ty);
+
+    /// Returns a callable that calls Div, and creates a Constant with its result of type `elem_ty`
+    /// if successful, or returns Failure otherwise.
+    /// @param elem_ty the element type of the Constant to create on success
+    /// @returns the callable function
+    auto DivFunc(const sem::Type* elem_ty);
 
     /// Returns a callable that calls Dot2, and creates a Constant with its result of type `elem_ty`
     /// if successful, or returns Failure otherwise.

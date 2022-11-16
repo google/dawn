@@ -535,8 +535,8 @@ fn refract<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, T) -> vec<N, T>
 @const fn sin<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn sinh<T: fa_f32_f16>(T) -> T
 @const fn sinh<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
-fn smoothstep<T: f32_f16>(T, T, T) -> T
-fn smoothstep<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
+@const fn smoothstep<T: fa_f32_f16>(@test_value(2) T, @test_value(4) T, @test_value(3) T) -> T
+@const fn smoothstep<N: num, T: fa_f32_f16>(@test_value(2) vec<N, T>, @test_value(4) vec<N, T>, @test_value(3) vec<N, T>) -> vec<N, T>
 @const fn sqrt<T: fa_f32_f16>(T) -> T
 @const fn sqrt<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn step<T: fa_f32_f16>(T, T) -> T

@@ -1,7 +1,7 @@
 enable f16;
 
 fn smoothstep_12c031() {
-  var res : vec2<f16> = smoothstep(vec2<f16>(1.0h), vec2<f16>(1.0h), vec2<f16>(1.0h));
+  var res : vec2<f16> = smoothstep(vec2<f16>(2.0h), vec2<f16>(4.0h), vec2<f16>(3.0h));
 }
 
 @vertex

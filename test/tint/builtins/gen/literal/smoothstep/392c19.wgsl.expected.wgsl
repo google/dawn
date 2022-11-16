@@ -1,5 +1,5 @@
 fn smoothstep_392c19() {
-  var res : vec2<f32> = smoothstep(vec2<f32>(1.0f), vec2<f32>(1.0f), vec2<f32>(1.0f));
+  var res : vec2<f32> = smoothstep(vec2<f32>(2.0f), vec2<f32>(4.0f), vec2<f32>(3.0f));
 }
 
 @vertex

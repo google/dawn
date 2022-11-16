@@ -1,7 +1,7 @@
 fn smoothstep_aad1db() {
-  var arg_0 = vec3<f32>(1.0f);
-  var arg_1 = vec3<f32>(1.0f);
-  var arg_2 = vec3<f32>(1.0f);
+  var arg_0 = vec3<f32>(2.0f);
+  var arg_1 = vec3<f32>(4.0f);
+  var arg_2 = vec3<f32>(3.0f);
   var res : vec3<f32> = smoothstep(arg_0, arg_1, arg_2);
 }
 

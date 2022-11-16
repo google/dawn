@@ -1,7 +1,7 @@
 #version 310 es
 
 void smoothstep_aad1db() {
-  vec3 res = smoothstep(vec3(1.0f), vec3(1.0f), vec3(1.0f));
+  vec3 res = vec3(0.5f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void smoothstep_aad1db() {
-  vec3 res = smoothstep(vec3(1.0f), vec3(1.0f), vec3(1.0f));
+  vec3 res = vec3(0.5f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void smoothstep_aad1db() {
-  vec3 res = smoothstep(vec3(1.0f), vec3(1.0f), vec3(1.0f));
+  vec3 res = vec3(0.5f);
 }
 
 void compute_main() {

@@ -2,9 +2,9 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void smoothstep_12c031() {
-  f16vec2 arg_0 = f16vec2(1.0hf);
-  f16vec2 arg_1 = f16vec2(1.0hf);
-  f16vec2 arg_2 = f16vec2(1.0hf);
+  f16vec2 arg_0 = f16vec2(2.0hf);
+  f16vec2 arg_1 = f16vec2(4.0hf);
+  f16vec2 arg_2 = f16vec2(3.0hf);
   f16vec2 res = smoothstep(arg_0, arg_1, arg_2);
 }
 
@@ -26,9 +26,9 @@ void main() {
 precision mediump float;
 
 void smoothstep_12c031() {
-  f16vec2 arg_0 = f16vec2(1.0hf);
-  f16vec2 arg_1 = f16vec2(1.0hf);
-  f16vec2 arg_2 = f16vec2(1.0hf);
+  f16vec2 arg_0 = f16vec2(2.0hf);
+  f16vec2 arg_1 = f16vec2(4.0hf);
+  f16vec2 arg_2 = f16vec2(3.0hf);
   f16vec2 res = smoothstep(arg_0, arg_1, arg_2);
 }
 
@@ -44,9 +44,9 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void smoothstep_12c031() {
-  f16vec2 arg_0 = f16vec2(1.0hf);
-  f16vec2 arg_1 = f16vec2(1.0hf);
-  f16vec2 arg_2 = f16vec2(1.0hf);
+  f16vec2 arg_0 = f16vec2(2.0hf);
+  f16vec2 arg_1 = f16vec2(4.0hf);
+  f16vec2 arg_2 = f16vec2(3.0hf);
   f16vec2 res = smoothstep(arg_0, arg_1, arg_2);
 }
 

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void smoothstep_6e7a74() {
-  half3 res = smoothstep(half3(1.0h), half3(1.0h), half3(1.0h));
+  half3 res = half3(0.5h);
 }
 
 struct tint_symbol {

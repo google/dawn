@@ -23,7 +23,7 @@
 
 // fn smoothstep(vec<2, f32>, vec<2, f32>, vec<2, f32>) -> vec<2, f32>
 fn smoothstep_392c19() {
-  var res: vec2<f32> = smoothstep(vec2<f32>(1.f), vec2<f32>(1.f), vec2<f32>(1.f));
+  var res: vec2<f32> = smoothstep(vec2<f32>(2.f), vec2<f32>(4.f), vec2<f32>(3.f));
 }
 
 @vertex

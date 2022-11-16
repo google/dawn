@@ -25,9 +25,9 @@ enable f16;
 
 // fn smoothstep(vec<2, f16>, vec<2, f16>, vec<2, f16>) -> vec<2, f16>
 fn smoothstep_12c031() {
-  var arg_0 = vec2<f16>(1.h);
-  var arg_1 = vec2<f16>(1.h);
-  var arg_2 = vec2<f16>(1.h);
+  var arg_0 = vec2<f16>(2.h);
+  var arg_1 = vec2<f16>(4.h);
+  var arg_2 = vec2<f16>(3.h);
   var res: vec2<f16> = smoothstep(arg_0, arg_1, arg_2);
 }
 

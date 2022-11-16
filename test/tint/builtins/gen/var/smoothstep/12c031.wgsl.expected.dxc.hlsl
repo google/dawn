@@ -1,7 +1,7 @@
 void smoothstep_12c031() {
-  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
-  vector<float16_t, 2> arg_1 = (float16_t(1.0h)).xx;
-  vector<float16_t, 2> arg_2 = (float16_t(1.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(2.0h)).xx;
+  vector<float16_t, 2> arg_1 = (float16_t(4.0h)).xx;
+  vector<float16_t, 2> arg_2 = (float16_t(3.0h)).xx;
   vector<float16_t, 2> res = smoothstep(arg_0, arg_1, arg_2);
 }
 

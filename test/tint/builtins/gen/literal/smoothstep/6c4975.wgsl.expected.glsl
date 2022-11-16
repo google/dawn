@@ -1,7 +1,7 @@
 #version 310 es
 
 void smoothstep_6c4975() {
-  float res = smoothstep(1.0f, 1.0f, 1.0f);
+  float res = 0.5f;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void smoothstep_6c4975() {
-  float res = smoothstep(1.0f, 1.0f, 1.0f);
+  float res = 0.5f;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void smoothstep_6c4975() {
-  float res = smoothstep(1.0f, 1.0f, 1.0f);
+  float res = 0.5f;
 }
 
 void compute_main() {

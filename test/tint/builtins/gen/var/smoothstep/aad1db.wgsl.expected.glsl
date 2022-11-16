@@ -1,9 +1,9 @@
 #version 310 es
 
 void smoothstep_aad1db() {
-  vec3 arg_0 = vec3(1.0f);
-  vec3 arg_1 = vec3(1.0f);
-  vec3 arg_2 = vec3(1.0f);
+  vec3 arg_0 = vec3(2.0f);
+  vec3 arg_1 = vec3(4.0f);
+  vec3 arg_2 = vec3(3.0f);
   vec3 res = smoothstep(arg_0, arg_1, arg_2);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void smoothstep_aad1db() {
-  vec3 arg_0 = vec3(1.0f);
-  vec3 arg_1 = vec3(1.0f);
-  vec3 arg_2 = vec3(1.0f);
+  vec3 arg_0 = vec3(2.0f);
+  vec3 arg_1 = vec3(4.0f);
+  vec3 arg_2 = vec3(3.0f);
   vec3 res = smoothstep(arg_0, arg_1, arg_2);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void smoothstep_aad1db() {
-  vec3 arg_0 = vec3(1.0f);
-  vec3 arg_1 = vec3(1.0f);
-  vec3 arg_2 = vec3(1.0f);
+  vec3 arg_0 = vec3(2.0f);
+  vec3 arg_1 = vec3(4.0f);
+  vec3 arg_2 = vec3(3.0f);
   vec3 res = smoothstep(arg_0, arg_1, arg_2);
 }
 

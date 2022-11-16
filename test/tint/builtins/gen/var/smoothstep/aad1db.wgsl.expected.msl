@@ -2,9 +2,9 @@
 
 using namespace metal;
 void smoothstep_aad1db() {
-  float3 arg_0 = float3(1.0f);
-  float3 arg_1 = float3(1.0f);
-  float3 arg_2 = float3(1.0f);
+  float3 arg_0 = float3(2.0f);
+  float3 arg_1 = float3(4.0f);
+  float3 arg_2 = float3(3.0f);
   float3 res = smoothstep(arg_0, arg_1, arg_2);
 }
 

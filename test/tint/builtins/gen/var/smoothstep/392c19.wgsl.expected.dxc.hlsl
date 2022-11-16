@@ -1,7 +1,7 @@
 void smoothstep_392c19() {
-  float2 arg_0 = (1.0f).xx;
-  float2 arg_1 = (1.0f).xx;
-  float2 arg_2 = (1.0f).xx;
+  float2 arg_0 = (2.0f).xx;
+  float2 arg_1 = (4.0f).xx;
+  float2 arg_2 = (3.0f).xx;
   float2 res = smoothstep(arg_0, arg_1, arg_2);
 }
 

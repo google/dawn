@@ -23,7 +23,7 @@
 
 // fn smoothstep(f32, f32, f32) -> f32
 fn smoothstep_6c4975() {
-  var res: f32 = smoothstep(1.f, 1.f, 1.f);
+  var res: f32 = smoothstep(2.f, 4.f, 3.f);
 }
 
 @vertex

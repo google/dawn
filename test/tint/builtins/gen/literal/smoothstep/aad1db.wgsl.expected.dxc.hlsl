@@ -1,5 +1,5 @@
 void smoothstep_aad1db() {
-  float3 res = smoothstep((1.0f).xxx, (1.0f).xxx, (1.0f).xxx);
+  float3 res = (0.5f).xxx;
 }
 
 struct tint_symbol {

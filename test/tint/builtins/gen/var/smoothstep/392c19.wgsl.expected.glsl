@@ -1,9 +1,9 @@
 #version 310 es
 
 void smoothstep_392c19() {
-  vec2 arg_0 = vec2(1.0f);
-  vec2 arg_1 = vec2(1.0f);
-  vec2 arg_2 = vec2(1.0f);
+  vec2 arg_0 = vec2(2.0f);
+  vec2 arg_1 = vec2(4.0f);
+  vec2 arg_2 = vec2(3.0f);
   vec2 res = smoothstep(arg_0, arg_1, arg_2);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void smoothstep_392c19() {
-  vec2 arg_0 = vec2(1.0f);
-  vec2 arg_1 = vec2(1.0f);
-  vec2 arg_2 = vec2(1.0f);
+  vec2 arg_0 = vec2(2.0f);
+  vec2 arg_1 = vec2(4.0f);
+  vec2 arg_2 = vec2(3.0f);
   vec2 res = smoothstep(arg_0, arg_1, arg_2);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void smoothstep_392c19() {
-  vec2 arg_0 = vec2(1.0f);
-  vec2 arg_1 = vec2(1.0f);
-  vec2 arg_2 = vec2(1.0f);
+  vec2 arg_0 = vec2(2.0f);
+  vec2 arg_1 = vec2(4.0f);
+  vec2 arg_2 = vec2(3.0f);
   vec2 res = smoothstep(arg_0, arg_1, arg_2);
 }
 
