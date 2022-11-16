@@ -1,5 +1,5 @@
 void sqrt_895a0c() {
-  vector<float16_t, 3> res = sqrt((float16_t(1.0h)).xxx);
+  vector<float16_t, 3> res = (float16_t(1.0h)).xxx;
 }
 
 struct tint_symbol {

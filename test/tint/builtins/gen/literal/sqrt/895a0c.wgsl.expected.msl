@@ -2,7 +2,7 @@
 
 using namespace metal;
 void sqrt_895a0c() {
-  half3 res = sqrt(half3(1.0h));
+  half3 res = half3(1.0h);
 }
 
 struct tint_symbol {

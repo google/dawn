@@ -1,5 +1,5 @@
 void sqrt_20c74e() {
-  float res = sqrt(1.0f);
+  float res = 1.0f;
 }
 
 struct tint_symbol {

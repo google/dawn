@@ -2375,6 +2375,24 @@ ConstEval::Result ConstEval::step(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
+ConstEval::Result ConstEval::sqrt(const sem::Type* ty,
+                                  utils::VectorRef<const sem::Constant*> args,
+                                  const Source& source) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto i) -> ImplResult {
+            using NumberT = decltype(i);
+            if (i < NumberT(0)) {
+                AddError("sqrt must be called with a value >= 0", source);
+                return utils::Failure;
+            }
+            return CreateElement(builder, c0->Type(), NumberT(std::sqrt(i.value)));
+        };
+        return Dispatch_fa_f32_f16(create, c0);
+    };
+
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
 ConstEval::Result ConstEval::tan(const sem::Type* ty,
                                  utils::VectorRef<const sem::Constant*> args,
                                  const Source&) {

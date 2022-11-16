@@ -1651,6 +1651,28 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               StepCases<f16>()))));
 
 template <typename T>
+std::vector<Case> SqrtCases() {
+    std::vector<Case> cases = {
+        C({-T(0)}, -T(0)),  //
+        C({T(0)}, T(0)),    //
+        C({T(25)}, T(5)),
+
+        // Vector tests
+        C({Vec(T(25), T(100))}, Vec(T(5), T(10))),
+
+        E({-T(25)}, "12:34 error: sqrt must be called with a value >= 0"),
+    };
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Sqrt,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kSqrt),
+                     testing::ValuesIn(Concat(SqrtCases<AFloat>(),  //
+                                              SqrtCases<f32>(),
+                                              SqrtCases<f16>()))));
+
+template <typename T>
 std::vector<Case> TanCases() {
     std::vector<Case> cases = {
         C({-T(0)}, -T(0)),
