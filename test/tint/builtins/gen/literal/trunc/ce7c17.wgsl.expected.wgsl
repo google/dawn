@@ -1,7 +1,7 @@
 enable f16;
 
 fn trunc_ce7c17() {
-  var res : vec4<f16> = trunc(vec4<f16>(1.0h));
+  var res : vec4<f16> = trunc(vec4<f16>(1.5h));
 }
 
 @vertex

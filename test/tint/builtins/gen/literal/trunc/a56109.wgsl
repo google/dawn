@@ -25,7 +25,7 @@ enable f16;
 
 // fn trunc(vec<2, f16>) -> vec<2, f16>
 fn trunc_a56109() {
-  var res: vec2<f16> = trunc(vec2<f16>(1.h));
+  var res: vec2<f16> = trunc(vec2<f16>(1.5h));
 }
 
 @vertex

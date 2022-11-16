@@ -1,5 +1,5 @@
 fn trunc_562d05() {
-  var res : vec3<f32> = trunc(vec3<f32>(1.0f));
+  var res : vec3<f32> = trunc(vec3<f32>(1.5f));
 }
 
 @vertex

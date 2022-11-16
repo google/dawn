@@ -1,5 +1,5 @@
 void trunc_cc2b0d() {
-  float16_t arg_0 = float16_t(1.0h);
+  float16_t arg_0 = float16_t(1.5h);
   float16_t res = trunc(arg_0);
 }
 

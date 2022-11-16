@@ -25,7 +25,7 @@ enable f16;
 
 // fn trunc(f16) -> f16
 fn trunc_cc2b0d() {
-  var res: f16 = trunc(1.h);
+  var res: f16 = trunc(1.5h);
 }
 
 @vertex

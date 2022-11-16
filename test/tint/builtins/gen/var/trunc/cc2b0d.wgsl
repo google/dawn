@@ -25,7 +25,7 @@ enable f16;
 
 // fn trunc(f16) -> f16
 fn trunc_cc2b0d() {
-  var arg_0 = 1.h;
+  var arg_0 = 1.5h;
   var res: f16 = trunc(arg_0);
 }
 

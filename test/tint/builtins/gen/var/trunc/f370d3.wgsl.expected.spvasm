@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 36
+; Bound: 37
 ; Schema: 0
                OpCapability Shader
          %20 = OpExtInstImport "GLSL.std.450"
@@ -33,11 +33,12 @@
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
     %v2float = OpTypeVector %float 2
-    %float_1 = OpConstant %float 1
-         %15 = OpConstantComposite %v2float %float_1 %float_1
+  %float_1_5 = OpConstant %float 1.5
+         %15 = OpConstantComposite %v2float %float_1_5 %float_1_5
 %_ptr_Function_v2float = OpTypePointer Function %v2float
          %18 = OpConstantNull %v2float
          %23 = OpTypeFunction %v4float
+    %float_1 = OpConstant %float 1
 %trunc_f370d3 = OpFunction %void None %9
          %12 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_v2float Function %18
@@ -61,12 +62,12 @@
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %31 = OpLabel
-         %32 = OpFunctionCall %void %trunc_f370d3
+         %32 = OpLabel
+         %33 = OpFunctionCall %void %trunc_f370d3
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %34 = OpLabel
-         %35 = OpFunctionCall %void %trunc_f370d3
+         %35 = OpLabel
+         %36 = OpFunctionCall %void %trunc_f370d3
                OpReturn
                OpFunctionEnd

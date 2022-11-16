@@ -1,5 +1,5 @@
 void trunc_cc2b0d() {
-  float16_t res = trunc(float16_t(1.0h));
+  float16_t res = float16_t(1.0h);
 }
 
 struct tint_symbol {

@@ -37,7 +37,7 @@
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
        %half = OpTypeFloat 16
-%half_0x1p_0 = OpConstant %half 0x1p+0
+%half_0x1_8p_0 = OpConstant %half 0x1.8p+0
 %_ptr_Function_half = OpTypePointer Function %half
          %17 = OpConstantNull %half
          %22 = OpTypeFunction %v4float
@@ -46,7 +46,7 @@
          %12 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_half Function %17
         %res = OpVariable %_ptr_Function_half Function %17
-               OpStore %arg_0 %half_0x1p_0
+               OpStore %arg_0 %half_0x1_8p_0
          %20 = OpLoad %half %arg_0
          %18 = OpExtInst %half %19 Trunc %20
                OpStore %res %18

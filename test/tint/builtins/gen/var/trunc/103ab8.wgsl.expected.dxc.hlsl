@@ -1,5 +1,5 @@
 void trunc_103ab8() {
-  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.5h)).xxx;
   vector<float16_t, 3> res = trunc(arg_0);
 }
 

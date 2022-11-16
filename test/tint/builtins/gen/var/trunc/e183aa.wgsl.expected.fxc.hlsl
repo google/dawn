@@ -1,5 +1,5 @@
 void trunc_e183aa() {
-  float4 arg_0 = (1.0f).xxxx;
+  float4 arg_0 = (1.5f).xxxx;
   float4 res = trunc(arg_0);
 }
 

@@ -1,5 +1,5 @@
 void trunc_562d05() {
-  float3 arg_0 = (1.0f).xxx;
+  float3 arg_0 = (1.5f).xxx;
   float3 res = trunc(arg_0);
 }
 

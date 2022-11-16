@@ -23,7 +23,7 @@
 
 // fn trunc(vec<2, f32>) -> vec<2, f32>
 fn trunc_f370d3() {
-  var arg_0 = vec2<f32>(1.f);
+  var arg_0 = vec2<f32>(1.5f);
   var res: vec2<f32> = trunc(arg_0);
 }
 

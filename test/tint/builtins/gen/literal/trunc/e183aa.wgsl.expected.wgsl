@@ -1,5 +1,5 @@
 fn trunc_e183aa() {
-  var res : vec4<f32> = trunc(vec4<f32>(1.0f));
+  var res : vec4<f32> = trunc(vec4<f32>(1.5f));
 }
 
 @vertex

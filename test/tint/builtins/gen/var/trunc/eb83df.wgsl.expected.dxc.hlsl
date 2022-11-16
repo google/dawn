@@ -1,5 +1,5 @@
 void trunc_eb83df() {
-  float arg_0 = 1.0f;
+  float arg_0 = 1.5f;
   float res = trunc(arg_0);
 }
 

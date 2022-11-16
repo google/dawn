@@ -2,7 +2,7 @@
 
 using namespace metal;
 void trunc_ce7c17() {
-  half4 arg_0 = half4(1.0h);
+  half4 arg_0 = half4(1.5h);
   half4 res = trunc(arg_0);
 }
 

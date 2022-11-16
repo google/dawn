@@ -2,7 +2,7 @@
 
 using namespace metal;
 void trunc_cc2b0d() {
-  half res = trunc(1.0h);
+  half res = 1.0h;
 }
 
 struct tint_symbol {

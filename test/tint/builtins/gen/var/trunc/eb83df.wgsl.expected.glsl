@@ -1,7 +1,7 @@
 #version 310 es
 
 void trunc_eb83df() {
-  float arg_0 = 1.0f;
+  float arg_0 = 1.5f;
   float res = trunc(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void trunc_eb83df() {
-  float arg_0 = 1.0f;
+  float arg_0 = 1.5f;
   float res = trunc(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void trunc_eb83df() {
-  float arg_0 = 1.0f;
+  float arg_0 = 1.5f;
   float res = trunc(arg_0);
 }
 

@@ -1693,6 +1693,26 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               TanhCases<f32>(),
                                               TanhCases<f16>()))));
 
+template <typename T>
+std::vector<Case> TruncCases() {
+    std::vector<Case> cases = {C({T(0)}, T(0)),    //
+                               C({-T(0)}, -T(0)),  //
+                               C({T(1.5)}, T(1)),  //
+                               C({-T(1.5)}, -T(1)),
+
+                               // Vector tests
+                               C({Vec(T(0.0), T(1.5), -T(2.2))}, Vec(T(0), T(1), -T(2)))};
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Trunc,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kTrunc),
+                     testing::ValuesIn(Concat(TruncCases<AFloat>(),  //
+                                              TruncCases<f32>(),
+                                              TruncCases<f16>()))));
+
 std::vector<Case> Unpack4x8snormCases() {
     return {
         C({Val(u32(0x0000'0000))}, Vec(f32(0), f32(0), f32(0), f32(0))),

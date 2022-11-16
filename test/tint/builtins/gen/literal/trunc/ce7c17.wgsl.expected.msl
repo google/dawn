@@ -2,7 +2,7 @@
 
 using namespace metal;
 void trunc_ce7c17() {
-  half4 res = trunc(half4(1.0h));
+  half4 res = half4(1.0h);
 }
 
 struct tint_symbol {

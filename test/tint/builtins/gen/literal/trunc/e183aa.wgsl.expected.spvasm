@@ -1,10 +1,9 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 32
+; Bound: 30
 ; Schema: 0
                OpCapability Shader
-         %14 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %vertex_main "vertex_main" %value %vertex_point_size
                OpEntryPoint Fragment %fragment_main "fragment_main"
@@ -32,35 +31,34 @@
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
     %float_1 = OpConstant %float 1
-         %16 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+         %14 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-         %19 = OpTypeFunction %v4float
+         %17 = OpTypeFunction %v4float
 %trunc_e183aa = OpFunction %void None %9
          %12 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function %5
-         %13 = OpExtInst %v4float %14 Trunc %16
-               OpStore %res %13
+               OpStore %res %14
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %19
-         %21 = OpLabel
-         %22 = OpFunctionCall %void %trunc_e183aa
+%vertex_main_inner = OpFunction %v4float None %17
+         %19 = OpLabel
+         %20 = OpFunctionCall %void %trunc_e183aa
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %24 = OpLabel
-         %25 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %25
+         %22 = OpLabel
+         %23 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %23
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %27 = OpLabel
-         %28 = OpFunctionCall %void %trunc_e183aa
+         %25 = OpLabel
+         %26 = OpFunctionCall %void %trunc_e183aa
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %30 = OpLabel
-         %31 = OpFunctionCall %void %trunc_e183aa
+         %28 = OpLabel
+         %29 = OpFunctionCall %void %trunc_e183aa
                OpReturn
                OpFunctionEnd

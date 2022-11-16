@@ -1,5 +1,5 @@
 fn trunc_eb83df() {
-  var arg_0 = 1.0f;
+  var arg_0 = 1.5f;
   var res : f32 = trunc(arg_0);
 }
 

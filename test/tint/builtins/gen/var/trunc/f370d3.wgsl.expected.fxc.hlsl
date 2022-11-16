@@ -1,5 +1,5 @@
 void trunc_f370d3() {
-  float2 arg_0 = (1.0f).xx;
+  float2 arg_0 = (1.5f).xx;
   float2 res = trunc(arg_0);
 }
 

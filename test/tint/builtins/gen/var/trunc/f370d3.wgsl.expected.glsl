@@ -1,7 +1,7 @@
 #version 310 es
 
 void trunc_f370d3() {
-  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_0 = vec2(1.5f);
   vec2 res = trunc(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void trunc_f370d3() {
-  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_0 = vec2(1.5f);
   vec2 res = trunc(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void trunc_f370d3() {
-  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_0 = vec2(1.5f);
   vec2 res = trunc(arg_0);
 }
 

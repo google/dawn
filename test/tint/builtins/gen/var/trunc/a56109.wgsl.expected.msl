@@ -2,7 +2,7 @@
 
 using namespace metal;
 void trunc_a56109() {
-  half2 arg_0 = half2(1.0h);
+  half2 arg_0 = half2(1.5h);
   half2 res = trunc(arg_0);
 }
 

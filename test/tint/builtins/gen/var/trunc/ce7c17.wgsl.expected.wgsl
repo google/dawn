@@ -1,7 +1,7 @@
 enable f16;
 
 fn trunc_ce7c17() {
-  var arg_0 = vec4<f16>(1.0h);
+  var arg_0 = vec4<f16>(1.5h);
   var res : vec4<f16> = trunc(arg_0);
 }
 

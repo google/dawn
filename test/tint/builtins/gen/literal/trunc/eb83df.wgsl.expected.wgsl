@@ -1,5 +1,5 @@
 fn trunc_eb83df() {
-  var res : f32 = trunc(1.0f);
+  var res : f32 = trunc(1.5f);
 }
 
 @vertex

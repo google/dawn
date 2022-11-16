@@ -1,5 +1,5 @@
 void trunc_f370d3() {
-  float2 res = trunc((1.0f).xx);
+  float2 res = (1.0f).xx;
 }
 
 struct tint_symbol {

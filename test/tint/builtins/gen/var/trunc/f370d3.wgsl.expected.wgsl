@@ -1,5 +1,5 @@
 fn trunc_f370d3() {
-  var arg_0 = vec2<f32>(1.0f);
+  var arg_0 = vec2<f32>(1.5f);
   var res : vec2<f32> = trunc(arg_0);
 }
 
