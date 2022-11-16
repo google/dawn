@@ -431,13 +431,14 @@ inline std::optional<AInt> CheckedAdd(AInt a, AInt b) {
     return AInt(result);
 }
 
-/// @returns a + b, or an empty optional if the resulting value overflowed the AFloat
-inline std::optional<AFloat> CheckedAdd(AFloat a, AFloat b) {
-    auto result = a.value + b.value;
-    if (!std::isfinite(result)) {
+/// @returns a + b, or an empty optional if the resulting value overflowed the float value
+template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
+inline std::optional<FloatingPointT> CheckedAdd(FloatingPointT a, FloatingPointT b) {
+    auto result = FloatingPointT{a.value + b.value};
+    if (!std::isfinite(result.value)) {
         return {};
     }
-    return AFloat{result};
+    return result;
 }
 
 /// @returns a - b, or an empty optional if the resulting value overflowed the AInt
@@ -462,13 +463,14 @@ inline std::optional<AInt> CheckedSub(AInt a, AInt b) {
     return AInt(result);
 }
 
-/// @returns a + b, or an empty optional if the resulting value overflowed the AFloat
-inline std::optional<AFloat> CheckedSub(AFloat a, AFloat b) {
-    auto result = a.value - b.value;
-    if (!std::isfinite(result)) {
+/// @returns a + b, or an empty optional if the resulting value overflowed the float value
+template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
+inline std::optional<FloatingPointT> CheckedSub(FloatingPointT a, FloatingPointT b) {
+    auto result = FloatingPointT{a.value - b.value};
+    if (!std::isfinite(result.value)) {
         return {};
     }
-    return AFloat{result};
+    return result;
 }
 
 /// @returns a * b, or an empty optional if the resulting value overflowed the AInt
@@ -505,13 +507,14 @@ inline std::optional<AInt> CheckedMul(AInt a, AInt b) {
     return AInt(result);
 }
 
-/// @returns a * b, or an empty optional if the resulting value overflowed the AFloat
-inline std::optional<AFloat> CheckedMul(AFloat a, AFloat b) {
-    auto result = a.value * b.value;
-    if (!std::isfinite(result)) {
+/// @returns a * b, or an empty optional if the resulting value overflowed the float value
+template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
+inline std::optional<FloatingPointT> CheckedMul(FloatingPointT a, FloatingPointT b) {
+    auto result = FloatingPointT{a.value * b.value};
+    if (!std::isfinite(result.value)) {
         return {};
     }
-    return AFloat{result};
+    return result;
 }
 
 /// @returns a / b, or an empty optional if the resulting value overflowed the AInt
@@ -527,13 +530,14 @@ inline std::optional<AInt> CheckedDiv(AInt a, AInt b) {
     return AInt{a.value / b.value};
 }
 
-/// @returns a / b, or an empty optional if the resulting value overflowed the AFloat
-inline std::optional<AFloat> CheckedDiv(AFloat a, AFloat b) {
-    auto result = a.value / b.value;
-    if (!std::isfinite(result)) {
+/// @returns a / b, or an empty optional if the resulting value overflowed the float value
+template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
+inline std::optional<FloatingPointT> CheckedDiv(FloatingPointT a, FloatingPointT b) {
+    auto result = FloatingPointT{a.value / b.value};
+    if (!std::isfinite(result.value)) {
         return {};
     }
-    return AFloat{result};
+    return result;
 }
 
 /// @returns a * b + c, or an empty optional if the value overflowed the AInt
