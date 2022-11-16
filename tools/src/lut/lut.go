@@ -83,7 +83,7 @@ func (t lut) Compact() {
 	// This helps 'seed' the compacted form with the largest items first.
 	// This can improve the compaction as small sequences can pack into larger,
 	// placed items.
-	sort.Slice(t.sequences, func(i, j int) bool {
+	sort.SliceStable(t.sequences, func(i, j int) bool {
 		return t.sequences[i].count > t.sequences[j].count
 	})
 
