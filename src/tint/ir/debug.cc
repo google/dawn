@@ -156,4 +156,11 @@ std::string Debug::AsDotGraph(const Module* mod) {
     return out.str();
 }
 
+// static
+std::string Debug::AsString(const Module*) {
+    std::stringstream out;
+    out << "IR" << std::endl;
+    return out.str();
+}
+
 }  // namespace tint::ir
