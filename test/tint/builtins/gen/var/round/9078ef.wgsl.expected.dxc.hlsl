@@ -1,5 +1,5 @@
 void round_9078ef() {
-  float16_t arg_0 = float16_t(1.0h);
+  float16_t arg_0 = float16_t(3.3984375h);
   float16_t res = round(arg_0);
 }
 

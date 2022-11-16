@@ -1,5 +1,5 @@
 fn round_9edc38() {
-  var res : f32 = round(1.0f);
+  var res : f32 = round(3.400000095f);
 }
 
 @vertex

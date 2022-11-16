@@ -1,5 +1,5 @@
 fn round_9edc38() {
-  var arg_0 = 1.0f;
+  var arg_0 = 3.400000095f;
   var res : f32 = round(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn round_52c84d() {
-  var arg_0 = vec2<f32>(1.0f);
+  var arg_0 = vec2<f32>(3.400000095f);
   var res : vec2<f32> = round(arg_0);
 }
 

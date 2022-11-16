@@ -2270,6 +2270,42 @@ ConstEval::Result ConstEval::reverseBits(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0]);
 }
 
+ConstEval::Result ConstEval::round(const sem::Type* ty,
+                                   utils::VectorRef<const sem::Constant*> args,
+                                   const Source&) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto e) {
+            using NumberT = decltype(e);
+            using T = UnwrapNumber<NumberT>;
+
+            auto integral = NumberT(0);
+            auto fract = std::abs(std::modf(e.value, &(integral.value)));
+            // When e lies halfway between integers k and k + 1, the result is k when k is even,
+            // and k + 1 when k is odd.
+            NumberT result = NumberT(0.0);
+            if (fract == NumberT(0.5)) {
+                // If the integral value is negative, then we need to subtract one in order to move
+                // to the correct `k`. The half way check is `k` and `k + 1` which in the positive
+                // case is `x` and `x + 1` but in the negative case is `x - 1` and `x`.
+                T integral_val = integral.value;
+                if (std::signbit(integral_val)) {
+                    integral_val = std::abs(integral_val - 1);
+                }
+                if (uint64_t(integral_val) % 2 == 0) {
+                    result = NumberT(std::floor(e.value));
+                } else {
+                    result = NumberT(std::ceil(e.value));
+                }
+            } else {
+                result = NumberT(std::round(e.value));
+            }
+            return CreateElement(builder, c0->Type(), result);
+        };
+        return Dispatch_fa_f32_f16(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
 ConstEval::Result ConstEval::saturate(const sem::Type* ty,
                                       utils::VectorRef<const sem::Constant*> args,
                                       const Source&) {

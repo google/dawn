@@ -1,5 +1,5 @@
 void round_f665b5() {
-  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(3.3984375h)).xxxx;
   vector<float16_t, 4> res = round(arg_0);
 }
 

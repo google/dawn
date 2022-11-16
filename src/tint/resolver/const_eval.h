@@ -656,6 +656,15 @@ class ConstEval {
                        utils::VectorRef<const sem::Constant*> args,
                        const Source& source);
 
+    /// round builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result round(const sem::Type* ty,
+                 utils::VectorRef<const sem::Constant*> args,
+                 const Source& source);
+
     /// saturate builtin
     /// @param ty the expression type
     /// @param args the input arguments

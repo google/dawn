@@ -522,8 +522,8 @@ fn reflect<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
 fn refract<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, T) -> vec<N, T>
 @const fn reverseBits<T: iu32>(T) -> T
 @const fn reverseBits<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
-fn round<T: f32_f16>(T) -> T
-fn round<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn round<T: fa_f32_f16>(@test_value(3.4) T) -> T
+@const fn round<N: num, T: fa_f32_f16>(@test_value(3.4) vec<N, T>) -> vec<N, T>
 @const fn saturate<T: fa_f32_f16>(@test_value(2) T) -> T
 @const fn saturate<T: fa_f32_f16, N: num>(@test_value(2) vec<N, T>) -> vec<N, T>
 @const("select_bool") fn select<T: scalar>(T, T, bool) -> T

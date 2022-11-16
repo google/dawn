@@ -2,7 +2,7 @@
 
 using namespace metal;
 void round_1c7897() {
-  float3 res = rint(float3(1.0f));
+  float3 res = float3(3.0f);
 }
 
 struct tint_symbol {

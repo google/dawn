@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void round_e1bba2() {
-  f16vec3 arg_0 = f16vec3(1.0hf);
+  f16vec3 arg_0 = f16vec3(3.3984375hf);
   f16vec3 res = round(arg_0);
 }
 
@@ -24,7 +24,7 @@ void main() {
 precision mediump float;
 
 void round_e1bba2() {
-  f16vec3 arg_0 = f16vec3(1.0hf);
+  f16vec3 arg_0 = f16vec3(3.3984375hf);
   f16vec3 res = round(arg_0);
 }
 
@@ -40,7 +40,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void round_e1bba2() {
-  f16vec3 arg_0 = f16vec3(1.0hf);
+  f16vec3 arg_0 = f16vec3(3.3984375hf);
   f16vec3 res = round(arg_0);
 }
 

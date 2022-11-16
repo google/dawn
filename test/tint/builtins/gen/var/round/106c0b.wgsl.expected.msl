@@ -2,7 +2,7 @@
 
 using namespace metal;
 void round_106c0b() {
-  float4 arg_0 = float4(1.0f);
+  float4 arg_0 = float4(3.400000095f);
   float4 res = rint(arg_0);
 }
 

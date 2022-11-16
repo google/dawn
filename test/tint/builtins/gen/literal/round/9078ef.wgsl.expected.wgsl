@@ -1,7 +1,7 @@
 enable f16;
 
 fn round_9078ef() {
-  var res : f16 = round(1.0h);
+  var res : f16 = round(3.3984375h);
 }
 
 @vertex

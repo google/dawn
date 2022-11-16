@@ -1,5 +1,5 @@
 fn round_52c84d() {
-  var res : vec2<f32> = round(vec2<f32>(1.0f));
+  var res : vec2<f32> = round(vec2<f32>(3.400000095f));
 }
 
 @vertex

@@ -1,5 +1,5 @@
 void round_52c84d() {
-  float2 res = round((1.0f).xx);
+  float2 res = (3.0f).xx;
 }
 
 struct tint_symbol {

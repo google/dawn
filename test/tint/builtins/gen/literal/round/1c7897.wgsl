@@ -23,7 +23,7 @@
 
 // fn round(vec<3, f32>) -> vec<3, f32>
 fn round_1c7897() {
-  var res: vec3<f32> = round(vec3<f32>(1.f));
+  var res: vec3<f32> = round(vec3<f32>(3.4f));
 }
 
 @vertex

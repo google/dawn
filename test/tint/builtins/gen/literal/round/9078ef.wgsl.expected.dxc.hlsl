@@ -1,5 +1,5 @@
 void round_9078ef() {
-  float16_t res = round(float16_t(1.0h));
+  float16_t res = float16_t(3.0h);
 }
 
 struct tint_symbol {

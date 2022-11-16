@@ -1,7 +1,7 @@
 #version 310 es
 
 void round_52c84d() {
-  vec2 res = round(vec2(1.0f));
+  vec2 res = vec2(3.0f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void round_52c84d() {
-  vec2 res = round(vec2(1.0f));
+  vec2 res = vec2(3.0f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void round_52c84d() {
-  vec2 res = round(vec2(1.0f));
+  vec2 res = vec2(3.0f);
 }
 
 void compute_main() {

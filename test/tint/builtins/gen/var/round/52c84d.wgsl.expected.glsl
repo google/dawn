@@ -1,7 +1,7 @@
 #version 310 es
 
 void round_52c84d() {
-  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_0 = vec2(3.400000095f);
   vec2 res = round(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void round_52c84d() {
-  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_0 = vec2(3.400000095f);
   vec2 res = round(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void round_52c84d() {
-  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_0 = vec2(3.400000095f);
   vec2 res = round(arg_0);
 }
 

@@ -1,7 +1,7 @@
 enable f16;
 
 fn round_f665b5() {
-  var res : vec4<f16> = round(vec4<f16>(1.0h));
+  var res : vec4<f16> = round(vec4<f16>(3.3984375h));
 }
 
 @vertex

@@ -23,7 +23,7 @@
 
 // fn round(vec<4, f32>) -> vec<4, f32>
 fn round_106c0b() {
-  var arg_0 = vec4<f32>(1.f);
+  var arg_0 = vec4<f32>(3.4f);
   var res: vec4<f32> = round(arg_0);
 }
 

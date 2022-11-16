@@ -2,7 +2,7 @@
 
 using namespace metal;
 void round_e1bba2() {
-  half3 arg_0 = half3(1.0h);
+  half3 arg_0 = half3(3.3984375h);
   half3 res = rint(arg_0);
 }
 

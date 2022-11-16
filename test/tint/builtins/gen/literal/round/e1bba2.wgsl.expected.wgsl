@@ -1,7 +1,7 @@
 enable f16;
 
 fn round_e1bba2() {
-  var res : vec3<f16> = round(vec3<f16>(1.0h));
+  var res : vec3<f16> = round(vec3<f16>(3.3984375h));
 }
 
 @vertex

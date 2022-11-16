@@ -1478,6 +1478,36 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               ReverseBitsCases<u32>()))));
 
 template <typename T>
+std::vector<Case> RoundCases() {
+    std::vector<Case> cases = {
+        C({T(0.0)}, T(0.0)),      //
+        C({-T(0.0)}, -T(0.0)),    //
+        C({T(1.5)}, T(2.0)),      //
+        C({T(2.5)}, T(2.0)),      //
+        C({T(2.4)}, T(2.0)),      //
+        C({T(2.6)}, T(3.0)),      //
+        C({T(1.49999)}, T(1.0)),  //
+        C({T(1.50001)}, T(2.0)),  //
+        C({-T(1.5)}, -T(2.0)),    //
+        C({-T(2.5)}, -T(2.0)),    //
+        C({-T(2.6)}, -T(3.0)),    //
+        C({-T(2.4)}, -T(2.0)),    //
+
+        // Vector tests
+        C({Vec(T(0.0), T(1.5), T(2.5))}, Vec(T(0.0), T(2.0), T(2.0))),
+    };
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Round,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kRound),
+                     testing::ValuesIn(Concat(RoundCases<AFloat>(),  //
+                                              RoundCases<f32>(),
+                                              RoundCases<f16>()))));
+
+template <typename T>
 std::vector<Case> SaturateCases() {
     return {
         C({T(0)}, T(0)),
