@@ -1916,7 +1916,6 @@ INSTANTIATE_TEST_SUITE_P(  //
                      testing::ValuesIn(Unpack2x16unormCases())));
 
 std::vector<Case> QuantizeToF16Cases() {
-    (void)E({Vec(0_f, 0_f)}, "");  // Currently unused, but will be soon.
     return {
         C({0_f}, 0_f),    //
         C({-0_f}, -0_f),  //
@@ -1945,12 +1944,6 @@ std::vector<Case> QuantizeToF16Cases() {
         C({0x0.06b7p-14_f}, 0x0.068p-14_f),    //
         C({-0x0.06b7p-14_f}, -0x0.068p-14_f),  //
 
-        // Value out of f16 range
-        C({65504.003_f}, 65504_f),     //
-        C({-65504.003_f}, -65504_f),   //
-        C({0x1.234p56_f}, 65504_f),    //
-        C({-0x4.321p65_f}, -65504_f),  //
-
         // Vector tests
         C({Vec(0_f, -0_f)}, Vec(0_f, -0_f)),  //
         C({Vec(1_f, -1_f)}, Vec(1_f, -1_f)),  //
@@ -1963,8 +1956,16 @@ std::vector<Case> QuantizeToF16Cases() {
         C({Vec(0x0.034p-14_f, -0x0.034p-14_f, 0x0.068p-14_f, -0x0.068p-14_f)},
           Vec(0x0.034p-14_f, -0x0.034p-14_f, 0x0.068p-14_f, -0x0.068p-14_f)),
 
-        C({Vec(65504.003_f, 0x1.234p56_f)}, Vec(65504_f, 65504_f)),
-        C({Vec(-0x1.234p56_f, -65504.003_f)}, Vec(-65504_f, -65504_f)),
+        // Value out of f16 range
+        E({65504.003_f}, "12:34 error: value 65504.00390625 cannot be represented as 'f16'"),
+        E({-65504.003_f}, "12:34 error: value -65504.00390625 cannot be represented as 'f16'"),
+        E({0x1.234p56_f}, "12:34 error: value 81979586966978560 cannot be represented as 'f16'"),
+        E({0x4.321p65_f},
+          "12:34 error: value 1.5478871919272394752e+20 cannot be represented as 'f16'"),
+        E({Vec(65504.003_f, 0_f)},
+          "12:34 error: value 65504.00390625 cannot be represented as 'f16'"),
+        E({Vec(0_f, -0x4.321p65_f)},
+          "12:34 error: value -1.5478871919272394752e+20 cannot be represented as 'f16'"),
     };
 }
 INSTANTIATE_TEST_SUITE_P(  //

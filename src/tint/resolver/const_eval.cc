@@ -2615,19 +2615,13 @@ ConstEval::Result ConstEval::unpack4x8unorm(const sem::Type* ty,
 
 ConstEval::Result ConstEval::quantizeToF16(const sem::Type* ty,
                                            utils::VectorRef<const sem::Constant*> args,
-                                           const Source&) {
-    auto transform = [&](const sem::Constant* c) {
-        auto conv = CheckedConvert<f32>(f16(c->As<f32>()));
+                                           const Source& source) {
+    auto transform = [&](const sem::Constant* c) -> ImplResult {
+        auto value = c->As<f32>();
+        auto conv = CheckedConvert<f32>(f16(value));
         if (!conv) {
-            // https://www.w3.org/TR/WGSL/#quantizeToF16-builtin
-            // If e is outside the finite range of binary16, then the result is any value of type
-            // f32
-            switch (conv.Failure()) {
-                case ConversionFailure::kExceedsNegativeLimit:
-                    return CreateElement(builder, c->Type(), f16(f16::kLowestValue));
-                case ConversionFailure::kExceedsPositiveLimit:
-                    return CreateElement(builder, c->Type(), f16(f16::kHighestValue));
-            }
+            AddError(OverflowErrorMessage(value, "f16"), source);
+            return utils::Failure;
         }
         return CreateElement(builder, c->Type(), conv.Get());
     };
