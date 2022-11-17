@@ -2738,9 +2738,6 @@ DAWN_INSTANTIATE_TEST_P(
 class T2TCopyFromDirtyHeapTests : public DawnTest {
   public:
     void DoTest(uint32_t layerCount, uint32_t levelCount) {
-        // TODO(crbug.com/1237175): Re-enable these tests when we add the workaround on the Intel
-        // D3D12 drivers.
-        DAWN_SUPPRESS_TEST_IF(IsIntel() && IsD3D12());
         std::vector<uint32_t> expectedData;
         wgpu::Buffer uploadBuffer = GetUploadBufferAndExpectedData(&expectedData);
 

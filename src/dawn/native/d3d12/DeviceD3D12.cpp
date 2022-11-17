@@ -565,10 +565,12 @@ ResultOrError<ResourceHeapAllocation> Device::AllocateMemory(
     D3D12_HEAP_TYPE heapType,
     const D3D12_RESOURCE_DESC& resourceDescriptor,
     D3D12_RESOURCE_STATES initialUsage,
-    uint32_t formatBytesPerBlock) {
+    uint32_t formatBytesPerBlock,
+    bool forceAllocateAsCommittedResource) {
     // formatBytesPerBlock is needed only for color non-compressed formats for a workaround.
     return mResourceAllocatorManager->AllocateMemory(heapType, resourceDescriptor, initialUsage,
-                                                     formatBytesPerBlock);
+                                                     formatBytesPerBlock,
+                                                     forceAllocateAsCommittedResource);
 }
 
 std::unique_ptr<ExternalImageDXGIImpl> Device::CreateExternalImageDXGIImpl(
@@ -726,6 +728,13 @@ void Device::InitTogglesFromDriver() {
                                               kFixedDriverVersion) == -1) {
             SetToggle(Toggle::D3D12AllocateExtraMemoryFor2DArrayTexture, true);
         }
+    }
+
+    // Currently this workaround is only needed on Intel Gen9.5 and Gen11 GPUs.
+    // See http://crbug.com/1237175 for more information.
+    if ((gpu_info::IsIntelGen9(vendorId, deviceId) && !gpu_info::IsSkylake(deviceId)) ||
+        gpu_info::IsIntelGen11(vendorId, deviceId)) {
+        SetToggle(Toggle::D3D12Allocate2DTexturewithCopyDstAsCommittedResource, true);
     }
 }
 

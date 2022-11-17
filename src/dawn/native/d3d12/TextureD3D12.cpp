@@ -611,9 +611,14 @@ MaybeError Texture::InitializeAsInternalTexture() {
     if (GetFormat().IsColor()) {
         bytesPerBlock = GetFormat().GetAspectInfo(wgpu::TextureAspect::All).block.byteSize;
     }
+    bool forceAllocateAsCommittedResource =
+        device->IsToggleEnabled(Toggle::D3D12Allocate2DTexturewithCopyDstAsCommittedResource) &&
+        GetDimension() == wgpu::TextureDimension::e2D &&
+        (GetInternalUsage() & wgpu::TextureUsage::CopyDst);
     DAWN_TRY_ASSIGN(mResourceAllocation,
                     device->AllocateMemory(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor,
-                                           D3D12_RESOURCE_STATE_COMMON, bytesPerBlock));
+                                           D3D12_RESOURCE_STATE_COMMON, bytesPerBlock,
+                                           forceAllocateAsCommittedResource));
 
     SetLabelImpl();
 

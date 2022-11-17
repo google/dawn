@@ -306,6 +306,11 @@ uint32_t ComputeExtraArraySizeForIntelGen12(uint32_t width,
     return 0;
 }
 
+bool ShouldAllocateAsCommittedResource(Device* device, bool forceAllocateAsCommittedResource) {
+    return forceAllocateAsCommittedResource ||
+           device->IsToggleEnabled(Toggle::DisableResourceSuballocation);
+}
+
 }  // namespace
 
 ResourceAllocatorManager::ResourceAllocatorManager(Device* device) : mDevice(device) {
@@ -329,7 +334,8 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
     D3D12_HEAP_TYPE heapType,
     const D3D12_RESOURCE_DESC& resourceDescriptor,
     D3D12_RESOURCE_STATES initialUsage,
-    uint32_t formatBytesPerBlock) {
+    uint32_t formatBytesPerBlock,
+    bool forceAllocateAsCommittedResource) {
     // In order to suppress a warning in the D3D12 debug layer, we need to specify an
     // optimized clear value. As there are no negative consequences when picking a mismatched
     // clear value, we use zero as the optimized clear value. This also enables fast clears on
@@ -358,7 +364,7 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
     // For very small resources, it is inefficent to suballocate given the min. heap
     // size could be much larger then the resource allocation.
     // Attempt to satisfy the request using sub-allocation (placed resource in a heap).
-    if (!mDevice->IsToggleEnabled(Toggle::DisableResourceSuballocation)) {
+    if (!ShouldAllocateAsCommittedResource(mDevice, forceAllocateAsCommittedResource)) {
         ResourceHeapAllocation subAllocation;
         DAWN_TRY_ASSIGN(subAllocation, CreatePlacedResource(heapType, revisedDescriptor,
                                                             optimizedClearValue, initialUsage));

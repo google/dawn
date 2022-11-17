@@ -319,6 +319,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "default on Qualcomm GPUs, which have been observed experiencing a driver crash in this "
       "situation.",
       "https://crbug.com/dawn/1564"}},
+    {Toggle::D3D12Allocate2DTexturewithCopyDstAsCommittedResource,
+     {"d3d12_allocate_2d_texture_with_copy_dst_as_committed_resource",
+      "Allocate each 2D texture with CopyDst usage as committed resources instead of placed "
+      "resources. This toggle is enabled by default on D3D12 backends using Intel Gen9.5 and Gen11 "
+      "GPUs due to a driver issue on Intel D3D12 driver.",
+      "https://crbug.com/1237175"}},
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 }  // anonymous namespace

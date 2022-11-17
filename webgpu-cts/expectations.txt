@@ -65,12 +65,15 @@
 
 ################################################################################
 # webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
-# Flakes on Windows Intel. depth32float-stencil8 and stencil8 fail consistently.
-# Marked all as failing to avoid expectation overlap with `dimension="2d";*`
-# and `dimension="2d";moreParams...`
+# depth32float-stencil8 and stencil8 fail consistently.
 # KEEP
 ################################################################################
-crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";* [ Failure ]
+crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth32float-stencil8" [ Failure ]
+crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
+crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
+crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Failure ]
+
+################################################################################
 
 ################################################################################
 # webgpu:web_platform,copyToTexture,ImageBitmap flakes on Windows Intel with rgba32float and rg32float formats
@@ -129,37 +132,6 @@ crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextur
 crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg32float";dstFormat="rg32float";dimension="2d" [ Failure ]
 crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba16float";dstFormat="rgba16float";dimension="2d" [ Failure ]
 crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="2d" [ Failure ]
-
-################################################################################
-# copyToTexture failures. Needs investigation
-# KEEP
-################################################################################
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg16sint";dstFormat="rg16sint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg16uint";dstFormat="rg16uint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg32float";dstFormat="rg32float";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg32sint";dstFormat="rg32sint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg32uint";dstFormat="rg32uint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba16sint";dstFormat="rgba16sint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba16uint";dstFormat="rgba16uint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba32sint";dstFormat="rgba32sint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba32uint";dstFormat="rgba32uint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8sint";dstFormat="rgba8sint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8uint";dstFormat="rgba8uint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg16sint";dstFormat="rg16sint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg16uint";dstFormat="rg16uint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg32float";dstFormat="rg32float";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg32sint";dstFormat="rg32sint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg32uint";dstFormat="rg32uint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba16sint";dstFormat="rgba16sint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba16uint";dstFormat="rgba16uint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba32sint";dstFormat="rgba32sint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba32uint";dstFormat="rgba32uint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba8sint";dstFormat="rgba8sint";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="2d" [ Failure ]
-crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba8uint";dstFormat="rgba8uint";dimension="2d" [ Failure ]
 
 ################################################################################
 # General test slowness because of https://github.com/gpuweb/cts/issues/1162
@@ -544,7 +516,6 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 monterey target-cpu
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,offsetAndSizeOOB: [ RetryOnFailure ]
 
 # New failures. Please triage:
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="rgba32uint";dimension="2d" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,shader_module,compilation_info:line_number_and_position:valid=false;name="carriage-return" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,compute_pipeline:overrides,workgroup_size,limits,* [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,createBindGroupLayout:multisampled_validation:viewDimension="2d" [ Failure ]
