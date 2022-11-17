@@ -66,8 +66,7 @@ fn f() {
     EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillAcosh(Level::kFull)));
 }
 
-// TODO(crbug.com/tint/1581): Enable once `acosh` is implemented as @const
-TEST_F(BuiltinPolyfillTest, DISABLED_Acosh_ConstantExpression) {
+TEST_F(BuiltinPolyfillTest, Acosh_ConstantExpression) {
     auto* src = R"(
 fn f() {
   let r : f32 = acosh(1.0);
@@ -287,11 +286,10 @@ fn f() {
     EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillAtanh(Level::kFull)));
 }
 
-// TODO(crbug.com/tint/1581): Enable once `atanh` is implemented as @const
-TEST_F(BuiltinPolyfillTest, DISABLED_Atanh_ConstantExpression) {
+TEST_F(BuiltinPolyfillTest, Atanh_ConstantExpression) {
     auto* src = R"(
 fn f() {
-  let r : f32 = atanh(1.23);
+  let r : f32 = atanh(0.23);
 }
 )";
 
@@ -727,8 +725,7 @@ fn f() {
     EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillCountLeadingZeros()));
 }
 
-// TODO(crbug.com/tint/1581): Enable once `countLeadingZeros` is implemented as @const
-TEST_F(BuiltinPolyfillTest, DISABLED_CountLeadingZeros_ConstantExpression) {
+TEST_F(BuiltinPolyfillTest, CountLeadingZeros_ConstantExpression) {
     auto* src = R"(
 fn f() {
   let r : i32 = countLeadingZeros(15i);
@@ -905,8 +902,7 @@ fn f() {
     EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillCountTrailingZeros()));
 }
 
-// TODO(crbug.com/tint/1581): Enable once `countTrailingZeros` is implemented as @const
-TEST_F(BuiltinPolyfillTest, DISABLED_CountTrailingZeros_ConstantExpression) {
+TEST_F(BuiltinPolyfillTest, CountTrailingZeros_ConstantExpression) {
     auto* src = R"(
 fn f() {
   let r : i32 = countTrailingZeros(15i);
@@ -1338,8 +1334,7 @@ fn f() {
     EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillFirstLeadingBit()));
 }
 
-// TODO(crbug.com/tint/1581): Enable once `firstLeadingBit` is implemented as @const
-TEST_F(BuiltinPolyfillTest, DISABLED_FirstLeadingBit_ConstantExpression) {
+TEST_F(BuiltinPolyfillTest, FirstLeadingBit_ConstantExpression) {
     auto* src = R"(
 fn f() {
   let r : i32 = firstLeadingBit(15i);
@@ -1516,8 +1511,7 @@ fn f() {
     EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillFirstTrailingBit()));
 }
 
-// TODO(crbug.com/tint/1581): Enable once `firstTrailingBit` is implemented as @const
-TEST_F(BuiltinPolyfillTest, DISABLED_FirstTrailingBit_ConstantExpression) {
+TEST_F(BuiltinPolyfillTest, FirstTrailingBit_ConstantExpression) {
     auto* src = R"(
 fn f() {
   let r : i32 = firstTrailingBit(15i);
@@ -1696,12 +1690,10 @@ fn f() {
     EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillInsertBits(Level::kFull)));
 }
 
-// TODO(crbug.com/tint/1581): Enable once `insertBits` is implemented as @const
-TEST_F(BuiltinPolyfillTest, DISABLED_InsertBits_ConstantExpression) {
+TEST_F(BuiltinPolyfillTest, InsertBits_ConstantExpression) {
     auto* src = R"(
 fn f() {
-  let v = 1234i;
-  let r : i32 = insertBits(v, 5678, 5u, 6u);
+  let r : i32 = insertBits(1234i, 5678i, 5u, 6u);
 }
 )";
 
