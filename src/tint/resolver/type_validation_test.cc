@@ -836,6 +836,15 @@ TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
               "12:34 error: texture_2d<f32> cannot be used as an element type of an array");
 }
 
+TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableTypeWithStride) {
+    auto* ptr_ty = ty.pointer<u32>(Source{{12, 34}}, ast::AddressSpace::kUniform);
+    GlobalVar("arr", ty.array(ptr_ty, 4_i, 16), ast::AddressSpace::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: ptr<uniform, u32, read> cannot be used as an element type of an array");
+}
+
 TEST_F(ResolverTypeValidationTest, VariableAsType) {
     // var<private> a : i32;
     // var<private> b : a;

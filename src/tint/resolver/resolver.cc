@@ -2920,9 +2920,14 @@ bool Resolver::ArrayAttributes(utils::VectorRef<const ast::Attribute*> attribute
     for (auto* attr : attributes) {
         Mark(attr);
         if (auto* sd = attr->As<ast::StrideAttribute>()) {
-            explicit_stride = sd->stride;
-            if (!validator_.ArrayStrideAttribute(sd, el_ty->Size(), el_ty->Align())) {
-                return false;
+            // If the element type is not plain, then el_ty->Align() may be 0, in which case we
+            // could get a DBZ in ArrayStrideAttribute(). In this case, validation will error about
+            // the invalid array element type (which is tested later), so this is just a seatbelt.
+            if (IsPlain(el_ty)) {
+                explicit_stride = sd->stride;
+                if (!validator_.ArrayStrideAttribute(sd, el_ty->Size(), el_ty->Align())) {
+                    return false;
+                }
             }
             continue;
         }
