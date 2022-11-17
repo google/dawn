@@ -875,6 +875,9 @@ void Resolver::SetShadows() {
 }
 
 sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
+    utils::UniqueVector<const sem::GlobalVariable*, 4> transitively_referenced_overrides;
+    TINT_SCOPED_ASSIGNMENT(resolved_overrides_, &transitively_referenced_overrides);
+
     auto* sem = As<sem::GlobalVariable>(Variable(v, /* is_global */ true));
     if (!sem) {
         return nullptr;
@@ -896,6 +899,16 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
     // referenced structs
     if (!validator_.AddressSpaceLayout(sem, enabled_extensions_, valid_type_storage_layouts_)) {
         return nullptr;
+    }
+
+    // Track the pipeline-overridable constants that are transitively referenced by this variable.
+    for (auto* var : transitively_referenced_overrides) {
+        sem->AddTransitivelyReferencedOverride(var);
+    }
+    if (auto* arr = sem->Type()->UnwrapRef()->As<sem::Array>()) {
+        for (auto* var : arr->TransitivelyReferencedOverrides()) {
+            sem->AddTransitivelyReferencedOverride(var);
+        }
     }
 
     return sem;
@@ -2477,9 +2490,22 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
             }
         }
 
+        auto* global = variable->As<sem::GlobalVariable>();
         if (current_function_) {
-            if (auto* global = variable->As<sem::GlobalVariable>()) {
+            if (global) {
                 current_function_->AddDirectlyReferencedGlobal(global);
+                for (auto* var : global->TransitivelyReferencedOverrides()) {
+                    current_function_->AddTransitivelyReferencedGlobal(var);
+                }
+            }
+        } else if (variable->Declaration()->Is<ast::Override>()) {
+            if (resolved_overrides_) {
+                // Track the reference to this pipeline-overridable constant and any other
+                // pipeline-overridable constants that it references.
+                resolved_overrides_->Add(global);
+                for (auto* var : global->TransitivelyReferencedOverrides()) {
+                    resolved_overrides_->Add(var);
+                }
             }
         } else if (variable->Declaration()->Is<ast::Var>()) {
             // Use of a module-scope 'var' outside of a function.
@@ -2828,6 +2854,9 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
         return nullptr;
     }
 
+    utils::UniqueVector<const sem::GlobalVariable*, 4> transitively_referenced_overrides;
+    TINT_SCOPED_ASSIGNMENT(resolved_overrides_, &transitively_referenced_overrides);
+
     auto* el_ty = Type(arr->type);
     if (!el_ty) {
         return nullptr;
@@ -2863,6 +2892,11 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
         if (auto found = atomic_composite_info_.Get(el_ty)) {
             atomic_composite_info_.Add(out, *found);
         }
+    }
+
+    // Track the pipeline-overridable constants that are transitively referenced by this array type.
+    for (auto* var : transitively_referenced_overrides) {
+        out->AddTransitivelyReferencedOverride(var);
     }
 
     return out;

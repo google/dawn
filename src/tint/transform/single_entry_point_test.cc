@@ -374,6 +374,41 @@ fn comp_main5() {
     }
 }
 
+TEST_F(SingleEntryPointTest, OverridableConstants_TransitiveUses) {
+    // Make sure we do not strip away transitive uses of overridable constants.
+    auto* src = R"(
+@id(0) override c0 : u32;
+
+@id(1) override c1 : u32 = (2 * c0);
+
+@id(2) override c2 : u32;
+
+@id(3) override c3 : u32 = (2 * c2);
+
+@id(4) override c4 : u32;
+
+@id(5) override c5 : u32 = (2 * c4);
+
+type arr_ty = array<i32, (2 * c5)>;
+
+var<workgroup> arr : arr_ty;
+
+@compute @workgroup_size(1, 1, (2 * c3))
+fn main() {
+  let local_d = c1;
+  arr[0] = 42;
+}
+)";
+
+    auto* expect = src;
+
+    SingleEntryPoint::Config cfg("main");
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(SingleEntryPointTest, CalledFunctions) {
     auto* src = R"(
 fn inner1() {

@@ -716,6 +716,193 @@ TEST_F(InspectorGetEntryPointTest, OverrideSomeReferenced) {
     EXPECT_EQ(1, result[0].overrides[0].id.value);
 }
 
+TEST_F(InspectorGetEntryPointTest, OverrideReferencedIndirectly) {
+    Override("foo", ty.f32());
+    Override("bar", ty.f32(), Mul(2_a, "foo"));
+    MakePlainGlobalReferenceBodyFunction("ep_func", "bar", ty.f32(),
+                                         utils::Vector{
+                                             Stage(ast::PipelineStage::kCompute),
+                                             WorkgroupSize(1_i),
+                                         });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    ASSERT_EQ(2u, result[0].overrides.size());
+    EXPECT_EQ("bar", result[0].overrides[0].name);
+    EXPECT_TRUE(result[0].overrides[0].is_initialized);
+    EXPECT_EQ("foo", result[0].overrides[1].name);
+    EXPECT_FALSE(result[0].overrides[1].is_initialized);
+}
+
+TEST_F(InspectorGetEntryPointTest, OverrideReferencedIndirectly_ViaPrivateInitializer) {
+    Override("foo", ty.f32());
+    GlobalVar("bar", ast::AddressSpace::kPrivate, ty.f32(), Mul(2_a, "foo"));
+    MakePlainGlobalReferenceBodyFunction("ep_func", "bar", ty.f32(),
+                                         utils::Vector{
+                                             Stage(ast::PipelineStage::kCompute),
+                                             WorkgroupSize(1_i),
+                                         });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    ASSERT_EQ(1u, result[0].overrides.size());
+    EXPECT_EQ("foo", result[0].overrides[0].name);
+    EXPECT_FALSE(result[0].overrides[0].is_initialized);
+}
+
+TEST_F(InspectorGetEntryPointTest, OverrideReferencedIndirectly_MultipleEntryPoints) {
+    Override("foo1", ty.f32());
+    Override("bar1", ty.f32(), Mul(2_a, "foo1"));
+    MakePlainGlobalReferenceBodyFunction("ep_func1", "bar1", ty.f32(),
+                                         utils::Vector{
+                                             Stage(ast::PipelineStage::kCompute),
+                                             WorkgroupSize(1_i),
+                                         });
+    Override("foo2", ty.f32());
+    Override("bar2", ty.f32(), Mul(2_a, "foo2"));
+    MakePlainGlobalReferenceBodyFunction("ep_func2", "bar2", ty.f32(),
+                                         utils::Vector{
+                                             Stage(ast::PipelineStage::kCompute),
+                                             WorkgroupSize(1_i),
+                                         });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(2u, result.size());
+
+    ASSERT_EQ(2u, result[0].overrides.size());
+    EXPECT_EQ("bar1", result[0].overrides[0].name);
+    EXPECT_TRUE(result[0].overrides[0].is_initialized);
+    EXPECT_EQ("foo1", result[0].overrides[1].name);
+    EXPECT_FALSE(result[0].overrides[1].is_initialized);
+
+    ASSERT_EQ(2u, result[1].overrides.size());
+    EXPECT_EQ("bar2", result[1].overrides[0].name);
+    EXPECT_TRUE(result[1].overrides[0].is_initialized);
+    EXPECT_EQ("foo2", result[1].overrides[1].name);
+    EXPECT_FALSE(result[1].overrides[1].is_initialized);
+}
+
+TEST_F(InspectorGetEntryPointTest, OverrideReferencedByAttribute) {
+    Override("wgsize", ty.u32());
+    MakeEmptyBodyFunction("ep_func", utils::Vector{
+                                         Stage(ast::PipelineStage::kCompute),
+                                         WorkgroupSize("wgsize"),
+                                     });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    ASSERT_EQ(1u, result[0].overrides.size());
+    EXPECT_EQ("wgsize", result[0].overrides[0].name);
+    EXPECT_FALSE(result[0].overrides[0].is_initialized);
+}
+
+TEST_F(InspectorGetEntryPointTest, OverrideReferencedByAttributeIndirectly) {
+    Override("foo", ty.u32());
+    Override("bar", ty.u32(), Mul(2_a, "foo"));
+    MakeEmptyBodyFunction("ep_func", utils::Vector{
+                                         Stage(ast::PipelineStage::kCompute),
+                                         WorkgroupSize(Mul(2_a, Expr("bar"))),
+                                     });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    ASSERT_EQ(2u, result[0].overrides.size());
+    EXPECT_EQ("bar", result[0].overrides[0].name);
+    EXPECT_TRUE(result[0].overrides[0].is_initialized);
+    EXPECT_EQ("foo", result[0].overrides[1].name);
+    EXPECT_FALSE(result[0].overrides[1].is_initialized);
+}
+
+TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySize) {
+    Override("size", ty.u32());
+    GlobalVar("v", ast::AddressSpace::kWorkgroup, ty.array(ty.f32(), "size"));
+    Func("ep", utils::Empty, ty.void_(),
+         utils::Vector{
+             Assign(Phony(), IndexAccessor("v", 0_a)),
+         },
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+         });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    ASSERT_EQ(1u, result[0].overrides.size());
+    EXPECT_EQ("size", result[0].overrides[0].name);
+    EXPECT_FALSE(result[0].overrides[0].is_initialized);
+}
+
+TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySizeIndirectly) {
+    Override("foo", ty.u32());
+    Override("bar", ty.u32(), Mul(2_a, "foo"));
+    GlobalVar("v", ast::AddressSpace::kWorkgroup, ty.array(ty.f32(), Mul(2_a, Expr("bar"))));
+    Func("ep", utils::Empty, ty.void_(),
+         utils::Vector{
+             Assign(Phony(), IndexAccessor("v", 0_a)),
+         },
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+         });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    ASSERT_EQ(2u, result[0].overrides.size());
+    EXPECT_EQ("bar", result[0].overrides[0].name);
+    EXPECT_TRUE(result[0].overrides[0].is_initialized);
+    EXPECT_EQ("foo", result[0].overrides[1].name);
+    EXPECT_FALSE(result[0].overrides[1].is_initialized);
+}
+
+TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySizeViaAlias) {
+    Override("foo", ty.u32());
+    Override("bar", ty.u32(), Expr("foo"));
+    Alias("MyArray", ty.array(ty.f32(), Mul(2_a, Expr("bar"))));
+    Override("zoo", ty.u32());
+    Alias("MyArrayUnused", ty.array(ty.f32(), Mul(2_a, Expr("zoo"))));
+    GlobalVar("v", ast::AddressSpace::kWorkgroup, ty.type_name("MyArray"));
+    Func("ep", utils::Empty, ty.void_(),
+         utils::Vector{
+             Assign(Phony(), IndexAccessor("v", 0_a)),
+         },
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+         });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    ASSERT_EQ(2u, result[0].overrides.size());
+    EXPECT_EQ("bar", result[0].overrides[0].name);
+    EXPECT_TRUE(result[0].overrides[0].is_initialized);
+    EXPECT_EQ("foo", result[0].overrides[1].name);
+    EXPECT_FALSE(result[0].overrides[1].is_initialized);
+}
+
 TEST_F(InspectorGetEntryPointTest, OverrideTypes) {
     Override("bool_var", ty.bool_());
     Override("float_var", ty.f32());

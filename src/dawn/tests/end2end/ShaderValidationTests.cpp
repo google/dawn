@@ -340,6 +340,7 @@ TEST_P(WorkgroupSizeValidationTest, ValidationAfterOverrideStorageSize) {
 
     auto CheckPipelineWithWorkgroupStorage = [this](bool success, uint32_t vec4_count,
                                                     uint32_t mat4_count) {
+        std::vector<wgpu::ConstantEntry> constants;
         std::ostringstream ss;
         std::ostringstream body;
         ss << "override a: u32;";
@@ -347,19 +348,18 @@ TEST_P(WorkgroupSizeValidationTest, ValidationAfterOverrideStorageSize) {
         if (vec4_count > 0) {
             ss << "var<workgroup> vec4_data: array<vec4<f32>, a>;";
             body << "_ = vec4_data[0];";
+            constants.push_back({nullptr, "a", static_cast<double>(vec4_count)});
         }
         if (mat4_count > 0) {
             ss << "var<workgroup> mat4_data: array<mat4x4<f32>, b>;";
             body << "_ = mat4_data[0];";
+            constants.push_back({nullptr, "b", static_cast<double>(mat4_count)});
         }
         ss << "@compute @workgroup_size(1) fn main() { " << body.str() << " }";
 
         wgpu::ComputePipelineDescriptor desc;
         desc.compute.entryPoint = "main";
         desc.compute.module = utils::CreateShaderModule(device, ss.str().c_str());
-
-        std::vector<wgpu::ConstantEntry> constants{{nullptr, "a", static_cast<double>(vec4_count)},
-                                                   {nullptr, "b", static_cast<double>(mat4_count)}};
         desc.compute.constants = constants.data();
         desc.compute.constantCount = constants.size();
 

@@ -470,6 +470,7 @@ class Resolver {
     sem::Statement* current_statement_ = nullptr;
     sem::CompoundStatement* current_compound_statement_ = nullptr;
     uint32_t current_scoping_depth_ = 0;
+    utils::UniqueVector<const sem::GlobalVariable*, 4>* resolved_overrides_ = nullptr;
 };
 
 }  // namespace tint::resolver
