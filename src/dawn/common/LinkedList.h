@@ -116,6 +116,12 @@ class LinkNode {
         }
     }
 
+    ~LinkNode() {
+        // Remove the node from any list, otherwise there can be outstanding references to the node
+        // even after it has been freed.
+        RemoveFromList();
+    }
+
     // Insert |this| into the linked list, before |e|.
     void InsertBefore(LinkNode<T>* e) {
         this->next_ = e;
@@ -174,13 +180,6 @@ class LinkedList {
     // list (root_.next() will point back to the start of the list,
     // and root_->previous() wraps around to the end of the list).
     LinkedList() : root_(&root_, &root_) {}
-
-    ~LinkedList() {
-        // If any LinkNodes still exist in the LinkedList, there will be outstanding references to
-        // root_ even after it has been freed. We should remove root_ from the list to prevent any
-        // future access.
-        root_.RemoveFromList();
-    }
 
     // Appends |e| to the end of the linked list.
     void Append(LinkNode<T>* e) { e->InsertBefore(&root_); }
