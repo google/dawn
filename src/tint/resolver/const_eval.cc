@@ -2092,18 +2092,18 @@ ConstEval::Result ConstEval::insertBits(const sem::Type* ty,
             NumberUT in_offset = args[2]->As<NumberUT>();
             NumberUT in_count = args[3]->As<NumberUT>();
 
-            constexpr UT w = sizeof(UT) * 8;
-            if ((in_offset + in_count) > w) {
-                AddError("'offset + 'count' must be less than or equal to the bit width of 'e'",
-                         source);
-                return utils::Failure;
-            }
-
             // Cast all to unsigned
             UT e = static_cast<UT>(in_e);
             UT newbits = static_cast<UT>(in_newbits);
             UT o = static_cast<UT>(in_offset);
             UT c = static_cast<UT>(in_count);
+
+            constexpr UT w = sizeof(UT) * 8;
+            if (o > w || c > w || (o + c) > w) {
+                AddError("'offset + 'count' must be less than or equal to the bit width of 'e'",
+                         source);
+                return utils::Failure;
+            }
 
             NumberT result;
             if (c == UT{0}) {

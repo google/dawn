@@ -1150,6 +1150,26 @@ std::vector<Case> InsertBitsCases() {
               T(0b1010'0101'1010'0101'1010'0111'1111'1101))),
     };
 
+    const char* error_msg =
+        "12:34 error: 'offset + 'count' must be less than or equal to the bit width of 'e'";
+    ConcatInto(  //
+        r, std::vector<Case>{
+               E({T(1), T(1), UT(33), UT(0)}, error_msg),         //
+               E({T(1), T(1), UT(34), UT(0)}, error_msg),         //
+               E({T(1), T(1), UT(1000), UT(0)}, error_msg),       //
+               E({T(1), T(1), UT::Highest(), UT()}, error_msg),   //
+               E({T(1), T(1), UT(0), UT(33)}, error_msg),         //
+               E({T(1), T(1), UT(0), UT(34)}, error_msg),         //
+               E({T(1), T(1), UT(0), UT(1000)}, error_msg),       //
+               E({T(1), T(1), UT(0), UT::Highest()}, error_msg),  //
+               E({T(1), T(1), UT(33), UT(33)}, error_msg),        //
+               E({T(1), T(1), UT(34), UT(34)}, error_msg),        //
+               E({T(1), T(1), UT(1000), UT(1000)}, error_msg),    //
+               E({T(1), T(1), UT::Highest(), UT(1)}, error_msg),
+               E({T(1), T(1), UT(1), UT::Highest()}, error_msg),
+               E({T(1), T(1), UT::Highest(), u32::Highest()}, error_msg),
+           });
+
     return r;
 }
 INSTANTIATE_TEST_SUITE_P(  //
@@ -1253,6 +1273,26 @@ std::vector<Case> ExtractBitsCases() {
               set_msbs_if_signed(T(0b11010001)))),
     };
 
+    const char* error_msg =
+        "12:34 error: 'offset + 'count' must be less than or equal to the bit width of 'e'";
+    ConcatInto(  //
+        r, std::vector<Case>{
+               E({T(1), UT(33), UT(0)}, error_msg),
+               E({T(1), UT(34), UT(0)}, error_msg),
+               E({T(1), UT(1000), UT(0)}, error_msg),
+               E({T(1), UT::Highest(), UT(0)}, error_msg),
+               E({T(1), UT(0), UT(33)}, error_msg),
+               E({T(1), UT(0), UT(34)}, error_msg),
+               E({T(1), UT(0), UT(1000)}, error_msg),
+               E({T(1), UT(0), UT::Highest()}, error_msg),
+               E({T(1), UT(33), UT(33)}, error_msg),
+               E({T(1), UT(34), UT(34)}, error_msg),
+               E({T(1), UT(1000), UT(1000)}, error_msg),
+               E({T(1), UT::Highest(), UT(1)}, error_msg),
+               E({T(1), UT(1), UT::Highest()}, error_msg),
+               E({T(1), UT::Highest(), UT::Highest()}, error_msg),
+           });
+
     return r;
 }
 INSTANTIATE_TEST_SUITE_P(  //
@@ -1261,35 +1301,6 @@ INSTANTIATE_TEST_SUITE_P(  //
     testing::Combine(testing::Values(sem::BuiltinType::kExtractBits),
                      testing::ValuesIn(Concat(ExtractBitsCases<i32>(),  //
                                               ExtractBitsCases<u32>()))));
-
-using ResolverConstEvalBuiltinTest_ExtractBits_InvalidOffsetAndCount =
-    ResolverTestWithParam<std::tuple<size_t, size_t>>;
-TEST_P(ResolverConstEvalBuiltinTest_ExtractBits_InvalidOffsetAndCount, Test) {
-    auto& p = GetParam();
-    auto* expr = Call(Source{{12, 34}}, sem::str(sem::BuiltinType::kExtractBits), Expr(1_u),
-                      Expr(u32(std::get<0>(p))), Expr(u32(std::get<1>(p))));
-    GlobalConst("C", expr);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: 'offset + 'count' must be less than or equal to the bit width of 'e'");
-}
-INSTANTIATE_TEST_SUITE_P(ExtractBits,
-                         ResolverConstEvalBuiltinTest_ExtractBits_InvalidOffsetAndCount,
-                         testing::Values(                         //
-                             std::make_tuple(33, 0),              //
-                             std::make_tuple(34, 0),              //
-                             std::make_tuple(1000, 0),            //
-                             std::make_tuple(u32::Highest(), 0),  //
-                             std::make_tuple(0, 33),              //
-                             std::make_tuple(0, 34),              //
-                             std::make_tuple(0, 1000),            //
-                             std::make_tuple(0, u32::Highest()),  //
-                             std::make_tuple(33, 33),             //
-                             std::make_tuple(34, 34),             //
-                             std::make_tuple(1000, 1000),         //
-                             std::make_tuple(u32::Highest(), 1),  //
-                             std::make_tuple(1, u32::Highest()),  //
-                             std::make_tuple(u32::Highest(), u32::Highest())));
 
 template <typename T>
 std::vector<Case> MaxCases() {
