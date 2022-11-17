@@ -157,7 +157,7 @@ OnDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     // We get to this line if no device was associated with the message. Crash so that the failure
     // is loud and makes tests fail in Debug.
     dawn::ErrorLog() << pCallbackData->pMessage;
-    UNREACHABLE();
+    ASSERT(false);
 
     return VK_FALSE;
 }
