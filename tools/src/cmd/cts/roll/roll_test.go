@@ -58,9 +58,11 @@ func TestRollCommitMessage(t *testing.T) {
 	)
 	expect := `Roll third_party/webgpu-cts/ d5e605a55..29275672e (2 commits)
 
-Update:
+Regenerated:
  - expectations.txt
  - ts_sources.txt
+ - test_list.txt
+ - cache_list.txt
  - resource_files.txt
  - webtest .html files
 

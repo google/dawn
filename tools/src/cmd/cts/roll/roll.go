@@ -55,6 +55,7 @@ const (
 	depsRelPath          = "DEPS"
 	tsSourcesRelPath     = "third_party/gn/webgpu-cts/ts_sources.txt"
 	testListRelPath      = "third_party/gn/webgpu-cts/test_list.txt"
+	cacheListRelPath     = "third_party/gn/webgpu-cts/cache_list.txt"
 	resourceFilesRelPath = "third_party/gn/webgpu-cts/resource_files.txt"
 	webTestsPath         = "webgpu-cts/webtests"
 	refMain              = "refs/heads/main"
@@ -296,7 +297,7 @@ func (r *roller) roll(ctx context.Context) error {
 
 	// Create a new gerrit change, if needed
 	changeID := ""
-	if len(existingRolls) == 0 {
+	if r.flags.preserve || len(existingRolls) == 0 {
 		msg := r.rollCommitMessage(oldCTSHash, newCTSHash, ctsLog, "")
 		change, err := r.gerrit.CreateChange(r.cfg.Gerrit.Project, "main", msg, true)
 		if err != nil {
@@ -447,9 +448,11 @@ func (r *roller) rollCommitMessage(
 		msg.WriteString(" commits)")
 	}
 	msg.WriteString("\n\n")
-	msg.WriteString("Update:\n")
+	msg.WriteString("Regenerated:\n")
 	msg.WriteString(" - expectations.txt\n")
 	msg.WriteString(" - ts_sources.txt\n")
+	msg.WriteString(" - test_list.txt\n")
+	msg.WriteString(" - cache_list.txt\n")
 	msg.WriteString(" - resource_files.txt\n")
 	msg.WriteString(" - webtest .html files\n")
 	msg.WriteString("\n\n")
@@ -606,6 +609,7 @@ func (r *roller) checkout(project, dir, host, hash string) (*git.Repository, err
 // file path to file content for the CTS roll's change. This includes:
 // * type-script source files
 // * CTS test list
+// * CTS cache list
 // * resource file list
 // * webtest file sources
 func (r *roller) generateFiles(ctx context.Context) (map[string]string, error) {
@@ -648,6 +652,7 @@ func (r *roller) generateFiles(ctx context.Context) (map[string]string, error) {
 	for relPath, generator := range map[string]func(context.Context) (string, error){
 		tsSourcesRelPath:     r.genTSDepList,
 		testListRelPath:      r.genTestList,
+		cacheListRelPath:     r.genCacheList,
 		resourceFilesRelPath: r.genResourceFilesList,
 	} {
 		relPath, generator := relPath, generator // Capture values, not iterators
@@ -760,6 +765,40 @@ func (r *roller) genTestList(ctx context.Context) (string, error) {
 	}
 
 	return strings.Join(tests, "\n"), nil
+}
+
+// genCacheList returns the file list of cached data
+func (r *roller) genCacheList(ctx context.Context) (string, error) {
+	// Run 'src/common/runtime/cmdline.ts' to obtain the full test list
+	cmd := exec.CommandContext(ctx, r.flags.nodePath,
+		"-e", "require('./src/common/tools/setup-ts-in-node.js');require('./src/common/tools/gen_cache.ts');",
+		"--", // Start of arguments
+		// src/common/runtime/helper/sys.ts expects 'node file.js <args>'
+		// and slices away the first two arguments. When running with '-e', args
+		// start at 1, so just inject a placeholder argument.
+		"placeholder-arg",
+		".",
+		"src/webgpu",
+		"--list",
+	)
+	cmd.Dir = r.ctsDir
+
+	stderr := bytes.Buffer{}
+	cmd.Stderr = &stderr
+
+	out, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to generate cache list: %w\n%v", err, stderr.String())
+	}
+
+	files := []string{}
+	for _, file := range strings.Split(string(out), "\n") {
+		if file != "" {
+			files = append(files, strings.TrimPrefix(file, "./"))
+		}
+	}
+
+	return strings.Join(files, "\n") + "\n", nil
 }
 
 // genResourceFilesList returns a list of resource files, for the CTS checkout at r.ctsDir
