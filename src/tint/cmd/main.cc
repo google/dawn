@@ -95,7 +95,7 @@ struct Options {
 
     std::unordered_set<uint32_t> skip_hash;
 
-    Format format = Format::kNone;
+    Format format = Format::kUnknown;
 
     bool emit_single_entry_point = false;
     std::string ep_name;
@@ -246,7 +246,7 @@ Format infer_format(const std::string& filename) {
     }
 #endif  // TINT_BUILD_HLSL_WRITER
 
-    return Format::kNone;
+    return Format::kUnknown;
 }
 
 std::vector<std::string> split_on_char(std::string list, char c) {
