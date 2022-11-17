@@ -372,6 +372,8 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
         return nullptr;
     }
 
+    RegisterLoadIfNeeded(rhs);
+
     // If the variable has no declared type, infer it from the RHS
     if (!ty) {
         ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
@@ -578,6 +580,8 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         if (!storage_ty) {
             storage_ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
         }
+
+        RegisterLoadIfNeeded(rhs);
     }
 
     if (!storage_ty) {
@@ -1288,6 +1292,8 @@ sem::IfStatement* Resolver::IfStatement(const ast::IfStatement* stmt) {
         sem->Behaviors() = cond->Behaviors();
         sem->Behaviors().Remove(sem::Behavior::kNext);
 
+        RegisterLoadIfNeeded(cond);
+
         Mark(stmt->body);
         auto* body = builder_->create<sem::BlockStatement>(stmt->body, current_compound_statement_,
                                                            current_function_);
@@ -1381,6 +1387,8 @@ sem::ForLoopStatement* Resolver::ForLoopStatement(const ast::ForLoopStatement* s
             }
             sem->SetCondition(cond);
             behaviors.Add(cond->Behaviors());
+
+            RegisterLoadIfNeeded(cond);
         }
 
         if (auto* continuing = stmt->continuing) {
@@ -1424,6 +1432,8 @@ sem::WhileStatement* Resolver::WhileStatement(const ast::WhileStatement* stmt) {
         }
         sem->SetCondition(cond);
         behaviors.Add(cond->Behaviors());
+
+        RegisterLoadIfNeeded(cond);
 
         Mark(stmt->body);
 
@@ -1524,6 +1534,145 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
 
     TINT_ICE(Resolver, diagnostics_) << "Expression() did not find root node";
     return nullptr;
+}
+
+void Resolver::RegisterLoadIfNeeded(const sem::Expression* expr) {
+    if (!expr) {
+        return;
+    }
+    if (!expr->Type()->Is<sem::Reference>()) {
+        return;
+    }
+    if (!current_function_) {
+        // There is currently no situation where the Load Rule can be invoked outside of a function.
+        return;
+    }
+    auto& info = alias_analysis_infos_[current_function_];
+    Switch(
+        expr->RootIdentifier(),
+        [&](const sem::GlobalVariable* global) {
+            info.module_scope_reads.insert({global, expr});
+        },
+        [&](const sem::Parameter* param) { info.parameter_reads.insert(param); });
+}
+
+void Resolver::RegisterStore(const sem::Expression* expr) {
+    auto& info = alias_analysis_infos_[current_function_];
+    Switch(
+        expr->RootIdentifier(),
+        [&](const sem::GlobalVariable* global) {
+            info.module_scope_writes.insert({global, expr});
+        },
+        [&](const sem::Parameter* param) { info.parameter_writes.insert(param); });
+}
+
+bool Resolver::AliasAnalysis(const sem::Call* call) {
+    auto* target = call->Target()->As<sem::Function>();
+    if (!target) {
+        return true;
+    }
+    if (validator_.IsValidationDisabled(target->Declaration()->attributes,
+                                        ast::DisabledValidation::kIgnorePointerAliasing)) {
+        return true;
+    }
+
+    // Helper to generate an aliasing error diagnostic.
+    struct Alias {
+        const sem::Expression* expr;          // the "other expression"
+        enum { Argument, ModuleScope } type;  // the type of the "other" expression
+        std::string access;                   // the access performed for the "other" expression
+    };
+    auto make_error = [&](const sem::Expression* arg, Alias&& var) {
+        // TODO(crbug.com/tint/1675): Switch to error and return false after deprecation period.
+        AddWarning("invalid aliased pointer argument", arg->Declaration()->source);
+        switch (var.type) {
+            case Alias::Argument:
+                AddNote("aliases with another argument passed here",
+                        var.expr->Declaration()->source);
+                break;
+            case Alias::ModuleScope: {
+                auto* func = var.expr->Stmt()->Function();
+                auto func_name = builder_->Symbols().NameFor(func->Declaration()->symbol);
+                AddNote(
+                    "aliases with module-scope variable " + var.access + " in '" + func_name + "'",
+                    var.expr->Declaration()->source);
+                break;
+            }
+        }
+        return true;
+    };
+
+    auto& args = call->Arguments();
+    auto& target_info = alias_analysis_infos_[target];
+    auto& caller_info = alias_analysis_infos_[current_function_];
+
+    // Track the set of root identifiers that are read and written by arguments passed in this call.
+    std::unordered_map<const sem::Variable*, const sem::Expression*> arg_reads;
+    std::unordered_map<const sem::Variable*, const sem::Expression*> arg_writes;
+    for (size_t i = 0; i < args.Length(); i++) {
+        auto* arg = args[i];
+        if (!arg->Type()->Is<sem::Pointer>()) {
+            continue;
+        }
+
+        auto* root = arg->RootIdentifier();
+        if (target_info.parameter_writes.count(target->Parameters()[i])) {
+            // Arguments that are written to can alias with any other argument or module-scope
+            // variable access.
+            if (arg_writes.count(root)) {
+                return make_error(arg, {arg_writes.at(root), Alias::Argument, "write"});
+            }
+            if (arg_reads.count(root)) {
+                return make_error(arg, {arg_reads.at(root), Alias::Argument, "read"});
+            }
+            if (target_info.module_scope_reads.count(root)) {
+                return make_error(
+                    arg, {target_info.module_scope_reads.at(root), Alias::ModuleScope, "read"});
+            }
+            if (target_info.module_scope_writes.count(root)) {
+                return make_error(
+                    arg, {target_info.module_scope_writes.at(root), Alias::ModuleScope, "write"});
+            }
+            arg_writes.insert({root, arg});
+
+            // Propagate the write access to the caller.
+            Switch(
+                root,
+                [&](const sem::GlobalVariable* global) {
+                    caller_info.module_scope_writes.insert({global, arg});
+                },
+                [&](const sem::Parameter* param) { caller_info.parameter_writes.insert(param); });
+        } else if (target_info.parameter_reads.count(target->Parameters()[i])) {
+            // Arguments that are read from can alias with arguments or module-scope variables that
+            // are written to.
+            if (arg_writes.count(root)) {
+                return make_error(arg, {arg_writes.at(root), Alias::Argument, "write"});
+            }
+            if (target_info.module_scope_writes.count(root)) {
+                return make_error(
+                    arg, {target_info.module_scope_writes.at(root), Alias::ModuleScope, "write"});
+            }
+            arg_reads.insert({root, arg});
+
+            // Propagate the read access to the caller.
+            Switch(
+                root,
+                [&](const sem::GlobalVariable* global) {
+                    caller_info.module_scope_reads.insert({global, arg});
+                },
+                [&](const sem::Parameter* param) { caller_info.parameter_reads.insert(param); });
+        }
+    }
+
+    // Propagate module-scope variable uses to the caller.
+    for (auto read : target_info.module_scope_reads) {
+        caller_info.module_scope_reads.insert({read.first, read.second});
+    }
+    for (auto write : target_info.module_scope_writes) {
+        caller_info.module_scope_writes.insert({write.first, write.second});
+    }
+
+    return true;
 }
 
 const sem::Type* Resolver::ConcreteType(const sem::Type* ty,
@@ -1668,6 +1817,7 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
         //     vec2(1, 2)[runtime-index]
         obj = Materialize(obj);
     }
+    RegisterLoadIfNeeded(idx);
     if (!obj) {
         return nullptr;
     }
@@ -1725,6 +1875,8 @@ sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
         return nullptr;
     }
 
+    RegisterLoadIfNeeded(inner);
+
     const sem::Constant* val = nullptr;
     if (auto r = const_eval_.Bitcast(ty, inner)) {
         val = r.Get();
@@ -1764,6 +1916,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         args.Push(arg);
         args_stage = sem::EarliestStage(args_stage, arg->Stage());
         arg_behaviors.Add(arg->Behaviors());
+
+        RegisterLoadIfNeeded(arg);
     }
     arg_behaviors.Remove(sem::Behavior::kNext);
 
@@ -2205,6 +2359,10 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
             current_function_->AddTransitivelyReferencedGlobal(var);
         }
 
+        if (!AliasAnalysis(call)) {
+            return nullptr;
+        }
+
         // Note: Validation *must* be performed before calling this method.
         CollectTextureSamplerPairs(target, call->Arguments());
     }
@@ -2520,6 +2678,9 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
         }
     }
 
+    RegisterLoadIfNeeded(lhs);
+    RegisterLoadIfNeeded(rhs);
+
     const sem::Constant* value = nullptr;
     if (stage == sem::EvaluationStage::kConstant) {
         if (op.const_eval_fn) {
@@ -2627,6 +2788,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
                     stage = sem::EvaluationStage::kRuntime;
                 }
             }
+            RegisterLoadIfNeeded(expr);
             break;
         }
     }
@@ -3076,6 +3238,8 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
             }
             behaviors.Add(expr->Behaviors() - sem::Behavior::kNext);
             value_ty = expr->Type()->UnwrapRef();
+
+            RegisterLoadIfNeeded(expr);
         } else {
             value_ty = builder_->create<sem::Void>();
         }
@@ -3098,6 +3262,8 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
             return false;
         }
         behaviors = cond->Behaviors() - sem::Behavior::kNext;
+
+        RegisterLoadIfNeeded(cond);
 
         auto* cond_ty = cond->Type()->UnwrapRef();
 
@@ -3202,10 +3368,16 @@ sem::Statement* Resolver::AssignmentStatement(const ast::AssignmentStatement* st
             }
         }
 
+        RegisterLoadIfNeeded(rhs);
+
         auto& behaviors = sem->Behaviors();
         behaviors = rhs->Behaviors();
         if (!is_phony_assignment) {
             behaviors.Add(lhs->Behaviors());
+        }
+
+        if (!is_phony_assignment) {
+            RegisterStore(lhs);
         }
 
         return validator_.Assignment(stmt, sem_.TypeOf(stmt->rhs));
@@ -3233,6 +3405,8 @@ sem::Statement* Resolver::BreakIfStatement(const ast::BreakIfStatement* stmt) {
         sem->SetCondition(cond);
         sem->Behaviors() = cond->Behaviors();
         sem->Behaviors().Add(sem::Behavior::kBreak);
+
+        RegisterLoadIfNeeded(cond);
 
         return validator_.BreakIfStatement(sem, current_statement_);
     });
@@ -3264,6 +3438,9 @@ sem::Statement* Resolver::CompoundAssignmentStatement(
         if (!rhs) {
             return false;
         }
+
+        RegisterLoadIfNeeded(rhs);
+        RegisterStore(lhs);
 
         sem->Behaviors() = rhs->Behaviors() + lhs->Behaviors();
 
@@ -3316,6 +3493,9 @@ sem::Statement* Resolver::IncrementDecrementStatement(
             return false;
         }
         sem->Behaviors() = lhs->Behaviors();
+
+        RegisterLoadIfNeeded(lhs);
+        RegisterStore(lhs);
 
         return validator_.IncrementDecrementStatement(stmt);
     });

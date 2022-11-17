@@ -18,6 +18,8 @@
 #include <memory>
 #include <string>
 #include <tuple>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -152,6 +154,18 @@ class Resolver {
     sem::Expression* Literal(const ast::LiteralExpression*);
     sem::Expression* MemberAccessor(const ast::MemberAccessorExpression*);
     sem::Expression* UnaryOp(const ast::UnaryOpExpression*);
+
+    /// Register a memory load from an expression, to track accesses to root identifiers in order to
+    /// perform alias analysis.
+    void RegisterLoadIfNeeded(const sem::Expression* expr);
+
+    /// Register a memory store to an expression, to track accesses to root identifiers in order to
+    /// perform alias analysis.
+    void RegisterStore(const sem::Expression* expr);
+
+    /// Perform pointer alias analysis for `call`.
+    /// @returns true is the call arguments are free from aliasing issues, false otherwise.
+    bool AliasAnalysis(const sem::Call* call);
 
     /// If `expr` is not of an abstract-numeric type, then Materialize() will just return `expr`.
     /// If `expr` is of an abstract-numeric type:
@@ -423,6 +437,19 @@ class Resolver {
         const char* constraint = nullptr;
     };
 
+    /// AliasAnalysisInfo captures the memory accesses performed by a given function for the purpose
+    /// of determining if any two arguments alias at any callsite.
+    struct AliasAnalysisInfo {
+        /// The set of module-scope variables that are written to, and where that write occurs.
+        std::unordered_map<const sem::Variable*, const sem::Expression*> module_scope_writes;
+        /// The set of module-scope variables that are read from, and where that read occurs.
+        std::unordered_map<const sem::Variable*, const sem::Expression*> module_scope_reads;
+        /// The set of function parameters that are written to.
+        std::unordered_set<const sem::Variable*> parameter_writes;
+        /// The set of function parameters that are read from.
+        std::unordered_set<const sem::Variable*> parameter_reads;
+    };
+
     ProgramBuilder* const builder_;
     diag::List& diagnostics_;
     ConstEval const_eval_;
@@ -435,6 +462,7 @@ class Resolver {
     utils::Hashmap<const sem::Type*, const Source*, 8> atomic_composite_info_;
     utils::Bitset<0> marked_;
     ExprEvalStageConstraint expr_eval_stage_constraint_;
+    std::unordered_map<const sem::Function*, AliasAnalysisInfo> alias_analysis_infos_;
     utils::Hashmap<OverrideId, const sem::Variable*, 8> override_ids_;
     utils::Hashmap<ArrayInitializerSig, sem::CallTarget*, 8> array_inits_;
     utils::Hashmap<StructInitializerSig, sem::CallTarget*, 8> struct_inits_;

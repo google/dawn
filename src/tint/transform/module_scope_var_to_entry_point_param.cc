@@ -354,6 +354,7 @@ struct ModuleScopeVarToEntryPointParam::State {
         for (auto* func_ast : functions_to_process) {
             auto* func_sem = ctx.src->Sem().Get(func_ast);
             bool is_entry_point = func_ast->IsEntryPoint();
+            bool needs_pointer_aliasing = false;
 
             // Map module-scope variables onto their replacement.
             struct NewVar {
@@ -424,6 +425,9 @@ struct ModuleScopeVarToEntryPointParam::State {
                                                     is_wrapped);
                     } else {
                         ProcessVariableInUserFunction(func_ast, var, new_var_symbol, is_pointer);
+                        if (var->AddressSpace() == ast::AddressSpace::kWorkgroup) {
+                            needs_pointer_aliasing = true;
+                        }
                     }
 
                     // Record the replacement symbol.
@@ -432,6 +436,12 @@ struct ModuleScopeVarToEntryPointParam::State {
 
                 // Replace all uses of the module-scope variable.
                 ReplaceUsesInFunction(func_ast, var, new_var_symbol, is_pointer, is_wrapped);
+            }
+
+            // Allow pointer aliasing if needed.
+            if (needs_pointer_aliasing) {
+                ctx.InsertBack(func_ast->attributes,
+                               ctx.dst->Disable(ast::DisabledValidation::kIgnorePointerAliasing));
             }
 
             if (!workgroup_parameter_members.IsEmpty()) {

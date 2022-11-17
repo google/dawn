@@ -125,12 +125,14 @@ fn zoo(@internal(disable_validation__ignore_address_space) @internal(disable_val
   *(tint_symbol) = (*(tint_symbol) * 2.0);
 }
 
+@internal(disable_validation__ignore_pointer_aliasing)
 fn bar(a : f32, b : f32, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_1 : ptr<private, f32>, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_2 : ptr<workgroup, f32>) {
   *(tint_symbol_1) = a;
   *(tint_symbol_2) = b;
   zoo(tint_symbol_1);
 }
 
+@internal(disable_validation__ignore_pointer_aliasing)
 fn foo(a : f32, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_3 : ptr<private, f32>, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_4 : ptr<workgroup, f32>) {
   let b : f32 = 2.0;
   bar(a, b, tint_symbol_3, tint_symbol_4);
@@ -188,6 +190,7 @@ fn main() {
   foo(1.0, &(tint_symbol_5), &(tint_symbol_6));
 }
 
+@internal(disable_validation__ignore_pointer_aliasing)
 fn foo(a : f32, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_3 : ptr<private, f32>, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_4 : ptr<workgroup, f32>) {
   let b : f32 = 2.0;
   bar(a, b, tint_symbol_3, tint_symbol_4);
@@ -197,6 +200,7 @@ fn foo(a : f32, @internal(disable_validation__ignore_address_space) @internal(di
 fn no_uses() {
 }
 
+@internal(disable_validation__ignore_pointer_aliasing)
 fn bar(a : f32, b : f32, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_1 : ptr<private, f32>, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_2 : ptr<workgroup, f32>) {
   *(tint_symbol_1) = a;
   *(tint_symbol_2) = b;

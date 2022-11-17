@@ -1116,6 +1116,7 @@ if (tint_build_unittests) {
     sources = [
       "resolver/address_space_layout_validation_test.cc",
       "resolver/address_space_validation_test.cc",
+      "resolver/alias_analysis_test.cc",
       "resolver/array_accessor_test.cc",
       "resolver/assignment_validation_test.cc",
       "resolver/atomics_test.cc",

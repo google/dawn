@@ -5,6 +5,8 @@
 ### Deprecated Features
 
 * The `sig` member of the return type of `frexp()` has been renamed to `fract`. [tint:1757](crbug.com/tint/1757)
+* Calling a function with multiple pointer arguments that alias each other is now a warning, and
+  will become an error in a future release. [tint:1675](crbug.com/tint/1675)
 
 ## Changes for M109
 

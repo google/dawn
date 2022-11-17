@@ -840,6 +840,7 @@ if(TINT_BUILD_TESTS)
     program_builder_test.cc
     program_test.cc
     reflection_test.cc
+    resolver/alias_analysis_test.cc
     resolver/array_accessor_test.cc
     resolver/assignment_validation_test.cc
     resolver/atomics_test.cc

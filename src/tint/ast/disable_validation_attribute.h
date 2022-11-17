@@ -42,6 +42,9 @@ enum class DisabledValidation {
     /// When applied to a pointer function parameter, the validator will not require a function call
     /// argument passed for that parameter to have a certain form.
     kIgnoreInvalidPointerArgument,
+    /// When applied to a function declaration, the validator will not complain if multiple
+    /// pointer arguments alias when that function is called.
+    kIgnorePointerAliasing,
 };
 
 /// An internal attribute used to tell the validator to ignore specific
