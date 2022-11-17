@@ -43,8 +43,6 @@ class Source {
 
         /// The original un-split file content
         const std::string data;
-        /// A string_view over #data
-        const std::string_view data_view;
         /// #data split by lines
         const std::vector<std::string_view> lines;
     };

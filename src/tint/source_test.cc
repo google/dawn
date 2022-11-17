@@ -31,7 +31,6 @@ using SourceFileContentTest = testing::Test;
 TEST_F(SourceFileContentTest, Init) {
     Source::FileContent fc(kSource);
     EXPECT_EQ(fc.data, kSource);
-    EXPECT_EQ(fc.data_view, kSource);
     ASSERT_EQ(fc.lines.size(), 3u);
     EXPECT_EQ(fc.lines[0], "line one");
     EXPECT_EQ(fc.lines[1], "line two");
@@ -43,7 +42,6 @@ TEST_F(SourceFileContentTest, CopyInit) {
     Source::FileContent fc{*src};
     src.reset();
     EXPECT_EQ(fc.data, kSource);
-    EXPECT_EQ(fc.data_view, kSource);
     ASSERT_EQ(fc.lines.size(), 3u);
     EXPECT_EQ(fc.lines[0], "line one");
     EXPECT_EQ(fc.lines[1], "line two");
@@ -55,7 +53,6 @@ TEST_F(SourceFileContentTest, MoveInit) {
     Source::FileContent fc{std::move(*src)};
     src.reset();
     EXPECT_EQ(fc.data, kSource);
-    EXPECT_EQ(fc.data_view, kSource);
     ASSERT_EQ(fc.lines.size(), 3u);
     EXPECT_EQ(fc.lines[0], "line one");
     EXPECT_EQ(fc.lines[1], "line two");

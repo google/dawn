@@ -113,13 +113,10 @@ std::vector<std::string_view> CopyRelativeStringViews(const std::vector<std::str
 
 }  // namespace
 
-Source::FileContent::FileContent(const std::string& body)
-    : data(body), data_view(data), lines(SplitLines(data_view)) {}
+Source::FileContent::FileContent(const std::string& body) : data(body), lines(SplitLines(data)) {}
 
 Source::FileContent::FileContent(const FileContent& rhs)
-    : data(rhs.data),
-      data_view(data),
-      lines(CopyRelativeStringViews(rhs.lines, rhs.data_view, data_view)) {}
+    : data(rhs.data), lines(CopyRelativeStringViews(rhs.lines, rhs.data, data)) {}
 
 Source::FileContent::~FileContent() = default;
 
