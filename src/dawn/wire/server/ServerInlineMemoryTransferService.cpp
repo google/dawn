@@ -51,8 +51,6 @@ class InlineMemoryTransferService : public MemoryTransferService {
                                    size_t deserializeSize,
                                    size_t offset,
                                    size_t size) override {
-            ASSERT(offset <= mDataLength);
-            ASSERT(size <= mDataLength - offset);
             if (deserializeSize != size || mTargetData == nullptr ||
                 deserializePointer == nullptr) {
                 return false;
