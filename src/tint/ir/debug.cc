@@ -26,6 +26,33 @@
 #include "src/tint/program.h"
 
 namespace tint::ir {
+namespace {
+
+class ScopedStopNode {
+  public:
+    ScopedStopNode(std::unordered_set<const FlowNode*>* stop_nodes, const FlowNode* node)
+        : stop_nodes_(stop_nodes), node_(node) {
+        stop_nodes_->insert(node_);
+    }
+
+    ~ScopedStopNode() { stop_nodes_->erase(node_); }
+
+  private:
+    std::unordered_set<const FlowNode*>* stop_nodes_;
+    const FlowNode* node_;
+};
+
+class ScopedIndent {
+  public:
+    explicit ScopedIndent(uint32_t* indent) : indent_(indent) { (*indent_) += 2; }
+
+    ~ScopedIndent() { (*indent_) -= 2; }
+
+  private:
+    uint32_t* indent_;
+};
+
+}  // namespace
 
 // static
 std::string Debug::AsDotGraph(const Module* mod) {
@@ -157,9 +184,100 @@ std::string Debug::AsDotGraph(const Module* mod) {
 }
 
 // static
-std::string Debug::AsString(const Module*) {
+std::string Debug::AsString(const Module* mod) {
     std::stringstream out;
-    out << "IR" << std::endl;
+
+    std::unordered_set<const FlowNode*> visited;
+    std::unordered_set<const FlowNode*> stop_nodes;
+    uint32_t indent_size = 0;
+
+    std::function<std::ostream&(void)> indent = [&]() -> std::ostream& {
+        for (uint32_t i = 0; i < indent_size; i++) {
+            out << " ";
+        }
+        return out;
+    };
+
+    std::function<void(const FlowNode*)> Walk = [&](const FlowNode* node) {
+        if ((visited.count(node) > 0) || (stop_nodes.count(node) > 0)) {
+            return;
+        }
+        visited.insert(node);
+
+        tint::Switch(
+            node,
+            [&](const ir::Function* f) {
+                out << "Function" << std::endl;
+
+                {
+                    ScopedIndent func_indent(&indent_size);
+                    ScopedStopNode scope(&stop_nodes, f->end_target);
+                    Walk(f->start_target);
+                }
+                Walk(f->end_target);
+            },
+            [&](const ir::Block* b) {
+                indent() << "Block" << std::endl;
+                Walk(b->branch_target);
+            },
+            [&](const ir::Switch* s) {
+                indent() << "Switch" << std::endl;
+
+                {
+                    ScopedIndent switch_indent(&indent_size);
+                    ScopedStopNode scope(&stop_nodes, s->merge_target);
+                    for (const auto& c : s->cases) {
+                        indent() << "Case" << std::endl;
+                        ScopedIndent case_indent(&indent_size);
+                        Walk(c.start_target);
+                    }
+                }
+
+                indent() << "Switch Merge" << std::endl;
+                Walk(s->merge_target);
+            },
+            [&](const ir::If* i) {
+                indent() << "if" << std::endl;
+                {
+                    ScopedIndent if_indent(&indent_size);
+                    ScopedStopNode scope(&stop_nodes, i->merge_target);
+
+                    indent() << "If true" << std::endl;
+                    Walk(i->true_target);
+
+                    indent() << "If false" << std::endl;
+                    Walk(i->false_target);
+                }
+
+                indent() << "if merge" << std::endl;
+                Walk(i->merge_target);
+            },
+            [&](const ir::Loop* l) {
+                indent() << "loop" << std::endl;
+                {
+                    ScopedStopNode loop_scope(&stop_nodes, l->merge_target);
+                    ScopedIndent loop_indent(&indent_size);
+                    {
+                        ScopedStopNode inner_scope(&stop_nodes, l->continuing_target);
+                        indent() << "loop start" << std::endl;
+                        Walk(l->start_target);
+                    }
+
+                    indent() << "loop continuing" << std::endl;
+                    ScopedIndent continuing_indent(&indent_size);
+                    Walk(l->continuing_target);
+                }
+
+                indent() << "loop merge" << std::endl;
+                Walk(l->merge_target);
+            },
+            [&](const ir::Terminator*) { indent() << "Function end" << std::endl; });
+    };
+
+    for (const auto* func : mod->functions) {
+        Walk(func);
+    }
+
     return out.str();
 }
 
