@@ -110,6 +110,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
 
     // TODO(crbug.com/dawn/1217): Remove this suppression.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());
 
     // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
@@ -192,7 +193,8 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
         device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
 
         wgpu::BufferDescriptor bufDesc;
-        bufDesc.size = Align(maxBufferBindingSize, 4);
+        uint64_t bufferSize = Align(maxBufferBindingSize - 3u, 4);
+        bufDesc.size = bufferSize;
         bufDesc.usage = usage | wgpu::BufferUsage::CopyDst;
         wgpu::Buffer buffer = device.CreateBuffer(&bufDesc);
 
@@ -213,7 +215,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
         queue.WriteBuffer(buffer, 0, &value0, sizeof(value0));
 
         uint32_t value1 = 234;
-        uint64_t value1Offset = Align(maxBufferBindingSize - sizeof(value1), 4);
+        uint64_t value1Offset = Align(bufferSize - sizeof(value1), 4);
         queue.WriteBuffer(buffer, value1Offset, &value1, sizeof(value1));
 
         wgpu::ComputePipelineDescriptor csDesc;
@@ -234,10 +236,9 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
         queue.Submit(1, &commands);
 
         EXPECT_BUFFER_U32_EQ(value0, resultBuffer, 0)
-            << "maxBufferBindingSize=" << maxBufferBindingSize << "; offset=" << 0
-            << "; usage=" << usage;
+            << "maxBufferBindingSize=" << bufferSize << "; offset=" << 0 << "; usage=" << usage;
         EXPECT_BUFFER_U32_EQ(value1, resultBuffer, 4)
-            << "maxBufferBindingSize=" << maxBufferBindingSize << "; offset=" << value1Offset
+            << "maxBufferBindingSize=" << bufferSize << "; offset=" << value1Offset
             << "; usage=" << usage;
     }
 }
