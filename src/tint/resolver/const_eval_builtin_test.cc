@@ -190,7 +190,7 @@ INSTANTIATE_TEST_SUITE_P(  //
                          C({1.0_a, 0_a}, kPiOver2<AFloat>),
                      })));
 
-template <typename T, bool finite_only>
+template <typename T>
 std::vector<Case> AbsCases() {
     std::vector<Case> cases = {
         C({T(0)}, T(0)),
@@ -200,7 +200,6 @@ std::vector<Case> AbsCases() {
         // Vector tests
         C({Vec(T(2.0), T::Highest())}, Vec(T(2.0), T::Highest())),
     };
-
     ConcatIntoIf<IsSignedIntegral<T>>(
         cases,
         std::vector<Case>{
@@ -215,27 +214,18 @@ std::vector<Case> AbsCases() {
             C({Vec(T(0), Negate(T(0)))}, Vec(T(0), T(0))),
             C({Vec(Negate(T(2.0)), T(2.0), T::Highest())}, Vec(T(2.0), T(2.0), T::Highest())),
         });
-
-    ConcatIntoIf<!finite_only>(cases, std::vector<Case>{
-                                          C({Negate(T::Inf())}, T::Inf()),
-                                          C({T::Inf()}, T::Inf()),
-                                          C({T::NaN()}, T::NaN()),
-                                          C({Vec(Negate(T::Inf()), T::Inf(), T::NaN())},
-                                            Vec(T::Inf(), T::Inf(), T::NaN())),
-                                      });
-
     return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Abs,
     ResolverConstEvalBuiltinTest,
     testing::Combine(testing::Values(sem::BuiltinType::kAbs),
-                     testing::ValuesIn(Concat(AbsCases<AInt, false>(),  //
-                                              AbsCases<i32, false>(),
-                                              AbsCases<u32, false>(),
-                                              AbsCases<AFloat, true>(),
-                                              AbsCases<f32, false>(),
-                                              AbsCases<f16, false>()))));
+                     testing::ValuesIn(Concat(AbsCases<AInt>(),  //
+                                              AbsCases<i32>(),
+                                              AbsCases<u32>(),
+                                              AbsCases<AFloat>(),
+                                              AbsCases<f32>(),
+                                              AbsCases<f16>()))));
 
 static std::vector<Case> AllCases() {
     return {
@@ -295,9 +285,9 @@ INSTANTIATE_TEST_SUITE_P(  //
     ResolverConstEvalBuiltinTest,
     testing::Combine(testing::Values(sem::BuiltinType::kAny), testing::ValuesIn(AnyCases())));
 
-template <typename T, bool finite_only>
+template <typename T>
 std::vector<Case> Atan2Cases() {
-    std::vector<Case> cases = {
+    return {
         // If y is +/-0 and x is negative or -0, +/-PI is returned
         C({T(0.0), -T(0.0)}, kPi<T>).PosOrNeg().FloatComp(),
 
@@ -318,59 +308,18 @@ std::vector<Case> Atan2Cases() {
             .FloatComp(),
         C({Vec(T(1.0), T(1.0)), Vec(T(0.0), -T(0.0))}, Vec(kPiOver2<T>, kPiOver2<T>)).FloatComp(),
     };
-
-    ConcatIntoIf<!finite_only>(  //
-        cases, std::vector<Case>{
-                   // If y is +/-INF and x is finite, +/-PI/2 is returned
-                   C({T::Inf(), T(0.0)}, kPiOver2<T>).PosOrNeg().FloatComp(),
-                   C({-T::Inf(), T(0.0)}, kPiOver2<T>).PosOrNeg().FloatComp(),
-
-                   // If y is +/-INF and x is -INF, +/-3PI/4 is returned
-                   C({T::Inf(), -T::Inf()}, k3PiOver4<T>).PosOrNeg().FloatComp(),
-                   C({-T::Inf(), -T::Inf()}, k3PiOver4<T>).PosOrNeg().FloatComp(),
-
-                   // If y is +/-INF and x is +INF, +/-PI/4 is returned
-                   C({T::Inf(), T::Inf()}, kPiOver4<T>).PosOrNeg().FloatComp(),
-                   C({-T::Inf(), T::Inf()}, kPiOver4<T>).PosOrNeg().FloatComp(),
-
-                   // If x is -INF and y is finite and positive, +PI is returned
-                   C({T(0.0), -T::Inf()}, kPi<T>).FloatComp(),
-
-                   // If x is -INF and y is finite and negative, -PI is returned
-                   C({-T(0.0), -T::Inf()}, -kPi<T>).FloatComp(),
-
-                   // If x is +INF and y is finite and positive, +0 is returned
-                   C({T(0.0), T::Inf()}, T(0.0)),
-
-                   // If x is +INF and y is finite and negative, -0 is returned
-                   C({-T(0.0), T::Inf()}, -T(0.0)),
-
-                   // If either x is NaN or y is NaN, NaN is returned
-                   C({T::NaN(), T(0.0)}, T::NaN()),
-                   C({T(0.0), T::NaN()}, T::NaN()),
-                   C({T::NaN(), T::NaN()}, T::NaN()),
-
-                   // Vector tests
-                   C({Vec(T::Inf(), -T::Inf(), T::Inf(), -T::Inf()),  //
-                      Vec(T(0.0), T(0.0), -T::Inf(), -T::Inf())},     //
-                     Vec(kPiOver2<T>, kPiOver2<T>, k3PiOver4<T>, k3PiOver4<T>))
-                       .PosOrNeg()
-                       .FloatComp(),
-               });
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Atan2,
     ResolverConstEvalBuiltinTest,
     testing::Combine(testing::Values(sem::BuiltinType::kAtan2),
-                     testing::ValuesIn(Concat(Atan2Cases<AFloat, true>(),  //
-                                              Atan2Cases<f32, false>(),
-                                              Atan2Cases<f16, false>()))));
+                     testing::ValuesIn(Concat(Atan2Cases<AFloat>(),  //
+                                              Atan2Cases<f32>(),
+                                              Atan2Cases<f16>()))));
 
-template <typename T, bool finite_only>
+template <typename T>
 std::vector<Case> AtanCases() {
-    std::vector<Case> cases = {
+    return {
         C({T(1.0)}, kPiOver4<T>).FloatComp(),
         C({-T(1.0)}, -kPiOver4<T>).FloatComp(),
 
@@ -380,35 +329,18 @@ std::vector<Case> AtanCases() {
         // Vector tests
         C({Vec(T(0.0), T(1.0), -T(1.0))}, Vec(T(0.0), kPiOver4<T>, -kPiOver4<T>)).FloatComp(),
     };
-
-    ConcatIntoIf<!finite_only>(  //
-        cases, std::vector<Case>{
-                   // If i is +/-INF, +/-PI/2 is returned
-                   C({T::Inf()}, kPiOver2<T>).PosOrNeg().FloatComp(),
-                   C({-T::Inf()}, -kPiOver2<T>).FloatComp(),
-
-                   // If i is NaN, NaN is returned
-                   C({T::NaN()}, T::NaN()),
-
-                   // Vector tests
-                   C({Vec(T::Inf(), -T::Inf(), T::Inf(), -T::Inf())},  //
-                     Vec(kPiOver2<T>, -kPiOver2<T>, kPiOver2<T>, -kPiOver2<T>))
-                       .FloatComp(),
-               });
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Atan,
     ResolverConstEvalBuiltinTest,
     testing::Combine(testing::Values(sem::BuiltinType::kAtan),
-                     testing::ValuesIn(Concat(AtanCases<AFloat, true>(),  //
-                                              AtanCases<f32, false>(),
-                                              AtanCases<f16, false>()))));
+                     testing::ValuesIn(Concat(AtanCases<AFloat>(),  //
+                                              AtanCases<f32>(),
+                                              AtanCases<f16>()))));
 
-template <typename T, bool finite_only>
+template <typename T>
 std::vector<Case> AtanhCases() {
-    std::vector<Case> cases = {
+    return {
         // If i is +/-0, +/-0 is returned
         C({T(0.0)}, T(0.0)).PosOrNeg(),
 
@@ -416,43 +348,24 @@ std::vector<Case> AtanhCases() {
 
         // Vector tests
         C({Vec(T(0.0), T(0.9), -T(0.9))}, Vec(T(0.0), T(1.4722193), -T(1.4722193))).FloatComp(),
+
+        E({1.1_a},
+          "12:34 error: atanh must be called with a value in the range (-1 .. 1) (exclusive)"),
+        E({-1.1_a},
+          "12:34 error: atanh must be called with a value in the range (-1 .. 1) (exclusive)"),
     };
-
-    ConcatIntoIf<finite_only>(  //
-        cases,
-        std::vector<Case>{
-            E({1.1_a},
-              "12:34 error: atanh must be called with a value in the range (-1 .. 1) (exclusive)"),
-            E({-1.1_a},
-              "12:34 error: atanh must be called with a value in the range (-1 .. 1) (exclusive)"),
-            E({T::Inf()},
-              "12:34 error: atanh must be called with a value in the range (-1 .. 1) (exclusive)"),
-            E({-T::Inf()},
-              "12:34 error: atanh must be called with a value in the range (-1 .. 1) (exclusive)"),
-        });
-
-    ConcatIntoIf<!finite_only>(  //
-        cases, std::vector<Case>{
-                   // If i is NaN, NaN is returned
-                   C({T::NaN()}, T::NaN()),
-
-                   // Vector tests
-                   C({Vec(T::NaN(), T::NaN())}, Vec(T::NaN(), T::NaN())).FloatComp(),
-               });
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Atanh,
     ResolverConstEvalBuiltinTest,
     testing::Combine(testing::Values(sem::BuiltinType::kAtanh),
-                     testing::ValuesIn(Concat(AtanhCases<AFloat, true>(),  //
-                                              AtanhCases<f32, false>(),
-                                              AtanhCases<f16, false>()))));
+                     testing::ValuesIn(Concat(AtanhCases<AFloat>(),  //
+                                              AtanhCases<f32>(),
+                                              AtanhCases<f16>()))));
 
-template <typename T, bool finite_only>
+template <typename T>
 std::vector<Case> AcosCases() {
-    std::vector<Case> cases = {
+    return {
         // If i is +/-0, +/-0 is returned
         C({T(0.87758256189)}, T(0.5)).FloatComp(),
 
@@ -461,70 +374,46 @@ std::vector<Case> AcosCases() {
 
         // Vector tests
         C({Vec(T(1.0), -T(1.0))}, Vec(T(0), kPi<T>)).FloatComp(),
+
+        E({1.1_a},
+          "12:34 error: acos must be called with a value in the range [-1 .. 1] (inclusive)"),
+        E({-1.1_a},
+          "12:34 error: acos must be called with a value in the range [-1 .. 1] (inclusive)"),
     };
-
-    ConcatIntoIf<finite_only>(  //
-        cases,
-        std::vector<Case>{
-            E({1.1_a},
-              "12:34 error: acos must be called with a value in the range [-1 .. 1] (inclusive)"),
-            E({-1.1_a},
-              "12:34 error: acos must be called with a value in the range [-1 .. 1] (inclusive)"),
-            E({T::Inf()},
-              "12:34 error: acos must be called with a value in the range [-1 .. 1] (inclusive)"),
-            E({-T::Inf()},
-              "12:34 error: acos must be called with a value in the range [-1 .. 1] (inclusive)"),
-        });
-
-    ConcatIntoIf<!finite_only>(  //
-        cases, std::vector<Case>{
-                   // If i is NaN, NaN is returned
-                   C({T::NaN()}, T::NaN()),
-
-                   // Vector tests
-                   C({Vec(T::NaN(), T::NaN())}, Vec(T::NaN(), T::NaN())),
-               });
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Acos,
     ResolverConstEvalBuiltinTest,
     testing::Combine(testing::Values(sem::BuiltinType::kAcos),
-                     testing::ValuesIn(Concat(AcosCases<AFloat, true>(),  //
-                                              AcosCases<f32, false>(),
-                                              AcosCases<f16, false>()))));
+                     testing::ValuesIn(Concat(AcosCases<AFloat>(),  //
+                                              AcosCases<f32>(),
+                                              AcosCases<f16>()))));
 
-template <typename T, bool finite_only>
+template <typename T>
 std::vector<Case> AcoshCases() {
-    std::vector<Case> cases = {
+    return {
         C({T(1.0)}, T(0.0)),
         C({T(11.5919532755)}, kPi<T>).FloatComp(),
 
         // Vector tests
         C({Vec(T(1.0), T(11.5919532755))}, Vec(T(0), kPi<T>)).FloatComp(),
+
+        E({T::Smallest()}, "12:34 error: acosh must be called with a value >= 1.0"),
+        E({-1.1_a}, "12:34 error: acosh must be called with a value >= 1.0"),
+        E({0_a}, "12:34 error: acosh must be called with a value >= 1.0"),
     };
-
-    ConcatIntoIf<finite_only>(  //
-        cases, std::vector<Case>{
-                   E({T::Smallest()}, "12:34 error: acosh must be called with a value >= 1.0"),
-                   E({-1.1_a}, "12:34 error: acosh must be called with a value >= 1.0"),
-                   E({0_a}, "12:34 error: acosh must be called with a value >= 1.0"),
-               });
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Acosh,
     ResolverConstEvalBuiltinTest,
     testing::Combine(testing::Values(sem::BuiltinType::kAcosh),
-                     testing::ValuesIn(Concat(AcoshCases<AFloat, true>(),  //
-                                              AcoshCases<f32, false>(),
-                                              AcoshCases<f16, false>()))));
+                     testing::ValuesIn(Concat(AcoshCases<AFloat>(),  //
+                                              AcoshCases<f32>(),
+                                              AcoshCases<f16>()))));
 
-template <typename T, bool finite_only>
+template <typename T>
 std::vector<Case> AsinCases() {
-    std::vector<Case> cases = {
+    return {
         // If i is +/-0, +/-0 is returned
         C({T(0.0)}, T(0.0)),
         C({-T(0.0)}, -T(0.0)),
@@ -534,43 +423,24 @@ std::vector<Case> AsinCases() {
 
         // Vector tests
         C({Vec(T(0.0), T(1.0), -T(1.0))}, Vec(T(0.0), kPiOver2<T>, -kPiOver2<T>)).FloatComp(),
+
+        E({1.1_a},
+          "12:34 error: asin must be called with a value in the range [-1 .. 1] (inclusive)"),
+        E({-1.1_a},
+          "12:34 error: asin must be called with a value in the range [-1 .. 1] (inclusive)"),
     };
-
-    ConcatIntoIf<finite_only>(  //
-        cases,
-        std::vector<Case>{
-            E({1.1_a},
-              "12:34 error: asin must be called with a value in the range [-1 .. 1] (inclusive)"),
-            E({-1.1_a},
-              "12:34 error: asin must be called with a value in the range [-1 .. 1] (inclusive)"),
-            E({T::Inf()},
-              "12:34 error: asin must be called with a value in the range [-1 .. 1] (inclusive)"),
-            E({-T::Inf()},
-              "12:34 error: asin must be called with a value in the range [-1 .. 1] (inclusive)"),
-        });
-
-    ConcatIntoIf<!finite_only>(  //
-        cases, std::vector<Case>{
-                   // If i is NaN, NaN is returned
-                   C({T::NaN()}, T::NaN()),
-
-                   // Vector tests
-                   C({Vec(T::NaN(), T::NaN())}, Vec(T::NaN(), T::NaN())).FloatComp(),
-               });
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Asin,
     ResolverConstEvalBuiltinTest,
     testing::Combine(testing::Values(sem::BuiltinType::kAsin),
-                     testing::ValuesIn(Concat(AsinCases<AFloat, true>(),  //
-                                              AsinCases<f32, false>(),
-                                              AsinCases<f16, false>()))));
+                     testing::ValuesIn(Concat(AsinCases<AFloat>(),  //
+                                              AsinCases<f32>(),
+                                              AsinCases<f16>()))));
 
-template <typename T, bool finite_only>
+template <typename T>
 std::vector<Case> AsinhCases() {
-    std::vector<Case> cases = {
+    return {
         // If i is +/-0, +/-0 is returned
         C({T(0.0)}, T(0.0)),
         C({-T(0.0)}, -T(0.0)),
@@ -583,34 +453,18 @@ std::vector<Case> AsinhCases() {
           Vec(T(0.0), T(0.8088669356278), -T(1.4436354751788)))
             .FloatComp(),
     };
-
-    ConcatIntoIf<!finite_only>(  //
-        cases, std::vector<Case>{
-                   // If i is +/- INF, +/-INF is returned
-                   C({T::Inf()}, T::Inf()),
-                   C({-T::Inf()}, -T::Inf()),
-
-                   // If i is NaN, NaN is returned
-                   C({T::NaN()}, T::NaN()),
-
-                   // Vector tests
-                   C({Vec(T::Inf(), T::NaN(), -T::Inf())},  //
-                     Vec(T::Inf(), T::NaN(), -T::Inf())),
-               });
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Asinh,
     ResolverConstEvalBuiltinTest,
     testing::Combine(testing::Values(sem::BuiltinType::kAsinh),
-                     testing::ValuesIn(Concat(AsinhCases<AFloat, true>(),  //
-                                              AsinhCases<f32, false>(),
-                                              AsinhCases<f16, false>()))));
+                     testing::ValuesIn(Concat(AsinhCases<AFloat>(),  //
+                                              AsinhCases<f32>(),
+                                              AsinhCases<f16>()))));
 
-template <typename T, bool finite_only>
+template <typename T>
 std::vector<Case> CeilCases() {
-    std::vector<Case> cases = {
+    return {
         C({T(0)}, T(0)),
         C({-T(0)}, -T(0)),
         C({-T(1.5)}, -T(1.0)),
@@ -620,24 +474,13 @@ std::vector<Case> CeilCases() {
 
         C({Vec(T(0), T(1.5), -T(1.5))}, Vec(T(0), T(2.0), -T(1.0))),
     };
-
-    ConcatIntoIf<!finite_only>(
-        cases, std::vector<Case>{
-                   C({-T::Inf()}, -T::Inf()),
-                   C({T::Inf()}, T::Inf()),
-                   C({T::NaN()}, T::NaN()),
-                   C({Vec(-T::Inf(), T::Inf(), T::NaN())}, Vec(-T::Inf(), T::Inf(), T::NaN())),
-               });
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Ceil,
     ResolverConstEvalBuiltinTest,
-    testing::Combine(testing::Values(sem::BuiltinType::kCeil),
-                     testing::ValuesIn(Concat(CeilCases<AFloat, true>(),
-                                              CeilCases<f32, false>(),
-                                              CeilCases<f16, false>()))));
+    testing::Combine(
+        testing::Values(sem::BuiltinType::kCeil),
+        testing::ValuesIn(Concat(CeilCases<AFloat>(), CeilCases<f32>(), CeilCases<f16>()))));
 
 template <typename T>
 std::vector<Case> ClampCases() {
@@ -1044,9 +887,9 @@ INSTANTIATE_TEST_SUITE_P(  //
                      testing::ValuesIn(Concat(FirstTrailingBitCases<i32>(),  //
                                               FirstTrailingBitCases<u32>()))));
 
-template <typename T, bool finite_only>
+template <typename T>
 std::vector<Case> FloorCases() {
-    std::vector<Case> cases = {
+    return {
         C({T(0)}, T(0)),
         C({-T(0)}, -T(0)),
         C({-T(1.5)}, -T(2.0)),
@@ -1056,24 +899,14 @@ std::vector<Case> FloorCases() {
 
         C({Vec(T(0), T(1.5), -T(1.5))}, Vec(T(0), T(1.0), -T(2.0))),
     };
-
-    ConcatIntoIf<!finite_only>(
-        cases, std::vector<Case>{
-                   C({-T::Inf()}, -T::Inf()),
-                   C({T::Inf()}, T::Inf()),
-                   C({T::NaN()}, T::NaN()),
-                   C({Vec(-T::Inf(), T::Inf(), T::NaN())}, Vec(-T::Inf(), T::Inf(), T::NaN())),
-               });
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Floor,
     ResolverConstEvalBuiltinTest,
     testing::Combine(testing::Values(sem::BuiltinType::kFloor),
-                     testing::ValuesIn(Concat(FloorCases<AFloat, true>(),
-                                              FloorCases<f32, false>(),
-                                              FloorCases<f16, false>()))));
+                     testing::ValuesIn(Concat(FloorCases<AFloat>(),  //
+                                              FloorCases<f32>(),
+                                              FloorCases<f16>()))));
 
 template <typename T>
 std::vector<Case> InsertBitsCases() {
