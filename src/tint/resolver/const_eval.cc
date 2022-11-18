@@ -655,8 +655,7 @@ ConstEval::ConstEval(ProgramBuilder& b) : builder(b) {}
 template <typename NumberT>
 utils::Result<NumberT> ConstEval::Add(NumberT a, NumberT b) {
     NumberT result;
-    if constexpr (IsAbstract<NumberT>) {
-        // Check for over/underflow for abstract values
+    if constexpr (IsAbstract<NumberT> || IsFloatingPoint<NumberT>) {
         if (auto r = CheckedAdd(a, b)) {
             result = r->value;
         } else {
@@ -682,8 +681,7 @@ utils::Result<NumberT> ConstEval::Add(NumberT a, NumberT b) {
 template <typename NumberT>
 utils::Result<NumberT> ConstEval::Sub(NumberT a, NumberT b) {
     NumberT result;
-    if constexpr (IsAbstract<NumberT>) {
-        // Check for over/underflow for abstract values
+    if constexpr (IsAbstract<NumberT> || IsFloatingPoint<NumberT>) {
         if (auto r = CheckedSub(a, b)) {
             result = r->value;
         } else {
@@ -710,7 +708,7 @@ template <typename NumberT>
 utils::Result<NumberT> ConstEval::Mul(NumberT a, NumberT b) {
     using T = UnwrapNumber<NumberT>;
     NumberT result;
-    if constexpr (IsAbstract<NumberT>) {
+    if constexpr (IsAbstract<NumberT> || IsFloatingPoint<NumberT>) {
         // Check for over/underflow for abstract values
         if (auto r = CheckedMul(a, b)) {
             result = r->value;
@@ -736,7 +734,7 @@ utils::Result<NumberT> ConstEval::Mul(NumberT a, NumberT b) {
 template <typename NumberT>
 utils::Result<NumberT> ConstEval::Div(NumberT a, NumberT b) {
     NumberT result;
-    if constexpr (IsAbstract<NumberT>) {
+    if constexpr (IsAbstract<NumberT> || IsFloatingPoint<NumberT>) {
         // Check for over/underflow for abstract values
         if (auto r = CheckedDiv(a, b)) {
             result = r->value;
@@ -1922,8 +1920,6 @@ ConstEval::Result ConstEval::cross(const sem::Type* ty,
     auto* v1 = v->Index(1);
     auto* v2 = v->Index(2);
 
-    // auto x = Dispatch_fa_f32_f16(ab_minus_cd_func(elem_ty), u->Index(1), v->Index(2),
-    //                              v->Index(1), u->Index(2));
     auto x = Dispatch_fa_f32_f16(Det2Func(elem_ty), u1, u2, v1, v2);
     if (!x) {
         return utils::Failure;

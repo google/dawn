@@ -352,9 +352,11 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
             Structure("S", utils::Vector{Member("v", target_ty())});
             WrapInFunction(Construct(ty.type_name("S"), abstract_expr));
             break;
-        case Method::kBinaryOp:
-            WrapInFunction(Add(target_expr(), abstract_expr));
-            break;
+        case Method::kBinaryOp: {
+            // Add 0 to ensure no overflow with max float values
+            auto binary_target_expr = data.target_expr(*this, 0);
+            WrapInFunction(Add(binary_target_expr, abstract_expr));
+        } break;
         case Method::kSwitchCond:
             WrapInFunction(
                 Switch(abstract_expr,                                                       //

@@ -848,7 +848,7 @@ INSTANTIATE_TEST_SUITE_P(  //
                      testing::ValuesIn(Concat(CountOneBitsCases<i32>(),  //
                                               CountOneBitsCases<u32>()))));
 
-template <typename T, bool finite_only>
+template <typename T>
 std::vector<Case> CrossCases() {
     constexpr auto vec_x = [](T v) { return Vec(T(v), T(0), T(0)); };
     constexpr auto vec_y = [](T v) { return Vec(T(0), T(v), T(0)); };
@@ -870,12 +870,6 @@ std::vector<Case> CrossCases() {
     const auto lowest_x = vec_x(T::Lowest());
     const auto lowest_y = vec_y(T::Lowest());
     const auto lowest_z = vec_z(T::Lowest());
-    const auto inf_x = vec_x(T::Inf());
-    const auto inf_y = vec_y(T::Inf());
-    const auto inf_z = vec_z(T::Inf());
-    const auto neg_inf_x = vec_x(-T::Inf());
-    const auto neg_inf_y = vec_y(-T::Inf());
-    const auto neg_inf_z = vec_z(-T::Inf());
 
     std::vector<Case> r = {
         C({zero, zero}, zero),
@@ -924,28 +918,11 @@ std::vector<Case> CrossCases() {
           Vec(T(-10.75), T(-6.75), T(11.75))),
     };
 
-    ConcatIntoIf<!finite_only>(  //
-        r, std::vector<Case>{
-               C({highest_x, highest_y}, inf_z).PosOrNeg(),  //
-               C({highest_y, highest_x}, inf_z).PosOrNeg(),  //
-               C({highest_z, highest_x}, inf_y).PosOrNeg(),  //
-               C({highest_x, highest_z}, inf_y).PosOrNeg(),  //
-               C({highest_y, highest_z}, inf_x).PosOrNeg(),  //
-               C({highest_z, highest_y}, inf_x).PosOrNeg(),  //
-               C({lowest_x, lowest_y}, inf_z).PosOrNeg(),    //
-               C({lowest_y, lowest_x}, inf_z).PosOrNeg(),    //
-               C({lowest_z, lowest_x}, inf_y).PosOrNeg(),    //
-               C({lowest_x, lowest_z}, inf_y).PosOrNeg(),    //
-               C({lowest_y, lowest_z}, inf_x).PosOrNeg(),    //
-               C({lowest_z, lowest_y}, inf_x).PosOrNeg(),
-           });
-
     std::string pos_error_msg =
         "12:34 error: " + OverflowErrorMessage(T::Highest(), "*", T::Highest());
     std::string neg_error_msg =
         "12:34 error: " + OverflowErrorMessage(T::Lowest(), "*", T::Lowest());
-
-    ConcatIntoIf<finite_only>(  //
+    ConcatInto(  //
         r, std::vector<Case>{
                E({highest_x, highest_y}, pos_error_msg),
                E({highest_y, highest_x}, pos_error_msg),
@@ -967,10 +944,10 @@ INSTANTIATE_TEST_SUITE_P(  //
     Cross,
     ResolverConstEvalBuiltinTest,
     testing::Combine(testing::Values(sem::BuiltinType::kCross),
-                     testing::ValuesIn(Concat(CrossCases<AFloat, true>(),  //
-                                              CrossCases<f32, false>(),
-                                              CrossCases<f32, false>(),  //
-                                              CrossCases<f16, false>()))));
+                     testing::ValuesIn(Concat(CrossCases<AFloat>(),  //
+                                              CrossCases<f32>(),
+                                              CrossCases<f32>(),  //
+                                              CrossCases<f16>()))));
 
 template <typename T>
 std::vector<Case> FirstLeadingBitCases() {

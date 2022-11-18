@@ -1099,7 +1099,7 @@ TEST_P(FloatAllMatching, Scalar) {
 
     utils::Vector<const ast::Expression*, 8> params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.Push(Expr(1_f));
+        params.Push(Expr(f32(i)));
     }
     auto* builtin = Call(name, params);
     Func("func", utils::Empty, ty.void_(),
@@ -1120,7 +1120,7 @@ TEST_P(FloatAllMatching, Vec2) {
 
     utils::Vector<const ast::Expression*, 8> params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.Push(vec2<f32>(1_f, 1_f));
+        params.Push(vec2<f32>(f32(i), f32(i)));
     }
     auto* builtin = Call(name, params);
     Func("func", utils::Empty, ty.void_(),
@@ -1141,7 +1141,7 @@ TEST_P(FloatAllMatching, Vec3) {
 
     utils::Vector<const ast::Expression*, 8> params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.Push(vec3<f32>(1_f, 1_f, 1_f));
+        params.Push(vec3<f32>(f32(i), f32(i), f32(i)));
     }
     auto* builtin = Call(name, params);
     Func("func", utils::Empty, ty.void_(),
@@ -1162,7 +1162,7 @@ TEST_P(FloatAllMatching, Vec4) {
 
     utils::Vector<const ast::Expression*, 8> params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.Push(vec4<f32>(1_f, 1_f, 1_f, 1_f));
+        params.Push(vec4<f32>(f32(i), f32(i), f32(i), f32(i)));
     }
     auto* builtin = Call(name, params);
     Func("func", utils::Empty, ty.void_(),

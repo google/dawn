@@ -144,46 +144,41 @@ std::vector<Case> OpAddIntCases() {
         C(T::Highest(), Negate(T{1}), T{T::Highest() - 1}),
         C(T::Lowest(), T::Highest(), Negate(T{1})),
     };
-    ConcatIntoIf<!IsAbstract<T>>(  //
-        r, std::vector<Case>{
-               C(T::Highest(), T{1}, T::Lowest()),
-               C(T::Lowest(), Negate(T{1}), T::Highest()),
-           });
+    if constexpr (IsAbstract<T>) {
+        auto error_msg = [](auto a, auto b) {
+            return "12:34 error: " + OverflowErrorMessage(a, "+", b);
+        };
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   E(T::Highest(), T{1}, error_msg(T::Highest(), T{1})),
+                   E(T::Lowest(), Negate(T{1}), error_msg(T::Lowest(), Negate(T{1}))),
+               });
+    } else {
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   C(T::Highest(), T{1}, T::Lowest()),
+                   C(T::Lowest(), Negate(T{1}), T::Highest()),
+               });
+    }
 
-    auto error_msg = [](auto a, auto b) {
-        return "12:34 error: " + OverflowErrorMessage(a, "+", b);
-    };
-    ConcatIntoIf<IsAbstract<T>>(  //
-        r, std::vector<Case>{
-               E(T::Highest(), T{1}, error_msg(T::Highest(), T{1})),
-               E(T::Lowest(), Negate(T{1}), error_msg(T::Lowest(), Negate(T{1}))),
-           });
     return r;
 }
 template <typename T>
 std::vector<Case> OpAddFloatCases() {
     static_assert(IsFloatingPoint<T>);
-    auto r = std::vector<Case>{
+    auto error_msg = [](auto a, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, "+", b);
+    };
+    return std::vector<Case>{
         C(T{0}, T{0}, T{0}),
         C(T{1}, T{2}, T{3}),
         C(T::Lowest(), T{1}, T{T::Lowest() + 1}),
         C(T::Highest(), Negate(T{1}), T{T::Highest() - 1}),
         C(T::Lowest(), T::Highest(), T{0}),
+
+        E(T::Highest(), T::Highest(), error_msg(T::Highest(), T::Highest())),
+        E(T::Lowest(), Negate(T::Highest()), error_msg(T::Lowest(), Negate(T::Highest()))),
     };
-    ConcatIntoIf<!IsAbstract<T>>(  //
-        r, std::vector<Case>{
-               C(T::Highest(), T::Highest(), T::Inf()),
-               C(T::Lowest(), Negate(T::Highest()), -T::Inf()),
-           });
-    auto error_msg = [](auto a, auto b) {
-        return "12:34 error: " + OverflowErrorMessage(a, "+", b);
-    };
-    ConcatIntoIf<IsAbstract<T>>(  //
-        r, std::vector<Case>{
-               E(T::Highest(), T::Highest(), error_msg(T::Highest(), T::Highest())),
-               E(T::Lowest(), Negate(T::Highest()), error_msg(T::Lowest(), Negate(T::Highest()))),
-           });
-    return r;
 }
 INSTANTIATE_TEST_SUITE_P(Add,
                          ResolverConstEvalBinaryOpTest,
@@ -206,45 +201,40 @@ std::vector<Case> OpSubIntCases() {
         C(T{T::Highest() - 1}, Negate(T{1}), T::Highest()),
         C(Negate(T{1}), T::Highest(), T::Lowest()),
     };
-    ConcatIntoIf<!IsAbstract<T>>(  //
-        r, std::vector<Case>{
-               C(T::Lowest(), T{1}, T::Highest()),
-               C(T::Highest(), Negate(T{1}), T::Lowest()),
-           });
-    auto error_msg = [](auto a, auto b) {
-        return "12:34 error: " + OverflowErrorMessage(a, "-", b);
-    };
-    ConcatIntoIf<IsAbstract<T>>(  //
-        r, std::vector<Case>{
-               E(T::Lowest(), T{1}, error_msg(T::Lowest(), T{1})),
-               E(T::Highest(), Negate(T{1}), error_msg(T::Highest(), Negate(T{1}))),
-           });
+    if constexpr (IsAbstract<T>) {
+        auto error_msg = [](auto a, auto b) {
+            return "12:34 error: " + OverflowErrorMessage(a, "-", b);
+        };
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   E(T::Lowest(), T{1}, error_msg(T::Lowest(), T{1})),
+                   E(T::Highest(), Negate(T{1}), error_msg(T::Highest(), Negate(T{1}))),
+               });
+    } else {
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   C(T::Lowest(), T{1}, T::Highest()),
+                   C(T::Highest(), Negate(T{1}), T::Lowest()),
+               });
+    }
     return r;
 }
 template <typename T>
 std::vector<Case> OpSubFloatCases() {
     static_assert(IsFloatingPoint<T>);
-    auto r = std::vector<Case>{
+    auto error_msg = [](auto a, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, "-", b);
+    };
+    return std::vector<Case>{
         C(T{0}, T{0}, T{0}),
         C(T{3}, T{2}, T{1}),
         C(T::Highest(), T{1}, T{T::Highest() - 1}),
         C(T::Lowest(), Negate(T{1}), T{T::Lowest() + 1}),
         C(T{0}, T::Highest(), T::Lowest()),
+
+        E(T::Highest(), Negate(T::Highest()), error_msg(T::Highest(), Negate(T::Highest()))),
+        E(T::Lowest(), T::Highest(), error_msg(T::Lowest(), T::Highest())),
     };
-    ConcatIntoIf<!IsAbstract<T>>(  //
-        r, std::vector<Case>{
-               C(T::Highest(), Negate(T::Highest()), T::Inf()),
-               C(T::Lowest(), T::Highest(), -T::Inf()),
-           });
-    auto error_msg = [](auto a, auto b) {
-        return "12:34 error: " + OverflowErrorMessage(a, "-", b);
-    };
-    ConcatIntoIf<IsAbstract<T>>(  //
-        r, std::vector<Case>{
-               E(T::Highest(), Negate(T::Highest()), error_msg(T::Highest(), Negate(T::Highest()))),
-               E(T::Lowest(), T::Highest(), error_msg(T::Lowest(), T::Highest())),
-           });
-    return r;
 }
 INSTANTIATE_TEST_SUITE_P(Sub,
                          ResolverConstEvalBinaryOpTest,
@@ -267,21 +257,25 @@ std::vector<Case> OpMulScalarCases() {
         C(T::Highest(), T{1}, T::Highest()),
         C(T::Lowest(), T{1}, T::Lowest()),
     };
-    ConcatIntoIf<!IsAbstract<T>>(  //
-        r, std::vector<Case>{
-               C(T::Highest(), T::Highest(), Mul(T::Highest(), T::Highest())),
-               C(T::Lowest(), T::Lowest(), Mul(T::Lowest(), T::Lowest())),
-           });
-    auto error_msg = [](auto a, auto b) {
-        return "12:34 error: " + OverflowErrorMessage(a, "*", b);
-    };
-    ConcatIntoIf<IsAbstract<T>>(  //
-        r, std::vector<Case>{
-               E(T::Highest(), T::Highest(), error_msg(T::Highest(), T::Highest())),
-               E(T::Lowest(), T::Lowest(), error_msg(T::Lowest(), T::Lowest())),
-               E(T::Highest(), T{2}, error_msg(T::Highest(), T{2})),
-               E(T::Lowest(), Negate(T{2}), error_msg(T::Lowest(), Negate(T{2}))),
-           });
+    if constexpr (IsAbstract<T> || IsFloatingPoint<T>) {
+        auto error_msg = [](auto a, auto b) {
+            return "12:34 error: " + OverflowErrorMessage(a, "*", b);
+        };
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   // Fail if result is +/-inf
+                   E(T::Highest(), T::Highest(), error_msg(T::Highest(), T::Highest())),
+                   E(T::Lowest(), T::Lowest(), error_msg(T::Lowest(), T::Lowest())),
+                   E(T::Highest(), T{2}, error_msg(T::Highest(), T{2})),
+                   E(T::Lowest(), Negate(T{2}), error_msg(T::Lowest(), Negate(T{2}))),
+               });
+    } else {
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   C(T::Highest(), T::Highest(), Mul(T::Highest(), T::Highest())),
+                   C(T::Lowest(), T::Lowest(), Mul(T::Lowest(), T::Lowest())),
+               });
+    }
     return r;
 }
 
@@ -295,14 +289,24 @@ std::vector<Case> OpMulVecCases() {
         // vec3 * vec3 = vec3
         C(Vec(T{1.25}, T{2.25}, T{3.25}), Vec(T{2.0}, T{2.0}, T{2.0}), Vec(T{2.5}, T{4.5}, T{6.5})),
     };
-    auto error_msg = [](auto a, auto b) {
-        return "12:34 error: " + OverflowErrorMessage(a, "*", b);
-    };
-    ConcatIntoIf<IsAbstract<T>>(  //
-        r, std::vector<Case>{
-               E(Val(T::Highest()), Vec(T{2}, T{1}), error_msg(T::Highest(), T{2})),
-               E(Val(T::Lowest()), Vec(Negate(T{2}), T{1}), error_msg(T::Lowest(), Negate(T{2}))),
-           });
+    if constexpr (IsAbstract<T> || IsFloatingPoint<T>) {
+        auto error_msg = [](auto a, auto b) {
+            return "12:34 error: " + OverflowErrorMessage(a, "*", b);
+        };
+        ConcatInto(  //
+            r,
+            std::vector<Case>{
+                // Fail if result is +/-inf
+                E(Val(T::Highest()), Vec(T{2}, T{1}), error_msg(T::Highest(), T{2})),
+                E(Val(T::Lowest()), Vec(Negate(T{2}), T{1}), error_msg(T::Lowest(), Negate(T{2}))),
+            });
+    } else {
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   C(Val(T::Highest()), Vec(T{2}, T{1}), Vec(T{-2}, T::Highest())),
+                   C(Val(T::Lowest()), Vec(Negate(T{2}), T{1}), Vec(T{0}, T{T::Lowest()})),
+               });
+    }
     return r;
 }
 
@@ -347,7 +351,7 @@ std::vector<Case> OpMulMatCases() {
     auto error_msg = [](auto a, const char* op, auto b) {
         return "12:34 error: " + OverflowErrorMessage(a, op, b);
     };
-    ConcatIntoIf<IsAbstract<T>>(  //
+    ConcatIntoIf<IsAbstract<T> || IsFloatingPoint<T>>(  //
         r, std::vector<Case>{
                // vector-matrix multiply
 
@@ -389,10 +393,10 @@ std::vector<Case> OpMulMatCases() {
                // Overflow from second multiplication of dot product of lhs row 0 and rhs column 0
                // i.e. m1[0][0] * m2[0][0] + m1[0][1] * m[1][0]
                //                                     ^
-               E(Mat({T{1.0}, T::Highest()},  //
-                     {T{1.0}, T{1.0}}),       //
-                 Mat({T{1.0}, T{1.0}},        //
-                     {T{2.0}, T{1.0}}),       //
+               E(Mat({T{1.0}, T{1.0}},         //
+                     {T::Highest(), T{1.0}}),  //
+                 Mat({T{1.0}, T{2.0}},         //
+                     {T{1.0}, T{1.0}}),        //
                  error_msg(T::Highest(), "*", T{2.0})),
 
                // Overflow from addition of dot product of lhs row 0 and rhs column 0
@@ -453,11 +457,23 @@ std::vector<Case> OpDivIntCases() {
                // e1, when e1 is the most negative value in T, and e2 is -1.
                C(T::Smallest(), T{-1}, T::Smallest()),
            });
+
+    auto error_msg = [](auto a, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, "/", b);
+    };
+    ConcatIntoIf<IsAbstract<T>>(  //
+        r, std::vector<Case>{
+               // Most negative value divided by -1
+               E(AInt::Lowest(), -1_a, error_msg(AInt::Lowest(), -1_a)),
+           });
     return r;
 }
 
 template <typename T>
 std::vector<Case> OpDivFloatCases() {
+    auto error_msg = [](auto a, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, "/", b);
+    };
     std::vector<Case> r = {
         C(Val(T{0}), Val(T{1}), Val(T{0})),
         C(Val(T{1}), Val(T{1}), Val(T{1})),
@@ -469,32 +485,13 @@ std::vector<Case> OpDivFloatCases() {
         C(Val(T::Highest()), Val(T::Highest()), Val(T{1})),
         C(Val(T{0}), Val(T::Highest()), Val(T{0})),
         C(Val(T{0}), Val(T::Lowest()), Val(-T{0})),
-    };
-    ConcatIntoIf<!IsAbstract<T>>(  //
-        r, std::vector<Case>{
-               C(T{123}, T{0}, T::Inf()),
-               C(T{-123}, -T{0}, T::Inf()),
-               C(T{-123}, T{0}, -T::Inf()),
-               C(T{123}, -T{0}, -T::Inf()),
-           });
-    auto error_msg = [](auto a, auto b) {
-        return "12:34 error: " + OverflowErrorMessage(a, "/", b);
-    };
-    ConcatIntoIf<IsAbstract<T>>(  //
-        r, std::vector<Case>{
-               // Divide by zero
-               E(T{123}, T{0}, error_msg(T{123}, T{0})),
-               E(Negate(T{123}), Negate(T{0}), error_msg(Negate(T{123}), Negate(T{0}))),
-               E(Negate(T{123}), T{0}, error_msg(Negate(T{123}), T{0})),
-               E(T{123}, Negate(T{0}), error_msg(T{123}, Negate(T{0}))),
-           });
 
-    ConcatIntoIf<std::is_same_v<T, AInt>>(  //
-        r, std::vector<Case>{
-               // Most negative value divided by -1
-               E(AInt::Lowest(), -1_a, error_msg(AInt::Lowest(), -1_a)),
-           });
-
+        // Divide by zero
+        E(T{123}, T{0}, error_msg(T{123}, T{0})),
+        E(Negate(T{123}), Negate(T{0}), error_msg(Negate(T{123}), Negate(T{0}))),
+        E(Negate(T{123}), T{0}, error_msg(Negate(T{123}), T{0})),
+        E(T{123}, Negate(T{0}), error_msg(T{123}, Negate(T{0}))),
+    };
     return r;
 }
 INSTANTIATE_TEST_SUITE_P(Div,

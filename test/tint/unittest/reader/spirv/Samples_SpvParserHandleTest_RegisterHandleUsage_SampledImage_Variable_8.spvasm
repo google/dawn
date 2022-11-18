@@ -146,7 +146,7 @@ OpDecorate %20 Binding 1
 %128 = OpLoad %50 %10
 %129 = OpLoad %52 %20
 %130 = OpSampledImage %124 %129 %128
-%131 = OpImageSampleProjDrefImplicitLod %float %130 %126 %float_0_200000003
+%131 = OpImageSampleProjDrefImplicitLod %float %130 %47 %float_0_200000003
 OpReturn
 OpFunctionEnd
 

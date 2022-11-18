@@ -63,7 +63,7 @@
        %main = OpFunction %void None %21
          %39 = OpLabel
   %undefined = OpVariable %_ptr_Function_float Function
-         %40 = OpFMod %float %float_5 %float_0
+         %40 = OpFMod %float %float_5 %float_5
                OpStore %undefined %40
          %41 = OpAccessChain %_ptr_Uniform_int %_ %int_0 %int_0
          %10 = OpLoad %int %41
