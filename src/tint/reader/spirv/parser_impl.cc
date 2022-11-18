@@ -1183,7 +1183,7 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
                         break;
                     case spv::BuiltIn::ClipDistance:  // not supported in WGSL
                     case spv::BuiltIn::CullDistance:  // not supported in WGSL
-                        create_ast_member = false;  // Not part of the WGSL structure.
+                        create_ast_member = false;    // Not part of the WGSL structure.
                         break;
                     default:
                         Fail() << "unrecognized builtin " << decoration[1];
@@ -2025,10 +2025,15 @@ TypedExpression ParserImpl::MakeConstantExpressionForScalarSpirvConstant(
                                        ast::IntLiteralExpression::Suffix::kU)};
         },
         [&](const F32*) {
-            return TypedExpression{ty_.F32(),
-                                   create<ast::FloatLiteralExpression>(
-                                       source, static_cast<double>(spirv_const->GetFloat()),
-                                       ast::FloatLiteralExpression::Suffix::kF)};
+            if (auto f = CheckedConvert<f32>(AFloat(spirv_const->GetFloat()))) {
+                return TypedExpression{ty_.F32(),
+                                       create<ast::FloatLiteralExpression>(
+                                           source, static_cast<double>(spirv_const->GetFloat()),
+                                           ast::FloatLiteralExpression::Suffix::kF)};
+            } else {
+                Fail() << "value cannot be represented as 'f32': " << spirv_const->GetFloat();
+                return TypedExpression{};
+            }
         },
         [&](const Bool*) {
             const bool value =

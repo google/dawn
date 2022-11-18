@@ -3966,7 +3966,11 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     if (op == spv::Op::OpCompositeConstruct) {
         ExpressionList operands;
         for (uint32_t iarg = 0; iarg < inst.NumInOperands(); ++iarg) {
-            operands.Push(MakeOperand(inst, iarg).expr);
+            auto operand = MakeOperand(inst, iarg);
+            if (!operand) {
+                return {};
+            }
+            operands.Push(operand.expr);
         }
         return {ast_type,
                 builder_.Construct(Source{}, ast_type->Build(builder_), std::move(operands))};

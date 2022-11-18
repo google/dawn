@@ -217,5 +217,35 @@ TEST_F(SpvParserTest, Impl_IsValidIdentifier) {
     EXPECT_TRUE(ParserImpl::IsValidIdentifier("x_"));           // has underscore
 }
 
+TEST_F(SpvParserTest, Impl_FailOnNonFiniteLiteral) {
+    auto spv = test::Assemble(R"(
+                       OpCapability Shader
+                       OpMemoryModel Logical GLSL450
+                       OpEntryPoint Fragment %main "main" %out_var_SV_TARGET
+                       OpExecutionMode %main OriginUpperLeft
+                       OpSource HLSL 600
+                       OpName %out_var_SV_TARGET "out.var.SV_TARGET"
+                       OpName %main "main"
+                       OpDecorate %out_var_SV_TARGET Location 0
+              %float = OpTypeFloat 32
+     %float_0x1p_128 = OpConstant %float -0x1p+128
+            %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+               %void = OpTypeVoid
+                  %9 = OpTypeFunction %void
+  %out_var_SV_TARGET = OpVariable %_ptr_Output_v4float Output
+               %main = OpFunction %void None %9
+                 %10 = OpLabel
+                 %12 = OpCompositeConstruct %v4float %float_0x1p_128 %float_0x1p_128 %float_0x1p_128 %float_0x1p_128
+                       OpStore %out_var_SV_TARGET %12
+                       OpReturn
+                       OpFunctionEnd
+
+)");
+    auto p = parser(spv);
+    EXPECT_FALSE(p->Parse());
+    EXPECT_THAT(p->error(), HasSubstr("value cannot be represented as 'f32': -inf"));
+}
+
 }  // namespace
 }  // namespace tint::reader::spirv
