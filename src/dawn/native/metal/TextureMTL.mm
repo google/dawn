@@ -1090,8 +1090,7 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
             if (@available(macOS 10.12, iOS 10.0, *)) {
                 if (textureFormat == MTLPixelFormatDepth32Float_Stencil8) {
                     viewFormat = MTLPixelFormatX32_Stencil8;
-                }
-                else {
+                } else {
                     UNREACHABLE();
                 }
             } else {

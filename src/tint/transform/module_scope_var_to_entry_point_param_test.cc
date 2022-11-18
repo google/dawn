@@ -329,7 +329,7 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
-// TODO(crbug.com/tint/1758): Requires support for workgroup pointer parameters, which is 
+// TODO(crbug.com/tint/1758): Requires support for workgroup pointer parameters, which is
 // unsupported until WGSL 1.1
 TEST_F(ModuleScopeVarToEntryPointParamTest, DISABLED_FoldAddressOfDeref) {
     auto* src = R"(
@@ -370,7 +370,7 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
-// TODO(crbug.com/tint/1758): Requires support for workgroup pointer parameters, which is 
+// TODO(crbug.com/tint/1758): Requires support for workgroup pointer parameters, which is
 // unsupported until WGSL 1.1
 TEST_F(ModuleScopeVarToEntryPointParamTest, DISABLED_FoldAddressOfDeref_OutOfOrder) {
     auto* src = R"(

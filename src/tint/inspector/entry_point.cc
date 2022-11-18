@@ -35,5 +35,4 @@ EntryPoint::EntryPoint(EntryPoint&) = default;
 EntryPoint::EntryPoint(EntryPoint&&) = default;
 EntryPoint::~EntryPoint() = default;
 
-
 }  // namespace tint::inspector

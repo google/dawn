@@ -25,7 +25,7 @@ namespace dawn::native {
 class CommandEncoder;
 struct BeginComputePassCmd;
 struct BeginRenderPassCmd;
-}
+}  // namespace dawn::native
 
 namespace dawn::native::metal {
 

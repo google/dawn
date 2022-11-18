@@ -219,7 +219,6 @@ TEST_F(TextureInternalUsageValidationTest, InternalUsagesAreNotReflected) {
     ASSERT_EQ(texture.GetUsage(), wgpu::TextureUsage::CopySrc);
 }
 
-
 // Test the validation of internal usages against command encoders with and without
 // useInternalUsages.
 TEST_F(TextureInternalUsageValidationTest, CommandValidation) {

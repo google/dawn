@@ -471,25 +471,25 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
     void DoSamplingExtraStencilComponentsRenderTest(TestAspectAndSamplerType aspectAndSamplerType,
                                                     wgpu::TextureFormat format,
                                                     std::vector<uint8_t> textureValues) {
-        DoSamplingTestImpl(aspectAndSamplerType,
-                           CreateSamplingRenderPipeline({TestAspectAndSamplerType::StencilAsUint},
-                                                        {0, 1, 2, 3}),
-                           format, textureValues, 4, [&](uint32_t expected, wgpu::Buffer buffer) {
-                               EXPECT_BUFFER(buffer, 0, 4 * sizeof(uint32_t),
-                                             new ExtraStencilComponentsExpectation(expected));
-                           });
+        DoSamplingTestImpl(
+            aspectAndSamplerType,
+            CreateSamplingRenderPipeline({TestAspectAndSamplerType::StencilAsUint}, {0, 1, 2, 3}),
+            format, textureValues, 4, [&](uint32_t expected, wgpu::Buffer buffer) {
+                EXPECT_BUFFER(buffer, 0, 4 * sizeof(uint32_t),
+                              new ExtraStencilComponentsExpectation(expected));
+            });
     }
 
     void DoSamplingExtraStencilComponentsComputeTest(TestAspectAndSamplerType aspectAndSamplerType,
                                                      wgpu::TextureFormat format,
                                                      std::vector<uint8_t> textureValues) {
-        DoSamplingTestImpl(aspectAndSamplerType,
-                           CreateSamplingComputePipeline({TestAspectAndSamplerType::StencilAsUint},
-                                                         {0, 1, 2, 3}),
-                           format, textureValues, 4, [&](uint32_t expected, wgpu::Buffer buffer) {
-                               EXPECT_BUFFER(buffer, 0, 4 * sizeof(uint32_t),
-                                             new ExtraStencilComponentsExpectation(expected));
-                           });
+        DoSamplingTestImpl(
+            aspectAndSamplerType,
+            CreateSamplingComputePipeline({TestAspectAndSamplerType::StencilAsUint}, {0, 1, 2, 3}),
+            format, textureValues, 4, [&](uint32_t expected, wgpu::Buffer buffer) {
+                EXPECT_BUFFER(buffer, 0, 4 * sizeof(uint32_t),
+                              new ExtraStencilComponentsExpectation(expected));
+            });
     }
 
     static bool CompareFunctionPasses(float compareRef,

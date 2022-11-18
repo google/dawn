@@ -50,7 +50,7 @@
 #define TINT_DISABLE_WARNING_OLD_STYLE_CAST _Pragma("clang diagnostic ignored \"-Wold-style-cast\"")
 #define TINT_DISABLE_WARNING_SIGN_CONVERSION \
     _Pragma("clang diagnostic ignored \"-Wsign-conversion\"")
-#define TINT_DISABLE_WARNING_UNREACHABLE_CODE    /* currently no-op */
+#define TINT_DISABLE_WARNING_UNREACHABLE_CODE /* currently no-op */
 #define TINT_DISABLE_WARNING_WEAK_VTABLES _Pragma("clang diagnostic ignored \"-Wweak-vtables\"")
 
 // clang-format off

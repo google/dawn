@@ -74,10 +74,10 @@ f16::type f16::Quantize(f16::type value) {
 
     uint32_t u32 = utils::Bitcast<uint32_t>(value);
     if ((u32 & ~kF32SignMask) == 0) {
-        return value;                // +/- zero
+        return value;  // +/- zero
     }
     if ((u32 & kF32ExponentMask) == kF32ExponentMask) {  // exponent all 1's
-        return value;                        // inf or nan
+        return value;                                    // inf or nan
     }
 
     // We are now going to quantize a f32 number into subnormal f16 and store the result value back
