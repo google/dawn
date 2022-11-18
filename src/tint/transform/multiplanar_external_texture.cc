@@ -211,8 +211,6 @@ struct MultiplanarExternalTexture::State {
                     switch (builtin->Type()) {
                         case sem::BuiltinType::kTextureLoad:
                             return createTextureLoad(call, syms);
-                        case sem::BuiltinType::kTextureSampleLevel:
-                            return createTextureSampleLevel(expr, syms);
                         case sem::BuiltinType::kTextureSampleBaseClampToEdge:
                             return createTextureSampleBaseClampToEdge(expr, syms);
                         default:
@@ -315,15 +313,6 @@ struct MultiplanarExternalTexture::State {
         const ast::CallExpression* plane_0_call = nullptr;
         const ast::CallExpression* plane_1_call = nullptr;
         switch (call_type) {
-            case sem::BuiltinType::kTextureSampleLevel:
-                // TODO(crbug.com/tint/1671): DEPRECATED
-                // textureSampleLevel(plane0, smp, coord, 0.0);
-                single_plane_call = b.Call("textureSampleLevel", "plane0", "smp", "coord", 0_a);
-                // textureSampleLevel(plane0, smp, coord, 0.0);
-                plane_0_call = b.Call("textureSampleLevel", "plane0", "smp", "coord", 0_a);
-                // textureSampleLevel(plane1, smp, coord, 0.0);
-                plane_1_call = b.Call("textureSampleLevel", "plane1", "smp", "coord", 0_a);
-                break;
             case sem::BuiltinType::kTextureSampleBaseClampToEdge:
                 stmts.Push(b.Decl(b.Let(
                     "plane0_dims",
@@ -397,54 +386,6 @@ struct MultiplanarExternalTexture::State {
         stmts.Push(b.Return(b.vec4<f32>("color", 1_a)));
 
         return stmts;
-    }
-
-    /// Creates the textureSampleExternal function if needed and returns a call expression to it.
-    /// TODO(crbug.com/tint/1671): DEPRECATED: Replaced with createTextureSampleBaseClampToEdge().
-    /// @param expr the call expression being transformed
-    /// @param syms the expanded symbols to be used in the new call
-    /// @returns a call expression to textureSampleExternal
-    const ast::CallExpression* createTextureSampleLevel(const ast::CallExpression* expr,
-                                                        NewBindingSymbols syms) {
-        const ast::Expression* plane_0_binding_param = ctx.Clone(expr->args[0]);
-
-        if (expr->args.Length() != 3) {
-            TINT_ICE(Transform, b.Diagnostics()) << "expected textureSampleLevel call with a "
-                                                    "texture_external to have 3 parameters, found "
-                                                 << expr->args.Length() << " parameters";
-        }
-
-        // TextureSampleExternal calls the gammaCorrection function, so ensure it
-        // exists.
-        if (!gamma_correction_sym.IsValid()) {
-            createGammaCorrectionFn();
-        }
-
-        if (!texture_sample_external_sym.IsValid()) {
-            texture_sample_external_sym = b.Symbols().New("textureSampleExternal");
-
-            // Emit the textureSampleExternal function.
-            b.Func(
-                texture_sample_external_sym,
-                utils::Vector{
-                    b.Param("plane0", b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32())),
-                    b.Param("plane1", b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32())),
-                    b.Param("smp", b.ty.sampler(ast::SamplerKind::kSampler)),
-                    b.Param("coord", b.ty.vec2(b.ty.f32())),
-                    b.Param("params", b.ty.type_name(params_struct_sym)),
-                },
-                b.ty.vec4(b.ty.f32()),
-                buildTextureBuiltinBody(sem::BuiltinType::kTextureSampleLevel));
-        }
-
-        const ast::IdentifierExpression* exp = b.Expr(texture_sample_external_sym);
-        return b.Call(exp, utils::Vector{
-                               plane_0_binding_param,
-                               b.Expr(syms.plane_1),
-                               ctx.Clone(expr->args[1]),
-                               ctx.Clone(expr->args[2]),
-                               b.Expr(syms.params),
-                           });
     }
 
     /// Creates the textureSampleExternal function if needed and returns a call expression to it.

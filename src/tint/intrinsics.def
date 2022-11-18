@@ -675,7 +675,6 @@ fn textureSampleLevel<A: iu32, L: iu32>(texture: texture_depth_2d_array, sampler
 fn textureSampleLevel<A: iu32, L: iu32>(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, level: L, @const offset: vec2<i32>) -> f32
 fn textureSampleLevel<L: iu32>(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>, level: L) -> f32
 fn textureSampleLevel<A: iu32, L: iu32>(texture: texture_depth_cube_array,sampler: sampler, coords: vec3<f32>, array_index: A, level: L) -> f32
-@deprecated fn textureSampleLevel(texture: texture_external, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
 fn textureSampleBaseClampToEdge(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
 fn textureSampleBaseClampToEdge(texture: texture_external, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
 fn textureStore<C: iu32>(texture: texture_storage_1d<f32_texel_format, write>, coords: C, value: vec4<f32>)

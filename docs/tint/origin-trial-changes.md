@@ -2,6 +2,10 @@
 
 ## Changes for M110
 
+### Breaking changes
+
+* The `textureSampleLevel()` overload for `texture_external` has been removed. Use `textureSampleBaseClampToEdge()`. [tint:1671](crbug.com/tint/1671)
+
 ### Deprecated Features
 
 * The `sig` member of the return type of `frexp()` has been renamed to `fract`. [tint:1757](crbug.com/tint/1757)
