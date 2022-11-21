@@ -618,7 +618,7 @@ BlobCache* DeviceBase::GetBlobCache() {
     // TODO(crbug.com/dawn/1481): Shader caching currently has a dependency on the WGSL writer to
     // generate cache keys. We can lift the dependency once we also cache frontend parsing,
     // transformations, and reflection.
-    if (IsToggleEnabled(Toggle::EnableBlobCache)) {
+    if (IsToggleEnabled(Toggle::EnableBlobCache) && !IsToggleEnabled(Toggle::DisableBlobCache)) {
         return mAdapter->GetInstance()->GetBlobCache();
     }
 #endif

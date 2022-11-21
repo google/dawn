@@ -261,6 +261,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "mips (level >= 2) doesn't work correctly. Workaround this issue by detecting this case and "
       "rendering to a temporary texture instead (with copies before and after if needed).",
       "https://crbug.com/dawn/1071"}},
+    {Toggle::DisableBlobCache,
+     {"disable_blob_cache",
+      "Disables usage of the blob cache (backed by the platform cache if set/passed). Prevents any "
+      "persistent caching capabilities, i.e. pipeline caching.",
+      "https://crbug.com/dawn/549"}},
+    // TODO(dawn:549) Remove after deprecating usage on the Chromium side.
     {Toggle::EnableBlobCache,
      {"enable_blob_cache",
       "Enables usage of the blob cache (backed by the platform cache if set/passed). Necessary for "
