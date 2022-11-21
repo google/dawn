@@ -37,11 +37,15 @@ Transform::ApplyResult Manager::Apply(const Program* program,
 #if TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
     auto print_program = [&](const char* msg, const Transform* transform) {
         auto wgsl = Program::printer(program);
-        std::cout << "---------------------------------------------------------" << std::endl;
-        std::cout << "-- " << msg << " " << transform->TypeInfo().name << ":" << std::endl;
-        std::cout << "---------------------------------------------------------" << std::endl;
+        std::cout << "=========================================================" << std::endl;
+        std::cout << "== " << msg << " " << transform->TypeInfo().name << ":" << std::endl;
+        std::cout << "=========================================================" << std::endl;
         std::cout << wgsl << std::endl;
-        std::cout << "---------------------------------------------------------" << std::endl
+        if (!program->IsValid()) {
+            std::cout << "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --" << std::endl;
+            std::cout << program->Diagnostics().str() << std::endl;
+        }
+        std::cout << "=========================================================" << std::endl
                   << std::endl;
     };
 #endif
