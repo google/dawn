@@ -9,7 +9,7 @@ var<private> x_GLF_color : vec4<f32>;
 fn main_1() {
   var x_31 : bool;
   var x_32_phi : bool;
-  let x_26 : bool = (sign(cosh(709.0)) == 1.0);
+  let x_26 : bool = (sign(cosh(70.0f)) == 1.0);
   x_32_phi = x_26;
   if (!(x_26)) {
     let x_6 : i32 = x_5.one;

@@ -14,8 +14,8 @@
     %v2float = OpTypeVector %float 2
 %_ptr_Function_v2float = OpTypePointer Function %v2float
     %float_1 = OpConstant %float 1
-  %float_100 = OpConstant %float 100
-         %12 = OpConstantComposite %v2float %float_1 %float_100
+  %float_10 = OpConstant %float 10
+         %12 = OpConstantComposite %v2float %float_1 %float_10
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
 %_ptr_Function_float = OpTypePointer Function %float

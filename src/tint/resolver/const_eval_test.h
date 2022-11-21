@@ -145,6 +145,16 @@ inline std::string OverflowErrorMessage(NumberT lhs, const char* op, NumberT rhs
     return ss.str();
 }
 
+/// Returns the overflow error message for converions
+template <typename VALUE_TY>
+std::string OverflowErrorMessage(VALUE_TY value, std::string_view target_ty) {
+    std::stringstream ss;
+    ss << std::setprecision(20);
+    ss << "value " << value << " cannot be represented as "
+       << "'" << target_ty << "'";
+    return ss.str();
+}
+
 using builder::IsValue;
 using builder::Mat;
 using builder::Val;

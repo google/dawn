@@ -506,6 +506,9 @@ crbug.com/tint/1755 [ win10 ] webgpu:shader,execution,expression,call,builtin,pa
 crbug.com/tint/1581 webgpu:shader,execution,expression,binary,f32_arithmetic:division:inputSource="const";* [ Failure ]
 crbug.com/tint/1581 [ win ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="const" [ Failure ]
 crbug.com/tint/1581 [ linux ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="const" [ Failure ]
+crbug.com/tint/1581 webgpu:shader,execution,expression,call,builtin,cosh:f32:inputSource="const";* [ Failure ]
+crbug.com/tint/1581 webgpu:shader,execution,expression,call,builtin,sinh:f32:inputSource="const";* [ Failure ]
+crbug.com/tint/1581 webgpu:shader,execution,expression,call,builtin,unpack2x16float:unpack:inputSource="const" [ Failure ]
 
 ################################################################################
 # untriaged failures

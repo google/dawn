@@ -247,7 +247,7 @@ TEST_F(ComputePipelineOverridableConstantsValidationTest, InvalidValue) {
     {
         // Valid:: Max
         std::vector<wgpu::ConstantEntry> constants{
-            {nullptr, "c3", std::numeric_limits<double>::max()}};
+            {nullptr, "c3", std::numeric_limits<float>::max()}};
         TestCreatePipeline(constants);
     }
 }

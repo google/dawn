@@ -20,7 +20,7 @@
           %8 = OpTypeFunction %void
        %bool = OpTypeBool
       %float = OpTypeFloat 32
-  %float_709 = OpConstant %float 709
+  %float_70 = OpConstant %float 70
     %float_1 = OpConstant %float 1
         %int = OpTypeInt 32 1
        %buf0 = OpTypeStruct %int
@@ -37,7 +37,7 @@
          %22 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
        %main = OpFunction %void None %8
          %23 = OpLabel
-         %24 = OpExtInst %float %1 Cosh %float_709
+         %24 = OpExtInst %float %1 Cosh %float_70
          %25 = OpExtInst %float %1 FSign %24
          %26 = OpFOrdEqual %bool %25 %float_1
          %27 = OpLogicalNot %bool %26

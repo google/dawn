@@ -541,6 +541,9 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> CoshCases() {
+    auto error_msg = [](auto a) {
+        return "12:34 error: " + OverflowErrorMessage(a, FriendlyName<decltype(a)>());
+    };
     std::vector<Case> cases = {
         C({T(0)}, T(1)),
         C({-T(0)}, T(1)),
@@ -550,8 +553,9 @@ std::vector<Case> CoshCases() {
 
         // Vector tests
         C({Vec(T(0), -T(0), T(1))}, Vec(T(1), T(1), T(1.5430806348))).FloatComp(),
-    };
 
+        E({T(10000)}, error_msg(T::Inf())),
+    };
     return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
@@ -1422,6 +1426,9 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> SinhCases() {
+    auto error_msg = [](auto a) {
+        return "12:34 error: " + OverflowErrorMessage(a, FriendlyName<decltype(a)>());
+    };
     std::vector<Case> cases = {
         C({T(0)}, T(0)),
         C({-T(0)}, -T(0)),
@@ -1430,8 +1437,9 @@ std::vector<Case> SinhCases() {
 
         // Vector tests
         C({Vec(T(0), -T(0), T(1))}, Vec(T(0), -T(0), T(1.1752012))).FloatComp(),
-    };
 
+        E({T(10000)}, error_msg(T::Inf())),
+    };
     return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
