@@ -310,12 +310,10 @@ struct Element : ImplConstant {
             } else if constexpr (IsFloatingPoint<TO>) {
                 // [x -> floating-point] - number not exactly representable
                 // https://www.w3.org/TR/WGSL/#floating-point-conversion
-                switch (conv.Failure()) {
-                    case ConversionFailure::kExceedsNegativeLimit:
-                        return builder.create<Element<TO>>(target_ty, -TO::Inf());
-                    case ConversionFailure::kExceedsPositiveLimit:
-                        return builder.create<Element<TO>>(target_ty, TO::Inf());
-                }
+                builder.Diagnostics().add_error(
+                    tint::diag::System::Resolver,
+                    OverflowErrorMessage(value, builder.FriendlyName(target_ty)), source);
+                return utils::Failure;
             } else if constexpr (IsFloatingPoint<FROM>) {
                 // [floating-point -> integer] - number not exactly representable
                 // https://www.w3.org/TR/WGSL/#floating-point-conversion

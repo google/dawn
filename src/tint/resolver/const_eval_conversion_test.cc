@@ -440,38 +440,11 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
     Enable(ast::Extension::kF16);
 
-    auto* expr = vec3<f16>(vec3<f32>(1e10_f, -1e20_f, 1e30_f));
+    auto* expr = vec3<f16>(Source{{12, 34}}, vec3<f32>(1e10_f, 0_f, 0_f));
     WrapInFunction(expr);
 
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-    constexpr auto kInfinity = std::numeric_limits<double>::infinity();
-
-    auto* sem = Sem().Get(expr);
-    ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
-    ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<sem::F16>());
-    EXPECT_EQ(vec->Width(), 3u);
-    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
-    EXPECT_FALSE(sem->ConstantValue()->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->AllZero());
-
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AFloat>(), kInfinity);
-
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AFloat>(), -kInfinity);
-
-    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AFloat>(), kInfinity);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: value 10000000000 cannot be represented as 'f16'");
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Small_f32_to_f16) {
