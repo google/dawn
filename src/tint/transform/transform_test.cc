@@ -21,6 +21,8 @@
 namespace tint::transform {
 namespace {
 
+using namespace tint::number_suffixes;  // NOLINT
+
 // Inherit from Transform so we have access to protected methods
 struct CreateASTTypeForTest : public testing::Test, public Transform {
     ApplyResult Apply(const Program*, const DataMap&, DataMap&) const override {
@@ -93,6 +95,28 @@ TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
     auto* size = arr->As<ast::Array>()->count->As<ast::IntLiteralExpression>();
     ASSERT_NE(size, nullptr);
     EXPECT_EQ(size->value, 2);
+}
+
+// crbug.com/tint/1764
+TEST_F(CreateASTTypeForTest, AliasedArrayWithComplexOverrideLength) {
+    // override O = 123;
+    // type A = array<i32, O*2>;
+    //
+    // var<workgroup> W : A;
+    //
+    ProgramBuilder b;
+    auto* arr_len = b.Mul("O", 2_a);
+    b.Override("O", b.Expr(123_a));
+    auto* alias = b.Alias("A", b.ty.array(b.ty.i32(), arr_len));
+
+    Program program(std::move(b));
+
+    auto* arr_ty = program.Sem().Get(alias);
+
+    CloneContext ctx(&ast_type_builder, &program, false);
+    auto* ast_ty = tint::As<ast::TypeName>(CreateASTTypeFor(ctx, arr_ty));
+    ASSERT_NE(ast_ty, nullptr);
+    EXPECT_EQ(ast_type_builder.Symbols().NameFor(ast_ty->name), "A");
 }
 
 TEST_F(CreateASTTypeForTest, Struct) {

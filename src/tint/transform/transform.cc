@@ -114,6 +114,19 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type*
             return ctx.dst->ty.array(el, count, std::move(attrs));
         }
         if (auto* override = std::get_if<sem::UnnamedOverrideArrayCount>(&a->Count())) {
+            // If the array count is an unnamed (complex) override expression, then its not safe to
+            // redeclare this type as we'd end up with two types that would not compare equal.
+            // See crbug.com/tint/1764.
+            // Look for a type alias for this array.
+            for (auto* type_decl : ctx.src->AST().TypeDecls()) {
+                if (auto* alias = type_decl->As<ast::Alias>()) {
+                    if (ty == ctx.src->Sem().Get(alias)) {
+                        // Alias found. Use the alias name to ensure types compare equal.
+                        return ctx.dst->ty.type_name(ctx.Clone(alias->name));
+                    }
+                }
+            }
+            // Array is not aliased. Rebuild the array.
             auto* count = ctx.Clone(override->expr->Declaration());
             return ctx.dst->ty.array(el, count, std::move(attrs));
         }
