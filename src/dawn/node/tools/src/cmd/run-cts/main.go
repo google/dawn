@@ -615,9 +615,13 @@ func (r *runner) runServer(id int, caseIndices <-chan int, results chan<- result
 			"placeholder-arg",
 			// Actual arguments begin here
 			"--gpu-provider", r.dawnNode,
+			"--data", filepath.Join(r.cts, "out-node", "data"),
 		}
 		if r.colors {
 			args = append(args, "--colors")
+		}
+		if r.verbose {
+			args = append(args, "--verbose")
 		}
 		for _, f := range r.flags {
 			args = append(args, "--gpu-provider-flag", f)
