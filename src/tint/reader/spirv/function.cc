@@ -3261,11 +3261,8 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
             // start of an if-selection or a switch-selection.  So at most one branch
             // is a kForward, kCaseFallThrough, or kIfBreak.
 
-            // The fallthrough case is special because WGSL requires the fallthrough
-            // statement to be last in the case clause.
-            if (true_kind == EdgeKind::kCaseFallThrough) {
-                return Fail() << "Fallthrough not supported in WGSL";
-            } else if (false_kind == EdgeKind::kCaseFallThrough) {
+            if (true_kind == EdgeKind::kCaseFallThrough ||
+                false_kind == EdgeKind::kCaseFallThrough) {
                 return Fail() << "Fallthrough not supported in WGSL";
             }
 
@@ -3278,8 +3275,8 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
             // requiring a flow guard, then get that flow guard name too.  It will
             // come from at most one of these two branches.
             std::string flow_guard;
-            auto* true_branch = MakeBranchDetailed(block_info, *true_info, false, &flow_guard);
-            auto* false_branch = MakeBranchDetailed(block_info, *false_info, false, &flow_guard);
+            auto* true_branch = MakeBranchDetailed(block_info, *true_info, &flow_guard);
+            auto* false_branch = MakeBranchDetailed(block_info, *false_info, &flow_guard);
 
             AddStatement(MakeSimpleIf(cond, true_branch, false_branch));
             if (!flow_guard.empty()) {
@@ -3304,7 +3301,6 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
 
 const ast::Statement* FunctionEmitter::MakeBranchDetailed(const BlockInfo& src_info,
                                                           const BlockInfo& dest_info,
-                                                          bool forced,
                                                           std::string* flow_guard_name_ptr) {
     auto kind = src_info.succ_edge.find(dest_info.id)->second;
     switch (kind) {
@@ -3312,11 +3308,7 @@ const ast::Statement* FunctionEmitter::MakeBranchDetailed(const BlockInfo& src_i
             // Nothing to do. The loop backedge is implicit.
             break;
         case EdgeKind::kSwitchBreak: {
-            if (forced) {
-                return create<ast::BreakStatement>(Source{});
-            }
-            // Unless forced, don't bother with a break at the end of a case/default
-            // clause.
+            // Don't bother with a break at the end of a case/default clause.
             const auto header = dest_info.header_for_merge;
             TINT_ASSERT(Reader, header != 0);
             const auto* exiting_construct = GetBlockInfo(header)->construct;

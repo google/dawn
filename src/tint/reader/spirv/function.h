@@ -721,36 +721,22 @@ class FunctionEmitter {
     /// @param dest_info the destination block
     /// @returns the new statement, or a null statement
     const ast::Statement* MakeBranch(const BlockInfo& src_info, const BlockInfo& dest_info) {
-        return MakeBranchDetailed(src_info, dest_info, false, nullptr);
+        return MakeBranchDetailed(src_info, dest_info, nullptr);
     }
 
     /// Returns a new statement to represent the given branch representing a
     /// "normal" terminator, as in the sense of EmitNormalTerminator.  If no
-    /// WGSL statement is required, the statement will be nullptr.
-    /// @param src_info the source block
-    /// @param dest_info the destination block
-    /// @returns the new statement, or a null statement
-    const ast::Statement* MakeForcedBranch(const BlockInfo& src_info, const BlockInfo& dest_info) {
-        return MakeBranchDetailed(src_info, dest_info, true, nullptr);
-    }
-
-    /// Returns a new statement to represent the given branch representing a
-    /// "normal" terminator, as in the sense of EmitNormalTerminator.  If no
-    /// WGSL statement is required, the statement will be nullptr. When `forced`
-    /// is false, this method tries to avoid emitting a 'break' statement when
-    /// that would be redundant in WGSL due to implicit breaking out of a switch.
-    /// When `forced` is true, the method won't try to avoid emitting that break.
-    /// If the control flow edge is an if-break for an if-selection with a
+    /// WGSL statement is required, the statement will be nullptr. This method tries to avoid
+    /// emitting a 'break' statement when that would be redundant in WGSL due to implicit breaking
+    /// out of a switch. If the control flow edge is an if-break for an if-selection with a
     /// control flow guard, then return that guard name via `flow_guard_name_ptr`
     /// when that parameter is not null.
     /// @param src_info the source block
     /// @param dest_info the destination block
-    /// @param forced if true, always emit the branch (if it exists in WGSL)
     /// @param flow_guard_name_ptr return parameter for control flow guard name
     /// @returns the new statement, or a null statement
     const ast::Statement* MakeBranchDetailed(const BlockInfo& src_info,
                                              const BlockInfo& dest_info,
-                                             bool forced,
                                              std::string* flow_guard_name_ptr);
 
     /// Returns a new if statement with the given statements as the then-clause
