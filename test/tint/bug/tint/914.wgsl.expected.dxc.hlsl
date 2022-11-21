@@ -1,7 +1,3 @@
-uint tint_div(uint lhs, uint rhs) {
-  return (lhs / ((rhs == 0u) ? 1u : rhs));
-}
-
 ByteAddressBuffer firstMatrix : register(t0, space0);
 ByteAddressBuffer secondMatrix : register(t1, space0);
 RWByteAddressBuffer resultMatrix : register(u2, space0);
@@ -46,6 +42,10 @@ void mm_write(uint row, uint col, float value) {
 
 groupshared float mm_Asub[64][64];
 groupshared float mm_Bsub[64][64];
+
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / ((rhs == 0u) ? 1u : rhs));
+}
 
 struct tint_symbol_1 {
   uint3 local_id : SV_GroupThreadID;

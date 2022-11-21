@@ -4,7 +4,7 @@
 ; Bound: 290
 ; Schema: 0
                OpCapability Shader
-         %86 = OpExtInstImport "GLSL.std.450"
+         %69 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main_count "main_count" %GlobalInvocationID_1
                OpExecutionMode %main_count LocalSize 128 1 1
@@ -47,12 +47,6 @@
                OpMemberName %Dbg 10 "value_f32_2"
                OpMemberName %Dbg 11 "value_f32_3"
                OpName %dbg "dbg"
-               OpName %tint_div "tint_div"
-               OpName %lhs "lhs"
-               OpName %rhs "rhs"
-               OpName %tint_mod "tint_mod"
-               OpName %lhs_0 "lhs"
-               OpName %rhs_0 "rhs"
                OpName %marg8uintin "marg8uintin"
                OpName %toVoxelPos "toVoxelPos"
                OpName %position "position"
@@ -68,6 +62,12 @@
                OpName %gridSize_0 "gridSize"
                OpName %voxelPos "voxelPos"
                OpName %icoord "icoord"
+               OpName %tint_div "tint_div"
+               OpName %lhs "lhs"
+               OpName %rhs "rhs"
+               OpName %tint_mod "tint_mod"
+               OpName %lhs_0 "lhs"
+               OpName %rhs_0 "rhs"
                OpName %toIndex4D "toIndex4D"
                OpName %gridSize_1 "gridSize"
                OpName %index "index"
@@ -177,27 +177,27 @@
   %dbg_block = OpTypeStruct %Dbg
 %_ptr_StorageBuffer_dbg_block = OpTypePointer StorageBuffer %dbg_block
         %dbg = OpVariable %_ptr_StorageBuffer_dbg_block StorageBuffer
-         %32 = OpTypeFunction %uint %uint %uint
-         %38 = OpConstantNull %uint
-       %bool = OpTypeBool
-     %uint_1 = OpConstant %uint 1
        %void = OpTypeVoid
-         %50 = OpTypeFunction %void
-         %54 = OpTypeFunction %v3float %v3float
+         %32 = OpTypeFunction %void
+         %36 = OpTypeFunction %v3float %v3float
      %uint_0 = OpConstant %uint 0
      %uint_4 = OpConstant %uint 4
 %_ptr_Uniform_float = OpTypePointer Uniform %float
+     %uint_1 = OpConstant %uint 1
      %uint_2 = OpConstant %uint 2
 %_ptr_Function_v3float = OpTypePointer Function %v3float
-         %71 = OpConstantNull %v3float
+         %54 = OpConstantNull %v3float
      %uint_5 = OpConstant %uint 5
 %_ptr_Function_float = OpTypePointer Function %float
-         %96 = OpConstantNull %float
+         %79 = OpConstantNull %float
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
-        %133 = OpTypeFunction %uint %uint %v3float
+        %116 = OpTypeFunction %uint %uint %v3float
 %_ptr_Function_v3uint = OpTypePointer Function %v3uint
-        %141 = OpConstantNull %v3uint
+        %124 = OpConstantNull %v3uint
 %_ptr_Function_uint = OpTypePointer Function %uint
+        %137 = OpTypeFunction %uint %uint %uint
+        %143 = OpConstantNull %uint
+       %bool = OpTypeBool
         %154 = OpTypeFunction %v3uint %uint %uint
         %174 = OpTypeFunction %v3float %uint
      %uint_3 = OpConstant %uint 3
@@ -210,132 +210,132 @@
         %222 = OpTypeFunction %void %v3uint
     %float_3 = OpConstant %float 3
       %int_1 = OpConstant %int 1
-   %tint_div = OpFunction %uint None %32
-        %lhs = OpFunctionParameter %uint
-        %rhs = OpFunctionParameter %uint
-         %36 = OpLabel
-         %39 = OpIEqual %bool %rhs %38
-         %37 = OpSelect %uint %39 %uint_1 %rhs
-         %42 = OpUDiv %uint %lhs %37
-               OpReturnValue %42
-               OpFunctionEnd
-   %tint_mod = OpFunction %uint None %32
-      %lhs_0 = OpFunctionParameter %uint
-      %rhs_0 = OpFunctionParameter %uint
-         %46 = OpLabel
-         %48 = OpIEqual %bool %rhs_0 %38
-         %47 = OpSelect %uint %48 %uint_1 %rhs_0
-         %49 = OpUMod %uint %lhs_0 %47
-               OpReturnValue %49
-               OpFunctionEnd
-%marg8uintin = OpFunction %void None %50
-         %53 = OpLabel
+%marg8uintin = OpFunction %void None %32
+         %35 = OpLabel
                OpReturn
                OpFunctionEnd
- %toVoxelPos = OpFunction %v3float None %54
+ %toVoxelPos = OpFunction %v3float None %36
    %position = OpFunctionParameter %v3float
-         %57 = OpLabel
-      %bbMin = OpVariable %_ptr_Function_v3float Function %71
-      %bbMax = OpVariable %_ptr_Function_v3float Function %71
-     %bbSize = OpVariable %_ptr_Function_v3float Function %71
-   %cubeSize = OpVariable %_ptr_Function_float Function %96
-   %gridSize = OpVariable %_ptr_Function_float Function %96
-         %gx = OpVariable %_ptr_Function_float Function %96
-         %gy = OpVariable %_ptr_Function_float Function %96
-         %gz = OpVariable %_ptr_Function_float Function %96
-         %61 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_4 %uint_0
-         %62 = OpLoad %float %61
-         %63 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_4 %uint_1
-         %64 = OpLoad %float %63
-         %66 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_4 %uint_2
-         %67 = OpLoad %float %66
-         %68 = OpCompositeConstruct %v3float %62 %64 %67
-               OpStore %bbMin %68
-         %73 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_5 %uint_0
-         %74 = OpLoad %float %73
-         %75 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_5 %uint_1
-         %76 = OpLoad %float %75
-         %77 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_5 %uint_2
-         %78 = OpLoad %float %77
-         %79 = OpCompositeConstruct %v3float %74 %76 %78
-               OpStore %bbMax %79
-         %81 = OpLoad %v3float %bbMin
-         %82 = OpLoad %v3float %bbMin
-         %83 = OpFSub %v3float %81 %82
-               OpStore %bbSize %83
-         %89 = OpAccessChain %_ptr_Function_float %bbMax %uint_0
-         %90 = OpLoad %float %89
-         %91 = OpAccessChain %_ptr_Function_float %bbMax %uint_1
-         %92 = OpLoad %float %91
-         %87 = OpExtInst %float %86 NMax %90 %92
-         %93 = OpAccessChain %_ptr_Function_float %bbSize %uint_2
-         %94 = OpLoad %float %93
-         %85 = OpExtInst %float %86 NMax %87 %94
-               OpStore %cubeSize %85
-         %99 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_0 %uint_1
-        %100 = OpLoad %uint %99
-         %97 = OpConvertUToF %float %100
-               OpStore %gridSize %97
-        %102 = OpLoad %float %cubeSize
-        %103 = OpCompositeExtract %float %position 0
-        %104 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_4 %uint_0
-        %105 = OpLoad %float %104
-        %106 = OpFSub %float %103 %105
-        %107 = OpFMul %float %102 %106
-        %108 = OpLoad %float %cubeSize
-        %109 = OpFDiv %float %107 %108
-               OpStore %gx %109
-        %111 = OpLoad %float %gx
-        %112 = OpCompositeExtract %float %position 1
-        %113 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_4 %uint_1
-        %114 = OpLoad %float %113
-        %115 = OpFSub %float %112 %114
-        %116 = OpFMul %float %111 %115
-        %117 = OpLoad %float %gridSize
-        %118 = OpFDiv %float %116 %117
-               OpStore %gy %118
-        %120 = OpLoad %float %gridSize
-        %121 = OpCompositeExtract %float %position 2
-        %122 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_4 %uint_2
-        %123 = OpLoad %float %122
-        %124 = OpFSub %float %121 %123
-        %125 = OpFMul %float %120 %124
-        %126 = OpLoad %float %gridSize
-        %127 = OpFDiv %float %125 %126
-               OpStore %gz %127
-        %129 = OpLoad %float %gz
-        %130 = OpLoad %float %gz
-        %131 = OpLoad %float %gz
-        %132 = OpCompositeConstruct %v3float %129 %130 %131
-               OpReturnValue %132
+         %39 = OpLabel
+      %bbMin = OpVariable %_ptr_Function_v3float Function %54
+      %bbMax = OpVariable %_ptr_Function_v3float Function %54
+     %bbSize = OpVariable %_ptr_Function_v3float Function %54
+   %cubeSize = OpVariable %_ptr_Function_float Function %79
+   %gridSize = OpVariable %_ptr_Function_float Function %79
+         %gx = OpVariable %_ptr_Function_float Function %79
+         %gy = OpVariable %_ptr_Function_float Function %79
+         %gz = OpVariable %_ptr_Function_float Function %79
+         %43 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_4 %uint_0
+         %44 = OpLoad %float %43
+         %46 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_4 %uint_1
+         %47 = OpLoad %float %46
+         %49 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_4 %uint_2
+         %50 = OpLoad %float %49
+         %51 = OpCompositeConstruct %v3float %44 %47 %50
+               OpStore %bbMin %51
+         %56 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_5 %uint_0
+         %57 = OpLoad %float %56
+         %58 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_5 %uint_1
+         %59 = OpLoad %float %58
+         %60 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_5 %uint_2
+         %61 = OpLoad %float %60
+         %62 = OpCompositeConstruct %v3float %57 %59 %61
+               OpStore %bbMax %62
+         %64 = OpLoad %v3float %bbMin
+         %65 = OpLoad %v3float %bbMin
+         %66 = OpFSub %v3float %64 %65
+               OpStore %bbSize %66
+         %72 = OpAccessChain %_ptr_Function_float %bbMax %uint_0
+         %73 = OpLoad %float %72
+         %74 = OpAccessChain %_ptr_Function_float %bbMax %uint_1
+         %75 = OpLoad %float %74
+         %70 = OpExtInst %float %69 NMax %73 %75
+         %76 = OpAccessChain %_ptr_Function_float %bbSize %uint_2
+         %77 = OpLoad %float %76
+         %68 = OpExtInst %float %69 NMax %70 %77
+               OpStore %cubeSize %68
+         %82 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_0 %uint_1
+         %83 = OpLoad %uint %82
+         %80 = OpConvertUToF %float %83
+               OpStore %gridSize %80
+         %85 = OpLoad %float %cubeSize
+         %86 = OpCompositeExtract %float %position 0
+         %87 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_4 %uint_0
+         %88 = OpLoad %float %87
+         %89 = OpFSub %float %86 %88
+         %90 = OpFMul %float %85 %89
+         %91 = OpLoad %float %cubeSize
+         %92 = OpFDiv %float %90 %91
+               OpStore %gx %92
+         %94 = OpLoad %float %gx
+         %95 = OpCompositeExtract %float %position 1
+         %96 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_4 %uint_1
+         %97 = OpLoad %float %96
+         %98 = OpFSub %float %95 %97
+         %99 = OpFMul %float %94 %98
+        %100 = OpLoad %float %gridSize
+        %101 = OpFDiv %float %99 %100
+               OpStore %gy %101
+        %103 = OpLoad %float %gridSize
+        %104 = OpCompositeExtract %float %position 2
+        %105 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_4 %uint_2
+        %106 = OpLoad %float %105
+        %107 = OpFSub %float %104 %106
+        %108 = OpFMul %float %103 %107
+        %109 = OpLoad %float %gridSize
+        %110 = OpFDiv %float %108 %109
+               OpStore %gz %110
+        %112 = OpLoad %float %gz
+        %113 = OpLoad %float %gz
+        %114 = OpLoad %float %gz
+        %115 = OpCompositeConstruct %v3float %112 %113 %114
+               OpReturnValue %115
                OpFunctionEnd
-  %toIndex1D = OpFunction %uint None %133
+  %toIndex1D = OpFunction %uint None %116
  %gridSize_0 = OpFunctionParameter %uint
    %voxelPos = OpFunctionParameter %v3float
-        %137 = OpLabel
-     %icoord = OpVariable %_ptr_Function_v3uint Function %141
-        %138 = OpConvertFToU %v3uint %voxelPos
-               OpStore %icoord %138
-        %143 = OpAccessChain %_ptr_Function_uint %icoord %uint_0
-        %144 = OpLoad %uint %143
-        %145 = OpAccessChain %_ptr_Function_uint %icoord %uint_1
-        %146 = OpLoad %uint %145
-        %147 = OpIMul %uint %gridSize_0 %146
-        %148 = OpIAdd %uint %144 %147
-        %149 = OpIMul %uint %gridSize_0 %gridSize_0
-        %150 = OpAccessChain %_ptr_Function_uint %icoord %uint_2
-        %151 = OpLoad %uint %150
-        %152 = OpIMul %uint %149 %151
-        %153 = OpIAdd %uint %148 %152
+        %120 = OpLabel
+     %icoord = OpVariable %_ptr_Function_v3uint Function %124
+        %121 = OpConvertFToU %v3uint %voxelPos
+               OpStore %icoord %121
+        %126 = OpAccessChain %_ptr_Function_uint %icoord %uint_0
+        %127 = OpLoad %uint %126
+        %128 = OpAccessChain %_ptr_Function_uint %icoord %uint_1
+        %129 = OpLoad %uint %128
+        %130 = OpIMul %uint %gridSize_0 %129
+        %131 = OpIAdd %uint %127 %130
+        %132 = OpIMul %uint %gridSize_0 %gridSize_0
+        %133 = OpAccessChain %_ptr_Function_uint %icoord %uint_2
+        %134 = OpLoad %uint %133
+        %135 = OpIMul %uint %132 %134
+        %136 = OpIAdd %uint %131 %135
+               OpReturnValue %136
+               OpFunctionEnd
+   %tint_div = OpFunction %uint None %137
+        %lhs = OpFunctionParameter %uint
+        %rhs = OpFunctionParameter %uint
+        %141 = OpLabel
+        %144 = OpIEqual %bool %rhs %143
+        %142 = OpSelect %uint %144 %uint_1 %rhs
+        %146 = OpUDiv %uint %lhs %142
+               OpReturnValue %146
+               OpFunctionEnd
+   %tint_mod = OpFunction %uint None %137
+      %lhs_0 = OpFunctionParameter %uint
+      %rhs_0 = OpFunctionParameter %uint
+        %150 = OpLabel
+        %152 = OpIEqual %bool %rhs_0 %143
+        %151 = OpSelect %uint %152 %uint_1 %rhs_0
+        %153 = OpUMod %uint %lhs_0 %151
                OpReturnValue %153
                OpFunctionEnd
   %toIndex4D = OpFunction %v3uint None %154
  %gridSize_1 = OpFunctionParameter %uint
       %index = OpFunctionParameter %uint
         %158 = OpLabel
-          %z = OpVariable %_ptr_Function_uint Function %38
-          %y = OpVariable %_ptr_Function_uint Function %38
-          %x = OpVariable %_ptr_Function_uint Function %38
+          %z = OpVariable %_ptr_Function_uint Function %143
+          %y = OpVariable %_ptr_Function_uint Function %143
+          %x = OpVariable %_ptr_Function_uint Function %143
         %160 = OpIMul %uint %index %index
         %159 = OpFunctionCall %uint %tint_div %gridSize_1 %160
                OpStore %z %159
@@ -356,9 +356,9 @@
 %loadPosition = OpFunction %v3float None %174
 %vertexIndex = OpFunctionParameter %uint
         %177 = OpLabel
- %position_0 = OpVariable %_ptr_Function_v3float Function %71
+ %position_0 = OpVariable %_ptr_Function_v3float Function %54
         %179 = OpIMul %uint %uint_3 %vertexIndex
-        %180 = OpIAdd %uint %179 %38
+        %180 = OpIAdd %uint %179 %143
         %182 = OpAccessChain %_ptr_StorageBuffer_float %positions %uint_0 %180
         %183 = OpLoad %float %182
         %184 = OpIMul %uint %uint_3 %vertexIndex
@@ -374,13 +374,13 @@
         %194 = OpLoad %v3float %position_0
                OpReturnValue %194
                OpFunctionEnd
-   %doIgnore = OpFunction %void None %50
+   %doIgnore = OpFunction %void None %32
         %196 = OpLabel
-        %g43 = OpVariable %_ptr_Function_uint Function %38
-        %kj6 = OpVariable %_ptr_Function_uint Function %38
-        %b53 = OpVariable %_ptr_Function_uint Function %38
-        %rwg = OpVariable %_ptr_Function_uint Function %38
-        %rb5 = OpVariable %_ptr_Function_float Function %96
+        %g43 = OpVariable %_ptr_Function_uint Function %143
+        %kj6 = OpVariable %_ptr_Function_uint Function %143
+        %b53 = OpVariable %_ptr_Function_uint Function %143
+        %rwg = OpVariable %_ptr_Function_uint Function %143
+        %rb5 = OpVariable %_ptr_Function_float Function %79
         %g55 = OpVariable %_ptr_Function_int Function %206
         %197 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_0 %uint_0
         %198 = OpLoad %uint %197
@@ -405,17 +405,17 @@
 %main_count_inner = OpFunction %void None %222
 %GlobalInvocationID = OpFunctionParameter %v3uint
         %225 = OpLabel
-%triangleIndex = OpVariable %_ptr_Function_uint Function %38
-         %i0 = OpVariable %_ptr_Function_uint Function %38
-         %i1 = OpVariable %_ptr_Function_uint Function %38
-         %i2 = OpVariable %_ptr_Function_uint Function %38
-         %p0 = OpVariable %_ptr_Function_v3float Function %71
-         %p1 = OpVariable %_ptr_Function_v3float Function %71
-         %p2 = OpVariable %_ptr_Function_v3float Function %71
-        %269 = OpVariable %_ptr_Function_v3float Function %71
-     %center = OpVariable %_ptr_Function_v3float Function %71
- %voxelPos_0 = OpVariable %_ptr_Function_v3float Function %71
-     %lIndex = OpVariable %_ptr_Function_uint Function %38
+%triangleIndex = OpVariable %_ptr_Function_uint Function %143
+         %i0 = OpVariable %_ptr_Function_uint Function %143
+         %i1 = OpVariable %_ptr_Function_uint Function %143
+         %i2 = OpVariable %_ptr_Function_uint Function %143
+         %p0 = OpVariable %_ptr_Function_v3float Function %54
+         %p1 = OpVariable %_ptr_Function_v3float Function %54
+         %p2 = OpVariable %_ptr_Function_v3float Function %54
+        %269 = OpVariable %_ptr_Function_v3float Function %54
+     %center = OpVariable %_ptr_Function_v3float Function %54
+ %voxelPos_0 = OpVariable %_ptr_Function_v3float Function %54
+     %lIndex = OpVariable %_ptr_Function_uint Function %143
 %triangleOffset = OpVariable %_ptr_Function_int Function %206
         %226 = OpCompositeExtract %uint %GlobalInvocationID 0
                OpStore %triangleIndex %226
@@ -431,7 +431,7 @@
         %234 = OpFunctionCall %void %doIgnore
         %235 = OpLoad %uint %triangleIndex
         %236 = OpIMul %uint %uint_3 %235
-        %237 = OpIAdd %uint %236 %38
+        %237 = OpIAdd %uint %236 %143
         %238 = OpAccessChain %_ptr_StorageBuffer_uint %indices %uint_0 %237
         %239 = OpLoad %uint %238
                OpStore %i0 %239
@@ -478,7 +478,7 @@
                OpStore %triangleOffset %280
                OpReturn
                OpFunctionEnd
- %main_count = OpFunction %void None %50
+ %main_count = OpFunction %void None %32
         %287 = OpLabel
         %289 = OpLoad %v3uint %GlobalInvocationID_1
         %288 = OpFunctionCall %void %main_count_inner %289

@@ -14,14 +14,14 @@ struct tint_array {
     T elements[N];
 };
 
-uint tint_mod(uint lhs, uint rhs) {
-  return (lhs % select(rhs, 1u, (rhs == 0u)));
-}
-
 struct Buf {
   /* 0x0000 */ uint count;
   /* 0x0004 */ tint_array<uint, 50> data;
 };
+
+uint tint_mod(uint lhs, uint rhs) {
+  return (lhs % select(rhs, 1u, (rhs == 0u)));
+}
 
 kernel void tint_symbol(device Buf* tint_symbol_2 [[buffer(0)]]) {
   uint i = 0u;

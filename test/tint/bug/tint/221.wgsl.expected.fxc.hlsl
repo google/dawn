@@ -1,8 +1,8 @@
+RWByteAddressBuffer b : register(u0, space0);
+
 uint tint_mod(uint lhs, uint rhs) {
   return (lhs % ((rhs == 0u) ? 1u : rhs));
 }
-
-RWByteAddressBuffer b : register(u0, space0);
 
 [numthreads(1, 1, 1)]
 void main() {

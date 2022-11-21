@@ -14,10 +14,6 @@ struct tint_array {
     T elements[N];
 };
 
-uint tint_div(uint lhs, uint rhs) {
-  return (lhs / select(rhs, 1u, (rhs == 0u)));
-}
-
 struct Uniforms {
   /* 0x0000 */ uint dimAOuter;
   /* 0x0004 */ uint dimInner;
@@ -49,6 +45,10 @@ void mm_write(uint row, uint col, float value, const constant Uniforms* const ti
     uint const index = (col + (row * (*(tint_symbol_8)).dimBOuter));
     (*(tint_symbol_9)).numbers[index] = value;
   }
+}
+
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / select(rhs, 1u, (rhs == 0u)));
 }
 
 void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_index, threadgroup tint_array<tint_array<float, 64>, 64>* const tint_symbol_10, threadgroup tint_array<tint_array<float, 64>, 64>* const tint_symbol_11, const constant Uniforms* const tint_symbol_12, const device Matrix* const tint_symbol_13, const device Matrix* const tint_symbol_14, device Matrix* const tint_symbol_15) {

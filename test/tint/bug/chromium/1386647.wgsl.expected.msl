@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+uint tint_mod(uint lhs, uint rhs) {
+  return (lhs % select(rhs, 1u, (rhs == 0u)));
+}
+
+void f_inner(uint3 v) {
+  uint const tint_symbol = v[0];
+  uint const tint_symbol_1 = tint_mod(v[1], 1u);
+  uint const l = (tint_symbol << (tint_symbol_1 & 31u));
+}
+
+kernel void f(uint3 v [[thread_position_in_grid]]) {
+  f_inner(v);
+  return;
+}
+

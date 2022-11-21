@@ -14,10 +14,6 @@ struct tint_array {
     T elements[N];
 };
 
-int4 tint_div(int4 lhs, int4 rhs) {
-  return (lhs / select(rhs, int4(1), ((rhs == int4(0)) | ((lhs == int4((-2147483647 - 1))) & (rhs == int4(-1))))));
-}
-
 struct UniformBuffer {
   /* 0x0000 */ tint_array<int8_t, 16> tint_pad;
   /* 0x0010 */ float unknownInput_S1_c0;
@@ -26,6 +22,10 @@ struct UniformBuffer {
   /* 0x0030 */ float4 ucolorGreen_S1_c0;
   /* 0x0040 */ float3x3 umatrix_S1;
 };
+
+int4 tint_div(int4 lhs, int4 rhs) {
+  return (lhs / select(rhs, int4(1), ((rhs == int4(0)) | ((lhs == int4((-2147483647 - 1))) & (rhs == int4(-1))))));
+}
 
 bool test_int_S1_c0_b(const constant UniformBuffer* const tint_symbol_6) {
   int unknown = 0;

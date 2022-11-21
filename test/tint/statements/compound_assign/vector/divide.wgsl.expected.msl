@@ -1,13 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
-int4 tint_div(int4 lhs, int4 rhs) {
-  return (lhs / select(rhs, int4(1), ((rhs == int4(0)) | ((lhs == int4((-2147483647 - 1))) & (rhs == int4(-1))))));
-}
-
 struct S {
   /* 0x0000 */ int4 a;
 };
+
+int4 tint_div(int4 lhs, int4 rhs) {
+  return (lhs / select(rhs, int4(1), ((rhs == int4(0)) | ((lhs == int4((-2147483647 - 1))) & (rhs == int4(-1))))));
+}
 
 void foo(device S* const tint_symbol_1) {
   int4 const tint_symbol = tint_div((*(tint_symbol_1)).a, int4(2));

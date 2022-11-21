@@ -1,13 +1,13 @@
-int4 tint_div(int4 lhs, int4 rhs) {
-  return (lhs / (((rhs == (0).xxxx) | ((lhs == (-2147483648).xxxx) & (rhs == (-1).xxxx))) ? (1).xxxx : rhs));
-}
-
 cbuffer cbuffer_x_4 : register(b0, space0) {
   uint4 x_4[7];
 };
 static float4 sk_FragColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 static bool sk_Clockwise = false;
 static float4 vcolor_S0 = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+int4 tint_div(int4 lhs, int4 rhs) {
+  return (lhs / (((rhs == (0).xxxx) | ((lhs == (-2147483648).xxxx) & (rhs == (-1).xxxx))) ? (1).xxxx : rhs));
+}
 
 bool test_int_S1_c0_b() {
   int unknown = 0;

@@ -1,11 +1,3 @@
-uint tint_div(uint lhs, uint rhs) {
-  return (lhs / ((rhs == 0u) ? 1u : rhs));
-}
-
-uint tint_mod(uint lhs, uint rhs) {
-  return (lhs % ((rhs == 0u) ? 1u : rhs));
-}
-
 void marg8uintin() {
 }
 
@@ -33,6 +25,14 @@ float3 toVoxelPos(float3 position) {
 uint toIndex1D(uint gridSize, float3 voxelPos) {
   uint3 icoord = uint3(voxelPos);
   return ((icoord.x + (gridSize * icoord.y)) + ((gridSize * gridSize) * icoord.z));
+}
+
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / ((rhs == 0u) ? 1u : rhs));
+}
+
+uint tint_mod(uint lhs, uint rhs) {
+  return (lhs % ((rhs == 0u) ? 1u : rhs));
 }
 
 uint3 toIndex4D(uint gridSize, uint index) {

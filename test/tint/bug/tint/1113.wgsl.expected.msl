@@ -14,14 +14,6 @@ struct tint_array {
     T elements[N];
 };
 
-uint tint_div(uint lhs, uint rhs) {
-  return (lhs / select(rhs, 1u, (rhs == 0u)));
-}
-
-uint tint_mod(uint lhs, uint rhs) {
-  return (lhs % select(rhs, 1u, (rhs == 0u)));
-}
-
 struct Uniforms {
   /* 0x0000 */ uint numTriangles;
   /* 0x0004 */ uint gridSize;
@@ -83,6 +75,14 @@ float3 toVoxelPos(float3 position, const constant Uniforms* const tint_symbol_1)
 uint toIndex1D(uint gridSize, float3 voxelPos) {
   uint3 icoord = uint3(voxelPos);
   return ((icoord[0] + (gridSize * icoord[1])) + ((gridSize * gridSize) * icoord[2]));
+}
+
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / select(rhs, 1u, (rhs == 0u)));
+}
+
+uint tint_mod(uint lhs, uint rhs) {
+  return (lhs % select(rhs, 1u, (rhs == 0u)));
 }
 
 uint3 toIndex3D(uint gridSize, uint index) {

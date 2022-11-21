@@ -1,9 +1,5 @@
 #version 310 es
 
-uint tint_mod(uint lhs, uint rhs) {
-  return (lhs % ((rhs == 0u) ? 1u : rhs));
-}
-
 struct Buf {
   uint count;
   uint data[50];
@@ -12,6 +8,10 @@ struct Buf {
 layout(binding = 0, std430) buffer b_block_ssbo {
   Buf inner;
 } b;
+
+uint tint_mod(uint lhs, uint rhs) {
+  return (lhs % ((rhs == 0u) ? 1u : rhs));
+}
 
 void tint_symbol() {
   uint i = 0u;

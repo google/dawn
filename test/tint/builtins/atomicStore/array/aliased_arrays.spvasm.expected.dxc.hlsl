@@ -1,3 +1,6 @@
+static uint local_invocation_index_1 = 0u;
+groupshared uint wg[3][2][1];
+
 uint tint_div(uint lhs, uint rhs) {
   return (lhs / ((rhs == 0u) ? 1u : rhs));
 }
@@ -5,9 +8,6 @@ uint tint_div(uint lhs, uint rhs) {
 uint tint_mod(uint lhs, uint rhs) {
   return (lhs % ((rhs == 0u) ? 1u : rhs));
 }
-
-static uint local_invocation_index_1 = 0u;
-groupshared uint wg[3][2][1];
 
 void compute_main_inner(uint local_invocation_index) {
   uint idx = 0u;

@@ -1,9 +1,5 @@
 #version 310 es
 
-uint tint_div(uint lhs, uint rhs) {
-  return (lhs / ((rhs == 0u) ? 1u : rhs));
-}
-
 struct Params {
   uint filterDim;
   uint blockDim;
@@ -28,6 +24,10 @@ layout(binding = 3, std140) uniform flip_block_ubo {
 } flip;
 
 shared vec3 tile[4][256];
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / ((rhs == 0u) ? 1u : rhs));
+}
+
 uniform highp sampler2D inputTex_1;
 uniform highp sampler2D inputTex_samp;
 

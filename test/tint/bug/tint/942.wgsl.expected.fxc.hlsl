@@ -1,7 +1,3 @@
-uint tint_div(uint lhs, uint rhs) {
-  return (lhs / ((rhs == 0u) ? 1u : rhs));
-}
-
 SamplerState samp : register(s0, space0);
 cbuffer cbuffer_params : register(b1, space0) {
   uint4 params[1];
@@ -13,6 +9,10 @@ cbuffer cbuffer_flip : register(b3, space1) {
   uint4 flip[1];
 };
 groupshared float3 tile[4][256];
+
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / ((rhs == 0u) ? 1u : rhs));
+}
 
 struct tint_symbol_1 {
   uint3 LocalInvocationID : SV_GroupThreadID;

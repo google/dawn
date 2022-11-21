@@ -3000,5 +3000,37 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Polyfill combinations
+////////////////////////////////////////////////////////////////////////////////
+
+TEST_F(BuiltinPolyfillTest, BitshiftAndModulo) {
+    auto* src = R"(
+fn f(x : i32, y : u32, z : u32) {
+    let l = x << (y % z);
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : u32, rhs : u32) -> u32 {
+  return (lhs % select(rhs, 1, (rhs == 0)));
+}
+
+fn f(x : i32, y : u32, z : u32) {
+  let l = (x << (tint_mod(y, z) & 31));
+}
+)";
+
+    BuiltinPolyfill::Builtins builtins;
+    builtins.bitshift_modulo = true;
+    builtins.int_div_mod = true;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+
+    auto got = Run<BuiltinPolyfill>(src, std::move(data));
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform

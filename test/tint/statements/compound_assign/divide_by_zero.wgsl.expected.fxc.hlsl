@@ -3,6 +3,9 @@ void unused_entry_point() {
   return;
 }
 
+static int a = 0;
+static float b = 0.0f;
+
 int tint_div(int lhs, int rhs) {
   return (lhs / (((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))) ? 1 : rhs));
 }
@@ -10,9 +13,6 @@ int tint_div(int lhs, int rhs) {
 int tint_mod(int lhs, int rhs) {
   return (lhs % (((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))) ? 1 : rhs));
 }
-
-static int a = 0;
-static float b = 0.0f;
 
 void foo(int maybe_zero) {
   a = tint_div(a, 0);

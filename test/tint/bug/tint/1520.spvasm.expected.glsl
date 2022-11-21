@@ -3,10 +3,6 @@ precision mediump float;
 
 layout(location = 0) in vec4 vcolor_S0_param_1;
 layout(location = 0) out vec4 sk_FragColor_1_1;
-ivec4 tint_div(ivec4 lhs, ivec4 rhs) {
-  return (lhs / mix(rhs, ivec4(1), bvec4(uvec4(equal(rhs, ivec4(0))) | uvec4(bvec4(uvec4(equal(lhs, ivec4(-2147483648))) & uvec4(equal(rhs, ivec4(-1))))))));
-}
-
 struct UniformBuffer {
   uint pad;
   uint pad_1;
@@ -28,6 +24,10 @@ layout(binding = 0, std140) uniform x_4_block_ubo {
 vec4 sk_FragColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 bool sk_Clockwise = false;
 vec4 vcolor_S0 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+ivec4 tint_div(ivec4 lhs, ivec4 rhs) {
+  return (lhs / mix(rhs, ivec4(1), bvec4(uvec4(equal(rhs, ivec4(0))) | uvec4(bvec4(uvec4(equal(lhs, ivec4(-2147483648))) & uvec4(equal(rhs, ivec4(-1))))))));
+}
+
 bool test_int_S1_c0_b() {
   int unknown = 0;
   bool ok = false;

@@ -1,9 +1,5 @@
 #version 310 es
 
-uint tint_div(uint lhs, uint rhs) {
-  return (lhs / ((rhs == 0u) ? 1u : rhs));
-}
-
 struct Uniforms {
   uint dimAOuter;
   uint dimInner;
@@ -64,6 +60,10 @@ void mm_write(uint row, uint col, float value) {
 
 shared float mm_Asub[64][64];
 shared float mm_Bsub[64][64];
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / ((rhs == 0u) ? 1u : rhs));
+}
+
 void tint_symbol(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {
