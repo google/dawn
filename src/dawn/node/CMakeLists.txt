@@ -72,7 +72,7 @@ set_target_properties(dawn_node PROPERTIES
 )
 target_link_libraries(dawn_node dawn_node_binding dawn_node_interop dawn_native dawncpp dawn_proc)
 target_include_directories(dawn_node PRIVATE
-    "${CMAKE_SOURCE_DIR}"
+    "${PROJECT_SOURCE_DIR}"
     "${DAWN_THIRD_PARTY_DIR}"
     "${NODE_API_HEADERS_DIR}/include"
     "${DAWN_NODE_GEN_DIR}"
