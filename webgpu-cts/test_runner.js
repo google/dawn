@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { globalTestConfig } from '../third_party/webgpu-cts/src/common/framework/test_config.js';
+import { dataCache } from '../third_party/webgpu-cts/src/common/framework/data_cache.js';
 import { DefaultTestFileLoader } from '../third_party/webgpu-cts/src/common/internal/file_loader.js';
 import { prettyPrintLog } from '../third_party/webgpu-cts/src/common/internal/logging/log_message.js';
 import { Logger } from '../third_party/webgpu-cts/src/common/internal/logging/logger.js';
@@ -97,6 +98,12 @@ async function runCtsTestViaSocket(event) {
   let input = JSON.parse(event.data);
   runCtsTest(input['q'], input['w']);
 }
+
+dataCache.setStore({
+  load: async (path) => {
+    return await (await fetch(`/third_party/webgpu-cts/cache/data/${path}`)).text();
+  }
+});
 
 // Make a rate-limited version `sendMessageTestHeartbeat` that executes
 // at most once every 500 ms.

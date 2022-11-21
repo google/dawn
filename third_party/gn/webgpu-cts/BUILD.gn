@@ -22,6 +22,7 @@ group("webgpu-cts") {
   public_deps = [
     ":compile_src",
     ":copy_resources",
+    ":gen_cache",
     ":verify_gen_ts_dep_list",
   ]
   data = [ "test_list.txt" ]
@@ -103,4 +104,24 @@ action("verify_gen_ts_dep_list") {
     "--stamp",
     rebase_path(outputs[0], root_build_dir),
   ]
+}
+
+action("gen_cache") {
+  script = "${dawn_root}/webgpu-cts/scripts/gen_cache.py"
+
+  deps = [ ":compile_src" ]
+  _gen_cache_js =
+      "$target_gen_dir/../../webgpu-cts/src-node/common/tools/gen_cache.js"
+  inputs = get_target_outputs(":compile_src") + [ _gen_cache_js ]
+  args = [
+    rebase_path(_gen_cache_js, root_build_dir),
+    rebase_path("$target_gen_dir/../../webgpu-cts/cache", root_build_dir),
+  ]
+
+  _outputs = read_file("cache_list.txt", "list lines")
+  outputs = []
+  foreach(file, _outputs) {
+    outputs += [ "$target_gen_dir/../../webgpu-cts/cache/$file" ]
+  }
+  data = outputs
 }
