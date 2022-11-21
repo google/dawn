@@ -409,6 +409,43 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SingleEntryPointTest, OverridableConstants_UnusedAliasForOverrideSizedArray) {
+    // Make sure we strip away aliases that reference unused overridable constants.
+    auto* src = R"(
+@id(0) override c0 : u32;
+
+// This is all unused by the target entry point.
+@id(1) override c1 : u32;
+type arr_ty = array<i32, c1>;
+var<workgroup> arr : arr_ty;
+
+@compute @workgroup_size(64)
+fn unused() {
+  arr[0] = 42;
+}
+
+@compute @workgroup_size(64)
+fn main() {
+  let local_d = c0;
+}
+)";
+
+    auto* expect = R"(
+@id(0) override c0 : u32;
+
+@compute @workgroup_size(64)
+fn main() {
+  let local_d = c0;
+}
+)";
+
+    SingleEntryPoint::Config cfg("main");
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(SingleEntryPointTest, CalledFunctions) {
     auto* src = R"(
 fn inner1() {

@@ -61,12 +61,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
     }
 
     auto& sem = src->Sem();
-
-    // Build set of referenced module-scope variables for faster lookups later.
-    std::unordered_set<const ast::Variable*> referenced_vars;
-    for (auto* var : sem.Get(entry_point)->TransitivelyReferencedGlobals()) {
-        referenced_vars.emplace(var->Declaration());
-    }
+    auto& referenced_vars = sem.Get(entry_point)->TransitivelyReferencedGlobals();
 
     // Clone any module-scope variables, types, and functions that are statically referenced by the
     // target entry point.
@@ -74,11 +69,20 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
         Switch(
             decl,  //
             [&](const ast::TypeDecl* ty) {
-                // TODO(jrprice): Strip unused types.
+                // Strip aliases that reference unused override declarations.
+                if (auto* arr = sem.Get(ty)->As<sem::Array>()) {
+                    for (auto* o : arr->TransitivelyReferencedOverrides()) {
+                        if (!referenced_vars.Contains(o)) {
+                            return;
+                        }
+                    }
+                }
+
+                // TODO(jrprice): Strip other unused types.
                 b.AST().AddTypeDecl(ctx.Clone(ty));
             },
             [&](const ast::Override* override) {
-                if (referenced_vars.count(override)) {
+                if (referenced_vars.Contains(sem.Get(override))) {
                     if (!ast::HasAttribute<ast::IdAttribute>(override->attributes)) {
                         // If the override doesn't already have an @id() attribute, add one
                         // so that its allocated ID so that it won't be affected by other
@@ -91,7 +95,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
                 }
             },
             [&](const ast::Var* var) {
-                if (referenced_vars.count(var)) {
+                if (referenced_vars.Contains(sem.Get<sem::GlobalVariable>(var))) {
                     b.AST().AddGlobalVariable(ctx.Clone(var));
                 }
             },
