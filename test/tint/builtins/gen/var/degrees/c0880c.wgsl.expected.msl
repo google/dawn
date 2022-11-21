@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void degrees_c0880c() {
+  float3 res = float3(57.295780182f);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  degrees_c0880c();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  degrees_c0880c();
+  return;
+}
+
+kernel void compute_main() {
+  degrees_c0880c();
+  return;
+}
+

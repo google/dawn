@@ -12174,24 +12174,24 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 0,
-    /* template types */ &kTemplateTypes[26],
+    /* template types */ &kTemplateTypes[23],
     /* template numbers */ &kTemplateNumbers[10],
     /* parameters */ &kParameters[835],
     /* return matcher indices */ &kMatcherIndices[3],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::degrees,
   },
   {
     /* [322] */
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 1,
-    /* template types */ &kTemplateTypes[26],
+    /* template types */ &kTemplateTypes[23],
     /* template numbers */ &kTemplateNumbers[4],
     /* parameters */ &kParameters[836],
     /* return matcher indices */ &kMatcherIndices[30],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::degrees,
   },
   {
     /* [323] */
@@ -12918,24 +12918,24 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 0,
-    /* template types */ &kTemplateTypes[26],
+    /* template types */ &kTemplateTypes[23],
     /* template numbers */ &kTemplateNumbers[10],
     /* parameters */ &kParameters[888],
     /* return matcher indices */ &kMatcherIndices[3],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::radians,
   },
   {
     /* [384] */
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 1,
-    /* template types */ &kTemplateTypes[26],
+    /* template types */ &kTemplateTypes[23],
     /* template numbers */ &kTemplateNumbers[4],
     /* parameters */ &kParameters[889],
     /* return matcher indices */ &kMatcherIndices[30],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::radians,
   },
   {
     /* [385] */
@@ -14117,8 +14117,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [19] */
-    /* fn degrees<T : f32_f16>(T) -> T */
-    /* fn degrees<N : num, T : f32_f16>(vec<N, T>) -> vec<N, T> */
+    /* fn degrees<T : fa_f32_f16>(T) -> T */
+    /* fn degrees<N : num, T : fa_f32_f16>(vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[321],
   },
@@ -14408,8 +14408,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [62] */
-    /* fn radians<T : f32_f16>(T) -> T */
-    /* fn radians<N : num, T : f32_f16>(vec<N, T>) -> vec<N, T> */
+    /* fn radians<T : fa_f32_f16>(T) -> T */
+    /* fn radians<N : num, T : fa_f32_f16>(vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[383],
   },

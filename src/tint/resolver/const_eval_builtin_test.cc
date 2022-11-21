@@ -994,6 +994,57 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               InsertBitsCases<u32>()))));
 
 template <typename T>
+std::vector<Case> DegreesAFloatCases() {
+    return std::vector<Case>{
+        C({T(0)}, T(0)),                             //
+        C({-T(0)}, -T(0)),                           //
+        C({T(0.698132)}, T(40)).FloatComp(),         //
+        C({-T(1.5708)}, -T(90.000214)).FloatComp(),  //
+        C({T(1.5708)}, T(90.000214)).FloatComp(),    //
+        C({T(6.28319)}, T(360.00027)).FloatComp(),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    DegreesAFloat,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kDegrees),
+                     testing::ValuesIn(DegreesAFloatCases<AFloat>())));
+
+template <typename T>
+std::vector<Case> DegreesF32Cases() {
+    return std::vector<Case>{
+        C({T(0)}, T(0)),                             //
+        C({-T(0)}, -T(0)),                           //
+        C({T(0.698132)}, T(40)).FloatComp(),         //
+        C({-T(1.5708)}, -T(90.000206)).FloatComp(),  //
+        C({T(1.5708)}, T(90.000206)).FloatComp(),    //
+        C({T(6.28319)}, T(360.00024)).FloatComp(),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    DegreesF32,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kDegrees),
+                     testing::ValuesIn(DegreesF32Cases<f32>())));
+
+template <typename T>
+std::vector<Case> DegreesF16Cases() {
+    return std::vector<Case>{
+        C({T(0)}, T(0)),                            //
+        C({-T(0)}, -T(0)),                          //
+        C({T(0.698132)}, T(39.96875)).FloatComp(),  //
+        C({-T(1.5708)}, -T(89.9375)).FloatComp(),   //
+        C({T(1.5708)}, T(89.9375)).FloatComp(),     //
+        C({T(6.28319)}, T(359.75)).FloatComp(),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    DegreesF16,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kDegrees),
+                     testing::ValuesIn(DegreesF16Cases<f16>())));
+
+template <typename T>
 std::vector<Case> ExtractBitsCases() {
     using UT = Number<std::make_unsigned_t<UnwrapNumber<T>>>;
 
@@ -1274,6 +1325,41 @@ INSTANTIATE_TEST_SUITE_P(  //
     testing::Combine(testing::Values(sem::BuiltinType::kReverseBits),
                      testing::ValuesIn(Concat(ReverseBitsCases<i32>(),  //
                                               ReverseBitsCases<u32>()))));
+
+template <typename T>
+std::vector<Case> RadiansCases() {
+    return std::vector<Case>{
+        C({T(0)}, T(0)),                         //
+        C({-T(0)}, -T(0)),                       //
+        C({T(40)}, T(0.69813168)).FloatComp(),   //
+        C({-T(90)}, -T(1.5707964)).FloatComp(),  //
+        C({T(90)}, T(1.5707964)).FloatComp(),    //
+        C({T(360)}, T(6.2831855)).FloatComp(),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Radians,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kRadians),
+                     testing::ValuesIn(Concat(RadiansCases<AFloat>(),  //
+                                              RadiansCases<f32>()))));
+
+template <typename T>
+std::vector<Case> RadiansF16Cases() {
+    return std::vector<Case>{
+        C({T(0)}, T(0)),                         //
+        C({-T(0)}, -T(0)),                       //
+        C({T(40)}, T(0.69726562)).FloatComp(),   //
+        C({-T(90)}, -T(1.5693359)).FloatComp(),  //
+        C({T(90)}, T(1.5693359)).FloatComp(),    //
+        C({T(360)}, T(6.2773438)).FloatComp(),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    RadiansF16,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kRadians),
+                     testing::ValuesIn(RadiansF16Cases<f16>())));
 
 template <typename T>
 std::vector<Case> RoundCases() {

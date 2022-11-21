@@ -1,9 +1,5 @@
-float16_t tint_degrees(float16_t param_0) {
-  return param_0 * 57.295779513082322865;
-}
-
 void degrees_5e9805() {
-  float16_t res = tint_degrees(float16_t(1.0h));
+  float16_t res = float16_t(57.3125h);
 }
 
 struct tint_symbol {

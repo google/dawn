@@ -1,12 +1,7 @@
 #version 310 es
 
-float tint_degrees(float param_0) {
-  return param_0 * 57.295779513082322865f;
-}
-
-
 void degrees_51f705() {
-  float res = tint_degrees(1.0f);
+  float res = 57.295776367f;
 }
 
 vec4 vertex_main() {
@@ -25,13 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-float tint_degrees(float param_0) {
-  return param_0 * 57.295779513082322865f;
-}
-
-
 void degrees_51f705() {
-  float res = tint_degrees(1.0f);
+  float res = 57.295776367f;
 }
 
 void fragment_main() {
@@ -44,13 +34,8 @@ void main() {
 }
 #version 310 es
 
-float tint_degrees(float param_0) {
-  return param_0 * 57.295779513082322865f;
-}
-
-
 void degrees_51f705() {
-  float res = tint_degrees(1.0f);
+  float res = 57.295776367f;
 }
 
 void compute_main() {

@@ -1954,6 +1954,32 @@ ConstEval::Result ConstEval::cross(const sem::Type* ty,
                            utils::Vector<const sem::Constant*, 3>{x.Get(), y.Get(), z.Get()});
 }
 
+ConstEval::Result ConstEval::degrees(const sem::Type* ty,
+                                     utils::VectorRef<const sem::Constant*> args,
+                                     const Source& source) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto e) -> ImplResult {
+            using NumberT = decltype(e);
+            using T = UnwrapNumber<NumberT>;
+
+            auto pi = kPi<T>;
+            auto scale = Div(source, NumberT(180), NumberT(pi));
+            if (!scale) {
+                AddNote("when calculating degrees", source);
+                return utils::Failure;
+            }
+            auto result = Mul(source, e, scale.Get());
+            if (!result) {
+                AddNote("when calculating degrees", source);
+                return utils::Failure;
+            }
+            return CreateElement(builder, source, c0->Type(), result.Get());
+        };
+        return Dispatch_fa_f32_f16(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
 ConstEval::Result ConstEval::extractBits(const sem::Type* ty,
                                          utils::VectorRef<const sem::Constant*> args,
                                          const Source& source) {
@@ -2265,6 +2291,32 @@ ConstEval::Result ConstEval::pack4x8unorm(const sem::Type* ty,
     uint32_t mask = 0x0000'00ff;
     u32 ret = u32((e0 & mask) | ((e1 & mask) << 8) | ((e2 & mask) << 16) | ((e3 & mask) << 24));
     return CreateElement(builder, source, ty, ret);
+}
+
+ConstEval::Result ConstEval::radians(const sem::Type* ty,
+                                     utils::VectorRef<const sem::Constant*> args,
+                                     const Source& source) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto e) -> ImplResult {
+            using NumberT = decltype(e);
+            using T = UnwrapNumber<NumberT>;
+
+            auto pi = kPi<T>;
+            auto scale = Div(source, NumberT(pi), NumberT(180));
+            if (!scale) {
+                AddNote("when calculating radians", source);
+                return utils::Failure;
+            }
+            auto result = Mul(source, e, scale.Get());
+            if (!result) {
+                AddNote("when calculating radians", source);
+                return utils::Failure;
+            }
+            return CreateElement(builder, source, c0->Type(), result.Get());
+        };
+        return Dispatch_fa_f32_f16(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
 }
 
 ConstEval::Result ConstEval::reverseBits(const sem::Type* ty,

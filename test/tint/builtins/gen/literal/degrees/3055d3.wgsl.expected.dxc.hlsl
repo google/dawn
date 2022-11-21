@@ -1,9 +1,5 @@
-vector<float16_t, 4> tint_degrees(vector<float16_t, 4> param_0) {
-  return param_0 * 57.295779513082322865;
-}
-
 void degrees_3055d3() {
-  vector<float16_t, 4> res = tint_degrees((float16_t(1.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(57.3125h)).xxxx;
 }
 
 struct tint_symbol {

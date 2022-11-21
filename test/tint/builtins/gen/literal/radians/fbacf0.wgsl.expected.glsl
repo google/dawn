@@ -1,13 +1,8 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-f16vec2 tint_radians(f16vec2 param_0) {
-  return param_0 * 0.017453292519943295474hf;
-}
-
-
 void radians_fbacf0() {
-  f16vec2 res = tint_radians(f16vec2(1.0hf));
+  f16vec2 res = f16vec2(0.017440796hf);
 }
 
 vec4 vertex_main() {
@@ -27,13 +22,8 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 precision mediump float;
 
-f16vec2 tint_radians(f16vec2 param_0) {
-  return param_0 * 0.017453292519943295474hf;
-}
-
-
 void radians_fbacf0() {
-  f16vec2 res = tint_radians(f16vec2(1.0hf));
+  f16vec2 res = f16vec2(0.017440796hf);
 }
 
 void fragment_main() {
@@ -47,13 +37,8 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-f16vec2 tint_radians(f16vec2 param_0) {
-  return param_0 * 0.017453292519943295474hf;
-}
-
-
 void radians_fbacf0() {
-  f16vec2 res = tint_radians(f16vec2(1.0hf));
+  f16vec2 res = f16vec2(0.017440796hf);
 }
 
 void compute_main() {

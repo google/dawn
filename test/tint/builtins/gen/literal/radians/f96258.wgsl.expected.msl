@@ -1,13 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-
-float3 tint_radians(float3 param_0) {
-  return param_0 * 0.017453292519943295474;
-}
-
 void radians_f96258() {
-  float3 res = tint_radians(float3(1.0f));
+  float3 res = float3(0.017453292f);
 }
 
 struct tint_symbol {

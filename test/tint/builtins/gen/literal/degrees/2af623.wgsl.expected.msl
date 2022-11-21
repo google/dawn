@@ -1,13 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-
-float3 tint_degrees(float3 param_0) {
-  return param_0 * 57.295779513082322865;
-}
-
 void degrees_2af623() {
-  float3 res = tint_degrees(float3(1.0f));
+  float3 res = float3(57.295776367f);
 }
 
 struct tint_symbol {

@@ -440,8 +440,8 @@ fn arrayLength<T, A: access>(ptr<storage, array<T>, A>) -> u32
 @const fn countTrailingZeros<T: iu32>(T) -> T
 @const fn countTrailingZeros<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 @const fn cross<T: fa_f32_f16>(vec3<T>, vec3<T>) -> vec3<T>
-fn degrees<T: f32_f16>(T) -> T
-fn degrees<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn degrees<T: fa_f32_f16>(T) -> T
+@const fn degrees<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 fn determinant<N: num, T: f32_f16>(mat<N, N, T>) -> T
 fn distance<T: f32_f16>(T, T) -> T
 fn distance<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> T
@@ -516,8 +516,8 @@ fn pow<T: f32_f16>(T, T) -> T
 fn pow<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
 @const fn quantizeToF16(f32) -> f32
 @const fn quantizeToF16<N: num>(vec<N, f32>) -> vec<N, f32>
-fn radians<T: f32_f16>(T) -> T
-fn radians<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn radians<T: fa_f32_f16>(T) -> T
+@const fn radians<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 fn reflect<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
 fn refract<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, T) -> vec<N, T>
 @const fn reverseBits<T: iu32>(T) -> T

@@ -1,12 +1,7 @@
 #version 310 es
 
-vec3 tint_degrees(vec3 param_0) {
-  return param_0 * 57.295779513082322865f;
-}
-
-
 void degrees_2af623() {
-  vec3 res = tint_degrees(vec3(1.0f));
+  vec3 res = vec3(57.295776367f);
 }
 
 vec4 vertex_main() {
@@ -25,13 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-vec3 tint_degrees(vec3 param_0) {
-  return param_0 * 57.295779513082322865f;
-}
-
-
 void degrees_2af623() {
-  vec3 res = tint_degrees(vec3(1.0f));
+  vec3 res = vec3(57.295776367f);
 }
 
 void fragment_main() {
@@ -44,13 +34,8 @@ void main() {
 }
 #version 310 es
 
-vec3 tint_degrees(vec3 param_0) {
-  return param_0 * 57.295779513082322865f;
-}
-
-
 void degrees_2af623() {
-  vec3 res = tint_degrees(vec3(1.0f));
+  vec3 res = vec3(57.295776367f);
 }
 
 void compute_main() {

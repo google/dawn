@@ -1,12 +1,7 @@
 #version 310 es
 
-float tint_radians(float param_0) {
-  return param_0 * 0.017453292519943295474f;
-}
-
-
 void radians_6b0ff2() {
-  float res = tint_radians(1.0f);
+  float res = 0.017453292f;
 }
 
 vec4 vertex_main() {
@@ -25,13 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-float tint_radians(float param_0) {
-  return param_0 * 0.017453292519943295474f;
-}
-
-
 void radians_6b0ff2() {
-  float res = tint_radians(1.0f);
+  float res = 0.017453292f;
 }
 
 void fragment_main() {
@@ -44,13 +34,8 @@ void main() {
 }
 #version 310 es
 
-float tint_radians(float param_0) {
-  return param_0 * 0.017453292519943295474f;
-}
-
-
 void radians_6b0ff2() {
-  float res = tint_radians(1.0f);
+  float res = 0.017453292f;
 }
 
 void compute_main() {

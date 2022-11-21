@@ -1,13 +1,8 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-float16_t tint_degrees(float16_t param_0) {
-  return param_0 * 57.295779513082322865hf;
-}
-
-
 void degrees_5e9805() {
-  float16_t res = tint_degrees(1.0hf);
+  float16_t res = 57.3125hf;
 }
 
 vec4 vertex_main() {
@@ -27,13 +22,8 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 precision mediump float;
 
-float16_t tint_degrees(float16_t param_0) {
-  return param_0 * 57.295779513082322865hf;
-}
-
-
 void degrees_5e9805() {
-  float16_t res = tint_degrees(1.0hf);
+  float16_t res = 57.3125hf;
 }
 
 void fragment_main() {
@@ -47,13 +37,8 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-float16_t tint_degrees(float16_t param_0) {
-  return param_0 * 57.295779513082322865hf;
-}
-
-
 void degrees_5e9805() {
-  float16_t res = tint_degrees(1.0hf);
+  float16_t res = 57.3125hf;
 }
 
 void compute_main() {

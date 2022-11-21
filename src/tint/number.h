@@ -274,6 +274,9 @@ using f32 = Number<float>;
 /// However since C++ don't have native binary16 type, the value is stored as float.
 using f16 = Number<detail::NumberKindF16>;
 
+template <typename T, traits::EnableIf<IsFloatingPoint<T>>* = nullptr>
+inline const auto kPi = T(UnwrapNumber<T>(3.14159265358979323846));
+
 /// True iff T is an abstract number type
 template <typename T>
 constexpr bool IsAbstract = std::is_same_v<T, AInt> || std::is_same_v<T, AFloat>;

@@ -1,13 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-
-half3 tint_degrees(half3 param_0) {
-  return param_0 * 57.295779513082322865;
-}
-
 void degrees_dfe8f4() {
-  half3 res = tint_degrees(half3(1.0h));
+  half3 res = half3(57.3125h);
 }
 
 struct tint_symbol {

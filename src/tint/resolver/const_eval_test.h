@@ -27,9 +27,6 @@
 namespace tint::resolver {
 
 template <typename T>
-inline const auto kPi = T(UnwrapNumber<T>(3.14159265358979323846));
-
-template <typename T>
 inline const auto kPiOver2 = T(UnwrapNumber<T>(1.57079632679489661923));
 
 template <typename T>

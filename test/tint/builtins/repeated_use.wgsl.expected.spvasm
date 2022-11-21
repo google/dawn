@@ -4,7 +4,7 @@
 ; Bound: 35
 ; Schema: 0
                OpCapability Shader
-          %8 = OpExtInstImport "GLSL.std.450"
+          %9 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -13,34 +13,34 @@
           %1 = OpTypeFunction %void
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
-          %9 = OpConstantNull %v4float
+          %7 = OpConstantNull %v4float
     %float_1 = OpConstant %float 1
-         %12 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+         %11 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
     %float_2 = OpConstant %float 2
     %float_3 = OpConstant %float 3
     %float_4 = OpConstant %float 4
-         %17 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+         %16 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
     %v3float = OpTypeVector %float 3
-         %20 = OpConstantNull %v3float
-         %22 = OpConstantComposite %v3float %float_1 %float_1 %float_1
-         %24 = OpConstantComposite %v3float %float_1 %float_2 %float_3
+         %19 = OpConstantNull %v3float
+         %21 = OpConstantComposite %v3float %float_1 %float_1 %float_1
+         %23 = OpConstantComposite %v3float %float_1 %float_2 %float_3
     %v2float = OpTypeVector %float 2
-         %27 = OpConstantNull %v2float
-         %29 = OpConstantComposite %v2float %float_1 %float_1
-         %31 = OpConstantComposite %v2float %float_1 %float_2
+         %26 = OpConstantNull %v2float
+         %28 = OpConstantComposite %v2float %float_1 %float_1
+         %30 = OpConstantComposite %v2float %float_1 %float_2
        %main = OpFunction %void None %1
           %4 = OpLabel
-          %5 = OpExtInst %v4float %8 Degrees %9
-         %10 = OpExtInst %v4float %8 Degrees %12
-         %13 = OpExtInst %v4float %8 Degrees %17
-         %18 = OpExtInst %v3float %8 Degrees %20
-         %21 = OpExtInst %v3float %8 Degrees %22
-         %23 = OpExtInst %v3float %8 Degrees %24
-         %25 = OpExtInst %v2float %8 Degrees %27
-         %28 = OpExtInst %v2float %8 Degrees %29
-         %30 = OpExtInst %v2float %8 Degrees %31
-         %32 = OpExtInst %float %8 Degrees %float_1
-         %33 = OpExtInst %float %8 Degrees %float_2
-         %34 = OpExtInst %float %8 Degrees %float_3
+          %8 = OpExtInst %v4float %9 Degrees %7
+         %12 = OpExtInst %v4float %9 Degrees %11
+         %17 = OpExtInst %v4float %9 Degrees %16
+         %20 = OpExtInst %v3float %9 Degrees %19
+         %22 = OpExtInst %v3float %9 Degrees %21
+         %24 = OpExtInst %v3float %9 Degrees %23
+         %27 = OpExtInst %v2float %9 Degrees %26
+         %29 = OpExtInst %v2float %9 Degrees %28
+         %31 = OpExtInst %v2float %9 Degrees %30
+         %32 = OpExtInst %float %9 Degrees %float_1
+         %33 = OpExtInst %float %9 Degrees %float_2
+         %34 = OpExtInst %float %9 Degrees %float_3
                OpReturn
                OpFunctionEnd

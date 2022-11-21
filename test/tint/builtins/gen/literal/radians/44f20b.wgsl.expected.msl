@@ -1,13 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-
-half4 tint_radians(half4 param_0) {
-  return param_0 * 0.017453292519943295474;
-}
-
 void radians_44f20b() {
-  half4 res = tint_radians(half4(1.0h));
+  half4 res = half4(0.017440796h);
 }
 
 struct tint_symbol {
