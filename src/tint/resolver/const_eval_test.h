@@ -62,6 +62,81 @@ inline builder::ScalarArgs ScalarArgsFrom(const sem::Constant* c) {
 }
 
 template <typename T>
+inline auto Abs(const Number<T>& v) {
+    if constexpr (std::is_integral_v<T> && std::is_unsigned_v<T>) {
+        return v;
+    } else {
+        return Number<T>(std::abs(v));
+    }
+}
+
+/// Flags that can be passed to CheckConstant()
+struct CheckConstantFlags {
+    /// Expected value may be positive or negative
+    bool pos_or_neg = false;
+    /// Expected value should be compared using FLOAT_EQ instead of EQ
+    bool float_compare = false;
+};
+
+/// CheckConstant checks that @p got_constant, the result value of
+/// constant-evaluation is equal to @p expected_value.
+/// @param got_constant the constant value evaluated by the resolver
+/// @param expected_value the expected value for the test
+/// @param flags optional flags for controlling the comparisons
+inline void CheckConstant(const sem::Constant* got_constant,
+                          const builder::ValueBase* expected_value,
+                          CheckConstantFlags flags = {}) {
+    auto values_flat = ScalarArgsFrom(got_constant);
+    auto expected_values_flat = expected_value->Args();
+    ASSERT_EQ(values_flat.values.Length(), expected_values_flat.values.Length());
+    for (size_t i = 0; i < values_flat.values.Length(); ++i) {
+        auto& got_scalar = values_flat.values[i];
+        auto& expected_scalar = expected_values_flat.values[i];
+        std::visit(
+            [&](auto&& expected) {
+                using T = std::decay_t<decltype(expected)>;
+
+                ASSERT_TRUE(std::holds_alternative<T>(got_scalar));
+                auto got = std::get<T>(got_scalar);
+
+                if constexpr (std::is_same_v<bool, T>) {
+                    EXPECT_EQ(got, expected);
+                } else if constexpr (IsFloatingPoint<T>) {
+                    if (std::isnan(expected)) {
+                        EXPECT_TRUE(std::isnan(got));
+                    } else {
+                        if (flags.pos_or_neg) {
+                            auto got_abs = Abs(got);
+                            if (flags.float_compare) {
+                                EXPECT_FLOAT_EQ(got_abs, expected);
+                            } else {
+                                EXPECT_EQ(got_abs, expected);
+                            }
+                        } else {
+                            if (flags.float_compare) {
+                                EXPECT_FLOAT_EQ(got, expected);
+                            } else {
+                                EXPECT_EQ(got, expected);
+                            }
+                        }
+                    }
+                } else {
+                    if (flags.pos_or_neg) {
+                        auto got_abs = Abs(got);
+                        EXPECT_EQ(got_abs, expected);
+                    } else {
+                        EXPECT_EQ(got, expected);
+                    }
+                    // Check that the constant's integer doesn't contain unexpected
+                    // data in the MSBs that are outside of the bit-width of T.
+                    EXPECT_EQ(AInt(got), AInt(expected));
+                }
+            },
+            expected_scalar);
+    }
+}
+
+template <typename T>
 inline constexpr auto Negate(const Number<T>& v) {
     if constexpr (std::is_integral_v<T>) {
         if constexpr (std::is_signed_v<T>) {
@@ -82,15 +157,6 @@ inline constexpr auto Negate(const Number<T>& v) {
     } else {
         // float case
         return -v;
-    }
-}
-
-template <typename T>
-inline auto Abs(const Number<T>& v) {
-    if constexpr (std::is_integral_v<T> && std::is_unsigned_v<T>) {
-        return v;
-    } else {
-        return Number<T>(std::abs(v));
     }
 }
 

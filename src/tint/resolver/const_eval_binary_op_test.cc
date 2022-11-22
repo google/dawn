@@ -106,19 +106,7 @@ TEST_P(ResolverConstEvalBinaryOpTest, Test) {
         ASSERT_NE(value, nullptr);
         EXPECT_TYPE(value->Type(), sem->Type());
 
-        auto values_flat = ScalarArgsFrom(value);
-        auto expected_values_flat = expected->Args();
-        ASSERT_EQ(values_flat.values.Length(), expected_values_flat.values.Length());
-        for (size_t i = 0; i < values_flat.values.Length(); ++i) {
-            auto& a = values_flat.values[i];
-            auto& b = expected_values_flat.values[i];
-            EXPECT_EQ(a, b);
-            if (expected->IsIntegral()) {
-                // Check that the constant's integer doesn't contain unexpected
-                // data in the MSBs that are outside of the bit-width of T.
-                EXPECT_EQ(builder::As<AInt>(a), builder::As<AInt>(b));
-            }
-        }
+        CheckConstant(value, expected);
     } else {
         ASSERT_FALSE(r()->Resolve());
         EXPECT_EQ(r()->error(), c.expected.Failure().error);
