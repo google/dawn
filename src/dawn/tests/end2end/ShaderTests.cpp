@@ -318,6 +318,237 @@ fn fragmentMain(input : VertexOut) -> @location(0) vec4<f32> {
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
+// Tests that sparse input output locations should work properly.
+// This test is not in dawn_unittests/RenderPipelineValidationTests because we want to test the
+// compilation of the pipeline in D3D12 backend.
+TEST_P(ShaderTests, WGSLInterstageVariablesSparse) {
+    std::string shader = R"(
+struct ShaderIO {
+    @builtin(position) position : vec4<f32>,
+    @location(1) attribute1 : vec4<f32>,
+    @location(3) attribute3 : vec4<f32>,
+}
+
+@vertex
+fn vertexMain() -> ShaderIO {
+    var output : ShaderIO;
+    output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.attribute1 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.attribute3 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    return output;
+}
+
+@fragment
+fn fragmentMain(input : ShaderIO) -> @location(0) vec4<f32> {
+    return input.attribute1;
+})";
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
+
+    utils::ComboRenderPipelineDescriptor rpDesc;
+    rpDesc.vertex.module = shaderModule;
+    rpDesc.vertex.entryPoint = "vertexMain";
+    rpDesc.cFragment.module = shaderModule;
+    rpDesc.cFragment.entryPoint = "fragmentMain";
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
+}
+
+// Tests that interstage built-in inputs and outputs usage mismatch don't mess up with input-output
+// locations.
+// This test is not in dawn_unittests/RenderPipelineValidationTests because we want to test the
+// compilation of the pipeline in D3D12 backend.
+TEST_P(ShaderTests, WGSLInterstageVariablesBuiltinsMismatched) {
+    std::string shader = R"(
+struct VertexOut {
+    @builtin(position) position : vec4<f32>,
+    @location(1) attribute1 : f32,
+    @location(3) attribute3 : vec4<f32>,
+}
+
+struct FragmentIn {
+    @location(3) attribute3 : vec4<f32>,
+    @builtin(front_facing) front_facing : bool,
+    @location(1) attribute1 : f32,
+    @builtin(position) position : vec4<f32>,
+}
+
+@vertex
+fn vertexMain() -> VertexOut {
+    var output : VertexOut;
+    output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.attribute1 = 1.0;
+    output.attribute3 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    return output;
+}
+
+@fragment
+fn fragmentMain(input : FragmentIn) -> @location(0) vec4<f32> {
+    _ = input.front_facing;
+    _ = input.position.x;
+    return input.attribute3;
+})";
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
+
+    utils::ComboRenderPipelineDescriptor rpDesc;
+    rpDesc.vertex.module = shaderModule;
+    rpDesc.vertex.entryPoint = "vertexMain";
+    rpDesc.cFragment.module = shaderModule;
+    rpDesc.cFragment.entryPoint = "fragmentMain";
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
+}
+
+// Tests that interstage inputs could be a prefix subset of the outputs.
+// This test is not in dawn_unittests/RenderPipelineValidationTests because we want to test the
+// compilation of the pipeline in D3D12 backend.
+TEST_P(ShaderTests, WGSLInterstageVariablesPrefixSubset) {
+    std::string shader = R"(
+struct VertexOut {
+    @builtin(position) position : vec4<f32>,
+    @location(1) attribute1 : f32,
+    @location(3) attribute3 : vec4<f32>,
+}
+
+struct FragmentIn {
+    @location(1) attribute1 : f32,
+    @builtin(position) position : vec4<f32>,
+}
+
+@vertex
+fn vertexMain() -> VertexOut {
+    var output : VertexOut;
+    output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.attribute1 = 1.0;
+    output.attribute3 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    return output;
+}
+
+@fragment
+fn fragmentMain(input : FragmentIn) -> @location(0) vec4<f32> {
+    _ = input.position.x;
+    return vec4<f32>(input.attribute1, 0.0, 0.0, 1.0);
+})";
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
+
+    utils::ComboRenderPipelineDescriptor rpDesc;
+    rpDesc.vertex.module = shaderModule;
+    rpDesc.vertex.entryPoint = "vertexMain";
+    rpDesc.cFragment.module = shaderModule;
+    rpDesc.cFragment.entryPoint = "fragmentMain";
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
+}
+
+// Tests that interstage inputs could be a sparse non-prefix subset of the outputs.
+// This test is not in dawn_unittests/RenderPipelineValidationTests because we want to test the
+// compilation of the pipeline in D3D12 backend.
+TEST_P(ShaderTests, WGSLInterstageVariablesSparseSubset) {
+    std::string shader = R"(
+struct VertexOut {
+    @builtin(position) position : vec4<f32>,
+    @location(1) attribute1 : f32,
+    @location(3) attribute3 : vec4<f32>,
+}
+
+struct FragmentIn {
+    @location(3) attribute3 : vec4<f32>,
+    @builtin(position) position : vec4<f32>,
+}
+
+@vertex
+fn vertexMain() -> VertexOut {
+    var output : VertexOut;
+    output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.attribute1 = 1.0;
+    output.attribute3 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    return output;
+}
+
+@fragment
+fn fragmentMain(input : FragmentIn) -> @location(0) vec4<f32> {
+    _ = input.position.x;
+    return input.attribute3;
+})";
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
+
+    utils::ComboRenderPipelineDescriptor rpDesc;
+    rpDesc.vertex.module = shaderModule;
+    rpDesc.vertex.entryPoint = "vertexMain";
+    rpDesc.cFragment.module = shaderModule;
+    rpDesc.cFragment.entryPoint = "fragmentMain";
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
+}
+
+// Tests that interstage inputs could be a sparse non-prefix subset of the outputs, and that
+// fragment inputs are unused. This test is not in dawn_unittests/RenderPipelineValidationTests
+// because we want to test the compilation of the pipeline in D3D12 backend.
+TEST_P(ShaderTests, WGSLInterstageVariablesSparseSubsetUnused) {
+    std::string shader = R"(
+struct VertexOut {
+    @builtin(position) position : vec4<f32>,
+    @location(1) attribute1 : f32,
+    @location(3) attribute3 : vec4<f32>,
+}
+
+struct FragmentIn {
+    @location(3) attribute3 : vec4<f32>,
+    @builtin(position) position : vec4<f32>,
+}
+
+@vertex
+fn vertexMain() -> VertexOut {
+    var output : VertexOut;
+    output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.attribute1 = 1.0;
+    output.attribute3 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    return output;
+}
+
+@fragment
+fn fragmentMain(input : FragmentIn) -> @location(0) vec4<f32> {
+    return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+})";
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
+
+    utils::ComboRenderPipelineDescriptor rpDesc;
+    rpDesc.vertex.module = shaderModule;
+    rpDesc.vertex.entryPoint = "vertexMain";
+    rpDesc.cFragment.module = shaderModule;
+    rpDesc.cFragment.entryPoint = "fragmentMain";
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
+}
+
+// Tests that interstage inputs could be empty when outputs are not.
+// This test is not in dawn_unittests/RenderPipelineValidationTests because we want to test the
+// compilation of the pipeline in D3D12 backend.
+TEST_P(ShaderTests, WGSLInterstageVariablesEmptySubset) {
+    std::string shader = R"(
+struct VertexOut {
+    @builtin(position) position : vec4<f32>,
+    @location(1) attribute1 : f32,
+    @location(3) attribute3 : vec4<f32>,
+}
+
+@vertex
+fn vertexMain() -> VertexOut {
+    var output : VertexOut;
+    output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.attribute1 = 1.0;
+    output.attribute3 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    return output;
+}
+
+@fragment
+fn fragmentMain() -> @location(0) vec4<f32> {
+    return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+})";
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
+
+    utils::ComboRenderPipelineDescriptor rpDesc;
+    rpDesc.vertex.module = shaderModule;
+    rpDesc.vertex.entryPoint = "vertexMain";
+    rpDesc.cFragment.module = shaderModule;
+    rpDesc.cFragment.entryPoint = "fragmentMain";
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
+}
+
 // This is a regression test for an issue caused by the FirstIndexOffset transfrom being done before
 // the BindingRemapper, causing an intermediate AST to be invalid (and fail the overall
 // compilation).
@@ -949,8 +1180,195 @@ TEST_P(ShaderTests, ShaderOverridingRobustnessBuiltins) {
     EXPECT_BUFFER_U32_EQ(2, buf, 0);
 }
 
+// Test that when fragment input is a subset of the vertex output, the render pipeline should be
+// valid.
+TEST_P(ShaderTests, FragmentInputIsSubsetOfVertexOutput) {
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+struct ShaderIO {
+    @location(1) var1: f32,
+    @location(3) @interpolate(flat) var3: u32,
+    @location(5) @interpolate(flat) var5: i32,
+    @location(7) var7: f32,
+    @location(9) @interpolate(flat) var9: u32,
+    @builtin(position) pos: vec4<f32>,
+}
+
+@vertex fn main(@builtin(vertex_index) VertexIndex : u32)
+     -> ShaderIO {
+  var pos = array<vec2<f32>, 3>(
+      vec2<f32>(-1.0, 3.0),
+      vec2<f32>(-1.0, -3.0),
+      vec2<f32>(3.0, 0.0));
+
+  var shaderIO: ShaderIO;
+  shaderIO.var1 = 0.0;
+  shaderIO.var3 = 1u;
+  shaderIO.var5 = -9;
+  shaderIO.var7 = 1.0;
+  shaderIO.var9 = 0u;
+  shaderIO.pos = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+
+  return shaderIO;
+})");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+struct ShaderIO {
+    @location(3) @interpolate(flat) var3: u32,
+    @location(7) var7: f32,
+}
+
+@fragment fn main(io: ShaderIO)
+    -> @location(0) vec4<f32> {
+    return vec4<f32>(f32(io.var3), io.var7, 1.0, 1.0);
+})");
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    descriptor.cTargets[0].format = renderPass.colorFormat;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.Draw(3);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(255, 255, 255, 255), renderPass.color, 0, 0);
+}
+
+// Test that when fragment input is a subset of the vertex output and the order of them is
+// different, the render pipeline should be valid.
+TEST_P(ShaderTests, FragmentInputIsSubsetOfVertexOutputWithDifferentOrder) {
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+struct ShaderIO {
+    @location(5) @align(16) var5: f32,
+    @location(1) var1: f32,
+    @location(2) var2: f32,
+    @location(3) @align(8) var3: f32,
+    @location(4) var4: vec4<f32>,
+    @builtin(position) pos: vec4<f32>,
+}
+
+@vertex fn main(@builtin(vertex_index) VertexIndex : u32)
+     -> ShaderIO {
+  var pos = array<vec2<f32>, 3>(
+      vec2<f32>(-1.0, 3.0),
+      vec2<f32>(-1.0, -3.0),
+      vec2<f32>(3.0, 0.0));
+
+  var shaderIO: ShaderIO;
+  shaderIO.var1 = 0.0;
+  shaderIO.var2 = 0.0;
+  shaderIO.var3 = 1.0;
+  shaderIO.var4 = vec4<f32>(0.4, 0.4, 0.4, 0.4);
+  shaderIO.var5 = 1.0;
+  shaderIO.pos = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+
+  return shaderIO;
+})");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+struct ShaderIO {
+    @location(4) var4: vec4<f32>,
+    @location(1) var1: f32,
+    @location(5) @align(16) var5: f32,
+}
+
+@fragment fn main(io: ShaderIO)
+    -> @location(0) vec4<f32> {
+    return vec4<f32>(io.var1, io.var5, io.var4.x, 1.0);
+})");
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    descriptor.cTargets[0].format = renderPass.colorFormat;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.Draw(3);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 102, 255), renderPass.color, 0, 0);
+}
+
+// Test that when fragment input is a subset of the vertex output and that when the builtin
+// interstage variables may mess up with the order, the render pipeline should be valid.
+TEST_P(ShaderTests, FragmentInputIsSubsetOfVertexOutputBuiltinOrder) {
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+struct ShaderIO {
+    @location(1) var1: f32,
+    @builtin(position) pos: vec4<f32>,
+    @location(8) var8: vec3<f32>,
+    @location(7) var7: f32,
+}
+
+@vertex fn main(@builtin(vertex_index) VertexIndex : u32)
+     -> ShaderIO {
+  var pos = array<vec2<f32>, 3>(
+      vec2<f32>(-1.0, 3.0),
+      vec2<f32>(-1.0, -3.0),
+      vec2<f32>(3.0, 0.0));
+
+  var shaderIO: ShaderIO;
+  shaderIO.var1 = 0.0;
+  shaderIO.var7 = 1.0;
+  shaderIO.var8 = vec3<f32>(1.0, 0.4, 0.0);
+  shaderIO.pos = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+
+  return shaderIO;
+})");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+struct ShaderIO {
+    @builtin(position) pos: vec4<f32>,
+    @location(7) var7: f32,
+}
+
+@fragment fn main(io: ShaderIO)
+    -> @location(0) vec4<f32> {
+    return vec4<f32>(0.0, io.var7, 0.4, 1.0);
+})");
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    descriptor.cTargets[0].format = renderPass.colorFormat;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.Draw(3);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 102, 255), renderPass.color, 0, 0);
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D12Backend(),
+                      D3D12Backend({"use_dxc"}),
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),

@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_WRITER_HLSL_GENERATOR_H_
 #define SRC_TINT_WRITER_HLSL_GENERATOR_H_
 
+#include <bitset>
 #include <memory>
 #include <optional>
 #include <string>
@@ -25,6 +26,7 @@
 #include "src/tint/ast/pipeline_stage.h"
 #include "src/tint/reflection.h"
 #include "src/tint/sem/binding_point.h"
+#include "src/tint/utils/bitset.h"
 #include "src/tint/writer/array_length_from_uniform_options.h"
 #include "src/tint/writer/text.h"
 
@@ -56,6 +58,9 @@ struct Options {
     /// Options used to specify a mapping of binding points to indices into a UBO
     /// from which to load buffer sizes.
     ArrayLengthFromUniformOptions array_length_from_uniform = {};
+    /// Interstage locations actually used as inputs in the next stage of the pipeline.
+    /// This is potentially used for truncating unused interstage outputs at current shader stage.
+    std::bitset<16> interstage_locations;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(root_constant_binding_point,

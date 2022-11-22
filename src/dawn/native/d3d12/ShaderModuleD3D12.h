@@ -52,10 +52,12 @@ class ShaderModule final : public ShaderModuleBase {
                                                    ShaderModuleParseResult* parseResult,
                                                    OwnedCompilationMessages* compilationMessages);
 
-    ResultOrError<CompiledShader> Compile(const ProgrammableStage& programmableStage,
-                                          SingleShaderStage stage,
-                                          const PipelineLayout* layout,
-                                          uint32_t compileFlags);
+    ResultOrError<CompiledShader> Compile(
+        const ProgrammableStage& programmableStage,
+        SingleShaderStage stage,
+        const PipelineLayout* layout,
+        uint32_t compileFlags,
+        const std::bitset<kMaxInterStageShaderVariables>* usedInterstageVariables = nullptr);
 
   private:
     ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);

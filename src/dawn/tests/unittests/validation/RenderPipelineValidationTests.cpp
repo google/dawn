@@ -1390,8 +1390,7 @@ class InterStageVariableMatchingValidationTest : public RenderPipelineValidation
     }
 };
 
-// Tests that creating render pipeline should fail when there is a vertex output that doesn't have
-// its corresponding fragment input at the same location, and there is a fragment input that
+// Tests that creating render pipeline should fail when there is a fragment input that
 // doesn't have its corresponding vertex output at the same location.
 TEST_F(InterStageVariableMatchingValidationTest, MissingDeclarationAtSameLocation) {
     wgpu::ShaderModule vertexModuleOutputAtLocation0 = utils::CreateShaderModule(device, R"(
@@ -1430,7 +1429,10 @@ TEST_F(InterStageVariableMatchingValidationTest, MissingDeclarationAtSameLocatio
             })");
 
     {
-        CheckCreatingRenderPipeline(vertexModuleOutputAtLocation0, fsModule, false);
+        // It is okay if the fragment output is a subset of the vertex input.
+        CheckCreatingRenderPipeline(vertexModuleOutputAtLocation0, fsModule, true);
+    }
+    {
         CheckCreatingRenderPipeline(vsModule, fragmentModuleAtLocation0, false);
         CheckCreatingRenderPipeline(vertexModuleOutputAtLocation0, fragmentModuleInputAtLocation1,
                                     false);

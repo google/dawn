@@ -64,6 +64,7 @@
 #include "src/tint/transform/remove_continue_in_switch.h"
 #include "src/tint/transform/remove_phonies.h"
 #include "src/tint/transform/simplify_pointers.h"
+#include "src/tint/transform/truncate_interstage_variables.h"
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
@@ -210,6 +211,27 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         manager.Add<transform::ZeroInitWorkgroupMemory>();
     }
     manager.Add<transform::CanonicalizeEntryPointIO>();
+
+    if (options.interstage_locations.any()) {
+        // When interstage_locations is empty, it means there's no user-defined interstage variables
+        // being used in the next stage. This is treated as a special case.
+        // TruncateInterstageVariables transform is trying to solve the HLSL compiler register
+        // mismatch issue. So it is not needed if no register is assigned to any interstage
+        // variables. As a result we only add this transform when there is at least one interstage
+        // locations being used.
+
+        // TruncateInterstageVariables itself will skip when interstage_locations matches exactly
+        // with the current stage output.
+
+        // Build the config for internal TruncateInterstageVariables transform.
+        transform::TruncateInterstageVariables::Config truncate_interstage_variables_cfg;
+        truncate_interstage_variables_cfg.interstage_locations =
+            std::move(options.interstage_locations);
+        manager.Add<transform::TruncateInterstageVariables>();
+        data.Add<transform::TruncateInterstageVariables::Config>(
+            std::move(truncate_interstage_variables_cfg));
+    }
+
     // NumWorkgroupsFromUniform must come after CanonicalizeEntryPointIO, as it
     // assumes that num_workgroups builtins only appear as struct members and are
     // only accessed directly via member accessors.

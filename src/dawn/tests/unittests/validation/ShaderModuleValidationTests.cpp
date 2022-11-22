@@ -278,10 +278,13 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
         }
 
         if (success) {
-            ASSERT_DEVICE_ERROR(
-                device.CreateRenderPipeline(&pDesc),
-                testing::HasSubstr(
-                    "One or more fragment inputs and vertex outputs are not one-to-one matching"));
+            if (failingShaderStage == wgpu::ShaderStage::Vertex) {
+                // It is allowed that fragment inputs are a subset of the vertex output variables.
+                device.CreateRenderPipeline(&pDesc);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
+                                    testing::HasSubstr("The fragment input at location"));
+            }
         } else {
             ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
                                 testing::HasSubstr(errorMatcher));
@@ -401,10 +404,13 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
         }
 
         if (success) {
-            ASSERT_DEVICE_ERROR(
-                device.CreateRenderPipeline(&pDesc),
-                testing::HasSubstr(
-                    "One or more fragment inputs and vertex outputs are not one-to-one matching"));
+            if (failingShaderStage == wgpu::ShaderStage::Vertex) {
+                // It is allowed that fragment inputs are a subset of the vertex output variables.
+                device.CreateRenderPipeline(&pDesc);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
+                                    testing::HasSubstr("The fragment input at location"));
+            }
         } else {
             ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
                                 testing::HasSubstr(errorMatcher));
