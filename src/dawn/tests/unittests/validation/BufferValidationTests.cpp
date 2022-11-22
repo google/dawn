@@ -528,6 +528,22 @@ TEST_F(BufferValidationTest, UnmapDestroyedBuffer) {
     }
 }
 
+// Test that unmap then mapping a destroyed buffer is an error.
+// Regression test for crbug.com/1388920.
+TEST_F(BufferValidationTest, MapDestroyedBufferAfterUnmap) {
+    wgpu::Buffer buffer = CreateMapReadBuffer(4);
+    buffer.Destroy();
+    buffer.Unmap();
+
+    ASSERT_DEVICE_ERROR(buffer.MapAsync(
+        wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
+        [](WGPUBufferMapAsyncStatus status, void* userdata) {
+            EXPECT_EQ(WGPUBufferMapAsyncStatus_Error, status);
+        },
+        nullptr));
+    WaitForAllOperations(device);
+}
+
 // Test that it is valid to submit a buffer in a queue with a map usage if it is unmapped
 TEST_F(BufferValidationTest, SubmitBufferWithMapUsage) {
     wgpu::BufferDescriptor descriptorA;

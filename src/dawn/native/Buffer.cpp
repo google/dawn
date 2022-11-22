@@ -422,6 +422,9 @@ void BufferBase::APIUnmap() {
 }
 
 void BufferBase::Unmap() {
+    if (mState == BufferState::Destroyed) {
+        return;
+    }
     UnmapInternal(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback);
 }
 
