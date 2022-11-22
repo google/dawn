@@ -1561,11 +1561,7 @@ ConstEval::Result ConstEval::OpXor(const sem::Type* ty,
         return Dispatch_ia_iu32(create, c0, c1);
     };
 
-    auto r = TransformElements(builder, ty, transform, args[0], args[1]);
-    if (builder.Diagnostics().contains_errors()) {
-        return utils::Failure;
-    }
-    return r;
+    return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
 ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
@@ -1590,13 +1586,13 @@ ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
                     UT mask = ~UT{0} << (bit_width - must_match_msb);
                     if ((e1u & mask) != 0 && (e1u & mask) != mask) {
                         AddError("shift left operation results in sign change", source);
-                        return nullptr;
+                        return utils::Failure;
                     }
                 } else {
                     // If shift value >= bit_width, then any non-zero value would overflow
                     if (e1 != 0) {
                         AddError(OverflowErrorMessage(e1, "<<", e2), source);
-                        return nullptr;
+                        return utils::Failure;
                     }
 
                     // It's UB in C++ to shift by greater or equal to the bit width (even if the lhs
@@ -1612,7 +1608,7 @@ ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
                         "shift left value must be less than the bit width of the lhs, which is " +
                             std::to_string(bit_width),
                         source);
-                    return nullptr;
+                    return utils::Failure;
                 }
 
                 if constexpr (std::is_signed_v<T>) {
@@ -1622,7 +1618,7 @@ ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
                     UT mask = ~UT{0} << (bit_width - must_match_msb);
                     if ((e1u & mask) != 0 && (e1u & mask) != mask) {
                         AddError("shift left operation results in sign change", source);
-                        return nullptr;
+                        return utils::Failure;
                     }
                 } else {
                     // If T is an unsigned integer type, and any of the e2 most significant bits of
@@ -1632,6 +1628,7 @@ ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
                         UT mask = ~UT{0} << (bit_width - must_be_zero_msb);
                         if ((e1u & mask) != 0) {
                             AddError(OverflowErrorMessage(e1, "<<", e2), source);
+                            return utils::Failure;
                         }
                     }
                 }
@@ -1647,14 +1644,10 @@ ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
     if (!sem::Type::DeepestElementOf(args[1]->Type())->Is<sem::U32>()) {
         TINT_ICE(Resolver, builder.Diagnostics())
             << "Element type of rhs of ShiftLeft must be a u32";
-        return nullptr;
-    }
-
-    auto r = TransformElements(builder, ty, transform, args[0], args[1]);
-    if (builder.Diagnostics().contains_errors()) {
         return utils::Failure;
     }
-    return r;
+
+    return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
 ConstEval::Result ConstEval::abs(const sem::Type* ty,
@@ -1758,11 +1751,7 @@ ConstEval::Result ConstEval::asinh(const sem::Type* ty,
         return Dispatch_fa_f32_f16(create, c0);
     };
 
-    auto r = TransformElements(builder, ty, transform, args[0]);
-    if (builder.Diagnostics().contains_errors()) {
-        return utils::Failure;
-    }
-    return r;
+    return TransformElements(builder, ty, transform, args[0]);
 }
 
 ConstEval::Result ConstEval::atan(const sem::Type* ty,
