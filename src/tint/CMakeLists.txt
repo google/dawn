@@ -666,6 +666,8 @@ if(${TINT_BUILD_IR})
     ir/loop.h
     ir/module.cc
     ir/module.h
+    ir/register.cc
+    ir/register.h
     ir/switch.cc
     ir/switch.h
     ir/terminator.cc
@@ -1330,6 +1332,7 @@ if(TINT_BUILD_TESTS)
   if (${TINT_BUILD_IR})
     list(APPEND TINT_TEST_SRCS
       ir/builder_impl_test.cc
+      ir/register_test.cc
       ir/test_helper.h
     )
   endif()
