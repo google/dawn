@@ -849,7 +849,8 @@ TEST_F(ResolverValidationTest, Stmt_Loop_Continuing_BreakIf_Not_Last) {
     WrapInFunction(loop_stmt);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:23 error: break-if must be last statement in a continuing block
+    EXPECT_EQ(r()->error(),
+              R"(12:23 error: break-if must be the last statement in a continuing block
 10:9 note: see continuing block here)");
 }
 
@@ -867,7 +868,8 @@ TEST_F(ResolverValidationTest, Stmt_Loop_Continuing_BreakIf_Duplicate) {
     WrapInFunction(loop_stmt);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:23 error: break-if must be last statement in a continuing block
+    EXPECT_EQ(r()->error(),
+              R"(12:23 error: break-if must be the last statement in a continuing block
 10:9 note: see continuing block here)");
 }
 

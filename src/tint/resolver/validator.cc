@@ -1592,7 +1592,7 @@ bool Validator::BreakIfStatement(const sem::BreakIfStatement* stmt,
         }
         if (auto* continuing = s->As<sem::LoopContinuingBlockStatement>()) {
             if (continuing->Declaration()->statements.Back() != stmt->Declaration()) {
-                AddError("break-if must be last statement in a continuing block",
+                AddError("break-if must be the last statement in a continuing block",
                          stmt->Declaration()->source);
                 AddNote("see continuing block here", s->Declaration()->source);
                 return false;
@@ -1601,7 +1601,7 @@ bool Validator::BreakIfStatement(const sem::BreakIfStatement* stmt,
         }
     }
 
-    AddError("break-if must in a continuing block", stmt->Declaration()->source);
+    AddError("break-if must be in a continuing block", stmt->Declaration()->source);
     return false;
 }
 
