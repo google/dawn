@@ -59,7 +59,10 @@ group("abseil") {
 }
 
 config("internal") {
-  configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
+  configs = [
+    "${dawn_root}/src/dawn/common:internal_config",
+    "${dawn_root}/src/tint:tint_public_config",
+  ]
 }
 
 config("weak_framework") {
