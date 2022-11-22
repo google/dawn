@@ -178,6 +178,12 @@ class BuilderImpl {
     /// The stack of flow control blocks.
     utils::Vector<FlowNode*, 8> flow_stack;
 
+    /// The IR builder being used by the impl.
+    Builder builder;
+
+    /// The current flow block for expressions
+    Block* current_flow_block = nullptr;
+
   private:
     enum class ControlFlags { kNone, kExcludeSwitch };
 
@@ -186,11 +192,8 @@ class BuilderImpl {
 
     FlowNode* FindEnclosingControl(ControlFlags flags);
 
-    Builder builder_;
-
     diag::List diagnostics_;
 
-    Block* current_flow_block_ = nullptr;
     Function* current_function_ = nullptr;
 
     /// Map from ast nodes to flow nodes, used to retrieve the flow node for a given AST node.

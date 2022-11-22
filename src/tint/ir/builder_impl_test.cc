@@ -28,7 +28,7 @@ TEST_F(IRBuilderImplTest, Func) {
     // func -> start -> end
 
     Func("f", utils::Empty, ty.void_(), utils::Empty);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -50,7 +50,7 @@ TEST_F(IRBuilderImplTest, Func) {
 TEST_F(IRBuilderImplTest, EntryPoint) {
     Func("f", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -70,7 +70,7 @@ TEST_F(IRBuilderImplTest, IfStatement) {
     //
     auto* ast_if = If(true, Block(), Else(Block()));
     WrapInFunction(ast_if);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -113,7 +113,7 @@ TEST_F(IRBuilderImplTest, IfStatement_TrueReturns) {
     //
     auto* ast_if = If(true, Block(Return()));
     WrapInFunction(ast_if);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -154,7 +154,7 @@ TEST_F(IRBuilderImplTest, IfStatement_FalseReturns) {
     //
     auto* ast_if = If(true, Block(), Else(Block(Return())));
     WrapInFunction(ast_if);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -195,7 +195,7 @@ TEST_F(IRBuilderImplTest, IfStatement_BothReturn) {
     //
     auto* ast_if = If(true, Block(Return()), Else(Block(Return())));
     WrapInFunction(ast_if);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -246,7 +246,7 @@ TEST_F(IRBuilderImplTest, IfStatement_JumpChainToMerge) {
     auto* ast_loop = Loop(Block(Break()));
     auto* ast_if = If(true, Block(ast_loop));
     WrapInFunction(ast_if);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -289,7 +289,7 @@ TEST_F(IRBuilderImplTest, Loop_WithBreak) {
     //
     auto* ast_loop = Loop(Block(Break()));
     WrapInFunction(ast_loop);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -333,7 +333,7 @@ TEST_F(IRBuilderImplTest, Loop_WithContinue) {
     auto* ast_if = If(true, Block(Break()));
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -392,7 +392,7 @@ TEST_F(IRBuilderImplTest, Loop_WithContinuing_BreakIf) {
     auto* ast_break_if = BreakIf(true);
     auto* ast_loop = Loop(Block(), Block(ast_break_if));
     WrapInFunction(ast_loop);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -452,7 +452,7 @@ TEST_F(IRBuilderImplTest, Loop_WithReturn) {
     auto* ast_if = If(true, Block(Return()));
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -520,7 +520,7 @@ TEST_F(IRBuilderImplTest, Loop_WithOnlyReturn) {
     // block.
     auto* ast_loop = Loop(Block(Return(), Continue()));
     WrapInFunction(ast_loop, If(true, Block(Return())));
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -578,7 +578,7 @@ TEST_F(IRBuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     auto* ast_loop = Loop(Block(Return()), Block(ast_break_if));
     auto* ast_if = If(true, Block(Return()));
     WrapInFunction(Block(ast_loop, ast_if));
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -635,7 +635,7 @@ TEST_F(IRBuilderImplTest, Loop_WithIf_BothBranchesBreak) {
     auto* ast_if = If(true, Block(Break()), Else(Block(Break())));
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -744,7 +744,7 @@ TEST_F(IRBuilderImplTest, Loop_Nested) {
     auto* ast_loop_a = Loop(Block(ast_loop_b, ast_if_d));
 
     WrapInFunction(ast_loop_a);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -896,7 +896,7 @@ TEST_F(IRBuilderImplTest, While) {
     //
     auto* ast_while = While(false, Block());
     WrapInFunction(ast_while);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -956,7 +956,7 @@ TEST_F(IRBuilderImplTest, While_Return) {
     //
     auto* ast_while = While(true, Block(Return()));
     WrapInFunction(ast_while);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -1015,7 +1015,7 @@ TEST_F(IRBuilderImplTest, DISABLED_For) {
     //
     auto* ast_for = For(Decl(Var("i", ty.i32())), LessThan("i", 10_a), Increment("i"), Block());
     WrapInFunction(ast_for);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -1067,7 +1067,7 @@ TEST_F(IRBuilderImplTest, For_NoInitCondOrContinuing) {
     //
     auto* ast_for = For(nullptr, nullptr, nullptr, Block(Break()));
     WrapInFunction(ast_for);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -1111,7 +1111,7 @@ TEST_F(IRBuilderImplTest, Switch) {
                            Case(utils::Vector{CaseSelector(1_i)}, Block()), DefaultCase(Block())});
 
     WrapInFunction(ast_switch);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -1159,7 +1159,7 @@ TEST_F(IRBuilderImplTest, Switch_OnlyDefault) {
     auto* ast_switch = Switch(1_i, utils::Vector{DefaultCase(Block())});
 
     WrapInFunction(ast_switch);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -1211,7 +1211,7 @@ TEST_F(IRBuilderImplTest, Switch_WithBreak) {
                                                  DefaultCase(Block())});
 
     WrapInFunction(ast_switch);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();
@@ -1275,7 +1275,7 @@ TEST_F(IRBuilderImplTest, Switch_AllReturn) {
     auto* ast_if = If(true, Block(Return()));
 
     WrapInFunction(ast_switch, ast_if);
-    auto& b = Build();
+    auto& b = CreateBuilder();
 
     auto r = b.Build();
     ASSERT_TRUE(r) << b.error();

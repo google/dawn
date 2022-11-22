@@ -36,7 +36,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     /// @note The builder is only created once. Multiple calls to Build() will
     /// return the same builder without rebuilding.
     /// @return the builder
-    BuilderImpl& Build() {
+    BuilderImpl& CreateBuilder() {
         if (gen_) {
             return *gen_;
         }
@@ -44,6 +44,16 @@ class TestHelperBase : public BASE, public ProgramBuilder {
         diag::Formatter formatter;
         [&]() { ASSERT_TRUE(program->IsValid()) << formatter.format(program->Diagnostics()); }();
         gen_ = std::make_unique<BuilderImpl>(program.get());
+        return *gen_;
+    }
+
+    /// Creates a BuilderImpl without an originating program. This is used for testing the
+    /// expressions which don't require the full builder implementation. The current flow block
+    /// is initialized with an empty block.
+    /// @returns the BuilderImpl for testing.
+    BuilderImpl& CreateEmptyBuilder() {
+        gen_ = std::make_unique<BuilderImpl>(nullptr);
+        gen_->current_flow_block = gen_->builder.CreateBlock();
         return *gen_;
     }
 
