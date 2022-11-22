@@ -57,7 +57,7 @@ template("generator_lib_action") {
   }
   _generator_args += [
     "--template-dir",
-    rebase_path(_template_dir),
+    rebase_path(_template_dir, root_build_dir),
   ]
 
   if (defined(invoker.root_dir)) {
@@ -70,7 +70,7 @@ template("generator_lib_action") {
   if (defined(invoker.jinja2_path)) {
     _generator_args += [
       "--jinja2-path",
-      rebase_path(invoker.jinja2_path),
+      rebase_path(invoker.jinja2_path, root_build_dir),
     ]
   }
 
