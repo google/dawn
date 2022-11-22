@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_COMMON_CONSTANTS_H_
 #define SRC_DAWN_COMMON_CONSTANTS_H_
 
+#include <cstddef>
 #include <cstdint>
 
 static constexpr uint32_t kMaxBindGroups = 4u;
@@ -64,5 +65,8 @@ static constexpr uint32_t kMaxQueryCount = 8192u;
 static constexpr uint8_t kSampledTexturesPerExternalTexture = 4u;
 static constexpr uint8_t kSamplersPerExternalTexture = 1u;
 static constexpr uint8_t kUniformsPerExternalTexture = 1u;
+
+// Wire buffer alignments.
+static constexpr size_t kWireBufferAlignment = 8u;
 
 #endif  // SRC_DAWN_COMMON_CONSTANTS_H_

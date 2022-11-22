@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_WIRE_BUFFERCONSUMER_IMPL_H_
 #define SRC_DAWN_WIRE_BUFFERCONSUMER_IMPL_H_
 
-#include "dawn/wire/BufferConsumer.h"
-
 #include <limits>
 #include <type_traits>
+
+#include "dawn/wire/BufferConsumer.h"
 
 namespace dawn::wire {
 
@@ -36,13 +36,14 @@ WireResult BufferConsumer<BufferT>::Peek(T** data) {
 template <typename BufferT>
 template <typename T>
 WireResult BufferConsumer<BufferT>::Next(T** data) {
-    if (sizeof(T) > mSize) {
+    constexpr size_t kSize = WireAlignSizeof<T>();
+    if (kSize > mSize) {
         return WireResult::FatalError;
     }
 
     *data = reinterpret_cast<T*>(mBuffer);
-    mBuffer += sizeof(T);
-    mSize -= sizeof(T);
+    mBuffer += kSize;
+    mSize -= kSize;
     return WireResult::Success;
 }
 
@@ -51,20 +52,15 @@ template <typename T, typename N>
 WireResult BufferConsumer<BufferT>::NextN(N count, T** data) {
     static_assert(std::is_unsigned<N>::value, "|count| argument of NextN must be unsigned.");
 
-    constexpr size_t kMaxCountWithoutOverflows = std::numeric_limits<size_t>::max() / sizeof(T);
-    if (count > kMaxCountWithoutOverflows) {
-        return WireResult::FatalError;
-    }
-
-    // Cannot overflow because |count| is not greater than |kMaxCountWithoutOverflows|.
-    size_t totalSize = sizeof(T) * count;
-    if (totalSize > mSize) {
+    // If size is zero then it indicates an overflow.
+    auto size = WireAlignSizeofN<T>(count);
+    if (size && *size > mSize) {
         return WireResult::FatalError;
     }
 
     *data = reinterpret_cast<T*>(mBuffer);
-    mBuffer += totalSize;
-    mSize -= totalSize;
+    mBuffer += *size;
+    mSize -= *size;
     return WireResult::Success;
 }
 

@@ -184,11 +184,9 @@ class Server : public ServerBase {
         mSerializer.SerializeCommand(cmd);
     }
 
-    template <typename Cmd, typename ExtraSizeSerializeFn>
-    void SerializeCommand(const Cmd& cmd,
-                          size_t extraSize,
-                          ExtraSizeSerializeFn&& SerializeExtraSize) {
-        mSerializer.SerializeCommand(cmd, extraSize, SerializeExtraSize);
+    template <typename Cmd, typename... Extensions>
+    void SerializeCommand(const Cmd& cmd, Extensions&&... es) {
+        mSerializer.SerializeCommand(cmd, std::forward<Extensions>(es)...);
     }
 
     void SetForwardingDeviceCallbacks(ObjectData<WGPUDevice>* deviceObject);

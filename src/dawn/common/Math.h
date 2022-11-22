@@ -20,6 +20,7 @@
 #include <cstring>
 
 #include <limits>
+#include <optional>
 #include <type_traits>
 
 #include "dawn/common/Assert.h"
@@ -59,6 +60,26 @@ T Align(T value, size_t alignment) {
     ASSERT(alignment != 0);
     T alignmentT = static_cast<T>(alignment);
     return (value + (alignmentT - 1)) & ~(alignmentT - 1);
+}
+
+template <typename T, size_t Alignment>
+constexpr size_t AlignSizeof() {
+    static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
+                  "Alignment must be a valid power of 2.");
+    static_assert(sizeof(T) <= std::numeric_limits<size_t>::max() - (Alignment - 1));
+    return (sizeof(T) + (Alignment - 1)) & ~(Alignment - 1);
+}
+
+// Returns an aligned size for an n-sized array of T elements. If the size would overflow, returns
+// nullopt instead.
+template <typename T, size_t Alignment>
+std::optional<size_t> AlignSizeofN(uint64_t n) {
+    constexpr uint64_t kMaxCountWithoutOverflows =
+        (std::numeric_limits<size_t>::max() - Alignment + 1) / sizeof(T);
+    if (n > kMaxCountWithoutOverflows) {
+        return std::nullopt;
+    }
+    return Align(sizeof(T) * n, Alignment);
 }
 
 template <typename T>

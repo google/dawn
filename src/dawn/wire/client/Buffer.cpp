@@ -47,6 +47,8 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     cmd.writeHandleCreateInfoLength = 0;
     cmd.writeHandleCreateInfo = nullptr;
 
+    size_t readHandleCreateInfoLength = 0;
+    size_t writeHandleCreateInfoLength = 0;
     if (mappable) {
         if ((descriptor->usage & WGPUBufferUsage_MapRead) != 0) {
             // Create the read handle on buffer creation.
@@ -56,7 +58,8 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
                 device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
                 return CreateError(device, descriptor);
             }
-            cmd.readHandleCreateInfoLength = readHandle->SerializeCreateSize();
+            readHandleCreateInfoLength = readHandle->SerializeCreateSize();
+            cmd.readHandleCreateInfoLength = readHandleCreateInfoLength;
         }
 
         if ((descriptor->usage & WGPUBufferUsage_MapWrite) != 0 || descriptor->mappedAtCreation) {
@@ -67,7 +70,8 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
                 device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
                 return CreateError(device, descriptor);
             }
-            cmd.writeHandleCreateInfoLength = writeHandle->SerializeCreateSize();
+            writeHandleCreateInfoLength = writeHandle->SerializeCreateSize();
+            cmd.writeHandleCreateInfoLength = writeHandleCreateInfoLength;
         }
     }
 
@@ -95,27 +99,28 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
 
     cmd.result = buffer->GetWireHandle();
 
+    // clang-format off
+    // Turning off clang format here because for some reason it does not format the
+    // CommandExtensions consistently, making it harder to read.
     wireClient->SerializeCommand(
-        cmd, cmd.readHandleCreateInfoLength + cmd.writeHandleCreateInfoLength,
-        [&](SerializeBuffer* serializeBuffer) {
-            if (readHandle != nullptr) {
-                char* readHandleBuffer;
-                WIRE_TRY(serializeBuffer->NextN(cmd.readHandleCreateInfoLength, &readHandleBuffer));
-                // Serialize the ReadHandle into the space after the command.
-                readHandle->SerializeCreate(readHandleBuffer);
-                buffer->mReadHandle = std::move(readHandle);
-            }
-            if (writeHandle != nullptr) {
-                char* writeHandleBuffer;
-                WIRE_TRY(
-                    serializeBuffer->NextN(cmd.writeHandleCreateInfoLength, &writeHandleBuffer));
-                // Serialize the WriteHandle into the space after the command.
-                writeHandle->SerializeCreate(writeHandleBuffer);
-                buffer->mWriteHandle = std::move(writeHandle);
-            }
-
-            return WireResult::Success;
-        });
+        cmd,
+        CommandExtension{readHandleCreateInfoLength,
+                         [&](char* readHandleBuffer) {
+                             if (readHandle != nullptr) {
+                                 // Serialize the ReadHandle into the space after the command.
+                                 readHandle->SerializeCreate(readHandleBuffer);
+                                 buffer->mReadHandle = std::move(readHandle);
+                             }
+                         }},
+        CommandExtension{writeHandleCreateInfoLength,
+                         [&](char* writeHandleBuffer) {
+                             if (writeHandle != nullptr) {
+                                 // Serialize the WriteHandle into the space after the command.
+                                 writeHandle->SerializeCreate(writeHandleBuffer);
+                                 buffer->mWriteHandle = std::move(writeHandle);
+                             }
+                         }});
+    // clang-format on
     return ToAPI(buffer);
 }
 
@@ -310,16 +315,12 @@ void Buffer::Unmap() {
         cmd.size = mMapSize;
 
         client->SerializeCommand(
-            cmd, writeDataUpdateInfoLength, [&](SerializeBuffer* serializeBuffer) {
-                char* writeHandleBuffer;
-                WIRE_TRY(serializeBuffer->NextN(writeDataUpdateInfoLength, &writeHandleBuffer));
-
-                // Serialize flush metadata into the space after the command.
-                // This closes the handle for writing.
-                mWriteHandle->SerializeDataUpdate(writeHandleBuffer, cmd.offset, cmd.size);
-
-                return WireResult::Success;
-            });
+            cmd, CommandExtension{writeDataUpdateInfoLength, [&](char* writeHandleBuffer) {
+                                      // Serialize flush metadata into the space after the command.
+                                      // This closes the handle for writing.
+                                      mWriteHandle->SerializeDataUpdate(writeHandleBuffer,
+                                                                        cmd.offset, cmd.size);
+                                  }});
 
         // If mDestructWriteHandleOnUnmap is true, that means the write handle is merely
         // for mappedAtCreation usage. It is destroyed on unmap after flush to server

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <cmath>
+#include <limits>
 #include <vector>
 
 #include "dawn/EnumClassBitmasks.h"
@@ -178,6 +179,41 @@ TEST(Math, Align) {
     // Test extrema
     ASSERT_EQ(Align(static_cast<uint64_t>(0xFFFFFFFF), 4), 0x100000000u);
     ASSERT_EQ(Align(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF), 1), 0xFFFFFFFFFFFFFFFFull);
+}
+
+TEST(Math, AlignSizeof) {
+    // Basic types should align to self if alignment is a divisor.
+    ASSERT_EQ((AlignSizeof<uint8_t, 1>()), 1u);
+
+    ASSERT_EQ((AlignSizeof<uint16_t, 1>()), 2u);
+    ASSERT_EQ((AlignSizeof<uint16_t, 2>()), 2u);
+
+    ASSERT_EQ((AlignSizeof<uint32_t, 1>()), 4u);
+    ASSERT_EQ((AlignSizeof<uint32_t, 2>()), 4u);
+    ASSERT_EQ((AlignSizeof<uint32_t, 4>()), 4u);
+
+    ASSERT_EQ((AlignSizeof<uint64_t, 1>()), 8u);
+    ASSERT_EQ((AlignSizeof<uint64_t, 2>()), 8u);
+    ASSERT_EQ((AlignSizeof<uint64_t, 4>()), 8u);
+    ASSERT_EQ((AlignSizeof<uint64_t, 8>()), 8u);
+
+    // Everything in range (align, 2*align] aligns to 2*align.
+    ASSERT_EQ((AlignSizeof<char[5], 4>()), 8u);
+    ASSERT_EQ((AlignSizeof<char[6], 4>()), 8u);
+    ASSERT_EQ((AlignSizeof<char[7], 4>()), 8u);
+    ASSERT_EQ((AlignSizeof<char[8], 4>()), 8u);
+}
+
+TEST(Math, AlignSizeofN) {
+    // Everything in range (align, 2*align] aligns to 2*align.
+    ASSERT_EQ(*(AlignSizeofN<char, 4>(5)), 8u);
+    ASSERT_EQ(*(AlignSizeofN<char, 4>(6)), 8u);
+    ASSERT_EQ(*(AlignSizeofN<char, 4>(7)), 8u);
+    ASSERT_EQ(*(AlignSizeofN<char, 4>(8)), 8u);
+
+    // Extremes should return nullopt.
+    ASSERT_EQ((AlignSizeofN<char, 4>(std::numeric_limits<size_t>::max())), std::nullopt);
+    ASSERT_EQ((AlignSizeofN<char, 4>(std::numeric_limits<uint64_t>::max())), std::nullopt);
 }
 
 // Tests for IsPtrAligned

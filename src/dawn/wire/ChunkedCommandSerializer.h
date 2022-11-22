@@ -17,15 +17,45 @@
 
 #include <algorithm>
 #include <cstring>
+#include <functional>
 #include <memory>
 #include <utility>
 
 #include "dawn/common/Alloc.h"
 #include "dawn/common/Compiler.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/Math.h"
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireCmd_autogen.h"
 
 namespace dawn::wire {
+
+// Simple command extension struct used when a command needs to serialize additional information
+// that is not baked directly into the command already.
+struct CommandExtension {
+    size_t size;
+    std::function<void(char*)> serialize;
+};
+
+namespace detail {
+
+inline WireResult SerializeCommandExtension(SerializeBuffer* serializeBuffer) {
+    return WireResult::Success;
+}
+
+template <typename Extension, typename... Extensions>
+WireResult SerializeCommandExtension(SerializeBuffer* serializeBuffer,
+                                     Extension&& e,
+                                     Extensions&&... es) {
+    char* buffer;
+    WIRE_TRY(serializeBuffer->NextN(e.size, &buffer));
+    e.serialize(buffer);
+
+    WIRE_TRY(SerializeCommandExtension(serializeBuffer, std::forward<Extensions>(es)...));
+    return WireResult::Success;
+}
+
+}  // namespace detail
 
 class ChunkedCommandSerializer {
   public:
@@ -33,57 +63,51 @@ class ChunkedCommandSerializer {
 
     template <typename Cmd>
     void SerializeCommand(const Cmd& cmd) {
-        SerializeCommand(cmd, 0, [](SerializeBuffer*) { return WireResult::Success; });
+        SerializeCommandImpl(
+            cmd, [](const Cmd& cmd, size_t requiredSize, SerializeBuffer* serializeBuffer) {
+                return cmd.Serialize(requiredSize, serializeBuffer);
+            });
     }
 
-    template <typename Cmd, typename ExtraSizeSerializeFn>
-    void SerializeCommand(const Cmd& cmd,
-                          size_t extraSize,
-                          ExtraSizeSerializeFn&& SerializeExtraSize) {
+    template <typename Cmd, typename... Extensions>
+    void SerializeCommand(const Cmd& cmd, CommandExtension&& e, Extensions&&... es) {
         SerializeCommandImpl(
             cmd,
             [](const Cmd& cmd, size_t requiredSize, SerializeBuffer* serializeBuffer) {
                 return cmd.Serialize(requiredSize, serializeBuffer);
             },
-            extraSize, std::forward<ExtraSizeSerializeFn>(SerializeExtraSize));
+            std::forward<CommandExtension>(e), std::forward<Extensions>(es)...);
     }
 
-    template <typename Cmd>
-    void SerializeCommand(const Cmd& cmd, const ObjectIdProvider& objectIdProvider) {
-        SerializeCommand(cmd, objectIdProvider, 0,
-                         [](SerializeBuffer*) { return WireResult::Success; });
-    }
-
-    template <typename Cmd, typename ExtraSizeSerializeFn>
+    template <typename Cmd, typename... Extensions>
     void SerializeCommand(const Cmd& cmd,
                           const ObjectIdProvider& objectIdProvider,
-                          size_t extraSize,
-                          ExtraSizeSerializeFn&& SerializeExtraSize) {
+                          Extensions&&... extensions) {
         SerializeCommandImpl(
             cmd,
             [&objectIdProvider](const Cmd& cmd, size_t requiredSize,
                                 SerializeBuffer* serializeBuffer) {
                 return cmd.Serialize(requiredSize, serializeBuffer, objectIdProvider);
             },
-            extraSize, std::forward<ExtraSizeSerializeFn>(SerializeExtraSize));
+            std::forward<Extensions>(extensions)...);
     }
 
   private:
-    template <typename Cmd, typename SerializeCmdFn, typename ExtraSizeSerializeFn>
+    template <typename Cmd, typename SerializeCmdFn, typename... Extensions>
     void SerializeCommandImpl(const Cmd& cmd,
                               SerializeCmdFn&& SerializeCmd,
-                              size_t extraSize,
-                              ExtraSizeSerializeFn&& SerializeExtraSize) {
+                              Extensions&&... extensions) {
         size_t commandSize = cmd.GetRequiredSize();
-        size_t requiredSize = commandSize + extraSize;
+        size_t requiredSize = (Align(extensions.size, kWireBufferAlignment) + ... + commandSize);
 
         if (requiredSize <= mMaxAllocationSize) {
             char* allocatedBuffer = static_cast<char*>(mSerializer->GetCmdSpace(requiredSize));
             if (allocatedBuffer != nullptr) {
                 SerializeBuffer serializeBuffer(allocatedBuffer, requiredSize);
-                WireResult r1 = SerializeCmd(cmd, requiredSize, &serializeBuffer);
-                WireResult r2 = SerializeExtraSize(&serializeBuffer);
-                if (DAWN_UNLIKELY(r1 != WireResult::Success || r2 != WireResult::Success)) {
+                WireResult rCmd = SerializeCmd(cmd, requiredSize, &serializeBuffer);
+                WireResult rExts =
+                    detail::SerializeCommandExtension(&serializeBuffer, extensions...);
+                if (DAWN_UNLIKELY(rCmd != WireResult::Success || rExts != WireResult::Success)) {
                     mSerializer->OnSerializeError();
                 }
             }
@@ -95,9 +119,9 @@ class ChunkedCommandSerializer {
             return;
         }
         SerializeBuffer serializeBuffer(cmdSpace.get(), requiredSize);
-        WireResult r1 = SerializeCmd(cmd, requiredSize, &serializeBuffer);
-        WireResult r2 = SerializeExtraSize(&serializeBuffer);
-        if (DAWN_UNLIKELY(r1 != WireResult::Success || r2 != WireResult::Success)) {
+        WireResult rCmd = SerializeCmd(cmd, requiredSize, &serializeBuffer);
+        WireResult rExts = detail::SerializeCommandExtension(&serializeBuffer, extensions...);
+        if (DAWN_UNLIKELY(rCmd != WireResult::Success || rExts != WireResult::Success)) {
             mSerializer->OnSerializeError();
             return;
         }

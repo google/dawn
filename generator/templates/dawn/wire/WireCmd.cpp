@@ -165,7 +165,7 @@
                 if (has_{{memberName}})
             {% endif %}
             {
-            result += std::strlen(record.{{memberName}});
+            result += Align(std::strlen(record.{{memberName}}), kWireBufferAlignment);
             }
         {% endfor %}
 
@@ -178,7 +178,9 @@
                 {% if member.annotation != "value" %}
                     {{ assert(member.annotation != "const*const*") }}
                     auto memberLength = {{member_length(member, "record.")}};
-                    result += memberLength * {{member_transfer_sizeof(member)}};
+                    auto size = WireAlignSizeofN<{{member_transfer_type(member)}}>(memberLength);
+                    ASSERT(size);
+                    result += *size;
                     //* Structures might contain more pointers so we need to add their extra size as well.
                     {% if member.type.category == "structure" %}
                         for (decltype(memberLength) i = 0; i < memberLength; ++i) {
@@ -431,7 +433,7 @@
     {% set Cmd = Name + "Cmd" %}
 
     size_t {{Cmd}}::GetRequiredSize() const {
-        size_t size = sizeof({{Name}}Transfer) + {{Name}}GetExtraRequiredSize(*this);
+        size_t size = WireAlignSizeof<{{Name}}Transfer>() + {{Name}}GetExtraRequiredSize(*this);
         return size;
     }
 
@@ -509,7 +511,7 @@
                     ) %}
                         case {{as_cEnum(types["s type"].name, sType.name)}}: {
                             const auto& typedStruct = *reinterpret_cast<{{as_cType(sType.name)}} const *>(chainedStruct);
-                            result += sizeof({{as_cType(sType.name)}}Transfer);
+                            result += WireAlignSizeof<{{as_cType(sType.name)}}Transfer>();
                             result += {{as_cType(sType.name)}}GetExtraRequiredSize(typedStruct);
                             chainedStruct = typedStruct.chain.next;
                             break;
@@ -519,7 +521,7 @@
                     case WGPUSType_Invalid:
                     default:
                         // Invalid enum. Reserve space just for the transfer header (sType and hasNext).
-                        result += sizeof(WGPUChainedStructTransfer);
+                        result += WireAlignSizeof<WGPUChainedStructTransfer>();
                         chainedStruct = chainedStruct->next;
                         break;
                 }
@@ -600,7 +602,7 @@
                             WIRE_TRY(deserializeBuffer->Read(&transfer));
 
                             {{CType}}* outStruct;
-                            WIRE_TRY(GetSpace(allocator, sizeof({{CType}}), &outStruct));
+                            WIRE_TRY(GetSpace(allocator, 1u, &outStruct));
                             outStruct->chain.sType = sType;
                             outStruct->chain.next = nullptr;
 
@@ -629,7 +631,7 @@
                         WIRE_TRY(deserializeBuffer->Read(&transfer));
 
                         {{ChainedStruct}}* outStruct;
-                        WIRE_TRY(GetSpace(allocator, sizeof({{ChainedStruct}}), &outStruct));
+                        WIRE_TRY(GetSpace(allocator, 1u, &outStruct));
                         outStruct->sType = WGPUSType_Invalid;
                         outStruct->next = nullptr;
 
@@ -654,13 +656,23 @@ namespace dawn::wire {
         // Always writes to |out| on success.
         template <typename T, typename N>
         WireResult GetSpace(DeserializeAllocator* allocator, N count, T** out) {
-            constexpr size_t kMaxCountWithoutOverflows = std::numeric_limits<size_t>::max() / sizeof(T);
-            if (count > kMaxCountWithoutOverflows) {
+            // Because we use this function extensively when `count` == 1, we can optimize the
+            // size computations a bit more for those cases via constexpr version of the
+            // alignment computation.
+            constexpr size_t kSizeofT = WireAlignSizeof<T>();
+            size_t size = 0;
+            if (count == 1) {
+              size = kSizeofT;
+            } else {
+              auto sizeN = WireAlignSizeofN<T>(count);
+              // A size of 0 indicates an overflow, so return an error.
+              if (!sizeN) {
                 return WireResult::FatalError;
+              }
+              size = *sizeN;
             }
 
-            size_t totalSize = sizeof(T) * count;
-            *out = static_cast<T*>(allocator->GetSpace(totalSize));
+            *out = static_cast<T*>(allocator->GetSpace(size));
             if (*out == nullptr) {
                 return WireResult::FatalError;
             }

@@ -237,12 +237,14 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data, WGPUBufferMapAsyncStatu
     cmd.readDataUpdateInfo = nullptr;
 
     const void* readData = nullptr;
+    size_t readDataUpdateInfoLength = 0;
     if (isSuccess) {
         if (isRead) {
             // Get the serialization size of the message to initialize ReadHandle data.
             readData = mProcs.bufferGetConstMappedRange(data->bufferObj, data->offset, data->size);
-            cmd.readDataUpdateInfoLength =
+            readDataUpdateInfoLength =
                 bufferData->readHandle->SizeOfSerializeDataUpdate(data->offset, data->size);
+            cmd.readDataUpdateInfoLength = readDataUpdateInfoLength;
         } else {
             ASSERT(data->mode & WGPUMapMode_Write);
             // The in-flight map request returned successfully.
@@ -259,16 +261,15 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data, WGPUBufferMapAsyncStatu
         }
     }
 
-    SerializeCommand(cmd, cmd.readDataUpdateInfoLength, [&](SerializeBuffer* serializeBuffer) {
-        if (isSuccess && isRead) {
-            char* readHandleBuffer;
-            WIRE_TRY(serializeBuffer->NextN(cmd.readDataUpdateInfoLength, &readHandleBuffer));
-            // The in-flight map request returned successfully.
-            bufferData->readHandle->SerializeDataUpdate(readData, data->offset, data->size,
-                                                        readHandleBuffer);
-        }
-        return WireResult::Success;
-    });
+    SerializeCommand(cmd, CommandExtension{readDataUpdateInfoLength, [&](char* readHandleBuffer) {
+                                               if (isSuccess && isRead) {
+                                                   // The in-flight map request returned
+                                                   // successfully.
+                                                   bufferData->readHandle->SerializeDataUpdate(
+                                                       readData, data->offset, data->size,
+                                                       readHandleBuffer);
+                                               }
+                                           }});
 }
 
 }  // namespace dawn::wire::server
