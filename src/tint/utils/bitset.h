@@ -92,6 +92,25 @@ class Bitset {
         return Bit{word, mask};
     }
 
+    /// Const index operator
+    /// @param index the index of the bit to access
+    /// @return bool value of the indexed bit
+    bool operator[](size_t index) const {
+        const auto& word = vec_[index / kWordBits];
+        auto mask = static_cast<Word>(1) << (index % kWordBits);
+        return word & mask;
+    }
+
+    /// @returns true iff the all bits are unset (0)
+    bool AllBitsZero() const {
+        for (auto word : vec_) {
+            if (word) {
+                return false;
+            }
+        }
+        return true;
+    }
+
   private:
     Vector<size_t, NumWords(N)> vec_;
     size_t len_ = 0;

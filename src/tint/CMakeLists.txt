@@ -475,6 +475,8 @@ list(APPEND TINT_LIB_SRCS
   transform/substitute_override.h
   transform/transform.cc
   transform/transform.h
+  transform/truncate_interstage_variables.cc
+  transform/truncate_interstage_variables.h
   transform/unshadow.cc
   transform/unshadow.h
   transform/utils/get_insertion_point.cc
@@ -1209,6 +1211,7 @@ if(TINT_BUILD_TESTS)
       transform/std140_test.cc
       transform/substitute_override_test.cc
       transform/test_helper.h
+      transform/truncate_interstage_variables_test.cc
       transform/unshadow_test.cc
       transform/var_for_dynamic_index_test.cc
       transform/vectorize_matrix_conversions_test.cc

@@ -26,6 +26,32 @@ TEST(Bitset, Length) {
     EXPECT_EQ(bits.Length(), 100u);
 }
 
+TEST(Bitset, AllBitsZero) {
+    Bitset<8> bits;
+    EXPECT_TRUE(bits.AllBitsZero());
+
+    bits.Resize(4u);
+    EXPECT_TRUE(bits.AllBitsZero());
+
+    bits.Resize(100u);
+    EXPECT_TRUE(bits.AllBitsZero());
+
+    bits[63] = true;
+    EXPECT_FALSE(bits.AllBitsZero());
+
+    bits.Resize(60);
+    EXPECT_TRUE(bits.AllBitsZero());
+
+    bits.Resize(64);
+    EXPECT_TRUE(bits.AllBitsZero());
+
+    bits[4] = true;
+    EXPECT_FALSE(bits.AllBitsZero());
+
+    bits.Resize(8);
+    EXPECT_FALSE(bits.AllBitsZero());
+}
+
 TEST(Bitset, InitCleared_NoSpill) {
     Bitset<256> bits;
     bits.Resize(256);
