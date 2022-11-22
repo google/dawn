@@ -38,6 +38,7 @@ class ForLoopStatement;
 class Function;
 class IfStatement;
 class LoopStatement;
+class LiteralExpression;
 class ReturnStatement;
 class Statement;
 class WhileStatement;
@@ -133,6 +134,36 @@ class BuilderImpl {
     /// @param stmt the break-if statement
     /// @returns true if successful, false otherwise.
     bool EmitBreakIf(const ast::BreakIfStatement* stmt);
+
+    /// Emits an expression
+    /// @param expr the expression to emit
+    /// @returns true if successful, false otherwise
+    bool EmitExpression(const ast::Expression* expr);
+
+    /// Emits a variable
+    /// @param var the variable to emit
+    /// @returns true if successful, false otherwise
+    bool EmitVariable(const ast::Variable* var);
+
+    /// Emits a literal expression
+    /// @param lit the literal to emit
+    /// @returns true if successful, false otherwise
+    bool EmitLiteral(const ast::LiteralExpression* lit);
+
+    /// Emits a type
+    /// @param ty the type to emit
+    /// @returns true if successful, false otherwise
+    bool EmitType(const ast::Type* ty);
+
+    /// Emits a set of attributes
+    /// @param attrs the attributes to emit
+    /// @returns true if successful, false otherwise
+    bool EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs);
+
+    /// Emits an attribute
+    /// @param attr the attribute to emit
+    /// @returns true if successful, false otherwise
+    bool EmitAttribute(const ast::Attribute* attr);
 
     /// Retrieve the IR Flow node for a given AST node.
     /// @param n the node to lookup

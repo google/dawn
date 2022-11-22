@@ -22,11 +22,13 @@
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/function.h"
 #include "src/tint/ast/if_statement.h"
+#include "src/tint/ast/literal_expression.h"
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/statement.h"
 #include "src/tint/ast/static_assert.h"
 #include "src/tint/ast/switch_statement.h"
+#include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/if.h"
@@ -115,23 +117,14 @@ ResultType BuilderImpl::Build() {
     for (auto* decl : sem->DependencyOrderedDeclarations()) {
         bool ok = tint::Switch(
             decl,  //
-            // [&](const ast::Struct* str) {
-            //   return false;
-            // },
+            // [&](const ast::Struct* str) { },
             [&](const ast::Alias*) {
                 // Folded away and doesn't appear in the IR.
                 return true;
             },
-            // [&](const ast::Const*) {
-            //   return false;
-            // },
-            // [&](const ast::Override*) {
-            //   return false;
-            // },
+            // [&](const ast::Variable* var) { },
             [&](const ast::Function* func) { return EmitFunction(func); },
-            // [&](const ast::Enable*) {
-            //   return false;
-            // },
+            // [&](const ast::Enable*) { },
             [&](const ast::StaticAssert*) {
                 // Evaluated by the resolver, drop from the IR.
                 return true;
@@ -202,20 +195,21 @@ bool BuilderImpl::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) 
 bool BuilderImpl::EmitStatement(const ast::Statement* stmt) {
     return tint::Switch(
         stmt,
-        //        [&](const ast::AssignmentStatement* a) { },
+        // [&](const ast::AssignmentStatement* a) { },
         [&](const ast::BlockStatement* b) { return EmitBlock(b); },
         [&](const ast::BreakStatement* b) { return EmitBreak(b); },
         [&](const ast::BreakIfStatement* b) { return EmitBreakIf(b); },
-        //        [&](const ast::CallStatement* c) { },
+        // [&](const ast::CallStatement* c) { },
+        // [&](const ast::CompoundAssignmentStatement* c) { },
         [&](const ast::ContinueStatement* c) { return EmitContinue(c); },
-        //        [&](const ast::DiscardStatement* d) { },
+        // [&](const ast::DiscardStatement* d) { },
         [&](const ast::IfStatement* i) { return EmitIf(i); },
         [&](const ast::LoopStatement* l) { return EmitLoop(l); },
         [&](const ast::ForLoopStatement* l) { return EmitForLoop(l); },
         [&](const ast::WhileStatement* l) { return EmitWhile(l); },
         [&](const ast::ReturnStatement* r) { return EmitReturn(r); },
         [&](const ast::SwitchStatement* s) { return EmitSwitch(s); },
-        //        [&](const ast::VariableDeclStatement* v) { },
+        [&](const ast::VariableDeclStatement* v) { return EmitVariable(v->variable); },
         [&](const ast::StaticAssert*) {
             return true;  // Not emitted
         },
@@ -497,6 +491,127 @@ bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
     BranchTo(loop->start_target);
 
     return true;
+}
+
+bool BuilderImpl::EmitExpression(const ast::Expression* expr) {
+    return tint::Switch(
+        expr,
+        // [&](const ast::IndexAccessorExpression* a) { return EmitIndexAccessor(a); },
+        // [&](const ast::BinaryExpression* b) { return EmitBinary(b); },
+        // [&](const ast::BitcastExpression* b) { return EmitBitcast(b); },
+        // [&](const ast::CallExpression* c) { return EmitCall(c); },
+        // [&](const ast::IdentifierExpression* i) { return EmitIdentifier(i); },
+        [&](const ast::LiteralExpression* l) { return EmitLiteral(l); },
+        // [&](const ast::MemberAccessorExpression* m) { return EmitMemberAccessor(m); },
+        // [&](const ast::PhonyExpression*) { return true; },
+        // [&](const ast::UnaryOpExpression* u) { return EmitUnaryOp(u); },
+        [&](Default) {
+            diagnostics_.add_warning(
+                tint::diag::System::IR,
+                "unknown expression type: " + std::string(expr->TypeInfo().name), expr->source);
+            return false;
+        });
+}
+
+bool BuilderImpl::EmitVariable(const ast::Variable* var) {
+    return tint::Switch(  //
+        var,
+        // [&](const ast::Var* var) {},
+        // [&](const ast::Let*) {},
+        // [&](const ast::Override*) { },
+        // [&](const ast::Const* c) { },
+        [&](Default) {
+            diagnostics_.add_warning(tint::diag::System::IR,
+                                     "unknown variable: " + std::string(var->TypeInfo().name),
+                                     var->source);
+            return false;
+        });
+}
+
+bool BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {
+    return tint::Switch(  //
+        lit,
+        // [&](const ast::BoolLiteralExpression* l) { },
+        // [&](const ast::FloatLiteralExpression* l) { },
+        // [&](const ast::IntLiteralExpression* l) { },
+        [&](Default) {
+            diagnostics_.add_warning(tint::diag::System::IR,
+                                     "unknown literal type: " + std::string(lit->TypeInfo().name),
+                                     lit->source);
+            return false;
+        });
+}
+
+bool BuilderImpl::EmitType(const ast::Type* ty) {
+    return tint::Switch(
+        ty,
+        // [&](const ast::Array* ary) { },
+        // [&](const ast::Bool* b) { },
+        // [&](const ast::F32* f) { },
+        // [&](const ast::F16* f) { },
+        // [&](const ast::I32* i) { },
+        // [&](const ast::U32* u) { },
+        // [&](const ast::Vector* v) { },
+        // [&](const ast::Matrix* mat) { },
+        // [&](const ast::Pointer* ptr) { },'
+        // [&](const ast::Atomic* a) { },
+        // [&](const ast::Sampler* s) { },
+        // [&](const ast::ExternalTexture* t) { },
+        // [&](const ast::Texture* t) {
+        //      return tint::Switch(
+        //          t,
+        //          [&](const ast::DepthTexture*) { },
+        //          [&](const ast::DepthMultisampledTexture*) { },
+        //          [&](const ast::SampledTexture*) { },
+        //          [&](const ast::MultisampledTexture*) { },
+        //          [&](const ast::StorageTexture*) {  },
+        //          [&](Default) {
+        //              diagnostics_.add_warning(tint::diag::System::IR,
+        //                  "unknown texture: " + std::string(t->TypeInfo().name), t->source);
+        //              return false;
+        //          });
+        // },
+        // [&](const ast::Void* v) { },
+        // [&](const ast::TypeName* tn) { },
+        [&](Default) {
+            diagnostics_.add_warning(tint::diag::System::IR,
+                                     "unknown type: " + std::string(ty->TypeInfo().name),
+                                     ty->source);
+            return false;
+        });
+}
+
+bool BuilderImpl::EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs) {
+    for (auto* attr : attrs) {
+        if (!EmitAttribute(attr)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool BuilderImpl::EmitAttribute(const ast::Attribute* attr) {
+    return tint::Switch(  //
+        attr,
+        // [&](const ast::WorkgroupAttribute* wg) {},
+        // [&](const ast::StageAttribute* s) {},
+        // [&](const ast::BindingAttribute* b) {},
+        // [&](const ast::GroupAttribute* g) {},
+        // [&](const ast::LocationAttribute* l) {},
+        // [&](const ast::BuiltinAttribute* b) {},
+        // [&](const ast::InterpolateAttribute* i) {},
+        // [&](const ast::InvariantAttribute* i) {},
+        // [&](const ast::IdAttribute* i) {},
+        // [&](const ast::StructMemberSizeAttribute* s) {},
+        // [&](const ast::StructMemberAlignAttribute* a) {},
+        // [&](const ast::StrideAttribute* s) {}
+        // [&](const ast::InternalAttribute *i) {},
+        [&](Default) {
+            diagnostics_.add_warning(tint::diag::System::IR,
+                                     "unknown attribute: " + std::string(attr->TypeInfo().name),
+                                     attr->source);
+            return false;
+        });
 }
 
 }  // namespace tint::ir
