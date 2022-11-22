@@ -1,11 +1,7 @@
 #version 310 es
 
-int tint_int_dot(ivec4 a, ivec4 b) {
-  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
-}
-
 void dot_ef6b1d() {
-  int res = tint_int_dot(ivec4(1), ivec4(1));
+  int res = 4;
 }
 
 vec4 vertex_main() {
@@ -24,12 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-int tint_int_dot(ivec4 a, ivec4 b) {
-  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
-}
-
 void dot_ef6b1d() {
-  int res = tint_int_dot(ivec4(1), ivec4(1));
+  int res = 4;
 }
 
 void fragment_main() {
@@ -42,12 +34,8 @@ void main() {
 }
 #version 310 es
 
-int tint_int_dot(ivec4 a, ivec4 b) {
-  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
-}
-
 void dot_ef6b1d() {
-  int res = tint_int_dot(ivec4(1), ivec4(1));
+  int res = 4;
 }
 
 void compute_main() {

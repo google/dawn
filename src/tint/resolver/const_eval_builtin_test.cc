@@ -792,9 +792,59 @@ INSTANTIATE_TEST_SUITE_P(  //
     ResolverConstEvalBuiltinTest,
     testing::Combine(testing::Values(sem::BuiltinType::kCross),
                      testing::ValuesIn(Concat(CrossCases<AFloat>(),  //
-                                              CrossCases<f32>(),
-                                              CrossCases<f32>(),  //
+                                              CrossCases<f32>(),     //
                                               CrossCases<f16>()))));
+
+template <typename T>
+std::vector<Case> DotCases() {
+    auto r = std::vector<Case>{
+        C({Vec(T(0), T(0)), Vec(T(0), T(0))}, Val(T(0))),
+        C({Vec(T(0), T(0), T(0)), Vec(T(0), T(0), T(0))}, Val(T(0))),
+        C({Vec(T(0), T(0), T(0), T(0)), Vec(T(0), T(0), T(0), T(0))}, Val(T(0))),
+        C({Vec(T(1), T(2), T(3), T(4)), Vec(T(5), T(6), T(7), T(8))}, Val(T(70))),
+
+        C({Vec(T(1), T(1)), Vec(T(1), T(1))}, Val(T(2))),
+        C({Vec(T(1), T(2)), Vec(T(2), T(1))}, Val(T(4))),
+        C({Vec(T(2), T(2)), Vec(T(2), T(2))}, Val(T(8))),
+
+        C({Vec(T::Highest(), T::Highest()), Vec(T(1), T(0))}, Val(T::Highest())),
+        C({Vec(T::Lowest(), T::Lowest()), Vec(T(1), T(0))}, Val(T::Lowest())),
+    };
+
+    if constexpr (IsAbstract<T> || IsFloatingPoint<T>) {
+        auto error_msg = [](auto a, const char* op, auto b) {
+            return "12:34 error: " + OverflowErrorMessage(a, op, b) + R"(
+12:34 note: when calculating dot)";
+        };
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   E({Vec(T::Highest(), T::Highest()), Vec(T(1), T(1))},
+                     error_msg(T::Highest(), "+", T::Highest())),
+                   E({Vec(T::Lowest(), T::Lowest()), Vec(T(1), T(1))},
+                     error_msg(T::Lowest(), "+", T::Lowest())),
+               });
+    } else {
+        // Overflow is not an error for concrete integrals
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   C({Vec(T::Highest(), T::Highest()), Vec(T(1), T(1))},
+                     Val(Add(T::Highest(), T::Highest()))),
+                   C({Vec(T::Lowest(), T::Lowest()), Vec(T(1), T(1))},
+                     Val(Add(T::Lowest(), T::Lowest()))),
+               });
+    }
+    return r;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Dot,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kDot),
+                     testing::ValuesIn(Concat(DotCases<AInt>(),    //
+                                              DotCases<i32>(),     //
+                                              DotCases<u32>(),     //
+                                              DotCases<AFloat>(),  //
+                                              DotCases<f32>(),     //
+                                              DotCases<f16>()))));
 
 template <typename T>
 std::vector<Case> FirstLeadingBitCases() {

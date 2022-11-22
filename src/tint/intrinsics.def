@@ -445,7 +445,7 @@ fn arrayLength<T, A: access>(ptr<storage, array<T>, A>) -> u32
 fn determinant<N: num, T: f32_f16>(mat<N, N, T>) -> T
 fn distance<T: f32_f16>(T, T) -> T
 fn distance<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> T
-fn dot<N: num, T: fiu32_f16>(vec<N, T>, vec<N, T>) -> T
+@const fn dot<N: num, T: fia_fiu32_f16>(vec<N, T>, vec<N, T>) -> T
 fn dot4I8Packed(u32, u32) -> i32
 fn dot4U8Packed(u32, u32) -> u32
 @stage("fragment") fn dpdx(f32) -> f32

@@ -1969,6 +1969,36 @@ ConstEval::Result ConstEval::degrees(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0]);
 }
 
+ConstEval::Result ConstEval::dot(const sem::Type* ty,
+                                 utils::VectorRef<const sem::Constant*> args,
+                                 const Source& source) {
+    auto calculate = [&]() -> ImplResult {
+        auto* v1 = args[0];
+        auto* v2 = args[1];
+        auto* vec_ty = v1->Type()->As<sem::Vector>();
+        switch (vec_ty->Width()) {
+            case 2:
+                return Dispatch_fia_fiu32_f16(Dot2Func(source, ty), v1->Index(0), v1->Index(1),
+                                              v2->Index(0), v2->Index(1));
+            case 3:
+                return Dispatch_fia_fiu32_f16(Dot3Func(source, ty), v1->Index(0), v1->Index(1),
+                                              v1->Index(2), v2->Index(0), v2->Index(1),
+                                              v2->Index(2));
+            case 4:
+                return Dispatch_fia_fiu32_f16(Dot4Func(source, ty), v1->Index(0), v1->Index(1),
+                                              v1->Index(2), v1->Index(3), v2->Index(0),
+                                              v2->Index(1), v2->Index(2), v2->Index(3));
+        }
+        TINT_ICE(Resolver, builder.Diagnostics()) << "Expected scalar or vector";
+        return utils::Failure;
+    };
+    auto r = calculate();
+    if (!r) {
+        AddNote("when calculating dot", source);
+    }
+    return r;
+}
+
 ConstEval::Result ConstEval::extractBits(const sem::Type* ty,
                                          utils::VectorRef<const sem::Constant*> args,
                                          const Source& source) {

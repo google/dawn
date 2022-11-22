@@ -1,13 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-
-template<typename T>
-T tint_dot2(vec<T,2> a, vec<T,2> b) {
-  return a[0]*b[0] + a[1]*b[1];
-}
 void dot_fc5f7c() {
-  int res = tint_dot2(int2(1), int2(1));
+  int res = 2;
 }
 
 struct tint_symbol {

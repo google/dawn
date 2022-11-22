@@ -107,6 +107,19 @@ inline constexpr Number<T> Mul(Number<T> v1, Number<T> v2) {
 }
 TINT_END_DISABLE_WARNING(CONSTANT_OVERFLOW);
 
+TINT_BEGIN_DISABLE_WARNING(CONSTANT_OVERFLOW);
+template <typename T>
+inline constexpr Number<T> Add(Number<T> v1, Number<T> v2) {
+    if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
+        // For signed integrals, avoid C++ UB by adding as unsigned
+        using UT = std::make_unsigned_t<T>;
+        return static_cast<Number<T>>(static_cast<UT>(v1) + static_cast<UT>(v2));
+    } else {
+        return static_cast<Number<T>>(v1 + v2);
+    }
+}
+TINT_END_DISABLE_WARNING(CONSTANT_OVERFLOW);
+
 // Concats any number of std::vectors
 template <typename Vec, typename... Vecs>
 [[nodiscard]] inline auto Concat(Vec&& v1, Vecs&&... vs) {

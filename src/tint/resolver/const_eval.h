@@ -539,7 +539,6 @@ class ConstEval {
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
-    /// degrees builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location of the conversion
@@ -547,6 +546,15 @@ class ConstEval {
     Result degrees(const sem::Type* ty,
                    utils::VectorRef<const sem::Constant*> args,
                    const Source& source);
+
+    /// dot builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result dot(const sem::Type* ty,
+               utils::VectorRef<const sem::Constant*> args,
+               const Source& source);
 
     /// extractBits builtin
     /// @param ty the expression type

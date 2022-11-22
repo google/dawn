@@ -2062,7 +2062,7 @@ TEST_F(ResolverBuiltinTest, Dot_Error_Scalar) {
               R"(error: no matching call to dot(f32, f32)
 
 1 candidate function:
-  dot(vecN<T>, vecN<T>) -> T  where: T is f32, i32, u32 or f16
+  dot(vecN<T>, vecN<T>) -> T  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
 )");
 }
 

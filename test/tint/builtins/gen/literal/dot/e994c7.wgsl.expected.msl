@@ -1,13 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-
-template<typename T>
-T tint_dot4(vec<T,4> a, vec<T,4> b) {
-  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
-}
 void dot_e994c7() {
-  uint res = tint_dot4(uint4(1u), uint4(1u));
+  uint res = 4u;
 }
 
 struct tint_symbol {
