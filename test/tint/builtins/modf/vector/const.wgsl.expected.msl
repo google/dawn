@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+struct modf_result_vec2 {
+  float2 fract;
+  float2 whole;
+};
+kernel void tint_symbol() {
+  modf_result_vec2 const res = modf_result_vec2{.fract=float2(0.230000019f, 0.450000048f), .whole=float2(1.0f, 3.0f)};
+  float2 const fract = res.fract;
+  float2 const whole = res.whole;
+  return;
+}
+

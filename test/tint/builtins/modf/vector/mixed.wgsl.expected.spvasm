@@ -1,0 +1,51 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 31
+; Schema: 0
+               OpCapability Shader
+         %22 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %__modf_result_vec2 "__modf_result_vec2"
+               OpMemberName %__modf_result_vec2 0 "fract"
+               OpMemberName %__modf_result_vec2 1 "whole"
+               OpName %res "res"
+               OpMemberDecorate %__modf_result_vec2 0 Offset 0
+               OpMemberDecorate %__modf_result_vec2 1 Offset 8
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+%float_1_23000002 = OpConstant %float 1.23000002
+%float_3_45000005 = OpConstant %float 3.45000005
+          %9 = OpConstantComposite %v2float %float_1_23000002 %float_3_45000005
+%__modf_result_vec2 = OpTypeStruct %v2float %v2float
+%float_0_230000019 = OpConstant %float 0.230000019
+%float_0_450000048 = OpConstant %float 0.450000048
+         %13 = OpConstantComposite %v2float %float_0_230000019 %float_0_450000048
+    %float_1 = OpConstant %float 1
+    %float_3 = OpConstant %float 3
+         %16 = OpConstantComposite %v2float %float_1 %float_3
+         %17 = OpConstantComposite %__modf_result_vec2 %13 %16
+%_ptr_Function___modf_result_vec2 = OpTypePointer Function %__modf_result_vec2
+         %20 = OpConstantNull %__modf_result_vec2
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+     %uint_1 = OpConstant %uint 1
+       %main = OpFunction %void None %1
+          %4 = OpLabel
+        %res = OpVariable %_ptr_Function___modf_result_vec2 Function %20
+               OpStore %res %17
+         %21 = OpExtInst %__modf_result_vec2 %22 ModfStruct %9
+               OpStore %res %21
+               OpStore %res %17
+         %26 = OpAccessChain %_ptr_Function_v2float %res %uint_0
+         %27 = OpLoad %v2float %26
+         %29 = OpAccessChain %_ptr_Function_v2float %res %uint_1
+         %30 = OpLoad %v2float %29
+               OpReturn
+               OpFunctionEnd

@@ -1,0 +1,44 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 24
+; Schema: 0
+               OpCapability Shader
+         %15 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %__modf_result "__modf_result"
+               OpMemberName %__modf_result 0 "fract"
+               OpMemberName %__modf_result 1 "whole"
+               OpName %res "res"
+               OpMemberDecorate %__modf_result 0 Offset 0
+               OpMemberDecorate %__modf_result 1 Offset 4
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+%float_1_23000002 = OpConstant %float 1.23000002
+%__modf_result = OpTypeStruct %float %float
+%float_0_230000019 = OpConstant %float 0.230000019
+    %float_1 = OpConstant %float 1
+         %10 = OpConstantComposite %__modf_result %float_0_230000019 %float_1
+%_ptr_Function___modf_result = OpTypePointer Function %__modf_result
+         %13 = OpConstantNull %__modf_result
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Function_float = OpTypePointer Function %float
+     %uint_1 = OpConstant %uint 1
+       %main = OpFunction %void None %1
+          %4 = OpLabel
+        %res = OpVariable %_ptr_Function___modf_result Function %13
+               OpStore %res %10
+         %14 = OpExtInst %__modf_result %15 ModfStruct %float_1_23000002
+               OpStore %res %14
+               OpStore %res %10
+         %19 = OpAccessChain %_ptr_Function_float %res %uint_0
+         %20 = OpLoad %float %19
+         %22 = OpAccessChain %_ptr_Function_float %res %uint_1
+         %23 = OpLoad %float %22
+               OpReturn
+               OpFunctionEnd
