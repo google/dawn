@@ -2219,6 +2219,79 @@ ConstEval::Result ConstEval::floor(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0]);
 }
 
+ConstEval::Result ConstEval::frexp(const sem::Type* ty,
+                                   utils::VectorRef<const sem::Constant*> args,
+                                   const Source& source) {
+    auto* arg = args[0];
+
+    struct FractExp {
+        ImplResult fract;
+        ImplResult exp;
+    };
+
+    auto scalar = [&](const sem::Constant* s) {
+        int exp = 0;
+        double fract = std::frexp(s->As<AFloat>(), &exp);
+        return Switch(
+            s->Type(),
+            [&](const sem::F32*) {
+                return FractExp{
+                    CreateElement(builder, source, builder.create<sem::F32>(), f32(fract)),
+                    CreateElement(builder, source, builder.create<sem::I32>(), i32(exp)),
+                };
+            },
+            [&](const sem::F16*) {
+                return FractExp{
+                    CreateElement(builder, source, builder.create<sem::F16>(), f16(fract)),
+                    CreateElement(builder, source, builder.create<sem::I32>(), i32(exp)),
+                };
+            },
+            [&](const sem::AbstractFloat*) {
+                return FractExp{
+                    CreateElement(builder, source, builder.create<sem::AbstractFloat>(),
+                                  AFloat(fract)),
+                    CreateElement(builder, source, builder.create<sem::AbstractInt>(), AInt(exp)),
+                };
+            },
+            [&](Default) {
+                TINT_ICE(Resolver, builder.Diagnostics())
+                    << "unhandled element type for frexp() const-eval: "
+                    << builder.FriendlyName(s->Type());
+                return FractExp{utils::Failure, utils::Failure};
+            });
+    };
+
+    if (auto* vec = arg->Type()->As<sem::Vector>()) {
+        utils::Vector<const sem::Constant*, 4> fract_els;
+        utils::Vector<const sem::Constant*, 4> exp_els;
+        for (uint32_t i = 0; i < vec->Width(); i++) {
+            auto fe = scalar(arg->Index(i));
+            if (!fe.fract || !fe.exp) {
+                return utils::Failure;
+            }
+            fract_els.Push(fe.fract.Get());
+            exp_els.Push(fe.exp.Get());
+        }
+        auto fract_ty = builder.create<sem::Vector>(fract_els[0]->Type(), vec->Width());
+        auto exp_ty = builder.create<sem::Vector>(exp_els[0]->Type(), vec->Width());
+        return CreateComposite(builder, ty,
+                               utils::Vector<const sem::Constant*, 2>{
+                                   CreateComposite(builder, fract_ty, std::move(fract_els)),
+                                   CreateComposite(builder, exp_ty, std::move(exp_els)),
+                               });
+    } else {
+        auto fe = scalar(arg);
+        if (!fe.fract || !fe.exp) {
+            return utils::Failure;
+        }
+        return CreateComposite(builder, ty,
+                               utils::Vector<const sem::Constant*, 2>{
+                                   fe.fract.Get(),
+                                   fe.exp.Get(),
+                               });
+    }
+}
+
 ConstEval::Result ConstEval::insertBits(const sem::Type* ty,
                                         utils::VectorRef<const sem::Constant*> args,
                                         const Source& source) {

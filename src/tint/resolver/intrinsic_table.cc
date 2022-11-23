@@ -855,6 +855,7 @@ const sem::Struct* build_modf_result(MatchState& state, const sem::Type* el) {
             return nullptr;
         });
 }
+
 const sem::Struct* build_modf_result_vec(MatchState& state, Number& n, const sem::Type* el) {
     auto prefix = "__modf_result_vec" + std::to_string(n.Value());
     auto build_f32 = [&] {
@@ -883,27 +884,70 @@ const sem::Struct* build_modf_result_vec(MatchState& state, Number& n, const sem
             return nullptr;
         });
 }
+
 const sem::Struct* build_frexp_result(MatchState& state, const sem::Type* el) {
-    std::string display_name;
-    if (el->Is<sem::F16>()) {
-        display_name = "__frexp_result_f16";
-    } else {
-        display_name = "__frexp_result";
-    }
-    auto* i32 = state.builder.create<sem::I32>();
-    return build_struct(state.builder, display_name, {{"fract", el}, {"exp", i32}});
+    auto build_f32 = [&] {
+        auto* f = state.builder.create<sem::F32>();
+        auto* i = state.builder.create<sem::I32>();
+        return build_struct(state.builder, "__frexp_result", {{"fract", f}, {"exp", i}});
+    };
+    auto build_f16 = [&] {
+        auto* f = state.builder.create<sem::F16>();
+        auto* i = state.builder.create<sem::I32>();
+        return build_struct(state.builder, "__frexp_result_f16", {{"fract", f}, {"exp", i}});
+    };
+
+    return Switch(
+        el,                                            //
+        [&](const sem::F32*) { return build_f32(); },  //
+        [&](const sem::F16*) { return build_f16(); },  //
+        [&](const sem::AbstractFloat*) {
+            auto* i = state.builder.create<sem::AbstractInt>();
+            auto* abstract =
+                build_struct(state.builder, "__frexp_result_abstract", {{"fract", el}, {"exp", i}});
+            abstract->SetConcreteTypes(utils::Vector{build_f32(), build_f16()});
+            return abstract;
+        },
+        [&](Default) {
+            TINT_ICE(Resolver, state.builder.Diagnostics())
+                << "unhandled frexp type: " << state.builder.FriendlyName(el);
+            return nullptr;
+        });
 }
+
 const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n, const sem::Type* el) {
-    std::string display_name;
-    if (el->Is<sem::F16>()) {
-        display_name = "__frexp_result_vec" + std::to_string(n.Value()) + "_f16";
-    } else {
-        display_name = "__frexp_result_vec" + std::to_string(n.Value());
-    }
-    auto* vec = state.builder.create<sem::Vector>(el, n.Value());
-    auto* vec_i32 = state.builder.create<sem::Vector>(state.builder.create<sem::I32>(), n.Value());
-    return build_struct(state.builder, display_name, {{"fract", vec}, {"exp", vec_i32}});
+    auto prefix = "__frexp_result_vec" + std::to_string(n.Value());
+    auto build_f32 = [&] {
+        auto* f = state.builder.create<sem::Vector>(state.builder.create<sem::F32>(), n.Value());
+        auto* e = state.builder.create<sem::Vector>(state.builder.create<sem::I32>(), n.Value());
+        return build_struct(state.builder, prefix, {{"fract", f}, {"exp", e}});
+    };
+    auto build_f16 = [&] {
+        auto* f = state.builder.create<sem::Vector>(state.builder.create<sem::F16>(), n.Value());
+        auto* e = state.builder.create<sem::Vector>(state.builder.create<sem::I32>(), n.Value());
+        return build_struct(state.builder, prefix + "_f16", {{"fract", f}, {"exp", e}});
+    };
+
+    return Switch(
+        el,                                            //
+        [&](const sem::F32*) { return build_f32(); },  //
+        [&](const sem::F16*) { return build_f16(); },  //
+        [&](const sem::AbstractFloat*) {
+            auto* f = state.builder.create<sem::Vector>(el, n.Value());
+            auto* e = state.builder.create<sem::Vector>(state.builder.create<sem::AbstractInt>(),
+                                                        n.Value());
+            auto* abstract =
+                build_struct(state.builder, prefix + "_abstract", {{"fract", f}, {"exp", e}});
+            abstract->SetConcreteTypes(utils::Vector{build_f32(), build_f16()});
+            return abstract;
+        },
+        [&](Default) {
+            TINT_ICE(Resolver, state.builder.Diagnostics())
+                << "unhandled frexp type: " << state.builder.FriendlyName(el);
+            return nullptr;
+        });
 }
+
 const sem::Struct* build_atomic_compare_exchange_result(MatchState& state, const sem::Type* ty) {
     return build_struct(
         state.builder,

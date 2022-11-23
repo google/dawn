@@ -6,14 +6,8 @@ struct frexp_result_vec2 {
   float2 fract;
   int2 exp;
 };
-frexp_result_vec2 tint_frexp(float2 param_0) {
-  frexp_result_vec2 result;
-  result.fract = frexp(param_0, result.exp);
-  return result;
-}
-
 void frexp_eb2421() {
-  frexp_result_vec2 res = tint_frexp(float2(1.0f));
+  frexp_result_vec2 res = frexp_result_vec2{.fract=float2(0.5f), .exp=int2(1)};
 }
 
 struct tint_symbol {

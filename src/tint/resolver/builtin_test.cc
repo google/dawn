@@ -1079,54 +1079,8 @@ TEST_F(ResolverBuiltinFloatTest, Frexp_Error_FirstParamInt) {
               R"(error: no matching call to frexp(i32, ptr<workgroup, i32, read_write>)
 
 2 candidate functions:
-  frexp(T) -> __frexp_result_T  where: T is f32 or f16
-  frexp(vecN<T>) -> __frexp_result_vecN_T  where: T is f32 or f16
-)");
-}
-
-TEST_F(ResolverBuiltinFloatTest, Frexp_Error_SecondParamFloatPtr) {
-    GlobalVar("v", ty.f32(), ast::AddressSpace::kWorkgroup);
-    auto* call = Call("frexp", 1_f, AddressOf("v"));
-    WrapInFunction(call);
-
-    EXPECT_FALSE(r()->Resolve());
-
-    EXPECT_EQ(r()->error(),
-              R"(error: no matching call to frexp(f32, ptr<workgroup, f32, read_write>)
-
-2 candidate functions:
-  frexp(T) -> __frexp_result_T  where: T is f32 or f16
-  frexp(vecN<T>) -> __frexp_result_vecN_T  where: T is f32 or f16
-)");
-}
-
-TEST_F(ResolverBuiltinFloatTest, Frexp_Error_SecondParamNotAPointer) {
-    auto* call = Call("frexp", 1_f, 1_i);
-    WrapInFunction(call);
-
-    EXPECT_FALSE(r()->Resolve());
-
-    EXPECT_EQ(r()->error(), R"(error: no matching call to frexp(f32, i32)
-
-2 candidate functions:
-  frexp(T) -> __frexp_result_T  where: T is f32 or f16
-  frexp(vecN<T>) -> __frexp_result_vecN_T  where: T is f32 or f16
-)");
-}
-
-TEST_F(ResolverBuiltinFloatTest, Frexp_Error_VectorSizesDontMatch) {
-    GlobalVar("v", ty.vec4<i32>(), ast::AddressSpace::kWorkgroup);
-    auto* call = Call("frexp", vec2<f32>(1_f, 2_f), AddressOf("v"));
-    WrapInFunction(call);
-
-    EXPECT_FALSE(r()->Resolve());
-
-    EXPECT_EQ(r()->error(),
-              R"(error: no matching call to frexp(vec2<f32>, ptr<workgroup, vec4<i32>, read_write>)
-
-2 candidate functions:
-  frexp(T) -> __frexp_result_T  where: T is f32 or f16
-  frexp(vecN<T>) -> __frexp_result_vecN_T  where: T is f32 or f16
+  frexp(T) -> __frexp_result_T  where: T is abstract-float, f32 or f16
+  frexp(vecN<T>) -> __frexp_result_vecN_T  where: T is abstract-float, f32 or f16
 )");
 }
 

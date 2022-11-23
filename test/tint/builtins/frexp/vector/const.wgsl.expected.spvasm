@@ -1,0 +1,35 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 19
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %__frexp_result_vec2 "__frexp_result_vec2"
+               OpMemberName %__frexp_result_vec2 0 "fract"
+               OpMemberName %__frexp_result_vec2 1 "exp"
+               OpMemberDecorate %__frexp_result_vec2 0 Offset 0
+               OpMemberDecorate %__frexp_result_vec2 1 Offset 8
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+%__frexp_result_vec2 = OpTypeStruct %v2float %v2int
+%float_0_625 = OpConstant %float 0.625
+%float_0_9375 = OpConstant %float 0.9375
+         %12 = OpConstantComposite %v2float %float_0_625 %float_0_9375
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
+         %15 = OpConstantComposite %v2int %int_1 %int_2
+         %16 = OpConstantComposite %__frexp_result_vec2 %12 %15
+       %main = OpFunction %void None %1
+          %4 = OpLabel
+         %17 = OpCompositeExtract %v2float %16 0
+         %18 = OpCompositeExtract %v2int %16 1
+               OpReturn
+               OpFunctionEnd

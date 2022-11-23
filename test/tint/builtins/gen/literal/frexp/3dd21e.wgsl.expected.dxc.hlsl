@@ -2,15 +2,8 @@ struct frexp_result_vec4_f16 {
   vector<float16_t, 4> fract;
   int4 exp;
 };
-frexp_result_vec4_f16 tint_frexp(vector<float16_t, 4> param_0) {
-  vector<float16_t, 4> exp;
-  vector<float16_t, 4> fract = frexp(param_0, exp);
-  frexp_result_vec4_f16 result = {fract, int4(exp)};
-  return result;
-}
-
 void frexp_3dd21e() {
-  frexp_result_vec4_f16 res = tint_frexp((float16_t(1.0h)).xxxx);
+  frexp_result_vec4_f16 res = {(float16_t(0.5h)).xxxx, (1).xxxx};
 }
 
 struct tint_symbol {

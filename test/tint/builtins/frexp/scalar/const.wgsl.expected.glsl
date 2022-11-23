@@ -1,0 +1,19 @@
+#version 310 es
+
+struct frexp_result {
+  float fract;
+  int exp;
+};
+
+
+void tint_symbol() {
+  frexp_result res = frexp_result(0.625f, 1);
+  float tint_symbol_2 = res.fract;
+  int tint_symbol_3 = res.exp;
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  tint_symbol();
+  return;
+}

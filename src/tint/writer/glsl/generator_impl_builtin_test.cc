@@ -668,9 +668,9 @@ void main() {
 )");
 }
 
-TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Scalar_f32) {
-    auto* call = Call("frexp", 1_f);
-    WrapInFunction(CallStmt(call));
+TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Frexp_Scalar_f32) {
+    WrapInFunction(Var("f", Expr(1_f)),  //
+                   Var("v", Call("frexp", "f")));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -690,7 +690,8 @@ frexp_result tint_frexp(float param_0) {
 
 
 void test_function() {
-  tint_frexp(1.0f);
+  float f = 1.0f;
+  frexp_result v = tint_frexp(f);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -701,11 +702,11 @@ void main() {
 )");
 }
 
-TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Scalar_f16) {
+TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Frexp_Scalar_f16) {
     Enable(ast::Extension::kF16);
 
-    auto* call = Call("frexp", 1_h);
-    WrapInFunction(CallStmt(call));
+    WrapInFunction(Var("f", Expr(1_h)),  //
+                   Var("v", Call("frexp", "f")));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -726,7 +727,8 @@ frexp_result_f16 tint_frexp(float16_t param_0) {
 
 
 void test_function() {
-  tint_frexp(1.0hf);
+  float16_t f = 1.0hf;
+  frexp_result_f16 v = tint_frexp(f);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -737,9 +739,9 @@ void main() {
 )");
 }
 
-TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Vector_f32) {
-    auto* call = Call("frexp", vec3<f32>());
-    WrapInFunction(CallStmt(call));
+TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Frexp_Vector_f32) {
+    WrapInFunction(Var("f", Expr(vec3<f32>())),  //
+                   Var("v", Call("frexp", "f")));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -759,7 +761,8 @@ frexp_result_vec3 tint_frexp(vec3 param_0) {
 
 
 void test_function() {
-  tint_frexp(vec3(0.0f));
+  vec3 f = vec3(0.0f);
+  frexp_result_vec3 v = tint_frexp(f);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -770,11 +773,11 @@ void main() {
 )");
 }
 
-TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Vector_f16) {
+TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Frexp_Vector_f16) {
     Enable(ast::Extension::kF16);
 
-    auto* call = Call("frexp", vec3<f16>());
-    WrapInFunction(CallStmt(call));
+    WrapInFunction(Var("f", Expr(vec3<f16>())),  //
+                   Var("v", Call("frexp", "f")));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -795,7 +798,118 @@ frexp_result_vec3_f16 tint_frexp(f16vec3 param_0) {
 
 
 void test_function() {
-  tint_frexp(f16vec3(0.0hf));
+  f16vec3 f = f16vec3(0.0hf);
+  frexp_result_vec3_f16 v = tint_frexp(f);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Builtin, Const_Frexp_Scalar_f32) {
+    WrapInFunction(Decl(Let("v", Call("frexp", 1_f))));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+struct frexp_result {
+  float fract;
+  int exp;
+};
+
+
+void test_function() {
+  frexp_result v = frexp_result(0.5f, 1);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Builtin, Const_Frexp_Scalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(Decl(Let("v", Call("frexp", 1_h))));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+#extension GL_AMD_gpu_shader_half_float : require
+
+struct frexp_result_f16 {
+  float16_t fract;
+  int exp;
+};
+
+
+void test_function() {
+  frexp_result_f16 v = frexp_result_f16(0.5hf, 1);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Builtin, Const_Frexp_Vector_f32) {
+    WrapInFunction(Decl(Let("v", Call("frexp", vec3<f32>()))));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+struct frexp_result_vec3 {
+  vec3 fract;
+  ivec3 exp;
+};
+
+
+void test_function() {
+  frexp_result_vec3 v = frexp_result_vec3(vec3(0.0f), ivec3(0));
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Builtin, Const_Frexp_Vector_f16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(Decl(Let("v", Call("frexp", vec3<f16>()))));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+#extension GL_AMD_gpu_shader_half_float : require
+
+struct frexp_result_vec3_f16 {
+  f16vec3 fract;
+  ivec3 exp;
+};
+
+
+void test_function() {
+  frexp_result_vec3_f16 v = frexp_result_vec3_f16(f16vec3(0.0hf), ivec3(0));
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -815,20 +929,8 @@ TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Sig_Deprecation) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
-struct frexp_result {
-  float fract;
-  int exp;
-};
-
-frexp_result tint_frexp(float param_0) {
-  frexp_result result;
-  result.fract = frexp(param_0, result.exp);
-  return result;
-}
-
-
 void test_function() {
-  float tint_symbol = tint_frexp(1.0f).fract;
+  float tint_symbol = 0.5f;
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

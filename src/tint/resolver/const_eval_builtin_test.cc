@@ -968,6 +968,62 @@ INSTANTIATE_TEST_SUITE_P(  //
                      testing::ValuesIn(Concat(FloorCases<AFloat>(),  //
                                               FloorCases<f32>(),
                                               FloorCases<f16>()))));
+template <typename T>
+std::vector<Case> FrexpCases() {
+    using F = T;                                                         // fract type
+    using E = std::conditional_t<std::is_same_v<T, AFloat>, AInt, i32>;  // exp type
+
+    auto cases = std::vector<Case>{
+        // Scalar tests
+        //  in         fract     exp
+        C({T(-3.5)}, {F(-0.875), E(2)}),  //
+        C({T(-3.0)}, {F(-0.750), E(2)}),  //
+        C({T(-2.5)}, {F(-0.625), E(2)}),  //
+        C({T(-2.0)}, {F(-0.500), E(2)}),  //
+        C({T(-1.5)}, {F(-0.750), E(1)}),  //
+        C({T(-1.0)}, {F(-0.500), E(1)}),  //
+        C({T(+0.0)}, {F(+0.000), E(0)}),  //
+        C({T(+1.0)}, {F(+0.500), E(1)}),  //
+        C({T(+1.5)}, {F(+0.750), E(1)}),  //
+        C({T(+2.0)}, {F(+0.500), E(2)}),  //
+        C({T(+2.5)}, {F(+0.625), E(2)}),  //
+        C({T(+3.0)}, {F(+0.750), E(2)}),  //
+        C({T(+3.5)}, {F(+0.875), E(2)}),  //
+
+        // Vector tests
+        //         in                 fract                    exp
+        C({Vec(T(-2.5), T(+1.0))}, {Vec(F(-0.625), F(+0.500)), Vec(E(2), E(1))}),
+        C({Vec(T(+3.5), T(-2.5))}, {Vec(F(+0.875), F(-0.625)), Vec(E(2), E(2))}),
+    };
+
+    ConcatIntoIf<std::is_same_v<T, f16>>(cases, std::vector<Case>{
+                                                    C({T::Highest()}, {F(0x0.ffep0), E(16)}),  //
+                                                    C({T::Lowest()}, {F(-0x0.ffep0), E(16)}),  //
+                                                    C({T::Smallest()}, {F(0.5), E(-13)}),      //
+                                                });
+
+    ConcatIntoIf<std::is_same_v<T, f32>>(cases,
+                                         std::vector<Case>{
+                                             C({T::Highest()}, {F(0x0.ffffffp0), E(128)}),  //
+                                             C({T::Lowest()}, {F(-0x0.ffffffp0), E(128)}),  //
+                                             C({T::Smallest()}, {F(0.5), E(-125)}),         //
+                                         });
+
+    ConcatIntoIf<std::is_same_v<T, AFloat>>(
+        cases, std::vector<Case>{
+                   C({T::Highest()}, {F(0x0.fffffffffffff8p0), E(1024)}),  //
+                   C({T::Lowest()}, {F(-0x0.fffffffffffff8p0), E(1024)}),  //
+                   C({T::Smallest()}, {F(0.5), E(-1021)}),                 //
+               });
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Frexp,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kFrexp),
+                     testing::ValuesIn(Concat(FrexpCases<AFloat>(),  //
+                                              FrexpCases<f32>(),     //
+                                              FrexpCases<f16>()))));
 
 template <typename T>
 std::vector<Case> InsertBitsCases() {

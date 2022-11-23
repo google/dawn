@@ -10,14 +10,8 @@ struct frexp_result {
   float fract;
   int exp;
 };
-frexp_result tint_frexp(float param_0) {
-  frexp_result result;
-  result.fract = frexp(param_0, result.exp);
-  return result;
-}
-
 kernel void tint_symbol() {
-  frexp_result const res = tint_frexp(1.230000019f);
+  frexp_result const res = frexp_result{.fract=0.61500001f, .exp=1};
   int const exp = res.exp;
   float const sig = res.fract;
   return;

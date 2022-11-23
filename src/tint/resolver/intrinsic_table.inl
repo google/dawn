@@ -12558,24 +12558,24 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 0,
-    /* template types */ &kTemplateTypes[26],
+    /* template types */ &kTemplateTypes[23],
     /* template numbers */ &kTemplateNumbers[10],
     /* parameters */ &kParameters[862],
     /* return matcher indices */ &kMatcherIndices[104],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::frexp,
   },
   {
     /* [354] */
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 1,
-    /* template types */ &kTemplateTypes[26],
+    /* template types */ &kTemplateTypes[23],
     /* template numbers */ &kTemplateNumbers[4],
     /* parameters */ &kParameters[863],
     /* return matcher indices */ &kMatcherIndices[39],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::frexp,
   },
   {
     /* [355] */
@@ -14259,8 +14259,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [40] */
-    /* fn frexp<T : f32_f16>(T) -> __frexp_result<T> */
-    /* fn frexp<N : num, T : f32_f16>(vec<N, T>) -> __frexp_result_vec<N, T> */
+    /* fn frexp<T : fa_f32_f16>(T) -> __frexp_result<T> */
+    /* fn frexp<N : num, T : fa_f32_f16>(vec<N, T>) -> __frexp_result_vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[353],
   },

@@ -477,8 +477,8 @@ fn fma<T: f32_f16>(T, T, T) -> T
 fn fma<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
 fn fract<T: f32_f16>(T) -> T
 fn fract<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn frexp<T: f32_f16>(T) -> __frexp_result<T>
-fn frexp<N: num, T: f32_f16>(vec<N, T>) -> __frexp_result_vec<N, T>
+@const fn frexp<T: fa_f32_f16>(T) -> __frexp_result<T>
+@const fn frexp<N: num, T: fa_f32_f16>(vec<N, T>) -> __frexp_result_vec<N, T>
 @stage("fragment") fn fwidth(f32) -> f32
 @stage("fragment") fn fwidth<N: num>(vec<N, f32>) -> vec<N, f32>
 @stage("fragment") fn fwidthCoarse(f32) -> f32

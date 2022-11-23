@@ -8,7 +8,6 @@ bug/tint/1757.wgsl:6:25 warning: use of deprecated language feature: 'sig' has b
 ; Bound: 13
 ; Schema: 0
                OpCapability Shader
-          %9 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -23,11 +22,12 @@ bug/tint/1757.wgsl:6:25 warning: use of deprecated language feature: 'sig' has b
       %float = OpTypeFloat 32
         %int = OpTypeInt 32 1
 %__frexp_result = OpTypeStruct %float %int
-%float_1_23000002 = OpConstant %float 1.23000002
+%float_0_61500001 = OpConstant %float 0.61500001
+      %int_1 = OpConstant %int 1
+         %10 = OpConstantComposite %__frexp_result %float_0_61500001 %int_1
        %main = OpFunction %void None %1
           %4 = OpLabel
-          %5 = OpExtInst %__frexp_result %9 FrexpStruct %float_1_23000002
-         %11 = OpCompositeExtract %int %5 1
-         %12 = OpCompositeExtract %float %5 0
+         %11 = OpCompositeExtract %int %10 1
+         %12 = OpCompositeExtract %float %10 0
                OpReturn
                OpFunctionEnd

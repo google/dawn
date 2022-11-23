@@ -5,15 +5,9 @@ struct frexp_result_vec4 {
   ivec4 exp;
 };
 
-frexp_result_vec4 tint_frexp(vec4 param_0) {
-  frexp_result_vec4 result;
-  result.fract = frexp(param_0, result.exp);
-  return result;
-}
-
 
 void frexp_77af93() {
-  frexp_result_vec4 res = tint_frexp(vec4(1.0f));
+  frexp_result_vec4 res = frexp_result_vec4(vec4(0.5f), ivec4(1));
 }
 
 vec4 vertex_main() {
@@ -37,15 +31,9 @@ struct frexp_result_vec4 {
   ivec4 exp;
 };
 
-frexp_result_vec4 tint_frexp(vec4 param_0) {
-  frexp_result_vec4 result;
-  result.fract = frexp(param_0, result.exp);
-  return result;
-}
-
 
 void frexp_77af93() {
-  frexp_result_vec4 res = tint_frexp(vec4(1.0f));
+  frexp_result_vec4 res = frexp_result_vec4(vec4(0.5f), ivec4(1));
 }
 
 void fragment_main() {
@@ -63,15 +51,9 @@ struct frexp_result_vec4 {
   ivec4 exp;
 };
 
-frexp_result_vec4 tint_frexp(vec4 param_0) {
-  frexp_result_vec4 result;
-  result.fract = frexp(param_0, result.exp);
-  return result;
-}
-
 
 void frexp_77af93() {
-  frexp_result_vec4 res = tint_frexp(vec4(1.0f));
+  frexp_result_vec4 res = frexp_result_vec4(vec4(0.5f), ivec4(1));
 }
 
 void compute_main() {

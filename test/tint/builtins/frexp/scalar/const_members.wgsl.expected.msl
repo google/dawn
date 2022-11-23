@@ -1,0 +1,16 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+struct frexp_result {
+  float fract;
+  int exp;
+};
+kernel void tint_symbol() {
+  frexp_result const tint_symbol_1 = frexp_result{.fract=0.625f, .exp=1};
+  float const fract = tint_symbol_1.fract;
+  frexp_result const tint_symbol_2 = frexp_result{.fract=0.625f, .exp=1};
+  int const exp = tint_symbol_2.exp;
+  return;
+}
+

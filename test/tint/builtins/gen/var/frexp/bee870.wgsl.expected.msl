@@ -1,0 +1,38 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+struct frexp_result {
+  float fract;
+  int exp;
+};
+void frexp_bee870() {
+  frexp_result res = frexp_result{.fract=0.5f, .exp=1};
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  frexp_bee870();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  frexp_bee870();
+  return;
+}
+
+kernel void compute_main() {
+  frexp_bee870();
+  return;
+}
+

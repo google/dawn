@@ -1320,6 +1320,94 @@ TEST_F(MaterializeAbstractStructure, Modf_Vector_ExplicitType) {
         abstract_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<sem::AbstractFloat>());
 }
 
+TEST_F(MaterializeAbstractStructure, Frexp_Scalar_DefaultType) {
+    // var v = frexp(1);
+    auto* call = Call("frexp", 1_a);
+    WrapInFunction(Decl(Var("v", call)));
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get(call);
+    ASSERT_TRUE(sem->Is<sem::Materialize>());
+    auto* materialize = sem->As<sem::Materialize>();
+    ASSERT_TRUE(materialize->Type()->Is<sem::Struct>());
+    auto* concrete_str = materialize->Type()->As<sem::Struct>();
+    ASSERT_TRUE(concrete_str->Members()[0]->Type()->Is<sem::F32>());
+    ASSERT_TRUE(concrete_str->Members()[1]->Type()->Is<sem::I32>());
+    ASSERT_TRUE(materialize->Expr()->Type()->Is<sem::Struct>());
+    auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
+    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::AbstractFloat>());
+    ASSERT_TRUE(abstract_str->Members()[1]->Type()->Is<sem::AbstractInt>());
+}
+
+TEST_F(MaterializeAbstractStructure, Frexp_Vector_DefaultType) {
+    // var v = frexp(vec2(1));
+    auto* call = Call("frexp", Construct(ty.vec2(nullptr), 1_a));
+    WrapInFunction(Decl(Var("v", call)));
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get(call);
+    ASSERT_TRUE(sem->Is<sem::Materialize>());
+    auto* materialize = sem->As<sem::Materialize>();
+    ASSERT_TRUE(materialize->Type()->Is<sem::Struct>());
+    auto* concrete_str = materialize->Type()->As<sem::Struct>();
+    ASSERT_TRUE(concrete_str->Members()[0]->Type()->Is<sem::Vector>());
+    ASSERT_TRUE(concrete_str->Members()[1]->Type()->Is<sem::Vector>());
+    ASSERT_TRUE(concrete_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+    ASSERT_TRUE(concrete_str->Members()[1]->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
+    ASSERT_TRUE(materialize->Expr()->Type()->Is<sem::Struct>());
+    auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
+    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::Vector>());
+    ASSERT_TRUE(
+        abstract_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<sem::AbstractFloat>());
+    ASSERT_TRUE(
+        abstract_str->Members()[1]->Type()->As<sem::Vector>()->type()->Is<sem::AbstractInt>());
+}
+
+TEST_F(MaterializeAbstractStructure, Frexp_Scalar_ExplicitType) {
+    // var v = frexp(1_h); // v is __frexp_result_f16
+    // v = frexp(1);       // __frexp_result_f16 <- __frexp_result_abstract
+    Enable(ast::Extension::kF16);
+    auto* call = Call("frexp", 1_a);
+    WrapInFunction(Decl(Var("v", Call("frexp", 1_h))),  //
+                   Assign("v", call));
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get(call);
+    ASSERT_TRUE(sem->Is<sem::Materialize>());
+    auto* materialize = sem->As<sem::Materialize>();
+    ASSERT_TRUE(materialize->Type()->Is<sem::Struct>());
+    auto* concrete_str = materialize->Type()->As<sem::Struct>();
+    ASSERT_TRUE(concrete_str->Members()[0]->Type()->Is<sem::F16>());
+    ASSERT_TRUE(concrete_str->Members()[1]->Type()->Is<sem::I32>());
+    ASSERT_TRUE(materialize->Expr()->Type()->Is<sem::Struct>());
+    auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
+    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::AbstractFloat>());
+    ASSERT_TRUE(abstract_str->Members()[1]->Type()->Is<sem::AbstractInt>());
+}
+
+TEST_F(MaterializeAbstractStructure, Frexp_Vector_ExplicitType) {
+    // var v = frexp(vec2(1_h)); // v is __frexp_result_vec2_f16
+    // v = frexp(vec2(1));       // __frexp_result_vec2_f16 <- __frexp_result_vec2_abstract
+    Enable(ast::Extension::kF16);
+    auto* call = Call("frexp", Construct(ty.vec2(nullptr), 1_a));
+    WrapInFunction(Decl(Var("v", Call("frexp", Construct(ty.vec2(nullptr), 1_h)))),
+                   Assign("v", call));
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get(call);
+    ASSERT_TRUE(sem->Is<sem::Materialize>());
+    auto* materialize = sem->As<sem::Materialize>();
+    ASSERT_TRUE(materialize->Type()->Is<sem::Struct>());
+    auto* concrete_str = materialize->Type()->As<sem::Struct>();
+    ASSERT_TRUE(concrete_str->Members()[0]->Type()->Is<sem::Vector>());
+    ASSERT_TRUE(concrete_str->Members()[1]->Type()->Is<sem::Vector>());
+    ASSERT_TRUE(concrete_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<sem::F16>());
+    ASSERT_TRUE(concrete_str->Members()[1]->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
+    ASSERT_TRUE(materialize->Expr()->Type()->Is<sem::Struct>());
+    auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
+    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::Vector>());
+    ASSERT_TRUE(
+        abstract_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<sem::AbstractFloat>());
+    ASSERT_TRUE(
+        abstract_str->Members()[1]->Type()->As<sem::Vector>()->type()->Is<sem::AbstractInt>());
+}
+
 }  // namespace materialize_abstract_structure
 
 }  // namespace
