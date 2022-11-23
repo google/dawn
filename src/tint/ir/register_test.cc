@@ -132,5 +132,17 @@ TEST_F(IR_RegisterTest, var) {
     EXPECT_FALSE(r.IsBool());
 }
 
+TEST_F(IR_RegisterTest, uninitialized) {
+    Register r;
+
+    EXPECT_FALSE(r.IsF32());
+    EXPECT_FALSE(r.IsF16());
+    EXPECT_FALSE(r.IsI32());
+    EXPECT_FALSE(r.IsU32());
+    EXPECT_FALSE(r.IsTemp());
+    EXPECT_FALSE(r.IsVar());
+    EXPECT_FALSE(r.IsBool());
+}
+
 }  // namespace
 }  // namespace tint::ir

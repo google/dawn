@@ -44,6 +44,10 @@ class Register {
     };
 
     /// Constructor
+    /// Creates a uninitialized register
+    Register();
+
+    /// Constructor
     /// @param id the id for the register
     explicit Register(Id id);
 
@@ -134,6 +138,8 @@ class Register {
   private:
     /// The type of the register
     enum class Kind {
+        /// A uninitialized register
+        kUninitialized,
         /// A temporary allocated register
         kTemp,
         /// A f32 register

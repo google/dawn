@@ -139,7 +139,7 @@ class BuilderImpl {
     /// Emits an expression
     /// @param expr the expression to emit
     /// @returns true if successful, false otherwise
-    bool EmitExpression(const ast::Expression* expr);
+    utils::Result<Register> EmitExpression(const ast::Expression* expr);
 
     /// Emits a variable
     /// @param var the variable to emit

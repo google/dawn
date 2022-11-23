@@ -221,7 +221,7 @@ std::string Debug::AsString(const Module* mod) {
                 Walk(b->branch_target);
             },
             [&](const ir::Switch* s) {
-                indent() << "Switch" << std::endl;
+                indent() << "Switch (" << s->condition.AsString() << ")" << std::endl;
 
                 {
                     ScopedIndent switch_indent(&indent_size);
@@ -237,15 +237,15 @@ std::string Debug::AsString(const Module* mod) {
                 Walk(s->merge_target);
             },
             [&](const ir::If* i) {
-                indent() << "if" << std::endl;
+                indent() << "if (" << i->condition.AsString() << ")" << std::endl;
                 {
                     ScopedIndent if_indent(&indent_size);
                     ScopedStopNode scope(&stop_nodes, i->merge_target);
 
-                    indent() << "If true" << std::endl;
+                    indent() << "true branch" << std::endl;
                     Walk(i->true_target);
 
-                    indent() << "If false" << std::endl;
+                    indent() << "false branch" << std::endl;
                     Walk(i->false_target);
                 }
 

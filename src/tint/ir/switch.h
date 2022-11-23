@@ -17,6 +17,7 @@
 
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/flow_node.h"
+#include "src/tint/ir/register.h"
 
 // Forward declarations
 namespace tint::ast {
@@ -50,6 +51,9 @@ class Switch : public Castable<Switch, FlowNode> {
 
     /// The switch case statements
     utils::Vector<Case, 4> cases;
+
+    /// Register holding the condition result
+    Register condition;
 };
 
 }  // namespace tint::ir

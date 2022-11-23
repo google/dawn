@@ -80,8 +80,6 @@ TEST_F(IR_BuilderImplTest, IfStatement) {
     ASSERT_NE(ir_if, nullptr);
     EXPECT_TRUE(ir_if->Is<ir::If>());
 
-    // TODO(dsinclair): check condition
-
     auto* flow = ir_if->As<ir::If>();
     ASSERT_NE(flow->true_target, nullptr);
     ASSERT_NE(flow->false_target, nullptr);
@@ -101,6 +99,11 @@ TEST_F(IR_BuilderImplTest, IfStatement) {
     EXPECT_EQ(flow->true_target->branch_target, flow->merge_target);
     EXPECT_EQ(flow->false_target->branch_target, flow->merge_target);
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
+
+    // Check condition
+    auto op = flow->condition;
+    ASSERT_TRUE(op.IsBool());
+    EXPECT_TRUE(op.AsBool());
 }
 
 TEST_F(IR_BuilderImplTest, IfStatement_TrueReturns) {
@@ -497,6 +500,11 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
 
     EXPECT_EQ(func->start_target->branch_target, ir_loop);
     EXPECT_EQ(loop_flow->merge_target->branch_target, nullptr);
+
+    // Check condition
+    auto op = if_flow->condition;
+    ASSERT_TRUE(op.IsBool());
+    EXPECT_TRUE(op.AsBool());
 }
 
 TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
@@ -937,6 +945,11 @@ TEST_F(IR_BuilderImplTest, While) {
     EXPECT_EQ(if_flow->merge_target->branch_target, flow->continuing_target);
     EXPECT_EQ(flow->continuing_target->branch_target, flow->start_target);
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
+
+    // Check condition
+    auto op = if_flow->condition;
+    ASSERT_TRUE(op.IsBool());
+    EXPECT_FALSE(op.AsBool());
 }
 
 TEST_F(IR_BuilderImplTest, While_Return) {
@@ -1056,6 +1069,11 @@ TEST_F(IR_BuilderImplTest, DISABLED_For) {
     EXPECT_EQ(if_flow->merge_target->branch_target, flow->continuing_target);
     EXPECT_EQ(flow->continuing_target->branch_target, flow->start_target);
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
+
+    // Check condition
+    auto op = if_flow->condition;
+    ASSERT_TRUE(op.IsBool());
+    EXPECT_FALSE(op.AsBool());
 }
 
 TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
@@ -1151,6 +1169,11 @@ TEST_F(IR_BuilderImplTest, Switch) {
     EXPECT_EQ(flow->cases[1].start_target->branch_target, flow->merge_target);
     EXPECT_EQ(flow->cases[2].start_target->branch_target, flow->merge_target);
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
+
+    // Check condition
+    auto op = flow->condition;
+    ASSERT_TRUE(op.IsI32());
+    EXPECT_EQ(1_i, op.AsI32());
 }
 
 TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {

@@ -16,6 +16,8 @@
 
 namespace tint::ir {
 
+Register::Register() : kind_(Kind::kUninitialized), data_(Id(0)) {}
+
 Register::Register(Id id) : kind_(Kind::kTemp), data_(id) {}
 
 Register::Register(f32 f) : kind_(Kind::kF32), data_(f) {}
@@ -57,6 +59,8 @@ std::string Register::AsString() const {
             return "%v" + std::to_string(AsVarData().id);
         case Kind::kBool:
             return AsBool() ? "true" : "false";
+        case Kind::kUninitialized:
+            break;
     }
     return "unknown register";
 }

@@ -234,7 +234,12 @@ bool BuilderImpl::EmitBlock(const ast::BlockStatement* block) {
 bool BuilderImpl::EmitIf(const ast::IfStatement* stmt) {
     auto* if_node = builder.CreateIf(stmt);
 
-    // TODO(dsinclair): Emit the condition expression into the current block
+    // Emit the if condition into the end of the preceeding block
+    auto reg = EmitExpression(stmt->condition);
+    if (!reg) {
+        return false;
+    }
+    if_node->condition = reg.Get();
 
     BranchTo(if_node);
 
@@ -242,8 +247,6 @@ bool BuilderImpl::EmitIf(const ast::IfStatement* stmt) {
 
     {
         FlowStackScope scope(this, if_node);
-
-        // TODO(dsinclair): set if condition register into if flow node
 
         current_flow_block = if_node->true_target;
         if (!EmitStatement(stmt->body)) {
@@ -323,13 +326,17 @@ bool BuilderImpl::EmitWhile(const ast::WhileStatement* stmt) {
 
         current_flow_block = loop_node->start_target;
 
-        // TODO(dsinclair): Emit the instructions for the condition
+        // Emit the while condition into the start target of the loop
+        auto reg = EmitExpression(stmt->condition);
+        if (!reg) {
+            return false;
+        }
 
         // Create an if (cond) {} else {break;} control flow
         auto* if_node = builder.CreateIf(nullptr);
         builder.Branch(if_node->true_target, if_node->merge_target);
         builder.Branch(if_node->false_target, loop_node->merge_target);
-        // TODO(dsinclair): set if condition register into if flow node
+        if_node->condition = reg.Get();
 
         BranchTo(if_node);
 
@@ -367,13 +374,17 @@ bool BuilderImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
         current_flow_block = loop_node->start_target;
 
         if (stmt->condition) {
-            // TODO(dsinclair): Emit the instructions for the condition
+            // Emit the condition into the target target of the loop
+            auto reg = EmitExpression(stmt->condition);
+            if (!reg) {
+                return false;
+            }
 
             // Create an if (cond) {} else {break;} control flow
             auto* if_node = builder.CreateIf(nullptr);
             builder.Branch(if_node->true_target, if_node->merge_target);
             builder.Branch(if_node->false_target, loop_node->merge_target);
-            // TODO(dsinclair): set if condition register into if flow node
+            if_node->condition = reg.Get();
 
             BranchTo(if_node);
             current_flow_block = if_node->merge_target;
@@ -401,7 +412,12 @@ bool BuilderImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
 bool BuilderImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     auto* switch_node = builder.CreateSwitch(stmt);
 
-    // TODO(dsinclair): Emit the condition expression into the current block
+    // Emit the condition into the preceeding block
+    auto reg = EmitExpression(stmt->condition);
+    if (!reg) {
+        return false;
+    }
+    switch_node->condition = reg.Get();
 
     BranchTo(switch_node);
 
@@ -466,7 +482,12 @@ bool BuilderImpl::EmitContinue(const ast::ContinueStatement*) {
 bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
     auto* if_node = builder.CreateIf(stmt);
 
-    // TODO(dsinclair): Emit the condition expression into the current block
+    // Emit the break-if condition into the end of the preceeding block
+    auto reg = EmitExpression(stmt->condition);
+    if (!reg) {
+        return false;
+    }
+    if_node->condition = reg.Get();
 
     BranchTo(if_node);
 
@@ -477,8 +498,6 @@ bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
     TINT_ASSERT(IR, current_control->Is<Loop>());
 
     auto* loop = current_control->As<Loop>();
-
-    // TODO(dsinclair): set if condition register into if flow node
 
     current_flow_block = if_node->true_target;
     BranchTo(loop->merge_target);
@@ -496,7 +515,7 @@ bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
     return true;
 }
 
-bool BuilderImpl::EmitExpression(const ast::Expression* expr) {
+utils::Result<Register> BuilderImpl::EmitExpression(const ast::Expression* expr) {
     return tint::Switch(
         expr,
         // [&](const ast::IndexAccessorExpression* a) { return EmitIndexAccessor(a); },
@@ -512,7 +531,7 @@ bool BuilderImpl::EmitExpression(const ast::Expression* expr) {
             diagnostics_.add_warning(
                 tint::diag::System::IR,
                 "unknown expression type: " + std::string(expr->TypeInfo().name), expr->source);
-            return false;
+            return utils::Failure;
         });
 }
 
