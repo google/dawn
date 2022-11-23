@@ -64,49 +64,36 @@ void OwnedCompilationMessages::AddMessage(const tint::diag::Diagnostic& diagnost
 
     // Tint line and column values are 1-based.
     uint64_t lineNum = diagnostic.source.range.begin.line;
-    uint64_t linePos = diagnostic.source.range.begin.column;
+    uint64_t lineCol = diagnostic.source.range.begin.column;
     // The offset is 0-based.
     uint64_t offset = 0;
     uint64_t length = 0;
 
-    if (lineNum && linePos && diagnostic.source.file) {
-        const auto& lines = diagnostic.source.file->content.lines;
-        size_t i = 0;
-        // To find the offset of the message position, loop through each of the first lineNum-1
-        // lines and add it's length (+1 to account for the line break) to the offset.
-        for (; i < lineNum - 1; ++i) {
-            offset += lines[i].length() + 1;
-        }
+    if (lineNum && lineCol && diagnostic.source.file) {
+        const tint::Source::FileContent& content = diagnostic.source.file->content;
 
-        // If the end line is on a different line from the beginning line, add the length of the
-        // lines in between to the ending offset.
+        // Tint stores line as std::string_view in a complete source std::string that's in the
+        // source file. So to get the offset in bytes of a line we just need to substract its start
+        // pointer with the start of the file's content. Note that line numbering in Tint source
+        // range starts at 1 while the array of lines start at 0 (hence the -1).
+        const char* fileStart = content.data.data();
+        const char* lineStart = content.lines[lineNum - 1].data();
+        offset = static_cast<uint64_t>(lineStart - fileStart) + lineCol - 1;
+
+        // If the range has a valid start but the end is not specified, clamp it to the start.
         uint64_t endLineNum = diagnostic.source.range.end.line;
-        uint64_t endLinePos = diagnostic.source.range.end.column;
-
-        // If the range has a valid start but the end it not specified, clamp it to the start.
-        if (endLineNum == 0 || endLinePos == 0) {
+        uint64_t endLineCol = diagnostic.source.range.end.column;
+        if (endLineNum == 0 || endLineCol == 0) {
             endLineNum = lineNum;
-            endLinePos = linePos;
+            endLineCol = lineCol;
         }
 
-        // Negative ranges aren't allowed
-        ASSERT(endLineNum >= lineNum);
-
-        uint64_t endOffset = offset;
-        for (; i < endLineNum - 1; ++i) {
-            endOffset += lines[i].length() + 1;
-        }
-
-        // Add the line positions to the offset and endOffset to get their final positions
-        // within the code string.
-        offset += linePos - 1;
-        endOffset += endLinePos - 1;
-
-        // Negative ranges aren't allowed
-        ASSERT(endOffset >= offset);
+        const char* endLineStart = content.lines[endLineNum - 1].data();
+        uint64_t endOffset = static_cast<uint64_t>(endLineStart - fileStart) + endLineCol - 1;
 
         // The length of the message is the difference between the starting offset and the
-        // ending offset.
+        // ending offset. Negative ranges aren't allowed
+        ASSERT(endOffset >= offset);
         length = endOffset - offset;
     }
 
@@ -117,7 +104,7 @@ void OwnedCompilationMessages::AddMessage(const tint::diag::Diagnostic& diagnost
     }
 
     mMessages.push_back({nullptr, nullptr, tintSeverityToMessageType(diagnostic.severity), lineNum,
-                         linePos, offset, length});
+                         lineCol, offset, length});
 }
 
 void OwnedCompilationMessages::AddMessages(const tint::diag::List& diagnostics) {

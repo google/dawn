@@ -202,7 +202,6 @@ crbug.com/dawn/1125 [ ubuntu ] webgpu:api,operation,rendering,depth_clip_clamp:d
 ################################################################################
 # compilation_info failures
 ################################################################################
-crbug.com/dawn/1357 webgpu:api,operation,shader_module,compilation_info:offset_and_length:valid=false;name="carriage-return" [ Failure ]
 crbug.com/dawn/1357 webgpu:api,operation,shader_module,compilation_info:offset_and_length:valid=false;name="unicode" [ Failure ]
 
 ################################################################################
