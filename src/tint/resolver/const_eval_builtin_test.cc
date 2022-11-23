@@ -2093,6 +2093,72 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               TanhCases<f16>()))));
 
 template <typename T>
+std::vector<Case> TransposeCases() {
+    return {
+        // 2x2
+        C({Mat({T(1), T(2)},    //
+               {T(3), T(4)})},  //
+          Mat({T(1), T(3)},     //
+              {T(2), T(4)})),
+
+        // 3x3
+        C({Mat({T(1), T(2), T(3)},    //
+               {T(4), T(5), T(6)},    //
+               {T(7), T(8), T(9)})},  //
+          Mat({T(1), T(4), T(7)},     //
+              {T(2), T(5), T(8)},     //
+              {T(3), T(6), T(9)})),
+
+        // 4x4
+        C({Mat({T(1), T(2), T(3), T(4)},        //
+               {T(5), T(6), T(7), T(8)},        //
+               {T(9), T(10), T(11), T(12)},     //
+               {T(13), T(14), T(15), T(16)})},  //
+          Mat({T(1), T(5), T(9), T(13)},        //
+              {T(2), T(6), T(10), T(14)},       //
+              {T(3), T(7), T(11), T(15)},       //
+              {T(4), T(8), T(12), T(16)})),
+
+        // 4x2
+        C({Mat({T(1), T(2), T(3), T(4)},    //
+               {T(5), T(6), T(7), T(8)})},  //
+          Mat({T(1), T(5)},                 //
+              {T(2), T(6)},                 //
+              {T(3), T(7)},                 //
+              {T(4), T(8)})),
+
+        // 2x4
+        C({Mat({T(1), T(2)},             //
+               {T(3), T(4)},             //
+               {T(5), T(6)},             //
+               {T(7), T(8)})},           //
+          Mat({T(1), T(3), T(5), T(7)},  //
+              {T(2), T(4), T(6), T(8)})),
+
+        // 3x2
+        C({Mat({T(1), T(2), T(3)},    //
+               {T(4), T(5), T(6)})},  //
+          Mat({T(1), T(4)},           //
+              {T(2), T(5)},           //
+              {T(3), T(6)})),
+
+        // 2x3
+        C({Mat({T(1), T(2)},       //
+               {T(3), T(4)},       //
+               {T(5), T(6)})},     //
+          Mat({T(1), T(3), T(5)},  //
+              {T(2), T(4), T(6)})),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Transpose,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kTranspose),
+                     testing::ValuesIn(Concat(TransposeCases<AFloat>(),  //
+                                              TransposeCases<f32>(),
+                                              TransposeCases<f16>()))));
+
+template <typename T>
 std::vector<Case> TruncCases() {
     std::vector<Case> cases = {C({T(0)}, T(0)),    //
                                C({-T(0)}, -T(0)),  //

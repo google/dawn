@@ -546,7 +546,7 @@ fn refract<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, T) -> vec<N, T>
 @const fn tan<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn tanh<T: fa_f32_f16>(T) -> T
 @const fn tanh<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
-fn transpose<M: num, N: num, T: f32_f16>(mat<M, N, T>) -> mat<N, M, T>
+@const fn transpose<M: num, N: num, T: fa_f32_f16>(mat<M, N, T>) -> mat<N, M, T>
 @const fn trunc<T: fa_f32_f16>(@test_value(1.5) T) -> T
 @const fn trunc<N: num, T: fa_f32_f16>(@test_value(1.5) vec<N, T>) -> vec<N, T>
 @const fn unpack2x16float(u32) -> vec2<f32>

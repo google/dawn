@@ -1,5 +1,5 @@
 void transpose_31e37e() {
-  float2x4 res = transpose(float4x2((1.0f).xx, (1.0f).xx, (1.0f).xx, (1.0f).xx));
+  float2x4 res = float2x4((1.0f).xxxx, (1.0f).xxxx);
 }
 
 struct tint_symbol {

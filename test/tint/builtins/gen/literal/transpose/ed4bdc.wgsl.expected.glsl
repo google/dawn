@@ -1,7 +1,7 @@
 #version 310 es
 
 void transpose_ed4bdc() {
-  mat2x3 res = transpose(mat3x2(vec2(1.0f), vec2(1.0f), vec2(1.0f)));
+  mat2x3 res = mat2x3(vec3(1.0f), vec3(1.0f));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void transpose_ed4bdc() {
-  mat2x3 res = transpose(mat3x2(vec2(1.0f), vec2(1.0f), vec2(1.0f)));
+  mat2x3 res = mat2x3(vec3(1.0f), vec3(1.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void transpose_ed4bdc() {
-  mat2x3 res = transpose(mat3x2(vec2(1.0f), vec2(1.0f), vec2(1.0f)));
+  mat2x3 res = mat2x3(vec3(1.0f), vec3(1.0f));
 }
 
 void compute_main() {

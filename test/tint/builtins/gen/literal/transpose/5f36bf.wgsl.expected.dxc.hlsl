@@ -1,5 +1,5 @@
 void transpose_5f36bf() {
-  matrix<float16_t, 3, 4> res = transpose(matrix<float16_t, 4, 3>((float16_t(1.0h)).xxx, (float16_t(1.0h)).xxx, (float16_t(1.0h)).xxx, (float16_t(1.0h)).xxx));
+  matrix<float16_t, 3, 4> res = matrix<float16_t, 3, 4>((float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx);
 }
 
 struct tint_symbol {

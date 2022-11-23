@@ -2,7 +2,7 @@
 
 using namespace metal;
 void transpose_854336() {
-  float3x3 res = transpose(float3x3(float3(1.0f), float3(1.0f), float3(1.0f)));
+  float3x3 res = float3x3(float3(1.0f), float3(1.0f), float3(1.0f));
 }
 
 struct tint_symbol {

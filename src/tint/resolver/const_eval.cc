@@ -3031,6 +3031,26 @@ ConstEval::Result ConstEval::tanh(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0]);
 }
 
+ConstEval::Result ConstEval::transpose(const sem::Type* ty,
+                                       utils::VectorRef<const sem::Constant*> args,
+                                       const Source&) {
+    auto* m = args[0];
+    auto* mat_ty = m->Type()->As<sem::Matrix>();
+    auto me = [&](size_t r, size_t c) { return m->Index(c)->Index(r); };
+    auto* result_mat_ty = ty->As<sem::Matrix>();
+
+    // Produce column vectors from each row
+    utils::Vector<const sem::Constant*, 4> result_mat;
+    for (size_t r = 0; r < mat_ty->rows(); ++r) {
+        utils::Vector<const sem::Constant*, 4> new_col_vec;
+        for (size_t c = 0; c < mat_ty->columns(); ++c) {
+            new_col_vec.Push(me(r, c));
+        }
+        result_mat.Push(CreateComposite(builder, result_mat_ty->ColumnType(), new_col_vec));
+    }
+    return CreateComposite(builder, ty, result_mat);
+}
+
 ConstEval::Result ConstEval::trunc(const sem::Type* ty,
                                    utils::VectorRef<const sem::Constant*> args,
                                    const Source& source) {

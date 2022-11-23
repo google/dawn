@@ -1,7 +1,7 @@
 #version 310 es
 
 void transpose_d8f8ba() {
-  mat4x3 res = transpose(mat3x4(vec4(1.0f), vec4(1.0f), vec4(1.0f)));
+  mat4x3 res = mat4x3(vec3(1.0f), vec3(1.0f), vec3(1.0f), vec3(1.0f));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void transpose_d8f8ba() {
-  mat4x3 res = transpose(mat3x4(vec4(1.0f), vec4(1.0f), vec4(1.0f)));
+  mat4x3 res = mat4x3(vec3(1.0f), vec3(1.0f), vec3(1.0f), vec3(1.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void transpose_d8f8ba() {
-  mat4x3 res = transpose(mat3x4(vec4(1.0f), vec4(1.0f), vec4(1.0f)));
+  mat4x3 res = mat4x3(vec3(1.0f), vec3(1.0f), vec3(1.0f), vec3(1.0f));
 }
 
 void compute_main() {
