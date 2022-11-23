@@ -128,7 +128,8 @@ class DepthStencilLoadOpTests : public DawnTestWithParams<DepthStencilLoadOpTest
                     std::vector<uint16_t> expectedDepth(mipSize * mipSize,
                                                         kU16DepthValues[mipLevel]);
                     EXPECT_TEXTURE_EQ(expectedDepth.data(), texture, {0, 0}, {mipSize, mipSize},
-                                      mipLevel, wgpu::TextureAspect::DepthOnly)
+                                      mipLevel, wgpu::TextureAspect::DepthOnly,
+                                      /* bytesPerRow */ 0, /* tolerance */ uint16_t(1))
                         << "copy depth mip " << mipLevel;
                 } else {
                     std::vector<float> expectedDepth(mipSize * mipSize, kDepthValues[mipLevel]);

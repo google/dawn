@@ -1607,6 +1607,18 @@ testing::AssertionResult CheckImpl<float>(const float& expected,
     return testing::AssertionSuccess();
 }
 
+template <>
+testing::AssertionResult CheckImpl<uint16_t>(const uint16_t& expected,
+                                             const uint16_t& actual,
+                                             const uint16_t& tolerance) {
+    if (abs(static_cast<int32_t>(expected) - static_cast<int32_t>(actual)) > tolerance) {
+        return tolerance == 0 ? testing::AssertionFailure() << expected << ", actual " << actual
+                              : testing::AssertionFailure() << "within " << tolerance << " of "
+                                                            << expected << ", actual " << actual;
+    }
+    return testing::AssertionSuccess();
+}
+
 // Interpret uint16_t as float16
 // This is mostly for reading float16 output from textures
 template <>
