@@ -471,7 +471,7 @@ class DependencyScanner {
             }
         }
 
-        if (auto* global = globals_.Find(to); global && (*global)->node == resolved) {
+        if (auto global = globals_.Find(to); global && (*global)->node == resolved) {
             if (dependency_edges_.Add(DependencyEdge{current_global_, *global},
                                       DependencyInfo{from->source, action})) {
                 current_global_->deps.Push(*global);

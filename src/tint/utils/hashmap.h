@@ -47,6 +47,67 @@ class Hashmap : public HashmapBase<KEY, VALUE, N, HASH, EQUAL> {
     /// Result of Add()
     using AddResult = typename Base::PutResult;
 
+    /// Reference is returned by Hashmap::Find(), and performs dynamic Hashmap lookups.
+    /// The value returned by the Reference reflects the current state of the Hashmap, and so the
+    /// referenced value may change, or transition between valid or invalid based on the current
+    /// state of the Hashmap.
+    template <bool IS_CONST>
+    class ReferenceT {
+        /// `const Value` if IS_CONST, or `Value` if !IS_CONST
+        using T = std::conditional_t<IS_CONST, const Value, Value>;
+
+        /// `const Hashmap` if IS_CONST, or `Hashmap` if !IS_CONST
+        using Map = std::conditional_t<IS_CONST, const Hashmap, Hashmap>;
+
+      public:
+        /// @returns true if the reference is valid.
+        operator bool() const { return Get() != nullptr; }
+
+        /// @returns the pointer to the Value, or nullptr if the reference is invalid.
+        operator T*() const { return Get(); }
+
+        /// @returns the pointer to the Value
+        /// @warning if the Hashmap does not contain a value for the reference, then this will
+        /// trigger a TINT_ASSERT, or invalid pointer dereference.
+        T* operator->() const {
+            auto* hashmap_reference_lookup = Get();
+            TINT_ASSERT(Utils, hashmap_reference_lookup != nullptr);
+            return hashmap_reference_lookup;
+        }
+
+        /// @returns the pointer to the Value, or nullptr if the reference is invalid.
+        T* Get() const {
+            auto generation = map_.Generation();
+            if (generation_ != generation) {
+                cached_ = map_.Lookup(key_);
+                generation_ = generation;
+            }
+            return cached_;
+        }
+
+      private:
+        friend Hashmap;
+
+        /// Constructor
+        ReferenceT(Map& map, const Key& key)
+            : map_(map), key_(key), cached_(nullptr), generation_(map.Generation() - 1) {}
+
+        /// Constructor
+        ReferenceT(Map& map, const Key& key, T* value)
+            : map_(map), key_(key), cached_(value), generation_(map.Generation()) {}
+
+        Map& map_;
+        const Key key_;
+        mutable T* cached_ = nullptr;
+        mutable size_t generation_ = 0;
+    };
+
+    /// A mutable reference returned by Find()
+    using Reference = ReferenceT</*IS_CONST*/ false>;
+
+    /// An immutable reference returned by Find()
+    using ConstReference = ReferenceT</*IS_CONST*/ true>;
+
     /// Adds a value to the map, if the map does not already contain an entry with the key @p key.
     /// @param key the entry key.
     /// @param value the value of the entry to add to the map.
@@ -108,25 +169,28 @@ class Hashmap : public HashmapBase<KEY, VALUE, N, HASH, EQUAL> {
     /// @param key the entry's key value to search for.
     /// @returns the value of the entry.
     template <typename K>
-    Value& GetOrZero(K&& key) {
+    Reference GetOrZero(K&& key) {
         auto res = Add(std::forward<K>(key), Value{});
-        return *res.value;
+        return Reference(*this, key, res.value);
     }
 
     /// @param key the key to search for.
-    /// @returns a pointer to the entry that is equal to the given value, or nullptr if the map does
-    ///          not contain the given value.
-    const Value* Find(const Key& key) const {
+    /// @returns a reference to the entry that is equal to the given value.
+    Reference Find(const Key& key) { return Reference(*this, key); }
+
+    /// @param key the key to search for.
+    /// @returns a reference to the entry that is equal to the given value.
+    ConstReference Find(const Key& key) const { return ConstReference(*this, key); }
+
+  private:
+    Value* Lookup(const Key& key) {
         if (auto [found, index] = this->IndexOf(key); found) {
             return &this->slots_[index].entry->value;
         }
         return nullptr;
     }
 
-    /// @param key the key to search for.
-    /// @returns a pointer to the entry that is equal to the given value, or nullptr if the map does
-    ///          not contain the given value.
-    Value* Find(const Key& key) {
+    const Value* Lookup(const Key& key) const {
         if (auto [found, index] = this->IndexOf(key); found) {
             return &this->slots_[index].entry->value;
         }

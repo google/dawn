@@ -90,6 +90,71 @@ TEST(Hashmap, Generation) {
     EXPECT_EQ(map.Generation(), 5u);
 }
 
+TEST(Hashmap, Index) {
+    Hashmap<int, std::string, 4> map;
+    auto zero = map.Find(0);
+    EXPECT_FALSE(zero);
+
+    map.Add(3, "three");
+    auto three = map.Find(3);
+    map.Add(2, "two");
+    auto two = map.Find(2);
+    map.Add(4, "four");
+    auto four = map.Find(4);
+    map.Add(8, "eight");
+    auto eight = map.Find(8);
+
+    EXPECT_FALSE(zero);
+    ASSERT_TRUE(three);
+    ASSERT_TRUE(two);
+    ASSERT_TRUE(four);
+    ASSERT_TRUE(eight);
+
+    EXPECT_EQ(*three, "three");
+    EXPECT_EQ(*two, "two");
+    EXPECT_EQ(*four, "four");
+    EXPECT_EQ(*eight, "eight");
+
+    map.Add(0, "zero");  // Note: Find called before Add() is okay!
+
+    map.Add(5, "five");
+    auto five = map.Find(5);
+    map.Add(6, "six");
+    auto six = map.Find(6);
+    map.Add(1, "one");
+    auto one = map.Find(1);
+    map.Add(7, "seven");
+    auto seven = map.Find(7);
+
+    ASSERT_TRUE(zero);
+    ASSERT_TRUE(three);
+    ASSERT_TRUE(two);
+    ASSERT_TRUE(four);
+    ASSERT_TRUE(eight);
+    ASSERT_TRUE(five);
+    ASSERT_TRUE(six);
+    ASSERT_TRUE(one);
+    ASSERT_TRUE(seven);
+
+    EXPECT_EQ(*zero, "zero");
+    EXPECT_EQ(*three, "three");
+    EXPECT_EQ(*two, "two");
+    EXPECT_EQ(*four, "four");
+    EXPECT_EQ(*eight, "eight");
+    EXPECT_EQ(*five, "five");
+    EXPECT_EQ(*six, "six");
+    EXPECT_EQ(*one, "one");
+    EXPECT_EQ(*seven, "seven");
+
+    map.Remove(2);
+    map.Remove(8);
+    map.Remove(1);
+
+    EXPECT_FALSE(two);
+    EXPECT_FALSE(eight);
+    EXPECT_FALSE(one);
+}
+
 TEST(Hashmap, Iterator) {
     using Map = Hashmap<int, std::string, 8>;
     using Entry = typename Map::Entry;

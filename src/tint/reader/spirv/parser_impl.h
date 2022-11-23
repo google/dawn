@@ -666,7 +666,7 @@ class ParserImpl : Reader {
     /// @param id a SPIR-V ID
     /// @returns the AST variable or null.
     const ast::Var* GetModuleVariable(uint32_t id) {
-        auto* entry = module_variable_.Find(id);
+        auto entry = module_variable_.Find(id);
         return entry ? *entry : nullptr;
     }
 

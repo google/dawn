@@ -600,7 +600,7 @@ class UniformityGraph {
                     }
 
                     // Add an edge from the variable's loop input node to its value at this point.
-                    auto** in_node = info.var_in_nodes.Find(var);
+                    auto in_node = info.var_in_nodes.Find(var);
                     TINT_ASSERT(Resolver, in_node != nullptr);
                     auto* out_node = current_function_->variables.Get(var);
                     if (out_node != *in_node) {
@@ -1334,7 +1334,7 @@ class UniformityGraph {
             [&](const sem::Function* func) {
                 // We must have already analyzed the user-defined function since we process
                 // functions in dependency order.
-                auto* info = functions_.Find(func->Declaration());
+                auto info = functions_.Find(func->Declaration());
                 TINT_ASSERT(Resolver, info != nullptr);
                 callsite_tag = info->callsite_tag;
                 function_tag = info->function_tag;
@@ -1466,7 +1466,7 @@ class UniformityGraph {
         } else if (auto* user = target->As<sem::Function>()) {
             // This is a call to a user-defined function, so inspect the functions called by that
             // function and look for one whose node has an edge from the RequiredToBeUniform node.
-            auto* target_info = functions_.Find(user->Declaration());
+            auto target_info = functions_.Find(user->Declaration());
             for (auto* call_node : target_info->required_to_be_uniform->edges) {
                 if (call_node->type == Node::kRegular) {
                     auto* child_call = call_node->ast->As<ast::CallExpression>();
@@ -1636,7 +1636,7 @@ class UniformityGraph {
             // If this is a call to a user-defined function, add a note to show the reason that the
             // parameter is required to be uniform.
             if (auto* user = target->As<sem::Function>()) {
-                auto* next_function = functions_.Find(user->Declaration());
+                auto next_function = functions_.Find(user->Declaration());
                 Node* next_cause = next_function->parameters[cause->arg_index].init_value;
                 MakeError(*next_function, next_cause, true);
             }

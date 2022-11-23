@@ -401,7 +401,7 @@ struct Std140::State {
         return Switch(
             ty,  //
             [&](const sem::Struct* str) -> const ast::Type* {
-                if (auto* std140 = std140_structs.Find(str)) {
+                if (auto std140 = std140_structs.Find(str)) {
                     return b.create<ast::TypeName>(*std140);
                 }
                 return nullptr;
@@ -695,7 +695,7 @@ struct Std140::State {
                     // call, or by reassembling a std140 matrix from column vector members.
                     utils::Vector<const ast::Expression*, 8> args;
                     for (auto* member : str->Members()) {
-                        if (auto* col_members = std140_mat_members.Find(member)) {
+                        if (auto col_members = std140_mat_members.Find(member)) {
                             // std140 decomposed matrix. Reassemble.
                             auto* mat_ty = CreateASTTypeFor(ctx, member->Type());
                             auto mat_args =

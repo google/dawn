@@ -3522,7 +3522,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
             const auto phi_id = assignment.phi_id;
             auto* const lhs_expr = builder_.Expr(namer_.Name(phi_id));
             // If RHS value is actually a phi we just cpatured, then use it.
-            auto* const copy_sym = copied_phis.Find(assignment.value_id);
+            auto copy_sym = copied_phis.Find(assignment.value_id);
             auto* const rhs_expr =
                 copy_sym ? builder_.Expr(*copy_sym) : MakeExpression(assignment.value_id).expr;
             AddStatement(builder_.Assign(lhs_expr, rhs_expr));

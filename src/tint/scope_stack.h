@@ -44,7 +44,7 @@ class ScopeStack {
     /// stack, otherwise the zero initializer for type T.
     V Set(const K& key, V val) {
         auto& back = stack_.Back();
-        if (auto* el = back.Find(key)) {
+        if (auto el = back.Find(key)) {
             std::swap(val, *el);
             return val;
         }
@@ -57,7 +57,7 @@ class ScopeStack {
     /// @returns the value, or the zero initializer if the value was not found
     V Get(const K& key) const {
         for (auto iter = stack_.rbegin(); iter != stack_.rend(); ++iter) {
-            if (auto* val = iter->Find(key)) {
+            if (auto val = iter->Find(key)) {
                 return *val;
             }
         }

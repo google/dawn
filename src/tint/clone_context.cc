@@ -73,7 +73,7 @@ const tint::Cloneable* CloneContext::CloneCloneable(const Cloneable* object) {
     }
 
     // Was Replace() called for this object?
-    if (auto* fn = replacements_.Find(object)) {
+    if (auto fn = replacements_.Find(object)) {
         return (*fn)();
     }
 

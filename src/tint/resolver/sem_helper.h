@@ -54,7 +54,7 @@ class SemHelper {
     /// @param node the node to retrieve
     template <typename SEM = sem::Node>
     SEM* ResolvedSymbol(const ast::Node* node) const {
-        auto* resolved = dependencies_.resolved_symbols.Find(node);
+        auto resolved = dependencies_.resolved_symbols.Find(node);
         return resolved ? const_cast<SEM*>(builder_->Sem().Get<SEM>(*resolved)) : nullptr;
     }
 

@@ -719,7 +719,7 @@ bool Validator::AtomicVariable(
             return false;
         }
     } else if (type->IsAnyOf<sem::Struct, sem::Array>()) {
-        if (auto* found = atomic_composite_info.Find(type)) {
+        if (auto found = atomic_composite_info.Find(type)) {
             if (address_space != ast::AddressSpace::kStorage &&
                 address_space != ast::AddressSpace::kWorkgroup) {
                 AddError("atomic variables must have <storage> or <workgroup> address space",
@@ -798,7 +798,7 @@ bool Validator::Override(
     for (auto* attr : decl->attributes) {
         if (attr->Is<ast::IdAttribute>()) {
             auto id = v->OverrideId();
-            if (auto* var = override_ids.Find(id); var && *var != v) {
+            if (auto var = override_ids.Find(id); var && *var != v) {
                 AddError("@id values must be unique", attr->source);
                 AddNote(
                     "a override with an ID of " + std::to_string(id.value) +

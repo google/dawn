@@ -2481,7 +2481,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                 if (loop_block->FirstContinue()) {
                     // If our identifier is in loop_block->decls, make sure its index is
                     // less than first_continue
-                    if (auto* decl = loop_block->Decls().Find(symbol)) {
+                    if (auto decl = loop_block->Decls().Find(symbol)) {
                         if (decl->order >= loop_block->NumDeclsAtFirstContinue()) {
                             AddError("continue statement bypasses declaration of '" +
                                          builder_->Symbols().NameFor(symbol) + "'",
