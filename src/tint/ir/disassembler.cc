@@ -26,15 +26,15 @@ namespace {
 
 class ScopedStopNode {
   public:
-    ScopedStopNode(std::unordered_set<const FlowNode*>* stop_nodes_, const FlowNode* node)
-        : stop_nodes__(stop_nodes_), node_(node) {
-        stop_nodes__->insert(node_);
+    ScopedStopNode(std::unordered_set<const FlowNode*>* stop_nodes, const FlowNode* node)
+        : stop_nodes_(stop_nodes), node_(node) {
+        stop_nodes_->insert(node_);
     }
 
-    ~ScopedStopNode() { stop_nodes__->erase(node_); }
+    ~ScopedStopNode() { stop_nodes_->erase(node_); }
 
   private:
-    std::unordered_set<const FlowNode*>* stop_nodes__;
+    std::unordered_set<const FlowNode*>* stop_nodes_;
     const FlowNode* node_;
 };
 
