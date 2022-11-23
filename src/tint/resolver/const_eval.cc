@@ -202,6 +202,15 @@ std::string OverflowErrorMessage(VALUE_TY value, std::string_view target_ty) {
     return ss.str();
 }
 
+template <typename NumberT>
+std::string OverflowExpErrorMessage(std::string_view base, NumberT value) {
+    std::stringstream ss;
+    ss << std::setprecision(20);
+    ss << base << "^" << value << " cannot be represented as "
+       << "'" << FriendlyName<NumberT>() << "'";
+    return ss.str();
+}
+
 /// @returns the number of consecutive leading bits in `@p e` set to `@p bit_value_to_count`.
 template <typename T>
 std::make_unsigned_t<T> CountLeadingBits(T e, T bit_value_to_count) {
@@ -2035,6 +2044,42 @@ ConstEval::Result ConstEval::dot(const sem::Type*,
         AddNote("when calculating dot", source);
     }
     return r;
+}
+
+ConstEval::Result ConstEval::exp(const sem::Type* ty,
+                                 utils::VectorRef<const sem::Constant*> args,
+                                 const Source& source) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto e0) -> ImplResult {
+            using NumberT = decltype(e0);
+            auto val = NumberT(std::exp(e0));
+            if (!std::isfinite(val.value)) {
+                AddError(OverflowExpErrorMessage("e", e0), source);
+                return utils::Failure;
+            }
+            return CreateElement(builder, source, c0->Type(), val);
+        };
+        return Dispatch_fa_f32_f16(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
+ConstEval::Result ConstEval::exp2(const sem::Type* ty,
+                                  utils::VectorRef<const sem::Constant*> args,
+                                  const Source& source) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto e0) -> ImplResult {
+            using NumberT = decltype(e0);
+            auto val = NumberT(std::exp2(e0));
+            if (!std::isfinite(val.value)) {
+                AddError(OverflowExpErrorMessage("2", e0), source);
+                return utils::Failure;
+            }
+            return CreateElement(builder, source, c0->Type(), val);
+        };
+        return Dispatch_fa_f32_f16(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
 }
 
 ConstEval::Result ConstEval::extractBits(const sem::Type* ty,

@@ -223,13 +223,23 @@ inline std::string OverflowErrorMessage(NumberT lhs, const char* op, NumberT rhs
     return ss.str();
 }
 
-/// Returns the overflow error message for converions
+/// Returns the overflow error message for conversions
 template <typename VALUE_TY>
 std::string OverflowErrorMessage(VALUE_TY value, std::string_view target_ty) {
     std::stringstream ss;
     ss << std::setprecision(20);
     ss << "value " << value << " cannot be represented as "
        << "'" << target_ty << "'";
+    return ss.str();
+}
+
+/// Returns the overflow error message for exponentiation
+template <typename NumberT>
+std::string OverflowExpErrorMessage(std::string_view base, NumberT value) {
+    std::stringstream ss;
+    ss << std::setprecision(20);
+    ss << base << "^" << value << " cannot be represented as "
+       << "'" << FriendlyName<NumberT>() << "'";
     return ss.str();
 }
 

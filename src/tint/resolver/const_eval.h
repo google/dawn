@@ -556,6 +556,24 @@ class ConstEval {
                utils::VectorRef<const sem::Constant*> args,
                const Source& source);
 
+    /// exp builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result exp(const sem::Type* ty,
+               utils::VectorRef<const sem::Constant*> args,
+               const Source& source);
+
+    /// exp2 builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result exp2(const sem::Type* ty,
+                utils::VectorRef<const sem::Constant*> args,
+                const Source& source);
+
     /// extractBits builtin
     /// @param ty the expression type
     /// @param args the input arguments

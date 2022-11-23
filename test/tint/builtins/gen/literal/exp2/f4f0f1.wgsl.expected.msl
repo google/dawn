@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void exp2_f4f0f1() {
+  float res = 2.0f;
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  exp2_f4f0f1();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  exp2_f4f0f1();
+  return;
+}
+
+kernel void compute_main() {
+  exp2_f4f0f1();
+  return;
+}
+

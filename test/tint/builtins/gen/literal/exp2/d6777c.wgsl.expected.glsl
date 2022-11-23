@@ -1,7 +1,7 @@
 #version 310 es
 
 void exp2_d6777c() {
-  vec2 res = exp2(vec2(1.0f));
+  vec2 res = vec2(2.0f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void exp2_d6777c() {
-  vec2 res = exp2(vec2(1.0f));
+  vec2 res = vec2(2.0f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void exp2_d6777c() {
-  vec2 res = exp2(vec2(1.0f));
+  vec2 res = vec2(2.0f);
 }
 
 void compute_main() {

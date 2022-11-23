@@ -1,5 +1,5 @@
 void exp2_dea523() {
-  float res = exp2(1.0f);
+  float res = 2.0f;
 }
 
 struct tint_symbol {

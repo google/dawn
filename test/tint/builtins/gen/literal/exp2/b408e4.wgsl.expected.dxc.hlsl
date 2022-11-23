@@ -1,5 +1,5 @@
 void exp2_b408e4() {
-  float16_t res = exp2(float16_t(1.0h));
+  float16_t res = float16_t(2.0h);
 }
 
 struct tint_symbol {

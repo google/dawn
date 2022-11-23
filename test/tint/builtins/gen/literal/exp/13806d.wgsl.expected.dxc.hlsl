@@ -1,5 +1,5 @@
 void exp_13806d() {
-  vector<float16_t, 3> res = exp((float16_t(1.0h)).xxx);
+  vector<float16_t, 3> res = (float16_t(2.716796875h)).xxx;
 }
 
 struct tint_symbol {

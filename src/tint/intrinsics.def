@@ -460,10 +460,10 @@ fn dot4U8Packed(u32, u32) -> u32
 @stage("fragment") fn dpdyCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
 @stage("fragment") fn dpdyFine(f32) -> f32
 @stage("fragment") fn dpdyFine<N: num>(vec<N, f32>) -> vec<N, f32>
-fn exp<T: f32_f16>(T) -> T
-fn exp<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn exp2<T: f32_f16>(T) -> T
-fn exp2<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn exp<T: fa_f32_f16>(T) -> T
+@const fn exp<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn exp2<T: fa_f32_f16>(T) -> T
+@const fn exp2<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn extractBits<T: iu32>(T, u32, u32) -> T
 @const fn extractBits<N: num, T: iu32>(vec<N, T>, u32, u32) -> vec<N, T>
 fn faceForward<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>

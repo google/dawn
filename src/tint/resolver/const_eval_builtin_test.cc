@@ -1102,6 +1102,46 @@ INSTANTIATE_TEST_SUITE_P(  //
                      testing::ValuesIn(DegreesF16Cases<f16>())));
 
 template <typename T>
+std::vector<Case> ExpCases() {
+    auto error_msg = [](auto a) { return "12:34 error: " + OverflowExpErrorMessage("e", a); };
+    return std::vector<Case>{C({T(0)}, T(1)),   //
+                             C({-T(0)}, T(1)),  //
+                             C({T(2)}, T(7.3890562)).FloatComp(),
+                             C({-T(2)}, T(0.13533528)).FloatComp(),  //
+                             C({T::Lowest()}, T(0)),
+
+                             E({T::Highest()}, error_msg(T::Highest()))};
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Exp,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kExp),
+                     testing::ValuesIn(Concat(ExpCases<AFloat>(),  //
+                                              ExpCases<f32>(),
+                                              ExpCases<f16>()))));
+
+template <typename T>
+std::vector<Case> Exp2Cases() {
+    auto error_msg = [](auto a) { return "12:34 error: " + OverflowExpErrorMessage("2", a); };
+    return std::vector<Case>{
+        C({T(0)}, T(1)),   //
+        C({-T(0)}, T(1)),  //
+        C({T(2)}, T(4.0)),
+        C({-T(2)}, T(0.25)),  //
+        C({T::Lowest()}, T(0)),
+
+        E({T::Highest()}, error_msg(T::Highest())),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Exp2,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kExp2),
+                     testing::ValuesIn(Concat(Exp2Cases<AFloat>(),  //
+                                              Exp2Cases<f32>(),
+                                              Exp2Cases<f16>()))));
+
+template <typename T>
 std::vector<Case> ExtractBitsCases() {
     using UT = Number<std::make_unsigned_t<UnwrapNumber<T>>>;
 
