@@ -100,6 +100,31 @@ TEST_F(ParserImplTest, LHSExpression_Multiple) {
     EXPECT_TRUE(expr->Is<ast::IdentifierExpression>());
 }
 
+TEST_F(ParserImplTest, LHSExpression_PostfixExpression_Array) {
+    auto p = parser("*a[0]");
+    auto e = p->lhs_expression();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_FALSE(e.errored);
+    EXPECT_TRUE(e.matched);
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
+
+    auto* u = e->As<ast::UnaryOpExpression>();
+    EXPECT_EQ(u->op, ast::UnaryOp::kIndirection);
+
+    ASSERT_TRUE(u->expr->Is<ast::IndexAccessorExpression>());
+
+    auto* access = u->expr->As<ast::IndexAccessorExpression>();
+    ASSERT_TRUE(access->object->Is<ast::IdentifierExpression>());
+
+    auto* obj = access->object->As<ast::IdentifierExpression>();
+    EXPECT_EQ(obj->symbol, p->builder().Symbols().Get("a"));
+
+    ASSERT_TRUE(access->index->Is<ast::IntLiteralExpression>());
+    auto* idx = access->index->As<ast::IntLiteralExpression>();
+    EXPECT_EQ(0, idx->value);
+}
+
 TEST_F(ParserImplTest, LHSExpression_PostfixExpression) {
     auto p = parser("*a.foo");
     auto e = p->lhs_expression();
@@ -107,16 +132,17 @@ TEST_F(ParserImplTest, LHSExpression_PostfixExpression) {
     ASSERT_FALSE(e.errored);
     EXPECT_TRUE(e.matched);
     ASSERT_NE(e.value, nullptr);
-    ASSERT_TRUE(e->Is<ast::MemberAccessorExpression>());
+    ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
-    auto* access = e->As<ast::MemberAccessorExpression>();
-    ASSERT_TRUE(access->structure->Is<ast::UnaryOpExpression>());
-
-    auto* u = access->structure->As<ast::UnaryOpExpression>();
+    auto* u = e->As<ast::UnaryOpExpression>();
     EXPECT_EQ(u->op, ast::UnaryOp::kIndirection);
 
-    ASSERT_TRUE(u->expr->Is<ast::IdentifierExpression>());
-    auto* struct_ident = u->expr->As<ast::IdentifierExpression>();
+    ASSERT_TRUE(u->expr->Is<ast::MemberAccessorExpression>());
+
+    auto* access = u->expr->As<ast::MemberAccessorExpression>();
+    ASSERT_TRUE(access->structure->Is<ast::IdentifierExpression>());
+
+    auto* struct_ident = access->structure->As<ast::IdentifierExpression>();
     EXPECT_EQ(struct_ident->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(access->member->Is<ast::IdentifierExpression>());

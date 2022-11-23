@@ -1298,6 +1298,23 @@ TEST_F(ResolverTest, U32_Overflow) {
     EXPECT_EQ(r()->error(), "12:24 error: value 4294967296 cannot be represented as 'u32'");
 }
 
+//    var a: array<i32,2>;
+//    *&a[0] = 1;
+TEST_F(ResolverTest, PointerIndexing_Fail) {
+    // var a: array<i32,2>;
+    // let p = &a;
+    // *p[0] = 0;
+
+    auto* a = Var("a", ty.array<i32, 2>());
+    auto* p = AddressOf("a");
+    auto* idx = Assign(Deref(IndexAccessor(p, 0_u)), 0_u);
+
+    WrapInFunction(a, idx);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "error: cannot index type 'ptr<function, array<i32, 2>, read_write>'");
+}
+
 }  // namespace
 }  // namespace tint::resolver
 

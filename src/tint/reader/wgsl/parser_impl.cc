@@ -3227,47 +3227,46 @@ Maybe<const ast::Expression*> ParserImpl::core_lhs_expression() {
 }
 
 // lhs_expression
-//   : ( STAR | AND )* core_lhs_expression component_or_swizzle_specifier?
+//   : core_lhs_expression component_or_swizzle_specifier ?
+//   | AND lhs_expression
+//   | STAR lhs_expression
 Maybe<const ast::Expression*> ParserImpl::lhs_expression() {
-    std::vector<const Token*> prefixes;
-    while (peek_is(Token::Type::kStar) || peek_is(Token::Type::kAnd) ||
-           peek_is(Token::Type::kAndAnd)) {
-        auto& t = next();
-
-        // If an '&&' is provided split into '&' and '&'
-        if (t.Is(Token::Type::kAndAnd)) {
-            split_token(Token::Type::kAnd, Token::Type::kAnd);
-        }
-
-        prefixes.push_back(&t);
-    }
-
     auto core_expr = core_lhs_expression();
     if (core_expr.errored) {
         return Failure::kErrored;
-    } else if (!core_expr.matched) {
-        if (prefixes.empty()) {
-            return Failure::kNoMatch;
+    }
+    if (core_expr.matched) {
+        return component_or_swizzle_specifier(core_expr.value);
+    }
+
+    auto check_lhs = [&](ast::UnaryOp op) -> Maybe<const ast::Expression*> {
+        auto& t = peek();
+        auto expr = lhs_expression();
+        if (expr.errored) {
+            return Failure::kErrored;
         }
-
-        return add_error(peek(), "missing expression");
-    }
-
-    const auto* expr = core_expr.value;
-    for (auto it = prefixes.rbegin(); it != prefixes.rend(); ++it) {
-        auto& t = **it;
-        ast::UnaryOp op = ast::UnaryOp::kAddressOf;
-        if (t.Is(Token::Type::kStar)) {
-            op = ast::UnaryOp::kIndirection;
+        if (!expr.matched) {
+            return add_error(t, "missing expression");
         }
-        expr = create<ast::UnaryOpExpression>(t.source(), op, expr);
+        return create<ast::UnaryOpExpression>(t.source(), op, expr.value);
+    };
+
+    // If an `&&` is encountered, split it into two `&`'s
+    if (match(Token::Type::kAndAnd)) {
+        // The first `&` is consumed as part of the `&&`, so this needs to run the check itself.
+        split_token(Token::Type::kAnd, Token::Type::kAnd);
+        return check_lhs(ast::UnaryOp::kAddressOf);
     }
 
-    auto e = component_or_swizzle_specifier(expr);
-    if (e.errored) {
-        return Failure::kErrored;
+    if (match(Token::Type::kAnd)) {
+        return check_lhs(ast::UnaryOp::kAddressOf);
     }
-    return e.value;
+
+    if (match(Token::Type::kStar)) {
+        return check_lhs(ast::UnaryOp::kIndirection);
+    }
+
+    return Failure::kNoMatch;
 }
 
 // variable_updating_statement
