@@ -55,6 +55,24 @@ class DeviceLostTest : public DawnTest {
         EXPECT_EQ(WGPUBufferMapAsyncStatus_DeviceLost, status);
         EXPECT_EQ(&fakeUserData, userdata);
     }
+
+    void MapAsyncAndWait(const wgpu::Buffer& buffer,
+                         wgpu::MapMode mode,
+                         size_t offset,
+                         size_t size) {
+        bool done = false;
+        buffer.MapAsync(
+            mode, offset, size,
+            [](WGPUBufferMapAsyncStatus status, void* userdata) {
+                ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
+                *static_cast<bool*>(userdata) = true;
+            },
+            &done);
+
+        while (!done) {
+            WaitABit();
+        }
+    }
 };
 
 // Test that DeviceLostCallback is invoked when LostForTestimg is called
@@ -338,7 +356,7 @@ TEST_P(DeviceLostTest, GetMappedRange_MapAsyncReading) {
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer buffer = device.CreateBuffer(&desc);
 
-    buffer.MapAsync(wgpu::MapMode::Read, 0, 4, nullptr, nullptr);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, 4);
     queue.Submit(0, nullptr);
 
     const void* rangeBeforeLoss = buffer.GetConstMappedRange();
@@ -355,7 +373,7 @@ TEST_P(DeviceLostTest, GetMappedRange_MapAsyncWriting) {
     desc.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
     wgpu::Buffer buffer = device.CreateBuffer(&desc);
 
-    buffer.MapAsync(wgpu::MapMode::Write, 0, 4, nullptr, nullptr);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 4);
     queue.Submit(0, nullptr);
 
     const void* rangeBeforeLoss = buffer.GetConstMappedRange();

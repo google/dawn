@@ -44,6 +44,7 @@ class BufferBase : public ApiObjectBase {
   public:
     enum class BufferState {
         Unmapped,
+        PendingMap,
         Mapped,
         MappedAtCreation,
         Destroyed,
@@ -62,7 +63,7 @@ class BufferBase : public ApiObjectBase {
     wgpu::BufferUsage GetUsageExternalOnly() const;
 
     MaybeError MapAtCreation();
-    void OnMapRequestCompleted(MapRequestID mapID, WGPUBufferMapAsyncStatus status);
+    void OnMapRequestCompleted(WGPUBufferMapAsyncStatus status);
 
     MaybeError ValidateCanUseOnQueueNow() const;
 
@@ -109,7 +110,7 @@ class BufferBase : public ApiObjectBase {
 
     virtual bool IsCPUWritableAtCreation() const = 0;
     MaybeError CopyFromStagingBuffer();
-    void CallMapCallback(MapRequestID mapID, WGPUBufferMapAsyncStatus status);
+    void CallMapCallback(WGPUBufferMapAsyncStatus status);
 
     MaybeError ValidateMapAsync(wgpu::MapMode mode,
                                 size_t offset,
@@ -128,7 +129,6 @@ class BufferBase : public ApiObjectBase {
 
     WGPUBufferMapCallback mMapCallback = nullptr;
     void* mMapUserdata = 0;
-    MapRequestID mLastMapID = MapRequestID(0);
     wgpu::MapMode mMapMode = wgpu::MapMode::None;
     size_t mMapOffset = 0;
     size_t mMapSize = 0;

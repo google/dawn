@@ -37,25 +37,24 @@ namespace dawn::native {
 
 namespace {
 struct MapRequestTask : TrackTaskCallback {
-    MapRequestTask(dawn::platform::Platform* platform, Ref<BufferBase> buffer, MapRequestID id)
-        : TrackTaskCallback(platform), buffer(std::move(buffer)), id(id) {}
+    MapRequestTask(dawn::platform::Platform* platform, Ref<BufferBase> buffer)
+        : TrackTaskCallback(platform), buffer(std::move(buffer)) {}
     void Finish() override {
         ASSERT(mSerial != kMaxExecutionSerial);
         TRACE_EVENT1(mPlatform, General, "Buffer::TaskInFlight::Finished", "serial",
                      uint64_t(mSerial));
-        buffer->OnMapRequestCompleted(id, WGPUBufferMapAsyncStatus_Success);
+        buffer->OnMapRequestCompleted(WGPUBufferMapAsyncStatus_Success);
     }
     void HandleDeviceLoss() override {
-        buffer->OnMapRequestCompleted(id, WGPUBufferMapAsyncStatus_DeviceLost);
+        buffer->OnMapRequestCompleted(WGPUBufferMapAsyncStatus_DeviceLost);
     }
     void HandleShutDown() override {
-        buffer->OnMapRequestCompleted(id, WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
+        buffer->OnMapRequestCompleted(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
     }
     ~MapRequestTask() override = default;
 
   private:
     Ref<BufferBase> buffer;
-    MapRequestID id;
 };
 
 class ErrorBuffer final : public BufferBase {
@@ -194,7 +193,7 @@ BufferBase::~BufferBase() {
 }
 
 void BufferBase::DestroyImpl() {
-    if (mState == BufferState::Mapped) {
+    if (mState == BufferState::Mapped || mState == BufferState::PendingMap) {
         UnmapInternal(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
     } else if (mState == BufferState::MappedAtCreation) {
         if (mStagingBuffer != nullptr) {
@@ -311,15 +310,17 @@ MaybeError BufferBase::ValidateCanUseOnQueueNow() const {
         case BufferState::Mapped:
         case BufferState::MappedAtCreation:
             return DAWN_VALIDATION_ERROR("%s used in submit while mapped.", this);
+        case BufferState::PendingMap:
+            return DAWN_VALIDATION_ERROR("%s used in submit while pending map.", this);
         case BufferState::Unmapped:
             return {};
     }
     UNREACHABLE();
 }
 
-void BufferBase::CallMapCallback(MapRequestID mapID, WGPUBufferMapAsyncStatus status) {
+void BufferBase::CallMapCallback(WGPUBufferMapAsyncStatus status) {
     ASSERT(!IsError());
-    if (mMapCallback != nullptr && mapID == mLastMapID) {
+    if (mMapCallback != nullptr) {
         // Tag the callback as fired before firing it, otherwise it could fire a second time if
         // for example buffer.Unmap() is called inside the application-provided callback.
         WGPUBufferMapCallback callback = mMapCallback;
@@ -330,6 +331,8 @@ void BufferBase::CallMapCallback(MapRequestID mapID, WGPUBufferMapAsyncStatus st
         } else {
             callback(status, mMapUserdata);
         }
+
+        mMapUserdata = 0;
     }
 }
 
@@ -356,20 +359,19 @@ void BufferBase::APIMapAsync(wgpu::MapMode mode,
     }
     ASSERT(!IsError());
 
-    mLastMapID++;
     mMapMode = mode;
     mMapOffset = offset;
     mMapSize = size;
     mMapCallback = callback;
     mMapUserdata = userdata;
-    mState = BufferState::Mapped;
+    mState = BufferState::PendingMap;
 
     if (GetDevice()->ConsumedError(MapAsyncImpl(mode, offset, size))) {
-        CallMapCallback(mLastMapID, WGPUBufferMapAsyncStatus_DeviceLost);
+        CallMapCallback(WGPUBufferMapAsyncStatus_DeviceLost);
         return;
     }
     std::unique_ptr<MapRequestTask> request =
-        std::make_unique<MapRequestTask>(GetDevice()->GetPlatform(), this, mLastMapID);
+        std::make_unique<MapRequestTask>(GetDevice()->GetPlatform(), this);
     TRACE_EVENT1(GetDevice()->GetPlatform(), General, "Buffer::APIMapAsync", "serial",
                  uint64_t(GetDevice()->GetPendingCommandSerial()));
     GetDevice()->GetQueue()->TrackTask(std::move(request));
@@ -438,16 +440,11 @@ void BufferBase::Unmap() {
 }
 
 void BufferBase::UnmapInternal(WGPUBufferMapAsyncStatus callbackStatus) {
-    if (mState == BufferState::Mapped) {
-        // A map request can only be called once, so this will fire only if the request wasn't
-        // completed before the Unmap.
-        // Callbacks are not fired if there is no callback registered, so this is correct for
-        // mappedAtCreation = true.
-        CallMapCallback(mLastMapID, callbackStatus);
+    if (mState == BufferState::PendingMap) {
+        CallMapCallback(callbackStatus);
         UnmapImpl();
-
-        mMapCallback = nullptr;
-        mMapUserdata = 0;
+    } else if (mState == BufferState::Mapped) {
+        UnmapImpl();
     } else if (mState == BufferState::MappedAtCreation) {
         if (mStagingBuffer != nullptr) {
             GetDevice()->ConsumedError(CopyFromStagingBuffer());
@@ -483,6 +480,8 @@ MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
         case BufferState::Mapped:
         case BufferState::MappedAtCreation:
             return DAWN_VALIDATION_ERROR("%s is already mapped.", this);
+        case BufferState::PendingMap:
+            return DAWN_VALIDATION_ERROR("%s is pending map.", this);
         case BufferState::Destroyed:
             return DAWN_VALIDATION_ERROR("%s is destroyed.", this);
         case BufferState::Unmapped:
@@ -542,6 +541,7 @@ bool BufferBase::CanGetMappedRange(bool writable, size_t offset, size_t size) co
             ASSERT(bool{mMapMode & wgpu::MapMode::Read} ^ bool{mMapMode & wgpu::MapMode::Write});
             return !writable || (mMapMode & wgpu::MapMode::Write);
 
+        case BufferState::PendingMap:
         case BufferState::Unmapped:
         case BufferState::Destroyed:
             return false;
@@ -554,8 +554,11 @@ MaybeError BufferBase::ValidateUnmap() const {
     return {};
 }
 
-void BufferBase::OnMapRequestCompleted(MapRequestID mapID, WGPUBufferMapAsyncStatus status) {
-    CallMapCallback(mapID, status);
+void BufferBase::OnMapRequestCompleted(WGPUBufferMapAsyncStatus status) {
+    if (status == WGPUBufferMapAsyncStatus_Success && mState == BufferState::PendingMap) {
+        mState = BufferState::Mapped;
+    }
+    CallMapCallback(status);
 }
 
 bool BufferBase::NeedsInitialization() const {
