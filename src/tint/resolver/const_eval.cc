@@ -2266,6 +2266,40 @@ ConstEval::Result ConstEval::min(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
+ConstEval::Result ConstEval::modf(const sem::Type* ty,
+                                  utils::VectorRef<const sem::Constant*> args,
+                                  const Source& source) {
+    auto transform_fract = [&](const sem::Constant* c) {
+        auto create = [&](auto e) {
+            return CreateElement(builder, source, c->Type(),
+                                 decltype(e)(e.value - std::trunc(e.value)));
+        };
+        return Dispatch_fa_f32_f16(create, c);
+    };
+    auto transform_whole = [&](const sem::Constant* c) {
+        auto create = [&](auto e) {
+            return CreateElement(builder, source, c->Type(), decltype(e)(std::trunc(e.value)));
+        };
+        return Dispatch_fa_f32_f16(create, c);
+    };
+
+    utils::Vector<const sem::Constant*, 2> fields;
+
+    if (auto fract = TransformElements(builder, args[0]->Type(), transform_fract, args[0])) {
+        fields.Push(fract.Get());
+    } else {
+        return utils::Failure;
+    }
+
+    if (auto whole = TransformElements(builder, args[0]->Type(), transform_whole, args[0])) {
+        fields.Push(whole.Get());
+    } else {
+        return utils::Failure;
+    }
+
+    return CreateComposite(builder, ty, std::move(fields));
+}
+
 ConstEval::Result ConstEval::pack2x16float(const sem::Type* ty,
                                            utils::VectorRef<const sem::Constant*> args,
                                            const Source& source) {

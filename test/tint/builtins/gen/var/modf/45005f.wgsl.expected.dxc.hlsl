@@ -9,7 +9,7 @@ modf_result_vec3_f16 tint_modf(vector<float16_t, 3> param_0) {
 }
 
 void modf_45005f() {
-  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(-1.5h)).xxx;
   modf_result_vec3_f16 res = tint_modf(arg_0);
 }
 

@@ -6,14 +6,8 @@ struct modf_result_vec3_f16 {
   half3 fract;
   half3 whole;
 };
-modf_result_vec3_f16 tint_modf(half3 param_0) {
-  modf_result_vec3_f16 result;
-  result.fract = modf(param_0, result.whole);
-  return result;
-}
-
 void modf_45005f() {
-  modf_result_vec3_f16 res = tint_modf(half3(1.0h));
+  modf_result_vec3_f16 res = modf_result_vec3_f16{.fract=half3(-0.5h), .whole=half3(-1.0h)};
 }
 
 struct tint_symbol {

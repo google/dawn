@@ -13,7 +13,7 @@ modf_result_vec2_f16 tint_modf(half2 param_0) {
 }
 
 void modf_a545b9() {
-  half2 arg_0 = half2(1.0h);
+  half2 arg_0 = half2(-1.5h);
   modf_result_vec2_f16 res = tint_modf(arg_0);
 }
 

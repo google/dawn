@@ -5,15 +5,9 @@ struct modf_result {
   float whole;
 };
 
-modf_result tint_modf(float param_0) {
-  modf_result result;
-  result.fract = modf(param_0, result.whole);
-  return result;
-}
-
 
 void modf_bbf7f7() {
-  modf_result res = tint_modf(1.0f);
+  modf_result res = modf_result(-0.5f, -1.0f);
 }
 
 vec4 vertex_main() {
@@ -37,15 +31,9 @@ struct modf_result {
   float whole;
 };
 
-modf_result tint_modf(float param_0) {
-  modf_result result;
-  result.fract = modf(param_0, result.whole);
-  return result;
-}
-
 
 void modf_bbf7f7() {
-  modf_result res = tint_modf(1.0f);
+  modf_result res = modf_result(-0.5f, -1.0f);
 }
 
 void fragment_main() {
@@ -63,15 +51,9 @@ struct modf_result {
   float whole;
 };
 
-modf_result tint_modf(float param_0) {
-  modf_result result;
-  result.fract = modf(param_0, result.whole);
-  return result;
-}
-
 
 void modf_bbf7f7() {
-  modf_result res = tint_modf(1.0f);
+  modf_result res = modf_result(-0.5f, -1.0f);
 }
 
 void compute_main() {

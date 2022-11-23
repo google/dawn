@@ -2,14 +2,8 @@ struct modf_result_f16 {
   float16_t fract;
   float16_t whole;
 };
-modf_result_f16 tint_modf(float16_t param_0) {
-  modf_result_f16 result;
-  result.fract = modf(param_0, result.whole);
-  return result;
-}
-
 void modf_8dbbbf() {
-  modf_result_f16 res = tint_modf(float16_t(1.0h));
+  modf_result_f16 res = {float16_t(-0.5h), float16_t(-1.0h)};
 }
 
 struct tint_symbol {

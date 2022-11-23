@@ -9,7 +9,7 @@ modf_result_vec2 tint_modf(float2 param_0) {
 }
 
 void modf_2d50da() {
-  float2 arg_0 = (1.0f).xx;
+  float2 arg_0 = (-1.5f).xx;
   modf_result_vec2 res = tint_modf(arg_0);
 }
 

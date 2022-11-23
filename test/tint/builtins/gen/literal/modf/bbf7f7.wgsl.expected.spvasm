@@ -1,10 +1,9 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 33
+; Bound: 34
 ; Schema: 0
                OpCapability Shader
-         %15 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %vertex_main "vertex_main" %value %vertex_point_size
                OpEntryPoint Fragment %fragment_main "fragment_main"
@@ -37,15 +36,17 @@
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
 %__modf_result = OpTypeStruct %float %float
-    %float_1 = OpConstant %float 1
+ %float_n0_5 = OpConstant %float -0.5
+   %float_n1 = OpConstant %float -1
+         %16 = OpConstantComposite %__modf_result %float_n0_5 %float_n1
 %_ptr_Function___modf_result = OpTypePointer Function %__modf_result
          %19 = OpConstantNull %__modf_result
          %20 = OpTypeFunction %v4float
+    %float_1 = OpConstant %float 1
 %modf_bbf7f7 = OpFunction %void None %9
          %12 = OpLabel
         %res = OpVariable %_ptr_Function___modf_result Function %19
-         %13 = OpExtInst %__modf_result %15 ModfStruct %float_1
-               OpStore %res %13
+               OpStore %res %16
                OpReturn
                OpFunctionEnd
 %vertex_main_inner = OpFunction %v4float None %20
@@ -61,12 +62,12 @@
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %28 = OpLabel
-         %29 = OpFunctionCall %void %modf_bbf7f7
+         %29 = OpLabel
+         %30 = OpFunctionCall %void %modf_bbf7f7
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %31 = OpLabel
-         %32 = OpFunctionCall %void %modf_bbf7f7
+         %32 = OpLabel
+         %33 = OpFunctionCall %void %modf_bbf7f7
                OpReturn
                OpFunctionEnd

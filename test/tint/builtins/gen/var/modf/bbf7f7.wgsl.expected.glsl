@@ -13,7 +13,7 @@ modf_result tint_modf(float param_0) {
 
 
 void modf_bbf7f7() {
-  float arg_0 = 1.0f;
+  float arg_0 = -1.5f;
   modf_result res = tint_modf(arg_0);
 }
 
@@ -46,7 +46,7 @@ modf_result tint_modf(float param_0) {
 
 
 void modf_bbf7f7() {
-  float arg_0 = 1.0f;
+  float arg_0 = -1.5f;
   modf_result res = tint_modf(arg_0);
 }
 
@@ -73,7 +73,7 @@ modf_result tint_modf(float param_0) {
 
 
 void modf_bbf7f7() {
-  float arg_0 = 1.0f;
+  float arg_0 = -1.5f;
   modf_result res = tint_modf(arg_0);
 }
 

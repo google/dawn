@@ -23,7 +23,7 @@
 
 // fn modf(vec<3, f32>) -> __modf_result_vec<3, f32>
 fn modf_5ea256() {
-  var arg_0 = vec3<f32>(1.f);
+  var arg_0 = vec3<f32>(-1.5f);
   var res = modf(arg_0);
 }
 

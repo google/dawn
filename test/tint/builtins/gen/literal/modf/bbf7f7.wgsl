@@ -23,7 +23,7 @@
 
 // fn modf(f32) -> __modf_result<f32>
 fn modf_bbf7f7() {
-  var res = modf(1.f);
+  var res = modf(-1.5f);
 }
 
 @vertex

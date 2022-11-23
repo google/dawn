@@ -1,5 +1,5 @@
 fn modf_5ea256() {
-  var res = modf(vec3<f32>(1.0f));
+  var res = modf(vec3<f32>(-(1.5f)));
 }
 
 @vertex

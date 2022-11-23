@@ -43,8 +43,8 @@
           %9 = OpTypeFunction %void
        %half = OpTypeFloat 16
      %v2half = OpTypeVector %half 2
-%half_0x1p_0 = OpConstant %half 0x1p+0
-         %16 = OpConstantComposite %v2half %half_0x1p_0 %half_0x1p_0
+%half_n0x1_8p_0 = OpConstant %half -0x1.8p+0
+         %16 = OpConstantComposite %v2half %half_n0x1_8p_0 %half_n0x1_8p_0
 %_ptr_Function_v2half = OpTypePointer Function %v2half
          %19 = OpConstantNull %v2half
 %__modf_result_vec2_f16 = OpTypeStruct %v2half %v2half

@@ -1,5 +1,5 @@
 fn modf_2d50da() {
-  var res = modf(vec2<f32>(1.0f));
+  var res = modf(vec2<f32>(-(1.5f)));
 }
 
 @vertex

@@ -14,7 +14,7 @@ modf_result_vec2_f16 tint_modf(f16vec2 param_0) {
 
 
 void modf_a545b9() {
-  f16vec2 arg_0 = f16vec2(1.0hf);
+  f16vec2 arg_0 = f16vec2(-1.5hf);
   modf_result_vec2_f16 res = tint_modf(arg_0);
 }
 
@@ -48,7 +48,7 @@ modf_result_vec2_f16 tint_modf(f16vec2 param_0) {
 
 
 void modf_a545b9() {
-  f16vec2 arg_0 = f16vec2(1.0hf);
+  f16vec2 arg_0 = f16vec2(-1.5hf);
   modf_result_vec2_f16 res = tint_modf(arg_0);
 }
 
@@ -76,7 +76,7 @@ modf_result_vec2_f16 tint_modf(f16vec2 param_0) {
 
 
 void modf_a545b9() {
-  f16vec2 arg_0 = f16vec2(1.0hf);
+  f16vec2 arg_0 = f16vec2(-1.5hf);
   modf_result_vec2_f16 res = tint_modf(arg_0);
 }
 

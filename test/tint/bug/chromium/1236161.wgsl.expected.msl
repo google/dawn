@@ -1,18 +1,7 @@
 #include <metal_stdlib>
 
 using namespace metal;
-
-struct modf_result {
-  float fract;
-  float whole;
-};
-modf_result tint_modf(float param_0) {
-  modf_result result;
-  result.fract = modf(param_0, result.whole);
-  return result;
-}
-
 void i() {
-  float const s = tint_modf(1.0f).whole;
+  float const s = 1.0f;
 }
 

@@ -9,7 +9,7 @@ modf_result_f16 tint_modf(float16_t param_0) {
 }
 
 void modf_8dbbbf() {
-  float16_t arg_0 = float16_t(1.0h);
+  float16_t arg_0 = float16_t(-1.5h);
   modf_result_f16 res = tint_modf(arg_0);
 }
 

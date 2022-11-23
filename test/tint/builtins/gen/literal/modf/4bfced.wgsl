@@ -23,7 +23,7 @@
 
 // fn modf(vec<4, f32>) -> __modf_result_vec<4, f32>
 fn modf_4bfced() {
-  var res = modf(vec4<f32>(1.f));
+  var res = modf(vec4<f32>(-1.5f));
 }
 
 @vertex

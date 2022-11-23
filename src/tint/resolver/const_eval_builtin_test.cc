@@ -98,6 +98,11 @@ static Case C(std::initializer_list<Types> args, Types result) {
     return Case{utils::Vector<Types, 8>{args}, utils::Vector<Types, 2>{std::move(result)}};
 }
 
+/// Creates a Case with Values for args and result
+static Case C(std::initializer_list<Types> args, std::initializer_list<Types> results) {
+    return Case{utils::Vector<Types, 8>{args}, utils::Vector<Types, 2>{results}};
+}
+
 /// Convenience overload that creates a Case with just scalars
 static Case C(std::initializer_list<ScalarTypes> sargs, ScalarTypes sresult) {
     utils::Vector<Types, 8> args;
@@ -107,6 +112,20 @@ static Case C(std::initializer_list<ScalarTypes> sargs, ScalarTypes sresult) {
     Types result = Val(0_a);
     std::visit([&](auto&& v) { result = Val(v); }, sresult);
     return Case{std::move(args), utils::Vector<Types, 2>{std::move(result)}};
+}
+
+/// Creates a Case with Values for args and result
+static Case C(std::initializer_list<ScalarTypes> sargs,
+              std::initializer_list<ScalarTypes> sresults) {
+    utils::Vector<Types, 8> args;
+    for (auto& sa : sargs) {
+        std::visit([&](auto&& v) { return args.Push(Val(v)); }, sa);
+    }
+    utils::Vector<Types, 2> results;
+    for (auto& sa : sresults) {
+        std::visit([&](auto&& v) { return results.Push(Val(v)); }, sa);
+    }
+    return Case{std::move(args), std::move(results)};
 }
 
 /// Creates a Case with Values for args and expected error
@@ -1290,6 +1309,38 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               MinCases<AFloat>(),
                                               MinCases<f32>(),
                                               MinCases<f16>()))));
+template <typename T>
+std::vector<Case> ModfCases() {
+    return {
+        // Scalar tests
+        //  in     fract    whole
+        C({T(0.0)}, {T(0.0), T(0.0)}),              //
+        C({T(1.0)}, {T(0.0), T(1.0)}),              //
+        C({T(2.0)}, {T(0.0), T(2.0)}),              //
+        C({T(1.5)}, {T(0.5), T(1.0)}),              //
+        C({T(4.25)}, {T(0.25), T(4.0)}),            //
+        C({T(-1.0)}, {T(0.0), T(-1.0)}),            //
+        C({T(-2.0)}, {T(0.0), T(-2.0)}),            //
+        C({T(-1.5)}, {T(-0.5), T(-1.0)}),           //
+        C({T(-4.25)}, {T(-0.25), T(-4.0)}),         //
+        C({T::Lowest()}, {T(0.0), T::Lowest()}),    //
+        C({T::Highest()}, {T(0.0), T::Highest()}),  //
+
+        // Vector tests
+        //         in                 fract                    whole
+        C({Vec(T(0.0), T(0.0))}, {Vec(T(0.0), T(0.0)), Vec(T(0.0), T(0.0))}),
+        C({Vec(T(1.0), T(2.0))}, {Vec(T(0.0), T(0.0)), Vec(T(1), T(2))}),
+        C({Vec(T(-2.0), T(1.0))}, {Vec(T(0.0), T(0.0)), Vec(T(-2), T(1))}),
+        C({Vec(T(1.5), T(-2.25))}, {Vec(T(0.5), T(-0.25)), Vec(T(1.0), T(-2.0))}),
+        C({Vec(T::Lowest(), T::Highest())}, {Vec(T(0.0), T(0.0)), Vec(T::Lowest(), T::Highest())}),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Modf,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kModf),
+                     testing::ValuesIn(Concat(ModfCases<f32>(),  //
+                                              ModfCases<f16>()))));
 
 std::vector<Case> Pack4x8snormCases() {
     return {

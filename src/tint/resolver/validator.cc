@@ -530,9 +530,13 @@ bool Validator::AddressSpaceLayout(const sem::Variable* var,
     }
 
     if (auto* str = var->Type()->UnwrapRef()->As<sem::Struct>()) {
-        if (!AddressSpaceLayout(str, var->AddressSpace(), str->Declaration()->source, layouts)) {
-            AddNote("see declaration of variable", var->Declaration()->source);
-            return false;
+        // Check the structure has a declaration. Builtins like modf() and frexp() return untypeable
+        // structures, and so they have no declaration. Just skip validation for these.
+        if (auto* str_decl = str->Declaration()) {
+            if (!AddressSpaceLayout(str, var->AddressSpace(), str_decl->source, layouts)) {
+                AddNote("see declaration of variable", var->Declaration()->source);
+                return false;
+            }
         }
     } else {
         Source source = var->Declaration()->source;

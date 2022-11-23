@@ -12851,7 +12851,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[878],
     /* return matcher indices */ &kMatcherIndices[106],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::modf,
   },
   {
     /* [378] */
@@ -12863,7 +12863,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[879],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::modf,
   },
   {
     /* [379] */
@@ -14351,8 +14351,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [53] */
-    /* fn modf<T : f32_f16>(T) -> __modf_result<T> */
-    /* fn modf<N : num, T : f32_f16>(vec<N, T>) -> __modf_result_vec<N, T> */
+    /* fn modf<T : f32_f16>(@test_value(-1.5) T) -> __modf_result<T> */
+    /* fn modf<N : num, T : f32_f16>(@test_value(-1.5) vec<N, T>) -> __modf_result_vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[377],
   },

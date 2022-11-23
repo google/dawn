@@ -1,7 +1,7 @@
 enable f16;
 
 fn modf_995934() {
-  var arg_0 = vec4<f16>(1.0h);
+  var arg_0 = vec4<f16>(-(1.5h));
   var res = modf(arg_0);
 }
 

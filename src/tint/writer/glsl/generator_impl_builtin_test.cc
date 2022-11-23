@@ -416,9 +416,9 @@ TEST_F(GlslGeneratorImplTest_Builtin, FMA_f16) {
     EXPECT_EQ(out.str(), "((a) * (b) + (c))");
 }
 
-TEST_F(GlslGeneratorImplTest_Builtin, Modf_Scalar_f32) {
-    auto* call = Call("modf", 1_f);
-    WrapInFunction(CallStmt(call));
+TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Modf_Scalar_f32) {
+    WrapInFunction(Decl(Let("f", Expr(1.5_f))),  //
+                   Decl(Let("v", Call("modf", "f"))));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -438,7 +438,8 @@ modf_result tint_modf(float param_0) {
 
 
 void test_function() {
-  tint_modf(1.0f);
+  float f = 1.5f;
+  modf_result v = tint_modf(f);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -449,11 +450,11 @@ void main() {
 )");
 }
 
-TEST_F(GlslGeneratorImplTest_Builtin, Modf_Scalar_f16) {
+TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Modf_Scalar_f16) {
     Enable(ast::Extension::kF16);
 
-    auto* call = Call("modf", 1_h);
-    WrapInFunction(CallStmt(call));
+    WrapInFunction(Decl(Let("f", Expr(1.5_h))),  //
+                   Decl(Let("v", Call("modf", "f"))));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -474,7 +475,8 @@ modf_result_f16 tint_modf(float16_t param_0) {
 
 
 void test_function() {
-  tint_modf(1.0hf);
+  float16_t f = 1.5hf;
+  modf_result_f16 v = tint_modf(f);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -485,9 +487,9 @@ void main() {
 )");
 }
 
-TEST_F(GlslGeneratorImplTest_Builtin, Modf_Vector_f32) {
-    auto* call = Call("modf", vec3<f32>());
-    WrapInFunction(CallStmt(call));
+TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Modf_Vector_f32) {
+    WrapInFunction(Decl(Let("f", vec3<f32>(1.5_f, 2.5_f, 3.5_f))),  //
+                   Decl(Let("v", Call("modf", "f"))));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -507,7 +509,8 @@ modf_result_vec3 tint_modf(vec3 param_0) {
 
 
 void test_function() {
-  tint_modf(vec3(0.0f));
+  vec3 f = vec3(1.5f, 2.5f, 3.5f);
+  modf_result_vec3 v = tint_modf(f);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -518,11 +521,11 @@ void main() {
 )");
 }
 
-TEST_F(GlslGeneratorImplTest_Builtin, Modf_Vector_f16) {
+TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Modf_Vector_f16) {
     Enable(ast::Extension::kF16);
 
-    auto* call = Call("modf", vec3<f16>());
-    WrapInFunction(CallStmt(call));
+    WrapInFunction(Decl(Let("f", vec3<f16>(1.5_h, 2.5_h, 3.5_h))),  //
+                   Decl(Let("v", Call("modf", "f"))));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -543,7 +546,118 @@ modf_result_vec3_f16 tint_modf(f16vec3 param_0) {
 
 
 void test_function() {
-  tint_modf(f16vec3(0.0hf));
+  f16vec3 f = f16vec3(1.5hf, 2.5hf, 3.5hf);
+  modf_result_vec3_f16 v = tint_modf(f);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Builtin, Const_Modf_Scalar_f32) {
+    WrapInFunction(Decl(Let("v", Call("modf", 1.5_f))));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+struct modf_result {
+  float fract;
+  float whole;
+};
+
+
+void test_function() {
+  modf_result v = modf_result(0.5f, 1.0f);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Builtin, Const_Modf_Scalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(Decl(Let("v", Call("modf", 1.5_h))));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+#extension GL_AMD_gpu_shader_half_float : require
+
+struct modf_result_f16 {
+  float16_t fract;
+  float16_t whole;
+};
+
+
+void test_function() {
+  modf_result_f16 v = modf_result_f16(0.5hf, 1.0hf);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Builtin, Const_Modf_Vector_f32) {
+    WrapInFunction(Decl(Let("v", Call("modf", vec3<f32>(1.5_f, 2.5_f, 3.5_f)))));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+struct modf_result_vec3 {
+  vec3 fract;
+  vec3 whole;
+};
+
+
+void test_function() {
+  modf_result_vec3 v = modf_result_vec3(vec3(0.5f), vec3(1.0f, 2.0f, 3.0f));
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Builtin, Const_Modf_Vector_f16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(Decl(Let("v", Call("modf", vec3<f16>(1.5_h, 2.5_h, 3.5_h)))));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+#extension GL_AMD_gpu_shader_half_float : require
+
+struct modf_result_vec3_f16 {
+  f16vec3 fract;
+  f16vec3 whole;
+};
+
+
+void test_function() {
+  modf_result_vec3_f16 v = modf_result_vec3_f16(f16vec3(0.5hf), f16vec3(1.0hf, 2.0hf, 3.0hf));
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

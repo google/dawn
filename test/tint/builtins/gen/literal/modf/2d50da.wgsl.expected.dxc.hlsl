@@ -2,14 +2,8 @@ struct modf_result_vec2 {
   float2 fract;
   float2 whole;
 };
-modf_result_vec2 tint_modf(float2 param_0) {
-  modf_result_vec2 result;
-  result.fract = modf(param_0, result.whole);
-  return result;
-}
-
 void modf_2d50da() {
-  modf_result_vec2 res = tint_modf((1.0f).xx);
+  modf_result_vec2 res = {(-0.5f).xx, (-1.0f).xx};
 }
 
 struct tint_symbol {

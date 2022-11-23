@@ -1,5 +1,5 @@
 fn modf_4bfced() {
-  var res = modf(vec4<f32>(1.0f));
+  var res = modf(vec4<f32>(-(1.5f)));
 }
 
 @vertex

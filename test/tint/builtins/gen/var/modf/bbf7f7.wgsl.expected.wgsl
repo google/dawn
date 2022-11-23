@@ -1,5 +1,5 @@
 fn modf_bbf7f7() {
-  var arg_0 = 1.0f;
+  var arg_0 = -(1.5f);
   var res = modf(arg_0);
 }
 

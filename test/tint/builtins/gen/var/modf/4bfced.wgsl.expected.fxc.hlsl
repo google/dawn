@@ -9,7 +9,7 @@ modf_result_vec4 tint_modf(float4 param_0) {
 }
 
 void modf_4bfced() {
-  float4 arg_0 = (1.0f).xxxx;
+  float4 arg_0 = (-1.5f).xxxx;
   modf_result_vec4 res = tint_modf(arg_0);
 }
 

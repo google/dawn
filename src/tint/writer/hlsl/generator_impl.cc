@@ -1651,9 +1651,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
             return true;
         }
         case sem::BuiltinType::kAtomicCompareExchangeWeak: {
-            // Emit the builtin return type unique to this overload. This does not
-            // exist in the AST, so it will not be generated in Generate().
-            if (!EmitStructTypeOnce(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
+            if (!EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
                 return false;
             }
 
@@ -2506,7 +2504,7 @@ bool GeneratorImpl::EmitCase(const ast::SwitchStatement* s, size_t case_idx) {
             out << "default";
         } else {
             out << "case ";
-            if (!EmitConstant(out, selector->Value())) {
+            if (!EmitConstant(out, selector->Value(), /* is_variable_initializer */ false)) {
                 return false;
             }
         }
@@ -2552,7 +2550,13 @@ bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
 bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* expr) {
     if (auto* sem = builder_.Sem().Get(expr)) {
         if (auto* constant = sem->ConstantValue()) {
-            return EmitConstant(out, constant);
+            bool is_variable_initializer = false;
+            if (auto* stmt = sem->Stmt()) {
+                if (auto* decl = As<ast::VariableDeclStatement>(stmt->Declaration())) {
+                    is_variable_initializer = decl->variable->initializer == expr;
+                }
+            }
+            return EmitConstant(out, constant, is_variable_initializer);
         }
     }
     return Switch(
@@ -3042,7 +3046,9 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     return true;
 }
 
-bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constant) {
+bool GeneratorImpl::EmitConstant(std::ostream& out,
+                                 const sem::Constant* constant,
+                                 bool is_variable_initializer) {
     return Switch(
         constant->Type(),  //
         [&](const sem::Bool*) {
@@ -3072,7 +3078,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             if (constant->AllEqual()) {
                 {
                     ScopedParen sp(out);
-                    if (!EmitConstant(out, constant->Index(0))) {
+                    if (!EmitConstant(out, constant->Index(0), is_variable_initializer)) {
                         return false;
                     }
                 }
@@ -3093,7 +3099,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
                 if (i > 0) {
                     out << ", ";
                 }
-                if (!EmitConstant(out, constant->Index(i))) {
+                if (!EmitConstant(out, constant->Index(i), is_variable_initializer)) {
                     return false;
                 }
             }
@@ -3110,7 +3116,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
                 if (i > 0) {
                     out << ", ";
                 }
-                if (!EmitConstant(out, constant->Index(i))) {
+                if (!EmitConstant(out, constant->Index(i), is_variable_initializer)) {
                     return false;
                 }
             }
@@ -3139,7 +3145,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
                 if (i > 0) {
                     out << ", ";
                 }
-                if (!EmitConstant(out, constant->Index(i))) {
+                if (!EmitConstant(out, constant->Index(i), is_variable_initializer)) {
                     return false;
                 }
             }
@@ -3147,25 +3153,45 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             return true;
         },
         [&](const sem::Struct* s) {
+            if (!EmitStructType(&helpers_, s)) {
+                return false;
+            }
+
             if (constant->AllZero()) {
-                out << "(";
-                if (!EmitType(out, s, ast::AddressSpace::kNone, ast::Access::kUndefined, "")) {
-                    return false;
-                }
-                out << ")0";
+                out << "(" << StructName(s) << ")0";
                 return true;
             }
 
-            out << "{";
-            TINT_DEFER(out << "}");
-
-            for (size_t i = 0; i < s->Members().size(); i++) {
-                if (i > 0) {
-                    out << ", ";
+            auto emit_member_values = [&](std::ostream& o) {
+                o << "{";
+                for (size_t i = 0; i < s->Members().size(); i++) {
+                    if (i > 0) {
+                        o << ", ";
+                    }
+                    if (!EmitConstant(o, constant->Index(i), is_variable_initializer)) {
+                        return false;
+                    }
                 }
-                if (!EmitConstant(out, constant->Index(i))) {
+                o << "}";
+                return true;
+            };
+
+            if (is_variable_initializer) {
+                if (!emit_member_values(out)) {
                     return false;
                 }
+            } else {
+                // HLSL requires structure initializers to be assigned directly to a variable.
+                auto name = UniqueIdentifier("c");
+                {
+                    auto decl = line();
+                    decl << "const " << StructName(s) << " " << name << " = ";
+                    if (!emit_member_values(decl)) {
+                        return false;
+                    }
+                    decl << ";";
+                }
+                out << name;
             }
 
             return true;
@@ -3891,6 +3917,11 @@ bool GeneratorImpl::EmitTypeAndName(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
+    auto it = emitted_structs_.emplace(str);
+    if (!it.second) {
+        return true;
+    }
+
     line(b) << "struct " << StructName(str) << " {";
     {
         ScopedIndent si(b);
@@ -3965,14 +3996,6 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
 
     line(b) << "};";
     return true;
-}
-
-bool GeneratorImpl::EmitStructTypeOnce(TextBuffer* buffer, const sem::Struct* str) {
-    auto it = emitted_structs_.emplace(str);
-    if (!it.second) {
-        return true;
-    }
-    return EmitStructType(buffer, str);
 }
 
 bool GeneratorImpl::EmitUnaryOp(std::ostream& out, const ast::UnaryOpExpression* expr) {

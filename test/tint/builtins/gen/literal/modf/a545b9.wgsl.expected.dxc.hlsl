@@ -2,14 +2,8 @@ struct modf_result_vec2_f16 {
   vector<float16_t, 2> fract;
   vector<float16_t, 2> whole;
 };
-modf_result_vec2_f16 tint_modf(vector<float16_t, 2> param_0) {
-  modf_result_vec2_f16 result;
-  result.fract = modf(param_0, result.whole);
-  return result;
-}
-
 void modf_a545b9() {
-  modf_result_vec2_f16 res = tint_modf((float16_t(1.0h)).xx);
+  modf_result_vec2_f16 res = {(float16_t(-0.5h)).xx, (float16_t(-1.0h)).xx};
 }
 
 struct tint_symbol {

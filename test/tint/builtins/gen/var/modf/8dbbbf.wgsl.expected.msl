@@ -13,7 +13,7 @@ modf_result_f16 tint_modf(half param_0) {
 }
 
 void modf_8dbbbf() {
-  half arg_0 = 1.0h;
+  half arg_0 = -1.5h;
   modf_result_f16 res = tint_modf(arg_0);
 }
 

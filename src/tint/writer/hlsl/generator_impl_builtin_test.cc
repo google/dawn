@@ -381,9 +381,9 @@ TEST_F(HlslGeneratorImplTest_Builtin, Select_Vector) {
     EXPECT_EQ(out.str(), "(bool2(true, false) ? b : a)");
 }
 
-TEST_F(HlslGeneratorImplTest_Builtin, Modf_Scalar_f32) {
-    auto* call = Call("modf", 1_f);
-    WrapInFunction(CallStmt(call));
+TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Modf_Scalar_f32) {
+    WrapInFunction(Decl(Let("f", Expr(1.5_f))),  //
+                   Decl(Let("v", Call("modf", "f"))));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -400,17 +400,18 @@ modf_result tint_modf(float param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_modf(1.0f);
+  const float f = 1.5f;
+  const modf_result v = tint_modf(f);
   return;
 }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Builtin, Modf_Scalar_f16) {
+TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Modf_Scalar_f16) {
     Enable(ast::Extension::kF16);
 
-    auto* call = Call("modf", 1_h);
-    WrapInFunction(CallStmt(call));
+    WrapInFunction(Decl(Let("f", Expr(1.5_h))),  //
+                   Decl(Let("v", Call("modf", "f"))));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -427,15 +428,16 @@ modf_result_f16 tint_modf(float16_t param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_modf(float16_t(1.0h));
+  const float16_t f = float16_t(1.5h);
+  const modf_result_f16 v = tint_modf(f);
   return;
 }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Builtin, Modf_Vector_f32) {
-    auto* call = Call("modf", vec3<f32>());
-    WrapInFunction(CallStmt(call));
+TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Modf_Vector_f32) {
+    WrapInFunction(Decl(Let("f", vec3<f32>(1.5_f, 2.5_f, 3.5_f))),  //
+                   Decl(Let("v", Call("modf", "f"))));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -452,17 +454,18 @@ modf_result_vec3 tint_modf(float3 param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_modf((0.0f).xxx);
+  const float3 f = float3(1.5f, 2.5f, 3.5f);
+  const modf_result_vec3 v = tint_modf(f);
   return;
 }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Builtin, Modf_Vector_f16) {
+TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Modf_Vector_f16) {
     Enable(ast::Extension::kF16);
 
-    auto* call = Call("modf", vec3<f16>());
-    WrapInFunction(CallStmt(call));
+    WrapInFunction(Decl(Let("f", vec3<f16>(1.5_h, 2.5_h, 3.5_h))),  //
+                   Decl(Let("v", Call("modf", "f"))));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -479,7 +482,110 @@ modf_result_vec3_f16 tint_modf(vector<float16_t, 3> param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_modf((float16_t(0.0h)).xxx);
+  const vector<float16_t, 3> f = vector<float16_t, 3>(float16_t(1.5h), float16_t(2.5h), float16_t(3.5h));
+  const modf_result_vec3_f16 v = tint_modf(f);
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Builtin, Const_Modf_Scalar_f32) {
+    WrapInFunction(Decl(Let("v", Call("modf", 1.5_f))));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(struct modf_result {
+  float fract;
+  float whole;
+};
+[numthreads(1, 1, 1)]
+void test_function() {
+  const modf_result v = {0.5f, 1.0f};
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Builtin, Const_Modf_Scalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(Decl(Let("v", Call("modf", 1.5_h))));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(struct modf_result_f16 {
+  float16_t fract;
+  float16_t whole;
+};
+[numthreads(1, 1, 1)]
+void test_function() {
+  const modf_result_f16 v = {float16_t(0.5h), float16_t(1.0h)};
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Builtin, Const_Modf_Vector_f32) {
+    WrapInFunction(Decl(Let("v", Call("modf", vec3<f32>(1.5_f, 2.5_f, 3.5_f)))));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(struct modf_result_vec3 {
+  float3 fract;
+  float3 whole;
+};
+[numthreads(1, 1, 1)]
+void test_function() {
+  const modf_result_vec3 v = {(0.5f).xxx, float3(1.0f, 2.0f, 3.0f)};
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Builtin, Const_Modf_Vector_f16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(Decl(Let("v", Call("modf", vec3<f16>(1.5_h, 2.5_h, 3.5_h)))));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(struct modf_result_vec3_f16 {
+  vector<float16_t, 3> fract;
+  vector<float16_t, 3> whole;
+};
+[numthreads(1, 1, 1)]
+void test_function() {
+  const modf_result_vec3_f16 v = {(float16_t(0.5h)).xxx, vector<float16_t, 3>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h))};
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Builtin, NonInitializer_Modf_Vector_f32) {
+    WrapInFunction(
+        // Declare a variable with the result of a modf call.
+        // This is required to infer the 'var' type.
+        Decl(Var("v", Call("modf", vec3<f32>(1.5_f, 2.5_f, 3.5_f)))),
+        // Now assign 'v' again with another modf call.
+        // This requires generating a temporary variable for the struct initializer.
+        Assign("v", Call("modf", vec3<f32>(4.5_f, 5.5_f, 6.5_f))));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(struct modf_result_vec3 {
+  float3 fract;
+  float3 whole;
+};
+[numthreads(1, 1, 1)]
+void test_function() {
+  modf_result_vec3 v = {(0.5f).xxx, float3(1.0f, 2.0f, 3.0f)};
+  const modf_result_vec3 c = {(0.5f).xxx, float3(4.0f, 5.0f, 6.0f)};
+  v = c;
   return;
 }
 )");

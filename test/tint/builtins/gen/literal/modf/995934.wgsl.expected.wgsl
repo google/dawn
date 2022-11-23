@@ -1,7 +1,7 @@
 enable f16;
 
 fn modf_995934() {
-  var res = modf(vec4<f16>(1.0h));
+  var res = modf(vec4<f16>(-(1.5h)));
 }
 
 @vertex

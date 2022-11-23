@@ -23,7 +23,7 @@
 
 // fn modf(vec<2, f32>) -> __modf_result_vec<2, f32>
 fn modf_2d50da() {
-  var arg_0 = vec2<f32>(1.f);
+  var arg_0 = vec2<f32>(-1.5f);
   var res = modf(arg_0);
 }
 

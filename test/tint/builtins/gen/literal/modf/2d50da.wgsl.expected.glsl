@@ -5,15 +5,9 @@ struct modf_result_vec2 {
   vec2 whole;
 };
 
-modf_result_vec2 tint_modf(vec2 param_0) {
-  modf_result_vec2 result;
-  result.fract = modf(param_0, result.whole);
-  return result;
-}
-
 
 void modf_2d50da() {
-  modf_result_vec2 res = tint_modf(vec2(1.0f));
+  modf_result_vec2 res = modf_result_vec2(vec2(-0.5f), vec2(-1.0f));
 }
 
 vec4 vertex_main() {
@@ -37,15 +31,9 @@ struct modf_result_vec2 {
   vec2 whole;
 };
 
-modf_result_vec2 tint_modf(vec2 param_0) {
-  modf_result_vec2 result;
-  result.fract = modf(param_0, result.whole);
-  return result;
-}
-
 
 void modf_2d50da() {
-  modf_result_vec2 res = tint_modf(vec2(1.0f));
+  modf_result_vec2 res = modf_result_vec2(vec2(-0.5f), vec2(-1.0f));
 }
 
 void fragment_main() {
@@ -63,15 +51,9 @@ struct modf_result_vec2 {
   vec2 whole;
 };
 
-modf_result_vec2 tint_modf(vec2 param_0) {
-  modf_result_vec2 result;
-  result.fract = modf(param_0, result.whole);
-  return result;
-}
-
 
 void modf_2d50da() {
-  modf_result_vec2 res = tint_modf(vec2(1.0f));
+  modf_result_vec2 res = modf_result_vec2(vec2(-0.5f), vec2(-1.0f));
 }
 
 void compute_main() {

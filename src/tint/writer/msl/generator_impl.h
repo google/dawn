@@ -328,17 +328,12 @@ class GeneratorImpl : public TextGenerator {
     /// @param sc the address space to generate
     /// @returns true if the address space is emitted
     bool EmitAddressSpace(std::ostream& out, ast::AddressSpace sc);
-    /// Handles generating a struct declaration
+    /// Handles generating a struct declaration. If the structure has already been emitted, then
+    /// this function will simply return `true` without emitting anything.
     /// @param buffer the text buffer that the type declaration will be written to
     /// @param str the struct to generate
     /// @returns true if the struct is emitted
     bool EmitStructType(TextBuffer* buffer, const sem::Struct* str);
-    /// Handles generating a structure declaration only the first time called. Subsequent calls are
-    /// a no-op and return true.
-    /// @param buffer the text buffer that the type declaration will be written to
-    /// @param ty the struct to generate
-    /// @returns true if the struct is emitted
-    bool EmitStructTypeOnce(TextBuffer* buffer, const sem::Struct* ty);
     /// Handles a unary op expression
     /// @param out the output of the expression stream
     /// @param expr the expression to emit

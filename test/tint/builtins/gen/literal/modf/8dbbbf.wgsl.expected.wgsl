@@ -1,7 +1,7 @@
 enable f16;
 
 fn modf_8dbbbf() {
-  var res = modf(1.0h);
+  var res = modf(-(1.5h));
 }
 
 @vertex

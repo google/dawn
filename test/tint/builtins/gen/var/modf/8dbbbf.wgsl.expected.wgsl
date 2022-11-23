@@ -1,7 +1,7 @@
 enable f16;
 
 fn modf_8dbbbf() {
-  var arg_0 = 1.0h;
+  var arg_0 = -(1.5h);
   var res = modf(arg_0);
 }
 

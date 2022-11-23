@@ -1,5 +1,5 @@
 fn modf_4bfced() {
-  var arg_0 = vec4<f32>(1.0f);
+  var arg_0 = vec4<f32>(-(1.5f));
   var res = modf(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn modf_5ea256() {
-  var arg_0 = vec3<f32>(1.0f);
+  var arg_0 = vec3<f32>(-(1.5f));
   var res = modf(arg_0);
 }
 

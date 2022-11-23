@@ -13,7 +13,7 @@ modf_result_vec2 tint_modf(vec2 param_0) {
 
 
 void modf_2d50da() {
-  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_0 = vec2(-1.5f);
   modf_result_vec2 res = tint_modf(arg_0);
 }
 
@@ -46,7 +46,7 @@ modf_result_vec2 tint_modf(vec2 param_0) {
 
 
 void modf_2d50da() {
-  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_0 = vec2(-1.5f);
   modf_result_vec2 res = tint_modf(arg_0);
 }
 
@@ -73,7 +73,7 @@ modf_result_vec2 tint_modf(vec2 param_0) {
 
 
 void modf_2d50da() {
-  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_0 = vec2(-1.5f);
   modf_result_vec2 res = tint_modf(arg_0);
 }
 

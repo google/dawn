@@ -1,5 +1,5 @@
 fn modf_bbf7f7() {
-  var res = modf(1.0f);
+  var res = modf(-(1.5f));
 }
 
 @vertex

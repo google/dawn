@@ -13,7 +13,7 @@ modf_result_vec3 tint_modf(float3 param_0) {
 }
 
 void modf_5ea256() {
-  float3 arg_0 = float3(1.0f);
+  float3 arg_0 = float3(-1.5f);
   modf_result_vec3 res = tint_modf(arg_0);
 }
 
