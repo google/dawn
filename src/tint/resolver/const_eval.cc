@@ -891,6 +891,24 @@ utils::Result<NumberT> ConstEval::Det2(const Source& source,
 }
 
 template <typename NumberT>
+utils::Result<NumberT> ConstEval::Sqrt(const Source& source, NumberT v) {
+    if (v < NumberT(0)) {
+        AddError("sqrt must be called with a value >= 0", source);
+        return utils::Failure;
+    }
+    return NumberT{std::sqrt(v)};
+}
+
+auto ConstEval::SqrtFunc(const Source& source, const sem::Type* elem_ty) {
+    return [=](auto v) -> ImplResult {
+        if (auto r = Sqrt(source, v)) {
+            return CreateElement(builder, source, elem_ty, r.Get());
+        }
+        return utils::Failure;
+    };
+}
+
+template <typename NumberT>
 utils::Result<NumberT> ConstEval::Clamp(const Source&, NumberT e, NumberT low, NumberT high) {
     return NumberT{std::min(std::max(e, low), high)};
 }
@@ -966,6 +984,33 @@ auto ConstEval::Dot4Func(const Source& source, const sem::Type* elem_ty) {
             }
             return utils::Failure;
         };
+}
+
+ConstEval::Result ConstEval::Dot(const Source& source,
+                                 const sem::Constant* v1,
+                                 const sem::Constant* v2) {
+    auto* vec_ty = v1->Type()->As<sem::Vector>();
+    TINT_ASSERT(Resolver, vec_ty);
+    auto* elem_ty = vec_ty->type();
+    switch (vec_ty->Width()) {
+        case 2:
+            return Dispatch_fia_fiu32_f16(   //
+                Dot2Func(source, elem_ty),   //
+                v1->Index(0), v1->Index(1),  //
+                v2->Index(0), v2->Index(1));
+        case 3:
+            return Dispatch_fia_fiu32_f16(                 //
+                Dot3Func(source, elem_ty),                 //
+                v1->Index(0), v1->Index(1), v1->Index(2),  //
+                v2->Index(0), v2->Index(1), v2->Index(2));
+        case 4:
+            return Dispatch_fia_fiu32_f16(                               //
+                Dot4Func(source, elem_ty),                               //
+                v1->Index(0), v1->Index(1), v1->Index(2), v1->Index(3),  //
+                v2->Index(0), v2->Index(1), v2->Index(2), v2->Index(3));
+    }
+    TINT_ICE(Resolver, builder.Diagnostics()) << "Expected vector";
+    return utils::Failure;
 }
 
 auto ConstEval::Det2Func(const Source& source, const sem::Type* elem_ty) {
@@ -1969,30 +2014,10 @@ ConstEval::Result ConstEval::degrees(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0]);
 }
 
-ConstEval::Result ConstEval::dot(const sem::Type* ty,
+ConstEval::Result ConstEval::dot(const sem::Type*,
                                  utils::VectorRef<const sem::Constant*> args,
                                  const Source& source) {
-    auto calculate = [&]() -> ImplResult {
-        auto* v1 = args[0];
-        auto* v2 = args[1];
-        auto* vec_ty = v1->Type()->As<sem::Vector>();
-        switch (vec_ty->Width()) {
-            case 2:
-                return Dispatch_fia_fiu32_f16(Dot2Func(source, ty), v1->Index(0), v1->Index(1),
-                                              v2->Index(0), v2->Index(1));
-            case 3:
-                return Dispatch_fia_fiu32_f16(Dot3Func(source, ty), v1->Index(0), v1->Index(1),
-                                              v1->Index(2), v2->Index(0), v2->Index(1),
-                                              v2->Index(2));
-            case 4:
-                return Dispatch_fia_fiu32_f16(Dot4Func(source, ty), v1->Index(0), v1->Index(1),
-                                              v1->Index(2), v1->Index(3), v2->Index(0),
-                                              v2->Index(1), v2->Index(2), v2->Index(3));
-        }
-        TINT_ICE(Resolver, builder.Diagnostics()) << "Expected scalar or vector";
-        return utils::Failure;
-    };
-    auto r = calculate();
+    auto r = Dot(source, args[0], args[1]);
     if (!r) {
         AddNote("when calculating dot", source);
     }
@@ -2186,6 +2211,35 @@ ConstEval::Result ConstEval::insertBits(const sem::Type* ty,
         return Dispatch_iu32(create, c0, c1);
     };
     return TransformElements(builder, ty, transform, args[0], args[1]);
+}
+
+ConstEval::Result ConstEval::length(const sem::Type* ty,
+                                    utils::VectorRef<const sem::Constant*> args,
+                                    const Source& source) {
+    auto calculate = [&]() -> ImplResult {
+        auto* vec_ty = args[0]->Type()->As<sem::Vector>();
+
+        // Evaluates to the absolute value of e if T is scalar.
+        if (vec_ty == nullptr) {
+            auto create = [&](auto e) {
+                using NumberT = decltype(e);
+                return CreateElement(builder, source, ty, NumberT{std::abs(e)});
+            };
+            return Dispatch_fa_f32_f16(create, args[0]);
+        }
+
+        // Evaluates to sqrt(e[0]^2 + e[1]^2 + ...) if T is a vector type.
+        auto d = Dot(source, args[0], args[0]);
+        if (!d) {
+            return utils::Failure;
+        }
+        return Dispatch_fa_f32_f16(SqrtFunc(source, ty), d.Get());
+    };
+    auto r = calculate();
+    if (!r) {
+        AddNote("when calculating length", source);
+    }
+    return r;
 }
 
 ConstEval::Result ConstEval::max(const sem::Type* ty,
@@ -2561,15 +2615,7 @@ ConstEval::Result ConstEval::sqrt(const sem::Type* ty,
                                   utils::VectorRef<const sem::Constant*> args,
                                   const Source& source) {
     auto transform = [&](const sem::Constant* c0) {
-        auto create = [&](auto i) -> ImplResult {
-            using NumberT = decltype(i);
-            if (i < NumberT(0)) {
-                AddError("sqrt must be called with a value >= 0", source);
-                return utils::Failure;
-            }
-            return CreateElement(builder, source, c0->Type(), NumberT(std::sqrt(i.value)));
-        };
-        return Dispatch_fa_f32_f16(create, c0);
+        return Dispatch_fa_f32_f16(SqrtFunc(source, c0->Type()), c0);
     };
 
     return TransformElements(builder, ty, transform, args[0]);

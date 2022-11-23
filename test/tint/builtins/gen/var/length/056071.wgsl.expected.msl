@@ -2,7 +2,7 @@
 
 using namespace metal;
 void length_056071() {
-  float3 arg_0 = float3(1.0f);
+  float3 arg_0 = float3(0.0f);
   float res = length(arg_0);
 }
 

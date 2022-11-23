@@ -2,7 +2,7 @@
 
 using namespace metal;
 void length_c158da() {
-  half arg_0 = 1.0h;
+  half arg_0 = 0.0h;
   half res = fabs(arg_0);
 }
 

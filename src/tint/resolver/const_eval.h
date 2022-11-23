@@ -601,6 +601,15 @@ class ConstEval {
                       utils::VectorRef<const sem::Constant*> args,
                       const Source& source);
 
+    /// length builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result length(const sem::Type* ty,
+                  utils::VectorRef<const sem::Constant*> args,
+                  const Source& source);
+
     /// max builtin
     /// @param ty the expression type
     /// @param args the input arguments
@@ -962,6 +971,9 @@ class ConstEval {
                                 NumberT b1,
                                 NumberT b2);
 
+    template <typename NumberT>
+    utils::Result<NumberT> Sqrt(const Source& source, NumberT v);
+
     /// Clamps e between low and high
     /// @param source the source location
     /// @param e the number to clamp
@@ -1033,6 +1045,20 @@ class ConstEval {
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
     auto ClampFunc(const Source& source, const sem::Type* elem_ty);
+
+    /// Returns a callable that calls SqrtFunc, and creates a Constant with its
+    /// result of type `elem_ty` if successful, or returns Failure otherwise.
+    /// @param source the source location
+    /// @param elem_ty the element type of the Constant to create on success
+    /// @returns the callable function
+    auto SqrtFunc(const Source& source, const sem::Type* elem_ty);
+
+    /// Returns the dot product of v1 and v2.
+    /// @param source the source location
+    /// @param v1 the first vector
+    /// @param v2 the second vector
+    /// @returns the dot product
+    Result Dot(const Source& source, const sem::Constant* v1, const sem::Constant* v2);
 
     ProgramBuilder& builder;
 };

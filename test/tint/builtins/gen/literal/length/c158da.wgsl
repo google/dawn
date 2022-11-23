@@ -25,7 +25,7 @@ enable f16;
 
 // fn length(f16) -> f16
 fn length_c158da() {
-  var res: f16 = length(1.h);
+  var res: f16 = length(0.h);
 }
 
 @vertex

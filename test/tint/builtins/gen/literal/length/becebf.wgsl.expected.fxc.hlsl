@@ -1,5 +1,5 @@
 void length_becebf() {
-  float res = length((1.0f).xxxx);
+  float res = 0.0f;
 }
 
 struct tint_symbol {

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void length_5b1a9b() {
-  half res = length(half4(1.0h));
+  half res = 0.0h;
 }
 
 struct tint_symbol {

@@ -25,7 +25,7 @@ enable f16;
 
 // fn length(vec<3, f16>) -> f16
 fn length_ba16d6() {
-  var arg_0 = vec3<f16>(1.h);
+  var arg_0 = vec3<f16>(0.h);
   var res: f16 = length(arg_0);
 }
 

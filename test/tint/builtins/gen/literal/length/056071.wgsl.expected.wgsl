@@ -1,5 +1,5 @@
 fn length_056071() {
-  var res : f32 = length(vec3<f32>(1.0f));
+  var res : f32 = length(vec3<f32>(0.0f));
 }
 
 @vertex

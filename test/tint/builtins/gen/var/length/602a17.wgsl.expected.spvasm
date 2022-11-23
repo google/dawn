@@ -4,7 +4,7 @@
 ; Bound: 33
 ; Schema: 0
                OpCapability Shader
-         %17 = OpExtInstImport "GLSL.std.450"
+         %16 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %vertex_main "vertex_main" %value %vertex_point_size
                OpEntryPoint Fragment %fragment_main "fragment_main"
@@ -32,28 +32,28 @@
 %vertex_point_size = OpVariable %_ptr_Output_float Output %8
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
-    %float_1 = OpConstant %float 1
 %_ptr_Function_float = OpTypePointer Function %float
-         %20 = OpTypeFunction %v4float
+         %19 = OpTypeFunction %v4float
+    %float_1 = OpConstant %float 1
 %length_602a17 = OpFunction %void None %9
          %12 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_float Function %8
         %res = OpVariable %_ptr_Function_float Function %8
-               OpStore %arg_0 %float_1
-         %18 = OpLoad %float %arg_0
-         %16 = OpExtInst %float %17 Length %18
-               OpStore %res %16
+               OpStore %arg_0 %8
+         %17 = OpLoad %float %arg_0
+         %15 = OpExtInst %float %16 Length %17
+               OpStore %res %15
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %20
-         %22 = OpLabel
-         %23 = OpFunctionCall %void %length_602a17
+%vertex_main_inner = OpFunction %v4float None %19
+         %21 = OpLabel
+         %22 = OpFunctionCall %void %length_602a17
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %25 = OpLabel
-         %26 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %26
+         %24 = OpLabel
+         %25 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %25
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd

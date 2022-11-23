@@ -41,10 +41,12 @@ struct Case {
         return *this;
     }
 
-    /// Expected value should be compared using FLOAT_EQ instead of EQ
-    Case& FloatComp() {
+    /// Expected value should be compared using EXPECT_FLOAT_EQ instead of EXPECT_EQ.
+    /// If optional epsilon is passed in, will be compared using EXPECT_NEAR with that epsilon.
+    Case& FloatComp(std::optional<double> epsilon = {}) {
         Success s = expected.Get();
         s.flags.float_compare = true;
+        s.flags.float_compare_epsilon = epsilon;
         expected = s;
         return *this;
     }
@@ -1175,6 +1177,65 @@ INSTANTIATE_TEST_SUITE_P(  //
     testing::Combine(testing::Values(sem::BuiltinType::kExtractBits),
                      testing::ValuesIn(Concat(ExtractBitsCases<i32>(),  //
                                               ExtractBitsCases<u32>()))));
+
+template <typename T>
+std::vector<Case> LengthCases() {
+    const auto kSqrtOfHighest = T(std::sqrt(T::Highest()));
+    const auto kSqrtOfHighestSquared = T(kSqrtOfHighest * kSqrtOfHighest);
+
+    auto error_msg = [](auto a, const char* op, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, op, b) + R"(
+12:34 note: when calculating length)";
+    };
+    return {
+        C({T(0)}, T(0)),
+        C({Vec(T(0), T(0))}, Val(T(0))),
+        C({Vec(T(0), T(0), T(0))}, Val(T(0))),
+        C({Vec(T(0), T(0), T(0), T(0))}, Val(T(0))),
+
+        C({T(1)}, T(1)),
+        C({Vec(T(1), T(1))}, Val(T(std::sqrt(2)))),
+        C({Vec(T(1), T(1), T(1))}, Val(T(std::sqrt(3)))),
+        C({Vec(T(1), T(1), T(1), T(1))}, Val(T(std::sqrt(4)))),
+
+        C({T(2)}, T(2)),
+        C({Vec(T(2), T(2))}, Val(T(std::sqrt(8)))),
+        C({Vec(T(2), T(2), T(2))}, Val(T(std::sqrt(12)))),
+        C({Vec(T(2), T(2), T(2), T(2))}, Val(T(std::sqrt(16)))),
+
+        C({Vec(T(2), T(3))}, Val(T(std::sqrt(13)))),
+        C({Vec(T(2), T(3), T(4))}, Val(T(std::sqrt(29)))),
+        C({Vec(T(2), T(3), T(4), T(5))}, Val(T(std::sqrt(54)))),
+
+        C({T(-5)}, T(5)),
+        C({T::Highest()}, T::Highest()),
+        C({T::Lowest()}, T::Highest()),
+
+        C({Vec(T(-2), T(-3), T(-4), T(-5))}, Val(T(std::sqrt(54)))),
+        C({Vec(T(2), T(-3), T(4), T(-5))}, Val(T(std::sqrt(54)))),
+        C({Vec(T(-2), T(3), T(-4), T(5))}, Val(T(std::sqrt(54)))),
+
+        C({Vec(kSqrtOfHighest, T(0))}, Val(kSqrtOfHighest)).FloatComp(0.2),
+        C({Vec(T(0), kSqrtOfHighest)}, Val(kSqrtOfHighest)).FloatComp(0.2),
+
+        C({Vec(-kSqrtOfHighest, T(0))}, Val(kSqrtOfHighest)).FloatComp(0.2),
+        C({Vec(T(0), -kSqrtOfHighest)}, Val(kSqrtOfHighest)).FloatComp(0.2),
+
+        // Overflow when squaring a term
+        E({Vec(T::Highest(), T(0))}, error_msg(T::Highest(), "*", T::Highest())),
+        E({Vec(T(0), T::Highest())}, error_msg(T::Highest(), "*", T::Highest())),
+        // Overflow when adding squared terms
+        E({Vec(kSqrtOfHighest, kSqrtOfHighest)},
+          error_msg(kSqrtOfHighestSquared, "+", kSqrtOfHighestSquared)),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Length,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kLength),
+                     testing::ValuesIn(Concat(LengthCases<AFloat>(),  //
+                                              LengthCases<f32>(),
+                                              LengthCases<f16>()))));
 
 template <typename T>
 std::vector<Case> MaxCases() {

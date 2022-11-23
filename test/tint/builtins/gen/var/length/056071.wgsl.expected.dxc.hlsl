@@ -1,5 +1,5 @@
 void length_056071() {
-  float3 arg_0 = (1.0f).xxx;
+  float3 arg_0 = (0.0f).xxx;
   float res = length(arg_0);
 }
 

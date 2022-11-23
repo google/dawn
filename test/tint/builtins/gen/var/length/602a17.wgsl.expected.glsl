@@ -1,7 +1,7 @@
 #version 310 es
 
 void length_602a17() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.0f;
   float res = length(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void length_602a17() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.0f;
   float res = length(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void length_602a17() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.0f;
   float res = length(arg_0);
 }
 

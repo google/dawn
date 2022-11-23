@@ -491,8 +491,8 @@ fn inverseSqrt<T: f32_f16>(T) -> T
 fn inverseSqrt<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn ldexp<T: f32_f16>(T, i32) -> T
 fn ldexp<N: num, T: f32_f16>(vec<N, T>, vec<N, i32>) -> vec<N, T>
-fn length<T: f32_f16>(T) -> T
-fn length<N: num, T: f32_f16>(vec<N, T>) -> T
+@const fn length<T: fa_f32_f16>(@test_value(0.0) T) -> T
+@const fn length<N: num, T: fa_f32_f16>(@test_value(0.0) vec<N, T>) -> T
 fn log<T: f32_f16>(T) -> T
 fn log<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn log2<T: f32_f16>(T) -> T

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void length_3f0e13() {
-  half2 arg_0 = half2(1.0h);
+  half2 arg_0 = half2(0.0h);
   half res = length(arg_0);
 }
 

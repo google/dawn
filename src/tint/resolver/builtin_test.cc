@@ -1184,8 +1184,8 @@ TEST_F(ResolverBuiltinFloatTest, Length_NoParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to length()
 
 2 candidate functions:
-  length(T) -> T  where: T is f32 or f16
-  length(vecN<T>) -> T  where: T is f32 or f16
+  length(T) -> T  where: T is abstract-float, f32 or f16
+  length(vecN<T>) -> T  where: T is abstract-float, f32 or f16
 )");
 }
 
@@ -1198,8 +1198,8 @@ TEST_F(ResolverBuiltinFloatTest, Length_TooManyParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to length(f32, f32)
 
 2 candidate functions:
-  length(T) -> T  where: T is f32 or f16
-  length(vecN<T>) -> T  where: T is f32 or f16
+  length(T) -> T  where: T is abstract-float, f32 or f16
+  length(vecN<T>) -> T  where: T is abstract-float, f32 or f16
 )");
 }
 

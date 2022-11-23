@@ -1,5 +1,5 @@
 void length_ba16d6() {
-  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
   float16_t res = length(arg_0);
 }
 

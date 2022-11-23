@@ -1,5 +1,5 @@
 void length_3f0e13() {
-  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
   float16_t res = length(arg_0);
 }
 

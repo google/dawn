@@ -2,7 +2,7 @@
 
 using namespace metal;
 void length_becebf() {
-  float res = length(float4(1.0f));
+  float res = 0.0f;
 }
 
 struct tint_symbol {

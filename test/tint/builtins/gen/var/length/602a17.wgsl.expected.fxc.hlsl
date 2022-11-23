@@ -1,5 +1,5 @@
 void length_602a17() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.0f;
   float res = length(arg_0);
 }
 

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void length_afde8b() {
-  float2 arg_0 = float2(1.0f);
+  float2 arg_0 = float2(0.0f);
   float res = length(arg_0);
 }
 

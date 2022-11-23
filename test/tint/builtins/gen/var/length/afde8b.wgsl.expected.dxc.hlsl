@@ -1,5 +1,5 @@
 void length_afde8b() {
-  float2 arg_0 = (1.0f).xx;
+  float2 arg_0 = (0.0f).xx;
   float res = length(arg_0);
 }
 

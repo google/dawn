@@ -1,5 +1,5 @@
 fn length_afde8b() {
-  var res : f32 = length(vec2<f32>(1.0f));
+  var res : f32 = length(vec2<f32>(0.0f));
 }
 
 @vertex

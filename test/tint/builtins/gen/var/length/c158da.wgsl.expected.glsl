@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void length_c158da() {
-  float16_t arg_0 = 1.0hf;
+  float16_t arg_0 = 0.0hf;
   float16_t res = length(arg_0);
 }
 
@@ -24,7 +24,7 @@ void main() {
 precision mediump float;
 
 void length_c158da() {
-  float16_t arg_0 = 1.0hf;
+  float16_t arg_0 = 0.0hf;
   float16_t res = length(arg_0);
 }
 
@@ -40,7 +40,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void length_c158da() {
-  float16_t arg_0 = 1.0hf;
+  float16_t arg_0 = 0.0hf;
   float16_t res = length(arg_0);
 }
 

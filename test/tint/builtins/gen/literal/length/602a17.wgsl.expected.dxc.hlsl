@@ -1,5 +1,5 @@
 void length_602a17() {
-  float res = length(1.0f);
+  float res = 0.0f;
 }
 
 struct tint_symbol {

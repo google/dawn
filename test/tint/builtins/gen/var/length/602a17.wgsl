@@ -23,7 +23,7 @@
 
 // fn length(f32) -> f32
 fn length_602a17() {
-  var arg_0 = 1.f;
+  var arg_0 = 0.f;
   var res: f32 = length(arg_0);
 }
 

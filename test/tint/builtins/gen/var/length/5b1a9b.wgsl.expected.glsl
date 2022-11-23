@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void length_5b1a9b() {
-  f16vec4 arg_0 = f16vec4(1.0hf);
+  f16vec4 arg_0 = f16vec4(0.0hf);
   float16_t res = length(arg_0);
 }
 
@@ -24,7 +24,7 @@ void main() {
 precision mediump float;
 
 void length_5b1a9b() {
-  f16vec4 arg_0 = f16vec4(1.0hf);
+  f16vec4 arg_0 = f16vec4(0.0hf);
   float16_t res = length(arg_0);
 }
 
@@ -40,7 +40,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void length_5b1a9b() {
-  f16vec4 arg_0 = f16vec4(1.0hf);
+  f16vec4 arg_0 = f16vec4(0.0hf);
   float16_t res = length(arg_0);
 }
 

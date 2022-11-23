@@ -16,6 +16,7 @@
 #define SRC_TINT_RESOLVER_CONST_EVAL_TEST_H_
 
 #include <limits>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -74,8 +75,11 @@ inline auto Abs(const Number<T>& v) {
 struct CheckConstantFlags {
     /// Expected value may be positive or negative
     bool pos_or_neg = false;
-    /// Expected value should be compared using FLOAT_EQ instead of EQ
+    /// Expected value should be compared using EXPECT_FLOAT_EQ instead of EQ, or EXPECT_NEAR if
+    /// float_compare_epsilon is set.
     bool float_compare = false;
+    /// Expected value should be compared using EXPECT_NEAR if float_compare is set.
+    std::optional<double> float_compare_epsilon;
 };
 
 /// CheckConstant checks that @p got_constant, the result value of
@@ -106,18 +110,16 @@ inline void CheckConstant(const sem::Constant* got_constant,
                         EXPECT_TRUE(std::isnan(got));
                     } else {
                         if (flags.pos_or_neg) {
-                            auto got_abs = Abs(got);
-                            if (flags.float_compare) {
-                                EXPECT_FLOAT_EQ(got_abs, expected);
+                            got = Abs(got);
+                        }
+                        if (flags.float_compare) {
+                            if (flags.float_compare_epsilon) {
+                                EXPECT_NEAR(got, expected, *flags.float_compare_epsilon);
                             } else {
-                                EXPECT_EQ(got_abs, expected);
+                                EXPECT_FLOAT_EQ(got, expected);
                             }
                         } else {
-                            if (flags.float_compare) {
-                                EXPECT_FLOAT_EQ(got, expected);
-                            } else {
-                                EXPECT_EQ(got, expected);
-                            }
+                            EXPECT_EQ(got, expected);
                         }
                     }
                 } else {

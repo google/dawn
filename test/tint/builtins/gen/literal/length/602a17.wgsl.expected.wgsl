@@ -1,5 +1,5 @@
 fn length_602a17() {
-  var res : f32 = length(1.0f);
+  var res : f32 = length(0.0f);
 }
 
 @vertex

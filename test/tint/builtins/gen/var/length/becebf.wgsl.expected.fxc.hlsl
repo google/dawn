@@ -1,5 +1,5 @@
 void length_becebf() {
-  float4 arg_0 = (1.0f).xxxx;
+  float4 arg_0 = (0.0f).xxxx;
   float res = length(arg_0);
 }
 

@@ -25,7 +25,7 @@ enable f16;
 
 // fn length(vec<2, f16>) -> f16
 fn length_3f0e13() {
-  var res: f16 = length(vec2<f16>(1.h));
+  var res: f16 = length(vec2<f16>(0.h));
 }
 
 @vertex

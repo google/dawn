@@ -1,7 +1,7 @@
 enable f16;
 
 fn length_c158da() {
-  var arg_0 = 1.0h;
+  var arg_0 = 0.0h;
   var res : f16 = length(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn length_afde8b() {
-  var arg_0 = vec2<f32>(1.0f);
+  var arg_0 = vec2<f32>(0.0f);
   var res : f32 = length(arg_0);
 }
 
