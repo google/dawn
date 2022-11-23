@@ -1,10 +1,9 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 35
+; Bound: 29
 ; Schema: 0
                OpCapability Shader
-         %14 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %vertex_main "vertex_main" %value %vertex_point_size
                OpEntryPoint Fragment %fragment_main "fragment_main"
@@ -31,39 +30,34 @@
 %vertex_point_size = OpVariable %_ptr_Output_float Output %8
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
-    %v3float = OpTypeVector %float 3
-%mat3v3float = OpTypeMatrix %v3float 3
-    %float_1 = OpConstant %float 1
-         %18 = OpConstantComposite %v3float %float_1 %float_1 %float_1
-         %19 = OpConstantComposite %mat3v3float %18 %18 %18
 %_ptr_Function_float = OpTypePointer Function %float
-         %22 = OpTypeFunction %v4float
+         %15 = OpTypeFunction %v4float
+    %float_1 = OpConstant %float 1
 %determinant_2b62ba = OpFunction %void None %9
          %12 = OpLabel
         %res = OpVariable %_ptr_Function_float Function %8
-         %13 = OpExtInst %float %14 Determinant %19
-               OpStore %res %13
+               OpStore %res %8
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %22
-         %24 = OpLabel
-         %25 = OpFunctionCall %void %determinant_2b62ba
+%vertex_main_inner = OpFunction %v4float None %15
+         %17 = OpLabel
+         %18 = OpFunctionCall %void %determinant_2b62ba
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %27 = OpLabel
-         %28 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %28
+         %20 = OpLabel
+         %21 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %21
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %30 = OpLabel
-         %31 = OpFunctionCall %void %determinant_2b62ba
+         %24 = OpLabel
+         %25 = OpFunctionCall %void %determinant_2b62ba
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %33 = OpLabel
-         %34 = OpFunctionCall %void %determinant_2b62ba
+         %27 = OpLabel
+         %28 = OpFunctionCall %void %determinant_2b62ba
                OpReturn
                OpFunctionEnd

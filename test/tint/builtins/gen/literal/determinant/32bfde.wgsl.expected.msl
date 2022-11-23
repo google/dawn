@@ -2,7 +2,7 @@
 
 using namespace metal;
 void determinant_32bfde() {
-  half res = determinant(half4x4(half4(1.0h), half4(1.0h), half4(1.0h), half4(1.0h)));
+  half res = 0.0h;
 }
 
 struct tint_symbol {

@@ -539,6 +539,7 @@ class ConstEval {
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
+    /// degrees builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location of the conversion
@@ -546,6 +547,15 @@ class ConstEval {
     Result degrees(const sem::Type* ty,
                    utils::VectorRef<const sem::Constant*> args,
                    const Source& source);
+
+    /// determinant builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result determinant(const sem::Type* ty,
+                       utils::VectorRef<const sem::Constant*> args,
+                       const Source& source);
 
     /// dot builtin
     /// @param ty the expression type
@@ -1012,18 +1022,87 @@ class ConstEval {
                                 NumberT b3,
                                 NumberT b4);
 
-    /// Returns the determinant of the 2x2 matrix [(a1, a2), (b1, b2)]
+    /// Returns the determinant of the 2x2 matrix:
+    /// | a c |
+    /// | b d |
     /// @param source the source location
-    /// @param a1 component 1 of the first column vector
-    /// @param a2 component 2 of the first column vector
-    /// @param b1 component 1 of the second column vector
-    /// @param b2 component 2 of the second column vector
+    /// @param a component 1 of the first column vector
+    /// @param b component 2 of the first column vector
+    /// @param c component 1 of the second column vector
+    /// @param d component 2 of the second column vector
     template <typename NumberT>
-    utils::Result<NumberT> Det2(const Source& source,
-                                NumberT a1,
-                                NumberT a2,
-                                NumberT b1,
-                                NumberT b2);
+    utils::Result<NumberT> Det2(const Source& source,  //
+                                NumberT a,
+                                NumberT b,
+                                NumberT c,
+                                NumberT d);
+
+    /// Returns the determinant of the 3x3 matrix:
+    /// | a d g |
+    /// | b e h |
+    /// | c f i |
+    /// @param source the source location
+    /// @param a component 1 of the first column vector
+    /// @param b component 2 of the first column vector
+    /// @param c component 3 of the first column vector
+    /// @param d component 1 of the second column vector
+    /// @param e component 2 of the second column vector
+    /// @param f component 3 of the second column vector
+    /// @param g component 1 of the third column vector
+    /// @param h component 2 of the third column vector
+    /// @param i component 3 of the third column vector
+    template <typename NumberT>
+    utils::Result<NumberT> Det3(const Source& source,
+                                NumberT a,
+                                NumberT b,
+                                NumberT c,
+                                NumberT d,
+                                NumberT e,
+                                NumberT f,
+                                NumberT g,
+                                NumberT h,
+                                NumberT i);
+
+    /// Returns the determinant of the 4x4 matrix:
+    /// | a e i m |
+    /// | b f j n |
+    /// | c g k o |
+    /// | d h l p |
+    /// @param source the source location
+    /// @param a component 1 of the first column vector
+    /// @param b component 2 of the first column vector
+    /// @param c component 3 of the first column vector
+    /// @param d component 4 of the first column vector
+    /// @param e component 1 of the second column vector
+    /// @param f component 2 of the second column vector
+    /// @param g component 3 of the second column vector
+    /// @param h component 4 of the second column vector
+    /// @param i component 1 of the third column vector
+    /// @param j component 2 of the third column vector
+    /// @param k component 3 of the third column vector
+    /// @param l component 4 of the third column vector
+    /// @param m component 1 of the fourth column vector
+    /// @param n component 2 of the fourth column vector
+    /// @param o component 3 of the fourth column vector
+    /// @param p component 4 of the fourth column vector
+    template <typename NumberT>
+    utils::Result<NumberT> Det4(const Source& source,
+                                NumberT a,
+                                NumberT b,
+                                NumberT c,
+                                NumberT d,
+                                NumberT e,
+                                NumberT f,
+                                NumberT g,
+                                NumberT h,
+                                NumberT i,
+                                NumberT j,
+                                NumberT k,
+                                NumberT l,
+                                NumberT m,
+                                NumberT n,
+                                NumberT o,
+                                NumberT p);
 
     template <typename NumberT>
     utils::Result<NumberT> Sqrt(const Source& source, NumberT v);
@@ -1092,6 +1171,20 @@ class ConstEval {
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
     auto Det2Func(const Source& source, const sem::Type* elem_ty);
+
+    /// Returns a callable that calls Det3, and creates a Constant with its result of type `elem_ty`
+    /// if successful, or returns Failure otherwise.
+    /// @param source the source location
+    /// @param elem_ty the element type of the Constant to create on success
+    /// @returns the callable function
+    auto Det3Func(const Source& source, const sem::Type* elem_ty);
+
+    /// Returns a callable that calls Det4, and creates a Constant with its result of type `elem_ty`
+    /// if successful, or returns Failure otherwise.
+    /// @param source the source location
+    /// @param elem_ty the element type of the Constant to create on success
+    /// @returns the callable function
+    auto Det4Func(const Source& source, const sem::Type* elem_ty);
 
     /// Returns a callable that calls Clamp, and creates a Constant with its result of type
     /// `elem_ty` if successful, or returns Failure otherwise.

@@ -1,5 +1,5 @@
 void determinant_32bfde() {
-  float16_t res = determinant(matrix<float16_t, 4, 4>((float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx));
+  float16_t res = float16_t(0.0h);
 }
 
 struct tint_symbol {

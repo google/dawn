@@ -2,7 +2,7 @@
 
 using namespace metal;
 void determinant_a0a87c() {
-  float res = determinant(float4x4(float4(1.0f), float4(1.0f), float4(1.0f), float4(1.0f)));
+  float res = 0.0f;
 }
 
 struct tint_symbol {

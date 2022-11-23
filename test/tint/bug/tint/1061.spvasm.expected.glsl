@@ -14,7 +14,7 @@ vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 void main_1() {
   float f = 0.0f;
   vec4 v = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-  f = determinant(mat3(vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)));
+  f = 1.0f;
   float x_33 = f;
   float x_35 = f;
   float x_37 = f;

@@ -893,15 +893,22 @@ utils::Result<NumberT> ConstEval::Dot4(const Source& source,
 
 template <typename NumberT>
 utils::Result<NumberT> ConstEval::Det2(const Source& source,
-                                       NumberT a1,
-                                       NumberT a2,
-                                       NumberT b1,
-                                       NumberT b2) {
-    auto r1 = Mul(source, a1, b2);
+                                       NumberT a,
+                                       NumberT b,
+                                       NumberT c,
+                                       NumberT d) {
+    // | a c |
+    // | b d |
+    //
+    // =
+    //
+    // a * d - c * b
+
+    auto r1 = Mul(source, a, d);
     if (!r1) {
         return utils::Failure;
     }
-    auto r2 = Mul(source, b1, a2);
+    auto r2 = Mul(source, c, b);
     if (!r2) {
         return utils::Failure;
     }
@@ -910,6 +917,129 @@ utils::Result<NumberT> ConstEval::Det2(const Source& source,
         return utils::Failure;
     }
     return r;
+}
+
+template <typename NumberT>
+utils::Result<NumberT> ConstEval::Det3(const Source& source,
+                                       NumberT a,
+                                       NumberT b,
+                                       NumberT c,
+                                       NumberT d,
+                                       NumberT e,
+                                       NumberT f,
+                                       NumberT g,
+                                       NumberT h,
+                                       NumberT i) {
+    // | a d g |
+    // | b e h |
+    // | c f i |
+    //
+    // =
+    //
+    // a | e h | - d | b h | + g | b e |
+    //   | f i |     | c i |     | c f |
+
+    auto det1 = Det2(source, e, f, h, i);
+    if (!det1) {
+        return utils::Failure;
+    }
+    auto a_det1 = Mul(source, a, det1.Get());
+    if (!a_det1) {
+        return utils::Failure;
+    }
+    auto det2 = Det2(source, b, c, h, i);
+    if (!det2) {
+        return utils::Failure;
+    }
+    auto d_det2 = Mul(source, d, det2.Get());
+    if (!d_det2) {
+        return utils::Failure;
+    }
+    auto det3 = Det2(source, b, c, e, f);
+    if (!det3) {
+        return utils::Failure;
+    }
+    auto g_det3 = Mul(source, g, det3.Get());
+    if (!g_det3) {
+        return utils::Failure;
+    }
+    auto r = Sub(source, a_det1.Get(), d_det2.Get());
+    if (!r) {
+        return utils::Failure;
+    }
+    return Add(source, r.Get(), g_det3.Get());
+}
+
+template <typename NumberT>
+utils::Result<NumberT> ConstEval::Det4(const Source& source,
+                                       NumberT a,
+                                       NumberT b,
+                                       NumberT c,
+                                       NumberT d,
+                                       NumberT e,
+                                       NumberT f,
+                                       NumberT g,
+                                       NumberT h,
+                                       NumberT i,
+                                       NumberT j,
+                                       NumberT k,
+                                       NumberT l,
+                                       NumberT m,
+                                       NumberT n,
+                                       NumberT o,
+                                       NumberT p) {
+    // | a e i m |
+    // | b f j n |
+    // | c g k o |
+    // | d h l p |
+    //
+    // =
+    //
+    // a | f j n | - e | b j n | + i | b f n | - m | b f j |
+    //   | g k o |     | c k o |     | c g o |     | c g k |
+    //   | h l p |     | d l p |     | d h p |     | d h l |
+
+    auto det1 = Det3(source, f, g, h, j, k, l, n, o, p);
+    if (!det1) {
+        return utils::Failure;
+    }
+    auto a_det1 = Mul(source, a, det1.Get());
+    if (!a_det1) {
+        return utils::Failure;
+    }
+    auto det2 = Det3(source, b, c, d, j, k, l, n, o, p);
+    if (!det2) {
+        return utils::Failure;
+    }
+    auto e_det2 = Mul(source, e, det2.Get());
+    if (!e_det2) {
+        return utils::Failure;
+    }
+    auto det3 = Det3(source, b, c, d, f, g, h, n, o, p);
+    if (!det3) {
+        return utils::Failure;
+    }
+    auto i_det3 = Mul(source, i, det3.Get());
+    if (!i_det3) {
+        return utils::Failure;
+    }
+    auto det4 = Det3(source, b, c, d, f, g, h, j, k, l);
+    if (!det4) {
+        return utils::Failure;
+    }
+    auto m_det4 = Mul(source, m, det4.Get());
+    if (!m_det4) {
+        return utils::Failure;
+    }
+    auto r = Sub(source, a_det1.Get(), e_det2.Get());
+    if (!r) {
+        return utils::Failure;
+    }
+    r = Add(source, r.Get(), i_det3.Get());
+    if (!r) {
+        return utils::Failure;
+    }
+    return Sub(source, r.Get(), m_det4.Get());
 }
 
 template <typename NumberT>
@@ -1038,6 +1168,26 @@ ConstEval::Result ConstEval::Dot(const Source& source,
 auto ConstEval::Det2Func(const Source& source, const sem::Type* elem_ty) {
     return [=](auto a, auto b, auto c, auto d) -> ImplResult {
         if (auto r = Det2(source, a, b, c, d)) {
+            return CreateElement(builder, source, elem_ty, r.Get());
+        }
+        return utils::Failure;
+    };
+}
+
+auto ConstEval::Det3Func(const Source& source, const sem::Type* elem_ty) {
+    return
+        [=](auto a, auto b, auto c, auto d, auto e, auto f, auto g, auto h, auto i) -> ImplResult {
+            if (auto r = Det3(source, a, b, c, d, e, f, g, h, i)) {
+                return CreateElement(builder, source, elem_ty, r.Get());
+            }
+            return utils::Failure;
+        };
+}
+
+auto ConstEval::Det4Func(const Source& source, const sem::Type* elem_ty) {
+    return [=](auto a, auto b, auto c, auto d, auto e, auto f, auto g, auto h, auto i, auto j,
+               auto k, auto l, auto m, auto n, auto o, auto p) -> ImplResult {
+        if (auto r = Det4(source, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)) {
             return CreateElement(builder, source, elem_ty, r.Get());
         }
         return utils::Failure;
@@ -2036,6 +2186,41 @@ ConstEval::Result ConstEval::degrees(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0]);
 }
 
+ConstEval::Result ConstEval::determinant(const sem::Type* ty,
+                                         utils::VectorRef<const sem::Constant*> args,
+                                         const Source& source) {
+    auto calculate = [&]() -> ImplResult {
+        auto* m = args[0];
+        auto* mat_ty = m->Type()->As<sem::Matrix>();
+        auto me = [&](size_t r, size_t c) { return m->Index(c)->Index(r); };
+        switch (mat_ty->rows()) {
+            case 2:
+                return Dispatch_fa_f32_f16(Det2Func(source, ty),  //
+                                           me(0, 0), me(1, 0),    //
+                                           me(0, 1), me(1, 1));
+
+            case 3:
+                return Dispatch_fa_f32_f16(Det3Func(source, ty),          //
+                                           me(0, 0), me(1, 0), me(2, 0),  //
+                                           me(0, 1), me(1, 1), me(2, 1),  //
+                                           me(0, 2), me(1, 2), me(2, 2));
+
+            case 4:
+                return Dispatch_fa_f32_f16(Det4Func(source, ty),                    //
+                                           me(0, 0), me(1, 0), me(2, 0), me(3, 0),  //
+                                           me(0, 1), me(1, 1), me(2, 1), me(3, 1),  //
+                                           me(0, 2), me(1, 2), me(2, 2), me(3, 2),  //
+                                           me(0, 3), me(1, 3), me(2, 3), me(3, 3));
+        }
+        TINT_ICE(Resolver, builder.Diagnostics()) << "Unexpected number of matrix rows";
+        return utils::Failure;
+    };
+    auto r = calculate();
+    if (!r) {
+        AddNote("when calculating determinant", source);
+    }
+    return r;
+}
 ConstEval::Result ConstEval::dot(const sem::Type*,
                                  utils::VectorRef<const sem::Constant*> args,
                                  const Source& source) {

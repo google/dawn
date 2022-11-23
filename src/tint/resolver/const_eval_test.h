@@ -288,6 +288,16 @@ using Types = std::variant<  //
     Value<builder::mat2x2<f32>>,
     Value<builder::mat2x2<f16>>,
 
+    Value<builder::mat3x3<AInt>>,
+    Value<builder::mat3x3<AFloat>>,
+    Value<builder::mat3x3<f32>>,
+    Value<builder::mat3x3<f16>>,
+
+    Value<builder::mat4x4<AInt>>,
+    Value<builder::mat4x4<AFloat>>,
+    Value<builder::mat4x4<f32>>,
+    Value<builder::mat4x4<f16>>,
+
     Value<builder::mat2x3<AInt>>,
     Value<builder::mat2x3<AFloat>>,
     Value<builder::mat2x3<f32>>,

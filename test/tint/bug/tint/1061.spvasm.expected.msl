@@ -8,7 +8,7 @@ struct buf0 {
 void main_1(const constant buf0* const tint_symbol_3, thread float4* const tint_symbol_4) {
   float f = 0.0f;
   float4 v = 0.0f;
-  f = determinant(float3x3(float3(1.0f, 0.0f, 0.0f), float3(0.0f, 1.0f, 0.0f), float3(0.0f, 0.0f, 1.0f)));
+  f = 1.0f;
   float const x_33 = f;
   float const x_35 = f;
   float const x_37 = f;

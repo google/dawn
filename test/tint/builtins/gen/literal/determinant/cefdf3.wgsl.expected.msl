@@ -1,8 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void determinant_d7c86f() {
-  half res = 0.0h;
+void determinant_cefdf3() {
+  float res = 0.0f;
 }
 
 struct tint_symbol {
@@ -10,7 +10,7 @@ struct tint_symbol {
 };
 
 float4 vertex_main_inner() {
-  determinant_d7c86f();
+  determinant_cefdf3();
   return float4(0.0f);
 }
 
@@ -22,12 +22,12 @@ vertex tint_symbol vertex_main() {
 }
 
 fragment void fragment_main() {
-  determinant_d7c86f();
+  determinant_cefdf3();
   return;
 }
 
 kernel void compute_main() {
-  determinant_d7c86f();
+  determinant_cefdf3();
   return;
 }
 

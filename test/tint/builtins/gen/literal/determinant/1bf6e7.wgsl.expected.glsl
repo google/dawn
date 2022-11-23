@@ -1,11 +1,11 @@
 #version 310 es
 
-void determinant_e19305() {
+void determinant_1bf6e7() {
   float res = 0.0f;
 }
 
 vec4 vertex_main() {
-  determinant_e19305();
+  determinant_1bf6e7();
   return vec4(0.0f);
 }
 
@@ -20,12 +20,12 @@ void main() {
 #version 310 es
 precision mediump float;
 
-void determinant_e19305() {
+void determinant_1bf6e7() {
   float res = 0.0f;
 }
 
 void fragment_main() {
-  determinant_e19305();
+  determinant_1bf6e7();
 }
 
 void main() {
@@ -34,12 +34,12 @@ void main() {
 }
 #version 310 es
 
-void determinant_e19305() {
+void determinant_1bf6e7() {
   float res = 0.0f;
 }
 
 void compute_main() {
-  determinant_e19305();
+  determinant_1bf6e7();
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

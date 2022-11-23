@@ -6,7 +6,7 @@ static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 void main_1() {
   float f = 0.0f;
   float4 v = float4(0.0f, 0.0f, 0.0f, 0.0f);
-  f = determinant(float3x3(float3(1.0f, 0.0f, 0.0f), float3(0.0f, 1.0f, 0.0f), float3(0.0f, 0.0f, 1.0f)));
+  f = 1.0f;
   const float x_33 = f;
   const float x_35 = f;
   const float x_37 = f;

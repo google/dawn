@@ -854,6 +854,83 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               DotCases<f16>()))));
 
 template <typename T>
+std::vector<Case> DeterminantCases() {
+    auto error_msg = [](auto a, const char* op, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, op, b) + R"(
+12:34 note: when calculating determinant)";
+    };
+
+    auto r = std::vector<Case>{
+        // All zero == 0
+        C({Mat({T(0), T(0)},    //
+               {T(0), T(0)})},  //
+          Val(T(0))),
+
+        C({Mat({T(0), T(0), T(0)},    //
+               {T(0), T(0), T(0)},    //
+               {T(0), T(0), T(0)})},  //
+          Val(T(0))),
+
+        C({Mat({T(0), T(0), T(0), T(0)},    //
+               {T(0), T(0), T(0), T(0)},    //
+               {T(0), T(0), T(0), T(0)},    //
+               {T(0), T(0), T(0), T(0)})},  //
+          Val(T(0))),
+
+        // All same == 0
+        C({Mat({T(42), T(42)},    //
+               {T(42), T(42)})},  //
+          Val(T(0))),
+
+        C({Mat({T(42), T(42), T(42)},    //
+               {T(42), T(42), T(42)},    //
+               {T(42), T(42), T(42)})},  //
+          Val(T(0))),
+
+        C({Mat({T(42), T(42), T(42), T(42)},    //
+               {T(42), T(42), T(42), T(42)},    //
+               {T(42), T(42), T(42), T(42)},    //
+               {T(42), T(42), T(42), T(42)})},  //
+          Val(T(0))),
+
+        // Various values
+        C({Mat({-T(2), T(17)},   //
+               {T(5), T(45)})},  //
+          Val(-T(175))),
+
+        C({Mat({T(4), T(6), -T(13)},    //
+               {T(12), T(5), T(8)},     //
+               {T(9), T(17), T(16)})},  //
+          Val(-T(3011))),
+
+        C({Mat({T(2), T(9), T(8), T(1)},       //
+               {-T(4), T(11), -T(3), T(7)},    //
+               {T(6), T(5), T(12), -T(6)},     //
+               {T(3), -T(10), T(4), -T(7)})},  //
+          Val(T(469))),
+
+        // Overflow during multiply
+        E({Mat({T::Highest(), T(0)},  //
+               {T(0), T(2)})},        //
+          error_msg(T::Highest(), "*", T(2))),
+
+        // Overflow during subtract
+        E({Mat({T::Highest(), T::Lowest()},  //
+               {T(1), T(1)})},               //
+          error_msg(T::Highest(), "-", T::Lowest())),
+    };
+
+    return r;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Determinant,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kDeterminant),
+                     testing::ValuesIn(Concat(DeterminantCases<AFloat>(),  //
+                                              DeterminantCases<f32>(),     //
+                                              DeterminantCases<f16>()))));
+
+template <typename T>
 std::vector<Case> FirstLeadingBitCases() {
     using B = BitValues<T>;
     auto r = std::vector<Case>{

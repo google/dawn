@@ -1,4 +1,4 @@
-void determinant_2b62ba() {
+void determinant_1bf6e7() {
   float res = 0.0f;
 }
 
@@ -7,7 +7,7 @@ struct tint_symbol {
 };
 
 float4 vertex_main_inner() {
-  determinant_2b62ba();
+  determinant_1bf6e7();
   return (0.0f).xxxx;
 }
 
@@ -19,12 +19,12 @@ tint_symbol vertex_main() {
 }
 
 void fragment_main() {
-  determinant_2b62ba();
+  determinant_1bf6e7();
   return;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  determinant_2b62ba();
+  determinant_1bf6e7();
   return;
 }

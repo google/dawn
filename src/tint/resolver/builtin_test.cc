@@ -1932,7 +1932,7 @@ TEST_F(ResolverBuiltinTest, Determinant_NotSquare) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to determinant(mat2x3<f32>)
 
 1 candidate function:
-  determinant(matNxN<T>) -> T  where: T is f32 or f16
+  determinant(matNxN<T>) -> T  where: T is abstract-float, f32 or f16
 )");
 }
 
@@ -1947,7 +1947,7 @@ TEST_F(ResolverBuiltinTest, Determinant_NotMatrix) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to determinant(f32)
 
 1 candidate function:
-  determinant(matNxN<T>) -> T  where: T is f32 or f16
+  determinant(matNxN<T>) -> T  where: T is abstract-float, f32 or f16
 )");
 }
 
