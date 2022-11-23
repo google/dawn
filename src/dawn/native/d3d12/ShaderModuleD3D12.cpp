@@ -648,9 +648,7 @@ ResultOrError<CompiledShader> ShaderModule::Compile(
         device->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
     }
 
-    if (BlobCache* cache = device->GetBlobCache()) {
-        cache->EnsureStored(compiledShader);
-    }
+    device->GetBlobCache()->EnsureStored(compiledShader);
 
     // Clear the hlslSource. It is only used for logging and should not be used
     // outside of the compilation.

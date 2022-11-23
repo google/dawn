@@ -93,7 +93,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
     void SetPlatform(dawn::platform::Platform* platform);
     void SetPlatformForTesting(dawn::platform::Platform* platform);
     dawn::platform::Platform* GetPlatform();
-    BlobCache* GetBlobCache();
+    BlobCache* GetBlobCache(bool enabled = true);
 
     uint64_t GetDeviceCountForTesting() const;
     void IncrementDeviceCountForTesting();
@@ -139,6 +139,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
     dawn::platform::Platform* mPlatform = nullptr;
     std::unique_ptr<dawn::platform::Platform> mDefaultPlatform;
     std::unique_ptr<BlobCache> mBlobCache;
+    BlobCache mPassthroughBlobCache;
 
     std::vector<std::unique_ptr<BackendConnection>> mBackends;
     std::vector<Ref<AdapterBase>> mAdapters;

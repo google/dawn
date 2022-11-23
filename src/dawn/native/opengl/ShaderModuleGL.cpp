@@ -299,9 +299,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
         }
     }
 
-    if (BlobCache* cache = GetDevice()->GetBlobCache()) {
-        cache->EnsureStored(compilationResult);
-    }
+    GetDevice()->GetBlobCache()->EnsureStored(compilationResult);
     *needsPlaceholderSampler = compilationResult->needsPlaceholderSampler;
     *combinedSamplers = std::move(compilationResult->combinedSamplerInfo);
     return shader;

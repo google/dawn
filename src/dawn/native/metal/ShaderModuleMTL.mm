@@ -366,9 +366,7 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
         out->function = AcquireNSPRef([*library newFunctionWithName:name.Get()]);
     }
 
-    if (BlobCache* cache = GetDevice()->GetBlobCache()) {
-        cache->EnsureStored(mslCompilation);
-    }
+    GetDevice()->GetBlobCache()->EnsureStored(mslCompilation);
 
     if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
         GetEntryPoint(entryPointName).usedVertexInputs.any()) {

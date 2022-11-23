@@ -375,9 +375,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
     ModuleAndSpirv moduleAndSpirv;
     if (newHandle != VK_NULL_HANDLE) {
-        if (BlobCache* cache = device->GetBlobCache()) {
-            cache->EnsureStored(compilation);
-        }
+        device->GetBlobCache()->EnsureStored(compilation);
+
         // Set the label on `newHandle` now, and not on `moduleAndSpirv.module` later
         // since `moduleAndSpirv.module` may be in use by multiple threads.
         SetDebugName(ToBackend(GetDevice()), newHandle, "Dawn_ShaderModule", GetLabel());

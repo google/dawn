@@ -456,8 +456,11 @@ dawn::platform::Platform* InstanceBase::GetPlatform() {
     return mPlatform;
 }
 
-BlobCache* InstanceBase::GetBlobCache() {
-    return mBlobCache.get();
+BlobCache* InstanceBase::GetBlobCache(bool enabled) {
+    if (enabled) {
+        return mBlobCache.get();
+    }
+    return &mPassthroughBlobCache;
 }
 
 uint64_t InstanceBase::GetDeviceCountForTesting() const {
