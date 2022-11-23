@@ -819,6 +819,10 @@ TEST_P(BufferTests, CreateBufferOOM) {
     descriptor.size = 1ull << 50;
     // TODO(dawn:1525): remove warning expectation after the deprecation period.
     ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(device.CreateBuffer(&descriptor)));
+
+    // Validation errors should always be prior to OOM.
+    descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::Uniform;
+    ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
 }
 
 // Test that a very large buffer mappedAtCreation fails gracefully.
@@ -844,12 +848,22 @@ TEST_P(BufferTests, BufferMappedAtCreationOOM) {
 
         // Test an enormous buffer fails
         descriptor.size = std::numeric_limits<uint64_t>::max();
-        ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
+        if (UsesWire()) {
+            wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+            ASSERT_EQ(nullptr, buffer.Get());
+        } else {
+            ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
+        }
 
         // UINT64_MAX may be special cased. Test a smaller, but really large buffer also fails
         descriptor.size = 1ull << 50;
-        // TODO(dawn:1525): remove warning expectation after the deprecation period.
-        ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(device.CreateBuffer(&descriptor)));
+        if (UsesWire()) {
+            wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+            ASSERT_EQ(nullptr, buffer.Get());
+        } else {
+            // TODO(dawn:1525): remove warning expectation after the deprecation period.
+            ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(device.CreateBuffer(&descriptor)));
+        }
     }
 
     // Test mappable buffer
@@ -864,12 +878,22 @@ TEST_P(BufferTests, BufferMappedAtCreationOOM) {
 
         // Test an enormous buffer fails
         descriptor.size = std::numeric_limits<uint64_t>::max();
-        ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
+        if (UsesWire()) {
+            wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+            ASSERT_EQ(nullptr, buffer.Get());
+        } else {
+            ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
+        }
 
         // UINT64_MAX may be special cased. Test a smaller, but really large buffer also fails
         descriptor.size = 1ull << 50;
-        // TODO(dawn:1525): remove warning expectation after the deprecation period.
-        ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(device.CreateBuffer(&descriptor)));
+        if (UsesWire()) {
+            wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+            ASSERT_EQ(nullptr, buffer.Get());
+        } else {
+            // TODO(dawn:1525): remove warning expectation after the deprecation period.
+            ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(device.CreateBuffer(&descriptor)));
+        }
     }
 }
 

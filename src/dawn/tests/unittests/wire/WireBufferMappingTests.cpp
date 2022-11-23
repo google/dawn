@@ -680,8 +680,7 @@ TEST_F(WireBufferMappingTests, MappedAtCreationThenMapFailure) {
     FlushClient();
 }
 
-// Check that trying to create a buffer of size MAX_SIZE_T is an error handling in the client
-// and never gets to the server-side.
+// Check that trying to create a buffer of size MAX_SIZE_T won't get OOM error at the client side.
 TEST_F(WireBufferMappingTests, MaxSizeMappableBufferOOMDirectly) {
     size_t kOOMSize = std::numeric_limits<size_t>::max();
     WGPUBuffer apiBuffer = api.GetNewBuffer();
@@ -694,8 +693,6 @@ TEST_F(WireBufferMappingTests, MaxSizeMappableBufferOOMDirectly) {
         descriptor.mappedAtCreation = true;
 
         wgpuDeviceCreateBuffer(device, &descriptor);
-        EXPECT_CALL(api, DeviceInjectError(apiDevice, WGPUErrorType_OutOfMemory, _));
-        EXPECT_CALL(api, DeviceCreateErrorBuffer(apiDevice)).WillOnce(Return(apiBuffer));
         FlushClient();
     }
 
@@ -706,8 +703,7 @@ TEST_F(WireBufferMappingTests, MaxSizeMappableBufferOOMDirectly) {
         descriptor.size = kOOMSize;
 
         wgpuDeviceCreateBuffer(device, &descriptor);
-        EXPECT_CALL(api, DeviceInjectError(apiDevice, WGPUErrorType_OutOfMemory, _));
-        EXPECT_CALL(api, DeviceCreateErrorBuffer(apiDevice)).WillOnce(Return(apiBuffer));
+        EXPECT_CALL(api, DeviceCreateErrorBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
         FlushClient();
     }
 
@@ -718,8 +714,7 @@ TEST_F(WireBufferMappingTests, MaxSizeMappableBufferOOMDirectly) {
         descriptor.size = kOOMSize;
 
         wgpuDeviceCreateBuffer(device, &descriptor);
-        EXPECT_CALL(api, DeviceInjectError(apiDevice, WGPUErrorType_OutOfMemory, _));
-        EXPECT_CALL(api, DeviceCreateErrorBuffer(apiDevice)).WillOnce(Return(apiBuffer));
+        EXPECT_CALL(api, DeviceCreateErrorBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
         FlushClient();
     }
 }

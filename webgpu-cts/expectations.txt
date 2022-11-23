@@ -206,11 +206,6 @@ crbug.com/dawn/1357 webgpu:api,operation,shader_module,compilation_info:offset_a
 crbug.com/dawn/1357 webgpu:api,operation,shader_module,compilation_info:offset_and_length:valid=false;name="unicode" [ Failure ]
 
 ################################################################################
-# createBuffer_invalid_and_oom failures
-################################################################################
-crbug.com/dawn/0000 webgpu:api,validation,buffer,create:createBuffer_invalid_and_oom: [ Failure ]
-
-################################################################################
 # atan2 shader execution failures
 # Very slow, many failing. Skip for now.
 # KEEP

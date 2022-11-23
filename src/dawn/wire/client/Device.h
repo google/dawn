@@ -41,7 +41,7 @@ class Device final : public ObjectBase {
     void InjectError(WGPUErrorType type, const char* message);
     bool PopErrorScope(WGPUErrorCallback callback, void* userdata);
     WGPUBuffer CreateBuffer(const WGPUBufferDescriptor* descriptor);
-    WGPUBuffer CreateErrorBuffer();
+    WGPUBuffer CreateErrorBuffer(const WGPUBufferDescriptor* descriptor);
     void CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* descriptor,
                                     WGPUCreateComputePipelineAsyncCallback callback,
                                     void* userdata);

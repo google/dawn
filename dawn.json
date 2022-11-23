@@ -994,7 +994,10 @@
             {
                 "name": "create error buffer",
                 "returns": "buffer",
-                "tags": ["dawn"]
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "descriptor", "type": "buffer descriptor", "annotation": "const*"}
+                ]
             },
             {
                 "name": "create command encoder",
@@ -2567,7 +2570,8 @@
             {"value": 1003, "name": "dawn encoder internal usage descriptor", "tags": ["dawn"]},
             {"value": 1004, "name": "dawn instance descriptor", "tags": ["dawn", "native"]},
             {"value": 1005, "name": "dawn cache device descriptor", "tags": ["dawn", "native"]},
-            {"value": 1006, "name": "dawn adapter properties power preference", "tags": ["dawn", "native"]}
+            {"value": 1006, "name": "dawn adapter properties power preference", "tags": ["dawn", "native"]},
+            {"value": 1007, "name": "dawn buffer descriptor error info from wire client", "tags": ["dawn"]}
         ]
     },
     "texture": {
@@ -2978,6 +2982,15 @@
         "tags": ["dawn"],
         "members": [
             {"name": "power preference", "type": "power preference", "default": "undefined"}
+        ]
+    },
+    "dawn buffer descriptor error info from wire client": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["buffer descriptor"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "out of memory", "type": "bool", "default": "false"}
         ]
     }
 }

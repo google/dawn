@@ -1193,9 +1193,27 @@ TextureBase* DeviceBase::APICreateTexture(const TextureDescriptor* descriptor) {
 
 // For Dawn Wire
 
-BufferBase* DeviceBase::APICreateErrorBuffer() {
-    BufferDescriptor desc = {};
-    return BufferBase::MakeError(this, &desc);
+BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
+    BufferDescriptor fakeDescriptor = *desc;
+    fakeDescriptor.nextInChain = nullptr;
+
+    // The validation errors on BufferDescriptor should be prior to any OOM errors when
+    // MapppedAtCreation == false.
+    MaybeError maybeError = ValidateBufferDescriptor(this, &fakeDescriptor);
+    if (maybeError.IsError()) {
+        ConsumedError(maybeError.AcquireError(), "calling %s.CreateBuffer(%s).", this, desc);
+    } else {
+        const DawnBufferDescriptorErrorInfoFromWireClient* clientErrorInfo = nullptr;
+        FindInChain(desc->nextInChain, &clientErrorInfo);
+        if (clientErrorInfo != nullptr && clientErrorInfo->outOfMemory) {
+            ConsumedError(DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer mapping"));
+        }
+    }
+
+    // Set the size of the error buffer to 0 as this function is called only when an OOM happens at
+    // the client side.
+    fakeDescriptor.size = 0;
+    return BufferBase::MakeError(this, &fakeDescriptor);
 }
 
 ExternalTextureBase* DeviceBase::APICreateErrorExternalTexture() {
@@ -1408,15 +1426,7 @@ ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::CreateBindGroupLayout(
 ResultOrError<Ref<BufferBase>> DeviceBase::CreateBuffer(const BufferDescriptor* descriptor) {
     DAWN_TRY(ValidateIsAlive());
     if (IsValidationEnabled()) {
-        DAWN_TRY_CONTEXT(ValidateBufferDescriptor(this, descriptor), "validating %s", descriptor);
-
-        // TODO(dawn:1525): Change to validation error after the deprecation period.
-        if (descriptor->size > mLimits.v1.maxBufferSize) {
-            std::string warning =
-                absl::StrFormat("Buffer size (%u) exceeds the max buffer size limit (%u).",
-                                descriptor->size, mLimits.v1.maxBufferSize);
-            EmitDeprecationWarning(warning.c_str());
-        }
+        DAWN_TRY(ValidateBufferDescriptor(this, descriptor));
     }
 
     Ref<BufferBase> buffer;

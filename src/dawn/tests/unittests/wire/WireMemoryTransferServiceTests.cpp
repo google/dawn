@@ -891,7 +891,7 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationWriteHandleCreationFailur
     descriptor.mappedAtCreation = true;
 
     WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
-    EXPECT_EQ(nullptr, wgpuBufferGetMappedRange(buffer, 0, sizeof(mBufferContent)));
+    EXPECT_EQ(nullptr, buffer);
 }
 
 // Test buffer creation with mappedAtCreation DeserializeWriteHandle failure.

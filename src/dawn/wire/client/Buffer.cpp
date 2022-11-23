@@ -24,6 +24,20 @@
 
 namespace dawn::wire::client {
 
+namespace {
+WGPUBuffer CreateErrorBufferOOMAtClient(Device* device, const WGPUBufferDescriptor* descriptor) {
+    if (descriptor->mappedAtCreation) {
+        return nullptr;
+    }
+    WGPUBufferDescriptor errorBufferDescriptor = *descriptor;
+    WGPUDawnBufferDescriptorErrorInfoFromWireClient errorInfo = {};
+    errorInfo.chain.sType = WGPUSType_DawnBufferDescriptorErrorInfoFromWireClient;
+    errorInfo.outOfMemory = true;
+    errorBufferDescriptor.nextInChain = &errorInfo.chain;
+    return device->CreateErrorBuffer(&errorBufferDescriptor);
+}
+}  // anonymous namespace
+
 // static
 WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor) {
     Client* wireClient = device->GetClient();
@@ -32,8 +46,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
         (descriptor->usage & (WGPUBufferUsage_MapRead | WGPUBufferUsage_MapWrite)) != 0 ||
         descriptor->mappedAtCreation;
     if (mappable && descriptor->size >= std::numeric_limits<size_t>::max()) {
-        device->InjectError(WGPUErrorType_OutOfMemory, "Buffer is too large for map usage");
-        return device->CreateErrorBuffer();
+        return CreateErrorBufferOOMAtClient(device, descriptor);
     }
 
     std::unique_ptr<MemoryTransferService::ReadHandle> readHandle = nullptr;
@@ -55,8 +68,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
             readHandle.reset(
                 wireClient->GetMemoryTransferService()->CreateReadHandle(descriptor->size));
             if (readHandle == nullptr) {
-                device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
-                return CreateError(device, descriptor);
+                return CreateErrorBufferOOMAtClient(device, descriptor);
             }
             readHandleCreateInfoLength = readHandle->SerializeCreateSize();
             cmd.readHandleCreateInfoLength = readHandleCreateInfoLength;
@@ -67,8 +79,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
             writeHandle.reset(
                 wireClient->GetMemoryTransferService()->CreateWriteHandle(descriptor->size));
             if (writeHandle == nullptr) {
-                device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
-                return CreateError(device, descriptor);
+                return CreateErrorBufferOOMAtClient(device, descriptor);
             }
             writeHandleCreateInfoLength = writeHandle->SerializeCreateSize();
             cmd.writeHandleCreateInfoLength = writeHandleCreateInfoLength;
@@ -131,6 +142,8 @@ WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descr
 
     DeviceCreateErrorBufferCmd cmd;
     cmd.self = ToAPI(device);
+    cmd.selfId = device->GetWireId();
+    cmd.descriptor = descriptor;
     cmd.result = buffer->GetWireHandle();
     client->SerializeCommand(cmd);
 

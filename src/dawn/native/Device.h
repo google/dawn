@@ -272,7 +272,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     InternalPipelineStore* GetInternalPipelineStore();
 
     // For Dawn Wire
-    BufferBase* APICreateErrorBuffer();
+    BufferBase* APICreateErrorBuffer(const BufferDescriptor* desc);
     ExternalTextureBase* APICreateErrorExternalTexture();
     TextureBase* APICreateErrorTexture(const TextureDescriptor* desc);
 
