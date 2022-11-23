@@ -2,12 +2,12 @@
 
 using namespace metal;
 
-struct modf_result_vec4 {
+struct modf_result_vec4_f32 {
   float4 fract;
   float4 whole;
 };
 void modf_4bfced() {
-  modf_result_vec4 res = modf_result_vec4{.fract=float4(-0.5f), .whole=float4(-1.0f)};
+  modf_result_vec4_f32 res = modf_result_vec4_f32{.fract=float4(-0.5f), .whole=float4(-1.0f)};
 }
 
 struct tint_symbol {

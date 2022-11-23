@@ -1,9 +1,9 @@
-struct frexp_result_vec2 {
+struct frexp_result_vec2_f32 {
   float2 fract;
   int2 exp;
 };
 void frexp_eb2421() {
-  frexp_result_vec2 res = {(0.5f).xx, (1).xx};
+  frexp_result_vec2_f32 res = {(0.5f).xx, (1).xx};
 }
 
 struct tint_symbol {

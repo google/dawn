@@ -1,9 +1,9 @@
-struct modf_result_vec3 {
+struct modf_result_vec3_f32 {
   float3 fract;
   float3 whole;
 };
 void modf_68d8ee() {
-  modf_result_vec3 res = {(-0.5f).xxx, (-1.0f).xxx};
+  modf_result_vec3_f32 res = {(-0.5f).xxx, (-1.0f).xxx};
 }
 
 struct tint_symbol {

@@ -1,13 +1,13 @@
 #version 310 es
 
-struct frexp_result {
+struct frexp_result_f32 {
   float fract;
   int exp;
 };
 
 
 void frexp_4b2200() {
-  frexp_result res = frexp_result(0.5f, 1);
+  frexp_result_f32 res = frexp_result_f32(0.5f, 1);
 }
 
 vec4 vertex_main() {
@@ -26,14 +26,14 @@ void main() {
 #version 310 es
 precision mediump float;
 
-struct frexp_result {
+struct frexp_result_f32 {
   float fract;
   int exp;
 };
 
 
 void frexp_4b2200() {
-  frexp_result res = frexp_result(0.5f, 1);
+  frexp_result_f32 res = frexp_result_f32(0.5f, 1);
 }
 
 void fragment_main() {
@@ -46,14 +46,14 @@ void main() {
 }
 #version 310 es
 
-struct frexp_result {
+struct frexp_result_f32 {
   float fract;
   int exp;
 };
 
 
 void frexp_4b2200() {
-  frexp_result res = frexp_result(0.5f, 1);
+  frexp_result_f32 res = frexp_result_f32(0.5f, 1);
 }
 
 void compute_main() {

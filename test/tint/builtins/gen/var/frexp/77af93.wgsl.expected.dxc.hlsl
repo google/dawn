@@ -1,17 +1,17 @@
-struct frexp_result_vec4 {
+struct frexp_result_vec4_f32 {
   float4 fract;
   int4 exp;
 };
-frexp_result_vec4 tint_frexp(float4 param_0) {
+frexp_result_vec4_f32 tint_frexp(float4 param_0) {
   float4 exp;
   float4 fract = frexp(param_0, exp);
-  frexp_result_vec4 result = {fract, int4(exp)};
+  frexp_result_vec4_f32 result = {fract, int4(exp)};
   return result;
 }
 
 void frexp_77af93() {
   float4 arg_0 = (1.0f).xxxx;
-  frexp_result_vec4 res = tint_frexp(arg_0);
+  frexp_result_vec4_f32 res = tint_frexp(arg_0);
 }
 
 struct tint_symbol {

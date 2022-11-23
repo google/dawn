@@ -1,13 +1,13 @@
 #version 310 es
 
-struct modf_result {
+struct modf_result_f32 {
   float fract;
   float whole;
 };
 
 
 void modf_c15f48() {
-  modf_result res = modf_result(-0.5f, -1.0f);
+  modf_result_f32 res = modf_result_f32(-0.5f, -1.0f);
 }
 
 vec4 vertex_main() {
@@ -26,14 +26,14 @@ void main() {
 #version 310 es
 precision mediump float;
 
-struct modf_result {
+struct modf_result_f32 {
   float fract;
   float whole;
 };
 
 
 void modf_c15f48() {
-  modf_result res = modf_result(-0.5f, -1.0f);
+  modf_result_f32 res = modf_result_f32(-0.5f, -1.0f);
 }
 
 void fragment_main() {
@@ -46,14 +46,14 @@ void main() {
 }
 #version 310 es
 
-struct modf_result {
+struct modf_result_f32 {
   float fract;
   float whole;
 };
 
 
 void modf_c15f48() {
-  modf_result res = modf_result(-0.5f, -1.0f);
+  modf_result_f32 res = modf_result_f32(-0.5f, -1.0f);
 }
 
 void compute_main() {

@@ -15,9 +15,9 @@
                OpName %vertex_point_size "vertex_point_size"
                OpName %modf_5ea256 "modf_5ea256"
                OpName %arg_0 "arg_0"
-               OpName %__modf_result_vec3 "__modf_result_vec3"
-               OpMemberName %__modf_result_vec3 0 "fract"
-               OpMemberName %__modf_result_vec3 1 "whole"
+               OpName %__modf_result_vec3_f32 "__modf_result_vec3_f32"
+               OpMemberName %__modf_result_vec3_f32 0 "fract"
+               OpMemberName %__modf_result_vec3_f32 1 "whole"
                OpName %res "res"
                OpName %vertex_main_inner "vertex_main_inner"
                OpName %vertex_main "vertex_main"
@@ -25,8 +25,8 @@
                OpName %compute_main "compute_main"
                OpDecorate %value BuiltIn Position
                OpDecorate %vertex_point_size BuiltIn PointSize
-               OpMemberDecorate %__modf_result_vec3 0 Offset 0
-               OpMemberDecorate %__modf_result_vec3 1 Offset 16
+               OpMemberDecorate %__modf_result_vec3_f32 0 Offset 0
+               OpMemberDecorate %__modf_result_vec3_f32 1 Offset 16
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
@@ -42,18 +42,18 @@
          %15 = OpConstantComposite %v3float %float_n1_5 %float_n1_5 %float_n1_5
 %_ptr_Function_v3float = OpTypePointer Function %v3float
          %18 = OpConstantNull %v3float
-%__modf_result_vec3 = OpTypeStruct %v3float %v3float
-%_ptr_Function___modf_result_vec3 = OpTypePointer Function %__modf_result_vec3
-         %25 = OpConstantNull %__modf_result_vec3
+%__modf_result_vec3_f32 = OpTypeStruct %v3float %v3float
+%_ptr_Function___modf_result_vec3_f32 = OpTypePointer Function %__modf_result_vec3_f32
+         %25 = OpConstantNull %__modf_result_vec3_f32
          %26 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %modf_5ea256 = OpFunction %void None %9
          %12 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_v3float Function %18
-        %res = OpVariable %_ptr_Function___modf_result_vec3 Function %25
+        %res = OpVariable %_ptr_Function___modf_result_vec3_f32 Function %25
                OpStore %arg_0 %15
          %22 = OpLoad %v3float %arg_0
-         %19 = OpExtInst %__modf_result_vec3 %21 ModfStruct %22
+         %19 = OpExtInst %__modf_result_vec3_f32 %21 ModfStruct %22
                OpStore %res %19
                OpReturn
                OpFunctionEnd

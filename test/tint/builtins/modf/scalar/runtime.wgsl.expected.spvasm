@@ -9,19 +9,19 @@
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
                OpName %main "main"
-               OpName %__modf_result "__modf_result"
-               OpMemberName %__modf_result 0 "fract"
-               OpMemberName %__modf_result 1 "whole"
-               OpMemberDecorate %__modf_result 0 Offset 0
-               OpMemberDecorate %__modf_result 1 Offset 4
+               OpName %__modf_result_f32 "__modf_result_f32"
+               OpMemberName %__modf_result_f32 0 "fract"
+               OpMemberName %__modf_result_f32 1 "whole"
+               OpMemberDecorate %__modf_result_f32 0 Offset 0
+               OpMemberDecorate %__modf_result_f32 1 Offset 4
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
       %float = OpTypeFloat 32
  %float_1_25 = OpConstant %float 1.25
-%__modf_result = OpTypeStruct %float %float
+%__modf_result_f32 = OpTypeStruct %float %float
        %main = OpFunction %void None %1
           %4 = OpLabel
-          %7 = OpExtInst %__modf_result %9 ModfStruct %float_1_25
+          %7 = OpExtInst %__modf_result_f32 %9 ModfStruct %float_1_25
          %10 = OpCompositeExtract %float %7 0
          %11 = OpCompositeExtract %float %7 1
                OpReturn

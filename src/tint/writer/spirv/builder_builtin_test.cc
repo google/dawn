@@ -1653,7 +1653,7 @@ OpEntryPoint Fragment %3 "a_func"
 OpExecutionMode %3 OriginUpperLeft
 OpName %3 "a_func"
 OpName %10 "vec"
-OpName %14 "__modf_result_vec2"
+OpName %14 "__modf_result_vec2_f32"
 OpMemberName %14 0 "fract"
 OpMemberName %14 1 "whole"
 OpMemberDecorate %14 0 Offset 0
@@ -1760,7 +1760,7 @@ OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %3 "a_func"
 OpExecutionMode %3 OriginUpperLeft
 OpName %3 "a_func"
-OpName %6 "__modf_result_vec2"
+OpName %6 "__modf_result_vec2_f32"
 OpMemberName %6 0 "fract"
 OpMemberName %6 1 "whole"
 OpMemberDecorate %6 0 Offset 0
@@ -1857,7 +1857,7 @@ OpEntryPoint Fragment %3 "a_func"
 OpExecutionMode %3 OriginUpperLeft
 OpName %3 "a_func"
 OpName %10 "vec"
-OpName %14 "__frexp_result_vec2"
+OpName %14 "__frexp_result_vec2_f32"
 OpMemberName %14 0 "fract"
 OpMemberName %14 1 "exp"
 OpMemberDecorate %14 0 Offset 0
@@ -1967,7 +1967,7 @@ OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %3 "a_func"
 OpExecutionMode %3 OriginUpperLeft
 OpName %3 "a_func"
-OpName %6 "__frexp_result_vec2"
+OpName %6 "__frexp_result_vec2_f32"
 OpMemberName %6 0 "fract"
 OpMemberName %6 1 "exp"
 OpMemberDecorate %6 0 Offset 0
@@ -2066,7 +2066,7 @@ OpEntryPoint Fragment %3 "a_func"
 OpExecutionMode %3 OriginUpperLeft
 OpName %3 "a_func"
 OpName %10 "vec"
-OpName %14 "__frexp_result_vec2"
+OpName %14 "__frexp_result_vec2_f32"
 OpMemberName %14 0 "fract"
 OpMemberName %14 1 "exp"
 OpMemberDecorate %14 0 Offset 0

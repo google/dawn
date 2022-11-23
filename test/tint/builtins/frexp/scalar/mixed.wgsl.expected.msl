@@ -2,21 +2,21 @@
 
 using namespace metal;
 
-struct frexp_result {
+struct frexp_result_f32 {
   float fract;
   int exp;
 };
-frexp_result tint_frexp(float param_0) {
-  frexp_result result;
+frexp_result_f32 tint_frexp(float param_0) {
+  frexp_result_f32 result;
   result.fract = frexp(param_0, result.exp);
   return result;
 }
 
 kernel void tint_symbol() {
   float const runtime_in = 1.25f;
-  frexp_result res = frexp_result{.fract=0.625f, .exp=1};
+  frexp_result_f32 res = frexp_result_f32{.fract=0.625f, .exp=1};
   res = tint_frexp(runtime_in);
-  res = frexp_result{.fract=0.625f, .exp=1};
+  res = frexp_result_f32{.fract=0.625f, .exp=1};
   float const fract = res.fract;
   int const exp = res.exp;
   return;

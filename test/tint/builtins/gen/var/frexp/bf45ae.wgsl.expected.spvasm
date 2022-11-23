@@ -13,9 +13,9 @@
                OpName %value "value"
                OpName %vertex_point_size "vertex_point_size"
                OpName %frexp_bf45ae "frexp_bf45ae"
-               OpName %__frexp_result_vec3 "__frexp_result_vec3"
-               OpMemberName %__frexp_result_vec3 0 "fract"
-               OpMemberName %__frexp_result_vec3 1 "exp"
+               OpName %__frexp_result_vec3_f32 "__frexp_result_vec3_f32"
+               OpMemberName %__frexp_result_vec3_f32 0 "fract"
+               OpMemberName %__frexp_result_vec3_f32 1 "exp"
                OpName %res "res"
                OpName %vertex_main_inner "vertex_main_inner"
                OpName %vertex_main "vertex_main"
@@ -23,8 +23,8 @@
                OpName %compute_main "compute_main"
                OpDecorate %value BuiltIn Position
                OpDecorate %vertex_point_size BuiltIn PointSize
-               OpMemberDecorate %__frexp_result_vec3 0 Offset 0
-               OpMemberDecorate %__frexp_result_vec3 1 Offset 16
+               OpMemberDecorate %__frexp_result_vec3_f32 0 Offset 0
+               OpMemberDecorate %__frexp_result_vec3_f32 1 Offset 16
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
@@ -38,19 +38,19 @@
     %v3float = OpTypeVector %float 3
         %int = OpTypeInt 32 1
       %v3int = OpTypeVector %int 3
-%__frexp_result_vec3 = OpTypeStruct %v3float %v3int
+%__frexp_result_vec3_f32 = OpTypeStruct %v3float %v3int
   %float_0_5 = OpConstant %float 0.5
          %18 = OpConstantComposite %v3float %float_0_5 %float_0_5 %float_0_5
       %int_1 = OpConstant %int 1
          %20 = OpConstantComposite %v3int %int_1 %int_1 %int_1
-         %21 = OpConstantComposite %__frexp_result_vec3 %18 %20
-%_ptr_Function___frexp_result_vec3 = OpTypePointer Function %__frexp_result_vec3
-         %24 = OpConstantNull %__frexp_result_vec3
+         %21 = OpConstantComposite %__frexp_result_vec3_f32 %18 %20
+%_ptr_Function___frexp_result_vec3_f32 = OpTypePointer Function %__frexp_result_vec3_f32
+         %24 = OpConstantNull %__frexp_result_vec3_f32
          %25 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %frexp_bf45ae = OpFunction %void None %9
          %12 = OpLabel
-        %res = OpVariable %_ptr_Function___frexp_result_vec3 Function %24
+        %res = OpVariable %_ptr_Function___frexp_result_vec3_f32 Function %24
                OpStore %res %21
                OpReturn
                OpFunctionEnd

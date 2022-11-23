@@ -2,12 +2,12 @@
 
 using namespace metal;
 
-struct frexp_result_vec4 {
+struct frexp_result_vec4_f32 {
   float4 fract;
   int4 exp;
 };
 void frexp_77af93() {
-  frexp_result_vec4 res = frexp_result_vec4{.fract=float4(0.5f), .exp=int4(1)};
+  frexp_result_vec4_f32 res = frexp_result_vec4_f32{.fract=float4(0.5f), .exp=int4(1)};
 }
 
 struct tint_symbol {

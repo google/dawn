@@ -2,14 +2,14 @@
 
 using namespace metal;
 
-struct modf_result {
+struct modf_result_f32 {
   float fract;
   float whole;
 };
 kernel void tint_symbol() {
-  modf_result const tint_symbol_1 = modf_result{.fract=0.25f, .whole=1.0f};
+  modf_result_f32 const tint_symbol_1 = modf_result_f32{.fract=0.25f, .whole=1.0f};
   float const fract = tint_symbol_1.fract;
-  modf_result const tint_symbol_2 = modf_result{.fract=0.25f, .whole=1.0f};
+  modf_result_f32 const tint_symbol_2 = modf_result_f32{.fract=0.25f, .whole=1.0f};
   float const whole = tint_symbol_2.whole;
   return;
 }

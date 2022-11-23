@@ -1,9 +1,9 @@
-struct frexp_result {
+struct frexp_result_f32 {
   float fract;
   int exp;
 };
 void frexp_bee870() {
-  frexp_result res = {0.5f, 1};
+  frexp_result_f32 res = {0.5f, 1};
 }
 
 struct tint_symbol {

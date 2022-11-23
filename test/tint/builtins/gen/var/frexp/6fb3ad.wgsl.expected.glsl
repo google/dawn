@@ -1,13 +1,13 @@
 #version 310 es
 
-struct frexp_result_vec2 {
+struct frexp_result_vec2_f32 {
   vec2 fract;
   ivec2 exp;
 };
 
 
 void frexp_6fb3ad() {
-  frexp_result_vec2 res = frexp_result_vec2(vec2(0.5f), ivec2(1));
+  frexp_result_vec2_f32 res = frexp_result_vec2_f32(vec2(0.5f), ivec2(1));
 }
 
 vec4 vertex_main() {
@@ -26,14 +26,14 @@ void main() {
 #version 310 es
 precision mediump float;
 
-struct frexp_result_vec2 {
+struct frexp_result_vec2_f32 {
   vec2 fract;
   ivec2 exp;
 };
 
 
 void frexp_6fb3ad() {
-  frexp_result_vec2 res = frexp_result_vec2(vec2(0.5f), ivec2(1));
+  frexp_result_vec2_f32 res = frexp_result_vec2_f32(vec2(0.5f), ivec2(1));
 }
 
 void fragment_main() {
@@ -46,14 +46,14 @@ void main() {
 }
 #version 310 es
 
-struct frexp_result_vec2 {
+struct frexp_result_vec2_f32 {
   vec2 fract;
   ivec2 exp;
 };
 
 
 void frexp_6fb3ad() {
-  frexp_result_vec2 res = frexp_result_vec2(vec2(0.5f), ivec2(1));
+  frexp_result_vec2_f32 res = frexp_result_vec2_f32(vec2(0.5f), ivec2(1));
 }
 
 void compute_main() {

@@ -15,9 +15,9 @@
                OpName %vertex_point_size "vertex_point_size"
                OpName %frexp_4b2200 "frexp_4b2200"
                OpName %arg_0 "arg_0"
-               OpName %__frexp_result "__frexp_result"
-               OpMemberName %__frexp_result 0 "fract"
-               OpMemberName %__frexp_result 1 "exp"
+               OpName %__frexp_result_f32 "__frexp_result_f32"
+               OpMemberName %__frexp_result_f32 0 "fract"
+               OpMemberName %__frexp_result_f32 1 "exp"
                OpName %res "res"
                OpName %vertex_main_inner "vertex_main_inner"
                OpName %vertex_main "vertex_main"
@@ -25,8 +25,8 @@
                OpName %compute_main "compute_main"
                OpDecorate %value BuiltIn Position
                OpDecorate %vertex_point_size BuiltIn PointSize
-               OpMemberDecorate %__frexp_result 0 Offset 0
-               OpMemberDecorate %__frexp_result 1 Offset 4
+               OpMemberDecorate %__frexp_result_f32 0 Offset 0
+               OpMemberDecorate %__frexp_result_f32 1 Offset 4
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
@@ -40,17 +40,17 @@
     %float_1 = OpConstant %float 1
 %_ptr_Function_float = OpTypePointer Function %float
         %int = OpTypeInt 32 1
-%__frexp_result = OpTypeStruct %float %int
-%_ptr_Function___frexp_result = OpTypePointer Function %__frexp_result
-         %23 = OpConstantNull %__frexp_result
+%__frexp_result_f32 = OpTypeStruct %float %int
+%_ptr_Function___frexp_result_f32 = OpTypePointer Function %__frexp_result_f32
+         %23 = OpConstantNull %__frexp_result_f32
          %24 = OpTypeFunction %v4float
 %frexp_4b2200 = OpFunction %void None %9
          %12 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_float Function %8
-        %res = OpVariable %_ptr_Function___frexp_result Function %23
+        %res = OpVariable %_ptr_Function___frexp_result_f32 Function %23
                OpStore %arg_0 %float_1
          %20 = OpLoad %float %arg_0
-         %16 = OpExtInst %__frexp_result %19 FrexpStruct %20
+         %16 = OpExtInst %__frexp_result_f32 %19 FrexpStruct %20
                OpStore %res %16
                OpReturn
                OpFunctionEnd

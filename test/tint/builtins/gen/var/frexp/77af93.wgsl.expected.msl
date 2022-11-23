@@ -2,19 +2,19 @@
 
 using namespace metal;
 
-struct frexp_result_vec4 {
+struct frexp_result_vec4_f32 {
   float4 fract;
   int4 exp;
 };
-frexp_result_vec4 tint_frexp(float4 param_0) {
-  frexp_result_vec4 result;
+frexp_result_vec4_f32 tint_frexp(float4 param_0) {
+  frexp_result_vec4_f32 result;
   result.fract = frexp(param_0, result.exp);
   return result;
 }
 
 void frexp_77af93() {
   float4 arg_0 = float4(1.0f);
-  frexp_result_vec4 res = tint_frexp(arg_0);
+  frexp_result_vec4_f32 res = tint_frexp(arg_0);
 }
 
 struct tint_symbol {

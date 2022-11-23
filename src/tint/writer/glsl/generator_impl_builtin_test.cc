@@ -425,13 +425,13 @@ TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Modf_Scalar_f32) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
-struct modf_result {
+struct modf_result_f32 {
   float fract;
   float whole;
 };
 
-modf_result tint_modf(float param_0) {
-  modf_result result;
+modf_result_f32 tint_modf(float param_0) {
+  modf_result_f32 result;
   result.fract = modf(param_0, result.whole);
   return result;
 }
@@ -439,7 +439,7 @@ modf_result tint_modf(float param_0) {
 
 void test_function() {
   float f = 1.5f;
-  modf_result v = tint_modf(f);
+  modf_result_f32 v = tint_modf(f);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -496,13 +496,13 @@ TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Modf_Vector_f32) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
-struct modf_result_vec3 {
+struct modf_result_vec3_f32 {
   vec3 fract;
   vec3 whole;
 };
 
-modf_result_vec3 tint_modf(vec3 param_0) {
-  modf_result_vec3 result;
+modf_result_vec3_f32 tint_modf(vec3 param_0) {
+  modf_result_vec3_f32 result;
   result.fract = modf(param_0, result.whole);
   return result;
 }
@@ -510,7 +510,7 @@ modf_result_vec3 tint_modf(vec3 param_0) {
 
 void test_function() {
   vec3 f = vec3(1.5f, 2.5f, 3.5f);
-  modf_result_vec3 v = tint_modf(f);
+  modf_result_vec3_f32 v = tint_modf(f);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -566,14 +566,14 @@ TEST_F(GlslGeneratorImplTest_Builtin, Const_Modf_Scalar_f32) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
-struct modf_result {
+struct modf_result_f32 {
   float fract;
   float whole;
 };
 
 
 void test_function() {
-  modf_result v = modf_result(0.5f, 1.0f);
+  modf_result_f32 v = modf_result_f32(0.5f, 1.0f);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -621,14 +621,14 @@ TEST_F(GlslGeneratorImplTest_Builtin, Const_Modf_Vector_f32) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
-struct modf_result_vec3 {
+struct modf_result_vec3_f32 {
   vec3 fract;
   vec3 whole;
 };
 
 
 void test_function() {
-  modf_result_vec3 v = modf_result_vec3(vec3(0.5f), vec3(1.0f, 2.0f, 3.0f));
+  modf_result_vec3_f32 v = modf_result_vec3_f32(vec3(0.5f), vec3(1.0f, 2.0f, 3.0f));
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -677,13 +677,13 @@ TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Frexp_Scalar_f32) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
-struct frexp_result {
+struct frexp_result_f32 {
   float fract;
   int exp;
 };
 
-frexp_result tint_frexp(float param_0) {
-  frexp_result result;
+frexp_result_f32 tint_frexp(float param_0) {
+  frexp_result_f32 result;
   result.fract = frexp(param_0, result.exp);
   return result;
 }
@@ -691,7 +691,7 @@ frexp_result tint_frexp(float param_0) {
 
 void test_function() {
   float f = 1.0f;
-  frexp_result v = tint_frexp(f);
+  frexp_result_f32 v = tint_frexp(f);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -748,13 +748,13 @@ TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Frexp_Vector_f32) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
-struct frexp_result_vec3 {
+struct frexp_result_vec3_f32 {
   vec3 fract;
   ivec3 exp;
 };
 
-frexp_result_vec3 tint_frexp(vec3 param_0) {
-  frexp_result_vec3 result;
+frexp_result_vec3_f32 tint_frexp(vec3 param_0) {
+  frexp_result_vec3_f32 result;
   result.fract = frexp(param_0, result.exp);
   return result;
 }
@@ -762,7 +762,7 @@ frexp_result_vec3 tint_frexp(vec3 param_0) {
 
 void test_function() {
   vec3 f = vec3(0.0f);
-  frexp_result_vec3 v = tint_frexp(f);
+  frexp_result_vec3_f32 v = tint_frexp(f);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -818,14 +818,14 @@ TEST_F(GlslGeneratorImplTest_Builtin, Const_Frexp_Scalar_f32) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
-struct frexp_result {
+struct frexp_result_f32 {
   float fract;
   int exp;
 };
 
 
 void test_function() {
-  frexp_result v = frexp_result(0.5f, 1);
+  frexp_result_f32 v = frexp_result_f32(0.5f, 1);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -873,14 +873,14 @@ TEST_F(GlslGeneratorImplTest_Builtin, Const_Frexp_Vector_f32) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
-struct frexp_result_vec3 {
+struct frexp_result_vec3_f32 {
   vec3 fract;
   ivec3 exp;
 };
 
 
 void test_function() {
-  frexp_result_vec3 v = frexp_result_vec3(vec3(0.0f), ivec3(0));
+  frexp_result_vec3_f32 v = frexp_result_vec3_f32(vec3(0.0f), ivec3(0));
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

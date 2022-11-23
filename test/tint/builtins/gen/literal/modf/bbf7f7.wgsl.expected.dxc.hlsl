@@ -1,9 +1,9 @@
-struct modf_result {
+struct modf_result_f32 {
   float fract;
   float whole;
 };
 void modf_bbf7f7() {
-  modf_result res = {-0.5f, -1.0f};
+  modf_result_f32 res = {-0.5f, -1.0f};
 }
 
 struct tint_symbol {

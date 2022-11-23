@@ -1,12 +1,12 @@
 #version 310 es
 
-struct modf_result_vec3 {
+struct modf_result_vec3_f32 {
   vec3 fract;
   vec3 whole;
 };
 
-modf_result_vec3 tint_modf(vec3 param_0) {
-  modf_result_vec3 result;
+modf_result_vec3_f32 tint_modf(vec3 param_0) {
+  modf_result_vec3_f32 result;
   result.fract = modf(param_0, result.whole);
   return result;
 }
@@ -14,7 +14,7 @@ modf_result_vec3 tint_modf(vec3 param_0) {
 
 void modf_5ea256() {
   vec3 arg_0 = vec3(-1.5f);
-  modf_result_vec3 res = tint_modf(arg_0);
+  modf_result_vec3_f32 res = tint_modf(arg_0);
 }
 
 vec4 vertex_main() {
@@ -33,13 +33,13 @@ void main() {
 #version 310 es
 precision mediump float;
 
-struct modf_result_vec3 {
+struct modf_result_vec3_f32 {
   vec3 fract;
   vec3 whole;
 };
 
-modf_result_vec3 tint_modf(vec3 param_0) {
-  modf_result_vec3 result;
+modf_result_vec3_f32 tint_modf(vec3 param_0) {
+  modf_result_vec3_f32 result;
   result.fract = modf(param_0, result.whole);
   return result;
 }
@@ -47,7 +47,7 @@ modf_result_vec3 tint_modf(vec3 param_0) {
 
 void modf_5ea256() {
   vec3 arg_0 = vec3(-1.5f);
-  modf_result_vec3 res = tint_modf(arg_0);
+  modf_result_vec3_f32 res = tint_modf(arg_0);
 }
 
 void fragment_main() {
@@ -60,13 +60,13 @@ void main() {
 }
 #version 310 es
 
-struct modf_result_vec3 {
+struct modf_result_vec3_f32 {
   vec3 fract;
   vec3 whole;
 };
 
-modf_result_vec3 tint_modf(vec3 param_0) {
-  modf_result_vec3 result;
+modf_result_vec3_f32 tint_modf(vec3 param_0) {
+  modf_result_vec3_f32 result;
   result.fract = modf(param_0, result.whole);
   return result;
 }
@@ -74,7 +74,7 @@ modf_result_vec3 tint_modf(vec3 param_0) {
 
 void modf_5ea256() {
   vec3 arg_0 = vec3(-1.5f);
-  modf_result_vec3 res = tint_modf(arg_0);
+  modf_result_vec3_f32 res = tint_modf(arg_0);
 }
 
 void compute_main() {

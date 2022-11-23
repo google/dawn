@@ -1,9 +1,9 @@
-struct modf_result_vec2 {
+struct modf_result_vec2_f32 {
   float2 fract;
   float2 whole;
 };
 void modf_732aa6() {
-  modf_result_vec2 res = {(-0.5f).xx, (-1.0f).xx};
+  modf_result_vec2_f32 res = {(-0.5f).xx, (-1.0f).xx};
 }
 
 struct tint_symbol {

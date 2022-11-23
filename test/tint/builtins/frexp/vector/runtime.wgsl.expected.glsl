@@ -1,12 +1,12 @@
 #version 310 es
 
-struct frexp_result_vec2 {
+struct frexp_result_vec2_f32 {
   vec2 fract;
   ivec2 exp;
 };
 
-frexp_result_vec2 tint_frexp(vec2 param_0) {
-  frexp_result_vec2 result;
+frexp_result_vec2_f32 tint_frexp(vec2 param_0) {
+  frexp_result_vec2_f32 result;
   result.fract = frexp(param_0, result.exp);
   return result;
 }
@@ -14,7 +14,7 @@ frexp_result_vec2 tint_frexp(vec2 param_0) {
 
 void tint_symbol() {
   vec2 tint_symbol_1 = vec2(1.25f, 3.75f);
-  frexp_result_vec2 res = tint_frexp(tint_symbol_1);
+  frexp_result_vec2_f32 res = tint_frexp(tint_symbol_1);
   vec2 tint_symbol_2 = res.fract;
   ivec2 tint_symbol_3 = res.exp;
 }

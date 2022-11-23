@@ -1,12 +1,12 @@
 #version 310 es
 
-struct modf_result {
+struct modf_result_f32 {
   float fract;
   float whole;
 };
 
-modf_result tint_modf(float param_0) {
-  modf_result result;
+modf_result_f32 tint_modf(float param_0) {
+  modf_result_f32 result;
   result.fract = modf(param_0, result.whole);
   return result;
 }
@@ -14,7 +14,7 @@ modf_result tint_modf(float param_0) {
 
 void tint_symbol() {
   float tint_symbol_1 = 1.25f;
-  modf_result res = tint_modf(tint_symbol_1);
+  modf_result_f32 res = tint_modf(tint_symbol_1);
   float tint_symbol_2 = res.fract;
   float whole = res.whole;
 }

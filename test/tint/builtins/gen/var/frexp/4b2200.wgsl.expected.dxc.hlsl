@@ -1,17 +1,17 @@
-struct frexp_result {
+struct frexp_result_f32 {
   float fract;
   int exp;
 };
-frexp_result tint_frexp(float param_0) {
+frexp_result_f32 tint_frexp(float param_0) {
   float exp;
   float fract = frexp(param_0, exp);
-  frexp_result result = {fract, int(exp)};
+  frexp_result_f32 result = {fract, int(exp)};
   return result;
 }
 
 void frexp_4b2200() {
   float arg_0 = 1.0f;
-  frexp_result res = tint_frexp(arg_0);
+  frexp_result_f32 res = tint_frexp(arg_0);
 }
 
 struct tint_symbol {

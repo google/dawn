@@ -832,7 +832,7 @@ sem::Struct* build_struct(ProgramBuilder& b,
 const sem::Struct* build_modf_result(MatchState& state, const sem::Type* el) {
     auto build_f32 = [&] {
         auto* ty = state.builder.create<sem::F32>();
-        return build_struct(state.builder, "__modf_result", {{"fract", ty}, {"whole", ty}});
+        return build_struct(state.builder, "__modf_result_f32", {{"fract", ty}, {"whole", ty}});
     };
     auto build_f16 = [&] {
         auto* ty = state.builder.create<sem::F16>();
@@ -860,7 +860,7 @@ const sem::Struct* build_modf_result_vec(MatchState& state, Number& n, const sem
     auto prefix = "__modf_result_vec" + std::to_string(n.Value());
     auto build_f32 = [&] {
         auto* vec = state.builder.create<sem::Vector>(state.builder.create<sem::F32>(), n.Value());
-        return build_struct(state.builder, prefix, {{"fract", vec}, {"whole", vec}});
+        return build_struct(state.builder, prefix + "_f32", {{"fract", vec}, {"whole", vec}});
     };
     auto build_f16 = [&] {
         auto* vec = state.builder.create<sem::Vector>(state.builder.create<sem::F16>(), n.Value());
@@ -889,7 +889,7 @@ const sem::Struct* build_frexp_result(MatchState& state, const sem::Type* el) {
     auto build_f32 = [&] {
         auto* f = state.builder.create<sem::F32>();
         auto* i = state.builder.create<sem::I32>();
-        return build_struct(state.builder, "__frexp_result", {{"fract", f}, {"exp", i}});
+        return build_struct(state.builder, "__frexp_result_f32", {{"fract", f}, {"exp", i}});
     };
     auto build_f16 = [&] {
         auto* f = state.builder.create<sem::F16>();
@@ -920,7 +920,7 @@ const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n, const se
     auto build_f32 = [&] {
         auto* f = state.builder.create<sem::Vector>(state.builder.create<sem::F32>(), n.Value());
         auto* e = state.builder.create<sem::Vector>(state.builder.create<sem::I32>(), n.Value());
-        return build_struct(state.builder, prefix, {{"fract", f}, {"exp", e}});
+        return build_struct(state.builder, prefix + "_f32", {{"fract", f}, {"exp", e}});
     };
     auto build_f16 = [&] {
         auto* f = state.builder.create<sem::Vector>(state.builder.create<sem::F16>(), n.Value());

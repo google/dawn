@@ -15,9 +15,9 @@
                OpName %vertex_point_size "vertex_point_size"
                OpName %modf_bbf7f7 "modf_bbf7f7"
                OpName %arg_0 "arg_0"
-               OpName %__modf_result "__modf_result"
-               OpMemberName %__modf_result 0 "fract"
-               OpMemberName %__modf_result 1 "whole"
+               OpName %__modf_result_f32 "__modf_result_f32"
+               OpMemberName %__modf_result_f32 0 "fract"
+               OpMemberName %__modf_result_f32 1 "whole"
                OpName %res "res"
                OpName %vertex_main_inner "vertex_main_inner"
                OpName %vertex_main "vertex_main"
@@ -25,8 +25,8 @@
                OpName %compute_main "compute_main"
                OpDecorate %value BuiltIn Position
                OpDecorate %vertex_point_size BuiltIn PointSize
-               OpMemberDecorate %__modf_result 0 Offset 0
-               OpMemberDecorate %__modf_result 1 Offset 4
+               OpMemberDecorate %__modf_result_f32 0 Offset 0
+               OpMemberDecorate %__modf_result_f32 1 Offset 4
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
@@ -39,18 +39,18 @@
           %9 = OpTypeFunction %void
  %float_n1_5 = OpConstant %float -1.5
 %_ptr_Function_float = OpTypePointer Function %float
-%__modf_result = OpTypeStruct %float %float
-%_ptr_Function___modf_result = OpTypePointer Function %__modf_result
-         %22 = OpConstantNull %__modf_result
+%__modf_result_f32 = OpTypeStruct %float %float
+%_ptr_Function___modf_result_f32 = OpTypePointer Function %__modf_result_f32
+         %22 = OpConstantNull %__modf_result_f32
          %23 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %modf_bbf7f7 = OpFunction %void None %9
          %12 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_float Function %8
-        %res = OpVariable %_ptr_Function___modf_result Function %22
+        %res = OpVariable %_ptr_Function___modf_result_f32 Function %22
                OpStore %arg_0 %float_n1_5
          %19 = OpLoad %float %arg_0
-         %16 = OpExtInst %__modf_result %18 ModfStruct %19
+         %16 = OpExtInst %__modf_result_f32 %18 ModfStruct %19
                OpStore %res %16
                OpReturn
                OpFunctionEnd

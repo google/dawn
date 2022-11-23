@@ -4,14 +4,14 @@ bug/tint/1757.wgsl:6:25 warning: use of deprecated language feature: 'sig' has b
 
 #version 310 es
 
-struct frexp_result {
+struct frexp_result_f32 {
   float fract;
   int exp;
 };
 
 
 void tint_symbol() {
-  frexp_result res = frexp_result(0.61500001f, 1);
+  frexp_result_f32 res = frexp_result_f32(0.61500001f, 1);
   int tint_symbol_1 = res.exp;
   float sig = res.fract;
 }

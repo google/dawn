@@ -1,13 +1,13 @@
 #version 310 es
 
-struct modf_result_vec3 {
+struct modf_result_vec3_f32 {
   vec3 fract;
   vec3 whole;
 };
 
 
 void modf_68d8ee() {
-  modf_result_vec3 res = modf_result_vec3(vec3(-0.5f), vec3(-1.0f));
+  modf_result_vec3_f32 res = modf_result_vec3_f32(vec3(-0.5f), vec3(-1.0f));
 }
 
 vec4 vertex_main() {
@@ -26,14 +26,14 @@ void main() {
 #version 310 es
 precision mediump float;
 
-struct modf_result_vec3 {
+struct modf_result_vec3_f32 {
   vec3 fract;
   vec3 whole;
 };
 
 
 void modf_68d8ee() {
-  modf_result_vec3 res = modf_result_vec3(vec3(-0.5f), vec3(-1.0f));
+  modf_result_vec3_f32 res = modf_result_vec3_f32(vec3(-0.5f), vec3(-1.0f));
 }
 
 void fragment_main() {
@@ -46,14 +46,14 @@ void main() {
 }
 #version 310 es
 
-struct modf_result_vec3 {
+struct modf_result_vec3_f32 {
   vec3 fract;
   vec3 whole;
 };
 
 
 void modf_68d8ee() {
-  modf_result_vec3 res = modf_result_vec3(vec3(-0.5f), vec3(-1.0f));
+  modf_result_vec3_f32 res = modf_result_vec3_f32(vec3(-0.5f), vec3(-1.0f));
 }
 
 void compute_main() {

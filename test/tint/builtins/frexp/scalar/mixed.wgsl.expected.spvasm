@@ -9,23 +9,23 @@
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
                OpName %main "main"
-               OpName %__frexp_result "__frexp_result"
-               OpMemberName %__frexp_result 0 "fract"
-               OpMemberName %__frexp_result 1 "exp"
+               OpName %__frexp_result_f32 "__frexp_result_f32"
+               OpMemberName %__frexp_result_f32 0 "fract"
+               OpMemberName %__frexp_result_f32 1 "exp"
                OpName %res "res"
-               OpMemberDecorate %__frexp_result 0 Offset 0
-               OpMemberDecorate %__frexp_result 1 Offset 4
+               OpMemberDecorate %__frexp_result_f32 0 Offset 0
+               OpMemberDecorate %__frexp_result_f32 1 Offset 4
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
       %float = OpTypeFloat 32
  %float_1_25 = OpConstant %float 1.25
         %int = OpTypeInt 32 1
-%__frexp_result = OpTypeStruct %float %int
+%__frexp_result_f32 = OpTypeStruct %float %int
 %float_0_625 = OpConstant %float 0.625
       %int_1 = OpConstant %int 1
-         %11 = OpConstantComposite %__frexp_result %float_0_625 %int_1
-%_ptr_Function___frexp_result = OpTypePointer Function %__frexp_result
-         %14 = OpConstantNull %__frexp_result
+         %11 = OpConstantComposite %__frexp_result_f32 %float_0_625 %int_1
+%_ptr_Function___frexp_result_f32 = OpTypePointer Function %__frexp_result_f32
+         %14 = OpConstantNull %__frexp_result_f32
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
 %_ptr_Function_float = OpTypePointer Function %float
@@ -33,9 +33,9 @@
 %_ptr_Function_int = OpTypePointer Function %int
        %main = OpFunction %void None %1
           %4 = OpLabel
-        %res = OpVariable %_ptr_Function___frexp_result Function %14
+        %res = OpVariable %_ptr_Function___frexp_result_f32 Function %14
                OpStore %res %11
-         %15 = OpExtInst %__frexp_result %16 FrexpStruct %float_1_25
+         %15 = OpExtInst %__frexp_result_f32 %16 FrexpStruct %float_1_25
                OpStore %res %15
                OpStore %res %11
          %20 = OpAccessChain %_ptr_Function_float %res %uint_0

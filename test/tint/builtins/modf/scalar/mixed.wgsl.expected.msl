@@ -2,21 +2,21 @@
 
 using namespace metal;
 
-struct modf_result {
+struct modf_result_f32 {
   float fract;
   float whole;
 };
-modf_result tint_modf(float param_0) {
-  modf_result result;
+modf_result_f32 tint_modf(float param_0) {
+  modf_result_f32 result;
   result.fract = modf(param_0, result.whole);
   return result;
 }
 
 kernel void tint_symbol() {
   float const runtime_in = 1.25f;
-  modf_result res = modf_result{.fract=0.25f, .whole=1.0f};
+  modf_result_f32 res = modf_result_f32{.fract=0.25f, .whole=1.0f};
   res = tint_modf(runtime_in);
-  res = modf_result{.fract=0.25f, .whole=1.0f};
+  res = modf_result_f32{.fract=0.25f, .whole=1.0f};
   float const fract = res.fract;
   float const whole = res.whole;
   return;

@@ -1,16 +1,16 @@
-struct modf_result_vec4 {
+struct modf_result_vec4_f32 {
   float4 fract;
   float4 whole;
 };
-modf_result_vec4 tint_modf(float4 param_0) {
-  modf_result_vec4 result;
+modf_result_vec4_f32 tint_modf(float4 param_0) {
+  modf_result_vec4_f32 result;
   result.fract = modf(param_0, result.whole);
   return result;
 }
 
 void modf_4bfced() {
   float4 arg_0 = (-1.5f).xxxx;
-  modf_result_vec4 res = tint_modf(arg_0);
+  modf_result_vec4_f32 res = tint_modf(arg_0);
 }
 
 struct tint_symbol {

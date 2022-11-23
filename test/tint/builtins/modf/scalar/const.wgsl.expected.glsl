@@ -1,13 +1,13 @@
 #version 310 es
 
-struct modf_result {
+struct modf_result_f32 {
   float fract;
   float whole;
 };
 
 
 void tint_symbol() {
-  modf_result res = modf_result(0.25f, 1.0f);
+  modf_result_f32 res = modf_result_f32(0.25f, 1.0f);
   float tint_symbol_2 = res.fract;
   float whole = res.whole;
 }
