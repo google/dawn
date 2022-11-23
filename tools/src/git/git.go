@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -299,14 +300,7 @@ type LogOptions struct {
 	Timeout time.Duration
 }
 
-// CommitInfo describes a single git commit
-type CommitInfo struct {
-	Hash        Hash
-	Date        time.Time
-	Author      string
-	Subject     string
-	Description string
-}
+const logPrettyFormatArg = "--pretty=format:ǁ%Hǀ%cIǀ%an <%ae>ǀ%sǀ%b"
 
 // Log returns the list of commits between two references (inclusive).
 // The first returned commit is the most recent.
@@ -322,12 +316,100 @@ func (r Repository) Log(opt *LogOptions) ([]CommitInfo, error) {
 	if opt.From != "" {
 		rng = opt.From + "^.." + rng
 	}
-	args = append(args, rng, "--pretty=format:ǁ%Hǀ%cIǀ%an <%ae>ǀ%sǀ%b")
+	args = append(args, rng, logPrettyFormatArg)
 	out, err := r.run(nil, opt.Timeout, args...)
 	if err != nil {
 		return nil, err
 	}
 	return parseLog(out)
+}
+
+// Optional settings for Repository.LogBetween
+type LogBetweenOptions struct {
+	// Timeout for the operation
+	Timeout time.Duration
+}
+
+// LogBetween returns the list of commits between two timestamps
+// The first returned commit is the most recent.
+func (r Repository) LogBetween(since, until time.Time, opt *LogBetweenOptions) ([]CommitInfo, error) {
+	if opt == nil {
+		opt = &LogBetweenOptions{}
+	}
+	args := []string{"log",
+		"--since", since.Format(time.RFC3339),
+		"--until", until.Format(time.RFC3339),
+		logPrettyFormatArg,
+	}
+	out, err := r.run(nil, opt.Timeout, args...)
+	if err != nil {
+		return nil, err
+	}
+	return parseLog(out)
+}
+
+// FileStats describes the changes to a given file in a commit
+type FileStats struct {
+	Insertions int
+	Deletions  int
+}
+
+// CommitStats is a map of file to FileStats
+type CommitStats map[string]FileStats
+
+// Optional settings for Repository.Stats
+type StatsOptions struct {
+	// Timeout for the operation
+	Timeout time.Duration
+}
+
+// StatsOptions returns the statistics for a given change
+func (r Repository) Stats(commit CommitInfo, opt *StatsOptions) (CommitStats, error) {
+	if opt == nil {
+		opt = &StatsOptions{}
+	}
+
+	hash := commit.Hash.String()
+	args := []string{"diff", "--numstat", hash, hash + "^"}
+	out, err := r.run(nil, opt.Timeout, args...)
+	if err != nil {
+		return nil, err
+	}
+	stats := CommitStats{}
+	for _, line := range strings.Split(out, "\n") {
+		if out == "" {
+			continue
+		}
+		parts := strings.Split(line, "\t")
+		if len(parts) != 3 {
+			return nil, fmt.Errorf("failed to parse stat line: '%v'", line)
+		}
+		insertions, deletions := 0, 0
+		if parts[0] != "-" {
+			insertions, err = strconv.Atoi(parts[0])
+			if err != nil {
+				return nil, fmt.Errorf("failed to stat insertions '%v': %w", parts[0], err)
+			}
+		}
+		if parts[1] != "-" {
+			deletions, err = strconv.Atoi(parts[1])
+			if err != nil {
+				return nil, fmt.Errorf("failed to stat deletions '%v': %w", parts[1], err)
+			}
+		}
+		file := parts[2]
+		stats[file] = FileStats{Insertions: insertions, Deletions: deletions}
+	}
+	return stats, nil
+}
+
+// CommitInfo describes a single git commit
+type CommitInfo struct {
+	Hash        Hash
+	Date        time.Time
+	Author      string
+	Subject     string
+	Description string
 }
 
 // Optional settings for Repository.ConfigOptions
