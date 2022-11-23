@@ -533,6 +533,7 @@ function(tint_default_compile_options TARGET)
     -Wno-c++98-compat
     -Wno-c++98-compat-pedantic
     -Wno-format-pedantic
+    -Wno-poison-system-directories
     -Wno-return-std-move-in-c++11
     -Wno-unknown-warning-option
     -Wno-undefined-var-template
