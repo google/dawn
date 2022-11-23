@@ -638,9 +638,8 @@ TEST_F(SpvParserCFGTest, RegisterMerges_GoodLoopMerge_MultiBlockLoop_ContinueIsN
     EXPECT_FALSE(bi99->is_continue_entire_loop);
 }
 
-TEST_F(
-    SpvParserCFGTest,
-    RegisterMerges_GoodLoopMerge_MultiBlockLoop_ContinueIsNotHeader_BranchConditional) {  // NOLINT
+TEST_F(SpvParserCFGTest,
+       RegisterMerges_GoodLoopMerge_MultiBlockLoop_ContinueIsNotHeader_BranchConditional) {
     auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -2605,7 +2604,7 @@ TEST_F(SpvParserCFGTest, VerifyHeaderContinueMergeOrder_HeaderDoesNotStrictlyDom
 }
 
 TEST_F(SpvParserCFGTest,
-       VerifyHeaderContinueMergeOrder_HeaderDoesNotStrictlyDominateContinueTarget) {  // NOLINT
+       VerifyHeaderContinueMergeOrder_HeaderDoesNotStrictlyDominateContinueTarget) {
     auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -4451,9 +4450,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_BackEdge_MultiBlockLoop_SingleBlockCon
     EXPECT_EQ(bi40->succ_edge[20], EdgeKind::kBack);
 }
 
-TEST_F(
-    SpvParserCFGTest,
-    ClassifyCFGEdges_BackEdge_MultiBlockLoop_MultiBlockContinueConstruct_ContinueIsNotHeader) {  // NOLINT
+TEST_F(SpvParserCFGTest,
+       ClassifyCFGEdges_BackEdge_MultiBlockLoop_MultiBlockContinueConstruct_ContinueIsNotHeader) {
     auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -4489,9 +4487,8 @@ TEST_F(
     EXPECT_EQ(bi50->succ_edge[20], EdgeKind::kBack);
 }
 
-TEST_F(
-    SpvParserCFGTest,
-    ClassifyCFGEdges_BackEdge_MultiBlockLoop_MultiBlockContinueConstruct_ContinueIsHeader) {  // NOLINT
+TEST_F(SpvParserCFGTest,
+       ClassifyCFGEdges_BackEdge_MultiBlockLoop_MultiBlockContinueConstruct_ContinueIsHeader) {
     auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -6051,7 +6048,7 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_DomViolation_AfterContinueToContinueIn
 }
 
 TEST_F(SpvParserCFGTest,
-       FindSwitchCaseHeaders_DomViolation_SwitchCase_CantBeMergeForOtherConstruct) {  // NOLINT
+       FindSwitchCaseHeaders_DomViolation_SwitchCase_CantBeMergeForOtherConstruct) {
     auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -6762,8 +6759,7 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_IfBreak_WithForwardToPremerge) {
 }
 
 TEST_F(SpvParserCFGTest,
-       FindIfSelectionInternalHeaders_DomViolation_InteriorMerge_CantBeTrueHeader) {  // NOLINT -
-                                                                                      // line length
+       FindIfSelectionInternalHeaders_DomViolation_InteriorMerge_CantBeTrueHeader) {
     auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -6795,10 +6791,8 @@ TEST_F(SpvParserCFGTest,
                    "merge block for header block 20 (violates dominance rule)"));
 }
 
-TEST_F(
-    SpvParserCFGTest,
-    FindIfSelectionInternalHeaders_DomViolation_InteriorMerge_CantBeFalseHeader) {  // NOLINT - line
-                                                                                    // length
+TEST_F(SpvParserCFGTest,
+       FindIfSelectionInternalHeaders_DomViolation_InteriorMerge_CantBeFalseHeader) {
     auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -9474,9 +9468,7 @@ TEST_F(SpvParserCFGTest,
 }
 
 TEST_F(SpvParserCFGTest,
-       EmitBody_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Unconditional) {  // NOLINT
-                                                                                           // - line
-                                                                                           // length
+       EmitBody_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Unconditional) {
     auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -9519,10 +9511,46 @@ return;
     ASSERT_EQ(expect, got);
 }
 
-TEST_F(
-    SpvParserCFGTest,
-    EmitBody_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Conditional) {  // NOLINT -
-                                                                                      // line length
+TEST_F(SpvParserCFGTest,
+       EmitBody_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Conditional_BreakIf) {
+    auto p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     OpStore %var %uint_1
+     OpBranchConditional %cond %99 %20  ; exit, and backedge
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(loop {
+
+  continuing {
+    var_1 = 1u;
+    break if false;
+  }
+}
+return;
+)";
+    ASSERT_EQ(expect, got);
+}
+
+TEST_F(SpvParserCFGTest,
+       EmitBody_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Conditional) {
     auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -9551,10 +9579,48 @@ TEST_F(
 
   continuing {
     var_1 = 1u;
-    if (false) {
-    } else {
-      break;
-    }
+    break if !(false);
+  }
+}
+return;
+)";
+    ASSERT_EQ(expect, got);
+}
+
+TEST_F(SpvParserCFGTest, EmitBody_Branch_LoopBreak_FromContinueConstructTail) {
+    auto p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+     %30 = OpLabel
+     OpBranch %50
+     %50 = OpLabel
+     OpBranch %60
+     %60 = OpLabel
+     OpBranchConditional %cond %20 %99
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(loop {
+  if (false) {
+  } else {
+    break;
+  }
+
+  continuing {
+    break if !(false);
   }
 }
 return;
@@ -10009,9 +10075,7 @@ loop {
   var_1 = 1u;
 
   continuing {
-    if (false) {
-      break;
-    }
+    break if false;
   }
 }
 var_1 = 5u;
@@ -10052,10 +10116,7 @@ loop {
   var_1 = 1u;
 
   continuing {
-    if (false) {
-    } else {
-      break;
-    }
+    break if !(false);
   }
 }
 var_1 = 5u;
@@ -10878,9 +10939,8 @@ return;
     ASSERT_EQ(expect, got);
 }
 
-TEST_F(
-    SpvParserCFGTest,
-    EmitBody_BranchConditional_Continue_Continue_AfterHeader_Conditional_EmptyContinuing) {  // NOLINT
+TEST_F(SpvParserCFGTest,
+       EmitBody_BranchConditional_Continue_Continue_AfterHeader_Conditional_EmptyContinuing) {
     // Like the previous tests, but with an empty continuing clause.
     auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn

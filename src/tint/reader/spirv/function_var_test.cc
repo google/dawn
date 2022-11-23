@@ -689,9 +689,7 @@ loop {
 
   continuing {
     x_1 = 4u;
-    if (false) {
-      break;
-    }
+    break if false;
   }
 }
 x_1 = 5u;
@@ -1610,9 +1608,7 @@ OpFunctionEnd
     x_999 = false;
 
     continuing {
-      if (true) {
-        break;
-      }
+      break if true;
     }
   }
 }
@@ -1694,9 +1690,7 @@ loop {
     x_999 = false;
 
     continuing {
-      if (true) {
-        break;
-      }
+      break if true;
     }
   }
 

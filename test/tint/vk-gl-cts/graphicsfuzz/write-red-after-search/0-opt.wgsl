@@ -103,10 +103,7 @@ fn insert_i1_i1_(treeIndex : ptr<function, i32>, data_1 : ptr<function, i32>) {
           continuing {
             let x_382 : f32 = x_27.injectionSwitch.x;
             let x_384 : f32 = x_27.injectionSwitch.y;
-            if ((x_382 > x_384)) {
-            } else {
-              break;
-            }
+            break if !(x_382 > x_384);
           }
         }
         continue;
