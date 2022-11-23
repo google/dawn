@@ -152,6 +152,14 @@ class Struct final : public Castable<Struct, Type> {
     /// including size and alignment information.
     std::string Layout(const tint::SymbolTable& symbols) const;
 
+    /// @param concrete the conversion-rank ordered concrete versions of this abstract structure.
+    void SetConcreteTypes(utils::VectorRef<const Struct*> concrete) { concrete_types_ = concrete; }
+
+    /// @returns the conversion-rank ordered concrete versions of this abstract structure, or an
+    /// empty vector if this structure is not abstract.
+    /// @note only structures returned by builtins may be abstract (e.g. modf, frexp)
+    const utils::Vector<const Struct*, 2>& ConcreteTypes() const { return concrete_types_; }
+
   private:
     ast::Struct const* const declaration_;
     const Symbol name_;
@@ -161,6 +169,7 @@ class Struct final : public Castable<Struct, Type> {
     const uint32_t size_no_padding_;
     std::unordered_set<ast::AddressSpace> address_space_usage_;
     std::unordered_set<PipelineStageUsage> pipeline_stage_uses_;
+    utils::Vector<const Struct*, 2> concrete_types_;
 };
 
 /// StructMember holds the semantic information for structure members.

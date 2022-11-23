@@ -11,7 +11,7 @@
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
       %float = OpTypeFloat 32
-%float_0_230000019 = OpConstant %float 0.230000019
+ %float_0_25 = OpConstant %float 0.25
     %float_1 = OpConstant %float 1
        %main = OpFunction %void None %1
           %4 = OpLabel

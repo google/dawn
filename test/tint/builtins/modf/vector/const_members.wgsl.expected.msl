@@ -7,9 +7,9 @@ struct modf_result_vec2 {
   float2 whole;
 };
 kernel void tint_symbol() {
-  modf_result_vec2 const tint_symbol_1 = modf_result_vec2{.fract=float2(0.230000019f, 0.450000048f), .whole=float2(1.0f, 3.0f)};
+  modf_result_vec2 const tint_symbol_1 = modf_result_vec2{.fract=float2(0.25f, 0.75f), .whole=float2(1.0f, 3.0f)};
   float2 const fract = tint_symbol_1.fract;
-  modf_result_vec2 const tint_symbol_2 = modf_result_vec2{.fract=float2(0.230000019f, 0.450000048f), .whole=float2(1.0f, 3.0f)};
+  modf_result_vec2 const tint_symbol_2 = modf_result_vec2{.fract=float2(0.25f, 0.75f), .whole=float2(1.0f, 3.0f)};
   float2 const whole = tint_symbol_2.whole;
   return;
 }

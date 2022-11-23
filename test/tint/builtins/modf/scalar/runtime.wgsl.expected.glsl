@@ -13,7 +13,7 @@ modf_result tint_modf(float param_0) {
 
 
 void tint_symbol() {
-  float tint_symbol_1 = 1.230000019f;
+  float tint_symbol_1 = 1.25f;
   modf_result res = tint_modf(tint_symbol_1);
   float tint_symbol_2 = res.fract;
   float whole = res.whole;

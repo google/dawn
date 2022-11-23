@@ -796,20 +796,20 @@ struct NameAndType {
     std::string name;
     const sem::Type* type;
 };
-const sem::Struct* build_struct(MatchState& state,
-                                std::string name,
-                                std::initializer_list<NameAndType> member_names_and_types) {
+sem::Struct* build_struct(ProgramBuilder& b,
+                          std::string name,
+                          std::initializer_list<NameAndType> member_names_and_types) {
     uint32_t offset = 0;
     uint32_t max_align = 0;
     sem::StructMemberList members;
     for (auto& m : member_names_and_types) {
-        uint32_t align = m.type->Align();
+        uint32_t align = std::max<uint32_t>(m.type->Align(), 1);
         uint32_t size = m.type->Size();
         offset = utils::RoundUp(align, offset);
         max_align = std::max(max_align, align);
-        members.emplace_back(state.builder.create<sem::StructMember>(
+        members.emplace_back(b.create<sem::StructMember>(
             /* declaration */ nullptr,
-            /* name */ state.builder.Sym(m.name),
+            /* name */ b.Sym(m.name),
             /* type */ m.type,
             /* index */ static_cast<uint32_t>(members.size()),
             /* offset */ offset,
@@ -820,9 +820,9 @@ const sem::Struct* build_struct(MatchState& state,
     }
     uint32_t size_without_padding = offset;
     uint32_t size_with_padding = utils::RoundUp(max_align, offset);
-    return state.builder.create<sem::Struct>(
+    return b.create<sem::Struct>(
         /* declaration */ nullptr,
-        /* name */ state.builder.Sym(name),
+        /* name */ b.Sym(name),
         /* members */ members,
         /* align */ max_align,
         /* size */ size_with_padding,
@@ -830,23 +830,58 @@ const sem::Struct* build_struct(MatchState& state,
 }
 
 const sem::Struct* build_modf_result(MatchState& state, const sem::Type* el) {
-    std::string display_name;
-    if (el->Is<sem::F16>()) {
-        display_name = "__modf_result_f16";
-    } else {
-        display_name = "__modf_result";
-    }
-    return build_struct(state, display_name, {{"fract", el}, {"whole", el}});
+    auto build_f32 = [&] {
+        auto* ty = state.builder.create<sem::F32>();
+        return build_struct(state.builder, "__modf_result", {{"fract", ty}, {"whole", ty}});
+    };
+    auto build_f16 = [&] {
+        auto* ty = state.builder.create<sem::F16>();
+        return build_struct(state.builder, "__modf_result_f16", {{"fract", ty}, {"whole", ty}});
+    };
+
+    return Switch(
+        el,                                            //
+        [&](const sem::F32*) { return build_f32(); },  //
+        [&](const sem::F16*) { return build_f16(); },  //
+        [&](const sem::AbstractFloat*) {
+            auto* abstract = build_struct(state.builder, "__modf_result_abstract",
+                                          {{"fract", el}, {"whole", el}});
+            abstract->SetConcreteTypes(utils::Vector{build_f32(), build_f16()});
+            return abstract;
+        },
+        [&](Default) {
+            TINT_ICE(Resolver, state.builder.Diagnostics())
+                << "unhandled modf type: " << state.builder.FriendlyName(el);
+            return nullptr;
+        });
 }
 const sem::Struct* build_modf_result_vec(MatchState& state, Number& n, const sem::Type* el) {
-    std::string display_name;
-    if (el->Is<sem::F16>()) {
-        display_name = "__modf_result_vec" + std::to_string(n.Value()) + "_f16";
-    } else {
-        display_name = "__modf_result_vec" + std::to_string(n.Value());
-    }
-    auto* vec = state.builder.create<sem::Vector>(el, n.Value());
-    return build_struct(state, display_name, {{"fract", vec}, {"whole", vec}});
+    auto prefix = "__modf_result_vec" + std::to_string(n.Value());
+    auto build_f32 = [&] {
+        auto* vec = state.builder.create<sem::Vector>(state.builder.create<sem::F32>(), n.Value());
+        return build_struct(state.builder, prefix, {{"fract", vec}, {"whole", vec}});
+    };
+    auto build_f16 = [&] {
+        auto* vec = state.builder.create<sem::Vector>(state.builder.create<sem::F16>(), n.Value());
+        return build_struct(state.builder, prefix + "_f16", {{"fract", vec}, {"whole", vec}});
+    };
+
+    return Switch(
+        el,                                            //
+        [&](const sem::F32*) { return build_f32(); },  //
+        [&](const sem::F16*) { return build_f16(); },  //
+        [&](const sem::AbstractFloat*) {
+            auto* vec = state.builder.create<sem::Vector>(el, n.Value());
+            auto* abstract =
+                build_struct(state.builder, prefix + "_abstract", {{"fract", vec}, {"whole", vec}});
+            abstract->SetConcreteTypes(utils::Vector{build_f32(), build_f16()});
+            return abstract;
+        },
+        [&](Default) {
+            TINT_ICE(Resolver, state.builder.Diagnostics())
+                << "unhandled modf type: " << state.builder.FriendlyName(el);
+            return nullptr;
+        });
 }
 const sem::Struct* build_frexp_result(MatchState& state, const sem::Type* el) {
     std::string display_name;
@@ -856,7 +891,7 @@ const sem::Struct* build_frexp_result(MatchState& state, const sem::Type* el) {
         display_name = "__frexp_result";
     }
     auto* i32 = state.builder.create<sem::I32>();
-    return build_struct(state, display_name, {{"fract", el}, {"exp", i32}});
+    return build_struct(state.builder, display_name, {{"fract", el}, {"exp", i32}});
 }
 const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n, const sem::Type* el) {
     std::string display_name;
@@ -867,11 +902,12 @@ const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n, const se
     }
     auto* vec = state.builder.create<sem::Vector>(el, n.Value());
     auto* vec_i32 = state.builder.create<sem::Vector>(state.builder.create<sem::I32>(), n.Value());
-    return build_struct(state, display_name, {{"fract", vec}, {"exp", vec_i32}});
+    return build_struct(state.builder, display_name, {{"fract", vec}, {"exp", vec_i32}});
 }
 const sem::Struct* build_atomic_compare_exchange_result(MatchState& state, const sem::Type* ty) {
     return build_struct(
-        state, "__atomic_compare_exchange_result" + ty->FriendlyName(state.builder.Symbols()),
+        state.builder,
+        "__atomic_compare_exchange_result" + ty->FriendlyName(state.builder.Symbols()),
         {{"old_value", const_cast<sem::Type*>(ty)},
          {"exchanged", state.builder.create<sem::Bool>()}});
 }

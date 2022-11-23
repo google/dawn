@@ -18,9 +18,9 @@
           %1 = OpTypeFunction %void
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
-%float_1_23000002 = OpConstant %float 1.23000002
-%float_3_45000005 = OpConstant %float 3.45000005
-          %9 = OpConstantComposite %v2float %float_1_23000002 %float_3_45000005
+ %float_1_25 = OpConstant %float 1.25
+ %float_3_75 = OpConstant %float 3.75
+          %9 = OpConstantComposite %v2float %float_1_25 %float_3_75
 %__modf_result_vec2 = OpTypeStruct %v2float %v2float
        %main = OpFunction %void None %1
           %4 = OpLabel

@@ -1236,5 +1236,91 @@ TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructLetInit) {
 
 }  // namespace materialize_abstract_numeric_to_unrelated_type
 
+////////////////////////////////////////////////////////////////////////////////
+// Materialization tests for builtin-returned abstract structures
+// These are too bespoke to slot into the more general materialization tests above
+////////////////////////////////////////////////////////////////////////////////
+namespace materialize_abstract_structure {
+
+using MaterializeAbstractStructure = resolver::ResolverTest;
+
+TEST_F(MaterializeAbstractStructure, Modf_Scalar_DefaultType) {
+    // var v = modf(1);
+    auto* call = Call("modf", 1_a);
+    WrapInFunction(Decl(Var("v", call)));
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get(call);
+    ASSERT_TRUE(sem->Is<sem::Materialize>());
+    auto* materialize = sem->As<sem::Materialize>();
+    ASSERT_TRUE(materialize->Type()->Is<sem::Struct>());
+    auto* concrete_str = materialize->Type()->As<sem::Struct>();
+    ASSERT_TRUE(concrete_str->Members()[0]->Type()->Is<sem::F32>());
+    ASSERT_TRUE(materialize->Expr()->Type()->Is<sem::Struct>());
+    auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
+    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::AbstractFloat>());
+}
+
+TEST_F(MaterializeAbstractStructure, Modf_Vector_DefaultType) {
+    // var v = modf(vec2(1));
+    auto* call = Call("modf", Construct(ty.vec2(nullptr), 1_a));
+    WrapInFunction(Decl(Var("v", call)));
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get(call);
+    ASSERT_TRUE(sem->Is<sem::Materialize>());
+    auto* materialize = sem->As<sem::Materialize>();
+    ASSERT_TRUE(materialize->Type()->Is<sem::Struct>());
+    auto* concrete_str = materialize->Type()->As<sem::Struct>();
+    ASSERT_TRUE(concrete_str->Members()[0]->Type()->Is<sem::Vector>());
+    ASSERT_TRUE(concrete_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+    ASSERT_TRUE(materialize->Expr()->Type()->Is<sem::Struct>());
+    auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
+    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::Vector>());
+    ASSERT_TRUE(
+        abstract_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<sem::AbstractFloat>());
+}
+
+TEST_F(MaterializeAbstractStructure, Modf_Scalar_ExplicitType) {
+    // var v = modf(1_h); // v is __modf_result_f16
+    // v = modf(1);       // __modf_result_f16 <- __modf_result_abstract
+    Enable(ast::Extension::kF16);
+    auto* call = Call("modf", 1_a);
+    WrapInFunction(Decl(Var("v", Call("modf", 1_h))),  //
+                   Assign("v", call));
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get(call);
+    ASSERT_TRUE(sem->Is<sem::Materialize>());
+    auto* materialize = sem->As<sem::Materialize>();
+    ASSERT_TRUE(materialize->Type()->Is<sem::Struct>());
+    auto* concrete_str = materialize->Type()->As<sem::Struct>();
+    ASSERT_TRUE(concrete_str->Members()[0]->Type()->Is<sem::F16>());
+    ASSERT_TRUE(materialize->Expr()->Type()->Is<sem::Struct>());
+    auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
+    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::AbstractFloat>());
+}
+
+TEST_F(MaterializeAbstractStructure, Modf_Vector_ExplicitType) {
+    // var v = modf(vec2(1_h)); // v is __modf_result_vec2_f16
+    // v = modf(vec2(1));       // __modf_result_vec2_f16 <- __modf_result_vec2_abstract
+    Enable(ast::Extension::kF16);
+    auto* call = Call("modf", Construct(ty.vec2(nullptr), 1_a));
+    WrapInFunction(Decl(Var("v", Call("modf", Construct(ty.vec2(nullptr), 1_h)))),
+                   Assign("v", call));
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get(call);
+    ASSERT_TRUE(sem->Is<sem::Materialize>());
+    auto* materialize = sem->As<sem::Materialize>();
+    ASSERT_TRUE(materialize->Type()->Is<sem::Struct>());
+    auto* concrete_str = materialize->Type()->As<sem::Struct>();
+    ASSERT_TRUE(concrete_str->Members()[0]->Type()->Is<sem::Vector>());
+    ASSERT_TRUE(concrete_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<sem::F16>());
+    ASSERT_TRUE(materialize->Expr()->Type()->Is<sem::Struct>());
+    auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
+    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::Vector>());
+    ASSERT_TRUE(
+        abstract_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<sem::AbstractFloat>());
+}
+
+}  // namespace materialize_abstract_structure
+
 }  // namespace
 }  // namespace tint::resolver

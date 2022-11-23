@@ -7,9 +7,9 @@ struct modf_result {
   float whole;
 };
 kernel void tint_symbol() {
-  modf_result const tint_symbol_1 = modf_result{.fract=0.230000019f, .whole=1.0f};
+  modf_result const tint_symbol_1 = modf_result{.fract=0.25f, .whole=1.0f};
   float const fract = tint_symbol_1.fract;
-  modf_result const tint_symbol_2 = modf_result{.fract=0.230000019f, .whole=1.0f};
+  modf_result const tint_symbol_2 = modf_result{.fract=0.25f, .whole=1.0f};
   float const whole = tint_symbol_2.whole;
   return;
 }

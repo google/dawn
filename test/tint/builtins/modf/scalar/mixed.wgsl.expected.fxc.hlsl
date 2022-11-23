@@ -10,10 +10,10 @@ modf_result tint_modf(float param_0) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const float runtime_in = 1.230000019f;
-  modf_result res = {0.230000019f, 1.0f};
+  const float runtime_in = 1.25f;
+  modf_result res = {0.25f, 1.0f};
   res = tint_modf(runtime_in);
-  const modf_result c = {0.230000019f, 1.0f};
+  const modf_result c = {0.25f, 1.0f};
   res = c;
   const float fract = res.fract;
   const float whole = res.whole;

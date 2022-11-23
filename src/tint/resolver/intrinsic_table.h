@@ -148,7 +148,6 @@ class IntrinsicTable {
     ///        `sem::EvaluationStage::kRuntime`, then only overloads with concrete argument types
     ///        will be considered, as all abstract-numerics will have been materialized
     ///        after shader creation time (sem::EvaluationStage::kConstant).
-
     /// @param source the source of the call
     /// @return a sem::TypeInitializer, sem::TypeConversion or nullptr if nothing matched
     virtual InitOrConv Lookup(InitConvIntrinsic type,

@@ -12846,7 +12846,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 0,
-    /* template types */ &kTemplateTypes[26],
+    /* template types */ &kTemplateTypes[23],
     /* template numbers */ &kTemplateNumbers[10],
     /* parameters */ &kParameters[878],
     /* return matcher indices */ &kMatcherIndices[106],
@@ -12858,7 +12858,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 1,
-    /* template types */ &kTemplateTypes[26],
+    /* template types */ &kTemplateTypes[23],
     /* template numbers */ &kTemplateNumbers[4],
     /* parameters */ &kParameters[879],
     /* return matcher indices */ &kMatcherIndices[45],
@@ -14351,8 +14351,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [53] */
-    /* fn modf<T : f32_f16>(@test_value(-1.5) T) -> __modf_result<T> */
-    /* fn modf<N : num, T : f32_f16>(@test_value(-1.5) vec<N, T>) -> __modf_result_vec<N, T> */
+    /* fn modf<T : fa_f32_f16>(@test_value(-1.5) T) -> __modf_result<T> */
+    /* fn modf<N : num, T : fa_f32_f16>(@test_value(-1.5) vec<N, T>) -> __modf_result_vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[377],
   },

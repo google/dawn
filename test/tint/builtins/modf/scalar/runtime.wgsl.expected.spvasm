@@ -17,11 +17,11 @@
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
       %float = OpTypeFloat 32
-%float_1_23000002 = OpConstant %float 1.23000002
+ %float_1_25 = OpConstant %float 1.25
 %__modf_result = OpTypeStruct %float %float
        %main = OpFunction %void None %1
           %4 = OpLabel
-          %7 = OpExtInst %__modf_result %9 ModfStruct %float_1_23000002
+          %7 = OpExtInst %__modf_result %9 ModfStruct %float_1_25
          %10 = OpCompositeExtract %float %7 0
          %11 = OpCompositeExtract %float %7 1
                OpReturn

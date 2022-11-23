@@ -403,13 +403,26 @@ struct Composite : ImplConstant {
                        const sem::Type* target_ty,
                        const Source& source) const override {
         // Convert each of the composite element types.
-        auto* el_ty = sem::Type::ElementOf(target_ty);
         utils::Vector<const sem::Constant*, 4> conv_els;
         conv_els.Reserve(elements.Length());
+        std::function<const sem::Type*(size_t idx)> target_el_ty;
+        if (auto* str = target_ty->As<sem::Struct>()) {
+            if (str->Members().size() != elements.Length()) {
+                TINT_ICE(Resolver, builder.Diagnostics())
+                    << "const-eval conversion of structure has mismatched element counts";
+                return utils::Failure;
+            }
+            target_el_ty = [str](size_t idx) { return str->Members()[idx]->Type(); };
+        } else {
+            auto* el_ty = sem::Type::ElementOf(target_ty);
+            target_el_ty = [el_ty](size_t) { return el_ty; };
+        }
+
         for (auto* el : elements) {
-            // Note: This file is the only place where `sem::Constant`s are created, so this
+            // Note: This file is the only place where `sem::Constant`s are created, so the
             // static_cast is safe.
-            auto conv_el = static_cast<const ImplConstant*>(el)->Convert(builder, el_ty, source);
+            auto conv_el = static_cast<const ImplConstant*>(el)->Convert(
+                builder, target_el_ty(conv_els.Length()), source);
             if (!conv_el) {
                 return utils::Failure;
             }

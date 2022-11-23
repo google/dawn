@@ -1726,6 +1726,12 @@ const sem::Type* Resolver::ConcreteType(const sem::Type* ty,
                 return Array(source, source, el_ty, a->Count(), /* explicit_stride */ 0);
             }
             return nullptr;
+        },
+        [&](const sem::Struct* s) -> const sem::Type* {
+            if (auto& tys = s->ConcreteTypes(); !tys.IsEmpty()) {
+                return target_ty ? target_ty : tys[0];
+            }
+            return nullptr;
         });
 }
 
@@ -1938,8 +1944,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     bool has_side_effects =
         std::any_of(args.begin(), args.end(), [](auto* e) { return e->HasSideEffects(); });
 
-    // ct_init_or_conv is a helper for building either a sem::TypeInitializer or sem::TypeConversion
-    // call for a InitConvIntrinsic with an optional template argument type.
+    // ct_init_or_conv is a helper for building either a sem::TypeInitializer or
+    // sem::TypeConversion call for a InitConvIntrinsic with an optional template argument type.
     auto ct_init_or_conv = [&](InitConvIntrinsic ty, const sem::Type* template_arg) -> sem::Call* {
         auto arg_tys = utils::Transform(args, [](auto* arg) { return arg->Type(); });
         auto ctor_or_conv =
@@ -1987,8 +1993,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             if (!value) {
                 // Constant evaluation failed.
                 // Can happen for expressions that will fail validation (later).
-                // Use the kRuntime EvaluationStage, as kConstant will trigger an assertion in the
-                // sem::Expression initializer, which checks that kConstant is paired with a
+                // Use the kRuntime EvaluationStage, as kConstant will trigger an assertion in
+                // the sem::Expression initializer, which checks that kConstant is paired with a
                 // constant value.
                 stage = sem::EvaluationStage::kRuntime;
             }
@@ -1998,8 +2004,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                                            current_statement_, value, has_side_effects);
     };
 
-    // ty_init_or_conv is a helper for building either a sem::TypeInitializer or sem::TypeConversion
-    // call for the given semantic type.
+    // ty_init_or_conv is a helper for building either a sem::TypeInitializer or
+    // sem::TypeConversion call for the given semantic type.
     auto ty_init_or_conv = [&](const sem::Type* ty) {
         return Switch(
             ty,  //
@@ -2076,7 +2082,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             });
     };
 
-    // ast::CallExpression has a target which is either an ast::Type or an ast::IdentifierExpression
+    // ast::CallExpression has a target which is either an ast::Type or an
+    // ast::IdentifierExpression
     sem::Call* call = nullptr;
     if (expr->target.type) {
         // ast::CallExpression has an ast::Type as the target.
@@ -2188,7 +2195,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             });
     } else {
         // ast::CallExpression has an ast::IdentifierExpression as the target.
-        // This call is either a function call, builtin call, type initializer or type conversion.
+        // This call is either a function call, builtin call, type initializer or type
+        // conversion.
         auto* ident = expr->target.name;
         Mark(ident);
         auto* resolved = sem_.ResolvedSymbol(ident);
@@ -2197,8 +2205,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             [&](sem::Type* ty) {
                 // A type initializer or conversions.
                 // Note: Unlike the code path where we're resolving the call target from an
-                // ast::Type, all types must already have the element type explicitly specified, so
-                // there's no need to infer element types.
+                // ast::Type, all types must already have the element type explicitly specified,
+                // so there's no need to infer element types.
                 return ty_init_or_conv(ty);
             },
             [&](sem::Function* func) { return FunctionCall(expr, func, args, arg_behaviors); },
@@ -2264,7 +2272,8 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         AddWarning("use of deprecated builtin", expr->source);
     }
 
-    // If the builtin is @const, and all arguments have constant values, evaluate the builtin now.
+    // If the builtin is @const, and all arguments have constant values, evaluate the builtin
+    // now.
     auto stage = sem::EarliestStage(arg_stage, builtin.sem->Stage());
     const sem::Constant* value = nullptr;
     if (stage == sem::EvaluationStage::kConstant) {
@@ -2894,7 +2903,8 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
         }
     }
 
-    // Track the pipeline-overridable constants that are transitively referenced by this array type.
+    // Track the pipeline-overridable constants that are transitively referenced by this array
+    // type.
     for (auto* var : transitively_referenced_overrides) {
         out->AddTransitivelyReferencedOverride(var);
     }
@@ -2955,8 +2965,9 @@ bool Resolver::ArrayAttributes(utils::VectorRef<const ast::Attribute*> attribute
         Mark(attr);
         if (auto* sd = attr->As<ast::StrideAttribute>()) {
             // If the element type is not plain, then el_ty->Align() may be 0, in which case we
-            // could get a DBZ in ArrayStrideAttribute(). In this case, validation will error about
-            // the invalid array element type (which is tested later), so this is just a seatbelt.
+            // could get a DBZ in ArrayStrideAttribute(). In this case, validation will error
+            // about the invalid array element type (which is tested later), so this is just a
+            // seatbelt.
             if (IsPlain(el_ty)) {
                 explicit_stride = sd->stride;
                 if (!validator_.ArrayStrideAttribute(sd, el_ty->Size(), el_ty->Align())) {

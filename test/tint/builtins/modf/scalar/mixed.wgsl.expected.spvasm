@@ -18,11 +18,11 @@
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
       %float = OpTypeFloat 32
-%float_1_23000002 = OpConstant %float 1.23000002
+ %float_1_25 = OpConstant %float 1.25
 %__modf_result = OpTypeStruct %float %float
-%float_0_230000019 = OpConstant %float 0.230000019
+ %float_0_25 = OpConstant %float 0.25
     %float_1 = OpConstant %float 1
-         %10 = OpConstantComposite %__modf_result %float_0_230000019 %float_1
+         %10 = OpConstantComposite %__modf_result %float_0_25 %float_1
 %_ptr_Function___modf_result = OpTypePointer Function %__modf_result
          %13 = OpConstantNull %__modf_result
        %uint = OpTypeInt 32 0
@@ -33,7 +33,7 @@
           %4 = OpLabel
         %res = OpVariable %_ptr_Function___modf_result Function %13
                OpStore %res %10
-         %14 = OpExtInst %__modf_result %15 ModfStruct %float_1_23000002
+         %14 = OpExtInst %__modf_result %15 ModfStruct %float_1_25
                OpStore %res %14
                OpStore %res %10
          %19 = OpAccessChain %_ptr_Function_float %res %uint_0

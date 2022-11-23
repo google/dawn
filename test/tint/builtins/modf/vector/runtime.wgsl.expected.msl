@@ -13,7 +13,7 @@ modf_result_vec2 tint_modf(float2 param_0) {
 }
 
 kernel void tint_symbol() {
-  float2 const in = float2(1.230000019f, 3.450000048f);
+  float2 const in = float2(1.25f, 3.75f);
   modf_result_vec2 const res = tint_modf(in);
   float2 const fract = res.fract;
   float2 const whole = res.whole;

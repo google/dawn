@@ -7,7 +7,7 @@ struct modf_result {
   float whole;
 };
 kernel void tint_symbol() {
-  modf_result const res = modf_result{.fract=0.230000019f, .whole=1.0f};
+  modf_result const res = modf_result{.fract=0.25f, .whole=1.0f};
   float const fract = res.fract;
   float const whole = res.whole;
   return;

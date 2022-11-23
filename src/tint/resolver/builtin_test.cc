@@ -1374,8 +1374,8 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_FirstParamInt) {
               R"(error: no matching call to modf(i32, ptr<workgroup, f32, read_write>)
 
 2 candidate functions:
-  modf(T) -> __modf_result_T  where: T is f32 or f16
-  modf(vecN<T>) -> __modf_result_vecN_T  where: T is f32 or f16
+  modf(T) -> __modf_result_T  where: T is abstract-float, f32 or f16
+  modf(vecN<T>) -> __modf_result_vecN_T  where: T is abstract-float, f32 or f16
 )");
 }
 
@@ -1390,8 +1390,8 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_SecondParamIntPtr) {
               R"(error: no matching call to modf(f32, ptr<workgroup, i32, read_write>)
 
 2 candidate functions:
-  modf(T) -> __modf_result_T  where: T is f32 or f16
-  modf(vecN<T>) -> __modf_result_vecN_T  where: T is f32 or f16
+  modf(T) -> __modf_result_T  where: T is abstract-float, f32 or f16
+  modf(vecN<T>) -> __modf_result_vecN_T  where: T is abstract-float, f32 or f16
 )");
 }
 
@@ -1404,8 +1404,8 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_SecondParamNotAPointer) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to modf(f32, f32)
 
 2 candidate functions:
-  modf(T) -> __modf_result_T  where: T is f32 or f16
-  modf(vecN<T>) -> __modf_result_vecN_T  where: T is f32 or f16
+  modf(T) -> __modf_result_T  where: T is abstract-float, f32 or f16
+  modf(vecN<T>) -> __modf_result_vecN_T  where: T is abstract-float, f32 or f16
 )");
 }
 
@@ -1420,8 +1420,8 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_VectorSizesDontMatch) {
               R"(error: no matching call to modf(vec2<f32>, ptr<workgroup, vec4<f32>, read_write>)
 
 2 candidate functions:
-  modf(T) -> __modf_result_T  where: T is f32 or f16
-  modf(vecN<T>) -> __modf_result_vecN_T  where: T is f32 or f16
+  modf(T) -> __modf_result_T  where: T is abstract-float, f32 or f16
+  modf(vecN<T>) -> __modf_result_vecN_T  where: T is abstract-float, f32 or f16
 )");
 }
 

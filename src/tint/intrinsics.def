@@ -504,8 +504,8 @@ fn log2<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn mix<T: f32_f16>(T, T, T) -> T
 fn mix<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
 fn mix<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, T) -> vec<N, T>
-@const fn modf<T: f32_f16>(@test_value(-1.5) T) -> __modf_result<T>
-@const fn modf<N: num, T: f32_f16>(@test_value(-1.5) vec<N, T>) -> __modf_result_vec<N, T>
+@const fn modf<T: fa_f32_f16>(@test_value(-1.5) T) -> __modf_result<T>
+@const fn modf<N: num, T: fa_f32_f16>(@test_value(-1.5) vec<N, T>) -> __modf_result_vec<N, T>
 fn normalize<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn pack2x16float(vec2<f32>) -> u32
 @const fn pack2x16snorm(vec2<f32>) -> u32

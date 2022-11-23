@@ -238,6 +238,15 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
             }
             return kNoConversion;
         },
+        [&](const Struct* from_str) {
+            auto& concrete_tys = from_str->ConcreteTypes();
+            for (size_t i = 0; i < concrete_tys.Length(); i++) {
+                if (concrete_tys[i] == to) {
+                    return static_cast<uint32_t>(i + 1);
+                }
+            }
+            return kNoConversion;
+        },
         [&](Default) { return kNoConversion; });
 }
 

@@ -12,9 +12,9 @@
           %1 = OpTypeFunction %void
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
-%float_0_230000019 = OpConstant %float 0.230000019
-%float_0_450000048 = OpConstant %float 0.450000048
-          %9 = OpConstantComposite %v2float %float_0_230000019 %float_0_450000048
+ %float_0_25 = OpConstant %float 0.25
+ %float_0_75 = OpConstant %float 0.75
+          %9 = OpConstantComposite %v2float %float_0_25 %float_0_75
     %float_1 = OpConstant %float 1
     %float_3 = OpConstant %float 3
          %12 = OpConstantComposite %v2float %float_1 %float_3

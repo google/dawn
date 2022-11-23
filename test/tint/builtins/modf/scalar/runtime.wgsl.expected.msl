@@ -13,7 +13,7 @@ modf_result tint_modf(float param_0) {
 }
 
 kernel void tint_symbol() {
-  float const in = 1.230000019f;
+  float const in = 1.25f;
   modf_result const res = tint_modf(in);
   float const fract = res.fract;
   float const whole = res.whole;

@@ -7,7 +7,7 @@ struct modf_result_vec2 {
 
 
 void tint_symbol() {
-  modf_result_vec2 res = modf_result_vec2(vec2(0.230000019f, 0.450000048f), vec2(1.0f, 3.0f));
+  modf_result_vec2 res = modf_result_vec2(vec2(0.25f, 0.75f), vec2(1.0f, 3.0f));
   vec2 tint_symbol_2 = res.fract;
   vec2 whole = res.whole;
 }

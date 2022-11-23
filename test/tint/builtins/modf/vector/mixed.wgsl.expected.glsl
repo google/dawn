@@ -13,10 +13,10 @@ modf_result_vec2 tint_modf(vec2 param_0) {
 
 
 void tint_symbol() {
-  vec2 runtime_in = vec2(1.230000019f, 3.450000048f);
-  modf_result_vec2 res = modf_result_vec2(vec2(0.230000019f, 0.450000048f), vec2(1.0f, 3.0f));
+  vec2 runtime_in = vec2(1.25f, 3.75f);
+  modf_result_vec2 res = modf_result_vec2(vec2(0.25f, 0.75f), vec2(1.0f, 3.0f));
   res = tint_modf(runtime_in);
-  res = modf_result_vec2(vec2(0.230000019f, 0.450000048f), vec2(1.0f, 3.0f));
+  res = modf_result_vec2(vec2(0.25f, 0.75f), vec2(1.0f, 3.0f));
   vec2 tint_symbol_1 = res.fract;
   vec2 whole = res.whole;
 }
