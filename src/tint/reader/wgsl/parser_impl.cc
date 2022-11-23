@@ -87,24 +87,23 @@ bool is_reserved(const Token& t) {
            t == "goto" || t == "groupshared" || t == "handle" || t == "highp" || t == "impl" ||
            t == "implements" || t == "import" || t == "inline" || t == "inout" ||
            t == "instanceof" || t == "interface" || t == "invariant" || t == "layout" ||
-           t == "line" || t == "lineadj" || t == "lowp" || t == "macro" || t == "macro_rules" ||
-           t == "match" || t == "mediump" || t == "meta" || t == "mod" || t == "module" ||
-           t == "move" || t == "mut" || t == "mutable" || t == "namespace" || t == "new" ||
-           t == "nil" || t == "noexcept" || t == "noinline" || t == "nointerpolation" ||
-           t == "noperspective" || t == "null" || t == "nullptr" || t == "of" || t == "operator" ||
-           t == "package" || t == "packoffset" || t == "partition" || t == "pass" || t == "patch" ||
-           t == "pixelfragment" || t == "point" || t == "precise" || t == "precision" ||
-           t == "premerge" || t == "priv" || t == "protected" || t == "pub" || t == "public" ||
-           t == "readonly" || t == "ref" || t == "regardless" || t == "register" ||
-           t == "reinterpret_cast" || t == "requires" || t == "resource" || t == "restrict" ||
-           t == "self" || t == "set" || t == "shared" || t == "signed" || t == "sizeof" ||
-           t == "smooth" || t == "snorm" || t == "static" || t == "static_cast" || t == "std" ||
-           t == "subroutine" || t == "super" || t == "target" || t == "template" || t == "this" ||
-           t == "thread_local" || t == "throw" || t == "trait" || t == "try" || t == "typedef" ||
-           t == "typeid" || t == "typename" || t == "typeof" || t == "union" || t == "unless" ||
-           t == "unorm" || t == "unsafe" || t == "unsized" || t == "use" || t == "using" ||
-           t == "varying" || t == "virtual" || t == "volatile" || t == "wgsl" || t == "where" ||
-           t == "with" || t == "writeonly" || t == "yield";
+           t == "lowp" || t == "macro" || t == "macro_rules" || t == "match" || t == "mediump" ||
+           t == "meta" || t == "mod" || t == "module" || t == "move" || t == "mut" ||
+           t == "mutable" || t == "namespace" || t == "new" || t == "nil" || t == "noexcept" ||
+           t == "noinline" || t == "nointerpolation" || t == "noperspective" || t == "null" ||
+           t == "nullptr" || t == "of" || t == "operator" || t == "package" || t == "packoffset" ||
+           t == "partition" || t == "pass" || t == "patch" || t == "pixelfragment" ||
+           t == "precise" || t == "precision" || t == "premerge" || t == "priv" ||
+           t == "protected" || t == "pub" || t == "public" || t == "readonly" || t == "ref" ||
+           t == "regardless" || t == "register" || t == "reinterpret_cast" || t == "requires" ||
+           t == "resource" || t == "restrict" || t == "self" || t == "set" || t == "shared" ||
+           t == "signed" || t == "sizeof" || t == "smooth" || t == "snorm" || t == "static" ||
+           t == "static_cast" || t == "std" || t == "subroutine" || t == "super" || t == "target" ||
+           t == "template" || t == "this" || t == "thread_local" || t == "throw" || t == "trait" ||
+           t == "try" || t == "typedef" || t == "typeid" || t == "typename" || t == "typeof" ||
+           t == "union" || t == "unless" || t == "unorm" || t == "unsafe" || t == "unsized" ||
+           t == "use" || t == "using" || t == "varying" || t == "virtual" || t == "volatile" ||
+           t == "wgsl" || t == "where" || t == "with" || t == "writeonly" || t == "yield";
 }
 
 /// Enter-exit counters for block token types.
