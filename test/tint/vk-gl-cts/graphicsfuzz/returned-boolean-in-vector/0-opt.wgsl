@@ -35,10 +35,7 @@ fn main_1() {
     continuing {
       x_40_phi = x_40;
       x_42_phi = x_43;
-      if (false) {
-      } else {
-        break;
-      }
+      break if !(false);
     }
   }
   x_36 = false;

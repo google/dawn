@@ -58,10 +58,7 @@ fn main_1() {
 
     continuing {
       let x_72 : f32 = a;
-      if (!((x_72 == 0.0))) {
-      } else {
-        break;
-      }
+      break if !((x_72 == 0.0));
     }
   }
   let x_75 : i32 = x_8.x_GLF_uniform_int_values[1].el;

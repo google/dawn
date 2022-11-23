@@ -3403,54 +3403,6 @@ bool Builder::GenerateConditionalBlock(const ast::Expression* cond,
 }
 
 bool Builder::GenerateIfStatement(const ast::IfStatement* stmt) {
-    if (!continuing_stack_.empty() &&
-        stmt == continuing_stack_.back().last_statement->As<ast::IfStatement>()) {
-        const ContinuingInfo& ci = continuing_stack_.back();
-        // Match one of two patterns: the break-if and break-unless patterns.
-        //
-        // The break-if pattern:
-        //  continuing { ...
-        //    if (cond) { break; }
-        //  }
-        //
-        // The break-unless pattern:
-        //  continuing { ...
-        //    if (cond) {} else {break;}
-        //  }
-        //
-        // TODO(crbug.com/tint/1451): Remove this when the if break construct is made an error.
-        auto is_just_a_break = [](const ast::BlockStatement* block) {
-            return block && (block->statements.Length() == 1) &&
-                   block->Last()->Is<ast::BreakStatement>();
-        };
-        if (is_just_a_break(stmt->body) && stmt->else_statement == nullptr) {
-            // It's a break-if.
-            TINT_ASSERT(Writer, !backedge_stack_.empty());
-            const auto cond_id = GenerateExpressionWithLoadIfNeeded(stmt->condition);
-            if (!cond_id) {
-                return false;
-            }
-            backedge_stack_.back() = Backedge(
-                spv::Op::OpBranchConditional,
-                {Operand(cond_id), Operand(ci.break_target_id), Operand(ci.loop_header_id)});
-            return true;
-        } else if (stmt->body->Empty()) {
-            auto* es_block = As<ast::BlockStatement>(stmt->else_statement);
-            if (es_block && is_just_a_break(es_block)) {
-                // It's a break-unless.
-                TINT_ASSERT(Writer, !backedge_stack_.empty());
-                const auto cond_id = GenerateExpressionWithLoadIfNeeded(stmt->condition);
-                if (!cond_id) {
-                    return false;
-                }
-                backedge_stack_.back() = Backedge(
-                    spv::Op::OpBranchConditional,
-                    {Operand(cond_id), Operand(ci.loop_header_id), Operand(ci.break_target_id)});
-                return true;
-            }
-        }
-    }
-
     if (!GenerateConditionalBlock(stmt->condition, stmt->body, stmt->else_statement)) {
         return false;
     }

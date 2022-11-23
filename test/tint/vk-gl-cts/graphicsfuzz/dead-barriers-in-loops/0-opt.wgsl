@@ -92,10 +92,7 @@ fn main_1() {
     continuing {
       let x_111 : f32 = x_6.injectionSwitch.x;
       let x_113 : f32 = x_6.injectionSwitch.y;
-      if ((x_111 > x_113)) {
-      } else {
-        break;
-      }
+      break if !(x_111 > x_113);
     }
   }
   return;

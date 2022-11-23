@@ -7,10 +7,7 @@ fn main() {
     }
 
     continuing {
-       if (true) {
-       } else {
-        break;
-       }
+       break if !true;
     }
   }
 }

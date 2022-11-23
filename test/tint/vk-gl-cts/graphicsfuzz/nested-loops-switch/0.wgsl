@@ -98,10 +98,7 @@ fn main_1() {
 
     continuing {
       let x_113 : i32 = i;
-      if ((x_113 < 200)) {
-      } else {
-        break;
-      }
+      break if !(x_113 < 200);
     }
   }
   x_GLF_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);

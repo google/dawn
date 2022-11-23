@@ -44,10 +44,7 @@ fn main_1() {
         let x_67 : i32 = c;
         let x_68 : i32 = a;
         let x_69 : i32 = b;
-        if (((x_67 & (x_68 | x_69)) == 0)) {
-        } else {
-          break;
-        }
+        break if !((x_67 & (x_68 | x_69)) == 0);
       }
     }
     let x_74 : f32 = x_6.one;

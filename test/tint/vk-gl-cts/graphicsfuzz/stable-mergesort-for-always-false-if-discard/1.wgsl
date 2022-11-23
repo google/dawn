@@ -60,10 +60,7 @@ fn main_1() {
 
     continuing {
       x_65_phi = x_66;
-      if ((x_66 < 10)) {
-      } else {
-        break;
-      }
+      break if !(x_66 < 10);
     }
   }
   x_93_phi = 0;

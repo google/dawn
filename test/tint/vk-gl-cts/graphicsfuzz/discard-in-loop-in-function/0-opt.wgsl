@@ -22,10 +22,7 @@ fn f_() {
     discard;
 
     continuing {
-      if (false) {
-      } else {
-        break;
-      }
+      break if !(false);
     }
   }
   return;

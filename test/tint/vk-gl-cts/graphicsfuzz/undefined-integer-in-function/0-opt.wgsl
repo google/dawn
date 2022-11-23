@@ -43,10 +43,7 @@ fn performPartition_() -> i32 {
     continuing {
       x_11 = x_11_phi;
       x_10_phi = x_11;
-      if (false) {
-      } else {
-        break;
-      }
+      break if !(false);
     }
   }
   return x_11;

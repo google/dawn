@@ -28,10 +28,7 @@ fn main_1() {
     }
 
     continuing {
-      if (false) {
-      } else {
-        break;
-      }
+      break if !(false);
     }
   }
   let x_8 : i32 = merge_();

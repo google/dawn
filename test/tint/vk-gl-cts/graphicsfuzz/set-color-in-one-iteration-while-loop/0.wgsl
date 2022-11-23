@@ -73,10 +73,7 @@ fn main_1() {
       continuing {
         x_38_phi = x_39;
         x_41_phi = x_42;
-        if ((x_34 < 0)) {
-        } else {
-          break;
-        }
+        break if !(x_34 < 0);
       }
     }
     if (x_39) {

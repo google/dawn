@@ -209,9 +209,7 @@ fn f() {
   loop {
 
     continuing {
-      if (true) {
-        break;
-      }
+      break if true;
     }
   }
   var preserve_me = 1;

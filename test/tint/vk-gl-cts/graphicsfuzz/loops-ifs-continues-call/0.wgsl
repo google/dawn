@@ -60,10 +60,7 @@ fn main_1() {
 
       continuing {
         let x_82 : f32 = x_8.injectionSwitch.y;
-        if ((0.0 > x_82)) {
-        } else {
-          break;
-        }
+        break if !(0.0 > x_82);
       }
     }
 

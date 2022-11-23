@@ -43,10 +43,7 @@ fn main_1() {
 
     continuing {
       let x_39 : i32 = x_GLF_global_loop_count;
-      if ((true & (x_39 < 100))) {
-      } else {
-        break;
-      }
+      break if !(true & (x_39 < 100));
     }
   }
   let x_42 : i32 = func_();

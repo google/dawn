@@ -60,18 +60,12 @@ fn main_1() {
           }
 
           continuing {
-            if (false) {
-            } else {
-              break;
-            }
+            break if !(false);
           }
         }
 
         continuing {
-          if (false) {
-          } else {
-            break;
-          }
+          break if !(false);
         }
       }
     }

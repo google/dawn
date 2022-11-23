@@ -29,10 +29,7 @@ fn func_() -> f32 {
     continuing {
       x_34_phi = 1.0;
       x_48_phi = 1.0;
-      if (false) {
-      } else {
-        break;
-      }
+      break if !(false);
     }
   }
   let x_48 : f32 = x_48_phi;

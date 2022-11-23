@@ -58,10 +58,7 @@ fn main_1() {
 
     continuing {
       let x_87 : i32 = one;
-      if ((x_87 < 0)) {
-      } else {
-        break;
-      }
+      break if !(x_87 < 0);
     }
   }
   var x_102 : bool;

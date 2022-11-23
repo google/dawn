@@ -38,10 +38,7 @@ fn main_1() {
           loop {
 
             continuing {
-              if (true) {
-              } else {
-                break;
-              }
+              break if !(true);
             }
           }
         }

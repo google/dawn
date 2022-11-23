@@ -218,10 +218,7 @@ fn main_1() {
 
     continuing {
       let x_129 : i32 = i_3;
-      if ((x_129 < 10)) {
-      } else {
-        break;
-      }
+      break if !(x_129 < 10);
     }
   }
   j_1 = 0;

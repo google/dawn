@@ -24,10 +24,7 @@ fn main_1() {
 
     continuing {
       x_41 = x_6.injectionSwitch.y;
-      if ((0.0 > x_41)) {
-      } else {
-        break;
-      }
+      break if !(0.0 > x_41);
     }
   }
   let x_43 : i32 = i32(x_41);

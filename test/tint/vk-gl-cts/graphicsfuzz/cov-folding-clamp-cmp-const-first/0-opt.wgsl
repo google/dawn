@@ -17,10 +17,7 @@ fn main_1() {
     continuing {
       let x_34 : f32 = f;
       let x_36 : f32 = x_6.one;
-      if ((10.0 > clamp(x_34, 8.0, (9.0 + x_36)))) {
-      } else {
-        break;
-      }
+      break if !(10.0 > clamp(x_34, 8.0, (9.0 + x_36)));
     }
   }
   let x_40 : f32 = f;

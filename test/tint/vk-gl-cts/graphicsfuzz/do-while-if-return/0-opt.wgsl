@@ -35,19 +35,13 @@ fn func_() -> i32 {
 
       continuing {
         x_45_phi = x_39;
-        if ((x_39 < 100)) {
-        } else {
-          break;
-        }
+        break if !(x_39 < 100);
       }
     }
 
     continuing {
       x_38_phi = x_39;
-      if ((x_39 < 100)) {
-      } else {
-        break;
-      }
+      break if !(x_39 < 100);
     }
   }
   return 0;

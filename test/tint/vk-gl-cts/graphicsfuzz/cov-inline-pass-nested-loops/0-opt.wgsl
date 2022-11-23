@@ -30,10 +30,7 @@ fn returnRed_() -> vec4<f32> {
       continuing {
         x_48_phi = vec4<f32>();
         x_49_phi = false;
-        if (false) {
-        } else {
-          break;
-        }
+        break if !(false);
       }
     }
     x_48 = x_48_phi;

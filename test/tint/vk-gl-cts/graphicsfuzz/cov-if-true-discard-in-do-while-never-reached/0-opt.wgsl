@@ -30,10 +30,7 @@ fn main_1() {
 
     continuing {
       let x_39 : i32 = a;
-      if ((x_39 != 1)) {
-      } else {
-        break;
-      }
+      break if !(x_39 != 1);
     }
   }
   let x_41 : i32 = a;

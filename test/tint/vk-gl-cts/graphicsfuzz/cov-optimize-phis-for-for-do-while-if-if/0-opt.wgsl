@@ -64,10 +64,7 @@ fn main_1() {
         continuing {
           let x_72 : i32 = a;
           let x_74 : i32 = x_7.x_GLF_uniform_int_values[1].el;
-          if ((x_72 < x_74)) {
-          } else {
-            break;
-          }
+          break if !(x_72 < x_74);
         }
       }
       let x_77 : f32 = gl_FragCoord.y;

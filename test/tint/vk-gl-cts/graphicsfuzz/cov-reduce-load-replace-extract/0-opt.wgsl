@@ -41,10 +41,7 @@ fn main_1() {
     a = 0.0;
 
     continuing {
-      if (false) {
-      } else {
-        break;
-      }
+      break if !(false);
     }
   }
   let x_63 : f32 = a;

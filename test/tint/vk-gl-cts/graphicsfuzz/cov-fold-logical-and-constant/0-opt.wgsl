@@ -11,10 +11,7 @@ fn main_1() {
 
     continuing {
       let x_35 : f32 = gl_FragCoord.x;
-      if (((x_35 >= 0.0) & false)) {
-      } else {
-        break;
-      }
+      break if !((x_35 >= 0.0) & false);
     }
   }
   let x_8 : i32 = i;

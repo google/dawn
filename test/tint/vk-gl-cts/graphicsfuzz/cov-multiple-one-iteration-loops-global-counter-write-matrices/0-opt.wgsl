@@ -332,10 +332,7 @@ fn main_1() {
 
                                                                                 continuing {
                                                                                   let x_373 : i32 = x_GLF_global_loop_count;
-                                                                                  if ((x_373 < 98)) {
-                                                                                  } else {
-                                                                                    break;
-                                                                                  }
+                                                                                  break if !(x_373 < 98);
                                                                                 }
                                                                               }
                                                                               let x_375 : i32 = i_37;

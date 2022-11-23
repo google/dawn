@@ -128,19 +128,13 @@ fn main_1() {
 
       continuing {
         let x_123 : f32 = gl_FragCoord.x;
-        if ((x_123 < -1.0)) {
-        } else {
-          break;
-        }
+        break if !(x_123 < -1.0);
       }
     }
 
     continuing {
       let x_126 : f32 = gl_FragCoord.y;
-      if ((x_126 < -1.0)) {
-      } else {
-        break;
-      }
+      break if !(x_126 < -1.0);
     }
   }
   let x_128 : vec4<f32> = c;

@@ -43,10 +43,7 @@ fn func_f1_(x : ptr<function, f32>) -> f32 {
           continuing {
             let x_88 : f32 = gl_FragCoord.x;
             let x_90 : f32 = x_8.x_GLF_uniform_float_values[2].el;
-            if ((x_88 < x_90)) {
-            } else {
-              break;
-            }
+            break if !(x_88 < x_90);
           }
         }
       }
@@ -60,10 +57,7 @@ fn func_f1_(x : ptr<function, f32>) -> f32 {
       continuing {
         let x_101 : f32 = gl_FragCoord.y;
         let x_103 : f32 = x_8.x_GLF_uniform_float_values[2].el;
-        if ((x_101 < x_103)) {
-        } else {
-          break;
-        }
+        break if !(x_101 < x_103);
       }
     }
   }

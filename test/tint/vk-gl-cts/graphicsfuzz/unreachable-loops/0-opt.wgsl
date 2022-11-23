@@ -15,10 +15,7 @@ fn main_1() {
     loop {
 
       continuing {
-        if (false) {
-        } else {
-          break;
-        }
+        break if !(false);
       }
     }
     m = 1;

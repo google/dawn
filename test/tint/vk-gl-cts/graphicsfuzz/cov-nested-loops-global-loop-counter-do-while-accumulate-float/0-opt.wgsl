@@ -192,10 +192,7 @@ fn main_1() {
                                   continuing {
                                     let x_225 : i32 = x_GLF_global_loop_count;
                                     let x_227 : i32 = x_10.x_GLF_uniform_int_values[3].el;
-                                    if ((x_225 < (100 - x_227))) {
-                                    } else {
-                                      break;
-                                    }
+                                    break if !(x_225 < (100 - x_227));
                                   }
                                 }
                                 let x_231 : f32 = x_7.x_GLF_uniform_float_values[0].el;

@@ -26,10 +26,7 @@ fn main_1() {
 
       continuing {
         x_46_phi = false;
-        if (false) {
-        } else {
-          break;
-        }
+        break if !(false);
       }
     }
     let x_46 : bool = x_46_phi;

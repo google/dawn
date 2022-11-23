@@ -368,10 +368,7 @@ fn main_1() {
 
     continuing {
       let x_468 : bool = canwalk;
-      if (x_468) {
-      } else {
-        break;
-      }
+      break if !(x_468);
     }
   }
   x_GLF_color = vec4<f32>(0.0, 0.0, 0.0, 1.0);

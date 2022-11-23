@@ -30,10 +30,7 @@ fn main_1() {
       continuing {
         let x_50 : i32 = x_5.x_GLF_uniform_int_values[1].el;
         let x_52 : i32 = x_5.x_GLF_uniform_int_values[0].el;
-        if ((x_50 > x_52)) {
-        } else {
-          break;
-        }
+        break if !(x_50 > x_52);
       }
     }
     return;

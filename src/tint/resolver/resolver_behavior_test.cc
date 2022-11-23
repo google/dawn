@@ -557,16 +557,6 @@ TEST_F(ResolverBehaviorTest, StmtLoopEmpty_ContEmpty_NoExit) {
     EXPECT_EQ(r()->error(), "12:34 error: loop does not exit");
 }
 
-TEST_F(ResolverBehaviorTest, StmtLoopEmpty_ContIfTrueBreak) {
-    auto* stmt = Loop(Block(), Block(If(true, Block(Break()))));
-    WrapInFunction(stmt);
-
-    ASSERT_TRUE(r()->Resolve()) << r()->error();
-
-    auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
-}
-
 TEST_F(ResolverBehaviorTest, StmtLoopEmpty_BreakIf) {
     auto* stmt = Loop(Block(), Block(BreakIf(true)));
     WrapInFunction(stmt);

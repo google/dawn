@@ -44,10 +44,7 @@ fn main_1() {
     return;
 
     continuing {
-      if (false) {
-      } else {
-        break;
-      }
+      break if !(false);
     }
   }
   let x_66 : i32 = x_5.x_GLF_uniform_int_values[1].el;
