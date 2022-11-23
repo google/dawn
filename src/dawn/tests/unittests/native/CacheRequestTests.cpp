@@ -39,18 +39,6 @@ class CacheRequestTests : public DawnNativeTest {
         return std::make_unique<DawnCachingMockPlatform>(&mMockCache);
     }
 
-    WGPUDevice CreateTestDevice() override {
-        wgpu::DeviceDescriptor deviceDescriptor = {};
-        wgpu::DawnTogglesDeviceDescriptor togglesDesc = {};
-        deviceDescriptor.nextInChain = &togglesDesc;
-
-        const char* toggle = "enable_blob_cache";
-        togglesDesc.forceEnabledToggles = &toggle;
-        togglesDesc.forceEnabledTogglesCount = 1;
-
-        return adapter.CreateDevice(&deviceDescriptor);
-    }
-
     DeviceBase* GetDevice() { return dawn::native::FromAPI(device.Get()); }
 
     StrictMock<CachingInterfaceMock> mMockCache;

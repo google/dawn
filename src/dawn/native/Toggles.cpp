@@ -266,12 +266,6 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Disables usage of the blob cache (backed by the platform cache if set/passed). Prevents any "
       "persistent caching capabilities, i.e. pipeline caching.",
       "https://crbug.com/dawn/549"}},
-    // TODO(dawn:549) Remove after deprecating usage on the Chromium side.
-    {Toggle::EnableBlobCache,
-     {"enable_blob_cache",
-      "Enables usage of the blob cache (backed by the platform cache if set/passed). Necessary for "
-      "any persistent caching capabilities, i.e. pipeline caching.",
-      "https://crbug.com/dawn/549"}},
     {Toggle::D3D12ForceClearCopyableDepthStencilTextureOnCreation,
      {"d3d12_force_clear_copyable_depth_stencil_texture_on_creation",
       "Always clearing copyable depth stencil textures when creating them instead of skipping the "

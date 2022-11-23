@@ -639,11 +639,11 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheIsolationKey) {
 }
 
 DAWN_INSTANTIATE_TEST(SinglePipelineCachingTests,
-                      D3D12Backend({"enable_blob_cache"}),
-                      D3D12Backend({"enable_blob_cache", "use_dxc"}),
-                      MetalBackend({"enable_blob_cache"}),
-                      OpenGLBackend({"enable_blob_cache"}),
-                      OpenGLESBackend({"enable_blob_cache"}),
-                      VulkanBackend({"enable_blob_cache"}));
+                      D3D12Backend(),
+                      D3D12Backend({"use_dxc"}),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
 
 }  // namespace
