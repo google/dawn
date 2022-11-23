@@ -493,10 +493,10 @@ fn ldexp<T: f32_f16>(T, i32) -> T
 fn ldexp<N: num, T: f32_f16>(vec<N, T>, vec<N, i32>) -> vec<N, T>
 @const fn length<T: fa_f32_f16>(@test_value(0.0) T) -> T
 @const fn length<N: num, T: fa_f32_f16>(@test_value(0.0) vec<N, T>) -> T
-fn log<T: f32_f16>(T) -> T
-fn log<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn log2<T: f32_f16>(T) -> T
-fn log2<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn log<T: fa_f32_f16>(T) -> T
+@const fn log<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn log2<T: fa_f32_f16>(T) -> T
+@const fn log2<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn max<T: fia_fiu32_f16>(T, T) -> T
 @const fn max<N: num, T: fia_fiu32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
 @const fn min<T: fia_fiu32_f16>(T, T) -> T

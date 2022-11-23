@@ -2,7 +2,7 @@
 
 using namespace metal;
 void log_3da25a() {
-  float4 res = log(float4(1.0f));
+  float4 res = float4(0.0f);
 }
 
 struct tint_symbol {

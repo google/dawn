@@ -2,7 +2,7 @@
 
 using namespace metal;
 void log2_776088() {
-  half4 res = log2(half4(1.0h));
+  half4 res = half4(0.0h);
 }
 
 struct tint_symbol {

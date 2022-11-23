@@ -1,5 +1,5 @@
 void log_cdbdc1() {
-  vector<float16_t, 4> res = log((float16_t(1.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(0.0h)).xxxx;
 }
 
 struct tint_symbol {

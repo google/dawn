@@ -1,5 +1,5 @@
 void log_f4c570() {
-  float3 res = log((1.0f).xxx);
+  float3 res = (0.0f).xxx;
 }
 
 struct tint_symbol {

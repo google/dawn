@@ -1,5 +1,5 @@
 void log_b2ce28() {
-  float2 res = log((1.0f).xx);
+  float2 res = (0.0f).xx;
 }
 
 struct tint_symbol {

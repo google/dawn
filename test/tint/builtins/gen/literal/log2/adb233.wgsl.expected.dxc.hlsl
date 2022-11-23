@@ -1,5 +1,5 @@
 void log2_adb233() {
-  float3 res = log2((1.0f).xxx);
+  float3 res = (0.0f).xxx;
 }
 
 struct tint_symbol {

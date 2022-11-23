@@ -1297,6 +1297,110 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               LengthCases<f16>()))));
 
 template <typename T>
+std::vector<Case> LogCases() {
+    auto error_msg = [] { return "12:34 error: log must be called with a value > 0"; };
+    return std::vector<Case>{C({T(1)}, T(0)),                              //
+                             C({T(54.598150033)}, T(4)).FloatComp(0.002),  //
+
+                             E({T::Lowest()}, error_msg()), E({T(0)}, error_msg()),
+                             E({-T(0)}, error_msg())};
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Log,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kLog),
+                     testing::ValuesIn(Concat(LogCases<AFloat>(),  //
+                                              LogCases<f32>(),
+                                              LogCases<f16>()))));
+template <typename T>
+std::vector<Case> LogF16Cases() {
+    return std::vector<Case>{
+        C({T::Highest()}, T(11.085938)).FloatComp(),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    LogF16,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kLog),
+                     testing::ValuesIn(LogF16Cases<f16>())));
+template <typename T>
+std::vector<Case> LogF32Cases() {
+    return std::vector<Case>{
+        C({T::Highest()}, T(88.722839)).FloatComp(),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    LogF32,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kLog),
+                     testing::ValuesIn(LogF32Cases<f32>())));
+
+template <typename T>
+std::vector<Case> LogAbstractCases() {
+    return std::vector<Case>{
+        C({T::Highest()}, T(709.78271)).FloatComp(),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    LogAbstract,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kLog),
+                     testing::ValuesIn(LogAbstractCases<AFloat>())));
+
+template <typename T>
+std::vector<Case> Log2Cases() {
+    auto error_msg = [] { return "12:34 error: log2 must be called with a value > 0"; };
+    return std::vector<Case>{
+        C({T(1)}, T(0)),  //
+        C({T(4)}, T(2)),  //
+
+        E({T::Lowest()}, error_msg()),
+        E({T(0)}, error_msg()),
+        E({-T(0)}, error_msg()),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Log2,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kLog2),
+                     testing::ValuesIn(Concat(Log2Cases<AFloat>(),  //
+                                              Log2Cases<f32>(),
+                                              Log2Cases<f16>()))));
+template <typename T>
+std::vector<Case> Log2F16Cases() {
+    return std::vector<Case>{
+        C({T::Highest()}, T(15.9922)).FloatComp(),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Log2F16,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kLog2),
+                     testing::ValuesIn(Log2F16Cases<f16>())));
+template <typename T>
+std::vector<Case> Log2F32Cases() {
+    return std::vector<Case>{
+        C({T::Highest()}, T(128)).FloatComp(),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Log2F32,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kLog2),
+                     testing::ValuesIn(Log2F32Cases<f32>())));
+template <typename T>
+std::vector<Case> Log2AbstractCases() {
+    return std::vector<Case>{
+        C({T::Highest()}, T(1024)).FloatComp(),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Log2Abstract,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kLog2),
+                     testing::ValuesIn(Log2AbstractCases<AFloat>())));
+
+template <typename T>
 std::vector<Case> MaxCases() {
     return {
         C({T(0), T(0)}, T(0)),

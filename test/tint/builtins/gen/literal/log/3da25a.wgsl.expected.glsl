@@ -1,7 +1,7 @@
 #version 310 es
 
 void log_3da25a() {
-  vec4 res = log(vec4(1.0f));
+  vec4 res = vec4(0.0f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void log_3da25a() {
-  vec4 res = log(vec4(1.0f));
+  vec4 res = vec4(0.0f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void log_3da25a() {
-  vec4 res = log(vec4(1.0f));
+  vec4 res = vec4(0.0f);
 }
 
 void compute_main() {

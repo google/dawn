@@ -1,5 +1,5 @@
 void log2_38b478() {
-  vector<float16_t, 3> res = log2((float16_t(1.0h)).xxx);
+  vector<float16_t, 3> res = (float16_t(0.0h)).xxx;
 }
 
 struct tint_symbol {

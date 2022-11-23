@@ -1,7 +1,7 @@
 #version 310 es
 
 void log2_adb233() {
-  vec3 res = log2(vec3(1.0f));
+  vec3 res = vec3(0.0f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void log2_adb233() {
-  vec3 res = log2(vec3(1.0f));
+  vec3 res = vec3(0.0f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void log2_adb233() {
-  vec3 res = log2(vec3(1.0f));
+  vec3 res = vec3(0.0f);
 }
 
 void compute_main() {

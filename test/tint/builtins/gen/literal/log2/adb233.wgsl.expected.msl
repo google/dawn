@@ -2,7 +2,7 @@
 
 using namespace metal;
 void log2_adb233() {
-  float3 res = log2(float3(1.0f));
+  float3 res = float3(0.0f);
 }
 
 struct tint_symbol {

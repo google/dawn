@@ -1,7 +1,7 @@
 #version 310 es
 
 void log_b2ce28() {
-  vec2 res = log(vec2(1.0f));
+  vec2 res = vec2(0.0f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void log_b2ce28() {
-  vec2 res = log(vec2(1.0f));
+  vec2 res = vec2(0.0f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void log_b2ce28() {
-  vec2 res = log(vec2(1.0f));
+  vec2 res = vec2(0.0f);
 }
 
 void compute_main() {
