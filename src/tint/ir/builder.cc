@@ -93,4 +93,84 @@ void Builder::Branch(Block* from, FlowNode* to) {
     to->inbound_branches.Push(from);
 }
 
+Register::Id Builder::AllocateRegister() {
+    return next_register_id++;
+}
+
+Op Builder::CreateOp(Op::Kind kind, Register lhs, Register rhs) {
+    return Op(kind, Register(AllocateRegister()), lhs, rhs);
+}
+
+Op Builder::And(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kAnd, lhs, rhs);
+}
+
+Op Builder::Or(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kOr, lhs, rhs);
+}
+
+Op Builder::Xor(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kXor, lhs, rhs);
+}
+
+Op Builder::LogicalAnd(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kLogicalAnd, lhs, rhs);
+}
+
+Op Builder::LogicalOr(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kLogicalOr, lhs, rhs);
+}
+
+Op Builder::Equal(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kEqual, lhs, rhs);
+}
+
+Op Builder::NotEqual(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kNotEqual, lhs, rhs);
+}
+
+Op Builder::LessThan(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kLessThan, lhs, rhs);
+}
+
+Op Builder::GreaterThan(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kGreaterThan, lhs, rhs);
+}
+
+Op Builder::LessThanEqual(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kLessThanEqual, lhs, rhs);
+}
+
+Op Builder::GreaterThanEqual(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kGreaterThanEqual, lhs, rhs);
+}
+
+Op Builder::ShiftLeft(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kShiftLeft, lhs, rhs);
+}
+
+Op Builder::ShiftRight(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kShiftRight, lhs, rhs);
+}
+
+Op Builder::Add(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kAdd, lhs, rhs);
+}
+
+Op Builder::Subtract(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kSubtract, lhs, rhs);
+}
+
+Op Builder::Multiply(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kMultiply, lhs, rhs);
+}
+
+Op Builder::Divide(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kDivide, lhs, rhs);
+}
+
+Op Builder::Modulo(Register lhs, Register rhs) {
+    return CreateOp(Op::Kind::kModulo, lhs, rhs);
+}
+
 }  // namespace tint::ir

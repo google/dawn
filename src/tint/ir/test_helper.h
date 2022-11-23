@@ -20,6 +20,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/ir/builder_impl.h"
+#include "src/tint/ir/disassembler.h"
 #include "src/tint/program_builder.h"
 
 namespace tint::ir {

@@ -19,6 +19,8 @@
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/ir/op.h"
+#include "src/tint/ir/register.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/terminator.h"
 
@@ -81,8 +83,129 @@ class Builder {
     /// @param to the node to branch too
     void Branch(Block* from, FlowNode* to);
 
+    /// Creates an op for `lhs kind rhs`
+    /// @param kind the kind of operation
+    /// @param lhs the left-hand-side of the operation
+    /// @param rhs the right-hand-side of the operation
+    /// @returns the operation
+    Op CreateOp(Op::Kind kind, Register lhs, Register rhs);
+
+    /// Creates an And operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op And(Register lhs, Register rhs);
+
+    /// Creates an Or operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op Or(Register lhs, Register rhs);
+
+    /// Creates an Xor operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op Xor(Register lhs, Register rhs);
+
+    /// Creates an LogicalAnd operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op LogicalAnd(Register lhs, Register rhs);
+
+    /// Creates an LogicalOr operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op LogicalOr(Register lhs, Register rhs);
+
+    /// Creates an Equal operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op Equal(Register lhs, Register rhs);
+
+    /// Creates an NotEqual operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op NotEqual(Register lhs, Register rhs);
+
+    /// Creates an LessThan operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op LessThan(Register lhs, Register rhs);
+
+    /// Creates an GreaterThan operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op GreaterThan(Register lhs, Register rhs);
+
+    /// Creates an LessThanEqual operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op LessThanEqual(Register lhs, Register rhs);
+
+    /// Creates an GreaterThanEqual operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op GreaterThanEqual(Register lhs, Register rhs);
+
+    /// Creates an ShiftLeft operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op ShiftLeft(Register lhs, Register rhs);
+
+    /// Creates an ShiftRight operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op ShiftRight(Register lhs, Register rhs);
+
+    /// Creates an Add operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op Add(Register lhs, Register rhs);
+
+    /// Creates an Subtract operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op Subtract(Register lhs, Register rhs);
+
+    /// Creates an Multiply operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op Multiply(Register lhs, Register rhs);
+
+    /// Creates an Divide operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op Divide(Register lhs, Register rhs);
+
+    /// Creates an Modulo operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    Op Modulo(Register lhs, Register rhs);
+
+    /// @returns a unique register id
+    Register::Id AllocateRegister();
+
     /// The IR module.
     Module ir;
+
+    /// The next register number to allocate
+    Register::Id next_register_id = 1;
 };
 
 }  // namespace tint::ir

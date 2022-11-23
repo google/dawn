@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_IR_REGISTER_H_
 #define SRC_TINT_IR_REGISTER_H_
 
-#include <string>
+#include <ostream>
 #include <variant>
 
 #include "src/tint/number.h"
@@ -30,6 +30,26 @@ class Register {
   public:
     /// A register id.
     using Id = uint32_t;
+
+    /// The type of the register
+    enum class Kind {
+        /// A uninitialized register
+        kUninitialized,
+        /// A temporary allocated register
+        kTemp,
+        /// A f32 register
+        kF32,
+        /// A f16 register
+        kF16,
+        /// An i32 register
+        kI32,
+        /// A u32 register
+        kU32,
+        /// A variable register
+        kVar,
+        /// A boolean register
+        kBool,
+    };
 
     /// Stores data for a given variable. There will be multiple `VarData` entries for a given `id`.
     /// The `id` acts like a generation number (although they aren't sequential, they are
@@ -110,6 +130,9 @@ class Register {
     /// @returns true if this is a bool register
     bool IsBool() const { return kind_ == Kind::kBool; }
 
+    /// @returns the kind of register
+    Kind GetKind() const { return kind_; }
+
     /// @returns the register data as a `f32`.
     /// @note, must only be called if `IsF32()` is true
     f32 AsF32() const { return std::get<f32>(data_); }
@@ -132,35 +155,14 @@ class Register {
     /// @note, must only be called if `IsBool()` is true
     bool AsBool() const { return std::get<bool>(data_); }
 
-    /// @returns the string representation of the register
-    std::string AsString() const;
-
   private:
-    /// The type of the register
-    enum class Kind {
-        /// A uninitialized register
-        kUninitialized,
-        /// A temporary allocated register
-        kTemp,
-        /// A f32 register
-        kF32,
-        /// A f16 register
-        kF16,
-        /// An i32 register
-        kI32,
-        /// A u32 register
-        kU32,
-        /// A variable register
-        kVar,
-        /// A boolean register
-        kBool,
-    };
-
     /// The type of data stored in this register
     Kind kind_;
     /// The data stored in the register
     std::variant<Id, f32, f16, u32, i32, VarData, bool> data_;
 };
+
+std::ostream& operator<<(std::ostream& out, const Register& r);
 
 }  // namespace tint::ir
 

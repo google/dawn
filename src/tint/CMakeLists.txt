@@ -658,6 +658,8 @@ if(${TINT_BUILD_IR})
     ir/builder_impl.h
     ir/debug.cc
     ir/debug.h
+    ir/disassembler.cc
+    ir/disassembler.h
     ir/flow_node.cc
     ir/flow_node.h
     ir/function.cc
@@ -668,6 +670,8 @@ if(${TINT_BUILD_IR})
     ir/loop.h
     ir/module.cc
     ir/module.h
+    ir/op.cc
+    ir/op.h
     ir/register.cc
     ir/register.h
     ir/switch.cc
@@ -1335,6 +1339,7 @@ if(TINT_BUILD_TESTS)
   if (${TINT_BUILD_IR})
     list(APPEND TINT_TEST_SRCS
       ir/builder_impl_test.cc
+      ir/op_test.cc
       ir/register_test.cc
       ir/test_helper.h
     )

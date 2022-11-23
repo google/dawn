@@ -42,27 +42,35 @@ Register& Register::operator=(const Register& o) = default;
 
 Register& Register::operator=(Register&& o) = default;
 
-std::string Register::AsString() const {
-    switch (kind_) {
-        case Kind::kTemp:
-            return "%" + std::to_string(AsId());
-        case Kind::kF32:
-            return std::to_string(AsF32().value);
-        case Kind::kF16:
-            return std::to_string(AsF16().value);
-        case Kind::kI32:
-            return std::to_string(AsI32().value);
-        case Kind::kU32:
-            return std::to_string(AsU32().value);
-        // TODO(dsinclair): Emit the symbol instead of v
-        case Kind::kVar:
-            return "%v" + std::to_string(AsVarData().id);
-        case Kind::kBool:
-            return AsBool() ? "true" : "false";
-        case Kind::kUninitialized:
+std::ostream& operator<<(std::ostream& out, const Register& r) {
+    switch (r.GetKind()) {
+        case Register::Kind::kTemp:
+            out << "%" << std::to_string(r.AsId());
+            break;
+        case Register::Kind::kF32:
+            out << std::to_string(r.AsF32().value);
+            break;
+        case Register::Kind::kF16:
+            out << std::to_string(r.AsF16().value);
+            break;
+        case Register::Kind::kI32:
+            out << std::to_string(r.AsI32().value);
+            break;
+        case Register::Kind::kU32:
+            out << std::to_string(r.AsU32().value);
+            break;
+            // TODO(dsinclair): Emit the symbol instead of v
+        case Register::Kind::kVar:
+            out << "%v" << std::to_string(r.AsVarData().id);
+            break;
+        case Register::Kind::kBool:
+            out << (r.AsBool() ? "true" : "false");
+            break;
+        case Register::Kind::kUninitialized:
+            out << "unknown register";
             break;
     }
-    return "unknown register";
+    return out;
 }
 
 }  // namespace tint::ir

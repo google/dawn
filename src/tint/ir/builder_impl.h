@@ -31,6 +31,7 @@ namespace tint {
 class Program;
 }  // namespace tint
 namespace tint::ast {
+class BinaryExpression;
 class BlockStatement;
 class BreakIfStatement;
 class BreakStatement;
@@ -145,6 +146,11 @@ class BuilderImpl {
     /// @param var the variable to emit
     /// @returns true if successful, false otherwise
     bool EmitVariable(const ast::Variable* var);
+
+    /// Emits a binary expression
+    /// @param expr the binary expression
+    /// @returns the register storing the result if successful, utils::Failure otherwise
+    utils::Result<Register> EmitBinary(const ast::BinaryExpression* expr);
 
     /// Emits a literal expression
     /// @param lit the literal to emit

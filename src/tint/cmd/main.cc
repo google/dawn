@@ -42,6 +42,7 @@
 
 #if TINT_BUILD_IR
 #include "src/tint/ir/debug.h"
+#include "src/tint/ir/disassembler.h"
 #include "src/tint/ir/module.h"
 #endif  // TINT_BUILD_IR
 
@@ -1343,7 +1344,8 @@ int main(int argc, const char** argv) {
         } else {
             auto mod = result.Move();
             if (options.dump_ir) {
-                std::cout << tint::ir::Debug::AsString(&mod) << std::endl;
+                tint::ir::Disassembler d;
+                std::cout << d.Disassemble(mod) << std::endl;
             }
             if (options.dump_ir_graph) {
                 auto graph = tint::ir::Debug::AsDotGraph(&mod);
