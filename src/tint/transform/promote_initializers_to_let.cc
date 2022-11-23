@@ -70,7 +70,8 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
         }
 
         any_promoted = true;
-        return hoist_to_decl_before.Add(expr, expr->Declaration(), true);
+        return hoist_to_decl_before.Add(expr, expr->Declaration(),
+                                        HoistToDeclBefore::VariableKind::kLet);
     };
 
     for (auto* node : src->ASTNodes().Objects()) {

@@ -44,7 +44,7 @@ TEST_F(HoistToDeclBeforeTest, VarInit) {
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
     auto* sem_expr = ctx.src->Sem().Get(expr);
-    hoistToDeclBefore.Add(sem_expr, expr, true);
+    hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kLet);
 
     ctx.Clone();
     Program cloned(std::move(cloned_b));
@@ -75,14 +75,14 @@ TEST_F(HoistToDeclBeforeTest, ForLoopInit) {
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
     auto* sem_expr = ctx.src->Sem().Get(expr);
-    hoistToDeclBefore.Add(sem_expr, expr, true);
+    hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kVar);
 
     ctx.Clone();
     Program cloned(std::move(cloned_b));
 
     auto* expect = R"(
 fn f() {
-  let tint_symbol = 1i;
+  var tint_symbol = 1i;
   for(var a = tint_symbol; true; ) {
   }
 }
@@ -93,12 +93,12 @@ fn f() {
 
 TEST_F(HoistToDeclBeforeTest, ForLoopCond) {
     // fn f() {
-    //     var a : bool;
+    //     const a = true;
     //     for(; a; ) {
     //     }
     // }
     ProgramBuilder b;
-    auto* var = b.Decl(b.Var("a", b.ty.bool_()));
+    auto* var = b.Decl(b.Const("a", b.Expr(true)));
     auto* expr = b.Expr("a");
     auto* s = b.For(nullptr, expr, nullptr, b.Block());
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var, s});
@@ -109,16 +109,16 @@ TEST_F(HoistToDeclBeforeTest, ForLoopCond) {
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
     auto* sem_expr = ctx.src->Sem().Get(expr);
-    hoistToDeclBefore.Add(sem_expr, expr, true);
+    hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kConst);
 
     ctx.Clone();
     Program cloned(std::move(cloned_b));
 
     auto* expect = R"(
 fn f() {
-  var a : bool;
+  const a = true;
   loop {
-    let tint_symbol = a;
+    const tint_symbol = a;
     if (!(tint_symbol)) {
       break;
     }
@@ -147,7 +147,7 @@ TEST_F(HoistToDeclBeforeTest, ForLoopCont) {
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
     auto* sem_expr = ctx.src->Sem().Get(expr);
-    hoistToDeclBefore.Add(sem_expr, expr, true);
+    hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kLet);
 
     ctx.Clone();
     Program cloned(std::move(cloned_b));
@@ -190,7 +190,7 @@ TEST_F(HoistToDeclBeforeTest, WhileCond) {
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
     auto* sem_expr = ctx.src->Sem().Get(expr);
-    hoistToDeclBefore.Add(sem_expr, expr, true);
+    hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kVar);
 
     ctx.Clone();
     Program cloned(std::move(cloned_b));
@@ -199,7 +199,7 @@ TEST_F(HoistToDeclBeforeTest, WhileCond) {
 fn f() {
   var a : bool;
   loop {
-    let tint_symbol = a;
+    var tint_symbol = a;
     if (!(tint_symbol)) {
       break;
     }
@@ -214,14 +214,14 @@ fn f() {
 
 TEST_F(HoistToDeclBeforeTest, ElseIf) {
     // fn f() {
-    //     var a : bool;
+    //     const a = true;
     //     if (true) {
     //     } else if (a) {
     //     } else {
     //     }
     // }
     ProgramBuilder b;
-    auto* var = b.Decl(b.Var("a", b.ty.bool_()));
+    auto* var = b.Decl(b.Const("a", b.Expr(true)));
     auto* expr = b.Expr("a");
     auto* s = b.If(b.Expr(true), b.Block(),      //
                    b.Else(b.If(expr, b.Block(),  //
@@ -234,17 +234,17 @@ TEST_F(HoistToDeclBeforeTest, ElseIf) {
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
     auto* sem_expr = ctx.src->Sem().Get(expr);
-    hoistToDeclBefore.Add(sem_expr, expr, true);
+    hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kConst);
 
     ctx.Clone();
     Program cloned(std::move(cloned_b));
 
     auto* expect = R"(
 fn f() {
-  var a : bool;
+  const a = true;
   if (true) {
   } else {
-    let tint_symbol = a;
+    const tint_symbol = a;
     if (tint_symbol) {
     } else {
     }
@@ -272,7 +272,7 @@ TEST_F(HoistToDeclBeforeTest, Array1D) {
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
     auto* sem_expr = ctx.src->Sem().Get(expr);
-    hoistToDeclBefore.Add(sem_expr, expr, true);
+    hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kLet);
 
     ctx.Clone();
     Program cloned(std::move(cloned_b));
@@ -306,7 +306,7 @@ TEST_F(HoistToDeclBeforeTest, Array2D) {
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
     auto* sem_expr = ctx.src->Sem().Get(expr);
-    hoistToDeclBefore.Add(sem_expr, expr, true);
+    hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kVar);
 
     ctx.Clone();
     Program cloned(std::move(cloned_b));
@@ -314,7 +314,7 @@ TEST_F(HoistToDeclBeforeTest, Array2D) {
     auto* expect = R"(
 fn f() {
   var a : array<array<i32, 10u>, 10i>;
-  let tint_symbol = a[0i][0i];
+  var tint_symbol = a[0i][0i];
   var b = tint_symbol;
 }
 )";

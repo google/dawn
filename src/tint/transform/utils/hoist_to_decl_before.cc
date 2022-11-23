@@ -38,23 +38,39 @@ struct HoistToDeclBefore::State {
     /// @copydoc HoistToDeclBefore::Add()
     bool Add(const sem::Expression* before_expr,
              const ast::Expression* expr,
-             bool as_let,
+             VariableKind kind,
              const char* decl_name) {
         auto name = b.Symbols().New(decl_name);
 
-        if (as_let) {
-            auto builder = [this, expr, name] {
-                return b.Decl(b.Let(name, ctx.CloneWithoutTransform(expr)));
-            };
-            if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
-                return false;
+        switch (kind) {
+            case VariableKind::kLet: {
+                auto builder = [this, expr, name] {
+                    return b.Decl(b.Let(name, ctx.CloneWithoutTransform(expr)));
+                };
+                if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
+                    return false;
+                }
+                break;
             }
-        } else {
-            auto builder = [this, expr, name] {
-                return b.Decl(b.Var(name, ctx.CloneWithoutTransform(expr)));
-            };
-            if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
-                return false;
+
+            case VariableKind::kVar: {
+                auto builder = [this, expr, name] {
+                    return b.Decl(b.Var(name, ctx.CloneWithoutTransform(expr)));
+                };
+                if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
+                    return false;
+                }
+                break;
+            }
+
+            case VariableKind::kConst: {
+                auto builder = [this, expr, name] {
+                    return b.Decl(b.Const(name, ctx.CloneWithoutTransform(expr)));
+                };
+                if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
+                    return false;
+                }
+                break;
             }
         }
 
@@ -361,9 +377,9 @@ HoistToDeclBefore::~HoistToDeclBefore() {}
 
 bool HoistToDeclBefore::Add(const sem::Expression* before_expr,
                             const ast::Expression* expr,
-                            bool as_let,
+                            VariableKind kind,
                             const char* decl_name) {
-    return state_->Add(before_expr, expr, as_let, decl_name);
+    return state_->Add(before_expr, expr, kind, decl_name);
 }
 
 bool HoistToDeclBefore::InsertBefore(const sem::Statement* before_stmt,

@@ -38,16 +38,23 @@ class HoistToDeclBefore {
     /// StmtBuilder is a builder of an AST statement
     using StmtBuilder = std::function<const ast::Statement*()>;
 
+    /// VariableKind is either a var, let or const
+    enum class VariableKind {
+        kVar,
+        kLet,
+        kConst,
+    };
+
     /// Hoists @p expr to a `let` or `var` with optional `decl_name`, inserting it
     /// before @p before_expr.
     /// @param before_expr expression to insert `expr` before
     /// @param expr expression to hoist
-    /// @param as_let hoist to `let` if true, otherwise to `var`
+    /// @param kind variable kind to hoist to
     /// @param decl_name optional name to use for the variable/constant name
     /// @return true on success
     bool Add(const sem::Expression* before_expr,
              const ast::Expression* expr,
-             bool as_let,
+             VariableKind kind,
              const char* decl_name = "");
 
     /// Inserts @p stmt before @p before_stmt, possibly converting 'for-loop's to 'loop's if
