@@ -23,6 +23,7 @@
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/ir/register.h"
 #include "src/tint/utils/result.h"
 
 // Forward Declarations
@@ -148,7 +149,7 @@ class BuilderImpl {
     /// Emits a literal expression
     /// @param lit the literal to emit
     /// @returns true if successful, false otherwise
-    bool EmitLiteral(const ast::LiteralExpression* lit);
+    utils::Result<Register> EmitLiteral(const ast::LiteralExpression* lit);
 
     /// Emits a type
     /// @param ty the type to emit

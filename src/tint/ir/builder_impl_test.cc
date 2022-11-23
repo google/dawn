@@ -22,9 +22,9 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IRBuilderImplTest = TestHelper;
+using IR_BuilderImplTest = TestHelper;
 
-TEST_F(IRBuilderImplTest, Func) {
+TEST_F(IR_BuilderImplTest, Func) {
     // func -> start -> end
 
     Func("f", utils::Empty, ty.void_(), utils::Empty);
@@ -47,7 +47,7 @@ TEST_F(IRBuilderImplTest, Func) {
     EXPECT_EQ(f->start_target->branch_target, f->end_target);
 }
 
-TEST_F(IRBuilderImplTest, EntryPoint) {
+TEST_F(IR_BuilderImplTest, EntryPoint) {
     Func("f", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
     auto& b = CreateBuilder();
@@ -60,7 +60,7 @@ TEST_F(IRBuilderImplTest, EntryPoint) {
     EXPECT_EQ(m.functions[0], m.entry_points[0]);
 }
 
-TEST_F(IRBuilderImplTest, IfStatement) {
+TEST_F(IR_BuilderImplTest, IfStatement) {
     // func -> start -> if -> true block
     //                     -> false block
     //
@@ -103,7 +103,7 @@ TEST_F(IRBuilderImplTest, IfStatement) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, IfStatement_TrueReturns) {
+TEST_F(IR_BuilderImplTest, IfStatement_TrueReturns) {
     // func -> start -> if -> true block
     //                     -> false block
     //
@@ -144,7 +144,7 @@ TEST_F(IRBuilderImplTest, IfStatement_TrueReturns) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, IfStatement_FalseReturns) {
+TEST_F(IR_BuilderImplTest, IfStatement_FalseReturns) {
     // func -> start -> if -> true block
     //                     -> false block
     //
@@ -185,7 +185,7 @@ TEST_F(IRBuilderImplTest, IfStatement_FalseReturns) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, IfStatement_BothReturn) {
+TEST_F(IR_BuilderImplTest, IfStatement_BothReturn) {
     // func -> start -> if -> true block
     //                     -> false block
     //
@@ -225,7 +225,7 @@ TEST_F(IRBuilderImplTest, IfStatement_BothReturn) {
     EXPECT_EQ(flow->false_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, IfStatement_JumpChainToMerge) {
+TEST_F(IR_BuilderImplTest, IfStatement_JumpChainToMerge) {
     // if (true) {
     //   loop {
     //     break;
@@ -282,7 +282,7 @@ TEST_F(IRBuilderImplTest, IfStatement_JumpChainToMerge) {
     EXPECT_EQ(if_flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, Loop_WithBreak) {
+TEST_F(IR_BuilderImplTest, Loop_WithBreak) {
     // func -> start -> loop -> loop start -> loop merge -> func end
     //
     //   [continuing] -> loop start
@@ -320,7 +320,7 @@ TEST_F(IRBuilderImplTest, Loop_WithBreak) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, Loop_WithContinue) {
+TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
     // func -> start -> loop -> loop start -> if -> true block
     //                                           -> false block
     //
@@ -379,7 +379,7 @@ TEST_F(IRBuilderImplTest, Loop_WithContinue) {
     EXPECT_EQ(loop_flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, Loop_WithContinuing_BreakIf) {
+TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
     // func -> start -> loop -> loop start -> continuing
     //
     //   [loop continuing] -> if -> true branch
@@ -439,7 +439,7 @@ TEST_F(IRBuilderImplTest, Loop_WithContinuing_BreakIf) {
     EXPECT_EQ(loop_flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, Loop_WithReturn) {
+TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
     // func -> start -> loop -> loop start -> if -> true block
     //                                           -> false block
     //
@@ -499,7 +499,7 @@ TEST_F(IRBuilderImplTest, Loop_WithReturn) {
     EXPECT_EQ(loop_flow->merge_target->branch_target, nullptr);
 }
 
-TEST_F(IRBuilderImplTest, Loop_WithOnlyReturn) {
+TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
     // {
     //   loop {
     //     return;
@@ -551,7 +551,7 @@ TEST_F(IRBuilderImplTest, Loop_WithOnlyReturn) {
     EXPECT_EQ(func->start_target->branch_target, ir_loop);
 }
 
-TEST_F(IRBuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
+TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     // {
     //   loop {
     //     return;
@@ -622,7 +622,7 @@ TEST_F(IRBuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     EXPECT_EQ(func->start_target->branch_target, ir_loop);
 }
 
-TEST_F(IRBuilderImplTest, Loop_WithIf_BothBranchesBreak) {
+TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
     // func -> start -> loop -> loop start -> if -> true branch
     //                                           -> false branch
     //
@@ -684,7 +684,7 @@ TEST_F(IRBuilderImplTest, Loop_WithIf_BothBranchesBreak) {
     EXPECT_EQ(loop_flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, Loop_Nested) {
+TEST_F(IR_BuilderImplTest, Loop_Nested) {
     // loop {   // loop_a
     //   loop {  // loop_b
     //      if (true) { break; }  // if_a
@@ -879,7 +879,7 @@ TEST_F(IRBuilderImplTest, Loop_Nested) {
     EXPECT_EQ(loop_flow_a->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, While) {
+TEST_F(IR_BuilderImplTest, While) {
     // {
     //   while false {
     //   }
@@ -939,7 +939,7 @@ TEST_F(IRBuilderImplTest, While) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, While_Return) {
+TEST_F(IR_BuilderImplTest, While_Return) {
     // {
     //   while true {
     //     return;
@@ -1000,7 +1000,7 @@ TEST_F(IRBuilderImplTest, While_Return) {
 }
 
 // TODO(dsinclair): Enable when variable declarations and increment are supported
-TEST_F(IRBuilderImplTest, DISABLED_For) {
+TEST_F(IR_BuilderImplTest, DISABLED_For) {
     // for(var i: 0; i < 10; i++) {
     // }
     //
@@ -1058,7 +1058,7 @@ TEST_F(IRBuilderImplTest, DISABLED_For) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, For_NoInitCondOrContinuing) {
+TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
     // for (;;) {
     //   break;
     // }
@@ -1096,7 +1096,7 @@ TEST_F(IRBuilderImplTest, For_NoInitCondOrContinuing) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, Switch) {
+TEST_F(IR_BuilderImplTest, Switch) {
     // func -> switch -> case 1
     //                -> case 2
     //                -> default
@@ -1153,7 +1153,7 @@ TEST_F(IRBuilderImplTest, Switch) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, Switch_OnlyDefault) {
+TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {
     // func -> switch -> default -> switch merge -> func end
     //
     auto* ast_switch = Switch(1_i, utils::Vector{DefaultCase(Block())});
@@ -1189,7 +1189,7 @@ TEST_F(IRBuilderImplTest, Switch_OnlyDefault) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, Switch_WithBreak) {
+TEST_F(IR_BuilderImplTest, Switch_WithBreak) {
     // {
     //   switch(1) {
     //     case 0: {
@@ -1248,7 +1248,7 @@ TEST_F(IRBuilderImplTest, Switch_WithBreak) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 }
 
-TEST_F(IRBuilderImplTest, Switch_AllReturn) {
+TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
     // {
     //   switch(1) {
     //     case 0: {
@@ -1311,6 +1311,66 @@ TEST_F(IRBuilderImplTest, Switch_AllReturn) {
     EXPECT_EQ(flow->cases[0].start_target->branch_target, func->end_target);
     EXPECT_EQ(flow->cases[1].start_target->branch_target, func->end_target);
     EXPECT_EQ(flow->merge_target->branch_target, nullptr);
+}
+
+TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_True) {
+    auto& b = CreateEmptyBuilder();
+    auto r = b.EmitLiteral(Expr(true));
+    ASSERT_TRUE(r);
+
+    auto reg = r.Get();
+    EXPECT_TRUE(reg.IsBool());
+    EXPECT_TRUE(reg.AsBool());
+}
+
+TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_False) {
+    auto& b = CreateEmptyBuilder();
+    auto r = b.EmitLiteral(Expr(false));
+    ASSERT_TRUE(r);
+
+    auto reg = r.Get();
+    EXPECT_TRUE(reg.IsBool());
+    EXPECT_FALSE(reg.AsBool());
+}
+
+TEST_F(IR_BuilderImplTest, EmitLiteral_F32) {
+    auto& b = CreateEmptyBuilder();
+    auto r = b.EmitLiteral(Expr(1.2_f));
+    ASSERT_TRUE(r);
+
+    auto reg = r.Get();
+    EXPECT_TRUE(reg.IsF32());
+    EXPECT_EQ(1.2_f, reg.AsF32());
+}
+
+TEST_F(IR_BuilderImplTest, EmitLiteral_F16) {
+    auto& b = CreateEmptyBuilder();
+    auto r = b.EmitLiteral(Expr(1.2_h));
+    ASSERT_TRUE(r);
+
+    auto reg = r.Get();
+    EXPECT_TRUE(reg.IsF16());
+    EXPECT_EQ(1.2_h, reg.AsF16());
+}
+
+TEST_F(IR_BuilderImplTest, EmitLiteral_I32) {
+    auto& b = CreateEmptyBuilder();
+    auto r = b.EmitLiteral(Expr(-2_i));
+    ASSERT_TRUE(r);
+
+    auto reg = r.Get();
+    EXPECT_TRUE(reg.IsI32());
+    EXPECT_EQ(-2_i, reg.AsI32());
+}
+
+TEST_F(IR_BuilderImplTest, EmitLiteral_U32) {
+    auto& b = CreateEmptyBuilder();
+    auto r = b.EmitLiteral(Expr(2_u));
+    ASSERT_TRUE(r);
+
+    auto reg = r.Get();
+    EXPECT_TRUE(reg.IsU32());
+    EXPECT_EQ(2_u, reg.AsU32());
 }
 
 }  // namespace

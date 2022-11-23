@@ -16,12 +16,15 @@
 
 #include "src/tint/ast/alias.h"
 #include "src/tint/ast/block_statement.h"
+#include "src/tint/ast/bool_literal_expression.h"
 #include "src/tint/ast/break_if_statement.h"
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/ast/continue_statement.h"
+#include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/function.h"
 #include "src/tint/ast/if_statement.h"
+#include "src/tint/ast/int_literal_expression.h"
 #include "src/tint/ast/literal_expression.h"
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/return_statement.h"
@@ -528,17 +531,29 @@ bool BuilderImpl::EmitVariable(const ast::Variable* var) {
         });
 }
 
-bool BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {
+utils::Result<Register> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {
     return tint::Switch(  //
         lit,
-        // [&](const ast::BoolLiteralExpression* l) { },
-        // [&](const ast::FloatLiteralExpression* l) { },
-        // [&](const ast::IntLiteralExpression* l) { },
+        [&](const ast::BoolLiteralExpression* l) {
+            return utils::Result<Register>{Register(l->value)};
+        },
+        [&](const ast::FloatLiteralExpression* l) {
+            if (l->suffix == ast::FloatLiteralExpression::Suffix::kF) {
+                return utils::Result<Register>{Register(f32(static_cast<float>(l->value)))};
+            }
+            return utils::Result<Register>{Register(f16(static_cast<float>(l->value)))};
+        },
+        [&](const ast::IntLiteralExpression* l) {
+            if (l->suffix == ast::IntLiteralExpression::Suffix::kI) {
+                return utils::Result<Register>{Register(i32(l->value))};
+            }
+            return utils::Result<Register>{Register(u32(l->value))};
+        },
         [&](Default) {
             diagnostics_.add_warning(tint::diag::System::IR,
                                      "unknown literal type: " + std::string(lit->TypeInfo().name),
                                      lit->source);
-            return false;
+            return utils::Failure;
         });
 }
 
