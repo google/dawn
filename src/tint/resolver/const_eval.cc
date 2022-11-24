@@ -2446,6 +2446,33 @@ ConstEval::Result ConstEval::floor(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0]);
 }
 
+ConstEval::Result ConstEval::fma(const sem::Type* ty,
+                                 utils::VectorRef<const sem::Constant*> args,
+                                 const Source& source) {
+    auto transform = [&](const sem::Constant* c1, const sem::Constant* c2,
+                         const sem::Constant* c3) {
+        auto create = [&](auto e1, auto e2, auto e3) -> ImplResult {
+            auto err_msg = [&] {
+                AddNote("when calculating fma", source);
+                return utils::Failure;
+            };
+
+            auto mul = Mul(source, e1, e2);
+            if (!mul) {
+                return err_msg();
+            }
+
+            auto val = Add(source, mul.Get(), e3);
+            if (!val) {
+                return err_msg();
+            }
+            return CreateElement(builder, source, c1->Type(), val.Get());
+        };
+        return Dispatch_fa_f32_f16(create, c1, c2, c3);
+    };
+    return TransformElements(builder, ty, transform, args[0], args[1], args[2]);
+}
+
 ConstEval::Result ConstEval::frexp(const sem::Type* ty,
                                    utils::VectorRef<const sem::Constant*> args,
                                    const Source& source) {

@@ -1,5 +1,5 @@
 void fma_6a3283() {
-  float4 res = mad((1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx);
+  float4 res = (2.0f).xxxx;
 }
 
 struct tint_symbol {

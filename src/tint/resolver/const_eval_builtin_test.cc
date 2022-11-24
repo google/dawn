@@ -1072,6 +1072,31 @@ INSTANTIATE_TEST_SUITE_P(  //
                      testing::ValuesIn(Concat(FloorCases<AFloat>(),  //
                                               FloorCases<f32>(),
                                               FloorCases<f16>()))));
+
+template <typename T>
+std::vector<Case> FmaCases() {
+    auto error_msg = [](auto a, const char* op, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, op, b) + R"(
+12:34 note: when calculating fma)";
+    };
+    return {
+        C({T(0), T(0), T(0)}, T(0)),
+        C({T(1), T(2), T(3)}, T(5)),
+        C({Vec(T(1), T(2.5), -T(1)), Vec(T(2), T(2.5), T(1)), Vec(T(4), T(3.75), -T(2))},
+          Vec(T(6), T(10), -T(3))),
+
+        E({T::Highest(), T::Highest(), T(0)}, error_msg(T::Highest(), "*", T::Highest())),
+        E({T::Highest(), T(1), T::Highest()}, error_msg(T::Highest(), "+", T::Highest())),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Fma,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kFma),
+                     testing::ValuesIn(Concat(FmaCases<AFloat>(),  //
+                                              FmaCases<f32>(),
+                                              FmaCases<f16>()))));
+
 template <typename T>
 std::vector<Case> FrexpCases() {
     using F = T;                                                         // fract type

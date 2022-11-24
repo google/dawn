@@ -1,5 +1,5 @@
 void fma_ab7818() {
-  vector<float16_t, 4> res = mad((float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(2.0h)).xxxx;
 }
 
 struct tint_symbol {
