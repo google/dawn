@@ -2,7 +2,7 @@
 
 using namespace metal;
 void inverseSqrt_8f2bd2() {
-  float2 res = rsqrt(float2(1.0f));
+  float2 res = float2(1.0f);
 }
 
 struct tint_symbol {

@@ -1184,6 +1184,28 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               InsertBitsCases<u32>()))));
 
 template <typename T>
+std::vector<Case> InverseSqrtCases() {
+    std::vector<Case> cases = {
+        C({T(25)}, T(.2)),
+
+        // Vector tests
+        C({Vec(T(25), T(100))}, Vec(T(.2), T(.1))),
+
+        E({T(0)}, "12:34 error: inverseSqrt must be called with a value > 0"),
+        E({-T(0)}, "12:34 error: inverseSqrt must be called with a value > 0"),
+        E({-T(25)}, "12:34 error: inverseSqrt must be called with a value > 0"),
+    };
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    InverseSqrt,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kInverseSqrt),
+                     testing::ValuesIn(Concat(InverseSqrtCases<AFloat>(),  //
+                                              InverseSqrtCases<f32>(),
+                                              InverseSqrtCases<f16>()))));
+
+template <typename T>
 std::vector<Case> DegreesAFloatCases() {
     return std::vector<Case>{
         C({T(0)}, T(0)),                             //

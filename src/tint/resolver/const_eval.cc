@@ -2529,6 +2529,40 @@ ConstEval::Result ConstEval::insertBits(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
+ConstEval::Result ConstEval::inverseSqrt(const sem::Type* ty,
+                                         utils::VectorRef<const sem::Constant*> args,
+                                         const Source& source) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto e) -> ImplResult {
+            using NumberT = decltype(e);
+
+            if (e <= NumberT(0)) {
+                AddError("inverseSqrt must be called with a value > 0", source);
+                return utils::Failure;
+            }
+
+            auto err = [&] {
+                AddNote("when calculating inverseSqrt", source);
+                return utils::Failure;
+            };
+
+            auto s = Sqrt(source, e);
+            if (!s) {
+                return err();
+            }
+            auto div = Div(source, NumberT(1), s.Get());
+            if (!div) {
+                return err();
+            }
+
+            return CreateElement(builder, source, c0->Type(), div.Get());
+        };
+        return Dispatch_fa_f32_f16(create, c0);
+    };
+
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
 ConstEval::Result ConstEval::length(const sem::Type* ty,
                                     utils::VectorRef<const sem::Constant*> args,
                                     const Source& source) {

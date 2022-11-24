@@ -2,7 +2,7 @@
 
 using namespace metal;
 void inverseSqrt_440300() {
-  half res = rsqrt(1.0h);
+  half res = 1.0h;
 }
 
 struct tint_symbol {

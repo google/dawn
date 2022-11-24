@@ -487,8 +487,8 @@ fn fract<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 @stage("fragment") fn fwidthFine<N: num>(vec<N, f32>) -> vec<N, f32>
 @const fn insertBits<T: iu32>(T, T, u32, u32) -> T
 @const fn insertBits<N: num, T: iu32>(vec<N, T>, vec<N, T>, u32, u32) -> vec<N, T>
-fn inverseSqrt<T: f32_f16>(T) -> T
-fn inverseSqrt<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn inverseSqrt<T: fa_f32_f16>(T) -> T
+@const fn inverseSqrt<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 fn ldexp<T: f32_f16>(T, i32) -> T
 fn ldexp<N: num, T: f32_f16>(vec<N, T>, vec<N, i32>) -> vec<N, T>
 @const fn length<T: fa_f32_f16>(@test_value(0.0) T) -> T

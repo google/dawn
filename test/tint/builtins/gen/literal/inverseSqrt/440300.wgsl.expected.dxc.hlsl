@@ -1,5 +1,5 @@
 void inverseSqrt_440300() {
-  float16_t res = rsqrt(float16_t(1.0h));
+  float16_t res = float16_t(1.0h);
 }
 
 struct tint_symbol {

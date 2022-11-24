@@ -1,5 +1,5 @@
 void inverseSqrt_cbdc70() {
-  vector<float16_t, 4> res = rsqrt((float16_t(1.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(1.0h)).xxxx;
 }
 
 struct tint_symbol {
