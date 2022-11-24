@@ -494,11 +494,17 @@ ResultOrError<CompiledShader> ShaderModule::Compile(
     req.bytecode.compileFlags = compileFlags;
 
     if (device->IsToggleEnabled(Toggle::UseDXC)) {
+        // If UseDXC toggle are not forced to be disable, DXC should have been validated to be
+        // available.
+        ASSERT(ToBackend(device->GetAdapter())->GetBackend()->IsDXCAvailable());
+        // We can get the DXC version information since IsDXCAvailable() is true.
+        DxcVersionInfo dxcVersionInfo =
+            ToBackend(device->GetAdapter())->GetBackend()->GetDxcVersion();
+
         req.bytecode.compiler = Compiler::DXC;
         req.bytecode.dxcLibrary = device->GetDxcLibrary().Get();
         req.bytecode.dxcCompiler = device->GetDxcCompiler().Get();
-        DAWN_TRY_ASSIGN(req.bytecode.compilerVersion,
-                        ToBackend(device->GetAdapter())->GetBackend()->GetDXCompilerVersion());
+        req.bytecode.compilerVersion = dxcVersionInfo.DxcCompilerVersion;
         req.bytecode.dxcShaderProfile = device->GetDeviceInfo().shaderProfiles[stage];
     } else {
         req.bytecode.compiler = Compiler::FXC;

@@ -142,7 +142,7 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
     mSupportedFeatures.EnableFeature(Feature::DepthClipControl);
 
     // Both Dp4a and ShaderF16 features require DXC version being 1.4 or higher
-    if (GetBackend()->IsDXCAvailable(1, 4)) {
+    if (GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4)) {
         if (mDeviceInfo.supportsDP4a) {
             mSupportedFeatures.EnableFeature(Feature::ChromiumExperimentalDp4a);
         }
@@ -323,9 +323,10 @@ MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(
     // D3D12.
     if (feature == wgpu::FeatureName::ShaderF16 ||
         feature == wgpu::FeatureName::ChromiumExperimentalDp4a) {
-        DAWN_INVALID_IF(
-            !(userProvidedToggles.IsEnabled(Toggle::UseDXC) && mBackend->IsDXCAvailable(1, 4)),
-            "Feature %s requires DXC for D3D12.", GetInstance()->GetFeatureInfo(feature)->name);
+        DAWN_INVALID_IF(!(userProvidedToggles.IsEnabled(Toggle::UseDXC) &&
+                          mBackend->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4)),
+                        "Feature %s requires DXC for D3D12.",
+                        GetInstance()->GetFeatureInfo(feature)->name);
     }
     return {};
 }
