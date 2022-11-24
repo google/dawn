@@ -156,7 +156,7 @@ TEST_P(DestroyTest, TextureSubmitDestroySubmit) {
 }
 
 // Attempting to set an object label after it has been destroyed should not cause an error.
-TEST_P(DestroyTest, DestroyThenSetLabel) {
+TEST_P(DestroyTest, DestroyObjectThenSetLabel) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     std::string label = "test";
     wgpu::BufferDescriptor descriptor;
@@ -165,6 +165,14 @@ TEST_P(DestroyTest, DestroyThenSetLabel) {
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
     buffer.Destroy();
     buffer.SetLabel(label.c_str());
+}
+
+// Attempting to set a device label after it has been destroyed should not cause an error.
+TEST_P(DestroyTest, DestroyDeviceThenSetLabel) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    std::string label = "test";
+    device.Destroy();
+    device.SetLabel(label.c_str());
 }
 
 // Device destroy before buffer submit will result in error.
