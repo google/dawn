@@ -34,65 +34,6 @@
 
 namespace tint::reader::spirv {
 
-namespace three_sided_patch {
-// This machinery is only used while SPIRV-Tools is in transition before it fully
-// uses the C++11 header spirv.hpp11
-
-/// Typedef for pointer to member function while the API call uses
-/// SpvStorageClass for its second argument.
-typedef uint32_t (
-    spvtools::opt::analysis::TypeManager::*PointerFinderSpvStorageClass)(uint32_t, SpvStorageClass);
-/// Typedef for pointer to member function while the API call uses
-/// spv::StorageClass for its second argument.
-typedef uint32_t (spvtools::opt::analysis::TypeManager::*PointerFinderSpvStorageClassCpp11)(
-    uint32_t,
-    spv::StorageClass);
-
-/// @param type_manager the SPIRV-Tools optimizer's type manager
-/// @param finder a pointer to member function in the type manager that does the
-/// actual lookup
-/// @param pointee_type_id the ID of the pointee type
-/// @param sc the storage class.  SC can be SpvStorageClass or spv::StorageClass
-/// @returns the ID for a SPIR-V pointer to pointee_type_id in storage class sc
-template <typename FinderType, typename SC>
-uint32_t FindPointerToType(spvtools::opt::analysis::TypeManager* type_manager,
-                           FinderType finder,
-                           uint32_t pointee_type_id,
-                           SC sc);
-
-template <>
-uint32_t FindPointerToType(spvtools::opt::analysis::TypeManager* type_mgr,
-                           PointerFinderSpvStorageClass finder,
-                           uint32_t pointee_type_id,
-                           SpvStorageClass sc) {
-    return (type_mgr->*finder)(pointee_type_id, sc);
-}
-
-template <>
-uint32_t FindPointerToType(spvtools::opt::analysis::TypeManager* type_mgr,
-                           PointerFinderSpvStorageClass finder,
-                           uint32_t pointee_type_id,
-                           spv::StorageClass sc) {
-    return (type_mgr->*finder)(pointee_type_id, static_cast<SpvStorageClass>(sc));
-}
-
-template <>
-uint32_t FindPointerToType(spvtools::opt::analysis::TypeManager* type_mgr,
-                           PointerFinderSpvStorageClassCpp11 finder,
-                           uint32_t pointee_type_id,
-                           SpvStorageClass sc) {
-    return (type_mgr->*finder)(pointee_type_id, static_cast<spv::StorageClass>(sc));
-}
-
-template <>
-uint32_t FindPointerToType(spvtools::opt::analysis::TypeManager* type_mgr,
-                           PointerFinderSpvStorageClassCpp11 finder,
-                           uint32_t pointee_type_id,
-                           spv::StorageClass sc) {
-    return (type_mgr->*finder)(pointee_type_id, sc);
-}
-}  // namespace three_sided_patch
-
 namespace {
 
 // Input SPIR-V needs only to conform to Vulkan 1.1 requirements.
@@ -104,12 +45,12 @@ const spv_target_env kInputEnv = SPV_ENV_VULKAN_1_1;
 /// @param inst a SPIR-V instruction
 /// @returns Returns the opcode for an instruciton
 inline spv::Op opcode(const spvtools::opt::Instruction& inst) {
-    return static_cast<spv::Op>(inst.opcode());
+    return inst.opcode();
 }
 /// @param inst a SPIR-V instruction pointer
 /// @returns Returns the opcode for an instruciton
 inline spv::Op opcode(const spvtools::opt::Instruction* inst) {
-    return static_cast<spv::Op>(inst->opcode());
+    return inst->opcode();
 }
 
 // A FunctionTraverser is used to compute an ordering of functions in the
@@ -1347,8 +1288,7 @@ bool ParserImpl::RegisterTypes() {
     // Manufacture a type for the gl_Position variable if we have to.
     if ((builtin_position_.struct_type_id != 0) &&
         (builtin_position_.position_member_pointer_type_id == 0)) {
-        builtin_position_.position_member_pointer_type_id = three_sided_patch::FindPointerToType(
-            type_mgr_, &spvtools::opt::analysis::TypeManager::FindPointerToType,
+        builtin_position_.position_member_pointer_type_id = type_mgr_->FindPointerToType(
             builtin_position_.position_member_type_id, builtin_position_.storage_class);
         ConvertType(builtin_position_.position_member_pointer_type_id);
     }
