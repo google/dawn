@@ -882,8 +882,8 @@ TEST_F(ResolverBuiltinFloatTest, Distance_TooManyParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to distance(vec3<f32>, vec3<f32>, vec3<f32>)
 
 2 candidate functions:
-  distance(T, T) -> T  where: T is f32 or f16
-  distance(vecN<T>, vecN<T>) -> T  where: T is f32 or f16
+  distance(T, T) -> T  where: T is abstract-float, f32 or f16
+  distance(vecN<T>, vecN<T>) -> T  where: T is abstract-float, f32 or f16
 )");
 }
 
@@ -896,8 +896,8 @@ TEST_F(ResolverBuiltinFloatTest, Distance_TooFewParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to distance(vec3<f32>)
 
 2 candidate functions:
-  distance(T, T) -> T  where: T is f32 or f16
-  distance(vecN<T>, vecN<T>) -> T  where: T is f32 or f16
+  distance(T, T) -> T  where: T is abstract-float, f32 or f16
+  distance(vecN<T>, vecN<T>) -> T  where: T is abstract-float, f32 or f16
 )");
 }
 
@@ -910,8 +910,8 @@ TEST_F(ResolverBuiltinFloatTest, Distance_NoParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to distance()
 
 2 candidate functions:
-  distance(T, T) -> T  where: T is f32 or f16
-  distance(vecN<T>, vecN<T>) -> T  where: T is f32 or f16
+  distance(T, T) -> T  where: T is abstract-float, f32 or f16
+  distance(vecN<T>, vecN<T>) -> T  where: T is abstract-float, f32 or f16
 )");
 }
 

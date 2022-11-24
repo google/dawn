@@ -2,7 +2,7 @@
 
 using namespace metal;
 void distance_7d201f() {
-  half res = fabs(1.0h - 1.0h);
+  half res = 0.0h;
 }
 
 struct tint_symbol {

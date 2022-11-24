@@ -1,5 +1,5 @@
 void distance_cfed73() {
-  float res = distance(1.0f, 1.0f);
+  float res = 0.0f;
 }
 
 struct tint_symbol {

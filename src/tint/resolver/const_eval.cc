@@ -1165,6 +1165,27 @@ ConstEval::Result ConstEval::Dot(const Source& source,
     return utils::Failure;
 }
 
+ConstEval::Result ConstEval::Length(const Source& source,
+                                    const sem::Type* ty,
+                                    const sem::Constant* c0) {
+    auto* vec_ty = c0->Type()->As<sem::Vector>();
+    // Evaluates to the absolute value of e if T is scalar.
+    if (vec_ty == nullptr) {
+        auto create = [&](auto e) {
+            using NumberT = decltype(e);
+            return CreateElement(builder, source, ty, NumberT{std::abs(e)});
+        };
+        return Dispatch_fa_f32_f16(create, c0);
+    }
+
+    // Evaluates to sqrt(e[0]^2 + e[1]^2 + ...) if T is a vector type.
+    auto d = Dot(source, c0, c0);
+    if (!d) {
+        return utils::Failure;
+    }
+    return Dispatch_fa_f32_f16(SqrtFunc(source, ty), d.Get());
+}
+
 auto ConstEval::Det2Func(const Source& source, const sem::Type* elem_ty) {
     return [=](auto a, auto b, auto c, auto d) -> ImplResult {
         if (auto r = Det2(source, a, b, c, d)) {
@@ -2221,6 +2242,27 @@ ConstEval::Result ConstEval::determinant(const sem::Type* ty,
     }
     return r;
 }
+
+ConstEval::Result ConstEval::distance(const sem::Type* ty,
+                                      utils::VectorRef<const sem::Constant*> args,
+                                      const Source& source) {
+    auto err = [&]() -> ImplResult {
+        AddNote("when calculating distance", source);
+        return utils::Failure;
+    };
+
+    auto minus = OpMinus(args[0]->Type(), args, source);
+    if (!minus) {
+        return err();
+    }
+
+    auto len = Length(source, ty, minus.Get());
+    if (!len) {
+        return err();
+    }
+    return len;
+}
+
 ConstEval::Result ConstEval::dot(const sem::Type*,
                                  utils::VectorRef<const sem::Constant*> args,
                                  const Source& source) {
@@ -2566,26 +2608,7 @@ ConstEval::Result ConstEval::inverseSqrt(const sem::Type* ty,
 ConstEval::Result ConstEval::length(const sem::Type* ty,
                                     utils::VectorRef<const sem::Constant*> args,
                                     const Source& source) {
-    auto calculate = [&]() -> ImplResult {
-        auto* vec_ty = args[0]->Type()->As<sem::Vector>();
-
-        // Evaluates to the absolute value of e if T is scalar.
-        if (vec_ty == nullptr) {
-            auto create = [&](auto e) {
-                using NumberT = decltype(e);
-                return CreateElement(builder, source, ty, NumberT{std::abs(e)});
-            };
-            return Dispatch_fa_f32_f16(create, args[0]);
-        }
-
-        // Evaluates to sqrt(e[0]^2 + e[1]^2 + ...) if T is a vector type.
-        auto d = Dot(source, args[0], args[0]);
-        if (!d) {
-            return utils::Failure;
-        }
-        return Dispatch_fa_f32_f16(SqrtFunc(source, ty), d.Get());
-    };
-    auto r = calculate();
+    auto r = Length(source, ty, args[0]);
     if (!r) {
         AddNote("when calculating length", source);
     }

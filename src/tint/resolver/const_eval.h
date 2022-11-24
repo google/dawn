@@ -557,6 +557,15 @@ class ConstEval {
                        utils::VectorRef<const sem::Constant*> args,
                        const Source& source);
 
+    /// distance builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result distance(const sem::Type* ty,
+                    utils::VectorRef<const sem::Constant*> args,
+                    const Source& source);
+
     /// dot builtin
     /// @param ty the expression type
     /// @param args the input arguments
@@ -1224,6 +1233,13 @@ class ConstEval {
     /// @param v2 the second vector
     /// @returns the dot product
     Result Dot(const Source& source, const sem::Constant* v1, const sem::Constant* v2);
+
+    /// Return sthe length of c0
+    /// @param source the source location
+    /// @param ty the return type
+    /// @param c0 the constant to calculate the length of
+    /// @returns the length of c0
+    Result Length(const Source& source, const sem::Type* ty, const sem::Constant* c0);
 
     ProgramBuilder& builder;
 };

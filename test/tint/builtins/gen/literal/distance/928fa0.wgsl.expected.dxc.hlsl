@@ -1,5 +1,5 @@
 void distance_928fa0() {
-  float16_t res = distance((float16_t(1.0h)).xxx, (float16_t(1.0h)).xxx);
+  float16_t res = float16_t(0.0h);
 }
 
 struct tint_symbol {
