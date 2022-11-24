@@ -1,17 +1,35 @@
-SKIP: FAILED
+RWByteAddressBuffer sb_rw : register(u0, space0);
 
-builtins/gen/literal/arrayLength/cbd6b5.wgsl:26:10 error: using f16 types in 'storage' address space is not implemented yet
-  arg_0: array<f16>,
-         ^^^^^^^^^^
+void arrayLength_cbd6b5() {
+  uint tint_symbol_2 = 0u;
+  sb_rw.GetDimensions(tint_symbol_2);
+  const uint tint_symbol_3 = ((tint_symbol_2 - 0u) / 2u);
+  uint res = tint_symbol_3;
+}
 
-builtins/gen/literal/arrayLength/cbd6b5.wgsl:25:1 note: see layout of struct:
-/*           align(2) size(2) */ struct SB_RW {
-/* offset(0) align(2) size(2) */   arg_0 : array<f16>;
-/*                            */ };
-struct SB_RW {
-^^^^^^
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
-builtins/gen/literal/arrayLength/cbd6b5.wgsl:28:48 note: see declaration of variable
-@group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;
-                                               ^^^^^
+float4 vertex_main_inner() {
+  arrayLength_cbd6b5();
+  return (0.0f).xxxx;
+}
 
+tint_symbol vertex_main() {
+  const float4 inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+void fragment_main() {
+  arrayLength_cbd6b5();
+  return;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  arrayLength_cbd6b5();
+  return;
+}

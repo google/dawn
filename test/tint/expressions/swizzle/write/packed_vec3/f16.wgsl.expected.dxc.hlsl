@@ -1,18 +1,13 @@
-SKIP: FAILED
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+  return;
+}
 
-swizzle/write/packed_vec3/f16.wgsl:3:8 error: using f16 types in 'storage' address space is not implemented yet
-    v: vec3<f16>,
-       ^^^^^^^^^
+RWByteAddressBuffer U : register(u0, space0);
 
-swizzle/write/packed_vec3/f16.wgsl:2:1 note: see layout of struct:
-/*           align(8) size(8) */ struct S {
-/* offset(0) align(8) size(6) */   v : vec3<f16>;
-/* offset(6) align(1) size(2) */   // -- implicit struct size padding --;
-/*                            */ };
-struct S {
-^^^^^^
-
-swizzle/write/packed_vec3/f16.wgsl:6:48 note: see declaration of variable
-@group(0) @binding(0) var<storage, read_write> U : S;
-                                               ^
-
+void f() {
+  U.Store<vector<float16_t, 3> >(0u, vector<float16_t, 3>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h)));
+  U.Store<float16_t>(0u, float16_t(1.0h));
+  U.Store<float16_t>(2u, float16_t(2.0h));
+  U.Store<float16_t>(4u, float16_t(3.0h));
+}

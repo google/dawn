@@ -1,18 +1,28 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-swizzle/write/packed_vec3/f16.wgsl:3:8 error: using f16 types in 'storage' address space is not implemented yet
-    v: vec3<f16>,
-       ^^^^^^^^^
+using namespace metal;
 
-swizzle/write/packed_vec3/f16.wgsl:2:1 note: see layout of struct:
-/*           align(8) size(8) */ struct S {
-/* offset(0) align(8) size(6) */   v : vec3<f16>;
-/* offset(6) align(1) size(2) */   // -- implicit struct size padding --;
-/*                            */ };
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
 struct S {
-^^^^^^
+  /* 0x0000 */ packed_half3 v;
+  /* 0x0006 */ tint_array<int8_t, 2> tint_pad;
+};
 
-swizzle/write/packed_vec3/f16.wgsl:6:48 note: see declaration of variable
-@group(0) @binding(0) var<storage, read_write> U : S;
-                                               ^
+void f(device S* const tint_symbol) {
+  (*(tint_symbol)).v = half3(1.0h, 2.0h, 3.0h);
+  (*(tint_symbol)).v[0] = 1.0h;
+  (*(tint_symbol)).v[1] = 2.0h;
+  (*(tint_symbol)).v[2] = 3.0h;
+}
 

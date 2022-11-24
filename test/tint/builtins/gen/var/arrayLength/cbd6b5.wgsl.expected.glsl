@@ -1,17 +1,64 @@
-SKIP: FAILED
+#version 310 es
+#extension GL_AMD_gpu_shader_half_float : require
 
-builtins/gen/var/arrayLength/cbd6b5.wgsl:26:10 error: using f16 types in 'storage' address space is not implemented yet
-  arg_0: array<f16>,
-         ^^^^^^^^^^
+layout(binding = 0, std430) buffer SB_RW_ssbo {
+  float16_t arg_0[];
+} sb_rw;
 
-builtins/gen/var/arrayLength/cbd6b5.wgsl:25:1 note: see layout of struct:
-/*           align(2) size(2) */ struct SB_RW {
-/* offset(0) align(2) size(2) */   arg_0 : array<f16>;
-/*                            */ };
-struct SB_RW {
-^^^^^^
+void arrayLength_cbd6b5() {
+  uint res = uint(sb_rw.arg_0.length());
+}
 
-builtins/gen/var/arrayLength/cbd6b5.wgsl:28:48 note: see declaration of variable
-@group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;
-                                               ^^^^^
+vec4 vertex_main() {
+  arrayLength_cbd6b5();
+  return vec4(0.0f);
+}
 
+void main() {
+  gl_PointSize = 1.0;
+  vec4 inner_result = vertex_main();
+  gl_Position = inner_result;
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  return;
+}
+#version 310 es
+#extension GL_AMD_gpu_shader_half_float : require
+precision mediump float;
+
+layout(binding = 0, std430) buffer SB_RW_ssbo {
+  float16_t arg_0[];
+} sb_rw;
+
+void arrayLength_cbd6b5() {
+  uint res = uint(sb_rw.arg_0.length());
+}
+
+void fragment_main() {
+  arrayLength_cbd6b5();
+}
+
+void main() {
+  fragment_main();
+  return;
+}
+#version 310 es
+#extension GL_AMD_gpu_shader_half_float : require
+
+layout(binding = 0, std430) buffer SB_RW_ssbo {
+  float16_t arg_0[];
+} sb_rw;
+
+void arrayLength_cbd6b5() {
+  uint res = uint(sb_rw.arg_0.length());
+}
+
+void compute_main() {
+  arrayLength_cbd6b5();
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  compute_main();
+  return;
+}

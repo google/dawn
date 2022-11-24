@@ -363,6 +363,29 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_Vec3MemberOffset_
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
+// Make sure that this doesn't fail validation because vec3's align is 8, but
+// size is 6. 's' should be at offset 6, which is okay here.
+TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_Vec3F16MemberOffset_NoFail) {
+    // struct ScalarPackedAtEndOfVec3 {
+    //     v : vec3<f16>;
+    //     s : f16;
+    // };
+    // @group(0) @binding(0)
+    // var<uniform> a : ScalarPackedAtEndOfVec3;
+
+    Enable(ast::Extension::kF16);
+
+    Structure("ScalarPackedAtEndOfVec3", utils::Vector{
+                                             Member("v", ty.vec3(ty.f16())),
+                                             Member("s", ty.f16()),
+                                         });
+
+    GlobalVar(Source{{78, 90}}, "a", ty.type_name("ScalarPackedAtEndOfVec3"),
+              ast::AddressSpace::kUniform, Group(0_a), Binding(0_a));
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
 // Detect array stride must be a multiple of 16 bytes for uniform buffers
 TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_Scalar) {
     // type Inner = array<f32, 10u>;

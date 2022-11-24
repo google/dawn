@@ -317,7 +317,9 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct) {
-    auto* s = Structure("my_struct", utils::Vector{Member("a", ty.f32())});
+    Enable(ast::Extension::kF16);
+
+    auto* s = Structure("my_struct", utils::Vector{Member("a", ty.f32()), Member("b", ty.f16())});
 
     spirv::Builder& b = Build();
 
@@ -326,17 +328,23 @@ TEST_F(BuilderTest_Type, GenerateStruct) {
     EXPECT_EQ(id, 1u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeStruct %2
+%3 = OpTypeFloat 16
+%1 = OpTypeStruct %2 %3
 )");
     EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_struct"
 OpMemberName %1 0 "a"
+OpMemberName %1 1 "b"
 )");
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
+    Enable(ast::Extension::kF16);
+
     auto* s = Structure("S", utils::Vector{
                                  Member("a", ty.f32()),
                                  Member("b", ty.f32(), utils::Vector{MemberAlign(8_i)}),
+                                 Member("c", ty.f16(), utils::Vector{MemberAlign(8_u)}),
+                                 Member("d", ty.f16()),
                              });
 
     spirv::Builder& b = Build();
@@ -346,23 +354,34 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
     EXPECT_EQ(id, 1u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeStruct %2 %2
+%3 = OpTypeFloat 16
+%1 = OpTypeStruct %2 %2 %3 %3
 )");
     EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
 OpMemberName %1 0 "a"
 OpMemberName %1 1 "b"
+OpMemberName %1 2 "c"
+OpMemberName %1 3 "d"
 )");
     EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %1 0 Offset 0
 OpMemberDecorate %1 1 Offset 8
+OpMemberDecorate %1 2 Offset 16
+OpMemberDecorate %1 3 Offset 18
 )");
 }
 
-TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
-    auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.mat2x2<f32>()),
-                                 Member("b", ty.mat2x3<f32>()),
-                                 Member("c", ty.mat4x4<f32>()),
-                             });
+TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_Matrix) {
+    Enable(ast::Extension::kF16);
+
+    auto* s =
+        Structure("S", utils::Vector{
+                           Member("mat2x2_f32", ty.mat2x2<f32>()),
+                           Member("mat2x3_f32", ty.mat2x3<f32>(), utils::Vector{MemberAlign(64_i)}),
+                           Member("mat4x4_f32", ty.mat4x4<f32>()),
+                           Member("mat2x2_f16", ty.mat2x2<f16>(), utils::Vector{MemberAlign(32_i)}),
+                           Member("mat2x3_f16", ty.mat2x3<f16>()),
+                           Member("mat4x4_f16", ty.mat4x4<f16>(), utils::Vector{MemberAlign(64_i)}),
+                       });
 
     spirv::Builder& b = Build();
 
@@ -377,78 +396,63 @@ TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
 %5 = OpTypeMatrix %6 2
 %8 = OpTypeVector %4 4
 %7 = OpTypeMatrix %8 4
-%1 = OpTypeStruct %2 %5 %7
+%11 = OpTypeFloat 16
+%10 = OpTypeVector %11 2
+%9 = OpTypeMatrix %10 2
+%13 = OpTypeVector %11 3
+%12 = OpTypeMatrix %13 2
+%15 = OpTypeVector %11 4
+%14 = OpTypeMatrix %15 4
+%1 = OpTypeStruct %2 %5 %7 %9 %12 %14
 )");
     EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
-OpMemberName %1 0 "a"
-OpMemberName %1 1 "b"
-OpMemberName %1 2 "c"
+OpMemberName %1 0 "mat2x2_f32"
+OpMemberName %1 1 "mat2x3_f32"
+OpMemberName %1 2 "mat4x4_f32"
+OpMemberName %1 3 "mat2x2_f16"
+OpMemberName %1 4 "mat2x3_f16"
+OpMemberName %1 5 "mat4x4_f16"
 )");
     EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %1 0 Offset 0
 OpMemberDecorate %1 0 ColMajor
 OpMemberDecorate %1 0 MatrixStride 8
-OpMemberDecorate %1 1 Offset 16
+OpMemberDecorate %1 1 Offset 64
 OpMemberDecorate %1 1 ColMajor
 OpMemberDecorate %1 1 MatrixStride 16
-OpMemberDecorate %1 2 Offset 48
+OpMemberDecorate %1 2 Offset 96
 OpMemberDecorate %1 2 ColMajor
 OpMemberDecorate %1 2 MatrixStride 16
+OpMemberDecorate %1 3 Offset 160
+OpMemberDecorate %1 3 ColMajor
+OpMemberDecorate %1 3 MatrixStride 4
+OpMemberDecorate %1 4 Offset 168
+OpMemberDecorate %1 4 ColMajor
+OpMemberDecorate %1 4 MatrixStride 8
+OpMemberDecorate %1 5 Offset 192
+OpMemberDecorate %1 5 ColMajor
+OpMemberDecorate %1 5 MatrixStride 8
 )");
 }
 
-TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
-    // We have to infer layout for matrix when it also has an offset.
-    auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.mat2x2<f32>()),
-                                 Member("b", ty.mat2x3<f32>()),
-                                 Member("c", ty.mat4x4<f32>()),
-                             });
+TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_ArraysOfMatrix) {
+    Enable(ast::Extension::kF16);
 
-    spirv::Builder& b = Build();
-
-    auto id = b.GenerateTypeIfNeeded(program->TypeOf(s));
-    ASSERT_FALSE(b.has_error()) << b.error();
-    EXPECT_EQ(id, 1u);
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
-%3 = OpTypeVector %4 2
-%2 = OpTypeMatrix %3 2
-%6 = OpTypeVector %4 3
-%5 = OpTypeMatrix %6 2
-%8 = OpTypeVector %4 4
-%7 = OpTypeMatrix %8 4
-%1 = OpTypeStruct %2 %5 %7
-)");
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
-OpMemberName %1 0 "a"
-OpMemberName %1 1 "b"
-OpMemberName %1 2 "c"
-)");
-    EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %1 0 Offset 0
-OpMemberDecorate %1 0 ColMajor
-OpMemberDecorate %1 0 MatrixStride 8
-OpMemberDecorate %1 1 Offset 16
-OpMemberDecorate %1 1 ColMajor
-OpMemberDecorate %1 1 MatrixStride 16
-OpMemberDecorate %1 2 Offset 48
-OpMemberDecorate %1 2 ColMajor
-OpMemberDecorate %1 2 MatrixStride 16
-)");
-}
-
-TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
-    // We have to infer layout for matrix when it also has an offset.
-    // The decoration goes on the struct member, even if the matrix is buried
-    // in levels of arrays.
-    auto* arr_mat2x2 = ty.array(ty.mat2x2<f32>(), 1_u);      // Singly nested array
-    auto* arr_arr_mat2x3 = ty.array(ty.mat2x3<f32>(), 1_u);  // Doubly nested array
+    auto* arr_mat2x2_f32 = ty.array(ty.mat2x2<f32>(), 1_u);  // Singly nested array
+    auto* arr_mat2x2_f16 = ty.array(ty.mat2x2<f16>(), 1_u);  // Singly nested array
+    auto* arr_arr_mat2x3_f32 =
+        ty.array(ty.array(ty.mat2x3<f32>(), 1_u), 2_u);  // Doubly nested array
+    auto* arr_arr_mat2x3_f16 =
+        ty.array(ty.array(ty.mat2x3<f16>(), 1_u), 2_u);      // Doubly nested array
     auto* rtarr_mat4x4 = ty.array(ty.mat4x4<f32>());         // Runtime array
 
-    auto* s = Structure("S", utils::Vector{
-                                 Member("a", arr_mat2x2),
-                                 Member("b", arr_arr_mat2x3),
-                                 Member("c", rtarr_mat4x4),
-                             });
+    auto* s = Structure(
+        "S", utils::Vector{
+                 Member("arr_mat2x2_f32", arr_mat2x2_f32),
+                 Member("arr_mat2x2_f16", arr_mat2x2_f16, utils::Vector{MemberAlign(64_i)}),
+                 Member("arr_arr_mat2x3_f32", arr_arr_mat2x3_f32, utils::Vector{MemberAlign(64_i)}),
+                 Member("arr_arr_mat2x3_f16", arr_arr_mat2x3_f16),
+                 Member("rtarr_mat4x4", rtarr_mat4x4),
+             });
 
     spirv::Builder& b = Build();
 
@@ -462,31 +466,53 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
 %6 = OpTypeInt 32 0
 %7 = OpConstant %6 1
 %2 = OpTypeArray %3 %7
-%10 = OpTypeVector %5 3
+%11 = OpTypeFloat 16
+%10 = OpTypeVector %11 2
 %9 = OpTypeMatrix %10 2
 %8 = OpTypeArray %9 %7
-%13 = OpTypeVector %5 4
-%12 = OpTypeMatrix %13 4
-%11 = OpTypeRuntimeArray %12
-%1 = OpTypeStruct %2 %8 %11
+%15 = OpTypeVector %5 3
+%14 = OpTypeMatrix %15 2
+%13 = OpTypeArray %14 %7
+%16 = OpConstant %6 2
+%12 = OpTypeArray %13 %16
+%20 = OpTypeVector %11 3
+%19 = OpTypeMatrix %20 2
+%18 = OpTypeArray %19 %7
+%17 = OpTypeArray %18 %16
+%23 = OpTypeVector %5 4
+%22 = OpTypeMatrix %23 4
+%21 = OpTypeRuntimeArray %22
+%1 = OpTypeStruct %2 %8 %12 %17 %21
 )");
     EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
-OpMemberName %1 0 "a"
-OpMemberName %1 1 "b"
-OpMemberName %1 2 "c"
+OpMemberName %1 0 "arr_mat2x2_f32"
+OpMemberName %1 1 "arr_mat2x2_f16"
+OpMemberName %1 2 "arr_arr_mat2x3_f32"
+OpMemberName %1 3 "arr_arr_mat2x3_f16"
+OpMemberName %1 4 "rtarr_mat4x4"
 )");
     EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %1 0 Offset 0
 OpMemberDecorate %1 0 ColMajor
 OpMemberDecorate %1 0 MatrixStride 8
 OpDecorate %2 ArrayStride 16
-OpMemberDecorate %1 1 Offset 16
+OpMemberDecorate %1 1 Offset 64
 OpMemberDecorate %1 1 ColMajor
-OpMemberDecorate %1 1 MatrixStride 16
-OpDecorate %8 ArrayStride 32
-OpMemberDecorate %1 2 Offset 48
+OpMemberDecorate %1 1 MatrixStride 4
+OpDecorate %8 ArrayStride 8
+OpMemberDecorate %1 2 Offset 128
 OpMemberDecorate %1 2 ColMajor
 OpMemberDecorate %1 2 MatrixStride 16
-OpDecorate %11 ArrayStride 64
+OpDecorate %13 ArrayStride 32
+OpDecorate %12 ArrayStride 32
+OpMemberDecorate %1 3 Offset 192
+OpMemberDecorate %1 3 ColMajor
+OpMemberDecorate %1 3 MatrixStride 8
+OpDecorate %18 ArrayStride 16
+OpDecorate %17 ArrayStride 16
+OpMemberDecorate %1 4 Offset 224
+OpMemberDecorate %1 4 ColMajor
+OpMemberDecorate %1 4 MatrixStride 16
+OpDecorate %21 ArrayStride 64
 )");
 }
 

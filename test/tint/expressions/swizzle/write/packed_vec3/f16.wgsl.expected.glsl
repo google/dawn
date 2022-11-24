@@ -1,18 +1,22 @@
-SKIP: FAILED
+#version 310 es
+#extension GL_AMD_gpu_shader_half_float : require
 
-expressions/swizzle/write/packed_vec3/f16.wgsl:3:8 error: using f16 types in 'storage' address space is not implemented yet
-    v: vec3<f16>,
-       ^^^^^^^^^
-
-expressions/swizzle/write/packed_vec3/f16.wgsl:2:1 note: see layout of struct:
-/*           align(8) size(8) */ struct S {
-/* offset(0) align(8) size(6) */   v : vec3<f16>;
-/* offset(6) align(1) size(2) */   // -- implicit struct size padding --;
-/*                            */ };
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+  return;
+}
 struct S {
-^^^^^^
+  f16vec3 v;
+};
 
-expressions/swizzle/write/packed_vec3/f16.wgsl:6:48 note: see declaration of variable
-@group(0) @binding(0) var<storage, read_write> U : S;
-                                               ^
+layout(binding = 0, std430) buffer U_block_ssbo {
+  S inner;
+} U;
+
+void f() {
+  U.inner.v = f16vec3(1.0hf, 2.0hf, 3.0hf);
+  U.inner.v.x = 1.0hf;
+  U.inner.v.y = 2.0hf;
+  U.inner.v.z = 3.0hf;
+}
 

@@ -96,7 +96,17 @@ size_t ScalarTypeSize(ScalarType scalarType) {
 //   3. "Padding": Add `size` bytes of padding bytes into buffer;
 //   4. "FillingFixed": Fill all `size` given (fixed) bytes into the memory buffer.
 // Note that data bytes and padding bytes are generated seperatedly and designed to
-// be distinguishable, i.e. data bytes have MSB set to 0 while padding bytes 1.
+// be distinguishable, i.e. data bytes have the second most significant bit set to 0 while padding
+// bytes 1.
+// We don't want testing data includes NaN or Inf, because according to WGSL spec an implementation
+// may give indeterminate value if a expression evaluated to NaN or Inf, and in Tint generated
+// HLSL reading a f16 NaN from buffer is not bit-pattern preserved (i.e. a NaN input may be changed
+// to another NaN with different bit pattern). In bit representation of both f32 and f16, the first
+// (most significant) bit is sign bit, and some biased exponent bits go after it (start from the
+// second most significant bit). A float value is NaN or Inf if and only if all its exponent bits
+// are 1. By setting the second most significant bit of every data byte to 0, we ensure that the
+// second most significant bit of any float data in the buffer is 0, and therefore avoid generating
+// NaN or Inf float datas.
 class MemoryDataBuilder {
   public:
     // Record a "Align" operation
@@ -150,15 +160,20 @@ class MemoryDataBuilder {
                                  uint8_t paddingXorKey) {
         uint8_t dataByte = 0x0u;
         uint8_t paddingByte = 0x2u;
-        // Get a data byte with MSB set to 0.
+        // Padding mask, setting the second most significant bit to 1
+        constexpr uint8_t paddingMask = 0x40u;
+        // Data mask, masking the second most significant bit to 0, distinguished from padding
+        // bytes and avoid NaN or Inf.
+        constexpr uint8_t dataMask = ~paddingMask;
+        // Get a data byte
         auto NextDataByte = [&]() {
             dataByte += 0x11u;
-            return static_cast<uint8_t>((dataByte ^ dataXorKey) & 0x7fu);
+            return static_cast<uint8_t>((dataByte ^ dataXorKey) & dataMask);
         };
-        // Get a padding byte with MSB set to 1, distinguished from data bytes.
+        // Get a padding byte
         auto NextPaddingByte = [&]() {
             paddingByte += 0x13u;
-            return static_cast<uint8_t>((paddingByte ^ paddingXorKey) | 0x80u);
+            return static_cast<uint8_t>((paddingByte ^ paddingXorKey) | paddingMask);
         };
         for (auto& operation : mOperations) {
             switch (operation.mType) {
@@ -234,10 +249,11 @@ class Field {
   public:
     // Constructor with WGSL type name, natural alignment and natural size. Set mStrideDataBytes to
     // natural size and mStridePaddingBytes to 0 by default to indicate continious data part.
-    Field(std::string wgslType, size_t align, size_t size)
+    Field(std::string wgslType, size_t align, size_t size, bool requireF16Feature)
         : mWGSLType(wgslType),
           mAlign(align),
           mSize(size),
+          mRequireF16Feature(requireF16Feature),
           mStrideDataBytes(size),
           mStridePaddingBytes(0) {}
 
@@ -247,6 +263,7 @@ class Field {
     size_t GetUnpaddedSize() const { return mSize; }
     // The padded size determined by @size attribute if existed, otherwise the natural size
     size_t GetPaddedSize() const { return mHasSizeAttribute ? mPaddedSize : mSize; }
+    bool IsRequireF16Feature() const { return mRequireF16Feature; }
 
     // Applies a @size attribute, sets the mPaddedSize to value.
     // Returns this Field so calls can be chained.
@@ -337,7 +354,8 @@ class Field {
 
     // Helper function to build a Field describing a scalar type.
     static Field Scalar(ScalarType type) {
-        return Field(ScalarTypeName(type), ScalarTypeSize(type), ScalarTypeSize(type));
+        return Field(ScalarTypeName(type), ScalarTypeSize(type), ScalarTypeSize(type),
+                     type == ScalarType::f16);
     }
 
     // Helper function to build a Field describing a vector type.
@@ -347,7 +365,7 @@ class Field {
         size_t vectorSize = n * elementSize;
         size_t vectorAlignment = (n == 3 ? 4 : n) * elementSize;
         return Field{"vec" + std::to_string(n) + "<" + ScalarTypeName(type) + ">", vectorAlignment,
-                     vectorSize};
+                     vectorSize, type == ScalarType::f16};
     }
 
     // Helper function to build a Field describing a matrix type.
@@ -360,7 +378,7 @@ class Field {
         size_t colVectorAlignment = (row == 3 ? 4 : row) * elementSize;
         Field field = Field{"mat" + std::to_string(col) + "x" + std::to_string(row) + "<" +
                                 ScalarTypeName(type) + ">",
-                            colVectorAlignment, col * colVectorAlignment};
+                            colVectorAlignment, col * colVectorAlignment, type == ScalarType::f16};
         if (colVectorSize != colVectorAlignment) {
             field.Strided(colVectorSize, colVectorAlignment - colVectorSize);
         }
@@ -371,6 +389,7 @@ class Field {
     const std::string mWGSLType;  // Friendly WGSL name of the type of the field
     size_t mAlign;       // Alignment of the type in bytes, can be change by @align attribute
     const size_t mSize;  // Natural size of the type in bytes
+    const bool mRequireF16Feature;
 
     bool mHasAlignAttribute = false;
     bool mHasSizeAttribute = false;
@@ -389,6 +408,25 @@ class Field {
 std::ostream& operator<<(std::ostream& o, Field field) {
     o << "@align(" << field.GetAlign() << ") @size(" << field.GetPaddedSize() << ") "
       << field.GetWGSLType();
+    return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const std::vector<uint8_t>& byteBuffer) {
+    o << "\n";
+    uint32_t i = 0;
+    for (auto byte : byteBuffer) {
+        o << std::hex << std::setw(2) << std::setfill('0') << uint32_t(byte);
+        if (i < 31) {
+            o << " ";
+            i++;
+        } else {
+            o << "\n";
+            i = 0;
+        }
+    }
+    if (i != 0) {
+        o << "\n";
+    }
     return o;
 }
 
@@ -445,7 +483,40 @@ DAWN_TEST_PARAM_STRUCT(ComputeLayoutMemoryBufferTestParams, AddressSpace, Field)
 
 class ComputeLayoutMemoryBufferTests
     : public DawnTestWithParams<ComputeLayoutMemoryBufferTestParams> {
-    void SetUp() override { DawnTestBase::SetUp(); }
+    // void SetUp() override { DawnTestBase::SetUp(); }
+
+  protected:
+    // Require f16 feature if possible
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        mIsShaderF16SupportedOnAdapter = SupportsFeatures({wgpu::FeatureName::ShaderF16});
+        if (!mIsShaderF16SupportedOnAdapter) {
+            return {};
+        }
+
+        if (!IsD3D12()) {
+            mUseDxcEnabledOrNonD3D12 = true;
+        } else {
+            for (auto* enabledToggle : GetParam().forceEnabledWorkarounds) {
+                if (strncmp(enabledToggle, "use_dxc", 7) == 0) {
+                    mUseDxcEnabledOrNonD3D12 = true;
+                    break;
+                }
+            }
+        }
+
+        if (mUseDxcEnabledOrNonD3D12) {
+            return {wgpu::FeatureName::ShaderF16};
+        }
+
+        return {};
+    }
+
+    bool IsShaderF16SupportedOnAdapter() const { return mIsShaderF16SupportedOnAdapter; }
+    bool UseDxcEnabledOrNonD3D12() const { return mUseDxcEnabledOrNonD3D12; }
+
+  private:
+    bool mIsShaderF16SupportedOnAdapter = false;
+    bool mUseDxcEnabledOrNonD3D12 = false;
 };
 
 // Align returns the WGSL decoration for an explicit structure field alignment
@@ -472,9 +543,14 @@ TEST_P(ComputeLayoutMemoryBufferTests, StructMember) {
 
     const Field& field = GetParam().mField;
 
+    if (field.IsRequireF16Feature() && !device.HasFeature(wgpu::FeatureName::ShaderF16)) {
+        return;
+    }
+
     const bool isUniform = GetParam().mAddressSpace == AddressSpace::Uniform;
 
-    std::string shader = R"(
+    std::string shader = std::string(field.IsRequireF16Feature() ? "enable f16;" : "") +
+                         R"(
 struct Data {
     header : u32,
     @align({field_align}) @size({field_size}) field : {field_type},
@@ -553,6 +629,7 @@ fn main() {
         {
             inputDataBuilder.AddFixedU32(kDataHeaderCode);           // Input.data.header
             inputDataBuilder.AddSubBuilder(field.GetDataBuilder());  // Input.data.field
+            inputDataBuilder.AlignTo(4);                             // Input.data.footer alignment
             inputDataBuilder.AddFixedU32(kDataFooterCode);           // Input.data.footer
             inputDataBuilder.AlignTo(field.GetAlign());              // Input.data padding
         }
@@ -563,6 +640,7 @@ fn main() {
 
     MemoryDataBuilder expectedDataBuilder;  // The expected data to be copied by the shader
     expectedDataBuilder.AddSubBuilder(field.GetDataBuilder());
+    expectedDataBuilder.AlignTo(4);  // Storage buffer size must be a multiple of 4
 
     // Expectation and input buffer have identical data bytes but different padding bytes.
     // Initializes the dst buffer with data bytes different from input and expectation, and padding
@@ -603,25 +681,36 @@ fn main() {
     EXPECT_BUFFER_U32_EQ(kStatusOk, statusBuf, 0) << "status code error" << std::endl
                                                   << "Shader: " << shader;
 
-    // Check the data
+    // Check the data. Note that MemoryDataBuilder avoid generating NaN and Inf floating point data,
+    // whose bit pattern will not get preserved when reading from buffer (arbitrary NaNs may be
+    // silently transformed into a quiet NaN). Having NaN and Inf floating point data in input may
+    // result in bitwise mismatch.
     field.CheckData([&](uint32_t offset, uint32_t size) {
         EXPECT_BUFFER_U8_RANGE_EQ(expectedData.data() + offset, outputBuf, offset, size)
-            << "offset: " << offset;
+            << "offset: " << offset << "\n Input buffer:" << inputData << "Shader:\n"
+            << shader << "\n";
     });
 }
 
 // Test different types that used directly as buffer type
 TEST_P(ComputeLayoutMemoryBufferTests, NonStructMember) {
     auto params = GetParam();
+
     Field& field = params.mField;
+
     // @size and @align attribute only apply to struct members, skip them
     if (field.HasSizeAttribute() || field.HasAlignAttribute()) {
         return;
     }
 
+    if (field.IsRequireF16Feature() && !device.HasFeature(wgpu::FeatureName::ShaderF16)) {
+        return;
+    }
+
     const bool isUniform = GetParam().mAddressSpace == AddressSpace::Uniform;
 
-    std::string shader = R"(
+    std::string shader = std::string(field.IsRequireF16Feature() ? "enable f16;" : "") +
+                         R"(
 @group(0) @binding(0) var<{input_qualifiers}> input : {field_type};
 @group(0) @binding(1) var<storage, read_write> output : {field_type};
 
@@ -638,10 +727,11 @@ fn main() {
     // Build the input and expected data.
     MemoryDataBuilder dataBuilder;
     dataBuilder.AddSubBuilder(field.GetDataBuilder());
+    dataBuilder.AlignTo(4);  // Storage buffer size must be a multiple of 4
 
     // Expectation and input buffer have identical data bytes but different padding bytes.
-    // Initializes the dst buffer with data bytes different from input and expectation, and padding
-    // bytes identical to expectation but different from input.
+    // Initializes the dst buffer with data bytes different from input and expectation, and
+    // padding bytes identical to expectation but different from input.
     constexpr uint8_t dataKeyForInputAndExpectation = 0x00u;
     constexpr uint8_t dataKeyForDstInit = 0xffu;
     constexpr uint8_t paddingKeyForInput = 0x3fu;
@@ -669,10 +759,14 @@ fn main() {
 
     RunComputeShaderWithBuffers(device, queue, shader, {inputBuf, outputBuf});
 
-    // Check the data
+    // Check the data. Note that MemoryDataBuilder avoid generating NaN and Inf floating point data,
+    // whose bit pattern will not get preserved when reading from buffer (arbitrary NaNs may be
+    // silently transformed into a quiet NaN). Having NaN and Inf floating point data in input may
+    // result in bitwise mismatch.
     field.CheckData([&](uint32_t offset, uint32_t size) {
         EXPECT_BUFFER_U8_RANGE_EQ(expectedData.data() + offset, outputBuf, offset, size)
-            << "offset: " << offset;
+            << "offset: " << offset << "\n Input buffer:" << inputData << "Shader:\n"
+            << shader << "\n";
     });
 }
 
@@ -680,6 +774,7 @@ auto GenerateParams() {
     auto params = MakeParamGenerator<ComputeLayoutMemoryBufferTestParams>(
         {
             D3D12Backend(),
+            D3D12Backend({"use_dxc"}),
             MetalBackend(),
             VulkanBackend(),
             OpenGLBackend(),
@@ -692,16 +787,19 @@ auto GenerateParams() {
             Field::Scalar(ScalarType::f32),
             Field::Scalar(ScalarType::i32),
             Field::Scalar(ScalarType::u32),
+            Field::Scalar(ScalarType::f16),
 
             // Scalar types with custom alignment
             Field::Scalar(ScalarType::f32).AlignAttribute(16),
             Field::Scalar(ScalarType::i32).AlignAttribute(16),
             Field::Scalar(ScalarType::u32).AlignAttribute(16),
+            Field::Scalar(ScalarType::f16).AlignAttribute(16),
 
             // Scalar types with custom size
             Field::Scalar(ScalarType::f32).SizeAttribute(24),
             Field::Scalar(ScalarType::i32).SizeAttribute(24),
             Field::Scalar(ScalarType::u32).SizeAttribute(24),
+            Field::Scalar(ScalarType::f16).SizeAttribute(24),
 
             // Vector types with no custom alignment or size
             Field::Vector(2, ScalarType::f32),
@@ -713,6 +811,9 @@ auto GenerateParams() {
             Field::Vector(2, ScalarType::u32),
             Field::Vector(3, ScalarType::u32),
             Field::Vector(4, ScalarType::u32),
+            Field::Vector(2, ScalarType::f16),
+            Field::Vector(3, ScalarType::f16),
+            Field::Vector(4, ScalarType::f16),
 
             // Vector types with custom alignment
             Field::Vector(2, ScalarType::f32).AlignAttribute(32),
@@ -724,6 +825,9 @@ auto GenerateParams() {
             Field::Vector(2, ScalarType::u32).AlignAttribute(32),
             Field::Vector(3, ScalarType::u32).AlignAttribute(32),
             Field::Vector(4, ScalarType::u32).AlignAttribute(32),
+            Field::Vector(2, ScalarType::f16).AlignAttribute(32),
+            Field::Vector(3, ScalarType::f16).AlignAttribute(32),
+            Field::Vector(4, ScalarType::f16).AlignAttribute(32),
 
             // Vector types with custom size
             Field::Vector(2, ScalarType::f32).SizeAttribute(24),
@@ -735,6 +839,9 @@ auto GenerateParams() {
             Field::Vector(2, ScalarType::u32).SizeAttribute(24),
             Field::Vector(3, ScalarType::u32).SizeAttribute(24),
             Field::Vector(4, ScalarType::u32).SizeAttribute(24),
+            Field::Vector(2, ScalarType::f16).SizeAttribute(24),
+            Field::Vector(3, ScalarType::f16).SizeAttribute(24),
+            Field::Vector(4, ScalarType::f16).SizeAttribute(24),
 
             // Matrix types with no custom alignment or size
             Field::Matrix(2, 2, ScalarType::f32),
@@ -746,6 +853,15 @@ auto GenerateParams() {
             Field::Matrix(2, 4, ScalarType::f32),
             Field::Matrix(3, 4, ScalarType::f32),
             Field::Matrix(4, 4, ScalarType::f32),
+            Field::Matrix(2, 2, ScalarType::f16),
+            Field::Matrix(3, 2, ScalarType::f16),
+            Field::Matrix(4, 2, ScalarType::f16),
+            Field::Matrix(2, 3, ScalarType::f16),
+            Field::Matrix(3, 3, ScalarType::f16),
+            Field::Matrix(4, 3, ScalarType::f16),
+            Field::Matrix(2, 4, ScalarType::f16),
+            Field::Matrix(3, 4, ScalarType::f16),
+            Field::Matrix(4, 4, ScalarType::f16),
 
             // Matrix types with custom alignment
             Field::Matrix(2, 2, ScalarType::f32).AlignAttribute(32),
@@ -757,6 +873,15 @@ auto GenerateParams() {
             Field::Matrix(2, 4, ScalarType::f32).AlignAttribute(32),
             Field::Matrix(3, 4, ScalarType::f32).AlignAttribute(32),
             Field::Matrix(4, 4, ScalarType::f32).AlignAttribute(32),
+            Field::Matrix(2, 2, ScalarType::f16).AlignAttribute(32),
+            Field::Matrix(3, 2, ScalarType::f16).AlignAttribute(32),
+            Field::Matrix(4, 2, ScalarType::f16).AlignAttribute(32),
+            Field::Matrix(2, 3, ScalarType::f16).AlignAttribute(32),
+            Field::Matrix(3, 3, ScalarType::f16).AlignAttribute(32),
+            Field::Matrix(4, 3, ScalarType::f16).AlignAttribute(32),
+            Field::Matrix(2, 4, ScalarType::f16).AlignAttribute(32),
+            Field::Matrix(3, 4, ScalarType::f16).AlignAttribute(32),
+            Field::Matrix(4, 4, ScalarType::f16).AlignAttribute(32),
 
             // Matrix types with custom size
             Field::Matrix(2, 2, ScalarType::f32).SizeAttribute(128),
@@ -768,85 +893,241 @@ auto GenerateParams() {
             Field::Matrix(2, 4, ScalarType::f32).SizeAttribute(128),
             Field::Matrix(3, 4, ScalarType::f32).SizeAttribute(128),
             Field::Matrix(4, 4, ScalarType::f32).SizeAttribute(128),
+            Field::Matrix(2, 2, ScalarType::f16).SizeAttribute(128),
+            Field::Matrix(3, 2, ScalarType::f16).SizeAttribute(128),
+            Field::Matrix(4, 2, ScalarType::f16).SizeAttribute(128),
+            Field::Matrix(2, 3, ScalarType::f16).SizeAttribute(128),
+            Field::Matrix(3, 3, ScalarType::f16).SizeAttribute(128),
+            Field::Matrix(4, 3, ScalarType::f16).SizeAttribute(128),
+            Field::Matrix(2, 4, ScalarType::f16).SizeAttribute(128),
+            Field::Matrix(3, 4, ScalarType::f16).SizeAttribute(128),
+            Field::Matrix(4, 4, ScalarType::f16).SizeAttribute(128),
 
             // Array types with no custom alignment or size.
-            // Note: The use of StorageBufferOnly() is due to UBOs requiring 16 byte alignment
-            // of array elements. See https://www.w3.org/TR/WGSL/#storage-class-constraints
-            Field("array<u32, 1>", /* align */ 4, /* size */ 4).StorageBufferOnly(),
-            Field("array<u32, 2>", /* align */ 4, /* size */ 8).StorageBufferOnly(),
-            Field("array<u32, 3>", /* align */ 4, /* size */ 12).StorageBufferOnly(),
-            Field("array<u32, 4>", /* align */ 4, /* size */ 16).StorageBufferOnly(),
-            Field("array<vec2<u32>, 1>", /* align */ 8, /* size */ 8).StorageBufferOnly(),
-            Field("array<vec2<u32>, 2>", /* align */ 8, /* size */ 16).StorageBufferOnly(),
-            Field("array<vec2<u32>, 3>", /* align */ 8, /* size */ 24).StorageBufferOnly(),
-            Field("array<vec2<u32>, 4>", /* align */ 8, /* size */ 32).StorageBufferOnly(),
-            Field("array<vec3<u32>, 1>", /* align */ 16, /* size */ 16).Strided(12, 4),
-            Field("array<vec3<u32>, 2>", /* align */ 16, /* size */ 32).Strided(12, 4),
-            Field("array<vec3<u32>, 3>", /* align */ 16, /* size */ 48).Strided(12, 4),
-            Field("array<vec3<u32>, 4>", /* align */ 16, /* size */ 64).Strided(12, 4),
-            Field("array<vec4<u32>, 1>", /* align */ 16, /* size */ 16),
-            Field("array<vec4<u32>, 2>", /* align */ 16, /* size */ 32),
-            Field("array<vec4<u32>, 3>", /* align */ 16, /* size */ 48),
-            Field("array<vec4<u32>, 4>", /* align */ 16, /* size */ 64),
+            // Note: The use of StorageBufferOnly() is due to UBOs requiring 16 byte
+            // alignment of array elements. See
+            // https://www.w3.org/TR/WGSL/#storage-class-constraints
+            Field("array<u32, 1>", /* align */ 4, /* size */ 4, /* requireF16Feature */ false)
+                .StorageBufferOnly(),
+            Field("array<u32, 2>", /* align */ 4, /* size */ 8, /* requireF16Feature */ false)
+                .StorageBufferOnly(),
+            Field("array<u32, 3>", /* align */ 4, /* size */ 12, /* requireF16Feature */ false)
+                .StorageBufferOnly(),
+            Field("array<u32, 4>", /* align */ 4, /* size */ 16, /* requireF16Feature */ false)
+                .StorageBufferOnly(),
+            Field("array<vec2<u32>, 1>", /* align */ 8, /* size */ 8, /* requireF16Feature */ false)
+                .StorageBufferOnly(),
+            Field("array<vec2<u32>, 2>", /* align */ 8, /* size */ 16,
+                  /* requireF16Feature */ false)
+                .StorageBufferOnly(),
+            Field("array<vec2<u32>, 3>", /* align */ 8, /* size */ 24,
+                  /* requireF16Feature */ false)
+                .StorageBufferOnly(),
+            Field("array<vec2<u32>, 4>", /* align */ 8, /* size */ 32,
+                  /* requireF16Feature */ false)
+                .StorageBufferOnly(),
+            Field("array<vec3<u32>, 1>", /* align */ 16, /* size */ 16,
+                  /* requireF16Feature */ false)
+                .Strided(12, 4),
+            Field("array<vec3<u32>, 2>", /* align */ 16, /* size */ 32,
+                  /* requireF16Feature */ false)
+                .Strided(12, 4),
+            Field("array<vec3<u32>, 3>", /* align */ 16, /* size */ 48,
+                  /* requireF16Feature */ false)
+                .Strided(12, 4),
+            Field("array<vec3<u32>, 4>", /* align */ 16, /* size */ 64,
+                  /* requireF16Feature */ false)
+                .Strided(12, 4),
+            Field("array<vec4<u32>, 1>", /* align */ 16, /* size */ 16,
+                  /* requireF16Feature */ false),
+            Field("array<vec4<u32>, 2>", /* align */ 16, /* size */ 32,
+                  /* requireF16Feature */ false),
+            Field("array<vec4<u32>, 3>", /* align */ 16, /* size */ 48,
+                  /* requireF16Feature */ false),
+            Field("array<vec4<u32>, 4>", /* align */ 16, /* size */ 64,
+                  /* requireF16Feature */ false),
 
             // Array types with custom alignment
-            Field("array<u32, 1>", /* align */ 4, /* size */ 4)
+            Field("array<u32, 1>", /* align */ 4, /* size */ 4, /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .StorageBufferOnly(),
-            Field("array<u32, 2>", /* align */ 4, /* size */ 8)
+            Field("array<u32, 2>", /* align */ 4, /* size */ 8, /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .StorageBufferOnly(),
-            Field("array<u32, 3>", /* align */ 4, /* size */ 12)
+            Field("array<u32, 3>", /* align */ 4, /* size */ 12, /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .StorageBufferOnly(),
-            Field("array<u32, 4>", /* align */ 4, /* size */ 16)
+            Field("array<u32, 4>", /* align */ 4, /* size */ 16, /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .StorageBufferOnly(),
-            Field("array<vec2<u32>, 1>", /* align */ 8, /* size */ 8)
+            Field("array<vec2<u32>, 1>", /* align */ 8, /* size */ 8, /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .StorageBufferOnly(),
-            Field("array<vec2<u32>, 2>", /* align */ 8, /* size */ 16)
+            Field("array<vec2<u32>, 2>", /* align */ 8, /* size */ 16,
+                  /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .StorageBufferOnly(),
-            Field("array<vec2<u32>, 3>", /* align */ 8, /* size */ 24)
+            Field("array<vec2<u32>, 3>", /* align */ 8, /* size */ 24,
+                  /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .StorageBufferOnly(),
-            Field("array<vec2<u32>, 4>", /* align */ 8, /* size */ 32)
+            Field("array<vec2<u32>, 4>", /* align */ 8, /* size */ 32,
+                  /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .StorageBufferOnly(),
-            Field("array<vec3<u32>, 1>", /* align */ 16, /* size */ 16)
+            Field("array<vec3<u32>, 1>", /* align */ 16, /* size */ 16,
+                  /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .Strided(12, 4),
-            Field("array<vec3<u32>, 2>", /* align */ 16, /* size */ 32)
+            Field("array<vec3<u32>, 2>", /* align */ 16, /* size */ 32,
+                  /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .Strided(12, 4),
-            Field("array<vec3<u32>, 3>", /* align */ 16, /* size */ 48)
+            Field("array<vec3<u32>, 3>", /* align */ 16, /* size */ 48,
+                  /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .Strided(12, 4),
-            Field("array<vec3<u32>, 4>", /* align */ 16, /* size */ 64)
+            Field("array<vec3<u32>, 4>", /* align */ 16, /* size */ 64,
+                  /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .Strided(12, 4),
-            Field("array<vec4<u32>, 1>", /* align */ 16, /* size */ 16).AlignAttribute(32),
-            Field("array<vec4<u32>, 2>", /* align */ 16, /* size */ 32).AlignAttribute(32),
-            Field("array<vec4<u32>, 3>", /* align */ 16, /* size */ 48).AlignAttribute(32),
-            Field("array<vec4<u32>, 4>", /* align */ 16, /* size */ 64).AlignAttribute(32),
+            Field("array<vec4<u32>, 1>", /* align */ 16, /* size */ 16,
+                  /* requireF16Feature */ false)
+                .AlignAttribute(32),
+            Field("array<vec4<u32>, 2>", /* align */ 16, /* size */ 32,
+                  /* requireF16Feature */ false)
+                .AlignAttribute(32),
+            Field("array<vec4<u32>, 3>", /* align */ 16, /* size */ 48,
+                  /* requireF16Feature */ false)
+                .AlignAttribute(32),
+            Field("array<vec4<u32>, 4>", /* align */ 16, /* size */ 64,
+                  /* requireF16Feature */ false)
+                .AlignAttribute(32),
 
             // Array types with custom size
-            Field("array<u32, 1>", /* align */ 4, /* size */ 4)
+            Field("array<u32, 1>", /* align */ 4, /* size */ 4, /* requireF16Feature */ false)
                 .SizeAttribute(128)
                 .StorageBufferOnly(),
-            Field("array<u32, 2>", /* align */ 4, /* size */ 8)
+            Field("array<u32, 2>", /* align */ 4, /* size */ 8, /* requireF16Feature */ false)
                 .SizeAttribute(128)
                 .StorageBufferOnly(),
-            Field("array<u32, 3>", /* align */ 4, /* size */ 12)
+            Field("array<u32, 3>", /* align */ 4, /* size */ 12, /* requireF16Feature */ false)
                 .SizeAttribute(128)
                 .StorageBufferOnly(),
-            Field("array<u32, 4>", /* align */ 4, /* size */ 16)
+            Field("array<u32, 4>", /* align */ 4, /* size */ 16, /* requireF16Feature */ false)
                 .SizeAttribute(128)
                 .StorageBufferOnly(),
-            Field("array<vec3<u32>, 4>", /* align */ 16, /* size */ 64)
+            Field("array<vec3<u32>, 4>", /* align */ 16, /* size */ 64,
+                  /* requireF16Feature */ false)
                 .SizeAttribute(128)
                 .Strided(12, 4),
+
+            // Array of f32 matrix
+            Field("array<mat2x2<f32>, 3>", /* align */ 8, /* size */ 48,
+                  /* requireF16Feature */ false)
+                .StorageBufferOnly(),
+            // Uniform scope require the array alignment round up to 16.
+            Field("array<mat2x2<f32>, 3>", /* align */ 8, /* size */ 48,
+                  /* requireF16Feature */ false)
+                .AlignAttribute(16),
+            Field("array<mat2x3<f32>, 3>", /* align */ 16, /* size */ 96,
+                  /* requireF16Feature */ false)
+                .Strided(12, 4),
+            Field("array<mat2x4<f32>, 3>", /* align */ 16, /* size */ 96,
+                  /* requireF16Feature */ false),
+            Field("array<mat3x2<f32>, 3>", /* align */ 8, /* size */ 72,
+                  /* requireF16Feature */ false)
+                .StorageBufferOnly(),
+            // `mat3x2<f16>` can not be the element type of a uniform array, because its size 24 is
+            // not a multiple of 16.
+            Field("array<mat3x2<f32>, 3>", /* align */ 8, /* size */ 72,
+                  /* requireF16Feature */ false)
+                .AlignAttribute(16)
+                .StorageBufferOnly(),
+            Field("array<mat3x3<f32>, 3>", /* align */ 16, /* size */ 144,
+                  /* requireF16Feature */ false)
+                .Strided(12, 4),
+            Field("array<mat3x4<f32>, 3>", /* align */ 16, /* size */ 144,
+                  /* requireF16Feature */ false),
+            Field("array<mat4x2<f32>, 3>", /* align */ 8, /* size */ 96,
+                  /* requireF16Feature */ false)
+                .StorageBufferOnly(),
+            Field("array<mat4x2<f32>, 3>", /* align */ 8, /* size */ 96,
+                  /* requireF16Feature */ false)
+                .AlignAttribute(16),
+            Field("array<mat4x3<f32>, 3>", /* align */ 16, /* size */ 192,
+                  /* requireF16Feature */ false)
+                .Strided(12, 4),
+            Field("array<mat4x4<f32>, 3>", /* align */ 16, /* size */ 192,
+                  /* requireF16Feature */ false),
+
+            // Array of f16 matrix
+            Field("array<mat2x2<f16>, 3>", /* align */ 4, /* size */ 24,
+                  /* requireF16Feature */ true)
+                .StorageBufferOnly(),
+            Field("array<mat2x3<f16>, 3>", /* align */ 8, /* size */ 48,
+                  /* requireF16Feature */ true)
+                .Strided(6, 2)
+                .StorageBufferOnly(),
+            Field("array<mat2x4<f16>, 3>", /* align */ 8, /* size */ 48,
+                  /* requireF16Feature */ true)
+                .StorageBufferOnly(),
+            Field("array<mat3x2<f16>, 3>", /* align */ 4, /* size */ 36,
+                  /* requireF16Feature */ true)
+                .StorageBufferOnly(),
+            Field("array<mat3x3<f16>, 3>", /* align */ 8, /* size */ 72,
+                  /* requireF16Feature */ true)
+                .Strided(6, 2)
+                .StorageBufferOnly(),
+            Field("array<mat3x4<f16>, 3>", /* align */ 8, /* size */ 72,
+                  /* requireF16Feature */ true)
+                .StorageBufferOnly(),
+            Field("array<mat4x2<f16>, 3>", /* align */ 4, /* size */ 48,
+                  /* requireF16Feature */ true)
+                .StorageBufferOnly(),
+            Field("array<mat4x3<f16>, 3>", /* align */ 8, /* size */ 96,
+                  /* requireF16Feature */ true)
+                .Strided(6, 2)
+                .StorageBufferOnly(),
+            Field("array<mat4x4<f16>, 3>", /* align */ 8, /* size */ 96,
+                  /* requireF16Feature */ true)
+                .StorageBufferOnly(),
+            // Uniform scope require the array alignment round up to 16, and array element size a
+            // multiple of 16.
+            Field("array<mat2x2<f16>, 3>", /* align */ 4, /* size */ 24,
+                  /* requireF16Feature */ true)
+                .AlignAttribute(16)
+                .StorageBufferOnly(),
+            Field("array<mat2x3<f16>, 3>", /* align */ 8, /* size */ 48,
+                  /* requireF16Feature */ true)
+                .AlignAttribute(16)
+                .Strided(6, 2),
+            Field("array<mat2x4<f16>, 3>", /* align */ 8, /* size */ 48,
+                  /* requireF16Feature */ true)
+                .AlignAttribute(16),
+            Field("array<mat3x2<f16>, 3>", /* align */ 4, /* size */ 36,
+                  /* requireF16Feature */ true)
+                .AlignAttribute(16)
+                .StorageBufferOnly(),
+            Field("array<mat3x3<f16>, 3>", /* align */ 8, /* size */ 72,
+                  /* requireF16Feature */ true)
+                .AlignAttribute(16)
+                .Strided(6, 2)
+                .StorageBufferOnly(),
+            Field("array<mat3x4<f16>, 3>", /* align */ 8, /* size */ 72,
+                  /* requireF16Feature */ true)
+                .AlignAttribute(16)
+                .StorageBufferOnly(),
+            Field("array<mat4x2<f16>, 3>", /* align */ 4, /* size */ 48,
+                  /* requireF16Feature */ true)
+                .AlignAttribute(16),
+            Field("array<mat4x3<f16>, 3>", /* align */ 8, /* size */ 96,
+                  /* requireF16Feature */ true)
+                .AlignAttribute(16)
+                .Strided(6, 2),
+            Field("array<mat4x4<f16>, 3>", /* align */ 8, /* size */ 96,
+                  /* requireF16Feature */ true)
+                .AlignAttribute(16),
         });
 
     std::vector<ComputeLayoutMemoryBufferTestParams> filtered;

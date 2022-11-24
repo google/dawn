@@ -1,19 +1,27 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-binary/mul/vec3-mat3x3/f16.wgsl:3:14 error: using f16 types in 'uniform' address space is not implemented yet
-    matrix : mat3x3<f16>,
-             ^^^^^^^^^^^
+using namespace metal;
 
-binary/mul/vec3-mat3x3/f16.wgsl:2:1 note: see layout of struct:
-/*            align(8) size(32) */ struct S {
-/* offset( 0) align(8) size(24) */   matrix : mat3x3<f16>;
-/* offset(24) align(8) size( 6) */   vector : vec3<f16>;
-/* offset(30) align(1) size( 2) */   // -- implicit struct size padding --;
-/*                              */ };
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
 struct S {
-^^^^^^
+  /* 0x0000 */ half3x3 tint_symbol;
+  /* 0x0018 */ packed_half3 vector;
+  /* 0x001e */ tint_array<int8_t, 2> tint_pad;
+};
 
-binary/mul/vec3-mat3x3/f16.wgsl:6:36 note: see declaration of variable
-@group(0) @binding(0) var<uniform> data: S;
-                                   ^^^^
+fragment void tint_symbol_1(const constant S* tint_symbol_2 [[buffer(0)]]) {
+  half3 const x = (half3((*(tint_symbol_2)).vector) * (*(tint_symbol_2)).tint_symbol);
+  return;
+}
 

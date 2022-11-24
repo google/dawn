@@ -2838,6 +2838,15 @@ INSTANTIATE_TEST_SUITE_P(,
                              {4, 2, MatrixType::f32},
                              {4, 3, MatrixType::f32},
                              {4, 4, MatrixType::f32},
+                             {2, 2, MatrixType::f16},
+                             {2, 3, MatrixType::f16},
+                             {2, 4, MatrixType::f16},
+                             {3, 2, MatrixType::f16},
+                             {3, 3, MatrixType::f16},
+                             {3, 4, MatrixType::f16},
+                             {4, 2, MatrixType::f16},
+                             {4, 3, MatrixType::f16},
+                             {4, 4, MatrixType::f16},
                          }));
 
 using Std140Test_MatrixArray = TransformTestWithParam<MatrixCase>;
@@ -4866,6 +4875,15 @@ INSTANTIATE_TEST_SUITE_P(,
                              {4, 2, MatrixType::f32},
                              {4, 3, MatrixType::f32},
                              {4, 4, MatrixType::f32},
+                             {2, 2, MatrixType::f16},
+                             {2, 3, MatrixType::f16},
+                             {2, 4, MatrixType::f16},
+                             {3, 2, MatrixType::f16},
+                             {3, 3, MatrixType::f16},
+                             {3, 4, MatrixType::f16},
+                             {4, 2, MatrixType::f16},
+                             {4, 3, MatrixType::f16},
+                             {4, 4, MatrixType::f16},
                          }));
 
 }  // namespace

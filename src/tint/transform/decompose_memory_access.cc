@@ -153,6 +153,10 @@ bool IntrinsicDataTypeFor(const sem::Type* ty, DecomposeMemoryAccess::Intrinsic:
         out = DecomposeMemoryAccess::Intrinsic::DataType::kF32;
         return true;
     }
+    if (ty->Is<sem::F16>()) {
+        out = DecomposeMemoryAccess::Intrinsic::DataType::kF16;
+        return true;
+    }
     if (auto* vec = ty->As<sem::Vector>()) {
         switch (vec->Width()) {
             case 2:
@@ -166,6 +170,10 @@ bool IntrinsicDataTypeFor(const sem::Type* ty, DecomposeMemoryAccess::Intrinsic:
                 }
                 if (vec->type()->Is<sem::F32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2F32;
+                    return true;
+                }
+                if (vec->type()->Is<sem::F16>()) {
+                    out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2F16;
                     return true;
                 }
                 break;
@@ -182,6 +190,10 @@ bool IntrinsicDataTypeFor(const sem::Type* ty, DecomposeMemoryAccess::Intrinsic:
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec3F32;
                     return true;
                 }
+                if (vec->type()->Is<sem::F16>()) {
+                    out = DecomposeMemoryAccess::Intrinsic::DataType::kVec3F16;
+                    return true;
+                }
                 break;
             case 4:
                 if (vec->type()->Is<sem::I32>()) {
@@ -194,6 +206,10 @@ bool IntrinsicDataTypeFor(const sem::Type* ty, DecomposeMemoryAccess::Intrinsic:
                 }
                 if (vec->type()->Is<sem::F32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec4F32;
+                    return true;
+                }
+                if (vec->type()->Is<sem::F16>()) {
+                    out = DecomposeMemoryAccess::Intrinsic::DataType::kVec4F16;
                     return true;
                 }
                 break;
@@ -776,6 +792,9 @@ std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
         case DataType::kI32:
             ss << "i32";
             break;
+        case DataType::kF16:
+            ss << "f16";
+            break;
         case DataType::kVec2U32:
             ss << "vec2_u32";
             break;
@@ -784,6 +803,9 @@ std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
             break;
         case DataType::kVec2I32:
             ss << "vec2_i32";
+            break;
+        case DataType::kVec2F16:
+            ss << "vec2_f16";
             break;
         case DataType::kVec3U32:
             ss << "vec3_u32";
@@ -794,6 +816,9 @@ std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
         case DataType::kVec3I32:
             ss << "vec3_i32";
             break;
+        case DataType::kVec3F16:
+            ss << "vec3_f16";
+            break;
         case DataType::kVec4U32:
             ss << "vec4_u32";
             break;
@@ -802,6 +827,9 @@ std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
             break;
         case DataType::kVec4I32:
             ss << "vec4_i32";
+            break;
+        case DataType::kVec4F16:
+            ss << "vec4_f16";
             break;
     }
     return ss.str();

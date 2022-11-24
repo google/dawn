@@ -3955,11 +3955,7 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
     if (matrix_type) {
         push_annot(spv::Op::OpMemberDecorate,
                    {Operand(struct_id), Operand(idx), U32Operand(SpvDecorationColMajor)});
-        if (!matrix_type->type()->Is<sem::F32>()) {
-            error_ = "matrix scalar element type must be f32";
-            return 0;
-        }
-        const uint32_t scalar_elem_size = 4;
+        const uint32_t scalar_elem_size = matrix_type->type()->Size();
         const uint32_t effective_row_count = (matrix_type->rows() == 2) ? 2 : 4;
         push_annot(spv::Op::OpMemberDecorate,
                    {Operand(struct_id), Operand(idx), U32Operand(SpvDecorationMatrixStride),

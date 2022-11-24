@@ -1097,30 +1097,61 @@ bool GeneratorImpl::EmitUniformBufferAccess(
     const auto& args = expr->args;
     auto* offset_arg = builder_.Sem().Get(args[1]);
 
-    uint32_t scalar_offset_value = 0;
-    std::string scalar_offset_expr;
+    // offset in bytes
+    uint32_t scalar_offset_bytes = 0;
+    // offset in uint (4 bytes)
+    uint32_t scalar_offset_index = 0;
+    // expression to calculate offset in bytes
+    std::string scalar_offset_bytes_expr;
+    // expression to calculate offset in uint, by dividing scalar_offset_bytes_expr by 4
+    std::string scalar_offset_index_expr;
+    // expression to calculate offset in uint, independently
+    std::string scalar_offset_index_unified_expr;
 
-    // If true, use scalar_offset_value, otherwise use scalar_offset_expr
+    // If true, use scalar_offset_index, otherwise use scalar_offset_index_expr
     bool scalar_offset_constant = false;
 
     if (auto* val = offset_arg->ConstantValue()) {
         TINT_ASSERT(Writer, val->Type()->Is<sem::U32>());
-        scalar_offset_value = static_cast<uint32_t>(std::get<AInt>(val->Value()));
-        scalar_offset_value /= 4;  // bytes -> scalar index
+        scalar_offset_bytes = static_cast<uint32_t>(std::get<AInt>(val->Value()));
+        scalar_offset_index = scalar_offset_bytes / 4;  // bytes -> scalar index
         scalar_offset_constant = true;
     }
+
+    // If true, scalar_offset_bytes or scalar_offset_bytes_expr should be used, otherwise only use
+    // scalar_offset_index or scalar_offset_index_unified_expr. Currently only loading f16 scalar
+    // require using offset in bytes.
+    const bool need_offset_in_bytes =
+        intrinsic->type == transform::DecomposeMemoryAccess::Intrinsic::DataType::kF16;
 
     if (!scalar_offset_constant) {
         // UBO offset not compile-time known.
         // Calculate the scalar offset into a temporary.
-        scalar_offset_expr = UniqueIdentifier("scalar_offset");
-        auto pre = line();
-        pre << "const uint " << scalar_offset_expr << " = (";
-        if (!EmitExpression(pre, args[1])) {  // offset
-            return false;
+        if (need_offset_in_bytes) {
+            scalar_offset_bytes_expr = UniqueIdentifier("scalar_offset_bytes");
+            scalar_offset_index_expr = UniqueIdentifier("scalar_offset_index");
+            {
+                auto pre = line();
+                pre << "const uint " << scalar_offset_bytes_expr << " = (";
+                if (!EmitExpression(pre, args[1])) {  // offset
+                    return false;
+                }
+                pre << ");";
+            }
+            line() << "const uint " << scalar_offset_index_expr << " = " << scalar_offset_bytes_expr
+                   << " / 4;";
+        } else {
+            scalar_offset_index_unified_expr = UniqueIdentifier("scalar_offset");
+            auto pre = line();
+            pre << "const uint " << scalar_offset_index_unified_expr << " = (";
+            if (!EmitExpression(pre, args[1])) {  // offset
+                return false;
+            }
+            pre << ") / 4;";
         }
-        pre << ") / 4;";
     }
+
+    constexpr const char swizzle[] = {'x', 'y', 'z', 'w'};
 
     using Op = transform::DecomposeMemoryAccess::Intrinsic::Op;
     using DataType = transform::DecomposeMemoryAccess::Intrinsic::DataType;
@@ -1132,27 +1163,28 @@ bool GeneratorImpl::EmitUniformBufferAccess(
                 out << ")";
                 return result;
             };
-            auto load_scalar = [&]() {
-                if (!EmitExpression(out, args[0])) {  // buffer
+            auto load_u32_to = [&](std::ostream& target) {
+                if (!EmitExpression(target, args[0])) {  // buffer
                     return false;
                 }
                 if (scalar_offset_constant) {
-                    char swizzle[] = {'x', 'y', 'z', 'w'};
-                    out << "[" << (scalar_offset_value / 4) << "]."
-                        << swizzle[scalar_offset_value & 3];
+                    target << "[" << (scalar_offset_index / 4) << "]."
+                           << swizzle[scalar_offset_index & 3];
                 } else {
-                    out << "[" << scalar_offset_expr << " / 4][" << scalar_offset_expr << " % 4]";
+                    target << "[" << scalar_offset_index_unified_expr << " / 4]["
+                           << scalar_offset_index_unified_expr << " % 4]";
                 }
                 return true;
             };
+            auto load_u32 = [&] { return load_u32_to(out); };
             // Has a minimum alignment of 8 bytes, so is either .xy or .zw
-            auto load_vec2 = [&] {
+            auto load_vec2_u32_to = [&](std::ostream& target) {
                 if (scalar_offset_constant) {
-                    if (!EmitExpression(out, args[0])) {  // buffer
+                    if (!EmitExpression(target, args[0])) {  // buffer
                         return false;
                     }
-                    out << "[" << (scalar_offset_value / 4) << "]";
-                    out << ((scalar_offset_value & 2) == 0 ? ".xy" : ".zw");
+                    target << "[" << (scalar_offset_index / 4) << "]";
+                    target << ((scalar_offset_index & 2) == 0 ? ".xy" : ".zw");
                 } else {
                     std::string ubo_load = UniqueIdentifier("ubo_load");
                     {
@@ -1161,58 +1193,190 @@ bool GeneratorImpl::EmitUniformBufferAccess(
                         if (!EmitExpression(pre, args[0])) {  // buffer
                             return false;
                         }
-                        pre << "[" << scalar_offset_expr << " / 4];";
+                        pre << "[" << scalar_offset_index_unified_expr << " / 4];";
                     }
-                    out << "((" << scalar_offset_expr << " & 2) ? " << ubo_load
-                        << ".zw : " << ubo_load << ".xy)";
+                    target << "((" << scalar_offset_index_unified_expr << " & 2) ? " << ubo_load
+                           << ".zw : " << ubo_load << ".xy)";
                 }
                 return true;
             };
+            auto load_vec2_u32 = [&] { return load_vec2_u32_to(out); };
             // vec4 has a minimum alignment of 16 bytes, easiest case
-            auto load_vec4 = [&] {
+            auto load_vec4_u32 = [&] {
                 if (!EmitExpression(out, args[0])) {  // buffer
                     return false;
                 }
                 if (scalar_offset_constant) {
-                    out << "[" << (scalar_offset_value / 4) << "]";
+                    out << "[" << (scalar_offset_index / 4) << "]";
                 } else {
-                    out << "[" << scalar_offset_expr << " / 4]";
+                    out << "[" << scalar_offset_index_unified_expr << " / 4]";
                 }
                 return true;
             };
             // vec3 has a minimum alignment of 16 bytes, so is just a .xyz swizzle
-            auto load_vec3 = [&] {
-                if (!load_vec4()) {
+            auto load_vec3_u32 = [&] {
+                if (!load_vec4_u32()) {
                     return false;
                 }
                 out << ".xyz";
                 return true;
             };
+            auto load_scalar_f16 = [&] {
+                // offset bytes = 4k,   ((buffer[index].x) & 0xFFFF)
+                // offset bytes = 4k+2, ((buffer[index].x >> 16) & 0xFFFF)
+                out << "float16_t(f16tof32(((";
+                if (!EmitExpression(out, args[0])) {  // buffer
+                    return false;
+                }
+                if (scalar_offset_constant) {
+                    out << "[" << (scalar_offset_index / 4) << "]."
+                        << swizzle[scalar_offset_index & 3];
+                    // WGSL spec ensure little endian memory layout.
+                    if (scalar_offset_bytes % 4 == 0) {
+                        out << ") & 0xFFFF)";
+                    } else {
+                        out << " >> 16) & 0xFFFF)";
+                    }
+                } else {
+                    out << "[" << scalar_offset_index_expr << " / 4][" << scalar_offset_index_expr
+                        << " % 4] >> (" << scalar_offset_bytes_expr
+                        << " % 4 == 0 ? 0 : 16)) & 0xFFFF)";
+                }
+                out << "))";
+                return true;
+            };
+            auto load_vec2_f16 = [&] {
+                // vec2<f16> is aligned to 4 bytes
+                // Preclude code load the vec2<f16> data as a uint:
+                //     uint ubo_load = buffer[id0][id1];
+                // Loading code convert it to vec2<f16>:
+                //     vector<float16_t, 2>(float16_t(f16tof32(ubo_load & 0xFFFF)),
+                //     float16_t(f16tof32(ubo_load >> 16)))
+                std::string ubo_load = UniqueIdentifier("ubo_load");
+                {
+                    auto pre = line();
+                    // Load the 4 bytes f16 vector as an uint
+                    pre << "uint " << ubo_load << " = ";
+                    if (!load_u32_to(pre)) {
+                        return false;
+                    }
+                    pre << ";";
+                }
+                out << "vector<float16_t, 2>(float16_t(f16tof32(" << ubo_load
+                    << " & 0xFFFF)), float16_t(f16tof32(" << ubo_load << " >> 16)))";
+                return true;
+            };
+            auto load_vec3_f16 = [&] {
+                // vec3<f16> is aligned to 8 bytes
+                // Preclude code load the vec3<f16> data as uint2 and convert its elements to
+                // float16_t:
+                //     uint2 ubo_load = buffer[id0].xy;
+                //     /* The low 8 bits of two uint are the x and z elements of vec3<f16> */
+                //     vector<float16_t> ubo_load_xz = vector<float16_t, 2>(f16tof32(ubo_load &
+                //     0xFFFF));
+                //     /* The high 8 bits of first uint is the y element of vec3<f16> */
+                //     float16_t ubo_load_y = f16tof32(ubo_load[0] >> 16);
+                // Loading code convert it to vec3<f16>:
+                //     vector<float16_t, 3>(ubo_load_xz[0], ubo_load_y, ubo_load_xz[1])
+                std::string ubo_load = UniqueIdentifier("ubo_load");
+                std::string ubo_load_xz = UniqueIdentifier(ubo_load + "_xz");
+                std::string ubo_load_y = UniqueIdentifier(ubo_load + "_y");
+                {
+                    auto pre = line();
+                    // Load the 8 bytes uint2 with the f16 vector at lower 6 bytes
+                    pre << "uint2 " << ubo_load << " = ";
+                    if (!load_vec2_u32_to(pre)) {
+                        return false;
+                    }
+                    pre << ";";
+                }
+                {
+                    auto pre = line();
+                    pre << "vector<float16_t, 2> " << ubo_load_xz
+                        << " = vector<float16_t, 2>(f16tof32(" << ubo_load << " & 0xFFFF));";
+                }
+                {
+                    auto pre = line();
+                    pre << "float16_t " << ubo_load_y << " = f16tof32(" << ubo_load
+                        << "[0] >> 16);";
+                }
+                out << "vector<float16_t, 3>(" << ubo_load_xz << "[0], " << ubo_load_y << ", "
+                    << ubo_load_xz << "[1])";
+                return true;
+            };
+            auto load_vec4_f16 = [&] {
+                // vec4<f16> is aligned to 8 bytes
+                // Preclude code load the vec4<f16> data as uint2 and convert its elements to
+                // float16_t:
+                //     uint2 ubo_load = buffer[id0].xy;
+                //     /* The low 8 bits of two uint are the x and z elements of vec4<f16> */
+                //     vector<float16_t> ubo_load_xz = vector<float16_t, 2>(f16tof32(ubo_load &
+                //     0xFFFF));
+                //     /* The high 8 bits of two uint are the y and w elements of vec4<f16> */
+                //     vector<float16_t, 2> ubo_load_yw = vector<float16_t, 2>(f16tof32(ubo_load >>
+                //     16));
+                // Loading code convert it to vec4<f16>:
+                //     vector<float16_t, 4>(ubo_load_xz[0], ubo_load_yw[0], ubo_load_xz[1],
+                //     ubo_load_yw[1])
+                std::string ubo_load = UniqueIdentifier("ubo_load");
+                std::string ubo_load_xz = UniqueIdentifier(ubo_load + "_xz");
+                std::string ubo_load_yw = UniqueIdentifier(ubo_load + "_yw");
+                {
+                    auto pre = line();
+                    // Load the 8 bytes f16 vector as an uint2
+                    pre << "uint2 " << ubo_load << " = ";
+                    if (!load_vec2_u32_to(pre)) {
+                        return false;
+                    }
+                    pre << ";";
+                }
+                {
+                    auto pre = line();
+                    pre << "vector<float16_t, 2> " << ubo_load_xz
+                        << " = vector<float16_t, 2>(f16tof32(" << ubo_load << " & 0xFFFF));";
+                }
+                {
+                    auto pre = line();
+                    pre << "vector<float16_t, 2> " << ubo_load_yw
+                        << " = vector<float16_t, 2>(f16tof32(" << ubo_load << " >> 16));";
+                }
+                out << "vector<float16_t, 4>(" << ubo_load_xz << "[0], " << ubo_load_yw << "[0], "
+                    << ubo_load_xz << "[1], " << ubo_load_yw << "[1])";
+                return true;
+            };
             switch (intrinsic->type) {
                 case DataType::kU32:
-                    return load_scalar();
+                    return load_u32();
                 case DataType::kF32:
-                    return cast("asfloat", load_scalar);
+                    return cast("asfloat", load_u32);
                 case DataType::kI32:
-                    return cast("asint", load_scalar);
+                    return cast("asint", load_u32);
+                case DataType::kF16:
+                    return load_scalar_f16();
                 case DataType::kVec2U32:
-                    return load_vec2();
+                    return load_vec2_u32();
                 case DataType::kVec2F32:
-                    return cast("asfloat", load_vec2);
+                    return cast("asfloat", load_vec2_u32);
                 case DataType::kVec2I32:
-                    return cast("asint", load_vec2);
+                    return cast("asint", load_vec2_u32);
+                case DataType::kVec2F16:
+                    return load_vec2_f16();
                 case DataType::kVec3U32:
-                    return load_vec3();
+                    return load_vec3_u32();
                 case DataType::kVec3F32:
-                    return cast("asfloat", load_vec3);
+                    return cast("asfloat", load_vec3_u32);
                 case DataType::kVec3I32:
-                    return cast("asint", load_vec3);
+                    return cast("asint", load_vec3_u32);
+                case DataType::kVec3F16:
+                    return load_vec3_f16();
                 case DataType::kVec4U32:
-                    return load_vec4();
+                    return load_vec4_u32();
                 case DataType::kVec4F32:
-                    return cast("asfloat", load_vec4);
+                    return cast("asfloat", load_vec4_u32);
                 case DataType::kVec4I32:
-                    return cast("asint", load_vec4);
+                    return cast("asint", load_vec4_u32);
+                case DataType::kVec4F16:
+                    return load_vec4_f16();
             }
             TINT_UNREACHABLE(Writer, diagnostics_)
                 << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
@@ -1257,6 +1421,20 @@ bool GeneratorImpl::EmitStorageBufferAccess(
                 }
                 return true;
             };
+            // Templated load used for f16 types, requires SM6.2 or higher and DXC
+            // Used by loading f16 types, e.g. for f16 type, set type parameter to "float16_t"
+            // to emit `buffer.Load<float16_t>(offset)`.
+            auto templated_load = [&](const char* type) {
+                if (!EmitExpression(out, args[0])) {  // buffer
+                    return false;
+                }
+                out << ".Load<" << type << ">";  // templated load
+                ScopedParen sp(out);
+                if (!EmitExpression(out, args[1])) {  // offset
+                    return false;
+                }
+                return true;
+            };
             switch (intrinsic->type) {
                 case DataType::kU32:
                     return load(nullptr, 1);
@@ -1264,24 +1442,32 @@ bool GeneratorImpl::EmitStorageBufferAccess(
                     return load("asfloat", 1);
                 case DataType::kI32:
                     return load("asint", 1);
+                case DataType::kF16:
+                    return templated_load("float16_t");
                 case DataType::kVec2U32:
                     return load(nullptr, 2);
                 case DataType::kVec2F32:
                     return load("asfloat", 2);
                 case DataType::kVec2I32:
                     return load("asint", 2);
+                case DataType::kVec2F16:
+                    return templated_load("vector<float16_t, 2> ");
                 case DataType::kVec3U32:
                     return load(nullptr, 3);
                 case DataType::kVec3F32:
                     return load("asfloat", 3);
                 case DataType::kVec3I32:
                     return load("asint", 3);
+                case DataType::kVec3F16:
+                    return templated_load("vector<float16_t, 3> ");
                 case DataType::kVec4U32:
                     return load(nullptr, 4);
                 case DataType::kVec4F32:
                     return load("asfloat", 4);
                 case DataType::kVec4I32:
                     return load("asint", 4);
+                case DataType::kVec4F16:
+                    return templated_load("vector<float16_t, 4> ");
             }
             TINT_UNREACHABLE(Writer, diagnostics_)
                 << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
@@ -1309,6 +1495,24 @@ bool GeneratorImpl::EmitStorageBufferAccess(
                 }
                 return true;
             };
+            // Templated stored used for f16 types, requires SM6.2 or higher and DXC
+            // Used by storing f16 types, e.g. for f16 type, set type parameter to "float16_t"
+            // to emit `buffer.Store<float16_t>(offset)`.
+            auto templated_store = [&](const char* type) {
+                if (!EmitExpression(out, args[0])) {  // buffer
+                    return false;
+                }
+                out << ".Store<" << type << ">";  // templated store
+                ScopedParen sp1(out);
+                if (!EmitExpression(out, args[1])) {  // offset
+                    return false;
+                }
+                out << ", ";
+                if (!EmitExpression(out, args[2])) {  // value
+                    return false;
+                }
+                return true;
+            };
             switch (intrinsic->type) {
                 case DataType::kU32:
                     return store(1);
@@ -1316,24 +1520,32 @@ bool GeneratorImpl::EmitStorageBufferAccess(
                     return store(1);
                 case DataType::kI32:
                     return store(1);
+                case DataType::kF16:
+                    return templated_store("float16_t");
                 case DataType::kVec2U32:
                     return store(2);
                 case DataType::kVec2F32:
                     return store(2);
                 case DataType::kVec2I32:
                     return store(2);
+                case DataType::kVec2F16:
+                    return templated_store("vector<float16_t, 2> ");
                 case DataType::kVec3U32:
                     return store(3);
                 case DataType::kVec3F32:
                     return store(3);
                 case DataType::kVec3I32:
                     return store(3);
+                case DataType::kVec3F16:
+                    return templated_store("vector<float16_t, 3> ");
                 case DataType::kVec4U32:
                     return store(4);
                 case DataType::kVec4F32:
                     return store(4);
                 case DataType::kVec4I32:
                     return store(4);
+                case DataType::kVec4F16:
+                    return templated_store("vector<float16_t, 4> ");
             }
             TINT_UNREACHABLE(Writer, diagnostics_)
                 << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "

@@ -1,19 +1,37 @@
-SKIP: FAILED
+#version 310 es
+#extension GL_AMD_gpu_shader_half_float : require
+precision mediump float;
 
-expressions/binary/mul/vec3-mat4x3/f16.wgsl:3:14 error: using f16 types in 'uniform' address space is not implemented yet
-    matrix : mat4x3<f16>,
-             ^^^^^^^^^^^
-
-expressions/binary/mul/vec3-mat4x3/f16.wgsl:2:1 note: see layout of struct:
-/*            align(8) size(40) */ struct S {
-/* offset( 0) align(8) size(32) */   matrix : mat4x3<f16>;
-/* offset(32) align(8) size( 6) */   vector : vec3<f16>;
-/* offset(38) align(1) size( 2) */   // -- implicit struct size padding --;
-/*                              */ };
 struct S {
-^^^^^^
+  f16mat4x3 matrix;
+  f16vec3 vector;
+  uint pad;
+  uint pad_1;
+};
 
-expressions/binary/mul/vec3-mat4x3/f16.wgsl:6:36 note: see declaration of variable
-@group(0) @binding(0) var<uniform> data: S;
-                                   ^^^^
+struct S_std140 {
+  f16vec3 matrix_0;
+  f16vec3 matrix_1;
+  f16vec3 matrix_2;
+  f16vec3 matrix_3;
+  f16vec3 vector;
+  uint pad;
+  uint pad_1;
+};
 
+layout(binding = 0, std140) uniform data_block_std140_ubo {
+  S_std140 inner;
+} data;
+
+f16mat4x3 load_data_inner_matrix() {
+  return f16mat4x3(data.inner.matrix_0, data.inner.matrix_1, data.inner.matrix_2, data.inner.matrix_3);
+}
+
+void tint_symbol() {
+  f16vec4 x = (data.inner.vector * load_data_inner_matrix());
+}
+
+void main() {
+  tint_symbol();
+  return;
+}

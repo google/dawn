@@ -1,17 +1,35 @@
-SKIP: FAILED
+ByteAddressBuffer sb_ro : register(t1, space0);
 
-builtins/gen/var/arrayLength/8421b9.wgsl:26:10 error: using f16 types in 'storage' address space is not implemented yet
-  arg_0: array<f16>,
-         ^^^^^^^^^^
+void arrayLength_8421b9() {
+  uint tint_symbol_2 = 0u;
+  sb_ro.GetDimensions(tint_symbol_2);
+  const uint tint_symbol_3 = ((tint_symbol_2 - 0u) / 2u);
+  uint res = tint_symbol_3;
+}
 
-builtins/gen/var/arrayLength/8421b9.wgsl:25:1 note: see layout of struct:
-/*           align(2) size(2) */ struct SB_RO {
-/* offset(0) align(2) size(2) */   arg_0 : array<f16>;
-/*                            */ };
-struct SB_RO {
-^^^^^^
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
-builtins/gen/var/arrayLength/8421b9.wgsl:28:42 note: see declaration of variable
-@group(0) @binding(1) var<storage, read> sb_ro : SB_RO;
-                                         ^^^^^
+float4 vertex_main_inner() {
+  arrayLength_8421b9();
+  return (0.0f).xxxx;
+}
 
+tint_symbol vertex_main() {
+  const float4 inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+void fragment_main() {
+  arrayLength_8421b9();
+  return;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  arrayLength_8421b9();
+  return;
+}

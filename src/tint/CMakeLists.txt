@@ -1212,6 +1212,8 @@ if(TINT_BUILD_TESTS)
       transform/single_entry_point_test.cc
       transform/spirv_atomic_test.cc
       transform/std140_exhaustive_test.cc
+      transform/std140_f16_test.cc
+      transform/std140_f32_test.cc
       transform/std140_test.cc
       transform/substitute_override_test.cc
       transform/test_helper.h

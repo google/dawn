@@ -60,15 +60,19 @@ class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Trans
             kU32,
             kF32,
             kI32,
+            kF16,
             kVec2U32,
             kVec2F32,
             kVec2I32,
+            kVec2F16,
             kVec3U32,
             kVec3F32,
             kVec3I32,
+            kVec3F16,
             kVec4U32,
             kVec4F32,
             kVec4I32,
+            kVec4F16,
         };
 
         /// Constructor
