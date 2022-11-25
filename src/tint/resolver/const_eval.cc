@@ -461,6 +461,8 @@ struct Composite : ImplConstant {
 /// CreateElement constructs and returns an Element<T>.
 template <typename T>
 ImplResult CreateElement(ProgramBuilder& builder, const Source& source, const sem::Type* t, T v) {
+    TINT_ASSERT(Resolver, t->is_scalar());
+
     if constexpr (IsFloatingPoint<T>) {
         if (!std::isfinite(v.value)) {
             auto msg = OverflowErrorMessage(v, builder.FriendlyName(t));
@@ -652,8 +654,9 @@ ImplResult TransformBinaryElements(ProgramBuilder& builder,
                                    F&& f,
                                    const sem::Constant* c0,
                                    const sem::Constant* c1) {
-    uint32_t n0 = 0, n1 = 0;
+    uint32_t n0 = 0;
     sem::Type::ElementOf(c0->Type(), &n0);
+    uint32_t n1 = 0;
     sem::Type::ElementOf(c1->Type(), &n1);
     uint32_t max_n = std::max(n0, n1);
     // If arity of both constants is 1, invoke callback
@@ -664,7 +667,7 @@ ImplResult TransformBinaryElements(ProgramBuilder& builder,
     utils::Vector<const sem::Constant*, 8> els;
     els.Reserve(max_n);
     for (uint32_t i = 0; i < max_n; i++) {
-        auto nested_or_self = [&](auto& c, uint32_t num_elems) {
+        auto nested_or_self = [&](auto* c, uint32_t num_elems) {
             if (num_elems == 1) {
                 return c;
             }
@@ -2732,6 +2735,23 @@ ConstEval::Result ConstEval::modf(const sem::Type* ty,
     }
 
     return CreateComposite(builder, ty, std::move(fields));
+}
+
+ConstEval::Result ConstEval::normalize(const sem::Type* ty,
+                                       utils::VectorRef<const sem::Constant*> args,
+                                       const Source& source) {
+    auto* len_ty = sem::Type::DeepestElementOf(ty);
+    auto len = Length(source, len_ty, args[0]);
+    if (!len) {
+        AddNote("when calculating normalize", source);
+        return utils::Failure;
+    }
+    auto* v = len.Get();
+    if (v->AllZero()) {
+        AddError("zero length vector can not be normalized", source);
+        return utils::Failure;
+    }
+    return OpDivide(ty, utils::Vector{args[0], v}, source);
 }
 
 ConstEval::Result ConstEval::pack2x16float(const sem::Type* ty,

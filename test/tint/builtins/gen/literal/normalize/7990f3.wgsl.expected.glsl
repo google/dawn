@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void normalize_7990f3() {
-  f16vec2 res = normalize(f16vec2(1.0hf));
+  f16vec2 res = f16vec2(0.70703125hf);
 }
 
 vec4 vertex_main() {
@@ -23,7 +23,7 @@ void main() {
 precision mediump float;
 
 void normalize_7990f3() {
-  f16vec2 res = normalize(f16vec2(1.0hf));
+  f16vec2 res = f16vec2(0.70703125hf);
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void normalize_7990f3() {
-  f16vec2 res = normalize(f16vec2(1.0hf));
+  f16vec2 res = f16vec2(0.70703125hf);
 }
 
 void compute_main() {

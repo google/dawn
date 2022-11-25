@@ -719,6 +719,15 @@ class ConstEval {
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
+    /// normalize builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result normalize(const sem::Type* ty,
+                     utils::VectorRef<const sem::Constant*> args,
+                     const Source& source);
+
     /// pack2x16float builtin
     /// @param ty the expression type
     /// @param args the input arguments

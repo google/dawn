@@ -13626,12 +13626,12 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 1,
-    /* template types */ &kTemplateTypes[26],
+    /* template types */ &kTemplateTypes[23],
     /* template numbers */ &kTemplateNumbers[4],
     /* parameters */ &kParameters[880],
     /* return matcher indices */ &kMatcherIndices[30],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::normalize,
   },
   {
     /* [443] */
@@ -14358,7 +14358,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [54] */
-    /* fn normalize<N : num, T : f32_f16>(vec<N, T>) -> vec<N, T> */
+    /* fn normalize<N : num, T : fa_f32_f16>(vec<N, T>) -> vec<N, T> */
     /* num overloads */ 1,
     /* overloads */ &kOverloads[442],
   },

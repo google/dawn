@@ -1,5 +1,5 @@
 void normalize_9a0aab() {
-  float4 res = normalize((1.0f).xxxx);
+  float4 res = (0.5f).xxxx;
 }
 
 struct tint_symbol {

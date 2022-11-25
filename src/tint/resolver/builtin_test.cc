@@ -1415,7 +1415,7 @@ TEST_F(ResolverBuiltinFloatTest, Normalize_Error_NoParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to normalize()
 
 1 candidate function:
-  normalize(vecN<T>) -> vecN<T>  where: T is f32 or f16
+  normalize(vecN<T>) -> vecN<T>  where: T is abstract-float, f32 or f16
 )");
 }
 

@@ -1694,6 +1694,36 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               ModfCases<f32>(),     //
                                               ModfCases<f16>()))));
 
+template <typename T>
+std::vector<Case> NormalizeCases() {
+    auto error_msg = [&](auto a) {
+        return "12:34 error: " + OverflowErrorMessage(a, "*", a) + R"(
+12:34 note: when calculating normalize)";
+    };
+
+    return {
+        C({Vec(T(2), T(4), T(2))}, Vec(T(0.4082482905), T(0.8164965809), T(0.4082482905)))
+            .FloatComp(),
+
+        C({Vec(T(2), T(0), T(0))}, Vec(T(1), T(0), T(0))),
+        C({Vec(T(0), T(2), T(0))}, Vec(T(0), T(1), T(0))),
+        C({Vec(T(0), T(0), T(2))}, Vec(T(0), T(0), T(1))),
+        C({Vec(-T(2), T(0), T(0))}, Vec(-T(1), T(0), T(0))),
+        C({Vec(T(0), -T(2), T(0))}, Vec(T(0), -T(1), T(0))),
+        C({Vec(T(0), T(0), -T(2))}, Vec(T(0), T(0), -T(1))),
+
+        E({Vec(T(0), T(0), T(0))}, "12:34 error: zero length vector can not be normalized"),
+        E({Vec(T::Highest(), T::Highest(), T::Highest())}, error_msg(T::Highest())),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Normalize,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kNormalize),
+                     testing::ValuesIn(Concat(NormalizeCases<AFloat>(),  //
+                                              NormalizeCases<f32>(),     //
+                                              NormalizeCases<f16>()))));
+
 std::vector<Case> Pack4x8snormCases() {
     return {
         C({Vec(f32(0), f32(0), f32(0), f32(0))}, Val(u32(0x0000'0000))),
