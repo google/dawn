@@ -19,22 +19,17 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::resolver {
 namespace {
 
-// Bring in std::ostream& operator<<(std::ostream& o, const Types& types)
-using resolver::operator<<;
-
 struct Case {
-    Types input;
-    Types expected;
+    Value input;
+    Value expected;
 };
 
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
     o << "input: " << c.input << ", expected: " << c.expected;
     return o;
 }
-
-/// Creates a Case with Values of any type
-template <typename T, typename U>
-Case C(Value<T> input, Value<U> expected) {
+// Creates a Case with Values of any type
+Case C(Value input, Value expected) {
     return Case{std::move(input), std::move(expected)};
 }
 
@@ -52,10 +47,10 @@ TEST_P(ResolverConstEvalUnaryOpTest, Test) {
     auto op = std::get<0>(GetParam());
     auto& c = std::get<1>(GetParam());
 
-    auto* expected = ToValueBase(c.expected);
-    auto* input = ToValueBase(c.input);
+    auto& expected = c.expected;
+    auto& input = c.input;
 
-    auto* input_expr = input->Expr(*this);
+    auto* input_expr = input.Expr(*this);
     auto* expr = create<ast::UnaryOpExpression>(op, input_expr);
 
     GlobalConst("C", expr);
@@ -67,13 +62,13 @@ TEST_P(ResolverConstEvalUnaryOpTest, Test) {
     EXPECT_TYPE(value->Type(), sem->Type());
 
     auto values_flat = ScalarArgsFrom(value);
-    auto expected_values_flat = expected->Args();
+    auto expected_values_flat = expected.Args();
     ASSERT_EQ(values_flat.values.Length(), expected_values_flat.values.Length());
     for (size_t i = 0; i < values_flat.values.Length(); ++i) {
         auto& a = values_flat.values[i];
         auto& b = expected_values_flat.values[i];
         EXPECT_EQ(a, b);
-        if (expected->IsIntegral()) {
+        if (expected.IsIntegral()) {
             // Check that the constant's integer doesn't contain unexpected
             // data in the MSBs that are outside of the bit-width of T.
             EXPECT_EQ(builder::As<AInt>(a), builder::As<AInt>(b));

@@ -22,15 +22,12 @@ using ::testing::HasSubstr;
 namespace tint::resolver {
 namespace {
 
-// Bring in std::ostream& operator<<(std::ostream& o, const Types& types)
-using resolver::operator<<;
-
 struct Case {
-    Case(utils::VectorRef<Types> in_args, utils::VectorRef<Types> expected_values)
+    Case(utils::VectorRef<Value> in_args, utils::VectorRef<Value> expected_values)
         : args(std::move(in_args)),
           expected(Success{std::move(expected_values), CheckConstantFlags{}}) {}
 
-    Case(utils::VectorRef<Types> in_args, std::string expected_err)
+    Case(utils::VectorRef<Value> in_args, std::string expected_err)
         : args(std::move(in_args)), expected(Failure{std::move(expected_err)}) {}
 
     /// Expected value may be positive or negative
@@ -52,14 +49,14 @@ struct Case {
     }
 
     struct Success {
-        utils::Vector<Types, 2> values;
+        utils::Vector<Value, 2> values;
         CheckConstantFlags flags;
     };
     struct Failure {
         std::string error;
     };
 
-    utils::Vector<Types, 8> args;
+    utils::Vector<Value, 8> args;
     utils::Result<Success, Failure> expected;
 };
 
@@ -94,34 +91,34 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 using ScalarTypes = std::variant<AInt, AFloat, u32, i32, f32, f16>;
 
 /// Creates a Case with Values for args and result
-static Case C(std::initializer_list<Types> args, Types result) {
-    return Case{utils::Vector<Types, 8>{args}, utils::Vector<Types, 2>{std::move(result)}};
+static Case C(std::initializer_list<Value> args, Value result) {
+    return Case{utils::Vector<Value, 8>{args}, utils::Vector<Value, 2>{std::move(result)}};
 }
 
 /// Creates a Case with Values for args and result
-static Case C(std::initializer_list<Types> args, std::initializer_list<Types> results) {
-    return Case{utils::Vector<Types, 8>{args}, utils::Vector<Types, 2>{results}};
+static Case C(std::initializer_list<Value> args, std::initializer_list<Value> results) {
+    return Case{utils::Vector<Value, 8>{args}, utils::Vector<Value, 2>{results}};
 }
 
 /// Convenience overload that creates a Case with just scalars
 static Case C(std::initializer_list<ScalarTypes> sargs, ScalarTypes sresult) {
-    utils::Vector<Types, 8> args;
+    utils::Vector<Value, 8> args;
     for (auto& sa : sargs) {
         std::visit([&](auto&& v) { return args.Push(Val(v)); }, sa);
     }
-    Types result = Val(0_a);
+    Value result = Val(0_a);
     std::visit([&](auto&& v) { result = Val(v); }, sresult);
-    return Case{std::move(args), utils::Vector<Types, 2>{std::move(result)}};
+    return Case{std::move(args), utils::Vector<Value, 2>{std::move(result)}};
 }
 
 /// Creates a Case with Values for args and result
 static Case C(std::initializer_list<ScalarTypes> sargs,
               std::initializer_list<ScalarTypes> sresults) {
-    utils::Vector<Types, 8> args;
+    utils::Vector<Value, 8> args;
     for (auto& sa : sargs) {
         std::visit([&](auto&& v) { return args.Push(Val(v)); }, sa);
     }
-    utils::Vector<Types, 2> results;
+    utils::Vector<Value, 2> results;
     for (auto& sa : sresults) {
         std::visit([&](auto&& v) { return results.Push(Val(v)); }, sa);
     }
@@ -129,13 +126,13 @@ static Case C(std::initializer_list<ScalarTypes> sargs,
 }
 
 /// Creates a Case with Values for args and expected error
-static Case E(std::initializer_list<Types> args, std::string err) {
-    return Case{utils::Vector<Types, 8>{args}, std::move(err)};
+static Case E(std::initializer_list<Value> args, std::string err) {
+    return Case{utils::Vector<Value, 8>{args}, std::move(err)};
 }
 
 /// Convenience overload that creates an expected-error Case with just scalars
 static Case E(std::initializer_list<ScalarTypes> sargs, std::string err) {
-    utils::Vector<Types, 8> args;
+    utils::Vector<Value, 8> args;
     for (auto& sa : sargs) {
         std::visit([&](auto&& v) { return args.Push(Val(v)); }, sa);
     }
@@ -152,7 +149,7 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
 
     utils::Vector<const ast::Expression*, 8> args;
     for (auto& a : c.args) {
-        std::visit([&](auto&& v) { args.Push(v.Expr(*this)); }, a);
+        args.Push(a.Expr(*this));
     }
 
     auto* expr = Call(Source{{12, 34}}, sem::str(builtin), std::move(args));
@@ -173,14 +170,13 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
             // The result type of the constant-evaluated expression is a structure.
             // Compare each of the fields individually.
             for (size_t i = 0; i < expected_case.values.Length(); i++) {
-                CheckConstant(value->Index(i), ToValueBase(expected_case.values[i]),
-                              expected_case.flags);
+                CheckConstant(value->Index(i), expected_case.values[i], expected_case.flags);
             }
         } else {
             // Return type is not a structure. Just compare the single value
             ASSERT_EQ(expected_case.values.Length(), 1u)
                 << "const-eval returned non-struct, but Case expected multiple values";
-            CheckConstant(value, ToValueBase(expected_case.values[0]), expected_case.flags);
+            CheckConstant(value, expected_case.values[0], expected_case.flags);
         }
     } else {
         EXPECT_FALSE(r()->Resolve());

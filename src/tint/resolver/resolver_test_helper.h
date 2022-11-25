@@ -241,12 +241,21 @@ using ast_expr_from_double_func_ptr = const ast::Expression* (*)(ProgramBuilder&
 using sem_type_func_ptr = const sem::Type* (*)(ProgramBuilder& b);
 using type_name_func_ptr = std::string (*)();
 
+struct UnspecializedElementType {};
+
+/// Base template for DataType, specialized below.
 template <typename T>
-struct DataType {};
+struct DataType {
+    /// The element type
+    using ElementType = UnspecializedElementType;
+};
 
 /// Helper that represents no-type. Returns nullptr for all static methods.
 template <>
 struct DataType<void> {
+    /// The element type
+    using ElementType = void;
+
     /// @return nullptr
     static inline const ast::Type* AST(ProgramBuilder&) { return nullptr; }
     /// @return nullptr
@@ -762,7 +771,13 @@ constexpr CreatePtrs CreatePtrsFor() {
             DataType<T>::Name};
 }
 
-/// Base class for Value<T>
+/// True if DataType<T> is specialized for T, false otherwise.
+template <typename T>
+const bool IsDataTypeSpecializedFor =
+    !std::is_same_v<typename DataType<T>::ElementType, UnspecializedElementType>;
+
+namespace detail {
+/// ValueBase is a base class of ConcreteValue<T>
 struct ValueBase {
     /// Constructor
     ValueBase() = default;
@@ -793,13 +808,12 @@ struct ValueBase {
     virtual std::ostream& Print(std::ostream& o) const = 0;
 };
 
-/// Value<T> is an instance of a value of type DataType<T>. Useful for storing values to create
-/// expressions with.
+/// ConcreteValue<T> is used to create Values of type DataType<T> with a ScalarArgs initializer.
 template <typename T>
-struct Value : ValueBase {
+struct ConcreteValue : ValueBase {
     /// Constructor
-    /// @param a the scalar args
-    explicit Value(ScalarArgs a) : args(std::move(a)) {}
+    /// @param args the scalar args
+    explicit ConcreteValue(ScalarArgs args) : args_(std::move(args)) {}
 
     /// Alias to T
     using Type = T;
@@ -808,21 +822,16 @@ struct Value : ValueBase {
     /// Alias to DataType::ElementType
     using ElementType = typename DataType::ElementType;
 
-    /// Creates a Value<T> with `args`
-    /// @param args the args that will be passed to the expression
-    /// @returns a Value<T>
-    static Value Create(ScalarArgs args) { return Value{std::move(args)}; }
-
     /// Creates an `ast::Expression` for the type T passing in previously stored args
     /// @param b the ProgramBuilder
     /// @returns an expression node
     const ast::Expression* Expr(ProgramBuilder& b) const override {
         auto create = CreatePtrsFor<T>();
-        return (*create.expr)(b, args);
+        return (*create.expr)(b, args_);
     }
 
     /// @returns args used to create expression via `Expr`
-    const ScalarArgs& Args() const override { return args; }
+    const ScalarArgs& Args() const override { return args_; }
 
     /// @returns true if element type is abstract
     bool IsAbstract() const override { return tint::IsAbstract<ElementType>; }
@@ -838,9 +847,9 @@ struct Value : ValueBase {
     /// @returns input argument `o`
     std::ostream& Print(std::ostream& o) const override {
         o << TypeName() << "(";
-        for (auto& a : args.values) {
+        for (auto& a : args_.values) {
             o << std::get<ElementType>(a);
-            if (&a != &args.values.Back()) {
+            if (&a != &args_.values.Back()) {
                 o << ", ";
             }
         }
@@ -848,60 +857,95 @@ struct Value : ValueBase {
         return o;
     }
 
+  private:
     /// args to create expression with
-    ScalarArgs args;
+    ScalarArgs args_;
 };
-
-namespace detail {
-/// Base template for IsValue
-template <typename T>
-struct IsValue : std::false_type {};
-/// Specialization for IsValue
-template <typename T>
-struct IsValue<Value<T>> : std::true_type {};
 }  // namespace detail
 
-/// True if T is of type Value
-template <typename T>
-constexpr bool IsValue = detail::IsValue<T>::value;
+/// A Value represents a value of type DataType<T> created with ScalarArgs. Useful for storing
+/// values for unit tests.
+class Value {
+  public:
+    /// Creates a Value for type T initialized with `args`
+    /// @param args the scalar args
+    /// @returns Value
+    template <typename T>
+    static Value Create(ScalarArgs args) {
+        static_assert(IsDataTypeSpecializedFor<T>, "No DataType<T> specialization exists");
+        return Value{std::make_shared<detail::ConcreteValue<T>>(std::move(args))};
+    }
 
-/// Returns the friendly name of ValueT
-template <typename ValueT, typename = traits::EnableIf<IsValue<ValueT>>>
-const char* FriendlyName() {
-    return tint::FriendlyName<typename ValueT::ElementType>();
+    /// Creates an `ast::Expression` for the type T passing in previously stored args
+    /// @param b the ProgramBuilder
+    /// @returns an expression node
+    const ast::Expression* Expr(ProgramBuilder& b) const { return value_->Expr(b); }
+
+    /// @returns args used to create expression via `Expr`
+    const ScalarArgs& Args() const { return value_->Args(); }
+
+    /// @returns true if element type is abstract
+    bool IsAbstract() const { return value_->IsAbstract(); }
+
+    /// @returns true if element type is an integral
+    bool IsIntegral() const { return value_->IsIntegral(); }
+
+    /// @returns element type name
+    std::string TypeName() const { return value_->TypeName(); }
+
+    /// Prints this value to the output stream
+    /// @param o the output stream
+    /// @returns input argument `o`
+    std::ostream& Print(std::ostream& o) const { return value_->Print(o); }
+
+  private:
+    /// Private constructor
+    explicit Value(std::shared_ptr<const detail::ValueBase> value) : value_(std::move(value)) {}
+
+    /// Shared pointer to an immutable value. This type-erasure pattern allows Value to wrap a
+    /// polymorphic type, while being used like a value-type (i.e. copyable).
+    std::shared_ptr<const detail::ValueBase> value_;
+};
+
+/// Prints Value to ostream
+inline std::ostream& operator<<(std::ostream& o, const Value& value) {
+    return value.Print(o);
 }
 
-/// Creates a `Value<T>` from a scalar `v`
+/// True if T is Value, false otherwise
 template <typename T>
-auto Val(T v) {
-    return Value<T>::Create(ScalarArgs{v});
+constexpr bool IsValue = std::is_same_v<T, Value>;
+
+/// Creates a Value of DataType<T> from a scalar `v`
+template <typename T>
+Value Val(T v) {
+    return Value::Create<T>(ScalarArgs{v});
 }
 
-/// Creates a `Value<vec<N, T>>` from N scalar `args`
+/// Creates a Value of DataType<vec<N, T>> from N scalar `args`
 template <typename... T>
-auto Vec(T... args) {
-    constexpr size_t N = sizeof...(args);
+Value Vec(T... args) {
     using FirstT = std::tuple_element_t<0, std::tuple<T...>>;
+    constexpr size_t N = sizeof...(args);
     utils::Vector v{args...};
-    using VT = vec<N, FirstT>;
-    return Value<VT>::Create(utils::VectorRef<FirstT>{v});
+    return Value::Create<vec<N, FirstT>>(utils::VectorRef<FirstT>{v});
 }
 
-/// Creates a `Value<mat<C,R,T>` from C*R scalar `args`
+/// Creates a Value of DataType<mat<C,R,T> from C*R scalar `args`
 template <size_t C, size_t R, typename T>
-auto Mat(const T (&m_in)[C][R]) {
+Value Mat(const T (&m_in)[C][R]) {
     utils::Vector<T, C * R> m;
     for (uint32_t i = 0; i < C; ++i) {
         for (size_t j = 0; j < R; ++j) {
             m.Push(m_in[i][j]);
         }
     }
-    return Value<mat<C, R, T>>::Create(utils::VectorRef<T>{m});
+    return Value::Create<mat<C, R, T>>(utils::VectorRef<T>{m});
 }
 
-/// Creates a `Value<mat<2,R,T>` from column vectors `c0` and `c1`
+/// Creates a Value of DataType<mat<2,R,T> from column vectors `c0` and `c1`
 template <typename T, size_t R>
-auto Mat(const T (&c0)[R], const T (&c1)[R]) {
+Value Mat(const T (&c0)[R], const T (&c1)[R]) {
     constexpr size_t C = 2;
     utils::Vector<T, C * R> m;
     for (auto v : c0) {
@@ -910,12 +954,12 @@ auto Mat(const T (&c0)[R], const T (&c1)[R]) {
     for (auto v : c1) {
         m.Push(v);
     }
-    return Value<mat<C, R, T>>::Create(utils::VectorRef<T>{m});
+    return Value::Create<mat<C, R, T>>(utils::VectorRef<T>{m});
 }
 
-/// Creates a `Value<mat<3,R,T>` from column vectors `c0`, `c1`, and `c2`
+/// Creates a Value of DataType<mat<3,R,T> from column vectors `c0`, `c1`, and `c2`
 template <typename T, size_t R>
-auto Mat(const T (&c0)[R], const T (&c1)[R], const T (&c2)[R]) {
+Value Mat(const T (&c0)[R], const T (&c1)[R], const T (&c2)[R]) {
     constexpr size_t C = 3;
     utils::Vector<T, C * R> m;
     for (auto v : c0) {
@@ -927,12 +971,12 @@ auto Mat(const T (&c0)[R], const T (&c1)[R], const T (&c2)[R]) {
     for (auto v : c2) {
         m.Push(v);
     }
-    return Value<mat<C, R, T>>::Create(utils::VectorRef<T>{m});
+    return Value::Create<mat<C, R, T>>(utils::VectorRef<T>{m});
 }
 
-/// Creates a `Value<mat<4,R,T>` from column vectors `c0`, `c1`, `c2`, and `c3`
+/// Creates a Value of DataType<mat<4,R,T> from column vectors `c0`, `c1`, `c2`, and `c3`
 template <typename T, size_t R>
-auto Mat(const T (&c0)[R], const T (&c1)[R], const T (&c2)[R], const T (&c3)[R]) {
+Value Mat(const T (&c0)[R], const T (&c1)[R], const T (&c2)[R], const T (&c3)[R]) {
     constexpr size_t C = 4;
     utils::Vector<T, C * R> m;
     for (auto v : c0) {
@@ -947,7 +991,7 @@ auto Mat(const T (&c0)[R], const T (&c1)[R], const T (&c2)[R], const T (&c3)[R])
     for (auto v : c3) {
         m.Push(v);
     }
-    return Value<mat<C, R, T>>::Create(utils::VectorRef<T>{m});
+    return Value::Create<mat<C, R, T>>(utils::VectorRef<T>{m});
 }
 
 }  // namespace builder

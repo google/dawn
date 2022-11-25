@@ -88,10 +88,10 @@ struct CheckConstantFlags {
 /// @param expected_value the expected value for the test
 /// @param flags optional flags for controlling the comparisons
 inline void CheckConstant(const sem::Constant* got_constant,
-                          const builder::ValueBase* expected_value,
+                          const builder::Value& expected_value,
                           CheckConstantFlags flags = {}) {
     auto values_flat = ScalarArgsFrom(got_constant);
-    auto expected_values_flat = expected_value->Args();
+    auto expected_values_flat = expected_value.Args();
     ASSERT_EQ(values_flat.values.Length(), expected_values_flat.values.Length());
     for (size_t i = 0; i < values_flat.values.Length(); ++i) {
         auto& got_scalar = values_flat.values[i];
@@ -247,92 +247,7 @@ using builder::IsValue;
 using builder::Mat;
 using builder::Val;
 using builder::Value;
-using builder::ValueBase;
 using builder::Vec;
-
-using Types = std::variant<  //
-    Value<AInt>,
-    Value<AFloat>,
-    Value<u32>,
-    Value<i32>,
-    Value<f32>,
-    Value<f16>,
-    Value<bool>,
-
-    Value<builder::vec2<AInt>>,
-    Value<builder::vec2<AFloat>>,
-    Value<builder::vec2<u32>>,
-    Value<builder::vec2<i32>>,
-    Value<builder::vec2<f32>>,
-    Value<builder::vec2<f16>>,
-    Value<builder::vec2<bool>>,
-
-    Value<builder::vec3<AInt>>,
-    Value<builder::vec3<AFloat>>,
-    Value<builder::vec3<u32>>,
-    Value<builder::vec3<i32>>,
-    Value<builder::vec3<f32>>,
-    Value<builder::vec3<f16>>,
-    Value<builder::vec3<bool>>,
-
-    Value<builder::vec4<AInt>>,
-    Value<builder::vec4<AFloat>>,
-    Value<builder::vec4<u32>>,
-    Value<builder::vec4<i32>>,
-    Value<builder::vec4<f32>>,
-    Value<builder::vec4<f16>>,
-    Value<builder::vec4<bool>>,
-
-    Value<builder::mat2x2<AInt>>,
-    Value<builder::mat2x2<AFloat>>,
-    Value<builder::mat2x2<f32>>,
-    Value<builder::mat2x2<f16>>,
-
-    Value<builder::mat3x3<AInt>>,
-    Value<builder::mat3x3<AFloat>>,
-    Value<builder::mat3x3<f32>>,
-    Value<builder::mat3x3<f16>>,
-
-    Value<builder::mat4x4<AInt>>,
-    Value<builder::mat4x4<AFloat>>,
-    Value<builder::mat4x4<f32>>,
-    Value<builder::mat4x4<f16>>,
-
-    Value<builder::mat2x3<AInt>>,
-    Value<builder::mat2x3<AFloat>>,
-    Value<builder::mat2x3<f32>>,
-    Value<builder::mat2x3<f16>>,
-
-    Value<builder::mat3x2<AInt>>,
-    Value<builder::mat3x2<AFloat>>,
-    Value<builder::mat3x2<f32>>,
-    Value<builder::mat3x2<f16>>,
-
-    Value<builder::mat2x4<AInt>>,
-    Value<builder::mat2x4<AFloat>>,
-    Value<builder::mat2x4<f32>>,
-    Value<builder::mat2x4<f16>>,
-
-    Value<builder::mat4x2<AInt>>,
-    Value<builder::mat4x2<AFloat>>,
-    Value<builder::mat4x2<f32>>,
-    Value<builder::mat4x2<f16>>
-    //
-    >;
-
-/// Returns the current Value<T> in the `types` variant as a `ValueBase` pointer to use the
-/// polymorphic API. This trades longer compile times using std::variant for longer runtime via
-/// virtual function calls.
-template <typename ValueVariant>
-inline const ValueBase* ToValueBase(const ValueVariant& types) {
-    return std::visit(
-        [](auto&& t) -> const ValueBase* { return static_cast<const ValueBase*>(&t); }, types);
-}
-
-/// Prints Types to ostream
-inline std::ostream& operator<<(std::ostream& o, const Types& types) {
-    return ToValueBase(types)->Print(o);
-}
 
 // Calls `f` on deepest elements of both `a` and `b`. If function returns Action::kStop, it stops
 // traversing, and return Action::kStop; if the function returns Action::kContinue, it continues and

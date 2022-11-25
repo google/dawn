@@ -22,30 +22,26 @@ using ::testing::HasSubstr;
 namespace tint::resolver {
 namespace {
 
-// Bring in std::ostream& operator<<(std::ostream& o, const Types& types)
-using resolver::operator<<;
-
 struct Case {
     struct Success {
-        Types value;
+        Value value;
     };
     struct Failure {
         std::string error;
     };
 
-    Types lhs;
-    Types rhs;
+    Value lhs;
+    Value rhs;
     utils::Result<Success, Failure> expected;
 };
 
 struct ErrorCase {
-    Types lhs;
-    Types rhs;
+    Value lhs;
+    Value rhs;
 };
 
 /// Creates a Case with Values of any type
-template <typename T, typename U, typename V>
-Case C(Value<T> lhs, Value<U> rhs, Value<V> expected) {
+Case C(Value lhs, Value rhs, Value expected) {
     return Case{std::move(lhs), std::move(rhs), Case::Success{std::move(expected)}};
 }
 
@@ -56,8 +52,7 @@ Case C(T lhs, U rhs, V expected) {
 }
 
 /// Creates an failure Case with Values of any type
-template <typename T, typename U>
-Case E(Value<T> lhs, Value<U> rhs, std::string error) {
+Case E(Value lhs, Value rhs, std::string error) {
     return Case{std::move(lhs), std::move(rhs), Case::Failure{std::move(error)}};
 }
 
@@ -71,7 +66,7 @@ Case E(T lhs, U rhs, std::string error) {
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
     o << "lhs: " << c.lhs << ", rhs: " << c.rhs << ", expected: ";
     if (c.expected) {
-        auto s = c.expected.Get();
+        auto& s = c.expected.Get();
         o << s.value;
     } else {
         o << "[ERROR: " << c.expected.Failure().error << "]";
@@ -91,15 +86,16 @@ TEST_P(ResolverConstEvalBinaryOpTest, Test) {
     auto op = std::get<0>(GetParam());
     auto& c = std::get<1>(GetParam());
 
-    auto* lhs_expr = ToValueBase(c.lhs)->Expr(*this);
-    auto* rhs_expr = ToValueBase(c.rhs)->Expr(*this);
+    auto* lhs_expr = c.lhs.Expr(*this);
+    auto* rhs_expr = c.rhs.Expr(*this);
+
     auto* expr = create<ast::BinaryExpression>(Source{{12, 34}}, op, lhs_expr, rhs_expr);
     GlobalConst("C", expr);
 
     if (c.expected) {
         ASSERT_TRUE(r()->Resolve()) << r()->error();
         auto expected_case = c.expected.Get();
-        auto* expected = ToValueBase(expected_case.value);
+        auto& expected = expected_case.value;
 
         auto* sem = Sem().Get(expr);
         const sem::Constant* value = sem->ConstantValue();
@@ -707,7 +703,6 @@ INSTANTIATE_TEST_SUITE_P(Or,
                                                       OpOrIntCases<u32>()))));
 
 TEST_F(ResolverConstEvalTest, NotAndOrOfVecs) {
-    // const C = !((vec2(true, true) & vec2(true, false)) | vec2(false, true));
     auto v1 = Vec(true, true).Expr(*this);
     auto v2 = Vec(true, false).Expr(*this);
     auto v3 = Vec(false, true).Expr(*this);
@@ -978,8 +973,8 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractShiftLeftRemainsAbstract) {
 // i32/u32 left shift by >= 32 -> error
 using ResolverConstEvalShiftLeftConcreteGeqBitWidthError = ResolverTestWithParam<ErrorCase>;
 TEST_P(ResolverConstEvalShiftLeftConcreteGeqBitWidthError, Test) {
-    auto* lhs_expr = ToValueBase(GetParam().lhs)->Expr(*this);
-    auto* rhs_expr = ToValueBase(GetParam().rhs)->Expr(*this);
+    auto* lhs_expr = GetParam().lhs.Expr(*this);
+    auto* rhs_expr = GetParam().rhs.Expr(*this);
     GlobalConst("c", Shl(Source{{1, 1}}, lhs_expr, rhs_expr));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -1024,8 +1019,8 @@ INSTANTIATE_TEST_SUITE_P(Test,
 // AInt left shift results in sign change error
 using ResolverConstEvalShiftLeftSignChangeError = ResolverTestWithParam<ErrorCase>;
 TEST_P(ResolverConstEvalShiftLeftSignChangeError, Test) {
-    auto* lhs_expr = ToValueBase(GetParam().lhs)->Expr(*this);
-    auto* rhs_expr = ToValueBase(GetParam().rhs)->Expr(*this);
+    auto* lhs_expr = GetParam().lhs.Expr(*this);
+    auto* rhs_expr = GetParam().rhs.Expr(*this);
     GlobalConst("c", Shl(Source{{1, 1}}, lhs_expr, rhs_expr));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "1:1 error: shift left operation results in sign change");
