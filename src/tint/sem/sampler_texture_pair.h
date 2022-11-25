@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <ostream>
 
 #include "src/tint/sem/binding_point.h"
 
@@ -42,6 +43,15 @@ struct SamplerTexturePair {
     /// @returns true if this SamplerTexturePair is not equal to `rhs`
     inline bool operator!=(const SamplerTexturePair& rhs) const { return !(*this == rhs); }
 };
+
+/// Prints the SamplerTexturePair @p stp to @p o
+/// @param o the std::ostream to write to
+/// @param stp the SamplerTexturePair
+/// @return the std::ostream so calls can be chained
+inline std::ostream& operator<<(std::ostream& o, const SamplerTexturePair& stp) {
+    return o << "[sampler: " << stp.sampler_binding_point
+             << ", texture: " << stp.sampler_binding_point << "]";
+}
 
 }  // namespace tint::sem
 
