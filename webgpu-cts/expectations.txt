@@ -74,18 +74,6 @@ crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,tex
 crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Failure ]
 
 ################################################################################
-
-################################################################################
-# webgpu:web_platform,copyToTexture,ImageBitmap flakes on Windows Intel with rgba32float and rg32float formats
-# and general test slowness because of https://github.com/gpuweb/cts/issues/1162 (crbug.com/dawn/1398).
-# Very flaky failures on Windows Intel (crbug.com/1343969).
-# Flaky failures using SwiftShader (crbug.com/1344876).
-# KEEP
-################################################################################
-crbug.com/1343969 [ win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
-crbug.com/1343969 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ RetryOnFailure ]
-
-################################################################################
 # copyToTexture failures on Linux
 # Skipped instead of just Crash because of the number of failures
 # KEEP
@@ -132,12 +120,6 @@ crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextur
 crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg32float";dstFormat="rg32float";dimension="2d" [ Failure ]
 crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba16float";dstFormat="rgba16float";dimension="2d" [ Failure ]
 crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="2d" [ Failure ]
-
-################################################################################
-# General test slowness because of https://github.com/gpuweb/cts/issues/1162
-# KEEP
-################################################################################
-crbug.com/dawn/1398 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ RetryOnFailure ]
 
 ################################################################################
 # Large and slow tests
