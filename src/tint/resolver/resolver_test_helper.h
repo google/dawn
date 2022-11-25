@@ -185,7 +185,7 @@ using Scalar = std::variant<i32, u32, f32, f16, AInt, AFloat, bool>;
 
 /// Returns current variant value in `s` cast to type `T`
 template <typename T>
-T As(Scalar& s) {
+T As(const Scalar& s) {
     return std::visit([](auto&& v) { return static_cast<T>(v); }, s);
 }
 

@@ -954,6 +954,88 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               DeterminantCases<f16>()))));
 
 template <typename T>
+std::vector<Case> FaceForwardCases() {
+    // Rotate v by degs around Z axis
+    auto rotate = [&](const Value& v, float degs) {
+        auto x = builder::As<T>(v.args[0]);
+        auto y = builder::As<T>(v.args[1]);
+        auto z = builder::As<T>(v.args[2]);
+        auto rads = T(degs) * kPi<T> / T(180);
+        auto x2 = T(x * std::cos(rads) - y * std::sin(rads));
+        auto y2 = T(x * std::sin(rads) + y * std::cos(rads));
+        return Vec(x2, y2, z);
+    };
+
+    // An arbitrary input vector and its negation, used for e1 args to FaceForward
+    auto pos_vec = Vec(T(1), T(2), T(3));
+    auto neg_vec = Vec(-T(1), -T(2), -T(3));
+
+    // An arbitrary vector in the xy plane, used for e2 and e3 args to FaceForward.
+    auto fwd_xy = Vec(T(1.23), T(4.56), T(0));
+
+    std::vector<Case> r = {
+        C({pos_vec, fwd_xy, rotate(fwd_xy, 85)}, neg_vec),
+        C({pos_vec, fwd_xy, rotate(fwd_xy, 85)}, neg_vec),
+        C({pos_vec, fwd_xy, rotate(fwd_xy, 95)}, pos_vec),
+        C({pos_vec, fwd_xy, rotate(fwd_xy, -95)}, pos_vec),
+        C({pos_vec, fwd_xy, rotate(fwd_xy, 180)}, pos_vec),
+
+        C({pos_vec, rotate(fwd_xy, 33), rotate(fwd_xy, 33 + 85)}, neg_vec),
+        C({pos_vec, rotate(fwd_xy, 33), rotate(fwd_xy, 33 - 85)}, neg_vec),
+        C({pos_vec, rotate(fwd_xy, 33), rotate(fwd_xy, 33 + 95)}, pos_vec),
+        C({pos_vec, rotate(fwd_xy, 33), rotate(fwd_xy, 33 - 95)}, pos_vec),
+        C({pos_vec, rotate(fwd_xy, 33), rotate(fwd_xy, 33 + 180)}, pos_vec),
+
+        C({pos_vec, rotate(fwd_xy, 234), rotate(fwd_xy, 234 + 85)}, neg_vec),
+        C({pos_vec, rotate(fwd_xy, 234), rotate(fwd_xy, 234 - 85)}, neg_vec),
+        C({pos_vec, rotate(fwd_xy, 234), rotate(fwd_xy, 234 + 95)}, pos_vec),
+        C({pos_vec, rotate(fwd_xy, 234), rotate(fwd_xy, 234 - 95)}, pos_vec),
+        C({pos_vec, rotate(fwd_xy, 234), rotate(fwd_xy, 234 + 180)}, pos_vec),
+
+        // Same, but swap input and result vectors
+        C({neg_vec, fwd_xy, rotate(fwd_xy, 85)}, pos_vec),
+        C({neg_vec, fwd_xy, rotate(fwd_xy, 85)}, pos_vec),
+        C({neg_vec, fwd_xy, rotate(fwd_xy, 95)}, neg_vec),
+        C({neg_vec, fwd_xy, rotate(fwd_xy, -95)}, neg_vec),
+        C({neg_vec, fwd_xy, rotate(fwd_xy, 180)}, neg_vec),
+
+        C({neg_vec, rotate(fwd_xy, 33), rotate(fwd_xy, 33 + 85)}, pos_vec),
+        C({neg_vec, rotate(fwd_xy, 33), rotate(fwd_xy, 33 - 85)}, pos_vec),
+        C({neg_vec, rotate(fwd_xy, 33), rotate(fwd_xy, 33 + 95)}, neg_vec),
+        C({neg_vec, rotate(fwd_xy, 33), rotate(fwd_xy, 33 - 95)}, neg_vec),
+        C({neg_vec, rotate(fwd_xy, 33), rotate(fwd_xy, 33 + 180)}, neg_vec),
+
+        C({neg_vec, rotate(fwd_xy, 234), rotate(fwd_xy, 234 + 85)}, pos_vec),
+        C({neg_vec, rotate(fwd_xy, 234), rotate(fwd_xy, 234 - 85)}, pos_vec),
+        C({neg_vec, rotate(fwd_xy, 234), rotate(fwd_xy, 234 + 95)}, neg_vec),
+        C({neg_vec, rotate(fwd_xy, 234), rotate(fwd_xy, 234 - 95)}, neg_vec),
+        C({neg_vec, rotate(fwd_xy, 234), rotate(fwd_xy, 234 + 180)}, neg_vec),
+    };
+
+    auto error_msg = [](auto a, const char* op, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, op, b) + R"(
+12:34 note: when calculating faceForward)";
+    };
+    ConcatInto(  //
+        r, std::vector<Case>{
+               // Overflow the dot product operation
+               E({pos_vec, Vec(T::Highest(), T::Highest(), T(0)), Vec(T(1), T(1), T(0))},
+                 error_msg(T::Highest(), "+", T::Highest())),
+               E({pos_vec, Vec(T::Lowest(), T::Lowest(), T(0)), Vec(T(1), T(1), T(0))},
+                 error_msg(T::Lowest(), "+", T::Lowest())),
+           });
+
+    return r;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    FaceForward,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kFaceForward),
+                     testing::ValuesIn(Concat(FaceForwardCases<AFloat>(),  //
+                                              FaceForwardCases<f32>(),     //
+                                              FaceForwardCases<f16>()))));
+
+template <typename T>
 std::vector<Case> FirstLeadingBitCases() {
     using B = BitValues<T>;
     auto r = std::vector<Case>{

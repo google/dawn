@@ -2,7 +2,7 @@
 
 using namespace metal;
 void faceForward_cc63dc() {
-  half4 res = faceforward(half4(1.0h), half4(1.0h), half4(1.0h));
+  half4 res = half4(-1.0h);
 }
 
 struct tint_symbol {

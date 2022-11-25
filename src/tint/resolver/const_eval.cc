@@ -2367,6 +2367,25 @@ ConstEval::Result ConstEval::extractBits(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0]);
 }
 
+ConstEval::Result ConstEval::faceForward(const sem::Type* ty,
+                                         utils::VectorRef<const sem::Constant*> args,
+                                         const Source& source) {
+    // Returns e1 if dot(e2, e3) is negative, and -e1 otherwise.
+    auto* e1 = args[0];
+    auto* e2 = args[1];
+    auto* e3 = args[2];
+    auto r = Dot(source, e2, e3);
+    if (!r) {
+        AddNote("when calculating faceForward", source);
+        return utils::Failure;
+    }
+    auto is_negative = [](auto v) { return v < 0; };
+    if (Dispatch_fa_f32_f16(is_negative, r.Get())) {
+        return e1;
+    }
+    return OpUnaryMinus(ty, utils::Vector{e1}, source);
+}
+
 ConstEval::Result ConstEval::firstLeadingBit(const sem::Type* ty,
                                              utils::VectorRef<const sem::Constant*> args,
                                              const Source& source) {

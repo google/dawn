@@ -2,7 +2,7 @@
 
 using namespace metal;
 void faceForward_fb0f2e() {
-  half2 res = faceforward(half2(1.0h), half2(1.0h), half2(1.0h));
+  half2 res = half2(-1.0h);
 }
 
 struct tint_symbol {
