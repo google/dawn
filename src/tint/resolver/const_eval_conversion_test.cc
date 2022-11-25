@@ -94,12 +94,12 @@ TEST_P(ResolverConstEvalConvTest, Test) {
         ASSERT_NE(sem->ConstantValue(), nullptr);
         EXPECT_TYPE(sem->ConstantValue()->Type(), target_sem_ty);
 
-        auto expected_values = expected.Args();
+        auto expected_values = expected.args;
         if (kind == Kind::kVector) {
-            expected_values.values.Push(expected_values.values[0]);
-            expected_values.values.Push(expected_values.values[0]);
+            expected_values.Push(expected_values[0]);
+            expected_values.Push(expected_values[0]);
         }
-        auto got_values = ScalarArgsFrom(sem->ConstantValue());
+        auto got_values = ScalarsFrom(sem->ConstantValue());
         EXPECT_EQ(expected_values, got_values);
     }
 }

@@ -37,28 +37,29 @@ template <typename T>
 inline const auto k3PiOver4 = T(UnwrapNumber<T>(2.356194490192344928846));
 
 /// Walks the sem::Constant @p c, accumulating all the inner-most scalar values into @p args
-inline void CollectScalarArgs(const sem::Constant* c, builder::ScalarArgs& args) {
+template <size_t N>
+inline void CollectScalars(const sem::Constant* c, utils::Vector<builder::Scalar, N>& scalars) {
     Switch(
         c->Type(),  //
-        [&](const sem::AbstractInt*) { args.values.Push(c->As<AInt>()); },
-        [&](const sem::AbstractFloat*) { args.values.Push(c->As<AFloat>()); },
-        [&](const sem::Bool*) { args.values.Push(c->As<bool>()); },
-        [&](const sem::I32*) { args.values.Push(c->As<i32>()); },
-        [&](const sem::U32*) { args.values.Push(c->As<u32>()); },
-        [&](const sem::F32*) { args.values.Push(c->As<f32>()); },
-        [&](const sem::F16*) { args.values.Push(c->As<f16>()); },
+        [&](const sem::AbstractInt*) { scalars.Push(c->As<AInt>()); },
+        [&](const sem::AbstractFloat*) { scalars.Push(c->As<AFloat>()); },
+        [&](const sem::Bool*) { scalars.Push(c->As<bool>()); },
+        [&](const sem::I32*) { scalars.Push(c->As<i32>()); },
+        [&](const sem::U32*) { scalars.Push(c->As<u32>()); },
+        [&](const sem::F32*) { scalars.Push(c->As<f32>()); },
+        [&](const sem::F16*) { scalars.Push(c->As<f16>()); },
         [&](Default) {
             size_t i = 0;
             while (auto* child = c->Index(i++)) {
-                CollectScalarArgs(child, args);
+                CollectScalars(child, scalars);
             }
         });
 }
 
 /// Walks the sem::Constant @p c, returning all the inner-most scalar values.
-inline builder::ScalarArgs ScalarArgsFrom(const sem::Constant* c) {
-    builder::ScalarArgs out;
-    CollectScalarArgs(c, out);
+inline utils::Vector<builder::Scalar, 16> ScalarsFrom(const sem::Constant* c) {
+    utils::Vector<builder::Scalar, 16> out;
+    CollectScalars(c, out);
     return out;
 }
 
@@ -90,14 +91,14 @@ struct CheckConstantFlags {
 inline void CheckConstant(const sem::Constant* got_constant,
                           const builder::Value& expected_value,
                           CheckConstantFlags flags = {}) {
-    auto values_flat = ScalarArgsFrom(got_constant);
-    auto expected_values_flat = expected_value.Args();
-    ASSERT_EQ(values_flat.values.Length(), expected_values_flat.values.Length());
-    for (size_t i = 0; i < values_flat.values.Length(); ++i) {
-        auto& got_scalar = values_flat.values[i];
-        auto& expected_scalar = expected_values_flat.values[i];
+    auto values_flat = ScalarsFrom(got_constant);
+    auto expected_values_flat = expected_value.args;
+    ASSERT_EQ(values_flat.Length(), expected_values_flat.Length());
+    for (size_t i = 0; i < values_flat.Length(); ++i) {
+        auto& got_scalar = values_flat[i];
+        auto& expected_scalar = expected_values_flat[i];
         std::visit(
-            [&](auto&& expected) {
+            [&](const auto& expected) {
                 using T = std::decay_t<decltype(expected)>;
 
                 ASSERT_TRUE(std::holds_alternative<T>(got_scalar));

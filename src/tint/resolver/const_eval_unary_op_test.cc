@@ -61,14 +61,14 @@ TEST_P(ResolverConstEvalUnaryOpTest, Test) {
     ASSERT_NE(value, nullptr);
     EXPECT_TYPE(value->Type(), sem->Type());
 
-    auto values_flat = ScalarArgsFrom(value);
-    auto expected_values_flat = expected.Args();
-    ASSERT_EQ(values_flat.values.Length(), expected_values_flat.values.Length());
-    for (size_t i = 0; i < values_flat.values.Length(); ++i) {
-        auto& a = values_flat.values[i];
-        auto& b = expected_values_flat.values[i];
+    auto values_flat = ScalarsFrom(value);
+    auto expected_values_flat = expected.args;
+    ASSERT_EQ(values_flat.Length(), expected_values_flat.Length());
+    for (size_t i = 0; i < values_flat.Length(); ++i) {
+        auto& a = values_flat[i];
+        auto& b = expected_values_flat[i];
         EXPECT_EQ(a, b);
-        if (expected.IsIntegral()) {
+        if (expected.is_integral) {
             // Check that the constant's integer doesn't contain unexpected
             // data in the MSBs that are outside of the bit-width of T.
             EXPECT_EQ(builder::As<AInt>(a), builder::As<AInt>(b));
