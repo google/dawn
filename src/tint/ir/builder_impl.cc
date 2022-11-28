@@ -516,7 +516,7 @@ bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
     return true;
 }
 
-utils::Result<Register> BuilderImpl::EmitExpression(const ast::Expression* expr) {
+utils::Result<Value> BuilderImpl::EmitExpression(const ast::Expression* expr) {
     return tint::Switch(
         expr,
         // [&](const ast::IndexAccessorExpression* a) { return EmitIndexAccessor(a); },
@@ -551,7 +551,7 @@ bool BuilderImpl::EmitVariable(const ast::Variable* var) {
         });
 }
 
-utils::Result<Register> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr) {
+utils::Result<Value> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr) {
     auto lhs = EmitExpression(expr->lhs);
     if (!lhs) {
         return utils::Failure;
@@ -562,89 +562,87 @@ utils::Result<Register> BuilderImpl::EmitBinary(const ast::BinaryExpression* exp
         return utils::Failure;
     }
 
-    Op op;
+    Instruction instr;
     switch (expr->op) {
         case ast::BinaryOp::kAnd:
-            op = builder.And(lhs.Get(), rhs.Get());
+            instr = builder.And(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kOr:
-            op = builder.Or(lhs.Get(), rhs.Get());
+            instr = builder.Or(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kXor:
-            op = builder.Xor(lhs.Get(), rhs.Get());
+            instr = builder.Xor(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLogicalAnd:
-            op = builder.LogicalAnd(lhs.Get(), rhs.Get());
+            instr = builder.LogicalAnd(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLogicalOr:
-            op = builder.LogicalOr(lhs.Get(), rhs.Get());
+            instr = builder.LogicalOr(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kEqual:
-            op = builder.Equal(lhs.Get(), rhs.Get());
+            instr = builder.Equal(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kNotEqual:
-            op = builder.NotEqual(lhs.Get(), rhs.Get());
+            instr = builder.NotEqual(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLessThan:
-            op = builder.LessThan(lhs.Get(), rhs.Get());
+            instr = builder.LessThan(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kGreaterThan:
-            op = builder.GreaterThan(lhs.Get(), rhs.Get());
+            instr = builder.GreaterThan(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLessThanEqual:
-            op = builder.LessThanEqual(lhs.Get(), rhs.Get());
+            instr = builder.LessThanEqual(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kGreaterThanEqual:
-            op = builder.GreaterThanEqual(lhs.Get(), rhs.Get());
+            instr = builder.GreaterThanEqual(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kShiftLeft:
-            op = builder.ShiftLeft(lhs.Get(), rhs.Get());
+            instr = builder.ShiftLeft(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kShiftRight:
-            op = builder.ShiftRight(lhs.Get(), rhs.Get());
+            instr = builder.ShiftRight(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kAdd:
-            op = builder.Add(lhs.Get(), rhs.Get());
+            instr = builder.Add(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kSubtract:
-            op = builder.Subtract(lhs.Get(), rhs.Get());
+            instr = builder.Subtract(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kMultiply:
-            op = builder.Multiply(lhs.Get(), rhs.Get());
+            instr = builder.Multiply(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kDivide:
-            op = builder.Divide(lhs.Get(), rhs.Get());
+            instr = builder.Divide(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kModulo:
-            op = builder.Modulo(lhs.Get(), rhs.Get());
+            instr = builder.Modulo(lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kNone:
             TINT_ICE(IR, diagnostics_) << "missing binary operand type";
             return utils::Failure;
     }
 
-    auto result = op.Result();
-    current_flow_block->ops.Push(op);
+    auto result = instr.Result();
+    current_flow_block->instructions.Push(instr);
     return result;
 }
 
-utils::Result<Register> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {
+utils::Result<Value> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {
     return tint::Switch(  //
         lit,
-        [&](const ast::BoolLiteralExpression* l) {
-            return utils::Result<Register>{Register(l->value)};
-        },
+        [&](const ast::BoolLiteralExpression* l) { return utils::Result<Value>{Value(l->value)}; },
         [&](const ast::FloatLiteralExpression* l) {
             if (l->suffix == ast::FloatLiteralExpression::Suffix::kF) {
-                return utils::Result<Register>{Register(f32(static_cast<float>(l->value)))};
+                return utils::Result<Value>{Value(f32(static_cast<float>(l->value)))};
             }
-            return utils::Result<Register>{Register(f16(static_cast<float>(l->value)))};
+            return utils::Result<Value>{Value(f16(static_cast<float>(l->value)))};
         },
         [&](const ast::IntLiteralExpression* l) {
             if (l->suffix == ast::IntLiteralExpression::Suffix::kI) {
-                return utils::Result<Register>{Register(i32(l->value))};
+                return utils::Result<Value>{Value(i32(l->value))};
             }
-            return utils::Result<Register>{Register(u32(l->value))};
+            return utils::Result<Value>{Value(u32(l->value))};
         },
         [&](Default) {
             diagnostics_.add_warning(tint::diag::System::IR,

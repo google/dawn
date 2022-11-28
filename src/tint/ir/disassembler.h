@@ -36,9 +36,9 @@ class Disassembler {
     /// @returns the string representation of the module
     std::string Disassemble(const Module& mod);
 
-    /// Writes the block ops to the stream
-    /// @param b the block containing the ops
-    void EmitBlockOps(const Block* b);
+    /// Writes the block instructions to the stream
+    /// @param b the block containing the instructions
+    void EmitBlockInstructions(const Block* b);
 
     /// @returns the string representation
     std::string AsString() const { return out_.str(); }

@@ -93,84 +93,84 @@ void Builder::Branch(Block* from, FlowNode* to) {
     to->inbound_branches.Push(from);
 }
 
-Register::Id Builder::AllocateRegister() {
-    return next_register_id++;
+Value::Id Builder::AllocateValue() {
+    return next_value_id++;
 }
 
-Op Builder::CreateOp(Op::Kind kind, Register lhs, Register rhs) {
-    return Op(kind, Register(AllocateRegister()), lhs, rhs);
+Instruction Builder::CreateInstruction(Instruction::Kind kind, Value lhs, Value rhs) {
+    return Instruction(kind, Value(AllocateValue()), lhs, rhs);
 }
 
-Op Builder::And(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kAnd, lhs, rhs);
+Instruction Builder::And(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kAnd, lhs, rhs);
 }
 
-Op Builder::Or(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kOr, lhs, rhs);
+Instruction Builder::Or(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kOr, lhs, rhs);
 }
 
-Op Builder::Xor(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kXor, lhs, rhs);
+Instruction Builder::Xor(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kXor, lhs, rhs);
 }
 
-Op Builder::LogicalAnd(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kLogicalAnd, lhs, rhs);
+Instruction Builder::LogicalAnd(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kLogicalAnd, lhs, rhs);
 }
 
-Op Builder::LogicalOr(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kLogicalOr, lhs, rhs);
+Instruction Builder::LogicalOr(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kLogicalOr, lhs, rhs);
 }
 
-Op Builder::Equal(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kEqual, lhs, rhs);
+Instruction Builder::Equal(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kEqual, lhs, rhs);
 }
 
-Op Builder::NotEqual(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kNotEqual, lhs, rhs);
+Instruction Builder::NotEqual(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kNotEqual, lhs, rhs);
 }
 
-Op Builder::LessThan(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kLessThan, lhs, rhs);
+Instruction Builder::LessThan(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kLessThan, lhs, rhs);
 }
 
-Op Builder::GreaterThan(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kGreaterThan, lhs, rhs);
+Instruction Builder::GreaterThan(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kGreaterThan, lhs, rhs);
 }
 
-Op Builder::LessThanEqual(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kLessThanEqual, lhs, rhs);
+Instruction Builder::LessThanEqual(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kLessThanEqual, lhs, rhs);
 }
 
-Op Builder::GreaterThanEqual(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kGreaterThanEqual, lhs, rhs);
+Instruction Builder::GreaterThanEqual(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kGreaterThanEqual, lhs, rhs);
 }
 
-Op Builder::ShiftLeft(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kShiftLeft, lhs, rhs);
+Instruction Builder::ShiftLeft(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kShiftLeft, lhs, rhs);
 }
 
-Op Builder::ShiftRight(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kShiftRight, lhs, rhs);
+Instruction Builder::ShiftRight(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kShiftRight, lhs, rhs);
 }
 
-Op Builder::Add(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kAdd, lhs, rhs);
+Instruction Builder::Add(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kAdd, lhs, rhs);
 }
 
-Op Builder::Subtract(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kSubtract, lhs, rhs);
+Instruction Builder::Subtract(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kSubtract, lhs, rhs);
 }
 
-Op Builder::Multiply(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kMultiply, lhs, rhs);
+Instruction Builder::Multiply(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kMultiply, lhs, rhs);
 }
 
-Op Builder::Divide(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kDivide, lhs, rhs);
+Instruction Builder::Divide(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kDivide, lhs, rhs);
 }
 
-Op Builder::Modulo(Register lhs, Register rhs) {
-    return CreateOp(Op::Kind::kModulo, lhs, rhs);
+Instruction Builder::Modulo(Value lhs, Value rhs) {
+    return CreateInstruction(Instruction::Kind::kModulo, lhs, rhs);
 }
 
 }  // namespace tint::ir

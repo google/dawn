@@ -666,18 +666,18 @@ if(${TINT_BUILD_IR})
     ir/function.h
     ir/if.cc
     ir/if.h
+    ir/instruction.cc
+    ir/instruction.h
     ir/loop.cc
     ir/loop.h
     ir/module.cc
     ir/module.h
-    ir/op.cc
-    ir/op.h
-    ir/register.cc
-    ir/register.h
     ir/switch.cc
     ir/switch.h
     ir/terminator.cc
     ir/terminator.h
+    ir/value.cc
+    ir/value.h
   )
 endif()
 
@@ -1341,9 +1341,9 @@ if(TINT_BUILD_TESTS)
   if (${TINT_BUILD_IR})
     list(APPEND TINT_TEST_SRCS
       ir/builder_impl_test.cc
-      ir/op_test.cc
-      ir/register_test.cc
+      ir/instruction_test.cc
       ir/test_helper.h
+      ir/value_test.cc
     )
   endif()
 

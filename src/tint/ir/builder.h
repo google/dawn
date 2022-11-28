@@ -17,12 +17,12 @@
 
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/if.h"
+#include "src/tint/ir/instruction.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
-#include "src/tint/ir/op.h"
-#include "src/tint/ir/register.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/terminator.h"
+#include "src/tint/ir/value.h"
 
 // Forward Declarations
 namespace tint {
@@ -88,124 +88,124 @@ class Builder {
     /// @param lhs the left-hand-side of the operation
     /// @param rhs the right-hand-side of the operation
     /// @returns the operation
-    Op CreateOp(Op::Kind kind, Register lhs, Register rhs);
+    Instruction CreateInstruction(Instruction::Kind kind, Value lhs, Value rhs);
 
     /// Creates an And operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op And(Register lhs, Register rhs);
+    Instruction And(Value lhs, Value rhs);
 
     /// Creates an Or operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op Or(Register lhs, Register rhs);
+    Instruction Or(Value lhs, Value rhs);
 
     /// Creates an Xor operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op Xor(Register lhs, Register rhs);
+    Instruction Xor(Value lhs, Value rhs);
 
     /// Creates an LogicalAnd operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op LogicalAnd(Register lhs, Register rhs);
+    Instruction LogicalAnd(Value lhs, Value rhs);
 
     /// Creates an LogicalOr operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op LogicalOr(Register lhs, Register rhs);
+    Instruction LogicalOr(Value lhs, Value rhs);
 
     /// Creates an Equal operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op Equal(Register lhs, Register rhs);
+    Instruction Equal(Value lhs, Value rhs);
 
     /// Creates an NotEqual operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op NotEqual(Register lhs, Register rhs);
+    Instruction NotEqual(Value lhs, Value rhs);
 
     /// Creates an LessThan operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op LessThan(Register lhs, Register rhs);
+    Instruction LessThan(Value lhs, Value rhs);
 
     /// Creates an GreaterThan operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op GreaterThan(Register lhs, Register rhs);
+    Instruction GreaterThan(Value lhs, Value rhs);
 
     /// Creates an LessThanEqual operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op LessThanEqual(Register lhs, Register rhs);
+    Instruction LessThanEqual(Value lhs, Value rhs);
 
     /// Creates an GreaterThanEqual operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op GreaterThanEqual(Register lhs, Register rhs);
+    Instruction GreaterThanEqual(Value lhs, Value rhs);
 
     /// Creates an ShiftLeft operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op ShiftLeft(Register lhs, Register rhs);
+    Instruction ShiftLeft(Value lhs, Value rhs);
 
     /// Creates an ShiftRight operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op ShiftRight(Register lhs, Register rhs);
+    Instruction ShiftRight(Value lhs, Value rhs);
 
     /// Creates an Add operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op Add(Register lhs, Register rhs);
+    Instruction Add(Value lhs, Value rhs);
 
     /// Creates an Subtract operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op Subtract(Register lhs, Register rhs);
+    Instruction Subtract(Value lhs, Value rhs);
 
     /// Creates an Multiply operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op Multiply(Register lhs, Register rhs);
+    Instruction Multiply(Value lhs, Value rhs);
 
     /// Creates an Divide operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op Divide(Register lhs, Register rhs);
+    Instruction Divide(Value lhs, Value rhs);
 
     /// Creates an Modulo operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Op Modulo(Register lhs, Register rhs);
+    Instruction Modulo(Value lhs, Value rhs);
 
-    /// @returns a unique register id
-    Register::Id AllocateRegister();
+    /// @returns a unique Value id
+    Value::Id AllocateValue();
 
     /// The IR module.
     Module ir;
 
-    /// The next register number to allocate
-    Register::Id next_register_id = 1;
+    /// The next Value number to allocate
+    Value::Id next_value_id = 1;
 };
 
 }  // namespace tint::ir

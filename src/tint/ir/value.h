@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_REGISTER_H_
-#define SRC_TINT_IR_REGISTER_H_
+#ifndef SRC_TINT_IR_VALUE_H_
+#define SRC_TINT_IR_VALUE_H_
 
 #include <ostream>
 #include <variant>
@@ -23,37 +23,37 @@
 
 namespace tint::ir {
 
-/// Register in the IR. The register can be one of several types these include, but aren't limited
-/// to, `f32`, `u32`, `temp`, `var`. The type of the register determines the type of data stored
-/// in the register.
-class Register {
+/// Value in the IR. The value can be one of several types these include, but aren't limited
+/// to, `f32`, `u32`, `temp`, `var`. The type of the value determines the type of data stored
+/// in the value.
+class Value {
   public:
-    /// A register id.
+    /// A value id.
     using Id = uint32_t;
 
-    /// The type of the register
+    /// The type of the value
     enum class Kind {
-        /// A uninitialized register
+        /// A uninitialized value
         kUninitialized,
-        /// A temporary allocated register
+        /// A temporary allocated value
         kTemp,
-        /// A f32 register
+        /// A f32 value
         kF32,
-        /// A f16 register
+        /// A f16 value
         kF16,
-        /// An i32 register
+        /// An i32 value
         kI32,
-        /// A u32 register
+        /// A u32 value
         kU32,
-        /// A variable register
+        /// A variable value
         kVar,
-        /// A boolean register
+        /// A boolean value
         kBool,
     };
 
     /// Stores data for a given variable. There will be multiple `VarData` entries for a given `id`.
     /// The `id` acts like a generation number (although they aren't sequential, they are
-    /// increasing). As the variable is stored too a new register will be created and the the `id`
+    /// increasing). As the variable is stored too a new value will be created and the the `id`
     /// will be incremented.
     struct VarData {
         /// The symbol for the variable
@@ -64,106 +64,106 @@ class Register {
     };
 
     /// Constructor
-    /// Creates a uninitialized register
-    Register();
+    /// Creates a uninitialized value
+    Value();
 
     /// Constructor
-    /// @param id the id for the register
-    explicit Register(Id id);
+    /// @param id the id for the value
+    explicit Value(Id id);
 
     /// Constructor
-    /// @param s the symbol for the register
-    /// @param id the id for the register
-    Register(Symbol s, Id id);
+    /// @param s the symbol for the value
+    /// @param id the id for the value
+    Value(Symbol s, Id id);
 
     /// Constructor
-    /// @param b the `bool` value to store in the register
-    explicit Register(bool b);
+    /// @param b the `bool` value to store in the value
+    explicit Value(bool b);
 
     /// Constructor
-    /// @param f the `f32` value to store in the register
-    explicit Register(f32 f);
+    /// @param f the `f32` value to store in the value
+    explicit Value(f32 f);
 
     /// Constructor
-    /// @param f the `f16` value to store in the register
-    explicit Register(f16 f);
+    /// @param f the `f16` value to store in the value
+    explicit Value(f16 f);
 
     /// Constructor
-    /// @param u the `u32` value to store in the register
-    explicit Register(u32 u);
+    /// @param u the `u32` value to store in the value
+    explicit Value(u32 u);
 
     /// Constructor
-    /// @param i the `i32` value to store in the register
-    explicit Register(i32 i);
+    /// @param i the `i32` value to store in the value
+    explicit Value(i32 i);
 
     /// Destructor
-    ~Register();
+    ~Value();
 
     /// Copy constructor
-    /// @param o the register to copy from
-    Register(const Register& o);
+    /// @param o the value to copy from
+    Value(const Value& o);
     /// Move constructor
-    /// @param o the register to move from
-    Register(Register&& o);
+    /// @param o the value to move from
+    Value(Value&& o);
 
     /// Copy assign
-    /// @param o the register to copy from
+    /// @param o the value to copy from
     /// @returns this
-    Register& operator=(const Register& o);
+    Value& operator=(const Value& o);
     /// Move assign
-    /// @param o the register to move from
+    /// @param o the value to move from
     /// @returns this
-    Register& operator=(Register&& o);
+    Value& operator=(Value&& o);
 
-    /// @returns true if this is a temporary register
+    /// @returns true if this is a temporary value
     bool IsTemp() const { return kind_ == Kind::kTemp; }
-    /// @returns true if this is a f32 register
+    /// @returns true if this is a f32 value
     bool IsF32() const { return kind_ == Kind::kF32; }
-    /// @returns true if this is a f16 register
+    /// @returns true if this is a f16 value
     bool IsF16() const { return kind_ == Kind::kF16; }
-    /// @returns true if this is an i32 register
+    /// @returns true if this is an i32 value
     bool IsI32() const { return kind_ == Kind::kI32; }
-    /// @returns true if this is a u32 register
+    /// @returns true if this is a u32 value
     bool IsU32() const { return kind_ == Kind::kU32; }
-    /// @returns true if this is a var register
+    /// @returns true if this is a var value
     bool IsVar() const { return kind_ == Kind::kVar; }
-    /// @returns true if this is a bool register
+    /// @returns true if this is a bool value
     bool IsBool() const { return kind_ == Kind::kBool; }
 
-    /// @returns the kind of register
+    /// @returns the kind of value
     Kind GetKind() const { return kind_; }
 
-    /// @returns the register data as a `f32`.
+    /// @returns the value data as a `f32`.
     /// @note, must only be called if `IsF32()` is true
     f32 AsF32() const { return std::get<f32>(data_); }
-    /// @returns the register data as a `f16`.
+    /// @returns the value data as a `f16`.
     /// @note, must only be called if `IsF16()` is true
     f16 AsF16() const { return std::get<f16>(data_); }
-    /// @returns the register data as an `i32`.
+    /// @returns the value data as an `i32`.
     /// @note, must only be called if `IsI32()` is true
     i32 AsI32() const { return std::get<i32>(data_); }
-    /// @returns the register data as a `u32`.
+    /// @returns the value data as a `u32`.
     /// @note, must only be called if `IsU32()` is true
     u32 AsU32() const { return std::get<u32>(data_); }
-    /// @returns the register data as an `Id`.
+    /// @returns the value data as an `Id`.
     /// @note, must only be called if `IsTemp()` is true
     Id AsId() const { return std::get<Id>(data_); }
-    /// @returns the register data as a `VarData` structure.
+    /// @returns the value data as a `VarData` structure.
     /// @note, must only be called if `IsVar()` is true
     VarData AsVarData() const { return std::get<VarData>(data_); }
-    /// @returns the register data as a `bool`.
+    /// @returns the value data as a `bool`.
     /// @note, must only be called if `IsBool()` is true
     bool AsBool() const { return std::get<bool>(data_); }
 
   private:
-    /// The type of data stored in this register
+    /// The type of data stored in this value
     Kind kind_;
-    /// The data stored in the register
+    /// The data stored in the value
     std::variant<Id, f32, f16, u32, i32, VarData, bool> data_;
 };
 
-std::ostream& operator<<(std::ostream& out, const Register& r);
+std::ostream& operator<<(std::ostream& out, const Value& r);
 
 }  // namespace tint::ir
 
-#endif  // SRC_TINT_IR_REGISTER_H_
+#endif  // SRC_TINT_IR_VALUE_H_

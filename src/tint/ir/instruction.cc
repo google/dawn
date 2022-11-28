@@ -12,91 +12,91 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/op.h"
+#include "src/tint/ir/instruction.h"
 
 namespace tint::ir {
 
-Op::Op() {}
+Instruction::Instruction() {}
 
-Op::Op(Kind kind, Register result, Register lhs, Register rhs)
+Instruction::Instruction(Kind kind, Value result, Value lhs, Value rhs)
     : kind_(kind), result_(result), args_({lhs, rhs}) {}
 
-Op::Op(const Op&) = default;
+Instruction::Instruction(const Instruction&) = default;
 
-Op::Op(Op&& o) = default;
+Instruction::Instruction(Instruction&& instr) = default;
 
-Op::~Op() = default;
+Instruction::~Instruction() = default;
 
-Op& Op::operator=(const Op& o) = default;
+Instruction& Instruction::operator=(const Instruction& instr) = default;
 
-Op& Op::operator=(Op&& o) = default;
+Instruction& Instruction::operator=(Instruction&& instr) = default;
 
-std::ostream& operator<<(std::ostream& out, const Op& op) {
-    out << op.Result() << " = ";
-    if (op.HasLHS()) {
-        out << op.LHS();
+std::ostream& operator<<(std::ostream& out, const Instruction& instr) {
+    out << instr.Result() << " = ";
+    if (instr.HasLHS()) {
+        out << instr.LHS();
     }
     out << " ";
 
-    switch (op.GetKind()) {
-        case Op::Kind::kAdd:
+    switch (instr.GetKind()) {
+        case Instruction::Kind::kAdd:
             out << "+";
             break;
-        case Op::Kind::kSubtract:
+        case Instruction::Kind::kSubtract:
             out << "-";
             break;
-        case Op::Kind::kMultiply:
+        case Instruction::Kind::kMultiply:
             out << "*";
             break;
-        case Op::Kind::kDivide:
+        case Instruction::Kind::kDivide:
             out << "/";
             break;
-        case Op::Kind::kModulo:
+        case Instruction::Kind::kModulo:
             out << "%";
             break;
-        case Op::Kind::kAnd:
+        case Instruction::Kind::kAnd:
             out << "&";
             break;
-        case Op::Kind::kOr:
+        case Instruction::Kind::kOr:
             out << "|";
             break;
-        case Op::Kind::kXor:
+        case Instruction::Kind::kXor:
             out << "^";
             break;
-        case Op::Kind::kLogicalAnd:
+        case Instruction::Kind::kLogicalAnd:
             out << "&&";
             break;
-        case Op::Kind::kLogicalOr:
+        case Instruction::Kind::kLogicalOr:
             out << "||";
             break;
-        case Op::Kind::kEqual:
+        case Instruction::Kind::kEqual:
             out << "==";
             break;
-        case Op::Kind::kNotEqual:
+        case Instruction::Kind::kNotEqual:
             out << "!=";
             break;
-        case Op::Kind::kLessThan:
+        case Instruction::Kind::kLessThan:
             out << "<";
             break;
-        case Op::Kind::kGreaterThan:
+        case Instruction::Kind::kGreaterThan:
             out << ">";
             break;
-        case Op::Kind::kLessThanEqual:
+        case Instruction::Kind::kLessThanEqual:
             out << "<=";
             break;
-        case Op::Kind::kGreaterThanEqual:
+        case Instruction::Kind::kGreaterThanEqual:
             out << ">=";
             break;
-        case Op::Kind::kShiftLeft:
+        case Instruction::Kind::kShiftLeft:
             out << "<<";
             break;
-        case Op::Kind::kShiftRight:
+        case Instruction::Kind::kShiftRight:
             out << ">>";
             break;
     }
 
-    if (op.HasRHS()) {
-        out << " " << op.RHS();
+    if (instr.HasRHS()) {
+        out << " " << instr.RHS();
     }
 
     return out;

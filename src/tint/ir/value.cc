@@ -12,62 +12,62 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/register.h"
+#include "src/tint/ir/value.h"
 
 namespace tint::ir {
 
-Register::Register() : kind_(Kind::kUninitialized), data_(Id(0)) {}
+Value::Value() : kind_(Kind::kUninitialized), data_(Id(0)) {}
 
-Register::Register(Id id) : kind_(Kind::kTemp), data_(id) {}
+Value::Value(Id id) : kind_(Kind::kTemp), data_(id) {}
 
-Register::Register(f32 f) : kind_(Kind::kF32), data_(f) {}
+Value::Value(f32 f) : kind_(Kind::kF32), data_(f) {}
 
-Register::Register(f16 f) : kind_(Kind::kF16), data_(f) {}
+Value::Value(f16 f) : kind_(Kind::kF16), data_(f) {}
 
-Register::Register(u32 u) : kind_(Kind::kU32), data_(u) {}
+Value::Value(u32 u) : kind_(Kind::kU32), data_(u) {}
 
-Register::Register(i32 i) : kind_(Kind::kI32), data_(i) {}
+Value::Value(i32 i) : kind_(Kind::kI32), data_(i) {}
 
-Register::Register(bool b) : kind_(Kind::kBool), data_(b) {}
+Value::Value(bool b) : kind_(Kind::kBool), data_(b) {}
 
-Register::Register(Symbol s, Id id) : kind_(Kind::kVar), data_(VarData{s, id}) {}
+Value::Value(Symbol s, Id id) : kind_(Kind::kVar), data_(VarData{s, id}) {}
 
-Register::~Register() = default;
+Value::~Value() = default;
 
-Register::Register(const Register& o) = default;
+Value::Value(const Value& o) = default;
 
-Register::Register(Register&& o) = default;
+Value::Value(Value&& o) = default;
 
-Register& Register::operator=(const Register& o) = default;
+Value& Value::operator=(const Value& o) = default;
 
-Register& Register::operator=(Register&& o) = default;
+Value& Value::operator=(Value&& o) = default;
 
-std::ostream& operator<<(std::ostream& out, const Register& r) {
+std::ostream& operator<<(std::ostream& out, const Value& r) {
     switch (r.GetKind()) {
-        case Register::Kind::kTemp:
+        case Value::Kind::kTemp:
             out << "%" << std::to_string(r.AsId());
             break;
-        case Register::Kind::kF32:
+        case Value::Kind::kF32:
             out << std::to_string(r.AsF32().value);
             break;
-        case Register::Kind::kF16:
+        case Value::Kind::kF16:
             out << std::to_string(r.AsF16().value);
             break;
-        case Register::Kind::kI32:
+        case Value::Kind::kI32:
             out << std::to_string(r.AsI32().value);
             break;
-        case Register::Kind::kU32:
+        case Value::Kind::kU32:
             out << std::to_string(r.AsU32().value);
             break;
             // TODO(dsinclair): Emit the symbol instead of v
-        case Register::Kind::kVar:
+        case Value::Kind::kVar:
             out << "%v" << std::to_string(r.AsVarData().id);
             break;
-        case Register::Kind::kBool:
+        case Value::Kind::kBool:
             out << (r.AsBool() ? "true" : "false");
             break;
-        case Register::Kind::kUninitialized:
-            out << "unknown register";
+        case Value::Kind::kUninitialized:
+            out << "unknown value";
             break;
     }
     return out;

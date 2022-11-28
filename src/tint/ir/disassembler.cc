@@ -61,9 +61,9 @@ std::ostream& Disassembler::Indent() {
     return out_;
 }
 
-void Disassembler::EmitBlockOps(const Block* b) {
-    for (const auto& op : b->ops) {
-        out_ << op << std::endl;
+void Disassembler::EmitBlockInstructions(const Block* b) {
+    for (const auto& instr : b->instructions) {
+        out_ << instr << std::endl;
     }
 }
 
@@ -87,7 +87,7 @@ void Disassembler::Walk(const FlowNode* node) {
         },
         [&](const ir::Block* b) {
             Indent() << "Block" << std::endl;
-            EmitBlockOps(b);
+            EmitBlockInstructions(b);
             Walk(b->branch_target);
         },
         [&](const ir::Switch* s) {
