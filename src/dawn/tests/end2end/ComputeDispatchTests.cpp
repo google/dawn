@@ -214,10 +214,6 @@ TEST_P(ComputeDispatchTests, DirectNoop) {
 
 // Test basic indirect
 TEST_P(ComputeDispatchTests, IndirectBasic) {
-#if DAWN_PLATFORM_IS(32_BIT)
-    // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
-#endif
     // TODO(crbug.com/dawn/1262): Fails with the full validation turned on.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
 
@@ -246,10 +242,6 @@ TEST_P(ComputeDispatchTests, IndirectNoop) {
 
 // Test indirect with buffer offset
 TEST_P(ComputeDispatchTests, IndirectOffset) {
-#if DAWN_PLATFORM_IS(32_BIT)
-    // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
-#endif
     // TODO(crbug.com/dawn/1262): Fails with the full validation turned on.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
 
@@ -263,10 +255,6 @@ TEST_P(ComputeDispatchTests, IndirectOffsetWithoutNumWorkgroups) {
 
 // Test indirect dispatches at max limit.
 TEST_P(ComputeDispatchTests, MaxWorkgroups) {
-#if DAWN_PLATFORM_IS(32_BIT)
-    // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
-#endif
     // TODO(crbug.com/dawn/1262): Fails with the full validation turned on.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
 
