@@ -81,7 +81,7 @@ crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,tex
 crbug.com/1234041 [ linux ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:* [ Skip ]
 crbug.com/1236130 [ linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Skip ]
 crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Skip ]
-crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Skip ]
+crbug.com/1309194 [ linux webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Skip ]
 crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ]
 crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
 crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Skip ]
@@ -485,6 +485,17 @@ crbug.com/tint/1581 [ linux ] webgpu:shader,execution,expression,call,builtin,cr
 crbug.com/tint/1581 webgpu:shader,execution,expression,call,builtin,cosh:f32:inputSource="const";* [ Failure ]
 crbug.com/tint/1581 webgpu:shader,execution,expression,call,builtin,sinh:f32:inputSource="const";* [ Failure ]
 crbug.com/tint/1581 webgpu:shader,execution,expression,call,builtin,unpack2x16float:unpack:inputSource="const" [ Failure ]
+
+################################################################################
+# copyToTexture,canvas:color_space_conversion:* fail with swiftshader
+# The other tests about canvas and image bitmap fail with swiftshader on Linux
+# KEEP
+################################################################################
+crbug.com/dawn/1599 [ webgpu-adapter-swiftshader linux ] webgpu:web_platform,canvas,configure:* [ Failure ]
+crbug.com/dawn/1599 [ webgpu-adapter-swiftshader linux ] webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
+crbug.com/dawn/1599 [ webgpu-adapter-swiftshader linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ Failure ]
+crbug.com/dawn/1599 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Failure ]
+################################################################################
 
 ################################################################################
 # untriaged failures
