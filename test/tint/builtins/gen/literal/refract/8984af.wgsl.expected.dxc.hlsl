@@ -1,5 +1,5 @@
 void refract_8984af() {
-  vector<float16_t, 3> res = refract((float16_t(1.0h)).xxx, (float16_t(1.0h)).xxx, float16_t(1.0h));
+  vector<float16_t, 3> res = (float16_t(-5.0h)).xxx;
 }
 
 struct tint_symbol {

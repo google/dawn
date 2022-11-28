@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void refract_570cb3() {
-  f16vec2 res = refract(f16vec2(1.0hf), f16vec2(1.0hf), 1.0hf);
+  f16vec2 res = f16vec2(-3.0hf);
 }
 
 vec4 vertex_main() {
@@ -23,7 +23,7 @@ void main() {
 precision mediump float;
 
 void refract_570cb3() {
-  f16vec2 res = refract(f16vec2(1.0hf), f16vec2(1.0hf), 1.0hf);
+  f16vec2 res = f16vec2(-3.0hf);
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void refract_570cb3() {
-  f16vec2 res = refract(f16vec2(1.0hf), f16vec2(1.0hf), 1.0hf);
+  f16vec2 res = f16vec2(-3.0hf);
 }
 
 void compute_main() {

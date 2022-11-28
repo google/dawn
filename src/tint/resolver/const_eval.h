@@ -800,6 +800,15 @@ class ConstEval {
                    utils::VectorRef<const sem::Constant*> args,
                    const Source& source);
 
+    /// refract builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result refract(const sem::Type* ty,
+                   utils::VectorRef<const sem::Constant*> args,
+                   const Source& source);
+
     /// reverseBits builtin
     /// @param ty the expression type
     /// @param args the input arguments

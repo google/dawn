@@ -2954,6 +2954,104 @@ ConstEval::Result ConstEval::reflect(const sem::Type* ty,
     return r;
 }
 
+ConstEval::Result ConstEval::refract(const sem::Type* ty,
+                                     utils::VectorRef<const sem::Constant*> args,
+                                     const Source& source) {
+    auto* vec_ty = ty->As<sem::Vector>();
+    auto* el_ty = vec_ty->type();
+
+    auto compute_k = [&](auto e3, auto dot_e2_e1) -> ConstEval::Result {
+        using NumberT = decltype(e3);
+        // let k = 1.0 - e3 * e3 * (1.0 - dot(e2, e1) * dot(e2, e1))
+        auto e3_squared = Mul(source, e3, e3);
+        if (!e3_squared) {
+            return utils::Failure;
+        }
+        auto dot_e2_e1_squared = Mul(source, dot_e2_e1, dot_e2_e1);
+        if (!dot_e2_e1_squared) {
+            return utils::Failure;
+        }
+        auto r = Sub(source, NumberT(1), dot_e2_e1_squared.Get());
+        if (!r) {
+            return utils::Failure;
+        }
+        r = Mul(source, e3_squared.Get(), r.Get());
+        if (!r) {
+            return utils::Failure;
+        }
+        r = Sub(source, NumberT(1), r.Get());
+        if (!r) {
+            return utils::Failure;
+        }
+        return CreateElement(builder, source, el_ty, r.Get());
+    };
+
+    auto compute_e2_scale = [&](auto e3, auto dot_e2_e1, auto k) -> ConstEval::Result {
+        // e3 * dot(e2, e1) + sqrt(k)
+        auto sqrt_k = Sqrt(source, k);
+        if (!sqrt_k) {
+            return utils::Failure;
+        }
+        auto r = Mul(source, e3, dot_e2_e1);
+        if (!r) {
+            return utils::Failure;
+        }
+        r = Add(source, r.Get(), sqrt_k.Get());
+        if (!r) {
+            return utils::Failure;
+        }
+        return CreateElement(builder, source, el_ty, r.Get());
+    };
+
+    auto calculate = [&]() -> ConstEval::Result {
+        auto* e1 = args[0];
+        auto* e2 = args[1];
+        auto* e3 = args[2];
+
+        // For the incident vector e1 and surface normal e2, and the ratio of indices of refraction
+        // e3, let k = 1.0 - e3 * e3 * (1.0 - dot(e2, e1) * dot(e2, e1)). If k < 0.0, returns the
+        // refraction vector 0.0, otherwise return the refraction vector e3 * e1 - (e3 * dot(e2, e1)
+        // + sqrt(k)) * e2.
+
+        // dot(e2, e1)
+        auto dot_e2_e1 = Dot(source, e2, e1);
+        if (!dot_e2_e1) {
+            return utils::Failure;
+        }
+
+        // let k = 1.0 - e3 * e3 * (1.0 - dot(e2, e1) * dot(e2, e1))
+        auto k = Dispatch_fa_f32_f16(compute_k, e3, dot_e2_e1.Get());
+        if (!k) {
+            return utils::Failure;
+        }
+
+        // If k < 0.0, returns the refraction vector 0.0
+        if (k.Get()->As<AFloat>() < 0) {
+            return ZeroValue(builder, ty);
+        }
+
+        // Otherwise return the refraction vector e3 * e1 - (e3 * dot(e2, e1) + sqrt(k)) * e2
+        auto e1_scaled = Mul(source, ty, e3, e1);
+        if (!e1_scaled) {
+            return utils::Failure;
+        }
+        auto e2_scale = Dispatch_fa_f32_f16(compute_e2_scale, e3, dot_e2_e1.Get(), k.Get());
+        if (!e2_scale) {
+            return utils::Failure;
+        }
+        auto e2_scaled = Mul(source, ty, e2_scale.Get(), e2);
+        if (!e1_scaled) {
+            return utils::Failure;
+        }
+        return Sub(source, ty, e1_scaled.Get(), e2_scaled.Get());
+    };
+    auto r = calculate();
+    if (!r) {
+        AddNote("when calculating refract", source);
+    }
+    return r;
+}
+
 ConstEval::Result ConstEval::reverseBits(const sem::Type* ty,
                                          utils::VectorRef<const sem::Constant*> args,
                                          const Source& source) {
