@@ -1935,6 +1935,61 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               ReverseBitsCases<u32>()))));
 
 template <typename T>
+std::vector<Case> ReflectCases() {
+    auto pos_y = Vec(T(0), T(1), T(0));
+    auto neg_y = Vec(T(0), -T(1), T(0));
+    auto pos_large_y = Vec(T(0), T(10000), T(0));
+    auto neg_large_y = Vec(T(0), -T(10000), T(0));
+
+    auto cos_45 = T(0.70710678118654752440084436210485);
+    auto pos_xyz = Vec(cos_45, cos_45, cos_45);
+
+    auto r = std::vector<Case>{
+        C({Vec(T(1), -T(1), T(0)), pos_y}, Vec(T(1), T(1), T(0))),
+        C({Vec(T(24), -T(42), T(0)), pos_y}, Vec(T(24), T(42), T(0))),
+        // Flipping reflection vector doesn't change the result
+        C({Vec(T(1), -T(1), T(0)), neg_y}, Vec(T(1), T(1), T(0))),
+        C({Vec(T(24), -T(42), T(0)), neg_y}, Vec(T(24), T(42), T(0))),
+        // Parallel input and reflection vectors: result is negation of input
+        C({pos_y, pos_y}, neg_y),
+        C({neg_y, pos_y}, pos_y),
+        C({pos_large_y, pos_y}, neg_large_y),
+        C({neg_large_y, pos_y}, pos_large_y),
+        // Input axis vectors reflected by normalized(vec(1,1,1)) vector.
+        C({Vec(T(1), T(0), T(0)), pos_xyz}, Vec(T(0), -T(1), -T(1))).FloatComp(0.02),
+        C({Vec(T(0), T(1), T(0)), pos_xyz}, Vec(-T(1), T(0), -T(1))).FloatComp(0.02),
+        C({Vec(T(0), T(0), T(1)), pos_xyz}, Vec(-T(1), -T(1), T(0))).FloatComp(0.02),
+        C({Vec(-T(1), T(0), T(0)), pos_xyz}, Vec(T(0), T(1), T(1))).FloatComp(0.02),
+        C({Vec(T(0), -T(1), T(0)), pos_xyz}, Vec(T(1), T(0), T(1))).FloatComp(0.02),
+        C({Vec(T(0), T(0), -T(1)), pos_xyz}, Vec(T(1), T(1), T(0))).FloatComp(0.02),
+    };
+
+    auto error_msg = [](auto a, const char* op, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, op, b) + R"(
+12:34 note: when calculating reflect)";
+    };
+    ConcatInto(  //
+        r, std::vector<Case>{
+               // Overflow the dot product operation
+               E({Vec(T::Highest(), T::Highest(), T(0)), Vec(T(1), T(1), T(0))},
+                 error_msg(T::Highest(), "+", T::Highest())),
+               E({Vec(T::Lowest(), T::Lowest(), T(0)), Vec(T(1), T(1), T(0))},
+                 error_msg(T::Lowest(), "+", T::Lowest())),
+           });
+
+    return r;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Reflect,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kReflect),
+                     testing::ValuesIn(
+                         // ReflectCases<f32>())));
+                         Concat(ReflectCases<AFloat>(),  //
+                                ReflectCases<f32>(),     //
+                                ReflectCases<f16>()))));
+
+template <typename T>
 std::vector<Case> RadiansCases() {
     return std::vector<Case>{
         C({T(0)}, T(0)),                         //

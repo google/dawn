@@ -791,6 +791,15 @@ class ConstEval {
                    utils::VectorRef<const sem::Constant*> args,
                    const Source& source);
 
+    /// reflect builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result reflect(const sem::Type* ty,
+                   utils::VectorRef<const sem::Constant*> args,
+                   const Source& source);
+
     /// reverseBits builtin
     /// @param ty the expression type
     /// @param args the input arguments
@@ -1261,12 +1270,34 @@ class ConstEval {
     /// @returns the dot product
     Result Dot(const Source& source, const sem::Constant* v1, const sem::Constant* v2);
 
-    /// Return sthe length of c0
+    /// Returns the length of c0
     /// @param source the source location
     /// @param ty the return type
     /// @param c0 the constant to calculate the length of
     /// @returns the length of c0
     Result Length(const Source& source, const sem::Type* ty, const sem::Constant* c0);
+
+    /// Returns the product of v1 and v2
+    /// @param source the source location
+    /// @param ty the return type
+    /// @param v1 lhs value
+    /// @param v2 rhs value
+    /// @returns the product of v1 and v2
+    Result Mul(const Source& source,
+               const sem::Type* ty,
+               const sem::Constant* v1,
+               const sem::Constant* v2);
+
+    /// Returns the difference between v2 and v1
+    /// @param source the source location
+    /// @param ty the return type
+    /// @param v1 lhs value
+    /// @param v2 rhs value
+    /// @returns the difference between v2 and v1
+    Result Sub(const Source& source,
+               const sem::Type* ty,
+               const sem::Constant* v1,
+               const sem::Constant* v2);
 
     ProgramBuilder& builder;
 };

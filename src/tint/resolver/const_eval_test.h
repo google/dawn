@@ -105,34 +105,34 @@ inline void CheckConstant(const sem::Constant* got_constant,
                 auto got = std::get<T>(got_scalar);
 
                 if constexpr (std::is_same_v<bool, T>) {
-                    EXPECT_EQ(got, expected);
+                    EXPECT_EQ(got, expected) << "index: " << i;
                 } else if constexpr (IsFloatingPoint<T>) {
                     if (std::isnan(expected)) {
-                        EXPECT_TRUE(std::isnan(got));
+                        EXPECT_TRUE(std::isnan(got)) << "index: " << i;
                     } else {
                         if (flags.pos_or_neg) {
                             got = Abs(got);
                         }
                         if (flags.float_compare) {
                             if (flags.float_compare_epsilon) {
-                                EXPECT_NEAR(got, expected, *flags.float_compare_epsilon);
+                                EXPECT_NEAR(got, expected, *flags.float_compare_epsilon)
+                                    << "index: " << i;
                             } else {
-                                EXPECT_FLOAT_EQ(got, expected);
+                                EXPECT_FLOAT_EQ(got, expected) << "index: " << i;
                             }
                         } else {
-                            EXPECT_EQ(got, expected);
+                            EXPECT_EQ(got, expected) << "index: " << i;
                         }
                     }
                 } else {
                     if (flags.pos_or_neg) {
-                        auto got_abs = Abs(got);
-                        EXPECT_EQ(got_abs, expected);
-                    } else {
-                        EXPECT_EQ(got, expected);
+                        got = Abs(got);
                     }
+                    EXPECT_EQ(got, expected) << "index: " << i;
+
                     // Check that the constant's integer doesn't contain unexpected
                     // data in the MSBs that are outside of the bit-width of T.
-                    EXPECT_EQ(AInt(got), AInt(expected));
+                    EXPECT_EQ(AInt(got), AInt(expected)) << "index: " << i;
                 }
             },
             expected_scalar);

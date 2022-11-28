@@ -1,5 +1,5 @@
 void reflect_05357e() {
-  float4 res = reflect((1.0f).xxxx, (1.0f).xxxx);
+  float4 res = (-7.0f).xxxx;
 }
 
 struct tint_symbol {
