@@ -103,7 +103,11 @@ Resolver::Resolver(ProgramBuilder* builder)
       const_eval_(*builder),
       intrinsic_table_(IntrinsicTable::Create(*builder)),
       sem_(builder, dependencies_),
-      validator_(builder, sem_) {}
+      validator_(builder,
+                 sem_,
+                 enabled_extensions_,
+                 atomic_composite_info_,
+                 valid_type_storage_layouts_) {}
 
 Resolver::~Resolver() = default;
 
@@ -891,13 +895,7 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
         return nullptr;
     }
 
-    if (!validator_.GlobalVariable(sem, override_ids_, atomic_composite_info_)) {
-        return nullptr;
-    }
-
-    // TODO(bclayton): Call this at the end of resolve on all uniform and storage
-    // referenced structs
-    if (!validator_.AddressSpaceLayout(sem, enabled_extensions_, valid_type_storage_layouts_)) {
+    if (!validator_.GlobalVariable(sem, override_ids_)) {
         return nullptr;
     }
 
@@ -2300,7 +2298,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         current_function_->AddDirectCall(call);
     }
 
-    if (!validator_.RequiredExtensionForBuiltinFunction(call, enabled_extensions_)) {
+    if (!validator_.RequiredExtensionForBuiltinFunction(call)) {
         return nullptr;
     }
 

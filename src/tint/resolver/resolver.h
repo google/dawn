@@ -111,8 +111,6 @@ class Resolver {
     const Validator* GetValidatorForTesting() const { return &validator_; }
 
   private:
-    Validator::ValidTypeStorageLayouts valid_type_storage_layouts_;
-
     /// Resolves the program, without creating final the semantic nodes.
     /// @returns true on success, false on error
     bool ResolveInternal();
@@ -471,6 +469,7 @@ class Resolver {
     sem::CompoundStatement* current_compound_statement_ = nullptr;
     uint32_t current_scoping_depth_ = 0;
     utils::UniqueVector<const sem::GlobalVariable*, 4>* resolved_overrides_ = nullptr;
+    utils::Hashset<TypeAndAddressSpace, 8> valid_type_storage_layouts_;
 };
 
 }  // namespace tint::resolver

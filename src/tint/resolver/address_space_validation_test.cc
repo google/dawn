@@ -472,8 +472,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PushConstantF16) {
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "56:78 error: using f16 types in 'push_constant' address space is not "
-              "implemented yet");
+              "error: using f16 types in 'push_constant' address space is not implemented yet");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, PushConstantPointer) {

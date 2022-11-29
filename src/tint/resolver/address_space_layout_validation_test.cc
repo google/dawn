@@ -52,7 +52,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, StorageBuffer_UnalignedMember) 
 /* offset(5) align(1) size( 4) */   b : f32;
 /* offset(9) align(1) size( 3) */   // -- implicit struct size padding --;
 /*                             */ };
-78:90 note: see declaration of variable)");
+78:90 note: 'S' used in address space 'storage' here)");
 }
 
 TEST_F(ResolverAddressSpaceLayoutValidationTest, StorageBuffer_UnalignedMember_SuggestedFix) {
@@ -116,7 +116,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_S
 /*           align(4) size(4) */ struct Inner {
 /* offset(0) align(4) size(4) */   scalar : i32;
 /*                            */ };
-78:90 note: see declaration of variable)");
+78:90 note: 'Outer' used in address space 'uniform' here)");
 }
 
 TEST_F(ResolverAddressSpaceLayoutValidationTest,
@@ -182,7 +182,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_A
 /* offset(  0) align(4) size(  4) */   scalar : f32;
 /* offset(  4) align(4) size(160) */   inner : @stride(16) array<f32, 10>;
 /*                                */ };
-78:90 note: see declaration of variable)");
+78:90 note: 'Outer' used in address space 'uniform' here)");
 }
 
 TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_Array_SuggestedFix) {
@@ -253,7 +253,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_MembersOffsetNotM
 /*           align(1) size(5) */ struct Inner {
 /* offset(0) align(1) size(5) */   scalar : i32;
 /*                            */ };
-22:24 note: see declaration of variable)");
+22:24 note: 'Outer' used in address space 'uniform' here)");
 }
 
 // See https://crbug.com/tint/1344
@@ -308,7 +308,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
 /* offset(12) align(1) size( 5) */   scalar : i32;
 /* offset(17) align(1) size( 3) */   // -- implicit struct size padding --;
 /*                              */ };
-22:24 note: see declaration of variable)");
+22:24 note: 'Outer' used in address space 'uniform' here)");
 }
 
 TEST_F(ResolverAddressSpaceLayoutValidationTest,
@@ -418,7 +418,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 /* offset( 0) align(4) size(40) */   inner : array<f32, 10>;
 /* offset(40) align(4) size( 4) */   scalar : i32;
 /*                              */ };
-78:90 note: see declaration of variable)");
+78:90 note: 'Outer' used in address space 'uniform' here)");
 }
 
 TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_Vector) {
@@ -453,7 +453,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 /* offset(80) align(4) size( 4) */   scalar : i32;
 /* offset(84) align(1) size( 4) */   // -- implicit struct size padding --;
 /*                              */ };
-78:90 note: see declaration of variable)");
+78:90 note: 'Outer' used in address space 'uniform' here)");
 }
 
 TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_Struct) {
@@ -495,7 +495,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 /* offset( 0) align(4) size(80) */   inner : array<ArrayElem, 10>;
 /* offset(80) align(4) size( 4) */   scalar : i32;
 /*                              */ };
-78:90 note: see declaration of variable)");
+78:90 note: 'Outer' used in address space 'uniform' here)");
 }
 
 TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_TopLevelArray) {
@@ -507,7 +507,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment is currently 4. Consider using a vector or struct as the element type instead.)");
+        R"(78:90 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment is currently 4. Consider using a vector or struct as the element type instead.)");
 }
 
 TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_NestedArray) {
@@ -534,7 +534,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 /*            align(4) size(64) */ struct Outer {
 /* offset( 0) align(4) size(64) */   inner : array<array<f32, 4>, 4>;
 /*                              */ };
-78:90 note: see declaration of variable)");
+78:90 note: 'Outer' used in address space 'uniform' here)");
 }
 
 TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_SuggestedFix) {
@@ -587,7 +587,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_UnalignedMember) {
 /* offset(5) align(1) size( 4) */   b : f32;
 /* offset(9) align(1) size( 3) */   // -- implicit struct size padding --;
 /*                             */ };
-78:90 note: see declaration of variable)");
+78:90 note: 'S' used in address space 'push_constant' here)");
 }
 
 TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_Aligned) {

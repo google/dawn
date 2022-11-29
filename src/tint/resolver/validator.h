@@ -24,6 +24,7 @@
 #include "src/tint/resolver/sem_helper.h"
 #include "src/tint/sem/evaluation_stage.h"
 #include "src/tint/source.h"
+#include "src/tint/utils/hash.h"
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/vector.h"
 
@@ -66,19 +67,38 @@ class WhileStatement;
 
 namespace tint::resolver {
 
+/// TypeAndAddressSpace is a pair of type and address space
+struct TypeAndAddressSpace {
+    /// The type
+    const sem::Type* type;
+    /// The address space
+    ast::AddressSpace address_space;
+
+    /// Equality operator
+    /// @param other the other TypeAndAddressSpace to compare this TypeAndAddressSpace to
+    /// @returns true if the type and address space of this TypeAndAddressSpace is equal to @p other
+    bool operator==(const TypeAndAddressSpace& other) const {
+        return type == other.type && address_space == other.address_space;
+    }
+};
+
 /// Validation logic for various ast nodes. The validations in general should
 /// be shallow and depend on the resolver to call on children. The validations
 /// also assume that sem changes have already been made. The validation checks
 /// should not alter the AST or SEM trees.
 class Validator {
   public:
-    /// The valid type storage layouts typedef
-    using ValidTypeStorageLayouts = std::set<std::pair<const sem::Type*, ast::AddressSpace>>;
-
     /// Constructor
     /// @param builder the program builder
     /// @param helper the SEM helper to validate with
-    Validator(ProgramBuilder* builder, SemHelper& helper);
+    /// @param enabled_extensions all the extensions declared in current module
+    /// @param atomic_composite_info atomic composite info of the module
+    /// @param valid_type_storage_layouts a set of validated type layouts by address space
+    Validator(ProgramBuilder* builder,
+              SemHelper& helper,
+              const ast::Extensions& enabled_extensions,
+              const utils::Hashmap<const sem::Type*, const Source*, 8>& atomic_composite_info,
+              utils::Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts);
     ~Validator();
 
     /// Adds the given error message to the diagnostics
@@ -143,19 +163,11 @@ class Validator {
                               uint32_t el_size,
                               uint32_t el_align) const;
 
-    /// Validates an atomic
-    /// @param a the atomic ast node to validate
+    /// Validates an atomic type
+    /// @param a the atomic ast node
     /// @param s the atomic sem node
     /// @returns true on success, false otherwise.
     bool Atomic(const ast::Atomic* a, const sem::Atomic* s) const;
-
-    /// Validates an atoic variable
-    /// @param var the variable to validate
-    /// @param atomic_composite_info store atomic information
-    /// @returns true on success, false otherwise.
-    bool AtomicVariable(
-        const sem::Variable* var,
-        const utils::Hashmap<const sem::Type*, const Source*, 8>& atomic_composite_info) const;
 
     /// Validates an assignment
     /// @param a the assignment statement
@@ -238,12 +250,10 @@ class Validator {
     /// Validates a global variable
     /// @param var the global variable to validate
     /// @param override_id the set of override ids in the module
-    /// @param atomic_composite_info atomic composite info in the module
     /// @returns true on success, false otherwise
     bool GlobalVariable(
         const sem::GlobalVariable* var,
-        const utils::Hashmap<OverrideId, const sem::Variable*, 8>& override_id,
-        const utils::Hashmap<const sem::Type*, const Source*, 8>& atomic_composite_info) const;
+        const utils::Hashmap<OverrideId, const sem::Variable*, 8>& override_id) const;
 
     /// Validates a break-if statement
     /// @param stmt the statement to validate
@@ -423,10 +433,8 @@ class Validator {
 
     /// Validates an optional builtin function and its required extension.
     /// @param call the builtin call to validate
-    /// @param enabled_extensions all the extensions declared in current module
     /// @returns true on success, false otherwise
-    bool RequiredExtensionForBuiltinFunction(const sem::Call* call,
-                                             const ast::Extensions& enabled_extensions) const;
+    bool RequiredExtensionForBuiltinFunction(const sem::Call* call) const;
 
     /// Validates there are no duplicate attributes
     /// @param attributes the list of attributes to validate
@@ -437,21 +445,8 @@ class Validator {
     /// @param type the type to validate
     /// @param sc the address space
     /// @param source the source of the type
-    /// @param layouts previously validated storage layouts
     /// @returns true on success, false otherwise
-    bool AddressSpaceLayout(const sem::Type* type,
-                            ast::AddressSpace sc,
-                            Source source,
-                            ValidTypeStorageLayouts& layouts) const;
-
-    /// Validates a address space layout
-    /// @param var the variable to validate
-    /// @param layouts previously validated storage layouts
-    /// @param enabled_extensions all the extensions declared in current module
-    /// @returns true on success, false otherwise.
-    bool AddressSpaceLayout(const sem::Variable* var,
-                            const ast::Extensions& enabled_extensions,
-                            ValidTypeStorageLayouts& layouts) const;
+    bool AddressSpaceLayout(const sem::Type* type, ast::AddressSpace sc, Source source) const;
 
     /// @returns true if the attribute list contains a
     /// ast::DisableValidationAttribute with the validation mode equal to
@@ -497,11 +492,41 @@ class Validator {
     /// @return pretty string representation
     std::string VectorPretty(uint32_t size, const sem::Type* element_type) const;
 
+    /// Raises an error if combination of @p store_ty, @p access and @p address_space are not valid
+    /// for a `var` or `ptr` declaration.
+    /// @param store_ty the store type of the var or pointer
+    /// @param access the var or pointer access
+    /// @param address_space the var or pointer address space
+    /// @param source the source for the error
+    /// @returns true on success, false if an error was raised.
+    bool CheckTypeAccessAddressSpace(const sem::Type* store_ty,
+                                     ast::Access access,
+                                     ast::AddressSpace address_space,
+                                     const utils::VectorRef<const tint::ast::Attribute*> attributes,
+                                     const Source& source) const;
     SymbolTable& symbols_;
     diag::List& diagnostics_;
     SemHelper& sem_;
+    const ast::Extensions& enabled_extensions_;
+    const utils::Hashmap<const sem::Type*, const Source*, 8>& atomic_composite_info_;
+    utils::Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts_;
 };
 
 }  // namespace tint::resolver
+
+namespace std {
+
+/// Custom std::hash specialization for tint::resolver::TypeAndAddressSpace.
+template <>
+class hash<tint::resolver::TypeAndAddressSpace> {
+  public:
+    /// @param tas the TypeAndAddressSpace
+    /// @return the hash value
+    inline std::size_t operator()(const tint::resolver::TypeAndAddressSpace& tas) const {
+        return tint::utils::Hash(tas.type, tas.address_space);
+    }
+};
+
+}  // namespace std
 
 #endif  // SRC_TINT_RESOLVER_VALIDATOR_H_
