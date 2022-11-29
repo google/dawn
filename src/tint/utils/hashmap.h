@@ -206,6 +206,31 @@ class Hashmap : public HashmapBase<KEY, VALUE, N, HASH, EQUAL> {
         return out;
     }
 
+    /// Equality operator
+    /// @param other the other Hashmap to compare this Hashmap to
+    /// @returns true if this Hashmap has the same key and value pairs as @p other
+    template <typename K, typename V, size_t N2>
+    bool operator==(const Hashmap<K, V, N2>& other) const {
+        if (this->Count() != other.Count()) {
+            return false;
+        }
+        for (auto it : *this) {
+            auto other_val = other.Find(it.key);
+            if (!other_val || it.value != *other_val) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /// Inequality operator
+    /// @param other the other Hashmap to compare this Hashmap to
+    /// @returns false if this Hashmap has the same key and value pairs as @p other
+    template <typename K, typename V, size_t N2>
+    bool operator!=(const Hashmap<K, V, N2>& other) const {
+        return !(*this == other);
+    }
+
   private:
     Value* Lookup(const Key& key) {
         if (auto [found, index] = this->IndexOf(key); found) {
@@ -219,6 +244,22 @@ class Hashmap : public HashmapBase<KEY, VALUE, N, HASH, EQUAL> {
             return &this->slots_[index].entry->value;
         }
         return nullptr;
+    }
+};
+
+/// Hasher specialization for Hashmap
+template <typename K, typename V, size_t N, typename HASH, typename EQUAL>
+struct Hasher<Hashmap<K, V, N, HASH, EQUAL>> {
+    /// @param map the Hashmap to hash
+    /// @returns a hash of the map
+    size_t operator()(const Hashmap<K, V, N, HASH, EQUAL>& map) const {
+        auto hash = Hash(map.Count());
+        for (auto it : map) {
+            // Use an XOR to ensure that the non-deterministic ordering of the map still produces
+            // the same hash value for the same entries.
+            hash ^= Hash(it.key) * 31 + Hash(it.value);
+        }
+        return hash;
     }
 };
 
