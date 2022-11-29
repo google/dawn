@@ -29,6 +29,7 @@ data/webgpu/shader/execution/case-cache/log2.json
 data/webgpu/shader/execution/case-cache/max.json
 data/webgpu/shader/execution/case-cache/min.json
 data/webgpu/shader/execution/case-cache/mix.json
+data/webgpu/shader/execution/case-cache/modf.json
 data/webgpu/shader/execution/case-cache/normalize.json
 data/webgpu/shader/execution/case-cache/pow.json
 data/webgpu/shader/execution/case-cache/quantizeToF16.json

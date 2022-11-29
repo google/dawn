@@ -61,7 +61,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2022-11-24 01:29:21AM
+# Last rolled: 2022-11-28 10:30:27PM
 
 ################################################################################
 # webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
@@ -159,14 +159,6 @@ crbug.com/dawn/0000 [ intel mac ] webgpu:web_platform,external_texture,video:imp
 crbug.com/dawn/0000 [ intel mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:sourceType="VideoElement";videoName="red-green.bt601.vp9.webm" [ Failure ]
 crbug.com/dawn/0000 [ intel mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:sourceType="VideoElement";videoName="red-green.theora.ogv" [ Failure ]
 crbug.com/dawn/0000 [ intel mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:sourceType="VideoElement";videoName="red-green.webmvp8.webm" [ Failure ]
-
-################################################################################
-# webgpu:api,operation,buffers failures
-################################################################################
-crbug.com/dawn/0000 webgpu:api,operation,buffers,map_oom:mappedAtCreation,full_getMappedRange:oom=true;size=137438953472 [ Failure ]
-crbug.com/dawn/0000 webgpu:api,operation,buffers,map_oom:mappedAtCreation,full_getMappedRange:oom=true;size=9007199254740984 [ Failure ]
-crbug.com/dawn/0000 webgpu:api,operation,buffers,map_oom:mappedAtCreation,smaller_getMappedRange:oom=true;size=137438953472 [ Failure ]
-crbug.com/dawn/0000 webgpu:api,operation,buffers,map_oom:mappedAtCreation,smaller_getMappedRange:oom=true;size=9007199254740984 [ Failure ]
 
 ################################################################################
 # texel_data failures
@@ -309,8 +301,7 @@ crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,acosh:f32:in
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,acosh:f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,acosh:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,acosh:f32:inputSource="const";vectorize=4 [ Failure ]
-crbug.com/tint/1613 [ dawn-backend-validation monterey ] webgpu:shader,execution,expression,call,builtin,cos:f32:inputSource="const";vectorize=3 [ Slow ]
-crbug.com/tint/1613 [ dawn-no-backend-validation monterey ] webgpu:shader,execution,expression,call,builtin,cos:f32:inputSource="const";vectorize=3 [ Failure ]
+crbug.com/tint/1613 [ dawn-no-backend-validation monterey ] webgpu:shader,execution,expression,call,builtin,cos:f32:inputSource="const";vectorize=3 [ RetryOnFailure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,degrees:f32:inputSource="const";vectorize="_undef_" [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,degrees:f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,degrees:f32:inputSource="const";vectorize=3 [ Failure ]
@@ -327,15 +318,12 @@ crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,fract:f32:in
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=4 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,inversesqrt:f32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,inversesqrt:f32:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,inversesqrt:f32:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,inversesqrt:f32:inputSource="const";vectorize=4 [ Failure ]
+crbug.com/tint/1613 [ dawn-backend-validation monterey ] webgpu:shader,execution,expression,call,builtin,inversesqrt:f32:inputSource="const";vectorize=3 [ Slow ]
+crbug.com/tint/1613 [ dawn-no-backend-validation monterey ] webgpu:shader,execution,expression,call,builtin,inversesqrt:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,ldexp:f32:inputSource="const";vectorize="_undef_" [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,ldexp:f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,ldexp:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,ldexp:f32:inputSource="const";vectorize=4 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,length:f32:inputSource="const" [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,log2:f32:inputSource="const";vectorize="_undef_" [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,log2:f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,log2:f32:inputSource="const";vectorize=3 [ Failure ]
@@ -348,26 +336,10 @@ crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,max:f32:inpu
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="const";vectorize=4 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,max:i32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,max:i32:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,max:i32:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,max:i32:inputSource="const";vectorize=4 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,max:u32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,max:u32:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,max:u32:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,max:u32:inputSource="const";vectorize=4 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="const";vectorize="_undef_" [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="const";vectorize=4 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,min:i32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,min:i32:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,min:i32:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,min:i32:inputSource="const";vectorize=4 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,min:u32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,min:u32:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,min:u32:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,min:u32:inputSource="const";vectorize=4 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,mix:matching_f32:inputSource="const";vectorize="_undef_" [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,mix:matching_f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,mix:matching_f32:inputSource="const";vectorize=3 [ Failure ]
@@ -376,24 +348,12 @@ crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,pow:f32:inpu
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,pow:f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,pow:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,pow:f32:inputSource="const";vectorize=4 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,radians:f32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,radians:f32:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,radians:f32:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,radians:f32:inputSource="const";vectorize=4 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,round:f32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,round:f32:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,round:f32:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,round:f32:inputSource="const";vectorize=4 [ Failure ]
 crbug.com/tint/1613 [ dawn-backend-validation monterey ] webgpu:shader,execution,expression,call,builtin,sin:f32:inputSource="const";vectorize=3 [ Slow ]
 crbug.com/tint/1613 [ dawn-no-backend-validation monterey ] webgpu:shader,execution,expression,call,builtin,sin:f32:inputSource="const";vectorize=3 [ RetryOnFailure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,sqrt:f32:inputSource="const";vectorize="_undef_" [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,sqrt:f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,sqrt:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,sqrt:f32:inputSource="const";vectorize=4 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,trunc:f32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,trunc:f32:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,trunc:f32:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,trunc:f32:inputSource="const";vectorize=4 [ Failure ]
 
 ################################################################################
 # webgpu:shader,execution,memory_model
@@ -407,7 +367,10 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,memory_model,* [ Failure ]
 ################################################################################
 crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="comment" [ Failure ]
 crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="eol" [ Failure ]
-crbug.com/tint/0000 webgpu:shader,validation,parse,identifiers:identifiers:* [ Failure ]
+crbug.com/tint/0000 [ intel-gen-9 target-cpu-32 ] webgpu:shader,validation,parse,identifiers:identifiers:* [ Failure ]
+crbug.com/tint/0000 [ intel-gen-9 target-cpu-64 ] webgpu:shader,validation,parse,identifiers:identifiers:* [ Failure ]
+crbug.com/tint/0000 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,validation,parse,identifiers:identifiers:* [ Failure ]
+crbug.com/tint/0000 [ nvidia-0x2184 target-cpu-64 ] webgpu:shader,validation,parse,identifiers:identifiers:* [ Failure ]
 
 ################################################################################
 # API operation failures
@@ -480,9 +443,9 @@ crbug.com/tint/1755 [ win10 ] webgpu:shader,execution,expression,call,builtin,pa
 # KEEP
 ################################################################################
 crbug.com/tint/1581 webgpu:shader,execution,expression,binary,f32_arithmetic:division:inputSource="const";* [ Failure ]
-crbug.com/tint/1581 [ win ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="const" [ Failure ]
-crbug.com/tint/1581 [ linux ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="const" [ Failure ]
 crbug.com/tint/1581 webgpu:shader,execution,expression,call,builtin,cosh:f32:inputSource="const";* [ Failure ]
+crbug.com/tint/1581 [ linux ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="const" [ Failure ]
+crbug.com/tint/1581 [ win ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="const" [ Failure ]
 crbug.com/tint/1581 webgpu:shader,execution,expression,call,builtin,sinh:f32:inputSource="const";* [ Failure ]
 crbug.com/tint/1581 webgpu:shader,execution,expression,call,builtin,unpack2x16float:unpack:inputSource="const" [ Failure ]
 
@@ -491,9 +454,9 @@ crbug.com/tint/1581 webgpu:shader,execution,expression,call,builtin,unpack2x16fl
 # The other tests about canvas and image bitmap fail with swiftshader on Linux
 # KEEP
 ################################################################################
-crbug.com/dawn/1599 [ webgpu-adapter-swiftshader linux ] webgpu:web_platform,canvas,configure:* [ Failure ]
-crbug.com/dawn/1599 [ webgpu-adapter-swiftshader linux ] webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
-crbug.com/dawn/1599 [ webgpu-adapter-swiftshader linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ Failure ]
+crbug.com/dawn/1599 [ linux webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,configure:* [ Failure ]
+crbug.com/dawn/1599 [ linux webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
+crbug.com/dawn/1599 [ linux webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ Failure ]
 crbug.com/dawn/1599 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Failure ]
 ################################################################################
 
@@ -507,13 +470,16 @@ crbug.com/dawn/0000 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:
 crbug.com/dawn/0000 [ mac ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,depth_stencil_attachment_only:depthStencilFormat="stencil8";* [ Failure ]
 
 # New flakes. Please triage:
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,binary,bitwise:bitwise_exclusive_or:type="u32";inputSource="const";vectorize=3 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,binary,bitwise:bitwise_or:type="u32";inputSource="const";vectorize=3 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="const";vectorize=3 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize=2 [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="const";vectorize=3 [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize=3 [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 ] worker_webgpu:api,operation,rendering,basic:large_draw:indexed=false;indirect=true [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-32 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,offsetAndSizeOOB: [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,offsetAndSizeOOB: [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,offsetAndSizeOOB: [ RetryOnFailure ]
 
 # New failures. Please triage:
+crbug.com/dawn/0000 [ target-cpu-32 ] webgpu:api,operation,buffers,map_oom:mapAsync:oom=true;size=137438953472 [ Failure ]
+crbug.com/dawn/0000 [ target-cpu-32 ] webgpu:api,operation,buffers,map_oom:mapAsync:oom=true;size=9007199254740984 [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,shader_module,compilation_info:line_number_and_position:valid=false;name="carriage-return" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,compute_pipeline:overrides,workgroup_size,limits,* [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,createBindGroupLayout:multisampled_validation:viewDimension="2d" [ Failure ]
@@ -531,7 +497,6 @@ crbug.com/dawn/0000 webgpu:api,validation,error_scope:parent_scope:errorFilter="
 crbug.com/dawn/0000 webgpu:api,validation,error_scope:simple:errorType="internal";errorFilter="internal" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,error_scope:simple:errorType="internal";errorFilter="out-of-memory" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,error_scope:simple:errorType="internal";errorFilter="validation" [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,binary,bitwise:bitwise_and:type="u32";inputSource="const";vectorize=3 [ Slow ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,binary,bool_logical:and_short_circuit:inputSource="const" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 target-cpu-64 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,bool_logical:and_short_circuit:inputSource="const" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,expression,binary,bool_logical:and_short_circuit:inputSource="const" [ Failure ]
@@ -652,6 +617,7 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 target-cpu-64 ubunt
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 target-cpu-64 webgpu-adapter-default win10 ] webgpu:shader,execution,expression,call,builtin,asin:f32:inputSource="uniform";vectorize=4 [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,expression,call,builtin,asin:f32:inputSource="uniform";vectorize=4 [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default win10 ] webgpu:shader,execution,expression,call,builtin,asin:f32:inputSource="uniform";vectorize=4 [ Failure ]
+crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="const" [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="const" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,distance:f32:inputSource="const" [ Failure ]
@@ -870,8 +836,6 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 target-cpu-64 webgp
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,expression,call,builtin,refract:f32_vec4:inputSource="const" [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,refract:f32_vec4:inputSource="const" [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default win10 ] webgpu:shader,execution,expression,call,builtin,refract:f32_vec4:inputSource="const" [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize=3 [ Slow ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":1,"y":1,"z":1} [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":1,"y":1,"z":1} [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":8,"y":4,"z":2} [ Failure ]
@@ -896,14 +860,18 @@ crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-32 webgpu
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":3,"y":7,"z":5};numGroups={"x":13,"y":9,"z":11} [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":8,"y":4,"z":2};numGroups={"x":1,"y":1,"z":1} [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":8,"y":4,"z":2};numGroups={"x":1,"y":1,"z":1} [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:alpha_mode:* [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:defaults:* [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:device:* [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rgba8unorm" [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:format:canvasType="onscreen";format="rgba8unorm" [ Failure ]
+crbug.com/dawn/0000 [ monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:alpha_mode:* [ Failure ]
+crbug.com/dawn/0000 [ monterey webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,configure:alpha_mode:* [ Failure ]
+crbug.com/dawn/0000 [ monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:defaults:* [ Failure ]
+crbug.com/dawn/0000 [ monterey webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,configure:defaults:* [ Failure ]
+crbug.com/dawn/0000 [ monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:device:* [ Failure ]
+crbug.com/dawn/0000 [ monterey webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,configure:device:* [ Failure ]
+crbug.com/dawn/0000 [ monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rgba8unorm" [ Failure ]
+crbug.com/dawn/0000 [ monterey webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rgba8unorm" [ Failure ]
+crbug.com/dawn/0000 [ monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:format:canvasType="onscreen";format="rgba8unorm" [ Failure ]
+crbug.com/dawn/0000 [ monterey webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,configure:format:canvasType="onscreen";format="rgba8unorm" [ Failure ]
 crbug.com/dawn/0000 [ monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/0000 [ monterey webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/0000 [ ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:usage:* [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-64 win10 ] worker_webgpu:api,operation,rendering,basic:large_draw:indexed=false;indirect=true [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,offsetAndSizeOOB: [ Failure ]
+crbug.com/dawn/0000 [ monterey webgpu-adapter-default ] webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
+crbug.com/dawn/0000 [ monterey webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
