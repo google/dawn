@@ -454,16 +454,16 @@ std::vector<Case> OpDivFloatCases() {
         return "12:34 error: " + OverflowErrorMessage(a, "/", b);
     };
     std::vector<Case> r = {
-        C(Val(T{0}), Val(T{1}), Val(T{0})),
-        C(Val(T{1}), Val(T{1}), Val(T{1})),
-        C(Val(T{1}), Val(T{1}), Val(T{1})),
-        C(Val(T{2}), Val(T{1}), Val(T{2})),
-        C(Val(T{4}), Val(T{2}), Val(T{2})),
-        C(Val(T::Highest()), Val(T{1}), Val(T::Highest())),
-        C(Val(T::Lowest()), Val(T{1}), Val(T::Lowest())),
-        C(Val(T::Highest()), Val(T::Highest()), Val(T{1})),
-        C(Val(T{0}), Val(T::Highest()), Val(T{0})),
-        C(Val(T{0}), Val(T::Lowest()), Val(-T{0})),
+        C(T{0}, T{1}, T{0}),
+        C(T{1}, T{1}, T{1}),
+        C(T{1}, T{1}, T{1}),
+        C(T{2}, T{1}, T{2}),
+        C(T{4}, T{2}, T{2}),
+        C(T::Highest(), T{1}, T::Highest()),
+        C(T::Lowest(), T{1}, T::Lowest()),
+        C(T::Highest(), T::Highest(), T{1}),
+        C(T{0}, T::Highest(), T{0}),
+        C(T{0}, T::Lowest(), -T{0}),
 
         // Divide by zero
         E(T{123}, T{0}, error_msg(T{123}, T{0})),
@@ -488,10 +488,10 @@ INSTANTIATE_TEST_SUITE_P(Div,
 template <typename T, bool equals>
 std::vector<Case> OpEqualCases() {
     return {
-        C(Val(T{0}), Val(T{0}), Val(true == equals)),
-        C(Val(T{0}), Val(T{1}), Val(false == equals)),
-        C(Val(T{1}), Val(T{0}), Val(false == equals)),
-        C(Val(T{1}), Val(T{1}), Val(true == equals)),
+        C(T{0}, T{0}, true == equals),
+        C(T{0}, T{1}, false == equals),
+        C(T{1}, T{0}, false == equals),
+        C(T{1}, T{1}, true == equals),
         C(Vec(T{0}, T{0}), Vec(T{0}, T{0}), Vec(true == equals, true == equals)),
         C(Vec(T{1}, T{0}), Vec(T{0}, T{1}), Vec(false == equals, false == equals)),
         C(Vec(T{1}, T{1}), Vec(T{0}, T{1}), Vec(false == equals, true == equals)),
@@ -525,10 +525,10 @@ INSTANTIATE_TEST_SUITE_P(NotEqual,
 template <typename T, bool less_than>
 std::vector<Case> OpLessThanCases() {
     return {
-        C(Val(T{0}), Val(T{0}), Val(false == less_than)),
-        C(Val(T{0}), Val(T{1}), Val(true == less_than)),
-        C(Val(T{1}), Val(T{0}), Val(false == less_than)),
-        C(Val(T{1}), Val(T{1}), Val(false == less_than)),
+        C(T{0}, T{0}, false == less_than),
+        C(T{0}, T{1}, true == less_than),
+        C(T{1}, T{0}, false == less_than),
+        C(T{1}, T{1}, false == less_than),
         C(Vec(T{0}, T{0}), Vec(T{0}, T{0}), Vec(false == less_than, false == less_than)),
         C(Vec(T{0}, T{0}), Vec(T{1}, T{1}), Vec(true == less_than, true == less_than)),
         C(Vec(T{1}, T{1}), Vec(T{0}, T{0}), Vec(false == less_than, false == less_than)),
@@ -561,10 +561,10 @@ INSTANTIATE_TEST_SUITE_P(GreaterThanEqual,
 template <typename T, bool greater_than>
 std::vector<Case> OpGreaterThanCases() {
     return {
-        C(Val(T{0}), Val(T{0}), Val(false == greater_than)),
-        C(Val(T{0}), Val(T{1}), Val(false == greater_than)),
-        C(Val(T{1}), Val(T{0}), Val(true == greater_than)),
-        C(Val(T{1}), Val(T{1}), Val(false == greater_than)),
+        C(T{0}, T{0}, false == greater_than),
+        C(T{0}, T{1}, false == greater_than),
+        C(T{1}, T{0}, true == greater_than),
+        C(T{1}, T{1}, false == greater_than),
         C(Vec(T{0}, T{0}), Vec(T{0}, T{0}), Vec(false == greater_than, false == greater_than)),
         C(Vec(T{1}, T{1}), Vec(T{0}, T{0}), Vec(true == greater_than, true == greater_than)),
         C(Vec(T{0}, T{0}), Vec(T{1}, T{1}), Vec(false == greater_than, false == greater_than)),
