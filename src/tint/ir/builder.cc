@@ -97,79 +97,81 @@ Temp::Id Builder::AllocateTempId() {
     return next_temp_id++;
 }
 
-Instruction Builder::CreateInstruction(Instruction::Kind kind, const Value* lhs, const Value* rhs) {
-    return Instruction(kind, Temp(), lhs, rhs);
+const Instruction* Builder::CreateInstruction(Instruction::Kind kind,
+                                              const Value* lhs,
+                                              const Value* rhs) {
+    return ir.instructions.Create<ir::Instruction>(kind, Temp(), lhs, rhs);
 }
 
-Instruction Builder::And(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::And(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kAnd, lhs, rhs);
 }
 
-Instruction Builder::Or(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::Or(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kOr, lhs, rhs);
 }
 
-Instruction Builder::Xor(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::Xor(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kXor, lhs, rhs);
 }
 
-Instruction Builder::LogicalAnd(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::LogicalAnd(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kLogicalAnd, lhs, rhs);
 }
 
-Instruction Builder::LogicalOr(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::LogicalOr(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kLogicalOr, lhs, rhs);
 }
 
-Instruction Builder::Equal(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::Equal(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kEqual, lhs, rhs);
 }
 
-Instruction Builder::NotEqual(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::NotEqual(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kNotEqual, lhs, rhs);
 }
 
-Instruction Builder::LessThan(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::LessThan(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kLessThan, lhs, rhs);
 }
 
-Instruction Builder::GreaterThan(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::GreaterThan(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kGreaterThan, lhs, rhs);
 }
 
-Instruction Builder::LessThanEqual(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::LessThanEqual(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kLessThanEqual, lhs, rhs);
 }
 
-Instruction Builder::GreaterThanEqual(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::GreaterThanEqual(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kGreaterThanEqual, lhs, rhs);
 }
 
-Instruction Builder::ShiftLeft(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::ShiftLeft(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kShiftLeft, lhs, rhs);
 }
 
-Instruction Builder::ShiftRight(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::ShiftRight(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kShiftRight, lhs, rhs);
 }
 
-Instruction Builder::Add(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::Add(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kAdd, lhs, rhs);
 }
 
-Instruction Builder::Subtract(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::Subtract(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kSubtract, lhs, rhs);
 }
 
-Instruction Builder::Multiply(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::Multiply(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kMultiply, lhs, rhs);
 }
 
-Instruction Builder::Divide(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::Divide(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kDivide, lhs, rhs);
 }
 
-Instruction Builder::Modulo(const Value* lhs, const Value* rhs) {
+const Instruction* Builder::Modulo(const Value* lhs, const Value* rhs) {
     return CreateInstruction(Instruction::Kind::kModulo, lhs, rhs);
 }
 

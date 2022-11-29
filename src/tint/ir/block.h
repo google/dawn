@@ -34,7 +34,7 @@ class Block : public Castable<Block, FlowNode> {
     const FlowNode* branch_target = nullptr;
 
     /// The instructions in the block
-    utils::Vector<Instruction, 16> instructions;
+    utils::Vector<const Instruction*, 16> instructions;
 };
 
 }  // namespace tint::ir

@@ -102,115 +102,117 @@ class Builder {
     /// @param lhs the left-hand-side of the operation
     /// @param rhs the right-hand-side of the operation
     /// @returns the operation
-    Instruction CreateInstruction(Instruction::Kind kind, const Value* lhs, const Value* rhs);
+    const Instruction* CreateInstruction(Instruction::Kind kind,
+                                         const Value* lhs,
+                                         const Value* rhs);
 
     /// Creates an And operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction And(const Value* lhs, const Value* rhs);
+    const Instruction* And(const Value* lhs, const Value* rhs);
 
     /// Creates an Or operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction Or(const Value* lhs, const Value* rhs);
+    const Instruction* Or(const Value* lhs, const Value* rhs);
 
     /// Creates an Xor operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction Xor(const Value* lhs, const Value* rhs);
+    const Instruction* Xor(const Value* lhs, const Value* rhs);
 
     /// Creates an LogicalAnd operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction LogicalAnd(const Value* lhs, const Value* rhs);
+    const Instruction* LogicalAnd(const Value* lhs, const Value* rhs);
 
     /// Creates an LogicalOr operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction LogicalOr(const Value* lhs, const Value* rhs);
+    const Instruction* LogicalOr(const Value* lhs, const Value* rhs);
 
     /// Creates an Equal operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction Equal(const Value* lhs, const Value* rhs);
+    const Instruction* Equal(const Value* lhs, const Value* rhs);
 
     /// Creates an NotEqual operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction NotEqual(const Value* lhs, const Value* rhs);
+    const Instruction* NotEqual(const Value* lhs, const Value* rhs);
 
     /// Creates an LessThan operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction LessThan(const Value* lhs, const Value* rhs);
+    const Instruction* LessThan(const Value* lhs, const Value* rhs);
 
     /// Creates an GreaterThan operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction GreaterThan(const Value* lhs, const Value* rhs);
+    const Instruction* GreaterThan(const Value* lhs, const Value* rhs);
 
     /// Creates an LessThanEqual operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction LessThanEqual(const Value* lhs, const Value* rhs);
+    const Instruction* LessThanEqual(const Value* lhs, const Value* rhs);
 
     /// Creates an GreaterThanEqual operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction GreaterThanEqual(const Value* lhs, const Value* rhs);
+    const Instruction* GreaterThanEqual(const Value* lhs, const Value* rhs);
 
     /// Creates an ShiftLeft operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction ShiftLeft(const Value* lhs, const Value* rhs);
+    const Instruction* ShiftLeft(const Value* lhs, const Value* rhs);
 
     /// Creates an ShiftRight operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction ShiftRight(const Value* lhs, const Value* rhs);
+    const Instruction* ShiftRight(const Value* lhs, const Value* rhs);
 
     /// Creates an Add operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction Add(const Value* lhs, const Value* rhs);
+    const Instruction* Add(const Value* lhs, const Value* rhs);
 
     /// Creates an Subtract operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction Subtract(const Value* lhs, const Value* rhs);
+    const Instruction* Subtract(const Value* lhs, const Value* rhs);
 
     /// Creates an Multiply operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction Multiply(const Value* lhs, const Value* rhs);
+    const Instruction* Multiply(const Value* lhs, const Value* rhs);
 
     /// Creates an Divide operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction Divide(const Value* lhs, const Value* rhs);
+    const Instruction* Divide(const Value* lhs, const Value* rhs);
 
     /// Creates an Modulo operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Instruction Modulo(const Value* lhs, const Value* rhs);
+    const Instruction* Modulo(const Value* lhs, const Value* rhs);
 
     /// @returns a unique temp id
     Temp::Id AllocateTempId();

@@ -62,8 +62,8 @@ std::ostream& Disassembler::Indent() {
 }
 
 void Disassembler::EmitBlockInstructions(const Block* b) {
-    for (const auto& instr : b->instructions) {
-        out_ << instr << std::endl;
+    for (const auto* instr : b->instructions) {
+        out_ << *instr << std::endl;
     }
 }
 

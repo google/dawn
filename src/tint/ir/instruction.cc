@@ -14,6 +14,8 @@
 
 #include "src/tint/ir/instruction.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::ir::Instruction);
+
 namespace tint::ir {
 
 Instruction::Instruction() {}

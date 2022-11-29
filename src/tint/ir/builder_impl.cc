@@ -562,7 +562,7 @@ utils::Result<const Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression*
         return utils::Failure;
     }
 
-    Instruction instr;
+    const Instruction* instr = nullptr;
     switch (expr->op) {
         case ast::BinaryOp::kAnd:
             instr = builder.And(lhs.Get(), rhs.Get());
@@ -623,9 +623,8 @@ utils::Result<const Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression*
             return utils::Failure;
     }
 
-    auto* result = instr.Result();
     current_flow_block->instructions.Push(instr);
-    return utils::Result<const Value*>(result);
+    return utils::Result<const Value*>(instr->Result());
 }
 
 utils::Result<const Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {

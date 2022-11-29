@@ -17,6 +17,7 @@
 
 #include <ostream>
 
+#include "src/tint/castable.h"
 #include "src/tint/debug.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/utils/vector.h"
@@ -24,7 +25,7 @@
 namespace tint::ir {
 
 /// An instruction in the IR.
-class Instruction {
+class Instruction : public Castable<Instruction> {
   public:
     /// The kind of instruction.
     enum class Kind {
