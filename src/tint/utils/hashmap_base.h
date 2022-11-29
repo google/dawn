@@ -70,6 +70,27 @@ struct KeyValue {
     }
 };
 
+/// KeyValueRef is a pair of references to a key and value.
+/// #key is always a const reference.
+/// #value is always a const reference if @tparam VALUE_IS_CONST is true, otherwise a non-const
+/// reference.
+template <typename KEY, typename VALUE, bool VALUE_IS_CONST>
+struct KeyValueRef {
+    /// The reference to key type
+    using KeyRef = const KEY&;
+    /// The reference to value type
+    using ValueRef = std::conditional_t<VALUE_IS_CONST, const VALUE&, VALUE&>;
+
+    /// The reference to the key
+    KeyRef key;
+
+    /// The reference to the value
+    ValueRef value;
+
+    /// @returns a KeyValue<KEY, VALUE> with the referenced key and value
+    operator KeyValue<KEY, VALUE>() const { return {key, value}; }
+};
+
 /// Writes the KeyValue to the std::ostream.
 /// @param out the std::ostream to write to
 /// @param key_value the KeyValue to write
@@ -97,8 +118,18 @@ class HashmapBase {
     /// The entry type for the map.
     /// This is:
     /// - Key when Value is void (used by Hashset)
-    /// - KeyValue<Key, Value> when Value is void (used by Hashmap)
+    /// - KeyValue<Key, Value> when Value is not void (used by Hashmap)
     using Entry = std::conditional_t<ValueIsVoid, Key, KeyValue<Key, Value>>;
+
+    /// A reference to an entry in the map.
+    /// This is:
+    /// - const Key& when Value is void (used by Hashset)
+    /// - KeyValueRef<Key, Value> when Value is not void (used by Hashmap)
+    template <bool IS_CONST>
+    using EntryRef = std::conditional_t<
+        ValueIsVoid,
+        const Key&,
+        KeyValueRef<Key, std::conditional_t<ValueIsVoid, bool, Value>, IS_CONST>>;
 
     /// STL-friendly alias to Entry. Used by gmock.
     using value_type = Entry;
@@ -154,17 +185,25 @@ class HashmapBase {
   public:
     /// Iterator for entries in the map.
     /// Iterators are invalidated if the map is modified.
-    class Iterator {
+    template <bool IS_CONST>
+    class IteratorT {
       public:
         /// @returns the value pointed to by this iterator
-        const Entry* operator->() const { return &current->entry.value(); }
+        EntryRef<IS_CONST> operator->() const { return *this; }
 
         /// @returns a reference to the value at the iterator
-        const Entry& operator*() const { return current->entry.value(); }
+        EntryRef<IS_CONST> operator*() const {
+            auto& ref = current->entry.value();
+            if constexpr (ValueIsVoid) {
+                return ref;
+            } else {
+                return {ref.key, ref.value};
+            }
+        }
 
         /// Increments the iterator
         /// @returns this iterator
-        Iterator& operator++() {
+        IteratorT& operator++() {
             if (current == end) {
                 return *this;
             }
@@ -176,18 +215,20 @@ class HashmapBase {
         /// Equality operator
         /// @param other the other iterator to compare this iterator to
         /// @returns true if this iterator is equal to other
-        bool operator==(const Iterator& other) const { return current == other.current; }
+        bool operator==(const IteratorT& other) const { return current == other.current; }
 
         /// Inequality operator
         /// @param other the other iterator to compare this iterator to
         /// @returns true if this iterator is not equal to other
-        bool operator!=(const Iterator& other) const { return current != other.current; }
+        bool operator!=(const IteratorT& other) const { return current != other.current; }
 
       private:
         /// Friend class
         friend class HashmapBase;
 
-        Iterator(const Slot* c, const Slot* e) : current(c), end(e) { SkipToNextValue(); }
+        using SLOT = std::conditional_t<IS_CONST, const Slot, Slot>;
+
+        IteratorT(SLOT* c, SLOT* e) : current(c), end(e) { SkipToNextValue(); }
 
         /// Moves the iterator forward, stopping at the next slot that is not empty.
         void SkipToNextValue() {
@@ -196,9 +237,15 @@ class HashmapBase {
             }
         }
 
-        const Slot* current;  /// The slot the iterator is pointing to
-        const Slot* end;      /// One past the last slot in the map
+        SLOT* current;  /// The slot the iterator is pointing to
+        SLOT* end;      /// One past the last slot in the map
     };
+
+    /// An immutable key and mutable value iterator
+    using Iterator = IteratorT</*IS_CONST*/ false>;
+
+    /// An immutable key and value iterator
+    using ConstIterator = IteratorT</*IS_CONST*/ true>;
 
     /// Constructor
     HashmapBase() { slots_.Resize(kMinSlots); }
@@ -322,11 +369,17 @@ class HashmapBase {
     /// @returns a monotonic counter which is incremented whenever the map is mutated.
     size_t Generation() const { return generation_; }
 
+    /// @returns an immutable iterator to the start of the map.
+    ConstIterator begin() const { return ConstIterator{slots_.begin(), slots_.end()}; }
+
+    /// @returns an immutable iterator to the end of the map.
+    ConstIterator end() const { return ConstIterator{slots_.end(), slots_.end()}; }
+
     /// @returns an iterator to the start of the map.
-    Iterator begin() const { return Iterator{slots_.begin(), slots_.end()}; }
+    Iterator begin() { return Iterator{slots_.begin(), slots_.end()}; }
 
     /// @returns an iterator to the end of the map.
-    Iterator end() const { return Iterator{slots_.end(), slots_.end()}; }
+    Iterator end() { return Iterator{slots_.end(), slots_.end()}; }
 
     /// A debug function for checking that the map is in good health.
     /// Asserts if the map is corrupted.

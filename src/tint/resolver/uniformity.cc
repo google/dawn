@@ -673,7 +673,7 @@ class UniformityGraph {
                 }
 
                 // Set each variable's exit node as its value in the outer scope.
-                for (auto& v : info.var_exit_nodes) {
+                for (auto v : info.var_exit_nodes) {
                     current_function_->variables.Set(v.key, v.value);
                 }
 
@@ -726,7 +726,7 @@ class UniformityGraph {
                 cfx->AddEdge(cf);
 
                 // Add edges from variable loop input nodes to their values at the end of the loop.
-                for (auto& v : info.var_in_nodes) {
+                for (auto v : info.var_in_nodes) {
                     auto* in_node = v.value;
                     auto* out_node = current_function_->variables.Get(v.key);
                     if (out_node != in_node) {
