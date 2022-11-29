@@ -133,16 +133,5 @@ TEST_F(IR_ValueTest, bool) {
     EXPECT_TRUE(val.IsBool());
 }
 
-TEST_F(IR_ValueTest, uninitialized) {
-    Value val;
-
-    EXPECT_FALSE(val.IsF32());
-    EXPECT_FALSE(val.IsF16());
-    EXPECT_FALSE(val.IsI32());
-    EXPECT_FALSE(val.IsU32());
-    EXPECT_FALSE(val.IsTemp());
-    EXPECT_FALSE(val.IsBool());
-}
-
 }  // namespace
 }  // namespace tint::ir

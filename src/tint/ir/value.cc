@@ -16,8 +16,6 @@
 
 namespace tint::ir {
 
-Value::Value() : kind_(Kind::kUninitialized), data_(Id(0)) {}
-
 Value::Value(Id id) : kind_(Kind::kTemp), data_(id) {}
 
 Value::Value(f32 f) : kind_(Kind::kF32), data_(f) {}
@@ -59,9 +57,6 @@ std::ostream& operator<<(std::ostream& out, const Value& r) {
             break;
         case Value::Kind::kBool:
             out << (r.AsBool() ? "true" : "false");
-            break;
-        case Value::Kind::kUninitialized:
-            out << "unknown value";
             break;
     }
     return out;

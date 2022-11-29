@@ -18,7 +18,7 @@ namespace tint::ir {
 
 Instruction::Instruction() {}
 
-Instruction::Instruction(Kind kind, Value result, Value lhs, Value rhs)
+Instruction::Instruction(Kind kind, const Value* result, const Value* lhs, const Value* rhs)
     : kind_(kind), result_(result), args_({lhs, rhs}) {}
 
 Instruction::Instruction(const Instruction&) = default;
@@ -32,9 +32,9 @@ Instruction& Instruction::operator=(const Instruction& instr) = default;
 Instruction& Instruction::operator=(Instruction&& instr) = default;
 
 std::ostream& operator<<(std::ostream& out, const Instruction& instr) {
-    out << instr.Result() << " = ";
+    out << *(instr.Result()) << " = ";
     if (instr.HasLHS()) {
-        out << instr.LHS();
+        out << *(instr.LHS());
     }
     out << " ";
 
@@ -96,7 +96,7 @@ std::ostream& operator<<(std::ostream& out, const Instruction& instr) {
     }
 
     if (instr.HasRHS()) {
-        out << " " << instr.RHS();
+        out << " " << *(instr.RHS());
     }
 
     return out;

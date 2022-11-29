@@ -32,8 +32,6 @@ class Value {
 
     /// The type of the value
     enum class Kind {
-        /// A uninitialized value
-        kUninitialized,
         /// A temporary allocated value
         kTemp,
         /// A f32 value
@@ -47,10 +45,6 @@ class Value {
         /// A boolean value
         kBool,
     };
-
-    /// Constructor
-    /// Creates a uninitialized value
-    Value();
 
     /// Constructor
     /// @param id the id for the value

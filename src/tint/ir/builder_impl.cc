@@ -516,7 +516,7 @@ bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
     return true;
 }
 
-utils::Result<Value> BuilderImpl::EmitExpression(const ast::Expression* expr) {
+utils::Result<const Value*> BuilderImpl::EmitExpression(const ast::Expression* expr) {
     return tint::Switch(
         expr,
         // [&](const ast::IndexAccessorExpression* a) { return EmitIndexAccessor(a); },
@@ -551,7 +551,7 @@ bool BuilderImpl::EmitVariable(const ast::Variable* var) {
         });
 }
 
-utils::Result<Value> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr) {
+utils::Result<const Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr) {
     auto lhs = EmitExpression(expr->lhs);
     if (!lhs) {
         return utils::Failure;
@@ -623,26 +623,29 @@ utils::Result<Value> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr) 
             return utils::Failure;
     }
 
-    auto result = instr.Result();
+    auto* result = instr.Result();
     current_flow_block->instructions.Push(instr);
-    return result;
+    return utils::Result<const Value*>(result);
 }
 
-utils::Result<Value> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {
+utils::Result<const Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {
     return tint::Switch(  //
         lit,
-        [&](const ast::BoolLiteralExpression* l) { return utils::Result<Value>{Value(l->value)}; },
+        [&](const ast::BoolLiteralExpression* l) {
+            return utils::Result<const Value*>(builder.MkValue(l->value));
+        },
         [&](const ast::FloatLiteralExpression* l) {
             if (l->suffix == ast::FloatLiteralExpression::Suffix::kF) {
-                return utils::Result<Value>{Value(f32(static_cast<float>(l->value)))};
+                return utils::Result<const Value*>(
+                    builder.MkValue(f32(static_cast<float>(l->value))));
             }
-            return utils::Result<Value>{Value(f16(static_cast<float>(l->value)))};
+            return utils::Result<const Value*>(builder.MkValue(f16(static_cast<float>(l->value))));
         },
         [&](const ast::IntLiteralExpression* l) {
             if (l->suffix == ast::IntLiteralExpression::Suffix::kI) {
-                return utils::Result<Value>{Value(i32(l->value))};
+                return utils::Result<const Value*>(builder.MkValue(i32(l->value)));
             }
-            return utils::Result<Value>{Value(u32(l->value))};
+            return utils::Result<const Value*>(builder.MkValue(u32(l->value)));
         },
         [&](Default) {
             diagnostics_.add_warning(tint::diag::System::IR,

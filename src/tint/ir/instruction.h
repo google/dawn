@@ -58,7 +58,7 @@ class Instruction {
     /// @param result the result value
     /// @param lhs the lhs of the instruction
     /// @param rhs the rhs of the instruction
-    Instruction(Kind kind, Value result, Value lhs, Value rhs);
+    Instruction(Kind kind, const Value* result, const Value* lhs, const Value* rhs);
     /// Copy constructor
     /// @param instr the instruction to copy from
     Instruction(const Instruction& instr);
@@ -81,12 +81,12 @@ class Instruction {
     Kind GetKind() const { return kind_; }
 
     /// @returns the result value for the instruction
-    const Value& Result() const { return result_; }
+    const Value* Result() const { return result_; }
 
     /// @returns true if the instruction has a LHS
     bool HasLHS() const { return args_.Length() >= 1; }
     /// @returns the left-hand-side value for the instruction
-    const Value& LHS() const {
+    const Value* LHS() const {
         TINT_ASSERT(IR, HasLHS());
         return args_[0];
     }
@@ -94,7 +94,7 @@ class Instruction {
     /// @returns true if the instruction has a RHS
     bool HasRHS() const { return args_.Length() >= 2; }
     /// @returns the right-hand-side value for the instruction
-    const Value& RHS() const {
+    const Value* RHS() const {
         TINT_ASSERT(IR, HasRHS());
         return args_[1];
     }
@@ -102,8 +102,8 @@ class Instruction {
   private:
     Kind kind_;
 
-    Value result_;
-    utils::Vector<Value, 2> args_;
+    const Value* result_;
+    utils::Vector<const Value*, 2> args_;
 };
 
 std::ostream& operator<<(std::ostream& out, const Instruction&);

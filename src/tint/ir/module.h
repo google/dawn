@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/tint/ir/function.h"
+#include "src/tint/ir/value.h"
 #include "src/tint/utils/block_allocator.h"
 #include "src/tint/utils/result.h"
 #include "src/tint/utils/vector.h"
@@ -66,6 +67,8 @@ class Module {
 
     /// The flow node allocator
     utils::BlockAllocator<FlowNode> flow_nodes;
+    /// The value allocator
+    utils::BlockAllocator<Value> values;
 
     /// List of functions in the program
     utils::Vector<Function*, 8> functions;

@@ -45,7 +45,7 @@ class If : public Castable<If, FlowNode> {
     /// branches into it. (e.g. if both branches `return`)
     Block* merge_target = nullptr;
     /// Value holding the condition result
-    Value condition;
+    const Value* condition = nullptr;
 };
 
 }  // namespace tint::ir
