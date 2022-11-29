@@ -22,6 +22,7 @@
 #include "absl/strings/str_format.h"
 #include "dawn/common/Result.h"
 #include "dawn/native/ErrorData.h"
+#include "dawn/native/Toggles.h"
 #include "dawn/native/webgpu_absl_format.h"
 
 namespace dawn::native {
@@ -80,6 +81,14 @@ using ResultOrError = Result<T, ErrorData>;
     }                                                                                        \
     for (;;)                                                                                 \
     break
+
+// DAWN_MAKE_DEPRECATION_ERROR is used at deprecation paths. It returns a MaybeError.
+// When the disallow_deprecated_path toggle is on, it creates an internal validation error.
+// Otherwise it returns {} and emits a deprecation warning, and moves on.
+#define DAWN_MAKE_DEPRECATION_ERROR(device, ...)            \
+    device->IsToggleEnabled(Toggle::DisallowDeprecatedAPIs) \
+        ? MaybeError(DAWN_VALIDATION_ERROR(__VA_ARGS__))    \
+        : (device->EmitDeprecationWarning(absl::StrFormat(__VA_ARGS__)), MaybeError{})
 
 // DAWN_DEVICE_LOST_ERROR means that there was a real unrecoverable native device lost error.
 // We can't even do a graceful shutdown because the Device is gone.

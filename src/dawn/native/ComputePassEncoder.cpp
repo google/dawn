@@ -167,15 +167,20 @@ void ComputePassEncoder::APIEnd() {
 }
 
 void ComputePassEncoder::APIEndPass() {
-    GetDevice()->EmitDeprecationWarning("endPass() has been deprecated. Use end() instead.");
+    if (GetDevice()->ConsumedError(DAWN_MAKE_DEPRECATION_ERROR(
+            GetDevice(), "endPass() has been deprecated. Use end() instead."))) {
+        return;
+    }
     APIEnd();
 }
 
 void ComputePassEncoder::APIDispatch(uint32_t workgroupCountX,
                                      uint32_t workgroupCountY,
                                      uint32_t workgroupCountZ) {
-    GetDevice()->EmitDeprecationWarning(
-        "dispatch() has been deprecated. Use dispatchWorkgroups() instead.");
+    if (GetDevice()->ConsumedError(DAWN_MAKE_DEPRECATION_ERROR(
+            GetDevice(), "dispatch() has been deprecated. Use dispatchWorkgroups() instead."))) {
+        return;
+    }
     APIDispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
 }
 
@@ -313,8 +318,11 @@ ComputePassEncoder::TransformIndirectDispatchBuffer(Ref<BufferBase> indirectBuff
 }
 
 void ComputePassEncoder::APIDispatchIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset) {
-    GetDevice()->EmitDeprecationWarning(
-        "dispatchIndirect() has been deprecated. Use dispatchWorkgroupsIndirect() instead.");
+    if (GetDevice()->ConsumedError(DAWN_MAKE_DEPRECATION_ERROR(
+            GetDevice(),
+            "dispatchIndirect() has been deprecated. Use dispatchWorkgroupsIndirect() instead."))) {
+        return;
+    }
     APIDispatchWorkgroupsIndirect(indirectBuffer, indirectOffset);
 }
 

@@ -25,6 +25,17 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+constexpr char kDisallowDeprecatedAPIsToggleName[] = "disallow_deprecated_apis";
+
+#define EXPECT_DEPRECATION_ERROR_OR_WARNING(statement)         \
+    if (HasToggleEnabled(kDisallowDeprecatedAPIsToggleName)) { \
+        ASSERT_DEVICE_ERROR(statement);                        \
+    } else {                                                   \
+        EXPECT_DEPRECATION_WARNING(statement);                 \
+    }                                                          \
+    for (;;)                                                   \
+    break
+
 class DeprecationTests : public DawnTest {
   protected:
     void SetUp() override {
@@ -36,9 +47,9 @@ class DeprecationTests : public DawnTest {
 
 // Test that setting attachment rather than view for render pass color and depth/stencil attachments
 // is deprecated.
-TEST_P(DeprecationTests, ReadOnlyDepthStencilStoreLoadOpsAttachment) {
+// TODO(dawn:1602): validation implementations need updating
+TEST_P(DeprecationTests, DISABLED_ReadOnlyDepthStencilStoreLoadOpsAttachment) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass;
 
     // Check that setting load/store ops with read only depth/stencil attachments gives a warning.
@@ -61,21 +72,28 @@ TEST_P(DeprecationTests, ReadOnlyDepthStencilStoreLoadOpsAttachment) {
     depthAttachment->depthLoadOp = wgpu::LoadOp::Load;
     depthAttachment->depthStoreOp = wgpu::StoreOp::Store;
 
-    EXPECT_DEPRECATION_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EXPECT_DEPRECATION_ERROR_OR_WARNING(
+            pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+    }
 
     depthAttachment->depthLoadOp = wgpu::LoadOp::Undefined;
     depthAttachment->depthStoreOp = wgpu::StoreOp::Undefined;
     depthAttachment->stencilLoadOp = wgpu::LoadOp::Load;
     depthAttachment->stencilStoreOp = wgpu::StoreOp::Store;
 
-    EXPECT_DEPRECATION_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
-
-    pass.End();
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EXPECT_DEPRECATION_ERROR_OR_WARNING(
+            pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+    }
 }
 
 // Test that setting the clearColor, clearDepth, or clearStencil values for render pass attachments
 // is deprecated. (dawn:1269)
-TEST_P(DeprecationTests, AttachmentClearColor) {
+// TODO(dawn:1602): validation implementations need updating
+TEST_P(DeprecationTests, DISABLED_AttachmentClearColor) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass;
@@ -103,22 +121,19 @@ TEST_P(DeprecationTests, AttachmentClearColor) {
 
     depthAttachment->clearStencil = 1;
 
-    EXPECT_DEPRECATION_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
-    pass.End();
+    EXPECT_DEPRECATION_ERROR_OR_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
 
     depthAttachment->clearStencil = 0;
     depthAttachment->depthClearValue = 0.0f;
     depthAttachment->clearDepth = 1.0f;
 
-    EXPECT_DEPRECATION_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
-    pass.End();
+    EXPECT_DEPRECATION_ERROR_OR_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
 
     renderPass.renderPassInfo.depthStencilAttachment = nullptr;
     renderPass.renderPassInfo.cColorAttachments[0].clearColor = {1.0, 2.0, 3.0, 4.0};
     renderPass.renderPassInfo.cColorAttachments[0].clearValue = {5.0, 4.0, 3.0, 2.0};
 
-    EXPECT_DEPRECATION_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
-    pass.End();
+    EXPECT_DEPRECATION_ERROR_OR_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
 }
 
 // Test that endPass() is deprecated for both render and compute passes.
@@ -129,13 +144,13 @@ TEST_P(DeprecationTests, EndPass) {
         utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
 
-        EXPECT_DEPRECATION_WARNING(pass.EndPass());
+        EXPECT_DEPRECATION_ERROR_OR_WARNING(pass.EndPass());
     }
 
     {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
 
-        EXPECT_DEPRECATION_WARNING(pass.EndPass());
+        EXPECT_DEPRECATION_ERROR_OR_WARNING(pass.EndPass());
     }
 }
 
@@ -161,9 +176,9 @@ TEST_P(DeprecationTests, Dispatch) {
     wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
     pass.SetPipeline(pipeline);
 
-    EXPECT_DEPRECATION_WARNING(pass.Dispatch(1));
+    EXPECT_DEPRECATION_ERROR_OR_WARNING(pass.Dispatch(1));
 
-    EXPECT_DEPRECATION_WARNING(pass.DispatchIndirect(indirectBuffer, 0));
+    EXPECT_DEPRECATION_ERROR_OR_WARNING(pass.DispatchIndirect(indirectBuffer, 0));
 
     pass.End();
 }
@@ -181,7 +196,16 @@ TEST_P(DeprecationTests, MaxBufferSizeValidation) {
     device.CreateBuffer(&descriptor);
 
     descriptor.size = GetSupportedLimits().limits.maxBufferSize + 1;
-    EXPECT_DEPRECATION_WARNING(device.CreateBuffer(&descriptor));
+    EXPECT_DEPRECATION_ERROR_OR_WARNING(device.CreateBuffer(&descriptor));
+}
+
+// Test that multisampled texture with sampleType == float should be deprecated.
+TEST_P(DeprecationTests, MultisampledTextureSampleType) {
+    EXPECT_DEPRECATION_ERROR_OR_WARNING(utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
+                     wgpu::TextureViewDimension::e2D, true},
+                }));
 }
 
 DAWN_INSTANTIATE_TEST(DeprecationTests,
@@ -190,4 +214,10 @@ DAWN_INSTANTIATE_TEST(DeprecationTests,
                       NullBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      D3D12Backend({kDisallowDeprecatedAPIsToggleName}),
+                      MetalBackend({kDisallowDeprecatedAPIsToggleName}),
+                      NullBackend({kDisallowDeprecatedAPIsToggleName}),
+                      OpenGLBackend({kDisallowDeprecatedAPIsToggleName}),
+                      OpenGLESBackend({kDisallowDeprecatedAPIsToggleName}),
+                      VulkanBackend({kDisallowDeprecatedAPIsToggleName}));
