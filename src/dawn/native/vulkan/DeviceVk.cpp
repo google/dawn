@@ -69,6 +69,23 @@ class ScopedSignalSemaphore : public NonMovable {
     VkSemaphore mSemaphore = VK_NULL_HANDLE;
 };
 
+// Destroys command pool/buffer.
+// TODO(dawn:1601) Revisit this and potentially bake into pool/buffer objects instead.
+void DestroyCommandPoolAndBuffer(const VulkanFunctions& fn,
+                                 VkDevice device,
+                                 const CommandPoolAndBuffer& commands) {
+    // The VkCommandBuffer memory should be wholly owned by the pool and freed when it is
+    // destroyed, but that's not the case in some drivers and they leak memory. So we call
+    // FreeCommandBuffers before DestroyCommandPool to be safe.
+    // TODO(enga): Only do this on a known list of bad drivers.
+    if (commands.pool != VK_NULL_HANDLE) {
+        if (commands.commandBuffer != VK_NULL_HANDLE) {
+            fn.FreeCommandBuffers(device, commands.pool, 1, &commands.commandBuffer);
+        }
+        fn.DestroyCommandPool(device, commands.pool, nullptr);
+    }
+}
+
 }  // namespace
 
 // static
@@ -745,7 +762,7 @@ MaybeError Device::SplitRecordingContext(CommandRecordingContext* recordingConte
     return {};
 }
 
-ResultOrError<Device::CommandPoolAndBuffer> Device::BeginVkCommandBuffer() {
+ResultOrError<CommandPoolAndBuffer> Device::BeginVkCommandBuffer() {
     CommandPoolAndBuffer commands;
 
     // First try to recycle unused command pools.
@@ -754,19 +771,7 @@ ResultOrError<Device::CommandPoolAndBuffer> Device::BeginVkCommandBuffer() {
         mUnusedCommands.pop_back();
         DAWN_TRY_WITH_CLEANUP(
             CheckVkSuccess(fn.ResetCommandPool(mVkDevice, commands.pool, 0), "vkResetCommandPool"),
-            {
-                // vkResetCommandPool failed (it may return out-of-memory).
-                // Free the commands in the cleanup step before returning to
-                // reclaim memory.
-
-                // The VkCommandBuffer memory should be wholly owned by the
-                // pool and freed when it is destroyed, but that's not the
-                // case in some drivers and they leak memory. So we call
-                // FreeCommandBuffers before DestroyCommandPool to be safe.
-                // TODO(enga): Only do this on a known list of bad drivers.
-                fn.FreeCommandBuffers(mVkDevice, commands.pool, 1, &commands.commandBuffer);
-                fn.DestroyCommandPool(mVkDevice, commands.pool, nullptr);
-            });
+            { DestroyCommandPoolAndBuffer(fn, mVkDevice, commands); });
     } else {
         // Create a new command pool for our commands and allocate the command buffer.
         VkCommandPoolCreateInfo createInfo;
@@ -786,9 +791,10 @@ ResultOrError<Device::CommandPoolAndBuffer> Device::BeginVkCommandBuffer() {
         allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocateInfo.commandBufferCount = 1;
 
-        DAWN_TRY(CheckVkSuccess(
-            fn.AllocateCommandBuffers(mVkDevice, &allocateInfo, &commands.commandBuffer),
-            "vkAllocateCommandBuffers"));
+        DAWN_TRY_WITH_CLEANUP(CheckVkSuccess(fn.AllocateCommandBuffers(mVkDevice, &allocateInfo,
+                                                                       &commands.commandBuffer),
+                                             "vkAllocateCommandBuffers"),
+                              { DestroyCommandPoolAndBuffer(fn, mVkDevice, commands); });
     }
 
     // Start the recording of commands in the command buffer.
@@ -798,8 +804,9 @@ ResultOrError<Device::CommandPoolAndBuffer> Device::BeginVkCommandBuffer() {
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     beginInfo.pInheritanceInfo = nullptr;
 
-    DAWN_TRY(CheckVkSuccess(fn.BeginCommandBuffer(commands.commandBuffer, &beginInfo),
-                            "vkBeginCommandBuffer"));
+    DAWN_TRY_WITH_CLEANUP(CheckVkSuccess(fn.BeginCommandBuffer(commands.commandBuffer, &beginInfo),
+                                         "vkBeginCommandBuffer"),
+                          { DestroyCommandPoolAndBuffer(fn, mVkDevice, commands); });
 
     return commands;
 }
@@ -1127,13 +1134,8 @@ void Device::DestroyImpl() {
     // Immediately tag the recording context as unused so we don't try to submit it in Tick.
     mRecordingContext.needsSubmit = false;
     if (mRecordingContext.commandPool != VK_NULL_HANDLE) {
-        // The VkCommandBuffer memory should be wholly owned by the pool and freed when it is
-        // destroyed, but that's not the case in some drivers and the leak memory.
-        // So we call FreeCommandBuffers before DestroyCommandPool to be safe.
-        // TODO(enga): Only do this on a known list of bad drivers.
-        fn.FreeCommandBuffers(mVkDevice, mRecordingContext.commandPool, 1,
-                              &mRecordingContext.commandBuffer);
-        fn.DestroyCommandPool(mVkDevice, mRecordingContext.commandPool, nullptr);
+        DestroyCommandPoolAndBuffer(
+            fn, mVkDevice, {mRecordingContext.commandPool, mRecordingContext.commandBuffer});
     }
 
     for (VkSemaphore semaphore : mRecordingContext.waitSemaphores) {
@@ -1147,12 +1149,7 @@ void Device::DestroyImpl() {
     ASSERT(mCommandsInFlight.Empty());
 
     for (const CommandPoolAndBuffer& commands : mUnusedCommands) {
-        // The VkCommandBuffer memory should be wholly owned by the pool and freed when it is
-        // destroyed, but that's not the case in some drivers and the leak memory.
-        // So we call FreeCommandBuffers before DestroyCommandPool to be safe.
-        // TODO(enga): Only do this on a known list of bad drivers.
-        fn.FreeCommandBuffers(mVkDevice, commands.pool, 1, &commands.commandBuffer);
-        fn.DestroyCommandPool(mVkDevice, commands.pool, nullptr);
+        DestroyCommandPoolAndBuffer(fn, mVkDevice, commands);
     }
     mUnusedCommands.clear();
 

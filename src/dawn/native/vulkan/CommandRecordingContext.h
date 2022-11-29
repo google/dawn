@@ -19,10 +19,20 @@
 
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/vulkan/BufferVk.h"
+#include "dawn/native/vulkan/VulkanFunctions.h"
 
 namespace dawn::native::vulkan {
 
 class Texture;
+
+// Wrapping class that currently associates a command buffer to it's corresponding pool.
+// TODO(dawn:1601) Revisit this structure since it is where the 1:1 mapping is implied.
+//                 Also consider reusing this in CommandRecordingContext below instead of
+//                 flattening the pool and command buffer again.
+struct CommandPoolAndBuffer {
+    VkCommandPool pool = VK_NULL_HANDLE;
+    VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+};
 
 // Used to track operations that are handled after recording.
 // Currently only tracks semaphores, but may be used to do barrier coalescing in the future.

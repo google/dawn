@@ -210,11 +210,6 @@ class Device final : public DeviceBase {
     const std::string mDebugPrefix;
     std::vector<std::string> mDebugMessages;
 
-    struct CommandPoolAndBuffer {
-        VkCommandPool pool = VK_NULL_HANDLE;
-        VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
-    };
-
     MaybeError PrepareRecordingContext();
     ResultOrError<CommandPoolAndBuffer> BeginVkCommandBuffer();
     void RecycleCompletedCommands();
