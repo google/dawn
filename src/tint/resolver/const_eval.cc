@@ -779,24 +779,22 @@ utils::Result<NumberT> ConstEval::Div(const Source& source, NumberT a, NumberT b
         }
     } else {
         using T = UnwrapNumber<NumberT>;
-        auto divide_values = [](T lhs, T rhs) {
-            if constexpr (std::is_integral_v<T>) {
-                // For integers, lhs / 0 returns lhs
-                if (rhs == 0) {
-                    return lhs;
-                }
-
-                if constexpr (std::is_signed_v<T>) {
-                    // For signed integers, for lhs / -1, return lhs if lhs is the
-                    // most negative value
-                    if (rhs == -1 && lhs == std::numeric_limits<T>::min()) {
-                        return lhs;
-                    }
-                }
+        auto lhs = a.value;
+        auto rhs = b.value;
+        if (rhs == 0) {
+            // For integers (as for floats), lhs / 0 is an error
+            AddError(OverflowErrorMessage(a, "/", b), source);
+            return utils::Failure;
+        }
+        if constexpr (std::is_signed_v<T>) {
+            // For signed integers, lhs / -1 where lhs is the
+            // most negative value is an error
+            if (rhs == -1 && lhs == std::numeric_limits<T>::min()) {
+                AddError(OverflowErrorMessage(a, "/", b), source);
+                return utils::Failure;
             }
-            return lhs / rhs;
-        };
-        result = divide_values(a.value, b.value);
+        }
+        result = lhs / rhs;
     }
     return result;
 }

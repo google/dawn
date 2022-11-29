@@ -419,36 +419,31 @@ INSTANTIATE_TEST_SUITE_P(Mul,
 
 template <typename T>
 std::vector<Case> OpDivIntCases() {
-    std::vector<Case> r = {
-        C(Val(T{0}), Val(T{1}), Val(T{0})),
-        C(Val(T{1}), Val(T{1}), Val(T{1})),
-        C(Val(T{1}), Val(T{1}), Val(T{1})),
-        C(Val(T{2}), Val(T{1}), Val(T{2})),
-        C(Val(T{4}), Val(T{2}), Val(T{2})),
-        C(Val(T::Highest()), Val(T{1}), Val(T::Highest())),
-        C(Val(T::Lowest()), Val(T{1}), Val(T::Lowest())),
-        C(Val(T::Highest()), Val(T::Highest()), Val(T{1})),
-        C(Val(T{0}), Val(T::Highest()), Val(T{0})),
-        C(Val(T{0}), Val(T::Lowest()), Val(T{0})),
-    };
-    ConcatIntoIf<!IsAbstract<T> && IsIntegral<T>>(  //
-        r, std::vector<Case>{
-               // e1, when e2 is zero.
-               C(T{123}, T{0}, T{123}),
-           });
-    ConcatIntoIf<!IsAbstract<T> && IsSignedIntegral<T>>(  //
-        r, std::vector<Case>{
-               // e1, when e1 is the most negative value in T, and e2 is -1.
-               C(T::Smallest(), T{-1}, T::Smallest()),
-           });
-
     auto error_msg = [](auto a, auto b) {
         return "12:34 error: " + OverflowErrorMessage(a, "/", b);
     };
-    ConcatIntoIf<IsAbstract<T>>(  //
+
+    std::vector<Case> r = {
+        C(T{0}, T{1}, T{0}),
+        C(T{1}, T{1}, T{1}),
+        C(T{1}, T{1}, T{1}),
+        C(T{2}, T{1}, T{2}),
+        C(T{4}, T{2}, T{2}),
+        C(T::Highest(), T{1}, T::Highest()),
+        C(T::Lowest(), T{1}, T::Lowest()),
+        C(T::Highest(), T::Highest(), T{1}),
+        C(T{0}, T::Highest(), T{0}),
+
+        // Divide by zero
+        E(T{123}, T{0}, error_msg(T{123}, T{0})),
+        E(T::Highest(), T{0}, error_msg(T::Highest(), T{0})),
+        E(T::Lowest(), T{0}, error_msg(T::Lowest(), T{0})),
+    };
+
+    // Error on most negative divided by -1
+    ConcatIntoIf<IsSignedIntegral<T>>(  //
         r, std::vector<Case>{
-               // Most negative value divided by -1
-               E(AInt::Lowest(), -1_a, error_msg(AInt::Lowest(), -1_a)),
+               E(T::Lowest(), T{-1}, error_msg(T::Lowest(), T{-1})),
            });
     return r;
 }
