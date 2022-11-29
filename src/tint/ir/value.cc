@@ -30,8 +30,6 @@ Value::Value(i32 i) : kind_(Kind::kI32), data_(i) {}
 
 Value::Value(bool b) : kind_(Kind::kBool), data_(b) {}
 
-Value::Value(Symbol s, Id id) : kind_(Kind::kVar), data_(VarData{s, id}) {}
-
 Value::~Value() = default;
 
 Value::Value(const Value& o) = default;
@@ -58,10 +56,6 @@ std::ostream& operator<<(std::ostream& out, const Value& r) {
             break;
         case Value::Kind::kU32:
             out << std::to_string(r.AsU32().value);
-            break;
-            // TODO(dsinclair): Emit the symbol instead of v
-        case Value::Kind::kVar:
-            out << "%v" << std::to_string(r.AsVarData().id);
             break;
         case Value::Kind::kBool:
             out << (r.AsBool() ? "true" : "false");

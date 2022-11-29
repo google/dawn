@@ -38,7 +38,6 @@ TEST_F(IR_ValueTest, f32) {
     EXPECT_FALSE(val.IsI32());
     EXPECT_FALSE(val.IsU32());
     EXPECT_FALSE(val.IsTemp());
-    EXPECT_FALSE(val.IsVar());
     EXPECT_FALSE(val.IsBool());
 }
 
@@ -56,7 +55,6 @@ TEST_F(IR_ValueTest, f16) {
     EXPECT_FALSE(val.IsI32());
     EXPECT_FALSE(val.IsU32());
     EXPECT_FALSE(val.IsTemp());
-    EXPECT_FALSE(val.IsVar());
     EXPECT_FALSE(val.IsBool());
 }
 
@@ -74,7 +72,6 @@ TEST_F(IR_ValueTest, i32) {
     EXPECT_TRUE(val.IsI32());
     EXPECT_FALSE(val.IsU32());
     EXPECT_FALSE(val.IsTemp());
-    EXPECT_FALSE(val.IsVar());
     EXPECT_FALSE(val.IsBool());
 }
 
@@ -92,7 +89,6 @@ TEST_F(IR_ValueTest, u32) {
     EXPECT_FALSE(val.IsI32());
     EXPECT_TRUE(val.IsU32());
     EXPECT_FALSE(val.IsTemp());
-    EXPECT_FALSE(val.IsVar());
     EXPECT_FALSE(val.IsBool());
 }
 
@@ -110,7 +106,6 @@ TEST_F(IR_ValueTest, id) {
     EXPECT_FALSE(val.IsI32());
     EXPECT_FALSE(val.IsU32());
     EXPECT_TRUE(val.IsTemp());
-    EXPECT_FALSE(val.IsVar());
     EXPECT_FALSE(val.IsBool());
 }
 
@@ -135,36 +130,7 @@ TEST_F(IR_ValueTest, bool) {
     EXPECT_FALSE(val.IsI32());
     EXPECT_FALSE(val.IsU32());
     EXPECT_FALSE(val.IsTemp());
-    EXPECT_FALSE(val.IsVar());
     EXPECT_TRUE(val.IsBool());
-}
-
-TEST_F(IR_ValueTest, var) {
-    std::stringstream str;
-
-    Symbol s;
-    Value val(s, 2);
-    EXPECT_EQ(2u, val.AsVarData().id);
-    EXPECT_EQ(s, val.AsVarData().sym);
-
-    str << val;
-    EXPECT_EQ("%v2", str.str());
-    str.str("");
-
-    val = Value(s, 4);
-    EXPECT_EQ(4u, val.AsVarData().id);
-    EXPECT_EQ(s, val.AsVarData().sym);
-
-    str << val;
-    EXPECT_EQ("%v4", str.str());
-
-    EXPECT_FALSE(val.IsF32());
-    EXPECT_FALSE(val.IsF16());
-    EXPECT_FALSE(val.IsI32());
-    EXPECT_FALSE(val.IsU32());
-    EXPECT_FALSE(val.IsTemp());
-    EXPECT_TRUE(val.IsVar());
-    EXPECT_FALSE(val.IsBool());
 }
 
 TEST_F(IR_ValueTest, uninitialized) {
@@ -175,7 +141,6 @@ TEST_F(IR_ValueTest, uninitialized) {
     EXPECT_FALSE(val.IsI32());
     EXPECT_FALSE(val.IsU32());
     EXPECT_FALSE(val.IsTemp());
-    EXPECT_FALSE(val.IsVar());
     EXPECT_FALSE(val.IsBool());
 }
 

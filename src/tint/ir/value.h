@@ -19,7 +19,6 @@
 #include <variant>
 
 #include "src/tint/number.h"
-#include "src/tint/symbol.h"
 
 namespace tint::ir {
 
@@ -45,22 +44,8 @@ class Value {
         kI32,
         /// A u32 value
         kU32,
-        /// A variable value
-        kVar,
         /// A boolean value
         kBool,
-    };
-
-    /// Stores data for a given variable. There will be multiple `VarData` entries for a given `id`.
-    /// The `id` acts like a generation number (although they aren't sequential, they are
-    /// increasing). As the variable is stored too a new value will be created and the the `id`
-    /// will be incremented.
-    struct VarData {
-        /// The symbol for the variable
-        Symbol sym;
-        /// The id for the variable.
-        Id id;
-        // TODO(dsinclair): Should var type data be stored here along side the variable info?
     };
 
     /// Constructor
@@ -70,11 +55,6 @@ class Value {
     /// Constructor
     /// @param id the id for the value
     explicit Value(Id id);
-
-    /// Constructor
-    /// @param s the symbol for the value
-    /// @param id the id for the value
-    Value(Symbol s, Id id);
 
     /// Constructor
     /// @param b the `bool` value to store in the value
@@ -125,8 +105,6 @@ class Value {
     bool IsI32() const { return kind_ == Kind::kI32; }
     /// @returns true if this is a u32 value
     bool IsU32() const { return kind_ == Kind::kU32; }
-    /// @returns true if this is a var value
-    bool IsVar() const { return kind_ == Kind::kVar; }
     /// @returns true if this is a bool value
     bool IsBool() const { return kind_ == Kind::kBool; }
 
@@ -148,9 +126,6 @@ class Value {
     /// @returns the value data as an `Id`.
     /// @note, must only be called if `IsTemp()` is true
     Id AsId() const { return std::get<Id>(data_); }
-    /// @returns the value data as a `VarData` structure.
-    /// @note, must only be called if `IsVar()` is true
-    VarData AsVarData() const { return std::get<VarData>(data_); }
     /// @returns the value data as a `bool`.
     /// @note, must only be called if `IsBool()` is true
     bool AsBool() const { return std::get<bool>(data_); }
@@ -159,7 +134,7 @@ class Value {
     /// The type of data stored in this value
     Kind kind_;
     /// The data stored in the value
-    std::variant<Id, f32, f16, u32, i32, VarData, bool> data_;
+    std::variant<Id, f32, f16, u32, i32, bool> data_;
 };
 
 std::ostream& operator<<(std::ostream& out, const Value& r);
