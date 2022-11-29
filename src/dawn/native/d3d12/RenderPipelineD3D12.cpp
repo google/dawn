@@ -358,11 +358,12 @@ MaybeError RenderPipeline::Initialize() {
     PerStage<CompiledShader> compiledShader;
 
     std::bitset<kMaxInterStageShaderVariables>* usedInterstageVariables = nullptr;
+    dawn::native::EntryPointMetadata fragmentEntryPoint;
     if (GetStageMask() & wgpu::ShaderStage::Fragment) {
         // Now that only fragment shader can have interstage inputs.
         const ProgrammableStage& programmableStage = GetStage(SingleShaderStage::Fragment);
-        auto entryPoint = programmableStage.module->GetEntryPoint(programmableStage.entryPoint);
-        usedInterstageVariables = &entryPoint.usedInterStageVariables;
+        fragmentEntryPoint = programmableStage.module->GetEntryPoint(programmableStage.entryPoint);
+        usedInterstageVariables = &fragmentEntryPoint.usedInterStageVariables;
     }
 
     for (auto stage : IterateStages(GetStageMask())) {
