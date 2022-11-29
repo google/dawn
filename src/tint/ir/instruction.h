@@ -17,6 +17,7 @@
 
 #include <ostream>
 
+#include "src/tint/debug.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/utils/vector.h"
 

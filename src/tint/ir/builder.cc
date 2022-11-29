@@ -93,12 +93,12 @@ void Builder::Branch(Block* from, FlowNode* to) {
     to->inbound_branches.Push(from);
 }
 
-Value::Id Builder::AllocateValue() {
-    return next_value_id++;
+Temp::Id Builder::AllocateTempId() {
+    return next_temp_id++;
 }
 
 Instruction Builder::CreateInstruction(Instruction::Kind kind, const Value* lhs, const Value* rhs) {
-    return Instruction(kind, MkValue(AllocateValue()), lhs, rhs);
+    return Instruction(kind, Temp(), lhs, rhs);
 }
 
 Instruction Builder::And(const Value* lhs, const Value* rhs) {

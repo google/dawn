@@ -15,12 +15,14 @@
 #ifndef SRC_TINT_IR_BUILDER_H_
 #define SRC_TINT_IR_BUILDER_H_
 
+#include "src/tint/ir/constant.h"
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/switch.h"
+#include "src/tint/ir/temp.h"
 #include "src/tint/ir/terminator.h"
 #include "src/tint/ir/value.h"
 
@@ -83,13 +85,17 @@ class Builder {
     /// @param to the node to branch too
     void Branch(Block* from, FlowNode* to);
 
-    /// Creates a new Value
-    /// @param val the value
-    /// @returns the new Value
+    /// Creates a new Constant
+    /// @param val the constant value
+    /// @returns the new constant
     template <typename T>
-    const Value* MkValue(T val) {
-        return ir.values.Create<Value>(val);
+    const ir::Constant* Constant(T val) {
+        return ir.values.Create<ir::Constant>(val);
     }
+
+    /// Creates a new Temporary
+    /// @returns the new temporary
+    const ir::Temp* Temp() { return ir.values.Create<ir::Temp>(AllocateTempId()); }
 
     /// Creates an op for `lhs kind rhs`
     /// @param kind the kind of operation
@@ -206,14 +212,14 @@ class Builder {
     /// @returns the operation
     Instruction Modulo(const Value* lhs, const Value* rhs);
 
-    /// @returns a unique Value id
-    Value::Id AllocateValue();
+    /// @returns a unique temp id
+    Temp::Id AllocateTempId();
 
     /// The IR module.
     Module ir;
 
-    /// The next Value number to allocate
-    Value::Id next_value_id = 1;
+    /// The next temporary number to allocate
+    Temp::Id next_temp_id = 1;
 };
 
 }  // namespace tint::ir

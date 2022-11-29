@@ -656,6 +656,8 @@ if(${TINT_BUILD_IR})
     ir/builder.h
     ir/builder_impl.cc
     ir/builder_impl.h
+    ir/constant.cc
+    ir/constant.h
     ir/debug.cc
     ir/debug.h
     ir/disassembler.cc
@@ -674,6 +676,8 @@ if(${TINT_BUILD_IR})
     ir/module.h
     ir/switch.cc
     ir/switch.h
+    ir/temp.cc
+    ir/temp.h
     ir/terminator.cc
     ir/terminator.h
     ir/value.cc
@@ -1341,9 +1345,10 @@ if(TINT_BUILD_TESTS)
   if (${TINT_BUILD_IR})
     list(APPEND TINT_TEST_SRCS
       ir/builder_impl_test.cc
+      ir/constant_test.cc
       ir/instruction_test.cc
+      ir/temp_test.cc
       ir/test_helper.h
-      ir/value_test.cc
     )
   endif()
 

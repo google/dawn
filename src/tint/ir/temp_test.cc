@@ -12,34 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_VALUE_H_
-#define SRC_TINT_IR_VALUE_H_
+#include <sstream>
 
-#include <ostream>
-
-#include "src/tint/castable.h"
+#include "src/tint/ir/temp.h"
+#include "src/tint/ir/test_helper.h"
 
 namespace tint::ir {
+namespace {
 
-/// Value in the IR.
-class Value : public Castable<Value> {
-  public:
-    /// Destructor
-    virtual ~Value();
+using namespace tint::number_suffixes;  // NOLINT
 
-    Value(const Value&) = delete;
-    Value(Value&&) = delete;
+using IR_TempTest = TestHelper;
 
-    Value& operator=(const Value&) = delete;
-    Value& operator=(Value&&) = delete;
+TEST_F(IR_TempTest, id) {
+    auto& b = CreateEmptyBuilder();
 
-  protected:
-    /// Constructor
-    Value();
-};
+    std::stringstream str;
 
-std::ostream& operator<<(std::ostream& out, const Value& v);
+    b.builder.next_temp_id = Temp::Id(4);
+    auto* val = b.builder.Temp();
+    EXPECT_EQ(4u, val->AsId());
 
+    str << *val;
+    EXPECT_EQ("%4", str.str());
+}
+
+}  // namespace
 }  // namespace tint::ir
-
-#endif  // SRC_TINT_IR_VALUE_H_

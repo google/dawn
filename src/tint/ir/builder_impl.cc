@@ -632,20 +632,20 @@ utils::Result<const Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpressio
     return tint::Switch(  //
         lit,
         [&](const ast::BoolLiteralExpression* l) {
-            return utils::Result<const Value*>(builder.MkValue(l->value));
+            return utils::Result<const Value*>(builder.Constant(l->value));
         },
         [&](const ast::FloatLiteralExpression* l) {
             if (l->suffix == ast::FloatLiteralExpression::Suffix::kF) {
                 return utils::Result<const Value*>(
-                    builder.MkValue(f32(static_cast<float>(l->value))));
+                    builder.Constant(f32(static_cast<float>(l->value))));
             }
-            return utils::Result<const Value*>(builder.MkValue(f16(static_cast<float>(l->value))));
+            return utils::Result<const Value*>(builder.Constant(f16(static_cast<float>(l->value))));
         },
         [&](const ast::IntLiteralExpression* l) {
             if (l->suffix == ast::IntLiteralExpression::Suffix::kI) {
-                return utils::Result<const Value*>(builder.MkValue(i32(l->value)));
+                return utils::Result<const Value*>(builder.Constant(i32(l->value)));
             }
-            return utils::Result<const Value*>(builder.MkValue(u32(l->value)));
+            return utils::Result<const Value*>(builder.Constant(u32(l->value)));
         },
         [&](Default) {
             diagnostics_.add_warning(tint::diag::System::IR,

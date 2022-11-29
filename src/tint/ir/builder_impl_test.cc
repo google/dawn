@@ -101,7 +101,8 @@ TEST_F(IR_BuilderImplTest, IfStatement) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 
     // Check condition
-    auto* instr = flow->condition;
+    ASSERT_TRUE(flow->condition->Is<Constant>());
+    auto* instr = flow->condition->As<Constant>();
     ASSERT_TRUE(instr->IsBool());
     EXPECT_TRUE(instr->AsBool());
 }
@@ -502,7 +503,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
     EXPECT_EQ(loop_flow->merge_target->branch_target, nullptr);
 
     // Check condition
-    auto* instr = if_flow->condition;
+    ASSERT_TRUE(if_flow->condition->Is<Constant>());
+    auto* instr = if_flow->condition->As<Constant>();
     ASSERT_TRUE(instr->IsBool());
     EXPECT_TRUE(instr->AsBool());
 }
@@ -947,7 +949,8 @@ TEST_F(IR_BuilderImplTest, While) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 
     // Check condition
-    auto* instr = if_flow->condition;
+    ASSERT_TRUE(if_flow->condition->Is<Constant>());
+    auto* instr = if_flow->condition->As<Constant>();
     ASSERT_TRUE(instr->IsBool());
     EXPECT_FALSE(instr->AsBool());
 }
@@ -1071,7 +1074,8 @@ TEST_F(IR_BuilderImplTest, DISABLED_For) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 
     // Check condition
-    auto* instr = if_flow->condition;
+    ASSERT_TRUE(if_flow->condition->Is<Constant>());
+    auto* instr = if_flow->condition->As<Constant>();
     ASSERT_TRUE(instr->IsBool());
     EXPECT_FALSE(instr->AsBool());
 }
@@ -1171,7 +1175,8 @@ TEST_F(IR_BuilderImplTest, Switch) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 
     // Check condition
-    auto* instr = flow->condition;
+    ASSERT_TRUE(flow->condition->Is<Constant>());
+    auto* instr = flow->condition->As<Constant>();
     ASSERT_TRUE(instr->IsI32());
     EXPECT_EQ(1_i, instr->AsI32());
 }
@@ -1341,7 +1346,8 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_True) {
     auto r = b.EmitLiteral(Expr(true));
     ASSERT_TRUE(r);
 
-    auto* val = r.Get();
+    ASSERT_TRUE(r.Get()->Is<Constant>());
+    auto* val = r.Get()->As<Constant>();
     EXPECT_TRUE(val->IsBool());
     EXPECT_TRUE(val->AsBool());
 }
@@ -1351,7 +1357,8 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_False) {
     auto r = b.EmitLiteral(Expr(false));
     ASSERT_TRUE(r);
 
-    auto val = r.Get();
+    ASSERT_TRUE(r.Get()->Is<Constant>());
+    auto* val = r.Get()->As<Constant>();
     EXPECT_TRUE(val->IsBool());
     EXPECT_FALSE(val->AsBool());
 }
@@ -1361,7 +1368,8 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_F32) {
     auto r = b.EmitLiteral(Expr(1.2_f));
     ASSERT_TRUE(r);
 
-    auto val = r.Get();
+    ASSERT_TRUE(r.Get()->Is<Constant>());
+    auto* val = r.Get()->As<Constant>();
     EXPECT_TRUE(val->IsF32());
     EXPECT_EQ(1.2_f, val->AsF32());
 }
@@ -1371,7 +1379,8 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_F16) {
     auto r = b.EmitLiteral(Expr(1.2_h));
     ASSERT_TRUE(r);
 
-    auto val = r.Get();
+    ASSERT_TRUE(r.Get()->Is<Constant>());
+    auto* val = r.Get()->As<Constant>();
     EXPECT_TRUE(val->IsF16());
     EXPECT_EQ(1.2_h, val->AsF16());
 }
@@ -1381,7 +1390,8 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_I32) {
     auto r = b.EmitLiteral(Expr(-2_i));
     ASSERT_TRUE(r);
 
-    auto val = r.Get();
+    ASSERT_TRUE(r.Get()->Is<Constant>());
+    auto* val = r.Get()->As<Constant>();
     EXPECT_TRUE(val->IsI32());
     EXPECT_EQ(-2_i, val->AsI32());
 }
@@ -1391,7 +1401,8 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_U32) {
     auto r = b.EmitLiteral(Expr(2_u));
     ASSERT_TRUE(r);
 
-    auto val = r.Get();
+    ASSERT_TRUE(r.Get()->Is<Constant>());
+    auto* val = r.Get()->As<Constant>();
     EXPECT_TRUE(val->IsU32());
     EXPECT_EQ(2_u, val->AsU32());
 }

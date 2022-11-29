@@ -12,34 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_VALUE_H_
-#define SRC_TINT_IR_VALUE_H_
+#include "src/tint/ir/temp.h"
 
-#include <ostream>
+#include <string>
 
-#include "src/tint/castable.h"
+TINT_INSTANTIATE_TYPEINFO(tint::ir::Temp);
 
 namespace tint::ir {
 
-/// Value in the IR.
-class Value : public Castable<Value> {
-  public:
-    /// Destructor
-    virtual ~Value();
+Temp::Temp(Id id) : id_(id) {}
 
-    Value(const Value&) = delete;
-    Value(Value&&) = delete;
+Temp::~Temp() = default;
 
-    Value& operator=(const Value&) = delete;
-    Value& operator=(Value&&) = delete;
-
-  protected:
-    /// Constructor
-    Value();
-};
-
-std::ostream& operator<<(std::ostream& out, const Value& v);
+std::ostream& operator<<(std::ostream& out, const Temp& r) {
+    out << "%" << std::to_string(r.AsId());
+    return out;
+}
 
 }  // namespace tint::ir
-
-#endif  // SRC_TINT_IR_VALUE_H_
