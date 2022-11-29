@@ -182,6 +182,30 @@ class Hashmap : public HashmapBase<KEY, VALUE, N, HASH, EQUAL> {
     /// @returns a reference to the entry that is equal to the given value.
     ConstReference Find(const Key& key) const { return ConstReference(*this, key); }
 
+    /// @returns the keys of the map as a vector.
+    /// @note the order of the returned vector is non-deterministic between compilers.
+    template <size_t N2 = N>
+    Vector<Key, N2> Keys() const {
+        Vector<Key, N2> out;
+        out.Reserve(this->Count());
+        for (auto it : *this) {
+            out.Push(it.key);
+        }
+        return out;
+    }
+
+    /// @returns the values of the map as a vector
+    /// @note the order of the returned vector is non-deterministic between compilers.
+    template <size_t N2 = N>
+    Vector<Value, N2> Values() const {
+        Vector<Value, N2> out;
+        out.Reserve(this->Count());
+        for (auto it : *this) {
+            out.Push(it.value);
+        }
+        return out;
+    }
+
   private:
     Value* Lookup(const Key& key) {
         if (auto [found, index] = this->IndexOf(key); found) {

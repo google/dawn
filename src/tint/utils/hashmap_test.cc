@@ -182,6 +182,17 @@ TEST(Hashmap, MutableIterator) {
                                                    Entry{3, "three!"}, Entry{4, "four!"}));
 }
 
+TEST(Hashmap, KeysValues) {
+    using Map = Hashmap<int, std::string, 8>;
+    Map map;
+    map.Add(1, "one");
+    map.Add(4, "four");
+    map.Add(3, "three");
+    map.Add(2, "two");
+    EXPECT_THAT(map.Keys(), testing::UnorderedElementsAre(1, 2, 3, 4));
+    EXPECT_THAT(map.Values(), testing::UnorderedElementsAre("one", "two", "three", "four"));
+}
+
 TEST(Hashmap, AddMany) {
     Hashmap<int, std::string, 8> map;
     for (size_t i = 0; i < kPrimes.size(); i++) {
