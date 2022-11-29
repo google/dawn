@@ -63,10 +63,15 @@ class Symbol {
     /// @returns teh symbol after doing the move
     Symbol& operator=(Symbol&& o);
 
-    /// Comparison operator
+    /// Equality operator
     /// @param o the other symbol
     /// @returns true if the symbols are the same
     bool operator==(const Symbol& o) const;
+
+    /// Inequality operator
+    /// @param o the other symbol
+    /// @returns true if the symbols are the different
+    bool operator!=(const Symbol& o) const;
 
     /// Less-than operator
     /// @param o the other symbol

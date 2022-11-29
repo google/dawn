@@ -43,8 +43,11 @@ TEST_F(SymbolTest, Comparison) {
     Symbol sym3(1, program_id);
 
     EXPECT_TRUE(sym1 == sym3);
+    EXPECT_FALSE(sym1 != sym3);
     EXPECT_FALSE(sym1 == sym2);
+    EXPECT_TRUE(sym1 != sym2);
     EXPECT_FALSE(sym3 == sym2);
+    EXPECT_TRUE(sym3 != sym2);
 }
 
 }  // namespace
