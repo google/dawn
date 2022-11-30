@@ -744,7 +744,6 @@ utils::Result<NumberT> ConstEval::Mul(const Source& source, NumberT a, NumberT b
     using T = UnwrapNumber<NumberT>;
     NumberT result;
     if constexpr (IsAbstract<NumberT> || IsFloatingPoint<NumberT>) {
-        // Check for over/underflow for abstract values
         if (auto r = CheckedMul(a, b)) {
             result = r->value;
         } else {
@@ -770,7 +769,6 @@ template <typename NumberT>
 utils::Result<NumberT> ConstEval::Div(const Source& source, NumberT a, NumberT b) {
     NumberT result;
     if constexpr (IsAbstract<NumberT> || IsFloatingPoint<NumberT>) {
-        // Check for over/underflow for abstract values
         if (auto r = CheckedDiv(a, b)) {
             result = r->value;
         } else {
@@ -795,6 +793,38 @@ utils::Result<NumberT> ConstEval::Div(const Source& source, NumberT a, NumberT b
             }
         }
         result = lhs / rhs;
+    }
+    return result;
+}
+
+template <typename NumberT>
+utils::Result<NumberT> ConstEval::Mod(const Source& source, NumberT a, NumberT b) {
+    NumberT result;
+    if constexpr (IsAbstract<NumberT> || IsFloatingPoint<NumberT>) {
+        if (auto r = CheckedMod(a, b)) {
+            result = r->value;
+        } else {
+            AddError(OverflowErrorMessage(a, "%", b), source);
+            return utils::Failure;
+        }
+    } else {
+        using T = UnwrapNumber<NumberT>;
+        auto lhs = a.value;
+        auto rhs = b.value;
+        if (rhs == 0) {
+            // lhs % 0 is an error
+            AddError(OverflowErrorMessage(a, "%", b), source);
+            return utils::Failure;
+        }
+        if constexpr (std::is_signed_v<T>) {
+            // For signed integers, lhs % -1 where lhs is the
+            // most negative value is an error
+            if (rhs == -1 && lhs == std::numeric_limits<T>::min()) {
+                AddError(OverflowErrorMessage(a, "%", b), source);
+                return utils::Failure;
+            }
+        }
+        result = lhs % rhs;
     }
     return result;
 }
@@ -1105,6 +1135,15 @@ auto ConstEval::MulFunc(const Source& source, const sem::Type* elem_ty) {
 auto ConstEval::DivFunc(const Source& source, const sem::Type* elem_ty) {
     return [=](auto a1, auto a2) -> ImplResult {
         if (auto r = Div(source, a1, a2)) {
+            return CreateElement(builder, source, elem_ty, r.Get());
+        }
+        return utils::Failure;
+    };
+}
+
+auto ConstEval::ModFunc(const Source& source, const sem::Type* elem_ty) {
+    return [=](auto a1, auto a2) -> ImplResult {
+        if (auto r = Mod(source, a1, a2)) {
             return CreateElement(builder, source, elem_ty, r.Get());
         }
         return utils::Failure;
@@ -1678,6 +1717,16 @@ ConstEval::Result ConstEval::OpDivide(const sem::Type* ty,
                                       const Source& source) {
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
         return Dispatch_fia_fiu32_f16(DivFunc(source, c0->Type()), c0, c1);
+    };
+
+    return TransformBinaryElements(builder, ty, transform, args[0], args[1]);
+}
+
+ConstEval::Result ConstEval::OpModulo(const sem::Type* ty,
+                                      utils::VectorRef<const sem::Constant*> args,
+                                      const Source& source) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        return Dispatch_fia_fiu32_f16(ModFunc(source, c0->Type()), c0, c1);
     };
 
     return TransformBinaryElements(builder, ty, transform, args[0], args[1]);

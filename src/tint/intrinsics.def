@@ -932,10 +932,10 @@ init mat4x4<T: fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T>
 @const op / <T: fia_fiu32_f16, N: num> (vec<N, T>, T) -> vec<N, T>
 @const op / <T: fia_fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
 
-op % <T: fiu32_f16>(T, T) -> T
-op % <T: fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
-op % <T: fiu32_f16, N: num> (vec<N, T>, T) -> vec<N, T>
-op % <T: fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
+@const op % <T: fia_fiu32_f16>(T, T) -> T
+@const op % <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+@const op % <T: fia_fiu32_f16, N: num> (vec<N, T>, T) -> vec<N, T>
+@const op % <T: fia_fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
 
 @const op ^ <T: ia_iu32>(T, T) -> T
 @const op ^ <T: ia_iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>

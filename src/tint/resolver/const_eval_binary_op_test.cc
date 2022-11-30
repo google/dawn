@@ -485,6 +485,161 @@ INSTANTIATE_TEST_SUITE_P(Div,
                                  OpDivFloatCases<f32>(),
                                  OpDivFloatCases<f16>()))));
 
+template <typename T>
+std::vector<Case> OpModCases() {
+    auto error_msg = [](auto a, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, "%", b);
+    };
+
+    // Common cases for all types
+    std::vector<Case> r = {
+        C(T{0}, T{1}, T{0}),    //
+        C(T{1}, T{1}, T{0}),    //
+        C(T{10}, T{1}, T{0}),   //
+        C(T{10}, T{2}, T{0}),   //
+        C(T{10}, T{3}, T{1}),   //
+        C(T{10}, T{4}, T{2}),   //
+        C(T{10}, T{5}, T{0}),   //
+        C(T{10}, T{6}, T{4}),   //
+        C(T{10}, T{5}, T{0}),   //
+        C(T{10}, T{8}, T{2}),   //
+        C(T{10}, T{9}, T{1}),   //
+        C(T{10}, T{10}, T{0}),  //
+
+        // Error on divide by zero
+        E(T{123}, T{0}, error_msg(T{123}, T{0})),
+        E(T::Highest(), T{0}, error_msg(T::Highest(), T{0})),
+        E(T::Lowest(), T{0}, error_msg(T::Lowest(), T{0})),
+    };
+
+    if constexpr (IsIntegral<T>) {
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   C(T::Highest(), T{T::Highest() - T{1}}, T{1}),
+               });
+    }
+
+    if constexpr (IsSignedIntegral<T>) {
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   C(T::Lowest(), T{T::Lowest() + T{1}}, -T(1)),
+
+                   // Error on most negative integer divided by -1
+                   E(T::Lowest(), T{-1}, error_msg(T::Lowest(), T{-1})),
+               });
+    }
+
+    // Negative values (both signed integrals and floating point)
+    if constexpr (IsSignedIntegral<T> || IsFloatingPoint<T>) {
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   C(-T{1}, T{1}, T{0}),  //
+
+                   // lhs negative, rhs positive
+                   C(-T{10}, T{1}, T{0}),   //
+                   C(-T{10}, T{2}, T{0}),   //
+                   C(-T{10}, T{3}, -T{1}),  //
+                   C(-T{10}, T{4}, -T{2}),  //
+                   C(-T{10}, T{5}, T{0}),   //
+                   C(-T{10}, T{6}, -T{4}),  //
+                   C(-T{10}, T{5}, T{0}),   //
+                   C(-T{10}, T{8}, -T{2}),  //
+                   C(-T{10}, T{9}, -T{1}),  //
+                   C(-T{10}, T{10}, T{0}),  //
+
+                   // lhs positive, rhs negative
+                   C(T{10}, -T{1}, T{0}),   //
+                   C(T{10}, -T{2}, T{0}),   //
+                   C(T{10}, -T{3}, T{1}),   //
+                   C(T{10}, -T{4}, T{2}),   //
+                   C(T{10}, -T{5}, T{0}),   //
+                   C(T{10}, -T{6}, T{4}),   //
+                   C(T{10}, -T{5}, T{0}),   //
+                   C(T{10}, -T{8}, T{2}),   //
+                   C(T{10}, -T{9}, T{1}),   //
+                   C(T{10}, -T{10}, T{0}),  //
+
+                   // lhs negative, rhs negative
+                   C(-T{10}, -T{1}, T{0}),   //
+                   C(-T{10}, -T{2}, T{0}),   //
+                   C(-T{10}, -T{3}, -T{1}),  //
+                   C(-T{10}, -T{4}, -T{2}),  //
+                   C(-T{10}, -T{5}, T{0}),   //
+                   C(-T{10}, -T{6}, -T{4}),  //
+                   C(-T{10}, -T{5}, T{0}),   //
+                   C(-T{10}, -T{8}, -T{2}),  //
+                   C(-T{10}, -T{9}, -T{1}),  //
+                   C(-T{10}, -T{10}, T{0}),  //
+               });
+    }
+
+    // Float values
+    if constexpr (IsFloatingPoint<T>) {
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   C(T{10.5}, T{1}, T{0.5}),   //
+                   C(T{10.5}, T{2}, T{0.5}),   //
+                   C(T{10.5}, T{3}, T{1.5}),   //
+                   C(T{10.5}, T{4}, T{2.5}),   //
+                   C(T{10.5}, T{5}, T{0.5}),   //
+                   C(T{10.5}, T{6}, T{4.5}),   //
+                   C(T{10.5}, T{5}, T{0.5}),   //
+                   C(T{10.5}, T{8}, T{2.5}),   //
+                   C(T{10.5}, T{9}, T{1.5}),   //
+                   C(T{10.5}, T{10}, T{0.5}),  //
+
+                   // lhs negative, rhs positive
+                   C(-T{10.5}, T{1}, -T{0.5}),   //
+                   C(-T{10.5}, T{2}, -T{0.5}),   //
+                   C(-T{10.5}, T{3}, -T{1.5}),   //
+                   C(-T{10.5}, T{4}, -T{2.5}),   //
+                   C(-T{10.5}, T{5}, -T{0.5}),   //
+                   C(-T{10.5}, T{6}, -T{4.5}),   //
+                   C(-T{10.5}, T{5}, -T{0.5}),   //
+                   C(-T{10.5}, T{8}, -T{2.5}),   //
+                   C(-T{10.5}, T{9}, -T{1.5}),   //
+                   C(-T{10.5}, T{10}, -T{0.5}),  //
+
+                   // lhs positive, rhs negative
+                   C(T{10.5}, -T{1}, T{0.5}),   //
+                   C(T{10.5}, -T{2}, T{0.5}),   //
+                   C(T{10.5}, -T{3}, T{1.5}),   //
+                   C(T{10.5}, -T{4}, T{2.5}),   //
+                   C(T{10.5}, -T{5}, T{0.5}),   //
+                   C(T{10.5}, -T{6}, T{4.5}),   //
+                   C(T{10.5}, -T{5}, T{0.5}),   //
+                   C(T{10.5}, -T{8}, T{2.5}),   //
+                   C(T{10.5}, -T{9}, T{1.5}),   //
+                   C(T{10.5}, -T{10}, T{0.5}),  //
+
+                   // lhs negative, rhs negative
+                   C(-T{10.5}, -T{1}, -T{0.5}),   //
+                   C(-T{10.5}, -T{2}, -T{0.5}),   //
+                   C(-T{10.5}, -T{3}, -T{1.5}),   //
+                   C(-T{10.5}, -T{4}, -T{2.5}),   //
+                   C(-T{10.5}, -T{5}, -T{0.5}),   //
+                   C(-T{10.5}, -T{6}, -T{4.5}),   //
+                   C(-T{10.5}, -T{5}, -T{0.5}),   //
+                   C(-T{10.5}, -T{8}, -T{2.5}),   //
+                   C(-T{10.5}, -T{9}, -T{1.5}),   //
+                   C(-T{10.5}, -T{10}, -T{0.5}),  //
+               });
+    }
+
+    return r;
+}
+INSTANTIATE_TEST_SUITE_P(Mod,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kModulo),
+                             testing::ValuesIn(Concat(  //
+                                 OpModCases<AInt>(),
+                                 OpModCases<i32>(),
+                                 OpModCases<u32>(),
+                                 OpModCases<AFloat>(),
+                                 OpModCases<f32>(),
+                                 OpModCases<f16>()))));
+
 template <typename T, bool equals>
 std::vector<Case> OpEqualCases() {
     return {

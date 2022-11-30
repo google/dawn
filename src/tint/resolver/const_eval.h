@@ -283,6 +283,15 @@ class ConstEval {
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
+    /// Modulo operator '%'
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result OpModulo(const sem::Type* ty,
+                    utils::VectorRef<const sem::Constant*> args,
+                    const Source& source);
+
     /// Equality operator '=='
     /// @param ty the expression type
     /// @param args the input arguments
@@ -1040,6 +1049,14 @@ class ConstEval {
     template <typename NumberT>
     utils::Result<NumberT> Div(const Source& source, NumberT a, NumberT b);
 
+    /// Returns the (signed) remainder of the division of two Number<T>s
+    /// @param source the source location
+    /// @param a the lhs number
+    /// @param b the rhs number
+    /// @returns the result number on success, or logs an error and returns Failure
+    template <typename NumberT>
+    utils::Result<NumberT> Mod(const Source& source, NumberT a, NumberT b);
+
     /// Returns the dot product of (a1,a2) with (b1,b2)
     /// @param source the source location
     /// @param a1 component 1 of lhs vector
@@ -1215,6 +1232,13 @@ class ConstEval {
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
     auto DivFunc(const Source& source, const sem::Type* elem_ty);
+
+    /// Returns a callable that calls Mod, and creates a Constant with its result of type `elem_ty`
+    /// if successful, or returns Failure otherwise.
+    /// @param source the source location
+    /// @param elem_ty the element type of the Constant to create on success
+    /// @returns the callable function
+    auto ModFunc(const Source& source, const sem::Type* elem_ty);
 
     /// Returns a callable that calls Dot2, and creates a Constant with its result of type `elem_ty`
     /// if successful, or returns Failure otherwise.
