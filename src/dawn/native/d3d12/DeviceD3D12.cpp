@@ -847,10 +847,9 @@ void Device::DestroyImpl() {
         ::CloseHandle(mFenceEvent);
     }
 
-    // Release recycled resource heaps.
-    if (mResourceAllocatorManager != nullptr) {
-        mResourceAllocatorManager->DestroyPool();
-    }
+    // Release recycled resource heaps and all other objects waiting for deletion in the resource
+    // allocation manager.
+    mResourceAllocatorManager.reset();
 
     // We need to handle clearing up com object refs that were enqeued after TickImpl
     mUsedComObjectRefs.ClearUpTo(std::numeric_limits<ExecutionSerial>::max());

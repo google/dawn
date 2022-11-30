@@ -23,7 +23,9 @@ namespace dawn::native {
 PooledResourceMemoryAllocator::PooledResourceMemoryAllocator(ResourceHeapAllocator* heapAllocator)
     : mHeapAllocator(heapAllocator) {}
 
-PooledResourceMemoryAllocator::~PooledResourceMemoryAllocator() = default;
+PooledResourceMemoryAllocator::~PooledResourceMemoryAllocator() {
+    ASSERT(mPool.empty());
+}
 
 void PooledResourceMemoryAllocator::DestroyPool() {
     for (auto& resourceHeap : mPool) {

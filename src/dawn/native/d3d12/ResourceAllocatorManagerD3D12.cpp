@@ -330,6 +330,16 @@ ResourceAllocatorManager::ResourceAllocatorManager(Device* device) : mDevice(dev
     }
 }
 
+ResourceAllocatorManager::~ResourceAllocatorManager() {
+    // Ensure any remaining objects go through the same shutdown path as normal usage.
+    // Placed resources must be released before any heaps they reside in.
+    Tick(std::numeric_limits<ExecutionSerial>::max());
+    DestroyPool();
+
+    ASSERT(mAllocationsToDelete.Empty());
+    ASSERT(mHeapsToDelete.Empty());
+}
+
 ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
     D3D12_HEAP_TYPE heapType,
     const D3D12_RESOURCE_DESC& resourceDescriptor,
