@@ -17,7 +17,7 @@
 #include <string>
 #include <tuple>
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #include "src/tint/utils/bitcast.h"
 
@@ -2007,6 +2007,18 @@ TEST(TintVectorRefTest, Index) {
     static_assert(std::is_const_v<std::remove_reference_t<decltype(vec_ref[0])>>);
     EXPECT_EQ(vec_ref[0], "one");
     EXPECT_EQ(vec_ref[1], "two");
+}
+
+TEST(TintVectorRefTest, Sort) {
+    Vector vec{1, 5, 3, 4, 2};
+    vec.Sort();
+    EXPECT_THAT(vec, testing::ElementsAre(1, 2, 3, 4, 5));
+}
+
+TEST(TintVectorRefTest, SortPredicate) {
+    Vector vec{1, 5, 3, 4, 2};
+    vec.Sort([](int a, int b) { return b < a; });
+    EXPECT_THAT(vec, testing::ElementsAre(5, 4, 3, 2, 1));
 }
 
 TEST(TintVectorRefTest, ConstIndex) {

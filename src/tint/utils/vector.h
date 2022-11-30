@@ -423,6 +423,19 @@ class Vector {
         return val;
     }
 
+    /// Sort sorts the vector in-place using the predicate function @p pred
+    /// @param pred a function that has the signature `bool(const T& a, const T& b)` which returns
+    /// true if `a` is ordered before `b`.
+    template <typename PREDICATE>
+    void Sort(PREDICATE&& pred) {
+        std::sort(begin(), end(), std::forward<PREDICATE>(pred));
+    }
+
+    /// Sort sorts the vector in-place using `T::operator<()`
+    void Sort() {
+        Sort([](auto& a, auto& b) { return a < b; });
+    }
+
     /// @returns true if the vector is empty.
     bool IsEmpty() const { return impl_.slice.len == 0; }
 
