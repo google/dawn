@@ -687,6 +687,58 @@ INSTANTIATE_TEST_SUITE_P(CheckedDivTest_Float,
                                                   CheckedDivTest_FloatCases<f32>(),
                                                   CheckedDivTest_FloatCases<f16>())));
 
+using CheckedModTest_AInt = testing::TestWithParam<BinaryCheckedCase_AInt>;
+TEST_P(CheckedModTest_AInt, Test) {
+    auto expect = std::get<0>(GetParam());
+    auto a = std::get<1>(GetParam());
+    auto b = std::get<2>(GetParam());
+    EXPECT_TRUE(CheckedMod(a, b) == expect) << std::hex << "0x" << a << " - 0x" << b;
+}
+INSTANTIATE_TEST_SUITE_P(
+    CheckedModTest_AInt,
+    CheckedModTest_AInt,
+    testing::ValuesIn(std::vector<BinaryCheckedCase_AInt>{
+        {AInt(0), AInt(0), AInt(1)},
+        {AInt(0), AInt(1), AInt(1)},
+        {AInt(1), AInt(10), AInt(3)},
+        {AInt(2), AInt(10), AInt(4)},
+        {AInt(0), AInt::Highest(), AInt::Highest()},
+        {AInt(0), AInt::Lowest(), AInt::Lowest()},
+        {OVERFLOW, AInt::Highest(), AInt(0)},
+        {OVERFLOW, AInt::Lowest(), AInt(0)},
+        ////////////////////////////////////////////////////////////////////////
+    }));
+
+using CheckedModTest_Float = testing::TestWithParam<BinaryCheckedCase_Float>;
+TEST_P(CheckedModTest_Float, Test) {
+    auto& p = GetParam();
+    std::visit(
+        [&](auto&& lhs) {
+            using T = std::decay_t<decltype(lhs)>;
+            auto rhs = std::get<T>(std::get<2>(p));
+            auto expect = std::get<std::optional<T>>(std::get<0>(p));
+            EXPECT_TRUE(CheckedMod(lhs, rhs) == expect)
+                << std::hex << "0x" << lhs << " / 0x" << rhs;
+        },
+        std::get<1>(p));
+}
+template <typename T>
+std::vector<BinaryCheckedCase_Float> CheckedModTest_FloatCases() {
+    return {
+        {T(0.5), T(10.5), T(1)},          {T(0.5), T(10.5), T(2)},
+        {T(1.5), T(10.5), T(3)},          {T(2.5), T(10.5), T(4)},
+        {T(0.5), T(10.5), T(5)},          {T(0), T::Highest(), T::Highest()},
+        {T(0), T::Lowest(), T::Lowest()}, {Overflow<T>, T(123), T(0)},
+        {Overflow<T>, T(123), T(-0)},     {Overflow<T>, T(-123), T(0)},
+        {Overflow<T>, T(-123), T(-0)},
+    };
+}
+INSTANTIATE_TEST_SUITE_P(CheckedModTest_Float,
+                         CheckedModTest_Float,
+                         testing::ValuesIn(Concat(CheckedModTest_FloatCases<AFloat>(),
+                                                  CheckedModTest_FloatCases<f32>(),
+                                                  CheckedModTest_FloatCases<f16>())));
+
 using TernaryCheckedCase = std::tuple<std::optional<AInt>, AInt, AInt, AInt>;
 
 using CheckedMaddTest_AInt = testing::TestWithParam<TernaryCheckedCase>;

@@ -543,6 +543,38 @@ inline std::optional<FloatingPointT> CheckedDiv(FloatingPointT a, FloatingPointT
     return result;
 }
 
+namespace detail {
+/// @returns the remainder of e1 / e2
+template <typename T>
+inline T Mod(T e1, T e2) {
+    return e1 - e2 * static_cast<T>(std::trunc(e1 / e2));
+}
+}  // namespace detail
+
+/// @returns the remainder of a / b, or an empty optional if the resulting value overflowed the AInt
+inline std::optional<AInt> CheckedMod(AInt a, AInt b) {
+    if (b == 0) {
+        return {};
+    }
+
+    if (b == -1 && a == AInt::Lowest()) {
+        return {};
+    }
+
+    return AInt{detail::Mod(a.value, b.value)};
+}
+
+/// @returns the remainder of a / b, or an empty optional if the resulting value overflowed the
+/// float value
+template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
+inline std::optional<FloatingPointT> CheckedMod(FloatingPointT a, FloatingPointT b) {
+    auto result = FloatingPointT{detail::Mod(a.value, b.value)};
+    if (!std::isfinite(result.value)) {
+        return {};
+    }
+    return result;
+}
+
 /// @returns a * b + c, or an empty optional if the value overflowed the AInt
 inline std::optional<AInt> CheckedMadd(AInt a, AInt b, AInt c) {
     // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
