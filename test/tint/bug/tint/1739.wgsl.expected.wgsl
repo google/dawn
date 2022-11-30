@@ -16,6 +16,7 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
+  rotationMatrix : mat2x2<f32>,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;

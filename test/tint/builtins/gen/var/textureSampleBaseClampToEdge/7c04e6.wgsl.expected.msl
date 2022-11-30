@@ -33,6 +33,7 @@ struct ExternalTextureParams {
   /* 0x0040 */ GammaTransferParams gammaDecodeParams;
   /* 0x0060 */ GammaTransferParams gammaEncodeParams;
   /* 0x0080 */ float3x3 gamutConversionMatrix;
+  /* 0x00b0 */ float2x2 rotationMatrix;
 };
 
 float3 gammaCorrection(float3 v, GammaTransferParams params) {
@@ -43,12 +44,13 @@ float3 gammaCorrection(float3 v, GammaTransferParams params) {
 }
 
 float4 textureSampleExternal(texture2d<float, access::sample> plane0, texture2d<float, access::sample> plane1, sampler smp, float2 coord, ExternalTextureParams params) {
+  float2 const modifiedCoords = (((coord - 0.5f) * params.rotationMatrix) + 0.5f);
   float2 const plane0_dims = float2(uint2(plane0.get_width(0), plane0.get_height(0)));
   float2 const plane0_half_texel = (float2(0.5f) / plane0_dims);
-  float2 const plane0_clamped = clamp(coord, plane0_half_texel, (1.0f - plane0_half_texel));
+  float2 const plane0_clamped = clamp(modifiedCoords, plane0_half_texel, (1.0f - plane0_half_texel));
   float2 const plane1_dims = float2(uint2(plane1.get_width(0), plane1.get_height(0)));
   float2 const plane1_half_texel = (float2(0.5f) / plane1_dims);
-  float2 const plane1_clamped = clamp(coord, plane1_half_texel, (1.0f - plane1_half_texel));
+  float2 const plane1_clamped = clamp(modifiedCoords, plane1_half_texel, (1.0f - plane1_half_texel));
   float3 color = 0.0f;
   if ((params.numPlanes == 1u)) {
     color = float4(plane0.sample(smp, plane0_clamped, level(0.0f))).rgb;

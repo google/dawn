@@ -1366,6 +1366,16 @@
             }
         ]
     },
+    "external texture rotation":{
+        "category": "enum",
+        "tags": ["dawn"],
+        "values": [
+            {"value": 0, "name": "rotate 0 degrees"},
+            {"value": 1, "name": "rotate 90 degrees"},
+            {"value": 2, "name": "rotate 180 degrees"},
+            {"value": 3, "name": "rotate 270 degrees"}
+        ]
+    },
     "external texture descriptor": {
         "category": "structure",
         "extensible": "in",
@@ -1384,7 +1394,9 @@
             {"name": "dst transfer function parameters", "type": "float", "annotation": "const*",
                 "length": 7},
             {"name": "gamut conversion matrix", "type": "float", "annotation": "const*",
-                "length": 9}
+                "length": 9},
+            {"name": "flip y", "type": "bool", "default": "false"},
+            {"name": "rotation", "type": "external texture rotation", "default": "rotate 0 degrees"}
         ]
     },
     "feature name": {

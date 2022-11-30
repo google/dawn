@@ -209,6 +209,28 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
     const float* dstFn = descriptor->dstTransferFunctionParameters;
     std::copy(dstFn, dstFn + 7, params.gammaEncodingParams.begin());
 
+    float flipY = 1;
+    if (descriptor->flipY) {
+        flipY = -1;
+    }
+
+    // We can perform the flip-Y operation by multiplying the y-component portion of the matrix by
+    // -1.
+    switch (descriptor->rotation) {
+        case wgpu::ExternalTextureRotation::Rotate0Degrees:
+            params.coordTransformMatrix = {1.0, 0.0, 0.0, 1.0f * flipY};
+            break;
+        case wgpu::ExternalTextureRotation::Rotate90Degrees:
+            params.coordTransformMatrix = {0.0, 1.0f * flipY, -1.0, 0.0};
+            break;
+        case wgpu::ExternalTextureRotation::Rotate180Degrees:
+            params.coordTransformMatrix = {-1.0, 0.0, 0.0, -1.0f * flipY};
+            break;
+        case wgpu::ExternalTextureRotation::Rotate270Degrees:
+            params.coordTransformMatrix = {0.0, -1.0f * flipY, 1.0, 0.0};
+            break;
+    }
+
     DAWN_TRY(device->GetQueue()->WriteBuffer(mParamsBuffer.Get(), 0, &params,
                                              sizeof(ExternalTextureParams)));
 

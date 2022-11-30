@@ -258,10 +258,11 @@ struct MultiplanarExternalTexture::State {
         utils::Vector ext_tex_params_member_list{
             b.Member("numPlanes", b.ty.u32()),
             b.Member("doYuvToRgbConversionOnly", b.ty.u32()),
-            b.Member("yuvToRgbConversionMatrix", b.ty.mat3x4(b.ty.f32())),
+            b.Member("yuvToRgbConversionMatrix", b.ty.mat3x4<f32>()),
             b.Member("gammaDecodeParams", b.ty.type_name("GammaTransferParams")),
             b.Member("gammaEncodeParams", b.ty.type_name("GammaTransferParams")),
-            b.Member("gamutConversionMatrix", b.ty.mat3x3(b.ty.f32()))};
+            b.Member("gamutConversionMatrix", b.ty.mat3x3<f32>()),
+            b.Member("rotationMatrix", b.ty.mat2x2<f32>())};
 
         params_struct_sym = b.Symbols().New("ExternalTextureParams");
 
@@ -314,22 +315,27 @@ struct MultiplanarExternalTexture::State {
         const ast::CallExpression* plane_1_call = nullptr;
         switch (call_type) {
             case sem::BuiltinType::kTextureSampleBaseClampToEdge:
+                stmts.Push(b.Decl(b.Let("modifiedCoords",
+                                        b.Add(b.Mul(b.Sub("coord", f32(0.5)),
+                                                    b.MemberAccessor("params", "rotationMatrix")),
+                                              f32(0.5)))));
+
                 stmts.Push(b.Decl(b.Let(
                     "plane0_dims",
                     b.Construct(b.ty.vec2<f32>(), b.Call("textureDimensions", "plane0", 0_a)))));
                 stmts.Push(
                     b.Decl(b.Let("plane0_half_texel", b.Div(b.vec2<f32>(0.5_a), "plane0_dims"))));
-                stmts.Push(
-                    b.Decl(b.Let("plane0_clamped", b.Call("clamp", "coord", "plane0_half_texel",
-                                                          b.Sub(1_a, "plane0_half_texel")))));
+                stmts.Push(b.Decl(
+                    b.Let("plane0_clamped", b.Call("clamp", "modifiedCoords", "plane0_half_texel",
+                                                   b.Sub(1_a, "plane0_half_texel")))));
                 stmts.Push(b.Decl(b.Let(
                     "plane1_dims",
                     b.Construct(b.ty.vec2<f32>(), b.Call("textureDimensions", "plane1", 0_a)))));
                 stmts.Push(
                     b.Decl(b.Let("plane1_half_texel", b.Div(b.vec2<f32>(0.5_a), "plane1_dims"))));
-                stmts.Push(
-                    b.Decl(b.Let("plane1_clamped", b.Call("clamp", "coord", "plane1_half_texel",
-                                                          b.Sub(1_a, "plane1_half_texel")))));
+                stmts.Push(b.Decl(
+                    b.Let("plane1_clamped", b.Call("clamp", "modifiedCoords", "plane1_half_texel",
+                                                   b.Sub(1_a, "plane1_half_texel")))));
 
                 // textureSampleLevel(plane0, smp, plane0_clamped, 0.0);
                 single_plane_call =
