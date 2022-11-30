@@ -1045,17 +1045,13 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
             value : u32
         }
 
-        struct OutputBuffer {
-            value : vec3<u32>
-        }
-
         @group(0) @binding(2) var<uniform> buffer2 : Buffer;
         @group(0) @binding(3) var<storage, read> buffer3 : Buffer;
         @group(0) @binding(0) var<storage, read> buffer0 : Buffer;
-        @group(0) @binding(4) var<storage, read_write> outputBuffer : OutputBuffer;
+        @group(0) @binding(4) var<storage, read_write> outputBuffer : vec3<u32>;
 
         @compute @workgroup_size(1) fn main() {
-            outputBuffer.value = vec3<u32>(buffer0.value, buffer2.value, buffer3.value);
+            outputBuffer = vec3<u32>(buffer0.value, buffer2.value, buffer3.value);
         })");
     pipelineDescriptor.compute.entryPoint = "main";
     pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);

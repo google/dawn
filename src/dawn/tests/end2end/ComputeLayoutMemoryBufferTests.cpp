@@ -640,7 +640,7 @@ fn main() {
 
     MemoryDataBuilder expectedDataBuilder;  // The expected data to be copied by the shader
     expectedDataBuilder.AddSubBuilder(field.GetDataBuilder());
-    expectedDataBuilder.AlignTo(4);  // Storage buffer size must be a multiple of 4
+    expectedDataBuilder.AlignTo(std::max<size_t>(field.GetAlign(), 4u));
 
     // Expectation and input buffer have identical data bytes but different padding bytes.
     // Initializes the dst buffer with data bytes different from input and expectation, and padding

@@ -696,7 +696,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
         switch (info.bindingType) {
             case BindingInfoType::Buffer:
-                info.buffer.minBindingSize = resource.size_no_padding;
+                info.buffer.minBindingSize = resource.size;
                 DAWN_TRY_ASSIGN(info.buffer.type,
                                 TintResourceTypeToBufferBindingType(resource.resource_type));
                 break;

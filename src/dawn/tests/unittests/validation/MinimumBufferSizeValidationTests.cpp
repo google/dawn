@@ -571,7 +571,7 @@ TEST_F(MinBufferSizeDefaultLayoutTests, MultipleBindGroups) {
 TEST_F(MinBufferSizeDefaultLayoutTests, NonDefaultLayout) {
     CheckShaderBindingSizeReflection(
         {{{0, 0, "@size(256) a : u32, b : u32,", "u32", "a", 260},
-          {0, 1, "c : u32, @align(16) d : u32,", "u32", "c", 20},
+          {0, 1, "c : u32, @align(16) d : u32,", "u32", "c", 32},
           {0, 2, "d : array<array<u32, 10>, 3>,", "u32", "d[0][0]", 120},
           {0, 3, "e : array<array<u32, 10>>,", "u32", "e[0][0]", 40}}});
 }
@@ -592,4 +592,32 @@ TEST_F(MinBufferSizeDefaultLayoutTests, RenderPassConsidersBothStages) {
     wgpu::BindGroupLayout renderLayout = GetBGLFromRenderShaders(vertexShader, fragShader, 0);
 
     CheckLayoutBindingSizeValidation(renderLayout, {{0, 0, "", "", "", 8}, {0, 1, "", "", "", 16}});
+}
+
+// Make sure that buffers with non-struct vec3 types do not include padding in the min buffer size.
+TEST_F(MinBufferSizePipelineCreationTests, NonStructVec3) {
+    std::vector<BindingDescriptor> bindings = {{0, 0, "", "", "", 12}, {0, 1, "", "", "", 12}};
+
+    auto MakeShader = [](const char* stageAttributes) {
+        std::ostringstream ostream;
+        ostream << "@group(0) @binding(0) var<storage, read_write> buffer : vec3<u32>;\n";
+        ostream << stageAttributes << " fn main() { buffer = vec3(42, 0, 7); }\n";
+        return ostream.str();
+    };
+    std::string computeShader = MakeShader("@compute @workgroup_size(1)");
+    std::string fragShader = MakeShader("@fragment");
+    std::string vertexShader = CreateVertexShaderWithBindings({});
+
+    CheckSizeBounds({12}, [&](const std::vector<uint64_t>& sizes, bool expectation) {
+        wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
+                      wgpu::BufferBindingType::Storage, false, sizes[0]}});
+        if (expectation) {
+            CreateRenderPipeline({layout}, vertexShader, fragShader);
+            CreateComputePipeline({layout}, computeShader);
+        } else {
+            ASSERT_DEVICE_ERROR(CreateRenderPipeline({layout}, vertexShader, fragShader));
+            ASSERT_DEVICE_ERROR(CreateComputePipeline({layout}, computeShader));
+        }
+    });
 }

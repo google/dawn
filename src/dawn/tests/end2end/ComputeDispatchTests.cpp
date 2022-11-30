@@ -28,22 +28,18 @@ class ComputeDispatchTests : public DawnTest {
         // Write workgroup number into the output buffer if we saw the biggest dispatch
         // To make sure the dispatch was not called, write maximum u32 value for 0 dispatches
         wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-            struct OutputBuf {
-                workGroups : vec3<u32>
-            }
-
-            @group(0) @binding(0) var<storage, read_write> output : OutputBuf;
+            @group(0) @binding(0) var<storage, read_write> output : vec3<u32>;
 
             @compute @workgroup_size(1, 1, 1)
             fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>,
                     @builtin(num_workgroups) dispatch : vec3<u32>) {
                 if (dispatch.x == 0u || dispatch.y == 0u || dispatch.z == 0u) {
-                    output.workGroups = vec3<u32>(0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu);
+                    output = vec3<u32>(0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu);
                     return;
                 }
 
                 if (all(GlobalInvocationID == dispatch - vec3<u32>(1u, 1u, 1u))) {
-                    output.workGroups = dispatch;
+                    output = dispatch;
                 }
             })");
 
@@ -54,27 +50,20 @@ class ComputeDispatchTests : public DawnTest {
 
         // Test the use of the compute pipelines without using @num_workgroups
         wgpu::ShaderModule moduleWithoutNumWorkgroups = utils::CreateShaderModule(device, R"(
-            struct InputBuf {
-                expectedDispatch : vec3<u32>
-            }
-            struct OutputBuf {
-                workGroups : vec3<u32>
-            }
-
-            @group(0) @binding(0) var<uniform> input : InputBuf;
-            @group(0) @binding(1) var<storage, read_write> output : OutputBuf;
+            @group(0) @binding(0) var<uniform> input : vec3<u32>;
+            @group(0) @binding(1) var<storage, read_write> output : vec3<u32>;
 
             @compute @workgroup_size(1, 1, 1)
             fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
-                let dispatch : vec3<u32> = input.expectedDispatch;
+                let dispatch : vec3<u32> = input;
 
                 if (dispatch.x == 0u || dispatch.y == 0u || dispatch.z == 0u) {
-                    output.workGroups = vec3<u32>(0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu);
+                    output = vec3<u32>(0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu);
                     return;
                 }
 
                 if (all(GlobalInvocationID == dispatch - vec3<u32>(1u, 1u, 1u))) {
-                    output.workGroups = dispatch;
+                    output = dispatch;
                 }
             })");
         csDesc.compute.module = moduleWithoutNumWorkgroups;
