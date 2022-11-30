@@ -3,7 +3,8 @@ int4 tint_extract_bits(int4 v, uint offset, uint count) {
   const uint e = min(32u, (s + count));
   const uint shl = (32u - e);
   const uint shr = (shl + s);
-  return ((v << uint4((shl).xxxx)) >> uint4((shr).xxxx));
+  const int4 shl_result = ((shl < 32u) ? (v << uint4((shl).xxxx)) : (0).xxxx);
+  return ((shr < 32u) ? (shl_result >> uint4((shr).xxxx)) : ((shl_result >> (31u).xxxx) >> (1u).xxxx));
 }
 
 void extractBits_fb850f() {

@@ -3,7 +3,8 @@ int3 tint_extract_bits(int3 v, uint offset, uint count) {
   const uint e = min(32u, (s + count));
   const uint shl = (32u - e);
   const uint shr = (shl + s);
-  return ((v << uint3((shl).xxx)) >> uint3((shr).xxx));
+  const int3 shl_result = ((shl < 32u) ? (v << uint3((shl).xxx)) : (0).xxx);
+  return ((shr < 32u) ? (shl_result >> uint3((shr).xxx)) : ((shl_result >> (31u).xxx) >> (1u).xxx));
 }
 
 void f_1() {

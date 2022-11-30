@@ -1109,7 +1109,8 @@ fn tint_extract_bits(v : i32, offset : u32, count : u32) -> i32 {
   let e = min(32u, (s + count));
   let shl = (32u - e);
   let shr = (shl + s);
-  return ((v << shl) >> shr);
+  let shl_result = select(i32(), (v << shl), (shl < 32u));
+  return select(((shl_result >> 31u) >> 1u), (shl_result >> shr), (shr < 32u));
 }
 
 fn f() {
@@ -1137,7 +1138,8 @@ fn tint_extract_bits(v : u32, offset : u32, count : u32) -> u32 {
   let e = min(32u, (s + count));
   let shl = (32u - e);
   let shr = (shl + s);
-  return ((v << shl) >> shr);
+  let shl_result = select(u32(), (v << shl), (shl < 32u));
+  return select(((shl_result >> 31u) >> 1u), (shl_result >> shr), (shr < 32u));
 }
 
 fn f() {
@@ -1165,7 +1167,8 @@ fn tint_extract_bits(v : vec3<i32>, offset : u32, count : u32) -> vec3<i32> {
   let e = min(32u, (s + count));
   let shl = (32u - e);
   let shr = (shl + s);
-  return ((v << vec3<u32>(shl)) >> vec3<u32>(shr));
+  let shl_result = select(vec3<i32>(), (v << vec3<u32>(shl)), (shl < 32u));
+  return select(((shl_result >> vec3<u32>(31u)) >> vec3<u32>(1u)), (shl_result >> vec3<u32>(shr)), (shr < 32u));
 }
 
 fn f() {
@@ -1193,7 +1196,8 @@ fn tint_extract_bits(v : vec3<u32>, offset : u32, count : u32) -> vec3<u32> {
   let e = min(32u, (s + count));
   let shl = (32u - e);
   let shr = (shl + s);
-  return ((v << vec3<u32>(shl)) >> vec3<u32>(shr));
+  let shl_result = select(vec3<u32>(), (v << vec3<u32>(shl)), (shl < 32u));
+  return select(((shl_result >> vec3<u32>(31u)) >> vec3<u32>(1u)), (shl_result >> vec3<u32>(shr)), (shr < 32u));
 }
 
 fn f() {

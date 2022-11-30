@@ -301,8 +301,18 @@ struct BuiltinPolyfill::State {
             case Level::kFull:
                 body.Push(b.Decl(b.Let("shl", b.Sub(u32(W), "e"))));
                 body.Push(b.Decl(b.Let("shr", b.Add("shl", "s"))));
-                body.Push(
-                    b.Return(b.Shr(b.Shl("v", vecN_u32(b.Expr("shl"))), vecN_u32(b.Expr("shr")))));
+                // Here we don't want the shl and shr modulos the rhs, so handle the `rhs >= 32u`
+                // cases using `select`. In order to handle the signed shr `lhs >> rhs` corrently,
+                // use `(lhs >> 31u) >> 1u` if `rhs >= 32u`.
+                body.Push(b.Decl(b.Let("shl_result", b.Call("select", b.Construct(T(ty)),
+                                                            b.Shl("v", vecN_u32(b.Expr("shl"))),
+                                                            b.LessThan("shl", 32_u)))));
+                body.Push(b.Return(b.Call(
+                    "select",
+                    b.Shr(b.Shr("shl_result", vecN_u32(b.Expr(31_u))), vecN_u32(b.Expr(1_u))),
+                    b.Shr("shl_result", vecN_u32(b.Expr("shr"))), b.LessThan("shr", 32_u))
+
+                                       ));
                 break;
             case Level::kClampParameters:
                 body.Push(b.Return(b.Call("extractBits", "v", "s", b.Sub("e", "s"))));
