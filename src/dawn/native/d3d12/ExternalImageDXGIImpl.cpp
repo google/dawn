@@ -38,7 +38,9 @@ ExternalImageDXGIImpl::ExternalImageDXGIImpl(Device* backendDevice,
       mSize(textureDescriptor->size),
       mFormat(textureDescriptor->format),
       mMipLevelCount(textureDescriptor->mipLevelCount),
-      mSampleCount(textureDescriptor->sampleCount) {
+      mSampleCount(textureDescriptor->sampleCount),
+      mViewFormats(textureDescriptor->viewFormats,
+                   textureDescriptor->viewFormats + textureDescriptor->viewFormatCount) {
     ASSERT(mBackendDevice != nullptr);
     ASSERT(mD3D12Resource != nullptr);
     ASSERT(!textureDescriptor->nextInChain || textureDescriptor->nextInChain->sType ==
@@ -84,6 +86,8 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
     textureDescriptor.format = mFormat;
     textureDescriptor.mipLevelCount = mMipLevelCount;
     textureDescriptor.sampleCount = mSampleCount;
+    textureDescriptor.viewFormats = mViewFormats.data();
+    textureDescriptor.viewFormatCount = static_cast<uint32_t>(mViewFormats.size());
 
     DawnTextureInternalUsageDescriptor internalDesc = {};
     if (mUsageInternal != wgpu::TextureUsage::None) {

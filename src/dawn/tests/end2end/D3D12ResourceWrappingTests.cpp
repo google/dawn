@@ -1017,6 +1017,47 @@ TEST_P(D3D12SharedHandleUsageTests, CallWriteBufferBeforeDestroyingExternalImage
     EXPECT_BUFFER_U32_EQ(kExpected, buffer, 0);
 }
 
+// Test that texture descriptor view formats are passed to the backend for wrapped external
+// textures, and that contents may be reinterpreted as sRGB.
+TEST_P(D3D12SharedHandleUsageTests, SRGBReinterpretation) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    wgpu::Texture texture;
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage;
+
+    // The texture will be reinterpreted as sRGB.
+    wgpu::TextureViewDescriptor viewDesc = {};
+    viewDesc.format = wgpu::TextureFormat::RGBA8UnormSrgb;
+
+    wgpu::TextureDescriptor textureDesc = baseDawnDescriptor;
+    textureDesc.viewFormatCount = 1;
+    textureDesc.viewFormats = &viewDesc.format;
+    // Check that the base format is not sRGB.
+    ASSERT_EQ(textureDesc.format, wgpu::TextureFormat::RGBA8Unorm);
+
+    // Wrap a shared handle as a Dawn texture.
+    WrapSharedHandle(&textureDesc, &baseD3dDescriptor, &texture, &d3d11Texture, &externalImage);
+    ASSERT_NE(texture.Get(), nullptr);
+
+    // Submit a clear operation to sRGB value rgb(234, 51, 35).
+    {
+        utils::ComboRenderPassDescriptor renderPassDescriptor({texture.CreateView(&viewDesc)}, {});
+        renderPassDescriptor.cColorAttachments[0].clearValue = {234.0 / 255.0, 51.0 / 255.0,
+                                                                35.0 / 255.0, 1.0};
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.BeginRenderPass(&renderPassDescriptor).End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    // Expect the contents to be approximately rgb(246 124 104)
+    EXPECT_PIXEL_RGBA8_BETWEEN(            //
+        utils::RGBA8(245, 123, 103, 255),  //
+        utils::RGBA8(247, 125, 105, 255), texture, 0, 0);
+}
+
 DAWN_INSTANTIATE_TEST_P(D3D12SharedHandleValidation,
                         {D3D12Backend()},
                         {SyncMode::kKeyedMutex, SyncMode::kFence});

@@ -18,6 +18,7 @@
 #include <wrl/client.h>
 
 #include <memory>
+#include <vector>
 
 #include "dawn/common/LinkedList.h"
 #include "dawn/dawn_wsi.h"
@@ -71,6 +72,7 @@ class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
     wgpu::TextureFormat mFormat;
     uint32_t mMipLevelCount;
     uint32_t mSampleCount;
+    std::vector<wgpu::TextureFormat> mViewFormats;
 };
 
 }  // namespace dawn::native::d3d12
