@@ -31,6 +31,7 @@
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/traits.h"
 #include "src/tint/utils/vector.h"
 
 namespace tint::resolver {
@@ -793,6 +794,7 @@ constexpr bool IsValue = std::is_same_v<T, Value>;
 /// Creates a Value of DataType<T> from a scalar `v`
 template <typename T>
 Value Val(T v) {
+    static_assert(traits::IsTypeIn<T, Scalar>, "v must be a Number of bool");
     return Value::Create<T>(utils::Vector<Scalar, 1>{v});
 }
 

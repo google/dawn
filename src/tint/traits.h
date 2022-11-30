@@ -160,6 +160,22 @@ template <std::size_t OFFSET, std::size_t COUNT, typename TUPLE>
 using SliceTuple =
     std::remove_pointer_t<decltype(detail::SwizzlePtrTy<TUPLE>(Range<OFFSET, COUNT>()))>;
 
+namespace detail {
+/// Base template for IsTypeIn
+template <class T, class TypeList>
+struct IsTypeIn;
+
+/// Specialization for IsTypeIn
+template <class T, template <class...> class TypeContainer, class... Ts>
+struct IsTypeIn<T, TypeContainer<Ts...>> : std::disjunction<std::is_same<T, Ts>...> {};
+}  // namespace detail
+
+/// Evaluates to true if T is one of the types in the TypeContainer's template arguments.
+/// Works for std::variant, std::tuple, std::pair, or any class template where all parameters are
+/// types.
+template <typename T, typename TypeContainer>
+static constexpr bool IsTypeIn = detail::IsTypeIn<T, TypeContainer>::value;
+
 }  // namespace tint::traits
 
 #endif  // SRC_TINT_TRAITS_H_
