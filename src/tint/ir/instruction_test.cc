@@ -46,7 +46,7 @@ TEST_F(IR_InstructionTest, CreateAnd) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 & 2");
 }
 
@@ -74,7 +74,7 @@ TEST_F(IR_InstructionTest, CreateOr) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 | 2");
 }
 
@@ -102,7 +102,7 @@ TEST_F(IR_InstructionTest, CreateXor) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 ^ 2");
 }
 
@@ -131,7 +131,7 @@ TEST_F(IR_InstructionTest, CreateLogicalAnd) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 && 2");
 }
 
@@ -159,7 +159,7 @@ TEST_F(IR_InstructionTest, CreateLogicalOr) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 || 2");
 }
 
@@ -187,7 +187,7 @@ TEST_F(IR_InstructionTest, CreateEqual) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 == 2");
 }
 
@@ -215,7 +215,7 @@ TEST_F(IR_InstructionTest, CreateNotEqual) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 != 2");
 }
 
@@ -243,7 +243,7 @@ TEST_F(IR_InstructionTest, CreateLessThan) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 < 2");
 }
 
@@ -272,7 +272,7 @@ TEST_F(IR_InstructionTest, CreateGreaterThan) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 > 2");
 }
 
@@ -301,7 +301,7 @@ TEST_F(IR_InstructionTest, CreateLessThanEqual) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 <= 2");
 }
 
@@ -330,7 +330,7 @@ TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 >= 2");
 }
 
@@ -358,7 +358,7 @@ TEST_F(IR_InstructionTest, CreateShiftLeft) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 << 2");
 }
 
@@ -387,7 +387,7 @@ TEST_F(IR_InstructionTest, CreateShiftRight) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 >> 2");
 }
 
@@ -415,7 +415,7 @@ TEST_F(IR_InstructionTest, CreateAdd) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 + 2");
 }
 
@@ -443,7 +443,7 @@ TEST_F(IR_InstructionTest, CreateSubtract) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 - 2");
 }
 
@@ -471,7 +471,7 @@ TEST_F(IR_InstructionTest, CreateMultiply) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 * 2");
 }
 
@@ -499,7 +499,7 @@ TEST_F(IR_InstructionTest, CreateDivide) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 / 2");
 }
 
@@ -527,7 +527,7 @@ TEST_F(IR_InstructionTest, CreateModulo) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    str << *instr;
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 = 4 % 2");
 }
 

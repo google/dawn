@@ -33,12 +33,15 @@ class Value : public Castable<Value> {
     Value& operator=(const Value&) = delete;
     Value& operator=(Value&&) = delete;
 
+    /// Write the value to the given stream
+    /// @param out the stream to write to
+    /// @returns the stream
+    virtual std::ostream& ToString(std::ostream& out) const = 0;
+
   protected:
     /// Constructor
     Value();
 };
-
-std::ostream& operator<<(std::ostream& out, const Value& v);
 
 }  // namespace tint::ir
 

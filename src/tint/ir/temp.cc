@@ -24,8 +24,8 @@ Temp::Temp(Id id) : id_(id) {}
 
 Temp::~Temp() = default;
 
-std::ostream& operator<<(std::ostream& out, const Temp& r) {
-    out << "%" << std::to_string(r.AsId());
+std::ostream& Temp::ToString(std::ostream& out) const {
+    out << "%" << std::to_string(AsId());
     return out;
 }
 

@@ -25,17 +25,4 @@ Value::Value() = default;
 
 Value::~Value() = default;
 
-std::ostream& operator<<(std::ostream& out, const Value& v) {
-    const auto* ptr = &v;
-
-    if (auto* c = ptr->As<Constant>()) {
-        out << *c;
-    } else if (auto* t = ptr->As<Temp>()) {
-        out << *t;
-    } else {
-        out << "Unknown value";
-    }
-    return out;
-}
-
 }  // namespace tint::ir

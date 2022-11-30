@@ -100,14 +100,17 @@ class Constant : public Castable<Constant, Value> {
     /// @note, must only be called if `IsBool()` is true
     bool AsBool() const { return std::get<bool>(data_); }
 
+    /// Write the constant to the given stream
+    /// @param out the stream to write to
+    /// @returns the stream
+    std::ostream& ToString(std::ostream& out) const override;
+
   private:
     /// The type of data stored in this constant
     Kind kind_;
     /// The data stored in the constant
     std::variant<f32, f16, u32, i32, bool> data_;
 };
-
-std::ostream& operator<<(std::ostream& out, const Constant& r);
 
 }  // namespace tint::ir
 

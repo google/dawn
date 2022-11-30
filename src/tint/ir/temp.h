@@ -43,11 +43,14 @@ class Temp : public Castable<Temp, Value> {
     /// @returns the value data as an `Id`.
     Id AsId() const { return id_; }
 
+    /// Write the temp to the given stream
+    /// @param out the stream to write to
+    /// @returns the stream
+    std::ostream& ToString(std::ostream& out) const override;
+
   private:
     Id id_ = 0;
 };
-
-std::ostream& operator<<(std::ostream& out, const Temp& r);
 
 }  // namespace tint::ir
 

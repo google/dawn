@@ -101,14 +101,17 @@ class Instruction : public Castable<Instruction> {
         return args_[1];
     }
 
+    /// Write the instructino to the given stream
+    /// @param out the stream to write to
+    /// @returns the stream
+    std::ostream& ToString(std::ostream& out) const;
+
   private:
     Kind kind_;
 
     const Value* result_;
     utils::Vector<const Value*, 2> args_;
 };
-
-std::ostream& operator<<(std::ostream& out, const Instruction&);
 
 }  // namespace tint::ir
 

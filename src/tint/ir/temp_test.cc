@@ -33,7 +33,7 @@ TEST_F(IR_TempTest, id) {
     auto* val = b.builder.Temp();
     EXPECT_EQ(4u, val->AsId());
 
-    str << *val;
+    val->ToString(str);
     EXPECT_EQ("%4", str.str());
 }
 

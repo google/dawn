@@ -32,22 +32,22 @@ Constant::Constant(bool b) : kind_(Kind::kBool), data_(b) {}
 
 Constant::~Constant() = default;
 
-std::ostream& operator<<(std::ostream& out, const Constant& r) {
-    switch (r.GetKind()) {
+std::ostream& Constant::ToString(std::ostream& out) const {
+    switch (GetKind()) {
         case Constant::Kind::kF32:
-            out << std::to_string(r.AsF32().value);
+            out << std::to_string(AsF32().value);
             break;
         case Constant::Kind::kF16:
-            out << std::to_string(r.AsF16().value);
+            out << std::to_string(AsF16().value);
             break;
         case Constant::Kind::kI32:
-            out << std::to_string(r.AsI32().value);
+            out << std::to_string(AsI32().value);
             break;
         case Constant::Kind::kU32:
-            out << std::to_string(r.AsU32().value);
+            out << std::to_string(AsU32().value);
             break;
         case Constant::Kind::kBool:
-            out << (r.AsBool() ? "true" : "false");
+            out << (AsBool() ? "true" : "false");
             break;
     }
     return out;

@@ -33,14 +33,14 @@ Instruction& Instruction::operator=(const Instruction& instr) = default;
 
 Instruction& Instruction::operator=(Instruction&& instr) = default;
 
-std::ostream& operator<<(std::ostream& out, const Instruction& instr) {
-    out << *(instr.Result()) << " = ";
-    if (instr.HasLHS()) {
-        out << *(instr.LHS());
+std::ostream& Instruction::ToString(std::ostream& out) const {
+    Result()->ToString(out) << " = ";
+    if (HasLHS()) {
+        LHS()->ToString(out);
     }
     out << " ";
 
-    switch (instr.GetKind()) {
+    switch (GetKind()) {
         case Instruction::Kind::kAdd:
             out << "+";
             break;
@@ -97,8 +97,9 @@ std::ostream& operator<<(std::ostream& out, const Instruction& instr) {
             break;
     }
 
-    if (instr.HasRHS()) {
-        out << " " << *(instr.RHS());
+    if (HasRHS()) {
+        out << " ";
+        RHS()->ToString(out);
     }
 
     return out;
