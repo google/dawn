@@ -1,0 +1,68 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 41
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %u_block "u_block"
+               OpMemberName %u_block 0 "inner"
+               OpName %u "u"
+               OpName %p "p"
+               OpName %f "f"
+               OpDecorate %u_block Block
+               OpMemberDecorate %u_block 0 Offset 0
+               OpMemberDecorate %u_block 0 ColMajor
+               OpMemberDecorate %u_block 0 MatrixStride 16
+               OpDecorate %_arr_mat2v3float_uint_4 ArrayStride 32
+               OpDecorate %u NonWritable
+               OpDecorate %u DescriptorSet 0
+               OpDecorate %u Binding 0
+      %float = OpTypeFloat 32
+    %v3float = OpTypeVector %float 3
+%mat2v3float = OpTypeMatrix %v3float 2
+       %uint = OpTypeInt 32 0
+     %uint_4 = OpConstant %uint 4
+%_arr_mat2v3float_uint_4 = OpTypeArray %mat2v3float %uint_4
+    %u_block = OpTypeStruct %_arr_mat2v3float_uint_4
+%_ptr_Uniform_u_block = OpTypePointer Uniform %u_block
+          %u = OpVariable %_ptr_Uniform_u_block Uniform
+%_ptr_Private__arr_mat2v3float_uint_4 = OpTypePointer Private %_arr_mat2v3float_uint_4
+         %12 = OpConstantNull %_arr_mat2v3float_uint_4
+          %p = OpVariable %_ptr_Private__arr_mat2v3float_uint_4 Private %12
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform__arr_mat2v3float_uint_4 = OpTypePointer Uniform %_arr_mat2v3float_uint_4
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+%_ptr_Private_mat2v3float = OpTypePointer Private %mat2v3float
+      %int_2 = OpConstant %int 2
+%_ptr_Uniform_mat2v3float = OpTypePointer Uniform %mat2v3float
+         %29 = OpConstantNull %int
+%_ptr_Private_v3float = OpTypePointer Private %v3float
+%_ptr_Uniform_v3float = OpTypePointer Uniform %v3float
+%_ptr_Private_float = OpTypePointer Private %float
+%_ptr_Uniform_float = OpTypePointer Uniform %float
+          %f = OpFunction %void None %13
+         %16 = OpLabel
+         %19 = OpAccessChain %_ptr_Uniform__arr_mat2v3float_uint_4 %u %uint_0
+         %20 = OpLoad %_arr_mat2v3float_uint_4 %19
+               OpStore %p %20
+         %24 = OpAccessChain %_ptr_Private_mat2v3float %p %int_1
+         %27 = OpAccessChain %_ptr_Uniform_mat2v3float %u %uint_0 %int_2
+         %28 = OpLoad %mat2v3float %27
+               OpStore %24 %28
+         %31 = OpAccessChain %_ptr_Private_v3float %p %int_1 %29
+         %33 = OpAccessChain %_ptr_Uniform_v3float %u %uint_0 %29 %int_1
+         %34 = OpLoad %v3float %33
+         %35 = OpVectorShuffle %v3float %34 %34 2 0 1
+               OpStore %31 %35
+         %37 = OpAccessChain %_ptr_Private_float %p %int_1 %29 %uint_0
+         %39 = OpAccessChain %_ptr_Uniform_float %u %uint_0 %29 %int_1 %uint_0
+         %40 = OpLoad %float %39
+               OpStore %37 %40
+               OpReturn
+               OpFunctionEnd

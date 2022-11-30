@@ -1,0 +1,8 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void tint_symbol(device half4* tint_symbol_1 [[buffer(0)]], const device half4* tint_symbol_2 [[buffer(1)]]) {
+  *(tint_symbol_1) = *(tint_symbol_2);
+  return;
+}
+

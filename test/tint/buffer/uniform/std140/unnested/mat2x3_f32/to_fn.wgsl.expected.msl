@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void a(float2x3 m) {
+}
+
+void b(float3 v) {
+}
+
+void c(float f_1) {
+}
+
+kernel void f(const constant float2x3* tint_symbol [[buffer(0)]]) {
+  a(*(tint_symbol));
+  b((*(tint_symbol))[1]);
+  b(float3((*(tint_symbol))[1]).zxy);
+  c((*(tint_symbol))[1][0]);
+  c(float3((*(tint_symbol))[1]).zxy[0]);
+  return;
+}
+

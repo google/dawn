@@ -1,0 +1,10 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void f(const constant half4x3* tint_symbol [[buffer(0)]]) {
+  half3x4 const t = transpose(*(tint_symbol));
+  half const l = length((*(tint_symbol))[1]);
+  half const a = fabs(half3((*(tint_symbol))[0]).zxy[0]);
+  return;
+}
+

@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
+struct Inner {
+  /* 0x0000 */ half scalar_f16;
+  /* 0x0002 */ tint_array<int8_t, 6> tint_pad;
+  /* 0x0008 */ packed_half3 vec3_f16;
+  /* 0x000e */ tint_array<int8_t, 2> tint_pad_1;
+  /* 0x0010 */ half2x4 mat2x4_f16;
+};
+
+struct S {
+  /* 0x0000 */ Inner inner;
+};
+
+kernel void tint_symbol(const constant S* tint_symbol_1 [[buffer(0)]]) {
+  S const x = *(tint_symbol_1);
+  return;
+}
+

@@ -1,0 +1,81 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 48
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %u_block "u_block"
+               OpMemberName %u_block 0 "inner"
+               OpName %u "u"
+               OpName %a "a"
+               OpName %m "m"
+               OpName %b "b"
+               OpName %v "v"
+               OpName %c "c"
+               OpName %f_1 "f_1"
+               OpName %f "f"
+               OpDecorate %u_block Block
+               OpMemberDecorate %u_block 0 Offset 0
+               OpMemberDecorate %u_block 0 ColMajor
+               OpMemberDecorate %u_block 0 MatrixStride 16
+               OpDecorate %u NonWritable
+               OpDecorate %u DescriptorSet 0
+               OpDecorate %u Binding 0
+      %float = OpTypeFloat 32
+    %v3float = OpTypeVector %float 3
+%mat4v3float = OpTypeMatrix %v3float 4
+    %u_block = OpTypeStruct %mat4v3float
+%_ptr_Uniform_u_block = OpTypePointer Uniform %u_block
+          %u = OpVariable %_ptr_Uniform_u_block Uniform
+       %void = OpTypeVoid
+          %7 = OpTypeFunction %void %mat4v3float
+         %12 = OpTypeFunction %void %v3float
+         %16 = OpTypeFunction %void %float
+         %20 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform_mat4v3float = OpTypePointer Uniform %mat4v3float
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+%_ptr_Uniform_v3float = OpTypePointer Uniform %v3float
+%_ptr_Uniform_float = OpTypePointer Uniform %float
+          %a = OpFunction %void None %7
+          %m = OpFunctionParameter %mat4v3float
+         %11 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %b = OpFunction %void None %12
+          %v = OpFunctionParameter %v3float
+         %15 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %c = OpFunction %void None %16
+        %f_1 = OpFunctionParameter %float
+         %19 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %20
+         %22 = OpLabel
+         %27 = OpAccessChain %_ptr_Uniform_mat4v3float %u %uint_0
+         %28 = OpLoad %mat4v3float %27
+         %23 = OpFunctionCall %void %a %28
+         %33 = OpAccessChain %_ptr_Uniform_v3float %u %uint_0 %int_1
+         %34 = OpLoad %v3float %33
+         %29 = OpFunctionCall %void %b %34
+         %36 = OpAccessChain %_ptr_Uniform_v3float %u %uint_0 %int_1
+         %37 = OpLoad %v3float %36
+         %38 = OpVectorShuffle %v3float %37 %37 2 0 1
+         %35 = OpFunctionCall %void %b %38
+         %41 = OpAccessChain %_ptr_Uniform_float %u %uint_0 %int_1 %uint_0
+         %42 = OpLoad %float %41
+         %39 = OpFunctionCall %void %c %42
+         %44 = OpAccessChain %_ptr_Uniform_v3float %u %uint_0 %int_1
+         %45 = OpLoad %v3float %44
+         %46 = OpVectorShuffle %v3float %45 %45 2 0 1
+         %47 = OpCompositeExtract %float %46 0
+         %43 = OpFunctionCall %void %c %47
+               OpReturn
+               OpFunctionEnd

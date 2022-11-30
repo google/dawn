@@ -1,0 +1,24 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_5 {
+  float4x3 w;
+};
+
+void f_inner(uint local_invocation_index, threadgroup float4x3* const tint_symbol, const constant float4x3* const tint_symbol_1) {
+  {
+    *(tint_symbol) = float4x3(float3(0.0f), float3(0.0f), float3(0.0f), float3(0.0f));
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  *(tint_symbol) = *(tint_symbol_1);
+  (*(tint_symbol))[1] = (*(tint_symbol_1))[0];
+  (*(tint_symbol))[1] = float3((*(tint_symbol_1))[0]).zxy;
+  (*(tint_symbol))[0][1] = (*(tint_symbol_1))[1][0];
+}
+
+kernel void f(const constant float4x3* tint_symbol_4 [[buffer(0)]], threadgroup tint_symbol_5* tint_symbol_3 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup float4x3* const tint_symbol_2 = &((*(tint_symbol_3)).w);
+  f_inner(local_invocation_index, tint_symbol_2, tint_symbol_4);
+  return;
+}
+

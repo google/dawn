@@ -1,37 +1,75 @@
 #version 310 es
 
 struct Inner {
-  ivec3 a;
-  int b;
-  uvec3 c;
-  uint d;
-  vec3 e;
-  float f;
-  ivec2 g;
-  ivec2 h;
-  mat2x3 i;
-  mat3x2 j;
+  float scalar_f32;
+  int scalar_i32;
+  uint scalar_u32;
   uint pad;
+  vec2 vec2_f32;
+  ivec2 vec2_i32;
+  uvec2 vec2_u32;
   uint pad_1;
-  ivec4 k[4];
+  uint pad_2;
+  vec3 vec3_f32;
+  uint pad_3;
+  ivec3 vec3_i32;
+  uint pad_4;
+  uvec3 vec3_u32;
+  uint pad_5;
+  vec4 vec4_f32;
+  ivec4 vec4_i32;
+  uvec4 vec4_u32;
+  mat2 mat2x2_f32;
+  mat2x3 mat2x3_f32;
+  mat2x4 mat2x4_f32;
+  mat3x2 mat3x2_f32;
+  uint pad_6;
+  uint pad_7;
+  mat3 mat3x3_f32;
+  mat3x4 mat3x4_f32;
+  mat4x2 mat4x2_f32;
+  mat4x3 mat4x3_f32;
+  mat4 mat4x4_f32;
+  vec3 arr2_vec3_f32[2];
 };
 
 struct Inner_std140 {
-  ivec3 a;
-  int b;
-  uvec3 c;
-  uint d;
-  vec3 e;
-  float f;
-  ivec2 g;
-  ivec2 h;
-  mat2x3 i;
-  vec2 j_0;
-  vec2 j_1;
-  vec2 j_2;
+  float scalar_f32;
+  int scalar_i32;
+  uint scalar_u32;
   uint pad;
+  vec2 vec2_f32;
+  ivec2 vec2_i32;
+  uvec2 vec2_u32;
   uint pad_1;
-  ivec4 k[4];
+  uint pad_2;
+  vec3 vec3_f32;
+  uint pad_3;
+  ivec3 vec3_i32;
+  uint pad_4;
+  uvec3 vec3_u32;
+  uint pad_5;
+  vec4 vec4_f32;
+  ivec4 vec4_i32;
+  uvec4 vec4_u32;
+  vec2 mat2x2_f32_0;
+  vec2 mat2x2_f32_1;
+  mat2x3 mat2x3_f32;
+  mat2x4 mat2x4_f32;
+  vec2 mat3x2_f32_0;
+  vec2 mat3x2_f32_1;
+  vec2 mat3x2_f32_2;
+  uint pad_6;
+  uint pad_7;
+  mat3 mat3x3_f32;
+  mat3x4 mat3x4_f32;
+  vec2 mat4x2_f32_0;
+  vec2 mat4x2_f32_1;
+  vec2 mat4x2_f32_2;
+  vec2 mat4x2_f32_3;
+  mat4x3 mat4x3_f32;
+  mat4 mat4x4_f32;
+  vec3 arr2_vec3_f32[2];
 };
 
 struct S {
@@ -42,27 +80,48 @@ struct S_std140 {
   Inner_std140 arr[8];
 };
 
-layout(binding = 0, std140) uniform s_block_std140_ubo {
+layout(binding = 0, std140) uniform ub_block_std140_ubo {
   S_std140 inner;
-} s;
+} ub;
 
-mat3x2 load_s_inner_arr_p0_j(uint p0) {
+mat2 load_ub_inner_arr_p0_mat2x2_f32(uint p0) {
   uint s_save = p0;
-  return mat3x2(s.inner.arr[s_save].j_0, s.inner.arr[s_save].j_1, s.inner.arr[s_save].j_2);
+  return mat2(ub.inner.arr[s_save].mat2x2_f32_0, ub.inner.arr[s_save].mat2x2_f32_1);
+}
+
+mat3x2 load_ub_inner_arr_p0_mat3x2_f32(uint p0) {
+  uint s_save_1 = p0;
+  return mat3x2(ub.inner.arr[s_save_1].mat3x2_f32_0, ub.inner.arr[s_save_1].mat3x2_f32_1, ub.inner.arr[s_save_1].mat3x2_f32_2);
+}
+
+mat4x2 load_ub_inner_arr_p0_mat4x2_f32(uint p0) {
+  uint s_save_2 = p0;
+  return mat4x2(ub.inner.arr[s_save_2].mat4x2_f32_0, ub.inner.arr[s_save_2].mat4x2_f32_1, ub.inner.arr[s_save_2].mat4x2_f32_2, ub.inner.arr[s_save_2].mat4x2_f32_3);
 }
 
 void tint_symbol(uint idx) {
-  ivec3 a = s.inner.arr[idx].a;
-  int b = s.inner.arr[idx].b;
-  uvec3 c = s.inner.arr[idx].c;
-  uint d = s.inner.arr[idx].d;
-  vec3 e = s.inner.arr[idx].e;
-  float f = s.inner.arr[idx].f;
-  ivec2 g = s.inner.arr[idx].g;
-  ivec2 h = s.inner.arr[idx].h;
-  mat2x3 i = s.inner.arr[idx].i;
-  mat3x2 j = load_s_inner_arr_p0_j(uint(idx));
-  ivec4 k[4] = s.inner.arr[idx].k;
+  float scalar_f32 = ub.inner.arr[idx].scalar_f32;
+  int scalar_i32 = ub.inner.arr[idx].scalar_i32;
+  uint scalar_u32 = ub.inner.arr[idx].scalar_u32;
+  vec2 vec2_f32 = ub.inner.arr[idx].vec2_f32;
+  ivec2 vec2_i32 = ub.inner.arr[idx].vec2_i32;
+  uvec2 vec2_u32 = ub.inner.arr[idx].vec2_u32;
+  vec3 vec3_f32 = ub.inner.arr[idx].vec3_f32;
+  ivec3 vec3_i32 = ub.inner.arr[idx].vec3_i32;
+  uvec3 vec3_u32 = ub.inner.arr[idx].vec3_u32;
+  vec4 vec4_f32 = ub.inner.arr[idx].vec4_f32;
+  ivec4 vec4_i32 = ub.inner.arr[idx].vec4_i32;
+  uvec4 vec4_u32 = ub.inner.arr[idx].vec4_u32;
+  mat2 mat2x2_f32 = load_ub_inner_arr_p0_mat2x2_f32(uint(idx));
+  mat2x3 mat2x3_f32 = ub.inner.arr[idx].mat2x3_f32;
+  mat2x4 mat2x4_f32 = ub.inner.arr[idx].mat2x4_f32;
+  mat3x2 mat3x2_f32 = load_ub_inner_arr_p0_mat3x2_f32(uint(idx));
+  mat3 mat3x3_f32 = ub.inner.arr[idx].mat3x3_f32;
+  mat3x4 mat3x4_f32 = ub.inner.arr[idx].mat3x4_f32;
+  mat4x2 mat4x2_f32 = load_ub_inner_arr_p0_mat4x2_f32(uint(idx));
+  mat4x3 mat4x3_f32 = ub.inner.arr[idx].mat4x3_f32;
+  mat4 mat4x4_f32 = ub.inner.arr[idx].mat4x4_f32;
+  vec3 arr2_vec3_f32[2] = ub.inner.arr[idx].arr2_vec3_f32;
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

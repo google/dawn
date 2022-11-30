@@ -1,0 +1,8 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void tint_symbol(const constant half3x4* tint_symbol_1 [[buffer(0)]]) {
+  half3x4 const x = *(tint_symbol_1);
+  return;
+}
+

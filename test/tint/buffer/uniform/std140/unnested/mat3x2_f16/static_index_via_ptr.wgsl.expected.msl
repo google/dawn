@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int i() {
+  thread int tint_symbol = 0;
+  tint_symbol = as_type<int>((as_type<uint>(tint_symbol) + as_type<uint>(1)));
+  return tint_symbol;
+}
+
+kernel void f(const constant half3x2* tint_symbol_1 [[buffer(0)]]) {
+  half3x2 const l_m = *(tint_symbol_1);
+  half2 const l_m_1 = (*(tint_symbol_1))[1];
+  return;
+}
+

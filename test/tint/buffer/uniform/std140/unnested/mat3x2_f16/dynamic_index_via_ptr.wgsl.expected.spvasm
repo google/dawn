@@ -1,0 +1,102 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 61
+; Schema: 0
+               OpCapability Shader
+               OpCapability Float16
+               OpCapability UniformAndStorageBuffer16BitAccess
+               OpCapability StorageBuffer16BitAccess
+               OpCapability StorageInputOutput16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %m_block_std140 "m_block_std140"
+               OpMemberName %m_block_std140 0 "inner_0"
+               OpMemberName %m_block_std140 1 "inner_1"
+               OpMemberName %m_block_std140 2 "inner_2"
+               OpName %m "m"
+               OpName %counter "counter"
+               OpName %i "i"
+               OpName %load_m_inner "load_m_inner"
+               OpName %load_m_inner_p0 "load_m_inner_p0"
+               OpName %p0 "p0"
+               OpName %f "f"
+               OpDecorate %m_block_std140 Block
+               OpMemberDecorate %m_block_std140 0 Offset 0
+               OpMemberDecorate %m_block_std140 1 Offset 4
+               OpMemberDecorate %m_block_std140 2 Offset 8
+               OpDecorate %m NonWritable
+               OpDecorate %m DescriptorSet 0
+               OpDecorate %m Binding 0
+       %half = OpTypeFloat 16
+     %v2half = OpTypeVector %half 2
+%m_block_std140 = OpTypeStruct %v2half %v2half %v2half
+%_ptr_Uniform_m_block_std140 = OpTypePointer Uniform %m_block_std140
+          %m = OpVariable %_ptr_Uniform_m_block_std140 Uniform
+        %int = OpTypeInt 32 1
+          %7 = OpConstantNull %int
+%_ptr_Private_int = OpTypePointer Private %int
+    %counter = OpVariable %_ptr_Private_int Private %7
+         %10 = OpTypeFunction %int
+      %int_1 = OpConstant %int 1
+ %mat3v2half = OpTypeMatrix %v2half 3
+         %17 = OpTypeFunction %mat3v2half
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform_v2half = OpTypePointer Uniform %v2half
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+         %37 = OpTypeFunction %v2half %uint
+         %52 = OpConstantNull %v2half
+       %void = OpTypeVoid
+         %53 = OpTypeFunction %void
+          %i = OpFunction %int None %10
+         %12 = OpLabel
+         %13 = OpLoad %int %counter
+         %15 = OpIAdd %int %13 %int_1
+               OpStore %counter %15
+         %16 = OpLoad %int %counter
+               OpReturnValue %16
+               OpFunctionEnd
+%load_m_inner = OpFunction %mat3v2half None %17
+         %20 = OpLabel
+         %26 = OpAccessChain %_ptr_Uniform_v2half %m %uint_0
+         %27 = OpLoad %v2half %26
+         %30 = OpAccessChain %_ptr_Uniform_v2half %m %uint_1
+         %31 = OpLoad %v2half %30
+         %34 = OpAccessChain %_ptr_Uniform_v2half %m %uint_2
+         %35 = OpLoad %v2half %34
+         %36 = OpCompositeConstruct %mat3v2half %27 %31 %35
+               OpReturnValue %36
+               OpFunctionEnd
+%load_m_inner_p0 = OpFunction %v2half None %37
+         %p0 = OpFunctionParameter %uint
+         %40 = OpLabel
+               OpSelectionMerge %41 None
+               OpSwitch %p0 %42 0 %43 1 %44 2 %45
+         %43 = OpLabel
+         %46 = OpAccessChain %_ptr_Uniform_v2half %m %uint_0
+         %47 = OpLoad %v2half %46
+               OpReturnValue %47
+         %44 = OpLabel
+         %48 = OpAccessChain %_ptr_Uniform_v2half %m %uint_1
+         %49 = OpLoad %v2half %48
+               OpReturnValue %49
+         %45 = OpLabel
+         %50 = OpAccessChain %_ptr_Uniform_v2half %m %uint_2
+         %51 = OpLoad %v2half %50
+               OpReturnValue %51
+         %42 = OpLabel
+               OpReturnValue %52
+         %41 = OpLabel
+               OpReturnValue %52
+               OpFunctionEnd
+          %f = OpFunction %void None %53
+         %56 = OpLabel
+         %57 = OpFunctionCall %int %i
+         %58 = OpFunctionCall %mat3v2half %load_m_inner
+         %60 = OpBitcast %uint %57
+         %59 = OpFunctionCall %v2half %load_m_inner_p0 %60
+               OpReturn
+               OpFunctionEnd

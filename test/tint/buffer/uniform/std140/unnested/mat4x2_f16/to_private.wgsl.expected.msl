@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void f(const constant half4x2* tint_symbol_1 [[buffer(0)]]) {
+  thread half4x2 tint_symbol = half4x2(0.0h);
+  tint_symbol = *(tint_symbol_1);
+  tint_symbol[1] = (*(tint_symbol_1))[0];
+  tint_symbol[1] = half2((*(tint_symbol_1))[0]).yx;
+  tint_symbol[0][1] = (*(tint_symbol_1))[1][0];
+  return;
+}
+

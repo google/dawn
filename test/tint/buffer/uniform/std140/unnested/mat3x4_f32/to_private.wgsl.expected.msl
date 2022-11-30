@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void f(const constant float3x4* tint_symbol_1 [[buffer(0)]]) {
+  thread float3x4 tint_symbol = float3x4(0.0f);
+  tint_symbol = *(tint_symbol_1);
+  tint_symbol[1] = (*(tint_symbol_1))[0];
+  tint_symbol[1] = float4((*(tint_symbol_1))[0]).ywxz;
+  tint_symbol[0][1] = (*(tint_symbol_1))[1][0];
+  return;
+}
+

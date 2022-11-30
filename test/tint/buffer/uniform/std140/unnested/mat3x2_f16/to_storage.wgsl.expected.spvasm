@@ -1,0 +1,92 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 53
+; Schema: 0
+               OpCapability Shader
+               OpCapability Float16
+               OpCapability UniformAndStorageBuffer16BitAccess
+               OpCapability StorageBuffer16BitAccess
+               OpCapability StorageInputOutput16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %u_block_std140 "u_block_std140"
+               OpMemberName %u_block_std140 0 "inner_0"
+               OpMemberName %u_block_std140 1 "inner_1"
+               OpMemberName %u_block_std140 2 "inner_2"
+               OpName %u "u"
+               OpName %u_block "u_block"
+               OpMemberName %u_block 0 "inner"
+               OpName %s "s"
+               OpName %load_u_inner "load_u_inner"
+               OpName %f "f"
+               OpDecorate %u_block_std140 Block
+               OpMemberDecorate %u_block_std140 0 Offset 0
+               OpMemberDecorate %u_block_std140 1 Offset 4
+               OpMemberDecorate %u_block_std140 2 Offset 8
+               OpDecorate %u NonWritable
+               OpDecorate %u DescriptorSet 0
+               OpDecorate %u Binding 0
+               OpDecorate %u_block Block
+               OpMemberDecorate %u_block 0 Offset 0
+               OpMemberDecorate %u_block 0 ColMajor
+               OpMemberDecorate %u_block 0 MatrixStride 4
+               OpDecorate %s DescriptorSet 0
+               OpDecorate %s Binding 1
+       %half = OpTypeFloat 16
+     %v2half = OpTypeVector %half 2
+%u_block_std140 = OpTypeStruct %v2half %v2half %v2half
+%_ptr_Uniform_u_block_std140 = OpTypePointer Uniform %u_block_std140
+          %u = OpVariable %_ptr_Uniform_u_block_std140 Uniform
+ %mat3v2half = OpTypeMatrix %v2half 3
+    %u_block = OpTypeStruct %mat3v2half
+%_ptr_StorageBuffer_u_block = OpTypePointer StorageBuffer %u_block
+          %s = OpVariable %_ptr_StorageBuffer_u_block StorageBuffer
+         %10 = OpTypeFunction %mat3v2half
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform_v2half = OpTypePointer Uniform %v2half
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+       %void = OpTypeVoid
+         %29 = OpTypeFunction %void
+%_ptr_StorageBuffer_mat3v2half = OpTypePointer StorageBuffer %mat3v2half
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+%_ptr_StorageBuffer_v2half = OpTypePointer StorageBuffer %v2half
+         %46 = OpConstantNull %int
+%_ptr_StorageBuffer_half = OpTypePointer StorageBuffer %half
+         %49 = OpConstantNull %uint
+%_ptr_Uniform_half = OpTypePointer Uniform %half
+%load_u_inner = OpFunction %mat3v2half None %10
+         %12 = OpLabel
+         %18 = OpAccessChain %_ptr_Uniform_v2half %u %uint_0
+         %19 = OpLoad %v2half %18
+         %22 = OpAccessChain %_ptr_Uniform_v2half %u %uint_1
+         %23 = OpLoad %v2half %22
+         %26 = OpAccessChain %_ptr_Uniform_v2half %u %uint_2
+         %27 = OpLoad %v2half %26
+         %28 = OpCompositeConstruct %mat3v2half %19 %23 %27
+               OpReturnValue %28
+               OpFunctionEnd
+          %f = OpFunction %void None %29
+         %32 = OpLabel
+         %34 = OpAccessChain %_ptr_StorageBuffer_mat3v2half %s %uint_0
+         %35 = OpFunctionCall %mat3v2half %load_u_inner
+               OpStore %34 %35
+         %39 = OpAccessChain %_ptr_StorageBuffer_v2half %s %uint_0 %int_1
+         %40 = OpAccessChain %_ptr_Uniform_v2half %u %uint_0
+         %41 = OpLoad %v2half %40
+               OpStore %39 %41
+         %42 = OpAccessChain %_ptr_StorageBuffer_v2half %s %uint_0 %int_1
+         %43 = OpAccessChain %_ptr_Uniform_v2half %u %uint_0
+         %44 = OpLoad %v2half %43
+         %45 = OpVectorShuffle %v2half %44 %44 1 0
+               OpStore %42 %45
+         %48 = OpAccessChain %_ptr_StorageBuffer_half %s %uint_0 %46 %int_1
+         %51 = OpAccessChain %_ptr_Uniform_half %u %uint_1 %49
+         %52 = OpLoad %half %51
+               OpStore %48 %52
+               OpReturn
+               OpFunctionEnd

@@ -1,0 +1,10 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void f(const constant float3x4* tint_symbol [[buffer(0)]]) {
+  float4x3 const t = transpose(*(tint_symbol));
+  float const l = length((*(tint_symbol))[1]);
+  float const a = fabs(float4((*(tint_symbol))[0]).ywxz[0]);
+  return;
+}
+

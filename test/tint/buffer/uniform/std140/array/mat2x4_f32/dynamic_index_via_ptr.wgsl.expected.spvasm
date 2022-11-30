@@ -1,0 +1,64 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 37
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %a_block "a_block"
+               OpMemberName %a_block 0 "inner"
+               OpName %a "a"
+               OpName %counter "counter"
+               OpName %i "i"
+               OpName %f "f"
+               OpDecorate %a_block Block
+               OpMemberDecorate %a_block 0 Offset 0
+               OpMemberDecorate %a_block 0 ColMajor
+               OpMemberDecorate %a_block 0 MatrixStride 16
+               OpDecorate %_arr_mat2v4float_uint_4 ArrayStride 32
+               OpDecorate %a NonWritable
+               OpDecorate %a DescriptorSet 0
+               OpDecorate %a Binding 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%mat2v4float = OpTypeMatrix %v4float 2
+       %uint = OpTypeInt 32 0
+     %uint_4 = OpConstant %uint 4
+%_arr_mat2v4float_uint_4 = OpTypeArray %mat2v4float %uint_4
+    %a_block = OpTypeStruct %_arr_mat2v4float_uint_4
+%_ptr_Uniform_a_block = OpTypePointer Uniform %a_block
+          %a = OpVariable %_ptr_Uniform_a_block Uniform
+        %int = OpTypeInt 32 1
+         %11 = OpConstantNull %int
+%_ptr_Private_int = OpTypePointer Private %int
+    %counter = OpVariable %_ptr_Private_int Private %11
+         %14 = OpTypeFunction %int
+      %int_1 = OpConstant %int 1
+       %void = OpTypeVoid
+         %21 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform__arr_mat2v4float_uint_4 = OpTypePointer Uniform %_arr_mat2v4float_uint_4
+%_ptr_Uniform_mat2v4float = OpTypePointer Uniform %mat2v4float
+%_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
+          %i = OpFunction %int None %14
+         %16 = OpLabel
+         %17 = OpLoad %int %counter
+         %19 = OpIAdd %int %17 %int_1
+               OpStore %counter %19
+         %20 = OpLoad %int %counter
+               OpReturnValue %20
+               OpFunctionEnd
+          %f = OpFunction %void None %21
+         %24 = OpLabel
+         %25 = OpFunctionCall %int %i
+         %26 = OpFunctionCall %int %i
+         %29 = OpAccessChain %_ptr_Uniform__arr_mat2v4float_uint_4 %a %uint_0
+         %30 = OpLoad %_arr_mat2v4float_uint_4 %29
+         %32 = OpAccessChain %_ptr_Uniform_mat2v4float %a %uint_0 %25
+         %33 = OpLoad %mat2v4float %32
+         %35 = OpAccessChain %_ptr_Uniform_v4float %a %uint_0 %25 %26
+         %36 = OpLoad %v4float %35
+               OpReturn
+               OpFunctionEnd

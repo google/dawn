@@ -1,0 +1,56 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 21
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %in_block "in_block"
+               OpMemberName %in_block 0 "inner"
+               OpName %S "S"
+               OpMemberName %S 0 "inner"
+               OpName %Inner "Inner"
+               OpMemberName %Inner 0 "scalar_f32"
+               OpMemberName %Inner 1 "vec3_f32"
+               OpMemberName %Inner 2 "mat2x4_f32"
+               OpName %in "in"
+               OpName %out "out"
+               OpName %main "main"
+               OpDecorate %in_block Block
+               OpMemberDecorate %in_block 0 Offset 0
+               OpMemberDecorate %S 0 Offset 0
+               OpMemberDecorate %Inner 0 Offset 0
+               OpMemberDecorate %Inner 1 Offset 16
+               OpMemberDecorate %Inner 2 Offset 32
+               OpMemberDecorate %Inner 2 ColMajor
+               OpMemberDecorate %Inner 2 MatrixStride 16
+               OpDecorate %in NonWritable
+               OpDecorate %in DescriptorSet 0
+               OpDecorate %in Binding 0
+               OpDecorate %out DescriptorSet 0
+               OpDecorate %out Binding 1
+      %float = OpTypeFloat 32
+    %v3float = OpTypeVector %float 3
+    %v4float = OpTypeVector %float 4
+%mat2v4float = OpTypeMatrix %v4float 2
+      %Inner = OpTypeStruct %float %v3float %mat2v4float
+          %S = OpTypeStruct %Inner
+   %in_block = OpTypeStruct %S
+%_ptr_StorageBuffer_in_block = OpTypePointer StorageBuffer %in_block
+         %in = OpVariable %_ptr_StorageBuffer_in_block StorageBuffer
+        %out = OpVariable %_ptr_StorageBuffer_in_block StorageBuffer
+       %void = OpTypeVoid
+         %11 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S
+       %main = OpFunction %void None %11
+         %14 = OpLabel
+         %18 = OpAccessChain %_ptr_StorageBuffer_S %in %uint_0
+         %19 = OpLoad %S %18
+         %20 = OpAccessChain %_ptr_StorageBuffer_S %out %uint_0
+               OpStore %20 %19
+               OpReturn
+               OpFunctionEnd
