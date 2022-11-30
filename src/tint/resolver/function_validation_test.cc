@@ -1041,21 +1041,26 @@ TEST_F(ResolverFunctionValidationTest, ParameterMatrixNoType) {
     EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
 }
 
+enum class Expectation {
+    kAlwaysPass,
+    kPassWithFullPtrParameterExtension,
+    kAlwaysFail,
+};
 struct TestParams {
     ast::AddressSpace address_space;
-    bool should_pass;
+    Expectation expectation;
 };
 
 struct TestWithParams : ResolverTestWithParam<TestParams> {};
 
 using ResolverFunctionParameterValidationTest = TestWithParams;
-TEST_P(ResolverFunctionParameterValidationTest, AddressSpace) {
+TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceNoExtension) {
     auto& param = GetParam();
     auto* ptr_type = ty.pointer(Source{{12, 34}}, ty.i32(), param.address_space);
     auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
     Func("f", utils::Vector{arg}, ty.void_(), utils::Empty);
 
-    if (param.should_pass) {
+    if (param.expectation == Expectation::kAlwaysPass) {
         ASSERT_TRUE(r()->Resolve()) << r()->error();
     } else {
         std::stringstream ss;
@@ -1065,17 +1070,36 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpace) {
                                     ss.str() + "' address space");
     }
 }
-INSTANTIATE_TEST_SUITE_P(ResolverTest,
-                         ResolverFunctionParameterValidationTest,
-                         testing::Values(TestParams{ast::AddressSpace::kNone, false},
-                                         TestParams{ast::AddressSpace::kIn, false},
-                                         TestParams{ast::AddressSpace::kOut, false},
-                                         TestParams{ast::AddressSpace::kUniform, false},
-                                         TestParams{ast::AddressSpace::kWorkgroup, false},
-                                         TestParams{ast::AddressSpace::kHandle, false},
-                                         TestParams{ast::AddressSpace::kStorage, false},
-                                         TestParams{ast::AddressSpace::kPrivate, true},
-                                         TestParams{ast::AddressSpace::kFunction, true}));
+TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithExtension) {
+    auto& param = GetParam();
+    auto* ptr_type = ty.pointer(Source{{12, 34}}, ty.i32(), param.address_space);
+    auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
+    Enable(ast::Extension::kChromiumExperimentalFullPtrParameters);
+    Func("f", utils::Vector{arg}, ty.void_(), utils::Empty);
+
+    if (param.expectation != Expectation::kAlwaysFail) {
+        ASSERT_TRUE(r()->Resolve()) << r()->error();
+    } else {
+        std::stringstream ss;
+        ss << param.address_space;
+        EXPECT_FALSE(r()->Resolve());
+        EXPECT_EQ(r()->error(), "12:34 error: function parameter of pointer type cannot be in '" +
+                                    ss.str() + "' address space");
+    }
+}
+INSTANTIATE_TEST_SUITE_P(
+    ResolverTest,
+    ResolverFunctionParameterValidationTest,
+    testing::Values(
+        TestParams{ast::AddressSpace::kNone, Expectation::kAlwaysFail},
+        TestParams{ast::AddressSpace::kIn, Expectation::kAlwaysFail},
+        TestParams{ast::AddressSpace::kOut, Expectation::kAlwaysFail},
+        TestParams{ast::AddressSpace::kUniform, Expectation::kPassWithFullPtrParameterExtension},
+        TestParams{ast::AddressSpace::kWorkgroup, Expectation::kPassWithFullPtrParameterExtension},
+        TestParams{ast::AddressSpace::kHandle, Expectation::kAlwaysFail},
+        TestParams{ast::AddressSpace::kStorage, Expectation::kPassWithFullPtrParameterExtension},
+        TestParams{ast::AddressSpace::kPrivate, Expectation::kAlwaysPass},
+        TestParams{ast::AddressSpace::kFunction, Expectation::kAlwaysPass}));
 
 }  // namespace
 }  // namespace tint::resolver

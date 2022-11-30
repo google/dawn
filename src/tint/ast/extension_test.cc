@@ -44,6 +44,8 @@ inline std::ostream& operator<<(std::ostream& out, Case c) {
 static constexpr Case kValidCases[] = {
     {"chromium_disable_uniformity_analysis", Extension::kChromiumDisableUniformityAnalysis},
     {"chromium_experimental_dp4a", Extension::kChromiumExperimentalDp4A},
+    {"chromium_experimental_full_ptr_parameters",
+     Extension::kChromiumExperimentalFullPtrParameters},
     {"chromium_experimental_push_constant", Extension::kChromiumExperimentalPushConstant},
     {"f16", Extension::kF16},
 };
@@ -55,12 +57,15 @@ static constexpr Case kInvalidCases[] = {
     {"chro1ium_experimental_dp4a", Extension::kUndefined},
     {"chrJmium_experiqqetal_dp4a", Extension::kUndefined},
     {"chromium_experimenll77l_dp4a", Extension::kUndefined},
-    {"cppromium_experiHHenal_qqush_constant", Extension::kUndefined},
-    {"chromium_xpericental_sh_vonstant", Extension::kUndefined},
-    {"chromium_experimental_Gsh_cbnstant", Extension::kUndefined},
-    {"f1vi", Extension::kUndefined},
-    {"f8WW", Extension::kUndefined},
-    {"fxx", Extension::kUndefined},
+    {"chroium_experimental_full_ptr_paqqppmetHHrs", Extension::kUndefined},
+    {"chrium_evperiental_full_ptr_paraceters", Extension::kUndefined},
+    {"chromium_expGimental_fullbptr_parameters", Extension::kUndefined},
+    {"chvomium_experimental_push_constiint", Extension::kUndefined},
+    {"chromiu8WWexperimental_push_constant", Extension::kUndefined},
+    {"chromium_experiMental_push_costanxx", Extension::kUndefined},
+    {"fgg", Extension::kUndefined},
+    {"X", Extension::kUndefined},
+    {"316", Extension::kUndefined},
 };
 
 using ExtensionParseTest = testing::TestWithParam<Case>;

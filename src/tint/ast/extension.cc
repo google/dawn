@@ -34,6 +34,9 @@ Extension ParseExtension(std::string_view str) {
     if (str == "chromium_experimental_dp4a") {
         return Extension::kChromiumExperimentalDp4A;
     }
+    if (str == "chromium_experimental_full_ptr_parameters") {
+        return Extension::kChromiumExperimentalFullPtrParameters;
+    }
     if (str == "chromium_experimental_push_constant") {
         return Extension::kChromiumExperimentalPushConstant;
     }
@@ -51,6 +54,8 @@ std::ostream& operator<<(std::ostream& out, Extension value) {
             return out << "chromium_disable_uniformity_analysis";
         case Extension::kChromiumExperimentalDp4A:
             return out << "chromium_experimental_dp4a";
+        case Extension::kChromiumExperimentalFullPtrParameters:
+            return out << "chromium_experimental_full_ptr_parameters";
         case Extension::kChromiumExperimentalPushConstant:
             return out << "chromium_experimental_push_constant";
         case Extension::kF16:

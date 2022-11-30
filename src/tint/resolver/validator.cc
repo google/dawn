@@ -800,15 +800,31 @@ bool Validator::Parameter(const ast::Function* func, const sem::Variable* var) c
     }
 
     if (auto* ref = var->Type()->As<sem::Pointer>()) {
-        auto address_space = ref->AddressSpace();
-        if (!(address_space == ast::AddressSpace::kFunction ||
-              address_space == ast::AddressSpace::kPrivate) &&
-            IsValidationEnabled(decl->attributes, ast::DisabledValidation::kIgnoreAddressSpace)) {
-            std::stringstream ss;
-            ss << "function parameter of pointer type cannot be in '" << address_space
-               << "' address space";
-            AddError(ss.str(), decl->source);
-            return false;
+        if (IsValidationEnabled(decl->attributes, ast::DisabledValidation::kIgnoreAddressSpace)) {
+            bool ok = false;
+
+            auto sc = ref->AddressSpace();
+            switch (sc) {
+                case ast::AddressSpace::kFunction:
+                case ast::AddressSpace::kPrivate:
+                    ok = true;
+                    break;
+                case ast::AddressSpace::kStorage:
+                case ast::AddressSpace::kUniform:
+                case ast::AddressSpace::kWorkgroup:
+                    ok = enabled_extensions_.Contains(
+                        ast::Extension::kChromiumExperimentalFullPtrParameters);
+                    break;
+                default:
+                    break;
+            }
+            if (!ok) {
+                std::stringstream ss;
+                ss << "function parameter of pointer type cannot be in '" << sc
+                   << "' address space";
+                AddError(ss.str(), decl->source);
+                return false;
+            }
         }
     }
 
@@ -1654,7 +1670,8 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
             return false;
         }
 
-        if (param_type->Is<sem::Pointer>()) {
+        if (param_type->Is<sem::Pointer>() &&
+            !enabled_extensions_.Contains(ast::Extension::kChromiumExperimentalFullPtrParameters)) {
             // https://gpuweb.github.io/gpuweb/wgsl/#function-restriction
             // Each argument of pointer type to a user-defined function must have the same memory
             // view as its root identifier.

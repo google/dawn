@@ -35,6 +35,7 @@ enum class Extension {
     kUndefined,
     kChromiumDisableUniformityAnalysis,
     kChromiumExperimentalDp4A,
+    kChromiumExperimentalFullPtrParameters,
     kChromiumExperimentalPushConstant,
     kF16,
 };
@@ -52,6 +53,7 @@ Extension ParseExtension(std::string_view str);
 constexpr const char* kExtensionStrings[] = {
     "chromium_disable_uniformity_analysis",
     "chromium_experimental_dp4a",
+    "chromium_experimental_full_ptr_parameters",
     "chromium_experimental_push_constant",
     "f16",
 };
