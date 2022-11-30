@@ -97,82 +97,80 @@ Temp::Id Builder::AllocateTempId() {
     return next_temp_id++;
 }
 
-const Instruction* Builder::CreateInstruction(Instruction::Kind kind,
-                                              const Value* lhs,
-                                              const Value* rhs) {
-    return ir.instructions.Create<ir::Instruction>(kind, Temp(), lhs, rhs);
+const Binary* Builder::CreateBinary(Binary::Kind kind, const Value* lhs, const Value* rhs) {
+    return ir.instructions.Create<ir::Binary>(kind, Temp(), lhs, rhs);
 }
 
-const Instruction* Builder::And(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kAnd, lhs, rhs);
+const Binary* Builder::And(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kAnd, lhs, rhs);
 }
 
-const Instruction* Builder::Or(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kOr, lhs, rhs);
+const Binary* Builder::Or(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kOr, lhs, rhs);
 }
 
-const Instruction* Builder::Xor(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kXor, lhs, rhs);
+const Binary* Builder::Xor(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kXor, lhs, rhs);
 }
 
-const Instruction* Builder::LogicalAnd(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kLogicalAnd, lhs, rhs);
+const Binary* Builder::LogicalAnd(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kLogicalAnd, lhs, rhs);
 }
 
-const Instruction* Builder::LogicalOr(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kLogicalOr, lhs, rhs);
+const Binary* Builder::LogicalOr(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kLogicalOr, lhs, rhs);
 }
 
-const Instruction* Builder::Equal(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kEqual, lhs, rhs);
+const Binary* Builder::Equal(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kEqual, lhs, rhs);
 }
 
-const Instruction* Builder::NotEqual(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kNotEqual, lhs, rhs);
+const Binary* Builder::NotEqual(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kNotEqual, lhs, rhs);
 }
 
-const Instruction* Builder::LessThan(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kLessThan, lhs, rhs);
+const Binary* Builder::LessThan(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kLessThan, lhs, rhs);
 }
 
-const Instruction* Builder::GreaterThan(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kGreaterThan, lhs, rhs);
+const Binary* Builder::GreaterThan(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kGreaterThan, lhs, rhs);
 }
 
-const Instruction* Builder::LessThanEqual(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kLessThanEqual, lhs, rhs);
+const Binary* Builder::LessThanEqual(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kLessThanEqual, lhs, rhs);
 }
 
-const Instruction* Builder::GreaterThanEqual(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kGreaterThanEqual, lhs, rhs);
+const Binary* Builder::GreaterThanEqual(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kGreaterThanEqual, lhs, rhs);
 }
 
-const Instruction* Builder::ShiftLeft(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kShiftLeft, lhs, rhs);
+const Binary* Builder::ShiftLeft(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kShiftLeft, lhs, rhs);
 }
 
-const Instruction* Builder::ShiftRight(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kShiftRight, lhs, rhs);
+const Binary* Builder::ShiftRight(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kShiftRight, lhs, rhs);
 }
 
-const Instruction* Builder::Add(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kAdd, lhs, rhs);
+const Binary* Builder::Add(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kAdd, lhs, rhs);
 }
 
-const Instruction* Builder::Subtract(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kSubtract, lhs, rhs);
+const Binary* Builder::Subtract(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kSubtract, lhs, rhs);
 }
 
-const Instruction* Builder::Multiply(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kMultiply, lhs, rhs);
+const Binary* Builder::Multiply(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kMultiply, lhs, rhs);
 }
 
-const Instruction* Builder::Divide(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kDivide, lhs, rhs);
+const Binary* Builder::Divide(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kDivide, lhs, rhs);
 }
 
-const Instruction* Builder::Modulo(const Value* lhs, const Value* rhs) {
-    return CreateInstruction(Instruction::Kind::kModulo, lhs, rhs);
+const Binary* Builder::Modulo(const Value* lhs, const Value* rhs) {
+    return CreateBinary(Binary::Kind::kModulo, lhs, rhs);
 }
 
 }  // namespace tint::ir

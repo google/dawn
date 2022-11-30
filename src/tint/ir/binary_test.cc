@@ -20,15 +20,15 @@
 namespace tint::ir {
 namespace {
 
-using IR_BinaryTest = TestHelper;
+using IR_InstructionTest = TestHelper;
 
-TEST_F(IR_BinaryTest, CreateAnd) {
+TEST_F(IR_InstructionTest, CreateAnd) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr = b.builder.And(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kAnd);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kAnd);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -48,13 +48,13 @@ TEST_F(IR_BinaryTest, CreateAnd) {
     EXPECT_EQ(str.str(), "%42 = 4 & 2");
 }
 
-TEST_F(IR_BinaryTest, CreateOr) {
+TEST_F(IR_InstructionTest, CreateOr) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr = b.builder.Or(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kOr);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kOr);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -74,13 +74,13 @@ TEST_F(IR_BinaryTest, CreateOr) {
     EXPECT_EQ(str.str(), "%42 = 4 | 2");
 }
 
-TEST_F(IR_BinaryTest, CreateXor) {
+TEST_F(IR_InstructionTest, CreateXor) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr = b.builder.Xor(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kXor);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kXor);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -100,14 +100,14 @@ TEST_F(IR_BinaryTest, CreateXor) {
     EXPECT_EQ(str.str(), "%42 = 4 ^ 2");
 }
 
-TEST_F(IR_BinaryTest, CreateLogicalAnd) {
+TEST_F(IR_InstructionTest, CreateLogicalAnd) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr =
         b.builder.LogicalAnd(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kLogicalAnd);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kLogicalAnd);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -127,13 +127,13 @@ TEST_F(IR_BinaryTest, CreateLogicalAnd) {
     EXPECT_EQ(str.str(), "%42 = 4 && 2");
 }
 
-TEST_F(IR_BinaryTest, CreateLogicalOr) {
+TEST_F(IR_InstructionTest, CreateLogicalOr) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr = b.builder.LogicalOr(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kLogicalOr);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kLogicalOr);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -153,13 +153,13 @@ TEST_F(IR_BinaryTest, CreateLogicalOr) {
     EXPECT_EQ(str.str(), "%42 = 4 || 2");
 }
 
-TEST_F(IR_BinaryTest, CreateEqual) {
+TEST_F(IR_InstructionTest, CreateEqual) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr = b.builder.Equal(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kEqual);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kEqual);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -179,13 +179,13 @@ TEST_F(IR_BinaryTest, CreateEqual) {
     EXPECT_EQ(str.str(), "%42 = 4 == 2");
 }
 
-TEST_F(IR_BinaryTest, CreateNotEqual) {
+TEST_F(IR_InstructionTest, CreateNotEqual) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr = b.builder.NotEqual(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kNotEqual);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kNotEqual);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -205,13 +205,13 @@ TEST_F(IR_BinaryTest, CreateNotEqual) {
     EXPECT_EQ(str.str(), "%42 = 4 != 2");
 }
 
-TEST_F(IR_BinaryTest, CreateLessThan) {
+TEST_F(IR_InstructionTest, CreateLessThan) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr = b.builder.LessThan(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kLessThan);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kLessThan);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -231,14 +231,14 @@ TEST_F(IR_BinaryTest, CreateLessThan) {
     EXPECT_EQ(str.str(), "%42 = 4 < 2");
 }
 
-TEST_F(IR_BinaryTest, CreateGreaterThan) {
+TEST_F(IR_InstructionTest, CreateGreaterThan) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr =
         b.builder.GreaterThan(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kGreaterThan);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kGreaterThan);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -258,14 +258,14 @@ TEST_F(IR_BinaryTest, CreateGreaterThan) {
     EXPECT_EQ(str.str(), "%42 = 4 > 2");
 }
 
-TEST_F(IR_BinaryTest, CreateLessThanEqual) {
+TEST_F(IR_InstructionTest, CreateLessThanEqual) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr =
         b.builder.LessThanEqual(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kLessThanEqual);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kLessThanEqual);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -285,14 +285,14 @@ TEST_F(IR_BinaryTest, CreateLessThanEqual) {
     EXPECT_EQ(str.str(), "%42 = 4 <= 2");
 }
 
-TEST_F(IR_BinaryTest, CreateGreaterThanEqual) {
+TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr =
         b.builder.GreaterThanEqual(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kGreaterThanEqual);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kGreaterThanEqual);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -312,13 +312,13 @@ TEST_F(IR_BinaryTest, CreateGreaterThanEqual) {
     EXPECT_EQ(str.str(), "%42 = 4 >= 2");
 }
 
-TEST_F(IR_BinaryTest, CreateShiftLeft) {
+TEST_F(IR_InstructionTest, CreateShiftLeft) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr = b.builder.ShiftLeft(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kShiftLeft);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kShiftLeft);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -338,14 +338,14 @@ TEST_F(IR_BinaryTest, CreateShiftLeft) {
     EXPECT_EQ(str.str(), "%42 = 4 << 2");
 }
 
-TEST_F(IR_BinaryTest, CreateShiftRight) {
+TEST_F(IR_InstructionTest, CreateShiftRight) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr =
         b.builder.ShiftRight(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kShiftRight);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kShiftRight);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -365,13 +365,13 @@ TEST_F(IR_BinaryTest, CreateShiftRight) {
     EXPECT_EQ(str.str(), "%42 = 4 >> 2");
 }
 
-TEST_F(IR_BinaryTest, CreateAdd) {
+TEST_F(IR_InstructionTest, CreateAdd) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr = b.builder.Add(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kAdd);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kAdd);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -391,13 +391,13 @@ TEST_F(IR_BinaryTest, CreateAdd) {
     EXPECT_EQ(str.str(), "%42 = 4 + 2");
 }
 
-TEST_F(IR_BinaryTest, CreateSubtract) {
+TEST_F(IR_InstructionTest, CreateSubtract) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr = b.builder.Subtract(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kSubtract);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kSubtract);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -417,13 +417,13 @@ TEST_F(IR_BinaryTest, CreateSubtract) {
     EXPECT_EQ(str.str(), "%42 = 4 - 2");
 }
 
-TEST_F(IR_BinaryTest, CreateMultiply) {
+TEST_F(IR_InstructionTest, CreateMultiply) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr = b.builder.Multiply(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kMultiply);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kMultiply);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -443,13 +443,13 @@ TEST_F(IR_BinaryTest, CreateMultiply) {
     EXPECT_EQ(str.str(), "%42 = 4 * 2");
 }
 
-TEST_F(IR_BinaryTest, CreateDivide) {
+TEST_F(IR_InstructionTest, CreateDivide) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr = b.builder.Divide(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kDivide);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kDivide);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
@@ -469,13 +469,13 @@ TEST_F(IR_BinaryTest, CreateDivide) {
     EXPECT_EQ(str.str(), "%42 = 4 / 2");
 }
 
-TEST_F(IR_BinaryTest, CreateModulo) {
+TEST_F(IR_InstructionTest, CreateModulo) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
     const auto* instr = b.builder.Modulo(b.builder.Constant(i32(4)), b.builder.Constant(i32(2)));
 
-    EXPECT_EQ(instr->GetKind(), Instruction::Kind::kModulo);
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kModulo);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());

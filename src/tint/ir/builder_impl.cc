@@ -562,7 +562,7 @@ utils::Result<const Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression*
         return utils::Failure;
     }
 
-    const Instruction* instr = nullptr;
+    const Binary* instr = nullptr;
     switch (expr->op) {
         case ast::BinaryOp::kAnd:
             instr = builder.And(lhs.Get(), rhs.Get());

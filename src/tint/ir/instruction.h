@@ -18,99 +18,28 @@
 #include <ostream>
 
 #include "src/tint/castable.h"
-#include "src/tint/debug.h"
-#include "src/tint/ir/value.h"
-#include "src/tint/utils/vector.h"
 
 namespace tint::ir {
 
 /// An instruction in the IR.
 class Instruction : public Castable<Instruction> {
   public:
-    /// The kind of instruction.
-    enum class Kind {
-        kAdd,
-        kSubtract,
-        kMultiply,
-        kDivide,
-        kModulo,
-
-        kAnd,
-        kOr,
-        kXor,
-
-        kLogicalAnd,
-        kLogicalOr,
-
-        kEqual,
-        kNotEqual,
-        kLessThan,
-        kGreaterThan,
-        kLessThanEqual,
-        kGreaterThanEqual,
-
-        kShiftLeft,
-        kShiftRight
-    };
-
-    /// Constructor
-    Instruction();
-    /// Constructor
-    /// @param kind the kind of instruction
-    /// @param result the result value
-    /// @param lhs the lhs of the instruction
-    /// @param rhs the rhs of the instruction
-    Instruction(Kind kind, const Value* result, const Value* lhs, const Value* rhs);
-    /// Copy constructor
-    /// @param instr the instruction to copy from
-    Instruction(const Instruction& instr);
-    /// Move constructor
-    /// @param instr the instruction to move from
-    Instruction(Instruction&& instr);
+    Instruction(const Instruction& instr) = delete;
+    Instruction(Instruction&& instr) = delete;
     /// Destructor
     ~Instruction() override;
 
-    /// Copy assign
-    /// @param instr the instruction to copy from
-    /// @returns a reference to this
-    Instruction& operator=(const Instruction& instr);
-    /// Move assign
-    /// @param instr the instruction to move from
-    /// @returns a reference to this
-    Instruction& operator=(Instruction&& instr);
+    Instruction& operator=(const Instruction& instr) = delete;
+    Instruction& operator=(Instruction&& instr) = delete;
 
-    /// @returns the kind of instruction
-    Kind GetKind() const { return kind_; }
-
-    /// @returns the result value for the instruction
-    const Value* Result() const { return result_; }
-
-    /// @returns true if the instruction has a LHS
-    bool HasLHS() const { return args_.Length() >= 1; }
-    /// @returns the left-hand-side value for the instruction
-    const Value* LHS() const {
-        TINT_ASSERT(IR, HasLHS());
-        return args_[0];
-    }
-
-    /// @returns true if the instruction has a RHS
-    bool HasRHS() const { return args_.Length() >= 2; }
-    /// @returns the right-hand-side value for the instruction
-    const Value* RHS() const {
-        TINT_ASSERT(IR, HasRHS());
-        return args_[1];
-    }
-
-    /// Write the instructino to the given stream
+    /// Write the instruction to the given stream
     /// @param out the stream to write to
     /// @returns the stream
-    std::ostream& ToString(std::ostream& out) const;
+    virtual std::ostream& ToString(std::ostream& out) const = 0;
 
-  private:
-    Kind kind_;
-
-    const Value* result_;
-    utils::Vector<const Value*, 2> args_;
+  protected:
+    /// Constructor
+    Instruction();
 };
 
 }  // namespace tint::ir
