@@ -231,7 +231,7 @@ class Parameter final : public Castable<Parameter, Variable> {
         return static_cast<const ast::Parameter*>(Variable::Declaration());
     }
 
-    /// @return the index of the parmeter in the function
+    /// @return the index of the parameter in the function
     uint32_t Index() const { return index_; }
 
     /// @returns the semantic usage for the parameter
