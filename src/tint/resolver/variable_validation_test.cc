@@ -321,16 +321,16 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_Atomic) {
 
 TEST_F(ResolverVariableValidationTest, NonConstructibleType_RuntimeArray) {
     auto* s = Structure("S", utils::Vector{
-                                 Member(Source{{56, 78}}, "m", ty.array(ty.i32())),
+                                 Member(Source{{12, 34}}, "m", ty.array<i32>()),
                              });
-    auto* v = Var(Source{{12, 34}}, "v", ty.Of(s));
+    auto* v = Var(Source{{56, 78}}, "v", ty.Of(s));
     WrapInFunction(v);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: runtime-sized arrays can only be used in the <storage> address space
-56:78 note: while analyzing structure member S.m
-12:34 note: while instantiating 'var' v)");
+              R"(error: runtime-sized arrays can only be used in the <storage> address space
+12:34 note: while analyzing structure member S.m
+56:78 note: while instantiating 'var' v)");
 }
 
 TEST_F(ResolverVariableValidationTest, NonConstructibleType_Struct_WithAtomic) {
@@ -365,7 +365,7 @@ TEST_F(ResolverVariableValidationTest, InvalidAddressSpaceForInitializer) {
     EXPECT_EQ(r()->error(),
               "12:34 error: var of address space 'workgroup' cannot have "
               "an initializer. var initializers are only supported for the "
-              "address spacees 'private' and 'function'");
+              "address spaces 'private' and 'function'");
 }
 
 TEST_F(ResolverVariableValidationTest, VectorConstNoType) {
@@ -484,6 +484,19 @@ TEST_F(ResolverVariableValidationTest, ConstInitWithOverrideExpr) {
         r()->error(),
         R"(12:34 error: const initializer requires a const-expression, but expression is an override-expression
 56:78 note: consider changing 'const' to 'let')");
+}
+
+TEST_F(ResolverVariableValidationTest, GlobalVariable_PushConstantWithInitializer) {
+    // enable chromium_experimental_push_constant;
+    // var<push_constant> a : u32 = 0u;
+    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    GlobalVar(Source{{1u, 2u}}, "a", ty.u32(), ast::AddressSpace::kPushConstant,
+              Expr(Source{{3u, 4u}}, u32(0)));
+
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(1:2 error: var of address space 'push_constant' cannot have an initializer. var initializers are only supported for the address spaces 'private' and 'function')");
 }
 
 }  // namespace

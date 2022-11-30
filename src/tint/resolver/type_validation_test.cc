@@ -321,12 +321,11 @@ TEST_F(ResolverTypeValidationTest, ArraySize_UnderElementCountLimit) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_OverElementCountLimit) {
     // var<private> a : array<f32, 65536>;
-    GlobalVar(Source{{1, 2}}, "a",
-              ty.array(Source{{12, 34}}, ty.f32(), Expr(Source{{12, 34}}, 65536_a)),
+    GlobalVar(Source{{56, 78}}, "a", ty.array(Source{{12, 34}}, ty.f32(), Expr(65536_a)),
               ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(1:2 error: array count (65536) must be less than 65536
-1:2 note: while instantiating 'var' a)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: array count (65536) must be less than 65536
+56:78 note: while instantiating 'var' a)");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_StorageBufferLargeArray) {
@@ -569,7 +568,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
     /// @vertex
     // fn func() { var a : array<i32>; }
 
-    auto* var = Var(Source{{12, 34}}, "a", ty.array<i32>());
+    auto* var = Var(Source{{56, 78}}, "a", ty.array(Source{{12, 34}}, ty.i32()));
 
     Func("func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -582,7 +581,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(12:34 error: runtime-sized arrays can only be used in the <storage> address space
-12:34 note: while instantiating 'var' a)");
+56:78 note: while instantiating 'var' a)");
 }
 
 TEST_F(ResolverTypeValidationTest, Struct_Member_VectorNoType) {
@@ -731,23 +730,24 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayAsGlobalVariable) {
-    GlobalVar(Source{{56, 78}}, "g", ty.array<i32>(), ast::AddressSpace::kPrivate);
+    GlobalVar(Source{{56, 78}}, "g", ty.array(Source{{12, 34}}, ty.i32()),
+              ast::AddressSpace::kPrivate);
 
     ASSERT_FALSE(r()->Resolve());
 
     EXPECT_EQ(r()->error(),
-              R"(56:78 error: runtime-sized arrays can only be used in the <storage> address space
+              R"(12:34 error: runtime-sized arrays can only be used in the <storage> address space
 56:78 note: while instantiating 'var' g)");
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayAsLocalVariable) {
-    auto* v = Var(Source{{56, 78}}, "g", ty.array<i32>());
+    auto* v = Var(Source{{56, 78}}, "g", ty.array(Source{{12, 34}}, ty.i32()));
     WrapInFunction(v);
 
     ASSERT_FALSE(r()->Resolve());
 
     EXPECT_EQ(r()->error(),
-              R"(56:78 error: runtime-sized arrays can only be used in the <storage> address space
+              R"(12:34 error: runtime-sized arrays can only be used in the <storage> address space
 56:78 note: while instantiating 'var' g)");
 }
 
@@ -755,7 +755,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
     // fn func(a : array<u32>) {}
     // @vertex fn main() {}
 
-    auto* param = Param(Source{{12, 34}}, "a", ty.array<i32>());
+    auto* param = Param(Source{{56, 78}}, "a", ty.array(Source{{12, 34}}, ty.i32()));
 
     Func("func", utils::Vector{param}, ty.void_(),
          utils::Vector{
@@ -773,14 +773,14 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
               R"(12:34 error: runtime-sized arrays can only be used in the <storage> address space
-12:34 note: while instantiating parameter a)");
+56:78 note: while instantiating parameter a)");
 }
 
-TEST_F(ResolverTypeValidationTest, PtrToRuntimeArrayAsParameter_Fail) {
+TEST_F(ResolverTypeValidationTest, PtrToRuntimeArrayAsPointerParameter_Fail) {
     // fn func(a : ptr<workgroup, array<u32>>) {}
 
-    auto* param =
-        Param(Source{{12, 34}}, "a", ty.pointer(ty.array<i32>(), ast::AddressSpace::kWorkgroup));
+    auto* param = Param("a", ty.pointer(Source{{56, 78}}, ty.array(Source{{12, 34}}, ty.i32()),
+                                        ast::AddressSpace::kWorkgroup));
 
     Func("func", utils::Vector{param}, ty.void_(),
          utils::Vector{
@@ -790,7 +790,23 @@ TEST_F(ResolverTypeValidationTest, PtrToRuntimeArrayAsParameter_Fail) {
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
               R"(12:34 error: runtime-sized arrays can only be used in the <storage> address space
-12:34 note: while instantiating parameter a)");
+56:78 note: while instantiating ptr<workgroup, array<i32>, read_write>)");
+}
+
+TEST_F(ResolverTypeValidationTest, PtrToRuntimeArrayAsParameter_Fail) {
+    // fn func(a : ptr<workgroup, array<u32>>) {}
+
+    auto* param = Param(Source{{56, 78}}, "a", ty.array(Source{{12, 34}}, ty.i32()));
+
+    Func("func", utils::Vector{param}, ty.void_(),
+         utils::Vector{
+             Return(),
+         });
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: runtime-sized arrays can only be used in the <storage> address space
+56:78 note: while instantiating parameter a)");
 }
 
 TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {

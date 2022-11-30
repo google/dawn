@@ -608,7 +608,7 @@ struct DataType<ptr<T>> {
     /// @return a new AST alias type
     static inline const ast::Type* AST(ProgramBuilder& b) {
         return b.create<ast::Pointer>(DataType<T>::AST(b), ast::AddressSpace::kPrivate,
-                                      ast::Access::kReadWrite);
+                                      ast::Access::kUndefined);
     }
     /// @param b the ProgramBuilder
     /// @return the semantic aliased type

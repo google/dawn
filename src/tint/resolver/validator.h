@@ -169,6 +169,12 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool Atomic(const ast::Atomic* a, const sem::Atomic* s) const;
 
+    /// Validates a pointer type
+    /// @param a the pointer ast node
+    /// @param s the pointer sem node
+    /// @returns true on success, false otherwise.
+    bool Pointer(const ast::Pointer* a, const sem::Pointer* s) const;
+
     /// Validates an assignment
     /// @param a the assignment statement
     /// @param rhs_ty the type of the right hand side

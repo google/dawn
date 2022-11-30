@@ -466,6 +466,9 @@ struct DecomposeMemoryAccess::State {
                     const sem::VariableUser* var_user) {
         auto address_space = var_user->Variable()->AddressSpace();
         auto access = var_user->Variable()->Access();
+        if (address_space != ast::AddressSpace::kStorage) {
+            access = ast::Access::kUndefined;
+        }
         return utils::GetOrCreate(
             load_funcs, LoadStoreKey{address_space, access, buf_ty, el_ty}, [&] {
                 utils::Vector params{
@@ -562,6 +565,9 @@ struct DecomposeMemoryAccess::State {
                      const sem::VariableUser* var_user) {
         auto address_space = var_user->Variable()->AddressSpace();
         auto access = var_user->Variable()->Access();
+        if (address_space != ast::AddressSpace::kStorage) {
+            access = ast::Access::kUndefined;
+        }
         return utils::GetOrCreate(
             store_funcs, LoadStoreKey{address_space, access, buf_ty, el_ty}, [&] {
                 utils::Vector params{
@@ -670,7 +676,11 @@ struct DecomposeMemoryAccess::State {
                       const sem::Builtin* intrinsic,
                       const sem::VariableUser* var_user) {
         auto op = intrinsic->Type();
+        auto address_space = var_user->Variable()->AddressSpace();
         auto access = var_user->Variable()->Access();
+        if (address_space != ast::AddressSpace::kStorage) {
+            access = ast::Access::kUndefined;
+        }
         return utils::GetOrCreate(atomic_funcs, AtomicKey{access, buf_ty, el_ty, op}, [&] {
             // The first parameter to all WGSL atomics is the expression to the
             // atomic. This is replaced with two parameters: the buffer and offset.

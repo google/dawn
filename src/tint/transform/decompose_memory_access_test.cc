@@ -804,126 +804,126 @@ struct UB {
 @group(0) @binding(0) var<uniform> ub : UB;
 
 @internal(intrinsic_load_uniform_f32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> f32
+fn tint_symbol(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> f32
 
 @internal(intrinsic_load_uniform_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_1(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> i32
+fn tint_symbol_1(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> i32
 
 @internal(intrinsic_load_uniform_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_2(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> u32
+fn tint_symbol_2(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> u32
 
 @internal(intrinsic_load_uniform_f16) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_3(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> f16
+fn tint_symbol_3(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> f16
 
 @internal(intrinsic_load_uniform_vec2_f32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_4(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec2<f32>
+fn tint_symbol_4(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec2<f32>
 
 @internal(intrinsic_load_uniform_vec2_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_5(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec2<i32>
+fn tint_symbol_5(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec2<i32>
 
 @internal(intrinsic_load_uniform_vec2_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_6(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec2<u32>
+fn tint_symbol_6(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec2<u32>
 
 @internal(intrinsic_load_uniform_vec2_f16) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_7(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec2<f16>
+fn tint_symbol_7(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec2<f16>
 
 @internal(intrinsic_load_uniform_vec3_f32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_8(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec3<f32>
+fn tint_symbol_8(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec3<f32>
 
 @internal(intrinsic_load_uniform_vec3_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_9(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec3<i32>
+fn tint_symbol_9(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec3<i32>
 
 @internal(intrinsic_load_uniform_vec3_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_10(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec3<u32>
+fn tint_symbol_10(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec3<u32>
 
 @internal(intrinsic_load_uniform_vec3_f16) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_11(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec3<f16>
+fn tint_symbol_11(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec3<f16>
 
 @internal(intrinsic_load_uniform_vec4_f32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_12(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec4<f32>
+fn tint_symbol_12(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec4<f32>
 
 @internal(intrinsic_load_uniform_vec4_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_13(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec4<i32>
+fn tint_symbol_13(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec4<i32>
 
 @internal(intrinsic_load_uniform_vec4_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_14(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec4<u32>
+fn tint_symbol_14(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec4<u32>
 
 @internal(intrinsic_load_uniform_vec4_f16) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_15(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec4<f16>
+fn tint_symbol_15(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec4<f16>
 
-fn tint_symbol_16(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat2x2<f32> {
+fn tint_symbol_16(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat2x2<f32> {
   return mat2x2<f32>(tint_symbol_4(buffer, (offset + 0u)), tint_symbol_4(buffer, (offset + 8u)));
 }
 
-fn tint_symbol_17(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat2x3<f32> {
+fn tint_symbol_17(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat2x3<f32> {
   return mat2x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_18(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat2x4<f32> {
+fn tint_symbol_18(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat2x4<f32> {
   return mat2x4<f32>(tint_symbol_12(buffer, (offset + 0u)), tint_symbol_12(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_19(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat3x2<f32> {
+fn tint_symbol_19(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat3x2<f32> {
   return mat3x2<f32>(tint_symbol_4(buffer, (offset + 0u)), tint_symbol_4(buffer, (offset + 8u)), tint_symbol_4(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_20(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat3x3<f32> {
+fn tint_symbol_20(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat3x3<f32> {
   return mat3x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)), tint_symbol_8(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_21(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat3x4<f32> {
+fn tint_symbol_21(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat3x4<f32> {
   return mat3x4<f32>(tint_symbol_12(buffer, (offset + 0u)), tint_symbol_12(buffer, (offset + 16u)), tint_symbol_12(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_22(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat4x2<f32> {
+fn tint_symbol_22(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat4x2<f32> {
   return mat4x2<f32>(tint_symbol_4(buffer, (offset + 0u)), tint_symbol_4(buffer, (offset + 8u)), tint_symbol_4(buffer, (offset + 16u)), tint_symbol_4(buffer, (offset + 24u)));
 }
 
-fn tint_symbol_23(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat4x3<f32> {
+fn tint_symbol_23(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat4x3<f32> {
   return mat4x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)), tint_symbol_8(buffer, (offset + 32u)), tint_symbol_8(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_24(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat4x4<f32> {
+fn tint_symbol_24(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat4x4<f32> {
   return mat4x4<f32>(tint_symbol_12(buffer, (offset + 0u)), tint_symbol_12(buffer, (offset + 16u)), tint_symbol_12(buffer, (offset + 32u)), tint_symbol_12(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_25(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat2x2<f16> {
+fn tint_symbol_25(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat2x2<f16> {
   return mat2x2<f16>(tint_symbol_7(buffer, (offset + 0u)), tint_symbol_7(buffer, (offset + 4u)));
 }
 
-fn tint_symbol_26(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat2x3<f16> {
+fn tint_symbol_26(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat2x3<f16> {
   return mat2x3<f16>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 8u)));
 }
 
-fn tint_symbol_27(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat2x4<f16> {
+fn tint_symbol_27(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat2x4<f16> {
   return mat2x4<f16>(tint_symbol_15(buffer, (offset + 0u)), tint_symbol_15(buffer, (offset + 8u)));
 }
 
-fn tint_symbol_28(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat3x2<f16> {
+fn tint_symbol_28(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat3x2<f16> {
   return mat3x2<f16>(tint_symbol_7(buffer, (offset + 0u)), tint_symbol_7(buffer, (offset + 4u)), tint_symbol_7(buffer, (offset + 8u)));
 }
 
-fn tint_symbol_29(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat3x3<f16> {
+fn tint_symbol_29(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat3x3<f16> {
   return mat3x3<f16>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 8u)), tint_symbol_11(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_30(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat3x4<f16> {
+fn tint_symbol_30(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat3x4<f16> {
   return mat3x4<f16>(tint_symbol_15(buffer, (offset + 0u)), tint_symbol_15(buffer, (offset + 8u)), tint_symbol_15(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_31(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat4x2<f16> {
+fn tint_symbol_31(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat4x2<f16> {
   return mat4x2<f16>(tint_symbol_7(buffer, (offset + 0u)), tint_symbol_7(buffer, (offset + 4u)), tint_symbol_7(buffer, (offset + 8u)), tint_symbol_7(buffer, (offset + 12u)));
 }
 
-fn tint_symbol_32(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat4x3<f16> {
+fn tint_symbol_32(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat4x3<f16> {
   return mat4x3<f16>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 8u)), tint_symbol_11(buffer, (offset + 16u)), tint_symbol_11(buffer, (offset + 24u)));
 }
 
-fn tint_symbol_33(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat4x4<f16> {
+fn tint_symbol_33(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat4x4<f16> {
   return mat4x4<f16>(tint_symbol_15(buffer, (offset + 0u)), tint_symbol_15(buffer, (offset + 8u)), tint_symbol_15(buffer, (offset + 16u)), tint_symbol_15(buffer, (offset + 24u)));
 }
 
-fn tint_symbol_34(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> array<vec3<f32>, 2u> {
+fn tint_symbol_34(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> array<vec3<f32>, 2u> {
   var arr : array<vec3<f32>, 2u>;
   for(var i = 0u; (i < 2u); i = (i + 1u)) {
     arr[i] = tint_symbol_8(buffer, (offset + (i * 16u)));
@@ -931,7 +931,7 @@ fn tint_symbol_34(@internal(disable_validation__function_parameter) buffer : ptr
   return arr;
 }
 
-fn tint_symbol_35(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> array<mat4x2<f16>, 2u> {
+fn tint_symbol_35(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> array<mat4x2<f16>, 2u> {
   var arr_1 : array<mat4x2<f16>, 2u>;
   for(var i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
     arr_1[i_1] = tint_symbol_31(buffer, (offset + (i_1 * 16u)));
@@ -1075,126 +1075,126 @@ struct UB {
 enable f16;
 
 @internal(intrinsic_load_uniform_f32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> f32
+fn tint_symbol(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> f32
 
 @internal(intrinsic_load_uniform_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_1(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> i32
+fn tint_symbol_1(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> i32
 
 @internal(intrinsic_load_uniform_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_2(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> u32
+fn tint_symbol_2(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> u32
 
 @internal(intrinsic_load_uniform_f16) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_3(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> f16
+fn tint_symbol_3(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> f16
 
 @internal(intrinsic_load_uniform_vec2_f32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_4(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec2<f32>
+fn tint_symbol_4(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec2<f32>
 
 @internal(intrinsic_load_uniform_vec2_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_5(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec2<i32>
+fn tint_symbol_5(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec2<i32>
 
 @internal(intrinsic_load_uniform_vec2_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_6(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec2<u32>
+fn tint_symbol_6(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec2<u32>
 
 @internal(intrinsic_load_uniform_vec2_f16) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_7(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec2<f16>
+fn tint_symbol_7(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec2<f16>
 
 @internal(intrinsic_load_uniform_vec3_f32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_8(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec3<f32>
+fn tint_symbol_8(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec3<f32>
 
 @internal(intrinsic_load_uniform_vec3_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_9(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec3<i32>
+fn tint_symbol_9(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec3<i32>
 
 @internal(intrinsic_load_uniform_vec3_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_10(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec3<u32>
+fn tint_symbol_10(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec3<u32>
 
 @internal(intrinsic_load_uniform_vec3_f16) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_11(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec3<f16>
+fn tint_symbol_11(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec3<f16>
 
 @internal(intrinsic_load_uniform_vec4_f32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_12(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec4<f32>
+fn tint_symbol_12(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec4<f32>
 
 @internal(intrinsic_load_uniform_vec4_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_13(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec4<i32>
+fn tint_symbol_13(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec4<i32>
 
 @internal(intrinsic_load_uniform_vec4_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_14(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec4<u32>
+fn tint_symbol_14(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec4<u32>
 
 @internal(intrinsic_load_uniform_vec4_f16) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_15(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> vec4<f16>
+fn tint_symbol_15(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> vec4<f16>
 
-fn tint_symbol_16(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat2x2<f32> {
+fn tint_symbol_16(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat2x2<f32> {
   return mat2x2<f32>(tint_symbol_4(buffer, (offset + 0u)), tint_symbol_4(buffer, (offset + 8u)));
 }
 
-fn tint_symbol_17(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat2x3<f32> {
+fn tint_symbol_17(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat2x3<f32> {
   return mat2x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_18(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat2x4<f32> {
+fn tint_symbol_18(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat2x4<f32> {
   return mat2x4<f32>(tint_symbol_12(buffer, (offset + 0u)), tint_symbol_12(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_19(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat3x2<f32> {
+fn tint_symbol_19(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat3x2<f32> {
   return mat3x2<f32>(tint_symbol_4(buffer, (offset + 0u)), tint_symbol_4(buffer, (offset + 8u)), tint_symbol_4(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_20(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat3x3<f32> {
+fn tint_symbol_20(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat3x3<f32> {
   return mat3x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)), tint_symbol_8(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_21(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat3x4<f32> {
+fn tint_symbol_21(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat3x4<f32> {
   return mat3x4<f32>(tint_symbol_12(buffer, (offset + 0u)), tint_symbol_12(buffer, (offset + 16u)), tint_symbol_12(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_22(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat4x2<f32> {
+fn tint_symbol_22(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat4x2<f32> {
   return mat4x2<f32>(tint_symbol_4(buffer, (offset + 0u)), tint_symbol_4(buffer, (offset + 8u)), tint_symbol_4(buffer, (offset + 16u)), tint_symbol_4(buffer, (offset + 24u)));
 }
 
-fn tint_symbol_23(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat4x3<f32> {
+fn tint_symbol_23(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat4x3<f32> {
   return mat4x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)), tint_symbol_8(buffer, (offset + 32u)), tint_symbol_8(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_24(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat4x4<f32> {
+fn tint_symbol_24(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat4x4<f32> {
   return mat4x4<f32>(tint_symbol_12(buffer, (offset + 0u)), tint_symbol_12(buffer, (offset + 16u)), tint_symbol_12(buffer, (offset + 32u)), tint_symbol_12(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_25(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat2x2<f16> {
+fn tint_symbol_25(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat2x2<f16> {
   return mat2x2<f16>(tint_symbol_7(buffer, (offset + 0u)), tint_symbol_7(buffer, (offset + 4u)));
 }
 
-fn tint_symbol_26(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat2x3<f16> {
+fn tint_symbol_26(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat2x3<f16> {
   return mat2x3<f16>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 8u)));
 }
 
-fn tint_symbol_27(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat2x4<f16> {
+fn tint_symbol_27(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat2x4<f16> {
   return mat2x4<f16>(tint_symbol_15(buffer, (offset + 0u)), tint_symbol_15(buffer, (offset + 8u)));
 }
 
-fn tint_symbol_28(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat3x2<f16> {
+fn tint_symbol_28(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat3x2<f16> {
   return mat3x2<f16>(tint_symbol_7(buffer, (offset + 0u)), tint_symbol_7(buffer, (offset + 4u)), tint_symbol_7(buffer, (offset + 8u)));
 }
 
-fn tint_symbol_29(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat3x3<f16> {
+fn tint_symbol_29(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat3x3<f16> {
   return mat3x3<f16>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 8u)), tint_symbol_11(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_30(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat3x4<f16> {
+fn tint_symbol_30(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat3x4<f16> {
   return mat3x4<f16>(tint_symbol_15(buffer, (offset + 0u)), tint_symbol_15(buffer, (offset + 8u)), tint_symbol_15(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_31(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat4x2<f16> {
+fn tint_symbol_31(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat4x2<f16> {
   return mat4x2<f16>(tint_symbol_7(buffer, (offset + 0u)), tint_symbol_7(buffer, (offset + 4u)), tint_symbol_7(buffer, (offset + 8u)), tint_symbol_7(buffer, (offset + 12u)));
 }
 
-fn tint_symbol_32(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat4x3<f16> {
+fn tint_symbol_32(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat4x3<f16> {
   return mat4x3<f16>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 8u)), tint_symbol_11(buffer, (offset + 16u)), tint_symbol_11(buffer, (offset + 24u)));
 }
 
-fn tint_symbol_33(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> mat4x4<f16> {
+fn tint_symbol_33(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> mat4x4<f16> {
   return mat4x4<f16>(tint_symbol_15(buffer, (offset + 0u)), tint_symbol_15(buffer, (offset + 8u)), tint_symbol_15(buffer, (offset + 16u)), tint_symbol_15(buffer, (offset + 24u)));
 }
 
-fn tint_symbol_34(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> array<vec3<f32>, 2u> {
+fn tint_symbol_34(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> array<vec3<f32>, 2u> {
   var arr : array<vec3<f32>, 2u>;
   for(var i = 0u; (i < 2u); i = (i + 1u)) {
     arr[i] = tint_symbol_8(buffer, (offset + (i * 16u)));
@@ -1202,7 +1202,7 @@ fn tint_symbol_34(@internal(disable_validation__function_parameter) buffer : ptr
   return arr;
 }
 
-fn tint_symbol_35(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB, read>, offset : u32) -> array<mat4x2<f16>, 2u> {
+fn tint_symbol_35(@internal(disable_validation__function_parameter) buffer : ptr<uniform, UB>, offset : u32) -> array<mat4x2<f16>, 2u> {
   var arr_1 : array<mat4x2<f16>, 2u>;
   for(var i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
     arr_1[i_1] = tint_symbol_31(buffer, (offset + (i_1 * 16u)));

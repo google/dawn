@@ -269,6 +269,28 @@ bool Validator::Atomic(const ast::Atomic* a, const sem::Atomic* s) const {
     return true;
 }
 
+bool Validator::Pointer(const ast::Pointer* a, const sem::Pointer* s) const {
+    if (s->AddressSpace() == ast::AddressSpace::kUndefined) {
+        AddError("ptr missing address space", a->source);
+        return false;
+    }
+
+    if (a->access != ast::Access::kUndefined) {
+        // https://www.w3.org/TR/WGSL/#access-mode-defaults
+        // When writing a variable declaration or a pointer type in WGSL source:
+        // * For the storage address space, the access mode is optional, and defaults to read.
+        // * For other address spaces, the access mode must not be written.
+        if (a->address_space != ast::AddressSpace::kStorage) {
+            AddError("only pointers in <storage> address space may declare an access mode",
+                     a->source);
+            return false;
+        }
+    }
+
+    return CheckTypeAccessAddressSpace(s->StoreType(), s->Access(), s->AddressSpace(), utils::Empty,
+                                       a->source);
+}
+
 bool Validator::StorageTexture(const ast::StorageTexture* t) const {
     switch (t->access) {
         case ast::Access::kWrite:
@@ -355,11 +377,10 @@ bool Validator::VariableInitializer(const ast::Variable* v,
             default:
                 // https://gpuweb.github.io/gpuweb/wgsl/#var-and-let
                 // Optionally has an initializer expression, if the variable is in the private or
-                // function address spacees.
+                // function address spaces.
                 AddError("var of address space '" + utils::ToString(address_space) +
-                             "' cannot have an initializer. var initializers are only "
-                             "supported for the address spacees "
-                             "'private' and 'function'",
+                             "' cannot have an initializer. var initializers are only supported "
+                             "for the address spaces 'private' and 'function'",
                          v->source);
                 return false;
         }
@@ -672,9 +693,10 @@ bool Validator::Var(const sem::Variable* v) const {
     }
 
     if (var->declared_access != ast::Access::kUndefined) {
-        // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
-        // The access mode always has a default, and except for variables in the storage address
-        // space, must not be written.
+        // https://www.w3.org/TR/WGSL/#access-mode-defaults
+        // When writing a variable declaration or a pointer type in WGSL source:
+        // * For the storage address space, the access mode is optional, and defaults to read.
+        // * For other address spaces, the access mode must not be written.
         if (var->declared_address_space != ast::AddressSpace::kStorage) {
             AddError("only variables in <storage> address space may declare an access mode",
                      var->source);
