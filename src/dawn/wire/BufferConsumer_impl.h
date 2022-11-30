@@ -54,7 +54,7 @@ WireResult BufferConsumer<BufferT>::NextN(N count, T** data) {
 
     // If size is zero then it indicates an overflow.
     auto size = WireAlignSizeofN<T>(count);
-    if (size && *size > mSize) {
+    if (!size || *size > mSize) {
         return WireResult::FatalError;
     }
 
