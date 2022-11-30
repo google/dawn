@@ -68,7 +68,7 @@ class Instruction : public Castable<Instruction> {
     /// @param instr the instruction to move from
     Instruction(Instruction&& instr);
     /// Destructor
-    ~Instruction();
+    ~Instruction() override;
 
     /// Copy assign
     /// @param instr the instruction to copy from

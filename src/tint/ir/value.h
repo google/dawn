@@ -25,7 +25,7 @@ namespace tint::ir {
 class Value : public Castable<Value> {
   public:
     /// Destructor
-    virtual ~Value();
+    ~Value() override;
 
     Value(const Value&) = delete;
     Value(Value&&) = delete;
