@@ -437,6 +437,14 @@ crbug.com/dawn/1599 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTex
 ################################################################################
 
 ################################################################################
+# Skip external_texture,video:* tests due to incorrect expectation values.
+# See cts issue https://github.com/gpuweb/cts/issues/2042
+# KEEP
+################################################################################
+crbug.com/dawn/1082 webgpu:web_platform,external_texture,video:* [ Skip ]
+################################################################################
+
+################################################################################
 # untriaged failures
 # KEEP
 ################################################################################
