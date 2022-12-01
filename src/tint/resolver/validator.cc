@@ -461,7 +461,7 @@ bool Validator::AddressSpaceLayout(const sem::Type* store_ty,
                              " bytes, but '" + member_name_of(m) + "' is currently at offset " +
                              std::to_string(m->Offset()) + ". Consider setting @align(" +
                              std::to_string(required_align) + ") on this member",
-                         m->Declaration()->source);
+                         m->Source());
 
                 AddNote("see layout of struct:\n" + str->Layout(symbols_),
                         str->Declaration()->source);
@@ -488,7 +488,7 @@ bool Validator::AddressSpaceLayout(const sem::Type* store_ty,
                             std::to_string(prev_to_curr_offset) + " bytes between '" +
                             member_name_of(prev_member) + "' and '" + member_name_of(m) +
                             "'. Consider setting @align(16) on this member",
-                        m->Declaration()->source);
+                        m->Source());
 
                     AddNote("see layout of struct:\n" + str->Layout(symbols_),
                             str->Declaration()->source);
@@ -1228,8 +1228,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
         if (auto* str = ty->As<sem::Struct>()) {
             for (auto* member : str->Members()) {
                 if (!validate_entry_point_attributes_inner(
-                        member->Declaration()->attributes, member->Type(),
-                        member->Declaration()->source, param_or_ret,
+                        member->Declaration()->attributes, member->Type(), member->Source(),
+                        param_or_ret,
                         /*is_struct_member*/ true, member->Location())) {
                     AddNote("while analyzing entry point '" + symbols_.NameFor(decl->symbol) + "'",
                             decl->source);
@@ -2027,7 +2027,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
             if (r->IsRuntimeSized()) {
                 if (member != str->Members().back()) {
                     AddError("runtime arrays may only appear as the last member of a struct",
-                             member->Declaration()->source);
+                             member->Source());
                     return false;
                 }
             }
@@ -2039,7 +2039,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         } else if (!IsFixedFootprint(member->Type())) {
             AddError(
                 "a struct that contains a runtime array cannot be nested inside another struct",
-                member->Declaration()->source);
+                member->Source());
             return false;
         }
 
@@ -2058,7 +2058,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                     has_location = true;
                     TINT_ASSERT(Resolver, member->Location().has_value());
                     if (!LocationAttribute(location, member->Location().value(), member->Type(),
-                                           locations, stage, member->Declaration()->source)) {
+                                           locations, stage, member->Source())) {
                         return false;
                     }
                     return true;

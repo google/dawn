@@ -49,6 +49,7 @@ struct TypeTest : public TestHelper {
                                                 StructMemberList{
                                                     create<StructMember>(
                                                         /* declaration */ nullptr,
+                                                        /* source */ Source{},
                                                         /* name */ Sym("x"),
                                                         /* type */ f32,
                                                         /* index */ 0u,
@@ -65,6 +66,7 @@ struct TypeTest : public TestHelper {
                                                 StructMemberList{
                                                     create<StructMember>(
                                                         /* declaration */ nullptr,
+                                                        /* source */ Source{},
                                                         /* name */ Sym("x"),
                                                         /* type */ f16,
                                                         /* index */ 0u,
@@ -81,6 +83,7 @@ struct TypeTest : public TestHelper {
                                          StructMemberList{
                                              create<StructMember>(
                                                  /* declaration */ nullptr,
+                                                 /* source */ Source{},
                                                  /* name */ Sym("x"),
                                                  /* type */ af,
                                                  /* index */ 0u,

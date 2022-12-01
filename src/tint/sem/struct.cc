@@ -166,6 +166,7 @@ std::string Struct::Layout(const tint::SymbolTable& symbols) const {
 }
 
 StructMember::StructMember(const ast::StructMember* declaration,
+                           tint::Source source,
                            Symbol name,
                            const sem::Type* type,
                            uint32_t index,
@@ -174,6 +175,7 @@ StructMember::StructMember(const ast::StructMember* declaration,
                            uint32_t size,
                            std::optional<uint32_t> location)
     : declaration_(declaration),
+      source_(source),
       name_(name),
       type_(type),
       index_(index),

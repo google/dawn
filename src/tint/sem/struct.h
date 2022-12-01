@@ -177,7 +177,8 @@ class StructMember final : public Castable<StructMember, Node> {
   public:
     /// Constructor
     /// @param declaration the AST declaration node
-    /// @param name the name of the structure
+    /// @param source the source of the struct member
+    /// @param name the name of the structure member
     /// @param type the type of the member
     /// @param index the index of the member in the structure
     /// @param offset the byte offset from the base of the structure
@@ -185,6 +186,7 @@ class StructMember final : public Castable<StructMember, Node> {
     /// @param size the byte size of the member
     /// @param location the location attribute, if present
     StructMember(const ast::StructMember* declaration,
+                 tint::Source source,
                  Symbol name,
                  const sem::Type* type,
                  uint32_t index,
@@ -198,6 +200,9 @@ class StructMember final : public Castable<StructMember, Node> {
 
     /// @returns the AST declaration node
     const ast::StructMember* Declaration() const { return declaration_; }
+
+    /// @returns the source the struct member
+    const tint::Source& Source() const { return source_; }
 
     /// @returns the name of the structure member
     Symbol Name() const { return name_; }
@@ -229,6 +234,7 @@ class StructMember final : public Castable<StructMember, Node> {
 
   private:
     const ast::StructMember* const declaration_;
+    const tint::Source source_;
     const Symbol name_;
     const sem::Struct* struct_;
     const sem::Type* type_;

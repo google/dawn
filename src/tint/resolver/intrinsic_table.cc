@@ -809,6 +809,7 @@ sem::Struct* build_struct(ProgramBuilder& b,
         max_align = std::max(max_align, align);
         members.emplace_back(b.create<sem::StructMember>(
             /* declaration */ nullptr,
+            /* source */ Source{},
             /* name */ b.Sym(m.name),
             /* type */ m.type,
             /* index */ static_cast<uint32_t>(members.size()),

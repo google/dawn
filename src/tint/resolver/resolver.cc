@@ -3265,7 +3265,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         }
 
         auto* sem_member = builder_->create<sem::StructMember>(
-            member, member->symbol, type, static_cast<uint32_t>(sem_members.size()),
+            member, member->source, member->symbol, type, static_cast<uint32_t>(sem_members.size()),
             static_cast<uint32_t>(offset), static_cast<uint32_t>(align),
             static_cast<uint32_t>(size), location);
         builder_->Sem().Add(member, sem_member);
@@ -3296,7 +3296,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     for (size_t i = 0; i < sem_members.size(); i++) {
         auto* mem_type = sem_members[i]->Type();
         if (mem_type->Is<sem::Atomic>()) {
-            atomic_composite_info_.Add(out, &sem_members[i]->Declaration()->source);
+            atomic_composite_info_.Add(out, &sem_members[i]->Source());
             break;
         } else {
             if (auto found = atomic_composite_info_.Get(mem_type)) {
@@ -3621,7 +3621,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace address_space,
                 std::stringstream err;
                 err << "while analyzing structure member " << sem_.TypeNameOf(str) << "."
                     << builder_->Symbols().NameFor(member->Name());
-                AddNote(err.str(), decl->source);
+                AddNote(err.str(), member->Source());
                 return false;
             }
         }
