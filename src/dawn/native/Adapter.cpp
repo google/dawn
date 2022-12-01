@@ -169,6 +169,10 @@ uint32_t AdapterBase::GetDeviceId() const {
     return mDeviceId;
 }
 
+const gpu_info::DriverVersion& AdapterBase::GetDriverVersion() const {
+    return mDriverVersion;
+}
+
 wgpu::BackendType AdapterBase::GetBackendType() const {
     return mBackend;
 }

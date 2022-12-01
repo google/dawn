@@ -17,13 +17,44 @@
 #include <algorithm>
 #include <string>
 
+#include "dawn/common/GPUInfo.h"
 #include "dawn/native/Limits.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 
-#include "dawn/common/GPUInfo.h"
-
 namespace dawn::native::vulkan {
+
+namespace {
+
+gpu_info::DriverVersion DecodeVulkanDriverVersion(uint32_t vendorID, uint32_t versionRaw) {
+    gpu_info::DriverVersion driverVersion;
+    switch (vendorID) {
+        case gpu_info::kVendorID_Nvidia:
+            driverVersion = {static_cast<uint16_t>((versionRaw >> 22) & 0x3FF),
+                             static_cast<uint16_t>((versionRaw >> 14) & 0x0FF),
+                             static_cast<uint16_t>((versionRaw >> 6) & 0x0FF),
+                             static_cast<uint16_t>(versionRaw & 0x003F)};
+            break;
+        case gpu_info::kVendorID_Intel:
+#if DAWN_PLATFORM_IS(WINDOWS)
+            // Windows Vulkan driver releases together with D3D driver, so they share the same
+            // version. But only CCC.DDDD is encoded in 32-bit driverVersion.
+            driverVersion = {static_cast<uint16_t>(versionRaw >> 14),
+                             static_cast<uint16_t>(versionRaw & 0x3FFF)};
+            break;
+#endif
+        default:
+            // Use Vulkan driver conversions for other vendors
+            driverVersion = {static_cast<uint16_t>(versionRaw >> 22),
+                             static_cast<uint16_t>((versionRaw >> 12) & 0x3FF),
+                             static_cast<uint16_t>(versionRaw & 0xFFF)};
+            break;
+    }
+
+    return driverVersion;
+}
+
+}  // anonymous namespace
 
 Adapter::Adapter(InstanceBase* instance,
                  VulkanInstance* vulkanInstance,
@@ -59,14 +90,35 @@ bool Adapter::IsDepthStencilFormatSupported(VkFormat format) {
 MaybeError Adapter::InitializeImpl() {
     DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this));
 
+    mDriverVersion = DecodeVulkanDriverVersion(mDeviceInfo.properties.vendorID,
+                                               mDeviceInfo.properties.driverVersion);
+    const std::string driverVersionStr = mDriverVersion.ToString();
+
+#if DAWN_PLATFORM_IS(WINDOWS)
+    // Disable Vulkan adapter on Windows Intel driver < 30.0.101.2111 due to flaky
+    // issues.
+    const gpu_info::DriverVersion kDriverVersion({30, 0, 101, 2111});
+    if (gpu_info::IsIntel(mDeviceInfo.properties.vendorID) &&
+        gpu_info::CompareWindowsDriverVersion(mDeviceInfo.properties.vendorID, mDriverVersion,
+                                              kDriverVersion) == -1) {
+        return DAWN_FORMAT_INTERNAL_ERROR(
+            "Disable Intel Vulkan adapter on Windows driver version %s. See "
+            "https://crbug.com/1338622.",
+            driverVersionStr);
+    }
+#endif
+
     if (mDeviceInfo.HasExt(DeviceExt::DriverProperties)) {
         mDriverDescription = mDeviceInfo.driverProperties.driverName;
         if (mDeviceInfo.driverProperties.driverInfo[0] != '\0') {
             mDriverDescription += std::string(": ") + mDeviceInfo.driverProperties.driverInfo;
         }
+        // There may be no driver version in driverInfo.
+        if (mDriverDescription.find(driverVersionStr) == std::string::npos) {
+            mDriverDescription += std::string(" ") + driverVersionStr;
+        }
     } else {
-        mDriverDescription =
-            "Vulkan driver version: " + std::to_string(mDeviceInfo.properties.driverVersion);
+        mDriverDescription = std::string("Vulkan driver version ") + driverVersionStr;
     }
 
     mDeviceId = mDeviceInfo.properties.deviceID;

@@ -19,6 +19,7 @@
 
 #include "dawn/native/DawnNative.h"
 
+#include "dawn/common/GPUInfo.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/ityp_span.h"
 #include "dawn/native/Error.h"
@@ -50,6 +51,7 @@ class AdapterBase : public RefCounted {
 
     uint32_t GetVendorId() const;
     uint32_t GetDeviceId() const;
+    const gpu_info::DriverVersion& GetDriverVersion() const;
     wgpu::BackendType GetBackendType() const;
     InstanceBase* GetInstance() const;
 
@@ -72,6 +74,7 @@ class AdapterBase : public RefCounted {
     uint32_t mDeviceId = 0xFFFFFFFF;
     std::string mName;
     wgpu::AdapterType mAdapterType = wgpu::AdapterType::Unknown;
+    gpu_info::DriverVersion mDriverVersion;
     std::string mDriverDescription;
 
     // Features set that CAN be supported by devices of this adapter. Some features in this set may

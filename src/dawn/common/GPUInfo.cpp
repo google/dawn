@@ -15,6 +15,9 @@
 #include "dawn/common/GPUInfo.h"
 
 #include <algorithm>
+#include <array>
+#include <iterator>
+#include <sstream>
 
 #include "dawn/common/Assert.h"
 
@@ -33,18 +36,52 @@ const std::array<uint32_t, 25> Skylake = {{0x1902, 0x1906, 0x190A, 0x190B, 0x190
 // last two fields.
 // See https://www.intel.com/content/www/us/en/support/articles/000005654/graphics.html for
 // more details.
-uint32_t GetIntelD3DDriverBuildNumber(const D3DDriverVersion& driverVersion) {
-    return driverVersion[2] * 10000 + driverVersion[3];
+uint32_t GetIntelWindowsDriverBuildNumber(const DriverVersion& driverVersion) {
+    size_t size = driverVersion.size();
+    ASSERT(size >= 2);
+    return driverVersion[size - 2] * 10000 + driverVersion[size - 1];
 }
 
 }  // anonymous namespace
 
-int CompareD3DDriverVersion(PCIVendorID vendorId,
-                            const D3DDriverVersion& version1,
-                            const D3DDriverVersion& version2) {
+DriverVersion::DriverVersion() = default;
+
+DriverVersion::DriverVersion(const std::initializer_list<uint16_t>& version) {
+    ASSERT(version.size() <= kMaxVersionFields);
+    mDriverVersion->assign(version.begin(), version.end());
+}
+
+uint16_t& DriverVersion::operator[](size_t i) {
+    return mDriverVersion->operator[](i);
+}
+
+const uint16_t& DriverVersion::operator[](size_t i) const {
+    return mDriverVersion->operator[](i);
+}
+
+uint32_t DriverVersion::size() const {
+    return mDriverVersion->size();
+}
+
+std::string DriverVersion::ToString() const {
+    std::ostringstream oss;
+    if (mDriverVersion->size() > 0) {
+        // Convert all but the last element to avoid a trailing "."
+        std::copy(mDriverVersion->begin(), mDriverVersion->end() - 1,
+                  std::ostream_iterator<uint16_t>(oss, "."));
+        // Add the last element
+        oss << mDriverVersion->back();
+    }
+
+    return oss.str();
+}
+
+int CompareWindowsDriverVersion(PCIVendorID vendorId,
+                                const DriverVersion& version1,
+                                const DriverVersion& version2) {
     if (IsIntel(vendorId)) {
-        uint32_t buildNumber1 = GetIntelD3DDriverBuildNumber(version1);
-        uint32_t buildNumber2 = GetIntelD3DDriverBuildNumber(version2);
+        uint32_t buildNumber1 = GetIntelWindowsDriverBuildNumber(version1);
+        uint32_t buildNumber2 = GetIntelWindowsDriverBuildNumber(version2);
         return buildNumber1 < buildNumber2 ? -1 : (buildNumber1 == buildNumber2 ? 0 : 1);
     }
 

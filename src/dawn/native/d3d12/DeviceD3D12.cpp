@@ -688,9 +688,9 @@ void Device::InitTogglesFromDriver() {
     // Currently this workaround is only needed on Intel Gen9, Gen9.5 and Gen11 GPUs.
     // See http://crbug.com/1161355 for more information.
     if (gpu_info::IsIntelGen9(vendorId, deviceId) || gpu_info::IsIntelGen11(vendorId, deviceId)) {
-        constexpr gpu_info::D3DDriverVersion kFixedDriverVersion = {31, 0, 101, 2114};
-        if (gpu_info::CompareD3DDriverVersion(vendorId, ToBackend(GetAdapter())->GetDriverVersion(),
-                                              kFixedDriverVersion) < 0) {
+        const gpu_info::DriverVersion kFixedDriverVersion = {31, 0, 101, 2114};
+        if (gpu_info::CompareWindowsDriverVersion(vendorId, GetAdapter()->GetDriverVersion(),
+                                                  kFixedDriverVersion) < 0) {
             SetToggle(
                 Toggle::UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
                 true);
@@ -721,9 +721,9 @@ void Device::InitTogglesFromDriver() {
     // This workaround is only needed on Intel Gen12LP with driver prior to 30.0.101.1692.
     // See http://crbug.com/dawn/949 for more information.
     if (gpu_info::IsIntelGen12LP(vendorId, deviceId)) {
-        constexpr gpu_info::D3DDriverVersion kFixedDriverVersion = {30, 0, 101, 1692};
-        if (gpu_info::CompareD3DDriverVersion(vendorId, ToBackend(GetAdapter())->GetDriverVersion(),
-                                              kFixedDriverVersion) == -1) {
+        const gpu_info::DriverVersion kFixedDriverVersion = {30, 0, 101, 1692};
+        if (gpu_info::CompareWindowsDriverVersion(vendorId, GetAdapter()->GetDriverVersion(),
+                                                  kFixedDriverVersion) == -1) {
             SetToggle(Toggle::D3D12AllocateExtraMemoryFor2DArrayTexture, true);
         }
     }
