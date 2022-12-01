@@ -78,16 +78,16 @@ class SwapChainValidationTests : public DawnTest {
     void CheckTextureViewIsValid(wgpu::TextureView view) { CheckTextureView(view, false, false); }
 
   private:
-    void CheckTextureView(wgpu::TextureView view, bool errorAtFinish, bool errorAtSubmit) {
+    void CheckTextureView(wgpu::TextureView view, bool errorAtBeginRenderPass, bool errorAtSubmit) {
         utils::ComboRenderPassDescriptor renderPassDesc({view});
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
-        pass.End();
 
-        if (errorAtFinish) {
-            ASSERT_DEVICE_ERROR(encoder.Finish());
+        if (errorAtBeginRenderPass) {
+            ASSERT_DEVICE_ERROR(encoder.BeginRenderPass(&renderPassDesc));
         } else {
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
+            pass.End();
             wgpu::CommandBuffer commands = encoder.Finish();
 
             if (errorAtSubmit) {

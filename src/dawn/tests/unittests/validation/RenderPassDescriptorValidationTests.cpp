@@ -27,20 +27,14 @@ namespace {
 class RenderPassDescriptorValidationTest : public ValidationTest {
   public:
     void AssertBeginRenderPassSuccess(const wgpu::RenderPassDescriptor* descriptor) {
-        wgpu::CommandEncoder commandEncoder = TestBeginRenderPass(descriptor);
-        commandEncoder.Finish();
-    }
-    void AssertBeginRenderPassError(const wgpu::RenderPassDescriptor* descriptor) {
-        wgpu::CommandEncoder commandEncoder = TestBeginRenderPass(descriptor);
-        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
-    }
-
-  private:
-    wgpu::CommandEncoder TestBeginRenderPass(const wgpu::RenderPassDescriptor* descriptor) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(descriptor);
         renderPassEncoder.End();
-        return commandEncoder;
+        commandEncoder.Finish();
+    }
+    void AssertBeginRenderPassError(const wgpu::RenderPassDescriptor* descriptor) {
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        ASSERT_DEVICE_ERROR(commandEncoder.BeginRenderPass(descriptor));
     }
 };
 

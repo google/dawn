@@ -47,8 +47,7 @@ class DeprecationTests : public DawnTest {
 
 // Test that setting attachment rather than view for render pass color and depth/stencil attachments
 // is deprecated.
-// TODO(dawn:1602): validation implementations need updating
-TEST_P(DeprecationTests, DISABLED_ReadOnlyDepthStencilStoreLoadOpsAttachment) {
+TEST_P(DeprecationTests, ReadOnlyDepthStencilStoreLoadOpsAttachment) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
     wgpu::RenderPassEncoder pass;
 
@@ -71,6 +70,8 @@ TEST_P(DeprecationTests, DISABLED_ReadOnlyDepthStencilStoreLoadOpsAttachment) {
 
     depthAttachment->depthLoadOp = wgpu::LoadOp::Load;
     depthAttachment->depthStoreOp = wgpu::StoreOp::Store;
+    depthAttachment->stencilLoadOp = wgpu::LoadOp::Undefined;
+    depthAttachment->stencilStoreOp = wgpu::StoreOp::Undefined;
 
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -92,8 +93,7 @@ TEST_P(DeprecationTests, DISABLED_ReadOnlyDepthStencilStoreLoadOpsAttachment) {
 
 // Test that setting the clearColor, clearDepth, or clearStencil values for render pass attachments
 // is deprecated. (dawn:1269)
-// TODO(dawn:1602): validation implementations need updating
-TEST_P(DeprecationTests, DISABLED_AttachmentClearColor) {
+TEST_P(DeprecationTests, AttachmentClearColor) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass;

@@ -446,6 +446,19 @@ crbug.com/dawn/1082 webgpu:web_platform,external_texture,video:* [ Skip ]
 ################################################################################
 
 ################################################################################
+# commandEncoder validation tests need updates in CTS
+################################################################################
+crbug.com/dawn/1602 webgpu:api,validation,encoding,beginComputePass:* [ Skip ]
+crbug.com/dawn/1602 webgpu:api,validation,encoding,beginRenderPass:* [ Skip ]
+crbug.com/dawn/1602 webgpu:api,validation,encoding,encoder_open_state:non_pass_commands:* [ Skip ]
+crbug.com/dawn/1602 webgpu:api,validation,encoding,queries,general:occlusion_query,* [ Skip ]
+crbug.com/dawn/1602 webgpu:api,validation,render_pass,render_pass_descriptor:* [ Skip ]
+crbug.com/dawn/1602 webgpu:api,validation,render_pass,resolve:resolve_attachment:* [ Skip ]
+crbug.com/dawn/1602 webgpu:api,validation,render_pass,storeOp:* [ Skip ]
+crbug.com/dawn/1602 webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,set_bind_group_on_same_index_depth_stencil_texture:* [ Skip ]
+################################################################################
+
+################################################################################
 # untriaged failures
 # KEEP
 ################################################################################
