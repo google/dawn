@@ -75,17 +75,20 @@ TEST_F(ParserImplTest, LHSExpression_InvalidCoreLHSExpr) {
 }
 
 TEST_F(ParserImplTest, LHSExpression_Multiple) {
-    auto p = parser("*&**&&*a");
+    auto p = parser("*&********&&&&&&*a");
     auto e = p->lhs_expression();
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
     EXPECT_TRUE(e.matched);
     ASSERT_NE(e.value, nullptr);
 
-    std::vector<ast::UnaryOp> results = {ast::UnaryOp::kIndirection, ast::UnaryOp::kAddressOf,
-                                         ast::UnaryOp::kIndirection, ast::UnaryOp::kIndirection,
-                                         ast::UnaryOp::kAddressOf,   ast::UnaryOp::kAddressOf,
-                                         ast::UnaryOp::kIndirection};
+    std::vector<ast::UnaryOp> results = {
+        ast::UnaryOp::kIndirection, ast::UnaryOp::kAddressOf,   ast::UnaryOp::kIndirection,
+        ast::UnaryOp::kIndirection, ast::UnaryOp::kIndirection, ast::UnaryOp::kIndirection,
+        ast::UnaryOp::kIndirection, ast::UnaryOp::kIndirection, ast::UnaryOp::kIndirection,
+        ast::UnaryOp::kIndirection, ast::UnaryOp::kAddressOf,   ast::UnaryOp::kAddressOf,
+        ast::UnaryOp::kAddressOf,   ast::UnaryOp::kAddressOf,   ast::UnaryOp::kAddressOf,
+        ast::UnaryOp::kAddressOf,   ast::UnaryOp::kIndirection};
 
     auto* expr = e.value;
     for (auto op : results) {

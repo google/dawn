@@ -43,6 +43,7 @@
 #include "src/tint/sem/external_texture.h"
 #include "src/tint/sem/multisampled_texture.h"
 #include "src/tint/sem/sampled_texture.h"
+#include "src/tint/utils/reverse.h"
 #include "src/tint/utils/string.h"
 
 namespace tint::reader::wgsl {
@@ -3239,34 +3240,50 @@ Maybe<const ast::Expression*> ParserImpl::lhs_expression() {
         return component_or_swizzle_specifier(core_expr.value);
     }
 
-    auto check_lhs = [&](ast::UnaryOp op) -> Maybe<const ast::Expression*> {
-        auto& t = peek();
-        auto expr = lhs_expression();
-        if (expr.errored) {
-            return Failure::kErrored;
-        }
-        if (!expr.matched) {
-            return add_error(t, "missing expression");
-        }
-        return create<ast::UnaryOpExpression>(t.source(), op, expr.value);
+    // Gather up all the `*`, `&` and `&&` tokens into a list and create all of the unary ops at
+    // once instead of recursing. This handles the case where the fuzzer decides >8k `*`s would be
+    // fun.
+    struct LHSData {
+        Source source;
+        ast::UnaryOp op;
     };
+    utils::Vector<LHSData, 4> ops;
+    while (true) {
+        auto& t = peek();
+        if (!t.Is(Token::Type::kAndAnd) && !t.Is(Token::Type::kAnd) && !t.Is(Token::Type::kStar)) {
+            break;
+        }
+        next();  // consume the peek
 
-    // If an `&&` is encountered, split it into two `&`'s
-    if (match(Token::Type::kAndAnd)) {
-        // The first `&` is consumed as part of the `&&`, so this needs to run the check itself.
-        split_token(Token::Type::kAnd, Token::Type::kAnd);
-        return check_lhs(ast::UnaryOp::kAddressOf);
+        if (t.Is(Token::Type::kAndAnd)) {
+            // The first `&` is consumed as part of the `&&`, so we only push one of the two `&`s.
+            split_token(Token::Type::kAnd, Token::Type::kAnd);
+            ops.Push({t.source(), ast::UnaryOp::kAddressOf});
+        } else if (t.Is(Token::Type::kAnd)) {
+            ops.Push({t.source(), ast::UnaryOp::kAddressOf});
+        } else if (t.Is(Token::Type::kStar)) {
+            ops.Push({t.source(), ast::UnaryOp::kIndirection});
+        }
+    }
+    if (ops.IsEmpty()) {
+        return Failure::kNoMatch;
     }
 
-    if (match(Token::Type::kAnd)) {
-        return check_lhs(ast::UnaryOp::kAddressOf);
+    auto& t = peek();
+    auto expr = lhs_expression();
+    if (expr.errored) {
+        return Failure::kErrored;
+    }
+    if (!expr.matched) {
+        return add_error(t, "missing expression");
     }
 
-    if (match(Token::Type::kStar)) {
-        return check_lhs(ast::UnaryOp::kIndirection);
+    const ast::Expression* ret = expr.value;
+    // Consume the ops in reverse order so we have the correct AST ordering.
+    for (auto& info : utils::Reverse(ops)) {
+        ret = create<ast::UnaryOpExpression>(info.source, info.op, ret);
     }
-
-    return Failure::kNoMatch;
+    return ret;
 }
 
 // variable_updating_statement
