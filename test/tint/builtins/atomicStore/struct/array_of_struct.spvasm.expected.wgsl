@@ -1,12 +1,18 @@
 struct S_atomic {
+  /* @offset(0) */
   x : i32,
+  /* @offset(4) */
   a : atomic<u32>,
+  /* @offset(8) */
   y : u32,
 }
 
 struct S {
+  /* @offset(0) */
   x : i32,
+  /* @offset(4) */
   a : u32,
+  /* @offset(8) */
   y : u32,
 }
 

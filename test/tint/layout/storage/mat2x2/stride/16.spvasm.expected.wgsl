@@ -4,6 +4,7 @@ struct strided_arr {
 }
 
 struct SSBO {
+  /* @offset(0) */
   m : array<strided_arr, 2u>,
 }
 

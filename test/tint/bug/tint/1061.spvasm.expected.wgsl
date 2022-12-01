@@ -1,4 +1,5 @@
 struct buf0 {
+  /* @offset(0) */
   r : vec4<f32>,
 }
 

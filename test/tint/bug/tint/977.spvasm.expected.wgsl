@@ -3,22 +3,28 @@ type RTArr = array<f32>;
 type RTArr_1 = array<f32>;
 
 struct ResultMatrix {
+  /* @offset(0) */
   numbers : RTArr_1,
 }
 
 type RTArr_2 = array<f32>;
 
 struct FirstMatrix {
+  /* @offset(0) */
   numbers : RTArr_1,
 }
 
 struct SecondMatrix {
+  /* @offset(0) */
   numbers : RTArr_1,
 }
 
 struct Uniforms {
+  /* @offset(0) */
   NAN : f32,
+  /* @offset(4) */
   sizeA : i32,
+  /* @offset(8) */
   sizeB : i32,
 }
 

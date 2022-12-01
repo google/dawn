@@ -1,11 +1,15 @@
 struct UniformBuffer {
   @size(16)
   padding : u32,
+  /* @offset(16) */
   unknownInput_S1_c0 : f32,
   @size(12)
   padding_1 : u32,
+  /* @offset(32) */
   ucolorRed_S1_c0 : vec4<f32>,
+  /* @offset(48) */
   ucolorGreen_S1_c0 : vec4<f32>,
+  /* @offset(64) */
   umatrix_S1 : mat3x3<f32>,
 }
 

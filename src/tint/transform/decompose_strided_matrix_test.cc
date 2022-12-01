@@ -90,6 +90,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
 struct S {
   @size(16)
   padding : u32,
+  /* @offset(16) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
 
@@ -147,6 +148,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
 struct S {
   @size(16)
   padding : u32,
+  /* @offset(16) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
 
@@ -199,6 +201,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
 struct S {
   @size(16)
   padding : u32,
+  /* @offset(16u) */
   @stride(8) @internal(disable_validation__ignore_stride)
   m : mat2x2<f32>,
 }
@@ -253,6 +256,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
 struct S {
   @size(8)
   padding : u32,
+  /* @offset(8) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
 
@@ -311,6 +315,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
 struct S {
   @size(16)
   padding : u32,
+  /* @offset(16) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
 
@@ -365,6 +370,7 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
 struct S {
   @size(8)
   padding : u32,
+  /* @offset(8) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
 
@@ -422,6 +428,7 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
 struct S {
   @size(8)
   padding : u32,
+  /* @offset(8) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
 
@@ -487,6 +494,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
 struct S {
   @size(8)
   padding : u32,
+  /* @offset(8) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
 
@@ -551,6 +559,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadPrivateMatrix) {
 struct S {
   @size(8)
   padding : u32,
+  /* @offset(8u) */
   @stride(32) @internal(disable_validation__ignore_stride)
   m : mat2x2<f32>,
 }
@@ -605,6 +614,7 @@ TEST_F(DecomposeStridedMatrixTest, WritePrivateMatrix) {
 struct S {
   @size(8)
   padding : u32,
+  /* @offset(8u) */
   @stride(32) @internal(disable_validation__ignore_stride)
   m : mat2x2<f32>,
 }

@@ -15,6 +15,7 @@ struct strided_arr_1 {
 type Arr_2 = array<strided_arr_1, 4u>;
 
 struct S {
+  /* @offset(0) */
   a : Arr_2,
 }
 

@@ -1254,8 +1254,11 @@ TEST_F(SpvModuleScopeVarParserTest, StructMember_NonReadableDecoration_Dropped) 
     EXPECT_THAT(module_str, HasSubstr(R"(type Arr = @stride(4) array<u32, 2u>;
 
 struct S {
+  /* @offset(0) */
   field0 : u32,
+  /* @offset(4) */
   field1 : f32,
+  /* @offset(8) */
   field2 : Arr,
 }
 
@@ -1286,6 +1289,7 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+  /* @offset(0) */
   field0 : mat3x2<f32>,
 }
 
@@ -1316,6 +1320,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+  /* @offset(0) */
   field0 : mat3x2<f32>,
 }
 
@@ -1346,6 +1351,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration) {
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+  /* @offset(0) */
   @stride(64) @internal(disable_validation__ignore_stride)
   field0 : mat3x2<f32>,
 }
@@ -1399,7 +1405,9 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+  /* @offset(0) */
   field0 : f32,
+  /* @offset(4) */
   field1 : f32,
 }
 
@@ -1428,7 +1436,9 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+  /* @offset(0) */
   field0 : f32,
+  /* @offset(4) */
   field1 : f32,
 }
 
@@ -1459,7 +1469,9 @@ TEST_F(SpvModuleScopeVarParserTest,
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+  /* @offset(0) */
   field0 : f32,
+  /* @offset(4) */
   field1 : f32,
 }
 

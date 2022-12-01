@@ -623,7 +623,14 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
         utils::Vector<const ast::Attribute*, 4> attributes_sanitized;
         attributes_sanitized.Reserve(mem->attributes.Length());
         for (auto* attr : mem->attributes) {
-            if (!attr->Is<ast::StructMemberOffsetAttribute>()) {
+            if (attr->Is<ast::StructMemberOffsetAttribute>()) {
+                auto l = line();
+                l << "/* ";
+                if (!EmitAttributes(l, utils::Vector{attr})) {
+                    return false;
+                }
+                l << " */";
+            } else {
                 attributes_sanitized.Push(attr);
             }
         }
@@ -787,6 +794,14 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
             [&](const ast::IdAttribute* override_deco) {
                 out << "id(";
                 if (!EmitExpression(out, override_deco->expr)) {
+                    return false;
+                }
+                out << ")";
+                return true;
+            },
+            [&](const ast::StructMemberOffsetAttribute* offset) {
+                out << "offset(";
+                if (!EmitExpression(out, offset->expr)) {
                     return false;
                 }
                 out << ")";

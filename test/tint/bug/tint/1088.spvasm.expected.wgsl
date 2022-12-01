@@ -8,11 +8,15 @@ struct strided_arr {
 type Arr_1 = array<strided_arr, 4u>;
 
 struct LeftOver {
+  /* @offset(0) */
   worldViewProjection : mat4x4<f32>,
+  /* @offset(64) */
   time : f32,
   @size(12)
   padding : u32,
+  /* @offset(80) */
   test2 : Arr,
+  /* @offset(208) */
   test : Arr_1,
 }
 

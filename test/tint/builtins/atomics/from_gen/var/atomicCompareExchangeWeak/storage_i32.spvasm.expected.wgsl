@@ -1,13 +1,17 @@
 struct SB_RW_atomic {
+  /* @offset(0) */
   arg_0 : atomic<i32>,
 }
 
 struct SB_RW {
+  /* @offset(0) */
   arg_0 : i32,
 }
 
 struct x__atomic_compare_exchange_resulti32 {
+  /* @offset(0) */
   old_value : i32,
+  /* @offset(4) */
   exchanged : bool,
 }
 

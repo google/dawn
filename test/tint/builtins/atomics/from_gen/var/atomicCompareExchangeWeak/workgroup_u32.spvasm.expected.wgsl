@@ -1,5 +1,7 @@
 struct x__atomic_compare_exchange_resultu32 {
+  /* @offset(0) */
   old_value : u32,
+  /* @offset(4) */
   exchanged : bool,
 }
 

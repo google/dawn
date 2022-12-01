@@ -1,8 +1,10 @@
 struct SB_RW_atomic {
+  /* @offset(0) */
   arg_0 : atomic<u32>,
 }
 
 struct SB_RW {
+  /* @offset(0) */
   arg_0 : u32,
 }
 
