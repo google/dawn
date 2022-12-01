@@ -1,0 +1,31 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/src/cmd/gen to generate type_alias_test.cc
+
+To update the generated file, run:
+    ./tools/run gen
+
+See:
+* tools/src/cmd/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+{{- Import "src/tint/templates/enums.tmpl.inc" -}}
+{{- $enum := (Sem.Enum "type_alias") -}}
+
+#include "src/tint/resolver/type_alias.h"
+
+#include <string>
+
+#include "gtest/gtest.h"
+
+#include "src/tint/utils/string.h"
+
+namespace tint::resolver {
+namespace {
+
+{{ Eval "TestParsePrintEnum" $enum}}
+
+}  // namespace
+}  // namespace tint::resolver

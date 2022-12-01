@@ -51,6 +51,7 @@
 #include "src/tint/ast/vector.h"
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/resolver/type_alias.h"
 #include "src/tint/resolver/uniformity.h"
 #include "src/tint/sem/abstract_float.h"
 #include "src/tint/sem/abstract_int.h"
@@ -329,12 +330,15 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
                     AddNote("'" + name + "' declared here", func->Declaration()->source);
                     return nullptr;
                 },
-                [&](Default) {
+                [&](Default) -> sem::Type* {
                     if (auto* tn = ty->As<ast::TypeName>()) {
                         if (IsBuiltin(tn->name)) {
                             auto name = builder_->Symbols().NameFor(tn->name);
                             AddError("cannot use builtin '" + name + "' as type", ty->source);
                             return nullptr;
+                        }
+                        if (auto* t = BuiltinTypeAlias(tn->name)) {
+                            return t;
                         }
                     }
                     TINT_UNREACHABLE(Resolver, diagnostics_)
@@ -2228,11 +2232,13 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             },
             [&](Default) -> sem::Call* {
                 auto name = builder_->Symbols().NameFor(ident->symbol);
-                auto builtin_type = sem::ParseBuiltinType(name);
-                if (builtin_type != sem::BuiltinType::kNone) {
+                if (auto* alias = BuiltinTypeAlias(ident->symbol)) {
+                    return ty_init_or_conv(alias);
+                }
+                if (auto builtin_type = sem::ParseBuiltinType(name);
+                    builtin_type != sem::BuiltinType::kNone) {
                     return BuiltinCall(expr, builtin_type, args);
                 }
-
                 TINT_ICE(Resolver, diagnostics_)
                     << expr->source << " unhandled CallExpression target:\n"
                     << "resolved: " << (resolved ? resolved->TypeInfo().name : "<null>") << "\n"
@@ -2326,6 +2332,40 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     }
 
     return call;
+}
+
+sem::Type* Resolver::BuiltinTypeAlias(Symbol sym) const {
+    auto name = builder_->Symbols().NameFor(sym);
+    auto& b = *builder_;
+    switch (ParseTypeAlias(name)) {
+        case TypeAlias::kVec2F:
+            return b.create<sem::Vector>(b.create<sem::F32>(), 2u);
+        case TypeAlias::kVec3F:
+            return b.create<sem::Vector>(b.create<sem::F32>(), 3u);
+        case TypeAlias::kVec4F:
+            return b.create<sem::Vector>(b.create<sem::F32>(), 4u);
+        case TypeAlias::kVec2H:
+            return b.create<sem::Vector>(b.create<sem::F16>(), 2u);
+        case TypeAlias::kVec3H:
+            return b.create<sem::Vector>(b.create<sem::F16>(), 3u);
+        case TypeAlias::kVec4H:
+            return b.create<sem::Vector>(b.create<sem::F16>(), 4u);
+        case TypeAlias::kVec2I:
+            return b.create<sem::Vector>(b.create<sem::I32>(), 2u);
+        case TypeAlias::kVec3I:
+            return b.create<sem::Vector>(b.create<sem::I32>(), 3u);
+        case TypeAlias::kVec4I:
+            return b.create<sem::Vector>(b.create<sem::I32>(), 4u);
+        case TypeAlias::kVec2U:
+            return b.create<sem::Vector>(b.create<sem::U32>(), 2u);
+        case TypeAlias::kVec3U:
+            return b.create<sem::Vector>(b.create<sem::U32>(), 3u);
+        case TypeAlias::kVec4U:
+            return b.create<sem::Vector>(b.create<sem::U32>(), 4u);
+        case TypeAlias::kUndefined:
+            break;
+    }
+    return nullptr;
 }
 
 void Resolver::CollectTextureSamplerPairs(const sem::Builtin* builtin,
@@ -2550,7 +2590,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         return nullptr;
     }
 
-    if (resolved->Is<sem::Type>()) {
+    if (resolved->Is<sem::Type>() || BuiltinTypeAlias(symbol)) {
         AddError("missing '(' for type initializer or cast", expr->source.End());
         return nullptr;
     }

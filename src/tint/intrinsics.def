@@ -111,6 +111,22 @@ enum interpolation_sampling {
   sample
 }
 
+// https://www.w3.org/TR/WGSL/#vector-types
+enum type_alias {
+  vec2f
+  vec2h
+  vec2i
+  vec2u
+  vec3f
+  vec3h
+  vec3i
+  vec3u
+  vec4f
+  vec4h
+  vec4i
+  vec4u
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // WGSL primitive types                                                       //
 // Types may be decorated with @precedence(N) to prioritize which type        //

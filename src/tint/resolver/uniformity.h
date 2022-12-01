@@ -16,10 +16,10 @@
 #define SRC_TINT_RESOLVER_UNIFORMITY_H_
 
 // Forward declarations.
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 struct DependencyGraph;
-}  // namespace resolver
+}  // namespace tint::resolver
+namespace tint {
 class ProgramBuilder;
 }  // namespace tint
 

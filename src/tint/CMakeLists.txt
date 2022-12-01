@@ -542,6 +542,7 @@ tint_generated(ast/extension BENCH TEST)
 tint_generated(ast/interpolate_attribute BENCH TEST)
 tint_generated(ast/texel_format BENCH TEST)
 tint_generated(resolver/init_conv_intrinsic)
+tint_generated(resolver/type_alias BENCH TEST)
 tint_generated(sem/builtin_type)
 tint_generated(sem/parameter_usage)
 

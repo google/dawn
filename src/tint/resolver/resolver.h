@@ -384,6 +384,7 @@ class Resolver {
     /// Set the shadowing information on variable declarations.
     /// @note this method must only be called after all semantic nodes are built.
     void SetShadows();
+
     /// StatementScope() does the following:
     /// * Creates the AST -> SEM mapping.
     /// * Assigns `sem` to #current_statement_
@@ -414,6 +415,9 @@ class Resolver {
 
     /// @returns true if the symbol is the name of a builtin function.
     bool IsBuiltin(Symbol) const;
+
+    /// @returns the builtin type alias for the given symbol
+    sem::Type* BuiltinTypeAlias(Symbol) const;
 
     // ArrayInitializerSig represents a unique array initializer signature.
     // It is a tuple of the array type, number of arguments provided and earliest evaluation stage.

@@ -1395,5 +1395,56 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                                          ParamsFor<array<2, f32>>(2)));
 }  // namespace VectorTests
 
+namespace BuiltinTypeAliasTests {
+struct Params {
+    const char* alias;
+    builder::ast_type_func_ptr type;
+};
+
+template <typename T>
+constexpr Params Case(const char* alias) {
+    return Params{alias, DataType<T>::AST};
+}
+
+using BuiltinTypeAliasTest = ResolverTestWithParam<Params>;
+TEST_P(BuiltinTypeAliasTest, CheckEquivalent) {
+    // var aliased : vecTN;
+    // var explicit : vecN<T>;
+    // explicit = aliased;
+    auto& params = GetParam();
+
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(Decl(Var("aliased", ty.type_name(params.alias))),
+                   Decl(Var("explicit", params.type(*this))),  //
+                   Assign("explicit", "aliased"));
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+TEST_P(BuiltinTypeAliasTest, Construct) {
+    // var v : vecN<T> = vecTN();
+    auto& params = GetParam();
+
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(Decl(Var("v", params.type(*this), Construct(ty.type_name(params.alias)))));
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
+                         BuiltinTypeAliasTest,
+                         testing::Values(Case<vec2<f32>>("vec2f"),
+                                         Case<vec3<f32>>("vec3f"),
+                                         Case<vec4<f32>>("vec4f"),
+                                         Case<vec2<f16>>("vec2h"),
+                                         Case<vec3<f16>>("vec3h"),
+                                         Case<vec4<f16>>("vec4h"),
+                                         Case<vec2<i32>>("vec2i"),
+                                         Case<vec3<i32>>("vec3i"),
+                                         Case<vec4<i32>>("vec4i"),
+                                         Case<vec2<u32>>("vec2u"),
+                                         Case<vec3<u32>>("vec3u"),
+                                         Case<vec4<u32>>("vec4u")));
+
+}  // namespace BuiltinTypeAliasTests
+
 }  // namespace
 }  // namespace tint::resolver

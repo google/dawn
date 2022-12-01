@@ -93,15 +93,26 @@ func (l *lexer) lex() error {
 			case l.match("/", tok.Divide):
 			case l.match(".", tok.Dot):
 			case l.match("->", tok.Arrow):
-			case l.match("fn", tok.Function):
-			case l.match("op", tok.Operator):
-			case l.match("enum", tok.Enum):
-			case l.match("type", tok.Type):
-			case l.match("init", tok.Initializer):
-			case l.match("conv", tok.Converter):
-			case l.match("match", tok.Match):
 			case unicode.IsLetter(l.peek(0)) || l.peek(0) == '_':
-				l.tok(l.count(alphaNumericOrUnderscore), tok.Identifier)
+				n := l.count(alphaNumericOrUnderscore)
+				switch string(l.runes[:n]) {
+				case "fn":
+					l.tok(n, tok.Function)
+				case "op":
+					l.tok(n, tok.Operator)
+				case "enum":
+					l.tok(n, tok.Enum)
+				case "type":
+					l.tok(n, tok.Type)
+				case "init":
+					l.tok(n, tok.Initializer)
+				case "conv":
+					l.tok(n, tok.Converter)
+				case "match":
+					l.tok(n, tok.Match)
+				default:
+					l.tok(n, tok.Identifier)
+				}
 			case unicode.IsNumber(l.peek(0)) || l.peek(0) == '-':
 				isFloat := false
 				isNegative := false

@@ -66,6 +66,7 @@
 #include "src/tint/ast/void.h"
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/resolver/type_alias.h"
 #include "src/tint/scope_stack.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/symbol_table.h"
@@ -481,9 +482,14 @@ class DependencyScanner {
         graph_.resolved_symbols.Add(from, resolved);
     }
 
-    /// @returns true if `name` is the name of a builtin function
+    /// @returns true if `name` is the name of a builtin function, or builtin type alias
     bool IsBuiltin(Symbol name) const {
-        return sem::ParseBuiltinType(symbols_.NameFor(name)) != sem::BuiltinType::kNone;
+        auto s = symbols_.NameFor(name);
+        if (sem::ParseBuiltinType(s) != sem::BuiltinType::kNone ||
+            ParseTypeAlias(s) != TypeAlias::kUndefined) {
+            return true;
+        }
+        return false;
     }
 
     /// Appends an error to the diagnostics that the given symbol cannot be

@@ -84,6 +84,9 @@ func TestLexTokens(t *testing.T) {
 		{"op", []tok.Token{{Kind: tok.Operator, Runes: []rune("op"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 3, 2),
 		}}}},
+		{"operation", []tok.Token{{Kind: tok.Identifier, Runes: []rune("operation"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 10, 9),
+		}}}},
 		{"type", []tok.Token{{Kind: tok.Type, Runes: []rune("type"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 5, 4),
 		}}}},
