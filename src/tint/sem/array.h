@@ -230,17 +230,6 @@ class Array final : public Castable<Array, Type> {
     /// @returns true if this array is runtime sized
     bool IsRuntimeSized() const { return std::holds_alternative<RuntimeArrayCount>(count_); }
 
-    /// Records that this array type (transitively) references the given override variable.
-    /// @param var the module-scope override variable
-    void AddTransitivelyReferencedOverride(const GlobalVariable* var) {
-        referenced_overrides_.Add(var);
-    }
-
-    /// @returns all transitively referenced override variables
-    const utils::UniqueVector<const GlobalVariable*, 4>& TransitivelyReferencedOverrides() const {
-        return referenced_overrides_;
-    }
-
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
@@ -253,7 +242,6 @@ class Array final : public Castable<Array, Type> {
     const uint32_t size_;
     const uint32_t stride_;
     const uint32_t implicit_stride_;
-    utils::UniqueVector<const GlobalVariable*, 4> referenced_overrides_;
 };
 
 }  // namespace tint::sem

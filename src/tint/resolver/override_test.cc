@@ -142,7 +142,9 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaOverrideInit) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     {
-        auto& refs = Sem().Get(b)->TransitivelyReferencedOverrides();
+        auto* r = Sem().TransitivelyReferencedOverrides(Sem().Get(b));
+        ASSERT_NE(r, nullptr);
+        auto& refs = *r;
         ASSERT_EQ(refs.Length(), 1u);
         EXPECT_EQ(refs[0], Sem().Get(a));
     }
@@ -167,7 +169,9 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaPrivateInit) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     {
-        auto& refs = Sem().Get<sem::GlobalVariable>(b)->TransitivelyReferencedOverrides();
+        auto* r = Sem().TransitivelyReferencedOverrides(Sem().Get<sem::GlobalVariable>(b));
+        ASSERT_NE(r, nullptr);
+        auto& refs = *r;
         ASSERT_EQ(refs.Length(), 1u);
         EXPECT_EQ(refs[0], Sem().Get(a));
     }
@@ -215,14 +219,18 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaArraySize) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     {
-        auto& refs = Sem().Get(arr_ty)->TransitivelyReferencedOverrides();
+        auto* r = Sem().TransitivelyReferencedOverrides(Sem().Get(arr_ty));
+        ASSERT_NE(r, nullptr);
+        auto& refs = *r;
         ASSERT_EQ(refs.Length(), 2u);
         EXPECT_EQ(refs[0], Sem().Get(b));
         EXPECT_EQ(refs[1], Sem().Get(a));
     }
 
     {
-        auto& refs = Sem().Get<sem::GlobalVariable>(arr)->TransitivelyReferencedOverrides();
+        auto* r = Sem().TransitivelyReferencedOverrides(Sem().Get<sem::GlobalVariable>(arr));
+        ASSERT_NE(r, nullptr);
+        auto& refs = *r;
         ASSERT_EQ(refs.Length(), 2u);
         EXPECT_EQ(refs[0], Sem().Get(b));
         EXPECT_EQ(refs[1], Sem().Get(a));
@@ -251,14 +259,18 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaArraySize_Alias) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     {
-        auto& refs = Sem().Get<sem::Array>(arr_ty->type)->TransitivelyReferencedOverrides();
+        auto* r = Sem().TransitivelyReferencedOverrides(Sem().Get<sem::Array>(arr_ty->type));
+        ASSERT_NE(r, nullptr);
+        auto& refs = *r;
         ASSERT_EQ(refs.Length(), 2u);
         EXPECT_EQ(refs[0], Sem().Get(b));
         EXPECT_EQ(refs[1], Sem().Get(a));
     }
 
     {
-        auto& refs = Sem().Get<sem::GlobalVariable>(arr)->TransitivelyReferencedOverrides();
+        auto* r = Sem().TransitivelyReferencedOverrides(Sem().Get<sem::GlobalVariable>(arr));
+        ASSERT_NE(r, nullptr);
+        auto& refs = *r;
         ASSERT_EQ(refs.Length(), 2u);
         EXPECT_EQ(refs[0], Sem().Get(b));
         EXPECT_EQ(refs[1], Sem().Get(a));

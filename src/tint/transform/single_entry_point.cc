@@ -71,9 +71,12 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
             [&](const ast::TypeDecl* ty) {
                 // Strip aliases that reference unused override declarations.
                 if (auto* arr = sem.Get(ty)->As<sem::Array>()) {
-                    for (auto* o : arr->TransitivelyReferencedOverrides()) {
-                        if (!referenced_vars.Contains(o)) {
-                            return;
+                    auto* refs = sem.TransitivelyReferencedOverrides(arr);
+                    if (refs) {
+                        for (auto* o : *refs) {
+                            if (!referenced_vars.Contains(o)) {
+                                return;
+                            }
                         }
                     }
                 }

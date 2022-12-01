@@ -917,11 +917,14 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
 
     // Track the pipeline-overridable constants that are transitively referenced by this variable.
     for (auto* var : transitively_referenced_overrides) {
-        sem->AddTransitivelyReferencedOverride(var);
+        builder_->Sem().AddTransitivelyReferencedOverride(sem, var);
     }
     if (auto* arr = sem->Type()->UnwrapRef()->As<sem::Array>()) {
-        for (auto* var : arr->TransitivelyReferencedOverrides()) {
-            sem->AddTransitivelyReferencedOverride(var);
+        auto* refs = builder_->Sem().TransitivelyReferencedOverrides(arr);
+        if (refs) {
+            for (auto* var : *refs) {
+                builder_->Sem().AddTransitivelyReferencedOverride(sem, var);
+            }
         }
     }
 
@@ -2553,8 +2556,11 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         if (current_function_) {
             if (global) {
                 current_function_->AddDirectlyReferencedGlobal(global);
-                for (auto* var : global->TransitivelyReferencedOverrides()) {
-                    current_function_->AddTransitivelyReferencedGlobal(var);
+                auto* refs = builder_->Sem().TransitivelyReferencedOverrides(global);
+                if (refs) {
+                    for (auto* var : *refs) {
+                        current_function_->AddTransitivelyReferencedGlobal(var);
+                    }
                 }
             }
         } else if (variable->Declaration()->Is<ast::Override>()) {
@@ -2562,8 +2568,11 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                 // Track the reference to this pipeline-overridable constant and any other
                 // pipeline-overridable constants that it references.
                 resolved_overrides_->Add(global);
-                for (auto* var : global->TransitivelyReferencedOverrides()) {
-                    resolved_overrides_->Add(var);
+                auto* refs = builder_->Sem().TransitivelyReferencedOverrides(global);
+                if (refs) {
+                    for (auto* var : *refs) {
+                        resolved_overrides_->Add(var);
+                    }
                 }
             }
         } else if (variable->Declaration()->Is<ast::Var>()) {
@@ -2956,7 +2965,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     // Track the pipeline-overridable constants that are transitively referenced by this array
     // type.
     for (auto* var : transitively_referenced_overrides) {
-        out->AddTransitivelyReferencedOverride(var);
+        builder_->Sem().AddTransitivelyReferencedOverride(out, var);
     }
 
     return out;
