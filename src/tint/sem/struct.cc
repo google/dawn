@@ -52,6 +52,7 @@ TypeFlags FlagsFrom(const StructMemberList& members) {
 }  // namespace
 
 Struct::Struct(const ast::Struct* declaration,
+               tint::Source source,
                Symbol name,
                StructMemberList members,
                uint32_t align,
@@ -59,6 +60,7 @@ Struct::Struct(const ast::Struct* declaration,
                uint32_t size_no_padding)
     : Base(FlagsFrom(members)),
       declaration_(declaration),
+      source_(source),
       name_(name),
       members_(std::move(members)),
       align_(align),

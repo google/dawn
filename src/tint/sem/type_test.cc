@@ -45,6 +45,7 @@ struct TypeTest : public TestHelper {
     const sem::Reference* ref_u32 =
         create<Reference>(u32, ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
     const sem::Struct* str_f32 = create<Struct>(nullptr,
+                                                Source{},
                                                 Sym("str_f32"),
                                                 StructMemberList{
                                                     create<StructMember>(
@@ -62,6 +63,7 @@ struct TypeTest : public TestHelper {
                                                 /* size*/ 4u,
                                                 /* size_no_padding*/ 4u);
     const sem::Struct* str_f16 = create<Struct>(nullptr,
+                                                Source{},
                                                 Sym("str_f16"),
                                                 StructMemberList{
                                                     create<StructMember>(
@@ -79,6 +81,7 @@ struct TypeTest : public TestHelper {
                                                 /* size*/ 4u,
                                                 /* size_no_padding*/ 4u);
     sem::Struct* str_af = create<Struct>(nullptr,
+                                         Source{},
                                          Sym("str_af"),
                                          StructMemberList{
                                              create<StructMember>(

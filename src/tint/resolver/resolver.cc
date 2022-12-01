@@ -3299,7 +3299,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     }
 
     auto* out = builder_->create<sem::Struct>(
-        str, str->name, sem_members, static_cast<uint32_t>(struct_align),
+        str, str->source, str->name, sem_members, static_cast<uint32_t>(struct_align),
         static_cast<uint32_t>(struct_size), static_cast<uint32_t>(size_no_padding));
 
     for (size_t i = 0; i < sem_members.size(); i++) {

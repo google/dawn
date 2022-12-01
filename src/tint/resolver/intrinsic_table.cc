@@ -823,6 +823,7 @@ sem::Struct* build_struct(ProgramBuilder& b,
     uint32_t size_with_padding = utils::RoundUp(max_align, offset);
     return b.create<sem::Struct>(
         /* declaration */ nullptr,
+        /* source */ Source{},
         /* name */ b.Sym(name),
         /* members */ members,
         /* align */ max_align,

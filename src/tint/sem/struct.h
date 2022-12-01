@@ -57,6 +57,7 @@ class Struct final : public Castable<Struct, Type> {
   public:
     /// Constructor
     /// @param declaration the AST structure declaration
+    /// @param source the source of the structure
     /// @param name the name of the structure
     /// @param members the structure members
     /// @param align the byte alignment of the structure
@@ -64,6 +65,7 @@ class Struct final : public Castable<Struct, Type> {
     /// @param size_no_padding size of the members without the end of structure
     /// alignment padding
     Struct(const ast::Struct* declaration,
+           tint::Source source,
            Symbol name,
            StructMemberList members,
            uint32_t align,
@@ -82,6 +84,9 @@ class Struct final : public Castable<Struct, Type> {
 
     /// @returns the struct
     const ast::Struct* Declaration() const { return declaration_; }
+
+    /// @returns the source of the structure
+    tint::Source Source() const { return source_; }
 
     /// @returns the name of the structure
     Symbol Name() const { return name_; }
@@ -162,6 +167,7 @@ class Struct final : public Castable<Struct, Type> {
 
   private:
     ast::Struct const* const declaration_;
+    const tint::Source source_;
     const Symbol name_;
     const StructMemberList members_;
     const uint32_t align_;
