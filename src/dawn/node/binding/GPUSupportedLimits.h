@@ -34,6 +34,7 @@ class GPUSupportedLimits final : public interop::GPUSupportedLimits {
     uint32_t getMaxTextureDimension3D(Napi::Env) override;
     uint32_t getMaxTextureArrayLayers(Napi::Env) override;
     uint32_t getMaxBindGroups(Napi::Env) override;
+    uint32_t getMaxBindingsPerBindGroup(Napi::Env) override;
     uint32_t getMaxDynamicUniformBuffersPerPipelineLayout(Napi::Env) override;
     uint32_t getMaxDynamicStorageBuffersPerPipelineLayout(Napi::Env) override;
     uint32_t getMaxSampledTexturesPerShaderStage(Napi::Env) override;
@@ -46,10 +47,13 @@ class GPUSupportedLimits final : public interop::GPUSupportedLimits {
     uint32_t getMinUniformBufferOffsetAlignment(Napi::Env) override;
     uint32_t getMinStorageBufferOffsetAlignment(Napi::Env) override;
     uint32_t getMaxVertexBuffers(Napi::Env) override;
+    uint64_t getMaxBufferSize(Napi::Env) override;
     uint32_t getMaxVertexAttributes(Napi::Env) override;
     uint32_t getMaxVertexBufferArrayStride(Napi::Env) override;
     uint32_t getMaxInterStageShaderComponents(Napi::Env) override;
     uint32_t getMaxInterStageShaderVariables(Napi::Env) override;
+    uint32_t getMaxColorAttachments(Napi::Env) override;
+    uint32_t getMaxColorAttachmentBytesPerSample(Napi::Env) override;
     uint32_t getMaxComputeWorkgroupStorageSize(Napi::Env) override;
     uint32_t getMaxComputeInvocationsPerWorkgroup(Napi::Env) override;
     uint32_t getMaxComputeWorkgroupSizeX(Napi::Env) override;

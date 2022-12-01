@@ -60,6 +60,7 @@ std::vector<std::string> Split(const std::string& s, char delim) {
     X(maxTextureDimension3D)                     \
     X(maxTextureArrayLayers)                     \
     X(maxBindGroups)                             \
+    X(maxBindingsPerBindGroup)                   \
     X(maxDynamicUniformBuffersPerPipelineLayout) \
     X(maxDynamicStorageBuffersPerPipelineLayout) \
     X(maxSampledTexturesPerShaderStage)          \
@@ -72,9 +73,12 @@ std::vector<std::string> Split(const std::string& s, char delim) {
     X(minUniformBufferOffsetAlignment)           \
     X(minStorageBufferOffsetAlignment)           \
     X(maxVertexBuffers)                          \
+    X(maxBufferSize)                             \
     X(maxVertexAttributes)                       \
     X(maxVertexBufferArrayStride)                \
     X(maxInterStageShaderComponents)             \
+    X(maxColorAttachments)                       \
+    /* X(maxColorAttachmentBytesPerSample) */    \
     X(maxComputeWorkgroupStorageSize)            \
     X(maxComputeInvocationsPerWorkgroup)         \
     X(maxComputeWorkgroupSizeX)                  \
@@ -214,6 +218,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
             case interop::GPUFeatureName::kShaderF16:
             case interop::GPUFeatureName::kIndirectFirstInstance:
             case interop::GPUFeatureName::kBgra8UnormStorage:
+            case interop::GPUFeatureName::kRg11B10UfloatRenderable:
                 // TODO(dawn:1123) Add support for these extensions when possible.
                 continue;
         }

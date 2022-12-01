@@ -166,6 +166,10 @@ interop::GPUSize64 GPUBuffer::getSize(Napi::Env) {
     return buffer_.GetSize();
 }
 
+interop::GPUBufferMapState GPUBuffer::getMapState(Napi::Env) {
+    UNIMPLEMENTED();
+}
+
 interop::GPUBufferUsageFlags GPUBuffer::getUsage(Napi::Env env) {
     interop::GPUBufferUsageFlags result;
 

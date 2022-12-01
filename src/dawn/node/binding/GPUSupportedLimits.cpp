@@ -44,6 +44,10 @@ uint32_t GPUSupportedLimits::getMaxBindGroups(Napi::Env) {
     return limits_.limits.maxBindGroups;
 }
 
+uint32_t GPUSupportedLimits::getMaxBindingsPerBindGroup(Napi::Env) {
+    return limits_.limits.maxBindingsPerBindGroup;
+}
+
 uint32_t GPUSupportedLimits::getMaxDynamicUniformBuffersPerPipelineLayout(Napi::Env) {
     return limits_.limits.maxDynamicUniformBuffersPerPipelineLayout;
 }
@@ -92,6 +96,10 @@ uint32_t GPUSupportedLimits::getMaxVertexBuffers(Napi::Env) {
     return limits_.limits.maxVertexBuffers;
 }
 
+uint64_t GPUSupportedLimits::getMaxBufferSize(Napi::Env) {
+    return limits_.limits.maxBufferSize;
+}
+
 uint32_t GPUSupportedLimits::getMaxVertexAttributes(Napi::Env) {
     return limits_.limits.maxVertexAttributes;
 }
@@ -105,8 +113,16 @@ uint32_t GPUSupportedLimits::getMaxInterStageShaderComponents(Napi::Env) {
 }
 
 uint32_t GPUSupportedLimits::getMaxInterStageShaderVariables(Napi::Env) {
+    return limits_.limits.maxInterStageShaderVariables;
+}
+
+uint32_t GPUSupportedLimits::getMaxColorAttachments(Napi::Env) {
+    return limits_.limits.maxColorAttachments;
+}
+
+uint32_t GPUSupportedLimits::getMaxColorAttachmentBytesPerSample(Napi::Env) {
     UNIMPLEMENTED();
-    // return limits_.limits.maxInterStageShaderVariables;
+    // return limits_.limits.maxColorAttachmentBytesPerSample;
 }
 
 uint32_t GPUSupportedLimits::getMaxComputeWorkgroupStorageSize(Napi::Env) {
