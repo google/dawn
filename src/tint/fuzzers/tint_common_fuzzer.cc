@@ -209,11 +209,11 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
                                    "transformed into an invalid output program");
                 }
             }
+            return 0;
         }
 
         program = std::move(out.program);
         RunInspector(&program);
-
         return 1;
     };
 
