@@ -359,10 +359,10 @@ struct CanonicalizeEntryPointIO::State {
                 continue;
             }
 
-            auto* member_ast = member->Declaration();
-            auto name = ctx.src->Symbols().NameFor(member_ast->symbol);
+            auto name = ctx.src->Symbols().NameFor(member->Name());
 
-            auto attributes = CloneShaderIOAttributes(member_ast->attributes, do_interpolate);
+            auto attributes =
+                CloneShaderIOAttributes(member->Declaration()->attributes, do_interpolate);
             auto* input_expr =
                 AddInput(name, member->Type(), member->Location(), std::move(attributes));
             inner_struct_values.Push(input_expr);
@@ -388,9 +388,9 @@ struct CanonicalizeEntryPointIO::State {
                     continue;
                 }
 
-                auto* member_ast = member->Declaration();
-                auto name = ctx.src->Symbols().NameFor(member_ast->symbol);
-                auto attributes = CloneShaderIOAttributes(member_ast->attributes, do_interpolate);
+                auto name = ctx.src->Symbols().NameFor(member->Name());
+                auto attributes =
+                    CloneShaderIOAttributes(member->Declaration()->attributes, do_interpolate);
 
                 // Extract the original structure member.
                 AddOutput(name, member->Type(), member->Location(), std::move(attributes),

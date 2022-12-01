@@ -57,7 +57,7 @@ struct PackedVec3::State {
 
                                 // Apply the PackedVec3::Attribute to the member
                                 auto* member_decl = member->Declaration();
-                                auto name = ctx.Clone(member_decl->symbol);
+                                auto name = ctx.Clone(member->Name());
                                 auto* type = ctx.Clone(member_decl->type);
                                 utils::Vector<const ast::Attribute*, 4> attrs{
                                     b.ASTNodes().Create<Attribute>(b.ID(), b.AllocateNodeID()),

@@ -413,7 +413,7 @@ bool Validator::AddressSpaceLayout(const sem::Type* store_ty,
     };
 
     auto member_name_of = [this](const sem::StructMember* sm) {
-        return symbols_.NameFor(sm->Declaration()->symbol);
+        return symbols_.NameFor(sm->Name());
     };
 
     // Only validate the [type + address space] once

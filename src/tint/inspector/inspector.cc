@@ -648,9 +648,9 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
     if (auto* struct_ty = unwrapped_type->As<sem::Struct>()) {
         // Recurse into members.
         for (auto* member : struct_ty->Members()) {
-            AddEntryPointInOutVariables(
-                name + "." + program_->Symbols().NameFor(member->Declaration()->symbol),
-                member->Type(), member->Declaration()->attributes, member->Location(), variables);
+            AddEntryPointInOutVariables(name + "." + program_->Symbols().NameFor(member->Name()),
+                                        member->Type(), member->Declaration()->attributes,
+                                        member->Location(), variables);
         }
         return;
     }

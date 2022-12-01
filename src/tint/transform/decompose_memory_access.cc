@@ -645,8 +645,8 @@ struct DecomposeMemoryAccess::State {
                             utils::Vector<const ast::Statement*, 8> stmts;
                             for (auto* member : str->Members()) {
                                 auto* offset = b.Add("offset", u32(member->Offset()));
-                                auto* element = b.MemberAccessor(
-                                    "value", ctx.Clone(member->Declaration()->symbol));
+                                auto* element =
+                                    b.MemberAccessor("value", ctx.Clone(member->Name()));
                                 Symbol store =
                                     StoreFunc(buf_ty, member->Type()->UnwrapRef(), var_user);
                                 auto* call = b.Call(store, "buffer", offset, element);

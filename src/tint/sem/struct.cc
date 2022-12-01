@@ -80,7 +80,7 @@ bool Struct::Equals(const sem::Type& other) const {
 
 const StructMember* Struct::FindMember(Symbol name) const {
     for (auto* member : members_) {
-        if (member->Declaration()->symbol == name) {
+        if (member->Name() == name) {
             return member;
         }
     }
@@ -102,9 +102,7 @@ std::string Struct::FriendlyName(const SymbolTable& symbols) const {
 std::string Struct::Layout(const tint::SymbolTable& symbols) const {
     std::stringstream ss;
 
-    auto member_name_of = [&](const sem::StructMember* sm) {
-        return symbols.NameFor(sm->Declaration()->symbol);
-    };
+    auto member_name_of = [&](const sem::StructMember* sm) { return symbols.NameFor(sm->Name()); };
 
     if (Members().empty()) {
         return {};

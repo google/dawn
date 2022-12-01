@@ -131,8 +131,7 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
                     }
 
                     truncated_members.Push(ctx.Clone(member->Declaration()));
-                    initializer_exprs.Push(
-                        b.MemberAccessor("io", ctx.Clone(member->Declaration()->symbol)));
+                    initializer_exprs.Push(b.MemberAccessor("io", ctx.Clone(member->Name())));
                 }
 
                 // Create the new shader io struct.

@@ -3620,7 +3620,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace address_space,
                                               decl->type->source)) {
                 std::stringstream err;
                 err << "while analyzing structure member " << sem_.TypeNameOf(str) << "."
-                    << builder_->Symbols().NameFor(decl->symbol);
+                    << builder_->Symbols().NameFor(member->Name());
                 AddNote(err.str(), decl->source);
                 return false;
             }
