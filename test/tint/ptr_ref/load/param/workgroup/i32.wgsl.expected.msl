@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int func(threadgroup int* const pointer) {
+  return *(pointer);
+}
+
+void tint_symbol_inner(uint local_invocation_index, threadgroup int* const tint_symbol_1) {
+  {
+    *(tint_symbol_1) = 0;
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  int const r = func(tint_symbol_1);
+}
+
+kernel void tint_symbol(uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup int tint_symbol_2;
+  tint_symbol_inner(local_invocation_index, &(tint_symbol_2));
+  return;
+}
+

@@ -425,6 +425,8 @@ list(APPEND TINT_LIB_SRCS
   transform/decompose_strided_matrix.h
   transform/demote_to_helper.cc
   transform/demote_to_helper.h
+  transform/direct_variable_access.cc
+  transform/direct_variable_access.h
   transform/disable_uniformity_analysis.cc
   transform/disable_uniformity_analysis.h
   transform/expand_compound_assignment.cc
@@ -1195,6 +1197,7 @@ if(TINT_BUILD_TESTS)
       transform/decompose_strided_array_test.cc
       transform/decompose_strided_matrix_test.cc
       transform/demote_to_helper_test.cc
+      transform/direct_variable_access_test.cc
       transform/disable_uniformity_analysis_test.cc
       transform/expand_compound_assignment_test.cc
       transform/first_index_offset_test.cc

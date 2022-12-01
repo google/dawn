@@ -1,0 +1,56 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 28
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %S_block "S_block"
+               OpMemberName %S_block 0 "inner"
+               OpName %str "str"
+               OpMemberName %str 0 "i"
+               OpName %S "S"
+               OpName %func_S_X "func_S_X"
+               OpName %pointer "pointer"
+               OpName %main "main"
+               OpDecorate %S_block Block
+               OpMemberDecorate %S_block 0 Offset 0
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %_arr_str_uint_4 ArrayStride 4
+               OpDecorate %S NonWritable
+               OpDecorate %S DescriptorSet 0
+               OpDecorate %S Binding 0
+               OpDecorate %_arr_uint_uint_1 ArrayStride 4
+        %int = OpTypeInt 32 1
+        %str = OpTypeStruct %int
+       %uint = OpTypeInt 32 0
+     %uint_4 = OpConstant %uint 4
+%_arr_str_uint_4 = OpTypeArray %str %uint_4
+    %S_block = OpTypeStruct %_arr_str_uint_4
+%_ptr_StorageBuffer_S_block = OpTypePointer StorageBuffer %S_block
+          %S = OpVariable %_ptr_StorageBuffer_S_block StorageBuffer
+     %uint_1 = OpConstant %uint 1
+%_arr_uint_uint_1 = OpTypeArray %uint %uint_1
+          %9 = OpTypeFunction %str %_arr_uint_uint_1
+     %uint_0 = OpConstant %uint 0
+         %16 = OpConstantNull %int
+%_ptr_StorageBuffer_str = OpTypePointer StorageBuffer %str
+       %void = OpTypeVoid
+         %21 = OpTypeFunction %void
+     %uint_2 = OpConstant %uint 2
+         %27 = OpConstantComposite %_arr_uint_uint_1 %uint_2
+   %func_S_X = OpFunction %str None %9
+    %pointer = OpFunctionParameter %_arr_uint_uint_1
+         %14 = OpLabel
+         %17 = OpCompositeExtract %uint %pointer 0
+         %19 = OpAccessChain %_ptr_StorageBuffer_str %S %uint_0 %17
+         %20 = OpLoad %str %19
+               OpReturnValue %20
+               OpFunctionEnd
+       %main = OpFunction %void None %21
+         %24 = OpLabel
+         %25 = OpFunctionCall %str %func_S_X %27
+               OpReturn
+               OpFunctionEnd

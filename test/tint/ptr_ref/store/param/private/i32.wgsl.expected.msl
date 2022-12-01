@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void func(thread int* const pointer) {
+  *(pointer) = 42;
+}
+
+kernel void tint_symbol() {
+  thread int tint_symbol_1 = 0;
+  func(&(tint_symbol_1));
+  return;
+}
+

@@ -1,0 +1,93 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 54
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %local_invocation_index_1
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %local_invocation_index_1 "local_invocation_index_1"
+               OpName %str "str"
+               OpMemberName %str 0 "i"
+               OpName %S "S"
+               OpName %func_S_X "func_S_X"
+               OpName %pointer "pointer"
+               OpName %main_inner "main_inner"
+               OpName %local_invocation_index "local_invocation_index"
+               OpName %idx "idx"
+               OpName %main "main"
+               OpDecorate %local_invocation_index_1 BuiltIn LocalInvocationIndex
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %_arr_str_uint_4 ArrayStride 4
+               OpDecorate %_arr_uint_uint_1 ArrayStride 4
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%local_invocation_index_1 = OpVariable %_ptr_Input_uint Input
+        %int = OpTypeInt 32 1
+        %str = OpTypeStruct %int
+     %uint_4 = OpConstant %uint 4
+%_arr_str_uint_4 = OpTypeArray %str %uint_4
+%_ptr_Workgroup__arr_str_uint_4 = OpTypePointer Workgroup %_arr_str_uint_4
+          %S = OpVariable %_ptr_Workgroup__arr_str_uint_4 Workgroup
+     %uint_1 = OpConstant %uint 1
+%_arr_uint_uint_1 = OpTypeArray %uint %uint_1
+         %10 = OpTypeFunction %str %_arr_uint_uint_1
+         %16 = OpConstantNull %int
+%_ptr_Workgroup_str = OpTypePointer Workgroup %str
+       %void = OpTypeVoid
+         %21 = OpTypeFunction %void %uint
+%_ptr_Function_uint = OpTypePointer Function %uint
+         %28 = OpConstantNull %uint
+       %bool = OpTypeBool
+         %41 = OpConstantNull %str
+     %uint_2 = OpConstant %uint 2
+   %uint_264 = OpConstant %uint 264
+         %48 = OpConstantComposite %_arr_uint_uint_1 %uint_2
+         %49 = OpTypeFunction %void
+   %func_S_X = OpFunction %str None %10
+    %pointer = OpFunctionParameter %_arr_uint_uint_1
+         %15 = OpLabel
+         %17 = OpCompositeExtract %uint %pointer 0
+         %19 = OpAccessChain %_ptr_Workgroup_str %S %17
+         %20 = OpLoad %str %19
+               OpReturnValue %20
+               OpFunctionEnd
+ %main_inner = OpFunction %void None %21
+%local_invocation_index = OpFunctionParameter %uint
+         %25 = OpLabel
+        %idx = OpVariable %_ptr_Function_uint Function %28
+               OpStore %idx %local_invocation_index
+               OpBranch %29
+         %29 = OpLabel
+               OpLoopMerge %30 %31 None
+               OpBranch %32
+         %32 = OpLabel
+         %34 = OpLoad %uint %idx
+         %35 = OpULessThan %bool %34 %uint_4
+         %33 = OpLogicalNot %bool %35
+               OpSelectionMerge %37 None
+               OpBranchConditional %33 %38 %37
+         %38 = OpLabel
+               OpBranch %30
+         %37 = OpLabel
+         %39 = OpLoad %uint %idx
+         %40 = OpAccessChain %_ptr_Workgroup_str %S %39
+               OpStore %40 %41
+               OpBranch %31
+         %31 = OpLabel
+         %42 = OpLoad %uint %idx
+         %43 = OpIAdd %uint %42 %uint_1
+               OpStore %idx %43
+               OpBranch %29
+         %30 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+         %47 = OpFunctionCall %str %func_S_X %48
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %49
+         %51 = OpLabel
+         %53 = OpLoad %uint %local_invocation_index_1
+         %52 = OpFunctionCall %void %main_inner %53
+               OpReturn
+               OpFunctionEnd

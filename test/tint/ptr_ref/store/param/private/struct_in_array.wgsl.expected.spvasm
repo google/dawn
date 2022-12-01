@@ -1,0 +1,51 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 30
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %str "str"
+               OpMemberName %str 0 "i"
+               OpName %P "P"
+               OpName %func_F_X "func_F_X"
+               OpName %pointer_base "pointer_base"
+               OpName %pointer_indices "pointer_indices"
+               OpName %main "main"
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %_arr_str_uint_4 ArrayStride 4
+               OpDecorate %_arr_uint_uint_1 ArrayStride 4
+        %int = OpTypeInt 32 1
+        %str = OpTypeStruct %int
+       %uint = OpTypeInt 32 0
+     %uint_4 = OpConstant %uint 4
+%_arr_str_uint_4 = OpTypeArray %str %uint_4
+%_ptr_Private__arr_str_uint_4 = OpTypePointer Private %_arr_str_uint_4
+          %8 = OpConstantNull %_arr_str_uint_4
+          %P = OpVariable %_ptr_Private__arr_str_uint_4 Private %8
+       %void = OpTypeVoid
+     %uint_1 = OpConstant %uint 1
+%_arr_uint_uint_1 = OpTypeArray %uint %uint_1
+          %9 = OpTypeFunction %void %_ptr_Private__arr_str_uint_4 %_arr_uint_uint_1
+         %18 = OpConstantNull %int
+%_ptr_Private_str = OpTypePointer Private %str
+         %22 = OpConstantNull %str
+         %23 = OpTypeFunction %void
+     %uint_2 = OpConstant %uint 2
+         %29 = OpConstantComposite %_arr_uint_uint_1 %uint_2
+   %func_F_X = OpFunction %void None %9
+%pointer_base = OpFunctionParameter %_ptr_Private__arr_str_uint_4
+%pointer_indices = OpFunctionParameter %_arr_uint_uint_1
+         %16 = OpLabel
+         %19 = OpCompositeExtract %uint %pointer_indices 0
+         %21 = OpAccessChain %_ptr_Private_str %pointer_base %19
+               OpStore %21 %22
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %23
+         %25 = OpLabel
+         %26 = OpFunctionCall %void %func_F_X %P %29
+               OpReturn
+               OpFunctionEnd

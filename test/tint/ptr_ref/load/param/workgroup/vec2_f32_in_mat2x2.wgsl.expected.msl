@@ -1,0 +1,25 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_4 {
+  float2x2 S;
+};
+
+float2 func(threadgroup float2* const pointer) {
+  return *(pointer);
+}
+
+void tint_symbol_inner(uint local_invocation_index, threadgroup float2x2* const tint_symbol_1) {
+  {
+    *(tint_symbol_1) = float2x2(float2(0.0f), float2(0.0f));
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  float2 const r = func(&((*(tint_symbol_1))[1]));
+}
+
+kernel void tint_symbol(threadgroup tint_symbol_4* tint_symbol_3 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup float2x2* const tint_symbol_2 = &((*(tint_symbol_3)).S);
+  tint_symbol_inner(local_invocation_index, tint_symbol_2);
+  return;
+}
+

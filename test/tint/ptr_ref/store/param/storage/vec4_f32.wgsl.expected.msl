@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void func(device float4* const pointer) {
+  *(pointer) = float4(0.0f);
+}
+
+kernel void tint_symbol(device float4* tint_symbol_1 [[buffer(0)]]) {
+  func(tint_symbol_1);
+  return;
+}
+

@@ -39,6 +39,7 @@ class BlockAllocator {
         static constexpr size_t kMax = 32;
         std::array<T*, kMax> ptrs;
         Pointers* next;
+        Pointers* prev;
     };
 
     /// Block is linked list of memory blocks.
@@ -55,7 +56,7 @@ class BlockAllocator {
     class TView;
 
     /// An iterator for the objects owned by the BlockAllocator.
-    template <bool IS_CONST>
+    template <bool IS_CONST, bool FORWARD>
     class TIterator {
         using PointerTy = std::conditional_t<IS_CONST, const T*, T*>;
 
@@ -72,15 +73,24 @@ class BlockAllocator {
         /// @returns true if this iterator is not equal to other
         bool operator!=(const TIterator& other) const { return !(*this == other); }
 
-        /// Advances the iterator
+        /// Progress the iterator forward one element
         /// @returns this iterator
         TIterator& operator++() {
-            if (ptrs != nullptr) {
-                ++idx;
-                if (idx == Pointers::kMax) {
-                    idx = 0;
-                    ptrs = ptrs->next;
-                }
+            if (FORWARD) {
+                ProgressForward();
+            } else {
+                ProgressBackwards();
+            }
+            return *this;
+        }
+
+        /// Progress the iterator backwards one element
+        /// @returns this iterator
+        TIterator& operator--() {
+            if (FORWARD) {
+                ProgressBackwards();
+            } else {
+                ProgressForward();
             }
             return *this;
         }
@@ -92,6 +102,27 @@ class BlockAllocator {
         friend TView<IS_CONST>;  // Keep internal iterator impl private.
         explicit TIterator(const Pointers* p, size_t i) : ptrs(p), idx(i) {}
 
+        /// Progresses the iterator forwards
+        void ProgressForward() {
+            if (ptrs != nullptr) {
+                ++idx;
+                if (idx == Pointers::kMax) {
+                    idx = 0;
+                    ptrs = ptrs->next;
+                }
+            }
+        }
+        /// Progresses the iterator backwards
+        void ProgressBackwards() {
+            if (ptrs != nullptr) {
+                if (idx == 0) {
+                    idx = Pointers::kMax - 1;
+                    ptrs = ptrs->prev;
+                }
+                --idx;
+            }
+        }
+
         const Pointers* ptrs;
         size_t idx;
     };
@@ -102,16 +133,25 @@ class BlockAllocator {
     class TView {
       public:
         /// @returns an iterator to the beginning of the view
-        TIterator<IS_CONST> begin() const {
-            return TIterator<IS_CONST>{allocator_->data.pointers.root, 0};
+        TIterator<IS_CONST, true> begin() const {
+            return TIterator<IS_CONST, true>{allocator_->data.pointers.root, 0};
         }
 
         /// @returns an iterator to the end of the view
-        TIterator<IS_CONST> end() const {
+        TIterator<IS_CONST, true> end() const {
             return allocator_->data.pointers.current_index >= Pointers::kMax
-                       ? TIterator<IS_CONST>(nullptr, 0)
-                       : TIterator<IS_CONST>(allocator_->data.pointers.current,
-                                             allocator_->data.pointers.current_index);
+                       ? TIterator<IS_CONST, true>{nullptr, 0}
+                       : TIterator<IS_CONST, true>{allocator_->data.pointers.current,
+                                                   allocator_->data.pointers.current_index};
+        }
+
+        /// @returns an iterator to the beginning of the view
+        TIterator<IS_CONST, false> rbegin() const { return TIterator<IS_CONST, false>{nullptr, 0}; }
+
+        /// @returns an iterator to the end of the view
+        TIterator<IS_CONST, false> rend() const {
+            return TIterator<IS_CONST, false>{allocator_->data.pointers.current,
+                                              allocator_->data.pointers.current_index};
         }
 
       private:
@@ -121,11 +161,17 @@ class BlockAllocator {
     };
 
   public:
-    /// An iterator type over the objects of the BlockAllocator
-    using Iterator = TIterator<false>;
+    /// A forward-iterator type over the objects of the BlockAllocator
+    using Iterator = TIterator</* const */ false, /* forward */ true>;
 
-    /// An immutable iterator type over the objects of the BlockAllocator
-    using ConstIterator = TIterator<true>;
+    /// An immutable forward-iterator type over the objects of the BlockAllocator
+    using ConstIterator = TIterator</* const */ true, /* forward */ true>;
+
+    /// A reverse-iterator type over the objects of the BlockAllocator
+    using ReverseIterator = TIterator</* const */ false, /* forward */ false>;
+
+    /// An immutable reverse-iterator type over the objects of the BlockAllocator
+    using ReverseConstIterator = TIterator</* const */ true, /* forward */ false>;
 
     /// View provides begin() and end() methods for looping over the objects owned by the
     /// BlockAllocator.
@@ -248,6 +294,7 @@ class BlockAllocator {
                 return;  // out of memory
             }
             pointers.current->next = nullptr;
+            pointers.current->prev = prev_pointers;
             pointers.current_index = 0;
 
             if (prev_pointers) {

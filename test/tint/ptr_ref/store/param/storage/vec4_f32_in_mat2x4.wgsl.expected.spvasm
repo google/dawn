@@ -1,0 +1,53 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 27
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %S_block "S_block"
+               OpMemberName %S_block 0 "inner"
+               OpName %S "S"
+               OpName %func_S_X "func_S_X"
+               OpName %pointer "pointer"
+               OpName %main "main"
+               OpDecorate %S_block Block
+               OpMemberDecorate %S_block 0 Offset 0
+               OpMemberDecorate %S_block 0 ColMajor
+               OpMemberDecorate %S_block 0 MatrixStride 16
+               OpDecorate %S DescriptorSet 0
+               OpDecorate %S Binding 0
+               OpDecorate %_arr_uint_uint_1 ArrayStride 4
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%mat2v4float = OpTypeMatrix %v4float 2
+    %S_block = OpTypeStruct %mat2v4float
+%_ptr_StorageBuffer_S_block = OpTypePointer StorageBuffer %S_block
+          %S = OpVariable %_ptr_StorageBuffer_S_block StorageBuffer
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+%_arr_uint_uint_1 = OpTypeArray %uint %uint_1
+          %7 = OpTypeFunction %void %_arr_uint_uint_1
+     %uint_0 = OpConstant %uint 0
+        %int = OpTypeInt 32 1
+         %17 = OpConstantNull %int
+%_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
+         %21 = OpConstantNull %v4float
+         %22 = OpTypeFunction %void
+         %26 = OpConstantComposite %_arr_uint_uint_1 %uint_1
+   %func_S_X = OpFunction %void None %7
+    %pointer = OpFunctionParameter %_arr_uint_uint_1
+         %14 = OpLabel
+         %18 = OpCompositeExtract %uint %pointer 0
+         %20 = OpAccessChain %_ptr_StorageBuffer_v4float %S %uint_0 %18
+               OpStore %20 %21
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %22
+         %24 = OpLabel
+         %25 = OpFunctionCall %void %func_S_X %26
+               OpReturn
+               OpFunctionEnd

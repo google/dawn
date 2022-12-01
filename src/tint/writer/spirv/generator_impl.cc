@@ -22,6 +22,7 @@
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/demote_to_helper.h"
+#include "src/tint/transform/direct_variable_access.h"
 #include "src/tint/transform/disable_uniformity_analysis.h"
 #include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/for_loop_to_loop.h"
@@ -77,12 +78,21 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     }
     manager.Add<transform::MultiplanarExternalTexture>();
 
-    manager.Add<transform::Unshadow>();
+    manager.Add<transform::Unshadow>();  // Must come before DirectVariableAccess
     bool disable_workgroup_init_in_sanitizer =
         options.disable_workgroup_init || options.use_zero_initialize_workgroup_memory_extension;
     if (!disable_workgroup_init_in_sanitizer) {
         manager.Add<transform::ZeroInitWorkgroupMemory>();
     }
+
+    {
+        transform::DirectVariableAccess::Options opts;
+        opts.transform_private = true;
+        opts.transform_function = true;
+        data.Add<transform::DirectVariableAccess::Config>(opts);
+        manager.Add<transform::DirectVariableAccess>();
+    }
+
     manager.Add<transform::RemoveUnreachableStatements>();
     manager.Add<transform::PromoteSideEffectsToDecl>();
     manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()

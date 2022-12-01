@@ -54,6 +54,7 @@
 #include "src/tint/transform/combine_samplers.h"
 #include "src/tint/transform/decompose_memory_access.h"
 #include "src/tint/transform/demote_to_helper.h"
+#include "src/tint/transform/direct_variable_access.h"
 #include "src/tint/transform/disable_uniformity_analysis.h"
 #include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/manager.h"
@@ -209,7 +210,8 @@ SanitizedResult Sanitize(const Program* in,
     manager.Add<transform::Renamer>();
     data.Add<transform::Renamer::Config>(transform::Renamer::Target::kGlslKeywords,
                                          /* preserve_unicode */ false);
-    manager.Add<transform::Unshadow>();
+    manager.Add<transform::Unshadow>();  // Must come before DirectVariableAccess
+    manager.Add<transform::DirectVariableAccess>();
 
     if (!options.disable_workgroup_init) {
         // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as

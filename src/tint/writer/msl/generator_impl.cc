@@ -266,6 +266,7 @@ bool GeneratorImpl::Generate() {
     if (!CheckSupportedExtensions("MSL", program_->AST(), diagnostics_,
                                   utils::Vector{
                                       ast::Extension::kChromiumDisableUniformityAnalysis,
+                                      ast::Extension::kChromiumExperimentalFullPtrParameters,
                                       ast::Extension::kChromiumExperimentalPushConstant,
                                       ast::Extension::kF16,
                                   })) {

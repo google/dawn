@@ -260,6 +260,7 @@ bool Builder::Build() {
                                   utils::Vector{
                                       ast::Extension::kChromiumDisableUniformityAnalysis,
                                       ast::Extension::kChromiumExperimentalDp4A,
+                                      ast::Extension::kChromiumExperimentalFullPtrParameters,
                                       ast::Extension::kChromiumExperimentalPushConstant,
                                       ast::Extension::kF16,
                                   })) {
