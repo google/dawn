@@ -12,8 +12,6 @@ struct LeftOver {
   worldViewProjection : mat4x4<f32>,
   /* @offset(64) */
   time : f32,
-  @size(12)
-  padding : u32,
   /* @offset(80) */
   test2 : Arr,
   /* @offset(208) */

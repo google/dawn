@@ -606,8 +606,8 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
     increment_indent();
     uint32_t offset = 0;
     for (auto* mem : str->members) {
-        // TODO(crbug.com/tint/798) move the @offset attribute handling to the
-        // transform::Wgsl sanitizer.
+        // TODO(crbug.com/tint/798) move the @offset attribute handling to the transform::Wgsl
+        // sanitizer.
         if (auto* mem_sem = program_->Sem().Get(mem)) {
             offset = utils::RoundUp(mem_sem->Align(), offset);
             if (uint32_t padding = mem_sem->Offset() - offset) {

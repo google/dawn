@@ -6,6 +6,7 @@ struct sspp962805860buildInformationS {
   vec4 offset;
   int essence;
   int orientation[6];
+  uint pad;
 };
 
 struct x_B4_BuildInformation {
