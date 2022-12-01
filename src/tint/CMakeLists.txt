@@ -299,6 +299,8 @@ list(APPEND TINT_LIB_SRCS
   sem/abstract_numeric.h
   sem/array.cc
   sem/array.h
+  sem/array_count.cc
+  sem/array_count.h
   sem/atomic.cc
   sem/atomic.h
   sem/behavior.cc

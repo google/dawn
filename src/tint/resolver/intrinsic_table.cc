@@ -532,12 +532,13 @@ bool match_array(MatchState&, const sem::Type* ty, const sem::Type*& T) {
 }
 
 const sem::Array* build_array(MatchState& state, const sem::Type* el) {
-    return state.builder.create<sem::Array>(el,
-                                            /* count */ sem::RuntimeArrayCount{},
-                                            /* align */ 0u,
-                                            /* size */ 0u,
-                                            /* stride */ 0u,
-                                            /* stride_implicit */ 0u);
+    return state.builder.create<sem::Array>(
+        el,
+        /* count */ state.builder.create<sem::RuntimeArrayCount>(),
+        /* align */ 0u,
+        /* size */ 0u,
+        /* stride */ 0u,
+        /* stride_implicit */ 0u);
 }
 
 bool match_ptr(MatchState&, const sem::Type* ty, Number& S, const sem::Type*& T, Number& A) {

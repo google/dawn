@@ -1778,7 +1778,12 @@ bool Validator::ArrayInitializer(const ast::CallExpression* ctor,
         return false;
     }
 
-    const auto count = std::get<sem::ConstantArrayCount>(array_type->Count()).value;
+    if (!array_type->IsConstantSized()) {
+        TINT_ICE(Resolver, diagnostics_) << "Invalid ArrayCount found";
+        return false;
+    }
+
+    const auto count = array_type->Count()->As<sem::ConstantArrayCount>()->value;
     if (!values.IsEmpty() && (values.Length() != count)) {
         std::string fm = values.Length() < count ? "few" : "many";
         AddError("array initializer has too " + fm + " elements: expected " +

@@ -91,6 +91,7 @@
 #include "src/tint/program.h"
 #include "src/tint/program_id.h"
 #include "src/tint/sem/array.h"
+#include "src/tint/sem/array_count.h"
 #include "src/tint/sem/bool.h"
 #include "src/tint/sem/constant.h"
 #include "src/tint/sem/depth_texture.h"
@@ -457,7 +458,8 @@ class ProgramBuilder {
     /// @returns the node pointer
     template <typename T, typename... ARGS>
     traits::EnableIf<traits::IsTypeOrDerived<T, sem::Node> &&
-                         !traits::IsTypeOrDerived<T, sem::Type>,
+                         !traits::IsTypeOrDerived<T, sem::Type> &&
+                         !traits::IsTypeOrDerived<T, sem::ArrayCount>,
                      T>*
     create(ARGS&&... args) {
         AssertNotMoved();
@@ -476,16 +478,27 @@ class ProgramBuilder {
 
     /// Creates a new sem::Type owned by the ProgramBuilder.
     /// When the ProgramBuilder is destructed, owned ProgramBuilder and the
-    /// returned`Type` will also be destructed.
+    /// returned `Type` will also be destructed.
     /// Types are unique (de-aliased), and so calling create() for the same `T`
     /// and arguments will return the same pointer.
     /// @param args the arguments to pass to the type constructor
     /// @returns the de-aliased type pointer
     template <typename T, typename... ARGS>
     traits::EnableIfIsType<T, sem::Type>* create(ARGS&&... args) {
-        static_assert(std::is_base_of<sem::Type, T>::value, "T does not derive from sem::Type");
         AssertNotMoved();
         return types_.Get<T>(std::forward<ARGS>(args)...);
+    }
+    /// Creates a new sem::ArrayCount owned by the ProgramBuilder.
+    /// When the ProgramBuilder is destructed, owned ProgramBuilder and the
+    /// returned `ArrayCount` will also be destructed.
+    /// ArrayCounts are unique (de-aliased), and so calling create() for the same `T`
+    /// and arguments will return the same pointer.
+    /// @param args the arguments to pass to the array count constructor
+    /// @returns the de-aliased array count pointer
+    template <typename T, typename... ARGS>
+    traits::EnableIfIsType<T, sem::ArrayCount>* create(ARGS&&... args) {
+        AssertNotMoved();
+        return types_.GetArrayCount<T>(std::forward<ARGS>(args)...);
     }
 
     /// Marks this builder as moved, preventing any further use of the builder.

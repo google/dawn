@@ -273,7 +273,7 @@ const Type* Type::ElementOf(const Type* ty, uint32_t* count /* = nullptr */) {
         },
         [&](const Array* a) {
             if (count) {
-                if (auto* const_count = std::get_if<ConstantArrayCount>(&a->Count())) {
+                if (auto* const_count = a->Count()->As<ConstantArrayCount>()) {
                     *count = const_count->value;
                 }
             }

@@ -91,7 +91,7 @@ class UniqueAllocator {
     struct Entry {
         /// The pre-calculated hash of the entry
         size_t hash;
-        /// Tge pointer to the unique object
+        /// The pointer to the unique object
         T* ptr;
     };
     /// Comparator is the hashing and equality function used by the unordered_set

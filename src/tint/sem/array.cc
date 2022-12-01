@@ -28,10 +28,10 @@ namespace tint::sem {
 
 namespace {
 
-TypeFlags FlagsFrom(const Type* element, ArrayCount count) {
+TypeFlags FlagsFrom(const Type* element, const ArrayCount* count) {
     TypeFlags flags;
     // Only constant-expression sized arrays are constructible
-    if (std::holds_alternative<ConstantArrayCount>(count)) {
+    if (count->Is<ConstantArrayCount>()) {
         if (element->IsConstructible()) {
             flags.Add(TypeFlag::kConstructable);
         }
@@ -39,9 +39,7 @@ TypeFlags FlagsFrom(const Type* element, ArrayCount count) {
             flags.Add(TypeFlag::kCreationFixedFootprint);
         }
     }
-    if (std::holds_alternative<ConstantArrayCount>(count) ||
-        std::holds_alternative<NamedOverrideArrayCount>(count) ||
-        std::holds_alternative<UnnamedOverrideArrayCount>(count)) {
+    if (count->IsAnyOf<ConstantArrayCount, NamedOverrideArrayCount, UnnamedOverrideArrayCount>()) {
         if (element->HasFixedFootprint()) {
             flags.Add(TypeFlag::kFixedFootprint);
         }
@@ -56,7 +54,7 @@ const char* const Array::kErrExpectedConstantCount =
     "Was the SubstituteOverride transform run?";
 
 Array::Array(const Type* element,
-             ArrayCount count,
+             const ArrayCount* count,
              uint32_t align,
              uint32_t size,
              uint32_t stride,
@@ -91,11 +89,11 @@ std::string Array::FriendlyName(const SymbolTable& symbols) const {
         out << "@stride(" << stride_ << ") ";
     }
     out << "array<" << element_->FriendlyName(symbols);
-    if (auto* const_count = std::get_if<ConstantArrayCount>(&count_)) {
+    if (auto* const_count = count_->As<ConstantArrayCount>()) {
         out << ", " << const_count->value;
-    } else if (auto* named_override_count = std::get_if<NamedOverrideArrayCount>(&count_)) {
+    } else if (auto* named_override_count = count_->As<NamedOverrideArrayCount>()) {
         out << ", " << symbols.NameFor(named_override_count->variable->Declaration()->symbol);
-    } else if (std::holds_alternative<UnnamedOverrideArrayCount>(count_)) {
+    } else if (count_->Is<UnnamedOverrideArrayCount>()) {
         out << ", [unnamed override-expression]";
     }
     out << ">";

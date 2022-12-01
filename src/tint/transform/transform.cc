@@ -109,11 +109,11 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type*
         if (a->IsRuntimeSized()) {
             return ctx.dst->ty.array(el, nullptr, std::move(attrs));
         }
-        if (auto* override = std::get_if<sem::NamedOverrideArrayCount>(&a->Count())) {
+        if (auto* override = a->Count()->As<sem::NamedOverrideArrayCount>()) {
             auto* count = ctx.Clone(override->variable->Declaration());
             return ctx.dst->ty.array(el, count, std::move(attrs));
         }
-        if (auto* override = std::get_if<sem::UnnamedOverrideArrayCount>(&a->Count())) {
+        if (auto* override = a->Count()->As<sem::UnnamedOverrideArrayCount>()) {
             // If the array count is an unnamed (complex) override expression, then its not safe to
             // redeclare this type as we'd end up with two types that would not compare equal.
             // See crbug.com/tint/1764.

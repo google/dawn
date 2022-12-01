@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "src/tint/sem/array_count.h"
 #include "src/tint/sem/type.h"
 #include "src/tint/utils/unique_allocator.h"
 
@@ -56,6 +57,7 @@ class TypeManager final {
     static TypeManager Wrap(const TypeManager& inner) {
         TypeManager out;
         out.types_.Wrap(inner.types_);
+        out.array_counts_.Wrap(inner.array_counts_);
         return out;
     }
 
@@ -80,6 +82,17 @@ class TypeManager final {
         return types_.Find<TYPE>(std::forward<ARGS>(args)...);
     }
 
+    /// @param args the arguments used to construct the object.
+    /// @return a pointer to an instance of `T` with the provided arguments.
+    ///         If an existing instance of `T` has been constructed, then the same
+    ///         pointer is returned.
+    template <typename TYPE,
+              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, sem::ArrayCount>>,
+              typename... ARGS>
+    TYPE* GetArrayCount(ARGS&&... args) {
+        return array_counts_.Get<TYPE>(std::forward<ARGS>(args)...);
+    }
+
     /// @returns an iterator to the beginning of the types
     TypeIterator begin() const { return types_.begin(); }
     /// @returns an iterator to the end of the types
@@ -87,6 +100,7 @@ class TypeManager final {
 
   private:
     utils::UniqueAllocator<Type> types_;
+    utils::UniqueAllocator<ArrayCount> array_counts_;
 };
 
 }  // namespace tint::sem
