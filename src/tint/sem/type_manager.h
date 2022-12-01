@@ -25,10 +25,10 @@
 namespace tint::sem {
 
 /// The type manager holds all the pointers to the known types.
-class TypeManager final : public utils::UniqueAllocator<Type> {
+class TypeManager final {
   public:
     /// Iterator is the type returned by begin() and end()
-    using Iterator = utils::BlockAllocator<Type>::ConstIterator;
+    using TypeIterator = utils::BlockAllocator<Type>::ConstIterator;
 
     /// Constructor
     TypeManager();
@@ -55,30 +55,38 @@ class TypeManager final : public utils::UniqueAllocator<Type> {
     /// @return the Manager that wraps `inner`
     static TypeManager Wrap(const TypeManager& inner) {
         TypeManager out;
-        out.items = inner.items;
+        out.types_.Wrap(inner.types_);
         return out;
     }
 
-    /// @param args the arguments used to create the temporary type used for the search.
-    /// @return a pointer to an instance of `T` with the provided arguments, or nullptr if the type
+    /// @param args the arguments used to construct the object.
+    /// @return a pointer to an instance of `T` with the provided arguments.
+    ///         If an existing instance of `T` has been constructed, then the same
+    ///         pointer is returned.
+    template <typename TYPE,
+              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, sem::Type>>,
+              typename... ARGS>
+    TYPE* Get(ARGS&&... args) {
+        return types_.Get<TYPE>(std::forward<ARGS>(args)...);
+    }
+
+    /// @param args the arguments used to create the temporary used for the search.
+    /// @return a pointer to an instance of `T` with the provided arguments, or nullptr if the item
     ///         was not found.
-    template <typename TYPE, typename... ARGS>
+    template <typename TYPE,
+              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, sem::Type>>,
+              typename... ARGS>
     TYPE* Find(ARGS&&... args) const {
-        // Create a temporary T instance on the stack so that we can hash it, and
-        // use it for equality lookup for the std::unordered_set.
-        TYPE key{args...};
-        auto hash = Hasher{}(key);
-        auto it = items.find(Entry{hash, &key});
-        if (it != items.end()) {
-            return static_cast<TYPE*>(it->ptr);
-        }
-        return nullptr;
+        return types_.Find<TYPE>(std::forward<ARGS>(args)...);
     }
 
     /// @returns an iterator to the beginning of the types
-    Iterator begin() const { return allocator.Objects().begin(); }
+    TypeIterator begin() const { return types_.begin(); }
     /// @returns an iterator to the end of the types
-    Iterator end() const { return allocator.Objects().end(); }
+    TypeIterator end() const { return types_.end(); }
+
+  private:
+    utils::UniqueAllocator<Type> types_;
 };
 
 }  // namespace tint::sem
