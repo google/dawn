@@ -1148,9 +1148,25 @@ bool Converter::Convert(wgpu::VertexBufferLayout& out, const interop::GPUVertexB
 
 bool Converter::Convert(wgpu::VertexState& out, const interop::GPUVertexState& in) {
     out = {};
-    return Convert(out.module, in.module) && Convert(out.buffers, out.bufferCount, in.buffers) &&
-           Convert(out.entryPoint, in.entryPoint) &&
-           Convert(out.constants, out.constantCount, in.constants);
+    wgpu::VertexBufferLayout* outBuffers = nullptr;
+    if (!Convert(out.module, in.module) ||                    //
+        !Convert(outBuffers, out.bufferCount, in.buffers) ||  //
+        !Convert(out.entryPoint, in.entryPoint) ||            //
+        !Convert(out.constants, out.constantCount, in.constants)) {
+        return false;
+    }
+
+    // Patch up the unused vertex buffer layouts to use wgpu::VertexStepMode::VertexBufferNotUsed.
+    // The converter for optional value will have put the default value of wgpu::VertexBufferLayout
+    // that has wgpu::VertexStepMode::Vertex.
+    out.buffers = outBuffers;
+    for (size_t i = 0; i < in.buffers.size(); i++) {
+        if (!in.buffers[i].has_value()) {
+            outBuffers[i].stepMode = wgpu::VertexStepMode::VertexBufferNotUsed;
+        }
+    }
+
+    return true;
 }
 
 bool Converter::Convert(wgpu::VertexStepMode& out, const interop::GPUVertexStepMode& in) {
