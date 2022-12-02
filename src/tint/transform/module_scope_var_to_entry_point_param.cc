@@ -146,7 +146,8 @@ struct ModuleScopeVarToEntryPointParam::State {
                 attributes.Push(ctx.dst->Disable(ast::DisabledValidation::kIgnoreAddressSpace));
 
                 auto* param_type = store_type();
-                if (auto* arr = ty->As<sem::Array>(); arr && arr->IsRuntimeSized()) {
+                if (auto* arr = ty->As<sem::Array>();
+                    arr && arr->Count()->Is<sem::RuntimeArrayCount>()) {
                     // Wrap runtime-sized arrays in structures, so that we can declare pointers to
                     // them. Ideally we'd just emit the array itself as a pointer, but this is not
                     // representable in Tint's AST.

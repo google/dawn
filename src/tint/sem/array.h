@@ -103,21 +103,6 @@ class Array final : public Castable<Array, Type> {
     /// natural stride
     bool IsStrideImplicit() const { return stride_ == implicit_stride_; }
 
-    /// @returns true if this array is sized using an const-expression
-    bool IsConstantSized() const { return count_->Is<ConstantArrayCount>(); }
-
-    /// @returns true if this array is sized using a named override variable
-    bool IsNamedOverrideSized() const { return count_->Is<NamedOverrideArrayCount>(); }
-
-    /// @returns true if this array is sized using an unnamed override variable
-    bool IsUnnamedOverrideSized() const { return count_->Is<UnnamedOverrideArrayCount>(); }
-
-    /// @returns true if this array is sized using a named or unnamed override variable
-    bool IsOverrideSized() const { return IsNamedOverrideSized() || IsUnnamedOverrideSized(); }
-
-    /// @returns true if this array is runtime sized
-    bool IsRuntimeSized() const { return count_->Is<RuntimeArrayCount>(); }
-
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.

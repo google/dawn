@@ -3639,7 +3639,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace address_space,
 
     if (auto* arr = ty->As<sem::Array>()) {
         if (address_space != ast::AddressSpace::kStorage) {
-            if (arr->IsRuntimeSized()) {
+            if (arr->Count()->Is<sem::RuntimeArrayCount>()) {
                 AddError("runtime-sized arrays can only be used in the <storage> address space",
                          usage);
                 return false;

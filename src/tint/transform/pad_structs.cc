@@ -84,7 +84,7 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
                 // std140 structs should be padded out to 16 bytes.
                 size = utils::RoundUp(16u, size);
             } else if (auto* array_ty = ty->As<sem::Array>()) {
-                if (array_ty->IsRuntimeSized()) {
+                if (array_ty->Count()->Is<sem::RuntimeArrayCount>()) {
                     has_runtime_sized_array = true;
                 }
             }

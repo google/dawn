@@ -106,7 +106,7 @@ struct Robustness::State {
             },
             [&](const sem::Array* arr) -> const ast::Expression* {
                 const ast::Expression* max = nullptr;
-                if (arr->IsRuntimeSized()) {
+                if (arr->Count()->Is<sem::RuntimeArrayCount>()) {
                     // Size is unknown until runtime.
                     // Must clamp, even if the index is constant.
                     auto* arr_ptr = b.AddressOf(ctx.Clone(expr->object));

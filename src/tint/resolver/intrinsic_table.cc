@@ -523,7 +523,7 @@ bool match_array(MatchState&, const sem::Type* ty, const sem::Type*& T) {
     }
 
     if (auto* a = ty->As<sem::Array>()) {
-        if (a->IsRuntimeSized()) {
+        if (a->Count()->Is<sem::RuntimeArrayCount>()) {
             T = a->ElemType();
             return true;
         }

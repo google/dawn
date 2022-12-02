@@ -292,7 +292,7 @@ bool GeneratorImpl::Generate() {
             auto* sem = builder_.Sem().Get(str);
             bool has_rt_arr = false;
             if (auto* arr = sem->Members().back()->Type()->As<sem::Array>()) {
-                has_rt_arr = arr->IsRuntimeSized();
+                has_rt_arr = arr->Count()->Is<sem::RuntimeArrayCount>();
             }
             bool is_block =
                 ast::HasAttribute<transform::AddBlockAttribute::BlockAttribute>(str->attributes);
@@ -2834,7 +2834,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         const sem::Type* base_type = ary;
         std::vector<uint32_t> sizes;
         while (auto* arr = base_type->As<sem::Array>()) {
-            if (arr->IsRuntimeSized()) {
+            if (arr->Count()->Is<sem::RuntimeArrayCount>()) {
                 sizes.push_back(0);
             } else {
                 auto count = arr->ConstantCount();

@@ -36,7 +36,7 @@ TEST_F(ArrayTest, CreateSizedArray) {
     EXPECT_EQ(a->Stride(), 32u);
     EXPECT_EQ(a->ImplicitStride(), 16u);
     EXPECT_FALSE(a->IsStrideImplicit());
-    EXPECT_FALSE(a->IsRuntimeSized());
+    EXPECT_FALSE(a->Count()->Is<RuntimeArrayCount>());
 
     EXPECT_EQ(a, b);
     EXPECT_NE(a, c);
@@ -61,7 +61,7 @@ TEST_F(ArrayTest, CreateRuntimeArray) {
     EXPECT_EQ(a->Stride(), 32u);
     EXPECT_EQ(a->ImplicitStride(), 32u);
     EXPECT_TRUE(a->IsStrideImplicit());
-    EXPECT_TRUE(a->IsRuntimeSized());
+    EXPECT_TRUE(a->Count()->Is<RuntimeArrayCount>());
 
     EXPECT_EQ(a, b);
     EXPECT_NE(a, c);

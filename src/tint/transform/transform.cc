@@ -106,7 +106,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type*
         if (!a->IsStrideImplicit()) {
             attrs.Push(ctx.dst->create<ast::StrideAttribute>(a->Stride()));
         }
-        if (a->IsRuntimeSized()) {
+        if (a->Count()->Is<sem::RuntimeArrayCount>()) {
             return ctx.dst->ty.array(el, nullptr, std::move(attrs));
         }
         if (auto* override = a->Count()->As<sem::NamedOverrideArrayCount>()) {

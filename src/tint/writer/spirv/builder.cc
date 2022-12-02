@@ -3839,7 +3839,7 @@ bool Builder::GenerateArrayType(const sem::Array* arr, const Operand& result) {
     }
 
     auto result_id = std::get<uint32_t>(result);
-    if (arr->IsRuntimeSized()) {
+    if (arr->Count()->Is<sem::RuntimeArrayCount>()) {
         push_type(spv::Op::OpTypeRuntimeArray, {result, Operand(elem_type)});
     } else {
         auto count = arr->ConstantCount();

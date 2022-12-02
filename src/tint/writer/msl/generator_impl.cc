@@ -2537,7 +2537,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                 return false;
             }
             out << ", ";
-            if (arr->IsRuntimeSized()) {
+            if (arr->Count()->Is<sem::RuntimeArrayCount>()) {
                 out << "1";
             } else {
                 auto count = arr->ConstantCount();
@@ -3165,7 +3165,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const sem::
                     << "arrays with explicit strides should not exist past the SPIR-V reader";
                 return SizeAndAlign{};
             }
-            if (arr->IsRuntimeSized()) {
+            if (arr->Count()->Is<sem::RuntimeArrayCount>()) {
                 return SizeAndAlign{arr->Stride(), arr->Align()};
             }
             if (auto count = arr->ConstantCount()) {
