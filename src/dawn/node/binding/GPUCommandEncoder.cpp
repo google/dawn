@@ -39,11 +39,15 @@ interop::Interface<interop::GPURenderPassEncoder> GPUCommandEncoder::beginRender
     Converter conv(env);
 
     wgpu::RenderPassDescriptor desc{};
+    wgpu::RenderPassDescriptorMaxDrawCount maxDrawCountDesc{};
+    desc.nextInChain = &maxDrawCountDesc;
+
     // TODO(dawn:1250) handle timestampWrites
     if (!conv(desc.colorAttachments, desc.colorAttachmentCount, descriptor.colorAttachments) ||
         !conv(desc.depthStencilAttachment, descriptor.depthStencilAttachment) ||
         !conv(desc.label, descriptor.label) ||
-        !conv(desc.occlusionQuerySet, descriptor.occlusionQuerySet)) {
+        !conv(desc.occlusionQuerySet, descriptor.occlusionQuerySet) ||
+        !conv(maxDrawCountDesc.maxDrawCount, descriptor.maxDrawCount)) {
         return {};
     }
 
