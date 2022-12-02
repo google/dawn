@@ -496,6 +496,9 @@ void GPUDevice::pushErrorScope(Napi::Env env, interop::GPUErrorFilter filter) {
         case interop::GPUErrorFilter::kValidation:
             f = wgpu::ErrorFilter::Validation;
             break;
+        case interop::GPUErrorFilter::kInternal:
+            f = wgpu::ErrorFilter::Internal;
+            break;
         default:
             Napi::Error::New(env, "unhandled GPUErrorFilter value").ThrowAsJavaScriptException();
             return;
