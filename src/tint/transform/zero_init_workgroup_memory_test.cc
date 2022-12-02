@@ -1363,5 +1363,28 @@ struct S {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(ZeroInitWorkgroupMemoryTest, ArrayWithOverrideCount) {
+    auto* src =
+        R"(override O = 123;
+type A = array<i32, O*2>;
+
+var<workgroup> W : A;
+
+@compute @workgroup_size(1)
+fn main() {
+    let p : ptr<workgroup, A> = &W;
+    (*p)[0] = 42;
+}
+)";
+
+    auto* expect =
+        R"(error: array size is an override-expression, when expected a constant-expression.
+Was the SubstituteOverride transform run?)";
+
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform
