@@ -382,6 +382,15 @@ class ConstEval {
                        utils::VectorRef<const sem::Constant*> args,
                        const Source& source);
 
+    /// Bitwise shift right operator '<<'
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result OpShiftRight(const sem::Type* ty,
+                        utils::VectorRef<const sem::Constant*> args,
+                        const Source& source);
+
     ////////////////////////////////////////////////////////////////////////////
     // Builtins
     ////////////////////////////////////////////////////////////////////////////

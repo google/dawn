@@ -917,8 +917,7 @@ INSTANTIATE_TEST_SUITE_P(Xor,
 
 template <typename T>
 std::vector<Case> ShiftLeftCases() {
-    // Shift type is u32 for non-abstract
-    using ST = std::conditional_t<IsAbstract<T>, T, u32>;
+    using ST = u32;  // Shift type is u32
     using B = BitValues<T>;
     auto r = std::vector<Case>{
         C(T{0b1010}, ST{0}, T{0b0000'0000'1010}),  //
@@ -1199,6 +1198,145 @@ INSTANTIATE_TEST_SUITE_P(Test,
                          testing::ValuesIn(Concat(  //
                              ShiftLeftSignChangeErrorCases<AInt>(),
                              ShiftLeftSignChangeErrorCases<i32>())));
+
+template <typename T>
+std::vector<Case> ShiftRightCases() {
+    using B = BitValues<T>;
+    auto r = std::vector<Case>{
+        C(T{0b10101100}, u32{0}, T{0b10101100}),  //
+        C(T{0b10101100}, u32{1}, T{0b01010110}),  //
+        C(T{0b10101100}, u32{2}, T{0b00101011}),  //
+        C(T{0b10101100}, u32{3}, T{0b00010101}),  //
+        C(T{0b10101100}, u32{4}, T{0b00001010}),  //
+        C(T{0b10101100}, u32{5}, T{0b00000101}),  //
+        C(T{0b10101100}, u32{6}, T{0b00000010}),  //
+        C(T{0b10101100}, u32{7}, T{0b00000001}),  //
+        C(T{0b10101100}, u32{8}, T{0b00000000}),  //
+        C(T{0b10101100}, u32{9}, T{0b00000000}),  //
+        C(B::LeftMost, u32{0}, B::LeftMost),      //
+    };
+
+    // msb not set, same for all types: inserted bit is 0
+    ConcatInto(  //
+        r, std::vector<Case>{
+               C(T{0b01000000000000000000000010101100}, u32{0},  //
+                 T{0b01000000000000000000000010101100}),
+               C(T{0b01000000000000000000000010101100}, u32{1},  //
+                 T{0b00100000000000000000000001010110}),
+               C(T{0b01000000000000000000000010101100}, u32{2},  //
+                 T{0b00010000000000000000000000101011}),
+               C(T{0b01000000000000000000000010101100}, u32{3},  //
+                 T{0b00001000000000000000000000010101}),
+               C(T{0b01000000000000000000000010101100}, u32{4},  //
+                 T{0b00000100000000000000000000001010}),
+               C(T{0b01000000000000000000000010101100}, u32{5},  //
+                 T{0b00000010000000000000000000000101}),
+               C(T{0b01000000000000000000000010101100}, u32{6},  //
+                 T{0b00000001000000000000000000000010}),
+               C(T{0b01000000000000000000000010101100}, u32{7},  //
+                 T{0b00000000100000000000000000000001}),
+               C(T{0b01000000000000000000000010101100}, u32{8},  //
+                 T{0b00000000010000000000000000000000}),
+               C(T{0b01000000000000000000000010101100}, u32{9},  //
+                 T{0b00000000001000000000000000000000}),
+           });
+
+    // msb set, result differs for i32 and u32
+    if constexpr (std::is_same_v<T, u32>) {
+        // If unsigned, insert zero bits at the most significant positions.
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   C(T{0b10000000000000000000000010101100}, u32{0},
+                     T{0b10000000000000000000000010101100}),
+                   C(T{0b10000000000000000000000010101100}, u32{1},
+                     T{0b01000000000000000000000001010110}),
+                   C(T{0b10000000000000000000000010101100}, u32{2},
+                     T{0b00100000000000000000000000101011}),
+                   C(T{0b10000000000000000000000010101100}, u32{3},
+                     T{0b00010000000000000000000000010101}),
+                   C(T{0b10000000000000000000000010101100}, u32{4},
+                     T{0b00001000000000000000000000001010}),
+                   C(T{0b10000000000000000000000010101100}, u32{5},
+                     T{0b00000100000000000000000000000101}),
+                   C(T{0b10000000000000000000000010101100}, u32{6},
+                     T{0b00000010000000000000000000000010}),
+                   C(T{0b10000000000000000000000010101100}, u32{7},
+                     T{0b00000001000000000000000000000001}),
+                   C(T{0b10000000000000000000000010101100}, u32{8},
+                     T{0b00000000100000000000000000000000}),
+                   C(T{0b10000000000000000000000010101100}, u32{9},
+                     T{0b00000000010000000000000000000000}),
+                   // msb shifted by bit width - 1
+                   C(T{0b10000000000000000000000000000000}, u32{31},
+                     T{0b00000000000000000000000000000001}),
+               });
+    } else if constexpr (std::is_same_v<T, i32>) {
+        // If signed, each inserted bit is 1, so the result is negative.
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   C(T{0b10000000000000000000000010101100}, u32{0},
+                     T{0b10000000000000000000000010101100}),  //
+                   C(T{0b10000000000000000000000010101100}, u32{1},
+                     T{0b11000000000000000000000001010110}),  //
+                   C(T{0b10000000000000000000000010101100}, u32{2},
+                     T{0b11100000000000000000000000101011}),  //
+                   C(T{0b10000000000000000000000010101100}, u32{3},
+                     T{0b11110000000000000000000000010101}),  //
+                   C(T{0b10000000000000000000000010101100}, u32{4},
+                     T{0b11111000000000000000000000001010}),  //
+                   C(T{0b10000000000000000000000010101100}, u32{5},
+                     T{0b11111100000000000000000000000101}),  //
+                   C(T{0b10000000000000000000000010101100}, u32{6},
+                     T{0b11111110000000000000000000000010}),  //
+                   C(T{0b10000000000000000000000010101100}, u32{7},
+                     T{0b11111111000000000000000000000001}),  //
+                   C(T{0b10000000000000000000000010101100}, u32{8},
+                     T{0b11111111100000000000000000000000}),  //
+                   C(T{0b10000000000000000000000010101100}, u32{9},
+                     T{0b11111111110000000000000000000000}),  //
+                   // msb shifted by bit width - 1
+                   C(T{0b10000000000000000000000000000000}, u32{31},
+                     T{0b11111111111111111111111111111111}),
+               });
+    }
+
+    // Test shift right by bit width or more
+    if constexpr (IsAbstract<T>) {
+        // For abstract int, no error, result is 0
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   C(T{0}, u32{B::NumBits}, T{0}),
+                   C(T{0}, u32{B::NumBits + 1}, T{0}),
+                   C(T{0}, u32{B::NumBits + 1000}, T{0}),
+                   C(T{42}, u32{B::NumBits}, T{0}),
+                   C(T{42}, u32{B::NumBits + 1}, T{0}),
+                   C(T{42}, u32{B::NumBits + 1000}, T{0}),
+               });
+    } else {
+        // For concretes, error
+        const char* error_msg =
+            "12:34 error: shift right value must be less than the bit width of the lhs, which is "
+            "32";
+        ConcatInto(  //
+            r, std::vector<Case>{
+                   E(T{0}, u32{B::NumBits}, error_msg),
+                   E(T{0}, u32{B::NumBits + 1}, error_msg),
+                   E(T{0}, u32{B::NumBits + 1000}, error_msg),
+                   E(T{42}, u32{B::NumBits}, error_msg),
+                   E(T{42}, u32{B::NumBits + 1}, error_msg),
+                   E(T{42}, u32{B::NumBits + 1000}, error_msg),
+               });
+    }
+
+    return r;
+}
+INSTANTIATE_TEST_SUITE_P(ShiftRight,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kShiftRight),
+                             testing::ValuesIn(Concat(ShiftRightCases<AInt>(),  //
+                                                      ShiftRightCases<i32>(),   //
+                                                      ShiftRightCases<u32>()))));
 
 }  // namespace
 }  // namespace tint::resolver

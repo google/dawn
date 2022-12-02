@@ -890,10 +890,11 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_x) {
     // @compute @workgroup_size(1 << 2 + 4)
     // fn main() {}
+    GlobalVar("x", ty.i32(), ast::AddressSpace::kPrivate, Expr(0_i));
     Func("main", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(Construct(Source{{12, 34}}, ty.i32(), Shr(1_i, Add(2_u, 4_u)))),
+             WorkgroupSize(Construct(Source{{12, 34}}, ty.i32(), "x")),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -905,10 +906,11 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_x) {
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_y) {
     // @compute @workgroup_size(1, 1 << 2 + 4)
     // fn main() {}
+    GlobalVar("x", ty.i32(), ast::AddressSpace::kPrivate, Expr(0_i));
     Func("main", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(Construct(Source{{12, 34}}, ty.i32(), Shr(1_i, Add(2_u, 4_u)))),
+             WorkgroupSize(Construct(Source{{12, 34}}, ty.i32(), "x")),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -920,10 +922,11 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_y) {
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_z) {
     // @compute @workgroup_size(1, 1, 1 << 2 + 4)
     // fn main() {}
+    GlobalVar("x", ty.i32(), ast::AddressSpace::kPrivate, Expr(0_i));
     Func("main", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(Construct(Source{{12, 34}}, ty.i32(), Shr(1_i, Add(2_u, 4_u)))),
+             WorkgroupSize(Construct(Source{{12, 34}}, ty.i32(), "x")),
          });
 
     EXPECT_FALSE(r()->Resolve());

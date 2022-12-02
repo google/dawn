@@ -13469,24 +13469,24 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 2,
     /* num template types */ 1,
     /* num template numbers */ 0,
-    /* template types */ &kTemplateTypes[25],
+    /* template types */ &kTemplateTypes[28],
     /* template numbers */ &kTemplateNumbers[10],
     /* parameters */ &kParameters[778],
     /* return matcher indices */ &kMatcherIndices[3],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::OpShiftRight,
   },
   {
     /* [432] */
     /* num parameters */ 2,
     /* num template types */ 1,
     /* num template numbers */ 1,
-    /* template types */ &kTemplateTypes[25],
+    /* template types */ &kTemplateTypes[28],
     /* template numbers */ &kTemplateNumbers[4],
     /* parameters */ &kParameters[780],
     /* return matcher indices */ &kMatcherIndices[30],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::OpShiftRight,
   },
   {
     /* [433] */
@@ -14975,8 +14975,8 @@ constexpr IntrinsicInfo kBinaryOperators[] = {
   },
   {
     /* [17] */
-    /* op >><T : iu32>(T, u32) -> T */
-    /* op >><T : iu32, N : num>(vec<N, T>, vec<N, u32>) -> vec<N, T> */
+    /* op >><T : ia_iu32>(T, u32) -> T */
+    /* op >><T : ia_iu32, N : num>(vec<N, T>, vec<N, u32>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[431],
   },
