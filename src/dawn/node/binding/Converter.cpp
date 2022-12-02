@@ -16,6 +16,7 @@
 
 #include "src/dawn/node/binding/GPUBuffer.h"
 #include "src/dawn/node/binding/GPUPipelineLayout.h"
+#include "src/dawn/node/binding/GPUQuerySet.h"
 #include "src/dawn/node/binding/GPUSampler.h"
 #include "src/dawn/node/binding/GPUShaderModule.h"
 #include "src/dawn/node/binding/GPUTexture.h"
@@ -1297,6 +1298,30 @@ bool Converter::Convert(wgpu::RenderPassDepthStencilAttachment& out,
            Convert(out.stencilReadOnly, in.stencilReadOnly);
 }
 
+bool Converter::Convert(wgpu::RenderPassTimestampWrite& out,
+                        const interop::GPURenderPassTimestampWrite& in) {
+    out = {};
+    return Convert(out.querySet, in.querySet) &&      //
+           Convert(out.queryIndex, in.queryIndex) &&  //
+           Convert(out.location, in.location);
+}
+
+bool Converter::Convert(wgpu::RenderPassTimestampLocation& out,
+                        const interop::GPURenderPassTimestampLocation& in) {
+    out = wgpu::RenderPassTimestampLocation::Beginning;
+    switch (in) {
+        case interop::GPURenderPassTimestampLocation::kBeginning:
+            out = wgpu::RenderPassTimestampLocation::Beginning;
+            return true;
+        case interop::GPURenderPassTimestampLocation::kEnd:
+            out = wgpu::RenderPassTimestampLocation::End;
+            return true;
+    }
+    Napi::Error::New(env, "invalid value for GPURenderPassTimestampLocation")
+        .ThrowAsJavaScriptException();
+    return false;
+}
+
 bool Converter::Convert(wgpu::LoadOp& out, const interop::GPULoadOp& in) {
     out = wgpu::LoadOp::Clear;
     switch (in) {
@@ -1322,6 +1347,30 @@ bool Converter::Convert(wgpu::StoreOp& out, const interop::GPUStoreOp& in) {
             return true;
     }
     Napi::Error::New(env, "invalid value for GPUStoreOp").ThrowAsJavaScriptException();
+    return false;
+}
+
+bool Converter::Convert(wgpu::ComputePassTimestampWrite& out,
+                        const interop::GPUComputePassTimestampWrite& in) {
+    out = {};
+    return Convert(out.querySet, in.querySet) &&      //
+           Convert(out.queryIndex, in.queryIndex) &&  //
+           Convert(out.location, in.location);
+}
+
+bool Converter::Convert(wgpu::ComputePassTimestampLocation& out,
+                        const interop::GPUComputePassTimestampLocation& in) {
+    out = wgpu::ComputePassTimestampLocation::Beginning;
+    switch (in) {
+        case interop::GPUComputePassTimestampLocation::kBeginning:
+            out = wgpu::ComputePassTimestampLocation::Beginning;
+            return true;
+        case interop::GPUComputePassTimestampLocation::kEnd:
+            out = wgpu::ComputePassTimestampLocation::End;
+            return true;
+    }
+    Napi::Error::New(env, "invalid value for GPUComputePassTimestampLocation")
+        .ThrowAsJavaScriptException();
     return false;
 }
 

@@ -42,11 +42,11 @@ interop::Interface<interop::GPURenderPassEncoder> GPUCommandEncoder::beginRender
     wgpu::RenderPassDescriptorMaxDrawCount maxDrawCountDesc{};
     desc.nextInChain = &maxDrawCountDesc;
 
-    // TODO(dawn:1250) handle timestampWrites
     if (!conv(desc.colorAttachments, desc.colorAttachmentCount, descriptor.colorAttachments) ||
         !conv(desc.depthStencilAttachment, descriptor.depthStencilAttachment) ||
         !conv(desc.label, descriptor.label) ||
         !conv(desc.occlusionQuerySet, descriptor.occlusionQuerySet) ||
+        !conv(desc.timestampWrites, desc.timestampWriteCount, descriptor.timestampWrites) ||
         !conv(maxDrawCountDesc.maxDrawCount, descriptor.maxDrawCount)) {
         return {};
     }
@@ -58,8 +58,13 @@ interop::Interface<interop::GPURenderPassEncoder> GPUCommandEncoder::beginRender
 interop::Interface<interop::GPUComputePassEncoder> GPUCommandEncoder::beginComputePass(
     Napi::Env env,
     interop::GPUComputePassDescriptor descriptor) {
+    Converter conv(env);
+
     wgpu::ComputePassDescriptor desc{};
-    // TODO(dawn:1250) handle timestampWrites
+    if (!conv(desc.timestampWrites, desc.timestampWriteCount, descriptor.timestampWrites)) {
+        return {};
+    }
+
     return interop::GPUComputePassEncoder::Create<GPUComputePassEncoder>(
         env, enc_.BeginComputePass(&desc));
 }
