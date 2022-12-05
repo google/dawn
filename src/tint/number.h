@@ -547,7 +547,12 @@ namespace detail {
 /// @returns the remainder of e1 / e2
 template <typename T>
 inline T Mod(T e1, T e2) {
-    return e1 - e2 * static_cast<T>(std::trunc(e1 / e2));
+    if constexpr (IsIntegral<T>) {
+        return e1 % e2;
+
+    } else {
+        return e1 - e2 * std::trunc(e1 / e2);
+    }
 }
 }  // namespace detail
 

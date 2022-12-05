@@ -704,6 +704,15 @@ INSTANTIATE_TEST_SUITE_P(
         {AInt(2), AInt(10), AInt(4)},
         {AInt(0), AInt::Highest(), AInt::Highest()},
         {AInt(0), AInt::Lowest(), AInt::Lowest()},
+        {AInt(2), AInt::Highest(), AInt(5)},
+        {AInt(1), AInt::Highest(), AInt(6)},
+        {AInt(0), AInt::Highest(), AInt(7)},
+        {-AInt{1}, -AInt{10}, AInt{3}},
+        {-AInt{2}, -AInt{10}, AInt{4}},
+        {AInt{1}, AInt{10}, -AInt{3}},
+        {AInt{2}, AInt{10}, -AInt{4}},
+        {-AInt{1}, -AInt{10}, -AInt{3}},
+        {-AInt{2}, -AInt{10}, -AInt{4}},
         {OVERFLOW, AInt::Highest(), AInt(0)},
         {OVERFLOW, AInt::Lowest(), AInt(0)},
         ////////////////////////////////////////////////////////////////////////
@@ -725,11 +734,22 @@ TEST_P(CheckedModTest_Float, Test) {
 template <typename T>
 std::vector<BinaryCheckedCase_Float> CheckedModTest_FloatCases() {
     return {
-        {T(0.5), T(10.5), T(1)},          {T(0.5), T(10.5), T(2)},
-        {T(1.5), T(10.5), T(3)},          {T(2.5), T(10.5), T(4)},
-        {T(0.5), T(10.5), T(5)},          {T(0), T::Highest(), T::Highest()},
-        {T(0), T::Lowest(), T::Lowest()}, {Overflow<T>, T(123), T(0)},
-        {Overflow<T>, T(123), T(-0)},     {Overflow<T>, T(-123), T(0)},
+        {T(0.5), T(10.5), T(1)},             //
+        {T(0.5), T(10.5), T(2)},             //
+        {T(1.5), T(10.5), T(3)},             //
+        {T(2.5), T(10.5), T(4)},             //
+        {T(0.5), T(10.5), T(5)},             //
+        {T(0), T::Highest(), T::Highest()},  //
+        {T(0), T::Lowest(), T::Lowest()},    //
+        {-T{1}, -T{10}, T{3}},               //
+        {-T{2}, -T{10}, T{4}},               //
+        {T{1}, T{10}, -T{3}},                //
+        {T{2}, T{10}, -T{4}},                //
+        {-T{1}, -T{10}, -T{3}},              //
+        {-T{2}, -T{10}, -T{4}},              //
+        {Overflow<T>, T(123), T(0)},         //
+        {Overflow<T>, T(123), T(-0)},        //
+        {Overflow<T>, T(-123), T(0)},        //
         {Overflow<T>, T(-123), T(-0)},
     };
 }
