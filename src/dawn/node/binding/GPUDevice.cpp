@@ -225,7 +225,7 @@ interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
 interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
     Napi::Env env,
     interop::GPUTextureDescriptor descriptor) {
-    Converter conv(env);
+    Converter conv(env, device_);
 
     wgpu::TextureDescriptor desc{};
     if (!conv(desc.label, descriptor.label) || !conv(desc.usage, descriptor.usage) ||  //
@@ -237,7 +237,7 @@ interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
         !conv(desc.viewFormats, desc.viewFormatCount, descriptor.viewFormats)) {
         return {};
     }
-    return interop::GPUTexture::Create<GPUTexture>(env, device_.CreateTexture(&desc));
+    return interop::GPUTexture::Create<GPUTexture>(env, device_, device_.CreateTexture(&desc));
 }
 
 interop::Interface<interop::GPUSampler> GPUDevice::createSampler(
@@ -271,7 +271,7 @@ interop::Interface<interop::GPUExternalTexture> GPUDevice::importExternalTexture
 interop::Interface<interop::GPUBindGroupLayout> GPUDevice::createBindGroupLayout(
     Napi::Env env,
     interop::GPUBindGroupLayoutDescriptor descriptor) {
-    Converter conv(env);
+    Converter conv(env, device_);
 
     wgpu::BindGroupLayoutDescriptor desc{};
     if (!conv(desc.label, descriptor.label) ||
@@ -345,7 +345,7 @@ interop::Interface<interop::GPUComputePipeline> GPUDevice::createComputePipeline
 interop::Interface<interop::GPURenderPipeline> GPUDevice::createRenderPipeline(
     Napi::Env env,
     interop::GPURenderPipelineDescriptor descriptor) {
-    Converter conv(env);
+    Converter conv(env, device_);
 
     wgpu::RenderPipelineDescriptor desc{};
     if (!conv(desc, descriptor)) {
@@ -404,7 +404,7 @@ GPUDevice::createRenderPipelineAsync(Napi::Env env,
                                      interop::GPURenderPipelineDescriptor descriptor) {
     using Promise = interop::Promise<interop::Interface<interop::GPURenderPipeline>>;
 
-    Converter conv(env);
+    Converter conv(env, device_);
 
     wgpu::RenderPipelineDescriptor desc{};
     if (!conv(desc, descriptor)) {
@@ -447,13 +447,13 @@ interop::Interface<interop::GPUCommandEncoder> GPUDevice::createCommandEncoder(
     interop::GPUCommandEncoderDescriptor descriptor) {
     wgpu::CommandEncoderDescriptor desc{};
     return interop::GPUCommandEncoder::Create<GPUCommandEncoder>(
-        env, device_.CreateCommandEncoder(&desc));
+        env, device_, device_.CreateCommandEncoder(&desc));
 }
 
 interop::Interface<interop::GPURenderBundleEncoder> GPUDevice::createRenderBundleEncoder(
     Napi::Env env,
     interop::GPURenderBundleEncoderDescriptor descriptor) {
-    Converter conv(env);
+    Converter conv(env, device_);
 
     wgpu::RenderBundleEncoderDescriptor desc{};
     if (!conv(desc.label, descriptor.label) ||

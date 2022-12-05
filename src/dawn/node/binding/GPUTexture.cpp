@@ -26,7 +26,8 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUTexture
 ////////////////////////////////////////////////////////////////////////////////
-GPUTexture::GPUTexture(wgpu::Texture texture) : texture_(std::move(texture)) {}
+GPUTexture::GPUTexture(wgpu::Device device, wgpu::Texture texture)
+    : device_(std::move(device)), texture_(std::move(texture)) {}
 
 interop::Interface<interop::GPUTextureView> GPUTexture::createView(
     Napi::Env env,
@@ -37,7 +38,7 @@ interop::Interface<interop::GPUTextureView> GPUTexture::createView(
     }
 
     wgpu::TextureViewDescriptor desc{};
-    Converter conv(env);
+    Converter conv(env, device_);
     if (!conv(desc.baseMipLevel, descriptor.baseMipLevel) ||        //
         !conv(desc.mipLevelCount, descriptor.mipLevelCount) ||      //
         !conv(desc.baseArrayLayer, descriptor.baseArrayLayer) ||    //

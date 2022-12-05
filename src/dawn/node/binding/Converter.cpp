@@ -14,6 +14,8 @@
 
 #include "src/dawn/node/binding/Converter.h"
 
+#include <cassert>
+
 #include "src/dawn/node/binding/GPUBuffer.h"
 #include "src/dawn/node/binding/GPUPipelineLayout.h"
 #include "src/dawn/node/binding/GPUQuerySet.h"
@@ -29,6 +31,13 @@ Converter::~Converter() {
     for (auto& free : free_) {
         free();
     }
+}
+
+bool Converter::HasFeature(wgpu::FeatureName feature) {
+    // Not all uses of the converter will have a device (for example for adapter-related
+    // conversions).
+    assert(device.Get() != nullptr);
+    return device.HasFeature(feature);
 }
 
 bool Converter::Convert(wgpu::Extent3D& out, const interop::GPUExtent3D& in) {
@@ -172,6 +181,7 @@ bool Converter::Convert(wgpu::TextureDataLayout& out, const interop::GPUImageDat
 
 bool Converter::Convert(wgpu::TextureFormat& out, const interop::GPUTextureFormat& in) {
     out = wgpu::TextureFormat::Undefined;
+    wgpu::FeatureName requiredFeature = wgpu::FeatureName::Undefined;
     switch (in) {
         case interop::GPUTextureFormat::kR8Unorm:
             out = wgpu::TextureFormat::R8Unorm;
@@ -296,168 +306,234 @@ bool Converter::Convert(wgpu::TextureFormat& out, const interop::GPUTextureForma
         case interop::GPUTextureFormat::kDepth32Float:
             out = wgpu::TextureFormat::Depth32Float;
             return true;
+
         case interop::GPUTextureFormat::kDepth32FloatStencil8:
             out = wgpu::TextureFormat::Depth32FloatStencil8;
-            return true;
+            requiredFeature = wgpu::FeatureName::Depth32FloatStencil8;
+            break;
         case interop::GPUTextureFormat::kBc1RgbaUnorm:
             out = wgpu::TextureFormat::BC1RGBAUnorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kBc1RgbaUnormSrgb:
             out = wgpu::TextureFormat::BC1RGBAUnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kBc2RgbaUnorm:
             out = wgpu::TextureFormat::BC2RGBAUnorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kBc2RgbaUnormSrgb:
             out = wgpu::TextureFormat::BC2RGBAUnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kBc3RgbaUnorm:
             out = wgpu::TextureFormat::BC3RGBAUnorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kBc3RgbaUnormSrgb:
             out = wgpu::TextureFormat::BC3RGBAUnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kBc4RUnorm:
             out = wgpu::TextureFormat::BC4RUnorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kBc4RSnorm:
             out = wgpu::TextureFormat::BC4RSnorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kBc5RgUnorm:
             out = wgpu::TextureFormat::BC5RGUnorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kBc5RgSnorm:
             out = wgpu::TextureFormat::BC5RGSnorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kBc6HRgbUfloat:
             out = wgpu::TextureFormat::BC6HRGBUfloat;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kBc6HRgbFloat:
             out = wgpu::TextureFormat::BC6HRGBFloat;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kBc7RgbaUnorm:
             out = wgpu::TextureFormat::BC7RGBAUnorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kBc7RgbaUnormSrgb:
             out = wgpu::TextureFormat::BC7RGBAUnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionBC;
+            break;
         case interop::GPUTextureFormat::kEtc2Rgb8Unorm:
             out = wgpu::TextureFormat::ETC2RGB8Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionETC2;
+            break;
         case interop::GPUTextureFormat::kEtc2Rgb8UnormSrgb:
             out = wgpu::TextureFormat::ETC2RGB8UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionETC2;
+            break;
         case interop::GPUTextureFormat::kEtc2Rgb8A1Unorm:
             out = wgpu::TextureFormat::ETC2RGB8A1Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionETC2;
+            break;
         case interop::GPUTextureFormat::kEtc2Rgb8A1UnormSrgb:
             out = wgpu::TextureFormat::ETC2RGB8A1UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionETC2;
+            break;
         case interop::GPUTextureFormat::kEtc2Rgba8Unorm:
             out = wgpu::TextureFormat::ETC2RGBA8Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionETC2;
+            break;
         case interop::GPUTextureFormat::kEtc2Rgba8UnormSrgb:
             out = wgpu::TextureFormat::ETC2RGBA8UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionETC2;
+            break;
         case interop::GPUTextureFormat::kEacR11Unorm:
             out = wgpu::TextureFormat::EACR11Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionETC2;
+            break;
         case interop::GPUTextureFormat::kEacR11Snorm:
             out = wgpu::TextureFormat::EACR11Snorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionETC2;
+            break;
         case interop::GPUTextureFormat::kEacRg11Unorm:
             out = wgpu::TextureFormat::EACRG11Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionETC2;
+            break;
         case interop::GPUTextureFormat::kEacRg11Snorm:
             out = wgpu::TextureFormat::EACRG11Snorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionETC2;
+            break;
         case interop::GPUTextureFormat::kAstc4X4Unorm:
             out = wgpu::TextureFormat::ASTC4x4Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc4X4UnormSrgb:
             out = wgpu::TextureFormat::ASTC4x4UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc5X4Unorm:
             out = wgpu::TextureFormat::ASTC5x4Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc5X4UnormSrgb:
             out = wgpu::TextureFormat::ASTC5x4UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc5X5Unorm:
             out = wgpu::TextureFormat::ASTC5x5Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc5X5UnormSrgb:
             out = wgpu::TextureFormat::ASTC5x5UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc6X5Unorm:
             out = wgpu::TextureFormat::ASTC6x5Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc6X5UnormSrgb:
             out = wgpu::TextureFormat::ASTC6x5UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc6X6Unorm:
             out = wgpu::TextureFormat::ASTC6x6Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc6X6UnormSrgb:
             out = wgpu::TextureFormat::ASTC6x6UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc8X5Unorm:
             out = wgpu::TextureFormat::ASTC8x5Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc8X5UnormSrgb:
             out = wgpu::TextureFormat::ASTC8x5UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc8X6Unorm:
             out = wgpu::TextureFormat::ASTC8x6Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc8X6UnormSrgb:
             out = wgpu::TextureFormat::ASTC8x6UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc8X8Unorm:
             out = wgpu::TextureFormat::ASTC8x8Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc8X8UnormSrgb:
             out = wgpu::TextureFormat::ASTC8x8UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc10X5Unorm:
             out = wgpu::TextureFormat::ASTC10x5Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc10X5UnormSrgb:
             out = wgpu::TextureFormat::ASTC10x5UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc10X6Unorm:
             out = wgpu::TextureFormat::ASTC10x6Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc10X6UnormSrgb:
             out = wgpu::TextureFormat::ASTC10x6UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc10X8Unorm:
             out = wgpu::TextureFormat::ASTC10x8Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc10X8UnormSrgb:
             out = wgpu::TextureFormat::ASTC10x8UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc10X10Unorm:
             out = wgpu::TextureFormat::ASTC10x10Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc10X10UnormSrgb:
             out = wgpu::TextureFormat::ASTC10x10UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc12X10Unorm:
             out = wgpu::TextureFormat::ASTC12x10Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc12X10UnormSrgb:
             out = wgpu::TextureFormat::ASTC12x10UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc12X12Unorm:
             out = wgpu::TextureFormat::ASTC12x12Unorm;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
         case interop::GPUTextureFormat::kAstc12X12UnormSrgb:
             out = wgpu::TextureFormat::ASTC12x12UnormSrgb;
-            return true;
+            requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
+            break;
+
+        default:
+            Napi::Error::New(env, "invalid value for GPUTextureFormat")
+                .ThrowAsJavaScriptException();
+            return false;
     }
-    Napi::Error::New(env, "invalid value for GPUTextureFormat").ThrowAsJavaScriptException();
-    return false;
+
+    assert(requiredFeature != wgpu::FeatureName::Undefined);
+    if (!HasFeature(requiredFeature)) {
+        Napi::TypeError::New(env, "invalid value for GPUTextureFormat")
+            .ThrowAsJavaScriptException();
+        return false;
+    }
+
+    return true;
 }
 
 bool Converter::Convert(interop::GPUTextureFormat& out, wgpu::TextureFormat in) {
