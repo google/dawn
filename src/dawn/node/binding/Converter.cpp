@@ -1042,6 +1042,13 @@ bool Converter::Convert(wgpu::BlendState& out, const interop::GPUBlendState& in)
 
 bool Converter::Convert(wgpu::PrimitiveState& out, const interop::GPUPrimitiveState& in) {
     out = {};
+
+    if (in.unclippedDepth) {
+        wgpu::PrimitiveDepthClipControl* depthClip = Allocate<wgpu::PrimitiveDepthClipControl>();
+        depthClip->unclippedDepth = true;
+        out.nextInChain = depthClip;
+    }
+
     return Convert(out.topology, in.topology) &&
            Convert(out.stripIndexFormat, in.stripIndexFormat) &&
            Convert(out.frontFace, in.frontFace) && Convert(out.cullMode, in.cullMode);
