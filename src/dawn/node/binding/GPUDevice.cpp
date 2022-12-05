@@ -472,7 +472,7 @@ interop::Interface<interop::GPURenderBundleEncoder> GPUDevice::createRenderBundl
 interop::Interface<interop::GPUQuerySet> GPUDevice::createQuerySet(
     Napi::Env env,
     interop::GPUQuerySetDescriptor descriptor) {
-    Converter conv(env);
+    Converter conv(env, device_);
 
     wgpu::QuerySetDescriptor desc{};
     if (!conv(desc.label, descriptor.label) || !conv(desc.type, descriptor.type) ||
