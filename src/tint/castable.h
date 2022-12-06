@@ -573,13 +573,11 @@ constexpr int IndexOfDefaultCase() {
 /// then the case handler is called.
 /// @returns true if a case handler was found, otherwise false.
 template <typename T, typename RETURN_TYPE, typename... CASES>
-inline bool NonDefaultCases(T* object,
+inline bool NonDefaultCases([[maybe_unused]] T* object,
                             const TypeInfo* type,
-                            RETURN_TYPE* result,
+                            [[maybe_unused]] RETURN_TYPE* result,
                             std::tuple<CASES...>&& cases) {
     using Cases = std::tuple<CASES...>;
-
-    (void)result;  // Not always used, avoid warning.
 
     static constexpr bool kHasReturnType = !std::is_same_v<RETURN_TYPE, void>;
     static constexpr size_t kNumCases = sizeof...(CASES);
