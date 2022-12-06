@@ -151,6 +151,19 @@ class SpirvAtomicTest : public TransformTest {
     std::vector<std::unique_ptr<Source::File>> files_;
 };
 
+TEST_F(SpirvAtomicTest, StripUnusedBuiltins) {
+    auto* src = R"(
+fn f() {
+}
+)";
+
+    auto* expect = src;
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(SpirvAtomicTest, ArrayOfU32) {
     auto* src = R"(
 var<workgroup> wg : array<u32, 4>;
