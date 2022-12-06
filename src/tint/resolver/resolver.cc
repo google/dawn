@@ -1745,7 +1745,7 @@ const sem::Type* Resolver::ConcreteType(const sem::Type* ty,
             return nullptr;
         },
         [&](const sem::Struct* s) -> const sem::Type* {
-            if (auto& tys = s->ConcreteTypes(); !tys.IsEmpty()) {
+            if (auto tys = s->ConcreteTypes(); !tys.IsEmpty()) {
                 return target_ty ? target_ty : tys[0];
             }
             return nullptr;

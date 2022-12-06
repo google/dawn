@@ -163,7 +163,7 @@ class Struct final : public Castable<Struct, Type> {
     /// @returns the conversion-rank ordered concrete versions of this abstract structure, or an
     /// empty vector if this structure is not abstract.
     /// @note only structures returned by builtins may be abstract (e.g. modf, frexp)
-    const utils::Vector<const Struct*, 2>& ConcreteTypes() const { return concrete_types_; }
+    utils::VectorRef<const Struct*> ConcreteTypes() const { return concrete_types_; }
 
   private:
     ast::Struct const* const declaration_;

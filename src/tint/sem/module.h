@@ -39,7 +39,7 @@ class Module final : public Castable<Module, Node> {
     ~Module() override;
 
     /// @returns the dependency-ordered global declarations for the module
-    const utils::Vector<const ast::Node*, 64>& DependencyOrderedDeclarations() const {
+    utils::VectorRef<const ast::Node*> DependencyOrderedDeclarations() const {
         return dep_ordered_decls_;
     }
 

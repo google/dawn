@@ -33,7 +33,7 @@ class Switch : public Castable<Switch, FlowNode> {
     /// A case label in the struct
     struct Case {
         /// The case selector for this node
-        const utils::VectorRef<const ast::CaseSelector*> selectors;
+        utils::Vector<const ast::CaseSelector*, 4> selectors;
         /// The start block for the case block.
         Block* start_target;
     };

@@ -532,7 +532,7 @@ std::vector<ResourceBinding> Inspector::GetExternalTextureResourceBindings(
                                       ResourceBinding::ResourceType::kExternalTexture);
 }
 
-utils::Vector<sem::SamplerTexturePair, 4> Inspector::GetSamplerTextureUses(
+utils::VectorRef<sem::SamplerTexturePair> Inspector::GetSamplerTextureUses(
     const std::string& entry_point) {
     auto* func = FindEntryPointByName(entry_point);
     if (!func) {

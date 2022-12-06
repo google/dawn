@@ -1811,7 +1811,7 @@ bool Validator::Matrix(const sem::Matrix* ty, const Source& source) const {
     return true;
 }
 
-bool Validator::PipelineStages(const utils::VectorRef<sem::Function*> entry_points) const {
+bool Validator::PipelineStages(utils::VectorRef<sem::Function*> entry_points) const {
     auto backtrace = [&](const sem::Function* func, const sem::Function* entry_point) {
         if (func != entry_point) {
             TraverseCallChain(diagnostics_, entry_point, func, [&](const sem::Function* f) {
@@ -1906,7 +1906,7 @@ bool Validator::PipelineStages(const utils::VectorRef<sem::Function*> entry_poin
     return true;
 }
 
-bool Validator::PushConstants(const utils::VectorRef<sem::Function*> entry_points) const {
+bool Validator::PushConstants(utils::VectorRef<sem::Function*> entry_points) const {
     for (auto* entry_point : entry_points) {
         // State checked and modified by check_push_constant so that it remembers previously seen
         // push_constant variables for an entry-point.
@@ -2422,7 +2422,7 @@ bool Validator::CheckTypeAccessAddressSpace(
     const sem::Type* store_ty,
     ast::Access access,
     ast::AddressSpace address_space,
-    const utils::VectorRef<const tint::ast::Attribute*> attributes,
+    utils::VectorRef<const tint::ast::Attribute*> attributes,
     const Source& source) const {
     if (!AddressSpaceLayout(store_ty, address_space, source)) {
         return false;

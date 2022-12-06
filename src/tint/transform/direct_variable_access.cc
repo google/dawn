@@ -228,7 +228,8 @@ struct DirectVariableAccess::State {
         // will have the pointer parameters replaced with an array of u32s, used to perform the
         // pointer indexing in the variant.
         // Function call pointer arguments are replaced with an array of these dynamic indices.
-        for (auto* decl : utils::Reverse(sem.Module()->DependencyOrderedDeclarations())) {
+        auto decls = sem.Module()->DependencyOrderedDeclarations();
+        for (auto* decl : utils::Reverse(decls)) {
             if (auto* fn = sem.Get<sem::Function>(decl)) {
                 auto* fn_info = FnInfoFor(fn);
                 ProcessFunction(fn, fn_info);

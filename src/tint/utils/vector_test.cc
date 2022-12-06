@@ -2073,15 +2073,6 @@ TEST(TintVectorRefTest, IsEmpty) {
 
 TEST(TintVectorRefTest, FrontBack) {
     Vector<std::string, 3> vec{"front", "mid", "back"};
-    VectorRef<std::string> vec_ref(vec);
-    static_assert(!std::is_const_v<std::remove_reference_t<decltype(vec_ref.Front())>>);
-    static_assert(!std::is_const_v<std::remove_reference_t<decltype(vec_ref.Back())>>);
-    EXPECT_EQ(vec_ref.Front(), "front");
-    EXPECT_EQ(vec_ref.Back(), "back");
-}
-
-TEST(TintVectorRefTest, ConstFrontBack) {
-    Vector<std::string, 3> vec{"front", "mid", "back"};
     const VectorRef<std::string> vec_ref(vec);
     static_assert(std::is_const_v<std::remove_reference_t<decltype(vec_ref.Front())>>);
     static_assert(std::is_const_v<std::remove_reference_t<decltype(vec_ref.Back())>>);
@@ -2090,15 +2081,6 @@ TEST(TintVectorRefTest, ConstFrontBack) {
 }
 
 TEST(TintVectorRefTest, BeginEnd) {
-    Vector<std::string, 3> vec{"front", "mid", "back"};
-    VectorRef<std::string> vec_ref(vec);
-    static_assert(!std::is_const_v<std::remove_reference_t<decltype(*vec_ref.begin())>>);
-    static_assert(!std::is_const_v<std::remove_reference_t<decltype(*vec_ref.end())>>);
-    EXPECT_EQ(vec_ref.begin(), &vec[0]);
-    EXPECT_EQ(vec_ref.end(), &vec[0] + 3);
-}
-
-TEST(TintVectorRefTest, ConstBeginEnd) {
     Vector<std::string, 3> vec{"front", "mid", "back"};
     const VectorRef<std::string> vec_ref(vec);
     static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec_ref.begin())>>);

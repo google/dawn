@@ -442,8 +442,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_ArraysOfMatrix) {
     auto* arr_arr_mat2x3_f32 =
         ty.array(ty.array(ty.mat2x3<f32>(), 1_u), 2_u);  // Doubly nested array
     auto* arr_arr_mat2x3_f16 =
-        ty.array(ty.array(ty.mat2x3<f16>(), 1_u), 2_u);      // Doubly nested array
-    auto* rtarr_mat4x4 = ty.array(ty.mat4x4<f32>());         // Runtime array
+        ty.array(ty.array(ty.mat2x3<f16>(), 1_u), 2_u);  // Doubly nested array
+    auto* rtarr_mat4x4 = ty.array(ty.mat4x4<f32>());     // Runtime array
 
     auto* s = Structure(
         "S", utils::Vector{

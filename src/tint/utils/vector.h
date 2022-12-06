@@ -680,11 +680,11 @@ template <typename... Ts>
 Vector(Ts...) -> Vector<VectorCommonType<Ts...>, sizeof...(Ts)>;
 
 /// VectorRef is a weak reference to a Vector, used to pass vectors as parameters, avoiding copies
-/// between the caller and the callee. VectorRef can accept a Vector of any 'N' value, decoupling
-/// the caller's vector internal size from the callee's vector size. A VectorRef tracks the usage of
-/// moves either side of the call. If at the call site, a Vector argument is moved to a VectorRef
-/// parameter, and within the callee, the VectorRef parameter is moved to a Vector, then the Vector
-/// heap allocation will be moved. For example:
+/// between the caller and the callee, or as an non-static sized accessor on a vector. VectorRef can
+/// accept a Vector of any 'N' value, decoupling the caller's vector internal size from the callee's
+/// vector size. A VectorRef tracks the usage of moves either side of the call. If at the call site,
+/// a Vector argument is moved to a VectorRef parameter, and within the callee, the VectorRef
+/// parameter is moved to a Vector, then the Vector heap allocation will be moved. For example:
 ///
 /// ```
 ///     void func_a() {
@@ -698,6 +698,8 @@ Vector(Ts...) -> Vector<VectorCommonType<Ts...>, sizeof...(Ts)>;
 ///        Vector<std::string, 2> vec(std::move(vec_ref));
 ///     }
 /// ```
+///
+/// Aside from this move pattern, a VectorRef provides an immutable reference to the Vector.
 template <typename T>
 class VectorRef {
     /// The slice type used by this vector reference
@@ -710,6 +712,9 @@ class VectorRef {
     }
 
   public:
+    /// Type of `T`.
+    using value_type = T;
+
     /// Constructor - empty reference
     VectorRef() : slice_(EmptySlice()) {}
 
@@ -805,37 +810,19 @@ class VectorRef {
     bool IsEmpty() const { return slice_.len == 0; }
 
     /// @returns a reference to the first element in the vector
-    T& Front() { return slice_.Front(); }
-
-    /// @returns a reference to the first element in the vector
     const T& Front() const { return slice_.Front(); }
-
-    /// @returns a reference to the last element in the vector
-    T& Back() { return slice_.Back(); }
 
     /// @returns a reference to the last element in the vector
     const T& Back() const { return slice_.Back(); }
 
     /// @returns a pointer to the first element in the vector
-    T* begin() { return slice_.begin(); }
-
-    /// @returns a pointer to the first element in the vector
     const T* begin() const { return slice_.begin(); }
-
-    /// @returns a pointer to one past the last element in the vector
-    T* end() { return slice_.end(); }
 
     /// @returns a pointer to one past the last element in the vector
     const T* end() const { return slice_.end(); }
 
     /// @returns a reverse iterator starting with the last element in the vector
-    auto rbegin() { return slice_.rbegin(); }
-
-    /// @returns a reverse iterator starting with the last element in the vector
     auto rbegin() const { return slice_.rbegin(); }
-
-    /// @returns the end for a reverse iterator
-    auto rend() { return slice_.rend(); }
 
     /// @returns the end for a reverse iterator
     auto rend() const { return slice_.rend(); }
@@ -907,7 +894,7 @@ inline std::ostream& operator<<(std::ostream& o, const utils::Vector<T, N>& vec)
 /// @param vec the vector reference
 /// @return the std::ostream so calls can be chained
 template <typename T>
-inline std::ostream& operator<<(std::ostream& o, const utils::VectorRef<T>& vec) {
+inline std::ostream& operator<<(std::ostream& o, utils::VectorRef<T> vec) {
     o << "[";
     bool first = true;
     for (auto& el : vec) {

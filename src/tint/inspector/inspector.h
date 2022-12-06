@@ -126,7 +126,7 @@ class Inspector {
     /// @param entry_point name of the entry point to get information about.
     /// @returns vector of all of the sampler/texture sampling pairs that are used
     /// by that entry point.
-    utils::Vector<sem::SamplerTexturePair, 4> GetSamplerTextureUses(const std::string& entry_point);
+    utils::VectorRef<sem::SamplerTexturePair> GetSamplerTextureUses(const std::string& entry_point);
 
     /// @param entry_point name of the entry point to get information about.
     /// @param placeholder the sampler binding point to use for texture-only

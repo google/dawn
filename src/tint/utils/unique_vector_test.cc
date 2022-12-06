@@ -94,11 +94,11 @@ TEST(UniqueVectorTest, AsVector) {
     unique_vec.Add(1);
     unique_vec.Add(2);
 
-    const utils::Vector<int, 4>& vec = unique_vec;
-    EXPECT_EQ(vec.Length(), 3u);
+    utils::VectorRef<int> ref = unique_vec;
+    EXPECT_EQ(ref.Length(), 3u);
     EXPECT_EQ(unique_vec.IsEmpty(), false);
     int i = 0;
-    for (auto n : vec) {
+    for (auto n : ref) {
         EXPECT_EQ(n, i);
         i++;
     }

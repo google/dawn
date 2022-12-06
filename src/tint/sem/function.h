@@ -135,9 +135,7 @@ class Function final : public Castable<Function, CallTarget> {
 
     /// @returns the list of texture/sampler pairs that this function uses
     /// (directly or indirectly).
-    const utils::Vector<VariablePair, 8>& TextureSamplerPairs() const {
-        return texture_sampler_pairs_;
-    }
+    utils::VectorRef<VariablePair> TextureSamplerPairs() const { return texture_sampler_pairs_; }
 
     /// @returns the list of direct calls to functions / builtins made by this
     /// function

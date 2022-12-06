@@ -91,8 +91,7 @@ auto Transform(const Vector<IN, N>& in, TRANSFORMER&& transform)
 /// @tparam N the small-array size of the returned Vector
 /// @returns a new vector with each element of the source vector transformed by `transform`.
 template <size_t N, typename IN, typename TRANSFORMER>
-auto Transform(const VectorRef<IN>& in, TRANSFORMER&& transform)
-    -> Vector<decltype(transform(in[0])), N> {
+auto Transform(VectorRef<IN> in, TRANSFORMER&& transform) -> Vector<decltype(transform(in[0])), N> {
     const auto count = in.Length();
     Vector<decltype(transform(in[0])), N> result;
     result.Reserve(count);
@@ -108,7 +107,7 @@ auto Transform(const VectorRef<IN>& in, TRANSFORMER&& transform)
 /// @tparam N the small-array size of the returned Vector
 /// @returns a new vector with each element of the source vector transformed by `transform`.
 template <size_t N, typename IN, typename TRANSFORMER>
-auto Transform(const VectorRef<IN>& in, TRANSFORMER&& transform)
+auto Transform(VectorRef<IN> in, TRANSFORMER&& transform)
     -> Vector<decltype(transform(in[0], 1u)), N> {
     const auto count = in.Length();
     Vector<decltype(transform(in[0], 1u)), N> result;

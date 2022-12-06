@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/id_attribute.h"
@@ -33,16 +34,13 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::inspector {
 namespace {
 
-// All the tests that descend from InspectorBuilder are expected to define their
-// test state via building up the AST through InspectorBuilder and then generate
-// the program with ::Build.
-// The returned Inspector from ::Build can then be used to test expecations.
+// All the tests that descend from InspectorBuilder are expected to define their test state via
+// building up the AST through InspectorBuilder and then generate the program with ::Build. The
+// returned Inspector from ::Build can then be used to test expectations.
 //
-// All the tests that descend from InspectorRunner are expected to define their
-// test state via a WGSL shader, which will be parsed to generate a Program and
-// Inspector in ::Initialize.
-// The returned Inspector from ::Initialize can then be used to test
-// expecations.
+// All the tests that descend from InspectorRunner are expected to define their test state via a
+// WGSL shader, which will be parsed to generate a Program and Inspector in ::Initialize. The
+// returned Inspector from ::Initialize can then be used to test expectations.
 
 class InspectorGetEntryPointTest : public InspectorBuilder, public testing::Test {};
 
@@ -3202,7 +3200,7 @@ fn main(@location(0) fragUV: vec2<f32>,
 })";
 
     Inspector& inspector = Initialize(shader);
-    auto result = inspector.GetSamplerTextureUses("foo");
+    inspector.GetSamplerTextureUses("foo");
     ASSERT_TRUE(inspector.has_error()) << inspector.error();
 }
 
@@ -3224,7 +3222,8 @@ fn main(@location(0) fragUV: vec2<f32>,
     auto result_1 = inspector.GetSamplerTextureUses("main");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    EXPECT_EQ(result_0, result_1);
+    EXPECT_EQ((utils::Vector<tint::sem::SamplerTexturePair, 4>(result_0)),
+              (utils::Vector<tint::sem::SamplerTexturePair, 4>(result_1)));
 }
 
 TEST_F(InspectorGetSamplerTextureUsesTest, BothIndirect) {
@@ -3641,7 +3640,7 @@ fn main(@location(0) fragUV: vec2<f32>,
 })";
 
     Inspector& inspector = Initialize(shader);
-    auto result = inspector.GetSamplerTextureUses("main");
+    inspector.GetSamplerTextureUses("main");
 }
 
 }  // namespace

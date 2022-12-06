@@ -135,12 +135,12 @@ class Validator {
     /// Validates pipeline stages
     /// @param entry_points the entry points to the module
     /// @returns true on success, false otherwise.
-    bool PipelineStages(const utils::VectorRef<sem::Function*> entry_points) const;
+    bool PipelineStages(utils::VectorRef<sem::Function*> entry_points) const;
 
     /// Validates push_constant variables
     /// @param entry_points the entry points to the module
     /// @returns true on success, false otherwise.
-    bool PushConstants(const utils::VectorRef<sem::Function*> entry_points) const;
+    bool PushConstants(utils::VectorRef<sem::Function*> entry_points) const;
 
     /// Validates aliases
     /// @param alias the alias to validate
@@ -508,7 +508,7 @@ class Validator {
     bool CheckTypeAccessAddressSpace(const sem::Type* store_ty,
                                      ast::Access access,
                                      ast::AddressSpace address_space,
-                                     const utils::VectorRef<const tint::ast::Attribute*> attributes,
+                                     utils::VectorRef<const tint::ast::Attribute*> attributes,
                                      const Source& source) const;
     SymbolTable& symbols_;
     diag::List& diagnostics_;
