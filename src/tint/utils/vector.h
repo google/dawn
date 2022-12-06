@@ -106,12 +106,20 @@ struct Slice {
     auto rend() const { return std::reverse_iterator<const T*>(begin()); }
 };
 
+/// Mode enumerator for ReinterpretSlice
+enum class ReinterpretMode {
+    /// Only upcasts of pointers are permitted
+    kSafe,
+    /// Potentially unsafe downcasts of pointers are also permitted
+    kUnsafe,
+};
+
 namespace detail {
 
 /// Private implementation of tint::utils::CanReinterpretSlice.
 /// Specialized for the case of TO equal to FROM, which is the common case, and avoids inspection of
 /// the base classes, which can be troublesome if the slice is of an incomplete type.
-template <typename TO, typename FROM>
+template <ReinterpretMode MODE, typename TO, typename FROM>
 struct CanReinterpretSlice {
     /// True if a slice of FROM can be reinterpreted as a slice of TO
     static constexpr bool value =
@@ -122,13 +130,14 @@ struct CanReinterpretSlice {
          !std::is_const_v<std::remove_pointer_t<FROM>>)&&  //
         // TO and FROM are both Castable
         IsCastable<std::remove_pointer_t<FROM>, std::remove_pointer_t<TO>> &&  //
-        // FROM is of, or derives from TO
-        traits::IsTypeOrDerived<std::remove_pointer_t<FROM>, std::remove_pointer_t<TO>>;
+        // MODE is kUnsafe, or FROM is of, or derives from TO
+        (MODE == ReinterpretMode::kUnsafe ||
+         traits::IsTypeOrDerived<std::remove_pointer_t<FROM>, std::remove_pointer_t<TO>>);
 };
 
 /// Specialization of 'CanReinterpretSlice' for when TO and FROM are equal types.
-template <typename T>
-struct CanReinterpretSlice<T, T> {
+template <typename T, ReinterpretMode MODE>
+struct CanReinterpretSlice<MODE, T, T> {
     /// Always `true` as TO and FROM are the same type.
     static constexpr bool value = true;
 };
@@ -140,16 +149,16 @@ struct CanReinterpretSlice<T, T> {
 /// CastableBase, and the pointee type of `TO` is of the same type as, or is an ancestor of the
 /// pointee type of `FROM`. Vectors of non-`const` Castable pointers can be converted to a vector of
 /// `const` Castable pointers.
-template <typename TO, typename FROM>
-static constexpr bool CanReinterpretSlice = detail::CanReinterpretSlice<TO, FROM>::value;
+template <ReinterpretMode MODE, typename TO, typename FROM>
+static constexpr bool CanReinterpretSlice = detail::CanReinterpretSlice<MODE, TO, FROM>::value;
 
 /// Reinterprets `const Slice<FROM>*` as `const Slice<TO>*`
 /// @param slice a pointer to the slice to reinterpret
 /// @returns the reinterpreted slice
 /// @see CanReinterpretSlice
-template <typename TO, typename FROM>
+template <ReinterpretMode MODE, typename TO, typename FROM>
 const Slice<TO>* ReinterpretSlice(const Slice<FROM>* slice) {
-    static_assert(CanReinterpretSlice<TO, FROM>);
+    static_assert(CanReinterpretSlice<MODE, TO, FROM>);
     return Bitcast<const Slice<TO>*>(slice);
 }
 
@@ -157,9 +166,9 @@ const Slice<TO>* ReinterpretSlice(const Slice<FROM>* slice) {
 /// @param slice a pointer to the slice to reinterpret
 /// @returns the reinterpreted slice
 /// @see CanReinterpretSlice
-template <typename TO, typename FROM>
+template <ReinterpretMode MODE, typename TO, typename FROM>
 Slice<TO>* ReinterpretSlice(Slice<FROM>* slice) {
-    static_assert(CanReinterpretSlice<TO, FROM>);
+    static_assert(CanReinterpretSlice<MODE, TO, FROM>);
     return Bitcast<Slice<TO>*>(slice);
 }
 
@@ -230,15 +239,21 @@ class Vector {
     /// Copy constructor with covariance / const conversion
     /// @param other the vector to copy
     /// @see CanReinterpretSlice for rules about conversion
-    template <typename U, size_t N2, typename = std::enable_if_t<CanReinterpretSlice<T, U>>>
+    template <typename U,
+              size_t N2,
+              ReinterpretMode MODE,
+              typename = std::enable_if_t<CanReinterpretSlice<MODE, T, U>>>
     Vector(const Vector<U, N2>& other) {  // NOLINT(runtime/explicit)
-        Copy(*ReinterpretSlice<T>(&other.impl_.slice));
+        Copy(*ReinterpretSlice<MODE, T>(&other.impl_.slice));
     }
 
     /// Move constructor with covariance / const conversion
     /// @param other the vector to move
     /// @see CanReinterpretSlice for rules about conversion
-    template <typename U, size_t N2, typename = std::enable_if_t<CanReinterpretSlice<T, U>>>
+    template <typename U,
+              size_t N2,
+              ReinterpretMode MODE,
+              typename = std::enable_if_t<CanReinterpretSlice<MODE, T, U>>>
     Vector(Vector<U, N2>&& other) {  // NOLINT(runtime/explicit)
         MoveOrCopy(VectorRef<T>(std::move(other)));
     }
@@ -701,6 +716,11 @@ class VectorRef {
     /// Constructor
     VectorRef(EmptyType) : slice_(EmptySlice()) {}  // NOLINT(runtime/explicit)
 
+    /// Constructor from a Slice
+    /// @param slice the slice
+    VectorRef(Slice& slice)  // NOLINT(runtime/explicit)
+        : slice_(slice) {}
+
     /// Constructor from a Vector
     /// @param vector the vector to create a reference of
     template <size_t N>
@@ -729,29 +749,37 @@ class VectorRef {
 
     /// Copy constructor with covariance / const conversion
     /// @param other the other vector reference
-    template <typename U, typename = std::enable_if_t<CanReinterpretSlice<T, U>>>
+    template <typename U,
+              typename = std::enable_if_t<CanReinterpretSlice<ReinterpretMode::kSafe, T, U>>>
     VectorRef(const VectorRef<U>& other)  // NOLINT(runtime/explicit)
-        : slice_(*ReinterpretSlice<T>(&other.slice_)) {}
+        : slice_(*ReinterpretSlice<ReinterpretMode::kSafe, T>(&other.slice_)) {}
 
     /// Move constructor with covariance / const conversion
     /// @param other the vector reference
-    template <typename U, typename = std::enable_if_t<CanReinterpretSlice<T, U>>>
+    template <typename U,
+              typename = std::enable_if_t<CanReinterpretSlice<ReinterpretMode::kSafe, T, U>>>
     VectorRef(VectorRef<U>&& other)  // NOLINT(runtime/explicit)
-        : slice_(*ReinterpretSlice<T>(&other.slice_)), can_move_(other.can_move_) {}
+        : slice_(*ReinterpretSlice<ReinterpretMode::kSafe, T>(&other.slice_)),
+          can_move_(other.can_move_) {}
 
     /// Constructor from a Vector with covariance / const conversion
     /// @param vector the vector to create a reference of
     /// @see CanReinterpretSlice for rules about conversion
-    template <typename U, size_t N, typename = std::enable_if_t<CanReinterpretSlice<T, U>>>
+    template <typename U,
+              size_t N,
+              typename = std::enable_if_t<CanReinterpretSlice<ReinterpretMode::kSafe, T, U>>>
     VectorRef(Vector<U, N>& vector)  // NOLINT(runtime/explicit)
-        : slice_(*ReinterpretSlice<T>(&vector.impl_.slice)) {}
+        : slice_(*ReinterpretSlice<ReinterpretMode::kSafe, T>(&vector.impl_.slice)) {}
 
     /// Constructor from a moved Vector with covariance / const conversion
     /// @param vector the vector to create a reference of
     /// @see CanReinterpretSlice for rules about conversion
-    template <typename U, size_t N, typename = std::enable_if_t<CanReinterpretSlice<T, U>>>
+    template <typename U,
+              size_t N,
+              typename = std::enable_if_t<CanReinterpretSlice<ReinterpretMode::kSafe, T, U>>>
     VectorRef(Vector<U, N>&& vector)  // NOLINT(runtime/explicit)
-        : slice_(*ReinterpretSlice<T>(&vector.impl_.slice)), can_move_(vector.impl_.CanMove()) {}
+        : slice_(*ReinterpretSlice<ReinterpretMode::kSafe, T>(&vector.impl_.slice)),
+          can_move_(vector.impl_.CanMove()) {}
 
     /// Index operator
     /// @param i the element index. Must be less than `len`.
@@ -764,6 +792,14 @@ class VectorRef {
     /// @return the number of elements that the vector could hold before a heap allocation needs to
     /// be made
     size_t Capacity() const { return slice_.cap; }
+
+    /// @return a reinterpretation of this VectorRef as elements of type U.
+    /// @note this is doing a reinterpret_cast of elements. It is up to the caller to ensure that
+    /// this is a safe operation.
+    template <typename U>
+    VectorRef<U> ReinterpretCast() const {
+        return {*ReinterpretSlice<ReinterpretMode::kUnsafe, U>(&slice_)};
+    }
 
     /// @returns true if the vector is empty.
     bool IsEmpty() const { return slice_.len == 0; }
