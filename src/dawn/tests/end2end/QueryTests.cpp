@@ -1078,6 +1078,26 @@ TEST_P(TimestampQueryTests, ResolveTwiceToSameBuffer) {
     EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
 }
 
+// Test calling WriteTimestamp many times into separate query sets.
+// Regression test for crbug.com/dawn/1603.
+TEST_P(TimestampQueryTests, ManyWriteTimestampDistinctQuerySets) {
+    constexpr uint32_t kQueryCount = 100;
+    // Write timestamp with a different query sets many times
+    for (uint32_t i = 0; i < kQueryCount; ++i) {
+        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(1);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.WriteTimestamp(querySet, 0);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // Destroy the query set so we don't OOM.
+        querySet.Destroy();
+        // Make sure the queue is idle so the query set is definitely destroyed.
+        WaitForAllOperations();
+    }
+}
+
 class TimestampQueryInsidePassesTests : public TimestampQueryTests {
   protected:
     void SetUp() override {
