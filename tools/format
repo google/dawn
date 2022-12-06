@@ -13,9 +13,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-find src -name "*.h"  -exec clang_format.py -i {} \;
-find src -name "*.cc"  -exec clang_format.py -i {} \;
-find src -name "*.cpp"  -exec clang_format.py -i {} \;
-find src -name "*.m"  -exec clang_format.py -i {} \;
-find src -name "*.mm"  -exec clang_format.py -i {} \;
-find include -name "*.h"  -exec clang_format.py -i {} \;
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd "${SCRIPT_DIR}/.." >/dev/null 2>&1 && pwd )"
+
+set -e  # fail on error
+
+if ! command -v clang_format.py &> /dev/null; then
+    echo "clang_format.py not found on PATH"
+    exit 1
+fi
+
+FILES=""
+FILES+="`find src -name "*.h"` "
+FILES+="`find src -name "*.cc"` "
+FILES+="`find src -name "*.cpp"` "
+FILES+="`find src -name "*.m"` "
+FILES+="`find src -name "*.mm"` "
+FILES+="`find include -name "*.h"` "
+
+if command -v go &> /dev/null; then
+    # Go is installed. Run cpplint in parallel for speed wins
+    ${SCRIPT_DIR}/run run-parallel  \
+         clang_format.py -i         \
+         $ -- $FILES
+else
+    clang_format.py -i $FILES
+fi

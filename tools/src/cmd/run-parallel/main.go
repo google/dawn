@@ -75,6 +75,7 @@ func run() error {
 
 	taskIndices := make(chan int, 64)
 	type result struct {
+		cmd    string
 		msg    string
 		failed bool
 	}
@@ -93,7 +94,7 @@ func run() error {
 				}
 				success, out := invoke(exe, taskArgs)
 				if !success || !*onlyPrintFailures {
-					results[idx] = result{out, !success}
+					results[idx] = result{fmt.Sprint(append([]string{exe}, taskArgs...)), out, !success}
 				}
 			}
 		}()
@@ -109,7 +110,7 @@ func run() error {
 	failed := false
 	for _, result := range results {
 		if result.msg != "" {
-			fmt.Println(result.msg)
+			fmt.Printf("'%v' returned %v\n", result.cmd, result.msg)
 		}
 		failed = failed || result.failed
 	}
