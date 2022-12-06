@@ -86,6 +86,10 @@ crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_conten
 crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
 crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Skip ]
 
+# Limit value changed. gpuweb#3648
+webgpu:api,validation,query_set,create:count:type="occlusion" [ Failure ]
+webgpu:api,validation,query_set,create:count:type="timestamp" [ Failure ]
+
 ################################################################################
 # web_platform crashes on SwiftShader
 # Skipped instead of just Crash because of the number of failures
