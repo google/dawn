@@ -892,8 +892,8 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Scalar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
-    auto& members = res_ty->Members();
-    ASSERT_EQ(members.size(), 2u);
+    auto members = res_ty->Members();
+    ASSERT_EQ(members.Length(), 2u);
     EXPECT_TRUE(members[0]->Type()->Is<sem::F32>());
     EXPECT_TRUE(members[1]->Type()->Is<sem::I32>());
 }
@@ -905,8 +905,8 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec2) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
-    auto& members = res_ty->Members();
-    ASSERT_EQ(members.size(), 2u);
+    auto members = res_ty->Members();
+    ASSERT_EQ(members.Length(), 2u);
     ASSERT_TRUE(members[0]->Type()->Is<sem::Vector>());
     ASSERT_TRUE(members[1]->Type()->Is<sem::Vector>());
     EXPECT_EQ(members[0]->Type()->As<sem::Vector>()->Width(), 2u);
@@ -922,8 +922,8 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec3) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
-    auto& members = res_ty->Members();
-    ASSERT_EQ(members.size(), 2u);
+    auto members = res_ty->Members();
+    ASSERT_EQ(members.Length(), 2u);
     ASSERT_TRUE(members[0]->Type()->Is<sem::Vector>());
     ASSERT_TRUE(members[1]->Type()->Is<sem::Vector>());
     EXPECT_EQ(members[0]->Type()->As<sem::Vector>()->Width(), 3u);
@@ -939,8 +939,8 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec4) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
-    auto& members = res_ty->Members();
-    ASSERT_EQ(members.size(), 2u);
+    auto members = res_ty->Members();
+    ASSERT_EQ(members.Length(), 2u);
     ASSERT_TRUE(members[0]->Type()->Is<sem::Vector>());
     ASSERT_TRUE(members[1]->Type()->Is<sem::Vector>());
     EXPECT_EQ(members[0]->Type()->As<sem::Vector>()->Width(), 4u);
@@ -956,8 +956,8 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Scalar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
-    auto& members = res_ty->Members();
-    ASSERT_EQ(members.size(), 2u);
+    auto members = res_ty->Members();
+    ASSERT_EQ(members.Length(), 2u);
     EXPECT_TRUE(members[0]->Type()->Is<sem::F32>());
     EXPECT_TRUE(members[1]->Type()->Is<sem::F32>());
 }
@@ -969,8 +969,8 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec2) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
-    auto& members = res_ty->Members();
-    ASSERT_EQ(members.size(), 2u);
+    auto members = res_ty->Members();
+    ASSERT_EQ(members.Length(), 2u);
     ASSERT_TRUE(members[0]->Type()->Is<sem::Vector>());
     ASSERT_TRUE(members[1]->Type()->Is<sem::Vector>());
     EXPECT_EQ(members[0]->Type()->As<sem::Vector>()->Width(), 2u);
@@ -986,8 +986,8 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec3) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
-    auto& members = res_ty->Members();
-    ASSERT_EQ(members.size(), 2u);
+    auto members = res_ty->Members();
+    ASSERT_EQ(members.Length(), 2u);
     ASSERT_TRUE(members[0]->Type()->Is<sem::Vector>());
     ASSERT_TRUE(members[1]->Type()->Is<sem::Vector>());
     EXPECT_EQ(members[0]->Type()->As<sem::Vector>()->Width(), 3u);
@@ -1003,8 +1003,8 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec4) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
-    auto& members = res_ty->Members();
-    ASSERT_EQ(members.size(), 2u);
+    auto members = res_ty->Members();
+    ASSERT_EQ(members.Length(), 2u);
     ASSERT_TRUE(members[0]->Type()->Is<sem::Vector>());
     ASSERT_TRUE(members[1]->Type()->Is<sem::Vector>());
     EXPECT_EQ(members[0]->Type()->As<sem::Vector>()->Width(), 4u);

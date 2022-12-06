@@ -23,13 +23,15 @@
 #include "src/tint/symbol_table.h"
 #include "src/tint/utils/hash.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::sem::StructBase);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Struct);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMemberBase);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMember);
 
 namespace tint::sem {
 namespace {
 
-TypeFlags FlagsFrom(const StructMemberList& members) {
+TypeFlags FlagsFrom(utils::VectorRef<const StructMemberBase*> members) {
     TypeFlags flags{
         TypeFlag::kConstructable,
         TypeFlag::kCreationFixedFootprint,
@@ -54,12 +56,21 @@ TypeFlags FlagsFrom(const StructMemberList& members) {
 Struct::Struct(const ast::Struct* declaration,
                tint::Source source,
                Symbol name,
-               StructMemberList members,
+               utils::VectorRef<const StructMember*> members,
                uint32_t align,
                uint32_t size,
                uint32_t size_no_padding)
+    : Base(source, name, members, align, size, size_no_padding), declaration_(declaration) {}
+
+Struct::~Struct() = default;
+
+StructBase::StructBase(tint::Source source,
+                       Symbol name,
+                       utils::VectorRef<const StructMemberBase*> members,
+                       uint32_t align,
+                       uint32_t size,
+                       uint32_t size_no_padding)
     : Base(FlagsFrom(members)),
-      declaration_(declaration),
       source_(source),
       name_(name),
       members_(std::move(members)),
@@ -67,20 +78,20 @@ Struct::Struct(const ast::Struct* declaration,
       size_(size),
       size_no_padding_(size_no_padding) {}
 
-Struct::~Struct() = default;
+StructBase::~StructBase() = default;
 
-size_t Struct::Hash() const {
+size_t StructBase::Hash() const {
     return utils::Hash(TypeInfo::Of<Struct>().full_hashcode, name_);
 }
 
-bool Struct::Equals(const sem::Type& other) const {
+bool StructBase::Equals(const sem::Type& other) const {
     if (auto* o = other.As<Struct>()) {
         return o->name_ == name_;
     }
     return false;
 }
 
-const StructMember* Struct::FindMember(Symbol name) const {
+const StructMemberBase* StructBase::FindMember(Symbol name) const {
     for (auto* member : members_) {
         if (member->Name() == name) {
             return member;
@@ -89,27 +100,29 @@ const StructMember* Struct::FindMember(Symbol name) const {
     return nullptr;
 }
 
-uint32_t Struct::Align() const {
+uint32_t StructBase::Align() const {
     return align_;
 }
 
-uint32_t Struct::Size() const {
+uint32_t StructBase::Size() const {
     return size_;
 }
 
-std::string Struct::FriendlyName(const SymbolTable& symbols) const {
+std::string StructBase::FriendlyName(const SymbolTable& symbols) const {
     return symbols.NameFor(name_);
 }
 
-std::string Struct::Layout(const tint::SymbolTable& symbols) const {
+std::string StructBase::Layout(const tint::SymbolTable& symbols) const {
     std::stringstream ss;
 
-    auto member_name_of = [&](const sem::StructMember* sm) { return symbols.NameFor(sm->Name()); };
+    auto member_name_of = [&](const sem::StructMemberBase* sm) {
+        return symbols.NameFor(sm->Name());
+    };
 
-    if (Members().empty()) {
+    if (Members().IsEmpty()) {
         return {};
     }
-    const auto* const last_member = Members().back();
+    const auto* const last_member = Members().Back();
     const uint32_t last_member_struct_padding_offset = last_member->Offset() + last_member->Size();
 
     // Compute max widths to align output
@@ -135,7 +148,7 @@ std::string Struct::Layout(const tint::SymbolTable& symbols) const {
 
     print_struct_begin_line(Align(), Size(), UnwrapRef()->FriendlyName(symbols));
 
-    for (size_t i = 0; i < Members().size(); ++i) {
+    for (size_t i = 0; i < Members().Length(); ++i) {
         auto* const m = Members()[i];
 
         // Output field alignment padding, if any
@@ -176,8 +189,19 @@ StructMember::StructMember(const ast::StructMember* declaration,
                            uint32_t align,
                            uint32_t size,
                            std::optional<uint32_t> location)
-    : declaration_(declaration),
-      source_(source),
+    : Base(source, name, type, index, offset, align, size, location), declaration_(declaration) {}
+
+StructMember::~StructMember() = default;
+
+StructMemberBase::StructMemberBase(tint::Source source,
+                                   Symbol name,
+                                   const sem::Type* type,
+                                   uint32_t index,
+                                   uint32_t offset,
+                                   uint32_t align,
+                                   uint32_t size,
+                                   std::optional<uint32_t> location)
+    : source_(source),
       name_(name),
       type_(type),
       index_(index),
@@ -186,6 +210,6 @@ StructMember::StructMember(const ast::StructMember* declaration,
       size_(size),
       location_(location) {}
 
-StructMember::~StructMember() = default;
+StructMemberBase::~StructMemberBase() = default;
 
 }  // namespace tint::sem

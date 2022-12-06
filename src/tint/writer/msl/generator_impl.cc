@@ -1761,8 +1761,8 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
                 return true;
             }
 
-            auto& members = s->Members();
-            for (size_t i = 0; i < members.size(); i++) {
+            auto members = s->Members();
+            for (size_t i = 0; i < members.Length(); i++) {
                 if (i > 0) {
                     out << ", ";
                 }

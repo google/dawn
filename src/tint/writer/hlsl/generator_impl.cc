@@ -3380,7 +3380,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out,
 
             auto emit_member_values = [&](std::ostream& o) {
                 o << "{";
-                for (size_t i = 0; i < s->Members().size(); i++) {
+                for (size_t i = 0; i < s->Members().Length(); i++) {
                     if (i > 0) {
                         o << ", ";
                     }

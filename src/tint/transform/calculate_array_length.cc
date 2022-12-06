@@ -207,7 +207,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                                 [&](const sem::Struct* str) {
                                     // The variable is a struct, so subtract the byte offset of
                                     // the array member.
-                                    auto* array_member_sem = str->Members().back();
+                                    auto* array_member_sem = str->Members().Back();
                                     total_size = b.Sub(total_size, u32(array_member_sem->Offset()));
                                     return array_member_sem->Type()->As<sem::Array>();
                                 },

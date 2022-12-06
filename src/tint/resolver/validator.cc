@@ -440,7 +440,7 @@ bool Validator::AddressSpaceLayout(const sem::Type* store_ty,
     }
 
     if (auto* str = store_ty->As<sem::Struct>()) {
-        for (size_t i = 0; i < str->Members().size(); ++i) {
+        for (size_t i = 0; i < str->Members().Length(); ++i) {
             auto* const m = str->Members()[i];
             uint32_t required_align = required_alignment_of(m->Type());
 
@@ -1724,10 +1724,10 @@ bool Validator::StructureInitializer(const ast::CallExpression* ctor,
     }
 
     if (ctor->args.Length() > 0) {
-        if (ctor->args.Length() != struct_type->Members().size()) {
-            std::string fm = ctor->args.Length() < struct_type->Members().size() ? "few" : "many";
+        if (ctor->args.Length() != struct_type->Members().Length()) {
+            std::string fm = ctor->args.Length() < struct_type->Members().Length() ? "few" : "many";
             AddError("struct initializer has too " + fm + " inputs: expected " +
-                         std::to_string(struct_type->Members().size()) + ", found " +
+                         std::to_string(struct_type->Members().Length()) + ", found " +
                          std::to_string(ctor->args.Length()),
                      ctor->source);
             return false;
@@ -2019,7 +2019,7 @@ bool Validator::Alias(const ast::Alias*) const {
 }
 
 bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) const {
-    if (str->Members().empty()) {
+    if (str->Members().IsEmpty()) {
         AddError("structures must have at least one member", str->Source());
         return false;
     }
@@ -2028,7 +2028,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
     for (auto* member : str->Members()) {
         if (auto* r = member->Type()->As<sem::Array>()) {
             if (r->Count()->Is<sem::RuntimeArrayCount>()) {
-                if (member != str->Members().back()) {
+                if (member != str->Members().Back()) {
                     AddError("runtime arrays may only appear as the last member of a struct",
                              member->Source());
                     return false;

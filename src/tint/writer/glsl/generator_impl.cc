@@ -295,7 +295,7 @@ bool GeneratorImpl::Generate() {
         } else if (auto* str = decl->As<ast::Struct>()) {
             auto* sem = builder_.Sem().Get(str);
             bool has_rt_arr = false;
-            if (auto* arr = sem->Members().back()->Type()->As<sem::Array>()) {
+            if (auto* arr = sem->Members().Back()->Type()->As<sem::Array>()) {
                 has_rt_arr = arr->Count()->Is<sem::RuntimeArrayCount>();
             }
             bool is_block =
@@ -2385,7 +2385,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
 
             ScopedParen sp(out);
 
-            for (size_t i = 0; i < s->Members().size(); i++) {
+            for (size_t i = 0; i < s->Members().Length(); i++) {
                 if (i > 0) {
                     out << ", ";
                 }

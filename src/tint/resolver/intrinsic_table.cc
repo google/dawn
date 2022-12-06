@@ -802,18 +802,18 @@ sem::Struct* build_struct(ProgramBuilder& b,
                           std::initializer_list<NameAndType> member_names_and_types) {
     uint32_t offset = 0;
     uint32_t max_align = 0;
-    sem::StructMemberList members;
+    utils::Vector<const sem::StructMember*, 4> members;
     for (auto& m : member_names_and_types) {
         uint32_t align = std::max<uint32_t>(m.type->Align(), 1);
         uint32_t size = m.type->Size();
         offset = utils::RoundUp(align, offset);
         max_align = std::max(max_align, align);
-        members.emplace_back(b.create<sem::StructMember>(
+        members.Push(b.create<sem::StructMember>(
             /* declaration */ nullptr,
             /* source */ Source{},
             /* name */ b.Sym(m.name),
             /* type */ m.type,
-            /* index */ static_cast<uint32_t>(members.size()),
+            /* index */ static_cast<uint32_t>(members.Length()),
             /* offset */ offset,
             /* align */ align,
             /* size */ size,
@@ -826,7 +826,7 @@ sem::Struct* build_struct(ProgramBuilder& b,
         /* declaration */ nullptr,
         /* source */ Source{},
         /* name */ b.Sym(name),
-        /* members */ members,
+        /* members */ std::move(members),
         /* align */ max_align,
         /* size */ size_with_padding,
         /* size_no_padding */ size_without_padding);

@@ -2069,7 +2069,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     StructInitializerSig{{str, args.Length(), args_stage}},
                     [&]() -> sem::TypeInitializer* {
                         utils::Vector<const sem::Parameter*, 8> params;
-                        params.Resize(std::min(args.Length(), str->Members().size()));
+                        params.Resize(std::min(args.Length(), str->Members().Length()));
                         for (size_t i = 0, n = params.Length(); i < n; i++) {
                             params[i] = builder_->create<sem::Parameter>(
                                 nullptr,                    // declaration
@@ -3097,19 +3097,15 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         Mark(attr);
     }
 
-    sem::StructMemberList sem_members;
-    sem_members.reserve(str->members.Length());
+    utils::Vector<const sem::StructMember*, 8> sem_members;
+    sem_members.Reserve(str->members.Length());
 
-    // Calculate the effective size and alignment of each field, and the overall
-    // size of the structure.
-    // For size, use the size attribute if provided, otherwise use the default
-    // size for the type.
-    // For alignment, use the alignment attribute if provided, otherwise use the
-    // default alignment for the member type.
-    // Diagnostic errors are raised if a basic rule is violated.
-    // Validation of storage-class rules requires analyzing the actual variable
-    // usage of the structure, and so is performed as part of the variable
-    // validation.
+    // Calculate the effective size and alignment of each field, and the overall size of the
+    // structure. For size, use the size attribute if provided, otherwise use the default size for
+    // the type. For alignment, use the alignment attribute if provided, otherwise use the default
+    // alignment for the member type. Diagnostic errors are raised if a basic rule is violated.
+    // Validation of storage-class rules requires analyzing the actual variable usage of the
+    // structure, and so is performed as part of the variable validation.
     uint64_t struct_size = 0;
     uint64_t struct_align = 1;
     utils::Hashmap<Symbol, const ast::StructMember*, 8> member_map;
@@ -3274,11 +3270,11 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         }
 
         auto* sem_member = builder_->create<sem::StructMember>(
-            member, member->source, member->symbol, type, static_cast<uint32_t>(sem_members.size()),
-            static_cast<uint32_t>(offset), static_cast<uint32_t>(align),
-            static_cast<uint32_t>(size), location);
+            member, member->source, member->symbol, type,
+            static_cast<uint32_t>(sem_members.Length()), static_cast<uint32_t>(offset),
+            static_cast<uint32_t>(align), static_cast<uint32_t>(size), location);
         builder_->Sem().Add(member, sem_member);
-        sem_members.emplace_back(sem_member);
+        sem_members.Push(sem_member);
 
         struct_size = offset + size;
         struct_align = std::max(struct_align, align);
@@ -3299,10 +3295,10 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     }
 
     auto* out = builder_->create<sem::Struct>(
-        str, str->source, str->name, sem_members, static_cast<uint32_t>(struct_align),
+        str, str->source, str->name, std::move(sem_members), static_cast<uint32_t>(struct_align),
         static_cast<uint32_t>(struct_size), static_cast<uint32_t>(size_no_padding));
 
-    for (size_t i = 0; i < sem_members.size(); i++) {
+    for (size_t i = 0; i < sem_members.Length(); i++) {
         auto* mem_type = sem_members[i]->Type();
         if (mem_type->Is<sem::Atomic>()) {
             atomic_composite_info_.Add(out, &sem_members[i]->Source());

@@ -184,7 +184,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamLocationSet) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    ASSERT_EQ(1u, sem->Members().size());
+    ASSERT_EQ(1u, sem->Members().Length());
     EXPECT_EQ(3u, sem->Members()[0]->Location());
 }
 
@@ -214,7 +214,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderReturnTypeLocationSet) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    ASSERT_EQ(1u, sem->Members().size());
+    ASSERT_EQ(1u, sem->Members().Length());
     EXPECT_EQ(3u, sem->Members()[0]->Location());
 }
 

@@ -1706,7 +1706,7 @@ uint32_t Builder::GenerateConstantIfNeeded(const sem::Constant* constant) {
             }
             return composite(count.value());
         },
-        [&](const sem::Struct* s) { return composite(s->Members().size()); },
+        [&](const sem::Struct* s) { return composite(s->Members().Length()); },
         [&](Default) {
             error_ = "unhandled constant type: " + builder_.FriendlyName(ty);
             return 0;
@@ -3922,7 +3922,7 @@ bool Builder::GenerateStructType(const sem::Struct* struct_type, const Operand& 
         push_annot(spv::Op::OpDecorate, {Operand(struct_id), U32Operand(SpvDecorationBlock)});
     }
 
-    for (uint32_t i = 0; i < struct_type->Members().size(); ++i) {
+    for (uint32_t i = 0; i < struct_type->Members().Length(); ++i) {
         auto mem_id = GenerateStructMember(struct_id, i, struct_type->Members()[i]);
         if (mem_id == 0) {
             return false;

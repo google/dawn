@@ -47,7 +47,7 @@ struct TypeTest : public TestHelper {
     const sem::Struct* str_f32 = create<Struct>(nullptr,
                                                 Source{},
                                                 Sym("str_f32"),
-                                                StructMemberList{
+                                                utils::Vector{
                                                     create<StructMember>(
                                                         /* declaration */ nullptr,
                                                         /* source */ Source{},
@@ -65,7 +65,7 @@ struct TypeTest : public TestHelper {
     const sem::Struct* str_f16 = create<Struct>(nullptr,
                                                 Source{},
                                                 Sym("str_f16"),
-                                                StructMemberList{
+                                                utils::Vector{
                                                     create<StructMember>(
                                                         /* declaration */ nullptr,
                                                         /* source */ Source{},
@@ -83,7 +83,7 @@ struct TypeTest : public TestHelper {
     sem::Struct* str_af = create<Struct>(nullptr,
                                          Source{},
                                          Sym("str_af"),
-                                         StructMemberList{
+                                         utils::Vector{
                                              create<StructMember>(
                                                  /* declaration */ nullptr,
                                                  /* source */ Source{},

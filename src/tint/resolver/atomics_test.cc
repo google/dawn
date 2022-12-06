@@ -55,7 +55,7 @@ TEST_F(ResolverAtomicTest, GlobalStorageStruct) {
     ASSERT_TRUE(TypeOf(g)->Is<sem::Reference>());
     auto* str = TypeOf(g)->UnwrapRef()->As<sem::Struct>();
     ASSERT_NE(str, nullptr);
-    ASSERT_EQ(str->Members().size(), 1u);
+    ASSERT_EQ(str->Members().Length(), 1u);
     auto* atomic = str->Members()[0]->Type()->As<sem::Atomic>();
     ASSERT_NE(atomic, nullptr);
     ASSERT_TRUE(atomic->Type()->Is<sem::I32>());

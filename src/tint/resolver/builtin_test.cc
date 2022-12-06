@@ -926,7 +926,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpScalar_f32) {
     ASSERT_NE(TypeOf(call), nullptr);
     auto* ty = TypeOf(call)->As<sem::Struct>();
     ASSERT_NE(ty, nullptr);
-    ASSERT_EQ(ty->Members().size(), 2u);
+    ASSERT_EQ(ty->Members().Length(), 2u);
 
     auto* fract = ty->Members()[0];
     EXPECT_TRUE(fract->Type()->Is<sem::F32>());
@@ -957,7 +957,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpScalar_f16) {
     ASSERT_NE(TypeOf(call), nullptr);
     auto* ty = TypeOf(call)->As<sem::Struct>();
     ASSERT_NE(ty, nullptr);
-    ASSERT_EQ(ty->Members().size(), 2u);
+    ASSERT_EQ(ty->Members().Length(), 2u);
 
     auto* fract = ty->Members()[0];
     EXPECT_TRUE(fract->Type()->Is<sem::F16>());
@@ -986,7 +986,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector_f32) {
     ASSERT_NE(TypeOf(call), nullptr);
     auto* ty = TypeOf(call)->As<sem::Struct>();
     ASSERT_NE(ty, nullptr);
-    ASSERT_EQ(ty->Members().size(), 2u);
+    ASSERT_EQ(ty->Members().Length(), 2u);
 
     auto* fract = ty->Members()[0];
     ASSERT_TRUE(fract->Type()->Is<sem::Vector>());
@@ -1021,7 +1021,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector_f16) {
     ASSERT_NE(TypeOf(call), nullptr);
     auto* ty = TypeOf(call)->As<sem::Struct>();
     ASSERT_NE(ty, nullptr);
-    ASSERT_EQ(ty->Members().size(), 2u);
+    ASSERT_EQ(ty->Members().Length(), 2u);
 
     auto* fract = ty->Members()[0];
     ASSERT_TRUE(fract->Type()->Is<sem::Vector>());
@@ -1058,7 +1058,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector_sig) {
     ASSERT_NE(TypeOf(call), nullptr);
     auto* ty = TypeOf(call)->As<sem::Struct>();
     ASSERT_NE(ty, nullptr);
-    ASSERT_EQ(ty->Members().size(), 2u);
+    ASSERT_EQ(ty->Members().Length(), 2u);
 
     auto* sig = ty->Members()[0];
     EXPECT_TYPE(sig->Type(), TypeOf(expr));
@@ -1198,7 +1198,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfScalar_f32) {
     ASSERT_NE(TypeOf(call), nullptr);
     auto* ty = TypeOf(call)->As<sem::Struct>();
     ASSERT_NE(ty, nullptr);
-    ASSERT_EQ(ty->Members().size(), 2u);
+    ASSERT_EQ(ty->Members().Length(), 2u);
 
     auto* fract = ty->Members()[0];
     EXPECT_TRUE(fract->Type()->Is<sem::F32>());
@@ -1229,7 +1229,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfScalar_f16) {
     ASSERT_NE(TypeOf(call), nullptr);
     auto* ty = TypeOf(call)->As<sem::Struct>();
     ASSERT_NE(ty, nullptr);
-    ASSERT_EQ(ty->Members().size(), 2u);
+    ASSERT_EQ(ty->Members().Length(), 2u);
 
     auto* fract = ty->Members()[0];
     EXPECT_TRUE(fract->Type()->Is<sem::F16>());
@@ -1258,7 +1258,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfVector_f32) {
     ASSERT_NE(TypeOf(call), nullptr);
     auto* ty = TypeOf(call)->As<sem::Struct>();
     ASSERT_NE(ty, nullptr);
-    ASSERT_EQ(ty->Members().size(), 2u);
+    ASSERT_EQ(ty->Members().Length(), 2u);
 
     auto* fract = ty->Members()[0];
     ASSERT_TRUE(fract->Type()->Is<sem::Vector>());
@@ -1293,7 +1293,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfVector_f16) {
     ASSERT_NE(TypeOf(call), nullptr);
     auto* ty = TypeOf(call)->As<sem::Struct>();
     ASSERT_NE(ty, nullptr);
-    ASSERT_EQ(ty->Members().size(), 2u);
+    ASSERT_EQ(ty->Members().Length(), 2u);
 
     auto* fract = ty->Members()[0];
     ASSERT_TRUE(fract->Type()->Is<sem::Vector>());

@@ -416,7 +416,7 @@ struct Composite : ImplConstant {
         conv_els.Reserve(elements.Length());
         std::function<const sem::Type*(size_t idx)> target_el_ty;
         if (auto* str = target_ty->As<sem::Struct>()) {
-            if (str->Members().size() != elements.Length()) {
+            if (str->Members().Length() != elements.Length()) {
                 TINT_ICE(Resolver, builder.Diagnostics())
                     << "const-eval conversion of structure has mismatched element counts";
                 return utils::Failure;
@@ -496,7 +496,7 @@ const ImplConstant* ZeroValue(ProgramBuilder& builder, const sem::Type* type) {
         [&](const sem::Struct* s) -> const ImplConstant* {
             utils::Hashmap<const sem::Type*, const ImplConstant*, 8> zero_by_type;
             utils::Vector<const sem::Constant*, 4> zeros;
-            zeros.Reserve(s->Members().size());
+            zeros.Reserve(s->Members().Length());
             for (auto* member : s->Members()) {
                 auto* zero = zero_by_type.GetOrCreate(
                     member->Type(), [&] { return ZeroValue(builder, member->Type()); });
@@ -507,7 +507,7 @@ const ImplConstant* ZeroValue(ProgramBuilder& builder, const sem::Type* type) {
             }
             if (zero_by_type.Count() == 1) {
                 // All members were of the same type, so the zero value is the same for all members.
-                return builder.create<Splat>(type, zeros[0], s->Members().size());
+                return builder.create<Splat>(type, zeros[0], s->Members().Length());
             }
             return CreateComposite(builder, s, std::move(zeros));
         },

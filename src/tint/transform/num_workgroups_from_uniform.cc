@@ -117,7 +117,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
                 ctx.Remove(str->Declaration()->members, member->Declaration());
 
                 // If this is the only member, remove the struct and parameter too.
-                if (str->Members().size() == 1) {
+                if (str->Members().Length() == 1) {
                     ctx.Remove(func->params, param->Declaration());
                     ctx.Remove(src->AST().GlobalDeclarations(), str->Declaration());
                 }

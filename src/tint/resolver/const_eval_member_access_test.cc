@@ -43,7 +43,7 @@ TEST_F(ResolverConstEvalTest, MemberAccess) {
     ASSERT_NE(outer, nullptr);
     auto* str = outer->Type()->As<sem::Struct>();
     ASSERT_NE(str, nullptr);
-    EXPECT_EQ(str->Members().size(), 2u);
+    EXPECT_EQ(str->Members().Length(), 2u);
     ASSERT_NE(outer->ConstantValue(), nullptr);
     EXPECT_TYPE(outer->ConstantValue()->Type(), outer->Type());
     EXPECT_FALSE(outer->ConstantValue()->AllEqual());

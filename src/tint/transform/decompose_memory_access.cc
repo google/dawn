@@ -714,7 +714,7 @@ struct DecomposeMemoryAccess::State {
                 TINT_ASSERT(Transform, str && str->Declaration() == nullptr);
 
                 utils::Vector<const ast::StructMember*, 8> ast_members;
-                ast_members.Reserve(str->Members().size());
+                ast_members.Reserve(str->Members().Length());
                 for (auto& m : str->Members()) {
                     ast_members.Push(
                         b.Member(ctx.Clone(m->Name()), CreateASTTypeFor(ctx, m->Type())));
