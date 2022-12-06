@@ -28,13 +28,39 @@ struct S {
   /* 0x0000 */ tint_array<strided_arr_1, 4> a;
 };
 
+void assign_and_preserve_padding_4(device strided_arr* const dest, strided_arr value) {
+  (*(dest)).el = value.el;
+}
+
+void assign_and_preserve_padding_3(device tint_array<strided_arr, 2>* const dest, tint_array<strided_arr, 2> value) {
+  for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+    assign_and_preserve_padding_4(&((*(dest))[i]), value[i]);
+  }
+}
+
+void assign_and_preserve_padding_2(device tint_array<tint_array<strided_arr, 2>, 3>* const dest, tint_array<tint_array<strided_arr, 2>, 3> value) {
+  for(uint i = 0u; (i < 3u); i = (i + 1u)) {
+    assign_and_preserve_padding_3(&((*(dest))[i]), value[i]);
+  }
+}
+
+void assign_and_preserve_padding_1(device strided_arr_1* const dest, strided_arr_1 value) {
+  assign_and_preserve_padding_2(&((*(dest)).el), value.el);
+}
+
+void assign_and_preserve_padding(device tint_array<strided_arr_1, 4>* const dest, tint_array<strided_arr_1, 4> value) {
+  for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    assign_and_preserve_padding_1(&((*(dest))[i]), value[i]);
+  }
+}
+
 void f_1(device S* const tint_symbol_1) {
   tint_array<strided_arr_1, 4> const x_19 = (*(tint_symbol_1)).a;
   tint_array<tint_array<strided_arr, 2>, 3> const x_24 = (*(tint_symbol_1)).a[3].el;
   tint_array<strided_arr, 2> const x_28 = (*(tint_symbol_1)).a[3].el[2];
   float const x_32 = (*(tint_symbol_1)).a[3].el[2][1].el;
   tint_array<strided_arr_1, 4> const tint_symbol = tint_array<strided_arr_1, 4>{};
-  (*(tint_symbol_1)).a = tint_symbol;
+  assign_and_preserve_padding(&((*(tint_symbol_1)).a), tint_symbol);
   (*(tint_symbol_1)).a[3].el[2][1].el = 5.0f;
   return;
 }

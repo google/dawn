@@ -67,6 +67,12 @@ struct S {
   /* 0x0000 */ tint_array<Inner, 1> arr;
 };
 
+void assign_and_preserve_padding(device tint_array<float3, 2>* const dest, tint_array<float3, 2> value) {
+  for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+    (*(dest))[i] = value[i];
+  }
+}
+
 void tint_symbol_inner(uint idx, device S* const tint_symbol_3) {
   (*(tint_symbol_3)).arr[idx].scalar_f32 = 0.0f;
   (*(tint_symbol_3)).arr[idx].scalar_i32 = 0;
@@ -103,7 +109,7 @@ void tint_symbol_inner(uint idx, device S* const tint_symbol_3) {
   (*(tint_symbol_3)).arr[idx].mat4x3_f16 = half4x3(half3(0.0h), half3(0.0h), half3(0.0h), half3(0.0h));
   (*(tint_symbol_3)).arr[idx].mat4x4_f16 = half4x4(half4(0.0h), half4(0.0h), half4(0.0h), half4(0.0h));
   tint_array<float3, 2> const tint_symbol_1 = tint_array<float3, 2>{};
-  (*(tint_symbol_3)).arr[idx].arr2_vec3_f32 = tint_symbol_1;
+  assign_and_preserve_padding(&((*(tint_symbol_3)).arr[idx].arr2_vec3_f32), tint_symbol_1);
   tint_array<half4x2, 2> const tint_symbol_2 = tint_array<half4x2, 2>{};
   (*(tint_symbol_3)).arr[idx].arr2_mat4x2_f16 = tint_symbol_2;
 }

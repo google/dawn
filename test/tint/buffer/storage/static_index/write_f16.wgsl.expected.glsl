@@ -66,6 +66,35 @@ layout(binding = 0, std430) buffer sb_block_ssbo {
   S inner;
 } sb;
 
+void assign_and_preserve_padding_sb_arr2_vec3_f32(vec3 value[2]) {
+  {
+    for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+      sb.inner.arr2_vec3_f32[i] = value[i];
+    }
+  }
+}
+
+void assign_and_preserve_padding_1_sb_struct_inner(Inner value) {
+  sb.inner.struct_inner.scalar_i32 = value.scalar_i32;
+  sb.inner.struct_inner.scalar_f32 = value.scalar_f32;
+  sb.inner.struct_inner.scalar_f16 = value.scalar_f16;
+}
+
+void assign_and_preserve_padding_1_sb_array_struct_inner_X(uint dest[1], Inner value) {
+  sb.inner.array_struct_inner[dest[0]].scalar_i32 = value.scalar_i32;
+  sb.inner.array_struct_inner[dest[0]].scalar_f32 = value.scalar_f32;
+  sb.inner.array_struct_inner[dest[0]].scalar_f16 = value.scalar_f16;
+}
+
+void assign_and_preserve_padding_2_sb_array_struct_inner(Inner value[4]) {
+  {
+    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+      uint tint_symbol_1[1] = uint[1](i);
+      assign_and_preserve_padding_1_sb_array_struct_inner_X(tint_symbol_1, value[i]);
+    }
+  }
+}
+
 void tint_symbol() {
   sb.inner.scalar_f32 = 0.0f;
   sb.inner.scalar_i32 = 0;
@@ -101,14 +130,14 @@ void tint_symbol() {
   sb.inner.mat4x2_f16 = f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf));
   sb.inner.mat4x3_f16 = f16mat4x3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf));
   sb.inner.mat4x4_f16 = f16mat4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf));
-  vec3 tint_symbol_1[2] = vec3[2](vec3(0.0f), vec3(0.0f));
-  sb.inner.arr2_vec3_f32 = tint_symbol_1;
-  f16mat4x2 tint_symbol_2[2] = f16mat4x2[2](f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf)), f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf)));
-  sb.inner.arr2_mat4x2_f16 = tint_symbol_2;
-  Inner tint_symbol_3 = Inner(0, 0.0f, 0.0hf);
-  sb.inner.struct_inner = tint_symbol_3;
-  Inner tint_symbol_4[4] = Inner[4](Inner(0, 0.0f, 0.0hf), Inner(0, 0.0f, 0.0hf), Inner(0, 0.0f, 0.0hf), Inner(0, 0.0f, 0.0hf));
-  sb.inner.array_struct_inner = tint_symbol_4;
+  vec3 tint_symbol_2[2] = vec3[2](vec3(0.0f), vec3(0.0f));
+  assign_and_preserve_padding_sb_arr2_vec3_f32(tint_symbol_2);
+  f16mat4x2 tint_symbol_3[2] = f16mat4x2[2](f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf)), f16mat4x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf)));
+  sb.inner.arr2_mat4x2_f16 = tint_symbol_3;
+  Inner tint_symbol_4 = Inner(0, 0.0f, 0.0hf);
+  assign_and_preserve_padding_1_sb_struct_inner(tint_symbol_4);
+  Inner tint_symbol_5[4] = Inner[4](Inner(0, 0.0f, 0.0hf), Inner(0, 0.0f, 0.0hf), Inner(0, 0.0f, 0.0hf), Inner(0, 0.0f, 0.0hf));
+  assign_and_preserve_padding_2_sb_array_struct_inner(tint_symbol_5);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

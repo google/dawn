@@ -37,6 +37,14 @@ layout(binding = 0, std430) buffer S_ssbo {
   Inner arr[];
 } sb;
 
+void assign_and_preserve_padding_sb_arr_X_arr2_vec3_f32(uint dest[1], vec3 value[2]) {
+  {
+    for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+      sb.arr[dest[0]].arr2_vec3_f32[i] = value[i];
+    }
+  }
+}
+
 void tint_symbol(uint idx) {
   sb.arr[idx].scalar_f32 = 0.0f;
   sb.arr[idx].scalar_i32 = 0;
@@ -59,8 +67,9 @@ void tint_symbol(uint idx) {
   sb.arr[idx].mat4x2_f32 = mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f));
   sb.arr[idx].mat4x3_f32 = mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
   sb.arr[idx].mat4x4_f32 = mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
-  vec3 tint_symbol_1[2] = vec3[2](vec3(0.0f), vec3(0.0f));
-  sb.arr[idx].arr2_vec3_f32 = tint_symbol_1;
+  uint tint_symbol_1[1] = uint[1](idx);
+  vec3 tint_symbol_2[2] = vec3[2](vec3(0.0f), vec3(0.0f));
+  assign_and_preserve_padding_sb_arr_X_arr2_vec3_f32(tint_symbol_1, tint_symbol_2);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

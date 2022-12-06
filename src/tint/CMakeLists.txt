@@ -453,6 +453,8 @@ list(APPEND TINT_LIB_SRCS
   transform/packed_vec3.h
   transform/pad_structs.cc
   transform/pad_structs.h
+  transform/preserve_padding.cc
+  transform/preserve_padding.h
   transform/promote_initializers_to_let.cc
   transform/promote_initializers_to_let.h
   transform/promote_side_effects_to_decl.cc
@@ -1212,6 +1214,7 @@ if(TINT_BUILD_TESTS)
       transform/num_workgroups_from_uniform_test.cc
       transform/packed_vec3_test.cc
       transform/pad_structs_test.cc
+      transform/preserve_padding_test.cc
       transform/promote_initializers_to_let_test.cc
       transform/promote_side_effects_to_decl_test.cc
       transform/remove_continue_in_switch_test.cc

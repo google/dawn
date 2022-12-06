@@ -68,6 +68,21 @@ layout(binding = 1, std430) buffer u_block_ssbo {
   S inner[4];
 } s;
 
+void assign_and_preserve_padding_1_s_X(uint dest[1], S value) {
+  s.inner[dest[0]].before = value.before;
+  s.inner[dest[0]].m = value.m;
+  s.inner[dest[0]].after = value.after;
+}
+
+void assign_and_preserve_padding_s(S value[4]) {
+  {
+    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+      uint tint_symbol[1] = uint[1](i);
+      assign_and_preserve_padding_1_s_X(tint_symbol, value[i]);
+    }
+  }
+}
+
 S conv_S(S_std140 val) {
   return S(val.before, val.pad, f16mat4(val.m_0, val.m_1, val.m_2, val.m_3), val.pad_1, val.pad_2, val.pad_3, val.pad_4, val.pad_5, val.pad_6, val.after, val.pad_7, val.pad_8, val.pad_9, val.pad_10, val.pad_11, val.pad_12, val.pad_13, val.pad_14, val.pad_15, val.pad_16, val.pad_17, val.pad_18, val.pad_19, val.pad_20, val.pad_21);
 }
@@ -87,8 +102,9 @@ f16mat4 load_u_inner_2_m() {
 }
 
 void f() {
-  s.inner = conv_arr4_S(u.inner);
-  s.inner[1] = conv_S(u.inner[2u]);
+  assign_and_preserve_padding_s(conv_arr4_S(u.inner));
+  uint tint_symbol_1[1] = uint[1](1u);
+  assign_and_preserve_padding_1_s_X(tint_symbol_1, conv_S(u.inner[2u]));
   s.inner[3].m = load_u_inner_2_m();
   s.inner[1].m[0] = u.inner[0u].m_1.ywxz;
 }

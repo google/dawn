@@ -67,6 +67,7 @@
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/module_scope_var_to_entry_point_param.h"
 #include "src/tint/transform/packed_vec3.h"
+#include "src/tint/transform/preserve_padding.h"
 #include "src/tint/transform/promote_initializers_to_let.h"
 #include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_phonies.h"
@@ -218,6 +219,8 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(new_bindings_map);
     }
     manager.Add<transform::MultiplanarExternalTexture>();
+
+    manager.Add<transform::PreservePadding>();
 
     manager.Add<transform::Unshadow>();
 

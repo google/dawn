@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 21
+; Bound: 42
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -21,6 +21,10 @@
                OpMemberName %Inner 2 "mat2x4_f16"
                OpName %in "in"
                OpName %out "out"
+               OpName %assign_and_preserve_padding_1_out_inner "assign_and_preserve_padding_1_out_inner"
+               OpName %value "value"
+               OpName %assign_and_preserve_padding_out "assign_and_preserve_padding_out"
+               OpName %value_0 "value"
                OpName %main "main"
                OpDecorate %in_block Block
                OpMemberDecorate %in_block 0 Offset 0
@@ -46,15 +50,42 @@
          %in = OpVariable %_ptr_StorageBuffer_in_block StorageBuffer
         %out = OpVariable %_ptr_StorageBuffer_in_block StorageBuffer
        %void = OpTypeVoid
-         %11 = OpTypeFunction %void
+         %11 = OpTypeFunction %void %Inner
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_half = OpTypePointer StorageBuffer %half
+     %uint_1 = OpConstant %uint 1
+%_ptr_StorageBuffer_v3half = OpTypePointer StorageBuffer %v3half
+     %uint_2 = OpConstant %uint 2
+%_ptr_StorageBuffer_mat2v4half = OpTypePointer StorageBuffer %mat2v4half
+         %29 = OpTypeFunction %void %S
+         %35 = OpTypeFunction %void
 %_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S
-       %main = OpFunction %void None %11
-         %14 = OpLabel
-         %18 = OpAccessChain %_ptr_StorageBuffer_S %in %uint_0
-         %19 = OpLoad %S %18
-         %20 = OpAccessChain %_ptr_StorageBuffer_S %out %uint_0
-               OpStore %20 %19
+%assign_and_preserve_padding_1_out_inner = OpFunction %void None %11
+      %value = OpFunctionParameter %Inner
+         %15 = OpLabel
+         %19 = OpAccessChain %_ptr_StorageBuffer_half %out %uint_0 %uint_0 %uint_0
+         %20 = OpCompositeExtract %half %value 0
+               OpStore %19 %20
+         %23 = OpAccessChain %_ptr_StorageBuffer_v3half %out %uint_0 %uint_0 %uint_1
+         %24 = OpCompositeExtract %v3half %value 1
+               OpStore %23 %24
+         %27 = OpAccessChain %_ptr_StorageBuffer_mat2v4half %out %uint_0 %uint_0 %uint_2
+         %28 = OpCompositeExtract %mat2v4half %value 2
+               OpStore %27 %28
+               OpReturn
+               OpFunctionEnd
+%assign_and_preserve_padding_out = OpFunction %void None %29
+    %value_0 = OpFunctionParameter %S
+         %32 = OpLabel
+         %34 = OpCompositeExtract %Inner %value_0 0
+         %33 = OpFunctionCall %void %assign_and_preserve_padding_1_out_inner %34
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %35
+         %37 = OpLabel
+         %39 = OpAccessChain %_ptr_StorageBuffer_S %in %uint_0
+         %40 = OpLoad %S %39
+         %41 = OpFunctionCall %void %assign_and_preserve_padding_out %40
                OpReturn
                OpFunctionEnd

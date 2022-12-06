@@ -59,6 +59,7 @@
 #include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/pad_structs.h"
+#include "src/tint/transform/preserve_padding.h"
 #include "src/tint/transform/promote_initializers_to_let.h"
 #include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_phonies.h"
@@ -210,6 +211,9 @@ SanitizedResult Sanitize(const Program* in,
     manager.Add<transform::Renamer>();
     data.Add<transform::Renamer::Config>(transform::Renamer::Target::kGlslKeywords,
                                          /* preserve_unicode */ false);
+
+    manager.Add<transform::PreservePadding>();  // Must come before DirectVariableAccess
+
     manager.Add<transform::Unshadow>();  // Must come before DirectVariableAccess
     manager.Add<transform::DirectVariableAccess>();
 

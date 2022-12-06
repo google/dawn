@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 33
+; Bound: 46
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -17,6 +17,8 @@
                OpMemberName %S 1 "u"
                OpMemberName %S 2 "v"
                OpName %output "output"
+               OpName %assign_and_preserve_padding_output "assign_and_preserve_padding_output"
+               OpName %value "value"
                OpName %frag_main_inner "frag_main_inner"
                OpName %input "input"
                OpName %frag_main "frag_main"
@@ -47,24 +49,41 @@
        %void = OpTypeVoid
          %14 = OpTypeFunction %void %S
      %uint_0 = OpConstant %uint 0
-%_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S
-         %25 = OpTypeFunction %void
-%frag_main_inner = OpFunction %void None %14
-      %input = OpFunctionParameter %S
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+     %uint_1 = OpConstant %uint 1
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+     %uint_2 = OpConstant %uint 2
+%_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
+         %38 = OpTypeFunction %void
+%assign_and_preserve_padding_output = OpFunction %void None %14
+      %value = OpFunctionParameter %S
          %18 = OpLabel
-         %19 = OpCompositeExtract %float %input 0
-         %20 = OpCompositeExtract %uint %input 1
-         %21 = OpCompositeExtract %v4float %input 2
-         %24 = OpAccessChain %_ptr_StorageBuffer_S %output %uint_0
-               OpStore %24 %input
+         %21 = OpAccessChain %_ptr_StorageBuffer_float %output %uint_0 %uint_0
+         %22 = OpCompositeExtract %float %value 0
+               OpStore %21 %22
+         %25 = OpAccessChain %_ptr_StorageBuffer_uint %output %uint_0 %uint_1
+         %26 = OpCompositeExtract %uint %value 1
+               OpStore %25 %26
+         %29 = OpAccessChain %_ptr_StorageBuffer_v4float %output %uint_0 %uint_2
+         %30 = OpCompositeExtract %v4float %value 2
+               OpStore %29 %30
                OpReturn
                OpFunctionEnd
-  %frag_main = OpFunction %void None %25
-         %27 = OpLabel
-         %29 = OpLoad %float %f_1
-         %30 = OpLoad %uint %u_1
-         %31 = OpLoad %v4float %v_1
-         %32 = OpCompositeConstruct %S %29 %30 %31
-         %28 = OpFunctionCall %void %frag_main_inner %32
+%frag_main_inner = OpFunction %void None %14
+      %input = OpFunctionParameter %S
+         %33 = OpLabel
+         %34 = OpCompositeExtract %float %input 0
+         %35 = OpCompositeExtract %uint %input 1
+         %36 = OpCompositeExtract %v4float %input 2
+         %37 = OpFunctionCall %void %assign_and_preserve_padding_output %input
+               OpReturn
+               OpFunctionEnd
+  %frag_main = OpFunction %void None %38
+         %40 = OpLabel
+         %42 = OpLoad %float %f_1
+         %43 = OpLoad %uint %u_1
+         %44 = OpLoad %v4float %v_1
+         %45 = OpCompositeConstruct %S %42 %43 %44
+         %41 = OpFunctionCall %void %frag_main_inner %45
                OpReturn
                OpFunctionEnd

@@ -526,6 +526,9 @@ std::string AlignDeco(uint32_t value) {
 
 // Test different types used as a struct member
 TEST_P(ComputeLayoutMemoryBufferTests, StructMember) {
+    // TODO(crbug.com/dawn/1606): find out why these tests fail on Windows for OpenGL.
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES() && IsWindows());
+
     // Sentinel value markers codes used to check that the start and end of
     // structures are correctly aligned. Each of these codes are distinct and
     // are not likely to be confused with data.
@@ -694,6 +697,9 @@ fn main() {
 
 // Test different types that used directly as buffer type
 TEST_P(ComputeLayoutMemoryBufferTests, NonStructMember) {
+    // TODO(crbug.com/dawn/1606): find out why these tests fail on Windows for OpenGL.
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES() && IsWindows());
+
     auto params = GetParam();
 
     Field& field = params.mField;

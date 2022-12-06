@@ -28,6 +28,7 @@
 #include "src/tint/transform/for_loop_to_loop.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/merge_return.h"
+#include "src/tint/transform/preserve_padding.h"
 #include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_phonies.h"
 #include "src/tint/transform/remove_unreachable_statements.h"
@@ -77,6 +78,8 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(new_bindings_map);
     }
     manager.Add<transform::MultiplanarExternalTexture>();
+
+    manager.Add<transform::PreservePadding>();  // Must come before DirectVariableAccess
 
     manager.Add<transform::Unshadow>();  // Must come before DirectVariableAccess
     bool disable_workgroup_init_in_sanitizer =

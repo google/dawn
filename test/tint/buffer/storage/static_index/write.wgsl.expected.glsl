@@ -46,6 +46,14 @@ layout(binding = 0, std430) buffer sb_block_ssbo {
   S inner;
 } sb;
 
+void assign_and_preserve_padding_sb_arr2_vec3_f32(vec3 value[2]) {
+  {
+    for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+      sb.inner.arr2_vec3_f32[i] = value[i];
+    }
+  }
+}
+
 void tint_symbol() {
   sb.inner.scalar_f32 = 0.0f;
   sb.inner.scalar_i32 = 0;
@@ -69,7 +77,7 @@ void tint_symbol() {
   sb.inner.mat4x3_f32 = mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
   sb.inner.mat4x4_f32 = mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
   vec3 tint_symbol_1[2] = vec3[2](vec3(0.0f), vec3(0.0f));
-  sb.inner.arr2_vec3_f32 = tint_symbol_1;
+  assign_and_preserve_padding_sb_arr2_vec3_f32(tint_symbol_1);
   Inner tint_symbol_2 = Inner(0, 0.0f);
   sb.inner.struct_inner = tint_symbol_2;
   Inner tint_symbol_3[4] = Inner[4](Inner(0, 0.0f), Inner(0, 0.0f), Inner(0, 0.0f), Inner(0, 0.0f));

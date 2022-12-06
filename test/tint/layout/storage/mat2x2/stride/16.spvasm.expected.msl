@@ -34,10 +34,20 @@ tint_array<strided_arr, 2> mat2x2_stride_16_to_arr(float2x2 m) {
   return tint_symbol_3;
 }
 
+void assign_and_preserve_padding_1(device strided_arr* const dest, strided_arr value) {
+  (*(dest)).el = value.el;
+}
+
+void assign_and_preserve_padding(device tint_array<strided_arr, 2>* const dest, tint_array<strided_arr, 2> value) {
+  for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+    assign_and_preserve_padding_1(&((*(dest))[i]), value[i]);
+  }
+}
+
 void f_1(device SSBO* const tint_symbol_4) {
   float2x2 const x_15 = arr_to_mat2x2_stride_16((*(tint_symbol_4)).m);
   tint_array<strided_arr, 2> const tint_symbol = mat2x2_stride_16_to_arr(x_15);
-  (*(tint_symbol_4)).m = tint_symbol;
+  assign_and_preserve_padding(&((*(tint_symbol_4)).m), tint_symbol);
   return;
 }
 

@@ -25,10 +25,23 @@ strided_arr[2] mat2x2_stride_16_to_arr(mat2 m) {
   return tint_symbol_3;
 }
 
+void assign_and_preserve_padding_1_ssbo_m_X(uint dest[1], strided_arr value) {
+  ssbo.inner.m[dest[0]].el = value.el;
+}
+
+void assign_and_preserve_padding_ssbo_m(strided_arr value[2]) {
+  {
+    for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+      uint tint_symbol_4[1] = uint[1](i);
+      assign_and_preserve_padding_1_ssbo_m_X(tint_symbol_4, value[i]);
+    }
+  }
+}
+
 void f_1() {
   mat2 x_15 = arr_to_mat2x2_stride_16(ssbo.inner.m);
   strided_arr tint_symbol[2] = mat2x2_stride_16_to_arr(x_15);
-  ssbo.inner.m = tint_symbol;
+  assign_and_preserve_padding_ssbo_m(tint_symbol);
   return;
 }
 

@@ -26,9 +26,19 @@ struct S {
   /* 0x0000 */ Inner inner;
 };
 
+void assign_and_preserve_padding_1(device Inner* const dest, Inner value) {
+  (*(dest)).scalar_f16 = value.scalar_f16;
+  (*(dest)).vec3_f16 = half3(value.vec3_f16);
+  (*(dest)).mat2x4_f16 = value.mat2x4_f16;
+}
+
+void assign_and_preserve_padding(device S* const dest, S value) {
+  assign_and_preserve_padding_1(&((*(dest)).inner), value.inner);
+}
+
 kernel void tint_symbol(const device S* tint_symbol_1 [[buffer(1)]], device S* tint_symbol_2 [[buffer(0)]]) {
   S const t = *(tint_symbol_1);
-  *(tint_symbol_2) = t;
+  assign_and_preserve_padding(tint_symbol_2, t);
   return;
 }
 
