@@ -590,6 +590,32 @@ struct BuiltinPolyfill::State {
         return name;
     }
 
+    /// Builds the polyfill function for the `sign` builtin when the element type is integer
+    /// @param ty the parameter and return type for the function
+    /// @return the polyfill function name
+    Symbol sign_int(const sem::Type* ty) {
+        const uint32_t width = WidthOf(ty);
+        auto zero = [&] { return ScalarOrVector(width, 0_a); };
+
+        // pos_or_neg_one = (v > 0) ? 1 : -1
+        auto pos_or_neg_one = b.Call("select",                     //
+                                     ScalarOrVector(width, -1_a),  //
+                                     ScalarOrVector(width, 1_a),   //
+                                     b.GreaterThan("v", zero()));
+
+        auto name = b.Symbols().New("tint_sign");
+        b.Func(name,
+               utils::Vector{
+                   b.Param("v", T(ty)),
+               },
+               T(ty),
+               utils::Vector{
+                   b.Return(b.Call("select", pos_or_neg_one, zero(), b.Equal("v", zero()))),
+               });
+
+        return name;
+    }
+
     /// Builds the polyfill function for the `textureSampleBaseClampToEdge` builtin, when the
     /// texture type is texture_2d<f32>.
     /// @return the polyfill function name
@@ -853,6 +879,15 @@ Transform::ApplyResult BuiltinPolyfill::Apply(const Program* src,
                     if (polyfill.saturate) {
                         fn = builtin_polyfills.GetOrCreate(
                             builtin, [&] { return s.saturate(builtin->ReturnType()); });
+                    }
+                    break;
+                case sem::BuiltinType::kSign:
+                    if (polyfill.sign_int) {
+                        auto* ty = builtin->ReturnType();
+                        if (ty->is_signed_integer_scalar_or_vector()) {
+                            fn = builtin_polyfills.GetOrCreate(builtin,
+                                                               [&] { return s.sign_int(ty); });
+                        }
                     }
                     break;
                 case sem::BuiltinType::kTextureSampleBaseClampToEdge:

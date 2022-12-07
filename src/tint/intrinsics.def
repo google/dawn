@@ -548,8 +548,8 @@ fn pow<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
 @const("select_bool") fn select<T: scalar>(T, T, bool) -> T
 @const("select_bool") fn select<T: scalar, N: num>(vec<N, T>, vec<N, T>, bool) -> vec<N, T>
 @const("select_boolvec") fn select<N: num, T: scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T>
-@const fn sign<T: fa_f32_f16>(T) -> T
-@const fn sign<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn sign<T: fia_fi32_f16>(T) -> T
+@const fn sign<N: num, T: fia_fi32_f16>(vec<N, T>) -> vec<N, T>
 @const fn sin<T: fa_f32_f16>(T) -> T
 @const fn sin<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn sinh<T: fa_f32_f16>(T) -> T

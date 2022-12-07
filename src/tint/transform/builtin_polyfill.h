@@ -68,6 +68,8 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         bool int_div_mod = false;
         /// Should `saturate()` be polyfilled?
         bool saturate = false;
+        /// Should `sign()` be polyfilled for integer types?
+        bool sign_int = false;
         /// Should `textureSampleBaseClampToEdge()` be polyfilled for texture_2d<f32> textures?
         bool texture_sample_base_clamp_to_edge_2d_f32 = false;
         /// Should the vector form of `quantizeToF16()` be polyfilled with a scalar implementation?

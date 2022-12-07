@@ -2200,27 +2200,40 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> SignCases() {
-    return {
-        C({-T(1)}, -T(1)),
-        C({-T(0.5)}, -T(1)),
+    std::vector<Case> cases = {
         C({T(0)}, T(0)),
         C({-T(0)}, T(0)),
-        C({T(0.5)}, T(1)),
+
+        C({-T(1)}, -T(1)),
+        C({-T(10)}, -T(1)),
+        C({-T(100)}, -T(1)),
         C({T(1)}, T(1)),
+        C({T(10)}, T(1)),
+        C({T(100)}, T(1)),
 
         C({T::Highest()}, T(1.0)),
         C({T::Lowest()}, -T(1.0)),
 
         // Vector tests
-        C({Vec(-T(0.5), T(0), T(0.5))}, Vec(-T(1.0), T(0.0), T(1.0))),
         C({Vec(T::Highest(), T::Lowest())}, Vec(T(1.0), -T(1.0))),
     };
+
+    ConcatIntoIf<IsFloatingPoint<T>>(
+        cases, std::vector<Case>{
+                   C({-T(0.5)}, -T(1)),
+                   C({T(0.5)}, T(1)),
+                   C({Vec(-T(0.5), T(0), T(0.5))}, Vec(-T(1.0), T(0.0), T(1.0))),
+               });
+
+    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Sign,
     ResolverConstEvalBuiltinTest,
     testing::Combine(testing::Values(sem::BuiltinType::kSign),
-                     testing::ValuesIn(Concat(SignCases<AFloat>(),  //
+                     testing::ValuesIn(Concat(SignCases<AInt>(),  //
+                                              SignCases<i32>(),
+                                              SignCases<AFloat>(),
                                               SignCases<f32>(),
                                               SignCases<f16>()))));
 

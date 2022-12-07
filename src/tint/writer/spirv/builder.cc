@@ -201,7 +201,11 @@ uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
         case BuiltinType::kRound:
             return GLSLstd450RoundEven;
         case BuiltinType::kSign:
-            return GLSLstd450FSign;
+            if (builtin->ReturnType()->is_signed_integer_scalar_or_vector()) {
+                return GLSLstd450SSign;
+            } else {
+                return GLSLstd450FSign;
+            }
         case BuiltinType::kSin:
             return GLSLstd450Sin;
         case BuiltinType::kSinh:

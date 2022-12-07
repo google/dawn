@@ -3298,7 +3298,7 @@ ConstEval::Result ConstEval::sign(const sem::Type* ty,
             }
             return CreateElement(builder, source, c0->Type(), result);
         };
-        return Dispatch_fa_f32_f16(create, c0);
+        return Dispatch_fia_fi32_f16(create, c0);
     };
     return TransformElements(builder, ty, transform, args[0]);
 }

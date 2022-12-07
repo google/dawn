@@ -34,11 +34,7 @@ TEST_F(BuiltinPolyfillTest, ShouldRunEmptyModule) {
 TEST_F(BuiltinPolyfillTest, EmptyModule) {
     auto* src = R"()";
 
-    auto* expect = src;
-
-    auto got = Run<BuiltinPolyfill>(src);
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,11 +69,7 @@ fn f() {
 }
 )";
 
-    auto* expect = src;
-
-    auto got = Run<BuiltinPolyfill>(src, polyfillAcosh(Level::kFull));
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillAcosh(Level::kFull)));
 }
 
 TEST_F(BuiltinPolyfillTest, Acosh_Full_f32) {
@@ -206,11 +198,7 @@ fn f() {
 }
 )";
 
-    auto* expect = src;
-
-    auto got = Run<BuiltinPolyfill>(src, polyfillSinh());
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillSinh()));
 }
 
 TEST_F(BuiltinPolyfillTest, Asinh_f32) {
@@ -293,11 +281,7 @@ fn f() {
 }
 )";
 
-    auto* expect = src;
-
-    auto got = Run<BuiltinPolyfill>(src, polyfillAtanh(Level::kFull));
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillAtanh(Level::kFull)));
 }
 
 TEST_F(BuiltinPolyfillTest, Atanh_Full_f32) {
@@ -603,11 +587,7 @@ fn f() {
 }
 )";
 
-    auto* expect = src;
-
-    auto got = Run<BuiltinPolyfill>(src, polyfillClampInteger());
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillClampInteger()));
 }
 
 TEST_F(BuiltinPolyfillTest, ClampInteger_i32) {
@@ -732,11 +712,7 @@ fn f() {
 }
 )";
 
-    auto* expect = src;
-
-    auto got = Run<BuiltinPolyfill>(src, polyfillCountLeadingZeros());
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillCountLeadingZeros()));
 }
 
 TEST_F(BuiltinPolyfillTest, CountLeadingZeros_i32) {
@@ -909,11 +885,7 @@ fn f() {
 }
 )";
 
-    auto* expect = src;
-
-    auto got = Run<BuiltinPolyfill>(src, polyfillCountTrailingZeros());
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillCountTrailingZeros()));
 }
 
 TEST_F(BuiltinPolyfillTest, CountTrailingZeros_i32) {
@@ -1088,11 +1060,7 @@ fn f() {
 }
 )";
 
-    auto* expect = src;
-
-    auto got = Run<BuiltinPolyfill>(src, polyfillExtractBits(Level::kFull));
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillExtractBits(Level::kFull)));
 }
 
 TEST_F(BuiltinPolyfillTest, ExtractBits_Full_i32) {
@@ -1345,11 +1313,7 @@ fn f() {
 }
 )";
 
-    auto* expect = src;
-
-    auto got = Run<BuiltinPolyfill>(src, polyfillFirstLeadingBit());
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillFirstLeadingBit()));
 }
 
 TEST_F(BuiltinPolyfillTest, FirstLeadingBit_i32) {
@@ -1522,11 +1486,7 @@ fn f() {
 }
 )";
 
-    auto* expect = src;
-
-    auto got = Run<BuiltinPolyfill>(src, polyfillFirstTrailingBit());
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillFirstTrailingBit()));
 }
 
 TEST_F(BuiltinPolyfillTest, FirstTrailingBit_i32) {
@@ -1701,11 +1661,7 @@ fn f() {
 }
 )";
 
-    auto* expect = src;
-
-    auto got = Run<BuiltinPolyfill>(src, polyfillInsertBits(Level::kFull));
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillInsertBits(Level::kFull)));
 }
 
 TEST_F(BuiltinPolyfillTest, InsertBits_Full_i32) {
@@ -2715,11 +2671,7 @@ fn f() {
 }
 )";
 
-    auto* expect = src;
-
-    auto got = Run<BuiltinPolyfill>(src, polyfillSaturate());
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillSaturate()));
 }
 
 TEST_F(BuiltinPolyfillTest, Saturate_f32) {
@@ -2822,6 +2774,99 @@ fn f() {
 )";
 
     auto got = Run<BuiltinPolyfill>(src, polyfillSaturate());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// sign_int
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillSignInt() {
+    BuiltinPolyfill::Builtins builtins;
+    builtins.sign_int = true;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+    return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunSign_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 1i;
+  sign(v);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillSignInt()));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunSign_f32) {
+    auto* src = R"(
+fn f() {
+  let v = 1f;
+  sign(v);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillSignInt()));
+}
+
+TEST_F(BuiltinPolyfillTest, SignInt_ConstantExpression) {
+    auto* src = R"(
+fn f() {
+  let r : i32 = sign(1i);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillSignInt()));
+}
+
+TEST_F(BuiltinPolyfillTest, SignInt_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 1i;
+  let r : i32 = sign(v);
+}
+)";
+
+    auto* expect = R"(
+fn tint_sign(v : i32) -> i32 {
+  return select(select(-1, 1, (v > 0)), 0, (v == 0));
+}
+
+fn f() {
+  let v = 1i;
+  let r : i32 = tint_sign(v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillSignInt());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, SignInt_vec3_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 1i;
+  let r : vec3<i32> = sign(vec3<i32>(v));
+}
+)";
+
+    auto* expect = R"(
+fn tint_sign(v : vec3<i32>) -> vec3<i32> {
+  return select(select(vec3(-1), vec3(1), (v > vec3(0))), vec3(0), (v == vec3(0)));
+}
+
+fn f() {
+  let v = 1i;
+  let r : vec3<i32> = tint_sign(vec3<i32>(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillSignInt());
 
     EXPECT_EQ(expect, str(got));
 }
