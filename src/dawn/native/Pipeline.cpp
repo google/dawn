@@ -68,8 +68,38 @@ MaybeError ValidateProgrammableStage(DeviceBase* device,
                         "Pipeline overridable constant \"%s\" not found in %s.", constants[i].key,
                         module);
         DAWN_INVALID_IF(!std::isfinite(constants[i].value),
-                        "Pipeline overridable constant \"%s\" with value (%f) is not finite",
-                        constants[i].key, constants[i].value);
+                        "Pipeline overridable constant \"%s\" with value (%f) is not finite in %s",
+                        constants[i].key, constants[i].value, module);
+
+        // Validate if constant value can be represented by the given scalar type in shader
+        auto type = metadata.overrides.at(constants[i].key).type;
+        switch (type) {
+            case EntryPointMetadata::Override::Type::Float32:
+                DAWN_INVALID_IF(!IsDoubleValueRepresentable<float>(constants[i].value),
+                                "Pipeline overridable constant \"%s\" with value (%f) is not "
+                                "representable in type (%s)",
+                                constants[i].key, constants[i].value, "f32");
+                break;
+            case EntryPointMetadata::Override::Type::Int32:
+                DAWN_INVALID_IF(!IsDoubleValueRepresentable<int32_t>(constants[i].value),
+                                "Pipeline overridable constant \"%s\" with value (%f) is not "
+                                "representable in type (%s)",
+                                constants[i].key, constants[i].value,
+                                type == EntryPointMetadata::Override::Type::Int32 ? "i32" : "b");
+                break;
+            case EntryPointMetadata::Override::Type::Uint32:
+                DAWN_INVALID_IF(!IsDoubleValueRepresentable<uint32_t>(constants[i].value),
+                                "Pipeline overridable constant \"%s\" with value (%f) is not "
+                                "representable in type (%s)",
+                                constants[i].key, constants[i].value, "u32");
+                break;
+            case EntryPointMetadata::Override::Type::Boolean:
+                // Conversion to boolean can't fail
+                // https://webidl.spec.whatwg.org/#es-boolean
+                break;
+            default:
+                UNREACHABLE();
+        }
 
         if (stageInitializedConstantIdentifiers.count(constants[i].key) == 0) {
             if (metadata.uninitializedOverrides.count(constants[i].key) > 0) {
@@ -79,8 +109,7 @@ MaybeError ValidateProgrammableStage(DeviceBase* device,
         } else {
             // There are duplicate initializations
             return DAWN_VALIDATION_ERROR(
-                "Pipeline overridable constants \"%s\" is set more than once in %s",
-                constants[i].key, module);
+                "Pipeline overridable constants \"%s\" is set more than once", constants[i].key);
         }
     }
 
@@ -102,9 +131,9 @@ MaybeError ValidateProgrammableStage(DeviceBase* device,
         }
 
         return DAWN_VALIDATION_ERROR(
-            "There are uninitialized pipeline overridable constants in shader module %s, their "
+            "There are uninitialized pipeline overridable constants, their "
             "identifiers:[%s]",
-            module, uninitializedConstantsArray);
+            uninitializedConstantsArray);
     }
 
     return {};

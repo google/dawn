@@ -51,4 +51,18 @@ inline Dst checked_cast(const Src& value) {
     return static_cast<Dst>(value);
 }
 
+template <typename T>
+bool IsDoubleValueRepresentable(double value) {
+    if constexpr (std::is_same_v<T, float> || std::is_integral_v<T>) {
+        // Following WebIDL 3.3.6.[EnforceRange] for integral
+        // Following WebIDL 3.2.5.float for float
+        // TODO(crbug.com/1396194): now follows what blink does but may need revisit.
+        constexpr double kLowest = static_cast<double>(std::numeric_limits<T>::lowest());
+        constexpr double kMax = static_cast<double>(std::numeric_limits<T>::max());
+        return kLowest <= value && value <= kMax;
+    } else {
+        static_assert(sizeof(T) != sizeof(T), "Unsupported type");
+    }
+}
+
 #endif  // SRC_DAWN_COMMON_NUMERIC_H_

@@ -533,24 +533,8 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
         for (auto& c : entryPoint.overrides) {
             auto id = name2Id.at(c.name);
-            OverrideScalar defaultValue;
-            if (c.is_initialized) {
-                // if it is initialized, the scalar must exist
-                const auto& scalar = id2Scalar.at(id);
-                if (scalar.IsBool()) {
-                    defaultValue.b = scalar.AsBool();
-                } else if (scalar.IsU32()) {
-                    defaultValue.u32 = scalar.AsU32();
-                } else if (scalar.IsI32()) {
-                    defaultValue.i32 = scalar.AsI32();
-                } else if (scalar.IsFloat()) {
-                    defaultValue.f32 = scalar.AsFloat();
-                } else {
-                    UNREACHABLE();
-                }
-            }
             EntryPointMetadata::Override override = {id, FromTintOverrideType(c.type),
-                                                     c.is_initialized, defaultValue};
+                                                     c.is_initialized};
 
             std::string identifier = c.is_id_specified ? std::to_string(override.id.value) : c.name;
             metadata->overrides[identifier] = override;

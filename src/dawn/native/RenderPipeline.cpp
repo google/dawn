@@ -128,7 +128,7 @@ MaybeError ValidateVertexState(DeviceBase* device,
     DAWN_TRY_CONTEXT(ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
                                                descriptor->constantCount, descriptor->constants,
                                                layout, SingleShaderStage::Vertex),
-                     "validating vertex stage (module: %s, entryPoint: %s).", descriptor->module,
+                     "validating vertex stage (%s, entryPoint: %s).", descriptor->module,
                      descriptor->entryPoint);
     const EntryPointMetadata& vertexMetadata =
         descriptor->module->GetEntryPoint(descriptor->entryPoint);
@@ -341,7 +341,7 @@ MaybeError ValidateFragmentState(DeviceBase* device,
     DAWN_TRY_CONTEXT(ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
                                                descriptor->constantCount, descriptor->constants,
                                                layout, SingleShaderStage::Fragment),
-                     "validating fragment stage (module: %s, entryPoint: %s).", descriptor->module,
+                     "validating fragment stage (%s, entryPoint: %s).", descriptor->module,
                      descriptor->entryPoint);
 
     uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
