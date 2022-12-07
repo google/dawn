@@ -51,7 +51,7 @@ enum extension {
   chromium_disable_uniformity_analysis
   // A Chromium-specific extension for push constants
   chromium_experimental_push_constant
-  // A Chromium-specific extension that enables passing of uniform, storage and workgroup 
+  // A Chromium-specific extension that enables passing of uniform, storage and workgroup
   // address-spaced pointers as parameters, as well as pointers into sub-objects.
   chromium_experimental_full_ptr_parameters
 }
@@ -969,8 +969,8 @@ init mat4x4<T: fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T>
 @const op | <T: ia_iu32>(T, T) -> T
 @const op | <T: ia_iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
 
-op && (bool, bool) -> bool
-op || (bool, bool) -> bool
+@const op && (bool, bool) -> bool
+@const op || (bool, bool) -> bool
 
 @const op == <T: scalar>(T, T) -> bool
 @const op == <T: scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>

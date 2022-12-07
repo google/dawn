@@ -1810,6 +1810,18 @@ ConstEval::Result ConstEval::OpGreaterThanEqual(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
+ConstEval::Result ConstEval::OpLogicalAnd(const sem::Type* ty,
+                                          utils::VectorRef<const sem::Constant*> args,
+                                          const Source& source) {
+    return CreateElement(builder, source, ty, args[0]->As<bool>() && args[1]->As<bool>());
+}
+
+ConstEval::Result ConstEval::OpLogicalOr(const sem::Type* ty,
+                                         utils::VectorRef<const sem::Constant*> args,
+                                         const Source& source) {
+    return CreateElement(builder, source, ty, args[0]->As<bool>() || args[1]->As<bool>());
+}
+
 ConstEval::Result ConstEval::OpAnd(const sem::Type* ty,
                                    utils::VectorRef<const sem::Constant*> args,
                                    const Source& source) {

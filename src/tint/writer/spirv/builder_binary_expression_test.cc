@@ -1071,38 +1071,43 @@ TEST_F(BuilderTest, Binary_logicalOr_Nested_LogicalAnd) {
     //    a || (b && c)
     // From: crbug.com/tint/355
 
+    auto* t = Let("t", Expr(true));
+    auto* f = Let("f", Expr(false));
+
     auto* logical_and_expr =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
+        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(t), Expr(f));
 
     auto* expr =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr(true), logical_and_expr);
+        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr(t), logical_and_expr);
 
-    WrapInFunction(expr);
+    WrapInFunction(t, f, expr);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateFunctionVariable(t)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(f)) << b.error();
     b.GenerateLabel(b.next_id());
 
     EXPECT_EQ(b.GenerateBinaryExpression(expr), 10u) << b.error();
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
-%3 = OpConstantTrue %2
-%8 = OpConstantNull %2
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
+%2 = OpConstantTrue %1
+%3 = OpConstantNull %1
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%1 = OpLabel
-OpSelectionMerge %4 None
-OpBranchConditional %3 %4 %5
-%5 = OpLabel
-OpSelectionMerge %6 None
-OpBranchConditional %3 %7 %6
-%7 = OpLabel
-OpBranch %6
+              R"(%4 = OpLabel
+OpSelectionMerge %5 None
+OpBranchConditional %2 %5 %6
 %6 = OpLabel
-%9 = OpPhi %2 %3 %5 %8 %7
-OpBranch %4
-%4 = OpLabel
-%10 = OpPhi %2 %3 %1 %9 %6
+OpSelectionMerge %7 None
+OpBranchConditional %2 %8 %7
+%8 = OpLabel
+OpBranch %7
+%7 = OpLabel
+%9 = OpPhi %1 %2 %6 %3 %8
+OpBranch %5
+%5 = OpLabel
+%10 = OpPhi %1 %2 %4 %9 %7
 )");
 }
 
@@ -1111,38 +1116,43 @@ TEST_F(BuilderTest, Binary_logicalAnd_Nested_LogicalOr) {
     //    a && (b || c)
     // From: crbug.com/tint/355
 
+    auto* t = Let("t", Expr(true));
+    auto* f = Let("f", Expr(false));
+
     auto* logical_or_expr =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr(true), Expr(false));
+        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr(t), Expr(f));
 
     auto* expr =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), logical_or_expr);
+        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(t), logical_or_expr);
 
-    WrapInFunction(expr);
+    WrapInFunction(t, f, expr);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateFunctionVariable(t)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(f)) << b.error();
     b.GenerateLabel(b.next_id());
 
     EXPECT_EQ(b.GenerateBinaryExpression(expr), 10u) << b.error();
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
-%3 = OpConstantTrue %2
-%8 = OpConstantNull %2
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
+%2 = OpConstantTrue %1
+%3 = OpConstantNull %1
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%1 = OpLabel
-OpSelectionMerge %4 None
-OpBranchConditional %3 %5 %4
-%5 = OpLabel
-OpSelectionMerge %6 None
-OpBranchConditional %3 %6 %7
-%7 = OpLabel
-OpBranch %6
+              R"(%4 = OpLabel
+OpSelectionMerge %5 None
+OpBranchConditional %2 %6 %5
 %6 = OpLabel
-%9 = OpPhi %2 %3 %5 %8 %7
-OpBranch %4
-%4 = OpLabel
-%10 = OpPhi %2 %3 %1 %9 %6
+OpSelectionMerge %7 None
+OpBranchConditional %2 %7 %8
+%8 = OpLabel
+OpBranch %7
+%7 = OpLabel
+%9 = OpPhi %1 %2 %6 %3 %8
+OpBranch %5
+%5 = OpLabel
+%10 = OpPhi %1 %2 %4 %9 %7
 )");
 }
 

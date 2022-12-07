@@ -749,6 +749,34 @@ INSTANTIATE_TEST_SUITE_P(LessThanEqual,
                                  OpGreaterThanCases<f32, false>(),
                                  OpGreaterThanCases<f16, false>()))));
 
+static std::vector<Case> OpLogicalAndCases() {
+    return {
+        C(true, true, true),
+        C(true, false, false),
+        C(false, true, false),
+        C(false, false, false),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(LogicalAnd,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kLogicalAnd),
+                             testing::ValuesIn(OpLogicalAndCases())));
+
+static std::vector<Case> OpLogicalOrCases() {
+    return {
+        C(true, true, true),
+        C(true, false, true),
+        C(false, true, true),
+        C(false, false, false),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(LogicalOr,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kLogicalOr),
+                             testing::ValuesIn(OpLogicalOrCases())));
+
 static std::vector<Case> OpAndBoolCases() {
     return {
         C(true, true, true),

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 33
+; Bound: 30
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -17,17 +17,17 @@
           %1 = OpTypeFunction %void
        %bool = OpTypeBool
        %true = OpConstantTrue %bool
-         %11 = OpConstantNull %bool
 %_ptr_Function_bool = OpTypePointer Function %bool
+         %11 = OpConstantNull %bool
      %v2bool = OpTypeVector %bool 2
 %_ptr_Function_v2bool = OpTypePointer Function %v2bool
-         %20 = OpConstantNull %v2bool
+         %17 = OpConstantNull %v2bool
      %v3bool = OpTypeVector %bool 3
 %_ptr_Function_v3bool = OpTypePointer Function %v3bool
-         %26 = OpConstantNull %v3bool
+         %23 = OpConstantNull %v3bool
      %v4bool = OpTypeVector %bool 4
 %_ptr_Function_v4bool = OpTypePointer Function %v4bool
-         %32 = OpConstantNull %v4bool
+         %29 = OpConstantNull %v4bool
 %unused_entry_point = OpFunction %void None %1
           %4 = OpLabel
                OpReturn
@@ -35,24 +35,18 @@
           %f = OpFunction %void None %1
           %6 = OpLabel
           %v = OpVariable %_ptr_Function_bool Function %11
-         %v2 = OpVariable %_ptr_Function_v2bool Function %20
-         %v3 = OpVariable %_ptr_Function_v3bool Function %26
-         %v4 = OpVariable %_ptr_Function_v4bool Function %32
-               OpSelectionMerge %9 None
-               OpBranchConditional %true %9 %10
-         %10 = OpLabel
-               OpBranch %9
-          %9 = OpLabel
-         %12 = OpPhi %bool %true %6 %11 %10
-               OpStore %v %12
-         %16 = OpLoad %bool %v
-         %17 = OpCompositeConstruct %v2bool %16 %16
-               OpStore %v2 %17
-         %22 = OpLoad %bool %v
-         %23 = OpCompositeConstruct %v3bool %22 %22 %22
-               OpStore %v3 %23
-         %28 = OpLoad %bool %v
-         %29 = OpCompositeConstruct %v4bool %28 %28 %28 %28
-               OpStore %v4 %29
+         %v2 = OpVariable %_ptr_Function_v2bool Function %17
+         %v3 = OpVariable %_ptr_Function_v3bool Function %23
+         %v4 = OpVariable %_ptr_Function_v4bool Function %29
+               OpStore %v %true
+         %13 = OpLoad %bool %v
+         %14 = OpCompositeConstruct %v2bool %13 %13
+               OpStore %v2 %14
+         %19 = OpLoad %bool %v
+         %20 = OpCompositeConstruct %v3bool %19 %19 %19
+               OpStore %v3 %20
+         %25 = OpLoad %bool %v
+         %26 = OpCompositeConstruct %v4bool %25 %25 %25 %25
+               OpStore %v4 %26
                OpReturn
                OpFunctionEnd

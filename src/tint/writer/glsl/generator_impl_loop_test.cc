@@ -212,14 +212,15 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleInit) {
 }
 
 TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtInit) {
-    // for(var b = true && false; ; ) {
+    // let t = true;
+    // for(var b = t && false; ; ) {
     //   return;
     // }
 
-    auto* multi_stmt =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
+    auto* t = Let("t", Expr(true));
+    auto* multi_stmt = LogicalAnd(t, false);
     auto* f = For(Decl(Var("b", multi_stmt)), nullptr, nullptr, Block(Return()));
-    WrapInFunction(f);
+    WrapInFunction(t, f);
 
     GeneratorImpl& gen = Build();
 
@@ -227,7 +228,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtInit) {
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  {
-    bool tint_tmp = true;
+    bool tint_tmp = t;
     if (tint_tmp) {
       tint_tmp = false;
     }
@@ -263,16 +264,16 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleCond) {
 }
 
 TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtCond) {
-    // for(; true && false; ) {
+    // let t = true;
+    // for(; t && false; ) {
     //   return;
     // }
 
     Func("a_statement", {}, ty.void_(), {});
-
-    auto* multi_stmt =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
+    auto* t = Let("t", Expr(true));
+    auto* multi_stmt = LogicalAnd(t, false);
     auto* f = For(nullptr, multi_stmt, nullptr, Block(CallStmt(Call("a_statement"))));
-    WrapInFunction(f);
+    WrapInFunction(t, f);
 
     GeneratorImpl& gen = Build();
 
@@ -281,7 +282,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtCond) {
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  {
     while (true) {
-      bool tint_tmp = true;
+      bool tint_tmp = t;
       if (tint_tmp) {
         tint_tmp = false;
       }
@@ -316,16 +317,17 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleCont) {
 }
 
 TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtCont) {
-    // for(; ; i = true && false) {
+    // let t = true;
+    // for(; ; i = t && false) {
     //   return;
     // }
 
-    auto* multi_stmt =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
+    auto* t = Let("t", Expr(true));
+    auto* multi_stmt = LogicalAnd(t, false);
     auto* v = Decl(Var("i", ty.bool_()));
     auto* f = For(nullptr, nullptr, Assign("i", multi_stmt),  //
                   Block(Return()));
-    WrapInFunction(v, f);
+    WrapInFunction(t, v, f);
 
     GeneratorImpl& gen = Build();
 
@@ -335,7 +337,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtCont) {
     EXPECT_EQ(gen.result(), R"(  {
     while (true) {
       return;
-      bool tint_tmp = true;
+      bool tint_tmp = t;
       if (tint_tmp) {
         tint_tmp = false;
       }
@@ -367,20 +369,19 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleInitCondCont) {
 }
 
 TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtInitCondCont) {
-    // for(var i = true && false; true && false; i = true && false) {
+    // let t = true;
+    // for(var i = t && false; t && false; i = t && false) {
     //   return;
     // }
 
-    auto* multi_stmt_a =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
-    auto* multi_stmt_b =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
-    auto* multi_stmt_c =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
+    auto* t = Let("t", Expr(true));
+    auto* multi_stmt_a = LogicalAnd(t, false);
+    auto* multi_stmt_b = LogicalAnd(t, false);
+    auto* multi_stmt_c = LogicalAnd(t, false);
 
     auto* f = For(Decl(Var("i", multi_stmt_a)), multi_stmt_b, Assign("i", multi_stmt_c),  //
                   Block(Return()));
-    WrapInFunction(f);
+    WrapInFunction(t, f);
 
     GeneratorImpl& gen = Build();
 
@@ -388,19 +389,19 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtInitCondCont) {
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  {
-    bool tint_tmp = true;
+    bool tint_tmp = t;
     if (tint_tmp) {
       tint_tmp = false;
     }
     bool i = (tint_tmp);
     while (true) {
-      bool tint_tmp_1 = true;
+      bool tint_tmp_1 = t;
       if (tint_tmp_1) {
         tint_tmp_1 = false;
       }
       if (!((tint_tmp_1))) { break; }
       return;
-      bool tint_tmp_2 = true;
+      bool tint_tmp_2 = t;
       if (tint_tmp_2) {
         tint_tmp_2 = false;
       }
@@ -449,16 +450,17 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_While_WithContinue) {
 }
 
 TEST_F(GlslGeneratorImplTest_Loop, Emit_WhileWithMultiStmtCond) {
-    // while(true && false) {
+    // let t = true;
+    // while(t && false) {
     //   return;
     // }
 
     Func("a_statement", {}, ty.void_(), {});
 
-    auto* multi_stmt =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
+    auto* t = Let("t", Expr(true));
+    auto* multi_stmt = LogicalAnd(t, false);
     auto* f = While(multi_stmt, Block(CallStmt(Call("a_statement"))));
-    WrapInFunction(f);
+    WrapInFunction(t, f);
 
     GeneratorImpl& gen = Build();
 
@@ -466,7 +468,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_WhileWithMultiStmtCond) {
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  while (true) {
-    bool tint_tmp = true;
+    bool tint_tmp = t;
     if (tint_tmp) {
       tint_tmp = false;
     }

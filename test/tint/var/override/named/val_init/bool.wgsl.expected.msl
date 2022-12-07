@@ -2,7 +2,7 @@
 
 using namespace metal;
 kernel void tint_symbol() {
-  if ((false && true)) {
+  if (false) {
   }
   return;
 }

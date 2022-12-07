@@ -419,17 +419,18 @@ TEST_F(MslGeneratorImplTest, Emit_WhileWithMultiCond) {
     //   return;
     // }
 
-    auto* multi_stmt =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
+    auto* t = Let("t", Expr(true));
+    auto* multi_stmt = LogicalAnd(t, false);
+    // create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(t), Expr(false));
     auto* f = While(multi_stmt, Block(Return()));
-    WrapInFunction(f);
+    WrapInFunction(t, f);
 
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
-    EXPECT_EQ(gen.result(), R"(  while((true && false)) {
+    EXPECT_EQ(gen.result(), R"(  while((t && false)) {
     return;
   }
 )");

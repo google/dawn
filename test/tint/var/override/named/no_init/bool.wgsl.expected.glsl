@@ -1,11 +1,7 @@
 #version 310 es
 
 void tint_symbol() {
-  bool tint_tmp = false;
-  if (tint_tmp) {
-    tint_tmp = true;
-  }
-  if ((tint_tmp)) {
+  if (false) {
   }
 }
 

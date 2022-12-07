@@ -5,20 +5,8 @@ void unused_entry_point() {
   return;
 }
 void f() {
-  bool tint_tmp = true;
-  if (!tint_tmp) {
-    tint_tmp = false;
-  }
-  bvec2 v2 = bvec2((tint_tmp));
-  bool tint_tmp_1 = true;
-  if (!tint_tmp_1) {
-    tint_tmp_1 = false;
-  }
-  bvec3 v3 = bvec3((tint_tmp_1));
-  bool tint_tmp_2 = true;
-  if (!tint_tmp_2) {
-    tint_tmp_2 = false;
-  }
-  bvec4 v4 = bvec4((tint_tmp_2));
+  bvec2 v2 = bvec2(true);
+  bvec3 v3 = bvec3(true);
+  bvec4 v4 = bvec4(true);
 }
 
