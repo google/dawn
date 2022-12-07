@@ -117,7 +117,7 @@ uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
         case BuiltinType::kClamp:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 return GLSLstd450NClamp;
-            } else if (builtin->ReturnType()->is_unsigned_scalar_or_vector()) {
+            } else if (builtin->ReturnType()->is_unsigned_integer_scalar_or_vector()) {
                 return GLSLstd450UClamp;
             } else {
                 return GLSLstd450SClamp;
@@ -161,7 +161,7 @@ uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
         case BuiltinType::kMax:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 return GLSLstd450NMax;
-            } else if (builtin->ReturnType()->is_unsigned_scalar_or_vector()) {
+            } else if (builtin->ReturnType()->is_unsigned_integer_scalar_or_vector()) {
                 return GLSLstd450UMax;
             } else {
                 return GLSLstd450SMax;
@@ -169,7 +169,7 @@ uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
         case BuiltinType::kMin:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 return GLSLstd450NMin;
-            } else if (builtin->ReturnType()->is_unsigned_scalar_or_vector()) {
+            } else if (builtin->ReturnType()->is_unsigned_integer_scalar_or_vector()) {
                 return GLSLstd450UMin;
             } else {
                 return GLSLstd450SMin;
@@ -2052,7 +2052,7 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
     bool lhs_is_float_or_vec = lhs_type->is_float_scalar_or_vector();
     bool lhs_is_bool_or_vec = lhs_type->is_bool_scalar_or_vector();
     bool lhs_is_integer_or_vec = lhs_type->is_integer_scalar_or_vector();
-    bool lhs_is_unsigned = lhs_type->is_unsigned_scalar_or_vector();
+    bool lhs_is_unsigned = lhs_type->is_unsigned_integer_scalar_or_vector();
 
     spv::Op op = spv::Op::OpNop;
     if (expr->IsAnd()) {
@@ -2187,7 +2187,7 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
         }
     } else if (expr->IsShiftLeft()) {
         op = spv::Op::OpShiftLeftLogical;
-    } else if (expr->IsShiftRight() && lhs_type->is_signed_scalar_or_vector()) {
+    } else if (expr->IsShiftRight() && lhs_type->is_signed_integer_scalar_or_vector()) {
         // A shift right with a signed LHS is an arithmetic shift.
         op = spv::Op::OpShiftRightArithmetic;
     } else if (expr->IsShiftRight()) {
@@ -2458,7 +2458,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             op = spv::Op::OpDPdyFine;
             break;
         case BuiltinType::kExtractBits:
-            op = builtin->Parameters()[0]->Type()->is_unsigned_scalar_or_vector()
+            op = builtin->Parameters()[0]->Type()->is_unsigned_integer_scalar_or_vector()
                      ? spv::Op::OpBitFieldUExtract
                      : spv::Op::OpBitFieldSExtract;
             break;
@@ -2543,7 +2543,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             op = spv::Op::OpTranspose;
             break;
         case BuiltinType::kAbs:
-            if (builtin->ReturnType()->is_unsigned_scalar_or_vector()) {
+            if (builtin->ReturnType()->is_unsigned_integer_scalar_or_vector()) {
                 // abs() only operates on *signed* integers.
                 // This is a no-op for unsigned integers.
                 return get_arg_as_value_id(0);

@@ -52,7 +52,7 @@ bool MutationChangeUnaryOperator::IsApplicable(const tint::Program& program,
 
     // Only signed integer or vector of signed integer has more than 1
     // unary operators to change between.
-    if (!basic_type->is_signed_scalar_or_vector()) {
+    if (!basic_type->is_signed_integer_scalar_or_vector()) {
         return false;
     }
 

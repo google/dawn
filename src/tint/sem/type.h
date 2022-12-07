@@ -126,9 +126,9 @@ class Type : public Castable<Type, Node> {
     /// @returns true if this type is an unsigned vector
     bool is_unsigned_integer_vector() const;
     /// @returns true if this type is an unsigned scalar or vector
-    bool is_unsigned_scalar_or_vector() const;
+    bool is_unsigned_integer_scalar_or_vector() const;
     /// @returns true if this type is a signed scalar or vector
-    bool is_signed_scalar_or_vector() const;
+    bool is_signed_integer_scalar_or_vector() const;
     /// @returns true if this type is an integer scalar or vector
     bool is_integer_scalar_or_vector() const;
     /// @returns true if this type is an abstract integer vector

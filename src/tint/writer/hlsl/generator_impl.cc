@@ -987,7 +987,7 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
     // crbug.com/tint/1550
     if (type == sem::BuiltinType::kCountOneBits || type == sem::BuiltinType::kReverseBits) {
         auto* arg = call->Arguments()[0];
-        if (arg->Type()->UnwrapRef()->is_signed_scalar_or_vector()) {
+        if (arg->Type()->UnwrapRef()->is_signed_integer_scalar_or_vector()) {
             out << "asint(" << name << "(asuint(";
             if (!EmitExpression(out, arg->Declaration())) {
                 return false;

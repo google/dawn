@@ -359,7 +359,7 @@ struct BuiltinPolyfill::State {
         };
 
         const ast::Expression* x = nullptr;
-        if (ty->is_unsigned_scalar_or_vector()) {
+        if (ty->is_unsigned_integer_scalar_or_vector()) {
             x = b.Expr("v");
         } else {
             // If ty is signed, then the value is inverted if the sign is negative
@@ -484,7 +484,7 @@ struct BuiltinPolyfill::State {
 
         auto V = [&](auto value) -> const ast::Expression* {
             const ast::Expression* expr = b.Expr(value);
-            if (!ty->is_unsigned_scalar_or_vector()) {
+            if (!ty->is_unsigned_integer_scalar_or_vector()) {
                 expr = b.Construct<i32>(expr);
             }
             if (ty->Is<sem::Vector>()) {
@@ -691,7 +691,7 @@ struct BuiltinPolyfill::State {
 
             auto name = b.Symbols().New(is_div ? "tint_div" : "tint_mod");
             auto* use_one = b.Equal(rhs, ScalarOrVector(width, 0_a));
-            if (lhs_ty->is_signed_scalar_or_vector()) {
+            if (lhs_ty->is_signed_integer_scalar_or_vector()) {
                 const auto bits = lhs_el_ty->Size() * 8;
                 auto min_int = AInt(AInt::kLowestValue >> (AInt::kNumBits - bits));
                 const ast::Expression* lhs_is_min = b.Equal(lhs, ScalarOrVector(width, min_int));

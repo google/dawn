@@ -121,16 +121,16 @@ bool Type::is_unsigned_integer_vector() const {
     return Is([](const Vector* v) { return v->type()->Is<U32>(); });
 }
 
-bool Type::is_unsigned_scalar_or_vector() const {
+bool Type::is_unsigned_integer_scalar_or_vector() const {
     return Is<U32>() || is_unsigned_integer_vector();
 }
 
-bool Type::is_signed_scalar_or_vector() const {
+bool Type::is_signed_integer_scalar_or_vector() const {
     return IsAnyOf<I32, AbstractInt>() || is_signed_integer_vector();
 }
 
 bool Type::is_integer_scalar_or_vector() const {
-    return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
+    return is_unsigned_integer_scalar_or_vector() || is_signed_integer_scalar_or_vector();
 }
 
 bool Type::is_abstract_integer_vector() const {

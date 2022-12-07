@@ -46,7 +46,7 @@ MutationList MutationFinderChangeUnaryOperators::FindMutations(
             type->Is<sem::Reference>() ? type->As<sem::Reference>()->StoreType() : type;
 
         // Only signed integer or vector of signed integer can be mutated.
-        if (!basic_type->is_signed_scalar_or_vector()) {
+        if (!basic_type->is_signed_integer_scalar_or_vector()) {
             continue;
         }
 

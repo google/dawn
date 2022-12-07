@@ -241,7 +241,7 @@ struct Robustness::State {
 
             // texture_dims is u32 or vecN<u32>
             const auto* unsigned_max = b.Sub(texture_dims, scalar_or_vec(b.Expr(1_a), width));
-            if (target_ty->is_signed_scalar_or_vector()) {
+            if (target_ty->is_signed_integer_scalar_or_vector()) {
                 const auto* zero = scalar_or_vec(b.Expr(0_a), width);
                 const auto* signed_max = cast_to_signed(unsigned_max, width);
                 ctx.Replace(coords_arg, b.Call("clamp", ctx.Clone(coords_arg), zero, signed_max));

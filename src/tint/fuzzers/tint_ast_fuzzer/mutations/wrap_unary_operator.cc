@@ -100,12 +100,12 @@ std::vector<ast::UnaryOp> MutationWrapUnaryOperator::GetValidUnaryWrapper(
         return {ast::UnaryOp::kNot};
     }
 
-    if (expr_type->is_signed_scalar_or_vector() ||
+    if (expr_type->is_signed_integer_scalar_or_vector() ||
         expr_type->is_abstract_integer_scalar_or_vector()) {
         return {ast::UnaryOp::kNegation, ast::UnaryOp::kComplement};
     }
 
-    if (expr_type->is_unsigned_scalar_or_vector()) {
+    if (expr_type->is_unsigned_integer_scalar_or_vector()) {
         return {ast::UnaryOp::kComplement};
     }
 
