@@ -26,6 +26,14 @@ struct S {
   /* 0x00c6 */ tint_array<int8_t, 58> tint_pad_3;
 };
 
+void assign_and_preserve_padding(device S* const dest, S value) {
+  (*(dest)).f = value.f;
+  (*(dest)).u = value.u;
+  (*(dest)).v = value.v;
+  (*(dest)).x = value.x;
+  (*(dest)).y = half3(value.y);
+}
+
 struct tint_symbol_1 {
   float f [[user(locn0)]];
   uint u [[user(locn1)]] [[flat]];
@@ -39,7 +47,7 @@ void frag_main_inner(S input, device S* const tint_symbol_3) {
   float4 const v = input.v;
   half const x = input.x;
   half3 const y = half3(input.y);
-  *(tint_symbol_3) = input;
+  assign_and_preserve_padding(tint_symbol_3, input);
 }
 
 fragment void frag_main(device S* tint_symbol_4 [[buffer(0)]], float4 v [[position]], tint_symbol_1 tint_symbol [[stage_in]]) {

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 43
+; Bound: 64
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -25,6 +25,8 @@
                OpMemberName %S 3 "x"
                OpMemberName %S 4 "y"
                OpName %output "output"
+               OpName %assign_and_preserve_padding_output "assign_and_preserve_padding_output"
+               OpName %value "value"
                OpName %frag_main_inner "frag_main_inner"
                OpName %input "input"
                OpName %frag_main "frag_main"
@@ -65,28 +67,55 @@
        %void = OpTypeVoid
          %20 = OpTypeFunction %void %S
      %uint_0 = OpConstant %uint 0
-%_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S
-         %33 = OpTypeFunction %void
-%frag_main_inner = OpFunction %void None %20
-      %input = OpFunctionParameter %S
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+     %uint_1 = OpConstant %uint 1
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+     %uint_2 = OpConstant %uint 2
+%_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
+     %uint_3 = OpConstant %uint 3
+%_ptr_StorageBuffer_half = OpTypePointer StorageBuffer %half
+     %uint_4 = OpConstant %uint 4
+%_ptr_StorageBuffer_v3half = OpTypePointer StorageBuffer %v3half
+         %54 = OpTypeFunction %void
+%assign_and_preserve_padding_output = OpFunction %void None %20
+      %value = OpFunctionParameter %S
          %24 = OpLabel
-         %25 = OpCompositeExtract %float %input 0
-         %26 = OpCompositeExtract %uint %input 1
-         %27 = OpCompositeExtract %v4float %input 2
-         %28 = OpCompositeExtract %half %input 3
-         %29 = OpCompositeExtract %v3half %input 4
-         %32 = OpAccessChain %_ptr_StorageBuffer_S %output %uint_0
-               OpStore %32 %input
+         %27 = OpAccessChain %_ptr_StorageBuffer_float %output %uint_0 %uint_0
+         %28 = OpCompositeExtract %float %value 0
+               OpStore %27 %28
+         %31 = OpAccessChain %_ptr_StorageBuffer_uint %output %uint_0 %uint_1
+         %32 = OpCompositeExtract %uint %value 1
+               OpStore %31 %32
+         %35 = OpAccessChain %_ptr_StorageBuffer_v4float %output %uint_0 %uint_2
+         %36 = OpCompositeExtract %v4float %value 2
+               OpStore %35 %36
+         %39 = OpAccessChain %_ptr_StorageBuffer_half %output %uint_0 %uint_3
+         %40 = OpCompositeExtract %half %value 3
+               OpStore %39 %40
+         %43 = OpAccessChain %_ptr_StorageBuffer_v3half %output %uint_0 %uint_4
+         %44 = OpCompositeExtract %v3half %value 4
+               OpStore %43 %44
                OpReturn
                OpFunctionEnd
-  %frag_main = OpFunction %void None %33
-         %35 = OpLabel
-         %37 = OpLoad %float %f_1
-         %38 = OpLoad %uint %u_1
-         %39 = OpLoad %v4float %v_1
-         %40 = OpLoad %half %x_1
-         %41 = OpLoad %v3half %y_1
-         %42 = OpCompositeConstruct %S %37 %38 %39 %40 %41
-         %36 = OpFunctionCall %void %frag_main_inner %42
+%frag_main_inner = OpFunction %void None %20
+      %input = OpFunctionParameter %S
+         %47 = OpLabel
+         %48 = OpCompositeExtract %float %input 0
+         %49 = OpCompositeExtract %uint %input 1
+         %50 = OpCompositeExtract %v4float %input 2
+         %51 = OpCompositeExtract %half %input 3
+         %52 = OpCompositeExtract %v3half %input 4
+         %53 = OpFunctionCall %void %assign_and_preserve_padding_output %input
+               OpReturn
+               OpFunctionEnd
+  %frag_main = OpFunction %void None %54
+         %56 = OpLabel
+         %58 = OpLoad %float %f_1
+         %59 = OpLoad %uint %u_1
+         %60 = OpLoad %v4float %v_1
+         %61 = OpLoad %half %x_1
+         %62 = OpLoad %v3half %y_1
+         %63 = OpCompositeConstruct %S %58 %59 %60 %61 %62
+         %57 = OpFunctionCall %void %frag_main_inner %63
                OpReturn
                OpFunctionEnd
