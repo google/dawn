@@ -522,7 +522,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> CosCases() {
-    std::vector<Case> cases = {
+    return {
         C({-T(0)}, T(1)),
         C({T(0)}, T(1)),
 
@@ -531,8 +531,6 @@ std::vector<Case> CosCases() {
         // Vector test
         C({Vec(T(0), -T(0), T(0.75))}, Vec(T(1), T(1), T(0.7316888689))).FloatComp(),
     };
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Cos,
@@ -547,7 +545,7 @@ std::vector<Case> CoshCases() {
     auto error_msg = [](auto a) {
         return "12:34 error: " + OverflowErrorMessage(a, FriendlyName<decltype(a)>());
     };
-    std::vector<Case> cases = {
+    return {
         C({T(0)}, T(1)),
         C({-T(0)}, T(1)),
         C({T(1)}, T(1.5430806348)).FloatComp(),
@@ -559,7 +557,6 @@ std::vector<Case> CoshCases() {
 
         E({T(10000)}, error_msg(T::Inf())),
     };
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Cosh,
@@ -805,7 +802,7 @@ std::vector<Case> DistanceCases() {
 12:34 note: when calculating distance)";
     };
 
-    return std::vector<Case>{
+    return {
         C({T(0), T(0)}, T(0)),
         // length(-5) -> 5
         C({T(30), T(35)}, T(5)),
@@ -1180,7 +1177,7 @@ std::vector<Case> FrexpCases() {
     using F = T;                                                         // fract type
     using E = std::conditional_t<std::is_same_v<T, AFloat>, AInt, i32>;  // exp type
 
-    auto cases = std::vector<Case>{
+    std::vector<Case> cases = {
         // Scalar tests
         //  in         fract     exp
         C({T(-3.5)}, {F(-0.875), E(2)}),  //
@@ -1315,7 +1312,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> InverseSqrtCases() {
-    std::vector<Case> cases = {
+    return {
         C({T(25)}, T(.2)),
 
         // Vector tests
@@ -1325,7 +1322,6 @@ std::vector<Case> InverseSqrtCases() {
         E({-T(0)}, "12:34 error: inverseSqrt must be called with a value > 0"),
         E({-T(25)}, "12:34 error: inverseSqrt must be called with a value > 0"),
     };
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     InverseSqrt,
@@ -1337,7 +1333,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> DegreesAFloatCases() {
-    return std::vector<Case>{
+    return {
         C({T(0)}, T(0)),                             //
         C({-T(0)}, -T(0)),                           //
         C({T(0.698132)}, T(40)).FloatComp(),         //
@@ -1354,7 +1350,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> DegreesF32Cases() {
-    return std::vector<Case>{
+    return {
         C({T(0)}, T(0)),                             //
         C({-T(0)}, -T(0)),                           //
         C({T(0.698132)}, T(40)).FloatComp(),         //
@@ -1371,7 +1367,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> DegreesF16Cases() {
-    return std::vector<Case>{
+    return {
         C({T(0)}, T(0)),                            //
         C({-T(0)}, -T(0)),                          //
         C({T(0.698132)}, T(39.96875)).FloatComp(),  //
@@ -1389,13 +1385,13 @@ INSTANTIATE_TEST_SUITE_P(  //
 template <typename T>
 std::vector<Case> ExpCases() {
     auto error_msg = [](auto a) { return "12:34 error: " + OverflowExpErrorMessage("e", a); };
-    return std::vector<Case>{C({T(0)}, T(1)),   //
-                             C({-T(0)}, T(1)),  //
-                             C({T(2)}, T(7.3890562)).FloatComp(),
-                             C({-T(2)}, T(0.13533528)).FloatComp(),  //
-                             C({T::Lowest()}, T(0)),
+    return {C({T(0)}, T(1)),   //
+            C({-T(0)}, T(1)),  //
+            C({T(2)}, T(7.3890562)).FloatComp(),
+            C({-T(2)}, T(0.13533528)).FloatComp(),  //
+            C({T::Lowest()}, T(0)),
 
-                             E({T::Highest()}, error_msg(T::Highest()))};
+            E({T::Highest()}, error_msg(T::Highest()))};
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Exp,
@@ -1408,7 +1404,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 template <typename T>
 std::vector<Case> Exp2Cases() {
     auto error_msg = [](auto a) { return "12:34 error: " + OverflowExpErrorMessage("2", a); };
-    return std::vector<Case>{
+    return {
         C({T(0)}, T(1)),   //
         C({-T(0)}, T(1)),  //
         C({T(2)}, T(4.0)),
@@ -1584,11 +1580,10 @@ INSTANTIATE_TEST_SUITE_P(  //
 template <typename T>
 std::vector<Case> LogCases() {
     auto error_msg = [] { return "12:34 error: log must be called with a value > 0"; };
-    return std::vector<Case>{C({T(1)}, T(0)),                              //
-                             C({T(54.598150033)}, T(4)).FloatComp(0.002),  //
+    return {C({T(1)}, T(0)),                              //
+            C({T(54.598150033)}, T(4)).FloatComp(0.002),  //
 
-                             E({T::Lowest()}, error_msg()), E({T(0)}, error_msg()),
-                             E({-T(0)}, error_msg())};
+            E({T::Lowest()}, error_msg()), E({T(0)}, error_msg()), E({-T(0)}, error_msg())};
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Log,
@@ -1599,7 +1594,7 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               LogCases<f16>()))));
 template <typename T>
 std::vector<Case> LogF16Cases() {
-    return std::vector<Case>{
+    return {
         C({T::Highest()}, T(11.085938)).FloatComp(),
     };
 }
@@ -1610,7 +1605,7 @@ INSTANTIATE_TEST_SUITE_P(  //
                      testing::ValuesIn(LogF16Cases<f16>())));
 template <typename T>
 std::vector<Case> LogF32Cases() {
-    return std::vector<Case>{
+    return {
         C({T::Highest()}, T(88.722839)).FloatComp(),
     };
 }
@@ -1622,7 +1617,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> LogAbstractCases() {
-    return std::vector<Case>{
+    return {
         C({T::Highest()}, T(709.78271)).FloatComp(),
     };
 }
@@ -1635,7 +1630,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 template <typename T>
 std::vector<Case> Log2Cases() {
     auto error_msg = [] { return "12:34 error: log2 must be called with a value > 0"; };
-    return std::vector<Case>{
+    return {
         C({T(1)}, T(0)),  //
         C({T(4)}, T(2)),  //
 
@@ -1653,7 +1648,7 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               Log2Cases<f16>()))));
 template <typename T>
 std::vector<Case> Log2F16Cases() {
-    return std::vector<Case>{
+    return {
         C({T::Highest()}, T(15.9922)).FloatComp(),
     };
 }
@@ -1664,7 +1659,7 @@ INSTANTIATE_TEST_SUITE_P(  //
                      testing::ValuesIn(Log2F16Cases<f16>())));
 template <typename T>
 std::vector<Case> Log2F32Cases() {
-    return std::vector<Case>{
+    return {
         C({T::Highest()}, T(128)).FloatComp(),
     };
 }
@@ -1675,7 +1670,7 @@ INSTANTIATE_TEST_SUITE_P(  //
                      testing::ValuesIn(Log2F32Cases<f32>())));
 template <typename T>
 std::vector<Case> Log2AbstractCases() {
-    return std::vector<Case>{
+    return {
         C({T::Highest()}, T(1024)).FloatComp(),
     };
 }
@@ -2071,7 +2066,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> RadiansCases() {
-    return std::vector<Case>{
+    return {
         C({T(0)}, T(0)),                         //
         C({-T(0)}, -T(0)),                       //
         C({T(40)}, T(0.69813168)).FloatComp(),   //
@@ -2089,7 +2084,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> RadiansF16Cases() {
-    return std::vector<Case>{
+    return {
         C({T(0)}, T(0)),                         //
         C({-T(0)}, -T(0)),                       //
         C({T(40)}, T(0.69726562)).FloatComp(),   //
@@ -2106,7 +2101,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> RoundCases() {
-    std::vector<Case> cases = {
+    return {
         C({T(0.0)}, T(0.0)),      //
         C({-T(0.0)}, -T(0.0)),    //
         C({T(1.5)}, T(2.0)),      //
@@ -2123,8 +2118,6 @@ std::vector<Case> RoundCases() {
         // Vector tests
         C({Vec(T(0.0), T(1.5), T(2.5))}, Vec(T(0.0), T(2.0), T(2.0))),
     };
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Round,
@@ -2233,7 +2226,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> SinCases() {
-    std::vector<Case> cases = {
+    return {
         C({-T(0)}, -T(0)),
         C({T(0)}, T(0)),
         C({T(0.75)}, T(0.68163876)).FloatComp(),
@@ -2242,8 +2235,6 @@ std::vector<Case> SinCases() {
         // Vector test
         C({Vec(T(0), -T(0), T(0.75))}, Vec(T(0), -T(0), T(0.68163876))).FloatComp(),
     };
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Sin,
@@ -2258,7 +2249,7 @@ std::vector<Case> SinhCases() {
     auto error_msg = [](auto a) {
         return "12:34 error: " + OverflowErrorMessage(a, FriendlyName<decltype(a)>());
     };
-    std::vector<Case> cases = {
+    return {
         C({T(0)}, T(0)),
         C({-T(0)}, -T(0)),
         C({T(1)}, T(1.1752012)).FloatComp(),
@@ -2269,7 +2260,6 @@ std::vector<Case> SinhCases() {
 
         E({T(10000)}, error_msg(T::Inf())),
     };
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Sinh,
@@ -2346,7 +2336,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> SqrtCases() {
-    std::vector<Case> cases = {
+    return {
         C({-T(0)}, -T(0)),  //
         C({T(0)}, T(0)),    //
         C({T(25)}, T(5)),
@@ -2356,7 +2346,6 @@ std::vector<Case> SqrtCases() {
 
         E({-T(25)}, "12:34 error: sqrt must be called with a value >= 0"),
     };
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Sqrt,
@@ -2368,7 +2357,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> TanCases() {
-    std::vector<Case> cases = {
+    return {
         C({-T(0)}, -T(0)),
         C({T(0)}, T(0)),
         C({T(.75)}, T(0.9315964599)).FloatComp(),
@@ -2376,8 +2365,6 @@ std::vector<Case> TanCases() {
         // Vector test
         C({Vec(T(0), -T(0), T(.75))}, Vec(T(0), -T(0), T(0.9315964599))).FloatComp(),
     };
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Tan,
@@ -2389,7 +2376,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> TanhCases() {
-    std::vector<Case> cases = {
+    return {
         C({T(0)}, T(0)),
         C({-T(0)}, -T(0)),
         C({T(1)}, T(0.761594156)).FloatComp(),
@@ -2398,8 +2385,6 @@ std::vector<Case> TanhCases() {
         // Vector tests
         C({Vec(T(0), -T(0), T(1))}, Vec(T(0), -T(0), T(0.761594156))).FloatComp(),
     };
-
-    return cases;
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Tanh,
@@ -2477,15 +2462,13 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> TruncCases() {
-    std::vector<Case> cases = {C({T(0)}, T(0)),    //
-                               C({-T(0)}, -T(0)),  //
-                               C({T(1.5)}, T(1)),  //
-                               C({-T(1.5)}, -T(1)),
+    return {C({T(0)}, T(0)),    //
+            C({-T(0)}, -T(0)),  //
+            C({T(1.5)}, T(1)),  //
+            C({-T(1.5)}, -T(1)),
 
-                               // Vector tests
-                               C({Vec(T(0.0), T(1.5), -T(2.2))}, Vec(T(0), T(1), -T(2)))};
-
-    return cases;
+            // Vector tests
+            C({Vec(T(0.0), T(1.5), -T(2.2))}, Vec(T(0), T(1), -T(2)))};
 }
 INSTANTIATE_TEST_SUITE_P(  //
     Trunc,
