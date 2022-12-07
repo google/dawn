@@ -24,6 +24,26 @@
 
 class RenderPipelineValidationTest : public ValidationTest {
   protected:
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
+        // Disabled disallowing unsafe APIs so we can test ShaderF16 feature.
+        const char* forceDisabledToggle[] = {"disallow_unsafe_apis"};
+
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::ShaderF16};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 1;
+
+        wgpu::DawnTogglesDeviceDescriptor togglesDesc;
+        descriptor.nextInChain = &togglesDesc;
+
+        togglesDesc.forceEnabledToggles = nullptr;
+        togglesDesc.forceEnabledTogglesCount = 0;
+        togglesDesc.forceDisabledToggles = forceDisabledToggle;
+        togglesDesc.forceDisabledTogglesCount = 1;
+
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+
     void SetUp() override {
         ValidationTest::SetUp();
 
@@ -326,30 +346,53 @@ TEST_F(RenderPipelineValidationTest, NonBlendableFormat) {
 
 // Tests that the format of the color state descriptor must match the output of the fragment shader.
 TEST_F(RenderPipelineValidationTest, FragmentOutputFormatCompatibility) {
-    std::array<const char*, 3> kScalarTypes = {{"f32", "i32", "u32"}};
-    std::array<wgpu::TextureFormat, 3> kColorFormats = {{wgpu::TextureFormat::RGBA8Unorm,
-                                                         wgpu::TextureFormat::RGBA8Sint,
-                                                         wgpu::TextureFormat::RGBA8Uint}};
+    std::vector<std::vector<std::string>> kScalarTypeLists = {// Float scalar types
+                                                              {"f32", "f16"},
+                                                              // Sint scalar type
+                                                              {"i32"},
+                                                              // Uint scalar type
+                                                              {"u32"}};
 
-    for (size_t i = 0; i < kScalarTypes.size(); ++i) {
-        utils::ComboRenderPipelineDescriptor descriptor;
-        descriptor.vertex.module = vsModule;
-        std::ostringstream stream;
-        stream << R"(
+    std::vector<std::vector<wgpu::TextureFormat>> kColorFormatLists = {
+        // Float color formats
+        {wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGBA16Float,
+         wgpu::TextureFormat::RGBA32Float},
+        // Sint color formats
+        {wgpu::TextureFormat::RGBA8Sint, wgpu::TextureFormat::RGBA16Sint,
+         wgpu::TextureFormat::RGBA32Sint},
+        // Uint color formats
+        {wgpu::TextureFormat::RGBA8Uint, wgpu::TextureFormat::RGBA16Uint,
+         wgpu::TextureFormat::RGBA32Uint}};
+
+    for (size_t i = 0; i < kScalarTypeLists.size(); ++i) {
+        for (const std::string& scalarType : kScalarTypeLists[i]) {
+            utils::ComboRenderPipelineDescriptor descriptor;
+            descriptor.vertex.module = vsModule;
+            std::ostringstream stream;
+
+            // Enable f16 extension if needed.
+            if (scalarType == "f16") {
+                stream << "enable f16;\n\n";
+            }
+            stream << R"(
             @fragment fn main() -> @location(0) vec4<)"
-               << kScalarTypes[i] << R"(> {
+                   << scalarType << R"(> {
                 var result : vec4<)"
-               << kScalarTypes[i] << R"(>;
+                   << scalarType << R"(>;
                 return result;
             })";
-        descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
 
-        for (size_t j = 0; j < kColorFormats.size(); ++j) {
-            descriptor.cTargets[0].format = kColorFormats[j];
-            if (i == j) {
-                device.CreateRenderPipeline(&descriptor);
-            } else {
-                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+            descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
+
+            for (size_t j = 0; j < kColorFormatLists.size(); ++j) {
+                for (wgpu::TextureFormat textureFormat : kColorFormatLists[j]) {
+                    descriptor.cTargets[0].format = textureFormat;
+                    if (i == j) {
+                        device.CreateRenderPipeline(&descriptor);
+                    } else {
+                        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+                    }
+                }
             }
         }
     }
@@ -1446,12 +1489,13 @@ TEST_F(InterStageVariableMatchingValidationTest, MissingDeclarationAtSameLocatio
 // Tests that creating render pipeline should fail when the type of a vertex stage output variable
 // doesn't match the type of the fragment stage input variable at the same location.
 TEST_F(InterStageVariableMatchingValidationTest, DifferentTypeAtSameLocation) {
-    constexpr std::array<const char*, 12> kTypes = {{"f32", "vec2<f32>", "vec3<f32>", "vec4<f32>",
+    constexpr std::array<const char*, 16> kTypes = {{"f32", "vec2<f32>", "vec3<f32>", "vec4<f32>",
+                                                     "f16", "vec2<f16>", "vec3<f16>", "vec4<f16>",
                                                      "i32", "vec2<i32>", "vec3<i32>", "vec4<i32>",
                                                      "u32", "vec2<u32>", "vec3<u32>", "vec4<u32>"}};
 
-    std::array<wgpu::ShaderModule, 12> vertexModules;
-    std::array<wgpu::ShaderModule, 12> fragmentModules;
+    std::array<wgpu::ShaderModule, 16> vertexModules;
+    std::array<wgpu::ShaderModule, 16> fragmentModules;
     for (uint32_t i = 0; i < kTypes.size(); ++i) {
         std::string interfaceDeclaration;
         {
@@ -1460,9 +1504,12 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentTypeAtSameLocation) {
                     << std::endl;
             interfaceDeclaration = sstream.str();
         }
+
+        std::string extensionDeclaration = "enable f16;\n\n";
+
         {
             std::ostringstream vertexStream;
-            vertexStream << interfaceDeclaration << R"(
+            vertexStream << extensionDeclaration << interfaceDeclaration << R"(
                     @builtin(position) pos: vec4<f32>,
                 }
                 @vertex fn main() -> A {
@@ -1474,7 +1521,7 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentTypeAtSameLocation) {
         }
         {
             std::ostringstream fragmentStream;
-            fragmentStream << interfaceDeclaration << R"(
+            fragmentStream << extensionDeclaration << interfaceDeclaration << R"(
                 }
                 @fragment fn main(fragmentIn: A) -> @location(0) vec4<f32> {
                     return vec4<f32>(0.0, 0.0, 0.0, 1.0);

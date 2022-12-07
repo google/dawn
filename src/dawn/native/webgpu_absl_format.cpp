@@ -409,14 +409,17 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
     switch (value) {
-        case InterStageComponentType::Float:
-            s->Append("Float");
+        case InterStageComponentType::F32:
+            s->Append("f32");
             break;
-        case InterStageComponentType::Uint:
-            s->Append("Uint");
+        case InterStageComponentType::F16:
+            s->Append("f16");
             break;
-        case InterStageComponentType::Sint:
-            s->Append("Sint");
+        case InterStageComponentType::U32:
+            s->Append("u32");
+            break;
+        case InterStageComponentType::I32:
+            s->Append("i32");
             break;
     }
     return {true};

@@ -1068,13 +1068,6 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                                                      ParamOrRetType param_or_ret,
                                                      bool is_struct_member,
                                                      std::optional<uint32_t> location) {
-        // Temporally forbid using f16 types in entry point IO.
-        // TODO(tint:1473, tint:1502): Remove this error after f16 is supported in entry point IO.
-        if (Is<sem::F16>(sem::Type::DeepestElementOf(ty))) {
-            AddError("entry point IO of f16 types is not implemented yet", source);
-            return false;
-        }
-
         // Scan attributes for pipeline IO attributes.
         // Check for overlap with attributes that have been seen previously.
         const ast::Attribute* pipeline_io_attribute = nullptr;

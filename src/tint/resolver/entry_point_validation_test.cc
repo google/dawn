@@ -606,17 +606,14 @@ static constexpr Params cases[] = {
     ParamsFor<alias<i32>>(true),    //
     ParamsFor<alias<u32>>(true),    //
     ParamsFor<alias<bool>>(false),  //
-    // Currently entry point IO of f16 types are not implemented yet.
-    // TODO(tint:1473, tint:1502): Change f16 and vecN<f16> cases to valid after f16 is supported in
-    // entry point IO.
-    ParamsFor<f16>(false),          //
-    ParamsFor<vec2<f16>>(false),    //
-    ParamsFor<vec3<f16>>(false),    //
-    ParamsFor<vec4<f16>>(false),    //
+    ParamsFor<f16>(true),           //
+    ParamsFor<vec2<f16>>(true),     //
+    ParamsFor<vec3<f16>>(true),     //
+    ParamsFor<vec4<f16>>(true),     //
     ParamsFor<mat2x2<f16>>(false),  //
     ParamsFor<mat3x3<f16>>(false),  //
     ParamsFor<mat4x4<f16>>(false),  //
-    ParamsFor<alias<f16>>(false),   //
+    ParamsFor<alias<f16>>(true),    //
 };
 
 TEST_P(TypeValidationTest, BareInputs) {

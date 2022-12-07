@@ -736,6 +736,63 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(VertexPullingTest, FloatVectorAttributes_F16) {
+    auto* src = R"(
+enable f16;
+
+@vertex
+fn main(@location(0) var_a : vec2<f16>,
+        @location(1) var_b : vec3<f16>,
+        @location(2) var_c : vec4<f16>
+        ) -> @builtin(position) vec4<f32> {
+  return vec4<f32>();
+}
+)";
+
+    auto* expect = R"(
+enable f16;
+
+struct TintVertexData {
+  tint_vertex_data : array<u32>,
+}
+
+@binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
+
+@binding(1) @group(4) var<storage, read> tint_pulling_vertex_buffer_1 : TintVertexData;
+
+@binding(2) @group(4) var<storage, read> tint_pulling_vertex_buffer_2 : TintVertexData;
+
+@vertex
+fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(position) vec4<f32> {
+  var var_a : vec2<f16>;
+  var var_b : vec3<f16>;
+  var var_c : vec4<f16>;
+  {
+    let buffer_array_base_0 = (tint_pulling_vertex_index * 2u);
+    var_a = vec2<f16>(vec2<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[buffer_array_base_0]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 1u)])));
+    let buffer_array_base_1 = (tint_pulling_vertex_index * 3u);
+    var_b = vec3<f16>(vec3<f32>(bitcast<f32>(tint_pulling_vertex_buffer_1.tint_vertex_data[buffer_array_base_1]), bitcast<f32>(tint_pulling_vertex_buffer_1.tint_vertex_data[(buffer_array_base_1 + 1u)]), bitcast<f32>(tint_pulling_vertex_buffer_1.tint_vertex_data[(buffer_array_base_1 + 2u)])));
+    let buffer_array_base_2 = (tint_pulling_vertex_index * 4u);
+    var_c = vec4<f16>(vec4<f32>(unpack2x16float(tint_pulling_vertex_buffer_2.tint_vertex_data[buffer_array_base_2]), unpack2x16float(tint_pulling_vertex_buffer_2.tint_vertex_data[(buffer_array_base_2 + 1u)])));
+  }
+  return vec4<f32>();
+}
+)";
+
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{
+        {8, VertexStepMode::kVertex, {{VertexFormat::kFloat32x2, 0, 0}}},
+        {12, VertexStepMode::kVertex, {{VertexFormat::kFloat32x3, 0, 1}}},
+        {16, VertexStepMode::kVertex, {{VertexFormat::kFloat16x4, 0, 2}}},
+    }};
+
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(VertexPullingTest, AttemptSymbolCollision) {
     auto* src = R"(
 @vertex
@@ -1019,6 +1076,104 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(VertexPullingTest, FormatsAligned_Float_F16) {
+    auto* src = R"(
+enable f16;
+
+@vertex
+fn main(
+    @location(0) unorm8x2 : vec2<f16>,
+    @location(1) unorm8x4 : vec4<f16>,
+    @location(2) snorm8x2 : vec2<f16>,
+    @location(3) snorm8x4 : vec4<f16>,
+    @location(4) unorm16x2 : vec2<f16>,
+    @location(5) unorm16x4 : vec4<f16>,
+    @location(6) snorm16x2 : vec2<f16>,
+    @location(7) snorm16x4 : vec4<f16>,
+    @location(8) float16x2 : vec2<f16>,
+    @location(9) float16x4 : vec4<f16>,
+    @location(10) float32 : f16,
+    @location(11) float32x2 : vec2<f16>,
+    @location(12) float32x3 : vec3<f16>,
+    @location(13) float32x4 : vec4<f16>,
+  ) -> @builtin(position) vec4<f32> {
+  return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+}
+)";
+
+    auto* expect = R"(
+enable f16;
+
+struct TintVertexData {
+  tint_vertex_data : array<u32>,
+}
+
+@binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
+
+@vertex
+fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(position) vec4<f32> {
+  var unorm8x2 : vec2<f16>;
+  var unorm8x4 : vec4<f16>;
+  var snorm8x2 : vec2<f16>;
+  var snorm8x4 : vec4<f16>;
+  var unorm16x2 : vec2<f16>;
+  var unorm16x4 : vec4<f16>;
+  var snorm16x2 : vec2<f16>;
+  var snorm16x4 : vec4<f16>;
+  var float16x2 : vec2<f16>;
+  var float16x4 : vec4<f16>;
+  var float32 : f16;
+  var float32x2 : vec2<f16>;
+  var float32x3 : vec3<f16>;
+  var float32x4 : vec4<f16>;
+  {
+    let buffer_array_base_0 = (tint_pulling_vertex_index * 64u);
+    unorm8x2 = vec2<f16>(unpack4x8unorm((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] & 65535u)).xy);
+    unorm8x4 = vec4<f16>(unpack4x8unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]));
+    snorm8x2 = vec2<f16>(unpack4x8snorm((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] & 65535u)).xy);
+    snorm8x4 = vec4<f16>(unpack4x8snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]));
+    unorm16x2 = vec2<f16>(unpack2x16unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]));
+    unorm16x4 = vec4<f16>(vec4<f32>(unpack2x16unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), unpack2x16unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)])));
+    snorm16x2 = vec2<f16>(unpack2x16snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]));
+    snorm16x4 = vec4<f16>(vec4<f32>(unpack2x16snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), unpack2x16snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)])));
+    float16x2 = vec2<f16>(unpack2x16float(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]));
+    float16x4 = vec4<f16>(vec4<f32>(unpack2x16float(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), unpack2x16float(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)])));
+    float32 = f16(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]));
+    float32x2 = vec2<f16>(vec2<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)])));
+    float32x3 = vec3<f16>(vec3<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)])));
+    float32x4 = vec4<f16>(vec4<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 19u)])));
+  }
+  return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+}
+)";
+
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{{256,
+                          VertexStepMode::kVertex,
+                          {
+                              {VertexFormat::kUnorm8x2, 64, 0},
+                              {VertexFormat::kUnorm8x4, 64, 1},
+                              {VertexFormat::kSnorm8x2, 64, 2},
+                              {VertexFormat::kSnorm8x4, 64, 3},
+                              {VertexFormat::kUnorm16x2, 64, 4},
+                              {VertexFormat::kUnorm16x4, 64, 5},
+                              {VertexFormat::kSnorm16x2, 64, 6},
+                              {VertexFormat::kSnorm16x4, 64, 7},
+                              {VertexFormat::kFloat16x2, 64, 8},
+                              {VertexFormat::kFloat16x4, 64, 9},
+                              {VertexFormat::kFloat32, 64, 10},
+                              {VertexFormat::kFloat32x2, 64, 11},
+                              {VertexFormat::kFloat32x3, 64, 12},
+                              {VertexFormat::kFloat32x4, 64, 13},
+                          }}}};
+
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(VertexPullingTest, FormatsUnaligned_SInt) {
     auto* src = R"(
 @vertex
@@ -1221,6 +1376,104 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
     float32x2 = vec2<f32>(bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))), bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)] << 8u))));
     float32x3 = vec3<f32>(bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))), bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)] << 8u))), bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)] << 8u))));
     float32x4 = vec4<f32>(bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))), bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)] << 8u))), bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)] << 8u))), bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 19u)] << 8u))));
+  }
+  return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+}
+)";
+
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{{256,
+                          VertexStepMode::kVertex,
+                          {
+                              {VertexFormat::kUnorm8x2, 63, 0},
+                              {VertexFormat::kUnorm8x4, 63, 1},
+                              {VertexFormat::kSnorm8x2, 63, 2},
+                              {VertexFormat::kSnorm8x4, 63, 3},
+                              {VertexFormat::kUnorm16x2, 63, 4},
+                              {VertexFormat::kUnorm16x4, 63, 5},
+                              {VertexFormat::kSnorm16x2, 63, 6},
+                              {VertexFormat::kSnorm16x4, 63, 7},
+                              {VertexFormat::kFloat16x2, 63, 8},
+                              {VertexFormat::kFloat16x4, 63, 9},
+                              {VertexFormat::kFloat32, 63, 10},
+                              {VertexFormat::kFloat32x2, 63, 11},
+                              {VertexFormat::kFloat32x3, 63, 12},
+                              {VertexFormat::kFloat32x4, 63, 13},
+                          }}}};
+
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(VertexPullingTest, FormatsUnaligned_Float_F16) {
+    auto* src = R"(
+enable f16;
+
+@vertex
+fn main(
+    @location(0) unorm8x2 : vec2<f16>,
+    @location(1) unorm8x4 : vec4<f16>,
+    @location(2) snorm8x2 : vec2<f16>,
+    @location(3) snorm8x4 : vec4<f16>,
+    @location(4) unorm16x2 : vec2<f16>,
+    @location(5) unorm16x4 : vec4<f16>,
+    @location(6) snorm16x2 : vec2<f16>,
+    @location(7) snorm16x4 : vec4<f16>,
+    @location(8) float16x2 : vec2<f16>,
+    @location(9) float16x4 : vec4<f16>,
+    @location(10) float32 : f16,
+    @location(11) float32x2 : vec2<f16>,
+    @location(12) float32x3 : vec3<f16>,
+    @location(13) float32x4 : vec4<f16>,
+  ) -> @builtin(position) vec4<f32> {
+  return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+}
+)";
+
+    auto* expect = R"(
+enable f16;
+
+struct TintVertexData {
+  tint_vertex_data : array<u32>,
+}
+
+@binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
+
+@vertex
+fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(position) vec4<f32> {
+  var unorm8x2 : vec2<f16>;
+  var unorm8x4 : vec4<f16>;
+  var snorm8x2 : vec2<f16>;
+  var snorm8x4 : vec4<f16>;
+  var unorm16x2 : vec2<f16>;
+  var unorm16x4 : vec4<f16>;
+  var snorm16x2 : vec2<f16>;
+  var snorm16x4 : vec4<f16>;
+  var float16x2 : vec2<f16>;
+  var float16x4 : vec4<f16>;
+  var float32 : f16;
+  var float32x2 : vec2<f16>;
+  var float32x3 : vec3<f16>;
+  var float32x4 : vec4<f16>;
+  {
+    let buffer_array_base_0 = (tint_pulling_vertex_index * 64u);
+    unorm8x2 = vec2<f16>(unpack4x8unorm((((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u)) & 65535u)).xy);
+    unorm8x4 = vec4<f16>(unpack4x8unorm(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))));
+    snorm8x2 = vec2<f16>(unpack4x8snorm((((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u)) & 65535u)).xy);
+    snorm8x4 = vec4<f16>(unpack4x8snorm(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))));
+    unorm16x2 = vec2<f16>(unpack2x16unorm(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))));
+    unorm16x4 = vec4<f16>(vec4<f32>(unpack2x16unorm(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))), unpack2x16unorm(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)] << 8u)))));
+    snorm16x2 = vec2<f16>(unpack2x16snorm(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))));
+    snorm16x4 = vec4<f16>(vec4<f32>(unpack2x16snorm(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))), unpack2x16snorm(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)] << 8u)))));
+    float16x2 = vec2<f16>(unpack2x16float(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))));
+    float16x4 = vec4<f16>(vec4<f32>(unpack2x16float(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))), unpack2x16float(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)] << 8u)))));
+    float32 = f16(bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))));
+    float32x2 = vec2<f16>(vec2<f32>(bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))), bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)] << 8u)))));
+    float32x3 = vec3<f16>(vec3<f32>(bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))), bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)] << 8u))), bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)] << 8u)))));
+    float32x4 = vec4<f16>(vec4<f32>(bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 15u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] << 8u))), bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)] << 8u))), bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)] << 8u))), bitcast<f32>(((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)] >> 24u) | (tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 19u)] << 8u)))));
   }
   return vec4<f32>(0.0, 0.0, 0.0, 1.0);
 }
@@ -1477,6 +1730,112 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
     vec3_float32x2 = vec3<f32>(vec2<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)])), 0.0);
     vec4_float32x2 = vec4<f32>(vec2<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)])), 0.0, 1.0);
     vec4_float32x3 = vec4<f32>(vec3<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)])), 1.0);
+  }
+  return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+}
+)";
+
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{{256,
+                          VertexStepMode::kVertex,
+                          {
+                              {VertexFormat::kUnorm8x2, 64, 0},
+                              {VertexFormat::kUnorm8x2, 64, 1},
+                              {VertexFormat::kSnorm8x2, 64, 2},
+                              {VertexFormat::kSnorm8x2, 64, 3},
+                              {VertexFormat::kUnorm16x2, 64, 4},
+                              {VertexFormat::kUnorm16x2, 64, 5},
+                              {VertexFormat::kSnorm16x2, 64, 6},
+                              {VertexFormat::kSnorm16x2, 64, 7},
+                              {VertexFormat::kFloat16x2, 64, 8},
+                              {VertexFormat::kFloat16x2, 64, 9},
+                              {VertexFormat::kFloat32, 64, 10},
+                              {VertexFormat::kFloat32, 64, 11},
+                              {VertexFormat::kFloat32, 64, 12},
+                              {VertexFormat::kFloat32x2, 64, 13},
+                              {VertexFormat::kFloat32x2, 64, 14},
+                              {VertexFormat::kFloat32x3, 64, 15},
+                          }}}};
+
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(VertexPullingTest, FormatsWithVectorsResized_Padding_Float_F16) {
+    auto* src = R"(
+enable f16;
+
+@vertex
+fn main(
+    @location(0)  vec3_unorm8x2 :  vec3<f16>,
+    @location(1)  vec4_unorm8x2 :  vec4<f16>,
+    @location(2)  vec3_snorm8x2 :  vec3<f16>,
+    @location(3)  vec4_snorm8x2 :  vec4<f16>,
+    @location(4)  vec3_unorm16x2 : vec3<f16>,
+    @location(5)  vec4_unorm16x2 : vec4<f16>,
+    @location(6)  vec3_snorm16x2 : vec3<f16>,
+    @location(7)  vec4_snorm16x2 : vec4<f16>,
+    @location(8)  vec3_float16x2 : vec3<f16>,
+    @location(9)  vec4_float16x2 : vec4<f16>,
+    @location(10) vec2_float32 :   vec2<f16>,
+    @location(11) vec3_float32 :   vec3<f16>,
+    @location(12) vec4_float32 :   vec4<f16>,
+    @location(13) vec3_float32x2 : vec3<f16>,
+    @location(14) vec4_float32x2 : vec4<f16>,
+    @location(15) vec4_float32x3 : vec4<f16>,
+  ) -> @builtin(position) vec4<f32> {
+  return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+}
+)";
+
+    auto* expect = R"(
+enable f16;
+
+struct TintVertexData {
+  tint_vertex_data : array<u32>,
+}
+
+@binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
+
+@vertex
+fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(position) vec4<f32> {
+  var vec3_unorm8x2 : vec3<f16>;
+  var vec4_unorm8x2 : vec4<f16>;
+  var vec3_snorm8x2 : vec3<f16>;
+  var vec4_snorm8x2 : vec4<f16>;
+  var vec3_unorm16x2 : vec3<f16>;
+  var vec4_unorm16x2 : vec4<f16>;
+  var vec3_snorm16x2 : vec3<f16>;
+  var vec4_snorm16x2 : vec4<f16>;
+  var vec3_float16x2 : vec3<f16>;
+  var vec4_float16x2 : vec4<f16>;
+  var vec2_float32 : vec2<f16>;
+  var vec3_float32 : vec3<f16>;
+  var vec4_float32 : vec4<f16>;
+  var vec3_float32x2 : vec3<f16>;
+  var vec4_float32x2 : vec4<f16>;
+  var vec4_float32x3 : vec4<f16>;
+  {
+    let buffer_array_base_0 = (tint_pulling_vertex_index * 64u);
+    vec3_unorm8x2 = vec3<f16>(vec2<f16>(unpack4x8unorm((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] & 65535u)).xy), 0.0);
+    vec4_unorm8x2 = vec4<f16>(vec2<f16>(unpack4x8unorm((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] & 65535u)).xy), 0.0, 1.0);
+    vec3_snorm8x2 = vec3<f16>(vec2<f16>(unpack4x8snorm((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] & 65535u)).xy), 0.0);
+    vec4_snorm8x2 = vec4<f16>(vec2<f16>(unpack4x8snorm((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] & 65535u)).xy), 0.0, 1.0);
+    vec3_unorm16x2 = vec3<f16>(vec2<f16>(unpack2x16unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])), 0.0);
+    vec4_unorm16x2 = vec4<f16>(vec2<f16>(unpack2x16unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])), 0.0, 1.0);
+    vec3_snorm16x2 = vec3<f16>(vec2<f16>(unpack2x16snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])), 0.0);
+    vec4_snorm16x2 = vec4<f16>(vec2<f16>(unpack2x16snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])), 0.0, 1.0);
+    vec3_float16x2 = vec3<f16>(vec2<f16>(unpack2x16float(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])), 0.0);
+    vec4_float16x2 = vec4<f16>(vec2<f16>(unpack2x16float(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])), 0.0, 1.0);
+    vec2_float32 = vec2<f16>(f16(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])), 0.0);
+    vec3_float32 = vec3<f16>(f16(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])), 0.0, 0.0);
+    vec4_float32 = vec4<f16>(f16(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])), 0.0, 0.0, 1.0);
+    vec3_float32x2 = vec3<f16>(vec2<f16>(vec2<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]))), 0.0);
+    vec4_float32x2 = vec4<f16>(vec2<f16>(vec2<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]))), 0.0, 1.0);
+    vec4_float32x3 = vec4<f16>(vec3<f16>(vec3<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)]))), 1.0);
   }
   return vec4<f32>(0.0, 0.0, 0.0, 1.0);
 }
@@ -1797,6 +2156,140 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
     sclr_float32x4 = vec4<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 19u)])).x;
     vec2_float32x4 = vec4<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 19u)])).xy;
     vec3_float32x4 = vec4<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 19u)])).xyz;
+  }
+  return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+}
+)";
+
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {
+        {{256,
+          VertexStepMode::kVertex,
+          {
+              {VertexFormat::kUnorm8x2, 64, 0},   {VertexFormat::kUnorm8x4, 64, 1},
+              {VertexFormat::kUnorm8x4, 64, 2},   {VertexFormat::kUnorm8x4, 64, 3},
+              {VertexFormat::kSnorm8x2, 64, 4},   {VertexFormat::kSnorm8x4, 64, 5},
+              {VertexFormat::kSnorm8x4, 64, 6},   {VertexFormat::kSnorm8x4, 64, 7},
+              {VertexFormat::kUnorm16x2, 64, 8},  {VertexFormat::kUnorm16x4, 64, 9},
+              {VertexFormat::kUnorm16x4, 64, 10}, {VertexFormat::kUnorm16x4, 64, 11},
+              {VertexFormat::kSnorm16x2, 64, 12}, {VertexFormat::kSnorm16x4, 64, 13},
+              {VertexFormat::kSnorm16x4, 64, 14}, {VertexFormat::kSnorm16x4, 64, 15},
+              {VertexFormat::kFloat16x2, 64, 16}, {VertexFormat::kFloat16x4, 64, 17},
+              {VertexFormat::kFloat16x4, 64, 18}, {VertexFormat::kFloat16x4, 64, 19},
+              {VertexFormat::kFloat32x2, 64, 20}, {VertexFormat::kFloat32x3, 64, 21},
+              {VertexFormat::kFloat32x3, 64, 22}, {VertexFormat::kFloat32x4, 64, 23},
+              {VertexFormat::kFloat32x4, 64, 24}, {VertexFormat::kFloat32x4, 64, 25},
+          }}}};
+
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(VertexPullingTest, FormatsWithVectorsResized_Shrinking_Float_F16) {
+    auto* src = R"(
+enable f16;
+
+@vertex
+fn main(
+    @location(0)  sclr_unorm8x2  :      f16 ,
+    @location(1)  sclr_unorm8x4  :      f16 ,
+    @location(2)  vec2_unorm8x4  : vec2<f16>,
+    @location(3)  vec3_unorm8x4  : vec3<f16>,
+    @location(4)  sclr_snorm8x2  :      f16 ,
+    @location(5)  sclr_snorm8x4  :      f16 ,
+    @location(6)  vec2_snorm8x4  : vec2<f16>,
+    @location(7)  vec3_snorm8x4  : vec3<f16>,
+    @location(8)  sclr_unorm16x2 :      f16 ,
+    @location(9)  sclr_unorm16x4 :      f16 ,
+    @location(10) vec2_unorm16x4 : vec2<f16>,
+    @location(11) vec3_unorm16x4 : vec3<f16>,
+    @location(12) sclr_snorm16x2 :      f16 ,
+    @location(13) sclr_snorm16x4 :      f16 ,
+    @location(14) vec2_snorm16x4 : vec2<f16>,
+    @location(15) vec3_snorm16x4 : vec3<f16>,
+    @location(16) sclr_float16x2 :      f16 ,
+    @location(17) sclr_float16x4 :      f16 ,
+    @location(18) vec2_float16x4 : vec2<f16>,
+    @location(19) vec3_float16x4 : vec3<f16>,
+    @location(20) sclr_float32x2 :      f16 ,
+    @location(21) sclr_float32x3 :      f16 ,
+    @location(22) vec2_float32x3 : vec2<f16>,
+    @location(23) sclr_float32x4 :      f16 ,
+    @location(24) vec2_float32x4 : vec2<f16>,
+    @location(25) vec3_float32x4 : vec3<f16>,
+  ) -> @builtin(position) vec4<f32> {
+  return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+}
+)";
+
+    auto* expect = R"(
+enable f16;
+
+struct TintVertexData {
+  tint_vertex_data : array<u32>,
+}
+
+@binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
+
+@vertex
+fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(position) vec4<f32> {
+  var sclr_unorm8x2 : f16;
+  var sclr_unorm8x4 : f16;
+  var vec2_unorm8x4 : vec2<f16>;
+  var vec3_unorm8x4 : vec3<f16>;
+  var sclr_snorm8x2 : f16;
+  var sclr_snorm8x4 : f16;
+  var vec2_snorm8x4 : vec2<f16>;
+  var vec3_snorm8x4 : vec3<f16>;
+  var sclr_unorm16x2 : f16;
+  var sclr_unorm16x4 : f16;
+  var vec2_unorm16x4 : vec2<f16>;
+  var vec3_unorm16x4 : vec3<f16>;
+  var sclr_snorm16x2 : f16;
+  var sclr_snorm16x4 : f16;
+  var vec2_snorm16x4 : vec2<f16>;
+  var vec3_snorm16x4 : vec3<f16>;
+  var sclr_float16x2 : f16;
+  var sclr_float16x4 : f16;
+  var vec2_float16x4 : vec2<f16>;
+  var vec3_float16x4 : vec3<f16>;
+  var sclr_float32x2 : f16;
+  var sclr_float32x3 : f16;
+  var vec2_float32x3 : vec2<f16>;
+  var sclr_float32x4 : f16;
+  var vec2_float32x4 : vec2<f16>;
+  var vec3_float32x4 : vec3<f16>;
+  {
+    let buffer_array_base_0 = (tint_pulling_vertex_index * 64u);
+    sclr_unorm8x2 = vec2<f16>(unpack4x8unorm((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] & 65535u)).xy).x;
+    sclr_unorm8x4 = vec4<f16>(unpack4x8unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])).x;
+    vec2_unorm8x4 = vec4<f16>(unpack4x8unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])).xy;
+    vec3_unorm8x4 = vec4<f16>(unpack4x8unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])).xyz;
+    sclr_snorm8x2 = vec2<f16>(unpack4x8snorm((tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)] & 65535u)).xy).x;
+    sclr_snorm8x4 = vec4<f16>(unpack4x8snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])).x;
+    vec2_snorm8x4 = vec4<f16>(unpack4x8snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])).xy;
+    vec3_snorm8x4 = vec4<f16>(unpack4x8snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])).xyz;
+    sclr_unorm16x2 = vec2<f16>(unpack2x16unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])).x;
+    sclr_unorm16x4 = vec4<f16>(vec4<f32>(unpack2x16unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), unpack2x16unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]))).x;
+    vec2_unorm16x4 = vec4<f16>(vec4<f32>(unpack2x16unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), unpack2x16unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]))).xy;
+    vec3_unorm16x4 = vec4<f16>(vec4<f32>(unpack2x16unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), unpack2x16unorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]))).xyz;
+    sclr_snorm16x2 = vec2<f16>(unpack2x16snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])).x;
+    sclr_snorm16x4 = vec4<f16>(vec4<f32>(unpack2x16snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), unpack2x16snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]))).x;
+    vec2_snorm16x4 = vec4<f16>(vec4<f32>(unpack2x16snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), unpack2x16snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]))).xy;
+    vec3_snorm16x4 = vec4<f16>(vec4<f32>(unpack2x16snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), unpack2x16snorm(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]))).xyz;
+    sclr_float16x2 = vec2<f16>(unpack2x16float(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)])).x;
+    sclr_float16x4 = vec4<f16>(vec4<f32>(unpack2x16float(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), unpack2x16float(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]))).x;
+    vec2_float16x4 = vec4<f16>(vec4<f32>(unpack2x16float(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), unpack2x16float(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]))).xy;
+    vec3_float16x4 = vec4<f16>(vec4<f32>(unpack2x16float(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), unpack2x16float(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]))).xyz;
+    sclr_float32x2 = vec2<f16>(vec2<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]))).x;
+    sclr_float32x3 = vec3<f16>(vec3<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)]))).x;
+    vec2_float32x3 = vec3<f16>(vec3<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)]))).xy;
+    sclr_float32x4 = vec4<f16>(vec4<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 19u)]))).x;
+    vec2_float32x4 = vec4<f16>(vec4<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 19u)]))).xy;
+    vec3_float32x4 = vec4<f16>(vec4<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 16u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 17u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 18u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(buffer_array_base_0 + 19u)]))).xyz;
   }
   return vec4<f32>(0.0, 0.0, 0.0, 1.0);
 }

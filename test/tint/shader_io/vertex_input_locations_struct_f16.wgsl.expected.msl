@@ -1,0 +1,43 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct VertexInputs {
+  int loc0;
+  uint loc1;
+  float loc2;
+  float4 loc3;
+  half loc4;
+  half3 loc5;
+};
+
+struct tint_symbol_2 {
+  int loc0 [[attribute(0)]];
+  uint loc1 [[attribute(1)]];
+  float loc2 [[attribute(2)]];
+  float4 loc3 [[attribute(3)]];
+  half loc4 [[attribute(4)]];
+  half3 loc5 [[attribute(5)]];
+};
+
+struct tint_symbol_3 {
+  float4 value [[position]];
+};
+
+float4 tint_symbol_inner(VertexInputs inputs) {
+  int const i = inputs.loc0;
+  uint const u = inputs.loc1;
+  float const f = inputs.loc2;
+  float4 const v = inputs.loc3;
+  half const x = inputs.loc4;
+  half3 const y = inputs.loc5;
+  return float4(0.0f);
+}
+
+vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  VertexInputs const tint_symbol_4 = {.loc0=tint_symbol_1.loc0, .loc1=tint_symbol_1.loc1, .loc2=tint_symbol_1.loc2, .loc3=tint_symbol_1.loc3, .loc4=tint_symbol_1.loc4, .loc5=tint_symbol_1.loc5};
+  float4 const inner_result = tint_symbol_inner(tint_symbol_4);
+  tint_symbol_3 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+

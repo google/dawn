@@ -69,41 +69,48 @@ void AppendResourceBindings(std::vector<ResourceBinding>* dest,
 }
 
 std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(const sem::Type* type) {
-    if (type->is_float_scalar()) {
-        return {ComponentType::kFloat, CompositionType::kScalar};
-    } else if (type->is_float_vector()) {
-        auto* vec = type->As<sem::Vector>();
-        if (vec->Width() == 2) {
-            return {ComponentType::kFloat, CompositionType::kVec2};
-        } else if (vec->Width() == 3) {
-            return {ComponentType::kFloat, CompositionType::kVec3};
-        } else if (vec->Width() == 4) {
-            return {ComponentType::kFloat, CompositionType::kVec4};
+    // entry point in/out variables must of numeric scalar or vector types.
+    TINT_ASSERT(Inspector, type->is_numeric_scalar_or_vector());
+
+    ComponentType componentType = Switch(
+        sem::Type::DeepestElementOf(type),  //
+        [&](const sem::F32*) { return ComponentType::kF32; },
+        [&](const sem::F16*) { return ComponentType::kF16; },
+        [&](const sem::I32*) { return ComponentType::kI32; },
+        [&](const sem::U32*) { return ComponentType::kU32; },
+        [&](Default) {
+            tint::diag::List diagnostics;
+            TINT_UNREACHABLE(Inspector, diagnostics) << "unhandled component type";
+            return ComponentType::kUnknown;
+        });
+
+    CompositionType compositionType;
+    if (auto* vec = type->As<sem::Vector>()) {
+        switch (vec->Width()) {
+            case 2: {
+                compositionType = CompositionType::kVec2;
+                break;
+            }
+            case 3: {
+                compositionType = CompositionType::kVec3;
+                break;
+            }
+            case 4: {
+                compositionType = CompositionType::kVec4;
+                break;
+            }
+            default: {
+                tint::diag::List diagnostics;
+                TINT_UNREACHABLE(Inspector, diagnostics) << "unhandled composition type";
+                compositionType = CompositionType::kUnknown;
+                break;
+            }
         }
-    } else if (type->is_unsigned_integer_scalar()) {
-        return {ComponentType::kUInt, CompositionType::kScalar};
-    } else if (type->is_unsigned_integer_vector()) {
-        auto* vec = type->As<sem::Vector>();
-        if (vec->Width() == 2) {
-            return {ComponentType::kUInt, CompositionType::kVec2};
-        } else if (vec->Width() == 3) {
-            return {ComponentType::kUInt, CompositionType::kVec3};
-        } else if (vec->Width() == 4) {
-            return {ComponentType::kUInt, CompositionType::kVec4};
-        }
-    } else if (type->is_signed_integer_scalar()) {
-        return {ComponentType::kSInt, CompositionType::kScalar};
-    } else if (type->is_signed_integer_vector()) {
-        auto* vec = type->As<sem::Vector>();
-        if (vec->Width() == 2) {
-            return {ComponentType::kSInt, CompositionType::kVec2};
-        } else if (vec->Width() == 3) {
-            return {ComponentType::kSInt, CompositionType::kVec3};
-        } else if (vec->Width() == 4) {
-            return {ComponentType::kSInt, CompositionType::kVec4};
-        }
+    } else {
+        compositionType = CompositionType::kScalar;
     }
-    return {ComponentType::kUnknown, CompositionType::kUnknown};
+
+    return {componentType, compositionType};
 }
 
 std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(

@@ -381,6 +381,11 @@ MaybeError Adapter::InitializeDebugLayerFilters() {
         // Even this means that no vertex buffer view has been set in D3D12 backend.
         // https://crbug.com/dawn/1255
         D3D12_MESSAGE_ID_COMMAND_LIST_DRAW_VERTEX_BUFFER_NOT_SET,
+
+        // When using f16 in vertex attributes the debug layer may report float16_t as type
+        // `unknown`, resulting in a CREATEINPUTLAYOUT_TYPE_MISMATCH warning.
+        // https://crbug.com/tint/1473
+        D3D12_MESSAGE_ID_CREATEINPUTLAYOUT_TYPE_MISMATCH,
     };
 
     // Create a retrieval filter with a deny list to suppress messages.

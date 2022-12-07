@@ -30,9 +30,10 @@ namespace tint::inspector {
 /// Base component type of a stage variable.
 enum class ComponentType {
     kUnknown = -1,
-    kFloat,
-    kUInt,
-    kSInt,
+    kF32,
+    kU32,
+    kI32,
+    kF16,
 };
 
 /// Composition of components of a stage variable.

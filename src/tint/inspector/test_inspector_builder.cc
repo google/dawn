@@ -307,14 +307,17 @@ std::function<const ast::Type*()> InspectorBuilder::GetTypeFunction(ComponentTyp
                                                                     CompositionType composition) {
     std::function<const ast::Type*()> func;
     switch (component) {
-        case ComponentType::kFloat:
+        case ComponentType::kF32:
             func = [this]() -> const ast::Type* { return ty.f32(); };
             break;
-        case ComponentType::kSInt:
+        case ComponentType::kI32:
             func = [this]() -> const ast::Type* { return ty.i32(); };
             break;
-        case ComponentType::kUInt:
+        case ComponentType::kU32:
             func = [this]() -> const ast::Type* { return ty.u32(); };
+            break;
+        case ComponentType::kF16:
+            func = [this]() -> const ast::Type* { return ty.f16(); };
             break;
         case ComponentType::kUnknown:
             return []() -> const ast::Type* { return nullptr; };

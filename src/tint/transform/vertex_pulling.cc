@@ -41,6 +41,7 @@ enum class BaseWGSLType {
     kU32,
     kI32,
     kF32,
+    kF16,
 };
 
 /// The data type of a vertex format.
@@ -138,6 +139,7 @@ struct VertexFormatType {
 bool IsTypeCompatible(AttributeWGSLType wgslType, VertexFormatType vertexFormatType) {
     switch (wgslType.base_type) {
         case BaseWGSLType::kF32:
+        case BaseWGSLType::kF16:
             return (vertexFormatType.base_type == VertexDataType::kFloat);
         case BaseWGSLType::kU32:
             return (vertexFormatType.base_type == VertexDataType::kUInt);
@@ -149,19 +151,26 @@ bool IsTypeCompatible(AttributeWGSLType wgslType, VertexFormatType vertexFormatT
 }
 
 AttributeWGSLType WGSLTypeOf(const sem::Type* ty) {
-    if (ty->Is<sem::I32>()) {
-        return {BaseWGSLType::kI32, 1};
-    }
-    if (ty->Is<sem::U32>()) {
-        return {BaseWGSLType::kU32, 1};
-    }
-    if (ty->Is<sem::F32>()) {
-        return {BaseWGSLType::kF32, 1};
-    }
-    if (auto* vec = ty->As<sem::Vector>()) {
-        return {WGSLTypeOf(vec->type()).base_type, vec->Width()};
-    }
-    return {BaseWGSLType::kInvalid, 0};
+    return Switch(
+        ty,
+        [](const sem::I32*) -> AttributeWGSLType {
+            return {BaseWGSLType::kI32, 1};
+        },
+        [](const sem::U32*) -> AttributeWGSLType {
+            return {BaseWGSLType::kU32, 1};
+        },
+        [](const sem::F32*) -> AttributeWGSLType {
+            return {BaseWGSLType::kF32, 1};
+        },
+        [](const sem::F16*) -> AttributeWGSLType {
+            return {BaseWGSLType::kF16, 1};
+        },
+        [](const sem::Vector* vec) -> AttributeWGSLType {
+            return {WGSLTypeOf(vec->type()).base_type, vec->Width()};
+        },
+        [](Default) -> AttributeWGSLType {
+            return {BaseWGSLType::kInvalid, 0};
+        });
 }
 
 VertexFormatType VertexFormatTypeOf(VertexFormat format) {
@@ -378,9 +387,22 @@ struct VertexPulling::State {
 
                 // Load the attribute value according to vertex format and convert the element type
                 // of result to match target WGSL variable. The result of `Fetch` should be of WGSL
-                // types `f32`, `i32`, `u32`, and their vectors.
+                // types `f32`, `i32`, `u32`, and their vectors, while WGSL variable can be of
+                // `f16`.
                 auto* fetch = Fetch(buffer_array_base, attribute_desc.offset, buffer_idx,
                                     attribute_desc.format);
+                // Convert the fetched scalar/vector if WGSL variable is of `f16` types
+                if (var_dt.base_type == BaseWGSLType::kF16) {
+                    // The type of the same element number of base type of target WGSL variable
+                    const ast::Type* loaded_data_target_type;
+                    if (fmt_dt.width == 1) {
+                        loaded_data_target_type = b.ty.f16();
+                    } else {
+                        loaded_data_target_type = b.ty.vec(b.ty.f16(), fmt_dt.width);
+                    }
+
+                    fetch = b.Construct(loaded_data_target_type, fetch);
+                }
 
                 // The attribute value may not be of the desired vector width. If it is not, we'll
                 // need to either reduce the width with a swizzle, or append 0's and / or a 1.

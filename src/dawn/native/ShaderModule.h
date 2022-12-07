@@ -60,9 +60,10 @@ struct EntryPointMetadata;
 
 // Base component type of an inter-stage variable
 enum class InterStageComponentType {
-    Sint,
-    Uint,
-    Float,
+    I32,
+    U32,
+    F32,
+    F16,
 };
 
 enum class InterpolationType {
