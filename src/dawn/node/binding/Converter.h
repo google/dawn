@@ -270,6 +270,12 @@ class Converter {
 
     [[nodiscard]] bool Convert(interop::GPUQueryType& out, wgpu::QueryType in);
 
+    // The two conversion methods don't generate an error when false is returned. That
+    // responsibility is left to the caller if it is needed (it isn't always needed, see
+    // https://gpuweb.github.io/gpuweb/#gpu-supportedfeatures)
+    [[nodiscard]] bool Convert(wgpu::FeatureName& out, interop::GPUFeatureName in);
+    [[nodiscard]] bool Convert(interop::GPUFeatureName& out, wgpu::FeatureName in);
+
     // std::string to C string
     inline bool Convert(const char*& out, const std::string& in) {
         out = in.c_str();

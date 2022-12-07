@@ -33,6 +33,7 @@
 #include "src/dawn/node/binding/GPURenderPipeline.h"
 #include "src/dawn/node/binding/GPUSampler.h"
 #include "src/dawn/node/binding/GPUShaderModule.h"
+#include "src/dawn/node/binding/GPUSupportedFeatures.h"
 #include "src/dawn/node/binding/GPUSupportedLimits.h"
 #include "src/dawn/node/binding/GPUTexture.h"
 #include "src/dawn/node/utils/Debug.h"
@@ -178,12 +179,11 @@ GPUDevice::~GPUDevice() {
 }
 
 interop::Interface<interop::GPUSupportedFeatures> GPUDevice::getFeatures(Napi::Env env) {
-    class Features : public interop::GPUSupportedFeatures {
-      public:
-        bool has(Napi::Env, std::string feature) override { UNIMPLEMENTED(); }
-        std::vector<std::string> keys(Napi::Env) override { UNIMPLEMENTED(); }
-    };
-    return interop::GPUSupportedFeatures::Create<Features>(env);
+    size_t count = device_.EnumerateFeatures(nullptr);
+    std::vector<wgpu::FeatureName> features(count);
+    device_.EnumerateFeatures(&features[0]);
+    return interop::GPUSupportedFeatures::Create<GPUSupportedFeatures>(env, env,
+                                                                       std::move(features));
 }
 
 interop::Interface<interop::GPUSupportedLimits> GPUDevice::getLimits(Napi::Env env) {

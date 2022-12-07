@@ -18,9 +18,11 @@
 #include <utility>
 #include <vector>
 
+#include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/Errors.h"
 #include "src/dawn/node/binding/Flags.h"
 #include "src/dawn/node/binding/GPUDevice.h"
+#include "src/dawn/node/binding/GPUSupportedFeatures.h"
 #include "src/dawn/node/binding/GPUSupportedLimits.h"
 
 namespace {
@@ -88,72 +90,6 @@ std::vector<std::string> Split(const std::string& s, char delim) {
 
 namespace wgpu::binding {
 
-namespace {
-
-////////////////////////////////////////////////////////////////////////////////
-// wgpu::binding::<anon>::Features
-// Implements interop::GPUSupportedFeatures
-////////////////////////////////////////////////////////////////////////////////
-class Features : public interop::GPUSupportedFeatures {
-  public:
-    explicit Features(std::vector<wgpu::FeatureName> features) {
-        for (wgpu::FeatureName feature : features) {
-            switch (feature) {
-                case wgpu::FeatureName::Depth32FloatStencil8:
-                    enabled_.emplace(interop::GPUFeatureName::kDepth32FloatStencil8);
-                    break;
-                case wgpu::FeatureName::TimestampQuery:
-                    enabled_.emplace(interop::GPUFeatureName::kTimestampQuery);
-                    break;
-                case wgpu::FeatureName::TextureCompressionBC:
-                    enabled_.emplace(interop::GPUFeatureName::kTextureCompressionBc);
-                    break;
-                case wgpu::FeatureName::TextureCompressionETC2:
-                    enabled_.emplace(interop::GPUFeatureName::kTextureCompressionEtc2);
-                    break;
-                case wgpu::FeatureName::TextureCompressionASTC:
-                    enabled_.emplace(interop::GPUFeatureName::kTextureCompressionAstc);
-                    break;
-                case wgpu::FeatureName::IndirectFirstInstance:
-                    enabled_.emplace(interop::GPUFeatureName::kIndirectFirstInstance);
-                    break;
-                case wgpu::FeatureName::DepthClipControl:
-                    enabled_.emplace(interop::GPUFeatureName::kDepthClipControl);
-                    break;
-                default:
-                    break;
-            }
-        }
-        // TODO(dawn:1123) add support for these extensions when possible.
-        // wgpu::interop::GPUFeatureName::kShaderF16
-        // wgpu::interop::GPUFeatureName::kBgra8UnormStorage
-    }
-
-    bool has(interop::GPUFeatureName feature) { return enabled_.count(feature) != 0; }
-
-    // interop::GPUSupportedFeatures compliance
-    bool has(Napi::Env, std::string name) override {
-        interop::GPUFeatureName feature;
-        if (interop::Converter<interop::GPUFeatureName>::FromString(name, feature)) {
-            return has(feature);
-        }
-        return false;
-    }
-    std::vector<std::string> keys(Napi::Env) override {
-        std::vector<std::string> out;
-        out.reserve(enabled_.size());
-        for (auto feature : enabled_) {
-            out.push_back(interop::Converter<interop::GPUFeatureName>::ToString(feature));
-        }
-        return out;
-    }
-
-  private:
-    std::unordered_set<interop::GPUFeatureName> enabled_;
-};
-
-}  // namespace
-
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUAdapter
 // TODO(crbug.com/dawn/1133): This is a stub implementation. Properly implement.
@@ -167,7 +103,8 @@ interop::Interface<interop::GPUSupportedFeatures> GPUAdapter::getFeatures(Napi::
     size_t count = adapter.EnumerateFeatures(nullptr);
     std::vector<wgpu::FeatureName> features(count);
     adapter.EnumerateFeatures(&features[0]);
-    return interop::GPUSupportedFeatures::Create<Features>(env, std::move(features));
+    return interop::GPUSupportedFeatures::Create<GPUSupportedFeatures>(env, env,
+                                                                       std::move(features));
 }
 
 interop::Interface<interop::GPUSupportedLimits> GPUAdapter::getLimits(Napi::Env env) {
@@ -195,34 +132,19 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
     wgpu::DeviceDescriptor desc{};  // TODO(crbug.com/dawn/1133): Fill in.
     interop::Promise<interop::Interface<interop::GPUDevice>> promise(env, PROMISE_INFO);
 
+    Converter conv(env);
     std::vector<wgpu::FeatureName> requiredFeatures;
-    // See src/dawn/native/Features.cpp for enum <-> string mappings.
     for (auto required : descriptor.requiredFeatures) {
-        switch (required) {
-            case interop::GPUFeatureName::kTextureCompressionBc:
-                requiredFeatures.emplace_back(wgpu::FeatureName::TextureCompressionBC);
-                continue;
-            case interop::GPUFeatureName::kTextureCompressionEtc2:
-                requiredFeatures.emplace_back(wgpu::FeatureName::TextureCompressionETC2);
-                continue;
-            case interop::GPUFeatureName::kTextureCompressionAstc:
-                requiredFeatures.emplace_back(wgpu::FeatureName::TextureCompressionASTC);
-                continue;
-            case interop::GPUFeatureName::kTimestampQuery:
-                requiredFeatures.emplace_back(wgpu::FeatureName::TimestampQuery);
-                continue;
-            case interop::GPUFeatureName::kDepth32FloatStencil8:
-                requiredFeatures.emplace_back(wgpu::FeatureName::Depth32FloatStencil8);
-                continue;
-            case interop::GPUFeatureName::kDepthClipControl:
-            case interop::GPUFeatureName::kShaderF16:
-            case interop::GPUFeatureName::kIndirectFirstInstance:
-            case interop::GPUFeatureName::kBgra8UnormStorage:
-            case interop::GPUFeatureName::kRg11B10UfloatRenderable:
-                // TODO(dawn:1123) Add support for these extensions when possible.
-                continue;
+        wgpu::FeatureName feature = wgpu::FeatureName::Undefined;
+
+        // requiredFeatures is a "sequence<GPUFeatureName>" so a Javascript exception should be
+        // thrown if one of the strings isn't one of the known features.
+        if (!conv(feature, required)) {
+            Napi::Error::New(env, "invalid value for GPUFeatureName").ThrowAsJavaScriptException();
+            return promise;
         }
-        UNIMPLEMENTED("required: ", required);
+
+        requiredFeatures.emplace_back(feature);
     }
 
     wgpu::RequiredLimits limits;

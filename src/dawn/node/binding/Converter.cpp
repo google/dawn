@@ -1622,6 +1622,85 @@ bool Converter::Convert(wgpu::QueryType& out, const interop::GPUQueryType& in) {
     return false;
 }
 
+bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
+    switch (in) {
+        case interop::GPUFeatureName::kTextureCompressionBc:
+            out = wgpu::FeatureName::TextureCompressionBC;
+            return true;
+        case interop::GPUFeatureName::kTextureCompressionEtc2:
+            out = wgpu::FeatureName::TextureCompressionETC2;
+            return true;
+        case interop::GPUFeatureName::kTextureCompressionAstc:
+            out = wgpu::FeatureName::TextureCompressionASTC;
+            return true;
+        case interop::GPUFeatureName::kTimestampQuery:
+            out = wgpu::FeatureName::TimestampQuery;
+            return true;
+        case interop::GPUFeatureName::kDepth32FloatStencil8:
+            out = wgpu::FeatureName::Depth32FloatStencil8;
+            return true;
+        case interop::GPUFeatureName::kDepthClipControl:
+            out = wgpu::FeatureName::DepthClipControl;
+            return true;
+        case interop::GPUFeatureName::kIndirectFirstInstance:
+            out = wgpu::FeatureName::IndirectFirstInstance;
+            return true;
+        case interop::GPUFeatureName::kShaderF16:
+            out = wgpu::FeatureName::ShaderF16;
+            return true;
+        case interop::GPUFeatureName::kRg11B10UfloatRenderable:
+            out = wgpu::FeatureName::RG11B10UfloatRenderable;
+            return true;
+        case interop::GPUFeatureName::kBgra8UnormStorage:
+            // TODO(dawn:1123) Add support for these extensions when possible.
+            return false;
+    }
+    return false;
+}
+
+bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
+    switch (in) {
+        case wgpu::FeatureName::Depth32FloatStencil8:
+            out = interop::GPUFeatureName::kDepth32FloatStencil8;
+            return true;
+        case wgpu::FeatureName::TimestampQuery:
+            out = interop::GPUFeatureName::kTimestampQuery;
+            return true;
+        case wgpu::FeatureName::TextureCompressionBC:
+            out = interop::GPUFeatureName::kTextureCompressionBc;
+            return true;
+        case wgpu::FeatureName::TextureCompressionETC2:
+            out = interop::GPUFeatureName::kTextureCompressionEtc2;
+            return true;
+        case wgpu::FeatureName::TextureCompressionASTC:
+            out = interop::GPUFeatureName::kTextureCompressionAstc;
+            return true;
+        case wgpu::FeatureName::IndirectFirstInstance:
+            out = interop::GPUFeatureName::kIndirectFirstInstance;
+            return true;
+        case wgpu::FeatureName::DepthClipControl:
+            out = interop::GPUFeatureName::kDepthClipControl;
+            return true;
+        case wgpu::FeatureName::ShaderF16:
+            out = interop::GPUFeatureName::kShaderF16;
+            return true;
+        case wgpu::FeatureName::RG11B10UfloatRenderable:
+            out = interop::GPUFeatureName::kRg11B10UfloatRenderable;
+            return true;
+
+        case wgpu::FeatureName::PipelineStatisticsQuery:
+        case wgpu::FeatureName::DawnShaderFloat16:
+        case wgpu::FeatureName::DawnInternalUsages:
+        case wgpu::FeatureName::DawnMultiPlanarFormats:
+        case wgpu::FeatureName::DawnNative:
+        case wgpu::FeatureName::ChromiumExperimentalDp4a:
+        case wgpu::FeatureName::TimestampQueryInsidePasses:
+        case wgpu::FeatureName::Undefined:
+            return false;
+    }
+    return false;
+}
+
 bool Converter::Convert(interop::GPUQueryType& out, wgpu::QueryType in) {
     switch (in) {
         case wgpu::QueryType::Occlusion:
