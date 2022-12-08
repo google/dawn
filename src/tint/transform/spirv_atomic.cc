@@ -121,10 +121,6 @@ struct SpirvAtomic::State {
         // If we need to change structure members, then fork them.
         if (!forked_structs.empty()) {
             ctx.ReplaceAll([&](const ast::Struct* str) {
-                // Always emit the original structure. This allows unrelated usage of the structure
-                // to continue working.
-                // auto* original = ctx.CloneWithoutTransform(str);
-
                 // Is `str` a structure we need to fork?
                 if (auto it = forked_structs.find(str); it != forked_structs.end()) {
                     const auto& forked = it->second;
@@ -144,8 +140,6 @@ struct SpirvAtomic::State {
                     }
                     b.Structure(forked.name, std::move(members));
                 }
-
-                // return original;
                 return nullptr;
             });
         }
