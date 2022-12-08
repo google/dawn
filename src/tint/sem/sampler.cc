@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Sampler);
 
 namespace tint::sem {
 
-Sampler::Sampler(ast::SamplerKind kind) : Base(TypeFlags{}), kind_(kind) {}
+Sampler::Sampler(ast::SamplerKind kind) : Base(type::TypeFlags{}), kind_(kind) {}
 
 Sampler::Sampler(Sampler&&) = default;
 
@@ -31,7 +31,7 @@ size_t Sampler::Hash() const {
     return utils::Hash(TypeInfo::Of<Sampler>().full_hashcode, kind_);
 }
 
-bool Sampler::Equals(const sem::Type& other) const {
+bool Sampler::Equals(const type::Type& other) const {
     if (auto* o = other.As<Sampler>()) {
         return o->kind_ == kind_;
     }

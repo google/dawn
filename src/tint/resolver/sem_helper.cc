@@ -23,17 +23,17 @@ SemHelper::SemHelper(ProgramBuilder* builder, DependencyGraph& dependencies)
 
 SemHelper::~SemHelper() = default;
 
-std::string SemHelper::TypeNameOf(const sem::Type* ty) const {
+std::string SemHelper::TypeNameOf(const type::Type* ty) const {
     return RawTypeNameOf(ty->UnwrapRef());
 }
 
-std::string SemHelper::RawTypeNameOf(const sem::Type* ty) const {
+std::string SemHelper::RawTypeNameOf(const type::Type* ty) const {
     return ty->FriendlyName(builder_->Symbols());
 }
 
-sem::Type* SemHelper::TypeOf(const ast::Expression* expr) const {
+type::Type* SemHelper::TypeOf(const ast::Expression* expr) const {
     auto* sem = Get(expr);
-    return sem ? const_cast<sem::Type*>(sem->Type()) : nullptr;
+    return sem ? const_cast<type::Type*>(sem->Type()) : nullptr;
 }
 
 }  // namespace tint::resolver

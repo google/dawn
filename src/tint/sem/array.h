@@ -22,7 +22,7 @@
 
 #include "src/tint/sem/array_count.h"
 #include "src/tint/sem/node.h"
-#include "src/tint/sem/type.h"
+#include "src/tint/type/type.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/unique_vector.h"
 
@@ -35,7 +35,7 @@ class GlobalVariable;
 namespace tint::sem {
 
 /// Array holds the semantic information for Array nodes.
-class Array final : public Castable<Array, Type> {
+class Array final : public Castable<Array, type::Type> {
   public:
     /// An error message string stating that the array count was expected to be a constant
     /// expression. Used by multiple writers and transforms.
@@ -52,8 +52,8 @@ class Array final : public Castable<Array, Type> {
     /// @param implicit_stride the number of bytes from the start of one element
     /// of the array to the start of the next element, if there was no `@stride`
     /// attribute applied.
-    Array(Type const* element,
-          const ArrayCount* count,
+    Array(type::Type const* element,
+          const type::ArrayCount* count,
           uint32_t align,
           uint32_t size,
           uint32_t stride,
@@ -64,17 +64,17 @@ class Array final : public Castable<Array, Type> {
 
     /// @param other the other type to compare against
     /// @returns true if the this type is equal to the given type
-    bool Equals(const Type& other) const override;
+    bool Equals(const type::Type& other) const override;
 
     /// @return the array element type
-    Type const* ElemType() const { return element_; }
+    type::Type const* ElemType() const { return element_; }
 
     /// @returns the number of elements in the array.
-    const ArrayCount* Count() const { return count_; }
+    const type::ArrayCount* Count() const { return count_; }
 
     /// @returns the array count if the count is a const-expression, otherwise returns nullopt.
     inline std::optional<uint32_t> ConstantCount() const {
-        if (auto* count = count_->As<ConstantArrayCount>()) {
+        if (auto* count = count_->As<type::ConstantArrayCount>()) {
             return count->value;
         }
         return std::nullopt;
@@ -109,8 +109,8 @@ class Array final : public Castable<Array, Type> {
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
   private:
-    Type const* const element_;
-    const ArrayCount* count_;
+    type::Type const* const element_;
+    const type::ArrayCount* count_;
     const uint32_t align_;
     const uint32_t size_;
     const uint32_t stride_;

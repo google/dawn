@@ -22,7 +22,7 @@ namespace tint {
 namespace sem {
 
 F16::F16()
-    : Base(TypeFlags{
+    : Base(type::TypeFlags{
           Flag::kConstructable,
           Flag::kCreationFixedFootprint,
           Flag::kFixedFootprint,

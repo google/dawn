@@ -27,7 +27,7 @@ class TypeInitializer final : public Castable<TypeInitializer, CallTarget> {
     /// @param type the type that's being constructed
     /// @param parameters the type initializer parameters
     /// @param stage the earliest evaluation stage for the expression
-    TypeInitializer(const sem::Type* type,
+    TypeInitializer(const type::Type* type,
                     utils::VectorRef<const Parameter*> parameters,
                     EvaluationStage stage);
 

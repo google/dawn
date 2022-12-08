@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/sem/type.h"
+#include "src/tint/type/type.h"
 
 // Forward declarations
 namespace tint::sem {
@@ -27,7 +27,7 @@ class Vector;
 namespace tint::sem {
 
 /// A matrix type
-class Matrix final : public Castable<Matrix, Type> {
+class Matrix final : public Castable<Matrix, type::Type> {
   public:
     /// Constructor
     /// @param column_type the type of a column of the matrix
@@ -45,7 +45,7 @@ class Matrix final : public Castable<Matrix, Type> {
     bool Equals(const Type& other) const override;
 
     /// @returns the type of the matrix
-    const Type* type() const { return subtype_; }
+    const type::Type* type() const { return subtype_; }
     /// @returns the number of rows in the matrix
     uint32_t rows() const { return rows_; }
     /// @returns the number of columns in the matrix
@@ -70,7 +70,7 @@ class Matrix final : public Castable<Matrix, Type> {
     uint32_t ColumnStride() const;
 
   private:
-    const Type* const subtype_;
+    const type::Type* const subtype_;
     const Vector* const column_type_;
     const uint32_t rows_;
     const uint32_t columns_;

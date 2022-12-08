@@ -17,16 +17,16 @@
 
 #include <string>
 
-#include "src/tint/sem/type.h"
+#include "src/tint/type/type.h"
 
 namespace tint::sem {
 
 /// A atomic type.
-class Atomic final : public Castable<Atomic, Type> {
+class Atomic final : public Castable<Atomic, type::Type> {
   public:
     /// Constructor
     /// @param subtype the atomic type
-    explicit Atomic(const sem::Type* subtype);
+    explicit Atomic(const type::Type* subtype);
 
     /// Move constructor
     Atomic(Atomic&&);
@@ -40,7 +40,7 @@ class Atomic final : public Castable<Atomic, Type> {
     bool Equals(const Type& other) const override;
 
     /// @returns the atomic type
-    const sem::Type* Type() const { return subtype_; }
+    const type::Type* Type() const { return subtype_; }
 
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
@@ -54,7 +54,7 @@ class Atomic final : public Castable<Atomic, Type> {
     uint32_t Align() const override;
 
   private:
-    sem::Type const* const subtype_;
+    type::Type const* const subtype_;
 };
 
 }  // namespace tint::sem

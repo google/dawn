@@ -27,6 +27,7 @@
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/parameter_usage.h"
+#include "src/tint/type/type.h"
 #include "src/tint/utils/unique_vector.h"
 
 // Forward declarations
@@ -37,7 +38,6 @@ class Variable;
 }  // namespace tint::ast
 namespace tint::sem {
 class CallTarget;
-class Type;
 class VariableUser;
 }  // namespace tint::sem
 
@@ -55,7 +55,7 @@ class Variable : public Castable<Variable, Node> {
     /// @param access the variable access control type
     /// @param constant_value the constant value for the variable. May be null
     Variable(const ast::Variable* declaration,
-             const sem::Type* type,
+             const type::Type* type,
              EvaluationStage stage,
              ast::AddressSpace address_space,
              ast::Access access,
@@ -68,7 +68,7 @@ class Variable : public Castable<Variable, Node> {
     const ast::Variable* Declaration() const { return declaration_; }
 
     /// @returns the canonical type for the variable
-    const sem::Type* Type() const { return type_; }
+    const type::Type* Type() const { return type_; }
 
     /// @returns the evaluation stage for an expression of this variable type
     EvaluationStage Stage() const { return stage_; }
@@ -98,7 +98,7 @@ class Variable : public Castable<Variable, Node> {
 
   private:
     const ast::Variable* const declaration_;
-    const sem::Type* const type_;
+    const type::Type* const type_;
     const EvaluationStage stage_;
     const ast::AddressSpace address_space_;
     const ast::Access access_;
@@ -119,7 +119,7 @@ class LocalVariable final : public Castable<LocalVariable, Variable> {
     /// @param statement the statement that declared this local variable
     /// @param constant_value the constant value for the variable. May be null
     LocalVariable(const ast::Variable* declaration,
-                  const sem::Type* type,
+                  const type::Type* type,
                   EvaluationStage stage,
                   ast::AddressSpace address_space,
                   ast::Access access,
@@ -133,15 +133,15 @@ class LocalVariable final : public Castable<LocalVariable, Variable> {
     const sem::Statement* Statement() const { return statement_; }
 
     /// @returns the Type, Function or Variable that this local variable shadows
-    const sem::Node* Shadows() const { return shadows_; }
+    const CastableBase* Shadows() const { return shadows_; }
 
     /// Sets the Type, Function or Variable that this local variable shadows
     /// @param shadows the Type, Function or Variable that this variable shadows
-    void SetShadows(const sem::Node* shadows) { shadows_ = shadows; }
+    void SetShadows(const CastableBase* shadows) { shadows_ = shadows; }
 
   private:
     const sem::Statement* const statement_;
-    const sem::Node* shadows_ = nullptr;
+    const CastableBase* shadows_ = nullptr;
 };
 
 /// GlobalVariable is a module-scope variable
@@ -160,7 +160,7 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     /// Note, a GlobalVariable generally doesn't have a `location` in WGSL, as it isn't allowed by
     /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.
     GlobalVariable(const ast::Variable* declaration,
-                   const sem::Type* type,
+                   const type::Type* type,
                    EvaluationStage stage,
                    ast::AddressSpace address_space,
                    ast::Access access,
@@ -204,7 +204,7 @@ class Parameter final : public Castable<Parameter, Variable> {
     /// @param location the location value, if set
     Parameter(const ast::Parameter* declaration,
               uint32_t index,
-              const sem::Type* type,
+              const type::Type* type,
               ast::AddressSpace address_space,
               ast::Access access,
               const ParameterUsage usage = ParameterUsage::kNone,
@@ -232,11 +232,11 @@ class Parameter final : public Castable<Parameter, Variable> {
     void SetOwner(CallTarget const* owner) { owner_ = owner; }
 
     /// @returns the Type, Function or Variable that this local variable shadows
-    const sem::Node* Shadows() const { return shadows_; }
+    const CastableBase* Shadows() const { return shadows_; }
 
     /// Sets the Type, Function or Variable that this local variable shadows
     /// @param shadows the Type, Function or Variable that this variable shadows
-    void SetShadows(const sem::Node* shadows) { shadows_ = shadows; }
+    void SetShadows(const CastableBase* shadows) { shadows_ = shadows; }
 
     /// @returns the resource binding point for the parameter
     sem::BindingPoint BindingPoint() const { return binding_point_; }
@@ -248,7 +248,7 @@ class Parameter final : public Castable<Parameter, Variable> {
     const uint32_t index_;
     const ParameterUsage usage_;
     CallTarget const* owner_ = nullptr;
-    const sem::Node* shadows_ = nullptr;
+    const CastableBase* shadows_ = nullptr;
     const sem::BindingPoint binding_point_;
     const std::optional<uint32_t> location_;
 };

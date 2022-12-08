@@ -172,7 +172,7 @@ struct LocalizeStructArrayAssignment::State {
     // Returns the type and address space of the originating variable of the lhs
     // of the assignment statement.
     // See https://www.w3.org/TR/WGSL/#originating-variable-section
-    std::pair<const sem::Type*, ast::AddressSpace> GetOriginatingTypeAndAddressSpace(
+    std::pair<const type::Type*, ast::AddressSpace> GetOriginatingTypeAndAddressSpace(
         const ast::AssignmentStatement* assign_stmt) {
         auto* root_ident = src->Sem().Get(assign_stmt->lhs)->RootIdentifier();
         if (!root_ident) {

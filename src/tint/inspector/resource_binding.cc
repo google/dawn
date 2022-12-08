@@ -18,9 +18,9 @@
 #include "src/tint/sem/f32.h"
 #include "src/tint/sem/i32.h"
 #include "src/tint/sem/matrix.h"
-#include "src/tint/sem/type.h"
 #include "src/tint/sem/u32.h"
 #include "src/tint/sem/vector.h"
+#include "src/tint/type/type.h"
 
 namespace tint::inspector {
 
@@ -45,7 +45,7 @@ ResourceBinding::TextureDimension TypeTextureDimensionToResourceBindingTextureDi
     return ResourceBinding::TextureDimension::kNone;
 }
 
-ResourceBinding::SampledKind BaseTypeToSampledKind(const sem::Type* base_type) {
+ResourceBinding::SampledKind BaseTypeToSampledKind(const type::Type* base_type) {
     if (!base_type) {
         return ResourceBinding::SampledKind::kUnknown;
     }

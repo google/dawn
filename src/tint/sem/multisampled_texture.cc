@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::MultisampledTexture);
 
 namespace tint::sem {
 
-MultisampledTexture::MultisampledTexture(ast::TextureDimension dim, const Type* type)
+MultisampledTexture::MultisampledTexture(ast::TextureDimension dim, const type::Type* type)
     : Base(dim), type_(type) {
     TINT_ASSERT(Semantic, type_);
 }
@@ -34,7 +34,7 @@ size_t MultisampledTexture::Hash() const {
     return utils::Hash(TypeInfo::Of<MultisampledTexture>().full_hashcode, dim(), type_);
 }
 
-bool MultisampledTexture::Equals(const sem::Type& other) const {
+bool MultisampledTexture::Equals(const type::Type& other) const {
     if (auto* o = other.As<MultisampledTexture>()) {
         return o->dim() == dim() && o->type_ == type_;
     }

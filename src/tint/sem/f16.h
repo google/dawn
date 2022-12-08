@@ -17,12 +17,12 @@
 
 #include <string>
 
-#include "src/tint/sem/type.h"
+#include "src/tint/type/type.h"
 
 namespace tint::sem {
 
 /// A float 16 type
-class F16 final : public Castable<F16, Type> {
+class F16 final : public Castable<F16, type::Type> {
   public:
     /// Constructor
     F16();

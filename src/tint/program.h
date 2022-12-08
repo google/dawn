@@ -136,20 +136,20 @@ class Program {
     /// @param expr the AST expression
     /// @return the resolved semantic type for the expression, or nullptr if the
     /// expression has no resolved type.
-    const sem::Type* TypeOf(const ast::Expression* expr) const;
+    const type::Type* TypeOf(const ast::Expression* expr) const;
 
     /// Helper for returning the resolved semantic type of the AST type `type`.
     /// @param type the AST type
     /// @return the resolved semantic type for the type, or nullptr if the type
     /// has no resolved type.
-    const sem::Type* TypeOf(const ast::Type* type) const;
+    const type::Type* TypeOf(const ast::Type* type) const;
 
     /// Helper for returning the resolved semantic type of the AST type
     /// declaration `type_decl`.
     /// @param type_decl the AST type declaration
     /// @return the resolved semantic type for the type declaration, or nullptr if
     /// the type declaration has no resolved type.
-    const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const;
+    const type::Type* TypeOf(const ast::TypeDecl* type_decl) const;
 
     /// @param type a type
     /// @returns the name for `type` that closely resembles how it would be
@@ -159,7 +159,7 @@ class Program {
     /// @param type a type
     /// @returns the name for `type` that closely resembles how it would be
     /// declared in WGSL.
-    std::string FriendlyName(const sem::Type* type) const;
+    std::string FriendlyName(const type::Type* type) const;
 
     /// Overload of FriendlyName, which removes an ambiguity when passing nullptr.
     /// Simplifies test code.

@@ -29,7 +29,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::VariableUser);
 
 namespace tint::sem {
 Variable::Variable(const ast::Variable* declaration,
-                   const sem::Type* type,
+                   const type::Type* type,
                    EvaluationStage stage,
                    ast::AddressSpace address_space,
                    ast::Access access,
@@ -44,7 +44,7 @@ Variable::Variable(const ast::Variable* declaration,
 Variable::~Variable() = default;
 
 LocalVariable::LocalVariable(const ast::Variable* declaration,
-                             const sem::Type* type,
+                             const type::Type* type,
                              EvaluationStage stage,
                              ast::AddressSpace address_space,
                              ast::Access access,
@@ -56,7 +56,7 @@ LocalVariable::LocalVariable(const ast::Variable* declaration,
 LocalVariable::~LocalVariable() = default;
 
 GlobalVariable::GlobalVariable(const ast::Variable* declaration,
-                               const sem::Type* type,
+                               const type::Type* type,
                                EvaluationStage stage,
                                ast::AddressSpace address_space,
                                ast::Access access,
@@ -71,7 +71,7 @@ GlobalVariable::~GlobalVariable() = default;
 
 Parameter::Parameter(const ast::Parameter* declaration,
                      uint32_t index,
-                     const sem::Type* type,
+                     const type::Type* type,
                      ast::AddressSpace address_space,
                      ast::Access access,
                      const ParameterUsage usage /* = ParameterUsage::kNone */,

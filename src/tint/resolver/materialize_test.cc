@@ -16,7 +16,7 @@
 
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/test_helper.h"
+#include "src/tint/type/test_helper.h"
 
 #include "gmock/gmock.h"
 
@@ -77,7 +77,7 @@ class MaterializeTest : public resolver::ResolverTestWithParam<CASE> {
     using ProgramBuilder::FriendlyName;
 
     void CheckTypesAndValues(const sem::Expression* expr,
-                             const tint::sem::Type* expected_sem_ty,
+                             const tint::type::Type* expected_sem_ty,
                              const std::variant<AInt, AFloat>& expected_value) {
         std::visit([&](auto v) { CheckTypesAndValuesImpl(expr, expected_sem_ty, v); },
                    expected_value);
@@ -86,7 +86,7 @@ class MaterializeTest : public resolver::ResolverTestWithParam<CASE> {
   private:
     template <typename T>
     void CheckTypesAndValuesImpl(const sem::Expression* expr,
-                                 const tint::sem::Type* expected_sem_ty,
+                                 const tint::type::Type* expected_sem_ty,
                                  T expected_value) {
         EXPECT_TYPE(expr->Type(), expected_sem_ty);
 

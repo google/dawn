@@ -24,7 +24,7 @@ namespace tint::sem {
 StorageTexture::StorageTexture(ast::TextureDimension dim,
                                ast::TexelFormat format,
                                ast::Access access,
-                               sem::Type* subtype)
+                               type::Type* subtype)
     : Base(dim), texel_format_(format), access_(access), subtype_(subtype) {}
 
 StorageTexture::StorageTexture(StorageTexture&&) = default;
@@ -35,7 +35,7 @@ size_t StorageTexture::Hash() const {
     return utils::Hash(TypeInfo::Of<StorageTexture>().full_hashcode, dim(), texel_format_, access_);
 }
 
-bool StorageTexture::Equals(const sem::Type& other) const {
+bool StorageTexture::Equals(const type::Type& other) const {
     if (auto* o = other.As<StorageTexture>()) {
         return o->dim() == dim() && o->texel_format_ == texel_format_ && o->access_ == access_;
     }
@@ -48,7 +48,7 @@ std::string StorageTexture::FriendlyName(const SymbolTable&) const {
     return out.str();
 }
 
-sem::Type* StorageTexture::SubtypeFor(ast::TexelFormat format, sem::TypeManager& type_mgr) {
+type::Type* StorageTexture::SubtypeFor(ast::TexelFormat format, sem::TypeManager& type_mgr) {
     switch (format) {
         case ast::TexelFormat::kR32Uint:
         case ast::TexelFormat::kRgba8Uint:

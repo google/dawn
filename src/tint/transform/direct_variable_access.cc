@@ -45,7 +45,7 @@ struct AccessRoot {
     /// The pointer-unwrapped type of the *transformed* variable.
     /// This may be different for pointers in 'private' and 'function' address space, as the pointer
     /// parameter type is to the *base object* instead of the input pointer type.
-    tint::sem::Type const* type = nullptr;
+    tint::type::Type const* type = nullptr;
     /// The originating module-scope variable ('private', 'storage', 'uniform', 'workgroup'),
     /// function-scope variable ('function'), or pointer parameter in the source program.
     tint::sem::Variable const* variable = nullptr;

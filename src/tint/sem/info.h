@@ -30,6 +30,10 @@
 namespace tint::sem {
 class Module;
 }  // namespace tint::sem
+namespace tint::type {
+class Node;
+class Type;
+}  // namespace tint::type
 
 namespace tint::sem {
 
@@ -142,7 +146,7 @@ class Info {
 
   private:
     // AST node index to semantic node
-    std::vector<const sem::Node*> nodes_;
+    std::vector<const CastableBase*> nodes_;
     // Lists transitively referenced overrides for the given item
     std::unordered_map<const CastableBase*, TransitivelyReferenced> referenced_overrides_;
     // The semantic module

@@ -111,8 +111,8 @@ struct OffsetBinOp : Offset {
 struct LoadStoreKey {
     ast::AddressSpace const address_space;  // buffer address space
     ast::Access const access;               // buffer access
-    sem::Type const* buf_ty = nullptr;      // buffer type
-    sem::Type const* el_ty = nullptr;       // element type
+    type::Type const* buf_ty = nullptr;     // buffer type
+    type::Type const* el_ty = nullptr;      // element type
     bool operator==(const LoadStoreKey& rhs) const {
         return address_space == rhs.address_space && access == rhs.access && buf_ty == rhs.buf_ty &&
                el_ty == rhs.el_ty;
@@ -127,8 +127,8 @@ struct LoadStoreKey {
 /// AtomicKey is the unordered map key to an atomic intrinsic.
 struct AtomicKey {
     ast::Access const access;           // buffer access
-    sem::Type const* buf_ty = nullptr;  // buffer type
-    sem::Type const* el_ty = nullptr;   // element type
+    type::Type const* buf_ty = nullptr;  // buffer type
+    type::Type const* el_ty = nullptr;   // element type
     sem::BuiltinType const op;          // atomic op
     bool operator==(const AtomicKey& rhs) const {
         return access == rhs.access && buf_ty == rhs.buf_ty && el_ty == rhs.el_ty && op == rhs.op;
@@ -140,7 +140,7 @@ struct AtomicKey {
     };
 };
 
-bool IntrinsicDataTypeFor(const sem::Type* ty, DecomposeMemoryAccess::Intrinsic::DataType& out) {
+bool IntrinsicDataTypeFor(const type::Type* ty, DecomposeMemoryAccess::Intrinsic::DataType& out) {
     if (ty->Is<sem::I32>()) {
         out = DecomposeMemoryAccess::Intrinsic::DataType::kI32;
         return true;
@@ -224,7 +224,7 @@ bool IntrinsicDataTypeFor(const sem::Type* ty, DecomposeMemoryAccess::Intrinsic:
 /// to a stub function to load the type `ty`.
 DecomposeMemoryAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
                                                    ast::AddressSpace address_space,
-                                                   const sem::Type* ty) {
+                                                   const type::Type* ty) {
     DecomposeMemoryAccess::Intrinsic::DataType type;
     if (!IntrinsicDataTypeFor(ty, type)) {
         return nullptr;
@@ -238,7 +238,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
 /// to a stub function to store the type `ty`.
 DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(ProgramBuilder* builder,
                                                     ast::AddressSpace address_space,
-                                                    const sem::Type* ty) {
+                                                    const type::Type* ty) {
     DecomposeMemoryAccess::Intrinsic::DataType type;
     if (!IntrinsicDataTypeFor(ty, type)) {
         return nullptr;
@@ -252,7 +252,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(ProgramBuilder* builder,
 /// to a stub function for the atomic op and the type `ty`.
 DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
                                                      sem::BuiltinType ity,
-                                                     const sem::Type* ty) {
+                                                     const type::Type* ty) {
     auto op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicLoad;
     switch (ity) {
         case sem::BuiltinType::kAtomicLoad:
@@ -307,7 +307,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
 struct BufferAccess {
     sem::Expression const* var = nullptr;  // Storage buffer variable
     Offset const* offset = nullptr;        // The byte offset on var
-    sem::Type const* type = nullptr;       // The type of the access
+    type::Type const* type = nullptr;      // The type of the access
     operator bool() const { return var; }  // Returns true if valid
 };
 
@@ -461,8 +461,8 @@ struct DecomposeMemoryAccess::State {
     /// @param el_ty the storage or uniform buffer element type
     /// @param var_user the variable user
     /// @return the name of the function that performs the load
-    Symbol LoadFunc(const sem::Type* buf_ty,
-                    const sem::Type* el_ty,
+    Symbol LoadFunc(const type::Type* buf_ty,
+                    const type::Type* el_ty,
                     const sem::VariableUser* var_user) {
         auto address_space = var_user->Variable()->AddressSpace();
         auto access = var_user->Variable()->Access();
@@ -560,8 +560,8 @@ struct DecomposeMemoryAccess::State {
     /// @param el_ty the storage buffer element type
     /// @param var_user the variable user
     /// @return the name of the function that performs the store
-    Symbol StoreFunc(const sem::Type* buf_ty,
-                     const sem::Type* el_ty,
+    Symbol StoreFunc(const type::Type* buf_ty,
+                     const type::Type* el_ty,
                      const sem::VariableUser* var_user) {
         auto address_space = var_user->Variable()->AddressSpace();
         auto access = var_user->Variable()->Access();
@@ -671,8 +671,8 @@ struct DecomposeMemoryAccess::State {
     /// @param intrinsic the atomic intrinsic
     /// @param var_user the variable user
     /// @return the name of the function that performs the load
-    Symbol AtomicFunc(const sem::Type* buf_ty,
-                      const sem::Type* el_ty,
+    Symbol AtomicFunc(const type::Type* buf_ty,
+                      const type::Type* el_ty,
                       const sem::Builtin* intrinsic,
                       const sem::VariableUser* var_user) {
         auto op = intrinsic->Type();

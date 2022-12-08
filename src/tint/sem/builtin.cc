@@ -106,7 +106,7 @@ bool IsDP4aBuiltin(BuiltinType i) {
 }
 
 Builtin::Builtin(BuiltinType type,
-                 const sem::Type* return_type,
+                 const type::Type* return_type,
                  utils::VectorRef<Parameter*> parameters,
                  EvaluationStage eval_stage,
                  PipelineStageSet supported_stages,

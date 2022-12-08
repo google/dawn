@@ -30,14 +30,14 @@ class Bool : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Bool::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* Bool::Match(MatchState& state, const type::Type* ty) const {
   if (!match_bool(state, ty)) {
     return nullptr;
   }
@@ -56,14 +56,14 @@ class Ia : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Ia::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* Ia::Match(MatchState& state, const type::Type* ty) const {
   if (!match_ia(state, ty)) {
     return nullptr;
   }
@@ -84,14 +84,14 @@ class Fa : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Fa::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* Fa::Match(MatchState& state, const type::Type* ty) const {
   if (!match_fa(state, ty)) {
     return nullptr;
   }
@@ -112,14 +112,14 @@ class I32 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* I32::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* I32::Match(MatchState& state, const type::Type* ty) const {
   if (!match_i32(state, ty)) {
     return nullptr;
   }
@@ -138,14 +138,14 @@ class U32 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* U32::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* U32::Match(MatchState& state, const type::Type* ty) const {
   if (!match_u32(state, ty)) {
     return nullptr;
   }
@@ -164,14 +164,14 @@ class F32 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* F32::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* F32::Match(MatchState& state, const type::Type* ty) const {
   if (!match_f32(state, ty)) {
     return nullptr;
   }
@@ -190,14 +190,14 @@ class F16 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* F16::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* F16::Match(MatchState& state, const type::Type* ty) const {
   if (!match_f16(state, ty)) {
     return nullptr;
   }
@@ -216,15 +216,15 @@ class Vec2 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Vec2::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Vec2::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_vec2(state, ty, T)) {
     return nullptr;
   }
@@ -248,15 +248,15 @@ class Vec3 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Vec3::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Vec3::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_vec3(state, ty, T)) {
     return nullptr;
   }
@@ -280,15 +280,15 @@ class Vec4 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Vec4::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Vec4::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_vec4(state, ty, T)) {
     return nullptr;
   }
@@ -312,15 +312,15 @@ class Mat2X2 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Mat2X2::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Mat2X2::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_mat2x2(state, ty, T)) {
     return nullptr;
   }
@@ -344,15 +344,15 @@ class Mat2X3 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Mat2X3::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Mat2X3::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_mat2x3(state, ty, T)) {
     return nullptr;
   }
@@ -376,15 +376,15 @@ class Mat2X4 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Mat2X4::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Mat2X4::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_mat2x4(state, ty, T)) {
     return nullptr;
   }
@@ -408,15 +408,15 @@ class Mat3X2 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Mat3X2::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Mat3X2::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_mat3x2(state, ty, T)) {
     return nullptr;
   }
@@ -440,15 +440,15 @@ class Mat3X3 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Mat3X3::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Mat3X3::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_mat3x3(state, ty, T)) {
     return nullptr;
   }
@@ -472,15 +472,15 @@ class Mat3X4 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Mat3X4::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Mat3X4::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_mat3x4(state, ty, T)) {
     return nullptr;
   }
@@ -504,15 +504,15 @@ class Mat4X2 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Mat4X2::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Mat4X2::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_mat4x2(state, ty, T)) {
     return nullptr;
   }
@@ -536,15 +536,15 @@ class Mat4X3 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Mat4X3::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Mat4X3::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_mat4x3(state, ty, T)) {
     return nullptr;
   }
@@ -568,15 +568,15 @@ class Mat4X4 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Mat4X4::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Mat4X4::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_mat4x4(state, ty, T)) {
     return nullptr;
   }
@@ -600,16 +600,16 @@ class Vec : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Vec::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* Vec::Match(MatchState& state, const type::Type* ty) const {
   Number N = Number::invalid;
-  const sem::Type* T = nullptr;
+  const type::Type* T = nullptr;
   if (!match_vec(state, ty, N, T)) {
     return nullptr;
   }
@@ -640,17 +640,17 @@ class Mat : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Mat::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* Mat::Match(MatchState& state, const type::Type* ty) const {
   Number N = Number::invalid;
   Number M = Number::invalid;
-  const sem::Type* T = nullptr;
+  const type::Type* T = nullptr;
   if (!match_mat(state, ty, N, M, T)) {
     return nullptr;
   }
@@ -686,16 +686,16 @@ class Ptr : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Ptr::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* Ptr::Match(MatchState& state, const type::Type* ty) const {
   Number S = Number::invalid;
-  const sem::Type* T = nullptr;
+  const type::Type* T = nullptr;
   Number A = Number::invalid;
   if (!match_ptr(state, ty, S, T, A)) {
     return nullptr;
@@ -730,15 +730,15 @@ class Atomic : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Atomic::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Atomic::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_atomic(state, ty, T)) {
     return nullptr;
   }
@@ -762,15 +762,15 @@ class Array : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Array::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Array::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_array(state, ty, T)) {
     return nullptr;
   }
@@ -794,14 +794,14 @@ class Sampler : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Sampler::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* Sampler::Match(MatchState& state, const type::Type* ty) const {
   if (!match_sampler(state, ty)) {
     return nullptr;
   }
@@ -820,14 +820,14 @@ class SamplerComparison : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* SamplerComparison::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* SamplerComparison::Match(MatchState& state, const type::Type* ty) const {
   if (!match_sampler_comparison(state, ty)) {
     return nullptr;
   }
@@ -846,15 +846,15 @@ class Texture1D : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Texture1D::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Texture1D::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_texture_1d(state, ty, T)) {
     return nullptr;
   }
@@ -878,15 +878,15 @@ class Texture2D : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Texture2D::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Texture2D::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_texture_2d(state, ty, T)) {
     return nullptr;
   }
@@ -910,15 +910,15 @@ class Texture2DArray : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Texture2DArray::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Texture2DArray::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_texture_2d_array(state, ty, T)) {
     return nullptr;
   }
@@ -942,15 +942,15 @@ class Texture3D : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Texture3D::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* Texture3D::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_texture_3d(state, ty, T)) {
     return nullptr;
   }
@@ -974,15 +974,15 @@ class TextureCube : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* TextureCube::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* TextureCube::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_texture_cube(state, ty, T)) {
     return nullptr;
   }
@@ -1006,15 +1006,15 @@ class TextureCubeArray : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* TextureCubeArray::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* TextureCubeArray::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_texture_cube_array(state, ty, T)) {
     return nullptr;
   }
@@ -1038,15 +1038,15 @@ class TextureMultisampled2D : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* TextureMultisampled2D::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* TextureMultisampled2D::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_texture_multisampled_2d(state, ty, T)) {
     return nullptr;
   }
@@ -1070,14 +1070,14 @@ class TextureDepth2D : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* TextureDepth2D::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* TextureDepth2D::Match(MatchState& state, const type::Type* ty) const {
   if (!match_texture_depth_2d(state, ty)) {
     return nullptr;
   }
@@ -1096,14 +1096,14 @@ class TextureDepth2DArray : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* TextureDepth2DArray::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* TextureDepth2DArray::Match(MatchState& state, const type::Type* ty) const {
   if (!match_texture_depth_2d_array(state, ty)) {
     return nullptr;
   }
@@ -1122,14 +1122,14 @@ class TextureDepthCube : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* TextureDepthCube::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* TextureDepthCube::Match(MatchState& state, const type::Type* ty) const {
   if (!match_texture_depth_cube(state, ty)) {
     return nullptr;
   }
@@ -1148,14 +1148,14 @@ class TextureDepthCubeArray : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* TextureDepthCubeArray::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* TextureDepthCubeArray::Match(MatchState& state, const type::Type* ty) const {
   if (!match_texture_depth_cube_array(state, ty)) {
     return nullptr;
   }
@@ -1174,14 +1174,14 @@ class TextureDepthMultisampled2D : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* TextureDepthMultisampled2D::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* TextureDepthMultisampled2D::Match(MatchState& state, const type::Type* ty) const {
   if (!match_texture_depth_multisampled_2d(state, ty)) {
     return nullptr;
   }
@@ -1200,14 +1200,14 @@ class TextureStorage1D : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* TextureStorage1D::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* TextureStorage1D::Match(MatchState& state, const type::Type* ty) const {
   Number F = Number::invalid;
   Number A = Number::invalid;
   if (!match_texture_storage_1d(state, ty, F, A)) {
@@ -1238,14 +1238,14 @@ class TextureStorage2D : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* TextureStorage2D::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* TextureStorage2D::Match(MatchState& state, const type::Type* ty) const {
   Number F = Number::invalid;
   Number A = Number::invalid;
   if (!match_texture_storage_2d(state, ty, F, A)) {
@@ -1276,14 +1276,14 @@ class TextureStorage2DArray : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* TextureStorage2DArray::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* TextureStorage2DArray::Match(MatchState& state, const type::Type* ty) const {
   Number F = Number::invalid;
   Number A = Number::invalid;
   if (!match_texture_storage_2d_array(state, ty, F, A)) {
@@ -1314,14 +1314,14 @@ class TextureStorage3D : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* TextureStorage3D::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* TextureStorage3D::Match(MatchState& state, const type::Type* ty) const {
   Number F = Number::invalid;
   Number A = Number::invalid;
   if (!match_texture_storage_3d(state, ty, F, A)) {
@@ -1352,14 +1352,14 @@ class TextureExternal : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* TextureExternal::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* TextureExternal::Match(MatchState& state, const type::Type* ty) const {
   if (!match_texture_external(state, ty)) {
     return nullptr;
   }
@@ -1378,15 +1378,15 @@ class ModfResult : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* ModfResult::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* ModfResult::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_modf_result(state, ty, T)) {
     return nullptr;
   }
@@ -1412,16 +1412,16 @@ class ModfResultVec : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* ModfResultVec::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* ModfResultVec::Match(MatchState& state, const type::Type* ty) const {
   Number N = Number::invalid;
-  const sem::Type* T = nullptr;
+  const type::Type* T = nullptr;
   if (!match_modf_result_vec(state, ty, N, T)) {
     return nullptr;
   }
@@ -1452,15 +1452,15 @@ class FrexpResult : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* FrexpResult::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* FrexpResult::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_frexp_result(state, ty, T)) {
     return nullptr;
   }
@@ -1486,16 +1486,16 @@ class FrexpResultVec : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* FrexpResultVec::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* FrexpResultVec::Match(MatchState& state, const type::Type* ty) const {
   Number N = Number::invalid;
-  const sem::Type* T = nullptr;
+  const type::Type* T = nullptr;
   if (!match_frexp_result_vec(state, ty, N, T)) {
     return nullptr;
   }
@@ -1526,15 +1526,15 @@ class AtomicCompareExchangeResult : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* AtomicCompareExchangeResult::Match(MatchState& state, const sem::Type* ty) const {
-  const sem::Type* T = nullptr;
+const type::Type* AtomicCompareExchangeResult::Match(MatchState& state, const type::Type* ty) const {
+  const type::Type* T = nullptr;
   if (!match_atomic_compare_exchange_result(state, ty, T)) {
     return nullptr;
   }
@@ -1559,14 +1559,14 @@ class Scalar : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Scalar::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* Scalar::Match(MatchState& state, const type::Type* ty) const {
   if (match_ia(state, ty)) {
     return build_ia(state);
   }
@@ -1608,14 +1608,14 @@ class ConcreteScalar : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* ConcreteScalar::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* ConcreteScalar::Match(MatchState& state, const type::Type* ty) const {
   if (match_i32(state, ty)) {
     return build_i32(state);
   }
@@ -1651,14 +1651,14 @@ class ScalarNoF32 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* ScalarNoF32::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* ScalarNoF32::Match(MatchState& state, const type::Type* ty) const {
   if (match_ia(state, ty)) {
     return build_ia(state);
   }
@@ -1697,14 +1697,14 @@ class ScalarNoF16 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* ScalarNoF16::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* ScalarNoF16::Match(MatchState& state, const type::Type* ty) const {
   if (match_ia(state, ty)) {
     return build_ia(state);
   }
@@ -1743,14 +1743,14 @@ class ScalarNoI32 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* ScalarNoI32::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* ScalarNoI32::Match(MatchState& state, const type::Type* ty) const {
   if (match_ia(state, ty)) {
     return build_ia(state);
   }
@@ -1789,14 +1789,14 @@ class ScalarNoU32 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* ScalarNoU32::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* ScalarNoU32::Match(MatchState& state, const type::Type* ty) const {
   if (match_ia(state, ty)) {
     return build_ia(state);
   }
@@ -1835,14 +1835,14 @@ class ScalarNoBool : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* ScalarNoBool::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* ScalarNoBool::Match(MatchState& state, const type::Type* ty) const {
   if (match_ia(state, ty)) {
     return build_ia(state);
   }
@@ -1881,14 +1881,14 @@ class FiaFiu32F16 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* FiaFiu32F16::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* FiaFiu32F16::Match(MatchState& state, const type::Type* ty) const {
   if (match_ia(state, ty)) {
     return build_ia(state);
   }
@@ -1927,14 +1927,14 @@ class FiaFi32F16 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* FiaFi32F16::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* FiaFi32F16::Match(MatchState& state, const type::Type* ty) const {
   if (match_ia(state, ty)) {
     return build_ia(state);
   }
@@ -1970,14 +1970,14 @@ class FiaFiu32 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* FiaFiu32::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* FiaFiu32::Match(MatchState& state, const type::Type* ty) const {
   if (match_ia(state, ty)) {
     return build_ia(state);
   }
@@ -2013,14 +2013,14 @@ class FaF32 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* FaF32::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* FaF32::Match(MatchState& state, const type::Type* ty) const {
   if (match_fa(state, ty)) {
     return build_fa(state);
   }
@@ -2047,14 +2047,14 @@ class FaF32F16 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* FaF32F16::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* FaF32F16::Match(MatchState& state, const type::Type* ty) const {
   if (match_fa(state, ty)) {
     return build_fa(state);
   }
@@ -2084,14 +2084,14 @@ class IaIu32 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* IaIu32::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* IaIu32::Match(MatchState& state, const type::Type* ty) const {
   if (match_ia(state, ty)) {
     return build_ia(state);
   }
@@ -2121,14 +2121,14 @@ class Fiu32F16 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Fiu32F16::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* Fiu32F16::Match(MatchState& state, const type::Type* ty) const {
   if (match_i32(state, ty)) {
     return build_i32(state);
   }
@@ -2161,14 +2161,14 @@ class Fiu32 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Fiu32::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* Fiu32::Match(MatchState& state, const type::Type* ty) const {
   if (match_i32(state, ty)) {
     return build_i32(state);
   }
@@ -2198,14 +2198,14 @@ class Fi32F16 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Fi32F16::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* Fi32F16::Match(MatchState& state, const type::Type* ty) const {
   if (match_i32(state, ty)) {
     return build_i32(state);
   }
@@ -2235,14 +2235,14 @@ class Fi32 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Fi32::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* Fi32::Match(MatchState& state, const type::Type* ty) const {
   if (match_i32(state, ty)) {
     return build_i32(state);
   }
@@ -2269,14 +2269,14 @@ class F32F16 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* F32F16::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* F32F16::Match(MatchState& state, const type::Type* ty) const {
   if (match_f32(state, ty)) {
     return build_f32(state);
   }
@@ -2303,14 +2303,14 @@ class Iu32 : public TypeMatcher {
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
+  const type::Type* Match(MatchState& state,
+                         const type::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Iu32::Match(MatchState& state, const sem::Type* ty) const {
+const type::Type* Iu32::Match(MatchState& state, const type::Type* ty) const {
   if (match_i32(state, ty)) {
     return build_i32(state);
   }

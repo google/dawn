@@ -27,7 +27,7 @@ class SampledTexture final : public Castable<SampledTexture, Texture> {
     /// Constructor
     /// @param dim the dimensionality of the texture
     /// @param type the data type of the sampled texture
-    SampledTexture(ast::TextureDimension dim, const Type* type);
+    SampledTexture(ast::TextureDimension dim, const type::Type* type);
     /// Move constructor
     SampledTexture(SampledTexture&&);
     ~SampledTexture() override;
@@ -40,7 +40,7 @@ class SampledTexture final : public Castable<SampledTexture, Texture> {
     bool Equals(const Type& other) const override;
 
     /// @returns the subtype of the sampled texture
-    Type* type() const { return const_cast<Type*>(type_); }
+    type::Type* type() const { return const_cast<type::Type*>(type_); }
 
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
@@ -48,7 +48,7 @@ class SampledTexture final : public Castable<SampledTexture, Texture> {
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
   private:
-    const Type* const type_;
+    const type::Type* const type_;
 };
 
 }  // namespace tint::sem

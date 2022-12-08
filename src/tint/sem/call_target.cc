@@ -23,7 +23,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::CallTarget);
 
 namespace tint::sem {
 
-CallTarget::CallTarget(const sem::Type* return_type,
+CallTarget::CallTarget(const type::Type* return_type,
                        utils::VectorRef<const Parameter*> parameters,
                        EvaluationStage stage)
     : signature_{return_type, std::move(parameters)}, stage_(stage) {
@@ -33,7 +33,7 @@ CallTarget::CallTarget(const sem::Type* return_type,
 CallTarget::CallTarget(const CallTarget&) = default;
 CallTarget::~CallTarget() = default;
 
-CallTargetSignature::CallTargetSignature(const sem::Type* ret_ty,
+CallTargetSignature::CallTargetSignature(const type::Type* ret_ty,
                                          utils::VectorRef<const sem::Parameter*> params)
     : return_type(ret_ty), parameters(std::move(params)) {}
 CallTargetSignature::CallTargetSignature(const CallTargetSignature&) = default;

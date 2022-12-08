@@ -93,19 +93,21 @@ class Resolver {
 
     /// @param type the given type
     /// @returns true if the given type is a plain type
-    bool IsPlain(const sem::Type* type) const { return validator_.IsPlain(type); }
+    bool IsPlain(const type::Type* type) const { return validator_.IsPlain(type); }
 
     /// @param type the given type
     /// @returns true if the given type is a fixed-footprint type
-    bool IsFixedFootprint(const sem::Type* type) const { return validator_.IsFixedFootprint(type); }
+    bool IsFixedFootprint(const type::Type* type) const {
+        return validator_.IsFixedFootprint(type);
+    }
 
     /// @param type the given type
     /// @returns true if the given type is storable
-    bool IsStorable(const sem::Type* type) const { return validator_.IsStorable(type); }
+    bool IsStorable(const type::Type* type) const { return validator_.IsStorable(type); }
 
     /// @param type the given type
     /// @returns true if the given type is host-shareable
-    bool IsHostShareable(const sem::Type* type) const { return validator_.IsHostShareable(type); }
+    bool IsHostShareable(const type::Type* type) const { return validator_.IsHostShareable(type); }
 
     /// @returns the validator for testing
     const Validator* GetValidatorForTesting() const { return &validator_; }
@@ -179,7 +181,7 @@ class Resolver {
     ///   materialized type.
     /// If `expr` is nullptr, then Materialize() will also return nullptr.
     const sem::Expression* Materialize(const sem::Expression* expr,
-                                       const sem::Type* target_type = nullptr);
+                                       const type::Type* target_type = nullptr);
 
     /// Materializes all the arguments in `args` to the parameter types of `target`.
     /// @returns true on success, false on failure.
@@ -189,11 +191,11 @@ class Resolver {
 
     /// @returns true if an argument of an abstract numeric type, passed to a parameter of type
     /// `parameter_ty` should be materialized.
-    bool ShouldMaterializeArgument(const sem::Type* parameter_ty) const;
+    bool ShouldMaterializeArgument(const type::Type* parameter_ty) const;
 
     /// Converts `c` to `target_ty`
     /// @returns true on success, false on failure.
-    bool Convert(const sem::Constant*& c, const sem::Type* target_ty, const Source& source);
+    bool Convert(const sem::Constant*& c, const type::Type* target_ty, const Source& source);
 
     /// Transforms `args` to a vector of constants, and converts each constant to the call target's
     /// parameter type.
@@ -209,9 +211,9 @@ class Resolver {
     /// @param source the source of the expression requiring materialization
     /// @returns the concrete (materialized) type for the given type, or nullptr if the type is
     ///          already concrete.
-    const sem::Type* ConcreteType(const sem::Type* ty,
-                                  const sem::Type* target_ty,
-                                  const Source& source);
+    const type::Type* ConcreteType(const type::Type* ty,
+                                   const type::Type* target_ty,
+                                   const Source& source);
 
     // Statement resolving methods
     // Each return true on success, false on failure.
@@ -220,7 +222,7 @@ class Resolver {
     sem::Statement* BreakStatement(const ast::BreakStatement*);
     sem::Statement* BreakIfStatement(const ast::BreakIfStatement*);
     sem::Statement* CallStatement(const ast::CallStatement*);
-    sem::CaseStatement* CaseStatement(const ast::CaseStatement*, const sem::Type*);
+    sem::CaseStatement* CaseStatement(const ast::CaseStatement*, const type::Type*);
     sem::Statement* CompoundAssignmentStatement(const ast::CompoundAssignmentStatement*);
     sem::Statement* ContinueStatement(const ast::ContinueStatement*);
     sem::Statement* DiscardStatement(const ast::DiscardStatement*);
@@ -249,11 +251,11 @@ class Resolver {
     /// current_function_
     bool WorkgroupSize(const ast::Function*);
 
-    /// @returns the sem::Type for the ast::Type `ty`, building it if it
+    /// @returns the type::Type for the ast::Type `ty`, building it if it
     /// hasn't been constructed already. If an error is raised, nullptr is
     /// returned.
     /// @param ty the ast::Type
-    sem::Type* Type(const ast::Type* ty);
+    type::Type* Type(const ast::Type* ty);
 
     /// @param enable the enable declaration
     /// @returns the resolved extension
@@ -261,7 +263,7 @@ class Resolver {
 
     /// @param named_type the named type to resolve
     /// @returns the resolved semantic type
-    sem::Type* TypeDecl(const ast::TypeDecl* named_type);
+    type::Type* TypeDecl(const ast::TypeDecl* named_type);
 
     /// Builds and returns the semantic information for the AST array `arr`.
     /// This method does not mark the ast::Array node, nor attach the generated semantic information
@@ -273,7 +275,7 @@ class Resolver {
     /// Resolves and validates the expression used as the count parameter of an array.
     /// @param count_expr the expression used as the second template parameter to an array<>.
     /// @returns the number of elements in the array.
-    const sem::ArrayCount* ArrayCount(const ast::Expression* count_expr);
+    const type::ArrayCount* ArrayCount(const ast::Expression* count_expr);
 
     /// Resolves and validates the attributes on an array.
     /// @param attributes the attributes on the array type.
@@ -281,7 +283,7 @@ class Resolver {
     /// @param explicit_stride assigned the specified stride of the array in bytes.
     /// @returns true on success, false on failure
     bool ArrayAttributes(utils::VectorRef<const ast::Attribute*> attributes,
-                         const sem::Type* el_ty,
+                         const type::Type* el_ty,
                          uint32_t& explicit_stride);
 
     /// Builds and returns the semantic information for an array.
@@ -295,15 +297,15 @@ class Resolver {
     /// @param explicit_stride the explicit byte stride of the array. Zero means implicit stride.
     sem::Array* Array(const Source& el_source,
                       const Source& count_source,
-                      const sem::Type* el_ty,
-                      const sem::ArrayCount* el_count,
+                      const type::Type* el_ty,
+                      const type::ArrayCount* el_count,
                       uint32_t explicit_stride);
 
     /// Builds and returns the semantic information for the alias `alias`.
     /// This method does not mark the ast::Alias node, nor attach the generated
     /// semantic information to the AST node.
     /// @returns the aliased type, or nullptr if an error is raised.
-    sem::Type* Alias(const ast::Alias* alias);
+    type::Type* Alias(const ast::Alias* alias);
 
     /// Builds and returns the semantic information for the structure `str`.
     /// This method does not mark the ast::Struct node, nor attach the generated
@@ -371,7 +373,7 @@ class Resolver {
     /// given type and address space. Used for generating sensible error
     /// messages.
     /// @returns true on success, false on error
-    bool ApplyAddressSpaceUsageToType(ast::AddressSpace sc, sem::Type* ty, const Source& usage);
+    bool ApplyAddressSpaceUsageToType(ast::AddressSpace sc, type::Type* ty, const Source& usage);
 
     /// @param address_space the address space
     /// @returns the default access control for the given address space
@@ -417,7 +419,7 @@ class Resolver {
     bool IsBuiltin(Symbol) const;
 
     /// @returns the builtin type alias for the given symbol
-    sem::Type* BuiltinTypeAlias(Symbol) const;
+    type::Type* BuiltinTypeAlias(Symbol) const;
 
     // ArrayInitializerSig represents a unique array initializer signature.
     // It is a tuple of the array type, number of arguments provided and earliest evaluation stage.
@@ -461,7 +463,7 @@ class Resolver {
     Validator validator_;
     ast::Extensions enabled_extensions_;
     utils::Vector<sem::Function*, 8> entry_points_;
-    utils::Hashmap<const sem::Type*, const Source*, 8> atomic_composite_info_;
+    utils::Hashmap<const type::Type*, const Source*, 8> atomic_composite_info_;
     utils::Bitset<0> marked_;
     ExprEvalStageConstraint expr_eval_stage_constraint_;
     std::unordered_map<const sem::Function*, AliasAnalysisInfo> alias_analysis_infos_;

@@ -16,147 +16,148 @@
 #include "src/tint/sem/abstract_int.h"
 #include "src/tint/sem/f16.h"
 #include "src/tint/sem/reference.h"
-#include "src/tint/sem/test_helper.h"
+#include "src/tint/type/array_count.h"
+#include "src/tint/type/test_helper.h"
 
-namespace tint::sem {
+namespace tint::type {
 namespace {
 
 struct TypeTest : public TestHelper {
-    const sem::AbstractFloat* af = create<AbstractFloat>();
-    const sem::AbstractInt* ai = create<AbstractInt>();
-    const sem::F32* f32 = create<F32>();
-    const sem::F16* f16 = create<F16>();
-    const sem::I32* i32 = create<I32>();
-    const sem::U32* u32 = create<U32>();
-    const sem::Vector* vec2_f32 = create<Vector>(f32, 2u);
-    const sem::Vector* vec3_f32 = create<Vector>(f32, 3u);
-    const sem::Vector* vec3_f16 = create<Vector>(f16, 3u);
-    const sem::Vector* vec4_f32 = create<Vector>(f32, 4u);
-    const sem::Vector* vec3_u32 = create<Vector>(u32, 3u);
-    const sem::Vector* vec3_i32 = create<Vector>(i32, 3u);
-    const sem::Vector* vec3_af = create<Vector>(af, 3u);
-    const sem::Vector* vec3_ai = create<Vector>(ai, 3u);
-    const sem::Matrix* mat2x4_f32 = create<Matrix>(vec4_f32, 2u);
-    const sem::Matrix* mat3x4_f32 = create<Matrix>(vec4_f32, 3u);
-    const sem::Matrix* mat4x2_f32 = create<Matrix>(vec2_f32, 4u);
-    const sem::Matrix* mat4x3_f32 = create<Matrix>(vec3_f32, 4u);
-    const sem::Matrix* mat4x3_f16 = create<Matrix>(vec3_f16, 4u);
-    const sem::Matrix* mat4x3_af = create<Matrix>(vec3_af, 4u);
+    const sem::AbstractFloat* af = create<sem::AbstractFloat>();
+    const sem::AbstractInt* ai = create<sem::AbstractInt>();
+    const sem::F32* f32 = create<sem::F32>();
+    const sem::F16* f16 = create<sem::F16>();
+    const sem::I32* i32 = create<sem::I32>();
+    const sem::U32* u32 = create<sem::U32>();
+    const sem::Vector* vec2_f32 = create<sem::Vector>(f32, 2u);
+    const sem::Vector* vec3_f32 = create<sem::Vector>(f32, 3u);
+    const sem::Vector* vec3_f16 = create<sem::Vector>(f16, 3u);
+    const sem::Vector* vec4_f32 = create<sem::Vector>(f32, 4u);
+    const sem::Vector* vec3_u32 = create<sem::Vector>(u32, 3u);
+    const sem::Vector* vec3_i32 = create<sem::Vector>(i32, 3u);
+    const sem::Vector* vec3_af = create<sem::Vector>(af, 3u);
+    const sem::Vector* vec3_ai = create<sem::Vector>(ai, 3u);
+    const sem::Matrix* mat2x4_f32 = create<sem::Matrix>(vec4_f32, 2u);
+    const sem::Matrix* mat3x4_f32 = create<sem::Matrix>(vec4_f32, 3u);
+    const sem::Matrix* mat4x2_f32 = create<sem::Matrix>(vec2_f32, 4u);
+    const sem::Matrix* mat4x3_f32 = create<sem::Matrix>(vec3_f32, 4u);
+    const sem::Matrix* mat4x3_f16 = create<sem::Matrix>(vec3_f16, 4u);
+    const sem::Matrix* mat4x3_af = create<sem::Matrix>(vec3_af, 4u);
     const sem::Reference* ref_u32 =
-        create<Reference>(u32, ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
-    const sem::Struct* str_f32 = create<Struct>(nullptr,
-                                                Source{},
-                                                Sym("str_f32"),
-                                                utils::Vector{
-                                                    create<StructMember>(
-                                                        /* declaration */ nullptr,
-                                                        /* source */ Source{},
-                                                        /* name */ Sym("x"),
-                                                        /* type */ f32,
-                                                        /* index */ 0u,
-                                                        /* offset */ 0u,
-                                                        /* align */ 4u,
-                                                        /* size */ 4u,
-                                                        /* location */ std::nullopt),
-                                                },
-                                                /* align*/ 4u,
-                                                /* size*/ 4u,
-                                                /* size_no_padding*/ 4u);
-    const sem::Struct* str_f16 = create<Struct>(nullptr,
-                                                Source{},
-                                                Sym("str_f16"),
-                                                utils::Vector{
-                                                    create<StructMember>(
-                                                        /* declaration */ nullptr,
-                                                        /* source */ Source{},
-                                                        /* name */ Sym("x"),
-                                                        /* type */ f16,
-                                                        /* index */ 0u,
-                                                        /* offset */ 0u,
-                                                        /* align */ 4u,
-                                                        /* size */ 4u,
-                                                        /* location */ std::nullopt),
-                                                },
-                                                /* align*/ 4u,
-                                                /* size*/ 4u,
-                                                /* size_no_padding*/ 4u);
-    sem::Struct* str_af = create<Struct>(nullptr,
-                                         Source{},
-                                         Sym("str_af"),
-                                         utils::Vector{
-                                             create<StructMember>(
-                                                 /* declaration */ nullptr,
-                                                 /* source */ Source{},
-                                                 /* name */ Sym("x"),
-                                                 /* type */ af,
-                                                 /* index */ 0u,
-                                                 /* offset */ 0u,
-                                                 /* align */ 4u,
-                                                 /* size */ 4u,
-                                                 /* location */ std::nullopt),
-                                         },
-                                         /* align*/ 4u,
-                                         /* size*/ 4u,
-                                         /* size_no_padding*/ 4u);
-    const sem::Array* arr_i32 = create<Array>(
+        create<sem::Reference>(u32, ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
+    const sem::Struct* str_f32 = create<sem::Struct>(nullptr,
+                                                     Source{},
+                                                     Sym("str_f32"),
+                                                     utils::Vector{
+                                                         create<sem::StructMember>(
+                                                             /* declaration */ nullptr,
+                                                             /* source */ Source{},
+                                                             /* name */ Sym("x"),
+                                                             /* type */ f32,
+                                                             /* index */ 0u,
+                                                             /* offset */ 0u,
+                                                             /* align */ 4u,
+                                                             /* size */ 4u,
+                                                             /* location */ std::nullopt),
+                                                     },
+                                                     /* align*/ 4u,
+                                                     /* size*/ 4u,
+                                                     /* size_no_padding*/ 4u);
+    const sem::Struct* str_f16 = create<sem::Struct>(nullptr,
+                                                     Source{},
+                                                     Sym("str_f16"),
+                                                     utils::Vector{
+                                                         create<sem::StructMember>(
+                                                             /* declaration */ nullptr,
+                                                             /* source */ Source{},
+                                                             /* name */ Sym("x"),
+                                                             /* type */ f16,
+                                                             /* index */ 0u,
+                                                             /* offset */ 0u,
+                                                             /* align */ 4u,
+                                                             /* size */ 4u,
+                                                             /* location */ std::nullopt),
+                                                     },
+                                                     /* align*/ 4u,
+                                                     /* size*/ 4u,
+                                                     /* size_no_padding*/ 4u);
+    sem::Struct* str_af = create<sem::Struct>(nullptr,
+                                              Source{},
+                                              Sym("str_af"),
+                                              utils::Vector{
+                                                  create<sem::StructMember>(
+                                                      /* declaration */ nullptr,
+                                                      /* source */ Source{},
+                                                      /* name */ Sym("x"),
+                                                      /* type */ af,
+                                                      /* index */ 0u,
+                                                      /* offset */ 0u,
+                                                      /* align */ 4u,
+                                                      /* size */ 4u,
+                                                      /* location */ std::nullopt),
+                                              },
+                                              /* align*/ 4u,
+                                              /* size*/ 4u,
+                                              /* size_no_padding*/ 4u);
+    const sem::Array* arr_i32 = create<sem::Array>(
         /* element */ i32,
-        /* count */ create<ConstantArrayCount>(5u),
+        /* count */ create<type::ConstantArrayCount>(5u),
         /* align */ 4u,
         /* size */ 5u * 4u,
         /* stride */ 5u * 4u,
         /* implicit_stride */ 5u * 4u);
-    const sem::Array* arr_ai = create<Array>(
+    const sem::Array* arr_ai = create<sem::Array>(
         /* element */ ai,
-        /* count */ create<ConstantArrayCount>(5u),
+        /* count */ create<type::ConstantArrayCount>(5u),
         /* align */ 4u,
         /* size */ 5u * 4u,
         /* stride */ 5u * 4u,
         /* implicit_stride */ 5u * 4u);
-    const sem::Array* arr_vec3_i32 = create<Array>(
+    const sem::Array* arr_vec3_i32 = create<sem::Array>(
         /* element */ vec3_i32,
         /* count */ create<ConstantArrayCount>(5u),
         /* align */ 16u,
         /* size */ 5u * 16u,
         /* stride */ 5u * 16u,
         /* implicit_stride */ 5u * 16u);
-    const sem::Array* arr_vec3_ai = create<Array>(
+    const sem::Array* arr_vec3_ai = create<sem::Array>(
         /* element */ vec3_ai,
-        /* count */ create<ConstantArrayCount>(5u),
+        /* count */ create<type::ConstantArrayCount>(5u),
         /* align */ 16u,
         /* size */ 5u * 16u,
         /* stride */ 5u * 16u,
         /* implicit_stride */ 5u * 16u);
-    const sem::Array* arr_mat4x3_f16 = create<Array>(
+    const sem::Array* arr_mat4x3_f16 = create<sem::Array>(
         /* element */ mat4x3_f16,
-        /* count */ create<ConstantArrayCount>(5u),
+        /* count */ create<type::ConstantArrayCount>(5u),
         /* align */ 32u,
         /* size */ 5u * 32u,
         /* stride */ 5u * 32u,
         /* implicit_stride */ 5u * 32u);
-    const sem::Array* arr_mat4x3_f32 = create<Array>(
+    const sem::Array* arr_mat4x3_f32 = create<sem::Array>(
         /* element */ mat4x3_f32,
-        /* count */ create<ConstantArrayCount>(5u),
+        /* count */ create<type::ConstantArrayCount>(5u),
         /* align */ 64u,
         /* size */ 5u * 64u,
         /* stride */ 5u * 64u,
         /* implicit_stride */ 5u * 64u);
-    const sem::Array* arr_mat4x3_af = create<Array>(
+    const sem::Array* arr_mat4x3_af = create<sem::Array>(
         /* element */ mat4x3_af,
-        /* count */ create<ConstantArrayCount>(5u),
+        /* count */ create<type::ConstantArrayCount>(5u),
         /* align */ 64u,
         /* size */ 5u * 64u,
         /* stride */ 5u * 64u,
         /* implicit_stride */ 5u * 64u);
-    const sem::Array* arr_str_f16 = create<Array>(
+    const sem::Array* arr_str_f16 = create<sem::Array>(
         /* element */ str_f16,
-        /* count */ create<ConstantArrayCount>(5u),
+        /* count */ create<type::ConstantArrayCount>(5u),
         /* align */ 4u,
         /* size */ 5u * 4u,
         /* stride */ 5u * 4u,
         /* implicit_stride */ 5u * 4u);
-    const sem::Array* arr_str_af = create<Array>(
+    const sem::Array* arr_str_af = create<sem::Array>(
         /* element */ str_af,
-        /* count */ create<ConstantArrayCount>(5u),
+        /* count */ create<type::ConstantArrayCount>(5u),
         /* align */ 4u,
         /* size */ 5u * 4u,
         /* stride */ 5u * 4u,
@@ -613,4 +614,4 @@ TEST_F(TypeTest, HoldsAbstract) {
 }
 
 }  // namespace
-}  // namespace tint::sem
+}  // namespace tint::type

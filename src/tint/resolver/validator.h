@@ -70,7 +70,7 @@ namespace tint::resolver {
 /// TypeAndAddressSpace is a pair of type and address space
 struct TypeAndAddressSpace {
     /// The type
-    const sem::Type* type;
+    const type::Type* type;
     /// The address space
     ast::AddressSpace address_space;
 
@@ -97,7 +97,7 @@ class Validator {
     Validator(ProgramBuilder* builder,
               SemHelper& helper,
               const ast::Extensions& enabled_extensions,
-              const utils::Hashmap<const sem::Type*, const Source*, 8>& atomic_composite_info,
+              const utils::Hashmap<const type::Type*, const Source*, 8>& atomic_composite_info,
               utils::Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts);
     ~Validator();
 
@@ -118,19 +118,19 @@ class Validator {
 
     /// @param type the given type
     /// @returns true if the given type is a plain type
-    bool IsPlain(const sem::Type* type) const;
+    bool IsPlain(const type::Type* type) const;
 
     /// @param type the given type
     /// @returns true if the given type is a fixed-footprint type
-    bool IsFixedFootprint(const sem::Type* type) const;
+    bool IsFixedFootprint(const type::Type* type) const;
 
     /// @param type the given type
     /// @returns true if the given type is storable
-    bool IsStorable(const sem::Type* type) const;
+    bool IsStorable(const type::Type* type) const;
 
     /// @param type the given type
     /// @returns true if the given type is host-shareable
-    bool IsHostShareable(const sem::Type* type) const;
+    bool IsHostShareable(const type::Type* type) const;
 
     /// Validates pipeline stages
     /// @param entry_points the entry points to the module
@@ -179,13 +179,13 @@ class Validator {
     /// @param a the assignment statement
     /// @param rhs_ty the type of the right hand side
     /// @returns true on success, false otherwise.
-    bool Assignment(const ast::Statement* a, const sem::Type* rhs_ty) const;
+    bool Assignment(const ast::Statement* a, const type::Type* rhs_ty) const;
 
     /// Validates a bitcase
     /// @param cast the bitcast expression
     /// @param to the destination type
     /// @returns true on success, false otherwise
-    bool Bitcast(const ast::BitcastExpression* cast, const sem::Type* to) const;
+    bool Bitcast(const ast::BitcastExpression* cast, const type::Type* to) const;
 
     /// Validates a break statement
     /// @param stmt the break statement to validate
@@ -200,7 +200,7 @@ class Validator {
     /// @param is_input true if this is an input attribute
     /// @returns true on success, false otherwise.
     bool BuiltinAttribute(const ast::BuiltinAttribute* attr,
-                          const sem::Type* storage_type,
+                          const type::Type* storage_type,
                           ast::PipelineStage stage,
                           const bool is_input) const;
 
@@ -283,7 +283,7 @@ class Validator {
     /// @param storage_type the storage type of the attached variable
     /// @returns true on succes, false otherwise
     bool InterpolateAttribute(const ast::InterpolateAttribute* attr,
-                              const sem::Type* storage_type) const;
+                              const type::Type* storage_type) const;
 
     /// Validates a builtin call
     /// @param call the builtin call to validate
@@ -306,7 +306,7 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool LocationAttribute(const ast::LocationAttribute* loc_attr,
                            uint32_t location,
-                           const sem::Type* type,
+                           const type::Type* type,
                            utils::Hashset<uint32_t, 8>& locations,
                            ast::PipelineStage stage,
                            const Source& source,
@@ -322,7 +322,7 @@ class Validator {
     /// @param from the abstract numeric type
     /// @param source the source of the materialization
     /// @returns true on success, false otherwise
-    bool Materialize(const sem::Type* to, const sem::Type* from, const Source& source) const;
+    bool Materialize(const type::Type* to, const type::Type* from, const Source& source) const;
 
     /// Validates a matrix
     /// @param ty the matrix to validate
@@ -343,8 +343,8 @@ class Validator {
     /// @param current_statement the current statement being resolved
     /// @returns true on success, false otherwise
     bool Return(const ast::ReturnStatement* ret,
-                const sem::Type* func_type,
-                const sem::Type* ret_type,
+                const type::Type* func_type,
+                const type::Type* ret_type,
                 sem::Statement* current_statement) const;
 
     /// Validates a list of statements
@@ -417,7 +417,7 @@ class Validator {
     /// @returns true on succes, false otherwise
     bool VariableInitializer(const ast::Variable* v,
                              ast::AddressSpace address_space,
-                             const sem::Type* storage_type,
+                             const type::Type* storage_type,
                              const sem::Expression* initializer) const;
 
     /// Validates a vector
@@ -452,7 +452,7 @@ class Validator {
     /// @param sc the address space
     /// @param source the source of the type
     /// @returns true on success, false otherwise
-    bool AddressSpaceLayout(const sem::Type* type, ast::AddressSpace sc, Source source) const;
+    bool AddressSpaceLayout(const type::Type* type, ast::AddressSpace sc, Source source) const;
 
     /// @returns true if the attribute list contains a
     /// ast::DisableValidationAttribute with the validation mode equal to
@@ -474,7 +474,7 @@ class Validator {
     /// @param ty the type to check
     /// @returns true if @p ty is an array with an `override` expression element count, otherwise
     ///          false.
-    bool IsArrayWithOverrideCount(const sem::Type* ty) const;
+    bool IsArrayWithOverrideCount(const type::Type* ty) const;
 
     /// Raises an error about an array type using an `override` expression element count, outside
     /// the single allowed use of a `var<workgroup>`.
@@ -496,7 +496,7 @@ class Validator {
     /// @param size the vector dimension
     /// @param element_type scalar vector sub-element type
     /// @return pretty string representation
-    std::string VectorPretty(uint32_t size, const sem::Type* element_type) const;
+    std::string VectorPretty(uint32_t size, const type::Type* element_type) const;
 
     /// Raises an error if combination of @p store_ty, @p access and @p address_space are not valid
     /// for a `var` or `ptr` declaration.
@@ -505,7 +505,7 @@ class Validator {
     /// @param address_space the var or pointer address space
     /// @param source the source for the error
     /// @returns true on success, false if an error was raised.
-    bool CheckTypeAccessAddressSpace(const sem::Type* store_ty,
+    bool CheckTypeAccessAddressSpace(const type::Type* store_ty,
                                      ast::Access access,
                                      ast::AddressSpace address_space,
                                      utils::VectorRef<const tint::ast::Attribute*> attributes,
@@ -514,7 +514,7 @@ class Validator {
     diag::List& diagnostics_;
     SemHelper& sem_;
     const ast::Extensions& enabled_extensions_;
-    const utils::Hashmap<const sem::Type*, const Source*, 8>& atomic_composite_info_;
+    const utils::Hashmap<const type::Type*, const Source*, 8>& atomic_composite_info_;
     utils::Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts_;
 };
 

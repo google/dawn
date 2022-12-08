@@ -104,7 +104,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
     // Mask all writes to host-visible memory using the discarded flag.
     // We also insert a discard statement before all return statements in entry points for shaders
     // that discard.
-    std::unordered_map<const sem::Type*, Symbol> atomic_cmpxchg_result_types;
+    std::unordered_map<const type::Type*, Symbol> atomic_cmpxchg_result_types;
     for (auto* node : src->ASTNodes().Objects()) {
         Switch(
             node,

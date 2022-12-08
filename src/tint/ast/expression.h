@@ -19,7 +19,6 @@
 #include <vector>
 
 #include "src/tint/ast/node.h"
-#include "src/tint/sem/type.h"
 
 namespace tint::ast {
 

@@ -195,7 +195,7 @@ class Transform : public Castable<Transform> {
     /// @param ty the semantic type to reconstruct
     /// @returns a ast::Type that when resolved, will produce the semantic type
     /// `ty`.
-    static const ast::Type* CreateASTTypeFor(CloneContext& ctx, const sem::Type* ty);
+    static const ast::Type* CreateASTTypeFor(CloneContext& ctx, const type::Type* ty);
 };
 
 }  // namespace tint::transform

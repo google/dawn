@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_TYPE_H_
-#define SRC_TINT_SEM_TYPE_H_
+#ifndef SRC_TINT_TYPE_TYPE_H_
+#define SRC_TINT_TYPE_TYPE_H_
 
 #include <functional>
 #include <string>
 
-#include "src/tint/sem/node.h"
+#include "src/tint/type/node.h"
 #include "src/tint/utils/enum_set.h"
 #include "src/tint/utils/vector.h"
 
@@ -28,7 +28,7 @@ class ProgramBuilder;
 class SymbolTable;
 }  // namespace tint
 
-namespace tint::sem {
+namespace tint::type {
 
 enum TypeFlag {
     /// Type is constructable.
@@ -192,7 +192,7 @@ class Type : public Castable<Type, Node> {
     /// @returns the lowest-ranking type that all types in `types` can be implicitly converted to,
     ///          or nullptr if there is no consistent common type across all types in `types`.
     /// @see https://www.w3.org/TR/WGSL/#conversion-rank
-    static const sem::Type* Common(utils::VectorRef<const Type*> types);
+    static const type::Type* Common(utils::VectorRef<const Type*> types);
 
   protected:
     /// Constructor
@@ -203,29 +203,29 @@ class Type : public Castable<Type, Node> {
     const TypeFlags flags_;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
 namespace std {
 
-/// std::hash specialization for tint::sem::Type
+/// std::hash specialization for tint::type::Type
 template <>
-struct hash<tint::sem::Type> {
+struct hash<tint::type::Type> {
     /// @param type the type to obtain a hash from
-    /// @returns the hash of the semantic type
-    size_t operator()(const tint::sem::Type& type) const { return type.Hash(); }
+    /// @returns the hash of the type
+    size_t operator()(const tint::type::Type& type) const { return type.Hash(); }
 };
 
-/// std::equal_to specialization for tint::sem::Type
+/// std::equal_to specialization for tint::type::Type
 template <>
-struct equal_to<tint::sem::Type> {
+struct equal_to<tint::type::Type> {
     /// @param a the first type to compare
     /// @param b the second type to compare
     /// @returns true if the two types are equal
-    bool operator()(const tint::sem::Type& a, const tint::sem::Type& b) const {
+    bool operator()(const tint::type::Type& a, const tint::type::Type& b) const {
         return a.Equals(b);
     }
 };
 
 }  // namespace std
 
-#endif  // SRC_TINT_SEM_TYPE_H_
+#endif  // SRC_TINT_TYPE_TYPE_H_

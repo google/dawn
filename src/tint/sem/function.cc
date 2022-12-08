@@ -39,7 +39,7 @@ utils::VectorRef<const Parameter*> SetOwner(utils::VectorRef<Parameter*> paramet
 }  // namespace
 
 Function::Function(const ast::Function* declaration,
-                   Type* return_type,
+                   type::Type* return_type,
                    std::optional<uint32_t> return_location,
                    utils::VectorRef<Parameter*> parameters)
     : Base(return_type, SetOwner(std::move(parameters), this), EvaluationStage::kRuntime),

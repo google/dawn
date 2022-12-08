@@ -28,20 +28,21 @@ namespace tint::sem {
 
 namespace {
 
-TypeFlags FlagsFrom(const Type* element, const ArrayCount* count) {
-    TypeFlags flags;
+type::TypeFlags FlagsFrom(const type::Type* element, const type::ArrayCount* count) {
+    type::TypeFlags flags;
     // Only constant-expression sized arrays are constructible
-    if (count->Is<ConstantArrayCount>()) {
+    if (count->Is<type::ConstantArrayCount>()) {
         if (element->IsConstructible()) {
-            flags.Add(TypeFlag::kConstructable);
+            flags.Add(type::TypeFlag::kConstructable);
         }
         if (element->HasCreationFixedFootprint()) {
-            flags.Add(TypeFlag::kCreationFixedFootprint);
+            flags.Add(type::TypeFlag::kCreationFixedFootprint);
         }
     }
-    if (count->IsAnyOf<ConstantArrayCount, NamedOverrideArrayCount, UnnamedOverrideArrayCount>()) {
+    if (count->IsAnyOf<type::ConstantArrayCount, sem::NamedOverrideArrayCount,
+                       sem::UnnamedOverrideArrayCount>()) {
         if (element->HasFixedFootprint()) {
-            flags.Add(TypeFlag::kFixedFootprint);
+            flags.Add(type::TypeFlag::kFixedFootprint);
         }
     }
     return flags;
@@ -53,8 +54,8 @@ const char* const Array::kErrExpectedConstantCount =
     "array size is an override-expression, when expected a constant-expression.\n"
     "Was the SubstituteOverride transform run?";
 
-Array::Array(const Type* element,
-             const ArrayCount* count,
+Array::Array(const type::Type* element,
+             const type::ArrayCount* count,
              uint32_t align,
              uint32_t size,
              uint32_t stride,
@@ -73,7 +74,7 @@ size_t Array::Hash() const {
     return utils::Hash(TypeInfo::Of<Array>().full_hashcode, count_, align_, size_, stride_);
 }
 
-bool Array::Equals(const sem::Type& other) const {
+bool Array::Equals(const type::Type& other) const {
     if (auto* o = other.As<Array>()) {
         // Note: implicit_stride is not part of the type_name string as this is
         // derived from the element type
@@ -89,11 +90,11 @@ std::string Array::FriendlyName(const SymbolTable& symbols) const {
         out << "@stride(" << stride_ << ") ";
     }
     out << "array<" << element_->FriendlyName(symbols);
-    if (auto* const_count = count_->As<ConstantArrayCount>()) {
+    if (auto* const_count = count_->As<type::ConstantArrayCount>()) {
         out << ", " << const_count->value;
-    } else if (auto* named_override_count = count_->As<NamedOverrideArrayCount>()) {
+    } else if (auto* named_override_count = count_->As<sem::NamedOverrideArrayCount>()) {
         out << ", " << symbols.NameFor(named_override_count->variable->Declaration()->symbol);
-    } else if (count_->Is<UnnamedOverrideArrayCount>()) {
+    } else if (count_->Is<sem::UnnamedOverrideArrayCount>()) {
         out << ", [unnamed override-expression]";
     }
     out << ">";

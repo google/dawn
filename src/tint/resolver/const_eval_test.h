@@ -23,7 +23,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/test_helper.h"
+#include "src/tint/type/test_helper.h"
 
 namespace tint::resolver {
 

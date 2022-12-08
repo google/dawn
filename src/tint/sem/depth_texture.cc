@@ -41,7 +41,7 @@ size_t DepthTexture::Hash() const {
     return utils::Hash(TypeInfo::Of<DepthTexture>().full_hashcode, dim());
 }
 
-bool DepthTexture::Equals(const sem::Type& other) const {
+bool DepthTexture::Equals(const type::Type& other) const {
     if (auto* o = other.As<DepthTexture>()) {
         return o->dim() == dim();
     }

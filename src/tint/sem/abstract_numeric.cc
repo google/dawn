@@ -19,7 +19,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::AbstractNumeric);
 namespace tint::sem {
 
 AbstractNumeric::AbstractNumeric()
-    : Base(TypeFlags{
+    : Base(type::TypeFlags{
           Flag::kConstructable,
           Flag::kCreationFixedFootprint,
           Flag::kFixedFootprint,

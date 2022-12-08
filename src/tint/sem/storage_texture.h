@@ -39,7 +39,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     StorageTexture(ast::TextureDimension dim,
                    ast::TexelFormat format,
                    ast::Access access,
-                   sem::Type* subtype);
+                   type::Type* subtype);
 
     /// Move constructor
     StorageTexture(StorageTexture&&);
@@ -53,7 +53,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     bool Equals(const Type& other) const override;
 
     /// @returns the storage subtype
-    Type* type() const { return subtype_; }
+    type::Type* type() const { return subtype_; }
 
     /// @returns the texel format
     ast::TexelFormat texel_format() const { return texel_format_; }
@@ -69,12 +69,12 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     /// @param format the storage texture image format
     /// @param type_mgr the sem::TypeManager used to build the returned type
     /// @returns the storage texture subtype for the given TexelFormat
-    static sem::Type* SubtypeFor(ast::TexelFormat format, sem::TypeManager& type_mgr);
+    static type::Type* SubtypeFor(ast::TexelFormat format, sem::TypeManager& type_mgr);
 
   private:
     ast::TexelFormat const texel_format_;
     ast::Access const access_;
-    Type* const subtype_;
+    type::Type* const subtype_;
 };
 
 }  // namespace tint::sem

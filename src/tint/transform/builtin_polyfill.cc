@@ -32,7 +32,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::BuiltinPolyfill::Config);
 namespace tint::transform {
 
 /// BinaryOpSignature is tuple of a binary op, LHS type and RHS type
-using BinaryOpSignature = std::tuple<ast::BinaryOp, const sem::Type*, const sem::Type*>;
+using BinaryOpSignature = std::tuple<ast::BinaryOp, const type::Type*, const type::Type*>;
 
 /// PIMPL state for the transform
 struct BuiltinPolyfill::State {
@@ -48,7 +48,7 @@ struct BuiltinPolyfill::State {
     /// Builds the polyfill function for the `acosh` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
-    Symbol acosh(const sem::Type* ty) {
+    Symbol acosh(const type::Type* ty) {
         auto name = b.Symbols().New("tint_acosh");
         uint32_t width = WidthOf(ty);
 
@@ -87,7 +87,7 @@ struct BuiltinPolyfill::State {
     /// Builds the polyfill function for the `asinh` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
-    Symbol asinh(const sem::Type* ty) {
+    Symbol asinh(const type::Type* ty) {
         auto name = b.Symbols().New("tint_sinh");
 
         // return log(x + sqrt(x*x + 1));
@@ -102,7 +102,7 @@ struct BuiltinPolyfill::State {
     /// Builds the polyfill function for the `atanh` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
-    Symbol atanh(const sem::Type* ty) {
+    Symbol atanh(const type::Type* ty) {
         auto name = b.Symbols().New("tint_atanh");
         uint32_t width = WidthOf(ty);
 
@@ -141,7 +141,7 @@ struct BuiltinPolyfill::State {
     /// (scalar or vector)
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
-    Symbol clampInteger(const sem::Type* ty) {
+    Symbol clampInteger(const type::Type* ty) {
         auto name = b.Symbols().New("tint_clamp");
 
         b.Func(name,
@@ -161,7 +161,7 @@ struct BuiltinPolyfill::State {
     /// Builds the polyfill function for the `countLeadingZeros` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
-    Symbol countLeadingZeros(const sem::Type* ty) {
+    Symbol countLeadingZeros(const type::Type* ty) {
         auto name = b.Symbols().New("tint_count_leading_zeros");
         uint32_t width = WidthOf(ty);
 
@@ -219,7 +219,7 @@ struct BuiltinPolyfill::State {
     /// Builds the polyfill function for the `countTrailingZeros` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
-    Symbol countTrailingZeros(const sem::Type* ty) {
+    Symbol countTrailingZeros(const type::Type* ty) {
         auto name = b.Symbols().New("tint_count_trailing_zeros");
         uint32_t width = WidthOf(ty);
 
@@ -279,7 +279,7 @@ struct BuiltinPolyfill::State {
     /// Builds the polyfill function for the `extractBits` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
-    Symbol extractBits(const sem::Type* ty) {
+    Symbol extractBits(const type::Type* ty) {
         auto name = b.Symbols().New("tint_extract_bits");
         uint32_t width = WidthOf(ty);
 
@@ -337,7 +337,7 @@ struct BuiltinPolyfill::State {
     /// Builds the polyfill function for the `firstLeadingBit` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
-    Symbol firstLeadingBit(const sem::Type* ty) {
+    Symbol firstLeadingBit(const type::Type* ty) {
         auto name = b.Symbols().New("tint_first_leading_bit");
         uint32_t width = WidthOf(ty);
 
@@ -409,7 +409,7 @@ struct BuiltinPolyfill::State {
     /// Builds the polyfill function for the `firstTrailingBit` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
-    Symbol firstTrailingBit(const sem::Type* ty) {
+    Symbol firstTrailingBit(const type::Type* ty) {
         auto name = b.Symbols().New("tint_first_trailing_bit");
         uint32_t width = WidthOf(ty);
 
@@ -468,12 +468,12 @@ struct BuiltinPolyfill::State {
     /// Builds the polyfill function for the `insertBits` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
-    Symbol insertBits(const sem::Type* ty) {
+    Symbol insertBits(const type::Type* ty) {
         auto name = b.Symbols().New("tint_insert_bits");
         uint32_t width = WidthOf(ty);
 
         // Currently in WGSL parameters of insertBits must be i32, u32, vecN<i32> or vecN<u32>
-        if (!sem::Type::DeepestElementOf(ty)->IsAnyOf<sem::I32, sem::U32>()) {
+        if (!type::Type::DeepestElementOf(ty)->IsAnyOf<sem::I32, sem::U32>()) {
             TINT_ICE(Transform, b.Diagnostics())
                 << "insertBits polyfill only support i32, u32, and vector of i32 or u32, got "
                 << b.FriendlyName(ty);
@@ -576,7 +576,7 @@ struct BuiltinPolyfill::State {
     /// Builds the polyfill function for the `saturate` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
-    Symbol saturate(const sem::Type* ty) {
+    Symbol saturate(const type::Type* ty) {
         auto name = b.Symbols().New("tint_saturate");
         auto body = utils::Vector{
             b.Return(b.Call("clamp", "v", b.Construct(T(ty), 0_a), b.Construct(T(ty), 1_a))),
@@ -593,7 +593,7 @@ struct BuiltinPolyfill::State {
     /// Builds the polyfill function for the `sign` builtin when the element type is integer
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
-    Symbol sign_int(const sem::Type* ty) {
+    Symbol sign_int(const type::Type* ty) {
         const uint32_t width = WidthOf(ty);
         auto zero = [&] { return ScalarOrVector(width, 0_a); };
 
@@ -671,7 +671,7 @@ struct BuiltinPolyfill::State {
     const ast::Expression* BitshiftModulo(const ast::BinaryExpression* bin_op) {
         auto* lhs_ty = ctx.src->TypeOf(bin_op->lhs)->UnwrapRef();
         auto* rhs_ty = ctx.src->TypeOf(bin_op->rhs)->UnwrapRef();
-        auto* lhs_el_ty = sem::Type::DeepestElementOf(lhs_ty);
+        auto* lhs_el_ty = type::Type::DeepestElementOf(lhs_ty);
         const ast::Expression* mask = b.Expr(AInt(lhs_el_ty->Size() * 8 - 1));
         if (rhs_ty->Is<sem::Vector>()) {
             mask = b.Construct(CreateASTTypeFor(ctx, rhs_ty), mask);
@@ -694,8 +694,8 @@ struct BuiltinPolyfill::State {
 
             uint32_t lhs_width = 1;
             uint32_t rhs_width = 1;
-            const auto* lhs_el_ty = sem::Type::ElementOf(lhs_ty, &lhs_width);
-            const auto* rhs_el_ty = sem::Type::ElementOf(rhs_ty, &rhs_width);
+            const auto* lhs_el_ty = type::Type::ElementOf(lhs_ty, &lhs_width);
+            const auto* rhs_el_ty = type::Type::ElementOf(rhs_ty, &rhs_width);
 
             const uint32_t width = std::max(lhs_width, rhs_width);
 
@@ -757,10 +757,10 @@ struct BuiltinPolyfill::State {
     utils::Hashmap<BinaryOpSignature, Symbol, 8> binary_op_polyfills;
 
     /// @returns the AST type for the given sem type
-    const ast::Type* T(const sem::Type* ty) const { return CreateASTTypeFor(ctx, ty); }
+    const ast::Type* T(const type::Type* ty) const { return CreateASTTypeFor(ctx, ty); }
 
     /// @returns 1 if `ty` is not a vector, otherwise the vector width
-    uint32_t WidthOf(const sem::Type* ty) const {
+    uint32_t WidthOf(const type::Type* ty) const {
         if (auto* v = ty->As<sem::Vector>()) {
             return v->Width();
         }

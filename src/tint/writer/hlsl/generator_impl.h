@@ -407,7 +407,7 @@ class GeneratorImpl : public TextGenerator {
     /// then the boolean is set to true.
     /// @returns true if the type is emitted
     bool EmitType(std::ostream& out,
-                  const sem::Type* type,
+                  const type::Type* type,
                   ast::AddressSpace address_space,
                   ast::Access access,
                   const std::string& name,
@@ -420,7 +420,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param name the name to emit
     /// @returns true if the type is emitted
     bool EmitTypeAndName(std::ostream& out,
-                         const sem::Type* type,
+                         const type::Type* type,
                          ast::AddressSpace address_space,
                          ast::Access access,
                          const std::string& name);
@@ -440,12 +440,12 @@ class GeneratorImpl : public TextGenerator {
     /// @param type the type to emit the value for
     /// @param value the value to emit
     /// @returns true if the value was successfully emitted.
-    bool EmitValue(std::ostream& out, const sem::Type* type, int value);
+    bool EmitValue(std::ostream& out, const type::Type* type, int value);
     /// Emits the zero value for the given type
     /// @param out the output stream
     /// @param type the type to emit the value for
     /// @returns true if the zero value was successfully emitted.
-    bool EmitZeroValue(std::ostream& out, const sem::Type* type);
+    bool EmitZeroValue(std::ostream& out, const type::Type* type);
     /// Handles generating a 'var' declaration
     /// @param var the variable to generate
     /// @returns true if the variable was emitted
@@ -547,7 +547,7 @@ class GeneratorImpl : public TextGenerator {
     std::unordered_map<const sem::Vector*, std::string> dynamic_vector_write_;
     std::unordered_map<const sem::Matrix*, std::string> dynamic_matrix_vector_write_;
     std::unordered_map<const sem::Matrix*, std::string> dynamic_matrix_scalar_write_;
-    std::unordered_map<const sem::Type*, std::string> value_or_one_if_zero_;
+    std::unordered_map<const type::Type*, std::string> value_or_one_if_zero_;
     std::unordered_set<const sem::Struct*> emitted_structs_;
 };
 

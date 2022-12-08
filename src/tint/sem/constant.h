@@ -18,11 +18,7 @@
 #include <variant>
 
 #include "src/tint/number.h"
-
-// Forward declarations
-namespace tint::sem {
-class Type;
-}
+#include "src/tint/type/type.h"
 
 namespace tint::sem {
 
@@ -36,7 +32,7 @@ class Constant {
     virtual ~Constant();
 
     /// @returns the type of the constant
-    virtual const sem::Type* Type() const = 0;
+    virtual const type::Type* Type() const = 0;
 
     /// @returns the value of this Constant, if this constant is of a scalar value or abstract
     /// numeric, otherwise std::monostate.

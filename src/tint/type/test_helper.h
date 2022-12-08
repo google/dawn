@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_TEST_HELPER_H_
-#define SRC_TINT_SEM_TEST_HELPER_H_
+#ifndef SRC_TINT_TYPE_TEST_HELPER_H_
+#define SRC_TINT_TYPE_TEST_HELPER_H_
 
 #include <utility>
 
 #include "gtest/gtest.h"
 #include "src/tint/program_builder.h"
 
-namespace tint::sem {
+namespace tint::type {
 
 /// Helper class for testing
 template <typename BASE>
@@ -42,6 +42,18 @@ using TestHelper = TestHelperBase<testing::Test>;
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
-#endif  // SRC_TINT_SEM_TEST_HELPER_H_
+/// Helper macro for testing that a type was as expected
+#define EXPECT_TYPE(GOT, EXPECT)                                         \
+    do {                                                                 \
+        const type::Type* got = GOT;                                     \
+        const type::Type* expect = EXPECT;                               \
+        if (got != expect) {                                             \
+            ADD_FAILURE() << #GOT " != " #EXPECT "\n"                    \
+                          << "  " #GOT ": " << FriendlyName(got) << "\n" \
+                          << "  " #EXPECT ": " << FriendlyName(expect);  \
+        }                                                                \
+    } while (false)
+
+#endif  // SRC_TINT_TYPE_TEST_HELPER_H_

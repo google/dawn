@@ -106,7 +106,7 @@ struct Robustness::State {
             },
             [&](const sem::Array* arr) -> const ast::Expression* {
                 const ast::Expression* max = nullptr;
-                if (arr->Count()->Is<sem::RuntimeArrayCount>()) {
+                if (arr->Count()->Is<type::RuntimeArrayCount>()) {
                     // Size is unknown until runtime.
                     // Must clamp, even if the index is constant.
                     auto* arr_ptr = b.AddressOf(ctx.Clone(expr->object));
@@ -176,7 +176,7 @@ struct Robustness::State {
         auto* coords_arg = expr->args[static_cast<size_t>(coords_idx)];
         auto* coords_ty = builtin->Parameters()[static_cast<size_t>(coords_idx)]->Type();
 
-        auto width_of = [&](const sem::Type* ty) {
+        auto width_of = [&](const type::Type* ty) {
             if (auto* vec = ty->As<sem::Vector>()) {
                 return vec->Width();
             }

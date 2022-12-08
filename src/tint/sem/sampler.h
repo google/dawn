@@ -18,12 +18,12 @@
 #include <string>
 
 #include "src/tint/ast/sampler.h"
-#include "src/tint/sem/type.h"
+#include "src/tint/type/type.h"
 
 namespace tint::sem {
 
 /// A sampler type.
-class Sampler final : public Castable<Sampler, Type> {
+class Sampler final : public Castable<Sampler, type::Type> {
   public:
     /// Constructor
     /// @param kind the kind of sampler

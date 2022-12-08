@@ -29,7 +29,7 @@ size_t AbstractFloat::Hash() const {
     return utils::Hash(TypeInfo::Of<AbstractFloat>().full_hashcode);
 }
 
-bool AbstractFloat::Equals(const sem::Type& other) const {
+bool AbstractFloat::Equals(const type::Type& other) const {
     return other.Is<AbstractFloat>();
 }
 

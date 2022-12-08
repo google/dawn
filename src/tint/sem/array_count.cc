@@ -14,41 +14,10 @@
 
 #include "src/tint/sem/array_count.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::ArrayCount);
-TINT_INSTANTIATE_TYPEINFO(tint::sem::ConstantArrayCount);
-TINT_INSTANTIATE_TYPEINFO(tint::sem::RuntimeArrayCount);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::NamedOverrideArrayCount);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::UnnamedOverrideArrayCount);
 
 namespace tint::sem {
-
-ArrayCount::ArrayCount() : Base() {}
-ArrayCount::~ArrayCount() = default;
-
-ConstantArrayCount::ConstantArrayCount(uint32_t val) : Base(), value(val) {}
-ConstantArrayCount::~ConstantArrayCount() = default;
-
-size_t ConstantArrayCount::Hash() const {
-    return static_cast<size_t>(TypeInfo::Of<ConstantArrayCount>().full_hashcode);
-}
-
-bool ConstantArrayCount::Equals(const ArrayCount& other) const {
-    if (auto* v = other.As<ConstantArrayCount>()) {
-        return value == v->value;
-    }
-    return false;
-}
-
-RuntimeArrayCount::RuntimeArrayCount() : Base() {}
-RuntimeArrayCount::~RuntimeArrayCount() = default;
-
-size_t RuntimeArrayCount::Hash() const {
-    return static_cast<size_t>(TypeInfo::Of<RuntimeArrayCount>().full_hashcode);
-}
-
-bool RuntimeArrayCount::Equals(const ArrayCount& other) const {
-    return other.Is<RuntimeArrayCount>();
-}
 
 NamedOverrideArrayCount::NamedOverrideArrayCount(const GlobalVariable* var)
     : Base(), variable(var) {}

@@ -40,7 +40,7 @@ class IndexAccessorExpression final : public Castable<IndexAccessorExpression, E
     /// @param has_side_effects whether this expression may have side effects
     /// @param root_ident the (optional) root identifier for this expression
     IndexAccessorExpression(const ast::IndexAccessorExpression* declaration,
-                            const sem::Type* type,
+                            const type::Type* type,
                             EvaluationStage stage,
                             const Expression* object,
                             const Expression* index,

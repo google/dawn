@@ -94,7 +94,7 @@ struct PreservePadding::State {
     /// @param lhs the lhs expression (in the destination program)
     /// @param rhs the rhs expression (in the destination program)
     /// @returns the statement that performs the assignment
-    const ast::Statement* MakeAssignment(const sem::Type* ty,
+    const ast::Statement* MakeAssignment(const type::Type* ty,
                                          const ast::Expression* lhs,
                                          const ast::Expression* rhs) {
         if (!HasPadding(ty)) {
@@ -168,7 +168,7 @@ struct PreservePadding::State {
     /// Checks if a type contains padding bytes.
     /// @param ty the type to check
     /// @returns true if `ty` (or any of its contained types) have padding bytes
-    bool HasPadding(const sem::Type* ty) {
+    bool HasPadding(const type::Type* ty) {
         return Switch(
             ty,  //
             [&](const sem::Array* arr) {
@@ -214,7 +214,7 @@ struct PreservePadding::State {
     /// Flag to track whether we have already enabled the full pointer parameters extension.
     bool ext_enabled = false;
     /// Map of semantic types to their assignment helper functions.
-    utils::Hashmap<const sem::Type*, Symbol, 8> helpers;
+    utils::Hashmap<const type::Type*, Symbol, 8> helpers;
 };
 
 Transform::ApplyResult PreservePadding::Apply(const Program* program,

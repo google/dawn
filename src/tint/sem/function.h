@@ -57,7 +57,7 @@ class Function final : public Castable<Function, CallTarget> {
     /// @param return_location the location value for the return, if provided
     /// @param parameters the parameters to the function
     Function(const ast::Function* declaration,
-             Type* return_type,
+             type::Type* return_type,
              std::optional<uint32_t> return_location,
              utils::VectorRef<Parameter*> parameters);
 

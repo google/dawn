@@ -2021,7 +2021,7 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
             }
 
             std::string member_type;
-            if (Is<sem::F16>(sem::Type::DeepestElementOf(ty))) {
+            if (Is<sem::F16>(type::Type::DeepestElementOf(ty))) {
                 member_type = width.empty() ? "float16_t" : ("vector<float16_t, " + width + ">");
             } else {
                 member_type = "float" + width;
@@ -3456,7 +3456,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
         });
 }
 
-bool GeneratorImpl::EmitValue(std::ostream& out, const sem::Type* type, int value) {
+bool GeneratorImpl::EmitValue(std::ostream& out, const type::Type* type, int value) {
     return Switch(
         type,
         [&](const sem::Bool*) {
@@ -3527,7 +3527,7 @@ bool GeneratorImpl::EmitValue(std::ostream& out, const sem::Type* type, int valu
         });
 }
 
-bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
+bool GeneratorImpl::EmitZeroValue(std::ostream& out, const type::Type* type) {
     return EmitValue(out, type, 0);
 }
 
@@ -3891,7 +3891,7 @@ bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitType(std::ostream& out,
-                             const sem::Type* type,
+                             const type::Type* type,
                              ast::AddressSpace address_space,
                              ast::Access access,
                              const std::string& name,
@@ -3921,10 +3921,10 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     return Switch(
         type,
         [&](const sem::Array* ary) {
-            const sem::Type* base_type = ary;
+            const type::Type* base_type = ary;
             std::vector<uint32_t> sizes;
             while (auto* arr = base_type->As<sem::Array>()) {
-                if (arr->Count()->Is<sem::RuntimeArrayCount>()) {
+                if (arr->Count()->Is<type::RuntimeArrayCount>()) {
                     TINT_ICE(Writer, diagnostics_)
                         << "runtime arrays may only exist in storage buffers, which should have "
                            "been transformed into a ByteAddressBuffer";
@@ -4118,7 +4118,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitTypeAndName(std::ostream& out,
-                                    const sem::Type* type,
+                                    const type::Type* type,
                                     ast::AddressSpace address_space,
                                     ast::Access access,
                                     const std::string& name) {

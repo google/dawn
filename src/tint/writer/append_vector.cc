@@ -44,7 +44,7 @@ VectorInitializerInfo AsVectorInitializer(const sem::Expression* expr) {
     return {};
 }
 
-const sem::Expression* Zero(ProgramBuilder& b, const sem::Type* ty, const sem::Statement* stmt) {
+const sem::Expression* Zero(ProgramBuilder& b, const type::Type* ty, const sem::Statement* stmt) {
     const ast::Expression* expr = nullptr;
     if (ty->Is<sem::I32>()) {
         expr = b.Expr(0_i);
@@ -72,7 +72,7 @@ const sem::Call* AppendVector(ProgramBuilder* b,
                               const ast::Expression* vector_ast,
                               const ast::Expression* scalar_ast) {
     uint32_t packed_size;
-    const sem::Type* packed_el_sem_ty;
+    const type::Type* packed_el_sem_ty;
     auto* vector_sem = b->Sem().Get(vector_ast);
     auto* scalar_sem = b->Sem().Get(scalar_ast);
     auto* vector_ty = vector_sem->Type()->UnwrapRef();

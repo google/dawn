@@ -27,9 +27,9 @@
 #include "src/tint/sem/reference.h"
 #include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/storage_texture.h"
-#include "src/tint/sem/test_helper.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_initializer.h"
+#include "src/tint/type/test_helper.h"
 
 namespace tint::resolver {
 namespace {
@@ -253,7 +253,7 @@ TEST_F(IntrinsicTableTest, MismatchPointer) {
 
 TEST_F(IntrinsicTableTest, MatchArray) {
     auto* arr =
-        create<sem::Array>(create<sem::U32>(), create<sem::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
+        create<sem::Array>(create<sem::U32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
     auto* arr_ptr = create<sem::Pointer>(arr, ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto result = table->Lookup(BuiltinType::kArrayLength, utils::Vector{arr_ptr},
                                 sem::EvaluationStage::kConstant, Source{});
@@ -957,7 +957,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion) {
 
 TEST_F(IntrinsicTableTest, MismatchTypeConversion) {
     auto* arr =
-        create<sem::Array>(create<sem::U32>(), create<sem::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
+        create<sem::Array>(create<sem::U32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
     auto* f32 = create<sem::F32>();
     auto result = table->Lookup(InitConvIntrinsic::kVec3, f32, utils::Vector{arr},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
@@ -1017,7 +1017,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion_RuntimeEval) {
 
 TEST_F(IntrinsicTableTest, Err257Arguments) {  // crbug.com/1323605
     auto* f32 = create<sem::F32>();
-    utils::Vector<const sem::Type*, 0> arg_tys;
+    utils::Vector<const type::Type*, 0> arg_tys;
     arg_tys.Resize(257, f32);
     auto result = table->Lookup(BuiltinType::kAbs, std::move(arg_tys),
                                 sem::EvaluationStage::kConstant, Source{});

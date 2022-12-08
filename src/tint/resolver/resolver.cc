@@ -199,7 +199,7 @@ bool Resolver::ResolveInternal() {
     return result;
 }
 
-sem::Type* Resolver::Type(const ast::Type* ty) {
+type::Type* Resolver::Type(const ast::Type* ty) {
     Mark(ty);
     auto* s = Switch(
         ty,  //
@@ -317,7 +317,7 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
             auto* resolved = sem_.ResolvedSymbol(ty);
             return Switch(
                 resolved,  //
-                [&](sem::Type* type) { return type; },
+                [&](type::Type* type) { return type; },
                 [&](sem::Variable* var) {
                     auto name = builder_->Symbols().NameFor(var->Declaration()->symbol);
                     AddError("cannot use variable '" + name + "' as type", ty->source);
@@ -330,7 +330,7 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
                     AddNote("'" + name + "' declared here", func->Declaration()->source);
                     return nullptr;
                 },
-                [&](Default) -> sem::Type* {
+                [&](Default) -> type::Type* {
                     if (auto* tn = ty->As<ast::TypeName>()) {
                         if (IsBuiltin(tn->name)) {
                             auto name = builder_->Symbols().NameFor(tn->name);
@@ -371,7 +371,7 @@ sem::Variable* Resolver::Variable(const ast::Variable* v, bool is_global) {
 }
 
 sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
-    const sem::Type* ty = nullptr;
+    const type::Type* ty = nullptr;
 
     // If the variable has a declared type, resolve it.
     if (v->type) {
@@ -402,7 +402,7 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(ast::AddressSpace::kNone, const_cast<sem::Type*>(ty),
+    if (!ApplyAddressSpaceUsageToType(ast::AddressSpace::kNone, const_cast<type::Type*>(ty),
                                       v->source)) {
         AddNote("while instantiating 'let' " + builder_->Symbols().NameFor(v->symbol), v->source);
         return nullptr;
@@ -427,7 +427,7 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
 }
 
 sem::Variable* Resolver::Override(const ast::Override* v) {
-    const sem::Type* ty = nullptr;
+    const type::Type* ty = nullptr;
 
     // If the variable has a declared type, resolve it.
     if (v->type) {
@@ -461,7 +461,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(ast::AddressSpace::kNone, const_cast<sem::Type*>(ty),
+    if (!ApplyAddressSpaceUsageToType(ast::AddressSpace::kNone, const_cast<type::Type*>(ty),
                                       v->source)) {
         AddNote("while instantiating 'override' " + builder_->Symbols().NameFor(v->symbol),
                 v->source);
@@ -511,7 +511,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
 }
 
 sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
-    const sem::Type* ty = nullptr;
+    const type::Type* ty = nullptr;
 
     // If the variable has a declared type, resolve it.
     if (c->type) {
@@ -551,7 +551,7 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(ast::AddressSpace::kNone, const_cast<sem::Type*>(ty),
+    if (!ApplyAddressSpaceUsageToType(ast::AddressSpace::kNone, const_cast<type::Type*>(ty),
                                       c->source)) {
         AddNote("while instantiating 'const' " + builder_->Symbols().NameFor(c->symbol), c->source);
         return nullptr;
@@ -571,7 +571,7 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
 }
 
 sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
-    const sem::Type* storage_ty = nullptr;
+    const type::Type* storage_ty = nullptr;
 
     // If the variable has a declared type, resolve it.
     if (auto* ty = var->type) {
@@ -738,7 +738,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
         return nullptr;
     }
 
-    sem::Type* ty = Type(param->type);
+    type::Type* ty = Type(param->type);
     if (!ty) {
         return nullptr;
     }
@@ -752,7 +752,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
         // For MSL, we push module-scope variables into the entry point as pointer
         // parameters, so we also need to handle their store type.
         if (!ApplyAddressSpaceUsageToType(
-                ptr->AddressSpace(), const_cast<sem::Type*>(ptr->StoreType()), param->source)) {
+                ptr->AddressSpace(), const_cast<type::Type*>(ptr->StoreType()), param->source)) {
             add_note();
             return nullptr;
         }
@@ -887,10 +887,18 @@ bool Resolver::AllocateOverridableConstantIds() {
 
 void Resolver::SetShadows() {
     for (auto it : dependencies_.shadows) {
+        CastableBase* b = sem_.Get(it.value);
+        if (!b) {
+            TINT_ICE(Resolver, builder_->Diagnostics())
+                << "AST node '" << it.value->TypeInfo().name << "' had no semantic info\n"
+                << "At: " << it.value->source << "\n"
+                << "Pointer: " << it.value;
+        }
+
         Switch(
             sem_.Get(it.key),  //
-            [&](sem::LocalVariable* local) { local->SetShadows(sem_.Get(it.value)); },
-            [&](sem::Parameter* param) { param->SetShadows(sem_.Get(it.value)); });
+            [&](sem::LocalVariable* local) { local->SetShadows(b); },
+            [&](sem::Parameter* param) { param->SetShadows(b); });
     }
 }
 
@@ -984,7 +992,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
 
         parameters.Push(p);
 
-        auto* p_ty = const_cast<sem::Type*>(p->Type());
+        auto* p_ty = const_cast<type::Type*>(p->Type());
         if (auto* str = p_ty->As<sem::Struct>()) {
             switch (decl->PipelineStage()) {
                 case ast::PipelineStage::kVertex:
@@ -1003,7 +1011,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     }
 
     // Resolve the return type
-    sem::Type* return_type = nullptr;
+    type::Type* return_type = nullptr;
     if (auto* ty = decl->return_type) {
         return_type = Type(ty);
         if (!return_type) {
@@ -1129,7 +1137,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
 
     auto values = attr->Values();
     utils::Vector<const sem::Expression*, 3> args;
-    utils::Vector<const sem::Type*, 3> arg_tys;
+    utils::Vector<const type::Type*, 3> arg_tys;
 
     constexpr const char* kErrBadExpr =
         "workgroup_size argument must be a constant or override-expression of type "
@@ -1162,7 +1170,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         arg_tys.Push(ty);
     }
 
-    auto* common_ty = sem::Type::Common(arg_tys);
+    auto* common_ty = type::Type::Common(arg_tys);
     if (!common_ty) {
         AddError("workgroup_size arguments must be of the same type, either i32 or u32",
                  attr->source);
@@ -1266,7 +1274,7 @@ sem::Statement* Resolver::Statement(const ast::Statement* stmt) {
         });
 }
 
-sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt, const sem::Type* ty) {
+sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt, const type::Type* ty) {
     auto* sem =
         builder_->create<sem::CaseStatement>(stmt, current_compound_statement_, current_function_);
     return StatementScope(stmt, sem, [&] {
@@ -1705,9 +1713,9 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
     return true;
 }
 
-const sem::Type* Resolver::ConcreteType(const sem::Type* ty,
-                                        const sem::Type* target_ty,
-                                        const Source& source) {
+const type::Type* Resolver::ConcreteType(const type::Type* ty,
+                                         const type::Type* target_ty,
+                                         const Source& source) {
     auto i32 = [&] { return builder_->create<sem::I32>(); };
     auto f32 = [&] { return builder_->create<sem::F32>(); };
     auto i32v = [&](uint32_t width) { return builder_->create<sem::Vector>(i32(), width); };
@@ -1734,8 +1742,8 @@ const sem::Type* Resolver::ConcreteType(const sem::Type* ty,
                               return target_ty ? target_ty : f32m(m->columns(), m->rows());
                           });
         },
-        [&](const sem::Array* a) -> const sem::Type* {
-            const sem::Type* target_el_ty = nullptr;
+        [&](const sem::Array* a) -> const type::Type* {
+            const type::Type* target_el_ty = nullptr;
             if (auto* target_arr_ty = As<sem::Array>(target_ty)) {
                 target_el_ty = target_arr_ty->ElemType();
             }
@@ -1744,7 +1752,7 @@ const sem::Type* Resolver::ConcreteType(const sem::Type* ty,
             }
             return nullptr;
         },
-        [&](const sem::Struct* s) -> const sem::Type* {
+        [&](const sem::Struct* s) -> const type::Type* {
             if (auto tys = s->ConcreteTypes(); !tys.IsEmpty()) {
                 return target_ty ? target_ty : tys[0];
             }
@@ -1753,7 +1761,7 @@ const sem::Type* Resolver::ConcreteType(const sem::Type* ty,
 }
 
 const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
-                                             const sem::Type* target_type /* = nullptr */) {
+                                             const type::Type* target_type /* = nullptr */) {
     if (!expr) {
         // Allow for Materialize(Expression(blah)), where failures pass through Materialize()
         return nullptr;
@@ -1813,12 +1821,12 @@ bool Resolver::MaybeMaterializeArguments(utils::Vector<const sem::Expression*, N
     return true;
 }
 
-bool Resolver::ShouldMaterializeArgument(const sem::Type* parameter_ty) const {
-    const auto* param_el_ty = sem::Type::DeepestElementOf(parameter_ty);
+bool Resolver::ShouldMaterializeArgument(const type::Type* parameter_ty) const {
+    const auto* param_el_ty = type::Type::DeepestElementOf(parameter_ty);
     return param_el_ty && !param_el_ty->Is<sem::AbstractNumeric>();
 }
 
-bool Resolver::Convert(const sem::Constant*& c, const sem::Type* target_ty, const Source& source) {
+bool Resolver::Convert(const sem::Constant*& c, const type::Type* target_ty, const Source& source) {
     auto r = const_eval_.Convert(target_ty, c, source);
     if (!r) {
         return false;
@@ -1963,7 +1971,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
     // ct_init_or_conv is a helper for building either a sem::TypeInitializer or
     // sem::TypeConversion call for a InitConvIntrinsic with an optional template argument type.
-    auto ct_init_or_conv = [&](InitConvIntrinsic ty, const sem::Type* template_arg) -> sem::Call* {
+    auto ct_init_or_conv = [&](InitConvIntrinsic ty, const type::Type* template_arg) -> sem::Call* {
         auto arg_tys = utils::Transform(args, [](auto* arg) { return arg->Type(); });
         auto ctor_or_conv =
             intrinsic_table_->Lookup(ty, template_arg, arg_tys, args_stage, expr->source);
@@ -1993,7 +2001,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
     // arr_or_str_init is a helper for building a sem::TypeInitializer for an array or structure
     // initializer call target.
-    auto arr_or_str_init = [&](const sem::Type* ty,
+    auto arr_or_str_init = [&](const type::Type* ty,
                                const sem::CallTarget* call_target) -> sem::Call* {
         if (!MaybeMaterializeArguments(args, call_target)) {
             return nullptr;
@@ -2023,7 +2031,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
     // ty_init_or_conv is a helper for building either a sem::TypeInitializer or
     // sem::TypeConversion call for the given semantic type.
-    auto ty_init_or_conv = [&](const sem::Type* ty) {
+    auto ty_init_or_conv = [&](const type::Type* ty) {
         return Switch(
             ty,  //
             [&](const sem::Vector* v) {
@@ -2110,7 +2118,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             [&](const ast::Vector* v) -> sem::Call* {
                 Mark(v);
                 // vector element type must be inferred if it was not specified.
-                sem::Type* template_arg = nullptr;
+                type::Type* template_arg = nullptr;
                 if (v->type) {
                     template_arg = Type(v->type);
                     if (!template_arg) {
@@ -2126,7 +2134,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             [&](const ast::Matrix* m) -> sem::Call* {
                 Mark(m);
                 // matrix element type must be inferred if it was not specified.
-                sem::Type* template_arg = nullptr;
+                type::Type* template_arg = nullptr;
                 if (m->type) {
                     template_arg = Type(m->type);
                     if (!template_arg) {
@@ -2143,8 +2151,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             [&](const ast::Array* a) -> sem::Call* {
                 Mark(a);
                 // array element type must be inferred if it was not specified.
-                const sem::ArrayCount* el_count = nullptr;
-                const sem::Type* el_ty = nullptr;
+                const type::ArrayCount* el_count = nullptr;
+                const type::Type* el_ty = nullptr;
                 if (a->type) {
                     el_ty = Type(a->type);
                     if (!el_ty) {
@@ -2161,16 +2169,16 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     // Note: validation later will detect any mismatches between explicit array
                     // size and number of initializer expressions.
                 } else {
-                    el_count = builder_->create<sem::ConstantArrayCount>(
+                    el_count = builder_->create<type::ConstantArrayCount>(
                         static_cast<uint32_t>(args.Length()));
                     auto arg_tys =
                         utils::Transform(args, [](auto* arg) { return arg->Type()->UnwrapRef(); });
-                    el_ty = sem::Type::Common(arg_tys);
+                    el_ty = type::Type::Common(arg_tys);
                     if (!el_ty) {
                         AddError(
                             "cannot infer common array element type from initializer arguments",
                             expr->source);
-                        utils::Hashset<const sem::Type*, 8> types;
+                        utils::Hashset<const type::Type*, 8> types;
                         for (size_t i = 0; i < args.Length(); i++) {
                             if (types.Add(args[i]->Type())) {
                                 AddNote("argument " + std::to_string(i) + " is of type '" +
@@ -2216,16 +2224,17 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         // conversion.
         auto* ident = expr->target.name;
         Mark(ident);
-        auto* resolved = sem_.ResolvedSymbol(ident);
+        if (auto* resolved = sem_.ResolvedSymbol<type::Type>(ident)) {
+            // A type initializer or conversions.
+            // Note: Unlike the code path where we're resolving the call target from an
+            // ast::Type, all types must already have the element type explicitly specified,
+            // so there's no need to infer element types.
+            return ty_init_or_conv(resolved);
+        }
+
+        auto* resolved = sem_.ResolvedSymbol<sem::Node>(ident);
         call = Switch<sem::Call*>(
             resolved,  //
-            [&](sem::Type* ty) {
-                // A type initializer or conversions.
-                // Note: Unlike the code path where we're resolving the call target from an
-                // ast::Type, all types must already have the element type explicitly specified,
-                // so there's no need to infer element types.
-                return ty_init_or_conv(ty);
-            },
             [&](sem::Function* func) { return FunctionCall(expr, func, args, arg_behaviors); },
             [&](sem::Variable* var) {
                 auto name = builder_->Symbols().NameFor(var->Declaration()->symbol);
@@ -2337,7 +2346,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     return call;
 }
 
-sem::Type* Resolver::BuiltinTypeAlias(Symbol sym) const {
+type::Type* Resolver::BuiltinTypeAlias(Symbol sym) const {
     auto name = builder_->Symbols().NameFor(sym);
     auto& b = *builder_;
     switch (ParseTypeAlias(name)) {
@@ -2471,7 +2480,7 @@ void Resolver::CollectTextureSamplerPairs(sem::Function* func,
 sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
     auto* ty = Switch(
         literal,
-        [&](const ast::IntLiteralExpression* i) -> sem::Type* {
+        [&](const ast::IntLiteralExpression* i) -> type::Type* {
             switch (i->suffix) {
                 case ast::IntLiteralExpression::Suffix::kNone:
                     return builder_->create<sem::AbstractInt>();
@@ -2482,7 +2491,7 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
             }
             return nullptr;
         },
-        [&](const ast::FloatLiteralExpression* f) -> sem::Type* {
+        [&](const ast::FloatLiteralExpression* f) -> type::Type* {
             switch (f->suffix) {
                 case ast::FloatLiteralExpression::Suffix::kNone:
                     return builder_->create<sem::AbstractFloat>();
@@ -2520,8 +2529,8 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
 
 sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
     auto symbol = expr->symbol;
-    auto* resolved = sem_.ResolvedSymbol(expr);
-    if (auto* variable = As<sem::Variable>(resolved)) {
+    auto* sem_resolved = sem_.ResolvedSymbol<sem::Node>(expr);
+    if (auto* variable = As<sem::Variable>(sem_resolved)) {
         auto* user = builder_->create<sem::VariableUser>(expr, current_statement_, variable);
 
         if (current_statement_) {
@@ -2589,7 +2598,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         return user;
     }
 
-    if (Is<sem::Function>(resolved)) {
+    if (Is<sem::Function>(sem_resolved)) {
         AddError("missing '(' for function call", expr->source.End());
         return nullptr;
     }
@@ -2599,14 +2608,14 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         return nullptr;
     }
 
-    if (resolved->Is<sem::Type>() || BuiltinTypeAlias(symbol)) {
+    if (sem_.ResolvedSymbol<type::Type>(expr)) {
         AddError("missing '(' for type initializer or cast", expr->source.End());
         return nullptr;
     }
 
     TINT_ICE(Resolver, diagnostics_)
         << expr->source << " unresolved identifier:\n"
-        << "resolved: " << (resolved ? resolved->TypeInfo().name : "<null>") << "\n"
+        << "resolved: " << (sem_resolved ? sem_resolved->TypeInfo().name : "<null>") << "\n"
         << "name: " << builder_->Symbols().NameFor(symbol);
     return nullptr;
 }
@@ -2617,7 +2626,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
     auto* object = sem_.Get(expr->structure);
     auto* root_ident = object->RootIdentifier();
 
-    const sem::Type* ty = nullptr;
+    const type::Type* ty = nullptr;
 
     // Object may be a side-effecting expression (e.g. function call).
     bool has_side_effects = object && object->HasSideEffects();
@@ -2812,7 +2821,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
         return nullptr;
     }
 
-    const sem::Type* ty = nullptr;
+    const type::Type* ty = nullptr;
     const sem::Variable* root_ident = nullptr;
     const sem::Constant* value = nullptr;
     auto stage = sem::EvaluationStage::kRuntime;
@@ -2898,8 +2907,8 @@ bool Resolver::Enable(const ast::Enable* enable) {
     return true;
 }
 
-sem::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
-    sem::Type* result = nullptr;
+type::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
+    type::Type* result = nullptr;
     if (auto* alias = named_type->As<ast::Alias>()) {
         result = Alias(alias);
     } else if (auto* str = named_type->As<ast::Struct>()) {
@@ -2936,7 +2945,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
         return nullptr;
     }
 
-    const sem::ArrayCount* el_count = nullptr;
+    const type::ArrayCount* el_count = nullptr;
 
     // Evaluate the constant array count expression.
     if (auto* count_expr = arr->count) {
@@ -2945,7 +2954,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
             return nullptr;
         }
     } else {
-        el_count = builder_->create<sem::RuntimeArrayCount>();
+        el_count = builder_->create<type::RuntimeArrayCount>();
     }
 
     auto* out = Array(arr->type->source,                              //
@@ -2972,7 +2981,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     return out;
 }
 
-const sem::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_expr) {
+const type::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_expr) {
     // Evaluate the constant array count expression.
     const auto* count_sem = Materialize(Expression(count_expr));
     if (!count_sem) {
@@ -3011,11 +3020,11 @@ const sem::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_expr) {
         return nullptr;
     }
 
-    return builder_->create<sem::ConstantArrayCount>(static_cast<uint32_t>(count));
+    return builder_->create<type::ConstantArrayCount>(static_cast<uint32_t>(count));
 }
 
 bool Resolver::ArrayAttributes(utils::VectorRef<const ast::Attribute*> attributes,
-                               const sem::Type* el_ty,
+                               const type::Type* el_ty,
                                uint32_t& explicit_stride) {
     if (!validator_.NoDuplicateAttributes(attributes)) {
         return false;
@@ -3046,8 +3055,8 @@ bool Resolver::ArrayAttributes(utils::VectorRef<const ast::Attribute*> attribute
 
 sem::Array* Resolver::Array(const Source& el_source,
                             const Source& count_source,
-                            const sem::Type* el_ty,
-                            const sem::ArrayCount* el_count,
+                            const type::Type* el_ty,
+                            const type::ArrayCount* el_count,
                             uint32_t explicit_stride) {
     uint32_t el_align = el_ty->Align();
     uint32_t el_size = el_ty->Size();
@@ -3055,7 +3064,7 @@ sem::Array* Resolver::Array(const Source& el_source,
     uint64_t stride = explicit_stride ? explicit_stride : implicit_stride;
     uint64_t size = 0;
 
-    if (auto const_count = el_count->As<sem::ConstantArrayCount>()) {
+    if (auto const_count = el_count->As<type::ConstantArrayCount>()) {
         size = const_count->value * stride;
         if (size > std::numeric_limits<uint32_t>::max()) {
             std::stringstream msg;
@@ -3064,7 +3073,7 @@ sem::Array* Resolver::Array(const Source& el_source,
             AddError(msg.str(), count_source);
             return nullptr;
         }
-    } else if (el_count->Is<sem::RuntimeArrayCount>()) {
+    } else if (el_count->Is<type::RuntimeArrayCount>()) {
         size = stride;
     }
     auto* out = builder_->create<sem::Array>(el_ty, el_count, el_align, static_cast<uint32_t>(size),
@@ -3078,7 +3087,7 @@ sem::Array* Resolver::Array(const Source& el_source,
     return out;
 }
 
-sem::Type* Resolver::Alias(const ast::Alias* alias) {
+type::Type* Resolver::Alias(const ast::Alias* alias) {
     auto* ty = Type(alias->type);
     if (!ty) {
         return nullptr;
@@ -3329,7 +3338,7 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
         auto& behaviors = current_statement_->Behaviors();
         behaviors = sem::Behavior::kReturn;
 
-        const sem::Type* value_ty = nullptr;
+        const type::Type* value_ty = nullptr;
         if (auto* value = stmt->value) {
             const auto* expr = Expression(value);
             if (!expr) {
@@ -3374,7 +3383,7 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
 
         // Determine the common type across all selectors and the switch expression
         // This must materialize to an integer scalar (non-abstract).
-        utils::Vector<const sem::Type*, 8> types;
+        utils::Vector<const type::Type*, 8> types;
         types.Push(cond_ty);
         for (auto* case_stmt : stmt->body) {
             for (auto* sel : case_stmt->selectors) {
@@ -3388,7 +3397,7 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
                 types.Push(sem_expr->Type()->UnwrapRef());
             }
         }
-        auto* common_ty = sem::Type::Common(types);
+        auto* common_ty = type::Type::Common(types);
         if (!common_ty || !common_ty->is_integer_scalar()) {
             // No common type found or the common type was abstract.
             // Pick i32 and let validation deal with any mismatches.
@@ -3607,9 +3616,9 @@ sem::Statement* Resolver::IncrementDecrementStatement(
 }
 
 bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace address_space,
-                                            sem::Type* ty,
+                                            type::Type* ty,
                                             const Source& usage) {
-    ty = const_cast<sem::Type*>(ty->UnwrapRef());
+    ty = const_cast<type::Type*>(ty->UnwrapRef());
 
     if (auto* str = ty->As<sem::Struct>()) {
         if (str->AddressSpaceUsage().count(address_space)) {
@@ -3621,8 +3630,8 @@ bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace address_space,
         for (auto* member : str->Members()) {
             auto decl = member->Declaration();
             if (decl &&
-                !ApplyAddressSpaceUsageToType(address_space, const_cast<sem::Type*>(member->Type()),
-                                              decl->type->source)) {
+                !ApplyAddressSpaceUsageToType(
+                    address_space, const_cast<type::Type*>(member->Type()), decl->type->source)) {
                 std::stringstream err;
                 err << "while analyzing structure member " << sem_.TypeNameOf(str) << "."
                     << builder_->Symbols().NameFor(member->Name());
@@ -3635,7 +3644,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace address_space,
 
     if (auto* arr = ty->As<sem::Array>()) {
         if (address_space != ast::AddressSpace::kStorage) {
-            if (arr->Count()->Is<sem::RuntimeArrayCount>()) {
+            if (arr->Count()->Is<type::RuntimeArrayCount>()) {
                 AddError("runtime-sized arrays can only be used in the <storage> address space",
                          usage);
                 return false;
@@ -3649,7 +3658,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace address_space,
                 return false;
             }
         }
-        return ApplyAddressSpaceUsageToType(address_space, const_cast<sem::Type*>(arr->ElemType()),
+        return ApplyAddressSpaceUsageToType(address_space, const_cast<type::Type*>(arr->ElemType()),
                                             usage);
     }
 

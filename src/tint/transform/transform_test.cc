@@ -29,7 +29,7 @@ struct CreateASTTypeForTest : public testing::Test, public Transform {
         return SkipTransform;
     }
 
-    const ast::Type* create(std::function<sem::Type*(ProgramBuilder&)> create_sem_type) {
+    const ast::Type* create(std::function<type::Type*(ProgramBuilder&)> create_sem_type) {
         ProgramBuilder sem_type_builder;
         auto* sem_type = create_sem_type(sem_type_builder);
         Program program(std::move(sem_type_builder));
@@ -69,8 +69,8 @@ TEST_F(CreateASTTypeForTest, Vector) {
 
 TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
     auto* arr = create([](ProgramBuilder& b) {
-        return b.create<sem::Array>(b.create<sem::F32>(), b.create<sem::ConstantArrayCount>(2u), 4u,
-                                    4u, 32u, 32u);
+        return b.create<sem::Array>(b.create<sem::F32>(), b.create<type::ConstantArrayCount>(2u),
+                                    4u, 4u, 32u, 32u);
     });
     ASSERT_TRUE(arr->Is<ast::Array>());
     ASSERT_TRUE(arr->As<ast::Array>()->type->Is<ast::F32>());
@@ -83,8 +83,8 @@ TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
 
 TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
     auto* arr = create([](ProgramBuilder& b) {
-        return b.create<sem::Array>(b.create<sem::F32>(), b.create<sem::ConstantArrayCount>(2u), 4u,
-                                    4u, 64u, 32u);
+        return b.create<sem::Array>(b.create<sem::F32>(), b.create<type::ConstantArrayCount>(2u),
+                                    4u, 4u, 64u, 32u);
     });
     ASSERT_TRUE(arr->Is<ast::Array>());
     ASSERT_TRUE(arr->As<ast::Array>()->type->Is<ast::F32>());

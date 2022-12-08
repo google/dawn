@@ -89,7 +89,7 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     /// @param is_deprecated true if the particular overload is considered
     /// deprecated
     Builtin(BuiltinType type,
-            const sem::Type* return_type,
+            const type::Type* return_type,
             utils::VectorRef<Parameter*> parameters,
             EvaluationStage eval_stage,
             PipelineStageSet supported_stages,

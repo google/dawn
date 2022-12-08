@@ -34,8 +34,8 @@
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/statement.h"
-#include "src/tint/sem/test_helper.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/type/test_helper.h"
 
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;

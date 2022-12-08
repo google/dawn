@@ -458,7 +458,6 @@ libtint_source_set("libtint_core_all_src") {
     "sem/storage_texture.h",
     "sem/switch_statement.h",
     "sem/texture.h",
-    "sem/type.h",
     "sem/type_conversion.h",
     "sem/type_initializer.h",
     "sem/type_manager.h",
@@ -577,6 +576,9 @@ libtint_source_set("libtint_core_all_src") {
     "transform/while_to_loop.h",
     "transform/zero_init_workgroup_memory.cc",
     "transform/zero_init_workgroup_memory.h",
+    "type/array_count.h",
+    "type/node.h",
+    "type/type.h",
     "utils/bitcast.h",
     "utils/bitset.h",
     "utils/block_allocator.h",
@@ -716,8 +718,6 @@ libtint_source_set("libtint_sem_src") {
     "sem/switch_statement.h",
     "sem/texture.cc",
     "sem/texture.h",
-    "sem/type.cc",
-    "sem/type.h",
     "sem/type_conversion.cc",
     "sem/type_conversion.h",
     "sem/type_initializer.cc",
@@ -739,10 +739,24 @@ libtint_source_set("libtint_sem_src") {
   public_deps = [ ":libtint_core_all_src" ]
 }
 
+libtint_source_set("libtint_type_src") {
+  sources = [
+    "type/array_count.cc",
+    "type/array_count.h",
+    "type/node.cc",
+    "type/node.h",
+    "type/type.cc",
+    "type/type.h",
+  ]
+
+  public_deps = [ ":libtint_core_all_src" ]
+}
+
 libtint_source_set("libtint_core_src") {
   public_deps = [
     ":libtint_core_all_src",
     ":libtint_sem_src",
+    ":libtint_type_src",
   ]
 }
 
@@ -1209,10 +1223,13 @@ if (tint_build_unittests) {
       "sem/struct_test.cc",
       "sem/texture_test.cc",
       "sem/type_manager_test.cc",
-      "sem/type_test.cc",
       "sem/u32_test.cc",
       "sem/vector_test.cc",
     ]
+  }
+
+  tint_unittests_source_set("tint_unittests_type_src") {
+    sources = [ "type/type_test.cc" ]
   }
 
   tint_unittests_source_set("tint_unittests_text_src") {
@@ -1690,6 +1707,7 @@ if (tint_build_unittests) {
       ":tint_unittests_sem_src",
       ":tint_unittests_text_src",
       ":tint_unittests_transform_src",
+      ":tint_unittests_type_src",
       ":tint_unittests_utils_src",
       ":tint_unittests_writer_src",
     ]

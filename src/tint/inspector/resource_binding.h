@@ -19,11 +19,7 @@
 
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/texture.h"
-
-// Forward declarations
-namespace tint::sem {
-class Type;
-}  // namespace tint::sem
+#include "src/tint/type/type.h"
 
 namespace tint::inspector {
 
@@ -114,10 +110,10 @@ struct ResourceBinding {
 ResourceBinding::TextureDimension TypeTextureDimensionToResourceBindingTextureDimension(
     const ast::TextureDimension& type_dim);
 
-/// Infer ResourceBinding::SampledKind for a given sem::Type
+/// Infer ResourceBinding::SampledKind for a given type::Type
 /// @param base_type internal type to infer from
 /// @returns the publicly visible equivalent
-ResourceBinding::SampledKind BaseTypeToSampledKind(const sem::Type* base_type);
+ResourceBinding::SampledKind BaseTypeToSampledKind(const type::Type* base_type);
 
 /// Convert from internal ast::TexelFormat to public
 /// ResourceBinding::TexelFormat

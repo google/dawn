@@ -194,15 +194,15 @@ class TextGenerator {
 
     /// @returns the resolved type of the ast::Expression `expr`
     /// @param expr the expression
-    const sem::Type* TypeOf(const ast::Expression* expr) const { return builder_.TypeOf(expr); }
+    const type::Type* TypeOf(const ast::Expression* expr) const { return builder_.TypeOf(expr); }
 
     /// @returns the resolved type of the ast::Type `type`
     /// @param type the type
-    const sem::Type* TypeOf(const ast::Type* type) const { return builder_.TypeOf(type); }
+    const type::Type* TypeOf(const ast::Type* type) const { return builder_.TypeOf(type); }
 
     /// @returns the resolved type of the ast::TypeDecl `type_decl`
     /// @param type_decl the type
-    const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const {
+    const type::Type* TypeOf(const ast::TypeDecl* type_decl) const {
         return builder_.TypeOf(type_decl);
     }
 

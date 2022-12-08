@@ -24,7 +24,6 @@
 // Forward declarations
 namespace tint::sem {
 class Statement;
-class Type;
 class Variable;
 }  // namespace tint::sem
 
@@ -42,7 +41,7 @@ class Expression : public Castable<Expression, Node> {
     /// @param has_side_effects true if this expression may have side-effects
     /// @param root_ident the (optional) root identifier for this expression
     Expression(const ast::Expression* declaration,
-               const sem::Type* type,
+               const type::Type* type,
                EvaluationStage stage,
                const Statement* statement,
                const Constant* constant,
@@ -56,7 +55,7 @@ class Expression : public Castable<Expression, Node> {
     const ast::Expression* Declaration() const { return declaration_; }
 
     /// @return the resolved type of the expression
-    const sem::Type* Type() const { return type_; }
+    const type::Type* Type() const { return type_; }
 
     /// @return the earliest evaluation stage for the expression
     EvaluationStage Stage() const { return stage_; }
@@ -93,7 +92,7 @@ class Expression : public Castable<Expression, Node> {
     const Variable* root_identifier_;
 
   private:
-    const sem::Type* const type_;
+    const type::Type* const type_;
     const EvaluationStage stage_;
     const Statement* const statement_;
     const Constant* const constant_;

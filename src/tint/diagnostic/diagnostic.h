@@ -47,6 +47,7 @@ enum class System {
     Symbol,
     Test,
     Transform,
+    Type,
     Utils,
     Writer,
 };

@@ -52,11 +52,11 @@ TEST_F(TypeManagerTest, GetSameTypeReturnsSamePtr) {
 
 TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
     TypeManager tm;
-    Type* t = tm.Get<I32>();
+    type::Type* t = tm.Get<I32>();
     ASSERT_NE(t, nullptr);
     EXPECT_TRUE(t->Is<I32>());
 
-    Type* t2 = tm.Get<U32>();
+    type::Type* t2 = tm.Get<U32>();
     ASSERT_NE(t2, nullptr);
     EXPECT_NE(t, t2);
     EXPECT_TRUE(t2->Is<U32>());

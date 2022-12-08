@@ -89,7 +89,7 @@ uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
 /// one or more levels of an arrays inside of `type`.
 /// @param type the given type, which must not be null
 /// @returns the nested matrix type, or nullptr if none
-const sem::Matrix* GetNestedMatrixType(const sem::Type* type) {
+const sem::Matrix* GetNestedMatrixType(const type::Type* type) {
     while (auto* arr = type->As<sem::Array>()) {
         type = arr->ElemType();
     }
@@ -239,7 +239,7 @@ uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
 }
 
 /// @return the vector element type if ty is a vector, otherwise return ty.
-const sem::Type* ElementTypeOf(const sem::Type* ty) {
+const type::Type* ElementTypeOf(const type::Type* ty) {
     if (auto* v = ty->As<sem::Vector>()) {
         return v->type();
     }
@@ -1157,7 +1157,7 @@ uint32_t Builder::GenerateExpressionWithLoadIfNeeded(const ast::Expression* expr
     return 0;
 }
 
-uint32_t Builder::GenerateLoadIfNeeded(const sem::Type* type, uint32_t id) {
+uint32_t Builder::GenerateLoadIfNeeded(const type::Type* type, uint32_t id) {
     if (auto* ref = type->As<sem::Reference>()) {
         type = ref->StoreType();
     } else {
@@ -1446,7 +1446,7 @@ uint32_t Builder::GenerateTypeInitializerOrConversion(const sem::Call* call,
     });
 }
 
-uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
+uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
                                                   const ast::Expression* from_expr,
                                                   bool is_global_init) {
     // This should not happen as we rely on constant folding to obviate
@@ -1458,7 +1458,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
         return 0;
     }
 
-    auto elem_type_of = [](const sem::Type* t) -> const sem::Type* {
+    auto elem_type_of = [](const type::Type* t) -> const type::Type* {
         if (t->is_scalar()) {
             return t;
         }
@@ -1788,7 +1788,7 @@ uint32_t Builder::GenerateConstantIfNeeded(const ScalarConstant& constant) {
     return result_id;
 }
 
-uint32_t Builder::GenerateConstantNullIfNeeded(const sem::Type* type) {
+uint32_t Builder::GenerateConstantNullIfNeeded(const type::Type* type) {
     auto type_id = GenerateTypeIfNeeded(type);
     if (type_id == 0) {
         return 0;
@@ -1898,7 +1898,7 @@ uint32_t Builder::GenerateShortCircuitBinaryExpression(const ast::BinaryExpressi
     return result_id;
 }
 
-uint32_t Builder::GenerateSplat(uint32_t scalar_id, const sem::Type* vec_type) {
+uint32_t Builder::GenerateSplat(uint32_t scalar_id, const type::Type* vec_type) {
     // Create a new vector to splat scalar into
     auto splat_vector = result_op();
     auto* splat_vector_type = builder_.create<sem::Pointer>(vec_type, ast::AddressSpace::kFunction,
@@ -3273,7 +3273,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
     }
 }
 
-uint32_t Builder::GenerateSampledImage(const sem::Type* texture_type,
+uint32_t Builder::GenerateSampledImage(const type::Type* texture_type,
                                        Operand texture_operand,
                                        Operand sampler_operand) {
     // DepthTexture is always declared as SampledTexture.
@@ -3629,7 +3629,7 @@ bool Builder::GenerateVariableDeclStatement(const ast::VariableDeclStatement* st
     return GenerateFunctionVariable(stmt->variable);
 }
 
-uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
+uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
     if (type == nullptr) {
         error_ = "attempting to generate type from null type";
         return 0;
@@ -3843,7 +3843,7 @@ bool Builder::GenerateArrayType(const sem::Array* arr, const Operand& result) {
     }
 
     auto result_id = std::get<uint32_t>(result);
-    if (arr->Count()->Is<sem::RuntimeArrayCount>()) {
+    if (arr->Count()->Is<type::RuntimeArrayCount>()) {
         push_type(spv::Op::OpTypeRuntimeArray, {result, Operand(elem_type)});
     } else {
         auto count = arr->ConstantCount();

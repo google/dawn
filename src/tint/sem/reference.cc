@@ -21,8 +21,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Reference);
 
 namespace tint::sem {
 
-Reference::Reference(const Type* subtype, ast::AddressSpace address_space, ast::Access access)
-    : Base(TypeFlags{}), subtype_(subtype), address_space_(address_space), access_(access) {
+Reference::Reference(const type::Type* subtype, ast::AddressSpace address_space, ast::Access access)
+    : Base(type::TypeFlags{}), subtype_(subtype), address_space_(address_space), access_(access) {
     TINT_ASSERT(Semantic, !subtype->Is<Reference>());
     TINT_ASSERT(Semantic, access != ast::Access::kUndefined);
 }
@@ -31,7 +31,7 @@ size_t Reference::Hash() const {
     return utils::Hash(TypeInfo::Of<Reference>().full_hashcode, address_space_, subtype_, access_);
 }
 
-bool Reference::Equals(const sem::Type& other) const {
+bool Reference::Equals(const type::Type& other) const {
     if (auto* o = other.As<Reference>()) {
         return o->address_space_ == address_space_ && o->subtype_ == subtype_ &&
                o->access_ == access_;

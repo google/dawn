@@ -68,12 +68,13 @@ void AppendResourceBindings(std::vector<ResourceBinding>* dest,
     dest->insert(dest->end(), orig.begin(), orig.end());
 }
 
-std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(const sem::Type* type) {
+std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
+    const type::Type* type) {
     // entry point in/out variables must of numeric scalar or vector types.
     TINT_ASSERT(Inspector, type->is_numeric_scalar_or_vector());
 
     ComponentType componentType = Switch(
-        sem::Type::DeepestElementOf(type),  //
+        type::Type::DeepestElementOf(type),  //
         [&](const sem::F32*) { return ComponentType::kF32; },
         [&](const sem::F16*) { return ComponentType::kF16; },
         [&](const sem::I32*) { return ComponentType::kI32; },
@@ -114,7 +115,7 @@ std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(cons
 }
 
 std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
-    const sem::Type* type,
+    const type::Type* type,
     utils::VectorRef<const ast::Attribute*> attributes) {
     auto* interpolation_attribute = ast::GetAttribute<ast::InterpolateAttribute>(attributes);
     if (type->is_integer_scalar_or_vector()) {
@@ -641,7 +642,7 @@ const ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
 }
 
 void Inspector::AddEntryPointInOutVariables(std::string name,
-                                            const sem::Type* type,
+                                            const type::Type* type,
                                             utils::VectorRef<const ast::Attribute*> attributes,
                                             std::optional<uint32_t> location,
                                             std::vector<StageVariable>& variables) const {
@@ -680,7 +681,7 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
 }
 
 bool Inspector::ContainsBuiltin(ast::BuiltinValue builtin,
-                                const sem::Type* type,
+                                const type::Type* type,
                                 utils::VectorRef<const ast::Attribute*> attributes) const {
     auto* unwrapped_type = type->UnwrapRef();
 
@@ -768,7 +769,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
         auto* texture_type = var->Type()->UnwrapRef()->As<sem::Texture>();
         entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(texture_type->dim());
 
-        const sem::Type* base_type = nullptr;
+        const type::Type* base_type = nullptr;
         if (multisampled_only) {
             base_type = texture_type->As<sem::MultisampledTexture>()->type();
         } else {

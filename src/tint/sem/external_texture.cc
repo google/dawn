@@ -30,7 +30,7 @@ size_t ExternalTexture::Hash() const {
     return static_cast<size_t>(TypeInfo::Of<ExternalTexture>().full_hashcode);
 }
 
-bool ExternalTexture::Equals(const sem::Type& other) const {
+bool ExternalTexture::Equals(const type::Type& other) const {
     return other.Is<ExternalTexture>();
 }
 

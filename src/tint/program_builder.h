@@ -458,8 +458,7 @@ class ProgramBuilder {
     /// @returns the node pointer
     template <typename T, typename... ARGS>
     traits::EnableIf<traits::IsTypeOrDerived<T, sem::Node> &&
-                         !traits::IsTypeOrDerived<T, sem::Type> &&
-                         !traits::IsTypeOrDerived<T, sem::ArrayCount>,
+                         !traits::IsTypeOrDerived<T, type::Node>,
                      T>*
     create(ARGS&&... args) {
         AssertNotMoved();
@@ -476,7 +475,7 @@ class ProgramBuilder {
         return constant_nodes_.Create<T>(std::forward<ARGS>(args)...);
     }
 
-    /// Creates a new sem::Type owned by the ProgramBuilder.
+    /// Creates a new type::Type owned by the ProgramBuilder.
     /// When the ProgramBuilder is destructed, owned ProgramBuilder and the
     /// returned `Type` will also be destructed.
     /// Types are unique (de-aliased), and so calling create() for the same `T`
@@ -484,11 +483,12 @@ class ProgramBuilder {
     /// @param args the arguments to pass to the type constructor
     /// @returns the de-aliased type pointer
     template <typename T, typename... ARGS>
-    traits::EnableIfIsType<T, sem::Type>* create(ARGS&&... args) {
+    traits::EnableIfIsType<T, type::Type>* create(ARGS&&... args) {
         AssertNotMoved();
         return types_.Get<T>(std::forward<ARGS>(args)...);
     }
-    /// Creates a new sem::ArrayCount owned by the ProgramBuilder.
+
+    /// Creates a new type::ArrayCount owned by the ProgramBuilder.
     /// When the ProgramBuilder is destructed, owned ProgramBuilder and the
     /// returned `ArrayCount` will also be destructed.
     /// ArrayCounts are unique (de-aliased), and so calling create() for the same `T`
@@ -496,9 +496,12 @@ class ProgramBuilder {
     /// @param args the arguments to pass to the array count constructor
     /// @returns the de-aliased array count pointer
     template <typename T, typename... ARGS>
-    traits::EnableIfIsType<T, sem::ArrayCount>* create(ARGS&&... args) {
+    traits::EnableIf<traits::IsTypeOrDerived<T, type::ArrayCount> ||
+                         traits::IsTypeOrDerived<T, sem::StructMemberBase>,
+                     T>*
+    create(ARGS&&... args) {
         AssertNotMoved();
-        return types_.GetArrayCount<T>(std::forward<ARGS>(args)...);
+        return types_.GetNode<T>(std::forward<ARGS>(args)...);
     }
 
     /// Marks this builder as moved, preventing any further use of the builder.
@@ -3159,7 +3162,7 @@ class ProgramBuilder {
     /// @param expr the AST expression
     /// @return the resolved semantic type for the expression, or nullptr if the
     /// expression has no resolved type.
-    const sem::Type* TypeOf(const ast::Expression* expr) const;
+    const type::Type* TypeOf(const ast::Expression* expr) const;
 
     /// Helper for returning the resolved semantic type of the variable `var`.
     /// @note As the Resolver is run when the Program is built, this will only be
@@ -3167,7 +3170,7 @@ class ProgramBuilder {
     /// @param var the AST variable
     /// @return the resolved semantic type for the variable, or nullptr if the
     /// variable has no resolved type.
-    const sem::Type* TypeOf(const ast::Variable* var) const;
+    const type::Type* TypeOf(const ast::Variable* var) const;
 
     /// Helper for returning the resolved semantic type of the AST type `type`.
     /// @note As the Resolver is run when the Program is built, this will only be
@@ -3175,7 +3178,7 @@ class ProgramBuilder {
     /// @param type the AST type
     /// @return the resolved semantic type for the type, or nullptr if the type
     /// has no resolved type.
-    const sem::Type* TypeOf(const ast::Type* type) const;
+    const type::Type* TypeOf(const ast::Type* type) const;
 
     /// Helper for returning the resolved semantic type of the AST type
     /// declaration `type_decl`.
@@ -3184,7 +3187,7 @@ class ProgramBuilder {
     /// @param type_decl the AST type declaration
     /// @return the resolved semantic type for the type declaration, or nullptr if
     /// the type declaration has no resolved type.
-    const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const;
+    const type::Type* TypeOf(const ast::TypeDecl* type_decl) const;
 
     /// @param type a type
     /// @returns the name for `type` that closely resembles how it would be
@@ -3194,7 +3197,7 @@ class ProgramBuilder {
     /// @param type a type
     /// @returns the name for `type` that closely resembles how it would be
     /// declared in WGSL.
-    std::string FriendlyName(const sem::Type* type) const;
+    std::string FriendlyName(const type::Type* type) const;
 
     /// Overload of FriendlyName, which removes an ambiguity when passing nullptr.
     /// Simplifies test code.

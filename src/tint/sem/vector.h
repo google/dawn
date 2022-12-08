@@ -17,12 +17,12 @@
 
 #include <string>
 
-#include "src/tint/sem/type.h"
+#include "src/tint/type/type.h"
 
 namespace tint::sem {
 
 /// A vector type.
-class Vector final : public Castable<Vector, Type> {
+class Vector final : public Castable<Vector, type::Type> {
   public:
     /// Constructor
     /// @param subtype the vector element type
@@ -40,7 +40,7 @@ class Vector final : public Castable<Vector, Type> {
     bool Equals(const Type& other) const override;
 
     /// @returns the type of the vector elements
-    const Type* type() const { return subtype_; }
+    const type::Type* type() const { return subtype_; }
 
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be

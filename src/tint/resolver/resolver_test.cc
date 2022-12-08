@@ -440,7 +440,7 @@ TEST_F(ResolverTest, ArraySize_UnsignedLiteral) {
     auto* ref = TypeOf(a)->As<sem::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
-    EXPECT_EQ(ary->Count(), create<sem::ConstantArrayCount>(10u));
+    EXPECT_EQ(ary->Count(), create<type::ConstantArrayCount>(10u));
 }
 
 TEST_F(ResolverTest, ArraySize_SignedLiteral) {
@@ -453,7 +453,7 @@ TEST_F(ResolverTest, ArraySize_SignedLiteral) {
     auto* ref = TypeOf(a)->As<sem::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
-    EXPECT_EQ(ary->Count(), create<sem::ConstantArrayCount>(10u));
+    EXPECT_EQ(ary->Count(), create<type::ConstantArrayCount>(10u));
 }
 
 TEST_F(ResolverTest, ArraySize_UnsignedConst) {
@@ -468,7 +468,7 @@ TEST_F(ResolverTest, ArraySize_UnsignedConst) {
     auto* ref = TypeOf(a)->As<sem::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
-    EXPECT_EQ(ary->Count(), create<sem::ConstantArrayCount>(10u));
+    EXPECT_EQ(ary->Count(), create<type::ConstantArrayCount>(10u));
 }
 
 TEST_F(ResolverTest, ArraySize_SignedConst) {
@@ -483,7 +483,7 @@ TEST_F(ResolverTest, ArraySize_SignedConst) {
     auto* ref = TypeOf(a)->As<sem::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
-    EXPECT_EQ(ary->Count(), create<sem::ConstantArrayCount>(10u));
+    EXPECT_EQ(ary->Count(), create<type::ConstantArrayCount>(10u));
 }
 
 TEST_F(ResolverTest, ArraySize_NamedOverride) {
@@ -1767,7 +1767,7 @@ TEST_P(Expr_Binary_Test_Invalid_VectorMatrixMultiply, All) {
 
     const ast::Type* lhs_type = nullptr;
     const ast::Type* rhs_type = nullptr;
-    const sem::Type* result_type = nullptr;
+    const type::Type* result_type = nullptr;
     bool is_valid_expr;
 
     if (vec_by_mat) {

@@ -25,9 +25,9 @@ namespace {
 
 class MockConstant : public sem::Constant {
   public:
-    explicit MockConstant(const sem::Type* ty) : type(ty) {}
+    explicit MockConstant(const type::Type* ty) : type(ty) {}
     ~MockConstant() override {}
-    const sem::Type* Type() const override { return type; }
+    const type::Type* Type() const override { return type; }
     std::variant<std::monostate, AInt, AFloat> Value() const override { return {}; }
     const Constant* Index(size_t) const override { return {}; }
     bool AllZero() const override { return {}; }
@@ -36,7 +36,7 @@ class MockConstant : public sem::Constant {
     size_t Hash() const override { return 0; }
 
   private:
-    const sem::Type* type;
+    const type::Type* type;
 };
 
 using ExpressionTest = TestHelper;

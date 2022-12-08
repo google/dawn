@@ -17,13 +17,13 @@
 
 #include <string>
 
-#include "src/tint/sem/type.h"
+#include "src/tint/type/type.h"
 
 namespace tint::sem {
 
 /// The base class for abstract-int and abstract-float types.
 /// @see https://www.w3.org/TR/WGSL/#types-for-creation-time-constants
-class AbstractNumeric : public Castable<AbstractNumeric, Type> {
+class AbstractNumeric : public Castable<AbstractNumeric, type::Type> {
   public:
     /// Constructor
     AbstractNumeric();

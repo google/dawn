@@ -18,7 +18,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::TypeConversion);
 
 namespace tint::sem {
 
-TypeConversion::TypeConversion(const sem::Type* type,
+TypeConversion::TypeConversion(const type::Type* type,
                                const sem::Parameter* parameter,
                                EvaluationStage stage)
     : Base(type, utils::Vector<const sem::Parameter*, 1>{parameter}, stage) {}

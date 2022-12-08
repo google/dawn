@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::F32);
 namespace tint::sem {
 
 F32::F32()
-    : Base(TypeFlags{
+    : Base(type::TypeFlags{
           Flag::kConstructable,
           Flag::kCreationFixedFootprint,
           Flag::kFixedFootprint,

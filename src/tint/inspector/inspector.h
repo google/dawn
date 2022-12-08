@@ -175,7 +175,7 @@ class Inspector {
     /// @param location the location value if provided
     /// @param variables the list to add the variables to
     void AddEntryPointInOutVariables(std::string name,
-                                     const sem::Type* type,
+                                     const type::Type* type,
                                      utils::VectorRef<const ast::Attribute*> attributes,
                                      std::optional<uint32_t> location,
                                      std::vector<StageVariable>& variables) const;
@@ -184,7 +184,7 @@ class Inspector {
     /// If `type` is a struct, recurse into members to check for the attribute.
     /// Otherwise, check `attributes` for the attribute.
     bool ContainsBuiltin(ast::BuiltinValue builtin,
-                         const sem::Type* type,
+                         const type::Type* type,
                          utils::VectorRef<const ast::Attribute*> attributes) const;
 
     /// Gathers all the texture resource bindings of the given type for the given

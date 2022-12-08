@@ -114,7 +114,7 @@ class TestHelper : public ProgramBuilder {
     /// @param type a type
     /// @returns the name for `type` that closely resembles how it would be
     /// declared in WGSL.
-    std::string FriendlyName(const sem::Type* type) { return type->FriendlyName(Symbols()); }
+    std::string FriendlyName(const type::Type* type) { return type->FriendlyName(Symbols()); }
 
   private:
     std::unique_ptr<Resolver> resolver_;
@@ -194,7 +194,7 @@ using ast_type_func_ptr = const ast::Type* (*)(ProgramBuilder& b);
 using ast_expr_func_ptr = const ast::Expression* (*)(ProgramBuilder& b,
                                                      utils::VectorRef<Scalar> args);
 using ast_expr_from_double_func_ptr = const ast::Expression* (*)(ProgramBuilder& b, double v);
-using sem_type_func_ptr = const sem::Type* (*)(ProgramBuilder& b);
+using sem_type_func_ptr = const type::Type* (*)(ProgramBuilder& b);
 using type_name_func_ptr = std::string (*)();
 
 struct UnspecializedElementType {};
@@ -215,7 +215,7 @@ struct DataType<void> {
     /// @return nullptr
     static inline const ast::Type* AST(ProgramBuilder&) { return nullptr; }
     /// @return nullptr
-    static inline const sem::Type* Sem(ProgramBuilder&) { return nullptr; }
+    static inline const type::Type* Sem(ProgramBuilder&) { return nullptr; }
 };
 
 /// Helper for building bool types and expressions
@@ -232,7 +232,7 @@ struct DataType<bool> {
     static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.bool_(); }
     /// @param b the ProgramBuilder
     /// @return the semantic bool type
-    static inline const sem::Type* Sem(ProgramBuilder& b) { return b.create<sem::Bool>(); }
+    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<sem::Bool>(); }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the boolean value to init with
     /// @return a new AST expression of the bool type
@@ -263,7 +263,7 @@ struct DataType<i32> {
     static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.i32(); }
     /// @param b the ProgramBuilder
     /// @return the semantic i32 type
-    static inline const sem::Type* Sem(ProgramBuilder& b) { return b.create<sem::I32>(); }
+    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<sem::I32>(); }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the i32 value to init with
     /// @return a new AST i32 literal value expression
@@ -294,7 +294,7 @@ struct DataType<u32> {
     static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.u32(); }
     /// @param b the ProgramBuilder
     /// @return the semantic u32 type
-    static inline const sem::Type* Sem(ProgramBuilder& b) { return b.create<sem::U32>(); }
+    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<sem::U32>(); }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the u32 value to init with
     /// @return a new AST u32 literal value expression
@@ -325,7 +325,7 @@ struct DataType<f32> {
     static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.f32(); }
     /// @param b the ProgramBuilder
     /// @return the semantic f32 type
-    static inline const sem::Type* Sem(ProgramBuilder& b) { return b.create<sem::F32>(); }
+    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<sem::F32>(); }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the f32 value to init with
     /// @return a new AST f32 literal value expression
@@ -356,7 +356,7 @@ struct DataType<f16> {
     static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.f16(); }
     /// @param b the ProgramBuilder
     /// @return the semantic f16 type
-    static inline const sem::Type* Sem(ProgramBuilder& b) { return b.create<sem::F16>(); }
+    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<sem::F16>(); }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the f16 value to init with
     /// @return a new AST f16 literal value expression
@@ -386,7 +386,9 @@ struct DataType<AFloat> {
     static inline const ast::Type* AST(ProgramBuilder&) { return nullptr; }
     /// @param b the ProgramBuilder
     /// @return the semantic abstract-float type
-    static inline const sem::Type* Sem(ProgramBuilder& b) { return b.create<sem::AbstractFloat>(); }
+    static inline const type::Type* Sem(ProgramBuilder& b) {
+        return b.create<sem::AbstractFloat>();
+    }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the abstract-float value to init with
     /// @return a new AST abstract-float literal value expression
@@ -416,7 +418,7 @@ struct DataType<AInt> {
     static inline const ast::Type* AST(ProgramBuilder&) { return nullptr; }
     /// @param b the ProgramBuilder
     /// @return the semantic abstract-int type
-    static inline const sem::Type* Sem(ProgramBuilder& b) { return b.create<sem::AbstractInt>(); }
+    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<sem::AbstractInt>(); }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the abstract-int value to init with
     /// @return a new AST abstract-int literal value expression
@@ -449,7 +451,7 @@ struct DataType<vec<N, T>> {
     }
     /// @param b the ProgramBuilder
     /// @return the semantic vector type
-    static inline const sem::Type* Sem(ProgramBuilder& b) {
+    static inline const type::Type* Sem(ProgramBuilder& b) {
         return b.create<sem::Vector>(DataType<T>::Sem(b), N);
     }
     /// @param b the ProgramBuilder
@@ -497,7 +499,7 @@ struct DataType<mat<N, M, T>> {
     }
     /// @param b the ProgramBuilder
     /// @return the semantic matrix type
-    static inline const sem::Type* Sem(ProgramBuilder& b) {
+    static inline const type::Type* Sem(ProgramBuilder& b) {
         auto* column_type = b.create<sem::Vector>(DataType<T>::Sem(b), M);
         return b.create<sem::Matrix>(column_type, N);
     }
@@ -561,7 +563,7 @@ struct DataType<alias<T, ID>> {
     }
     /// @param b the ProgramBuilder
     /// @return the semantic aliased type
-    static inline const sem::Type* Sem(ProgramBuilder& b) { return DataType<T>::Sem(b); }
+    static inline const type::Type* Sem(ProgramBuilder& b) { return DataType<T>::Sem(b); }
 
     /// @param b the ProgramBuilder
     /// @param args the value nested elements will be initialized with
@@ -613,7 +615,7 @@ struct DataType<ptr<T>> {
     }
     /// @param b the ProgramBuilder
     /// @return the semantic aliased type
-    static inline const sem::Type* Sem(ProgramBuilder& b) {
+    static inline const type::Type* Sem(ProgramBuilder& b) {
         return b.create<sem::Pointer>(DataType<T>::Sem(b), ast::AddressSpace::kPrivate,
                                       ast::Access::kReadWrite);
     }
@@ -657,13 +659,13 @@ struct DataType<array<N, T>> {
     }
     /// @param b the ProgramBuilder
     /// @return the semantic array type
-    static inline const sem::Type* Sem(ProgramBuilder& b) {
+    static inline const type::Type* Sem(ProgramBuilder& b) {
         auto* el = DataType<T>::Sem(b);
-        const sem::ArrayCount* count = nullptr;
+        const type::ArrayCount* count = nullptr;
         if (N == 0) {
-            count = b.create<sem::RuntimeArrayCount>();
+            count = b.create<type::RuntimeArrayCount>();
         } else {
-            count = b.create<sem::ConstantArrayCount>(N);
+            count = b.create<type::ConstantArrayCount>(N);
         }
         return b.create<sem::Array>(
             /* element */ el,

@@ -31,21 +31,21 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMember);
 namespace tint::sem {
 namespace {
 
-TypeFlags FlagsFrom(utils::VectorRef<const StructMemberBase*> members) {
-    TypeFlags flags{
-        TypeFlag::kConstructable,
-        TypeFlag::kCreationFixedFootprint,
-        TypeFlag::kFixedFootprint,
+type::TypeFlags FlagsFrom(utils::VectorRef<const StructMemberBase*> members) {
+    type::TypeFlags flags{
+        type::TypeFlag::kConstructable,
+        type::TypeFlag::kCreationFixedFootprint,
+        type::TypeFlag::kFixedFootprint,
     };
     for (auto* member : members) {
         if (!member->Type()->IsConstructible()) {
-            flags.Remove(TypeFlag::kConstructable);
+            flags.Remove(type::TypeFlag::kConstructable);
         }
         if (!member->Type()->HasFixedFootprint()) {
-            flags.Remove(TypeFlag::kFixedFootprint);
+            flags.Remove(type::TypeFlag::kFixedFootprint);
         }
         if (!member->Type()->HasCreationFixedFootprint()) {
-            flags.Remove(TypeFlag::kCreationFixedFootprint);
+            flags.Remove(type::TypeFlag::kCreationFixedFootprint);
         }
     }
     return flags;
@@ -84,7 +84,7 @@ size_t StructBase::Hash() const {
     return utils::Hash(TypeInfo::Of<Struct>().full_hashcode, name_);
 }
 
-bool StructBase::Equals(const sem::Type& other) const {
+bool StructBase::Equals(const type::Type& other) const {
     if (auto* o = other.As<Struct>()) {
         return o->name_ == name_;
     }
@@ -183,7 +183,7 @@ std::string StructBase::Layout(const tint::SymbolTable& symbols) const {
 StructMember::StructMember(const ast::StructMember* declaration,
                            tint::Source source,
                            Symbol name,
-                           const sem::Type* type,
+                           const type::Type* type,
                            uint32_t index,
                            uint32_t offset,
                            uint32_t align,
@@ -195,7 +195,7 @@ StructMember::~StructMember() = default;
 
 StructMemberBase::StructMemberBase(tint::Source source,
                                    Symbol name,
-                                   const sem::Type* type,
+                                   const type::Type* type,
                                    uint32_t index,
                                    uint32_t offset,
                                    uint32_t align,

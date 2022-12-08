@@ -24,7 +24,7 @@ namespace tint::fuzzers::ast_fuzzer {
 
 namespace {
 
-bool IsSuitableForShift(const sem::Type* lhs_type, const sem::Type* rhs_type) {
+bool IsSuitableForShift(const type::Type* lhs_type, const type::Type* rhs_type) {
     // `a << b` requires b to be an unsigned scalar or vector, and `a` to be an
     // integer scalar or vector with the same width as `b`. Similar for `a >> b`.
 
@@ -37,8 +37,8 @@ bool IsSuitableForShift(const sem::Type* lhs_type, const sem::Type* rhs_type) {
     return false;
 }
 
-bool CanReplaceAddSubtractWith(const sem::Type* lhs_type,
-                               const sem::Type* rhs_type,
+bool CanReplaceAddSubtractWith(const type::Type* lhs_type,
+                               const type::Type* rhs_type,
                                ast::BinaryOp new_operator) {
     // The program is assumed to be well-typed, so this method determines when
     // 'new_operator' can be used as a type-preserving replacement in an '+' or
@@ -71,8 +71,8 @@ bool CanReplaceAddSubtractWith(const sem::Type* lhs_type,
     }
 }
 
-bool CanReplaceMultiplyWith(const sem::Type* lhs_type,
-                            const sem::Type* rhs_type,
+bool CanReplaceMultiplyWith(const type::Type* lhs_type,
+                            const type::Type* rhs_type,
                             ast::BinaryOp new_operator) {
     // The program is assumed to be well-typed, so this method determines when
     // 'new_operator' can be used as a type-preserving replacement in a '*'
@@ -107,8 +107,8 @@ bool CanReplaceMultiplyWith(const sem::Type* lhs_type,
     }
 }
 
-bool CanReplaceDivideOrModuloWith(const sem::Type* lhs_type,
-                                  const sem::Type* rhs_type,
+bool CanReplaceDivideOrModuloWith(const type::Type* lhs_type,
+                                  const type::Type* rhs_type,
                                   ast::BinaryOp new_operator) {
     // The program is assumed to be well-typed, so this method determines when
     // 'new_operator' can be used as a type-preserving replacement in a '/'
@@ -149,8 +149,8 @@ bool CanReplaceLogicalAndLogicalOrWith(ast::BinaryOp new_operator) {
     }
 }
 
-bool CanReplaceAndOrWith(const sem::Type* lhs_type,
-                         const sem::Type* rhs_type,
+bool CanReplaceAndOrWith(const type::Type* lhs_type,
+                         const type::Type* rhs_type,
                          ast::BinaryOp new_operator) {
     switch (new_operator) {
         case ast::BinaryOp::kAnd:
@@ -184,8 +184,8 @@ bool CanReplaceAndOrWith(const sem::Type* lhs_type,
     }
 }
 
-bool CanReplaceXorWith(const sem::Type* lhs_type,
-                       const sem::Type* rhs_type,
+bool CanReplaceXorWith(const type::Type* lhs_type,
+                       const type::Type* rhs_type,
                        ast::BinaryOp new_operator) {
     switch (new_operator) {
         case ast::BinaryOp::kAdd:
@@ -207,8 +207,8 @@ bool CanReplaceXorWith(const sem::Type* lhs_type,
     }
 }
 
-bool CanReplaceShiftLeftShiftRightWith(const sem::Type* lhs_type,
-                                       const sem::Type* rhs_type,
+bool CanReplaceShiftLeftShiftRightWith(const type::Type* lhs_type,
+                                       const type::Type* rhs_type,
                                        ast::BinaryOp new_operator) {
     switch (new_operator) {
         case ast::BinaryOp::kShiftLeft:
@@ -232,7 +232,7 @@ bool CanReplaceShiftLeftShiftRightWith(const sem::Type* lhs_type,
     }
 }
 
-bool CanReplaceEqualNotEqualWith(const sem::Type* lhs_type, ast::BinaryOp new_operator) {
+bool CanReplaceEqualNotEqualWith(const type::Type* lhs_type, ast::BinaryOp new_operator) {
     switch (new_operator) {
         case ast::BinaryOp::kEqual:
         case ast::BinaryOp::kNotEqual:
@@ -301,9 +301,9 @@ bool MutationChangeBinaryOperator::CanReplaceBinaryOperator(
     const auto* rhs_type = program.Sem().Get(binary_expr.rhs)->Type();
 
     // If these are reference types, unwrap them to get the pointee type.
-    const sem::Type* lhs_basic_type =
+    const type::Type* lhs_basic_type =
         lhs_type->Is<sem::Reference>() ? lhs_type->As<sem::Reference>()->StoreType() : lhs_type;
-    const sem::Type* rhs_basic_type =
+    const type::Type* rhs_basic_type =
         rhs_type->Is<sem::Reference>() ? rhs_type->As<sem::Reference>()->StoreType() : rhs_type;
 
     switch (binary_expr.op) {

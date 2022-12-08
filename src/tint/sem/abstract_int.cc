@@ -29,7 +29,7 @@ size_t AbstractInt::Hash() const {
     return utils::Hash(TypeInfo::Of<AbstractInt>().full_hashcode);
 }
 
-bool AbstractInt::Equals(const sem::Type& other) const {
+bool AbstractInt::Equals(const type::Type& other) const {
     return other.Is<AbstractInt>();
 }
 

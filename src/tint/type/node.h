@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,30 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/void.h"
+#ifndef SRC_TINT_TYPE_NODE_H_
+#define SRC_TINT_TYPE_NODE_H_
 
-#include "src/tint/program_builder.h"
+#include "src/tint/castable.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::Void);
+namespace tint::type {
 
-namespace tint::sem {
+/// Node is the base class for all type nodes
+class Node : public Castable<Node> {
+  public:
+    /// Constructor
+    Node();
 
-Void::Void() : Base(type::TypeFlags{}) {}
+    /// Copy constructor
+    Node(const Node&);
 
-Void::Void(Void&&) = default;
+    /// Destructor
+    ~Node() override;
+};
 
-Void::~Void() = default;
+}  // namespace tint::type
 
-size_t Void::Hash() const {
-    return static_cast<size_t>(TypeInfo::Of<Void>().full_hashcode);
-}
-
-bool Void::Equals(const Type& other) const {
-    return other.Is<Void>();
-}
-
-std::string Void::FriendlyName(const SymbolTable&) const {
-    return "void";
-}
-
-}  // namespace tint::sem
+#endif  // SRC_TINT_TYPE_NODE_H_

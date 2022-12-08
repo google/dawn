@@ -23,11 +23,6 @@
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/vector.h"
 
-// Forward declarations
-namespace tint::sem {
-class Type;
-}  // namespace tint::sem
-
 namespace tint::sem {
 
 /// CallTargetSignature holds the return type and parameters for a call target
@@ -35,7 +30,7 @@ struct CallTargetSignature {
     /// Constructor
     /// @param ret_ty the call target return type
     /// @param params the call target parameters
-    CallTargetSignature(const sem::Type* ret_ty, utils::VectorRef<const Parameter*> params);
+    CallTargetSignature(const type::Type* ret_ty, utils::VectorRef<const Parameter*> params);
 
     /// Copy constructor
     CallTargetSignature(const CallTargetSignature&);
@@ -44,7 +39,7 @@ struct CallTargetSignature {
     ~CallTargetSignature();
 
     /// The type of the call target return value
-    const sem::Type* const return_type = nullptr;
+    const type::Type* const return_type = nullptr;
     /// The parameters of the call target
     const utils::Vector<const sem::Parameter*, 8> parameters;
 
@@ -75,7 +70,7 @@ class CallTarget : public Castable<CallTarget, Node> {
     /// @param stage the earliest evaluation stage for a call to this target
     /// @param return_type the return type of the call target
     /// @param parameters the parameters for the call target
-    CallTarget(const sem::Type* return_type,
+    CallTarget(const type::Type* return_type,
                utils::VectorRef<const Parameter*> parameters,
                EvaluationStage stage);
 
@@ -86,7 +81,7 @@ class CallTarget : public Castable<CallTarget, Node> {
     ~CallTarget() override;
 
     /// @return the return type of the call target
-    const sem::Type* ReturnType() const { return signature_.return_type; }
+    const type::Type* ReturnType() const { return signature_.return_type; }
 
     /// @return the parameters of the call target
     auto& Parameters() const { return signature_.parameters; }

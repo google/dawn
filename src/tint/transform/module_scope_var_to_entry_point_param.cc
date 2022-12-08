@@ -48,7 +48,7 @@ bool ShouldRun(const Program* program) {
 }
 
 // Returns `true` if `type` is or contains a matrix type.
-bool ContainsMatrix(const sem::Type* type) {
+bool ContainsMatrix(const type::Type* type) {
     type = type->UnwrapRef();
     if (type->Is<sem::Matrix>()) {
         return true;
@@ -78,7 +78,7 @@ struct ModuleScopeVarToEntryPointParam::State {
     /// and add it to the global declarations now, so that they precede new global
     /// declarations that need to reference them.
     /// @param ty the type to clone
-    void CloneStructTypes(const sem::Type* ty) {
+    void CloneStructTypes(const type::Type* ty) {
         if (auto* str = ty->As<sem::Struct>()) {
             if (!cloned_structs_.emplace(str).second) {
                 // The struct has already been cloned.
@@ -147,7 +147,7 @@ struct ModuleScopeVarToEntryPointParam::State {
 
                 auto* param_type = store_type();
                 if (auto* arr = ty->As<sem::Array>();
-                    arr && arr->Count()->Is<sem::RuntimeArrayCount>()) {
+                    arr && arr->Count()->Is<type::RuntimeArrayCount>()) {
                     // Wrap runtime-sized arrays in structures, so that we can declare pointers to
                     // them. Ideally we'd just emit the array itself as a pointer, but this is not
                     // representable in Tint's AST.

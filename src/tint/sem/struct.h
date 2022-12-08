@@ -24,8 +24,8 @@
 #include "src/tint/ast/address_space.h"
 #include "src/tint/ast/struct.h"
 #include "src/tint/sem/node.h"
-#include "src/tint/sem/type.h"
 #include "src/tint/symbol.h"
+#include "src/tint/type/type.h"
 #include "src/tint/utils/vector.h"
 
 // Forward declarations
@@ -35,7 +35,6 @@ class StructMember;
 namespace tint::sem {
 class StructMember;
 class StructMemberBase;
-class Type;
 }  // namespace tint::sem
 
 namespace tint::sem {
@@ -51,7 +50,7 @@ enum class PipelineStageUsage {
 };
 
 /// StructBase holds the semantic information for structures.
-class StructBase : public Castable<StructBase, Type> {
+class StructBase : public Castable<StructBase, type::Type> {
   public:
     /// Constructor
     /// @param source the source of the structure
@@ -208,7 +207,7 @@ class Struct final : public Castable<Struct, StructBase> {
 };
 
 /// StructMemberBase holds the semantic information for structure members.
-class StructMemberBase : public Castable<StructMemberBase, Node> {
+class StructMemberBase : public Castable<StructMemberBase, type::Node> {
   public:
     /// Constructor
     /// @param source the source of the struct member
@@ -221,7 +220,7 @@ class StructMemberBase : public Castable<StructMemberBase, Node> {
     /// @param location the location attribute, if present
     StructMemberBase(tint::Source source,
                      Symbol name,
-                     const sem::Type* type,
+                     const type::Type* type,
                      uint32_t index,
                      uint32_t offset,
                      uint32_t align,
@@ -245,7 +244,7 @@ class StructMemberBase : public Castable<StructMemberBase, Node> {
     const sem::StructBase* Struct() const { return struct_; }
 
     /// @returns the type of the member
-    const sem::Type* Type() const { return type_; }
+    const type::Type* Type() const { return type_; }
 
     /// @returns the member index
     uint32_t Index() const { return index_; }
@@ -266,7 +265,7 @@ class StructMemberBase : public Castable<StructMemberBase, Node> {
     const tint::Source source_;
     const Symbol name_;
     const sem::StructBase* struct_;
-    const sem::Type* type_;
+    const type::Type* type_;
     const uint32_t index_;
     const uint32_t offset_;
     const uint32_t align_;
@@ -290,7 +289,7 @@ class StructMember final : public Castable<StructMember, StructMemberBase> {
     StructMember(const ast::StructMember* declaration,
                  tint::Source source,
                  Symbol name,
-                 const sem::Type* type,
+                 const type::Type* type,
                  uint32_t index,
                  uint32_t offset,
                  uint32_t align,

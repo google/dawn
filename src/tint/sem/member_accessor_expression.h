@@ -50,7 +50,7 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Expre
     /// @param has_side_effects whether this expression may have side effects
     /// @param root_ident the (optional) root identifier for this expression
     MemberAccessorExpression(const ast::MemberAccessorExpression* declaration,
-                             const sem::Type* type,
+                             const type::Type* type,
                              EvaluationStage stage,
                              const Statement* statement,
                              const Constant* constant,
@@ -77,7 +77,7 @@ class StructMemberAccess final : public Castable<StructMemberAccess, MemberAcces
     /// @param has_side_effects whether this expression may have side effects
     /// @param root_ident the (optional) root identifier for this expression
     StructMemberAccess(const ast::MemberAccessorExpression* declaration,
-                       const sem::Type* type,
+                       const type::Type* type,
                        const Statement* statement,
                        const Constant* constant,
                        const Expression* object,
@@ -109,7 +109,7 @@ class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
     /// @param has_side_effects whether this expression may have side effects
     /// @param root_ident the (optional) root identifier for this expression
     Swizzle(const ast::MemberAccessorExpression* declaration,
-            const sem::Type* type,
+            const type::Type* type,
             const Statement* statement,
             const Constant* constant,
             const Expression* object,

@@ -23,7 +23,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::IndexAccessorExpression);
 namespace tint::sem {
 
 IndexAccessorExpression::IndexAccessorExpression(const ast::IndexAccessorExpression* declaration,
-                                                 const sem::Type* type,
+                                                 const type::Type* type,
                                                  EvaluationStage stage,
                                                  const Expression* object,
                                                  const Expression* index,

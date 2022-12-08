@@ -27,7 +27,7 @@ class MultisampledTexture final : public Castable<MultisampledTexture, Texture> 
     /// Constructor
     /// @param dim the dimensionality of the texture
     /// @param type the data type of the multisampled texture
-    MultisampledTexture(ast::TextureDimension dim, const Type* type);
+    MultisampledTexture(ast::TextureDimension dim, const type::Type* type);
     /// Move constructor
     MultisampledTexture(MultisampledTexture&&);
     ~MultisampledTexture() override;
@@ -40,7 +40,7 @@ class MultisampledTexture final : public Castable<MultisampledTexture, Texture> 
     bool Equals(const Type& other) const override;
 
     /// @returns the subtype of the sampled texture
-    const Type* type() const { return type_; }
+    const type::Type* type() const { return type_; }
 
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
@@ -48,7 +48,7 @@ class MultisampledTexture final : public Castable<MultisampledTexture, Texture> 
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
   private:
-    const Type* const type_;
+    const type::Type* const type_;
 };
 
 }  // namespace tint::sem

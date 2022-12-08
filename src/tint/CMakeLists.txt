@@ -382,8 +382,6 @@ list(APPEND TINT_LIB_SRCS
   sem/type_manager.cc
   sem/type_manager.h
   sem/type_mappings.h
-  sem/type.cc
-  sem/type.h
   sem/u32.cc
   sem/u32.h
   sem/variable.cc
@@ -501,6 +499,12 @@ list(APPEND TINT_LIB_SRCS
   transform/while_to_loop.h
   transform/zero_init_workgroup_memory.cc
   transform/zero_init_workgroup_memory.h
+  type/array_count.cc
+  type/array_count.h
+  type/node.cc
+  type/node.h
+  type/type.cc
+  type/type.h
   utils/bitcast.h
   utils/bitset.h
   utils/block_allocator.h
@@ -937,7 +941,6 @@ if(TINT_BUILD_TESTS)
     sem/struct_test.cc
     sem/texture_test.cc
     sem/type_manager_test.cc
-    sem/type_test.cc
     sem/u32_test.cc
     sem/vector_test.cc
     source_test.cc
@@ -947,6 +950,7 @@ if(TINT_BUILD_TESTS)
     text/unicode_test.cc
     traits_test.cc
     transform/transform_test.cc
+    type/type_test.cc
     utils/bitcast_test.cc
     utils/bitset_test.cc
     utils/block_allocator_test.cc

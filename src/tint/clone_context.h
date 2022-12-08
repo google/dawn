@@ -93,14 +93,14 @@ class CloneContext {
     /// Destructor
     ~CloneContext();
 
-    /// Clones the Node or sem::Type `a` into the ProgramBuilder #dst if `a` is
+    /// Clones the Node or type::Type `a` into the ProgramBuilder #dst if `a` is
     /// not null. If `a` is null, then Clone() returns null.
     ///
     /// Clone() may use a function registered with ReplaceAll() to create a
     /// transformed version of the object. See ReplaceAll() for more information.
     ///
     /// If the CloneContext is cloning from a Program to a ProgramBuilder, then
-    /// the Node or sem::Type `a` must be owned by the Program #src.
+    /// the Node or type::Type `a` must be owned by the Program #src.
     ///
     /// @param object the type deriving from Cloneable to clone
     /// @return the cloned node
@@ -117,14 +117,14 @@ class CloneContext {
         return nullptr;
     }
 
-    /// Clones the Node or sem::Type `a` into the ProgramBuilder #dst if `a` is
+    /// Clones the Node or type::Type `a` into the ProgramBuilder #dst if `a` is
     /// not null. If `a` is null, then Clone() returns null.
     ///
     /// Unlike Clone(), this method does not invoke or use any transformations
     /// registered by ReplaceAll().
     ///
     /// If the CloneContext is cloning from a Program to a ProgramBuilder, then
-    /// the Node or sem::Type `a` must be owned by the Program #src.
+    /// the Node or type::Type `a` must be owned by the Program #src.
     ///
     /// @param a the type deriving from Cloneable to clone
     /// @return the cloned node

@@ -128,7 +128,7 @@ struct Std140::State {
     /// @returns true if this transform should be run for the given program
     bool ShouldRun() const {
         // Returns true if the type needs to be forked for std140 usage.
-        auto needs_fork = [&](const sem::Type* ty) {
+        auto needs_fork = [&](const type::Type* ty) {
             while (auto* arr = ty->As<sem::Array>()) {
                 ty = arr->ElemType();
             }
@@ -218,7 +218,7 @@ struct Std140::State {
     utils::Hashmap<LoadFnKey, Symbol, 8, LoadFnKey::Hasher> load_fns;
 
     /// Map of std140-forked type to converter function name
-    utils::Hashmap<const sem::Type*, Symbol, 8> conv_fns;
+    utils::Hashmap<const type::Type*, Symbol, 8> conv_fns;
 
     // Uniform variables that have been modified to use a std140 type
     utils::Hashset<const sem::Variable*, 8> std140_uniforms;
@@ -397,7 +397,7 @@ struct Std140::State {
     ///          If the semantic type is not split for std140-layout, then nullptr is returned.
     /// @note will construct new std140 structures to hold decomposed matrices, populating
     ///       #std140_mats.
-    const ast::Type* Std140Type(const sem::Type* ty) {
+    const ast::Type* Std140Type(const type::Type* ty) {
         return Switch(
             ty,  //
             [&](const sem::Struct* str) -> const ast::Type* {
@@ -625,7 +625,7 @@ struct Std140::State {
 
     /// @returns a name suffix for a std140 -> non-std140 conversion function based on the type
     ///          being converted.
-    const std::string ConvertSuffix(const sem::Type* ty) {
+    const std::string ConvertSuffix(const type::Type* ty) {
         return Switch(
             ty,  //
             [&](const sem::Struct* str) { return sym.NameFor(str->Name()); },
@@ -659,7 +659,7 @@ struct Std140::State {
     /// @param chain the access chain from a uniform buffer to the value to load.
     const ast::Expression* LoadWithConvert(const AccessChain& chain) {
         const ast::Expression* expr = nullptr;
-        const sem::Type* ty = nullptr;
+        const type::Type* ty = nullptr;
         auto dynamic_index = [&](size_t idx) {
             return ctx.Clone(chain.dynamic_indices[idx]->Declaration());
         };
@@ -675,7 +675,7 @@ struct Std140::State {
     /// std140-forked type to the type @p ty. If @p expr is not a std140-forked type, then Convert()
     /// will simply return @p expr.
     /// @returns the converted value expression.
-    const ast::Expression* Convert(const sem::Type* ty, const ast::Expression* expr) {
+    const ast::Expression* Convert(const type::Type* ty, const ast::Expression* expr) {
         // Get an existing, or create a new function for converting the std140 type to ty.
         auto fn = conv_fns.GetOrCreate(ty, [&] {
             auto std140_ty = Std140Type(ty);
@@ -815,7 +815,7 @@ struct Std140::State {
         };
 
         const ast::Expression* expr = nullptr;
-        const sem::Type* ty = nullptr;
+        const type::Type* ty = nullptr;
 
         // Build the expression up to, but not including the matrix member
         auto std140_mat_idx = *chain.std140_mat_idx;
@@ -889,13 +889,13 @@ struct Std140::State {
         utils::Vector<const ast::CaseStatement*, 4> cases;
 
         // The function return type.
-        const sem::Type* ret_ty = nullptr;
+        const type::Type* ret_ty = nullptr;
 
         // Build switch() cases for each column of the matrix
         auto num_columns = chain.std140_mat_ty->columns();
         for (uint32_t column_idx = 0; column_idx < num_columns; column_idx++) {
             const ast::Expression* expr = nullptr;
-            const sem::Type* ty = nullptr;
+            const type::Type* ty = nullptr;
 
             // Build the expression up to, but not including the matrix
             for (size_t i = 0; i < std140_mat_idx; i++) {
@@ -985,7 +985,7 @@ struct Std140::State {
         auto dynamic_index = [&](size_t idx) { return b.Expr(dynamic_index_params[idx]->symbol); };
 
         const ast::Expression* expr = nullptr;
-        const sem::Type* ty = nullptr;
+        const type::Type* ty = nullptr;
         std::string name = "load";
 
         // Build the expression up to, but not including the matrix member
@@ -1048,7 +1048,7 @@ struct Std140::State {
         /// The new, post-access expression
         const ast::Expression* expr;
         /// The type of #expr
-        const sem::Type* type;
+        const type::Type* type;
         /// A name segment which can be used to build sensible names for helper functions
         std::string name;
     };
@@ -1061,7 +1061,7 @@ struct Std140::State {
     /// @returns a ExprTypeName which holds the new expression, new type and a name segment which
     ///          can be used for creating helper function names.
     ExprTypeName BuildAccessExpr(const ast::Expression* lhs,
-                                 const sem::Type* ty,
+                                 const type::Type* ty,
                                  const AccessChain& chain,
                                  size_t index,
                                  std::function<const ast::Expression*(size_t)> dynamic_index) {

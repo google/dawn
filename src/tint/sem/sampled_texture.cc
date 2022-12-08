@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::SampledTexture);
 
 namespace tint::sem {
 
-SampledTexture::SampledTexture(ast::TextureDimension dim, const Type* type)
+SampledTexture::SampledTexture(ast::TextureDimension dim, const type::Type* type)
     : Base(dim), type_(type) {
     TINT_ASSERT(Semantic, type_);
 }
@@ -34,7 +34,7 @@ size_t SampledTexture::Hash() const {
     return utils::Hash(TypeInfo::Of<SampledTexture>().full_hashcode, dim(), type_);
 }
 
-bool SampledTexture::Equals(const sem::Type& other) const {
+bool SampledTexture::Equals(const type::Type& other) const {
     if (auto* o = other.As<SampledTexture>()) {
         return o->dim() == dim() && o->type_ == type_;
     }

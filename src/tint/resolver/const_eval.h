@@ -18,6 +18,7 @@
 #include <stddef.h>
 #include <string>
 
+#include "src/tint/type/type.h"
 #include "src/tint/utils/result.h"
 #include "src/tint/utils/vector.h"
 
@@ -33,7 +34,6 @@ namespace tint::sem {
 class Constant;
 class Expression;
 class StructMember;
-class Type;
 }  // namespace tint::sem
 
 namespace tint::resolver {
@@ -56,7 +56,7 @@ class ConstEval {
     using Result = utils::Result<const sem::Constant*>;
 
     /// Typedef for a constant evaluation function
-    using Function = Result (ConstEval::*)(const sem::Type* result_ty,
+    using Function = Result (ConstEval::*)(const type::Type* result_ty,
                                            utils::VectorRef<const sem::Constant*>,
                                            const Source&);
 
@@ -71,13 +71,13 @@ class ConstEval {
     /// @param ty the target type - must be an array or initializer
     /// @param args the input arguments
     /// @return the constructed value, or null if the value cannot be calculated
-    Result ArrayOrStructInit(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    Result ArrayOrStructInit(const type::Type* ty, utils::VectorRef<const sem::Expression*> args);
 
     /// @param ty the target type
     /// @param expr the input expression
     /// @return the bit-cast of the given expression to the given type, or null if the value cannot
     ///         be calculated
-    Result Bitcast(const sem::Type* ty, const sem::Expression* expr);
+    Result Bitcast(const type::Type* ty, const sem::Expression* expr);
 
     /// @param obj the object being indexed
     /// @param idx the index expression
@@ -87,7 +87,7 @@ class ConstEval {
     /// @param ty the result type
     /// @param lit the literal AST node
     /// @return the constant value of the literal
-    Result Literal(const sem::Type* ty, const ast::LiteralExpression* lit);
+    Result Literal(const type::Type* ty, const ast::LiteralExpression* lit);
 
     /// @param obj the object being accessed
     /// @param member the member
@@ -98,7 +98,7 @@ class ConstEval {
     /// @param vector the vector being swizzled
     /// @param indices the swizzle indices
     /// @return the result of the swizzle, or null if the value cannot be calculated
-    Result Swizzle(const sem::Type* ty,
+    Result Swizzle(const type::Type* ty,
                    const sem::Expression* vector,
                    utils::VectorRef<uint32_t> indices);
 
@@ -107,7 +107,7 @@ class ConstEval {
     /// @param value the value being converted
     /// @param source the source location
     /// @return the converted value, or null if the value cannot be calculated
-    Result Convert(const sem::Type* ty, const sem::Constant* value, const Source& source);
+    Result Convert(const type::Type* ty, const sem::Constant* value, const Source& source);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Constant value evaluation methods, to be indirectly called via the intrinsic table
@@ -118,7 +118,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the converted value, or null if the value cannot be calculated
-    Result Conv(const sem::Type* ty,
+    Result Conv(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -127,7 +127,7 @@ class ConstEval {
     /// @param args the input arguments (no arguments provided)
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result Zero(const sem::Type* ty,
+    Result Zero(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -136,7 +136,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result Identity(const sem::Type* ty,
+    Result Identity(const type::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
@@ -145,7 +145,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result VecSplat(const sem::Type* ty,
+    Result VecSplat(const type::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
@@ -154,7 +154,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result VecInitS(const sem::Type* ty,
+    Result VecInitS(const type::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
@@ -163,7 +163,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result VecInitM(const sem::Type* ty,
+    Result VecInitM(const type::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
@@ -172,7 +172,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result MatInitS(const sem::Type* ty,
+    Result MatInitS(const type::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
@@ -181,7 +181,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result MatInitV(const sem::Type* ty,
+    Result MatInitV(const type::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
@@ -194,7 +194,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpComplement(const sem::Type* ty,
+    Result OpComplement(const type::Type* ty,
                         utils::VectorRef<const sem::Constant*> args,
                         const Source& source);
 
@@ -203,7 +203,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpUnaryMinus(const sem::Type* ty,
+    Result OpUnaryMinus(const type::Type* ty,
                         utils::VectorRef<const sem::Constant*> args,
                         const Source& source);
 
@@ -212,7 +212,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpNot(const sem::Type* ty,
+    Result OpNot(const type::Type* ty,
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
@@ -225,7 +225,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpPlus(const sem::Type* ty,
+    Result OpPlus(const type::Type* ty,
                   utils::VectorRef<const sem::Constant*> args,
                   const Source& source);
 
@@ -234,7 +234,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpMinus(const sem::Type* ty,
+    Result OpMinus(const type::Type* ty,
                    utils::VectorRef<const sem::Constant*> args,
                    const Source& source);
 
@@ -243,7 +243,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpMultiply(const sem::Type* ty,
+    Result OpMultiply(const type::Type* ty,
                       utils::VectorRef<const sem::Constant*> args,
                       const Source& source);
 
@@ -252,7 +252,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpMultiplyMatVec(const sem::Type* ty,
+    Result OpMultiplyMatVec(const type::Type* ty,
                             utils::VectorRef<const sem::Constant*> args,
                             const Source& source);
 
@@ -261,7 +261,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpMultiplyVecMat(const sem::Type* ty,
+    Result OpMultiplyVecMat(const type::Type* ty,
                             utils::VectorRef<const sem::Constant*> args,
                             const Source& source);
 
@@ -270,7 +270,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpMultiplyMatMat(const sem::Type* ty,
+    Result OpMultiplyMatMat(const type::Type* ty,
                             utils::VectorRef<const sem::Constant*> args,
                             const Source& source);
 
@@ -279,7 +279,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpDivide(const sem::Type* ty,
+    Result OpDivide(const type::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
@@ -288,7 +288,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpModulo(const sem::Type* ty,
+    Result OpModulo(const type::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
@@ -297,7 +297,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpEqual(const sem::Type* ty,
+    Result OpEqual(const type::Type* ty,
                    utils::VectorRef<const sem::Constant*> args,
                    const Source& source);
 
@@ -306,7 +306,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpNotEqual(const sem::Type* ty,
+    Result OpNotEqual(const type::Type* ty,
                       utils::VectorRef<const sem::Constant*> args,
                       const Source& source);
 
@@ -315,7 +315,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpLessThan(const sem::Type* ty,
+    Result OpLessThan(const type::Type* ty,
                       utils::VectorRef<const sem::Constant*> args,
                       const Source& source);
 
@@ -324,7 +324,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpGreaterThan(const sem::Type* ty,
+    Result OpGreaterThan(const type::Type* ty,
                          utils::VectorRef<const sem::Constant*> args,
                          const Source& source);
 
@@ -333,7 +333,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpLessThanEqual(const sem::Type* ty,
+    Result OpLessThanEqual(const type::Type* ty,
                            utils::VectorRef<const sem::Constant*> args,
                            const Source& source);
 
@@ -342,7 +342,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpGreaterThanEqual(const sem::Type* ty,
+    Result OpGreaterThanEqual(const type::Type* ty,
                               utils::VectorRef<const sem::Constant*> args,
                               const Source& source);
 
@@ -351,7 +351,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpLogicalAnd(const sem::Type* ty,
+    Result OpLogicalAnd(const type::Type* ty,
                         utils::VectorRef<const sem::Constant*> args,
                         const Source& source);
 
@@ -360,7 +360,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpLogicalOr(const sem::Type* ty,
+    Result OpLogicalOr(const type::Type* ty,
                        utils::VectorRef<const sem::Constant*> args,
                        const Source& source);
 
@@ -369,7 +369,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpAnd(const sem::Type* ty,
+    Result OpAnd(const type::Type* ty,
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
@@ -378,7 +378,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpOr(const sem::Type* ty,
+    Result OpOr(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -387,7 +387,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpXor(const sem::Type* ty,
+    Result OpXor(const type::Type* ty,
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
@@ -396,7 +396,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpShiftLeft(const sem::Type* ty,
+    Result OpShiftLeft(const type::Type* ty,
                        utils::VectorRef<const sem::Constant*> args,
                        const Source& source);
 
@@ -405,7 +405,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpShiftRight(const sem::Type* ty,
+    Result OpShiftRight(const type::Type* ty,
                         utils::VectorRef<const sem::Constant*> args,
                         const Source& source);
 
@@ -418,7 +418,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result abs(const sem::Type* ty,
+    Result abs(const type::Type* ty,
                utils::VectorRef<const sem::Constant*> args,
                const Source& source);
 
@@ -427,7 +427,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result acos(const sem::Type* ty,
+    Result acos(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -436,7 +436,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result acosh(const sem::Type* ty,
+    Result acosh(const type::Type* ty,
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
@@ -445,7 +445,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result all(const sem::Type* ty,
+    Result all(const type::Type* ty,
                utils::VectorRef<const sem::Constant*> args,
                const Source& source);
 
@@ -454,7 +454,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result any(const sem::Type* ty,
+    Result any(const type::Type* ty,
                utils::VectorRef<const sem::Constant*> args,
                const Source& source);
 
@@ -463,7 +463,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result asin(const sem::Type* ty,
+    Result asin(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -472,7 +472,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result asinh(const sem::Type* ty,
+    Result asinh(const type::Type* ty,
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
@@ -481,7 +481,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result atan(const sem::Type* ty,
+    Result atan(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -490,7 +490,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result atanh(const sem::Type* ty,
+    Result atanh(const type::Type* ty,
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
@@ -499,7 +499,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result atan2(const sem::Type* ty,
+    Result atan2(const type::Type* ty,
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
@@ -508,7 +508,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result ceil(const sem::Type* ty,
+    Result ceil(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -517,7 +517,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result clamp(const sem::Type* ty,
+    Result clamp(const type::Type* ty,
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
@@ -526,7 +526,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result cos(const sem::Type* ty,
+    Result cos(const type::Type* ty,
                utils::VectorRef<const sem::Constant*> args,
                const Source& source);
 
@@ -535,7 +535,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result cosh(const sem::Type* ty,
+    Result cosh(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -544,7 +544,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result countLeadingZeros(const sem::Type* ty,
+    Result countLeadingZeros(const type::Type* ty,
                              utils::VectorRef<const sem::Constant*> args,
                              const Source& source);
 
@@ -553,7 +553,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result countOneBits(const sem::Type* ty,
+    Result countOneBits(const type::Type* ty,
                         utils::VectorRef<const sem::Constant*> args,
                         const Source& source);
 
@@ -562,7 +562,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result countTrailingZeros(const sem::Type* ty,
+    Result countTrailingZeros(const type::Type* ty,
                               utils::VectorRef<const sem::Constant*> args,
                               const Source& source);
 
@@ -571,7 +571,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result cross(const sem::Type* ty,
+    Result cross(const type::Type* ty,
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
@@ -580,7 +580,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    Result degrees(const sem::Type* ty,
+    Result degrees(const type::Type* ty,
                    utils::VectorRef<const sem::Constant*> args,
                    const Source& source);
 
@@ -589,7 +589,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    Result determinant(const sem::Type* ty,
+    Result determinant(const type::Type* ty,
                        utils::VectorRef<const sem::Constant*> args,
                        const Source& source);
 
@@ -598,7 +598,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    Result distance(const sem::Type* ty,
+    Result distance(const type::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
@@ -607,7 +607,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result dot(const sem::Type* ty,
+    Result dot(const type::Type* ty,
                utils::VectorRef<const sem::Constant*> args,
                const Source& source);
 
@@ -616,7 +616,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result exp(const sem::Type* ty,
+    Result exp(const type::Type* ty,
                utils::VectorRef<const sem::Constant*> args,
                const Source& source);
 
@@ -625,7 +625,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result exp2(const sem::Type* ty,
+    Result exp2(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -634,7 +634,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result extractBits(const sem::Type* ty,
+    Result extractBits(const type::Type* ty,
                        utils::VectorRef<const sem::Constant*> args,
                        const Source& source);
 
@@ -643,7 +643,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result faceForward(const sem::Type* ty,
+    Result faceForward(const type::Type* ty,
                        utils::VectorRef<const sem::Constant*> args,
                        const Source& source);
 
@@ -652,7 +652,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result firstLeadingBit(const sem::Type* ty,
+    Result firstLeadingBit(const type::Type* ty,
                            utils::VectorRef<const sem::Constant*> args,
                            const Source& source);
 
@@ -661,7 +661,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result firstTrailingBit(const sem::Type* ty,
+    Result firstTrailingBit(const type::Type* ty,
                             utils::VectorRef<const sem::Constant*> args,
                             const Source& source);
 
@@ -670,7 +670,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result floor(const sem::Type* ty,
+    Result floor(const type::Type* ty,
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
@@ -679,7 +679,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result fma(const sem::Type* ty,
+    Result fma(const type::Type* ty,
                utils::VectorRef<const sem::Constant*> args,
                const Source& source);
 
@@ -688,7 +688,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result frexp(const sem::Type* ty,
+    Result frexp(const type::Type* ty,
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
@@ -697,7 +697,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result insertBits(const sem::Type* ty,
+    Result insertBits(const type::Type* ty,
                       utils::VectorRef<const sem::Constant*> args,
                       const Source& source);
 
@@ -706,7 +706,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result inverseSqrt(const sem::Type* ty,
+    Result inverseSqrt(const type::Type* ty,
                        utils::VectorRef<const sem::Constant*> args,
                        const Source& source);
 
@@ -715,7 +715,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result length(const sem::Type* ty,
+    Result length(const type::Type* ty,
                   utils::VectorRef<const sem::Constant*> args,
                   const Source& source);
 
@@ -724,7 +724,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result log(const sem::Type* ty,
+    Result log(const type::Type* ty,
                utils::VectorRef<const sem::Constant*> args,
                const Source& source);
 
@@ -733,7 +733,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result log2(const sem::Type* ty,
+    Result log2(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -742,7 +742,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result max(const sem::Type* ty,
+    Result max(const type::Type* ty,
                utils::VectorRef<const sem::Constant*> args,
                const Source& source);
 
@@ -751,7 +751,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result min(const sem::Type* ty,  // NOLINT(build/include_what_you_use)  -- confused by min
+    Result min(const type::Type* ty,  // NOLINT(build/include_what_you_use)  -- confused by min
                utils::VectorRef<const sem::Constant*> args,
                const Source& source);
 
@@ -760,7 +760,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result modf(const sem::Type* ty,
+    Result modf(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -769,7 +769,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result normalize(const sem::Type* ty,
+    Result normalize(const type::Type* ty,
                      utils::VectorRef<const sem::Constant*> args,
                      const Source& source);
 
@@ -778,7 +778,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result pack2x16float(const sem::Type* ty,
+    Result pack2x16float(const type::Type* ty,
                          utils::VectorRef<const sem::Constant*> args,
                          const Source& source);
 
@@ -787,7 +787,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result pack2x16snorm(const sem::Type* ty,
+    Result pack2x16snorm(const type::Type* ty,
                          utils::VectorRef<const sem::Constant*> args,
                          const Source& source);
 
@@ -796,7 +796,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result pack2x16unorm(const sem::Type* ty,
+    Result pack2x16unorm(const type::Type* ty,
                          utils::VectorRef<const sem::Constant*> args,
                          const Source& source);
 
@@ -805,7 +805,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result pack4x8snorm(const sem::Type* ty,
+    Result pack4x8snorm(const type::Type* ty,
                         utils::VectorRef<const sem::Constant*> args,
                         const Source& source);
 
@@ -814,7 +814,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result pack4x8unorm(const sem::Type* ty,
+    Result pack4x8unorm(const type::Type* ty,
                         utils::VectorRef<const sem::Constant*> args,
                         const Source& source);
 
@@ -823,7 +823,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    Result radians(const sem::Type* ty,
+    Result radians(const type::Type* ty,
                    utils::VectorRef<const sem::Constant*> args,
                    const Source& source);
 
@@ -832,7 +832,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    Result reflect(const sem::Type* ty,
+    Result reflect(const type::Type* ty,
                    utils::VectorRef<const sem::Constant*> args,
                    const Source& source);
 
@@ -841,7 +841,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    Result refract(const sem::Type* ty,
+    Result refract(const type::Type* ty,
                    utils::VectorRef<const sem::Constant*> args,
                    const Source& source);
 
@@ -850,7 +850,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result reverseBits(const sem::Type* ty,
+    Result reverseBits(const type::Type* ty,
                        utils::VectorRef<const sem::Constant*> args,
                        const Source& source);
 
@@ -859,7 +859,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result round(const sem::Type* ty,
+    Result round(const type::Type* ty,
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
@@ -868,7 +868,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result saturate(const sem::Type* ty,
+    Result saturate(const type::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
@@ -877,7 +877,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result select_bool(const sem::Type* ty,
+    Result select_bool(const type::Type* ty,
                        utils::VectorRef<const sem::Constant*> args,
                        const Source& source);
 
@@ -886,7 +886,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result select_boolvec(const sem::Type* ty,
+    Result select_boolvec(const type::Type* ty,
                           utils::VectorRef<const sem::Constant*> args,
                           const Source& source);
 
@@ -895,7 +895,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result sign(const sem::Type* ty,
+    Result sign(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -904,7 +904,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result sin(const sem::Type* ty,
+    Result sin(const type::Type* ty,
                utils::VectorRef<const sem::Constant*> args,
                const Source& source);
 
@@ -913,7 +913,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result sinh(const sem::Type* ty,
+    Result sinh(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -922,7 +922,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result smoothstep(const sem::Type* ty,
+    Result smoothstep(const type::Type* ty,
                       utils::VectorRef<const sem::Constant*> args,
                       const Source& source);
 
@@ -931,7 +931,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result step(const sem::Type* ty,
+    Result step(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -940,7 +940,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result sqrt(const sem::Type* ty,
+    Result sqrt(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -949,7 +949,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result tan(const sem::Type* ty,
+    Result tan(const type::Type* ty,
                utils::VectorRef<const sem::Constant*> args,
                const Source& source);
 
@@ -958,7 +958,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result tanh(const sem::Type* ty,
+    Result tanh(const type::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
@@ -967,7 +967,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result transpose(const sem::Type* ty,
+    Result transpose(const type::Type* ty,
                      utils::VectorRef<const sem::Constant*> args,
                      const Source& source);
 
@@ -976,7 +976,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result trunc(const sem::Type* ty,
+    Result trunc(const type::Type* ty,
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
@@ -985,7 +985,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result unpack2x16float(const sem::Type* ty,
+    Result unpack2x16float(const type::Type* ty,
                            utils::VectorRef<const sem::Constant*> args,
                            const Source& source);
 
@@ -994,7 +994,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result unpack2x16snorm(const sem::Type* ty,
+    Result unpack2x16snorm(const type::Type* ty,
                            utils::VectorRef<const sem::Constant*> args,
                            const Source& source);
 
@@ -1003,7 +1003,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result unpack2x16unorm(const sem::Type* ty,
+    Result unpack2x16unorm(const type::Type* ty,
                            utils::VectorRef<const sem::Constant*> args,
                            const Source& source);
 
@@ -1012,7 +1012,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result unpack4x8snorm(const sem::Type* ty,
+    Result unpack4x8snorm(const type::Type* ty,
                           utils::VectorRef<const sem::Constant*> args,
                           const Source& source);
 
@@ -1021,7 +1021,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result unpack4x8unorm(const sem::Type* ty,
+    Result unpack4x8unorm(const type::Type* ty,
                           utils::VectorRef<const sem::Constant*> args,
                           const Source& source);
 
@@ -1030,7 +1030,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result quantizeToF16(const sem::Type* ty,
+    Result quantizeToF16(const type::Type* ty,
                          utils::VectorRef<const sem::Constant*> args,
                          const Source& source);
 
@@ -1237,91 +1237,91 @@ class ConstEval {
     /// @param source the source location
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
-    auto AddFunc(const Source& source, const sem::Type* elem_ty);
+    auto AddFunc(const Source& source, const type::Type* elem_ty);
 
     /// Returns a callable that calls Sub, and creates a Constant with its result of type `elem_ty`
     /// if successful, or returns Failure otherwise.
     /// @param source the source location
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
-    auto SubFunc(const Source& source, const sem::Type* elem_ty);
+    auto SubFunc(const Source& source, const type::Type* elem_ty);
 
     /// Returns a callable that calls Mul, and creates a Constant with its result of type `elem_ty`
     /// if successful, or returns Failure otherwise.
     /// @param source the source location
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
-    auto MulFunc(const Source& source, const sem::Type* elem_ty);
+    auto MulFunc(const Source& source, const type::Type* elem_ty);
 
     /// Returns a callable that calls Div, and creates a Constant with its result of type `elem_ty`
     /// if successful, or returns Failure otherwise.
     /// @param source the source location
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
-    auto DivFunc(const Source& source, const sem::Type* elem_ty);
+    auto DivFunc(const Source& source, const type::Type* elem_ty);
 
     /// Returns a callable that calls Mod, and creates a Constant with its result of type `elem_ty`
     /// if successful, or returns Failure otherwise.
     /// @param source the source location
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
-    auto ModFunc(const Source& source, const sem::Type* elem_ty);
+    auto ModFunc(const Source& source, const type::Type* elem_ty);
 
     /// Returns a callable that calls Dot2, and creates a Constant with its result of type `elem_ty`
     /// if successful, or returns Failure otherwise.
     /// @param source the source location
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
-    auto Dot2Func(const Source& source, const sem::Type* elem_ty);
+    auto Dot2Func(const Source& source, const type::Type* elem_ty);
 
     /// Returns a callable that calls Dot3, and creates a Constant with its result of type `elem_ty`
     /// if successful, or returns Failure otherwise.
     /// @param source the source location
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
-    auto Dot3Func(const Source& source, const sem::Type* elem_ty);
+    auto Dot3Func(const Source& source, const type::Type* elem_ty);
 
     /// Returns a callable that calls Dot4, and creates a Constant with its result of type `elem_ty`
     /// if successful, or returns Failure otherwise.
     /// @param source the source location
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
-    auto Dot4Func(const Source& source, const sem::Type* elem_ty);
+    auto Dot4Func(const Source& source, const type::Type* elem_ty);
 
     /// Returns a callable that calls Det2, and creates a Constant with its result of type `elem_ty`
     /// if successful, or returns Failure otherwise.
     /// @param source the source location
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
-    auto Det2Func(const Source& source, const sem::Type* elem_ty);
+    auto Det2Func(const Source& source, const type::Type* elem_ty);
 
     /// Returns a callable that calls Det3, and creates a Constant with its result of type `elem_ty`
     /// if successful, or returns Failure otherwise.
     /// @param source the source location
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
-    auto Det3Func(const Source& source, const sem::Type* elem_ty);
+    auto Det3Func(const Source& source, const type::Type* elem_ty);
 
     /// Returns a callable that calls Det4, and creates a Constant with its result of type `elem_ty`
     /// if successful, or returns Failure otherwise.
     /// @param source the source location
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
-    auto Det4Func(const Source& source, const sem::Type* elem_ty);
+    auto Det4Func(const Source& source, const type::Type* elem_ty);
 
     /// Returns a callable that calls Clamp, and creates a Constant with its result of type
     /// `elem_ty` if successful, or returns Failure otherwise.
     /// @param source the source location
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
-    auto ClampFunc(const Source& source, const sem::Type* elem_ty);
+    auto ClampFunc(const Source& source, const type::Type* elem_ty);
 
     /// Returns a callable that calls SqrtFunc, and creates a Constant with its
     /// result of type `elem_ty` if successful, or returns Failure otherwise.
     /// @param source the source location
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
-    auto SqrtFunc(const Source& source, const sem::Type* elem_ty);
+    auto SqrtFunc(const Source& source, const type::Type* elem_ty);
 
     /// Returns the dot product of v1 and v2.
     /// @param source the source location
@@ -1335,7 +1335,7 @@ class ConstEval {
     /// @param ty the return type
     /// @param c0 the constant to calculate the length of
     /// @returns the length of c0
-    Result Length(const Source& source, const sem::Type* ty, const sem::Constant* c0);
+    Result Length(const Source& source, const type::Type* ty, const sem::Constant* c0);
 
     /// Returns the product of v1 and v2
     /// @param source the source location
@@ -1344,7 +1344,7 @@ class ConstEval {
     /// @param v2 rhs value
     /// @returns the product of v1 and v2
     Result Mul(const Source& source,
-               const sem::Type* ty,
+               const type::Type* ty,
                const sem::Constant* v1,
                const sem::Constant* v2);
 
@@ -1355,7 +1355,7 @@ class ConstEval {
     /// @param v2 rhs value
     /// @returns the difference between v2 and v1
     Result Sub(const Source& source,
-               const sem::Type* ty,
+               const type::Type* ty,
                const sem::Constant* v1,
                const sem::Constant* v2);
 

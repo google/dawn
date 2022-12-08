@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::TypeInitializer);
 
 namespace tint::sem {
 
-TypeInitializer::TypeInitializer(const sem::Type* type,
+TypeInitializer::TypeInitializer(const type::Type* type,
                                  utils::VectorRef<const Parameter*> parameters,
                                  EvaluationStage stage)
     : Base(type, std::move(parameters), stage) {}

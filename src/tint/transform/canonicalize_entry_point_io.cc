@@ -207,7 +207,7 @@ struct CanonicalizeEntryPointIO::State {
     /// @param attributes the attributes to apply to the shader input
     /// @returns an expression which evaluates to the value of the shader input
     const ast::Expression* AddInput(std::string name,
-                                    const sem::Type* type,
+                                    const type::Type* type,
                                     std::optional<uint32_t> location,
                                     utils::Vector<const ast::Attribute*, 8> attributes) {
         auto* ast_type = CreateASTTypeFor(ctx, type);
@@ -278,7 +278,7 @@ struct CanonicalizeEntryPointIO::State {
     /// @param attributes the attributes to apply to the shader output
     /// @param value the value of the shader output
     void AddOutput(std::string name,
-                   const sem::Type* type,
+                   const type::Type* type,
                    std::optional<uint32_t> location,
                    utils::Vector<const ast::Attribute*, 8> attributes,
                    const ast::Expression* value) {
@@ -378,7 +378,7 @@ struct CanonicalizeEntryPointIO::State {
     /// function.
     /// @param inner_ret_type the original function return type
     /// @param original_result the result object produced by the original function
-    void ProcessReturnType(const sem::Type* inner_ret_type, Symbol original_result) {
+    void ProcessReturnType(const type::Type* inner_ret_type, Symbol original_result) {
         // Do not add interpolation attributes on fragment output
         bool do_interpolate = func_ast->PipelineStage() != ast::PipelineStage::kFragment;
         if (auto* str = inner_ret_type->As<sem::Struct>()) {
@@ -754,7 +754,7 @@ struct CanonicalizeEntryPointIO::State {
     /// @returns the converted value which can be assigned to the GLSL builtin
     const ast::Expression* ToGLSLBuiltin(ast::BuiltinValue builtin,
                                          const ast::Expression* value,
-                                         const sem::Type*& type) {
+                                         const type::Type*& type) {
         switch (builtin) {
             case ast::BuiltinValue::kVertexIndex:
             case ast::BuiltinValue::kInstanceIndex:

@@ -73,7 +73,7 @@ void Transform::RemoveStatement(CloneContext& ctx, const ast::Statement* stmt) {
         << "unable to remove statement from parent of type " << sem->TypeInfo().name;
 }
 
-const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type* ty) {
+const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
     if (ty->Is<sem::Void>()) {
         return ctx.dst->create<ast::Void>();
     }
@@ -106,7 +106,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type*
         if (!a->IsStrideImplicit()) {
             attrs.Push(ctx.dst->create<ast::StrideAttribute>(a->Stride()));
         }
-        if (a->Count()->Is<sem::RuntimeArrayCount>()) {
+        if (a->Count()->Is<type::RuntimeArrayCount>()) {
             return ctx.dst->ty.array(el, nullptr, std::move(attrs));
         }
         if (auto* override = a->Count()->As<sem::NamedOverrideArrayCount>()) {

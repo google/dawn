@@ -67,7 +67,7 @@ class Builder {
         uint32_t source_id;
         /// The type of the current chain source. This type matches the deduced
         /// result_type of the current source defined above.
-        const sem::Type* source_type;
+        const type::Type* source_type;
         /// A list of access chain indices to emit. Note, we _only_ have access
         /// chain indices if the source is reference.
         std::vector<uint32_t> access_chain_indices;
@@ -286,7 +286,7 @@ class Builder {
     /// @param type the type to generate for
     /// @param struct_id the struct id
     /// @param member_idx the member index
-    void GenerateMemberAccessIfNeeded(const sem::Type* type,
+    void GenerateMemberAccessIfNeeded(const type::Type* type,
                                       uint32_t struct_id,
                                       uint32_t member_idx);
     /// Generates a function variable
@@ -402,7 +402,7 @@ class Builder {
     /// @param texture_operand the texture operand
     /// @param sampler_operand the sampler operand
     /// @returns the expression ID
-    uint32_t GenerateSampledImage(const sem::Type* texture_type,
+    uint32_t GenerateSampledImage(const type::Type* texture_type,
                                   Operand texture_operand,
                                   Operand sampler_operand);
     /// Generates a cast or object copy for the expression result,
@@ -412,7 +412,7 @@ class Builder {
     /// @param from_expr the expression to cast
     /// @param is_global_init if this is a global initializer
     /// @returns the expression ID on success or 0 otherwise
-    uint32_t GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
+    uint32_t GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
                                              const ast::Expression* from_expr,
                                              bool is_global_init);
     /// Generates a loop statement
@@ -458,7 +458,7 @@ class Builder {
     /// @param type the type of the expression
     /// @param id the SPIR-V id of the experssion
     /// @returns the ID of the loaded value or `id` if type is not a reference
-    uint32_t GenerateLoadIfNeeded(const sem::Type* type, uint32_t id);
+    uint32_t GenerateLoadIfNeeded(const type::Type* type, uint32_t id);
     /// Generates an OpStore. Emits an error and returns false if we're
     /// currently outside a function.
     /// @param to the ID to store too
@@ -468,7 +468,7 @@ class Builder {
     /// Generates a type if not already created
     /// @param type the type to create
     /// @returns the ID to use for the given type. Returns 0 on unknown type.
-    uint32_t GenerateTypeIfNeeded(const sem::Type* type);
+    uint32_t GenerateTypeIfNeeded(const type::Type* type);
     /// Generates a texture type declaration
     /// @param texture the texture to generate
     /// @param result the result operand
@@ -522,7 +522,7 @@ class Builder {
     /// @param scalar_id scalar to splat
     /// @param vec_type type of vector
     /// @returns id of the new vector
-    uint32_t GenerateSplat(uint32_t scalar_id, const sem::Type* vec_type);
+    uint32_t GenerateSplat(uint32_t scalar_id, const type::Type* vec_type);
 
     /// Generates instructions to add or subtract two matrices
     /// @param lhs_id id of multiplicand
@@ -552,7 +552,7 @@ class Builder {
 
     /// @returns the resolved type of the ast::Expression `expr`
     /// @param expr the expression
-    const sem::Type* TypeOf(const ast::Expression* expr) const { return builder_.TypeOf(expr); }
+    const type::Type* TypeOf(const ast::Expression* expr) const { return builder_.TypeOf(expr); }
 
     /// Generates a constant value if needed
     /// @param constant the constant to generate.
@@ -567,7 +567,7 @@ class Builder {
     /// Generates a constant-null of the given type, if needed
     /// @param type the type of the constant null to generate.
     /// @returns the ID on success or 0 on failure
-    uint32_t GenerateConstantNullIfNeeded(const sem::Type* type);
+    uint32_t GenerateConstantNullIfNeeded(const type::Type* type);
 
     /// Generates a vector constant splat if needed
     /// @param type the type of the vector to generate
@@ -619,11 +619,11 @@ class Builder {
     std::unordered_map<std::string, uint32_t> import_name_to_id_;
     std::unordered_map<Symbol, uint32_t> func_symbol_to_id_;
     std::unordered_map<sem::CallTargetSignature, uint32_t> func_sig_to_id_;
-    std::unordered_map<const sem::Type*, uint32_t> type_to_id_;
+    std::unordered_map<const type::Type*, uint32_t> type_to_id_;
     std::unordered_map<ScalarConstant, uint32_t> const_to_id_;
-    std::unordered_map<const sem::Type*, uint32_t> const_null_to_id_;
+    std::unordered_map<const type::Type*, uint32_t> const_null_to_id_;
     std::unordered_map<uint64_t, uint32_t> const_splat_to_id_;
-    std::unordered_map<const sem::Type*, uint32_t> texture_type_to_sampled_image_type_id_;
+    std::unordered_map<const type::Type*, uint32_t> texture_type_to_sampled_image_type_id_;
     std::vector<Scope> scope_stack_;
     std::vector<uint32_t> merge_stack_;
     std::vector<uint32_t> continue_stack_;

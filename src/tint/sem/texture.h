@@ -16,12 +16,12 @@
 #define SRC_TINT_SEM_TEXTURE_H_
 
 #include "src/tint/ast/texture.h"
-#include "src/tint/sem/type.h"
+#include "src/tint/type/type.h"
 
 namespace tint::sem {
 
 /// A texture type.
-class Texture : public Castable<Texture, Type> {
+class Texture : public Castable<Texture, type::Type> {
   public:
     /// Constructor
     /// @param dim the dimensionality of the texture

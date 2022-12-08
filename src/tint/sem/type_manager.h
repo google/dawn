@@ -15,12 +15,15 @@
 #ifndef SRC_TINT_SEM_TYPE_MANAGER_H_
 #define SRC_TINT_SEM_TYPE_MANAGER_H_
 
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <utility>
 
-#include "src/tint/sem/array_count.h"
-#include "src/tint/sem/type.h"
+#include "src/tint/sem/struct.h"
+#include "src/tint/type/array_count.h"
+#include "src/tint/type/node.h"
+#include "src/tint/type/type.h"
 #include "src/tint/utils/unique_allocator.h"
 
 namespace tint::sem {
@@ -29,7 +32,7 @@ namespace tint::sem {
 class TypeManager final {
   public:
     /// Iterator is the type returned by begin() and end()
-    using TypeIterator = utils::BlockAllocator<Type>::ConstIterator;
+    using TypeIterator = utils::BlockAllocator<type::Type>::ConstIterator;
 
     /// Constructor
     TypeManager();
@@ -57,7 +60,7 @@ class TypeManager final {
     static TypeManager Wrap(const TypeManager& inner) {
         TypeManager out;
         out.types_.Wrap(inner.types_);
-        out.array_counts_.Wrap(inner.array_counts_);
+        out.nodes_.Wrap(inner.nodes_);
         return out;
     }
 
@@ -66,7 +69,7 @@ class TypeManager final {
     ///         If an existing instance of `T` has been constructed, then the same
     ///         pointer is returned.
     template <typename TYPE,
-              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, sem::Type>>,
+              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, type::Type>>,
               typename... ARGS>
     TYPE* Get(ARGS&&... args) {
         return types_.Get<TYPE>(std::forward<ARGS>(args)...);
@@ -76,7 +79,7 @@ class TypeManager final {
     /// @return a pointer to an instance of `T` with the provided arguments, or nullptr if the item
     ///         was not found.
     template <typename TYPE,
-              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, sem::Type>>,
+              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, type::Type>>,
               typename... ARGS>
     TYPE* Find(ARGS&&... args) const {
         return types_.Find<TYPE>(std::forward<ARGS>(args)...);
@@ -87,10 +90,11 @@ class TypeManager final {
     ///         If an existing instance of `T` has been constructed, then the same
     ///         pointer is returned.
     template <typename TYPE,
-              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, sem::ArrayCount>>,
+              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, type::ArrayCount> ||
+                                          traits::IsTypeOrDerived<TYPE, sem::StructMemberBase>>,
               typename... ARGS>
-    TYPE* GetArrayCount(ARGS&&... args) {
-        return array_counts_.Get<TYPE>(std::forward<ARGS>(args)...);
+    TYPE* GetNode(ARGS&&... args) {
+        return nodes_.Get<TYPE>(std::forward<ARGS>(args)...);
     }
 
     /// @returns an iterator to the beginning of the types
@@ -99,10 +103,50 @@ class TypeManager final {
     TypeIterator end() const { return types_.end(); }
 
   private:
-    utils::UniqueAllocator<Type> types_;
-    utils::UniqueAllocator<ArrayCount> array_counts_;
+    utils::UniqueAllocator<type::Type> types_;
+    utils::UniqueAllocator<type::Node> nodes_;
 };
 
 }  // namespace tint::sem
+
+namespace std {
+
+/// std::hash specialization for tint::type::Node
+template <>
+struct hash<tint::type::Node> {
+    /// @param type the type to obtain a hash from
+    /// @returns the hash of the type
+    size_t operator()(const tint::type::Node& type) const {
+        if (const auto* ac = type.As<tint::type::ArrayCount>()) {
+            return ac->Hash();
+        } else if (type.Is<tint::sem::StructMemberBase>()) {
+            return tint::TypeInfo::Of<tint::sem::StructMemberBase>().full_hashcode;
+        }
+        TINT_ASSERT(Type, false && "Unreachable");
+        return 0;
+    }
+};
+
+/// std::equal_to specialization for tint::type::Node
+template <>
+struct equal_to<tint::type::Node> {
+    /// @param a the first type to compare
+    /// @param b the second type to compare
+    /// @returns true if the two types are equal
+    bool operator()(const tint::type::Node& a, const tint::type::Node& b) const {
+        if (const auto* ac = a.As<tint::type::ArrayCount>()) {
+            if (const auto* bc = b.As<tint::type::ArrayCount>()) {
+                return ac->Equals(*bc);
+            }
+            return false;
+        } else if (a.Is<tint::sem::StructMemberBase>()) {
+            return &a == &b;
+        }
+        TINT_ASSERT(Type, false && "Unreachable");
+        return false;
+    }
+};
+
+}  // namespace std
 
 #endif  // SRC_TINT_SEM_TYPE_MANAGER_H_

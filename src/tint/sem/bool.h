@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/sem/type.h"
+#include "src/tint/type/type.h"
 
 // X11 likes to #define Bool leading to confusing error messages.
 // If its defined, undefine it.
@@ -28,7 +28,7 @@
 namespace tint::sem {
 
 /// A boolean type
-class Bool final : public Castable<Bool, Type> {
+class Bool final : public Castable<Bool, type::Type> {
   public:
     /// Constructor
     Bool();
