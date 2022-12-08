@@ -103,15 +103,32 @@ func (c *Content) appendConsumedResultsForSkippedTests(results result.List,
 	for _, q := range testlist {
 		tree.Add(q, struct{}{})
 	}
-	for _, c := range c.Chunks {
-		for _, ex := range c.Expectations {
-			if container.NewSet(ex.Status...).Contains(string(result.Skip)) {
-				for _, variant := range variants {
-					if !variant.ContainsAll(ex.Tags) {
-						continue
-					}
-					glob, _ := tree.Glob(query.Parse(ex.Query))
-					for _, qd := range glob {
+	// For each variant...
+	for _, variant := range variants {
+		resultsForVariant := container.NewSet[string]()
+		for _, result := range results.FilterByVariant(variant) {
+			resultsForVariant.Add(result.Query.String())
+		}
+
+		// For each expectation...
+		for _, c := range c.Chunks {
+			for _, ex := range c.Expectations {
+				// Does this expectation apply for variant?
+				if !variant.ContainsAll(ex.Tags) {
+					continue // Nope.
+				}
+
+				// Does the expectation contain a Skip status?
+				if !container.NewSet(ex.Status...).Contains(string(result.Skip)) {
+					continue // Nope.
+				}
+
+				// Gather all the tests that apply to the expectation
+				glob, _ := tree.Glob(query.Parse(ex.Query))
+				for _, qd := range glob {
+					// If we don't have a result for the test, then append a
+					// synthetic 'consumed' result.
+					if !resultsForVariant.Contains(qd.Query.String()) {
 						results = append(results, result.Result{
 							Query:  qd.Query,
 							Tags:   variant,
