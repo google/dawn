@@ -32,7 +32,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeStridedArray);
 namespace tint::transform {
 namespace {
 
-using DecomposedArrays = std::unordered_map<const sem::Array*, Symbol>;
+using DecomposedArrays = std::unordered_map<const type::Array*, Symbol>;
 
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
@@ -66,7 +66,7 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
 
     // Maps an array type in the source program to the name of the struct wrapper
     // type in the target program.
-    std::unordered_map<const sem::Array*, Symbol> decomposed;
+    std::unordered_map<const type::Array*, Symbol> decomposed;
 
     // Find and replace all arrays with a @stride attribute with a array that has
     // the @stride removed. If the source array stride does not match the natural
@@ -105,7 +105,7 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
     // Example: `arr[i]` -> `arr[i].el`
     ctx.ReplaceAll([&](const ast::IndexAccessorExpression* idx) -> const ast::Expression* {
         if (auto* ty = src->TypeOf(idx->object)) {
-            if (auto* arr = ty->UnwrapRef()->As<sem::Array>()) {
+            if (auto* arr = ty->UnwrapRef()->As<type::Array>()) {
                 if (!arr->IsStrideImplicit()) {
                     auto* expr = ctx.CloneWithoutTransform(idx);
                     return b.MemberAccessor(expr, kMemberName);
@@ -127,7 +127,7 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
         if (!expr->args.IsEmpty()) {
             if (auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>()) {
                 if (auto* ctor = call->Target()->As<sem::TypeInitializer>()) {
-                    if (auto* arr = ctor->ReturnType()->As<sem::Array>()) {
+                    if (auto* arr = ctor->ReturnType()->As<type::Array>()) {
                         // Begin by cloning the array initializer type or name
                         // If this is an unaliased array, this may add a new entry to
                         // decomposed.

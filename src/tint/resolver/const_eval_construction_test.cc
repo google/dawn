@@ -1318,7 +1318,7 @@ TEST_F(ResolverConstEvalTest, Array_i32_Zero) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<sem::Array>();
+    auto* arr = sem->Type()->As<type::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<type::I32>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -1355,7 +1355,7 @@ TEST_F(ResolverConstEvalTest, Array_f32_Zero) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<sem::Array>();
+    auto* arr = sem->Type()->As<type::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<type::F32>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -1392,7 +1392,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Zero) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<sem::Array>();
+    auto* arr = sem->Type()->As<type::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<type::Vector>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -1443,7 +1443,7 @@ TEST_F(ResolverConstEvalTest, Array_Struct_f32_Zero) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<sem::Array>();
+    auto* arr = sem->Type()->As<type::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<sem::Struct>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -1480,7 +1480,7 @@ TEST_F(ResolverConstEvalTest, Array_i32_Elements) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<sem::Array>();
+    auto* arr = sem->Type()->As<type::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<type::I32>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -1517,7 +1517,7 @@ TEST_F(ResolverConstEvalTest, Array_f32_Elements) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<sem::Array>();
+    auto* arr = sem->Type()->As<type::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<type::F32>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -1555,7 +1555,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Elements) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<sem::Array>();
+    auto* arr = sem->Type()->As<type::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<type::Vector>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -1584,7 +1584,7 @@ TEST_F(ResolverConstEvalTest, Array_Struct_f32_Elements) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<sem::Array>();
+    auto* arr = sem->Type()->As<type::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<sem::Struct>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -2087,14 +2087,14 @@ TEST_F(ResolverConstEvalTest, Struct_Array_Construct) {
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<sem::Array>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::Array>());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->As<i32>(), 1_i);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->As<u32>(), 2_i);
 
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<sem::Array>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::Array>());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->As<i32>(), 1_f);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->As<u32>(), 2_f);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->As<f32>(), 3_f);

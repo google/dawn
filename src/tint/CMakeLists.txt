@@ -291,8 +291,6 @@ list(APPEND TINT_LIB_SRCS
   resolver/validator.cc
   resolver/validator.h
   scope_stack.h
-  sem/array.cc
-  sem/array.h
   sem/array_count.cc
   sem/array_count.h
   sem/behavior.cc
@@ -460,6 +458,8 @@ list(APPEND TINT_LIB_SRCS
   type/abstract_int.h
   type/abstract_numeric.cc
   type/abstract_numeric.h
+  type/array.cc
+  type/array.h
   type/array_count.cc
   type/array_count.h
   type/atomic.cc
@@ -923,7 +923,6 @@ if(TINT_BUILD_TESTS)
     resolver/variable_test.cc
     resolver/variable_validation_test.cc
     scope_stack_test.cc
-    sem/array_test.cc
     sem/builtin_test.cc
     sem/expression_test.cc
     sem/struct_test.cc
@@ -934,6 +933,7 @@ if(TINT_BUILD_TESTS)
     text/unicode_test.cc
     traits_test.cc
     transform/transform_test.cc
+    type/array_test.cc
     type/atomic.cc
     type/bool_test.cc
     type/depth_multisampled_texture_test.cc

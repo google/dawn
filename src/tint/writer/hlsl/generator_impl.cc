@@ -28,7 +28,6 @@
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/debug.h"
-#include "src/tint/sem/array.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/constant.h"
@@ -63,6 +62,7 @@
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
+#include "src/tint/type/array.h"
 #include "src/tint/type/atomic.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
@@ -1053,7 +1053,7 @@ bool GeneratorImpl::EmitTypeInitializer(std::ostream& out,
         }
     }
 
-    bool brackets = type->IsAnyOf<sem::Array, sem::Struct>();
+    bool brackets = type->IsAnyOf<type::Array, sem::Struct>();
 
     // For single-value vector initializers, swizzle the scalar to the right
     // vector dimension using .x
@@ -2852,7 +2852,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
         auto name = builder_.Symbols().NameFor(func->symbol);
         // If the function returns an array, then we need to declare a typedef for
         // this.
-        if (sem->ReturnType()->Is<sem::Array>()) {
+        if (sem->ReturnType()->Is<type::Array>()) {
             auto typedef_name = UniqueIdentifier(name + "_ret");
             auto pre = line();
             pre << "typedef ";
@@ -3338,7 +3338,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out,
             }
             return true;
         },
-        [&](const sem::Array* a) {
+        [&](const type::Array* a) {
             if (constant->AllZero()) {
                 out << "(";
                 if (!EmitType(out, a, ast::AddressSpace::kNone, ast::Access::kUndefined, "")) {
@@ -3353,7 +3353,8 @@ bool GeneratorImpl::EmitConstant(std::ostream& out,
 
             auto count = a->ConstantCount();
             if (!count) {
-                diagnostics_.add_error(diag::System::Writer, sem::Array::kErrExpectedConstantCount);
+                diagnostics_.add_error(diag::System::Writer,
+                                       type::Array::kErrExpectedConstantCount);
                 return false;
             }
 
@@ -3514,7 +3515,7 @@ bool GeneratorImpl::EmitValue(std::ostream& out, const type::Type* type, int val
             TINT_DEFER(out << ")" << value);
             return EmitType(out, type, ast::AddressSpace::kNone, ast::Access::kUndefined, "");
         },
-        [&](const sem::Array*) {
+        [&](const type::Array*) {
             out << "(";
             TINT_DEFER(out << ")" << value);
             return EmitType(out, type, ast::AddressSpace::kNone, ast::Access::kUndefined, "");
@@ -3920,10 +3921,10 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 
     return Switch(
         type,
-        [&](const sem::Array* ary) {
+        [&](const type::Array* ary) {
             const type::Type* base_type = ary;
             std::vector<uint32_t> sizes;
-            while (auto* arr = base_type->As<sem::Array>()) {
+            while (auto* arr = base_type->As<type::Array>()) {
                 if (arr->Count()->Is<type::RuntimeArrayCount>()) {
                     TINT_ICE(Writer, diagnostics_)
                         << "runtime arrays may only exist in storage buffers, which should have "
@@ -3933,7 +3934,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                 const auto count = arr->ConstantCount();
                 if (!count) {
                     diagnostics_.add_error(diag::System::Writer,
-                                           sem::Array::kErrExpectedConstantCount);
+                                           type::Array::kErrExpectedConstantCount);
                     return false;
                 }
 

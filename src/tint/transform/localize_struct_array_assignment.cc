@@ -157,7 +157,7 @@ struct LocalizeStructArrayAssignment::State {
                     // Indexing a member access expr?
                     if (auto* ma = ia->object->As<ast::MemberAccessorExpression>()) {
                         // That accesses an array?
-                        if (src->TypeOf(ma)->UnwrapRef()->Is<sem::Array>()) {
+                        if (src->TypeOf(ma)->UnwrapRef()->Is<type::Array>()) {
                             result = true;
                             return ast::TraverseAction::Stop;
                         }

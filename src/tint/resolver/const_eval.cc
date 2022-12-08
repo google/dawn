@@ -23,12 +23,12 @@
 #include <utility>
 
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/array.h"
 #include "src/tint/sem/constant.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
+#include "src/tint/type/array.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
@@ -486,7 +486,7 @@ const ImplConstant* ZeroValue(ProgramBuilder& builder, const type::Type* type) {
             auto* zero_el = ZeroValue(builder, m->ColumnType());
             return builder.create<Splat>(type, zero_el, m->columns());
         },
-        [&](const sem::Array* a) -> const ImplConstant* {
+        [&](const type::Array* a) -> const ImplConstant* {
             if (auto n = a->ConstantCount()) {
                 if (auto* zero_el = ZeroValue(builder, a->ElemType())) {
                     return builder.create<Splat>(type, zero_el, n.value());
@@ -547,7 +547,7 @@ bool Equal(const sem::Constant* a, const sem::Constant* b) {
             }
             return true;
         },
-        [&](const sem::Array* arr) {
+        [&](const type::Array* arr) {
             if (auto count = arr->ConstantCount()) {
                 for (size_t i = 0; i < count; i++) {
                     if (!Equal(a->Index(i), b->Index(i))) {

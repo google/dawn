@@ -333,7 +333,7 @@ struct ZeroInitWorkgroupMemory::State {
             return true;
         }
 
-        if (auto* arr = ty->As<sem::Array>()) {
+        if (auto* arr = ty->As<type::Array>()) {
             auto get_el = [&](uint32_t num_values) {
                 // num_values is the number of values to zero for the element type.
                 // The number of iterations required to zero the array and its elements is:
@@ -343,7 +343,7 @@ struct ZeroInitWorkgroupMemory::State {
                 auto count = arr->ConstantCount();
                 if (!count) {
                     ctx.dst->Diagnostics().add_error(diag::System::Transform,
-                                                     sem::Array::kErrExpectedConstantCount);
+                                                     type::Array::kErrExpectedConstantCount);
                     return Expression{};  // error
                 }
                 auto modulo = num_values * count.value();
@@ -449,7 +449,7 @@ struct ZeroInitWorkgroupMemory::State {
                 }
             }
         }
-        if (ty->Is<sem::Array>()) {
+        if (ty->Is<type::Array>()) {
             return false;
         }
         // True for all other storable types

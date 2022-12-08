@@ -259,7 +259,7 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaArraySize_Alias) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     {
-        auto* r = Sem().TransitivelyReferencedOverrides(Sem().Get<sem::Array>(arr_ty->type));
+        auto* r = Sem().TransitivelyReferencedOverrides(Sem().Get<type::Array>(arr_ty->type));
         ASSERT_NE(r, nullptr);
         auto& refs = *r;
         ASSERT_EQ(refs.Length(), 2u);

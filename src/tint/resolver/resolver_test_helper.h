@@ -667,7 +667,7 @@ struct DataType<array<N, T>> {
         } else {
             count = b.create<type::ConstantArrayCount>(N);
         }
-        return b.create<sem::Array>(
+        return b.create<type::Array>(
             /* element */ el,
             /* count */ count,
             /* align */ el->Align(),

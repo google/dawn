@@ -104,7 +104,7 @@ struct Robustness::State {
 
                 return b.Call("min", idx(), u32(mat->columns() - 1u));
             },
-            [&](const sem::Array* arr) -> const ast::Expression* {
+            [&](const type::Array* arr) -> const ast::Expression* {
                 const ast::Expression* max = nullptr;
                 if (arr->Count()->Is<type::RuntimeArrayCount>()) {
                     // Size is unknown until runtime.
@@ -122,7 +122,7 @@ struct Robustness::State {
                     // Note: Don't be tempted to use the array override variable as an expression
                     // here, the name might be shadowed!
                     b.Diagnostics().add_error(diag::System::Transform,
-                                              sem::Array::kErrExpectedConstantCount);
+                                              type::Array::kErrExpectedConstantCount);
                     return nullptr;
                 }
 

@@ -64,7 +64,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
         }
 
         auto* src_ty = expr->Type();
-        if (!src_ty->IsAnyOf<sem::Array, sem::Struct>()) {
+        if (!src_ty->IsAnyOf<type::Array, sem::Struct>()) {
             // We only care about array and struct initializers
             return true;
         }

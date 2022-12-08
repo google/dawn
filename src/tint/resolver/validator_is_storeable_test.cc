@@ -89,14 +89,14 @@ TEST_F(ValidatorIsStorableTest, Atomic) {
 }
 
 TEST_F(ValidatorIsStorableTest, ArraySizedOfStorable) {
-    auto* arr = create<sem::Array>(create<type::I32>(), create<type::ConstantArrayCount>(5u), 4u,
-                                   20u, 4u, 4u);
+    auto* arr = create<type::Array>(create<type::I32>(), create<type::ConstantArrayCount>(5u), 4u,
+                                    20u, 4u, 4u);
     EXPECT_TRUE(v()->IsStorable(arr));
 }
 
 TEST_F(ValidatorIsStorableTest, ArrayUnsizedOfStorable) {
     auto* arr =
-        create<sem::Array>(create<type::I32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
+        create<type::Array>(create<type::I32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
     EXPECT_TRUE(v()->IsStorable(arr));
 }
 

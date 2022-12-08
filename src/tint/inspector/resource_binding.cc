@@ -14,7 +14,7 @@
 
 #include "src/tint/inspector/resource_binding.h"
 
-#include "src/tint/sem/array.h"
+#include "src/tint/type/array.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
 #include "src/tint/type/matrix.h"
@@ -50,7 +50,7 @@ ResourceBinding::SampledKind BaseTypeToSampledKind(const type::Type* base_type) 
         return ResourceBinding::SampledKind::kUnknown;
     }
 
-    if (auto* at = base_type->As<sem::Array>()) {
+    if (auto* at = base_type->As<type::Array>()) {
         base_type = at->ElemType();
     } else if (auto* mt = base_type->As<type::Matrix>()) {
         base_type = mt->type();

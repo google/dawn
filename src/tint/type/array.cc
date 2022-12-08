@@ -1,4 +1,4 @@
-// Copyright 2021 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/array.h"
+#include "src/tint/type/array.h"
 
 #include <string>
 
 #include "src/tint/ast/variable.h"
 #include "src/tint/debug.h"
-#include "src/tint/sem/variable.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/utils/hash.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::Array);
+TINT_INSTANTIATE_TYPEINFO(tint::type::Array);
 
-namespace tint::sem {
+namespace tint::type {
 
 namespace {
 
@@ -39,8 +38,7 @@ type::TypeFlags FlagsFrom(const type::Type* element, const type::ArrayCount* cou
             flags.Add(type::TypeFlag::kCreationFixedFootprint);
         }
     }
-    if (count->IsAnyOf<type::ConstantArrayCount, sem::NamedOverrideArrayCount,
-                       sem::UnnamedOverrideArrayCount>()) {
+    if (!count->Is<type::RuntimeArrayCount>()) {
         if (element->HasFixedFootprint()) {
             flags.Add(type::TypeFlag::kFixedFootprint);
         }
@@ -67,7 +65,7 @@ Array::Array(const type::Type* element,
       size_(size),
       stride_(stride),
       implicit_stride_(implicit_stride) {
-    TINT_ASSERT(Semantic, element_);
+    TINT_ASSERT(Type, element_);
 }
 
 size_t Array::Hash() const {
@@ -90,13 +88,12 @@ std::string Array::FriendlyName(const SymbolTable& symbols) const {
         out << "@stride(" << stride_ << ") ";
     }
     out << "array<" << element_->FriendlyName(symbols);
-    if (auto* const_count = count_->As<type::ConstantArrayCount>()) {
-        out << ", " << const_count->value;
-    } else if (auto* named_override_count = count_->As<sem::NamedOverrideArrayCount>()) {
-        out << ", " << symbols.NameFor(named_override_count->variable->Declaration()->symbol);
-    } else if (count_->Is<sem::UnnamedOverrideArrayCount>()) {
-        out << ", [unnamed override-expression]";
+
+    auto count_str = count_->FriendlyName(symbols);
+    if (!count_str.empty()) {
+        out << ", " << count_str;
     }
+
     out << ">";
     return out.str();
 }
@@ -109,4 +106,4 @@ uint32_t Array::Size() const {
     return size_;
 }
 
-}  // namespace tint::sem
+}  // namespace tint::type

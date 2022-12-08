@@ -52,7 +52,6 @@
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/resolver/uniformity.h"
-#include "src/tint/sem/array.h"
 #include "src/tint/sem/break_if_statement.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/for_loop_statement.h"
@@ -72,6 +71,7 @@
 #include "src/tint/sem/while_statement.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
+#include "src/tint/type/array.h"
 #include "src/tint/type/atomic.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
@@ -927,7 +927,7 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
     for (auto* var : transitively_referenced_overrides) {
         builder_->Sem().AddTransitivelyReferencedOverride(sem, var);
     }
-    if (auto* arr = sem->Type()->UnwrapRef()->As<sem::Array>()) {
+    if (auto* arr = sem->Type()->UnwrapRef()->As<type::Array>()) {
         auto* refs = builder_->Sem().TransitivelyReferencedOverrides(arr);
         if (refs) {
             for (auto* var : *refs) {
@@ -1742,9 +1742,9 @@ const type::Type* Resolver::ConcreteType(const type::Type* ty,
                               return target_ty ? target_ty : f32m(m->columns(), m->rows());
                           });
         },
-        [&](const sem::Array* a) -> const type::Type* {
+        [&](const type::Array* a) -> const type::Type* {
             const type::Type* target_el_ty = nullptr;
-            if (auto* target_arr_ty = As<sem::Array>(target_ty)) {
+            if (auto* target_arr_ty = As<type::Array>(target_ty)) {
                 target_el_ty = target_arr_ty->ElemType();
             }
             if (auto* el_ty = ConcreteType(a->ElemType(), target_el_ty, source)) {
@@ -1869,7 +1869,7 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
     auto* obj_ty = obj_raw_ty->UnwrapRef();
     auto* ty = Switch(
         obj_ty,  //
-        [&](const sem::Array* arr) { return arr->ElemType(); },
+        [&](const type::Array* arr) { return arr->ElemType(); },
         [&](const type::Vector* vec) { return vec->type(); },
         [&](const type::Matrix* mat) {
             return builder_->create<type::Vector>(mat->type(), mat->rows());
@@ -2045,7 +2045,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             [&](const type::F16*) { return ct_init_or_conv(InitConvIntrinsic::kF16, nullptr); },
             [&](const type::F32*) { return ct_init_or_conv(InitConvIntrinsic::kF32, nullptr); },
             [&](const type::Bool*) { return ct_init_or_conv(InitConvIntrinsic::kBool, nullptr); },
-            [&](const sem::Array* arr) -> sem::Call* {
+            [&](const type::Array* arr) -> sem::Call* {
                 auto* call_target = array_inits_.GetOrCreate(
                     ArrayInitializerSig{{arr, args.Length(), args_stage}},
                     [&]() -> sem::TypeInitializer* {
@@ -2925,7 +2925,7 @@ type::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
     return result;
 }
 
-sem::Array* Resolver::Array(const ast::Array* arr) {
+type::Array* Resolver::Array(const ast::Array* arr) {
     if (!arr->type) {
         AddError("missing array element type", arr->source.End());
         return nullptr;
@@ -3053,11 +3053,11 @@ bool Resolver::ArrayAttributes(utils::VectorRef<const ast::Attribute*> attribute
     return true;
 }
 
-sem::Array* Resolver::Array(const Source& el_source,
-                            const Source& count_source,
-                            const type::Type* el_ty,
-                            const type::ArrayCount* el_count,
-                            uint32_t explicit_stride) {
+type::Array* Resolver::Array(const Source& el_source,
+                             const Source& count_source,
+                             const type::Type* el_ty,
+                             const type::ArrayCount* el_count,
+                             uint32_t explicit_stride) {
     uint32_t el_align = el_ty->Align();
     uint32_t el_size = el_ty->Size();
     uint64_t implicit_stride = el_size ? utils::RoundUp<uint64_t>(el_align, el_size) : 0;
@@ -3076,9 +3076,9 @@ sem::Array* Resolver::Array(const Source& el_source,
     } else if (el_count->Is<type::RuntimeArrayCount>()) {
         size = stride;
     }
-    auto* out = builder_->create<sem::Array>(el_ty, el_count, el_align, static_cast<uint32_t>(size),
-                                             static_cast<uint32_t>(stride),
-                                             static_cast<uint32_t>(implicit_stride));
+    auto* out = builder_->create<type::Array>(
+        el_ty, el_count, el_align, static_cast<uint32_t>(size), static_cast<uint32_t>(stride),
+        static_cast<uint32_t>(implicit_stride));
 
     if (!validator_.Array(out, el_source)) {
         return nullptr;
@@ -3642,7 +3642,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace address_space,
         return true;
     }
 
-    if (auto* arr = ty->As<sem::Array>()) {
+    if (auto* arr = ty->As<type::Array>()) {
         if (address_space != ast::AddressSpace::kStorage) {
             if (arr->Count()->Is<type::RuntimeArrayCount>()) {
                 AddError("runtime-sized arrays can only be used in the <storage> address space",

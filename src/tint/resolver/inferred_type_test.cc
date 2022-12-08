@@ -135,7 +135,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest, ResolverInferredTypeParamTest, testing::V
 
 TEST_F(ResolverInferredTypeTest, InferArray_Pass) {
     auto* type = ty.array(ty.u32(), 10_u);
-    auto* expected_type = create<sem::Array>(
+    auto* expected_type = create<type::Array>(
         create<type::U32>(), create<type::ConstantArrayCount>(10u), 4u, 4u * 10u, 4u, 4u);
 
     auto* ctor_expr = Construct(type);

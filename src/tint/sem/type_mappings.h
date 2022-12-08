@@ -36,7 +36,6 @@ class Variable;
 class WhileStatement;
 }  // namespace tint::ast
 namespace tint::sem {
-class Array;
 class Expression;
 class ForLoopStatement;
 class Function;
@@ -51,6 +50,7 @@ class Variable;
 class WhileStatement;
 }  // namespace tint::sem
 namespace tint::type {
+class Array;
 class Type;
 }  // namespace tint::type
 
@@ -62,7 +62,7 @@ namespace tint::sem {
 /// rules will be used to infer the return type based on the argument type.
 struct TypeMappings {
     //! @cond Doxygen_Suppress
-    Array* operator()(ast::Array*);
+    type::Array* operator()(ast::Array*);
     Expression* operator()(ast::Expression*);
     ForLoopStatement* operator()(ast::ForLoopStatement*);
     Function* operator()(ast::Function*);

@@ -34,6 +34,10 @@ bool NamedOverrideArrayCount::Equals(const ArrayCount& other) const {
     return false;
 }
 
+std::string NamedOverrideArrayCount::FriendlyName(const SymbolTable& symbols) const {
+    return symbols.NameFor(variable->Declaration()->symbol);
+}
+
 UnnamedOverrideArrayCount::UnnamedOverrideArrayCount(const Expression* e) : Base(), expr(e) {}
 UnnamedOverrideArrayCount::~UnnamedOverrideArrayCount() = default;
 
@@ -46,6 +50,10 @@ bool UnnamedOverrideArrayCount::Equals(const ArrayCount& other) const {
         return expr == v->expr;
     }
     return false;
+}
+
+std::string UnnamedOverrideArrayCount::FriendlyName(const SymbolTable&) const {
+    return "[unnamed override-expression]";
 }
 
 }  // namespace tint::sem

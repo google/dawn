@@ -253,7 +253,7 @@ TEST_F(IntrinsicTableTest, MismatchPointer) {
 
 TEST_F(IntrinsicTableTest, MatchArray) {
     auto* arr =
-        create<sem::Array>(create<type::U32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
+        create<type::Array>(create<type::U32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
     auto* arr_ptr =
         create<type::Pointer>(arr, ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto result = table->Lookup(BuiltinType::kArrayLength, utils::Vector{arr_ptr},
@@ -265,7 +265,7 @@ TEST_F(IntrinsicTableTest, MatchArray) {
     ASSERT_EQ(result.sem->Parameters().Length(), 1u);
     auto* param_type = result.sem->Parameters()[0]->Type();
     ASSERT_TRUE(param_type->Is<type::Pointer>());
-    EXPECT_TRUE(param_type->As<type::Pointer>()->StoreType()->Is<sem::Array>());
+    EXPECT_TRUE(param_type->As<type::Pointer>()->StoreType()->Is<type::Array>());
 }
 
 TEST_F(IntrinsicTableTest, MismatchArray) {
@@ -958,7 +958,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion) {
 
 TEST_F(IntrinsicTableTest, MismatchTypeConversion) {
     auto* arr =
-        create<sem::Array>(create<type::U32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
+        create<type::Array>(create<type::U32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
     auto* f32 = create<type::F32>();
     auto result = table->Lookup(InitConvIntrinsic::kVec3, f32, utils::Vector{arr},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});

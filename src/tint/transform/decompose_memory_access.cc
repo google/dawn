@@ -26,12 +26,12 @@
 #include "src/tint/ast/type_name.h"
 #include "src/tint/ast/unary_op.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/array.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/type/array.h"
 #include "src/tint/type/atomic.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/utils/block_allocator.h"
@@ -490,7 +490,7 @@ struct DecomposeMemoryAccess::State {
                         },
                         utils::Empty);
                     b.AST().AddFunction(func);
-                } else if (auto* arr_ty = el_ty->As<sem::Array>()) {
+                } else if (auto* arr_ty = el_ty->As<type::Array>()) {
                     // fn load_func(buffer : buf_ty, offset : u32) -> array<T, N> {
                     //   var arr : array<T, N>;
                     //   for (var i = 0u; i < array_count; i = i + 1) {
@@ -592,7 +592,7 @@ struct DecomposeMemoryAccess::State {
                 } else {
                     auto body = Switch<utils::Vector<const ast::Statement*, 8>>(
                         el_ty,  //
-                        [&](const sem::Array* arr_ty) {
+                        [&](const type::Array* arr_ty) {
                             // fn store_func(buffer : buf_ty, offset : u32, value : el_ty) {
                             //   var array = value; // No dynamic indexing on constant arrays
                             //   for (var i = 0u; i < array_count; i = i + 1) {
@@ -928,7 +928,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
         if (auto* accessor = node->As<ast::IndexAccessorExpression>()) {
             if (auto access = state.TakeAccess(accessor->object)) {
                 // X[Y]
-                if (auto* arr = access.type->As<sem::Array>()) {
+                if (auto* arr = access.type->As<type::Array>()) {
                     auto* offset = state.Mul(arr->Stride(), accessor->index);
                     state.AddAccess(accessor, {
                                                   access.var,

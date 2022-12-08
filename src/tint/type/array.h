@@ -12,29 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_ARRAY_H_
-#define SRC_TINT_SEM_ARRAY_H_
+#ifndef SRC_TINT_TYPE_ARRAY_H_
+#define SRC_TINT_TYPE_ARRAY_H_
 
 #include <stdint.h>
 #include <optional>
 #include <string>
 #include <variant>
 
-#include "src/tint/sem/array_count.h"
-#include "src/tint/sem/node.h"
+#include "src/tint/type/array_count.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/unique_vector.h"
 
-// Forward declarations
-namespace tint::sem {
-class Expression;
-class GlobalVariable;
-}  // namespace tint::sem
+namespace tint::type {
 
-namespace tint::sem {
-
-/// Array holds the semantic information for Array nodes.
+/// Array holds the type information for Array nodes.
 class Array final : public Castable<Array, type::Type> {
   public:
     /// An error message string stating that the array count was expected to be a constant
@@ -117,6 +110,6 @@ class Array final : public Castable<Array, type::Type> {
     const uint32_t implicit_stride_;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
-#endif  // SRC_TINT_SEM_ARRAY_H_
+#endif  // SRC_TINT_TYPE_ARRAY_H_

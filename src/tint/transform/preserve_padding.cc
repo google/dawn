@@ -132,7 +132,7 @@ struct PreservePadding::State {
 
         return Switch(
             ty,  //
-            [&](const sem::Array* arr) {
+            [&](const type::Array* arr) {
                 // Call a helper function that uses a loop to assigns each element separately.
                 return call_helper([&]() {
                     utils::Vector<const ast::Statement*, 8> body;
@@ -171,7 +171,7 @@ struct PreservePadding::State {
     bool HasPadding(const type::Type* ty) {
         return Switch(
             ty,  //
-            [&](const sem::Array* arr) {
+            [&](const type::Array* arr) {
                 auto* elem_ty = arr->ElemType();
                 if (elem_ty->Size() % elem_ty->Align() > 0) {
                     return true;

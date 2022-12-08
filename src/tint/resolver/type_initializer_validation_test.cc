@@ -494,7 +494,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Array_ZeroValue_Pass) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    EXPECT_TRUE(call->Type()->Is<type::Array>());
     auto* ctor = call->Target()->As<sem::TypeInitializer>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -510,7 +510,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Array_U32U32U32) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    EXPECT_TRUE(call->Type()->Is<type::Array>());
     auto* ctor = call->Target()->As<sem::TypeInitializer>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -529,7 +529,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArray_U32U32U32) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    EXPECT_TRUE(call->Type()->Is<type::Array>());
     auto* ctor = call->Target()->As<sem::TypeInitializer>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -548,7 +548,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Array_U32AIU32) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    EXPECT_TRUE(call->Type()->Is<type::Array>());
     auto* ctor = call->Target()->As<sem::TypeInitializer>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -567,7 +567,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArray_U32AIU32) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    EXPECT_TRUE(call->Type()->Is<type::Array>());
     auto* ctor = call->Target()->As<sem::TypeInitializer>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -586,7 +586,7 @@ TEST_F(ResolverTypeInitializerValidationTest, ArrayU32_AIAIAI) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    EXPECT_TRUE(call->Type()->Is<type::Array>());
     auto* ctor = call->Target()->As<sem::TypeInitializer>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -605,7 +605,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArray_AIAIAI) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    EXPECT_TRUE(call->Type()->Is<type::Array>());
     auto* ctor = call->Target()->As<sem::TypeInitializer>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -626,7 +626,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArrayU32_VecI32_VecAI) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    EXPECT_TRUE(call->Type()->Is<type::Array>());
     auto* ctor = call->Target()->As<sem::TypeInitializer>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -648,7 +648,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArrayU32_VecAI_VecF32) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    EXPECT_TRUE(call->Type()->Is<type::Array>());
     auto* ctor = call->Target()->As<sem::TypeInitializer>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());

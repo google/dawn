@@ -16,7 +16,9 @@
 #define SRC_TINT_TYPE_ARRAY_COUNT_H_
 
 #include <functional>
+#include <string>
 
+#include "src/tint/symbol_table.h"
 #include "src/tint/type/node.h"
 
 namespace tint::type {
@@ -32,6 +34,10 @@ class ArrayCount : public Castable<ArrayCount, Node> {
     /// @param t other array count
     /// @returns true if this array count is equal to the given array count
     virtual bool Equals(const ArrayCount& t) const = 0;
+
+    /// @param symbols the symbol table
+    /// @returns the friendly name for this array count
+    virtual std::string FriendlyName(const SymbolTable& symbols) const = 0;
 
   protected:
     ArrayCount();
@@ -57,6 +63,10 @@ class ConstantArrayCount final : public Castable<ConstantArrayCount, ArrayCount>
     /// @returns true if this array count is equal to the given array count
     bool Equals(const ArrayCount& t) const override;
 
+    /// @param symbols the symbol table
+    /// @returns the friendly name for this array count
+    std::string FriendlyName(const SymbolTable& symbols) const override;
+
     /// The array count constant-expression value.
     uint32_t value;
 };
@@ -78,6 +88,10 @@ class RuntimeArrayCount final : public Castable<RuntimeArrayCount, ArrayCount> {
     /// @param t other array count
     /// @returns true if this array count is equal to the given array count
     bool Equals(const ArrayCount& t) const override;
+
+    /// @param symbols the symbol table
+    /// @returns the friendly name for this array count
+    std::string FriendlyName(const SymbolTable& symbols) const override;
 };
 
 }  // namespace tint::type

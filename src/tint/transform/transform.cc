@@ -100,7 +100,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
         auto* el = CreateASTTypeFor(ctx, v->type());
         return ctx.dst->create<ast::Vector>(el, v->Width());
     }
-    if (auto* a = ty->As<sem::Array>()) {
+    if (auto* a = ty->As<type::Array>()) {
         auto* el = CreateASTTypeFor(ctx, a->ElemType());
         utils::Vector<const ast::Attribute*, 1> attrs;
         if (!a->IsStrideImplicit()) {
@@ -133,7 +133,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
         if (auto count = a->ConstantCount()) {
             return ctx.dst->ty.array(el, u32(count.value()), std::move(attrs));
         }
-        TINT_ICE(Transform, ctx.dst->Diagnostics()) << sem::Array::kErrExpectedConstantCount;
+        TINT_ICE(Transform, ctx.dst->Diagnostics()) << type::Array::kErrExpectedConstantCount;
         return ctx.dst->ty.array(el, u32(1), std::move(attrs));
     }
     if (auto* s = ty->As<sem::Struct>()) {

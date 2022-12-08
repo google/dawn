@@ -20,9 +20,9 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/tint/sem/struct.h"
 #include "src/tint/type/array_count.h"
 #include "src/tint/type/node.h"
+#include "src/tint/type/struct.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/unique_allocator.h"
 

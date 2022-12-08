@@ -522,7 +522,7 @@ bool match_array(MatchState&, const type::Type* ty, const type::Type*& T) {
         return true;
     }
 
-    if (auto* a = ty->As<sem::Array>()) {
+    if (auto* a = ty->As<type::Array>()) {
         if (a->Count()->Is<type::RuntimeArrayCount>()) {
             T = a->ElemType();
             return true;
@@ -531,8 +531,8 @@ bool match_array(MatchState&, const type::Type* ty, const type::Type*& T) {
     return false;
 }
 
-const sem::Array* build_array(MatchState& state, const type::Type* el) {
-    return state.builder.create<sem::Array>(
+const type::Array* build_array(MatchState& state, const type::Type* el) {
+    return state.builder.create<type::Array>(
         el,
         /* count */ state.builder.create<type::RuntimeArrayCount>(),
         /* align */ 0u,

@@ -14,10 +14,9 @@
 
 #include "src/tint/type/type.h"
 
-#include "src/tint/sem/array.h"
-#include "src/tint/sem/struct.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
+#include "src/tint/type/array.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
@@ -26,6 +25,7 @@
 #include "src/tint/type/pointer.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/type/sampler.h"
+#include "src/tint/type/struct.h"
 #include "src/tint/type/texture.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
@@ -181,7 +181,7 @@ bool Type::HoldsAbstract() const {
         [&](const type::AbstractNumeric*) { return true; },
         [&](const type::Vector* v) { return v->type()->HoldsAbstract(); },
         [&](const type::Matrix* m) { return m->type()->HoldsAbstract(); },
-        [&](const sem::Array* a) { return a->ElemType()->HoldsAbstract(); },
+        [&](const type::Array* a) { return a->ElemType()->HoldsAbstract(); },
         [&](const type::StructBase* s) {
             for (auto* m : s->Members()) {
                 if (m->Type()->HoldsAbstract()) {
@@ -232,8 +232,8 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
             }
             return kNoConversion;
         },
-        [&](const sem::Array* from_arr) {
-            if (auto* to_arr = to->As<sem::Array>()) {
+        [&](const type::Array* from_arr) {
+            if (auto* to_arr = to->As<type::Array>()) {
                 if (from_arr->Count() == to_arr->Count()) {
                     return ConversionRank(from_arr->ElemType(), to_arr->ElemType());
                 }
@@ -273,7 +273,7 @@ const Type* Type::ElementOf(const Type* ty, uint32_t* count /* = nullptr */) {
             }
             return m->ColumnType();
         },
-        [&](const sem::Array* a) {
+        [&](const type::Array* a) {
             if (count) {
                 if (auto* const_count = a->Count()->As<type::ConstantArrayCount>()) {
                     *count = const_count->value;

@@ -154,7 +154,7 @@ class Validator {
     /// @param el_source the source of the array element, or the array if the array does not have a
     ///        locally-declared element AST node.
     /// @returns true on success, false otherwise.
-    bool Array(const sem::Array* arr, const Source& el_source) const;
+    bool Array(const type::Array* arr, const Source& el_source) const;
 
     /// Validates an array stride attribute
     /// @param attr the stride attribute to validate
@@ -432,7 +432,7 @@ class Validator {
     /// @param ctor the call expresion to validate
     /// @param arr_type the type of the array
     /// @returns true on success, false otherwise
-    bool ArrayInitializer(const ast::CallExpression* ctor, const sem::Array* arr_type) const;
+    bool ArrayInitializer(const ast::CallExpression* ctor, const type::Array* arr_type) const;
 
     /// Validates a texture builtin function
     /// @param call the builtin call to validate

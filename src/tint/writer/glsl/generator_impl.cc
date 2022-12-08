@@ -27,7 +27,6 @@
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/debug.h"
-#include "src/tint/sem/array.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/constant.h"
@@ -63,6 +62,7 @@
 #include "src/tint/transform/std140.h"
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
+#include "src/tint/type/array.h"
 #include "src/tint/type/atomic.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
@@ -295,7 +295,7 @@ bool GeneratorImpl::Generate() {
         } else if (auto* str = decl->As<ast::Struct>()) {
             auto* sem = builder_.Sem().Get(str);
             bool has_rt_arr = false;
-            if (auto* arr = sem->Members().Back()->Type()->As<sem::Array>()) {
+            if (auto* arr = sem->Members().Back()->Type()->As<type::Array>()) {
                 has_rt_arr = arr->Count()->Is<type::RuntimeArrayCount>();
             }
             bool is_block =
@@ -2355,7 +2355,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             }
             return true;
         },
-        [&](const sem::Array* a) {
+        [&](const type::Array* a) {
             if (!EmitType(out, a, ast::AddressSpace::kNone, ast::Access::kUndefined, "")) {
                 return false;
             }
@@ -2364,7 +2364,8 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
 
             auto count = a->ConstantCount();
             if (!count) {
-                diagnostics_.add_error(diag::System::Writer, sem::Array::kErrExpectedConstantCount);
+                diagnostics_.add_error(diag::System::Writer,
+                                       type::Array::kErrExpectedConstantCount);
                 return false;
             }
 
@@ -2486,7 +2487,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const type::Type* type) {
             }
             EmitZeroValue(out, member->Type());
         }
-    } else if (auto* arr = type->As<sem::Array>()) {
+    } else if (auto* arr = type->As<type::Array>()) {
         if (!EmitType(out, type, ast::AddressSpace::kNone, ast::Access::kUndefined, "")) {
             return false;
         }
@@ -2494,7 +2495,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const type::Type* type) {
 
         auto count = arr->ConstantCount();
         if (!count) {
-            diagnostics_.add_error(diag::System::Writer, sem::Array::kErrExpectedConstantCount);
+            diagnostics_.add_error(diag::System::Writer, type::Array::kErrExpectedConstantCount);
             return false;
         }
 
@@ -2837,17 +2838,17 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             break;
     }
 
-    if (auto* ary = type->As<sem::Array>()) {
+    if (auto* ary = type->As<type::Array>()) {
         const type::Type* base_type = ary;
         std::vector<uint32_t> sizes;
-        while (auto* arr = base_type->As<sem::Array>()) {
+        while (auto* arr = base_type->As<type::Array>()) {
             if (arr->Count()->Is<type::RuntimeArrayCount>()) {
                 sizes.push_back(0);
             } else {
                 auto count = arr->ConstantCount();
                 if (!count) {
                     diagnostics_.add_error(diag::System::Writer,
-                                           sem::Array::kErrExpectedConstantCount);
+                                           type::Array::kErrExpectedConstantCount);
                     return false;
                 }
                 sizes.push_back(count.value());

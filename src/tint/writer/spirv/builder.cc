@@ -22,7 +22,6 @@
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/ast/traverse_expressions.h"
-#include "src/tint/sem/array.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/constant.h"
@@ -37,6 +36,7 @@
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/transform/add_block_attribute.h"
+#include "src/tint/type/array.h"
 #include "src/tint/type/atomic.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
@@ -90,7 +90,7 @@ uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
 /// @param type the given type, which must not be null
 /// @returns the nested matrix type, or nullptr if none
 const type::Matrix* GetNestedMatrixType(const type::Type* type) {
-    while (auto* arr = type->As<sem::Array>()) {
+    while (auto* arr = type->As<type::Array>()) {
         type = arr->ElemType();
     }
     return type->As<type::Matrix>();
@@ -1348,7 +1348,7 @@ uint32_t Builder::GenerateTypeInitializerOrConversion(const sem::Call* call,
         // If the result is not a vector then we should have validated that the
         // value type is a correctly sized vector so we can just use it directly.
         if (result_type == value_type || result_type->Is<type::Matrix>() ||
-            result_type->Is<sem::Array>() || result_type->Is<sem::Struct>()) {
+            result_type->Is<type::Array>() || result_type->Is<sem::Struct>()) {
             ops.push_back(Operand(id));
             continue;
         }
@@ -1702,10 +1702,10 @@ uint32_t Builder::GenerateConstantIfNeeded(const sem::Constant* constant) {
         },
         [&](const type::Vector* v) { return composite(v->Width()); },
         [&](const type::Matrix* m) { return composite(m->columns()); },
-        [&](const sem::Array* a) {
+        [&](const type::Array* a) {
             auto count = a->ConstantCount();
             if (!count) {
-                error_ = sem::Array::kErrExpectedConstantCount;
+                error_ = type::Array::kErrExpectedConstantCount;
                 return static_cast<uint32_t>(0);
             }
             return composite(count.value());
@@ -3673,7 +3673,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
         auto id = std::get<uint32_t>(result);
         bool ok = Switch(
             type,
-            [&](const sem::Array* arr) {  //
+            [&](const type::Array* arr) {  //
                 return GenerateArrayType(arr, result);
             },
             [&](const type::Bool*) {
@@ -3838,7 +3838,7 @@ bool Builder::GenerateTextureType(const type::Texture* texture, const Operand& r
     return true;
 }
 
-bool Builder::GenerateArrayType(const sem::Array* arr, const Operand& result) {
+bool Builder::GenerateArrayType(const type::Array* arr, const Operand& result) {
     auto elem_type = GenerateTypeIfNeeded(arr->ElemType());
     if (elem_type == 0) {
         return false;
@@ -3850,7 +3850,7 @@ bool Builder::GenerateArrayType(const sem::Array* arr, const Operand& result) {
     } else {
         auto count = arr->ConstantCount();
         if (!count) {
-            error_ = sem::Array::kErrExpectedConstantCount;
+            error_ = type::Array::kErrExpectedConstantCount;
             return static_cast<uint32_t>(0);
         }
 

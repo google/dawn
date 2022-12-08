@@ -37,6 +37,10 @@ bool ConstantArrayCount::Equals(const ArrayCount& other) const {
     return false;
 }
 
+std::string ConstantArrayCount::FriendlyName(const SymbolTable&) const {
+    return std::to_string(value);
+}
+
 RuntimeArrayCount::RuntimeArrayCount() : Base() {}
 RuntimeArrayCount::~RuntimeArrayCount() = default;
 
@@ -46,6 +50,10 @@ size_t RuntimeArrayCount::Hash() const {
 
 bool RuntimeArrayCount::Equals(const ArrayCount& other) const {
     return other.Is<RuntimeArrayCount>();
+}
+
+std::string RuntimeArrayCount::FriendlyName(const SymbolTable&) const {
+    return "";
 }
 
 }  // namespace tint::type

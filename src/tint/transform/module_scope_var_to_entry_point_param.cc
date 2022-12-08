@@ -52,7 +52,7 @@ bool ContainsMatrix(const type::Type* type) {
     type = type->UnwrapRef();
     if (type->Is<type::Matrix>()) {
         return true;
-    } else if (auto* ary = type->As<sem::Array>()) {
+    } else if (auto* ary = type->As<type::Array>()) {
         return ContainsMatrix(ary->ElemType());
     } else if (auto* str = type->As<sem::Struct>()) {
         for (auto* member : str->Members()) {
@@ -95,7 +95,7 @@ struct ModuleScopeVarToEntryPointParam::State {
             auto* ast_str = str->Declaration();
             ctx.dst->AST().AddTypeDecl(ctx.Clone(ast_str));
             ctx.Remove(ctx.src->AST().GlobalDeclarations(), ast_str);
-        } else if (auto* arr = ty->As<sem::Array>()) {
+        } else if (auto* arr = ty->As<type::Array>()) {
             CloneStructTypes(arr->ElemType());
         }
     }
@@ -146,7 +146,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                 attributes.Push(ctx.dst->Disable(ast::DisabledValidation::kIgnoreAddressSpace));
 
                 auto* param_type = store_type();
-                if (auto* arr = ty->As<sem::Array>();
+                if (auto* arr = ty->As<type::Array>();
                     arr && arr->Count()->Is<type::RuntimeArrayCount>()) {
                     // Wrap runtime-sized arrays in structures, so that we can declare pointers to
                     // them. Ideally we'd just emit the array itself as a pointer, but this is not

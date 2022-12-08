@@ -70,7 +70,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
             decl,  //
             [&](const ast::TypeDecl* ty) {
                 // Strip aliases that reference unused override declarations.
-                if (auto* arr = sem.Get(ty)->As<sem::Array>()) {
+                if (auto* arr = sem.Get(ty)->As<type::Array>()) {
                     auto* refs = sem.TransitivelyReferencedOverrides(arr);
                     if (refs) {
                         for (auto* o : *refs) {

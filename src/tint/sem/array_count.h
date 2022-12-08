@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_SEM_ARRAY_COUNT_H_
 #define SRC_TINT_SEM_ARRAY_COUNT_H_
 
+#include <string>
+
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/type/array_count.h"
@@ -41,6 +43,10 @@ class NamedOverrideArrayCount final : public Castable<NamedOverrideArrayCount, t
     /// @returns true if this array count is equal to the given array count
     bool Equals(const type::ArrayCount& t) const override;
 
+    /// @param symbols the symbol table
+    /// @returns the friendly name for this array count
+    std::string FriendlyName(const SymbolTable& symbols) const override;
+
     /// The `override` variable.
     const GlobalVariable* variable;
 };
@@ -65,6 +71,10 @@ class UnnamedOverrideArrayCount final
     /// @param t other array count
     /// @returns true if this array count is equal to the given array count
     bool Equals(const type::ArrayCount& t) const override;
+
+    /// @param symbols the symbol table
+    /// @returns the friendly name for this array count
+    std::string FriendlyName(const SymbolTable& symbols) const override;
 
     /// The unnamed override expression.
     /// Note: Each AST expression gets a unique semantic expression node, so two equivalent AST

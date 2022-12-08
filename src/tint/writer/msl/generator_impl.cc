@@ -31,7 +31,6 @@
 #include "src/tint/ast/module.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/void.h"
-#include "src/tint/sem/array.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/constant.h"
 #include "src/tint/sem/function.h"
@@ -59,6 +58,7 @@
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
+#include "src/tint/type/array.h"
 #include "src/tint/type/atomic.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/depth_multisampled_texture.h"
@@ -805,7 +805,7 @@ bool GeneratorImpl::EmitTypeInitializer(std::ostream& out,
 
     bool ok = Switch(
         type,
-        [&](const sem::Array*) {
+        [&](const type::Array*) {
             if (!EmitType(out, type, "")) {
                 return false;
             }
@@ -1642,7 +1642,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const type::Type* type) {
             ScopedParen sp(out);
             return EmitZeroValue(out, mat->type());
         },
-        [&](const sem::Array*) {
+        [&](const type::Array*) {
             out << "{}";
             return true;
         },
@@ -1722,7 +1722,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             }
             return true;
         },
-        [&](const sem::Array* a) {
+        [&](const type::Array* a) {
             if (!EmitType(out, a, "")) {
                 return false;
             }
@@ -1736,7 +1736,8 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
 
             auto count = a->ConstantCount();
             if (!count) {
-                diagnostics_.add_error(diag::System::Writer, sem::Array::kErrExpectedConstantCount);
+                diagnostics_.add_error(diag::System::Writer,
+                                       type::Array::kErrExpectedConstantCount);
                 return false;
             }
 
@@ -2536,7 +2537,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                 << "unhandled atomic type " << atomic->Type()->FriendlyName(builder_.Symbols());
             return false;
         },
-        [&](const sem::Array* arr) {
+        [&](const type::Array* arr) {
             out << ArrayType() << "<";
             if (!EmitType(out, arr->ElemType(), "")) {
                 return false;
@@ -2548,7 +2549,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                 auto count = arr->ConstantCount();
                 if (!count) {
                     diagnostics_.add_error(diag::System::Writer,
-                                           sem::Array::kErrExpectedConstantCount);
+                                           type::Array::kErrExpectedConstantCount);
                     return false;
                 }
 
@@ -3164,7 +3165,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const type:
             return SizeAndAlign{};
         },
 
-        [&](const sem::Array* arr) {
+        [&](const type::Array* arr) {
             if (!arr->IsStrideImplicit()) {
                 TINT_ICE(Writer, diagnostics_)
                     << "arrays with explicit strides should not exist past the SPIR-V reader";
@@ -3176,7 +3177,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const type:
             if (auto count = arr->ConstantCount()) {
                 return SizeAndAlign{arr->Stride() * count.value(), arr->Align()};
             }
-            diagnostics_.add_error(diag::System::Writer, sem::Array::kErrExpectedConstantCount);
+            diagnostics_.add_error(diag::System::Writer, type::Array::kErrExpectedConstantCount);
             return SizeAndAlign{};
         },
 

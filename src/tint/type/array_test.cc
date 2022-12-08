@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/test_helper.h"
+#include "src/tint/sem/array_count.h"
+#include "src/tint/type/test_helper.h"
 #include "src/tint/type/texture.h"
 
-namespace tint::sem {
+namespace tint::type {
 namespace {
 
 using ArrayTest = TestHelper;
@@ -205,4 +206,4 @@ TEST_F(ArrayTest, HasFixedFootprint) {
 }
 
 }  // namespace
-}  // namespace tint::sem
+}  // namespace tint::type

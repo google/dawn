@@ -129,7 +129,7 @@ struct Std140::State {
     bool ShouldRun() const {
         // Returns true if the type needs to be forked for std140 usage.
         auto needs_fork = [&](const type::Type* ty) {
-            while (auto* arr = ty->As<sem::Array>()) {
+            while (auto* arr = ty->As<type::Array>()) {
                 ty = arr->ElemType();
             }
             if (auto* mat = ty->As<type::Matrix>()) {
@@ -426,7 +426,7 @@ struct Std140::State {
                 }
                 return nullptr;
             },
-            [&](const sem::Array* arr) -> const ast::Type* {
+            [&](const type::Array* arr) -> const ast::Type* {
                 if (auto* std140 = Std140Type(arr->ElemType())) {
                     utils::Vector<const ast::Attribute*, 1> attrs;
                     if (!arr->IsStrideImplicit()) {
@@ -631,7 +631,7 @@ struct Std140::State {
         return Switch(
             ty,  //
             [&](const sem::Struct* str) { return sym.NameFor(str->Name()); },
-            [&](const sem::Array* arr) {
+            [&](const type::Array* arr) {
                 auto count = arr->ConstantCount();
                 if (!count) {
                     // Non-constant counts should not be possible:
@@ -730,7 +730,7 @@ struct Std140::State {
                             << "failed to find std140 matrix info for: " << src->FriendlyName(ty);
                     }
                 },  //
-                [&](const sem::Array* arr) {
+                [&](const type::Array* arr) {
                     // Converting an array. Create a function var for the converted array, and
                     // loop over the input elements, converting each and assigning the result to
                     // the local array.
@@ -1081,7 +1081,7 @@ struct Std140::State {
             auto name = "p" + std::to_string(dyn_idx->slot);
             return Switch(
                 ty,  //
-                [&](const sem::Array* arr) -> ExprTypeName {
+                [&](const type::Array* arr) -> ExprTypeName {
                     auto* idx = dynamic_index(dyn_idx->slot);
                     auto* expr = b.IndexAccessor(lhs, idx);
                     return {expr, arr->ElemType(), name};
@@ -1134,7 +1134,7 @@ struct Std140::State {
                 ty = member->Type();
                 return {expr, ty, member_name};
             },  //
-            [&](const sem::Array* arr) -> ExprTypeName {
+            [&](const type::Array* arr) -> ExprTypeName {
                 auto* expr = b.IndexAccessor(lhs, idx);
                 return {expr, arr->ElemType(), std::to_string(idx)};
             },  //

@@ -117,7 +117,7 @@ class MaterializeTest : public resolver::ResolverTestWithParam<CASE> {
                     }
                 }
             },
-            [&](const sem::Array* a) {
+            [&](const type::Array* a) {
                 auto count = a->ConstantCount();
                 ASSERT_NE(count, 0u);
                 for (uint32_t i = 0; i < count; i++) {

@@ -47,7 +47,6 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
 #include "src/tint/ast/workgroup_attribute.h"
-#include "src/tint/sem/array.h"
 #include "src/tint/sem/break_if_statement.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/for_loop_statement.h"
@@ -64,6 +63,7 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/while_statement.h"
 #include "src/tint/type/abstract_numeric.h"
+#include "src/tint/type/array.h"
 #include "src/tint/type/atomic.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
@@ -183,7 +183,7 @@ void Validator::AddNote(const std::string& msg, const Source& source) const {
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 bool Validator::IsPlain(const type::Type* type) const {
     return type->is_scalar() ||
-           type->IsAnyOf<type::Atomic, type::Vector, type::Matrix, sem::Array, sem::Struct>();
+           type->IsAnyOf<type::Atomic, type::Vector, type::Matrix, type::Array, sem::Struct>();
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#fixed-footprint-types
@@ -193,7 +193,7 @@ bool Validator::IsFixedFootprint(const type::Type* type) const {
         [&](const type::Vector*) { return true; },  //
         [&](const type::Matrix*) { return true; },  //
         [&](const type::Atomic*) { return true; },
-        [&](const sem::Array* arr) {
+        [&](const type::Array* arr) {
             return !arr->Count()->Is<type::RuntimeArrayCount>() &&
                    IsFixedFootprint(arr->ElemType());
         },
@@ -217,7 +217,7 @@ bool Validator::IsHostShareable(const type::Type* type) const {
         type,  //
         [&](const type::Vector* vec) { return IsHostShareable(vec->type()); },
         [&](const type::Matrix* mat) { return IsHostShareable(mat->type()); },
-        [&](const sem::Array* arr) { return IsHostShareable(arr->ElemType()); },
+        [&](const type::Array* arr) { return IsHostShareable(arr->ElemType()); },
         [&](const sem::Struct* str) {
             for (auto* member : str->Members()) {
                 if (!IsHostShareable(member->Type())) {
@@ -398,7 +398,7 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
 
     auto is_uniform_struct_or_array = [address_space](const type::Type* ty) {
         return address_space == ast::AddressSpace::kUniform &&
-               ty->IsAnyOf<sem::Array, sem::Struct>();
+               ty->IsAnyOf<type::Array, sem::Struct>();
     };
 
     auto is_uniform_struct = [address_space](const type::Type* ty) {
@@ -504,7 +504,7 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
     }
 
     // For uniform buffer array members, validate that array elements are aligned to 16 bytes
-    if (auto* arr = store_ty->As<sem::Array>()) {
+    if (auto* arr = store_ty->As<type::Array>()) {
         // Recurse into the element type.
         // TODO(crbug.com/tint/1388): Ideally we'd pass the source for nested element type here, but
         // we can't easily get that from the semantic node. We should consider recursing through the
@@ -1744,7 +1744,7 @@ bool Validator::StructureInitializer(const ast::CallExpression* ctor,
 }
 
 bool Validator::ArrayInitializer(const ast::CallExpression* ctor,
-                                 const sem::Array* array_type) const {
+                                 const type::Array* array_type) const {
     auto& values = ctor->args;
     auto* elem_ty = array_type->ElemType();
     for (auto* value : values) {
@@ -1968,7 +1968,7 @@ bool Validator::PushConstants(utils::VectorRef<sem::Function*> entry_points) con
     return true;
 }
 
-bool Validator::Array(const sem::Array* arr, const Source& el_source) const {
+bool Validator::Array(const type::Array* arr, const Source& el_source) const {
     auto* el_ty = arr->ElemType();
 
     if (!IsPlain(el_ty)) {
@@ -2021,7 +2021,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
 
     utils::Hashset<uint32_t, 8> locations;
     for (auto* member : str->Members()) {
-        if (auto* r = member->Type()->As<sem::Array>()) {
+        if (auto* r = member->Type()->As<type::Array>()) {
             if (r->Count()->Is<type::RuntimeArrayCount>()) {
                 if (member != str->Members().Back()) {
                     AddError("runtime arrays may only appear as the last member of a struct",
@@ -2393,7 +2393,7 @@ bool Validator::IsValidationEnabled(utils::VectorRef<const ast::Attribute*> attr
 }
 
 bool Validator::IsArrayWithOverrideCount(const type::Type* ty) const {
-    if (auto* arr = ty->UnwrapRef()->As<sem::Array>()) {
+    if (auto* arr = ty->UnwrapRef()->As<type::Array>()) {
         if (arr->Count()->IsAnyOf<sem::NamedOverrideArrayCount, sem::UnnamedOverrideArrayCount>()) {
             return true;
         }
@@ -2474,7 +2474,7 @@ bool Validator::CheckTypeAccessAddressSpace(
             return true;
         },
         [&](const sem::Struct*) { return check_sub_atomics(); },  //
-        [&](const sem::Array*) { return check_sub_atomics(); },   //
+        [&](const type::Array*) { return check_sub_atomics(); },  //
         [&](Default) { return true; });
 }
 

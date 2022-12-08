@@ -272,7 +272,7 @@ class Resolver {
     /// to the AST node.
     /// @returns the semantic Array information, or nullptr if an error is raised.
     /// @param arr the Array to get semantic information for
-    sem::Array* Array(const ast::Array* arr);
+    type::Array* Array(const ast::Array* arr);
 
     /// Resolves and validates the expression used as the count parameter of an array.
     /// @param count_expr the expression used as the second template parameter to an array<>.
@@ -297,11 +297,11 @@ class Resolver {
     /// @param el_ty the Array element type
     /// @param el_count the number of elements in the array.
     /// @param explicit_stride the explicit byte stride of the array. Zero means implicit stride.
-    sem::Array* Array(const Source& el_source,
-                      const Source& count_source,
-                      const type::Type* el_ty,
-                      const type::ArrayCount* el_count,
-                      uint32_t explicit_stride);
+    type::Array* Array(const Source& el_source,
+                       const Source& count_source,
+                       const type::Type* el_ty,
+                       const type::ArrayCount* el_count,
+                       uint32_t explicit_stride);
 
     /// Builds and returns the semantic information for the alias `alias`.
     /// This method does not mark the ast::Alias node, nor attach the generated
@@ -426,7 +426,7 @@ class Resolver {
     // ArrayInitializerSig represents a unique array initializer signature.
     // It is a tuple of the array type, number of arguments provided and earliest evaluation stage.
     using ArrayInitializerSig =
-        utils::UnorderedKeyWrapper<std::tuple<const sem::Array*, size_t, sem::EvaluationStage>>;
+        utils::UnorderedKeyWrapper<std::tuple<const type::Array*, size_t, sem::EvaluationStage>>;
 
     // StructInitializerSig represents a unique structure initializer signature.
     // It is a tuple of the structure type, number of arguments provided and earliest evaluation

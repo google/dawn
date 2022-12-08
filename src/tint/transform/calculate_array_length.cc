@@ -202,16 +202,16 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                             const ast::Expression* total_size =
                                 b.Expr(buffer_size_result->variable);
 
-                            const sem::Array* array_type = Switch(
+                            const type::Array* array_type = Switch(
                                 storage_buffer_type->StoreType(),
                                 [&](const sem::Struct* str) {
                                     // The variable is a struct, so subtract the byte offset of
                                     // the array member.
                                     auto* array_member_sem = str->Members().Back();
                                     total_size = b.Sub(total_size, u32(array_member_sem->Offset()));
-                                    return array_member_sem->Type()->As<sem::Array>();
+                                    return array_member_sem->Type()->As<type::Array>();
                                 },
-                                [&](const sem::Array* arr) { return arr; });
+                                [&](const type::Array* arr) { return arr; });
 
                             if (!array_type) {
                                 TINT_ICE(Transform, b.Diagnostics())
