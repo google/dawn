@@ -49,7 +49,6 @@ class WhileStatement;
 }  // namespace tint::ast
 namespace tint::sem {
 class Array;
-class Atomic;
 class BlockStatement;
 class BreakIfStatement;
 class Builtin;
@@ -64,6 +63,9 @@ class SwitchStatement;
 class TypeInitializer;
 class WhileStatement;
 }  // namespace tint::sem
+namespace tint::type {
+class Atomic;
+}  // namespace tint::type
 
 namespace tint::resolver {
 
@@ -167,7 +169,7 @@ class Validator {
     /// @param a the atomic ast node
     /// @param s the atomic sem node
     /// @returns true on success, false otherwise.
-    bool Atomic(const ast::Atomic* a, const sem::Atomic* s) const;
+    bool Atomic(const ast::Atomic* a, const type::Atomic* s) const;
 
     /// Validates a pointer type
     /// @param a the pointer ast node

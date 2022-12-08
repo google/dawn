@@ -16,7 +16,7 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/atomic.h"
+#include "src/tint/type/atomic.h"
 
 namespace tint::resolver {
 namespace {
@@ -84,8 +84,8 @@ TEST_F(ResolverIsStorableTest, Pointer) {
 }
 
 TEST_F(ResolverIsStorableTest, Atomic) {
-    EXPECT_TRUE(r()->IsStorable(create<sem::Atomic>(create<type::I32>())));
-    EXPECT_TRUE(r()->IsStorable(create<sem::Atomic>(create<type::U32>())));
+    EXPECT_TRUE(r()->IsStorable(create<type::Atomic>(create<type::I32>())));
+    EXPECT_TRUE(r()->IsStorable(create<type::Atomic>(create<type::U32>())));
 }
 
 TEST_F(ResolverIsStorableTest, ArraySizedOfStorable) {

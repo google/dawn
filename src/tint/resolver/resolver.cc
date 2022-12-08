@@ -53,7 +53,6 @@
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/resolver/uniformity.h"
 #include "src/tint/sem/array.h"
-#include "src/tint/sem/atomic.h"
 #include "src/tint/sem/break_if_statement.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/for_loop_statement.h"
@@ -73,6 +72,7 @@
 #include "src/tint/sem/while_statement.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
@@ -247,9 +247,9 @@ type::Type* Resolver::Type(const ast::Type* ty) {
             return nullptr;
         },
         [&](const ast::Array* t) { return Array(t); },
-        [&](const ast::Atomic* t) -> sem::Atomic* {
+        [&](const ast::Atomic* t) -> type::Atomic* {
             if (auto* el = Type(t->type)) {
-                auto* a = builder_->create<sem::Atomic>(el);
+                auto* a = builder_->create<type::Atomic>(el);
                 if (!validator_.Atomic(t, a)) {
                     return nullptr;
                 }
@@ -2964,7 +2964,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
         return nullptr;
     }
 
-    if (el_ty->Is<sem::Atomic>()) {
+    if (el_ty->Is<type::Atomic>()) {
         atomic_composite_info_.Add(out, &arr->type->source);
     } else {
         if (auto found = atomic_composite_info_.Get(el_ty)) {
@@ -3309,7 +3309,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
 
     for (size_t i = 0; i < sem_members.Length(); i++) {
         auto* mem_type = sem_members[i]->Type();
-        if (mem_type->Is<sem::Atomic>()) {
+        if (mem_type->Is<type::Atomic>()) {
             atomic_composite_info_.Add(out, &sem_members[i]->Source());
             break;
         } else {

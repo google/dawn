@@ -14,7 +14,7 @@
 
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/atomic.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/reference.h"
 
 #include "gmock/gmock.h"

@@ -48,7 +48,6 @@
 #include "src/tint/ast/vector.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/sem/array.h"
-#include "src/tint/sem/atomic.h"
 #include "src/tint/sem/break_if_statement.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/for_loop_statement.h"
@@ -65,6 +64,7 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/while_statement.h"
 #include "src/tint/type/abstract_numeric.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
@@ -183,7 +183,7 @@ void Validator::AddNote(const std::string& msg, const Source& source) const {
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 bool Validator::IsPlain(const type::Type* type) const {
     return type->is_scalar() ||
-           type->IsAnyOf<sem::Atomic, type::Vector, type::Matrix, sem::Array, sem::Struct>();
+           type->IsAnyOf<type::Atomic, type::Vector, type::Matrix, sem::Array, sem::Struct>();
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#fixed-footprint-types
@@ -192,7 +192,7 @@ bool Validator::IsFixedFootprint(const type::Type* type) const {
         type,                                       //
         [&](const type::Vector*) { return true; },  //
         [&](const type::Matrix*) { return true; },  //
-        [&](const sem::Atomic*) { return true; },
+        [&](const type::Atomic*) { return true; },
         [&](const sem::Array* arr) {
             return !arr->Count()->Is<type::RuntimeArrayCount>() &&
                    IsFixedFootprint(arr->ElemType());
@@ -226,7 +226,7 @@ bool Validator::IsHostShareable(const type::Type* type) const {
             }
             return true;
         },
-        [&](const sem::Atomic* atomic) { return IsHostShareable(atomic->Type()); });
+        [&](const type::Atomic* atomic) { return IsHostShareable(atomic->Type()); });
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
@@ -260,7 +260,7 @@ const ast::Statement* Validator::ClosestContinuing(bool stop_at_loop,
     return nullptr;
 }
 
-bool Validator::Atomic(const ast::Atomic* a, const sem::Atomic* s) const {
+bool Validator::Atomic(const ast::Atomic* a, const type::Atomic* s) const {
     // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
     // T must be either u32 or i32.
     if (!s->Type()->IsAnyOf<type::U32, type::I32>()) {
@@ -2466,7 +2466,7 @@ bool Validator::CheckTypeAccessAddressSpace(
 
     return Switch(
         store_ty,  //
-        [&](const sem::Atomic*) {
+        [&](const type::Atomic*) {
             if (auto* err = atomic_error()) {
                 AddError(err, source);
                 return false;

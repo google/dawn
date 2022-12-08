@@ -29,7 +29,6 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/debug.h"
 #include "src/tint/sem/array.h"
-#include "src/tint/sem/atomic.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/constant.h"
@@ -64,6 +63,7 @@
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
@@ -4104,7 +4104,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             }
             return true;
         },
-        [&](const sem::Atomic* atomic) {
+        [&](const type::Atomic* atomic) {
             return EmitType(out, atomic->Type(), address_space, access, name);
         },
         [&](const type::Void*) {

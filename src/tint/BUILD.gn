@@ -415,7 +415,6 @@ libtint_source_set("libtint_core_all_src") {
     "scope_stack.h",
     "sem/array.h",
     "sem/array_count.h",
-    "sem/atomic.h",
     "sem/behavior.h",
     "sem/binding_point.h",
     "sem/break_if_statement.h",
@@ -557,6 +556,7 @@ libtint_source_set("libtint_core_all_src") {
     "type/abstract_int.h",
     "type/abstract_numeric.h",
     "type/array_count.h",
+    "type/atomic.h",
     "type/bool.h",
     "type/depth_multisampled_texture.h",
     "type/depth_texture.h",
@@ -636,8 +636,6 @@ libtint_source_set("libtint_sem_src") {
     "sem/array.h",
     "sem/array_count.cc",
     "sem/array_count.h",
-    "sem/atomic.cc",
-    "sem/atomic.h",
     "sem/behavior.cc",
     "sem/behavior.h",
     "sem/binding_point.h",
@@ -706,6 +704,8 @@ libtint_source_set("libtint_type_src") {
     "type/abstract_numeric.h",
     "type/array_count.cc",
     "type/array_count.h",
+    "type/atomic.cc",
+    "type/atomic.h",
     "type/bool.cc",
     "type/bool.h",
     "type/depth_multisampled_texture.cc",
@@ -1204,7 +1204,6 @@ if (tint_build_unittests) {
   tint_unittests_source_set("tint_unittests_sem_src") {
     sources = [
       "sem/array_test.cc",
-      "sem/atomic_test.cc",
       "sem/builtin_test.cc",
       "sem/expression_test.cc",
       "sem/struct_test.cc",
@@ -1213,6 +1212,7 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_type_src") {
     sources = [
+      "type/atomic_test.cc",
       "type/bool_test.cc",
       "type/depth_multisampled_texture_test.cc",
       "type/depth_texture_test.cc",

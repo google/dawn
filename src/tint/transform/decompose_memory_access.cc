@@ -27,12 +27,12 @@
 #include "src/tint/ast/unary_op.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/array.h"
-#include "src/tint/sem/atomic.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/utils/block_allocator.h"
 #include "src/tint/utils/hash.h"
@@ -994,7 +994,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
                             auto* buf = access.var->Declaration();
                             auto* offset = access.offset->Build(ctx);
                             auto* buf_ty = access.var->Type()->UnwrapRef();
-                            auto* el_ty = access.type->UnwrapRef()->As<sem::Atomic>()->Type();
+                            auto* el_ty = access.type->UnwrapRef()->As<type::Atomic>()->Type();
                             Symbol func = state.AtomicFunc(buf_ty, el_ty, builtin,
                                                            access.var->As<sem::VariableUser>());
 

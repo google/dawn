@@ -18,10 +18,10 @@
 #include <string>
 
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/atomic.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/type/sampler.h"
@@ -142,7 +142,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
     if (auto* s = ty->As<type::Reference>()) {
         return CreateASTTypeFor(ctx, s->StoreType());
     }
-    if (auto* a = ty->As<sem::Atomic>()) {
+    if (auto* a = ty->As<type::Atomic>()) {
         return ctx.dst->create<ast::Atomic>(CreateASTTypeFor(ctx, a->Type()));
     }
     if (auto* t = ty->As<type::DepthTexture>()) {

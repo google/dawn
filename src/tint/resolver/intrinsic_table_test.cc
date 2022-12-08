@@ -19,9 +19,9 @@
 #include "gmock/gmock.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/atomic.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_initializer.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/external_texture.h"
@@ -229,7 +229,7 @@ TEST_F(IntrinsicTableTest, MismatchBool) {
 
 TEST_F(IntrinsicTableTest, MatchPointer) {
     auto* i32 = create<type::I32>();
-    auto* atomicI32 = create<sem::Atomic>(i32);
+    auto* atomicI32 = create<type::Atomic>(i32);
     auto* ptr =
         create<type::Pointer>(atomicI32, ast::AddressSpace::kWorkgroup, ast::Access::kReadWrite);
     auto result = table->Lookup(BuiltinType::kAtomicLoad, utils::Vector{ptr},
@@ -244,7 +244,7 @@ TEST_F(IntrinsicTableTest, MatchPointer) {
 
 TEST_F(IntrinsicTableTest, MismatchPointer) {
     auto* i32 = create<type::I32>();
-    auto* atomicI32 = create<sem::Atomic>(i32);
+    auto* atomicI32 = create<type::Atomic>(i32);
     auto result = table->Lookup(BuiltinType::kAtomicLoad, utils::Vector{atomicI32},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_EQ(result.sem, nullptr);

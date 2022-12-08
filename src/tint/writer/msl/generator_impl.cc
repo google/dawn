@@ -32,7 +32,6 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/void.h"
 #include "src/tint/sem/array.h"
-#include "src/tint/sem/atomic.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/constant.h"
 #include "src/tint/sem/function.h"
@@ -60,6 +59,7 @@
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
@@ -2523,7 +2523,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 
     return Switch(
         type,
-        [&](const sem::Atomic* atomic) {
+        [&](const type::Atomic* atomic) {
             if (atomic->Type()->Is<type::I32>()) {
                 out << "atomic_int";
                 return true;
@@ -3187,7 +3187,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const type:
             return SizeAndAlign{str->Size(), str->Align()};
         },
 
-        [&](const sem::Atomic* atomic) { return MslPackedTypeSizeAndAlign(atomic->Type()); },
+        [&](const type::Atomic* atomic) { return MslPackedTypeSizeAndAlign(atomic->Type()); },
 
         [&](Default) {
             TINT_UNREACHABLE(Writer, diagnostics_) << "Unhandled type " << ty->TypeInfo().name;

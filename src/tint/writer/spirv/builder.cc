@@ -23,7 +23,6 @@
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/ast/traverse_expressions.h"
 #include "src/tint/sem/array.h"
-#include "src/tint/sem/atomic.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/constant.h"
@@ -38,6 +37,7 @@
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/transform/add_block_attribute.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
@@ -3637,7 +3637,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
 
     // Atomics are a type in WGSL, but aren't a distinct type in SPIR-V.
     // Just emit the type inside the atomic.
-    if (auto* atomic = type->As<sem::Atomic>()) {
+    if (auto* atomic = type->As<type::Atomic>()) {
         return GenerateTypeIfNeeded(atomic->Type());
     }
 

@@ -20,7 +20,6 @@
 
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/atomic.h"
 #include "src/tint/sem/evaluation_stage.h"
 #include "src/tint/sem/pipeline_stage_set.h"
 #include "src/tint/sem/type_conversion.h"
@@ -28,6 +27,7 @@
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
 #include "src/tint/type/abstract_numeric.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/external_texture.h"
@@ -569,15 +569,15 @@ bool match_atomic(MatchState&, const type::Type* ty, const type::Type*& T) {
         return true;
     }
 
-    if (auto* a = ty->As<sem::Atomic>()) {
+    if (auto* a = ty->As<type::Atomic>()) {
         T = a->Type();
         return true;
     }
     return false;
 }
 
-const sem::Atomic* build_atomic(MatchState& state, const type::Type* T) {
-    return state.builder.create<sem::Atomic>(T);
+const type::Atomic* build_atomic(MatchState& state, const type::Type* T) {
+    return state.builder.create<type::Atomic>(T);
 }
 
 bool match_sampler(MatchState&, const type::Type* ty) {

@@ -14,7 +14,7 @@
 
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/atomic.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/reference.h"
 
 #include "gmock/gmock.h"
@@ -31,7 +31,7 @@ TEST_F(ResolverAtomicTest, GlobalWorkgroupI32) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_TRUE(TypeOf(g)->Is<type::Reference>());
-    auto* atomic = TypeOf(g)->UnwrapRef()->As<sem::Atomic>();
+    auto* atomic = TypeOf(g)->UnwrapRef()->As<type::Atomic>();
     ASSERT_NE(atomic, nullptr);
     EXPECT_TRUE(atomic->Type()->Is<type::I32>());
 }
@@ -41,7 +41,7 @@ TEST_F(ResolverAtomicTest, GlobalWorkgroupU32) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_TRUE(TypeOf(g)->Is<type::Reference>());
-    auto* atomic = TypeOf(g)->UnwrapRef()->As<sem::Atomic>();
+    auto* atomic = TypeOf(g)->UnwrapRef()->As<type::Atomic>();
     ASSERT_NE(atomic, nullptr);
     EXPECT_TRUE(atomic->Type()->Is<type::U32>());
 }
@@ -56,7 +56,7 @@ TEST_F(ResolverAtomicTest, GlobalStorageStruct) {
     auto* str = TypeOf(g)->UnwrapRef()->As<sem::Struct>();
     ASSERT_NE(str, nullptr);
     ASSERT_EQ(str->Members().Length(), 1u);
-    auto* atomic = str->Members()[0]->Type()->As<sem::Atomic>();
+    auto* atomic = str->Members()[0]->Type()->As<type::Atomic>();
     ASSERT_NE(atomic, nullptr);
     ASSERT_TRUE(atomic->Type()->Is<type::I32>());
 }

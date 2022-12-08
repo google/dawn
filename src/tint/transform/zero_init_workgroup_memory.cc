@@ -22,9 +22,9 @@
 
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/atomic.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/unique_vector.h"
 
@@ -303,7 +303,7 @@ struct ZeroInitWorkgroupMemory::State {
             return true;
         }
 
-        if (auto* atomic = ty->As<sem::Atomic>()) {
+        if (auto* atomic = ty->As<type::Atomic>()) {
             auto* zero_init = b.Construct(CreateASTTypeFor(ctx, atomic->Type()));
             auto expr = get_expr(1u);
             if (!expr) {
@@ -439,7 +439,7 @@ struct ZeroInitWorkgroupMemory::State {
     /// sub-initializations.
     /// @param ty the type to inspect
     bool CanTriviallyZero(const type::Type* ty) {
-        if (ty->Is<sem::Atomic>()) {
+        if (ty->Is<type::Atomic>()) {
             return false;
         }
         if (auto* str = ty->As<sem::Struct>()) {

@@ -59,7 +59,6 @@ class WhileStatement;
 }  // namespace tint::ast
 namespace tint::sem {
 class Array;
-class Atomic;
 class BlockStatement;
 class Builtin;
 class CaseStatement;
@@ -72,6 +71,9 @@ class SwitchStatement;
 class TypeInitializer;
 class WhileStatement;
 }  // namespace tint::sem
+namespace tint::type {
+class Atomic;
+}  // namespace tint::type
 
 namespace tint::resolver {
 
