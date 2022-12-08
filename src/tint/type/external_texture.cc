@@ -1,4 +1,4 @@
-// Copyright 2021 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/external_texture.h"
+#include "src/tint/type/external_texture.h"
 
 #include "src/tint/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::ExternalTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::type::ExternalTexture);
 
-namespace tint::sem {
+namespace tint::type {
 
 ExternalTexture::ExternalTexture() : Base(ast::TextureDimension::k2d) {}
 
@@ -38,4 +38,4 @@ std::string ExternalTexture::FriendlyName(const SymbolTable&) const {
     return "texture_external";
 }
 
-}  // namespace tint::sem
+}  // namespace tint::type

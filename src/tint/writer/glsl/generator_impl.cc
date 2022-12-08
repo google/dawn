@@ -32,15 +32,10 @@
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/constant.h"
-#include "src/tint/sem/depth_multisampled_texture.h"
-#include "src/tint/sem/depth_texture.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
-#include "src/tint/sem/multisampled_texture.h"
-#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/statement.h"
-#include "src/tint/sem/storage_texture.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
 #include "src/tint/sem/type_conversion.h"
@@ -69,6 +64,11 @@
 #include "src/tint/transform/std140.h"
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
+#include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
@@ -1380,7 +1380,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         return false;
     }
 
-    auto* texture_type = TypeOf(texture)->UnwrapRef()->As<sem::Texture>();
+    auto* texture_type = TypeOf(texture)->UnwrapRef()->As<type::Texture>();
 
     auto emit_signed_int_type = [&](const type::Type* ty) {
         uint32_t width = 0;
@@ -1420,7 +1420,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
             emit_unsigned_int_type(call->Type());
             ScopedParen sp(out);
 
-            if (texture_type->Is<sem::StorageTexture>()) {
+            if (texture_type->Is<type::StorageTexture>()) {
                 out << "imageSize(";
             } else {
                 out << "textureSize(";
@@ -1431,9 +1431,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
             // The LOD parameter is mandatory on textureSize() for non-multisampled
             // textures.
-            if (!texture_type->Is<sem::StorageTexture>() &&
-                !texture_type->Is<sem::MultisampledTexture>() &&
-                !texture_type->Is<sem::DepthMultisampledTexture>()) {
+            if (!texture_type->Is<type::StorageTexture>() &&
+                !texture_type->Is<type::MultisampledTexture>() &&
+                !texture_type->Is<type::DepthMultisampledTexture>()) {
                 out << ", ";
                 if (auto* level_arg = arg(Usage::kLevel)) {
                     if (!emit_expr_as_signed(level_arg)) {
@@ -1459,7 +1459,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
             out << "uint";
             ScopedParen sp(out);
 
-            if (texture_type->Is<sem::StorageTexture>()) {
+            if (texture_type->Is<type::StorageTexture>()) {
                 out << "imageSize(";
             } else {
                 out << "textureSize(";
@@ -1471,9 +1471,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
             }
             // The LOD parameter is mandatory on textureSize() for non-multisampled
             // textures.
-            if (!texture_type->Is<sem::StorageTexture>() &&
-                !texture_type->Is<sem::MultisampledTexture>() &&
-                !texture_type->Is<sem::DepthMultisampledTexture>()) {
+            if (!texture_type->Is<type::StorageTexture>() &&
+                !texture_type->Is<type::MultisampledTexture>() &&
+                !texture_type->Is<type::DepthMultisampledTexture>()) {
                 out << ", ";
                 if (auto* level_arg = arg(Usage::kLevel)) {
                     if (!emit_expr_as_signed(level_arg)) {
@@ -1520,7 +1520,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
     uint32_t glsl_ret_width = 4u;
     bool append_depth_ref_to_coords = true;
-    bool is_depth = texture_type->Is<sem::DepthTexture>();
+    bool is_depth = texture_type->Is<type::DepthTexture>();
 
     switch (builtin->Type()) {
         case sem::BuiltinType::kTextureSample:
@@ -2069,7 +2069,7 @@ bool GeneratorImpl::EmitHandleVariable(const ast::Var* var, const sem::Variable*
         // GLSL ignores Sampler variables.
         return true;
     }
-    if (auto* storage = type->As<sem::StorageTexture>()) {
+    if (auto* storage = type->As<type::StorageTexture>()) {
         out << "layout(" << convert_texel_format_to_glsl(storage->texel_format()) << ") ";
     }
     if (!EmitTypeAndName(out, type, sem->AddressSpace(), sem->Access(), name)) {
@@ -2897,16 +2897,16 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         return false;
     } else if (auto* str = type->As<sem::Struct>()) {
         out << StructName(str);
-    } else if (auto* tex = type->As<sem::Texture>()) {
-        if (tex->Is<sem::ExternalTexture>()) {
+    } else if (auto* tex = type->As<type::Texture>()) {
+        if (tex->Is<type::ExternalTexture>()) {
             TINT_ICE(Writer, diagnostics_) << "Multiplanar external texture transform was not run.";
             return false;
         }
 
-        auto* storage = tex->As<sem::StorageTexture>();
-        auto* ms = tex->As<sem::MultisampledTexture>();
-        auto* depth_ms = tex->As<sem::DepthMultisampledTexture>();
-        auto* sampled = tex->As<sem::SampledTexture>();
+        auto* storage = tex->As<type::StorageTexture>();
+        auto* ms = tex->As<type::MultisampledTexture>();
+        auto* depth_ms = tex->As<type::DepthMultisampledTexture>();
+        auto* sampled = tex->As<type::SampledTexture>();
 
         out << "highp ";
 
@@ -2953,7 +2953,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                     << "unexpected TextureDimension " << tex->dim();
                 return false;
         }
-        if (tex->Is<sem::DepthTexture>()) {
+        if (tex->Is<type::DepthTexture>()) {
             out << "Shadow";
         }
     } else if (type->Is<sem::U32>()) {

@@ -15,11 +15,11 @@
 #include "gmock/gmock.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/sem/depth_texture.h"
-#include "src/tint/sem/multisampled_texture.h"
-#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/sampler.h"
-#include "src/tint/sem/storage_texture.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
 using ::testing::HasSubstr;
@@ -495,7 +495,7 @@ INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Type,
 
 TEST_F(GlslGeneratorImplTest_Type, EmitMultisampledTexture) {
     auto* f32 = create<sem::F32>();
-    auto* s = create<sem::MultisampledTexture>(ast::TextureDimension::k2d, f32);
+    auto* s = create<type::MultisampledTexture>(ast::TextureDimension::k2d, f32);
 
     GeneratorImpl& gen = Build();
 

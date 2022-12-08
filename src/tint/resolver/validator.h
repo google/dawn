@@ -361,13 +361,13 @@ class Validator {
     /// @param t the texture to validate
     /// @param source the source of the texture
     /// @returns true on success, false otherwise
-    bool SampledTexture(const sem::SampledTexture* t, const Source& source) const;
+    bool SampledTexture(const type::SampledTexture* t, const Source& source) const;
 
     /// Validates a multisampled texture
     /// @param t the texture to validate
     /// @param source the source of the texture
     /// @returns true on success, false otherwise
-    bool MultisampledTexture(const sem::MultisampledTexture* t, const Source& source) const;
+    bool MultisampledTexture(const type::MultisampledTexture* t, const Source& source) const;
 
     /// Validates a structure
     /// @param str the structure to validate

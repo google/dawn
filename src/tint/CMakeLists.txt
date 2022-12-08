@@ -320,15 +320,9 @@ list(APPEND TINT_LIB_SRCS
   sem/call.h
   sem/constant.cc
   sem/constant.h
-  sem/depth_multisampled_texture.cc
-  sem/depth_multisampled_texture.h
-  sem/depth_texture.cc
-  sem/depth_texture.h
   sem/evaluation_stage.h
   sem/expression.cc
   sem/expression.h
-  sem/external_texture.cc
-  sem/external_texture.h
   sem/f16.cc
   sem/f16.h
   sem/f32.cc
@@ -353,8 +347,6 @@ list(APPEND TINT_LIB_SRCS
   sem/member_accessor_expression.cc
   sem/module.cc
   sem/module.h
-  sem/multisampled_texture.cc
-  sem/multisampled_texture.h
   sem/node.cc
   sem/node.h
   sem/pipeline_stage_set.h
@@ -362,19 +354,13 @@ list(APPEND TINT_LIB_SRCS
   sem/pointer.h
   sem/reference.cc
   sem/reference.h
-  sem/sampled_texture.cc
-  sem/sampled_texture.h
   sem/sampler_texture_pair.h
   sem/sampler.cc
   sem/sampler.h
   sem/statement.cc
-  sem/storage_texture.cc
-  sem/storage_texture.h
   sem/struct.cc
   sem/switch_statement.cc
   sem/switch_statement.h
-  sem/texture.cc
-  sem/texture.h
   sem/type_initializer.cc
   sem/type_initializer.h
   sem/type_conversion.cc
@@ -499,8 +485,22 @@ list(APPEND TINT_LIB_SRCS
   transform/zero_init_workgroup_memory.h
   type/array_count.cc
   type/array_count.h
+  type/depth_multisampled_texture.cc
+  type/depth_multisampled_texture.h
+  type/depth_texture.cc
+  type/depth_texture.h
+  type/external_texture.cc
+  type/external_texture.h
+  type/multisampled_texture.cc
+  type/multisampled_texture.h
   type/node.cc
   type/node.h
+  type/sampled_texture.cc
+  type/sampled_texture.h
+  type/storage_texture.cc
+  type/storage_texture.h
+  type/texture.cc
+  type/texture.h
   type/type.cc
   type/type.h
   type/type_manager.cc
@@ -924,22 +924,15 @@ if(TINT_BUILD_TESTS)
     sem/atomic.cc
     sem/bool_test.cc
     sem/builtin_test.cc
-    sem/depth_multisampled_texture_test.cc
-    sem/depth_texture_test.cc
     sem/expression_test.cc
-    sem/external_texture_test.cc
     sem/f16_test.cc
     sem/f32_test.cc
     sem/i32_test.cc
     sem/matrix_test.cc
-    sem/multisampled_texture_test.cc
     sem/pointer_test.cc
     sem/reference_test.cc
-    sem/sampled_texture_test.cc
     sem/sampler_test.cc
-    sem/storage_texture_test.cc
     sem/struct_test.cc
-    sem/texture_test.cc
     sem/u32_test.cc
     sem/vector_test.cc
     source_test.cc
@@ -949,6 +942,13 @@ if(TINT_BUILD_TESTS)
     text/unicode_test.cc
     traits_test.cc
     transform/transform_test.cc
+    type/depth_multisampled_texture_test.cc
+    type/depth_texture_test.cc
+    type/external_texture_test.cc
+    type/multisampled_texture_test.cc
+    type/sampled_texture_test.cc
+    type/storage_texture_test.cc
+    type/texture_test.cc
     type/type_test.cc
     type/type_manager_test.cc
     utils/bitcast_test.cc

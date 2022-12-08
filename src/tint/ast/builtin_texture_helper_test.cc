@@ -14,9 +14,9 @@
 
 #include "src/tint/ast/builtin_texture_helper_test.h"
 
-#include "src/tint/sem/depth_texture.h"
-#include "src/tint/sem/multisampled_texture.h"
-#include "src/tint/sem/sampled_texture.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

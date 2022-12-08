@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/depth_texture.h"
+#include "src/tint/type/depth_texture.h"
 
-#include "src/tint/sem/test_helper.h"
+#include "src/tint/type/external_texture.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
+#include "src/tint/type/test_helper.h"
 
-#include "src/tint/sem/external_texture.h"
-#include "src/tint/sem/sampled_texture.h"
-#include "src/tint/sem/storage_texture.h"
-
-namespace tint::sem {
+namespace tint::type {
 namespace {
 
 using DepthTextureTest = TestHelper;
@@ -50,7 +49,7 @@ TEST_F(DepthTextureTest, Equals) {
 
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
-    EXPECT_FALSE(a->Equals(Void{}));
+    EXPECT_FALSE(a->Equals(sem::Void{}));
 }
 
 TEST_F(DepthTextureTest, IsTexture) {
@@ -73,4 +72,4 @@ TEST_F(DepthTextureTest, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace tint::sem
+}  // namespace tint::type

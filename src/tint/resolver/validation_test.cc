@@ -34,9 +34,9 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/member_accessor_expression.h"
-#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/type/sampled_texture.h"
 
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;

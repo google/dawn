@@ -16,12 +16,12 @@
 
 #include "gmock/gmock.h"
 
-#include "src/tint/sem/depth_multisampled_texture.h"
-#include "src/tint/sem/depth_texture.h"
-#include "src/tint/sem/multisampled_texture.h"
-#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/sampler.h"
-#include "src/tint/sem/storage_texture.h"
+#include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/writer/msl/test_helper.h"
 
 using ::testing::HasSubstr;
@@ -761,7 +761,7 @@ using MslDepthTexturesTest = TestParamHelper<MslDepthTextureData>;
 TEST_P(MslDepthTexturesTest, Emit) {
     auto params = GetParam();
 
-    sem::DepthTexture s(params.dim);
+    type::DepthTexture s(params.dim);
 
     GeneratorImpl& gen = Build();
 
@@ -782,7 +782,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 using MslDepthMultisampledTexturesTest = TestHelper;
 TEST_F(MslDepthMultisampledTexturesTest, Emit) {
-    sem::DepthMultisampledTexture s(ast::TextureDimension::k2d);
+    type::DepthMultisampledTexture s(ast::TextureDimension::k2d);
 
     GeneratorImpl& gen = Build();
 
@@ -804,7 +804,7 @@ TEST_P(MslSampledtexturesTest, Emit) {
     auto params = GetParam();
 
     auto* f32 = create<sem::F32>();
-    auto* s = create<sem::SampledTexture>(params.dim, f32);
+    auto* s = create<type::SampledTexture>(params.dim, f32);
 
     GeneratorImpl& gen = Build();
 
@@ -826,7 +826,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(MslGeneratorImplTest, Emit_TypeMultisampledTexture) {
     auto* u32 = create<sem::U32>();
-    auto* ms = create<sem::MultisampledTexture>(ast::TextureDimension::k2d, u32);
+    auto* ms = create<type::MultisampledTexture>(ast::TextureDimension::k2d, u32);
 
     GeneratorImpl& gen = Build();
 

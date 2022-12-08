@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_TEXTURE_H_
-#define SRC_TINT_SEM_TEXTURE_H_
+#ifndef SRC_TINT_TYPE_TEXTURE_H_
+#define SRC_TINT_TYPE_TEXTURE_H_
 
 #include "src/tint/ast/texture.h"
 #include "src/tint/type/type.h"
 
-namespace tint::sem {
+namespace tint::type {
 
 /// A texture type.
 class Texture : public Castable<Texture, type::Type> {
@@ -37,6 +37,6 @@ class Texture : public Castable<Texture, type::Type> {
     ast::TextureDimension const dim_;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
-#endif  // SRC_TINT_SEM_TEXTURE_H_
+#endif  // SRC_TINT_TYPE_TEXTURE_H_

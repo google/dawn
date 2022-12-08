@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/sem/test_helper.h"
-#include "src/tint/sem/texture.h"
+#include "src/tint/type/texture.h"
 
 namespace tint::sem {
 namespace {

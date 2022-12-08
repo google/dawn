@@ -34,7 +34,7 @@ namespace {
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
         if (auto* ty = node->As<ast::Type>()) {
-            if (program->Sem().Get<sem::ExternalTexture>(ty)) {
+            if (program->Sem().Get<type::ExternalTexture>(ty)) {
                 return true;
             }
         }
@@ -101,7 +101,7 @@ struct MultiplanarExternalTexture::State {
         // one uniform buffer for the ExternalTextureParams struct).
         for (auto* global : ctx.src->AST().GlobalVariables()) {
             auto* sem_var = sem.Get<sem::GlobalVariable>(global);
-            if (!sem_var->Type()->UnwrapRef()->Is<sem::ExternalTexture>()) {
+            if (!sem_var->Type()->UnwrapRef()->Is<type::ExternalTexture>()) {
                 continue;
             }
 
@@ -161,7 +161,7 @@ struct MultiplanarExternalTexture::State {
         for (auto* fn : ctx.src->AST().Functions()) {
             for (const ast::Variable* param : fn->params) {
                 if (auto* sem_var = sem.Get(param)) {
-                    if (!sem_var->Type()->UnwrapRef()->Is<sem::ExternalTexture>()) {
+                    if (!sem_var->Type()->UnwrapRef()->Is<type::ExternalTexture>()) {
                         continue;
                     }
                     // If we find a texture_external, we must ensure the ExternalTextureParams
@@ -195,7 +195,7 @@ struct MultiplanarExternalTexture::State {
             auto* builtin = call->Target()->As<sem::Builtin>();
 
             if (builtin && !builtin->Parameters().IsEmpty() &&
-                builtin->Parameters()[0]->Type()->Is<sem::ExternalTexture>() &&
+                builtin->Parameters()[0]->Type()->Is<type::ExternalTexture>() &&
                 builtin->Type() != sem::BuiltinType::kTextureDimensions) {
                 if (auto* var_user = sem.Get<sem::VariableUser>(expr->args[0])) {
                     auto it = new_binding_symbols.find(var_user->Variable());

@@ -22,11 +22,11 @@
 #include "src/tint/inspector/test_inspector_builder.h"
 #include "src/tint/inspector/test_inspector_runner.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/depth_texture.h"
-#include "src/tint/sem/external_texture.h"
-#include "src/tint/sem/multisampled_texture.h"
-#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/external_texture.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
 #include "tint/tint.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -3227,8 +3227,8 @@ fn main(@location(0) fragUV: vec2<f32>,
     auto result_1 = inspector.GetSamplerTextureUses("main");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    EXPECT_EQ((utils::Vector<tint::sem::SamplerTexturePair, 4>(result_0)),
-              (utils::Vector<tint::sem::SamplerTexturePair, 4>(result_1)));
+    EXPECT_EQ((utils::Vector<sem::SamplerTexturePair, 4>(result_0)),
+              (utils::Vector<sem::SamplerTexturePair, 4>(result_1)));
 }
 
 TEST_F(InspectorGetSamplerTextureUsesTest, BothIndirect) {

@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors
+// Copyright 2022 The Tint Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/storage_texture.h"
+#include "src/tint/type/storage_texture.h"
 
-#include "src/tint/sem/depth_texture.h"
-#include "src/tint/sem/external_texture.h"
-#include "src/tint/sem/sampled_texture.h"
-#include "src/tint/sem/test_helper.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/external_texture.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/test_helper.h"
 
-namespace tint::sem {
+namespace tint::type {
 namespace {
 
 struct StorageTextureTest : public TestHelper {
@@ -41,7 +41,7 @@ TEST_F(StorageTextureTest, Creation) {
     auto* e =
         Create(ast::TextureDimension::kCube, ast::TexelFormat::kRgba32Float, ast::Access::kRead);
 
-    EXPECT_TRUE(a->type()->Is<F32>());
+    EXPECT_TRUE(a->type()->Is<sem::F32>());
     EXPECT_EQ(a->dim(), ast::TextureDimension::kCube);
 
     EXPECT_EQ(a, b);
@@ -84,7 +84,7 @@ TEST_F(StorageTextureTest, Equals) {
     EXPECT_FALSE(a->Equals(*c));
     EXPECT_FALSE(a->Equals(*d));
     EXPECT_FALSE(a->Equals(*e));
-    EXPECT_FALSE(a->Equals(Void{}));
+    EXPECT_FALSE(a->Equals(sem::Void{}));
 }
 
 TEST_F(StorageTextureTest, Dim) {
@@ -114,11 +114,11 @@ TEST_F(StorageTextureTest, F32) {
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
     ASSERT_TRUE(s->Is<Texture>());
     ASSERT_TRUE(s->Is<StorageTexture>());
-    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<F32>());
+    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<sem::F32>());
 }
 
 TEST_F(StorageTextureTest, U32) {
-    auto* subtype = sem::StorageTexture::SubtypeFor(ast::TexelFormat::kRg32Uint, Types());
+    auto* subtype = type::StorageTexture::SubtypeFor(ast::TexelFormat::kRg32Uint, Types());
     type::Type* s =
         create<StorageTexture>(ast::TextureDimension::k2dArray, ast::TexelFormat::kRg32Uint,
                                ast::Access::kReadWrite, subtype);
@@ -128,11 +128,11 @@ TEST_F(StorageTextureTest, U32) {
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
     ASSERT_TRUE(s->Is<Texture>());
     ASSERT_TRUE(s->Is<StorageTexture>());
-    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<U32>());
+    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<sem::U32>());
 }
 
 TEST_F(StorageTextureTest, I32) {
-    auto* subtype = sem::StorageTexture::SubtypeFor(ast::TexelFormat::kRgba32Sint, Types());
+    auto* subtype = type::StorageTexture::SubtypeFor(ast::TexelFormat::kRgba32Sint, Types());
     type::Type* s =
         create<StorageTexture>(ast::TextureDimension::k2dArray, ast::TexelFormat::kRgba32Sint,
                                ast::Access::kReadWrite, subtype);
@@ -142,8 +142,8 @@ TEST_F(StorageTextureTest, I32) {
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
     ASSERT_TRUE(s->Is<Texture>());
     ASSERT_TRUE(s->Is<StorageTexture>());
-    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<I32>());
+    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<sem::I32>());
 }
 
 }  // namespace
-}  // namespace tint::sem
+}  // namespace tint::type

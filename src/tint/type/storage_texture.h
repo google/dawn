@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_STORAGE_TEXTURE_H_
-#define SRC_TINT_SEM_STORAGE_TEXTURE_H_
+#ifndef SRC_TINT_TYPE_STORAGE_TEXTURE_H_
+#define SRC_TINT_TYPE_STORAGE_TEXTURE_H_
 
 #include <string>
 
 #include "src/tint/ast/access.h"
 #include "src/tint/ast/storage_texture.h"
-#include "src/tint/sem/texture.h"
+#include "src/tint/type/texture.h"
 
 // Forward declarations
 namespace tint::type {
 class TypeManager;
 }  // namespace tint::type
 
-namespace tint::sem {
+namespace tint::type {
 
 /// A storage texture type.
 class StorageTexture final : public Castable<StorageTexture, Texture> {
@@ -77,6 +77,6 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     type::Type* const subtype_;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
-#endif  // SRC_TINT_SEM_STORAGE_TEXTURE_H_
+#endif  // SRC_TINT_TYPE_STORAGE_TEXTURE_H_

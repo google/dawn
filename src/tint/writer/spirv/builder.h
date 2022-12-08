@@ -36,7 +36,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/scope_stack.h"
 #include "src/tint/sem/builtin.h"
-#include "src/tint/sem/storage_texture.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/writer/spirv/function.h"
 #include "src/tint/writer/spirv/scalar_constant.h"
 
@@ -473,7 +473,7 @@ class Builder {
     /// @param texture the texture to generate
     /// @param result the result operand
     /// @returns true if the texture was successfully generated
-    bool GenerateTextureType(const sem::Texture* texture, const Operand& result);
+    bool GenerateTextureType(const type::Texture* texture, const Operand& result);
     /// Generates an array type declaration
     /// @param ary the array to generate
     /// @param result the result operand

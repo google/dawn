@@ -27,15 +27,11 @@
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/constant.h"
-#include "src/tint/sem/depth_multisampled_texture.h"
-#include "src/tint/sem/depth_texture.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
-#include "src/tint/sem/multisampled_texture.h"
 #include "src/tint/sem/reference.h"
-#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
@@ -44,6 +40,10 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/vector.h"
 #include "src/tint/transform/add_block_attribute.h"
+#include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/writer/append_vector.h"
@@ -779,9 +779,9 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
     if (v->initializer) {
         ops.push_back(Operand(init_id));
     } else {
-        auto* st = type->As<sem::StorageTexture>();
+        auto* st = type->As<type::StorageTexture>();
         if (st || type->Is<sem::Struct>()) {
-            // type is a sem::Struct or a sem::StorageTexture
+            // type is a sem::Struct or a type::StorageTexture
             auto access = st ? st->access() : sem->Access();
             switch (access) {
                 case ast::Access::kWrite:
@@ -2649,7 +2649,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
         TINT_ICE(Writer, builder_.Diagnostics()) << "missing texture argument";
     }
 
-    auto* texture_type = texture->Type()->UnwrapRef()->As<sem::Texture>();
+    auto* texture_type = texture->Type()->UnwrapRef()->As<type::Texture>();
 
     auto op = spv::Op::OpNop;
 
@@ -2685,7 +2685,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     // If the texture is not a depth texture, then this function simply delegates
     // to calling append_result_type_and_id_to_spirv_params().
     auto append_result_type_and_id_to_spirv_params_for_read = [&]() {
-        if (texture_type->IsAnyOf<sem::DepthTexture, sem::DepthMultisampledTexture>()) {
+        if (texture_type->IsAnyOf<type::DepthTexture, type::DepthMultisampledTexture>()) {
             auto* f32 = builder_.create<sem::F32>();
             auto* spirv_result_type = builder_.create<sem::Vector>(f32, 4u);
             auto spirv_result = result_op();
@@ -2807,9 +2807,9 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             }
 
             spirv_params.emplace_back(gen_arg(Usage::kTexture));
-            if (texture_type->IsAnyOf<sem::MultisampledTexture,       //
-                                      sem::DepthMultisampledTexture,  //
-                                      sem::StorageTexture>()) {
+            if (texture_type->IsAnyOf<type::MultisampledTexture,       //
+                                      type::DepthMultisampledTexture,  //
+                                      type::StorageTexture>()) {
                 op = spv::Op::OpImageQuerySize;
             } else if (auto* level = arg(Usage::kLevel)) {
                 op = spv::Op::OpImageQuerySizeLod;
@@ -2841,8 +2841,8 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
 
             spirv_params.emplace_back(gen_arg(Usage::kTexture));
 
-            if (texture_type->Is<sem::MultisampledTexture>() ||
-                texture_type->Is<sem::StorageTexture>()) {
+            if (texture_type->Is<type::MultisampledTexture>() ||
+                texture_type->Is<type::StorageTexture>()) {
                 op = spv::Op::OpImageQuerySize;
             } else {
                 op = spv::Op::OpImageQuerySizeLod;
@@ -2864,8 +2864,8 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             break;
         }
         case BuiltinType::kTextureLoad: {
-            op = texture_type->Is<sem::StorageTexture>() ? spv::Op::OpImageRead
-                                                         : spv::Op::OpImageFetch;
+            op = texture_type->Is<type::StorageTexture>() ? spv::Op::OpImageRead
+                                                          : spv::Op::OpImageFetch;
             append_result_type_and_id_to_spirv_params_for_read();
             spirv_params.emplace_back(gen_arg(Usage::kTexture));
             if (!append_coords_to_spirv_params()) {
@@ -3280,9 +3280,9 @@ uint32_t Builder::GenerateSampledImage(const type::Type* texture_type,
     // The Vulkan spec says: The "Depth" operand of OpTypeImage is ignored.
     // In SPIRV, 0 means not depth, 1 means depth, and 2 means unknown.
     // Using anything other than 0 is problematic on various Vulkan drivers.
-    if (auto* depthTextureType = texture_type->As<sem::DepthTexture>()) {
-        texture_type = builder_.create<sem::SampledTexture>(depthTextureType->dim(),
-                                                            builder_.create<sem::F32>());
+    if (auto* depthTextureType = texture_type->As<type::DepthTexture>()) {
+        texture_type = builder_.create<type::SampledTexture>(depthTextureType->dim(),
+                                                             builder_.create<sem::F32>());
     }
 
     uint32_t sampled_image_type_id =
@@ -3645,12 +3645,12 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
     // The Vulkan spec says: The "Depth" operand of OpTypeImage is ignored.
     // In SPIRV, 0 means not depth, 1 means depth, and 2 means unknown.
     // Using anything other than 0 is problematic on various Vulkan drivers.
-    if (auto* depthTextureType = type->As<sem::DepthTexture>()) {
-        type = builder_.create<sem::SampledTexture>(depthTextureType->dim(),
-                                                    builder_.create<sem::F32>());
-    } else if (auto* multisampledDepthTextureType = type->As<sem::DepthMultisampledTexture>()) {
-        type = builder_.create<sem::MultisampledTexture>(multisampledDepthTextureType->dim(),
-                                                         builder_.create<sem::F32>());
+    if (auto* depthTextureType = type->As<type::DepthTexture>()) {
+        type = builder_.create<type::SampledTexture>(depthTextureType->dim(),
+                                                     builder_.create<sem::F32>());
+    } else if (auto* multisampledDepthTextureType = type->As<type::DepthMultisampledTexture>()) {
+        type = builder_.create<type::MultisampledTexture>(multisampledDepthTextureType->dim(),
+                                                          builder_.create<sem::F32>());
     }
 
     // Pointers and references with differing accesses should not result in a
@@ -3715,7 +3715,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
                 push_type(spv::Op::OpTypeVoid, {result});
                 return true;
             },
-            [&](const sem::StorageTexture* tex) {
+            [&](const type::StorageTexture* tex) {
                 if (!GenerateTextureType(tex, result)) {
                     return false;
                 }
@@ -3723,15 +3723,15 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
                 // Register all three access types of StorageTexture names. In
                 // SPIR-V, we must output a single type, while the variable is
                 // annotated with the access type. Doing this ensures we de-dupe.
-                type_to_id_[builder_.create<sem::StorageTexture>(
+                type_to_id_[builder_.create<type::StorageTexture>(
                     tex->dim(), tex->texel_format(), ast::Access::kRead, tex->type())] = id;
-                type_to_id_[builder_.create<sem::StorageTexture>(
+                type_to_id_[builder_.create<type::StorageTexture>(
                     tex->dim(), tex->texel_format(), ast::Access::kWrite, tex->type())] = id;
-                type_to_id_[builder_.create<sem::StorageTexture>(
+                type_to_id_[builder_.create<type::StorageTexture>(
                     tex->dim(), tex->texel_format(), ast::Access::kReadWrite, tex->type())] = id;
                 return true;
             },
-            [&](const sem::Texture* tex) { return GenerateTextureType(tex, result); },
+            [&](const type::Texture* tex) { return GenerateTextureType(tex, result); },
             [&](const sem::Sampler* s) {
                 push_type(spv::Op::OpTypeSampler, {result});
 
@@ -3758,8 +3758,8 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
     });
 }
 
-bool Builder::GenerateTextureType(const sem::Texture* texture, const Operand& result) {
-    if (texture->Is<sem::ExternalTexture>()) {
+bool Builder::GenerateTextureType(const type::Texture* texture, const Operand& result) {
+    if (texture->Is<type::ExternalTexture>()) {
         TINT_ICE(Writer, builder_.Diagnostics())
             << "Multiplanar external texture transform was not run.";
         return false;
@@ -3774,9 +3774,9 @@ bool Builder::GenerateTextureType(const sem::Texture* texture, const Operand& re
     uint32_t dim_literal = SpvDim2D;
     if (dim == ast::TextureDimension::k1d) {
         dim_literal = SpvDim1D;
-        if (texture->Is<sem::SampledTexture>()) {
+        if (texture->Is<type::SampledTexture>()) {
             push_capability(SpvCapabilitySampled1D);
-        } else if (texture->Is<sem::StorageTexture>()) {
+        } else if (texture->Is<type::StorageTexture>()) {
             push_capability(SpvCapabilityImage1D);
         }
     }
@@ -3788,7 +3788,7 @@ bool Builder::GenerateTextureType(const sem::Texture* texture, const Operand& re
     }
 
     uint32_t ms_literal = 0u;
-    if (texture->IsAnyOf<sem::MultisampledTexture, sem::DepthMultisampledTexture>()) {
+    if (texture->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture>()) {
         ms_literal = 1u;
     }
 
@@ -3798,33 +3798,35 @@ bool Builder::GenerateTextureType(const sem::Texture* texture, const Operand& re
     // Using anything other than 0 is problematic on various Vulkan drivers.
 
     uint32_t sampled_literal = 2u;
-    if (texture->IsAnyOf<sem::MultisampledTexture, sem::SampledTexture, sem::DepthTexture,
-                         sem::DepthMultisampledTexture>()) {
+    if (texture->IsAnyOf<type::MultisampledTexture, type::SampledTexture, type::DepthTexture,
+                         type::DepthMultisampledTexture>()) {
         sampled_literal = 1u;
     }
 
     if (dim == ast::TextureDimension::kCubeArray) {
-        if (texture->IsAnyOf<sem::SampledTexture, sem::DepthTexture>()) {
+        if (texture->IsAnyOf<type::SampledTexture, type::DepthTexture>()) {
             push_capability(SpvCapabilitySampledCubeArray);
         }
     }
 
     uint32_t type_id = Switch(
         texture,
-        [&](const sem::DepthTexture*) { return GenerateTypeIfNeeded(builder_.create<sem::F32>()); },
-        [&](const sem::DepthMultisampledTexture*) {
+        [&](const type::DepthTexture*) {
             return GenerateTypeIfNeeded(builder_.create<sem::F32>());
         },
-        [&](const sem::SampledTexture* t) { return GenerateTypeIfNeeded(t->type()); },
-        [&](const sem::MultisampledTexture* t) { return GenerateTypeIfNeeded(t->type()); },
-        [&](const sem::StorageTexture* t) { return GenerateTypeIfNeeded(t->type()); },
+        [&](const type::DepthMultisampledTexture*) {
+            return GenerateTypeIfNeeded(builder_.create<sem::F32>());
+        },
+        [&](const type::SampledTexture* t) { return GenerateTypeIfNeeded(t->type()); },
+        [&](const type::MultisampledTexture* t) { return GenerateTypeIfNeeded(t->type()); },
+        [&](const type::StorageTexture* t) { return GenerateTypeIfNeeded(t->type()); },
         [&](Default) { return 0u; });
     if (type_id == 0u) {
         return false;
     }
 
     uint32_t format_literal = SpvImageFormat_::SpvImageFormatUnknown;
-    if (auto* t = texture->As<sem::StorageTexture>()) {
+    if (auto* t = texture->As<type::StorageTexture>()) {
         format_literal = convert_texel_format_to_spv(t->texel_format());
     }
 

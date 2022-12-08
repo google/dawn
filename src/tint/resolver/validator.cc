@@ -52,27 +52,27 @@
 #include "src/tint/sem/atomic.h"
 #include "src/tint/sem/break_if_statement.h"
 #include "src/tint/sem/call.h"
-#include "src/tint/sem/depth_multisampled_texture.h"
-#include "src/tint/sem/depth_texture.h"
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/if_statement.h"
 #include "src/tint/sem/loop_statement.h"
 #include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
-#include "src/tint/sem/multisampled_texture.h"
 #include "src/tint/sem/pointer.h"
 #include "src/tint/sem/reference.h"
-#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/sampler.h"
 #include "src/tint/sem/statement.h"
-#include "src/tint/sem/storage_texture.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/while_statement.h"
+#include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/math.h"
@@ -231,7 +231,7 @@ bool Validator::IsHostShareable(const type::Type* type) const {
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
 bool Validator::IsStorable(const type::Type* type) const {
-    return IsPlain(type) || type->IsAnyOf<sem::Texture, sem::Sampler>();
+    return IsPlain(type) || type->IsAnyOf<type::Texture, sem::Sampler>();
 }
 
 const ast::Statement* Validator::ClosestContinuing(bool stop_at_loop,
@@ -319,7 +319,7 @@ bool Validator::StorageTexture(const ast::StorageTexture* t) const {
     return true;
 }
 
-bool Validator::SampledTexture(const sem::SampledTexture* t, const Source& source) const {
+bool Validator::SampledTexture(const type::SampledTexture* t, const Source& source) const {
     if (!t->type()->UnwrapRef()->IsAnyOf<sem::F32, sem::I32, sem::U32>()) {
         AddError("texture_2d<type>: type must be f32, i32 or u32", source);
         return false;
@@ -328,7 +328,8 @@ bool Validator::SampledTexture(const sem::SampledTexture* t, const Source& sourc
     return true;
 }
 
-bool Validator::MultisampledTexture(const sem::MultisampledTexture* t, const Source& source) const {
+bool Validator::MultisampledTexture(const type::MultisampledTexture* t,
+                                    const Source& source) const {
     if (t->dim() != ast::TextureDimension::k2d) {
         AddError("only 2d multisampled textures are supported", source);
         return false;
@@ -831,7 +832,7 @@ bool Validator::Parameter(const ast::Function* func, const sem::Variable* var) c
             AddError("type of function parameter must be constructible", decl->type->source);
             return false;
         }
-    } else if (!var->Type()->IsAnyOf<sem::Texture, sem::Sampler, sem::Pointer>()) {
+    } else if (!var->Type()->IsAnyOf<type::Texture, sem::Sampler, sem::Pointer>()) {
         AddError("type of function parameter cannot be " + sem_.TypeNameOf(var->Type()),
                  decl->source);
         return false;
@@ -2265,7 +2266,7 @@ bool Validator::Assignment(const ast::Statement* a, const type::Type* rhs_ty) co
         // https://www.w3.org/TR/WGSL/#phony-assignment-section
         auto* ty = rhs_ty->UnwrapRef();
         if (!ty->IsConstructible() &&
-            !ty->IsAnyOf<sem::Pointer, sem::Texture, sem::Sampler, sem::AbstractNumeric>()) {
+            !ty->IsAnyOf<sem::Pointer, type::Texture, sem::Sampler, sem::AbstractNumeric>()) {
             AddError("cannot assign '" + sem_.TypeNameOf(rhs_ty) +
                          "' to '_'. '_' can only be assigned a constructible, pointer, texture or "
                          "sampler type",

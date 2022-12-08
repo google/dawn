@@ -894,7 +894,7 @@ Transform::ApplyResult BuiltinPolyfill::Apply(const Program* src,
                     if (polyfill.texture_sample_base_clamp_to_edge_2d_f32) {
                         auto& sig = builtin->Signature();
                         auto* tex = sig.Parameter(sem::ParameterUsage::kTexture);
-                        if (auto* stex = tex->Type()->As<sem::SampledTexture>()) {
+                        if (auto* stex = tex->Type()->As<type::SampledTexture>()) {
                             if (stex->type()->Is<sem::F32>()) {
                                 fn = builtin_polyfills.GetOrCreate(builtin, [&] {
                                     return s.textureSampleBaseClampToEdge_2d_f32();

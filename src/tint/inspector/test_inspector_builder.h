@@ -26,11 +26,11 @@
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/depth_texture.h"
-#include "src/tint/sem/external_texture.h"
-#include "src/tint/sem/multisampled_texture.h"
-#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/external_texture.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
 #include "tint/tint.h"
 
 namespace tint::inspector {

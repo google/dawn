@@ -33,9 +33,9 @@
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/sem/builtin_type.h"
-#include "src/tint/sem/depth_texture.h"
-#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/transform/spirv_atomic.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/sampled_texture.h"
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/hashset.h"
 

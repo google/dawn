@@ -19,7 +19,7 @@
 
 #include "src/tint/ast/access.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/storage_texture.h"
+#include "src/tint/type/storage_texture.h"
 
 namespace tint::ast::builtin::test {
 

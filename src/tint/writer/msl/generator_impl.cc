@@ -36,8 +36,6 @@
 #include "src/tint/sem/bool.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/constant.h"
-#include "src/tint/sem/depth_multisampled_texture.h"
-#include "src/tint/sem/depth_texture.h"
 #include "src/tint/sem/f16.h"
 #include "src/tint/sem/f32.h"
 #include "src/tint/sem/function.h"
@@ -45,11 +43,8 @@
 #include "src/tint/sem/matrix.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
-#include "src/tint/sem/multisampled_texture.h"
 #include "src/tint/sem/pointer.h"
 #include "src/tint/sem/reference.h"
-#include "src/tint/sem/sampled_texture.h"
-#include "src/tint/sem/storage_texture.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
 #include "src/tint/sem/type_conversion.h"
@@ -75,6 +70,11 @@
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
+#include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
@@ -997,7 +997,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         return false;
     }
 
-    auto* texture_type = TypeOf(texture)->UnwrapRef()->As<sem::Texture>();
+    auto* texture_type = TypeOf(texture)->UnwrapRef()->As<type::Texture>();
 
     // Helper to emit the texture expression, wrapped in parentheses if the
     // expression includes an operator with lower precedence than the member
@@ -2607,14 +2607,14 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             out << StructName(str);
             return true;
         },
-        [&](const sem::Texture* tex) {
-            if (tex->Is<sem::ExternalTexture>()) {
+        [&](const type::Texture* tex) {
+            if (tex->Is<type::ExternalTexture>()) {
                 TINT_ICE(Writer, diagnostics_)
                     << "Multiplanar external texture transform was not run.";
                 return false;
             }
 
-            if (tex->IsAnyOf<sem::DepthTexture, sem::DepthMultisampledTexture>()) {
+            if (tex->IsAnyOf<type::DepthTexture, type::DepthMultisampledTexture>()) {
                 out << "depth";
             } else {
                 out << "texture";
@@ -2643,7 +2643,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                     diagnostics_.add_error(diag::System::Writer, "Invalid texture dimensions");
                     return false;
             }
-            if (tex->IsAnyOf<sem::MultisampledTexture, sem::DepthMultisampledTexture>()) {
+            if (tex->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture>()) {
                 out << "_ms";
             }
             out << "<";
@@ -2651,15 +2651,15 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 
             return Switch(
                 tex,
-                [&](const sem::DepthTexture*) {
+                [&](const type::DepthTexture*) {
                     out << "float, access::sample";
                     return true;
                 },
-                [&](const sem::DepthMultisampledTexture*) {
+                [&](const type::DepthMultisampledTexture*) {
                     out << "float, access::read";
                     return true;
                 },
-                [&](const sem::StorageTexture* storage) {
+                [&](const type::StorageTexture* storage) {
                     if (!EmitType(out, storage->type(), "")) {
                         return false;
                     }
@@ -2676,14 +2676,14 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                     }
                     return true;
                 },
-                [&](const sem::MultisampledTexture* ms) {
+                [&](const type::MultisampledTexture* ms) {
                     if (!EmitType(out, ms->type(), "")) {
                         return false;
                     }
                     out << ", access::read";
                     return true;
                 },
-                [&](const sem::SampledTexture* sampled) {
+                [&](const type::SampledTexture* sampled) {
                     if (!EmitType(out, sampled->type(), "")) {
                         return false;
                     }

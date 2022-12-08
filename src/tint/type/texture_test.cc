@@ -1,4 +1,4 @@
-// Copyright 2021 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/texture.h"
+#include "src/tint/type/texture.h"
 
-#include "src/tint/sem/sampled_texture.h"
-#include "src/tint/sem/test_helper.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/test_helper.h"
 
-namespace tint::sem {
+namespace tint::type {
 namespace {
 
 using TextureTypeDimTest = TestParamHelper<ast::TextureDimension>;
 
 TEST_P(TextureTypeDimTest, DimMustMatch) {
     // Check that the dim() query returns the right dimensionality.
-    F32 f32;
+    sem::F32 f32;
     // TextureType is an abstract class, so use concrete class
     // SampledTexture in its stead.
     SampledTexture st(GetParam(), &f32);
@@ -41,4 +41,4 @@ INSTANTIATE_TEST_SUITE_P(Dimensions,
                                            ast::TextureDimension::kCubeArray));
 
 }  // namespace
-}  // namespace tint::sem
+}  // namespace tint::type

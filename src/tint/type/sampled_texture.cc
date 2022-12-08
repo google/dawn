@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/sampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
 
 #include "src/tint/program_builder.h"
 #include "src/tint/utils/hash.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::SampledTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::type::SampledTexture);
 
-namespace tint::sem {
+namespace tint::type {
 
 SampledTexture::SampledTexture(ast::TextureDimension dim, const type::Type* type)
     : Base(dim), type_(type) {
-    TINT_ASSERT(Semantic, type_);
+    TINT_ASSERT(Type, type_);
 }
 
 SampledTexture::SampledTexture(SampledTexture&&) = default;
@@ -47,4 +47,4 @@ std::string SampledTexture::FriendlyName(const SymbolTable& symbols) const {
     return out.str();
 }
 
-}  // namespace tint::sem
+}  // namespace tint::type

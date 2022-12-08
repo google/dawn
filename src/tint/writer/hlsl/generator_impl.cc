@@ -33,15 +33,10 @@
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/constant.h"
-#include "src/tint/sem/depth_multisampled_texture.h"
-#include "src/tint/sem/depth_texture.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
-#include "src/tint/sem/multisampled_texture.h"
-#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/statement.h"
-#include "src/tint/sem/storage_texture.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
 #include "src/tint/sem/type_conversion.h"
@@ -69,6 +64,11 @@
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
+#include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
@@ -2274,7 +2274,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         return false;
     }
 
-    auto* texture_type = TypeOf(texture)->UnwrapRef()->As<sem::Texture>();
+    auto* texture_type = TypeOf(texture)->UnwrapRef()->As<type::Texture>();
 
     switch (builtin->Type()) {
         case sem::BuiltinType::kTextureDimensions:
@@ -2283,7 +2283,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         case sem::BuiltinType::kTextureNumSamples: {
             // All of these builtins use the GetDimensions() method on the texture
             bool is_ms =
-                texture_type->IsAnyOf<sem::MultisampledTexture, sem::DepthMultisampledTexture>();
+                texture_type->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture>();
             int num_dimensions = 0;
             std::string swizzle;
 
@@ -2488,7 +2488,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         case sem::BuiltinType::kTextureLoad:
             out << ".Load(";
             // Multisampled textures do not support mip-levels.
-            if (!texture_type->Is<sem::MultisampledTexture>()) {
+            if (!texture_type->Is<type::MultisampledTexture>()) {
                 pack_level_in_coords = true;
             }
             break;
@@ -3059,9 +3059,9 @@ bool GeneratorImpl::EmitHandleVariable(const ast::Var* var, const sem::Variable*
 
     const char* register_space = nullptr;
 
-    if (unwrapped_type->Is<sem::Texture>()) {
+    if (unwrapped_type->Is<type::Texture>()) {
         register_space = "t";
-        if (unwrapped_type->Is<sem::StorageTexture>()) {
+        if (unwrapped_type->Is<type::StorageTexture>()) {
             register_space = "u";
         }
     } else if (unwrapped_type->Is<sem::Sampler>()) {
@@ -4011,17 +4011,17 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             out << StructName(str);
             return true;
         },
-        [&](const sem::Texture* tex) {
-            if (tex->Is<sem::ExternalTexture>()) {
+        [&](const type::Texture* tex) {
+            if (tex->Is<type::ExternalTexture>()) {
                 TINT_ICE(Writer, diagnostics_)
                     << "Multiplanar external texture transform was not run.";
                 return false;
             }
 
-            auto* storage = tex->As<sem::StorageTexture>();
-            auto* ms = tex->As<sem::MultisampledTexture>();
-            auto* depth_ms = tex->As<sem::DepthMultisampledTexture>();
-            auto* sampled = tex->As<sem::SampledTexture>();
+            auto* storage = tex->As<type::StorageTexture>();
+            auto* ms = tex->As<type::MultisampledTexture>();
+            auto* depth_ms = tex->As<type::DepthMultisampledTexture>();
+            auto* sampled = tex->As<type::SampledTexture>();
 
             if (storage && storage->access() != ast::Access::kRead) {
                 out << "RW";

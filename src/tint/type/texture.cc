@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/texture.h"
+#include "src/tint/type/texture.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::Texture);
+TINT_INSTANTIATE_TYPEINFO(tint::type::Texture);
 
-namespace tint::sem {
+namespace tint::type {
 
 Texture::Texture(ast::TextureDimension dim) : Base(type::TypeFlags{}), dim_(dim) {}
 
@@ -24,4 +24,4 @@ Texture::Texture(Texture&&) = default;
 
 Texture::~Texture() = default;
 
-}  // namespace tint::sem
+}  // namespace tint::type

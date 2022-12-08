@@ -21,7 +21,7 @@
 #include "src/tint/ast/builtin_value.h"
 #include "src/tint/ast/pipeline_stage.h"
 #include "src/tint/reader/spirv/fail_stream.h"
-#include "src/tint/sem/storage_texture.h"
+#include "src/tint/type/storage_texture.h"
 
 namespace tint::reader::spirv {
 

@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_MULTISAMPLED_TEXTURE_H_
-#define SRC_TINT_SEM_MULTISAMPLED_TEXTURE_H_
+#ifndef SRC_TINT_TYPE_MULTISAMPLED_TEXTURE_H_
+#define SRC_TINT_TYPE_MULTISAMPLED_TEXTURE_H_
 
 #include <string>
 
-#include "src/tint/sem/texture.h"
+#include "src/tint/type/texture.h"
 
-namespace tint::sem {
+namespace tint::type {
 
 /// A multisampled texture type.
 class MultisampledTexture final : public Castable<MultisampledTexture, Texture> {
@@ -51,6 +51,6 @@ class MultisampledTexture final : public Castable<MultisampledTexture, Texture> 
     const type::Type* const type_;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
-#endif  // SRC_TINT_SEM_MULTISAMPLED_TEXTURE_H_
+#endif  // SRC_TINT_TYPE_MULTISAMPLED_TEXTURE_H_

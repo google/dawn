@@ -59,8 +59,6 @@
 #include "src/tint/sem/atomic.h"
 #include "src/tint/sem/break_if_statement.h"
 #include "src/tint/sem/call.h"
-#include "src/tint/sem/depth_multisampled_texture.h"
-#include "src/tint/sem/depth_texture.h"
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/if_statement.h"
@@ -69,19 +67,21 @@
 #include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
-#include "src/tint/sem/multisampled_texture.h"
 #include "src/tint/sem/pointer.h"
 #include "src/tint/sem/reference.h"
-#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/sampler.h"
 #include "src/tint/sem/statement.h"
-#include "src/tint/sem/storage_texture.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/while_statement.h"
+#include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/math.h"
 #include "src/tint/utils/reverse.h"
@@ -279,9 +279,9 @@ type::Type* Resolver::Type(const ast::Type* ty) {
             return nullptr;
         },
         [&](const ast::Sampler* t) { return builder_->create<sem::Sampler>(t->kind); },
-        [&](const ast::SampledTexture* t) -> sem::SampledTexture* {
+        [&](const ast::SampledTexture* t) -> type::SampledTexture* {
             if (auto* el = Type(t->type)) {
-                auto* sem = builder_->create<sem::SampledTexture>(t->dim, el);
+                auto* sem = builder_->create<type::SampledTexture>(t->dim, el);
                 if (!validator_.SampledTexture(sem, t->source)) {
                     return nullptr;
                 }
@@ -289,9 +289,9 @@ type::Type* Resolver::Type(const ast::Type* ty) {
             }
             return nullptr;
         },
-        [&](const ast::MultisampledTexture* t) -> sem::MultisampledTexture* {
+        [&](const ast::MultisampledTexture* t) -> type::MultisampledTexture* {
             if (auto* el = Type(t->type)) {
-                auto* sem = builder_->create<sem::MultisampledTexture>(t->dim, el);
+                auto* sem = builder_->create<type::MultisampledTexture>(t->dim, el);
                 if (!validator_.MultisampledTexture(sem, t->source)) {
                     return nullptr;
                 }
@@ -299,20 +299,20 @@ type::Type* Resolver::Type(const ast::Type* ty) {
             }
             return nullptr;
         },
-        [&](const ast::DepthTexture* t) { return builder_->create<sem::DepthTexture>(t->dim); },
+        [&](const ast::DepthTexture* t) { return builder_->create<type::DepthTexture>(t->dim); },
         [&](const ast::DepthMultisampledTexture* t) {
-            return builder_->create<sem::DepthMultisampledTexture>(t->dim);
+            return builder_->create<type::DepthMultisampledTexture>(t->dim);
         },
-        [&](const ast::StorageTexture* t) -> sem::StorageTexture* {
+        [&](const ast::StorageTexture* t) -> type::StorageTexture* {
             if (auto* el = Type(t->type)) {
                 if (!validator_.StorageTexture(t)) {
                     return nullptr;
                 }
-                return builder_->create<sem::StorageTexture>(t->dim, t->format, t->access, el);
+                return builder_->create<type::StorageTexture>(t->dim, t->format, t->access, el);
             }
             return nullptr;
         },
-        [&](const ast::ExternalTexture*) { return builder_->create<sem::ExternalTexture>(); },
+        [&](const ast::ExternalTexture*) { return builder_->create<type::ExternalTexture>(); },
         [&](Default) {
             auto* resolved = sem_.ResolvedSymbol(ty);
             return Switch(
@@ -2390,7 +2390,7 @@ void Resolver::CollectTextureSamplerPairs(const sem::Builtin* builtin,
     }
     if (auto* user = args[static_cast<size_t>(texture_index)]->As<sem::VariableUser>()) {
         auto* texture = user->Variable();
-        if (!texture->Type()->UnwrapRef()->Is<sem::StorageTexture>()) {
+        if (!texture->Type()->UnwrapRef()->Is<type::StorageTexture>()) {
             int sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
             const sem::Variable* sampler =
                 sampler_index != -1

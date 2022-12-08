@@ -15,12 +15,12 @@
 #include "src/tint/sem/function.h"
 
 #include "src/tint/ast/function.h"
-#include "src/tint/sem/depth_texture.h"
-#include "src/tint/sem/external_texture.h"
-#include "src/tint/sem/multisampled_texture.h"
-#include "src/tint/sem/sampled_texture.h"
-#include "src/tint/sem/storage_texture.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/external_texture.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/utils/transform.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Function);
@@ -172,13 +172,13 @@ Function::VariableBindings Function::TransitivelyReferencedSampledTextureVariabl
 
     for (auto* global : TransitivelyReferencedGlobals()) {
         auto* unwrapped_type = global->Type()->UnwrapRef();
-        auto* texture = unwrapped_type->As<sem::Texture>();
+        auto* texture = unwrapped_type->As<type::Texture>();
         if (texture == nullptr) {
             continue;
         }
 
-        auto is_multisampled = texture->Is<sem::MultisampledTexture>();
-        auto is_sampled = texture->Is<sem::SampledTexture>();
+        auto is_multisampled = texture->Is<type::MultisampledTexture>();
+        auto is_sampled = texture->Is<type::SampledTexture>();
 
         if ((multisampled && !is_multisampled) || (!multisampled && !is_sampled)) {
             continue;

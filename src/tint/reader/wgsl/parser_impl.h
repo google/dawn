@@ -26,7 +26,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/reader/wgsl/parser_impl_detail.h"
 #include "src/tint/reader/wgsl/token.h"
-#include "src/tint/sem/storage_texture.h"
+#include "src/tint/type/storage_texture.h"
 
 namespace tint::ast {
 class BreakStatement;

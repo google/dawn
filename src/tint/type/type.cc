@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@
 #include "src/tint/sem/reference.h"
 #include "src/tint/sem/sampler.h"
 #include "src/tint/sem/struct.h"
-#include "src/tint/sem/texture.h"
 #include "src/tint/sem/u32.h"
 #include "src/tint/sem/vector.h"
+#include "src/tint/type/texture.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Type);
 
@@ -172,7 +172,7 @@ bool Type::is_numeric_scalar_or_vector() const {
 }
 
 bool Type::is_handle() const {
-    return IsAnyOf<sem::Sampler, sem::Texture>();
+    return IsAnyOf<sem::Sampler, type::Texture>();
 }
 
 bool Type::HoldsAbstract() const {

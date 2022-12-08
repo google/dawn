@@ -20,11 +20,11 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/atomic.h"
 #include "src/tint/sem/block_statement.h"
-#include "src/tint/sem/depth_multisampled_texture.h"
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/reference.h"
 #include "src/tint/sem/sampler.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/type/depth_multisampled_texture.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Transform);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Data);
@@ -145,23 +145,23 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
     if (auto* a = ty->As<sem::Atomic>()) {
         return ctx.dst->create<ast::Atomic>(CreateASTTypeFor(ctx, a->Type()));
     }
-    if (auto* t = ty->As<sem::DepthTexture>()) {
+    if (auto* t = ty->As<type::DepthTexture>()) {
         return ctx.dst->create<ast::DepthTexture>(t->dim());
     }
-    if (auto* t = ty->As<sem::DepthMultisampledTexture>()) {
+    if (auto* t = ty->As<type::DepthMultisampledTexture>()) {
         return ctx.dst->create<ast::DepthMultisampledTexture>(t->dim());
     }
-    if (ty->Is<sem::ExternalTexture>()) {
+    if (ty->Is<type::ExternalTexture>()) {
         return ctx.dst->create<ast::ExternalTexture>();
     }
-    if (auto* t = ty->As<sem::MultisampledTexture>()) {
+    if (auto* t = ty->As<type::MultisampledTexture>()) {
         return ctx.dst->create<ast::MultisampledTexture>(t->dim(),
                                                          CreateASTTypeFor(ctx, t->type()));
     }
-    if (auto* t = ty->As<sem::SampledTexture>()) {
+    if (auto* t = ty->As<type::SampledTexture>()) {
         return ctx.dst->create<ast::SampledTexture>(t->dim(), CreateASTTypeFor(ctx, t->type()));
     }
-    if (auto* t = ty->As<sem::StorageTexture>()) {
+    if (auto* t = ty->As<type::StorageTexture>()) {
         return ctx.dst->create<ast::StorageTexture>(t->dim(), t->texel_format(),
                                                     CreateASTTypeFor(ctx, t->type()), t->access());
     }

@@ -24,16 +24,16 @@
 #include "src/tint/sem/abstract_int.h"
 #include "src/tint/sem/abstract_numeric.h"
 #include "src/tint/sem/atomic.h"
-#include "src/tint/sem/depth_multisampled_texture.h"
-#include "src/tint/sem/depth_texture.h"
 #include "src/tint/sem/evaluation_stage.h"
-#include "src/tint/sem/external_texture.h"
-#include "src/tint/sem/multisampled_texture.h"
 #include "src/tint/sem/pipeline_stage_set.h"
-#include "src/tint/sem/sampled_texture.h"
-#include "src/tint/sem/storage_texture.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_initializer.h"
+#include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/external_texture.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/math.h"
@@ -611,7 +611,7 @@ bool match_texture(MatchState&,
         T = ty;
         return true;
     }
-    if (auto* v = ty->As<sem::SampledTexture>()) {
+    if (auto* v = ty->As<type::SampledTexture>()) {
         if (v->dim() == dim) {
             T = v->type();
             return true;
@@ -622,14 +622,14 @@ bool match_texture(MatchState&,
 
 #define JOIN(a, b) a##b
 
-#define DECLARE_SAMPLED_TEXTURE(suffix, dim)                                       \
-    bool JOIN(match_texture_, suffix)(MatchState & state, const type::Type* ty,    \
-                                      const type::Type*& T) {                      \
-        return match_texture(state, ty, dim, T);                                   \
-    }                                                                              \
-    const sem::SampledTexture* JOIN(build_texture_, suffix)(MatchState & state,    \
-                                                            const type::Type* T) { \
-        return state.builder.create<sem::SampledTexture>(dim, T);                  \
+#define DECLARE_SAMPLED_TEXTURE(suffix, dim)                                        \
+    bool JOIN(match_texture_, suffix)(MatchState & state, const type::Type* ty,     \
+                                      const type::Type*& T) {                       \
+        return match_texture(state, ty, dim, T);                                    \
+    }                                                                               \
+    const type::SampledTexture* JOIN(build_texture_, suffix)(MatchState & state,    \
+                                                             const type::Type* T) { \
+        return state.builder.create<type::SampledTexture>(dim, T);                  \
     }
 
 DECLARE_SAMPLED_TEXTURE(1d, ast::TextureDimension::k1d)
@@ -648,7 +648,7 @@ bool match_texture_multisampled(MatchState&,
         T = ty;
         return true;
     }
-    if (auto* v = ty->As<sem::MultisampledTexture>()) {
+    if (auto* v = ty->As<type::MultisampledTexture>()) {
         if (v->dim() == dim) {
             T = v->type();
             return true;
@@ -662,9 +662,9 @@ bool match_texture_multisampled(MatchState&,
                                                    const type::Type*& T) {                   \
         return match_texture_multisampled(state, ty, dim, T);                                \
     }                                                                                        \
-    const sem::MultisampledTexture* JOIN(build_texture_multisampled_, suffix)(               \
+    const type::MultisampledTexture* JOIN(build_texture_multisampled_, suffix)(              \
         MatchState & state, const type::Type* T) {                                           \
-        return state.builder.create<sem::MultisampledTexture>(dim, T);                       \
+        return state.builder.create<type::MultisampledTexture>(dim, T);                      \
     }
 
 DECLARE_MULTISAMPLED_TEXTURE(2d, ast::TextureDimension::k2d)
@@ -674,15 +674,15 @@ bool match_texture_depth(MatchState&, const type::Type* ty, ast::TextureDimensio
     if (ty->Is<Any>()) {
         return true;
     }
-    return ty->Is([&](const sem::DepthTexture* t) { return t->dim() == dim; });
+    return ty->Is([&](const type::DepthTexture* t) { return t->dim() == dim; });
 }
 
 #define DECLARE_DEPTH_TEXTURE(suffix, dim)                                              \
     bool JOIN(match_texture_depth_, suffix)(MatchState & state, const type::Type* ty) { \
         return match_texture_depth(state, ty, dim);                                     \
     }                                                                                   \
-    const sem::DepthTexture* JOIN(build_texture_depth_, suffix)(MatchState & state) {   \
-        return state.builder.create<sem::DepthTexture>(dim);                            \
+    const type::DepthTexture* JOIN(build_texture_depth_, suffix)(MatchState & state) {  \
+        return state.builder.create<type::DepthTexture>(dim);                           \
     }
 
 DECLARE_DEPTH_TEXTURE(2d, ast::TextureDimension::k2d)
@@ -695,13 +695,13 @@ bool match_texture_depth_multisampled_2d(MatchState&, const type::Type* ty) {
     if (ty->Is<Any>()) {
         return true;
     }
-    return ty->Is([&](const sem::DepthMultisampledTexture* t) {
+    return ty->Is([&](const type::DepthMultisampledTexture* t) {
         return t->dim() == ast::TextureDimension::k2d;
     });
 }
 
-sem::DepthMultisampledTexture* build_texture_depth_multisampled_2d(MatchState& state) {
-    return state.builder.create<sem::DepthMultisampledTexture>(ast::TextureDimension::k2d);
+type::DepthMultisampledTexture* build_texture_depth_multisampled_2d(MatchState& state) {
+    return state.builder.create<type::DepthMultisampledTexture>(ast::TextureDimension::k2d);
 }
 
 bool match_texture_storage(MatchState&,
@@ -714,7 +714,7 @@ bool match_texture_storage(MatchState&,
         A = Number::any;
         return true;
     }
-    if (auto* v = ty->As<sem::StorageTexture>()) {
+    if (auto* v = ty->As<type::StorageTexture>()) {
         if (v->dim() == dim) {
             F = Number(static_cast<uint32_t>(v->texel_format()));
             A = Number(static_cast<uint32_t>(v->access()));
@@ -729,12 +729,12 @@ bool match_texture_storage(MatchState&,
                                               Number& A) {                                         \
         return match_texture_storage(state, ty, dim, F, A);                                        \
     }                                                                                              \
-    const sem::StorageTexture* JOIN(build_texture_storage_, suffix)(MatchState & state, Number F,  \
-                                                                    Number A) {                    \
+    const type::StorageTexture* JOIN(build_texture_storage_, suffix)(MatchState & state, Number F, \
+                                                                     Number A) {                   \
         auto format = static_cast<TexelFormat>(F.Value());                                         \
         auto access = static_cast<Access>(A.Value());                                              \
-        auto* T = sem::StorageTexture::SubtypeFor(format, state.builder.Types());                  \
-        return state.builder.create<sem::StorageTexture>(dim, format, access, T);                  \
+        auto* T = type::StorageTexture::SubtypeFor(format, state.builder.Types());                 \
+        return state.builder.create<type::StorageTexture>(dim, format, access, T);                 \
     }
 
 DECLARE_STORAGE_TEXTURE(1d, ast::TextureDimension::k1d)
@@ -744,11 +744,11 @@ DECLARE_STORAGE_TEXTURE(3d, ast::TextureDimension::k3d)
 #undef DECLARE_STORAGE_TEXTURE
 
 bool match_texture_external(MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<Any, sem::ExternalTexture>();
+    return ty->IsAnyOf<Any, type::ExternalTexture>();
 }
 
-const sem::ExternalTexture* build_texture_external(MatchState& state) {
-    return state.builder.create<sem::ExternalTexture>();
+const type::ExternalTexture* build_texture_external(MatchState& state) {
+    return state.builder.create<type::ExternalTexture>();
 }
 
 // Builtin types starting with a _ prefix cannot be declared in WGSL, so they
