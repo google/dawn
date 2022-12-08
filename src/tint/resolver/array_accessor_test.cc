@@ -132,7 +132,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix_BothDimensions) {
     ASSERT_TRUE(TypeOf(acc)->Is<sem::Reference>());
 
     auto* ref = TypeOf(acc)->As<sem::Reference>();
-    EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
+    EXPECT_TRUE(ref->StoreType()->Is<type::F32>());
 
     auto idx_sem = Sem().Get<sem::IndexAccessorExpression>(acc);
     ASSERT_NE(idx_sem, nullptr);
@@ -184,7 +184,7 @@ TEST_F(ResolverIndexAccessorTest, Vector) {
     ASSERT_TRUE(TypeOf(acc)->Is<sem::Reference>());
 
     auto* ref = TypeOf(acc)->As<sem::Reference>();
-    EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
+    EXPECT_TRUE(ref->StoreType()->Is<type::F32>());
 
     auto idx_sem = Sem().Get<sem::IndexAccessorExpression>(acc);
     ASSERT_NE(idx_sem, nullptr);
@@ -200,7 +200,7 @@ TEST_F(ResolverIndexAccessorTest, Array_Literal_i32) {
     ASSERT_NE(TypeOf(acc), nullptr);
     auto* ref = TypeOf(acc)->As<sem::Reference>();
     ASSERT_NE(ref, nullptr);
-    EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
+    EXPECT_TRUE(ref->StoreType()->Is<type::F32>());
 
     auto idx_sem = Sem().Get<sem::IndexAccessorExpression>(acc);
     ASSERT_NE(idx_sem, nullptr);
@@ -216,7 +216,7 @@ TEST_F(ResolverIndexAccessorTest, Array_Literal_u32) {
     ASSERT_NE(TypeOf(acc), nullptr);
     auto* ref = TypeOf(acc)->As<sem::Reference>();
     ASSERT_NE(ref, nullptr);
-    EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
+    EXPECT_TRUE(ref->StoreType()->Is<type::F32>());
 
     auto idx_sem = Sem().Get<sem::IndexAccessorExpression>(acc);
     ASSERT_NE(idx_sem, nullptr);
@@ -232,7 +232,7 @@ TEST_F(ResolverIndexAccessorTest, Array_Literal_AInt) {
     ASSERT_NE(TypeOf(acc), nullptr);
     auto* ref = TypeOf(acc)->As<sem::Reference>();
     ASSERT_NE(ref, nullptr);
-    EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
+    EXPECT_TRUE(ref->StoreType()->Is<type::F32>());
 
     auto idx_sem = Sem().Get<sem::IndexAccessorExpression>(acc);
     ASSERT_NE(idx_sem, nullptr);
@@ -254,7 +254,7 @@ TEST_F(ResolverIndexAccessorTest, Alias_Array) {
     ASSERT_TRUE(TypeOf(acc)->Is<sem::Reference>());
 
     auto* ref = TypeOf(acc)->As<sem::Reference>();
-    EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
+    EXPECT_TRUE(ref->StoreType()->Is<type::F32>());
 
     auto idx_sem = Sem().Get<sem::IndexAccessorExpression>(acc);
     ASSERT_NE(idx_sem, nullptr);
@@ -271,7 +271,7 @@ TEST_F(ResolverIndexAccessorTest, Array_Constant) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(acc), nullptr);
-    EXPECT_TRUE(TypeOf(acc)->Is<sem::F32>());
+    EXPECT_TRUE(TypeOf(acc)->Is<type::F32>());
 }
 
 TEST_F(ResolverIndexAccessorTest, Array_Dynamic_I32) {

@@ -12,23 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_F16_H_
-#define SRC_TINT_SEM_F16_H_
+#ifndef SRC_TINT_TYPE_U32_H_
+#define SRC_TINT_TYPE_U32_H_
 
 #include <string>
 
 #include "src/tint/type/type.h"
 
-namespace tint::sem {
+namespace tint::type {
 
-/// A float 16 type
-class F16 final : public Castable<F16, type::Type> {
+/// A unsigned int 32 type.
+class U32 final : public Castable<U32, type::Type> {
   public:
     /// Constructor
-    F16();
+    U32();
     /// Move constructor
-    F16(F16&&);
-    ~F16() override;
+    U32(U32&&);
+    ~U32() override;
 
     /// @returns a hash of the type.
     size_t Hash() const override;
@@ -49,6 +49,6 @@ class F16 final : public Castable<F16, type::Type> {
     uint32_t Align() const override;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
-#endif  // SRC_TINT_SEM_F16_H_
+#endif  // SRC_TINT_TYPE_U32_H_

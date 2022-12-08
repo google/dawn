@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,43 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/bool.h"
+#include "src/tint/type/u32.h"
 
 #include "src/tint/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::Bool);
+TINT_INSTANTIATE_TYPEINFO(tint::type::U32);
 
-namespace tint::sem {
+namespace tint::type {
 
-Bool::Bool()
+U32::U32()
     : Base(type::TypeFlags{
           Flag::kConstructable,
           Flag::kCreationFixedFootprint,
           Flag::kFixedFootprint,
       }) {}
 
-Bool::Bool(Bool&&) = default;
+U32::~U32() = default;
 
-Bool::~Bool() = default;
+U32::U32(U32&&) = default;
 
-size_t Bool::Hash() const {
-    return static_cast<size_t>(TypeInfo::Of<Bool>().full_hashcode);
+size_t U32::Hash() const {
+    return static_cast<size_t>(TypeInfo::Of<U32>().full_hashcode);
 }
 
-bool Bool::Equals(const Type& other) const {
-    return other.Is<Bool>();
+bool U32::Equals(const Type& other) const {
+    return other.Is<U32>();
 }
 
-std::string Bool::FriendlyName(const SymbolTable&) const {
-    return "bool";
+std::string U32::FriendlyName(const SymbolTable&) const {
+    return "u32";
 }
 
-uint32_t Bool::Size() const {
+uint32_t U32::Size() const {
     return 4;
 }
 
-uint32_t Bool::Align() const {
+uint32_t U32::Align() const {
     return 4;
 }
 
-}  // namespace tint::sem
+}  // namespace tint::type

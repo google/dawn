@@ -302,8 +302,6 @@ list(APPEND TINT_LIB_SRCS
   sem/binding_point.h
   sem/block_statement.cc
   sem/block_statement.h
-  sem/bool.cc
-  sem/bool.h
   sem/break_if_statement.cc
   sem/break_if_statement.h
   sem/builtin.cc
@@ -317,15 +315,9 @@ list(APPEND TINT_LIB_SRCS
   sem/evaluation_stage.h
   sem/expression.cc
   sem/expression.h
-  sem/f16.cc
-  sem/f16.h
-  sem/f32.cc
-  sem/f32.h
   sem/for_loop_statement.cc
   sem/for_loop_statement.h
   sem/function.cc
-  sem/i32.cc
-  sem/i32.h
   sem/if_statement.cc
   sem/if_statement.h
   sem/index_accessor_expression.cc
@@ -358,13 +350,9 @@ list(APPEND TINT_LIB_SRCS
   sem/type_conversion.cc
   sem/type_conversion.h
   sem/type_mappings.h
-  sem/u32.cc
-  sem/u32.h
   sem/variable.cc
   sem/vector.cc
   sem/vector.h
-  sem/void.cc
-  sem/void.h
   sem/while_statement.cc
   sem/while_statement.h
   symbol_table.cc
@@ -483,12 +471,20 @@ list(APPEND TINT_LIB_SRCS
   type/abstract_numeric.h
   type/array_count.cc
   type/array_count.h
+  type/bool.cc
+  type/bool.h
   type/depth_multisampled_texture.cc
   type/depth_multisampled_texture.h
   type/depth_texture.cc
   type/depth_texture.h
   type/external_texture.cc
   type/external_texture.h
+  type/f16.cc
+  type/f16.h
+  type/f32.cc
+  type/f32.h
+  type/i32.cc
+  type/i32.h
   type/multisampled_texture.cc
   type/multisampled_texture.h
   type/node.cc
@@ -505,6 +501,10 @@ list(APPEND TINT_LIB_SRCS
   type/type.h
   type/type_manager.cc
   type/type_manager.h
+  type/u32.cc
+  type/u32.h
+  type/void.cc
+  type/void.h
   utils/bitcast.h
   utils/bitset.h
   utils/block_allocator.h
@@ -922,17 +922,12 @@ if(TINT_BUILD_TESTS)
     scope_stack_test.cc
     sem/array_test.cc
     sem/atomic.cc
-    sem/bool_test.cc
     sem/builtin_test.cc
     sem/expression_test.cc
-    sem/f16_test.cc
-    sem/f32_test.cc
-    sem/i32_test.cc
     sem/matrix_test.cc
     sem/pointer_test.cc
     sem/reference_test.cc
     sem/struct_test.cc
-    sem/u32_test.cc
     sem/vector_test.cc
     source_test.cc
     symbol_table_test.cc
@@ -941,9 +936,13 @@ if(TINT_BUILD_TESTS)
     text/unicode_test.cc
     traits_test.cc
     transform/transform_test.cc
+    type/bool_test.cc
     type/depth_multisampled_texture_test.cc
     type/depth_texture_test.cc
     type/external_texture_test.cc
+    type/f16_test.cc
+    type/f32_test.cc
+    type/i32_test.cc
     type/multisampled_texture_test.cc
     type/sampled_texture_test.cc
     type/sampler_test.cc
@@ -951,6 +950,7 @@ if(TINT_BUILD_TESTS)
     type/texture_test.cc
     type/type_test.cc
     type/type_manager_test.cc
+    type/u32_test.cc
     utils/bitcast_test.cc
     utils/bitset_test.cc
     utils/block_allocator_test.cc

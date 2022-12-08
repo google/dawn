@@ -76,7 +76,7 @@ struct OffsetExpr : Offset {
     const ast::Expression* Build(CloneContext& ctx) const override {
         auto* type = ctx.src->Sem().Get(expr)->Type()->UnwrapRef();
         auto* res = ctx.Clone(expr);
-        if (!type->Is<sem::U32>()) {
+        if (!type->Is<type::U32>()) {
             res = ctx.dst->Construct<u32>(res);
         }
         return res;
@@ -141,74 +141,74 @@ struct AtomicKey {
 };
 
 bool IntrinsicDataTypeFor(const type::Type* ty, DecomposeMemoryAccess::Intrinsic::DataType& out) {
-    if (ty->Is<sem::I32>()) {
+    if (ty->Is<type::I32>()) {
         out = DecomposeMemoryAccess::Intrinsic::DataType::kI32;
         return true;
     }
-    if (ty->Is<sem::U32>()) {
+    if (ty->Is<type::U32>()) {
         out = DecomposeMemoryAccess::Intrinsic::DataType::kU32;
         return true;
     }
-    if (ty->Is<sem::F32>()) {
+    if (ty->Is<type::F32>()) {
         out = DecomposeMemoryAccess::Intrinsic::DataType::kF32;
         return true;
     }
-    if (ty->Is<sem::F16>()) {
+    if (ty->Is<type::F16>()) {
         out = DecomposeMemoryAccess::Intrinsic::DataType::kF16;
         return true;
     }
     if (auto* vec = ty->As<sem::Vector>()) {
         switch (vec->Width()) {
             case 2:
-                if (vec->type()->Is<sem::I32>()) {
+                if (vec->type()->Is<type::I32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2I32;
                     return true;
                 }
-                if (vec->type()->Is<sem::U32>()) {
+                if (vec->type()->Is<type::U32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2U32;
                     return true;
                 }
-                if (vec->type()->Is<sem::F32>()) {
+                if (vec->type()->Is<type::F32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2F32;
                     return true;
                 }
-                if (vec->type()->Is<sem::F16>()) {
+                if (vec->type()->Is<type::F16>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2F16;
                     return true;
                 }
                 break;
             case 3:
-                if (vec->type()->Is<sem::I32>()) {
+                if (vec->type()->Is<type::I32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec3I32;
                     return true;
                 }
-                if (vec->type()->Is<sem::U32>()) {
+                if (vec->type()->Is<type::U32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec3U32;
                     return true;
                 }
-                if (vec->type()->Is<sem::F32>()) {
+                if (vec->type()->Is<type::F32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec3F32;
                     return true;
                 }
-                if (vec->type()->Is<sem::F16>()) {
+                if (vec->type()->Is<type::F16>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec3F16;
                     return true;
                 }
                 break;
             case 4:
-                if (vec->type()->Is<sem::I32>()) {
+                if (vec->type()->Is<type::I32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec4I32;
                     return true;
                 }
-                if (vec->type()->Is<sem::U32>()) {
+                if (vec->type()->Is<type::U32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec4U32;
                     return true;
                 }
-                if (vec->type()->Is<sem::F32>()) {
+                if (vec->type()->Is<type::F32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec4F32;
                     return true;
                 }
-                if (vec->type()->Is<sem::F16>()) {
+                if (vec->type()->Is<type::F16>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec4F16;
                     return true;
                 }

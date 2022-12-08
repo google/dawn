@@ -74,22 +74,22 @@ void Transform::RemoveStatement(CloneContext& ctx, const ast::Statement* stmt) {
 }
 
 const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
-    if (ty->Is<sem::Void>()) {
+    if (ty->Is<type::Void>()) {
         return ctx.dst->create<ast::Void>();
     }
-    if (ty->Is<sem::I32>()) {
+    if (ty->Is<type::I32>()) {
         return ctx.dst->create<ast::I32>();
     }
-    if (ty->Is<sem::U32>()) {
+    if (ty->Is<type::U32>()) {
         return ctx.dst->create<ast::U32>();
     }
-    if (ty->Is<sem::F16>()) {
+    if (ty->Is<type::F16>()) {
         return ctx.dst->create<ast::F16>();
     }
-    if (ty->Is<sem::F32>()) {
+    if (ty->Is<type::F32>()) {
         return ctx.dst->create<ast::F32>();
     }
-    if (ty->Is<sem::Bool>()) {
+    if (ty->Is<type::Bool>()) {
         return ctx.dst->create<ast::Bool>();
     }
     if (auto* m = ty->As<sem::Matrix>()) {

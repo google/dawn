@@ -15,12 +15,12 @@
 #include "src/tint/inspector/resource_binding.h"
 
 #include "src/tint/sem/array.h"
-#include "src/tint/sem/f32.h"
-#include "src/tint/sem/i32.h"
 #include "src/tint/sem/matrix.h"
-#include "src/tint/sem/u32.h"
 #include "src/tint/sem/vector.h"
+#include "src/tint/type/f32.h"
+#include "src/tint/type/i32.h"
 #include "src/tint/type/type.h"
+#include "src/tint/type/u32.h"
 
 namespace tint::inspector {
 
@@ -58,11 +58,11 @@ ResourceBinding::SampledKind BaseTypeToSampledKind(const type::Type* base_type) 
         base_type = vt->type();
     }
 
-    if (base_type->Is<sem::F32>()) {
+    if (base_type->Is<type::F32>()) {
         return ResourceBinding::SampledKind::kFloat;
-    } else if (base_type->Is<sem::U32>()) {
+    } else if (base_type->Is<type::U32>()) {
         return ResourceBinding::SampledKind::kUInt;
-    } else if (base_type->Is<sem::I32>()) {
+    } else if (base_type->Is<type::I32>()) {
         return ResourceBinding::SampledKind::kSInt;
     } else {
         return ResourceBinding::SampledKind::kUnknown;

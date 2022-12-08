@@ -244,11 +244,11 @@
 		<DisplayString>AbstractFloat</DisplayString>
 	</Type>
 
-	<Type Name="tint::sem::Bool">
+	<Type Name="tint::type::Bool">
 		<DisplayString>bool</DisplayString>
 	</Type>
 
-	<Type Name="tint::sem::F32">
+	<Type Name="tint::type::F32">
 		<DisplayString>f32</DisplayString>
 	</Type>
 

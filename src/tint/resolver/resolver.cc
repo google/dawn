@@ -203,19 +203,19 @@ type::Type* Resolver::Type(const ast::Type* ty) {
     Mark(ty);
     auto* s = Switch(
         ty,  //
-        [&](const ast::Void*) { return builder_->create<sem::Void>(); },
-        [&](const ast::Bool*) { return builder_->create<sem::Bool>(); },
-        [&](const ast::I32*) { return builder_->create<sem::I32>(); },
-        [&](const ast::U32*) { return builder_->create<sem::U32>(); },
-        [&](const ast::F16* t) -> sem::F16* {
+        [&](const ast::Void*) { return builder_->create<type::Void>(); },
+        [&](const ast::Bool*) { return builder_->create<type::Bool>(); },
+        [&](const ast::I32*) { return builder_->create<type::I32>(); },
+        [&](const ast::U32*) { return builder_->create<type::U32>(); },
+        [&](const ast::F16* t) -> type::F16* {
             // Validate if f16 type is allowed.
             if (!enabled_extensions_.Contains(ast::Extension::kF16)) {
                 AddError("f16 used without 'f16' extension enabled", t->source);
                 return nullptr;
             }
-            return builder_->create<sem::F16>();
+            return builder_->create<type::F16>();
         },
-        [&](const ast::F32*) { return builder_->create<sem::F32>(); },
+        [&](const ast::F32*) { return builder_->create<type::F32>(); },
         [&](const ast::Vector* t) -> sem::Vector* {
             if (!t->type) {
                 AddError("missing vector element type", t->source.End());
@@ -481,7 +481,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         if (!materialized) {
             return nullptr;
         }
-        if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
+        if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
             AddError("@id must be an i32 or u32 value", id_attr->source);
             return nullptr;
         }
@@ -661,7 +661,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                 if (!materialized) {
                     return nullptr;
                 }
-                if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
+                if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
                     AddError("@binding must be an i32 or u32 value", attr->source);
                     return nullptr;
                 }
@@ -685,7 +685,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                 if (!materialized) {
                     return nullptr;
                 }
-                if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
+                if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
                     AddError("@group must be an i32 or u32 value", attr->source);
                     return nullptr;
                 }
@@ -809,7 +809,7 @@ utils::Result<uint32_t> Resolver::LocationAttribute(const ast::LocationAttribute
         return utils::Failure;
     }
 
-    if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
+    if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
         AddError("@location must be an i32 or u32 value", attr->source);
         return utils::Failure;
     }
@@ -947,7 +947,7 @@ sem::Statement* Resolver::StaticAssert(const ast::StaticAssert* assertion) {
         return nullptr;
     }
     auto* cond = expr->ConstantValue();
-    if (auto* ty = cond->Type(); !ty->Is<sem::Bool>()) {
+    if (auto* ty = cond->Type(); !ty->Is<type::Bool>()) {
         AddError(
             "static assertion condition must be a bool, got '" + builder_->FriendlyName(ty) + "'",
             assertion->condition->source);
@@ -1018,7 +1018,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
             return nullptr;
         }
     } else {
-        return_type = builder_->create<sem::Void>();
+        return_type = builder_->create<type::Void>();
     }
 
     // Determine if the return type has a location
@@ -1155,7 +1155,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
             return false;
         }
         auto* ty = expr->Type();
-        if (!ty->IsAnyOf<sem::I32, sem::U32, type::AbstractInt>()) {
+        if (!ty->IsAnyOf<type::I32, type::U32, type::AbstractInt>()) {
             AddError(kErrBadExpr, value->source);
             return false;
         }
@@ -1179,7 +1179,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
 
     // If all arguments are abstract-integers, then materialize to i32.
     if (common_ty->Is<type::AbstractInt>()) {
-        common_ty = builder_->create<sem::I32>();
+        common_ty = builder_->create<type::I32>();
     }
 
     for (size_t i = 0; i < args.Length(); i++) {
@@ -1293,7 +1293,7 @@ sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt, cons
                 if (!materialized) {
                     return false;
                 }
-                if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
+                if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
                     AddError("case selector must be an i32 or u32 value", sel->source);
                     return false;
                 }
@@ -1542,7 +1542,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
             },
             [&](const ast::UnaryOpExpression* unary) -> sem::Expression* { return UnaryOp(unary); },
             [&](const ast::PhonyExpression*) -> sem::Expression* {
-                return builder_->create<sem::Expression>(expr, builder_->create<sem::Void>(),
+                return builder_->create<sem::Expression>(expr, builder_->create<type::Void>(),
                                                          sem::EvaluationStage::kRuntime,
                                                          current_statement_,
                                                          /* constant_value */ nullptr,
@@ -1716,8 +1716,8 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
 const type::Type* Resolver::ConcreteType(const type::Type* ty,
                                          const type::Type* target_ty,
                                          const Source& source) {
-    auto i32 = [&] { return builder_->create<sem::I32>(); };
-    auto f32 = [&] { return builder_->create<sem::F32>(); };
+    auto i32 = [&] { return builder_->create<type::I32>(); };
+    auto f32 = [&] { return builder_->create<type::F32>(); };
     auto i32v = [&](uint32_t width) { return builder_->create<sem::Vector>(i32(), width); };
     auto f32v = [&](uint32_t width) { return builder_->create<sem::Vector>(f32(), width); };
     auto f32m = [&](uint32_t columns, uint32_t rows) {
@@ -1883,7 +1883,7 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
     }
 
     auto* idx_ty = idx->Type()->UnwrapRef();
-    if (!idx_ty->IsAnyOf<sem::I32, sem::U32>()) {
+    if (!idx_ty->IsAnyOf<type::I32, type::U32>()) {
         AddError("index must be of type 'i32' or 'u32', found: '" + sem_.TypeNameOf(idx_ty) + "'",
                  idx->Declaration()->source);
         return nullptr;
@@ -2040,11 +2040,11 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             [&](const sem::Matrix* m) {
                 return ct_init_or_conv(MatrixInitConvIntrinsic(m->columns(), m->rows()), m->type());
             },
-            [&](const sem::I32*) { return ct_init_or_conv(InitConvIntrinsic::kI32, nullptr); },
-            [&](const sem::U32*) { return ct_init_or_conv(InitConvIntrinsic::kU32, nullptr); },
-            [&](const sem::F16*) { return ct_init_or_conv(InitConvIntrinsic::kF16, nullptr); },
-            [&](const sem::F32*) { return ct_init_or_conv(InitConvIntrinsic::kF32, nullptr); },
-            [&](const sem::Bool*) { return ct_init_or_conv(InitConvIntrinsic::kBool, nullptr); },
+            [&](const type::I32*) { return ct_init_or_conv(InitConvIntrinsic::kI32, nullptr); },
+            [&](const type::U32*) { return ct_init_or_conv(InitConvIntrinsic::kU32, nullptr); },
+            [&](const type::F16*) { return ct_init_or_conv(InitConvIntrinsic::kF16, nullptr); },
+            [&](const type::F32*) { return ct_init_or_conv(InitConvIntrinsic::kF32, nullptr); },
+            [&](const type::Bool*) { return ct_init_or_conv(InitConvIntrinsic::kBool, nullptr); },
             [&](const sem::Array* arr) -> sem::Call* {
                 auto* call_target = array_inits_.GetOrCreate(
                     ArrayInitializerSig{{arr, args.Length(), args_stage}},
@@ -2351,29 +2351,29 @@ type::Type* Resolver::BuiltinTypeAlias(Symbol sym) const {
     auto& b = *builder_;
     switch (ParseTypeAlias(name)) {
         case TypeAlias::kVec2F:
-            return b.create<sem::Vector>(b.create<sem::F32>(), 2u);
+            return b.create<sem::Vector>(b.create<type::F32>(), 2u);
         case TypeAlias::kVec3F:
-            return b.create<sem::Vector>(b.create<sem::F32>(), 3u);
+            return b.create<sem::Vector>(b.create<type::F32>(), 3u);
         case TypeAlias::kVec4F:
-            return b.create<sem::Vector>(b.create<sem::F32>(), 4u);
+            return b.create<sem::Vector>(b.create<type::F32>(), 4u);
         case TypeAlias::kVec2H:
-            return b.create<sem::Vector>(b.create<sem::F16>(), 2u);
+            return b.create<sem::Vector>(b.create<type::F16>(), 2u);
         case TypeAlias::kVec3H:
-            return b.create<sem::Vector>(b.create<sem::F16>(), 3u);
+            return b.create<sem::Vector>(b.create<type::F16>(), 3u);
         case TypeAlias::kVec4H:
-            return b.create<sem::Vector>(b.create<sem::F16>(), 4u);
+            return b.create<sem::Vector>(b.create<type::F16>(), 4u);
         case TypeAlias::kVec2I:
-            return b.create<sem::Vector>(b.create<sem::I32>(), 2u);
+            return b.create<sem::Vector>(b.create<type::I32>(), 2u);
         case TypeAlias::kVec3I:
-            return b.create<sem::Vector>(b.create<sem::I32>(), 3u);
+            return b.create<sem::Vector>(b.create<type::I32>(), 3u);
         case TypeAlias::kVec4I:
-            return b.create<sem::Vector>(b.create<sem::I32>(), 4u);
+            return b.create<sem::Vector>(b.create<type::I32>(), 4u);
         case TypeAlias::kVec2U:
-            return b.create<sem::Vector>(b.create<sem::U32>(), 2u);
+            return b.create<sem::Vector>(b.create<type::U32>(), 2u);
         case TypeAlias::kVec3U:
-            return b.create<sem::Vector>(b.create<sem::U32>(), 3u);
+            return b.create<sem::Vector>(b.create<type::U32>(), 3u);
         case TypeAlias::kVec4U:
-            return b.create<sem::Vector>(b.create<sem::U32>(), 4u);
+            return b.create<sem::Vector>(b.create<type::U32>(), 4u);
         case TypeAlias::kUndefined:
             break;
     }
@@ -2485,9 +2485,9 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
                 case ast::IntLiteralExpression::Suffix::kNone:
                     return builder_->create<type::AbstractInt>();
                 case ast::IntLiteralExpression::Suffix::kI:
-                    return builder_->create<sem::I32>();
+                    return builder_->create<type::I32>();
                 case ast::IntLiteralExpression::Suffix::kU:
-                    return builder_->create<sem::U32>();
+                    return builder_->create<type::U32>();
             }
             return nullptr;
         },
@@ -2496,13 +2496,13 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
                 case ast::FloatLiteralExpression::Suffix::kNone:
                     return builder_->create<type::AbstractFloat>();
                 case ast::FloatLiteralExpression::Suffix::kF:
-                    return builder_->create<sem::F32>();
+                    return builder_->create<type::F32>();
                 case ast::FloatLiteralExpression::Suffix::kH:
-                    return builder_->create<sem::F16>();
+                    return builder_->create<type::F16>();
             }
             return nullptr;
         },
-        [&](const ast::BoolLiteralExpression*) { return builder_->create<sem::Bool>(); },
+        [&](const ast::BoolLiteralExpression*) { return builder_->create<type::Bool>(); },
         [&](Default) { return nullptr; });
 
     if (ty == nullptr) {
@@ -2511,7 +2511,7 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
         return nullptr;
     }
 
-    if ((ty->Is<sem::F16>()) && (!enabled_extensions_.Contains(tint::ast::Extension::kF16))) {
+    if ((ty->Is<type::F16>()) && (!enabled_extensions_.Contains(tint::ast::Extension::kF16))) {
         AddError("f16 literal used without 'f16' extension enabled", literal->source);
         return nullptr;
     }
@@ -3190,7 +3190,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     if (!materialized) {
                         return false;
                     }
-                    if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
+                    if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
                         AddError("@align must be an i32 or u32 value", a->source);
                         return false;
                     }
@@ -3219,7 +3219,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     if (!materialized) {
                         return false;
                     }
-                    if (!materialized->Type()->IsAnyOf<sem::U32, sem::I32>()) {
+                    if (!materialized->Type()->IsAnyOf<type::U32, type::I32>()) {
                         AddError("@size must be an i32 or u32 value", s->source);
                         return false;
                     }
@@ -3344,7 +3344,7 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
             if (!expr) {
                 return false;
             }
-            if (auto* ret_ty = current_function_->ReturnType(); !ret_ty->Is<sem::Void>()) {
+            if (auto* ret_ty = current_function_->ReturnType(); !ret_ty->Is<type::Void>()) {
                 expr = Materialize(expr, ret_ty);
                 if (!expr) {
                     return false;
@@ -3355,7 +3355,7 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
 
             RegisterLoadIfNeeded(expr);
         } else {
-            value_ty = builder_->create<sem::Void>();
+            value_ty = builder_->create<type::Void>();
         }
 
         // Validate after processing the return value expression so that its type
@@ -3401,7 +3401,7 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
         if (!common_ty || !common_ty->is_integer_scalar()) {
             // No common type found or the common type was abstract.
             // Pick i32 and let validation deal with any mismatches.
-            common_ty = builder_->create<sem::I32>();
+            common_ty = builder_->create<type::I32>();
         }
         cond = Materialize(cond, common_ty);
         if (!cond) {

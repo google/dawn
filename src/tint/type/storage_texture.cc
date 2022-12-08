@@ -55,7 +55,7 @@ type::Type* StorageTexture::SubtypeFor(ast::TexelFormat format, type::TypeManage
         case ast::TexelFormat::kRg32Uint:
         case ast::TexelFormat::kRgba16Uint:
         case ast::TexelFormat::kRgba32Uint: {
-            return type_mgr.Get<sem::U32>();
+            return type_mgr.Get<type::U32>();
         }
 
         case ast::TexelFormat::kR32Sint:
@@ -63,7 +63,7 @@ type::Type* StorageTexture::SubtypeFor(ast::TexelFormat format, type::TypeManage
         case ast::TexelFormat::kRg32Sint:
         case ast::TexelFormat::kRgba16Sint:
         case ast::TexelFormat::kRgba32Sint: {
-            return type_mgr.Get<sem::I32>();
+            return type_mgr.Get<type::I32>();
         }
 
         case ast::TexelFormat::kRgba8Unorm:
@@ -72,7 +72,7 @@ type::Type* StorageTexture::SubtypeFor(ast::TexelFormat format, type::TypeManage
         case ast::TexelFormat::kRg32Float:
         case ast::TexelFormat::kRgba16Float:
         case ast::TexelFormat::kRgba32Float: {
-            return type_mgr.Get<sem::F32>();
+            return type_mgr.Get<type::F32>();
         }
 
         case ast::TexelFormat::kUndefined:

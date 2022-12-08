@@ -24,39 +24,39 @@ namespace {
 using ResolverIsStorableTest = ResolverTest;
 
 TEST_F(ResolverIsStorableTest, Void) {
-    EXPECT_FALSE(r()->IsStorable(create<sem::Void>()));
+    EXPECT_FALSE(r()->IsStorable(create<type::Void>()));
 }
 
 TEST_F(ResolverIsStorableTest, Scalar) {
-    EXPECT_TRUE(r()->IsStorable(create<sem::Bool>()));
-    EXPECT_TRUE(r()->IsStorable(create<sem::I32>()));
-    EXPECT_TRUE(r()->IsStorable(create<sem::U32>()));
-    EXPECT_TRUE(r()->IsStorable(create<sem::F32>()));
-    EXPECT_TRUE(r()->IsStorable(create<sem::F16>()));
+    EXPECT_TRUE(r()->IsStorable(create<type::Bool>()));
+    EXPECT_TRUE(r()->IsStorable(create<type::I32>()));
+    EXPECT_TRUE(r()->IsStorable(create<type::U32>()));
+    EXPECT_TRUE(r()->IsStorable(create<type::F32>()));
+    EXPECT_TRUE(r()->IsStorable(create<type::F16>()));
 }
 
 TEST_F(ResolverIsStorableTest, Vector) {
-    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::I32>(), 2u)));
-    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::I32>(), 3u)));
-    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::I32>(), 4u)));
-    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::U32>(), 2u)));
-    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::U32>(), 3u)));
-    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::U32>(), 4u)));
-    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::F32>(), 2u)));
-    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::F32>(), 3u)));
-    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::F32>(), 4u)));
-    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::F16>(), 2u)));
-    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::F16>(), 3u)));
-    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::F16>(), 4u)));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<type::I32>(), 2u)));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<type::I32>(), 3u)));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<type::I32>(), 4u)));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<type::U32>(), 2u)));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<type::U32>(), 3u)));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<type::U32>(), 4u)));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<type::F32>(), 2u)));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<type::F32>(), 3u)));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<type::F32>(), 4u)));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<type::F16>(), 2u)));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<type::F16>(), 3u)));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<type::F16>(), 4u)));
 }
 
 TEST_F(ResolverIsStorableTest, Matrix) {
-    auto* vec2_f32 = create<sem::Vector>(create<sem::F32>(), 2u);
-    auto* vec3_f32 = create<sem::Vector>(create<sem::F32>(), 3u);
-    auto* vec4_f32 = create<sem::Vector>(create<sem::F32>(), 4u);
-    auto* vec2_f16 = create<sem::Vector>(create<sem::F16>(), 2u);
-    auto* vec3_f16 = create<sem::Vector>(create<sem::F16>(), 3u);
-    auto* vec4_f16 = create<sem::Vector>(create<sem::F16>(), 4u);
+    auto* vec2_f32 = create<sem::Vector>(create<type::F32>(), 2u);
+    auto* vec3_f32 = create<sem::Vector>(create<type::F32>(), 3u);
+    auto* vec4_f32 = create<sem::Vector>(create<type::F32>(), 4u);
+    auto* vec2_f16 = create<sem::Vector>(create<type::F16>(), 2u);
+    auto* vec3_f16 = create<sem::Vector>(create<type::F16>(), 3u);
+    auto* vec4_f16 = create<sem::Vector>(create<type::F16>(), 4u);
     EXPECT_TRUE(r()->IsStorable(create<sem::Matrix>(vec2_f32, 2u)));
     EXPECT_TRUE(r()->IsStorable(create<sem::Matrix>(vec2_f32, 3u)));
     EXPECT_TRUE(r()->IsStorable(create<sem::Matrix>(vec2_f32, 4u)));
@@ -78,25 +78,25 @@ TEST_F(ResolverIsStorableTest, Matrix) {
 }
 
 TEST_F(ResolverIsStorableTest, Pointer) {
-    auto* ptr = create<sem::Pointer>(create<sem::I32>(), ast::AddressSpace::kPrivate,
+    auto* ptr = create<sem::Pointer>(create<type::I32>(), ast::AddressSpace::kPrivate,
                                      ast::Access::kReadWrite);
     EXPECT_FALSE(r()->IsStorable(ptr));
 }
 
 TEST_F(ResolverIsStorableTest, Atomic) {
-    EXPECT_TRUE(r()->IsStorable(create<sem::Atomic>(create<sem::I32>())));
-    EXPECT_TRUE(r()->IsStorable(create<sem::Atomic>(create<sem::U32>())));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Atomic>(create<type::I32>())));
+    EXPECT_TRUE(r()->IsStorable(create<sem::Atomic>(create<type::U32>())));
 }
 
 TEST_F(ResolverIsStorableTest, ArraySizedOfStorable) {
-    auto* arr = create<sem::Array>(create<sem::I32>(), create<type::ConstantArrayCount>(5u), 4u,
+    auto* arr = create<sem::Array>(create<type::I32>(), create<type::ConstantArrayCount>(5u), 4u,
                                    20u, 4u, 4u);
     EXPECT_TRUE(r()->IsStorable(arr));
 }
 
 TEST_F(ResolverIsStorableTest, ArrayUnsizedOfStorable) {
     auto* arr =
-        create<sem::Array>(create<sem::I32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
+        create<sem::Array>(create<type::I32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
     EXPECT_TRUE(r()->IsStorable(arr));
 }
 

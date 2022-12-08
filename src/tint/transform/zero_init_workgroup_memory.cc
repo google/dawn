@@ -411,7 +411,7 @@ struct ZeroInitWorkgroupMemory::State {
             // Constant value could not be found. Build expression instead.
             workgroup_size_expr = [this, expr, size = workgroup_size_expr] {
                 auto* e = ctx.Clone(expr);
-                if (ctx.src->TypeOf(expr)->UnwrapRef()->Is<sem::I32>()) {
+                if (ctx.src->TypeOf(expr)->UnwrapRef()->Is<type::I32>()) {
                     e = b.Construct<u32>(e);
                 }
                 return size ? b.Mul(size(), e) : e;

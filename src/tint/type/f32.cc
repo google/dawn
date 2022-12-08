@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/f32.h"
+#include "src/tint/type/f32.h"
 
 #include "src/tint/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::F32);
+TINT_INSTANTIATE_TYPEINFO(tint::type::F32);
 
-namespace tint::sem {
+namespace tint::type {
 
 F32::F32()
     : Base(type::TypeFlags{
@@ -51,4 +51,4 @@ uint32_t F32::Align() const {
     return 4;
 }
 
-}  // namespace tint::sem
+}  // namespace tint::type

@@ -24,7 +24,7 @@ using TextureTypeDimTest = TestParamHelper<ast::TextureDimension>;
 
 TEST_P(TextureTypeDimTest, DimMustMatch) {
     // Check that the dim() query returns the right dimensionality.
-    sem::F32 f32;
+    type::F32 f32;
     // TextureType is an abstract class, so use concrete class
     // SampledTexture in its stead.
     SampledTexture st(GetParam(), &f32);

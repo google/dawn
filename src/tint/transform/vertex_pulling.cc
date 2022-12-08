@@ -153,16 +153,16 @@ bool IsTypeCompatible(AttributeWGSLType wgslType, VertexFormatType vertexFormatT
 AttributeWGSLType WGSLTypeOf(const type::Type* ty) {
     return Switch(
         ty,
-        [](const sem::I32*) -> AttributeWGSLType {
+        [](const type::I32*) -> AttributeWGSLType {
             return {BaseWGSLType::kI32, 1};
         },
-        [](const sem::U32*) -> AttributeWGSLType {
+        [](const type::U32*) -> AttributeWGSLType {
             return {BaseWGSLType::kU32, 1};
         },
-        [](const sem::F32*) -> AttributeWGSLType {
+        [](const type::F32*) -> AttributeWGSLType {
             return {BaseWGSLType::kF32, 1};
         },
-        [](const sem::F16*) -> AttributeWGSLType {
+        [](const type::F16*) -> AttributeWGSLType {
             return {BaseWGSLType::kF16, 1};
         },
         [](const sem::Vector* vec) -> AttributeWGSLType {

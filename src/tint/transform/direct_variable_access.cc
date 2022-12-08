@@ -573,7 +573,7 @@ struct DirectVariableAccess::State {
             if (!idx->UnwrapMaterialize()
                      ->Type()
                      ->UnwrapRef()
-                     ->IsAnyOf<sem::U32, type::AbstractInt>()) {
+                     ->IsAnyOf<type::U32, type::AbstractInt>()) {
                 expr = b.Construct(b.ty.u32(), expr);
             }
         }

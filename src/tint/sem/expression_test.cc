@@ -42,8 +42,8 @@ class MockConstant : public sem::Constant {
 using ExpressionTest = TestHelper;
 
 TEST_F(ExpressionTest, UnwrapMaterialize) {
-    MockConstant c(create<I32>());
-    auto* a = create<Expression>(/* declaration */ nullptr, create<I32>(),
+    MockConstant c(create<type::I32>());
+    auto* a = create<Expression>(/* declaration */ nullptr, create<type::I32>(),
                                  sem::EvaluationStage::kRuntime, /* statement */ nullptr,
                                  /* constant_value */ nullptr,
                                  /* has_side_effects */ false, /* root_ident */ nullptr);

@@ -645,8 +645,8 @@ struct Std140::State {
                 return "mat" + std::to_string(mat->columns()) + "x" + std::to_string(mat->rows()) +
                        "_" + ConvertSuffix(mat->type());
             },
-            [&](const sem::F32*) { return "f32"; },  //
-            [&](const sem::F16*) { return "f16"; },
+            [&](const type::F32*) { return "f32"; },  //
+            [&](const type::F16*) { return "f16"; },
             [&](Default) {
                 TINT_ICE(Transform, b.Diagnostics())
                     << "unhandled type for conversion name: " << src->FriendlyName(ty);

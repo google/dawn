@@ -46,13 +46,13 @@ VectorInitializerInfo AsVectorInitializer(const sem::Expression* expr) {
 
 const sem::Expression* Zero(ProgramBuilder& b, const type::Type* ty, const sem::Statement* stmt) {
     const ast::Expression* expr = nullptr;
-    if (ty->Is<sem::I32>()) {
+    if (ty->Is<type::I32>()) {
         expr = b.Expr(0_i);
-    } else if (ty->Is<sem::U32>()) {
+    } else if (ty->Is<type::U32>()) {
         expr = b.Expr(0_u);
-    } else if (ty->Is<sem::F32>()) {
+    } else if (ty->Is<type::F32>()) {
         expr = b.Expr(0_f);
-    } else if (ty->Is<sem::Bool>()) {
+    } else if (ty->Is<type::Bool>()) {
         expr = b.Expr(false);
     } else {
         TINT_UNREACHABLE(Writer, b.Diagnostics())
@@ -85,13 +85,13 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     }
 
     const ast::Type* packed_el_ast_ty = nullptr;
-    if (packed_el_sem_ty->Is<sem::I32>()) {
+    if (packed_el_sem_ty->Is<type::I32>()) {
         packed_el_ast_ty = b->create<ast::I32>();
-    } else if (packed_el_sem_ty->Is<sem::U32>()) {
+    } else if (packed_el_sem_ty->Is<type::U32>()) {
         packed_el_ast_ty = b->create<ast::U32>();
-    } else if (packed_el_sem_ty->Is<sem::F32>()) {
+    } else if (packed_el_sem_ty->Is<type::F32>()) {
         packed_el_ast_ty = b->create<ast::F32>();
-    } else if (packed_el_sem_ty->Is<sem::Bool>()) {
+    } else if (packed_el_sem_ty->Is<type::Bool>()) {
         packed_el_ast_ty = b->create<ast::Bool>();
     } else {
         TINT_UNREACHABLE(Writer, b->Diagnostics())

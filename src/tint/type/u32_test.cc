@@ -12,37 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/test_helper.h"
+#include "src/tint/type/test_helper.h"
 #include "src/tint/type/texture.h"
 
-namespace tint::sem {
+namespace tint::type {
 namespace {
 
-using F16Test = TestHelper;
+using U32Test = TestHelper;
 
-TEST_F(F16Test, Creation) {
-    auto* a = create<F16>();
-    auto* b = create<F16>();
+TEST_F(U32Test, Creation) {
+    auto* a = create<U32>();
+    auto* b = create<U32>();
     EXPECT_EQ(a, b);
 }
 
-TEST_F(F16Test, Hash) {
-    auto* a = create<F16>();
-    auto* b = create<F16>();
+TEST_F(U32Test, Hash) {
+    auto* a = create<U32>();
+    auto* b = create<U32>();
     EXPECT_EQ(a->Hash(), b->Hash());
 }
 
-TEST_F(F16Test, Equals) {
-    auto* a = create<F16>();
-    auto* b = create<F16>();
+TEST_F(U32Test, Equals) {
+    auto* a = create<U32>();
+    auto* b = create<U32>();
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(Void{}));
 }
 
-TEST_F(F16Test, FriendlyName) {
-    F16 f;
-    EXPECT_EQ(f.FriendlyName(Symbols()), "f16");
+TEST_F(U32Test, FriendlyName) {
+    U32 u;
+    EXPECT_EQ(u.FriendlyName(Symbols()), "u32");
 }
 
 }  // namespace
-}  // namespace tint::sem
+}  // namespace tint::type

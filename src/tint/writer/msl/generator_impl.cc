@@ -33,13 +33,9 @@
 #include "src/tint/ast/void.h"
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/atomic.h"
-#include "src/tint/sem/bool.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/constant.h"
-#include "src/tint/sem/f16.h"
-#include "src/tint/sem/f32.h"
 #include "src/tint/sem/function.h"
-#include "src/tint/sem/i32.h"
 #include "src/tint/sem/matrix.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
@@ -49,10 +45,8 @@
 #include "src/tint/sem/switch_statement.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_initializer.h"
-#include "src/tint/sem/u32.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/vector.h"
-#include "src/tint/sem/void.h"
 #include "src/tint/transform/array_length_from_uniform.h"
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
@@ -70,11 +64,17 @@
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
+#include "src/tint/type/bool.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
+#include "src/tint/type/f16.h"
+#include "src/tint/type/f32.h"
+#include "src/tint/type/i32.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
+#include "src/tint/type/u32.h"
+#include "src/tint/type/void.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
@@ -494,18 +494,18 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
 
     auto signed_type_of = [&](const type::Type* ty) -> const type::Type* {
         if (ty->is_integer_scalar()) {
-            return builder_.create<sem::I32>();
+            return builder_.create<type::I32>();
         } else if (auto* v = ty->As<sem::Vector>()) {
-            return builder_.create<sem::Vector>(builder_.create<sem::I32>(), v->Width());
+            return builder_.create<sem::Vector>(builder_.create<type::I32>(), v->Width());
         }
         return {};
     };
 
     auto unsigned_type_of = [&](const type::Type* ty) -> const type::Type* {
         if (ty->is_integer_scalar()) {
-            return builder_.create<sem::U32>();
+            return builder_.create<type::U32>();
         } else if (auto* v = ty->As<sem::Vector>()) {
-            return builder_.create<sem::Vector>(builder_.create<sem::U32>(), v->Width());
+            return builder_.create<sem::Vector>(builder_.create<type::U32>(), v->Width());
         }
         return {};
     };
@@ -584,7 +584,7 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
     }
 
     // Handle '&' and '|' of booleans.
-    if ((expr->IsAnd() || expr->IsOr()) && lhs_type->Is<sem::Bool>()) {
+    if ((expr->IsAnd() || expr->IsOr()) && lhs_type->Is<type::Bool>()) {
         out << "bool";
         ScopedParen sp(out);
         if (!EmitExpression(out, expr->lhs)) {
@@ -1612,23 +1612,23 @@ bool GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
 bool GeneratorImpl::EmitZeroValue(std::ostream& out, const type::Type* type) {
     return Switch(
         type,
-        [&](const sem::Bool*) {
+        [&](const type::Bool*) {
             out << "false";
             return true;
         },
-        [&](const sem::F16*) {
+        [&](const type::F16*) {
             out << "0.0h";
             return true;
         },
-        [&](const sem::F32*) {
+        [&](const type::F32*) {
             out << "0.0f";
             return true;
         },
-        [&](const sem::I32*) {
+        [&](const type::I32*) {
             out << "0";
             return true;
         },
-        [&](const sem::U32*) {
+        [&](const type::U32*) {
             out << "0u";
             return true;
         },
@@ -1661,23 +1661,23 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const type::Type* type) {
 bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constant) {
     return Switch(
         constant->Type(),  //
-        [&](const sem::Bool*) {
+        [&](const type::Bool*) {
             out << (constant->As<AInt>() ? "true" : "false");
             return true;
         },
-        [&](const sem::F32*) {
+        [&](const type::F32*) {
             PrintF32(out, constant->As<float>());
             return true;
         },
-        [&](const sem::F16*) {
+        [&](const type::F16*) {
             PrintF16(out, constant->As<float>());
             return true;
         },
-        [&](const sem::I32*) {
+        [&](const type::I32*) {
             PrintI32(out, constant->As<int32_t>());
             return true;
         },
-        [&](const sem::U32*) {
+        [&](const type::U32*) {
             out << constant->As<AInt>() << "u";
             return true;
         },
@@ -2524,11 +2524,11 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     return Switch(
         type,
         [&](const sem::Atomic* atomic) {
-            if (atomic->Type()->Is<sem::I32>()) {
+            if (atomic->Type()->Is<type::I32>()) {
                 out << "atomic_int";
                 return true;
             }
-            if (atomic->Type()->Is<sem::U32>()) {
+            if (atomic->Type()->Is<type::U32>()) {
                 out << "atomic_uint";
                 return true;
             }
@@ -2557,19 +2557,19 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             out << ">";
             return true;
         },
-        [&](const sem::Bool*) {
+        [&](const type::Bool*) {
             out << "bool";
             return true;
         },
-        [&](const sem::F16*) {
+        [&](const type::F16*) {
             out << "half";
             return true;
         },
-        [&](const sem::F32*) {
+        [&](const type::F32*) {
             out << "float";
             return true;
         },
-        [&](const sem::I32*) {
+        [&](const type::I32*) {
             out << "int";
             return true;
         },
@@ -2695,7 +2695,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                     return false;
                 });
         },
-        [&](const sem::U32*) {
+        [&](const type::U32*) {
             out << "uint";
             return true;
         },
@@ -2706,7 +2706,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             out << vec->Width();
             return true;
         },
-        [&](const sem::Void*) {
+        [&](const type::Void*) {
             out << "void";
             return true;
         },
@@ -3085,16 +3085,16 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const type:
 
         // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
         // 2.1 Scalar Data Types
-        [&](const sem::U32*) {
+        [&](const type::U32*) {
             return SizeAndAlign{4, 4};
         },
-        [&](const sem::I32*) {
+        [&](const type::I32*) {
             return SizeAndAlign{4, 4};
         },
-        [&](const sem::F32*) {
+        [&](const type::F32*) {
             return SizeAndAlign{4, 4};
         },
-        [&](const sem::F16*) {
+        [&](const type::F16*) {
             return SizeAndAlign{2, 2};
         },
 
@@ -3102,7 +3102,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const type:
             auto num_els = vec->Width();
             auto* el_ty = vec->type();
             SizeAndAlign el_size_align = MslPackedTypeSizeAndAlign(el_ty);
-            if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32, sem::F16>()) {
+            if (el_ty->IsAnyOf<type::U32, type::I32, type::F32, type::F16>()) {
                 // Use a packed_vec type for 3-element vectors only.
                 if (num_els == 3) {
                     // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
@@ -3127,7 +3127,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const type:
             auto rows = mat->rows();
             auto* el_ty = mat->type();
             // Metal only support half and float matrix.
-            if (el_ty->IsAnyOf<sem::F32, sem::F16>()) {
+            if (el_ty->IsAnyOf<type::F32, type::F16>()) {
                 static constexpr SizeAndAlign table_f32[] = {
                     /* float2x2 */ {16, 8},
                     /* float2x3 */ {32, 16},
@@ -3151,7 +3151,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const type:
                     /* half4x4 */ {32, 8},
                 };
                 if (cols >= 2 && cols <= 4 && rows >= 2 && rows <= 4) {
-                    if (el_ty->Is<sem::F32>()) {
+                    if (el_ty->Is<type::F32>()) {
                         return table_f32[(3 * (cols - 2)) + (rows - 2)];
                     } else {
                         return table_f16[(3 * (cols - 2)) + (rows - 2)];

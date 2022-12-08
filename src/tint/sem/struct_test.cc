@@ -55,7 +55,7 @@ TEST_F(StructTest, Equals) {
 
     EXPECT_TRUE(a->Equals(*a));
     EXPECT_FALSE(a->Equals(*b));
-    EXPECT_FALSE(a->Equals(Void{}));
+    EXPECT_FALSE(a->Equals(type::Void{}));
 }
 
 TEST_F(StructTest, FriendlyName) {

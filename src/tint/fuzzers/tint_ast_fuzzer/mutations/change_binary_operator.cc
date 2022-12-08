@@ -17,8 +17,8 @@
 #include <utility>
 
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/bool.h"
 #include "src/tint/sem/reference.h"
+#include "src/tint/type/bool.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 
@@ -173,7 +173,7 @@ bool CanReplaceAndOrWith(const type::Type* lhs_type,
         case ast::BinaryOp::kLogicalOr:
             // '&' and '|' can be applied to booleans, and for boolean scalar
             // scalar contexts, their logical counterparts work.
-            return lhs_type->Is<sem::Bool>();
+            return lhs_type->Is<type::Bool>();
         case ast::BinaryOp::kEqual:
         case ast::BinaryOp::kNotEqual:
             // '&' and '|' can be applied to booleans, and in these contexts equality
@@ -249,7 +249,7 @@ bool CanReplaceEqualNotEqualWith(const type::Type* lhs_type, ast::BinaryOp new_o
         case ast::BinaryOp::kLogicalOr:
             // An equality comparison between boolean scalars can be turned into a
             // logical operation.
-            return lhs_type->Is<sem::Bool>();
+            return lhs_type->Is<type::Bool>();
         case ast::BinaryOp::kAnd:
         case ast::BinaryOp::kOr:
             // An equality comparison between boolean scalars or vectors can be turned

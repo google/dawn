@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,43 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/u32.h"
+#include "src/tint/type/f16.h"
 
 #include "src/tint/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::U32);
+TINT_INSTANTIATE_TYPEINFO(tint::type::F16);
 
-namespace tint::sem {
+namespace tint::type {
 
-U32::U32()
+F16::F16()
     : Base(type::TypeFlags{
           Flag::kConstructable,
           Flag::kCreationFixedFootprint,
           Flag::kFixedFootprint,
       }) {}
 
-U32::~U32() = default;
+F16::F16(F16&&) = default;
 
-U32::U32(U32&&) = default;
+F16::~F16() = default;
 
-size_t U32::Hash() const {
-    return static_cast<size_t>(TypeInfo::Of<U32>().full_hashcode);
+size_t F16::Hash() const {
+    return static_cast<size_t>(TypeInfo::Of<F16>().full_hashcode);
 }
 
-bool U32::Equals(const Type& other) const {
-    return other.Is<U32>();
+bool F16::Equals(const Type& other) const {
+    return other.Is<F16>();
 }
 
-std::string U32::FriendlyName(const SymbolTable&) const {
-    return "u32";
+std::string F16::FriendlyName(const SymbolTable&) const {
+    return "f16";
 }
 
-uint32_t U32::Size() const {
-    return 4;
+uint32_t F16::Size() const {
+    return 2;
 }
 
-uint32_t U32::Align() const {
-    return 4;
+uint32_t F16::Align() const {
+    return 2;
 }
 
-}  // namespace tint::sem
+}  // namespace tint::type

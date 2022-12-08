@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,23 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_VOID_H_
-#define SRC_TINT_SEM_VOID_H_
+#ifndef SRC_TINT_TYPE_F16_H_
+#define SRC_TINT_TYPE_F16_H_
 
 #include <string>
 
 #include "src/tint/type/type.h"
 
-namespace tint::sem {
+namespace tint::type {
 
-/// A void type
-class Void final : public Castable<Void, type::Type> {
+/// A float 16 type
+class F16 final : public Castable<F16, type::Type> {
   public:
     /// Constructor
-    Void();
+    F16();
     /// Move constructor
-    Void(Void&&);
-    ~Void() override;
+    F16(F16&&);
+    ~F16() override;
 
     /// @returns a hash of the type.
     size_t Hash() const override;
@@ -41,8 +41,14 @@ class Void final : public Castable<Void, type::Type> {
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
     std::string FriendlyName(const SymbolTable& symbols) const override;
+
+    /// @returns the size in bytes of the type.
+    uint32_t Size() const override;
+
+    /// @returns the alignment in bytes of the type.
+    uint32_t Align() const override;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
-#endif  // SRC_TINT_SEM_VOID_H_
+#endif  // SRC_TINT_TYPE_F16_H_

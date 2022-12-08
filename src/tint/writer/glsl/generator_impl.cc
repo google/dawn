@@ -941,7 +941,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
                     return false;
                 }
                 out << ", 0";
-                if (builtin->ReturnType()->Is<sem::U32>()) {
+                if (builtin->ReturnType()->Is<type::U32>()) {
                     out << "u";
                 }
             }
@@ -1280,7 +1280,7 @@ bool GeneratorImpl::EmitDegreesCall(std::ostream& out,
                                     const ast::CallExpression* expr,
                                     const sem::Builtin* builtin) {
     auto* return_elem_type = type::Type::DeepestElementOf(builtin->ReturnType());
-    const std::string suffix = Is<sem::F16>(return_elem_type) ? "hf" : "f";
+    const std::string suffix = Is<type::F16>(return_elem_type) ? "hf" : "f";
     return CallBuiltinHelper(out, expr, builtin,
                              [&](TextBuffer* b, const std::vector<std::string>& params) {
                                  line(b) << "return " << params[0] << " * " << std::setprecision(20)
@@ -1293,7 +1293,7 @@ bool GeneratorImpl::EmitRadiansCall(std::ostream& out,
                                     const ast::CallExpression* expr,
                                     const sem::Builtin* builtin) {
     auto* return_elem_type = type::Type::DeepestElementOf(builtin->ReturnType());
-    const std::string suffix = Is<sem::F16>(return_elem_type) ? "hf" : "f";
+    const std::string suffix = Is<type::F16>(return_elem_type) ? "hf" : "f";
     return CallBuiltinHelper(out, expr, builtin,
                              [&](TextBuffer* b, const std::vector<std::string>& params) {
                                  line(b) << "return " << params[0] << " * " << std::setprecision(20)
@@ -1351,7 +1351,7 @@ bool GeneratorImpl::EmitBarrierCall(std::ostream& out, const sem::Builtin* built
 
 const ast::Expression* GeneratorImpl::CreateF32Zero(const sem::Statement* stmt) {
     auto* zero = builder_.Expr(0_f);
-    auto* f32 = builder_.create<sem::F32>();
+    auto* f32 = builder_.create<type::F32>();
     auto* sem_zero = builder_.create<sem::Expression>(zero, f32, sem::EvaluationStage::kRuntime,
                                                       stmt, /* constant_value */ nullptr,
                                                       /* has_side_effects */ false);
@@ -1658,7 +1658,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
     out << ")";
 
-    if (builtin->ReturnType()->Is<sem::Void>()) {
+    if (builtin->ReturnType()->Is<type::Void>()) {
         return true;
     }
     // If the builtin return type does not match the number of elements of the
@@ -2297,23 +2297,23 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
 bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constant) {
     return Switch(
         constant->Type(),  //
-        [&](const sem::Bool*) {
+        [&](const type::Bool*) {
             out << (constant->As<AInt>() ? "true" : "false");
             return true;
         },
-        [&](const sem::F32*) {
+        [&](const type::F32*) {
             PrintF32(out, constant->As<float>());
             return true;
         },
-        [&](const sem::F16*) {
+        [&](const type::F16*) {
             PrintF16(out, constant->As<float>());
             return true;
         },
-        [&](const sem::I32*) {
+        [&](const type::I32*) {
             out << constant->As<AInt>();
             return true;
         },
-        [&](const sem::U32*) {
+        [&](const type::U32*) {
             out << constant->As<AInt>() << "u";
             return true;
         },
@@ -2436,15 +2436,15 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
 }
 
 bool GeneratorImpl::EmitZeroValue(std::ostream& out, const type::Type* type) {
-    if (type->Is<sem::Bool>()) {
+    if (type->Is<type::Bool>()) {
         out << "false";
-    } else if (type->Is<sem::F32>()) {
+    } else if (type->Is<type::F32>()) {
         out << "0.0f";
-    } else if (type->Is<sem::F16>()) {
+    } else if (type->Is<type::F16>()) {
         out << "0.0hf";
-    } else if (type->Is<sem::I32>()) {
+    } else if (type->Is<type::I32>()) {
         out << "0";
-    } else if (type->Is<sem::U32>()) {
+    } else if (type->Is<type::U32>()) {
         out << "0u";
     } else if (auto* vec = type->As<sem::Vector>()) {
         if (!EmitType(out, type, ast::AddressSpace::kNone, ast::Access::kReadWrite, "")) {
@@ -2871,17 +2871,17 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                 out << "[]";
             }
         }
-    } else if (type->Is<sem::Bool>()) {
+    } else if (type->Is<type::Bool>()) {
         out << "bool";
-    } else if (type->Is<sem::F32>()) {
+    } else if (type->Is<type::F32>()) {
         out << "float";
-    } else if (type->Is<sem::F16>()) {
+    } else if (type->Is<type::F16>()) {
         out << "float16_t";
-    } else if (type->Is<sem::I32>()) {
+    } else if (type->Is<type::I32>()) {
         out << "int";
     } else if (auto* mat = type->As<sem::Matrix>()) {
-        TINT_ASSERT(Writer, (mat->type()->IsAnyOf<sem::F32, sem::F16>()));
-        if (mat->type()->Is<sem::F16>()) {
+        TINT_ASSERT(Writer, (mat->type()->IsAnyOf<type::F32, type::F16>()));
+        if (mat->type()->Is<type::F16>()) {
             out << "f16";
         }
         out << "mat" << mat->columns();
@@ -2917,10 +2917,10 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                         : storage ? storage->type()
                         : ms      ? ms->type()
                                   : nullptr;
-        if (!subtype || subtype->Is<sem::F32>()) {
-        } else if (subtype->Is<sem::I32>()) {
+        if (!subtype || subtype->Is<type::F32>()) {
+        } else if (subtype->Is<type::I32>()) {
             out << "i";
-        } else if (subtype->Is<sem::U32>()) {
+        } else if (subtype->Is<type::U32>()) {
             out << "u";
         } else {
             TINT_ICE(Writer, diagnostics_) << "Unsupported texture type";
@@ -2956,19 +2956,19 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         if (tex->Is<type::DepthTexture>()) {
             out << "Shadow";
         }
-    } else if (type->Is<sem::U32>()) {
+    } else if (type->Is<type::U32>()) {
         out << "uint";
     } else if (auto* vec = type->As<sem::Vector>()) {
         auto width = vec->Width();
-        if (vec->type()->Is<sem::F32>() && width >= 1 && width <= 4) {
+        if (vec->type()->Is<type::F32>() && width >= 1 && width <= 4) {
             out << "vec" << width;
-        } else if (vec->type()->Is<sem::F16>() && width >= 1 && width <= 4) {
+        } else if (vec->type()->Is<type::F16>() && width >= 1 && width <= 4) {
             out << "f16vec" << width;
-        } else if (vec->type()->Is<sem::I32>() && width >= 1 && width <= 4) {
+        } else if (vec->type()->Is<type::I32>() && width >= 1 && width <= 4) {
             out << "ivec" << width;
-        } else if (vec->type()->Is<sem::U32>() && width >= 1 && width <= 4) {
+        } else if (vec->type()->Is<type::U32>() && width >= 1 && width <= 4) {
             out << "uvec" << width;
-        } else if (vec->type()->Is<sem::Bool>() && width >= 1 && width <= 4) {
+        } else if (vec->type()->Is<type::Bool>() && width >= 1 && width <= 4) {
             out << "bvec" << width;
         } else {
             out << "vector<";
@@ -2981,7 +2981,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         if (!EmitType(out, atomic->Type(), address_space, access, name)) {
             return false;
         }
-    } else if (type->Is<sem::Void>()) {
+    } else if (type->Is<type::Void>()) {
         out << "void";
     } else {
         diagnostics_.add_error(diag::System::Writer, "unknown type in EmitType");
@@ -3206,8 +3206,8 @@ bool GeneratorImpl::CallBuiltinHelper(std::ostream& out,
 }
 
 type::Type* GeneratorImpl::BoolTypeToUint(const type::Type* type) {
-    auto* u32 = builder_.create<sem::U32>();
-    if (type->Is<sem::Bool>()) {
+    auto* u32 = builder_.create<type::U32>();
+    if (type->Is<type::Bool>()) {
         return u32;
     } else if (auto* vec = type->As<sem::Vector>()) {
         return builder_.create<sem::Vector>(u32, vec->Width());

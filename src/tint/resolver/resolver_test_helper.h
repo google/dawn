@@ -232,7 +232,7 @@ struct DataType<bool> {
     static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.bool_(); }
     /// @param b the ProgramBuilder
     /// @return the semantic bool type
-    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<sem::Bool>(); }
+    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<type::Bool>(); }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the boolean value to init with
     /// @return a new AST expression of the bool type
@@ -263,7 +263,7 @@ struct DataType<i32> {
     static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.i32(); }
     /// @param b the ProgramBuilder
     /// @return the semantic i32 type
-    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<sem::I32>(); }
+    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<type::I32>(); }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the i32 value to init with
     /// @return a new AST i32 literal value expression
@@ -294,7 +294,7 @@ struct DataType<u32> {
     static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.u32(); }
     /// @param b the ProgramBuilder
     /// @return the semantic u32 type
-    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<sem::U32>(); }
+    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<type::U32>(); }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the u32 value to init with
     /// @return a new AST u32 literal value expression
@@ -325,7 +325,7 @@ struct DataType<f32> {
     static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.f32(); }
     /// @param b the ProgramBuilder
     /// @return the semantic f32 type
-    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<sem::F32>(); }
+    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<type::F32>(); }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the f32 value to init with
     /// @return a new AST f32 literal value expression
@@ -356,7 +356,7 @@ struct DataType<f16> {
     static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.f16(); }
     /// @param b the ProgramBuilder
     /// @return the semantic f16 type
-    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<sem::F16>(); }
+    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<type::F16>(); }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the f16 value to init with
     /// @return a new AST f16 literal value expression

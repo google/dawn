@@ -1116,7 +1116,7 @@ bool GeneratorImpl::EmitUniformBufferAccess(
     bool scalar_offset_constant = false;
 
     if (auto* val = offset_arg->ConstantValue()) {
-        TINT_ASSERT(Writer, val->Type()->Is<sem::U32>());
+        TINT_ASSERT(Writer, val->Type()->Is<type::U32>());
         scalar_offset_bytes = static_cast<uint32_t>(std::get<AInt>(val->Value()));
         scalar_offset_index = scalar_offset_bytes / 4;  // bytes -> scalar index
         scalar_offset_constant = true;
@@ -1775,7 +1775,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
                                             const sem::Builtin* builtin) {
     std::string result = UniqueIdentifier("atomic_result");
 
-    if (!builtin->ReturnType()->Is<sem::Void>()) {
+    if (!builtin->ReturnType()->Is<type::Void>()) {
         auto pre = line();
         if (!EmitTypeAndName(pre, builtin->ReturnType(), ast::AddressSpace::kNone,
                              ast::Access::kUndefined, result)) {
@@ -2021,7 +2021,7 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
             }
 
             std::string member_type;
-            if (Is<sem::F16>(type::Type::DeepestElementOf(ty))) {
+            if (Is<type::F16>(type::Type::DeepestElementOf(ty))) {
                 member_type = width.empty() ? "float16_t" : ("vector<float16_t, " + width + ">");
             } else {
                 member_type = "float" + width;
@@ -2539,7 +2539,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     }
 
     auto emit_vector_appended_with_i32_zero = [&](const ast::Expression* vector) {
-        auto* i32 = builder_.create<sem::I32>();
+        auto* i32 = builder_.create<type::I32>();
         auto* zero = builder_.Expr(0_i);
         auto* stmt = builder_.Sem().Get(vector)->Stmt();
         builder_.Sem().Add(
@@ -2915,7 +2915,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
         out << ") {";
     }
 
-    if (sem->DiscardStatement() && !sem->ReturnType()->Is<sem::Void>()) {
+    if (sem->DiscardStatement() && !sem->ReturnType()->Is<type::Void>()) {
         // BUG(crbug.com/tint/1081): work around non-void functions with discard
         // failing compilation sometimes
         if (!EmitFunctionBodyWithDiscard(func)) {
@@ -2939,7 +2939,7 @@ bool GeneratorImpl::EmitFunctionBodyWithDiscard(const ast::Function* func) {
     // there is always an (unused) return statement.
 
     auto* sem = builder_.Sem().Get(func);
-    TINT_ASSERT(Writer, sem->DiscardStatement() && !sem->ReturnType()->Is<sem::Void>());
+    TINT_ASSERT(Writer, sem->DiscardStatement() && !sem->ReturnType()->Is<type::Void>());
 
     ScopedIndent si(this);
     line() << "if (true) {";
@@ -3267,26 +3267,26 @@ bool GeneratorImpl::EmitConstant(std::ostream& out,
                                  bool is_variable_initializer) {
     return Switch(
         constant->Type(),  //
-        [&](const sem::Bool*) {
+        [&](const type::Bool*) {
             out << (constant->As<AInt>() ? "true" : "false");
             return true;
         },
-        [&](const sem::F32*) {
+        [&](const type::F32*) {
             PrintF32(out, constant->As<float>());
             return true;
         },
-        [&](const sem::F16*) {
+        [&](const type::F16*) {
             // emit a f16 scalar with explicit float16_t type declaration.
             out << "float16_t(";
             PrintF16(out, constant->As<float>());
             out << ")";
             return true;
         },
-        [&](const sem::I32*) {
+        [&](const type::I32*) {
             out << constant->As<AInt>();
             return true;
         },
-        [&](const sem::U32*) {
+        [&](const type::U32*) {
             out << constant->As<AInt>() << "u";
             return true;
         },
@@ -3459,23 +3459,23 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
 bool GeneratorImpl::EmitValue(std::ostream& out, const type::Type* type, int value) {
     return Switch(
         type,
-        [&](const sem::Bool*) {
+        [&](const type::Bool*) {
             out << (value == 0 ? "false" : "true");
             return true;
         },
-        [&](const sem::F32*) {
+        [&](const type::F32*) {
             out << value << ".0f";
             return true;
         },
-        [&](const sem::F16*) {
+        [&](const type::F16*) {
             out << "float16_t(" << value << ".0h)";
             return true;
         },
-        [&](const sem::I32*) {
+        [&](const type::I32*) {
             out << value;
             return true;
         },
-        [&](const sem::U32*) {
+        [&](const type::U32*) {
             out << value << "u";
             return true;
         },
@@ -3954,24 +3954,24 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             }
             return true;
         },
-        [&](const sem::Bool*) {
+        [&](const type::Bool*) {
             out << "bool";
             return true;
         },
-        [&](const sem::F32*) {
+        [&](const type::F32*) {
             out << "float";
             return true;
         },
-        [&](const sem::F16*) {
+        [&](const type::F16*) {
             out << "float16_t";
             return true;
         },
-        [&](const sem::I32*) {
+        [&](const type::I32*) {
             out << "int";
             return true;
         },
         [&](const sem::Matrix* mat) {
-            if (mat->type()->Is<sem::F16>()) {
+            if (mat->type()->Is<type::F16>()) {
                 // Use matrix<type, N, M> for f16 matrix
                 out << "matrix<";
                 if (!EmitType(out, mat->type(), address_space, access, "")) {
@@ -4066,11 +4066,11 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             } else if (sampled || ms) {
                 auto* subtype = sampled ? sampled->type() : ms->type();
                 out << "<";
-                if (subtype->Is<sem::F32>()) {
+                if (subtype->Is<type::F32>()) {
                     out << "float4";
-                } else if (subtype->Is<sem::I32>()) {
+                } else if (subtype->Is<type::I32>()) {
                     out << "int4";
-                } else if (subtype->Is<sem::U32>()) {
+                } else if (subtype->Is<type::U32>()) {
                     out << "uint4";
                 } else {
                     TINT_ICE(Writer, diagnostics_) << "Unsupported multisampled texture type";
@@ -4080,19 +4080,19 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             }
             return true;
         },
-        [&](const sem::U32*) {
+        [&](const type::U32*) {
             out << "uint";
             return true;
         },
         [&](const sem::Vector* vec) {
             auto width = vec->Width();
-            if (vec->type()->Is<sem::F32>() && width >= 1 && width <= 4) {
+            if (vec->type()->Is<type::F32>() && width >= 1 && width <= 4) {
                 out << "float" << width;
-            } else if (vec->type()->Is<sem::I32>() && width >= 1 && width <= 4) {
+            } else if (vec->type()->Is<type::I32>() && width >= 1 && width <= 4) {
                 out << "int" << width;
-            } else if (vec->type()->Is<sem::U32>() && width >= 1 && width <= 4) {
+            } else if (vec->type()->Is<type::U32>() && width >= 1 && width <= 4) {
                 out << "uint" << width;
-            } else if (vec->type()->Is<sem::Bool>() && width >= 1 && width <= 4) {
+            } else if (vec->type()->Is<type::Bool>() && width >= 1 && width <= 4) {
                 out << "bool" << width;
             } else {
                 // For example, use "vector<float16_t, N>" for f16 vector.
@@ -4107,7 +4107,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         [&](const sem::Atomic* atomic) {
             return EmitType(out, atomic->Type(), address_space, access, name);
         },
-        [&](const sem::Void*) {
+        [&](const type::Void*) {
             out << "void";
             return true;
         },

@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,23 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_U32_H_
-#define SRC_TINT_SEM_U32_H_
+#ifndef SRC_TINT_TYPE_F32_H_
+#define SRC_TINT_TYPE_F32_H_
 
 #include <string>
 
 #include "src/tint/type/type.h"
 
-namespace tint::sem {
+namespace tint::type {
 
-/// A unsigned int 32 type.
-class U32 final : public Castable<U32, type::Type> {
+/// A float 32 type
+class F32 final : public Castable<F32, type::Type> {
   public:
     /// Constructor
-    U32();
+    F32();
     /// Move constructor
-    U32(U32&&);
-    ~U32() override;
+    F32(F32&&);
+    ~F32() override;
 
     /// @returns a hash of the type.
     size_t Hash() const override;
@@ -49,6 +49,6 @@ class U32 final : public Castable<U32, type::Type> {
     uint32_t Align() const override;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
-#endif  // SRC_TINT_SEM_U32_H_
+#endif  // SRC_TINT_TYPE_F32_H_

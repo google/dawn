@@ -210,7 +210,7 @@ bool Validator::IsFixedFootprint(const type::Type* type) const {
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable-types
 bool Validator::IsHostShareable(const type::Type* type) const {
-    if (type->IsAnyOf<sem::I32, sem::U32, sem::F32, sem::F16>()) {
+    if (type->IsAnyOf<type::I32, type::U32, type::F32, type::F16>()) {
         return true;
     }
     return Switch(
@@ -263,7 +263,7 @@ const ast::Statement* Validator::ClosestContinuing(bool stop_at_loop,
 bool Validator::Atomic(const ast::Atomic* a, const sem::Atomic* s) const {
     // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
     // T must be either u32 or i32.
-    if (!s->Type()->IsAnyOf<sem::U32, sem::I32>()) {
+    if (!s->Type()->IsAnyOf<type::U32, type::I32>()) {
         AddError("atomic only supports i32 or u32 types", a->type ? a->type->source : a->source);
         return false;
     }
@@ -320,7 +320,7 @@ bool Validator::StorageTexture(const ast::StorageTexture* t) const {
 }
 
 bool Validator::SampledTexture(const type::SampledTexture* t, const Source& source) const {
-    if (!t->type()->UnwrapRef()->IsAnyOf<sem::F32, sem::I32, sem::U32>()) {
+    if (!t->type()->UnwrapRef()->IsAnyOf<type::F32, type::I32, type::U32>()) {
         AddError("texture_2d<type>: type must be f32, i32 or u32", source);
         return false;
     }
@@ -335,7 +335,7 @@ bool Validator::MultisampledTexture(const type::MultisampledTexture* t,
         return false;
     }
 
-    if (!t->type()->UnwrapRef()->IsAnyOf<sem::F32, sem::I32, sem::U32>()) {
+    if (!t->type()->UnwrapRef()->IsAnyOf<type::F32, type::I32, type::U32>()) {
         AddError("texture_multisampled_2d<type>: type must be f32, i32 or u32", source);
         return false;
     }
@@ -435,7 +435,7 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
 
     // Among three host-shareable address spaces, f16 is supported in "uniform" and
     // "storage" address space, but not "push_constant" address space yet.
-    if (Is<sem::F16>(type::Type::DeepestElementOf(store_ty)) &&
+    if (Is<type::F16>(type::Type::DeepestElementOf(store_ty)) &&
         address_space == ast::AddressSpace::kPushConstant) {
         AddError("using f16 types in 'push_constant' address space is not implemented yet", source);
         return false;
@@ -764,7 +764,7 @@ bool Validator::Override(
         return false;
     }
 
-    if (storage_ty->Is<sem::F16>()) {
+    if (storage_ty->Is<type::F16>()) {
         AddError("'override' of type f16 is not implemented yet", decl->source);
         return false;
     }
@@ -882,7 +882,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 !(stage == ast::PipelineStage::kFragment && !is_input)) {
                 is_stage_mismatch = true;
             }
-            if (!type->Is<sem::F32>()) {
+            if (!type->Is<type::F32>()) {
                 AddError("store type of " + attr_to_str(attr) + " must be 'f32'", attr->source);
                 return false;
             }
@@ -892,7 +892,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 !(stage == ast::PipelineStage::kFragment && is_input)) {
                 is_stage_mismatch = true;
             }
-            if (!type->Is<sem::Bool>()) {
+            if (!type->Is<type::Bool>()) {
                 AddError("store type of " + attr_to_str(attr) + " must be 'bool'", attr->source);
                 return false;
             }
@@ -902,7 +902,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 !(stage == ast::PipelineStage::kCompute && is_input)) {
                 is_stage_mismatch = true;
             }
-            if (!type->Is<sem::U32>()) {
+            if (!type->Is<type::U32>()) {
                 AddError("store type of " + attr_to_str(attr) + " must be 'u32'", attr->source);
                 return false;
             }
@@ -913,7 +913,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 !(stage == ast::PipelineStage::kVertex && is_input)) {
                 is_stage_mismatch = true;
             }
-            if (!type->Is<sem::U32>()) {
+            if (!type->Is<type::U32>()) {
                 AddError("store type of " + attr_to_str(attr) + " must be 'u32'", attr->source);
                 return false;
             }
@@ -922,7 +922,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
             if (stage != ast::PipelineStage::kNone && !(stage == ast::PipelineStage::kFragment)) {
                 is_stage_mismatch = true;
             }
-            if (!type->Is<sem::U32>()) {
+            if (!type->Is<type::U32>()) {
                 AddError("store type of " + attr_to_str(attr) + " must be 'u32'", attr->source);
                 return false;
             }
@@ -932,7 +932,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 !(stage == ast::PipelineStage::kFragment && is_input)) {
                 is_stage_mismatch = true;
             }
-            if (!type->Is<sem::U32>()) {
+            if (!type->Is<type::U32>()) {
                 AddError("store type of " + attr_to_str(attr) + " must be 'u32'", attr->source);
                 return false;
             }
@@ -991,7 +991,7 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
         return false;
     }
 
-    if (!func->ReturnType()->Is<sem::Void>()) {
+    if (!func->ReturnType()->Is<type::Void>()) {
         if (!func->ReturnType()->IsConstructible()) {
             AddError("function return type must be a constructible type",
                      decl->return_type->source);
@@ -1247,7 +1247,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     builtins.Clear();
     locations.Clear();
 
-    if (!func->ReturnType()->Is<sem::Void>()) {
+    if (!func->ReturnType()->Is<type::Void>()) {
         if (!validate_entry_point_attributes(decl->return_type_attributes, func->ReturnType(),
                                              decl->source, ParamOrRetType::kReturnType,
                                              func->ReturnLocation())) {
@@ -1458,7 +1458,7 @@ bool Validator::ForLoopStatement(const sem::ForLoopStatement* stmt) const {
     }
     if (auto* cond = stmt->Condition()) {
         auto* cond_ty = cond->Type()->UnwrapRef();
-        if (!cond_ty->Is<sem::Bool>()) {
+        if (!cond_ty->Is<type::Bool>()) {
             AddError("for-loop condition must be bool, got " + sem_.TypeNameOf(cond_ty),
                      stmt->Condition()->Declaration()->source);
             return false;
@@ -1474,7 +1474,7 @@ bool Validator::WhileStatement(const sem::WhileStatement* stmt) const {
     }
     if (auto* cond = stmt->Condition()) {
         auto* cond_ty = cond->Type()->UnwrapRef();
-        if (!cond_ty->Is<sem::Bool>()) {
+        if (!cond_ty->Is<type::Bool>()) {
             AddError("while condition must be bool, got " + sem_.TypeNameOf(cond_ty),
                      stmt->Condition()->Declaration()->source);
             return false;
@@ -1486,7 +1486,7 @@ bool Validator::WhileStatement(const sem::WhileStatement* stmt) const {
 bool Validator::BreakIfStatement(const sem::BreakIfStatement* stmt,
                                  sem::Statement* current_statement) const {
     auto* cond_ty = stmt->Condition()->Type()->UnwrapRef();
-    if (!cond_ty->Is<sem::Bool>()) {
+    if (!cond_ty->Is<type::Bool>()) {
         AddError("break-if statement condition must be bool, got " + sem_.TypeNameOf(cond_ty),
                  stmt->Condition()->Declaration()->source);
         return false;
@@ -1513,7 +1513,7 @@ bool Validator::BreakIfStatement(const sem::BreakIfStatement* stmt,
 
 bool Validator::IfStatement(const sem::IfStatement* stmt) const {
     auto* cond_ty = stmt->Condition()->Type()->UnwrapRef();
-    if (!cond_ty->Is<sem::Bool>()) {
+    if (!cond_ty->Is<type::Bool>()) {
         AddError("if statement condition must be bool, got " + sem_.TypeNameOf(cond_ty),
                  stmt->Condition()->Declaration()->source);
         return false;
@@ -1522,7 +1522,7 @@ bool Validator::IfStatement(const sem::IfStatement* stmt) const {
 }
 
 bool Validator::BuiltinCall(const sem::Call* call) const {
-    if (call->Type()->Is<sem::Void>()) {
+    if (call->Type()->Is<type::Void>()) {
         bool is_call_statement = false;
         // Some built-in call are not owned by a statement, e.g. a built-in called in global
         // variable declaration. Calling no-return-value built-in in these context is invalid as
@@ -1692,7 +1692,7 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
         }
     }
 
-    if (call->Type()->Is<sem::Void>()) {
+    if (call->Type()->Is<type::Void>()) {
         bool is_call_statement = false;
         if (auto* call_stmt = As<ast::CallStatement>(call->Stmt()->Declaration())) {
             if (call_stmt->expr == call->Declaration()) {
@@ -2228,7 +2228,7 @@ bool Validator::SwitchStatement(const ast::SwitchStatement* s) {
             auto value = selector->Value()->As<uint32_t>();
             if (auto added = selectors.Add(value, selector->Declaration()->source); !added) {
                 AddError("duplicate switch case '" +
-                             (decl_ty->IsAnyOf<sem::I32, type::AbstractNumeric>()
+                             (decl_ty->IsAnyOf<type::I32, type::AbstractNumeric>()
                                   ? std::to_string(i32(value))
                                   : std::to_string(value)) +
                              "'",

@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,23 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_I32_H_
-#define SRC_TINT_SEM_I32_H_
+#ifndef SRC_TINT_TYPE_BOOL_H_
+#define SRC_TINT_TYPE_BOOL_H_
 
 #include <string>
 
 #include "src/tint/type/type.h"
 
-namespace tint::sem {
+// X11 likes to #define Bool leading to confusing error messages.
+// If its defined, undefine it.
+#ifdef Bool
+#undef Bool
+#endif
 
-/// A signed int 32 type.
-class I32 final : public Castable<I32, type::Type> {
+namespace tint::type {
+
+/// A boolean type
+class Bool final : public Castable<Bool, type::Type> {
   public:
     /// Constructor
-    I32();
+    Bool();
     /// Move constructor
-    I32(I32&&);
-    ~I32() override;
+    Bool(Bool&&);
+    ~Bool() override;
 
     /// @returns a hash of the type.
     size_t Hash() const override;
@@ -43,12 +49,16 @@ class I32 final : public Castable<I32, type::Type> {
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
     /// @returns the size in bytes of the type.
+    /// @note: booleans are not host-sharable, but still may exist in workgroup
+    /// storage.
     uint32_t Size() const override;
 
     /// @returns the alignment in bytes of the type.
+    /// @note: booleans are not host-sharable, but still may exist in workgroup
+    /// storage.
     uint32_t Align() const override;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
-#endif  // SRC_TINT_SEM_I32_H_
+#endif  // SRC_TINT_TYPE_BOOL_H_

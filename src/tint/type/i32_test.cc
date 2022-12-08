@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,37 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/test_helper.h"
+#include "src/tint/type/test_helper.h"
 #include "src/tint/type/texture.h"
 
-namespace tint::sem {
+namespace tint::type {
 namespace {
 
-using U32Test = TestHelper;
+using I32Test = TestHelper;
 
-TEST_F(U32Test, Creation) {
-    auto* a = create<U32>();
-    auto* b = create<U32>();
+TEST_F(I32Test, Creation) {
+    auto* a = create<I32>();
+    auto* b = create<I32>();
     EXPECT_EQ(a, b);
 }
 
-TEST_F(U32Test, Hash) {
-    auto* a = create<U32>();
-    auto* b = create<U32>();
+TEST_F(I32Test, Hash) {
+    auto* a = create<I32>();
+    auto* b = create<I32>();
     EXPECT_EQ(a->Hash(), b->Hash());
 }
 
-TEST_F(U32Test, Equals) {
-    auto* a = create<U32>();
-    auto* b = create<U32>();
+TEST_F(I32Test, Equals) {
+    auto* a = create<I32>();
+    auto* b = create<I32>();
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(Void{}));
 }
 
-TEST_F(U32Test, FriendlyName) {
-    U32 u;
-    EXPECT_EQ(u.FriendlyName(Symbols()), "u32");
+TEST_F(I32Test, FriendlyName) {
+    I32 i;
+    EXPECT_EQ(i.FriendlyName(Symbols()), "i32");
 }
 
 }  // namespace
-}  // namespace tint::sem
+}  // namespace tint::type

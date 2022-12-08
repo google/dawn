@@ -33,7 +33,7 @@ TEST_F(ResolverAtomicTest, GlobalWorkgroupI32) {
     ASSERT_TRUE(TypeOf(g)->Is<sem::Reference>());
     auto* atomic = TypeOf(g)->UnwrapRef()->As<sem::Atomic>();
     ASSERT_NE(atomic, nullptr);
-    EXPECT_TRUE(atomic->Type()->Is<sem::I32>());
+    EXPECT_TRUE(atomic->Type()->Is<type::I32>());
 }
 
 TEST_F(ResolverAtomicTest, GlobalWorkgroupU32) {
@@ -43,7 +43,7 @@ TEST_F(ResolverAtomicTest, GlobalWorkgroupU32) {
     ASSERT_TRUE(TypeOf(g)->Is<sem::Reference>());
     auto* atomic = TypeOf(g)->UnwrapRef()->As<sem::Atomic>();
     ASSERT_NE(atomic, nullptr);
-    EXPECT_TRUE(atomic->Type()->Is<sem::U32>());
+    EXPECT_TRUE(atomic->Type()->Is<type::U32>());
 }
 
 TEST_F(ResolverAtomicTest, GlobalStorageStruct) {
@@ -58,7 +58,7 @@ TEST_F(ResolverAtomicTest, GlobalStorageStruct) {
     ASSERT_EQ(str->Members().Length(), 1u);
     auto* atomic = str->Members()[0]->Type()->As<sem::Atomic>();
     ASSERT_NE(atomic, nullptr);
-    ASSERT_TRUE(atomic->Type()->Is<sem::I32>());
+    ASSERT_TRUE(atomic->Type()->Is<type::I32>());
 }
 
 }  // namespace

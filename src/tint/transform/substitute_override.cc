@@ -81,11 +81,11 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program* src,
         auto value = iter->second;
         auto* ctor = Switch(
             sem->Type(),
-            [&](const sem::Bool*) { return b.Expr(!std::equal_to<double>()(value, 0.0)); },
-            [&](const sem::I32*) { return b.Expr(i32(value)); },
-            [&](const sem::U32*) { return b.Expr(u32(value)); },
-            [&](const sem::F32*) { return b.Expr(f32(value)); },
-            [&](const sem::F16*) { return b.Expr(f16(value)); });
+            [&](const type::Bool*) { return b.Expr(!std::equal_to<double>()(value, 0.0)); },
+            [&](const type::I32*) { return b.Expr(i32(value)); },
+            [&](const type::U32*) { return b.Expr(u32(value)); },
+            [&](const type::F32*) { return b.Expr(f32(value)); },
+            [&](const type::F16*) { return b.Expr(f16(value)); });
 
         if (!ctor) {
             b.Diagnostics().add_error(diag::System::Transform,

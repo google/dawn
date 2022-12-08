@@ -15,20 +15,20 @@
 #include "src/tint/type/type.h"
 
 #include "src/tint/sem/array.h"
-#include "src/tint/sem/bool.h"
-#include "src/tint/sem/f16.h"
-#include "src/tint/sem/f32.h"
-#include "src/tint/sem/i32.h"
 #include "src/tint/sem/matrix.h"
 #include "src/tint/sem/pointer.h"
 #include "src/tint/sem/reference.h"
 #include "src/tint/sem/struct.h"
-#include "src/tint/sem/u32.h"
 #include "src/tint/sem/vector.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
+#include "src/tint/type/bool.h"
+#include "src/tint/type/f16.h"
+#include "src/tint/type/f32.h"
+#include "src/tint/type/i32.h"
 #include "src/tint/type/sampler.h"
 #include "src/tint/type/texture.h"
+#include "src/tint/type/u32.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Type);
 
@@ -69,15 +69,15 @@ uint32_t Type::Align() const {
 }
 
 bool Type::is_scalar() const {
-    return IsAnyOf<sem::F16, sem::F32, sem::U32, sem::I32, type::AbstractNumeric, sem::Bool>();
+    return IsAnyOf<type::F16, type::F32, type::U32, type::I32, type::AbstractNumeric, type::Bool>();
 }
 
 bool Type::is_numeric_scalar() const {
-    return IsAnyOf<sem::F16, sem::F32, sem::U32, sem::I32, type::AbstractNumeric>();
+    return IsAnyOf<type::F16, type::F32, type::U32, type::I32, type::AbstractNumeric>();
 }
 
 bool Type::is_float_scalar() const {
-    return IsAnyOf<sem::F16, sem::F32, type::AbstractNumeric>();
+    return IsAnyOf<type::F16, type::F32, type::AbstractNumeric>();
 }
 
 bool Type::is_float_matrix() const {
@@ -103,32 +103,32 @@ bool Type::is_float_scalar_or_vector_or_matrix() const {
 }
 
 bool Type::is_integer_scalar() const {
-    return IsAnyOf<sem::U32, sem::I32>();
+    return IsAnyOf<type::U32, type::I32>();
 }
 
 bool Type::is_signed_integer_scalar() const {
-    return IsAnyOf<sem::I32, type::AbstractInt>();
+    return IsAnyOf<type::I32, type::AbstractInt>();
 }
 
 bool Type::is_unsigned_integer_scalar() const {
-    return Is<sem::U32>();
+    return Is<type::U32>();
 }
 
 bool Type::is_signed_integer_vector() const {
     return Is(
-        [](const sem::Vector* v) { return v->type()->IsAnyOf<sem::I32, type::AbstractInt>(); });
+        [](const sem::Vector* v) { return v->type()->IsAnyOf<type::I32, type::AbstractInt>(); });
 }
 
 bool Type::is_unsigned_integer_vector() const {
-    return Is([](const sem::Vector* v) { return v->type()->Is<sem::U32>(); });
+    return Is([](const sem::Vector* v) { return v->type()->Is<type::U32>(); });
 }
 
 bool Type::is_unsigned_integer_scalar_or_vector() const {
-    return Is<sem::U32>() || is_unsigned_integer_vector();
+    return Is<type::U32>() || is_unsigned_integer_vector();
 }
 
 bool Type::is_signed_integer_scalar_or_vector() const {
-    return IsAnyOf<sem::I32, type::AbstractInt>() || is_signed_integer_vector();
+    return IsAnyOf<type::I32, type::AbstractInt>() || is_signed_integer_vector();
 }
 
 bool Type::is_integer_scalar_or_vector() const {
@@ -152,11 +152,11 @@ bool Type::is_abstract_float_scalar_or_vector() const {
 }
 
 bool Type::is_bool_vector() const {
-    return Is([](const sem::Vector* v) { return v->type()->Is<sem::Bool>(); });
+    return Is([](const sem::Vector* v) { return v->type()->Is<type::Bool>(); });
 }
 
 bool Type::is_bool_scalar_or_vector() const {
-    return Is<sem::Bool>() || is_bool_vector();
+    return Is<type::Bool>() || is_bool_vector();
 }
 
 bool Type::is_numeric_vector() const {
@@ -200,19 +200,19 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
         from,
         [&](const type::AbstractFloat*) {
             return Switch(
-                to,                                  //
-                [&](const sem::F32*) { return 1; },  //
-                [&](const sem::F16*) { return 2; },  //
+                to,                                   //
+                [&](const type::F32*) { return 1; },  //
+                [&](const type::F16*) { return 2; },  //
                 [&](Default) { return kNoConversion; });
         },
         [&](const type::AbstractInt*) {
             return Switch(
                 to,                                             //
-                [&](const sem::I32*) { return 3; },             //
-                [&](const sem::U32*) { return 4; },             //
+                [&](const type::I32*) { return 3; },            //
+                [&](const type::U32*) { return 4; },            //
                 [&](const type::AbstractFloat*) { return 5; },  //
-                [&](const sem::F32*) { return 6; },             //
-                [&](const sem::F16*) { return 7; },             //
+                [&](const type::F32*) { return 6; },            //
+                [&](const type::F16*) { return 7; },            //
                 [&](Default) { return kNoConversion; });
         },
         [&](const sem::Vector* from_vec) {

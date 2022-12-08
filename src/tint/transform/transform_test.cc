@@ -41,16 +41,16 @@ struct CreateASTTypeForTest : public testing::Test, public Transform {
 };
 
 TEST_F(CreateASTTypeForTest, Basic) {
-    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<sem::I32>(); })->Is<ast::I32>());
-    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<sem::U32>(); })->Is<ast::U32>());
-    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<sem::F32>(); })->Is<ast::F32>());
-    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<sem::Bool>(); })->Is<ast::Bool>());
-    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<sem::Void>(); })->Is<ast::Void>());
+    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<type::I32>(); })->Is<ast::I32>());
+    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<type::U32>(); })->Is<ast::U32>());
+    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<type::F32>(); })->Is<ast::F32>());
+    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<type::Bool>(); })->Is<ast::Bool>());
+    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<type::Void>(); })->Is<ast::Void>());
 }
 
 TEST_F(CreateASTTypeForTest, Matrix) {
     auto* mat = create([](ProgramBuilder& b) {
-        auto* column_type = b.create<sem::Vector>(b.create<sem::F32>(), 2u);
+        auto* column_type = b.create<sem::Vector>(b.create<type::F32>(), 2u);
         return b.create<sem::Matrix>(column_type, 3u);
     });
     ASSERT_TRUE(mat->Is<ast::Matrix>());
@@ -61,7 +61,7 @@ TEST_F(CreateASTTypeForTest, Matrix) {
 
 TEST_F(CreateASTTypeForTest, Vector) {
     auto* vec =
-        create([](ProgramBuilder& b) { return b.create<sem::Vector>(b.create<sem::F32>(), 2u); });
+        create([](ProgramBuilder& b) { return b.create<sem::Vector>(b.create<type::F32>(), 2u); });
     ASSERT_TRUE(vec->Is<ast::Vector>());
     ASSERT_TRUE(vec->As<ast::Vector>()->type->Is<ast::F32>());
     ASSERT_EQ(vec->As<ast::Vector>()->width, 2u);
@@ -69,7 +69,7 @@ TEST_F(CreateASTTypeForTest, Vector) {
 
 TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
     auto* arr = create([](ProgramBuilder& b) {
-        return b.create<sem::Array>(b.create<sem::F32>(), b.create<type::ConstantArrayCount>(2u),
+        return b.create<sem::Array>(b.create<type::F32>(), b.create<type::ConstantArrayCount>(2u),
                                     4u, 4u, 32u, 32u);
     });
     ASSERT_TRUE(arr->Is<ast::Array>());
@@ -83,7 +83,7 @@ TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
 
 TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
     auto* arr = create([](ProgramBuilder& b) {
-        return b.create<sem::Array>(b.create<sem::F32>(), b.create<type::ConstantArrayCount>(2u),
+        return b.create<sem::Array>(b.create<type::F32>(), b.create<type::ConstantArrayCount>(2u),
                                     4u, 4u, 64u, 32u);
     });
     ASSERT_TRUE(arr->Is<ast::Array>());

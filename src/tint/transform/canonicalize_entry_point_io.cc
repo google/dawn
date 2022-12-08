@@ -396,7 +396,7 @@ struct CanonicalizeEntryPointIO::State {
                 AddOutput(name, member->Type(), member->Location(), std::move(attributes),
                           ctx.dst->MemberAccessor(original_result, name));
             }
-        } else if (!inner_ret_type->Is<sem::Void>()) {
+        } else if (!inner_ret_type->Is<type::Void>()) {
             auto attributes =
                 CloneShaderIOAttributes(func_ast->return_type_attributes, do_interpolate);
 
@@ -421,7 +421,7 @@ struct CanonicalizeEntryPointIO::State {
 
         // No existing sample mask builtin was found, so create a new output value
         // using the fixed sample mask.
-        AddOutput("fixed_sample_mask", ctx.dst->create<sem::U32>(), std::nullopt,
+        AddOutput("fixed_sample_mask", ctx.dst->create<type::U32>(), std::nullopt,
                   {ctx.dst->Builtin(ast::BuiltinValue::kSampleMask)},
                   ctx.dst->Expr(u32(cfg.fixed_sample_mask)));
     }
@@ -429,7 +429,7 @@ struct CanonicalizeEntryPointIO::State {
     /// Add a point size builtin to the wrapper function output.
     void AddVertexPointSize() {
         // Create a new output value and assign it a literal 1.0 value.
-        AddOutput("vertex_point_size", ctx.dst->create<sem::F32>(), std::nullopt,
+        AddOutput("vertex_point_size", ctx.dst->create<type::F32>(), std::nullopt,
                   {ctx.dst->Builtin(ast::BuiltinValue::kPointSize)}, ctx.dst->Expr(1_f));
     }
 
@@ -576,7 +576,7 @@ struct CanonicalizeEntryPointIO::State {
         }
 
         // Exit early if there is no shader IO to handle.
-        if (func_sem->Parameters().Length() == 0 && func_sem->ReturnType()->Is<sem::Void>() &&
+        if (func_sem->Parameters().Length() == 0 && func_sem->ReturnType()->Is<type::Void>() &&
             !needs_fixed_sample_mask && !needs_vertex_point_size &&
             cfg.shader_style != ShaderStyle::kGlsl) {
             return;
@@ -604,7 +604,7 @@ struct CanonicalizeEntryPointIO::State {
 
         // Process the return type, and start building the wrapper function body.
         std::function<const ast::Type*()> wrapper_ret_type = [&] { return ctx.dst->ty.void_(); };
-        if (func_sem->ReturnType()->Is<sem::Void>()) {
+        if (func_sem->ReturnType()->Is<type::Void>()) {
             // The function call is just a statement with no result.
             wrapper_body.Push(ctx.dst->CallStmt(call_inner));
         } else {
@@ -760,7 +760,7 @@ struct CanonicalizeEntryPointIO::State {
             case ast::BuiltinValue::kInstanceIndex:
             case ast::BuiltinValue::kSampleIndex:
             case ast::BuiltinValue::kSampleMask:
-                type = ctx.dst->create<sem::I32>();
+                type = ctx.dst->create<type::I32>();
                 value = ctx.dst->Bitcast(CreateASTTypeFor(ctx, type), value);
                 break;
             default:

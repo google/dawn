@@ -65,7 +65,7 @@ TEST_F(ResolverConstEvalTest, MemberAccess) {
     EXPECT_TRUE(i2->ConstantValue()->AllEqual());
     EXPECT_FALSE(i2->ConstantValue()->AnyZero());
     EXPECT_FALSE(i2->ConstantValue()->AllZero());
-    EXPECT_TRUE(i2->ConstantValue()->Type()->Is<sem::U32>());
+    EXPECT_TRUE(i2->ConstantValue()->Type()->Is<type::U32>());
     EXPECT_EQ(i2->ConstantValue()->As<u32>(), 2_u);
 }
 

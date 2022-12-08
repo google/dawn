@@ -12,45 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/f16.h"
+#include "src/tint/type/i32.h"
 
 #include "src/tint/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::F16);
+TINT_INSTANTIATE_TYPEINFO(tint::type::I32);
 
-namespace tint {
-namespace sem {
+namespace tint::type {
 
-F16::F16()
+I32::I32()
     : Base(type::TypeFlags{
           Flag::kConstructable,
           Flag::kCreationFixedFootprint,
           Flag::kFixedFootprint,
       }) {}
 
-F16::F16(F16&&) = default;
+I32::I32(I32&&) = default;
 
-F16::~F16() = default;
+I32::~I32() = default;
 
-size_t F16::Hash() const {
-    return static_cast<size_t>(TypeInfo::Of<F16>().full_hashcode);
+size_t I32::Hash() const {
+    return static_cast<size_t>(TypeInfo::Of<I32>().full_hashcode);
 }
 
-bool F16::Equals(const Type& other) const {
-    return other.Is<F16>();
+bool I32::Equals(const Type& other) const {
+    return other.Is<I32>();
 }
 
-std::string F16::FriendlyName(const SymbolTable&) const {
-    return "f16";
+std::string I32::FriendlyName(const SymbolTable&) const {
+    return "i32";
 }
 
-uint32_t F16::Size() const {
-    return 2;
+uint32_t I32::Size() const {
+    return 4;
 }
 
-uint32_t F16::Align() const {
-    return 2;
+uint32_t I32::Align() const {
+    return 4;
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::type

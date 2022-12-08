@@ -37,7 +37,7 @@ TEST_F(ResolverPtrRefTest, AddressOf) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_TRUE(TypeOf(expr)->Is<sem::Pointer>());
-    EXPECT_TRUE(TypeOf(expr)->As<sem::Pointer>()->StoreType()->Is<sem::I32>());
+    EXPECT_TRUE(TypeOf(expr)->As<sem::Pointer>()->StoreType()->Is<type::I32>());
     EXPECT_EQ(TypeOf(expr)->As<sem::Pointer>()->AddressSpace(), ast::AddressSpace::kFunction);
 }
 
@@ -53,7 +53,7 @@ TEST_F(ResolverPtrRefTest, AddressOfThenDeref) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_TRUE(TypeOf(expr)->Is<sem::Reference>());
-    EXPECT_TRUE(TypeOf(expr)->As<sem::Reference>()->StoreType()->Is<sem::I32>());
+    EXPECT_TRUE(TypeOf(expr)->As<sem::Reference>()->StoreType()->Is<type::I32>());
 }
 
 TEST_F(ResolverPtrRefTest, DefaultPtrAddressSpace) {

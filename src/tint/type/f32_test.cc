@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,37 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/test_helper.h"
+#include "src/tint/type/test_helper.h"
 #include "src/tint/type/texture.h"
 
-namespace tint::sem {
+namespace tint::type {
 namespace {
 
-using BoolTest = TestHelper;
+using F32Test = TestHelper;
 
-TEST_F(BoolTest, Creation) {
-    auto* a = create<Bool>();
-    auto* b = create<Bool>();
+TEST_F(F32Test, Creation) {
+    auto* a = create<F32>();
+    auto* b = create<F32>();
     EXPECT_EQ(a, b);
 }
 
-TEST_F(BoolTest, Hash) {
-    auto* a = create<Bool>();
-    auto* b = create<Bool>();
+TEST_F(F32Test, Hash) {
+    auto* a = create<F32>();
+    auto* b = create<F32>();
     EXPECT_EQ(a->Hash(), b->Hash());
 }
 
-TEST_F(BoolTest, Equals) {
-    auto* a = create<Bool>();
-    auto* b = create<Bool>();
+TEST_F(F32Test, Equals) {
+    auto* a = create<F32>();
+    auto* b = create<F32>();
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(Void{}));
 }
 
-TEST_F(BoolTest, FriendlyName) {
-    Bool b;
-    EXPECT_EQ(b.FriendlyName(Symbols()), "bool");
+TEST_F(F32Test, FriendlyName) {
+    F32 f;
+    EXPECT_EQ(f.FriendlyName(Symbols()), "f32");
 }
 
 }  // namespace
-}  // namespace tint::sem
+}  // namespace tint::type

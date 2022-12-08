@@ -631,7 +631,7 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
     }
 
     if (InsideBasicBlock()) {
-        if (func->ReturnType()->Is<sem::Void>()) {
+        if (func->ReturnType()->Is<type::Void>()) {
             push_function_inst(spv::Op::OpReturn, {});
         } else {
             auto zero = GenerateConstantNullIfNeeded(func->ReturnType());
@@ -1484,20 +1484,20 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
     auto* from_type = TypeOf(from_expr)->UnwrapRef();
 
     spv::Op op = spv::Op::OpNop;
-    if ((from_type->Is<sem::I32>() && to_type->is_float_scalar()) ||
+    if ((from_type->Is<type::I32>() && to_type->is_float_scalar()) ||
         (from_type->is_signed_integer_vector() && to_type->is_float_vector())) {
         op = spv::Op::OpConvertSToF;
-    } else if ((from_type->Is<sem::U32>() && to_type->is_float_scalar()) ||
+    } else if ((from_type->Is<type::U32>() && to_type->is_float_scalar()) ||
                (from_type->is_unsigned_integer_vector() && to_type->is_float_vector())) {
         op = spv::Op::OpConvertUToF;
-    } else if ((from_type->is_float_scalar() && to_type->Is<sem::I32>()) ||
+    } else if ((from_type->is_float_scalar() && to_type->Is<type::I32>()) ||
                (from_type->is_float_vector() && to_type->is_signed_integer_vector())) {
         op = spv::Op::OpConvertFToS;
-    } else if ((from_type->is_float_scalar() && to_type->Is<sem::U32>()) ||
+    } else if ((from_type->is_float_scalar() && to_type->Is<type::U32>()) ||
                (from_type->is_float_vector() && to_type->is_unsigned_integer_vector())) {
         op = spv::Op::OpConvertFToU;
-    } else if (from_type
-                   ->IsAnyOf<sem::Bool, sem::F32, sem::I32, sem::U32, sem::F16, sem::Vector>() &&
+    } else if (from_type->IsAnyOf<type::Bool, type::F32, type::I32, type::U32, type::F16,
+                                  sem::Vector>() &&
                from_type == to_type) {
         // Identity initializer for scalar and vector types
         return val_id;
@@ -1509,13 +1509,13 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
         // and to_type being the same floating point scalar or vector type, i.e. identity
         // initializer, is already handled in the previous else-if clause.
         op = spv::Op::OpFConvert;
-    } else if ((from_type->Is<sem::I32>() && to_type->Is<sem::U32>()) ||
-               (from_type->Is<sem::U32>() && to_type->Is<sem::I32>()) ||
+    } else if ((from_type->Is<type::I32>() && to_type->Is<type::U32>()) ||
+               (from_type->Is<type::U32>() && to_type->Is<type::I32>()) ||
                (from_type->is_signed_integer_vector() && to_type->is_unsigned_integer_vector()) ||
                (from_type->is_unsigned_integer_vector() &&
                 to_type->is_integer_scalar_or_vector())) {
         op = spv::Op::OpBitcast;
-    } else if ((from_type->is_numeric_scalar() && to_type->Is<sem::Bool>()) ||
+    } else if ((from_type->is_numeric_scalar() && to_type->Is<type::Bool>()) ||
                (from_type->is_numeric_vector() && to_type->is_bool_vector())) {
         // Convert scalar (vector) to bool (vector)
 
@@ -1536,16 +1536,16 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
         const auto* to_elem_type = elem_type_of(to_type);
         uint32_t one_id;
         uint32_t zero_id;
-        if (to_elem_type->Is<sem::F32>()) {
+        if (to_elem_type->Is<type::F32>()) {
             zero_id = GenerateConstantIfNeeded(ScalarConstant::F32(0));
             one_id = GenerateConstantIfNeeded(ScalarConstant::F32(1));
-        } else if (to_elem_type->Is<sem::F16>()) {
+        } else if (to_elem_type->Is<type::F16>()) {
             zero_id = GenerateConstantIfNeeded(ScalarConstant::F16(0));
             one_id = GenerateConstantIfNeeded(ScalarConstant::F16(1));
-        } else if (to_elem_type->Is<sem::U32>()) {
+        } else if (to_elem_type->Is<type::U32>()) {
             zero_id = GenerateConstantIfNeeded(ScalarConstant::U32(0));
             one_id = GenerateConstantIfNeeded(ScalarConstant::U32(1));
-        } else if (to_elem_type->Is<sem::I32>()) {
+        } else if (to_elem_type->Is<type::I32>()) {
             zero_id = GenerateConstantIfNeeded(ScalarConstant::I32(0));
             one_id = GenerateConstantIfNeeded(ScalarConstant::I32(1));
         } else {
@@ -1680,23 +1680,23 @@ uint32_t Builder::GenerateConstantIfNeeded(const sem::Constant* constant) {
 
     return Switch(
         ty,  //
-        [&](const sem::Bool*) {
+        [&](const type::Bool*) {
             bool val = constant->As<bool>();
             return GenerateConstantIfNeeded(ScalarConstant::Bool(val));
         },
-        [&](const sem::F32*) {
+        [&](const type::F32*) {
             auto val = constant->As<f32>();
             return GenerateConstantIfNeeded(ScalarConstant::F32(val.value));
         },
-        [&](const sem::F16*) {
+        [&](const type::F16*) {
             auto val = constant->As<f16>();
             return GenerateConstantIfNeeded(ScalarConstant::F16(val.value));
         },
-        [&](const sem::I32*) {
+        [&](const type::I32*) {
             auto val = constant->As<i32>();
             return GenerateConstantIfNeeded(ScalarConstant::I32(val.value));
         },
-        [&](const sem::U32*) {
+        [&](const type::U32*) {
             auto val = constant->As<u32>();
             return GenerateConstantIfNeeded(ScalarConstant::U32(val.value));
         },
@@ -1727,23 +1727,23 @@ uint32_t Builder::GenerateConstantIfNeeded(const ScalarConstant& constant) {
 
     switch (constant.kind) {
         case ScalarConstant::Kind::kU32: {
-            type_id = GenerateTypeIfNeeded(builder_.create<sem::U32>());
+            type_id = GenerateTypeIfNeeded(builder_.create<type::U32>());
             break;
         }
         case ScalarConstant::Kind::kI32: {
-            type_id = GenerateTypeIfNeeded(builder_.create<sem::I32>());
+            type_id = GenerateTypeIfNeeded(builder_.create<type::I32>());
             break;
         }
         case ScalarConstant::Kind::kF32: {
-            type_id = GenerateTypeIfNeeded(builder_.create<sem::F32>());
+            type_id = GenerateTypeIfNeeded(builder_.create<type::F32>());
             break;
         }
         case ScalarConstant::Kind::kF16: {
-            type_id = GenerateTypeIfNeeded(builder_.create<sem::F16>());
+            type_id = GenerateTypeIfNeeded(builder_.create<type::F16>());
             break;
         }
         case ScalarConstant::Kind::kBool: {
-            type_id = GenerateTypeIfNeeded(builder_.create<sem::Bool>());
+            type_id = GenerateTypeIfNeeded(builder_.create<type::Bool>());
             break;
         }
     }
@@ -2349,14 +2349,14 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
 
     switch (builtin->Type()) {
         case BuiltinType::kAny:
-            if (builtin->Parameters()[0]->Type()->Is<sem::Bool>()) {
+            if (builtin->Parameters()[0]->Type()->Is<type::Bool>()) {
                 // any(v: bool) just resolves to v.
                 return get_arg_as_value_id(0);
             }
             op = spv::Op::OpAny;
             break;
         case BuiltinType::kAll:
-            if (builtin->Parameters()[0]->Type()->Is<sem::Bool>()) {
+            if (builtin->Parameters()[0]->Type()->Is<type::Bool>()) {
                 // all(v: bool) just resolves to v.
                 return get_arg_as_value_id(0);
             }
@@ -2525,7 +2525,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             // TODO(jrprice): If we're targeting SPIR-V 1.4, we don't need to do this.
             auto* result_vector_type = builtin->ReturnType()->As<sem::Vector>();
             if (result_vector_type && builtin->Parameters()[2]->Type()->is_scalar()) {
-                auto* bool_vec_ty = builder_.create<sem::Vector>(builder_.create<sem::Bool>(),
+                auto* bool_vec_ty = builder_.create<sem::Vector>(builder_.create<type::Bool>(),
                                                                  result_vector_type->Width());
                 if (!GenerateTypeIfNeeded(bool_vec_ty)) {
                     return 0;
@@ -2686,7 +2686,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     // to calling append_result_type_and_id_to_spirv_params().
     auto append_result_type_and_id_to_spirv_params_for_read = [&]() {
         if (texture_type->IsAnyOf<type::DepthTexture, type::DepthMultisampledTexture>()) {
-            auto* f32 = builder_.create<sem::F32>();
+            auto* f32 = builder_.create<type::F32>();
             auto* spirv_result_type = builder_.create<sem::Vector>(f32, 4u);
             auto spirv_result = result_op();
             post_emission = [=] {
@@ -2940,10 +2940,10 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
                 return false;
             }
             auto level = Operand(0u);
-            if (arg(Usage::kLevel)->Type()->UnwrapRef()->IsAnyOf<sem::I32, sem::U32>()) {
+            if (arg(Usage::kLevel)->Type()->UnwrapRef()->IsAnyOf<type::I32, type::U32>()) {
                 // Depth textures have i32 or u32 parameters for the level, but SPIR-V expects f32.
                 // Cast.
-                auto f32_type_id = GenerateTypeIfNeeded(builder_.create<sem::F32>());
+                auto f32_type_id = GenerateTypeIfNeeded(builder_.create<type::F32>());
                 if (f32_type_id == 0) {
                     return 0;
                 }
@@ -3068,7 +3068,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                     const sem::Builtin* builtin,
                                     Operand result_type,
                                     Operand result_id) {
-    auto is_value_signed = [&] { return builtin->Parameters()[1]->Type()->Is<sem::I32>(); };
+    auto is_value_signed = [&] { return builtin->Parameters()[1]->Type()->Is<type::I32>(); };
 
     auto address_space = builtin->Parameters()[0]->Type()->As<sem::Pointer>()->AddressSpace();
 
@@ -3219,7 +3219,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                 return false;
             }
 
-            auto* bool_sem_ty = builder_.create<sem::Bool>();
+            auto* bool_sem_ty = builder_.create<type::Bool>();
             auto bool_type = GenerateTypeIfNeeded(bool_sem_ty);
             if (bool_type == 0) {
                 return false;
@@ -3282,7 +3282,7 @@ uint32_t Builder::GenerateSampledImage(const type::Type* texture_type,
     // Using anything other than 0 is problematic on various Vulkan drivers.
     if (auto* depthTextureType = texture_type->As<type::DepthTexture>()) {
         texture_type = builder_.create<type::SampledTexture>(depthTextureType->dim(),
-                                                             builder_.create<sem::F32>());
+                                                             builder_.create<type::F32>());
     }
 
     uint32_t sampled_image_type_id =
@@ -3647,10 +3647,10 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
     // Using anything other than 0 is problematic on various Vulkan drivers.
     if (auto* depthTextureType = type->As<type::DepthTexture>()) {
         type = builder_.create<type::SampledTexture>(depthTextureType->dim(),
-                                                     builder_.create<sem::F32>());
+                                                     builder_.create<type::F32>());
     } else if (auto* multisampledDepthTextureType = type->As<type::DepthMultisampledTexture>()) {
         type = builder_.create<type::MultisampledTexture>(multisampledDepthTextureType->dim(),
-                                                          builder_.create<sem::F32>());
+                                                          builder_.create<type::F32>());
     }
 
     // Pointers and references with differing accesses should not result in a
@@ -3676,19 +3676,19 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
             [&](const sem::Array* arr) {  //
                 return GenerateArrayType(arr, result);
             },
-            [&](const sem::Bool*) {
+            [&](const type::Bool*) {
                 push_type(spv::Op::OpTypeBool, {result});
                 return true;
             },
-            [&](const sem::F32*) {
+            [&](const type::F32*) {
                 push_type(spv::Op::OpTypeFloat, {result, Operand(32u)});
                 return true;
             },
-            [&](const sem::F16*) {
+            [&](const type::F16*) {
                 push_type(spv::Op::OpTypeFloat, {result, Operand(16u)});
                 return true;
             },
-            [&](const sem::I32*) {
+            [&](const type::I32*) {
                 push_type(spv::Op::OpTypeInt, {result, Operand(32u), Operand(1u)});
                 return true;
             },
@@ -3704,14 +3704,14 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
             [&](const sem::Struct* str) {  //
                 return GenerateStructType(str, result);
             },
-            [&](const sem::U32*) {
+            [&](const type::U32*) {
                 push_type(spv::Op::OpTypeInt, {result, Operand(32u), Operand(0u)});
                 return true;
             },
             [&](const sem::Vector* vec) {  //
                 return GenerateVectorType(vec, result);
             },
-            [&](const sem::Void*) {
+            [&](const type::Void*) {
                 push_type(spv::Op::OpTypeVoid, {result});
                 return true;
             },
@@ -3812,10 +3812,10 @@ bool Builder::GenerateTextureType(const type::Texture* texture, const Operand& r
     uint32_t type_id = Switch(
         texture,
         [&](const type::DepthTexture*) {
-            return GenerateTypeIfNeeded(builder_.create<sem::F32>());
+            return GenerateTypeIfNeeded(builder_.create<type::F32>());
         },
         [&](const type::DepthMultisampledTexture*) {
-            return GenerateTypeIfNeeded(builder_.create<sem::F32>());
+            return GenerateTypeIfNeeded(builder_.create<type::F32>());
         },
         [&](const type::SampledTexture* t) { return GenerateTypeIfNeeded(t->type()); },
         [&](const type::MultisampledTexture* t) { return GenerateTypeIfNeeded(t->type()); },

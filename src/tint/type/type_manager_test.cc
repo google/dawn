@@ -15,8 +15,8 @@
 #include "src/tint/type/type_manager.h"
 
 #include "gtest/gtest.h"
-#include "src/tint/sem/i32.h"
-#include "src/tint/sem/u32.h"
+#include "src/tint/type/i32.h"
+#include "src/tint/type/u32.h"
 
 namespace tint::type {
 namespace {
@@ -35,51 +35,51 @@ using TypeManagerTest = testing::Test;
 
 TEST_F(TypeManagerTest, GetUnregistered) {
     TypeManager tm;
-    auto* t = tm.Get<sem::I32>();
+    auto* t = tm.Get<type::I32>();
     ASSERT_NE(t, nullptr);
-    EXPECT_TRUE(t->Is<sem::I32>());
+    EXPECT_TRUE(t->Is<type::I32>());
 }
 
 TEST_F(TypeManagerTest, GetSameTypeReturnsSamePtr) {
     TypeManager tm;
-    auto* t = tm.Get<sem::I32>();
+    auto* t = tm.Get<type::I32>();
     ASSERT_NE(t, nullptr);
-    EXPECT_TRUE(t->Is<sem::I32>());
+    EXPECT_TRUE(t->Is<type::I32>());
 
-    auto* t2 = tm.Get<sem::I32>();
+    auto* t2 = tm.Get<type::I32>();
     EXPECT_EQ(t, t2);
 }
 
 TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
     TypeManager tm;
-    type::Type* t = tm.Get<sem::I32>();
+    type::Type* t = tm.Get<type::I32>();
     ASSERT_NE(t, nullptr);
-    EXPECT_TRUE(t->Is<sem::I32>());
+    EXPECT_TRUE(t->Is<type::I32>());
 
-    type::Type* t2 = tm.Get<sem::U32>();
+    type::Type* t2 = tm.Get<type::U32>();
     ASSERT_NE(t2, nullptr);
     EXPECT_NE(t, t2);
-    EXPECT_TRUE(t2->Is<sem::U32>());
+    EXPECT_TRUE(t2->Is<type::U32>());
 }
 
 TEST_F(TypeManagerTest, Find) {
     TypeManager tm;
-    auto* created = tm.Get<sem::I32>();
+    auto* created = tm.Get<type::I32>();
 
-    EXPECT_EQ(tm.Find<sem::U32>(), nullptr);
-    EXPECT_EQ(tm.Find<sem::I32>(), created);
+    EXPECT_EQ(tm.Find<type::U32>(), nullptr);
+    EXPECT_EQ(tm.Find<type::I32>(), created);
 }
 
 TEST_F(TypeManagerTest, WrapDoesntAffectInner) {
     TypeManager inner;
     TypeManager outer = TypeManager::Wrap(inner);
 
-    inner.Get<sem::I32>();
+    inner.Get<type::I32>();
 
     EXPECT_EQ(count(inner), 1u);
     EXPECT_EQ(count(outer), 0u);
 
-    outer.Get<sem::U32>();
+    outer.Get<type::U32>();
 
     EXPECT_EQ(count(inner), 1u);
     EXPECT_EQ(count(outer), 1u);

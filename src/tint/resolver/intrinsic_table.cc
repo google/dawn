@@ -349,7 +349,7 @@ enum class OverloadFlag {
 using OverloadFlags = utils::EnumSet<OverloadFlag>;
 
 bool match_bool(MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<Any, sem::Bool>();
+    return ty->IsAnyOf<Any, type::Bool>();
 }
 
 const type::AbstractFloat* build_fa(MatchState& state) {
@@ -370,40 +370,40 @@ bool match_ia(MatchState& state, const type::Type* ty) {
            ty->IsAnyOf<Any, type::AbstractInt>();
 }
 
-const sem::Bool* build_bool(MatchState& state) {
-    return state.builder.create<sem::Bool>();
+const type::Bool* build_bool(MatchState& state) {
+    return state.builder.create<type::Bool>();
 }
 
-const sem::F16* build_f16(MatchState& state) {
-    return state.builder.create<sem::F16>();
+const type::F16* build_f16(MatchState& state) {
+    return state.builder.create<type::F16>();
 }
 
 bool match_f16(MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<Any, sem::F16, type::AbstractNumeric>();
+    return ty->IsAnyOf<Any, type::F16, type::AbstractNumeric>();
 }
 
-const sem::F32* build_f32(MatchState& state) {
-    return state.builder.create<sem::F32>();
+const type::F32* build_f32(MatchState& state) {
+    return state.builder.create<type::F32>();
 }
 
 bool match_f32(MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<Any, sem::F32, type::AbstractNumeric>();
+    return ty->IsAnyOf<Any, type::F32, type::AbstractNumeric>();
 }
 
-const sem::I32* build_i32(MatchState& state) {
-    return state.builder.create<sem::I32>();
+const type::I32* build_i32(MatchState& state) {
+    return state.builder.create<type::I32>();
 }
 
 bool match_i32(MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<Any, sem::I32, type::AbstractInt>();
+    return ty->IsAnyOf<Any, type::I32, type::AbstractInt>();
 }
 
-const sem::U32* build_u32(MatchState& state) {
-    return state.builder.create<sem::U32>();
+const type::U32* build_u32(MatchState& state) {
+    return state.builder.create<type::U32>();
 }
 
 bool match_u32(MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<Any, sem::U32, type::AbstractInt>();
+    return ty->IsAnyOf<Any, type::U32, type::AbstractInt>();
 }
 
 bool match_vec(MatchState&, const type::Type* ty, Number& N, const type::Type*& T) {
@@ -834,18 +834,18 @@ sem::Struct* build_struct(ProgramBuilder& b,
 
 const sem::Struct* build_modf_result(MatchState& state, const type::Type* el) {
     auto build_f32 = [&] {
-        auto* ty = state.builder.create<sem::F32>();
+        auto* ty = state.builder.create<type::F32>();
         return build_struct(state.builder, "__modf_result_f32", {{"fract", ty}, {"whole", ty}});
     };
     auto build_f16 = [&] {
-        auto* ty = state.builder.create<sem::F16>();
+        auto* ty = state.builder.create<type::F16>();
         return build_struct(state.builder, "__modf_result_f16", {{"fract", ty}, {"whole", ty}});
     };
 
     return Switch(
-        el,                                            //
-        [&](const sem::F32*) { return build_f32(); },  //
-        [&](const sem::F16*) { return build_f16(); },  //
+        el,                                             //
+        [&](const type::F32*) { return build_f32(); },  //
+        [&](const type::F16*) { return build_f16(); },  //
         [&](const type::AbstractFloat*) {
             auto* abstract = build_struct(state.builder, "__modf_result_abstract",
                                           {{"fract", el}, {"whole", el}});
@@ -862,18 +862,18 @@ const sem::Struct* build_modf_result(MatchState& state, const type::Type* el) {
 const sem::Struct* build_modf_result_vec(MatchState& state, Number& n, const type::Type* el) {
     auto prefix = "__modf_result_vec" + std::to_string(n.Value());
     auto build_f32 = [&] {
-        auto* vec = state.builder.create<sem::Vector>(state.builder.create<sem::F32>(), n.Value());
+        auto* vec = state.builder.create<sem::Vector>(state.builder.create<type::F32>(), n.Value());
         return build_struct(state.builder, prefix + "_f32", {{"fract", vec}, {"whole", vec}});
     };
     auto build_f16 = [&] {
-        auto* vec = state.builder.create<sem::Vector>(state.builder.create<sem::F16>(), n.Value());
+        auto* vec = state.builder.create<sem::Vector>(state.builder.create<type::F16>(), n.Value());
         return build_struct(state.builder, prefix + "_f16", {{"fract", vec}, {"whole", vec}});
     };
 
     return Switch(
-        el,                                            //
-        [&](const sem::F32*) { return build_f32(); },  //
-        [&](const sem::F16*) { return build_f16(); },  //
+        el,                                             //
+        [&](const type::F32*) { return build_f32(); },  //
+        [&](const type::F16*) { return build_f16(); },  //
         [&](const type::AbstractFloat*) {
             auto* vec = state.builder.create<sem::Vector>(el, n.Value());
             auto* abstract =
@@ -890,20 +890,20 @@ const sem::Struct* build_modf_result_vec(MatchState& state, Number& n, const typ
 
 const sem::Struct* build_frexp_result(MatchState& state, const type::Type* el) {
     auto build_f32 = [&] {
-        auto* f = state.builder.create<sem::F32>();
-        auto* i = state.builder.create<sem::I32>();
+        auto* f = state.builder.create<type::F32>();
+        auto* i = state.builder.create<type::I32>();
         return build_struct(state.builder, "__frexp_result_f32", {{"fract", f}, {"exp", i}});
     };
     auto build_f16 = [&] {
-        auto* f = state.builder.create<sem::F16>();
-        auto* i = state.builder.create<sem::I32>();
+        auto* f = state.builder.create<type::F16>();
+        auto* i = state.builder.create<type::I32>();
         return build_struct(state.builder, "__frexp_result_f16", {{"fract", f}, {"exp", i}});
     };
 
     return Switch(
-        el,                                            //
-        [&](const sem::F32*) { return build_f32(); },  //
-        [&](const sem::F16*) { return build_f16(); },  //
+        el,                                             //
+        [&](const type::F32*) { return build_f32(); },  //
+        [&](const type::F16*) { return build_f16(); },  //
         [&](const type::AbstractFloat*) {
             auto* i = state.builder.create<type::AbstractInt>();
             auto* abstract =
@@ -921,20 +921,20 @@ const sem::Struct* build_frexp_result(MatchState& state, const type::Type* el) {
 const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n, const type::Type* el) {
     auto prefix = "__frexp_result_vec" + std::to_string(n.Value());
     auto build_f32 = [&] {
-        auto* f = state.builder.create<sem::Vector>(state.builder.create<sem::F32>(), n.Value());
-        auto* e = state.builder.create<sem::Vector>(state.builder.create<sem::I32>(), n.Value());
+        auto* f = state.builder.create<sem::Vector>(state.builder.create<type::F32>(), n.Value());
+        auto* e = state.builder.create<sem::Vector>(state.builder.create<type::I32>(), n.Value());
         return build_struct(state.builder, prefix + "_f32", {{"fract", f}, {"exp", e}});
     };
     auto build_f16 = [&] {
-        auto* f = state.builder.create<sem::Vector>(state.builder.create<sem::F16>(), n.Value());
-        auto* e = state.builder.create<sem::Vector>(state.builder.create<sem::I32>(), n.Value());
+        auto* f = state.builder.create<sem::Vector>(state.builder.create<type::F16>(), n.Value());
+        auto* e = state.builder.create<sem::Vector>(state.builder.create<type::I32>(), n.Value());
         return build_struct(state.builder, prefix + "_f16", {{"fract", f}, {"exp", e}});
     };
 
     return Switch(
-        el,                                            //
-        [&](const sem::F32*) { return build_f32(); },  //
-        [&](const sem::F16*) { return build_f16(); },  //
+        el,                                             //
+        [&](const type::F32*) { return build_f32(); },  //
+        [&](const type::F16*) { return build_f16(); },  //
         [&](const type::AbstractFloat*) {
             auto* f = state.builder.create<sem::Vector>(el, n.Value());
             auto* e = state.builder.create<sem::Vector>(state.builder.create<type::AbstractInt>(),
@@ -956,7 +956,7 @@ const sem::Struct* build_atomic_compare_exchange_result(MatchState& state, const
         state.builder,
         "__atomic_compare_exchange_result" + ty->FriendlyName(state.builder.Symbols()),
         {{"old_value", const_cast<type::Type*>(ty)},
-         {"exchanged", state.builder.create<sem::Bool>()}});
+         {"exchanged", state.builder.create<type::Bool>()}});
 }
 
 /// ParameterInfo describes a parameter
@@ -1549,7 +1549,7 @@ IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
             return {};
         }
     } else {
-        return_type = builder.create<sem::Void>();
+        return_type = builder.create<type::Void>();
     }
 
     return IntrinsicPrototype{match.overload, return_type, std::move(match.parameters)};

@@ -473,7 +473,7 @@ struct BuiltinPolyfill::State {
         uint32_t width = WidthOf(ty);
 
         // Currently in WGSL parameters of insertBits must be i32, u32, vecN<i32> or vecN<u32>
-        if (!type::Type::DeepestElementOf(ty)->IsAnyOf<sem::I32, sem::U32>()) {
+        if (!type::Type::DeepestElementOf(ty)->IsAnyOf<type::I32, type::U32>()) {
             TINT_ICE(Transform, b.Diagnostics())
                 << "insertBits polyfill only support i32, u32, and vector of i32 or u32, got "
                 << b.FriendlyName(ty);
@@ -895,7 +895,7 @@ Transform::ApplyResult BuiltinPolyfill::Apply(const Program* src,
                         auto& sig = builtin->Signature();
                         auto* tex = sig.Parameter(sem::ParameterUsage::kTexture);
                         if (auto* stex = tex->Type()->As<type::SampledTexture>()) {
-                            if (stex->type()->Is<sem::F32>()) {
+                            if (stex->type()->Is<type::F32>()) {
                                 fn = builtin_polyfills.GetOrCreate(builtin, [&] {
                                     return s.textureSampleBaseClampToEdge_2d_f32();
                                 });

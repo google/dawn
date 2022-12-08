@@ -52,7 +52,7 @@ TEST_F(SamplerTest, Equals) {
 
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
-    EXPECT_FALSE(a->Equals(sem::Void{}));
+    EXPECT_FALSE(a->Equals(type::Void{}));
 }
 
 TEST_F(SamplerTest, FriendlyNameSampler) {

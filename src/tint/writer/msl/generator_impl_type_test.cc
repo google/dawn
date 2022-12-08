@@ -146,7 +146,7 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Bool) {
-    auto* bool_ = create<sem::Bool>();
+    auto* bool_ = create<type::Bool>();
 
     GeneratorImpl& gen = Build();
 
@@ -156,7 +156,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Bool) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_F32) {
-    auto* f32 = create<sem::F32>();
+    auto* f32 = create<type::F32>();
 
     GeneratorImpl& gen = Build();
 
@@ -166,7 +166,7 @@ TEST_F(MslGeneratorImplTest, EmitType_F32) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_F16) {
-    auto* f16 = create<sem::F16>();
+    auto* f16 = create<type::F16>();
 
     GeneratorImpl& gen = Build();
 
@@ -176,7 +176,7 @@ TEST_F(MslGeneratorImplTest, EmitType_F16) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_I32) {
-    auto* i32 = create<sem::I32>();
+    auto* i32 = create<type::I32>();
 
     GeneratorImpl& gen = Build();
 
@@ -186,7 +186,7 @@ TEST_F(MslGeneratorImplTest, EmitType_I32) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Matrix_F32) {
-    auto* f32 = create<sem::F32>();
+    auto* f32 = create<type::F32>();
     auto* vec3 = create<sem::Vector>(f32, 3u);
     auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
 
@@ -198,7 +198,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Matrix_F32) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Matrix_F16) {
-    auto* f16 = create<sem::F16>();
+    auto* f16 = create<type::F16>();
     auto* vec3 = create<sem::Vector>(f16, 3u);
     auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
 
@@ -210,7 +210,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Matrix_F16) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Pointer) {
-    auto* f32 = create<sem::F32>();
+    auto* f32 = create<type::F32>();
     auto* p = create<sem::Pointer>(f32, ast::AddressSpace::kWorkgroup, ast::Access::kReadWrite);
 
     GeneratorImpl& gen = Build();
@@ -699,7 +699,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_WithAttribute) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_U32) {
-    auto* u32 = create<sem::U32>();
+    auto* u32 = create<type::U32>();
 
     GeneratorImpl& gen = Build();
 
@@ -709,7 +709,7 @@ TEST_F(MslGeneratorImplTest, EmitType_U32) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Vector) {
-    auto* f32 = create<sem::F32>();
+    auto* f32 = create<type::F32>();
     auto* vec3 = create<sem::Vector>(f32, 3u);
 
     GeneratorImpl& gen = Build();
@@ -720,7 +720,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Vector) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Void) {
-    auto* void_ = create<sem::Void>();
+    auto* void_ = create<type::Void>();
 
     GeneratorImpl& gen = Build();
 
@@ -803,7 +803,7 @@ using MslSampledtexturesTest = TestParamHelper<MslTextureData>;
 TEST_P(MslSampledtexturesTest, Emit) {
     auto params = GetParam();
 
-    auto* f32 = create<sem::F32>();
+    auto* f32 = create<type::F32>();
     auto* s = create<type::SampledTexture>(params.dim, f32);
 
     GeneratorImpl& gen = Build();
@@ -825,7 +825,7 @@ INSTANTIATE_TEST_SUITE_P(
                        "texturecube_array<float, access::sample>"}));
 
 TEST_F(MslGeneratorImplTest, Emit_TypeMultisampledTexture) {
-    auto* u32 = create<sem::U32>();
+    auto* u32 = create<type::U32>();
     auto* ms = create<type::MultisampledTexture>(ast::TextureDimension::k2d, u32);
 
     GeneratorImpl& gen = Build();

@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,43 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/i32.h"
+#include "src/tint/type/bool.h"
 
 #include "src/tint/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::I32);
+TINT_INSTANTIATE_TYPEINFO(tint::type::Bool);
 
-namespace tint::sem {
+namespace tint::type {
 
-I32::I32()
+Bool::Bool()
     : Base(type::TypeFlags{
           Flag::kConstructable,
           Flag::kCreationFixedFootprint,
           Flag::kFixedFootprint,
       }) {}
 
-I32::I32(I32&&) = default;
+Bool::Bool(Bool&&) = default;
 
-I32::~I32() = default;
+Bool::~Bool() = default;
 
-size_t I32::Hash() const {
-    return static_cast<size_t>(TypeInfo::Of<I32>().full_hashcode);
+size_t Bool::Hash() const {
+    return static_cast<size_t>(TypeInfo::Of<Bool>().full_hashcode);
 }
 
-bool I32::Equals(const Type& other) const {
-    return other.Is<I32>();
+bool Bool::Equals(const Type& other) const {
+    return other.Is<Bool>();
 }
 
-std::string I32::FriendlyName(const SymbolTable&) const {
-    return "i32";
+std::string Bool::FriendlyName(const SymbolTable&) const {
+    return "bool";
 }
 
-uint32_t I32::Size() const {
+uint32_t Bool::Size() const {
     return 4;
 }
 
-uint32_t I32::Align() const {
+uint32_t Bool::Align() const {
     return 4;
 }
 
-}  // namespace tint::sem
+}  // namespace tint::type

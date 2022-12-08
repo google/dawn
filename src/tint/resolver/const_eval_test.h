@@ -43,11 +43,11 @@ inline void CollectScalars(const sem::Constant* c, utils::Vector<builder::Scalar
         c->Type(),  //
         [&](const type::AbstractInt*) { scalars.Push(c->As<AInt>()); },
         [&](const type::AbstractFloat*) { scalars.Push(c->As<AFloat>()); },
-        [&](const sem::Bool*) { scalars.Push(c->As<bool>()); },
-        [&](const sem::I32*) { scalars.Push(c->As<i32>()); },
-        [&](const sem::U32*) { scalars.Push(c->As<u32>()); },
-        [&](const sem::F32*) { scalars.Push(c->As<f32>()); },
-        [&](const sem::F16*) { scalars.Push(c->As<f16>()); },
+        [&](const type::Bool*) { scalars.Push(c->As<bool>()); },
+        [&](const type::I32*) { scalars.Push(c->As<i32>()); },
+        [&](const type::U32*) { scalars.Push(c->As<u32>()); },
+        [&](const type::F32*) { scalars.Push(c->As<f32>()); },
+        [&](const type::F16*) { scalars.Push(c->As<f16>()); },
         [&](Default) {
             size_t i = 0;
             while (auto* child = c->Index(i++)) {

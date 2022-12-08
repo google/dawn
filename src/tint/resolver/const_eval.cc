@@ -24,18 +24,18 @@
 
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/array.h"
-#include "src/tint/sem/bool.h"
 #include "src/tint/sem/constant.h"
-#include "src/tint/sem/f16.h"
-#include "src/tint/sem/f32.h"
-#include "src/tint/sem/i32.h"
 #include "src/tint/sem/matrix.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/type_initializer.h"
-#include "src/tint/sem/u32.h"
 #include "src/tint/sem/vector.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
+#include "src/tint/type/bool.h"
+#include "src/tint/type/f16.h"
+#include "src/tint/type/f32.h"
+#include "src/tint/type/i32.h"
+#include "src/tint/type/u32.h"
 #include "src/tint/utils/bitcast.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/map.h"
@@ -59,8 +59,8 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_iu32(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const sem::I32*) { return f(cs->template As<i32>()...); },
-        [&](const sem::U32*) { return f(cs->template As<u32>()...); });
+        [&](const type::I32*) { return f(cs->template As<i32>()...); },
+        [&](const type::U32*) { return f(cs->template As<u32>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
@@ -70,8 +70,8 @@ auto Dispatch_ia_iu32(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
         [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
-        [&](const sem::I32*) { return f(cs->template As<i32>()...); },
-        [&](const sem::U32*) { return f(cs->template As<u32>()...); });
+        [&](const type::I32*) { return f(cs->template As<i32>()...); },
+        [&](const type::U32*) { return f(cs->template As<u32>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
@@ -81,9 +81,9 @@ auto Dispatch_ia_iu32_bool(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
         [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
-        [&](const sem::I32*) { return f(cs->template As<i32>()...); },
-        [&](const sem::U32*) { return f(cs->template As<u32>()...); },
-        [&](const sem::Bool*) { return f(cs->template As<bool>()...); });
+        [&](const type::I32*) { return f(cs->template As<i32>()...); },
+        [&](const type::U32*) { return f(cs->template As<u32>()...); },
+        [&](const type::Bool*) { return f(cs->template As<bool>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
@@ -94,9 +94,9 @@ auto Dispatch_fia_fi32_f16(F&& f, CONSTANTS&&... cs) {
         First(cs...)->Type(),  //
         [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
         [&](const type::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
-        [&](const sem::F32*) { return f(cs->template As<f32>()...); },
-        [&](const sem::I32*) { return f(cs->template As<i32>()...); },
-        [&](const sem::F16*) { return f(cs->template As<f16>()...); });
+        [&](const type::F32*) { return f(cs->template As<f32>()...); },
+        [&](const type::I32*) { return f(cs->template As<i32>()...); },
+        [&](const type::F16*) { return f(cs->template As<f16>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
@@ -107,10 +107,10 @@ auto Dispatch_fia_fiu32_f16(F&& f, CONSTANTS&&... cs) {
         First(cs...)->Type(),  //
         [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
         [&](const type::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
-        [&](const sem::F32*) { return f(cs->template As<f32>()...); },
-        [&](const sem::I32*) { return f(cs->template As<i32>()...); },
-        [&](const sem::U32*) { return f(cs->template As<u32>()...); },
-        [&](const sem::F16*) { return f(cs->template As<f16>()...); });
+        [&](const type::F32*) { return f(cs->template As<f32>()...); },
+        [&](const type::I32*) { return f(cs->template As<i32>()...); },
+        [&](const type::U32*) { return f(cs->template As<u32>()...); },
+        [&](const type::F16*) { return f(cs->template As<f16>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
@@ -121,11 +121,11 @@ auto Dispatch_fia_fiu32_f16_bool(F&& f, CONSTANTS&&... cs) {
         First(cs...)->Type(),  //
         [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
         [&](const type::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
-        [&](const sem::F32*) { return f(cs->template As<f32>()...); },
-        [&](const sem::I32*) { return f(cs->template As<i32>()...); },
-        [&](const sem::U32*) { return f(cs->template As<u32>()...); },
-        [&](const sem::F16*) { return f(cs->template As<f16>()...); },
-        [&](const sem::Bool*) { return f(cs->template As<bool>()...); });
+        [&](const type::F32*) { return f(cs->template As<f32>()...); },
+        [&](const type::I32*) { return f(cs->template As<i32>()...); },
+        [&](const type::U32*) { return f(cs->template As<u32>()...); },
+        [&](const type::F16*) { return f(cs->template As<f16>()...); },
+        [&](const type::Bool*) { return f(cs->template As<bool>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
@@ -135,8 +135,8 @@ auto Dispatch_fa_f32_f16(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
         [&](const type::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
-        [&](const sem::F32*) { return f(cs->template As<f32>()...); },
-        [&](const sem::F16*) { return f(cs->template As<f16>()...); });
+        [&](const type::F32*) { return f(cs->template As<f32>()...); },
+        [&](const type::F16*) { return f(cs->template As<f16>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
@@ -148,7 +148,7 @@ auto Dispatch_bool(F&& f, CONSTANTS&&... cs) {
 
 /// ZeroTypeDispatch is a helper for calling the function `f`, passing a single zero-value argument
 /// of the C++ type that corresponds to the type::Type `type`. For example, calling
-/// `ZeroTypeDispatch()` with a type of `sem::I32*` will call the function f with a single argument
+/// `ZeroTypeDispatch()` with a type of `type::I32*` will call the function f with a single argument
 /// of `i32(0)`.
 /// @returns the value returned by calling `f`.
 /// @note `type` must be a scalar or abstract numeric type. Other types will not call `f`, and will
@@ -159,11 +159,11 @@ auto ZeroTypeDispatch(const type::Type* type, F&& f) {
         type,                                                      //
         [&](const type::AbstractInt*) { return f(AInt(0)); },      //
         [&](const type::AbstractFloat*) { return f(AFloat(0)); },  //
-        [&](const sem::I32*) { return f(i32(0)); },                //
-        [&](const sem::U32*) { return f(u32(0)); },                //
-        [&](const sem::F32*) { return f(f32(0)); },                //
-        [&](const sem::F16*) { return f(f16(0)); },                //
-        [&](const sem::Bool*) { return f(static_cast<bool>(0)); });
+        [&](const type::I32*) { return f(i32(0)); },               //
+        [&](const type::U32*) { return f(u32(0)); },               //
+        [&](const type::F32*) { return f(f32(0)); },               //
+        [&](const type::F16*) { return f(f16(0)); },               //
+        [&](const type::Bool*) { return f(static_cast<bool>(0)); });
 }
 
 /// @returns `value` if `T` is not a Number, otherwise ValueOf returns the inner value of the
@@ -1954,7 +1954,7 @@ ConstEval::Result ConstEval::OpShiftLeft(const type::Type* ty,
         return Dispatch_ia_iu32(create, c0, c1);
     };
 
-    if (!type::Type::DeepestElementOf(args[1]->Type())->Is<sem::U32>()) {
+    if (!type::Type::DeepestElementOf(args[1]->Type())->Is<type::U32>()) {
         TINT_ICE(Resolver, builder.Diagnostics())
             << "Element type of rhs of ShiftLeft must be a u32";
         return utils::Failure;
@@ -2019,7 +2019,7 @@ ConstEval::Result ConstEval::OpShiftRight(const type::Type* ty,
         return Dispatch_ia_iu32(create, c0, c1);
     };
 
-    if (!type::Type::DeepestElementOf(args[1]->Type())->Is<sem::U32>()) {
+    if (!type::Type::DeepestElementOf(args[1]->Type())->Is<type::U32>()) {
         TINT_ICE(Resolver, builder.Diagnostics())
             << "Element type of rhs of ShiftLeft must be a u32";
         return utils::Failure;
@@ -2647,16 +2647,16 @@ ConstEval::Result ConstEval::frexp(const type::Type* ty,
         double fract = std::frexp(s->As<AFloat>(), &exp);
         return Switch(
             s->Type(),
-            [&](const sem::F32*) {
+            [&](const type::F32*) {
                 return FractExp{
-                    CreateElement(builder, source, builder.create<sem::F32>(), f32(fract)),
-                    CreateElement(builder, source, builder.create<sem::I32>(), i32(exp)),
+                    CreateElement(builder, source, builder.create<type::F32>(), f32(fract)),
+                    CreateElement(builder, source, builder.create<type::I32>(), i32(exp)),
                 };
             },
-            [&](const sem::F16*) {
+            [&](const type::F16*) {
                 return FractExp{
-                    CreateElement(builder, source, builder.create<sem::F16>(), f16(fract)),
-                    CreateElement(builder, source, builder.create<sem::I32>(), i32(exp)),
+                    CreateElement(builder, source, builder.create<type::F16>(), f16(fract)),
+                    CreateElement(builder, source, builder.create<type::I32>(), i32(exp)),
                 };
             },
             [&](const type::AbstractFloat*) {
