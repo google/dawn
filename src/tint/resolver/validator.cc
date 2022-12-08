@@ -57,8 +57,6 @@
 #include "src/tint/sem/loop_statement.h"
 #include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
-#include "src/tint/sem/pointer.h"
-#include "src/tint/sem/reference.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
@@ -70,6 +68,8 @@
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/pointer.h"
+#include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/sampler.h"
 #include "src/tint/type/storage_texture.h"
@@ -270,7 +270,7 @@ bool Validator::Atomic(const ast::Atomic* a, const sem::Atomic* s) const {
     return true;
 }
 
-bool Validator::Pointer(const ast::Pointer* a, const sem::Pointer* s) const {
+bool Validator::Pointer(const ast::Pointer* a, const type::Pointer* s) const {
     if (s->AddressSpace() == ast::AddressSpace::kUndefined) {
         AddError("ptr missing address space", a->source);
         return false;
@@ -721,7 +721,7 @@ bool Validator::Let(const sem::Variable* v) const {
     auto* decl = v->Declaration();
     auto* storage_ty = v->Type()->UnwrapRef();
 
-    if (!(storage_ty->IsConstructible() || storage_ty->Is<sem::Pointer>())) {
+    if (!(storage_ty->IsConstructible() || storage_ty->Is<type::Pointer>())) {
         AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a 'let'",
                  decl->source);
         return false;
@@ -798,7 +798,7 @@ bool Validator::Parameter(const ast::Function* func, const sem::Variable* var) c
         }
     }
 
-    if (auto* ref = var->Type()->As<sem::Pointer>()) {
+    if (auto* ref = var->Type()->As<type::Pointer>()) {
         if (IsValidationEnabled(decl->attributes, ast::DisabledValidation::kIgnoreAddressSpace)) {
             bool ok = false;
 
@@ -832,7 +832,7 @@ bool Validator::Parameter(const ast::Function* func, const sem::Variable* var) c
             AddError("type of function parameter must be constructible", decl->type->source);
             return false;
         }
-    } else if (!var->Type()->IsAnyOf<type::Texture, type::Sampler, sem::Pointer>()) {
+    } else if (!var->Type()->IsAnyOf<type::Texture, type::Sampler, type::Pointer>()) {
         AddError("type of function parameter cannot be " + sem_.TypeNameOf(var->Type()),
                  decl->source);
         return false;
@@ -1662,17 +1662,17 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
             return false;
         }
 
-        if (param_type->Is<sem::Pointer>() &&
+        if (param_type->Is<type::Pointer>() &&
             !enabled_extensions_.Contains(ast::Extension::kChromiumExperimentalFullPtrParameters)) {
             // https://gpuweb.github.io/gpuweb/wgsl/#function-restriction
             // Each argument of pointer type to a user-defined function must have the same memory
             // view as its root identifier.
             // We can validate this by just comparing the store type of the argument with that of
             // its root identifier, as these will match iff the memory view is the same.
-            auto* arg_store_type = arg_type->As<sem::Pointer>()->StoreType();
+            auto* arg_store_type = arg_type->As<type::Pointer>()->StoreType();
             auto* root = call->Arguments()[i]->RootIdentifier();
-            auto* root_ptr_ty = root->Type()->As<sem::Pointer>();
-            auto* root_ref_ty = root->Type()->As<sem::Reference>();
+            auto* root_ptr_ty = root->Type()->As<type::Pointer>();
+            auto* root_ref_ty = root->Type()->As<type::Reference>();
             TINT_ASSERT(Resolver, root_ptr_ty || root_ref_ty);
             const type::Type* root_store_type;
             if (root_ptr_ty) {
@@ -2266,7 +2266,7 @@ bool Validator::Assignment(const ast::Statement* a, const type::Type* rhs_ty) co
         // https://www.w3.org/TR/WGSL/#phony-assignment-section
         auto* ty = rhs_ty->UnwrapRef();
         if (!ty->IsConstructible() &&
-            !ty->IsAnyOf<sem::Pointer, type::Texture, type::Sampler, type::AbstractNumeric>()) {
+            !ty->IsAnyOf<type::Pointer, type::Texture, type::Sampler, type::AbstractNumeric>()) {
             AddError("cannot assign '" + sem_.TypeNameOf(rhs_ty) +
                          "' to '_'. '_' can only be assigned a constructible, pointer, texture or "
                          "sampler type",
@@ -2293,7 +2293,7 @@ bool Validator::Assignment(const ast::Statement* a, const type::Type* rhs_ty) co
         }
     }
 
-    auto* lhs_ref = lhs_ty->As<sem::Reference>();
+    auto* lhs_ref = lhs_ty->As<type::Reference>();
     if (!lhs_ref) {
         // LHS is not a reference, so it has no storage.
         AddError("cannot assign to value of type '" + sem_.TypeNameOf(lhs_ty) + "'", lhs->source);
@@ -2342,7 +2342,7 @@ bool Validator::IncrementDecrementStatement(const ast::IncrementDecrementStateme
     }
 
     auto const* lhs_ty = sem_.TypeOf(lhs);
-    auto* lhs_ref = lhs_ty->As<sem::Reference>();
+    auto* lhs_ref = lhs_ty->As<type::Reference>();
     if (!lhs_ref) {
         // LHS is not a reference, so it has no storage.
         AddError("cannot modify value of type '" + sem_.TypeNameOf(lhs_ty) + "'", lhs->source);

@@ -15,7 +15,7 @@
 #include "src/tint/sem/atomic.h"
 
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/reference.h"
+#include "src/tint/type/reference.h"
 #include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Atomic);
@@ -28,7 +28,7 @@ Atomic::Atomic(const type::Type* subtype)
           Flag::kFixedFootprint,
       }),
       subtype_(subtype) {
-    TINT_ASSERT(AST, !subtype->Is<Reference>());
+    TINT_ASSERT(AST, !subtype->Is<type::Reference>());
 }
 
 size_t Atomic::Hash() const {

@@ -22,9 +22,9 @@
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
-#include "src/tint/sem/reference.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/transform/utils/hoist_to_decl_before.h"
+#include "src/tint/type/reference.h"
 #include "src/tint/utils/map.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DemoteToHelper);
@@ -123,7 +123,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                 }
 
                 // Skip writes to invocation-private address spaces.
-                auto* ref = sem.Get(assign->lhs)->Type()->As<sem::Reference>();
+                auto* ref = sem.Get(assign->lhs)->Type()->As<type::Reference>();
                 switch (ref->AddressSpace()) {
                     case ast::AddressSpace::kStorage:
                         // Need to mask these.

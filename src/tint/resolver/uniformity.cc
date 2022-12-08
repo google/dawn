@@ -172,7 +172,7 @@ struct FunctionInfo {
             parameters[i].sem = sem;
 
             Node* node_init;
-            if (sem->Type()->Is<sem::Pointer>()) {
+            if (sem->Type()->Is<type::Pointer>()) {
                 node_init = CreateNode("ptrparam_" + name + "_init");
                 parameters[i].pointer_return_value = CreateNode("ptrparam_" + name + "_return");
                 local_var_decls.Add(sem);
@@ -982,7 +982,7 @@ class UniformityGraph {
                     node = v;
 
                     // Store if lhs is a partial pointer
-                    if (sem_var->Type()->Is<sem::Pointer>()) {
+                    if (sem_var->Type()->Is<type::Pointer>()) {
                         auto* init = sem_.Get(decl->variable->initializer);
                         if (auto* unary_init = init->Declaration()->As<ast::UnaryOpExpression>()) {
                             auto* e = UnwrapIndirectAndAddressOfChain(unary_init);
@@ -1378,7 +1378,7 @@ class UniformityGraph {
                 }
 
                 auto* sem_arg = sem_.Get(call->args[i]);
-                if (sem_arg->Type()->Is<sem::Pointer>()) {
+                if (sem_arg->Type()->Is<type::Pointer>()) {
                     auto* ptr_result =
                         CreateNode(name + "_ptrarg_" + std::to_string(i) + "_result", call);
                     ptr_result->type = Node::kFunctionCallPointerArgumentResult;

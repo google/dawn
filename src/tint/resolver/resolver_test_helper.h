@@ -616,8 +616,8 @@ struct DataType<ptr<T>> {
     /// @param b the ProgramBuilder
     /// @return the semantic aliased type
     static inline const type::Type* Sem(ProgramBuilder& b) {
-        return b.create<sem::Pointer>(DataType<T>::Sem(b), ast::AddressSpace::kPrivate,
-                                      ast::Access::kReadWrite);
+        return b.create<type::Pointer>(DataType<T>::Sem(b), ast::AddressSpace::kPrivate,
+                                       ast::Access::kReadWrite);
     }
 
     /// @param b the ProgramBuilder

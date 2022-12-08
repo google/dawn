@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/reference.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
 #include "src/tint/type/array_count.h"
 #include "src/tint/type/f16.h"
+#include "src/tint/type/reference.h"
 #include "src/tint/type/test_helper.h"
 
 namespace tint::type {
@@ -43,8 +43,8 @@ struct TypeTest : public TestHelper {
     const sem::Matrix* mat4x3_f32 = create<sem::Matrix>(vec3_f32, 4u);
     const sem::Matrix* mat4x3_f16 = create<sem::Matrix>(vec3_f16, 4u);
     const sem::Matrix* mat4x3_af = create<sem::Matrix>(vec3_af, 4u);
-    const sem::Reference* ref_u32 =
-        create<sem::Reference>(u32, ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
+    const type::Reference* ref_u32 =
+        create<type::Reference>(u32, ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
     const sem::Struct* str_f32 = create<sem::Struct>(nullptr,
                                                      Source{},
                                                      Sym("str_f32"),

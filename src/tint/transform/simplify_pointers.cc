@@ -115,7 +115,7 @@ struct SimplifyPointers::State {
                 auto* var = user->Variable();
                 if (var->Is<sem::LocalVariable>() &&       //
                     var->Declaration()->Is<ast::Let>() &&  //
-                    var->Type()->Is<sem::Pointer>()) {
+                    var->Type()->Is<type::Pointer>()) {
                     op.expr = var->Declaration()->initializer;
                     continue;
                 }
@@ -170,7 +170,7 @@ struct SimplifyPointers::State {
                 }
 
                 auto* var = ctx.src->Sem().Get(let->variable);
-                if (!var->Type()->Is<sem::Pointer>()) {
+                if (!var->Type()->Is<type::Pointer>()) {
                     continue;  // Not a pointer type. Ignore.
                 }
 

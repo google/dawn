@@ -173,7 +173,7 @@ class Validator {
     /// @param a the pointer ast node
     /// @param s the pointer sem node
     /// @returns true on success, false otherwise.
-    bool Pointer(const ast::Pointer* a, const sem::Pointer* s) const;
+    bool Pointer(const ast::Pointer* a, const type::Pointer* s) const;
 
     /// Validates an assignment
     /// @param a the assignment statement

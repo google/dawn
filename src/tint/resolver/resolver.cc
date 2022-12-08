@@ -65,8 +65,6 @@
 #include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
-#include "src/tint/sem/pointer.h"
-#include "src/tint/sem/reference.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
@@ -79,6 +77,8 @@
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/pointer.h"
+#include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/sampler.h"
 #include "src/tint/type/storage_texture.h"
@@ -257,13 +257,13 @@ type::Type* Resolver::Type(const ast::Type* ty) {
             }
             return nullptr;
         },
-        [&](const ast::Pointer* t) -> sem::Pointer* {
+        [&](const ast::Pointer* t) -> type::Pointer* {
             if (auto* el = Type(t->type)) {
                 auto access = t->access;
                 if (access == ast::Access::kUndefined) {
                     access = DefaultAccessForAddressSpace(t->address_space);
                 }
-                auto ptr = builder_->create<sem::Pointer>(el, t->address_space, access);
+                auto ptr = builder_->create<type::Pointer>(el, t->address_space, access);
                 if (!ptr) {
                     return nullptr;
                 }
@@ -638,7 +638,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         return nullptr;
     }
 
-    auto* var_ty = builder_->create<sem::Reference>(storage_ty, address_space, access);
+    auto* var_ty = builder_->create<type::Reference>(storage_ty, address_space, access);
 
     if (!ApplyAddressSpaceUsageToType(address_space, var_ty,
                                       var->type ? var->type->source : var->source)) {
@@ -748,7 +748,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
         return nullptr;
     }
 
-    if (auto* ptr = ty->As<sem::Pointer>()) {
+    if (auto* ptr = ty->As<type::Pointer>()) {
         // For MSL, we push module-scope variables into the entry point as pointer
         // parameters, so we also need to handle their store type.
         if (!ApplyAddressSpaceUsageToType(
@@ -1578,7 +1578,7 @@ void Resolver::RegisterLoadIfNeeded(const sem::Expression* expr) {
     if (!expr) {
         return;
     }
-    if (!expr->Type()->Is<sem::Reference>()) {
+    if (!expr->Type()->Is<type::Reference>()) {
         return;
     }
     if (!current_function_) {
@@ -1649,7 +1649,7 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
     std::unordered_map<const sem::Variable*, const sem::Expression*> arg_writes;
     for (size_t i = 0; i < args.Length(); i++) {
         auto* arg = args[i];
-        if (!arg->Type()->Is<sem::Pointer>()) {
+        if (!arg->Type()->Is<type::Pointer>()) {
             continue;
         }
 
@@ -1890,8 +1890,8 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
     }
 
     // If we're extracting from a reference, we return a reference.
-    if (auto* ref = obj_raw_ty->As<sem::Reference>()) {
-        ty = builder_->create<sem::Reference>(ty, ref->AddressSpace(), ref->Access());
+    if (auto* ref = obj_raw_ty->As<type::Reference>()) {
+        ty = builder_->create<type::Reference>(ty, ref->AddressSpace(), ref->Access());
     }
 
     auto stage = sem::EarliestStage(obj->Stage(), idx->Stage());
@@ -2664,8 +2664,8 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
             ty = member->Type();
 
             // If we're extracting from a reference, we return a reference.
-            if (auto* ref = structure->As<sem::Reference>()) {
-                ty = builder_->create<sem::Reference>(ty, ref->AddressSpace(), ref->Access());
+            if (auto* ref = structure->As<type::Reference>()) {
+                ty = builder_->create<type::Reference>(ty, ref->AddressSpace(), ref->Access());
             }
 
             auto val = const_eval_.MemberAccess(object, member);
@@ -2733,8 +2733,8 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
                 // A single element swizzle is just the type of the vector.
                 ty = vec->type();
                 // If we're extracting from a reference, we return a reference.
-                if (auto* ref = structure->As<sem::Reference>()) {
-                    ty = builder_->create<sem::Reference>(ty, ref->AddressSpace(), ref->Access());
+                if (auto* ref = structure->As<type::Reference>()) {
+                    ty = builder_->create<type::Reference>(ty, ref->AddressSpace(), ref->Access());
                 }
             } else {
                 // The vector will have a number of components equal to the length of
@@ -2828,7 +2828,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
     switch (unary->op) {
         case ast::UnaryOp::kAddressOf:
-            if (auto* ref = expr_ty->As<sem::Reference>()) {
+            if (auto* ref = expr_ty->As<type::Reference>()) {
                 if (ref->StoreType()->UnwrapRef()->is_handle()) {
                     AddError("cannot take the address of expression in handle address space",
                              unary->expr->source);
@@ -2843,8 +2843,8 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
                     return nullptr;
                 }
 
-                ty = builder_->create<sem::Pointer>(ref->StoreType(), ref->AddressSpace(),
-                                                    ref->Access());
+                ty = builder_->create<type::Pointer>(ref->StoreType(), ref->AddressSpace(),
+                                                     ref->Access());
 
                 root_ident = expr->RootIdentifier();
             } else {
@@ -2854,9 +2854,9 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
             break;
 
         case ast::UnaryOp::kIndirection:
-            if (auto* ptr = expr_ty->As<sem::Pointer>()) {
-                ty = builder_->create<sem::Reference>(ptr->StoreType(), ptr->AddressSpace(),
-                                                      ptr->Access());
+            if (auto* ptr = expr_ty->As<type::Pointer>()) {
+                ty = builder_->create<type::Reference>(ptr->StoreType(), ptr->AddressSpace(),
+                                                       ptr->Access());
                 root_ident = expr->RootIdentifier();
             } else {
                 AddError("cannot dereference expression of type '" + sem_.TypeNameOf(expr_ty) + "'",

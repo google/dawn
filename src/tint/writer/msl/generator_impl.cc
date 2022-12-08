@@ -39,8 +39,6 @@
 #include "src/tint/sem/matrix.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
-#include "src/tint/sem/pointer.h"
-#include "src/tint/sem/reference.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
 #include "src/tint/sem/type_conversion.h"
@@ -71,6 +69,8 @@
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
 #include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/pointer.h"
+#include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/u32.h"
@@ -907,7 +907,7 @@ bool GeneratorImpl::EmitAtomicCall(std::ostream& out,
             return call("atomic_exchange_explicit", true);
 
         case sem::BuiltinType::kAtomicCompareExchangeWeak: {
-            auto* ptr_ty = TypeOf(expr->args[0])->UnwrapRef()->As<sem::Pointer>();
+            auto* ptr_ty = TypeOf(expr->args[0])->UnwrapRef()->As<type::Pointer>();
             auto sc = ptr_ty->AddressSpace();
             auto* str = builtin->ReturnType()->As<sem::Struct>();
 
@@ -1884,7 +1884,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
                 return false;
             }
             // Parameter name is output as part of the type for pointers.
-            if (!type->Is<sem::Pointer>()) {
+            if (!type->Is<type::Pointer>()) {
                 out << " " << program_->Symbols().NameFor(v->symbol);
             }
         }
@@ -2011,7 +2011,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                 return false;
             }
             // Parameter name is output as part of the type for pointers.
-            if (!type->Is<sem::Pointer>()) {
+            if (!type->Is<type::Pointer>()) {
                 out << " " << param_name;
             }
 
@@ -2580,7 +2580,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             out << mat->columns() << "x" << mat->rows();
             return true;
         },
-        [&](const sem::Pointer* ptr) {
+        [&](const type::Pointer* ptr) {
             if (ptr->Access() == ast::Access::kRead) {
                 out << "const ";
             }
@@ -3016,7 +3016,7 @@ bool GeneratorImpl::EmitVar(const ast::Var* var) {
         return false;
     }
     // Variable name is output as part of the type for pointers.
-    if (!type->Is<sem::Pointer>()) {
+    if (!type->Is<type::Pointer>()) {
         out << " " << name;
     }
 
@@ -3066,7 +3066,7 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
     }
 
     // Variable name is output as part of the type for pointers.
-    if (!type->Is<sem::Pointer>()) {
+    if (!type->Is<type::Pointer>()) {
         out << " " << name;
     }
 

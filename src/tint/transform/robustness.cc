@@ -23,8 +23,8 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/index_accessor_expression.h"
-#include "src/tint/sem/reference.h"
 #include "src/tint/sem/statement.h"
+#include "src/tint/type/reference.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Robustness);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Robustness::Config);
@@ -70,7 +70,7 @@ struct Robustness::State {
         auto* sem = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::IndexAccessorExpression>();
         auto* ret_type = sem->Type();
 
-        auto* ref = ret_type->As<sem::Reference>();
+        auto* ref = ret_type->As<type::Reference>();
         if (ref && omitted_address_spaces.count(ref->AddressSpace()) != 0) {
             return nullptr;
         }

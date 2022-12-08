@@ -2883,7 +2883,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
             auto address_space = ast::AddressSpace::kNone;
             auto access = ast::Access::kUndefined;
 
-            if (auto* ptr = type->As<sem::Pointer>()) {
+            if (auto* ptr = type->As<type::Pointer>()) {
                 type = ptr->StoreType();
                 switch (ptr->AddressSpace()) {
                     case ast::AddressSpace::kStorage:
@@ -3993,7 +3993,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             out << mat->columns() << "x" << mat->rows();
             return true;
         },
-        [&](const sem::Pointer*) {
+        [&](const type::Pointer*) {
             TINT_ICE(Writer, diagnostics_)
                 << "Attempting to emit pointer type. These should have been "
                    "removed with the InlinePointerLets transform";
@@ -4311,7 +4311,7 @@ bool GeneratorImpl::CallBuiltinHelper(std::ostream& out,
                     }
                     auto param_name = "param_" + std::to_string(parameter_names.size());
                     const auto* ty = param->Type();
-                    if (auto* ptr = ty->As<sem::Pointer>()) {
+                    if (auto* ptr = ty->As<type::Pointer>()) {
                         decl << "inout ";
                         ty = ptr->StoreType();
                     }

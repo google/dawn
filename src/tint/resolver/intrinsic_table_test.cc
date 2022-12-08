@@ -20,13 +20,13 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/atomic.h"
-#include "src/tint/sem/reference.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/external_texture.h"
 #include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/test_helper.h"
@@ -231,7 +231,7 @@ TEST_F(IntrinsicTableTest, MatchPointer) {
     auto* i32 = create<type::I32>();
     auto* atomicI32 = create<sem::Atomic>(i32);
     auto* ptr =
-        create<sem::Pointer>(atomicI32, ast::AddressSpace::kWorkgroup, ast::Access::kReadWrite);
+        create<type::Pointer>(atomicI32, ast::AddressSpace::kWorkgroup, ast::Access::kReadWrite);
     auto result = table->Lookup(BuiltinType::kAtomicLoad, utils::Vector{ptr},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
@@ -254,7 +254,8 @@ TEST_F(IntrinsicTableTest, MismatchPointer) {
 TEST_F(IntrinsicTableTest, MatchArray) {
     auto* arr =
         create<sem::Array>(create<type::U32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
-    auto* arr_ptr = create<sem::Pointer>(arr, ast::AddressSpace::kStorage, ast::Access::kReadWrite);
+    auto* arr_ptr =
+        create<type::Pointer>(arr, ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto result = table->Lookup(BuiltinType::kArrayLength, utils::Vector{arr_ptr},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
@@ -263,8 +264,8 @@ TEST_F(IntrinsicTableTest, MatchArray) {
     EXPECT_TRUE(result.sem->ReturnType()->Is<type::U32>());
     ASSERT_EQ(result.sem->Parameters().Length(), 1u);
     auto* param_type = result.sem->Parameters()[0]->Type();
-    ASSERT_TRUE(param_type->Is<sem::Pointer>());
-    EXPECT_TRUE(param_type->As<sem::Pointer>()->StoreType()->Is<sem::Array>());
+    ASSERT_TRUE(param_type->Is<type::Pointer>());
+    EXPECT_TRUE(param_type->As<type::Pointer>()->StoreType()->Is<sem::Array>());
 }
 
 TEST_F(IntrinsicTableTest, MismatchArray) {
@@ -446,7 +447,7 @@ TEST_F(IntrinsicTableTest, ImplicitLoadOnReference) {
     auto result = table->Lookup(
         BuiltinType::kCos,
         utils::Vector{
-            create<sem::Reference>(f32, ast::AddressSpace::kFunction, ast::Access::kReadWrite),
+            create<type::Reference>(f32, ast::AddressSpace::kFunction, ast::Access::kReadWrite),
         },
         sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
@@ -546,8 +547,8 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_ConstantEval) {
 
 TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_RuntimeEval) {
     auto* af = create<type::AbstractFloat>();
-    auto* bool_ref = create<sem::Reference>(create<type::Bool>(), ast::AddressSpace::kFunction,
-                                            ast::Access::kReadWrite);
+    auto* bool_ref = create<type::Reference>(create<type::Bool>(), ast::AddressSpace::kFunction,
+                                             ast::Access::kReadWrite);
     auto result = table->Lookup(BuiltinType::kSelect, utils::Vector{af, af, bool_ref},
                                 sem::EvaluationStage::kRuntime, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();

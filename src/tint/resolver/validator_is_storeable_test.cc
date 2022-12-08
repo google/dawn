@@ -78,8 +78,8 @@ TEST_F(ValidatorIsStorableTest, Matrix) {
 }
 
 TEST_F(ValidatorIsStorableTest, Pointer) {
-    auto* ptr = create<sem::Pointer>(create<type::I32>(), ast::AddressSpace::kPrivate,
-                                     ast::Access::kReadWrite);
+    auto* ptr = create<type::Pointer>(create<type::I32>(), ast::AddressSpace::kPrivate,
+                                      ast::Access::kReadWrite);
     EXPECT_FALSE(v()->IsStorable(ptr));
 }
 

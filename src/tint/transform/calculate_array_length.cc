@@ -23,11 +23,11 @@
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
-#include "src/tint/sem/reference.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/transform/simplify_pointers.h"
+#include "src/tint/type/reference.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
 
@@ -100,8 +100,8 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
     // get_buffer_size_intrinsic() emits the function decorated with
     // BufferSizeIntrinsic that is transformed by the HLSL writer into a call to
     // [RW]ByteAddressBuffer.GetDimensions().
-    std::unordered_map<const sem::Reference*, Symbol> buffer_size_intrinsics;
-    auto get_buffer_size_intrinsic = [&](const sem::Reference* buffer_type) {
+    std::unordered_map<const type::Reference*, Symbol> buffer_size_intrinsics;
+    auto get_buffer_size_intrinsic = [&](const type::Reference* buffer_type) {
         return utils::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
             auto name = b.Sym();
             auto* type = CreateASTTypeFor(ctx, buffer_type);
@@ -168,7 +168,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                         break;
                     }
                     auto* storage_buffer_var = storage_buffer_sem->Variable();
-                    auto* storage_buffer_type = storage_buffer_sem->Type()->As<sem::Reference>();
+                    auto* storage_buffer_type = storage_buffer_sem->Type()->As<type::Reference>();
 
                     // Generate BufferSizeIntrinsic for this storage type if we haven't already
                     auto buffer_size = get_buffer_size_intrinsic(storage_buffer_type);

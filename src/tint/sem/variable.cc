@@ -19,7 +19,7 @@
 #include "src/tint/ast/identifier_expression.h"
 #include "src/tint/ast/parameter.h"
 #include "src/tint/ast/variable.h"
-#include "src/tint/sem/pointer.h"
+#include "src/tint/type/pointer.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Variable);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::GlobalVariable);
@@ -96,7 +96,7 @@ VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
            /* has_side_effects */ false),
       variable_(variable) {
     auto* type = variable->Type();
-    if (type->Is<sem::Pointer>() && variable->Initializer()) {
+    if (type->Is<type::Pointer>() && variable->Initializer()) {
         root_identifier_ = variable->Initializer()->RootIdentifier();
     } else {
         root_identifier_ = variable;

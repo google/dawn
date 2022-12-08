@@ -18,7 +18,7 @@
 
 #include "src/tint/fuzzers/tint_ast_fuzzer/util.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/reference.h"
+#include "src/tint/type/reference.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 
@@ -48,7 +48,7 @@ bool MutationChangeUnaryOperator::IsApplicable(const tint::Program& program,
     // Get the type of the unary expression.
     const auto* type = program.Sem().Get(unary_expr_node)->Type();
     const auto* basic_type =
-        type->Is<sem::Reference>() ? type->As<sem::Reference>()->StoreType() : type;
+        type->Is<type::Reference>() ? type->As<type::Reference>()->StoreType() : type;
 
     // Only signed integer or vector of signed integer has more than 1
     // unary operators to change between.

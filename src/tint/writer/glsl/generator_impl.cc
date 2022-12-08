@@ -1939,7 +1939,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
 
             auto const* type = v->Type();
 
-            if (auto* ptr = type->As<sem::Pointer>()) {
+            if (auto* ptr = type->As<type::Pointer>()) {
                 // Transform pointer parameters in to `inout` parameters.
                 // The WGSL spec is highly restrictive in what can be passed in pointer
                 // parameters, which allows for this transformation. See:
@@ -2888,7 +2888,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         if (mat->rows() != mat->columns()) {
             out << "x" << mat->rows();
         }
-    } else if (type->Is<sem::Pointer>()) {
+    } else if (type->Is<type::Pointer>()) {
         TINT_ICE(Writer, diagnostics_)
             << "Attempting to emit pointer type. These should have been removed "
                "with the InlinePointerLets transform";
@@ -3159,7 +3159,7 @@ bool GeneratorImpl::CallBuiltinHelper(std::ostream& out,
                     }
                     auto param_name = "param_" + std::to_string(parameter_names.size());
                     const auto* ty = param->Type();
-                    if (auto* ptr = ty->As<sem::Pointer>()) {
+                    if (auto* ptr = ty->As<type::Pointer>()) {
                         decl << "inout ";
                         ty = ptr->StoreType();
                     }

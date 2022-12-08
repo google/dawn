@@ -516,7 +516,7 @@ struct Std140::State {
                         access.indices.Push(UniformVariable{});
                         return Action::kStop;
                     }
-                    if (user->Variable()->Type()->Is<sem::Pointer>()) {
+                    if (user->Variable()->Type()->Is<type::Pointer>()) {
                         // Found a pointer. As the root identifier is a uniform buffer variable,
                         // this must be a pointer-let. Continue traversing from the let
                         // initializer.

@@ -14,7 +14,7 @@
 
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/reference.h"
+#include "src/tint/type/reference.h"
 
 #include "gmock/gmock.h"
 
@@ -36,9 +36,9 @@ TEST_F(ResolverPtrRefTest, AddressOf) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    ASSERT_TRUE(TypeOf(expr)->Is<sem::Pointer>());
-    EXPECT_TRUE(TypeOf(expr)->As<sem::Pointer>()->StoreType()->Is<type::I32>());
-    EXPECT_EQ(TypeOf(expr)->As<sem::Pointer>()->AddressSpace(), ast::AddressSpace::kFunction);
+    ASSERT_TRUE(TypeOf(expr)->Is<type::Pointer>());
+    EXPECT_TRUE(TypeOf(expr)->As<type::Pointer>()->StoreType()->Is<type::I32>());
+    EXPECT_EQ(TypeOf(expr)->As<type::Pointer>()->AddressSpace(), ast::AddressSpace::kFunction);
 }
 
 TEST_F(ResolverPtrRefTest, AddressOfThenDeref) {
@@ -52,8 +52,8 @@ TEST_F(ResolverPtrRefTest, AddressOfThenDeref) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    ASSERT_TRUE(TypeOf(expr)->Is<sem::Reference>());
-    EXPECT_TRUE(TypeOf(expr)->As<sem::Reference>()->StoreType()->Is<type::I32>());
+    ASSERT_TRUE(TypeOf(expr)->Is<type::Reference>());
+    EXPECT_TRUE(TypeOf(expr)->As<type::Reference>()->StoreType()->Is<type::I32>());
 }
 
 TEST_F(ResolverPtrRefTest, DefaultPtrAddressSpace) {
@@ -83,22 +83,22 @@ TEST_F(ResolverPtrRefTest, DefaultPtrAddressSpace) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    ASSERT_TRUE(TypeOf(function_ptr)->Is<sem::Pointer>())
+    ASSERT_TRUE(TypeOf(function_ptr)->Is<type::Pointer>())
         << "function_ptr is " << TypeOf(function_ptr)->TypeInfo().name;
-    ASSERT_TRUE(TypeOf(private_ptr)->Is<sem::Pointer>())
+    ASSERT_TRUE(TypeOf(private_ptr)->Is<type::Pointer>())
         << "private_ptr is " << TypeOf(private_ptr)->TypeInfo().name;
-    ASSERT_TRUE(TypeOf(workgroup_ptr)->Is<sem::Pointer>())
+    ASSERT_TRUE(TypeOf(workgroup_ptr)->Is<type::Pointer>())
         << "workgroup_ptr is " << TypeOf(workgroup_ptr)->TypeInfo().name;
-    ASSERT_TRUE(TypeOf(uniform_ptr)->Is<sem::Pointer>())
+    ASSERT_TRUE(TypeOf(uniform_ptr)->Is<type::Pointer>())
         << "uniform_ptr is " << TypeOf(uniform_ptr)->TypeInfo().name;
-    ASSERT_TRUE(TypeOf(storage_ptr)->Is<sem::Pointer>())
+    ASSERT_TRUE(TypeOf(storage_ptr)->Is<type::Pointer>())
         << "storage_ptr is " << TypeOf(storage_ptr)->TypeInfo().name;
 
-    EXPECT_EQ(TypeOf(function_ptr)->As<sem::Pointer>()->Access(), ast::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(private_ptr)->As<sem::Pointer>()->Access(), ast::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(workgroup_ptr)->As<sem::Pointer>()->Access(), ast::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(uniform_ptr)->As<sem::Pointer>()->Access(), ast::Access::kRead);
-    EXPECT_EQ(TypeOf(storage_ptr)->As<sem::Pointer>()->Access(), ast::Access::kRead);
+    EXPECT_EQ(TypeOf(function_ptr)->As<type::Pointer>()->Access(), ast::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(private_ptr)->As<type::Pointer>()->Access(), ast::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(workgroup_ptr)->As<type::Pointer>()->Access(), ast::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(uniform_ptr)->As<type::Pointer>()->Access(), ast::Access::kRead);
+    EXPECT_EQ(TypeOf(storage_ptr)->As<type::Pointer>()->Access(), ast::Access::kRead);
 }
 
 }  // namespace

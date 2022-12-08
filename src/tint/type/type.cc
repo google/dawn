@@ -16,8 +16,6 @@
 
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/matrix.h"
-#include "src/tint/sem/pointer.h"
-#include "src/tint/sem/reference.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/vector.h"
 #include "src/tint/type/abstract_float.h"
@@ -26,6 +24,8 @@
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
+#include "src/tint/type/pointer.h"
+#include "src/tint/type/reference.h"
 #include "src/tint/type/sampler.h"
 #include "src/tint/type/texture.h"
 #include "src/tint/type/u32.h"
@@ -46,7 +46,7 @@ Type::~Type() = default;
 
 const Type* Type::UnwrapPtr() const {
     auto* type = this;
-    while (auto* ptr = type->As<sem::Pointer>()) {
+    while (auto* ptr = type->As<type::Pointer>()) {
         type = ptr->StoreType();
     }
     return type;
@@ -54,7 +54,7 @@ const Type* Type::UnwrapPtr() const {
 
 const Type* Type::UnwrapRef() const {
     auto* type = this;
-    if (auto* ref = type->As<sem::Reference>()) {
+    if (auto* ref = type->As<type::Reference>()) {
         type = ref->StoreType();
     }
     return type;

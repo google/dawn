@@ -44,10 +44,12 @@
 namespace tint::sem {
 class Call;
 class Constant;
-class Reference;
 class TypeInitializer;
 class TypeConversion;
 }  // namespace tint::sem
+namespace tint::type {
+class Reference;
+}  // namespace tint::type
 
 namespace tint::writer::spirv {
 
@@ -488,12 +490,12 @@ class Builder {
     /// @param ptr the pointer type to generate
     /// @param result the result operand
     /// @returns true if the pointer was successfully generated
-    bool GeneratePointerType(const sem::Pointer* ptr, const Operand& result);
+    bool GeneratePointerType(const type::Pointer* ptr, const Operand& result);
     /// Generates a reference type declaration
     /// @param ref the reference type to generate
     /// @param result the result operand
     /// @returns true if the reference was successfully generated
-    bool GenerateReferenceType(const sem::Reference* ref, const Operand& result);
+    bool GenerateReferenceType(const type::Reference* ref, const Operand& result);
     /// Generates a vector type declaration
     /// @param struct_type the vector to generate
     /// @param result the result operand

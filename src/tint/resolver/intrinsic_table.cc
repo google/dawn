@@ -549,7 +549,7 @@ bool match_ptr(MatchState&, const type::Type* ty, Number& S, const type::Type*& 
         return true;
     }
 
-    if (auto* p = ty->As<sem::Pointer>()) {
+    if (auto* p = ty->As<type::Pointer>()) {
         S = Number(static_cast<uint32_t>(p->AddressSpace()));
         T = p->StoreType();
         A = Number(static_cast<uint32_t>(p->Access()));
@@ -558,9 +558,9 @@ bool match_ptr(MatchState&, const type::Type* ty, Number& S, const type::Type*& 
     return false;
 }
 
-const sem::Pointer* build_ptr(MatchState& state, Number S, const type::Type* T, Number& A) {
-    return state.builder.create<sem::Pointer>(T, static_cast<ast::AddressSpace>(S.Value()),
-                                              static_cast<ast::Access>(A.Value()));
+const type::Pointer* build_ptr(MatchState& state, Number S, const type::Type* T, Number& A) {
+    return state.builder.create<type::Pointer>(T, static_cast<ast::AddressSpace>(S.Value()),
+                                               static_cast<ast::Access>(A.Value()));
 }
 
 bool match_atomic(MatchState&, const type::Type* ty, const type::Type*& T) {

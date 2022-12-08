@@ -21,9 +21,9 @@
 #include "src/tint/sem/atomic.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/for_loop_statement.h"
-#include "src/tint/sem/reference.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/reference.h"
 #include "src/tint/type/sampler.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Transform);
@@ -139,7 +139,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
     if (auto* s = ty->As<sem::Struct>()) {
         return ctx.dst->create<ast::TypeName>(ctx.Clone(s->Declaration()->name));
     }
-    if (auto* s = ty->As<sem::Reference>()) {
+    if (auto* s = ty->As<type::Reference>()) {
         return CreateASTTypeFor(ctx, s->StoreType());
     }
     if (auto* a = ty->As<sem::Atomic>()) {

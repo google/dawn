@@ -39,10 +39,10 @@
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
-#include "src/tint/sem/reference.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/switch_statement.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
 
 using ::testing::ElementsAre;
@@ -437,7 +437,7 @@ TEST_F(ResolverTest, ArraySize_UnsignedLiteral) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(a), nullptr);
-    auto* ref = TypeOf(a)->As<sem::Reference>();
+    auto* ref = TypeOf(a)->As<type::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
     EXPECT_EQ(ary->Count(), create<type::ConstantArrayCount>(10u));
@@ -450,7 +450,7 @@ TEST_F(ResolverTest, ArraySize_SignedLiteral) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(a), nullptr);
-    auto* ref = TypeOf(a)->As<sem::Reference>();
+    auto* ref = TypeOf(a)->As<type::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
     EXPECT_EQ(ary->Count(), create<type::ConstantArrayCount>(10u));
@@ -465,7 +465,7 @@ TEST_F(ResolverTest, ArraySize_UnsignedConst) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(a), nullptr);
-    auto* ref = TypeOf(a)->As<sem::Reference>();
+    auto* ref = TypeOf(a)->As<type::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
     EXPECT_EQ(ary->Count(), create<type::ConstantArrayCount>(10u));
@@ -480,7 +480,7 @@ TEST_F(ResolverTest, ArraySize_SignedConst) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(a), nullptr);
-    auto* ref = TypeOf(a)->As<sem::Reference>();
+    auto* ref = TypeOf(a)->As<type::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
     EXPECT_EQ(ary->Count(), create<type::ConstantArrayCount>(10u));
@@ -495,7 +495,7 @@ TEST_F(ResolverTest, ArraySize_NamedOverride) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(a), nullptr);
-    auto* ref = TypeOf(a)->As<sem::Reference>();
+    auto* ref = TypeOf(a)->As<type::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
     auto* sem_override = Sem().Get<sem::GlobalVariable>(override);
@@ -514,12 +514,12 @@ TEST_F(ResolverTest, ArraySize_NamedOverride_Equivalence) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(a), nullptr);
-    auto* ref_a = TypeOf(a)->As<sem::Reference>();
+    auto* ref_a = TypeOf(a)->As<type::Reference>();
     ASSERT_NE(ref_a, nullptr);
     auto* ary_a = ref_a->StoreType()->As<sem::Array>();
 
     ASSERT_NE(TypeOf(b), nullptr);
-    auto* ref_b = TypeOf(b)->As<sem::Reference>();
+    auto* ref_b = TypeOf(b)->As<type::Reference>();
     ASSERT_NE(ref_b, nullptr);
     auto* ary_b = ref_b->StoreType()->As<sem::Array>();
 
@@ -540,7 +540,7 @@ TEST_F(ResolverTest, ArraySize_UnnamedOverride) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(a), nullptr);
-    auto* ref = TypeOf(a)->As<sem::Reference>();
+    auto* ref = TypeOf(a)->As<type::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
     auto* sem_override = Sem().Get<sem::GlobalVariable>(override);
@@ -561,12 +561,12 @@ TEST_F(ResolverTest, ArraySize_UnamedOverride_Equivalence) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(a), nullptr);
-    auto* ref_a = TypeOf(a)->As<sem::Reference>();
+    auto* ref_a = TypeOf(a)->As<type::Reference>();
     ASSERT_NE(ref_a, nullptr);
     auto* ary_a = ref_a->StoreType()->As<sem::Array>();
 
     ASSERT_NE(TypeOf(b), nullptr);
-    auto* ref_b = TypeOf(b)->As<sem::Reference>();
+    auto* ref_b = TypeOf(b)->As<type::Reference>();
     ASSERT_NE(ref_b, nullptr);
     auto* ary_b = ref_b->StoreType()->As<sem::Array>();
 
@@ -707,7 +707,7 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(ident), nullptr);
-    ASSERT_TRUE(TypeOf(ident)->Is<sem::Reference>());
+    ASSERT_TRUE(TypeOf(ident)->Is<type::Reference>());
     EXPECT_TRUE(TypeOf(ident)->UnwrapRef()->Is<type::F32>());
     EXPECT_TRUE(CheckVarUsers(my_var, utils::Vector{ident}));
     ASSERT_NE(VarOf(ident), nullptr);
@@ -784,11 +784,11 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(my_var_a), nullptr);
-    ASSERT_TRUE(TypeOf(my_var_a)->Is<sem::Reference>());
+    ASSERT_TRUE(TypeOf(my_var_a)->Is<type::Reference>());
     EXPECT_TRUE(TypeOf(my_var_a)->UnwrapRef()->Is<type::F32>());
     EXPECT_EQ(StmtOf(my_var_a), assign);
     ASSERT_NE(TypeOf(my_var_b), nullptr);
-    ASSERT_TRUE(TypeOf(my_var_b)->Is<sem::Reference>());
+    ASSERT_TRUE(TypeOf(my_var_b)->Is<type::Reference>());
     EXPECT_TRUE(TypeOf(my_var_b)->UnwrapRef()->Is<type::F32>());
     EXPECT_EQ(StmtOf(my_var_b), assign);
     EXPECT_TRUE(CheckVarUsers(var, utils::Vector{my_var_a, my_var_b}));
@@ -814,11 +814,11 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(v), nullptr);
-    ASSERT_TRUE(TypeOf(v)->Is<sem::Reference>());
+    ASSERT_TRUE(TypeOf(v)->Is<type::Reference>());
     EXPECT_TRUE(TypeOf(v)->UnwrapRef()->Is<type::F32>());
     EXPECT_EQ(StmtOf(v), p_decl);
     ASSERT_NE(TypeOf(p), nullptr);
-    ASSERT_TRUE(TypeOf(p)->Is<sem::Pointer>());
+    ASSERT_TRUE(TypeOf(p)->Is<type::Pointer>());
     EXPECT_TRUE(TypeOf(p)->UnwrapPtr()->Is<type::F32>());
     EXPECT_EQ(StmtOf(p), assign);
 }
@@ -1250,9 +1250,9 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(mem), nullptr);
-    ASSERT_TRUE(TypeOf(mem)->Is<sem::Reference>());
+    ASSERT_TRUE(TypeOf(mem)->Is<type::Reference>());
 
-    auto* ref = TypeOf(mem)->As<sem::Reference>();
+    auto* ref = TypeOf(mem)->As<type::Reference>();
     EXPECT_TRUE(ref->StoreType()->Is<type::F32>());
     auto* sma = Sem().Get(mem)->As<sem::StructMemberAccess>();
     ASSERT_NE(sma, nullptr);
@@ -1274,9 +1274,9 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(mem), nullptr);
-    ASSERT_TRUE(TypeOf(mem)->Is<sem::Reference>());
+    ASSERT_TRUE(TypeOf(mem)->Is<type::Reference>());
 
-    auto* ref = TypeOf(mem)->As<sem::Reference>();
+    auto* ref = TypeOf(mem)->As<type::Reference>();
     EXPECT_TRUE(ref->StoreType()->Is<type::F32>());
     auto* sma = Sem().Get(mem)->As<sem::StructMemberAccess>();
     ASSERT_NE(sma, nullptr);
@@ -1312,9 +1312,9 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(mem), nullptr);
-    ASSERT_TRUE(TypeOf(mem)->Is<sem::Reference>());
+    ASSERT_TRUE(TypeOf(mem)->Is<type::Reference>());
 
-    auto* ref = TypeOf(mem)->As<sem::Reference>();
+    auto* ref = TypeOf(mem)->As<type::Reference>();
     ASSERT_TRUE(ref->StoreType()->Is<type::F32>());
     auto* sma = Sem().Get(mem)->As<sem::Swizzle>();
     ASSERT_NE(sma, nullptr);

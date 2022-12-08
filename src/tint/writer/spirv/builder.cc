@@ -31,7 +31,6 @@
 #include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
-#include "src/tint/sem/reference.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
@@ -43,6 +42,7 @@
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
@@ -882,7 +882,7 @@ bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr, Ac
     // If the source is a reference, we access chain into it.
     // In the future, pointers may support access-chaining.
     // See https://github.com/gpuweb/gpuweb/pull/1580
-    if (info->source_type->Is<sem::Reference>()) {
+    if (info->source_type->Is<type::Reference>()) {
         info->access_chain_indices.push_back(idx_id);
         info->source_type = TypeOf(expr);
         return true;
@@ -942,7 +942,7 @@ bool Builder::GenerateMemberAccessor(const ast::MemberAccessorExpression* expr,
     if (auto* access = expr_sem->As<sem::StructMemberAccess>()) {
         uint32_t idx = access->Member()->Index();
 
-        if (info->source_type->Is<sem::Reference>()) {
+        if (info->source_type->Is<type::Reference>()) {
             auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(idx));
             if (idx_id == 0) {
                 return 0;
@@ -974,7 +974,7 @@ bool Builder::GenerateMemberAccessor(const ast::MemberAccessorExpression* expr,
         // Single element swizzle is either an access chain or a composite extract
         auto& indices = swizzle->Indices();
         if (indices.Length() == 1) {
-            if (info->source_type->Is<sem::Reference>()) {
+            if (info->source_type->Is<type::Reference>()) {
                 auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(indices[0]));
                 if (idx_id == 0) {
                     return 0;
@@ -1158,7 +1158,7 @@ uint32_t Builder::GenerateExpressionWithLoadIfNeeded(const ast::Expression* expr
 }
 
 uint32_t Builder::GenerateLoadIfNeeded(const type::Type* type, uint32_t id) {
-    if (auto* ref = type->As<sem::Reference>()) {
+    if (auto* ref = type->As<type::Reference>()) {
         type = ref->StoreType();
     } else {
         return id;
@@ -1901,8 +1901,8 @@ uint32_t Builder::GenerateShortCircuitBinaryExpression(const ast::BinaryExpressi
 uint32_t Builder::GenerateSplat(uint32_t scalar_id, const type::Type* vec_type) {
     // Create a new vector to splat scalar into
     auto splat_vector = result_op();
-    auto* splat_vector_type = builder_.create<sem::Pointer>(vec_type, ast::AddressSpace::kFunction,
-                                                            ast::Access::kReadWrite);
+    auto* splat_vector_type = builder_.create<type::Pointer>(vec_type, ast::AddressSpace::kFunction,
+                                                             ast::Access::kReadWrite);
     push_function_var({Operand(GenerateTypeIfNeeded(splat_vector_type)), splat_vector,
                        U32Operand(ConvertAddressSpace(ast::AddressSpace::kFunction)),
                        Operand(GenerateConstantNullIfNeeded(vec_type))});
@@ -2329,7 +2329,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             return 0;
         }
 
-        if (generate_load && !param->Type()->Is<sem::Pointer>()) {
+        if (generate_load && !param->Type()->Is<type::Pointer>()) {
             val_id = GenerateLoadIfNeeded(arg->Type(), val_id);
         }
         return val_id;
@@ -3070,10 +3070,10 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                     Operand result_id) {
     auto is_value_signed = [&] { return builtin->Parameters()[1]->Type()->Is<type::I32>(); };
 
-    auto address_space = builtin->Parameters()[0]->Type()->As<sem::Pointer>()->AddressSpace();
+    auto address_space = builtin->Parameters()[0]->Type()->As<type::Pointer>()->AddressSpace();
 
     uint32_t memory_id = 0;
-    switch (builtin->Parameters()[0]->Type()->As<sem::Pointer>()->AddressSpace()) {
+    switch (builtin->Parameters()[0]->Type()->As<type::Pointer>()->AddressSpace()) {
         case ast::AddressSpace::kWorkgroup:
             memory_id = GenerateConstantIfNeeded(
                 ScalarConstant::U32(static_cast<uint32_t>(spv::Scope::Workgroup)));
@@ -3660,12 +3660,12 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
     // definitions in the generated SPIR-V. Note that nested pointers and
     // references are not legal in WGSL, so only considering the top-level type is
     // fine.
-    if (auto* ptr = type->As<sem::Pointer>()) {
-        type = builder_.create<sem::Pointer>(ptr->StoreType(), ptr->AddressSpace(),
-                                             ast::Access::kReadWrite);
-    } else if (auto* ref = type->As<sem::Reference>()) {
-        type = builder_.create<sem::Pointer>(ref->StoreType(), ref->AddressSpace(),
-                                             ast::Access::kReadWrite);
+    if (auto* ptr = type->As<type::Pointer>()) {
+        type = builder_.create<type::Pointer>(ptr->StoreType(), ptr->AddressSpace(),
+                                              ast::Access::kReadWrite);
+    } else if (auto* ref = type->As<type::Reference>()) {
+        type = builder_.create<type::Pointer>(ref->StoreType(), ref->AddressSpace(),
+                                              ast::Access::kReadWrite);
     }
 
     return utils::GetOrCreate(type_to_id_, type, [&]() -> uint32_t {
@@ -3695,10 +3695,10 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
             [&](const sem::Matrix* mat) {  //
                 return GenerateMatrixType(mat, result);
             },
-            [&](const sem::Pointer* ptr) {  //
+            [&](const type::Pointer* ptr) {  //
                 return GeneratePointerType(ptr, result);
             },
-            [&](const sem::Reference* ref) {  //
+            [&](const type::Reference* ref) {  //
                 return GenerateReferenceType(ref, result);
             },
             [&](const sem::Struct* str) {  //
@@ -3878,7 +3878,7 @@ bool Builder::GenerateMatrixType(const sem::Matrix* mat, const Operand& result) 
     return true;
 }
 
-bool Builder::GeneratePointerType(const sem::Pointer* ptr, const Operand& result) {
+bool Builder::GeneratePointerType(const type::Pointer* ptr, const Operand& result) {
     auto subtype_id = GenerateTypeIfNeeded(ptr->StoreType());
     if (subtype_id == 0) {
         return false;
@@ -3895,7 +3895,7 @@ bool Builder::GeneratePointerType(const sem::Pointer* ptr, const Operand& result
     return true;
 }
 
-bool Builder::GenerateReferenceType(const sem::Reference* ref, const Operand& result) {
+bool Builder::GenerateReferenceType(const type::Reference* ref, const Operand& result) {
     auto subtype_id = GenerateTypeIfNeeded(ref->StoreType());
     if (subtype_id == 0) {
         return false;

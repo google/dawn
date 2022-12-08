@@ -1,4 +1,4 @@
-// Copyright 2021 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/reference.h"
+#include "src/tint/type/reference.h"
 
 #include "src/tint/program_builder.h"
 #include "src/tint/utils/hash.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::Reference);
+TINT_INSTANTIATE_TYPEINFO(tint::type::Reference);
 
-namespace tint::sem {
+namespace tint::type {
 
 Reference::Reference(const type::Type* subtype, ast::AddressSpace address_space, ast::Access access)
     : Base(type::TypeFlags{}), subtype_(subtype), address_space_(address_space), access_(access) {
-    TINT_ASSERT(Semantic, !subtype->Is<Reference>());
-    TINT_ASSERT(Semantic, access != ast::Access::kUndefined);
+    TINT_ASSERT(Type, !subtype->Is<Reference>());
+    TINT_ASSERT(Type, access != ast::Access::kUndefined);
 }
 
 size_t Reference::Hash() const {
@@ -54,4 +54,4 @@ Reference::Reference(Reference&&) = default;
 
 Reference::~Reference() = default;
 
-}  // namespace tint::sem
+}  // namespace tint::type

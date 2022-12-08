@@ -14,9 +14,9 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/reference.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_initializer.h"
+#include "src/tint/type/reference.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -67,12 +67,12 @@ TEST_F(ResolverTypeInitializerValidationTest, InferTypeTest_Simple) {
     WrapInFunction(a, b, Assign(a_ident, "a"), Assign(b_ident, "b"));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    ASSERT_TRUE(TypeOf(a_ident)->Is<sem::Reference>());
-    EXPECT_TRUE(TypeOf(a_ident)->As<sem::Reference>()->StoreType()->Is<type::I32>());
-    EXPECT_EQ(TypeOf(a_ident)->As<sem::Reference>()->AddressSpace(), ast::AddressSpace::kFunction);
-    ASSERT_TRUE(TypeOf(b_ident)->Is<sem::Reference>());
-    EXPECT_TRUE(TypeOf(b_ident)->As<sem::Reference>()->StoreType()->Is<type::I32>());
-    EXPECT_EQ(TypeOf(b_ident)->As<sem::Reference>()->AddressSpace(), ast::AddressSpace::kFunction);
+    ASSERT_TRUE(TypeOf(a_ident)->Is<type::Reference>());
+    EXPECT_TRUE(TypeOf(a_ident)->As<type::Reference>()->StoreType()->Is<type::I32>());
+    EXPECT_EQ(TypeOf(a_ident)->As<type::Reference>()->AddressSpace(), ast::AddressSpace::kFunction);
+    ASSERT_TRUE(TypeOf(b_ident)->Is<type::Reference>());
+    EXPECT_TRUE(TypeOf(b_ident)->As<type::Reference>()->StoreType()->Is<type::I32>());
+    EXPECT_EQ(TypeOf(b_ident)->As<type::Reference>()->AddressSpace(), ast::AddressSpace::kFunction);
 }
 
 using InferTypeTest_FromInitializerExpression = ResolverTestWithParam<Params>;
@@ -95,8 +95,8 @@ TEST_P(InferTypeTest_FromInitializerExpression, All) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* got = TypeOf(a_ident);
-    auto* expected = create<sem::Reference>(params.create_rhs_sem_type(*this),
-                                            ast::AddressSpace::kFunction, ast::Access::kReadWrite);
+    auto* expected = create<type::Reference>(params.create_rhs_sem_type(*this),
+                                             ast::AddressSpace::kFunction, ast::Access::kReadWrite);
     ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                              << "expected: " << FriendlyName(expected) << "\n";
 }
@@ -149,8 +149,8 @@ TEST_P(InferTypeTest_FromArithmeticExpression, All) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* got = TypeOf(a_ident);
-    auto* expected = create<sem::Reference>(params.create_rhs_sem_type(*this),
-                                            ast::AddressSpace::kFunction, ast::Access::kReadWrite);
+    auto* expected = create<type::Reference>(params.create_rhs_sem_type(*this),
+                                             ast::AddressSpace::kFunction, ast::Access::kReadWrite);
     ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                              << "expected: " << FriendlyName(expected) << "\n";
 }
@@ -197,8 +197,8 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* got = TypeOf(a_ident);
-    auto* expected = create<sem::Reference>(params.create_rhs_sem_type(*this),
-                                            ast::AddressSpace::kFunction, ast::Access::kReadWrite);
+    auto* expected = create<type::Reference>(params.create_rhs_sem_type(*this),
+                                             ast::AddressSpace::kFunction, ast::Access::kReadWrite);
     ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                              << "expected: " << FriendlyName(expected) << "\n";
 }

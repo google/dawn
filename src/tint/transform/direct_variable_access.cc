@@ -441,7 +441,7 @@ struct DirectVariableAccess::State {
                     chain->root.variable = variable;
                     chain->root.type = variable->Type();
                     chain->root.address_space = variable->AddressSpace();
-                    if (auto* ptr = chain->root.type->As<sem::Pointer>()) {
+                    if (auto* ptr = chain->root.type->As<type::Pointer>()) {
                         chain->root.address_space = ptr->AddressSpace();
                     }
                     access_chains.Add(expr, chain);
@@ -456,13 +456,13 @@ struct DirectVariableAccess::State {
                         }
                     },
                     [&](const ast::Parameter*) {
-                        if (variable->Type()->Is<sem::Pointer>()) {
+                        if (variable->Type()->Is<type::Pointer>()) {
                             // Start a new access chain for the pointer parameter access
                             create_new_chain();
                         }
                     },
                     [&](const ast::Let*) {
-                        if (variable->Type()->Is<sem::Pointer>()) {
+                        if (variable->Type()->Is<type::Pointer>()) {
                             // variable is a pointer-let.
                             auto* init = sem.Get(variable->Declaration()->initializer);
                             // Note: We do not use take_chain() here, as we need to preserve the
@@ -637,7 +637,7 @@ struct DirectVariableAccess::State {
             for (size_t i = 0; i < call->Arguments().Length(); i++) {
                 const auto* arg = call->Arguments()[i];
                 const auto* param = target->Parameters()[i];
-                const auto* param_ty = param->Type()->As<sem::Pointer>();
+                const auto* param_ty = param->Type()->As<type::Pointer>();
                 if (!param_ty) {
                     continue;  // Parameter type is not a pointer.
                 }
@@ -880,7 +880,7 @@ struct DirectVariableAccess::State {
             for (size_t arg_idx = 0; arg_idx < call->Arguments().Length(); arg_idx++) {
                 auto* arg = call->Arguments()[arg_idx];
                 auto* param = call->Target()->Parameters()[arg_idx];
-                auto* param_ty = param->Type()->As<sem::Pointer>();
+                auto* param_ty = param->Type()->As<type::Pointer>();
                 if (!param_ty) {
                     // Parameter is not a pointer.
                     // Just clone the unaltered argument.
@@ -1048,7 +1048,7 @@ struct DirectVariableAccess::State {
 
             // BuildAccessExpr() always returns a non-pointer.
             // If the expression we're replacing is a pointer, take the address.
-            if (expr->Type()->Is<sem::Pointer>()) {
+            if (expr->Type()->Is<type::Pointer>()) {
                 chain_expr = b.AddressOf(chain_expr);
             }
 
@@ -1123,7 +1123,7 @@ struct DirectVariableAccess::State {
 
         const ast::Expression* expr = b.Expr(ctx.Clone(root.variable->Declaration()->symbol));
         if (deref) {
-            if (root.variable->Type()->Is<sem::Pointer>()) {
+            if (root.variable->Type()->Is<type::Pointer>()) {
                 expr = b.Deref(expr);
             }
         }
@@ -1164,7 +1164,7 @@ struct DirectVariableAccess::State {
     /// @returns true if the function @p fn has at least one pointer parameter.
     static bool HasPointerParameter(const sem::Function* fn) {
         for (auto* param : fn->Parameters()) {
-            if (param->Type()->Is<sem::Pointer>()) {
+            if (param->Type()->Is<type::Pointer>()) {
                 return true;
             }
         }
@@ -1176,7 +1176,7 @@ struct DirectVariableAccess::State {
     /// generated, and must be stripped.
     static bool MustBeCalled(const sem::Function* fn) {
         for (auto* param : fn->Parameters()) {
-            if (auto* ptr = param->Type()->As<sem::Pointer>()) {
+            if (auto* ptr = param->Type()->As<type::Pointer>()) {
                 switch (ptr->AddressSpace()) {
                     case ast::AddressSpace::kUniform:
                     case ast::AddressSpace::kStorage:
