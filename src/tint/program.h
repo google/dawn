@@ -22,8 +22,8 @@
 #include "src/tint/program_id.h"
 #include "src/tint/sem/constant.h"
 #include "src/tint/sem/info.h"
-#include "src/tint/sem/type_manager.h"
 #include "src/tint/symbol_table.h"
+#include "src/tint/type/type_manager.h"
 
 // Forward Declarations
 namespace tint {
@@ -73,7 +73,7 @@ class Program {
     ast::NodeID HighestASTNodeID() const { return highest_node_id_; }
 
     /// @returns a reference to the program's types
-    const sem::TypeManager& Types() const {
+    const type::TypeManager& Types() const {
         AssertNotMoved();
         return types_;
     }
@@ -180,7 +180,7 @@ class Program {
 
     ProgramID id_;
     ast::NodeID highest_node_id_;
-    sem::TypeManager types_;
+    type::TypeManager types_;
     ASTNodeAllocator ast_nodes_;
     SemNodeAllocator sem_nodes_;
     ConstantAllocator constant_nodes_;

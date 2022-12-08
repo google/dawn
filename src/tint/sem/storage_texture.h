@@ -22,9 +22,9 @@
 #include "src/tint/sem/texture.h"
 
 // Forward declarations
-namespace tint::sem {
+namespace tint::type {
 class TypeManager;
-}  // namespace tint::sem
+}  // namespace tint::type
 
 namespace tint::sem {
 
@@ -67,9 +67,9 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
     /// @param format the storage texture image format
-    /// @param type_mgr the sem::TypeManager used to build the returned type
+    /// @param type_mgr the type::TypeManager used to build the returned type
     /// @returns the storage texture subtype for the given TexelFormat
-    static type::Type* SubtypeFor(ast::TexelFormat format, sem::TypeManager& type_mgr);
+    static type::Type* SubtypeFor(ast::TexelFormat format, type::TypeManager& type_mgr);
 
   private:
     ast::TexelFormat const texel_format_;

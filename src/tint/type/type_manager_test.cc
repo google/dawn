@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/type_manager.h"
+#include "src/tint/type/type_manager.h"
 
 #include "gtest/gtest.h"
 #include "src/tint/sem/i32.h"
 #include "src/tint/sem/u32.h"
 
-namespace tint::sem {
+namespace tint::type {
 namespace {
 
 template <typename T>
@@ -35,55 +35,55 @@ using TypeManagerTest = testing::Test;
 
 TEST_F(TypeManagerTest, GetUnregistered) {
     TypeManager tm;
-    auto* t = tm.Get<I32>();
+    auto* t = tm.Get<sem::I32>();
     ASSERT_NE(t, nullptr);
-    EXPECT_TRUE(t->Is<I32>());
+    EXPECT_TRUE(t->Is<sem::I32>());
 }
 
 TEST_F(TypeManagerTest, GetSameTypeReturnsSamePtr) {
     TypeManager tm;
-    auto* t = tm.Get<I32>();
+    auto* t = tm.Get<sem::I32>();
     ASSERT_NE(t, nullptr);
-    EXPECT_TRUE(t->Is<I32>());
+    EXPECT_TRUE(t->Is<sem::I32>());
 
-    auto* t2 = tm.Get<I32>();
+    auto* t2 = tm.Get<sem::I32>();
     EXPECT_EQ(t, t2);
 }
 
 TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
     TypeManager tm;
-    type::Type* t = tm.Get<I32>();
+    type::Type* t = tm.Get<sem::I32>();
     ASSERT_NE(t, nullptr);
-    EXPECT_TRUE(t->Is<I32>());
+    EXPECT_TRUE(t->Is<sem::I32>());
 
-    type::Type* t2 = tm.Get<U32>();
+    type::Type* t2 = tm.Get<sem::U32>();
     ASSERT_NE(t2, nullptr);
     EXPECT_NE(t, t2);
-    EXPECT_TRUE(t2->Is<U32>());
+    EXPECT_TRUE(t2->Is<sem::U32>());
 }
 
 TEST_F(TypeManagerTest, Find) {
     TypeManager tm;
-    auto* created = tm.Get<I32>();
+    auto* created = tm.Get<sem::I32>();
 
-    EXPECT_EQ(tm.Find<U32>(), nullptr);
-    EXPECT_EQ(tm.Find<I32>(), created);
+    EXPECT_EQ(tm.Find<sem::U32>(), nullptr);
+    EXPECT_EQ(tm.Find<sem::I32>(), created);
 }
 
 TEST_F(TypeManagerTest, WrapDoesntAffectInner) {
     TypeManager inner;
     TypeManager outer = TypeManager::Wrap(inner);
 
-    inner.Get<I32>();
+    inner.Get<sem::I32>();
 
     EXPECT_EQ(count(inner), 1u);
     EXPECT_EQ(count(outer), 0u);
 
-    outer.Get<U32>();
+    outer.Get<sem::U32>();
 
     EXPECT_EQ(count(inner), 1u);
     EXPECT_EQ(count(outer), 1u);
 }
 
 }  // namespace
-}  // namespace tint::sem
+}  // namespace tint::type

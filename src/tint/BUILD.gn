@@ -460,7 +460,6 @@ libtint_source_set("libtint_core_all_src") {
     "sem/texture.h",
     "sem/type_conversion.h",
     "sem/type_initializer.h",
-    "sem/type_manager.h",
     "sem/type_mappings.h",
     "sem/u32.h",
     "sem/vector.h",
@@ -579,6 +578,7 @@ libtint_source_set("libtint_core_all_src") {
     "type/array_count.h",
     "type/node.h",
     "type/type.h",
+    "type/type_manager.h",
     "utils/bitcast.h",
     "utils/bitset.h",
     "utils/block_allocator.h",
@@ -722,8 +722,6 @@ libtint_source_set("libtint_sem_src") {
     "sem/type_conversion.h",
     "sem/type_initializer.cc",
     "sem/type_initializer.h",
-    "sem/type_manager.cc",
-    "sem/type_manager.h",
     "sem/type_mappings.h",
     "sem/u32.cc",
     "sem/u32.h",
@@ -747,6 +745,8 @@ libtint_source_set("libtint_type_src") {
     "type/node.h",
     "type/type.cc",
     "type/type.h",
+    "type/type_manager.cc",
+    "type/type_manager.h",
   ]
 
   public_deps = [ ":libtint_core_all_src" ]
@@ -1222,14 +1222,16 @@ if (tint_build_unittests) {
       "sem/storage_texture_test.cc",
       "sem/struct_test.cc",
       "sem/texture_test.cc",
-      "sem/type_manager_test.cc",
       "sem/u32_test.cc",
       "sem/vector_test.cc",
     ]
   }
 
   tint_unittests_source_set("tint_unittests_type_src") {
-    sources = [ "type/type_test.cc" ]
+    sources = [
+      "type/type_manager_test.cc",
+      "type/type_test.cc",
+    ]
   }
 
   tint_unittests_source_set("tint_unittests_text_src") {

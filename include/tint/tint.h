@@ -25,7 +25,6 @@
 #include "src/tint/diagnostic/printer.h"
 #include "src/tint/inspector/inspector.h"
 #include "src/tint/reader/reader.h"
-#include "src/tint/sem/type_manager.h"
 #include "src/tint/transform/binding_remapper.h"
 #include "src/tint/transform/first_index_offset.h"
 #include "src/tint/transform/manager.h"
@@ -35,6 +34,7 @@
 #include "src/tint/transform/single_entry_point.h"
 #include "src/tint/transform/substitute_override.h"
 #include "src/tint/transform/vertex_pulling.h"
+#include "src/tint/type/type_manager.h"
 #include "src/tint/writer/flatten_bindings.h"
 #include "src/tint/writer/writer.h"
 

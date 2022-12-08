@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/type_manager.h"
+#include "src/tint/type/type_manager.h"
 
-namespace tint::sem {
+namespace tint::type {
 
 TypeManager::TypeManager() = default;
 TypeManager::TypeManager(TypeManager&&) = default;
 TypeManager& TypeManager::operator=(TypeManager&& rhs) = default;
 TypeManager::~TypeManager() = default;
 
-}  // namespace tint::sem
+}  // namespace tint::type

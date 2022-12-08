@@ -379,8 +379,6 @@ list(APPEND TINT_LIB_SRCS
   sem/type_initializer.h
   sem/type_conversion.cc
   sem/type_conversion.h
-  sem/type_manager.cc
-  sem/type_manager.h
   sem/type_mappings.h
   sem/u32.cc
   sem/u32.h
@@ -505,6 +503,8 @@ list(APPEND TINT_LIB_SRCS
   type/node.h
   type/type.cc
   type/type.h
+  type/type_manager.cc
+  type/type_manager.h
   utils/bitcast.h
   utils/bitset.h
   utils/block_allocator.h
@@ -940,7 +940,6 @@ if(TINT_BUILD_TESTS)
     sem/storage_texture_test.cc
     sem/struct_test.cc
     sem/texture_test.cc
-    sem/type_manager_test.cc
     sem/u32_test.cc
     sem/vector_test.cc
     source_test.cc
@@ -951,6 +950,7 @@ if(TINT_BUILD_TESTS)
     traits_test.cc
     transform/transform_test.cc
     type/type_test.cc
+    type/type_manager_test.cc
     utils/bitcast_test.cc
     utils/bitset_test.cc
     utils/block_allocator_test.cc

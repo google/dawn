@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_TYPE_MANAGER_H_
-#define SRC_TINT_SEM_TYPE_MANAGER_H_
+#ifndef SRC_TINT_TYPE_TYPE_MANAGER_H_
+#define SRC_TINT_TYPE_TYPE_MANAGER_H_
 
 #include <functional>
 #include <string>
@@ -26,7 +26,7 @@
 #include "src/tint/type/type.h"
 #include "src/tint/utils/unique_allocator.h"
 
-namespace tint::sem {
+namespace tint::type {
 
 /// The type manager holds all the pointers to the known types.
 class TypeManager final {
@@ -107,7 +107,7 @@ class TypeManager final {
     utils::UniqueAllocator<type::Node> nodes_;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
 namespace std {
 
@@ -149,4 +149,4 @@ struct equal_to<tint::type::Node> {
 
 }  // namespace std
 
-#endif  // SRC_TINT_SEM_TYPE_MANAGER_H_
+#endif  // SRC_TINT_TYPE_TYPE_MANAGER_H_
