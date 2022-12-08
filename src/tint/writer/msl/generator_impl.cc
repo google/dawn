@@ -2597,7 +2597,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             }
             return true;
         },
-        [&](const sem::Sampler*) {
+        [&](const type::Sampler*) {
             out << "sampler";
             return true;
         },

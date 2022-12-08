@@ -69,7 +69,6 @@
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/pointer.h"
 #include "src/tint/sem/reference.h"
-#include "src/tint/sem/sampler.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
@@ -81,6 +80,7 @@
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/sampler.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/math.h"
@@ -278,7 +278,7 @@ type::Type* Resolver::Type(const ast::Type* ty) {
             }
             return nullptr;
         },
-        [&](const ast::Sampler* t) { return builder_->create<sem::Sampler>(t->kind); },
+        [&](const ast::Sampler* t) { return builder_->create<type::Sampler>(t->kind); },
         [&](const ast::SampledTexture* t) -> type::SampledTexture* {
             if (auto* el = Type(t->type)) {
                 auto* sem = builder_->create<type::SampledTexture>(t->dim, el);

@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/sampler.h"
-#include "src/tint/sem/test_helper.h"
+#include "src/tint/type/sampler.h"
+#include "src/tint/type/test_helper.h"
 #include "src/tint/type/texture.h"
 
-namespace tint::sem {
+namespace tint::type {
 namespace {
 
 using SamplerTest = TestHelper;
@@ -52,7 +52,7 @@ TEST_F(SamplerTest, Equals) {
 
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
-    EXPECT_FALSE(a->Equals(Void{}));
+    EXPECT_FALSE(a->Equals(sem::Void{}));
 }
 
 TEST_F(SamplerTest, FriendlyNameSampler) {
@@ -66,4 +66,4 @@ TEST_F(SamplerTest, FriendlyNameComparisonSampler) {
 }
 
 }  // namespace
-}  // namespace tint::sem
+}  // namespace tint::type

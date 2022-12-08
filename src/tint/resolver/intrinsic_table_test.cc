@@ -280,7 +280,7 @@ TEST_F(IntrinsicTableTest, MatchSampler) {
     auto* vec2_f32 = create<sem::Vector>(f32, 2u);
     auto* vec4_f32 = create<sem::Vector>(f32, 4u);
     auto* tex = create<type::SampledTexture>(ast::TextureDimension::k2d, f32);
-    auto* sampler = create<sem::Sampler>(ast::SamplerKind::kSampler);
+    auto* sampler = create<type::Sampler>(ast::SamplerKind::kSampler);
     auto result = table->Lookup(BuiltinType::kTextureSample, utils::Vector{tex, sampler, vec2_f32},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();

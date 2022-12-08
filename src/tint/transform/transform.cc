@@ -22,9 +22,9 @@
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/reference.h"
-#include "src/tint/sem/sampler.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/sampler.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Transform);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Data);
@@ -165,7 +165,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
         return ctx.dst->create<ast::StorageTexture>(t->dim(), t->texel_format(),
                                                     CreateASTTypeFor(ctx, t->type()), t->access());
     }
-    if (auto* s = ty->As<sem::Sampler>()) {
+    if (auto* s = ty->As<type::Sampler>()) {
         return ctx.dst->create<ast::Sampler>(s->kind());
     }
     TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())

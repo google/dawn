@@ -18,8 +18,8 @@
 #include <vector>
 
 #include "src/tint/sem/node.h"
-#include "src/tint/sem/sampler.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/type/sampler.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/vector.h"
 

@@ -2065,7 +2065,7 @@ bool GeneratorImpl::EmitHandleVariable(const ast::Var* var, const sem::Variable*
 
     auto name = builder_.Symbols().NameFor(var->symbol);
     auto* type = sem->Type()->UnwrapRef();
-    if (type->Is<sem::Sampler>()) {
+    if (type->Is<type::Sampler>()) {
         // GLSL ignores Sampler variables.
         return true;
     }
@@ -2893,7 +2893,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             << "Attempting to emit pointer type. These should have been removed "
                "with the InlinePointerLets transform";
         return false;
-    } else if (type->Is<sem::Sampler>()) {
+    } else if (type->Is<type::Sampler>()) {
         return false;
     } else if (auto* str = type->As<sem::Struct>()) {
         out << StructName(str);

@@ -797,7 +797,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
                     break;
             }
         }
-        if (!type->Is<sem::Sampler>()) {
+        if (!type->Is<type::Sampler>()) {
             // If we don't have a initializer and we're an Output or Private
             // variable, then WGSL requires that we zero-initialize.
             // If we're a Workgroup variable, and the
@@ -3732,16 +3732,16 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
                 return true;
             },
             [&](const type::Texture* tex) { return GenerateTextureType(tex, result); },
-            [&](const sem::Sampler* s) {
+            [&](const type::Sampler* s) {
                 push_type(spv::Op::OpTypeSampler, {result});
 
                 // Register both of the sampler type names. In SPIR-V they're the same
                 // sampler type, so we need to match that when we do the dedup check.
                 if (s->kind() == ast::SamplerKind::kSampler) {
-                    type_to_id_[builder_.create<sem::Sampler>(
+                    type_to_id_[builder_.create<type::Sampler>(
                         ast::SamplerKind::kComparisonSampler)] = id;
                 } else {
-                    type_to_id_[builder_.create<sem::Sampler>(ast::SamplerKind::kSampler)] = id;
+                    type_to_id_[builder_.create<type::Sampler>(ast::SamplerKind::kSampler)] = id;
                 }
                 return true;
             },

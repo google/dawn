@@ -15,10 +15,10 @@
 #include "gmock/gmock.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/sem/sampler.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/sampler.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
@@ -279,7 +279,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Void) {
 }
 
 TEST_F(GlslGeneratorImplTest_Type, EmitSampler) {
-    auto* sampler = create<sem::Sampler>(ast::SamplerKind::kSampler);
+    auto* sampler = create<type::Sampler>(ast::SamplerKind::kSampler);
 
     GeneratorImpl& gen = Build();
 
@@ -289,7 +289,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitSampler) {
 }
 
 TEST_F(GlslGeneratorImplTest_Type, EmitSamplerComparison) {
-    auto* sampler = create<sem::Sampler>(ast::SamplerKind::kComparisonSampler);
+    auto* sampler = create<type::Sampler>(ast::SamplerKind::kComparisonSampler);
 
     GeneratorImpl& gen = Build();
 

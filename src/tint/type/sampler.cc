@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/sampler.h"
+#include "src/tint/type/sampler.h"
 
 #include "src/tint/program_builder.h"
 #include "src/tint/utils/hash.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::Sampler);
+TINT_INSTANTIATE_TYPEINFO(tint::type::Sampler);
 
-namespace tint::sem {
+namespace tint::type {
 
 Sampler::Sampler(ast::SamplerKind kind) : Base(type::TypeFlags{}), kind_(kind) {}
 
@@ -42,4 +42,4 @@ std::string Sampler::FriendlyName(const SymbolTable&) const {
     return kind_ == ast::SamplerKind::kSampler ? "sampler" : "sampler_comparison";
 }
 
-}  // namespace tint::sem
+}  // namespace tint::type

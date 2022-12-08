@@ -16,11 +16,11 @@
 
 #include "gmock/gmock.h"
 
-#include "src/tint/sem/sampler.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/sampler.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/writer/msl/test_helper.h"
 
@@ -730,7 +730,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Void) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Sampler) {
-    auto* sampler = create<sem::Sampler>(ast::SamplerKind::kSampler);
+    auto* sampler = create<type::Sampler>(ast::SamplerKind::kSampler);
 
     GeneratorImpl& gen = Build();
 
@@ -740,7 +740,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Sampler) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_SamplerComparison) {
-    auto* sampler = create<sem::Sampler>(ast::SamplerKind::kComparisonSampler);
+    auto* sampler = create<type::Sampler>(ast::SamplerKind::kComparisonSampler);
 
     GeneratorImpl& gen = Build();
 

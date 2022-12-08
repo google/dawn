@@ -964,7 +964,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_SampledTypeUint_Format_r32uint)
 }
 
 TEST_F(BuilderTest_Type, Sampler) {
-    auto* sampler = create<sem::Sampler>(ast::SamplerKind::kSampler);
+    auto* sampler = create<type::Sampler>(ast::SamplerKind::kSampler);
 
     spirv::Builder& b = Build();
 
@@ -974,7 +974,7 @@ TEST_F(BuilderTest_Type, Sampler) {
 }
 
 TEST_F(BuilderTest_Type, ComparisonSampler) {
-    auto* sampler = create<sem::Sampler>(ast::SamplerKind::kComparisonSampler);
+    auto* sampler = create<type::Sampler>(ast::SamplerKind::kComparisonSampler);
 
     spirv::Builder& b = Build();
 
@@ -984,8 +984,8 @@ TEST_F(BuilderTest_Type, ComparisonSampler) {
 }
 
 TEST_F(BuilderTest_Type, Dedup_Sampler_And_ComparisonSampler) {
-    auto* comp_sampler = create<sem::Sampler>(ast::SamplerKind::kComparisonSampler);
-    auto* sampler = create<sem::Sampler>(ast::SamplerKind::kSampler);
+    auto* comp_sampler = create<type::Sampler>(ast::SamplerKind::kComparisonSampler);
+    auto* sampler = create<type::Sampler>(ast::SamplerKind::kSampler);
 
     spirv::Builder& b = Build();
 

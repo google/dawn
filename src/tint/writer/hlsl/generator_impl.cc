@@ -3064,7 +3064,7 @@ bool GeneratorImpl::EmitHandleVariable(const ast::Var* var, const sem::Variable*
         if (unwrapped_type->Is<type::StorageTexture>()) {
             register_space = "u";
         }
-    } else if (unwrapped_type->Is<sem::Sampler>()) {
+    } else if (unwrapped_type->Is<type::Sampler>()) {
         register_space = "s";
     }
 
@@ -3999,7 +3999,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                    "removed with the InlinePointerLets transform";
             return false;
         },
-        [&](const sem::Sampler* sampler) {
+        [&](const type::Sampler* sampler) {
             out << "Sampler";
             if (sampler->IsComparison()) {
                 out << "Comparison";

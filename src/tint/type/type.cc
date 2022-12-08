@@ -24,10 +24,10 @@
 #include "src/tint/sem/matrix.h"
 #include "src/tint/sem/pointer.h"
 #include "src/tint/sem/reference.h"
-#include "src/tint/sem/sampler.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/u32.h"
 #include "src/tint/sem/vector.h"
+#include "src/tint/type/sampler.h"
 #include "src/tint/type/texture.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Type);
@@ -172,7 +172,7 @@ bool Type::is_numeric_scalar_or_vector() const {
 }
 
 bool Type::is_handle() const {
-    return IsAnyOf<sem::Sampler, type::Texture>();
+    return IsAnyOf<type::Sampler, type::Texture>();
 }
 
 bool Type::HoldsAbstract() const {

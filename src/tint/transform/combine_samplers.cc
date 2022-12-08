@@ -159,7 +159,7 @@ struct CombineSamplers::State {
         for (auto* global : ctx.src->AST().GlobalVariables()) {
             auto* global_sem = sem.Get(global)->As<sem::GlobalVariable>();
             auto* type = sem.Get(global->type);
-            if (tint::IsAnyOf<type::Texture, sem::Sampler>(type) &&
+            if (tint::IsAnyOf<type::Texture, type::Sampler>(type) &&
                 !type->Is<type::StorageTexture>()) {
                 ctx.Remove(ctx.src->AST().GlobalDeclarations(), global);
             } else if (global->HasBindingPoint()) {
@@ -208,7 +208,7 @@ struct CombineSamplers::State {
                 // Filter out separate textures and samplers from the original
                 // function signature.
                 for (auto* param : fn->Parameters()) {
-                    if (!param->Type()->IsAnyOf<type::Texture, sem::Sampler>()) {
+                    if (!param->Type()->IsAnyOf<type::Texture, type::Sampler>()) {
                         params.Push(ctx.Clone(param->Declaration()));
                     }
                 }
@@ -263,7 +263,7 @@ struct CombineSamplers::State {
                                     : function_combined_texture_samplers_[call->Stmt()->Function()]
                                                                          [new_pair];
                             args.Push(ctx.dst->Expr(var->symbol));
-                        } else if (auto* sampler_type = type->As<sem::Sampler>()) {
+                        } else if (auto* sampler_type = type->As<type::Sampler>()) {
                             ast::SamplerKind kind = sampler_type->kind();
                             int index = (kind == ast::SamplerKind::kSampler) ? 0 : 1;
                             const ast::Variable*& p = placeholder_samplers_[index];
@@ -321,7 +321,7 @@ struct CombineSamplers::State {
                     for (auto* arg : expr->args) {
                         if (!ctx.src->TypeOf(arg)
                                  ->UnwrapRef()
-                                 ->IsAnyOf<type::Texture, sem::Sampler>()) {
+                                 ->IsAnyOf<type::Texture, type::Sampler>()) {
                             args.Push(ctx.Clone(arg));
                         }
                     }

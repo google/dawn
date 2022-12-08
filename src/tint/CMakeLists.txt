@@ -355,8 +355,6 @@ list(APPEND TINT_LIB_SRCS
   sem/reference.cc
   sem/reference.h
   sem/sampler_texture_pair.h
-  sem/sampler.cc
-  sem/sampler.h
   sem/statement.cc
   sem/struct.cc
   sem/switch_statement.cc
@@ -497,6 +495,8 @@ list(APPEND TINT_LIB_SRCS
   type/node.h
   type/sampled_texture.cc
   type/sampled_texture.h
+  type/sampler.cc
+  type/sampler.h
   type/storage_texture.cc
   type/storage_texture.h
   type/texture.cc
@@ -931,7 +931,6 @@ if(TINT_BUILD_TESTS)
     sem/matrix_test.cc
     sem/pointer_test.cc
     sem/reference_test.cc
-    sem/sampler_test.cc
     sem/struct_test.cc
     sem/u32_test.cc
     sem/vector_test.cc
@@ -947,6 +946,7 @@ if(TINT_BUILD_TESTS)
     type/external_texture_test.cc
     type/multisampled_texture_test.cc
     type/sampled_texture_test.cc
+    type/sampler_test.cc
     type/storage_texture_test.cc
     type/texture_test.cc
     type/type_test.cc

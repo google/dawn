@@ -60,7 +60,6 @@
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/pointer.h"
 #include "src/tint/sem/reference.h"
-#include "src/tint/sem/sampler.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
@@ -72,6 +71,7 @@
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/sampler.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
@@ -231,7 +231,7 @@ bool Validator::IsHostShareable(const type::Type* type) const {
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
 bool Validator::IsStorable(const type::Type* type) const {
-    return IsPlain(type) || type->IsAnyOf<type::Texture, sem::Sampler>();
+    return IsPlain(type) || type->IsAnyOf<type::Texture, type::Sampler>();
 }
 
 const ast::Statement* Validator::ClosestContinuing(bool stop_at_loop,
@@ -832,7 +832,7 @@ bool Validator::Parameter(const ast::Function* func, const sem::Variable* var) c
             AddError("type of function parameter must be constructible", decl->type->source);
             return false;
         }
-    } else if (!var->Type()->IsAnyOf<type::Texture, sem::Sampler, sem::Pointer>()) {
+    } else if (!var->Type()->IsAnyOf<type::Texture, type::Sampler, sem::Pointer>()) {
         AddError("type of function parameter cannot be " + sem_.TypeNameOf(var->Type()),
                  decl->source);
         return false;
@@ -2266,7 +2266,7 @@ bool Validator::Assignment(const ast::Statement* a, const type::Type* rhs_ty) co
         // https://www.w3.org/TR/WGSL/#phony-assignment-section
         auto* ty = rhs_ty->UnwrapRef();
         if (!ty->IsConstructible() &&
-            !ty->IsAnyOf<sem::Pointer, type::Texture, sem::Sampler, sem::AbstractNumeric>()) {
+            !ty->IsAnyOf<sem::Pointer, type::Texture, type::Sampler, sem::AbstractNumeric>()) {
             AddError("cannot assign '" + sem_.TypeNameOf(rhs_ty) +
                          "' to '_'. '_' can only be assigned a constructible, pointer, texture or "
                          "sampler type",
