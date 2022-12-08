@@ -161,14 +161,15 @@ crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:compute:isAs
 # KEEP
 ################################################################################
 crbug.com/dawn/0000 [ linux ] webgpu:web_platform,external_texture,* [ Failure ]
-crbug.com/dawn/0000 [ intel mac ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:sourceType="VideoElement";videoName="red-green.bt2020.vp9.webm" [ Failure ]
-crbug.com/dawn/0000 [ intel mac ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:sourceType="VideoElement";videoName="red-green.bt601.vp9.webm" [ Failure ]
-crbug.com/dawn/0000 [ intel mac ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:sourceType="VideoElement";videoName="red-green.bt709.vp9.webm" [ Failure ]
-crbug.com/dawn/0000 [ intel mac ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:sourceType="VideoElement";videoName="red-green.theora.ogv" [ Failure ]
-crbug.com/dawn/0000 [ intel mac ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:sourceType="VideoElement";videoName="red-green.webmvp8.webm" [ Failure ]
-crbug.com/dawn/0000 [ intel mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:sourceType="VideoElement";videoName="red-green.bt601.vp9.webm" [ Failure ]
-crbug.com/dawn/0000 [ intel mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:sourceType="VideoElement";videoName="red-green.theora.ogv" [ Failure ]
-crbug.com/dawn/0000 [ intel mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:sourceType="VideoElement";videoName="red-green.webmvp8.webm" [ Failure ]
+
+################################################################################
+# Skip external_texture,video:* tests due to incorrect expectation values.
+# See cts issue https://github.com/gpuweb/cts/issues/2042
+# KEEP
+################################################################################
+crbug.com/dawn/1082 [ win ] webgpu:web_platform,external_texture,video:* [ Skip ]
+crbug.com/dawn/1082 [ mac ] webgpu:web_platform,external_texture,video:* [ Skip ]
+################################################################################
 
 ################################################################################
 # texel_data failures
@@ -445,14 +446,6 @@ crbug.com/dawn/1599 [ linux webgpu-adapter-swiftshader ] webgpu:web_platform,can
 crbug.com/dawn/1599 [ linux webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
 crbug.com/dawn/1599 [ linux webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ Failure ]
 crbug.com/dawn/1599 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Failure ]
-################################################################################
-
-################################################################################
-# Skip external_texture,video:* tests due to incorrect expectation values.
-# See cts issue https://github.com/gpuweb/cts/issues/2042
-# KEEP
-################################################################################
-crbug.com/dawn/1082 webgpu:web_platform,external_texture,video:* [ Skip ]
 ################################################################################
 
 ################################################################################
