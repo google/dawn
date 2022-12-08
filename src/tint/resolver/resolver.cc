@@ -53,8 +53,6 @@
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/resolver/type_alias.h"
 #include "src/tint/resolver/uniformity.h"
-#include "src/tint/sem/abstract_float.h"
-#include "src/tint/sem/abstract_int.h"
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/atomic.h"
 #include "src/tint/sem/break_if_statement.h"
@@ -76,6 +74,8 @@
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/while_statement.h"
+#include "src/tint/type/abstract_float.h"
+#include "src/tint/type/abstract_int.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
@@ -1155,7 +1155,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
             return false;
         }
         auto* ty = expr->Type();
-        if (!ty->IsAnyOf<sem::I32, sem::U32, sem::AbstractInt>()) {
+        if (!ty->IsAnyOf<sem::I32, sem::U32, type::AbstractInt>()) {
             AddError(kErrBadExpr, value->source);
             return false;
         }
@@ -1178,7 +1178,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
     }
 
     // If all arguments are abstract-integers, then materialize to i32.
-    if (common_ty->Is<sem::AbstractInt>()) {
+    if (common_ty->Is<type::AbstractInt>()) {
         common_ty = builder_->create<sem::I32>();
     }
 
@@ -1726,19 +1726,19 @@ const type::Type* Resolver::ConcreteType(const type::Type* ty,
 
     return Switch(
         ty,  //
-        [&](const sem::AbstractInt*) { return target_ty ? target_ty : i32(); },
-        [&](const sem::AbstractFloat*) { return target_ty ? target_ty : f32(); },
+        [&](const type::AbstractInt*) { return target_ty ? target_ty : i32(); },
+        [&](const type::AbstractFloat*) { return target_ty ? target_ty : f32(); },
         [&](const sem::Vector* v) {
             return Switch(
                 v->type(),  //
-                [&](const sem::AbstractInt*) { return target_ty ? target_ty : i32v(v->Width()); },
-                [&](const sem::AbstractFloat*) {
+                [&](const type::AbstractInt*) { return target_ty ? target_ty : i32v(v->Width()); },
+                [&](const type::AbstractFloat*) {
                     return target_ty ? target_ty : f32v(v->Width());
                 });
         },
         [&](const sem::Matrix* m) {
             return Switch(m->type(),  //
-                          [&](const sem::AbstractFloat*) {
+                          [&](const type::AbstractFloat*) {
                               return target_ty ? target_ty : f32m(m->columns(), m->rows());
                           });
         },
@@ -1823,7 +1823,7 @@ bool Resolver::MaybeMaterializeArguments(utils::Vector<const sem::Expression*, N
 
 bool Resolver::ShouldMaterializeArgument(const type::Type* parameter_ty) const {
     const auto* param_el_ty = type::Type::DeepestElementOf(parameter_ty);
-    return param_el_ty && !param_el_ty->Is<sem::AbstractNumeric>();
+    return param_el_ty && !param_el_ty->Is<type::AbstractNumeric>();
 }
 
 bool Resolver::Convert(const sem::Constant*& c, const type::Type* target_ty, const Source& source) {
@@ -2483,7 +2483,7 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
         [&](const ast::IntLiteralExpression* i) -> type::Type* {
             switch (i->suffix) {
                 case ast::IntLiteralExpression::Suffix::kNone:
-                    return builder_->create<sem::AbstractInt>();
+                    return builder_->create<type::AbstractInt>();
                 case ast::IntLiteralExpression::Suffix::kI:
                     return builder_->create<sem::I32>();
                 case ast::IntLiteralExpression::Suffix::kU:
@@ -2494,7 +2494,7 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
         [&](const ast::FloatLiteralExpression* f) -> type::Type* {
             switch (f->suffix) {
                 case ast::FloatLiteralExpression::Suffix::kNone:
-                    return builder_->create<sem::AbstractFloat>();
+                    return builder_->create<type::AbstractFloat>();
                 case ast::FloatLiteralExpression::Suffix::kF:
                     return builder_->create<sem::F32>();
                 case ast::FloatLiteralExpression::Suffix::kH:

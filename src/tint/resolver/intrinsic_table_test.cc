@@ -529,7 +529,7 @@ TEST_F(IntrinsicTableTest, MismatchOpenSizeMatrix) {
 }
 
 TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_ConstantEval) {
-    auto* af = create<sem::AbstractFloat>();
+    auto* af = create<type::AbstractFloat>();
     auto* bool_ = create<sem::Bool>();
     auto result = table->Lookup(BuiltinType::kSelect, utils::Vector{af, af, bool_},
                                 sem::EvaluationStage::kConstant, Source{});
@@ -545,7 +545,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_ConstantEval) {
 }
 
 TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_RuntimeEval) {
-    auto* af = create<sem::AbstractFloat>();
+    auto* af = create<type::AbstractFloat>();
     auto* bool_ref = create<sem::Reference>(create<sem::Bool>(), ast::AddressSpace::kFunction,
                                             ast::Access::kReadWrite);
     auto result = table->Lookup(BuiltinType::kSelect, utils::Vector{af, af, bool_ref},
@@ -562,7 +562,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_RuntimeEval) {
 }
 
 TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Binary_ConstantEval) {
-    auto* ai = create<sem::AbstractInt>();
+    auto* ai = create<type::AbstractInt>();
     auto* u32 = create<sem::U32>();
     auto result = table->Lookup(ast::BinaryOp::kShiftLeft, ai, u32, sem::EvaluationStage::kConstant,
                                 Source{}, false);
@@ -575,7 +575,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Binary_ConstantEval) {
 }
 
 TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Binary_RuntimeEval) {
-    auto* ai = create<sem::AbstractInt>();
+    auto* ai = create<type::AbstractInt>();
     auto* u32 = create<sem::U32>();
     auto result = table->Lookup(ast::BinaryOp::kShiftLeft, ai, u32, sem::EvaluationStage::kRuntime,
                                 Source{}, false);
@@ -712,7 +712,7 @@ TEST_F(IntrinsicTableTest, MismatchUnaryOp) {
 }
 
 TEST_F(IntrinsicTableTest, MatchUnaryOp_Constant) {
-    auto* ai = create<sem::AbstractInt>();
+    auto* ai = create<type::AbstractInt>();
     auto result = table->Lookup(ast::UnaryOp::kNegation, ai, sem::EvaluationStage::kConstant,
                                 Source{{12, 34}});
     EXPECT_EQ(result.result, ai);
@@ -720,7 +720,7 @@ TEST_F(IntrinsicTableTest, MatchUnaryOp_Constant) {
 }
 
 TEST_F(IntrinsicTableTest, MatchUnaryOp_Runtime) {
-    auto* ai = create<sem::AbstractInt>();
+    auto* ai = create<type::AbstractInt>();
     auto result = table->Lookup(ast::UnaryOp::kNegation, ai, sem::EvaluationStage::kRuntime,
                                 Source{{12, 34}});
     EXPECT_NE(result.result, ai);
@@ -879,7 +879,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerExplicit) {
 }
 
 TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitVecFromVecAbstract) {
-    auto* ai = create<sem::AbstractInt>();
+    auto* ai = create<type::AbstractInt>();
     auto* vec3_ai = create<sem::Vector>(ai, 3u);
     auto result = table->Lookup(InitConvIntrinsic::kVec3, nullptr, utils::Vector{vec3_ai},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
@@ -892,8 +892,8 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitVecFromVecAbstract) {
 }
 
 TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitMatFromVec) {
-    auto* af = create<sem::AbstractFloat>();
-    auto* vec2_ai = create<sem::Vector>(create<sem::AbstractInt>(), 2u);
+    auto* af = create<type::AbstractFloat>();
+    auto* vec2_ai = create<sem::Vector>(create<type::AbstractInt>(), 2u);
     auto* vec2_af = create<sem::Vector>(af, 2u);
     auto* mat2x2_af = create<sem::Matrix>(vec2_af, 2u);
     auto result =
@@ -909,7 +909,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitMatFromVec) {
 }
 
 TEST_F(IntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
-    auto* ai = create<sem::AbstractInt>();
+    auto* ai = create<type::AbstractInt>();
     auto* vec3_ai = create<sem::Vector>(ai, 3u);
     auto result = table->Lookup(InitConvIntrinsic::kVec3, nullptr, utils::Vector{ai, ai, ai},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
@@ -925,7 +925,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
 }
 
 TEST_F(IntrinsicTableTest, MatchTypeInitializer_RuntimeEval) {
-    auto* ai = create<sem::AbstractInt>();
+    auto* ai = create<type::AbstractInt>();
     auto result = table->Lookup(InitConvIntrinsic::kVec3, nullptr, utils::Vector{ai, ai, ai},
                                 sem::EvaluationStage::kRuntime, Source{{12, 34}});
     auto* i32 = create<sem::I32>();
@@ -983,8 +983,8 @@ TEST_F(IntrinsicTableTest, MismatchTypeConversion) {
 }
 
 TEST_F(IntrinsicTableTest, MatchTypeConversion_ConstantEval) {
-    auto* ai = create<sem::AbstractInt>();
-    auto* af = create<sem::AbstractFloat>();
+    auto* ai = create<type::AbstractInt>();
+    auto* af = create<type::AbstractFloat>();
     auto* vec3_ai = create<sem::Vector>(ai, 3u);
     auto* f32 = create<sem::F32>();
     auto* vec3_f32 = create<sem::Vector>(f32, 3u);
@@ -1000,8 +1000,8 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion_ConstantEval) {
 }
 
 TEST_F(IntrinsicTableTest, MatchTypeConversion_RuntimeEval) {
-    auto* ai = create<sem::AbstractInt>();
-    auto* af = create<sem::AbstractFloat>();
+    auto* ai = create<type::AbstractInt>();
+    auto* af = create<type::AbstractFloat>();
     auto* vec3_ai = create<sem::Vector>(ai, 3u);
     auto* vec3_f32 = create<sem::Vector>(create<sem::F32>(), 3u);
     auto* vec3_i32 = create<sem::Vector>(create<sem::I32>(), 3u);
@@ -1030,7 +1030,7 @@ TEST_F(IntrinsicTableTest, OverloadResolution) {
     //    ctor i32(i32) -> i32
     //    conv i32<T: scalar_no_i32>(T) -> i32
     // The first should win overload resolution.
-    auto* ai = create<sem::AbstractInt>();
+    auto* ai = create<type::AbstractInt>();
     auto* i32 = create<sem::I32>();
     auto result = table->Lookup(InitConvIntrinsic::kI32, nullptr, utils::Vector{ai},
                                 sem::EvaluationStage::kConstant, Source{});

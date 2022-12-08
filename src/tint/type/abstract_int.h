@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_ABSTRACT_INT_H_
-#define SRC_TINT_SEM_ABSTRACT_INT_H_
+#ifndef SRC_TINT_TYPE_ABSTRACT_INT_H_
+#define SRC_TINT_TYPE_ABSTRACT_INT_H_
 
 #include <string>
 
-#include "src/tint/sem/abstract_numeric.h"
+#include "src/tint/type/abstract_numeric.h"
 
-namespace tint::sem {
+namespace tint::type {
 
 /// An abstract-int type.
 /// @see https://www.w3.org/TR/WGSL/#abstractint
@@ -44,6 +44,6 @@ class AbstractInt final : public Castable<AbstractInt, AbstractNumeric> {
     std::string FriendlyName(const SymbolTable& symbols) const override;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
-#endif  // SRC_TINT_SEM_ABSTRACT_INT_H_
+#endif  // SRC_TINT_TYPE_ABSTRACT_INT_H_

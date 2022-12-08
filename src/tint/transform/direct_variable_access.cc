@@ -20,7 +20,6 @@
 
 #include "src/tint/ast/traverse_expressions.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/abstract_int.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/index_accessor_expression.h"
@@ -30,6 +29,7 @@
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/transform/utils/hoist_to_decl_before.h"
+#include "src/tint/type/abstract_int.h"
 #include "src/tint/utils/reverse.h"
 #include "src/tint/utils/scoped_assignment.h"
 
@@ -573,7 +573,7 @@ struct DirectVariableAccess::State {
             if (!idx->UnwrapMaterialize()
                      ->Type()
                      ->UnwrapRef()
-                     ->IsAnyOf<sem::U32, sem::AbstractInt>()) {
+                     ->IsAnyOf<sem::U32, type::AbstractInt>()) {
                 expr = b.Construct(b.ty.u32(), expr);
             }
         }

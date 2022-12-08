@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/abstract_float.h"
-#include "src/tint/sem/abstract_int.h"
 #include "src/tint/sem/f16.h"
 #include "src/tint/sem/reference.h"
+#include "src/tint/type/abstract_float.h"
+#include "src/tint/type/abstract_int.h"
 #include "src/tint/type/array_count.h"
 #include "src/tint/type/test_helper.h"
 
@@ -23,8 +23,8 @@ namespace tint::type {
 namespace {
 
 struct TypeTest : public TestHelper {
-    const sem::AbstractFloat* af = create<sem::AbstractFloat>();
-    const sem::AbstractInt* ai = create<sem::AbstractInt>();
+    const type::AbstractFloat* af = create<type::AbstractFloat>();
+    const type::AbstractInt* ai = create<type::AbstractInt>();
     const sem::F32* f32 = create<sem::F32>();
     const sem::F16* f16 = create<sem::F16>();
     const sem::I32* i32 = create<sem::I32>();

@@ -47,7 +47,6 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
 #include "src/tint/ast/workgroup_attribute.h"
-#include "src/tint/sem/abstract_numeric.h"
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/atomic.h"
 #include "src/tint/sem/break_if_statement.h"
@@ -67,6 +66,7 @@
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/while_statement.h"
+#include "src/tint/type/abstract_numeric.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
@@ -2228,7 +2228,7 @@ bool Validator::SwitchStatement(const ast::SwitchStatement* s) {
             auto value = selector->Value()->As<uint32_t>();
             if (auto added = selectors.Add(value, selector->Declaration()->source); !added) {
                 AddError("duplicate switch case '" +
-                             (decl_ty->IsAnyOf<sem::I32, sem::AbstractNumeric>()
+                             (decl_ty->IsAnyOf<sem::I32, type::AbstractNumeric>()
                                   ? std::to_string(i32(value))
                                   : std::to_string(value)) +
                              "'",
@@ -2266,7 +2266,7 @@ bool Validator::Assignment(const ast::Statement* a, const type::Type* rhs_ty) co
         // https://www.w3.org/TR/WGSL/#phony-assignment-section
         auto* ty = rhs_ty->UnwrapRef();
         if (!ty->IsConstructible() &&
-            !ty->IsAnyOf<sem::Pointer, type::Texture, type::Sampler, sem::AbstractNumeric>()) {
+            !ty->IsAnyOf<sem::Pointer, type::Texture, type::Sampler, type::AbstractNumeric>()) {
             AddError("cannot assign '" + sem_.TypeNameOf(rhs_ty) +
                          "' to '_'. '_' can only be assigned a constructible, pointer, texture or "
                          "sampler type",

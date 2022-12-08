@@ -18,10 +18,10 @@
 #include <utility>
 
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/abstract_numeric.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/type_initializer.h"
+#include "src/tint/type/abstract_numeric.h"
 #include "src/tint/utils/map.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VectorizeScalarMatrixInitializers);
@@ -84,7 +84,7 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
         if (args[0]
                 ->Type()
                 ->UnwrapRef()
-                ->IsAnyOf<sem::Matrix, sem::Vector, sem::AbstractNumeric>()) {
+                ->IsAnyOf<sem::Matrix, sem::Vector, type::AbstractNumeric>()) {
             return nullptr;
         }
 

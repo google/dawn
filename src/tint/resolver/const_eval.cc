@@ -23,8 +23,6 @@
 #include <utility>
 
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/abstract_float.h"
-#include "src/tint/sem/abstract_int.h"
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/bool.h"
 #include "src/tint/sem/constant.h"
@@ -36,6 +34,8 @@
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/u32.h"
 #include "src/tint/sem/vector.h"
+#include "src/tint/type/abstract_float.h"
+#include "src/tint/type/abstract_int.h"
 #include "src/tint/utils/bitcast.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/map.h"
@@ -69,7 +69,7 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_ia_iu32(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const sem::AbstractInt*) { return f(cs->template As<AInt>()...); },
+        [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
         [&](const sem::I32*) { return f(cs->template As<i32>()...); },
         [&](const sem::U32*) { return f(cs->template As<u32>()...); });
 }
@@ -80,7 +80,7 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_ia_iu32_bool(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const sem::AbstractInt*) { return f(cs->template As<AInt>()...); },
+        [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
         [&](const sem::I32*) { return f(cs->template As<i32>()...); },
         [&](const sem::U32*) { return f(cs->template As<u32>()...); },
         [&](const sem::Bool*) { return f(cs->template As<bool>()...); });
@@ -92,8 +92,8 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_fia_fi32_f16(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const sem::AbstractInt*) { return f(cs->template As<AInt>()...); },
-        [&](const sem::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
+        [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
+        [&](const type::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
         [&](const sem::F32*) { return f(cs->template As<f32>()...); },
         [&](const sem::I32*) { return f(cs->template As<i32>()...); },
         [&](const sem::F16*) { return f(cs->template As<f16>()...); });
@@ -105,8 +105,8 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_fia_fiu32_f16(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const sem::AbstractInt*) { return f(cs->template As<AInt>()...); },
-        [&](const sem::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
+        [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
+        [&](const type::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
         [&](const sem::F32*) { return f(cs->template As<f32>()...); },
         [&](const sem::I32*) { return f(cs->template As<i32>()...); },
         [&](const sem::U32*) { return f(cs->template As<u32>()...); },
@@ -119,8 +119,8 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_fia_fiu32_f16_bool(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const sem::AbstractInt*) { return f(cs->template As<AInt>()...); },
-        [&](const sem::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
+        [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
+        [&](const type::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
         [&](const sem::F32*) { return f(cs->template As<f32>()...); },
         [&](const sem::I32*) { return f(cs->template As<i32>()...); },
         [&](const sem::U32*) { return f(cs->template As<u32>()...); },
@@ -134,7 +134,7 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_fa_f32_f16(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const sem::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
+        [&](const type::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
         [&](const sem::F32*) { return f(cs->template As<f32>()...); },
         [&](const sem::F16*) { return f(cs->template As<f16>()...); });
 }
@@ -156,13 +156,13 @@ auto Dispatch_bool(F&& f, CONSTANTS&&... cs) {
 template <typename F>
 auto ZeroTypeDispatch(const type::Type* type, F&& f) {
     return Switch(
-        type,                                                     //
-        [&](const sem::AbstractInt*) { return f(AInt(0)); },      //
-        [&](const sem::AbstractFloat*) { return f(AFloat(0)); },  //
-        [&](const sem::I32*) { return f(i32(0)); },               //
-        [&](const sem::U32*) { return f(u32(0)); },               //
-        [&](const sem::F32*) { return f(f32(0)); },               //
-        [&](const sem::F16*) { return f(f16(0)); },               //
+        type,                                                      //
+        [&](const type::AbstractInt*) { return f(AInt(0)); },      //
+        [&](const type::AbstractFloat*) { return f(AFloat(0)); },  //
+        [&](const sem::I32*) { return f(i32(0)); },                //
+        [&](const sem::U32*) { return f(u32(0)); },                //
+        [&](const sem::F32*) { return f(f32(0)); },                //
+        [&](const sem::F16*) { return f(f16(0)); },                //
         [&](const sem::Bool*) { return f(static_cast<bool>(0)); });
 }
 
@@ -2659,11 +2659,11 @@ ConstEval::Result ConstEval::frexp(const type::Type* ty,
                     CreateElement(builder, source, builder.create<sem::I32>(), i32(exp)),
                 };
             },
-            [&](const sem::AbstractFloat*) {
+            [&](const type::AbstractFloat*) {
                 return FractExp{
-                    CreateElement(builder, source, builder.create<sem::AbstractFloat>(),
+                    CreateElement(builder, source, builder.create<type::AbstractFloat>(),
                                   AFloat(fract)),
-                    CreateElement(builder, source, builder.create<sem::AbstractInt>(), AInt(exp)),
+                    CreateElement(builder, source, builder.create<type::AbstractInt>(), AInt(exp)),
                 };
             },
             [&](Default) {

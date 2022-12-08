@@ -41,8 +41,8 @@ template <size_t N>
 inline void CollectScalars(const sem::Constant* c, utils::Vector<builder::Scalar, N>& scalars) {
     Switch(
         c->Type(),  //
-        [&](const sem::AbstractInt*) { scalars.Push(c->As<AInt>()); },
-        [&](const sem::AbstractFloat*) { scalars.Push(c->As<AFloat>()); },
+        [&](const type::AbstractInt*) { scalars.Push(c->As<AInt>()); },
+        [&](const type::AbstractFloat*) { scalars.Push(c->As<AFloat>()); },
         [&](const sem::Bool*) { scalars.Push(c->As<bool>()); },
         [&](const sem::I32*) { scalars.Push(c->As<i32>()); },
         [&](const sem::U32*) { scalars.Push(c->As<u32>()); },

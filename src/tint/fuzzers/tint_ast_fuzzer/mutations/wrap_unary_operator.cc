@@ -18,8 +18,8 @@
 #include <vector>
 
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/abstract_float.h"
-#include "src/tint/sem/abstract_int.h"
+#include "src/tint/type/abstract_float.h"
+#include "src/tint/type/abstract_int.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 

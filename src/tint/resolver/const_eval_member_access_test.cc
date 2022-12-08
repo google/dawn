@@ -83,7 +83,7 @@ TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
     auto* cv = sem->ConstantValue();
     EXPECT_TYPE(cv->Type(), sem->Type());
     EXPECT_TRUE(cv->Index(0)->Type()->Is<sem::Vector>());
-    EXPECT_TRUE(cv->Index(0)->Index(0)->Type()->Is<sem::AbstractFloat>());
+    EXPECT_TRUE(cv->Index(0)->Index(0)->Type()->Is<type::AbstractFloat>());
     EXPECT_FALSE(cv->AllEqual());
     EXPECT_FALSE(cv->AnyZero());
     EXPECT_FALSE(cv->AllZero());

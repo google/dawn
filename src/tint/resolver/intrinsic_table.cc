@@ -20,14 +20,14 @@
 
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/abstract_float.h"
-#include "src/tint/sem/abstract_int.h"
-#include "src/tint/sem/abstract_numeric.h"
 #include "src/tint/sem/atomic.h"
 #include "src/tint/sem/evaluation_stage.h"
 #include "src/tint/sem/pipeline_stage_set.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_initializer.h"
+#include "src/tint/type/abstract_float.h"
+#include "src/tint/type/abstract_int.h"
+#include "src/tint/type/abstract_numeric.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/external_texture.h"
@@ -352,22 +352,22 @@ bool match_bool(MatchState&, const type::Type* ty) {
     return ty->IsAnyOf<Any, sem::Bool>();
 }
 
-const sem::AbstractFloat* build_fa(MatchState& state) {
-    return state.builder.create<sem::AbstractFloat>();
+const type::AbstractFloat* build_fa(MatchState& state) {
+    return state.builder.create<type::AbstractFloat>();
 }
 
 bool match_fa(MatchState& state, const type::Type* ty) {
     return (state.earliest_eval_stage == sem::EvaluationStage::kConstant) &&
-           ty->IsAnyOf<Any, sem::AbstractNumeric>();
+           ty->IsAnyOf<Any, type::AbstractNumeric>();
 }
 
-const sem::AbstractInt* build_ia(MatchState& state) {
-    return state.builder.create<sem::AbstractInt>();
+const type::AbstractInt* build_ia(MatchState& state) {
+    return state.builder.create<type::AbstractInt>();
 }
 
 bool match_ia(MatchState& state, const type::Type* ty) {
     return (state.earliest_eval_stage == sem::EvaluationStage::kConstant) &&
-           ty->IsAnyOf<Any, sem::AbstractInt>();
+           ty->IsAnyOf<Any, type::AbstractInt>();
 }
 
 const sem::Bool* build_bool(MatchState& state) {
@@ -379,7 +379,7 @@ const sem::F16* build_f16(MatchState& state) {
 }
 
 bool match_f16(MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<Any, sem::F16, sem::AbstractNumeric>();
+    return ty->IsAnyOf<Any, sem::F16, type::AbstractNumeric>();
 }
 
 const sem::F32* build_f32(MatchState& state) {
@@ -387,7 +387,7 @@ const sem::F32* build_f32(MatchState& state) {
 }
 
 bool match_f32(MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<Any, sem::F32, sem::AbstractNumeric>();
+    return ty->IsAnyOf<Any, sem::F32, type::AbstractNumeric>();
 }
 
 const sem::I32* build_i32(MatchState& state) {
@@ -395,7 +395,7 @@ const sem::I32* build_i32(MatchState& state) {
 }
 
 bool match_i32(MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<Any, sem::I32, sem::AbstractInt>();
+    return ty->IsAnyOf<Any, sem::I32, type::AbstractInt>();
 }
 
 const sem::U32* build_u32(MatchState& state) {
@@ -403,7 +403,7 @@ const sem::U32* build_u32(MatchState& state) {
 }
 
 bool match_u32(MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<Any, sem::U32, sem::AbstractInt>();
+    return ty->IsAnyOf<Any, sem::U32, type::AbstractInt>();
 }
 
 bool match_vec(MatchState&, const type::Type* ty, Number& N, const type::Type*& T) {
@@ -846,7 +846,7 @@ const sem::Struct* build_modf_result(MatchState& state, const type::Type* el) {
         el,                                            //
         [&](const sem::F32*) { return build_f32(); },  //
         [&](const sem::F16*) { return build_f16(); },  //
-        [&](const sem::AbstractFloat*) {
+        [&](const type::AbstractFloat*) {
             auto* abstract = build_struct(state.builder, "__modf_result_abstract",
                                           {{"fract", el}, {"whole", el}});
             abstract->SetConcreteTypes(utils::Vector{build_f32(), build_f16()});
@@ -874,7 +874,7 @@ const sem::Struct* build_modf_result_vec(MatchState& state, Number& n, const typ
         el,                                            //
         [&](const sem::F32*) { return build_f32(); },  //
         [&](const sem::F16*) { return build_f16(); },  //
-        [&](const sem::AbstractFloat*) {
+        [&](const type::AbstractFloat*) {
             auto* vec = state.builder.create<sem::Vector>(el, n.Value());
             auto* abstract =
                 build_struct(state.builder, prefix + "_abstract", {{"fract", vec}, {"whole", vec}});
@@ -904,8 +904,8 @@ const sem::Struct* build_frexp_result(MatchState& state, const type::Type* el) {
         el,                                            //
         [&](const sem::F32*) { return build_f32(); },  //
         [&](const sem::F16*) { return build_f16(); },  //
-        [&](const sem::AbstractFloat*) {
-            auto* i = state.builder.create<sem::AbstractInt>();
+        [&](const type::AbstractFloat*) {
+            auto* i = state.builder.create<type::AbstractInt>();
             auto* abstract =
                 build_struct(state.builder, "__frexp_result_abstract", {{"fract", el}, {"exp", i}});
             abstract->SetConcreteTypes(utils::Vector{build_f32(), build_f16()});
@@ -935,9 +935,9 @@ const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n, const ty
         el,                                            //
         [&](const sem::F32*) { return build_f32(); },  //
         [&](const sem::F16*) { return build_f16(); },  //
-        [&](const sem::AbstractFloat*) {
+        [&](const type::AbstractFloat*) {
             auto* f = state.builder.create<sem::Vector>(el, n.Value());
-            auto* e = state.builder.create<sem::Vector>(state.builder.create<sem::AbstractInt>(),
+            auto* e = state.builder.create<sem::Vector>(state.builder.create<type::AbstractInt>(),
                                                         n.Value());
             auto* abstract =
                 build_struct(state.builder, prefix + "_abstract", {{"fract", f}, {"exp", e}});

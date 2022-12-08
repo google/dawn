@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/abstract_numeric.h"
+#include "src/tint/type/abstract_numeric.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::AbstractNumeric);
+TINT_INSTANTIATE_TYPEINFO(tint::type::AbstractNumeric);
 
-namespace tint::sem {
+namespace tint::type {
 
 AbstractNumeric::AbstractNumeric()
     : Base(type::TypeFlags{
@@ -35,4 +35,4 @@ uint32_t AbstractNumeric::Align() const {
     return 0;
 }
 
-}  // namespace tint::sem
+}  // namespace tint::type

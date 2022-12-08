@@ -974,8 +974,8 @@ TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_i32)->Is<sem::I32>());
     ASSERT_TRUE(TypeOf(c_u32)->Is<sem::U32>());
     ASSERT_TRUE(TypeOf(c_f32)->Is<sem::F32>());
-    ASSERT_TRUE(TypeOf(c_ai)->Is<sem::AbstractInt>());
-    ASSERT_TRUE(TypeOf(c_af)->Is<sem::AbstractFloat>());
+    ASSERT_TRUE(TypeOf(c_ai)->Is<type::AbstractInt>());
+    ASSERT_TRUE(TypeOf(c_af)->Is<type::AbstractFloat>());
     ASSERT_TRUE(TypeOf(c_vi32)->Is<sem::Vector>());
     ASSERT_TRUE(TypeOf(c_vu32)->Is<sem::Vector>());
     ASSERT_TRUE(TypeOf(c_vf32)->Is<sem::Vector>());
@@ -1145,8 +1145,8 @@ TEST_F(ResolverVariableTest, GlobalConst_ImplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_i32)->Is<sem::I32>());
     ASSERT_TRUE(TypeOf(c_u32)->Is<sem::U32>());
     ASSERT_TRUE(TypeOf(c_f32)->Is<sem::F32>());
-    ASSERT_TRUE(TypeOf(c_ai)->Is<sem::AbstractInt>());
-    ASSERT_TRUE(TypeOf(c_af)->Is<sem::AbstractFloat>());
+    ASSERT_TRUE(TypeOf(c_ai)->Is<type::AbstractInt>());
+    ASSERT_TRUE(TypeOf(c_af)->Is<type::AbstractFloat>());
     ASSERT_TRUE(TypeOf(c_vi32)->Is<sem::Vector>());
     ASSERT_TRUE(TypeOf(c_vu32)->Is<sem::Vector>());
     ASSERT_TRUE(TypeOf(c_vf32)->Is<sem::Vector>());

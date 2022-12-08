@@ -14,8 +14,6 @@
 
 #include "src/tint/type/type.h"
 
-#include "src/tint/sem/abstract_float.h"
-#include "src/tint/sem/abstract_int.h"
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/bool.h"
 #include "src/tint/sem/f16.h"
@@ -27,6 +25,8 @@
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/u32.h"
 #include "src/tint/sem/vector.h"
+#include "src/tint/type/abstract_float.h"
+#include "src/tint/type/abstract_int.h"
 #include "src/tint/type/sampler.h"
 #include "src/tint/type/texture.h"
 
@@ -69,15 +69,15 @@ uint32_t Type::Align() const {
 }
 
 bool Type::is_scalar() const {
-    return IsAnyOf<sem::F16, sem::F32, sem::U32, sem::I32, sem::AbstractNumeric, sem::Bool>();
+    return IsAnyOf<sem::F16, sem::F32, sem::U32, sem::I32, type::AbstractNumeric, sem::Bool>();
 }
 
 bool Type::is_numeric_scalar() const {
-    return IsAnyOf<sem::F16, sem::F32, sem::U32, sem::I32, sem::AbstractNumeric>();
+    return IsAnyOf<sem::F16, sem::F32, sem::U32, sem::I32, type::AbstractNumeric>();
 }
 
 bool Type::is_float_scalar() const {
-    return IsAnyOf<sem::F16, sem::F32, sem::AbstractNumeric>();
+    return IsAnyOf<sem::F16, sem::F32, type::AbstractNumeric>();
 }
 
 bool Type::is_float_matrix() const {
@@ -107,7 +107,7 @@ bool Type::is_integer_scalar() const {
 }
 
 bool Type::is_signed_integer_scalar() const {
-    return IsAnyOf<sem::I32, sem::AbstractInt>();
+    return IsAnyOf<sem::I32, type::AbstractInt>();
 }
 
 bool Type::is_unsigned_integer_scalar() const {
@@ -116,7 +116,7 @@ bool Type::is_unsigned_integer_scalar() const {
 
 bool Type::is_signed_integer_vector() const {
     return Is(
-        [](const sem::Vector* v) { return v->type()->IsAnyOf<sem::I32, sem::AbstractInt>(); });
+        [](const sem::Vector* v) { return v->type()->IsAnyOf<sem::I32, type::AbstractInt>(); });
 }
 
 bool Type::is_unsigned_integer_vector() const {
@@ -128,7 +128,7 @@ bool Type::is_unsigned_integer_scalar_or_vector() const {
 }
 
 bool Type::is_signed_integer_scalar_or_vector() const {
-    return IsAnyOf<sem::I32, sem::AbstractInt>() || is_signed_integer_vector();
+    return IsAnyOf<sem::I32, type::AbstractInt>() || is_signed_integer_vector();
 }
 
 bool Type::is_integer_scalar_or_vector() const {
@@ -136,19 +136,19 @@ bool Type::is_integer_scalar_or_vector() const {
 }
 
 bool Type::is_abstract_integer_vector() const {
-    return Is([](const sem::Vector* v) { return v->type()->Is<sem::AbstractInt>(); });
+    return Is([](const sem::Vector* v) { return v->type()->Is<type::AbstractInt>(); });
 }
 
 bool Type::is_abstract_float_vector() const {
-    return Is([](const sem::Vector* v) { return v->type()->Is<sem::AbstractFloat>(); });
+    return Is([](const sem::Vector* v) { return v->type()->Is<type::AbstractFloat>(); });
 }
 
 bool Type::is_abstract_integer_scalar_or_vector() const {
-    return Is<sem::AbstractInt>() || is_abstract_integer_vector();
+    return Is<type::AbstractInt>() || is_abstract_integer_vector();
 }
 
 bool Type::is_abstract_float_scalar_or_vector() const {
-    return Is<sem::AbstractFloat>() || is_abstract_float_vector();
+    return Is<type::AbstractFloat>() || is_abstract_float_vector();
 }
 
 bool Type::is_bool_vector() const {
@@ -178,7 +178,7 @@ bool Type::is_handle() const {
 bool Type::HoldsAbstract() const {
     return Switch(
         this,  //
-        [&](const sem::AbstractNumeric*) { return true; },
+        [&](const type::AbstractNumeric*) { return true; },
         [&](const sem::Vector* v) { return v->type()->HoldsAbstract(); },
         [&](const sem::Matrix* m) { return m->type()->HoldsAbstract(); },
         [&](const sem::Array* a) { return a->ElemType()->HoldsAbstract(); },
@@ -198,21 +198,21 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
     }
     return Switch(
         from,
-        [&](const sem::AbstractFloat*) {
+        [&](const type::AbstractFloat*) {
             return Switch(
                 to,                                  //
                 [&](const sem::F32*) { return 1; },  //
                 [&](const sem::F16*) { return 2; },  //
                 [&](Default) { return kNoConversion; });
         },
-        [&](const sem::AbstractInt*) {
+        [&](const type::AbstractInt*) {
             return Switch(
-                to,                                            //
-                [&](const sem::I32*) { return 3; },            //
-                [&](const sem::U32*) { return 4; },            //
-                [&](const sem::AbstractFloat*) { return 5; },  //
-                [&](const sem::F32*) { return 6; },            //
-                [&](const sem::F16*) { return 7; },            //
+                to,                                             //
+                [&](const sem::I32*) { return 3; },             //
+                [&](const sem::U32*) { return 4; },             //
+                [&](const type::AbstractFloat*) { return 5; },  //
+                [&](const sem::F32*) { return 6; },             //
+                [&](const sem::F16*) { return 7; },             //
                 [&](Default) { return kNoConversion; });
         },
         [&](const sem::Vector* from_vec) {

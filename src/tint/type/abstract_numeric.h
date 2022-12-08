@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_ABSTRACT_NUMERIC_H_
-#define SRC_TINT_SEM_ABSTRACT_NUMERIC_H_
+#ifndef SRC_TINT_TYPE_ABSTRACT_NUMERIC_H_
+#define SRC_TINT_TYPE_ABSTRACT_NUMERIC_H_
 
 #include <string>
 
 #include "src/tint/type/type.h"
 
-namespace tint::sem {
+namespace tint::type {
 
 /// The base class for abstract-int and abstract-float types.
 /// @see https://www.w3.org/TR/WGSL/#types-for-creation-time-constants
@@ -39,6 +39,6 @@ class AbstractNumeric : public Castable<AbstractNumeric, type::Type> {
     uint32_t Align() const override;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
-#endif  // SRC_TINT_SEM_ABSTRACT_NUMERIC_H_
+#endif  // SRC_TINT_TYPE_ABSTRACT_NUMERIC_H_

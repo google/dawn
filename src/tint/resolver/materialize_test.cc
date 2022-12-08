@@ -1257,7 +1257,7 @@ TEST_F(MaterializeAbstractStructure, Modf_Scalar_DefaultType) {
     ASSERT_TRUE(concrete_str->Members()[0]->Type()->Is<sem::F32>());
     ASSERT_TRUE(materialize->Expr()->Type()->Is<sem::Struct>());
     auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
-    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::AbstractFloat>());
+    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<type::AbstractFloat>());
 }
 
 TEST_F(MaterializeAbstractStructure, Modf_Vector_DefaultType) {
@@ -1276,7 +1276,7 @@ TEST_F(MaterializeAbstractStructure, Modf_Vector_DefaultType) {
     auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
     ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::Vector>());
     ASSERT_TRUE(
-        abstract_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<sem::AbstractFloat>());
+        abstract_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<type::AbstractFloat>());
 }
 
 TEST_F(MaterializeAbstractStructure, Modf_Scalar_ExplicitType) {
@@ -1295,7 +1295,7 @@ TEST_F(MaterializeAbstractStructure, Modf_Scalar_ExplicitType) {
     ASSERT_TRUE(concrete_str->Members()[0]->Type()->Is<sem::F16>());
     ASSERT_TRUE(materialize->Expr()->Type()->Is<sem::Struct>());
     auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
-    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::AbstractFloat>());
+    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<type::AbstractFloat>());
 }
 
 TEST_F(MaterializeAbstractStructure, Modf_Vector_ExplicitType) {
@@ -1317,7 +1317,7 @@ TEST_F(MaterializeAbstractStructure, Modf_Vector_ExplicitType) {
     auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
     ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::Vector>());
     ASSERT_TRUE(
-        abstract_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<sem::AbstractFloat>());
+        abstract_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<type::AbstractFloat>());
 }
 
 TEST_F(MaterializeAbstractStructure, Frexp_Scalar_DefaultType) {
@@ -1334,8 +1334,8 @@ TEST_F(MaterializeAbstractStructure, Frexp_Scalar_DefaultType) {
     ASSERT_TRUE(concrete_str->Members()[1]->Type()->Is<sem::I32>());
     ASSERT_TRUE(materialize->Expr()->Type()->Is<sem::Struct>());
     auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
-    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::AbstractFloat>());
-    ASSERT_TRUE(abstract_str->Members()[1]->Type()->Is<sem::AbstractInt>());
+    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<type::AbstractFloat>());
+    ASSERT_TRUE(abstract_str->Members()[1]->Type()->Is<type::AbstractInt>());
 }
 
 TEST_F(MaterializeAbstractStructure, Frexp_Vector_DefaultType) {
@@ -1356,9 +1356,9 @@ TEST_F(MaterializeAbstractStructure, Frexp_Vector_DefaultType) {
     auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
     ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::Vector>());
     ASSERT_TRUE(
-        abstract_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<sem::AbstractFloat>());
+        abstract_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<type::AbstractFloat>());
     ASSERT_TRUE(
-        abstract_str->Members()[1]->Type()->As<sem::Vector>()->type()->Is<sem::AbstractInt>());
+        abstract_str->Members()[1]->Type()->As<sem::Vector>()->type()->Is<type::AbstractInt>());
 }
 
 TEST_F(MaterializeAbstractStructure, Frexp_Scalar_ExplicitType) {
@@ -1378,8 +1378,8 @@ TEST_F(MaterializeAbstractStructure, Frexp_Scalar_ExplicitType) {
     ASSERT_TRUE(concrete_str->Members()[1]->Type()->Is<sem::I32>());
     ASSERT_TRUE(materialize->Expr()->Type()->Is<sem::Struct>());
     auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
-    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::AbstractFloat>());
-    ASSERT_TRUE(abstract_str->Members()[1]->Type()->Is<sem::AbstractInt>());
+    ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<type::AbstractFloat>());
+    ASSERT_TRUE(abstract_str->Members()[1]->Type()->Is<type::AbstractInt>());
 }
 
 TEST_F(MaterializeAbstractStructure, Frexp_Vector_ExplicitType) {
@@ -1403,9 +1403,9 @@ TEST_F(MaterializeAbstractStructure, Frexp_Vector_ExplicitType) {
     auto* abstract_str = materialize->Expr()->Type()->As<sem::Struct>();
     ASSERT_TRUE(abstract_str->Members()[0]->Type()->Is<sem::Vector>());
     ASSERT_TRUE(
-        abstract_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<sem::AbstractFloat>());
+        abstract_str->Members()[0]->Type()->As<sem::Vector>()->type()->Is<type::AbstractFloat>());
     ASSERT_TRUE(
-        abstract_str->Members()[1]->Type()->As<sem::Vector>()->type()->Is<sem::AbstractInt>());
+        abstract_str->Members()[1]->Type()->As<sem::Vector>()->type()->Is<type::AbstractInt>());
 }
 
 }  // namespace materialize_abstract_structure

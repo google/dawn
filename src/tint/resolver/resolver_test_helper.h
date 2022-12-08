@@ -26,12 +26,12 @@
 #include "gtest/gtest.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/resolver.h"
-#include "src/tint/sem/abstract_float.h"
-#include "src/tint/sem/abstract_int.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/traits.h"
+#include "src/tint/type/abstract_float.h"
+#include "src/tint/type/abstract_int.h"
 #include "src/tint/utils/vector.h"
 
 namespace tint::resolver {
@@ -387,7 +387,7 @@ struct DataType<AFloat> {
     /// @param b the ProgramBuilder
     /// @return the semantic abstract-float type
     static inline const type::Type* Sem(ProgramBuilder& b) {
-        return b.create<sem::AbstractFloat>();
+        return b.create<type::AbstractFloat>();
     }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the abstract-float value to init with
@@ -418,7 +418,7 @@ struct DataType<AInt> {
     static inline const ast::Type* AST(ProgramBuilder&) { return nullptr; }
     /// @param b the ProgramBuilder
     /// @return the semantic abstract-int type
-    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<sem::AbstractInt>(); }
+    static inline const type::Type* Sem(ProgramBuilder& b) { return b.create<type::AbstractInt>(); }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 with the abstract-int value to init with
     /// @return a new AST abstract-int literal value expression

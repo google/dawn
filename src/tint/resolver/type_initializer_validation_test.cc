@@ -610,9 +610,9 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArray_AIAIAI) {
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
-    EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<sem::AbstractInt>());
-    EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<sem::AbstractInt>());
-    EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<sem::AbstractInt>());
+    EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<type::AbstractInt>());
+    EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<type::AbstractInt>());
+    EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<type::AbstractInt>());
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, InferredArrayU32_VecI32_VecAI) {

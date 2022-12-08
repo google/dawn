@@ -291,12 +291,6 @@ list(APPEND TINT_LIB_SRCS
   resolver/validator.cc
   resolver/validator.h
   scope_stack.h
-  sem/abstract_float.cc
-  sem/abstract_float.h
-  sem/abstract_int.cc
-  sem/abstract_int.h
-  sem/abstract_numeric.cc
-  sem/abstract_numeric.h
   sem/array.cc
   sem/array.h
   sem/array_count.cc
@@ -481,6 +475,12 @@ list(APPEND TINT_LIB_SRCS
   transform/while_to_loop.h
   transform/zero_init_workgroup_memory.cc
   transform/zero_init_workgroup_memory.h
+  type/abstract_float.cc
+  type/abstract_float.h
+  type/abstract_int.cc
+  type/abstract_int.h
+  type/abstract_numeric.cc
+  type/abstract_numeric.h
   type/array_count.cc
   type/array_count.h
   type/depth_multisampled_texture.cc

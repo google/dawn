@@ -1142,7 +1142,7 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractShiftLeftRemainsAbstract) {
     auto* sem2 = Sem().Get(expr2);
     ASSERT_NE(sem2, nullptr);
 
-    auto aint_ty = create<sem::AbstractInt>();
+    auto aint_ty = create<type::AbstractInt>();
     EXPECT_EQ(sem1->Type(), aint_ty);
     EXPECT_EQ(sem2->Type(), aint_ty);
 }

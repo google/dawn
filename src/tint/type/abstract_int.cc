@@ -12,29 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/abstract_float.h"
+#include "src/tint/type/abstract_int.h"
 
 #include "src/tint/program_builder.h"
 #include "src/tint/utils/hash.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::AbstractFloat);
+TINT_INSTANTIATE_TYPEINFO(tint::type::AbstractInt);
 
-namespace tint::sem {
+namespace tint::type {
 
-AbstractFloat::AbstractFloat() = default;
-AbstractFloat::AbstractFloat(AbstractFloat&&) = default;
-AbstractFloat::~AbstractFloat() = default;
+AbstractInt::AbstractInt() = default;
+AbstractInt::AbstractInt(AbstractInt&&) = default;
+AbstractInt::~AbstractInt() = default;
 
-size_t AbstractFloat::Hash() const {
-    return utils::Hash(TypeInfo::Of<AbstractFloat>().full_hashcode);
+size_t AbstractInt::Hash() const {
+    return utils::Hash(TypeInfo::Of<AbstractInt>().full_hashcode);
 }
 
-bool AbstractFloat::Equals(const type::Type& other) const {
-    return other.Is<AbstractFloat>();
+bool AbstractInt::Equals(const type::Type& other) const {
+    return other.Is<AbstractInt>();
 }
 
-std::string AbstractFloat::FriendlyName(const SymbolTable&) const {
-    return "abstract-float";
+std::string AbstractInt::FriendlyName(const SymbolTable&) const {
+    return "abstract-int";
 }
 
-}  // namespace tint::sem
+}  // namespace tint::type

@@ -19,10 +19,10 @@
 #include <utility>
 
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/abstract_numeric.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/type_conversion.h"
+#include "src/tint/type/abstract_numeric.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
 

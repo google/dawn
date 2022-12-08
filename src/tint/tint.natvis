@@ -236,11 +236,11 @@
 	<!-- sem -->
 	<!--=================================================================-->
 
-	<Type Name="tint::sem::AbstractInt">
+	<Type Name="tint::type::AbstractInt">
 		<DisplayString>AbstractInt</DisplayString>
 	</Type>
 
-	<Type Name="tint::sem::AbstractFloat">
+	<Type Name="tint::type::AbstractFloat">
 		<DisplayString>AbstractFloat</DisplayString>
 	</Type>
 
