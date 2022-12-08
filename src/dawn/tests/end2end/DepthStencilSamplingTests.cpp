@@ -619,6 +619,113 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
     bool mIsFormatSupported = false;
 };
 
+// Repro test for crbug.com/dawn/1187 where sampling a depth texture returns values not in [0, 1]
+TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
+    // TODO(crbug.com/dawn/1187): The test fails on ANGLE D3D11, investigate why.
+    DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
+
+    constexpr uint32_t kWidth = 16;
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        const kWidth = 16.0;
+
+        // Write a point per texel of a height = 0 texture with depths varying between 0 and 1.
+        @vertex fn vs(@builtin(vertex_index) index : u32) -> @builtin(position) vec4<f32> {
+            let x = (f32(index) + 0.5) / kWidth * 2.0 - 1.0;
+            let z = f32(index) / (kWidth - 1.0);
+            return vec4(x, 0.0, z, 1.0);
+        }
+
+        // Writes an unused color, we only care about the depth.
+        @fragment fn fs1() -> @location(0) f32 {
+            return -42.0;
+        }
+
+        @group(0) @binding(0) var t : texture_depth_2d;
+        @group(0) @binding(1) var s : sampler;
+
+        // Check each depth texture texel has the expected value and outputs a "bool".
+        @fragment fn fs2(@builtin(position) pos : vec4<f32>) -> @location(0) f32 {
+            let x = pos.x / kWidth;
+            let depth = textureSample(t, s, vec2(x, 0.5));
+
+            let index = pos.x - 0.5;
+            let expectedDepth = index / (kWidth - 1.0);
+
+            if (abs(depth - expectedDepth) < 0.001) {
+                return 1.0;
+            }
+            return 0.0;
+        }
+    )");
+
+    // The first pipeline will write to the depth texture.
+    utils::ComboRenderPipelineDescriptor pDesc1;
+    pDesc1.vertex.module = module;
+    pDesc1.vertex.entryPoint = "vs";
+    pDesc1.cFragment.module = module;
+    pDesc1.cFragment.entryPoint = "fs1";
+    pDesc1.cTargets[0].format = wgpu::TextureFormat::R32Float;
+    pDesc1.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    pDesc1.EnableDepthStencil(wgpu::TextureFormat::Depth24PlusStencil8);
+    pDesc1.cDepthStencil.depthWriteEnabled = true;
+    wgpu::RenderPipeline pipeline1 = device.CreateRenderPipeline(&pDesc1);
+
+    // The second pipeline checks the depth texture and outputs 1 to a texel on success.
+    utils::ComboRenderPipelineDescriptor pDesc2;
+    pDesc2.vertex.module = module;
+    pDesc2.vertex.entryPoint = "vs";
+    pDesc2.cFragment.module = module;
+    pDesc2.cFragment.entryPoint = "fs2";
+    pDesc2.cTargets[0].format = wgpu::TextureFormat::R32Float;
+    pDesc2.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    wgpu::RenderPipeline pipeline2 = device.CreateRenderPipeline(&pDesc2);
+
+    // Initialize resources.
+    wgpu::TextureDescriptor tDesc;
+    tDesc.size = {kWidth};
+    tDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment |
+                  wgpu::TextureUsage::CopySrc;
+    tDesc.format = wgpu::TextureFormat::R32Float;
+    wgpu::Texture colorTexture = device.CreateTexture(&tDesc);
+
+    tDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+    wgpu::Texture depthTexture = device.CreateTexture(&tDesc);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    // Render the depth texture with varied depth values.
+    utils::ComboRenderPassDescriptor passDesc1({colorTexture.CreateView()},
+                                               depthTexture.CreateView());
+    wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&passDesc1);
+    pass1.SetPipeline(pipeline1);
+    pass1.Draw(kWidth);
+    pass1.End();
+
+    // Check the depth values and output the result in a "boolean" encoded in an f32
+    wgpu::TextureViewDescriptor viewDesc;
+    viewDesc.aspect = wgpu::TextureAspect::DepthOnly;
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline2.GetBindGroupLayout(0),
+                                              {
+                                                  {0, depthTexture.CreateView(&viewDesc)},
+                                                  {1, device.CreateSampler()},
+                                              });
+
+    utils::ComboRenderPassDescriptor passDesc2({colorTexture.CreateView()});
+    wgpu::RenderPassEncoder pass2 = encoder.BeginRenderPass(&passDesc2);
+    pass2.SetPipeline(pipeline2);
+    pass2.SetBindGroup(0, bg);
+    pass2.Draw(kWidth);
+    pass2.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Check all booleans are true.
+    for (uint32_t x = 0; x < kWidth; x++) {
+        EXPECT_PIXEL_FLOAT_EQ(1.0f, colorTexture, x, 0);
+    }
+}
+
 // Test that sampling a depth/stencil texture at components 1, 2, and 3 yield 0, 0, and 1
 // respectively
 TEST_P(DepthStencilSamplingTest, SampleExtraComponents) {
