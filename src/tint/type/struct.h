@@ -45,7 +45,7 @@ enum class PipelineStageUsage {
 };
 
 /// StructBase holds the Type information for structures.
-class StructBase : public Castable<StructBase, type::Type> {
+class StructBase : public Castable<StructBase, Type> {
   public:
     /// Constructor
     /// @param source the source of the structure
@@ -167,7 +167,7 @@ class StructBase : public Castable<StructBase, type::Type> {
 };
 
 /// StructMemberBase holds the type information for structure members.
-class StructMemberBase : public Castable<StructMemberBase, type::Node> {
+class StructMemberBase : public Castable<StructMemberBase, Node> {
   public:
     /// Constructor
     /// @param source the source of the struct member
@@ -198,10 +198,10 @@ class StructMemberBase : public Castable<StructMemberBase, type::Node> {
 
     /// Sets the owning structure to `s`
     /// @param s the new structure owner
-    void SetStruct(const type::StructBase* s) { struct_ = s; }
+    void SetStruct(const StructBase* s) { struct_ = s; }
 
     /// @returns the structure that owns this member
-    const type::StructBase* Struct() const { return struct_; }
+    const StructBase* Struct() const { return struct_; }
 
     /// @returns the type of the member
     const type::Type* Type() const { return type_; }
@@ -224,7 +224,7 @@ class StructMemberBase : public Castable<StructMemberBase, type::Node> {
   private:
     const tint::Source source_;
     const Symbol name_;
-    const type::StructBase* struct_;
+    const StructBase* struct_;
     const type::Type* type_;
     const uint32_t index_;
     const uint32_t offset_;

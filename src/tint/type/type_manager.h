@@ -32,7 +32,7 @@ namespace tint::type {
 class TypeManager final {
   public:
     /// Iterator is the type returned by begin() and end()
-    using TypeIterator = utils::BlockAllocator<type::Type>::ConstIterator;
+    using TypeIterator = utils::BlockAllocator<Type>::ConstIterator;
 
     /// Constructor
     TypeManager();
@@ -69,7 +69,7 @@ class TypeManager final {
     ///         If an existing instance of `T` has been constructed, then the same
     ///         pointer is returned.
     template <typename TYPE,
-              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, type::Type>>,
+              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, Type>>,
               typename... ARGS>
     TYPE* Get(ARGS&&... args) {
         return types_.Get<TYPE>(std::forward<ARGS>(args)...);
@@ -79,7 +79,7 @@ class TypeManager final {
     /// @return a pointer to an instance of `T` with the provided arguments, or nullptr if the item
     ///         was not found.
     template <typename TYPE,
-              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, type::Type>>,
+              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, Type>>,
               typename... ARGS>
     TYPE* Find(ARGS&&... args) const {
         return types_.Find<TYPE>(std::forward<ARGS>(args)...);
@@ -90,8 +90,8 @@ class TypeManager final {
     ///         If an existing instance of `T` has been constructed, then the same
     ///         pointer is returned.
     template <typename TYPE,
-              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, type::ArrayCount> ||
-                                          traits::IsTypeOrDerived<TYPE, type::StructMemberBase>>,
+              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, ArrayCount> ||
+                                          traits::IsTypeOrDerived<TYPE, StructMemberBase>>,
               typename... ARGS>
     TYPE* GetNode(ARGS&&... args) {
         return nodes_.Get<TYPE>(std::forward<ARGS>(args)...);
@@ -103,8 +103,8 @@ class TypeManager final {
     TypeIterator end() const { return types_.end(); }
 
   private:
-    utils::UniqueAllocator<type::Type> types_;
-    utils::UniqueAllocator<type::Node> nodes_;
+    utils::UniqueAllocator<Type> types_;
+    utils::UniqueAllocator<Node> nodes_;
 };
 
 }  // namespace tint::type

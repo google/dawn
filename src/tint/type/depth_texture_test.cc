@@ -49,7 +49,7 @@ TEST_F(DepthTextureTest, Equals) {
 
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
-    EXPECT_FALSE(a->Equals(type::Void{}));
+    EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(DepthTextureTest, IsTexture) {

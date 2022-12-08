@@ -22,7 +22,7 @@
 namespace tint::type {
 
 /// A float 16 type
-class F16 final : public Castable<F16, type::Type> {
+class F16 final : public Castable<F16, Type> {
   public:
     /// Constructor
     F16();

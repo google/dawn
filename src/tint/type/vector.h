@@ -22,7 +22,7 @@
 namespace tint::type {
 
 /// A vector type.
-class Vector final : public Castable<Vector, type::Type> {
+class Vector final : public Castable<Vector, Type> {
   public:
     /// Constructor
     /// @param subtype the vector element type
@@ -40,7 +40,7 @@ class Vector final : public Castable<Vector, type::Type> {
     bool Equals(const Type& other) const override;
 
     /// @returns the type of the vector elements
-    const type::Type* type() const { return subtype_; }
+    const Type* type() const { return subtype_; }
 
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be

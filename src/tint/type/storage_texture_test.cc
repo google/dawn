@@ -41,7 +41,7 @@ TEST_F(StorageTextureTest, Creation) {
     auto* e =
         Create(ast::TextureDimension::kCube, ast::TexelFormat::kRgba32Float, ast::Access::kRead);
 
-    EXPECT_TRUE(a->type()->Is<type::F32>());
+    EXPECT_TRUE(a->type()->Is<F32>());
     EXPECT_EQ(a->dim(), ast::TextureDimension::kCube);
 
     EXPECT_EQ(a, b);
@@ -84,7 +84,7 @@ TEST_F(StorageTextureTest, Equals) {
     EXPECT_FALSE(a->Equals(*c));
     EXPECT_FALSE(a->Equals(*d));
     EXPECT_FALSE(a->Equals(*e));
-    EXPECT_FALSE(a->Equals(type::Void{}));
+    EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(StorageTextureTest, Dim) {
@@ -106,43 +106,41 @@ TEST_F(StorageTextureTest, FriendlyName) {
 }
 
 TEST_F(StorageTextureTest, F32) {
-    type::Type* s = Create(ast::TextureDimension::k2dArray, ast::TexelFormat::kRgba32Float,
-                           ast::Access::kReadWrite);
+    Type* s = Create(ast::TextureDimension::k2dArray, ast::TexelFormat::kRgba32Float,
+                     ast::Access::kReadWrite);
 
     auto program = Build();
 
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
     ASSERT_TRUE(s->Is<Texture>());
     ASSERT_TRUE(s->Is<StorageTexture>());
-    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<type::F32>());
+    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<F32>());
 }
 
 TEST_F(StorageTextureTest, U32) {
-    auto* subtype = type::StorageTexture::SubtypeFor(ast::TexelFormat::kRg32Uint, Types());
-    type::Type* s =
-        create<StorageTexture>(ast::TextureDimension::k2dArray, ast::TexelFormat::kRg32Uint,
-                               ast::Access::kReadWrite, subtype);
+    auto* subtype = StorageTexture::SubtypeFor(ast::TexelFormat::kRg32Uint, Types());
+    Type* s = create<StorageTexture>(ast::TextureDimension::k2dArray, ast::TexelFormat::kRg32Uint,
+                                     ast::Access::kReadWrite, subtype);
 
     auto program = Build();
 
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
     ASSERT_TRUE(s->Is<Texture>());
     ASSERT_TRUE(s->Is<StorageTexture>());
-    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<type::U32>());
+    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<U32>());
 }
 
 TEST_F(StorageTextureTest, I32) {
-    auto* subtype = type::StorageTexture::SubtypeFor(ast::TexelFormat::kRgba32Sint, Types());
-    type::Type* s =
-        create<StorageTexture>(ast::TextureDimension::k2dArray, ast::TexelFormat::kRgba32Sint,
-                               ast::Access::kReadWrite, subtype);
+    auto* subtype = StorageTexture::SubtypeFor(ast::TexelFormat::kRgba32Sint, Types());
+    Type* s = create<StorageTexture>(ast::TextureDimension::k2dArray, ast::TexelFormat::kRgba32Sint,
+                                     ast::Access::kReadWrite, subtype);
 
     auto program = Build();
 
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
     ASSERT_TRUE(s->Is<Texture>());
     ASSERT_TRUE(s->Is<StorageTexture>());
-    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<type::I32>());
+    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<I32>());
 }
 
 }  // namespace

@@ -23,135 +23,135 @@ namespace tint::type {
 namespace {
 
 struct TypeTest : public TestHelper {
-    const type::AbstractFloat* af = create<type::AbstractFloat>();
-    const type::AbstractInt* ai = create<type::AbstractInt>();
-    const type::F32* f32 = create<type::F32>();
-    const type::F16* f16 = create<type::F16>();
-    const type::I32* i32 = create<type::I32>();
-    const type::U32* u32 = create<type::U32>();
-    const type::Vector* vec2_f32 = create<type::Vector>(f32, 2u);
-    const type::Vector* vec3_f32 = create<type::Vector>(f32, 3u);
-    const type::Vector* vec3_f16 = create<type::Vector>(f16, 3u);
-    const type::Vector* vec4_f32 = create<type::Vector>(f32, 4u);
-    const type::Vector* vec3_u32 = create<type::Vector>(u32, 3u);
-    const type::Vector* vec3_i32 = create<type::Vector>(i32, 3u);
-    const type::Vector* vec3_af = create<type::Vector>(af, 3u);
-    const type::Vector* vec3_ai = create<type::Vector>(ai, 3u);
-    const type::Matrix* mat2x4_f32 = create<type::Matrix>(vec4_f32, 2u);
-    const type::Matrix* mat3x4_f32 = create<type::Matrix>(vec4_f32, 3u);
-    const type::Matrix* mat4x2_f32 = create<type::Matrix>(vec2_f32, 4u);
-    const type::Matrix* mat4x3_f32 = create<type::Matrix>(vec3_f32, 4u);
-    const type::Matrix* mat4x3_f16 = create<type::Matrix>(vec3_f16, 4u);
-    const type::Matrix* mat4x3_af = create<type::Matrix>(vec3_af, 4u);
-    const type::Reference* ref_u32 =
-        create<type::Reference>(u32, ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
-    const type::StructBase* str_f32 = create<type::StructBase>(Source{},
-                                                               Sym("str_f32"),
-                                                               utils::Vector{
-                                                                   create<type::StructMemberBase>(
-                                                                       /* source */ Source{},
-                                                                       /* name */ Sym("x"),
-                                                                       /* type */ f32,
-                                                                       /* index */ 0u,
-                                                                       /* offset */ 0u,
-                                                                       /* align */ 4u,
-                                                                       /* size */ 4u,
-                                                                       /* location */ std::nullopt),
-                                                               },
-                                                               /* align*/ 4u,
-                                                               /* size*/ 4u,
-                                                               /* size_no_padding*/ 4u);
-    const type::StructBase* str_f16 = create<type::StructBase>(Source{},
-                                                               Sym("str_f16"),
-                                                               utils::Vector{
-                                                                   create<type::StructMemberBase>(
-                                                                       /* source */ Source{},
-                                                                       /* name */ Sym("x"),
-                                                                       /* type */ f16,
-                                                                       /* index */ 0u,
-                                                                       /* offset */ 0u,
-                                                                       /* align */ 4u,
-                                                                       /* size */ 4u,
-                                                                       /* location */ std::nullopt),
-                                                               },
-                                                               /* align*/ 4u,
-                                                               /* size*/ 4u,
-                                                               /* size_no_padding*/ 4u);
-    type::StructBase* str_af = create<type::StructBase>(Source{},
-                                                        Sym("str_af"),
-                                                        utils::Vector{
-                                                            create<type::StructMemberBase>(
-                                                                /* source */ Source{},
-                                                                /* name */ Sym("x"),
-                                                                /* type */ af,
-                                                                /* index */ 0u,
-                                                                /* offset */ 0u,
-                                                                /* align */ 4u,
-                                                                /* size */ 4u,
-                                                                /* location */ std::nullopt),
-                                                        },
-                                                        /* align*/ 4u,
-                                                        /* size*/ 4u,
-                                                        /* size_no_padding*/ 4u);
-    const type::Array* arr_i32 = create<type::Array>(
+    const AbstractFloat* af = create<AbstractFloat>();
+    const AbstractInt* ai = create<AbstractInt>();
+    const F32* f32 = create<F32>();
+    const F16* f16 = create<F16>();
+    const I32* i32 = create<I32>();
+    const U32* u32 = create<U32>();
+    const Vector* vec2_f32 = create<Vector>(f32, 2u);
+    const Vector* vec3_f32 = create<Vector>(f32, 3u);
+    const Vector* vec3_f16 = create<Vector>(f16, 3u);
+    const Vector* vec4_f32 = create<Vector>(f32, 4u);
+    const Vector* vec3_u32 = create<Vector>(u32, 3u);
+    const Vector* vec3_i32 = create<Vector>(i32, 3u);
+    const Vector* vec3_af = create<Vector>(af, 3u);
+    const Vector* vec3_ai = create<Vector>(ai, 3u);
+    const Matrix* mat2x4_f32 = create<Matrix>(vec4_f32, 2u);
+    const Matrix* mat3x4_f32 = create<Matrix>(vec4_f32, 3u);
+    const Matrix* mat4x2_f32 = create<Matrix>(vec2_f32, 4u);
+    const Matrix* mat4x3_f32 = create<Matrix>(vec3_f32, 4u);
+    const Matrix* mat4x3_f16 = create<Matrix>(vec3_f16, 4u);
+    const Matrix* mat4x3_af = create<Matrix>(vec3_af, 4u);
+    const Reference* ref_u32 =
+        create<Reference>(u32, ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
+    const StructBase* str_f32 = create<StructBase>(Source{},
+                                                   Sym("str_f32"),
+                                                   utils::Vector{
+                                                       create<StructMemberBase>(
+                                                           /* source */ Source{},
+                                                           /* name */ Sym("x"),
+                                                           /* type */ f32,
+                                                           /* index */ 0u,
+                                                           /* offset */ 0u,
+                                                           /* align */ 4u,
+                                                           /* size */ 4u,
+                                                           /* location */ std::nullopt),
+                                                   },
+                                                   /* align*/ 4u,
+                                                   /* size*/ 4u,
+                                                   /* size_no_padding*/ 4u);
+    const StructBase* str_f16 = create<StructBase>(Source{},
+                                                   Sym("str_f16"),
+                                                   utils::Vector{
+                                                       create<StructMemberBase>(
+                                                           /* source */ Source{},
+                                                           /* name */ Sym("x"),
+                                                           /* type */ f16,
+                                                           /* index */ 0u,
+                                                           /* offset */ 0u,
+                                                           /* align */ 4u,
+                                                           /* size */ 4u,
+                                                           /* location */ std::nullopt),
+                                                   },
+                                                   /* align*/ 4u,
+                                                   /* size*/ 4u,
+                                                   /* size_no_padding*/ 4u);
+    StructBase* str_af = create<StructBase>(Source{},
+                                            Sym("str_af"),
+                                            utils::Vector{
+                                                create<StructMemberBase>(
+                                                    /* source */ Source{},
+                                                    /* name */ Sym("x"),
+                                                    /* type */ af,
+                                                    /* index */ 0u,
+                                                    /* offset */ 0u,
+                                                    /* align */ 4u,
+                                                    /* size */ 4u,
+                                                    /* location */ std::nullopt),
+                                            },
+                                            /* align*/ 4u,
+                                            /* size*/ 4u,
+                                            /* size_no_padding*/ 4u);
+    const Array* arr_i32 = create<Array>(
         /* element */ i32,
-        /* count */ create<type::ConstantArrayCount>(5u),
+        /* count */ create<ConstantArrayCount>(5u),
         /* align */ 4u,
         /* size */ 5u * 4u,
         /* stride */ 5u * 4u,
         /* implicit_stride */ 5u * 4u);
-    const type::Array* arr_ai = create<type::Array>(
+    const Array* arr_ai = create<Array>(
         /* element */ ai,
-        /* count */ create<type::ConstantArrayCount>(5u),
+        /* count */ create<ConstantArrayCount>(5u),
         /* align */ 4u,
         /* size */ 5u * 4u,
         /* stride */ 5u * 4u,
         /* implicit_stride */ 5u * 4u);
-    const type::Array* arr_vec3_i32 = create<type::Array>(
+    const Array* arr_vec3_i32 = create<Array>(
         /* element */ vec3_i32,
         /* count */ create<ConstantArrayCount>(5u),
         /* align */ 16u,
         /* size */ 5u * 16u,
         /* stride */ 5u * 16u,
         /* implicit_stride */ 5u * 16u);
-    const type::Array* arr_vec3_ai = create<type::Array>(
+    const Array* arr_vec3_ai = create<Array>(
         /* element */ vec3_ai,
-        /* count */ create<type::ConstantArrayCount>(5u),
+        /* count */ create<ConstantArrayCount>(5u),
         /* align */ 16u,
         /* size */ 5u * 16u,
         /* stride */ 5u * 16u,
         /* implicit_stride */ 5u * 16u);
-    const type::Array* arr_mat4x3_f16 = create<type::Array>(
+    const Array* arr_mat4x3_f16 = create<Array>(
         /* element */ mat4x3_f16,
-        /* count */ create<type::ConstantArrayCount>(5u),
+        /* count */ create<ConstantArrayCount>(5u),
         /* align */ 32u,
         /* size */ 5u * 32u,
         /* stride */ 5u * 32u,
         /* implicit_stride */ 5u * 32u);
-    const type::Array* arr_mat4x3_f32 = create<type::Array>(
+    const Array* arr_mat4x3_f32 = create<Array>(
         /* element */ mat4x3_f32,
-        /* count */ create<type::ConstantArrayCount>(5u),
+        /* count */ create<ConstantArrayCount>(5u),
         /* align */ 64u,
         /* size */ 5u * 64u,
         /* stride */ 5u * 64u,
         /* implicit_stride */ 5u * 64u);
-    const type::Array* arr_mat4x3_af = create<type::Array>(
+    const Array* arr_mat4x3_af = create<Array>(
         /* element */ mat4x3_af,
-        /* count */ create<type::ConstantArrayCount>(5u),
+        /* count */ create<ConstantArrayCount>(5u),
         /* align */ 64u,
         /* size */ 5u * 64u,
         /* stride */ 5u * 64u,
         /* implicit_stride */ 5u * 64u);
-    const type::Array* arr_str_f16 = create<type::Array>(
+    const Array* arr_str_f16 = create<Array>(
         /* element */ str_f16,
-        /* count */ create<type::ConstantArrayCount>(5u),
+        /* count */ create<ConstantArrayCount>(5u),
         /* align */ 4u,
         /* size */ 5u * 4u,
         /* stride */ 5u * 4u,
         /* implicit_stride */ 5u * 4u);
-    const type::Array* arr_str_af = create<type::Array>(
+    const Array* arr_str_af = create<Array>(
         /* element */ str_af,
-        /* count */ create<type::ConstantArrayCount>(5u),
+        /* count */ create<ConstantArrayCount>(5u),
         /* align */ 4u,
         /* size */ 5u * 4u,
         /* stride */ 5u * 4u,

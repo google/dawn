@@ -21,7 +21,7 @@
 namespace tint::type {
 
 /// A texture type.
-class Texture : public Castable<Texture, type::Type> {
+class Texture : public Castable<Texture, Type> {
   public:
     /// Constructor
     /// @param dim the dimensionality of the texture

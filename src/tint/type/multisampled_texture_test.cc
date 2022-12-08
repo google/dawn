@@ -26,38 +26,38 @@ namespace {
 using MultisampledTextureTest = TestHelper;
 
 TEST_F(MultisampledTextureTest, Creation) {
-    auto* a = create<MultisampledTexture>(ast::TextureDimension::k2d, create<type::F32>());
-    auto* b = create<MultisampledTexture>(ast::TextureDimension::k2d, create<type::F32>());
-    auto* c = create<MultisampledTexture>(ast::TextureDimension::k3d, create<type::F32>());
-    auto* d = create<MultisampledTexture>(ast::TextureDimension::k2d, create<type::I32>());
+    auto* a = create<MultisampledTexture>(ast::TextureDimension::k2d, create<F32>());
+    auto* b = create<MultisampledTexture>(ast::TextureDimension::k2d, create<F32>());
+    auto* c = create<MultisampledTexture>(ast::TextureDimension::k3d, create<F32>());
+    auto* d = create<MultisampledTexture>(ast::TextureDimension::k2d, create<I32>());
     EXPECT_EQ(a, b);
     EXPECT_NE(a, c);
     EXPECT_NE(a, d);
 }
 
 TEST_F(MultisampledTextureTest, Hash) {
-    auto* a = create<MultisampledTexture>(ast::TextureDimension::k2d, create<type::F32>());
-    auto* b = create<MultisampledTexture>(ast::TextureDimension::k2d, create<type::F32>());
-    auto* c = create<MultisampledTexture>(ast::TextureDimension::k3d, create<type::F32>());
-    auto* d = create<MultisampledTexture>(ast::TextureDimension::k2d, create<type::I32>());
+    auto* a = create<MultisampledTexture>(ast::TextureDimension::k2d, create<F32>());
+    auto* b = create<MultisampledTexture>(ast::TextureDimension::k2d, create<F32>());
+    auto* c = create<MultisampledTexture>(ast::TextureDimension::k3d, create<F32>());
+    auto* d = create<MultisampledTexture>(ast::TextureDimension::k2d, create<I32>());
     EXPECT_EQ(a->Hash(), b->Hash());
     EXPECT_NE(a->Hash(), c->Hash());
     EXPECT_NE(a->Hash(), d->Hash());
 }
 
 TEST_F(MultisampledTextureTest, Equals) {
-    auto* a = create<MultisampledTexture>(ast::TextureDimension::k2d, create<type::F32>());
-    auto* b = create<MultisampledTexture>(ast::TextureDimension::k2d, create<type::F32>());
-    auto* c = create<MultisampledTexture>(ast::TextureDimension::k3d, create<type::F32>());
-    auto* d = create<MultisampledTexture>(ast::TextureDimension::k2d, create<type::I32>());
+    auto* a = create<MultisampledTexture>(ast::TextureDimension::k2d, create<F32>());
+    auto* b = create<MultisampledTexture>(ast::TextureDimension::k2d, create<F32>());
+    auto* c = create<MultisampledTexture>(ast::TextureDimension::k3d, create<F32>());
+    auto* d = create<MultisampledTexture>(ast::TextureDimension::k2d, create<I32>());
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
     EXPECT_FALSE(a->Equals(*d));
-    EXPECT_FALSE(a->Equals(type::Void{}));
+    EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(MultisampledTextureTest, IsTexture) {
-    type::F32 f32;
+    F32 f32;
     MultisampledTexture s(ast::TextureDimension::kCube, &f32);
     Texture* ty = &s;
     EXPECT_FALSE(ty->Is<DepthTexture>());
@@ -68,19 +68,19 @@ TEST_F(MultisampledTextureTest, IsTexture) {
 }
 
 TEST_F(MultisampledTextureTest, Dim) {
-    type::F32 f32;
+    F32 f32;
     MultisampledTexture s(ast::TextureDimension::k3d, &f32);
     EXPECT_EQ(s.dim(), ast::TextureDimension::k3d);
 }
 
 TEST_F(MultisampledTextureTest, Type) {
-    type::F32 f32;
+    F32 f32;
     MultisampledTexture s(ast::TextureDimension::k3d, &f32);
     EXPECT_EQ(s.type(), &f32);
 }
 
 TEST_F(MultisampledTextureTest, FriendlyName) {
-    type::F32 f32;
+    F32 f32;
     MultisampledTexture s(ast::TextureDimension::k3d, &f32);
     EXPECT_EQ(s.FriendlyName(Symbols()), "texture_multisampled_3d<f32>");
 }

@@ -24,13 +24,13 @@
 namespace tint::type {
 
 /// A reference type.
-class Reference final : public Castable<Reference, type::Type> {
+class Reference final : public Castable<Reference, Type> {
   public:
     /// Constructor
     /// @param subtype the pointee type
     /// @param address_space the address space of the reference
     /// @param access the resolved access control of the reference
-    Reference(const type::Type* subtype, ast::AddressSpace address_space, ast::Access access);
+    Reference(const Type* subtype, ast::AddressSpace address_space, ast::Access access);
 
     /// Move constructor
     Reference(Reference&&);
@@ -44,7 +44,7 @@ class Reference final : public Castable<Reference, type::Type> {
     bool Equals(const Type& other) const override;
 
     /// @returns the pointee type
-    const type::Type* StoreType() const { return subtype_; }
+    const Type* StoreType() const { return subtype_; }
 
     /// @returns the address space of the reference
     ast::AddressSpace AddressSpace() const { return address_space_; }

@@ -28,7 +28,7 @@
 namespace tint::type {
 
 /// Array holds the type information for Array nodes.
-class Array final : public Castable<Array, type::Type> {
+class Array final : public Castable<Array, Type> {
   public:
     /// An error message string stating that the array count was expected to be a constant
     /// expression. Used by multiple writers and transforms.
@@ -45,8 +45,8 @@ class Array final : public Castable<Array, type::Type> {
     /// @param implicit_stride the number of bytes from the start of one element
     /// of the array to the start of the next element, if there was no `@stride`
     /// attribute applied.
-    Array(type::Type const* element,
-          const type::ArrayCount* count,
+    Array(Type const* element,
+          const ArrayCount* count,
           uint32_t align,
           uint32_t size,
           uint32_t stride,
@@ -57,17 +57,17 @@ class Array final : public Castable<Array, type::Type> {
 
     /// @param other the other type to compare against
     /// @returns true if the this type is equal to the given type
-    bool Equals(const type::Type& other) const override;
+    bool Equals(const Type& other) const override;
 
     /// @return the array element type
-    type::Type const* ElemType() const { return element_; }
+    Type const* ElemType() const { return element_; }
 
     /// @returns the number of elements in the array.
-    const type::ArrayCount* Count() const { return count_; }
+    const ArrayCount* Count() const { return count_; }
 
     /// @returns the array count if the count is a const-expression, otherwise returns nullopt.
     inline std::optional<uint32_t> ConstantCount() const {
-        if (auto* count = count_->As<type::ConstantArrayCount>()) {
+        if (auto* count = count_->As<ConstantArrayCount>()) {
             return count->value;
         }
         return std::nullopt;
@@ -102,8 +102,8 @@ class Array final : public Castable<Array, type::Type> {
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
   private:
-    type::Type const* const element_;
-    const type::ArrayCount* count_;
+    Type const* const element_;
+    const ArrayCount* count_;
     const uint32_t align_;
     const uint32_t size_;
     const uint32_t stride_;

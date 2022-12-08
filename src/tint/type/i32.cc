@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::I32);
 namespace tint::type {
 
 I32::I32()
-    : Base(type::TypeFlags{
+    : Base(TypeFlags{
           Flag::kConstructable,
           Flag::kCreationFixedFootprint,
           Flag::kFixedFootprint,

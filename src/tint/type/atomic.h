@@ -22,7 +22,7 @@
 namespace tint::type {
 
 /// A atomic type.
-class Atomic final : public Castable<Atomic, type::Type> {
+class Atomic final : public Castable<Atomic, Type> {
   public:
     /// Constructor
     /// @param subtype the atomic type
@@ -37,7 +37,7 @@ class Atomic final : public Castable<Atomic, type::Type> {
 
     /// @param other the other type to compare against
     /// @returns true if the this type is equal to the given type
-    bool Equals(const Type& other) const override;
+    bool Equals(const type::Type& other) const override;
 
     /// @returns the atomic type
     const type::Type* Type() const { return subtype_; }

@@ -192,7 +192,7 @@ class Type : public Castable<Type, Node> {
     /// @returns the lowest-ranking type that all types in `types` can be implicitly converted to,
     ///          or nullptr if there is no consistent common type across all types in `types`.
     /// @see https://www.w3.org/TR/WGSL/#conversion-rank
-    static const type::Type* Common(utils::VectorRef<const Type*> types);
+    static const Type* Common(utils::VectorRef<const Type*> types);
 
   protected:
     /// Constructor

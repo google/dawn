@@ -24,13 +24,13 @@
 namespace tint::type {
 
 /// A pointer type.
-class Pointer final : public Castable<Pointer, type::Type> {
+class Pointer final : public Castable<Pointer, Type> {
   public:
     /// Constructor
     /// @param subtype the pointee type
     /// @param address_space the address space of the pointer
     /// @param access the resolved access control of the reference
-    Pointer(const type::Type* subtype, ast::AddressSpace address_space, ast::Access access);
+    Pointer(const Type* subtype, ast::AddressSpace address_space, ast::Access access);
 
     /// Move constructor
     Pointer(Pointer&&);
@@ -44,7 +44,7 @@ class Pointer final : public Castable<Pointer, type::Type> {
     bool Equals(const Type& other) const override;
 
     /// @returns the pointee type
-    const type::Type* StoreType() const { return subtype_; }
+    const Type* StoreType() const { return subtype_; }
 
     /// @returns the address space of the pointer
     ast::AddressSpace AddressSpace() const { return address_space_; }

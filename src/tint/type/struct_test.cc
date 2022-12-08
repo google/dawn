@@ -24,37 +24,37 @@ using TypeStructTest = TestHelper;
 
 TEST_F(TypeStructTest, Creation) {
     auto name = Sym("S");
-    auto* s = create<type::StructBase>(Source{}, name, utils::Empty, 4u /* align */, 8u /* size */,
-                                       16u /* size_no_padding */);
+    auto* s = create<StructBase>(Source{}, name, utils::Empty, 4u /* align */, 8u /* size */,
+                                 16u /* size_no_padding */);
     EXPECT_EQ(s->Align(), 4u);
     EXPECT_EQ(s->Size(), 8u);
     EXPECT_EQ(s->SizeNoPadding(), 16u);
 }
 
 TEST_F(TypeStructTest, Hash) {
-    auto* a = create<type::StructBase>(Source{}, Sym("a"), utils::Empty, 4u /* align */,
-                                       4u /* size */, 4u /* size_no_padding */);
-    auto* b = create<type::StructBase>(Source{}, Sym("b"), utils::Empty, 4u /* align */,
-                                       4u /* size */, 4u /* size_no_padding */);
+    auto* a = create<StructBase>(Source{}, Sym("a"), utils::Empty, 4u /* align */, 4u /* size */,
+                                 4u /* size_no_padding */);
+    auto* b = create<StructBase>(Source{}, Sym("b"), utils::Empty, 4u /* align */, 4u /* size */,
+                                 4u /* size_no_padding */);
 
     EXPECT_NE(a->Hash(), b->Hash());
 }
 
 TEST_F(TypeStructTest, Equals) {
-    auto* a = create<type::StructBase>(Source{}, Sym("a"), utils::Empty, 4u /* align */,
-                                       4u /* size */, 4u /* size_no_padding */);
-    auto* b = create<type::StructBase>(Source{}, Sym("b"), utils::Empty, 4u /* align */,
-                                       4u /* size */, 4u /* size_no_padding */);
+    auto* a = create<StructBase>(Source{}, Sym("a"), utils::Empty, 4u /* align */, 4u /* size */,
+                                 4u /* size_no_padding */);
+    auto* b = create<StructBase>(Source{}, Sym("b"), utils::Empty, 4u /* align */, 4u /* size */,
+                                 4u /* size_no_padding */);
 
     EXPECT_TRUE(a->Equals(*a));
     EXPECT_FALSE(a->Equals(*b));
-    EXPECT_FALSE(a->Equals(type::Void{}));
+    EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(TypeStructTest, FriendlyName) {
     auto name = Sym("my_struct");
-    auto* s = create<type::StructBase>(Source{}, name, utils::Empty, 4u /* align */, 4u /* size */,
-                                       4u /* size_no_padding */);
+    auto* s = create<StructBase>(Source{}, name, utils::Empty, 4u /* align */, 4u /* size */,
+                                 4u /* size_no_padding */);
     EXPECT_EQ(s->FriendlyName(Symbols()), "my_struct");
 }
 

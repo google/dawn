@@ -28,7 +28,7 @@
 namespace tint::type {
 
 /// A boolean type
-class Bool final : public Castable<Bool, type::Type> {
+class Bool final : public Castable<Bool, Type> {
   public:
     /// Constructor
     Bool();

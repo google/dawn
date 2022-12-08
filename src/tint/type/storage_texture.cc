@@ -24,7 +24,7 @@ namespace tint::type {
 StorageTexture::StorageTexture(ast::TextureDimension dim,
                                ast::TexelFormat format,
                                ast::Access access,
-                               type::Type* subtype)
+                               Type* subtype)
     : Base(dim), texel_format_(format), access_(access), subtype_(subtype) {}
 
 StorageTexture::StorageTexture(StorageTexture&&) = default;
@@ -35,7 +35,7 @@ size_t StorageTexture::Hash() const {
     return utils::Hash(TypeInfo::Of<StorageTexture>().full_hashcode, dim(), texel_format_, access_);
 }
 
-bool StorageTexture::Equals(const type::Type& other) const {
+bool StorageTexture::Equals(const Type& other) const {
     if (auto* o = other.As<StorageTexture>()) {
         return o->dim() == dim() && o->texel_format_ == texel_format_ && o->access_ == access_;
     }
@@ -48,14 +48,14 @@ std::string StorageTexture::FriendlyName(const SymbolTable&) const {
     return out.str();
 }
 
-type::Type* StorageTexture::SubtypeFor(ast::TexelFormat format, type::TypeManager& type_mgr) {
+Type* StorageTexture::SubtypeFor(ast::TexelFormat format, TypeManager& type_mgr) {
     switch (format) {
         case ast::TexelFormat::kR32Uint:
         case ast::TexelFormat::kRgba8Uint:
         case ast::TexelFormat::kRg32Uint:
         case ast::TexelFormat::kRgba16Uint:
         case ast::TexelFormat::kRgba32Uint: {
-            return type_mgr.Get<type::U32>();
+            return type_mgr.Get<U32>();
         }
 
         case ast::TexelFormat::kR32Sint:
@@ -63,7 +63,7 @@ type::Type* StorageTexture::SubtypeFor(ast::TexelFormat format, type::TypeManage
         case ast::TexelFormat::kRg32Sint:
         case ast::TexelFormat::kRgba16Sint:
         case ast::TexelFormat::kRgba32Sint: {
-            return type_mgr.Get<type::I32>();
+            return type_mgr.Get<I32>();
         }
 
         case ast::TexelFormat::kRgba8Unorm:
@@ -72,7 +72,7 @@ type::Type* StorageTexture::SubtypeFor(ast::TexelFormat format, type::TypeManage
         case ast::TexelFormat::kRg32Float:
         case ast::TexelFormat::kRgba16Float:
         case ast::TexelFormat::kRgba32Float: {
-            return type_mgr.Get<type::F32>();
+            return type_mgr.Get<F32>();
         }
 
         case ast::TexelFormat::kUndefined:

@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Bool);
 namespace tint::type {
 
 Bool::Bool()
-    : Base(type::TypeFlags{
+    : Base(TypeFlags{
           Flag::kConstructable,
           Flag::kCreationFixedFootprint,
           Flag::kFixedFootprint,

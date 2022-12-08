@@ -46,7 +46,7 @@ Type::~Type() = default;
 
 const Type* Type::UnwrapPtr() const {
     auto* type = this;
-    while (auto* ptr = type->As<type::Pointer>()) {
+    while (auto* ptr = type->As<Pointer>()) {
         type = ptr->StoreType();
     }
     return type;
@@ -54,7 +54,7 @@ const Type* Type::UnwrapPtr() const {
 
 const Type* Type::UnwrapRef() const {
     auto* type = this;
-    if (auto* ref = type->As<type::Reference>()) {
+    if (auto* ref = type->As<Reference>()) {
         type = ref->StoreType();
     }
     return type;
@@ -69,29 +69,28 @@ uint32_t Type::Align() const {
 }
 
 bool Type::is_scalar() const {
-    return IsAnyOf<type::F16, type::F32, type::U32, type::I32, type::AbstractNumeric, type::Bool>();
+    return IsAnyOf<F16, F32, U32, I32, AbstractNumeric, Bool>();
 }
 
 bool Type::is_numeric_scalar() const {
-    return IsAnyOf<type::F16, type::F32, type::U32, type::I32, type::AbstractNumeric>();
+    return IsAnyOf<F16, F32, U32, I32, AbstractNumeric>();
 }
 
 bool Type::is_float_scalar() const {
-    return IsAnyOf<type::F16, type::F32, type::AbstractNumeric>();
+    return IsAnyOf<F16, F32, AbstractNumeric>();
 }
 
 bool Type::is_float_matrix() const {
-    return Is([](const type::Matrix* m) { return m->type()->is_float_scalar(); });
+    return Is([](const Matrix* m) { return m->type()->is_float_scalar(); });
 }
 
 bool Type::is_square_float_matrix() const {
-    return Is([](const type::Matrix* m) {
-        return m->type()->is_float_scalar() && m->rows() == m->columns();
-    });
+    return Is(
+        [](const Matrix* m) { return m->type()->is_float_scalar() && m->rows() == m->columns(); });
 }
 
 bool Type::is_float_vector() const {
-    return Is([](const type::Vector* v) { return v->type()->is_float_scalar(); });
+    return Is([](const Vector* v) { return v->type()->is_float_scalar(); });
 }
 
 bool Type::is_float_scalar_or_vector() const {
@@ -103,32 +102,31 @@ bool Type::is_float_scalar_or_vector_or_matrix() const {
 }
 
 bool Type::is_integer_scalar() const {
-    return IsAnyOf<type::U32, type::I32>();
+    return IsAnyOf<U32, I32>();
 }
 
 bool Type::is_signed_integer_scalar() const {
-    return IsAnyOf<type::I32, type::AbstractInt>();
+    return IsAnyOf<I32, AbstractInt>();
 }
 
 bool Type::is_unsigned_integer_scalar() const {
-    return Is<type::U32>();
+    return Is<U32>();
 }
 
 bool Type::is_signed_integer_vector() const {
-    return Is(
-        [](const type::Vector* v) { return v->type()->IsAnyOf<type::I32, type::AbstractInt>(); });
+    return Is([](const Vector* v) { return v->type()->IsAnyOf<I32, AbstractInt>(); });
 }
 
 bool Type::is_unsigned_integer_vector() const {
-    return Is([](const type::Vector* v) { return v->type()->Is<type::U32>(); });
+    return Is([](const Vector* v) { return v->type()->Is<U32>(); });
 }
 
 bool Type::is_unsigned_integer_scalar_or_vector() const {
-    return Is<type::U32>() || is_unsigned_integer_vector();
+    return Is<U32>() || is_unsigned_integer_vector();
 }
 
 bool Type::is_signed_integer_scalar_or_vector() const {
-    return IsAnyOf<type::I32, type::AbstractInt>() || is_signed_integer_vector();
+    return IsAnyOf<I32, AbstractInt>() || is_signed_integer_vector();
 }
 
 bool Type::is_integer_scalar_or_vector() const {
@@ -136,35 +134,35 @@ bool Type::is_integer_scalar_or_vector() const {
 }
 
 bool Type::is_abstract_integer_vector() const {
-    return Is([](const type::Vector* v) { return v->type()->Is<type::AbstractInt>(); });
+    return Is([](const Vector* v) { return v->type()->Is<AbstractInt>(); });
 }
 
 bool Type::is_abstract_float_vector() const {
-    return Is([](const type::Vector* v) { return v->type()->Is<type::AbstractFloat>(); });
+    return Is([](const Vector* v) { return v->type()->Is<AbstractFloat>(); });
 }
 
 bool Type::is_abstract_integer_scalar_or_vector() const {
-    return Is<type::AbstractInt>() || is_abstract_integer_vector();
+    return Is<AbstractInt>() || is_abstract_integer_vector();
 }
 
 bool Type::is_abstract_float_scalar_or_vector() const {
-    return Is<type::AbstractFloat>() || is_abstract_float_vector();
+    return Is<AbstractFloat>() || is_abstract_float_vector();
 }
 
 bool Type::is_bool_vector() const {
-    return Is([](const type::Vector* v) { return v->type()->Is<type::Bool>(); });
+    return Is([](const Vector* v) { return v->type()->Is<Bool>(); });
 }
 
 bool Type::is_bool_scalar_or_vector() const {
-    return Is<type::Bool>() || is_bool_vector();
+    return Is<Bool>() || is_bool_vector();
 }
 
 bool Type::is_numeric_vector() const {
-    return Is([](const type::Vector* v) { return v->type()->is_numeric_scalar(); });
+    return Is([](const Vector* v) { return v->type()->is_numeric_scalar(); });
 }
 
 bool Type::is_scalar_vector() const {
-    return Is([](const type::Vector* v) { return v->type()->is_scalar(); });
+    return Is([](const Vector* v) { return v->type()->is_scalar(); });
 }
 
 bool Type::is_numeric_scalar_or_vector() const {
@@ -172,17 +170,17 @@ bool Type::is_numeric_scalar_or_vector() const {
 }
 
 bool Type::is_handle() const {
-    return IsAnyOf<type::Sampler, type::Texture>();
+    return IsAnyOf<Sampler, Texture>();
 }
 
 bool Type::HoldsAbstract() const {
     return Switch(
         this,  //
-        [&](const type::AbstractNumeric*) { return true; },
-        [&](const type::Vector* v) { return v->type()->HoldsAbstract(); },
-        [&](const type::Matrix* m) { return m->type()->HoldsAbstract(); },
-        [&](const type::Array* a) { return a->ElemType()->HoldsAbstract(); },
-        [&](const type::StructBase* s) {
+        [&](const AbstractNumeric*) { return true; },
+        [&](const Vector* v) { return v->type()->HoldsAbstract(); },
+        [&](const Matrix* m) { return m->type()->HoldsAbstract(); },
+        [&](const Array* a) { return a->ElemType()->HoldsAbstract(); },
+        [&](const StructBase* s) {
             for (auto* m : s->Members()) {
                 if (m->Type()->HoldsAbstract()) {
                     return true;
@@ -198,33 +196,33 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
     }
     return Switch(
         from,
-        [&](const type::AbstractFloat*) {
+        [&](const AbstractFloat*) {
             return Switch(
-                to,                                   //
-                [&](const type::F32*) { return 1; },  //
-                [&](const type::F16*) { return 2; },  //
+                to,                             //
+                [&](const F32*) { return 1; },  //
+                [&](const F16*) { return 2; },  //
                 [&](Default) { return kNoConversion; });
         },
-        [&](const type::AbstractInt*) {
+        [&](const AbstractInt*) {
             return Switch(
-                to,                                             //
-                [&](const type::I32*) { return 3; },            //
-                [&](const type::U32*) { return 4; },            //
-                [&](const type::AbstractFloat*) { return 5; },  //
-                [&](const type::F32*) { return 6; },            //
-                [&](const type::F16*) { return 7; },            //
+                to,                                       //
+                [&](const I32*) { return 3; },            //
+                [&](const U32*) { return 4; },            //
+                [&](const AbstractFloat*) { return 5; },  //
+                [&](const F32*) { return 6; },            //
+                [&](const F16*) { return 7; },            //
                 [&](Default) { return kNoConversion; });
         },
-        [&](const type::Vector* from_vec) {
-            if (auto* to_vec = to->As<type::Vector>()) {
+        [&](const Vector* from_vec) {
+            if (auto* to_vec = to->As<Vector>()) {
                 if (from_vec->Width() == to_vec->Width()) {
                     return ConversionRank(from_vec->type(), to_vec->type());
                 }
             }
             return kNoConversion;
         },
-        [&](const type::Matrix* from_mat) {
-            if (auto* to_mat = to->As<type::Matrix>()) {
+        [&](const Matrix* from_mat) {
+            if (auto* to_mat = to->As<Matrix>()) {
                 if (from_mat->columns() == to_mat->columns() &&
                     from_mat->rows() == to_mat->rows()) {
                     return ConversionRank(from_mat->type(), to_mat->type());
@@ -232,15 +230,15 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
             }
             return kNoConversion;
         },
-        [&](const type::Array* from_arr) {
-            if (auto* to_arr = to->As<type::Array>()) {
+        [&](const Array* from_arr) {
+            if (auto* to_arr = to->As<Array>()) {
                 if (from_arr->Count() == to_arr->Count()) {
                     return ConversionRank(from_arr->ElemType(), to_arr->ElemType());
                 }
             }
             return kNoConversion;
         },
-        [&](const type::StructBase* from_str) {
+        [&](const StructBase* from_str) {
             auto concrete_tys = from_str->ConcreteTypes();
             for (size_t i = 0; i < concrete_tys.Length(); i++) {
                 if (concrete_tys[i] == to) {
@@ -261,21 +259,21 @@ const Type* Type::ElementOf(const Type* ty, uint32_t* count /* = nullptr */) {
     }
     return Switch(
         ty,  //
-        [&](const type::Vector* v) {
+        [&](const Vector* v) {
             if (count) {
                 *count = v->Width();
             }
             return v->type();
         },
-        [&](const type::Matrix* m) {
+        [&](const Matrix* m) {
             if (count) {
                 *count = m->columns();
             }
             return m->ColumnType();
         },
-        [&](const type::Array* a) {
+        [&](const Array* a) {
             if (count) {
-                if (auto* const_count = a->Count()->As<type::ConstantArrayCount>()) {
+                if (auto* const_count = a->Count()->As<ConstantArrayCount>()) {
                     *count = const_count->value;
                 }
             }
@@ -303,7 +301,7 @@ const Type* Type::DeepestElementOf(const Type* ty, uint32_t* count /* = nullptr 
     return el_ty;
 }
 
-const type::Type* Type::Common(utils::VectorRef<const Type*> types) {
+const Type* Type::Common(utils::VectorRef<const Type*> types) {
     const auto count = types.Length();
     if (count == 0) {
         return nullptr;
@@ -314,10 +312,10 @@ const type::Type* Type::Common(utils::VectorRef<const Type*> types) {
         if (ty == common) {
             continue;  // ty == common
         }
-        if (type::Type::ConversionRank(ty, common) != type::Type::kNoConversion) {
+        if (Type::ConversionRank(ty, common) != Type::kNoConversion) {
             continue;  // ty can be converted to common.
         }
-        if (type::Type::ConversionRank(common, ty) != type::Type::kNoConversion) {
+        if (Type::ConversionRank(common, ty) != Type::kNoConversion) {
             common = ty;  // common can be converted to ty.
             continue;
         }

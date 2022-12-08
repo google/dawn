@@ -27,20 +27,20 @@ namespace tint::type {
 
 namespace {
 
-type::TypeFlags FlagsFrom(const type::Type* element, const type::ArrayCount* count) {
-    type::TypeFlags flags;
+TypeFlags FlagsFrom(const Type* element, const ArrayCount* count) {
+    TypeFlags flags;
     // Only constant-expression sized arrays are constructible
-    if (count->Is<type::ConstantArrayCount>()) {
+    if (count->Is<ConstantArrayCount>()) {
         if (element->IsConstructible()) {
-            flags.Add(type::TypeFlag::kConstructable);
+            flags.Add(TypeFlag::kConstructable);
         }
         if (element->HasCreationFixedFootprint()) {
-            flags.Add(type::TypeFlag::kCreationFixedFootprint);
+            flags.Add(TypeFlag::kCreationFixedFootprint);
         }
     }
-    if (!count->Is<type::RuntimeArrayCount>()) {
+    if (!count->Is<RuntimeArrayCount>()) {
         if (element->HasFixedFootprint()) {
-            flags.Add(type::TypeFlag::kFixedFootprint);
+            flags.Add(TypeFlag::kFixedFootprint);
         }
     }
     return flags;
@@ -52,8 +52,8 @@ const char* const Array::kErrExpectedConstantCount =
     "array size is an override-expression, when expected a constant-expression.\n"
     "Was the SubstituteOverride transform run?";
 
-Array::Array(const type::Type* element,
-             const type::ArrayCount* count,
+Array::Array(const Type* element,
+             const ArrayCount* count,
              uint32_t align,
              uint32_t size,
              uint32_t stride,
@@ -72,7 +72,7 @@ size_t Array::Hash() const {
     return utils::Hash(TypeInfo::Of<Array>().full_hashcode, count_, align_, size_, stride_);
 }
 
-bool Array::Equals(const type::Type& other) const {
+bool Array::Equals(const Type& other) const {
     if (auto* o = other.As<Array>()) {
         // Note: implicit_stride is not part of the type_name string as this is
         // derived from the element type

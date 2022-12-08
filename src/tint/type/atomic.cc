@@ -23,12 +23,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Atomic);
 namespace tint::type {
 
 Atomic::Atomic(const type::Type* subtype)
-    : Base(type::TypeFlags{
+    : Base(TypeFlags{
           Flag::kCreationFixedFootprint,
           Flag::kFixedFootprint,
       }),
       subtype_(subtype) {
-    TINT_ASSERT(AST, !subtype->Is<type::Reference>());
+    TINT_ASSERT(AST, !subtype->Is<Reference>());
 }
 
 size_t Atomic::Hash() const {

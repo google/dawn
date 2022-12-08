@@ -28,21 +28,21 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::StructMemberBase);
 namespace tint::type {
 namespace {
 
-type::TypeFlags FlagsFrom(utils::VectorRef<const StructMemberBase*> members) {
-    type::TypeFlags flags{
-        type::TypeFlag::kConstructable,
-        type::TypeFlag::kCreationFixedFootprint,
-        type::TypeFlag::kFixedFootprint,
+TypeFlags FlagsFrom(utils::VectorRef<const StructMemberBase*> members) {
+    TypeFlags flags{
+        TypeFlag::kConstructable,
+        TypeFlag::kCreationFixedFootprint,
+        TypeFlag::kFixedFootprint,
     };
     for (auto* member : members) {
         if (!member->Type()->IsConstructible()) {
-            flags.Remove(type::TypeFlag::kConstructable);
+            flags.Remove(TypeFlag::kConstructable);
         }
         if (!member->Type()->HasFixedFootprint()) {
-            flags.Remove(type::TypeFlag::kFixedFootprint);
+            flags.Remove(TypeFlag::kFixedFootprint);
         }
         if (!member->Type()->HasCreationFixedFootprint()) {
-            flags.Remove(type::TypeFlag::kCreationFixedFootprint);
+            flags.Remove(TypeFlag::kCreationFixedFootprint);
         }
     }
     return flags;
@@ -70,7 +70,7 @@ size_t StructBase::Hash() const {
     return utils::Hash(TypeInfo::Of<StructBase>().full_hashcode, name_);
 }
 
-bool StructBase::Equals(const type::Type& other) const {
+bool StructBase::Equals(const Type& other) const {
     if (auto* o = other.As<StructBase>()) {
         return o->name_ == name_;
     }
@@ -101,9 +101,7 @@ std::string StructBase::FriendlyName(const SymbolTable& symbols) const {
 std::string StructBase::Layout(const tint::SymbolTable& symbols) const {
     std::stringstream ss;
 
-    auto member_name_of = [&](const type::StructMemberBase* sm) {
-        return symbols.NameFor(sm->Name());
-    };
+    auto member_name_of = [&](const StructMemberBase* sm) { return symbols.NameFor(sm->Name()); };
 
     if (Members().IsEmpty()) {
         return {};

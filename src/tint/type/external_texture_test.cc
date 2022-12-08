@@ -41,11 +41,11 @@ TEST_F(ExternalTextureTest, Equals) {
     auto* a = create<ExternalTexture>();
     auto* b = create<ExternalTexture>();
     EXPECT_TRUE(a->Equals(*b));
-    EXPECT_FALSE(a->Equals(type::Void{}));
+    EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(ExternalTextureTest, IsTexture) {
-    type::F32 f32;
+    F32 f32;
     ExternalTexture s;
     Texture* ty = &s;
     EXPECT_FALSE(ty->Is<DepthTexture>());
@@ -56,7 +56,7 @@ TEST_F(ExternalTextureTest, IsTexture) {
 }
 
 TEST_F(ExternalTextureTest, Dim) {
-    type::F32 f32;
+    F32 f32;
     ExternalTexture s;
     EXPECT_EQ(s.dim(), ast::TextureDimension::k2d);
 }
