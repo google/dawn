@@ -37,24 +37,25 @@ namespace dawn::native {
 
 namespace {
 struct MapRequestTask : TrackTaskCallback {
-    MapRequestTask(dawn::platform::Platform* platform, Ref<BufferBase> buffer)
-        : TrackTaskCallback(platform), buffer(std::move(buffer)) {}
+    MapRequestTask(dawn::platform::Platform* platform, Ref<BufferBase> buffer, MapRequestID id)
+        : TrackTaskCallback(platform), buffer(std::move(buffer)), id(id) {}
     void Finish() override {
         ASSERT(mSerial != kMaxExecutionSerial);
         TRACE_EVENT1(mPlatform, General, "Buffer::TaskInFlight::Finished", "serial",
                      uint64_t(mSerial));
-        buffer->OnMapRequestCompleted(WGPUBufferMapAsyncStatus_Success);
+        buffer->OnMapRequestCompleted(id, WGPUBufferMapAsyncStatus_Success);
     }
     void HandleDeviceLoss() override {
-        buffer->OnMapRequestCompleted(WGPUBufferMapAsyncStatus_DeviceLost);
+        buffer->OnMapRequestCompleted(id, WGPUBufferMapAsyncStatus_DeviceLost);
     }
     void HandleShutDown() override {
-        buffer->OnMapRequestCompleted(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
+        buffer->OnMapRequestCompleted(id, WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
     }
     ~MapRequestTask() override = default;
 
   private:
     Ref<BufferBase> buffer;
+    MapRequestID id;
 };
 
 class ErrorBuffer final : public BufferBase {
@@ -316,9 +317,9 @@ MaybeError BufferBase::ValidateCanUseOnQueueNow() const {
     UNREACHABLE();
 }
 
-void BufferBase::CallMapCallback(WGPUBufferMapAsyncStatus status) {
+void BufferBase::CallMapCallback(MapRequestID mapID, WGPUBufferMapAsyncStatus status) {
     ASSERT(!IsError());
-    if (mMapCallback != nullptr) {
+    if (mMapCallback != nullptr && mapID == mLastMapID) {
         // Tag the callback as fired before firing it, otherwise it could fire a second time if
         // for example buffer.Unmap() is called inside the application-provided callback.
         WGPUBufferMapCallback callback = mMapCallback;
@@ -357,6 +358,7 @@ void BufferBase::APIMapAsync(wgpu::MapMode mode,
     }
     ASSERT(!IsError());
 
+    mLastMapID++;
     mMapMode = mode;
     mMapOffset = offset;
     mMapSize = size;
@@ -365,11 +367,11 @@ void BufferBase::APIMapAsync(wgpu::MapMode mode,
     mState = BufferState::PendingMap;
 
     if (GetDevice()->ConsumedError(MapAsyncImpl(mode, offset, size))) {
-        CallMapCallback(WGPUBufferMapAsyncStatus_DeviceLost);
+        CallMapCallback(mLastMapID, WGPUBufferMapAsyncStatus_DeviceLost);
         return;
     }
     std::unique_ptr<MapRequestTask> request =
-        std::make_unique<MapRequestTask>(GetDevice()->GetPlatform(), this);
+        std::make_unique<MapRequestTask>(GetDevice()->GetPlatform(), this, mLastMapID);
     TRACE_EVENT1(GetDevice()->GetPlatform(), General, "Buffer::APIMapAsync", "serial",
                  uint64_t(GetDevice()->GetPendingCommandSerial()));
     GetDevice()->GetQueue()->TrackTask(std::move(request));
@@ -439,7 +441,7 @@ void BufferBase::Unmap() {
 
 void BufferBase::UnmapInternal(WGPUBufferMapAsyncStatus callbackStatus) {
     if (mState == BufferState::PendingMap) {
-        CallMapCallback(callbackStatus);
+        CallMapCallback(mLastMapID, callbackStatus);
         UnmapImpl();
     } else if (mState == BufferState::Mapped) {
         UnmapImpl();
@@ -552,11 +554,12 @@ MaybeError BufferBase::ValidateUnmap() const {
     return {};
 }
 
-void BufferBase::OnMapRequestCompleted(WGPUBufferMapAsyncStatus status) {
-    if (status == WGPUBufferMapAsyncStatus_Success && mState == BufferState::PendingMap) {
+void BufferBase::OnMapRequestCompleted(MapRequestID mapID, WGPUBufferMapAsyncStatus status) {
+    if (mapID == mLastMapID && status == WGPUBufferMapAsyncStatus_Success &&
+        mState == BufferState::PendingMap) {
         mState = BufferState::Mapped;
     }
-    CallMapCallback(status);
+    CallMapCallback(mapID, status);
 }
 
 bool BufferBase::NeedsInitialization() const {

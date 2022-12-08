@@ -406,32 +406,40 @@ TEST_F(BufferValidationTest, MapAsync_UnmapBeforeResult) {
 // works as expected and we don't get the cancelled request's data.
 TEST_F(BufferValidationTest, MapAsync_UnmapBeforeResultAndMapAgain) {
     {
-        wgpu::Buffer buf = CreateMapReadBuffer(4);
-        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, this + 0);
+        wgpu::Buffer buf = CreateMapReadBuffer(16);
+        buf.MapAsync(wgpu::MapMode::Read, 0, 8, ToMockBufferMapAsyncCallback, this + 0);
 
         EXPECT_CALL(*mockBufferMapAsyncCallback,
                     Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, this + 0))
             .Times(1);
         buf.Unmap();
 
-        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, this + 1);
+        buf.MapAsync(wgpu::MapMode::Read, 8, 8, ToMockBufferMapAsyncCallback, this + 1);
         EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, this + 1))
             .Times(1);
         WaitForAllOperations(device);
+
+        // Check that only the second MapAsync had an effect
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange(0));
+        ASSERT_NE(nullptr, buf.GetConstMappedRange(8));
     }
     {
-        wgpu::Buffer buf = CreateMapWriteBuffer(4);
-        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, this + 0);
+        wgpu::Buffer buf = CreateMapWriteBuffer(16);
+        buf.MapAsync(wgpu::MapMode::Write, 0, 8, ToMockBufferMapAsyncCallback, this + 0);
 
         EXPECT_CALL(*mockBufferMapAsyncCallback,
                     Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, this + 0))
             .Times(1);
         buf.Unmap();
 
-        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, this + 1);
+        buf.MapAsync(wgpu::MapMode::Write, 8, 8, ToMockBufferMapAsyncCallback, this + 1);
         EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, this + 1))
             .Times(1);
         WaitForAllOperations(device);
+
+        // Check that only the second MapAsync had an effect
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange(0));
+        ASSERT_NE(nullptr, buf.GetConstMappedRange(8));
     }
 }
 

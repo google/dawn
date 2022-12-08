@@ -63,7 +63,7 @@ class BufferBase : public ApiObjectBase {
     wgpu::BufferUsage GetUsageExternalOnly() const;
 
     MaybeError MapAtCreation();
-    void OnMapRequestCompleted(WGPUBufferMapAsyncStatus status);
+    void OnMapRequestCompleted(MapRequestID mapID, WGPUBufferMapAsyncStatus status);
 
     MaybeError ValidateCanUseOnQueueNow() const;
 
@@ -110,7 +110,7 @@ class BufferBase : public ApiObjectBase {
 
     virtual bool IsCPUWritableAtCreation() const = 0;
     MaybeError CopyFromStagingBuffer();
-    void CallMapCallback(WGPUBufferMapAsyncStatus status);
+    void CallMapCallback(MapRequestID mapID, WGPUBufferMapAsyncStatus status);
 
     MaybeError ValidateMapAsync(wgpu::MapMode mode,
                                 size_t offset,
@@ -129,6 +129,7 @@ class BufferBase : public ApiObjectBase {
 
     WGPUBufferMapCallback mMapCallback = nullptr;
     void* mMapUserdata = 0;
+    MapRequestID mLastMapID = MapRequestID(0);
     wgpu::MapMode mMapMode = wgpu::MapMode::None;
     size_t mMapOffset = 0;
     size_t mMapSize = 0;
