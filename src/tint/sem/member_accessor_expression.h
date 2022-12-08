@@ -23,7 +23,6 @@ namespace tint::ast {
 class MemberAccessorExpression;
 }  // namespace tint::ast
 namespace tint::sem {
-class Struct;
 class StructMember;
 }  // namespace tint::sem
 

@@ -20,9 +20,9 @@ namespace tint::sem {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
-using StructTest = TestHelper;
+using SemStructTest = TestHelper;
 
-TEST_F(StructTest, Creation) {
+TEST_F(SemStructTest, Creation) {
     auto name = Sym("S");
     auto* impl = create<ast::Struct>(name, utils::Empty, utils::Empty);
     auto* ptr = impl;
@@ -34,7 +34,7 @@ TEST_F(StructTest, Creation) {
     EXPECT_EQ(s->SizeNoPadding(), 16u);
 }
 
-TEST_F(StructTest, Hash) {
+TEST_F(SemStructTest, Hash) {
     auto* a_impl = create<ast::Struct>(Sym("a"), utils::Empty, utils::Empty);
     auto* a = create<sem::Struct>(a_impl, a_impl->source, a_impl->name, utils::Empty,
                                   4u /* align */, 4u /* size */, 4u /* size_no_padding */);
@@ -45,7 +45,7 @@ TEST_F(StructTest, Hash) {
     EXPECT_NE(a->Hash(), b->Hash());
 }
 
-TEST_F(StructTest, Equals) {
+TEST_F(SemStructTest, Equals) {
     auto* a_impl = create<ast::Struct>(Sym("a"), utils::Empty, utils::Empty);
     auto* a = create<sem::Struct>(a_impl, a_impl->source, a_impl->name, utils::Empty,
                                   4u /* align */, 4u /* size */, 4u /* size_no_padding */);
@@ -58,169 +58,12 @@ TEST_F(StructTest, Equals) {
     EXPECT_FALSE(a->Equals(type::Void{}));
 }
 
-TEST_F(StructTest, FriendlyName) {
+TEST_F(SemStructTest, FriendlyName) {
     auto name = Sym("my_struct");
     auto* impl = create<ast::Struct>(name, utils::Empty, utils::Empty);
     auto* s = create<sem::Struct>(impl, impl->source, impl->name, utils::Empty, 4u /* align */,
                                   4u /* size */, 4u /* size_no_padding */);
     EXPECT_EQ(s->FriendlyName(Symbols()), "my_struct");
-}
-
-TEST_F(StructTest, Layout) {
-    auto* inner_st =  //
-        Structure("Inner", utils::Vector{
-                               Member("a", ty.i32()),
-                               Member("b", ty.u32()),
-                               Member("c", ty.f32()),
-                               Member("d", ty.vec3<f32>()),
-                               Member("e", ty.mat4x2<f32>()),
-                           });
-
-    auto* outer_st = Structure("Outer", utils::Vector{
-                                            Member("inner", ty.type_name("Inner")),
-                                            Member("a", ty.i32()),
-                                        });
-
-    auto p = Build();
-    ASSERT_TRUE(p.IsValid()) << p.Diagnostics().str();
-
-    auto* sem_inner_st = p.Sem().Get(inner_st);
-    auto* sem_outer_st = p.Sem().Get(outer_st);
-
-    EXPECT_EQ(sem_inner_st->Layout(p.Symbols()),
-              R"(/*            align(16) size(64) */ struct Inner {
-/* offset( 0) align( 4) size( 4) */   a : i32;
-/* offset( 4) align( 4) size( 4) */   b : u32;
-/* offset( 8) align( 4) size( 4) */   c : f32;
-/* offset(12) align( 1) size( 4) */   // -- implicit field alignment padding --;
-/* offset(16) align(16) size(12) */   d : vec3<f32>;
-/* offset(28) align( 1) size( 4) */   // -- implicit field alignment padding --;
-/* offset(32) align( 8) size(32) */   e : mat4x2<f32>;
-/*                               */ };)");
-
-    EXPECT_EQ(sem_outer_st->Layout(p.Symbols()),
-              R"(/*            align(16) size(80) */ struct Outer {
-/* offset( 0) align(16) size(64) */   inner : Inner;
-/* offset(64) align( 4) size( 4) */   a : i32;
-/* offset(68) align( 1) size(12) */   // -- implicit struct size padding --;
-/*                               */ };)");
-}
-
-TEST_F(StructTest, Location) {
-    auto* st = Structure("st", utils::Vector{
-                                   Member("a", ty.i32(), utils::Vector{Location(1_u)}),
-                                   Member("b", ty.u32()),
-                               });
-
-    auto p = Build();
-    ASSERT_TRUE(p.IsValid()) << p.Diagnostics().str();
-
-    auto* sem = p.Sem().Get(st);
-    ASSERT_EQ(2u, sem->Members().Length());
-
-    EXPECT_TRUE(sem->Members()[0]->Location().has_value());
-    EXPECT_EQ(sem->Members()[0]->Location().value(), 1u);
-
-    EXPECT_FALSE(sem->Members()[1]->Location().has_value());
-}
-
-TEST_F(StructTest, IsConstructable) {
-    auto* inner =  //
-        Structure("Inner", utils::Vector{
-                               Member("a", ty.i32()),
-                               Member("b", ty.u32()),
-                               Member("c", ty.f32()),
-                               Member("d", ty.vec3<f32>()),
-                               Member("e", ty.mat4x2<f32>()),
-                           });
-
-    auto* outer = Structure("Outer", utils::Vector{
-                                         Member("inner", ty.type_name("Inner")),
-                                         Member("a", ty.i32()),
-                                     });
-
-    auto* outer_runtime_sized_array =
-        Structure("OuterRuntimeSizedArray", utils::Vector{
-                                                Member("inner", ty.type_name("Inner")),
-                                                Member("a", ty.i32()),
-                                                Member("runtime_sized_array", ty.array<i32>()),
-                                            });
-    auto p = Build();
-    ASSERT_TRUE(p.IsValid()) << p.Diagnostics().str();
-
-    auto* sem_inner = p.Sem().Get(inner);
-    auto* sem_outer = p.Sem().Get(outer);
-    auto* sem_outer_runtime_sized_array = p.Sem().Get(outer_runtime_sized_array);
-
-    EXPECT_TRUE(sem_inner->IsConstructible());
-    EXPECT_TRUE(sem_outer->IsConstructible());
-    EXPECT_FALSE(sem_outer_runtime_sized_array->IsConstructible());
-}
-
-TEST_F(StructTest, HasCreationFixedFootprint) {
-    auto* inner =  //
-        Structure("Inner", utils::Vector{
-                               Member("a", ty.i32()),
-                               Member("b", ty.u32()),
-                               Member("c", ty.f32()),
-                               Member("d", ty.vec3<f32>()),
-                               Member("e", ty.mat4x2<f32>()),
-                               Member("f", ty.array<f32, 32>()),
-                           });
-
-    auto* outer = Structure("Outer", utils::Vector{
-                                         Member("inner", ty.type_name("Inner")),
-                                     });
-
-    auto* outer_with_runtime_sized_array =
-        Structure("OuterRuntimeSizedArray", utils::Vector{
-                                                Member("inner", ty.type_name("Inner")),
-                                                Member("runtime_sized_array", ty.array<i32>()),
-                                            });
-
-    auto p = Build();
-    ASSERT_TRUE(p.IsValid()) << p.Diagnostics().str();
-
-    auto* sem_inner = p.Sem().Get(inner);
-    auto* sem_outer = p.Sem().Get(outer);
-    auto* sem_outer_with_runtime_sized_array = p.Sem().Get(outer_with_runtime_sized_array);
-
-    EXPECT_TRUE(sem_inner->HasCreationFixedFootprint());
-    EXPECT_TRUE(sem_outer->HasCreationFixedFootprint());
-    EXPECT_FALSE(sem_outer_with_runtime_sized_array->HasCreationFixedFootprint());
-}
-
-TEST_F(StructTest, HasFixedFootprint) {
-    auto* inner =  //
-        Structure("Inner", utils::Vector{
-                               Member("a", ty.i32()),
-                               Member("b", ty.u32()),
-                               Member("c", ty.f32()),
-                               Member("d", ty.vec3<f32>()),
-                               Member("e", ty.mat4x2<f32>()),
-                               Member("f", ty.array<f32, 32>()),
-                           });
-
-    auto* outer = Structure("Outer", utils::Vector{
-                                         Member("inner", ty.type_name("Inner")),
-                                     });
-
-    auto* outer_with_runtime_sized_array =
-        Structure("OuterRuntimeSizedArray", utils::Vector{
-                                                Member("inner", ty.type_name("Inner")),
-                                                Member("runtime_sized_array", ty.array<i32>()),
-                                            });
-
-    auto p = Build();
-    ASSERT_TRUE(p.IsValid()) << p.Diagnostics().str();
-
-    auto* sem_inner = p.Sem().Get(inner);
-    auto* sem_outer = p.Sem().Get(outer);
-    auto* sem_outer_with_runtime_sized_array = p.Sem().Get(outer_with_runtime_sized_array);
-
-    EXPECT_TRUE(sem_inner->HasFixedFootprint());
-    EXPECT_TRUE(sem_outer->HasFixedFootprint());
-    EXPECT_FALSE(sem_outer_with_runtime_sized_array->HasFixedFootprint());
 }
 
 }  // namespace

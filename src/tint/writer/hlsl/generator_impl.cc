@@ -4155,16 +4155,16 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
                         }
 
                         auto loc = mem->Location().value();
-                        if (pipeline_stage_uses.count(sem::PipelineStageUsage::kVertexInput)) {
+                        if (pipeline_stage_uses.count(type::PipelineStageUsage::kVertexInput)) {
                             post += " : TEXCOORD" + std::to_string(loc);
                         } else if (pipeline_stage_uses.count(
-                                       sem::PipelineStageUsage::kVertexOutput)) {
+                                       type::PipelineStageUsage::kVertexOutput)) {
                             post += " : TEXCOORD" + std::to_string(loc);
                         } else if (pipeline_stage_uses.count(
-                                       sem::PipelineStageUsage::kFragmentInput)) {
+                                       type::PipelineStageUsage::kFragmentInput)) {
                             post += " : TEXCOORD" + std::to_string(loc);
                         } else if (pipeline_stage_uses.count(
-                                       sem::PipelineStageUsage::kFragmentOutput)) {
+                                       type::PipelineStageUsage::kFragmentOutput)) {
                             post += " : SV_Target" + std::to_string(loc);
                         } else {
                             TINT_ICE(Writer, diagnostics_) << "invalid use of location attribute";

@@ -91,7 +91,7 @@ class TypeManager final {
     ///         pointer is returned.
     template <typename TYPE,
               typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, type::ArrayCount> ||
-                                          traits::IsTypeOrDerived<TYPE, sem::StructMemberBase>>,
+                                          traits::IsTypeOrDerived<TYPE, type::StructMemberBase>>,
               typename... ARGS>
     TYPE* GetNode(ARGS&&... args) {
         return nodes_.Get<TYPE>(std::forward<ARGS>(args)...);
@@ -119,8 +119,8 @@ struct hash<tint::type::Node> {
     size_t operator()(const tint::type::Node& type) const {
         if (const auto* ac = type.As<tint::type::ArrayCount>()) {
             return ac->Hash();
-        } else if (type.Is<tint::sem::StructMemberBase>()) {
-            return tint::TypeInfo::Of<tint::sem::StructMemberBase>().full_hashcode;
+        } else if (type.Is<tint::type::StructMemberBase>()) {
+            return tint::TypeInfo::Of<tint::type::StructMemberBase>().full_hashcode;
         }
         TINT_ASSERT(Type, false && "Unreachable");
         return 0;
@@ -139,7 +139,7 @@ struct equal_to<tint::type::Node> {
                 return ac->Equals(*bc);
             }
             return false;
-        } else if (a.Is<tint::sem::StructMemberBase>()) {
+        } else if (a.Is<tint::type::StructMemberBase>()) {
             return &a == &b;
         }
         TINT_ASSERT(Type, false && "Unreachable");

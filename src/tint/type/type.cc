@@ -182,7 +182,7 @@ bool Type::HoldsAbstract() const {
         [&](const type::Vector* v) { return v->type()->HoldsAbstract(); },
         [&](const type::Matrix* m) { return m->type()->HoldsAbstract(); },
         [&](const sem::Array* a) { return a->ElemType()->HoldsAbstract(); },
-        [&](const sem::Struct* s) {
+        [&](const type::StructBase* s) {
             for (auto* m : s->Members()) {
                 if (m->Type()->HoldsAbstract()) {
                     return true;
@@ -240,7 +240,7 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
             }
             return kNoConversion;
         },
-        [&](const sem::Struct* from_str) {
+        [&](const type::StructBase* from_str) {
             auto concrete_tys = from_str->ConcreteTypes();
             for (size_t i = 0; i < concrete_tys.Length(); i++) {
                 if (concrete_tys[i] == to) {

@@ -2841,16 +2841,16 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
                         }
 
                         uint32_t loc = mem->Location().value();
-                        if (pipeline_stage_uses.count(sem::PipelineStageUsage::kVertexInput)) {
+                        if (pipeline_stage_uses.count(type::PipelineStageUsage::kVertexInput)) {
                             out << " [[attribute(" + std::to_string(loc) + ")]]";
                         } else if (pipeline_stage_uses.count(
-                                       sem::PipelineStageUsage::kVertexOutput)) {
+                                       type::PipelineStageUsage::kVertexOutput)) {
                             out << " [[user(locn" + std::to_string(loc) + ")]]";
                         } else if (pipeline_stage_uses.count(
-                                       sem::PipelineStageUsage::kFragmentInput)) {
+                                       type::PipelineStageUsage::kFragmentInput)) {
                             out << " [[user(locn" + std::to_string(loc) + ")]]";
                         } else if (pipeline_stage_uses.count(
-                                       sem::PipelineStageUsage::kFragmentOutput)) {
+                                       type::PipelineStageUsage::kFragmentOutput)) {
                             out << " [[color(" + std::to_string(loc) + ")]]";
                         } else {
                             TINT_ICE(Writer, diagnostics_) << "invalid use of location decoration";

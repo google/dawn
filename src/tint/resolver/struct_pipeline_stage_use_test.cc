@@ -76,7 +76,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderParam) {
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->PipelineStageUses(),
-                UnorderedElementsAre(sem::PipelineStageUsage::kVertexInput));
+                UnorderedElementsAre(type::PipelineStageUsage::kVertexInput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderReturnType) {
@@ -92,7 +92,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderReturnType) {
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->PipelineStageUses(),
-                UnorderedElementsAre(sem::PipelineStageUsage::kVertexOutput));
+                UnorderedElementsAre(type::PipelineStageUsage::kVertexOutput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderParam) {
@@ -106,7 +106,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderParam) {
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->PipelineStageUses(),
-                UnorderedElementsAre(sem::PipelineStageUsage::kFragmentInput));
+                UnorderedElementsAre(type::PipelineStageUsage::kFragmentInput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderReturnType) {
@@ -120,7 +120,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderReturnType) {
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->PipelineStageUses(),
-                UnorderedElementsAre(sem::PipelineStageUsage::kFragmentOutput));
+                UnorderedElementsAre(type::PipelineStageUsage::kFragmentOutput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsComputeShaderParam) {
@@ -136,7 +136,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsComputeShaderParam) {
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->PipelineStageUses(),
-                UnorderedElementsAre(sem::PipelineStageUsage::kComputeInput));
+                UnorderedElementsAre(type::PipelineStageUsage::kComputeInput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
@@ -155,8 +155,8 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->PipelineStageUses(),
-                UnorderedElementsAre(sem::PipelineStageUsage::kVertexOutput,
-                                     sem::PipelineStageUsage::kFragmentInput));
+                UnorderedElementsAre(type::PipelineStageUsage::kVertexOutput,
+                                     type::PipelineStageUsage::kFragmentInput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamViaAlias) {
@@ -171,7 +171,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamViaAlias) {
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->PipelineStageUses(),
-                UnorderedElementsAre(sem::PipelineStageUsage::kFragmentInput));
+                UnorderedElementsAre(type::PipelineStageUsage::kFragmentInput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamLocationSet) {
@@ -201,7 +201,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderReturnTypeViaAlias) {
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->PipelineStageUses(),
-                UnorderedElementsAre(sem::PipelineStageUsage::kFragmentOutput));
+                UnorderedElementsAre(type::PipelineStageUsage::kFragmentOutput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderReturnTypeLocationSet) {

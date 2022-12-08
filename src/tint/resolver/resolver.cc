@@ -996,13 +996,13 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
         if (auto* str = p_ty->As<sem::Struct>()) {
             switch (decl->PipelineStage()) {
                 case ast::PipelineStage::kVertex:
-                    str->AddUsage(sem::PipelineStageUsage::kVertexInput);
+                    str->AddUsage(type::PipelineStageUsage::kVertexInput);
                     break;
                 case ast::PipelineStage::kFragment:
-                    str->AddUsage(sem::PipelineStageUsage::kFragmentInput);
+                    str->AddUsage(type::PipelineStageUsage::kFragmentInput);
                     break;
                 case ast::PipelineStage::kCompute:
-                    str->AddUsage(sem::PipelineStageUsage::kComputeInput);
+                    str->AddUsage(type::PipelineStageUsage::kComputeInput);
                     break;
                 case ast::PipelineStage::kNone:
                     break;
@@ -1048,13 +1048,13 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
 
         switch (decl->PipelineStage()) {
             case ast::PipelineStage::kVertex:
-                str->AddUsage(sem::PipelineStageUsage::kVertexOutput);
+                str->AddUsage(type::PipelineStageUsage::kVertexOutput);
                 break;
             case ast::PipelineStage::kFragment:
-                str->AddUsage(sem::PipelineStageUsage::kFragmentOutput);
+                str->AddUsage(type::PipelineStageUsage::kFragmentOutput);
                 break;
             case ast::PipelineStage::kCompute:
-                str->AddUsage(sem::PipelineStageUsage::kComputeOutput);
+                str->AddUsage(type::PipelineStageUsage::kComputeOutput);
                 break;
             case ast::PipelineStage::kNone:
                 break;

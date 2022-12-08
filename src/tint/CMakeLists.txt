@@ -335,6 +335,7 @@ list(APPEND TINT_LIB_SRCS
   sem/sampler_texture_pair.h
   sem/statement.cc
   sem/struct.cc
+  sem/struct.h
   sem/switch_statement.cc
   sem/switch_statement.h
   sem/type_initializer.cc
@@ -493,6 +494,8 @@ list(APPEND TINT_LIB_SRCS
   type/sampler.h
   type/storage_texture.cc
   type/storage_texture.h
+  type/struct.cc
+  type/struct.h
   type/texture.cc
   type/texture.h
   type/type.cc
@@ -946,6 +949,7 @@ if(TINT_BUILD_TESTS)
     type/sampled_texture_test.cc
     type/sampler_test.cc
     type/storage_texture_test.cc
+    type/struct_test.cc
     type/texture_test.cc
     type/type_test.cc
     type/type_manager_test.cc

@@ -497,7 +497,7 @@ class ProgramBuilder {
     /// @returns the de-aliased array count pointer
     template <typename T, typename... ARGS>
     traits::EnableIf<traits::IsTypeOrDerived<T, type::ArrayCount> ||
-                         traits::IsTypeOrDerived<T, sem::StructMemberBase>,
+                         traits::IsTypeOrDerived<T, type::StructMemberBase>,
                      T>*
     create(ARGS&&... args) {
         AssertNotMoved();
