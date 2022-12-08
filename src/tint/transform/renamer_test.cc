@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/transform/test_helper.h"
+#include "src/tint/type/short_name.h"
 
 namespace tint::transform {
 namespace {
@@ -1456,6 +1457,220 @@ INSTANTIATE_TEST_SUITE_P(
         "M_SQRT1_2_H",
         // "while"  // WGSL reserved keyword
         kUnicodeIdentifier));
+
+const char* ExpandShortName(std::string_view name) {
+    if (name == "vec2f") {
+        return "vec2<f32>";
+    }
+    if (name == "vec2h") {
+        return "vec2<f16>";
+    }
+    if (name == "vec2i") {
+        return "vec2<i32>";
+    }
+    if (name == "vec2u") {
+        return "vec2<u32>";
+    }
+    if (name == "vec3f") {
+        return "vec3<f32>";
+    }
+    if (name == "vec3h") {
+        return "vec3<f16>";
+    }
+    if (name == "vec3i") {
+        return "vec3<i32>";
+    }
+    if (name == "vec3u") {
+        return "vec3<u32>";
+    }
+    if (name == "vec4f") {
+        return "vec4<f32>";
+    }
+    if (name == "vec4h") {
+        return "vec4<f16>";
+    }
+    if (name == "vec4i") {
+        return "vec4<i32>";
+    }
+    if (name == "vec4u") {
+        return "vec4<u32>";
+    }
+    ADD_FAILURE() << "unhandled type short-name: " << name;
+    return "<invalid>";
+}
+
+using RenamerTypeShortNamesTest = TransformTestWithParam<const char*>;
+
+TEST_P(RenamerTypeShortNamesTest, PreserveTypeUsage) {
+    auto expand = [&](const char* source) {
+        auto out = utils::ReplaceAll(source, "$name", GetParam());
+        out = utils::ReplaceAll(out, "$type", ExpandShortName(GetParam()));
+        return out;
+    };
+
+    auto src = expand(R"(
+enable f16;
+
+fn x(v : $name) -> $name {
+  const a : $name = $name();
+  let b : $name = a;
+  var c : $name = b;
+  return c;
+}
+
+struct y {
+  a : $name,
+}
+)");
+
+    auto expect = expand(R"(
+enable f16;
+
+fn tint_symbol(tint_symbol_1 : $name) -> $name {
+  const tint_symbol_2 : $name = $name();
+  let tint_symbol_3 : $name = tint_symbol_2;
+  var tint_symbol_4 : $name = tint_symbol_3;
+  return tint_symbol_4;
+}
+
+struct tint_symbol_5 {
+  tint_symbol_2 : $name,
+}
+)");
+
+    auto got = Run<Renamer>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+TEST_P(RenamerTypeShortNamesTest, PreserveTypeInitializer) {
+    auto expand = [&](const char* source) {
+        auto out = utils::ReplaceAll(source, "$name", GetParam());
+        out = utils::ReplaceAll(out, "$type", ExpandShortName(GetParam()));
+        return out;
+    };
+
+    auto src = expand(R"(
+enable f16;
+
+@fragment
+fn f() {
+  var v : $type = $name();
+}
+)");
+
+    auto expect = expand(R"(
+enable f16;
+
+@fragment
+fn tint_symbol() {
+  var tint_symbol_1 : $type = $name();
+}
+)");
+
+    auto got = Run<Renamer>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_P(RenamerTypeShortNamesTest, PreserveTypeConversion) {
+    auto expand = [&](const char* source) {
+        auto out = utils::ReplaceAll(source, "$name", GetParam());
+        out = utils::ReplaceAll(out, "$type", ExpandShortName(GetParam()));
+        return out;
+    };
+
+    auto src = expand(R"(
+enable f16;
+
+@fragment
+fn f() {
+  var v : $type = $name($type());
+}
+)");
+
+    auto expect = expand(R"(
+enable f16;
+
+@fragment
+fn tint_symbol() {
+  var tint_symbol_1 : $type = $name($type());
+}
+)");
+
+    auto got = Run<Renamer>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_P(RenamerTypeShortNamesTest, RenameShadowedByAlias) {
+    auto expand = [&](const char* source) {
+        auto out = utils::ReplaceAll(source, "$name", GetParam());
+        out = utils::ReplaceAll(out, "$type", ExpandShortName(GetParam()));
+        return out;
+    };
+
+    auto src = expand(R"(
+type $name = i32;
+
+@fragment
+fn f() {
+  var v : i32 = $name();
+}
+)");
+
+    auto expect = expand(R"(
+type tint_symbol = i32;
+
+@fragment
+fn tint_symbol_1() {
+  var tint_symbol_2 : i32 = tint_symbol();
+}
+)");
+
+    auto got = Run<Renamer>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_P(RenamerTypeShortNamesTest, RenameShadowedByStruct) {
+    auto expand = [&](const char* source) {
+        auto out = utils::ReplaceAll(source, "$name", GetParam());
+        out = utils::ReplaceAll(out, "$type", ExpandShortName(GetParam()));
+        return out;
+    };
+
+    auto src = expand(R"(
+struct $name {
+  i : i32,
+}
+
+@fragment
+fn f() {
+  var a = $name();
+  var b = a.i;
+}
+)");
+
+    auto expect = expand(R"(
+struct tint_symbol {
+  tint_symbol_1 : i32,
+}
+
+@fragment
+fn tint_symbol_2() {
+  var tint_symbol_3 = tint_symbol();
+  var tint_symbol_4 = tint_symbol_3.tint_symbol_1;
+}
+)");
+
+    auto got = Run<Renamer>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+INSTANTIATE_TEST_SUITE_P(RenamerTypeShortNamesTest,
+                         RenamerTypeShortNamesTest,
+                         testing::ValuesIn(type::kShortNameStrings));
 
 }  // namespace
 }  // namespace tint::transform

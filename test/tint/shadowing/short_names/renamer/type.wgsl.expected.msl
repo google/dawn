@@ -1,0 +1,25 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct vec4f {
+  int i;
+};
+
+struct tint_symbol_1 {
+  float4 value [[position]];
+};
+
+float4 tint_symbol_inner(uint VertexIndex) {
+  vec4f const s = vec4f{.i=1};
+  float const f = float(s.i);
+  bool const b = bool(f);
+  return select(float4(0.0f), float4(1.0f), b);
+}
+
+vertex tint_symbol_1 tint_symbol(uint VertexIndex [[vertex_id]]) {
+  float4 const inner_result = tint_symbol_inner(VertexIndex);
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+

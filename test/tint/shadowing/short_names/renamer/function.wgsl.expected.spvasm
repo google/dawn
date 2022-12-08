@@ -1,0 +1,82 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 49
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %tint_symbol_5 "tint_symbol_5" %tint_symbol_6_1 %value %vertex_point_size
+               OpName %tint_symbol_6_1 "tint_symbol_6_1"
+               OpName %value "value"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %tint_symbol_4 "tint_symbol_4"
+               OpName %tint_symbol_5_inner "tint_symbol_5_inner"
+               OpName %tint_symbol_6 "tint_symbol_6"
+               OpName %tint_symbol_5 "tint_symbol_5"
+               OpDecorate %tint_symbol_6_1 BuiltIn VertexIndex
+               OpDecorate %value BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%tint_symbol_6_1 = OpVariable %_ptr_Input_uint Input
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %8 = OpConstantNull %v4float
+      %value = OpVariable %_ptr_Output_v4float Output %8
+%_ptr_Output_float = OpTypePointer Output %float
+         %11 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %11
+        %int = OpTypeInt 32 1
+         %12 = OpTypeFunction %int
+         %16 = OpConstantNull %int
+         %17 = OpTypeFunction %float %int
+       %bool = OpTypeBool
+         %22 = OpTypeFunction %bool %float
+         %28 = OpTypeFunction %v4float %uint
+    %float_1 = OpConstant %float 1
+         %33 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+     %v4bool = OpTypeVector %bool 4
+%_ptr_Function_v4bool = OpTypePointer Function %v4bool
+         %41 = OpConstantNull %v4bool
+       %void = OpTypeVoid
+         %43 = OpTypeFunction %void
+%tint_symbol = OpFunction %int None %12
+         %15 = OpLabel
+               OpReturnValue %16
+               OpFunctionEnd
+%tint_symbol_1 = OpFunction %float None %17
+%tint_symbol_2 = OpFunctionParameter %int
+         %20 = OpLabel
+         %21 = OpConvertSToF %float %tint_symbol_2
+               OpReturnValue %21
+               OpFunctionEnd
+%tint_symbol_3 = OpFunction %bool None %22
+%tint_symbol_4 = OpFunctionParameter %float
+         %26 = OpLabel
+         %27 = OpFUnordNotEqual %bool %tint_symbol_4 %11
+               OpReturnValue %27
+               OpFunctionEnd
+%tint_symbol_5_inner = OpFunction %v4float None %28
+%tint_symbol_6 = OpFunctionParameter %uint
+         %31 = OpLabel
+         %39 = OpVariable %_ptr_Function_v4bool Function %41
+         %34 = OpFunctionCall %int %tint_symbol
+         %35 = OpFunctionCall %float %tint_symbol_1 %34
+         %36 = OpFunctionCall %bool %tint_symbol_3 %35
+         %42 = OpCompositeConstruct %v4bool %36 %36 %36 %36
+         %37 = OpSelect %v4float %42 %33 %8
+               OpReturnValue %37
+               OpFunctionEnd
+%tint_symbol_5 = OpFunction %void None %43
+         %46 = OpLabel
+         %48 = OpLoad %uint %tint_symbol_6_1
+         %47 = OpFunctionCall %v4float %tint_symbol_5_inner %48
+               OpStore %value %47
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd
