@@ -50,7 +50,7 @@ bool ShouldRun(const Program* program) {
 // Returns `true` if `type` is or contains a matrix type.
 bool ContainsMatrix(const type::Type* type) {
     type = type->UnwrapRef();
-    if (type->Is<sem::Matrix>()) {
+    if (type->Is<type::Matrix>()) {
         return true;
     } else if (auto* ary = type->As<sem::Array>()) {
         return ContainsMatrix(ary->ElemType());

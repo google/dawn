@@ -111,8 +111,8 @@ TEST_F(ResolverIndexAccessorTest, Matrix) {
     ASSERT_TRUE(TypeOf(acc)->Is<type::Reference>());
 
     auto* ref = TypeOf(acc)->As<type::Reference>();
-    ASSERT_TRUE(ref->StoreType()->Is<sem::Vector>());
-    EXPECT_EQ(ref->StoreType()->As<sem::Vector>()->Width(), 3u);
+    ASSERT_TRUE(ref->StoreType()->Is<type::Vector>());
+    EXPECT_EQ(ref->StoreType()->As<type::Vector>()->Width(), 3u);
 
     auto idx_sem = Sem().Get<sem::IndexAccessorExpression>(acc);
     ASSERT_NE(idx_sem, nullptr);

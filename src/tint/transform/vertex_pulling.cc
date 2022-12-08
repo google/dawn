@@ -165,7 +165,7 @@ AttributeWGSLType WGSLTypeOf(const type::Type* ty) {
         [](const type::F16*) -> AttributeWGSLType {
             return {BaseWGSLType::kF16, 1};
         },
-        [](const sem::Vector* vec) -> AttributeWGSLType {
+        [](const type::Vector* vec) -> AttributeWGSLType {
             return {WGSLTypeOf(vec->type()).base_type, vec->Width()};
         },
         [](Default) -> AttributeWGSLType {

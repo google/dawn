@@ -413,7 +413,7 @@ bool match_vec(MatchState&, const type::Type* ty, Number& N, const type::Type*& 
         return true;
     }
 
-    if (auto* v = ty->As<sem::Vector>()) {
+    if (auto* v = ty->As<type::Vector>()) {
         N = v->Width();
         T = v->type();
         return true;
@@ -428,7 +428,7 @@ bool match_vec(MatchState&, const type::Type* ty, const type::Type*& T) {
         return true;
     }
 
-    if (auto* v = ty->As<sem::Vector>()) {
+    if (auto* v = ty->As<type::Vector>()) {
         if (v->Width() == N) {
             T = v->type();
             return true;
@@ -437,13 +437,13 @@ bool match_vec(MatchState&, const type::Type* ty, const type::Type*& T) {
     return false;
 }
 
-const sem::Vector* build_vec(MatchState& state, Number N, const type::Type* el) {
-    return state.builder.create<sem::Vector>(el, N.Value());
+const type::Vector* build_vec(MatchState& state, Number N, const type::Type* el) {
+    return state.builder.create<type::Vector>(el, N.Value());
 }
 
 template <uint32_t N>
-const sem::Vector* build_vec(MatchState& state, const type::Type* el) {
-    return state.builder.create<sem::Vector>(el, N);
+const type::Vector* build_vec(MatchState& state, const type::Type* el) {
+    return state.builder.create<type::Vector>(el, N);
 }
 
 constexpr auto match_vec2 = match_vec<2>;
@@ -461,7 +461,7 @@ bool match_mat(MatchState&, const type::Type* ty, Number& M, Number& N, const ty
         T = ty;
         return true;
     }
-    if (auto* m = ty->As<sem::Matrix>()) {
+    if (auto* m = ty->As<type::Matrix>()) {
         M = m->columns();
         N = m->ColumnType()->Width();
         T = m->type();
@@ -476,7 +476,7 @@ bool match_mat(MatchState&, const type::Type* ty, const type::Type*& T) {
         T = ty;
         return true;
     }
-    if (auto* m = ty->As<sem::Matrix>()) {
+    if (auto* m = ty->As<type::Matrix>()) {
         if (m->columns() == C && m->rows() == R) {
             T = m->type();
             return true;
@@ -485,15 +485,15 @@ bool match_mat(MatchState&, const type::Type* ty, const type::Type*& T) {
     return false;
 }
 
-const sem::Matrix* build_mat(MatchState& state, Number C, Number R, const type::Type* T) {
-    auto* column_type = state.builder.create<sem::Vector>(T, R.Value());
-    return state.builder.create<sem::Matrix>(column_type, C.Value());
+const type::Matrix* build_mat(MatchState& state, Number C, Number R, const type::Type* T) {
+    auto* column_type = state.builder.create<type::Vector>(T, R.Value());
+    return state.builder.create<type::Matrix>(column_type, C.Value());
 }
 
 template <uint32_t C, uint32_t R>
-const sem::Matrix* build_mat(MatchState& state, const type::Type* T) {
-    auto* column_type = state.builder.create<sem::Vector>(T, R);
-    return state.builder.create<sem::Matrix>(column_type, C);
+const type::Matrix* build_mat(MatchState& state, const type::Type* T) {
+    auto* column_type = state.builder.create<type::Vector>(T, R);
+    return state.builder.create<type::Matrix>(column_type, C);
 }
 
 constexpr auto build_mat2x2 = build_mat<2, 2>;
@@ -862,11 +862,13 @@ const sem::Struct* build_modf_result(MatchState& state, const type::Type* el) {
 const sem::Struct* build_modf_result_vec(MatchState& state, Number& n, const type::Type* el) {
     auto prefix = "__modf_result_vec" + std::to_string(n.Value());
     auto build_f32 = [&] {
-        auto* vec = state.builder.create<sem::Vector>(state.builder.create<type::F32>(), n.Value());
+        auto* vec =
+            state.builder.create<type::Vector>(state.builder.create<type::F32>(), n.Value());
         return build_struct(state.builder, prefix + "_f32", {{"fract", vec}, {"whole", vec}});
     };
     auto build_f16 = [&] {
-        auto* vec = state.builder.create<sem::Vector>(state.builder.create<type::F16>(), n.Value());
+        auto* vec =
+            state.builder.create<type::Vector>(state.builder.create<type::F16>(), n.Value());
         return build_struct(state.builder, prefix + "_f16", {{"fract", vec}, {"whole", vec}});
     };
 
@@ -875,7 +877,7 @@ const sem::Struct* build_modf_result_vec(MatchState& state, Number& n, const typ
         [&](const type::F32*) { return build_f32(); },  //
         [&](const type::F16*) { return build_f16(); },  //
         [&](const type::AbstractFloat*) {
-            auto* vec = state.builder.create<sem::Vector>(el, n.Value());
+            auto* vec = state.builder.create<type::Vector>(el, n.Value());
             auto* abstract =
                 build_struct(state.builder, prefix + "_abstract", {{"fract", vec}, {"whole", vec}});
             abstract->SetConcreteTypes(utils::Vector{build_f32(), build_f16()});
@@ -921,13 +923,13 @@ const sem::Struct* build_frexp_result(MatchState& state, const type::Type* el) {
 const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n, const type::Type* el) {
     auto prefix = "__frexp_result_vec" + std::to_string(n.Value());
     auto build_f32 = [&] {
-        auto* f = state.builder.create<sem::Vector>(state.builder.create<type::F32>(), n.Value());
-        auto* e = state.builder.create<sem::Vector>(state.builder.create<type::I32>(), n.Value());
+        auto* f = state.builder.create<type::Vector>(state.builder.create<type::F32>(), n.Value());
+        auto* e = state.builder.create<type::Vector>(state.builder.create<type::I32>(), n.Value());
         return build_struct(state.builder, prefix + "_f32", {{"fract", f}, {"exp", e}});
     };
     auto build_f16 = [&] {
-        auto* f = state.builder.create<sem::Vector>(state.builder.create<type::F16>(), n.Value());
-        auto* e = state.builder.create<sem::Vector>(state.builder.create<type::I32>(), n.Value());
+        auto* f = state.builder.create<type::Vector>(state.builder.create<type::F16>(), n.Value());
+        auto* e = state.builder.create<type::Vector>(state.builder.create<type::I32>(), n.Value());
         return build_struct(state.builder, prefix + "_f16", {{"fract", f}, {"exp", e}});
     };
 
@@ -936,9 +938,9 @@ const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n, const ty
         [&](const type::F32*) { return build_f32(); },  //
         [&](const type::F16*) { return build_f16(); },  //
         [&](const type::AbstractFloat*) {
-            auto* f = state.builder.create<sem::Vector>(el, n.Value());
-            auto* e = state.builder.create<sem::Vector>(state.builder.create<type::AbstractInt>(),
-                                                        n.Value());
+            auto* f = state.builder.create<type::Vector>(el, n.Value());
+            auto* e = state.builder.create<type::Vector>(state.builder.create<type::AbstractInt>(),
+                                                         n.Value());
             auto* abstract =
                 build_struct(state.builder, prefix + "_abstract", {{"fract", f}, {"exp", e}});
             abstract->SetConcreteTypes(utils::Vector{build_f32(), build_f16()});

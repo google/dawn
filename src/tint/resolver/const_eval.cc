@@ -25,17 +25,17 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/constant.h"
-#include "src/tint/sem/matrix.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/type_initializer.h"
-#include "src/tint/sem/vector.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
+#include "src/tint/type/matrix.h"
 #include "src/tint/type/u32.h"
+#include "src/tint/type/vector.h"
 #include "src/tint/utils/bitcast.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/map.h"
@@ -477,11 +477,11 @@ ImplResult CreateElement(ProgramBuilder& builder, const Source& source, const ty
 const ImplConstant* ZeroValue(ProgramBuilder& builder, const type::Type* type) {
     return Switch(
         type,  //
-        [&](const sem::Vector* v) -> const ImplConstant* {
+        [&](const type::Vector* v) -> const ImplConstant* {
             auto* zero_el = ZeroValue(builder, v->type());
             return builder.create<Splat>(type, zero_el, v->Width());
         },
-        [&](const sem::Matrix* m) -> const ImplConstant* {
+        [&](const type::Matrix* m) -> const ImplConstant* {
             auto* zero_el = ZeroValue(builder, m->ColumnType());
             return builder.create<Splat>(type, zero_el, m->columns());
         },
@@ -530,7 +530,7 @@ bool Equal(const sem::Constant* a, const sem::Constant* b) {
     }
     return Switch(
         a->Type(),  //
-        [&](const sem::Vector* vec) {
+        [&](const type::Vector* vec) {
             for (size_t i = 0; i < vec->Width(); i++) {
                 if (!Equal(a->Index(i), b->Index(i))) {
                     return false;
@@ -538,7 +538,7 @@ bool Equal(const sem::Constant* a, const sem::Constant* b) {
             }
             return true;
         },
-        [&](const sem::Matrix* mat) {
+        [&](const type::Matrix* mat) {
             for (size_t i = 0; i < mat->columns(); i++) {
                 if (!Equal(a->Index(i), b->Index(i))) {
                     return false;
@@ -1181,7 +1181,7 @@ auto ConstEval::Dot4Func(const Source& source, const type::Type* elem_ty) {
 ConstEval::Result ConstEval::Dot(const Source& source,
                                  const sem::Constant* v1,
                                  const sem::Constant* v2) {
-    auto* vec_ty = v1->Type()->As<sem::Vector>();
+    auto* vec_ty = v1->Type()->As<type::Vector>();
     TINT_ASSERT(Resolver, vec_ty);
     auto* elem_ty = vec_ty->type();
     switch (vec_ty->Width()) {
@@ -1208,7 +1208,7 @@ ConstEval::Result ConstEval::Dot(const Source& source,
 ConstEval::Result ConstEval::Length(const Source& source,
                                     const type::Type* ty,
                                     const sem::Constant* c0) {
-    auto* vec_ty = c0->Type()->As<sem::Vector>();
+    auto* vec_ty = c0->Type()->As<type::Vector>();
     // Evaluates to the absolute value of e if T is scalar.
     if (vec_ty == nullptr) {
         auto create = [&](auto e) {
@@ -1358,7 +1358,7 @@ ConstEval::Result ConstEval::VecSplat(const type::Type* ty,
                                       utils::VectorRef<const sem::Constant*> args,
                                       const Source&) {
     if (auto* arg = args[0]) {
-        return builder.create<Splat>(ty, arg, static_cast<const sem::Vector*>(ty)->Width());
+        return builder.create<Splat>(ty, arg, static_cast<const type::Vector*>(ty)->Width());
     }
     return nullptr;
 }
@@ -1379,7 +1379,7 @@ ConstEval::Result ConstEval::VecInitM(const type::Type* ty,
             return nullptr;
         }
         auto* arg_ty = arg->Type();
-        if (auto* arg_vec = arg_ty->As<sem::Vector>()) {
+        if (auto* arg_vec = arg_ty->As<type::Vector>()) {
             // Extract out vector elements.
             for (uint32_t j = 0; j < arg_vec->Width(); j++) {
                 auto* el = val->Index(j);
@@ -1398,7 +1398,7 @@ ConstEval::Result ConstEval::VecInitM(const type::Type* ty,
 ConstEval::Result ConstEval::MatInitS(const type::Type* ty,
                                       utils::VectorRef<const sem::Constant*> args,
                                       const Source&) {
-    auto* m = static_cast<const sem::Matrix*>(ty);
+    auto* m = static_cast<const type::Matrix*>(ty);
 
     utils::Vector<const sem::Constant*, 4> els;
     for (uint32_t c = 0; c < m->columns(); c++) {
@@ -1550,8 +1550,8 @@ ConstEval::Result ConstEval::OpMultiply(const type::Type* ty,
 ConstEval::Result ConstEval::OpMultiplyMatVec(const type::Type* ty,
                                               utils::VectorRef<const sem::Constant*> args,
                                               const Source& source) {
-    auto* mat_ty = args[0]->Type()->As<sem::Matrix>();
-    auto* vec_ty = args[1]->Type()->As<sem::Vector>();
+    auto* mat_ty = args[0]->Type()->As<type::Matrix>();
+    auto* vec_ty = args[1]->Type()->As<type::Vector>();
     auto* elem_ty = vec_ty->type();
 
     auto dot = [&](const sem::Constant* m, size_t row, const sem::Constant* v) {
@@ -1600,8 +1600,8 @@ ConstEval::Result ConstEval::OpMultiplyMatVec(const type::Type* ty,
 ConstEval::Result ConstEval::OpMultiplyVecMat(const type::Type* ty,
                                               utils::VectorRef<const sem::Constant*> args,
                                               const Source& source) {
-    auto* vec_ty = args[0]->Type()->As<sem::Vector>();
-    auto* mat_ty = args[1]->Type()->As<sem::Matrix>();
+    auto* vec_ty = args[0]->Type()->As<type::Vector>();
+    auto* mat_ty = args[1]->Type()->As<type::Matrix>();
     auto* elem_ty = vec_ty->type();
 
     auto dot = [&](const sem::Constant* v, const sem::Constant* m, size_t col) {
@@ -1653,8 +1653,8 @@ ConstEval::Result ConstEval::OpMultiplyMatMat(const type::Type* ty,
                                               const Source& source) {
     auto* mat1 = args[0];
     auto* mat2 = args[1];
-    auto* mat1_ty = mat1->Type()->As<sem::Matrix>();
-    auto* mat2_ty = mat2->Type()->As<sem::Matrix>();
+    auto* mat1_ty = mat1->Type()->As<type::Matrix>();
+    auto* mat2_ty = mat2->Type()->As<type::Matrix>();
     auto* elem_ty = mat1_ty->type();
 
     auto dot = [&](const sem::Constant* m1, size_t row, const sem::Constant* m2, size_t col) {
@@ -1706,7 +1706,7 @@ ConstEval::Result ConstEval::OpMultiplyMatMat(const type::Type* ty,
         }
 
         // Add column vector to matrix
-        auto* col_vec_ty = ty->As<sem::Matrix>()->ColumnType();
+        auto* col_vec_ty = ty->As<type::Matrix>()->ColumnType();
         result_mat.Push(CreateComposite(builder, col_vec_ty, col_vec));
     }
     return CreateComposite(builder, ty, result_mat);
@@ -2283,7 +2283,7 @@ ConstEval::Result ConstEval::cross(const type::Type* ty,
                                    const Source& source) {
     auto* u = args[0];
     auto* v = args[1];
-    auto* elem_ty = u->Type()->As<sem::Vector>()->type();
+    auto* elem_ty = u->Type()->As<type::Vector>()->type();
 
     // cross product of a v3 is the determinant of the 3x3 matrix:
     //
@@ -2352,7 +2352,7 @@ ConstEval::Result ConstEval::determinant(const type::Type* ty,
                                          const Source& source) {
     auto calculate = [&]() -> ConstEval::Result {
         auto* m = args[0];
-        auto* mat_ty = m->Type()->As<sem::Matrix>();
+        auto* mat_ty = m->Type()->As<type::Matrix>();
         auto me = [&](size_t r, size_t c) { return m->Index(c)->Index(r); };
         switch (mat_ty->rows()) {
             case 2:
@@ -2674,7 +2674,7 @@ ConstEval::Result ConstEval::frexp(const type::Type* ty,
             });
     };
 
-    if (auto* vec = arg->Type()->As<sem::Vector>()) {
+    if (auto* vec = arg->Type()->As<type::Vector>()) {
         utils::Vector<const sem::Constant*, 4> fract_els;
         utils::Vector<const sem::Constant*, 4> exp_els;
         for (uint32_t i = 0; i < vec->Width(); i++) {
@@ -2685,8 +2685,8 @@ ConstEval::Result ConstEval::frexp(const type::Type* ty,
             fract_els.Push(fe.fract.Get());
             exp_els.Push(fe.exp.Get());
         }
-        auto fract_ty = builder.create<sem::Vector>(fract_els[0]->Type(), vec->Width());
-        auto exp_ty = builder.create<sem::Vector>(exp_els[0]->Type(), vec->Width());
+        auto fract_ty = builder.create<type::Vector>(fract_els[0]->Type(), vec->Width());
+        auto exp_ty = builder.create<type::Vector>(exp_els[0]->Type(), vec->Width());
         return CreateComposite(builder, ty,
                                utils::Vector<const sem::Constant*, 2>{
                                    CreateComposite(builder, fract_ty, std::move(fract_els)),
@@ -3044,7 +3044,7 @@ ConstEval::Result ConstEval::reflect(const type::Type* ty,
         // e1 - 2 * dot(e2, e1) * e2.
         auto* e1 = args[0];
         auto* e2 = args[1];
-        auto* vec_ty = ty->As<sem::Vector>();
+        auto* vec_ty = ty->As<type::Vector>();
         auto* el_ty = vec_ty->type();
 
         // dot(e2, e1)
@@ -3082,7 +3082,7 @@ ConstEval::Result ConstEval::reflect(const type::Type* ty,
 ConstEval::Result ConstEval::refract(const type::Type* ty,
                                      utils::VectorRef<const sem::Constant*> args,
                                      const Source& source) {
-    auto* vec_ty = ty->As<sem::Vector>();
+    auto* vec_ty = ty->As<type::Vector>();
     auto* el_ty = vec_ty->type();
 
     auto compute_k = [&](auto e3, auto dot_e2_e1) -> ConstEval::Result {
@@ -3436,9 +3436,9 @@ ConstEval::Result ConstEval::transpose(const type::Type* ty,
                                        utils::VectorRef<const sem::Constant*> args,
                                        const Source&) {
     auto* m = args[0];
-    auto* mat_ty = m->Type()->As<sem::Matrix>();
+    auto* mat_ty = m->Type()->As<type::Matrix>();
     auto me = [&](size_t r, size_t c) { return m->Index(c)->Index(r); };
-    auto* result_mat_ty = ty->As<sem::Matrix>();
+    auto* result_mat_ty = ty->As<type::Matrix>();
 
     // Produce column vectors from each row
     utils::Vector<const sem::Constant*, 4> result_mat;

@@ -39,59 +39,59 @@ TEST_F(ResolverIsHostShareable, NumericScalar) {
 }
 
 TEST_F(ResolverIsHostShareable, NumericVector) {
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<type::I32>(), 2u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<type::I32>(), 3u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<type::I32>(), 4u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<type::U32>(), 2u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<type::U32>(), 3u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<type::U32>(), 4u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<type::F32>(), 2u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<type::F32>(), 3u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<type::F32>(), 4u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<type::F16>(), 2u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<type::F16>(), 3u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<type::F16>(), 4u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Vector>(create<type::I32>(), 2u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Vector>(create<type::I32>(), 3u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Vector>(create<type::I32>(), 4u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Vector>(create<type::U32>(), 2u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Vector>(create<type::U32>(), 3u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Vector>(create<type::U32>(), 4u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Vector>(create<type::F32>(), 2u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Vector>(create<type::F32>(), 3u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Vector>(create<type::F32>(), 4u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Vector>(create<type::F16>(), 2u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Vector>(create<type::F16>(), 3u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Vector>(create<type::F16>(), 4u)));
 }
 
 TEST_F(ResolverIsHostShareable, BoolVector) {
-    EXPECT_FALSE(r()->IsHostShareable(create<sem::Vector>(create<type::Bool>(), 2u)));
-    EXPECT_FALSE(r()->IsHostShareable(create<sem::Vector>(create<type::Bool>(), 3u)));
-    EXPECT_FALSE(r()->IsHostShareable(create<sem::Vector>(create<type::Bool>(), 4u)));
-    EXPECT_FALSE(r()->IsHostShareable(create<sem::Vector>(create<type::Bool>(), 2u)));
-    EXPECT_FALSE(r()->IsHostShareable(create<sem::Vector>(create<type::Bool>(), 3u)));
-    EXPECT_FALSE(r()->IsHostShareable(create<sem::Vector>(create<type::Bool>(), 4u)));
-    EXPECT_FALSE(r()->IsHostShareable(create<sem::Vector>(create<type::Bool>(), 2u)));
-    EXPECT_FALSE(r()->IsHostShareable(create<sem::Vector>(create<type::Bool>(), 3u)));
-    EXPECT_FALSE(r()->IsHostShareable(create<sem::Vector>(create<type::Bool>(), 4u)));
+    EXPECT_FALSE(r()->IsHostShareable(create<type::Vector>(create<type::Bool>(), 2u)));
+    EXPECT_FALSE(r()->IsHostShareable(create<type::Vector>(create<type::Bool>(), 3u)));
+    EXPECT_FALSE(r()->IsHostShareable(create<type::Vector>(create<type::Bool>(), 4u)));
+    EXPECT_FALSE(r()->IsHostShareable(create<type::Vector>(create<type::Bool>(), 2u)));
+    EXPECT_FALSE(r()->IsHostShareable(create<type::Vector>(create<type::Bool>(), 3u)));
+    EXPECT_FALSE(r()->IsHostShareable(create<type::Vector>(create<type::Bool>(), 4u)));
+    EXPECT_FALSE(r()->IsHostShareable(create<type::Vector>(create<type::Bool>(), 2u)));
+    EXPECT_FALSE(r()->IsHostShareable(create<type::Vector>(create<type::Bool>(), 3u)));
+    EXPECT_FALSE(r()->IsHostShareable(create<type::Vector>(create<type::Bool>(), 4u)));
 }
 
 TEST_F(ResolverIsHostShareable, Matrix) {
-    auto* vec2_f32 = create<sem::Vector>(create<type::F32>(), 2u);
-    auto* vec3_f32 = create<sem::Vector>(create<type::F32>(), 3u);
-    auto* vec4_f32 = create<sem::Vector>(create<type::F32>(), 4u);
-    auto* vec2_f16 = create<sem::Vector>(create<type::F16>(), 2u);
-    auto* vec3_f16 = create<sem::Vector>(create<type::F16>(), 3u);
-    auto* vec4_f16 = create<sem::Vector>(create<type::F16>(), 4u);
+    auto* vec2_f32 = create<type::Vector>(create<type::F32>(), 2u);
+    auto* vec3_f32 = create<type::Vector>(create<type::F32>(), 3u);
+    auto* vec4_f32 = create<type::Vector>(create<type::F32>(), 4u);
+    auto* vec2_f16 = create<type::Vector>(create<type::F16>(), 2u);
+    auto* vec3_f16 = create<type::Vector>(create<type::F16>(), 3u);
+    auto* vec4_f16 = create<type::Vector>(create<type::F16>(), 4u);
 
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec2_f32, 2u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec2_f32, 3u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec2_f32, 4u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec3_f32, 2u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec3_f32, 3u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec3_f32, 4u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec4_f32, 2u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec4_f32, 3u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec4_f32, 4u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec2_f32, 2u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec2_f32, 3u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec2_f32, 4u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec3_f32, 2u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec3_f32, 3u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec3_f32, 4u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec4_f32, 2u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec4_f32, 3u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec4_f32, 4u)));
 
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec2_f16, 2u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec2_f16, 3u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec2_f16, 4u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec3_f16, 2u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec3_f16, 3u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec3_f16, 4u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec4_f16, 2u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec4_f16, 3u)));
-    EXPECT_TRUE(r()->IsHostShareable(create<sem::Matrix>(vec4_f16, 4u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec2_f16, 2u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec2_f16, 3u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec2_f16, 4u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec3_f16, 2u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec3_f16, 3u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec3_f16, 4u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec4_f16, 2u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec4_f16, 3u)));
+    EXPECT_TRUE(r()->IsHostShareable(create<type::Matrix>(vec4_f16, 4u)));
 }
 
 TEST_F(ResolverIsHostShareable, Pointer) {

@@ -36,7 +36,7 @@ bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
         if (auto* sem = program->Sem().Get<sem::Expression>(node)) {
             if (auto* call = sem->UnwrapMaterialize()->As<sem::Call>()) {
-                if (call->Target()->Is<sem::TypeConversion>() && call->Type()->Is<sem::Matrix>()) {
+                if (call->Target()->Is<sem::TypeConversion>() && call->Type()->Is<type::Matrix>()) {
                     auto& args = call->Arguments();
                     if (args.Length() == 1 && args[0]->Type()->UnwrapRef()->is_float_matrix()) {
                         return true;
@@ -65,7 +65,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
     CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     using HelperFunctionKey =
-        utils::UnorderedKeyWrapper<std::tuple<const sem::Matrix*, const sem::Matrix*>>;
+        utils::UnorderedKeyWrapper<std::tuple<const type::Matrix*, const type::Matrix*>>;
 
     std::unordered_map<HelperFunctionKey, Symbol> matrix_convs;
 
@@ -75,7 +75,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
         if (!ty_conv) {
             return nullptr;
         }
-        auto* dst_type = call->Type()->As<sem::Matrix>();
+        auto* dst_type = call->Type()->As<type::Matrix>();
         if (!dst_type) {
             return nullptr;
         }
@@ -87,7 +87,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
 
         auto& matrix = args[0];
 
-        auto* src_type = matrix->Type()->UnwrapRef()->As<sem::Matrix>();
+        auto* src_type = matrix->Type()->UnwrapRef()->As<type::Matrix>();
         if (!src_type) {
             return nullptr;
         }

@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_MATRIX_H_
-#define SRC_TINT_SEM_MATRIX_H_
+#ifndef SRC_TINT_TYPE_MATRIX_H_
+#define SRC_TINT_TYPE_MATRIX_H_
 
 #include <string>
 
 #include "src/tint/type/type.h"
 
 // Forward declarations
-namespace tint::sem {
+namespace tint::type {
 class Vector;
-}  // namespace tint::sem
+}  // namespace tint::type
 
-namespace tint::sem {
+namespace tint::type {
 
 /// A matrix type
 class Matrix final : public Castable<Matrix, type::Type> {
@@ -76,6 +76,6 @@ class Matrix final : public Castable<Matrix, type::Type> {
     const uint32_t columns_;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
-#endif  // SRC_TINT_SEM_MATRIX_H_
+#endif  // SRC_TINT_TYPE_MATRIX_H_

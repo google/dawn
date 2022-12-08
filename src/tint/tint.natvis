@@ -252,7 +252,7 @@
 		<DisplayString>f32</DisplayString>
 	</Type>
 
-	<Type Name="tint::sem::Vector">
+	<Type Name="tint::type::Vector">
 		<DisplayString>vec{width_}&lt;{*subtype_}&gt;</DisplayString>
 	</Type>
 

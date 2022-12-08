@@ -79,7 +79,7 @@ TEST_P(ResolverConstEvalConvTest, Test) {
 
     auto* target_sem_ty = type.sem(*this);
     if (kind == Kind::kVector) {
-        target_sem_ty = create<sem::Vector>(target_sem_ty, 3u);
+        target_sem_ty = create<type::Vector>(target_sem_ty, 3u);
     }
 
     if (unrepresentable) {
@@ -230,7 +230,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_f32_to_i32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
+    auto* vec = sem->Type()->As<type::Vector>();
     ASSERT_NE(vec, nullptr);
     EXPECT_TRUE(vec->type()->Is<type::I32>());
     EXPECT_EQ(vec->Width(), 3u);
@@ -263,7 +263,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
+    auto* vec = sem->Type()->As<type::Vector>();
     ASSERT_NE(vec, nullptr);
     EXPECT_TRUE(vec->type()->Is<type::F32>());
     EXPECT_EQ(vec->Width(), 3u);
@@ -298,7 +298,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_f16_to_i32) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
+    auto* vec = sem->Type()->As<type::Vector>();
     ASSERT_NE(vec, nullptr);
     EXPECT_TRUE(vec->type()->Is<type::I32>());
     EXPECT_EQ(vec->Width(), 3u);
@@ -333,7 +333,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f16) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
+    auto* vec = sem->Type()->As<type::Vector>();
     ASSERT_NE(vec, nullptr);
     EXPECT_TRUE(vec->type()->Is<type::F16>());
     EXPECT_EQ(vec->Width(), 3u);
@@ -366,7 +366,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_i32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
+    auto* vec = sem->Type()->As<type::Vector>();
     ASSERT_NE(vec, nullptr);
     EXPECT_TRUE(vec->type()->Is<type::I32>());
     EXPECT_EQ(vec->Width(), 3u);
@@ -399,7 +399,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
+    auto* vec = sem->Type()->As<type::Vector>();
     ASSERT_NE(vec, nullptr);
     EXPECT_TRUE(vec->type()->Is<type::U32>());
     EXPECT_EQ(vec->Width(), 3u);
@@ -444,7 +444,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Small_f32_to_f16) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
+    auto* vec = sem->Type()->As<type::Vector>();
     ASSERT_NE(vec, nullptr);
     EXPECT_TRUE(vec->type()->Is<type::F16>());
     EXPECT_EQ(vec->Width(), 3u);

@@ -367,7 +367,7 @@ bool GeneratorImpl::Generate() {
 }
 
 bool GeneratorImpl::EmitDynamicVectorAssignment(const ast::AssignmentStatement* stmt,
-                                                const sem::Vector* vec) {
+                                                const type::Vector* vec) {
     auto name = utils::GetOrCreate(dynamic_vector_write_, vec, [&]() -> std::string {
         std::string fn;
         {
@@ -441,7 +441,7 @@ bool GeneratorImpl::EmitDynamicVectorAssignment(const ast::AssignmentStatement* 
 }
 
 bool GeneratorImpl::EmitDynamicMatrixVectorAssignment(const ast::AssignmentStatement* stmt,
-                                                      const sem::Matrix* mat) {
+                                                      const type::Matrix* mat) {
     auto name = utils::GetOrCreate(dynamic_matrix_vector_write_, mat, [&]() -> std::string {
         std::string fn;
         {
@@ -507,7 +507,7 @@ bool GeneratorImpl::EmitDynamicMatrixVectorAssignment(const ast::AssignmentState
 }
 
 bool GeneratorImpl::EmitDynamicMatrixScalarAssignment(const ast::AssignmentStatement* stmt,
-                                                      const sem::Matrix* mat) {
+                                                      const type::Matrix* mat) {
     auto* lhs_col_access = stmt->lhs->As<ast::IndexAccessorExpression>();
     auto* lhs_row_access = lhs_col_access->object->As<ast::IndexAccessorExpression>();
 
@@ -540,7 +540,7 @@ bool GeneratorImpl::EmitDynamicMatrixScalarAssignment(const ast::AssignmentState
             line(&helpers_) << "switch (col) {";
             {
                 ScopedIndent si2(&helpers_);
-                auto* vec = TypeOf(lhs_row_access->object)->UnwrapRef()->As<sem::Vector>();
+                auto* vec = TypeOf(lhs_row_access->object)->UnwrapRef()->As<type::Vector>();
                 for (uint32_t i = 0; i < mat->columns(); ++i) {
                     line(&helpers_) << "case " << i << ":";
                     {
@@ -623,7 +623,7 @@ bool GeneratorImpl::EmitIndexAccessor(std::ostream& out, const ast::IndexAccesso
 
 bool GeneratorImpl::EmitBitcast(std::ostream& out, const ast::BitcastExpression* expr) {
     auto* type = TypeOf(expr);
-    if (auto* vec = type->UnwrapRef()->As<sem::Vector>()) {
+    if (auto* vec = type->UnwrapRef()->As<type::Vector>()) {
         type = vec->type();
     }
 
@@ -650,7 +650,7 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
         // BUG(crbug.com/tint/1333): work around assignment of scalar to matrices
         // with at least one dynamic index
         if (auto* lhs_sub_access = lhs_access->object->As<ast::IndexAccessorExpression>()) {
-            if (auto* mat = TypeOf(lhs_sub_access->object)->UnwrapRef()->As<sem::Matrix>()) {
+            if (auto* mat = TypeOf(lhs_sub_access->object)->UnwrapRef()->As<type::Matrix>()) {
                 auto* rhs_col_idx_sem = builder_.Sem().Get(lhs_access->index);
                 auto* rhs_row_idx_sem = builder_.Sem().Get(lhs_sub_access->index);
                 if (!rhs_col_idx_sem->ConstantValue() || !rhs_row_idx_sem->ConstantValue()) {
@@ -661,7 +661,7 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
         // BUG(crbug.com/tint/1333): work around assignment of vector to matrices
         // with dynamic indices
         const auto* lhs_access_type = TypeOf(lhs_access->object)->UnwrapRef();
-        if (auto* mat = lhs_access_type->As<sem::Matrix>()) {
+        if (auto* mat = lhs_access_type->As<type::Matrix>()) {
             auto* lhs_index_sem = builder_.Sem().Get(lhs_access->index);
             if (!lhs_index_sem->ConstantValue()) {
                 return EmitDynamicMatrixVectorAssignment(stmt, mat);
@@ -669,7 +669,7 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
         }
         // BUG(crbug.com/tint/534): work around assignment to vectors with dynamic
         // indices
-        if (auto* vec = lhs_access_type->As<sem::Vector>()) {
+        if (auto* vec = lhs_access_type->As<type::Vector>()) {
             auto* rhs_sem = builder_.Sem().Get(lhs_access->index);
             if (!rhs_sem->ConstantValue()) {
                 return EmitDynamicVectorAssignment(stmt, vec);
@@ -729,9 +729,9 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
     // Multiplying by a matrix requires the use of `mul` in order to get the
     // type of multiply we desire.
     if (expr->op == ast::BinaryOp::kMultiply &&
-        ((lhs_type->Is<sem::Vector>() && rhs_type->Is<sem::Matrix>()) ||
-         (lhs_type->Is<sem::Matrix>() && rhs_type->Is<sem::Vector>()) ||
-         (lhs_type->Is<sem::Matrix>() && rhs_type->Is<sem::Matrix>()))) {
+        ((lhs_type->Is<type::Vector>() && rhs_type->Is<type::Matrix>()) ||
+         (lhs_type->Is<type::Matrix>() && rhs_type->Is<type::Vector>()) ||
+         (lhs_type->Is<type::Matrix>() && rhs_type->Is<type::Matrix>()))) {
         // Matrices are transposed, so swap LHS and RHS.
         out << "mul(";
         if (!EmitExpression(out, expr->rhs)) {
@@ -1045,7 +1045,7 @@ bool GeneratorImpl::EmitTypeInitializer(std::ostream& out,
 
     // Single parameter matrix initializers must be identity initializer.
     // It could also be conversions between f16 and f32 matrix when f16 is properly supported.
-    if (type->Is<sem::Matrix>() && call->Arguments().Length() == 1) {
+    if (type->Is<type::Matrix>() && call->Arguments().Length() == 1) {
         if (!ctor->Parameters()[0]->Type()->UnwrapRef()->is_float_matrix()) {
             TINT_UNREACHABLE(Writer, diagnostics_)
                 << "found a single-parameter matrix initializer that is not identity initializer";
@@ -1087,7 +1087,7 @@ bool GeneratorImpl::EmitTypeInitializer(std::ostream& out,
     }
 
     if (is_single_value_vector_init) {
-        out << ")." << std::string(type->As<sem::Vector>()->Width(), 'x');
+        out << ")." << std::string(type->As<type::Vector>()->Width(), 'x');
     }
 
     out << (brackets ? "}" : ")");
@@ -1977,7 +1977,7 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
             auto in = params[0];
 
             std::string width;
-            if (auto* vec = ty->As<sem::Vector>()) {
+            if (auto* vec = ty->As<type::Vector>()) {
                 width = std::to_string(vec->Width());
             }
 
@@ -2010,7 +2010,7 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
             auto in = params[0];
 
             std::string width;
-            if (auto* vec = ty->As<sem::Vector>()) {
+            if (auto* vec = ty->As<type::Vector>()) {
                 width = std::to_string(vec->Width());
             }
 
@@ -2069,7 +2069,7 @@ bool GeneratorImpl::EmitQuantizeToF16Call(std::ostream& out,
                                           const sem::Builtin* builtin) {
     // Emulate by casting to min16float and back again.
     std::string width;
-    if (auto* vec = builtin->ReturnType()->As<sem::Vector>()) {
+    if (auto* vec = builtin->ReturnType()->As<type::Vector>()) {
         width = std::to_string(vec->Width());
     }
     out << "float" << width << "(min16float" << width << "(";
@@ -2607,7 +2607,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         // HLSL builtin, we need to swizzle the expression to generate the correct
         // number of components.
         uint32_t wgsl_ret_width = 1;
-        if (auto* vec = builtin->ReturnType()->As<sem::Vector>()) {
+        if (auto* vec = builtin->ReturnType()->As<type::Vector>()) {
             wgsl_ret_width = vec->Width();
         }
         if (wgsl_ret_width < hlsl_ret_width) {
@@ -3290,7 +3290,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out,
             out << constant->As<AInt>() << "u";
             return true;
         },
-        [&](const sem::Vector* v) {
+        [&](const type::Vector* v) {
             if (constant->AllEqual()) {
                 {
                     ScopedParen sp(out);
@@ -3321,7 +3321,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out,
             }
             return true;
         },
-        [&](const sem::Matrix* m) {
+        [&](const type::Matrix* m) {
             if (!EmitType(out, m, ast::AddressSpace::kNone, ast::Access::kUndefined, "")) {
                 return false;
             }
@@ -3479,7 +3479,7 @@ bool GeneratorImpl::EmitValue(std::ostream& out, const type::Type* type, int val
             out << value << "u";
             return true;
         },
-        [&](const sem::Vector* vec) {
+        [&](const type::Vector* vec) {
             if (!EmitType(out, type, ast::AddressSpace::kNone, ast::Access::kReadWrite, "")) {
                 return false;
             }
@@ -3494,7 +3494,7 @@ bool GeneratorImpl::EmitValue(std::ostream& out, const type::Type* type, int val
             }
             return true;
         },
-        [&](const sem::Matrix* mat) {
+        [&](const type::Matrix* mat) {
             if (!EmitType(out, type, ast::AddressSpace::kNone, ast::Access::kReadWrite, "")) {
                 return false;
             }
@@ -3970,7 +3970,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             out << "int";
             return true;
         },
-        [&](const sem::Matrix* mat) {
+        [&](const type::Matrix* mat) {
             if (mat->type()->Is<type::F16>()) {
                 // Use matrix<type, N, M> for f16 matrix
                 out << "matrix<";
@@ -4084,7 +4084,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             out << "uint";
             return true;
         },
-        [&](const sem::Vector* vec) {
+        [&](const type::Vector* vec) {
             auto width = vec->Width();
             if (vec->type()->Is<type::F32>() && width >= 1 && width <= 4) {
                 out << "float" << width;

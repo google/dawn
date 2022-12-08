@@ -487,7 +487,7 @@ struct BuiltinPolyfill::State {
             if (!ty->is_unsigned_integer_scalar_or_vector()) {
                 expr = b.Construct<i32>(expr);
             }
-            if (ty->Is<sem::Vector>()) {
+            if (ty->Is<type::Vector>()) {
                 expr = b.Construct(T(ty), expr);
             }
             return expr;
@@ -643,7 +643,7 @@ struct BuiltinPolyfill::State {
     /// with scalar calls.
     /// @param vec the vector type
     /// @return the polyfill function name
-    Symbol quantizeToF16(const sem::Vector* vec) {
+    Symbol quantizeToF16(const type::Vector* vec) {
         auto name = b.Symbols().New("tint_quantizeToF16");
         utils::Vector<const ast::Expression*, 4> args;
         for (uint32_t i = 0; i < vec->Width(); i++) {
@@ -673,7 +673,7 @@ struct BuiltinPolyfill::State {
         auto* rhs_ty = ctx.src->TypeOf(bin_op->rhs)->UnwrapRef();
         auto* lhs_el_ty = type::Type::DeepestElementOf(lhs_ty);
         const ast::Expression* mask = b.Expr(AInt(lhs_el_ty->Size() * 8 - 1));
-        if (rhs_ty->Is<sem::Vector>()) {
+        if (rhs_ty->Is<type::Vector>()) {
             mask = b.Construct(CreateASTTypeFor(ctx, rhs_ty), mask);
         }
         auto* lhs = ctx.Clone(bin_op->lhs);
@@ -761,7 +761,7 @@ struct BuiltinPolyfill::State {
 
     /// @returns 1 if `ty` is not a vector, otherwise the vector width
     uint32_t WidthOf(const type::Type* ty) const {
-        if (auto* v = ty->As<sem::Vector>()) {
+        if (auto* v = ty->As<type::Vector>()) {
             return v->Width();
         }
         return 1;
@@ -905,7 +905,7 @@ Transform::ApplyResult BuiltinPolyfill::Apply(const Program* src,
                     break;
                 case sem::BuiltinType::kQuantizeToF16:
                     if (polyfill.quantize_to_vec_f16) {
-                        if (auto* vec = builtin->ReturnType()->As<sem::Vector>()) {
+                        if (auto* vec = builtin->ReturnType()->As<type::Vector>()) {
                             fn = builtin_polyfills.GetOrCreate(
                                 builtin, [&] { return s.quantizeToF16(vec); });
                         }

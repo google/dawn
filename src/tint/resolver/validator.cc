@@ -183,15 +183,15 @@ void Validator::AddNote(const std::string& msg, const Source& source) const {
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 bool Validator::IsPlain(const type::Type* type) const {
     return type->is_scalar() ||
-           type->IsAnyOf<sem::Atomic, sem::Vector, sem::Matrix, sem::Array, sem::Struct>();
+           type->IsAnyOf<sem::Atomic, type::Vector, type::Matrix, sem::Array, sem::Struct>();
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#fixed-footprint-types
 bool Validator::IsFixedFootprint(const type::Type* type) const {
     return Switch(
-        type,                                      //
-        [&](const sem::Vector*) { return true; },  //
-        [&](const sem::Matrix*) { return true; },  //
+        type,                                       //
+        [&](const type::Vector*) { return true; },  //
+        [&](const type::Matrix*) { return true; },  //
         [&](const sem::Atomic*) { return true; },
         [&](const sem::Array* arr) {
             return !arr->Count()->Is<type::RuntimeArrayCount>() &&
@@ -215,8 +215,8 @@ bool Validator::IsHostShareable(const type::Type* type) const {
     }
     return Switch(
         type,  //
-        [&](const sem::Vector* vec) { return IsHostShareable(vec->type()); },
-        [&](const sem::Matrix* mat) { return IsHostShareable(mat->type()); },
+        [&](const type::Vector* vec) { return IsHostShareable(vec->type()); },
+        [&](const type::Matrix* mat) { return IsHostShareable(mat->type()); },
         [&](const sem::Array* arr) { return IsHostShareable(arr->ElemType()); },
         [&](const sem::Struct* str) {
             for (auto* member : str->Members()) {
@@ -522,7 +522,7 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
                 std::string hint;
                 if (arr->ElemType()->is_scalar()) {
                     hint = "Consider using a vector or struct as the element type instead.";
-                } else if (auto* vec = arr->ElemType()->As<sem::Vector>();
+                } else if (auto* vec = arr->ElemType()->As<type::Vector>();
                            vec && vec->type()->Size() == 4) {
                     hint = "Consider using a vec4 instead.";
                 } else if (arr->ElemType()->Is<sem::Struct>()) {
@@ -857,7 +857,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                   (is_output && stage == ast::PipelineStage::kVertex))) {
                 is_stage_mismatch = true;
             }
-            if (!(type->is_float_vector() && type->As<sem::Vector>()->Width() == 4)) {
+            if (!(type->is_float_vector() && type->As<type::Vector>()->Width() == 4)) {
                 AddError("store type of " + attr_to_str(attr) + " must be 'vec4<f32>'",
                          attr->source);
                 return false;
@@ -871,7 +871,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 !(stage == ast::PipelineStage::kCompute && is_input)) {
                 is_stage_mismatch = true;
             }
-            if (!(type->is_unsigned_integer_vector() && type->As<sem::Vector>()->Width() == 3)) {
+            if (!(type->is_unsigned_integer_vector() && type->As<type::Vector>()->Width() == 3)) {
                 AddError("store type of " + attr_to_str(attr) + " must be 'vec3<u32>'",
                          attr->source);
                 return false;
@@ -1371,7 +1371,7 @@ bool Validator::Bitcast(const ast::BitcastExpression* cast, const type::Type* to
     }
 
     auto width = [&](const type::Type* ty) {
-        if (auto* vec = ty->As<sem::Vector>()) {
+        if (auto* vec = ty->As<type::Vector>()) {
             return vec->Width();
         }
         return 1u;
@@ -1566,7 +1566,7 @@ bool Validator::TextureBuiltinFunction(const sem::Call* call) const {
         std::string name = sem::str(usage);
         auto* arg = call->Arguments()[index];
         if (auto values = arg->ConstantValue()) {
-            if (auto* vector = values->Type()->As<sem::Vector>()) {
+            if (auto* vector = values->Type()->As<type::Vector>()) {
                 for (size_t i = 0; i < vector->Width(); i++) {
                     auto value = values->Index(i)->As<AInt>();
                     if (value < min || value > max) {
@@ -1790,7 +1790,7 @@ bool Validator::ArrayInitializer(const ast::CallExpression* ctor,
     return true;
 }
 
-bool Validator::Vector(const sem::Vector* ty, const Source& source) const {
+bool Validator::Vector(const type::Vector* ty, const Source& source) const {
     if (!ty->type()->is_scalar()) {
         AddError("vector element type must be 'bool', 'f32', 'f16', 'i32' or 'u32'", source);
         return false;
@@ -1798,7 +1798,7 @@ bool Validator::Vector(const sem::Vector* ty, const Source& source) const {
     return true;
 }
 
-bool Validator::Matrix(const sem::Matrix* ty, const Source& source) const {
+bool Validator::Matrix(const type::Matrix* ty, const Source& source) const {
     if (!ty->is_float_matrix()) {
         AddError("matrix element type must be 'f32' or 'f16'", source);
         return false;
@@ -2409,7 +2409,7 @@ void Validator::RaiseArrayWithOverrideCountError(const Source& source) const {
 }
 
 std::string Validator::VectorPretty(uint32_t size, const type::Type* element_type) const {
-    sem::Vector vec_type(element_type, size);
+    type::Vector vec_type(element_type, size);
     return vec_type.FriendlyName(symbols_);
 }
 

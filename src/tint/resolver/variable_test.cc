@@ -916,10 +916,10 @@ TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_i32)->Is<type::I32>());
     ASSERT_TRUE(TypeOf(c_u32)->Is<type::U32>());
     ASSERT_TRUE(TypeOf(c_f32)->Is<type::F32>());
-    ASSERT_TRUE(TypeOf(c_vi32)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_vu32)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_vf32)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
+    ASSERT_TRUE(TypeOf(c_vi32)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_vu32)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_vf32)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_mf32)->Is<type::Matrix>());
     ASSERT_TRUE(TypeOf(c_s)->Is<sem::Struct>());
 
     EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue()->AllZero());
@@ -976,13 +976,13 @@ TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_f32)->Is<type::F32>());
     ASSERT_TRUE(TypeOf(c_ai)->Is<type::AbstractInt>());
     ASSERT_TRUE(TypeOf(c_af)->Is<type::AbstractFloat>());
-    ASSERT_TRUE(TypeOf(c_vi32)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_vu32)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_vf32)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_vai)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_vaf)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
-    ASSERT_TRUE(TypeOf(c_maf32)->Is<sem::Matrix>());
+    ASSERT_TRUE(TypeOf(c_vi32)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_vu32)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_vf32)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_vai)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_vaf)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_mf32)->Is<type::Matrix>());
+    ASSERT_TRUE(TypeOf(c_maf32)->Is<type::Matrix>());
     ASSERT_TRUE(TypeOf(c_s)->Is<sem::Struct>());
 
     EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue()->AllZero());
@@ -1096,10 +1096,10 @@ TEST_F(ResolverVariableTest, GlobalConst_ExplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_i32)->Is<type::I32>());
     ASSERT_TRUE(TypeOf(c_u32)->Is<type::U32>());
     ASSERT_TRUE(TypeOf(c_f32)->Is<type::F32>());
-    ASSERT_TRUE(TypeOf(c_vi32)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_vu32)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_vf32)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
+    ASSERT_TRUE(TypeOf(c_vi32)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_vu32)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_vf32)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_mf32)->Is<type::Matrix>());
 
     EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue()->AllZero());
     EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue()->AllZero());
@@ -1147,13 +1147,13 @@ TEST_F(ResolverVariableTest, GlobalConst_ImplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_f32)->Is<type::F32>());
     ASSERT_TRUE(TypeOf(c_ai)->Is<type::AbstractInt>());
     ASSERT_TRUE(TypeOf(c_af)->Is<type::AbstractFloat>());
-    ASSERT_TRUE(TypeOf(c_vi32)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_vu32)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_vf32)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_vai)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_vaf)->Is<sem::Vector>());
-    ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
-    ASSERT_TRUE(TypeOf(c_maf32)->Is<sem::Matrix>());
+    ASSERT_TRUE(TypeOf(c_vi32)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_vu32)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_vf32)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_vai)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_vaf)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(c_mf32)->Is<type::Matrix>());
+    ASSERT_TRUE(TypeOf(c_maf32)->Is<type::Matrix>());
 
     EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue()->AllZero());
     EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue()->AllZero());

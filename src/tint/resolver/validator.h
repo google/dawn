@@ -328,7 +328,7 @@ class Validator {
     /// @param ty the matrix to validate
     /// @param source the source of the matrix
     /// @returns true on success, false otherwise
-    bool Matrix(const sem::Matrix* ty, const Source& source) const;
+    bool Matrix(const type::Matrix* ty, const Source& source) const;
 
     /// Validates a function parameter
     /// @param func the function the variable is for
@@ -424,7 +424,7 @@ class Validator {
     /// @param ty the vector to validate
     /// @param source the source of the vector
     /// @returns true on success, false otherwise
-    bool Vector(const sem::Vector* ty, const Source& source) const;
+    bool Vector(const type::Vector* ty, const Source& source) const;
 
     /// Validates an array initializer
     /// @param ctor the call expresion to validate

@@ -36,7 +36,6 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/constant.h"
 #include "src/tint/sem/function.h"
-#include "src/tint/sem/matrix.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/struct.h"
@@ -44,7 +43,6 @@
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/variable.h"
-#include "src/tint/sem/vector.h"
 #include "src/tint/transform/array_length_from_uniform.h"
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
@@ -68,12 +66,14 @@
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
+#include "src/tint/type/matrix.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/pointer.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/u32.h"
+#include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
@@ -135,7 +135,7 @@ class ScopedBitCast {
                   const type::Type* curr_type,
                   const type::Type* target_type)
         : s(stream) {
-        auto* target_vec_type = target_type->As<sem::Vector>();
+        auto* target_vec_type = target_type->As<type::Vector>();
 
         // If we need to promote from scalar to vector, bitcast the scalar to the
         // vector element type.
@@ -495,8 +495,8 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
     auto signed_type_of = [&](const type::Type* ty) -> const type::Type* {
         if (ty->is_integer_scalar()) {
             return builder_.create<type::I32>();
-        } else if (auto* v = ty->As<sem::Vector>()) {
-            return builder_.create<sem::Vector>(builder_.create<type::I32>(), v->Width());
+        } else if (auto* v = ty->As<type::Vector>()) {
+            return builder_.create<type::Vector>(builder_.create<type::I32>(), v->Width());
         }
         return {};
     };
@@ -504,8 +504,8 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
     auto unsigned_type_of = [&](const type::Type* ty) -> const type::Type* {
         if (ty->is_integer_scalar()) {
             return builder_.create<type::U32>();
-        } else if (auto* v = ty->As<sem::Vector>()) {
-            return builder_.create<sem::Vector>(builder_.create<type::U32>(), v->Width());
+        } else if (auto* v = ty->As<type::Vector>()) {
+            return builder_.create<type::Vector>(builder_.create<type::U32>(), v->Width());
         }
         return {};
     };
@@ -533,9 +533,9 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
         rhs_type->is_signed_integer_scalar_or_vector()) {
         // If lhs or rhs is a vector, use that type (support implicit scalar to
         // vector promotion)
-        auto* target_type = lhs_type->Is<sem::Vector>()
+        auto* target_type = lhs_type->Is<type::Vector>()
                                 ? lhs_type
-                                : (rhs_type->Is<sem::Vector>() ? rhs_type : lhs_type);
+                                : (rhs_type->Is<type::Vector>() ? rhs_type : lhs_type);
 
         // WGSL defines behaviour for signed overflow, MSL does not. For these
         // cases, bitcast operands to unsigned, then cast result to signed.
@@ -705,7 +705,7 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
         }
         case sem::BuiltinType::kQuantizeToF16: {
             std::string width = "";
-            if (auto* vec = builtin->ReturnType()->As<sem::Vector>()) {
+            if (auto* vec = builtin->ReturnType()->As<type::Vector>()) {
                 width = std::to_string(vec->Width());
             }
             out << "float" << width << "(half" << width << "(";
@@ -1292,7 +1292,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 bool GeneratorImpl::EmitDotCall(std::ostream& out,
                                 const ast::CallExpression* expr,
                                 const sem::Builtin* builtin) {
-    auto* vec_ty = builtin->Parameters()[0]->Type()->As<sem::Vector>();
+    auto* vec_ty = builtin->Parameters()[0]->Type()->As<type::Vector>();
     std::string fn = "dot";
     if (vec_ty->type()->is_integer_scalar()) {
         // MSL does not have a builtin for dot() with integer vector types.
@@ -1343,7 +1343,7 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
             auto in = params[0];
 
             std::string width;
-            if (auto* vec = ty->As<sem::Vector>()) {
+            if (auto* vec = ty->As<type::Vector>()) {
                 width = std::to_string(vec->Width());
             }
 
@@ -1369,7 +1369,7 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
             auto in = params[0];
 
             std::string width;
-            if (auto* vec = ty->As<sem::Vector>()) {
+            if (auto* vec = ty->As<type::Vector>()) {
                 width = std::to_string(vec->Width());
             }
 
@@ -1632,10 +1632,10 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const type::Type* type) {
             out << "0u";
             return true;
         },
-        [&](const sem::Vector* vec) {  //
+        [&](const type::Vector* vec) {  //
             return EmitZeroValue(out, vec->type());
         },
-        [&](const sem::Matrix* mat) {
+        [&](const type::Matrix* mat) {
             if (!EmitType(out, mat, "")) {
                 return false;
             }
@@ -1681,7 +1681,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             out << constant->As<AInt>() << "u";
             return true;
         },
-        [&](const sem::Vector* v) {
+        [&](const type::Vector* v) {
             if (!EmitType(out, v, "")) {
                 return false;
             }
@@ -1705,7 +1705,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             }
             return true;
         },
-        [&](const sem::Matrix* m) {
+        [&](const type::Matrix* m) {
             if (!EmitType(out, m, "")) {
                 return false;
             }
@@ -2573,7 +2573,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             out << "int";
             return true;
         },
-        [&](const sem::Matrix* mat) {
+        [&](const type::Matrix* mat) {
             if (!EmitType(out, mat->type(), "")) {
                 return false;
             }
@@ -2699,7 +2699,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             out << "uint";
             return true;
         },
-        [&](const sem::Vector* vec) {
+        [&](const type::Vector* vec) {
             if (!EmitType(out, vec->type(), "")) {
                 return false;
             }
@@ -3098,7 +3098,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const type:
             return SizeAndAlign{2, 2};
         },
 
-        [&](const sem::Vector* vec) {
+        [&](const type::Vector* vec) {
             auto num_els = vec->Width();
             auto* el_ty = vec->type();
             SizeAndAlign el_size_align = MslPackedTypeSizeAndAlign(el_ty);
@@ -3120,7 +3120,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const type:
             return SizeAndAlign{};
         },
 
-        [&](const sem::Matrix* mat) {
+        [&](const type::Matrix* mat) {
             // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
             // 2.3 Matrix Data Types
             auto cols = mat->columns();

@@ -50,8 +50,8 @@ TEST_F(CreateASTTypeForTest, Basic) {
 
 TEST_F(CreateASTTypeForTest, Matrix) {
     auto* mat = create([](ProgramBuilder& b) {
-        auto* column_type = b.create<sem::Vector>(b.create<type::F32>(), 2u);
-        return b.create<sem::Matrix>(column_type, 3u);
+        auto* column_type = b.create<type::Vector>(b.create<type::F32>(), 2u);
+        return b.create<type::Matrix>(column_type, 3u);
     });
     ASSERT_TRUE(mat->Is<ast::Matrix>());
     ASSERT_TRUE(mat->As<ast::Matrix>()->type->Is<ast::F32>());
@@ -61,7 +61,7 @@ TEST_F(CreateASTTypeForTest, Matrix) {
 
 TEST_F(CreateASTTypeForTest, Vector) {
     auto* vec =
-        create([](ProgramBuilder& b) { return b.create<sem::Vector>(b.create<type::F32>(), 2u); });
+        create([](ProgramBuilder& b) { return b.create<type::Vector>(b.create<type::F32>(), 2u); });
     ASSERT_TRUE(vec->Is<ast::Vector>());
     ASSERT_TRUE(vec->As<ast::Vector>()->type->Is<ast::F32>());
     ASSERT_EQ(vec->As<ast::Vector>()->width, 2u);

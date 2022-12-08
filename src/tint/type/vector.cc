@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/vector.h"
+#include "src/tint/type/vector.h"
 
 #include "src/tint/program_builder.h"
 #include "src/tint/utils/hash.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::Vector);
+TINT_INSTANTIATE_TYPEINFO(tint::type::Vector);
 
-namespace tint::sem {
+namespace tint::type {
 
 Vector::Vector(Type const* subtype, uint32_t width)
     : Base(type::TypeFlags{
@@ -29,8 +29,8 @@ Vector::Vector(Type const* subtype, uint32_t width)
       }),
       subtype_(subtype),
       width_(width) {
-    TINT_ASSERT(Semantic, width_ > 1);
-    TINT_ASSERT(Semantic, width_ < 5);
+    TINT_ASSERT(Type, width_ > 1);
+    TINT_ASSERT(Type, width_ < 5);
 }
 
 Vector::Vector(Vector&&) = default;
@@ -70,4 +70,4 @@ uint32_t Vector::Align() const {
     return 0;  // Unreachable
 }
 
-}  // namespace tint::sem
+}  // namespace tint::type

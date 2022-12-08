@@ -187,8 +187,8 @@ TEST_F(MslGeneratorImplTest, EmitType_I32) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Matrix_F32) {
     auto* f32 = create<type::F32>();
-    auto* vec3 = create<sem::Vector>(f32, 3u);
-    auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
+    auto* vec3 = create<type::Vector>(f32, 3u);
+    auto* mat2x3 = create<type::Matrix>(vec3, 2u);
 
     GeneratorImpl& gen = Build();
 
@@ -199,8 +199,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Matrix_F32) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Matrix_F16) {
     auto* f16 = create<type::F16>();
-    auto* vec3 = create<sem::Vector>(f16, 3u);
-    auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
+    auto* vec3 = create<type::Vector>(f16, 3u);
+    auto* mat2x3 = create<type::Matrix>(vec3, 2u);
 
     GeneratorImpl& gen = Build();
 
@@ -710,7 +710,7 @@ TEST_F(MslGeneratorImplTest, EmitType_U32) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Vector) {
     auto* f32 = create<type::F32>();
-    auto* vec3 = create<sem::Vector>(f32, 3u);
+    auto* vec3 = create<type::Vector>(f32, 3u);
 
     GeneratorImpl& gen = Build();
 

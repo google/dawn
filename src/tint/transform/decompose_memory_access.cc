@@ -157,7 +157,7 @@ bool IntrinsicDataTypeFor(const type::Type* ty, DecomposeMemoryAccess::Intrinsic
         out = DecomposeMemoryAccess::Intrinsic::DataType::kF16;
         return true;
     }
-    if (auto* vec = ty->As<sem::Vector>()) {
+    if (auto* vec = ty->As<type::Vector>()) {
         switch (vec->Width()) {
             case 2:
                 if (vec->type()->Is<type::I32>()) {
@@ -529,7 +529,7 @@ struct DecomposeMemoryAccess::State {
                            });
                 } else {
                     utils::Vector<const ast::Expression*, 8> values;
-                    if (auto* mat_ty = el_ty->As<sem::Matrix>()) {
+                    if (auto* mat_ty = el_ty->As<type::Matrix>()) {
                         auto* vec_ty = mat_ty->ColumnType();
                         Symbol load = LoadFunc(buf_ty, vec_ty, var_user);
                         for (uint32_t i = 0; i < mat_ty->columns(); i++) {
@@ -629,7 +629,7 @@ struct DecomposeMemoryAccess::State {
 
                             return utils::Vector{b.Decl(array), for_loop};
                         },
-                        [&](const sem::Matrix* mat_ty) {
+                        [&](const type::Matrix* mat_ty) {
                             auto* vec_ty = mat_ty->ColumnType();
                             Symbol store = StoreFunc(buf_ty, vec_ty, var_user);
                             utils::Vector<const ast::Statement*, 4> stmts;
@@ -901,7 +901,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
             if (auto* swizzle = accessor_sem->As<sem::Swizzle>()) {
                 if (swizzle->Indices().Length() == 1) {
                     if (auto access = state.TakeAccess(accessor->structure)) {
-                        auto* vec_ty = access.type->As<sem::Vector>();
+                        auto* vec_ty = access.type->As<type::Vector>();
                         auto* offset = state.Mul(vec_ty->type()->Size(), swizzle->Indices()[0u]);
                         state.AddAccess(accessor, {
                                                       access.var,
@@ -937,7 +937,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
                                               });
                     continue;
                 }
-                if (auto* vec_ty = access.type->As<sem::Vector>()) {
+                if (auto* vec_ty = access.type->As<type::Vector>()) {
                     auto* offset = state.Mul(vec_ty->type()->Size(), accessor->index);
                     state.AddAccess(accessor, {
                                                   access.var,
@@ -946,7 +946,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
                                               });
                     continue;
                 }
-                if (auto* mat_ty = access.type->As<sem::Matrix>()) {
+                if (auto* mat_ty = access.type->As<type::Matrix>()) {
                     auto* offset = state.Mul(mat_ty->ColumnStride(), accessor->index);
                     state.AddAccess(accessor, {
                                                   access.var,

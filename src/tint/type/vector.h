@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_VECTOR_H_
-#define SRC_TINT_SEM_VECTOR_H_
+#ifndef SRC_TINT_TYPE_VECTOR_H_
+#define SRC_TINT_TYPE_VECTOR_H_
 
 #include <string>
 
 #include "src/tint/type/type.h"
 
-namespace tint::sem {
+namespace tint::type {
 
 /// A vector type.
 class Vector final : public Castable<Vector, type::Type> {
@@ -70,6 +70,6 @@ class Vector final : public Castable<Vector, type::Type> {
     const uint32_t width_;
 };
 
-}  // namespace tint::sem
+}  // namespace tint::type
 
-#endif  // SRC_TINT_SEM_VECTOR_H_
+#endif  // SRC_TINT_TYPE_VECTOR_H_

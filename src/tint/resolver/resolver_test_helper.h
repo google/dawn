@@ -452,7 +452,7 @@ struct DataType<vec<N, T>> {
     /// @param b the ProgramBuilder
     /// @return the semantic vector type
     static inline const type::Type* Sem(ProgramBuilder& b) {
-        return b.create<sem::Vector>(DataType<T>::Sem(b), N);
+        return b.create<type::Vector>(DataType<T>::Sem(b), N);
     }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 or N with values of type T to initialize with
@@ -500,8 +500,8 @@ struct DataType<mat<N, M, T>> {
     /// @param b the ProgramBuilder
     /// @return the semantic matrix type
     static inline const type::Type* Sem(ProgramBuilder& b) {
-        auto* column_type = b.create<sem::Vector>(DataType<T>::Sem(b), M);
-        return b.create<sem::Matrix>(column_type, N);
+        auto* column_type = b.create<type::Vector>(DataType<T>::Sem(b), M);
+        return b.create<type::Matrix>(column_type, N);
     }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 or N*M with values of type T to initialize with

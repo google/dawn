@@ -75,7 +75,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Vector) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
+    auto* vec = sem->Type()->As<type::Vector>();
     ASSERT_NE(vec, nullptr);
     EXPECT_EQ(vec->Width(), 2u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -117,7 +117,7 @@ TEST_F(ResolverConstEvalTest, Mat3x2_Index) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
+    auto* vec = sem->Type()->As<type::Vector>();
     ASSERT_NE(vec, nullptr);
     EXPECT_EQ(vec->Width(), 2u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -163,7 +163,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
+    auto* vec = sem->Type()->As<type::Vector>();
     ASSERT_NE(vec, nullptr);
     EXPECT_TRUE(vec->type()->Is<type::F32>());
     EXPECT_EQ(vec->Width(), 3u);
@@ -232,9 +232,9 @@ TEST_F(ResolverConstEvalTest, ChainedIndex) {
     {
         auto* mat = Sem().Get(mat_expr);
         EXPECT_NE(mat, nullptr);
-        auto* ty = mat->Type()->As<sem::Matrix>();
+        auto* ty = mat->Type()->As<type::Matrix>();
         ASSERT_NE(mat->Type(), nullptr);
-        EXPECT_TRUE(ty->ColumnType()->Is<sem::Vector>());
+        EXPECT_TRUE(ty->ColumnType()->Is<type::Vector>());
         EXPECT_EQ(ty->columns(), 2u);
         EXPECT_EQ(ty->rows(), 3u);
         EXPECT_EQ(mat->ConstantValue()->Type(), mat->Type());
@@ -275,7 +275,7 @@ TEST_F(ResolverConstEvalTest, ChainedIndex) {
     {
         auto* vec = Sem().Get(vec_expr);
         EXPECT_NE(vec, nullptr);
-        auto* ty = vec->Type()->As<sem::Vector>();
+        auto* ty = vec->Type()->As<type::Vector>();
         ASSERT_NE(vec->Type(), nullptr);
         EXPECT_TRUE(ty->type()->Is<type::F32>());
         EXPECT_EQ(ty->Width(), 3u);

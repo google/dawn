@@ -485,7 +485,7 @@ class Builder {
     /// @param mat the matrix to generate
     /// @param result the result operand
     /// @returns true if the matrix was successfully generated
-    bool GenerateMatrixType(const sem::Matrix* mat, const Operand& result);
+    bool GenerateMatrixType(const type::Matrix* mat, const Operand& result);
     /// Generates a pointer type declaration
     /// @param ptr the pointer type to generate
     /// @param result the result operand
@@ -517,7 +517,7 @@ class Builder {
     /// @param vec the vector to generate
     /// @param result the result operand
     /// @returns true if the vector was successfully generated
-    bool GenerateVectorType(const sem::Vector* vec, const Operand& result);
+    bool GenerateVectorType(const type::Vector* vec, const Operand& result);
 
     /// Generates instructions to splat `scalar_id` into a vector of type
     /// `vec_type`
@@ -534,7 +534,7 @@ class Builder {
     /// @returns id of the result matrix
     uint32_t GenerateMatrixAddOrSub(uint32_t lhs_id,
                                     uint32_t rhs_id,
-                                    const sem::Matrix* type,
+                                    const type::Matrix* type,
                                     spv::Op op);
 
     /// Converts TexelFormat to SPIR-V and pushes an appropriate capability.
@@ -575,7 +575,7 @@ class Builder {
     /// @param type the type of the vector to generate
     /// @param value_id the ID of the scalar value to splat
     /// @returns the ID on success or 0 on failure
-    uint32_t GenerateConstantVectorSplatIfNeeded(const sem::Vector* type, uint32_t value_id);
+    uint32_t GenerateConstantVectorSplatIfNeeded(const type::Vector* type, uint32_t value_id);
 
     /// Registers the semantic variable to the given SPIR-V ID
     /// @param var the semantic variable

@@ -92,11 +92,11 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
     if (ty->Is<type::Bool>()) {
         return ctx.dst->create<ast::Bool>();
     }
-    if (auto* m = ty->As<sem::Matrix>()) {
+    if (auto* m = ty->As<type::Matrix>()) {
         auto* el = CreateASTTypeFor(ctx, m->type());
         return ctx.dst->create<ast::Matrix>(el, m->rows(), m->columns());
     }
-    if (auto* v = ty->As<sem::Vector>()) {
+    if (auto* v = ty->As<type::Vector>()) {
         auto* el = CreateASTTypeFor(ctx, v->type());
         return ctx.dst->create<ast::Vector>(el, v->Width());
     }

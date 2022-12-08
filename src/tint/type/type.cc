@@ -15,20 +15,20 @@
 #include "src/tint/type/type.h"
 
 #include "src/tint/sem/array.h"
-#include "src/tint/sem/matrix.h"
 #include "src/tint/sem/struct.h"
-#include "src/tint/sem/vector.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
+#include "src/tint/type/matrix.h"
 #include "src/tint/type/pointer.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/type/sampler.h"
 #include "src/tint/type/texture.h"
 #include "src/tint/type/u32.h"
+#include "src/tint/type/vector.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Type);
 
@@ -81,17 +81,17 @@ bool Type::is_float_scalar() const {
 }
 
 bool Type::is_float_matrix() const {
-    return Is([](const sem::Matrix* m) { return m->type()->is_float_scalar(); });
+    return Is([](const type::Matrix* m) { return m->type()->is_float_scalar(); });
 }
 
 bool Type::is_square_float_matrix() const {
-    return Is([](const sem::Matrix* m) {
+    return Is([](const type::Matrix* m) {
         return m->type()->is_float_scalar() && m->rows() == m->columns();
     });
 }
 
 bool Type::is_float_vector() const {
-    return Is([](const sem::Vector* v) { return v->type()->is_float_scalar(); });
+    return Is([](const type::Vector* v) { return v->type()->is_float_scalar(); });
 }
 
 bool Type::is_float_scalar_or_vector() const {
@@ -116,11 +116,11 @@ bool Type::is_unsigned_integer_scalar() const {
 
 bool Type::is_signed_integer_vector() const {
     return Is(
-        [](const sem::Vector* v) { return v->type()->IsAnyOf<type::I32, type::AbstractInt>(); });
+        [](const type::Vector* v) { return v->type()->IsAnyOf<type::I32, type::AbstractInt>(); });
 }
 
 bool Type::is_unsigned_integer_vector() const {
-    return Is([](const sem::Vector* v) { return v->type()->Is<type::U32>(); });
+    return Is([](const type::Vector* v) { return v->type()->Is<type::U32>(); });
 }
 
 bool Type::is_unsigned_integer_scalar_or_vector() const {
@@ -136,11 +136,11 @@ bool Type::is_integer_scalar_or_vector() const {
 }
 
 bool Type::is_abstract_integer_vector() const {
-    return Is([](const sem::Vector* v) { return v->type()->Is<type::AbstractInt>(); });
+    return Is([](const type::Vector* v) { return v->type()->Is<type::AbstractInt>(); });
 }
 
 bool Type::is_abstract_float_vector() const {
-    return Is([](const sem::Vector* v) { return v->type()->Is<type::AbstractFloat>(); });
+    return Is([](const type::Vector* v) { return v->type()->Is<type::AbstractFloat>(); });
 }
 
 bool Type::is_abstract_integer_scalar_or_vector() const {
@@ -152,7 +152,7 @@ bool Type::is_abstract_float_scalar_or_vector() const {
 }
 
 bool Type::is_bool_vector() const {
-    return Is([](const sem::Vector* v) { return v->type()->Is<type::Bool>(); });
+    return Is([](const type::Vector* v) { return v->type()->Is<type::Bool>(); });
 }
 
 bool Type::is_bool_scalar_or_vector() const {
@@ -160,11 +160,11 @@ bool Type::is_bool_scalar_or_vector() const {
 }
 
 bool Type::is_numeric_vector() const {
-    return Is([](const sem::Vector* v) { return v->type()->is_numeric_scalar(); });
+    return Is([](const type::Vector* v) { return v->type()->is_numeric_scalar(); });
 }
 
 bool Type::is_scalar_vector() const {
-    return Is([](const sem::Vector* v) { return v->type()->is_scalar(); });
+    return Is([](const type::Vector* v) { return v->type()->is_scalar(); });
 }
 
 bool Type::is_numeric_scalar_or_vector() const {
@@ -179,8 +179,8 @@ bool Type::HoldsAbstract() const {
     return Switch(
         this,  //
         [&](const type::AbstractNumeric*) { return true; },
-        [&](const sem::Vector* v) { return v->type()->HoldsAbstract(); },
-        [&](const sem::Matrix* m) { return m->type()->HoldsAbstract(); },
+        [&](const type::Vector* v) { return v->type()->HoldsAbstract(); },
+        [&](const type::Matrix* m) { return m->type()->HoldsAbstract(); },
         [&](const sem::Array* a) { return a->ElemType()->HoldsAbstract(); },
         [&](const sem::Struct* s) {
             for (auto* m : s->Members()) {
@@ -215,16 +215,16 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
                 [&](const type::F16*) { return 7; },            //
                 [&](Default) { return kNoConversion; });
         },
-        [&](const sem::Vector* from_vec) {
-            if (auto* to_vec = to->As<sem::Vector>()) {
+        [&](const type::Vector* from_vec) {
+            if (auto* to_vec = to->As<type::Vector>()) {
                 if (from_vec->Width() == to_vec->Width()) {
                     return ConversionRank(from_vec->type(), to_vec->type());
                 }
             }
             return kNoConversion;
         },
-        [&](const sem::Matrix* from_mat) {
-            if (auto* to_mat = to->As<sem::Matrix>()) {
+        [&](const type::Matrix* from_mat) {
+            if (auto* to_mat = to->As<type::Matrix>()) {
                 if (from_mat->columns() == to_mat->columns() &&
                     from_mat->rows() == to_mat->rows()) {
                     return ConversionRank(from_mat->type(), to_mat->type());
@@ -261,13 +261,13 @@ const Type* Type::ElementOf(const Type* ty, uint32_t* count /* = nullptr */) {
     }
     return Switch(
         ty,  //
-        [&](const sem::Vector* v) {
+        [&](const type::Vector* v) {
             if (count) {
                 *count = v->Width();
             }
             return v->type();
         },
-        [&](const sem::Matrix* m) {
+        [&](const type::Matrix* m) {
             if (count) {
                 *count = m->columns();
             }

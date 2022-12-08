@@ -86,7 +86,7 @@ struct Robustness::State {
 
         auto* clamped_idx = Switch(
             sem->Object()->Type()->UnwrapRef(),  //
-            [&](const sem::Vector* vec) -> const ast::Expression* {
+            [&](const type::Vector* vec) -> const ast::Expression* {
                 if (sem->Index()->ConstantValue()) {
                     // Index and size is constant.
                     // Validation will have rejected any OOB accesses.
@@ -95,7 +95,7 @@ struct Robustness::State {
 
                 return b.Call("min", idx(), u32(vec->Width() - 1u));
             },
-            [&](const sem::Matrix* mat) -> const ast::Expression* {
+            [&](const type::Matrix* mat) -> const ast::Expression* {
                 if (sem->Index()->ConstantValue()) {
                     // Index and size is constant.
                     // Validation will have rejected any OOB accesses.
@@ -177,7 +177,7 @@ struct Robustness::State {
         auto* coords_ty = builtin->Parameters()[static_cast<size_t>(coords_idx)]->Type();
 
         auto width_of = [&](const type::Type* ty) {
-            if (auto* vec = ty->As<sem::Vector>()) {
+            if (auto* vec = ty->As<type::Vector>()) {
                 return vec->Width();
             }
             return 1u;

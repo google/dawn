@@ -227,8 +227,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedI32) {
 
 TEST_F(BuilderTest_Type, GenerateMatrix) {
     auto* f32 = create<type::F32>();
-    auto* vec3 = create<sem::Vector>(f32, 3u);
-    auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
+    auto* vec3 = create<type::Vector>(f32, 3u);
+    auto* mat2x3 = create<type::Matrix>(vec3, 2u);
 
     spirv::Builder& b = Build();
 
@@ -245,8 +245,8 @@ TEST_F(BuilderTest_Type, GenerateMatrix) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
     auto* i32 = create<type::I32>();
-    auto* col = create<sem::Vector>(i32, 4u);
-    auto* mat = create<sem::Matrix>(col, 3u);
+    auto* col = create<type::Vector>(i32, 4u);
+    auto* mat = create<type::Matrix>(col, 3u);
 
     spirv::Builder& b = Build();
 
@@ -260,8 +260,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
 
 TEST_F(BuilderTest_Type, GenerateF16Matrix) {
     auto* f16 = create<type::F16>();
-    auto* vec3 = create<sem::Vector>(f16, 3u);
-    auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
+    auto* vec3 = create<type::Vector>(f16, 3u);
+    auto* mat2x3 = create<type::Matrix>(vec3, 2u);
 
     spirv::Builder& b = Build();
 
@@ -278,8 +278,8 @@ TEST_F(BuilderTest_Type, GenerateF16Matrix) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedF16Matrix) {
     auto* f16 = create<type::F16>();
-    auto* col = create<sem::Vector>(f16, 4u);
-    auto* mat = create<sem::Matrix>(col, 3u);
+    auto* col = create<type::Vector>(f16, 4u);
+    auto* mat = create<type::Matrix>(col, 3u);
 
     spirv::Builder& b = Build();
 
@@ -545,7 +545,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedU32) {
 }
 
 TEST_F(BuilderTest_Type, GenerateVector) {
-    auto* vec = create<sem::Vector>(create<type::F32>(), 3u);
+    auto* vec = create<type::Vector>(create<type::F32>(), 3u);
 
     spirv::Builder& b = Build();
 
@@ -561,7 +561,7 @@ TEST_F(BuilderTest_Type, GenerateVector) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedVector) {
     auto* i32 = create<type::I32>();
-    auto* vec = create<sem::Vector>(i32, 3u);
+    auto* vec = create<type::Vector>(i32, 3u);
 
     spirv::Builder& b = Build();
 

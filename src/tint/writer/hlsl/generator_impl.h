@@ -461,7 +461,7 @@ class GeneratorImpl : public TextGenerator {
     /// via an accessor expression
     /// @param vec the vector type being assigned to
     /// @returns true on success
-    bool EmitDynamicVectorAssignment(const ast::AssignmentStatement* stmt, const sem::Vector* vec);
+    bool EmitDynamicVectorAssignment(const ast::AssignmentStatement* stmt, const type::Vector* vec);
     /// Emits call to a helper matrix assignment function for the input assignment
     /// statement and matrix type. This is used to work around FXC issues where
     /// assignment of a vector to a matrix with a dynamic index causes compilation
@@ -471,7 +471,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param mat the matrix type being assigned to
     /// @returns true on success
     bool EmitDynamicMatrixVectorAssignment(const ast::AssignmentStatement* stmt,
-                                           const sem::Matrix* mat);
+                                           const type::Matrix* mat);
     /// Emits call to a helper matrix assignment function for the input assignment
     /// statement and matrix type. This is used to work around FXC issues where
     /// assignment of a scalar to a matrix with at least one dynamic index causes
@@ -481,7 +481,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param mat the matrix type being assigned to
     /// @returns true on success
     bool EmitDynamicMatrixScalarAssignment(const ast::AssignmentStatement* stmt,
-                                           const sem::Matrix* mat);
+                                           const type::Matrix* mat);
 
     /// Handles generating a builtin method name
     /// @param builtin the semantic info for the builtin
@@ -542,11 +542,11 @@ class GeneratorImpl : public TextGenerator {
 
     TextBuffer helpers_;  // Helper functions emitted at the top of the output
     std::function<bool()> emit_continuing_;
-    std::unordered_map<const sem::Matrix*, std::string> matrix_scalar_inits_;
+    std::unordered_map<const type::Matrix*, std::string> matrix_scalar_inits_;
     std::unordered_map<const sem::Builtin*, std::string> builtins_;
-    std::unordered_map<const sem::Vector*, std::string> dynamic_vector_write_;
-    std::unordered_map<const sem::Matrix*, std::string> dynamic_matrix_vector_write_;
-    std::unordered_map<const sem::Matrix*, std::string> dynamic_matrix_scalar_write_;
+    std::unordered_map<const type::Vector*, std::string> dynamic_vector_write_;
+    std::unordered_map<const type::Matrix*, std::string> dynamic_matrix_vector_write_;
+    std::unordered_map<const type::Matrix*, std::string> dynamic_matrix_scalar_write_;
     std::unordered_map<const type::Type*, std::string> value_or_one_if_zero_;
     std::unordered_set<const sem::Struct*> emitted_structs_;
 };

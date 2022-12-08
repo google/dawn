@@ -35,7 +35,7 @@ struct MatrixInfo {
     /// The stride in bytes between columns of the matrix
     uint32_t stride = 0;
     /// The type of the matrix
-    const sem::Matrix* matrix = nullptr;
+    const type::Matrix* matrix = nullptr;
 
     /// @returns a new ast::Array that holds an vector column for each row of the
     /// matrix.
@@ -77,7 +77,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
                 continue;
             }
             for (auto* member : str_ty->Members()) {
-                auto* matrix = member->Type()->As<sem::Matrix>();
+                auto* matrix = member->Type()->As<type::Matrix>();
                 if (!matrix) {
                     continue;
                 }

@@ -36,7 +36,7 @@ struct VectorInitializerInfo {
 VectorInitializerInfo AsVectorInitializer(const sem::Expression* expr) {
     if (auto* call = expr->As<sem::Call>()) {
         if (auto* ctor = call->Target()->As<sem::TypeInitializer>()) {
-            if (ctor->ReturnType()->Is<sem::Vector>()) {
+            if (ctor->ReturnType()->Is<type::Vector>()) {
                 return {call, ctor};
             }
         }
@@ -76,7 +76,7 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     auto* vector_sem = b->Sem().Get(vector_ast);
     auto* scalar_sem = b->Sem().Get(scalar_ast);
     auto* vector_ty = vector_sem->Type()->UnwrapRef();
-    if (auto* vec = vector_ty->As<sem::Vector>()) {
+    if (auto* vec = vector_ty->As<type::Vector>()) {
         packed_size = vec->Width() + 1;
         packed_el_sem_ty = vec->type();
     } else {
@@ -101,7 +101,7 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     auto* statement = vector_sem->Stmt();
 
     auto* packed_ast_ty = b->create<ast::Vector>(packed_el_ast_ty, packed_size);
-    auto* packed_sem_ty = b->create<sem::Vector>(packed_el_sem_ty, packed_size);
+    auto* packed_sem_ty = b->create<type::Vector>(packed_el_sem_ty, packed_size);
 
     // If the coordinates are already passed in a vector initializer, with only
     // scalar components supplied, extract the elements into the new vector

@@ -37,13 +37,13 @@
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/variable.h"
-#include "src/tint/sem/vector.h"
 #include "src/tint/transform/add_block_attribute.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/vector.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/writer/append_vector.h"
@@ -89,11 +89,11 @@ uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
 /// one or more levels of an arrays inside of `type`.
 /// @param type the given type, which must not be null
 /// @returns the nested matrix type, or nullptr if none
-const sem::Matrix* GetNestedMatrixType(const type::Type* type) {
+const type::Matrix* GetNestedMatrixType(const type::Type* type) {
     while (auto* arr = type->As<sem::Array>()) {
         type = arr->ElemType();
     }
-    return type->As<sem::Matrix>();
+    return type->As<type::Matrix>();
 }
 
 uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
@@ -240,7 +240,7 @@ uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
 
 /// @return the vector element type if ty is a vector, otherwise return ty.
 const type::Type* ElementTypeOf(const type::Type* ty) {
-    if (auto* v = ty->As<sem::Vector>()) {
+    if (auto* v = ty->As<type::Vector>()) {
         return v->type();
     }
     return ty;
@@ -917,7 +917,7 @@ bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr, Ac
     }
 
     // If the source is a vector, we use OpVectorExtractDynamic.
-    if (info->source_type->Is<sem::Vector>()) {
+    if (info->source_type->Is<type::Vector>()) {
         if (!push_function_inst(
                 spv::Op::OpVectorExtractDynamic,
                 {Operand(result_type_id), extract, Operand(info->source_id), Operand(idx_id)})) {
@@ -1294,10 +1294,10 @@ uint32_t Builder::GenerateTypeInitializerOrConversion(const sem::Call* call,
 
     bool can_cast_or_copy = result_type->is_scalar();
 
-    if (auto* res_vec = result_type->As<sem::Vector>()) {
+    if (auto* res_vec = result_type->As<type::Vector>()) {
         if (res_vec->type()->is_scalar()) {
             auto* value_type = args[0]->Type()->UnwrapRef();
-            if (auto* val_vec = value_type->As<sem::Vector>()) {
+            if (auto* val_vec = value_type->As<type::Vector>()) {
                 if (val_vec->type()->is_scalar()) {
                     can_cast_or_copy = res_vec->Width() == val_vec->Width();
                 }
@@ -1305,9 +1305,9 @@ uint32_t Builder::GenerateTypeInitializerOrConversion(const sem::Call* call,
         }
     }
 
-    if (auto* res_mat = result_type->As<sem::Matrix>()) {
+    if (auto* res_mat = result_type->As<type::Matrix>()) {
         auto* value_type = args[0]->Type()->UnwrapRef();
-        if (auto* val_mat = value_type->As<sem::Matrix>()) {
+        if (auto* val_mat = value_type->As<type::Matrix>()) {
             // Generate passthrough for matrices of the same type
             can_cast_or_copy = res_mat == val_mat;
         }
@@ -1325,7 +1325,7 @@ uint32_t Builder::GenerateTypeInitializerOrConversion(const sem::Call* call,
     bool result_is_constant_composite = initializer_is_const;
     bool result_is_spec_composite = false;
 
-    if (auto* vec = result_type->As<sem::Vector>()) {
+    if (auto* vec = result_type->As<type::Vector>()) {
         result_type = vec->type();
     }
 
@@ -1347,7 +1347,7 @@ uint32_t Builder::GenerateTypeInitializerOrConversion(const sem::Call* call,
         // If the result and value types are the same we can just use the object.
         // If the result is not a vector then we should have validated that the
         // value type is a correctly sized vector so we can just use it directly.
-        if (result_type == value_type || result_type->Is<sem::Matrix>() ||
+        if (result_type == value_type || result_type->Is<type::Matrix>() ||
             result_type->Is<sem::Array>() || result_type->Is<sem::Struct>()) {
             ops.push_back(Operand(id));
             continue;
@@ -1370,7 +1370,7 @@ uint32_t Builder::GenerateTypeInitializerOrConversion(const sem::Call* call,
         //
         // For cases 1 and 2, if the type is different we also may need to insert
         // a type cast.
-        if (auto* vec = value_type->As<sem::Vector>()) {
+        if (auto* vec = value_type->As<type::Vector>()) {
             auto* vec_type = vec->type();
 
             auto value_type_id = GenerateTypeIfNeeded(vec_type);
@@ -1418,7 +1418,7 @@ uint32_t Builder::GenerateTypeInitializerOrConversion(const sem::Call* call,
     auto* const init_result_type = call->Type()->UnwrapRef();
     if (args.Length() == 1 && init_result_type->is_scalar_vector() &&
         args[0]->Type()->UnwrapRef()->is_scalar()) {
-        size_t vec_size = init_result_type->As<sem::Vector>()->Width();
+        size_t vec_size = init_result_type->As<type::Vector>()->Width();
         for (size_t i = 0; i < (vec_size - 1); ++i) {
             ops.push_back(ops[kOpsFirstValueIdx]);
         }
@@ -1462,7 +1462,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
         if (t->is_scalar()) {
             return t;
         }
-        if (auto* v = t->As<sem::Vector>()) {
+        if (auto* v = t->As<type::Vector>()) {
             return v->type();
         }
         return nullptr;
@@ -1497,13 +1497,13 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
                (from_type->is_float_vector() && to_type->is_unsigned_integer_vector())) {
         op = spv::Op::OpConvertFToU;
     } else if (from_type->IsAnyOf<type::Bool, type::F32, type::I32, type::U32, type::F16,
-                                  sem::Vector>() &&
+                                  type::Vector>() &&
                from_type == to_type) {
         // Identity initializer for scalar and vector types
         return val_id;
     } else if ((from_type->is_float_scalar() && to_type->is_float_scalar()) ||
                (from_type->is_float_vector() && to_type->is_float_vector() &&
-                from_type->As<sem::Vector>()->Width() == to_type->As<sem::Vector>()->Width())) {
+                from_type->As<type::Vector>()->Width() == to_type->As<type::Vector>()->Width())) {
         // Convert between f32 and f16 types.
         // OpFConvert requires the scalar component types to be different, and the case of from_type
         // and to_type being the same floating point scalar or vector type, i.e. identity
@@ -1552,7 +1552,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
             error_ = "invalid destination type for bool conversion";
             return false;
         }
-        if (auto* to_vec = to_type->As<sem::Vector>()) {
+        if (auto* to_vec = to_type->As<type::Vector>()) {
             // Splat the scalars into vectors.
             zero_id = GenerateConstantVectorSplatIfNeeded(to_vec, zero_id);
             one_id = GenerateConstantVectorSplatIfNeeded(to_vec, one_id);
@@ -1568,12 +1568,12 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
         }
 
         return result_id;
-    } else if (from_type->Is<sem::Matrix>() && to_type->Is<sem::Matrix>()) {
+    } else if (from_type->Is<type::Matrix>() && to_type->Is<type::Matrix>()) {
         // SPIRV does not support matrix conversion, the only valid case is matrix identity
         // initializer. Matrix conversion between f32 and f16 should be transformed into vector
         // conversions for each column vectors by VectorizeMatrixConversions.
-        auto* from_mat = from_type->As<sem::Matrix>();
-        auto* to_mat = to_type->As<sem::Matrix>();
+        auto* from_mat = from_type->As<type::Matrix>();
+        auto* to_mat = to_type->As<type::Matrix>();
         if (from_mat == to_mat) {
             return val_id;
         }
@@ -1700,8 +1700,8 @@ uint32_t Builder::GenerateConstantIfNeeded(const sem::Constant* constant) {
             auto val = constant->As<u32>();
             return GenerateConstantIfNeeded(ScalarConstant::U32(val.value));
         },
-        [&](const sem::Vector* v) { return composite(v->Width()); },
-        [&](const sem::Matrix* m) { return composite(m->columns()); },
+        [&](const type::Vector* v) { return composite(v->Width()); },
+        [&](const type::Matrix* m) { return composite(m->columns()); },
         [&](const sem::Array* a) {
             auto count = a->ConstantCount();
             if (!count) {
@@ -1803,7 +1803,7 @@ uint32_t Builder::GenerateConstantNullIfNeeded(const type::Type* type) {
     });
 }
 
-uint32_t Builder::GenerateConstantVectorSplatIfNeeded(const sem::Vector* type, uint32_t value_id) {
+uint32_t Builder::GenerateConstantVectorSplatIfNeeded(const type::Vector* type, uint32_t value_id) {
     auto type_id = GenerateTypeIfNeeded(type);
     if (type_id == 0 || value_id == 0) {
         return 0;
@@ -1912,7 +1912,7 @@ uint32_t Builder::GenerateSplat(uint32_t scalar_id, const type::Type* vec_type) 
     OperandList ops;
     ops.push_back(Operand(GenerateTypeIfNeeded(vec_type)));
     ops.push_back(splat_result);
-    for (size_t i = 0; i < vec_type->As<sem::Vector>()->Width(); ++i) {
+    for (size_t i = 0; i < vec_type->As<type::Vector>()->Width(); ++i) {
         ops.push_back(Operand(scalar_id));
     }
     if (!push_function_inst(spv::Op::OpCompositeConstruct, ops)) {
@@ -1924,7 +1924,7 @@ uint32_t Builder::GenerateSplat(uint32_t scalar_id, const type::Type* vec_type) 
 
 uint32_t Builder::GenerateMatrixAddOrSub(uint32_t lhs_id,
                                          uint32_t rhs_id,
-                                         const sem::Matrix* type,
+                                         const type::Matrix* type,
                                          spv::Op op) {
     // Example addition of two matrices:
     // %31 = OpLoad %mat3v4float %m34
@@ -1940,7 +1940,7 @@ uint32_t Builder::GenerateMatrixAddOrSub(uint32_t lhs_id,
     // %41 = OpFAdd %v4float %39 %40
     // %42 = OpCompositeConstruct %mat3v4float %35 %38 %41
 
-    auto* column_type = builder_.create<sem::Vector>(type->type(), type->rows());
+    auto* column_type = builder_.create<type::Vector>(type->type(), type->rows());
     auto column_type_id = GenerateTypeIfNeeded(column_type);
 
     OperandList ops;
@@ -2015,8 +2015,8 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
     // Handle matrix-matrix addition and subtraction
     if ((expr->IsAdd() || expr->IsSubtract()) && lhs_type->is_float_matrix() &&
         rhs_type->is_float_matrix()) {
-        auto* lhs_mat = lhs_type->As<sem::Matrix>();
-        auto* rhs_mat = rhs_type->As<sem::Matrix>();
+        auto* lhs_mat = lhs_type->As<type::Matrix>();
+        auto* rhs_mat = rhs_type->As<type::Matrix>();
 
         // This should already have been validated by resolver
         if (lhs_mat->rows() != rhs_mat->rows() || lhs_mat->columns() != rhs_mat->columns()) {
@@ -2035,7 +2035,7 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
                                (lhs_type->is_float_vector() && rhs_type->is_float_scalar()));
 
     if (expr->IsArithmetic() && !is_float_scalar_vector_multiply) {
-        if (lhs_type->Is<sem::Vector>() && rhs_type->is_numeric_scalar()) {
+        if (lhs_type->Is<type::Vector>() && rhs_type->is_numeric_scalar()) {
             uint32_t splat_vector_id = GenerateSplat(rhs_id, lhs_type);
             if (splat_vector_id == 0) {
                 return 0;
@@ -2043,7 +2043,7 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
             rhs_id = splat_vector_id;
             rhs_type = lhs_type;
 
-        } else if (lhs_type->is_numeric_scalar() && rhs_type->Is<sem::Vector>()) {
+        } else if (lhs_type->is_numeric_scalar() && rhs_type->Is<type::Vector>()) {
             uint32_t splat_vector_id = GenerateSplat(lhs_id, rhs_type);
             if (splat_vector_id == 0) {
                 return 0;
@@ -2404,7 +2404,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             break;
         case BuiltinType::kDot: {
             op = spv::Op::OpDot;
-            auto* vec_ty = builtin->Parameters()[0]->Type()->As<sem::Vector>();
+            auto* vec_ty = builtin->Parameters()[0]->Type()->As<type::Vector>();
             if (vec_ty->type()->is_integer_scalar()) {
                 // TODO(crbug.com/tint/1267): OpDot requires floating-point types, but
                 // WGSL also supports integer types. SPV_KHR_integer_dot_product adds
@@ -2490,7 +2490,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
 
             // If the interpolant is scalar but the objects are vectors, we need to
             // splat the interpolant into a vector of the same size.
-            auto* result_vector_type = builtin->ReturnType()->As<sem::Vector>();
+            auto* result_vector_type = builtin->ReturnType()->As<type::Vector>();
             if (result_vector_type && builtin->Parameters()[2]->Type()->is_scalar()) {
                 f_id = GenerateSplat(f_id, builtin->Parameters()[0]->Type());
                 if (f_id == 0) {
@@ -2523,10 +2523,10 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             // If the condition is scalar but the objects are vectors, we need to
             // splat the condition into a vector of the same size.
             // TODO(jrprice): If we're targeting SPIR-V 1.4, we don't need to do this.
-            auto* result_vector_type = builtin->ReturnType()->As<sem::Vector>();
+            auto* result_vector_type = builtin->ReturnType()->As<type::Vector>();
             if (result_vector_type && builtin->Parameters()[2]->Type()->is_scalar()) {
-                auto* bool_vec_ty = builder_.create<sem::Vector>(builder_.create<type::Bool>(),
-                                                                 result_vector_type->Width());
+                auto* bool_vec_ty = builder_.create<type::Vector>(builder_.create<type::Bool>(),
+                                                                  result_vector_type->Width());
                 if (!GenerateTypeIfNeeded(bool_vec_ty)) {
                     return 0;
                 }
@@ -2687,7 +2687,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     auto append_result_type_and_id_to_spirv_params_for_read = [&]() {
         if (texture_type->IsAnyOf<type::DepthTexture, type::DepthMultisampledTexture>()) {
             auto* f32 = builder_.create<type::F32>();
-            auto* spirv_result_type = builder_.create<sem::Vector>(f32, 4u);
+            auto* spirv_result_type = builder_.create<type::Vector>(f32, 4u);
             auto spirv_result = result_op();
             post_emission = [=] {
                 return push_function_inst(spv::Op::OpCompositeExtract,
@@ -2718,7 +2718,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             auto* element_type = ElementTypeOf(call->Type());
             auto spirv_result = result_op();
             auto* spirv_result_type =
-                builder_.create<sem::Vector>(element_type, spirv_result_width);
+                builder_.create<type::Vector>(element_type, spirv_result_width);
             if (swizzle.size() > 1) {
                 post_emission = [=] {
                     OperandList operands{
@@ -3692,7 +3692,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
                 push_type(spv::Op::OpTypeInt, {result, Operand(32u), Operand(1u)});
                 return true;
             },
-            [&](const sem::Matrix* mat) {  //
+            [&](const type::Matrix* mat) {  //
                 return GenerateMatrixType(mat, result);
             },
             [&](const type::Pointer* ptr) {  //
@@ -3708,7 +3708,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
                 push_type(spv::Op::OpTypeInt, {result, Operand(32u), Operand(0u)});
                 return true;
             },
-            [&](const sem::Vector* vec) {  //
+            [&](const type::Vector* vec) {  //
                 return GenerateVectorType(vec, result);
             },
             [&](const type::Void*) {
@@ -3867,8 +3867,8 @@ bool Builder::GenerateArrayType(const sem::Array* arr, const Operand& result) {
     return true;
 }
 
-bool Builder::GenerateMatrixType(const sem::Matrix* mat, const Operand& result) {
-    auto* col_type = builder_.create<sem::Vector>(mat->type(), mat->rows());
+bool Builder::GenerateMatrixType(const type::Matrix* mat, const Operand& result) {
+    auto* col_type = builder_.create<type::Vector>(mat->type(), mat->rows());
     auto col_type_id = GenerateTypeIfNeeded(col_type);
     if (has_error()) {
         return false;
@@ -3972,7 +3972,7 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
     return GenerateTypeIfNeeded(member->Type());
 }
 
-bool Builder::GenerateVectorType(const sem::Vector* vec, const Operand& result) {
+bool Builder::GenerateVectorType(const type::Vector* vec, const Operand& result) {
     auto type_id = GenerateTypeIfNeeded(vec->type());
     if (has_error()) {
         return false;

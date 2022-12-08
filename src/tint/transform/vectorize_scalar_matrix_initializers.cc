@@ -32,7 +32,7 @@ namespace {
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
         if (auto* call = program->Sem().Get<sem::Call>(node)) {
-            if (call->Target()->Is<sem::TypeInitializer>() && call->Type()->Is<sem::Matrix>()) {
+            if (call->Target()->Is<sem::TypeInitializer>() && call->Type()->Is<type::Matrix>()) {
                 auto& args = call->Arguments();
                 if (!args.IsEmpty() && args[0]->Type()->UnwrapRef()->is_scalar()) {
                     return true;
@@ -59,7 +59,7 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
     ProgramBuilder b;
     CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
-    std::unordered_map<const sem::Matrix*, Symbol> scalar_inits;
+    std::unordered_map<const type::Matrix*, Symbol> scalar_inits;
 
     ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::CallExpression* {
         auto* call = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
@@ -67,7 +67,7 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
         if (!ty_init) {
             return nullptr;
         }
-        auto* mat_type = call->Type()->As<sem::Matrix>();
+        auto* mat_type = call->Type()->As<type::Matrix>();
         if (!mat_type) {
             return nullptr;
         }
@@ -84,7 +84,7 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
         if (args[0]
                 ->Type()
                 ->UnwrapRef()
-                ->IsAnyOf<sem::Matrix, sem::Vector, type::AbstractNumeric>()) {
+                ->IsAnyOf<type::Matrix, type::Vector, type::AbstractNumeric>()) {
             return nullptr;
         }
 

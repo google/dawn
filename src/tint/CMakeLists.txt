@@ -328,8 +328,6 @@ list(APPEND TINT_LIB_SRCS
   sem/loop_statement.h
   sem/materialize.cc
   sem/materialize.h
-  sem/matrix.cc
-  sem/matrix.h
   sem/member_accessor_expression.cc
   sem/module.cc
   sem/module.h
@@ -347,8 +345,6 @@ list(APPEND TINT_LIB_SRCS
   sem/type_conversion.h
   sem/type_mappings.h
   sem/variable.cc
-  sem/vector.cc
-  sem/vector.h
   sem/while_statement.cc
   sem/while_statement.h
   symbol_table.cc
@@ -481,6 +477,8 @@ list(APPEND TINT_LIB_SRCS
   type/f32.h
   type/i32.cc
   type/i32.h
+  type/matrix.cc
+  type/matrix.h
   type/multisampled_texture.cc
   type/multisampled_texture.h
   type/node.cc
@@ -503,6 +501,8 @@ list(APPEND TINT_LIB_SRCS
   type/type_manager.h
   type/u32.cc
   type/u32.h
+  type/vector.cc
+  type/vector.h
   type/void.cc
   type/void.h
   utils/bitcast.h
@@ -924,9 +924,7 @@ if(TINT_BUILD_TESTS)
     sem/atomic.cc
     sem/builtin_test.cc
     sem/expression_test.cc
-    sem/matrix_test.cc
     sem/struct_test.cc
-    sem/vector_test.cc
     source_test.cc
     symbol_table_test.cc
     symbol_test.cc
@@ -941,6 +939,7 @@ if(TINT_BUILD_TESTS)
     type/f16_test.cc
     type/f32_test.cc
     type/i32_test.cc
+    type/matrix_test.cc
     type/multisampled_texture_test.cc
     type/pointer_test.cc
     type/reference_test.cc
@@ -951,6 +950,7 @@ if(TINT_BUILD_TESTS)
     type/type_test.cc
     type/type_manager_test.cc
     type/u32_test.cc
+    type/vector_test.cc
     utils/bitcast_test.cc
     utils/bitset_test.cc
     utils/block_allocator_test.cc

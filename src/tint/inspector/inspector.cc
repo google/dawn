@@ -31,12 +31,10 @@
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
-#include "src/tint/sem/matrix.h"
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/variable.h"
-#include "src/tint/sem/vector.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
@@ -44,10 +42,12 @@
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
+#include "src/tint/type/matrix.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/u32.h"
+#include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
 #include "src/tint/utils/math.h"
 #include "src/tint/utils/string.h"
@@ -86,7 +86,7 @@ std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
         });
 
     CompositionType compositionType;
-    if (auto* vec = type->As<sem::Vector>()) {
+    if (auto* vec = type->As<type::Vector>()) {
         switch (vec->Width()) {
             case 2: {
                 compositionType = CompositionType::kVec2;

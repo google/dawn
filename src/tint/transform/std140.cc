@@ -132,7 +132,7 @@ struct Std140::State {
             while (auto* arr = ty->As<sem::Array>()) {
                 ty = arr->ElemType();
             }
-            if (auto* mat = ty->As<sem::Matrix>()) {
+            if (auto* mat = ty->As<type::Matrix>()) {
                 if (MatrixNeedsDecomposing(mat)) {
                     return true;
                 }
@@ -241,7 +241,7 @@ struct Std140::State {
     };
 
     // Map of matrix type in src, to decomposed column structure in ctx.dst.
-    utils::Hashmap<const sem::Matrix*, Std140Matrix, 8> std140_mats;
+    utils::Hashmap<const type::Matrix*, Std140Matrix, 8> std140_mats;
 
     /// AccessChain describes a chain of access expressions to uniform buffer variable.
     struct AccessChain {
@@ -253,7 +253,7 @@ struct Std140::State {
         utils::Vector<const sem::Expression*, 8> dynamic_indices;
         /// The type of the std140-decomposed matrix being accessed.
         /// May be nullptr if the chain does not pass through a std140-decomposed matrix.
-        const sem::Matrix* std140_mat_ty = nullptr;
+        const type::Matrix* std140_mat_ty = nullptr;
         /// The index in #indices of the access that resolves to the std140-decomposed matrix.
         /// May hold no value if the chain does not pass through a std140-decomposed matrix.
         std::optional<size_t> std140_mat_idx;
@@ -266,7 +266,9 @@ struct Std140::State {
 
     /// @returns true if the given matrix needs decomposing to column vectors for std140 layout.
     /// Std140 layout require matrix stride to be 16, otherwise decomposing is needed.
-    static bool MatrixNeedsDecomposing(const sem::Matrix* mat) { return mat->ColumnStride() != 16; }
+    static bool MatrixNeedsDecomposing(const type::Matrix* mat) {
+        return mat->ColumnStride() != 16;
+    }
 
     /// ForkTypes walks the user-declared types in dependency order, forking structures that are
     /// used as uniform buffers which (transitively) use matrices that need std140 decomposition to
@@ -282,7 +284,7 @@ struct Std140::State {
                 bool fork_std140 = false;
                 utils::Vector<const ast::StructMember*, 8> members;
                 for (auto* member : str->Members()) {
-                    if (auto* mat = member->Type()->As<sem::Matrix>()) {
+                    if (auto* mat = member->Type()->As<type::Matrix>()) {
                         // Is this member a matrix that needs decomposition for std140-layout?
                         if (MatrixNeedsDecomposing(mat)) {
                             // Structure member of matrix type needs decomposition.
@@ -406,7 +408,7 @@ struct Std140::State {
                 }
                 return nullptr;
             },
-            [&](const sem::Matrix* mat) -> const ast::Type* {
+            [&](const type::Matrix* mat) -> const ast::Type* {
                 if (MatrixNeedsDecomposing(mat)) {
                     auto std140_mat = std140_mats.GetOrCreate(mat, [&] {
                         auto name = b.Symbols().New("mat" + std::to_string(mat->columns()) + "x" +
@@ -453,7 +455,7 @@ struct Std140::State {
     /// @param size the size in bytes of the matrix.
     /// @returns a vector of decomposed matrix column vectors as structure members (in ctx.dst).
     utils::Vector<const ast::StructMember*, 4> DecomposedMatrixStructMembers(
-        const sem::Matrix* mat,
+        const type::Matrix* mat,
         const std::string& name_prefix,
         uint32_t align,
         uint32_t size) {
@@ -533,7 +535,7 @@ struct Std140::State {
                     if (std140_mat_members.Contains(a->Member())) {
                         // Record this on the access.
                         access.std140_mat_idx = access.indices.Length();
-                        access.std140_mat_ty = expr->Type()->UnwrapRef()->As<sem::Matrix>();
+                        access.std140_mat_ty = expr->Type()->UnwrapRef()->As<type::Matrix>();
                     }
                     // Structure member accesses are always statically indexed
                     access.indices.Push(u32(a->Member()->Index()));
@@ -551,7 +553,7 @@ struct Std140::State {
                     expr = a->Object();
 
                     // Is the object a std140 decomposed matrix?
-                    if (auto* mat = expr->Type()->UnwrapRef()->As<sem::Matrix>()) {
+                    if (auto* mat = expr->Type()->UnwrapRef()->As<type::Matrix>()) {
                         if (std140_mats.Contains(mat)) {
                             // Record this on the access.
                             access.std140_mat_idx = access.indices.Length();
@@ -641,7 +643,7 @@ struct Std140::State {
                 }
                 return "arr" + std::to_string(count.value()) + "_" + ConvertSuffix(arr->ElemType());
             },
-            [&](const sem::Matrix* mat) {
+            [&](const type::Matrix* mat) {
                 return "mat" + std::to_string(mat->columns()) + "x" + std::to_string(mat->rows()) +
                        "_" + ConvertSuffix(mat->type());
             },
@@ -713,7 +715,7 @@ struct Std140::State {
                     }
                     stmts.Push(b.Return(b.Construct(CreateASTTypeFor(ctx, ty), std::move(args))));
                 },  //
-                [&](const sem::Matrix* mat) {
+                [&](const type::Matrix* mat) {
                     // Reassemble a std140 matrix from the structure of column vector members.
                     if (auto std140_mat = std140_mats.Get(mat)) {
                         utils::Vector<const ast::Expression*, 8> args;
@@ -835,7 +837,7 @@ struct Std140::State {
             auto* mat_member = str->Members()[mat_member_idx];
             auto mat_columns = *std140_mat_members.Get(mat_member);
             expr = b.MemberAccessor(expr, mat_columns[column_idx]->symbol);
-            ty = mat_member->Type()->As<sem::Matrix>()->ColumnType();
+            ty = mat_member->Type()->As<type::Matrix>()->ColumnType();
         } else {
             // Non-structure-member matrix. The columns are decomposed into a new, bespoke std140
             // structure.
@@ -843,8 +845,8 @@ struct Std140::State {
                 BuildAccessExpr(expr, ty, chain, std140_mat_idx, dynamic_index);
             expr = new_expr;
             ty = new_ty;
-            auto* mat = ty->As<sem::Matrix>();
-            auto std140_mat = std140_mats.Get(ty->As<sem::Matrix>());
+            auto* mat = ty->As<type::Matrix>();
+            auto std140_mat = std140_mats.Get(ty->As<type::Matrix>());
             expr = b.MemberAccessor(expr, std140_mat->columns[column_idx]);
             ty = mat->ColumnType();
         }
@@ -918,7 +920,7 @@ struct Std140::State {
                 }
                 auto mat_columns = *std140_mat_members.Get(mat_member);
                 expr = b.MemberAccessor(expr, mat_columns[column_idx]->symbol);
-                ty = mat_member->Type()->As<sem::Matrix>()->ColumnType();
+                ty = mat_member->Type()->As<type::Matrix>()->ColumnType();
             } else {
                 // Non-structure-member matrix. The columns are decomposed into a new, bespoke
                 // std140 structure.
@@ -929,8 +931,8 @@ struct Std140::State {
                 if (column_idx == 0) {
                     name += "_" + mat_name + "_p" + std::to_string(column_param_idx);
                 }
-                auto* mat = ty->As<sem::Matrix>();
-                auto std140_mat = std140_mats.Get(ty->As<sem::Matrix>());
+                auto* mat = ty->As<type::Matrix>();
+                auto std140_mat = std140_mats.Get(ty->As<type::Matrix>());
                 expr = b.MemberAccessor(expr, std140_mat->columns[column_idx]);
                 ty = mat->ColumnType();
             }
@@ -1021,8 +1023,8 @@ struct Std140::State {
             auto [new_expr, new_ty, mat_name] =
                 BuildAccessExpr(expr, ty, chain, std140_mat_idx, dynamic_index);
             expr = new_expr;
-            auto* mat = ty->As<sem::Matrix>();
-            auto std140_mat = std140_mats.Get(ty->As<sem::Matrix>());
+            auto* mat = ty->As<type::Matrix>();
+            auto std140_mat = std140_mats.Get(ty->As<type::Matrix>());
             columns = utils::Transform(std140_mat->columns, [&](auto column_name) {
                 return b.MemberAccessor(b.Deref(let), column_name);
             });
@@ -1084,12 +1086,12 @@ struct Std140::State {
                     auto* expr = b.IndexAccessor(lhs, idx);
                     return {expr, arr->ElemType(), name};
                 },  //
-                [&](const sem::Matrix* mat) -> ExprTypeName {
+                [&](const type::Matrix* mat) -> ExprTypeName {
                     auto* idx = dynamic_index(dyn_idx->slot);
                     auto* expr = b.IndexAccessor(lhs, idx);
                     return {expr, mat->ColumnType(), name};
                 },  //
-                [&](const sem::Vector* vec) -> ExprTypeName {
+                [&](const type::Vector* vec) -> ExprTypeName {
                     auto* idx = dynamic_index(dyn_idx->slot);
                     auto* expr = b.IndexAccessor(lhs, idx);
                     return {expr, vec->type(), name};
@@ -1104,13 +1106,13 @@ struct Std140::State {
             /// The access is a vector swizzle.
             return Switch(
                 ty,  //
-                [&](const sem::Vector* vec) -> ExprTypeName {
+                [&](const type::Vector* vec) -> ExprTypeName {
                     static const char xyzw[] = {'x', 'y', 'z', 'w'};
                     std::string rhs;
                     for (auto el : *swizzle) {
                         rhs += xyzw[el];
                     }
-                    auto swizzle_ty = src->Types().Find<sem::Vector>(
+                    auto swizzle_ty = src->Types().Find<type::Vector>(
                         vec->type(), static_cast<uint32_t>(swizzle->Length()));
                     auto* expr = b.MemberAccessor(lhs, rhs);
                     return {expr, swizzle_ty, rhs};
@@ -1136,11 +1138,11 @@ struct Std140::State {
                 auto* expr = b.IndexAccessor(lhs, idx);
                 return {expr, arr->ElemType(), std::to_string(idx)};
             },  //
-            [&](const sem::Matrix* mat) -> ExprTypeName {
+            [&](const type::Matrix* mat) -> ExprTypeName {
                 auto* expr = b.IndexAccessor(lhs, idx);
                 return {expr, mat->ColumnType(), std::to_string(idx)};
             },  //
-            [&](const sem::Vector* vec) -> ExprTypeName {
+            [&](const type::Vector* vec) -> ExprTypeName {
                 auto* expr = b.IndexAccessor(lhs, idx);
                 return {expr, vec->type(), std::to_string(idx)};
             },  //

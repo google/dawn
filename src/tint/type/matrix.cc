@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/matrix.h"
+#include "src/tint/type/matrix.h"
 
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/vector.h"
+#include "src/tint/type/vector.h"
 #include "src/tint/utils/hash.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::Matrix);
+TINT_INSTANTIATE_TYPEINFO(tint::type::Matrix);
 
-namespace tint::sem {
+namespace tint::type {
 
 Matrix::Matrix(const Vector* column_type, uint32_t columns)
     : Base(type::TypeFlags{
@@ -71,4 +71,4 @@ uint32_t Matrix::ColumnStride() const {
     return column_type_->Align();
 }
 
-}  // namespace tint::sem
+}  // namespace tint::type

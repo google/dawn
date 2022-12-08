@@ -216,13 +216,13 @@ type::Type* Resolver::Type(const ast::Type* ty) {
             return builder_->create<type::F16>();
         },
         [&](const ast::F32*) { return builder_->create<type::F32>(); },
-        [&](const ast::Vector* t) -> sem::Vector* {
+        [&](const ast::Vector* t) -> type::Vector* {
             if (!t->type) {
                 AddError("missing vector element type", t->source.End());
                 return nullptr;
             }
             if (auto* el = Type(t->type)) {
-                if (auto* vector = builder_->create<sem::Vector>(el, t->width)) {
+                if (auto* vector = builder_->create<type::Vector>(el, t->width)) {
                     if (validator_.Vector(vector, t->source)) {
                         return vector;
                     }
@@ -230,14 +230,14 @@ type::Type* Resolver::Type(const ast::Type* ty) {
             }
             return nullptr;
         },
-        [&](const ast::Matrix* t) -> sem::Matrix* {
+        [&](const ast::Matrix* t) -> type::Matrix* {
             if (!t->type) {
                 AddError("missing matrix element type", t->source.End());
                 return nullptr;
             }
             if (auto* el = Type(t->type)) {
-                if (auto* column_type = builder_->create<sem::Vector>(el, t->rows)) {
-                    if (auto* matrix = builder_->create<sem::Matrix>(column_type, t->columns)) {
+                if (auto* column_type = builder_->create<type::Vector>(el, t->rows)) {
+                    if (auto* matrix = builder_->create<type::Matrix>(column_type, t->columns)) {
                         if (validator_.Matrix(matrix, t->source)) {
                             return matrix;
                         }
@@ -1718,17 +1718,17 @@ const type::Type* Resolver::ConcreteType(const type::Type* ty,
                                          const Source& source) {
     auto i32 = [&] { return builder_->create<type::I32>(); };
     auto f32 = [&] { return builder_->create<type::F32>(); };
-    auto i32v = [&](uint32_t width) { return builder_->create<sem::Vector>(i32(), width); };
-    auto f32v = [&](uint32_t width) { return builder_->create<sem::Vector>(f32(), width); };
+    auto i32v = [&](uint32_t width) { return builder_->create<type::Vector>(i32(), width); };
+    auto f32v = [&](uint32_t width) { return builder_->create<type::Vector>(f32(), width); };
     auto f32m = [&](uint32_t columns, uint32_t rows) {
-        return builder_->create<sem::Matrix>(f32v(rows), columns);
+        return builder_->create<type::Matrix>(f32v(rows), columns);
     };
 
     return Switch(
         ty,  //
         [&](const type::AbstractInt*) { return target_ty ? target_ty : i32(); },
         [&](const type::AbstractFloat*) { return target_ty ? target_ty : f32(); },
-        [&](const sem::Vector* v) {
+        [&](const type::Vector* v) {
             return Switch(
                 v->type(),  //
                 [&](const type::AbstractInt*) { return target_ty ? target_ty : i32v(v->Width()); },
@@ -1736,7 +1736,7 @@ const type::Type* Resolver::ConcreteType(const type::Type* ty,
                     return target_ty ? target_ty : f32v(v->Width());
                 });
         },
-        [&](const sem::Matrix* m) {
+        [&](const type::Matrix* m) {
             return Switch(m->type(),  //
                           [&](const type::AbstractFloat*) {
                               return target_ty ? target_ty : f32m(m->columns(), m->rows());
@@ -1870,9 +1870,9 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
     auto* ty = Switch(
         obj_ty,  //
         [&](const sem::Array* arr) { return arr->ElemType(); },
-        [&](const sem::Vector* vec) { return vec->type(); },
-        [&](const sem::Matrix* mat) {
-            return builder_->create<sem::Vector>(mat->type(), mat->rows());
+        [&](const type::Vector* vec) { return vec->type(); },
+        [&](const type::Matrix* mat) {
+            return builder_->create<type::Vector>(mat->type(), mat->rows());
         },
         [&](Default) {
             AddError("cannot index type '" + sem_.TypeNameOf(obj_ty) + "'", expr->source);
@@ -2034,10 +2034,10 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     auto ty_init_or_conv = [&](const type::Type* ty) {
         return Switch(
             ty,  //
-            [&](const sem::Vector* v) {
+            [&](const type::Vector* v) {
                 return ct_init_or_conv(VectorInitConvIntrinsic(v->Width()), v->type());
             },
-            [&](const sem::Matrix* m) {
+            [&](const type::Matrix* m) {
                 return ct_init_or_conv(MatrixInitConvIntrinsic(m->columns(), m->rows()), m->type());
             },
             [&](const type::I32*) { return ct_init_or_conv(InitConvIntrinsic::kI32, nullptr); },
@@ -2351,29 +2351,29 @@ type::Type* Resolver::BuiltinTypeAlias(Symbol sym) const {
     auto& b = *builder_;
     switch (type::ParseShortName(name)) {
         case type::ShortName::kVec2F:
-            return b.create<sem::Vector>(b.create<type::F32>(), 2u);
+            return b.create<type::Vector>(b.create<type::F32>(), 2u);
         case type::ShortName::kVec3F:
-            return b.create<sem::Vector>(b.create<type::F32>(), 3u);
+            return b.create<type::Vector>(b.create<type::F32>(), 3u);
         case type::ShortName::kVec4F:
-            return b.create<sem::Vector>(b.create<type::F32>(), 4u);
+            return b.create<type::Vector>(b.create<type::F32>(), 4u);
         case type::ShortName::kVec2H:
-            return b.create<sem::Vector>(b.create<type::F16>(), 2u);
+            return b.create<type::Vector>(b.create<type::F16>(), 2u);
         case type::ShortName::kVec3H:
-            return b.create<sem::Vector>(b.create<type::F16>(), 3u);
+            return b.create<type::Vector>(b.create<type::F16>(), 3u);
         case type::ShortName::kVec4H:
-            return b.create<sem::Vector>(b.create<type::F16>(), 4u);
+            return b.create<type::Vector>(b.create<type::F16>(), 4u);
         case type::ShortName::kVec2I:
-            return b.create<sem::Vector>(b.create<type::I32>(), 2u);
+            return b.create<type::Vector>(b.create<type::I32>(), 2u);
         case type::ShortName::kVec3I:
-            return b.create<sem::Vector>(b.create<type::I32>(), 3u);
+            return b.create<type::Vector>(b.create<type::I32>(), 3u);
         case type::ShortName::kVec4I:
-            return b.create<sem::Vector>(b.create<type::I32>(), 4u);
+            return b.create<type::Vector>(b.create<type::I32>(), 4u);
         case type::ShortName::kVec2U:
-            return b.create<sem::Vector>(b.create<type::U32>(), 2u);
+            return b.create<type::Vector>(b.create<type::U32>(), 2u);
         case type::ShortName::kVec3U:
-            return b.create<sem::Vector>(b.create<type::U32>(), 3u);
+            return b.create<type::Vector>(b.create<type::U32>(), 3u);
         case type::ShortName::kVec4U:
-            return b.create<sem::Vector>(b.create<type::U32>(), 4u);
+            return b.create<type::Vector>(b.create<type::U32>(), 4u);
         case type::ShortName::kUndefined:
             break;
     }
@@ -2677,7 +2677,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
                                                              has_side_effects, root_ident);
         },
 
-        [&](const sem::Vector* vec) -> sem::Expression* {
+        [&](const type::Vector* vec) -> sem::Expression* {
             Mark(expr->member);
             std::string s = builder_->Symbols().NameFor(expr->member->symbol);
             auto size = s.size();
@@ -2739,7 +2739,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
             } else {
                 // The vector will have a number of components equal to the length of
                 // the swizzle.
-                ty = builder_->create<sem::Vector>(vec->type(), static_cast<uint32_t>(size));
+                ty = builder_->create<type::Vector>(vec->type(), static_cast<uint32_t>(size));
             }
             auto val = const_eval_.Swizzle(ty, object, swizzle);
             if (!val) {
@@ -2837,8 +2837,8 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
                 auto* array = unary->expr->As<ast::IndexAccessorExpression>();
                 auto* member = unary->expr->As<ast::MemberAccessorExpression>();
-                if ((array && sem_.TypeOf(array->object)->UnwrapRef()->Is<sem::Vector>()) ||
-                    (member && sem_.TypeOf(member->structure)->UnwrapRef()->Is<sem::Vector>())) {
+                if ((array && sem_.TypeOf(array->object)->UnwrapRef()->Is<type::Vector>()) ||
+                    (member && sem_.TypeOf(member->structure)->UnwrapRef()->Is<type::Vector>())) {
                     AddError("cannot take the address of a vector component", unary->expr->source);
                     return nullptr;
                 }
