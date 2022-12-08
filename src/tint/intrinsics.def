@@ -112,7 +112,7 @@ enum interpolation_sampling {
 }
 
 // https://www.w3.org/TR/WGSL/#vector-types
-enum type_alias {
+enum short_name {
   vec2f
   vec2h
   vec2i

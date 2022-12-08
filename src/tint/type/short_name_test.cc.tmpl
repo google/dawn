@@ -1,6 +1,6 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate type_alias_bench.cc
+Template file for use with tools/src/cmd/gen to generate short_name_test.cc
 
 To update the generated file, run:
     ./tools/run gen
@@ -12,18 +12,20 @@ See:
 */ -}}
 
 {{- Import "src/tint/templates/enums.tmpl.inc" -}}
-{{- $enum := (Sem.Enum "type_alias") -}}
+{{- $enum := (Sem.Enum "short_name") -}}
 
-#include "src/tint/resolver/type_alias.h"
+#include "src/tint/type/short_name.h"
 
-#include <array>
+#include <string>
 
-#include "benchmark/benchmark.h"
+#include "gtest/gtest.h"
 
-namespace tint::resolver {
+#include "src/tint/utils/string.h"
+
+namespace tint::type {
 namespace {
 
-{{ Eval "BenchmarkParseEnum" $enum }}
+{{ Eval "TestParsePrintEnum" $enum}}
 
 }  // namespace
-}  // namespace tint::resolver
+}  // namespace tint::type
