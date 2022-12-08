@@ -56,16 +56,9 @@ struct PackedVec3::State {
                                 members.Add(member);
 
                                 // Apply the PackedVec3::Attribute to the member
-                                auto* member_decl = member->Declaration();
-                                auto name = ctx.Clone(member->Name());
-                                auto* type = ctx.Clone(member_decl->type);
-                                utils::Vector<const ast::Attribute*, 4> attrs{
-                                    b.ASTNodes().Create<Attribute>(b.ID(), b.AllocateNodeID()),
-                                };
-                                for (auto* attr : member_decl->attributes) {
-                                    attrs.Push(ctx.Clone(attr));
-                                }
-                                ctx.Replace(member_decl, b.Member(name, type, std::move(attrs)));
+                                ctx.InsertFront(
+                                    member->Declaration()->attributes,
+                                    b.ASTNodes().Create<Attribute>(b.ID(), b.AllocateNodeID()));
                             }
                         }
                     }
