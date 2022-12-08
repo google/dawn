@@ -175,6 +175,8 @@ using SpvParserTest_GlslStd450_Float3_Float3Float3 =
 
 using SpvParserTest_GlslStd450_Inting_Inting =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
+using SpvParserTest_GlslStd450_Inting_Inting_SignednessCoercing =
+    SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 using SpvParserTest_GlslStd450_Inting_IntingInting =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 using SpvParserTest_GlslStd450_Inting_IntingIntingInting =
@@ -490,6 +492,42 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Scalar) {
     EXPECT_THAT(body, HasSubstr("let x_1 : i32 = " + GetParam().wgsl_func + "(i1);")) << body;
 }
 
+TEST_P(SpvParserTest_GlslStd450_Inting_Inting_SignednessCoercing, Scalar_UnsignedArg) {
+    const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %int %glsl )" +
+                          GetParam().opcode +
+                          R"( %u1
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : i32 = " + GetParam().wgsl_func + "(bitcast<i32>(u1));"))
+        << body;
+}
+
+TEST_P(SpvParserTest_GlslStd450_Inting_Inting_SignednessCoercing, Scalar_UnsignedResult) {
+    const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %uint %glsl )" +
+                          GetParam().opcode +
+                          R"( %i1
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : u32 = bitcast<u32>(" + GetParam().wgsl_func + "(i1));"))
+        << body;
+}
+
 TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Vector) {
     const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v2int %glsl )" +
@@ -505,6 +543,44 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Vector) {
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
     EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func + "(v2i1);"))
+        << body;
+}
+
+TEST_P(SpvParserTest_GlslStd450_Inting_Inting_SignednessCoercing, Vector_UnsignedArg) {
+    const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v2int %glsl )" +
+                          GetParam().opcode +
+                          R"( %v2u1
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func +
+                                "(bitcast<vec2<i32>>(v2u1));"))
+        << body;
+}
+
+TEST_P(SpvParserTest_GlslStd450_Inting_Inting_SignednessCoercing, Vector_UnsignedResult) {
+    const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v2uint %glsl )" +
+                          GetParam().opcode +
+                          R"( %v2i1
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<u32> = bitcast<vec2<u32>>(" + GetParam().wgsl_func +
+                                "(v2i1));"))
         << body;
 }
 
@@ -584,7 +660,12 @@ INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Inting_Inting,
                          ::testing::Values(GlslStd450Case{"SAbs", "abs"},
                                            GlslStd450Case{"FindILsb", "firstTrailingBit"},
-                                           GlslStd450Case{"FindSMsb", "firstLeadingBit"}));
+                                           GlslStd450Case{"FindSMsb", "firstLeadingBit"},
+                                           GlslStd450Case{"SSign", "sign"}));
+
+INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvParserTest_GlslStd450_Inting_Inting_SignednessCoercing,
+                         ::testing::Values(GlslStd450Case{"SSign", "sign"}));
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Inting_IntingInting,
