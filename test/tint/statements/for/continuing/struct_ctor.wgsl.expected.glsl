@@ -10,17 +10,7 @@ struct S {
 
 void f() {
   {
-    int i = 0;
-    while (true) {
-      if (true) {
-        break;
-      }
-      {
-      }
-      {
-        S tint_symbol = S(1);
-        i = (i + tint_symbol.i);
-      }
+    for(int i = 0; false; i = (i + 1)) {
     }
   }
 }

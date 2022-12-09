@@ -9,9 +9,8 @@ struct S {
 };
 
 void f() {
-  S tint_symbol = S(1);
   {
-    for(int i = tint_symbol.i; false; ) {
+    for(int i = 1; false; ) {
     }
   }
 }

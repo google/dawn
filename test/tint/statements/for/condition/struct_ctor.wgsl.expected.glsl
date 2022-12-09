@@ -10,12 +10,8 @@ struct S {
 
 void f() {
   int i = 0;
-  while (true) {
-    S tint_symbol = S(1);
-    if (!((i < tint_symbol.i))) {
-      break;
-    }
-    {
+  {
+    for(; (i < 1); ) {
     }
   }
 }

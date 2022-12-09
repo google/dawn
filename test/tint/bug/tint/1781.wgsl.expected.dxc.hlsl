@@ -4,9 +4,4 @@ void unused_entry_point() {
 }
 
 void f() {
-  int i = 0;
-  {
-    for(; false; i = (i + 1)) {
-    }
-  }
 }

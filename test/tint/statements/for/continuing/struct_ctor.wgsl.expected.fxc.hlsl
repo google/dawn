@@ -3,23 +3,9 @@ void unused_entry_point() {
   return;
 }
 
-struct S {
-  int i;
-};
-
 void f() {
   {
-    int i = 0;
-    while (true) {
-      if (true) {
-        break;
-      }
-      {
-      }
-      {
-        const S tint_symbol = {1};
-        i = (i + tint_symbol.i);
-      }
+    for(int i = 0; false; i = (i + 1)) {
     }
   }
 }

@@ -43,6 +43,18 @@ class Hashset : public HashmapBase<KEY, void, N, HASH, EQUAL> {
         struct NoValue {};
         return this->template Put<PutMode::kAdd>(std::forward<V>(value), NoValue{});
     }
+
+    /// @returns the set entries of the map as a vector
+    /// @note the order of the returned vector is non-deterministic between compilers.
+    template <size_t N2 = N>
+    utils::Vector<KEY, N2> Vector() const {
+        utils::Vector<KEY, N2> out;
+        out.Reserve(this->Count());
+        for (auto& value : *this) {
+            out.Push(value);
+        }
+        return out;
+    }
 };
 
 }  // namespace tint::utils

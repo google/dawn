@@ -197,17 +197,19 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
 }
 
 TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
+    auto* runtime_value = Var("runtime_value", Expr(3_f));
     auto* str = Structure("S", utils::Vector{
                                    Member("a", ty.i32()),
                                    Member("b", ty.vec3<f32>()),
                                    Member("c", ty.i32()),
                                });
-    auto* struct_init = Construct(ty.Of(str), 1_i, vec3<f32>(2_f, 3_f, 4_f), 4_i);
+    auto* struct_init = Construct(ty.Of(str), 1_i, vec3<f32>(2_f, runtime_value, 4_f), 4_i);
     auto* struct_access = MemberAccessor(struct_init, "b");
     auto* pos = Var("pos", ty.vec3<f32>(), struct_access);
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
+             Decl(runtime_value),
              Decl(pos),
          },
          utils::Vector{
@@ -226,7 +228,8 @@ TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
 };
 
 void main() {
-  const S tint_symbol = {1, float3(2.0f, 3.0f, 4.0f), 4};
+  float runtime_value = 3.0f;
+  const S tint_symbol = {1, float3(2.0f, runtime_value, 4.0f), 4};
   float3 pos = tint_symbol.b;
   return;
 }

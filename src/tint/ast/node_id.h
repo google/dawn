@@ -25,7 +25,12 @@ struct NodeID {
     /// Equality operator
     /// @param other the other NodeID
     /// @returns true if the NodeIDs are the same
-    bool operator==(const NodeID& other) const { return value == other.value; }
+    bool operator==(NodeID other) const { return value == other.value; }
+
+    /// Less-than comparison operator
+    /// @param other the other NodeID
+    /// @returns true if the other comes before this node
+    bool operator<(NodeID other) const { return value < other.value; }
 
     /// The numerical value for the node identifier
     size_t value = 0;

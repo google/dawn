@@ -6,8 +6,7 @@ struct S {
 };
 
 void f() {
-  S const tint_symbol = S{.i=1};
-  for(int i = tint_symbol.i; false; ) {
+  for(int i = 1; false; ) {
   }
 }
 

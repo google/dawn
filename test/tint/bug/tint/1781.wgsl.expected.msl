@@ -1,9 +1,11 @@
 #include <metal_stdlib>
 
 using namespace metal;
+struct S {
+  int a;
+  float b;
+};
+
 void f() {
-  int i = 0;
-  for(; (i < 1); ) {
-  }
 }
 

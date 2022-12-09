@@ -91,6 +91,16 @@ TEST(Hashset, Iterator) {
     EXPECT_THAT(set, testing::UnorderedElementsAre("one", "two", "three", "four"));
 }
 
+TEST(Hashset, Vector) {
+    Hashset<std::string, 8> set;
+    set.Add("one");
+    set.Add("four");
+    set.Add("three");
+    set.Add("two");
+    auto vec = set.Vector();
+    EXPECT_THAT(vec, testing::UnorderedElementsAre("one", "two", "three", "four"));
+}
+
 TEST(Hashset, Soak) {
     std::mt19937 rnd;
     std::unordered_set<std::string> reference;

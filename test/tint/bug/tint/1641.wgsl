@@ -7,5 +7,6 @@ const faceNormals = array<Normals, 1>(
 
 @vertex
 fn main() -> @builtin(position) vec4<f32> {
-  return vec4(faceNormals[0].f, 1.);
+  let zero = 0;
+  return vec4(faceNormals[zero].f, 1.);
 }
