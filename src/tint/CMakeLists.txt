@@ -478,6 +478,8 @@ list(APPEND TINT_LIB_SRCS
   type/f32.h
   type/i32.cc
   type/i32.h
+  type/manager.cc
+  type/manager.h
   type/matrix.cc
   type/matrix.h
   type/multisampled_texture.cc
@@ -500,8 +502,6 @@ list(APPEND TINT_LIB_SRCS
   type/texture.h
   type/type.cc
   type/type.h
-  type/type_manager.cc
-  type/type_manager.h
   type/u32.cc
   type/u32.h
   type/vector.cc
@@ -942,6 +942,7 @@ if(TINT_BUILD_TESTS)
     type/f16_test.cc
     type/f32_test.cc
     type/i32_test.cc
+    type/manager_test.cc
     type/matrix_test.cc
     type/multisampled_texture_test.cc
     type/pointer_test.cc
@@ -952,7 +953,6 @@ if(TINT_BUILD_TESTS)
     type/struct_test.cc
     type/texture_test.cc
     type/type_test.cc
-    type/type_manager_test.cc
     type/u32_test.cc
     type/vector_test.cc
     utils/bitcast_test.cc

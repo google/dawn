@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/type/type_manager.h"
+#include "src/tint/type/manager.h"
 
 #include "gtest/gtest.h"
 #include "src/tint/type/i32.h"
@@ -31,17 +31,17 @@ size_t count(const T& range_loopable) {
     return n;
 }
 
-using TypeManagerTest = testing::Test;
+using ManagerTest = testing::Test;
 
-TEST_F(TypeManagerTest, GetUnregistered) {
-    TypeManager tm;
+TEST_F(ManagerTest, GetUnregistered) {
+    Manager tm;
     auto* t = tm.Get<I32>();
     ASSERT_NE(t, nullptr);
     EXPECT_TRUE(t->Is<I32>());
 }
 
-TEST_F(TypeManagerTest, GetSameTypeReturnsSamePtr) {
-    TypeManager tm;
+TEST_F(ManagerTest, GetSameTypeReturnsSamePtr) {
+    Manager tm;
     auto* t = tm.Get<I32>();
     ASSERT_NE(t, nullptr);
     EXPECT_TRUE(t->Is<I32>());
@@ -50,8 +50,8 @@ TEST_F(TypeManagerTest, GetSameTypeReturnsSamePtr) {
     EXPECT_EQ(t, t2);
 }
 
-TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
-    TypeManager tm;
+TEST_F(ManagerTest, GetDifferentTypeReturnsDifferentPtr) {
+    Manager tm;
     Type* t = tm.Get<I32>();
     ASSERT_NE(t, nullptr);
     EXPECT_TRUE(t->Is<I32>());
@@ -62,17 +62,17 @@ TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
     EXPECT_TRUE(t2->Is<U32>());
 }
 
-TEST_F(TypeManagerTest, Find) {
-    TypeManager tm;
+TEST_F(ManagerTest, Find) {
+    Manager tm;
     auto* created = tm.Get<I32>();
 
     EXPECT_EQ(tm.Find<U32>(), nullptr);
     EXPECT_EQ(tm.Find<I32>(), created);
 }
 
-TEST_F(TypeManagerTest, WrapDoesntAffectInner) {
-    TypeManager inner;
-    TypeManager outer = TypeManager::Wrap(inner);
+TEST_F(ManagerTest, WrapDoesntAffectInner) {
+    Manager inner;
+    Manager outer = Manager::Wrap(inner);
 
     inner.Get<I32>();
 

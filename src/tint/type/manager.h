@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_TYPE_TYPE_MANAGER_H_
-#define SRC_TINT_TYPE_TYPE_MANAGER_H_
+#ifndef SRC_TINT_TYPE_MANAGER_H_
+#define SRC_TINT_TYPE_MANAGER_H_
 
 #include <functional>
 #include <string>
@@ -29,24 +29,24 @@
 namespace tint::type {
 
 /// The type manager holds all the pointers to the known types.
-class TypeManager final {
+class Manager final {
   public:
     /// Iterator is the type returned by begin() and end()
     using TypeIterator = utils::BlockAllocator<Type>::ConstIterator;
 
     /// Constructor
-    TypeManager();
+    Manager();
 
     /// Move constructor
-    TypeManager(TypeManager&&);
+    Manager(Manager&&);
 
     /// Move assignment operator
     /// @param rhs the Manager to move
     /// @return this Manager
-    TypeManager& operator=(TypeManager&& rhs);
+    Manager& operator=(Manager&& rhs);
 
     /// Destructor
-    ~TypeManager();
+    ~Manager();
 
     /// Wrap returns a new Manager created with the types of `inner`.
     /// The Manager returned by Wrap is intended to temporarily extend the types
@@ -57,8 +57,8 @@ class TypeManager final {
     /// function. See crbug.com/tint/460.
     /// @param inner the immutable Manager to extend
     /// @return the Manager that wraps `inner`
-    static TypeManager Wrap(const TypeManager& inner) {
-        TypeManager out;
+    static Manager Wrap(const Manager& inner) {
+        Manager out;
         out.types_.Wrap(inner.types_);
         out.nodes_.Wrap(inner.nodes_);
         return out;
@@ -149,4 +149,4 @@ struct equal_to<tint::type::Node> {
 
 }  // namespace std
 
-#endif  // SRC_TINT_TYPE_TYPE_MANAGER_H_
+#endif  // SRC_TINT_TYPE_MANAGER_H_

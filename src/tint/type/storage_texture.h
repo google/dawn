@@ -23,7 +23,7 @@
 
 // Forward declarations
 namespace tint::type {
-class TypeManager;
+class Manager;
 }  // namespace tint::type
 
 namespace tint::type {
@@ -67,9 +67,9 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
     /// @param format the storage texture image format
-    /// @param type_mgr the TypeManager used to build the returned type
+    /// @param type_mgr the Manager used to build the returned type
     /// @returns the storage texture subtype for the given TexelFormat
-    static Type* SubtypeFor(ast::TexelFormat format, TypeManager& type_mgr);
+    static Type* SubtypeFor(ast::TexelFormat format, Manager& type_mgr);
 
   private:
     ast::TexelFormat const texel_format_;

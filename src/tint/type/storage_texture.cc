@@ -48,7 +48,7 @@ std::string StorageTexture::FriendlyName(const SymbolTable&) const {
     return out.str();
 }
 
-Type* StorageTexture::SubtypeFor(ast::TexelFormat format, TypeManager& type_mgr) {
+Type* StorageTexture::SubtypeFor(ast::TexelFormat format, Manager& type_mgr) {
     switch (format) {
         case ast::TexelFormat::kR32Uint:
         case ast::TexelFormat::kRgba8Uint:
