@@ -293,5 +293,53 @@ TEST_F(ResolverEvaluationStageTest, MemberAccessor_Runtime) {
     EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kRuntime);
 }
 
+TEST_F(ResolverEvaluationStageTest, Binary_Runtime) {
+    // let one = 1;
+    // let result = (one == 1) && (one == 1);
+    auto* one = Let("one", Expr(1_a));
+    auto* lhs = Equal("one", 1_a);
+    auto* rhs = Equal("one", 1_a);
+    auto* binary = LogicalAnd(lhs, rhs);
+    auto* result = Let("result", binary);
+    WrapInFunction(one, result);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(Sem().Get(lhs)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(rhs)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(binary)->Stage(), sem::EvaluationStage::kRuntime);
+}
+
+TEST_F(ResolverEvaluationStageTest, Binary_Const) {
+    // const one = 1;
+    // const result = (one == 1) && (one == 1);
+    auto* one = Const("one", Expr(1_a));
+    auto* lhs = Equal("one", 1_a);
+    auto* rhs = Equal("one", 1_a);
+    auto* binary = LogicalAnd(lhs, rhs);
+    auto* result = Const("result", binary);
+    WrapInFunction(one, result);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(Sem().Get(lhs)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(rhs)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(binary)->Stage(), sem::EvaluationStage::kConstant);
+}
+
+TEST_F(ResolverEvaluationStageTest, Binary_NotEvaluated) {
+    // const one = 1;
+    // const result = (one == 0) && (one == 1);
+    auto* one = Const("one", Expr(1_a));
+    auto* lhs = Equal("one", 0_a);
+    auto* rhs = Equal("one", 1_a);
+    auto* binary = LogicalAnd(lhs, rhs);
+    auto* result = Const("result", binary);
+    WrapInFunction(one, result);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(Sem().Get(lhs)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(rhs)->Stage(), sem::EvaluationStage::kNotEvaluated);
+    EXPECT_EQ(Sem().Get(binary)->Stage(), sem::EvaluationStage::kConstant);
+}
+
 }  // namespace
 }  // namespace tint::resolver

@@ -30,8 +30,12 @@ class Materialize final : public Castable<Materialize, Expression> {
     /// Constructor
     /// @param expr the inner expression, being materialized
     /// @param statement the statement that owns this expression
-    /// @param constant the constant value of this expression
-    Materialize(const Expression* expr, const Statement* statement, const Constant* constant);
+    /// @param type concrete type to materialize to
+    /// @param constant the constant value of this expression or nullptr
+    Materialize(const Expression* expr,
+                const Statement* statement,
+                const type::Type* type,
+                const Constant* constant);
 
     /// Destructor
     ~Materialize() override;

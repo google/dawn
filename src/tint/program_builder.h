@@ -1977,6 +1977,16 @@ class ProgramBuilder {
         return create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr(std::forward<EXPR>(expr)));
     }
 
+    /// @param source the source information
+    /// @param expr the expression to perform a unary not on
+    /// @return an ast::UnaryOpExpression that is the unary not of the input
+    /// expression
+    template <typename EXPR>
+    const ast::UnaryOpExpression* Not(const Source& source, EXPR&& expr) {
+        return create<ast::UnaryOpExpression>(source, ast::UnaryOp::kNot,
+                                              Expr(std::forward<EXPR>(expr)));
+    }
+
     /// @param expr the expression to perform a unary complement on
     /// @return an ast::UnaryOpExpression that is the unary complement of the
     /// input expression
@@ -2121,6 +2131,17 @@ class ProgramBuilder {
                                              Expr(std::forward<RHS>(rhs)));
     }
 
+    /// @param source the source information
+    /// @param lhs the left hand argument to the division operation
+    /// @param rhs the right hand argument to the division operation
+    /// @returns a `ast::BinaryExpression` dividing `lhs` by `rhs`
+    template <typename LHS, typename RHS>
+    const ast::BinaryExpression* Div(const Source& source, LHS&& lhs, RHS&& rhs) {
+        return create<ast::BinaryExpression>(source, ast::BinaryOp::kDivide,
+                                             Expr(std::forward<LHS>(lhs)),
+                                             Expr(std::forward<RHS>(rhs)));
+    }
+
     /// @param lhs the left hand argument to the modulo operation
     /// @param rhs the right hand argument to the modulo operation
     /// @returns a `ast::BinaryExpression` applying modulo of `lhs` by `rhs`
@@ -2177,6 +2198,17 @@ class ProgramBuilder {
             ast::BinaryOp::kLogicalAnd, Expr(std::forward<LHS>(lhs)), Expr(std::forward<RHS>(rhs)));
     }
 
+    /// @param source the source information
+    /// @param lhs the left hand argument to the logical and operation
+    /// @param rhs the right hand argument to the logical and operation
+    /// @returns a `ast::BinaryExpression` of `lhs` && `rhs`
+    template <typename LHS, typename RHS>
+    const ast::BinaryExpression* LogicalAnd(const Source& source, LHS&& lhs, RHS&& rhs) {
+        return create<ast::BinaryExpression>(source, ast::BinaryOp::kLogicalAnd,
+                                             Expr(std::forward<LHS>(lhs)),
+                                             Expr(std::forward<RHS>(rhs)));
+    }
+
     /// @param lhs the left hand argument to the logical or operation
     /// @param rhs the right hand argument to the logical or operation
     /// @returns a `ast::BinaryExpression` of `lhs` || `rhs`
@@ -2184,6 +2216,17 @@ class ProgramBuilder {
     const ast::BinaryExpression* LogicalOr(LHS&& lhs, RHS&& rhs) {
         return create<ast::BinaryExpression>(
             ast::BinaryOp::kLogicalOr, Expr(std::forward<LHS>(lhs)), Expr(std::forward<RHS>(rhs)));
+    }
+
+    /// @param source the source information
+    /// @param lhs the left hand argument to the logical or operation
+    /// @param rhs the right hand argument to the logical or operation
+    /// @returns a `ast::BinaryExpression` of `lhs` || `rhs`
+    template <typename LHS, typename RHS>
+    const ast::BinaryExpression* LogicalOr(const Source& source, LHS&& lhs, RHS&& rhs) {
+        return create<ast::BinaryExpression>(source, ast::BinaryOp::kLogicalOr,
+                                             Expr(std::forward<LHS>(lhs)),
+                                             Expr(std::forward<RHS>(rhs)));
     }
 
     /// @param lhs the left hand argument to the greater than operation
@@ -2231,6 +2274,17 @@ class ProgramBuilder {
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Equal(LHS&& lhs, RHS&& rhs) {
         return create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(std::forward<LHS>(lhs)),
+                                             Expr(std::forward<RHS>(rhs)));
+    }
+
+    /// @param source the source information
+    /// @param lhs the left hand argument to the equal expression
+    /// @param rhs the right hand argument to the equal expression
+    /// @returns a `ast::BinaryExpression` comparing `lhs` equal to `rhs`
+    template <typename LHS, typename RHS>
+    const ast::BinaryExpression* Equal(const Source& source, LHS&& lhs, RHS&& rhs) {
+        return create<ast::BinaryExpression>(source, ast::BinaryOp::kEqual,
+                                             Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
 

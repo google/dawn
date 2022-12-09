@@ -47,7 +47,7 @@ TEST_F(ExpressionTest, UnwrapMaterialize) {
                                  sem::EvaluationStage::kRuntime, /* statement */ nullptr,
                                  /* constant_value */ nullptr,
                                  /* has_side_effects */ false, /* root_ident */ nullptr);
-    auto* b = create<Materialize>(a, /* statement */ nullptr, &c);
+    auto* b = create<Materialize>(a, /* statement */ nullptr, c.Type(), &c);
 
     EXPECT_EQ(a, a->UnwrapMaterialize());
     EXPECT_EQ(a, b->UnwrapMaterialize());

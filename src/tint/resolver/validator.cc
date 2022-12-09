@@ -1318,6 +1318,9 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
 bool Validator::EvaluationStage(const sem::Expression* expr,
                                 sem::EvaluationStage latest_stage,
                                 std::string_view constraint) const {
+    if (expr->Stage() == sem::EvaluationStage::kNotEvaluated) {
+        return true;
+    }
     if (expr->Stage() > latest_stage) {
         auto stage_name = [](sem::EvaluationStage stage) -> std::string {
             switch (stage) {
@@ -1327,6 +1330,8 @@ bool Validator::EvaluationStage(const sem::Expression* expr,
                     return "an override-expression";
                 case sem::EvaluationStage::kConstant:
                     return "a const-expression";
+                case sem::EvaluationStage::kNotEvaluated:
+                    return "an unevaluated expression";
             }
             return "<unknown>";
         };

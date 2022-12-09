@@ -22,6 +22,8 @@ namespace tint::sem {
 
 /// The earliest point in time that an expression can be evaluated
 enum class EvaluationStage {
+    /// Expression will not be evaluated
+    kNotEvaluated,
     /// Expression can be evaluated at shader creation time
     kConstant,
     /// Expression can be evaluated at pipeline creation time
@@ -43,7 +45,7 @@ inline bool operator>(EvaluationStage a, EvaluationStage b) {
 /// @param stages a list of EvaluationStage.
 /// @returns the earliest stage supported by all the provided stages
 inline EvaluationStage EarliestStage(std::initializer_list<EvaluationStage> stages) {
-    auto earliest = EvaluationStage::kConstant;
+    auto earliest = EvaluationStage::kNotEvaluated;
     for (auto stage : stages) {
         earliest = std::max(stage, earliest);
     }

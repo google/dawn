@@ -1814,13 +1814,17 @@ ConstEval::Result ConstEval::OpGreaterThanEqual(const type::Type* ty,
 ConstEval::Result ConstEval::OpLogicalAnd(const type::Type* ty,
                                           utils::VectorRef<const sem::Constant*> args,
                                           const Source& source) {
+    // Note: Due to short-circuiting, this function is only called if lhs is true, so we could
+    // technically only return the value of the rhs.
     return CreateElement(builder, source, ty, args[0]->As<bool>() && args[1]->As<bool>());
 }
 
 ConstEval::Result ConstEval::OpLogicalOr(const type::Type* ty,
                                          utils::VectorRef<const sem::Constant*> args,
                                          const Source& source) {
-    return CreateElement(builder, source, ty, args[0]->As<bool>() || args[1]->As<bool>());
+    // Note: Due to short-circuiting, this function is only called if lhs is false, so we could
+    // technically only return the value of the rhs.
+    return CreateElement(builder, source, ty, args[1]->As<bool>());
 }
 
 ConstEval::Result ConstEval::OpAnd(const type::Type* ty,

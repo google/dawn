@@ -801,7 +801,8 @@ Transform::ApplyResult BuiltinPolyfill::Apply(const Program* src,
     bool made_changes = false;
     for (auto* node : src->ASTNodes().Objects()) {
         auto* expr = src->Sem().Get<sem::Expression>(node);
-        if (!expr || expr->Stage() == sem::EvaluationStage::kConstant) {
+        if (!expr || expr->Stage() == sem::EvaluationStage::kConstant ||
+            expr->Stage() == sem::EvaluationStage::kNotEvaluated) {
             continue;  // Don't polyfill @const expressions
         }
 

@@ -1510,6 +1510,11 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
                     failed = true;
                     return ast::TraverseAction::Stop;
                 }
+                if (auto* binary = expr->As<ast::BinaryExpression>();
+                    binary && binary->IsLogical()) {
+                    // Store potential const-eval short-circuit pair
+                    logical_binary_lhs_to_parent_.Add(binary->lhs, binary);
+                }
                 sorted.Push(expr);
                 return ast::TraverseAction::Descend;
             })) {
@@ -1567,6 +1572,26 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
         builder_->Sem().Add(expr, sem_expr);
         if (expr == root) {
             return sem_expr;
+        }
+
+        // If we just processed the lhs of a constexpr logical binary expression, mark the rhs for
+        // short-circuiting.
+        if (sem_expr->ConstantValue()) {
+            if (auto binary = logical_binary_lhs_to_parent_.Find(expr)) {
+                const bool lhs_is_true = sem_expr->ConstantValue()->As<bool>();
+                if (((*binary)->IsLogicalAnd() && !lhs_is_true) ||
+                    ((*binary)->IsLogicalOr() && lhs_is_true)) {
+                    // Mark entire expression tree to not const-evaluate
+                    auto r = ast::TraverseExpressions(  //
+                        (*binary)->rhs, diagnostics_, [&](const ast::Expression* e) {
+                            skip_const_eval_.Add(e);
+                            return ast::TraverseAction::Descend;
+                        });
+                    if (!r) {
+                        return nullptr;
+                    }
+                }
+            }
         }
     }
 
@@ -1779,27 +1804,32 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
         return nullptr;
     }
 
-    auto expr_val = expr->ConstantValue();
-    if (!expr_val) {
-        TINT_ICE(Resolver, builder_->Diagnostics())
-            << decl->source << "Materialize(" << decl->TypeInfo().name
-            << ") called on expression with no constant value";
-        return nullptr;
+    const sem::Constant* materialized_val = nullptr;
+    if (!skip_const_eval_.Contains(decl)) {
+        auto expr_val = expr->ConstantValue();
+        if (!expr_val) {
+            TINT_ICE(Resolver, builder_->Diagnostics())
+                << decl->source << "Materialize(" << decl->TypeInfo().name
+                << ") called on expression with no constant value";
+            return nullptr;
+        }
+
+        auto val = const_eval_.Convert(concrete_ty, expr_val, decl->source);
+        if (!val) {
+            // Convert() has already failed and raised an diagnostic error.
+            return nullptr;
+        }
+        materialized_val = val.Get();
+        if (!materialized_val) {
+            TINT_ICE(Resolver, builder_->Diagnostics())
+                << decl->source << "ConvertValue(" << builder_->FriendlyName(expr_val->Type())
+                << " -> " << builder_->FriendlyName(concrete_ty) << ") returned invalid value";
+            return nullptr;
+        }
     }
 
-    auto materialized_val = const_eval_.Convert(concrete_ty, expr_val, decl->source);
-    if (!materialized_val) {
-        // ConvertValue() has already failed and raised an diagnostic error.
-        return nullptr;
-    }
-
-    if (!materialized_val.Get()) {
-        TINT_ICE(Resolver, builder_->Diagnostics())
-            << decl->source << "ConvertValue(" << builder_->FriendlyName(expr_val->Type()) << " -> "
-            << builder_->FriendlyName(concrete_ty) << ") returned invalid value";
-        return nullptr;
-    }
-    auto* m = builder_->create<sem::Materialize>(expr, current_statement_, materialized_val.Get());
+    auto* m =
+        builder_->create<sem::Materialize>(expr, current_statement_, concrete_ty, materialized_val);
     m->Behaviors() = expr->Behaviors();
     builder_->Sem().Replace(decl, m);
     return m;
@@ -1894,12 +1924,16 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
         ty = builder_->create<type::Reference>(ty, ref->AddressSpace(), ref->Access());
     }
 
-    auto stage = sem::EarliestStage(obj->Stage(), idx->Stage());
     const sem::Constant* val = nullptr;
-    if (auto r = const_eval_.Index(obj, idx)) {
-        val = r.Get();
+    auto stage = sem::EarliestStage(obj->Stage(), idx->Stage());
+    if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+        stage = sem::EvaluationStage::kNotEvaluated;
     } else {
-        return nullptr;
+        if (auto r = const_eval_.Index(obj, idx)) {
+            val = r.Get();
+        } else {
+            return nullptr;
+        }
     }
     bool has_side_effects = idx->HasSideEffects() || obj->HasSideEffects();
     auto* sem = builder_->create<sem::IndexAccessorExpression>(
@@ -1922,6 +1956,7 @@ sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
     RegisterLoadIfNeeded(inner);
 
     const sem::Constant* val = nullptr;
+    // TODO(crbug.com/tint/1582): short circuit 'expr' once const eval of Bitcast is implemented.
     if (auto r = const_eval_.Bitcast(ty, inner)) {
         val = r.Get();
     } else {
@@ -1981,8 +2016,12 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         if (!MaybeMaterializeArguments(args, ctor_or_conv.target)) {
             return nullptr;
         }
+
         const sem::Constant* value = nullptr;
         auto stage = sem::EarliestStage(ctor_or_conv.target->Stage(), args_stage);
+        if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+            stage = sem::EvaluationStage::kNotEvaluated;
+        }
         if (stage == sem::EvaluationStage::kConstant) {
             auto const_args = ConvertArguments(args, ctor_or_conv.target);
             if (!const_args) {
@@ -2302,13 +2341,17 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
 
     // If the builtin is @const, and all arguments have constant values, evaluate the builtin
     // now.
-    auto stage = sem::EarliestStage(arg_stage, builtin.sem->Stage());
     const sem::Constant* value = nullptr;
+    auto stage = sem::EarliestStage(arg_stage, builtin.sem->Stage());
+    if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+        stage = sem::EvaluationStage::kNotEvaluated;
+    }
     if (stage == sem::EvaluationStage::kConstant) {
         auto const_args = ConvertArguments(args, builtin.sem);
         if (!const_args) {
             return nullptr;
         }
+
         if (auto r = (const_eval_.*builtin.const_eval_fn)(builtin.sem->ReturnType(),
                                                           const_args.Get(), expr->source)) {
             value = r.Get();
@@ -2787,19 +2830,25 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
     const sem::Constant* value = nullptr;
     if (stage == sem::EvaluationStage::kConstant) {
         if (op.const_eval_fn) {
-            auto const_args = utils::Vector{lhs->ConstantValue(), rhs->ConstantValue()};
-            // Implicit conversion (e.g. AInt -> AFloat)
-            if (!Convert(const_args[0], op.lhs, lhs->Declaration()->source)) {
-                return nullptr;
-            }
-            if (!Convert(const_args[1], op.rhs, rhs->Declaration()->source)) {
-                return nullptr;
-            }
-
-            if (auto r = (const_eval_.*op.const_eval_fn)(op.result, const_args, expr->source)) {
-                value = r.Get();
+            if (skip_const_eval_.Contains(expr)) {
+                stage = sem::EvaluationStage::kNotEvaluated;
+            } else if (skip_const_eval_.Contains(expr->rhs)) {
+                // Only the rhs should be short-circuited, use the lhs value
+                value = lhs->ConstantValue();
             } else {
-                return nullptr;
+                auto const_args = utils::Vector{lhs->ConstantValue(), rhs->ConstantValue()};
+                // Implicit conversion (e.g. AInt -> AFloat)
+                if (!Convert(const_args[0], op.lhs, lhs->Declaration()->source)) {
+                    return nullptr;
+                }
+                if (!Convert(const_args[1], op.rhs, rhs->Declaration()->source)) {
+                    return nullptr;
+                }
+                if (auto r = (const_eval_.*op.const_eval_fn)(op.result, const_args, expr->source)) {
+                    value = r.Get();
+                } else {
+                    return nullptr;
+                }
             }
         } else {
             stage = sem::EvaluationStage::kRuntime;
