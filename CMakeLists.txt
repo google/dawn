@@ -136,6 +136,8 @@ option_if_not_defined(DAWN_ENABLE_SWIFTSHADER "Enables building Swiftshader as p
 
 option_if_not_defined(DAWN_ENABLE_PIC "Build with Position-Independent-Code enabled" OFF)
 
+option_if_not_defined(DAWN_EMIT_COVERAGE "Emit code coverage information" OFF)
+
 if (DAWN_ENABLE_OPENGLES OR DAWN_ENABLE_DESKTOP_GL)
   set(TINT_DEFAULT_GLSL ON)
 else()
@@ -166,7 +168,6 @@ option_if_not_defined(TINT_BUILD_AS_OTHER_OS "Override OS detection to force bui
 option_if_not_defined(TINT_BUILD_REMOTE_COMPILE "Build the remote-compile tool for validating shaders on a remote machine" OFF)
 
 option_if_not_defined(TINT_ENABLE_BREAK_IN_DEBUGGER "Enable tint::debugger::Break()" OFF)
-option_if_not_defined(TINT_EMIT_COVERAGE "Emit code coverage information" OFF)
 option_if_not_defined(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
 option_if_not_defined(TINT_SYMBOL_STORE_DEBUG_NAME "Enable storing of name in tint::ast::Symbol to help debugging the AST" OFF)
 
@@ -335,6 +336,18 @@ function(common_compile_options TARGET)
   if(MSVC)
       target_compile_options(${TARGET} PUBLIC /utf-8)
   endif()
+
+  if (DAWN_EMIT_COVERAGE)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        target_compile_options(${TARGET} PRIVATE "--coverage")
+        target_link_options(${TARGET} PRIVATE "gcov")
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(${TARGET} PRIVATE "-fprofile-instr-generate" "-fcoverage-mapping")
+        target_link_options(${TARGET} PRIVATE "-fprofile-instr-generate" "-fcoverage-mapping")
+    else()
+        message(FATAL_ERROR "Coverage generation not supported for the ${CMAKE_CXX_COMPILER_ID} toolchain")
+    endif()
+  endif(DAWN_EMIT_COVERAGE)
 endfunction()
 
 if (${DAWN_ENABLE_TSAN})
@@ -502,18 +515,6 @@ function(tint_core_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_IR=$<BOOL:${TINT_BUILD_IR}>)
 
   common_compile_options(${TARGET})
-
-  if (TINT_EMIT_COVERAGE)
-    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-        target_compile_options(${TARGET} PRIVATE "--coverage")
-        target_link_options(${TARGET} PRIVATE "gcov")
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        target_compile_options(${TARGET} PRIVATE "-fprofile-instr-generate" "-fcoverage-mapping")
-        target_link_options(${TARGET} PRIVATE "-fprofile-instr-generate" "-fcoverage-mapping")
-    else()
-        message(FATAL_ERROR "Coverage generation not supported for the ${CMAKE_CXX_COMPILER_ID} toolchain")
-    endif()
-  endif(TINT_EMIT_COVERAGE)
 endfunction()
 
 function(tint_default_compile_options TARGET)
@@ -639,7 +640,7 @@ add_custom_target(tint-format
   VERBATIM)
 
 
-if (TINT_EMIT_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+if (DAWN_EMIT_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # Generates a lcov.info file at the project root.
   # This can be used by tools such as VSCode's Coverage Gutters extension to
   # visualize code coverage in the editor.
