@@ -23,7 +23,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Atomic);
 namespace tint::type {
 
 Atomic::Atomic(const type::Type* subtype)
-    : Base(TypeFlags{
+    : Base(type::Flags{
           Flag::kCreationFixedFootprint,
           Flag::kFixedFootprint,
       }),

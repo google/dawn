@@ -23,7 +23,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Pointer);
 namespace tint::type {
 
 Pointer::Pointer(const Type* subtype, ast::AddressSpace address_space, ast::Access access)
-    : Base(TypeFlags{}), subtype_(subtype), address_space_(address_space), access_(access) {
+    : Base(type::Flags{}), subtype_(subtype), address_space_(address_space), access_(access) {
     TINT_ASSERT(Type, !subtype->Is<Reference>());
     TINT_ASSERT(Type, access != ast::Access::kUndefined);
 }

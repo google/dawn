@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Vector);
 namespace tint::type {
 
 Vector::Vector(Type const* subtype, uint32_t width)
-    : Base(TypeFlags{
+    : Base(type::Flags{
           Flag::kConstructable,
           Flag::kCreationFixedFootprint,
           Flag::kFixedFootprint,

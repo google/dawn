@@ -18,7 +18,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Texture);
 
 namespace tint::type {
 
-Texture::Texture(ast::TextureDimension dim) : Base(TypeFlags{}), dim_(dim) {}
+Texture::Texture(ast::TextureDimension dim) : Base(type::Flags{}), dim_(dim) {}
 
 Texture::Texture(Texture&&) = default;
 

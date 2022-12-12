@@ -30,7 +30,7 @@ class SymbolTable;
 
 namespace tint::type {
 
-enum TypeFlag {
+enum Flag {
     /// Type is constructable.
     /// @see https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
     kConstructable,
@@ -42,15 +42,12 @@ enum TypeFlag {
     kFixedFootprint,
 };
 
-/// An alias to utils::EnumSet<TypeFlag>
-using TypeFlags = utils::EnumSet<TypeFlag>;
+/// An alias to utils::EnumSet<Flag>
+using Flags = utils::EnumSet<Flag>;
 
 /// Base class for a type in the system
 class Type : public Castable<Type, Node> {
   public:
-    /// Alias to TypeFlag
-    using Flag = TypeFlag;
-
     /// Move constructor
     Type(Type&&);
     ~Type() override;
@@ -83,7 +80,7 @@ class Type : public Castable<Type, Node> {
     virtual uint32_t Align() const;
 
     /// @returns the flags on the type
-    TypeFlags Flags() { return flags_; }
+    type::Flags Flags() { return flags_; }
 
     /// @returns true if type is constructable
     /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
@@ -197,10 +194,10 @@ class Type : public Castable<Type, Node> {
   protected:
     /// Constructor
     /// @param flags the flags of this type
-    explicit Type(TypeFlags flags);
+    explicit Type(type::Flags flags);
 
     /// The flags of this type.
-    const TypeFlags flags_;
+    const type::Flags flags_;
 };
 
 }  // namespace tint::type

@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Sampler);
 
 namespace tint::type {
 
-Sampler::Sampler(ast::SamplerKind kind) : Base(TypeFlags{}), kind_(kind) {}
+Sampler::Sampler(ast::SamplerKind kind) : Base(type::Flags{}), kind_(kind) {}
 
 Sampler::Sampler(Sampler&&) = default;
 

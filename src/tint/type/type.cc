@@ -34,7 +34,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Type);
 
 namespace tint::type {
 
-Type::Type(TypeFlags flags) : flags_(flags) {
+Type::Type(type::Flags flags) : flags_(flags) {
     if (IsConstructible()) {
         TINT_ASSERT(Type, HasCreationFixedFootprint());
     }

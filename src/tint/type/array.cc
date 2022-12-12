@@ -27,20 +27,20 @@ namespace tint::type {
 
 namespace {
 
-TypeFlags FlagsFrom(const Type* element, const ArrayCount* count) {
-    TypeFlags flags;
+type::Flags FlagsFrom(const Type* element, const ArrayCount* count) {
+    type::Flags flags;
     // Only constant-expression sized arrays are constructible
     if (count->Is<ConstantArrayCount>()) {
         if (element->IsConstructible()) {
-            flags.Add(TypeFlag::kConstructable);
+            flags.Add(Flag::kConstructable);
         }
         if (element->HasCreationFixedFootprint()) {
-            flags.Add(TypeFlag::kCreationFixedFootprint);
+            flags.Add(Flag::kCreationFixedFootprint);
         }
     }
     if (!count->Is<RuntimeArrayCount>()) {
         if (element->HasFixedFootprint()) {
-            flags.Add(TypeFlag::kFixedFootprint);
+            flags.Add(Flag::kFixedFootprint);
         }
     }
     return flags;

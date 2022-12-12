@@ -28,21 +28,21 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::StructMember);
 namespace tint::type {
 namespace {
 
-TypeFlags FlagsFrom(utils::VectorRef<const StructMember*> members) {
-    TypeFlags flags{
-        TypeFlag::kConstructable,
-        TypeFlag::kCreationFixedFootprint,
-        TypeFlag::kFixedFootprint,
+type::Flags FlagsFrom(utils::VectorRef<const StructMember*> members) {
+    type::Flags flags{
+        Flag::kConstructable,
+        Flag::kCreationFixedFootprint,
+        Flag::kFixedFootprint,
     };
     for (auto* member : members) {
         if (!member->Type()->IsConstructible()) {
-            flags.Remove(TypeFlag::kConstructable);
+            flags.Remove(Flag::kConstructable);
         }
         if (!member->Type()->HasFixedFootprint()) {
-            flags.Remove(TypeFlag::kFixedFootprint);
+            flags.Remove(Flag::kFixedFootprint);
         }
         if (!member->Type()->HasCreationFixedFootprint()) {
-            flags.Remove(TypeFlag::kCreationFixedFootprint);
+            flags.Remove(Flag::kCreationFixedFootprint);
         }
     }
     return flags;
