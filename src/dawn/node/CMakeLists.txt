@@ -13,10 +13,10 @@
 # limitations under the License.
 
 set(DAWN_NODE_GEN_DIR "${DAWN_BUILD_GEN_DIR}/node")
-set(IDLGEN_TOOL_DIR   "${CMAKE_CURRENT_SOURCE_DIR}/tools/src/cmd/idlgen")
+set(IDLGEN_TOOL_DIR   "${CMAKE_SOURCE_DIR}/tools/src/cmd/idlgen")
 
-# idlgen() is a function that uses the tools/cmd/idlgen/main.go tool to generate
-# code from an IDL file and template.
+# idlgen() is a function that uses the tools/src/cmd/idlgen/main.go tool to
+# generate code from an IDL file and template.
 # idlgen() accepts the following named arguments:
 #   TEMPLATE <path> - (required) the path to the root .tmpl file. If the
 #                     template imports other templates, then these should be
@@ -41,7 +41,7 @@ function(idlgen)
         message(FATAL_ERROR "idlgen() missing IDLS argument(s)")
     endif()
     add_custom_command(
-        COMMAND ${GO_EXECUTABLE} "run" "main.go"
+        COMMAND ${GO_EXECUTABLE} "run" "${IDLGEN_TOOL_DIR}/main.go"
                 "--template" "${IDLGEN_TEMPLATE}"
                 "--output"   "${IDLGEN_OUTPUT}"
                 ${IDLGEN_IDLS}

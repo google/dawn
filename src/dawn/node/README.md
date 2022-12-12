@@ -57,15 +57,15 @@ ninja dawn.node
   - Run `npm install` from inside the CTS directory to install its dependencies
 
 ```sh
-./src/dawn/node/tools/run-cts --cts=<path-to-webgpu-cts> --dawn-node=<path-to-dawn.node> [WebGPU CTS query]
+./src/tools/run run-cts --dawn-node=<path-to-dawn.node> [WebGPU CTS query]
 ```
 
 If this fails with the error message `TypeError: expander is not a function or its return value is not iterable`, try appending `--build=false` to the start of the `run-cts` command line flags.
 
-To test against SwiftShader instead of the default Vulkan device, prefix `./src/dawn/node/tools/run-cts` with `VK_ICD_FILENAMES=<swiftshader-cmake-build>/Linux/vk_swiftshader_icd.json` and append `--flag=dawn-backend=vulkan` to the start of run-cts command line flags. For example:
+To test against SwiftShader instead of the default Vulkan device, prefix `./src/tools/run run-cts` with `VK_ICD_FILENAMES=<swiftshader-cmake-build>/Linux/vk_swiftshader_icd.json`. For example:
 
 ```sh
-VK_ICD_FILENAMES=<swiftshader-cmake-build>/Linux/vk_swiftshader_icd.json ./src/dawn/node/tools/run-cts --cts=<path-to-webgpu-cts> --dawn-node=<path-to-dawn.node> --flag=dawn-backend=vulkan [WebGPU CTS query]
+VK_ICD_FILENAMES=<swiftshader-cmake-build>/Linux/vk_swiftshader_icd.json ./src/tools/run run-cts --dawn-node=<path-to-dawn.node> [WebGPU CTS query]
 ```
 
 The `--flag` parameter must be passed in multiple times, once for each flag begin set. Here are some common arguments:
@@ -77,7 +77,7 @@ The `--flag` parameter must be passed in multiple times, once for each flag begi
 For example, on Windows, to use the d3dcompiler_47.dll from a Chromium checkout, and to dump shader output, we could run the following using Git Bash:
 
 ```sh
-./src/dawn/node/tools/run-cts --verbose --dawn-node=/c/src/dawn/build/Debug/dawn.node --cts=/c/src/webgpu-cts --flag=dlldir="C:\src\chromium\src\out\Release" --flag=enable-dawn-features=dump_shaders 'webgpu:shader,execution,builtin,abs:integer_builtin_functions,abs_unsigned:storageClass="storage";storageMode="read_write";containerType="vector";isAtomic=false;baseType="u32";type="vec2%3Cu32%3E"'
+./src/tools/run run-cts --verbose --dawn-node=/c/src/dawn/build/Debug/dawn.node --cts=/c/src/webgpu-cts --flag=dlldir="C:\src\chromium\src\out\Release" --flag=enable-dawn-features=dump_shaders 'webgpu:shader,execution,builtin,abs:integer_builtin_functions,abs_unsigned:storageClass="storage";storageMode="read_write";containerType="vector";isAtomic=false;baseType="u32";type="vec2%3Cu32%3E"'
 ```
 
 Note that we pass `--verbose` above so that all test output, including the dumped shader, is written to stdout.
