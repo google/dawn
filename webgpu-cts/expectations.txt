@@ -78,13 +78,7 @@ crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,tex
 # Skipped instead of just Crash because of the number of failures
 # KEEP
 ################################################################################
-crbug.com/1234041 [ linux ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:* [ Skip ]
 crbug.com/1236130 [ linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Skip ]
-crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Skip ]
-crbug.com/1309194 [ linux webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Skip ]
-crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ]
-crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
-crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Skip ]
 
 # Limit value changed. gpuweb#3648
 webgpu:api,validation,query_set,create:count:type="occlusion" [ Failure ]
