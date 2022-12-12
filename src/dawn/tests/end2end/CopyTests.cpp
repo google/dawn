@@ -2178,11 +2178,6 @@ TEST_P(CopyTests_T2T, CopyWithinSameTextureNonOverlappedSlices) {
 // A regression test (from WebGPU CTS) for an Intel D3D12 driver bug about T2T copy with specific
 // texture formats. See http://crbug.com/1161355 for more details.
 TEST_P(CopyTests_T2T, CopyFromNonZeroMipLevelWithTexelBlockSizeLessThan4Bytes) {
-    // This test can pass on the Windows Intel Vulkan driver version 27.20.100.9168.
-    // TODO(crbug.com/dawn/819): enable this test on Intel Vulkan drivers after the upgrade of
-    // try bots.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsWindows() && IsIntel());
-
     constexpr std::array<wgpu::TextureFormat, 11> kFormats = {
         {wgpu::TextureFormat::RG8Sint, wgpu::TextureFormat::RG8Uint, wgpu::TextureFormat::RG8Snorm,
          wgpu::TextureFormat::RG8Unorm, wgpu::TextureFormat::R16Float, wgpu::TextureFormat::R16Sint,

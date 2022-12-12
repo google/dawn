@@ -246,14 +246,6 @@ TEST_P(OcclusionQueryTests, QueryWithDepthStencilTest) {
 // zero indicates that no sample passed scissor testing,
 // non-zero indicates that at least one sample passed scissor testing.
 TEST_P(OcclusionQueryTests, QueryWithScissorTest) {
-    // TODO(hao.x.li@intel.com): It's failed weirdly on Intel TGL（Window Vulkan) which says
-    // the destination buffer keep sentinel value in the second case, it cannot be reproduced with
-    // any debug actions including Vulkan validation layers enabled, and takes time to find out if
-    // the WriteBuffer and ResolveQuerySet are not executed in order or the ResolveQuerySet does not
-    // copy the result to the buffer. In order to integrate end2end tests to Intel driver CL without
-    // unknown issues, skip it until we find the root cause.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     // Test there are samples passed scissor testing, the expected occlusion result is non-zero.
     TestOcclusionQueryWithScissorTest({2, 1, 2, 1}, OcclusionExpectation::Result::NonZero);
 
@@ -301,11 +293,6 @@ TEST_P(OcclusionQueryTests, Rewrite) {
 // Test resolving occlusion query correctly if the queries are written sparsely, which also tests
 // the query resetting at the start of render passes on Vulkan backend.
 TEST_P(OcclusionQueryTests, ResolveSparseQueries) {
-    // TODO(hao.x.li@intel.com): Fails on Intel Windows Vulkan due to a driver issue that
-    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
-    // the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     // TODO(hao.x.li@intel.com): Investigate why it's failed on D3D12 on Nvidia when running with
     // the previous occlusion tests. Expect resolve to 0 for these unwritten queries but the
     // occlusion result of the previous tests is got.
@@ -737,11 +724,6 @@ TEST_P(TimestampQueryTests, TimestampOnCommandEncoder) {
 
 // Test timestampWrites with query set in compute pass descriptor
 TEST_P(TimestampQueryTests, TimestampWritesQuerySetOnComputePass) {
-    // TODO(dawn:1489): Fails on Intel Windows Vulkan due to a driver issue that
-    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
-    // the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     // TODO (dawn:1473): Metal bug which fails to store GPU counters to different sample buffer.
     DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsApple());
 
@@ -755,11 +737,6 @@ TEST_P(TimestampQueryTests, TimestampWritesQuerySetOnComputePass) {
 
 // Test timestampWrites with query index in compute pass descriptor
 TEST_P(TimestampQueryTests, TimestampWritesQueryIndexOnComputePass) {
-    // TODO(dawn:1489): Fails on Intel Windows Vulkan due to a driver issue that
-    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
-    // the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     constexpr uint32_t kQueryCount = 2;
 
     // Set timestampWrites with different query indexes on same compute pass
@@ -793,11 +770,6 @@ TEST_P(TimestampQueryTests, TimestampWritesQueryIndexOnComputePass) {
 
 // Test timestampWrites with timestamp location in compute pass descriptor
 TEST_P(TimestampQueryTests, TimestampWritesLocationOnComputePass) {
-    // TODO(dawn:1489): Fails on Intel Windows Vulkan due to a driver issue that
-    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
-    // the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     constexpr uint32_t kQueryCount = 2;
 
     // Set timestampWrites with only one value of ComputePassTimestampLocation
@@ -823,11 +795,6 @@ TEST_P(TimestampQueryTests, TimestampWritesLocationOnComputePass) {
 
 // Test timestampWrites on compute pass without pipeline
 TEST_P(TimestampQueryTests, TimestampWritesOnComputePassWithNoPipline) {
-    // TODO(dawn:1489): Fails on Intel Windows Vulkan due to a driver issue that
-    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
-    // the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     // TODO (dawn:1473): Metal fails to store GPU counters to sampleBufferAttachments on empty
     // encoders.
     DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsApple());
@@ -841,11 +808,6 @@ TEST_P(TimestampQueryTests, TimestampWritesOnComputePassWithNoPipline) {
 
 // Test timestampWrites with query set in render pass descriptor
 TEST_P(TimestampQueryTests, TimestampWritesQuerySetOnRenderPass) {
-    // TODO(dawn:1489): Fails on Intel Windows Vulkan due to a driver issue that
-    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
-    // the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     // TODO (dawn:1473): Metal bug which fails to store GPU counters to different sample buffer.
     DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsApple());
 
@@ -859,11 +821,6 @@ TEST_P(TimestampQueryTests, TimestampWritesQuerySetOnRenderPass) {
 
 // Test timestampWrites with query index in compute pass descriptor
 TEST_P(TimestampQueryTests, TimestampWritesQueryIndexOnRenderPass) {
-    // TODO(dawn:1489): Fails on Intel Windows Vulkan due to a driver issue that
-    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
-    // the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     // Set timestampWrites with different query indexes and locations, not need test write same
     // query index due to it's not allowed on render pass.
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
@@ -874,11 +831,6 @@ TEST_P(TimestampQueryTests, TimestampWritesQueryIndexOnRenderPass) {
 
 // Test timestampWrites with timestamp location in render pass descriptor
 TEST_P(TimestampQueryTests, TimestampWritesLocationOnRenderPass) {
-    // TODO(dawn:1489): Fails on Intel Windows Vulkan due to a driver issue that
-    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
-    // the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     // Set timestampWrites with only one value of RenderPassTimestampLocation
     {
         wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
@@ -902,11 +854,6 @@ TEST_P(TimestampQueryTests, TimestampWritesLocationOnRenderPass) {
 
 // Test timestampWrites on render pass without pipeline
 TEST_P(TimestampQueryTests, TimestampWritesOnRenderPassWithNoPipline) {
-    // TODO(dawn:1489): Fails on Intel Windows Vulkan due to a driver issue that
-    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
-    // the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
     TestTimestampWritesOnRenderPass({{querySet, 0, wgpu::RenderPassTimestampLocation::Beginning},
                                      {querySet, 1, wgpu::RenderPassTimestampLocation::End}},
@@ -916,11 +863,6 @@ TEST_P(TimestampQueryTests, TimestampWritesOnRenderPassWithNoPipline) {
 // Test timestampWrites on render pass with pipeline but no fragment stage
 TEST_P(TimestampQueryTests, TimestampWritesOnRenderPassWithOnlyVertexStage) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("use_placeholder_fragment_in_vertex_only_pipeline"));
-
-    // TODO(dawn:1489): Fails on Intel Windows Vulkan due to a driver issue that
-    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
-    // the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
     TestTimestampWritesOnRenderPass({{querySet, 0, wgpu::RenderPassTimestampLocation::Beginning},
@@ -951,11 +893,6 @@ TEST_P(TimestampQueryTests, ResolveFromAnotherEncoder) {
 
 // Test resolving timestamp query correctly if the queries are written sparsely
 TEST_P(TimestampQueryTests, ResolveSparseQueries) {
-    // TODO(dawn:1489): Fails on Intel Windows Vulkan due to a driver issue that
-    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
-    // the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     constexpr uint32_t kQueryCount = 4;
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
@@ -1002,11 +939,6 @@ TEST_P(TimestampQueryTests, ResolveWithoutWritten) {
 
 // Test resolving timestamp query to one slot in the buffer
 TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
-    // TODO(dawn:1489): Fails on Intel Windows Vulkan due to a driver issue that
-    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
-    // the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     constexpr uint32_t kQueryCount = 2;
     constexpr uint64_t kBufferSize = kQueryCount * sizeof(uint64_t) + kMinDestinationOffset;
     constexpr uint64_t kCount = kQueryCount + kMinCount;
@@ -1052,11 +984,6 @@ TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
 // Test resolving a query set twice into the same destination buffer with potentially overlapping
 // ranges
 TEST_P(TimestampQueryTests, ResolveTwiceToSameBuffer) {
-    // TODO(dawn:1489): Fails on Intel Windows Vulkan due to a driver issue that
-    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
-    // the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     // TODO(dawn:1546): Intel D3D driver regression on Gen12 GPUs. The compute shader in two
     // ResolveQuerySet execute wrong.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsIntelGen12());

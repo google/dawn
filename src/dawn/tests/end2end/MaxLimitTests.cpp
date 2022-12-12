@@ -105,9 +105,6 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
     // The uniform buffer layout used in this test is not supported on ES.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
-    // TODO(crbug.com/dawn/1172)
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     // TODO(crbug.com/dawn/1217): Remove this suppression.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());
