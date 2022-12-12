@@ -473,8 +473,6 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 win
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,offsetAndSizeOOB: [ RetryOnFailure ]
 
 # New failures. Please triage:
-crbug.com/dawn/0000 [ target-cpu-32 ] webgpu:api,operation,buffers,map_oom:mapAsync:oom=true;size=137438953472 [ Failure ]
-crbug.com/dawn/0000 [ target-cpu-32 ] webgpu:api,operation,buffers,map_oom:mapAsync:oom=true;size=9007199254740984 [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,shader_module,compilation_info:line_number_and_position:valid=false;name="carriage-return" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,createBindGroupLayout:multisampled_validation:viewDimension="2d" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,createBindGroupLayout:multisampled_validation:viewDimension="_undef_" [ Failure ]
