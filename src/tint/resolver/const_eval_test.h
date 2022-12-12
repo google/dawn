@@ -101,7 +101,8 @@ inline void CheckConstant(const sem::Constant* got_constant,
             [&](const auto& expected) {
                 using T = std::decay_t<decltype(expected)>;
 
-                ASSERT_TRUE(std::holds_alternative<T>(got_scalar));
+                ASSERT_TRUE(std::holds_alternative<T>(got_scalar))
+                    << "Scalar variant index: " << got_scalar.index();
                 auto got = std::get<T>(got_scalar);
 
                 if constexpr (std::is_same_v<bool, T>) {

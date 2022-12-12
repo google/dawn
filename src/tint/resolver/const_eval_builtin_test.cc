@@ -179,7 +179,7 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
             CheckConstant(value, expected_case.values[0], expected_case.flags);
         }
     } else {
-        EXPECT_FALSE(r()->Resolve());
+        ASSERT_FALSE(r()->Resolve());
         EXPECT_EQ(r()->error(), c.expected.Failure().error);
     }
 }
@@ -1733,6 +1733,94 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               MinCases<AFloat>(),
                                               MinCases<f32>(),
                                               MinCases<f16>()))));
+
+template <typename T>
+std::vector<Case> MixCases() {
+    auto r = std::vector<Case>{
+        C({T(0), T(1), T(0)}, T(0)),                         //
+        C({T(0), T(1), T(1)}, T(1)),                         //
+        C({T(0), T(1), T(2)}, T(2)),                         //
+        C({T(0), T(1), T::Highest()}, T::Highest()),         //
+        C({T::Lowest(), T::Highest(), T(1)}, T::Highest()),  //
+        C({T::Lowest(), T::Highest(), T(0)}, T::Lowest()),   //
+        C({T(0), T(1), T(0.25)}, T(0.25)),                   //
+        C({T(0), T(1), T(0.5)}, T(0.5)),                     //
+        C({T(0), T(1), T(0.75)}, T(0.75)),                   //
+        C({T(0), T(1000), T(0.25)}, T(250)),                 //
+        C({T(0), T(1000), T(0.5)}, T(500)),                  //
+        C({T(0), T(1000), T(0.75)}, T(750)),                 //
+        // Swap e1 and e2//
+        C({T(1), T(0), T(0)}, T(1)),                         //
+        C({T(1), T(0), T(1)}, T(0)),                         //
+        C({T(1), T(0), T(2)}, T(-1)),                        //
+        C({T::Highest(), T::Lowest(), T(1)}, T::Lowest()),   //
+        C({T::Highest(), T::Lowest(), T(0)}, T::Highest()),  //
+        C({T(1), T(0), T(0.25)}, T(0.75)),                   //
+        C({T(1), T(0), T(0.5)}, T(0.5)),                     //
+        C({T(1), T(0), T(0.75)}, T(0.25)),                   //
+        C({T(1000), T(0), T(0.25)}, T(750)),                 //
+        C({T(1000), T(0), T(0.5)}, T(500)),                  //
+        C({T(1000), T(0), T(0.75)}, T(250)),
+
+        // mix(vec, vec, vec) cases
+        C({Vec(T(0), T(0), T(0)),  //
+           Vec(T(1), T(1), T(1)),  //
+           Vec(T(0), T(1), T(2))},
+          Vec(T(0), T(1), T(2))),
+
+        // mix(vec, vec, scalar) cases
+        C({Vec(T(0), T(1), T(0)),     //
+           Vec(T(1), T(0), T(1000)),  //
+           Val(T(0.25))},
+          Vec(T(0.25), T(0.75), T(250))),
+    };
+    // Can't interpolate lowest value for f16 because (1 - lowest) is not representable as f16.
+    if constexpr (!std::is_same_v<T, f16>) {
+        ConcatInto(r, std::vector<Case>{
+                          C({T(0), T(1), T::Lowest()}, T::Lowest()),
+                          C({T(1), T(0), T::Highest()}, T::Lowest()),
+                      });
+    }
+
+    auto error_msg = [](auto a, const char* op, auto b) {
+        return "12:34 error: " + OverflowErrorMessage(a, op, b) + R"(
+12:34 note: when calculating mix)";
+    };
+    auto kLargeValue = T{T::Highest() / 2};
+    // Test f16 separately as it overflows for a different reason at the boundary inputs.
+    // Specifically, (1 - lowest) fails for f16 because the result is not representable.
+    if constexpr (!std::is_same_v<T, f16>) {
+        ConcatInto(  //
+            r,
+            std::vector<Case>{
+                E({T(0), T::Highest(), T::Highest()}, error_msg(T::Highest(), "*", T::Highest())),
+                E({T(0), T::Lowest(), T::Lowest()}, error_msg(T::Lowest(), "*", T::Lowest())),
+                E({T::Highest(), T(0), T::Lowest()}, error_msg(T::Highest(), "*", T::Highest())),
+                E({-kLargeValue, kLargeValue, T(2)},
+                  error_msg(T{-kLargeValue * T(1 - 2)}, "+", T{kLargeValue * T(2)})),
+            });
+    } else {
+        ConcatInto(  //
+            r,
+            std::vector<Case>{
+                E({T(0), T::Highest(), T::Highest()}, error_msg(T::Highest(), "*", T::Highest())),
+                E({T(0), T::Lowest(), T::Lowest()}, error_msg(T(1), "-", T::Lowest())),
+                E({T::Highest(), T(0), T::Lowest()}, error_msg(T(1), "-", T::Lowest())),
+                E({-kLargeValue, kLargeValue, T(2)},
+                  error_msg(T{-kLargeValue * T(1 - 2)}, "+", T{kLargeValue * T(2)})),
+            });
+    }
+
+    return r;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Mix,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kMix),
+                     testing::ValuesIn(Concat(MixCases<AFloat>(),  //
+                                              MixCases<f32>(),     //
+                                              MixCases<f16>()))));
+
 template <typename T>
 std::vector<Case> ModfCases() {
     return {

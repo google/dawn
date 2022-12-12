@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void mix_98007a() {
+  float4 res = float4(1.0f);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  mix_98007a();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  mix_98007a();
+  return;
+}
+
+kernel void compute_main() {
+  mix_98007a();
+  return;
+}
+

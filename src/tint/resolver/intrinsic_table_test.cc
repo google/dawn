@@ -1483,68 +1483,6 @@ Case::Create<u32V,     u32V,     u32V,     u32V,     u32V,     u32V,     AIntV>(
         // clang-format on
         ));
 
-struct IntrinsicTableAbstractTernaryTest_NonConstEval : public ResolverTestWithParam<Case> {
-    std::unique_ptr<IntrinsicTable> table = IntrinsicTable::Create(*this);
-};
-
-TEST_P(IntrinsicTableAbstractTernaryTest_NonConstEval, MatchMix) {
-    auto* arg_a = GetParam().arg_a(*this);
-    auto* arg_b = GetParam().arg_b(*this);
-    auto* arg_c = GetParam().arg_c(*this);
-    auto builtin = table->Lookup(sem::BuiltinType::kMix, utils::Vector{arg_a, arg_b, arg_c},
-                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
-
-    bool matched = builtin.sem != nullptr;
-    bool expected_match = GetParam().expected_match;
-    EXPECT_EQ(matched, expected_match) << Diagnostics().str();
-
-    auto* result = builtin.sem ? builtin.sem->ReturnType() : nullptr;
-    auto* expected_result = GetParam().expected_result(*this);
-    EXPECT_TYPE(result, expected_result);
-
-    auto* param_a = builtin.sem ? builtin.sem->Parameters()[0]->Type() : nullptr;
-    auto* expected_param_a = GetParam().expected_param_a(*this);
-    EXPECT_TYPE(param_a, expected_param_a);
-
-    auto* param_b = builtin.sem ? builtin.sem->Parameters()[1]->Type() : nullptr;
-    auto* expected_param_b = GetParam().expected_param_b(*this);
-    EXPECT_TYPE(param_b, expected_param_b);
-
-    auto* param_c = builtin.sem ? builtin.sem->Parameters()[2]->Type() : nullptr;
-    auto* expected_param_c = GetParam().expected_param_c(*this);
-    EXPECT_TYPE(param_c, expected_param_c);
-}
-
-INSTANTIATE_TEST_SUITE_P(
-    AFloat_f32,
-    IntrinsicTableAbstractTernaryTest_NonConstEval,
-    testing::Values(  // clang-format off
-                      //           result  | param a | param b | param c |  arg a  |  arg b  |  arg c
-        Case::Create<f32,      f32,      f32,      f32,      AFloat,   AFloat,   AFloat>(),
-        Case::Create<f32,      f32,      f32,      f32,      AFloat,   AFloat,   f32>(),
-        Case::Create<f32,      f32,      f32,      f32,      AFloat,   f32,      AFloat>(),
-        Case::Create<f32,      f32,      f32,      f32,      AFloat,   f32,      f32>(),
-        Case::Create<f32,      f32,      f32,      f32,      f32,      AFloat,   AFloat>(),
-        Case::Create<f32,      f32,      f32,      f32,      f32,      AFloat,   f32>(),
-        Case::Create<f32,      f32,      f32,      f32,      f32,      f32,      AFloat>()
-        // clang-format on
-        ));
-
-INSTANTIATE_TEST_SUITE_P(
-    VecAFloat_Vecf32,
-    IntrinsicTableAbstractTernaryTest_NonConstEval,
-    testing::Values(  // clang-format off
-                      //           result  | param a | param b | param c |  arg a  |  arg b  |  arg c
-        Case::Create<f32V,     f32V,     f32V,     f32V,     AFloatV,  AFloatV,  AFloatV>(),
-        Case::Create<f32V,     f32V,     f32V,     f32V,     AFloatV,  AFloatV,  f32V>(),
-        Case::Create<f32V,     f32V,     f32V,     f32V,     AFloatV,  f32V,     AFloatV>(),
-        Case::Create<f32V,     f32V,     f32V,     f32V,     AFloatV,  f32V,     f32V>(),
-        Case::Create<f32V,     f32V,     f32V,     f32V,     f32V,     AFloatV,  AFloatV>(),
-        Case::Create<f32V,     f32V,     f32V,     f32V,     f32V,     AFloatV,  f32V>(),
-        Case::Create<f32V,     f32V,     f32V,     f32V,     f32V,     f32V,     AFloatV> ()
-        // clang-format on
-        ));
-
 }  // namespace AbstractTernaryTests
 
 }  // namespace
