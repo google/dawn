@@ -23,7 +23,7 @@
 
 namespace dawn::native {
 
-MaybeError ValidateRenderBundleEncoderDescriptor(const DeviceBase* device,
+MaybeError ValidateRenderBundleEncoderDescriptor(DeviceBase* device,
                                                  const RenderBundleEncoderDescriptor* descriptor);
 
 class RenderBundleEncoder final : public RenderEncoderBase {

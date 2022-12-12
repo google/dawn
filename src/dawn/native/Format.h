@@ -97,8 +97,10 @@ struct Format {
     bool supportsMultisample = false;
     bool supportsResolveTarget = false;
     Aspect aspects{};
-    // Only used for renderable color formats, number of color channels.
-    uint8_t componentCount = 0;
+    // Only used for renderable color formats:
+    uint8_t componentCount = 0;                  // number of color channels
+    uint8_t renderTargetPixelByteCost = 0;       // byte cost of pixel in render targets
+    uint8_t renderTargetComponentAlignment = 0;  // byte alignment for components in render targets
 
     bool IsColor() const;
     bool HasDepth() const;

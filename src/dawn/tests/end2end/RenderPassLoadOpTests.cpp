@@ -465,6 +465,7 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearNormalizedFormatsOutOfBound) {
 }
 
 // Test clearing multiple color attachments with different big integers can still work correctly.
+// TODO(dawn:1522) Refactor and fix this test to avoid deprecation warnings.
 TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigInt32ValuesOnMultipleColorAttachments) {
     constexpr int32_t kMaxInt32RepresentableInFloat = 1 << std::numeric_limits<float>::digits;
     constexpr int32_t kMinInt32RepresentableInFloat = -kMaxInt32RepresentableInFloat;
@@ -523,7 +524,14 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigInt32ValuesOnMultipleColorAttach
     wgpu::RenderPassDescriptor renderPassDescriptor = {};
     renderPassDescriptor.colorAttachmentCount = kMaxColorAttachments;
     renderPassDescriptor.colorAttachments = colorAttachmentsInfo.data();
-    wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+    wgpu::RenderPassEncoder renderPass;
+    if (HasToggleEnabled("apply_clear_big_integer_color_value_with_draw")) {
+        // When the toggle is enabled, an extra internal pipeline is created which will hit the same
+        // deprecation issue again, hence we need to check for 2 warnings instead of 1.
+        EXPECT_DEPRECATION_WARNINGS(renderPass = encoder.BeginRenderPass(&renderPassDescriptor), 2);
+    } else {
+        EXPECT_DEPRECATION_WARNING(renderPass = encoder.BeginRenderPass(&renderPassDescriptor));
+    }
     renderPass.End();
 
     std::array<wgpu::Buffer, kMaxColorAttachments> outputBuffers;
@@ -553,6 +561,7 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigInt32ValuesOnMultipleColorAttach
 
 // Test clearing multiple color attachments with different big unsigned integers can still work
 // correctly.
+// TODO(dawn:1522) Refactor and fix this test to avoid deprecation warnings.
 TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigUInt32ValuesOnMultipleColorAttachments) {
     constexpr int32_t kMaxUInt32RepresentableInFloat = 1 << std::numeric_limits<float>::digits;
 
@@ -628,7 +637,14 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigUInt32ValuesOnMultipleColorAttac
     wgpu::RenderPassDescriptor renderPassDescriptor = {};
     renderPassDescriptor.colorAttachmentCount = kMaxColorAttachments;
     renderPassDescriptor.colorAttachments = colorAttachmentsInfo.data();
-    wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+    wgpu::RenderPassEncoder renderPass;
+    if (HasToggleEnabled("apply_clear_big_integer_color_value_with_draw")) {
+        // When the toggle is enabled, an extra internal pipeline is created which will hit the same
+        // deprecation issue again, hence we need to check for 2 warnings instead of 1.
+        EXPECT_DEPRECATION_WARNINGS(renderPass = encoder.BeginRenderPass(&renderPassDescriptor), 2);
+    } else {
+        EXPECT_DEPRECATION_WARNING(renderPass = encoder.BeginRenderPass(&renderPassDescriptor));
+    }
     renderPass.End();
 
     std::array<wgpu::Buffer, kMaxColorAttachments> outputBuffers;

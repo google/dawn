@@ -16,6 +16,8 @@
 
 #include <algorithm>
 #include <limits>
+#include <sstream>
+#include <string>
 #include <utility>
 
 #include "dawn/common/BitSetIterator.h"
@@ -488,6 +490,36 @@ MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage) {
     ASSERT(wgpu::HasZeroOrOneBits(usage));
     DAWN_INVALID_IF(!(buffer->GetUsageExternalOnly() & usage), "%s usage (%s) doesn't include %s.",
                     buffer, buffer->GetUsageExternalOnly(), usage);
+    return {};
+}
+
+namespace {
+std::string TextureFormatsToString(const ColorAttachmentFormats& formats) {
+    std::ostringstream ss;
+    ss << "[ ";
+    for (const Format* format : formats) {
+        ss << absl::StrFormat("%s", format->format) << " ";
+    }
+    ss << "]";
+    return ss.str();
+}
+}  // anonymous namespace
+
+MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
+                                                 const ColorAttachmentFormats& formats) {
+    uint32_t totalByteSize = 0;
+    for (const Format* format : formats) {
+        totalByteSize = Align(totalByteSize, format->renderTargetComponentAlignment);
+        totalByteSize += format->renderTargetPixelByteCost;
+    }
+    uint32_t maxColorAttachmentBytesPerSample =
+        device->GetLimits().v1.maxColorAttachmentBytesPerSample;
+    // TODO(dawn:1522) Promote to DAWN_INVALID_IF after deprecation period.
+    DAWN_DEPRECATED_IF(
+        device, totalByteSize > maxColorAttachmentBytesPerSample,
+        "Total color attachment bytes per sample (%u) exceeds maximum (%u) with formats (%s).",
+        totalByteSize, maxColorAttachmentBytesPerSample, TextureFormatsToString(formats));
+
     return {};
 }
 

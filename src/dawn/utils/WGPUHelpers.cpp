@@ -96,7 +96,7 @@ wgpu::Buffer CreateBufferFromData(const wgpu::Device& device,
 }
 
 ComboRenderPassDescriptor::ComboRenderPassDescriptor(
-    std::initializer_list<wgpu::TextureView> colorAttachmentInfo,
+    const std::vector<wgpu::TextureView>& colorAttachmentInfo,
     wgpu::TextureView depthStencil) {
     for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
         cColorAttachments[i].loadOp = wgpu::LoadOp::Clear;
@@ -174,7 +174,7 @@ BasicRenderPass::BasicRenderPass()
       height(0),
       color(nullptr),
       colorFormat(wgpu::TextureFormat::RGBA8Unorm),
-      renderPassInfo({}) {}
+      renderPassInfo() {}
 
 BasicRenderPass::BasicRenderPass(uint32_t texWidth,
                                  uint32_t texHeight,

@@ -16,10 +16,10 @@
 
 #include <algorithm>
 #include <cmath>
-#include <sstream>
 
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/InternalPipelineStore.h"
@@ -351,6 +351,7 @@ MaybeError ValidateFragmentState(DeviceBase* device,
 
     const EntryPointMetadata& fragmentMetadata =
         descriptor->module->GetEntryPoint(descriptor->entryPoint);
+    ColorAttachmentFormats colorAttachmentFormats;
     for (ColorAttachmentIndex i(uint8_t(0));
          i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->targetCount)); ++i) {
         const ColorTargetState* target = &descriptor->targets[static_cast<uint8_t>(i)];
@@ -359,12 +360,14 @@ MaybeError ValidateFragmentState(DeviceBase* device,
                 ValidateColorTargetState(device, target, fragmentMetadata.fragmentOutputsWritten[i],
                                          fragmentMetadata.fragmentOutputVariables[i]),
                 "validating targets[%u].", static_cast<uint8_t>(i));
+            colorAttachmentFormats->push_back(&device->GetValidInternalFormat(target->format));
         } else {
             DAWN_INVALID_IF(target->blend,
                             "Color target[%u] blend state is set when the format is undefined.",
                             static_cast<uint8_t>(i));
         }
     }
+    DAWN_TRY(ValidateColorAttachmentBytesPerSample(device, colorAttachmentFormats));
 
     DAWN_INVALID_IF(fragmentMetadata.usesSampleMaskOutput && alphaToCoverageEnabled,
                     "alphaToCoverageEnabled is true when the sample_mask builtin is a "

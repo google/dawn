@@ -832,7 +832,7 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretationRenderAttachment) {
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                          {{0, sampledTexture.CreateView()}});
 
-        utils::ComboRenderPassDescriptor renderPassInfo{textureView};
+        utils::ComboRenderPassDescriptor renderPassInfo({textureView});
 
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassInfo);
         pass.SetPipeline(pipeline);
@@ -947,7 +947,7 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretionResolveAttachment) {
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                          {{0, sampledTexture.CreateView()}});
 
-        utils::ComboRenderPassDescriptor renderPassInfo{multisampledTextureView};
+        utils::ComboRenderPassDescriptor renderPassInfo({multisampledTextureView});
         renderPassInfo.cColorAttachments[0].resolveTarget = resolveView;
 
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassInfo);

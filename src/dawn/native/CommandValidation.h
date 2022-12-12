@@ -17,6 +17,8 @@
 
 #include <vector>
 
+#include "dawn/common/Constants.h"
+#include "dawn/common/StackContainer.h"
 #include "dawn/native/CommandAllocator.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Features.h"
@@ -89,6 +91,10 @@ MaybeError ValidateCanUseAs(const TextureBase* texture,
                             wgpu::TextureUsage usage,
                             UsageValidationMode mode);
 MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage);
+
+using ColorAttachmentFormats = StackVector<const Format*, kMaxColorAttachments>;
+MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
+                                                 const ColorAttachmentFormats& formats);
 
 }  // namespace dawn::native
 

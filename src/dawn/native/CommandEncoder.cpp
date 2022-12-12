@@ -458,6 +458,7 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
         descriptor->colorAttachmentCount, maxColorAttachments);
 
     bool isAllColorAttachmentNull = true;
+    ColorAttachmentFormats colorAttachmentFormats;
     for (uint32_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
         DAWN_TRY_CONTEXT(
             ValidateRenderPassColorAttachment(device, descriptor->colorAttachments[i], width,
@@ -465,8 +466,11 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
             "validating colorAttachments[%u].", i);
         if (descriptor->colorAttachments[i].view) {
             isAllColorAttachmentNull = false;
+            colorAttachmentFormats->push_back(&descriptor->colorAttachments[i].view->GetFormat());
         }
     }
+    DAWN_TRY_CONTEXT(ValidateColorAttachmentBytesPerSample(device, colorAttachmentFormats),
+                     "validating color attachment bytes per sample.");
 
     if (descriptor->depthStencilAttachment != nullptr) {
         DAWN_TRY_CONTEXT(ValidateRenderPassDepthStencilAttachment(
@@ -854,7 +858,8 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
 
     // If descriptor is invalid, make pass invalid and stop immediately
     if (device->ConsumedError(ValidateRenderPassDescriptor(device, descriptor, &width, &height,
-                                                           &sampleCount, mUsageValidationMode))) {
+                                                           &sampleCount, mUsageValidationMode),
+                              "validating render pass descriptor.")) {
         return RenderPassEncoder::MakeError(device, this, &mEncodingContext);
     }
 

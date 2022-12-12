@@ -12,38 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This file contains test for deprecated parts of Dawn's API while following WebGPU's evolution.
-// It contains test for the "old" behavior that will be deleted once users are migrated, tests that
-// a deprecation warning is emitted when the "old" behavior is used, and tests that an error is
-// emitted when both the old and the new behavior are used (when applicable).
-
 #include <cmath>
 
-#include "dawn/tests/DawnTest.h"
+#include "dawn/tests/unittests/validation/DeprecatedAPITests.h"
 
 #include "dawn/common/Constants.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
-constexpr char kDisallowDeprecatedAPIsToggleName[] = "disallow_deprecated_apis";
+WGPUDevice DeprecationTests::CreateTestDevice(dawn::native::Adapter dawnAdapter) {
+    wgpu::DeviceDescriptor descriptor = {};
 
-#define EXPECT_DEPRECATION_ERROR_OR_WARNING(statement)         \
-    if (HasToggleEnabled(kDisallowDeprecatedAPIsToggleName)) { \
-        ASSERT_DEVICE_ERROR(statement);                        \
-    } else {                                                   \
-        EXPECT_DEPRECATION_WARNING(statement);                 \
-    }                                                          \
-    for (;;)                                                   \
-    break
+    wgpu::DawnTogglesDeviceDescriptor togglesDesc = {};
+    const char* forceEnabledToggles[1] = {kDisallowDeprecatedAPIsToggleName};
+    togglesDesc.forceEnabledToggles = forceEnabledToggles;
+    togglesDesc.forceEnabledTogglesCount = 1;
 
-class DeprecationTests : public DawnTest {
-  protected:
-    void SetUp() override {
-        DawnTest::SetUp();
-        // Skip when validation is off because warnings might be emitted during validation calls
-        DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+    if (GetParam()) {
+        descriptor.nextInChain = &togglesDesc;
     }
-};
+    return dawnAdapter.CreateDevice(&descriptor);
+}
 
 // Test that setting attachment rather than view for render pass color and depth/stencil attachments
 // is deprecated.
@@ -208,16 +197,9 @@ TEST_P(DeprecationTests, MultisampledTextureSampleType) {
                 }));
 }
 
-DAWN_INSTANTIATE_TEST(DeprecationTests,
-                      D3D12Backend(),
-                      MetalBackend(),
-                      NullBackend(),
-                      OpenGLBackend(),
-                      OpenGLESBackend(),
-                      VulkanBackend(),
-                      D3D12Backend({kDisallowDeprecatedAPIsToggleName}),
-                      MetalBackend({kDisallowDeprecatedAPIsToggleName}),
-                      NullBackend({kDisallowDeprecatedAPIsToggleName}),
-                      OpenGLBackend({kDisallowDeprecatedAPIsToggleName}),
-                      OpenGLESBackend({kDisallowDeprecatedAPIsToggleName}),
-                      VulkanBackend({kDisallowDeprecatedAPIsToggleName}));
+INSTANTIATE_TEST_SUITE_P(DeprecatedAPITest,
+                         DeprecationTests,
+                         testing::Values(true, false),
+                         [](const testing::TestParamInfo<DeprecationTests::ParamType>& info) {
+                             return info.param ? "Disallowed" : "Allowed";
+                         });

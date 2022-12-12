@@ -57,7 +57,7 @@ wgpu::TextureDataLayout CreateTextureDataLayout(uint64_t offset,
 
 struct ComboRenderPassDescriptor : public wgpu::RenderPassDescriptor {
   public:
-    ComboRenderPassDescriptor(std::initializer_list<wgpu::TextureView> colorAttachmentInfo,
+    ComboRenderPassDescriptor(const std::vector<wgpu::TextureView>& colorAttachmentInfo = {},
                               wgpu::TextureView depthStencil = wgpu::TextureView());
     ~ComboRenderPassDescriptor();
 

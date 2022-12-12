@@ -59,6 +59,7 @@
     X(Maximum,               maxInterStageShaderComponents,        60,         60) \
     X(Maximum,               maxInterStageShaderVariables,         16,         16) \
     X(Maximum,                         maxColorAttachments,         8,          8) \
+    X(Maximum,            maxColorAttachmentBytesPerSample,        32,         32) \
     X(Maximum,           maxComputeInvocationsPerWorkgroup,       256,        256) \
     X(Maximum,                    maxComputeWorkgroupSizeX,       256,        256) \
     X(Maximum,                    maxComputeWorkgroupSizeY,       256,        256) \

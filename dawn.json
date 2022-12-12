@@ -1271,6 +1271,7 @@
             {"name": "max inter stage shader components", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max inter stage shader variables", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max color attachments", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max color attachment bytes per sample", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max compute workgroup storage size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max compute invocations per workgroup", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max compute workgroup size x", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},

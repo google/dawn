@@ -16,6 +16,7 @@
 
 #include <utility>
 
+#include "dawn/common/StackContainer.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
@@ -57,7 +58,7 @@ MaybeError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateRenderBundleEncoderDescriptor(const DeviceBase* device,
+MaybeError ValidateRenderBundleEncoderDescriptor(DeviceBase* device,
                                                  const RenderBundleEncoderDescriptor* descriptor) {
     DAWN_INVALID_IF(!IsValidSampleCount(descriptor->sampleCount),
                     "Sample count (%u) is not supported.", descriptor->sampleCount);
@@ -68,14 +69,18 @@ MaybeError ValidateRenderBundleEncoderDescriptor(const DeviceBase* device,
                     descriptor->colorFormatsCount, maxColorAttachments);
 
     bool allColorFormatsUndefined = true;
+    ColorAttachmentFormats colorAttachmentFormats;
     for (uint32_t i = 0; i < descriptor->colorFormatsCount; ++i) {
         wgpu::TextureFormat format = descriptor->colorFormats[i];
         if (format != wgpu::TextureFormat::Undefined) {
             DAWN_TRY_CONTEXT(ValidateColorAttachmentFormat(device, format),
                              "validating colorFormats[%u]", i);
+            colorAttachmentFormats->push_back(&device->GetValidInternalFormat(format));
             allColorFormatsUndefined = false;
         }
     }
+    DAWN_TRY_CONTEXT(ValidateColorAttachmentBytesPerSample(device, colorAttachmentFormats),
+                     "validating color attachment bytes per sample.");
 
     if (descriptor->depthStencilFormat != wgpu::TextureFormat::Undefined) {
         DAWN_TRY_CONTEXT(ValidateDepthStencilAttachmentFormat(
