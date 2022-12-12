@@ -137,6 +137,7 @@ option_if_not_defined(DAWN_ENABLE_SWIFTSHADER "Enables building Swiftshader as p
 option_if_not_defined(DAWN_ENABLE_PIC "Build with Position-Independent-Code enabled" OFF)
 
 option_if_not_defined(DAWN_EMIT_COVERAGE "Emit code coverage information" OFF)
+set_if_not_defined(LLVM_SOURCE_DIR "${Dawn_LLVM_SOURCE_DIR}" "Directory to an LLVM source checkout. Required to build turbo-cov")
 
 if (DAWN_ENABLE_OPENGLES OR DAWN_ENABLE_DESKTOP_GL)
   set(TINT_DEFAULT_GLSL ON)
