@@ -22,6 +22,8 @@ import (
 	"os"
 )
 
+const ExeExt = ""
+
 // IsExe returns true if the file at path is an executable
 func IsExe(path string) bool {
 	s, err := os.Stat(path)
