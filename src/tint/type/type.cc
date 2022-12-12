@@ -180,7 +180,7 @@ bool Type::HoldsAbstract() const {
         [&](const Vector* v) { return v->type()->HoldsAbstract(); },
         [&](const Matrix* m) { return m->type()->HoldsAbstract(); },
         [&](const Array* a) { return a->ElemType()->HoldsAbstract(); },
-        [&](const StructBase* s) {
+        [&](const Struct* s) {
             for (auto* m : s->Members()) {
                 if (m->Type()->HoldsAbstract()) {
                     return true;
@@ -238,7 +238,7 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
             }
             return kNoConversion;
         },
-        [&](const StructBase* from_str) {
+        [&](const Struct* from_str) {
             auto concrete_tys = from_str->ConcreteTypes();
             for (size_t i = 0; i < concrete_tys.Length(); i++) {
                 if (concrete_tys[i] == to) {

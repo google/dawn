@@ -32,13 +32,13 @@ namespace tint::sem {
 class StructMember;
 }  // namespace tint::sem
 namespace tint::type {
-class StructMemberBase;
+class StructMember;
 }  // namespace tint::type
 
 namespace tint::sem {
 
 /// Struct holds the semantic information for structures.
-class Struct final : public Castable<Struct, type::StructBase> {
+class Struct final : public Castable<Struct, type::Struct> {
   public:
     /// Constructor
     /// @param declaration the AST structure declaration
@@ -73,7 +73,7 @@ class Struct final : public Castable<Struct, type::StructBase> {
 };
 
 /// StructMember holds the semantic information for structure members.
-class StructMember final : public Castable<StructMember, type::StructMemberBase> {
+class StructMember final : public Castable<StructMember, type::StructMember> {
   public:
     /// Constructor
     /// @param declaration the AST declaration node

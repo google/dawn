@@ -22,13 +22,13 @@
 #include "src/tint/symbol_table.h"
 #include "src/tint/utils/hash.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::StructBase);
-TINT_INSTANTIATE_TYPEINFO(tint::type::StructMemberBase);
+TINT_INSTANTIATE_TYPEINFO(tint::type::Struct);
+TINT_INSTANTIATE_TYPEINFO(tint::type::StructMember);
 
 namespace tint::type {
 namespace {
 
-TypeFlags FlagsFrom(utils::VectorRef<const StructMemberBase*> members) {
+TypeFlags FlagsFrom(utils::VectorRef<const StructMember*> members) {
     TypeFlags flags{
         TypeFlag::kConstructable,
         TypeFlag::kCreationFixedFootprint,
@@ -50,12 +50,12 @@ TypeFlags FlagsFrom(utils::VectorRef<const StructMemberBase*> members) {
 
 }  // namespace
 
-StructBase::StructBase(tint::Source source,
-                       Symbol name,
-                       utils::VectorRef<const StructMemberBase*> members,
-                       uint32_t align,
-                       uint32_t size,
-                       uint32_t size_no_padding)
+Struct::Struct(tint::Source source,
+               Symbol name,
+               utils::VectorRef<const StructMember*> members,
+               uint32_t align,
+               uint32_t size,
+               uint32_t size_no_padding)
     : Base(FlagsFrom(members)),
       source_(source),
       name_(name),
@@ -64,20 +64,20 @@ StructBase::StructBase(tint::Source source,
       size_(size),
       size_no_padding_(size_no_padding) {}
 
-StructBase::~StructBase() = default;
+Struct::~Struct() = default;
 
-size_t StructBase::Hash() const {
-    return utils::Hash(TypeInfo::Of<StructBase>().full_hashcode, name_);
+size_t Struct::Hash() const {
+    return utils::Hash(TypeInfo::Of<Struct>().full_hashcode, name_);
 }
 
-bool StructBase::Equals(const Type& other) const {
-    if (auto* o = other.As<StructBase>()) {
+bool Struct::Equals(const Type& other) const {
+    if (auto* o = other.As<Struct>()) {
         return o->name_ == name_;
     }
     return false;
 }
 
-const StructMemberBase* StructBase::FindMember(Symbol name) const {
+const StructMember* Struct::FindMember(Symbol name) const {
     for (auto* member : members_) {
         if (member->Name() == name) {
             return member;
@@ -86,22 +86,22 @@ const StructMemberBase* StructBase::FindMember(Symbol name) const {
     return nullptr;
 }
 
-uint32_t StructBase::Align() const {
+uint32_t Struct::Align() const {
     return align_;
 }
 
-uint32_t StructBase::Size() const {
+uint32_t Struct::Size() const {
     return size_;
 }
 
-std::string StructBase::FriendlyName(const SymbolTable& symbols) const {
+std::string Struct::FriendlyName(const SymbolTable& symbols) const {
     return symbols.NameFor(name_);
 }
 
-std::string StructBase::Layout(const tint::SymbolTable& symbols) const {
+std::string Struct::Layout(const tint::SymbolTable& symbols) const {
     std::stringstream ss;
 
-    auto member_name_of = [&](const StructMemberBase* sm) { return symbols.NameFor(sm->Name()); };
+    auto member_name_of = [&](const StructMember* sm) { return symbols.NameFor(sm->Name()); };
 
     if (Members().IsEmpty()) {
         return {};
@@ -164,14 +164,14 @@ std::string StructBase::Layout(const tint::SymbolTable& symbols) const {
     return ss.str();
 }
 
-StructMemberBase::StructMemberBase(tint::Source source,
-                                   Symbol name,
-                                   const type::Type* type,
-                                   uint32_t index,
-                                   uint32_t offset,
-                                   uint32_t align,
-                                   uint32_t size,
-                                   std::optional<uint32_t> location)
+StructMember::StructMember(tint::Source source,
+                           Symbol name,
+                           const type::Type* type,
+                           uint32_t index,
+                           uint32_t offset,
+                           uint32_t align,
+                           uint32_t size,
+                           std::optional<uint32_t> location)
     : source_(source),
       name_(name),
       type_(type),
@@ -181,6 +181,6 @@ StructMemberBase::StructMemberBase(tint::Source source,
       size_(size),
       location_(location) {}
 
-StructMemberBase::~StructMemberBase() = default;
+StructMember::~StructMember() = default;
 
 }  // namespace tint::type

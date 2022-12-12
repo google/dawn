@@ -45,54 +45,54 @@ struct TypeTest : public TestHelper {
     const Matrix* mat4x3_af = create<Matrix>(vec3_af, 4u);
     const Reference* ref_u32 =
         create<Reference>(u32, ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
-    const StructBase* str_f32 = create<StructBase>(Source{},
-                                                   Sym("str_f32"),
-                                                   utils::Vector{
-                                                       create<StructMemberBase>(
-                                                           /* source */ Source{},
-                                                           /* name */ Sym("x"),
-                                                           /* type */ f32,
-                                                           /* index */ 0u,
-                                                           /* offset */ 0u,
-                                                           /* align */ 4u,
-                                                           /* size */ 4u,
-                                                           /* location */ std::nullopt),
-                                                   },
-                                                   /* align*/ 4u,
-                                                   /* size*/ 4u,
-                                                   /* size_no_padding*/ 4u);
-    const StructBase* str_f16 = create<StructBase>(Source{},
-                                                   Sym("str_f16"),
-                                                   utils::Vector{
-                                                       create<StructMemberBase>(
-                                                           /* source */ Source{},
-                                                           /* name */ Sym("x"),
-                                                           /* type */ f16,
-                                                           /* index */ 0u,
-                                                           /* offset */ 0u,
-                                                           /* align */ 4u,
-                                                           /* size */ 4u,
-                                                           /* location */ std::nullopt),
-                                                   },
-                                                   /* align*/ 4u,
-                                                   /* size*/ 4u,
-                                                   /* size_no_padding*/ 4u);
-    StructBase* str_af = create<StructBase>(Source{},
-                                            Sym("str_af"),
-                                            utils::Vector{
-                                                create<StructMemberBase>(
-                                                    /* source */ Source{},
-                                                    /* name */ Sym("x"),
-                                                    /* type */ af,
-                                                    /* index */ 0u,
-                                                    /* offset */ 0u,
-                                                    /* align */ 4u,
-                                                    /* size */ 4u,
-                                                    /* location */ std::nullopt),
-                                            },
-                                            /* align*/ 4u,
-                                            /* size*/ 4u,
-                                            /* size_no_padding*/ 4u);
+    const Struct* str_f32 = create<Struct>(Source{},
+                                           Sym("str_f32"),
+                                           utils::Vector{
+                                               create<StructMember>(
+                                                   /* source */ Source{},
+                                                   /* name */ Sym("x"),
+                                                   /* type */ f32,
+                                                   /* index */ 0u,
+                                                   /* offset */ 0u,
+                                                   /* align */ 4u,
+                                                   /* size */ 4u,
+                                                   /* location */ std::nullopt),
+                                           },
+                                           /* align*/ 4u,
+                                           /* size*/ 4u,
+                                           /* size_no_padding*/ 4u);
+    const Struct* str_f16 = create<Struct>(Source{},
+                                           Sym("str_f16"),
+                                           utils::Vector{
+                                               create<StructMember>(
+                                                   /* source */ Source{},
+                                                   /* name */ Sym("x"),
+                                                   /* type */ f16,
+                                                   /* index */ 0u,
+                                                   /* offset */ 0u,
+                                                   /* align */ 4u,
+                                                   /* size */ 4u,
+                                                   /* location */ std::nullopt),
+                                           },
+                                           /* align*/ 4u,
+                                           /* size*/ 4u,
+                                           /* size_no_padding*/ 4u);
+    Struct* str_af = create<Struct>(Source{},
+                                    Sym("str_af"),
+                                    utils::Vector{
+                                        create<StructMember>(
+                                            /* source */ Source{},
+                                            /* name */ Sym("x"),
+                                            /* type */ af,
+                                            /* index */ 0u,
+                                            /* offset */ 0u,
+                                            /* align */ 4u,
+                                            /* size */ 4u,
+                                            /* location */ std::nullopt),
+                                    },
+                                    /* align*/ 4u,
+                                    /* size*/ 4u,
+                                    /* size_no_padding*/ 4u);
     const Array* arr_i32 = create<Array>(
         /* element */ i32,
         /* count */ create<ConstantArrayCount>(5u),

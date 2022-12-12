@@ -416,7 +416,7 @@ struct Composite : ImplConstant {
         utils::Vector<const sem::Constant*, 4> conv_els;
         conv_els.Reserve(elements.Length());
         std::function<const type::Type*(size_t idx)> target_el_ty;
-        if (auto* str = target_ty->As<type::StructBase>()) {
+        if (auto* str = target_ty->As<type::Struct>()) {
             if (str->Members().Length() != elements.Length()) {
                 TINT_ICE(Resolver, builder.Diagnostics())
                     << "const-eval conversion of structure has mismatched element counts";
@@ -494,7 +494,7 @@ const ImplConstant* ZeroValue(ProgramBuilder& builder, const type::Type* type) {
             }
             return nullptr;
         },
-        [&](const type::StructBase* s) -> const ImplConstant* {
+        [&](const type::Struct* s) -> const ImplConstant* {
             utils::Hashmap<const type::Type*, const ImplConstant*, 8> zero_by_type;
             utils::Vector<const sem::Constant*, 4> zeros;
             zeros.Reserve(s->Members().Length());
@@ -1449,7 +1449,7 @@ ConstEval::Result ConstEval::Index(const sem::Expression* obj_expr,
 }
 
 ConstEval::Result ConstEval::MemberAccess(const sem::Expression* obj_expr,
-                                          const type::StructMemberBase* member) {
+                                          const type::StructMember* member) {
     auto obj_val = obj_expr->ConstantValue();
     if (!obj_val) {
         return nullptr;

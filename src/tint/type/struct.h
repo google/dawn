@@ -29,7 +29,7 @@
 
 // Forward declarations
 namespace tint::type {
-class StructMemberBase;
+class StructMember;
 }  // namespace tint::type
 
 namespace tint::type {
@@ -44,8 +44,8 @@ enum class PipelineStageUsage {
     kComputeOutput,
 };
 
-/// StructBase holds the Type information for structures.
-class StructBase : public Castable<StructBase, Type> {
+/// Struct holds the Type information for structures.
+class Struct : public Castable<Struct, Type> {
   public:
     /// Constructor
     /// @param source the source of the structure
@@ -55,15 +55,15 @@ class StructBase : public Castable<StructBase, Type> {
     /// @param size the byte size of the structure
     /// @param size_no_padding size of the members without the end of structure
     /// alignment padding
-    StructBase(tint::Source source,
-               Symbol name,
-               utils::VectorRef<const StructMemberBase*> members,
-               uint32_t align,
-               uint32_t size,
-               uint32_t size_no_padding);
+    Struct(tint::Source source,
+           Symbol name,
+           utils::VectorRef<const StructMember*> members,
+           uint32_t align,
+           uint32_t size,
+           uint32_t size_no_padding);
 
     /// Destructor
-    ~StructBase() override;
+    ~Struct() override;
 
     /// @returns a hash of the type.
     size_t Hash() const override;
@@ -79,11 +79,11 @@ class StructBase : public Castable<StructBase, Type> {
     Symbol Name() const { return name_; }
 
     /// @returns the members of the structure
-    utils::VectorRef<const StructMemberBase*> Members() const { return members_; }
+    utils::VectorRef<const StructMember*> Members() const { return members_; }
 
     /// @param name the member name to look for
     /// @returns the member with the given name, or nullptr if it was not found.
-    const StructMemberBase* FindMember(Symbol name) const;
+    const StructMember* FindMember(Symbol name) const;
 
     /// @returns the byte alignment of the structure
     /// @note this may differ from the alignment of a structure member of this
@@ -145,29 +145,27 @@ class StructBase : public Castable<StructBase, Type> {
     std::string Layout(const tint::SymbolTable& symbols) const;
 
     /// @param concrete the conversion-rank ordered concrete versions of this abstract structure.
-    void SetConcreteTypes(utils::VectorRef<const StructBase*> concrete) {
-        concrete_types_ = concrete;
-    }
+    void SetConcreteTypes(utils::VectorRef<const Struct*> concrete) { concrete_types_ = concrete; }
 
     /// @returns the conversion-rank ordered concrete versions of this abstract structure, or an
     /// empty vector if this structure is not abstract.
     /// @note only structures returned by builtins may be abstract (e.g. modf, frexp)
-    utils::VectorRef<const StructBase*> ConcreteTypes() const { return concrete_types_; }
+    utils::VectorRef<const Struct*> ConcreteTypes() const { return concrete_types_; }
 
   private:
     const tint::Source source_;
     const Symbol name_;
-    const utils::Vector<const StructMemberBase*, 4> members_;
+    const utils::Vector<const StructMember*, 4> members_;
     const uint32_t align_;
     const uint32_t size_;
     const uint32_t size_no_padding_;
     std::unordered_set<ast::AddressSpace> address_space_usage_;
     std::unordered_set<PipelineStageUsage> pipeline_stage_uses_;
-    utils::Vector<const StructBase*, 2> concrete_types_;
+    utils::Vector<const Struct*, 2> concrete_types_;
 };
 
-/// StructMemberBase holds the type information for structure members.
-class StructMemberBase : public Castable<StructMemberBase, Node> {
+/// StructMember holds the type information for structure members.
+class StructMember : public Castable<StructMember, Node> {
   public:
     /// Constructor
     /// @param source the source of the struct member
@@ -178,17 +176,17 @@ class StructMemberBase : public Castable<StructMemberBase, Node> {
     /// @param align the byte alignment of the member
     /// @param size the byte size of the member
     /// @param location the location attribute, if present
-    StructMemberBase(tint::Source source,
-                     Symbol name,
-                     const type::Type* type,
-                     uint32_t index,
-                     uint32_t offset,
-                     uint32_t align,
-                     uint32_t size,
-                     std::optional<uint32_t> location);
+    StructMember(tint::Source source,
+                 Symbol name,
+                 const type::Type* type,
+                 uint32_t index,
+                 uint32_t offset,
+                 uint32_t align,
+                 uint32_t size,
+                 std::optional<uint32_t> location);
 
     /// Destructor
-    ~StructMemberBase() override;
+    ~StructMember() override;
 
     /// @returns the source the struct member
     const tint::Source& Source() const { return source_; }
@@ -198,10 +196,10 @@ class StructMemberBase : public Castable<StructMemberBase, Node> {
 
     /// Sets the owning structure to `s`
     /// @param s the new structure owner
-    void SetStruct(const StructBase* s) { struct_ = s; }
+    void SetStruct(const Struct* s) { struct_ = s; }
 
     /// @returns the structure that owns this member
-    const StructBase* Struct() const { return struct_; }
+    const type::Struct* Struct() const { return struct_; }
 
     /// @returns the type of the member
     const type::Type* Type() const { return type_; }
@@ -224,7 +222,7 @@ class StructMemberBase : public Castable<StructMemberBase, Node> {
   private:
     const tint::Source source_;
     const Symbol name_;
-    const StructBase* struct_;
+    const type::Struct* struct_;
     const type::Type* type_;
     const uint32_t index_;
     const uint32_t offset_;

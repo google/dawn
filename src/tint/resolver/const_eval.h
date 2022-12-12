@@ -35,7 +35,7 @@ class Constant;
 class Expression;
 }  // namespace tint::sem
 namespace tint::type {
-class StructMemberBase;
+class StructMember;
 }  // namespace tint::type
 
 namespace tint::resolver {
@@ -94,7 +94,7 @@ class ConstEval {
     /// @param obj the object being accessed
     /// @param member the member
     /// @return the result of the member access, or null if the value cannot be calculated
-    Result MemberAccess(const sem::Expression* obj, const type::StructMemberBase* member);
+    Result MemberAccess(const sem::Expression* obj, const type::StructMember* member);
 
     /// @param ty the result type
     /// @param vector the vector being swizzled
