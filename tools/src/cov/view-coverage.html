@@ -262,6 +262,10 @@
             readOnly: true,
         });
 
+        addEventListener('beforeunload', () => {
+            fetch("viewer.closed");
+        });
+
         window.onload = function () {
             el_source.doc.setValue("// Loading... ");
             fetch("coverage.dat").then(response =>

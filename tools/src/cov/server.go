@@ -30,6 +30,8 @@ import (
 // StartServer starts a localhost http server to display the coverage data.
 // Calls started() when the server is started, and then blocks until the context is cancelled.
 func StartServer(ctx context.Context, port int, covData []byte, started func() error) error {
+	ctx, stop := context.WithCancel(ctx)
+
 	url := fmt.Sprintf("http://localhost:%v/index.html", port)
 	handler := http.NewServeMux()
 	handler.HandleFunc("/index.html", func(w http.ResponseWriter, r *http.Request) {
@@ -65,6 +67,9 @@ func StartServer(ctx context.Context, port int, covData []byte, started func() e
 		defer f.Close()
 		io.Copy(w, f)
 	})
+	handler.HandleFunc("/viewer.closed", func(w http.ResponseWriter, r *http.Request) {
+		stop()
+	})
 
 	server := &http.Server{Addr: fmt.Sprint(":", port), Handler: handler}
 	go server.ListenAndServe()
@@ -74,5 +79,11 @@ func StartServer(ctx context.Context, port int, covData []byte, started func() e
 	}
 
 	<-ctx.Done()
-	return server.Shutdown(ctx)
+	err := server.Shutdown(ctx)
+	switch err {
+	case nil, context.Canceled:
+		return nil
+	default:
+		return err
+	}
 }
