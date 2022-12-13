@@ -37,12 +37,8 @@ TEST_F(VectorTest, Creation) {
 TEST_F(VectorTest, Hash) {
     auto* a = create<Vector>(create<I32>(), 2u);
     auto* b = create<Vector>(create<I32>(), 2u);
-    auto* c = create<Vector>(create<F32>(), 2u);
-    auto* d = create<Vector>(create<F32>(), 3u);
 
     EXPECT_EQ(a->Hash(), b->Hash());
-    EXPECT_NE(a->Hash(), c->Hash());
-    EXPECT_NE(a->Hash(), d->Hash());
 }
 
 TEST_F(VectorTest, Equals) {

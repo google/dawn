@@ -36,10 +36,8 @@ TEST_F(DepthTextureTest, Creation) {
 TEST_F(DepthTextureTest, Hash) {
     auto* a = create<DepthTexture>(ast::TextureDimension::k2d);
     auto* b = create<DepthTexture>(ast::TextureDimension::k2d);
-    auto* c = create<DepthTexture>(ast::TextureDimension::k2dArray);
 
     EXPECT_EQ(a->Hash(), b->Hash());
-    EXPECT_NE(a->Hash(), c->Hash());
 }
 
 TEST_F(DepthTextureTest, Equals) {

@@ -55,17 +55,8 @@ TEST_F(StorageTextureTest, Hash) {
                      ast::Access::kReadWrite);
     auto* b = Create(ast::TextureDimension::kCube, ast::TexelFormat::kRgba32Float,
                      ast::Access::kReadWrite);
-    auto* c =
-        Create(ast::TextureDimension::k2d, ast::TexelFormat::kRgba32Float, ast::Access::kReadWrite);
-    auto* d =
-        Create(ast::TextureDimension::kCube, ast::TexelFormat::kR32Float, ast::Access::kReadWrite);
-    auto* e =
-        Create(ast::TextureDimension::kCube, ast::TexelFormat::kRgba32Float, ast::Access::kRead);
 
     EXPECT_EQ(a->Hash(), b->Hash());
-    EXPECT_NE(a->Hash(), c->Hash());
-    EXPECT_NE(a->Hash(), d->Hash());
-    EXPECT_NE(a->Hash(), e->Hash());
 }
 
 TEST_F(StorageTextureTest, Equals) {

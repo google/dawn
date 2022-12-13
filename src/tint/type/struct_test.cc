@@ -31,15 +31,6 @@ TEST_F(TypeStructTest, Creation) {
     EXPECT_EQ(s->SizeNoPadding(), 16u);
 }
 
-TEST_F(TypeStructTest, Hash) {
-    auto* a = create<Struct>(Source{}, Sym("a"), utils::Empty, 4u /* align */, 4u /* size */,
-                             4u /* size_no_padding */);
-    auto* b = create<Struct>(Source{}, Sym("b"), utils::Empty, 4u /* align */, 4u /* size */,
-                             4u /* size_no_padding */);
-
-    EXPECT_NE(a->Hash(), b->Hash());
-}
-
 TEST_F(TypeStructTest, Equals) {
     auto* a = create<Struct>(Source{}, Sym("a"), utils::Empty, 4u /* align */, 4u /* size */,
                              4u /* size_no_padding */);

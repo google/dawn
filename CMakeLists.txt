@@ -171,6 +171,7 @@ option_if_not_defined(TINT_BUILD_REMOTE_COMPILE "Build the remote-compile tool f
 option_if_not_defined(TINT_ENABLE_BREAK_IN_DEBUGGER "Enable tint::debugger::Break()" OFF)
 option_if_not_defined(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
 option_if_not_defined(TINT_SYMBOL_STORE_DEBUG_NAME "Enable storing of name in tint::ast::Symbol to help debugging the AST" OFF)
+option_if_not_defined(TINT_RANDOMIZE_HASHES "Randomize the hash seed value to detect non-deterministic output" OFF)
 
 # Recommended setting for compability with future abseil releases.
 set(ABSL_PROPAGATE_CXX_STD ON)
@@ -597,6 +598,15 @@ function(tint_default_compile_options TARGET)
         -Wno-language-extension-token
       )
     endif()
+  endif()
+
+  if (TINT_RANDOMIZE_HASHES)
+    if(NOT DEFINED TINT_HASH_SEED)
+        string(RANDOM LENGTH 16 ALPHABET "0123456789abcdef" seed)
+        set(TINT_HASH_SEED "0x${seed}" CACHE STRING "Tint hash seed value")
+        message("Using TINT_HASH_SEED: ${TINT_HASH_SEED}")
+    endif()
+    target_compile_definitions(${TARGET} PUBLIC "-DTINT_HASH_SEED=${TINT_HASH_SEED}")
   endif()
 endfunction()
 

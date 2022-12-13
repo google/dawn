@@ -46,16 +46,8 @@ TEST_F(ReferenceTest, Hash) {
         create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto* b =
         create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
-    auto* c =
-        create<Reference>(create<F32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
-    auto* d =
-        create<Reference>(create<I32>(), ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
-    auto* e = create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kRead);
 
     EXPECT_EQ(a->Hash(), b->Hash());
-    EXPECT_NE(a->Hash(), c->Hash());
-    EXPECT_NE(a->Hash(), d->Hash());
-    EXPECT_NE(a->Hash(), e->Hash());
 }
 
 TEST_F(ReferenceTest, Equals) {

@@ -34,17 +34,6 @@ TEST_F(SemStructTest, Creation) {
     EXPECT_EQ(s->SizeNoPadding(), 16u);
 }
 
-TEST_F(SemStructTest, Hash) {
-    auto* a_impl = create<ast::Struct>(Sym("a"), utils::Empty, utils::Empty);
-    auto* a = create<sem::Struct>(a_impl, a_impl->source, a_impl->name, utils::Empty,
-                                  4u /* align */, 4u /* size */, 4u /* size_no_padding */);
-    auto* b_impl = create<ast::Struct>(Sym("b"), utils::Empty, utils::Empty);
-    auto* b = create<sem::Struct>(b_impl, b_impl->source, b_impl->name, utils::Empty,
-                                  4u /* align */, 4u /* size */, 4u /* size_no_padding */);
-
-    EXPECT_NE(a->Hash(), b->Hash());
-}
-
 TEST_F(SemStructTest, Equals) {
     auto* a_impl = create<ast::Struct>(Sym("a"), utils::Empty, utils::Empty);
     auto* a = create<sem::Struct>(a_impl, a_impl->source, a_impl->name, utils::Empty,

@@ -33,9 +33,7 @@ TEST_F(AtomicTest, Creation) {
 TEST_F(AtomicTest, Hash) {
     auto* a = create<Atomic>(create<I32>());
     auto* b = create<Atomic>(create<I32>());
-    auto* c = create<Atomic>(create<U32>());
     EXPECT_EQ(a->Hash(), b->Hash());
-    EXPECT_NE(a->Hash(), c->Hash());
 }
 
 TEST_F(AtomicTest, Equals) {

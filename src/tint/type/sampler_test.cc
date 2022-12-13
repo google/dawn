@@ -39,10 +39,8 @@ TEST_F(SamplerTest, Creation) {
 TEST_F(SamplerTest, Hash) {
     auto* a = create<Sampler>(ast::SamplerKind::kSampler);
     auto* b = create<Sampler>(ast::SamplerKind::kSampler);
-    auto* c = create<Sampler>(ast::SamplerKind::kComparisonSampler);
 
     EXPECT_EQ(a->Hash(), b->Hash());
-    EXPECT_NE(a->Hash(), c->Hash());
 }
 
 TEST_F(SamplerTest, Equals) {

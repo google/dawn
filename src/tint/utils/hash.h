@@ -23,6 +23,7 @@
 #include <variant>
 #include <vector>
 
+#include "src/tint/utils/crc32.h"
 #include "src/tint/utils/vector.h"
 
 namespace tint::utils {
@@ -37,14 +38,26 @@ struct HashCombineOffset {};
 template <>
 struct HashCombineOffset<4> {
     /// @returns the seed bias value for HashCombine()
-    static constexpr inline uint32_t value() { return 0x7f4a7c16; }
+    static constexpr inline uint32_t value() {
+        constexpr uint32_t base = 0x7f4a7c16;
+#ifdef TINT_HASH_SEED
+        return base ^ static_cast<uint32_t>(TINT_HASH_SEED);
+#endif
+        return base;
+    }
 };
 
 /// Specialization of HashCombineOffset for size_t == 8.
 template <>
 struct HashCombineOffset<8> {
     /// @returns the seed bias value for HashCombine()
-    static constexpr inline uint64_t value() { return 0x9e3779b97f4a7c16; }
+    static constexpr inline uint64_t value() {
+        constexpr uint64_t base = 0x9e3779b97f4a7c16;
+#ifdef TINT_HASH_SEED
+        return base ^ static_cast<uint64_t>(TINT_HASH_SEED);
+#endif
+        return base;
+    }
 };
 
 }  // namespace detail
@@ -76,6 +89,9 @@ struct Hasher<T*> {
     /// @returns a hash of the pointer
     size_t operator()(T* ptr) const {
         auto hash = std::hash<T*>()(ptr);
+#ifdef TINT_HASH_SEED
+        hash ^= static_cast<uint32_t>(TINT_HASH_SEED);
+#endif
         return hash ^ (hash >> 4);
     }
 };

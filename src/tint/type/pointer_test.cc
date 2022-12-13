@@ -40,14 +40,8 @@ TEST_F(PointerTest, Creation) {
 TEST_F(PointerTest, Hash) {
     auto* a = create<Pointer>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto* b = create<Pointer>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
-    auto* c = create<Pointer>(create<F32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
-    auto* d = create<Pointer>(create<I32>(), ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
-    auto* e = create<Pointer>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kRead);
 
     EXPECT_EQ(a->Hash(), b->Hash());
-    EXPECT_NE(a->Hash(), c->Hash());
-    EXPECT_NE(a->Hash(), d->Hash());
-    EXPECT_NE(a->Hash(), e->Hash());
 }
 
 TEST_F(PointerTest, Equals) {

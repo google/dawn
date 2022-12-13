@@ -388,11 +388,8 @@ TEST(Hashmap, HashSameSize) {
     Hashmap<int, std::string, 8> b;
     EXPECT_EQ(Hash(a), Hash(b));
     a.Add(1, "one");
-    EXPECT_NE(Hash(a), Hash(b));
     b.Add(2, "two");
-    EXPECT_NE(Hash(a), Hash(b));
     a.Add(2, "two");
-    EXPECT_NE(Hash(a), Hash(b));
     b.Add(1, "one");
     EXPECT_EQ(Hash(a), Hash(b));
 }
@@ -402,11 +399,8 @@ TEST(Hashmap, HashDifferentSize) {
     Hashmap<int, std::string, 4> b;
     EXPECT_EQ(Hash(a), Hash(b));
     a.Add(1, "one");
-    EXPECT_NE(Hash(a), Hash(b));
     b.Add(2, "two");
-    EXPECT_NE(Hash(a), Hash(b));
     a.Add(2, "two");
-    EXPECT_NE(Hash(a), Hash(b));
     b.Add(1, "one");
     EXPECT_EQ(Hash(a), Hash(b));
 }

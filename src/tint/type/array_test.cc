@@ -74,18 +74,8 @@ TEST_F(ArrayTest, CreateRuntimeArray) {
 TEST_F(ArrayTest, Hash) {
     auto* a = create<Array>(create<U32>(), create<ConstantArrayCount>(2u), 4u, 8u, 32u, 16u);
     auto* b = create<Array>(create<U32>(), create<ConstantArrayCount>(2u), 4u, 8u, 32u, 16u);
-    auto* c = create<Array>(create<U32>(), create<ConstantArrayCount>(3u), 4u, 8u, 32u, 16u);
-    auto* d = create<Array>(create<U32>(), create<ConstantArrayCount>(2u), 5u, 8u, 32u, 16u);
-    auto* e = create<Array>(create<U32>(), create<ConstantArrayCount>(2u), 4u, 9u, 32u, 16u);
-    auto* f = create<Array>(create<U32>(), create<ConstantArrayCount>(2u), 4u, 8u, 33u, 16u);
-    auto* g = create<Array>(create<U32>(), create<ConstantArrayCount>(2u), 4u, 8u, 33u, 17u);
 
     EXPECT_EQ(a->Hash(), b->Hash());
-    EXPECT_NE(a->Hash(), c->Hash());
-    EXPECT_NE(a->Hash(), d->Hash());
-    EXPECT_NE(a->Hash(), e->Hash());
-    EXPECT_NE(a->Hash(), f->Hash());
-    EXPECT_NE(a->Hash(), g->Hash());
 }
 
 TEST_F(ArrayTest, Equals) {
