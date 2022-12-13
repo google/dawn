@@ -412,6 +412,9 @@ std::enable_if_t<IsNumeric<A>, bool> operator!=(A a, Number<B> b) {
 #endif
 #endif
 
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
+TINT_BEGIN_DISABLE_WARNING(MAYBE_UNINITIALIZED);
+
 /// @returns a + b, or an empty optional if the resulting value overflowed the AInt
 inline std::optional<AInt> CheckedAdd(AInt a, AInt b) {
     int64_t result;
@@ -582,16 +585,28 @@ inline std::optional<FloatingPointT> CheckedMod(FloatingPointT a, FloatingPointT
 
 /// @returns a * b + c, or an empty optional if the value overflowed the AInt
 inline std::optional<AInt> CheckedMadd(AInt a, AInt b, AInt c) {
-    // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
-    TINT_BEGIN_DISABLE_WARNING(MAYBE_UNINITIALIZED);
-
     if (auto mul = CheckedMul(a, b)) {
         return CheckedAdd(mul.value(), c);
     }
     return {};
-
-    TINT_END_DISABLE_WARNING(MAYBE_UNINITIALIZED);
 }
+
+/// @returns the value of `base` raised to the power `exp`, or an empty optional if the operation
+/// cannot be performed.
+template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
+inline std::optional<FloatingPointT> CheckedPow(FloatingPointT base, FloatingPointT exp) {
+    static_assert(IsNumber<FloatingPointT>);
+    if ((base < 0) || (base == 0 && exp <= 0)) {
+        return {};
+    }
+    auto result = FloatingPointT{std::pow(base.value, exp.value)};
+    if (!std::isfinite(result.value)) {
+        return {};
+    }
+    return result;
+}
+
+TINT_END_DISABLE_WARNING(MAYBE_UNINITIALIZED);
 
 }  // namespace tint
 

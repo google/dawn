@@ -399,12 +399,32 @@ using FloatExpectedTypes =
     std::variant<std::optional<AFloat>, std::optional<f32>, std::optional<f16>>;
 using BinaryCheckedCase_Float = std::tuple<FloatExpectedTypes, FloatInputTypes, FloatInputTypes>;
 
+/// Validates that result is equal to expect. If `float_comp` is true, uses EXPECT_FLOAT_EQ to
+/// compare the values.
+template <typename T>
+void ValidateResult(std::optional<T> result, std::optional<T> expect, bool float_comp = false) {
+    if (!expect) {
+        EXPECT_TRUE(!result) << *result;
+    } else {
+        ASSERT_TRUE(result);
+        if constexpr (IsIntegral<T>) {
+            EXPECT_EQ(*result, *expect);
+        } else {
+            if (float_comp) {
+                EXPECT_FLOAT_EQ(*result, *expect);
+            } else {
+                EXPECT_EQ(*result, *expect);
+            }
+        }
+    }
+}
+
 TEST_P(CheckedAddTest_AInt, Test) {
     auto expect = std::get<0>(GetParam());
     auto a = std::get<1>(GetParam());
     auto b = std::get<2>(GetParam());
-    EXPECT_TRUE(CheckedAdd(a, b) == expect) << std::hex << "0x" << a << " + 0x" << b;
-    EXPECT_TRUE(CheckedAdd(b, a) == expect) << std::hex << "0x" << a << " + 0x" << b;
+    ValidateResult(CheckedAdd(a, b), expect);
+    ValidateResult(CheckedAdd(b, a), expect);
 }
 INSTANTIATE_TEST_SUITE_P(
     CheckedAddTest_AInt,
@@ -477,7 +497,7 @@ TEST_P(CheckedSubTest_AInt, Test) {
     auto expect = std::get<0>(GetParam());
     auto a = std::get<1>(GetParam());
     auto b = std::get<2>(GetParam());
-    EXPECT_TRUE(CheckedSub(a, b) == expect) << std::hex << "0x" << a << " - 0x" << b;
+    ValidateResult(CheckedSub(a, b), expect);
 }
 INSTANTIATE_TEST_SUITE_P(
     CheckedSubTest_AInt,
@@ -514,8 +534,7 @@ TEST_P(CheckedSubTest_Float, Test) {
             using T = std::decay_t<decltype(lhs)>;
             auto rhs = std::get<T>(std::get<2>(p));
             auto expect = std::get<std::optional<T>>(std::get<0>(p));
-            EXPECT_TRUE(CheckedSub(lhs, rhs) == expect)
-                << std::hex << "0x" << lhs << " - 0x" << rhs;
+            ValidateResult(CheckedSub(lhs, rhs), expect);
         },
         std::get<1>(p));
 }
@@ -546,8 +565,8 @@ TEST_P(CheckedMulTest_AInt, Test) {
     auto expect = std::get<0>(GetParam());
     auto a = std::get<1>(GetParam());
     auto b = std::get<2>(GetParam());
-    EXPECT_TRUE(CheckedMul(a, b) == expect) << std::hex << "0x" << a << " * 0x" << b;
-    EXPECT_TRUE(CheckedMul(b, a) == expect) << std::hex << "0x" << a << " * 0x" << b;
+    ValidateResult(CheckedMul(a, b), expect);
+    ValidateResult(CheckedMul(b, a), expect);
 }
 INSTANTIATE_TEST_SUITE_P(
     CheckedMulTest_AInt,
@@ -595,10 +614,8 @@ TEST_P(CheckedMulTest_Float, Test) {
             using T = std::decay_t<decltype(lhs)>;
             auto rhs = std::get<T>(std::get<2>(p));
             auto expect = std::get<std::optional<T>>(std::get<0>(p));
-            EXPECT_TRUE(CheckedMul(lhs, rhs) == expect)
-                << std::hex << "0x" << lhs << " * 0x" << rhs;
-            EXPECT_TRUE(CheckedMul(rhs, lhs) == expect)
-                << std::hex << "0x" << lhs << " * 0x" << rhs;
+            ValidateResult(CheckedMul(lhs, rhs), expect);
+            ValidateResult(CheckedMul(rhs, lhs), expect);
         },
         std::get<1>(p));
 }
@@ -628,7 +645,7 @@ TEST_P(CheckedDivTest_AInt, Test) {
     auto expect = std::get<0>(GetParam());
     auto a = std::get<1>(GetParam());
     auto b = std::get<2>(GetParam());
-    EXPECT_TRUE(CheckedDiv(a, b) == expect) << std::hex << "0x" << a << " - 0x" << b;
+    ValidateResult(CheckedDiv(a, b), expect);
 }
 INSTANTIATE_TEST_SUITE_P(
     CheckedDivTest_AInt,
@@ -657,8 +674,7 @@ TEST_P(CheckedDivTest_Float, Test) {
             using T = std::decay_t<decltype(lhs)>;
             auto rhs = std::get<T>(std::get<2>(p));
             auto expect = std::get<std::optional<T>>(std::get<0>(p));
-            EXPECT_TRUE(CheckedDiv(lhs, rhs) == expect)
-                << std::hex << "0x" << lhs << " / 0x" << rhs;
+            ValidateResult(CheckedDiv(lhs, rhs), expect);
         },
         std::get<1>(p));
 }
@@ -692,7 +708,7 @@ TEST_P(CheckedModTest_AInt, Test) {
     auto expect = std::get<0>(GetParam());
     auto a = std::get<1>(GetParam());
     auto b = std::get<2>(GetParam());
-    EXPECT_TRUE(CheckedMod(a, b) == expect) << std::hex << "0x" << a << " - 0x" << b;
+    EXPECT_TRUE(CheckedMod(a, b) == expect) << std::hex << "0x" << a << " % 0x" << b;
 }
 INSTANTIATE_TEST_SUITE_P(
     CheckedModTest_AInt,
@@ -726,8 +742,7 @@ TEST_P(CheckedModTest_Float, Test) {
             using T = std::decay_t<decltype(lhs)>;
             auto rhs = std::get<T>(std::get<2>(p));
             auto expect = std::get<std::optional<T>>(std::get<0>(p));
-            EXPECT_TRUE(CheckedMod(lhs, rhs) == expect)
-                << std::hex << "0x" << lhs << " / 0x" << rhs;
+            ValidateResult(CheckedMod(lhs, rhs), expect);
         },
         std::get<1>(p));
 }
@@ -759,6 +774,51 @@ INSTANTIATE_TEST_SUITE_P(CheckedModTest_Float,
                                                   CheckedModTest_FloatCases<f32>(),
                                                   CheckedModTest_FloatCases<f16>())));
 
+using CheckedPowTest_Float = testing::TestWithParam<BinaryCheckedCase_Float>;
+TEST_P(CheckedPowTest_Float, Test) {
+    auto& p = GetParam();
+    std::visit(
+        [&](auto&& lhs) {
+            using T = std::decay_t<decltype(lhs)>;
+            auto rhs = std::get<T>(std::get<2>(p));
+            auto expect = std::get<std::optional<T>>(std::get<0>(p));
+            ValidateResult(CheckedPow(lhs, rhs), expect, /* float_comp */ true);
+        },
+        std::get<1>(p));
+}
+template <typename T>
+std::vector<BinaryCheckedCase_Float> CheckedPowTest_FloatCases() {
+    return {
+        {T(0), T(0), T(1)},                        //
+        {T(0), T(0), T::Highest()},                //
+        {T(1), T(1), T(1)},                        //
+        {T(1), T(1), T::Lowest()},                 //
+        {T(4), T(2), T(2)},                        //
+        {T(8), T(2), T(3)},                        //
+        {T(1), T(1), T::Highest()},                //
+        {T(1), T(1), -T(1)},                       //
+        {T(0.25), T(2), -T(2)},                    //
+        {T(0.125), T(2), -T(3)},                   //
+        {T(15.625), T(2.5), T(3)},                 //
+        {T(11.313708498), T(2), T(3.5)},           //
+        {T(24.705294220), T(2.5), T(3.5)},         //
+        {T(0.0883883476), T(2), -T(3.5)},          //
+        {Overflow<T>, -T(1), T(1)},                //
+        {Overflow<T>, -T(1), T::Highest()},        //
+        {Overflow<T>, T::Lowest(), T(1)},          //
+        {Overflow<T>, T::Lowest(), T::Highest()},  //
+        {Overflow<T>, T::Lowest(), T::Lowest()},   //
+        {Overflow<T>, T(0), T(0)},                 //
+        {Overflow<T>, T(0), -T(1)},                //
+        {Overflow<T>, T(0), T::Lowest()},          //
+    };
+}
+INSTANTIATE_TEST_SUITE_P(CheckedPowTest_Float,
+                         CheckedPowTest_Float,
+                         testing::ValuesIn(Concat(CheckedPowTest_FloatCases<AFloat>(),
+                                                  CheckedPowTest_FloatCases<f32>(),
+                                                  CheckedPowTest_FloatCases<f16>())));
+
 using TernaryCheckedCase = std::tuple<std::optional<AInt>, AInt, AInt, AInt>;
 
 using CheckedMaddTest_AInt = testing::TestWithParam<TernaryCheckedCase>;
@@ -767,10 +827,8 @@ TEST_P(CheckedMaddTest_AInt, Test) {
     auto a = std::get<1>(GetParam());
     auto b = std::get<2>(GetParam());
     auto c = std::get<3>(GetParam());
-    EXPECT_EQ(CheckedMadd(a, b, c), expect)
-        << std::hex << "0x" << a << " * 0x" << b << " + 0x" << c;
-    EXPECT_EQ(CheckedMadd(b, a, c), expect)
-        << std::hex << "0x" << a << " * 0x" << b << " + 0x" << c;
+    ValidateResult(CheckedMadd(a, b, c), expect);
+    ValidateResult(CheckedMadd(b, a, c), expect);
 }
 INSTANTIATE_TEST_SUITE_P(
     CheckedMaddTest_AInt,
