@@ -3077,9 +3077,9 @@ ConstEval::Result ConstEval::pack4x8unorm(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::pow(const type::Type* ty,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto e1, auto e2) -> ImplResult {
             auto r = CheckedPow(e1, e2);
             if (!r) {

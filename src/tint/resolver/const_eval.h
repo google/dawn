@@ -839,7 +839,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result pow(const type::Type* ty,
-               utils::VectorRef<const sem::Constant*> args,
+               utils::VectorRef<const constant::Constant*> args,
                const Source& source);
 
     /// radians builtin
