@@ -204,10 +204,10 @@ std::string OverflowErrorMessage(VALUE_TY value, std::string_view target_ty) {
 }
 
 template <typename NumberT>
-std::string OverflowExpErrorMessage(std::string_view base, NumberT value) {
+std::string OverflowExpErrorMessage(std::string_view base, NumberT exp) {
     std::stringstream ss;
     ss << std::setprecision(20);
-    ss << base << "^" << value << " cannot be represented as "
+    ss << base << "^" << exp << " cannot be represented as "
        << "'" << FriendlyName<NumberT>() << "'";
     return ss.str();
 }
@@ -463,6 +463,7 @@ struct Composite : ImplConstant {
 /// CreateElement constructs and returns an Element<T>.
 template <typename T>
 ImplResult CreateElement(ProgramBuilder& builder, const Source& source, const type::Type* t, T v) {
+    static_assert(IsNumber<T> || std::is_same_v<T, bool>, "T must be a Number or bool");
     TINT_ASSERT(Resolver, t->is_scalar());
 
     if constexpr (IsFloatingPoint<T>) {
@@ -3073,6 +3074,23 @@ ConstEval::Result ConstEval::pack4x8unorm(const type::Type* ty,
     uint32_t mask = 0x0000'00ff;
     u32 ret = u32((e0 & mask) | ((e1 & mask) << 8) | ((e2 & mask) << 16) | ((e3 & mask) << 24));
     return CreateElement(builder, source, ty, ret);
+}
+
+ConstEval::Result ConstEval::pow(const type::Type* ty,
+                                 utils::VectorRef<const sem::Constant*> args,
+                                 const Source& source) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto e1, auto e2) -> ImplResult {
+            auto r = CheckedPow(e1, e2);
+            if (!r) {
+                AddError(OverflowErrorMessage(e1, "^", e2), source);
+                return utils::Failure;
+            }
+            return CreateElement(builder, source, c0->Type(), *r);
+        };
+        return Dispatch_fa_f32_f16(create, c0, c1);
+    };
+    return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
 ConstEval::Result ConstEval::radians(const type::Type* ty,

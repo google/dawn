@@ -531,8 +531,8 @@ fn ldexp<N: num, T: f32_f16>(vec<N, T>, vec<N, i32>) -> vec<N, T>
 @const fn pack2x16unorm(vec2<f32>) -> u32
 @const fn pack4x8snorm(vec4<f32>) -> u32
 @const fn pack4x8unorm(vec4<f32>) -> u32
-fn pow<T: f32_f16>(T, T) -> T
-fn pow<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
+@const fn pow<T: fa_f32_f16>(T, T) -> T
+@const fn pow<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
 @const fn quantizeToF16(f32) -> f32
 @const fn quantizeToF16<N: num>(vec<N, f32>) -> vec<N, f32>
 @const fn radians<T: fa_f32_f16>(T) -> T

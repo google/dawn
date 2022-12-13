@@ -1,5 +1,5 @@
 void pow_f37b25() {
-  vector<float16_t, 2> res = pow((float16_t(1.0h)).xx, (float16_t(1.0h)).xx);
+  vector<float16_t, 2> res = (float16_t(1.0h)).xx;
 }
 
 struct tint_symbol {

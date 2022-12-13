@@ -1,5 +1,5 @@
 void pow_ce9ef5() {
-  float16_t res = pow(float16_t(1.0h), float16_t(1.0h));
+  float16_t res = float16_t(1.0h);
 }
 
 struct tint_symbol {
