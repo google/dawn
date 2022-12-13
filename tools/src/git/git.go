@@ -64,6 +64,13 @@ type Git struct {
 
 // New returns a new Git instance
 func New(exe string) (*Git, error) {
+	if exe == "" {
+		g, err := exec.LookPath("git")
+		if err != nil {
+			return nil, fmt.Errorf("failed to find git: %v", err)
+		}
+		exe = g
+	}
 	if _, err := os.Stat(exe); err != nil {
 		return nil, err
 	}

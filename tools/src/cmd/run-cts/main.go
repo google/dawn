@@ -39,7 +39,9 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"dawn.googlesource.com/dawn/tools/src/cov"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/git"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 )
@@ -65,8 +67,7 @@ Usage:
 }
 
 var (
-	colors  bool
-	mainCtx context.Context
+	colors bool
 )
 
 // ANSI escape sequences
@@ -99,7 +100,7 @@ func (f *dawnNodeFlags) Set(value string) error {
 	return nil
 }
 
-func makeMainCtx() context.Context {
+func makeCtx() context.Context {
 	ctx, cancel := context.WithCancel(context.Background())
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -112,7 +113,7 @@ func makeMainCtx() context.Context {
 }
 
 func run() error {
-	mainCtx = makeMainCtx()
+	ctx := makeCtx()
 
 	colors = os.Getenv("TERM") != "dumb" ||
 		isatty.IsTerminal(os.Stdout.Fd()) ||
@@ -128,8 +129,8 @@ func run() error {
 		backendDefault = "vulkan"
 	}
 
-	var dawnNode, cts, node, npx, resultsPath, expectationsPath, logFilename, backend string
-	var printStdout, verbose, isolated, build, dumpShaders bool
+	var dawnNode, cts, node, npx, resultsPath, expectationsPath, logFilename, backend, coverageFile string
+	var printStdout, verbose, isolated, build, dumpShaders, genCoverage bool
 	var numRunners int
 	var flags dawnNodeFlags
 	flag.StringVar(&dawnNode, "dawn-node", "", "path to dawn.node module")
@@ -149,6 +150,8 @@ func run() error {
 	flag.StringVar(&backend, "backend", backendDefault, "backend to use: default|null|webgpu|d3d11|d3d12|metal|vulkan|opengl|opengles."+
 		" set to 'vulkan' if VK_ICD_FILENAMES environment variable is set, 'default' otherwise")
 	flag.BoolVar(&dumpShaders, "dump-shaders", false, "dump WGSL shaders. Enables --verbose")
+	flag.BoolVar(&genCoverage, "coverage", false, "displays coverage data. Enables --isolated")
+	flag.StringVar(&coverageFile, "export-coverage", "", "write coverage data to the given path")
 	flag.Parse()
 
 	// Create a thread-safe, color supporting stdout wrapper.
@@ -233,6 +236,7 @@ func run() error {
 		npx:         npx,
 		dawnNode:    dawnNode,
 		cts:         cts,
+		tmpDir:      filepath.Join(os.TempDir(), "dawn-cts"),
 		flags:       flags,
 		results:     testcaseStatuses{},
 		evalScript: func(main string) string {
@@ -240,6 +244,28 @@ func run() error {
 		},
 		stdout: stdout,
 		colors: colors,
+	}
+
+	if coverageFile != "" {
+		r.coverageFile = coverageFile
+		genCoverage = true
+	}
+
+	if genCoverage {
+		isolated = true
+		llvmCov, err := exec.LookPath("llvm-cov")
+		if err != nil {
+			return fmt.Errorf("failed to find LLVM, required for --coverage")
+		}
+		turboCov := filepath.Join(filepath.Dir(dawnNode), "turbo-cov"+fileutils.ExeExt)
+		if !fileutils.IsExe(turboCov) {
+			turboCov = ""
+		}
+		r.covEnv = &cov.Env{
+			LLVMBin:  filepath.Dir(llvmCov),
+			Binary:   dawnNode,
+			TurboCov: turboCov,
+		}
 	}
 
 	if logFilename != "" {
@@ -305,19 +331,19 @@ func run() error {
 		if isolated {
 			fmt.Fprintln(stdout, "Running in parallel isolated...")
 			fmt.Fprintf(stdout, "Testing %d test cases...\n", len(r.testcases))
-			if err := r.runParallelIsolated(); err != nil {
+			if err := r.runParallelIsolated(ctx); err != nil {
 				return err
 			}
 		} else {
 			fmt.Fprintln(stdout, "Running in parallel with server...")
 			fmt.Fprintf(stdout, "Testing %d test cases...\n", len(r.testcases))
-			if err := r.runParallelWithServer(); err != nil {
+			if err := r.runParallelWithServer(ctx); err != nil {
 				return err
 			}
 		}
 	} else {
 		fmt.Fprintln(stdout, "Running serially...")
-		if err := r.runSerially(query); err != nil {
+		if err := r.runSerially(ctx, query); err != nil {
 			return err
 		}
 	}
@@ -385,18 +411,24 @@ func (c *cache) save(path string) error {
 }
 
 type runner struct {
-	numRunners               int
-	printStdout              bool
-	verbose                  bool
-	node, npx, dawnNode, cts string
-	flags                    dawnNodeFlags
-	evalScript               func(string) string
-	testcases                []string
-	expectations             testcaseStatuses
-	results                  testcaseStatuses
-	log                      logger
-	stdout                   io.WriteCloser
-	colors                   bool // Colors enabled?
+	numRunners   int
+	printStdout  bool
+	verbose      bool
+	node         string
+	npx          string
+	dawnNode     string
+	cts          string
+	tmpDir       string
+	flags        dawnNodeFlags
+	covEnv       *cov.Env
+	coverageFile string
+	evalScript   func(string) string
+	testcases    []string
+	expectations testcaseStatuses
+	results      testcaseStatuses
+	log          logger
+	stdout       io.WriteCloser
+	colors       bool // Colors enabled?
 }
 
 // scanSourceTimestamps scans all the .js and .ts files in all subdirectories of
@@ -562,7 +594,7 @@ func (p *prefixWriter) Write(data []byte) (int, error) {
 
 // runParallelWithServer() starts r.numRunners instances of the CTS server test
 // runner, and issues test run requests to those servers, concurrently.
-func (r *runner) runParallelWithServer() error {
+func (r *runner) runParallelWithServer(ctx context.Context) error {
 	// Create a chan of test indices.
 	// This will be read by the test runner goroutines.
 	caseIndices := make(chan int, len(r.testcases))
@@ -582,7 +614,7 @@ func (r *runner) runParallelWithServer() error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := r.runServer(id, caseIndices, results); err != nil {
+			if err := r.runServer(ctx, id, caseIndices, results); err != nil {
 				results <- result{
 					status: fail,
 					error:  fmt.Errorf("Test server error: %w", err),
@@ -591,8 +623,7 @@ func (r *runner) runParallelWithServer() error {
 		}()
 	}
 
-	r.streamResults(wg, results)
-	return nil
+	return r.streamResults(ctx, wg, results)
 }
 
 // runServer starts a test runner server instance, takes case indices from
@@ -600,7 +631,7 @@ func (r *runner) runParallelWithServer() error {
 // The result of the test run is written to the results chan.
 // Once the caseIndices chan has been closed, the server is stopped and
 // runServer returns.
-func (r *runner) runServer(id int, caseIndices <-chan int, results chan<- result) error {
+func (r *runner) runServer(ctx context.Context, id int, caseIndices <-chan int, results chan<- result) error {
 	var port int
 	testCaseLog := &bytes.Buffer{}
 
@@ -627,7 +658,6 @@ func (r *runner) runServer(id int, caseIndices <-chan int, results chan<- result
 			args = append(args, "--gpu-provider-flag", f)
 		}
 
-		ctx := mainCtx
 		cmd := exec.CommandContext(ctx, r.node, args...)
 
 		writer := io.Writer(testCaseLog)
@@ -736,7 +766,7 @@ func (r *runner) runServer(id int, caseIndices <-chan int, results chan<- result
 // testcase in a separate process. This reduces possibility of state leakage
 // between tests.
 // Up to r.numRunners tests will be run concurrently.
-func (r *runner) runParallelIsolated() error {
+func (r *runner) runParallelIsolated(ctx context.Context) error {
 	// Create a chan of test indices.
 	// This will be read by the test runner goroutines.
 	caseIndices := make(chan int, len(r.testcases))
@@ -753,18 +783,28 @@ func (r *runner) runParallelIsolated() error {
 	wg := &sync.WaitGroup{}
 	for i := 0; i < r.numRunners; i++ {
 		wg.Add(1)
+
+		profraw := ""
+		if r.covEnv != nil {
+			profraw = filepath.Join(r.tmpDir, fmt.Sprintf("cts-%v.profraw", i))
+			defer os.Remove(profraw)
+		}
+
 		go func() {
 			defer wg.Done()
 			for idx := range caseIndices {
-				res := r.runTestcase(r.testcases[idx])
+				res := r.runTestcase(ctx, r.testcases[idx], profraw)
 				res.index = idx
 				results <- res
+
+				if err := ctx.Err(); err != nil {
+					return
+				}
 			}
 		}()
 	}
 
-	r.streamResults(wg, results)
-	return nil
+	return r.streamResults(ctx, wg, results)
 }
 
 // streamResults reads from the chan 'results', printing the results in test-id
@@ -772,7 +812,7 @@ func (r *runner) runParallelIsolated() error {
 // automatically close the 'results' chan.
 // Once all the results have been printed, a summary will be printed and the
 // function will return.
-func (r *runner) streamResults(wg *sync.WaitGroup, results chan result) {
+func (r *runner) streamResults(ctx context.Context, wg *sync.WaitGroup, results chan result) error {
 	// Create another goroutine to close the results chan when all the runner
 	// goroutines have finished.
 	start := time.Now()
@@ -801,6 +841,11 @@ func (r *runner) streamResults(wg *sync.WaitGroup, results chan result) {
 		// No colors == no cursor control. Reduce progress updates so that
 		// we're not printing endless progress bars.
 		progressUpdateRate = time.Second
+	}
+
+	var covTree *cov.Tree
+	if r.covEnv != nil {
+		covTree = &cov.Tree{}
 	}
 
 	for res := range results {
@@ -838,6 +883,10 @@ func (r *runner) streamResults(wg *sync.WaitGroup, results chan result) {
 		}
 		if time.Since(lastStatusUpdate) > progressUpdateRate {
 			updateProgress()
+		}
+
+		if res.coverage != nil {
+			covTree.Add(splitTestCaseForCoverage(res.testcase), res.coverage)
 		}
 	}
 	fmt.Fprint(r.stdout, ansiProgressBar(animFrame, numTests, numByExpectedStatus))
@@ -888,14 +937,53 @@ func (r *runner) streamResults(wg *sync.WaitGroup, results chan result) {
 		fmt.Fprintln(r.stdout)
 	}
 
+	if covTree != nil {
+		// Obtain the current git revision
+		revision := "HEAD"
+		if g, err := git.New(""); err == nil {
+			if r, err := g.Open(fileutils.DawnRoot()); err == nil {
+				if l, err := r.Log(&git.LogOptions{From: "HEAD", To: "HEAD"}); err == nil {
+					revision = l[0].Hash.String()
+				}
+			}
+		}
+
+		if r.coverageFile != "" {
+			file, err := os.Create(r.coverageFile)
+			if err != nil {
+				return fmt.Errorf("failed to create the coverage file: %w", err)
+			}
+			defer file.Close()
+			if err := covTree.Encode(revision, file); err != nil {
+				return fmt.Errorf("failed to encode coverage file: %w", err)
+			}
+
+			fmt.Fprintln(r.stdout)
+			fmt.Fprintln(r.stdout, "Coverage data written to "+r.coverageFile)
+			return nil
+		}
+
+		cov := &bytes.Buffer{}
+		if err := covTree.Encode(revision, cov); err != nil {
+			return fmt.Errorf("failed to encode coverage file: %w", err)
+		}
+		return showCoverageServer(ctx, cov.Bytes(), r.stdout)
+	}
+
+	return nil
 }
 
 // runSerially() calls the CTS test runner to run the test query in a single
 // process.
 // TODO(bclayton): Support comparing against r.expectations
-func (r *runner) runSerially(query string) error {
+func (r *runner) runSerially(ctx context.Context, query string) error {
+	profraw := ""
+	if r.covEnv != nil {
+		profraw = filepath.Join(r.tmpDir, "cts.profraw")
+	}
+
 	start := time.Now()
-	result := r.runTestcase(query)
+	result := r.runTestcase(ctx, query, profraw)
 	timeTaken := time.Since(start)
 
 	if r.verbose {
@@ -942,12 +1030,13 @@ type result struct {
 	status   status
 	message  string
 	error    error
+	coverage *cov.Coverage
 }
 
 // runTestcase() runs the CTS testcase with the given query, returning the test
 // result.
-func (r *runner) runTestcase(query string) result {
-	ctx, cancel := context.WithTimeout(mainCtx, testTimeout)
+func (r *runner) runTestcase(ctx context.Context, query string, profraw string) result {
+	ctx, cancel := context.WithTimeout(ctx, testTimeout)
 	defer cancel()
 
 	args := []string{
@@ -973,27 +1062,52 @@ func (r *runner) runTestcase(query string) result {
 	cmd := exec.CommandContext(ctx, r.node, args...)
 	cmd.Dir = r.cts
 
+	if profraw != "" {
+		cmd.Env = os.Environ()
+		cmd.Env = append(cmd.Env, cov.RuntimeEnv(cmd.Env, profraw))
+	}
+
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
 	cmd.Stderr = &buf
 
 	err := cmd.Run()
+
 	msg := buf.String()
+	res := result{testcase: query,
+		status:  pass,
+		message: msg,
+		error:   err,
+	}
+
+	if r.covEnv != nil {
+		coverage, covErr := r.covEnv.Import(profraw)
+		if covErr != nil {
+			err = fmt.Errorf("could not import coverage data: %v", err)
+		}
+		res.coverage = coverage
+	}
+
 	switch {
 	case errors.Is(err, context.DeadlineExceeded):
-		return result{testcase: query, status: timeout, message: msg, error: err}
-	case err != nil:
-		break
-	case strings.Contains(msg, "[fail]"):
-		return result{testcase: query, status: fail, message: msg}
+		res.status = timeout
+	case err != nil, strings.Contains(msg, "[fail]"):
+		res.status = fail
 	case strings.Contains(msg, "[warn]"):
-		return result{testcase: query, status: warn, message: msg}
+		res.status = warn
 	case strings.Contains(msg, "[skip]"):
-		return result{testcase: query, status: skip, message: msg}
-	case strings.Contains(msg, "[pass]"), err == nil:
-		return result{testcase: query, status: pass, message: msg}
+		res.status = skip
+	case strings.Contains(msg, "[pass]"):
+		break
+	default:
+		res.status = fail
+		msg += "\ncould not parse test output"
 	}
-	return result{testcase: query, status: fail, message: fmt.Sprint(msg, err), error: err}
+
+	if res.error != nil {
+		res.message = fmt.Sprint(res.message, res.error)
+	}
+	return res
 }
 
 // filterTestcases returns in with empty strings removed
@@ -1250,4 +1364,84 @@ func (w *muxWriter) Write(data []byte) (n int, err error) {
 func (w *muxWriter) Close() error {
 	close(w.data)
 	return <-w.err
+}
+
+func splitTestCaseForCoverage(testcase string) []string {
+	out := []string{}
+	s := 0
+	for e, r := range testcase {
+		switch r {
+		case ':', '.':
+			out = append(out, testcase[s:e])
+			s = e
+		}
+	}
+	return out
+}
+
+// showCoverageServer starts a localhost http server to display the coverage data, launching a
+// browser if one can be found. Blocks until the context is cancelled.
+func showCoverageServer(ctx context.Context, covData []byte, stdout io.Writer) error {
+	const port = "9392"
+	url := fmt.Sprintf("http://localhost:%v/index.html", port)
+
+	handler := http.NewServeMux()
+	handler.HandleFunc("/index.html", func(w http.ResponseWriter, r *http.Request) {
+		f, err := os.Open(filepath.Join(fileutils.ThisDir(), "view-coverage.html"))
+		if err != nil {
+			fmt.Fprint(w, "file not found")
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		defer f.Close()
+		io.Copy(w, f)
+	})
+	handler.HandleFunc("/coverage.dat", func(w http.ResponseWriter, r *http.Request) {
+		io.Copy(w, bytes.NewReader(covData))
+	})
+	handler.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		rel := r.URL.Path
+		if r.URL.Path == "" {
+			http.Redirect(w, r, url, http.StatusSeeOther)
+			return
+		}
+		if strings.Contains(rel, "..") {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "file path must not contain '..'")
+			return
+		}
+		f, err := os.Open(filepath.Join(fileutils.DawnRoot(), r.URL.Path))
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprintf(w, "file '%v' not found", r.URL.Path)
+			return
+		}
+		defer f.Close()
+		io.Copy(w, f)
+	})
+
+	server := &http.Server{Addr: ":" + port, Handler: handler}
+	go server.ListenAndServe()
+
+	fmt.Fprintln(stdout)
+	fmt.Fprintln(stdout, "Serving coverage view at "+blue+url+ansiReset)
+
+	openBrowser(url)
+
+	<-ctx.Done()
+	return server.Shutdown(ctx)
+}
+
+// openBrowser launches a browser to open the given url
+func openBrowser(url string) error {
+	switch runtime.GOOS {
+	case "linux":
+		return exec.Command("xdg-open", url).Start()
+	case "windows":
+		return exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		return exec.Command("open", url).Start()
+	default:
+		return fmt.Errorf("unsupported platform")
+	}
 }
