@@ -560,7 +560,22 @@ bool Equal(const constant::Constant* a, const constant::Constant* b) {
 
             return false;
         },
-        [&](Default) { return a->Value() == b->Value(); });
+        [&](const type::Struct* str) {
+            auto count = str->Members().Length();
+            for (size_t i = 0; i < count; i++) {
+                if (!Equal(a->Index(i), b->Index(i))) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        [&](Default) {
+            auto va = a->Value();
+            auto vb = b->Value();
+            TINT_ASSERT(Resolver, !std::holds_alternative<std::monostate>(va));
+            TINT_ASSERT(Resolver, !std::holds_alternative<std::monostate>(vb));
+            return va == vb;
+        });
 }
 
 /// CreateComposite is used to construct a constant of a vector, matrix or array type.
