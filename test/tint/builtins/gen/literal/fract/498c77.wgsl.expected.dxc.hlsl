@@ -1,5 +1,5 @@
 void fract_498c77() {
-  vector<float16_t, 4> res = frac((float16_t(1.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(0.25h)).xxxx;
 }
 
 struct tint_symbol {

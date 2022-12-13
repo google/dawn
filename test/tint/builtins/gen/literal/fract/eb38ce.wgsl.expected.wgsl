@@ -1,7 +1,7 @@
 enable f16;
 
 fn fract_eb38ce() {
-  var res : f16 = fract(1.0h);
+  var res : f16 = fract(1.25h);
 }
 
 @vertex

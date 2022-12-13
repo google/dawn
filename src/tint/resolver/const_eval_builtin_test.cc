@@ -1173,6 +1173,38 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               FmaCases<f16>()))));
 
 template <typename T>
+std::vector<Case> FractCases() {
+    auto r = std::vector<Case>{
+        C({T(0)}, T(0)),
+        C({T(0.1)}, T(0.1)),
+        C({T(-0.1)}, T(0.9)),
+        C({T(0.0000001)}, T(0.0000001)),
+        C({T(-0.0000001)}, T(0.9999999)),
+        C({T(12.34567)}, T(0.34567)).FloatComp(0.002),
+        C({T(-12.34567)}, T(0.65433)).FloatComp(0.002),
+        C({T::Lowest()}, T(0)),
+        C({T::Highest()}, T(0)),
+        // Vector tests
+        C({Vec(T(0.1), T(-0.1), T(-0.0000001))}, Vec(T(0.1), T(0.9), T(0.9999999))),
+    };
+    // Note: Valid results are in the closed interval [0, 1.0]. For example, if e is a very small
+    // negative number, then fract(e) may be 1.0.
+    ConcatIntoIf<!std::is_same_v<T, f16>>(  //
+        r, std::vector<Case>{
+               C({T(-0.000000000000000001)}, T(1)),
+           });
+
+    return r;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Fract,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kFract),
+                     testing::ValuesIn(Concat(FractCases<AFloat>(),  //
+                                              FractCases<f32>(),
+                                              FractCases<f16>()))));
+
+template <typename T>
 std::vector<Case> FrexpCases() {
     using F = T;                                                         // fract type
     using E = std::conditional_t<std::is_same_v<T, AFloat>, AInt, i32>;  // exp type

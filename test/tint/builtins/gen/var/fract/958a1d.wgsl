@@ -25,7 +25,7 @@ enable f16;
 
 // fn fract(vec<3, f16>) -> vec<3, f16>
 fn fract_958a1d() {
-  var arg_0 = vec3<f16>(1.h);
+  var arg_0 = vec3<f16>(1.25h);
   var res: vec3<f16> = fract(arg_0);
 }
 

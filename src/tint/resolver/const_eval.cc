@@ -2680,6 +2680,20 @@ ConstEval::Result ConstEval::fma(const type::Type* ty,
     return TransformElements(builder, ty, transform, args[0], args[1], args[2]);
 }
 
+ConstEval::Result ConstEval::fract(const type::Type* ty,
+                                   utils::VectorRef<const constant::Constant*> args,
+                                   const Source& source) {
+    auto transform = [&](const constant::Constant* c1) {
+        auto create = [&](auto e) -> ImplResult {
+            using NumberT = decltype(e);
+            auto r = e - std::floor(e);
+            return CreateElement(builder, source, c1->Type(), NumberT{r});
+        };
+        return Dispatch_fa_f32_f16(create, c1);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
 ConstEval::Result ConstEval::frexp(const type::Type* ty,
                                    utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {

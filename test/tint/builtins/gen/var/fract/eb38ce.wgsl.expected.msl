@@ -2,7 +2,7 @@
 
 using namespace metal;
 void fract_eb38ce() {
-  half arg_0 = 1.0h;
+  half arg_0 = 1.25h;
   half res = fract(arg_0);
 }
 

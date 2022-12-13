@@ -23,7 +23,7 @@
 
 // fn fract(f32) -> f32
 fn fract_fa5c71() {
-  var arg_0 = 1.f;
+  var arg_0 = 1.25f;
   var res: f32 = fract(arg_0);
 }
 

@@ -25,7 +25,7 @@ enable f16;
 
 // fn fract(f16) -> f16
 fn fract_eb38ce() {
-  var arg_0 = 1.h;
+  var arg_0 = 1.25h;
   var res: f16 = fract(arg_0);
 }
 

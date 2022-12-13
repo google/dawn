@@ -1,5 +1,5 @@
 void fract_fa5c71() {
-  float arg_0 = 1.0f;
+  float arg_0 = 1.25f;
   float res = frac(arg_0);
 }
 

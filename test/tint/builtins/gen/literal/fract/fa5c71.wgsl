@@ -23,7 +23,7 @@
 
 // fn fract(f32) -> f32
 fn fract_fa5c71() {
-  var res: f32 = fract(1.f);
+  var res: f32 = fract(1.25f);
 }
 
 @vertex

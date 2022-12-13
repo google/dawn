@@ -1,7 +1,7 @@
 #version 310 es
 
 void fract_fa5c71() {
-  float arg_0 = 1.0f;
+  float arg_0 = 1.25f;
   float res = fract(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void fract_fa5c71() {
-  float arg_0 = 1.0f;
+  float arg_0 = 1.25f;
   float res = fract(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void fract_fa5c71() {
-  float arg_0 = 1.0f;
+  float arg_0 = 1.25f;
   float res = fract(arg_0);
 }
 

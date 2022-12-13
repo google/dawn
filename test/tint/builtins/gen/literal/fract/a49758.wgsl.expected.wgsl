@@ -1,5 +1,5 @@
 fn fract_a49758() {
-  var res : vec3<f32> = fract(vec3<f32>(1.0f));
+  var res : vec3<f32> = fract(vec3<f32>(1.25f));
 }
 
 @vertex

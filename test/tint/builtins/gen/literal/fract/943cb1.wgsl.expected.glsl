@@ -1,7 +1,7 @@
 #version 310 es
 
 void fract_943cb1() {
-  vec2 res = fract(vec2(1.0f));
+  vec2 res = vec2(0.25f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void fract_943cb1() {
-  vec2 res = fract(vec2(1.0f));
+  vec2 res = vec2(0.25f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void fract_943cb1() {
-  vec2 res = fract(vec2(1.0f));
+  vec2 res = vec2(0.25f);
 }
 
 void compute_main() {

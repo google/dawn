@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void fract_eb38ce() {
-  float16_t arg_0 = 1.0hf;
+  float16_t arg_0 = 1.25hf;
   float16_t res = fract(arg_0);
 }
 
@@ -24,7 +24,7 @@ void main() {
 precision mediump float;
 
 void fract_eb38ce() {
-  float16_t arg_0 = 1.0hf;
+  float16_t arg_0 = 1.25hf;
   float16_t res = fract(arg_0);
 }
 
@@ -40,7 +40,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void fract_eb38ce() {
-  float16_t arg_0 = 1.0hf;
+  float16_t arg_0 = 1.25hf;
   float16_t res = fract(arg_0);
 }
 

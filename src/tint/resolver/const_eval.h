@@ -689,6 +689,15 @@ class ConstEval {
                utils::VectorRef<const constant::Constant*> args,
                const Source& source);
 
+    /// fract builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result fract(const type::Type* ty,
+                 utils::VectorRef<const constant::Constant*> args,
+                 const Source& source);
+
     /// frexp builtin
     /// @param ty the expression type
     /// @param args the input arguments

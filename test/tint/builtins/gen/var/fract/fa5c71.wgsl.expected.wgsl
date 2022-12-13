@@ -1,5 +1,5 @@
 fn fract_fa5c71() {
-  var arg_0 = 1.0f;
+  var arg_0 = 1.25f;
   var res : f32 = fract(arg_0);
 }
 

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void fract_fa5c71() {
-  float arg_0 = 1.0f;
+  float arg_0 = 1.25f;
   float res = fract(arg_0);
 }
 

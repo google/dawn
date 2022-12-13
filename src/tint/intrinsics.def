@@ -494,8 +494,8 @@ fn dot4U8Packed(u32, u32) -> u32
 @const fn floor<N: num, T: fa_f32_f16>(@test_value(1.5) vec<N, T>) -> vec<N, T>
 @const fn fma<T: fa_f32_f16>(T, T, T) -> T
 @const fn fma<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
-fn fract<T: f32_f16>(T) -> T
-fn fract<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn fract<T: fa_f32_f16>(@test_value(1.25) T) -> T
+@const fn fract<N: num, T: fa_f32_f16>(@test_value(1.25) vec<N, T>) -> vec<N, T>
 @const fn frexp<T: fa_f32_f16>(T) -> __frexp_result<T>
 @const fn frexp<N: num, T: fa_f32_f16>(vec<N, T>) -> __frexp_result_vec<N, T>
 @stage("fragment") fn fwidth(f32) -> f32

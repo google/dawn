@@ -23,7 +23,7 @@
 
 // fn fract(vec<2, f32>) -> vec<2, f32>
 fn fract_943cb1() {
-  var res: vec2<f32> = fract(vec2<f32>(1.f));
+  var res: vec2<f32> = fract(vec2<f32>(1.25f));
 }
 
 @vertex
