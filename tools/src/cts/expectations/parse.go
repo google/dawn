@@ -15,6 +15,7 @@
 package expectations
 
 import (
+	"fmt"
 	"strings"
 
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
@@ -26,7 +27,10 @@ const (
 )
 
 // Parse parses an expectations file, returning the Content
-func Parse(body string) (Content, error) {
+func Parse(path, body string) (Content, error) {
+	// Normalize CRLF -> LF
+	body = strings.ReplaceAll(body, "\r\n", "\n")
+
 	// LineType is an enumerator classifying the 'type' of the line.
 	type LineType int
 	const (
@@ -120,7 +124,7 @@ func Parse(body string) (Content, error) {
 			if columnIdx == 1 {
 				columnIdx = len(l) + 1
 			}
-			return Diagnostic{Error, lineIdx, columnIdx, msg}
+			return fmt.Errorf("%v:%v:%v error: %v", path, lineIdx, columnIdx, msg)
 		}
 
 		// peek returns the next token without consuming it.

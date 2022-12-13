@@ -66,6 +66,16 @@ func TestParse(t *testing.T) {
 			},
 		}, /////////////////////////////////////////////////////////////////////
 		{
+			name: "carriage-return line-feed, followed by single line comment",
+			in:   "\r\n# a comment",
+			expect: expectations.Content{
+				Chunks: []expectations.Chunk{
+					{},
+					{Comments: []string{`# a comment`}},
+				},
+			},
+		}, /////////////////////////////////////////////////////////////////////
+		{
 			name: "comments separated by single newline",
 			in: `# comment 1
 # comment 2`,
@@ -120,6 +130,30 @@ func TestParse(t *testing.T) {
 								Tags:   result.NewTags(),
 								Query:  "abc,def",
 								Status: []string{"FAIL"},
+							},
+						},
+					},
+				},
+			},
+		}, /////////////////////////////////////////////////////////////////////
+		{
+			name: "two expectations, separated with carriage-return line-feed",
+			in:   "abc,def [ FAIL ]\r\nghi,jkl [ PASS ]",
+			expect: expectations.Content{
+				Chunks: []expectations.Chunk{
+					{
+						Expectations: []expectations.Expectation{
+							{
+								Line:   1,
+								Tags:   result.NewTags(),
+								Query:  "abc,def",
+								Status: []string{"FAIL"},
+							},
+							{
+								Line:   2,
+								Tags:   result.NewTags(),
+								Query:  "ghi,jkl",
+								Status: []string{"PASS"},
 							},
 						},
 					},
@@ -432,31 +466,31 @@ crbug.com/456 [ Mac ] ghi_jkl [ PASS ]
 		{
 			name:      "err missing tag ']'",
 			in:        `[`,
-			expectErr: "1:2 error: expected ']' for tags",
+			expectErr: "expectations.txt:1:2 error: expected ']' for tags",
 		}, /////////////////////////////////////////////////////////////////////
 		{
 			name:      "err missing test query",
 			in:        `[ a ]`,
-			expectErr: "1:6 error: expected test query",
+			expectErr: "expectations.txt:1:6 error: expected test query",
 		}, /////////////////////////////////////////////////////////////////////
 		{
 			name:      "err missing status EOL",
 			in:        `[ a ] b`,
-			expectErr: "1:8 error: expected status",
+			expectErr: "expectations.txt:1:8 error: expected status",
 		}, /////////////////////////////////////////////////////////////////////
 		{
 			name:      "err missing status comment",
 			in:        `[ a ] b # c`,
-			expectErr: "1:9 error: expected status",
+			expectErr: "expectations.txt:1:9 error: expected status",
 		}, /////////////////////////////////////////////////////////////////////
 		{
 			name:      "err missing status ']'",
 			in:        `[ a ] b [ c`,
-			expectErr: "1:12 error: expected ']' for status",
+			expectErr: "expectations.txt:1:12 error: expected ']' for status",
 		},
 	} {
 
-		got, err := expectations.Parse(test.in)
+		got, err := expectations.Parse("expectations.txt", test.in)
 		errMsg := ""
 		if err != nil {
 			errMsg = err.Error()

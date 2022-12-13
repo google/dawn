@@ -117,7 +117,7 @@ crbug.com/a/123 [ os-a ] a:b,c:d,* [ Failure ]
 			},
 		},
 	} {
-		ex, err := expectations.Parse(header + test.expectations)
+		ex, err := expectations.Parse("expectations.txt", header+test.expectations)
 		if err != nil {
 			t.Fatalf("'%v': expectations.Parse():\n%v", test.name, err)
 		}

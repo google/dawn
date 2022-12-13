@@ -90,7 +90,7 @@ func Load(path string) (Content, error) {
 	if err != nil {
 		return Content{}, err
 	}
-	ex, err := Parse(string(content))
+	ex, err := Parse(path, string(content))
 	if err != nil {
 		return Content{}, err
 	}

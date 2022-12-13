@@ -507,7 +507,7 @@ crbug.com/dawn/0000 a:b,c:t29:* [ Failure ]
 `,
 		},
 	} {
-		ex, err := expectations.Parse(header + test.expectations)
+		ex, err := expectations.Parse("expectations.txt", header+test.expectations)
 		if err != nil {
 			t.Fatalf("'%v': expectations.Parse():\n%v", test.name, err)
 		}

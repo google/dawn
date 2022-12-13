@@ -222,7 +222,7 @@ func (r *roller) roll(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	ex, err := expectations.Parse(expectationsFile)
+	ex, err := expectations.Parse(common.RelativeExpectationsPath, expectationsFile)
 	if err != nil {
 		return fmt.Errorf("failed to load expectations: %v", err)
 	}
