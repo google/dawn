@@ -164,7 +164,7 @@ size_t Hash(const ARGS&... args) {
 template <typename... ARGS>
 size_t HashCombine(size_t hash, const ARGS&... values) {
     constexpr size_t offset = detail::HashCombineOffset<sizeof(size_t)>::value();
-    ((hash ^= Hash(values) + offset + (hash << 6) + (hash >> 2)), ...);
+    ((hash ^= Hash(values) + (offset ^ (hash >> 2))), ...);
     return hash;
 }
 
