@@ -87,11 +87,11 @@
 #include "src/tint/ast/void.h"
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/constant/constant.h"
 #include "src/tint/number.h"
 #include "src/tint/program.h"
 #include "src/tint/program_id.h"
 #include "src/tint/sem/array_count.h"
-#include "src/tint/sem/constant.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/type/array.h"
 #include "src/tint/type/bool.h"
@@ -265,8 +265,8 @@ class ProgramBuilder {
     /// SemNodeAllocator is an alias to BlockAllocator<sem::Node>
     using SemNodeAllocator = utils::BlockAllocator<sem::Node>;
 
-    /// ConstantAllocator is an alias to BlockAllocator<sem::Constant>
-    using ConstantAllocator = utils::BlockAllocator<sem::Constant>;
+    /// ConstantAllocator is an alias to BlockAllocator<constant::Constant>
+    using ConstantAllocator = utils::BlockAllocator<constant::Constant>;
 
     /// Constructor
     ProgramBuilder();
@@ -465,12 +465,12 @@ class ProgramBuilder {
         return sem_nodes_.Create<T>(std::forward<ARGS>(args)...);
     }
 
-    /// Creates a new sem::Constant owned by the ProgramBuilder.
+    /// Creates a new constant::Constant owned by the ProgramBuilder.
     /// When the ProgramBuilder is destructed, the sem::Node will also be destructed.
     /// @param args the arguments to pass to the constructor
     /// @returns the node pointer
     template <typename T, typename... ARGS>
-    traits::EnableIf<traits::IsTypeOrDerived<T, sem::Constant>, T>* create(ARGS&&... args) {
+    traits::EnableIf<traits::IsTypeOrDerived<T, constant::Constant>, T>* create(ARGS&&... args) {
         AssertNotMoved();
         return constant_nodes_.Create<T>(std::forward<ARGS>(args)...);
     }

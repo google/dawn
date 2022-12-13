@@ -35,7 +35,7 @@ class Materialize final : public Castable<Materialize, Expression> {
     Materialize(const Expression* expr,
                 const Statement* statement,
                 const type::Type* type,
-                const Constant* constant);
+                const constant::Constant* constant);
 
     /// Destructor
     ~Materialize() override;

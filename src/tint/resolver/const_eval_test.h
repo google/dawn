@@ -36,9 +36,10 @@ inline const auto kPiOver4 = T(UnwrapNumber<T>(0.785398163397448309616));
 template <typename T>
 inline const auto k3PiOver4 = T(UnwrapNumber<T>(2.356194490192344928846));
 
-/// Walks the sem::Constant @p c, accumulating all the inner-most scalar values into @p args
+/// Walks the constant::Constant @p c, accumulating all the inner-most scalar values into @p args
 template <size_t N>
-inline void CollectScalars(const sem::Constant* c, utils::Vector<builder::Scalar, N>& scalars) {
+inline void CollectScalars(const constant::Constant* c,
+                           utils::Vector<builder::Scalar, N>& scalars) {
     Switch(
         c->Type(),  //
         [&](const type::AbstractInt*) { scalars.Push(c->As<AInt>()); },
@@ -56,8 +57,8 @@ inline void CollectScalars(const sem::Constant* c, utils::Vector<builder::Scalar
         });
 }
 
-/// Walks the sem::Constant @p c, returning all the inner-most scalar values.
-inline utils::Vector<builder::Scalar, 16> ScalarsFrom(const sem::Constant* c) {
+/// Walks the constant::Constant @p c, returning all the inner-most scalar values.
+inline utils::Vector<builder::Scalar, 16> ScalarsFrom(const constant::Constant* c) {
     utils::Vector<builder::Scalar, 16> out;
     CollectScalars(c, out);
     return out;
@@ -88,7 +89,7 @@ struct CheckConstantFlags {
 /// @param got_constant the constant value evaluated by the resolver
 /// @param expected_value the expected value for the test
 /// @param flags optional flags for controlling the comparisons
-inline void CheckConstant(const sem::Constant* got_constant,
+inline void CheckConstant(const constant::Constant* got_constant,
                           const builder::Value& expected_value,
                           CheckConstantFlags flags = {}) {
     auto values_flat = ScalarsFrom(got_constant);
@@ -257,7 +258,7 @@ using builder::Vec;
 // TODO(amaiorano): Move to Constant.h?
 enum class Action { kStop, kContinue };
 template <typename Func>
-inline Action ForEachElemPair(const sem::Constant* a, const sem::Constant* b, Func&& f) {
+inline Action ForEachElemPair(const constant::Constant* a, const constant::Constant* b, Func&& f) {
     EXPECT_EQ(a->Type(), b->Type());
     size_t i = 0;
     while (true) {

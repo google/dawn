@@ -260,7 +260,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream
     /// @param constant the constant value to emit
     /// @returns true if the constant value was successfully emitted
-    bool EmitConstant(std::ostream& out, const sem::Constant* constant);
+    bool EmitConstant(std::ostream& out, const constant::Constant* constant);
     /// Handles a literal
     /// @param out the output of the expression stream
     /// @param lit the literal to emit

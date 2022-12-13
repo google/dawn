@@ -22,9 +22,9 @@
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/ast/traverse_expressions.h"
+#include "src/tint/constant/constant.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/call.h"
-#include "src/tint/sem/constant.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
@@ -1641,7 +1641,7 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::LiteralExpression* lit) {
     return GenerateConstantIfNeeded(constant);
 }
 
-uint32_t Builder::GenerateConstantIfNeeded(const sem::Constant* constant) {
+uint32_t Builder::GenerateConstantIfNeeded(const constant::Constant* constant) {
     if (constant->AllZero()) {
         return GenerateConstantNullIfNeeded(constant->Type());
     }

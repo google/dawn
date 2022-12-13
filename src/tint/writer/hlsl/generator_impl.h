@@ -352,7 +352,7 @@ class GeneratorImpl : public TextGenerator {
     /// initializer
     /// @returns true if the constant value was successfully emitted
     bool EmitConstant(std::ostream& out,
-                      const sem::Constant* constant,
+                      const constant::Constant* constant,
                       bool is_variable_initializer);
     /// Handles a literal
     /// @param out the output stream

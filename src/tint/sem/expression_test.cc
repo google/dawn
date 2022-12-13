@@ -23,13 +23,13 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::sem {
 namespace {
 
-class MockConstant : public sem::Constant {
+class MockConstant : public constant::Constant {
   public:
     explicit MockConstant(const type::Type* ty) : type(ty) {}
     ~MockConstant() override {}
     const type::Type* Type() const override { return type; }
     std::variant<std::monostate, AInt, AFloat> Value() const override { return {}; }
-    const Constant* Index(size_t) const override { return {}; }
+    const constant::Constant* Index(size_t) const override { return {}; }
     bool AllZero() const override { return {}; }
     bool AnyZero() const override { return {}; }
     bool AllEqual() const override { return {}; }

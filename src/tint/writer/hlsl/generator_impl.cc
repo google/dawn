@@ -27,10 +27,10 @@
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/variable_decl_statement.h"
+#include "src/tint/constant/constant.h"
 #include "src/tint/debug.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
-#include "src/tint/sem/constant.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
@@ -3263,7 +3263,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
 }
 
 bool GeneratorImpl::EmitConstant(std::ostream& out,
-                                 const sem::Constant* constant,
+                                 const constant::Constant* constant,
                                  bool is_variable_initializer) {
     return Switch(
         constant->Type(),  //

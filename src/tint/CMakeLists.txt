@@ -254,6 +254,8 @@ list(APPEND TINT_LIB_SRCS
   castable.h
   clone_context.cc
   clone_context.h
+  constant/constant.cc
+  constant/constant.h
   demangler.cc
   demangler.h
   inspector/entry_point.cc
@@ -306,8 +308,6 @@ list(APPEND TINT_LIB_SRCS
   sem/call_target.h
   sem/call.cc
   sem/call.h
-  sem/constant.cc
-  sem/constant.h
   sem/evaluation_stage.h
   sem/expression.cc
   sem/expression.h

@@ -23,6 +23,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/constant/constant.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/const_eval.h"
 #include "src/tint/resolver/dependency_graph.h"
@@ -32,7 +33,6 @@
 #include "src/tint/scope_stack.h"
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/sem/block_statement.h"
-#include "src/tint/sem/constant.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/utils/bitset.h"
@@ -197,13 +197,13 @@ class Resolver {
 
     /// Converts `c` to `target_ty`
     /// @returns true on success, false on failure.
-    bool Convert(const sem::Constant*& c, const type::Type* target_ty, const Source& source);
+    bool Convert(const constant::Constant*& c, const type::Type* target_ty, const Source& source);
 
     /// Transforms `args` to a vector of constants, and converts each constant to the call target's
     /// parameter type.
     /// @returns the vector of constants, `utils::Failure` on failure.
     template <size_t N>
-    utils::Result<utils::Vector<const sem::Constant*, N>> ConvertArguments(
+    utils::Result<utils::Vector<const constant::Constant*, N>> ConvertArguments(
         const utils::Vector<const sem::Expression*, N>& args,
         const sem::CallTarget* target);
 

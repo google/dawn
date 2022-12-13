@@ -22,8 +22,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "src/tint/constant/constant.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/constant.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/type/abstract_float.h"
@@ -246,8 +246,9 @@ std::make_unsigned_t<T> CountTrailingBits(T e, T bit_value_to_count) {
     return count;
 }
 
-/// ImplConstant inherits from sem::Constant to add an private implementation method for conversion.
-struct ImplConstant : public sem::Constant {
+/// ImplConstant inherits from constant::Constant to add an private implementation method for
+/// conversion.
+struct ImplConstant : public constant::Constant {
     /// Convert attempts to convert the constant value to the given type. On error, Convert()
     /// creates a new diagnostic message and returns a Failure.
     virtual utils::Result<const ImplConstant*> Convert(ProgramBuilder& builder,
@@ -261,7 +262,7 @@ using ImplResult = utils::Result<const ImplConstant*>;
 // Forward declaration
 const ImplConstant* CreateComposite(ProgramBuilder& builder,
                                     const type::Type* type,
-                                    utils::VectorRef<const sem::Constant*> elements);
+                                    utils::VectorRef<const constant::Constant*> elements);
 
 /// Element holds a single scalar or abstract-numeric value.
 /// Element implements the Constant interface.
@@ -284,7 +285,7 @@ struct Element : ImplConstant {
             return static_cast<AInt>(value);
         }
     }
-    const sem::Constant* Index(size_t) const override { return nullptr; }
+    const constant::Constant* Index(size_t) const override { return nullptr; }
     bool AllZero() const override { return IsPositiveZero(value); }
     bool AnyZero() const override { return IsPositiveZero(value); }
     bool AllEqual() const override { return true; }
@@ -355,11 +356,11 @@ struct Element : ImplConstant {
 /// identical. Splat may be of a vector, matrix or array type.
 /// Splat implements the Constant interface.
 struct Splat : ImplConstant {
-    Splat(const type::Type* t, const sem::Constant* e, size_t n) : type(t), el(e), count(n) {}
+    Splat(const type::Type* t, const constant::Constant* e, size_t n) : type(t), el(e), count(n) {}
     ~Splat() override = default;
     const type::Type* Type() const override { return type; }
     std::variant<std::monostate, AInt, AFloat> Value() const override { return {}; }
-    const sem::Constant* Index(size_t i) const override { return i < count ? el : nullptr; }
+    const constant::Constant* Index(size_t i) const override { return i < count ? el : nullptr; }
     bool AllZero() const override { return el->AllZero(); }
     bool AnyZero() const override { return el->AnyZero(); }
     bool AllEqual() const override { return true; }
@@ -369,8 +370,8 @@ struct Splat : ImplConstant {
                        const type::Type* target_ty,
                        const Source& source) const override {
         // Convert the single splatted element type.
-        // Note: This file is the only place where `sem::Constant`s are created, so this static_cast
-        // is safe.
+        // Note: This file is the only place where `constant::Constant`s are created, so this
+        // static_cast is safe.
         auto conv_el = static_cast<const ImplConstant*>(el)->Convert(
             builder, type::Type::ElementOf(target_ty), source);
         if (!conv_el) {
@@ -383,7 +384,7 @@ struct Splat : ImplConstant {
     }
 
     type::Type const* const type;
-    const sem::Constant* el;
+    const constant::Constant* el;
     const size_t count;
 };
 
@@ -394,14 +395,14 @@ struct Splat : ImplConstant {
 /// Composite implements the Constant interface.
 struct Composite : ImplConstant {
     Composite(const type::Type* t,
-              utils::VectorRef<const sem::Constant*> els,
+              utils::VectorRef<const constant::Constant*> els,
               bool all_0,
               bool any_0)
         : type(t), elements(std::move(els)), all_zero(all_0), any_zero(any_0), hash(CalcHash()) {}
     ~Composite() override = default;
     const type::Type* Type() const override { return type; }
     std::variant<std::monostate, AInt, AFloat> Value() const override { return {}; }
-    const sem::Constant* Index(size_t i) const override {
+    const constant::Constant* Index(size_t i) const override {
         return i < elements.Length() ? elements[i] : nullptr;
     }
     bool AllZero() const override { return all_zero; }
@@ -413,7 +414,7 @@ struct Composite : ImplConstant {
                        const type::Type* target_ty,
                        const Source& source) const override {
         // Convert each of the composite element types.
-        utils::Vector<const sem::Constant*, 4> conv_els;
+        utils::Vector<const constant::Constant*, 4> conv_els;
         conv_els.Reserve(elements.Length());
         std::function<const type::Type*(size_t idx)> target_el_ty;
         if (auto* str = target_ty->As<type::Struct>()) {
@@ -429,7 +430,7 @@ struct Composite : ImplConstant {
         }
 
         for (auto* el : elements) {
-            // Note: This file is the only place where `sem::Constant`s are created, so the
+            // Note: This file is the only place where `constant::Constant`s are created, so the
             // static_cast is safe.
             auto conv_el = static_cast<const ImplConstant*>(el)->Convert(
                 builder, target_el_ty(conv_els.Length()), source);
@@ -453,7 +454,7 @@ struct Composite : ImplConstant {
     }
 
     type::Type const* const type;
-    const utils::Vector<const sem::Constant*, 8> elements;
+    const utils::Vector<const constant::Constant*, 8> elements;
     const bool all_zero;
     const bool any_zero;
     const size_t hash;
@@ -496,7 +497,7 @@ const ImplConstant* ZeroValue(ProgramBuilder& builder, const type::Type* type) {
         },
         [&](const type::Struct* s) -> const ImplConstant* {
             utils::Hashmap<const type::Type*, const ImplConstant*, 8> zero_by_type;
-            utils::Vector<const sem::Constant*, 4> zeros;
+            utils::Vector<const constant::Constant*, 4> zeros;
             zeros.Reserve(s->Members().Length());
             for (auto* member : s->Members()) {
                 auto* zero = zero_by_type.GetOrCreate(
@@ -522,7 +523,7 @@ const ImplConstant* ZeroValue(ProgramBuilder& builder, const type::Type* type) {
 }
 
 /// Equal returns true if the constants `a` and `b` are of the same type and value.
-bool Equal(const sem::Constant* a, const sem::Constant* b) {
+bool Equal(const constant::Constant* a, const constant::Constant* b) {
     if (a->Hash() != b->Hash()) {
         return false;
     }
@@ -567,7 +568,7 @@ bool Equal(const sem::Constant* a, const sem::Constant* b) {
 /// depending on the element types and values.
 const ImplConstant* CreateComposite(ProgramBuilder& builder,
                                     const type::Type* type,
-                                    utils::VectorRef<const sem::Constant*> elements) {
+                                    utils::VectorRef<const constant::Constant*> elements) {
     if (elements.IsEmpty()) {
         return nullptr;
     }
@@ -617,7 +618,7 @@ ImplResult TransformElements(ProgramBuilder& builder,
             return f(cs...);
         }
     }
-    utils::Vector<const sem::Constant*, 8> els;
+    utils::Vector<const constant::Constant*, 8> els;
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
         if (auto el = detail::TransformElements(builder, type::Type::ElementOf(composite_ty),
@@ -653,8 +654,8 @@ template <typename F>
 ImplResult TransformBinaryElements(ProgramBuilder& builder,
                                    const type::Type* composite_ty,
                                    F&& f,
-                                   const sem::Constant* c0,
-                                   const sem::Constant* c1) {
+                                   const constant::Constant* c0,
+                                   const constant::Constant* c1) {
     uint32_t n0 = 0;
     type::Type::ElementOf(c0->Type(), &n0);
     uint32_t n1 = 0;
@@ -665,7 +666,7 @@ ImplResult TransformBinaryElements(ProgramBuilder& builder,
         return f(c0, c1);
     }
 
-    utils::Vector<const sem::Constant*, 8> els;
+    utils::Vector<const constant::Constant*, 8> els;
     els.Reserve(max_n);
     for (uint32_t i = 0; i < max_n; i++) {
         auto nested_or_self = [&](auto* c, uint32_t num_elems) {
@@ -1180,8 +1181,8 @@ auto ConstEval::Dot4Func(const Source& source, const type::Type* elem_ty) {
 }
 
 ConstEval::Result ConstEval::Dot(const Source& source,
-                                 const sem::Constant* v1,
-                                 const sem::Constant* v2) {
+                                 const constant::Constant* v1,
+                                 const constant::Constant* v2) {
     auto* vec_ty = v1->Type()->As<type::Vector>();
     TINT_ASSERT(Resolver, vec_ty);
     auto* elem_ty = vec_ty->type();
@@ -1208,7 +1209,7 @@ ConstEval::Result ConstEval::Dot(const Source& source,
 
 ConstEval::Result ConstEval::Length(const Source& source,
                                     const type::Type* ty,
-                                    const sem::Constant* c0) {
+                                    const constant::Constant* c0) {
     auto* vec_ty = c0->Type()->As<type::Vector>();
     // Evaluates to the absolute value of e if T is scalar.
     if (vec_ty == nullptr) {
@@ -1229,9 +1230,9 @@ ConstEval::Result ConstEval::Length(const Source& source,
 
 ConstEval::Result ConstEval::Mul(const Source& source,
                                  const type::Type* ty,
-                                 const sem::Constant* v1,
-                                 const sem::Constant* v2) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+                                 const constant::Constant* v1,
+                                 const constant::Constant* v2) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         return Dispatch_fia_fiu32_f16(MulFunc(source, c0->Type()), c0, c1);
     };
     return TransformBinaryElements(builder, ty, transform, v1, v2);
@@ -1239,9 +1240,9 @@ ConstEval::Result ConstEval::Mul(const Source& source,
 
 ConstEval::Result ConstEval::Sub(const Source& source,
                                  const type::Type* ty,
-                                 const sem::Constant* v1,
-                                 const sem::Constant* v2) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+                                 const constant::Constant* v1,
+                                 const constant::Constant* v2) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         return Dispatch_fia_fiu32_f16(SubFunc(source, c0->Type()), c0, c1);
     };
     return TransformBinaryElements(builder, ty, transform, v1, v2);
@@ -1319,7 +1320,7 @@ ConstEval::Result ConstEval::ArrayOrStructInit(const type::Type* ty,
     }
 
     // Multiple arguments. Must be a type initializer.
-    utils::Vector<const sem::Constant*, 4> els;
+    utils::Vector<const constant::Constant*, 4> els;
     els.Reserve(args.Length());
     for (auto* arg : args) {
         els.Push(arg->ConstantValue());
@@ -1328,7 +1329,7 @@ ConstEval::Result ConstEval::ArrayOrStructInit(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::Conv(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
     uint32_t el_count = 0;
     auto* el_ty = type::Type::ElementOf(ty, &el_count);
@@ -1344,19 +1345,19 @@ ConstEval::Result ConstEval::Conv(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::Zero(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*>,
+                                  utils::VectorRef<const constant::Constant*>,
                                   const Source&) {
     return ZeroValue(builder, ty);
 }
 
 ConstEval::Result ConstEval::Identity(const type::Type*,
-                                      utils::VectorRef<const sem::Constant*> args,
+                                      utils::VectorRef<const constant::Constant*> args,
                                       const Source&) {
     return args[0];
 }
 
 ConstEval::Result ConstEval::VecSplat(const type::Type* ty,
-                                      utils::VectorRef<const sem::Constant*> args,
+                                      utils::VectorRef<const constant::Constant*> args,
                                       const Source&) {
     if (auto* arg = args[0]) {
         return builder.create<Splat>(ty, arg, static_cast<const type::Vector*>(ty)->Width());
@@ -1365,15 +1366,15 @@ ConstEval::Result ConstEval::VecSplat(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::VecInitS(const type::Type* ty,
-                                      utils::VectorRef<const sem::Constant*> args,
+                                      utils::VectorRef<const constant::Constant*> args,
                                       const Source&) {
     return CreateComposite(builder, ty, args);
 }
 
 ConstEval::Result ConstEval::VecInitM(const type::Type* ty,
-                                      utils::VectorRef<const sem::Constant*> args,
+                                      utils::VectorRef<const constant::Constant*> args,
                                       const Source&) {
-    utils::Vector<const sem::Constant*, 4> els;
+    utils::Vector<const constant::Constant*, 4> els;
     for (auto* arg : args) {
         auto* val = arg;
         if (!val) {
@@ -1397,13 +1398,13 @@ ConstEval::Result ConstEval::VecInitM(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::MatInitS(const type::Type* ty,
-                                      utils::VectorRef<const sem::Constant*> args,
+                                      utils::VectorRef<const constant::Constant*> args,
                                       const Source&) {
     auto* m = static_cast<const type::Matrix*>(ty);
 
-    utils::Vector<const sem::Constant*, 4> els;
+    utils::Vector<const constant::Constant*, 4> els;
     for (uint32_t c = 0; c < m->columns(); c++) {
-        utils::Vector<const sem::Constant*, 4> column;
+        utils::Vector<const constant::Constant*, 4> column;
         for (uint32_t r = 0; r < m->rows(); r++) {
             auto i = r + c * m->rows();
             column.Push(args[i]);
@@ -1414,7 +1415,7 @@ ConstEval::Result ConstEval::MatInitS(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::MatInitV(const type::Type* ty,
-                                      utils::VectorRef<const sem::Constant*> args,
+                                      utils::VectorRef<const constant::Constant*> args,
                                       const Source&) {
     return CreateComposite(builder, ty, args);
 }
@@ -1478,9 +1479,9 @@ ConstEval::Result ConstEval::Bitcast(const type::Type*, const sem::Expression*) 
 }
 
 ConstEval::Result ConstEval::OpComplement(const type::Type* ty,
-                                          utils::VectorRef<const sem::Constant*> args,
+                                          utils::VectorRef<const constant::Constant*> args,
                                           const Source& source) {
-    auto transform = [&](const sem::Constant* c) {
+    auto transform = [&](const constant::Constant* c) {
         auto create = [&](auto i) {
             return CreateElement(builder, source, c->Type(), decltype(i)(~i.value));
         };
@@ -1490,9 +1491,9 @@ ConstEval::Result ConstEval::OpComplement(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpUnaryMinus(const type::Type* ty,
-                                          utils::VectorRef<const sem::Constant*> args,
+                                          utils::VectorRef<const constant::Constant*> args,
                                           const Source& source) {
-    auto transform = [&](const sem::Constant* c) {
+    auto transform = [&](const constant::Constant* c) {
         auto create = [&](auto i) {
             // For signed integrals, avoid C++ UB by not negating the
             // smallest negative number. In WGSL, this operation is well
@@ -1515,9 +1516,9 @@ ConstEval::Result ConstEval::OpUnaryMinus(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpNot(const type::Type* ty,
-                                   utils::VectorRef<const sem::Constant*> args,
+                                   utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {
-    auto transform = [&](const sem::Constant* c) {
+    auto transform = [&](const constant::Constant* c) {
         auto create = [&](auto i) {
             return CreateElement(builder, source, c->Type(), decltype(i)(!i));
         };
@@ -1527,9 +1528,9 @@ ConstEval::Result ConstEval::OpNot(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpPlus(const type::Type* ty,
-                                    utils::VectorRef<const sem::Constant*> args,
+                                    utils::VectorRef<const constant::Constant*> args,
                                     const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         return Dispatch_fia_fiu32_f16(AddFunc(source, c0->Type()), c0, c1);
     };
 
@@ -1537,25 +1538,25 @@ ConstEval::Result ConstEval::OpPlus(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpMinus(const type::Type* ty,
-                                     utils::VectorRef<const sem::Constant*> args,
+                                     utils::VectorRef<const constant::Constant*> args,
                                      const Source& source) {
     return Sub(source, ty, args[0], args[1]);
 }
 
 ConstEval::Result ConstEval::OpMultiply(const type::Type* ty,
-                                        utils::VectorRef<const sem::Constant*> args,
+                                        utils::VectorRef<const constant::Constant*> args,
                                         const Source& source) {
     return Mul(source, ty, args[0], args[1]);
 }
 
 ConstEval::Result ConstEval::OpMultiplyMatVec(const type::Type* ty,
-                                              utils::VectorRef<const sem::Constant*> args,
+                                              utils::VectorRef<const constant::Constant*> args,
                                               const Source& source) {
     auto* mat_ty = args[0]->Type()->As<type::Matrix>();
     auto* vec_ty = args[1]->Type()->As<type::Vector>();
     auto* elem_ty = vec_ty->type();
 
-    auto dot = [&](const sem::Constant* m, size_t row, const sem::Constant* v) {
+    auto dot = [&](const constant::Constant* m, size_t row, const constant::Constant* v) {
         ImplResult result;
         switch (mat_ty->columns()) {
             case 2:
@@ -1588,7 +1589,7 @@ ConstEval::Result ConstEval::OpMultiplyMatVec(const type::Type* ty,
         return result;
     };
 
-    utils::Vector<const sem::Constant*, 4> result;
+    utils::Vector<const constant::Constant*, 4> result;
     for (size_t i = 0; i < mat_ty->rows(); ++i) {
         auto r = dot(args[0], i, args[1]);  // matrix row i * vector
         if (!r) {
@@ -1599,13 +1600,13 @@ ConstEval::Result ConstEval::OpMultiplyMatVec(const type::Type* ty,
     return CreateComposite(builder, ty, result);
 }
 ConstEval::Result ConstEval::OpMultiplyVecMat(const type::Type* ty,
-                                              utils::VectorRef<const sem::Constant*> args,
+                                              utils::VectorRef<const constant::Constant*> args,
                                               const Source& source) {
     auto* vec_ty = args[0]->Type()->As<type::Vector>();
     auto* mat_ty = args[1]->Type()->As<type::Matrix>();
     auto* elem_ty = vec_ty->type();
 
-    auto dot = [&](const sem::Constant* v, const sem::Constant* m, size_t col) {
+    auto dot = [&](const constant::Constant* v, const constant::Constant* m, size_t col) {
         ImplResult result;
         switch (mat_ty->rows()) {
             case 2:
@@ -1638,7 +1639,7 @@ ConstEval::Result ConstEval::OpMultiplyVecMat(const type::Type* ty,
         return result;
     };
 
-    utils::Vector<const sem::Constant*, 4> result;
+    utils::Vector<const constant::Constant*, 4> result;
     for (size_t i = 0; i < mat_ty->columns(); ++i) {
         auto r = dot(args[0], args[1], i);  // vector * matrix col i
         if (!r) {
@@ -1650,7 +1651,7 @@ ConstEval::Result ConstEval::OpMultiplyVecMat(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpMultiplyMatMat(const type::Type* ty,
-                                              utils::VectorRef<const sem::Constant*> args,
+                                              utils::VectorRef<const constant::Constant*> args,
                                               const Source& source) {
     auto* mat1 = args[0];
     auto* mat2 = args[1];
@@ -1658,7 +1659,8 @@ ConstEval::Result ConstEval::OpMultiplyMatMat(const type::Type* ty,
     auto* mat2_ty = mat2->Type()->As<type::Matrix>();
     auto* elem_ty = mat1_ty->type();
 
-    auto dot = [&](const sem::Constant* m1, size_t row, const sem::Constant* m2, size_t col) {
+    auto dot = [&](const constant::Constant* m1, size_t row, const constant::Constant* m2,
+                   size_t col) {
         auto m1e = [&](size_t r, size_t c) { return m1->Index(c)->Index(r); };
         auto m2e = [&](size_t r, size_t c) { return m2->Index(c)->Index(r); };
 
@@ -1695,9 +1697,9 @@ ConstEval::Result ConstEval::OpMultiplyMatMat(const type::Type* ty,
         return result;
     };
 
-    utils::Vector<const sem::Constant*, 4> result_mat;
+    utils::Vector<const constant::Constant*, 4> result_mat;
     for (size_t c = 0; c < mat2_ty->columns(); ++c) {
-        utils::Vector<const sem::Constant*, 4> col_vec;
+        utils::Vector<const constant::Constant*, 4> col_vec;
         for (size_t r = 0; r < mat1_ty->rows(); ++r) {
             auto v = dot(mat1, r, mat2, c);  // mat1 row r * mat2 col c
             if (!v) {
@@ -1714,9 +1716,9 @@ ConstEval::Result ConstEval::OpMultiplyMatMat(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpDivide(const type::Type* ty,
-                                      utils::VectorRef<const sem::Constant*> args,
+                                      utils::VectorRef<const constant::Constant*> args,
                                       const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         return Dispatch_fia_fiu32_f16(DivFunc(source, c0->Type()), c0, c1);
     };
 
@@ -1724,9 +1726,9 @@ ConstEval::Result ConstEval::OpDivide(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpModulo(const type::Type* ty,
-                                      utils::VectorRef<const sem::Constant*> args,
+                                      utils::VectorRef<const constant::Constant*> args,
                                       const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         return Dispatch_fia_fiu32_f16(ModFunc(source, c0->Type()), c0, c1);
     };
 
@@ -1734,9 +1736,9 @@ ConstEval::Result ConstEval::OpModulo(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpEqual(const type::Type* ty,
-                                     utils::VectorRef<const sem::Constant*> args,
+                                     utils::VectorRef<const constant::Constant*> args,
                                      const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto i, auto j) -> ImplResult {
             return CreateElement(builder, source, type::Type::DeepestElementOf(ty), i == j);
         };
@@ -1747,9 +1749,9 @@ ConstEval::Result ConstEval::OpEqual(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpNotEqual(const type::Type* ty,
-                                        utils::VectorRef<const sem::Constant*> args,
+                                        utils::VectorRef<const constant::Constant*> args,
                                         const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto i, auto j) -> ImplResult {
             return CreateElement(builder, source, type::Type::DeepestElementOf(ty), i != j);
         };
@@ -1760,9 +1762,9 @@ ConstEval::Result ConstEval::OpNotEqual(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpLessThan(const type::Type* ty,
-                                        utils::VectorRef<const sem::Constant*> args,
+                                        utils::VectorRef<const constant::Constant*> args,
                                         const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto i, auto j) -> ImplResult {
             return CreateElement(builder, source, type::Type::DeepestElementOf(ty), i < j);
         };
@@ -1773,9 +1775,9 @@ ConstEval::Result ConstEval::OpLessThan(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpGreaterThan(const type::Type* ty,
-                                           utils::VectorRef<const sem::Constant*> args,
+                                           utils::VectorRef<const constant::Constant*> args,
                                            const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto i, auto j) -> ImplResult {
             return CreateElement(builder, source, type::Type::DeepestElementOf(ty), i > j);
         };
@@ -1786,9 +1788,9 @@ ConstEval::Result ConstEval::OpGreaterThan(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpLessThanEqual(const type::Type* ty,
-                                             utils::VectorRef<const sem::Constant*> args,
+                                             utils::VectorRef<const constant::Constant*> args,
                                              const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto i, auto j) -> ImplResult {
             return CreateElement(builder, source, type::Type::DeepestElementOf(ty), i <= j);
         };
@@ -1799,9 +1801,9 @@ ConstEval::Result ConstEval::OpLessThanEqual(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpGreaterThanEqual(const type::Type* ty,
-                                                utils::VectorRef<const sem::Constant*> args,
+                                                utils::VectorRef<const constant::Constant*> args,
                                                 const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto i, auto j) -> ImplResult {
             return CreateElement(builder, source, type::Type::DeepestElementOf(ty), i >= j);
         };
@@ -1812,7 +1814,7 @@ ConstEval::Result ConstEval::OpGreaterThanEqual(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpLogicalAnd(const type::Type* ty,
-                                          utils::VectorRef<const sem::Constant*> args,
+                                          utils::VectorRef<const constant::Constant*> args,
                                           const Source& source) {
     // Note: Due to short-circuiting, this function is only called if lhs is true, so we could
     // technically only return the value of the rhs.
@@ -1820,7 +1822,7 @@ ConstEval::Result ConstEval::OpLogicalAnd(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpLogicalOr(const type::Type* ty,
-                                         utils::VectorRef<const sem::Constant*> args,
+                                         utils::VectorRef<const constant::Constant*> args,
                                          const Source& source) {
     // Note: Due to short-circuiting, this function is only called if lhs is false, so we could
     // technically only return the value of the rhs.
@@ -1828,9 +1830,9 @@ ConstEval::Result ConstEval::OpLogicalOr(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpAnd(const type::Type* ty,
-                                   utils::VectorRef<const sem::Constant*> args,
+                                   utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto i, auto j) -> ImplResult {
             using T = decltype(i);
             T result;
@@ -1848,9 +1850,9 @@ ConstEval::Result ConstEval::OpAnd(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpOr(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto i, auto j) -> ImplResult {
             using T = decltype(i);
             T result;
@@ -1868,9 +1870,9 @@ ConstEval::Result ConstEval::OpOr(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpXor(const type::Type* ty,
-                                   utils::VectorRef<const sem::Constant*> args,
+                                   utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto i, auto j) -> ImplResult {
             return CreateElement(builder, source, type::Type::DeepestElementOf(ty),
                                  decltype(i){i ^ j});
@@ -1882,9 +1884,9 @@ ConstEval::Result ConstEval::OpXor(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpShiftLeft(const type::Type* ty,
-                                         utils::VectorRef<const sem::Constant*> args,
+                                         utils::VectorRef<const constant::Constant*> args,
                                          const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto e1, auto e2) -> ImplResult {
             using NumberT = decltype(e1);
             using T = UnwrapNumber<NumberT>;
@@ -1969,9 +1971,9 @@ ConstEval::Result ConstEval::OpShiftLeft(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::OpShiftRight(const type::Type* ty,
-                                          utils::VectorRef<const sem::Constant*> args,
+                                          utils::VectorRef<const constant::Constant*> args,
                                           const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto e1, auto e2) -> ImplResult {
             using NumberT = decltype(e1);
             using T = UnwrapNumber<NumberT>;
@@ -2034,9 +2036,9 @@ ConstEval::Result ConstEval::OpShiftRight(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::abs(const type::Type* ty,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) {
             using NumberT = decltype(e);
             NumberT result;
@@ -2059,9 +2061,9 @@ ConstEval::Result ConstEval::abs(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::acos(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto i) -> ImplResult {
             using NumberT = decltype(i);
             if (i < NumberT(-1.0) || i > NumberT(1.0)) {
@@ -2077,9 +2079,9 @@ ConstEval::Result ConstEval::acos(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::acosh(const type::Type* ty,
-                                   utils::VectorRef<const sem::Constant*> args,
+                                   utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto i) -> ImplResult {
             using NumberT = decltype(i);
             if (i < NumberT(1.0)) {
@@ -2095,21 +2097,21 @@ ConstEval::Result ConstEval::acosh(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::all(const type::Type* ty,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
     return CreateElement(builder, source, ty, !args[0]->AnyZero());
 }
 
 ConstEval::Result ConstEval::any(const type::Type* ty,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
     return CreateElement(builder, source, ty, !args[0]->AllZero());
 }
 
 ConstEval::Result ConstEval::asin(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto i) -> ImplResult {
             using NumberT = decltype(i);
             if (i < NumberT(-1.0) || i > NumberT(1.0)) {
@@ -2125,9 +2127,9 @@ ConstEval::Result ConstEval::asin(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::asinh(const type::Type* ty,
-                                   utils::VectorRef<const sem::Constant*> args,
+                                   utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto i) {
             return CreateElement(builder, source, c0->Type(), decltype(i)(std::asinh(i.value)));
         };
@@ -2138,9 +2140,9 @@ ConstEval::Result ConstEval::asinh(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::atan(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto i) {
             return CreateElement(builder, source, c0->Type(), decltype(i)(std::atan(i.value)));
         };
@@ -2150,9 +2152,9 @@ ConstEval::Result ConstEval::atan(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::atanh(const type::Type* ty,
-                                   utils::VectorRef<const sem::Constant*> args,
+                                   utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto i) -> ImplResult {
             using NumberT = decltype(i);
             if (i <= NumberT(-1.0) || i >= NumberT(1.0)) {
@@ -2169,9 +2171,9 @@ ConstEval::Result ConstEval::atanh(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::atan2(const type::Type* ty,
-                                   utils::VectorRef<const sem::Constant*> args,
+                                   utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto i, auto j) {
             return CreateElement(builder, source, c0->Type(),
                                  decltype(i)(std::atan2(i.value, j.value)));
@@ -2182,9 +2184,9 @@ ConstEval::Result ConstEval::atan2(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::ceil(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) {
             return CreateElement(builder, source, c0->Type(), decltype(e)(std::ceil(e)));
         };
@@ -2194,19 +2196,19 @@ ConstEval::Result ConstEval::ceil(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::clamp(const type::Type* ty,
-                                   utils::VectorRef<const sem::Constant*> args,
+                                   utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1,
-                         const sem::Constant* c2) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1,
+                         const constant::Constant* c2) {
         return Dispatch_fia_fiu32_f16(ClampFunc(source, c0->Type()), c0, c1, c2);
     };
     return TransformElements(builder, ty, transform, args[0], args[1], args[2]);
 }
 
 ConstEval::Result ConstEval::cos(const type::Type* ty,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto i) -> ImplResult {
             using NumberT = decltype(i);
             return CreateElement(builder, source, c0->Type(), NumberT(std::cos(i.value)));
@@ -2217,9 +2219,9 @@ ConstEval::Result ConstEval::cos(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::cosh(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto i) -> ImplResult {
             using NumberT = decltype(i);
             return CreateElement(builder, source, c0->Type(), NumberT(std::cosh(i.value)));
@@ -2230,9 +2232,9 @@ ConstEval::Result ConstEval::cosh(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::countLeadingZeros(const type::Type* ty,
-                                               utils::VectorRef<const sem::Constant*> args,
+                                               utils::VectorRef<const constant::Constant*> args,
                                                const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) {
             using NumberT = decltype(e);
             using T = UnwrapNumber<NumberT>;
@@ -2245,9 +2247,9 @@ ConstEval::Result ConstEval::countLeadingZeros(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::countOneBits(const type::Type* ty,
-                                          utils::VectorRef<const sem::Constant*> args,
+                                          utils::VectorRef<const constant::Constant*> args,
                                           const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) {
             using NumberT = decltype(e);
             using T = UnwrapNumber<NumberT>;
@@ -2269,9 +2271,9 @@ ConstEval::Result ConstEval::countOneBits(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::countTrailingZeros(const type::Type* ty,
-                                                utils::VectorRef<const sem::Constant*> args,
+                                                utils::VectorRef<const constant::Constant*> args,
                                                 const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) {
             using NumberT = decltype(e);
             using T = UnwrapNumber<NumberT>;
@@ -2284,7 +2286,7 @@ ConstEval::Result ConstEval::countTrailingZeros(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::cross(const type::Type* ty,
-                                   utils::VectorRef<const sem::Constant*> args,
+                                   utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {
     auto* u = args[0];
     auto* v = args[1];
@@ -2323,13 +2325,13 @@ ConstEval::Result ConstEval::cross(const type::Type* ty,
     }
 
     return CreateComposite(builder, ty,
-                           utils::Vector<const sem::Constant*, 3>{x.Get(), y.Get(), z.Get()});
+                           utils::Vector<const constant::Constant*, 3>{x.Get(), y.Get(), z.Get()});
 }
 
 ConstEval::Result ConstEval::degrees(const type::Type* ty,
-                                     utils::VectorRef<const sem::Constant*> args,
+                                     utils::VectorRef<const constant::Constant*> args,
                                      const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) -> ImplResult {
             using NumberT = decltype(e);
             using T = UnwrapNumber<NumberT>;
@@ -2353,7 +2355,7 @@ ConstEval::Result ConstEval::degrees(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::determinant(const type::Type* ty,
-                                         utils::VectorRef<const sem::Constant*> args,
+                                         utils::VectorRef<const constant::Constant*> args,
                                          const Source& source) {
     auto calculate = [&]() -> ConstEval::Result {
         auto* m = args[0];
@@ -2389,7 +2391,7 @@ ConstEval::Result ConstEval::determinant(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::distance(const type::Type* ty,
-                                      utils::VectorRef<const sem::Constant*> args,
+                                      utils::VectorRef<const constant::Constant*> args,
                                       const Source& source) {
     auto err = [&]() -> ImplResult {
         AddNote("when calculating distance", source);
@@ -2409,7 +2411,7 @@ ConstEval::Result ConstEval::distance(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::dot(const type::Type*,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
     auto r = Dot(source, args[0], args[1]);
     if (!r) {
@@ -2419,9 +2421,9 @@ ConstEval::Result ConstEval::dot(const type::Type*,
 }
 
 ConstEval::Result ConstEval::exp(const type::Type* ty,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e0) -> ImplResult {
             using NumberT = decltype(e0);
             auto val = NumberT(std::exp(e0));
@@ -2437,9 +2439,9 @@ ConstEval::Result ConstEval::exp(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::exp2(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e0) -> ImplResult {
             using NumberT = decltype(e0);
             auto val = NumberT(std::exp2(e0));
@@ -2455,9 +2457,9 @@ ConstEval::Result ConstEval::exp2(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::extractBits(const type::Type* ty,
-                                         utils::VectorRef<const sem::Constant*> args,
+                                         utils::VectorRef<const constant::Constant*> args,
                                          const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto in_e) -> ImplResult {
             using NumberT = decltype(in_e);
             using T = UnwrapNumber<NumberT>;
@@ -2510,7 +2512,7 @@ ConstEval::Result ConstEval::extractBits(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::faceForward(const type::Type* ty,
-                                         utils::VectorRef<const sem::Constant*> args,
+                                         utils::VectorRef<const constant::Constant*> args,
                                          const Source& source) {
     // Returns e1 if dot(e2, e3) is negative, and -e1 otherwise.
     auto* e1 = args[0];
@@ -2529,9 +2531,9 @@ ConstEval::Result ConstEval::faceForward(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::firstLeadingBit(const type::Type* ty,
-                                             utils::VectorRef<const sem::Constant*> args,
+                                             utils::VectorRef<const constant::Constant*> args,
                                              const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) {
             using NumberT = decltype(e);
             using T = UnwrapNumber<NumberT>;
@@ -2573,9 +2575,9 @@ ConstEval::Result ConstEval::firstLeadingBit(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::firstTrailingBit(const type::Type* ty,
-                                              utils::VectorRef<const sem::Constant*> args,
+                                              utils::VectorRef<const constant::Constant*> args,
                                               const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) {
             using NumberT = decltype(e);
             using T = UnwrapNumber<NumberT>;
@@ -2599,9 +2601,9 @@ ConstEval::Result ConstEval::firstTrailingBit(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::floor(const type::Type* ty,
-                                   utils::VectorRef<const sem::Constant*> args,
+                                   utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) {
             return CreateElement(builder, source, c0->Type(), decltype(e)(std::floor(e)));
         };
@@ -2611,10 +2613,10 @@ ConstEval::Result ConstEval::floor(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::fma(const type::Type* ty,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
-    auto transform = [&](const sem::Constant* c1, const sem::Constant* c2,
-                         const sem::Constant* c3) {
+    auto transform = [&](const constant::Constant* c1, const constant::Constant* c2,
+                         const constant::Constant* c3) {
         auto create = [&](auto e1, auto e2, auto e3) -> ImplResult {
             auto err_msg = [&] {
                 AddNote("when calculating fma", source);
@@ -2638,7 +2640,7 @@ ConstEval::Result ConstEval::fma(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::frexp(const type::Type* ty,
-                                   utils::VectorRef<const sem::Constant*> args,
+                                   utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {
     auto* arg = args[0];
 
@@ -2647,7 +2649,7 @@ ConstEval::Result ConstEval::frexp(const type::Type* ty,
         ImplResult exp;
     };
 
-    auto scalar = [&](const sem::Constant* s) {
+    auto scalar = [&](const constant::Constant* s) {
         int exp = 0;
         double fract = std::frexp(s->As<AFloat>(), &exp);
         return Switch(
@@ -2680,8 +2682,8 @@ ConstEval::Result ConstEval::frexp(const type::Type* ty,
     };
 
     if (auto* vec = arg->Type()->As<type::Vector>()) {
-        utils::Vector<const sem::Constant*, 4> fract_els;
-        utils::Vector<const sem::Constant*, 4> exp_els;
+        utils::Vector<const constant::Constant*, 4> fract_els;
+        utils::Vector<const constant::Constant*, 4> exp_els;
         for (uint32_t i = 0; i < vec->Width(); i++) {
             auto fe = scalar(arg->Index(i));
             if (!fe.fract || !fe.exp) {
@@ -2693,7 +2695,7 @@ ConstEval::Result ConstEval::frexp(const type::Type* ty,
         auto fract_ty = builder.create<type::Vector>(fract_els[0]->Type(), vec->Width());
         auto exp_ty = builder.create<type::Vector>(exp_els[0]->Type(), vec->Width());
         return CreateComposite(builder, ty,
-                               utils::Vector<const sem::Constant*, 2>{
+                               utils::Vector<const constant::Constant*, 2>{
                                    CreateComposite(builder, fract_ty, std::move(fract_els)),
                                    CreateComposite(builder, exp_ty, std::move(exp_els)),
                                });
@@ -2703,7 +2705,7 @@ ConstEval::Result ConstEval::frexp(const type::Type* ty,
             return utils::Failure;
         }
         return CreateComposite(builder, ty,
-                               utils::Vector<const sem::Constant*, 2>{
+                               utils::Vector<const constant::Constant*, 2>{
                                    fe.fract.Get(),
                                    fe.exp.Get(),
                                });
@@ -2711,9 +2713,9 @@ ConstEval::Result ConstEval::frexp(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::insertBits(const type::Type* ty,
-                                        utils::VectorRef<const sem::Constant*> args,
+                                        utils::VectorRef<const constant::Constant*> args,
                                         const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto in_e, auto in_newbits) -> ImplResult {
             using NumberT = decltype(in_e);
             using T = UnwrapNumber<NumberT>;
@@ -2763,9 +2765,9 @@ ConstEval::Result ConstEval::insertBits(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::inverseSqrt(const type::Type* ty,
-                                         utils::VectorRef<const sem::Constant*> args,
+                                         utils::VectorRef<const constant::Constant*> args,
                                          const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) -> ImplResult {
             using NumberT = decltype(e);
 
@@ -2797,7 +2799,7 @@ ConstEval::Result ConstEval::inverseSqrt(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::length(const type::Type* ty,
-                                    utils::VectorRef<const sem::Constant*> args,
+                                    utils::VectorRef<const constant::Constant*> args,
                                     const Source& source) {
     auto r = Length(source, ty, args[0]);
     if (!r) {
@@ -2807,9 +2809,9 @@ ConstEval::Result ConstEval::length(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::log(const type::Type* ty,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto v) -> ImplResult {
             using NumberT = decltype(v);
             if (v <= NumberT(0)) {
@@ -2824,9 +2826,9 @@ ConstEval::Result ConstEval::log(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::log2(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto v) -> ImplResult {
             using NumberT = decltype(v);
             if (v <= NumberT(0)) {
@@ -2841,9 +2843,9 @@ ConstEval::Result ConstEval::log2(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::max(const type::Type* ty,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto e0, auto e1) {
             return CreateElement(builder, source, c0->Type(), decltype(e0)(std::max(e0, e1)));
         };
@@ -2853,9 +2855,9 @@ ConstEval::Result ConstEval::max(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::min(const type::Type* ty,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto e0, auto e1) {
             return CreateElement(builder, source, c0->Type(), decltype(e0)(std::min(e0, e1)));
         };
@@ -2865,9 +2867,9 @@ ConstEval::Result ConstEval::min(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::mix(const type::Type* ty,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1, size_t index) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1, size_t index) {
         auto create = [&](auto e1, auto e2) -> ImplResult {
             using NumberT = decltype(e1);
             // e3 is either a vector or a scalar
@@ -2908,23 +2910,23 @@ ConstEval::Result ConstEval::mix(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::modf(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform_fract = [&](const sem::Constant* c) {
+    auto transform_fract = [&](const constant::Constant* c) {
         auto create = [&](auto e) {
             return CreateElement(builder, source, c->Type(),
                                  decltype(e)(e.value - std::trunc(e.value)));
         };
         return Dispatch_fa_f32_f16(create, c);
     };
-    auto transform_whole = [&](const sem::Constant* c) {
+    auto transform_whole = [&](const constant::Constant* c) {
         auto create = [&](auto e) {
             return CreateElement(builder, source, c->Type(), decltype(e)(std::trunc(e.value)));
         };
         return Dispatch_fa_f32_f16(create, c);
     };
 
-    utils::Vector<const sem::Constant*, 2> fields;
+    utils::Vector<const constant::Constant*, 2> fields;
 
     if (auto fract = TransformElements(builder, args[0]->Type(), transform_fract, args[0])) {
         fields.Push(fract.Get());
@@ -2942,7 +2944,7 @@ ConstEval::Result ConstEval::modf(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::normalize(const type::Type* ty,
-                                       utils::VectorRef<const sem::Constant*> args,
+                                       utils::VectorRef<const constant::Constant*> args,
                                        const Source& source) {
     auto* len_ty = type::Type::DeepestElementOf(ty);
     auto len = Length(source, len_ty, args[0]);
@@ -2959,7 +2961,7 @@ ConstEval::Result ConstEval::normalize(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::pack2x16float(const type::Type* ty,
-                                           utils::VectorRef<const sem::Constant*> args,
+                                           utils::VectorRef<const constant::Constant*> args,
                                            const Source& source) {
     auto convert = [&](f32 val) -> utils::Result<uint32_t> {
         auto conv = CheckedConvert<f16>(val);
@@ -2987,7 +2989,7 @@ ConstEval::Result ConstEval::pack2x16float(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::pack2x16snorm(const type::Type* ty,
-                                           utils::VectorRef<const sem::Constant*> args,
+                                           utils::VectorRef<const constant::Constant*> args,
                                            const Source& source) {
     auto calc = [&](f32 val) -> u32 {
         auto clamped = Clamp(source, val, f32(-1.0f), f32(1.0f)).Get();
@@ -3004,7 +3006,7 @@ ConstEval::Result ConstEval::pack2x16snorm(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::pack2x16unorm(const type::Type* ty,
-                                           utils::VectorRef<const sem::Constant*> args,
+                                           utils::VectorRef<const constant::Constant*> args,
                                            const Source& source) {
     auto calc = [&](f32 val) -> u32 {
         auto clamped = Clamp(source, val, f32(0.0f), f32(1.0f)).Get();
@@ -3020,7 +3022,7 @@ ConstEval::Result ConstEval::pack2x16unorm(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::pack4x8snorm(const type::Type* ty,
-                                          utils::VectorRef<const sem::Constant*> args,
+                                          utils::VectorRef<const constant::Constant*> args,
                                           const Source& source) {
     auto calc = [&](f32 val) -> u32 {
         auto clamped = Clamp(source, val, f32(-1.0f), f32(1.0f)).Get();
@@ -3040,7 +3042,7 @@ ConstEval::Result ConstEval::pack4x8snorm(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::pack4x8unorm(const type::Type* ty,
-                                          utils::VectorRef<const sem::Constant*> args,
+                                          utils::VectorRef<const constant::Constant*> args,
                                           const Source& source) {
     auto calc = [&](f32 val) -> u32 {
         auto clamped = Clamp(source, val, f32(0.0f), f32(1.0f)).Get();
@@ -3059,9 +3061,9 @@ ConstEval::Result ConstEval::pack4x8unorm(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::radians(const type::Type* ty,
-                                     utils::VectorRef<const sem::Constant*> args,
+                                     utils::VectorRef<const constant::Constant*> args,
                                      const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) -> ImplResult {
             using NumberT = decltype(e);
             using T = UnwrapNumber<NumberT>;
@@ -3085,7 +3087,7 @@ ConstEval::Result ConstEval::radians(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::reflect(const type::Type* ty,
-                                     utils::VectorRef<const sem::Constant*> args,
+                                     utils::VectorRef<const constant::Constant*> args,
                                      const Source& source) {
     auto calculate = [&]() -> ConstEval::Result {
         // For the incident vector e1 and surface orientation e2, returns the reflection direction
@@ -3128,7 +3130,7 @@ ConstEval::Result ConstEval::reflect(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::refract(const type::Type* ty,
-                                     utils::VectorRef<const sem::Constant*> args,
+                                     utils::VectorRef<const constant::Constant*> args,
                                      const Source& source) {
     auto* vec_ty = ty->As<type::Vector>();
     auto* el_ty = vec_ty->type();
@@ -3226,9 +3228,9 @@ ConstEval::Result ConstEval::refract(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::reverseBits(const type::Type* ty,
-                                         utils::VectorRef<const sem::Constant*> args,
+                                         utils::VectorRef<const constant::Constant*> args,
                                          const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto in_e) -> ImplResult {
             using NumberT = decltype(in_e);
             using T = UnwrapNumber<NumberT>;
@@ -3253,9 +3255,9 @@ ConstEval::Result ConstEval::reverseBits(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::round(const type::Type* ty,
-                                   utils::VectorRef<const sem::Constant*> args,
+                                   utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) {
             using NumberT = decltype(e);
             using T = UnwrapNumber<NumberT>;
@@ -3289,9 +3291,9 @@ ConstEval::Result ConstEval::round(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::saturate(const type::Type* ty,
-                                      utils::VectorRef<const sem::Constant*> args,
+                                      utils::VectorRef<const constant::Constant*> args,
                                       const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) {
             using NumberT = decltype(e);
             return CreateElement(builder, source, c0->Type(),
@@ -3303,10 +3305,10 @@ ConstEval::Result ConstEval::saturate(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::select_bool(const type::Type* ty,
-                                         utils::VectorRef<const sem::Constant*> args,
+                                         utils::VectorRef<const constant::Constant*> args,
                                          const Source& source) {
     auto cond = args[2]->As<bool>();
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto f, auto t) -> ImplResult {
             return CreateElement(builder, source, type::Type::DeepestElementOf(ty), cond ? t : f);
         };
@@ -3317,9 +3319,9 @@ ConstEval::Result ConstEval::select_bool(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::select_boolvec(const type::Type* ty,
-                                            utils::VectorRef<const sem::Constant*> args,
+                                            utils::VectorRef<const constant::Constant*> args,
                                             const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1, size_t index) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1, size_t index) {
         auto create = [&](auto f, auto t) -> ImplResult {
             // Get corresponding bool value at the current vector value index
             auto cond = args[2]->Index(index)->As<bool>();
@@ -3332,9 +3334,9 @@ ConstEval::Result ConstEval::select_boolvec(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::sign(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto e) -> ImplResult {
             using NumberT = decltype(e);
             NumberT result;
@@ -3354,9 +3356,9 @@ ConstEval::Result ConstEval::sign(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::sin(const type::Type* ty,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto i) -> ImplResult {
             using NumberT = decltype(i);
             return CreateElement(builder, source, c0->Type(), NumberT(std::sin(i.value)));
@@ -3367,9 +3369,9 @@ ConstEval::Result ConstEval::sin(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::sinh(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto i) -> ImplResult {
             using NumberT = decltype(i);
             return CreateElement(builder, source, c0->Type(), NumberT(std::sinh(i.value)));
@@ -3380,10 +3382,10 @@ ConstEval::Result ConstEval::sinh(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::smoothstep(const type::Type* ty,
-                                        utils::VectorRef<const sem::Constant*> args,
+                                        utils::VectorRef<const constant::Constant*> args,
                                         const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1,
-                         const sem::Constant* c2) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1,
+                         const constant::Constant* c2) {
         auto create = [&](auto low, auto high, auto x) -> ImplResult {
             using NumberT = decltype(low);
 
@@ -3431,9 +3433,9 @@ ConstEval::Result ConstEval::smoothstep(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::step(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+    auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto edge, auto x) -> ImplResult {
             using NumberT = decltype(edge);
             NumberT result = x.value < edge.value ? NumberT(0.0) : NumberT(1.0);
@@ -3445,9 +3447,9 @@ ConstEval::Result ConstEval::step(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::sqrt(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         return Dispatch_fa_f32_f16(SqrtFunc(source, c0->Type()), c0);
     };
 
@@ -3455,9 +3457,9 @@ ConstEval::Result ConstEval::sqrt(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::tan(const type::Type* ty,
-                                 utils::VectorRef<const sem::Constant*> args,
+                                 utils::VectorRef<const constant::Constant*> args,
                                  const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto i) -> ImplResult {
             using NumberT = decltype(i);
             return CreateElement(builder, source, c0->Type(), NumberT(std::tan(i.value)));
@@ -3468,9 +3470,9 @@ ConstEval::Result ConstEval::tan(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::tanh(const type::Type* ty,
-                                  utils::VectorRef<const sem::Constant*> args,
+                                  utils::VectorRef<const constant::Constant*> args,
                                   const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto i) -> ImplResult {
             using NumberT = decltype(i);
             return CreateElement(builder, source, c0->Type(), NumberT(std::tanh(i.value)));
@@ -3481,7 +3483,7 @@ ConstEval::Result ConstEval::tanh(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::transpose(const type::Type* ty,
-                                       utils::VectorRef<const sem::Constant*> args,
+                                       utils::VectorRef<const constant::Constant*> args,
                                        const Source&) {
     auto* m = args[0];
     auto* mat_ty = m->Type()->As<type::Matrix>();
@@ -3489,9 +3491,9 @@ ConstEval::Result ConstEval::transpose(const type::Type* ty,
     auto* result_mat_ty = ty->As<type::Matrix>();
 
     // Produce column vectors from each row
-    utils::Vector<const sem::Constant*, 4> result_mat;
+    utils::Vector<const constant::Constant*, 4> result_mat;
     for (size_t r = 0; r < mat_ty->rows(); ++r) {
-        utils::Vector<const sem::Constant*, 4> new_col_vec;
+        utils::Vector<const constant::Constant*, 4> new_col_vec;
         for (size_t c = 0; c < mat_ty->columns(); ++c) {
             new_col_vec.Push(me(r, c));
         }
@@ -3501,9 +3503,9 @@ ConstEval::Result ConstEval::transpose(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::trunc(const type::Type* ty,
-                                   utils::VectorRef<const sem::Constant*> args,
+                                   utils::VectorRef<const constant::Constant*> args,
                                    const Source& source) {
-    auto transform = [&](const sem::Constant* c0) {
+    auto transform = [&](const constant::Constant* c0) {
         auto create = [&](auto i) {
             return CreateElement(builder, source, c0->Type(), decltype(i)(std::trunc(i.value)));
         };
@@ -3513,12 +3515,12 @@ ConstEval::Result ConstEval::trunc(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::unpack2x16float(const type::Type* ty,
-                                             utils::VectorRef<const sem::Constant*> args,
+                                             utils::VectorRef<const constant::Constant*> args,
                                              const Source& source) {
     auto* inner_ty = type::Type::DeepestElementOf(ty);
     auto e = args[0]->As<u32>().value;
 
-    utils::Vector<const sem::Constant*, 2> els;
+    utils::Vector<const constant::Constant*, 2> els;
     els.Reserve(2);
     for (size_t i = 0; i < 2; ++i) {
         auto in = f16::FromBits(uint16_t((e >> (16 * i)) & 0x0000'ffff));
@@ -3537,12 +3539,12 @@ ConstEval::Result ConstEval::unpack2x16float(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::unpack2x16snorm(const type::Type* ty,
-                                             utils::VectorRef<const sem::Constant*> args,
+                                             utils::VectorRef<const constant::Constant*> args,
                                              const Source& source) {
     auto* inner_ty = type::Type::DeepestElementOf(ty);
     auto e = args[0]->As<u32>().value;
 
-    utils::Vector<const sem::Constant*, 2> els;
+    utils::Vector<const constant::Constant*, 2> els;
     els.Reserve(2);
     for (size_t i = 0; i < 2; ++i) {
         auto val = f32(
@@ -3557,12 +3559,12 @@ ConstEval::Result ConstEval::unpack2x16snorm(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::unpack2x16unorm(const type::Type* ty,
-                                             utils::VectorRef<const sem::Constant*> args,
+                                             utils::VectorRef<const constant::Constant*> args,
                                              const Source& source) {
     auto* inner_ty = type::Type::DeepestElementOf(ty);
     auto e = args[0]->As<u32>().value;
 
-    utils::Vector<const sem::Constant*, 2> els;
+    utils::Vector<const constant::Constant*, 2> els;
     els.Reserve(2);
     for (size_t i = 0; i < 2; ++i) {
         auto val = f32(static_cast<float>(uint16_t((e >> (16 * i)) & 0x0000'ffff)) / 65535.f);
@@ -3576,12 +3578,12 @@ ConstEval::Result ConstEval::unpack2x16unorm(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::unpack4x8snorm(const type::Type* ty,
-                                            utils::VectorRef<const sem::Constant*> args,
+                                            utils::VectorRef<const constant::Constant*> args,
                                             const Source& source) {
     auto* inner_ty = type::Type::DeepestElementOf(ty);
     auto e = args[0]->As<u32>().value;
 
-    utils::Vector<const sem::Constant*, 4> els;
+    utils::Vector<const constant::Constant*, 4> els;
     els.Reserve(4);
     for (size_t i = 0; i < 4; ++i) {
         auto val =
@@ -3596,12 +3598,12 @@ ConstEval::Result ConstEval::unpack4x8snorm(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::unpack4x8unorm(const type::Type* ty,
-                                            utils::VectorRef<const sem::Constant*> args,
+                                            utils::VectorRef<const constant::Constant*> args,
                                             const Source& source) {
     auto* inner_ty = type::Type::DeepestElementOf(ty);
     auto e = args[0]->As<u32>().value;
 
-    utils::Vector<const sem::Constant*, 4> els;
+    utils::Vector<const constant::Constant*, 4> els;
     els.Reserve(4);
     for (size_t i = 0; i < 4; ++i) {
         auto val = f32(static_cast<float>(uint8_t((e >> (8 * i)) & 0x0000'00ff)) / 255.f);
@@ -3615,9 +3617,9 @@ ConstEval::Result ConstEval::unpack4x8unorm(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::quantizeToF16(const type::Type* ty,
-                                           utils::VectorRef<const sem::Constant*> args,
+                                           utils::VectorRef<const constant::Constant*> args,
                                            const Source& source) {
-    auto transform = [&](const sem::Constant* c) -> ImplResult {
+    auto transform = [&](const constant::Constant* c) -> ImplResult {
         auto value = c->As<f32>();
         auto conv = CheckedConvert<f32>(f16(value));
         if (!conv) {
@@ -3630,7 +3632,7 @@ ConstEval::Result ConstEval::quantizeToF16(const type::Type* ty,
 }
 
 ConstEval::Result ConstEval::Convert(const type::Type* target_ty,
-                                     const sem::Constant* value,
+                                     const constant::Constant* value,
                                      const Source& source) {
     if (value->Type() == target_ty) {
         return value;

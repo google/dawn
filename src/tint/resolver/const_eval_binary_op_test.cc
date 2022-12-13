@@ -99,7 +99,7 @@ TEST_P(ResolverConstEvalBinaryOpTest, Test) {
         auto& expected = expected_case.value;
 
         auto* sem = Sem().Get(expr);
-        const sem::Constant* value = sem->ConstantValue();
+        const constant::Constant* value = sem->ConstantValue();
         ASSERT_NE(value, nullptr);
         EXPECT_TYPE(value->Type(), sem->Type());
 
@@ -892,19 +892,20 @@ TEST_F(ResolverConstEvalTest, NotAndOrOfVecs) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(expr);
-    const sem::Constant* value = sem->ConstantValue();
+    const constant::Constant* value = sem->ConstantValue();
     ASSERT_NE(value, nullptr);
     EXPECT_TYPE(value->Type(), sem->Type());
 
     auto* expected_sem = Sem().Get(expected_expr);
-    const sem::Constant* expected_value = expected_sem->ConstantValue();
+    const constant::Constant* expected_value = expected_sem->ConstantValue();
     ASSERT_NE(expected_value, nullptr);
     EXPECT_TYPE(expected_value->Type(), expected_sem->Type());
 
-    ForEachElemPair(value, expected_value, [&](const sem::Constant* a, const sem::Constant* b) {
-        EXPECT_EQ(a->As<bool>(), b->As<bool>());
-        return HasFailure() ? Action::kStop : Action::kContinue;
-    });
+    ForEachElemPair(value, expected_value,
+                    [&](const constant::Constant* a, const constant::Constant* b) {
+                        EXPECT_EQ(a->As<bool>(), b->As<bool>());
+                        return HasFailure() ? Action::kStop : Action::kContinue;
+                    });
 }
 
 template <typename T>

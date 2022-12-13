@@ -41,7 +41,7 @@ class Call final : public Castable<Call, Expression> {
          EvaluationStage stage,
          utils::VectorRef<const sem::Expression*> arguments,
          const Statement* statement,
-         const Constant* constant,
+         const constant::Constant* constant,
          bool has_side_effects);
 
     /// Destructor

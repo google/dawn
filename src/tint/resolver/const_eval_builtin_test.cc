@@ -162,7 +162,7 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
 
         auto* sem = Sem().Get(expr);
         ASSERT_NE(sem, nullptr);
-        const sem::Constant* value = sem->ConstantValue();
+        const constant::Constant* value = sem->ConstantValue();
         ASSERT_NE(value, nullptr);
         EXPECT_TYPE(value->Type(), sem->Type());
 

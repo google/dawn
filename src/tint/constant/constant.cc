@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/constant.h"
+#include "src/tint/constant/constant.h"
 
-namespace tint::sem {
+namespace tint::constant {
 
 Constant::Constant() = default;
 
 Constant::~Constant() = default;
 
-}  // namespace tint::sem
+}  // namespace tint::constant

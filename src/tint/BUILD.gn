@@ -366,6 +366,7 @@ libtint_source_set("libtint_core_all_src") {
     "castable.h",
     "clone_context.cc",
     "clone_context.h",
+    "constant/constant.h",
     "debug.cc",
     "debug.h",
     "demangler.cc",
@@ -421,7 +422,6 @@ libtint_source_set("libtint_core_all_src") {
     "sem/builtin_type.h",
     "sem/call.h",
     "sem/call_target.h",
-    "sem/constant.h",
     "sem/evaluation_stage.h",
     "sem/expression.h",
     "sem/for_loop_statement.h",
@@ -649,8 +649,6 @@ libtint_source_set("libtint_sem_src") {
     "sem/call.h",
     "sem/call_target.cc",
     "sem/call_target.h",
-    "sem/constant.cc",
-    "sem/constant.h",
     "sem/evaluation_stage.h",
     "sem/expression.cc",
     "sem/expression.h",
@@ -758,8 +756,17 @@ libtint_source_set("libtint_type_src") {
   public_deps = [ ":libtint_core_all_src" ]
 }
 
+libtint_source_set("libtint_constant_src") {
+  sources = [
+    "constant/constant.cc",
+    "constant/constant.h",
+  ]
+  public_deps = [ ":libtint_core_all_src" ]
+}
+
 libtint_source_set("libtint_core_src") {
   public_deps = [
+    ":libtint_constant_src",
     ":libtint_core_all_src",
     ":libtint_sem_src",
     ":libtint_type_src",
