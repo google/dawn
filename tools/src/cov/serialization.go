@@ -31,7 +31,7 @@ func ReadJSON(r io.Reader) (*Tree, string, error) {
 	return p.parse()
 }
 
-// Encode zlib encodes the JSON coverage tree to w.
+// Encode compresses the JSON coverage tree with zlib and writes the result to w.
 func (t *Tree) Encode(revision string, w io.Writer) error {
 	t.Optimize()
 

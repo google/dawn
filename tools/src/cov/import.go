@@ -202,6 +202,8 @@ func (e Env) parseCov(raw []byte) (*Coverage, error) {
 	return c, nil
 }
 
+// parseTurboCov parses coverage information from a `turbo-cov` file.
+// See tools/src/cmd/turbo-cov/README.md for more information
 func (e Env) parseTurboCov(data []byte) (*Coverage, error) {
 	u32 := func() uint32 {
 		out := binary.LittleEndian.Uint32(data)
@@ -272,5 +274,8 @@ func (e Env) parseTurboCov(data []byte) (*Coverage, error) {
 	return c, nil
 }
 
-// Path is a tree node path formed from a list of strings
+// Path uniquely identifies a test that was run to produce coverage.
+// Paths are split into a hierarchical sequence of strings, where the 0'th
+// string represents the root of the hierarchy and the last string is typically
+// the leaf name of the test.
 type Path []string

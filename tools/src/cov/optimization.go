@@ -20,8 +20,121 @@ import (
 	"sync"
 )
 
-// Optimize optimizes the Tree by de-duplicating common spans into a tree of
-// SpanGroups.
+// Optimize optimizes the Tree by de-duplicating common spans into a tree of SpanGroups.
+//
+// Breaking down tests into group hierarchies provide a natural way to structure
+// coverage data, as tests of the same suite, file or test are likely to have
+// similar coverage spans.
+//
+// For each source file in the codebase, we create a tree of SpanGroups, where the
+// leaves are the test cases.
+//
+// For example, given the following Paths:
+//
+//	a.b.d.h
+//	a.b.d.i.n
+//	a.b.d.i.o
+//	a.b.e.j
+//	a.b.e.k.p
+//	a.b.e.k.q
+//	a.c.f
+//	a.c.g.l.r
+//	a.c.g.m
+//
+// We would construct the following tree:
+//
+//	             a
+//	      ╭──────┴──────╮
+//	      b             c
+//	  ╭───┴───╮     ╭───┴───╮
+//	  d       e     f       g
+//	╭─┴─╮   ╭─┴─╮         ╭─┴─╮
+//	h   i   j   k         l   m
+//	   ╭┴╮     ╭┴╮        │
+//	   n o     p q        r
+//
+// Each leaf node in this tree (`h`, `n`, `o`, `j`, `p`, `q`, `f`, `r`, `m`)
+// represent a test case, and non-leaf nodes (`a`, `b`, `c`, `d`, `e`, `g`, `i`,
+// `k`, `l`) are suite, file or tests.
+//
+// To begin, we create a test tree structure, and associate the full list of test
+// coverage spans with every leaf node (test case) in this tree.
+//
+// This data structure hasn't given us any compression benefits yet, but we can
+// now do a few tricks to dramatically reduce number of spans needed to describe
+// the graph:
+//
+//	~ Optimization 1: Common span promotion ~
+//
+// The first compression scheme is to promote common spans up the tree when they
+// are common for all children. This will reduce the number of spans needed to be
+// encoded in the final file.
+//
+// For example, if the test group `a` has 4 children that all share the same span
+// `X`:
+//
+//	         a
+//	   ╭───┬─┴─┬───╮
+//	   b   c   d   e
+//	[X,Y] [X] [X] [X,Z]
+//
+// Then span `X` can be promoted up to `a`:
+//
+//	      [X]
+//	       a
+//	 ╭───┬─┴─┬───╮
+//	 b   c   d   e
+//	[Y] []   [] [Z]
+//
+//	~ Optimization 2: Span XOR promotion ~
+//
+// This idea can be extended further, by not requiring all the children to share
+// the same span before promotion. If *most* child nodes share the same span, we
+// can still promote the span, but this time we *remove* the span from the
+// children *if they had it*, and *add* the span to children *if they didn't
+// have it*.
+//
+// For example, if the test group `a` has 4 children with 3 that share the span
+// `X`:
+//
+//	         a
+//	   ╭───┬─┴─┬───╮
+//	   b   c   d   e
+//	[X,Y] [X]  [] [X,Z]
+//
+// Then span `X` can be promoted up to `a` by flipping the presence of `X` on the
+// child nodes:
+//
+//	      [X]
+//	       a
+//	 ╭───┬─┴─┬───╮
+//	 b   c   d   e
+//	[Y] []  [X] [Z]
+//
+// This process repeats up the tree.
+//
+// With this optimization applied, we now need to traverse the tree from root to
+// leaf in order to know whether a given span is in use for the leaf node (test case):
+//
+// * If the span is encountered an *odd* number of times during traversal, then
+// the span is *covered*.
+// * If the span is encountered an *even* number of times during traversal, then
+// the span is *not covered*.
+//
+// See tools/src/cov/coverage_test.go for more examples of this optimization.
+//
+//	~ Optimization 3: Common span grouping ~
+//
+// With real world data, we encounter groups of spans that are commonly found
+// together. To further reduce coverage data, the whole graph is scanned for common
+// span patterns, and are indexed by each tree node.
+// The XOR'ing of spans as described above is performed as if the spans were not
+// grouped.
+//
+//	~ Optimization 4: Lookup tables ~
+//
+// All spans, span-groups and strings are stored in de-duplicated tables, and are
+// indexed wherever possible.
 func (t *Tree) Optimize() {
 	log.Printf("Optimizing coverage tree...")
 

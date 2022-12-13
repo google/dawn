@@ -78,7 +78,7 @@ int main(int argc, const char** argv) {
     //         uint8  hasCount
     //       file[0].segment[1]
     //         ...
-    //   file[2]
+    //   file[1]
     //     ...
 
     auto files = coverage->getUniqueSourceFiles();

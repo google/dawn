@@ -86,6 +86,23 @@ Note that we pass `--verbose` above so that all test output, including the dumpe
 
 You can write out an expectations file with the `--output <path>` command line flag, and then compare this snapshot to a later run with `--expect <path>`.
 
+## Viewing Dawn per-test coverage
+
+### Requirements:
+
+Dawn needs to be built with clang and the `DAWN_EMIT_COVERAGE` CMake flag.
+
+Optionally, the `LLVM_SOURCE_DIR` CMake flag can also be specified to point the the `./llvm` directory of [an LLVM checkout](https://github.com/llvm/llvm-project), which will build [`turbo-cov`](../../../tools/src/cmd/turbo-cov/README.md) and dramatically speed up the processing of coverage data.
+
+### Usage
+
+Run `./src/tools/run run-cts` like before, but include the `--coverage` flag.
+After running the tests, your browser will open with a coverage viewer.
+
+Click a source file in the left hand panel, then click a green span in the file source to see the tests that exercised that code.
+
+You can also highlight multiple lines to view all the tests that covered any of that highlighted source.
+
 ## Debugging TypeScript with VSCode
 
 Open or create the `.vscode/launch.json` file, and add:

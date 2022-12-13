@@ -14,4 +14,8 @@
 
 // Package cov provides functions for consuming and combining llvm coverage
 // information from multiple processes.
+//
+// Combined coverage data is compressed by Tree.Optimize() and is encoded to
+// JSON and zlib compressed with Tree.Encode(). This file can be viewed with
+// tools/src/cov/view-coverage.html.
 package cov

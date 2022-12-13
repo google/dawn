@@ -886,7 +886,7 @@ func (r *runner) streamResults(ctx context.Context, wg *sync.WaitGroup, results 
 		}
 
 		if res.coverage != nil {
-			covTree.Add(splitTestCaseForCoverage(res.testcase), res.coverage)
+			covTree.Add(SplitCTSQuery(res.testcase), res.coverage)
 		}
 	}
 	fmt.Fprint(r.stdout, ansiProgressBar(animFrame, numTests, numByExpectedStatus))
@@ -963,11 +963,20 @@ func (r *runner) streamResults(ctx context.Context, wg *sync.WaitGroup, results 
 			return nil
 		}
 
-		cov := &bytes.Buffer{}
-		if err := covTree.Encode(revision, cov); err != nil {
+		covData := &bytes.Buffer{}
+		if err := covTree.Encode(revision, covData); err != nil {
 			return fmt.Errorf("failed to encode coverage file: %w", err)
 		}
-		return showCoverageServer(ctx, cov.Bytes(), r.stdout)
+
+		const port = 9392
+		url := fmt.Sprintf("http://localhost:%v/index.html", port)
+
+		return cov.StartServer(ctx, port, covData.Bytes(), func() error {
+			fmt.Fprintln(r.stdout)
+			fmt.Fprintln(r.stdout, blue+"Serving coverage view at "+url+ansiReset)
+			launchBrowser(url)
+			return nil
+		})
 	}
 
 	return nil
@@ -1366,74 +1375,8 @@ func (w *muxWriter) Close() error {
 	return <-w.err
 }
 
-func splitTestCaseForCoverage(testcase string) []string {
-	out := []string{}
-	s := 0
-	for e, r := range testcase {
-		switch r {
-		case ':', '.':
-			out = append(out, testcase[s:e])
-			s = e
-		}
-	}
-	return out
-}
-
-// showCoverageServer starts a localhost http server to display the coverage data, launching a
-// browser if one can be found. Blocks until the context is cancelled.
-func showCoverageServer(ctx context.Context, covData []byte, stdout io.Writer) error {
-	const port = "9392"
-	url := fmt.Sprintf("http://localhost:%v/index.html", port)
-
-	handler := http.NewServeMux()
-	handler.HandleFunc("/index.html", func(w http.ResponseWriter, r *http.Request) {
-		f, err := os.Open(filepath.Join(fileutils.ThisDir(), "view-coverage.html"))
-		if err != nil {
-			fmt.Fprint(w, "file not found")
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-		defer f.Close()
-		io.Copy(w, f)
-	})
-	handler.HandleFunc("/coverage.dat", func(w http.ResponseWriter, r *http.Request) {
-		io.Copy(w, bytes.NewReader(covData))
-	})
-	handler.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		rel := r.URL.Path
-		if r.URL.Path == "" {
-			http.Redirect(w, r, url, http.StatusSeeOther)
-			return
-		}
-		if strings.Contains(rel, "..") {
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, "file path must not contain '..'")
-			return
-		}
-		f, err := os.Open(filepath.Join(fileutils.DawnRoot(), r.URL.Path))
-		if err != nil {
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(w, "file '%v' not found", r.URL.Path)
-			return
-		}
-		defer f.Close()
-		io.Copy(w, f)
-	})
-
-	server := &http.Server{Addr: ":" + port, Handler: handler}
-	go server.ListenAndServe()
-
-	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "Serving coverage view at "+blue+url+ansiReset)
-
-	openBrowser(url)
-
-	<-ctx.Done()
-	return server.Shutdown(ctx)
-}
-
-// openBrowser launches a browser to open the given url
-func openBrowser(url string) error {
+// launchBrowser launches a browser to open the given url
+func launchBrowser(url string) error {
 	switch runtime.GOOS {
 	case "linux":
 		return exec.Command("xdg-open", url).Start()
@@ -1444,4 +1387,42 @@ func openBrowser(url string) error {
 	default:
 		return fmt.Errorf("unsupported platform")
 	}
+}
+
+// SplitCTSQuery splits a CTS query into a cov.Path
+//
+// Each WebGPU CTS test is uniquely identified by a test query.
+// See https://github.com/gpuweb/cts/blob/main/docs/terms.md#queries about how a
+// query is officially structured.
+//
+// A Path is a simplified form of a CTS Query, where all colons ':' and comma
+// ',' denote a split point in the tree. These delimiters are included in the
+// parent node's string.
+//
+// For example, the query string for the single test case:
+//
+//	webgpu:shader,execution,expression,call,builtin,acos:f32:inputSource="storage_r";vectorize=4
+//
+// Is broken down into the following strings:
+//
+//	'webgpu:'
+//	'shader,'
+//	'execution,'
+//	'expression,'
+//	'call,'
+//	'builtin,'
+//	'acos:'
+//	'f32:'
+//	'inputSource="storage_r";vectorize=4'
+func SplitCTSQuery(testcase string) cov.Path {
+	out := []string{}
+	s := 0
+	for e, r := range testcase {
+		switch r {
+		case ':', '.':
+			out = append(out, testcase[s:e+1])
+			s = e + 1
+		}
+	}
+	return out
 }

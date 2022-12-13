@@ -470,8 +470,7 @@ func (s SpanSet) invertAll(rhs SpanSet) SpanSet {
 // SpanGroupID is an identifier of a SpanGroup.
 type SpanGroupID int
 
-// SpanGroup holds a number of spans, potentially extending from another
-// SpanGroup.
+// SpanGroup holds a number of spans, potentially extending from another SpanGroup.
 type SpanGroup struct {
 	Spans  SpanSet
 	Extend *SpanGroupID
