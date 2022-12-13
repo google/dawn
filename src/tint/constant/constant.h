@@ -17,19 +17,21 @@
 
 #include <variant>
 
+#include "src/tint/castable.h"
+#include "src/tint/constant/node.h"
 #include "src/tint/number.h"
 #include "src/tint/type/type.h"
 
 namespace tint::constant {
 
 /// Constant is the interface to a compile-time evaluated expression value.
-class Constant {
+class Constant : public Castable<Constant, Node> {
   public:
     /// Constructor
     Constant();
 
     /// Destructor
-    virtual ~Constant();
+    ~Constant() override;
 
     /// @returns the type of the constant
     virtual const type::Type* Type() const = 0;

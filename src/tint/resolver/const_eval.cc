@@ -23,6 +23,7 @@
 #include <utility>
 
 #include "src/tint/constant/constant.h"
+#include "src/tint/number.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/type_initializer.h"
@@ -248,7 +249,11 @@ std::make_unsigned_t<T> CountTrailingBits(T e, T bit_value_to_count) {
 
 /// ImplConstant inherits from constant::Constant to add an private implementation method for
 /// conversion.
-struct ImplConstant : public constant::Constant {
+class ImplConstant : public Castable<ImplConstant, constant::Constant> {
+  public:
+    ImplConstant() = default;
+    ~ImplConstant() override = default;
+
     /// Convert attempts to convert the constant value to the given type. On error, Convert()
     /// creates a new diagnostic message and returns a Failure.
     virtual utils::Result<const ImplConstant*> Convert(ProgramBuilder& builder,
@@ -267,7 +272,8 @@ const ImplConstant* CreateComposite(ProgramBuilder& builder,
 /// Element holds a single scalar or abstract-numeric value.
 /// Element implements the Constant interface.
 template <typename T>
-struct Element : ImplConstant {
+class Element : public Castable<Element<T>, ImplConstant> {
+  public:
     static_assert(!std::is_same_v<UnwrapNumber<T>, T> || std::is_same_v<T, bool>,
                   "T must be a Number or bool");
 
@@ -355,7 +361,8 @@ struct Element : ImplConstant {
 /// Splat is used for zero-initializers, 'splat' initializers, or initializers where each element is
 /// identical. Splat may be of a vector, matrix or array type.
 /// Splat implements the Constant interface.
-struct Splat : ImplConstant {
+class Splat : public Castable<Splat, ImplConstant> {
+  public:
     Splat(const type::Type* t, const constant::Constant* e, size_t n) : type(t), el(e), count(n) {}
     ~Splat() override = default;
     const type::Type* Type() const override { return type; }
@@ -393,7 +400,8 @@ struct Splat : ImplConstant {
 /// If each element is the same type and value, then a Splat would be a more efficient constant
 /// implementation. Use CreateComposite() to create the appropriate Constant type.
 /// Composite implements the Constant interface.
-struct Composite : ImplConstant {
+class Composite : public Castable<Composite, ImplConstant> {
+  public:
     Composite(const type::Type* t,
               utils::VectorRef<const constant::Constant*> els,
               bool all_0,
@@ -459,6 +467,23 @@ struct Composite : ImplConstant {
     const bool any_zero;
     const size_t hash;
 };
+
+}  // namespace
+}  // namespace tint::resolver
+
+TINT_INSTANTIATE_TYPEINFO(tint::resolver::ImplConstant);
+TINT_INSTANTIATE_TYPEINFO(tint::resolver::Element<tint::AInt>);
+TINT_INSTANTIATE_TYPEINFO(tint::resolver::Element<tint::AFloat>);
+TINT_INSTANTIATE_TYPEINFO(tint::resolver::Element<tint::i32>);
+TINT_INSTANTIATE_TYPEINFO(tint::resolver::Element<tint::u32>);
+TINT_INSTANTIATE_TYPEINFO(tint::resolver::Element<tint::f16>);
+TINT_INSTANTIATE_TYPEINFO(tint::resolver::Element<tint::f32>);
+TINT_INSTANTIATE_TYPEINFO(tint::resolver::Element<bool>);
+TINT_INSTANTIATE_TYPEINFO(tint::resolver::Splat);
+TINT_INSTANTIATE_TYPEINFO(tint::resolver::Composite);
+
+namespace tint::resolver {
+namespace {
 
 /// CreateElement constructs and returns an Element<T>.
 template <typename T>

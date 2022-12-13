@@ -1,6 +1,6 @@
-// Copyright 2021 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
-// Licensed under the Apache License, Version 2.0(the "License");
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/constant/constant.h"
+#include "src/tint/constant/node.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::constant::Constant);
+TINT_INSTANTIATE_TYPEINFO(tint::constant::Node);
 
 namespace tint::constant {
 
-Constant::Constant() = default;
+Node::Node() = default;
 
-Constant::~Constant() = default;
+Node::Node(const Node&) = default;
+
+Node::~Node() = default;
 
 }  // namespace tint::constant

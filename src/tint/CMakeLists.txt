@@ -256,6 +256,8 @@ list(APPEND TINT_LIB_SRCS
   clone_context.h
   constant/constant.cc
   constant/constant.h
+  constant/node.cc
+  constant/node.h
   demangler.cc
   demangler.h
   inspector/entry_point.cc

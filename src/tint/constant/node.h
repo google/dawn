@@ -1,6 +1,6 @@
-// Copyright 2021 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
-// Licensed under the Apache License, Version 2.0(the "License");
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -12,14 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/constant/constant.h"
+#ifndef SRC_TINT_CONSTANT_NODE_H_
+#define SRC_TINT_CONSTANT_NODE_H_
 
-TINT_INSTANTIATE_TYPEINFO(tint::constant::Constant);
+#include "src/tint/castable.h"
 
 namespace tint::constant {
 
-Constant::Constant() = default;
+/// Node is the base class for all constant nodes
+class Node : public Castable<Node> {
+  public:
+    /// Constructor
+    Node();
 
-Constant::~Constant() = default;
+    /// Copy constructor
+    Node(const Node&);
+
+    /// Destructor
+    ~Node() override;
+};
 
 }  // namespace tint::constant
+
+#endif  // SRC_TINT_CONSTANT_NODE_H_

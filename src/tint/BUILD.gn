@@ -367,6 +367,7 @@ libtint_source_set("libtint_core_all_src") {
     "clone_context.cc",
     "clone_context.h",
     "constant/constant.h",
+    "constant/node.h",
     "debug.cc",
     "debug.h",
     "demangler.cc",
@@ -760,6 +761,8 @@ libtint_source_set("libtint_constant_src") {
   sources = [
     "constant/constant.cc",
     "constant/constant.h",
+    "constant/node.cc",
+    "constant/node.h",
   ]
   public_deps = [ ":libtint_core_all_src" ]
 }
