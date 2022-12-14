@@ -40,7 +40,7 @@ class Materialize final : public Castable<Materialize, Expression> {
     /// Destructor
     ~Materialize() override;
 
-    /// @return the target of the call
+    /// @return the expression being materialized
     const Expression* Expr() const { return expr_; }
 
   private:
