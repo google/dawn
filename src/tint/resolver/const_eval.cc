@@ -168,24 +168,6 @@ auto ZeroTypeDispatch(const type::Type* type, F&& f) {
         [&](const type::Bool*) { return f(static_cast<bool>(0)); });
 }
 
-/// @returns `value` if `T` is not a Number, otherwise ValueOf returns the inner value of the
-/// Number.
-template <typename T>
-inline auto ValueOf(T value) {
-    if constexpr (std::is_same_v<UnwrapNumber<T>, T>) {
-        return value;
-    } else {
-        return value.value;
-    }
-}
-
-/// @returns true if `value` is a positive zero.
-template <typename T>
-inline bool IsPositiveZero(T value) {
-    using N = UnwrapNumber<T>;
-    return Number<N>(value) == Number<N>(0);  // Considers sign bit
-}
-
 template <typename NumberT>
 std::string OverflowErrorMessage(NumberT lhs, const char* op, NumberT rhs) {
     std::stringstream ss;
@@ -278,10 +260,28 @@ class Scalar : public Castable<Scalar<T>, constant::Constant> {
         }
     }
     const constant::Constant* Index(size_t) const override { return nullptr; }
-    bool AllZero() const override { return IsPositiveZero(value); }
-    bool AnyZero() const override { return IsPositiveZero(value); }
+
+    bool AllZero() const override { return IsPositiveZero(); }
+    bool AnyZero() const override { return IsPositiveZero(); }
+
     bool AllEqual() const override { return true; }
-    size_t Hash() const override { return utils::Hash(type, ValueOf(value)); }
+    size_t Hash() const override { return utils::Hash(type, ValueOf()); }
+
+    /// @returns `value` if `T` is not a Number, otherwise ValueOf returns the inner value of the
+    /// Number.
+    inline auto ValueOf() const {
+        if constexpr (std::is_same_v<UnwrapNumber<T>, T>) {
+            return value;
+        } else {
+            return value.value;
+        }
+    }
+
+    /// @returns true if `value` is a positive zero.
+    inline bool IsPositiveZero() const {
+        using N = UnwrapNumber<T>;
+        return Number<N>(value) == Number<N>(0);  // Considers sign bit
+    }
 
     type::Type const* const type;
     const T value;
@@ -364,7 +364,7 @@ ImplResult ScalarConvert(const Scalar<T>* scalar,
         using FROM = T;
         if constexpr (std::is_same_v<TO, bool>) {
             // [x -> bool]
-            return builder.create<Scalar<TO>>(target_ty, !IsPositiveZero(scalar->value));
+            return builder.create<Scalar<TO>>(target_ty, !scalar->IsPositiveZero());
         } else if constexpr (std::is_same_v<FROM, bool>) {
             // [bool -> x]
             return builder.create<Scalar<TO>>(target_ty, TO(scalar->value ? 1 : 0));
