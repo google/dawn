@@ -247,26 +247,18 @@ std::make_unsigned_t<T> CountTrailingBits(T e, T bit_value_to_count) {
     return count;
 }
 
-/// ImplConstant inherits from constant::Constant to add an private implementation method for
-/// conversion.
-class ImplConstant : public Castable<ImplConstant, constant::Constant> {
-  public:
-    ImplConstant() = default;
-    ~ImplConstant() override = default;
-};
-
-/// A result templated with a ImplConstant.
-using ImplResult = utils::Result<const ImplConstant*>;
+/// A result templated with a constant::Constant.
+using ImplResult = utils::Result<const constant::Constant*>;
 
 // Forward declaration
-const ImplConstant* CreateComposite(ProgramBuilder& builder,
-                                    const type::Type* type,
-                                    utils::VectorRef<const constant::Constant*> elements);
+const constant::Constant* CreateComposite(ProgramBuilder& builder,
+                                          const type::Type* type,
+                                          utils::VectorRef<const constant::Constant*> elements);
 
 /// Scalar holds a single scalar or abstract-numeric value.
 /// Scalar implements the Constant interface.
 template <typename T>
-class Scalar : public Castable<Scalar<T>, ImplConstant> {
+class Scalar : public Castable<Scalar<T>, constant::Constant> {
   public:
     static_assert(!std::is_same_v<UnwrapNumber<T>, T> || std::is_same_v<T, bool>,
                   "T must be a Number or bool");
@@ -299,7 +291,7 @@ class Scalar : public Castable<Scalar<T>, ImplConstant> {
 /// Splat is used for zero-initializers, 'splat' initializers, or initializers where each element is
 /// identical. Splat may be of a vector, matrix or array type.
 /// Splat implements the Constant interface.
-class Splat : public Castable<Splat, ImplConstant> {
+class Splat : public Castable<Splat, constant::Constant> {
   public:
     Splat(const type::Type* t, const constant::Constant* e, size_t n) : type(t), el(e), count(n) {}
     ~Splat() override = default;
@@ -321,7 +313,7 @@ class Splat : public Castable<Splat, ImplConstant> {
 /// If each element is the same type and value, then a Splat would be a more efficient constant
 /// implementation. Use CreateComposite() to create the appropriate Constant type.
 /// Composite implements the Constant interface.
-class Composite : public Castable<Composite, ImplConstant> {
+class Composite : public Castable<Composite, constant::Constant> {
   public:
     Composite(const type::Type* t,
               utils::VectorRef<const constant::Constant*> els,
@@ -499,7 +491,6 @@ ImplResult ConvertInternal(const constant::Constant* c,
 }  // namespace
 }  // namespace tint::resolver
 
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::ImplConstant);
 TINT_INSTANTIATE_TYPEINFO(tint::resolver::Scalar<tint::AInt>);
 TINT_INSTANTIATE_TYPEINFO(tint::resolver::Scalar<tint::AFloat>);
 TINT_INSTANTIATE_TYPEINFO(tint::resolver::Scalar<tint::i32>);
@@ -530,18 +521,18 @@ ImplResult CreateScalar(ProgramBuilder& builder, const Source& source, const typ
 }
 
 /// ZeroValue returns a Constant for the zero-value of the type `type`.
-const ImplConstant* ZeroValue(ProgramBuilder& builder, const type::Type* type) {
+const constant::Constant* ZeroValue(ProgramBuilder& builder, const type::Type* type) {
     return Switch(
         type,  //
-        [&](const type::Vector* v) -> const ImplConstant* {
+        [&](const type::Vector* v) -> const constant::Constant* {
             auto* zero_el = ZeroValue(builder, v->type());
             return builder.create<Splat>(type, zero_el, v->Width());
         },
-        [&](const type::Matrix* m) -> const ImplConstant* {
+        [&](const type::Matrix* m) -> const constant::Constant* {
             auto* zero_el = ZeroValue(builder, m->ColumnType());
             return builder.create<Splat>(type, zero_el, m->columns());
         },
-        [&](const type::Array* a) -> const ImplConstant* {
+        [&](const type::Array* a) -> const constant::Constant* {
             if (auto n = a->ConstantCount()) {
                 if (auto* zero_el = ZeroValue(builder, a->ElemType())) {
                     return builder.create<Splat>(type, zero_el, n.value());
@@ -549,8 +540,8 @@ const ImplConstant* ZeroValue(ProgramBuilder& builder, const type::Type* type) {
             }
             return nullptr;
         },
-        [&](const type::Struct* s) -> const ImplConstant* {
-            utils::Hashmap<const type::Type*, const ImplConstant*, 8> zero_by_type;
+        [&](const type::Struct* s) -> const constant::Constant* {
+            utils::Hashmap<const type::Type*, const constant::Constant*, 8> zero_by_type;
             utils::Vector<const constant::Constant*, 4> zeros;
             zeros.Reserve(s->Members().Length());
             for (auto* member : s->Members()) {
@@ -567,8 +558,8 @@ const ImplConstant* ZeroValue(ProgramBuilder& builder, const type::Type* type) {
             }
             return CreateComposite(builder, s, std::move(zeros));
         },
-        [&](Default) -> const ImplConstant* {
-            return ZeroTypeDispatch(type, [&](auto zero) -> const ImplConstant* {
+        [&](Default) -> const constant::Constant* {
+            return ZeroTypeDispatch(type, [&](auto zero) -> const constant::Constant* {
                 auto el = CreateScalar(builder, Source{}, type, zero);
                 TINT_ASSERT(Resolver, el);
                 return el.Get();
@@ -635,9 +626,9 @@ bool Equal(const constant::Constant* a, const constant::Constant* b) {
 /// CreateComposite is used to construct a constant of a vector, matrix or array type.
 /// CreateComposite examines the element values and will return either a Composite or a Splat,
 /// depending on the element types and values.
-const ImplConstant* CreateComposite(ProgramBuilder& builder,
-                                    const type::Type* type,
-                                    utils::VectorRef<const constant::Constant*> elements) {
+const constant::Constant* CreateComposite(ProgramBuilder& builder,
+                                          const type::Type* type,
+                                          utils::VectorRef<const constant::Constant*> elements) {
     if (elements.IsEmpty()) {
         return nullptr;
     }
