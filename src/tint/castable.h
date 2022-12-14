@@ -339,7 +339,7 @@ class CastableBase {
     CastableBase& operator=(const CastableBase& other) = default;
 
     /// @returns the TypeInfo of the object
-    virtual const tint::TypeInfo& TypeInfo() const = 0;
+    inline const tint::TypeInfo& TypeInfo() const { return *type_info_; }
 
     /// @returns true if this object is of, or derives from the class `TO`
     template <typename TO>
@@ -381,6 +381,9 @@ class CastableBase {
 
   protected:
     CastableBase() = default;
+
+    /// The type information for the object
+    const tint::TypeInfo* type_info_ = nullptr;
 };
 
 /// Castable is a helper to derive `CLASS` from `BASE`, automatically
@@ -405,9 +408,6 @@ class CastableBase {
 template <typename CLASS, typename BASE = CastableBase>
 class Castable : public BASE {
   public:
-    // Inherit the `BASE` class constructors.
-    using BASE::BASE;
-
     /// A type alias for `CLASS` to easily access the `BASE` class members.
     /// Base actually aliases to the Castable instead of `BASE` so that you can
     /// use Base in the `CLASS` constructor.
@@ -416,8 +416,12 @@ class Castable : public BASE {
     /// A type alias for `BASE`.
     using TrueBase = BASE;
 
-    /// @returns the TypeInfo of the object
-    const tint::TypeInfo& TypeInfo() const override { return TypeInfo::Of<CLASS>(); }
+    /// Constructor
+    /// @param args the arguments to forward to the base class.
+    template <typename... ARGS>
+    inline explicit Castable(ARGS&&... args) : TrueBase(std::forward<ARGS>(args)...) {
+        this->type_info_ = &TypeInfo::Of<CLASS>();
+    }
 
     /// @returns true if this object is of, or derives from the class `TO`
     /// @see CastFlags
