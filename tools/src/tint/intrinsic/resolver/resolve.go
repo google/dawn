@@ -352,7 +352,7 @@ func (r *resolver) intrinsic(
 			case ast.Builtin, ast.Operator:
 				overload.ConstEvalFunction = overload.Decl.Name
 			case ast.Initializer:
-				overload.ConstEvalFunction = "init"
+				overload.ConstEvalFunction = "Init"
 			case ast.Converter:
 				overload.ConstEvalFunction = "Conv"
 			}
@@ -448,12 +448,15 @@ func (r *resolver) intrinsic(
 }
 
 // fullyQualifiedName() resolves the ast.TemplatedName to a sem.FullyQualifiedName.
+// The resolved name cannot be a TypeMatcher
 func (r *resolver) fullyQualifiedName(s *scope, arg ast.TemplatedName) (sem.FullyQualifiedName, error) {
 	target, err := r.lookupNamed(s, arg)
 	if err != nil {
 		return sem.FullyQualifiedName{}, err
 	}
-
+	if _, ok := target.(*sem.TypeMatcher); ok {
+		return sem.FullyQualifiedName{}, fmt.Errorf("%v type matcher cannot be used directly here. Use a matcher constrained template argument", arg.Source)
+	}
 	fqn := sem.FullyQualifiedName{
 		Target:            target,
 		TemplateArguments: make([]interface{}, len(arg.TemplateArgs)),
