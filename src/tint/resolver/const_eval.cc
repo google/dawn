@@ -22,7 +22,10 @@
 #include <type_traits>
 #include <utility>
 
+#include "src/tint/constant/composite.h"
 #include "src/tint/constant/constant.h"
+#include "src/tint/constant/scalar.h"
+#include "src/tint/constant/splat.h"
 #include "src/tint/number.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/member_accessor_expression.h"
@@ -237,115 +240,6 @@ const constant::Constant* CreateComposite(ProgramBuilder& builder,
                                           const type::Type* type,
                                           utils::VectorRef<const constant::Constant*> elements);
 
-/// Scalar holds a single scalar or abstract-numeric value.
-/// Scalar implements the Constant interface.
-template <typename T>
-class Scalar : public Castable<Scalar<T>, constant::Constant> {
-  public:
-    static_assert(!std::is_same_v<UnwrapNumber<T>, T> || std::is_same_v<T, bool>,
-                  "T must be a Number or bool");
-
-    Scalar(const type::Type* t, T v) : type(t), value(v) {
-        if constexpr (IsFloatingPoint<T>) {
-            TINT_ASSERT(Resolver, std::isfinite(v.value));
-        }
-    }
-    ~Scalar() override = default;
-    const type::Type* Type() const override { return type; }
-    std::variant<std::monostate, AInt, AFloat> Value() const override {
-        if constexpr (IsFloatingPoint<UnwrapNumber<T>>) {
-            return static_cast<AFloat>(value);
-        } else {
-            return static_cast<AInt>(value);
-        }
-    }
-    const constant::Constant* Index(size_t) const override { return nullptr; }
-
-    bool AllZero() const override { return IsPositiveZero(); }
-    bool AnyZero() const override { return IsPositiveZero(); }
-
-    bool AllEqual() const override { return true; }
-    size_t Hash() const override { return utils::Hash(type, ValueOf()); }
-
-    /// @returns `value` if `T` is not a Number, otherwise ValueOf returns the inner value of the
-    /// Number.
-    inline auto ValueOf() const {
-        if constexpr (std::is_same_v<UnwrapNumber<T>, T>) {
-            return value;
-        } else {
-            return value.value;
-        }
-    }
-
-    /// @returns true if `value` is a positive zero.
-    inline bool IsPositiveZero() const {
-        using N = UnwrapNumber<T>;
-        return Number<N>(value) == Number<N>(0);  // Considers sign bit
-    }
-
-    type::Type const* const type;
-    const T value;
-};
-
-/// Splat holds a single Constant value, duplicated as all children.
-/// Splat is used for zero-initializers, 'splat' initializers, or initializers where each element is
-/// identical. Splat may be of a vector, matrix or array type.
-/// Splat implements the Constant interface.
-class Splat : public Castable<Splat, constant::Constant> {
-  public:
-    Splat(const type::Type* t, const constant::Constant* e, size_t n) : type(t), el(e), count(n) {}
-    ~Splat() override = default;
-    const type::Type* Type() const override { return type; }
-    std::variant<std::monostate, AInt, AFloat> Value() const override { return {}; }
-    const constant::Constant* Index(size_t i) const override { return i < count ? el : nullptr; }
-    bool AllZero() const override { return el->AllZero(); }
-    bool AnyZero() const override { return el->AnyZero(); }
-    bool AllEqual() const override { return true; }
-    size_t Hash() const override { return utils::Hash(type, el->Hash(), count); }
-
-    type::Type const* const type;
-    const constant::Constant* el;
-    const size_t count;
-};
-
-/// Composite holds a number of mixed child Constant values.
-/// Composite may be of a vector, matrix or array type.
-/// If each element is the same type and value, then a Splat would be a more efficient constant
-/// implementation. Use CreateComposite() to create the appropriate Constant type.
-/// Composite implements the Constant interface.
-class Composite : public Castable<Composite, constant::Constant> {
-  public:
-    Composite(const type::Type* t,
-              utils::VectorRef<const constant::Constant*> els,
-              bool all_0,
-              bool any_0)
-        : type(t), elements(std::move(els)), all_zero(all_0), any_zero(any_0), hash(CalcHash()) {}
-    ~Composite() override = default;
-    const type::Type* Type() const override { return type; }
-    std::variant<std::monostate, AInt, AFloat> Value() const override { return {}; }
-    const constant::Constant* Index(size_t i) const override {
-        return i < elements.Length() ? elements[i] : nullptr;
-    }
-    bool AllZero() const override { return all_zero; }
-    bool AnyZero() const override { return any_zero; }
-    bool AllEqual() const override { return false; /* otherwise this should be a Splat */ }
-    size_t Hash() const override { return hash; }
-
-    size_t CalcHash() {
-        auto h = utils::Hash(type, all_zero, any_zero);
-        for (auto* el : elements) {
-            h = utils::HashCombine(h, el->Hash());
-        }
-        return h;
-    }
-
-    type::Type const* const type;
-    const utils::Vector<const constant::Constant*, 8> elements;
-    const bool all_zero;
-    const bool any_zero;
-    const size_t hash;
-};
-
 template <typename T>
 ImplResult ScalarConvert(const Scalar<T>* scalar,
                          ProgramBuilder& builder,
@@ -487,22 +381,6 @@ ImplResult ConvertInternal(const constant::Constant* c,
         [&](const Splat* val) { return SplatConvert(val, builder, target_ty, source); },
         [&](const Composite* val) { return CompositeConvert(val, builder, target_ty, source); });
 }
-
-}  // namespace
-}  // namespace tint::resolver
-
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::Scalar<tint::AInt>);
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::Scalar<tint::AFloat>);
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::Scalar<tint::i32>);
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::Scalar<tint::u32>);
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::Scalar<tint::f16>);
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::Scalar<tint::f32>);
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::Scalar<bool>);
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::Splat);
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::Composite);
-
-namespace tint::resolver {
-namespace {
 
 /// CreateScalar constructs and returns an Scalar<T>.
 template <typename T>

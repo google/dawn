@@ -254,8 +254,14 @@ list(APPEND TINT_LIB_SRCS
   castable.h
   clone_context.cc
   clone_context.h
+  constant/composite.cc
+  constant/composite.h
   constant/constant.cc
   constant/constant.h
+  constant/scalar.cc
+  constant/scalar.h
+  constant/splat.cc
+  constant/splat.h
   constant/node.cc
   constant/node.h
   demangler.cc
