@@ -28,6 +28,60 @@ namespace tint::type {
 /// @param str the string to parse
 /// @returns the parsed enum, or ShortName::kUndefined if the string could not be parsed.
 ShortName ParseShortName(std::string_view str) {
+    if (str == "mat2x2f") {
+        return ShortName::kMat2X2F;
+    }
+    if (str == "mat2x2h") {
+        return ShortName::kMat2X2H;
+    }
+    if (str == "mat2x3f") {
+        return ShortName::kMat2X3F;
+    }
+    if (str == "mat2x3h") {
+        return ShortName::kMat2X3H;
+    }
+    if (str == "mat2x4f") {
+        return ShortName::kMat2X4F;
+    }
+    if (str == "mat2x4h") {
+        return ShortName::kMat2X4H;
+    }
+    if (str == "mat3x2f") {
+        return ShortName::kMat3X2F;
+    }
+    if (str == "mat3x2h") {
+        return ShortName::kMat3X2H;
+    }
+    if (str == "mat3x3f") {
+        return ShortName::kMat3X3F;
+    }
+    if (str == "mat3x3h") {
+        return ShortName::kMat3X3H;
+    }
+    if (str == "mat3x4f") {
+        return ShortName::kMat3X4F;
+    }
+    if (str == "mat3x4h") {
+        return ShortName::kMat3X4H;
+    }
+    if (str == "mat4x2f") {
+        return ShortName::kMat4X2F;
+    }
+    if (str == "mat4x2h") {
+        return ShortName::kMat4X2H;
+    }
+    if (str == "mat4x3f") {
+        return ShortName::kMat4X3F;
+    }
+    if (str == "mat4x3h") {
+        return ShortName::kMat4X3H;
+    }
+    if (str == "mat4x4f") {
+        return ShortName::kMat4X4F;
+    }
+    if (str == "mat4x4h") {
+        return ShortName::kMat4X4H;
+    }
     if (str == "vec2f") {
         return ShortName::kVec2F;
     }
@@ -71,6 +125,42 @@ std::ostream& operator<<(std::ostream& out, ShortName value) {
     switch (value) {
         case ShortName::kUndefined:
             return out << "undefined";
+        case ShortName::kMat2X2F:
+            return out << "mat2x2f";
+        case ShortName::kMat2X2H:
+            return out << "mat2x2h";
+        case ShortName::kMat2X3F:
+            return out << "mat2x3f";
+        case ShortName::kMat2X3H:
+            return out << "mat2x3h";
+        case ShortName::kMat2X4F:
+            return out << "mat2x4f";
+        case ShortName::kMat2X4H:
+            return out << "mat2x4h";
+        case ShortName::kMat3X2F:
+            return out << "mat3x2f";
+        case ShortName::kMat3X2H:
+            return out << "mat3x2h";
+        case ShortName::kMat3X3F:
+            return out << "mat3x3f";
+        case ShortName::kMat3X3H:
+            return out << "mat3x3h";
+        case ShortName::kMat3X4F:
+            return out << "mat3x4f";
+        case ShortName::kMat3X4H:
+            return out << "mat3x4h";
+        case ShortName::kMat4X2F:
+            return out << "mat4x2f";
+        case ShortName::kMat4X2H:
+            return out << "mat4x2h";
+        case ShortName::kMat4X3F:
+            return out << "mat4x3f";
+        case ShortName::kMat4X3H:
+            return out << "mat4x3h";
+        case ShortName::kMat4X4F:
+            return out << "mat4x4f";
+        case ShortName::kMat4X4H:
+            return out << "mat4x4h";
         case ShortName::kVec2F:
             return out << "vec2f";
         case ShortName::kVec2H:

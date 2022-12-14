@@ -30,6 +30,24 @@ namespace tint::type {
 /// An enumerator of builtin type aliases.
 enum class ShortName {
     kUndefined,
+    kMat2X2F,
+    kMat2X2H,
+    kMat2X3F,
+    kMat2X3H,
+    kMat2X4F,
+    kMat2X4H,
+    kMat3X2F,
+    kMat3X2H,
+    kMat3X3F,
+    kMat3X3H,
+    kMat3X4F,
+    kMat3X4H,
+    kMat4X2F,
+    kMat4X2H,
+    kMat4X3F,
+    kMat4X3H,
+    kMat4X4F,
+    kMat4X4H,
     kVec2F,
     kVec2H,
     kVec2I,
@@ -55,8 +73,10 @@ std::ostream& operator<<(std::ostream& out, ShortName value);
 ShortName ParseShortName(std::string_view str);
 
 constexpr const char* kShortNameStrings[] = {
-    "vec2f", "vec2h", "vec2i", "vec2u", "vec3f", "vec3h",
-    "vec3i", "vec3u", "vec4f", "vec4h", "vec4i", "vec4u",
+    "mat2x2f", "mat2x2h", "mat2x3f", "mat2x3h", "mat2x4f", "mat2x4h", "mat3x2f", "mat3x2h",
+    "mat3x3f", "mat3x3h", "mat3x4f", "mat3x4h", "mat4x2f", "mat4x2h", "mat4x3f", "mat4x3h",
+    "mat4x4f", "mat4x4h", "vec2f",   "vec2h",   "vec2i",   "vec2u",   "vec3f",   "vec3h",
+    "vec3i",   "vec3u",   "vec4f",   "vec4h",   "vec4i",   "vec4u",
 };
 
 }  // namespace tint::type

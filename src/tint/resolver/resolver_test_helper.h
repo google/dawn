@@ -149,16 +149,22 @@ template <typename T>
 using mat2x3 = mat<2, 3, T>;
 
 template <typename T>
+using mat2x4 = mat<2, 4, T>;
+
+template <typename T>
 using mat3x2 = mat<3, 2, T>;
 
 template <typename T>
-using mat2x4 = mat<2, 4, T>;
+using mat3x3 = mat<3, 3, T>;
+
+template <typename T>
+using mat3x4 = mat<3, 4, T>;
 
 template <typename T>
 using mat4x2 = mat<4, 2, T>;
 
 template <typename T>
-using mat3x3 = mat<3, 3, T>;
+using mat4x3 = mat<4, 3, T>;
 
 template <typename T>
 using mat4x4 = mat<4, 4, T>;

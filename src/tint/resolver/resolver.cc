@@ -2387,25 +2387,67 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
 type::Type* Resolver::ShortName(Symbol sym, const Source& source) const {
     auto name = builder_->Symbols().NameFor(sym);
     auto& b = *builder_;
+    auto vec_f32 = [&](uint32_t n) { return b.create<type::Vector>(b.create<type::F32>(), n); };
+    auto vec_f16 = [&](uint32_t n) { return b.create<type::Vector>(b.create<type::F16>(), n); };
+
     switch (type::ParseShortName(name)) {
+        case type::ShortName::kMat2X2F:
+            return b.create<type::Matrix>(vec_f32(2u), 2u);
+        case type::ShortName::kMat2X3F:
+            return b.create<type::Matrix>(vec_f32(3u), 2u);
+        case type::ShortName::kMat2X4F:
+            return b.create<type::Matrix>(vec_f32(4u), 2u);
+        case type::ShortName::kMat3X2F:
+            return b.create<type::Matrix>(vec_f32(2u), 3u);
+        case type::ShortName::kMat3X3F:
+            return b.create<type::Matrix>(vec_f32(3u), 3u);
+        case type::ShortName::kMat3X4F:
+            return b.create<type::Matrix>(vec_f32(4u), 3u);
+        case type::ShortName::kMat4X2F:
+            return b.create<type::Matrix>(vec_f32(2u), 4u);
+        case type::ShortName::kMat4X3F:
+            return b.create<type::Matrix>(vec_f32(3u), 4u);
+        case type::ShortName::kMat4X4F:
+            return b.create<type::Matrix>(vec_f32(4u), 4u);
+        case type::ShortName::kMat2X2H:
+            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(2u), 2u)
+                                                      : nullptr;
+        case type::ShortName::kMat2X3H:
+            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(3u), 2u)
+                                                      : nullptr;
+        case type::ShortName::kMat2X4H:
+            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(4u), 2u)
+                                                      : nullptr;
+        case type::ShortName::kMat3X2H:
+            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(2u), 3u)
+                                                      : nullptr;
+        case type::ShortName::kMat3X3H:
+            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(3u), 3u)
+                                                      : nullptr;
+        case type::ShortName::kMat3X4H:
+            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(4u), 3u)
+                                                      : nullptr;
+        case type::ShortName::kMat4X2H:
+            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(2u), 4u)
+                                                      : nullptr;
+        case type::ShortName::kMat4X3H:
+            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(3u), 4u)
+                                                      : nullptr;
+        case type::ShortName::kMat4X4H:
+            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(4u), 4u)
+                                                      : nullptr;
         case type::ShortName::kVec2F:
-            return b.create<type::Vector>(b.create<type::F32>(), 2u);
+            return vec_f32(2u);
         case type::ShortName::kVec3F:
-            return b.create<type::Vector>(b.create<type::F32>(), 3u);
+            return vec_f32(3u);
         case type::ShortName::kVec4F:
-            return b.create<type::Vector>(b.create<type::F32>(), 4u);
+            return vec_f32(4u);
         case type::ShortName::kVec2H:
-            return validator_.CheckF16Enabled(source)
-                       ? b.create<type::Vector>(b.create<type::F16>(), 2u)
-                       : nullptr;
+            return validator_.CheckF16Enabled(source) ? vec_f16(2u) : nullptr;
         case type::ShortName::kVec3H:
-            return validator_.CheckF16Enabled(source)
-                       ? b.create<type::Vector>(b.create<type::F16>(), 3u)
-                       : nullptr;
+            return validator_.CheckF16Enabled(source) ? vec_f16(3u) : nullptr;
         case type::ShortName::kVec4H:
-            return validator_.CheckF16Enabled(source)
-                       ? b.create<type::Vector>(b.create<type::F16>(), 4u)
-                       : nullptr;
+            return validator_.CheckF16Enabled(source) ? vec_f16(4u) : nullptr;
         case type::ShortName::kVec2I:
             return b.create<type::Vector>(b.create<type::I32>(), 2u);
         case type::ShortName::kVec3I:

@@ -111,8 +111,27 @@ enum interpolation_sampling {
   sample
 }
 
-// https://www.w3.org/TR/WGSL/#vector-types
 enum short_name {
+  // https://www.w3.org/TR/WGSL/#matrix-types
+  mat2x2f
+  mat2x2h
+  mat2x3f
+  mat2x3h
+  mat2x4f
+  mat2x4h
+  mat3x2f
+  mat3x2h
+  mat3x3f
+  mat3x3h
+  mat3x4f
+  mat3x4h
+  mat4x2f
+  mat4x2h
+  mat4x3f
+  mat4x3h
+  mat4x4f
+  mat4x4h
+  // https://www.w3.org/TR/WGSL/#vector-types
   vec2f
   vec2h
   vec2i

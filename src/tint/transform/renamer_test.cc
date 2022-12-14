@@ -1459,6 +1459,60 @@ INSTANTIATE_TEST_SUITE_P(
         kUnicodeIdentifier));
 
 const char* ExpandShortName(std::string_view name) {
+    if (name == "mat2x2f") {
+        return "mat2x2<f32>";
+    }
+    if (name == "mat2x2h") {
+        return "mat2x2<f16>";
+    }
+    if (name == "mat2x3f") {
+        return "mat2x3<f32>";
+    }
+    if (name == "mat2x3h") {
+        return "mat2x3<f16>";
+    }
+    if (name == "mat2x4f") {
+        return "mat2x4<f32>";
+    }
+    if (name == "mat2x4h") {
+        return "mat2x4<f16>";
+    }
+    if (name == "mat3x2f") {
+        return "mat3x2<f32>";
+    }
+    if (name == "mat3x2h") {
+        return "mat3x2<f16>";
+    }
+    if (name == "mat3x3f") {
+        return "mat3x3<f32>";
+    }
+    if (name == "mat3x3h") {
+        return "mat3x3<f16>";
+    }
+    if (name == "mat3x4f") {
+        return "mat3x4<f32>";
+    }
+    if (name == "mat3x4h") {
+        return "mat3x4<f16>";
+    }
+    if (name == "mat4x2f") {
+        return "mat4x2<f32>";
+    }
+    if (name == "mat4x2h") {
+        return "mat4x2<f16>";
+    }
+    if (name == "mat4x3f") {
+        return "mat4x3<f32>";
+    }
+    if (name == "mat4x3h") {
+        return "mat4x3<f16>";
+    }
+    if (name == "mat4x4f") {
+        return "mat4x4<f32>";
+    }
+    if (name == "mat4x4h") {
+        return "mat4x4<f16>";
+    }
     if (name == "vec2f") {
         return "vec2<f32>";
     }

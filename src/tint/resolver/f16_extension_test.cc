@@ -138,7 +138,18 @@ TEST_P(ResolverF16ExtensionShortNameTest, Vec2hTypeUsedWithoutExtension) {
 
 INSTANTIATE_TEST_SUITE_P(ResolverF16ExtensionShortNameTest,
                          ResolverF16ExtensionShortNameTest,
-                         testing::Values("vec2h", "vec3h", "vec4h"));
+                         testing::Values("mat2x2h",
+                                         "mat2x3h",
+                                         "mat2x4h",
+                                         "mat3x2h",
+                                         "mat3x3h",
+                                         "mat3x4h",
+                                         "mat4x2h",
+                                         "mat4x3h",
+                                         "mat4x4h",
+                                         "vec2h",
+                                         "vec3h",
+                                         "vec4h"));
 
 }  // namespace
 }  // namespace tint::resolver
