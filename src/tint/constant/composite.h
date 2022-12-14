@@ -22,7 +22,7 @@
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/vector.h"
 
-namespace tint::resolver {
+namespace tint::constant {
 
 /// Composite holds a number of mixed child Constant values.
 /// Composite may be of a vector, matrix or array type.
@@ -75,6 +75,6 @@ class Composite : public Castable<Composite, constant::Constant> {
     }
 };
 
-}  // namespace tint::resolver
+}  // namespace tint::constant
 
 #endif  // SRC_TINT_CONSTANT_COMPOSITE_H_

@@ -16,9 +16,9 @@
 
 #include <utility>
 
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::Composite);
+TINT_INSTANTIATE_TYPEINFO(tint::constant::Composite);
 
-namespace tint::resolver {
+namespace tint::constant {
 
 Composite::Composite(const type::Type* t,
                      utils::VectorRef<const constant::Constant*> els,
@@ -28,4 +28,4 @@ Composite::Composite(const type::Type* t,
 
 Composite::~Composite() = default;
 
-}  // namespace tint::resolver
+}  // namespace tint::constant

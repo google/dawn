@@ -14,13 +14,13 @@
 
 #include "src/tint/constant/splat.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::Splat);
+TINT_INSTANTIATE_TYPEINFO(tint::constant::Splat);
 
-namespace tint::resolver {
+namespace tint::constant {
 
 Splat::Splat(const type::Type* t, const constant::Constant* e, size_t n)
     : type(t), el(e), count(n) {}
 
 Splat::~Splat() = default;
 
-}  // namespace tint::resolver
+}  // namespace tint::constant

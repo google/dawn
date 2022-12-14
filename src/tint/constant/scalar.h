@@ -21,7 +21,7 @@
 #include "src/tint/type/type.h"
 #include "src/tint/utils/hash.h"
 
-namespace tint::resolver {
+namespace tint::constant {
 
 /// Scalar holds a single scalar or abstract-numeric value.
 /// Scalar implements the Constant interface.
@@ -36,7 +36,7 @@ class Scalar : public Castable<Scalar<T>, constant::Constant> {
     /// @param v the scalar value
     Scalar(const type::Type* t, T v) : type(t), value(v) {
         if constexpr (IsFloatingPoint<T>) {
-            TINT_ASSERT(Resolver, std::isfinite(v.value));
+            TINT_ASSERT(Constant, std::isfinite(v.value));
         }
     }
     ~Scalar() override = default;
@@ -79,6 +79,6 @@ class Scalar : public Castable<Scalar<T>, constant::Constant> {
     const T value;
 };
 
-}  // namespace tint::resolver
+}  // namespace tint::constant
 
 #endif  // SRC_TINT_CONSTANT_SCALAR_H_

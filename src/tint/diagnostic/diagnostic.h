@@ -37,6 +37,7 @@ inline bool operator>=(Severity a, Severity b) {
 enum class System {
     AST,
     Clone,
+    Constant,
     Inspector,
     IR,
     Program,

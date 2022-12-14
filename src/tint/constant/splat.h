@@ -20,7 +20,7 @@
 #include "src/tint/type/type.h"
 #include "src/tint/utils/vector.h"
 
-namespace tint::resolver {
+namespace tint::constant {
 
 /// Splat holds a single Constant value, duplicated as all children.
 /// Splat is used for zero-initializers, 'splat' initializers, or initializers where each element is
@@ -64,6 +64,6 @@ class Splat : public Castable<Splat, constant::Constant> {
     const size_t count;
 };
 
-}  // namespace tint::resolver
+}  // namespace tint::constant
 
 #endif  // SRC_TINT_CONSTANT_SPLAT_H_
