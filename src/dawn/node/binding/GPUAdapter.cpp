@@ -80,7 +80,7 @@ std::vector<std::string> Split(const std::string& s, char delim) {
     X(maxVertexBufferArrayStride)                \
     X(maxInterStageShaderComponents)             \
     X(maxColorAttachments)                       \
-    /* X(maxColorAttachmentBytesPerSample) */    \
+    X(maxColorAttachmentBytesPerSample)          \
     X(maxComputeWorkgroupStorageSize)            \
     X(maxComputeInvocationsPerWorkgroup)         \
     X(maxComputeWorkgroupSizeX)                  \

@@ -121,8 +121,7 @@ uint32_t GPUSupportedLimits::getMaxColorAttachments(Napi::Env) {
 }
 
 uint32_t GPUSupportedLimits::getMaxColorAttachmentBytesPerSample(Napi::Env) {
-    UNIMPLEMENTED();
-    // return limits_.limits.maxColorAttachmentBytesPerSample;
+    return limits_.limits.maxColorAttachmentBytesPerSample;
 }
 
 uint32_t GPUSupportedLimits::getMaxComputeWorkgroupStorageSize(Napi::Env) {
