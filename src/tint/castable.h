@@ -77,11 +77,10 @@ static constexpr bool IsCastable =
     };                                                          \
     TINT_CASTABLE_POP_DISABLE_WARNINGS()
 
-/// Bit flags that can be passed to the template parameter `FLAGS` of Is() and
-/// As().
+/// Bit flags that can be passed to the template parameter `FLAGS` of Is() and As().
 enum CastFlags {
-    /// Disables the static_assert() inside Is(), that compile-time-verifies that
-    /// the cast is possible. This flag may be useful for highly-generic template
+    /// Disables the static_assert() inside Is(), that compile-time-verifies that the cast is
+    /// possible. This flag may be useful for highly-generic template
     /// code that needs to compile for template permutations that generate
     /// impossible casts.
     kDontErrorOnImpossibleCast = 1,
@@ -102,8 +101,7 @@ struct TypeInfo {
     const HashCode full_hashcode;
 
     /// @returns true if `type` derives from the class `TO`
-    /// @param object the object type to test from, which must be, or derive from
-    /// type `FROM`.
+    /// @param object the object type to test from, which must be, or derive from type `FROM`.
     /// @see CastFlags
     template <typename TO, typename FROM, int FLAGS = 0>
     static inline bool Is(const tint::TypeInfo* object) {
@@ -135,9 +133,9 @@ struct TypeInfo {
     /// @returns true if the class with this TypeInfo is of, or derives from the
     /// class with the given TypeInfo.
     inline bool Is(const tint::TypeInfo* type) const {
-        // Optimization: Check whether the all the bits of the type's hashcode can
-        // be found in the full_hashcode. If a single bit is missing, then we
-        // can quickly tell that that this TypeInfo does not derive from `type`.
+        // Optimization: Check whether the all the bits of the type's hashcode can be found in the
+        // full_hashcode. If a single bit is missing, then we can quickly tell that that this
+        // TypeInfo does not derive from `type`.
         if ((full_hashcode & type->hashcode) != type->hashcode) {
             return false;
         }
@@ -159,9 +157,9 @@ struct TypeInfo {
     }
 
     /// @returns a compile-time hashcode for the type `T`.
-    /// @note the returned hashcode will have exactly 2 bits set, as the hashes
-    /// are expected to be used in bloom-filters which will quickly saturate when
-    /// multiple hashcodes are bitwise-or'd together.
+    /// @note the returned hashcode will have exactly 2 bits set, as the hashes are expected to be
+    /// used in bloom-filters which will quickly saturate when multiple hashcodes are bitwise-or'd
+    /// together.
     template <typename T>
     static constexpr HashCode HashCodeOf() {
         static_assert(IsCastable<T>, "T is not Castable");
@@ -180,8 +178,8 @@ struct TypeInfo {
         return (static_cast<HashCode>(1) << bit_a) | (static_cast<HashCode>(1) << bit_c);
     }
 
-    /// @returns the hashcode of the given type, bitwise-or'd with the hashcodes
-    /// of all base classes.
+    /// @returns the hashcode of the given type, bitwise-or'd with the hashcodes of all base
+    /// classes.
     template <typename T>
     static constexpr HashCode FullHashCodeOf() {
         if constexpr (std::is_same_v<T, CastableBase>) {
@@ -214,8 +212,7 @@ struct TypeInfo {
         return CombinedHashCodeOfTuple<std::tuple<TYPES...>>();
     }
 
-    /// @returns true if this TypeInfo is of, or derives from any of the types in
-    /// `TUPLE`.
+    /// @returns true if this TypeInfo is of, or derives from any of the types in `TUPLE`.
     template <typename TUPLE>
     inline bool IsAnyOfTuple() const {
         constexpr auto kCount = std::tuple_size_v<TUPLE>;
@@ -242,8 +239,7 @@ struct TypeInfo {
         }
     }
 
-    /// @returns true if this TypeInfo is of, or derives from any of the types in
-    /// `TYPES`.
+    /// @returns true if this TypeInfo is of, or derives from any of the types in `TYPES`.
     template <typename... TYPES>
     inline bool IsAnyOf() const {
         return IsAnyOfTuple<std::tuple<TYPES...>>();
@@ -253,22 +249,20 @@ struct TypeInfo {
 namespace detail {
 
 /// TypeInfoOf contains a single TypeInfo field for the type T.
-/// TINT_INSTANTIATE_TYPEINFO() must be defined in a .cpp file for each type
-/// `T`.
+/// TINT_INSTANTIATE_TYPEINFO() must be defined in a .cpp file for each type `T`.
 template <typename T>
 struct TypeInfoOf {
     /// The unique TypeInfo for the type T.
     static const TypeInfo info;
 };
 
-/// A placeholder structure used for template parameters that need a default
-/// type, but can always be automatically inferred.
+/// A placeholder structure used for template parameters that need a default type, but can always be
+/// automatically inferred.
 struct Infer;
 
 }  // namespace detail
 
-/// @returns true if `obj` is a valid pointer, and is of, or derives from the
-/// class `TO`
+/// @returns true if `obj` is a valid pointer, and is of, or derives from the class `TO`
 /// @param obj the object to test from
 /// @see CastFlags
 template <typename TO, int FLAGS = 0, typename FROM = detail::Infer>
@@ -279,19 +273,19 @@ inline bool Is(FROM* obj) {
     return TypeInfo::Is<TO, FROM, FLAGS>(&obj->TypeInfo());
 }
 
-/// @returns true if `obj` is a valid pointer, and is of, or derives from the
-/// type `TYPE`, and pred(const TYPE*) returns true
+/// @returns true if `obj` is a valid pointer, and is of, or derives from the type `TYPE`, and
+/// pred(const TYPE*) returns true
 /// @param obj the object to test from
-/// @param pred predicate function with signature `bool(const TYPE*)` called iff
-/// object is of, or derives from the class `TYPE`.
+/// @param pred predicate function with signature `bool(const TYPE*)` called iff object is of, or
+/// derives from the class `TYPE`.
 /// @see CastFlags
 template <typename TYPE, int FLAGS = 0, typename OBJ = detail::Infer, typename Pred = detail::Infer>
 inline bool Is(OBJ* obj, Pred&& pred) {
     return Is<TYPE, FLAGS, OBJ>(obj) && pred(static_cast<std::add_const_t<TYPE>*>(obj));
 }
 
-/// @returns true if `obj` is a valid pointer, and is of, or derives from any of
-/// the types in `TYPES`.OBJ
+/// @returns true if `obj` is a valid pointer, and is of, or derives from any of the types in
+/// `TYPES`.
 /// @param obj the object to query.
 template <typename... TYPES, typename OBJ>
 inline bool IsAnyOf(OBJ* obj) {
@@ -301,8 +295,8 @@ inline bool IsAnyOf(OBJ* obj) {
     return obj->TypeInfo().template IsAnyOf<TYPES...>();
 }
 
-/// @returns obj dynamically cast to the type `TO` or `nullptr` if
-/// this object does not derive from `TO`.
+/// @returns obj dynamically cast to the type `TO` or `nullptr` if this object does not derive from
+/// `TO`.
 /// @param obj the object to cast from
 /// @see CastFlags
 template <typename TO, int FLAGS = 0, typename FROM = detail::Infer>
@@ -311,8 +305,8 @@ inline TO* As(FROM* obj) {
     return Is<TO, FLAGS>(obj) ? static_cast<TO*>(as_castable) : nullptr;
 }
 
-/// @returns obj dynamically cast to the type `TO` or `nullptr` if
-/// this object does not derive from `TO`.
+/// @returns obj dynamically cast to the type `TO` or `nullptr` if this object does not derive from
+/// `TO`.
 /// @param obj the object to cast from
 /// @see CastFlags
 template <typename TO, int FLAGS = 0, typename FROM = detail::Infer>
@@ -322,8 +316,8 @@ inline const TO* As(const FROM* obj) {
 }
 
 /// CastableBase is the base class for all Castable objects.
-/// It is not encouraged to directly derive from CastableBase without using the
-/// Castable helper template.
+/// It is not encouraged to directly derive from CastableBase without using the Castable helper
+/// template.
 /// @see Castable
 class CastableBase {
   public:
@@ -347,32 +341,31 @@ class CastableBase {
         return tint::Is<TO>(this);
     }
 
-    /// @returns true if this object is of, or derives from the class `TO` and
-    /// pred(const TO*) returns true
-    /// @param pred predicate function with signature `bool(const TO*)` called iff
-    /// object is of, or derives from the class `TO`.
+    /// @returns true if this object is of, or derives from the class `TO` and pred(const TO*)
+    /// returns true
+    /// @param pred predicate function with signature `bool(const TO*)` called iff object is of, or
+    /// derives from the class `TO`.
     template <typename TO, int FLAGS = 0, typename Pred = detail::Infer>
     inline bool Is(Pred&& pred) const {
         return tint::Is<TO, FLAGS>(this, std::forward<Pred>(pred));
     }
 
-    /// @returns true if this object is of, or derives from any of the `TO`
-    /// classes.
+    /// @returns true if this object is of, or derives from any of the `TO` classes.
     template <typename... TO>
     inline bool IsAnyOf() const {
         return tint::IsAnyOf<TO...>(this);
     }
 
-    /// @returns this object dynamically cast to the type `TO` or `nullptr` if
-    /// this object does not derive from `TO`.
+    /// @returns this object dynamically cast to the type `TO` or `nullptr` if this object does not
+    /// derive from `TO`.
     /// @see CastFlags
     template <typename TO, int FLAGS = 0>
     inline TO* As() {
         return tint::As<TO, FLAGS>(this);
     }
 
-    /// @returns this object dynamically cast to the type `TO` or `nullptr` if
-    /// this object does not derive from `TO`.
+    /// @returns this object dynamically cast to the type `TO` or `nullptr` if this object does not
+    /// derive from `TO`.
     /// @see CastFlags
     template <typename TO, int FLAGS = 0>
     inline const TO* As() const {
@@ -386,8 +379,8 @@ class CastableBase {
     const tint::TypeInfo* type_info_ = nullptr;
 };
 
-/// Castable is a helper to derive `CLASS` from `BASE`, automatically
-/// implementing the Is() and As() methods, along with a #Base type alias.
+/// Castable is a helper to derive `CLASS` from `BASE`, automatically implementing the Is() and As()
+/// methods, along with a #Base type alias.
 ///
 /// Example usage:
 ///
@@ -465,8 +458,8 @@ class Castable : public BASE {
 };
 
 namespace detail {
-/// <code>typename CastableCommonBaseImpl<TYPES>::type</code> resolves to the
-/// common base class for all of TYPES.
+/// <code>typename CastableCommonBaseImpl<TYPES>::type</code> resolves to the common base class for
+/// all of TYPES.
 template <typename... TYPES>
 struct CastableCommonBaseImpl {};
 
@@ -520,13 +513,11 @@ struct CastableCommonBaseImpl<A, B, OTHERS...> {
 
 }  // namespace detail
 
-/// Resolves to the common most derived type that each of the types in `TYPES`
-/// derives from.
+/// Resolves to the common most derived type that each of the types in `TYPES` derives from.
 template <typename... TYPES>
 using CastableCommonBase = detail::CastableCommonBase<TYPES...>;
 
-/// Default can be used as the default case for a Switch(), when all previous
-/// cases failed to match.
+/// Default can be used as the default case for a Switch(), when all previous cases failed to match.
 ///
 /// Example:
 /// ```
@@ -539,23 +530,20 @@ struct Default {};
 
 namespace detail {
 
-/// Evaluates to the Switch case type being matched by the switch case function
-/// `FN`.
+/// Evaluates to the Switch case type being matched by the switch case function `FN`.
 /// @note does not handle the Default case
 /// @see Switch().
 template <typename FN>
 using SwitchCaseType = std::remove_pointer_t<traits::ParameterType<std::remove_reference_t<FN>, 0>>;
 
-/// Evaluates to true if the function `FN` has the signature of a Default case
-/// in a Switch().
+/// Evaluates to true if the function `FN` has the signature of a Default case in a Switch().
 /// @see Switch().
 template <typename FN>
 inline constexpr bool IsDefaultCase =
     std::is_same_v<traits::ParameterType<std::remove_reference_t<FN>, 0>, Default>;
 
-/// Searches the list of Switch cases for a Default case, returning the index of
-/// the Default case. If the a Default case is not found in the tuple, then -1
-/// is returned.
+/// Searches the list of Switch cases for a Default case, returning the index of the Default case.
+/// If the a Default case is not found in the tuple, then -1 is returned.
 template <typename TUPLE, std::size_t START_IDX = 0>
 constexpr int IndexOfDefaultCase() {
     if constexpr (START_IDX < std::tuple_size_v<TUPLE>) {
@@ -568,13 +556,11 @@ constexpr int IndexOfDefaultCase() {
 }
 
 /// The implementation of Switch() for non-Default cases.
-/// Switch splits the cases into two a low and high block of cases, and quickly
-/// rules out blocks that cannot match by comparing the TypeInfo::HashCode of
-/// the object and the cases in the block. If a block of cases may match the
-/// given object's type, then that block is split into two, and the process
-/// recurses. When NonDefaultCases() is called with a single case, then As<>
-/// will be used to dynamically cast to the case type and if the cast succeeds,
-/// then the case handler is called.
+/// Switch splits the cases into two a low and high block of cases, and quickly rules out blocks
+/// that cannot match by comparing the HashCode of the object and the cases in the block. If a block
+/// of cases may match the given object's type, then that block is split into two, and the process
+/// recurses. When NonDefaultCases() is called with a single case, then As<> will be used to
+/// dynamically cast to the case type and if the cast succeeds, then the case handler is called.
 /// @returns true if a case handler was found, otherwise false.
 template <typename T, typename RETURN_TYPE, typename... CASES>
 inline bool NonDefaultCases([[maybe_unused]] T* object,
@@ -594,8 +580,8 @@ inline bool NonDefaultCases([[maybe_unused]] T* object,
         // Single case.
         using CaseFunc = std::tuple_element_t<0, Cases>;
         static_assert(!IsDefaultCase<CaseFunc>, "NonDefaultCases called with a Default case");
-        // Attempt to dynamically cast the object to the handler type. If that
-        // succeeds, call the case handler with the cast object.
+        // Attempt to dynamically cast the object to the handler type. If that succeeds, call the
+        // case handler with the cast object.
         using CaseType = SwitchCaseType<CaseFunc>;
         if (type->Is<CaseType>()) {
             auto* ptr = static_cast<CaseType*>(object);
@@ -698,8 +684,8 @@ inline void SwitchCases(T* object, RETURN_TYPE* result, std::tuple<CASES...>&& c
 template <typename T>
 using NullptrToIgnore = std::conditional_t<std::is_same_v<T, std::nullptr_t>, Ignore, T>;
 
-/// Resolves to `const TYPE` if any of `CASE_RETURN_TYPES` are const or
-/// pointer-to-const, otherwise resolves to TYPE.
+/// Resolves to `const TYPE` if any of `CASE_RETURN_TYPES` are const or pointer-to-const, otherwise
+/// resolves to TYPE.
 template <typename TYPE, typename... CASE_RETURN_TYPES>
 using PropagateReturnConst = std::conditional_t<
     // Are any of the pointer-stripped types const?
@@ -711,24 +697,23 @@ using PropagateReturnConst = std::conditional_t<
 template <bool IS_CASTABLE, typename REQUESTED_TYPE, typename... CASE_RETURN_TYPES>
 struct SwitchReturnTypeImpl;
 
-/// SwitchReturnTypeImpl specialization for non-castable case types and an
-/// explicitly specified return type.
+/// SwitchReturnTypeImpl specialization for non-castable case types and an explicitly specified
+/// return type.
 template <typename REQUESTED_TYPE, typename... CASE_RETURN_TYPES>
 struct SwitchReturnTypeImpl</*IS_CASTABLE*/ false, REQUESTED_TYPE, CASE_RETURN_TYPES...> {
     /// Resolves to `REQUESTED_TYPE`
     using type = REQUESTED_TYPE;
 };
 
-/// SwitchReturnTypeImpl specialization for non-castable case types and an
-/// inferred return type.
+/// SwitchReturnTypeImpl specialization for non-castable case types and an inferred return type.
 template <typename... CASE_RETURN_TYPES>
 struct SwitchReturnTypeImpl</*IS_CASTABLE*/ false, Infer, CASE_RETURN_TYPES...> {
     /// Resolves to the common type for all the cases return types.
     using type = std::common_type_t<CASE_RETURN_TYPES...>;
 };
 
-/// SwitchReturnTypeImpl specialization for castable case types and an
-/// explicitly specified return type.
+/// SwitchReturnTypeImpl specialization for castable case types and an explicitly specified return
+/// type.
 template <typename REQUESTED_TYPE, typename... CASE_RETURN_TYPES>
 struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true, REQUESTED_TYPE, CASE_RETURN_TYPES...> {
   public:
@@ -736,8 +721,7 @@ struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true, REQUESTED_TYPE, CASE_RETURN_TY
     using type = PropagateReturnConst<std::remove_pointer_t<REQUESTED_TYPE>, CASE_RETURN_TYPES...>*;
 };
 
-/// SwitchReturnTypeImpl specialization for castable case types and an infered
-/// return type.
+/// SwitchReturnTypeImpl specialization for castable case types and an inferred return type.
 template <typename... CASE_RETURN_TYPES>
 struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true, Infer, CASE_RETURN_TYPES...> {
   private:
@@ -745,14 +729,13 @@ struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true, Infer, CASE_RETURN_TYPES...> {
         CastableCommonBase<detail::NullptrToIgnore<std::remove_pointer_t<CASE_RETURN_TYPES>>...>;
 
   public:
-    /// `const T*` or `T*`, where T is the common base type for all the castable
-    /// case types.
+    /// `const T*` or `T*`, where T is the common base type for all the castable case types.
     using type = PropagateReturnConst<InferredType, CASE_RETURN_TYPES...>*;
 };
 
-/// Resolves to the return type for a Switch() with the requested return type
-/// `REQUESTED_TYPE` and case statement return types. If `REQUESTED_TYPE` is
-/// Infer then the return type will be inferred from the case return types.
+/// Resolves to the return type for a Switch() with the requested return type `REQUESTED_TYPE` and
+/// case statement return types. If `REQUESTED_TYPE` is Infer then the return type will be inferred
+/// from the case return types.
 template <typename REQUESTED_TYPE, typename... CASE_RETURN_TYPES>
 using SwitchReturnType = typename SwitchReturnTypeImpl<
     IsCastable<NullptrToIgnore<std::remove_pointer_t<CASE_RETURN_TYPES>>...>,
@@ -761,24 +744,20 @@ using SwitchReturnType = typename SwitchReturnTypeImpl<
 
 }  // namespace detail
 
-/// Switch is used to dispatch one of the provided callback case handler
-/// functions based on the type of `object` and the parameter type of the case
-/// handlers. Switch will sequentially check the type of `object` against each
-/// of the switch case handler functions, and will invoke the first case handler
-/// function which has a parameter type that matches the object type. When a
-/// case handler is matched, it will be called with the single argument of
-/// `object` cast to the case handler's parameter type. Switch will invoke at
-/// most one case handler. Each of the case functions must have the signature
-/// `R(T*)` or `R(const T*)`, where `T` is the type matched by that case and `R`
+/// Switch is used to dispatch one of the provided callback case handler functions based on the type
+/// of `object` and the parameter type of the case handlers. Switch will sequentially check the type
+/// of `object` against each of the switch case handler functions, and will invoke the first case
+/// handler function which has a parameter type that matches the object type. When a case handler is
+/// matched, it will be called with the single argument of `object` cast to the case handler's
+/// parameter type. Switch will invoke at most one case handler. Each of the case functions must
+/// have the signature `R(T*)` or `R(const T*)`, where `T` is the type matched by that case and `R`
 /// is the return type, consistent across all case handlers.
 ///
-/// An optional default case function with the signature `R(Default)` can be
-/// used as the last case. This default case will be called if all previous
-/// cases failed to match.
+/// An optional default case function with the signature `R(Default)` can be used as the last case.
+/// This default case will be called if all previous cases failed to match.
 ///
-/// If `object` is nullptr and a default case is provided, then the default case
-/// will be called. If `object` is nullptr and no default case is provided, then
-/// no cases will be called.
+/// If `object` is nullptr and a default case is provided, then the default case will be called. If
+/// `object` is nullptr and no default case is provided, then no cases will be called.
 ///
 /// Example:
 /// ```
@@ -794,8 +773,8 @@ using SwitchReturnType = typename SwitchReturnTypeImpl<
 ///
 /// @param object the object who's type is used to
 /// @param cases the switch cases
-/// @return the value returned by the called case. If no cases matched, then the
-/// zero value for the consistent case type.
+/// @return the value returned by the called case. If no cases matched, then the zero value for the
+/// consistent case type.
 template <typename RETURN_TYPE = detail::Infer, typename T = CastableBase, typename... CASES>
 inline auto Switch(T* object, CASES&&... cases) {
     using ReturnType = detail::SwitchReturnType<RETURN_TYPE, traits::ReturnType<CASES>...>;
