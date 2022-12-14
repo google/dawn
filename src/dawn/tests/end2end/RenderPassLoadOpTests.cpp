@@ -13,8 +13,11 @@
 // limitations under the License.
 
 #include <array>
+#include <cstring>
 #include <limits>
 #include <tuple>
+#include <type_traits>
+#include <vector>
 
 #include "dawn/tests/DawnTest.h"
 
@@ -464,109 +467,13 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearNormalizedFormatsOutOfBound) {
     }
 }
 
-// Test clearing multiple color attachments with different big integers can still work correctly.
-// TODO(dawn:1522) Refactor and fix this test to avoid deprecation warnings.
-TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigInt32ValuesOnMultipleColorAttachments) {
+// Test clearing multiple color attachments with different big signed and unsigned integers can
+// still work correctly.
+TEST_P(RenderPassLoadOpTests, LoadOpClearWithBig32BitIntegralValuesOnMultipleColorAttachments) {
     constexpr int32_t kMaxInt32RepresentableInFloat = 1 << std::numeric_limits<float>::digits;
     constexpr int32_t kMinInt32RepresentableInFloat = -kMaxInt32RepresentableInFloat;
 
-    using TestCase = std::tuple<wgpu::TextureFormat, wgpu::Color, std::array<int32_t, 4>>;
-
-    constexpr std::array<TestCase, kMaxColorAttachments> kTestCases = {{
-        {wgpu::TextureFormat::R32Sint,
-         {kMaxInt32RepresentableInFloat, 0, 0, 0},
-         {kMaxInt32RepresentableInFloat, 0, 0, 0}},
-        {wgpu::TextureFormat::R32Sint,
-         {kMaxInt32RepresentableInFloat + 1, 0, 0, 0},
-         {kMaxInt32RepresentableInFloat + 1, 0, 0, 0}},
-        {wgpu::TextureFormat::R32Sint,
-         {kMinInt32RepresentableInFloat, 0, 0, 0},
-         {kMinInt32RepresentableInFloat, 0, 0, 0}},
-        {wgpu::TextureFormat::R32Sint,
-         {kMinInt32RepresentableInFloat - 1, 0, 0, 0},
-         {kMinInt32RepresentableInFloat - 1, 0, 0, 0}},
-        {wgpu::TextureFormat::RG32Sint,
-         {kMaxInt32RepresentableInFloat, kMaxInt32RepresentableInFloat + 1, 0, 0},
-         {kMaxInt32RepresentableInFloat, kMaxInt32RepresentableInFloat + 1, 0, 0}},
-        {wgpu::TextureFormat::RG32Sint,
-         {kMinInt32RepresentableInFloat, kMinInt32RepresentableInFloat - 1, 0, 0},
-         {kMinInt32RepresentableInFloat, kMinInt32RepresentableInFloat - 1, 0, 0}},
-        {wgpu::TextureFormat::RGBA32Sint,
-         {kMaxInt32RepresentableInFloat, kMinInt32RepresentableInFloat,
-          kMaxInt32RepresentableInFloat + 1, kMinInt32RepresentableInFloat - 1},
-         {kMaxInt32RepresentableInFloat, kMinInt32RepresentableInFloat,
-          kMaxInt32RepresentableInFloat + 1, kMinInt32RepresentableInFloat - 1}},
-        {wgpu::TextureFormat::RGBA32Sint,
-         {kMaxInt32RepresentableInFloat, kMinInt32RepresentableInFloat,
-          kMaxInt32RepresentableInFloat - 1, kMinInt32RepresentableInFloat + 1},
-         {kMaxInt32RepresentableInFloat, kMinInt32RepresentableInFloat,
-          kMaxInt32RepresentableInFloat - 1, kMinInt32RepresentableInFloat + 1}},
-    }};
-
-    std::array<wgpu::Texture, kMaxColorAttachments> textures;
-
-    wgpu::TextureDescriptor textureDescriptor = {};
-    textureDescriptor.size = {1, 1, 1};
-    textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
-
-    std::array<wgpu::RenderPassColorAttachment, kMaxColorAttachments> colorAttachmentsInfo;
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-        textureDescriptor.format = std::get<0>(kTestCases[i]);
-        textures[i] = device.CreateTexture(&textureDescriptor);
-
-        colorAttachmentsInfo[i].view = textures[i].CreateView();
-        colorAttachmentsInfo[i].loadOp = wgpu::LoadOp::Clear;
-        colorAttachmentsInfo[i].storeOp = wgpu::StoreOp::Store;
-        colorAttachmentsInfo[i].clearValue = std::get<1>(kTestCases[i]);
-    }
-
-    wgpu::RenderPassDescriptor renderPassDescriptor = {};
-    renderPassDescriptor.colorAttachmentCount = kMaxColorAttachments;
-    renderPassDescriptor.colorAttachments = colorAttachmentsInfo.data();
-    wgpu::RenderPassEncoder renderPass;
-    if (HasToggleEnabled("apply_clear_big_integer_color_value_with_draw")) {
-        // When the toggle is enabled, an extra internal pipeline is created which will hit the same
-        // deprecation issue again, hence we need to check for 2 warnings instead of 1.
-        EXPECT_DEPRECATION_WARNINGS(renderPass = encoder.BeginRenderPass(&renderPassDescriptor), 2);
-    } else {
-        EXPECT_DEPRECATION_WARNING(renderPass = encoder.BeginRenderPass(&renderPassDescriptor));
-    }
-    renderPass.End();
-
-    std::array<wgpu::Buffer, kMaxColorAttachments> outputBuffers;
-    for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-        wgpu::BufferDescriptor bufferDescriptor = {};
-        bufferDescriptor.size = sizeof(int32_t) * 4;
-        bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-        outputBuffers[i] = device.CreateBuffer(&bufferDescriptor);
-
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(textures[i], 0, {0, 0, 0});
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(outputBuffers[i], 0, kTextureBytesPerRowAlignment);
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &textureDescriptor.size);
-    }
-
-    wgpu::CommandBuffer commandBuffer = encoder.Finish();
-    queue.Submit(1, &commandBuffer);
-
-    for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-        const uint8_t* expected =
-            reinterpret_cast<const uint8_t*>(std::get<2>(kTestCases[i]).data());
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, outputBuffers[i], 0,
-                                  sizeof(std::get<2>(kTestCases[i])));
-    }
-}
-
-// Test clearing multiple color attachments with different big unsigned integers can still work
-// correctly.
-// TODO(dawn:1522) Refactor and fix this test to avoid deprecation warnings.
-TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigUInt32ValuesOnMultipleColorAttachments) {
-    constexpr int32_t kMaxUInt32RepresentableInFloat = 1 << std::numeric_limits<float>::digits;
-
-    using TestCase = std::tuple<wgpu::TextureFormat, wgpu::Color, std::array<uint32_t, 4>>;
-
+    constexpr uint32_t kMaxUInt32RepresentableInFloat = 1 << std::numeric_limits<float>::digits;
     std::array<float, 4> testColorForRGBA32Float = {
         kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat - 1,
         kMaxUInt32RepresentableInFloat - 2, kMaxUInt32RepresentableInFloat - 3};
@@ -575,105 +482,166 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigUInt32ValuesOnMultipleColorAttac
         expectedDataForRGBA32Float[i] = *(reinterpret_cast<uint32_t*>(&testColorForRGBA32Float[i]));
     }
 
-    const std::array<TestCase, kMaxColorAttachments> kTestCases = {{
-        {wgpu::TextureFormat::R32Uint,
-         {kMaxUInt32RepresentableInFloat, 0, 0, 0},
-         {kMaxUInt32RepresentableInFloat, 0, 0, 0}},
-        {wgpu::TextureFormat::R32Uint,
-         {kMaxUInt32RepresentableInFloat + 1, 0, 0, 0},
-         {kMaxUInt32RepresentableInFloat + 1, 0, 0, 0}},
-        {wgpu::TextureFormat::RG32Uint,
-         {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat, 0, 0},
-         {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat, 0, 0}},
-        {wgpu::TextureFormat::RG32Uint,
-         {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat + 1, 0, 0},
-         {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat + 1, 0, 0}},
-        {wgpu::TextureFormat::RGBA32Uint,
-         {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat + 1,
-          kMaxUInt32RepresentableInFloat - 1, kMaxUInt32RepresentableInFloat - 2},
-         {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat + 1,
-          kMaxUInt32RepresentableInFloat - 1, kMaxUInt32RepresentableInFloat - 2}},
-        {wgpu::TextureFormat::RGBA32Sint,
-         {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat - 1,
-          kMaxUInt32RepresentableInFloat - 2, kMaxUInt32RepresentableInFloat - 3},
-         {static_cast<int32_t>(kMaxUInt32RepresentableInFloat),
-          static_cast<int32_t>(kMaxUInt32RepresentableInFloat - 1),
-          static_cast<int32_t>(kMaxUInt32RepresentableInFloat - 2),
-          static_cast<int32_t>(kMaxUInt32RepresentableInFloat - 3)}},
-        {wgpu::TextureFormat::RGBA32Float,
-         {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat - 1,
-          kMaxUInt32RepresentableInFloat - 2, kMaxUInt32RepresentableInFloat - 3},
-         expectedDataForRGBA32Float},
-        {wgpu::TextureFormat::Undefined,
-         {kMaxUInt32RepresentableInFloat + 1, kMaxUInt32RepresentableInFloat + 1, 0, 0},
-         {0, 0, 0, 0}},
-    }};
-
-    std::array<wgpu::Texture, kMaxColorAttachments> textures;
-
-    wgpu::TextureDescriptor textureDescriptor = {};
-    textureDescriptor.size = {1, 1, 1};
-    textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
-
-    std::array<wgpu::RenderPassColorAttachment, kMaxColorAttachments> colorAttachmentsInfo;
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-        wgpu::TextureFormat format = std::get<0>(kTestCases[i]);
-        if (format == wgpu::TextureFormat::Undefined) {
-            textures[i] = nullptr;
-            colorAttachmentsInfo[i].view = nullptr;
-            continue;
+    struct AttachmentCase {
+        static AttachmentCase Int(wgpu::TextureFormat format,
+                                  wgpu::Color clearValue,
+                                  const std::array<int32_t, 4> expData) {
+            AttachmentCase attachmentCase;
+            static_assert(sizeof(int32_t) * expData.size() == sizeof(attachmentCase.mExpData));
+            attachmentCase.mFormat = format;
+            attachmentCase.mClearValue = clearValue;
+            memcpy(attachmentCase.mExpData, reinterpret_cast<const uint8_t*>(expData.data()),
+                   sizeof(attachmentCase.mExpData));
+            return attachmentCase;
+        }
+        static AttachmentCase Uint(wgpu::TextureFormat format,
+                                   wgpu::Color clearValue,
+                                   const std::array<uint32_t, 4> expData) {
+            AttachmentCase attachmentCase;
+            static_assert(sizeof(uint32_t) * expData.size() == sizeof(attachmentCase.mExpData));
+            attachmentCase.mFormat = format;
+            attachmentCase.mClearValue = clearValue;
+            memcpy(attachmentCase.mExpData, reinterpret_cast<const uint8_t*>(expData.data()),
+                   sizeof(attachmentCase.mExpData));
+            return attachmentCase;
         }
 
-        textureDescriptor.format = format;
-        textures[i] = device.CreateTexture(&textureDescriptor);
+        wgpu::TextureFormat mFormat;
+        wgpu::Color mClearValue;
+        uint8_t mExpData[16];
+    };
+    using TestCase = std::vector<AttachmentCase>;
+    // Test cases are split so that the attachments in each case do not exceed the default
+    // maxColorAttachmentBytesPerSample.
+    static std::vector<TestCase> kTestCases = {
+        // Full 8 attachment case (Signed 1 and 2 components).
+        {AttachmentCase::Int(wgpu::TextureFormat::R32Sint, {kMaxInt32RepresentableInFloat, 0, 0, 0},
+                             {kMaxInt32RepresentableInFloat, 0, 0, 0}),
+         AttachmentCase::Int(wgpu::TextureFormat::R32Sint,
+                             {kMaxInt32RepresentableInFloat + 1, 0, 0, 0},
+                             {kMaxInt32RepresentableInFloat + 1, 0, 0, 0}),
+         AttachmentCase::Int(wgpu::TextureFormat::R32Sint, {kMinInt32RepresentableInFloat, 0, 0, 0},
+                             {kMinInt32RepresentableInFloat, 0, 0, 0}),
+         AttachmentCase::Int(wgpu::TextureFormat::R32Sint,
+                             {kMinInt32RepresentableInFloat - 1, 0, 0, 0},
+                             {kMinInt32RepresentableInFloat - 1, 0, 0, 0}),
+         AttachmentCase::Int(
+             wgpu::TextureFormat::RG32Sint,
+             {kMaxInt32RepresentableInFloat, kMaxInt32RepresentableInFloat + 1, 0, 0},
+             {kMaxInt32RepresentableInFloat, kMaxInt32RepresentableInFloat + 1, 0, 0}),
+         AttachmentCase::Int(
+             wgpu::TextureFormat::RG32Sint,
+             {kMinInt32RepresentableInFloat, kMinInt32RepresentableInFloat - 1, 0, 0},
+             {kMinInt32RepresentableInFloat, kMinInt32RepresentableInFloat - 1, 0, 0})},
 
-        colorAttachmentsInfo[i].view = textures[i].CreateView();
-        colorAttachmentsInfo[i].loadOp = wgpu::LoadOp::Clear;
-        colorAttachmentsInfo[i].storeOp = wgpu::StoreOp::Store;
-        colorAttachmentsInfo[i].clearValue = std::get<1>(kTestCases[i]);
-    }
+        // Signed 4 components.
+        {AttachmentCase::Int(
+             wgpu::TextureFormat::RGBA32Sint,
+             {kMaxInt32RepresentableInFloat, kMinInt32RepresentableInFloat,
+              kMaxInt32RepresentableInFloat + 1, kMinInt32RepresentableInFloat - 1},
+             {kMaxInt32RepresentableInFloat, kMinInt32RepresentableInFloat,
+              kMaxInt32RepresentableInFloat + 1, kMinInt32RepresentableInFloat - 1}),
+         AttachmentCase::Int(
+             wgpu::TextureFormat::RGBA32Sint,
+             {kMaxInt32RepresentableInFloat, kMinInt32RepresentableInFloat,
+              kMaxInt32RepresentableInFloat - 1, kMinInt32RepresentableInFloat + 1},
+             {kMaxInt32RepresentableInFloat, kMinInt32RepresentableInFloat,
+              kMaxInt32RepresentableInFloat - 1, kMinInt32RepresentableInFloat + 1})},
 
-    wgpu::RenderPassDescriptor renderPassDescriptor = {};
-    renderPassDescriptor.colorAttachmentCount = kMaxColorAttachments;
-    renderPassDescriptor.colorAttachments = colorAttachmentsInfo.data();
-    wgpu::RenderPassEncoder renderPass;
-    if (HasToggleEnabled("apply_clear_big_integer_color_value_with_draw")) {
-        // When the toggle is enabled, an extra internal pipeline is created which will hit the same
-        // deprecation issue again, hence we need to check for 2 warnings instead of 1.
-        EXPECT_DEPRECATION_WARNINGS(renderPass = encoder.BeginRenderPass(&renderPassDescriptor), 2);
-    } else {
-        EXPECT_DEPRECATION_WARNING(renderPass = encoder.BeginRenderPass(&renderPassDescriptor));
-    }
-    renderPass.End();
+        // Unsigned 1 components.
+        {AttachmentCase::Uint(wgpu::TextureFormat::R32Uint,
+                              {kMaxUInt32RepresentableInFloat, 0, 0, 0},
+                              {kMaxUInt32RepresentableInFloat, 0, 0, 0}),
+         AttachmentCase::Uint(wgpu::TextureFormat::R32Uint,
+                              {kMaxUInt32RepresentableInFloat + 1, 0, 0, 0},
+                              {kMaxUInt32RepresentableInFloat + 1, 0, 0, 0})},
 
-    std::array<wgpu::Buffer, kMaxColorAttachments> outputBuffers;
-    for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-        wgpu::TextureFormat format = std::get<0>(kTestCases[i]);
-        if (format == wgpu::TextureFormat::Undefined) {
-            continue;
+        // Unsigned 2 components.
+        {AttachmentCase::Uint(
+             wgpu::TextureFormat::RG32Uint,
+             {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat, 0, 0},
+             {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat, 0, 0}),
+         AttachmentCase::Uint(
+             wgpu::TextureFormat::RG32Uint,
+             {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat + 1, 0, 0},
+             {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat + 1, 0, 0})},
+
+        // Unsigned 4 component expectations (with use of signed inputs).
+        {AttachmentCase::Uint(
+             wgpu::TextureFormat::RGBA32Uint,
+             {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat + 1,
+              kMaxUInt32RepresentableInFloat - 1, kMaxUInt32RepresentableInFloat - 2},
+             {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat + 1,
+              kMaxUInt32RepresentableInFloat - 1, kMaxUInt32RepresentableInFloat - 2}),
+         AttachmentCase::Uint(
+             wgpu::TextureFormat::RGBA32Sint,
+             {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat - 1,
+              kMaxUInt32RepresentableInFloat - 2, kMaxUInt32RepresentableInFloat - 3},
+             {static_cast<int32_t>(kMaxUInt32RepresentableInFloat),
+              static_cast<int32_t>(kMaxUInt32RepresentableInFloat - 1),
+              static_cast<int32_t>(kMaxUInt32RepresentableInFloat - 2),
+              static_cast<int32_t>(kMaxUInt32RepresentableInFloat - 3)})},
+
+        // Unsigned 4 component expectations from float.
+        {AttachmentCase::Uint(
+            wgpu::TextureFormat::RGBA32Float,
+            {kMaxUInt32RepresentableInFloat, kMaxUInt32RepresentableInFloat - 1,
+             kMaxUInt32RepresentableInFloat - 2, kMaxUInt32RepresentableInFloat - 3},
+            expectedDataForRGBA32Float)}};
+
+    for (const TestCase& testCase : kTestCases) {
+        std::vector<wgpu::Texture> textures;
+        std::vector<wgpu::RenderPassColorAttachment> colorAttachmentsInfo;
+        std::vector<wgpu::Buffer> outputBuffers;
+
+        // Initialize the default values for the textures.
+        wgpu::TextureDescriptor textureDescriptor = {};
+        textureDescriptor.size = {1, 1, 1};
+        textureDescriptor.usage =
+            wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        for (const AttachmentCase& attachmentCase : testCase) {
+            textureDescriptor.format = attachmentCase.mFormat;
+            textures.push_back(device.CreateTexture(&textureDescriptor));
+
+            wgpu::RenderPassColorAttachment colorAttachmentInfo = {};
+            colorAttachmentInfo.view = textures.back().CreateView();
+            colorAttachmentInfo.loadOp = wgpu::LoadOp::Clear;
+            colorAttachmentInfo.storeOp = wgpu::StoreOp::Store;
+            colorAttachmentInfo.clearValue = attachmentCase.mClearValue;
+            colorAttachmentsInfo.push_back(colorAttachmentInfo);
+
+            // Create the output buffer to compare values against.
+            wgpu::BufferDescriptor bufferDescriptor = {};
+            bufferDescriptor.size = sizeof(attachmentCase.mExpData);
+            bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+            outputBuffers.push_back(device.CreateBuffer(&bufferDescriptor));
         }
 
-        wgpu::BufferDescriptor bufferDescriptor = {};
-        bufferDescriptor.size = sizeof(int32_t) * 4;
-        bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-        outputBuffers[i] = device.CreateBuffer(&bufferDescriptor);
+        wgpu::RenderPassDescriptor renderPassDescriptor = {};
+        renderPassDescriptor.colorAttachmentCount = colorAttachmentsInfo.size();
+        renderPassDescriptor.colorAttachments = colorAttachmentsInfo.data();
+        wgpu::RenderPassEncoder renderPass;
+        renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.End();
 
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(textures[i], 0, {0, 0, 0});
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(outputBuffers[i], 0, kTextureBytesPerRowAlignment);
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &textureDescriptor.size);
-    }
+        for (uint32_t i = 0; i < testCase.size(); ++i) {
+            wgpu::ImageCopyTexture imageCopyTexture =
+                utils::CreateImageCopyTexture(textures[i], 0, {0, 0, 0});
+            wgpu::ImageCopyBuffer imageCopyBuffer =
+                utils::CreateImageCopyBuffer(outputBuffers[i], 0, kTextureBytesPerRowAlignment);
+            encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer,
+                                        &textureDescriptor.size);
+        }
 
-    wgpu::CommandBuffer commandBuffer = encoder.Finish();
-    queue.Submit(1, &commandBuffer);
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        queue.Submit(1, &commandBuffer);
 
-    for (uint32_t i = 0; i < kMaxColorAttachments - 1; ++i) {
-        const uint8_t* expected =
-            reinterpret_cast<const uint8_t*>(std::get<2>(kTestCases[i]).data());
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, outputBuffers[i], 0,
-                                  sizeof(std::get<2>(kTestCases[i])));
+        for (uint32_t i = 0; i < testCase.size(); ++i) {
+            EXPECT_BUFFER_U8_RANGE_EQ(testCase.at(i).mExpData, outputBuffers[i], 0,
+                                      sizeof(testCase.at(i).mExpData));
+        }
     }
 }
 
