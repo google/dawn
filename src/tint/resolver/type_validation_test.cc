@@ -893,24 +893,6 @@ TEST_F(ResolverTypeValidationTest, BuiltinAsType) {
     EXPECT_EQ(r()->error(), "error: cannot use builtin 'max' as type");
 }
 
-TEST_F(ResolverTypeValidationTest, F16TypeUsedWithExtension) {
-    // enable f16;
-    // var<private> v : f16;
-    Enable(ast::Extension::kF16);
-
-    GlobalVar("v", ty.f16(), ast::AddressSpace::kPrivate);
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
-TEST_F(ResolverTypeValidationTest, F16TypeUsedWithoutExtension) {
-    // var<private> v : f16;
-    GlobalVar("v", ty.f16(), ast::AddressSpace::kPrivate);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "error: f16 used without 'f16' extension enabled");
-}
-
 namespace GetCanonicalTests {
 struct Params {
     builder::ast_type_func_ptr create_ast_type;

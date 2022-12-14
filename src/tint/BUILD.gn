@@ -1185,6 +1185,7 @@ if (tint_build_unittests) {
       "resolver/dependency_graph_test.cc",
       "resolver/entry_point_validation_test.cc",
       "resolver/evaluation_stage_test.cc",
+      "resolver/f16_extension_test.cc",
       "resolver/function_validation_test.cc",
       "resolver/host_shareable_validation_test.cc",
       "resolver/increment_decrement_validation_test.cc",

@@ -444,6 +444,11 @@ class Validator {
     /// @returns true on success, false otherwise
     bool RequiredExtensionForBuiltinFunction(const sem::Call* call) const;
 
+    /// Validates that 'f16' extension is enabled for f16 usage at @p source
+    /// @param source the source of the f16 usage
+    /// @returns true on success, false otherwise
+    bool CheckF16Enabled(const Source& source) const;
+
     /// Validates there are no duplicate attributes
     /// @param attributes the list of attributes to validate
     /// @returns true on success, false otherwise.

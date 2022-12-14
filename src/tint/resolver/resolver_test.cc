@@ -2361,23 +2361,6 @@ TEST_F(ResolverTest, MaxExpressionDepth_Fail) {
                                         std::to_string(kMaxExpressionDepth)));
 }
 
-TEST_F(ResolverTest, Literal_F16WithoutExtension) {
-    // fn test() {_ = 1.23h;}
-    WrapInFunction(Ignore(Expr(f16(1.23f))));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("error: f16 literal used without 'f16' extension enabled"));
-}
-
-TEST_F(ResolverTest, Literal_F16WithExtension) {
-    // enable f16;
-    // fn test() {_ = 1.23h;}
-    Enable(ast::Extension::kF16);
-    WrapInFunction(Ignore(Expr(f16(1.23f))));
-
-    EXPECT_TRUE(r()->Resolve());
-}
-
 // Windows debug builds have significantly smaller stack than other builds, and these tests will
 // stack overflow.
 #if !defined(NDEBUG)

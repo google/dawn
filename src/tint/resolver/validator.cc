@@ -1625,6 +1625,15 @@ bool Validator::RequiredExtensionForBuiltinFunction(const sem::Call* call) const
     return true;
 }
 
+bool Validator::CheckF16Enabled(const Source& source) const {
+    // Validate if f16 type is allowed.
+    if (!enabled_extensions_.Contains(ast::Extension::kF16)) {
+        AddError("f16 type used without 'f16' extension enabled", source);
+        return false;
+    }
+    return true;
+}
+
 bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_statement) const {
     auto* decl = call->Declaration();
     auto* target = call->Target()->As<sem::Function>();

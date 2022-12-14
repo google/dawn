@@ -208,12 +208,7 @@ type::Type* Resolver::Type(const ast::Type* ty) {
         [&](const ast::I32*) { return builder_->create<type::I32>(); },
         [&](const ast::U32*) { return builder_->create<type::U32>(); },
         [&](const ast::F16* t) -> type::F16* {
-            // Validate if f16 type is allowed.
-            if (!enabled_extensions_.Contains(ast::Extension::kF16)) {
-                AddError("f16 used without 'f16' extension enabled", t->source);
-                return nullptr;
-            }
-            return builder_->create<type::F16>();
+            return validator_.CheckF16Enabled(t->source) ? builder_->create<type::F16>() : nullptr;
         },
         [&](const ast::F32*) { return builder_->create<type::F32>(); },
         [&](const ast::Vector* t) -> type::Vector* {
@@ -337,9 +332,7 @@ type::Type* Resolver::Type(const ast::Type* ty) {
                             AddError("cannot use builtin '" + name + "' as type", ty->source);
                             return nullptr;
                         }
-                        if (auto* t = BuiltinTypeAlias(tn->name)) {
-                            return t;
-                        }
+                        return ShortName(tn->name, tn->source);
                     }
                     TINT_UNREACHABLE(Resolver, diagnostics_)
                         << "Unhandled resolved type '"
@@ -2048,7 +2041,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             return nullptr;
         }
 
-        auto stage = args_stage;               // The evaluation stage of the call
+        auto stage = args_stage;                    // The evaluation stage of the call
         const constant::Constant* value = nullptr;  // The constant value for the call
         if (stage == sem::EvaluationStage::kConstant) {
             if (auto r = const_eval_.ArrayOrStructInit(ty, args)) {
@@ -2083,7 +2076,11 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             },
             [&](const type::I32*) { return ct_init_or_conv(InitConvIntrinsic::kI32, nullptr); },
             [&](const type::U32*) { return ct_init_or_conv(InitConvIntrinsic::kU32, nullptr); },
-            [&](const type::F16*) { return ct_init_or_conv(InitConvIntrinsic::kF16, nullptr); },
+            [&](const type::F16*) {
+                return validator_.CheckF16Enabled(expr->source)
+                           ? ct_init_or_conv(InitConvIntrinsic::kF16, nullptr)
+                           : nullptr;
+            },
             [&](const type::F32*) { return ct_init_or_conv(InitConvIntrinsic::kF32, nullptr); },
             [&](const type::Bool*) { return ct_init_or_conv(InitConvIntrinsic::kBool, nullptr); },
             [&](const type::Array* arr) -> sem::Call* {
@@ -2285,17 +2282,13 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             },
             [&](Default) -> sem::Call* {
                 auto name = builder_->Symbols().NameFor(ident->symbol);
-                if (auto* alias = BuiltinTypeAlias(ident->symbol)) {
-                    return ty_init_or_conv(alias);
-                }
                 if (auto builtin_type = sem::ParseBuiltinType(name);
                     builtin_type != sem::BuiltinType::kNone) {
                     return BuiltinCall(expr, builtin_type, args);
                 }
-                TINT_ICE(Resolver, diagnostics_)
-                    << expr->source << " unhandled CallExpression target:\n"
-                    << "resolved: " << (resolved ? resolved->TypeInfo().name : "<null>") << "\n"
-                    << "name: " << builder_->Symbols().NameFor(ident->symbol);
+                if (auto* alias = ShortName(ident->symbol, ident->source)) {
+                    return ty_init_or_conv(alias);
+                }
                 return nullptr;
             });
     }
@@ -2391,7 +2384,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     return call;
 }
 
-type::Type* Resolver::BuiltinTypeAlias(Symbol sym) const {
+type::Type* Resolver::ShortName(Symbol sym, const Source& source) const {
     auto name = builder_->Symbols().NameFor(sym);
     auto& b = *builder_;
     switch (type::ParseShortName(name)) {
@@ -2402,11 +2395,17 @@ type::Type* Resolver::BuiltinTypeAlias(Symbol sym) const {
         case type::ShortName::kVec4F:
             return b.create<type::Vector>(b.create<type::F32>(), 4u);
         case type::ShortName::kVec2H:
-            return b.create<type::Vector>(b.create<type::F16>(), 2u);
+            return validator_.CheckF16Enabled(source)
+                       ? b.create<type::Vector>(b.create<type::F16>(), 2u)
+                       : nullptr;
         case type::ShortName::kVec3H:
-            return b.create<type::Vector>(b.create<type::F16>(), 3u);
+            return validator_.CheckF16Enabled(source)
+                       ? b.create<type::Vector>(b.create<type::F16>(), 3u)
+                       : nullptr;
         case type::ShortName::kVec4H:
-            return b.create<type::Vector>(b.create<type::F16>(), 4u);
+            return validator_.CheckF16Enabled(source)
+                       ? b.create<type::Vector>(b.create<type::F16>(), 4u)
+                       : nullptr;
         case type::ShortName::kVec2I:
             return b.create<type::Vector>(b.create<type::I32>(), 2u);
         case type::ShortName::kVec3I:
@@ -2422,6 +2421,8 @@ type::Type* Resolver::BuiltinTypeAlias(Symbol sym) const {
         case type::ShortName::kUndefined:
             break;
     }
+
+    TINT_ICE(Resolver, diagnostics_) << source << " unhandled type short name '" << name << "'";
     return nullptr;
 }
 
@@ -2534,6 +2535,8 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
                 case ast::IntLiteralExpression::Suffix::kU:
                     return builder_->create<type::U32>();
             }
+            TINT_UNREACHABLE(Resolver, builder_->Diagnostics())
+                << "Unhandled integer literal suffix: " << i->suffix;
             return nullptr;
         },
         [&](const ast::FloatLiteralExpression* f) -> type::Type* {
@@ -2543,21 +2546,22 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
                 case ast::FloatLiteralExpression::Suffix::kF:
                     return builder_->create<type::F32>();
                 case ast::FloatLiteralExpression::Suffix::kH:
-                    return builder_->create<type::F16>();
+                    return validator_.CheckF16Enabled(literal->source)
+                               ? builder_->create<type::F16>()
+                               : nullptr;
             }
+            TINT_UNREACHABLE(Resolver, builder_->Diagnostics())
+                << "Unhandled float literal suffix: " << f->suffix;
             return nullptr;
         },
         [&](const ast::BoolLiteralExpression*) { return builder_->create<type::Bool>(); },
-        [&](Default) { return nullptr; });
+        [&](Default) {
+            TINT_UNREACHABLE(Resolver, builder_->Diagnostics())
+                << "Unhandled literal type: " << literal->TypeInfo().name;
+            return nullptr;
+        });
 
     if (ty == nullptr) {
-        TINT_UNREACHABLE(Resolver, builder_->Diagnostics())
-            << "Unhandled literal type: " << literal->TypeInfo().name;
-        return nullptr;
-    }
-
-    if ((ty->Is<type::F16>()) && (!enabled_extensions_.Contains(tint::ast::Extension::kF16))) {
-        AddError("f16 literal used without 'f16' extension enabled", literal->source);
         return nullptr;
     }
 
@@ -3161,11 +3165,11 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     sem_members.Reserve(str->members.Length());
 
     // Calculate the effective size and alignment of each field, and the overall size of the
-    // structure. For size, use the size attribute if provided, otherwise use the default size for
-    // the type. For alignment, use the alignment attribute if provided, otherwise use the default
-    // alignment for the member type. Diagnostic errors are raised if a basic rule is violated.
-    // Validation of storage-class rules requires analyzing the actual variable usage of the
-    // structure, and so is performed as part of the variable validation.
+    // structure. For size, use the size attribute if provided, otherwise use the default size
+    // for the type. For alignment, use the alignment attribute if provided, otherwise use the
+    // default alignment for the member type. Diagnostic errors are raised if a basic rule is
+    // violated. Validation of storage-class rules requires analyzing the actual variable usage
+    // of the structure, and so is performed as part of the variable validation.
     uint64_t struct_size = 0;
     uint64_t struct_align = 1;
     utils::Hashmap<Symbol, const ast::StructMember*, 8> member_map;
