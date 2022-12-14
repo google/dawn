@@ -57,7 +57,7 @@ class Composite : public Castable<Composite, constant::Constant> {
     /// The composite type
     type::Type const* const type;
     /// The composite elements
-    const utils::Vector<const constant::Constant*, 8> elements;
+    const utils::Vector<const constant::Constant*, 4> elements;
     /// True if all elements are zero
     const bool all_zero;
     /// True if any element is zero
