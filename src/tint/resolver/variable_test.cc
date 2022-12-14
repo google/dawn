@@ -1011,7 +1011,7 @@ TEST_F(ResolverVariableTest, LocalConst_PropagateConstValue) {
 
     ASSERT_TRUE(TypeOf(c)->Is<type::I32>());
 
-    EXPECT_EQ(Sem().Get(c)->ConstantValue()->As<i32>(), 42_i);
+    EXPECT_EQ(Sem().Get(c)->ConstantValue()->ValueAs<i32>(), 42_i);
 }
 
 TEST_F(ResolverVariableTest, LocalConst_ConstEval) {
@@ -1023,7 +1023,7 @@ TEST_F(ResolverVariableTest, LocalConst_ConstEval) {
 
     ASSERT_TRUE(TypeOf(c)->Is<type::I32>());
 
-    EXPECT_EQ(Sem().Get(c)->ConstantValue()->As<i32>(), 3_i);
+    EXPECT_EQ(Sem().Get(c)->ConstantValue()->ValueAs<i32>(), 3_i);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1178,7 +1178,7 @@ TEST_F(ResolverVariableTest, GlobalConst_PropagateConstValue) {
 
     ASSERT_TRUE(TypeOf(c)->Is<type::I32>());
 
-    EXPECT_EQ(Sem().Get(c)->ConstantValue()->As<i32>(), 42_i);
+    EXPECT_EQ(Sem().Get(c)->ConstantValue()->ValueAs<i32>(), 42_i);
 }
 
 TEST_F(ResolverVariableTest, GlobalConst_ConstEval) {
@@ -1188,7 +1188,7 @@ TEST_F(ResolverVariableTest, GlobalConst_ConstEval) {
 
     ASSERT_TRUE(TypeOf(c)->Is<type::I32>());
 
-    EXPECT_EQ(Sem().Get(c)->ConstantValue()->As<i32>(), 3_i);
+    EXPECT_EQ(Sem().Get(c)->ConstantValue()->ValueAs<i32>(), 3_i);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -545,7 +545,7 @@ struct Std140::State {
                 [&](const sem::IndexAccessorExpression* a) {
                     // Array, matrix or vector index.
                     if (auto* val = a->Index()->ConstantValue()) {
-                        access.indices.Push(val->As<u32>());
+                        access.indices.Push(val->ValueAs<u32>());
                     } else {
                         access.indices.Push(DynamicIndex{access.dynamic_indices.Length()});
                         access.dynamic_indices.Push(a->Index());

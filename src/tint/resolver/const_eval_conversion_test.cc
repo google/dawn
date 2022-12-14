@@ -242,17 +242,17 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_f32_to_i32) {
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AInt>(), 1);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AInt>(), 1);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AInt>(), 2);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AInt>(), 2);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AInt>(), 3);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 3);
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f32) {
@@ -275,17 +275,17 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f32) {
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AFloat>(), 10.f);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AFloat>(), 10.f);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AFloat>(), 20.f);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AFloat>(), 20.f);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AFloat>(), 30.f);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 30.f);
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_f16_to_i32) {
@@ -310,17 +310,17 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_f16_to_i32) {
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AInt>(), 1_i);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AInt>(), 1_i);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AInt>(), 2_i);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AInt>(), 2_i);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AInt>(), 3_i);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 3_i);
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f16) {
@@ -345,17 +345,17 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f16) {
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AFloat>(), 10.f);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AFloat>(), 10.f);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AFloat>(), 20.f);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AFloat>(), 20.f);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AFloat>(), 30.f);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 30.f);
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_i32) {
@@ -378,17 +378,17 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_i32) {
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AInt>(), i32::Highest());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AInt>(), i32::Highest());
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AInt>(), i32::Lowest());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AInt>(), i32::Lowest());
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AInt>(), i32::Highest());
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), i32::Highest());
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
@@ -411,17 +411,17 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AInt>(), u32::Highest());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AInt>(), u32::Highest());
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AInt>(), u32::Lowest());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AInt>(), u32::Lowest());
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AInt>(), u32::Highest());
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), u32::Highest());
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
@@ -456,20 +456,20 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Small_f32_to_f16) {
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AFloat>(), 0.0);
-    EXPECT_FALSE(std::signbit(sem->ConstantValue()->Index(0)->As<AFloat>().value));
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AFloat>(), 0.0);
+    EXPECT_FALSE(std::signbit(sem->ConstantValue()->Index(0)->ValueAs<AFloat>().value));
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AFloat>(), -0.0);
-    EXPECT_TRUE(std::signbit(sem->ConstantValue()->Index(1)->As<AFloat>().value));
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AFloat>(), -0.0);
+    EXPECT_TRUE(std::signbit(sem->ConstantValue()->Index(1)->ValueAs<AFloat>().value));
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AFloat>(), 0.0);
-    EXPECT_FALSE(std::signbit(sem->ConstantValue()->Index(2)->As<AFloat>().value));
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 0.0);
+    EXPECT_FALSE(std::signbit(sem->ConstantValue()->Index(2)->ValueAs<AFloat>().value));
 }
 
 }  // namespace

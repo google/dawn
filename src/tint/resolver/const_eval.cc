@@ -64,8 +64,8 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_iu32(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const type::I32*) { return f(cs->template As<i32>()...); },
-        [&](const type::U32*) { return f(cs->template As<u32>()...); });
+        [&](const type::I32*) { return f(cs->template ValueAs<i32>()...); },
+        [&](const type::U32*) { return f(cs->template ValueAs<u32>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
@@ -74,9 +74,9 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_ia_iu32(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
-        [&](const type::I32*) { return f(cs->template As<i32>()...); },
-        [&](const type::U32*) { return f(cs->template As<u32>()...); });
+        [&](const type::AbstractInt*) { return f(cs->template ValueAs<AInt>()...); },
+        [&](const type::I32*) { return f(cs->template ValueAs<i32>()...); },
+        [&](const type::U32*) { return f(cs->template ValueAs<u32>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
@@ -85,10 +85,10 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_ia_iu32_bool(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
-        [&](const type::I32*) { return f(cs->template As<i32>()...); },
-        [&](const type::U32*) { return f(cs->template As<u32>()...); },
-        [&](const type::Bool*) { return f(cs->template As<bool>()...); });
+        [&](const type::AbstractInt*) { return f(cs->template ValueAs<AInt>()...); },
+        [&](const type::I32*) { return f(cs->template ValueAs<i32>()...); },
+        [&](const type::U32*) { return f(cs->template ValueAs<u32>()...); },
+        [&](const type::Bool*) { return f(cs->template ValueAs<bool>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
@@ -97,11 +97,11 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_fia_fi32_f16(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
-        [&](const type::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
-        [&](const type::F32*) { return f(cs->template As<f32>()...); },
-        [&](const type::I32*) { return f(cs->template As<i32>()...); },
-        [&](const type::F16*) { return f(cs->template As<f16>()...); });
+        [&](const type::AbstractInt*) { return f(cs->template ValueAs<AInt>()...); },
+        [&](const type::AbstractFloat*) { return f(cs->template ValueAs<AFloat>()...); },
+        [&](const type::F32*) { return f(cs->template ValueAs<f32>()...); },
+        [&](const type::I32*) { return f(cs->template ValueAs<i32>()...); },
+        [&](const type::F16*) { return f(cs->template ValueAs<f16>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
@@ -110,12 +110,12 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_fia_fiu32_f16(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
-        [&](const type::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
-        [&](const type::F32*) { return f(cs->template As<f32>()...); },
-        [&](const type::I32*) { return f(cs->template As<i32>()...); },
-        [&](const type::U32*) { return f(cs->template As<u32>()...); },
-        [&](const type::F16*) { return f(cs->template As<f16>()...); });
+        [&](const type::AbstractInt*) { return f(cs->template ValueAs<AInt>()...); },
+        [&](const type::AbstractFloat*) { return f(cs->template ValueAs<AFloat>()...); },
+        [&](const type::F32*) { return f(cs->template ValueAs<f32>()...); },
+        [&](const type::I32*) { return f(cs->template ValueAs<i32>()...); },
+        [&](const type::U32*) { return f(cs->template ValueAs<u32>()...); },
+        [&](const type::F16*) { return f(cs->template ValueAs<f16>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
@@ -124,13 +124,13 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_fia_fiu32_f16_bool(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const type::AbstractInt*) { return f(cs->template As<AInt>()...); },
-        [&](const type::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
-        [&](const type::F32*) { return f(cs->template As<f32>()...); },
-        [&](const type::I32*) { return f(cs->template As<i32>()...); },
-        [&](const type::U32*) { return f(cs->template As<u32>()...); },
-        [&](const type::F16*) { return f(cs->template As<f16>()...); },
-        [&](const type::Bool*) { return f(cs->template As<bool>()...); });
+        [&](const type::AbstractInt*) { return f(cs->template ValueAs<AInt>()...); },
+        [&](const type::AbstractFloat*) { return f(cs->template ValueAs<AFloat>()...); },
+        [&](const type::F32*) { return f(cs->template ValueAs<f32>()...); },
+        [&](const type::I32*) { return f(cs->template ValueAs<i32>()...); },
+        [&](const type::U32*) { return f(cs->template ValueAs<u32>()...); },
+        [&](const type::F16*) { return f(cs->template ValueAs<f16>()...); },
+        [&](const type::Bool*) { return f(cs->template ValueAs<bool>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
@@ -139,16 +139,16 @@ template <typename F, typename... CONSTANTS>
 auto Dispatch_fa_f32_f16(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
-        [&](const type::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
-        [&](const type::F32*) { return f(cs->template As<f32>()...); },
-        [&](const type::F16*) { return f(cs->template As<f16>()...); });
+        [&](const type::AbstractFloat*) { return f(cs->template ValueAs<AFloat>()...); },
+        [&](const type::F32*) { return f(cs->template ValueAs<f32>()...); },
+        [&](const type::F16*) { return f(cs->template ValueAs<f16>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
 /// Calls `f` with all constants cast to the type of the first `cs` argument.
 template <typename F, typename... CONSTANTS>
 auto Dispatch_bool(F&& f, CONSTANTS&&... cs) {
-    return f(cs->template As<bool>()...);
+    return f(cs->template ValueAs<bool>()...);
 }
 
 /// ZeroTypeDispatch is a helper for calling the function `f`, passing a single zero-value argument
@@ -1373,7 +1373,7 @@ ConstEval::Result ConstEval::Index(const sem::Expression* obj_expr,
     uint32_t el_count = 0;
     type::Type::ElementOf(obj_expr->Type()->UnwrapRef(), &el_count);
 
-    AInt idx = idx_val->As<AInt>();
+    AInt idx = idx_val->ValueAs<AInt>();
     if (idx < 0 || (el_count > 0 && idx >= el_count)) {
         std::string range;
         if (el_count > 0) {
@@ -1761,7 +1761,7 @@ ConstEval::Result ConstEval::OpLogicalAnd(const type::Type* ty,
                                           const Source& source) {
     // Note: Due to short-circuiting, this function is only called if lhs is true, so we could
     // technically only return the value of the rhs.
-    return CreateScalar(builder, source, ty, args[0]->As<bool>() && args[1]->As<bool>());
+    return CreateScalar(builder, source, ty, args[0]->ValueAs<bool>() && args[1]->ValueAs<bool>());
 }
 
 ConstEval::Result ConstEval::OpLogicalOr(const type::Type* ty,
@@ -1769,7 +1769,7 @@ ConstEval::Result ConstEval::OpLogicalOr(const type::Type* ty,
                                          const Source& source) {
     // Note: Due to short-circuiting, this function is only called if lhs is false, so we could
     // technically only return the value of the rhs.
-    return CreateScalar(builder, source, ty, args[1]->As<bool>());
+    return CreateScalar(builder, source, ty, args[1]->ValueAs<bool>());
 }
 
 ConstEval::Result ConstEval::OpAnd(const type::Type* ty,
@@ -2408,8 +2408,8 @@ ConstEval::Result ConstEval::extractBits(const type::Type* ty,
             using NumberUT = Number<UT>;
 
             // Read args that are always scalar
-            NumberUT in_offset = args[1]->As<NumberUT>();
-            NumberUT in_count = args[2]->As<NumberUT>();
+            NumberUT in_offset = args[1]->ValueAs<NumberUT>();
+            NumberUT in_count = args[2]->ValueAs<NumberUT>();
 
             // Cast all to unsigned
             UT e = static_cast<UT>(in_e);
@@ -2606,7 +2606,7 @@ ConstEval::Result ConstEval::frexp(const type::Type* ty,
 
     auto scalar = [&](const constant::Constant* s) {
         int exp = 0;
-        double fract = std::frexp(s->As<AFloat>(), &exp);
+        double fract = std::frexp(s->ValueAs<AFloat>(), &exp);
         return Switch(
             s->Type(),
             [&](const type::F32*) {
@@ -2678,8 +2678,8 @@ ConstEval::Result ConstEval::insertBits(const type::Type* ty,
             using NumberUT = Number<UT>;
 
             // Read args that are always scalar
-            NumberUT in_offset = args[2]->As<NumberUT>();
-            NumberUT in_count = args[3]->As<NumberUT>();
+            NumberUT in_offset = args[2]->ValueAs<NumberUT>();
+            NumberUT in_count = args[3]->ValueAs<NumberUT>();
 
             // Cast all to unsigned
             UT e = static_cast<UT>(in_e);
@@ -2831,9 +2831,9 @@ ConstEval::Result ConstEval::mix(const type::Type* ty,
             NumberT e3;
             auto* c2 = args[2];
             if (c2->Type()->Is<type::Vector>()) {
-                e3 = c2->Index(index)->As<NumberT>();
+                e3 = c2->Index(index)->ValueAs<NumberT>();
             } else {
-                e3 = c2->As<NumberT>();
+                e3 = c2->ValueAs<NumberT>();
             }
             // Implement as `e1 * (1 - e3) + e2 * e3)` instead of as `e1 + e3 * (e2 - e1)` to avoid
             // float precision loss when e1 and e2 significantly differ in magnitude.
@@ -2929,12 +2929,12 @@ ConstEval::Result ConstEval::pack2x16float(const type::Type* ty,
     };
 
     auto* e = args[0];
-    auto e0 = convert(e->Index(0)->As<f32>());
+    auto e0 = convert(e->Index(0)->ValueAs<f32>());
     if (!e0) {
         return utils::Failure;
     }
 
-    auto e1 = convert(e->Index(1)->As<f32>());
+    auto e1 = convert(e->Index(1)->ValueAs<f32>());
     if (!e1) {
         return utils::Failure;
     }
@@ -2953,8 +2953,8 @@ ConstEval::Result ConstEval::pack2x16snorm(const type::Type* ty,
     };
 
     auto* e = args[0];
-    auto e0 = calc(e->Index(0)->As<f32>());
-    auto e1 = calc(e->Index(1)->As<f32>());
+    auto e0 = calc(e->Index(0)->ValueAs<f32>());
+    auto e1 = calc(e->Index(1)->ValueAs<f32>());
 
     u32 ret = u32((e0 & 0x0000'ffff) | (e1 << 16));
     return CreateScalar(builder, source, ty, ret);
@@ -2969,8 +2969,8 @@ ConstEval::Result ConstEval::pack2x16unorm(const type::Type* ty,
     };
 
     auto* e = args[0];
-    auto e0 = calc(e->Index(0)->As<f32>());
-    auto e1 = calc(e->Index(1)->As<f32>());
+    auto e0 = calc(e->Index(0)->ValueAs<f32>());
+    auto e1 = calc(e->Index(1)->ValueAs<f32>());
 
     u32 ret = u32((e0 & 0x0000'ffff) | (e1 << 16));
     return CreateScalar(builder, source, ty, ret);
@@ -2986,10 +2986,10 @@ ConstEval::Result ConstEval::pack4x8snorm(const type::Type* ty,
     };
 
     auto* e = args[0];
-    auto e0 = calc(e->Index(0)->As<f32>());
-    auto e1 = calc(e->Index(1)->As<f32>());
-    auto e2 = calc(e->Index(2)->As<f32>());
-    auto e3 = calc(e->Index(3)->As<f32>());
+    auto e0 = calc(e->Index(0)->ValueAs<f32>());
+    auto e1 = calc(e->Index(1)->ValueAs<f32>());
+    auto e2 = calc(e->Index(2)->ValueAs<f32>());
+    auto e3 = calc(e->Index(3)->ValueAs<f32>());
 
     uint32_t mask = 0x0000'00ff;
     u32 ret = u32((e0 & mask) | ((e1 & mask) << 8) | ((e2 & mask) << 16) | ((e3 & mask) << 24));
@@ -3005,10 +3005,10 @@ ConstEval::Result ConstEval::pack4x8unorm(const type::Type* ty,
     };
 
     auto* e = args[0];
-    auto e0 = calc(e->Index(0)->As<f32>());
-    auto e1 = calc(e->Index(1)->As<f32>());
-    auto e2 = calc(e->Index(2)->As<f32>());
-    auto e3 = calc(e->Index(3)->As<f32>());
+    auto e0 = calc(e->Index(0)->ValueAs<f32>());
+    auto e1 = calc(e->Index(1)->ValueAs<f32>());
+    auto e2 = calc(e->Index(2)->ValueAs<f32>());
+    auto e3 = calc(e->Index(3)->ValueAs<f32>());
 
     uint32_t mask = 0x0000'00ff;
     u32 ret = u32((e0 & mask) | ((e1 & mask) << 8) | ((e2 & mask) << 16) | ((e3 & mask) << 24));
@@ -3173,7 +3173,7 @@ ConstEval::Result ConstEval::refract(const type::Type* ty,
         }
 
         // If k < 0.0, returns the refraction vector 0.0
-        if (k.Get()->As<AFloat>() < 0) {
+        if (k.Get()->ValueAs<AFloat>() < 0) {
             return ZeroValue(builder, ty);
         }
 
@@ -3279,7 +3279,7 @@ ConstEval::Result ConstEval::saturate(const type::Type* ty,
 ConstEval::Result ConstEval::select_bool(const type::Type* ty,
                                          utils::VectorRef<const constant::Constant*> args,
                                          const Source& source) {
-    auto cond = args[2]->As<bool>();
+    auto cond = args[2]->ValueAs<bool>();
     auto transform = [&](const constant::Constant* c0, const constant::Constant* c1) {
         auto create = [&](auto f, auto t) -> ConstEval::Result {
             return CreateScalar(builder, source, type::Type::DeepestElementOf(ty), cond ? t : f);
@@ -3296,7 +3296,7 @@ ConstEval::Result ConstEval::select_boolvec(const type::Type* ty,
     auto transform = [&](const constant::Constant* c0, const constant::Constant* c1, size_t index) {
         auto create = [&](auto f, auto t) -> ConstEval::Result {
             // Get corresponding bool value at the current vector value index
-            auto cond = args[2]->Index(index)->As<bool>();
+            auto cond = args[2]->Index(index)->ValueAs<bool>();
             return CreateScalar(builder, source, type::Type::DeepestElementOf(ty), cond ? t : f);
         };
         return Dispatch_fia_fiu32_f16_bool(create, c0, c1);
@@ -3490,7 +3490,7 @@ ConstEval::Result ConstEval::unpack2x16float(const type::Type* ty,
                                              utils::VectorRef<const constant::Constant*> args,
                                              const Source& source) {
     auto* inner_ty = type::Type::DeepestElementOf(ty);
-    auto e = args[0]->As<u32>().value;
+    auto e = args[0]->ValueAs<u32>().value;
 
     utils::Vector<const constant::Constant*, 2> els;
     els.Reserve(2);
@@ -3514,7 +3514,7 @@ ConstEval::Result ConstEval::unpack2x16snorm(const type::Type* ty,
                                              utils::VectorRef<const constant::Constant*> args,
                                              const Source& source) {
     auto* inner_ty = type::Type::DeepestElementOf(ty);
-    auto e = args[0]->As<u32>().value;
+    auto e = args[0]->ValueAs<u32>().value;
 
     utils::Vector<const constant::Constant*, 2> els;
     els.Reserve(2);
@@ -3534,7 +3534,7 @@ ConstEval::Result ConstEval::unpack2x16unorm(const type::Type* ty,
                                              utils::VectorRef<const constant::Constant*> args,
                                              const Source& source) {
     auto* inner_ty = type::Type::DeepestElementOf(ty);
-    auto e = args[0]->As<u32>().value;
+    auto e = args[0]->ValueAs<u32>().value;
 
     utils::Vector<const constant::Constant*, 2> els;
     els.Reserve(2);
@@ -3553,7 +3553,7 @@ ConstEval::Result ConstEval::unpack4x8snorm(const type::Type* ty,
                                             utils::VectorRef<const constant::Constant*> args,
                                             const Source& source) {
     auto* inner_ty = type::Type::DeepestElementOf(ty);
-    auto e = args[0]->As<u32>().value;
+    auto e = args[0]->ValueAs<u32>().value;
 
     utils::Vector<const constant::Constant*, 4> els;
     els.Reserve(4);
@@ -3573,7 +3573,7 @@ ConstEval::Result ConstEval::unpack4x8unorm(const type::Type* ty,
                                             utils::VectorRef<const constant::Constant*> args,
                                             const Source& source) {
     auto* inner_ty = type::Type::DeepestElementOf(ty);
-    auto e = args[0]->As<u32>().value;
+    auto e = args[0]->ValueAs<u32>().value;
 
     utils::Vector<const constant::Constant*, 4> els;
     els.Reserve(4);
@@ -3592,7 +3592,7 @@ ConstEval::Result ConstEval::quantizeToF16(const type::Type* ty,
                                            utils::VectorRef<const constant::Constant*> args,
                                            const Source& source) {
     auto transform = [&](const constant::Constant* c) -> ConstEval::Result {
-        auto value = c->As<f32>();
+        auto value = c->ValueAs<f32>();
         auto conv = CheckedConvert<f32>(f16(value));
         if (!conv) {
             AddError(OverflowErrorMessage(value, "f16"), source);

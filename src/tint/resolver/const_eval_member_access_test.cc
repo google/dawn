@@ -56,9 +56,9 @@ TEST_F(ResolverConstEvalTest, MemberAccess) {
     EXPECT_FALSE(o1->ConstantValue()->AnyZero());
     EXPECT_FALSE(o1->ConstantValue()->AllZero());
     EXPECT_TRUE(o1->ConstantValue()->Type()->Is<sem::Struct>());
-    EXPECT_EQ(o1->ConstantValue()->Index(0)->As<i32>(), 1_i);
-    EXPECT_EQ(o1->ConstantValue()->Index(1)->As<u32>(), 2_u);
-    EXPECT_EQ(o1->ConstantValue()->Index(2)->As<f32>(), 3_f);
+    EXPECT_EQ(o1->ConstantValue()->Index(0)->ValueAs<i32>(), 1_i);
+    EXPECT_EQ(o1->ConstantValue()->Index(1)->ValueAs<u32>(), 2_u);
+    EXPECT_EQ(o1->ConstantValue()->Index(2)->ValueAs<f32>(), 3_f);
 
     auto* i2 = Sem().Get(i2_expr);
     ASSERT_NE(i2->ConstantValue(), nullptr);
@@ -66,7 +66,7 @@ TEST_F(ResolverConstEvalTest, MemberAccess) {
     EXPECT_FALSE(i2->ConstantValue()->AnyZero());
     EXPECT_FALSE(i2->ConstantValue()->AllZero());
     EXPECT_TRUE(i2->ConstantValue()->Type()->Is<type::U32>());
-    EXPECT_EQ(i2->ConstantValue()->As<u32>(), 2_u);
+    EXPECT_EQ(i2->ConstantValue()->ValueAs<u32>(), 2_u);
 }
 
 TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {

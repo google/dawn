@@ -62,7 +62,7 @@ class Constant : public Castable<Constant, Node> {
 
     /// @returns the value of the constant as the given scalar or abstract value.
     template <typename T>
-    T As() const {
+    T ValueAs() const {
         return std::visit(
             [](auto v) {
                 if constexpr (std::is_same_v<decltype(v), std::monostate>) {

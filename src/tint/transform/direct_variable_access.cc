@@ -559,7 +559,7 @@ struct DirectVariableAccess::State {
     const ast::Expression* BuildDynamicIndex(const sem::Expression* idx, bool cast_to_u32) {
         if (auto* val = idx->ConstantValue()) {
             // Expression evaluated to a constant value. Just emit that constant.
-            return b.Expr(val->As<AInt>());
+            return b.Expr(val->ValueAs<AInt>());
         }
 
         // Expression is not a constant, clone the expression.

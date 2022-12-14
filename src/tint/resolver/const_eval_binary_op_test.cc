@@ -903,7 +903,7 @@ TEST_F(ResolverConstEvalTest, NotAndOrOfVecs) {
 
     ForEachElemPair(value, expected_value,
                     [&](const constant::Constant* a, const constant::Constant* b) {
-                        EXPECT_EQ(a->As<bool>(), b->As<bool>());
+                        EXPECT_EQ(a->ValueAs<bool>(), b->ValueAs<bool>());
                         return HasFailure() ? Action::kStop : Action::kContinue;
                     });
 }
@@ -1377,7 +1377,7 @@ static void ValidateAnd(const sem::Info& sem, const ast::BinaryExpression* binar
 
     auto* lhs_sem = sem.Get(lhs);
     ASSERT_TRUE(lhs_sem->ConstantValue());
-    EXPECT_EQ(lhs_sem->ConstantValue()->As<bool>(), false);
+    EXPECT_EQ(lhs_sem->ConstantValue()->ValueAs<bool>(), false);
     EXPECT_EQ(lhs_sem->Stage(), sem::EvaluationStage::kConstant);
 
     auto* rhs_sem = sem.Get(rhs);
@@ -1386,7 +1386,7 @@ static void ValidateAnd(const sem::Info& sem, const ast::BinaryExpression* binar
 
     auto* binary_sem = sem.Get(binary);
     ASSERT_TRUE(binary_sem->ConstantValue());
-    EXPECT_EQ(binary_sem->ConstantValue()->As<bool>(), false);
+    EXPECT_EQ(binary_sem->ConstantValue()->ValueAs<bool>(), false);
     EXPECT_EQ(binary_sem->Stage(), sem::EvaluationStage::kConstant);
 }
 
@@ -1397,7 +1397,7 @@ static void ValidateOr(const sem::Info& sem, const ast::BinaryExpression* binary
 
     auto* lhs_sem = sem.Get(lhs);
     ASSERT_TRUE(lhs_sem->ConstantValue());
-    EXPECT_EQ(lhs_sem->ConstantValue()->As<bool>(), true);
+    EXPECT_EQ(lhs_sem->ConstantValue()->ValueAs<bool>(), true);
     EXPECT_EQ(lhs_sem->Stage(), sem::EvaluationStage::kConstant);
 
     auto* rhs_sem = sem.Get(rhs);
@@ -1406,7 +1406,7 @@ static void ValidateOr(const sem::Info& sem, const ast::BinaryExpression* binary
 
     auto* binary_sem = sem.Get(binary);
     ASSERT_TRUE(binary_sem->ConstantValue());
-    EXPECT_EQ(binary_sem->ConstantValue()->As<bool>(), true);
+    EXPECT_EQ(binary_sem->ConstantValue()->ValueAs<bool>(), true);
     EXPECT_EQ(binary_sem->Stage(), sem::EvaluationStage::kConstant);
 }
 

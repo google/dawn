@@ -314,10 +314,10 @@ std::map<OverrideId, Scalar> Inspector::GetOverrideDefaultValues() {
             if (auto* value = global->Initializer()->ConstantValue()) {
                 result[override_id] = Switch(
                     value->Type(),  //
-                    [&](const type::I32*) { return Scalar(value->As<i32>()); },
-                    [&](const type::U32*) { return Scalar(value->As<u32>()); },
-                    [&](const type::F32*) { return Scalar(value->As<f32>()); },
-                    [&](const type::Bool*) { return Scalar(value->As<bool>()); });
+                    [&](const type::I32*) { return Scalar(value->ValueAs<i32>()); },
+                    [&](const type::U32*) { return Scalar(value->ValueAs<u32>()); },
+                    [&](const type::F32*) { return Scalar(value->ValueAs<f32>()); },
+                    [&](const type::Bool*) { return Scalar(value->ValueAs<bool>()); });
                 continue;
             }
         }

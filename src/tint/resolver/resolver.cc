@@ -480,7 +480,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         }
 
         auto const_value = materialized->ConstantValue();
-        auto value = const_value->As<AInt>();
+        auto value = const_value->ValueAs<AInt>();
         if (value < 0) {
             AddError("@id value must be non-negative", id_attr->source);
             return nullptr;
@@ -660,7 +660,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                 }
 
                 auto const_value = materialized->ConstantValue();
-                auto value = const_value->As<AInt>();
+                auto value = const_value->ValueAs<AInt>();
                 if (value < 0) {
                     AddError("@binding value must be non-negative", attr->source);
                     return nullptr;
@@ -684,7 +684,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                 }
 
                 auto const_value = materialized->ConstantValue();
-                auto value = const_value->As<AInt>();
+                auto value = const_value->ValueAs<AInt>();
                 if (value < 0) {
                     AddError("@group value must be non-negative", attr->source);
                     return nullptr;
@@ -762,7 +762,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
             if (!materialized) {
                 return nullptr;
             }
-            binding_point.binding = materialized->ConstantValue()->As<uint32_t>();
+            binding_point.binding = materialized->ConstantValue()->ValueAs<u32>();
         }
         {
             ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@group value"};
@@ -773,7 +773,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
             if (!materialized) {
                 return nullptr;
             }
-            binding_point.group = materialized->ConstantValue()->As<uint32_t>();
+            binding_point.group = materialized->ConstantValue()->ValueAs<u32>();
         }
     }
 
@@ -808,7 +808,7 @@ utils::Result<uint32_t> Resolver::LocationAttribute(const ast::LocationAttribute
     }
 
     auto const_value = materialized->ConstantValue();
-    auto value = const_value->As<AInt>();
+    auto value = const_value->ValueAs<AInt>();
     if (value < 0) {
         AddError("@location value must be non-negative", attr->source);
         return utils::Failure;
@@ -946,7 +946,7 @@ sem::Statement* Resolver::StaticAssert(const ast::StaticAssert* assertion) {
             assertion->condition->source);
         return nullptr;
     }
-    if (!cond->As<bool>()) {
+    if (!cond->ValueAs<bool>()) {
         AddError("static assertion failed", assertion->source);
         return nullptr;
     }
@@ -1181,11 +1181,11 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
             return false;
         }
         if (auto* value = materialized->ConstantValue()) {
-            if (value->As<AInt>() < 1) {
+            if (value->ValueAs<AInt>() < 1) {
                 AddError("workgroup_size argument must be at least 1", values[i]->source);
                 return false;
             }
-            ws[i] = value->As<uint32_t>();
+            ws[i] = value->ValueAs<u32>();
         } else {
             ws[i] = std::nullopt;
         }
@@ -1571,7 +1571,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
         // short-circuiting.
         if (sem_expr->ConstantValue()) {
             if (auto binary = logical_binary_lhs_to_parent_.Find(expr)) {
-                const bool lhs_is_true = sem_expr->ConstantValue()->As<bool>();
+                const bool lhs_is_true = sem_expr->ConstantValue()->ValueAs<bool>();
                 if (((*binary)->IsLogicalAnd() && !lhs_is_true) ||
                     ((*binary)->IsLogicalOr() && lhs_is_true)) {
                     // Mark entire expression tree to not const-evaluate
@@ -3110,7 +3110,7 @@ const type::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_expr) 
         return nullptr;
     }
 
-    int64_t count = count_val->As<AInt>();
+    int64_t count = count_val->ValueAs<AInt>();
     if (count < 1) {
         AddError("array count (" + std::to_string(count) + ") must be greater than 0",
                  count_expr->source);
@@ -3270,7 +3270,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                         AddError("@offset must be constant expression", o->expr->source);
                         return false;
                     }
-                    offset = const_value->As<uint64_t>();
+                    offset = const_value->ValueAs<uint64_t>();
 
                     if (offset < struct_size) {
                         AddError("offsets must be in ascending order", o->source);
@@ -3297,7 +3297,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                         AddError("@align must be constant expression", a->source);
                         return false;
                     }
-                    auto value = const_value->As<AInt>();
+                    auto value = const_value->ValueAs<AInt>();
 
                     if (value <= 0 || !utils::IsPowerOfTwo(value)) {
                         AddError("@align value must be a positive, power-of-two integer",
@@ -3327,13 +3327,13 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                         return false;
                     }
                     {
-                        auto value = const_value->As<AInt>();
+                        auto value = const_value->ValueAs<AInt>();
                         if (value <= 0) {
                             AddError("@size must be a positive integer", s->source);
                             return false;
                         }
                     }
-                    auto value = const_value->As<uint64_t>();
+                    auto value = const_value->ValueAs<uint64_t>();
                     if (value < size) {
                         AddError("@size must be at least as big as the type's size (" +
                                      std::to_string(size) + ")",

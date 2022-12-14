@@ -2495,7 +2495,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         case sem::BuiltinType::kTextureGather:
             out << ".Gather";
             if (builtin->Parameters()[0]->Usage() == sem::ParameterUsage::kComponent) {
-                switch (call->Arguments()[0]->ConstantValue()->As<AInt>()) {
+                switch (call->Arguments()[0]->ConstantValue()->ValueAs<AInt>()) {
                     case 0:
                         out << "Red";
                         break;
@@ -3268,26 +3268,26 @@ bool GeneratorImpl::EmitConstant(std::ostream& out,
     return Switch(
         constant->Type(),  //
         [&](const type::Bool*) {
-            out << (constant->As<AInt>() ? "true" : "false");
+            out << (constant->ValueAs<AInt>() ? "true" : "false");
             return true;
         },
         [&](const type::F32*) {
-            PrintF32(out, constant->As<float>());
+            PrintF32(out, constant->ValueAs<f32>());
             return true;
         },
         [&](const type::F16*) {
             // emit a f16 scalar with explicit float16_t type declaration.
             out << "float16_t(";
-            PrintF16(out, constant->As<float>());
+            PrintF16(out, constant->ValueAs<f16>());
             out << ")";
             return true;
         },
         [&](const type::I32*) {
-            out << constant->As<AInt>();
+            out << constant->ValueAs<AInt>();
             return true;
         },
         [&](const type::U32*) {
-            out << constant->As<AInt>() << "u";
+            out << constant->ValueAs<AInt>() << "u";
             return true;
         },
         [&](const type::Vector* v) {
