@@ -340,6 +340,15 @@ void BufferBase::APIMapAsync(wgpu::MapMode mode,
                              size_t size,
                              WGPUBufferMapCallback callback,
                              void* userdata) {
+    // Check for an existing pending map first because it just
+    // rejects the callback and doesn't produce a validation error.
+    if (mState == BufferState::PendingMap) {
+        if (callback) {
+            callback(WGPUBufferMapAsyncStatus_Error, userdata);
+        }
+        return;
+    }
+
     // Handle the defaulting of size required by WebGPU, even if in webgpu_cpp.h it is not
     // possible to default the function argument (because there is the callback later in the
     // argument list)
@@ -481,7 +490,7 @@ MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
         case BufferState::MappedAtCreation:
             return DAWN_VALIDATION_ERROR("%s is already mapped.", this);
         case BufferState::PendingMap:
-            return DAWN_VALIDATION_ERROR("%s is pending map.", this);
+            UNREACHABLE();
         case BufferState::Destroyed:
             return DAWN_VALIDATION_ERROR("%s is destroyed.", this);
         case BufferState::Unmapped:

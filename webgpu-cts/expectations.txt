@@ -456,6 +456,15 @@ crbug.com/dawn/1602 webgpu:api,validation,resource_usages,texture,in_render_misc
 ################################################################################
 
 ################################################################################
+# Buffer.MapAsync pending map error tests need updates in CTS
+################################################################################
+crbug.com/dawn/1613 webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending:* [ Failure ]
+crbug.com/dawn/1613 webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending:* [ Failure ]
+crbug.com/dawn/1613 worker_webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending:* [ Failure ]
+crbug.com/dawn/1613 worker_webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending:* [ Failure ]
+################################################################################
+
+################################################################################
 # untriaged failures
 # KEEP
 ################################################################################
