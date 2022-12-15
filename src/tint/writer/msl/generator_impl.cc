@@ -31,7 +31,7 @@
 #include "src/tint/ast/module.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/void.h"
-#include "src/tint/constant/constant.h"
+#include "src/tint/constant/value.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/member_accessor_expression.h"
@@ -1658,7 +1658,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const type::Type* type) {
         });
 }
 
-bool GeneratorImpl::EmitConstant(std::ostream& out, const constant::Constant* constant) {
+bool GeneratorImpl::EmitConstant(std::ostream& out, const constant::Value* constant) {
     return Switch(
         constant->Type(),  //
         [&](const type::Bool*) {

@@ -16,7 +16,7 @@
 #define SRC_TINT_CONSTANT_COMPOSITE_H_
 
 #include "src/tint/castable.h"
-#include "src/tint/constant/constant.h"
+#include "src/tint/constant/value.h"
 #include "src/tint/number.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/hash.h"
@@ -24,12 +24,11 @@
 
 namespace tint::constant {
 
-/// Composite holds a number of mixed child Constant values.
+/// Composite holds a number of mixed child values.
 /// Composite may be of a vector, matrix or array type.
 /// If each element is the same type and value, then a Splat would be a more efficient constant
-/// implementation. Use CreateComposite() to create the appropriate Constant type.
-/// Composite implements the Constant interface.
-class Composite : public Castable<Composite, constant::Constant> {
+/// implementation. Use CreateComposite() to create the appropriate type.
+class Composite : public Castable<Composite, constant::Value> {
   public:
     /// Constructor
     /// @param t the compsite type
@@ -37,15 +36,14 @@ class Composite : public Castable<Composite, constant::Constant> {
     /// @param all_0 true if all elements are 0
     /// @param any_0 true if any element is 0
     Composite(const type::Type* t,
-              utils::VectorRef<const constant::Constant*> els,
+              utils::VectorRef<const constant::Value*> els,
               bool all_0,
               bool any_0);
     ~Composite() override;
 
     const type::Type* Type() const override { return type; }
 
-    std::variant<std::monostate, AInt, AFloat> Value() const override { return {}; }
-    const constant::Constant* Index(size_t i) const override {
+    const constant::Value* Index(size_t i) const override {
         return i < elements.Length() ? elements[i] : nullptr;
     }
 
@@ -57,13 +55,16 @@ class Composite : public Castable<Composite, constant::Constant> {
     /// The composite type
     type::Type const* const type;
     /// The composite elements
-    const utils::Vector<const constant::Constant*, 4> elements;
+    const utils::Vector<const constant::Value*, 4> elements;
     /// True if all elements are zero
     const bool all_zero;
     /// True if any element is zero
     const bool any_zero;
     /// The hash of the composite
     const size_t hash;
+
+  protected:
+    std::variant<std::monostate, AInt, AFloat> InternalValue() const override { return {}; }
 
   private:
     size_t CalcHash() {

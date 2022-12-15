@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/constant/constant.h"
+#include "src/tint/constant/value.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/const_eval.h"
 #include "src/tint/resolver/dependency_graph.h"
@@ -197,13 +197,13 @@ class Resolver {
 
     /// Converts `c` to `target_ty`
     /// @returns true on success, false on failure.
-    bool Convert(const constant::Constant*& c, const type::Type* target_ty, const Source& source);
+    bool Convert(const constant::Value*& c, const type::Type* target_ty, const Source& source);
 
     /// Transforms `args` to a vector of constants, and converts each constant to the call target's
     /// parameter type.
     /// @returns the vector of constants, `utils::Failure` on failure.
     template <size_t N>
-    utils::Result<utils::Vector<const constant::Constant*, N>> ConvertArguments(
+    utils::Result<utils::Vector<const constant::Value*, N>> ConvertArguments(
         const utils::Vector<const sem::Expression*, N>& args,
         const sem::CallTarget* target);
 

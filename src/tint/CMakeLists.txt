@@ -256,14 +256,14 @@ list(APPEND TINT_LIB_SRCS
   clone_context.h
   constant/composite.cc
   constant/composite.h
-  constant/constant.cc
-  constant/constant.h
   constant/scalar.cc
   constant/scalar.h
   constant/splat.cc
   constant/splat.h
   constant/node.cc
   constant/node.h
+  constant/value.cc
+  constant/value.h
   demangler.cc
   demangler.h
   inspector/entry_point.cc

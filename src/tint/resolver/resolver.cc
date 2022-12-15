@@ -1278,7 +1278,7 @@ sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt, cons
             ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "case selector"};
             TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
-            const constant::Constant* const_value = nullptr;
+            const constant::Value* const_value = nullptr;
             if (!sel->IsDefault()) {
                 // The sem statement was created in the switch when attempting to determine the
                 // common type.
@@ -1797,7 +1797,7 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
         return nullptr;
     }
 
-    const constant::Constant* materialized_val = nullptr;
+    const constant::Value* materialized_val = nullptr;
     if (!skip_const_eval_.Contains(decl)) {
         auto expr_val = expr->ConstantValue();
         if (!expr_val) {
@@ -1849,7 +1849,7 @@ bool Resolver::ShouldMaterializeArgument(const type::Type* parameter_ty) const {
     return param_el_ty && !param_el_ty->Is<type::AbstractNumeric>();
 }
 
-bool Resolver::Convert(const constant::Constant*& c,
+bool Resolver::Convert(const constant::Value*& c,
                        const type::Type* target_ty,
                        const Source& source) {
     auto r = const_eval_.Convert(target_ty, c, source);
@@ -1861,7 +1861,7 @@ bool Resolver::Convert(const constant::Constant*& c,
 }
 
 template <size_t N>
-utils::Result<utils::Vector<const constant::Constant*, N>> Resolver::ConvertArguments(
+utils::Result<utils::Vector<const constant::Value*, N>> Resolver::ConvertArguments(
     const utils::Vector<const sem::Expression*, N>& args,
     const sem::CallTarget* target) {
     auto const_args = utils::Transform(args, [](auto* arg) { return arg->ConstantValue(); });
@@ -1919,7 +1919,7 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
         ty = builder_->create<type::Reference>(ty, ref->AddressSpace(), ref->Access());
     }
 
-    const constant::Constant* val = nullptr;
+    const constant::Value* val = nullptr;
     auto stage = sem::EarliestStage(obj->Stage(), idx->Stage());
     if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
         stage = sem::EvaluationStage::kNotEvaluated;
@@ -1950,7 +1950,7 @@ sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
 
     RegisterLoadIfNeeded(inner);
 
-    const constant::Constant* val = nullptr;
+    const constant::Value* val = nullptr;
     // TODO(crbug.com/tint/1582): short circuit 'expr' once const eval of Bitcast is implemented.
     if (auto r = const_eval_.Bitcast(ty, inner)) {
         val = r.Get();
@@ -2012,7 +2012,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             return nullptr;
         }
 
-        const constant::Constant* value = nullptr;
+        const constant::Value* value = nullptr;
         auto stage = sem::EarliestStage(ctor_or_conv.target->Stage(), args_stage);
         if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
             stage = sem::EvaluationStage::kNotEvaluated;
@@ -2042,7 +2042,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         }
 
         auto stage = args_stage;                    // The evaluation stage of the call
-        const constant::Constant* value = nullptr;  // The constant value for the call
+        const constant::Value* value = nullptr;     // The constant value for the call
         if (stage == sem::EvaluationStage::kConstant) {
             if (auto r = const_eval_.ArrayOrStructInit(ty, args)) {
                 value = r.Get();
@@ -2336,7 +2336,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
 
     // If the builtin is @const, and all arguments have constant values, evaluate the builtin
     // now.
-    const constant::Constant* value = nullptr;
+    const constant::Value* value = nullptr;
     auto stage = sem::EarliestStage(arg_stage, builtin.sem->Stage());
     if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
         stage = sem::EvaluationStage::kNotEvaluated;
@@ -2607,7 +2607,7 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
         return nullptr;
     }
 
-    const constant::Constant* val = nullptr;
+    const constant::Value* val = nullptr;
     if (auto r = const_eval_.Literal(ty, literal)) {
         val = r.Get();
     } else {
@@ -2875,7 +2875,7 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
     RegisterLoadIfNeeded(lhs);
     RegisterLoadIfNeeded(rhs);
 
-    const constant::Constant* value = nullptr;
+    const constant::Value* value = nullptr;
     if (stage == sem::EvaluationStage::kConstant) {
         if (op.const_eval_fn) {
             if (skip_const_eval_.Contains(expr)) {
@@ -2920,7 +2920,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
     const type::Type* ty = nullptr;
     const sem::Variable* root_ident = nullptr;
-    const constant::Constant* value = nullptr;
+    const constant::Value* value = nullptr;
     auto stage = sem::EvaluationStage::kRuntime;
 
     switch (unary->op) {

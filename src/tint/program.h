@@ -19,7 +19,7 @@
 #include <unordered_set>
 
 #include "src/tint/ast/function.h"
-#include "src/tint/constant/constant.h"
+#include "src/tint/constant/value.h"
 #include "src/tint/program_id.h"
 #include "src/tint/sem/info.h"
 #include "src/tint/symbol_table.h"
@@ -44,8 +44,8 @@ class Program {
     /// SemNodeAllocator is an alias to BlockAllocator<sem::Node>
     using SemNodeAllocator = utils::BlockAllocator<sem::Node>;
 
-    /// ConstantAllocator is an alias to BlockAllocator<constant::Constant>
-    using ConstantAllocator = utils::BlockAllocator<constant::Constant>;
+    /// ConstantAllocator is an alias to BlockAllocator<constant::Value>
+    using ConstantAllocator = utils::BlockAllocator<constant::Value>;
 
     /// Constructor
     Program();

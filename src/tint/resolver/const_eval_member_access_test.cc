@@ -89,10 +89,10 @@ TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
     EXPECT_FALSE(cv->AllZero());
     auto* c0 = cv->Index(0);
     auto* c1 = cv->Index(1);
-    EXPECT_EQ(std::get<AFloat>(c0->Index(0)->Value()), 1.0);
-    EXPECT_EQ(std::get<AFloat>(c0->Index(1)->Value()), 2.0);
-    EXPECT_EQ(std::get<AFloat>(c1->Index(0)->Value()), 3.0);
-    EXPECT_EQ(std::get<AFloat>(c1->Index(1)->Value()), 4.0);
+    EXPECT_EQ(c0->Index(0)->ValueAs<AFloat>(), 1.0);
+    EXPECT_EQ(c0->Index(1)->ValueAs<AFloat>(), 2.0);
+    EXPECT_EQ(c1->Index(0)->ValueAs<AFloat>(), 3.0);
+    EXPECT_EQ(c1->Index(1)->ValueAs<AFloat>(), 4.0);
 }
 }  // namespace
 }  // namespace tint::resolver

@@ -27,7 +27,7 @@
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/variable_decl_statement.h"
-#include "src/tint/constant/constant.h"
+#include "src/tint/constant/value.h"
 #include "src/tint/debug.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
@@ -1117,7 +1117,7 @@ bool GeneratorImpl::EmitUniformBufferAccess(
 
     if (auto* val = offset_arg->ConstantValue()) {
         TINT_ASSERT(Writer, val->Type()->Is<type::U32>());
-        scalar_offset_bytes = static_cast<uint32_t>(std::get<AInt>(val->Value()));
+        scalar_offset_bytes = static_cast<uint32_t>(val->ValueAs<AInt>());
         scalar_offset_index = scalar_offset_bytes / 4;  // bytes -> scalar index
         scalar_offset_constant = true;
     }
@@ -3263,7 +3263,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
 }
 
 bool GeneratorImpl::EmitConstant(std::ostream& out,
-                                 const constant::Constant* constant,
+                                 const constant::Value* constant,
                                  bool is_variable_initializer) {
     return Switch(
         constant->Type(),  //

@@ -26,7 +26,7 @@ Expression::Expression(const ast::Expression* declaration,
                        const type::Type* type,
                        EvaluationStage stage,
                        const Statement* statement,
-                       const constant::Constant* constant,
+                       const constant::Value* constant,
                        bool has_side_effects,
                        const Variable* root_ident /* = nullptr */)
     : declaration_(declaration),

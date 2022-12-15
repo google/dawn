@@ -22,29 +22,26 @@
 
 namespace tint::constant {
 
-/// Splat holds a single Constant value, duplicated as all children.
+/// Splat holds a single value, duplicated as all children.
+///
 /// Splat is used for zero-initializers, 'splat' initializers, or initializers where each element is
 /// identical. Splat may be of a vector, matrix or array type.
-/// Splat implements the Constant interface.
-class Splat : public Castable<Splat, constant::Constant> {
+class Splat : public Castable<Splat, constant::Value> {
   public:
     /// Constructor
     /// @param t the splat type
     /// @param e the splat element
     /// @param n the number of items in the splat
-    Splat(const type::Type* t, const constant::Constant* e, size_t n);
+    Splat(const type::Type* t, const constant::Value* e, size_t n);
     ~Splat() override;
 
     /// @returns the type of the splat
     const type::Type* Type() const override { return type; }
 
-    /// @returns a monostate variant.
-    std::variant<std::monostate, AInt, AFloat> Value() const override { return {}; }
-
     /// Retrieve item at index @p i
     /// @param i the index to retrieve
     /// @returns the element, or nullptr if out of bounds
-    const constant::Constant* Index(size_t i) const override { return i < count ? el : nullptr; }
+    const constant::Value* Index(size_t i) const override { return i < count ? el : nullptr; }
 
     /// @returns true if the element is zero
     bool AllZero() const override { return el->AllZero(); }
@@ -59,9 +56,13 @@ class Splat : public Castable<Splat, constant::Constant> {
     /// The type of the splat element
     type::Type const* const type;
     /// The element stored in the splat
-    const constant::Constant* el;
+    const constant::Value* el;
     /// The number of items in the splat
     const size_t count;
+
+  protected:
+    /// @returns a monostate variant.
+    std::variant<std::monostate, AInt, AFloat> InternalValue() const override { return {}; }
 };
 
 }  // namespace tint::constant

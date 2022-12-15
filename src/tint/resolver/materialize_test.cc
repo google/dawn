@@ -101,7 +101,7 @@ class MaterializeTest : public resolver::ResolverTestWithParam<CASE> {
                     auto* el = value->Index(i);
                     ASSERT_NE(el, nullptr);
                     EXPECT_TYPE(el->Type(), v->type());
-                    EXPECT_EQ(std::get<T>(el->Value()), expected_value);
+                    EXPECT_EQ(el->ValueAs<T>(), expected_value);
                 }
             },
             [&](const type::Matrix* m) {
@@ -113,7 +113,7 @@ class MaterializeTest : public resolver::ResolverTestWithParam<CASE> {
                         auto* el = column->Index(r);
                         ASSERT_NE(el, nullptr);
                         EXPECT_TYPE(el->Type(), m->type());
-                        EXPECT_EQ(std::get<T>(el->Value()), expected_value);
+                        EXPECT_EQ(el->ValueAs<T>(), expected_value);
                     }
                 }
             },
@@ -124,10 +124,10 @@ class MaterializeTest : public resolver::ResolverTestWithParam<CASE> {
                     auto* el = value->Index(i);
                     ASSERT_NE(el, nullptr);
                     EXPECT_TYPE(el->Type(), a->ElemType());
-                    EXPECT_EQ(std::get<T>(el->Value()), expected_value);
+                    EXPECT_EQ(el->ValueAs<T>(), expected_value);
                 }
             },
-            [&](Default) { EXPECT_EQ(std::get<T>(value->Value()), expected_value); });
+            [&](Default) { EXPECT_EQ(value->ValueAs<T>(), expected_value); });
     }
 };
 

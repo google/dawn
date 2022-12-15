@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::constant::Composite);
 namespace tint::constant {
 
 Composite::Composite(const type::Type* t,
-                     utils::VectorRef<const constant::Constant*> els,
+                     utils::VectorRef<const constant::Value*> els,
                      bool all_0,
                      bool any_0)
     : type(t), elements(std::move(els)), all_zero(all_0), any_zero(any_0), hash(CalcHash()) {}

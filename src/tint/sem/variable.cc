@@ -33,7 +33,7 @@ Variable::Variable(const ast::Variable* declaration,
                    EvaluationStage stage,
                    ast::AddressSpace address_space,
                    ast::Access access,
-                   const constant::Constant* constant_value)
+                   const constant::Value* constant_value)
     : declaration_(declaration),
       type_(type),
       stage_(stage),
@@ -49,7 +49,7 @@ LocalVariable::LocalVariable(const ast::Variable* declaration,
                              ast::AddressSpace address_space,
                              ast::Access access,
                              const sem::Statement* statement,
-                             const constant::Constant* constant_value)
+                             const constant::Value* constant_value)
     : Base(declaration, type, stage, address_space, access, constant_value),
       statement_(statement) {}
 
@@ -60,7 +60,7 @@ GlobalVariable::GlobalVariable(const ast::Variable* declaration,
                                EvaluationStage stage,
                                ast::AddressSpace address_space,
                                ast::Access access,
-                               const constant::Constant* constant_value,
+                               const constant::Value* constant_value,
                                sem::BindingPoint binding_point,
                                std::optional<uint32_t> location)
     : Base(declaration, type, stage, address_space, access, constant_value),

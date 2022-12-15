@@ -45,7 +45,7 @@ class IndexAccessorExpression final : public Castable<IndexAccessorExpression, E
                             const Expression* object,
                             const Expression* index,
                             const Statement* statement,
-                            const constant::Constant* constant,
+                            const constant::Value* constant,
                             bool has_side_effects,
                             const Variable* root_ident = nullptr);
 

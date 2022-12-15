@@ -16,7 +16,7 @@
 #define SRC_TINT_CONSTANT_SCALAR_H_
 
 #include "src/tint/castable.h"
-#include "src/tint/constant/constant.h"
+#include "src/tint/constant/value.h"
 #include "src/tint/number.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/hash.h"
@@ -24,9 +24,8 @@
 namespace tint::constant {
 
 /// Scalar holds a single scalar or abstract-numeric value.
-/// Scalar implements the Constant interface.
 template <typename T>
-class Scalar : public Castable<Scalar<T>, constant::Constant> {
+class Scalar : public Castable<Scalar<T>, constant::Value> {
   public:
     static_assert(!std::is_same_v<UnwrapNumber<T>, T> || std::is_same_v<T, bool>,
                   "T must be a Number or bool");
@@ -43,14 +42,7 @@ class Scalar : public Castable<Scalar<T>, constant::Constant> {
 
     const type::Type* Type() const override { return type; }
 
-    std::variant<std::monostate, AInt, AFloat> Value() const override {
-        if constexpr (IsFloatingPoint<UnwrapNumber<T>>) {
-            return static_cast<AFloat>(value);
-        } else {
-            return static_cast<AInt>(value);
-        }
-    }
-    const constant::Constant* Index(size_t) const override { return nullptr; }
+    const constant::Value* Index(size_t) const override { return nullptr; }
 
     bool AllZero() const override { return IsPositiveZero(); }
     bool AnyZero() const override { return IsPositiveZero(); }
@@ -77,6 +69,15 @@ class Scalar : public Castable<Scalar<T>, constant::Constant> {
     type::Type const* const type;
     /// The scalar value
     const T value;
+
+  protected:
+    std::variant<std::monostate, AInt, AFloat> InternalValue() const override {
+        if constexpr (IsFloatingPoint<UnwrapNumber<T>>) {
+            return static_cast<AFloat>(value);
+        } else {
+            return static_cast<AInt>(value);
+        }
+    }
 };
 
 }  // namespace tint::constant

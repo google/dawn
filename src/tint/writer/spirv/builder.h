@@ -43,7 +43,6 @@
 // Forward declarations
 namespace tint::sem {
 class Call;
-class Constant;
 class TypeInitializer;
 class TypeConversion;
 }  // namespace tint::sem
@@ -559,7 +558,7 @@ class Builder {
     /// Generates a constant value if needed
     /// @param constant the constant to generate.
     /// @returns the ID on success or 0 on failure
-    uint32_t GenerateConstantIfNeeded(const constant::Constant* constant);
+    uint32_t GenerateConstantIfNeeded(const constant::Value* constant);
 
     /// Generates a scalar constant if needed
     /// @param constant the constant to generate.

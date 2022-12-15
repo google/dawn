@@ -20,7 +20,7 @@ namespace tint::sem {
 Materialize::Materialize(const Expression* expr,
                          const Statement* statement,
                          const type::Type* type,
-                         const constant::Constant* constant)
+                         const constant::Value* constant)
     : Base(/* declaration */ expr->Declaration(),
            /* type */ type,
            /* stage */ constant ? EvaluationStage::kConstant : EvaluationStage::kNotEvaluated,

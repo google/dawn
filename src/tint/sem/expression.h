@@ -16,7 +16,7 @@
 #define SRC_TINT_SEM_EXPRESSION_H_
 
 #include "src/tint/ast/expression.h"
-#include "src/tint/constant/constant.h"
+#include "src/tint/constant/value.h"
 #include "src/tint/sem/behavior.h"
 #include "src/tint/sem/evaluation_stage.h"
 #include "src/tint/sem/node.h"
@@ -44,7 +44,7 @@ class Expression : public Castable<Expression, Node> {
                const type::Type* type,
                EvaluationStage stage,
                const Statement* statement,
-               const constant::Constant* constant,
+               const constant::Value* constant,
                bool has_side_effects,
                const Variable* root_ident = nullptr);
 
@@ -64,7 +64,7 @@ class Expression : public Castable<Expression, Node> {
     const Statement* Stmt() const { return statement_; }
 
     /// @return the constant value of this expression
-    const constant::Constant* ConstantValue() const { return constant_; }
+    const constant::Value* ConstantValue() const { return constant_; }
 
     /// Returns the variable or parameter that this expression derives from.
     /// For reference and pointer expressions, this will either be the originating
@@ -95,7 +95,7 @@ class Expression : public Castable<Expression, Node> {
     const type::Type* const type_;
     const EvaluationStage stage_;
     const Statement* const statement_;
-    const constant::Constant* const constant_;
+    const constant::Value* const constant_;
     sem::Behaviors behaviors_{sem::Behavior::kNext};
     const bool has_side_effects_;
 };

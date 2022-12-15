@@ -59,7 +59,7 @@ class Variable : public Castable<Variable, Node> {
              EvaluationStage stage,
              ast::AddressSpace address_space,
              ast::Access access,
-             const constant::Constant* constant_value);
+             const constant::Value* constant_value);
 
     /// Destructor
     ~Variable() override;
@@ -80,7 +80,7 @@ class Variable : public Castable<Variable, Node> {
     ast::Access Access() const { return access_; }
 
     /// @return the constant value of this expression
-    const constant::Constant* ConstantValue() const { return constant_value_; }
+    const constant::Value* ConstantValue() const { return constant_value_; }
 
     /// @returns the variable initializer expression, or nullptr if the variable
     /// does not have one.
@@ -102,7 +102,7 @@ class Variable : public Castable<Variable, Node> {
     const EvaluationStage stage_;
     const ast::AddressSpace address_space_;
     const ast::Access access_;
-    const constant::Constant* constant_value_;
+    const constant::Value* constant_value_;
     const Expression* initializer_ = nullptr;
     std::vector<const VariableUser*> users_;
 };
@@ -124,7 +124,7 @@ class LocalVariable final : public Castable<LocalVariable, Variable> {
                   ast::AddressSpace address_space,
                   ast::Access access,
                   const sem::Statement* statement,
-                  const constant::Constant* constant_value);
+                  const constant::Value* constant_value);
 
     /// Destructor
     ~LocalVariable() override;
@@ -164,7 +164,7 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
                    EvaluationStage stage,
                    ast::AddressSpace address_space,
                    ast::Access access,
-                   const constant::Constant* constant_value,
+                   const constant::Value* constant_value,
                    sem::BindingPoint binding_point = {},
                    std::optional<uint32_t> location = std::nullopt);
 
