@@ -16,40 +16,48 @@
 
 #include <string>
 
+#include "src/tint/constant/composite.h"
+#include "src/tint/constant/scalar.h"
+#include "src/tint/constant/splat.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Constant);
 
 namespace tint::ir {
 
-Constant::Constant(f32 f) : kind_(Kind::kF32), data_(f) {}
-
-Constant::Constant(f16 f) : kind_(Kind::kF16), data_(f) {}
-
-Constant::Constant(u32 u) : kind_(Kind::kU32), data_(u) {}
-
-Constant::Constant(i32 i) : kind_(Kind::kI32), data_(i) {}
-
-Constant::Constant(bool b) : kind_(Kind::kBool), data_(b) {}
+Constant::Constant(const constant::Value* val) : value(val) {}
 
 Constant::~Constant() = default;
 
-std::ostream& Constant::ToString(std::ostream& out) const {
-    switch (GetKind()) {
-        case Constant::Kind::kF32:
-            out << std::to_string(AsF32().value);
-            break;
-        case Constant::Kind::kF16:
-            out << std::to_string(AsF16().value);
-            break;
-        case Constant::Kind::kI32:
-            out << std::to_string(AsI32().value);
-            break;
-        case Constant::Kind::kU32:
-            out << std::to_string(AsU32().value);
-            break;
-        case Constant::Kind::kBool:
-            out << (AsBool() ? "true" : "false");
-            break;
-    }
+std::ostream& Constant::ToString(std::ostream& out, const SymbolTable& st) const {
+    std::function<void(const constant::Value*)> emit = [&](const constant::Value* c) {
+        Switch(
+            c,
+            [&](const constant::Scalar<AFloat>* scalar) { out << scalar->ValueAs<AFloat>().value; },
+            [&](const constant::Scalar<AInt>* scalar) { out << scalar->ValueAs<AInt>().value; },
+            [&](const constant::Scalar<i32>* scalar) { out << scalar->ValueAs<i32>().value; },
+            [&](const constant::Scalar<u32>* scalar) { out << scalar->ValueAs<u32>().value; },
+            [&](const constant::Scalar<f32>* scalar) { out << scalar->ValueAs<f32>().value; },
+            [&](const constant::Scalar<f16>* scalar) { out << scalar->ValueAs<f16>().value; },
+            [&](const constant::Scalar<bool>* scalar) {
+                out << (scalar->ValueAs<bool>() ? "true" : "false");
+            },
+            [&](const constant::Splat* splat) {
+                out << splat->Type()->FriendlyName(st) << "(";
+                emit(splat->Index(0));
+                out << ")";
+            },
+            [&](const constant::Composite* composite) {
+                out << composite->Type()->FriendlyName(st) << "(";
+                for (const auto* elem : composite->elements) {
+                    if (elem != composite->elements[0]) {
+                        out << ", ";
+                    }
+                    emit(elem);
+                }
+                out << ")";
+            });
+    };
+    emit(value);
     return out;
 }
 

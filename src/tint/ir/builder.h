@@ -15,6 +15,9 @@
 #ifndef SRC_TINT_IR_BUILDER_H_
 #define SRC_TINT_IR_BUILDER_H_
 
+#include <utility>
+
+#include "src/tint/constant/scalar.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/function.h"
@@ -25,6 +28,11 @@
 #include "src/tint/ir/temp.h"
 #include "src/tint/ir/terminator.h"
 #include "src/tint/ir/value.h"
+#include "src/tint/type/bool.h"
+#include "src/tint/type/f16.h"
+#include "src/tint/type/f32.h"
+#include "src/tint/type/i32.h"
+#include "src/tint/type/u32.h"
 
 // Forward Declarations
 namespace tint {
@@ -85,12 +93,54 @@ class Builder {
     /// @param to the node to branch too
     void Branch(Block* from, FlowNode* to);
 
-    /// Creates a new Constant
+    /// Creates a constant::Value
+    /// @param args the arguments
+    /// @returns the new constant value
+    template <typename T, typename... ARGS>
+    traits::EnableIf<traits::IsTypeOrDerived<T, constant::Value>, const T>* create(ARGS&&... args) {
+        return ir.constants.Create<T>(std::forward<ARGS>(args)...);
+    }
+
+    /// Creates a new ir::Constant
     /// @param val the constant value
     /// @returns the new constant
-    template <typename T>
-    const ir::Constant* Constant(T val) {
+    const ir::Constant* Constant(const constant::Value* val) {
         return ir.values.Create<ir::Constant>(val);
+    }
+
+    /// Creates a ir::Constant for an i32 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    const ir::Constant* Constant(i32 v) {
+        return Constant(create<constant::Scalar<i32>>(ir.types.Get<type::I32>(), v));
+    }
+
+    /// Creates a ir::Constant for a u32 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    const ir::Constant* Constant(u32 v) {
+        return Constant(create<constant::Scalar<u32>>(ir.types.Get<type::U32>(), v));
+    }
+
+    /// Creates a ir::Constant for a f32 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    const ir::Constant* Constant(f32 v) {
+        return Constant(create<constant::Scalar<f32>>(ir.types.Get<type::F32>(), v));
+    }
+
+    /// Creates a ir::Constant for a f16 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    const ir::Constant* Constant(f16 v) {
+        return Constant(create<constant::Scalar<f16>>(ir.types.Get<type::F16>(), v));
+    }
+
+    /// Creates a ir::Constant for a bool Scalar
+    /// @param v the value
+    /// @returns the new constant
+    const ir::Constant* Constant(bool v) {
+        return Constant(create<constant::Scalar<bool>>(ir.types.Get<type::Bool>(), v));
     }
 
     /// Creates a new Temporary

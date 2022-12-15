@@ -44,7 +44,7 @@ TEST_F(IR_BinaryTest, CreateAnd) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 & 2");
 }
 
@@ -70,7 +70,7 @@ TEST_F(IR_BinaryTest, CreateOr) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 | 2");
 }
 
@@ -96,7 +96,7 @@ TEST_F(IR_BinaryTest, CreateXor) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 ^ 2");
 }
 
@@ -123,7 +123,7 @@ TEST_F(IR_BinaryTest, CreateLogicalAnd) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 && 2");
 }
 
@@ -149,7 +149,7 @@ TEST_F(IR_BinaryTest, CreateLogicalOr) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 || 2");
 }
 
@@ -175,7 +175,7 @@ TEST_F(IR_BinaryTest, CreateEqual) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 == 2");
 }
 
@@ -201,7 +201,7 @@ TEST_F(IR_BinaryTest, CreateNotEqual) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 != 2");
 }
 
@@ -227,7 +227,7 @@ TEST_F(IR_BinaryTest, CreateLessThan) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 < 2");
 }
 
@@ -254,7 +254,7 @@ TEST_F(IR_BinaryTest, CreateGreaterThan) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 > 2");
 }
 
@@ -281,7 +281,7 @@ TEST_F(IR_BinaryTest, CreateLessThanEqual) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 <= 2");
 }
 
@@ -308,7 +308,7 @@ TEST_F(IR_BinaryTest, CreateGreaterThanEqual) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 >= 2");
 }
 
@@ -334,7 +334,7 @@ TEST_F(IR_BinaryTest, CreateShiftLeft) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 << 2");
 }
 
@@ -361,7 +361,7 @@ TEST_F(IR_BinaryTest, CreateShiftRight) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 >> 2");
 }
 
@@ -387,7 +387,7 @@ TEST_F(IR_BinaryTest, CreateAdd) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 + 2");
 }
 
@@ -413,7 +413,7 @@ TEST_F(IR_BinaryTest, CreateSubtract) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 - 2");
 }
 
@@ -439,7 +439,7 @@ TEST_F(IR_BinaryTest, CreateMultiply) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 * 2");
 }
 
@@ -465,7 +465,7 @@ TEST_F(IR_BinaryTest, CreateDivide) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 / 2");
 }
 
@@ -491,7 +491,7 @@ TEST_F(IR_BinaryTest, CreateModulo) {
     EXPECT_EQ(i32(2), rhs->AsI32());
 
     std::stringstream str;
-    instr->ToString(str);
+    instr->ToString(str, program->Symbols());
     EXPECT_EQ(str.str(), "%42 = 4 % 2");
 }
 

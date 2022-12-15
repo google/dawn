@@ -41,6 +41,7 @@
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/terminator.h"
 #include "src/tint/program.h"
+#include "src/tint/sem/expression.h"
 #include "src/tint/sem/module.h"
 
 namespace tint::ir {
@@ -628,30 +629,24 @@ utils::Result<const Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression*
 }
 
 utils::Result<const Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {
-    return tint::Switch(  //
-        lit,
-        [&](const ast::BoolLiteralExpression* l) {
-            return utils::Result<const Value*>(builder.Constant(l->value));
-        },
-        [&](const ast::FloatLiteralExpression* l) {
-            if (l->suffix == ast::FloatLiteralExpression::Suffix::kF) {
-                return utils::Result<const Value*>(
-                    builder.Constant(f32(static_cast<float>(l->value))));
-            }
-            return utils::Result<const Value*>(builder.Constant(f16(static_cast<float>(l->value))));
-        },
-        [&](const ast::IntLiteralExpression* l) {
-            if (l->suffix == ast::IntLiteralExpression::Suffix::kI) {
-                return utils::Result<const Value*>(builder.Constant(i32(l->value)));
-            }
-            return utils::Result<const Value*>(builder.Constant(u32(l->value)));
-        },
-        [&](Default) {
-            diagnostics_.add_warning(tint::diag::System::IR,
-                                     "unknown literal type: " + std::string(lit->TypeInfo().name),
-                                     lit->source);
-            return utils::Failure;
-        });
+    auto* sem = builder.ir.program->Sem().Get(lit);
+    if (!sem) {
+        diagnostics_.add_error(
+            tint::diag::System::IR,
+            "Failed to get semantic information for node " + std::string(lit->TypeInfo().name),
+            lit->source);
+        return utils::Failure;
+    }
+
+    auto* cv = sem->ConstantValue();
+    if (!cv) {
+        diagnostics_.add_error(
+            tint::diag::System::IR,
+            "Failed to get constant value for node " + std::string(lit->TypeInfo().name),
+            lit->source);
+        return utils::Failure;
+    }
+    return utils::Result<const Value*>(builder.Constant(cv));
 }
 
 bool BuilderImpl::EmitType(const ast::Type* ty) {

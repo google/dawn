@@ -102,9 +102,9 @@ TEST_F(IR_BuilderImplTest, IfStatement) {
 
     // Check condition
     ASSERT_TRUE(flow->condition->Is<Constant>());
-    auto* instr = flow->condition->As<Constant>();
-    ASSERT_TRUE(instr->IsBool());
-    EXPECT_TRUE(instr->AsBool());
+    auto* instr = flow->condition->As<Constant>()->value;
+    ASSERT_TRUE(instr->Is<constant::Scalar<bool>>());
+    EXPECT_TRUE(instr->As<constant::Scalar<bool>>()->ValueAs<bool>());
 }
 
 TEST_F(IR_BuilderImplTest, IfStatement_TrueReturns) {
@@ -504,9 +504,9 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
 
     // Check condition
     ASSERT_TRUE(if_flow->condition->Is<Constant>());
-    auto* instr = if_flow->condition->As<Constant>();
-    ASSERT_TRUE(instr->IsBool());
-    EXPECT_TRUE(instr->AsBool());
+    auto* instr = if_flow->condition->As<Constant>()->value;
+    ASSERT_TRUE(instr->Is<constant::Scalar<bool>>());
+    EXPECT_TRUE(instr->As<constant::Scalar<bool>>()->ValueAs<bool>());
 }
 
 TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
@@ -950,9 +950,9 @@ TEST_F(IR_BuilderImplTest, While) {
 
     // Check condition
     ASSERT_TRUE(if_flow->condition->Is<Constant>());
-    auto* instr = if_flow->condition->As<Constant>();
-    ASSERT_TRUE(instr->IsBool());
-    EXPECT_FALSE(instr->AsBool());
+    auto* instr = if_flow->condition->As<Constant>()->value;
+    ASSERT_TRUE(instr->Is<constant::Scalar<bool>>());
+    EXPECT_FALSE(instr->As<constant::Scalar<bool>>()->ValueAs<bool>());
 }
 
 TEST_F(IR_BuilderImplTest, While_Return) {
@@ -1075,9 +1075,9 @@ TEST_F(IR_BuilderImplTest, DISABLED_For) {
 
     // Check condition
     ASSERT_TRUE(if_flow->condition->Is<Constant>());
-    auto* instr = if_flow->condition->As<Constant>();
-    ASSERT_TRUE(instr->IsBool());
-    EXPECT_FALSE(instr->AsBool());
+    auto* instr = if_flow->condition->As<Constant>()->value;
+    ASSERT_TRUE(instr->Is<constant::Scalar<bool>>());
+    EXPECT_FALSE(instr->As<constant::Scalar<bool>>()->ValueAs<bool>());
 }
 
 TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
@@ -1176,9 +1176,9 @@ TEST_F(IR_BuilderImplTest, Switch) {
 
     // Check condition
     ASSERT_TRUE(flow->condition->Is<Constant>());
-    auto* instr = flow->condition->As<Constant>();
-    ASSERT_TRUE(instr->IsI32());
-    EXPECT_EQ(1_i, instr->AsI32());
+    auto* instr = flow->condition->As<Constant>()->value;
+    ASSERT_TRUE(instr->Is<constant::Scalar<i32>>());
+    EXPECT_EQ(1_i, instr->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
 TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {
@@ -1342,283 +1342,378 @@ TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
 }
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_True) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitLiteral(Expr(true));
-    ASSERT_TRUE(r);
+    auto* expr = Expr(true);
+    GlobalVar("a", ty.bool_(), ast::AddressSpace::kPrivate, expr);
+
+    auto& b = CreateBuilder();
+    auto r = b.EmitLiteral(expr);
+    ASSERT_TRUE(r) << b.error();
 
     ASSERT_TRUE(r.Get()->Is<Constant>());
-    auto* val = r.Get()->As<Constant>();
-    EXPECT_TRUE(val->IsBool());
-    EXPECT_TRUE(val->AsBool());
+    auto* val = r.Get()->As<Constant>()->value;
+    EXPECT_TRUE(val->Is<constant::Scalar<bool>>());
+    EXPECT_TRUE(val->As<constant::Scalar<bool>>()->ValueAs<bool>());
 }
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_False) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitLiteral(Expr(false));
-    ASSERT_TRUE(r);
+    auto* expr = Expr(false);
+    GlobalVar("a", ty.bool_(), ast::AddressSpace::kPrivate, expr);
+
+    auto& b = CreateBuilder();
+    auto r = b.EmitLiteral(expr);
+    ASSERT_TRUE(r) << b.error();
 
     ASSERT_TRUE(r.Get()->Is<Constant>());
-    auto* val = r.Get()->As<Constant>();
-    EXPECT_TRUE(val->IsBool());
-    EXPECT_FALSE(val->AsBool());
+    auto* val = r.Get()->As<Constant>()->value;
+    EXPECT_TRUE(val->Is<constant::Scalar<bool>>());
+    EXPECT_FALSE(val->As<constant::Scalar<bool>>()->ValueAs<bool>());
 }
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_F32) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitLiteral(Expr(1.2_f));
-    ASSERT_TRUE(r);
+    auto* expr = Expr(1.2_f);
+    GlobalVar("a", ty.f32(), ast::AddressSpace::kPrivate, expr);
+
+    auto& b = CreateBuilder();
+    auto r = b.EmitLiteral(expr);
+    ASSERT_TRUE(r) << b.error();
 
     ASSERT_TRUE(r.Get()->Is<Constant>());
-    auto* val = r.Get()->As<Constant>();
-    EXPECT_TRUE(val->IsF32());
-    EXPECT_EQ(1.2_f, val->AsF32());
+    auto* val = r.Get()->As<Constant>()->value;
+    EXPECT_TRUE(val->Is<constant::Scalar<f32>>());
+    EXPECT_EQ(1.2_f, val->As<constant::Scalar<f32>>()->ValueAs<f32>());
 }
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_F16) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitLiteral(Expr(1.2_h));
-    ASSERT_TRUE(r);
+    Enable(ast::Extension::kF16);
+    auto* expr = Expr(1.2_h);
+    GlobalVar("a", ty.f16(), ast::AddressSpace::kPrivate, expr);
+
+    auto& b = CreateBuilder();
+    auto r = b.EmitLiteral(expr);
+    ASSERT_TRUE(r) << b.error();
 
     ASSERT_TRUE(r.Get()->Is<Constant>());
-    auto* val = r.Get()->As<Constant>();
-    EXPECT_TRUE(val->IsF16());
-    EXPECT_EQ(1.2_h, val->AsF16());
+    auto* val = r.Get()->As<Constant>()->value;
+    EXPECT_TRUE(val->Is<constant::Scalar<f16>>());
+    EXPECT_EQ(1.2_h, val->As<constant::Scalar<f16>>()->ValueAs<f32>());
 }
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_I32) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitLiteral(Expr(-2_i));
-    ASSERT_TRUE(r);
+    auto* expr = Expr(-2_i);
+    GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate, expr);
+
+    auto& b = CreateBuilder();
+    auto r = b.EmitLiteral(expr);
+    ASSERT_TRUE(r) << b.error();
 
     ASSERT_TRUE(r.Get()->Is<Constant>());
-    auto* val = r.Get()->As<Constant>();
-    EXPECT_TRUE(val->IsI32());
-    EXPECT_EQ(-2_i, val->AsI32());
+    auto* val = r.Get()->As<Constant>()->value;
+    EXPECT_TRUE(val->Is<constant::Scalar<i32>>());
+    EXPECT_EQ(-2_i, val->As<constant::Scalar<i32>>()->ValueAs<f32>());
 }
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_U32) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitLiteral(Expr(2_u));
-    ASSERT_TRUE(r);
+    auto* expr = Expr(2_u);
+    GlobalVar("a", ty.u32(), ast::AddressSpace::kPrivate, expr);
+
+    auto& b = CreateBuilder();
+    auto r = b.EmitLiteral(expr);
+    ASSERT_TRUE(r) << b.error();
 
     ASSERT_TRUE(r.Get()->Is<Constant>());
-    auto* val = r.Get()->As<Constant>();
-    EXPECT_TRUE(val->IsU32());
-    EXPECT_EQ(2_u, val->AsU32());
+    auto* val = r.Get()->As<Constant>()->value;
+    EXPECT_TRUE(val->Is<constant::Scalar<u32>>());
+    EXPECT_EQ(2_u, val->As<constant::Scalar<u32>>()->ValueAs<f32>());
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Add) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(Add(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = Add(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 + 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Subtract) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(Sub(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = Sub(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 - 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Multiply) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(Mul(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = Mul(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 * 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Div) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(Div(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = Div(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 / 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Modulo) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(Mod(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = Mod(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 % 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_And) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(And(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = And(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 & 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Or) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(Or(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = Or(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 | 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Xor) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(Xor(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = Xor(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 ^ 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(LogicalAnd(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = LogicalAnd(true, false);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 && 4
+    EXPECT_EQ(d.AsString(), R"(%1 = true && false
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(LogicalOr(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = LogicalOr(false, true);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 || 4
+    EXPECT_EQ(d.AsString(), R"(%1 = false || true
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Eqaul) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(Equal(3_u, 4_u));
-    ASSERT_TRUE(r);
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Equal) {
+    auto* expr = Equal(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 == 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_NotEqual) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(NotEqual(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = NotEqual(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 != 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThan) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(LessThan(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = LessThan(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 < 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThan) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(GreaterThan(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = GreaterThan(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 > 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThanEqual) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(LessThanEqual(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = LessThanEqual(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 <= 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThanEqual) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(GreaterThanEqual(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = GreaterThanEqual(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 >= 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftLeft) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(Shl(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = Shl(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 << 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftRight) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(Shr(3_u, 4_u));
-    ASSERT_TRUE(r);
+    auto* expr = Shr(3_u, 4_u);
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 >> 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
-    auto& b = CreateEmptyBuilder();
-    auto r = b.EmitExpression(LogicalOr(  //
-        LessThan(1_u, Add(Shr(3_u, 4_u), 9_u)), GreaterThan(2.5_f, Div(6.7_f, Mul(2.3_f, 5.5_f)))));
-    ASSERT_TRUE(r);
+    auto* expr = LogicalOr(LessThan(1_u, Add(Shr(3_u, 4_u), 9_u)),
+                           GreaterThan(2.5_f, Div(6.7_f, Mul(2.3_f, 5.5_f))));
+    WrapInFunction(expr);
 
-    Disassembler d;
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
     EXPECT_EQ(d.AsString(), R"(%1 = 3 >> 4
 %2 = %1 + 9
 %3 = 1 < %2
-%4 = 2.300000 * 5.500000
-%5 = 6.700000 / %4
-%6 = 2.500000 > %5
+%4 = 2.3 * 5.5
+%5 = 6.7 / %4
+%6 = 2.5 > %5
 %7 = %3 || %6
 )");
 }

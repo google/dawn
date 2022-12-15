@@ -20,6 +20,7 @@
 #include "src/tint/castable.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/value.h"
+#include "src/tint/symbol_table.h"
 
 namespace tint::ir {
 
@@ -79,8 +80,9 @@ class Binary : public Castable<Binary, Instruction> {
 
     /// Write the instruction to the given stream
     /// @param out the stream to write to
+    /// @param st the symbol table
     /// @returns the stream
-    std::ostream& ToString(std::ostream& out) const override;
+    std::ostream& ToString(std::ostream& out, const SymbolTable& st) const override;
 
   private:
     Kind kind_;

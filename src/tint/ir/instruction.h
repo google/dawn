@@ -18,6 +18,7 @@
 #include <ostream>
 
 #include "src/tint/castable.h"
+#include "src/tint/symbol_table.h"
 
 namespace tint::ir {
 
@@ -34,8 +35,9 @@ class Instruction : public Castable<Instruction> {
 
     /// Write the instruction to the given stream
     /// @param out the stream to write to
+    /// @param st the symbol table
     /// @returns the stream
-    virtual std::ostream& ToString(std::ostream& out) const = 0;
+    virtual std::ostream& ToString(std::ostream& out, const SymbolTable& st) const = 0;
 
   protected:
     /// Constructor

@@ -28,13 +28,13 @@ namespace tint::ir {
 class Disassembler {
   public:
     /// Constructor
-    Disassembler();
+    /// @param mod the module
+    explicit Disassembler(const Module& mod);
     ~Disassembler();
 
     /// Returns the module as a string
-    /// @param mod the module to emit
     /// @returns the string representation of the module
-    std::string Disassemble(const Module& mod);
+    std::string Disassemble();
 
     /// Writes the block instructions to the stream
     /// @param b the block containing the instructions
@@ -47,6 +47,7 @@ class Disassembler {
     std::ostream& Indent();
     void Walk(const FlowNode* node);
 
+    const Module& mod_;
     std::stringstream out_;
     std::unordered_set<const FlowNode*> visited_;
     std::unordered_set<const FlowNode*> stop_nodes_;

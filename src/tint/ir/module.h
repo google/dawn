@@ -17,9 +17,11 @@
 
 #include <string>
 
+#include "src/tint/constant/value.h"
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/value.h"
+#include "src/tint/type/manager.h"
 #include "src/tint/utils/block_allocator.h"
 #include "src/tint/utils/result.h"
 #include "src/tint/utils/vector.h"
@@ -68,6 +70,8 @@ class Module {
 
     /// The flow node allocator
     utils::BlockAllocator<FlowNode> flow_nodes;
+    /// The constant allocator
+    utils::BlockAllocator<constant::Value> constants;
     /// The value allocator
     utils::BlockAllocator<Value> values;
     /// The instruction allocator
@@ -80,6 +84,9 @@ class Module {
 
     /// The source ast::Program this module was constucted from
     const Program* program;
+
+    /// The type manager for the module
+    type::Manager types;
 };
 
 }  // namespace tint::ir

@@ -24,7 +24,7 @@ Temp::Temp(Id id) : id_(id) {}
 
 Temp::~Temp() = default;
 
-std::ostream& Temp::ToString(std::ostream& out) const {
+std::ostream& Temp::ToString(std::ostream& out, const SymbolTable&) const {
     out << "%" << std::to_string(AsId());
     return out;
 }

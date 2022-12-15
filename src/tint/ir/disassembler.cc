@@ -50,7 +50,7 @@ class ScopedIndent {
 
 }  // namespace
 
-Disassembler::Disassembler() = default;
+Disassembler::Disassembler(const Module& mod) : mod_(mod) {}
 
 Disassembler::~Disassembler() = default;
 
@@ -63,7 +63,7 @@ std::ostream& Disassembler::Indent() {
 
 void Disassembler::EmitBlockInstructions(const Block* b) {
     for (const auto* instr : b->instructions) {
-        instr->ToString(out_) << std::endl;
+        instr->ToString(out_, mod_.program->Symbols()) << std::endl;
     }
 }
 
@@ -144,8 +144,8 @@ void Disassembler::Walk(const FlowNode* node) {
         [&](const ir::Terminator*) { Indent() << "Function end" << std::endl; });
 }
 
-std::string Disassembler::Disassemble(const Module& mod) {
-    for (const auto* func : mod.functions) {
+std::string Disassembler::Disassemble() {
+    for (const auto* func : mod_.functions) {
         Walk(func);
     }
     return out_.str();

@@ -29,17 +29,17 @@ TEST_F(IR_ConstantTest, f32) {
 
     std::stringstream str;
 
-    auto* val = b.builder.Constant(1.2_f);
-    EXPECT_EQ(1.2_f, val->AsF32());
+    auto* c = b.builder.Constant(1.2_f);
+    EXPECT_EQ(1.2_f, c->value->As<constant::Scalar<f32>>()->ValueAs<f32>());
 
-    val->ToString(str);
-    EXPECT_EQ("1.200000", str.str());
+    c->ToString(str, program->Symbols());
+    EXPECT_EQ("1.2", str.str());
 
-    EXPECT_TRUE(val->IsF32());
-    EXPECT_FALSE(val->IsF16());
-    EXPECT_FALSE(val->IsI32());
-    EXPECT_FALSE(val->IsU32());
-    EXPECT_FALSE(val->IsBool());
+    EXPECT_TRUE(c->value->Is<constant::Scalar<f32>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<f16>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<i32>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<u32>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<bool>>());
 }
 
 TEST_F(IR_ConstantTest, f16) {
@@ -47,17 +47,17 @@ TEST_F(IR_ConstantTest, f16) {
 
     std::stringstream str;
 
-    auto* val = b.builder.Constant(1.1_h);
-    EXPECT_EQ(1.1_h, val->AsF16());
+    auto* c = b.builder.Constant(1.1_h);
+    EXPECT_EQ(1.1_h, c->value->As<constant::Scalar<f16>>()->ValueAs<f16>());
 
-    val->ToString(str);
-    EXPECT_EQ("1.099609", str.str());
+    c->ToString(str, program->Symbols());
+    EXPECT_EQ("1.09961", str.str());
 
-    EXPECT_FALSE(val->IsF32());
-    EXPECT_TRUE(val->IsF16());
-    EXPECT_FALSE(val->IsI32());
-    EXPECT_FALSE(val->IsU32());
-    EXPECT_FALSE(val->IsBool());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());
+    EXPECT_TRUE(c->value->Is<constant::Scalar<f16>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<i32>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<u32>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<bool>>());
 }
 
 TEST_F(IR_ConstantTest, i32) {
@@ -65,17 +65,17 @@ TEST_F(IR_ConstantTest, i32) {
 
     std::stringstream str;
 
-    auto* val = b.builder.Constant(1_i);
-    EXPECT_EQ(1_i, val->AsI32());
+    auto* c = b.builder.Constant(1_i);
+    EXPECT_EQ(1_i, c->value->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    val->ToString(str);
+    c->ToString(str, program->Symbols());
     EXPECT_EQ("1", str.str());
 
-    EXPECT_FALSE(val->IsF32());
-    EXPECT_FALSE(val->IsF16());
-    EXPECT_TRUE(val->IsI32());
-    EXPECT_FALSE(val->IsU32());
-    EXPECT_FALSE(val->IsBool());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<f16>>());
+    EXPECT_TRUE(c->value->Is<constant::Scalar<i32>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<u32>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<bool>>());
 }
 
 TEST_F(IR_ConstantTest, u32) {
@@ -83,17 +83,17 @@ TEST_F(IR_ConstantTest, u32) {
 
     std::stringstream str;
 
-    auto* val = b.builder.Constant(2_u);
-    EXPECT_EQ(2_u, val->AsU32());
+    auto* c = b.builder.Constant(2_u);
+    EXPECT_EQ(2_u, c->value->As<constant::Scalar<u32>>()->ValueAs<u32>());
 
-    val->ToString(str);
+    c->ToString(str, program->Symbols());
     EXPECT_EQ("2", str.str());
 
-    EXPECT_FALSE(val->IsF32());
-    EXPECT_FALSE(val->IsF16());
-    EXPECT_FALSE(val->IsI32());
-    EXPECT_TRUE(val->IsU32());
-    EXPECT_FALSE(val->IsBool());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<f16>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<i32>>());
+    EXPECT_TRUE(c->value->Is<constant::Scalar<u32>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<bool>>());
 }
 
 TEST_F(IR_ConstantTest, bool) {
@@ -101,24 +101,24 @@ TEST_F(IR_ConstantTest, bool) {
 
     std::stringstream str;
 
-    auto* val = b.builder.Constant(false);
-    EXPECT_FALSE(val->AsBool());
+    auto* c = b.builder.Constant(false);
+    EXPECT_FALSE(c->value->As<constant::Scalar<bool>>()->ValueAs<bool>());
 
-    val->ToString(str);
+    c->ToString(str, program->Symbols());
     EXPECT_EQ("false", str.str());
 
     str.str("");
-    val = b.builder.Constant(true);
-    EXPECT_TRUE(val->AsBool());
+    c = b.builder.Constant(true);
+    EXPECT_TRUE(c->value->As<constant::Scalar<bool>>()->ValueAs<bool>());
 
-    val->ToString(str);
+    c->ToString(str, program->Symbols());
     EXPECT_EQ("true", str.str());
 
-    EXPECT_FALSE(val->IsF32());
-    EXPECT_FALSE(val->IsF16());
-    EXPECT_FALSE(val->IsI32());
-    EXPECT_FALSE(val->IsU32());
-    EXPECT_TRUE(val->IsBool());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<f16>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<i32>>());
+    EXPECT_FALSE(c->value->Is<constant::Scalar<u32>>());
+    EXPECT_TRUE(c->value->Is<constant::Scalar<bool>>());
 }
 
 }  // namespace

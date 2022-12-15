@@ -18,6 +18,7 @@
 #include <ostream>
 
 #include "src/tint/ir/value.h"
+#include "src/tint/symbol_table.h"
 
 namespace tint::ir {
 
@@ -45,8 +46,9 @@ class Temp : public Castable<Temp, Value> {
 
     /// Write the temp to the given stream
     /// @param out the stream to write to
+    /// @param st the symbol table
     /// @returns the stream
-    std::ostream& ToString(std::ostream& out) const override;
+    std::ostream& ToString(std::ostream& out, const SymbolTable& st) const override;
 
   private:
     Id id_ = 0;

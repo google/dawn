@@ -1344,8 +1344,8 @@ int main(int argc, const char** argv) {
         } else {
             auto mod = result.Move();
             if (options.dump_ir) {
-                tint::ir::Disassembler d;
-                std::cout << d.Disassemble(mod) << std::endl;
+                tint::ir::Disassembler d(mod);
+                std::cout << d.Disassemble() << std::endl;
             }
             if (options.dump_ir_graph) {
                 auto graph = tint::ir::Debug::AsDotGraph(&mod);

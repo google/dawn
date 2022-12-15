@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/ir/builder_impl.h"
 #include "src/tint/ir/disassembler.h"
+#include "src/tint/number.h"
 #include "src/tint/program_builder.h"
 
 namespace tint::ir {
@@ -41,11 +42,20 @@ class TestHelperBase : public BASE, public ProgramBuilder {
         if (gen_) {
             return *gen_;
         }
-        program = std::make_unique<Program>(std::move(*this));
         diag::Formatter formatter;
+
+        program = std::make_unique<Program>(std::move(*this));
         [&]() { ASSERT_TRUE(program->IsValid()) << formatter.format(program->Diagnostics()); }();
         gen_ = std::make_unique<BuilderImpl>(program.get());
         return *gen_;
+    }
+
+    /// Injects a flow block into the builder
+    /// @returns the injected block
+    ir::Block* InjectFlowBlock() {
+        auto* block = gen_->builder.CreateBlock();
+        gen_->current_flow_block = block;
+        return block;
     }
 
     /// Creates a BuilderImpl without an originating program. This is used for testing the
@@ -53,7 +63,8 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     /// is initialized with an empty block.
     /// @returns the BuilderImpl for testing.
     BuilderImpl& CreateEmptyBuilder() {
-        gen_ = std::make_unique<BuilderImpl>(nullptr);
+        program = std::make_unique<Program>();
+        gen_ = std::make_unique<BuilderImpl>(program.get());
         gen_->current_flow_block = gen_->builder.CreateBlock();
         return *gen_;
     }
