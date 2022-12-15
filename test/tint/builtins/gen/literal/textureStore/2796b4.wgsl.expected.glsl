@@ -4,7 +4,7 @@ SKIP: FAILED
 
 layout(rg32i) uniform highp writeonly iimage3D arg_0;
 void textureStore_2796b4() {
-  imageStore(arg_0, ivec3(0), ivec4(0));
+  imageStore(arg_0, ivec3(1), ivec4(1));
 }
 
 vec4 vertex_main() {
@@ -32,7 +32,7 @@ precision mediump float;
 
 layout(rg32i) uniform highp writeonly iimage3D arg_0;
 void textureStore_2796b4() {
-  imageStore(arg_0, ivec3(0), ivec4(0));
+  imageStore(arg_0, ivec3(1), ivec4(1));
 }
 
 void fragment_main() {
@@ -54,7 +54,7 @@ ERROR: 2 compilation errors.  No code generated.
 
 layout(rg32i) uniform highp writeonly iimage3D arg_0;
 void textureStore_2796b4() {
-  imageStore(arg_0, ivec3(0), ivec4(0));
+  imageStore(arg_0, ivec3(1), ivec4(1));
 }
 
 void compute_main() {

@@ -5,10 +5,10 @@ SKIP: FAILED
 uniform highp samplerCubeArray arg_0_arg_1;
 
 void textureSampleGrad_bbb58f() {
-  vec3 arg_2 = vec3(0.0f);
+  vec3 arg_2 = vec3(1.0f);
   uint arg_3 = 1u;
-  vec3 arg_4 = vec3(0.0f);
-  vec3 arg_5 = vec3(0.0f);
+  vec3 arg_4 = vec3(1.0f);
+  vec3 arg_5 = vec3(1.0f);
   vec4 res = textureGrad(arg_0_arg_1, vec4(arg_2, float(arg_3)), arg_4, arg_5);
 }
 
@@ -38,10 +38,10 @@ precision mediump float;
 uniform highp samplerCubeArray arg_0_arg_1;
 
 void textureSampleGrad_bbb58f() {
-  vec3 arg_2 = vec3(0.0f);
+  vec3 arg_2 = vec3(1.0f);
   uint arg_3 = 1u;
-  vec3 arg_4 = vec3(0.0f);
-  vec3 arg_5 = vec3(0.0f);
+  vec3 arg_4 = vec3(1.0f);
+  vec3 arg_5 = vec3(1.0f);
   vec4 res = textureGrad(arg_0_arg_1, vec4(arg_2, float(arg_3)), arg_4, arg_5);
 }
 
@@ -65,10 +65,10 @@ ERROR: 2 compilation errors.  No code generated.
 uniform highp samplerCubeArray arg_0_arg_1;
 
 void textureSampleGrad_bbb58f() {
-  vec3 arg_2 = vec3(0.0f);
+  vec3 arg_2 = vec3(1.0f);
   uint arg_3 = 1u;
-  vec3 arg_4 = vec3(0.0f);
-  vec3 arg_5 = vec3(0.0f);
+  vec3 arg_4 = vec3(1.0f);
+  vec3 arg_5 = vec3(1.0f);
   vec4 res = textureGrad(arg_0_arg_1, vec4(arg_2, float(arg_3)), arg_4, arg_5);
 }
 

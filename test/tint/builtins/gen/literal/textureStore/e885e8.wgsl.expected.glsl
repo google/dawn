@@ -4,7 +4,7 @@ SKIP: FAILED
 
 layout(rgba16f) uniform highp writeonly image1D arg_0;
 void textureStore_e885e8() {
-  imageStore(arg_0, 1, vec4(0.0f));
+  imageStore(arg_0, 1, vec4(1.0f));
 }
 
 vec4 vertex_main() {
@@ -33,7 +33,7 @@ precision mediump float;
 
 layout(rgba16f) uniform highp writeonly image1D arg_0;
 void textureStore_e885e8() {
-  imageStore(arg_0, 1, vec4(0.0f));
+  imageStore(arg_0, 1, vec4(1.0f));
 }
 
 void fragment_main() {
@@ -56,7 +56,7 @@ ERROR: 2 compilation errors.  No code generated.
 
 layout(rgba16f) uniform highp writeonly image1D arg_0;
 void textureStore_e885e8() {
-  imageStore(arg_0, 1, vec4(0.0f));
+  imageStore(arg_0, 1, vec4(1.0f));
 }
 
 void compute_main() {

@@ -5,7 +5,7 @@ SKIP: FAILED
 uniform highp usamplerCubeArray arg_1_arg_2;
 
 void textureGather_e2acac() {
-  vec3 arg_3 = vec3(0.0f);
+  vec3 arg_3 = vec3(1.0f);
   uint arg_4 = 1u;
   uvec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), int(1u));
 }
@@ -36,7 +36,7 @@ precision mediump float;
 uniform highp usamplerCubeArray arg_1_arg_2;
 
 void textureGather_e2acac() {
-  vec3 arg_3 = vec3(0.0f);
+  vec3 arg_3 = vec3(1.0f);
   uint arg_4 = 1u;
   uvec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), int(1u));
 }
@@ -61,7 +61,7 @@ ERROR: 2 compilation errors.  No code generated.
 uniform highp usamplerCubeArray arg_1_arg_2;
 
 void textureGather_e2acac() {
-  vec3 arg_3 = vec3(0.0f);
+  vec3 arg_3 = vec3(1.0f);
   uint arg_4 = 1u;
   uvec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), int(1u));
 }

@@ -5,7 +5,7 @@ SKIP: FAILED
 layout(rgba16f) uniform highp writeonly image1D arg_0;
 void textureStore_a4c338() {
   uint arg_1 = 1u;
-  vec4 arg_2 = vec4(0.0f);
+  vec4 arg_2 = vec4(1.0f);
   imageStore(arg_0, int(arg_1), arg_2);
 }
 
@@ -36,7 +36,7 @@ precision mediump float;
 layout(rgba16f) uniform highp writeonly image1D arg_0;
 void textureStore_a4c338() {
   uint arg_1 = 1u;
-  vec4 arg_2 = vec4(0.0f);
+  vec4 arg_2 = vec4(1.0f);
   imageStore(arg_0, int(arg_1), arg_2);
 }
 
@@ -61,7 +61,7 @@ ERROR: 2 compilation errors.  No code generated.
 layout(rgba16f) uniform highp writeonly image1D arg_0;
 void textureStore_a4c338() {
   uint arg_1 = 1u;
-  vec4 arg_2 = vec4(0.0f);
+  vec4 arg_2 = vec4(1.0f);
   imageStore(arg_0, int(arg_1), arg_2);
 }
 

@@ -5,7 +5,7 @@ SKIP: FAILED
 uniform highp isamplerCubeArray arg_1_arg_2;
 
 void textureGather_aaf6bd() {
-  vec3 arg_3 = vec3(0.0f);
+  vec3 arg_3 = vec3(1.0f);
   int arg_4 = 1;
   ivec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), int(1u));
 }
@@ -36,7 +36,7 @@ precision mediump float;
 uniform highp isamplerCubeArray arg_1_arg_2;
 
 void textureGather_aaf6bd() {
-  vec3 arg_3 = vec3(0.0f);
+  vec3 arg_3 = vec3(1.0f);
   int arg_4 = 1;
   ivec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), int(1u));
 }
@@ -61,7 +61,7 @@ ERROR: 2 compilation errors.  No code generated.
 uniform highp isamplerCubeArray arg_1_arg_2;
 
 void textureGather_aaf6bd() {
-  vec3 arg_3 = vec3(0.0f);
+  vec3 arg_3 = vec3(1.0f);
   int arg_4 = 1;
   ivec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), int(1u));
 }

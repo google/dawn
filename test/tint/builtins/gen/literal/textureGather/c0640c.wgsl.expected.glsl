@@ -5,7 +5,7 @@ SKIP: FAILED
 uniform highp isamplerCubeArray arg_1_arg_2;
 
 void textureGather_c0640c() {
-  ivec4 res = textureGather(arg_1_arg_2, vec4(0.0f, 0.0f, 0.0f, float(1)), 1);
+  ivec4 res = textureGather(arg_1_arg_2, vec4(vec3(1.0f), float(1)), 1);
 }
 
 vec4 vertex_main() {
@@ -34,7 +34,7 @@ precision mediump float;
 uniform highp isamplerCubeArray arg_1_arg_2;
 
 void textureGather_c0640c() {
-  ivec4 res = textureGather(arg_1_arg_2, vec4(0.0f, 0.0f, 0.0f, float(1)), 1);
+  ivec4 res = textureGather(arg_1_arg_2, vec4(vec3(1.0f), float(1)), 1);
 }
 
 void fragment_main() {
@@ -57,7 +57,7 @@ ERROR: 2 compilation errors.  No code generated.
 uniform highp isamplerCubeArray arg_1_arg_2;
 
 void textureGather_c0640c() {
-  ivec4 res = textureGather(arg_1_arg_2, vec4(0.0f, 0.0f, 0.0f, float(1)), 1);
+  ivec4 res = textureGather(arg_1_arg_2, vec4(vec3(1.0f), float(1)), 1);
 }
 
 void compute_main() {

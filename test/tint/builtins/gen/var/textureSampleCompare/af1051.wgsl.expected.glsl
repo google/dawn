@@ -6,10 +6,10 @@ precision mediump float;
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
 void textureSampleCompare_af1051() {
-  vec2 arg_2 = vec2(0.0f);
+  vec2 arg_2 = vec2(1.0f);
   int arg_3 = 1;
   float arg_4 = 1.0f;
-  float res = textureOffset(arg_0_arg_1, vec4(vec3(arg_2, float(arg_3)), arg_4), ivec2(0));
+  float res = textureOffset(arg_0_arg_1, vec4(vec3(arg_2, float(arg_3)), arg_4), ivec2(1));
 }
 
 void fragment_main() {

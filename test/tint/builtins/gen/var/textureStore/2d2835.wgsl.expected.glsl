@@ -4,9 +4,9 @@ SKIP: FAILED
 
 layout(rg32f) uniform highp writeonly image2DArray arg_0;
 void textureStore_2d2835() {
-  uvec2 arg_1 = uvec2(0u);
+  uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
-  vec4 arg_3 = vec4(0.0f);
+  vec4 arg_3 = vec4(1.0f);
   imageStore(arg_0, ivec3(uvec3(arg_1, arg_2)), arg_3);
 }
 
@@ -35,9 +35,9 @@ precision mediump float;
 
 layout(rg32f) uniform highp writeonly image2DArray arg_0;
 void textureStore_2d2835() {
-  uvec2 arg_1 = uvec2(0u);
+  uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
-  vec4 arg_3 = vec4(0.0f);
+  vec4 arg_3 = vec4(1.0f);
   imageStore(arg_0, ivec3(uvec3(arg_1, arg_2)), arg_3);
 }
 
@@ -60,9 +60,9 @@ ERROR: 2 compilation errors.  No code generated.
 
 layout(rg32f) uniform highp writeonly image2DArray arg_0;
 void textureStore_2d2835() {
-  uvec2 arg_1 = uvec2(0u);
+  uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
-  vec4 arg_3 = vec4(0.0f);
+  vec4 arg_3 = vec4(1.0f);
   imageStore(arg_0, ivec3(uvec3(arg_1, arg_2)), arg_3);
 }
 

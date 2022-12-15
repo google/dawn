@@ -5,7 +5,7 @@ SKIP: FAILED
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
 void textureSampleLevel_1bf73e() {
-  float res = textureLod(arg_0_arg_1, vec4(0.0f, 0.0f, float(1), 0.0f), float(1));
+  float res = textureLod(arg_0_arg_1, vec4(vec3(vec2(1.0f), float(1)), 0.0f), float(1));
 }
 
 vec4 vertex_main() {
@@ -34,7 +34,7 @@ precision mediump float;
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
 void textureSampleLevel_1bf73e() {
-  float res = textureLod(arg_0_arg_1, vec4(0.0f, 0.0f, float(1), 0.0f), float(1));
+  float res = textureLod(arg_0_arg_1, vec4(vec3(vec2(1.0f), float(1)), 0.0f), float(1));
 }
 
 void fragment_main() {
@@ -57,7 +57,7 @@ ERROR: 2 compilation errors.  No code generated.
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
 void textureSampleLevel_1bf73e() {
-  float res = textureLod(arg_0_arg_1, vec4(0.0f, 0.0f, float(1), 0.0f), float(1));
+  float res = textureLod(arg_0_arg_1, vec4(vec3(vec2(1.0f), float(1)), 0.0f), float(1));
 }
 
 void compute_main() {

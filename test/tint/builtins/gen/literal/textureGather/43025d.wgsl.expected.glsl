@@ -5,7 +5,7 @@ SKIP: FAILED
 uniform highp samplerCubeArrayShadow arg_0_arg_1;
 
 void textureGather_43025d() {
-  vec4 res = textureGather(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)), 0.0);
+  vec4 res = textureGather(arg_0_arg_1, vec4(vec3(1.0f), float(1)), 0.0);
 }
 
 vec4 vertex_main() {
@@ -34,7 +34,7 @@ precision mediump float;
 uniform highp samplerCubeArrayShadow arg_0_arg_1;
 
 void textureGather_43025d() {
-  vec4 res = textureGather(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)), 0.0);
+  vec4 res = textureGather(arg_0_arg_1, vec4(vec3(1.0f), float(1)), 0.0);
 }
 
 void fragment_main() {
@@ -57,7 +57,7 @@ ERROR: 2 compilation errors.  No code generated.
 uniform highp samplerCubeArrayShadow arg_0_arg_1;
 
 void textureGather_43025d() {
-  vec4 res = textureGather(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)), 0.0);
+  vec4 res = textureGather(arg_0_arg_1, vec4(vec3(1.0f), float(1)), 0.0);
 }
 
 void compute_main() {

@@ -6,6 +6,7 @@ struct QuicksortObject {
 }
 
 struct buf0 {
+  /* @offset(0) */
   resolution : vec2<f32>,
 }
 

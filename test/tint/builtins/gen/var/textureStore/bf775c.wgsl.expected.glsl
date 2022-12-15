@@ -5,7 +5,7 @@ SKIP: FAILED
 layout(rgba8i) uniform highp writeonly iimage1D arg_0;
 void textureStore_bf775c() {
   int arg_1 = 1;
-  ivec4 arg_2 = ivec4(0);
+  ivec4 arg_2 = ivec4(1);
   imageStore(arg_0, arg_1, arg_2);
 }
 
@@ -36,7 +36,7 @@ precision mediump float;
 layout(rgba8i) uniform highp writeonly iimage1D arg_0;
 void textureStore_bf775c() {
   int arg_1 = 1;
-  ivec4 arg_2 = ivec4(0);
+  ivec4 arg_2 = ivec4(1);
   imageStore(arg_0, arg_1, arg_2);
 }
 
@@ -61,7 +61,7 @@ ERROR: 2 compilation errors.  No code generated.
 layout(rgba8i) uniform highp writeonly iimage1D arg_0;
 void textureStore_bf775c() {
   int arg_1 = 1;
-  ivec4 arg_2 = ivec4(0);
+  ivec4 arg_2 = ivec4(1);
   imageStore(arg_0, arg_1, arg_2);
 }
 

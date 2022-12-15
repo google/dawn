@@ -5,10 +5,10 @@ SKIP: FAILED
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
 void textureSampleLevel_36f0d3() {
-  vec2 arg_2 = vec2(0.0f);
+  vec2 arg_2 = vec2(1.0f);
   int arg_3 = 1;
   uint arg_4 = 1u;
-  float res = textureLodOffset(arg_0_arg_1, vec4(vec3(arg_2, float(arg_3)), 0.0f), float(arg_4), ivec2(0));
+  float res = textureLodOffset(arg_0_arg_1, vec4(vec3(arg_2, float(arg_3)), 0.0f), float(arg_4), ivec2(1));
 }
 
 vec4 vertex_main() {
@@ -37,10 +37,10 @@ precision mediump float;
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
 void textureSampleLevel_36f0d3() {
-  vec2 arg_2 = vec2(0.0f);
+  vec2 arg_2 = vec2(1.0f);
   int arg_3 = 1;
   uint arg_4 = 1u;
-  float res = textureLodOffset(arg_0_arg_1, vec4(vec3(arg_2, float(arg_3)), 0.0f), float(arg_4), ivec2(0));
+  float res = textureLodOffset(arg_0_arg_1, vec4(vec3(arg_2, float(arg_3)), 0.0f), float(arg_4), ivec2(1));
 }
 
 void fragment_main() {
@@ -63,10 +63,10 @@ ERROR: 2 compilation errors.  No code generated.
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
 void textureSampleLevel_36f0d3() {
-  vec2 arg_2 = vec2(0.0f);
+  vec2 arg_2 = vec2(1.0f);
   int arg_3 = 1;
   uint arg_4 = 1u;
-  float res = textureLodOffset(arg_0_arg_1, vec4(vec3(arg_2, float(arg_3)), 0.0f), float(arg_4), ivec2(0));
+  float res = textureLodOffset(arg_0_arg_1, vec4(vec3(arg_2, float(arg_3)), 0.0f), float(arg_4), ivec2(1));
 }
 
 void compute_main() {

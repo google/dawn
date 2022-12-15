@@ -4,8 +4,8 @@ SKIP: FAILED
 
 layout(rg32ui) uniform highp writeonly uimage3D arg_0;
 void textureStore_ac67aa() {
-  ivec3 arg_1 = ivec3(0);
-  uvec4 arg_2 = uvec4(0u);
+  ivec3 arg_1 = ivec3(1);
+  uvec4 arg_2 = uvec4(1u);
   imageStore(arg_0, arg_1, arg_2);
 }
 
@@ -34,8 +34,8 @@ precision mediump float;
 
 layout(rg32ui) uniform highp writeonly uimage3D arg_0;
 void textureStore_ac67aa() {
-  ivec3 arg_1 = ivec3(0);
-  uvec4 arg_2 = uvec4(0u);
+  ivec3 arg_1 = ivec3(1);
+  uvec4 arg_2 = uvec4(1u);
   imageStore(arg_0, arg_1, arg_2);
 }
 
@@ -58,8 +58,8 @@ ERROR: 2 compilation errors.  No code generated.
 
 layout(rg32ui) uniform highp writeonly uimage3D arg_0;
 void textureStore_ac67aa() {
-  ivec3 arg_1 = ivec3(0);
-  uvec4 arg_2 = uvec4(0u);
+  ivec3 arg_1 = ivec3(1);
+  uvec4 arg_2 = uvec4(1u);
   imageStore(arg_0, arg_1, arg_2);
 }
 

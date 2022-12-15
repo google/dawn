@@ -5,7 +5,7 @@ SKIP: FAILED
 uniform highp samplerCubeArray arg_0_arg_1;
 
 void textureSampleLevel_0bdd9a() {
-  vec3 arg_2 = vec3(0.0f);
+  vec3 arg_2 = vec3(1.0f);
   int arg_3 = 1;
   float arg_4 = 1.0f;
   vec4 res = textureLod(arg_0_arg_1, vec4(arg_2, float(arg_3)), arg_4);
@@ -37,7 +37,7 @@ precision mediump float;
 uniform highp samplerCubeArray arg_0_arg_1;
 
 void textureSampleLevel_0bdd9a() {
-  vec3 arg_2 = vec3(0.0f);
+  vec3 arg_2 = vec3(1.0f);
   int arg_3 = 1;
   float arg_4 = 1.0f;
   vec4 res = textureLod(arg_0_arg_1, vec4(arg_2, float(arg_3)), arg_4);
@@ -63,7 +63,7 @@ ERROR: 2 compilation errors.  No code generated.
 uniform highp samplerCubeArray arg_0_arg_1;
 
 void textureSampleLevel_0bdd9a() {
-  vec3 arg_2 = vec3(0.0f);
+  vec3 arg_2 = vec3(1.0f);
   int arg_3 = 1;
   float arg_4 = 1.0f;
   vec4 res = textureLod(arg_0_arg_1, vec4(arg_2, float(arg_3)), arg_4);
