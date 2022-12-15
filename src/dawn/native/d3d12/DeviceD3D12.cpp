@@ -724,7 +724,7 @@ void Device::InitTogglesFromDriver() {
         const gpu_info::DriverVersion kFixedDriverVersion = {30, 0, 101, 1692};
         if (gpu_info::CompareWindowsDriverVersion(vendorId, GetAdapter()->GetDriverVersion(),
                                                   kFixedDriverVersion) == -1) {
-            SetToggle(Toggle::D3D12AllocateExtraMemoryFor2DArrayTexture, true);
+            SetToggle(Toggle::D3D12AllocateExtraMemoryFor2DArrayColorTexture, true);
         }
     }
 

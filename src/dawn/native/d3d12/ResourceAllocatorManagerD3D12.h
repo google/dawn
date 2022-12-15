@@ -65,7 +65,7 @@ class ResourceAllocatorManager {
         D3D12_HEAP_TYPE heapType,
         const D3D12_RESOURCE_DESC& resourceDescriptor,
         D3D12_RESOURCE_STATES initialUsage,
-        uint32_t formatBytesPerBlock,
+        uint32_t colorFormatBytesPerBlock,
         bool forceAllocateAsCommittedResource = false);
 
     void DeallocateMemory(ResourceHeapAllocation& allocation);

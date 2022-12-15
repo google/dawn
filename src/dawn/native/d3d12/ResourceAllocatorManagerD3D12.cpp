@@ -229,7 +229,7 @@ uint32_t ComputeExtraArraySizeForIntelGen12(uint32_t width,
                                             uint32_t arrayLayerCount,
                                             uint32_t mipLevelCount,
                                             uint32_t sampleCount,
-                                            uint32_t formatBytesPerBlock) {
+                                            uint32_t colorFormatBytesPerBlock) {
     // For details about texture memory layout on Intel Gen12 GPU, read
     // https://01.org/sites/default/files/documentation/intel-gfx-prm-osrc-tgl-vol05-memory_data_formats.pdf.
     //   - Texture memory layout: from <Surface Memory Organizations> to
@@ -243,9 +243,9 @@ uint32_t ComputeExtraArraySizeForIntelGen12(uint32_t width,
     // around the bug.
     constexpr uint32_t kTileSize = 16 * kPageSize;
 
-    // Tile's width and height vary according to format bit-wise (formatBytesPerBlock)
+    // Tile's width and height vary according to format bit-wise (colorFormatBytesPerBlock)
     uint32_t tileHeight = 0;
-    switch (formatBytesPerBlock) {
+    switch (colorFormatBytesPerBlock) {
         case 1:
             tileHeight = 256;
             break;
@@ -270,7 +270,7 @@ uint32_t ComputeExtraArraySizeForIntelGen12(uint32_t width,
 
     uint32_t columnPitch = GetColumnPitch(height, mipLevelCount);
 
-    uint64_t totalWidth = width * formatBytesPerBlock;
+    uint64_t totalWidth = width * colorFormatBytesPerBlock;
     uint64_t totalHeight = columnPitch * layerxSamples;
 
     // Texture should be aligned on both tile width (512 bytes) and tile height (128 rows) on Intel
@@ -280,17 +280,17 @@ uint32_t ComputeExtraArraySizeForIntelGen12(uint32_t width,
     uint64_t mainTileCount = mainTileCols * mainTileRows;
 
     // There is a bug in Intel old drivers to compute the auxiliary memory size (auxSize) of the
-    // texture, which is calculated from the main memory size (mainSize) of the texture. Note that
-    // memory allocation for mainSize itself is correct. But during memory allocation for auxSize,
-    // it re-caculated mainSize and did it in a wrong way. The incorrect algorithm doesn't respect
-    // alignment requirements from tile-based texture memory layout. It just simple aligned to a
-    // constant value (16K) for each sample and layer.
+    // color texture, which is calculated from the main memory size (mainSize) of the texture. Note
+    // that memory allocation for mainSize itself is correct. But during memory allocation for
+    // auxSize, it re-caculated mainSize and did it in a wrong way. The incorrect algorithm doesn't
+    // respect alignment requirements from tile-based texture memory layout. It just simple aligned
+    // to a constant value (16K) for each sample and layer.
     uint64_t expectedMainSize = mainTileCount * kTileSize;
     uint64_t actualMainSize = Align(columnPitch * totalWidth, kLinearAlignment) * layerxSamples;
 
     // If the incorrect mainSize calculation lead to less-than-expected auxSize, texture corruption
-    // is very likely to happen for any texture access like texture copy, rendering, sampling, etc.
-    // So we have to allocate a few more extra layers to offset the less-than-expected auxSize.
+    // is very likely to happen for any color texture access like texture copy, rendering, sampling,
+    // etc. So we have to allocate a few more extra layers to offset the less-than-expected auxSize.
     // However, it is fine if the incorrect mainSize calculation doesn't introduce less auxSize. For
     // example, if correct mainSize is 3.8M, it requires 4 pages of auxSize (16K). Any incorrect
     // mainSize between 3.0+ M and 4.0M also requires 16K auxSize according to the calculation:
@@ -344,7 +344,7 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
     D3D12_HEAP_TYPE heapType,
     const D3D12_RESOURCE_DESC& resourceDescriptor,
     D3D12_RESOURCE_STATES initialUsage,
-    uint32_t formatBytesPerBlock,
+    uint32_t colorFormatBytesPerBlock,
     bool forceAllocateAsCommittedResource) {
     // In order to suppress a warning in the D3D12 debug layer, we need to specify an
     // optimized clear value. As there are no negative consequences when picking a mismatched
@@ -357,16 +357,20 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
         optimizedClearValue = &zero;
     }
 
-    // If we are allocating memory for a 2D array texture on D3D12 backend, we need to allocate
-    // extra layers on some Intel Gen12 devices, see crbug.com/dawn/949 for details.
+    // If we are allocating memory for a 2D array texture with a color format on D3D12 backend,
+    // we need to allocate extra layers on some Intel Gen12 devices, see crbug.com/dawn/949
+    // for details.
     D3D12_RESOURCE_DESC revisedDescriptor = resourceDescriptor;
-    if (mDevice->IsToggleEnabled(Toggle::D3D12AllocateExtraMemoryFor2DArrayTexture) &&
+    if (mDevice->IsToggleEnabled(Toggle::D3D12AllocateExtraMemoryFor2DArrayColorTexture) &&
         resourceDescriptor.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D &&
-        resourceDescriptor.DepthOrArraySize > 1) {
+        resourceDescriptor.DepthOrArraySize > 1 && colorFormatBytesPerBlock > 0) {
+        // Multisample textures have one layer at most. Only non-multisample textures need the
+        // workaround.
+        ASSERT(revisedDescriptor.SampleDesc.Count <= 1);
         revisedDescriptor.DepthOrArraySize += ComputeExtraArraySizeForIntelGen12(
             resourceDescriptor.Width, resourceDescriptor.Height,
             resourceDescriptor.DepthOrArraySize, resourceDescriptor.MipLevels,
-            resourceDescriptor.SampleDesc.Count, formatBytesPerBlock);
+            resourceDescriptor.SampleDesc.Count, colorFormatBytesPerBlock);
     }
 
     // TODO(crbug.com/dawn/849): Conditionally disable sub-allocation.
@@ -614,7 +618,7 @@ uint64_t ResourceAllocatorManager::GetResourcePadding(
     const D3D12_RESOURCE_DESC& resourceDescriptor) const {
     // If we are allocating memory for a 2D array texture on D3D12 backend, we need to allocate
     // extra memory on some devices, see crbug.com/dawn/949 for details.
-    if (mDevice->IsToggleEnabled(Toggle::D3D12AllocateExtraMemoryFor2DArrayTexture) &&
+    if (mDevice->IsToggleEnabled(Toggle::D3D12AllocateExtraMemoryFor2DArrayColorTexture) &&
         resourceDescriptor.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D &&
         resourceDescriptor.DepthOrArraySize > 1) {
         return kExtraMemoryToMitigateTextureCorruption;
