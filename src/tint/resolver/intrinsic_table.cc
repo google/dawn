@@ -62,7 +62,7 @@ class Any final : public Castable<Any, type::Type> {
 
     // Stub implementations for type::Type conformance.
     size_t Hash() const override { return 0; }
-    bool Equals(const type::Type&) const override { return false; }
+    bool Equals(const type::UniqueNode&) const override { return false; }
     std::string FriendlyName(const SymbolTable&) const override { return "<any>"; }
 };
 

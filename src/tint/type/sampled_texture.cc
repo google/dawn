@@ -34,7 +34,7 @@ size_t SampledTexture::Hash() const {
     return utils::Hash(TypeInfo::Of<SampledTexture>().full_hashcode, dim(), type_);
 }
 
-bool SampledTexture::Equals(const Type& other) const {
+bool SampledTexture::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<SampledTexture>()) {
         return o->dim() == dim() && o->type_ == type_;
     }

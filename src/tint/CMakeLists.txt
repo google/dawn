@@ -514,6 +514,8 @@ list(APPEND TINT_LIB_SRCS
   type/type.h
   type/u32.cc
   type/u32.h
+  type/unique_node.cc
+  type/unique_node.h
   type/vector.cc
   type/vector.h
   type/void.cc

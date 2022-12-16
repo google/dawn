@@ -35,7 +35,7 @@ size_t F16::Hash() const {
     return static_cast<size_t>(TypeInfo::Of<F16>().full_hashcode);
 }
 
-bool F16::Equals(const Type& other) const {
+bool F16::Equals(const UniqueNode& other) const {
     return other.Is<F16>();
 }
 

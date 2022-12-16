@@ -19,21 +19,14 @@
 #include <string>
 
 #include "src/tint/symbol_table.h"
-#include "src/tint/type/node.h"
+#include "src/tint/type/unique_node.h"
 
 namespace tint::type {
 
 /// An array count
-class ArrayCount : public Castable<ArrayCount, Node> {
+class ArrayCount : public Castable<ArrayCount, UniqueNode> {
   public:
     ~ArrayCount() override;
-
-    /// @returns a hash of the array count.
-    virtual size_t Hash() const = 0;
-
-    /// @param t other array count
-    /// @returns true if this array count is equal to the given array count
-    virtual bool Equals(const ArrayCount& t) const = 0;
 
     /// @param symbols the symbol table
     /// @returns the friendly name for this array count
@@ -59,9 +52,9 @@ class ConstantArrayCount final : public Castable<ConstantArrayCount, ArrayCount>
     /// @returns a hash of the array count.
     size_t Hash() const override;
 
-    /// @param t other array count
-    /// @returns true if this array count is equal to the given array count
-    bool Equals(const ArrayCount& t) const override;
+    /// @param other the other object
+    /// @returns true if this array count is equal to other
+    bool Equals(const UniqueNode& other) const override;
 
     /// @param symbols the symbol table
     /// @returns the friendly name for this array count
@@ -85,9 +78,9 @@ class RuntimeArrayCount final : public Castable<RuntimeArrayCount, ArrayCount> {
     /// @returns a hash of the array count.
     size_t Hash() const override;
 
-    /// @param t other array count
-    /// @returns true if this array count is equal to the given array count
-    bool Equals(const ArrayCount& t) const override;
+    /// @param other the other object
+    /// @returns true if this array count is equal to other
+    bool Equals(const UniqueNode& other) const override;
 
     /// @param symbols the symbol table
     /// @returns the friendly name for this array count

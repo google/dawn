@@ -35,9 +35,9 @@ class Sampler final : public Castable<Sampler, Type> {
     /// @returns a hash of the type.
     size_t Hash() const override;
 
-    /// @param other the other type to compare against
-    /// @returns true if the this type is equal to the given type
-    bool Equals(const Type& other) const override;
+    /// @param other the other node to compare against
+    /// @returns true if the this type is equal to @p other
+    bool Equals(const UniqueNode& other) const override;
 
     /// @returns the sampler type
     ast::SamplerKind kind() const { return kind_; }

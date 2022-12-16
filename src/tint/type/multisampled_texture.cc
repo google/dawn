@@ -34,7 +34,7 @@ size_t MultisampledTexture::Hash() const {
     return utils::Hash(TypeInfo::Of<MultisampledTexture>().full_hashcode, dim(), type_);
 }
 
-bool MultisampledTexture::Equals(const Type& other) const {
+bool MultisampledTexture::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<MultisampledTexture>()) {
         return o->dim() == dim() && o->type_ == type_;
     }

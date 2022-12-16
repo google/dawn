@@ -31,7 +31,7 @@ size_t Sampler::Hash() const {
     return utils::Hash(TypeInfo::Of<Sampler>().full_hashcode, kind_);
 }
 
-bool Sampler::Equals(const Type& other) const {
+bool Sampler::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<Sampler>()) {
         return o->kind_ == kind_;
     }

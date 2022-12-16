@@ -539,33 +539,16 @@ class ProgramBuilder {
         return constant_nodes_.Create<constant::Splat>(type, element, n);
     }
 
-    /// Creates a new type::Type owned by the ProgramBuilder.
-    /// When the ProgramBuilder is destructed, owned ProgramBuilder and the
-    /// returned `Type` will also be destructed.
-    /// Types are unique (de-aliased), and so calling create() for the same `T`
-    /// and arguments will return the same pointer.
-    /// @param args the arguments to pass to the type constructor
-    /// @returns the de-aliased type pointer
+    /// Creates a new type::Node owned by the ProgramBuilder.
+    /// When the ProgramBuilder is destructed, owned ProgramBuilder and the returned node will also
+    /// be destructed. If T derives from type::UniqueNode, then the calling create() for the same
+    /// `T` and arguments will return the same pointer.
+    /// @param args the arguments to pass to the constructor
+    /// @returns the new, or existing node
     template <typename T, typename... ARGS>
-    traits::EnableIfIsType<T, type::Type>* create(ARGS&&... args) {
+    traits::EnableIfIsType<T, type::Node>* create(ARGS&&... args) {
         AssertNotMoved();
         return types_.Get<T>(std::forward<ARGS>(args)...);
-    }
-
-    /// Creates a new type::ArrayCount owned by the ProgramBuilder.
-    /// When the ProgramBuilder is destructed, owned ProgramBuilder and the
-    /// returned `ArrayCount` will also be destructed.
-    /// ArrayCounts are unique (de-aliased), and so calling create() for the same `T`
-    /// and arguments will return the same pointer.
-    /// @param args the arguments to pass to the array count constructor
-    /// @returns the de-aliased array count pointer
-    template <typename T, typename... ARGS>
-    traits::EnableIf<traits::IsTypeOrDerived<T, type::ArrayCount> ||
-                         traits::IsTypeOrDerived<T, type::StructMember>,
-                     T>*
-    create(ARGS&&... args) {
-        AssertNotMoved();
-        return types_.GetNode<T>(std::forward<ARGS>(args)...);
     }
 
     /// Marks this builder as moved, preventing any further use of the builder.

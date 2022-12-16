@@ -31,7 +31,7 @@ size_t Reference::Hash() const {
     return utils::Hash(TypeInfo::Of<Reference>().full_hashcode, address_space_, subtype_, access_);
 }
 
-bool Reference::Equals(const Type& other) const {
+bool Reference::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<Reference>()) {
         return o->address_space_ == address_space_ && o->subtype_ == subtype_ &&
                o->access_ == access_;

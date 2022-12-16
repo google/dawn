@@ -27,7 +27,7 @@ size_t NamedOverrideArrayCount::Hash() const {
     return static_cast<size_t>(TypeInfo::Of<NamedOverrideArrayCount>().full_hashcode);
 }
 
-bool NamedOverrideArrayCount::Equals(const ArrayCount& other) const {
+bool NamedOverrideArrayCount::Equals(const UniqueNode& other) const {
     if (auto* v = other.As<NamedOverrideArrayCount>()) {
         return variable == v->variable;
     }
@@ -45,7 +45,7 @@ size_t UnnamedOverrideArrayCount::Hash() const {
     return static_cast<size_t>(TypeInfo::Of<UnnamedOverrideArrayCount>().full_hashcode);
 }
 
-bool UnnamedOverrideArrayCount::Equals(const ArrayCount& other) const {
+bool UnnamedOverrideArrayCount::Equals(const UniqueNode& other) const {
     if (auto* v = other.As<UnnamedOverrideArrayCount>()) {
         return expr == v->expr;
     }

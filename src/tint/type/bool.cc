@@ -35,7 +35,7 @@ size_t Bool::Hash() const {
     return static_cast<size_t>(TypeInfo::Of<Bool>().full_hashcode);
 }
 
-bool Bool::Equals(const Type& other) const {
+bool Bool::Equals(const UniqueNode& other) const {
     return other.Is<Bool>();
 }
 

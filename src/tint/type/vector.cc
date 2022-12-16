@@ -41,7 +41,7 @@ size_t Vector::Hash() const {
     return utils::Hash(TypeInfo::Of<Vector>().full_hashcode, width_, subtype_);
 }
 
-bool Vector::Equals(const Type& other) const {
+bool Vector::Equals(const UniqueNode& other) const {
     if (auto* v = other.As<Vector>()) {
         return v->width_ == width_ && v->subtype_ == subtype_;
     }

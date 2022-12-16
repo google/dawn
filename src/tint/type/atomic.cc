@@ -35,7 +35,7 @@ size_t Atomic::Hash() const {
     return utils::Hash(TypeInfo::Of<Atomic>().full_hashcode, subtype_);
 }
 
-bool Atomic::Equals(const type::Type& other) const {
+bool Atomic::Equals(const type::UniqueNode& other) const {
     if (auto* o = other.As<Atomic>()) {
         return o->subtype_ == subtype_;
     }

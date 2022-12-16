@@ -46,7 +46,7 @@ size_t Matrix::Hash() const {
     return utils::Hash(TypeInfo::Of<Vector>().full_hashcode, rows_, columns_, column_type_);
 }
 
-bool Matrix::Equals(const Type& other) const {
+bool Matrix::Equals(const UniqueNode& other) const {
     if (auto* v = other.As<Matrix>()) {
         return v->rows_ == rows_ && v->columns_ == columns_ && v->column_type_ == column_type_;
     }

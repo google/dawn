@@ -30,7 +30,7 @@ size_t ConstantArrayCount::Hash() const {
     return static_cast<size_t>(TypeInfo::Of<ConstantArrayCount>().full_hashcode);
 }
 
-bool ConstantArrayCount::Equals(const ArrayCount& other) const {
+bool ConstantArrayCount::Equals(const UniqueNode& other) const {
     if (auto* v = other.As<ConstantArrayCount>()) {
         return value == v->value;
     }
@@ -48,7 +48,7 @@ size_t RuntimeArrayCount::Hash() const {
     return static_cast<size_t>(TypeInfo::Of<RuntimeArrayCount>().full_hashcode);
 }
 
-bool RuntimeArrayCount::Equals(const ArrayCount& other) const {
+bool RuntimeArrayCount::Equals(const UniqueNode& other) const {
     return other.Is<RuntimeArrayCount>();
 }
 

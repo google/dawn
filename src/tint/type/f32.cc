@@ -35,7 +35,7 @@ size_t F32::Hash() const {
     return static_cast<size_t>(TypeInfo::Of<F32>().full_hashcode);
 }
 
-bool F32::Equals(const Type& other) const {
+bool F32::Equals(const UniqueNode& other) const {
     return other.Is<F32>();
 }
 

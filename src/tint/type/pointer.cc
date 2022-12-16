@@ -32,7 +32,7 @@ size_t Pointer::Hash() const {
     return utils::Hash(TypeInfo::Of<Pointer>().full_hashcode, address_space_, subtype_, access_);
 }
 
-bool Pointer::Equals(const Type& other) const {
+bool Pointer::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<Pointer>()) {
         return o->address_space_ == address_space_ && o->subtype_ == subtype_ &&
                o->access_ == access_;

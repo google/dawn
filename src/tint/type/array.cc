@@ -72,7 +72,7 @@ size_t Array::Hash() const {
     return utils::Hash(TypeInfo::Of<Array>().full_hashcode, count_, align_, size_, stride_);
 }
 
-bool Array::Equals(const Type& other) const {
+bool Array::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<Array>()) {
         // Note: implicit_stride is not part of the type_name string as this is
         // derived from the element type

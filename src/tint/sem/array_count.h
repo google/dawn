@@ -39,9 +39,9 @@ class NamedOverrideArrayCount final : public Castable<NamedOverrideArrayCount, t
     /// @returns a hash of the array count.
     size_t Hash() const override;
 
-    /// @param t other array count
-    /// @returns true if this array count is equal to the given array count
-    bool Equals(const type::ArrayCount& t) const override;
+    /// @param other the other node
+    /// @returns true if this array count is equal @p other
+    bool Equals(const type::UniqueNode& other) const override;
 
     /// @param symbols the symbol table
     /// @returns the friendly name for this array count
@@ -68,9 +68,9 @@ class UnnamedOverrideArrayCount final
     /// @returns a hash of the array count.
     size_t Hash() const override;
 
-    /// @param t other array count
-    /// @returns true if this array count is equal to the given array count
-    bool Equals(const type::ArrayCount& t) const override;
+    /// @param other the other node
+    /// @returns true if this array count is equal @p other
+    bool Equals(const type::UniqueNode& other) const override;
 
     /// @param symbols the symbol table
     /// @returns the friendly name for this array count

@@ -30,7 +30,7 @@ size_t Void::Hash() const {
     return static_cast<size_t>(TypeInfo::Of<Void>().full_hashcode);
 }
 
-bool Void::Equals(const Type& other) const {
+bool Void::Equals(const UniqueNode& other) const {
     return other.Is<Void>();
 }
 

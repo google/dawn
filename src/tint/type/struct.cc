@@ -70,7 +70,7 @@ size_t Struct::Hash() const {
     return utils::Hash(TypeInfo::Of<Struct>().full_hashcode, name_);
 }
 
-bool Struct::Equals(const Type& other) const {
+bool Struct::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<Struct>()) {
         return o->name_ == name_;
     }

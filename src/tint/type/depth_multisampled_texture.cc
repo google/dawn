@@ -40,7 +40,7 @@ size_t DepthMultisampledTexture::Hash() const {
     return utils::Hash(TypeInfo::Of<DepthMultisampledTexture>().full_hashcode, dim());
 }
 
-bool DepthMultisampledTexture::Equals(const Type& other) const {
+bool DepthMultisampledTexture::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<DepthMultisampledTexture>()) {
         return o->dim() == dim();
     }

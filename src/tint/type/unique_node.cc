@@ -12,29 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/type/abstract_float.h"
+#include "src/tint/type/unique_node.h"
 
-#include "src/tint/program_builder.h"
-#include "src/tint/utils/hash.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::type::AbstractFloat);
+TINT_INSTANTIATE_TYPEINFO(tint::type::UniqueNode);
 
 namespace tint::type {
 
-AbstractFloat::AbstractFloat() = default;
-AbstractFloat::AbstractFloat(AbstractFloat&&) = default;
-AbstractFloat::~AbstractFloat() = default;
+UniqueNode::UniqueNode() = default;
 
-size_t AbstractFloat::Hash() const {
-    return utils::Hash(TypeInfo::Of<AbstractFloat>().full_hashcode);
-}
+UniqueNode::UniqueNode(const UniqueNode&) = default;
 
-bool AbstractFloat::Equals(const UniqueNode& other) const {
-    return other.Is<AbstractFloat>();
-}
-
-std::string AbstractFloat::FriendlyName(const SymbolTable&) const {
-    return "abstract-float";
-}
+UniqueNode::~UniqueNode() = default;
 
 }  // namespace tint::type

@@ -18,7 +18,7 @@
 #include <functional>
 #include <string>
 
-#include "src/tint/type/node.h"
+#include "src/tint/type/unique_node.h"
 #include "src/tint/utils/enum_set.h"
 #include "src/tint/utils/vector.h"
 
@@ -46,17 +46,11 @@ enum Flag {
 using Flags = utils::EnumSet<Flag>;
 
 /// Base class for a type in the system
-class Type : public Castable<Type, Node> {
+class Type : public Castable<Type, UniqueNode> {
   public:
     /// Move constructor
     Type(Type&&);
     ~Type() override;
-
-    /// @returns a hash of the type.
-    virtual size_t Hash() const = 0;
-
-    /// @returns true if the this type is equal to the given type
-    virtual bool Equals(const Type&) const = 0;
 
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be

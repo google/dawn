@@ -35,7 +35,7 @@ size_t U32::Hash() const {
     return static_cast<size_t>(TypeInfo::Of<U32>().full_hashcode);
 }
 
-bool U32::Equals(const Type& other) const {
+bool U32::Equals(const UniqueNode& other) const {
     return other.Is<U32>();
 }
 

@@ -35,7 +35,7 @@ size_t StorageTexture::Hash() const {
     return utils::Hash(TypeInfo::Of<StorageTexture>().full_hashcode, dim(), texel_format_, access_);
 }
 
-bool StorageTexture::Equals(const Type& other) const {
+bool StorageTexture::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<StorageTexture>()) {
         return o->dim() == dim() && o->texel_format_ == texel_format_ && o->access_ == access_;
     }

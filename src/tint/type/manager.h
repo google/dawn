@@ -15,15 +15,10 @@
 #ifndef SRC_TINT_TYPE_MANAGER_H_
 #define SRC_TINT_TYPE_MANAGER_H_
 
-#include <functional>
-#include <string>
-#include <unordered_map>
 #include <utility>
 
-#include "src/tint/type/array_count.h"
-#include "src/tint/type/node.h"
-#include "src/tint/type/struct.h"
 #include "src/tint/type/type.h"
+#include "src/tint/utils/hash.h"
 #include "src/tint/utils/unique_allocator.h"
 
 namespace tint::type {
@@ -60,19 +55,23 @@ class Manager final {
     static Manager Wrap(const Manager& inner) {
         Manager out;
         out.types_.Wrap(inner.types_);
-        out.nodes_.Wrap(inner.nodes_);
+        out.unique_nodes_.Wrap(inner.unique_nodes_);
         return out;
     }
 
-    /// @param args the arguments used to construct the object.
+    /// @param args the arguments used to construct the type, unique node or node.
     /// @return a pointer to an instance of `T` with the provided arguments.
-    ///         If an existing instance of `T` has been constructed, then the same
-    ///         pointer is returned.
-    template <typename TYPE,
-              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, Type>>,
-              typename... ARGS>
-    TYPE* Get(ARGS&&... args) {
-        return types_.Get<TYPE>(std::forward<ARGS>(args)...);
+    ///         If NODE derives from UniqueNode and an existing instance of `T` has been
+    ///         constructed, then the same pointer is returned.
+    template <typename NODE, typename... ARGS>
+    NODE* Get(ARGS&&... args) {
+        if constexpr (traits::IsTypeOrDerived<NODE, Type>) {
+            return types_.Get<NODE>(std::forward<ARGS>(args)...);
+        } else if constexpr (traits::IsTypeOrDerived<NODE, UniqueNode>) {
+            return unique_nodes_.Get<NODE>(std::forward<ARGS>(args)...);
+        } else {
+            return nodes_.Create<NODE>(std::forward<ARGS>(args)...);
+        }
     }
 
     /// @param args the arguments used to create the temporary used for the search.
@@ -85,68 +84,20 @@ class Manager final {
         return types_.Find<TYPE>(std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments used to construct the object.
-    /// @return a pointer to an instance of `T` with the provided arguments.
-    ///         If an existing instance of `T` has been constructed, then the same
-    ///         pointer is returned.
-    template <typename TYPE,
-              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, ArrayCount> ||
-                                          traits::IsTypeOrDerived<TYPE, StructMember>>,
-              typename... ARGS>
-    TYPE* GetNode(ARGS&&... args) {
-        return nodes_.Get<TYPE>(std::forward<ARGS>(args)...);
-    }
-
     /// @returns an iterator to the beginning of the types
     TypeIterator begin() const { return types_.begin(); }
     /// @returns an iterator to the end of the types
     TypeIterator end() const { return types_.end(); }
 
   private:
+    /// Unique types owned by the manager
     utils::UniqueAllocator<Type> types_;
-    utils::UniqueAllocator<Node> nodes_;
+    /// Unique nodes (excluding types) owned by the manager
+    utils::UniqueAllocator<UniqueNode> unique_nodes_;
+    /// Non-unique nodes owned by the manager
+    utils::BlockAllocator<Node> nodes_;
 };
 
 }  // namespace tint::type
-
-namespace std {
-
-/// std::hash specialization for tint::type::Node
-template <>
-struct hash<tint::type::Node> {
-    /// @param type the type to obtain a hash from
-    /// @returns the hash of the type
-    size_t operator()(const tint::type::Node& type) const {
-        if (const auto* ac = type.As<tint::type::ArrayCount>()) {
-            return ac->Hash();
-        } else if (type.Is<tint::type::StructMember>()) {
-            return tint::TypeInfo::Of<tint::type::StructMember>().full_hashcode;
-        }
-        TINT_ASSERT(Type, false && "Unreachable");
-        return 0;
-    }
-};
-
-/// std::equal_to specialization for tint::type::Node
-template <>
-struct equal_to<tint::type::Node> {
-    /// @param a the first type to compare
-    /// @param b the second type to compare
-    /// @returns true if the two types are equal
-    bool operator()(const tint::type::Node& a, const tint::type::Node& b) const {
-        if (const auto* ac = a.As<tint::type::ArrayCount>()) {
-            if (const auto* bc = b.As<tint::type::ArrayCount>()) {
-                return ac->Equals(*bc);
-            }
-            return false;
-        } else if (a.Is<tint::type::StructMember>()) {
-            return &a == &b;
-        }
-        TINT_ASSERT(Type, false && "Unreachable");
-        return false;
-    }
-};
-
-}  // namespace std
 
 #endif  // SRC_TINT_TYPE_MANAGER_H_
