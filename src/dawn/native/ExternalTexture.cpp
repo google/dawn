@@ -209,25 +209,64 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
     const float* dstFn = descriptor->dstTransferFunctionParameters;
     std::copy(dstFn, dstFn + 7, params.gammaEncodingParams.begin());
 
+    // These scale factors perform part of the cropping operation. These default to 1, so we can use
+    // them directly for performing rotation in the matrix later.
+    float xScale = descriptor->visibleRect.width;
+    float yScale = descriptor->visibleRect.height;
+
+    // In the shader, we must convert UV coordinates from the {0, 1} space to the {-0.5, 0.5} space
+    // to do rotation. Ideally, we want to combine the rotate, flip-Y operations in a single matrix
+    // operation - but this is complicated because scaling most easily occurs in the {0, 1} space.
+    // We can work around this and perform scaling in the {-0.5, 0.5} space by multiplying the
+    // needed conversion constant "+ 0.5" by the scale factor. We then can do this all within a
+    // single matrix operation by calculating and adding this value to the offset specified in the
+    // matrix. For reference, this is the entire operation needed is:
+    //
+    //    newCoords = vec3<f32>((coord - 0.5f), 1.0f) * coordTransformationMatrix) + (scaleFactor *
+    //    0.5)
+    //
+    // Because we combine the ending (scaleFactor * 0.5) into the crop offset within the matrix, the
+    // shader is actually:
+    //
+    //    newCoords = vec3<f32>((coord - 0.5f), 1.0f) * params.coordTransformationMatrix;
+    //
+    // TODO(dawn:1614): Incorporate the "- 0.5f" into the matrix.
+    float xOffset = descriptor->visibleRect.x + 0.5f * xScale;
+    float yOffset = descriptor->visibleRect.y + 0.5f * yScale;
+
+    // Flip-Y can be done by simply negating the scaling factor in the y-plane. The position of the
+    // y-plane scaling factor in the matrix can be different depending on the rotation.
     float flipY = 1;
     if (descriptor->flipY) {
         flipY = -1;
     }
 
-    // We can perform the flip-Y operation by multiplying the y-component portion of the matrix by
-    // -1.
+    // This block creates a 2x3 matrix which when multiplied by UV coordinates in a shader performs
+    // rotation, flip-Y and cropping operations.
     switch (descriptor->rotation) {
         case wgpu::ExternalTextureRotation::Rotate0Degrees:
-            params.coordTransformMatrix = {1.0, 0.0, 0.0, 1.0f * flipY};
+            params.coordTransformMatrix = {xScale,  0.0,             //
+                                           xOffset, 0.0,             //
+                                           0.0,     flipY * yScale,  //
+                                           yOffset, 0.0};
             break;
         case wgpu::ExternalTextureRotation::Rotate90Degrees:
-            params.coordTransformMatrix = {0.0, 1.0f * flipY, -1.0, 0.0};
+            params.coordTransformMatrix = {0.0,     flipY * yScale,  //
+                                           xOffset, 0.0,             //
+                                           -xScale, 0.0,             //
+                                           yOffset, 0.0};
             break;
         case wgpu::ExternalTextureRotation::Rotate180Degrees:
-            params.coordTransformMatrix = {-1.0, 0.0, 0.0, -1.0f * flipY};
+            params.coordTransformMatrix = {-xScale, 0.0,              //
+                                           xOffset, 0.0,              //
+                                           0.0,     flipY * -yScale,  //
+                                           yOffset, 0.0};
             break;
         case wgpu::ExternalTextureRotation::Rotate270Degrees:
-            params.coordTransformMatrix = {0.0, -1.0f * flipY, 1.0, 0.0};
+            params.coordTransformMatrix = {0.0,     flipY * -yScale,  //
+                                           xOffset, 0.0,              //
+                                           xScale,  0.0,              //
+                                           yOffset, 0.0};
             break;
     }
 

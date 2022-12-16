@@ -625,6 +625,341 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
     }
 }
 
+// This test draws a 2x2 multi-colored square surrounded by a 1px black border. We test the external
+// texture crop functionality by cropping to specific ranges inside the texture.
+TEST_P(ExternalTextureTests, CropSinglePlane) {
+    // TODO(crbug.com/tint/1774): Tint has an issue compiling shaders that use external textures on
+    // OpenGL/OpenGLES.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    const wgpu::ShaderModule sourceTextureFsModule = utils::CreateShaderModule(device, R"(
+        @fragment fn main(@builtin(position) FragCoord : vec4<f32>)
+                                 -> @location(0) vec4<f32> {
+            if(FragCoord.x >= 1.0 && FragCoord.x < 3.0 && FragCoord.y >= 1.0 && FragCoord.y < 3.0) {
+                if(FragCoord.y < 2.0 && FragCoord.x < 2.0) {
+                   return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+                }
+
+                if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
+                   return vec4<f32>(1.0, 1.0, 1.0, 1.0);
+                }
+
+                if(FragCoord.y >= 2.0 && FragCoord.x < 2.0) {
+                   return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+                }
+
+                if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
+                   return vec4<f32>(0.0, 0.0, 1.0, 1.0);
+                }
+            }
+
+            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        })");
+
+    wgpu::Texture sourceTexture =
+        Create2DTexture(device, kWidth, kHeight, kFormat,
+                        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+
+    RenderToSourceTexture(sourceTextureFsModule, sourceTexture);
+
+    wgpu::Texture renderTexture =
+        Create2DTexture(device, kWidth, kHeight, kFormat,
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
+
+    struct CropExpectation {
+        wgpu::ExternalTextureVisibleRect visibleRect;
+        wgpu::ExternalTextureRotation rotation;
+        utils::RGBA8 upperLeftColor;
+        utils::RGBA8 upperRightColor;
+        utils::RGBA8 lowerLeftColor;
+        utils::RGBA8 lowerRightColor;
+    };
+
+    std::array<CropExpectation, 9> expectations = {{
+        {{0.0, 0.0, 1.0, 1.0},
+         wgpu::ExternalTextureRotation::Rotate0Degrees,
+         utils::RGBA8::kBlack,
+         utils::RGBA8::kBlack,
+         utils::RGBA8::kBlack,
+         utils::RGBA8::kBlack},
+        {{0.25, 0.25, 0.25, 0.25},
+         wgpu::ExternalTextureRotation::Rotate0Degrees,
+         utils::RGBA8::kGreen,
+         utils::RGBA8::kGreen,
+         utils::RGBA8::kGreen,
+         utils::RGBA8::kGreen},
+        {{0.5, 0.25, 0.25, 0.25},
+         wgpu::ExternalTextureRotation::Rotate0Degrees,
+         utils::RGBA8::kWhite,
+         utils::RGBA8::kWhite,
+         utils::RGBA8::kWhite,
+         utils::RGBA8::kWhite},
+        {{0.25, 0.5, 0.25, 0.25},
+         wgpu::ExternalTextureRotation::Rotate0Degrees,
+         utils::RGBA8::kRed,
+         utils::RGBA8::kRed,
+         utils::RGBA8::kRed,
+         utils::RGBA8::kRed},
+        {{0.5, 0.5, 0.25, 0.25},
+         wgpu::ExternalTextureRotation::Rotate0Degrees,
+         utils::RGBA8::kBlue,
+         utils::RGBA8::kBlue,
+         utils::RGBA8::kBlue,
+         utils::RGBA8::kBlue},
+        {{0.25, 0.25, 0.5, 0.5},
+         wgpu::ExternalTextureRotation::Rotate0Degrees,
+         utils::RGBA8::kGreen,
+         utils::RGBA8::kWhite,
+         utils::RGBA8::kRed,
+         utils::RGBA8::kBlue},
+        {{0.25, 0.25, 0.5, 0.5},
+         wgpu::ExternalTextureRotation::Rotate90Degrees,
+         utils::RGBA8::kRed,
+         utils::RGBA8::kGreen,
+         utils::RGBA8::kBlue,
+         utils::RGBA8::kWhite},
+        {{0.25, 0.25, 0.5, 0.5},
+         wgpu::ExternalTextureRotation::Rotate180Degrees,
+         utils::RGBA8::kBlue,
+         utils::RGBA8::kRed,
+         utils::RGBA8::kWhite,
+         utils::RGBA8::kGreen},
+        {{0.25, 0.25, 0.5, 0.5},
+         wgpu::ExternalTextureRotation::Rotate270Degrees,
+         utils::RGBA8::kWhite,
+         utils::RGBA8::kBlue,
+         utils::RGBA8::kGreen,
+         utils::RGBA8::kRed},
+    }};
+
+    for (const CropExpectation& exp : expectations) {
+        // Pipeline Creation
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsSampleExternalTextureModule;
+        descriptor.cTargets[0].format = kFormat;
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+        // Create an ExternalTextureDescriptor from the texture view
+        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
+        externalDesc.plane0 = sourceTexture.CreateView();
+        externalDesc.visibleRect = exp.visibleRect;
+        externalDesc.rotation = exp.rotation;
+
+        // Import the external texture
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+
+        // Create a sampler and bind group
+        wgpu::Sampler sampler = device.CreateSampler();
+
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {{0, sampler}, {1, externalTexture}});
+
+        // Run the shader, which should sample from the external texture and draw a triangle into
+        // the upper left corner of the render texture.
+        wgpu::TextureView renderView = renderTexture.CreateView();
+        utils::ComboRenderPassDescriptor renderPass({renderView}, nullptr);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        {
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup);
+            pass.Draw(6);
+            pass.End();
+        }
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(exp.upperLeftColor, renderTexture, 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(exp.upperRightColor, renderTexture, 3, 0);
+        EXPECT_PIXEL_RGBA8_EQ(exp.lowerLeftColor, renderTexture, 0, 3);
+        EXPECT_PIXEL_RGBA8_EQ(exp.lowerRightColor, renderTexture, 3, 3);
+    }
+}
+
+// This test draws a 2x2 multi-colored square surrounded by a 1px black border. We test the external
+// texture crop functionality by cropping to specific ranges inside the texture.
+TEST_P(ExternalTextureTests, CropMultiplanar) {
+    // TODO(crbug.com/tint/1774): Tint has an issue compiling shaders that use external textures on
+    // OpenGL/OpenGLES.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    const wgpu::ShaderModule sourceTexturePlane0FsModule = utils::CreateShaderModule(device, R"(
+        @fragment fn main(@builtin(position) FragCoord : vec4<f32>)
+                                 -> @location(0) vec4<f32> {
+            if(FragCoord.x >= 1.0 && FragCoord.x < 3.0 && FragCoord.y >= 1.0 && FragCoord.y < 3.0) {
+                if(FragCoord.y < 2.0 && FragCoord.x < 2.0) {
+                   return vec4<f32>(0.7152, 0.0, 0.0, 0.0);
+                }
+
+                if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
+                   return vec4<f32>(1.0, 0.0, 0.0, 0.0);
+                }
+
+                if(FragCoord.y >= 2.0 && FragCoord.x < 2.0) {
+                   return vec4<f32>(0.2126, 0.0, 0.0, 0.0);
+                }
+
+                if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
+                   return vec4<f32>(0.0722, 0.0, 1.0, 1.0);
+                }
+            }
+
+            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        })");
+
+    const wgpu::ShaderModule sourceTexturePlane1FsModule = utils::CreateShaderModule(device, R"(
+        @fragment fn main(@builtin(position) FragCoord : vec4<f32>)
+                                 -> @location(0) vec4<f32> {
+            if(FragCoord.x >= 1.0 && FragCoord.x < 3.0 && FragCoord.y >= 1.0 && FragCoord.y < 3.0) {
+                if(FragCoord.y < 2.0 && FragCoord.x < 2.0) {
+                    return vec4<f32>(0.1402, 0.0175, 0.0, 0.0);
+                }
+
+                if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
+                    return vec4<f32>(0.5, 0.5, 0.0, 0.0);
+                }
+
+                if(FragCoord.y >= 2.0 && FragCoord.x < 2.0) {
+                    return vec4<f32>(0.4172, 1.0, 0.0, 0.0);
+                }
+
+                if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
+                    return vec4<f32>(1.0, 0.4937, 0.0, 0.0);
+                }
+            }
+
+            return vec4<f32>(0.5, 0.5, 0.0, 0.0);
+        })");
+
+    wgpu::Texture sourceTexturePlane0 =
+        Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::R8Unorm,
+                        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+    wgpu::Texture sourceTexturePlane1 =
+        Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::RG8Unorm,
+                        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+
+    RenderToSourceTexture(sourceTexturePlane0FsModule, sourceTexturePlane0);
+    RenderToSourceTexture(sourceTexturePlane1FsModule, sourceTexturePlane1);
+
+    wgpu::Texture renderTexture =
+        Create2DTexture(device, kWidth, kHeight, kFormat,
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
+
+    struct CropExpectation {
+        wgpu::ExternalTextureVisibleRect visibleRect;
+        wgpu::ExternalTextureRotation rotation;
+        utils::RGBA8 upperLeftColor;
+        utils::RGBA8 upperRightColor;
+        utils::RGBA8 lowerLeftColor;
+        utils::RGBA8 lowerRightColor;
+    };
+
+    std::array<CropExpectation, 9> expectations = {{
+        {{0.0, 0.0, 1.0, 1.0},
+         wgpu::ExternalTextureRotation::Rotate0Degrees,
+         utils::RGBA8::kBlack,
+         utils::RGBA8::kBlack,
+         utils::RGBA8::kBlack,
+         utils::RGBA8::kBlack},
+        {{0.25, 0.25, 0.25, 0.25},
+         wgpu::ExternalTextureRotation::Rotate0Degrees,
+         utils::RGBA8::kGreen,
+         utils::RGBA8::kGreen,
+         utils::RGBA8::kGreen,
+         utils::RGBA8::kGreen},
+        {{0.5, 0.25, 0.25, 0.25},
+         wgpu::ExternalTextureRotation::Rotate0Degrees,
+         utils::RGBA8::kWhite,
+         utils::RGBA8::kWhite,
+         utils::RGBA8::kWhite,
+         utils::RGBA8::kWhite},
+        {{0.25, 0.5, 0.25, 0.25},
+         wgpu::ExternalTextureRotation::Rotate0Degrees,
+         utils::RGBA8::kRed,
+         utils::RGBA8::kRed,
+         utils::RGBA8::kRed,
+         utils::RGBA8::kRed},
+        {{0.5, 0.5, 0.25, 0.25},
+         wgpu::ExternalTextureRotation::Rotate0Degrees,
+         utils::RGBA8::kBlue,
+         utils::RGBA8::kBlue,
+         utils::RGBA8::kBlue,
+         utils::RGBA8::kBlue},
+        {{0.25, 0.25, 0.5, 0.5},
+         wgpu::ExternalTextureRotation::Rotate0Degrees,
+         utils::RGBA8::kGreen,
+         utils::RGBA8::kWhite,
+         utils::RGBA8::kRed,
+         utils::RGBA8::kBlue},
+        {{0.25, 0.25, 0.5, 0.5},
+         wgpu::ExternalTextureRotation::Rotate90Degrees,
+         utils::RGBA8::kRed,
+         utils::RGBA8::kGreen,
+         utils::RGBA8::kBlue,
+         utils::RGBA8::kWhite},
+        {{0.25, 0.25, 0.5, 0.5},
+         wgpu::ExternalTextureRotation::Rotate180Degrees,
+         utils::RGBA8::kBlue,
+         utils::RGBA8::kRed,
+         utils::RGBA8::kWhite,
+         utils::RGBA8::kGreen},
+        {{0.25, 0.25, 0.5, 0.5},
+         wgpu::ExternalTextureRotation::Rotate270Degrees,
+         utils::RGBA8::kWhite,
+         utils::RGBA8::kBlue,
+         utils::RGBA8::kGreen,
+         utils::RGBA8::kRed},
+    }};
+
+    for (const CropExpectation& exp : expectations) {
+        // Pipeline Creation
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsSampleExternalTextureModule;
+        descriptor.cTargets[0].format = kFormat;
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+        // Create an ExternalTextureDescriptor from the texture view
+        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
+        externalDesc.plane0 = sourceTexturePlane0.CreateView();
+        externalDesc.plane1 = sourceTexturePlane1.CreateView();
+        externalDesc.rotation = exp.rotation;
+        externalDesc.visibleRect = exp.visibleRect;
+
+        // Import the external texture
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+
+        // Create a sampler and bind group
+        wgpu::Sampler sampler = device.CreateSampler();
+
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {{0, sampler}, {1, externalTexture}});
+
+        // Run the shader, which should sample from the external texture and draw a triangle into
+        // the upper left corner of the render texture.
+        wgpu::TextureView renderView = renderTexture.CreateView();
+        utils::ComboRenderPassDescriptor renderPass({renderView}, nullptr);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        {
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup);
+            pass.Draw(6);
+            pass.End();
+        }
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(exp.upperLeftColor, renderTexture, 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(exp.upperRightColor, renderTexture, 3, 0);
+        EXPECT_PIXEL_RGBA8_EQ(exp.lowerLeftColor, renderTexture, 0, 3);
+        EXPECT_PIXEL_RGBA8_EQ(exp.lowerRightColor, renderTexture, 3, 3);
+    }
+}
+
 DAWN_INSTANTIATE_TEST(ExternalTextureTests,
                       D3D12Backend(),
                       MetalBackend(),

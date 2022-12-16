@@ -18,22 +18,11 @@ struct ExternalTextureParams {
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   mat3 gamutConversionMatrix;
-  mat2 rotationMatrix;
+  mat2x3 coordTransformationMatrix;
 };
 
-struct ExternalTextureParams_std140 {
-  uint numPlanes;
-  uint doYuvToRgbConversionOnly;
-  mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
-  vec2 rotationMatrix_0;
-  vec2 rotationMatrix_1;
-};
-
-layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
-  ExternalTextureParams_std140 inner;
+layout(binding = 2, std140) uniform ext_tex_params_block_ubo {
+  ExternalTextureParams inner;
 } ext_tex_params;
 
 vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
@@ -64,12 +53,8 @@ vec4 textureLoad2d(highp sampler2D tint_symbol_1, highp sampler2D ext_tex_plane_
 
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D ext_tex_plane_1_2;
-ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 val) {
-  return ExternalTextureParams(val.numPlanes, val.doYuvToRgbConversionOnly, val.yuvToRgbConversionMatrix, val.gammaDecodeParams, val.gammaEncodeParams, val.gamutConversionMatrix, mat2(val.rotationMatrix_0, val.rotationMatrix_1));
-}
-
 void doTextureLoad() {
-  vec4 res = textureLoad2d(arg_0_1, ext_tex_plane_1_2, conv_ExternalTextureParams(ext_tex_params.inner), ivec2(0));
+  vec4 res = textureLoad2d(arg_0_1, ext_tex_plane_1_2, ext_tex_params.inner, ivec2(0));
 }
 
 vec4 vertex_main() {
@@ -106,22 +91,11 @@ struct ExternalTextureParams {
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   mat3 gamutConversionMatrix;
-  mat2 rotationMatrix;
+  mat2x3 coordTransformationMatrix;
 };
 
-struct ExternalTextureParams_std140 {
-  uint numPlanes;
-  uint doYuvToRgbConversionOnly;
-  mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
-  vec2 rotationMatrix_0;
-  vec2 rotationMatrix_1;
-};
-
-layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
-  ExternalTextureParams_std140 inner;
+layout(binding = 2, std140) uniform ext_tex_params_block_ubo {
+  ExternalTextureParams inner;
 } ext_tex_params;
 
 vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
@@ -152,12 +126,8 @@ vec4 textureLoad2d(highp sampler2D tint_symbol_1, highp sampler2D ext_tex_plane_
 
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D ext_tex_plane_1_2;
-ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 val) {
-  return ExternalTextureParams(val.numPlanes, val.doYuvToRgbConversionOnly, val.yuvToRgbConversionMatrix, val.gammaDecodeParams, val.gammaEncodeParams, val.gamutConversionMatrix, mat2(val.rotationMatrix_0, val.rotationMatrix_1));
-}
-
 void doTextureLoad() {
-  vec4 res = textureLoad2d(arg_0_1, ext_tex_plane_1_2, conv_ExternalTextureParams(ext_tex_params.inner), ivec2(0));
+  vec4 res = textureLoad2d(arg_0_1, ext_tex_plane_1_2, ext_tex_params.inner, ivec2(0));
 }
 
 void fragment_main() {
@@ -188,22 +158,11 @@ struct ExternalTextureParams {
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   mat3 gamutConversionMatrix;
-  mat2 rotationMatrix;
+  mat2x3 coordTransformationMatrix;
 };
 
-struct ExternalTextureParams_std140 {
-  uint numPlanes;
-  uint doYuvToRgbConversionOnly;
-  mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
-  vec2 rotationMatrix_0;
-  vec2 rotationMatrix_1;
-};
-
-layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
-  ExternalTextureParams_std140 inner;
+layout(binding = 2, std140) uniform ext_tex_params_block_ubo {
+  ExternalTextureParams inner;
 } ext_tex_params;
 
 vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
@@ -234,12 +193,8 @@ vec4 textureLoad2d(highp sampler2D tint_symbol_1, highp sampler2D ext_tex_plane_
 
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D ext_tex_plane_1_2;
-ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 val) {
-  return ExternalTextureParams(val.numPlanes, val.doYuvToRgbConversionOnly, val.yuvToRgbConversionMatrix, val.gammaDecodeParams, val.gammaEncodeParams, val.gamutConversionMatrix, mat2(val.rotationMatrix_0, val.rotationMatrix_1));
-}
-
 void doTextureLoad() {
-  vec4 res = textureLoad2d(arg_0_1, ext_tex_plane_1_2, conv_ExternalTextureParams(ext_tex_params.inner), ivec2(0));
+  vec4 res = textureLoad2d(arg_0_1, ext_tex_plane_1_2, ext_tex_params.inner, ivec2(0));
 }
 
 void compute_main() {

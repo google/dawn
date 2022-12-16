@@ -18,22 +18,11 @@ struct ExternalTextureParams {
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   mat3 gamutConversionMatrix;
-  mat2 rotationMatrix;
+  mat2x3 coordTransformationMatrix;
 };
 
-struct ExternalTextureParams_std140 {
-  uint numPlanes;
-  uint doYuvToRgbConversionOnly;
-  mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
-  vec2 rotationMatrix_0;
-  vec2 rotationMatrix_1;
-};
-
-layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
-  ExternalTextureParams_std140 inner;
+layout(binding = 2, std140) uniform ext_tex_params_block_ubo {
+  ExternalTextureParams inner;
 } ext_tex_params;
 
 uniform highp sampler2D arg_0_1;
@@ -75,22 +64,11 @@ struct ExternalTextureParams {
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   mat3 gamutConversionMatrix;
-  mat2 rotationMatrix;
+  mat2x3 coordTransformationMatrix;
 };
 
-struct ExternalTextureParams_std140 {
-  uint numPlanes;
-  uint doYuvToRgbConversionOnly;
-  mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
-  vec2 rotationMatrix_0;
-  vec2 rotationMatrix_1;
-};
-
-layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
-  ExternalTextureParams_std140 inner;
+layout(binding = 2, std140) uniform ext_tex_params_block_ubo {
+  ExternalTextureParams inner;
 } ext_tex_params;
 
 uniform highp sampler2D arg_0_1;
@@ -126,22 +104,11 @@ struct ExternalTextureParams {
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   mat3 gamutConversionMatrix;
-  mat2 rotationMatrix;
+  mat2x3 coordTransformationMatrix;
 };
 
-struct ExternalTextureParams_std140 {
-  uint numPlanes;
-  uint doYuvToRgbConversionOnly;
-  mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
-  vec2 rotationMatrix_0;
-  vec2 rotationMatrix_1;
-};
-
-layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
-  ExternalTextureParams_std140 inner;
+layout(binding = 2, std140) uniform ext_tex_params_block_ubo {
+  ExternalTextureParams inner;
 } ext_tex_params;
 
 uniform highp sampler2D arg_0_1;

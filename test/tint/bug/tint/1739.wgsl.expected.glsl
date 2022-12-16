@@ -20,24 +20,11 @@ struct ExternalTextureParams {
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   mat3 gamutConversionMatrix;
-  mat2 rotationMatrix;
+  mat2x3 coordTransformationMatrix;
 };
 
-struct ExternalTextureParams_std140 {
-  uint numPlanes;
-  uint doYuvToRgbConversionOnly;
-  uint pad;
-  uint pad_1;
-  mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
-  vec2 rotationMatrix_0;
-  vec2 rotationMatrix_1;
-};
-
-layout(binding = 3, std140) uniform ext_tex_params_block_std140_ubo {
-  ExternalTextureParams_std140 inner;
+layout(binding = 3, std140) uniform ext_tex_params_block_ubo {
+  ExternalTextureParams inner;
 } ext_tex_params;
 
 layout(rgba8) uniform highp writeonly image2D outImage;
@@ -65,14 +52,10 @@ vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, ive
 
 uniform highp sampler2D t_2;
 uniform highp sampler2D ext_tex_plane_1_1;
-ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 val) {
-  return ExternalTextureParams(val.numPlanes, val.doYuvToRgbConversionOnly, val.pad, val.pad_1, val.yuvToRgbConversionMatrix, val.gammaDecodeParams, val.gammaEncodeParams, val.gamutConversionMatrix, mat2(val.rotationMatrix_0, val.rotationMatrix_1));
-}
-
 void tint_symbol() {
-  vec4 red = textureLoadExternal(t_2, ext_tex_plane_1_1, clamp(ivec2(10), ivec2(0), ivec2((uvec2(uvec2(textureSize(t_2, 0))) - uvec2(1u)))), conv_ExternalTextureParams(ext_tex_params.inner));
+  vec4 red = textureLoadExternal(t_2, ext_tex_plane_1_1, clamp(ivec2(10), ivec2(0), ivec2((uvec2(uvec2(textureSize(t_2, 0))) - uvec2(1u)))), ext_tex_params.inner);
   imageStore(outImage, clamp(ivec2(0), ivec2(0), ivec2((uvec2(uvec2(imageSize(outImage))) - uvec2(1u)))), red);
-  vec4 green = textureLoadExternal(t_2, ext_tex_plane_1_1, clamp(ivec2(70, 118), ivec2(0), ivec2((uvec2(uvec2(textureSize(t_2, 0))) - uvec2(1u)))), conv_ExternalTextureParams(ext_tex_params.inner));
+  vec4 green = textureLoadExternal(t_2, ext_tex_plane_1_1, clamp(ivec2(70, 118), ivec2(0), ivec2((uvec2(uvec2(textureSize(t_2, 0))) - uvec2(1u)))), ext_tex_params.inner);
   imageStore(outImage, clamp(ivec2(1, 0), ivec2(0), ivec2((uvec2(uvec2(imageSize(outImage))) - uvec2(1u)))), green);
   return;
 }
