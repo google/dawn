@@ -257,6 +257,15 @@ void Device::InitTogglesFromDriver() {
     if (@available(macos 11.0, iOS 14.0, *)) {
         SetToggle(Toggle::MetalUseMockBlitEncoderForWriteTimestamp, true);
     }
+
+#if DAWN_PLATFORM_IS(MACOS)
+    if (gpu_info::IsIntel(vendorId)) {
+        if ([NSProcessInfo.processInfo
+                isOperatingSystemAtLeastVersion:NSOperatingSystemVersion{12, 0, 0}]) {
+            ForceSetToggle(Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget, true);
+        }
+    }
+#endif
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(

@@ -332,6 +332,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "This toggle is off by default. It is expected to turn on or get removed when WebGPU V1 "
       "ships and stays stable.",
       "https://crbug.com/dawn/1563"}},
+    {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
+     {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
+      "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "
+      "target. If there are multiple color targets, all but the last one will use a sample mask "
+      "of zero.",
+      "https://crbug.com/dawn/1462"}}
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 }  // anonymous namespace

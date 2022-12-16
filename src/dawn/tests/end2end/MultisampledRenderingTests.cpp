@@ -643,9 +643,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithEmptyFinalSampleMask) 
 // Test doing MSAA resolve into multiple resolve targets works correctly with a non-default sample
 // mask.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithSampleMask) {
-    // TODO(crbug.com/dawn/1462): Re-enable on Mac Intel 12.4.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && (IsMacOS(12, 4) || IsMacOS(12, 5)));
-
     // TODO(dawn:1550) Fails on ARM-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
@@ -682,7 +679,13 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithSampleMas
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
     queue.Submit(1, &commandBuffer);
 
-    VerifyResolveTarget(kRed, mResolveTexture, 0, 0, kMSAACoverage);
+    // TODO(crbug.com/dawn/1462): Work around that a sample mask of zero is used for all
+    // color targets except the last one.
+    VerifyResolveTarget(
+        HasToggleEnabled("no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target")
+            ? wgpu::Color{}
+            : kRed,
+        mResolveTexture, 0, 0, kMSAACoverage);
     VerifyResolveTarget(kGreen, resolveTexture2, 0, 0, kMSAACoverage);
 }
 
@@ -812,9 +815,6 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
     // supported on some platforms.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_sample_variables"));
 
-    // TODO(crbug.com/dawn/1462): Re-enable on Mac Intel 12.4.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && (IsMacOS(12, 4) || IsMacOS(12, 5)));
-
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
     wgpu::Texture resolveTexture2 = CreateTextureForRenderAttachment(kColorFormat, 1);
@@ -866,7 +866,13 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
     queue.Submit(1, &commandBuffer);
 
-    VerifyResolveTarget(kRed, mResolveTexture, 0, 0, kMSAACoverage);
+    // TODO(crbug.com/dawn/1462): Work around that a sample mask of zero is used for all
+    // color targets except the last one.
+    VerifyResolveTarget(
+        HasToggleEnabled("no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target")
+            ? wgpu::Color{}
+            : kRed,
+        mResolveTexture, 0, 0, kMSAACoverage);
     VerifyResolveTarget(kGreen, resolveTexture2, 0, 0, kMSAACoverage);
 }
 
