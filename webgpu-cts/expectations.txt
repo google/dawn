@@ -444,6 +444,7 @@ crbug.com/dawn/1599 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTex
 
 ################################################################################
 # commandEncoder validation tests need updates in CTS
+# KEEP
 ################################################################################
 crbug.com/dawn/1602 webgpu:api,validation,encoding,beginComputePass:* [ Skip ]
 crbug.com/dawn/1602 webgpu:api,validation,encoding,beginRenderPass:* [ Skip ]
