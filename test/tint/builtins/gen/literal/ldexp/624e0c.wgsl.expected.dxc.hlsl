@@ -1,5 +1,5 @@
 void ldexp_624e0c() {
-  float16_t res = ldexp(float16_t(1.0h), 1);
+  float16_t res = float16_t(2.0h);
 }
 
 struct tint_symbol {

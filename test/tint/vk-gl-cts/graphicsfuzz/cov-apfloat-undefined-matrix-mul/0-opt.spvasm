@@ -83,8 +83,7 @@
 %_ptr_Function_v3float = OpTypePointer Function %v3float
          %64 = OpConstantComposite %v3float %float_1 %float_1 %float_1
       %v3int = OpTypeVector %int 3
-    %int_500 = OpConstant %int 500
-         %67 = OpConstantComposite %v3int %int_500 %int_500 %int_500
+         %67 = OpConstantComposite %v3int %int_1 %int_1 %int_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
      %uint_0 = OpConstant %uint 0
 %_ptr_Function_float = OpTypePointer Function %float

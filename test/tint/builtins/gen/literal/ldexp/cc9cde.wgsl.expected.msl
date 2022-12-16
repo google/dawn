@@ -2,7 +2,7 @@
 
 using namespace metal;
 void ldexp_cc9cde() {
-  float4 res = ldexp(float4(1.0f), int4(1));
+  float4 res = float4(2.0f);
 }
 
 struct tint_symbol {

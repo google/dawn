@@ -1,5 +1,5 @@
 void ldexp_7fa13c() {
-  vector<float16_t, 4> res = ldexp((float16_t(1.0h)).xxxx, (1).xxxx);
+  vector<float16_t, 4> res = (float16_t(2.0h)).xxxx;
 }
 
 struct tint_symbol {

@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void ldexp_7485ce() {
-  vector<float16_t, 3> res = ldexp((float16_t(0.0h)).xxx, (1).xxx);
+  vector<float16_t, 3> res = (float16_t(2.0h)).xxx;
 }
 
 struct tint_symbol {
@@ -30,3 +30,6 @@ void compute_main() {
   ldexp_7485ce();
   return;
 }
+FXC validation failure:
+C:\src\dawn\test\tint\Shader@0x000001A317BC93B0(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
+

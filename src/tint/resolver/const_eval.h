@@ -725,6 +725,15 @@ class ConstEval {
                        utils::VectorRef<const constant::Value*> args,
                        const Source& source);
 
+    /// ldexp builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result ldexp(const type::Type* ty,
+                 utils::VectorRef<const constant::Value*> args,
+                 const Source& source);
+
     /// length builtin
     /// @param ty the expression type
     /// @param args the input arguments

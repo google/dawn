@@ -1,0 +1,37 @@
+SKIP: FAILED
+
+void ldexp_8a0c2f() {
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> res = ldexp(arg_0, (1).xxxx);
+}
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
+float4 vertex_main_inner() {
+  ldexp_8a0c2f();
+  return (0.0f).xxxx;
+}
+
+tint_symbol vertex_main() {
+  const float4 inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+void fragment_main() {
+  ldexp_8a0c2f();
+  return;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  ldexp_8a0c2f();
+  return;
+}
+FXC validation failure:
+C:\src\dawn\test\tint\Shader@0x000001B927CE7790(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\test\tint\Shader@0x000001B927CE7790(3,10-18): error X3000: syntax error: unexpected token 'float16_t'
+

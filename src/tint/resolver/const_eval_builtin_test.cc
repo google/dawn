@@ -1551,6 +1551,71 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               ExtractBitsCases<u32>()))));
 
 template <typename T>
+std::vector<Case> LdexpCases() {
+    using T2 = std::conditional_t<std::is_same_v<T, AFloat>, AInt, i32>;
+    T2 bias;
+    if constexpr (std::is_same_v<T, f16>) {
+        bias = 15;
+    } else if constexpr (std::is_same_v<T, f32>) {
+        bias = 127;
+    } else {
+        bias = 1023;
+    }
+
+    auto compute = [](T e1, T2 e2) { return T{std::ldexp(e1.value, static_cast<int>(e2.value))}; };
+
+    auto r = std::vector<Case>{
+        C({T(0), T2(0)}, T(0)),          //
+        C({T(7), T2(4)}, T(112)),        //
+        C({T(7), T2(5)}, T(224)),        //
+        C({T(7), T2(6)}, T(448)),        //
+        C({T(7), T2(-4)}, T(0.4375)),    //
+        C({T(7), T2(-5)}, T(0.21875)),   //
+        C({T(7), T2(-6)}, T(0.109375)),  //
+        // With bias exponent
+        C({T(0), T2(bias)}, T(0)),                           //
+        C({T(0), T2(bias + 1)}, T(0)),                       //
+        C({T(1), T2(bias)}, compute(T(1), T2(bias))),        //
+        C({T(0.5), T2(bias)}, compute(T(0.5), T2(bias))),    //
+        C({T(0.25), T2(bias)}, compute(T(0.25), T2(bias))),  //
+        // The result may be zero if e2 + bias ≤ 0.
+        C({T(0), T2(-bias)}, T(0)),      //
+        C({T(0), T2(-bias - 1)}, T(0)),  //
+        C({T(0), T2(-bias - 2)}, T(0)),  //
+
+        // Vector tests
+        C({Vec(T(0), T(7), T(7)), Vec(T2(0), T2(4), T2(-4))}, Vec(T(0), T(112), T(0.4375))),
+    };
+
+    std::string e2_too_large_error_msg =
+        "12:34 error: e2 must be less than or equal to " + std::to_string(bias + 1);
+    auto val_overflow_error_msg = [](auto val) {
+        return "12:34 error: " + OverflowErrorMessage(val, FriendlyName<T>());
+    };
+    ConcatInto(r, std::vector<Case>{
+                      // e2 is > bias + 1
+                      E({T(0), T2(bias + 2)}, e2_too_large_error_msg),
+                      E({T(0), T2(bias + 1000)}, e2_too_large_error_msg),
+                      E({T(0), T2::Highest()}, e2_too_large_error_msg),
+                      // Result is inf
+                      E({T(1), T2(bias + 1)}, val_overflow_error_msg(T::Inf())),
+                      E({T(2), T2(bias + 1)}, val_overflow_error_msg(T::Inf())),
+                      E({T::Highest(), T2(bias + 1)}, val_overflow_error_msg(T::Inf())),
+                      E({T(-1), T2(bias + 1)}, val_overflow_error_msg(-T::Inf())),
+                      E({T(-2), T2(bias + 1)}, val_overflow_error_msg(-T::Inf())),
+                      E({T::Lowest(), T2(bias + 1)}, val_overflow_error_msg(-T::Inf())),
+                  });
+    return r;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Ldexp,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kLdexp),
+                     testing::ValuesIn(Concat(LdexpCases<AFloat>(),  //
+                                              LdexpCases<f32>(),
+                                              LdexpCases<f16>()))));
+
+template <typename T>
 std::vector<Case> LengthCases() {
     const auto kSqrtOfHighest = T(std::sqrt(T::Highest()));
     const auto kSqrtOfHighestSquared = T(kSqrtOfHighest * kSqrtOfHighest);

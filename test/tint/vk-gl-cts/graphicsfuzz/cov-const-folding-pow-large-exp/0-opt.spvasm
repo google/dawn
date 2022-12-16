@@ -31,7 +31,6 @@
 %float_40_3300018 = OpConstant %float 40.3300018
     %float_1 = OpConstant %float 1
         %int = OpTypeInt 32 1
-  %int_98980 = OpConstant %int 98980
        %bool = OpTypeBool
        %uint = OpTypeInt 32 0
      %uint_2 = OpConstant %uint 2
@@ -54,7 +53,7 @@
        %main = OpFunction %void None %12
          %31 = OpLabel
           %f = OpVariable %_ptr_Function_float Function
-         %32 = OpExtInst %float %1 Ldexp %float_1 %int_98980
+         %32 = OpExtInst %float %1 Ldexp %float_1 %int_1
          %33 = OpExtInst %float %1 Pow %float_40_3300018 %32
                OpStore %f %33
          %34 = OpAccessChain %_ptr_Uniform_int %_ %int_0 %int_0

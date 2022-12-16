@@ -1,7 +1,7 @@
 #version 310 es
 
 void ldexp_db8b49() {
-  float res = ldexp(1.0f, 1);
+  float res = 2.0f;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void ldexp_db8b49() {
-  float res = ldexp(1.0f, 1);
+  float res = 2.0f;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void ldexp_db8b49() {
-  float res = ldexp(1.0f, 1);
+  float res = 2.0f;
 }
 
 void compute_main() {

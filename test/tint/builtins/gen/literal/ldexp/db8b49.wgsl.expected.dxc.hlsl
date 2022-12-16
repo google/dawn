@@ -1,5 +1,5 @@
 void ldexp_db8b49() {
-  float res = ldexp(1.0f, 1);
+  float res = 2.0f;
 }
 
 struct tint_symbol {

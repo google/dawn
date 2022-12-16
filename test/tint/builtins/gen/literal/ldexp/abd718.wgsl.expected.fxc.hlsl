@@ -1,5 +1,5 @@
 void ldexp_abd718() {
-  float2 res = ldexp((1.0f).xx, (1).xx);
+  float2 res = (2.0f).xx;
 }
 
 struct tint_symbol {

@@ -30,7 +30,7 @@ fn main_1() {
   var f : f32;
   var x_48 : bool;
   var x_49_phi : bool;
-  f = pow(40.330001831, ldexp(1.0, 98980));
+  f = pow(40.330001831, ldexp(1.0, 1));
   let x_35 : i32 = x_6.x_GLF_uniform_int_values[0].el;
   let x_37 : i32 = x_6.x_GLF_uniform_int_values[0].el;
   let x_39 : i32 = x_6.x_GLF_uniform_int_values[1].el;
