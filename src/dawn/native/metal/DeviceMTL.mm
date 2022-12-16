@@ -264,6 +264,10 @@ void Device::InitTogglesFromDriver() {
                 isOperatingSystemAtLeastVersion:NSOperatingSystemVersion{12, 0, 0}]) {
             ForceSetToggle(Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget, true);
         }
+        if (gpu_info::IsIntelGen7(vendorId, deviceId) ||
+            gpu_info::IsIntelGen8(vendorId, deviceId)) {
+            ForceSetToggle(Toggle::NoWorkaroundIndirectBaseVertexNotApplied, true);
+        }
     }
 #endif
 }

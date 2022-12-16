@@ -337,7 +337,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "
       "target. If there are multiple color targets, all but the last one will use a sample mask "
       "of zero.",
-      "https://crbug.com/dawn/1462"}}
+      "https://crbug.com/dawn/1462"}},
+    {Toggle::NoWorkaroundIndirectBaseVertexNotApplied,
+     {"no_workaround_indirect_base_vertex_not_applied",
+      "MacOS Intel < Gen9 has a bug where indirect base vertex is not applied for "
+      "drawIndexedIndirect. Draws are done as if it is always zero.",
+      "https://crbug.com/dawn/966"}}
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 }  // anonymous namespace

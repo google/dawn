@@ -86,6 +86,7 @@ enum class Toggle {
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
+    NoWorkaroundIndirectBaseVertexNotApplied,
 
     EnumCount,
     InvalidEnum = EnumCount,
