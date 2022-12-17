@@ -249,10 +249,10 @@ struct FunctionInfo {
         // This only matters if we're dumping the graph.
         std::string unique_tag = tag;
         int suffix = 0;
-        while (tags_.count(unique_tag)) {
+        while (tags_.Contains(unique_tag)) {
             unique_tag = tag + "_$" + std::to_string(++suffix);
         }
-        tags_.insert(unique_tag);
+        tags_.Add(unique_tag);
         node->tag = name + "." + unique_tag;
 #endif
 
