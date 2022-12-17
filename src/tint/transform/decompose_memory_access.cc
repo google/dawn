@@ -126,10 +126,10 @@ struct LoadStoreKey {
 
 /// AtomicKey is the unordered map key to an atomic intrinsic.
 struct AtomicKey {
-    ast::Access const access;           // buffer access
+    ast::Access const access;            // buffer access
     type::Type const* buf_ty = nullptr;  // buffer type
     type::Type const* el_ty = nullptr;   // element type
-    sem::BuiltinType const op;          // atomic op
+    sem::BuiltinType const op;           // atomic op
     bool operator==(const AtomicKey& rhs) const {
         return access == rhs.access && buf_ty == rhs.buf_ty && el_ty == rhs.el_ty && op == rhs.op;
     }
@@ -881,15 +881,17 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
     for (auto* node : src->ASTNodes().Objects()) {
         if (auto* ident = node->As<ast::IdentifierExpression>()) {
             // X
-            if (auto* var = sem.Get<sem::VariableUser>(ident)) {
-                if (var->Variable()->AddressSpace() == ast::AddressSpace::kStorage ||
-                    var->Variable()->AddressSpace() == ast::AddressSpace::kUniform) {
-                    // Variable to a storage or uniform buffer
-                    state.AddAccess(ident, {
-                                               var,
-                                               state.ToOffset(0u),
-                                               var->Type()->UnwrapRef(),
-                                           });
+            if (auto* sem_ident = sem.Get(ident)) {
+                if (auto* var = sem_ident->UnwrapLoad()->As<sem::VariableUser>()) {
+                    if (var->Variable()->AddressSpace() == ast::AddressSpace::kStorage ||
+                        var->Variable()->AddressSpace() == ast::AddressSpace::kUniform) {
+                        // Variable to a storage or uniform buffer
+                        state.AddAccess(ident, {
+                                                   var,
+                                                   state.ToOffset(0u),
+                                                   var->Type()->UnwrapRef(),
+                                               });
+                    }
                 }
             }
             continue;
@@ -897,7 +899,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
 
         if (auto* accessor = node->As<ast::MemberAccessorExpression>()) {
             // X.Y
-            auto* accessor_sem = sem.Get(accessor);
+            auto* accessor_sem = sem.Get(accessor)->UnwrapLoad();
             if (auto* swizzle = accessor_sem->As<sem::Swizzle>()) {
                 if (swizzle->Indices().Length() == 1) {
                     if (auto access = state.TakeAccess(accessor->structure)) {
@@ -906,7 +908,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
                         state.AddAccess(accessor, {
                                                       access.var,
                                                       state.Add(access.offset, offset),
-                                                      vec_ty->type()->UnwrapRef(),
+                                                      vec_ty->type(),
                                                   });
                     }
                 }
@@ -918,7 +920,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
                     state.AddAccess(accessor, {
                                                   access.var,
                                                   state.Add(access.offset, offset),
-                                                  member->Type()->UnwrapRef(),
+                                                  member->Type(),
                                               });
                 }
             }
@@ -933,7 +935,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
                     state.AddAccess(accessor, {
                                                   access.var,
                                                   state.Add(access.offset, offset),
-                                                  arr->ElemType()->UnwrapRef(),
+                                                  arr->ElemType(),
                                               });
                     continue;
                 }
@@ -942,7 +944,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
                     state.AddAccess(accessor, {
                                                   access.var,
                                                   state.Add(access.offset, offset),
-                                                  vec_ty->type()->UnwrapRef(),
+                                                  vec_ty->type(),
                                               });
                     continue;
                 }
@@ -1014,6 +1016,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
 
     // All remaining accesses are loads, transform these into calls to the
     // corresponding load function
+    // TODO(crbug.com/tint/1784): Use `sem::Load`s instead of maintaining `state.expression_order`.
     for (auto* expr : state.expression_order) {
         auto access_it = state.accesses.find(expr);
         if (access_it == state.accesses.end()) {

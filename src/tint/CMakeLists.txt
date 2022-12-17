@@ -913,6 +913,7 @@ if(TINT_BUILD_TESTS)
     resolver/intrinsic_table_test.cc
     resolver/is_host_shareable_test.cc
     resolver/is_storeable_test.cc
+    resolver/load_test.cc
     resolver/materialize_test.cc
     resolver/override_test.cc
     resolver/ptr_ref_test.cc

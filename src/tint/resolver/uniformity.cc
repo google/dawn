@@ -1035,7 +1035,7 @@ class UniformityGraph {
         };
 
         auto name = builder_->Symbols().NameFor(ident->symbol);
-        auto* sem = sem_.Get(ident)->UnwrapMaterialize()->As<sem::VariableUser>()->Variable();
+        auto* sem = sem_.Get(ident)->Unwrap()->As<sem::VariableUser>()->Variable();
         auto* node = CreateNode(name + "_ident_expr", ident);
         return Switch(
             sem,
@@ -1203,7 +1203,7 @@ class UniformityGraph {
 
             [&](const ast::IdentifierExpression* i) {
                 auto name = builder_->Symbols().NameFor(i->symbol);
-                auto* sem = sem_.Get<sem::VariableUser>(i);
+                auto* sem = sem_.Get(i)->UnwrapLoad()->As<sem::VariableUser>();
                 if (sem->Variable()->Is<sem::GlobalVariable>()) {
                     return std::make_pair(cf, current_function_->may_be_non_uniform);
                 } else if (auto* local = sem->Variable()->As<sem::LocalVariable>()) {
@@ -1536,7 +1536,7 @@ class UniformityGraph {
         Switch(
             non_uniform_source->ast,
             [&](const ast::IdentifierExpression* ident) {
-                auto* var = sem_.Get<sem::VariableUser>(ident)->Variable();
+                auto* var = sem_.Get(ident)->UnwrapLoad()->As<sem::VariableUser>()->Variable();
                 std::string var_type = get_var_type(var);
                 diagnostics_.add_note(diag::System::Resolver,
                                       "reading from " + var_type + "'" +

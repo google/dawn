@@ -26,6 +26,7 @@
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
+#include "src/tint/sem/load.h"
 #include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
@@ -436,7 +437,7 @@ bool Builder::GenerateAssignStatement(const ast::AssignmentStatement* assign) {
         if (lhs_id == 0) {
             return false;
         }
-        auto rhs_id = GenerateExpressionWithLoadIfNeeded(assign->rhs);
+        auto rhs_id = GenerateExpression(assign->rhs);
         if (rhs_id == 0) {
             return false;
         }
@@ -457,7 +458,7 @@ bool Builder::GenerateBreakStatement(const ast::BreakStatement*) {
 
 bool Builder::GenerateBreakIfStatement(const ast::BreakIfStatement* stmt) {
     TINT_ASSERT(Writer, !backedge_stack_.empty());
-    const auto cond_id = GenerateExpressionWithLoadIfNeeded(stmt->condition);
+    const auto cond_id = GenerateExpression(stmt->condition);
     if (!cond_id) {
         return false;
     }
@@ -555,14 +556,19 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
     return true;
 }
 
-uint32_t Builder::GenerateExpression(const ast::Expression* expr) {
-    if (auto* sem = builder_.Sem().Get(expr)) {
-        if (auto constant = sem->ConstantValue()) {
-            return GenerateConstantIfNeeded(constant);
+uint32_t Builder::GenerateExpression(const sem::Expression* expr) {
+    if (auto* constant = expr->ConstantValue()) {
+        return GenerateConstantIfNeeded(constant);
+    }
+    if (auto* load = expr->As<sem::Load>()) {
+        auto ref_id = GenerateExpression(load->Reference());
+        if (ref_id == 0) {
+            return 0;
         }
+        return GenerateLoad(load->ReferenceType(), ref_id);
     }
     return Switch(
-        expr,  //
+        expr->Declaration(),  //
         [&](const ast::IndexAccessorExpression* a) { return GenerateAccessorExpression(a); },
         [&](const ast::BinaryExpression* b) { return GenerateBinaryExpression(b); },
         [&](const ast::BitcastExpression* b) { return GenerateBitcastExpression(b); },
@@ -575,6 +581,10 @@ uint32_t Builder::GenerateExpression(const ast::Expression* expr) {
             error_ = "unknown expression type: " + std::string(expr->TypeInfo().name);
             return 0;
         });
+}
+
+uint32_t Builder::GenerateExpression(const ast::Expression* expr) {
+    return GenerateExpression(builder_.Sem().Get(expr));
 }
 
 bool Builder::GenerateFunction(const ast::Function* func_ast) {
@@ -686,7 +696,7 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* v) {
 
     uint32_t init_id = 0;
     if (v->initializer) {
-        init_id = GenerateExpressionWithLoadIfNeeded(v->initializer);
+        init_id = GenerateExpression(v->initializer);
         if (init_id == 0) {
             return false;
         }
@@ -874,7 +884,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
 }
 
 bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr, AccessorInfo* info) {
-    auto idx_id = GenerateExpressionWithLoadIfNeeded(expr->index);
+    auto idx_id = GenerateExpression(expr->index);
     if (idx_id == 0) {
         return 0;
     }
@@ -884,7 +894,7 @@ bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr, Ac
     // See https://github.com/gpuweb/gpuweb/pull/1580
     if (info->source_type->Is<type::Reference>()) {
         info->access_chain_indices.push_back(idx_id);
-        info->source_type = TypeOf(expr);
+        info->source_type = builder_.Sem().Get(expr)->UnwrapLoad()->Type();
         return true;
     }
 
@@ -936,7 +946,7 @@ bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr, Ac
 
 bool Builder::GenerateMemberAccessor(const ast::MemberAccessorExpression* expr,
                                      AccessorInfo* info) {
-    auto* expr_sem = builder_.Sem().Get(expr);
+    auto* expr_sem = builder_.Sem().Get(expr)->UnwrapLoad();
     auto* expr_type = expr_sem->Type();
 
     if (auto* access = expr_sem->As<sem::StructMemberAccess>()) {
@@ -1108,7 +1118,7 @@ uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
     }
 
     if (!info.access_chain_indices.empty()) {
-        auto* type = TypeOf(expr);
+        auto* type = builder_.Sem().Get(expr)->UnwrapLoad()->Type();
         auto result_type_id = GenerateTypeIfNeeded(type);
         if (result_type_id == 0) {
             return 0;
@@ -1133,44 +1143,31 @@ uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
 
 uint32_t Builder::GenerateIdentifierExpression(const ast::IdentifierExpression* expr) {
     auto* sem = builder_.Sem().Get(expr);
-    if (auto* user = sem->As<sem::VariableUser>()) {
-        return LookupVariableID(user->Variable());
+    if (sem) {
+        if (auto* user = sem->UnwrapLoad()->As<sem::VariableUser>()) {
+            return LookupVariableID(user->Variable());
+        }
     }
     error_ = "identifier '" + builder_.Symbols().NameFor(expr->symbol) +
              "' does not resolve to a variable";
     return 0;
 }
 
-uint32_t Builder::GenerateExpressionWithLoadIfNeeded(const sem::Expression* expr) {
-    // The semantic node directly knows both the AST node and the resolved type.
-    if (const auto id = GenerateExpression(expr->Declaration())) {
-        return GenerateLoadIfNeeded(expr->Type(), id);
-    }
-    return 0;
-}
-
-uint32_t Builder::GenerateExpressionWithLoadIfNeeded(const ast::Expression* expr) {
-    if (const auto id = GenerateExpression(expr)) {
-        // Perform a lookup to get the resolved type.
-        return GenerateLoadIfNeeded(TypeOf(expr), id);
-    }
-    return 0;
-}
-
-uint32_t Builder::GenerateLoadIfNeeded(const type::Type* type, uint32_t id) {
-    if (auto* ref = type->As<type::Reference>()) {
-        type = ref->StoreType();
-    } else {
-        return id;
-    }
-
-    auto type_id = GenerateTypeIfNeeded(type);
+uint32_t Builder::GenerateLoad(const type::Reference* type, uint32_t id) {
+    auto type_id = GenerateTypeIfNeeded(type->StoreType());
     auto result = result_op();
     auto result_id = std::get<uint32_t>(result);
     if (!push_function_inst(spv::Op::OpLoad, {Operand(type_id), result, Operand(id)})) {
         return 0;
     }
     return result_id;
+}
+
+uint32_t Builder::GenerateLoadIfNeeded(const type::Type* type, uint32_t id) {
+    if (auto* ref = type->As<type::Reference>()) {
+        return GenerateLoad(ref, id);
+    }
+    return id;
 }
 
 uint32_t Builder::GenerateUnaryOpExpression(const ast::UnaryOpExpression* expr) {
@@ -1200,7 +1197,7 @@ uint32_t Builder::GenerateUnaryOpExpression(const ast::UnaryOpExpression* expr) 
             return GenerateExpression(expr->expr);
     }
 
-    auto val_id = GenerateExpressionWithLoadIfNeeded(expr->expr);
+    auto val_id = GenerateExpression(expr->expr);
     if (val_id == 0) {
         return 0;
     }
@@ -1338,7 +1335,7 @@ uint32_t Builder::GenerateTypeInitializerOrConversion(const sem::Call* call,
 
     for (auto* e : args) {
         uint32_t id = 0;
-        id = GenerateExpressionWithLoadIfNeeded(e);
+        id = GenerateExpression(e);
         if (id == 0) {
             return 0;
         }
@@ -1476,7 +1473,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
         return 0;
     }
 
-    auto val_id = GenerateExpressionWithLoadIfNeeded(from_expr);
+    auto val_id = GenerateExpression(from_expr);
     if (val_id == 0) {
         return 0;
     }
@@ -1828,7 +1825,7 @@ uint32_t Builder::GenerateConstantVectorSplatIfNeeded(const type::Vector* type, 
 }
 
 uint32_t Builder::GenerateShortCircuitBinaryExpression(const ast::BinaryExpression* expr) {
-    auto lhs_id = GenerateExpressionWithLoadIfNeeded(expr->lhs);
+    auto lhs_id = GenerateExpression(expr->lhs);
     if (lhs_id == 0) {
         return false;
     }
@@ -1869,7 +1866,7 @@ uint32_t Builder::GenerateShortCircuitBinaryExpression(const ast::BinaryExpressi
     if (!GenerateLabel(block_id)) {
         return 0;
     }
-    auto rhs_id = GenerateExpressionWithLoadIfNeeded(expr->rhs);
+    auto rhs_id = GenerateExpression(expr->rhs);
     if (rhs_id == 0) {
         return 0;
     }
@@ -1989,12 +1986,12 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
         return GenerateShortCircuitBinaryExpression(expr);
     }
 
-    auto lhs_id = GenerateExpressionWithLoadIfNeeded(expr->lhs);
+    auto lhs_id = GenerateExpression(expr->lhs);
     if (lhs_id == 0) {
         return 0;
     }
 
-    auto rhs_id = GenerateExpressionWithLoadIfNeeded(expr->rhs);
+    auto rhs_id = GenerateExpression(expr->rhs);
     if (rhs_id == 0) {
         return 0;
     }
@@ -2267,7 +2264,7 @@ uint32_t Builder::GenerateFunctionCall(const sem::Call* call, const sem::Functio
     ops.push_back(Operand(func_id));
 
     for (auto* arg : expr->args) {
-        auto id = GenerateExpressionWithLoadIfNeeded(arg);
+        auto id = GenerateExpression(arg);
         if (id == 0) {
             return 0;
         }
@@ -2623,10 +2620,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     auto& arguments = call->Arguments();
 
     // Generates the given expression, returning the operand ID
-    auto gen = [&](const sem::Expression* expr) {
-        const auto val_id = GenerateExpressionWithLoadIfNeeded(expr);
-        return Operand(val_id);
-    };
+    auto gen = [&](const sem::Expression* expr) { return Operand(GenerateExpression(expr)); };
 
     // Returns the argument with the given usage
     auto arg = [&](Usage usage) {
@@ -2754,7 +2748,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             // Array index needs to be appended to the coordinates.
             auto* packed = AppendVector(&builder_, arg(Usage::kCoords)->Declaration(),
                                         array_index->Declaration());
-            auto param = GenerateExpression(packed->Declaration());
+            auto param = GenerateExpression(packed);
             if (param == 0) {
                 return false;
             }
@@ -3097,14 +3091,14 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
         return false;
     }
 
-    uint32_t pointer_id = GenerateExpression(call->Arguments()[0]->Declaration());
+    uint32_t pointer_id = GenerateExpression(call->Arguments()[0]);
     if (pointer_id == 0) {
         return false;
     }
 
     uint32_t value_id = 0;
     if (call->Arguments().Length() > 1) {
-        value_id = GenerateExpressionWithLoadIfNeeded(call->Arguments().Back());
+        value_id = GenerateExpression(call->Arguments().Back());
         if (value_id == 0) {
             return false;
         }
@@ -3206,8 +3200,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                      value,
                                                                  });
         case sem::BuiltinType::kAtomicCompareExchangeWeak: {
-            auto comparator =
-                GenerateExpressionWithLoadIfNeeded(call->Arguments()[1]->Declaration());
+            auto comparator = GenerateExpression(call->Arguments()[1]);
             if (comparator == 0) {
                 return false;
             }
@@ -3312,7 +3305,7 @@ uint32_t Builder::GenerateBitcastExpression(const ast::BitcastExpression* expr) 
         return 0;
     }
 
-    auto val_id = GenerateExpressionWithLoadIfNeeded(expr->expr);
+    auto val_id = GenerateExpression(expr->expr);
     if (val_id == 0) {
         return 0;
     }
@@ -3339,7 +3332,7 @@ uint32_t Builder::GenerateBitcastExpression(const ast::BitcastExpression* expr) 
 bool Builder::GenerateConditionalBlock(const ast::Expression* cond,
                                        const ast::BlockStatement* true_body,
                                        const ast::Statement* else_stmt) {
-    auto cond_id = GenerateExpressionWithLoadIfNeeded(cond);
+    auto cond_id = GenerateExpression(cond);
     if (cond_id == 0) {
         return false;
     }
@@ -3420,7 +3413,7 @@ bool Builder::GenerateSwitchStatement(const ast::SwitchStatement* stmt) {
 
     merge_stack_.push_back(merge_block_id);
 
-    auto cond_id = GenerateExpressionWithLoadIfNeeded(stmt->condition);
+    auto cond_id = GenerateExpression(stmt->condition);
     if (cond_id == 0) {
         return false;
     }
@@ -3504,7 +3497,7 @@ bool Builder::GenerateSwitchStatement(const ast::SwitchStatement* stmt) {
 
 bool Builder::GenerateReturnStatement(const ast::ReturnStatement* stmt) {
     if (stmt->value) {
-        auto val_id = GenerateExpressionWithLoadIfNeeded(stmt->value);
+        auto val_id = GenerateExpression(stmt->value);
         if (val_id == 0) {
             return false;
         }

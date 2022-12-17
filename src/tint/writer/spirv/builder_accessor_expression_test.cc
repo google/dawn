@@ -1263,12 +1263,12 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
 %7 = OpTypeVector %8 3
 %6 = OpTypePointer Function %7
 %9 = OpConstantNull %7
-%10 = OpTypeVector %8 2
+%11 = OpTypeVector %8 2
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%5 = OpVariable %6 Function %9
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(%11 = OpLoad %7 %5
-%12 = OpVectorShuffle %10 %11 %11 1 0
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(%10 = OpLoad %7 %5
+%12 = OpVectorShuffle %11 %10 %10 1 0
 OpReturn
 )");
 

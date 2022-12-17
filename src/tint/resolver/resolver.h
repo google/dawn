@@ -157,10 +157,6 @@ class Resolver {
     sem::Expression* MemberAccessor(const ast::MemberAccessorExpression*);
     sem::Expression* UnaryOp(const ast::UnaryOpExpression*);
 
-    /// Register a memory load from an expression, to track accesses to root identifiers in order to
-    /// perform alias analysis.
-    void RegisterLoadIfNeeded(const sem::Expression* expr);
-
     /// Register a memory store to an expression, to track accesses to root identifiers in order to
     /// perform alias analysis.
     void RegisterStore(const sem::Expression* expr);
@@ -169,8 +165,11 @@ class Resolver {
     /// @returns true is the call arguments are free from aliasing issues, false otherwise.
     bool AliasAnalysis(const sem::Call* call);
 
+    /// If `expr` is of a reference type, then Load will create and return a sem::Load node wrapping
+    /// `expr`. If `expr` is not of a reference type, then Load will just return `expr`.
+    const sem::Expression* Load(const sem::Expression* expr);
+
     /// If `expr` is not of an abstract-numeric type, then Materialize() will just return `expr`.
-    /// If `expr` is of an abstract-numeric type:
     /// * Materialize will create and return a sem::Materialize node wrapping `expr`.
     /// * The AST -> Sem binding will be updated to point to the new sem::Materialize node.
     /// * The sem::Materialize node will have a new concrete type, which will be `target_type` if
@@ -181,15 +180,19 @@ class Resolver {
     ///       if `expr` has a element type of abstract-float.
     /// * The sem::Materialize constant value will be the value of `expr` value-converted to the
     ///   materialized type.
+    /// If `expr` is not of an abstract-numeric type, then Materialize() will just return `expr`.
     /// If `expr` is nullptr, then Materialize() will also return nullptr.
     const sem::Expression* Materialize(const sem::Expression* expr,
                                        const type::Type* target_type = nullptr);
 
-    /// Materializes all the arguments in `args` to the parameter types of `target`.
+    /// For each argument in `args`:
+    /// * Calls Materialize() passing the argument and the corresponding parameter type.
+    /// * Calls Load() passing the argument, iff the corresponding parameter type is not a
+    ///   reference type.
     /// @returns true on success, false on failure.
     template <size_t N>
-    bool MaybeMaterializeArguments(utils::Vector<const sem::Expression*, N>& args,
-                                   const sem::CallTarget* target);
+    bool MaybeMaterializeAndLoadArguments(utils::Vector<const sem::Expression*, N>& args,
+                                          const sem::CallTarget* target);
 
     /// @returns true if an argument of an abstract numeric type, passed to a parameter of type
     /// `parameter_ty` should be materialized.

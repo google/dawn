@@ -67,7 +67,7 @@ struct Robustness::State {
     /// @return the clamped replacement expression, or nullptr if `expr` should be cloned without
     /// changes.
     const ast::IndexAccessorExpression* Transform(const ast::IndexAccessorExpression* expr) {
-        auto* sem = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::IndexAccessorExpression>();
+        auto* sem = src->Sem().Get(expr)->Unwrap()->As<sem::IndexAccessorExpression>();
         auto* ret_type = sem->Type();
 
         auto* ref = ret_type->As<type::Reference>();
@@ -78,7 +78,7 @@ struct Robustness::State {
         // idx return the cloned index expression, as a u32.
         auto idx = [&]() -> const ast::Expression* {
             auto* i = ctx.Clone(expr->index);
-            if (sem->Index()->Type()->UnwrapRef()->is_signed_integer_scalar()) {
+            if (sem->Index()->Type()->is_signed_integer_scalar()) {
                 return b.Construct(b.ty.u32(), i);  // u32(idx)
             }
             return i;

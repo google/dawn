@@ -83,7 +83,7 @@ class TestHelper : public ProgramBuilder {
     /// @return the resolved sem::Variable of the identifier, or nullptr if
     /// the expression did not resolve to a variable.
     const sem::Variable* VarOf(const ast::Expression* expr) {
-        auto* sem_ident = Sem().Get(expr);
+        auto* sem_ident = Sem().Get(expr)->UnwrapLoad();
         auto* var_user = sem_ident ? sem_ident->As<sem::VariableUser>() : nullptr;
         return var_user ? var_user->Variable() : nullptr;
     }

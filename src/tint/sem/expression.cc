@@ -16,6 +16,7 @@
 
 #include <utility>
 
+#include "src/tint/sem/load.h"
 #include "src/tint/sem/materialize.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Expression);
@@ -47,6 +48,21 @@ const Expression* Expression::UnwrapMaterialize() const {
         return m->Expr();
     }
     return this;
+}
+
+const Expression* Expression::UnwrapLoad() const {
+    if (auto* l = As<Load>()) {
+        return l->Reference();
+    }
+    return this;
+}
+
+const Expression* Expression::Unwrap() const {
+    return Switch(
+        this,  // note: An expression can only be wrapped by a Load or Materialize, not both.
+        [&](const Load* load) { return load->Reference(); },
+        [&](const Materialize* materialize) { return materialize->Expr(); },
+        [&](Default) { return this; });
 }
 
 }  // namespace tint::sem

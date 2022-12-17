@@ -2205,7 +2205,7 @@ bool Validator::Return(const ast::ReturnStatement* ret,
 }
 
 bool Validator::SwitchStatement(const ast::SwitchStatement* s) {
-    auto* cond_ty = sem_.TypeOf(s->condition)->UnwrapRef();
+    auto* cond_ty = sem_.TypeOf(s->condition);
     if (!cond_ty->is_integer_scalar()) {
         AddError("switch statement selector expression must be of a scalar integer type",
                  s->condition->source);

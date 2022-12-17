@@ -43,6 +43,7 @@
 // Forward declarations
 namespace tint::sem {
 class Call;
+class Load;
 class TypeInitializer;
 class TypeConversion;
 }  // namespace tint::sem
@@ -274,6 +275,10 @@ class Builder {
     /// Generates an expression
     /// @param expr the expression to generate
     /// @returns the resulting ID of the expression or 0 on error
+    uint32_t GenerateExpression(const sem::Expression* expr);
+    /// Generates an expression
+    /// @param expr the expression to generate
+    /// @returns the resulting ID of the expression or 0 on error
     uint32_t GenerateExpression(const ast::Expression* expr);
     /// Generates the instructions for a function
     /// @param func the function to generate
@@ -440,24 +445,15 @@ class Builder {
     /// @param stmt the statement to generate
     /// @returns true if the statement was generated
     bool GenerateStatement(const ast::Statement* stmt);
-    /// Generates an expression. If the WGSL expression does not have reference
-    /// type, then return the SPIR-V ID for the expression. Otherwise implement
-    /// the WGSL Load Rule: generate an OpLoad and return the ID of the result.
-    /// Returns 0 if the expression could not be generated.
-    /// @param expr the semantic expression node to be generated
-    /// @returns the the ID of the expression, or loaded expression
-    uint32_t GenerateExpressionWithLoadIfNeeded(const sem::Expression* expr);
-    /// Generates an expression. If the WGSL expression does not have reference
-    /// type, then return the SPIR-V ID for the expression. Otherwise implement
-    /// the WGSL Load Rule: generate an OpLoad and return the ID of the result.
-    /// Returns 0 if the expression could not be generated.
-    /// @param expr the AST expression to be generated
-    /// @returns the the ID of the expression, or loaded expression
-    uint32_t GenerateExpressionWithLoadIfNeeded(const ast::Expression* expr);
-    /// Generates an OpLoad on the given ID if it has reference type in WGSL,
-    /// othewrise return the ID itself.
+    /// Generates an OpLoad of the given expression type
+    /// @param type the reference type of the expression
+    /// @param id the SPIR-V id of the expression
+    /// @returns the ID of the loaded value or 0 on failure.
+    uint32_t GenerateLoad(const type::Reference* type, uint32_t id);
+    /// Generates an OpLoad on the given ID if it has reference type in WGSL, otherwise return the
+    /// ID itself.
     /// @param type the type of the expression
-    /// @param id the SPIR-V id of the experssion
+    /// @param id the SPIR-V id of the expression
     /// @returns the ID of the loaded value or `id` if type is not a reference
     uint32_t GenerateLoadIfNeeded(const type::Type* type, uint32_t id);
     /// Generates an OpStore. Emits an error and returns false if we're

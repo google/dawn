@@ -74,8 +74,14 @@ struct PackedVec3::State {
         // that load a whole packed vector (not a scalar / swizzle of the vector).
         utils::Hashset<const sem::Expression*, 16> refs;
         for (auto* node : ctx.src->ASTNodes().Objects()) {
+            auto* sem_node = sem.Get(node);
+            if (sem_node) {
+                if (auto* expr = sem_node->As<sem::Expression>()) {
+                    sem_node = expr->UnwrapLoad();
+                }
+            }
             Switch(
-                sem.Get(node),  //
+                sem_node,  //
                 [&](const sem::StructMemberAccess* access) {
                     if (members.Contains(access->Member())) {
                         // Access to a packed vector member. Seed the expression tracking.
@@ -84,11 +90,11 @@ struct PackedVec3::State {
                 },
                 [&](const sem::IndexAccessorExpression* access) {
                     // Not loading a whole packed vector. Ignore.
-                    refs.Remove(access->Object());
+                    refs.Remove(access->Object()->UnwrapLoad());
                 },
                 [&](const sem::Swizzle* access) {
                     // Not loading a whole packed vector. Ignore.
-                    refs.Remove(access->Object());
+                    refs.Remove(access->Object()->UnwrapLoad());
                 },
                 [&](const sem::VariableUser* user) {
                     auto* v = user->Variable();

@@ -24,8 +24,8 @@
           %v = OpVariable %_ptr_Function_v3float Function %9
          %13 = OpAccessChain %_ptr_Function_float %v %uint_1
          %14 = OpLoad %float %13
-         %16 = OpLoad %v3float %v
-         %17 = OpVectorShuffle %v2float %16 %16 0 2
+         %15 = OpLoad %v3float %v
+         %17 = OpVectorShuffle %v2float %15 %15 0 2
          %18 = OpLoad %v3float %v
          %19 = OpVectorShuffle %v3float %18 %18 0 2 1
                OpReturn

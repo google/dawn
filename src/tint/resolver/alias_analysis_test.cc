@@ -804,6 +804,37 @@ TEST_F(ResolverAliasAnalysisTest, Write_MemberAccessor) {
 12:34 note: aliases with another argument passed here)");
 }
 
+TEST_F(ResolverAliasAnalysisTest, Read_MultiComponentSwizzle) {
+    // fn f2(p1 : ptr<function, vec4<f32>, p2 : ptr<function, vec4<f32>) {
+    //   _ = (*p2).zy;
+    //   *p1 = vec4<f32>();
+    // }
+    // fn f1() {
+    //   var v : vec4<f32>;
+    //   f2(&v, &v);
+    // }
+    Structure("S", utils::Vector{Member("a", ty.i32())});
+    Func("f2",
+         utils::Vector{
+             Param("p1", ty.pointer(ty.vec4<f32>(), ast::AddressSpace::kFunction)),
+             Param("p2", ty.pointer(ty.vec4<f32>(), ast::AddressSpace::kFunction)),
+         },
+         ty.void_(),
+         utils::Vector{
+             Assign(Phony(), MemberAccessor(Deref("p2"), "zy")),
+             Assign(Deref("p1"), Construct(ty.vec4<f32>())),
+         });
+    Func("f1", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Var("v", ty.vec4<f32>())),
+             CallStmt(
+                 Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
+         });
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(56:76 warning: invalid aliased pointer argument
+12:34 note: aliases with another argument passed here)");
+}
+
 TEST_F(ResolverAliasAnalysisTest, SinglePointerReadWrite) {
     // Test that we can both read and write from a single pointer parameter.
     //

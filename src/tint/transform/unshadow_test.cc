@@ -760,5 +760,31 @@ type a = i32;
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(UnshadowTest, RenamedVarHasUsers) {
+    auto* src = R"(
+fn F() {
+  var a : bool;
+  {
+    var a : i32;
+    var b = a + 1;
+  }
+}
+)";
+
+    auto* expect = R"(
+fn F() {
+  var a : bool;
+  {
+    var a_1 : i32;
+    var b = (a_1 + 1);
+  }
+}
+)";
+
+    auto got = Run<Unshadow>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform

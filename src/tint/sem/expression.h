@@ -85,6 +85,12 @@ class Expression : public Castable<Expression, Node> {
     /// @return the inner expression node if this is a Materialize, otherwise this.
     const Expression* UnwrapMaterialize() const;
 
+    /// @return the inner reference expression if this is a Load, otherwise this.
+    const Expression* UnwrapLoad() const;
+
+    /// @return the inner expression node if this is a Materialize or Load, otherwise this.
+    const Expression* Unwrap() const;
+
   protected:
     /// The AST expression node for this semantic expression
     const ast::Expression* const declaration_;

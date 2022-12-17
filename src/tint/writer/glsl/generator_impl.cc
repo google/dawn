@@ -2706,7 +2706,7 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
     }
     out << ".";
 
-    auto* sem = builder_.Sem().Get(expr);
+    auto* sem = builder_.Sem().Get(expr)->UnwrapLoad();
 
     return Switch(
         sem,

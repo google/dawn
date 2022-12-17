@@ -250,9 +250,10 @@ struct CombineSamplers::State {
                     const sem::Expression* sampler =
                         sampler_index != -1 ? call->Arguments()[static_cast<size_t>(sampler_index)]
                                             : nullptr;
-                    auto* texture_var = texture->As<sem::VariableUser>()->Variable();
+                    auto* texture_var = texture->UnwrapLoad()->As<sem::VariableUser>()->Variable();
                     auto* sampler_var =
-                        sampler ? sampler->As<sem::VariableUser>()->Variable() : nullptr;
+                        sampler ? sampler->UnwrapLoad()->As<sem::VariableUser>()->Variable()
+                                : nullptr;
                     sem::VariablePair new_pair(texture_var, sampler_var);
                     for (auto* arg : expr->args) {
                         auto* type = ctx.src->TypeOf(arg)->UnwrapRef();
@@ -296,12 +297,14 @@ struct CombineSamplers::State {
                         const sem::Variable* sampler_var = pair.second;
                         if (auto* param = texture_var->As<sem::Parameter>()) {
                             const sem::Expression* texture = call->Arguments()[param->Index()];
-                            texture_var = texture->As<sem::VariableUser>()->Variable();
+                            texture_var =
+                                texture->UnwrapLoad()->As<sem::VariableUser>()->Variable();
                         }
                         if (sampler_var) {
                             if (auto* param = sampler_var->As<sem::Parameter>()) {
                                 const sem::Expression* sampler = call->Arguments()[param->Index()];
-                                sampler_var = sampler->As<sem::VariableUser>()->Variable();
+                                sampler_var =
+                                    sampler->UnwrapLoad()->As<sem::VariableUser>()->Variable();
                             }
                         }
                         sem::VariablePair new_pair(texture_var, sampler_var);

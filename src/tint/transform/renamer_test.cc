@@ -93,7 +93,8 @@ fn entry() -> @builtin(position) vec4<f32> {
   var v : vec4<f32>;
   var rgba : f32;
   var xyzw : f32;
-  return v.zyxw + v.rgab;
+  var z : f32;
+  return v.zyxw + v.rgab * v.z;
 }
 )";
 
@@ -103,7 +104,8 @@ fn tint_symbol() -> @builtin(position) vec4<f32> {
   var tint_symbol_1 : vec4<f32>;
   var tint_symbol_2 : f32;
   var tint_symbol_3 : f32;
-  return (tint_symbol_1.zyxw + tint_symbol_1.rgab);
+  var tint_symbol_4 : f32;
+  return (tint_symbol_1.zyxw + (tint_symbol_1.rgab * tint_symbol_1.z));
 }
 )";
 
@@ -115,10 +117,8 @@ fn tint_symbol() -> @builtin(position) vec4<f32> {
 
     ASSERT_NE(data, nullptr);
     Renamer::Data::Remappings expected_remappings = {
-        {"entry", "tint_symbol"},
-        {"v", "tint_symbol_1"},
-        {"rgba", "tint_symbol_2"},
-        {"xyzw", "tint_symbol_3"},
+        {"entry", "tint_symbol"},  {"v", "tint_symbol_1"}, {"rgba", "tint_symbol_2"},
+        {"xyzw", "tint_symbol_3"}, {"z", "tint_symbol_4"},
     };
     EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }

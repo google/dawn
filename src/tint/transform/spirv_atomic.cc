@@ -164,7 +164,7 @@ struct SpirvAtomic::State {
     void ProcessAtomicExpressions() {
         for (size_t i = 0; i < atomic_expressions.Length(); i++) {
             Switch(
-                atomic_expressions[i],  //
+                atomic_expressions[i]->UnwrapLoad(),  //
                 [&](const sem::VariableUser* user) {
                     auto* v = user->Variable()->Declaration();
                     if (v->type && atomic_variables.emplace(user->Variable()).second) {
@@ -262,7 +262,7 @@ struct SpirvAtomic::State {
                         }
 
                         auto sem_rhs = ctx.src->Sem().Get(assign->rhs);
-                        if (is_ref_to_atomic_var(sem_rhs)) {
+                        if (is_ref_to_atomic_var(sem_rhs->UnwrapLoad())) {
                             ctx.Replace(assign->rhs, [=] {
                                 auto* rhs = ctx.CloneWithoutTransform(assign->rhs);
                                 return b.Call(sem::str(sem::BuiltinType::kAtomicLoad),
@@ -274,7 +274,7 @@ struct SpirvAtomic::State {
                     [&](const ast::VariableDeclStatement* decl) {
                         auto* var = decl->variable;
                         if (auto* sem_init = ctx.src->Sem().Get(var->initializer)) {
-                            if (is_ref_to_atomic_var(sem_init)) {
+                            if (is_ref_to_atomic_var(sem_init->UnwrapLoad())) {
                                 ctx.Replace(var->initializer, [=] {
                                     auto* rhs = ctx.CloneWithoutTransform(var->initializer);
                                     return b.Call(sem::str(sem::BuiltinType::kAtomicLoad),

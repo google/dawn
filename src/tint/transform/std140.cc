@@ -511,7 +511,7 @@ struct Std140::State {
         while (true) {
             enum class Action { kStop, kContinue, kError };
             Action action = Switch(
-                expr,  //
+                expr->Unwrap(),  //
                 [&](const sem::VariableUser* user) {
                     if (user->Variable() == access.var) {
                         // Walked all the way to the root identifier. We're done traversing.

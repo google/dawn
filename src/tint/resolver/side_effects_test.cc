@@ -83,7 +83,7 @@ TEST_F(SideEffectsTest, VariableUser) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    EXPECT_TRUE(sem->Is<sem::VariableUser>());
+    EXPECT_TRUE(sem->UnwrapLoad()->Is<sem::VariableUser>());
     EXPECT_FALSE(sem->HasSideEffects());
 }
 
@@ -438,8 +438,8 @@ TEST_F(SideEffectsTest, MemberAccessor_Vector) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(expr);
-    EXPECT_TRUE(sem->Is<sem::MemberAccessorExpression>());
     ASSERT_NE(sem, nullptr);
+    EXPECT_TRUE(sem->UnwrapLoad()->Is<sem::MemberAccessorExpression>());
     EXPECT_FALSE(sem->HasSideEffects());
 }
 
@@ -450,8 +450,8 @@ TEST_F(SideEffectsTest, MemberAccessor_VectorSwizzleNoSE) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(expr);
-    EXPECT_TRUE(sem->Is<sem::Swizzle>());
     ASSERT_NE(sem, nullptr);
+    EXPECT_TRUE(sem->Is<sem::Swizzle>());
     EXPECT_FALSE(sem->HasSideEffects());
 }
 
@@ -462,8 +462,8 @@ TEST_F(SideEffectsTest, MemberAccessor_VectorSwizzleSE) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(expr);
-    EXPECT_TRUE(sem->Is<sem::Swizzle>());
     ASSERT_NE(sem, nullptr);
+    EXPECT_TRUE(sem->Is<sem::Swizzle>());
     EXPECT_TRUE(sem->HasSideEffects());
 }
 

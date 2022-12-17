@@ -707,8 +707,7 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(ident), nullptr);
-    ASSERT_TRUE(TypeOf(ident)->Is<type::Reference>());
-    EXPECT_TRUE(TypeOf(ident)->UnwrapRef()->Is<type::F32>());
+    EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
     EXPECT_TRUE(CheckVarUsers(my_var, utils::Vector{ident}));
     ASSERT_NE(VarOf(ident), nullptr);
     EXPECT_EQ(VarOf(ident)->Declaration(), my_var);
@@ -788,8 +787,7 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable) {
     EXPECT_TRUE(TypeOf(my_var_a)->UnwrapRef()->Is<type::F32>());
     EXPECT_EQ(StmtOf(my_var_a), assign);
     ASSERT_NE(TypeOf(my_var_b), nullptr);
-    ASSERT_TRUE(TypeOf(my_var_b)->Is<type::Reference>());
-    EXPECT_TRUE(TypeOf(my_var_b)->UnwrapRef()->Is<type::F32>());
+    EXPECT_TRUE(TypeOf(my_var_b)->Is<type::F32>());
     EXPECT_EQ(StmtOf(my_var_b), assign);
     EXPECT_TRUE(CheckVarUsers(var, utils::Vector{my_var_a, my_var_b}));
     ASSERT_NE(VarOf(my_var_a), nullptr);
@@ -1250,11 +1248,8 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(mem), nullptr);
-    ASSERT_TRUE(TypeOf(mem)->Is<type::Reference>());
-
-    auto* ref = TypeOf(mem)->As<type::Reference>();
-    EXPECT_TRUE(ref->StoreType()->Is<type::F32>());
-    auto* sma = Sem().Get(mem)->As<sem::StructMemberAccess>();
+    EXPECT_TRUE(TypeOf(mem)->Is<type::F32>());
+    auto* sma = Sem().Get(mem)->UnwrapLoad()->As<sem::StructMemberAccess>();
     ASSERT_NE(sma, nullptr);
     EXPECT_TRUE(sma->Member()->Type()->Is<type::F32>());
     EXPECT_EQ(sma->Object()->Declaration(), mem->structure);
@@ -1274,11 +1269,8 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(mem), nullptr);
-    ASSERT_TRUE(TypeOf(mem)->Is<type::Reference>());
-
-    auto* ref = TypeOf(mem)->As<type::Reference>();
-    EXPECT_TRUE(ref->StoreType()->Is<type::F32>());
-    auto* sma = Sem().Get(mem)->As<sem::StructMemberAccess>();
+    EXPECT_TRUE(TypeOf(mem)->Is<type::F32>());
+    auto* sma = Sem().Get(mem)->UnwrapLoad()->As<sem::StructMemberAccess>();
     ASSERT_NE(sma, nullptr);
     EXPECT_EQ(sma->Object()->Declaration(), mem->structure);
     EXPECT_TRUE(sma->Member()->Type()->Is<type::F32>());
@@ -1300,7 +1292,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
     auto* sma = Sem().Get(mem)->As<sem::Swizzle>();
     ASSERT_NE(sma, nullptr);
     EXPECT_EQ(sma->Object()->Declaration(), mem->structure);
-    EXPECT_THAT(sma->As<sem::Swizzle>()->Indices(), ElementsAre(0, 2, 1, 3));
+    EXPECT_THAT(sma->Indices(), ElementsAre(0, 2, 1, 3));
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
@@ -1312,14 +1304,11 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(mem), nullptr);
-    ASSERT_TRUE(TypeOf(mem)->Is<type::Reference>());
-
-    auto* ref = TypeOf(mem)->As<type::Reference>();
-    ASSERT_TRUE(ref->StoreType()->Is<type::F32>());
-    auto* sma = Sem().Get(mem)->As<sem::Swizzle>();
+    ASSERT_TRUE(TypeOf(mem)->Is<type::F32>());
+    auto* sma = Sem().Get(mem)->UnwrapLoad()->As<sem::Swizzle>();
     ASSERT_NE(sma, nullptr);
     EXPECT_EQ(sma->Object()->Declaration(), mem->structure);
-    EXPECT_THAT(Sem().Get(mem)->As<sem::Swizzle>()->Indices(), ElementsAre(2));
+    EXPECT_THAT(sma->Indices(), ElementsAre(2));
 }
 
 TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {

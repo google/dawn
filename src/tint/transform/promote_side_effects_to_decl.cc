@@ -276,7 +276,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
             },
             [&](const ast::IdentifierExpression* e) {
                 if (auto* sem_e = sem.Get(e)) {
-                    if (auto* var_user = sem_e->As<sem::VariableUser>()) {
+                    if (auto* var_user = sem_e->UnwrapLoad()->As<sem::VariableUser>()) {
                         // Don't hoist constants.
                         if (var_user->ConstantValue()) {
                             return false;
