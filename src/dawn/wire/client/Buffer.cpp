@@ -159,20 +159,23 @@ Buffer::Buffer(const ObjectBaseParams& params,
       mDeviceIsAlive(device->GetAliveWeakPtr()) {}
 
 Buffer::~Buffer() {
-    ClearAllCallbacks(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
+    InvokeAndClearCallback(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
     FreeMappedData();
 }
 
 void Buffer::CancelCallbacksForDisconnect() {
-    ClearAllCallbacks(WGPUBufferMapAsyncStatus_DeviceLost);
+    InvokeAndClearCallback(WGPUBufferMapAsyncStatus_DeviceLost);
 }
 
-void Buffer::ClearAllCallbacks(WGPUBufferMapAsyncStatus status) {
-    mRequests.CloseAll([status](MapRequestData* request) {
-        if (request->callback != nullptr) {
-            request->callback(status, request->userdata);
-        }
-    });
+void Buffer::InvokeAndClearCallback(WGPUBufferMapAsyncStatus status) {
+    WGPUBufferMapCallback callback = mRequest.callback;
+    void* userdata = mRequest.userdata;
+    mRequest.callback = nullptr;
+    mRequest.userdata = nullptr;
+    if (callback != nullptr) {
+        callback(status, userdata);
+    }
+    mPendingMap = false;
 }
 
 void Buffer::MapAsync(WGPUMapModeFlags mode,
@@ -180,6 +183,10 @@ void Buffer::MapAsync(WGPUMapModeFlags mode,
                       size_t size,
                       WGPUBufferMapCallback callback,
                       void* userdata) {
+    if (mPendingMap) {
+        return callback(WGPUBufferMapAsyncStatus_Error, userdata);
+    }
+
     Client* client = GetClient();
     if (client->IsDisconnected()) {
         return callback(WGPUBufferMapAsyncStatus_DeviceLost, userdata);
@@ -190,25 +197,24 @@ void Buffer::MapAsync(WGPUMapModeFlags mode,
         size = mSize - offset;
     }
 
-    // Create the request structure that will hold information while this mapping is
+    // Set up the request structure that will hold information while this mapping is
     // in flight.
-    MapRequestData request = {};
-    request.callback = callback;
-    request.userdata = userdata;
-    request.offset = offset;
-    request.size = size;
+    mRequest.callback = callback;
+    mRequest.userdata = userdata;
+    mRequest.offset = offset;
+    mRequest.size = size;
     if (mode & WGPUMapMode_Read) {
-        request.type = MapRequestType::Read;
+        mRequest.type = MapRequestType::Read;
     } else if (mode & WGPUMapMode_Write) {
-        request.type = MapRequestType::Write;
+        mRequest.type = MapRequestType::Write;
     }
 
-    uint64_t serial = mRequests.Add(std::move(request));
-
     // Serialize the command to send to the server.
+    mPendingMap = true;
+    mSerial++;
     BufferMapAsyncCmd cmd;
     cmd.bufferId = GetWireId();
-    cmd.requestSerial = serial;
+    cmd.requestSerial = mSerial;
     cmd.mode = mode;
     cmd.offset = offset;
     cmd.size = size;
@@ -220,26 +226,26 @@ bool Buffer::OnMapAsyncCallback(uint64_t requestSerial,
                                 uint32_t status,
                                 uint64_t readDataUpdateInfoLength,
                                 const uint8_t* readDataUpdateInfo) {
-    MapRequestData request;
-    if (!mRequests.Acquire(requestSerial, &request)) {
-        return false;
+    // If requestSerial doesn't match mSerial the corresponding request must have
+    // already been rejected by unmap or destroy and another MapAsync request must
+    // have been issued.
+    if (mSerial != requestSerial) {
+        return true;
     }
 
-    auto FailRequest = [&request]() -> bool {
-        if (request.callback != nullptr) {
-            request.callback(WGPUBufferMapAsyncStatus_DeviceLost, request.userdata);
-        }
+    // If mPendingMap is false the request must have been already rejected
+    // by unmap or destroy.
+    if (!mPendingMap) {
+        return true;
+    }
+
+    auto FailRequest = [this]() -> bool {
+        InvokeAndClearCallback(WGPUBufferMapAsyncStatus_DeviceLost);
         return false;
     };
 
-    // Take into account the client-side status of the request if the server says it is a
-    // success.
     if (status == WGPUBufferMapAsyncStatus_Success) {
-        status = request.clientStatus;
-    }
-
-    if (status == WGPUBufferMapAsyncStatus_Success) {
-        switch (request.type) {
+        switch (mRequest.type) {
             case MapRequestType::Read: {
                 if (readDataUpdateInfoLength > std::numeric_limits<size_t>::max()) {
                     // This is the size of data deserialized from the command stream, which must
@@ -254,7 +260,7 @@ bool Buffer::OnMapAsyncCallback(uint64_t requestSerial,
                 // Update user map data with server returned data
                 if (!mReadHandle->DeserializeDataUpdate(
                         readDataUpdateInfo, static_cast<size_t>(readDataUpdateInfoLength),
-                        request.offset, request.size)) {
+                        mRequest.offset, mRequest.size)) {
                     return FailRequest();
                 }
                 mMapState = MapState::MappedForRead;
@@ -273,13 +279,11 @@ bool Buffer::OnMapAsyncCallback(uint64_t requestSerial,
                 UNREACHABLE();
         }
 
-        mMapOffset = request.offset;
-        mMapSize = request.size;
+        mMapOffset = mRequest.offset;
+        mMapSize = mRequest.size;
     }
 
-    if (request.callback) {
-        request.callback(static_cast<WGPUBufferMapAsyncStatus>(status), request.userdata);
-    }
+    InvokeAndClearCallback(static_cast<WGPUBufferMapAsyncStatus>(status));
 
     return true;
 }
@@ -354,12 +358,7 @@ void Buffer::Unmap() {
     mMapOffset = 0;
     mMapSize = 0;
 
-    // Tag all mapping requests still in flight as unmapped before callback.
-    mRequests.ForAll([](MapRequestData* request) {
-        if (request->clientStatus == WGPUBufferMapAsyncStatus_Success) {
-            request->clientStatus = WGPUBufferMapAsyncStatus_UnmappedBeforeCallback;
-        }
-    });
+    InvokeAndClearCallback(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback);
 
     BufferUnmapCmd cmd;
     cmd.self = ToAPI(this);
@@ -372,12 +371,7 @@ void Buffer::Destroy() {
     // Remove the current mapping and destroy Read/WriteHandles.
     FreeMappedData();
 
-    // Tag all mapping requests still in flight as destroyed before callback.
-    mRequests.ForAll([](MapRequestData* request) {
-        if (request->clientStatus == WGPUBufferMapAsyncStatus_Success) {
-            request->clientStatus = WGPUBufferMapAsyncStatus_DestroyedBeforeCallback;
-        }
-    });
+    InvokeAndClearCallback(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
 
     BufferDestroyCmd cmd;
     cmd.self = ToAPI(this);

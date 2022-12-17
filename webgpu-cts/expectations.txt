@@ -466,6 +466,16 @@ crbug.com/dawn/1613 worker_webgpu:api,validation,buffer,mapping:mapAsync,state,m
 ################################################################################
 
 ################################################################################
+# Buffer mapping tests need updates in CTS
+################################################################################
+webgpu:api,operation,buffers,map_oom:mapAsync:* [ Failure ]
+webgpu:api,validation,buffer,mapping:getMappedRange,state,mapped:* [ Failure ]
+webgpu:api,validation,buffer,mapping:getMappedRange,state,mappedAtCreation:* [ Failure ]
+worker_webgpu:api,validation,buffer,mapping:getMappedRange,state,mapped:* [ Failure ]
+worker_webgpu:api,validation,buffer,mapping:getMappedRange,state,mappedAtCreation:* [ Failure ]
+################################################################################
+
+################################################################################
 # untriaged failures
 # KEEP
 ################################################################################

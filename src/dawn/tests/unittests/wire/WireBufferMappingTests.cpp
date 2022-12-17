@@ -186,18 +186,17 @@ TEST_F(WireBufferMappingReadTests, UnmapCalledTooEarlyForRead) {
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
-    // Oh no! We are calling Unmap too early! However the callback gets fired only after we get
-    // an answer from the server.
+    // The callback should get called immediately with UnmappedBeforeCallback status
+    // even if the request succeeds on the server side
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, _))
+        .Times(1);
+
+    // Oh no! We are calling Unmap too early! The callback should get fired immediately
+    // before we get an answer from the server.
     wgpuBufferUnmap(buffer);
     EXPECT_CALL(api, BufferUnmap(apiBuffer));
 
     FlushClient();
-
-    // The callback shouldn't get called with success, even when the request succeeded on the
-    // server side
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, _))
-        .Times(1);
-
     FlushServer();
 }
 
@@ -210,17 +209,17 @@ TEST_F(WireBufferMappingReadTests, UnmapCalledTooEarlyForReadButServerSideError)
         .WillOnce(InvokeWithoutArgs(
             [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
 
-    // Oh no! We are calling Unmap too early! However the callback gets fired only after we get
-    // an answer from the server that the mapAsync call was an error.
+    // The callback should get called immediately with UnmappedBeforeCallback status,
+    // not server-side error, even if the request fails on the server side
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, _))
+        .Times(1);
+
+    // Oh no! We are calling Unmap too early! The callback should get fired immediately
+    // before we get an answer from the server that the mapAsync call was an error.
     wgpuBufferUnmap(buffer);
     EXPECT_CALL(api, BufferUnmap(apiBuffer));
 
     FlushClient();
-
-    // The callback should be called with the server-side error and not the
-    // UnmappedBeforeCallback.
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, _)).Times(1);
-
     FlushServer();
 }
 
@@ -237,18 +236,17 @@ TEST_F(WireBufferMappingReadTests, DestroyCalledTooEarlyForRead) {
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
-    // Oh no! We are calling Unmap too early! However the callback gets fired only after we get
-    // an answer from the server.
+    // The callback should get called immediately with DestroyedBeforeCallback status
+    // even if the request succeeds on the server side
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, _))
+        .Times(1);
+
+    // Oh no! We are calling Destroy too early! The callback should get fired immediately
+    // before we get an answer from the server.
     wgpuBufferDestroy(buffer);
     EXPECT_CALL(api, BufferDestroy(apiBuffer));
 
     FlushClient();
-
-    // The callback shouldn't get called with success, even when the request succeeded on the
-    // server side
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, _))
-        .Times(1);
-
     FlushServer();
 }
 
@@ -261,17 +259,17 @@ TEST_F(WireBufferMappingReadTests, DestroyCalledTooEarlyForReadButServerSideErro
         .WillOnce(InvokeWithoutArgs(
             [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
 
-    // Oh no! We are calling Destroy too early! However the callback gets fired only after we
-    // get an answer from the server that the mapAsync call was an error.
+    // The callback should be called with the server-side error and not the
+    // DestroyedBeforCallback..
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, _))
+        .Times(1);
+
+    // Oh no! We are calling Destroy too early! The callback should get fired immediately
+    // before we get an answer from the server that the mapAsync call was an error.
     wgpuBufferDestroy(buffer);
     EXPECT_CALL(api, BufferDestroy(apiBuffer));
 
     FlushClient();
-
-    // The callback should be called with the server-side error and not the
-    // DestroyedBeforCallback..
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, _)).Times(1);
-
     FlushServer();
 }
 
@@ -748,6 +746,16 @@ TEST_F(WireBufferMappingTests, MapAfterDisconnect) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, this);
 }
 
+// Test that mappinga again while pending map immediately cause an error
+TEST_F(WireBufferMappingTests, PendingMapImmediateError) {
+    SetupBuffer(WGPUMapMode_Read);
+
+    wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, nullptr, this);
+
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, this)).Times(1);
+    wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, this);
+}
+
 // Hack to pass in test context into user callback
 struct TestData {
     WireBufferMappingTests* pTest;
@@ -787,8 +795,9 @@ TEST_F(WireBufferMappingTests, MapInsideCallbackBeforeDisconnect) {
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DeviceLost, this))
-        .Times(1 + testData.numRequests);
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, this))
+        .Times(testData.numRequests);
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DeviceLost, this)).Times(1);
     GetWireClient()->Disconnect();
 }
 
@@ -806,9 +815,11 @@ TEST_F(WireBufferMappingWriteTests, MapInsideCallbackBeforeDestruction) {
 
     FlushClient();
 
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, this))
+        .Times(testData.numRequests);
     EXPECT_CALL(*mockBufferMapCallback,
                 Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, this))
-        .Times(1 + testData.numRequests);
+        .Times(1);
     wgpuBufferRelease(buffer);
 }
 

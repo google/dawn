@@ -20,7 +20,6 @@
 #include "dawn/webgpu.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/client/ObjectBase.h"
-#include "dawn/wire/client/RequestTracker.h"
 
 namespace dawn::wire::client {
 
@@ -55,7 +54,7 @@ class Buffer final : public ObjectBase {
 
   private:
     void CancelCallbacksForDisconnect() override;
-    void ClearAllCallbacks(WGPUBufferMapAsyncStatus status);
+    void InvokeAndClearCallback(WGPUBufferMapAsyncStatus status);
 
     bool IsMappedForReading() const;
     bool IsMappedForWriting() const;
@@ -72,28 +71,22 @@ class Buffer final : public ObjectBase {
         MappedAtCreation,
     };
 
-    // We want to defer all the validation to the server, which means we could have multiple
-    // map request in flight at a single time and need to track them separately.
-    // On well-behaved applications, only one request should exist at a single time.
+    // Up to only one request can exist at a single time.
+    // Other requests are rejected.
     struct MapRequestData {
         WGPUBufferMapCallback callback = nullptr;
         void* userdata = nullptr;
         size_t offset = 0;
         size_t size = 0;
-
-        // When the buffer is destroyed or unmapped too early, the unmappedBeforeX status takes
-        // precedence over the success value returned from the server. However Error statuses
-        // from the server take precedence over the client-side status.
-        WGPUBufferMapAsyncStatus clientStatus = WGPUBufferMapAsyncStatus_Success;
-
         MapRequestType type = MapRequestType::None;
     };
-    RequestTracker<MapRequestData> mRequests;
+    MapRequestData mRequest;
+    bool mPendingMap = false;
+    uint64_t mSerial = 0;
     uint64_t mSize = 0;
     WGPUBufferUsage mUsage;
 
-    // Only one mapped pointer can be active at a time because Unmap clears all the in-flight
-    // requests.
+    // Only one mapped pointer can be active at a time
     // TODO(enga): Use a tagged pointer to save space.
     std::unique_ptr<MemoryTransferService::ReadHandle> mReadHandle = nullptr;
     std::unique_ptr<MemoryTransferService::WriteHandle> mWriteHandle = nullptr;
