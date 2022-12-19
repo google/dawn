@@ -746,7 +746,7 @@ TEST_F(WireBufferMappingTests, MapAfterDisconnect) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, this);
 }
 
-// Test that mappinga again while pending map immediately cause an error
+// Test that mapping again while pending map immediately cause an error
 TEST_F(WireBufferMappingTests, PendingMapImmediateError) {
     SetupBuffer(WGPUMapMode_Read);
 
@@ -754,6 +754,66 @@ TEST_F(WireBufferMappingTests, PendingMapImmediateError) {
 
     EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, this)).Times(1);
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, this);
+}
+
+// Test that GetMapState() returns map state as expected
+TEST_F(WireBufferMappingTests, GetMapState) {
+    SetupBuffer(WGPUMapMode_Read);
+
+    // Server-side success case
+    {
+        uint32_t bufferContent = 31337;
+        EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+            .WillOnce(InvokeWithoutArgs([&]() {
+                api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+            }));
+        EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
+            .WillOnce(Return(&bufferContent));
+        EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Success, _)).Times(1);
+
+        ASSERT_EQ(wgpuBufferGetMapState(buffer), WGPUBufferMapState_Unmapped);
+        wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback,
+                           nullptr);
+
+        // map state should become pending immediately after map async call
+        ASSERT_EQ(wgpuBufferGetMapState(buffer), WGPUBufferMapState_Pending);
+        FlushClient();
+
+        // map state should be pending until receiving a response from server
+        ASSERT_EQ(wgpuBufferGetMapState(buffer), WGPUBufferMapState_Pending);
+        FlushServer();
+
+        // mapping succeeded
+        ASSERT_EQ(wgpuBufferGetMapState(buffer), WGPUBufferMapState_Mapped);
+    }
+
+    wgpuBufferUnmap(buffer);
+    EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
+    FlushClient();
+
+    // Server-side error case
+    {
+        EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+            .WillOnce(InvokeWithoutArgs([&]() {
+                api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error);
+            }));
+        EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, _)).Times(1);
+
+        ASSERT_EQ(wgpuBufferGetMapState(buffer), WGPUBufferMapState_Unmapped);
+        wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback,
+                           nullptr);
+
+        // map state should become pending immediately after map async call
+        ASSERT_EQ(wgpuBufferGetMapState(buffer), WGPUBufferMapState_Pending);
+        FlushClient();
+
+        // map state should be pending until receiving a response from server
+        ASSERT_EQ(wgpuBufferGetMapState(buffer), WGPUBufferMapState_Pending);
+        FlushServer();
+
+        // mapping failed
+        ASSERT_EQ(wgpuBufferGetMapState(buffer), WGPUBufferMapState_Unmapped);
+    }
 }
 
 // Hack to pass in test context into user callback

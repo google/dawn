@@ -52,6 +52,8 @@ class Buffer final : public ObjectBase {
     WGPUBufferUsage GetUsage() const;
     uint64_t GetSize() const;
 
+    WGPUBufferMapState GetMapState() const;
+
   private:
     void CancelCallbacksForDisconnect() override;
     void InvokeAndClearCallback(WGPUBufferMapAsyncStatus status);

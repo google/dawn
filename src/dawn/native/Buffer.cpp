@@ -239,6 +239,19 @@ wgpu::BufferUsage BufferBase::APIGetUsage() const {
     return mUsage & ~kAllInternalBufferUsages;
 }
 
+wgpu::BufferMapState BufferBase::APIGetMapState() const {
+    switch (mState) {
+        case BufferState::Mapped:
+        case BufferState::MappedAtCreation:
+            return wgpu::BufferMapState::Mapped;
+        case BufferState::PendingMap:
+            return wgpu::BufferMapState::Pending;
+        case BufferState::Unmapped:
+        case BufferState::Destroyed:
+            return wgpu::BufferMapState::Unmapped;
+    }
+}
+
 MaybeError BufferBase::MapAtCreation() {
     DAWN_TRY(MapAtCreationInternal());
 

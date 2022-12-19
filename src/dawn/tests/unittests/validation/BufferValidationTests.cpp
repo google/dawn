@@ -1101,3 +1101,44 @@ TEST_F(BufferValidationTest, CreationParameterReflectionNoInternalUsage) {
     EXPECT_EQ(wgpu::BufferUsage::QueryResolve, buf.GetUsage());
     EXPECT_EQ(16u, buf.GetSize());
 }
+
+// Test that GetMapState() shows expected buffer map state
+TEST_F(BufferValidationTest, GetMapState) {
+    // MapRead
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, nullptr, nullptr);
+        EXPECT_EQ(wgpu::BufferMapState::Pending, buf.GetMapState());
+        WaitForAllOperations(device);
+        EXPECT_EQ(wgpu::BufferMapState::Mapped, buf.GetMapState());
+        buf.Unmap();
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        buf.Destroy();
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+    }
+
+    // MapWrite
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, nullptr, nullptr);
+        EXPECT_EQ(wgpu::BufferMapState::Pending, buf.GetMapState());
+        WaitForAllOperations(device);
+        EXPECT_EQ(wgpu::BufferMapState::Mapped, buf.GetMapState());
+        buf.Unmap();
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        buf.Destroy();
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+    }
+
+    // MappedAtCreation
+    {
+        wgpu::Buffer buf = BufferMappedAtCreation(4, wgpu::BufferUsage::CopySrc);
+        EXPECT_EQ(wgpu::BufferMapState::Mapped, buf.GetMapState());
+        buf.Unmap();
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        buf.Destroy();
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+    }
+}

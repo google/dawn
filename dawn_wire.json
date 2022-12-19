@@ -189,6 +189,7 @@
             "BufferMapAsync",
             "BufferGetConstMappedRange",
             "BufferGetMappedRange",
+            "BufferGetMapState",
             "BufferGetSize",
             "BufferGetUsage",
             "DeviceCreateBuffer",

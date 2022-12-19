@@ -446,6 +446,10 @@
                 "returns": "uint64_t"
             },
             {
+                "name": "get map state",
+                "returns": "buffer map state"
+            },
+            {
                 "name": "unmap"
             },
             {
@@ -480,6 +484,14 @@
             {"value": 3, "name": "device lost"},
             {"value": 4, "name": "destroyed before callback"},
             {"value": 5, "name": "unmapped before callback"}
+        ]
+    },
+    "buffer map state": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "unmapped"},
+            {"value": 1, "name": "pending"},
+            {"value": 2, "name": "mapped"}
         ]
     },
     "buffer usage": {
