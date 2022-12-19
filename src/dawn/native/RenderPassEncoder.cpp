@@ -59,7 +59,8 @@ RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
                                      uint32_t renderTargetWidth,
                                      uint32_t renderTargetHeight,
                                      bool depthReadOnly,
-                                     bool stencilReadOnly)
+                                     bool stencilReadOnly,
+                                     std::function<void()> endCallback)
     : RenderEncoderBase(device,
                         descriptor->label,
                         encodingContext,
@@ -69,7 +70,8 @@ RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
       mCommandEncoder(commandEncoder),
       mRenderTargetWidth(renderTargetWidth),
       mRenderTargetHeight(renderTargetHeight),
-      mOcclusionQuerySet(descriptor->occlusionQuerySet) {
+      mOcclusionQuerySet(descriptor->occlusionQuerySet),
+      mEndCallback(std::move(endCallback)) {
     mUsageTracker = std::move(usageTracker);
     const RenderPassDescriptorMaxDrawCount* maxDrawCountInfo = nullptr;
     FindInChain(descriptor->nextInChain, &maxDrawCountInfo);
@@ -89,11 +91,12 @@ Ref<RenderPassEncoder> RenderPassEncoder::Create(DeviceBase* device,
                                                  uint32_t renderTargetWidth,
                                                  uint32_t renderTargetHeight,
                                                  bool depthReadOnly,
-                                                 bool stencilReadOnly) {
+                                                 bool stencilReadOnly,
+                                                 std::function<void()> endCallback) {
     return AcquireRef(new RenderPassEncoder(device, descriptor, commandEncoder, encodingContext,
                                             std::move(usageTracker), std::move(attachmentState),
                                             renderTargetWidth, renderTargetHeight, depthReadOnly,
-                                            stencilReadOnly));
+                                            stencilReadOnly, std::move(endCallback)));
 }
 
 RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
@@ -157,6 +160,10 @@ void RenderPassEncoder::APIEnd() {
             return {};
         },
         "encoding %s.End().", this);
+
+    if (mEndCallback) {
+        mEndCallback();
+    }
 }
 
 void RenderPassEncoder::APIEndPass() {

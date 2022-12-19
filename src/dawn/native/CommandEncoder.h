@@ -102,6 +102,12 @@ class CommandEncoder final : public ApiObjectBase {
 
     void DestroyImpl() override;
 
+    ResultOrError<std::function<void()>> ApplyRenderPassWorkarounds(
+        DeviceBase* device,
+        RenderPassResourceUsageTracker* usageTracker,
+        BeginRenderPassCmd* cmd,
+        std::function<void()> passEndCallback = nullptr);
+
     // Helper to be able to implement both APICopyTextureToTexture and
     // APICopyTextureToTextureInternal. The only difference between both
     // copies, is that the Internal one will also check internal usage.

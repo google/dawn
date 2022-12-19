@@ -639,12 +639,16 @@ void Device::InitTogglesFromDriver() {
     // By default try to use S8 if available.
     SetToggle(Toggle::VulkanUseS8, true);
 
-    // dawn:1564: Clearing a depth/stencil buffer in a render pass and then sampling it in a
-    // compute pass in the same command buffer causes a crash on Qualcomm GPUs. To work around that
-    // bug, split the command buffer any time we can detect that situation.
     if (ToBackend(GetAdapter())->IsAndroidQualcomm()) {
-        ForceSetToggle(Toggle::VulkanSplitCommandBufferOnDepthStencilComputeSampleAfterRenderPass,
-                       true);
+        // dawn:1564: Clearing a depth/stencil buffer in a render pass and then sampling it in a
+        // compute pass in the same command buffer causes a crash on Qualcomm GPUs. To work around
+        // that bug, split the command buffer any time we can detect that situation.
+        SetToggle(Toggle::VulkanSplitCommandBufferOnDepthStencilComputeSampleAfterRenderPass, true);
+
+        // dawn:1569: Qualcomm devices have a bug resolving into a non-zero level of an array
+        // texture. Work around it by resolving into a single level texture and then copying into
+        // the intended layer.
+        SetToggle(Toggle::AlwaysResolveIntoZeroLevelAndLayer, true);
     }
 }
 

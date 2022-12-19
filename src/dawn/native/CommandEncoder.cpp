@@ -656,6 +656,17 @@ bool IsReadOnlyDepthStencilAttachment(
     return true;
 }
 
+// Tracks the temporary resolve attachments used when the AlwaysResolveIntoZeroLevelAndLayer toggle
+// is active so that the results can be copied from the temporary resolve attachment into the
+// intended target after the render pass is complete.
+struct TemporaryResolveAttachment {
+    TemporaryResolveAttachment(Ref<TextureViewBase> src, Ref<TextureViewBase> dst)
+        : copySrc(std::move(src)), copyDst(std::move(dst)) {}
+
+    Ref<TextureViewBase> copySrc;
+    Ref<TextureViewBase> copyDst;
+};
+
 }  // namespace
 
 bool HasDeprecatedColor(const RenderPassColorAttachment& attachment) {
@@ -863,6 +874,8 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
         return RenderPassEncoder::MakeError(device, this, &mEncodingContext);
     }
 
+    std::function<void()> passEndCallback = nullptr;
+
     bool success = mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
@@ -1004,14 +1017,19 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                 usageTracker.TrackQueryAvailability(querySet, queryIndex);
             }
 
+            DAWN_TRY_ASSIGN(passEndCallback,
+                            ApplyRenderPassWorkarounds(device, &usageTracker, cmd));
+
             return {};
         },
         "encoding %s.BeginRenderPass(%s).", this, descriptor);
 
     if (success) {
-        Ref<RenderPassEncoder> passEncoder = RenderPassEncoder::Create(
-            device, descriptor, this, &mEncodingContext, std::move(usageTracker),
-            std::move(attachmentState), width, height, depthReadOnly, stencilReadOnly);
+        Ref<RenderPassEncoder> passEncoder =
+            RenderPassEncoder::Create(device, descriptor, this, &mEncodingContext,
+                                      std::move(usageTracker), std::move(attachmentState), width,
+                                      height, depthReadOnly, stencilReadOnly, passEndCallback);
+
         mEncodingContext.EnterPass(passEncoder.Get());
 
         if (ShouldApplyClearBigIntegerColorValueWithDraw(device, descriptor)) {
@@ -1026,6 +1044,101 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
     }
 
     return RenderPassEncoder::MakeError(device, this, &mEncodingContext);
+}
+
+// This function handles render pass workarounds. Because some cases may require
+// multiple workarounds, it applies any workarounds one by one and calls itself
+// recursively to handle the next workaround if needed.
+ResultOrError<std::function<void()>> CommandEncoder::ApplyRenderPassWorkarounds(
+    DeviceBase* device,
+    RenderPassResourceUsageTracker* usageTracker,
+    BeginRenderPassCmd* cmd,
+    std::function<void()> passEndCallback) {
+    // dawn:56, dawn:1569
+    // Handle Toggle AlwaysResolveIntoZeroLevelAndLayer. This swaps out the given resolve attachment
+    // for a temporary one that has no layers or mip levels. The results are copied from the
+    // temporary attachment into the given attachment when the render pass ends. (Handled at the
+    // bottom of this function)
+    if (device->IsToggleEnabled(Toggle::AlwaysResolveIntoZeroLevelAndLayer)) {
+        std::vector<TemporaryResolveAttachment> temporaryResolveAttachments;
+
+        for (ColorAttachmentIndex index :
+             IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+            TextureViewBase* resolveTarget = cmd->colorAttachments[index].resolveTarget.Get();
+
+            if (resolveTarget != nullptr && (resolveTarget->GetBaseMipLevel() != 0 ||
+                                             resolveTarget->GetBaseArrayLayer() != 0)) {
+                // Create a temporary texture to resolve into
+                // TODO(dawn:1618): Defer allocation of temporary textures till submit time.
+                TextureDescriptor descriptor = {};
+                descriptor.usage =
+                    wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+                descriptor.format = resolveTarget->GetFormat().format;
+                descriptor.size =
+                    resolveTarget->GetTexture()->GetMipLevelSingleSubresourceVirtualSize(
+                        resolveTarget->GetBaseMipLevel());
+                descriptor.dimension = wgpu::TextureDimension::e2D;
+                descriptor.mipLevelCount = 1;
+
+                Ref<TextureBase> temporaryResolveTexture;
+                DAWN_TRY_ASSIGN(temporaryResolveTexture, device->CreateTexture(&descriptor));
+
+                TextureViewDescriptor viewDescriptor = {};
+                Ref<TextureViewBase> temporaryResolveView;
+                DAWN_TRY_ASSIGN(
+                    temporaryResolveView,
+                    device->CreateTextureView(temporaryResolveTexture.Get(), &viewDescriptor));
+
+                // Save the temporary and given render targets together for copying after
+                // the render pass ends.
+                temporaryResolveAttachments.emplace_back(temporaryResolveView, resolveTarget);
+
+                // Replace the given resolve attachment with the temporary one.
+                usageTracker->TextureViewUsedAs(temporaryResolveView.Get(),
+                                                wgpu::TextureUsage::RenderAttachment);
+                cmd->colorAttachments[index].resolveTarget = temporaryResolveView;
+            }
+        }
+
+        if (temporaryResolveAttachments.size()) {
+            // Check for other workarounds that need to be applied recursively.
+            return ApplyRenderPassWorkarounds(
+                device, usageTracker, cmd,
+                [this, passEndCallback = std::move(passEndCallback),
+                 temporaryResolveAttachments = std::move(temporaryResolveAttachments)]() -> void {
+                    // Called once the render pass has been ended.
+                    // Handle any copies needed for the AlwaysResolveIntoZeroLevelAndLayer
+                    // workaround immediately after the render pass ends and before any additional
+                    // commands are recorded.
+                    for (auto& copyTarget : temporaryResolveAttachments) {
+                        ImageCopyTexture srcImageCopyTexture = {};
+                        srcImageCopyTexture.texture = copyTarget.copySrc->GetTexture();
+                        srcImageCopyTexture.aspect = wgpu::TextureAspect::All;
+                        srcImageCopyTexture.mipLevel = 0;
+                        srcImageCopyTexture.origin = {0, 0, 0};
+
+                        ImageCopyTexture dstImageCopyTexture = {};
+                        dstImageCopyTexture.texture = copyTarget.copyDst->GetTexture();
+                        dstImageCopyTexture.aspect = wgpu::TextureAspect::All;
+                        dstImageCopyTexture.mipLevel = copyTarget.copyDst->GetBaseMipLevel();
+                        dstImageCopyTexture.origin = {0, 0,
+                                                      copyTarget.copyDst->GetBaseArrayLayer()};
+
+                        Extent3D extent3D = copyTarget.copySrc->GetTexture()->GetSize();
+
+                        this->APICopyTextureToTextureInternal(&srcImageCopyTexture,
+                                                              &dstImageCopyTexture, &extent3D);
+                    }
+
+                    // If there were any other callbacks in the workaround stack, call the next one.
+                    if (passEndCallback) {
+                        passEndCallback();
+                    }
+                });
+        }
+    }
+
+    return std::move(passEndCallback);
 }
 
 void CommandEncoder::APICopyBufferToBuffer(BufferBase* source,

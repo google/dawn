@@ -553,6 +553,16 @@ TextureBase::TextureBase(DeviceBase* device,
         mInternalUsage |= internalUsageDesc->internalUsage;
     }
     GetObjectTrackingList()->Track(this);
+
+    // dawn:1569: If a texture with multiple array layers or mip levels is specified as a texture
+    // attachment when this toggle is active, it needs to be given CopyDst usage internally.
+    bool applyAlwaysResolveIntoZeroLevelAndLayerToggle =
+        device->IsToggleEnabled(Toggle::AlwaysResolveIntoZeroLevelAndLayer) &&
+        (GetArrayLayers() > 1 || GetNumMipLevels() > 1) &&
+        (GetInternalUsage() & wgpu::TextureUsage::RenderAttachment);
+    if (applyAlwaysResolveIntoZeroLevelAndLayerToggle) {
+        AddInternalUsage(wgpu::TextureUsage::CopyDst);
+    }
 }
 
 TextureBase::~TextureBase() = default;

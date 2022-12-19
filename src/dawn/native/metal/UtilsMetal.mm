@@ -111,23 +111,6 @@ ResultOrError<SavedMetalAttachment> PatchAttachmentWithTemporary(
     return result;
 }
 
-// Same as PatchAttachmentWithTemporary but for the resolve attachment.
-ResultOrError<SavedMetalAttachment> PatchResolveAttachmentWithTemporary(
-    Device* device,
-    MTLRenderPassAttachmentDescriptor* attachment) {
-    SavedMetalAttachment result;
-    DAWN_TRY_ASSIGN(
-        result, SaveAttachmentCreateTemporary(device, attachment.resolveTexture,
-                                              attachment.resolveLevel, attachment.resolveSlice));
-
-    // Replace the resolve attachment with the tempoary.
-    attachment.resolveTexture = result.temporary.Get();
-    attachment.resolveLevel = 0;
-    attachment.resolveSlice = 0;
-
-    return result;
-}
-
 // Helper function for Toggle EmulateStoreAndMSAAResolve
 void ResolveInAnotherRenderPass(
     CommandRecordingContext* commandContext,
@@ -333,45 +316,6 @@ MaybeError EncodeMetalRenderPass(Device* device,
     // This function handles multiple workarounds. Because some cases requires multiple
     // workarounds to happen at the same time, it handles workarounds one by one and calls
     // itself recursively to handle the next workaround if needed.
-
-    // Handle Toggle AlwaysResolveIntoZeroLevelAndLayer. We must handle this before applying
-    // the store + MSAA resolve workaround, otherwise this toggle will never be handled because
-    // the resolve texture is removed when applying the store + MSAA resolve workaround.
-    if (device->IsToggleEnabled(Toggle::AlwaysResolveIntoZeroLevelAndLayer)) {
-        std::array<SavedMetalAttachment, kMaxColorAttachments> trueResolveAttachments = {};
-        bool workaroundUsed = false;
-        for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-            if (mtlRenderPass.colorAttachments[i].resolveTexture == nullptr) {
-                continue;
-            }
-
-            if (mtlRenderPass.colorAttachments[i].resolveLevel == 0 &&
-                mtlRenderPass.colorAttachments[i].resolveSlice == 0) {
-                continue;
-            }
-
-            DAWN_TRY_ASSIGN(
-                trueResolveAttachments[i],
-                PatchResolveAttachmentWithTemporary(device, mtlRenderPass.colorAttachments[i]));
-            workaroundUsed = true;
-        }
-
-        // If we need to use a temporary resolve texture we need to copy the result of MSAA
-        // resolve back to the true resolve targets.
-        if (workaroundUsed) {
-            DAWN_TRY(EncodeMetalRenderPass(device, commandContext, mtlRenderPass, width, height,
-                                           std::move(encodeInside), renderPassCmd));
-
-            for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-                if (trueResolveAttachments[i].texture == nullptr) {
-                    continue;
-                }
-
-                trueResolveAttachments[i].CopyFromTemporaryToAttachment(commandContext);
-            }
-            return {};
-        }
-    }
 
     // Handles the workaround for r8unorm rg8unorm mipmap rendering being broken on some
     // devices. Render to a temporary texture instead and then copy back to the attachment.

@@ -36,7 +36,8 @@ class RenderPassEncoder final : public RenderEncoderBase {
                                          uint32_t renderTargetWidth,
                                          uint32_t renderTargetHeight,
                                          bool depthReadOnly,
-                                         bool stencilReadOnly);
+                                         bool stencilReadOnly,
+                                         std::function<void()> endCallback = nullptr);
     static Ref<RenderPassEncoder> MakeError(DeviceBase* device,
                                             CommandEncoder* commandEncoder,
                                             EncodingContext* encodingContext);
@@ -72,7 +73,8 @@ class RenderPassEncoder final : public RenderEncoderBase {
                       uint32_t renderTargetWidth,
                       uint32_t renderTargetHeight,
                       bool depthReadOnly,
-                      bool stencilReadOnly);
+                      bool stencilReadOnly,
+                      std::function<void()> endCallback = nullptr);
     RenderPassEncoder(DeviceBase* device,
                       CommandEncoder* commandEncoder,
                       EncodingContext* encodingContext,
@@ -97,6 +99,8 @@ class RenderPassEncoder final : public RenderEncoderBase {
 
     // This is the hardcoded value in the WebGPU spec.
     uint64_t mMaxDrawCount = 50000000;
+
+    std::function<void()> mEndCallback;
 };
 
 }  // namespace dawn::native

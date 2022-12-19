@@ -49,7 +49,8 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "a texture, we first resolve into a temporarily 2D texture with only one mipmap level and "
       "one array layer, and copy the result of MSAA resolve into the true resolve target. This "
       "workaround is enabled by default on the Metal drivers that have bugs when setting non-zero "
-      "resolveLevel or resolveSlice.",
+      "resolveLevel or resolveSlice. It is also enabled by default on Qualcomm Vulkan drivers, "
+      "which have similar bugs.",
       "https://crbug.com/dawn/56"}},
     {Toggle::LazyClearResourceOnFirstUse,
      {"lazy_clear_resource_on_first_use",
