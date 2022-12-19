@@ -485,6 +485,12 @@ crbug.com/dawn/0000 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:
 crbug.com/dawn/0000 [ mac ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,depth_stencil_attachment_only:depthStencilFormat="stencil8";* [ Failure ]
 
 # New flakes. Please triage:
+crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="bgra8unorm";storeOperation="store" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rg32float";storeOperation="store" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rg32sint";storeOperation="store" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rgba16float";storeOperation="store" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rgba16sint";storeOperation="store" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rgba8uint";storeOperation="store" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="const";vectorize=3 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize=3 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 ] worker_webgpu:api,operation,rendering,basic:large_draw:indexed=false;indirect=true [ RetryOnFailure ]
