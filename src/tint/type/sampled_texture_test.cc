@@ -42,7 +42,7 @@ TEST_F(SampledTextureTest, Hash) {
     auto* a = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
     auto* b = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
 
-    EXPECT_EQ(a->Hash(), b->Hash());
+    EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(SampledTextureTest, Equals) {

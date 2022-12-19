@@ -33,12 +33,9 @@ class Matrix final : public Castable<Matrix, Type> {
     /// @param column_type the type of a column of the matrix
     /// @param columns the number of columns in the matrix
     Matrix(const Vector* column_type, uint32_t columns);
-    /// Move constructor
-    Matrix(Matrix&&);
-    ~Matrix() override;
 
-    /// @returns a hash of the type.
-    size_t Hash() const override;
+    /// Destructor
+    ~Matrix() override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

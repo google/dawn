@@ -27,12 +27,9 @@ class DepthMultisampledTexture final : public Castable<DepthMultisampledTexture,
     /// Constructor
     /// @param dim the dimensionality of the texture
     explicit DepthMultisampledTexture(ast::TextureDimension dim);
-    /// Move constructor
-    DepthMultisampledTexture(DepthMultisampledTexture&&);
-    ~DepthMultisampledTexture() override;
 
-    /// @returns a hash of the type.
-    size_t Hash() const override;
+    /// Destructor
+    ~DepthMultisampledTexture() override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

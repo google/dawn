@@ -34,13 +34,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Type);
 
 namespace tint::type {
 
-Type::Type(type::Flags flags) : flags_(flags) {
+Type::Type(size_t hash, type::Flags flags) : Base(hash), flags_(flags) {
     if (IsConstructible()) {
         TINT_ASSERT(Type, HasCreationFixedFootprint());
     }
 }
-
-Type::Type(Type&&) = default;
 
 Type::~Type() = default;
 

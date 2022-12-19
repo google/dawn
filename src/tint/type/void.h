@@ -26,12 +26,9 @@ class Void final : public Castable<Void, Type> {
   public:
     /// Constructor
     Void();
-    /// Move constructor
-    Void(Void&&);
-    ~Void() override;
 
-    /// @returns a hash of the type.
-    size_t Hash() const override;
+    /// Destructor
+    ~Void() override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

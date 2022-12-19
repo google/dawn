@@ -23,13 +23,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Pointer);
 namespace tint::type {
 
 Pointer::Pointer(const Type* subtype, ast::AddressSpace address_space, ast::Access access)
-    : Base(type::Flags{}), subtype_(subtype), address_space_(address_space), access_(access) {
+    : Base(utils::Hash(TypeInfo::Of<Pointer>().full_hashcode, address_space, subtype, access),
+           type::Flags{}),
+      subtype_(subtype),
+      address_space_(address_space),
+      access_(access) {
     TINT_ASSERT(Type, !subtype->Is<Reference>());
     TINT_ASSERT(Type, access != ast::Access::kUndefined);
-}
-
-size_t Pointer::Hash() const {
-    return utils::Hash(TypeInfo::Of<Pointer>().full_hashcode, address_space_, subtype_, access_);
 }
 
 bool Pointer::Equals(const UniqueNode& other) const {
@@ -50,8 +50,6 @@ std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
     out << ">";
     return out.str();
 }
-
-Pointer::Pointer(Pointer&&) = default;
 
 Pointer::~Pointer() = default;
 

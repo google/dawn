@@ -48,8 +48,7 @@ using Flags = utils::EnumSet<Flag>;
 /// Base class for a type in the system
 class Type : public Castable<Type, UniqueNode> {
   public:
-    /// Move constructor
-    Type(Type&&);
+    /// Destructor
     ~Type() override;
 
     /// @param symbols the program's symbol table
@@ -187,8 +186,9 @@ class Type : public Castable<Type, UniqueNode> {
 
   protected:
     /// Constructor
+    /// @param hash the immutable hash for the node
     /// @param flags the flags of this type
-    explicit Type(type::Flags flags);
+    Type(size_t hash, type::Flags flags);
 
     /// The flags of this type.
     const type::Flags flags_;
@@ -203,7 +203,7 @@ template <>
 struct hash<tint::type::Type> {
     /// @param type the type to obtain a hash from
     /// @returns the hash of the type
-    size_t operator()(const tint::type::Type& type) const { return type.Hash(); }
+    size_t operator()(const tint::type::Type& type) const { return type.unique_hash; }
 };
 
 /// std::equal_to specialization for tint::type::Type

@@ -33,7 +33,9 @@ class ArrayCount : public Castable<ArrayCount, UniqueNode> {
     virtual std::string FriendlyName(const SymbolTable& symbols) const = 0;
 
   protected:
-    ArrayCount();
+    /// Constructor
+    /// @param hash the unique hash of the node
+    explicit ArrayCount(size_t hash);
 };
 
 /// The variant of an ArrayCount when the array is a const-expression.
@@ -48,9 +50,6 @@ class ConstantArrayCount final : public Castable<ConstantArrayCount, ArrayCount>
     /// @param val the constant-expression value
     explicit ConstantArrayCount(uint32_t val);
     ~ConstantArrayCount() override;
-
-    /// @returns a hash of the array count.
-    size_t Hash() const override;
 
     /// @param other the other object
     /// @returns true if this array count is equal to other
@@ -75,9 +74,6 @@ class RuntimeArrayCount final : public Castable<RuntimeArrayCount, ArrayCount> {
     RuntimeArrayCount();
     ~RuntimeArrayCount() override;
 
-    /// @returns a hash of the array count.
-    size_t Hash() const override;
-
     /// @param other the other object
     /// @returns true if this array count is equal to other
     bool Equals(const UniqueNode& other) const override;
@@ -88,28 +84,5 @@ class RuntimeArrayCount final : public Castable<RuntimeArrayCount, ArrayCount> {
 };
 
 }  // namespace tint::type
-
-namespace std {
-
-/// std::hash specialization for tint::type::ArrayCount
-template <>
-struct hash<tint::type::ArrayCount> {
-    /// @param a the array count to obtain a hash from
-    /// @returns the hash of the array count
-    size_t operator()(const tint::type::ArrayCount& a) const { return a.Hash(); }
-};
-
-/// std::equal_to specialization for tint::type::ArrayCount
-template <>
-struct equal_to<tint::type::ArrayCount> {
-    /// @param a the first array count to compare
-    /// @param b the second array count to compare
-    /// @returns true if the two array counts are equal
-    bool operator()(const tint::type::ArrayCount& a, const tint::type::ArrayCount& b) const {
-        return a.Equals(b);
-    }
-};
-
-}  // namespace std
 
 #endif  // SRC_TINT_TYPE_ARRAY_COUNT_H_

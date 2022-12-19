@@ -41,12 +41,8 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
                    ast::Access access,
                    Type* subtype);
 
-    /// Move constructor
-    StorageTexture(StorageTexture&&);
+    /// Destructor
     ~StorageTexture() override;
-
-    /// @returns a hash of the type.
-    size_t Hash() const override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

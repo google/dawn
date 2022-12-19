@@ -21,19 +21,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Bool);
 namespace tint::type {
 
 Bool::Bool()
-    : Base(type::Flags{
-          Flag::kConstructable,
-          Flag::kCreationFixedFootprint,
-          Flag::kFixedFootprint,
-      }) {}
-
-Bool::Bool(Bool&&) = default;
+    : Base(static_cast<size_t>(TypeInfo::Of<Bool>().full_hashcode),
+           type::Flags{
+               Flag::kConstructable,
+               Flag::kCreationFixedFootprint,
+               Flag::kFixedFootprint,
+           }) {}
 
 Bool::~Bool() = default;
-
-size_t Bool::Hash() const {
-    return static_cast<size_t>(TypeInfo::Of<Bool>().full_hashcode);
-}
 
 bool Bool::Equals(const UniqueNode& other) const {
     return other.Is<Bool>();

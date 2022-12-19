@@ -32,12 +32,8 @@ class Reference final : public Castable<Reference, Type> {
     /// @param access the resolved access control of the reference
     Reference(const Type* subtype, ast::AddressSpace address_space, ast::Access access);
 
-    /// Move constructor
-    Reference(Reference&&);
+    /// Destructor
     ~Reference() override;
-
-    /// @returns a hash of the type.
-    size_t Hash() const override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

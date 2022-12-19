@@ -28,12 +28,9 @@ class Sampler final : public Castable<Sampler, Type> {
     /// Constructor
     /// @param kind the kind of sampler
     explicit Sampler(ast::SamplerKind kind);
-    /// Move constructor
-    Sampler(Sampler&&);
-    ~Sampler() override;
 
-    /// @returns a hash of the type.
-    size_t Hash() const override;
+    /// Destructor
+    ~Sampler() override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

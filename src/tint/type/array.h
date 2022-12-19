@@ -52,9 +52,6 @@ class Array final : public Castable<Array, Type> {
           uint32_t stride,
           uint32_t implicit_stride);
 
-    /// @returns a hash of the type.
-    size_t Hash() const override;
-
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other
     bool Equals(const UniqueNode& other) const override;

@@ -58,7 +58,8 @@ Array::Array(const Type* element,
              uint32_t size,
              uint32_t stride,
              uint32_t implicit_stride)
-    : Base(FlagsFrom(element, count)),
+    : Base(utils::Hash(TypeInfo::Of<Array>().full_hashcode, count, align, size, stride),
+           FlagsFrom(element, count)),
       element_(element),
       count_(count),
       align_(align),
@@ -66,10 +67,6 @@ Array::Array(const Type* element,
       stride_(stride),
       implicit_stride_(implicit_stride) {
     TINT_ASSERT(Type, element_);
-}
-
-size_t Array::Hash() const {
-    return utils::Hash(TypeInfo::Of<Array>().full_hashcode, count_, align_, size_, stride_);
 }
 
 bool Array::Equals(const UniqueNode& other) const {

@@ -47,7 +47,7 @@ TEST_F(ReferenceTest, Hash) {
     auto* b =
         create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
 
-    EXPECT_EQ(a->Hash(), b->Hash());
+    EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(ReferenceTest, Equals) {

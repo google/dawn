@@ -56,7 +56,7 @@ Struct::Struct(tint::Source source,
                uint32_t align,
                uint32_t size,
                uint32_t size_no_padding)
-    : Base(FlagsFrom(members)),
+    : Base(utils::Hash(TypeInfo::Of<Struct>().full_hashcode, name), FlagsFrom(members)),
       source_(source),
       name_(name),
       members_(std::move(members)),
@@ -65,10 +65,6 @@ Struct::Struct(tint::Source source,
       size_no_padding_(size_no_padding) {}
 
 Struct::~Struct() = default;
-
-size_t Struct::Hash() const {
-    return utils::Hash(TypeInfo::Of<Struct>().full_hashcode, name_);
-}
 
 bool Struct::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<Struct>()) {

@@ -22,17 +22,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::MultisampledTexture);
 namespace tint::type {
 
 MultisampledTexture::MultisampledTexture(ast::TextureDimension dim, const Type* type)
-    : Base(dim), type_(type) {
+    : Base(utils::Hash(TypeInfo::Of<MultisampledTexture>().full_hashcode, dim, type), dim),
+      type_(type) {
     TINT_ASSERT(Type, type_);
 }
 
-MultisampledTexture::MultisampledTexture(MultisampledTexture&&) = default;
-
 MultisampledTexture::~MultisampledTexture() = default;
-
-size_t MultisampledTexture::Hash() const {
-    return utils::Hash(TypeInfo::Of<MultisampledTexture>().full_hashcode, dim(), type_);
-}
 
 bool MultisampledTexture::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<MultisampledTexture>()) {

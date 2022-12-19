@@ -28,12 +28,8 @@ class AbstractFloat final : public Castable<AbstractFloat, AbstractNumeric> {
     /// Constructor
     AbstractFloat();
 
-    /// Move constructor
-    AbstractFloat(AbstractFloat&&);
+    /// Destructor
     ~AbstractFloat() override;
-
-    /// @returns a hash of the type.
-    size_t Hash() const override;
 
     /// @param other the other type to compare against
     /// @returns true if this type is equal to the given type

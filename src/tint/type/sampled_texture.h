@@ -28,12 +28,9 @@ class SampledTexture final : public Castable<SampledTexture, Texture> {
     /// @param dim the dimensionality of the texture
     /// @param type the data type of the sampled texture
     SampledTexture(ast::TextureDimension dim, const Type* type);
-    /// Move constructor
-    SampledTexture(SampledTexture&&);
-    ~SampledTexture() override;
 
-    /// @returns a hash of the type.
-    size_t Hash() const override;
+    /// Destructor
+    ~SampledTexture() override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

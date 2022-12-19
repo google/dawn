@@ -28,12 +28,8 @@ class Atomic final : public Castable<Atomic, Type> {
     /// @param subtype the atomic type
     explicit Atomic(const type::Type* subtype);
 
-    /// Move constructor
-    Atomic(Atomic&&);
+    /// Destructor
     ~Atomic() override;
-
-    /// @returns a hash of the type.
-    size_t Hash() const override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

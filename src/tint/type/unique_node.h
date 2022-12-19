@@ -28,20 +28,18 @@ namespace tint::type {
 class UniqueNode : public Castable<UniqueNode, Node> {
   public:
     /// Constructor
-    UniqueNode();
-
-    /// Copy constructor
-    UniqueNode(const UniqueNode&);
+    /// @param hash the immutable hash for the node
+    inline explicit UniqueNode(size_t hash) : unique_hash(hash) {}
 
     /// Destructor
     ~UniqueNode() override;
 
-    /// @returns a hash of the node.
-    virtual size_t Hash() const = 0;
-
     /// @param other the other node to compare this node against
     /// @returns true if the this node is equal to @p other
     virtual bool Equals(const UniqueNode& other) const = 0;
+
+    /// the immutable hash for the node
+    const size_t unique_hash;
 };
 
 }  // namespace tint::type
@@ -53,7 +51,7 @@ template <>
 struct hash<tint::type::UniqueNode> {
     /// @param node the unique node to obtain a hash from
     /// @returns the hash of the node
-    size_t operator()(const tint::type::UniqueNode& node) const { return node.Hash(); }
+    size_t operator()(const tint::type::UniqueNode& node) const { return node.unique_hash; }
 };
 
 /// std::equal_to specialization for tint::type::UniqueNode

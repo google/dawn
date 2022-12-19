@@ -34,7 +34,7 @@ TEST_F(ExternalTextureTest, Creation) {
 TEST_F(ExternalTextureTest, Hash) {
     auto* a = create<ExternalTexture>();
     auto* b = create<ExternalTexture>();
-    EXPECT_EQ(a->Hash(), b->Hash());
+    EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(ExternalTextureTest, Equals) {

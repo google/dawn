@@ -29,7 +29,7 @@ TEST_F(F32Test, Creation) {
 TEST_F(F32Test, Hash) {
     auto* a = create<F32>();
     auto* b = create<F32>();
-    EXPECT_EQ(a->Hash(), b->Hash());
+    EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(F32Test, Equals) {

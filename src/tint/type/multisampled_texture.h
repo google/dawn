@@ -28,12 +28,9 @@ class MultisampledTexture final : public Castable<MultisampledTexture, Texture> 
     /// @param dim the dimensionality of the texture
     /// @param type the data type of the multisampled texture
     MultisampledTexture(ast::TextureDimension dim, const Type* type);
-    /// Move constructor
-    MultisampledTexture(MultisampledTexture&&);
-    ~MultisampledTexture() override;
 
-    /// @returns a hash of the type.
-    size_t Hash() const override;
+    /// Destructor
+    ~MultisampledTexture() override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

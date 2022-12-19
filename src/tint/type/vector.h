@@ -28,12 +28,9 @@ class Vector final : public Castable<Vector, Type> {
     /// @param subtype the vector element type
     /// @param size the number of elements in the vector
     Vector(Type const* subtype, uint32_t size);
-    /// Move constructor
-    Vector(Vector&&);
-    ~Vector() override;
 
-    /// @returns a hash of the type.
-    size_t Hash() const override;
+    /// Destructor
+    ~Vector() override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

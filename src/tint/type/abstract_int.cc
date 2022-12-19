@@ -21,13 +21,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::AbstractInt);
 
 namespace tint::type {
 
-AbstractInt::AbstractInt() = default;
-AbstractInt::AbstractInt(AbstractInt&&) = default;
-AbstractInt::~AbstractInt() = default;
+AbstractInt::AbstractInt() : Base(utils::Hash(TypeInfo::Of<AbstractInt>().full_hashcode)) {}
 
-size_t AbstractInt::Hash() const {
-    return utils::Hash(TypeInfo::Of<AbstractInt>().full_hashcode);
-}
+AbstractInt::~AbstractInt() = default;
 
 bool AbstractInt::Equals(const UniqueNode& other) const {
     return other.Is<AbstractInt>();

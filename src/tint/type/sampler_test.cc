@@ -40,7 +40,7 @@ TEST_F(SamplerTest, Hash) {
     auto* a = create<Sampler>(ast::SamplerKind::kSampler);
     auto* b = create<Sampler>(ast::SamplerKind::kSampler);
 
-    EXPECT_EQ(a->Hash(), b->Hash());
+    EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(SamplerTest, Equals) {

@@ -56,7 +56,7 @@ TEST_F(StorageTextureTest, Hash) {
     auto* b = Create(ast::TextureDimension::kCube, ast::TexelFormat::kRgba32Float,
                      ast::Access::kReadWrite);
 
-    EXPECT_EQ(a->Hash(), b->Hash());
+    EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(StorageTextureTest, Equals) {

@@ -20,15 +20,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::RuntimeArrayCount);
 
 namespace tint::type {
 
-ArrayCount::ArrayCount() : Base() {}
+ArrayCount::ArrayCount(size_t hash) : Base(hash) {}
 ArrayCount::~ArrayCount() = default;
 
-ConstantArrayCount::ConstantArrayCount(uint32_t val) : Base(), value(val) {}
+ConstantArrayCount::ConstantArrayCount(uint32_t val)
+    : Base(static_cast<size_t>(TypeInfo::Of<ConstantArrayCount>().full_hashcode)), value(val) {}
 ConstantArrayCount::~ConstantArrayCount() = default;
-
-size_t ConstantArrayCount::Hash() const {
-    return static_cast<size_t>(TypeInfo::Of<ConstantArrayCount>().full_hashcode);
-}
 
 bool ConstantArrayCount::Equals(const UniqueNode& other) const {
     if (auto* v = other.As<ConstantArrayCount>()) {
@@ -41,12 +38,9 @@ std::string ConstantArrayCount::FriendlyName(const SymbolTable&) const {
     return std::to_string(value);
 }
 
-RuntimeArrayCount::RuntimeArrayCount() : Base() {}
+RuntimeArrayCount::RuntimeArrayCount()
+    : Base(static_cast<size_t>(TypeInfo::Of<RuntimeArrayCount>().full_hashcode)) {}
 RuntimeArrayCount::~RuntimeArrayCount() = default;
-
-size_t RuntimeArrayCount::Hash() const {
-    return static_cast<size_t>(TypeInfo::Of<RuntimeArrayCount>().full_hashcode);
-}
 
 bool RuntimeArrayCount::Equals(const UniqueNode& other) const {
     return other.Is<RuntimeArrayCount>();

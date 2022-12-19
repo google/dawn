@@ -21,19 +21,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::F16);
 namespace tint::type {
 
 F16::F16()
-    : Base(type::Flags{
-          Flag::kConstructable,
-          Flag::kCreationFixedFootprint,
-          Flag::kFixedFootprint,
-      }) {}
-
-F16::F16(F16&&) = default;
+    : Base(static_cast<size_t>(TypeInfo::Of<F16>().full_hashcode),
+           type::Flags{
+               Flag::kConstructable,
+               Flag::kCreationFixedFootprint,
+               Flag::kFixedFootprint,
+           }) {}
 
 F16::~F16() = default;
-
-size_t F16::Hash() const {
-    return static_cast<size_t>(TypeInfo::Of<F16>().full_hashcode);
-}
 
 bool F16::Equals(const UniqueNode& other) const {
     return other.Is<F16>();

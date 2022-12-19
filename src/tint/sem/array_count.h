@@ -36,9 +36,6 @@ class NamedOverrideArrayCount final : public Castable<NamedOverrideArrayCount, t
     explicit NamedOverrideArrayCount(const GlobalVariable* var);
     ~NamedOverrideArrayCount() override;
 
-    /// @returns a hash of the array count.
-    size_t Hash() const override;
-
     /// @param other the other node
     /// @returns true if this array count is equal @p other
     bool Equals(const type::UniqueNode& other) const override;
@@ -64,9 +61,6 @@ class UnnamedOverrideArrayCount final
     /// @param e the override expression
     explicit UnnamedOverrideArrayCount(const Expression* e);
     ~UnnamedOverrideArrayCount() override;
-
-    /// @returns a hash of the array count.
-    size_t Hash() const override;
 
     /// @param other the other node
     /// @returns true if this array count is equal @p other

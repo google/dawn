@@ -26,10 +26,10 @@ namespace tint::type {
 class AbstractNumeric : public Castable<AbstractNumeric, Type> {
   public:
     /// Constructor
-    AbstractNumeric();
+    /// @param hash the unique hash of the node
+    explicit AbstractNumeric(size_t hash);
 
-    /// Move constructor
-    AbstractNumeric(AbstractNumeric&&);
+    /// Destructor
     ~AbstractNumeric() override;
 
     /// @returns 0, as the type is abstract.

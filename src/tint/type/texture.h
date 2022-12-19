@@ -24,10 +24,10 @@ namespace tint::type {
 class Texture : public Castable<Texture, Type> {
   public:
     /// Constructor
+    /// @param hash the unique hash of the node
     /// @param dim the dimensionality of the texture
-    explicit Texture(ast::TextureDimension dim);
-    /// Move constructor
-    Texture(Texture&&);
+    Texture(size_t hash, ast::TextureDimension dim);
+    /// Destructor
     ~Texture() override;
 
     /// @returns the texture dimension

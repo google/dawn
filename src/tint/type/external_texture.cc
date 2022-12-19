@@ -20,15 +20,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::ExternalTexture);
 
 namespace tint::type {
 
-ExternalTexture::ExternalTexture() : Base(ast::TextureDimension::k2d) {}
-
-ExternalTexture::ExternalTexture(ExternalTexture&&) = default;
+ExternalTexture::ExternalTexture()
+    : Base(static_cast<size_t>(TypeInfo::Of<ExternalTexture>().full_hashcode),
+           ast::TextureDimension::k2d) {}
 
 ExternalTexture::~ExternalTexture() = default;
-
-size_t ExternalTexture::Hash() const {
-    return static_cast<size_t>(TypeInfo::Of<ExternalTexture>().full_hashcode);
-}
 
 bool ExternalTexture::Equals(const UniqueNode& other) const {
     return other.Is<ExternalTexture>();

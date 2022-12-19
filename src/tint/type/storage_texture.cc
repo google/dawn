@@ -25,15 +25,12 @@ StorageTexture::StorageTexture(ast::TextureDimension dim,
                                ast::TexelFormat format,
                                ast::Access access,
                                Type* subtype)
-    : Base(dim), texel_format_(format), access_(access), subtype_(subtype) {}
-
-StorageTexture::StorageTexture(StorageTexture&&) = default;
+    : Base(utils::Hash(TypeInfo::Of<StorageTexture>().full_hashcode, dim, format, access), dim),
+      texel_format_(format),
+      access_(access),
+      subtype_(subtype) {}
 
 StorageTexture::~StorageTexture() = default;
-
-size_t StorageTexture::Hash() const {
-    return utils::Hash(TypeInfo::Of<StorageTexture>().full_hashcode, dim(), texel_format_, access_);
-}
 
 bool StorageTexture::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<StorageTexture>()) {

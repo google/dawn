@@ -23,11 +23,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Matrix);
 namespace tint::type {
 
 Matrix::Matrix(const Vector* column_type, uint32_t columns)
-    : Base(type::Flags{
-          Flag::kConstructable,
-          Flag::kCreationFixedFootprint,
-          Flag::kFixedFootprint,
-      }),
+    : Base(utils::Hash(TypeInfo::Of<Vector>().full_hashcode, columns, column_type),
+           type::Flags{
+               Flag::kConstructable,
+               Flag::kCreationFixedFootprint,
+               Flag::kFixedFootprint,
+           }),
       subtype_(column_type->type()),
       column_type_(column_type),
       rows_(column_type->Width()),
@@ -38,13 +39,7 @@ Matrix::Matrix(const Vector* column_type, uint32_t columns)
     TINT_ASSERT(AST, columns_ < 5);
 }
 
-Matrix::Matrix(Matrix&&) = default;
-
 Matrix::~Matrix() = default;
-
-size_t Matrix::Hash() const {
-    return utils::Hash(TypeInfo::Of<Vector>().full_hashcode, rows_, columns_, column_type_);
-}
 
 bool Matrix::Equals(const UniqueNode& other) const {
     if (auto* v = other.As<Matrix>()) {

@@ -32,12 +32,9 @@ class Bool final : public Castable<Bool, Type> {
   public:
     /// Constructor
     Bool();
-    /// Move constructor
-    Bool(Bool&&);
-    ~Bool() override;
 
-    /// @returns a hash of the type.
-    size_t Hash() const override;
+    /// Destructor
+    ~Bool() override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

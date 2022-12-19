@@ -65,9 +65,6 @@ class Struct : public Castable<Struct, Type> {
     /// Destructor
     ~Struct() override;
 
-    /// @returns a hash of the type.
-    size_t Hash() const override;
-
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other
     bool Equals(const UniqueNode& other) const override;

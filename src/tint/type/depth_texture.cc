@@ -29,17 +29,12 @@ bool IsValidDepthDimension(ast::TextureDimension dim) {
 
 }  // namespace
 
-DepthTexture::DepthTexture(ast::TextureDimension dim) : Base(dim) {
+DepthTexture::DepthTexture(ast::TextureDimension dim)
+    : Base(utils::Hash(TypeInfo::Of<DepthTexture>().full_hashcode, dim), dim) {
     TINT_ASSERT(Type, IsValidDepthDimension(dim));
 }
 
-DepthTexture::DepthTexture(DepthTexture&&) = default;
-
 DepthTexture::~DepthTexture() = default;
-
-size_t DepthTexture::Hash() const {
-    return utils::Hash(TypeInfo::Of<DepthTexture>().full_hashcode, dim());
-}
 
 bool DepthTexture::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<DepthTexture>()) {

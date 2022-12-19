@@ -18,13 +18,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::AbstractNumeric);
 
 namespace tint::type {
 
-AbstractNumeric::AbstractNumeric()
-    : Base(type::Flags{
-          Flag::kConstructable,
-          Flag::kCreationFixedFootprint,
-          Flag::kFixedFootprint,
-      }) {}
-AbstractNumeric::AbstractNumeric(AbstractNumeric&&) = default;
+AbstractNumeric::AbstractNumeric(size_t hash)
+    : Base(hash,
+           type::Flags{
+               Flag::kConstructable,
+               Flag::kCreationFixedFootprint,
+               Flag::kFixedFootprint,
+           }) {}
 AbstractNumeric::~AbstractNumeric() = default;
 
 uint32_t AbstractNumeric::Size() const {

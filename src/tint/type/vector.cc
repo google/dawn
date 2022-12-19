@@ -22,24 +22,19 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Vector);
 namespace tint::type {
 
 Vector::Vector(Type const* subtype, uint32_t width)
-    : Base(type::Flags{
-          Flag::kConstructable,
-          Flag::kCreationFixedFootprint,
-          Flag::kFixedFootprint,
-      }),
+    : Base(utils::Hash(TypeInfo::Of<Vector>().full_hashcode, width, subtype),
+           type::Flags{
+               Flag::kConstructable,
+               Flag::kCreationFixedFootprint,
+               Flag::kFixedFootprint,
+           }),
       subtype_(subtype),
       width_(width) {
     TINT_ASSERT(Type, width_ > 1);
     TINT_ASSERT(Type, width_ < 5);
 }
 
-Vector::Vector(Vector&&) = default;
-
 Vector::~Vector() = default;
-
-size_t Vector::Hash() const {
-    return utils::Hash(TypeInfo::Of<Vector>().full_hashcode, width_, subtype_);
-}
 
 bool Vector::Equals(const UniqueNode& other) const {
     if (auto* v = other.As<Vector>()) {

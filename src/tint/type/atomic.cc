@@ -23,16 +23,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Atomic);
 namespace tint::type {
 
 Atomic::Atomic(const type::Type* subtype)
-    : Base(type::Flags{
-          Flag::kCreationFixedFootprint,
-          Flag::kFixedFootprint,
-      }),
+    : Base(utils::Hash(TypeInfo::Of<Atomic>().full_hashcode, subtype),
+           type::Flags{
+               Flag::kCreationFixedFootprint,
+               Flag::kFixedFootprint,
+           }),
       subtype_(subtype) {
     TINT_ASSERT(AST, !subtype->Is<Reference>());
-}
-
-size_t Atomic::Hash() const {
-    return utils::Hash(TypeInfo::Of<Atomic>().full_hashcode, subtype_);
 }
 
 bool Atomic::Equals(const type::UniqueNode& other) const {
@@ -55,8 +52,6 @@ uint32_t Atomic::Size() const {
 uint32_t Atomic::Align() const {
     return subtype_->Align();
 }
-
-Atomic::Atomic(Atomic&&) = default;
 
 Atomic::~Atomic() = default;
 

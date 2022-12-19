@@ -29,7 +29,7 @@ TEST_F(F16Test, Creation) {
 TEST_F(F16Test, Hash) {
     auto* a = create<F16>();
     auto* b = create<F16>();
-    EXPECT_EQ(a->Hash(), b->Hash());
+    EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(F16Test, Equals) {

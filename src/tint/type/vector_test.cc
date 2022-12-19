@@ -38,7 +38,7 @@ TEST_F(VectorTest, Hash) {
     auto* a = create<Vector>(create<I32>(), 2u);
     auto* b = create<Vector>(create<I32>(), 2u);
 
-    EXPECT_EQ(a->Hash(), b->Hash());
+    EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(VectorTest, Equals) {

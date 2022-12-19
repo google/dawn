@@ -18,10 +18,6 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::UniqueNode);
 
 namespace tint::type {
 
-UniqueNode::UniqueNode() = default;
-
-UniqueNode::UniqueNode(const UniqueNode&) = default;
-
 UniqueNode::~UniqueNode() = default;
 
 }  // namespace tint::type

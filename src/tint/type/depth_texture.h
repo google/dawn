@@ -27,12 +27,9 @@ class DepthTexture final : public Castable<DepthTexture, Texture> {
     /// Constructor
     /// @param dim the dimensionality of the texture
     explicit DepthTexture(ast::TextureDimension dim);
-    /// Move constructor
-    DepthTexture(DepthTexture&&);
-    ~DepthTexture() override;
 
-    /// @returns a hash of the type.
-    size_t Hash() const override;
+    /// Destructor
+    ~DepthTexture() override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

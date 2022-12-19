@@ -41,7 +41,7 @@ TEST_F(MatrixTest, Hash) {
     auto* a = create<Matrix>(create<Vector>(create<I32>(), 3u), 4u);
     auto* b = create<Matrix>(create<Vector>(create<I32>(), 3u), 4u);
 
-    EXPECT_EQ(a->Hash(), b->Hash());
+    EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(MatrixTest, Equals) {

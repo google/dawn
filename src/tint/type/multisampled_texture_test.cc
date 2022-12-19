@@ -38,7 +38,7 @@ TEST_F(MultisampledTextureTest, Creation) {
 TEST_F(MultisampledTextureTest, Hash) {
     auto* a = create<MultisampledTexture>(ast::TextureDimension::k2d, create<F32>());
     auto* b = create<MultisampledTexture>(ast::TextureDimension::k2d, create<F32>());
-    EXPECT_EQ(a->Hash(), b->Hash());
+    EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(MultisampledTextureTest, Equals) {

@@ -26,12 +26,9 @@ class F16 final : public Castable<F16, Type> {
   public:
     /// Constructor
     F16();
-    /// Move constructor
-    F16(F16&&);
-    ~F16() override;
 
-    /// @returns a hash of the type.
-    size_t Hash() const override;
+    /// Destructor
+    ~F16() override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

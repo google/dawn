@@ -26,12 +26,9 @@ class I32 final : public Castable<I32, Type> {
   public:
     /// Constructor
     I32();
-    /// Move constructor
-    I32(I32&&);
-    ~I32() override;
 
-    /// @returns a hash of the type.
-    size_t Hash() const override;
+    /// Destructor
+    ~I32() override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

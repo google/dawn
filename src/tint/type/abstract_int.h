@@ -28,12 +28,8 @@ class AbstractInt final : public Castable<AbstractInt, AbstractNumeric> {
     /// Constructor
     AbstractInt();
 
-    /// Move constructor
-    AbstractInt(AbstractInt&&);
+    /// Destructor
     ~AbstractInt() override;
-
-    /// @returns a hash of the type.
-    size_t Hash() const override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other

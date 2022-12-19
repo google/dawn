@@ -21,15 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Sampler);
 
 namespace tint::type {
 
-Sampler::Sampler(ast::SamplerKind kind) : Base(type::Flags{}), kind_(kind) {}
-
-Sampler::Sampler(Sampler&&) = default;
+Sampler::Sampler(ast::SamplerKind kind)
+    : Base(utils::Hash(TypeInfo::Of<Sampler>().full_hashcode, kind), type::Flags{}), kind_(kind) {}
 
 Sampler::~Sampler() = default;
-
-size_t Sampler::Hash() const {
-    return utils::Hash(TypeInfo::Of<Sampler>().full_hashcode, kind_);
-}
 
 bool Sampler::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<Sampler>()) {
