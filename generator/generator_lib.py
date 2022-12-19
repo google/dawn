@@ -335,8 +335,7 @@ def run_generator(generator):
             output_path = os.path.join(args.output_dir, output.name)
 
             directory = os.path.dirname(output_path)
-            if not os.path.exists(directory):
-                os.makedirs(directory)
+            os.makedirs(directory, exist_ok=True)
 
             with open(output_path, 'w') as outfile:
                 outfile.write(output.content)
