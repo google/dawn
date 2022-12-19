@@ -104,8 +104,8 @@ class TextureView final : public TextureViewBase {
   private:
     using TextureViewBase::TextureViewBase;
     MaybeError Initialize(const TextureViewDescriptor* descriptor);
+    void DestroyImpl() override;
 
-    // TODO(crbug.com/dawn/1355): Clear this reference on texture destroy.
     NSPRef<id<MTLTexture>> mMtlTextureView;
 };
 

@@ -1124,6 +1124,10 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
     return {};
 }
 
+void TextureView::DestroyImpl() {
+    mMtlTextureView = nil;
+}
+
 id<MTLTexture> TextureView::GetMTLTexture() const {
     ASSERT(mMtlTextureView != nullptr);
     return mMtlTextureView.Get();
