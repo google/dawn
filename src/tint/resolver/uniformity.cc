@@ -591,20 +591,11 @@ class UniformityGraph {
                 auto& info = current_function_->LoopSwitchInfoFor(parent);
 
                 // Propagate assignments to the loop input nodes.
-                for (auto* var : current_function_->local_var_decls) {
-                    // Skip variables that were declared inside this loop.
-                    if (auto* lv = var->As<sem::LocalVariable>();
-                        lv &&
-                        lv->Statement()->FindFirstParent([&](auto* s) { return s == parent; })) {
-                        continue;
-                    }
-
-                    // Add an edge from the variable's loop input node to its value at this point.
-                    auto in_node = info.var_in_nodes.Find(var);
-                    TINT_ASSERT(Resolver, in_node != nullptr);
-                    auto* out_node = current_function_->variables.Get(var);
-                    if (out_node != *in_node) {
-                        (*in_node)->AddEdge(out_node);
+                for (auto v : info.var_in_nodes) {
+                    auto* in_node = v.value;
+                    auto* out_node = current_function_->variables.Get(v.key);
+                    if (out_node != in_node) {
+                        in_node->AddEdge(out_node);
                     }
                 }
                 return cf;
@@ -675,6 +666,13 @@ class UniformityGraph {
                 // Set each variable's exit node as its value in the outer scope.
                 for (auto v : info.var_exit_nodes) {
                     current_function_->variables.Set(v.key, v.value);
+                }
+
+                if (f->initializer) {
+                    // Remove variables declared in the for-loop initializer from the current scope.
+                    if (auto* decl = f->initializer->As<ast::VariableDeclStatement>()) {
+                        current_function_->local_var_decls.Remove(sem_.Get(decl->variable));
+                    }
                 }
 
                 current_function_->RemoveLoopSwitchInfoFor(sem_loop);

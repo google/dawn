@@ -1939,6 +1939,43 @@ test:12:9 note: reading from read_write storage buffer 'non_uniform' may result 
 )");
 }
 
+TEST_F(UniformityAnalysisTest,
+       ForLoop_InitializerVarBecomesNonUniformBeforeConditionalContinue_BarrierAtStart) {
+    // Use a variable declared in a for-loop initializer for a conditional barrier in a loop, assign
+    // a non-uniform value to that variable later in that loop and then execute a continue.
+    // Tests that variables declared in the for-loop initializer are properly tracked.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  for (var i = 0; i < 10; i++) {
+    if (i < 5) {
+      workgroupBarrier();
+    }
+    if (true) {
+      i = non_uniform;
+      continue;
+    }
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:7:7 warning: 'workgroupBarrier' must only be called from uniform control flow
+      workgroupBarrier();
+      ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on non-uniform value
+  for (var i = 0; i < 10; i++) {
+  ^^^
+
+test:10:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+      i = non_uniform;
+          ^^^^^^^^^^^
+)");
+}
+
 TEST_F(UniformityAnalysisTest, ForLoop_NonUniformCondition_Reconverge) {
     // Loops reconverge at exit, so test that we can call workgroupBarrier() after a loop that has a
     // non-uniform condition.
@@ -1949,6 +1986,41 @@ fn foo() {
   for (var i = 0; i < n; i = i + 1) {
   }
   workgroupBarrier();
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, ForLoop_VarDeclaredInBody) {
+    // Make sure that we can declare a variable inside the loop body without causing issues for
+    // tracking local variables across iterations.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> n : i32;
+
+fn foo() {
+  var outer : i32;
+  for (var i = 0; i < n; i = i + 1) {
+    var inner : i32;
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, ForLoop_InitializerScope) {
+    // Make sure that variables declared in a for-loop initializer are properly removed from the
+    // local variable list, otherwise a parent control-flow statement will try to add edges to nodes
+    // that no longer exist.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> n : i32;
+
+fn foo() {
+  if (n == 5) {
+    for (var i = 0; i < n; i = i + 1) {
+    }
+  }
 }
 )";
 
