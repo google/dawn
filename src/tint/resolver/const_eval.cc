@@ -71,6 +71,17 @@ auto Dispatch_iu32(F&& f, CONSTANTS&&... cs) {
 /// Helper that calls `f` passing in the value of all `cs`.
 /// Calls `f` with all constants cast to the type of the first `cs` argument.
 template <typename F, typename... CONSTANTS>
+auto Dispatch_fiu32(F&& f, CONSTANTS&&... cs) {
+    return Switch(
+        First(cs...)->Type(),  //
+        [&](const type::F32*) { return f(cs->template ValueAs<f32>()...); },
+        [&](const type::I32*) { return f(cs->template ValueAs<i32>()...); },
+        [&](const type::U32*) { return f(cs->template ValueAs<u32>()...); });
+}
+
+/// Helper that calls `f` passing in the value of all `cs`.
+/// Calls `f` with all constants cast to the type of the first `cs` argument.
+template <typename F, typename... CONSTANTS>
 auto Dispatch_ia_iu32(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
@@ -1319,9 +1330,33 @@ ConstEval::Result ConstEval::Swizzle(const type::Type* ty,
     return builder.create<constant::Composite>(ty, std::move(values));
 }
 
-ConstEval::Result ConstEval::Bitcast(const type::Type*, const sem::Expression*) {
-    // TODO(crbug.com/tint/1581): Implement @const intrinsics
-    return nullptr;
+ConstEval::Result ConstEval::Bitcast(const type::Type* ty, const sem::Expression* expr) {
+    auto* value = expr->ConstantValue();
+    if (!value) {
+        return nullptr;
+    }
+    auto* el_ty = type::Type::DeepestElementOf(ty);
+    auto& source = expr->Declaration()->source;
+    auto transform = [&](const constant::Value* c0) {
+        auto create = [&](auto e) {
+            return Switch(
+                el_ty,
+                [&](const type::U32*) {  //
+                    auto r = utils::Bitcast<u32>(e);
+                    return CreateScalar(builder, source, el_ty, r);
+                },
+                [&](const type::I32*) {  //
+                    auto r = utils::Bitcast<i32>(e);
+                    return CreateScalar(builder, source, el_ty, r);
+                },
+                [&](const type::F32*) {  //
+                    auto r = utils::Bitcast<f32>(e);
+                    return CreateScalar(builder, source, el_ty, r);
+                });
+        };
+        return Dispatch_fiu32(create, c0);
+    };
+    return TransformElements(builder, ty, transform, value);
 }
 
 ConstEval::Result ConstEval::OpComplement(const type::Type* ty,

@@ -7,7 +7,7 @@ void main_1() {
   uvec4 x_18 = texelFetch(Src_1, ivec2(0), 0);
   srcValue = x_18;
   uint x_22 = srcValue.x;
-  srcValue.x = (x_22 + uint(1));
+  srcValue.x = (x_22 + 1u);
   uvec4 x_27 = srcValue;
   imageStore(Dst, ivec2(0), x_27);
   return;

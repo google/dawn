@@ -894,6 +894,7 @@ if(TINT_BUILD_TESTS)
     resolver/compound_assignment_validation_test.cc
     resolver/compound_statement_test.cc
     resolver/const_eval_binary_op_test.cc
+    resolver/const_eval_bitcast_test.cc
     resolver/const_eval_builtin_test.cc
     resolver/const_eval_construction_test.cc
     resolver/const_eval_conversion_test.cc

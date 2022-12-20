@@ -6,7 +6,7 @@ void main_1(texture2d<uint, access::sample> tint_symbol_1, texture2d<uint, acces
   uint4 const x_18 = tint_symbol_1.read(uint2(int2(0)), 0);
   srcValue = x_18;
   uint const x_22 = srcValue[0];
-  srcValue[0] = (x_22 + as_type<uint>(1));
+  srcValue[0] = (x_22 + 1u);
   uint4 const x_27 = srcValue;
   tint_symbol_2.write(x_27, uint2(int2(0)));
   return;

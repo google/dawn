@@ -755,15 +755,18 @@ struct Value {
         static_assert(IsDataTypeSpecializedFor<T>, "No DataType<T> specialization exists");
         using EL_TY = typename builder::DataType<T>::ElementType;
         return Value{
-            std::move(args),         CreatePtrsFor<T>().expr,     tint::IsAbstract<EL_TY>,
-            tint::IsIntegral<EL_TY>, tint::FriendlyName<EL_TY>(),
+            std::move(args),          //
+            CreatePtrsFor<T>(),       //
+            tint::IsAbstract<EL_TY>,  //
+            tint::IsIntegral<EL_TY>,  //
+            tint::FriendlyName<EL_TY>(),
         };
     }
 
     /// Creates an `ast::Expression` for the type T passing in previously stored args
     /// @param b the ProgramBuilder
     /// @returns an expression node
-    const ast::Expression* Expr(ProgramBuilder& b) const { return (*create)(b, args); }
+    const ast::Expression* Expr(ProgramBuilder& b) const { return (*create_ptrs.expr)(b, args); }
 
     /// Prints this value to the output stream
     /// @param o the output stream
@@ -782,8 +785,8 @@ struct Value {
 
     /// The arguments used to construct the value
     utils::Vector<Scalar, 4> args;
-    /// Function used to construct an expression with the given value
-    builder::ast_expr_func_ptr create;
+    /// CreatePtrs for value's type used to create an expression with `args`
+    builder::CreatePtrs create_ptrs;
     /// True if the element type is abstract
     bool is_abstract = false;
     /// True if the element type is an integer
@@ -809,9 +812,11 @@ Value Val(T v) {
 }
 
 /// Creates a Value of DataType<vec<N, T>> from N scalar `args`
-template <typename... T>
-Value Vec(T... args) {
-    using FirstT = std::tuple_element_t<0, std::tuple<T...>>;
+template <typename... Ts>
+Value Vec(Ts... args) {
+    using FirstT = std::tuple_element_t<0, std::tuple<Ts...>>;
+    static_assert(std::conjunction_v<std::is_same<FirstT, Ts>...>,
+                  "Vector args must all be the same type");
     constexpr size_t N = sizeof...(args);
     utils::Vector<Scalar, sizeof...(args)> v{args...};
     return Value::Create<vec<N, FirstT>>(std::move(v));

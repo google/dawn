@@ -22,14 +22,15 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Bitcast) {
-    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(1_i));
-    WrapInFunction(bitcast);
+    auto* a = Let("a", Expr(1_i));
+    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr("a"));
+    WrapInFunction(a, bitcast);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
-    EXPECT_EQ(out.str(), "as_type<float>(1)");
+    EXPECT_EQ(out.str(), "as_type<float>(a)");
 }
 
 }  // namespace

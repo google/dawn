@@ -15,6 +15,7 @@ OpExecutionMode %100 OriginUpperLeft
 %float = OpTypeFloat 32
 %uint_10 = OpConstant %uint 10
 %uint_20 = OpConstant %uint 20
+%int_1 = OpConstant %int 1
 %int_30 = OpConstant %int 30
 %int_40 = OpConstant %int 40
 %float_50 = OpConstant %float 50
@@ -33,7 +34,7 @@ OpExecutionMode %100 OriginUpperLeft
 %24 = OpConstantComposite %v2float %float_60 %float_50
 %100 = OpFunction %void None %3
 %25 = OpLabel
-%1 = OpShiftRightArithmetic %int %int_30 %int_40
+%1 = OpShiftRightArithmetic %int %int_30 %int_1
 OpReturn
 OpFunctionEnd
 

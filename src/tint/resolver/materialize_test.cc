@@ -789,11 +789,11 @@ enum class Method {
     // let a = abstract_expr;
     kLet,
 
-    // bitcast<f32>(abstract_expr)
-    kBitcastF32Arg,
+    // bitcast<i32>(abstract_expr)
+    kBitcastI32Arg,
 
-    // bitcast<vec3<f32>>(abstract_expr)
-    kBitcastVec3F32Arg,
+    // bitcast<vec3<i32>>(abstract_expr)
+    kBitcastVec3I32Arg,
 
     // array<i32, abstract_expr>()
     kArrayLength,
@@ -825,10 +825,10 @@ static std::ostream& operator<<(std::ostream& o, Method m) {
             return o << "var";
         case Method::kLet:
             return o << "let";
-        case Method::kBitcastF32Arg:
-            return o << "bitcast-f32-arg";
-        case Method::kBitcastVec3F32Arg:
-            return o << "bitcast-vec3-f32-arg";
+        case Method::kBitcastI32Arg:
+            return o << "bitcast-i32-arg";
+        case Method::kBitcastVec3I32Arg:
+            return o << "bitcast-vec3-i32-arg";
         case Method::kArrayLength:
             return o << "array-length";
         case Method::kSwitch:
@@ -903,12 +903,12 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
             WrapInFunction(Decl(Let("a", abstract_expr())));
             break;
         }
-        case Method::kBitcastF32Arg: {
-            WrapInFunction(Bitcast<f32>(abstract_expr()));
+        case Method::kBitcastI32Arg: {
+            WrapInFunction(Bitcast<i32>(abstract_expr()));
             break;
         }
-        case Method::kBitcastVec3F32Arg: {
-            WrapInFunction(Bitcast(ty.vec3<f32>(), abstract_expr()));
+        case Method::kBitcastVec3I32Arg: {
+            WrapInFunction(Bitcast(ty.vec3<i32>(), abstract_expr()));
             break;
         }
         case Method::kArrayLength: {
@@ -977,7 +977,7 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
 constexpr Method kScalarMethods[] = {
     Method::kLet,
     Method::kVar,
-    Method::kBitcastF32Arg,
+    Method::kBitcastI32Arg,
     Method::kTintMaterializeBuiltin,
 };
 
@@ -985,7 +985,7 @@ constexpr Method kScalarMethods[] = {
 constexpr Method kVectorMethods[] = {
     Method::kLet,
     Method::kVar,
-    Method::kBitcastVec3F32Arg,
+    Method::kBitcastVec3I32Arg,
     Method::kRuntimeIndex,
     Method::kTintMaterializeBuiltin,
 };

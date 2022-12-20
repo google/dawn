@@ -22,36 +22,39 @@ namespace {
 using HlslGeneratorImplTest_Bitcast = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
-    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(1_i));
-    WrapInFunction(bitcast);
+    auto* a = Let("a", Expr(1_i));
+    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr("a"));
+    WrapInFunction(a, bitcast);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
-    EXPECT_EQ(out.str(), "asfloat(1)");
+    EXPECT_EQ(out.str(), "asfloat(a)");
 }
 
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
-    auto* bitcast = create<ast::BitcastExpression>(ty.i32(), Expr(1_u));
-    WrapInFunction(bitcast);
+    auto* a = Let("a", Expr(1_u));
+    auto* bitcast = create<ast::BitcastExpression>(ty.i32(), Expr("a"));
+    WrapInFunction(a, bitcast);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
-    EXPECT_EQ(out.str(), "asint(1u)");
+    EXPECT_EQ(out.str(), "asint(a)");
 }
 
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
-    auto* bitcast = create<ast::BitcastExpression>(ty.u32(), Expr(1_i));
-    WrapInFunction(bitcast);
+    auto* a = Let("a", Expr(1_i));
+    auto* bitcast = create<ast::BitcastExpression>(ty.u32(), Expr("a"));
+    WrapInFunction(a, bitcast);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
-    EXPECT_EQ(out.str(), "asuint(1)");
+    EXPECT_EQ(out.str(), "asuint(a)");
 }
 
 }  // namespace

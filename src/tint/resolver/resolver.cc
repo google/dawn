@@ -1957,23 +1957,26 @@ sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
     if (!ty) {
         return nullptr;
     }
+    if (!validator_.Bitcast(expr, ty)) {
+        return nullptr;
+    }
+    //
 
     const constant::Value* val = nullptr;
+    sem::EvaluationStage stage = sem::EvaluationStage::kRuntime;
     // TODO(crbug.com/tint/1582): short circuit 'expr' once const eval of Bitcast is implemented.
     if (auto r = const_eval_.Bitcast(ty, inner)) {
         val = r.Get();
+        if (val) {
+            stage = sem::EvaluationStage::kConstant;
+        }
     } else {
         return nullptr;
     }
-    auto stage = sem::EvaluationStage::kRuntime;  // TODO(crbug.com/tint/1581)
     auto* sem = builder_->create<sem::Expression>(expr, ty, stage, current_statement_,
                                                   std::move(val), inner->HasSideEffects());
 
     sem->Behaviors() = inner->Behaviors();
-
-    if (!validator_.Bitcast(expr, ty)) {
-        return nullptr;
-    }
 
     return sem;
 }
@@ -2047,8 +2050,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             return nullptr;
         }
 
-        auto stage = args_stage;                    // The evaluation stage of the call
-        const constant::Value* value = nullptr;     // The constant value for the call
+        auto stage = args_stage;                 // The evaluation stage of the call
+        const constant::Value* value = nullptr;  // The constant value for the call
         if (stage == sem::EvaluationStage::kConstant) {
             if (auto r = const_eval_.ArrayOrStructInit(ty, args)) {
                 value = r.Get();
