@@ -486,6 +486,8 @@ crbug.com/dawn/0000 [ mac ] worker_webgpu:api,operation,render_pass,storeOp:rend
 
 # New flakes. Please triage:
 crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="bgra8unorm";storeOperation="store" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="r32uint";storeOperation="store" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rg16sint";storeOperation="store" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rg32float";storeOperation="store" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rg32sint";storeOperation="store" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rgba16float";storeOperation="store" [ RetryOnFailure ]
