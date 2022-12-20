@@ -64,8 +64,9 @@ TEST_P(DeprecationTests, ReadOnlyDepthStencilStoreLoadOpsAttachment) {
 
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        EXPECT_DEPRECATION_ERROR_OR_WARNING(
-            pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+        EXPECT_DEPRECATION_WARNING_ONLY(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+        pass.End();
+        EXPECT_DEPRECATION_ERROR_ONLY(encoder.Finish(););
     }
 
     depthAttachment->depthLoadOp = wgpu::LoadOp::Undefined;
@@ -75,8 +76,9 @@ TEST_P(DeprecationTests, ReadOnlyDepthStencilStoreLoadOpsAttachment) {
 
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        EXPECT_DEPRECATION_ERROR_OR_WARNING(
-            pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+        EXPECT_DEPRECATION_WARNING_ONLY(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+        pass.End();
+        EXPECT_DEPRECATION_ERROR_ONLY(encoder.Finish(););
     }
 }
 
@@ -110,19 +112,22 @@ TEST_P(DeprecationTests, AttachmentClearColor) {
 
     depthAttachment->clearStencil = 1;
 
-    EXPECT_DEPRECATION_ERROR_OR_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+    EXPECT_DEPRECATION_WARNING_ONLY(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+    pass.End();
 
     depthAttachment->clearStencil = 0;
     depthAttachment->depthClearValue = 0.0f;
     depthAttachment->clearDepth = 1.0f;
 
-    EXPECT_DEPRECATION_ERROR_OR_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+    EXPECT_DEPRECATION_WARNING_ONLY(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+    pass.End();
 
     renderPass.renderPassInfo.depthStencilAttachment = nullptr;
     renderPass.renderPassInfo.cColorAttachments[0].clearColor = {1.0, 2.0, 3.0, 4.0};
     renderPass.renderPassInfo.cColorAttachments[0].clearValue = {5.0, 4.0, 3.0, 2.0};
 
-    EXPECT_DEPRECATION_ERROR_OR_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+    EXPECT_DEPRECATION_WARNING_ONLY(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+    pass.End();
 }
 
 // Test that endPass() is deprecated for both render and compute passes.

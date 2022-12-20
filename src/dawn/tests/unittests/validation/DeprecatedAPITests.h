@@ -35,6 +35,24 @@ static constexpr char kDisallowDeprecatedAPIsToggleName[] = "disallow_deprecated
     for (;;)                                                   \
     break
 
+#define EXPECT_DEPRECATION_WARNING_ONLY(statement)              \
+    if (!HasToggleEnabled(kDisallowDeprecatedAPIsToggleName)) { \
+        EXPECT_DEPRECATION_WARNING(statement);                  \
+    } else {                                                    \
+        statement;                                              \
+    }                                                           \
+    for (;;)                                                    \
+    break
+
+#define EXPECT_DEPRECATION_ERROR_ONLY(statement)               \
+    if (HasToggleEnabled(kDisallowDeprecatedAPIsToggleName)) { \
+        ASSERT_DEVICE_ERROR(statement);                        \
+    } else {                                                   \
+        statement;                                             \
+    }                                                          \
+    for (;;)                                                   \
+    break
+
 // Parameter is a single bool. When true, deprecated APIs are strictly disallowed (i.e. generate
 // errors). Otherwise, deprecated APIs only generate a warning message.
 class DeprecationTests : public ValidationTest, public testing::WithParamInterface<bool> {

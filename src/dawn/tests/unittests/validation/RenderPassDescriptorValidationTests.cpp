@@ -29,14 +29,20 @@ namespace {
 class RenderPassDescriptorValidationTest : public ValidationTest {
   public:
     void AssertBeginRenderPassSuccess(const wgpu::RenderPassDescriptor* descriptor) {
-        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(descriptor);
-        renderPassEncoder.End();
+        wgpu::CommandEncoder commandEncoder = TestBeginRenderPass(descriptor);
         commandEncoder.Finish();
     }
     void AssertBeginRenderPassError(const wgpu::RenderPassDescriptor* descriptor) {
+        wgpu::CommandEncoder commandEncoder = TestBeginRenderPass(descriptor);
+        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+    }
+
+  private:
+    wgpu::CommandEncoder TestBeginRenderPass(const wgpu::RenderPassDescriptor* descriptor) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        ASSERT_DEVICE_ERROR(commandEncoder.BeginRenderPass(descriptor));
+        wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(descriptor);
+        renderPassEncoder.End();
+        return commandEncoder;
     }
 };
 
@@ -1464,7 +1470,7 @@ TEST_P(DeprecationTests, RenderPassColorAttachmentBytesPerSample) {
             renderPassEncoder.End();
             commandEncoder.Finish();
         } else {
-            EXPECT_DEPRECATION_ERROR_OR_WARNING(commandEncoder.BeginRenderPass(&descriptor));
+            EXPECT_DEPRECATION_WARNING_ONLY(commandEncoder.BeginRenderPass(&descriptor));
         }
     }
 }

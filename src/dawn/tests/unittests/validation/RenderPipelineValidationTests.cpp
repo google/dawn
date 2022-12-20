@@ -754,7 +754,11 @@ TEST_F(RenderPipelineValidationTest, VertexOnlyPipelineRequireDepthStencilAttach
         utils::ComboRenderPassDescriptor renderPassDescriptor;
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        ASSERT_DEVICE_ERROR(encoder.BeginRenderPass(&renderPassDescriptor));
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(vertexOnlyPipeline);
+        renderPass.End();
+
+        ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
     // Vertex-only render pipeline can not work with color target
