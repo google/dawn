@@ -1545,6 +1545,71 @@ fn foo() {
     RunTest(src, true);
 }
 
+TEST_F(UniformityAnalysisTest, Loop_NonUniformValueDeclaredInBody_UnreachableContinuing) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  var condition = true;
+  loop {
+    var v = non_uniform;
+    if (condition) {
+      break;
+    } else {
+      break;
+    }
+
+    continuing {
+      if (v == 0) {
+        workgroupBarrier();
+      }
+    }
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, Loop_NonUniformValueDeclaredInBody_MaybeReachesContinuing) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  var condition = true;
+  loop {
+    var v = non_uniform;
+    if (condition) {
+      continue;
+    } else {
+      break;
+    }
+
+    continuing {
+      if (v == 0) {
+        workgroupBarrier();
+      }
+    }
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:16:9 warning: 'workgroupBarrier' must only be called from uniform control flow
+        workgroupBarrier();
+        ^^^^^^^^^^^^^^^^
+
+test:15:7 note: control flow depends on non-uniform value
+      if (v == 0) {
+      ^^
+
+test:7:13 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    var v = non_uniform;
+            ^^^^^^^^^^^
+)");
+}
+
 TEST_F(UniformityAnalysisTest, Loop_NonUniformBreakInBody_Reconverge) {
     // Loops reconverge at exit, so test that we can call workgroupBarrier() after a loop that
     // contains a non-uniform conditional break.

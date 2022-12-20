@@ -462,6 +462,22 @@ class UniformityGraph {
                         }
                     }
 
+                    auto* parent = sem_.Get(b)->Parent();
+                    auto* loop = parent ? parent->As<sem::LoopStatement>() : nullptr;
+                    if (loop) {
+                        // We've reached the end of a loop body. If there is a continuing block,
+                        // process it before ending the block so that any variables declared in the
+                        // loop body are visible to the continuing block.
+                        if (auto* continuing =
+                                loop->Declaration()->As<ast::LoopStatement>()->continuing) {
+                            auto& loop_body_behavior = sem_.Get(b)->Behaviors();
+                            if (loop_body_behavior.Contains(sem::Behavior::kNext) ||
+                                loop_body_behavior.Contains(sem::Behavior::kContinue)) {
+                                cf = ProcessStatement(cf, continuing);
+                            }
+                        }
+                    }
+
                     if (sem_.Get<sem::FunctionBlockStatement>(b)) {
                         // We've reached the end of the function body.
                         // Add edges from pointer parameter outputs to their current value.
@@ -860,13 +876,11 @@ class UniformityGraph {
                     current_function_->variables.Set(v, in_node);
                 }
 
+                // Note: The continuing block is processed as a special case at the end of
+                // processing the loop body BlockStatement. This is so that variable declarations
+                // inside the loop body are visible to the continuing statement.
                 auto* cf1 = ProcessStatement(cfx, l->body);
-                if (l->continuing) {
-                    auto* cf2 = ProcessStatement(cf1, l->continuing);
-                    cfx->AddEdge(cf2);
-                } else {
-                    cfx->AddEdge(cf1);
-                }
+                cfx->AddEdge(cf1);
                 cfx->AddEdge(cf);
 
                 // Add edges from variable loop input nodes to their values at the end of the loop.
