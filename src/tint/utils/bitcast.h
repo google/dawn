@@ -15,7 +15,9 @@
 #ifndef SRC_TINT_UTILS_BITCAST_H_
 #define SRC_TINT_UTILS_BITCAST_H_
 
+#include <cstddef>
 #include <cstring>
+#include <type_traits>
 
 namespace tint::utils {
 
@@ -29,8 +31,20 @@ namespace tint::utils {
 template <typename TO, typename FROM>
 inline TO Bitcast(FROM&& from) {
     static_assert(sizeof(FROM) == sizeof(TO));
+    // gcc warns in cases where either TO or FROM are classes, even if they are trivially
+    // copyable, with for example:
+    //
+    // error: ‘void* memcpy(void*, const void*, size_t)’ copying an object of
+    // non-trivial type ‘struct tint::Number<unsigned int>’ from an array of ‘float’
+    // [-Werror=class-memaccess]
+    //
+    // We avoid this by asserting that both types are indeed trivially copyable, and casting both
+    // args to std::byte*.
+    static_assert(std::is_trivially_copyable_v<std::decay_t<FROM>>);
+    static_assert(std::is_trivially_copyable_v<std::decay_t<TO>>);
     TO to;
-    memcpy(&to, &from, sizeof(TO));
+    memcpy(reinterpret_cast<std::byte*>(&to), reinterpret_cast<const std::byte*>(&from),
+           sizeof(TO));
     return to;
 }
 
