@@ -1727,6 +1727,104 @@ TEST_F(ResolverConstEvalTest, Array_Struct_f32_Elements) {
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->ValueAs<f32>(), 4_f);
 }
 
+TEST_F(ResolverConstEvalTest, Struct_ZeroInit) {
+    Enable(ast::Extension::kF16);
+    auto* s = Structure("S", utils::Vector{
+                                 Member("a", ty.i32()),
+                                 Member("b", ty.u32()),
+                                 Member("c", ty.f32()),
+                                 Member("d", ty.f16()),
+                                 Member("e", ty.bool_()),
+                             });
+
+    auto* expr = Construct(ty.Of(s));
+    auto* a = Const("a", expr);
+    WrapInFunction(a);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* str = sem->Type()->As<type::Struct>();
+    ASSERT_NE(str, nullptr);
+    EXPECT_EQ(str->Members().Length(), 5u);
+
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::I32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<i32>(), 0);
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::U32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<u32>(), 0u);
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<type::F32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f32>(), 0.0f);
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<type::F16>());
+    EXPECT_EQ(sem->ConstantValue()->Index(3)->ValueAs<f16>(), 0.0f);
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<type::Bool>());
+    EXPECT_EQ(sem->ConstantValue()->Index(4)->ValueAs<bool>(), false);
+
+    for (size_t i = 0; i < str->Members().Length(); ++i) {
+        EXPECT_TRUE(sem->ConstantValue()->Index(i)->AllEqual());
+        EXPECT_TRUE(sem->ConstantValue()->Index(i)->AnyZero());
+        EXPECT_TRUE(sem->ConstantValue()->Index(i)->AllZero());
+    }
+}
+
+TEST_F(ResolverConstEvalTest, Struct_Nested_ZeroInit) {
+    Enable(ast::Extension::kF16);
+    auto* inner = Structure("Inner", utils::Vector{
+                                         Member("a", ty.i32()),
+                                         Member("b", ty.u32()),
+                                         Member("c", ty.f32()),
+                                         Member("d", ty.f16()),
+                                         Member("e", ty.bool_()),
+                                     });
+    auto* s = Structure("s",  //
+                        utils::Vector{
+                            Member("inner", ty.Of(inner)),
+                        });
+
+    auto* expr = Construct(ty.Of(s));
+    auto* a = Const("a", expr);
+    WrapInFunction(a);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* str = sem->Type()->As<type::Struct>();
+    ASSERT_NE(str, nullptr);
+    EXPECT_EQ(str->Members().Length(), 1u);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue()->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
+
+    auto* inner_struct = sem->ConstantValue()->Index(0);
+    EXPECT_FALSE(inner_struct->AllEqual());
+    EXPECT_TRUE(inner_struct->AnyZero());
+    EXPECT_TRUE(inner_struct->AllZero());
+
+    EXPECT_TRUE(inner_struct->Index(0)->Type()->Is<type::I32>());
+    EXPECT_EQ(inner_struct->Index(0)->ValueAs<i32>(), 0);
+    EXPECT_TRUE(inner_struct->Index(1)->Type()->Is<type::U32>());
+    EXPECT_EQ(inner_struct->Index(1)->ValueAs<u32>(), 0u);
+    EXPECT_TRUE(inner_struct->Index(2)->Type()->Is<type::F32>());
+    EXPECT_EQ(inner_struct->Index(2)->ValueAs<f32>(), 0.0f);
+    EXPECT_TRUE(inner_struct->Index(3)->Type()->Is<type::F16>());
+    EXPECT_EQ(inner_struct->Index(3)->ValueAs<f16>(), 0.0f);
+    EXPECT_TRUE(inner_struct->Index(4)->Type()->Is<type::Bool>());
+    EXPECT_EQ(inner_struct->Index(4)->ValueAs<bool>(), false);
+
+    for (size_t i = 0; i < str->Members().Length(); ++i) {
+        EXPECT_TRUE(inner_struct->Index(i)->AllEqual());
+        EXPECT_TRUE(inner_struct->Index(i)->AnyZero());
+        EXPECT_TRUE(inner_struct->Index(i)->AllZero());
+    }
+}
+
 TEST_F(ResolverConstEvalTest, Struct_I32s_ZeroInit) {
     Structure(
         "S", utils::Vector{Member("m1", ty.i32()), Member("m2", ty.i32()), Member("m3", ty.i32())});
