@@ -19,6 +19,40 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::resolver {
 namespace {
 
+TEST_F(ResolverConstEvalTest, Scalar_AFloat) {
+    auto* expr = Expr(99.0_a);
+    auto* a = Const("a", expr);
+    WrapInFunction(a);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_TRUE(sem->Type()->Is<type::AbstractFloat>());
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue()->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->ValueAs<AFloat>(), 99.0f);
+}
+
+TEST_F(ResolverConstEvalTest, Scalar_AInt) {
+    auto* expr = Expr(99_a);
+    auto* a = Const("a", expr);
+    WrapInFunction(a);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_TRUE(sem->Type()->Is<type::AbstractInt>());
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue()->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->ValueAs<AInt>(), 99);
+}
+
 TEST_F(ResolverConstEvalTest, Scalar_i32) {
     auto* expr = Expr(99_i);
     WrapInFunction(expr);
