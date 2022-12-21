@@ -343,7 +343,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"no_workaround_indirect_base_vertex_not_applied",
       "MacOS Intel < Gen9 has a bug where indirect base vertex is not applied for "
       "drawIndexedIndirect. Draws are done as if it is always zero.",
-      "https://crbug.com/dawn/966"}}
+      "https://crbug.com/dawn/966"}},
+    {Toggle::NoWorkaroundDstAlphaBlendDoesNotWork,
+     {"no_workaround_dst_alpha_blend_does_not_work",
+      "Using D3D12_BLEND_DEST_ALPHA as blend factor doesn't work correctly on the D3D12 backend "
+      "using Intel Gen9 or Gen9.5 GPUs.",
+      "https://crbug.com/dawn/1579"}},
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 }  // anonymous namespace

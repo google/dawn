@@ -734,6 +734,12 @@ void Device::InitTogglesFromDriver() {
         gpu_info::IsIntelGen11(vendorId, deviceId)) {
         SetToggle(Toggle::D3D12Allocate2DTexturewithCopyDstAsCommittedResource, true);
     }
+
+    // Currently this toggle is only needed on Intel Gen9 and Gen9.5 GPUs.
+    // See http://crbug.com/dawn/1579 for more information.
+    if (gpu_info::IsIntelGen9(vendorId, deviceId)) {
+        SetToggle(Toggle::NoWorkaroundDstAlphaBlendDoesNotWork, true);
+    }
 }
 
 MaybeError Device::WaitForIdleForDestruction() {
