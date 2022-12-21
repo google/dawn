@@ -24,6 +24,7 @@ TEST_F(ResolverConstEvalTest, MemberAccess) {
                            Member("i1", ty.i32()),
                            Member("i2", ty.u32()),
                            Member("i3", ty.f32()),
+                           Member("i4", ty.bool_()),
                        });
 
     Structure("Outer", utils::Vector{
@@ -31,7 +32,7 @@ TEST_F(ResolverConstEvalTest, MemberAccess) {
                            Member("o2", ty.type_name("Inner")),
                        });
     auto* outer_expr = Construct(ty.type_name("Outer"),  //
-                                 Construct(ty.type_name("Inner"), 1_i, 2_u, 3_f),
+                                 Construct(ty.type_name("Inner"), 1_i, 2_u, 3_f, true),
                                  Construct(ty.type_name("Inner")));
     auto* o1_expr = MemberAccessor(outer_expr, "o1");
     auto* i2_expr = MemberAccessor(o1_expr, "i2");
@@ -59,6 +60,7 @@ TEST_F(ResolverConstEvalTest, MemberAccess) {
     EXPECT_EQ(o1->ConstantValue()->Index(0)->ValueAs<i32>(), 1_i);
     EXPECT_EQ(o1->ConstantValue()->Index(1)->ValueAs<u32>(), 2_u);
     EXPECT_EQ(o1->ConstantValue()->Index(2)->ValueAs<f32>(), 3_f);
+    EXPECT_EQ(o1->ConstantValue()->Index(2)->ValueAs<bool>(), true);
 
     auto* i2 = Sem().Get(i2_expr);
     ASSERT_NE(i2->ConstantValue(), nullptr);
