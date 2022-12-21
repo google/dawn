@@ -80,10 +80,11 @@ class ConstEval {
     Result ArrayOrStructInit(const type::Type* ty, utils::VectorRef<const sem::Expression*> args);
 
     /// @param ty the target type
-    /// @param expr the input expression
+    /// @param value the value being converted
+    /// @param source the source location
     /// @return the bit-cast of the given expression to the given type, or null if the value cannot
     ///         be calculated
-    Result Bitcast(const type::Type* ty, const sem::Expression* expr);
+    Result Bitcast(const type::Type* ty, const constant::Value* value, const Source& source);
 
     /// @param obj the object being indexed
     /// @param idx the index expression

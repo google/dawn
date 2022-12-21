@@ -1330,13 +1330,10 @@ ConstEval::Result ConstEval::Swizzle(const type::Type* ty,
     return builder.create<constant::Composite>(ty, std::move(values));
 }
 
-ConstEval::Result ConstEval::Bitcast(const type::Type* ty, const sem::Expression* expr) {
-    auto* value = expr->ConstantValue();
-    if (!value) {
-        return nullptr;
-    }
+ConstEval::Result ConstEval::Bitcast(const type::Type* ty,
+                                     const constant::Value* value,
+                                     const Source& source) {
     auto* el_ty = type::Type::DeepestElementOf(ty);
-    auto& source = expr->Declaration()->source;
     auto transform = [&](const constant::Value* c0) {
         auto create = [&](auto e) {
             return Switch(

@@ -1775,8 +1775,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Index) {
 // Short-Circuit Bitcast
 ////////////////////////////////////////////////
 
-// @TODO(crbug.com/tint/1581): Enable once const eval of bitcast is implemented
-TEST_F(ResolverConstEvalTest, DISABLED_ShortCircuit_And_Invalid_Bitcast) {
+TEST_F(ResolverConstEvalTest, ShortCircuit_And_Invalid_Bitcast) {
     // const one = 1;
     // const a = 0x7F800000;
     // const result = (one == 0) && (bitcast<f32>(a) == 0.0);
@@ -1791,8 +1790,7 @@ TEST_F(ResolverConstEvalTest, DISABLED_ShortCircuit_And_Invalid_Bitcast) {
     ValidateAnd(Sem(), binary);
 }
 
-// @TODO(crbug.com/tint/1581): Enable once const eval of bitcast is implemented
-TEST_F(ResolverConstEvalTest, DISABLED_NonShortCircuit_And_Invalid_Bitcast) {
+TEST_F(ResolverConstEvalTest, NonShortCircuit_And_Invalid_Bitcast) {
     // const one = 1;
     // const a = 0x7F800000;
     // const result = (one == 1) && (bitcast<f32>(a) == 0.0);
@@ -1804,11 +1802,10 @@ TEST_F(ResolverConstEvalTest, DISABLED_NonShortCircuit_And_Invalid_Bitcast) {
     GlobalConst("result", binary);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: value not representable as f32 message here");
+    EXPECT_EQ(r()->error(), "12:34 error: value inf cannot be represented as 'f32'");
 }
 
-// @TODO(crbug.com/tint/1581): Enable once const eval of bitcast is implemented
-TEST_F(ResolverConstEvalTest, DISABLED_ShortCircuit_And_Error_Bitcast) {
+TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Bitcast) {
     // const one = 1;
     // const a = 0x7F800000;
     // const result = (one == 0) && (bitcast<f32>(a) == 0i);
@@ -1820,11 +1817,15 @@ TEST_F(ResolverConstEvalTest, DISABLED_ShortCircuit_And_Error_Bitcast) {
     GlobalConst("result", binary);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: no matching overload message here)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: no matching overload for operator == (f32, i32)
+
+2 candidate operators:
+  operator == (T, T) -> bool  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  operator == (vecN<T>, vecN<T>) -> vecN<bool>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+)");
 }
 
-// @TODO(crbug.com/tint/1581): Enable once const eval of bitcast is implemented
-TEST_F(ResolverConstEvalTest, DISABLED_ShortCircuit_Or_Invalid_Bitcast) {
+TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Invalid_Bitcast) {
     // const one = 1;
     // const a = 0x7F800000;
     // const result = (one == 1) || (bitcast<f32>(a) == 0.0);
@@ -1839,8 +1840,7 @@ TEST_F(ResolverConstEvalTest, DISABLED_ShortCircuit_Or_Invalid_Bitcast) {
     ValidateOr(Sem(), binary);
 }
 
-// @TODO(crbug.com/tint/1581): Enable once const eval of bitcast is implemented
-TEST_F(ResolverConstEvalTest, DISABLED_NonShortCircuit_Or_Invalid_Bitcast) {
+TEST_F(ResolverConstEvalTest, NonShortCircuit_Or_Invalid_Bitcast) {
     // const one = 1;
     // const a = 0x7F800000;
     // const result = (one == 0) || (bitcast<f32>(a) == 0.0);
@@ -1852,11 +1852,10 @@ TEST_F(ResolverConstEvalTest, DISABLED_NonShortCircuit_Or_Invalid_Bitcast) {
     GlobalConst("result", binary);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: value not representable as f32 message here");
+    EXPECT_EQ(r()->error(), "12:34 error: value inf cannot be represented as 'f32'");
 }
 
-// @TODO(crbug.com/tint/1581): Enable once const eval of bitcast is implemented
-TEST_F(ResolverConstEvalTest, DISABLED_ShortCircuit_Or_Error_Bitcast) {
+TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Bitcast) {
     // const one = 1;
     // const a = 0x7F800000;
     // const result = (one == 1) || (bitcast<f32>(a) == 0i);
@@ -1868,7 +1867,12 @@ TEST_F(ResolverConstEvalTest, DISABLED_ShortCircuit_Or_Error_Bitcast) {
     GlobalConst("result", binary);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: no matching overload message here)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: no matching overload for operator == (f32, i32)
+
+2 candidate operators:
+  operator == (T, T) -> bool  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  operator == (vecN<T>, vecN<T>) -> vecN<bool>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+)");
 }
 
 ////////////////////////////////////////////////

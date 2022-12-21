@@ -67,7 +67,7 @@ TEST_P(ResolverConstEvalBitcastTest, Test) {
     auto* target_ty = target_create_ptrs.ast(*this);
     ASSERT_NE(target_ty, nullptr);
     auto* input_val = input.Expr(*this);
-    const ast::Expression* expr = Bitcast(target_ty, input_val);
+    const ast::Expression* expr = Bitcast(Source{{12, 34}}, target_ty, input_val);
 
     WrapInFunction(expr);
 
@@ -87,6 +87,7 @@ TEST_P(ResolverConstEvalBitcastTest, Test) {
         EXPECT_EQ(expected_values, got_values);
     } else {
         ASSERT_FALSE(r()->Resolve());
+        EXPECT_THAT(r()->error(), testing::StartsWith("12:34 error:"));
         EXPECT_THAT(r()->error(), testing::HasSubstr("cannot be represented as"));
     }
 }

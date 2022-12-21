@@ -1960,24 +1960,24 @@ sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
     if (!validator_.Bitcast(expr, ty)) {
         return nullptr;
     }
-    //
 
-    const constant::Value* val = nullptr;
-    sem::EvaluationStage stage = sem::EvaluationStage::kRuntime;
-    // TODO(crbug.com/tint/1582): short circuit 'expr' once const eval of Bitcast is implemented.
-    if (auto r = const_eval_.Bitcast(ty, inner)) {
-        val = r.Get();
-        if (val) {
-            stage = sem::EvaluationStage::kConstant;
-        }
-    } else {
-        return nullptr;
+    auto stage = inner->Stage();
+    if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+        stage = sem::EvaluationStage::kNotEvaluated;
     }
+
+    const constant::Value* value = nullptr;
+    if (stage == sem::EvaluationStage::kConstant) {
+        if (auto r = const_eval_.Bitcast(ty, inner->ConstantValue(), expr->source)) {
+            value = r.Get();
+        } else {
+            return nullptr;
+        }
+    }
+
     auto* sem = builder_->create<sem::Expression>(expr, ty, stage, current_statement_,
-                                                  std::move(val), inner->HasSideEffects());
-
+                                                  std::move(value), inner->HasSideEffects());
     sem->Behaviors() = inner->Behaviors();
-
     return sem;
 }
 
