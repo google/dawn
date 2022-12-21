@@ -27,6 +27,7 @@
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/if_statement.h"
 #include "src/tint/sem/info.h"
+#include "src/tint/sem/load.h"
 #include "src/tint/sem/loop_statement.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/switch_statement.h"
@@ -76,8 +77,8 @@ enum FunctionTag {
 
 /// ParameterTag describes the uniformity requirements of values passed to a function parameter.
 enum ParameterTag {
-    ParameterRequiredToBeUniform,
-    ParameterRequiredToBeUniformForReturnValue,
+    ParameterValueRequiredToBeUniform,
+    ParameterContentsRequiredToBeUniform,
     ParameterNoRestriction,
 };
 
@@ -97,7 +98,8 @@ struct Node {
     /// information.
     enum Type {
         kRegular,
-        kFunctionCallArgument,
+        kFunctionCallArgumentValue,
+        kFunctionCallArgumentContents,
         kFunctionCallPointerArgumentResult,
         kFunctionCallReturnValue,
     };
@@ -122,7 +124,10 @@ struct Node {
 
     /// Add an edge to the `to` node.
     /// @param to the destination node
-    void AddEdge(Node* to) { edges.Add(to); }
+    void AddEdge(Node* to) {
+        TINT_ASSERT(Resolver, to != nullptr);
+        edges.Add(to);
+    }
 };
 
 /// ParameterInfo holds information about the uniformity requirements and effects for a particular
@@ -130,18 +135,25 @@ struct Node {
 struct ParameterInfo {
     /// The semantic node in corresponds to this parameter.
     const sem::Parameter* sem;
-    /// The parameter's uniformity requirements.
-    ParameterTag tag = ParameterNoRestriction;
+    /// The parameter's direct uniformity requirements.
+    ParameterTag tag_direct = ParameterNoRestriction;
+    /// The parameter's uniformity requirements that affect the function return value.
+    ParameterTag tag_retval = ParameterNoRestriction;
     /// Will be `true` if this function may cause the contents of this pointer parameter to become
     /// non-uniform.
     bool pointer_may_become_non_uniform = false;
     /// The parameters that are required to be uniform for the contents of this pointer parameter to
     /// be uniform at function exit.
-    utils::Vector<const sem::Parameter*, 8> pointer_param_output_sources;
-    /// The node in the graph that corresponds to this parameter's initial value.
-    Node* init_value;
-    /// The node in the graph that corresponds to this parameter's output value (or nullptr).
-    Node* pointer_return_value = nullptr;
+    utils::Vector<const sem::Parameter*, 8> ptr_output_source_param_values;
+    /// The pointer parameters whose contents are required to be uniform for the contents of this
+    /// pointer parameter to be uniform at function exit.
+    utils::Vector<const sem::Parameter*, 8> ptr_output_source_param_contents;
+    /// The node in the graph that corresponds to this parameter's (immutable) value.
+    Node* value;
+    /// The node in the graph that corresponds to this pointer parameter's initial contents.
+    Node* ptr_input_contents = nullptr;
+    /// The node in the graph that corresponds to this pointer parameter's contents on return.
+    Node* ptr_output_contents = nullptr;
 };
 
 /// FunctionInfo holds information about the uniformity requirements and effects for a particular
@@ -171,16 +183,19 @@ struct FunctionInfo {
             auto* sem = builder->Sem().Get<sem::Parameter>(param);
             parameters[i].sem = sem;
 
-            Node* node_init;
+            parameters[i].value = CreateNode("param_" + param_name);
             if (sem->Type()->Is<type::Pointer>()) {
-                node_init = CreateNode("ptrparam_" + name + "_init");
-                parameters[i].pointer_return_value = CreateNode("ptrparam_" + name + "_return");
+                // Create extra nodes for a pointer parameter's initial contents and its contents
+                // when the function returns.
+                parameters[i].ptr_input_contents =
+                    CreateNode("ptrparam_" + param_name + "_input_contents");
+                parameters[i].ptr_output_contents =
+                    CreateNode("ptrparam_" + param_name + "_output_contents");
+                variables.Set(sem, parameters[i].ptr_input_contents);
                 local_var_decls.Add(sem);
             } else {
-                node_init = CreateNode("param_" + name);
+                variables.Set(sem, parameters[i].value);
             }
-            parameters[i].init_value = node_init;
-            variables.Set(sem, node_init);
         }
     }
 
@@ -209,8 +224,10 @@ struct FunctionInfo {
     /// Map from variables to their value nodes in the graph, scoped with respect to control flow.
     ScopeStack<const sem::Variable*, Node*> variables;
 
-    /// The set of a local read-write vars that are in scope at any given point in the process.
-    /// Includes pointer parameters.
+    /// The set of mutable variables declared in the function that are in scope at any given point
+    /// in the analysis. This includes the contents of parameters to the function that are pointers.
+    /// This is used by the analysis for if statements and loops to know which variables need extra
+    /// nodes to capture their state when entering/exiting those constructs.
     utils::Hashset<const sem::Variable*, 8> local_var_decls;
 
     /// The set of partial pointer variables - pointers that point to a subobject (into an array or
@@ -360,6 +377,25 @@ class UniformityGraph {
         std::cout << "\n}\n";
 #endif
 
+        /// Helper to generate a tag for the uniformity requirements of the parameter at `index`.
+        auto get_param_tag = [&](utils::UniqueVector<Node*, 4>& reachable, size_t index) {
+            auto* param = sem_.Get(func->params[index]);
+            auto& param_info = current_function_->parameters[index];
+            if (param->Type()->Is<type::Pointer>()) {
+                // For pointers, we distinguish between requiring uniformity of the contents versus
+                // the pointer itself.
+                if (reachable.Contains(param_info.ptr_input_contents)) {
+                    return ParameterContentsRequiredToBeUniform;
+                } else if (reachable.Contains(param_info.value)) {
+                    return ParameterValueRequiredToBeUniform;
+                }
+            } else if (reachable.Contains(current_function_->variables.Get(param))) {
+                // For non-pointers, the requirement is always on the value.
+                return ParameterValueRequiredToBeUniform;
+            }
+            return ParameterNoRestriction;
+        };
+
         // Look at which nodes are reachable from "RequiredToBeUniform".
         {
             utils::UniqueVector<Node*, 4> reachable;
@@ -372,17 +408,13 @@ class UniformityGraph {
                 current_function_->callsite_tag = CallSiteRequiredToBeUniform;
             }
 
-            // Set the parameter tag to ParameterRequiredToBeUniform for each parameter node that
-            // was reachable.
+            // Set the tags to capture the direct uniformity requirements of each parameter.
             for (size_t i = 0; i < func->params.Length(); i++) {
-                auto* param = func->params[i];
-                if (reachable.Contains(current_function_->variables.Get(sem_.Get(param)))) {
-                    current_function_->parameters[i].tag = ParameterRequiredToBeUniform;
-                }
+                current_function_->parameters[i].tag_direct = get_param_tag(reachable, i);
             }
         }
 
-        // If "Value_return" exists, look at which nodes are reachable from it
+        // If "Value_return" exists, look at which nodes are reachable from it.
         if (current_function_->value_return) {
             utils::UniqueVector<Node*, 4> reachable;
             Traverse(current_function_->value_return, &reachable);
@@ -390,20 +422,17 @@ class UniformityGraph {
                 current_function_->function_tag = ReturnValueMayBeNonUniform;
             }
 
-            // Set the parameter tag to ParameterRequiredToBeUniformForReturnValue for each
-            // parameter node that was reachable.
+            // Set the tags to capture the uniformity requirements of each parameter with respect to
+            // the function return value.
             for (size_t i = 0; i < func->params.Length(); i++) {
-                auto* param = func->params[i];
-                if (reachable.Contains(current_function_->variables.Get(sem_.Get(param)))) {
-                    current_function_->parameters[i].tag =
-                        ParameterRequiredToBeUniformForReturnValue;
-                }
+                current_function_->parameters[i].tag_retval = get_param_tag(reachable, i);
             }
         }
 
         // Traverse the graph for each pointer parameter.
         for (size_t i = 0; i < func->params.Length(); i++) {
-            if (current_function_->parameters[i].pointer_return_value == nullptr) {
+            auto& param_info = current_function_->parameters[i];
+            if (param_info.ptr_output_contents == nullptr) {
                 continue;
             }
 
@@ -411,17 +440,21 @@ class UniformityGraph {
             current_function_->ResetVisited();
 
             utils::UniqueVector<Node*, 4> reachable;
-            Traverse(current_function_->parameters[i].pointer_return_value, &reachable);
+            Traverse(param_info.ptr_output_contents, &reachable);
             if (reachable.Contains(current_function_->may_be_non_uniform)) {
-                current_function_->parameters[i].pointer_may_become_non_uniform = true;
+                param_info.pointer_may_become_non_uniform = true;
             }
 
-            // Check every other parameter to see if they feed into this parameter's final value.
+            // Check every parameter to see if it feeds into this parameter's output value.
+            // This includes checking this parameter (as it may feed into its own output value), so
+            // we do not skip the `i==j` case.
             for (size_t j = 0; j < func->params.Length(); j++) {
-                auto* param_source = sem_.Get<sem::Parameter>(func->params[j]);
-                if (reachable.Contains(current_function_->parameters[j].init_value)) {
-                    current_function_->parameters[i].pointer_param_output_sources.Push(
-                        param_source);
+                auto tag = get_param_tag(reachable, j);
+                auto* source_param = sem_.Get<sem::Parameter>(func->params[j]);
+                if (tag == ParameterContentsRequiredToBeUniform) {
+                    param_info.ptr_output_source_param_contents.Push(source_param);
+                } else if (tag == ParameterValueRequiredToBeUniform) {
+                    param_info.ptr_output_source_param_values.Push(source_param);
                 }
             }
         }
@@ -481,9 +514,9 @@ class UniformityGraph {
                     if (sem_.Get<sem::FunctionBlockStatement>(b)) {
                         // We've reached the end of the function body.
                         // Add edges from pointer parameter outputs to their current value.
-                        for (auto param : current_function_->parameters) {
-                            if (param.pointer_return_value) {
-                                param.pointer_return_value->AddEdge(
+                        for (auto& param : current_function_->parameters) {
+                            if (param.ptr_output_contents) {
+                                param.ptr_output_contents->AddEdge(
                                     current_function_->variables.Get(param.sem));
                             }
                         }
@@ -588,7 +621,9 @@ class UniformityGraph {
 
             [&](const ast::CompoundAssignmentStatement* c) {
                 // The compound assignment statement `a += b` is equivalent to `a = a + b`.
-                auto [cf1, v1] = ProcessExpression(cf, c->lhs);
+                // Note: we set load_rule=true when evaluating the LHS the first time, as the
+                // resolver does not add a load node for it.
+                auto [cf1, v1] = ProcessExpression(cf, c->lhs, /* load_rule */ true);
                 auto [cf2, v2] = ProcessExpression(cf1, c->rhs);
                 auto* result = CreateNode("binary_expr_result");
                 result->AddEdge(v1);
@@ -850,7 +885,9 @@ class UniformityGraph {
 
             [&](const ast::IncrementDecrementStatement* i) {
                 // The increment/decrement statement `i++` is equivalent to `i = i + 1`.
-                auto [cf1, v1] = ProcessExpression(cf, i->lhs);
+                // Note: we set load_rule=true when evaluating the LHS the first time, as the
+                // resolver does not add a load node for it.
+                auto [cf1, v1] = ProcessExpression(cf, i->lhs, /* load_rule */ true);
                 auto* result = CreateNode("incdec_result");
                 result->AddEdge(v1);
                 result->AddEdge(cf1);
@@ -918,9 +955,9 @@ class UniformityGraph {
                 }
 
                 // Add edges from each pointer parameter output to its current value.
-                for (auto param : current_function_->parameters) {
-                    if (param.pointer_return_value) {
-                        param.pointer_return_value->AddEdge(
+                for (auto& param : current_function_->parameters) {
+                    if (param.ptr_output_contents) {
+                        param.ptr_output_contents->AddEdge(
                             current_function_->variables.Get(param.sem));
                     }
                 }
@@ -1031,9 +1068,11 @@ class UniformityGraph {
     /// Process an identifier expression.
     /// @param cf the input control flow node
     /// @param ident the identifier expression to process
+    /// @param load_rule true if the load rule is being invoked on this identifier
     /// @returns a pair of (control flow node, value node)
     std::pair<Node*, Node*> ProcessIdentExpression(Node* cf,
-                                                   const ast::IdentifierExpression* ident) {
+                                                   const ast::IdentifierExpression* ident,
+                                                   bool load_rule = false) {
         // Helper to check if the entry point attribute of `obj` indicates non-uniformity.
         auto has_nonuniform_entry_point_attribute = [](auto* obj) {
             // Only the num_workgroups and workgroup_id builtins are uniform.
@@ -1047,7 +1086,8 @@ class UniformityGraph {
         };
 
         auto name = builder_->Symbols().NameFor(ident->symbol);
-        auto* sem = sem_.Get(ident)->Unwrap()->As<sem::VariableUser>()->Variable();
+        auto* var_user = sem_.Get(ident)->Unwrap()->As<sem::VariableUser>();
+        auto* sem = var_user->Variable();
         auto* node = CreateNode(name + "_ident_expr", ident);
         return Switch(
             sem,
@@ -1075,28 +1115,77 @@ class UniformityGraph {
                         return std::make_pair(cf, node);
                     }
                 } else {
-                    auto* x = current_function_->variables.Get(param);
                     node->AddEdge(cf);
-                    node->AddEdge(x);
+
+                    auto* current_value = current_function_->variables.Get(param);
+                    if (param->Type()->Is<type::Pointer>()) {
+                        if (load_rule) {
+                            // We are loading from the pointer, so add an edge to its contents.
+                            node->AddEdge(current_value);
+                        } else {
+                            // This is a pointer parameter that we are not loading from, so add an
+                            // edge to the pointer value itself.
+                            node->AddEdge(current_function_->parameters[param->Index()].value);
+                        }
+                    } else {
+                        // The parameter is a value, so add an edge to it.
+                        node->AddEdge(current_value);
+                    }
+
                     return std::make_pair(cf, node);
                 }
             },
 
             [&](const sem::GlobalVariable* global) {
-                if (!global->Declaration()->Is<ast::Var>() ||
-                    global->Access() == ast::Access::kRead) {
-                    node->AddEdge(cf);
-                } else {
+                // Loads from global read-write variables may be non-uniform.
+                if (global->Declaration()->Is<ast::Var>() &&
+                    global->Access() != ast::Access::kRead && load_rule) {
                     node->AddEdge(current_function_->may_be_non_uniform);
+                } else {
+                    node->AddEdge(cf);
                 }
                 return std::make_pair(cf, node);
             },
 
             [&](const sem::LocalVariable* local) {
                 node->AddEdge(cf);
-                if (auto* x = current_function_->variables.Get(local)) {
-                    node->AddEdge(x);
+
+                auto* local_value = current_function_->variables.Get(local);
+                if (local->Type()->Is<type::Pointer>()) {
+                    if (load_rule) {
+                        // We are loading from the pointer, so add an edge to its contents.
+                        auto* root = var_user->RootIdentifier();
+                        if (root->Is<sem::GlobalVariable>()) {
+                            if (root->Access() != ast::Access::kRead) {
+                                // The contents of a mutable global variable is always non-uniform.
+                                node->AddEdge(current_function_->may_be_non_uniform);
+                            }
+                        } else {
+                            node->AddEdge(current_function_->variables.Get(root));
+                        }
+
+                        // The uniformity of the contents also depends on the uniformity of the
+                        // pointer itself. For a pointer captured in a let declaration, this will
+                        // come from the value node of that declaration.
+                        node->AddEdge(local_value);
+                    } else {
+                        // The variable is a pointer that we are not loading from, so add an edge to
+                        // the pointer value itself.
+                        node->AddEdge(local_value);
+                    }
+                } else if (local->Type()->Is<type::Reference>()) {
+                    if (load_rule) {
+                        // We are loading from the reference, so add an edge to its contents.
+                        node->AddEdge(local_value);
+                    } else {
+                        // References to local variables (i.e. var declarations) are always uniform,
+                        // so no other edges needed.
+                    }
+                } else {
+                    // The identifier is a value declaration, so add an edge to it.
+                    node->AddEdge(local_value);
                 }
+
                 return std::make_pair(cf, node);
             },
 
@@ -1110,8 +1199,17 @@ class UniformityGraph {
     /// Process an expression.
     /// @param cf the input control flow node
     /// @param expr the expression to process
+    /// @param load_rule true if the load rule is being invoked on this expression
     /// @returns a pair of (control flow node, value node)
-    std::pair<Node*, Node*> ProcessExpression(Node* cf, const ast::Expression* expr) {
+    std::pair<Node*, Node*> ProcessExpression(Node* cf,
+                                              const ast::Expression* expr,
+                                              bool load_rule = false) {
+        if (sem_.Get<sem::Load>(expr)) {
+            // Set the load-rule flag to indicate that identifier expressions in this sub-tree
+            // should add edges to the contents of the variables that they refer to.
+            load_rule = true;
+        }
+
         return Switch(
             expr,
 
@@ -1141,10 +1239,12 @@ class UniformityGraph {
 
             [&](const ast::CallExpression* c) { return ProcessCall(cf, c); },
 
-            [&](const ast::IdentifierExpression* i) { return ProcessIdentExpression(cf, i); },
+            [&](const ast::IdentifierExpression* i) {
+                return ProcessIdentExpression(cf, i, load_rule);
+            },
 
             [&](const ast::IndexAccessorExpression* i) {
-                auto [cf1, v1] = ProcessExpression(cf, i->object);
+                auto [cf1, v1] = ProcessExpression(cf, i->object, load_rule);
                 auto [cf2, v2] = ProcessExpression(cf1, i->index);
                 auto* result = CreateNode("index_accessor_result");
                 result->AddEdge(v1);
@@ -1155,21 +1255,11 @@ class UniformityGraph {
             [&](const ast::LiteralExpression*) { return std::make_pair(cf, cf); },
 
             [&](const ast::MemberAccessorExpression* m) {
-                return ProcessExpression(cf, m->structure);
+                return ProcessExpression(cf, m->structure, load_rule);
             },
 
             [&](const ast::UnaryOpExpression* u) {
-                if (u->op == ast::UnaryOp::kIndirection) {
-                    // Cut the analysis short, since we only need to know the originating variable
-                    // which is being accessed.
-                    auto* root_ident = sem_.Get(u)->RootIdentifier();
-                    auto* value = current_function_->variables.Get(root_ident);
-                    if (!value) {
-                        value = cf;
-                    }
-                    return std::pair<Node*, Node*>(cf, value);
-                }
-                return ProcessExpression(cf, u->expr);
+                return ProcessExpression(cf, u->expr, load_rule);
             },
 
             [&](Default) {
@@ -1296,6 +1386,8 @@ class UniformityGraph {
         // Process call arguments
         Node* cf_last_arg = cf;
         utils::Vector<Node*, 8> args;
+        utils::Vector<Node*, 8> ptrarg_contents;
+        ptrarg_contents.Resize(call->args.Length());
         for (size_t i = 0; i < call->args.Length(); i++) {
             auto [cf_i, arg_i] = ProcessExpression(cf_last_arg, call->args[i]);
 
@@ -1303,9 +1395,31 @@ class UniformityGraph {
             // Note: This is an additional node that isn't described in the specification, for the
             // purpose of providing diagnostic information.
             Node* arg_node = CreateNode(name + "_arg_" + std::to_string(i), call);
-            arg_node->type = Node::kFunctionCallArgument;
+            arg_node->type = Node::kFunctionCallArgumentValue;
             arg_node->arg_index = static_cast<uint32_t>(i);
             arg_node->AddEdge(arg_i);
+
+            // For pointer arguments, create an additional node to represent the contents of that
+            // pointer prior to the function call.
+            auto* sem_arg = sem_.Get(call->args[i]);
+            if (sem_arg->Type()->Is<type::Pointer>()) {
+                auto* arg_contents =
+                    CreateNode(name + "_ptrarg_" + std::to_string(i) + "_contents", call);
+                arg_contents->type = Node::kFunctionCallArgumentContents;
+                arg_contents->arg_index = static_cast<uint32_t>(i);
+
+                auto* root = sem_arg->RootIdentifier();
+                if (root->Is<sem::GlobalVariable>()) {
+                    if (root->Access() != ast::Access::kRead) {
+                        // The contents of a mutable global variable is always non-uniform.
+                        arg_contents->AddEdge(current_function_->may_be_non_uniform);
+                    }
+                } else {
+                    arg_contents->AddEdge(current_function_->variables.Get(root));
+                }
+                arg_contents->AddEdge(arg_node);
+                ptrarg_contents[i] = arg_contents;
+            }
 
             cf_last_arg = cf_i;
             args.Push(arg_node);
@@ -1328,8 +1442,8 @@ class UniformityGraph {
         Switch(
             sem->Target(),
             [&](const sem::Builtin* builtin) {
-                // Most builtins have no restrictions. The exceptions are barriers, derivatives, and
-                // some texture sampling builtins.
+                // Most builtins have no restrictions. The exceptions are barriers, derivatives,
+                // some texture sampling builtins, and atomics.
                 if (builtin->IsBarrier()) {
                     callsite_tag = CallSiteRequiredToBeUniform;
                 } else if (builtin->IsDerivative() ||
@@ -1337,6 +1451,9 @@ class UniformityGraph {
                            builtin->Type() == sem::BuiltinType::kTextureSampleBias ||
                            builtin->Type() == sem::BuiltinType::kTextureSampleCompare) {
                     callsite_tag = CallSiteRequiredToBeUniform;
+                    function_tag = ReturnValueMayBeNonUniform;
+                } else if (builtin->IsAtomic()) {
+                    callsite_tag = CallSiteNoRestriction;
                     function_tag = ReturnValueMayBeNonUniform;
                 } else {
                     callsite_tag = CallSiteNoRestriction;
@@ -1378,24 +1495,42 @@ class UniformityGraph {
         // For each argument, add edges based on parameter tags.
         for (size_t i = 0; i < args.Length(); i++) {
             if (func_info) {
-                switch (func_info->parameters[i].tag) {
-                    case ParameterRequiredToBeUniform:
+                auto& param_info = func_info->parameters[i];
+
+                // Capture the direct uniformity requirements.
+                switch (param_info.tag_direct) {
+                    case ParameterValueRequiredToBeUniform:
                         current_function_->required_to_be_uniform->AddEdge(args[i]);
                         break;
-                    case ParameterRequiredToBeUniformForReturnValue:
+                    case ParameterContentsRequiredToBeUniform: {
+                        current_function_->required_to_be_uniform->AddEdge(ptrarg_contents[i]);
+                        break;
+                    }
+                    case ParameterNoRestriction:
+                        break;
+                }
+                // Capture the effects of this parameter on the return value.
+                switch (param_info.tag_retval) {
+                    case ParameterValueRequiredToBeUniform:
                         result->AddEdge(args[i]);
                         break;
+                    case ParameterContentsRequiredToBeUniform: {
+                        result->AddEdge(ptrarg_contents[i]);
+                        break;
+                    }
                     case ParameterNoRestriction:
                         break;
                 }
 
+                // Capture the effects of other call parameters on the contents of this parameter
+                // after the call returns.
                 auto* sem_arg = sem_.Get(call->args[i]);
                 if (sem_arg->Type()->Is<type::Pointer>()) {
                     auto* ptr_result =
                         CreateNode(name + "_ptrarg_" + std::to_string(i) + "_result", call);
                     ptr_result->type = Node::kFunctionCallPointerArgumentResult;
                     ptr_result->arg_index = static_cast<uint32_t>(i);
-                    if (func_info->parameters[i].pointer_may_become_non_uniform) {
+                    if (param_info.pointer_may_become_non_uniform) {
                         ptr_result->AddEdge(current_function_->may_be_non_uniform);
                     } else {
                         // Add edge to the call to catch when it's called in non-uniform control
@@ -1403,9 +1538,13 @@ class UniformityGraph {
                         ptr_result->AddEdge(call_node);
 
                         // Add edges from the resulting pointer value to any other arguments that
-                        // feed it.
-                        for (auto* source : func_info->parameters[i].pointer_param_output_sources) {
+                        // feed it. We distinguish between requirements on the source arguments
+                        // value versus its contents for pointer arguments.
+                        for (auto* source : param_info.ptr_output_source_param_values) {
                             ptr_result->AddEdge(args[source->Index()]);
+                        }
+                        for (auto* source : param_info.ptr_output_source_param_contents) {
+                            ptr_result->AddEdge(ptrarg_contents[source->Index()]);
                         }
                     }
 
@@ -1417,12 +1556,7 @@ class UniformityGraph {
             } else {
                 // All builtin function parameters are RequiredToBeUniformForReturnValue, as are
                 // parameters for type initializers and type conversions.
-                // The arrayLength() builtin is a special case, as there is currently no way for it
-                // to have a non-uniform return value.
-                auto* builtin = sem->Target()->As<sem::Builtin>();
-                if (!builtin || builtin->Type() != sem::BuiltinType::kArrayLength) {
-                    result->AddEdge(args[i]);
-                }
+                result->AddEdge(args[i]);
             }
         }
 
@@ -1575,6 +1709,27 @@ class UniformityGraph {
                             "return value of '" + target_name + "' may be non-uniform", c->source);
                         break;
                     }
+                    case Node::kFunctionCallArgumentContents: {
+                        auto* arg = c->args[non_uniform_source->arg_index];
+                        auto* var = sem_.Get(arg)->RootIdentifier();
+                        std::string var_type = get_var_type(var);
+                        diagnostics_.add_note(
+                            diag::System::Resolver,
+                            "reading from " + var_type + "'" +
+                                builder_->Symbols().NameFor(var->Declaration()->symbol) +
+                                "' may result in a non-uniform value",
+                            var->Declaration()->source);
+                        break;
+                    }
+                    case Node::kFunctionCallArgumentValue: {
+                        auto* arg = c->args[non_uniform_source->arg_index];
+                        // TODO(jrprice): Which output? (return value vs another pointer argument).
+                        diagnostics_.add_note(diag::System::Resolver,
+                                              "passing non-uniform pointer to '" + target_name +
+                                                  "' may produce a non-uniform output",
+                                              arg->source);
+                        break;
+                    }
                     case Node::kFunctionCallPointerArgumentResult: {
                         diagnostics_.add_note(
                             diag::System::Resolver,
@@ -1638,7 +1793,7 @@ class UniformityGraph {
             func_name = builder_->Symbols().NameFor(user->Declaration()->symbol);
         }
 
-        if (cause->type == Node::kFunctionCallArgument) {
+        if (cause->type == Node::kFunctionCallArgumentValue) {
             // The requirement was on a function parameter.
             auto param_name = builder_->Symbols().NameFor(
                 target->Parameters()[cause->arg_index]->Declaration()->symbol);
@@ -1649,7 +1804,22 @@ class UniformityGraph {
             // parameter is required to be uniform.
             if (auto* user = target->As<sem::Function>()) {
                 auto next_function = functions_.Find(user->Declaration());
-                Node* next_cause = next_function->parameters[cause->arg_index].init_value;
+                Node* next_cause = next_function->parameters[cause->arg_index].value;
+                MakeError(*next_function, next_cause, true);
+            }
+        } else if (cause->type == Node::kFunctionCallArgumentContents) {
+            // The requirement was on the contents of a function parameter.
+            auto param_name = builder_->Symbols().NameFor(
+                target->Parameters()[cause->arg_index]->Declaration()->symbol);
+            report(call->args[cause->arg_index]->source, "contents of parameter '" + param_name +
+                                                             "' of '" + func_name +
+                                                             "' must be uniform");
+
+            // If this is a call to a user-defined function, add a note to show the reason that the
+            // parameter is required to be uniform.
+            if (auto* user = target->As<sem::Function>()) {
+                auto next_function = functions_.Find(user->Declaration());
+                Node* next_cause = next_function->parameters[cause->arg_index].ptr_input_contents;
                 MakeError(*next_function, next_cause, true);
             }
         } else {
