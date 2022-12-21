@@ -136,6 +136,86 @@ TEST_F(ResolverConstEvalTest, Scalar_bool) {
     EXPECT_EQ(sem->ConstantValue()->ValueAs<bool>(), true);
 }
 
+namespace ZeroInit {
+struct Case {
+    builder::ast_type_func_ptr type;
+};
+template <typename T>
+Case C() {
+    return Case{builder::DataType<T>::AST};
+}
+using ResolverConstEvalZeroInitTest = ResolverTestWithParam<Case>;
+TEST_P(ResolverConstEvalZeroInitTest, Test) {
+    Enable(ast::Extension::kF16);
+    auto& param = GetParam();
+    auto* ty = param.type(*this);
+    auto* expr = Construct(ty);
+    auto* a = Const("a", expr);
+    WrapInFunction(a);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+
+    EXPECT_TRUE(sem->ConstantValue()->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
+
+    if (sem->Type()->is_scalar()) {
+        EXPECT_EQ(sem->ConstantValue()->Index(0), nullptr);
+        EXPECT_EQ(sem->ConstantValue()->ValueAs<f32>(), 0.0f);
+    } else if (auto* vec = sem->Type()->As<type::Vector>()) {
+        for (size_t i = 0; i < vec->Width(); ++i) {
+            EXPECT_TRUE(sem->ConstantValue()->Index(i)->AllEqual());
+            EXPECT_TRUE(sem->ConstantValue()->Index(i)->AnyZero());
+            EXPECT_TRUE(sem->ConstantValue()->Index(i)->AllZero());
+            EXPECT_EQ(sem->ConstantValue()->Index(i)->ValueAs<f32>(), 0.0f);
+        }
+    } else if (auto* mat = sem->Type()->As<type::Matrix>()) {
+        for (size_t i = 0; i < mat->columns(); ++i) {
+            EXPECT_TRUE(sem->ConstantValue()->Index(i)->AllEqual());
+            EXPECT_TRUE(sem->ConstantValue()->Index(i)->AnyZero());
+            EXPECT_TRUE(sem->ConstantValue()->Index(i)->AllZero());
+            for (size_t j = 0; j < mat->rows(); ++j) {
+                EXPECT_TRUE(sem->ConstantValue()->Index(i)->Index(j)->AllEqual());
+                EXPECT_TRUE(sem->ConstantValue()->Index(i)->Index(j)->AnyZero());
+                EXPECT_TRUE(sem->ConstantValue()->Index(i)->Index(j)->AllZero());
+                EXPECT_EQ(sem->ConstantValue()->Index(i)->Index(j)->ValueAs<f32>(), 0.0f);
+            }
+        }
+    } else if (auto* arr = sem->Type()->As<type::Array>()) {
+        for (size_t i = 0; i < *(arr->ConstantCount()); ++i) {
+            EXPECT_TRUE(sem->ConstantValue()->Index(i)->AllEqual());
+            EXPECT_TRUE(sem->ConstantValue()->Index(i)->AnyZero());
+            EXPECT_TRUE(sem->ConstantValue()->Index(i)->AllZero());
+            EXPECT_EQ(sem->ConstantValue()->Index(i)->ValueAs<f32>(), 0.0f);
+        }
+    }
+}
+INSTANTIATE_TEST_SUITE_P(ZeroInit,
+                         ResolverConstEvalZeroInitTest,
+                         testing::ValuesIn({
+                             C<u32>(),
+                             C<i32>(),
+                             C<f32>(),
+                             C<f16>(),
+                             C<bool>(),
+                             C<builder::vec3<u32>>(),
+                             C<builder::vec3<i32>>(),
+                             C<builder::vec3<f32>>(),
+                             C<builder::vec3<f16>>(),
+                             C<builder::mat2x2<f32>>(),
+                             C<builder::mat2x2<f16>>(),
+                             C<builder::array<3, u32>>(),
+                             C<builder::array<3, i32>>(),
+                             C<builder::array<3, f32>>(),
+                             C<builder::array<3, f16>>(),
+                             C<builder::array<3, bool>>(),
+                         }));
+
+}  // namespace ZeroInit
+
 TEST_F(ResolverConstEvalTest, Vec3_ZeroInit_i32) {
     auto* expr = vec3<i32>();
     WrapInFunction(expr);
