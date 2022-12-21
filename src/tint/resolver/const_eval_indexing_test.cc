@@ -51,6 +51,78 @@ TEST_F(ResolverConstEvalTest, Vec3_Index_OOB_Low) {
     EXPECT_EQ(r()->error(), "12:34 error: index -3 out of bounds [0..2]");
 }
 
+namespace Swizzle {
+struct Case {
+    Value input;
+    const char* swizzle;
+    Value expected;
+};
+
+static Case C(Value input, const char* swizzle, Value expected) {
+    return Case{std::move(input), swizzle, std::move(expected)};
+}
+
+static std::ostream& operator<<(std::ostream& o, const Case& c) {
+    return o << "input: " << c.input << ", swizzle: " << c.swizzle << ", expected: " << c.expected;
+}
+
+using ResolverConstEvalSwizzleTest = ResolverTestWithParam<Case>;
+TEST_P(ResolverConstEvalSwizzleTest, Test) {
+    Enable(ast::Extension::kF16);
+    auto& param = GetParam();
+    auto* expr = MemberAccessor(param.input.Expr(*this), param.swizzle);
+    auto* a = Const("a", expr);
+    WrapInFunction(a);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+
+    CheckConstant(sem->ConstantValue(), param.expected);
+}
+template <typename T>
+std::vector<Case> SwizzleCases() {
+    return {
+        C(Vec(T(0), T(1), T(2)), "xyz", Vec(T(0), T(1), T(2))),
+        C(Vec(T(0), T(1), T(2)), "xzy", Vec(T(0), T(2), T(1))),
+        C(Vec(T(0), T(1), T(2)), "yxz", Vec(T(1), T(0), T(2))),
+        C(Vec(T(0), T(1), T(2)), "yzx", Vec(T(1), T(2), T(0))),
+        C(Vec(T(0), T(1), T(2)), "zxy", Vec(T(2), T(0), T(1))),
+        C(Vec(T(0), T(1), T(2)), "zyx", Vec(T(2), T(1), T(0))),
+        C(Vec(T(0), T(1), T(2)), "xy", Vec(T(0), T(1))),
+        C(Vec(T(0), T(1), T(2)), "xz", Vec(T(0), T(2))),
+        C(Vec(T(0), T(1), T(2)), "yx", Vec(T(1), T(0))),
+        C(Vec(T(0), T(1), T(2)), "yz", Vec(T(1), T(2))),
+        C(Vec(T(0), T(1), T(2)), "zx", Vec(T(2), T(0))),
+        C(Vec(T(0), T(1), T(2)), "zy", Vec(T(2), T(1))),
+        C(Vec(T(0), T(1), T(2)), "xxxx", Vec(T(0), T(0), T(0), T(0))),
+        C(Vec(T(0), T(1), T(2)), "yyyy", Vec(T(1), T(1), T(1), T(1))),
+        C(Vec(T(0), T(1), T(2)), "zzzz", Vec(T(2), T(2), T(2), T(2))),
+        C(Vec(T(0), T(1), T(2)), "xxx", Vec(T(0), T(0), T(0))),
+        C(Vec(T(0), T(1), T(2)), "yyy", Vec(T(1), T(1), T(1))),
+        C(Vec(T(0), T(1), T(2)), "zzz", Vec(T(2), T(2), T(2))),
+        C(Vec(T(0), T(1), T(2)), "xx", Vec(T(0), T(0))),
+        C(Vec(T(0), T(1), T(2)), "yy", Vec(T(1), T(1))),
+        C(Vec(T(0), T(1), T(2)), "zz", Vec(T(2), T(2))),
+        C(Vec(T(0), T(1), T(2)), "x", Vec(T(0))),
+        C(Vec(T(0), T(1), T(2)), "y", Vec(T(1))),
+        C(Vec(T(0), T(1), T(2)), "z", Vec(T(2))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(Swizzle,
+                         ResolverConstEvalSwizzleTest,
+                         testing::ValuesIn(Concat(SwizzleCases<AInt>(),    //
+                                                  SwizzleCases<AFloat>(),  //
+                                                  SwizzleCases<f32>(),     //
+                                                  SwizzleCases<f16>(),     //
+                                                  SwizzleCases<i32>(),     //
+                                                  SwizzleCases<u32>(),     //
+                                                  SwizzleCases<bool>()     //
+                                                  )));
+}  // namespace Swizzle
+
 TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Scalar) {
     auto* expr = MemberAccessor(vec3<i32>(1_i, 2_i, 3_i), "y");
     WrapInFunction(expr);
