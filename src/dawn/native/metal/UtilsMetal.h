@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_METAL_UTILSMETAL_H_
 #define SRC_DAWN_NATIVE_METAL_UTILSMETAL_H_
 
+#include "dawn/common/StackContainer.h"
 #include "dawn/native/dawn_platform.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/ShaderModuleMTL.h"
@@ -34,9 +35,21 @@ namespace dawn::native::metal {
 MTLCompareFunction ToMetalCompareFunction(wgpu::CompareFunction compareFunction);
 
 struct TextureBufferCopySplit {
-    static constexpr uint32_t kMaxTextureBufferCopyRegions = 3;
+    // Avoid allocations except in the worse case. Most cases require at most 3 regions.
+    static constexpr uint32_t kNumCommonTextureBufferCopyRegions = 3;
 
     struct CopyInfo {
+        CopyInfo(NSUInteger bufferOffset,
+                 NSUInteger bytesPerRow,
+                 NSUInteger bytesPerImage,
+                 Origin3D textureOrigin,
+                 Extent3D copyExtent)
+            : bufferOffset(bufferOffset),
+              bytesPerRow(bytesPerRow),
+              bytesPerImage(bytesPerImage),
+              textureOrigin(textureOrigin),
+              copyExtent(copyExtent) {}
+
         NSUInteger bufferOffset;
         NSUInteger bytesPerRow;
         NSUInteger bytesPerImage;
@@ -44,12 +57,11 @@ struct TextureBufferCopySplit {
         Extent3D copyExtent;
     };
 
-    uint32_t count = 0;
-    std::array<CopyInfo, kMaxTextureBufferCopyRegions> copies;
+    StackVector<CopyInfo, kNumCommonTextureBufferCopyRegions> copies;
 
-    auto begin() const { return copies.begin(); }
-
-    auto end() const { return copies.begin() + count; }
+    auto begin() const { return copies->begin(); }
+    auto end() const { return copies->end(); }
+    void push_back(const CopyInfo& copyInfo) { copies->push_back(copyInfo); }
 };
 
 TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,

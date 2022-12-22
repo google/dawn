@@ -120,12 +120,6 @@ crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextur
 crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="2d" [ Failure ]
 
 ################################################################################
-# Failing with Metal validation layers
-################################################################################
-crbug.com/dawn/1430 [ mac dawn-backend-validation ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="CopyB2T";checkMethod="FullCopyT2B";* [ Failure ]
-crbug.com/dawn/1430 [ mac dawn-backend-validation ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="PartialCopyT2B";* [ Failure ]
-
-################################################################################
 # Large and slow tests
 # KEEP
 ################################################################################
