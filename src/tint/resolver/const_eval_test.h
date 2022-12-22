@@ -245,6 +245,7 @@ std::string OverflowExpErrorMessage(std::string_view base, NumberT exp) {
     return ss.str();
 }
 
+using builder::Array;
 using builder::IsValue;
 using builder::Mat;
 using builder::Val;

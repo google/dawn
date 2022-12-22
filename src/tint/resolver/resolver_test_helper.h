@@ -822,6 +822,17 @@ Value Vec(Ts... args) {
     return Value::Create<vec<N, FirstT>>(std::move(v));
 }
 
+/// Creates a Value of DataType<array<N, T>> from N scalar `args`
+template <typename... Ts>
+Value Array(Ts... args) {
+    using FirstT = std::tuple_element_t<0, std::tuple<Ts...>>;
+    static_assert(std::conjunction_v<std::is_same<FirstT, Ts>...>,
+                  "Array args must all be the same type");
+    constexpr size_t N = sizeof...(args);
+    utils::Vector<Scalar, sizeof...(args)> v{args...};
+    return Value::Create<array<N, FirstT>>(std::move(v));
+}
+
 /// Creates a Value of DataType<mat<C,R,T> from C*R scalar `args`
 template <size_t C, size_t R, typename T>
 Value Mat(const T (&m_in)[C][R]) {
@@ -884,7 +895,6 @@ Value Mat(const T (&c0)[R], const T (&c1)[R], const T (&c2)[R], const T (&c3)[R]
     }
     return Value::Create<mat<C, R, T>>(std::move(m));
 }
-
 }  // namespace builder
 }  // namespace tint::resolver
 
