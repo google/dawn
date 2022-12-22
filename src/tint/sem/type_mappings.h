@@ -18,6 +18,9 @@
 #include <type_traits>
 
 // Forward declarations
+namespace tint {
+class CastableBase;
+}  // namespace tint
 namespace tint::ast {
 class Array;
 class Expression;
