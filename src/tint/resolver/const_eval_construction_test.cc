@@ -551,6 +551,74 @@ TEST_F(ResolverConstEvalTest, Vec3_Splat_bool) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<bool>(), true);
 }
 
+TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_AInt) {
+    auto* expr = vec3<AInt>(1_a, 2_a, 3_a);
+    auto* a = Const("a", expr);
+    WrapInFunction(a);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* vec = sem->Type()->As<type::Vector>();
+    ASSERT_NE(vec, nullptr);
+    EXPECT_TRUE(vec->type()->Is<type::AbstractInt>());
+    EXPECT_EQ(vec->Width(), 3u);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AInt>(), 1);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AInt>(), 2);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 3);
+}
+
+TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_AFloat) {
+    auto* expr = vec3<AFloat>(1.0_a, 2.0_a, 3.0_a);
+    auto* a = Const("a", expr);
+    WrapInFunction(a);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* vec = sem->Type()->As<type::Vector>();
+    ASSERT_NE(vec, nullptr);
+    EXPECT_TRUE(vec->type()->Is<type::AbstractFloat>());
+    EXPECT_EQ(vec->Width(), 3u);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AFloat>(), 1.0f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AFloat>(), 2.0f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 3.0f);
+}
+
 TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_i32) {
     auto* expr = vec3<i32>(1_i, 2_i, 3_i);
     WrapInFunction(expr);
