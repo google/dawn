@@ -172,5 +172,78 @@ INSTANTIATE_TEST_SUITE_P(  //
                              ArrayAccessCases<bool>())));
 }  // namespace ArrayAccess
 
+namespace VectorAccess {
+struct Case {
+    Value input;
+};
+static Case C(Value input) {
+    return Case{std::move(input)};
+}
+static std::ostream& operator<<(std::ostream& o, const Case& c) {
+    return o << "input: " << c.input;
+}
+
+using ResolverConstEvalVectorAccessTest = ResolverTestWithParam<Case>;
+TEST_P(ResolverConstEvalVectorAccessTest, Test) {
+    Enable(ast::Extension::kF16);
+
+    auto& param = GetParam();
+    auto* expr = param.input.Expr(*this);
+    auto* a = Const("a", expr);
+
+    utils::Vector<const ast::IndexAccessorExpression*, 4> index_accessors;
+    for (size_t i = 0; i < param.input.args.Length(); ++i) {
+        auto* index = IndexAccessor("a", Expr(i32(i)));
+        index_accessors.Push(index);
+    }
+
+    utils::Vector<const ast::Statement*, 5> stmts;
+    stmts.Push(WrapInStatement(a));
+    for (auto* ia : index_accessors) {
+        stmts.Push(WrapInStatement(ia));
+    }
+    WrapInFunction(std::move(stmts));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* vec = sem->Type()->As<type::Vector>();
+    ASSERT_NE(vec, nullptr);
+
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    for (size_t i = 0; i < index_accessors.Length(); ++i) {
+        auto* ia_sem = Sem().Get(index_accessors[i]);
+        ASSERT_NE(ia_sem, nullptr);
+        ASSERT_NE(ia_sem->ConstantValue(), nullptr);
+        EXPECT_EQ(ia_sem->ConstantValue()->ValueAs<AInt>(), i);
+    }
+}
+template <typename T>
+std::vector<Case> VectorAccessCases() {
+    if constexpr (std::is_same_v<T, bool>) {
+        return {
+            C(Vec(false, true)),
+        };
+    } else {
+        return {
+            C(Vec(T(0), T(1))),              //
+            C(Vec(T(0), T(1), T(2))),        //
+            C(Vec(T(0), T(1), T(2), T(3))),  //
+        };
+    }
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    VectorAccess,
+    ResolverConstEvalVectorAccessTest,
+    testing::ValuesIn(Concat(VectorAccessCases<AInt>(),    //
+                             VectorAccessCases<AFloat>(),  //
+                             VectorAccessCases<i32>(),     //
+                             VectorAccessCases<u32>(),     //
+                             VectorAccessCases<f32>(),     //
+                             VectorAccessCases<f16>(),     //
+                             VectorAccessCases<bool>())));
+}  // namespace VectorAccess
+
 }  // namespace
 }  // namespace tint::resolver

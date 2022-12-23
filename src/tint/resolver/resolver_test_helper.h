@@ -815,6 +815,7 @@ Value Val(T v) {
 template <typename... Ts>
 Value Vec(Ts... args) {
     using FirstT = std::tuple_element_t<0, std::tuple<Ts...>>;
+    static_assert(sizeof...(args) >= 2 && sizeof...(args) <= 4, "Invalid vector size");
     static_assert(std::conjunction_v<std::is_same<FirstT, Ts>...>,
                   "Vector args must all be the same type");
     constexpr size_t N = sizeof...(args);

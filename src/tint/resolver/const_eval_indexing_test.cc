@@ -106,9 +106,9 @@ std::vector<Case> SwizzleCases() {
         C(Vec(T(0), T(1), T(2)), "xx", Vec(T(0), T(0))),
         C(Vec(T(0), T(1), T(2)), "yy", Vec(T(1), T(1))),
         C(Vec(T(0), T(1), T(2)), "zz", Vec(T(2), T(2))),
-        C(Vec(T(0), T(1), T(2)), "x", Vec(T(0))),
-        C(Vec(T(0), T(1), T(2)), "y", Vec(T(1))),
-        C(Vec(T(0), T(1), T(2)), "z", Vec(T(2))),
+        C(Vec(T(0), T(1), T(2)), "x", Val(T(0))),
+        C(Vec(T(0), T(1), T(2)), "y", Val(T(1))),
+        C(Vec(T(0), T(1), T(2)), "z", Val(T(2))),
     };
 }
 INSTANTIATE_TEST_SUITE_P(Swizzle,
