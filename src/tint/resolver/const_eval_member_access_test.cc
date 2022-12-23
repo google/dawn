@@ -19,7 +19,7 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::resolver {
 namespace {
 
-TEST_F(ResolverConstEvalTest, MemberAccess) {
+TEST_F(ResolverConstEvalTest, StructMemberAccess) {
     Structure("Inner", utils::Vector{
                            Member("i1", ty.i32()),
                            Member("i2", ty.u32()),
@@ -95,6 +95,162 @@ TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
     EXPECT_EQ(c0->Index(1)->ValueAs<AFloat>(), 2.0);
     EXPECT_EQ(c1->Index(0)->ValueAs<AFloat>(), 3.0);
     EXPECT_EQ(c1->Index(1)->ValueAs<AFloat>(), 4.0);
+}
+
+TEST_F(ResolverConstEvalTest, MatrixMemberAccess_AFloat) {
+    auto* c =
+        Const("a", Construct(ty.mat(nullptr, 2, 3),  //
+                             Construct(ty.vec(nullptr, 3), Expr(1.0_a), Expr(2.0_a), Expr(3.0_a)),
+                             Construct(ty.vec(nullptr, 3), Expr(4.0_a), Expr(5.0_a), Expr(6.0_a))));
+
+    auto* col_0 = Const("col_0", IndexAccessor("a", Expr(0_i)));
+    auto* col_1 = Const("col_1", IndexAccessor("a", Expr(1_i)));
+    auto* e00 = Const("e00", IndexAccessor("col_0", Expr(0_i)));
+    auto* e01 = Const("e01", IndexAccessor("col_0", Expr(1_i)));
+    auto* e02 = Const("e02", IndexAccessor("col_0", Expr(2_i)));
+    auto* e10 = Const("e10", IndexAccessor("col_1", Expr(0_i)));
+    auto* e11 = Const("e11", IndexAccessor("col_1", Expr(1_i)));
+    auto* e12 = Const("e12", IndexAccessor("col_1", Expr(2_i)));
+
+    (void)col_0;
+    (void)col_1;
+
+    WrapInFunction(c, col_0, col_1, e00, e01, e02, e10, e11, e12);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(c);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_TRUE(sem->Type()->Is<type::Matrix>());
+    auto* cv = sem->ConstantValue();
+    EXPECT_TYPE(cv->Type(), sem->Type());
+    EXPECT_TRUE(cv->Index(0)->Type()->Is<type::Vector>());
+    EXPECT_TRUE(cv->Index(0)->Index(0)->Type()->Is<type::AbstractFloat>());
+    EXPECT_FALSE(cv->AllEqual());
+    EXPECT_FALSE(cv->AnyZero());
+    EXPECT_FALSE(cv->AllZero());
+
+    auto* sem_col0 = Sem().Get(col_0);
+    ASSERT_NE(sem_col0, nullptr);
+    EXPECT_TRUE(sem_col0->Type()->Is<type::Vector>());
+    EXPECT_EQ(sem_col0->ConstantValue()->Index(0)->ValueAs<AFloat>(), 1.0);
+    EXPECT_EQ(sem_col0->ConstantValue()->Index(1)->ValueAs<AFloat>(), 2.0);
+    EXPECT_EQ(sem_col0->ConstantValue()->Index(2)->ValueAs<AFloat>(), 3.0);
+
+    auto* sem_col1 = Sem().Get(col_1);
+    ASSERT_NE(sem_col1, nullptr);
+    EXPECT_TRUE(sem_col1->Type()->Is<type::Vector>());
+    EXPECT_EQ(sem_col1->ConstantValue()->Index(0)->ValueAs<AFloat>(), 4.0);
+    EXPECT_EQ(sem_col1->ConstantValue()->Index(1)->ValueAs<AFloat>(), 5.0);
+    EXPECT_EQ(sem_col1->ConstantValue()->Index(2)->ValueAs<AFloat>(), 6.0);
+
+    auto* sem_e00 = Sem().Get(e00);
+    ASSERT_NE(sem_e00, nullptr);
+    EXPECT_TRUE(sem_e00->Type()->Is<type::AbstractFloat>());
+    EXPECT_EQ(sem_e00->ConstantValue()->ValueAs<AFloat>(), 1.0);
+
+    auto* sem_e01 = Sem().Get(e01);
+    ASSERT_NE(sem_e01, nullptr);
+    EXPECT_TRUE(sem_e01->Type()->Is<type::AbstractFloat>());
+    EXPECT_EQ(sem_e01->ConstantValue()->ValueAs<AFloat>(), 2.0);
+
+    auto* sem_e02 = Sem().Get(e02);
+    ASSERT_NE(sem_e02, nullptr);
+    EXPECT_TRUE(sem_e02->Type()->Is<type::AbstractFloat>());
+    EXPECT_EQ(sem_e02->ConstantValue()->ValueAs<AFloat>(), 3.0);
+
+    auto* sem_e10 = Sem().Get(e10);
+    ASSERT_NE(sem_e10, nullptr);
+    EXPECT_TRUE(sem_e10->Type()->Is<type::AbstractFloat>());
+    EXPECT_EQ(sem_e10->ConstantValue()->ValueAs<AFloat>(), 4.0);
+
+    auto* sem_e11 = Sem().Get(e11);
+    ASSERT_NE(sem_e11, nullptr);
+    EXPECT_TRUE(sem_e11->Type()->Is<type::AbstractFloat>());
+    EXPECT_EQ(sem_e11->ConstantValue()->ValueAs<AFloat>(), 5.0);
+
+    auto* sem_e12 = Sem().Get(e12);
+    ASSERT_NE(sem_e12, nullptr);
+    EXPECT_TRUE(sem_e12->Type()->Is<type::AbstractFloat>());
+    EXPECT_EQ(sem_e12->ConstantValue()->ValueAs<AFloat>(), 6.0);
+}
+
+TEST_F(ResolverConstEvalTest, MatrixMemberAccess_f32) {
+    auto* c =
+        Const("a", Construct(ty.mat(nullptr, 2, 3),  //
+                             Construct(ty.vec(nullptr, 3), Expr(1.0_f), Expr(2.0_f), Expr(3.0_f)),
+                             Construct(ty.vec(nullptr, 3), Expr(4.0_f), Expr(5.0_f), Expr(6.0_f))));
+
+    auto* col_0 = Const("col_0", IndexAccessor("a", Expr(0_i)));
+    auto* col_1 = Const("col_1", IndexAccessor("a", Expr(1_i)));
+    auto* e00 = Const("e00", IndexAccessor("col_0", Expr(0_i)));
+    auto* e01 = Const("e01", IndexAccessor("col_0", Expr(1_i)));
+    auto* e02 = Const("e02", IndexAccessor("col_0", Expr(2_i)));
+    auto* e10 = Const("e10", IndexAccessor("col_1", Expr(0_i)));
+    auto* e11 = Const("e11", IndexAccessor("col_1", Expr(1_i)));
+    auto* e12 = Const("e12", IndexAccessor("col_1", Expr(2_i)));
+
+    (void)col_0;
+    (void)col_1;
+
+    WrapInFunction(c, col_0, col_1, e00, e01, e02, e10, e11, e12);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(c);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_TRUE(sem->Type()->Is<type::Matrix>());
+    auto* cv = sem->ConstantValue();
+    EXPECT_TYPE(cv->Type(), sem->Type());
+    EXPECT_TRUE(cv->Index(0)->Type()->Is<type::Vector>());
+    EXPECT_TRUE(cv->Index(0)->Index(0)->Type()->Is<type::F32>());
+    EXPECT_FALSE(cv->AllEqual());
+    EXPECT_FALSE(cv->AnyZero());
+    EXPECT_FALSE(cv->AllZero());
+
+    auto* sem_col0 = Sem().Get(col_0);
+    ASSERT_NE(sem_col0, nullptr);
+    EXPECT_TRUE(sem_col0->Type()->Is<type::Vector>());
+    EXPECT_EQ(sem_col0->ConstantValue()->Index(0)->ValueAs<f32>(), 1.0f);
+    EXPECT_EQ(sem_col0->ConstantValue()->Index(1)->ValueAs<f32>(), 2.0f);
+    EXPECT_EQ(sem_col0->ConstantValue()->Index(2)->ValueAs<f32>(), 3.0f);
+
+    auto* sem_col1 = Sem().Get(col_1);
+    ASSERT_NE(sem_col1, nullptr);
+    EXPECT_TRUE(sem_col1->Type()->Is<type::Vector>());
+    EXPECT_EQ(sem_col1->ConstantValue()->Index(0)->ValueAs<f32>(), 4.0f);
+    EXPECT_EQ(sem_col1->ConstantValue()->Index(1)->ValueAs<f32>(), 5.0f);
+    EXPECT_EQ(sem_col1->ConstantValue()->Index(2)->ValueAs<f32>(), 6.0f);
+
+    auto* sem_e00 = Sem().Get(e00);
+    ASSERT_NE(sem_e00, nullptr);
+    EXPECT_TRUE(sem_e00->Type()->Is<type::F32>());
+    EXPECT_EQ(sem_e00->ConstantValue()->ValueAs<f32>(), 1.0f);
+
+    auto* sem_e01 = Sem().Get(e01);
+    ASSERT_NE(sem_e01, nullptr);
+    EXPECT_TRUE(sem_e01->Type()->Is<type::F32>());
+    EXPECT_EQ(sem_e01->ConstantValue()->ValueAs<f32>(), 2.0f);
+
+    auto* sem_e02 = Sem().Get(e02);
+    ASSERT_NE(sem_e02, nullptr);
+    EXPECT_TRUE(sem_e02->Type()->Is<type::F32>());
+    EXPECT_EQ(sem_e02->ConstantValue()->ValueAs<f32>(), 3.0f);
+
+    auto* sem_e10 = Sem().Get(e10);
+    ASSERT_NE(sem_e10, nullptr);
+    EXPECT_TRUE(sem_e10->Type()->Is<type::F32>());
+    EXPECT_EQ(sem_e10->ConstantValue()->ValueAs<f32>(), 4.0f);
+
+    auto* sem_e11 = Sem().Get(e11);
+    ASSERT_NE(sem_e11, nullptr);
+    EXPECT_TRUE(sem_e11->Type()->Is<type::F32>());
+    EXPECT_EQ(sem_e11->ConstantValue()->ValueAs<f32>(), 5.0f);
+
+    auto* sem_e12 = Sem().Get(e12);
+    ASSERT_NE(sem_e12, nullptr);
+    EXPECT_TRUE(sem_e12->Type()->Is<type::F32>());
+    EXPECT_EQ(sem_e12->ConstantValue()->ValueAs<f32>(), 6.0f);
 }
 
 namespace ArrayAccess {
