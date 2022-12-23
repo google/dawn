@@ -149,6 +149,10 @@ struct IsVectorLike<utils::VectorRef<T>> {
 };
 }  // namespace detail
 
+// Forward declare metafunction that evaluates to true iff T can be wrapped in a statement.
+template <typename T, typename = void>
+struct CanWrapInStatement;
+
 /// ProgramBuilder is a mutable builder for a Program.
 /// To construct a Program, populate the builder and then `std::move` it to a
 /// Program.
@@ -3326,12 +3330,13 @@ class ProgramBuilder {
     /// by the Resolver.
     /// @param args a mix of ast::Expression, ast::Statement, ast::Variables.
     /// @returns the function
-    template <typename... ARGS>
+    template <typename... ARGS,
+              typename = traits::EnableIf<(CanWrapInStatement<ARGS>::value && ...)>>
     const ast::Function* WrapInFunction(ARGS&&... args) {
         utils::Vector stmts{
             WrapInStatement(std::forward<ARGS>(args))...,
         };
-        return WrapInFunction(utils::VectorRef<const ast::Statement*>{std::move(stmts)});
+        return WrapInFunction(std::move(stmts));
     }
     /// @param stmts a list of ast::Statement that will be wrapped by a function,
     /// so that each statement is reachable by the Resolver.
@@ -3410,6 +3415,17 @@ struct ProgramBuilder::TypesBuilder::CToAST<void> {
 inline ProgramID ProgramIDOf(const ProgramBuilder* builder) {
     return builder->ID();
 }
+
+// Primary template for metafunction that evaluates to true iff T can be wrapped in a statement.
+template <typename T, typename /*  = void */>
+struct CanWrapInStatement : std::false_type {};
+
+// Specialization of CanWrapInStatement
+template <typename T>
+struct CanWrapInStatement<
+    T,
+    std::void_t<decltype(std::declval<ProgramBuilder>().WrapInStatement(std::declval<T>()))>>
+    : std::true_type {};
 
 }  // namespace tint
 
