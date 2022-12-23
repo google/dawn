@@ -96,5 +96,81 @@ TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
     EXPECT_EQ(c1->Index(0)->ValueAs<AFloat>(), 3.0);
     EXPECT_EQ(c1->Index(1)->ValueAs<AFloat>(), 4.0);
 }
+
+namespace ArrayAccess {
+struct Case {
+    Value input;
+};
+static Case C(Value input) {
+    return Case{std::move(input)};
+}
+static std::ostream& operator<<(std::ostream& o, const Case& c) {
+    return o << "input: " << c.input;
+}
+
+using ResolverConstEvalArrayAccessTest = ResolverTestWithParam<Case>;
+TEST_P(ResolverConstEvalArrayAccessTest, Test) {
+    Enable(ast::Extension::kF16);
+
+    auto& param = GetParam();
+    auto* expr = param.input.Expr(*this);
+    auto* a = Const("a", expr);
+
+    utils::Vector<const ast::IndexAccessorExpression*, 4> index_accessors;
+    for (size_t i = 0; i < param.input.args.Length(); ++i) {
+        auto* index = IndexAccessor("a", Expr(i32(i)));
+        index_accessors.Push(index);
+    }
+
+    utils::Vector<const ast::Statement*, 5> stmts;
+    stmts.Push(WrapInStatement(a));
+    for (auto* ia : index_accessors) {
+        stmts.Push(WrapInStatement(ia));
+    }
+    WrapInFunction(std::move(stmts));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* arr = sem->Type()->As<type::Array>();
+    ASSERT_NE(arr, nullptr);
+
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    for (size_t i = 0; i < index_accessors.Length(); ++i) {
+        auto* ia_sem = Sem().Get(index_accessors[i]);
+        ASSERT_NE(ia_sem, nullptr);
+        ASSERT_NE(ia_sem->ConstantValue(), nullptr);
+        EXPECT_EQ(ia_sem->ConstantValue()->ValueAs<AInt>(), i);
+    }
+}
+template <typename T>
+std::vector<Case> ArrayAccessCases() {
+    if constexpr (std::is_same_v<T, bool>) {
+        return {
+            C(Array(false, true)),
+        };
+    } else {
+        return {
+            C(Array(T(0))),                          //
+            C(Array(T(0), T(1))),                    //
+            C(Array(T(0), T(1), T(2))),              //
+            C(Array(T(0), T(1), T(2), T(3))),        //
+            C(Array(T(0), T(1), T(2), T(3), T(4))),  //
+        };
+    }
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    ArrayAccess,
+    ResolverConstEvalArrayAccessTest,
+    testing::ValuesIn(Concat(ArrayAccessCases<AInt>(),    //
+                             ArrayAccessCases<AFloat>(),  //
+                             ArrayAccessCases<i32>(),     //
+                             ArrayAccessCases<u32>(),     //
+                             ArrayAccessCases<f32>(),     //
+                             ArrayAccessCases<f16>(),     //
+                             ArrayAccessCases<bool>())));
+}  // namespace ArrayAccess
+
 }  // namespace
 }  // namespace tint::resolver
