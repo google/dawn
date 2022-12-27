@@ -92,6 +92,9 @@ TEST_P(DrawIndirectTest, Uint32) {
     // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
     // the offsets that Tint/GLSL produces.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+    // TODO(crbug.com/dawn/1620): flaky VUID-vkDestroyBuffer-buffer-00922 on UHD630
+    // driver 31.0.101.2111
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
 
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
