@@ -31,6 +31,15 @@ thread_local DeviceBase* tlDevice = nullptr;
 void TintICEReporter(const tint::diag::List& diagnostics) {
     if (tlDevice) {
         tlDevice->HandleError(InternalErrorType::Internal, diagnostics.str().c_str());
+#if DAWN_ENABLE_ASSERTS
+        for (const tint::diag::Diagnostic& diag : diagnostics) {
+            if (diag.severity >= tint::diag::Severity::InternalCompilerError) {
+                HandleAssertionFailure(
+                    diag.source.file ? diag.source.file->path.c_str() : "<unknown>", "",
+                    diag.source.range.begin.line, diag.message.c_str());
+            }
+        }
+#endif
     }
 }
 
