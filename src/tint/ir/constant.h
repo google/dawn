@@ -31,6 +31,9 @@ class Constant : public Castable<Constant, Value> {
     explicit Constant(const constant::Value* val);
     ~Constant() override;
 
+    /// @returns the type of the constant
+    const type::Type* Type() const override { return value->Type(); }
+
     /// Write the constant to the given stream
     /// @param out the stream to write to
     /// @param st the symbol table

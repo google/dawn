@@ -144,123 +144,148 @@ class Builder {
     }
 
     /// Creates a new Temporary
+    /// @param type the type of the temporary
     /// @returns the new temporary
-    const ir::Temp* Temp() { return ir.values.Create<ir::Temp>(AllocateTempId()); }
+    const ir::Temp* Temp(const type::Type* type) {
+        return ir.values.Create<ir::Temp>(type, AllocateTempId());
+    }
 
     /// Creates an op for `lhs kind rhs`
     /// @param kind the kind of operation
+    /// @param type the result type of the binary expression
     /// @param lhs the left-hand-side of the operation
     /// @param rhs the right-hand-side of the operation
     /// @returns the operation
-    const Binary* CreateBinary(Binary::Kind kind, const Value* lhs, const Value* rhs);
+    const Binary* CreateBinary(Binary::Kind kind,
+                               const type::Type* type,
+                               const Value* lhs,
+                               const Value* rhs);
 
     /// Creates an And operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* And(const Value* lhs, const Value* rhs);
+    const Binary* And(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an Or operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* Or(const Value* lhs, const Value* rhs);
+    const Binary* Or(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an Xor operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* Xor(const Value* lhs, const Value* rhs);
+    const Binary* Xor(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an LogicalAnd operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* LogicalAnd(const Value* lhs, const Value* rhs);
+    const Binary* LogicalAnd(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an LogicalOr operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* LogicalOr(const Value* lhs, const Value* rhs);
+    const Binary* LogicalOr(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an Equal operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* Equal(const Value* lhs, const Value* rhs);
+    const Binary* Equal(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an NotEqual operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* NotEqual(const Value* lhs, const Value* rhs);
+    const Binary* NotEqual(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an LessThan operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* LessThan(const Value* lhs, const Value* rhs);
+    const Binary* LessThan(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an GreaterThan operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* GreaterThan(const Value* lhs, const Value* rhs);
+    const Binary* GreaterThan(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an LessThanEqual operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* LessThanEqual(const Value* lhs, const Value* rhs);
+    const Binary* LessThanEqual(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an GreaterThanEqual operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* GreaterThanEqual(const Value* lhs, const Value* rhs);
+    const Binary* GreaterThanEqual(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an ShiftLeft operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* ShiftLeft(const Value* lhs, const Value* rhs);
+    const Binary* ShiftLeft(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an ShiftRight operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* ShiftRight(const Value* lhs, const Value* rhs);
+    const Binary* ShiftRight(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an Add operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* Add(const Value* lhs, const Value* rhs);
+    const Binary* Add(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an Subtract operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* Subtract(const Value* lhs, const Value* rhs);
+    const Binary* Subtract(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an Multiply operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* Multiply(const Value* lhs, const Value* rhs);
+    const Binary* Multiply(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an Divide operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* Divide(const Value* lhs, const Value* rhs);
+    const Binary* Divide(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// Creates an Modulo operation
+    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    const Binary* Modulo(const Value* lhs, const Value* rhs);
+    const Binary* Modulo(const type::Type* type, const Value* lhs, const Value* rhs);
 
     /// @returns a unique temp id
     Temp::Id AllocateTempId();

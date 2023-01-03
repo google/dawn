@@ -19,6 +19,7 @@
 
 #include "src/tint/castable.h"
 #include "src/tint/symbol_table.h"
+#include "src/tint/type/type.h"
 
 namespace tint::ir {
 
@@ -33,6 +34,9 @@ class Value : public Castable<Value> {
 
     Value& operator=(const Value&) = delete;
     Value& operator=(Value&&) = delete;
+
+    /// @returns the type of the value
+    virtual const type::Type* Type() const = 0;
 
     /// Write the value to the given stream
     /// @param out the stream to write to

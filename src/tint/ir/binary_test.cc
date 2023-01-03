@@ -28,7 +28,8 @@ TEST_F(IR_InstructionTest, CreateAnd) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.And(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.And(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i),
+                                      b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kAnd);
 
@@ -54,7 +55,8 @@ TEST_F(IR_InstructionTest, CreateOr) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.Or(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.Or(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i),
+                                     b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kOr);
 
@@ -80,7 +82,8 @@ TEST_F(IR_InstructionTest, CreateXor) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.Xor(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.Xor(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i),
+                                      b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kXor);
 
@@ -106,7 +109,8 @@ TEST_F(IR_InstructionTest, CreateLogicalAnd) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.LogicalAnd(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.LogicalAnd(b.builder.ir.types.Get<type::I32>(),
+                                             b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kLogicalAnd);
 
@@ -132,7 +136,8 @@ TEST_F(IR_InstructionTest, CreateLogicalOr) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.LogicalOr(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.LogicalOr(b.builder.ir.types.Get<type::I32>(),
+                                            b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kLogicalOr);
 
@@ -158,7 +163,8 @@ TEST_F(IR_InstructionTest, CreateEqual) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.Equal(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.Equal(b.builder.ir.types.Get<type::Bool>(),
+                                        b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kEqual);
 
@@ -184,7 +190,8 @@ TEST_F(IR_InstructionTest, CreateNotEqual) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.NotEqual(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.NotEqual(b.builder.ir.types.Get<type::Bool>(),
+                                           b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kNotEqual);
 
@@ -210,7 +217,8 @@ TEST_F(IR_InstructionTest, CreateLessThan) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.LessThan(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.LessThan(b.builder.ir.types.Get<type::Bool>(),
+                                           b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kLessThan);
 
@@ -236,7 +244,8 @@ TEST_F(IR_InstructionTest, CreateGreaterThan) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.GreaterThan(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.GreaterThan(b.builder.ir.types.Get<type::Bool>(),
+                                              b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kGreaterThan);
 
@@ -262,7 +271,8 @@ TEST_F(IR_InstructionTest, CreateLessThanEqual) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.LessThanEqual(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.LessThanEqual(b.builder.ir.types.Get<type::Bool>(),
+                                                b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kLessThanEqual);
 
@@ -288,8 +298,8 @@ TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr =
-        b.builder.GreaterThanEqual(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.GreaterThanEqual(
+        b.builder.ir.types.Get<type::Bool>(), b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kGreaterThanEqual);
 
@@ -315,7 +325,8 @@ TEST_F(IR_InstructionTest, CreateShiftLeft) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.ShiftLeft(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.ShiftLeft(b.builder.ir.types.Get<type::I32>(),
+                                            b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kShiftLeft);
 
@@ -341,7 +352,8 @@ TEST_F(IR_InstructionTest, CreateShiftRight) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.ShiftRight(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.ShiftRight(b.builder.ir.types.Get<type::I32>(),
+                                             b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kShiftRight);
 
@@ -367,7 +379,8 @@ TEST_F(IR_InstructionTest, CreateAdd) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.Add(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.Add(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i),
+                                      b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kAdd);
 
@@ -393,7 +406,8 @@ TEST_F(IR_InstructionTest, CreateSubtract) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.Subtract(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.Subtract(b.builder.ir.types.Get<type::I32>(),
+                                           b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kSubtract);
 
@@ -419,7 +433,8 @@ TEST_F(IR_InstructionTest, CreateMultiply) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.Multiply(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.Multiply(b.builder.ir.types.Get<type::I32>(),
+                                           b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kMultiply);
 
@@ -445,7 +460,8 @@ TEST_F(IR_InstructionTest, CreateDivide) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.Divide(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.Divide(b.builder.ir.types.Get<type::I32>(),
+                                         b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kDivide);
 
@@ -471,7 +487,8 @@ TEST_F(IR_InstructionTest, CreateModulo) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.Modulo(b.builder.Constant(4_i), b.builder.Constant(2_i));
+    const auto* instr = b.builder.Modulo(b.builder.ir.types.Get<type::I32>(),
+                                         b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kModulo);
 

@@ -30,7 +30,7 @@ TEST_F(IR_TempTest, id) {
     std::stringstream str;
 
     b.builder.next_temp_id = Temp::Id(4);
-    auto* val = b.builder.Temp();
+    auto* val = b.builder.Temp(b.builder.ir.types.Get<type::I32>());
     EXPECT_EQ(4u, val->AsId());
 
     val->ToString(str, program->Symbols());

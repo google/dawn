@@ -21,6 +21,7 @@
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/symbol_table.h"
+#include "src/tint/type/type.h"
 
 namespace tint::ir {
 

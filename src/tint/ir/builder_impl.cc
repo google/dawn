@@ -563,61 +563,62 @@ utils::Result<const Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression*
         return utils::Failure;
     }
 
+    auto* sem = builder.ir.program->Sem().Get(expr);
     const Binary* instr = nullptr;
     switch (expr->op) {
         case ast::BinaryOp::kAnd:
-            instr = builder.And(lhs.Get(), rhs.Get());
+            instr = builder.And(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kOr:
-            instr = builder.Or(lhs.Get(), rhs.Get());
+            instr = builder.Or(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kXor:
-            instr = builder.Xor(lhs.Get(), rhs.Get());
+            instr = builder.Xor(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLogicalAnd:
-            instr = builder.LogicalAnd(lhs.Get(), rhs.Get());
+            instr = builder.LogicalAnd(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLogicalOr:
-            instr = builder.LogicalOr(lhs.Get(), rhs.Get());
+            instr = builder.LogicalOr(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kEqual:
-            instr = builder.Equal(lhs.Get(), rhs.Get());
+            instr = builder.Equal(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kNotEqual:
-            instr = builder.NotEqual(lhs.Get(), rhs.Get());
+            instr = builder.NotEqual(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLessThan:
-            instr = builder.LessThan(lhs.Get(), rhs.Get());
+            instr = builder.LessThan(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kGreaterThan:
-            instr = builder.GreaterThan(lhs.Get(), rhs.Get());
+            instr = builder.GreaterThan(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLessThanEqual:
-            instr = builder.LessThanEqual(lhs.Get(), rhs.Get());
+            instr = builder.LessThanEqual(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kGreaterThanEqual:
-            instr = builder.GreaterThanEqual(lhs.Get(), rhs.Get());
+            instr = builder.GreaterThanEqual(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kShiftLeft:
-            instr = builder.ShiftLeft(lhs.Get(), rhs.Get());
+            instr = builder.ShiftLeft(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kShiftRight:
-            instr = builder.ShiftRight(lhs.Get(), rhs.Get());
+            instr = builder.ShiftRight(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kAdd:
-            instr = builder.Add(lhs.Get(), rhs.Get());
+            instr = builder.Add(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kSubtract:
-            instr = builder.Subtract(lhs.Get(), rhs.Get());
+            instr = builder.Subtract(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kMultiply:
-            instr = builder.Multiply(lhs.Get(), rhs.Get());
+            instr = builder.Multiply(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kDivide:
-            instr = builder.Divide(lhs.Get(), rhs.Get());
+            instr = builder.Divide(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kModulo:
-            instr = builder.Modulo(lhs.Get(), rhs.Get());
+            instr = builder.Modulo(sem->Type(), lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kNone:
             TINT_ICE(IR, diagnostics_) << "missing binary operand type";

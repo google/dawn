@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Temp);
 
 namespace tint::ir {
 
-Temp::Temp(Id id) : id_(id) {}
+Temp::Temp(const type::Type* type, Id id) : type_(type), id_(id) {}
 
 Temp::~Temp() = default;
 

@@ -29,8 +29,9 @@ class Temp : public Castable<Temp, Value> {
     using Id = uint32_t;
 
     /// Constructor
+    /// @param type the type of the temporary
     /// @param id the id for the value
-    explicit Temp(Id id);
+    Temp(const type::Type* type, Id id);
 
     /// Destructor
     ~Temp() override;
@@ -44,6 +45,9 @@ class Temp : public Castable<Temp, Value> {
     /// @returns the value data as an `Id`.
     Id AsId() const { return id_; }
 
+    /// @returns the type of the temporary
+    const type::Type* Type() const override { return type_; }
+
     /// Write the temp to the given stream
     /// @param out the stream to write to
     /// @param st the symbol table
@@ -51,6 +55,7 @@ class Temp : public Castable<Temp, Value> {
     std::ostream& ToString(std::ostream& out, const SymbolTable& st) const override;
 
   private:
+    const type::Type* type_ = nullptr;
     Id id_ = 0;
 };
 
