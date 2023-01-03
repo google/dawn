@@ -153,4 +153,39 @@ const ast::Function* ProgramBuilder::WrapInFunction(utils::VectorRef<const ast::
                 });
 }
 
+const constant::Value* ProgramBuilder::createSplatOrComposite(
+    const type::Type* type,
+    utils::VectorRef<const constant::Value*> elements) {
+    if (elements.IsEmpty()) {
+        return nullptr;
+    }
+
+    bool any_zero = false;
+    bool all_zero = true;
+    bool all_equal = true;
+    auto* first = elements.Front();
+    for (auto* el : elements) {
+        if (!el) {
+            return nullptr;
+        }
+        if (!any_zero && el->AnyZero()) {
+            any_zero = true;
+        }
+        if (all_zero && !el->AllZero()) {
+            all_zero = false;
+        }
+        if (all_equal && el != first) {
+            if (!el->Equal(first)) {
+                all_equal = false;
+            }
+        }
+    }
+    if (all_equal) {
+        return create<constant::Splat>(type, elements[0], elements.Length());
+    }
+
+    return constant_nodes_.Create<constant::Composite>(type, std::move(elements), all_zero,
+                                                       any_zero);
+}
+
 }  // namespace tint

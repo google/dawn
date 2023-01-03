@@ -493,42 +493,13 @@ class ProgramBuilder {
     /// @param type the composite type
     /// @param elements the composite elements
     /// @returns the node pointer
-    template <typename T>
-    traits::EnableIf<traits::IsTypeOrDerived<T, constant::Composite> ||
-                         traits::IsTypeOrDerived<T, constant::Splat>,
-                     const constant::Value>*
-    create(const type::Type* type, utils::VectorRef<const constant::Value*> elements) {
+    template <typename T,
+              typename = traits::EnableIf<traits::IsTypeOrDerived<T, constant::Composite> ||
+                                          traits::IsTypeOrDerived<T, constant::Splat>>>
+    const constant::Value* create(const type::Type* type,
+                                  utils::VectorRef<const constant::Value*> elements) {
         AssertNotMoved();
-        if (elements.IsEmpty()) {
-            return nullptr;
-        }
-
-        bool any_zero = false;
-        bool all_zero = true;
-        bool all_equal = true;
-        auto* first = elements.Front();
-        for (auto* el : elements) {
-            if (!el) {
-                return nullptr;
-            }
-            if (!any_zero && el->AnyZero()) {
-                any_zero = true;
-            }
-            if (all_zero && !el->AllZero()) {
-                all_zero = false;
-            }
-            if (all_equal && el != first) {
-                if (!el->Equal(first)) {
-                    all_equal = false;
-                }
-            }
-        }
-        if (all_equal) {
-            return create<constant::Splat>(type, elements[0], elements.Length());
-        }
-
-        return constant_nodes_.Create<constant::Composite>(type, std::move(elements), all_zero,
-                                                           any_zero);
+        return createSplatOrComposite(type, elements);
     }
 
     /// Constructs a splat constant.
@@ -536,9 +507,10 @@ class ProgramBuilder {
     /// @param element the splat element
     /// @param n the number of elements
     /// @returns the node pointer
-    template <typename T>
-    traits::EnableIf<traits::IsTypeOrDerived<T, constant::Splat>, const constant::Splat>*
-    create(const type::Type* type, const constant::Value* element, size_t n) {
+    template <typename T, typename = traits::EnableIf<traits::IsTypeOrDerived<T, constant::Splat>>>
+    const constant::Splat* create(const type::Type* type,
+                                  const constant::Value* element,
+                                  size_t n) {
         AssertNotMoved();
         return constant_nodes_.Create<constant::Splat>(type, element, n);
     }
@@ -3351,6 +3323,10 @@ class ProgramBuilder {
     void AssertNotMoved() const;
 
   private:
+    const constant::Value* createSplatOrComposite(
+        const type::Type* type,
+        utils::VectorRef<const constant::Value*> elements);
+
     ProgramID id_;
     ast::NodeID last_ast_node_id_ = ast::NodeID{static_cast<decltype(ast::NodeID::value)>(0) - 1};
     type::Manager types_;
