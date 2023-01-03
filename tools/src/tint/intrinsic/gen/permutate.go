@@ -328,17 +328,22 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 		return false // Builtin, untypeable return type
 	}
 
-	switch fqn.Target.GetName() {
-	case "array":
-		elTy := fqn.TemplateArguments[0].(sem.FullyQualifiedName)
+	isStorable := func(elTy sem.FullyQualifiedName) bool {
 		elTyName := elTy.Target.GetName()
 		switch {
-		case elTyName == "bool" ||
+		case elTyName == "bool",
 			strings.Contains(elTyName, "sampler"),
-			strings.Contains(elTyName, "texture"):
-			return false // Not storable
-		case IsAbstract(DeepestElementType(elTy)):
-			return false // Abstract types are not typeable
+			strings.Contains(elTyName, "texture"),
+			IsAbstract(DeepestElementType(elTy)):
+			return false
+		}
+		return true
+	}
+
+	switch fqn.Target.GetName() {
+	case "array":
+		if !isStorable(fqn.TemplateArguments[0].(sem.FullyQualifiedName)) {
+			return false
 		}
 	case "ptr":
 		// https://gpuweb.github.io/gpuweb/wgsl/#address-space
@@ -353,6 +358,9 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 			uses.Vertex = false
 			uses.Fragment = false
 			if access != "read_write" {
+				return false
+			}
+			if !isStorable(fqn.TemplateArguments[1].(sem.FullyQualifiedName)) {
 				return false
 			}
 		case "uniform":
