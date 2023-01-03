@@ -32,6 +32,7 @@ class Program;
 }  // namespace tint
 namespace tint::ast {
 class BinaryExpression;
+class BitcastExpression;
 class BlockStatement;
 class BreakIfStatement;
 class BreakStatement;
@@ -151,6 +152,11 @@ class BuilderImpl {
     /// @param expr the binary expression
     /// @returns the value storing the result if successful, utils::Failure otherwise
     utils::Result<const Value*> EmitBinary(const ast::BinaryExpression* expr);
+
+    /// Emits a bitcast expression
+    /// @param expr the bitcast expression
+    /// @returns the value storing the result if successful, utils::Failure otherwise
+    utils::Result<const Value*> EmitBitcast(const ast::BitcastExpression* expr);
 
     /// Emits a literal expression
     /// @param lit the literal to emit

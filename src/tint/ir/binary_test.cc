@@ -34,6 +34,7 @@ TEST_F(IR_InstructionTest, CreateAnd) {
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kAnd);
 
     ASSERT_TRUE(instr->Result()->Is<Temp>());
+    ASSERT_NE(instr->Result()->Type(), nullptr);
     EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
 
     ASSERT_TRUE(instr->LHS()->Is<Constant>());
@@ -48,7 +49,7 @@ TEST_F(IR_InstructionTest, CreateAnd) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 & 2");
+    EXPECT_EQ(str.str(), "%42 (i32) = 4 & 2");
 }
 
 TEST_F(IR_InstructionTest, CreateOr) {
@@ -75,7 +76,7 @@ TEST_F(IR_InstructionTest, CreateOr) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 | 2");
+    EXPECT_EQ(str.str(), "%42 (i32) = 4 | 2");
 }
 
 TEST_F(IR_InstructionTest, CreateXor) {
@@ -102,14 +103,14 @@ TEST_F(IR_InstructionTest, CreateXor) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 ^ 2");
+    EXPECT_EQ(str.str(), "%42 (i32) = 4 ^ 2");
 }
 
 TEST_F(IR_InstructionTest, CreateLogicalAnd) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.LogicalAnd(b.builder.ir.types.Get<type::I32>(),
+    const auto* instr = b.builder.LogicalAnd(b.builder.ir.types.Get<type::Bool>(),
                                              b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kLogicalAnd);
@@ -129,14 +130,14 @@ TEST_F(IR_InstructionTest, CreateLogicalAnd) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 && 2");
+    EXPECT_EQ(str.str(), "%42 (bool) = 4 && 2");
 }
 
 TEST_F(IR_InstructionTest, CreateLogicalOr) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_temp_id = Temp::Id(42);
-    const auto* instr = b.builder.LogicalOr(b.builder.ir.types.Get<type::I32>(),
+    const auto* instr = b.builder.LogicalOr(b.builder.ir.types.Get<type::Bool>(),
                                             b.builder.Constant(4_i), b.builder.Constant(2_i));
 
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kLogicalOr);
@@ -156,7 +157,7 @@ TEST_F(IR_InstructionTest, CreateLogicalOr) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 || 2");
+    EXPECT_EQ(str.str(), "%42 (bool) = 4 || 2");
 }
 
 TEST_F(IR_InstructionTest, CreateEqual) {
@@ -183,7 +184,7 @@ TEST_F(IR_InstructionTest, CreateEqual) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 == 2");
+    EXPECT_EQ(str.str(), "%42 (bool) = 4 == 2");
 }
 
 TEST_F(IR_InstructionTest, CreateNotEqual) {
@@ -210,7 +211,7 @@ TEST_F(IR_InstructionTest, CreateNotEqual) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 != 2");
+    EXPECT_EQ(str.str(), "%42 (bool) = 4 != 2");
 }
 
 TEST_F(IR_InstructionTest, CreateLessThan) {
@@ -237,7 +238,7 @@ TEST_F(IR_InstructionTest, CreateLessThan) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 < 2");
+    EXPECT_EQ(str.str(), "%42 (bool) = 4 < 2");
 }
 
 TEST_F(IR_InstructionTest, CreateGreaterThan) {
@@ -264,7 +265,7 @@ TEST_F(IR_InstructionTest, CreateGreaterThan) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 > 2");
+    EXPECT_EQ(str.str(), "%42 (bool) = 4 > 2");
 }
 
 TEST_F(IR_InstructionTest, CreateLessThanEqual) {
@@ -291,7 +292,7 @@ TEST_F(IR_InstructionTest, CreateLessThanEqual) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 <= 2");
+    EXPECT_EQ(str.str(), "%42 (bool) = 4 <= 2");
 }
 
 TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
@@ -318,7 +319,7 @@ TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 >= 2");
+    EXPECT_EQ(str.str(), "%42 (bool) = 4 >= 2");
 }
 
 TEST_F(IR_InstructionTest, CreateShiftLeft) {
@@ -345,7 +346,7 @@ TEST_F(IR_InstructionTest, CreateShiftLeft) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 << 2");
+    EXPECT_EQ(str.str(), "%42 (i32) = 4 << 2");
 }
 
 TEST_F(IR_InstructionTest, CreateShiftRight) {
@@ -372,7 +373,7 @@ TEST_F(IR_InstructionTest, CreateShiftRight) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 >> 2");
+    EXPECT_EQ(str.str(), "%42 (i32) = 4 >> 2");
 }
 
 TEST_F(IR_InstructionTest, CreateAdd) {
@@ -399,7 +400,7 @@ TEST_F(IR_InstructionTest, CreateAdd) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 + 2");
+    EXPECT_EQ(str.str(), "%42 (i32) = 4 + 2");
 }
 
 TEST_F(IR_InstructionTest, CreateSubtract) {
@@ -426,7 +427,7 @@ TEST_F(IR_InstructionTest, CreateSubtract) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 - 2");
+    EXPECT_EQ(str.str(), "%42 (i32) = 4 - 2");
 }
 
 TEST_F(IR_InstructionTest, CreateMultiply) {
@@ -453,7 +454,7 @@ TEST_F(IR_InstructionTest, CreateMultiply) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 * 2");
+    EXPECT_EQ(str.str(), "%42 (i32) = 4 * 2");
 }
 
 TEST_F(IR_InstructionTest, CreateDivide) {
@@ -480,7 +481,7 @@ TEST_F(IR_InstructionTest, CreateDivide) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 / 2");
+    EXPECT_EQ(str.str(), "%42 (i32) = 4 / 2");
 }
 
 TEST_F(IR_InstructionTest, CreateModulo) {
@@ -507,7 +508,7 @@ TEST_F(IR_InstructionTest, CreateModulo) {
 
     std::stringstream str;
     instr->ToString(str, program->Symbols());
-    EXPECT_EQ(str.str(), "%42 = 4 % 2");
+    EXPECT_EQ(str.str(), "%42 (i32) = 4 % 2");
 }
 
 }  // namespace

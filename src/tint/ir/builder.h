@@ -19,6 +19,7 @@
 
 #include "src/tint/constant/scalar.h"
 #include "src/tint/ir/binary.h"
+#include "src/tint/ir/bitcast.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/if.h"
@@ -286,6 +287,12 @@ class Builder {
     /// @param rhs the rhs of the add
     /// @returns the operation
     const Binary* Modulo(const type::Type* type, const Value* lhs, const Value* rhs);
+
+    /// Creates a bitcast instruction
+    /// @param type the result type of the bitcast
+    /// @param val the value being bitcast
+    /// @returns the instruction
+    const ir::Bitcast* Bitcast(const type::Type* type, const Value* val);
 
     /// @returns a unique temp id
     Temp::Id AllocateTempId();

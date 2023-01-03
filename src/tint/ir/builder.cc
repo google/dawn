@@ -178,4 +178,8 @@ const Binary* Builder::Modulo(const type::Type* type, const Value* lhs, const Va
     return CreateBinary(Binary::Kind::kModulo, type, lhs, rhs);
 }
 
+const ir::Bitcast* Builder::Bitcast(const type::Type* type, const Value* val) {
+    return ir.instructions.Create<ir::Bitcast>(Temp(type), val);
+}
+
 }  // namespace tint::ir

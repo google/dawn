@@ -1437,7 +1437,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Add) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 + 4
+    EXPECT_EQ(d.AsString(), R"(%1 (u32) = 3 + 4
 )");
 }
 
@@ -1452,7 +1452,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Subtract) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 - 4
+    EXPECT_EQ(d.AsString(), R"(%1 (u32) = 3 - 4
 )");
 }
 
@@ -1467,7 +1467,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Multiply) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 * 4
+    EXPECT_EQ(d.AsString(), R"(%1 (u32) = 3 * 4
 )");
 }
 
@@ -1482,7 +1482,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Div) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 / 4
+    EXPECT_EQ(d.AsString(), R"(%1 (u32) = 3 / 4
 )");
 }
 
@@ -1497,7 +1497,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Modulo) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 % 4
+    EXPECT_EQ(d.AsString(), R"(%1 (u32) = 3 % 4
 )");
 }
 
@@ -1512,7 +1512,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_And) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 & 4
+    EXPECT_EQ(d.AsString(), R"(%1 (u32) = 3 & 4
 )");
 }
 
@@ -1527,7 +1527,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Or) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 | 4
+    EXPECT_EQ(d.AsString(), R"(%1 (u32) = 3 | 4
 )");
 }
 
@@ -1542,7 +1542,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Xor) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 ^ 4
+    EXPECT_EQ(d.AsString(), R"(%1 (u32) = 3 ^ 4
 )");
 }
 
@@ -1557,7 +1557,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = true && false
+    EXPECT_EQ(d.AsString(), R"(%1 (bool) = true && false
 )");
 }
 
@@ -1572,7 +1572,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = false || true
+    EXPECT_EQ(d.AsString(), R"(%1 (bool) = false || true
 )");
 }
 
@@ -1587,7 +1587,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Equal) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 == 4
+    EXPECT_EQ(d.AsString(), R"(%1 (bool) = 3 == 4
 )");
 }
 
@@ -1602,7 +1602,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_NotEqual) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 != 4
+    EXPECT_EQ(d.AsString(), R"(%1 (bool) = 3 != 4
 )");
 }
 
@@ -1617,7 +1617,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThan) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 < 4
+    EXPECT_EQ(d.AsString(), R"(%1 (bool) = 3 < 4
 )");
 }
 
@@ -1632,7 +1632,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThan) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 > 4
+    EXPECT_EQ(d.AsString(), R"(%1 (bool) = 3 > 4
 )");
 }
 
@@ -1647,7 +1647,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThanEqual) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 <= 4
+    EXPECT_EQ(d.AsString(), R"(%1 (bool) = 3 <= 4
 )");
 }
 
@@ -1662,7 +1662,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThanEqual) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 >= 4
+    EXPECT_EQ(d.AsString(), R"(%1 (bool) = 3 >= 4
 )");
 }
 
@@ -1677,7 +1677,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftLeft) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 << 4
+    EXPECT_EQ(d.AsString(), R"(%1 (u32) = 3 << 4
 )");
 }
 
@@ -1692,7 +1692,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftRight) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 >> 4
+    EXPECT_EQ(d.AsString(), R"(%1 (u32) = 3 >> 4
 )");
 }
 
@@ -1708,15 +1708,29 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block);
-    EXPECT_EQ(d.AsString(), R"(%1 = 3 >> 4
-%2 = %1 + 9
-%3 = 1 < %2
-%4 = 2.3 * 5.5
-%5 = 6.7 / %4
-%6 = 2.5 > %5
-%7 = %3 || %6
+    EXPECT_EQ(d.AsString(), R"(%1 (u32) = 3 >> 4
+%2 (u32) = %1 (u32) + 9
+%3 (bool) = 1 < %2 (u32)
+%4 (f32) = 2.3 * 5.5
+%5 (f32) = 6.7 / %4 (f32)
+%6 (bool) = 2.5 > %5 (f32)
+%7 (bool) = %3 (bool) || %6 (bool)
 )");
 }
 
+TEST_F(IR_BuilderImplTest, EmitExpression_Bitcast) {
+    auto* expr = Bitcast(ty.f32(), 3_u);
+    WrapInFunction(expr);
+
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
+    d.EmitBlockInstructions(b.current_flow_block);
+    EXPECT_EQ(d.AsString(), R"(%1 (f32) = bitcast(3)
+)");
+}
 }  // namespace
 }  // namespace tint::ir

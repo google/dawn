@@ -1,4 +1,4 @@
-// Copyright 2022 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,30 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <sstream>
+#include "src/tint/ir/bitcast.h"
+#include "src/tint/debug.h"
 
-#include "src/tint/ir/temp.h"
-#include "src/tint/ir/test_helper.h"
+TINT_INSTANTIATE_TYPEINFO(tint::ir::Bitcast);
 
 namespace tint::ir {
-namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
-
-using IR_TempTest = TestHelper;
-
-TEST_F(IR_TempTest, id) {
-    auto& b = CreateEmptyBuilder();
-
-    std::stringstream str;
-
-    b.builder.next_temp_id = Temp::Id(4);
-    auto* val = b.builder.Temp(b.builder.ir.types.Get<type::I32>());
-    EXPECT_EQ(4u, val->AsId());
-
-    val->ToString(str, program->Symbols());
-    EXPECT_EQ("%4 (i32)", str.str());
+Bitcast::Bitcast(const Value* result, const Value* val) : result_(result), val_(val) {
+    TINT_ASSERT(IR, result_);
+    TINT_ASSERT(IR, val_);
 }
 
-}  // namespace
+Bitcast::~Bitcast() = default;
+
+std::ostream& Bitcast::ToString(std::ostream& out, const SymbolTable& st) const {
+    Result()->ToString(out, st);
+    out << " = bitcast(";
+    val_->ToString(out, st);
+    out << ")";
+    return out;
+}
+
 }  // namespace tint::ir

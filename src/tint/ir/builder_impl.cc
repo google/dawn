@@ -16,6 +16,7 @@
 
 #include "src/tint/ast/alias.h"
 #include "src/tint/ast/binary_expression.h"
+#include "src/tint/ast/bitcast_expression.h"
 #include "src/tint/ast/block_statement.h"
 #include "src/tint/ast/bool_literal_expression.h"
 #include "src/tint/ast/break_if_statement.h"
@@ -522,7 +523,7 @@ utils::Result<const Value*> BuilderImpl::EmitExpression(const ast::Expression* e
         expr,
         // [&](const ast::IndexAccessorExpression* a) { return EmitIndexAccessor(a); },
         [&](const ast::BinaryExpression* b) { return EmitBinary(b); },
-        // [&](const ast::BitcastExpression* b) { return EmitBitcast(b); },
+        [&](const ast::BitcastExpression* b) { return EmitBitcast(b); },
         // [&](const ast::CallExpression* c) { return EmitCall(c); },
         // [&](const ast::IdentifierExpression* i) { return EmitIdentifier(i); },
         [&](const ast::LiteralExpression* l) { return EmitLiteral(l); },
@@ -624,6 +625,19 @@ utils::Result<const Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression*
             TINT_ICE(IR, diagnostics_) << "missing binary operand type";
             return utils::Failure;
     }
+
+    current_flow_block->instructions.Push(instr);
+    return utils::Result<const Value*>(instr->Result());
+}
+
+utils::Result<const Value*> BuilderImpl::EmitBitcast(const ast::BitcastExpression* expr) {
+    auto val = EmitExpression(expr->expr);
+    if (!val) {
+        return utils::Failure;
+    }
+
+    auto* sem = builder.ir.program->Sem().Get(expr);
+    auto* instr = builder.Bitcast(sem->Type(), val.Get());
 
     current_flow_block->instructions.Push(instr);
     return utils::Result<const Value*>(instr->Result());

@@ -678,6 +678,8 @@ if(${TINT_BUILD_IR})
   list(APPEND TINT_LIB_SRCS
     ir/binary.cc
     ir/binary.h
+    ir/bitcast.cc
+    ir/bitcast.h
     ir/block.cc
     ir/block.h
     ir/builder.cc
@@ -1378,6 +1380,7 @@ if(TINT_BUILD_TESTS)
   if (${TINT_BUILD_IR})
     list(APPEND TINT_TEST_SRCS
       ir/binary_test.cc
+      ir/bitcast_test.cc
       ir/builder_impl_test.cc
       ir/constant_test.cc
       ir/temp_test.cc
