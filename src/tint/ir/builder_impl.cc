@@ -518,7 +518,7 @@ bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
     return true;
 }
 
-utils::Result<const Value*> BuilderImpl::EmitExpression(const ast::Expression* expr) {
+utils::Result<Value*> BuilderImpl::EmitExpression(const ast::Expression* expr) {
     return tint::Switch(
         expr,
         // [&](const ast::IndexAccessorExpression* a) { return EmitIndexAccessor(a); },
@@ -553,7 +553,7 @@ bool BuilderImpl::EmitVariable(const ast::Variable* var) {
         });
 }
 
-utils::Result<const Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr) {
+utils::Result<Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr) {
     auto lhs = EmitExpression(expr->lhs);
     if (!lhs) {
         return utils::Failure;
@@ -565,7 +565,7 @@ utils::Result<const Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression*
     }
 
     auto* sem = builder.ir.program->Sem().Get(expr);
-    const Binary* instr = nullptr;
+    Binary* instr = nullptr;
     switch (expr->op) {
         case ast::BinaryOp::kAnd:
             instr = builder.And(sem->Type(), lhs.Get(), rhs.Get());
@@ -627,10 +627,10 @@ utils::Result<const Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression*
     }
 
     current_flow_block->instructions.Push(instr);
-    return utils::Result<const Value*>(instr->Result());
+    return instr->Result();
 }
 
-utils::Result<const Value*> BuilderImpl::EmitBitcast(const ast::BitcastExpression* expr) {
+utils::Result<Value*> BuilderImpl::EmitBitcast(const ast::BitcastExpression* expr) {
     auto val = EmitExpression(expr->expr);
     if (!val) {
         return utils::Failure;
@@ -640,10 +640,10 @@ utils::Result<const Value*> BuilderImpl::EmitBitcast(const ast::BitcastExpressio
     auto* instr = builder.Bitcast(sem->Type(), val.Get());
 
     current_flow_block->instructions.Push(instr);
-    return utils::Result<const Value*>(instr->Result());
+    return instr->Result();
 }
 
-utils::Result<const Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {
+utils::Result<Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {
     auto* sem = builder.ir.program->Sem().Get(lit);
     if (!sem) {
         diagnostics_.add_error(
@@ -661,7 +661,7 @@ utils::Result<const Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpressio
             lit->source);
         return utils::Failure;
     }
-    return utils::Result<const Value*>(builder.Constant(cv));
+    return builder.Constant(cv);
 }
 
 bool BuilderImpl::EmitType(const ast::Type* ty) {

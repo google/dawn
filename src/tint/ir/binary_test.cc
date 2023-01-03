@@ -511,5 +511,48 @@ TEST_F(IR_InstructionTest, CreateModulo) {
     EXPECT_EQ(str.str(), "%42 (i32) = 4 % 2");
 }
 
+TEST_F(IR_InstructionTest, Binary_Usage) {
+    auto& b = CreateEmptyBuilder();
+
+    b.builder.next_temp_id = Temp::Id(42);
+    const auto* instr = b.builder.And(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i),
+                                      b.builder.Constant(2_i));
+
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kAnd);
+
+    ASSERT_NE(instr->Result(), nullptr);
+    ASSERT_EQ(instr->Result()->Usage().Length(), 1);
+    EXPECT_EQ(instr->Result()->Usage()[0], instr);
+
+    ASSERT_NE(instr->LHS(), nullptr);
+    ASSERT_EQ(instr->LHS()->Usage().Length(), 1);
+    EXPECT_EQ(instr->LHS()->Usage()[0], instr);
+
+    ASSERT_NE(instr->RHS(), nullptr);
+    ASSERT_EQ(instr->RHS()->Usage().Length(), 1);
+    EXPECT_EQ(instr->RHS()->Usage()[0], instr);
+}
+
+TEST_F(IR_InstructionTest, Binary_Usage_DuplicateValue) {
+    auto& b = CreateEmptyBuilder();
+
+    auto val = b.builder.Constant(4_i);
+
+    b.builder.next_temp_id = Temp::Id(42);
+    const auto* instr = b.builder.And(b.builder.ir.types.Get<type::I32>(), val, val);
+
+    EXPECT_EQ(instr->GetKind(), Binary::Kind::kAnd);
+
+    ASSERT_NE(instr->Result(), nullptr);
+    ASSERT_EQ(instr->Result()->Usage().Length(), 1);
+    EXPECT_EQ(instr->Result()->Usage()[0], instr);
+
+    ASSERT_EQ(instr->LHS(), instr->RHS());
+
+    ASSERT_NE(instr->LHS(), nullptr);
+    ASSERT_EQ(instr->LHS()->Usage().Length(), 1);
+    EXPECT_EQ(instr->LHS()->Usage()[0], instr);
+}
+
 }  // namespace
 }  // namespace tint::ir

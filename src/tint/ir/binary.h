@@ -19,7 +19,6 @@
 
 #include "src/tint/castable.h"
 #include "src/tint/ir/instruction.h"
-#include "src/tint/ir/value.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/type.h"
 
@@ -59,7 +58,7 @@ class Binary : public Castable<Binary, Instruction> {
     /// @param result the result value
     /// @param lhs the lhs of the instruction
     /// @param rhs the rhs of the instruction
-    Binary(Kind kind, const Value* result, const Value* lhs, const Value* rhs);
+    Binary(Kind kind, Value* result, Value* lhs, Value* rhs);
     Binary(const Binary& instr) = delete;
     Binary(Binary&& instr) = delete;
     ~Binary() override;
@@ -69,9 +68,6 @@ class Binary : public Castable<Binary, Instruction> {
 
     /// @returns the kind of instruction
     Kind GetKind() const { return kind_; }
-
-    /// @returns the result value for the instruction
-    const Value* Result() const { return result_; }
 
     /// @returns the left-hand-side value for the instruction
     const Value* LHS() const { return lhs_; }
@@ -87,9 +83,8 @@ class Binary : public Castable<Binary, Instruction> {
 
   private:
     Kind kind_;
-    const Value* result_ = nullptr;
-    const Value* lhs_ = nullptr;
-    const Value* rhs_ = nullptr;
+    Value* lhs_ = nullptr;
+    Value* rhs_ = nullptr;
 };
 
 std::ostream& operator<<(std::ostream& out, const Binary&);

@@ -19,7 +19,6 @@
 
 #include "src/tint/castable.h"
 #include "src/tint/ir/instruction.h"
-#include "src/tint/ir/value.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/type.h"
 
@@ -31,16 +30,13 @@ class Bitcast : public Castable<Bitcast, Instruction> {
     /// Constructor
     /// @param result the result value
     /// @param val the value being bitcast
-    Bitcast(const Value* result, const Value* val);
+    Bitcast(Value* result, Value* val);
     Bitcast(const Bitcast& instr) = delete;
     Bitcast(Bitcast&& instr) = delete;
     ~Bitcast() override;
 
     Bitcast& operator=(const Bitcast& instr) = delete;
     Bitcast& operator=(Bitcast&& instr) = delete;
-
-    /// @returns the result value for the instruction
-    const Value* Result() const { return result_; }
 
     /// @returns the left-hand-side value for the instruction
     const Value* Val() const { return val_; }
@@ -52,8 +48,7 @@ class Bitcast : public Castable<Bitcast, Instruction> {
     std::ostream& ToString(std::ostream& out, const SymbolTable& st) const override;
 
   private:
-    const Value* result_ = nullptr;
-    const Value* val_ = nullptr;
+    Value* val_ = nullptr;
 };
 
 std::ostream& operator<<(std::ostream& out, const Bitcast&);

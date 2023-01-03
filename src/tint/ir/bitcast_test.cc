@@ -45,5 +45,21 @@ TEST_F(IR_InstructionTest, Bitcast) {
     EXPECT_EQ(str.str(), "%42 (i32) = bitcast(4)");
 }
 
+TEST_F(IR_InstructionTest, Bitcast_Usage) {
+    auto& b = CreateEmptyBuilder();
+
+    b.builder.next_temp_id = Temp::Id(42);
+    const auto* instr =
+        b.builder.Bitcast(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i));
+
+    ASSERT_NE(instr->Result(), nullptr);
+    ASSERT_EQ(instr->Result()->Usage().Length(), 1);
+    EXPECT_EQ(instr->Result()->Usage()[0], instr);
+
+    ASSERT_NE(instr->Val(), nullptr);
+    ASSERT_EQ(instr->Val()->Usage().Length(), 1);
+    EXPECT_EQ(instr->Val()->Usage()[0], instr);
+}
+
 }  // namespace
 }  // namespace tint::ir

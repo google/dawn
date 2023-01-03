@@ -141,7 +141,7 @@ class BuilderImpl {
     /// Emits an expression
     /// @param expr the expression to emit
     /// @returns true if successful, false otherwise
-    utils::Result<const Value*> EmitExpression(const ast::Expression* expr);
+    utils::Result<Value*> EmitExpression(const ast::Expression* expr);
 
     /// Emits a variable
     /// @param var the variable to emit
@@ -151,17 +151,17 @@ class BuilderImpl {
     /// Emits a binary expression
     /// @param expr the binary expression
     /// @returns the value storing the result if successful, utils::Failure otherwise
-    utils::Result<const Value*> EmitBinary(const ast::BinaryExpression* expr);
+    utils::Result<Value*> EmitBinary(const ast::BinaryExpression* expr);
 
     /// Emits a bitcast expression
     /// @param expr the bitcast expression
     /// @returns the value storing the result if successful, utils::Failure otherwise
-    utils::Result<const Value*> EmitBitcast(const ast::BitcastExpression* expr);
+    utils::Result<Value*> EmitBitcast(const ast::BitcastExpression* expr);
 
     /// Emits a literal expression
     /// @param lit the literal to emit
     /// @returns true if successful, false otherwise
-    utils::Result<const Value*> EmitLiteral(const ast::LiteralExpression* lit);
+    utils::Result<Value*> EmitLiteral(const ast::LiteralExpression* lit);
 
     /// Emits a type
     /// @param ty the type to emit

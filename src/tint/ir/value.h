@@ -20,6 +20,12 @@
 #include "src/tint/castable.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/type.h"
+#include "src/tint/utils/unique_vector.h"
+
+// Forward declarations
+namespace tint::ir {
+class Instruction;
+}  // namespace tint::ir
 
 namespace tint::ir {
 
@@ -35,6 +41,14 @@ class Value : public Castable<Value> {
     Value& operator=(const Value&) = delete;
     Value& operator=(Value&&) = delete;
 
+    /// Adds an instruction which uses this value.
+    /// @param instr the instruction
+    void AddUsage(const Instruction* instr) { uses_.Add(instr); }
+
+    /// @returns the vector of instructions which use this value. An instruction will only be
+    /// returned once even if that instruction uses the given value multiple times.
+    utils::VectorRef<const Instruction*> Usage() const { return uses_; }
+
     /// @returns the type of the value
     virtual const type::Type* Type() const = 0;
 
@@ -47,6 +61,9 @@ class Value : public Castable<Value> {
   protected:
     /// Constructor
     Value();
+
+  private:
+    utils::UniqueVector<const Instruction*, 4> uses_;
 };
 
 }  // namespace tint::ir
