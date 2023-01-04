@@ -1697,8 +1697,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftRight) {
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
-    auto* expr = LogicalOr(LessThan(1_u, Add(Shr(3_u, 4_u), 9_u)),
-                           GreaterThan(2.5_f, Div(6.7_f, Mul(2.3_f, 5.5_f))));
+    auto* expr = LogicalAnd(LessThan(1_u, Add(Shr(3_u, 4_u), 9_u)),
+                            GreaterThan(2.5_f, Div(6.7_f, Mul(2.3_f, 5.5_f))));
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1714,7 +1714,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
 %4 (f32) = 2.3 * 5.5
 %5 (f32) = 6.7 / %4 (f32)
 %6 (bool) = 2.5 > %5 (f32)
-%7 (bool) = %3 (bool) || %6 (bool)
+%7 (bool) = %3 (bool) && %6 (bool)
 )");
 }
 

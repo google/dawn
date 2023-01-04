@@ -1,0 +1,9 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void d() {
+  int j = 0;
+  for(; false; ) {
+  }
+}
+

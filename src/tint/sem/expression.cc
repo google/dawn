@@ -39,6 +39,9 @@ Expression::Expression(const ast::Expression* declaration,
       has_side_effects_(has_side_effects) {
     TINT_ASSERT(Semantic, type_);
     TINT_ASSERT(Semantic, (constant != nullptr) == (stage == EvaluationStage::kConstant));
+    if (constant != nullptr) {
+        TINT_ASSERT(Semantic, type_ == constant->Type());
+    }
 }
 
 Expression::~Expression() = default;

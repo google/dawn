@@ -2209,6 +2209,32 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Swizzle) {
 }
 
 ////////////////////////////////////////////////
+// Short-Circuit Mixed Constant and Runtime
+////////////////////////////////////////////////
+
+TEST_F(ResolverConstEvalTest, ShortCircuit_And_MixedConstantAndRuntime) {
+    // var j : i32;
+    // let result = false && j < (0 - 8);
+    auto* j = Decl(Var("j", ty.i32()));
+    auto* binary = LogicalAnd(Expr(false), LessThan("j", Sub(0_a, 8_a)));
+    auto* result = Let("result", binary);
+    WrapInFunction(j, result);
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ValidateAnd(Sem(), binary);
+}
+
+TEST_F(ResolverConstEvalTest, ShortCircuit_Or_MixedConstantAndRuntime) {
+    // var j : i32;
+    // let result = true || j < (0 - 8);
+    auto* j = Decl(Var("j", ty.i32()));
+    auto* binary = LogicalOr(Expr(true), LessThan("j", Sub(0_a, 8_a)));
+    auto* result = Let("result", binary);
+    WrapInFunction(j, result);
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ValidateOr(Sem(), binary);
+}
+
+////////////////////////////////////////////////
 // Short-Circuit Nested
 ////////////////////////////////////////////////
 

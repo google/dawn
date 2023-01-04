@@ -356,7 +356,7 @@ const type::AbstractFloat* build_fa(MatchState& state) {
 }
 
 bool match_fa(MatchState& state, const type::Type* ty) {
-    return (state.earliest_eval_stage == sem::EvaluationStage::kConstant) &&
+    return (state.earliest_eval_stage <= sem::EvaluationStage::kConstant) &&
            ty->IsAnyOf<Any, type::AbstractNumeric>();
 }
 
@@ -365,7 +365,7 @@ const type::AbstractInt* build_ia(MatchState& state) {
 }
 
 bool match_ia(MatchState& state, const type::Type* ty) {
-    return (state.earliest_eval_stage == sem::EvaluationStage::kConstant) &&
+    return (state.earliest_eval_stage <= sem::EvaluationStage::kConstant) &&
            ty->IsAnyOf<Any, type::AbstractInt>();
 }
 

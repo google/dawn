@@ -2620,13 +2620,18 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
     }
 
     const constant::Value* val = nullptr;
-    if (auto r = const_eval_.Literal(ty, literal)) {
-        val = r.Get();
-    } else {
-        return nullptr;
+    auto stage = sem::EvaluationStage::kConstant;
+    if (skip_const_eval_.Contains(literal)) {
+        stage = sem::EvaluationStage::kNotEvaluated;
     }
-    return builder_->create<sem::Expression>(literal, ty, sem::EvaluationStage::kConstant,
-                                             current_statement_, std::move(val),
+    if (stage == sem::EvaluationStage::kConstant) {
+        if (auto r = const_eval_.Literal(ty, literal)) {
+            val = r.Get();
+        } else {
+            return nullptr;
+        }
+    }
+    return builder_->create<sem::Expression>(literal, ty, stage, current_statement_, std::move(val),
                                              /* has_side_effects */ false);
 }
 
@@ -2899,29 +2904,36 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
     }
 
     const constant::Value* value = nullptr;
-    if (stage == sem::EvaluationStage::kConstant) {
-        if (op.const_eval_fn) {
-            if (skip_const_eval_.Contains(expr)) {
-                stage = sem::EvaluationStage::kNotEvaluated;
-            } else if (skip_const_eval_.Contains(expr->rhs)) {
-                // Only the rhs should be short-circuited, use the lhs value
-                value = lhs->ConstantValue();
+    if (skip_const_eval_.Contains(expr)) {
+        // This expression is short-circuited by an ancestor expression.
+        // Do not const-eval.
+        stage = sem::EvaluationStage::kNotEvaluated;
+    } else if (lhs->Stage() == sem::EvaluationStage::kConstant &&
+               rhs->Stage() == sem::EvaluationStage::kNotEvaluated) {
+        // Short-circuiting binary expression. Use the LHS value and stage.
+        value = lhs->ConstantValue();
+        stage = sem::EvaluationStage::kConstant;
+    } else if (stage == sem::EvaluationStage::kConstant) {
+        // Both LHS and RHS have expressions that are constant evaluation stage.
+        if (op.const_eval_fn) {  // Do we have a @const operator?
+            // Yes. Perform any required abstract argument values implicit conversions to the
+            // overload parameter types, and const-eval.
+            utils::Vector const_args{lhs->ConstantValue(), rhs->ConstantValue()};
+            // Implicit conversion (e.g. AInt -> AFloat)
+            if (!Convert(const_args[0], op.lhs, lhs->Declaration()->source)) {
+                return nullptr;
+            }
+            if (!Convert(const_args[1], op.rhs, rhs->Declaration()->source)) {
+                return nullptr;
+            }
+            if (auto r = (const_eval_.*op.const_eval_fn)(op.result, const_args, expr->source)) {
+                value = r.Get();
             } else {
-                auto const_args = utils::Vector{lhs->ConstantValue(), rhs->ConstantValue()};
-                // Implicit conversion (e.g. AInt -> AFloat)
-                if (!Convert(const_args[0], op.lhs, lhs->Declaration()->source)) {
-                    return nullptr;
-                }
-                if (!Convert(const_args[1], op.rhs, rhs->Declaration()->source)) {
-                    return nullptr;
-                }
-                if (auto r = (const_eval_.*op.const_eval_fn)(op.result, const_args, expr->source)) {
-                    value = r.Get();
-                } else {
-                    return nullptr;
-                }
+                return nullptr;
             }
         } else {
+            // The arguments have constant values, but the operator cannot be const-evaluated. This
+            // can only be evaluated at runtime.
             stage = sem::EvaluationStage::kRuntime;
         }
     }
