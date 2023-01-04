@@ -405,11 +405,13 @@ Token Lexer::try_float() {
         }
     }
 
+    TINT_BEGIN_DISABLE_WARNING(FLOAT_EQUAL);
     if (value == HUGE_VAL || -value == HUGE_VAL) {
         return {Token::Type::kError, source, "value cannot be represented as 'abstract-float'"};
     } else {
         return {Token::Type::kFloatLiteral, source, value};
     }
+    TINT_END_DISABLE_WARNING(FLOAT_EQUAL);
 }
 
 Token Lexer::try_hex_float() {
