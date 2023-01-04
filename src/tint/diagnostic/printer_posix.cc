@@ -42,9 +42,9 @@ bool supports_colors(FILE* f) {
     return true;
 }
 
-class PrinterLinux : public Printer {
+class PrinterPosix : public Printer {
   public:
-    PrinterLinux(FILE* f, bool colors) : file(f), use_colors(colors && supports_colors(f)) {}
+    PrinterPosix(FILE* f, bool colors) : file(f), use_colors(colors && supports_colors(f)) {}
 
     void write(const std::string& str, const Style& style) override {
         write_color(style.color, style.bold);
@@ -91,7 +91,7 @@ class PrinterLinux : public Printer {
 }  // namespace
 
 std::unique_ptr<Printer> Printer::create(FILE* out, bool use_colors) {
-    return std::make_unique<PrinterLinux>(out, use_colors);
+    return std::make_unique<PrinterPosix>(out, use_colors);
 }
 
 }  // namespace tint::diag

@@ -572,7 +572,7 @@ tint_generated(sem/parameter_usage)
 tint_generated(type/short_name BENCH TEST)
 
 if(UNIX)
-  list(APPEND TINT_LIB_SRCS diagnostic/printer_linux.cc)
+  list(APPEND TINT_LIB_SRCS diagnostic/printer_posix.cc)
 elseif(WIN32)
   list(APPEND TINT_LIB_SRCS diagnostic/printer_windows.cc)
 else()
