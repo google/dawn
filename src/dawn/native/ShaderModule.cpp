@@ -529,7 +529,6 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
     if (!entryPoint.overrides.empty()) {
         const auto& name2Id = inspector->GetNamedOverrideIds();
-        const auto& id2Scalar = inspector->GetOverrideDefaultValues();
 
         for (auto& c : entryPoint.overrides) {
             auto id = name2Id.at(c.name);
