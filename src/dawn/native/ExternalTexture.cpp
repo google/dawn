@@ -209,66 +209,105 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
     const float* dstFn = descriptor->dstTransferFunctionParameters;
     std::copy(dstFn, dstFn + 7, params.gammaEncodingParams.begin());
 
-    // These scale factors perform part of the cropping operation. These default to 1, so we can use
-    // them directly for performing rotation in the matrix later.
-    float xScale = descriptor->visibleRect.width;
-    float yScale = descriptor->visibleRect.height;
+    // Unlike WGSL, which stores matrices in column vectors, the following arithmetic uses row
+    // vectors, so elements are stored in the following order:
+    // ┌         ┐
+    // │ 0, 1, 2 │
+    // │ 3, 4, 5 │
+    // └         ┘
+    // The matrix is transposed at the end.
+    using mat2x3 = std::array<float, 6>;
 
-    // In the shader, we must convert UV coordinates from the {0, 1} space to the {-0.5, 0.5} space
-    // to do rotation. Ideally, we want to combine the rotate, flip-Y operations in a single matrix
-    // operation - but this is complicated because scaling most easily occurs in the {0, 1} space.
-    // We can work around this and perform scaling in the {-0.5, 0.5} space by multiplying the
-    // needed conversion constant "+ 0.5" by the scale factor. We then can do this all within a
-    // single matrix operation by calculating and adding this value to the offset specified in the
-    // matrix. For reference, this is the entire operation needed is:
-    //
-    //    newCoords = vec3<f32>((coord - 0.5f), 1.0f) * coordTransformationMatrix) + (scaleFactor *
-    //    0.5)
-    //
-    // Because we combine the ending (scaleFactor * 0.5) into the crop offset within the matrix, the
-    // shader is actually:
-    //
-    //    newCoords = vec3<f32>((coord - 0.5f), 1.0f) * params.coordTransformationMatrix;
-    //
-    // TODO(dawn:1614): Incorporate the "- 0.5f" into the matrix.
-    float xOffset = descriptor->visibleRect.x + 0.5f * xScale;
-    float yOffset = descriptor->visibleRect.y + 0.5f * yScale;
+    // Multiplies the two mat2x3 matrices, by treating the RHS matrix as a mat3x3 where the last row
+    // is [0, 0, 1].
+    auto Mul = [&](const mat2x3& lhs, const mat2x3& rhs) {
+        auto& a = lhs[0];
+        auto& b = lhs[1];
+        auto& c = lhs[2];
+        auto& d = lhs[3];
+        auto& e = lhs[4];
+        auto& f = lhs[5];
+        auto& g = rhs[0];
+        auto& h = rhs[1];
+        auto& i = rhs[2];
+        auto& j = rhs[3];
+        auto& k = rhs[4];
+        auto& l = rhs[5];
+        // ┌         ┐   ┌         ┐
+        // │ a, b, c │   │ g, h, i │
+        // │ d, e, f │ x │ j, k, l │
+        // └         ┘   │ 0, 0, 1 │
+        //               └         ┘
+        return mat2x3{
+            a * g + b * j,      //
+            a * h + b * k,      //
+            a * i + b * l + c,  //
+            d * g + e * j,      //
+            d * h + e * k,      //
+            d * i + e * l + f,  //
+        };
+    };
 
-    // Flip-Y can be done by simply negating the scaling factor in the y-plane. The position of the
-    // y-plane scaling factor in the matrix can be different depending on the rotation.
-    float flipY = 1;
+    auto Scale = [&](const mat2x3& m, float x, float y) {
+        return Mul(mat2x3{x, 0, 0, 0, y, 0}, m);
+    };
+
+    auto Translate = [&](const mat2x3& m, float x, float y) {
+        return Mul(mat2x3{1, 0, x, 0, 1, y}, m);
+    };
+
+    mat2x3 coordTransformMatrix = {
+        1, 0, 0,  //
+        0, 1, 0,  //
+    };
+
+    // Offset the coordinates so the center texel is at the origin, so we can apply rotations and
+    // y-flips. After translation, coordinates range from [-0.5 .. +0.5] in both U and V.
+    coordTransformMatrix = Translate(coordTransformMatrix, -0.5, -0.5);
+
+    // If the texture needs flipping, mirror in Y.
     if (descriptor->flipY) {
-        flipY = -1;
+        coordTransformMatrix = Scale(coordTransformMatrix, 1, -1);
     }
 
-    // This block creates a 2x3 matrix which when multiplied by UV coordinates in a shader performs
-    // rotation, flip-Y and cropping operations.
+    // Apply rotations as needed.
     switch (descriptor->rotation) {
         case wgpu::ExternalTextureRotation::Rotate0Degrees:
-            params.coordTransformMatrix = {xScale,  0.0,             //
-                                           xOffset, 0.0,             //
-                                           0.0,     flipY * yScale,  //
-                                           yOffset, 0.0};
             break;
         case wgpu::ExternalTextureRotation::Rotate90Degrees:
-            params.coordTransformMatrix = {0.0,     flipY * yScale,  //
-                                           xOffset, 0.0,             //
-                                           -xScale, 0.0,             //
-                                           yOffset, 0.0};
+            coordTransformMatrix = Mul(mat2x3{0, +1, 0,   // x' = y
+                                              -1, 0, 0},  // y' = -x
+                                       coordTransformMatrix);
             break;
         case wgpu::ExternalTextureRotation::Rotate180Degrees:
-            params.coordTransformMatrix = {-xScale, 0.0,              //
-                                           xOffset, 0.0,              //
-                                           0.0,     flipY * -yScale,  //
-                                           yOffset, 0.0};
+            coordTransformMatrix = Mul(mat2x3{-1, 0, 0,   // x' = -x
+                                              0, -1, 0},  // y' = -y
+                                       coordTransformMatrix);
             break;
         case wgpu::ExternalTextureRotation::Rotate270Degrees:
-            params.coordTransformMatrix = {0.0,     flipY * -yScale,  //
-                                           xOffset, 0.0,              //
-                                           xScale,  0.0,              //
-                                           yOffset, 0.0};
+            coordTransformMatrix = Mul(mat2x3{0, -1, 0,   // x' = -y
+                                              +1, 0, 0},  // y' = x
+                                       coordTransformMatrix);
             break;
     }
+
+    // Offset the coordinates so the bottom-left texel is at origin.
+    // After translation, coordinates range from [0 .. 1] in both U and V.
+    coordTransformMatrix = Translate(coordTransformMatrix, 0.5, 0.5);
+
+    // Finally, scale and translate based on the visible rect. This applies cropping.
+    coordTransformMatrix =
+        Scale(coordTransformMatrix, descriptor->visibleRect.width, descriptor->visibleRect.height);
+    coordTransformMatrix =
+        Translate(coordTransformMatrix, descriptor->visibleRect.x, descriptor->visibleRect.y);
+
+    // Transpose the mat2x3 into column vectors for use by WGSL.
+    params.coordTransformMatrix[0] = coordTransformMatrix[0];
+    params.coordTransformMatrix[1] = coordTransformMatrix[3];
+    params.coordTransformMatrix[2] = coordTransformMatrix[1];
+    params.coordTransformMatrix[3] = coordTransformMatrix[4];
+    params.coordTransformMatrix[4] = coordTransformMatrix[2];
+    params.coordTransformMatrix[5] = coordTransformMatrix[5];
 
     DAWN_TRY(device->GetQueue()->WriteBuffer(mParamsBuffer.Get(), 0, &params,
                                              sizeof(ExternalTextureParams)));

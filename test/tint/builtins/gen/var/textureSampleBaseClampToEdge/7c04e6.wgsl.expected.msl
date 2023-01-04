@@ -33,7 +33,8 @@ struct ExternalTextureParams {
   /* 0x0040 */ GammaTransferParams gammaDecodeParams;
   /* 0x0060 */ GammaTransferParams gammaEncodeParams;
   /* 0x0080 */ float3x3 gamutConversionMatrix;
-  /* 0x00b0 */ float2x3 coordTransformationMatrix;
+  /* 0x00b0 */ float3x2 coordTransformationMatrix;
+  /* 0x00c8 */ tint_array<int8_t, 8> tint_pad_1;
 };
 
 float3 gammaCorrection(float3 v, GammaTransferParams params) {
@@ -44,7 +45,7 @@ float3 gammaCorrection(float3 v, GammaTransferParams params) {
 }
 
 float4 textureSampleExternal(texture2d<float, access::sample> plane0, texture2d<float, access::sample> plane1, sampler smp, float2 coord, ExternalTextureParams params) {
-  float2 const modifiedCoords = (float3((coord - 0.5f), 1.0f) * params.coordTransformationMatrix);
+  float2 const modifiedCoords = (params.coordTransformationMatrix * float3(coord, 1.0f));
   float2 const plane0_dims = float2(uint2(plane0.get_width(0), plane0.get_height(0)));
   float2 const plane0_half_texel = (float2(0.5f) / plane0_dims);
   float2 const plane0_clamped = clamp(modifiedCoords, plane0_half_texel, (1.0f - plane0_half_texel));

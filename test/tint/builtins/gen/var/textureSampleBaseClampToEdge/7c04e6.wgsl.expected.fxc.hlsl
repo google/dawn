@@ -15,7 +15,7 @@ struct ExternalTextureParams {
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   float3x3 gamutConversionMatrix;
-  float2x3 coordTransformationMatrix;
+  float3x2 coordTransformationMatrix;
 };
 
 Texture2D<float4> ext_tex_plane_1 : register(t2, space1);
@@ -33,7 +33,7 @@ float3 gammaCorrection(float3 v, GammaTransferParams params) {
 }
 
 float4 textureSampleExternal(Texture2D<float4> plane0, Texture2D<float4> plane1, SamplerState smp, float2 coord, ExternalTextureParams params) {
-  const float2 modifiedCoords = mul(params.coordTransformationMatrix, float3((coord - 0.5f), 1.0f));
+  const float2 modifiedCoords = mul(float3(coord, 1.0f), params.coordTransformationMatrix);
   int3 tint_tmp;
   plane0.GetDimensions(0, tint_tmp.x, tint_tmp.y, tint_tmp.z);
   const float2 plane0_dims = float2(tint_tmp.xy);
@@ -74,8 +74,8 @@ GammaTransferParams tint_symbol_5(uint4 buffer[13], uint offset) {
   const uint scalar_offset_8 = ((offset + 20u)) / 4;
   const uint scalar_offset_9 = ((offset + 24u)) / 4;
   const uint scalar_offset_10 = ((offset + 28u)) / 4;
-  const GammaTransferParams tint_symbol_10 = {asfloat(buffer[scalar_offset_3 / 4][scalar_offset_3 % 4]), asfloat(buffer[scalar_offset_4 / 4][scalar_offset_4 % 4]), asfloat(buffer[scalar_offset_5 / 4][scalar_offset_5 % 4]), asfloat(buffer[scalar_offset_6 / 4][scalar_offset_6 % 4]), asfloat(buffer[scalar_offset_7 / 4][scalar_offset_7 % 4]), asfloat(buffer[scalar_offset_8 / 4][scalar_offset_8 % 4]), asfloat(buffer[scalar_offset_9 / 4][scalar_offset_9 % 4]), buffer[scalar_offset_10 / 4][scalar_offset_10 % 4]};
-  return tint_symbol_10;
+  const GammaTransferParams tint_symbol_11 = {asfloat(buffer[scalar_offset_3 / 4][scalar_offset_3 % 4]), asfloat(buffer[scalar_offset_4 / 4][scalar_offset_4 % 4]), asfloat(buffer[scalar_offset_5 / 4][scalar_offset_5 % 4]), asfloat(buffer[scalar_offset_6 / 4][scalar_offset_6 % 4]), asfloat(buffer[scalar_offset_7 / 4][scalar_offset_7 % 4]), asfloat(buffer[scalar_offset_8 / 4][scalar_offset_8 % 4]), asfloat(buffer[scalar_offset_9 / 4][scalar_offset_9 % 4]), buffer[scalar_offset_10 / 4][scalar_offset_10 % 4]};
+  return tint_symbol_11;
 }
 
 float3x3 tint_symbol_7(uint4 buffer[13], uint offset) {
@@ -85,17 +85,21 @@ float3x3 tint_symbol_7(uint4 buffer[13], uint offset) {
   return float3x3(asfloat(buffer[scalar_offset_11 / 4].xyz), asfloat(buffer[scalar_offset_12 / 4].xyz), asfloat(buffer[scalar_offset_13 / 4].xyz));
 }
 
-float2x3 tint_symbol_9(uint4 buffer[13], uint offset) {
+float3x2 tint_symbol_9(uint4 buffer[13], uint offset) {
   const uint scalar_offset_14 = ((offset + 0u)) / 4;
-  const uint scalar_offset_15 = ((offset + 16u)) / 4;
-  return float2x3(asfloat(buffer[scalar_offset_14 / 4].xyz), asfloat(buffer[scalar_offset_15 / 4].xyz));
+  uint4 ubo_load = buffer[scalar_offset_14 / 4];
+  const uint scalar_offset_15 = ((offset + 8u)) / 4;
+  uint4 ubo_load_1 = buffer[scalar_offset_15 / 4];
+  const uint scalar_offset_16 = ((offset + 16u)) / 4;
+  uint4 ubo_load_2 = buffer[scalar_offset_16 / 4];
+  return float3x2(asfloat(((scalar_offset_14 & 2) ? ubo_load.zw : ubo_load.xy)), asfloat(((scalar_offset_15 & 2) ? ubo_load_1.zw : ubo_load_1.xy)), asfloat(((scalar_offset_16 & 2) ? ubo_load_2.zw : ubo_load_2.xy)));
 }
 
 ExternalTextureParams tint_symbol_1(uint4 buffer[13], uint offset) {
-  const uint scalar_offset_16 = ((offset + 0u)) / 4;
-  const uint scalar_offset_17 = ((offset + 4u)) / 4;
-  const ExternalTextureParams tint_symbol_11 = {buffer[scalar_offset_16 / 4][scalar_offset_16 % 4], buffer[scalar_offset_17 / 4][scalar_offset_17 % 4], tint_symbol_3(buffer, (offset + 16u)), tint_symbol_5(buffer, (offset + 64u)), tint_symbol_5(buffer, (offset + 96u)), tint_symbol_7(buffer, (offset + 128u)), tint_symbol_9(buffer, (offset + 176u))};
-  return tint_symbol_11;
+  const uint scalar_offset_17 = ((offset + 0u)) / 4;
+  const uint scalar_offset_18 = ((offset + 4u)) / 4;
+  const ExternalTextureParams tint_symbol_12 = {buffer[scalar_offset_17 / 4][scalar_offset_17 % 4], buffer[scalar_offset_18 / 4][scalar_offset_18 % 4], tint_symbol_3(buffer, (offset + 16u)), tint_symbol_5(buffer, (offset + 64u)), tint_symbol_5(buffer, (offset + 96u)), tint_symbol_7(buffer, (offset + 128u)), tint_symbol_9(buffer, (offset + 176u))};
+  return tint_symbol_12;
 }
 
 void textureSampleBaseClampToEdge_7c04e6() {

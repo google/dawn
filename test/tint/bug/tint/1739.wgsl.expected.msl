@@ -37,7 +37,8 @@ struct ExternalTextureParams {
   /* 0x0040 */ GammaTransferParams gammaDecodeParams;
   /* 0x0060 */ GammaTransferParams gammaEncodeParams;
   /* 0x0080 */ float3x3 gamutConversionMatrix;
-  /* 0x00b0 */ float2x3 coordTransformationMatrix;
+  /* 0x00b0 */ float3x2 coordTransformationMatrix;
+  /* 0x00c8 */ tint_array<int8_t, 8> tint_pad_1;
 };
 
 float3 gammaCorrection(float3 v, GammaTransferParams params) {

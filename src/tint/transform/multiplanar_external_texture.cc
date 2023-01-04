@@ -263,7 +263,7 @@ struct MultiplanarExternalTexture::State {
             b.Member("gammaDecodeParams", b.ty.type_name("GammaTransferParams")),
             b.Member("gammaEncodeParams", b.ty.type_name("GammaTransferParams")),
             b.Member("gamutConversionMatrix", b.ty.mat3x3<f32>()),
-            b.Member("coordTransformationMatrix", b.ty.mat2x3<f32>())};
+            b.Member("coordTransformationMatrix", b.ty.mat3x2<f32>())};
 
         params_struct_sym = b.Symbols().New("ExternalTextureParams");
 
@@ -316,12 +316,9 @@ struct MultiplanarExternalTexture::State {
         const ast::CallExpression* plane_1_call = nullptr;
         switch (call_type) {
             case sem::BuiltinType::kTextureSampleBaseClampToEdge:
-                // TODO(dawn:1614): Change this statement to incorporate the "- 0.5" into the
-                // matrix.
-                stmts.Push(
-                    b.Decl(b.Let("modifiedCoords",
-                                 b.Mul(b.vec3<f32>(b.Sub("coord", f32(0.5)), f32(1.0f)),
-                                       b.MemberAccessor("params", "coordTransformationMatrix")))));
+                stmts.Push(b.Decl(b.Let(
+                    "modifiedCoords", b.Mul(b.MemberAccessor("params", "coordTransformationMatrix"),
+                                            b.vec3<f32>("coord", 1_a)))));
 
                 stmts.Push(b.Decl(b.Let(
                     "plane0_dims",

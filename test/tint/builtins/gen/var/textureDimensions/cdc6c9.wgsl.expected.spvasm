@@ -14,13 +14,13 @@
                OpName %value "value"
                OpName %vertex_point_size "vertex_point_size"
                OpName %ext_tex_plane_1 "ext_tex_plane_1"
-               OpName %ext_tex_params_block "ext_tex_params_block"
-               OpMemberName %ext_tex_params_block 0 "inner"
-               OpName %ExternalTextureParams "ExternalTextureParams"
-               OpMemberName %ExternalTextureParams 0 "numPlanes"
-               OpMemberName %ExternalTextureParams 1 "doYuvToRgbConversionOnly"
-               OpMemberName %ExternalTextureParams 2 "yuvToRgbConversionMatrix"
-               OpMemberName %ExternalTextureParams 3 "gammaDecodeParams"
+               OpName %ext_tex_params_block_std140 "ext_tex_params_block_std140"
+               OpMemberName %ext_tex_params_block_std140 0 "inner"
+               OpName %ExternalTextureParams_std140 "ExternalTextureParams_std140"
+               OpMemberName %ExternalTextureParams_std140 0 "numPlanes"
+               OpMemberName %ExternalTextureParams_std140 1 "doYuvToRgbConversionOnly"
+               OpMemberName %ExternalTextureParams_std140 2 "yuvToRgbConversionMatrix"
+               OpMemberName %ExternalTextureParams_std140 3 "gammaDecodeParams"
                OpName %GammaTransferParams "GammaTransferParams"
                OpMemberName %GammaTransferParams 0 "G"
                OpMemberName %GammaTransferParams 1 "A"
@@ -30,9 +30,11 @@
                OpMemberName %GammaTransferParams 5 "E"
                OpMemberName %GammaTransferParams 6 "F"
                OpMemberName %GammaTransferParams 7 "padding"
-               OpMemberName %ExternalTextureParams 4 "gammaEncodeParams"
-               OpMemberName %ExternalTextureParams 5 "gamutConversionMatrix"
-               OpMemberName %ExternalTextureParams 6 "coordTransformationMatrix"
+               OpMemberName %ExternalTextureParams_std140 4 "gammaEncodeParams"
+               OpMemberName %ExternalTextureParams_std140 5 "gamutConversionMatrix"
+               OpMemberName %ExternalTextureParams_std140 6 "coordTransformationMatrix_0"
+               OpMemberName %ExternalTextureParams_std140 7 "coordTransformationMatrix_1"
+               OpMemberName %ExternalTextureParams_std140 8 "coordTransformationMatrix_2"
                OpName %ext_tex_params "ext_tex_params"
                OpName %arg_0 "arg_0"
                OpName %textureDimensions_cdc6c9 "textureDimensions_cdc6c9"
@@ -45,14 +47,14 @@
                OpDecorate %vertex_point_size BuiltIn PointSize
                OpDecorate %ext_tex_plane_1 DescriptorSet 1
                OpDecorate %ext_tex_plane_1 Binding 1
-               OpDecorate %ext_tex_params_block Block
-               OpMemberDecorate %ext_tex_params_block 0 Offset 0
-               OpMemberDecorate %ExternalTextureParams 0 Offset 0
-               OpMemberDecorate %ExternalTextureParams 1 Offset 4
-               OpMemberDecorate %ExternalTextureParams 2 Offset 16
-               OpMemberDecorate %ExternalTextureParams 2 ColMajor
-               OpMemberDecorate %ExternalTextureParams 2 MatrixStride 16
-               OpMemberDecorate %ExternalTextureParams 3 Offset 64
+               OpDecorate %ext_tex_params_block_std140 Block
+               OpMemberDecorate %ext_tex_params_block_std140 0 Offset 0
+               OpMemberDecorate %ExternalTextureParams_std140 0 Offset 0
+               OpMemberDecorate %ExternalTextureParams_std140 1 Offset 4
+               OpMemberDecorate %ExternalTextureParams_std140 2 Offset 16
+               OpMemberDecorate %ExternalTextureParams_std140 2 ColMajor
+               OpMemberDecorate %ExternalTextureParams_std140 2 MatrixStride 16
+               OpMemberDecorate %ExternalTextureParams_std140 3 Offset 64
                OpMemberDecorate %GammaTransferParams 0 Offset 0
                OpMemberDecorate %GammaTransferParams 1 Offset 4
                OpMemberDecorate %GammaTransferParams 2 Offset 8
@@ -61,13 +63,13 @@
                OpMemberDecorate %GammaTransferParams 5 Offset 20
                OpMemberDecorate %GammaTransferParams 6 Offset 24
                OpMemberDecorate %GammaTransferParams 7 Offset 28
-               OpMemberDecorate %ExternalTextureParams 4 Offset 96
-               OpMemberDecorate %ExternalTextureParams 5 Offset 128
-               OpMemberDecorate %ExternalTextureParams 5 ColMajor
-               OpMemberDecorate %ExternalTextureParams 5 MatrixStride 16
-               OpMemberDecorate %ExternalTextureParams 6 Offset 176
-               OpMemberDecorate %ExternalTextureParams 6 ColMajor
-               OpMemberDecorate %ExternalTextureParams 6 MatrixStride 16
+               OpMemberDecorate %ExternalTextureParams_std140 4 Offset 96
+               OpMemberDecorate %ExternalTextureParams_std140 5 Offset 128
+               OpMemberDecorate %ExternalTextureParams_std140 5 ColMajor
+               OpMemberDecorate %ExternalTextureParams_std140 5 MatrixStride 16
+               OpMemberDecorate %ExternalTextureParams_std140 6 Offset 176
+               OpMemberDecorate %ExternalTextureParams_std140 7 Offset 184
+               OpMemberDecorate %ExternalTextureParams_std140 8 Offset 192
                OpDecorate %ext_tex_params NonWritable
                OpDecorate %ext_tex_params DescriptorSet 1
                OpDecorate %ext_tex_params Binding 2
@@ -89,11 +91,11 @@
 %GammaTransferParams = OpTypeStruct %float %float %float %float %float %float %float %uint
     %v3float = OpTypeVector %float 3
 %mat3v3float = OpTypeMatrix %v3float 3
-%mat2v3float = OpTypeMatrix %v3float 2
-%ExternalTextureParams = OpTypeStruct %uint %uint %mat3v4float %GammaTransferParams %GammaTransferParams %mat3v3float %mat2v3float
-%ext_tex_params_block = OpTypeStruct %ExternalTextureParams
-%_ptr_Uniform_ext_tex_params_block = OpTypePointer Uniform %ext_tex_params_block
-%ext_tex_params = OpVariable %_ptr_Uniform_ext_tex_params_block Uniform
+    %v2float = OpTypeVector %float 2
+%ExternalTextureParams_std140 = OpTypeStruct %uint %uint %mat3v4float %GammaTransferParams %GammaTransferParams %mat3v3float %v2float %v2float %v2float
+%ext_tex_params_block_std140 = OpTypeStruct %ExternalTextureParams_std140
+%_ptr_Uniform_ext_tex_params_block_std140 = OpTypePointer Uniform %ext_tex_params_block_std140
+%ext_tex_params = OpVariable %_ptr_Uniform_ext_tex_params_block_std140 Uniform
       %arg_0 = OpVariable %_ptr_UniformConstant_11 UniformConstant
        %void = OpTypeVoid
          %23 = OpTypeFunction %void

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 176
+; Bound: 190
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
@@ -15,13 +15,13 @@
                OpName %value "value"
                OpName %vertex_point_size "vertex_point_size"
                OpName %ext_tex_plane_1 "ext_tex_plane_1"
-               OpName %ext_tex_params_block "ext_tex_params_block"
-               OpMemberName %ext_tex_params_block 0 "inner"
-               OpName %ExternalTextureParams "ExternalTextureParams"
-               OpMemberName %ExternalTextureParams 0 "numPlanes"
-               OpMemberName %ExternalTextureParams 1 "doYuvToRgbConversionOnly"
-               OpMemberName %ExternalTextureParams 2 "yuvToRgbConversionMatrix"
-               OpMemberName %ExternalTextureParams 3 "gammaDecodeParams"
+               OpName %ext_tex_params_block_std140 "ext_tex_params_block_std140"
+               OpMemberName %ext_tex_params_block_std140 0 "inner"
+               OpName %ExternalTextureParams_std140 "ExternalTextureParams_std140"
+               OpMemberName %ExternalTextureParams_std140 0 "numPlanes"
+               OpMemberName %ExternalTextureParams_std140 1 "doYuvToRgbConversionOnly"
+               OpMemberName %ExternalTextureParams_std140 2 "yuvToRgbConversionMatrix"
+               OpMemberName %ExternalTextureParams_std140 3 "gammaDecodeParams"
                OpName %GammaTransferParams "GammaTransferParams"
                OpMemberName %GammaTransferParams 0 "G"
                OpMemberName %GammaTransferParams 1 "A"
@@ -31,15 +31,25 @@
                OpMemberName %GammaTransferParams 5 "E"
                OpMemberName %GammaTransferParams 6 "F"
                OpMemberName %GammaTransferParams 7 "padding"
-               OpMemberName %ExternalTextureParams 4 "gammaEncodeParams"
-               OpMemberName %ExternalTextureParams 5 "gamutConversionMatrix"
-               OpMemberName %ExternalTextureParams 6 "coordTransformationMatrix"
+               OpMemberName %ExternalTextureParams_std140 4 "gammaEncodeParams"
+               OpMemberName %ExternalTextureParams_std140 5 "gamutConversionMatrix"
+               OpMemberName %ExternalTextureParams_std140 6 "coordTransformationMatrix_0"
+               OpMemberName %ExternalTextureParams_std140 7 "coordTransformationMatrix_1"
+               OpMemberName %ExternalTextureParams_std140 8 "coordTransformationMatrix_2"
                OpName %ext_tex_params "ext_tex_params"
                OpName %arg_0 "arg_0"
                OpName %arg_1 "arg_1"
                OpName %gammaCorrection "gammaCorrection"
                OpName %v "v"
                OpName %params "params"
+               OpName %ExternalTextureParams "ExternalTextureParams"
+               OpMemberName %ExternalTextureParams 0 "numPlanes"
+               OpMemberName %ExternalTextureParams 1 "doYuvToRgbConversionOnly"
+               OpMemberName %ExternalTextureParams 2 "yuvToRgbConversionMatrix"
+               OpMemberName %ExternalTextureParams 3 "gammaDecodeParams"
+               OpMemberName %ExternalTextureParams 4 "gammaEncodeParams"
+               OpMemberName %ExternalTextureParams 5 "gamutConversionMatrix"
+               OpMemberName %ExternalTextureParams 6 "coordTransformationMatrix"
                OpName %textureSampleExternal "textureSampleExternal"
                OpName %plane0 "plane0"
                OpName %plane1 "plane1"
@@ -47,6 +57,8 @@
                OpName %coord "coord"
                OpName %params_0 "params"
                OpName %color "color"
+               OpName %conv_ExternalTextureParams "conv_ExternalTextureParams"
+               OpName %val "val"
                OpName %textureSampleBaseClampToEdge_7c04e6 "textureSampleBaseClampToEdge_7c04e6"
                OpName %arg_2 "arg_2"
                OpName %res "res"
@@ -58,14 +70,14 @@
                OpDecorate %vertex_point_size BuiltIn PointSize
                OpDecorate %ext_tex_plane_1 DescriptorSet 1
                OpDecorate %ext_tex_plane_1 Binding 2
-               OpDecorate %ext_tex_params_block Block
-               OpMemberDecorate %ext_tex_params_block 0 Offset 0
-               OpMemberDecorate %ExternalTextureParams 0 Offset 0
-               OpMemberDecorate %ExternalTextureParams 1 Offset 4
-               OpMemberDecorate %ExternalTextureParams 2 Offset 16
-               OpMemberDecorate %ExternalTextureParams 2 ColMajor
-               OpMemberDecorate %ExternalTextureParams 2 MatrixStride 16
-               OpMemberDecorate %ExternalTextureParams 3 Offset 64
+               OpDecorate %ext_tex_params_block_std140 Block
+               OpMemberDecorate %ext_tex_params_block_std140 0 Offset 0
+               OpMemberDecorate %ExternalTextureParams_std140 0 Offset 0
+               OpMemberDecorate %ExternalTextureParams_std140 1 Offset 4
+               OpMemberDecorate %ExternalTextureParams_std140 2 Offset 16
+               OpMemberDecorate %ExternalTextureParams_std140 2 ColMajor
+               OpMemberDecorate %ExternalTextureParams_std140 2 MatrixStride 16
+               OpMemberDecorate %ExternalTextureParams_std140 3 Offset 64
                OpMemberDecorate %GammaTransferParams 0 Offset 0
                OpMemberDecorate %GammaTransferParams 1 Offset 4
                OpMemberDecorate %GammaTransferParams 2 Offset 8
@@ -74,13 +86,13 @@
                OpMemberDecorate %GammaTransferParams 5 Offset 20
                OpMemberDecorate %GammaTransferParams 6 Offset 24
                OpMemberDecorate %GammaTransferParams 7 Offset 28
-               OpMemberDecorate %ExternalTextureParams 4 Offset 96
-               OpMemberDecorate %ExternalTextureParams 5 Offset 128
-               OpMemberDecorate %ExternalTextureParams 5 ColMajor
-               OpMemberDecorate %ExternalTextureParams 5 MatrixStride 16
-               OpMemberDecorate %ExternalTextureParams 6 Offset 176
-               OpMemberDecorate %ExternalTextureParams 6 ColMajor
-               OpMemberDecorate %ExternalTextureParams 6 MatrixStride 16
+               OpMemberDecorate %ExternalTextureParams_std140 4 Offset 96
+               OpMemberDecorate %ExternalTextureParams_std140 5 Offset 128
+               OpMemberDecorate %ExternalTextureParams_std140 5 ColMajor
+               OpMemberDecorate %ExternalTextureParams_std140 5 MatrixStride 16
+               OpMemberDecorate %ExternalTextureParams_std140 6 Offset 176
+               OpMemberDecorate %ExternalTextureParams_std140 7 Offset 184
+               OpMemberDecorate %ExternalTextureParams_std140 8 Offset 192
                OpDecorate %ext_tex_params NonWritable
                OpDecorate %ext_tex_params DescriptorSet 1
                OpDecorate %ext_tex_params Binding 3
@@ -88,6 +100,19 @@
                OpDecorate %arg_0 Binding 0
                OpDecorate %arg_1 DescriptorSet 1
                OpDecorate %arg_1 Binding 1
+               OpMemberDecorate %ExternalTextureParams 0 Offset 0
+               OpMemberDecorate %ExternalTextureParams 1 Offset 4
+               OpMemberDecorate %ExternalTextureParams 2 Offset 16
+               OpMemberDecorate %ExternalTextureParams 2 ColMajor
+               OpMemberDecorate %ExternalTextureParams 2 MatrixStride 16
+               OpMemberDecorate %ExternalTextureParams 3 Offset 64
+               OpMemberDecorate %ExternalTextureParams 4 Offset 96
+               OpMemberDecorate %ExternalTextureParams 5 Offset 128
+               OpMemberDecorate %ExternalTextureParams 5 ColMajor
+               OpMemberDecorate %ExternalTextureParams 5 MatrixStride 16
+               OpMemberDecorate %ExternalTextureParams 6 Offset 176
+               OpMemberDecorate %ExternalTextureParams 6 ColMajor
+               OpMemberDecorate %ExternalTextureParams 6 MatrixStride 8
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
@@ -104,11 +129,11 @@
 %GammaTransferParams = OpTypeStruct %float %float %float %float %float %float %float %uint
     %v3float = OpTypeVector %float 3
 %mat3v3float = OpTypeMatrix %v3float 3
-%mat2v3float = OpTypeMatrix %v3float 2
-%ExternalTextureParams = OpTypeStruct %uint %uint %mat3v4float %GammaTransferParams %GammaTransferParams %mat3v3float %mat2v3float
-%ext_tex_params_block = OpTypeStruct %ExternalTextureParams
-%_ptr_Uniform_ext_tex_params_block = OpTypePointer Uniform %ext_tex_params_block
-%ext_tex_params = OpVariable %_ptr_Uniform_ext_tex_params_block Uniform
+    %v2float = OpTypeVector %float 2
+%ExternalTextureParams_std140 = OpTypeStruct %uint %uint %mat3v4float %GammaTransferParams %GammaTransferParams %mat3v3float %v2float %v2float %v2float
+%ext_tex_params_block_std140 = OpTypeStruct %ExternalTextureParams_std140
+%_ptr_Uniform_ext_tex_params_block_std140 = OpTypePointer Uniform %ext_tex_params_block_std140
+%ext_tex_params = OpVariable %_ptr_Uniform_ext_tex_params_block_std140 Uniform
       %arg_0 = OpVariable %_ptr_UniformConstant_11 UniformConstant
          %25 = OpTypeSampler
 %_ptr_UniformConstant_25 = OpTypePointer UniformConstant %25
@@ -118,26 +143,28 @@
      %v3bool = OpTypeVector %bool 3
 %_ptr_Function_v3float = OpTypePointer Function %v3float
          %46 = OpConstantNull %v3float
-    %v2float = OpTypeVector %float 2
+%mat3v2float = OpTypeMatrix %v2float 3
+%ExternalTextureParams = OpTypeStruct %uint %uint %mat3v4float %GammaTransferParams %GammaTransferParams %mat3v3float %mat3v2float
          %66 = OpTypeFunction %v4float %11 %11 %25 %v2float %ExternalTextureParams
-  %float_0_5 = OpConstant %float 0.5
-%_ptr_Function_v2float = OpTypePointer Function %v2float
-         %79 = OpConstantNull %v2float
     %float_1 = OpConstant %float 1
      %v2uint = OpTypeVector %uint 2
         %int = OpTypeInt 32 1
-         %91 = OpConstantNull %int
-         %92 = OpConstantComposite %v2float %float_0_5 %float_0_5
+         %86 = OpConstantNull %int
+  %float_0_5 = OpConstant %float 0.5
+         %88 = OpConstantComposite %v2float %float_0_5 %float_0_5
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+         %94 = OpConstantNull %v2float
      %uint_1 = OpConstant %uint 1
-        %113 = OpTypeSampledImage %11
-        %128 = OpConstantNull %uint
+        %111 = OpTypeSampledImage %11
+        %126 = OpConstantNull %uint
+        %144 = OpTypeFunction %ExternalTextureParams %ExternalTextureParams_std140
        %void = OpTypeVoid
-        %146 = OpTypeFunction %void
-        %150 = OpConstantComposite %v2float %float_1 %float_1
+        %159 = OpTypeFunction %void
+        %163 = OpConstantComposite %v2float %float_1 %float_1
      %uint_0 = OpConstant %uint 0
-%_ptr_Uniform_ExternalTextureParams = OpTypePointer Uniform %ExternalTextureParams
+%_ptr_Uniform_ExternalTextureParams_std140 = OpTypePointer Uniform %ExternalTextureParams_std140
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-        %163 = OpTypeFunction %v4float
+        %177 = OpTypeFunction %v4float
 %gammaCorrection = OpFunction %v3float None %26
           %v = OpFunctionParameter %v3float
      %params = OpFunctionParameter %GammaTransferParams
@@ -180,115 +207,129 @@
         %smp = OpFunctionParameter %25
       %coord = OpFunctionParameter %v2float
    %params_0 = OpFunctionParameter %ExternalTextureParams
-         %74 = OpLabel
-         %77 = OpVariable %_ptr_Function_v2float Function %79
-         %96 = OpVariable %_ptr_Function_v2float Function %79
-        %103 = OpVariable %_ptr_Function_v2float Function %79
+         %75 = OpLabel
+         %92 = OpVariable %_ptr_Function_v2float Function %94
+        %101 = OpVariable %_ptr_Function_v2float Function %94
       %color = OpVariable %_ptr_Function_v3float Function %46
-         %80 = OpCompositeConstruct %v2float %float_0_5 %float_0_5
-         %76 = OpFSub %v2float %coord %80
-         %81 = OpCompositeExtract %float %76 0
-         %82 = OpCompositeExtract %float %76 1
-         %84 = OpCompositeConstruct %v3float %81 %82 %float_1
-         %85 = OpCompositeExtract %mat2v3float %params_0 6
-         %86 = OpVectorTimesMatrix %v2float %84 %85
-         %88 = OpImageQuerySizeLod %v2uint %plane0 %91
-         %87 = OpConvertUToF %v2float %88
-         %93 = OpFDiv %v2float %92 %87
-         %97 = OpCompositeConstruct %v2float %float_1 %float_1
-         %95 = OpFSub %v2float %97 %93
-         %94 = OpExtInst %v2float %32 NClamp %86 %93 %95
-         %99 = OpImageQuerySizeLod %v2uint %plane1 %91
-         %98 = OpConvertUToF %v2float %99
-        %100 = OpFDiv %v2float %92 %98
-        %104 = OpCompositeConstruct %v2float %float_1 %float_1
-        %102 = OpFSub %v2float %104 %100
-        %101 = OpExtInst %v2float %32 NClamp %86 %100 %102
-        %106 = OpCompositeExtract %uint %params_0 0
-        %108 = OpIEqual %bool %106 %uint_1
-               OpSelectionMerge %109 None
-               OpBranchConditional %108 %110 %111
-        %110 = OpLabel
-        %114 = OpSampledImage %113 %plane0 %smp
-        %112 = OpImageSampleExplicitLod %v4float %114 %94 Lod %8
-        %115 = OpVectorShuffle %v3float %112 %112 0 1 2
-               OpStore %color %115
-               OpBranch %109
-        %111 = OpLabel
-        %117 = OpSampledImage %113 %plane0 %smp
-        %116 = OpImageSampleExplicitLod %v4float %117 %94 Lod %8
-        %118 = OpCompositeExtract %float %116 0
-        %120 = OpSampledImage %113 %plane1 %smp
-        %119 = OpImageSampleExplicitLod %v4float %120 %101 Lod %8
-        %121 = OpVectorShuffle %v2float %119 %119 0 1
-        %122 = OpCompositeExtract %float %121 0
-        %123 = OpCompositeExtract %float %121 1
-        %124 = OpCompositeConstruct %v4float %118 %122 %123 %float_1
-        %125 = OpCompositeExtract %mat3v4float %params_0 2
-        %126 = OpVectorTimesMatrix %v3float %124 %125
-               OpStore %color %126
-               OpBranch %109
+         %76 = OpCompositeExtract %mat3v2float %params_0 6
+         %77 = OpCompositeExtract %float %coord 0
+         %78 = OpCompositeExtract %float %coord 1
+         %80 = OpCompositeConstruct %v3float %77 %78 %float_1
+         %81 = OpMatrixTimesVector %v2float %76 %80
+         %83 = OpImageQuerySizeLod %v2uint %plane0 %86
+         %82 = OpConvertUToF %v2float %83
+         %89 = OpFDiv %v2float %88 %82
+         %95 = OpCompositeConstruct %v2float %float_1 %float_1
+         %91 = OpFSub %v2float %95 %89
+         %90 = OpExtInst %v2float %32 NClamp %81 %89 %91
+         %97 = OpImageQuerySizeLod %v2uint %plane1 %86
+         %96 = OpConvertUToF %v2float %97
+         %98 = OpFDiv %v2float %88 %96
+        %102 = OpCompositeConstruct %v2float %float_1 %float_1
+        %100 = OpFSub %v2float %102 %98
+         %99 = OpExtInst %v2float %32 NClamp %81 %98 %100
+        %104 = OpCompositeExtract %uint %params_0 0
+        %106 = OpIEqual %bool %104 %uint_1
+               OpSelectionMerge %107 None
+               OpBranchConditional %106 %108 %109
+        %108 = OpLabel
+        %112 = OpSampledImage %111 %plane0 %smp
+        %110 = OpImageSampleExplicitLod %v4float %112 %90 Lod %8
+        %113 = OpVectorShuffle %v3float %110 %110 0 1 2
+               OpStore %color %113
+               OpBranch %107
         %109 = OpLabel
-        %127 = OpCompositeExtract %uint %params_0 1
-        %129 = OpIEqual %bool %127 %128
-               OpSelectionMerge %130 None
-               OpBranchConditional %129 %131 %130
-        %131 = OpLabel
-        %133 = OpLoad %v3float %color
-        %134 = OpCompositeExtract %GammaTransferParams %params_0 3
-        %132 = OpFunctionCall %v3float %gammaCorrection %133 %134
-               OpStore %color %132
-        %135 = OpCompositeExtract %mat3v3float %params_0 5
-        %136 = OpLoad %v3float %color
-        %137 = OpMatrixTimesVector %v3float %135 %136
-               OpStore %color %137
+        %115 = OpSampledImage %111 %plane0 %smp
+        %114 = OpImageSampleExplicitLod %v4float %115 %90 Lod %8
+        %116 = OpCompositeExtract %float %114 0
+        %118 = OpSampledImage %111 %plane1 %smp
+        %117 = OpImageSampleExplicitLod %v4float %118 %99 Lod %8
+        %119 = OpVectorShuffle %v2float %117 %117 0 1
+        %120 = OpCompositeExtract %float %119 0
+        %121 = OpCompositeExtract %float %119 1
+        %122 = OpCompositeConstruct %v4float %116 %120 %121 %float_1
+        %123 = OpCompositeExtract %mat3v4float %params_0 2
+        %124 = OpVectorTimesMatrix %v3float %122 %123
+               OpStore %color %124
+               OpBranch %107
+        %107 = OpLabel
+        %125 = OpCompositeExtract %uint %params_0 1
+        %127 = OpIEqual %bool %125 %126
+               OpSelectionMerge %128 None
+               OpBranchConditional %127 %129 %128
+        %129 = OpLabel
+        %131 = OpLoad %v3float %color
+        %132 = OpCompositeExtract %GammaTransferParams %params_0 3
+        %130 = OpFunctionCall %v3float %gammaCorrection %131 %132
+               OpStore %color %130
+        %133 = OpCompositeExtract %mat3v3float %params_0 5
+        %134 = OpLoad %v3float %color
+        %135 = OpMatrixTimesVector %v3float %133 %134
+               OpStore %color %135
+        %137 = OpLoad %v3float %color
+        %138 = OpCompositeExtract %GammaTransferParams %params_0 4
+        %136 = OpFunctionCall %v3float %gammaCorrection %137 %138
+               OpStore %color %136
+               OpBranch %128
+        %128 = OpLabel
         %139 = OpLoad %v3float %color
-        %140 = OpCompositeExtract %GammaTransferParams %params_0 4
-        %138 = OpFunctionCall %v3float %gammaCorrection %139 %140
-               OpStore %color %138
-               OpBranch %130
-        %130 = OpLabel
-        %141 = OpLoad %v3float %color
-        %142 = OpCompositeExtract %float %141 0
-        %143 = OpCompositeExtract %float %141 1
-        %144 = OpCompositeExtract %float %141 2
-        %145 = OpCompositeConstruct %v4float %142 %143 %144 %float_1
-               OpReturnValue %145
+        %140 = OpCompositeExtract %float %139 0
+        %141 = OpCompositeExtract %float %139 1
+        %142 = OpCompositeExtract %float %139 2
+        %143 = OpCompositeConstruct %v4float %140 %141 %142 %float_1
+               OpReturnValue %143
                OpFunctionEnd
-%textureSampleBaseClampToEdge_7c04e6 = OpFunction %void None %146
-        %149 = OpLabel
-      %arg_2 = OpVariable %_ptr_Function_v2float Function %79
+%conv_ExternalTextureParams = OpFunction %ExternalTextureParams None %144
+        %val = OpFunctionParameter %ExternalTextureParams_std140
+        %147 = OpLabel
+        %148 = OpCompositeExtract %uint %val 0
+        %149 = OpCompositeExtract %uint %val 1
+        %150 = OpCompositeExtract %mat3v4float %val 2
+        %151 = OpCompositeExtract %GammaTransferParams %val 3
+        %152 = OpCompositeExtract %GammaTransferParams %val 4
+        %153 = OpCompositeExtract %mat3v3float %val 5
+        %154 = OpCompositeExtract %v2float %val 6
+        %155 = OpCompositeExtract %v2float %val 7
+        %156 = OpCompositeExtract %v2float %val 8
+        %157 = OpCompositeConstruct %mat3v2float %154 %155 %156
+        %158 = OpCompositeConstruct %ExternalTextureParams %148 %149 %150 %151 %152 %153 %157
+               OpReturnValue %158
+               OpFunctionEnd
+%textureSampleBaseClampToEdge_7c04e6 = OpFunction %void None %159
+        %162 = OpLabel
+      %arg_2 = OpVariable %_ptr_Function_v2float Function %94
         %res = OpVariable %_ptr_Function_v4float Function %5
-               OpStore %arg_2 %150
-        %153 = OpLoad %11 %arg_0
-        %154 = OpLoad %11 %ext_tex_plane_1
-        %155 = OpLoad %25 %arg_1
-        %156 = OpLoad %v2float %arg_2
-        %159 = OpAccessChain %_ptr_Uniform_ExternalTextureParams %ext_tex_params %uint_0
-        %160 = OpLoad %ExternalTextureParams %159
-        %152 = OpFunctionCall %v4float %textureSampleExternal %153 %154 %155 %156 %160
-               OpStore %res %152
+               OpStore %arg_2 %163
+        %166 = OpLoad %11 %arg_0
+        %167 = OpLoad %11 %ext_tex_plane_1
+        %168 = OpLoad %25 %arg_1
+        %169 = OpLoad %v2float %arg_2
+        %173 = OpAccessChain %_ptr_Uniform_ExternalTextureParams_std140 %ext_tex_params %uint_0
+        %174 = OpLoad %ExternalTextureParams_std140 %173
+        %170 = OpFunctionCall %ExternalTextureParams %conv_ExternalTextureParams %174
+        %165 = OpFunctionCall %v4float %textureSampleExternal %166 %167 %168 %169 %170
+               OpStore %res %165
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %163
-        %165 = OpLabel
-        %166 = OpFunctionCall %void %textureSampleBaseClampToEdge_7c04e6
+%vertex_main_inner = OpFunction %v4float None %177
+        %179 = OpLabel
+        %180 = OpFunctionCall %void %textureSampleBaseClampToEdge_7c04e6
                OpReturnValue %5
                OpFunctionEnd
-%vertex_main = OpFunction %void None %146
-        %168 = OpLabel
-        %169 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %169
+%vertex_main = OpFunction %void None %159
+        %182 = OpLabel
+        %183 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %183
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
-%fragment_main = OpFunction %void None %146
-        %171 = OpLabel
-        %172 = OpFunctionCall %void %textureSampleBaseClampToEdge_7c04e6
+%fragment_main = OpFunction %void None %159
+        %185 = OpLabel
+        %186 = OpFunctionCall %void %textureSampleBaseClampToEdge_7c04e6
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %146
-        %174 = OpLabel
-        %175 = OpFunctionCall %void %textureSampleBaseClampToEdge_7c04e6
+%compute_main = OpFunction %void None %159
+        %188 = OpLabel
+        %189 = OpFunctionCall %void %textureSampleBaseClampToEdge_7c04e6
                OpReturn
                OpFunctionEnd

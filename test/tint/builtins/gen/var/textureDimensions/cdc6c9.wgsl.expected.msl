@@ -19,7 +19,7 @@ struct ExternalTextureParams {
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   float3x3 gamutConversionMatrix;
-  float2x3 coordTransformationMatrix;
+  float3x2 coordTransformationMatrix;
 };
 
 void textureDimensions_cdc6c9(texture2d<float, access::sample> tint_symbol_1) {
