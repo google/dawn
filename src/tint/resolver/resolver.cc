@@ -2716,11 +2716,13 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         return nullptr;
     }
 
-    if (sem_.ResolvedSymbol<type::Type>(expr)) {
+    if (sem_.ResolvedSymbol<type::Type>(expr) ||
+        type::ParseShortName(builder_->Symbols().NameFor(symbol)) != type::ShortName::kUndefined) {
         AddError("missing '(' for type initializer or cast", expr->source.End());
         return nullptr;
     }
 
+    // The dependency graph should have errored on this unresolved identifier before reaching here.
     TINT_ICE(Resolver, diagnostics_)
         << expr->source << " unresolved identifier:\n"
         << "resolved: " << (sem_resolved ? sem_resolved->TypeInfo().name : "<null>") << "\n"

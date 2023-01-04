@@ -174,10 +174,17 @@ TEST_F(ResolverValidationTest, Expr_DontCall_Builtin) {
 
 TEST_F(ResolverValidationTest, Expr_DontCall_Type) {
     Alias("T", ty.u32());
-    WrapInFunction(Expr(Source{{{3, 3}, {3, 8}}}, "T"));
+    WrapInFunction(Expr(Source{{12, 34}}, "T"));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "3:8 error: missing '(' for type initializer or cast");
+    EXPECT_EQ(r()->error(), "12:34 error: missing '(' for type initializer or cast");
+}
+
+TEST_F(ResolverValidationTest, Expr_DontCall_ShortName) {
+    WrapInFunction(Expr(Source{{12, 34}}, "vec3f"));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: missing '(' for type initializer or cast");
 }
 
 TEST_F(ResolverValidationTest, AssignmentStmt_InvalidLHS_BuiltinFunctionName) {
