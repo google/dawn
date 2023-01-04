@@ -159,17 +159,17 @@ TEST_F(ResolverValidationTest, Expr_ErrUnknownExprType) {
 
 TEST_F(ResolverValidationTest, Expr_DontCall_Function) {
     Func("func", utils::Empty, ty.void_(), utils::Empty, {});
-    WrapInFunction(Expr(Source{{{3, 3}, {3, 8}}}, "func"));
+    WrapInFunction(Expr(Source{{12, 34}}, "func"));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "3:8 error: missing '(' for function call");
+    EXPECT_EQ(r()->error(), "12:34 error: missing '(' for function call");
 }
 
 TEST_F(ResolverValidationTest, Expr_DontCall_Builtin) {
-    WrapInFunction(Expr(Source{{{3, 3}, {3, 8}}}, "round"));
+    WrapInFunction(Expr(Source{{12, 34}}, "round"));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "3:8 error: missing '(' for builtin call");
+    EXPECT_EQ(r()->error(), "12:34 error: missing '(' for builtin call");
 }
 
 TEST_F(ResolverValidationTest, Expr_DontCall_Type) {
@@ -405,9 +405,9 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_BadParent) {
     // var param: vec4<f32>
     // let ret: f32 = *(&param).x;
     auto* param = Var("param", ty.vec4<f32>());
-    auto* x = Expr(Source{{{3, 3}, {3, 8}}}, "x");
+    auto* x = Expr(Source{{12, 34}}, "x");
 
-    auto* addressOf_expr = AddressOf(Source{{12, 34}}, param);
+    auto* addressOf_expr = AddressOf(param);
     auto* accessor_expr = MemberAccessor(addressOf_expr, x);
     auto* star_p = Deref(accessor_expr);
     auto* ret = Var("r", ty.f32(), star_p);
@@ -415,8 +415,8 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_BadParent) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: invalid member accessor expression. Expected vector "
-              "or struct, got 'ptr<function, vec4<f32>, read_write>'");
+              "12:34 error: invalid member accessor expression. Expected vector or struct, got "
+              "'ptr<function, vec4<f32>, read_write>'");
 }
 
 TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncGoodParent) {
@@ -426,7 +426,7 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncGoodParent) {
     // }
     auto* p = Param("p", ty.pointer(ty.vec4<f32>(), ast::AddressSpace::kFunction));
     auto* star_p = Deref(p);
-    auto* z = Expr(Source{{{3, 3}, {3, 8}}}, "z");
+    auto* z = Expr("z");
     auto* accessor_expr = MemberAccessor(star_p, z);
     auto* x = Var("x", ty.f32(), accessor_expr);
     Func("func", utils::Vector{p}, ty.f32(),
@@ -443,7 +443,7 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncBadParent) {
     //     return x;
     // }
     auto* p = Param("p", ty.pointer(ty.vec4<f32>(), ast::AddressSpace::kFunction));
-    auto* z = Expr(Source{{{3, 3}, {3, 8}}}, "z");
+    auto* z = Expr(Source{{12, 34}}, "z");
     auto* accessor_expr = MemberAccessor(p, z);
     auto* star_p = Deref(accessor_expr);
     auto* x = Var("x", ty.f32(), star_p);
@@ -455,8 +455,8 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncBadParent) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "error: invalid member accessor expression. "
-              "Expected vector or struct, got 'ptr<function, vec4<f32>, read_write>'");
+              "12:34 error: invalid member accessor expression. Expected vector or struct, got "
+              "'ptr<function, vec4<f32>, read_write>'");
 }
 
 TEST_F(ResolverValidationTest,

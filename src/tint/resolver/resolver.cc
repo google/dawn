@@ -2866,7 +2866,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
         [&](Default) {
             AddError("invalid member accessor expression. Expected vector or struct, got '" +
                          sem_.TypeNameOf(storage_ty) + "'",
-                     expr->structure->source);
+                     expr->member->source);
             return nullptr;
         });
 }
