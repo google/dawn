@@ -16,6 +16,7 @@
 #define SRC_TINT_TRAITS_H_
 
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 namespace tint::traits {
