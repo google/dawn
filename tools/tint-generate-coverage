@@ -57,7 +57,7 @@ LLVM_PROFILE_FILE="${PROFRAW_FILE}" "$@"
 # Check that coverage information was generated
 if [ ! -f "$PROFRAW_FILE" ]; then
     echo "lcov.info was not generated. Is coverage generation enabled?"
-    echo "To enable, run cmake with -DTINT_EMIT_COVERAGE=1".
+    echo "To enable, run cmake with -DDAWN_EMIT_COVERAGE=1".
     exit 1
 fi
 
