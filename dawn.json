@@ -1389,16 +1389,6 @@
             {"value": 3, "name": "rotate 270 degrees"}
         ]
     },
-    "external texture visible rect" :{
-        "category": "structure",
-        "tags": ["dawn"],
-        "members": [
-            {"name": "x", "type": "float", "default": "0.0"},
-            {"name": "y", "type": "float", "default": "0.0"},
-            {"name": "width", "type": "float", "default": "1.0"},
-            {"name": "height", "type": "float", "default": "1.0"}
-        ]
-    },
     "external texture descriptor": {
         "category": "structure",
         "extensible": "in",
@@ -1419,8 +1409,7 @@
             {"name": "gamut conversion matrix", "type": "float", "annotation": "const*",
                 "length": 9},
             {"name": "flip y", "type": "bool", "default": "false"},
-            {"name": "rotation", "type": "external texture rotation", "default": "rotate 0 degrees"},
-            {"name": "visible rect", "type": "external texture visible rect"}
+            {"name": "rotation", "type": "external texture rotation", "default": "rotate 0 degrees"}
         ]
     },
     "feature name": {

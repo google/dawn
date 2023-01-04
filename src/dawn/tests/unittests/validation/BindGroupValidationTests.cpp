@@ -29,7 +29,7 @@ class BindGroupValidationTest : public ValidationTest {
                                 uint32_t layerCount) {
         wgpu::TextureDescriptor descriptor;
         descriptor.dimension = wgpu::TextureDimension::e2D;
-        descriptor.size = {16, 16, layerCount};
+        descriptor.size = {kWidth, kHeight, layerCount};
         descriptor.sampleCount = 1;
         descriptor.mipLevelCount = 1;
         descriptor.usage = usage;
@@ -75,6 +75,7 @@ class BindGroupValidationTest : public ValidationTest {
         desc.gamutConversionMatrix = mPlaceholderConstantArray.data();
         desc.srcTransferFunctionParameters = mPlaceholderConstantArray.data();
         desc.dstTransferFunctionParameters = mPlaceholderConstantArray.data();
+        desc.visibleSize = {kWidth, kHeight};
         return desc;
     }
 
@@ -96,6 +97,8 @@ class BindGroupValidationTest : public ValidationTest {
     static constexpr wgpu::TextureFormat kDefaultTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
 
   private:
+    uint32_t kWidth = 16;
+    uint32_t kHeight = 16;
     wgpu::ExternalTexture mExternalTexture;
     std::array<float, 12> mPlaceholderConstantArray;
 };

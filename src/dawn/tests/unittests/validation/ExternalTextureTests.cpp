@@ -47,6 +47,7 @@ class ExternalTextureTest : public ValidationTest {
         desc.gamutConversionMatrix = mPlaceholderConstantArray.data();
         desc.srcTransferFunctionParameters = mPlaceholderConstantArray.data();
         desc.dstTransferFunctionParameters = mPlaceholderConstantArray.data();
+        desc.visibleSize = {kWidth, kHeight};
 
         return desc;
     }

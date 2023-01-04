@@ -99,26 +99,21 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
         }
     }
 
-    // TODO(crbug.com/1316671): visible size width must have valid value after chromium side changes
-    // landed.
-    if (descriptor->visibleSize.width > 0) {
-        DAWN_INVALID_IF(descriptor->visibleSize.width == 0 || descriptor->visibleSize.height == 0,
-                        "VisibleSize %s have 0 on width or height.", &descriptor->visibleSize);
+    DAWN_INVALID_IF(descriptor->visibleSize.width == 0 || descriptor->visibleSize.height == 0,
+                    "VisibleSize %s have 0 on width or height.", &descriptor->visibleSize);
 
-        const Extent3D textureSize = descriptor->plane0->GetTexture()->GetSize();
-        DAWN_INVALID_IF(
-            descriptor->visibleSize.width > textureSize.width ||
-                descriptor->visibleSize.height > textureSize.height,
-            "VisibleSize %s is exceed the texture size, defined by Plane0 size (%u, %u).",
-            &descriptor->visibleSize, textureSize.width, textureSize.height);
-        DAWN_INVALID_IF(
-            descriptor->visibleOrigin.x > textureSize.width - descriptor->visibleSize.width ||
-                descriptor->visibleOrigin.y > textureSize.height - descriptor->visibleSize.height,
-            "VisibleRect[Origin: %s, Size: %s] is exceed the texture size, defined by "
-            "Plane0 size (%u, %u).",
-            &descriptor->visibleOrigin, &descriptor->visibleSize, textureSize.width,
-            textureSize.height);
-    }
+    const Extent3D textureSize = descriptor->plane0->GetTexture()->GetSize();
+    DAWN_INVALID_IF(descriptor->visibleSize.width > textureSize.width ||
+                        descriptor->visibleSize.height > textureSize.height,
+                    "VisibleSize %s is exceed the texture size, defined by Plane0 size (%u, %u).",
+                    &descriptor->visibleSize, textureSize.width, textureSize.height);
+    DAWN_INVALID_IF(
+        descriptor->visibleOrigin.x > textureSize.width - descriptor->visibleSize.width ||
+            descriptor->visibleOrigin.y > textureSize.height - descriptor->visibleSize.height,
+        "VisibleRect[Origin: %s, Size: %s] is exceed the texture size, defined by "
+        "Plane0 size (%u, %u).",
+        &descriptor->visibleOrigin, &descriptor->visibleSize, textureSize.width,
+        textureSize.height);
 
     return {};
 }
@@ -295,11 +290,23 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
     // After translation, coordinates range from [0 .. 1] in both U and V.
     coordTransformMatrix = Translate(coordTransformMatrix, 0.5, 0.5);
 
+    // Calculate scale factors and offsets from the specified visibleSize.
+    ASSERT(descriptor->visibleSize.width > 0);
+    ASSERT(descriptor->visibleSize.height > 0);
+    uint32_t frameWidth = descriptor->plane0->GetTexture()->GetWidth();
+    uint32_t frameHeight = descriptor->plane0->GetTexture()->GetHeight();
+    float xScale =
+        static_cast<float>(descriptor->visibleSize.width) / static_cast<float>(frameWidth);
+    float yScale =
+        static_cast<float>(descriptor->visibleSize.height) / static_cast<float>(frameHeight);
+    float xOffset =
+        static_cast<float>(descriptor->visibleOrigin.x) / static_cast<float>(frameWidth);
+    float yOffset =
+        static_cast<float>(descriptor->visibleOrigin.y) / static_cast<float>(frameHeight);
+
     // Finally, scale and translate based on the visible rect. This applies cropping.
-    coordTransformMatrix =
-        Scale(coordTransformMatrix, descriptor->visibleRect.width, descriptor->visibleRect.height);
-    coordTransformMatrix =
-        Translate(coordTransformMatrix, descriptor->visibleRect.x, descriptor->visibleRect.y);
+    coordTransformMatrix = Scale(coordTransformMatrix, xScale, yScale);
+    coordTransformMatrix = Translate(coordTransformMatrix, xOffset, yOffset);
 
     // Transpose the mat2x3 into column vectors for use by WGSL.
     params.coordTransformMatrix[0] = coordTransformMatrix[0];
