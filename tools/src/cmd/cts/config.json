@@ -43,9 +43,6 @@
     "Remove": [
       // crbug.com/dawn/1401
       "release-x64",
-      // crbug.com/dawn/1387, crbug.com/dawn/1444
-      "intel-0x5912",
-      "intel-0x3e92"
     ],
   },
   "Sheets": {
