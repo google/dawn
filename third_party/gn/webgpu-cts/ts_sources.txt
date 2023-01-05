@@ -52,6 +52,7 @@ src/common/util/preprocessor.ts
 src/unittests/unit_test.ts
 src/demo/a.spec.ts
 src/demo/json.spec.ts
+src/demo/subcases.spec.ts
 src/demo/a/b.spec.ts
 src/demo/a/b/c.spec.ts
 src/demo/a/b/d.spec.ts
@@ -131,6 +132,7 @@ src/webgpu/api/operation/labels.spec.ts
 src/webgpu/api/operation/onSubmittedWorkDone.spec.ts
 src/webgpu/api/operation/reflection.spec.ts
 src/webgpu/api/operation/uncapturederror.spec.ts
+src/webgpu/api/operation/adapter/requestAdapter.spec.ts
 src/webgpu/api/operation/adapter/requestAdapterInfo.spec.ts
 src/webgpu/api/operation/adapter/requestDevice.spec.ts
 src/webgpu/api/operation/buffers/mapping_test.ts
@@ -177,10 +179,12 @@ src/webgpu/api/operation/render_pipeline/vertex_only_render_pipeline.spec.ts
 src/webgpu/api/operation/rendering/basic.spec.ts
 src/webgpu/api/operation/rendering/color_target_state.spec.ts
 src/webgpu/api/operation/rendering/depth.spec.ts
+src/webgpu/api/operation/rendering/depth_bias.spec.ts
 src/webgpu/api/operation/rendering/depth_clip_clamp.spec.ts
 src/webgpu/api/operation/rendering/draw.spec.ts
 src/webgpu/api/operation/rendering/indirect_draw.spec.ts
 src/webgpu/api/operation/rendering/robust_access_index.spec.ts
+src/webgpu/api/operation/rendering/stencil.spec.ts
 src/webgpu/api/operation/resource_init/buffer.spec.ts
 src/webgpu/util/texture/subresource.ts
 src/webgpu/api/operation/resource_init/check_texture/by_copy.ts
@@ -286,6 +290,7 @@ src/webgpu/idl/constants/flags.spec.ts
 src/webgpu/shader/types.ts
 src/webgpu/shader/values.ts
 src/webgpu/shader/execution/evaluation_order.spec.ts
+src/webgpu/shader/execution/padding.spec.ts
 src/webgpu/shader/execution/robust_access.spec.ts
 src/webgpu/shader/execution/robust_access_vertex.spec.ts
 src/webgpu/shader/execution/zero_init.spec.ts

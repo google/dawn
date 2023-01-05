@@ -20,6 +20,7 @@ data/webgpu/shader/execution/case-cache/exp.json
 data/webgpu/shader/execution/case-cache/exp2.json
 data/webgpu/shader/execution/case-cache/faceForward.json
 data/webgpu/shader/execution/case-cache/floor.json
+data/webgpu/shader/execution/case-cache/fma.json
 data/webgpu/shader/execution/case-cache/fract.json
 data/webgpu/shader/execution/case-cache/inverseSqrt.json
 data/webgpu/shader/execution/case-cache/ldexp.json
@@ -31,10 +32,12 @@ data/webgpu/shader/execution/case-cache/min.json
 data/webgpu/shader/execution/case-cache/mix.json
 data/webgpu/shader/execution/case-cache/modf.json
 data/webgpu/shader/execution/case-cache/normalize.json
+data/webgpu/shader/execution/case-cache/pack2x16float.json
 data/webgpu/shader/execution/case-cache/pow.json
 data/webgpu/shader/execution/case-cache/quantizeToF16.json
 data/webgpu/shader/execution/case-cache/radians.json
 data/webgpu/shader/execution/case-cache/reflect.json
+data/webgpu/shader/execution/case-cache/refract.json
 data/webgpu/shader/execution/case-cache/round.json
 data/webgpu/shader/execution/case-cache/saturate.json
 data/webgpu/shader/execution/case-cache/sign.json
