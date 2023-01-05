@@ -64,16 +64,6 @@
 # Last rolled: 2023-01-05 05:47:34PM
 
 ################################################################################
-# webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
-# depth32float-stencil8 and stencil8 fail consistently.
-# KEEP
-################################################################################
-crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
-crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
-crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Failure ]
-
-################################################################################
 # copyToTexture failures on Linux
 # Skipped instead of just Crash because of the number of failures
 # KEEP
