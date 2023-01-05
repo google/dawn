@@ -101,6 +101,7 @@ class RenderPipelineBase : public PipelineBase {
     bool IsAlphaToCoverageEnabled() const;
     bool WritesDepth() const;
     bool WritesStencil() const;
+    bool UsesFragDepth() const;
 
     const AttachmentState* GetAttachmentState() const;
 
@@ -140,6 +141,7 @@ class RenderPipelineBase : public PipelineBase {
     bool mUnclippedDepth = false;
     bool mWritesDepth = false;
     bool mWritesStencil = false;
+    bool mUsesFragDepth = false;
 };
 
 }  // namespace dawn::native

@@ -232,7 +232,9 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
         mSupportedFeatures.EnableFeature(Feature::ChromiumExperimentalDp4a);
     }
 
-    if (mDeviceInfo.HasExt(DeviceExt::DepthClipEnable) &&
+    // unclippedDepth=true translates to depthClipEnable=false, depthClamp=true
+    if (mDeviceInfo.features.depthClamp == VK_TRUE &&
+        mDeviceInfo.HasExt(DeviceExt::DepthClipEnable) &&
         mDeviceInfo.depthClipEnableFeatures.depthClipEnable == VK_TRUE) {
         mSupportedFeatures.EnableFeature(Feature::DepthClipControl);
     }

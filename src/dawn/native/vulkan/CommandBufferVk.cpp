@@ -1108,6 +1108,23 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
     DescriptorSetTracker descriptorSets = {};
     RenderPipeline* lastPipeline = nullptr;
 
+    // Tracking for the push constants needed by the ClampFragDepth transform.
+    // TODO(dawn:1125): Avoid the need for this when the depthClamp feature is available, but doing
+    // so would require fixing issue dawn:1576 first to have more dynamic push constant usage. (and
+    // also additional tests that the dirtying logic here is correct so with a Toggle we can test it
+    // on our infra).
+    ClampFragDepthArgs clampFragDepthArgs = {0.0f, 1.0f};
+    bool clampFragDepthArgsDirty = true;
+    auto ApplyClampFragDepthArgs = [&]() {
+        if (!clampFragDepthArgsDirty || lastPipeline == nullptr) {
+            return;
+        }
+        device->fn.CmdPushConstants(commands, ToBackend(lastPipeline->GetLayout())->GetHandle(),
+                                    VK_SHADER_STAGE_FRAGMENT_BIT, kClampFragDepthArgsOffset,
+                                    kClampFragDepthArgsSize, &clampFragDepthArgs);
+        clampFragDepthArgsDirty = false;
+    };
+
     auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) {
         switch (type) {
             case Command::Draw: {
@@ -1231,6 +1248,9 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 lastPipeline = pipeline;
 
                 descriptorSets.OnSetPipeline(pipeline);
+
+                // Apply the deferred min/maxDepth push constants update if needed.
+                ApplyClampFragDepthArgs();
                 break;
             }
 
@@ -1302,6 +1322,12 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 }
 
                 device->fn.CmdSetViewport(commands, 0, 1, &viewport);
+
+                // Try applying the push constants that contain min/maxDepth immediately. This can
+                // be deferred if no pipeline is currently bound.
+                clampFragDepthArgs = {viewport.minDepth, viewport.maxDepth};
+                clampFragDepthArgsDirty = true;
+                ApplyClampFragDepthArgs();
                 break;
             }
 

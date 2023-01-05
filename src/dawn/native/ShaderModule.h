@@ -245,6 +245,7 @@ struct EntryPointMetadata {
     std::unordered_set<std::string> initializedOverrides;
 
     bool usesNumWorkgroups = false;
+    bool usesFragDepth = false;
     // Used at render pipeline validation.
     bool usesSampleMaskOutput = false;
 };

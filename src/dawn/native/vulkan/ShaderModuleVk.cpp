@@ -175,6 +175,7 @@ ShaderModule::~ShaderModule() = default;
     X(bool, disableWorkgroupInit)                                                           \
     X(bool, disableSymbolRenaming)                                                          \
     X(bool, useZeroInitializeWorkgroupMemoryExtension)                                      \
+    X(bool, clampFragDepth)                                                                 \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, tracePlatform)
 
 DAWN_MAKE_CACHE_REQUEST(SpirvCompilationRequest, SPIRV_COMPILATION_REQUEST_MEMBERS);
@@ -183,7 +184,8 @@ DAWN_MAKE_CACHE_REQUEST(SpirvCompilationRequest, SPIRV_COMPILATION_REQUEST_MEMBE
 ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     SingleShaderStage stage,
     const ProgrammableStage& programmableStage,
-    const PipelineLayout* layout) {
+    const PipelineLayout* layout,
+    bool clampFragDepth) {
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleVk::GetHandleAndSpirv");
 
     // If the shader was destroyed, we should never call this function.
@@ -258,6 +260,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.disableSymbolRenaming = GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.useZeroInitializeWorkgroupMemoryExtension =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension);
+    req.clampFragDepth = clampFragDepth;
     req.tracePlatform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
 
@@ -303,6 +306,10 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                 transformManager.Add<tint::transform::SubstituteOverride>();
                 transformInputs.Add<tint::transform::SubstituteOverride::Config>(
                     std::move(r.substituteOverrideConfig).value());
+            }
+
+            if (r.clampFragDepth) {
+                transformManager.Add<tint::transform::ClampFragDepth>();
             }
 
             tint::Program program;

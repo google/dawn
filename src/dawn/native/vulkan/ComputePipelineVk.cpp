@@ -61,7 +61,8 @@ MaybeError ComputePipeline::Initialize() {
 
     ShaderModule::ModuleAndSpirv moduleAndSpirv;
     DAWN_TRY_ASSIGN(moduleAndSpirv,
-                    module->GetHandleAndSpirv(SingleShaderStage::Compute, computeStage, layout));
+                    module->GetHandleAndSpirv(SingleShaderStage::Compute, computeStage, layout,
+                                              /*clampFragDepth*/ false));
 
     createInfo.stage.module = moduleAndSpirv.module;
     createInfo.stage.pName = moduleAndSpirv.remappedEntryPoint;

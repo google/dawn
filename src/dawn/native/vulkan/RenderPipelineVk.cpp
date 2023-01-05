@@ -343,45 +343,38 @@ MaybeError RenderPipeline::Initialize() {
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
     uint32_t stageCount = 0;
 
-    for (auto stage : IterateStages(this->GetStageMask())) {
-        VkPipelineShaderStageCreateInfo shaderStage;
-
+    auto AddShaderStage = [&](SingleShaderStage stage, VkShaderStageFlagBits vkStage,
+                              bool clampFragDepth) -> MaybeError {
         const ProgrammableStage& programmableStage = GetStage(stage);
-        ShaderModule* module = ToBackend(programmableStage.module.Get());
-
         ShaderModule::ModuleAndSpirv moduleAndSpirv;
         DAWN_TRY_ASSIGN(moduleAndSpirv,
-                        module->GetHandleAndSpirv(stage, programmableStage, layout));
-
-        shaderStage.module = moduleAndSpirv.module;
-        shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        shaderStage.pNext = nullptr;
-        shaderStage.flags = 0;
-        shaderStage.pSpecializationInfo = nullptr;
-        shaderStage.pName = moduleAndSpirv.remappedEntryPoint;
-
-        switch (stage) {
-            case dawn::native::SingleShaderStage::Vertex: {
-                shaderStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
-                break;
-            }
-            case dawn::native::SingleShaderStage::Fragment: {
-                shaderStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-                break;
-            }
-            default: {
-                // For render pipeline only Vertex and Fragment stage is possible
-                DAWN_UNREACHABLE();
-                break;
-            }
-        }
-
-        DAWN_ASSERT(stageCount < 2);
-        shaderStages[stageCount] = shaderStage;
-        stageCount++;
-
+                        ToBackend(programmableStage.module)
+                            ->GetHandleAndSpirv(stage, programmableStage, layout, clampFragDepth));
         // Record cache key for each shader since it will become inaccessible later on.
         StreamIn(&mCacheKey, stream::Iterable(moduleAndSpirv.spirv, moduleAndSpirv.wordCount));
+
+        VkPipelineShaderStageCreateInfo* shaderStage = &shaderStages[stageCount];
+        shaderStage->module = moduleAndSpirv.module;
+        shaderStage->sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        shaderStage->pNext = nullptr;
+        shaderStage->flags = 0;
+        shaderStage->pSpecializationInfo = nullptr;
+        shaderStage->stage = vkStage;
+        shaderStage->pName = moduleAndSpirv.remappedEntryPoint;
+
+        stageCount++;
+        return {};
+    };
+
+    // Add the vertex stage that's always present.
+    DAWN_TRY(AddShaderStage(SingleShaderStage::Vertex, VK_SHADER_STAGE_VERTEX_BIT,
+                            /*clampFragDepth*/ false));
+
+    // Add the fragment stage if present.
+    if (GetStageMask() & wgpu::ShaderStage::Fragment) {
+        bool clampFragDepth = UsesFragDepth() && !HasUnclippedDepth();
+        DAWN_TRY(AddShaderStage(SingleShaderStage::Fragment, VK_SHADER_STAGE_FRAGMENT_BIT,
+                                clampFragDepth));
     }
 
     PipelineVertexInputStateCreateInfoTemporaryAllocations tempAllocations;
@@ -422,7 +415,7 @@ MaybeError RenderPipeline::Initialize() {
     rasterization.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterization.pNext = nullptr;
     rasterization.flags = 0;
-    rasterization.depthClampEnable = VK_FALSE;
+    rasterization.depthClampEnable = HasUnclippedDepth();
     rasterization.rasterizerDiscardEnable = VK_FALSE;
     rasterization.polygonMode = VK_POLYGON_MODE_FILL;
     rasterization.cullMode = VulkanCullMode(GetCullMode());

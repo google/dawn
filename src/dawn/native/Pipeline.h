@@ -59,6 +59,7 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     const RequiredBufferSizes& GetMinBufferSizes() const;
     const ProgrammableStage& GetStage(SingleShaderStage stage) const;
     const PerStage<ProgrammableStage>& GetAllStages() const;
+    bool HasStage(SingleShaderStage stage) const;
     wgpu::ShaderStage GetStageMask() const;
 
     ResultOrError<Ref<BindGroupLayoutBase>> GetBindGroupLayout(uint32_t groupIndex);

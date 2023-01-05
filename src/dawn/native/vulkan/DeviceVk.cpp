@@ -505,6 +505,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalD
         ASSERT(deviceInfo.HasExt(DeviceExt::DepthClipEnable) &&
                deviceInfo.depthClipEnableFeatures.depthClipEnable == VK_TRUE);
 
+        usedKnobs.features.depthClamp = VK_TRUE;
         usedKnobs.depthClipEnableFeatures.depthClipEnable = VK_TRUE;
         featuresChain.Add(&usedKnobs.depthClipEnableFeatures,
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLIP_ENABLE_FEATURES_EXT);

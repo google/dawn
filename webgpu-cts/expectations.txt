@@ -165,8 +165,7 @@ crbug.com/dawn/0000 webgpu:util,texture,texel_data:unorm_texel_data_in_shader:fo
 ################################################################################
 # depth_clip_clamp failures
 ################################################################################
-crbug.com/dawn/1125 [ ubuntu ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:* [ Failure ]
-crbug.com/dawn/1125 [ ubuntu ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:* [ Failure ]
+crbug.com/dawn/1125 [ mac ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:* [ Failure ]
 
 ################################################################################
 # compilation_info failures

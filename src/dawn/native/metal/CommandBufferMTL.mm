@@ -1490,9 +1490,13 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
                            slopeScale:newPipeline->GetDepthBiasSlopeScale()
                                 clamp:newPipeline->GetDepthBiasClamp()];
                 if (@available(macOS 10.11, iOS 11.0, *)) {
-                    MTLDepthClipMode clipMode = newPipeline->HasUnclippedDepth()
-                                                    ? MTLDepthClipModeClamp
-                                                    : MTLDepthClipModeClip;
+                    // When using @builtin(frag_depth) we need to clamp to the viewport, otherwise
+                    // Metal writes the raw value to the depth buffer, which doesn't match other
+                    // APIs.
+                    MTLDepthClipMode clipMode =
+                        (newPipeline->UsesFragDepth() || newPipeline->HasUnclippedDepth())
+                            ? MTLDepthClipModeClamp
+                            : MTLDepthClipModeClip;
                     [encoder setDepthClipMode:clipMode];
                 }
                 newPipeline->Encode(encoder);
