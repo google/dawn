@@ -140,6 +140,14 @@ wrapPromiseWithHeartbeat(GPUShaderModule.prototype, 'compilationInfo');
 globalTestConfig.testHeartbeatCallback = sendHeartbeat;
 globalTestConfig.noRaceWithRejectOnTimeout = true;
 
+// FXC is very slow to compile unrolled const-eval loops, where the metal shader
+// compiler (Intel GPU) is very slow to compile rolled loops. Intel drivers for
+// linux may also suffer the same performance issues, so unroll const-eval loops
+// if we're not running on Windows.
+if (navigator.userAgent.indexOf("Windows") !== -1) {
+  globalTestConfig.unrollConstEvalLoops = true;
+}
+
 async function runCtsTest(query, use_worker) {
   const workerEnabled = use_worker;
   const worker = workerEnabled ? new TestWorker(false) : undefined;
@@ -208,9 +216,11 @@ function sendMessageTestHeartbeat() {
 }
 
 function sendMessageTestStatus(status, jsDurationMs) {
-  socket.send(JSON.stringify({'type': 'TEST_STATUS',
-                              'status': status,
-                              'js_duration_ms': jsDurationMs}));
+  socket.send(JSON.stringify({
+    'type': 'TEST_STATUS',
+    'status': status,
+    'js_duration_ms': jsDurationMs
+  }));
 }
 
 function sendMessageTestLog(logs) {
