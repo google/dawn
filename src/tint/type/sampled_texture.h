@@ -44,6 +44,10 @@ class SampledTexture final : public Castable<SampledTexture, Texture> {
     /// declared in WGSL.
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    SampledTexture* Clone(CloneContext& ctx) const override;
+
   private:
     const Type* const type_;
 };

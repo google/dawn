@@ -52,4 +52,9 @@ std::string Reference::FriendlyName(const SymbolTable& symbols) const {
 
 Reference::~Reference() = default;
 
+Reference* Reference::Clone(CloneContext& ctx) const {
+    auto* ty = subtype_->Clone(ctx);
+    return ctx.dst.mgr->Get<Reference>(ty, address_space_, access_);
+}
+
 }  // namespace tint::type

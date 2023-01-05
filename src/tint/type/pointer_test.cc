@@ -68,5 +68,17 @@ TEST_F(PointerTest, FriendlyNameWithAddressSpace) {
     EXPECT_EQ(r->FriendlyName(Symbols()), "ptr<workgroup, i32, read>");
 }
 
+TEST_F(PointerTest, Clone) {
+    auto* a = create<Pointer>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
+
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* ptr = a->Clone(ctx);
+    EXPECT_TRUE(ptr->StoreType()->Is<I32>());
+    EXPECT_EQ(ptr->AddressSpace(), ast::AddressSpace::kStorage);
+    EXPECT_EQ(ptr->Access(), ast::Access::kReadWrite);
+}
+
 }  // namespace
 }  // namespace tint::type

@@ -37,4 +37,8 @@ std::string Sampler::FriendlyName(const SymbolTable&) const {
     return kind_ == ast::SamplerKind::kSampler ? "sampler" : "sampler_comparison";
 }
 
+Sampler* Sampler::Clone(CloneContext& ctx) const {
+    return ctx.dst.mgr->Get<Sampler>(kind_);
+}
+
 }  // namespace tint::type

@@ -66,6 +66,10 @@ class Matrix final : public Castable<Matrix, Type> {
     /// @returns the number of bytes between columns of the matrix
     uint32_t ColumnStride() const;
 
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    Matrix* Clone(CloneContext& ctx) const override;
+
   private:
     const Type* const subtype_;
     const Vector* const column_type_;

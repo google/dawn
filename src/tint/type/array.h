@@ -98,6 +98,10 @@ class Array final : public Castable<Array, Type> {
     /// declared in WGSL.
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    Array* Clone(CloneContext& ctx) const override;
+
   private:
     Type const* const element_;
     const ArrayCount* count_;

@@ -49,4 +49,8 @@ std::string DepthTexture::FriendlyName(const SymbolTable&) const {
     return out.str();
 }
 
+DepthTexture* DepthTexture::Clone(CloneContext& ctx) const {
+    return ctx.dst.mgr->Get<DepthTexture>(dim());
+}
+
 }  // namespace tint::type

@@ -44,5 +44,15 @@ TEST_F(F16Test, FriendlyName) {
     EXPECT_EQ(f.FriendlyName(Symbols()), "f16");
 }
 
+TEST_F(F16Test, Clone) {
+    auto* a = create<F16>();
+
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* b = a->Clone(ctx);
+    ASSERT_TRUE(b->Is<F16>());
+}
+
 }  // namespace
 }  // namespace tint::type

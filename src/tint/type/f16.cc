@@ -46,4 +46,8 @@ uint32_t F16::Align() const {
     return 2;
 }
 
+F16* F16::Clone(CloneContext& ctx) const {
+    return ctx.dst.mgr->Get<F16>();
+}
+
 }  // namespace tint::type

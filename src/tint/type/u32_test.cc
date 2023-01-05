@@ -44,5 +44,15 @@ TEST_F(U32Test, FriendlyName) {
     EXPECT_EQ(u.FriendlyName(Symbols()), "u32");
 }
 
+TEST_F(U32Test, Clone) {
+    auto* a = create<U32>();
+
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* b = a->Clone(ctx);
+    ASSERT_TRUE(b->Is<U32>());
+}
+
 }  // namespace
 }  // namespace tint::type

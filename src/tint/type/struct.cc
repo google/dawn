@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "src/tint/symbol_table.h"
+#include "src/tint/type/manager.h"
 #include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Struct);
@@ -160,6 +161,16 @@ std::string Struct::Layout(const tint::SymbolTable& symbols) const {
     return ss.str();
 }
 
+Struct* Struct::Clone(CloneContext& ctx) const {
+    auto sym = ctx.dst.st->Register(ctx.src.st->NameFor(name_));
+
+    utils::Vector<const StructMember*, 4> members;
+    for (const auto& mem : members_) {
+        members.Push(mem->Clone(ctx));
+    }
+    return ctx.dst.mgr->Get<Struct>(source_, sym, members, align_, size_, size_no_padding_);
+}
+
 StructMember::StructMember(tint::Source source,
                            Symbol name,
                            const type::Type* type,
@@ -178,5 +189,12 @@ StructMember::StructMember(tint::Source source,
       location_(location) {}
 
 StructMember::~StructMember() = default;
+
+StructMember* StructMember::Clone(CloneContext& ctx) const {
+    auto sym = ctx.dst.st->Register(ctx.src.st->NameFor(name_));
+    auto* ty = type_->Clone(ctx);
+    return ctx.dst.mgr->Get<StructMember>(source_, sym, ty, index_, offset_, align_, size_,
+                                          location_);
+}
 
 }  // namespace tint::type

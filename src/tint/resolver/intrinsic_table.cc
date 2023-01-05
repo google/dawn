@@ -63,6 +63,7 @@ class Any final : public Castable<Any, type::Type> {
     // Stub implementations for type::Type conformance.
     bool Equals(const type::UniqueNode&) const override { return false; }
     std::string FriendlyName(const SymbolTable&) const override { return "<any>"; }
+    type::Type* Clone(type::CloneContext&) const override { return nullptr; }
 };
 
 /// Number is an 32 bit unsigned integer, which can be in one of three states:

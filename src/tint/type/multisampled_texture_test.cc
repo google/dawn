@@ -81,5 +81,16 @@ TEST_F(MultisampledTextureTest, FriendlyName) {
     EXPECT_EQ(s.FriendlyName(Symbols()), "texture_multisampled_3d<f32>");
 }
 
+TEST_F(MultisampledTextureTest, Clone) {
+    auto* a = create<MultisampledTexture>(ast::TextureDimension::k2d, create<F32>());
+
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* mt = a->Clone(ctx);
+    EXPECT_EQ(mt->dim(), ast::TextureDimension::k2d);
+    EXPECT_TRUE(mt->type()->Is<F32>());
+}
+
 }  // namespace
 }  // namespace tint::type

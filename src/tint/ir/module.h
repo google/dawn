@@ -21,6 +21,8 @@
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/value.h"
+#include "src/tint/program_id.h"
+#include "src/tint/symbol_table.h"
 #include "src/tint/type/manager.h"
 #include "src/tint/utils/block_allocator.h"
 #include "src/tint/utils/result.h"
@@ -68,6 +70,11 @@ class Module {
     ///  (Note, this will probably turn into a utils::Result, just stubbing for now)
     const Program* ToProgram() const;
 
+  private:
+    /// Program Id required to create other components
+    ProgramID prog_id_;
+
+  public:
     /// The flow node allocator
     utils::BlockAllocator<FlowNode> flow_nodes;
     /// The constant allocator
@@ -87,6 +94,9 @@ class Module {
 
     /// The type manager for the module
     type::Manager types;
+
+    /// The symbol table for the module
+    SymbolTable symbols{prog_id_};
 };
 
 }  // namespace tint::ir

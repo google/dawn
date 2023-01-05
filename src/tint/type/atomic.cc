@@ -55,4 +55,9 @@ uint32_t Atomic::Align() const {
 
 Atomic::~Atomic() = default;
 
+Atomic* Atomic::Clone(CloneContext& ctx) const {
+    auto* ty = subtype_->Clone(ctx);
+    return ctx.dst.mgr->Get<Atomic>(ty);
+}
+
 }  // namespace tint::type

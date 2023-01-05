@@ -38,6 +38,10 @@ class AbstractFloat final : public Castable<AbstractFloat, AbstractNumeric> {
     /// @param symbols the program's symbol table
     /// @returns the name for this type when printed in diagnostics.
     std::string FriendlyName(const SymbolTable& symbols) const override;
+
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    AbstractFloat* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::type

@@ -65,5 +65,17 @@ TEST_F(MatrixTest, FriendlyName) {
     EXPECT_EQ(m.FriendlyName(Symbols()), "mat2x3<i32>");
 }
 
+TEST_F(MatrixTest, Clone) {
+    auto* a = create<Matrix>(create<Vector>(create<I32>(), 3u), 4u);
+
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* mat = a->Clone(ctx);
+    EXPECT_TRUE(mat->type()->Is<I32>());
+    EXPECT_EQ(mat->rows(), 3u);
+    EXPECT_EQ(mat->columns(), 4u);
+}
+
 }  // namespace
 }  // namespace tint::type

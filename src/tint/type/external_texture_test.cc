@@ -66,5 +66,15 @@ TEST_F(ExternalTextureTest, FriendlyName) {
     EXPECT_EQ(s.FriendlyName(Symbols()), "texture_external");
 }
 
+TEST_F(ExternalTextureTest, Clone) {
+    auto* a = create<ExternalTexture>();
+
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* b = a->Clone(ctx);
+    ASSERT_TRUE(b->Is<ExternalTexture>());
+}
+
 }  // namespace
 }  // namespace tint::type

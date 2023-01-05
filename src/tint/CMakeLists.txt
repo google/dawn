@@ -476,6 +476,7 @@ list(APPEND TINT_LIB_SRCS
   type/atomic.h
   type/bool.cc
   type/bool.h
+  type/clone_context.h
   type/depth_multisampled_texture.cc
   type/depth_multisampled_texture.h
   type/depth_texture.cc
@@ -951,7 +952,7 @@ if(TINT_BUILD_TESTS)
     traits_test.cc
     transform/transform_test.cc
     type/array_test.cc
-    type/atomic.cc
+    type/atomic_test.cc
     type/bool_test.cc
     type/depth_multisampled_texture_test.cc
     type/depth_texture_test.cc

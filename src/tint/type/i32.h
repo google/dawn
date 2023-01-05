@@ -44,6 +44,10 @@ class I32 final : public Castable<I32, Type> {
 
     /// @returns the alignment in bytes of the type.
     uint32_t Align() const override;
+
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    I32* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::type

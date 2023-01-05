@@ -134,5 +134,18 @@ TEST_F(StorageTextureTest, I32) {
     EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<I32>());
 }
 
+TEST_F(StorageTextureTest, Clone) {
+    auto* a = Create(ast::TextureDimension::kCube, ast::TexelFormat::kRgba32Float,
+                     ast::Access::kReadWrite);
+
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* mt = a->Clone(ctx);
+    EXPECT_EQ(mt->dim(), ast::TextureDimension::kCube);
+    EXPECT_EQ(mt->texel_format(), ast::TexelFormat::kRgba32Float);
+    EXPECT_TRUE(mt->type()->Is<F32>());
+}
+
 }  // namespace
 }  // namespace tint::type

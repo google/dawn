@@ -47,6 +47,10 @@ class Sampler final : public Castable<Sampler, Type> {
     /// declared in WGSL.
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    Sampler* Clone(CloneContext& ctx) const override;
+
   private:
     ast::SamplerKind const kind_;
 };

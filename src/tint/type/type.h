@@ -18,6 +18,7 @@
 #include <functional>
 #include <string>
 
+#include "src/tint/type/clone_context.h"
 #include "src/tint/type/unique_node.h"
 #include "src/tint/utils/enum_set.h"
 #include "src/tint/utils/vector.h"
@@ -71,6 +72,10 @@ class Type : public Castable<Type, UniqueNode> {
     /// padding.
     /// @note opaque types will return a size of 0.
     virtual uint32_t Align() const;
+
+    /// @param ctx the clone context
+    /// @returns a clone of this type created in the provided context
+    virtual Type* Clone(CloneContext& ctx) const = 0;
 
     /// @returns the flags on the type
     type::Flags Flags() { return flags_; }

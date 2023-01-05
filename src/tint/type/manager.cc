@@ -17,8 +17,11 @@
 namespace tint::type {
 
 Manager::Manager() = default;
+
 Manager::Manager(Manager&&) = default;
+
 Manager& Manager::operator=(Manager&& rhs) = default;
+
 Manager::~Manager() = default;
 
 }  // namespace tint::type

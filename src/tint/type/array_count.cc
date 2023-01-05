@@ -14,6 +14,8 @@
 
 #include "src/tint/type/array_count.h"
 
+#include "src/tint/type/manager.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::type::ArrayCount);
 TINT_INSTANTIATE_TYPEINFO(tint::type::ConstantArrayCount);
 TINT_INSTANTIATE_TYPEINFO(tint::type::RuntimeArrayCount);
@@ -38,6 +40,10 @@ std::string ConstantArrayCount::FriendlyName(const SymbolTable&) const {
     return std::to_string(value);
 }
 
+ConstantArrayCount* ConstantArrayCount::Clone(CloneContext& ctx) const {
+    return ctx.dst.mgr->Get<ConstantArrayCount>(value);
+}
+
 RuntimeArrayCount::RuntimeArrayCount()
     : Base(static_cast<size_t>(TypeInfo::Of<RuntimeArrayCount>().full_hashcode)) {}
 RuntimeArrayCount::~RuntimeArrayCount() = default;
@@ -48,6 +54,10 @@ bool RuntimeArrayCount::Equals(const UniqueNode& other) const {
 
 std::string RuntimeArrayCount::FriendlyName(const SymbolTable&) const {
     return "";
+}
+
+RuntimeArrayCount* RuntimeArrayCount::Clone(CloneContext& ctx) const {
+    return ctx.dst.mgr->Get<RuntimeArrayCount>();
 }
 
 }  // namespace tint::type

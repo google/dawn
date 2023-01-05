@@ -78,5 +78,18 @@ TEST_F(ReferenceTest, FriendlyNameWithAddressSpace) {
     EXPECT_EQ(r->FriendlyName(Symbols()), "ref<workgroup, i32, read>");
 }
 
+TEST_F(ReferenceTest, Clone) {
+    auto* a =
+        create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
+
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* ref = a->Clone(ctx);
+    EXPECT_TRUE(ref->StoreType()->Is<I32>());
+    EXPECT_EQ(ref->AddressSpace(), ast::AddressSpace::kStorage);
+    EXPECT_EQ(ref->Access(), ast::Access::kReadWrite);
+}
+
 }  // namespace
 }  // namespace tint::type

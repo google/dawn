@@ -19,6 +19,7 @@
 #include <string>
 
 #include "src/tint/symbol_table.h"
+#include "src/tint/type/clone_context.h"
 #include "src/tint/type/unique_node.h"
 
 namespace tint::type {
@@ -31,6 +32,10 @@ class ArrayCount : public Castable<ArrayCount, UniqueNode> {
     /// @param symbols the symbol table
     /// @returns the friendly name for this array count
     virtual std::string FriendlyName(const SymbolTable& symbols) const = 0;
+
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    virtual ArrayCount* Clone(CloneContext& ctx) const = 0;
 
   protected:
     /// Constructor
@@ -59,6 +64,10 @@ class ConstantArrayCount final : public Castable<ConstantArrayCount, ArrayCount>
     /// @returns the friendly name for this array count
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    ConstantArrayCount* Clone(CloneContext& ctx) const override;
+
     /// The array count constant-expression value.
     uint32_t value;
 };
@@ -81,6 +90,10 @@ class RuntimeArrayCount final : public Castable<RuntimeArrayCount, ArrayCount> {
     /// @param symbols the symbol table
     /// @returns the friendly name for this array count
     std::string FriendlyName(const SymbolTable& symbols) const override;
+
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    RuntimeArrayCount* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::type

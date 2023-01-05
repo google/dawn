@@ -53,4 +53,9 @@ std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
 
 Pointer::~Pointer() = default;
 
+Pointer* Pointer::Clone(CloneContext& ctx) const {
+    auto* ty = subtype_->Clone(ctx);
+    return ctx.dst.mgr->Get<Pointer>(ty, address_space_, access_);
+}
+
 }  // namespace tint::type

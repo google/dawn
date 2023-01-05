@@ -50,5 +50,15 @@ TEST_F(AtomicTest, FriendlyName) {
     EXPECT_EQ(a->FriendlyName(Symbols()), "atomic<i32>");
 }
 
+TEST_F(AtomicTest, Clone) {
+    auto* atomic = create<Atomic>(create<I32>());
+
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* val = atomic->Clone(ctx);
+    EXPECT_TRUE(val->Type()->Is<I32>());
+}
+
 }  // namespace
 }  // namespace tint::type

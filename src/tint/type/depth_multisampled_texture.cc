@@ -48,4 +48,8 @@ std::string DepthMultisampledTexture::FriendlyName(const SymbolTable&) const {
     return out.str();
 }
 
+DepthMultisampledTexture* DepthMultisampledTexture::Clone(CloneContext& ctx) const {
+    return ctx.dst.mgr->Get<DepthMultisampledTexture>(dim());
+}
+
 }  // namespace tint::type

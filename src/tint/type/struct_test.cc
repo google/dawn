@@ -206,5 +206,47 @@ TEST_F(TypeStructTest, HasFixedFootprint) {
     EXPECT_FALSE(sem_outer_with_runtime_sized_array->HasFixedFootprint());
 }
 
+TEST_F(TypeStructTest, Clone) {
+    auto* s = create<Struct>(
+        Source{}, Sym("my_struct"),
+        utils::Vector{create<StructMember>(Source{}, Sym("b"), create<Vector>(create<F32>(), 3u),
+                                           0u, 0u, 16u, 12u, std::optional<uint32_t>{2}),
+                      create<StructMember>(Source{}, Sym("a"), create<I32>(), 1u, 16u, 4u, 4u,
+                                           std::optional<uint32_t>())},
+        4u /* align */, 8u /* size */, 16u /* size_no_padding */);
+
+    ProgramID id;
+    SymbolTable new_st{id};
+
+    type::Manager mgr;
+    type::CloneContext ctx{{&Symbols()}, {&new_st, &mgr}};
+
+    auto* st = s->Clone(ctx);
+
+    EXPECT_TRUE(new_st.Get("my_struct").IsValid());
+    EXPECT_EQ(new_st.NameFor(st->Name()), "my_struct");
+
+    EXPECT_EQ(st->Align(), 4u);
+    EXPECT_EQ(st->Size(), 8u);
+    EXPECT_EQ(st->SizeNoPadding(), 16u);
+
+    auto members = st->Members();
+    ASSERT_EQ(members.Length(), 2u);
+
+    EXPECT_EQ(new_st.NameFor(members[0]->Name()), "b");
+    EXPECT_TRUE(members[0]->Type()->Is<Vector>());
+    EXPECT_EQ(members[0]->Index(), 0u);
+    EXPECT_EQ(members[0]->Offset(), 0u);
+    EXPECT_EQ(members[0]->Align(), 16u);
+    EXPECT_EQ(members[0]->Size(), 12u);
+
+    EXPECT_EQ(new_st.NameFor(members[1]->Name()), "a");
+    EXPECT_TRUE(members[1]->Type()->Is<I32>());
+    EXPECT_EQ(members[1]->Index(), 1u);
+    EXPECT_EQ(members[1]->Offset(), 16u);
+    EXPECT_EQ(members[1]->Align(), 4u);
+    EXPECT_EQ(members[1]->Size(), 4u);
+}
+
 }  // namespace
 }  // namespace tint::type

@@ -42,4 +42,9 @@ std::string MultisampledTexture::FriendlyName(const SymbolTable& symbols) const 
     return out.str();
 }
 
+MultisampledTexture* MultisampledTexture::Clone(CloneContext& ctx) const {
+    auto* ty = type_->Clone(ctx);
+    return ctx.dst.mgr->Get<MultisampledTexture>(dim(), ty);
+}
+
 }  // namespace tint::type

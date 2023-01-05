@@ -65,4 +65,9 @@ uint32_t Vector::Align() const {
     return 0;  // Unreachable
 }
 
+Vector* Vector::Clone(CloneContext& ctx) const {
+    auto* subtype = subtype_->Clone(ctx);
+    return ctx.dst.mgr->Get<Vector>(subtype, width_);
+}
+
 }  // namespace tint::type

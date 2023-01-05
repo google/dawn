@@ -49,6 +49,10 @@ class Atomic final : public Castable<Atomic, Type> {
     /// @returns the alignment in bytes of the type.
     uint32_t Align() const override;
 
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    Atomic* Clone(CloneContext& ctx) const override;
+
   private:
     type::Type const* const subtype_;
 };

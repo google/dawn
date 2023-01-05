@@ -32,4 +32,8 @@ std::string Void::FriendlyName(const SymbolTable&) const {
     return "void";
 }
 
+Void* Void::Clone(CloneContext& ctx) const {
+    return ctx.dst.mgr->Get<Void>();
+}
+
 }  // namespace tint::type

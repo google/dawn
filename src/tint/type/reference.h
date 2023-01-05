@@ -53,6 +53,10 @@ class Reference final : public Castable<Reference, Type> {
     /// declared in WGSL.
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    Reference* Clone(CloneContext& ctx) const override;
+
   private:
     Type const* const subtype_;
     ast::AddressSpace const address_space_;

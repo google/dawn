@@ -85,5 +85,16 @@ TEST_F(SampledTextureTest, FriendlyName) {
     EXPECT_EQ(s.FriendlyName(Symbols()), "texture_3d<f32>");
 }
 
+TEST_F(SampledTextureTest, Clone) {
+    auto* a = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
+
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* mt = a->Clone(ctx);
+    EXPECT_EQ(mt->dim(), ast::TextureDimension::kCube);
+    EXPECT_TRUE(mt->type()->Is<F32>());
+}
+
 }  // namespace
 }  // namespace tint::type

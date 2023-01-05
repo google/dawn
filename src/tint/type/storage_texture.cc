@@ -79,4 +79,9 @@ Type* StorageTexture::SubtypeFor(ast::TexelFormat format, Manager& type_mgr) {
     return nullptr;
 }
 
+StorageTexture* StorageTexture::Clone(CloneContext& ctx) const {
+    auto* ty = subtype_->Clone(ctx);
+    return ctx.dst.mgr->Get<StorageTexture>(dim(), texel_format_, access_, ty);
+}
+
 }  // namespace tint::type

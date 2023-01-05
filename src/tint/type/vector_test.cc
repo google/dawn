@@ -59,5 +59,16 @@ TEST_F(VectorTest, FriendlyName) {
     EXPECT_EQ(v->FriendlyName(Symbols()), "vec3<f32>");
 }
 
+TEST_F(VectorTest, Clone) {
+    auto* a = create<Vector>(create<I32>(), 2u);
+
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* vec = a->Clone(ctx);
+    EXPECT_TRUE(vec->type()->Is<I32>());
+    EXPECT_EQ(vec->Width(), 2u);
+}
+
 }  // namespace
 }  // namespace tint::type

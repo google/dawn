@@ -44,5 +44,14 @@ TEST_F(BoolTest, FriendlyName) {
     EXPECT_EQ(b.FriendlyName(Symbols()), "bool");
 }
 
+TEST_F(BoolTest, Clone) {
+    auto* a = create<Bool>();
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* b = a->Clone(ctx);
+    ASSERT_TRUE(b->Is<Bool>());
+}
+
 }  // namespace
 }  // namespace tint::type

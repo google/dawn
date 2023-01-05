@@ -35,6 +35,11 @@ std::string NamedOverrideArrayCount::FriendlyName(const SymbolTable& symbols) co
     return symbols.NameFor(variable->Declaration()->symbol);
 }
 
+type::ArrayCount* NamedOverrideArrayCount::Clone(type::CloneContext&) const {
+    TINT_ASSERT(Type, false && "Named override array count clone not available");
+    return nullptr;
+}
+
 UnnamedOverrideArrayCount::UnnamedOverrideArrayCount(const Expression* e)
     : Base(static_cast<size_t>(TypeInfo::Of<UnnamedOverrideArrayCount>().full_hashcode)), expr(e) {}
 UnnamedOverrideArrayCount::~UnnamedOverrideArrayCount() = default;
@@ -48,6 +53,11 @@ bool UnnamedOverrideArrayCount::Equals(const UniqueNode& other) const {
 
 std::string UnnamedOverrideArrayCount::FriendlyName(const SymbolTable&) const {
     return "[unnamed override-expression]";
+}
+
+type::ArrayCount* UnnamedOverrideArrayCount::Clone(type::CloneContext&) const {
+    TINT_ASSERT(Type, false && "Unnamed override array count clone not available");
+    return nullptr;
 }
 
 }  // namespace tint::sem

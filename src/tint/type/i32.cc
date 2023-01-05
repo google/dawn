@@ -46,4 +46,8 @@ uint32_t I32::Align() const {
     return 4;
 }
 
+I32* I32::Clone(CloneContext& ctx) const {
+    return ctx.dst.mgr->Get<I32>();
+}
+
 }  // namespace tint::type

@@ -39,6 +39,10 @@ class DepthTexture final : public Castable<DepthTexture, Texture> {
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
     std::string FriendlyName(const SymbolTable& symbols) const override;
+
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    DepthTexture* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::type

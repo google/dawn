@@ -44,5 +44,15 @@ TEST_F(F32Test, FriendlyName) {
     EXPECT_EQ(f.FriendlyName(Symbols()), "f32");
 }
 
+TEST_F(F32Test, Clone) {
+    auto* a = create<F32>();
+
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* b = a->Clone(ctx);
+    ASSERT_TRUE(b->Is<F32>());
+}
+
 }  // namespace
 }  // namespace tint::type

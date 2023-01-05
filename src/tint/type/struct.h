@@ -149,6 +149,10 @@ class Struct : public Castable<Struct, Type> {
     /// @note only structures returned by builtins may be abstract (e.g. modf, frexp)
     utils::VectorRef<const Struct*> ConcreteTypes() const { return concrete_types_; }
 
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    Struct* Clone(CloneContext& ctx) const override;
+
   private:
     const tint::Source source_;
     const Symbol name_;
@@ -215,6 +219,10 @@ class StructMember : public Castable<StructMember, Node> {
 
     /// @returns the location, if set
     std::optional<uint32_t> Location() const { return location_; }
+
+    /// @param ctx the clone context
+    /// @returns a clone of this struct member
+    StructMember* Clone(CloneContext& ctx) const;
 
   private:
     const tint::Source source_;

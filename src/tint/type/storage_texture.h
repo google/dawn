@@ -67,6 +67,10 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     /// @returns the storage texture subtype for the given TexelFormat
     static Type* SubtypeFor(ast::TexelFormat format, Manager& type_mgr);
 
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    StorageTexture* Clone(CloneContext& ctx) const override;
+
   private:
     ast::TexelFormat const texel_format_;
     ast::Access const access_;

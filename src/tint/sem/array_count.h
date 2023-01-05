@@ -44,6 +44,10 @@ class NamedOverrideArrayCount final : public Castable<NamedOverrideArrayCount, t
     /// @returns the friendly name for this array count
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    type::ArrayCount* Clone(type::CloneContext& ctx) const override;
+
     /// The `override` variable.
     const GlobalVariable* variable;
 };
@@ -69,6 +73,10 @@ class UnnamedOverrideArrayCount final
     /// @param symbols the symbol table
     /// @returns the friendly name for this array count
     std::string FriendlyName(const SymbolTable& symbols) const override;
+
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    type::ArrayCount* Clone(type::CloneContext& ctx) const override;
 
     /// The unnamed override expression.
     /// Note: Each AST expression gets a unique semantic expression node, so two equivalent AST

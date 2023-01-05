@@ -44,6 +44,10 @@ class F16 final : public Castable<F16, Type> {
 
     /// @returns the alignment in bytes of the type.
     uint32_t Align() const override;
+
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    F16* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::type

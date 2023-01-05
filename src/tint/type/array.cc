@@ -19,6 +19,7 @@
 #include "src/tint/ast/variable.h"
 #include "src/tint/debug.h"
 #include "src/tint/symbol_table.h"
+#include "src/tint/type/manager.h"
 #include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Array);
@@ -101,6 +102,13 @@ uint32_t Array::Align() const {
 
 uint32_t Array::Size() const {
     return size_;
+}
+
+Array* Array::Clone(CloneContext& ctx) const {
+    auto* elem_ty = element_->Clone(ctx);
+    auto* count = count_->Clone(ctx);
+
+    return ctx.dst.mgr->Get<Array>(elem_ty, count, align_, size_, stride_, implicit_stride_);
 }
 
 }  // namespace tint::type

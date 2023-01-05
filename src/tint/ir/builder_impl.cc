@@ -83,7 +83,9 @@ bool IsConnected(const FlowNode* b) {
 
 }  // namespace
 
-BuilderImpl::BuilderImpl(const Program* program) : builder(program) {}
+BuilderImpl::BuilderImpl(const Program* program)
+    : builder(program),
+      type_clone_ctx_{{&program->Symbols()}, {&builder.ir.symbols, &builder.ir.types}} {}
 
 BuilderImpl::~BuilderImpl() = default;
 
@@ -565,61 +567,63 @@ utils::Result<Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr)
     }
 
     auto* sem = builder.ir.program->Sem().Get(expr);
+    auto* ty = sem->Type()->Clone(type_clone_ctx_);
+
     Binary* instr = nullptr;
     switch (expr->op) {
         case ast::BinaryOp::kAnd:
-            instr = builder.And(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.And(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kOr:
-            instr = builder.Or(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.Or(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kXor:
-            instr = builder.Xor(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.Xor(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLogicalAnd:
-            instr = builder.LogicalAnd(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.LogicalAnd(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLogicalOr:
-            instr = builder.LogicalOr(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.LogicalOr(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kEqual:
-            instr = builder.Equal(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.Equal(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kNotEqual:
-            instr = builder.NotEqual(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.NotEqual(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLessThan:
-            instr = builder.LessThan(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.LessThan(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kGreaterThan:
-            instr = builder.GreaterThan(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.GreaterThan(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLessThanEqual:
-            instr = builder.LessThanEqual(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.LessThanEqual(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kGreaterThanEqual:
-            instr = builder.GreaterThanEqual(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.GreaterThanEqual(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kShiftLeft:
-            instr = builder.ShiftLeft(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.ShiftLeft(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kShiftRight:
-            instr = builder.ShiftRight(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.ShiftRight(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kAdd:
-            instr = builder.Add(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.Add(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kSubtract:
-            instr = builder.Subtract(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.Subtract(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kMultiply:
-            instr = builder.Multiply(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.Multiply(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kDivide:
-            instr = builder.Divide(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.Divide(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kModulo:
-            instr = builder.Modulo(sem->Type(), lhs.Get(), rhs.Get());
+            instr = builder.Modulo(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kNone:
             TINT_ICE(IR, diagnostics_) << "missing binary operand type";
@@ -637,7 +641,8 @@ utils::Result<Value*> BuilderImpl::EmitBitcast(const ast::BitcastExpression* exp
     }
 
     auto* sem = builder.ir.program->Sem().Get(expr);
-    auto* instr = builder.Bitcast(sem->Type(), val.Get());
+    auto* ty = sem->Type()->Clone(type_clone_ctx_);
+    auto* instr = builder.Bitcast(ty, val.Get());
 
     current_flow_block->instructions.Push(instr);
     return instr->Result();

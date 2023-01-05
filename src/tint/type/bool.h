@@ -54,6 +54,10 @@ class Bool final : public Castable<Bool, Type> {
     /// @note: booleans are not host-sharable, but still may exist in workgroup
     /// storage.
     uint32_t Align() const override;
+
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    Bool* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::type
