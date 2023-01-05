@@ -326,10 +326,6 @@ TEST_P(VideoViewsTests, NV12SampleUVtoRG) {
 // Renders a NV12 "checkerboard" texture into a RGB quad then checks the color at specific
 // points to ensure the image has not been flipped.
 TEST_P(VideoViewsTests, NV12SampleYUVtoRGB) {
-    // TODO(https://crbug.com/dawn/733): Figure out why Nvidia bot occasionally fails testing all
-    // four corners.
-    DAWN_SUPPRESS_TEST_IF(IsNvidia());
-
     std::unique_ptr<VideoViewsTestBackend::PlatformTexture> platformTexture =
         mBackend->CreateVideoTextureForTest(wgpu::TextureFormat::R8BG8Biplanar420Unorm,
                                             wgpu::TextureUsage::TextureBinding,
