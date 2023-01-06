@@ -15,13 +15,13 @@
 #ifndef SRC_TINT_IR_SWITCH_H_
 #define SRC_TINT_IR_SWITCH_H_
 
+#include "src/tint/constant/value.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/value.h"
 
 // Forward declarations
 namespace tint::ast {
-class CaseSelector;
 class SwitchStatement;
 }  // namespace tint::ast
 
@@ -30,10 +30,19 @@ namespace tint::ir {
 /// Flow node representing a switch statement
 class Switch : public Castable<Switch, FlowNode> {
   public:
+    /// A case selector
+    struct CaseSelector {
+        /// @returns true if this is a default selector
+        bool IsDefault() const { return val == nullptr; }
+
+        /// The selector value, or nullptr if this is the default selector
+        constant::Value* val = nullptr;
+    };
+
     /// A case label in the struct
     struct Case {
         /// The case selector for this node
-        utils::Vector<const ast::CaseSelector*, 4> selectors;
+        utils::Vector<CaseSelector, 4> selectors;
         /// The start block for the case block.
         Block* start_target;
     };

@@ -77,7 +77,7 @@ Switch* Builder::CreateSwitch(const ast::SwitchStatement* stmt) {
     return ir_switch;
 }
 
-Block* Builder::CreateCase(Switch* s, utils::VectorRef<const ast::CaseSelector*> selectors) {
+Block* Builder::CreateCase(Switch* s, utils::VectorRef<Switch::CaseSelector> selectors) {
     s->cases.Push(Switch::Case{selectors, CreateBlock()});
 
     Block* b = s->cases.Back().start_target;

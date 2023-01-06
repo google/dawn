@@ -44,6 +44,7 @@
 #include "src/tint/program.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/module.h"
+#include "src/tint/sem/switch_statement.h"
 
 namespace tint::ir {
 namespace {
@@ -437,9 +438,19 @@ bool BuilderImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     {
         FlowStackScope scope(this, switch_node);
 
-        for (const auto* c : stmt->body) {
-            current_flow_block = builder.CreateCase(switch_node, c->selectors);
-            if (!EmitStatement(c->body)) {
+        const auto* sem = builder.ir.program->Sem().Get(stmt);
+        for (const auto* c : sem->Cases()) {
+            utils::Vector<Switch::CaseSelector, 4> selectors;
+            for (const auto* selector : c->Selectors()) {
+                if (selector->IsDefault()) {
+                    selectors.Push({nullptr});
+                } else {
+                    selectors.Push({selector->Value()->Clone(clone_ctx_)});
+                }
+            }
+
+            current_flow_block = builder.CreateCase(switch_node, selectors);
+            if (!EmitStatement(c->Body()->Declaration())) {
                 return false;
             }
             BranchToIfNeeded(switch_node->merge_target);

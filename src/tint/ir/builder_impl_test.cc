@@ -16,6 +16,7 @@
 
 #include "src/tint/ast/case_selector.h"
 #include "src/tint/ast/int_literal_expression.h"
+#include "src/tint/constant/scalar.h"
 
 namespace tint::ir {
 namespace {
@@ -1151,15 +1152,15 @@ TEST_F(IR_BuilderImplTest, Switch) {
     auto* func = m.functions[0];
 
     ASSERT_EQ(1u, flow->cases[0].selectors.Length());
-    ASSERT_TRUE(flow->cases[0].selectors[0]->expr->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(0_i, flow->cases[0].selectors[0]->expr->As<ast::IntLiteralExpression>()->value);
+    ASSERT_TRUE(flow->cases[0].selectors[0].val->Is<constant::Scalar<tint::i32>>());
+    EXPECT_EQ(0_i, flow->cases[0].selectors[0].val->As<constant::Scalar<tint::i32>>()->ValueOf());
 
     ASSERT_EQ(1u, flow->cases[1].selectors.Length());
-    ASSERT_TRUE(flow->cases[1].selectors[0]->expr->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(1_i, flow->cases[1].selectors[0]->expr->As<ast::IntLiteralExpression>()->value);
+    ASSERT_TRUE(flow->cases[1].selectors[0].val->Is<constant::Scalar<tint::i32>>());
+    EXPECT_EQ(1_i, flow->cases[1].selectors[0].val->As<constant::Scalar<tint::i32>>()->ValueOf());
 
     ASSERT_EQ(1u, flow->cases[2].selectors.Length());
-    EXPECT_TRUE(flow->cases[2].selectors[0]->IsDefault());
+    EXPECT_TRUE(flow->cases[2].selectors[0].IsDefault());
 
     EXPECT_EQ(1u, flow->inbound_branches.Length());
     EXPECT_EQ(1u, flow->cases[0].start_target->inbound_branches.Length());
@@ -1205,7 +1206,7 @@ TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {
     auto* func = m.functions[0];
 
     ASSERT_EQ(1u, flow->cases[0].selectors.Length());
-    EXPECT_TRUE(flow->cases[0].selectors[0]->IsDefault());
+    EXPECT_TRUE(flow->cases[0].selectors[0].IsDefault());
 
     EXPECT_EQ(1u, flow->inbound_branches.Length());
     EXPECT_EQ(1u, flow->cases[0].start_target->inbound_branches.Length());
@@ -1257,11 +1258,11 @@ TEST_F(IR_BuilderImplTest, Switch_WithBreak) {
     auto* func = m.functions[0];
 
     ASSERT_EQ(1u, flow->cases[0].selectors.Length());
-    ASSERT_TRUE(flow->cases[0].selectors[0]->expr->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(0_i, flow->cases[0].selectors[0]->expr->As<ast::IntLiteralExpression>()->value);
+    ASSERT_TRUE(flow->cases[0].selectors[0].val->Is<constant::Scalar<tint::i32>>());
+    EXPECT_EQ(0_i, flow->cases[0].selectors[0].val->As<constant::Scalar<tint::i32>>()->ValueOf());
 
     ASSERT_EQ(1u, flow->cases[1].selectors.Length());
-    EXPECT_TRUE(flow->cases[1].selectors[0]->IsDefault());
+    EXPECT_TRUE(flow->cases[1].selectors[0].IsDefault());
 
     EXPECT_EQ(1u, flow->inbound_branches.Length());
     EXPECT_EQ(1u, flow->cases[0].start_target->inbound_branches.Length());
@@ -1323,11 +1324,11 @@ TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
     auto* func = m.functions[0];
 
     ASSERT_EQ(1u, flow->cases[0].selectors.Length());
-    ASSERT_TRUE(flow->cases[0].selectors[0]->expr->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(0_i, flow->cases[0].selectors[0]->expr->As<ast::IntLiteralExpression>()->value);
+    ASSERT_TRUE(flow->cases[0].selectors[0].val->Is<constant::Scalar<tint::i32>>());
+    EXPECT_EQ(0_i, flow->cases[0].selectors[0].val->As<constant::Scalar<tint::i32>>()->ValueOf());
 
     ASSERT_EQ(1u, flow->cases[1].selectors.Length());
-    EXPECT_TRUE(flow->cases[1].selectors[0]->IsDefault());
+    EXPECT_TRUE(flow->cases[1].selectors[0].IsDefault());
 
     EXPECT_EQ(1u, flow->inbound_branches.Length());
     EXPECT_EQ(1u, flow->cases[0].start_target->inbound_branches.Length());
