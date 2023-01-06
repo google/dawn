@@ -116,7 +116,8 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinData{"unpack2x16unorm", BuiltinType::kUnpack2X16Unorm},
                     BuiltinData{"unpack4x8snorm", BuiltinType::kUnpack4X8Snorm},
                     BuiltinData{"unpack4x8unorm", BuiltinType::kUnpack4X8Unorm},
-                    BuiltinData{"workgroupBarrier", BuiltinType::kWorkgroupBarrier}));
+                    BuiltinData{"workgroupBarrier", BuiltinType::kWorkgroupBarrier},
+                    BuiltinData{"workgroupUniformLoad", BuiltinType::kWorkgroupUniformLoad}));
 
 TEST_F(BuiltinTypeTest, ParseNoMatch) {
     EXPECT_EQ(ParseBuiltinType("not_builtin"), BuiltinType::kNone);

@@ -647,5 +647,70 @@ TEST_F(ResolverDP4aExtensionValidationTest, Dot4U8PackedWithoutExtension) {
         R"(12:34 error: cannot call built-in function 'dot4U8Packed' without extension chromium_experimental_dp4a)");
 }
 
+TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_WrongAddressSpace) {
+    // @group(0) @binding(0) var<storage, read_write> v : i32;
+    // fn foo() {
+    //   workgroupUniformLoad(&v);
+    // }
+    GlobalVar("v", ty.i32(), ast::AddressSpace::kStorage, ast::Access::kReadWrite,
+              utils::Vector{Group(0_a), Binding(0_a)});
+    WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf(Source{{12, 34}}, "v"))));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: no matching call to workgroupUniformLoad(ptr<storage, i32, read_write>)
+
+1 candidate function:
+  workgroupUniformLoad(ptr<workgroup, T, read_write>) -> T
+)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_Atomic) {
+    // var<workgroup> v : atomic<i32>;
+    // fn foo() {
+    //   workgroupUniformLoad(&v);
+    // }
+    GlobalVar("v", ty.atomic<i32>(), ast::AddressSpace::kWorkgroup);
+    WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf(Source{{12, 34}}, "v"))));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: workgroupUniformLoad must not be called with an argument that contains an atomic type)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInArray) {
+    // var<workgroup> v : array<atomic<i32>, 4>;
+    // fn foo() {
+    //   workgroupUniformLoad(&v);
+    // }
+    GlobalVar("v", ty.array(ty.atomic<i32>(), 4_a), ast::AddressSpace::kWorkgroup);
+    WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf(Source{{12, 34}}, "v"))));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: workgroupUniformLoad must not be called with an argument that contains an atomic type)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInStruct) {
+    // struct Inner { a : array<atomic<i32, 4> }
+    // struct S { i : Inner }
+    // var<workgroup> v : array<S, 4>;
+    // fn foo() {
+    //   workgroupUniformLoad(&v);
+    // }
+    Structure("Inner", utils::Vector{Member("a", ty.array(ty.atomic<i32>(), 4_a))});
+    Structure("S", utils::Vector{Member("i", ty.type_name("Inner"))});
+    GlobalVar(Source{{12, 34}}, "v", ty.array(ty.type_name("S"), 4_a),
+              ast::AddressSpace::kWorkgroup);
+    WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf("v"))));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(error: workgroupUniformLoad must not be called with an argument that contains an atomic type)");
+}
+
 }  // namespace
 }  // namespace tint::resolver

@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+float3x3 tint_workgroupUniformLoad(threadgroup float3x3* const p) {
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  float3x3 const result = *(p);
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  return result;
+}
+
+float3x3 foo(threadgroup float3x3* const tint_symbol) {
+  return tint_workgroupUniformLoad(tint_symbol);
+}
+

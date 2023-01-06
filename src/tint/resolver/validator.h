@@ -439,6 +439,11 @@ class Validator {
     /// @returns true on success, false otherwise
     bool TextureBuiltinFunction(const sem::Call* call) const;
 
+    /// Validates a workgroupUniformLoad builtin function
+    /// @param call the builtin call to validate
+    /// @returns true on success, false otherwise
+    bool WorkgroupUniformLoad(const sem::Call* call) const;
+
     /// Validates an optional builtin function and its required extension.
     /// @param call the builtin call to validate
     /// @returns true on success, false otherwise

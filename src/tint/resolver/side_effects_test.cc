@@ -176,6 +176,7 @@ TEST_P(SideEffectsBuiltinTest, Test) {
     GlobalVar("arr", ty.array<f32, 10>(), ast::AddressSpace::kPrivate);
     GlobalVar("storage_arr", ty.array<f32>(), ast::AddressSpace::kStorage, Group(0_a),
               Binding(AInt(next_binding++)));
+    GlobalVar("workgroup_arr", ty.array<f32, 4>(), ast::AddressSpace::kWorkgroup);
     GlobalVar("a", ty.atomic(ty.i32()), ast::AddressSpace::kStorage, ast::Access::kReadWrite,
               Group(0_a), Binding(AInt(next_binding++)));
     if (c.pipeline_stage != ast::PipelineStage::kCompute) {
@@ -199,6 +200,9 @@ TEST_P(SideEffectsBuiltinTest, Test) {
 
     utils::Vector<const ast::Statement*, 4> stmts;
     stmts.Push(Decl(Let("pstorage_arr", AddressOf("storage_arr"))));
+    if (c.pipeline_stage == ast::PipelineStage::kCompute) {
+        stmts.Push(Decl(Let("pworkgroup_arr", AddressOf("workgroup_arr"))));
+    }
     stmts.Push(Decl(Let("pa", AddressOf("a"))));
 
     utils::Vector<const ast::Expression*, 5> args;
@@ -339,6 +343,10 @@ INSTANTIATE_TEST_SUITE_P(
         C("atomicSub", utils::Vector{"pa", "i"}, true),                       //
         C("atomicXor", utils::Vector{"pa", "i"}, true),                       //
         C("textureStore", utils::Vector{"tstorage2d", "vi2", "vf4"}, true),   //
+        C("workgroupUniformLoad",
+          utils::Vector{"pworkgroup_arr"},
+          true,
+          ast::PipelineStage::kCompute),  //
 
         // Unimplemented builtins
         // C("quantizeToF16", utils::Vector{"f"}, false), //

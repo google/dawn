@@ -657,6 +657,7 @@ bool WgslMutator::ReplaceFunctionCallWithBuiltin(std::string& wgsl_code) {
                                                "unpack2x16unorm",
                                                "unpack2x16float",
                                                "storageBarrier",
+                                               "workgroupUniformLoad",
                                                "workgroupBarrier"};
     wgsl_code.replace(left_bracket_pos + function_call_identifier.first,
                       function_call_identifier.second,

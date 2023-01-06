@@ -2386,6 +2386,12 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         CollectTextureSamplerPairs(builtin.sem, call->Arguments());
     }
 
+    if (builtin_type == sem::BuiltinType::kWorkgroupUniformLoad) {
+        if (!validator_.WorkgroupUniformLoad(call)) {
+            return nullptr;
+        }
+    }
+
     if (!validator_.BuiltinCall(call)) {
         return nullptr;
     }

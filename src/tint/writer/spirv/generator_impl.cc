@@ -69,6 +69,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         polyfills.saturate = true;
         polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         polyfills.quantize_to_vec_f16 = true;  // crbug.com/tint/1741
+        polyfills.workgroup_uniform_load = true;
         data.Add<transform::BuiltinPolyfill::Config>(polyfills);
         manager.Add<transform::BuiltinPolyfill>();
     }

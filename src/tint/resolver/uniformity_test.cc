@@ -116,6 +116,7 @@ class BasicTest : public UniformityAnalysisTestBase,
         kUserRequiredToBeUniform,
         kWorkgroupBarrier,
         kStorageBarrier,
+        kWorkgroupUniformLoad,
         kTextureSample,
         kTextureSampleBias,
         kTextureSampleCompare,
@@ -184,6 +185,8 @@ class BasicTest : public UniformityAnalysisTestBase,
                 return "workgroupBarrier()";
             case kStorageBarrier:
                 return "storageBarrier()";
+            case kWorkgroupUniformLoad:
+                return "workgroupUniformLoad(&w)";
             case kTextureSample:
                 return "textureSample(t, s, vec2(0.5, 0.5))";
             case kTextureSampleBias:
@@ -257,6 +260,7 @@ class BasicTest : public UniformityAnalysisTestBase,
             CASE(kUserRequiredToBeUniform);
             CASE(kWorkgroupBarrier);
             CASE(kStorageBarrier);
+            CASE(kWorkgroupUniformLoad);
             CASE(kTextureSample);
             CASE(kTextureSampleBias);
             CASE(kTextureSampleCompare);
@@ -7591,6 +7595,106 @@ test:4:48 note: reading from read_write storage buffer 'arr' may result in a non
 )");
 }
 
+TEST_F(UniformityAnalysisTest, WorkgroupUniformLoad) {
+    std::string src = R"(
+const wgsize = 4;
+var<workgroup> data : array<u32, wgsize>;
+
+@compute @workgroup_size(wgsize)
+fn main(@builtin(local_invocation_index) idx : u32) {
+  data[idx] = idx + 1;
+  if (workgroupUniformLoad(&data[0]) > 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, WorkgroupUniformLoad_ViaPtrArg) {
+    std::string src = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+const wgsize = 4;
+var<workgroup> data : array<u32, wgsize>;
+
+fn foo(p : ptr<workgroup, u32>) -> u32 {
+  return workgroupUniformLoad(p);
+}
+
+@compute @workgroup_size(wgsize)
+fn main(@builtin(local_invocation_index) idx : u32) {
+  data[idx] = idx + 1;
+  if (foo(&data[0]) > 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, WorkgroupUniformLoad_NonUniformPtr) {
+    std::string src = R"(
+const wgsize = 4;
+var<workgroup> data : array<u32, wgsize>;
+
+@compute @workgroup_size(wgsize)
+fn main(@builtin(local_invocation_index) idx : u32) {
+  data[idx] = idx + 1;
+  if (workgroupUniformLoad(&data[idx]) > 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_, R"(test:8:28 warning: parameter of 'workgroupUniformLoad' must be uniform
+  if (workgroupUniformLoad(&data[idx]) > 0) {
+                           ^
+
+test:8:34 note: reading from builtin 'idx' may result in a non-uniform value
+  if (workgroupUniformLoad(&data[idx]) > 0) {
+                                 ^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, WorkgroupUniformLoad_NonUniformPtr_ViaPtrArg) {
+    std::string src = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+const wgsize = 4;
+var<workgroup> data : array<u32, wgsize>;
+
+fn foo(p : ptr<workgroup, u32>) -> u32 {
+  return workgroupUniformLoad(p);
+}
+
+@compute @workgroup_size(wgsize)
+fn main(@builtin(local_invocation_index) idx : u32) {
+  data[idx] = idx + 1;
+  if (foo(&data[idx]) > 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_, R"(test:14:11 warning: parameter 'p' of 'foo' must be uniform
+  if (foo(&data[idx]) > 0) {
+          ^
+
+test:8:31 note: parameter of 'workgroupUniformLoad' must be uniform
+  return workgroupUniformLoad(p);
+                              ^
+
+test:14:17 note: reading from builtin 'idx' may result in a non-uniform value
+  if (foo(&data[idx]) > 0) {
+                ^^^
+)");
+}
+
 TEST_F(UniformityAnalysisTest, WorkgroupAtomics) {
     std::string src = R"(
 var<workgroup> a : atomic<i32>;
@@ -7860,6 +7964,45 @@ test:17:3 note: control flow depends on non-uniform value
 test:17:7 note: return value of 'foo' may be non-uniform
   if (foo() == 42) {
       ^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, Error_CallsiteAndParameterRequireUniformity) {
+    // Test that we report a violation for the callsite of a function when it has multiple
+    // uniformity requirements.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo(v : i32) {
+  if (v == 0) {
+    workgroupBarrier();
+  }
+}
+
+fn main() {
+  if (non_uniform == 42) {
+    foo(0);
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:12:5 warning: 'foo' must only be called from uniform control flow
+    foo(0);
+    ^^^
+
+test:6:5 note: 'foo' requires uniformity because it calls workgroupBarrier
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:11:3 note: control flow depends on non-uniform value
+  if (non_uniform == 42) {
+  ^^
+
+test:11:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  if (non_uniform == 42) {
+      ^^^^^^^^^^^
 )");
 }
 

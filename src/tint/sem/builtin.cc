@@ -171,6 +171,7 @@ bool Builtin::HasSideEffects() const {
         case sem::BuiltinType::kAtomicSub:
         case sem::BuiltinType::kAtomicXor:
         case sem::BuiltinType::kTextureStore:
+        case sem::BuiltinType::kWorkgroupUniformLoad:
             return true;
         default:
             break;

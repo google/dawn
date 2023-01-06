@@ -117,6 +117,7 @@ enum class BuiltinType {
     kUnpack4X8Snorm,
     kUnpack4X8Unorm,
     kWorkgroupBarrier,
+    kWorkgroupUniformLoad,
     kTextureDimensions,
     kTextureGather,
     kTextureGatherCompare,

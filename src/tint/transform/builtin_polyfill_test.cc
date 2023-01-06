@@ -2943,6 +2943,169 @@ fn f() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// workgroupUniformLoad
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillWorkgroupUniformLoad() {
+    BuiltinPolyfill::Builtins builtins;
+    builtins.workgroup_uniform_load = true;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+    return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunWorkgroupUniformLoad) {
+    auto* src = R"(
+var<workgroup> v : i32;
+
+fn f() {
+  workgroupUniformLoad(&v);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillWorkgroupUniformLoad()));
+}
+
+TEST_F(BuiltinPolyfillTest, WorkgroupUniformLoad_i32) {
+    auto* src = R"(
+var<workgroup> v : i32;
+
+fn f() {
+  let r = workgroupUniformLoad(&v);
+}
+)";
+
+    auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+fn tint_workgroupUniformLoad(p : ptr<workgroup, i32>) -> i32 {
+  workgroupBarrier();
+  let result = *(p);
+  workgroupBarrier();
+  return result;
+}
+
+var<workgroup> v : i32;
+
+fn f() {
+  let r = tint_workgroupUniformLoad(&(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillWorkgroupUniformLoad());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, WorkgroupUniformLoad_ComplexType) {
+    auto* src = R"(
+struct Inner {
+  b : bool,
+  v : vec4<i32>,
+  m : mat3x3<f32>,
+}
+
+struct Outer {
+  a : array<Inner, 4>,
+}
+
+var<workgroup> v : Outer;
+
+fn f() {
+  let r = workgroupUniformLoad(&v);
+}
+)";
+
+    auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+fn tint_workgroupUniformLoad(p : ptr<workgroup, Outer>) -> Outer {
+  workgroupBarrier();
+  let result = *(p);
+  workgroupBarrier();
+  return result;
+}
+
+struct Inner {
+  b : bool,
+  v : vec4<i32>,
+  m : mat3x3<f32>,
+}
+
+struct Outer {
+  a : array<Inner, 4>,
+}
+
+var<workgroup> v : Outer;
+
+fn f() {
+  let r = tint_workgroupUniformLoad(&(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillWorkgroupUniformLoad());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, WorkgroupUniformLoad_AvoidDuplicateEnables) {
+    auto* src = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+var<workgroup> a : i32;
+var<workgroup> b : u32;
+var<workgroup> c : f32;
+
+fn f() {
+  let ra = workgroupUniformLoad(&a);
+  let rb = workgroupUniformLoad(&b);
+  let rc = workgroupUniformLoad(&c);
+}
+)";
+
+    auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+fn tint_workgroupUniformLoad(p : ptr<workgroup, i32>) -> i32 {
+  workgroupBarrier();
+  let result = *(p);
+  workgroupBarrier();
+  return result;
+}
+
+fn tint_workgroupUniformLoad_1(p : ptr<workgroup, u32>) -> u32 {
+  workgroupBarrier();
+  let result = *(p);
+  workgroupBarrier();
+  return result;
+}
+
+fn tint_workgroupUniformLoad_2(p : ptr<workgroup, f32>) -> f32 {
+  workgroupBarrier();
+  let result = *(p);
+  workgroupBarrier();
+  return result;
+}
+
+var<workgroup> a : i32;
+
+var<workgroup> b : u32;
+
+var<workgroup> c : f32;
+
+fn f() {
+  let ra = tint_workgroupUniformLoad(&(a));
+  let rb = tint_workgroupUniformLoad_1(&(b));
+  let rc = tint_workgroupUniformLoad_2(&(c));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillWorkgroupUniformLoad());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // quantizeToF16
 ////////////////////////////////////////////////////////////////////////////////
 DataMap polyfillQuantizeToF16_2d_f32() {

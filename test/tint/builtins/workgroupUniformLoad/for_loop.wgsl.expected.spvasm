@@ -1,0 +1,75 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 42
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %a "a"
+               OpName %b "b"
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %tint_workgroupUniformLoad_a "tint_workgroupUniformLoad_a"
+               OpName %tint_workgroupUniformLoad_b "tint_workgroupUniformLoad_b"
+               OpName %foo "foo"
+               OpName %i "i"
+        %int = OpTypeInt 32 1
+%_ptr_Workgroup_int = OpTypePointer Workgroup %int
+          %a = OpVariable %_ptr_Workgroup_int Workgroup
+          %b = OpVariable %_ptr_Workgroup_int Workgroup
+       %void = OpTypeVoid
+          %5 = OpTypeFunction %void
+          %9 = OpTypeFunction %int
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+   %uint_264 = OpConstant %uint 264
+         %25 = OpConstantNull %int
+%_ptr_Function_int = OpTypePointer Function %int
+       %bool = OpTypeBool
+%unused_entry_point = OpFunction %void None %5
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%tint_workgroupUniformLoad_a = OpFunction %int None %9
+         %11 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+         %16 = OpLoad %int %a
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+               OpReturnValue %16
+               OpFunctionEnd
+%tint_workgroupUniformLoad_b = OpFunction %int None %9
+         %19 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+         %21 = OpLoad %int %b
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+               OpReturnValue %21
+               OpFunctionEnd
+        %foo = OpFunction %void None %5
+         %24 = OpLabel
+          %i = OpVariable %_ptr_Function_int Function %25
+               OpStore %i %25
+               OpBranch %28
+         %28 = OpLabel
+               OpLoopMerge %29 %30 None
+               OpBranch %31
+         %31 = OpLabel
+         %32 = OpLoad %int %i
+         %33 = OpFunctionCall %int %tint_workgroupUniformLoad_a
+         %35 = OpSLessThan %bool %32 %33
+         %34 = OpLogicalNot %bool %35
+               OpSelectionMerge %37 None
+               OpBranchConditional %34 %38 %37
+         %38 = OpLabel
+               OpBranch %29
+         %37 = OpLabel
+               OpBranch %30
+         %30 = OpLabel
+         %39 = OpLoad %int %i
+         %40 = OpFunctionCall %int %tint_workgroupUniformLoad_b
+         %41 = OpIAdd %int %39 %40
+               OpStore %i %41
+               OpBranch %28
+         %29 = OpLabel
+               OpReturn
+               OpFunctionEnd

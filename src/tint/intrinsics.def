@@ -275,6 +275,8 @@ match workgroup_or_storage
   | address_space.storage
 match storage
   : address_space.storage
+match workgroup
+  : address_space.workgroup
 
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
@@ -594,6 +596,7 @@ fn dot4U8Packed(u32, u32) -> u32
 @const fn unpack4x8snorm(u32) -> vec4<f32>
 @const fn unpack4x8unorm(u32) -> vec4<f32>
 @stage("compute") fn workgroupBarrier()
+@stage("compute") fn workgroupUniformLoad<T>(ptr<workgroup, T, read_write>) -> T
 
 fn textureDimensions<T: fiu32>(texture: texture_1d<T>) -> u32
 fn textureDimensions<T: fiu32, L: iu32>(texture: texture_1d<T>, level: L) -> u32

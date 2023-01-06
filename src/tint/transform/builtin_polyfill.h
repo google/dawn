@@ -75,6 +75,8 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         /// Should the vector form of `quantizeToF16()` be polyfilled with a scalar implementation?
         /// See crbug.com/tint/1741
         bool quantize_to_vec_f16 = false;
+        /// Should `workgroupUniformLoad()` be polyfilled?
+        bool workgroup_uniform_load = false;
     };
 
     /// Config is consumed by the BuiltinPolyfill transform.

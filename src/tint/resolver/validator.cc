@@ -1604,6 +1604,28 @@ bool Validator::TextureBuiltinFunction(const sem::Call* call) const {
            check_arg_is_constexpr(sem::ParameterUsage::kComponent, 0, 3);
 }
 
+bool Validator::WorkgroupUniformLoad(const sem::Call* call) const {
+    auto* builtin = call->Target()->As<sem::Builtin>();
+    if (!builtin) {
+        return false;
+    }
+
+    TINT_ASSERT(Resolver, call->Arguments().Length() > 0);
+    auto* arg = call->Arguments()[0];
+    auto* ptr = arg->Type()->As<type::Pointer>();
+    TINT_ASSERT(Resolver, ptr != nullptr);
+    auto* ty = ptr->StoreType();
+
+    if (ty->Is<type::Atomic>() || atomic_composite_info_.Contains(ty)) {
+        AddError(
+            "workgroupUniformLoad must not be called with an argument that contains an atomic type",
+            arg->Declaration()->source);
+        return false;
+    }
+
+    return true;
+}
+
 bool Validator::RequiredExtensionForBuiltinFunction(const sem::Call* call) const {
     const auto* builtin = call->Target()->As<sem::Builtin>();
     if (!builtin) {

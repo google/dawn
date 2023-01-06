@@ -1,0 +1,39 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 21
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %v "v"
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %tint_workgroupUniformLoad_v "tint_workgroupUniformLoad_v"
+               OpName %foo "foo"
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Workgroup_v4float = OpTypePointer Workgroup %v4float
+          %v = OpVariable %_ptr_Workgroup_v4float Workgroup
+       %void = OpTypeVoid
+          %5 = OpTypeFunction %void
+          %9 = OpTypeFunction %v4float
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+   %uint_264 = OpConstant %uint 264
+%unused_entry_point = OpFunction %void None %5
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%tint_workgroupUniformLoad_v = OpFunction %v4float None %9
+         %11 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+         %16 = OpLoad %v4float %v
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+               OpReturnValue %16
+               OpFunctionEnd
+        %foo = OpFunction %v4float None %9
+         %19 = OpLabel
+         %20 = OpFunctionCall %v4float %tint_workgroupUniformLoad_v
+               OpReturnValue %20
+               OpFunctionEnd

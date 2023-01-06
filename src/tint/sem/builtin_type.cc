@@ -285,6 +285,9 @@ BuiltinType ParseBuiltinType(const std::string& name) {
     if (name == "workgroupBarrier") {
         return BuiltinType::kWorkgroupBarrier;
     }
+    if (name == "workgroupUniformLoad") {
+        return BuiltinType::kWorkgroupUniformLoad;
+    }
     if (name == "textureDimensions") {
         return BuiltinType::kTextureDimensions;
     }
@@ -545,6 +548,8 @@ const char* str(BuiltinType i) {
             return "unpack4x8unorm";
         case BuiltinType::kWorkgroupBarrier:
             return "workgroupBarrier";
+        case BuiltinType::kWorkgroupUniformLoad:
+            return "workgroupUniformLoad";
         case BuiltinType::kTextureDimensions:
             return "textureDimensions";
         case BuiltinType::kTextureGather:

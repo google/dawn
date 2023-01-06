@@ -183,6 +183,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         polyfills.int_div_mod = true;
         polyfills.sign_int = true;
         polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
+        polyfills.workgroup_uniform_load = true;
         data.Add<transform::BuiltinPolyfill::Config>(polyfills);
         manager.Add<transform::BuiltinPolyfill>();
     }

@@ -39,7 +39,14 @@ struct BuiltinPolyfill::State {
     /// Constructor
     /// @param c the CloneContext
     /// @param p the builtins to polyfill
-    State(CloneContext& c, Builtins p) : ctx(c), polyfill(p) {}
+    State(CloneContext& c, Builtins p) : ctx(c), polyfill(p) {
+        has_full_ptr_params = false;
+        for (auto* enable : c.src->AST().Enables()) {
+            if (enable->extension == ast::Extension::kChromiumExperimentalFullPtrParameters) {
+                has_full_ptr_params = true;
+            }
+        }
+    }
 
     ////////////////////////////////////////////////////////////////////////////
     // Function polyfills
@@ -660,6 +667,29 @@ struct BuiltinPolyfill::State {
         return name;
     }
 
+    /// Builds the polyfill function for the `workgroupUniformLoad` builtin.
+    /// @param type the type being loaded
+    /// @return the polyfill function name
+    Symbol workgroupUniformLoad(const type::Type* type) {
+        if (!has_full_ptr_params) {
+            b.Enable(ast::Extension::kChromiumExperimentalFullPtrParameters);
+            has_full_ptr_params = true;
+        }
+        auto name = b.Symbols().New("tint_workgroupUniformLoad");
+        b.Func(name,
+               utils::Vector{
+                   b.Param("p", b.ty.pointer(T(type), ast::AddressSpace::kWorkgroup)),
+               },
+               T(type),
+               utils::Vector{
+                   b.CallStmt(b.Call("workgroupBarrier")),
+                   b.Decl(b.Let("result", b.Deref("p"))),
+                   b.CallStmt(b.Call("workgroupBarrier")),
+                   b.Return("result"),
+               });
+        return name;
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     // Inline polyfills
     ////////////////////////////////////////////////////////////////////////////
@@ -755,6 +785,9 @@ struct BuiltinPolyfill::State {
 
     // Polyfill functions for binary operators.
     utils::Hashmap<BinaryOpSignature, Symbol, 8> binary_op_polyfills;
+
+    // Tracks whether the chromium_experimental_full_ptr_parameters extension has been enabled.
+    bool has_full_ptr_params;
 
     /// @returns the AST type for the given sem type
     const ast::Type* T(const type::Type* ty) const { return CreateASTTypeFor(ctx, ty); }
@@ -910,6 +943,13 @@ Transform::ApplyResult BuiltinPolyfill::Apply(const Program* src,
                             fn = builtin_polyfills.GetOrCreate(
                                 builtin, [&] { return s.quantizeToF16(vec); });
                         }
+                    }
+                    break;
+
+                case sem::BuiltinType::kWorkgroupUniformLoad:
+                    if (polyfill.workgroup_uniform_load) {
+                        fn = builtin_polyfills.GetOrCreate(
+                            builtin, [&] { return s.workgroupUniformLoad(builtin->ReturnType()); });
                     }
                     break;
 
