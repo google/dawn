@@ -1091,9 +1091,6 @@ TEST_P(CopyTextureForBrowser_Basic, VerifyCopyFromLargeTexture) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
 
-    // TODO(crbug.com/dawn/1070): Flaky VK_DEVICE_LOST
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
     DoBasicCopyTest({899, 999});
 }
 

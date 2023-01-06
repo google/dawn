@@ -673,9 +673,6 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
 
 // Test copying into the whole texture with 2x2 blocks and sampling from it.
 TEST_P(CompressedTextureFormatTest, Basic) {
-    // TODO(crbug.com/dawn/815): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
-
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
     CopyConfig config = GetDefaultSmallConfig();
@@ -700,9 +697,6 @@ TEST_P(CompressedTextureFormatTest, CopyIntoSubRegion) {
 
 // Test copying into the non-zero layer of a 2D array texture works correctly.
 TEST_P(CompressedTextureFormatTest, CopyIntoNonZeroArrayLayer) {
-    // TODO(crbug.com/dawn/815): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
-
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
     // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
@@ -720,9 +714,6 @@ TEST_P(CompressedTextureFormatTest, CopyIntoNonZeroArrayLayer) {
 
 // Test copying into a non-zero mipmap level of a texture.
 TEST_P(CompressedTextureFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
-    // TODO(crbug.com/dawn/815): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
-
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
     // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
@@ -738,9 +729,6 @@ TEST_P(CompressedTextureFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
 
 // Test texture-to-texture whole-size copies.
 TEST_P(CompressedTextureFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipmapLevel) {
-    // TODO(crbug.com/dawn/815): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
-
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
     // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
@@ -983,9 +971,6 @@ TEST_P(CompressedTextureFormatTest, CopyWithMultipleLayerAndPhysicalSizeNotEqual
 // Test the special case of the B2T copies on the D3D12 backend that the buffer offset and texture
 // extent exactly fit the RowPitch.
 TEST_P(CompressedTextureFormatTest, BufferOffsetAndExtentFitRowPitch) {
-    // TODO(crbug.com/dawn/815): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
-
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
     CopyConfig config = GetDefaultSmallConfig();
@@ -1005,9 +990,6 @@ TEST_P(CompressedTextureFormatTest, BufferOffsetAndExtentFitRowPitch) {
 // backend the texelOffset.y will be greater than 0 after calcuting the texelOffset in the function
 // ComputeTexelOffsets().
 TEST_P(CompressedTextureFormatTest, BufferOffsetExceedsSlicePitch) {
-    // TODO(crbug.com/dawn/815): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
-
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
     CopyConfig config = GetDefaultSmallConfig();
@@ -1029,9 +1011,6 @@ TEST_P(CompressedTextureFormatTest, BufferOffsetExceedsSlicePitch) {
 // Test the special case of the B2T copies on the D3D12 backend that the buffer offset and texture
 // extent exceed the RowPitch. On D3D12 backend two copies are required for this case.
 TEST_P(CompressedTextureFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitch) {
-    // TODO(crbug.com/dawn/815): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
-
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
     constexpr uint32_t kExceedRowBlockCount = 1;
@@ -1074,9 +1053,6 @@ TEST_P(CompressedTextureFormatTest, RowPitchEqualToSlicePitch) {
 // copyExtent.depthOrArrayLayers) on Metal backends. As copyExtent.depthOrArrayLayers can only be 1
 // for compressed formats, on Metal backend we will use two copies to implement such copy.
 TEST_P(CompressedTextureFormatTest, LargeImageHeight) {
-    // TODO(crbug.com/dawn/815): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
-
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
     CopyConfig config = GetDefaultSmallConfig();
@@ -1089,9 +1065,6 @@ TEST_P(CompressedTextureFormatTest, LargeImageHeight) {
 // Test the workaround in the B2T copies when (bufferSize - bufferOffset < bytesPerImage *
 // copyExtent.depthOrArrayLayers) and copyExtent needs to be clamped.
 TEST_P(CompressedTextureFormatTest, LargeImageHeightAndClampedCopyExtent) {
-    // TODO(crbug.com/dawn/815): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
-
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
     // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
@@ -1111,9 +1084,6 @@ TEST_P(CompressedTextureFormatTest, LargeImageHeightAndClampedCopyExtent) {
 // Test copying a whole 2D array texture with array layer count > 1 in one copy command works with
 // compressed formats.
 TEST_P(CompressedTextureFormatTest, CopyWhole2DArrayTexture) {
-    // TODO(crbug.com/dawn/815): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
-
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
     // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
@@ -1131,9 +1101,6 @@ TEST_P(CompressedTextureFormatTest, CopyWhole2DArrayTexture) {
 
 // Test copying a multiple 2D texture array layers in one copy command works.
 TEST_P(CompressedTextureFormatTest, CopyMultiple2DArrayLayers) {
-    // TODO(crbug.com/dawn/815): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
-
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
     // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
