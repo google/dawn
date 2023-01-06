@@ -29,10 +29,8 @@ TEST_F(IR_BuilderImplTest, Func) {
     // func -> start -> end
 
     Func("f", utils::Empty, ty.void_(), utils::Empty);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
     ASSERT_EQ(0u, m.entry_points.Length());
@@ -51,10 +49,8 @@ TEST_F(IR_BuilderImplTest, Func) {
 TEST_F(IR_BuilderImplTest, EntryPoint) {
     Func("f", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
     ASSERT_EQ(1u, m.entry_points.Length());
@@ -71,13 +67,11 @@ TEST_F(IR_BuilderImplTest, IfStatement) {
     //
     auto* ast_if = If(true, Block(), Else(Block()));
     WrapInFunction(ast_if);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_if = b.FlowNodeForAstNode(ast_if);
+    auto* ir_if = FlowNodeForAstNode(ast_if);
     ASSERT_NE(ir_if, nullptr);
     EXPECT_TRUE(ir_if->Is<ir::If>());
 
@@ -118,13 +112,11 @@ TEST_F(IR_BuilderImplTest, IfStatement_TrueReturns) {
     //
     auto* ast_if = If(true, Block(Return()));
     WrapInFunction(ast_if);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_if = b.FlowNodeForAstNode(ast_if);
+    auto* ir_if = FlowNodeForAstNode(ast_if);
     ASSERT_NE(ir_if, nullptr);
     EXPECT_TRUE(ir_if->Is<ir::If>());
 
@@ -159,13 +151,11 @@ TEST_F(IR_BuilderImplTest, IfStatement_FalseReturns) {
     //
     auto* ast_if = If(true, Block(), Else(Block(Return())));
     WrapInFunction(ast_if);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_if = b.FlowNodeForAstNode(ast_if);
+    auto* ir_if = FlowNodeForAstNode(ast_if);
     ASSERT_NE(ir_if, nullptr);
     EXPECT_TRUE(ir_if->Is<ir::If>());
 
@@ -200,13 +190,11 @@ TEST_F(IR_BuilderImplTest, IfStatement_BothReturn) {
     //
     auto* ast_if = If(true, Block(Return()), Else(Block(Return())));
     WrapInFunction(ast_if);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_if = b.FlowNodeForAstNode(ast_if);
+    auto* ir_if = FlowNodeForAstNode(ast_if);
     ASSERT_NE(ir_if, nullptr);
     EXPECT_TRUE(ir_if->Is<ir::If>());
 
@@ -251,13 +239,11 @@ TEST_F(IR_BuilderImplTest, IfStatement_JumpChainToMerge) {
     auto* ast_loop = Loop(Block(Break()));
     auto* ast_if = If(true, Block(ast_loop));
     WrapInFunction(ast_if);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_if = b.FlowNodeForAstNode(ast_if);
+    auto* ir_if = FlowNodeForAstNode(ast_if);
     ASSERT_NE(ir_if, nullptr);
     EXPECT_TRUE(ir_if->Is<ir::If>());
 
@@ -266,7 +252,7 @@ TEST_F(IR_BuilderImplTest, IfStatement_JumpChainToMerge) {
     ASSERT_NE(if_flow->false_target, nullptr);
     ASSERT_NE(if_flow->merge_target, nullptr);
 
-    auto* ir_loop = b.FlowNodeForAstNode(ast_loop);
+    auto* ir_loop = FlowNodeForAstNode(ast_loop);
     ASSERT_NE(ir_loop, nullptr);
     EXPECT_TRUE(ir_loop->Is<ir::Loop>());
 
@@ -294,13 +280,11 @@ TEST_F(IR_BuilderImplTest, Loop_WithBreak) {
     //
     auto* ast_loop = Loop(Block(Break()));
     WrapInFunction(ast_loop);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_loop = b.FlowNodeForAstNode(ast_loop);
+    auto* ir_loop = FlowNodeForAstNode(ast_loop);
     ASSERT_NE(ir_loop, nullptr);
     EXPECT_TRUE(ir_loop->Is<ir::Loop>());
 
@@ -338,13 +322,11 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
     auto* ast_if = If(true, Block(Break()));
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_loop = b.FlowNodeForAstNode(ast_loop);
+    auto* ir_loop = FlowNodeForAstNode(ast_loop);
     ASSERT_NE(ir_loop, nullptr);
     EXPECT_TRUE(ir_loop->Is<ir::Loop>());
 
@@ -353,7 +335,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
     ASSERT_NE(loop_flow->continuing_target, nullptr);
     ASSERT_NE(loop_flow->merge_target, nullptr);
 
-    auto* ir_if = b.FlowNodeForAstNode(ast_if);
+    auto* ir_if = FlowNodeForAstNode(ast_if);
     ASSERT_NE(ir_if, nullptr);
     ASSERT_TRUE(ir_if->Is<ir::If>());
 
@@ -397,13 +379,11 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
     auto* ast_break_if = BreakIf(true);
     auto* ast_loop = Loop(Block(), Block(ast_break_if));
     WrapInFunction(ast_loop);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_loop = b.FlowNodeForAstNode(ast_loop);
+    auto* ir_loop = FlowNodeForAstNode(ast_loop);
     ASSERT_NE(ir_loop, nullptr);
     EXPECT_TRUE(ir_loop->Is<ir::Loop>());
 
@@ -412,7 +392,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
     ASSERT_NE(loop_flow->continuing_target, nullptr);
     ASSERT_NE(loop_flow->merge_target, nullptr);
 
-    auto* ir_break_if = b.FlowNodeForAstNode(ast_break_if);
+    auto* ir_break_if = FlowNodeForAstNode(ast_break_if);
     ASSERT_NE(ir_break_if, nullptr);
     ASSERT_TRUE(ir_break_if->Is<ir::If>());
 
@@ -457,13 +437,11 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
     auto* ast_if = If(true, Block(Return()));
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_loop = b.FlowNodeForAstNode(ast_loop);
+    auto* ir_loop = FlowNodeForAstNode(ast_loop);
     ASSERT_NE(ir_loop, nullptr);
     EXPECT_TRUE(ir_loop->Is<ir::Loop>());
 
@@ -472,7 +450,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
     ASSERT_NE(loop_flow->continuing_target, nullptr);
     ASSERT_NE(loop_flow->merge_target, nullptr);
 
-    auto* ir_if = b.FlowNodeForAstNode(ast_if);
+    auto* ir_if = FlowNodeForAstNode(ast_if);
     ASSERT_NE(ir_if, nullptr);
     ASSERT_TRUE(ir_if->Is<ir::If>());
 
@@ -531,13 +509,11 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
     // block.
     auto* ast_loop = Loop(Block(Return(), Continue()));
     WrapInFunction(ast_loop, If(true, Block(Return())));
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_loop = b.FlowNodeForAstNode(ast_loop);
+    auto* ir_loop = FlowNodeForAstNode(ast_loop);
     ASSERT_NE(ir_loop, nullptr);
     EXPECT_TRUE(ir_loop->Is<ir::Loop>());
 
@@ -589,13 +565,11 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     auto* ast_loop = Loop(Block(Return()), Block(ast_break_if));
     auto* ast_if = If(true, Block(Return()));
     WrapInFunction(Block(ast_loop, ast_if));
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_loop = b.FlowNodeForAstNode(ast_loop);
+    auto* ir_loop = FlowNodeForAstNode(ast_loop);
     ASSERT_NE(ir_loop, nullptr);
     EXPECT_TRUE(ir_loop->Is<ir::Loop>());
 
@@ -604,10 +578,10 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     ASSERT_NE(loop_flow->continuing_target, nullptr);
     ASSERT_NE(loop_flow->merge_target, nullptr);
 
-    auto* ir_if = b.FlowNodeForAstNode(ast_if);
+    auto* ir_if = FlowNodeForAstNode(ast_if);
     EXPECT_EQ(ir_if, nullptr);
 
-    auto* ir_break_if = b.FlowNodeForAstNode(ast_break_if);
+    auto* ir_break_if = FlowNodeForAstNode(ast_break_if);
     ASSERT_NE(ir_break_if, nullptr);
     EXPECT_TRUE(ir_break_if->Is<ir::If>());
 
@@ -646,13 +620,11 @@ TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
     auto* ast_if = If(true, Block(Break()), Else(Block(Break())));
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_loop = b.FlowNodeForAstNode(ast_loop);
+    auto* ir_loop = FlowNodeForAstNode(ast_loop);
     ASSERT_NE(ir_loop, nullptr);
     EXPECT_TRUE(ir_loop->Is<ir::Loop>());
 
@@ -661,7 +633,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
     ASSERT_NE(loop_flow->continuing_target, nullptr);
     ASSERT_NE(loop_flow->merge_target, nullptr);
 
-    auto* ir_if = b.FlowNodeForAstNode(ast_if);
+    auto* ir_if = FlowNodeForAstNode(ast_if);
     ASSERT_NE(ir_if, nullptr);
     ASSERT_TRUE(ir_if->Is<ir::If>());
 
@@ -755,13 +727,11 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
     auto* ast_loop_a = Loop(Block(ast_loop_b, ast_if_d));
 
     WrapInFunction(ast_loop_a);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_loop_a = b.FlowNodeForAstNode(ast_loop_a);
+    auto* ir_loop_a = FlowNodeForAstNode(ast_loop_a);
     ASSERT_NE(ir_loop_a, nullptr);
     EXPECT_TRUE(ir_loop_a->Is<ir::Loop>());
     auto* loop_flow_a = ir_loop_a->As<ir::Loop>();
@@ -769,7 +739,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
     ASSERT_NE(loop_flow_a->continuing_target, nullptr);
     ASSERT_NE(loop_flow_a->merge_target, nullptr);
 
-    auto* ir_loop_b = b.FlowNodeForAstNode(ast_loop_b);
+    auto* ir_loop_b = FlowNodeForAstNode(ast_loop_b);
     ASSERT_NE(ir_loop_b, nullptr);
     EXPECT_TRUE(ir_loop_b->Is<ir::Loop>());
     auto* loop_flow_b = ir_loop_b->As<ir::Loop>();
@@ -777,7 +747,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
     ASSERT_NE(loop_flow_b->continuing_target, nullptr);
     ASSERT_NE(loop_flow_b->merge_target, nullptr);
 
-    auto* ir_loop_c = b.FlowNodeForAstNode(ast_loop_c);
+    auto* ir_loop_c = FlowNodeForAstNode(ast_loop_c);
     ASSERT_NE(ir_loop_c, nullptr);
     EXPECT_TRUE(ir_loop_c->Is<ir::Loop>());
     auto* loop_flow_c = ir_loop_c->As<ir::Loop>();
@@ -785,7 +755,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
     ASSERT_NE(loop_flow_c->continuing_target, nullptr);
     ASSERT_NE(loop_flow_c->merge_target, nullptr);
 
-    auto* ir_loop_d = b.FlowNodeForAstNode(ast_loop_d);
+    auto* ir_loop_d = FlowNodeForAstNode(ast_loop_d);
     ASSERT_NE(ir_loop_d, nullptr);
     EXPECT_TRUE(ir_loop_d->Is<ir::Loop>());
     auto* loop_flow_d = ir_loop_d->As<ir::Loop>();
@@ -793,7 +763,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
     ASSERT_NE(loop_flow_d->continuing_target, nullptr);
     ASSERT_NE(loop_flow_d->merge_target, nullptr);
 
-    auto* ir_if_a = b.FlowNodeForAstNode(ast_if_a);
+    auto* ir_if_a = FlowNodeForAstNode(ast_if_a);
     ASSERT_NE(ir_if_a, nullptr);
     EXPECT_TRUE(ir_if_a->Is<ir::If>());
     auto* if_flow_a = ir_if_a->As<ir::If>();
@@ -801,7 +771,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
     ASSERT_NE(if_flow_a->false_target, nullptr);
     ASSERT_NE(if_flow_a->merge_target, nullptr);
 
-    auto* ir_if_b = b.FlowNodeForAstNode(ast_if_b);
+    auto* ir_if_b = FlowNodeForAstNode(ast_if_b);
     ASSERT_NE(ir_if_b, nullptr);
     EXPECT_TRUE(ir_if_b->Is<ir::If>());
     auto* if_flow_b = ir_if_b->As<ir::If>();
@@ -809,7 +779,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
     ASSERT_NE(if_flow_b->false_target, nullptr);
     ASSERT_NE(if_flow_b->merge_target, nullptr);
 
-    auto* ir_if_c = b.FlowNodeForAstNode(ast_if_c);
+    auto* ir_if_c = FlowNodeForAstNode(ast_if_c);
     ASSERT_NE(ir_if_c, nullptr);
     EXPECT_TRUE(ir_if_c->Is<ir::If>());
     auto* if_flow_c = ir_if_c->As<ir::If>();
@@ -817,7 +787,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
     ASSERT_NE(if_flow_c->false_target, nullptr);
     ASSERT_NE(if_flow_c->merge_target, nullptr);
 
-    auto* ir_if_d = b.FlowNodeForAstNode(ast_if_d);
+    auto* ir_if_d = FlowNodeForAstNode(ast_if_d);
     ASSERT_NE(ir_if_d, nullptr);
     EXPECT_TRUE(ir_if_d->Is<ir::If>());
     auto* if_flow_d = ir_if_d->As<ir::If>();
@@ -907,13 +877,11 @@ TEST_F(IR_BuilderImplTest, While) {
     //
     auto* ast_while = While(false, Block());
     WrapInFunction(ast_while);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_while = b.FlowNodeForAstNode(ast_while);
+    auto* ir_while = FlowNodeForAstNode(ast_while);
     ASSERT_NE(ir_while, nullptr);
     ASSERT_TRUE(ir_while->Is<ir::Loop>());
 
@@ -973,13 +941,11 @@ TEST_F(IR_BuilderImplTest, While_Return) {
     //
     auto* ast_while = While(true, Block(Return()));
     WrapInFunction(ast_while);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_while = b.FlowNodeForAstNode(ast_while);
+    auto* ir_while = FlowNodeForAstNode(ast_while);
     ASSERT_NE(ir_while, nullptr);
     ASSERT_TRUE(ir_while->Is<ir::Loop>());
 
@@ -1032,13 +998,11 @@ TEST_F(IR_BuilderImplTest, DISABLED_For) {
     //
     auto* ast_for = For(Decl(Var("i", ty.i32())), LessThan("i", 10_a), Increment("i"), Block());
     WrapInFunction(ast_for);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_for = b.FlowNodeForAstNode(ast_for);
+    auto* ir_for = FlowNodeForAstNode(ast_for);
     ASSERT_NE(ir_for, nullptr);
     ASSERT_TRUE(ir_for->Is<ir::Loop>());
 
@@ -1090,13 +1054,11 @@ TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
     //
     auto* ast_for = For(nullptr, nullptr, nullptr, Block(Break()));
     WrapInFunction(ast_for);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_for = b.FlowNodeForAstNode(ast_for);
+    auto* ir_for = FlowNodeForAstNode(ast_for);
     ASSERT_NE(ir_for, nullptr);
     ASSERT_TRUE(ir_for->Is<ir::Loop>());
 
@@ -1134,13 +1096,11 @@ TEST_F(IR_BuilderImplTest, Switch) {
                            Case(utils::Vector{CaseSelector(1_i)}, Block()), DefaultCase(Block())});
 
     WrapInFunction(ast_switch);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_switch = b.FlowNodeForAstNode(ast_switch);
+    auto* ir_switch = FlowNodeForAstNode(ast_switch);
     ASSERT_NE(ir_switch, nullptr);
     ASSERT_TRUE(ir_switch->Is<ir::Switch>());
 
@@ -1188,13 +1148,11 @@ TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {
     auto* ast_switch = Switch(1_i, utils::Vector{DefaultCase(Block())});
 
     WrapInFunction(ast_switch);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_switch = b.FlowNodeForAstNode(ast_switch);
+    auto* ir_switch = FlowNodeForAstNode(ast_switch);
     ASSERT_NE(ir_switch, nullptr);
     ASSERT_TRUE(ir_switch->Is<ir::Switch>());
 
@@ -1240,13 +1198,11 @@ TEST_F(IR_BuilderImplTest, Switch_WithBreak) {
                                                  DefaultCase(Block())});
 
     WrapInFunction(ast_switch);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    auto* ir_switch = b.FlowNodeForAstNode(ast_switch);
+    auto* ir_switch = FlowNodeForAstNode(ast_switch);
     ASSERT_NE(ir_switch, nullptr);
     ASSERT_TRUE(ir_switch->Is<ir::Switch>());
 
@@ -1304,15 +1260,13 @@ TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
     auto* ast_if = If(true, Block(Return()));
 
     WrapInFunction(ast_switch, ast_if);
-    auto& b = CreateBuilder();
-
-    auto r = b.Build();
-    ASSERT_TRUE(r) << b.error();
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    ASSERT_EQ(b.FlowNodeForAstNode(ast_if), nullptr);
+    ASSERT_EQ(FlowNodeForAstNode(ast_if), nullptr);
 
-    auto* ir_switch = b.FlowNodeForAstNode(ast_switch);
+    auto* ir_switch = FlowNodeForAstNode(ast_switch);
     ASSERT_NE(ir_switch, nullptr);
     ASSERT_TRUE(ir_switch->Is<ir::Switch>());
 

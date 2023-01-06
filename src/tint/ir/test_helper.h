@@ -16,6 +16,7 @@
 #define SRC_TINT_IR_TEST_HELPER_H_
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "gtest/gtest.h"
@@ -44,9 +45,9 @@ class TestHelperBase : public BASE, public ProgramBuilder {
         }
         diag::Formatter formatter;
 
-        program = std::make_unique<Program>(std::move(*this));
-        [&]() { ASSERT_TRUE(program->IsValid()) << formatter.format(program->Diagnostics()); }();
-        gen_ = std::make_unique<BuilderImpl>(program.get());
+        program_ = std::make_unique<Program>(std::move(*this));
+        [&]() { ASSERT_TRUE(program_->IsValid()) << formatter.format(program_->Diagnostics()); }();
+        gen_ = std::make_unique<BuilderImpl>(program_.get());
         return *gen_;
     }
 
@@ -63,17 +64,45 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     /// is initialized with an empty block.
     /// @returns the BuilderImpl for testing.
     BuilderImpl& CreateEmptyBuilder() {
-        program = std::make_unique<Program>();
-        gen_ = std::make_unique<BuilderImpl>(program.get());
+        program_ = std::make_unique<Program>();
+        gen_ = std::make_unique<BuilderImpl>(program_.get());
         gen_->current_flow_block = gen_->builder.CreateBlock();
         return *gen_;
     }
 
-    /// The program built with a call to Build()
-    std::unique_ptr<Program> program;
+    /// Build the module, cleaning up the program before returning.
+    /// @returns the generated module
+    utils::Result<Module> Build() {
+        auto& b = CreateBuilder();
+        auto m = b.Build();
+
+        // Store the error away in case we need it
+        error_ = b.error();
+
+        // Explicitly remove program to guard against pointers back to ast. Note, this does mean the
+        // BuilderImpl is pointing to an invalid program. We keep the BuilderImpl around because we
+        // need to be able to map from ast pointers to flow nodes in tests.
+        program_ = nullptr;
+        return m;
+    }
+
+    /// @param node the ast node to lookup
+    /// @returns the IR flow node for the given ast node.
+    const ir::FlowNode* FlowNodeForAstNode(const ast::Node* node) const {
+        return gen_->FlowNodeForAstNode(node);
+    }
+
+    /// @returns the error generated during build, if any
+    std::string Error() const { return error_; }
 
   private:
     std::unique_ptr<BuilderImpl> gen_;
+
+    /// The program built with a call to Build()
+    std::unique_ptr<Program> program_;
+
+    /// Error generated when calling `Build`
+    std::string error_;
 };
 using TestHelper = TestHelperBase<testing::Test>;
 
