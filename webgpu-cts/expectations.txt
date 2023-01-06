@@ -401,6 +401,12 @@ webgpu:api,operation,buffers,map_oom:mapAsync:oom=true;size=9007199254740984 [ F
 ################################################################################
 
 ################################################################################
+# webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:* fail on win10 Intel
+# KEEP
+################################################################################
+crbug.com/dawn/1628 [ intel-gen-9 win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:* [ Failure ]
+
+################################################################################
 # untriaged failures
 # KEEP
 ################################################################################
@@ -412,12 +418,6 @@ crbug.com/dawn/0000 [ mac ] worker_webgpu:api,operation,render_pass,storeOp:rend
 # New failures. Please triage:
 crbug.com/dawn/0000 webgpu:api,operation,buffers,map_ArrayBuffer:postMessage:transfer=true;mapMode="READ" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,buffers,map_ArrayBuffer:postMessage:transfer=true;mapMode="WRITE" [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 target-cpu-64 win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="r32uint";storeOperation="store" [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 target-cpu-32 win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rg32sint";storeOperation="store" [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 target-cpu-32 win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rg32sint";storeOperation="store" [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 target-cpu-64 win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rg32sint";storeOperation="store" [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 target-cpu-32 win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rgba8uint";storeOperation="store" [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 target-cpu-32 win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rgba8uint";storeOperation="store" [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=-8388608;biasSlopeScale=0;biasClamp=0.125 [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,buffer,mapping:getMappedRange,state,mapped: [ Failure ]
