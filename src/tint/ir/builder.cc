@@ -17,11 +17,10 @@
 #include <utility>
 
 #include "src/tint/ir/builder_impl.h"
-#include "src/tint/program.h"
 
 namespace tint::ir {
 
-Builder::Builder(const Program* prog) : ir(prog) {}
+Builder::Builder() {}
 
 Builder::Builder(Module&& mod) : ir(std::move(mod)) {}
 
@@ -35,8 +34,8 @@ Terminator* Builder::CreateTerminator() {
     return ir.flow_nodes.Create<Terminator>();
 }
 
-Function* Builder::CreateFunction(const ast::Function* ast_func) {
-    auto* ir_func = ir.flow_nodes.Create<Function>(ast_func);
+Function* Builder::CreateFunction() {
+    auto* ir_func = ir.flow_nodes.Create<Function>();
     ir_func->start_target = CreateBlock();
     ir_func->end_target = CreateTerminator();
 
@@ -46,8 +45,8 @@ Function* Builder::CreateFunction(const ast::Function* ast_func) {
     return ir_func;
 }
 
-If* Builder::CreateIf(const ast::Statement* stmt) {
-    auto* ir_if = ir.flow_nodes.Create<If>(stmt);
+If* Builder::CreateIf() {
+    auto* ir_if = ir.flow_nodes.Create<If>();
     ir_if->true_target = CreateBlock();
     ir_if->false_target = CreateBlock();
     ir_if->merge_target = CreateBlock();
@@ -59,8 +58,8 @@ If* Builder::CreateIf(const ast::Statement* stmt) {
     return ir_if;
 }
 
-Loop* Builder::CreateLoop(const ast::Statement* stmt) {
-    auto* ir_loop = ir.flow_nodes.Create<Loop>(stmt);
+Loop* Builder::CreateLoop() {
+    auto* ir_loop = ir.flow_nodes.Create<Loop>();
     ir_loop->start_target = CreateBlock();
     ir_loop->continuing_target = CreateBlock();
     ir_loop->merge_target = CreateBlock();
@@ -71,8 +70,8 @@ Loop* Builder::CreateLoop(const ast::Statement* stmt) {
     return ir_loop;
 }
 
-Switch* Builder::CreateSwitch(const ast::SwitchStatement* stmt) {
-    auto* ir_switch = ir.flow_nodes.Create<Switch>(stmt);
+Switch* Builder::CreateSwitch() {
+    auto* ir_switch = ir.flow_nodes.Create<Switch>();
     ir_switch->merge_target = CreateBlock();
     return ir_switch;
 }

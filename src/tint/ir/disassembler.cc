@@ -19,7 +19,6 @@
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/terminator.h"
-#include "src/tint/program.h"
 
 namespace tint::ir {
 namespace {
@@ -63,7 +62,7 @@ std::ostream& Disassembler::Indent() {
 
 void Disassembler::EmitBlockInstructions(const Block* b) {
     for (const auto* instr : b->instructions) {
-        instr->ToString(out_, mod_.program->Symbols()) << std::endl;
+        instr->ToString(out_, mod_.symbols) << std::endl;
     }
 }
 

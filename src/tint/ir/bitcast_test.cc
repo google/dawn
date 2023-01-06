@@ -41,7 +41,7 @@ TEST_F(IR_InstructionTest, Bitcast) {
     EXPECT_EQ(4_i, val->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     std::stringstream str;
-    instr->ToString(str, program->Symbols());
+    instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (i32) = bitcast(4)");
 }
 

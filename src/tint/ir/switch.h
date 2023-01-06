@@ -20,11 +20,6 @@
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/value.h"
 
-// Forward declarations
-namespace tint::ast {
-class SwitchStatement;
-}  // namespace tint::ast
-
 namespace tint::ir {
 
 /// Flow node representing a switch statement
@@ -48,12 +43,8 @@ class Switch : public Castable<Switch, FlowNode> {
     };
 
     /// Constructor
-    /// @param stmt the originating ast switch statement
-    explicit Switch(const ast::SwitchStatement* stmt);
+    Switch();
     ~Switch() override;
-
-    /// The originating switch statment in the AST
-    const ast::SwitchStatement* source;
 
     /// The switch merge target
     Block* merge_target;

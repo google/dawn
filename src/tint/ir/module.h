@@ -52,8 +52,7 @@ class Module {
     static Result FromProgram(const Program* program);
 
     /// Constructor
-    /// @param program the program this module was constructed from
-    explicit Module(const Program* program);
+    Module();
     /// Move constructor
     /// @param o the module to move from
     Module(Module&& o);
@@ -88,9 +87,6 @@ class Module {
     utils::Vector<Function*, 8> functions;
     /// List of indexes into the functions list for the entry points
     utils::Vector<Function*, 8> entry_points;
-
-    /// The source ast::Program this module was constucted from
-    const Program* program;
 
     /// The type manager for the module
     type::Manager types;

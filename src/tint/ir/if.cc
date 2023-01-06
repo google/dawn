@@ -18,7 +18,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::If);
 
 namespace tint::ir {
 
-If::If(const ast::Statement* stmt) : Base(), source(stmt) {}
+If::If() : Base() {}
 
 If::~If() = default;
 

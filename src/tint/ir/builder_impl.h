@@ -32,20 +32,26 @@ namespace tint {
 class Program;
 }  // namespace tint
 namespace tint::ast {
+class Attribute;
 class BinaryExpression;
 class BitcastExpression;
 class BlockStatement;
 class BreakIfStatement;
 class BreakStatement;
 class ContinueStatement;
+class Expression;
 class ForLoopStatement;
 class Function;
 class IfStatement;
 class LoopStatement;
 class LiteralExpression;
+class Node;
 class ReturnStatement;
 class Statement;
+class SwitchStatement;
+class Type;
 class WhileStatement;
+class Variable;
 }  // namespace tint::ast
 namespace tint::ir {
 class Block;
@@ -200,6 +206,10 @@ class BuilderImpl {
     void BranchToIfNeeded(ir::FlowNode* node);
 
     FlowNode* FindEnclosingControl(ControlFlags flags);
+
+    const Program* program_ = nullptr;
+
+    Symbol CloneSymbol(Symbol sym) const;
 
     diag::List diagnostics_;
 

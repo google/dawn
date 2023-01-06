@@ -15,8 +15,8 @@
 #ifndef SRC_TINT_IR_FUNCTION_H_
 #define SRC_TINT_IR_FUNCTION_H_
 
-#include "src/tint/ast/function.h"
 #include "src/tint/ir/flow_node.h"
+#include "src/tint/symbol.h"
 
 // Forward declarations
 namespace tint::ir {
@@ -30,12 +30,11 @@ namespace tint::ir {
 class Function : public Castable<Function, FlowNode> {
   public:
     /// Constructor
-    /// @param func the ast::Function to create from
-    explicit Function(const ast::Function* func);
+    Function();
     ~Function() override;
 
-    /// The ast function this ir function is created from.
-    const ast::Function* source;
+    /// The function name
+    Symbol name;
 
     /// The start target is the first block in a function.
     Block* start_target = nullptr;

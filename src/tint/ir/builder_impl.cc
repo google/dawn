@@ -85,7 +85,7 @@ bool IsConnected(const FlowNode* b) {
 }  // namespace
 
 BuilderImpl::BuilderImpl(const Program* program)
-    : builder(program),
+    : program_(program),
       clone_ctx_{
           type::CloneContext{{&program->Symbols()}, {&builder.ir.symbols, &builder.ir.types}},
           {&builder.ir.constants}} {}
@@ -122,8 +122,12 @@ FlowNode* BuilderImpl::FindEnclosingControl(ControlFlags flags) {
     return nullptr;
 }
 
+Symbol BuilderImpl::CloneSymbol(Symbol sym) const {
+    return clone_ctx_.type_ctx.dst.st->Register(clone_ctx_.type_ctx.src.st->NameFor(sym));
+}
+
 ResultType BuilderImpl::Build() {
-    auto* sem = builder.ir.program->Sem().Module();
+    auto* sem = program_->Sem().Module();
 
     for (auto* decl : sem->DependencyOrderedDeclarations()) {
         bool ok = tint::Switch(
@@ -158,7 +162,8 @@ bool BuilderImpl::EmitFunction(const ast::Function* ast_func) {
     // The flow stack should have been emptied when the previous function finished building.
     TINT_ASSERT(IR, flow_stack.IsEmpty());
 
-    auto* ir_func = builder.CreateFunction(ast_func);
+    auto* ir_func = builder.CreateFunction();
+    ir_func->name = CloneSymbol(ast_func->symbol);
     current_function_ = ir_func;
     builder.ir.functions.Push(ir_func);
 
@@ -244,7 +249,7 @@ bool BuilderImpl::EmitBlock(const ast::BlockStatement* block) {
 }
 
 bool BuilderImpl::EmitIf(const ast::IfStatement* stmt) {
-    auto* if_node = builder.CreateIf(stmt);
+    auto* if_node = builder.CreateIf();
 
     // Emit the if condition into the end of the preceding block
     auto reg = EmitExpression(stmt->condition);
@@ -287,7 +292,7 @@ bool BuilderImpl::EmitIf(const ast::IfStatement* stmt) {
 }
 
 bool BuilderImpl::EmitLoop(const ast::LoopStatement* stmt) {
-    auto* loop_node = builder.CreateLoop(stmt);
+    auto* loop_node = builder.CreateLoop();
 
     BranchTo(loop_node);
 
@@ -325,7 +330,7 @@ bool BuilderImpl::EmitLoop(const ast::LoopStatement* stmt) {
 }
 
 bool BuilderImpl::EmitWhile(const ast::WhileStatement* stmt) {
-    auto* loop_node = builder.CreateLoop(stmt);
+    auto* loop_node = builder.CreateLoop();
     // Continue is always empty, just go back to the start
     builder.Branch(loop_node->continuing_target, loop_node->start_target);
 
@@ -345,7 +350,7 @@ bool BuilderImpl::EmitWhile(const ast::WhileStatement* stmt) {
         }
 
         // Create an `if (cond) {} else {break;}` control flow
-        auto* if_node = builder.CreateIf(nullptr);
+        auto* if_node = builder.CreateIf();
         builder.Branch(if_node->true_target, if_node->merge_target);
         builder.Branch(if_node->false_target, loop_node->merge_target);
         if_node->condition = reg.Get();
@@ -366,7 +371,7 @@ bool BuilderImpl::EmitWhile(const ast::WhileStatement* stmt) {
 }
 
 bool BuilderImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
-    auto* loop_node = builder.CreateLoop(stmt);
+    auto* loop_node = builder.CreateLoop();
     builder.Branch(loop_node->continuing_target, loop_node->start_target);
 
     if (stmt->initializer) {
@@ -393,7 +398,7 @@ bool BuilderImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
             }
 
             // Create an `if (cond) {} else {break;}` control flow
-            auto* if_node = builder.CreateIf(nullptr);
+            auto* if_node = builder.CreateIf();
             builder.Branch(if_node->true_target, if_node->merge_target);
             builder.Branch(if_node->false_target, loop_node->merge_target);
             if_node->condition = reg.Get();
@@ -422,7 +427,7 @@ bool BuilderImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
 }
 
 bool BuilderImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
-    auto* switch_node = builder.CreateSwitch(stmt);
+    auto* switch_node = builder.CreateSwitch();
 
     // Emit the condition into the preceding block
     auto reg = EmitExpression(stmt->condition);
@@ -438,7 +443,7 @@ bool BuilderImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     {
         FlowStackScope scope(this, switch_node);
 
-        const auto* sem = builder.ir.program->Sem().Get(stmt);
+        const auto* sem = program_->Sem().Get(stmt);
         for (const auto* c : sem->Cases()) {
             utils::Vector<Switch::CaseSelector, 4> selectors;
             for (const auto* selector : c->Selectors()) {
@@ -504,7 +509,7 @@ bool BuilderImpl::EmitContinue(const ast::ContinueStatement*) {
 }
 
 bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
-    auto* if_node = builder.CreateIf(stmt);
+    auto* if_node = builder.CreateIf();
 
     // Emit the break-if condition into the end of the preceding block
     auto reg = EmitExpression(stmt->condition);
@@ -584,7 +589,7 @@ utils::Result<Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr)
         return utils::Failure;
     }
 
-    auto* sem = builder.ir.program->Sem().Get(expr);
+    auto* sem = program_->Sem().Get(expr);
     auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
 
     Binary* instr = nullptr;
@@ -658,7 +663,7 @@ utils::Result<Value*> BuilderImpl::EmitBitcast(const ast::BitcastExpression* exp
         return utils::Failure;
     }
 
-    auto* sem = builder.ir.program->Sem().Get(expr);
+    auto* sem = program_->Sem().Get(expr);
     auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
     auto* instr = builder.Bitcast(ty, val.Get());
 
@@ -667,7 +672,7 @@ utils::Result<Value*> BuilderImpl::EmitBitcast(const ast::BitcastExpression* exp
 }
 
 utils::Result<Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {
-    auto* sem = builder.ir.program->Sem().Get(lit);
+    auto* sem = program_->Sem().Get(lit);
     if (!sem) {
         diagnostics_.add_error(
             tint::diag::System::IR,

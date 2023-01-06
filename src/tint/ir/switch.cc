@@ -18,7 +18,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Switch);
 
 namespace tint::ir {
 
-Switch::Switch(const ast::SwitchStatement* stmt) : Base(), source(stmt) {}
+Switch::Switch() : Base() {}
 
 Switch::~Switch() = default;
 

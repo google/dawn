@@ -34,7 +34,7 @@ Module::Result Module::FromProgram(const Program* program) {
     return Result{r.Move()};
 }
 
-Module::Module(const Program* prog) : program(prog) {}
+Module::Module() = default;
 
 Module::Module(Module&&) = default;
 

@@ -18,7 +18,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Function);
 
 namespace tint::ir {
 
-Function::Function(const ast::Function* f) : Base(), source(f) {}
+Function::Function() : Base() {}
 
 Function::~Function() = default;
 
