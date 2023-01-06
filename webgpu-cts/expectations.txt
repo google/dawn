@@ -142,7 +142,6 @@ crbug.com/dawn/0000 [ linux ] webgpu:web_platform,external_texture,* [ Failure ]
 # KEEP
 ################################################################################
 crbug.com/dawn/1082 [ mac ] webgpu:web_platform,external_texture,video:* [ Skip ]
-crbug.com/dawn/1082 [ win ] webgpu:web_platform,external_texture,video:* [ Skip ]
 ################################################################################
 
 ################################################################################
