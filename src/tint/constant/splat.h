@@ -53,6 +53,11 @@ class Splat : public Castable<Splat, constant::Value> {
     /// @returns the hash for the splat
     size_t Hash() const override { return utils::Hash(type, el->Hash(), count); }
 
+    /// Clones the constant into the provided context
+    /// @param ctx the clone context
+    /// @returns the cloned node
+    Splat* Clone(CloneContext& ctx) const override;
+
     /// The type of the splat element
     type::Type const* const type;
     /// The element stored in the splat

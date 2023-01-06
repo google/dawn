@@ -49,6 +49,14 @@ class Scalar : public Castable<Scalar<T>, constant::Value> {
     bool AllEqual() const override { return true; }
     size_t Hash() const override { return utils::Hash(type, ValueOf()); }
 
+    /// Clones the constant into the provided context
+    /// @param ctx the clone context
+    /// @returns the cloned node
+    Scalar* Clone(CloneContext& ctx) const override {
+        auto* ty = type->Clone(ctx.type_ctx);
+        return ctx.dst.constants->Create<Scalar<T>>(ty, value);
+    }
+
     /// @returns `value` if `T` is not a Number, otherwise ValueOf returns the inner value of the
     /// Number.
     inline auto ValueOf() const {

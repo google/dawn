@@ -52,6 +52,11 @@ class Composite : public Castable<Composite, constant::Value> {
     bool AllEqual() const override { return false; }
     size_t Hash() const override { return hash; }
 
+    /// Clones the constant into the provided context
+    /// @param ctx the clone context
+    /// @returns the cloned node
+    Composite* Clone(CloneContext& ctx) const override;
+
     /// The composite type
     type::Type const* const type;
     /// The composite elements

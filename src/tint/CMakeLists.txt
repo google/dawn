@@ -254,6 +254,7 @@ list(APPEND TINT_LIB_SRCS
   castable.h
   clone_context.cc
   clone_context.h
+  constant/clone_context.h
   constant/composite.cc
   constant/composite.h
   constant/scalar.cc
@@ -873,6 +874,9 @@ if(TINT_BUILD_TESTS)
     ast/workgroup_attribute_test.cc
     castable_test.cc
     clone_context_test.cc
+    constant/composite_test.cc
+    constant/scalar_test.cc
+    constant/splat_test.cc
     debug_test.cc
     demangler_test.cc
     diagnostic/diagnostic_test.cc

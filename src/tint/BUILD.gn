@@ -366,6 +366,7 @@ libtint_source_set("libtint_core_all_src") {
     "castable.h",
     "clone_context.cc",
     "clone_context.h",
+    "constant/clone_context.h",
     "constant/composite.h",
     "constant/node.h",
     "constant/scalar.h",
@@ -770,6 +771,7 @@ libtint_source_set("libtint_type_src") {
 
 libtint_source_set("libtint_constant_src") {
   sources = [
+    "constant/clone_context.h",
     "constant/composite.cc",
     "constant/composite.h",
     "constant/node.cc",
@@ -1239,6 +1241,14 @@ if (tint_build_unittests) {
       "sem/builtin_test.cc",
       "sem/expression_test.cc",
       "sem/struct_test.cc",
+    ]
+  }
+
+  tint_unittests_source_set("tint_unittests_constant_src") {
+    sources = [
+      "constant/composite_test.cc",
+      "constant/scalar_test.cc",
+      "constant/splat_test.cc",
     ]
   }
 
@@ -1738,6 +1748,7 @@ if (tint_build_unittests) {
       ":libtint_wgsl_reader_src",
       ":libtint_wgsl_writer_src",
       ":tint_unittests_ast_src",
+      ":tint_unittests_constant_src",
       ":tint_unittests_core_src",
       ":tint_unittests_diagnostic_src",
       ":tint_unittests_inspector_src",

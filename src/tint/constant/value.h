@@ -18,6 +18,7 @@
 #include <variant>
 
 #include "src/tint/castable.h"
+#include "src/tint/constant/clone_context.h"
 #include "src/tint/constant/node.h"
 #include "src/tint/number.h"
 #include "src/tint/type/type.h"
@@ -74,6 +75,11 @@ class Value : public Castable<Value, Node> {
     /// @param b the value to compare too
     /// @returns true if this value is equal to @p b
     bool Equal(const constant::Value* b) const;
+
+    /// Clones the constant into the provided context
+    /// @param ctx the clone context
+    /// @returns the cloned node
+    virtual Value* Clone(CloneContext& ctx) const = 0;
 
   protected:
     /// @returns the value, if this is of a scalar value or abstract numeric, otherwise

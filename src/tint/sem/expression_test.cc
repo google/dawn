@@ -33,6 +33,7 @@ class MockConstant : public constant::Value {
     bool AnyZero() const override { return {}; }
     bool AllEqual() const override { return {}; }
     size_t Hash() const override { return 0; }
+    MockConstant* Clone(constant::CloneContext&) const override { return nullptr; }
 
   protected:
     std::variant<std::monostate, AInt, AFloat> InternalValue() const override { return {}; }

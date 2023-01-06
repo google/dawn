@@ -1,4 +1,4 @@
-// Copyright 2022 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/constant/splat.h"
+#ifndef SRC_TINT_CONSTANT_TEST_HELPER_H_
+#define SRC_TINT_CONSTANT_TEST_HELPER_H_
 
-TINT_INSTANTIATE_TYPEINFO(tint::constant::Splat);
+#include "gtest/gtest.h"
+#include "src/tint/program_builder.h"
 
 namespace tint::constant {
 
-Splat::Splat(const type::Type* t, const constant::Value* e, size_t n) : type(t), el(e), count(n) {}
+/// Helper base class for testing
+template <typename BASE>
+class TestHelperBase : public BASE, public ProgramBuilder {};
 
-Splat::~Splat() = default;
+/// Helper class for testing that derives from testing::Test.
+using TestHelper = TestHelperBase<testing::Test>;
 
-Splat* Splat::Clone(CloneContext& ctx) const {
-    auto* ty = type->Clone(ctx.type_ctx);
-    auto* element = el->Clone(ctx);
-    return ctx.dst.constants->Create<Splat>(ty, element, count);
-}
+/// Helper class for testing that derives from `T`.
+template <typename T>
+using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
 }  // namespace tint::constant
+
+#endif  // SRC_TINT_CONSTANT_TEST_HELPER_H_

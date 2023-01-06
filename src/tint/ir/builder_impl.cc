@@ -85,7 +85,9 @@ bool IsConnected(const FlowNode* b) {
 
 BuilderImpl::BuilderImpl(const Program* program)
     : builder(program),
-      type_clone_ctx_{{&program->Symbols()}, {&builder.ir.symbols, &builder.ir.types}} {}
+      clone_ctx_{
+          type::CloneContext{{&program->Symbols()}, {&builder.ir.symbols, &builder.ir.types}},
+          {&builder.ir.constants}} {}
 
 BuilderImpl::~BuilderImpl() = default;
 
@@ -567,7 +569,7 @@ utils::Result<Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr)
     }
 
     auto* sem = builder.ir.program->Sem().Get(expr);
-    auto* ty = sem->Type()->Clone(type_clone_ctx_);
+    auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
 
     Binary* instr = nullptr;
     switch (expr->op) {
@@ -641,7 +643,7 @@ utils::Result<Value*> BuilderImpl::EmitBitcast(const ast::BitcastExpression* exp
     }
 
     auto* sem = builder.ir.program->Sem().Get(expr);
-    auto* ty = sem->Type()->Clone(type_clone_ctx_);
+    auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
     auto* instr = builder.Bitcast(ty, val.Get());
 
     current_flow_block->instructions.Push(instr);
@@ -658,7 +660,7 @@ utils::Result<Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit
         return utils::Failure;
     }
 
-    auto* cv = sem->ConstantValue();
+    auto* cv = sem->ConstantValue()->Clone(clone_ctx_);
     if (!cv) {
         diagnostics_.add_error(
             tint::diag::System::IR,

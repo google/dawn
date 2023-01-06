@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "src/tint/constant/clone_context.h"
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/flow_node.h"
@@ -213,7 +214,7 @@ class BuilderImpl {
     /// Used for testing purposes.
     std::unordered_map<const ast::Node*, const FlowNode*> ast_to_flow_;
 
-    type::CloneContext type_clone_ctx_;
+    constant::CloneContext clone_ctx_;
 };
 
 }  // namespace tint::ir
