@@ -164,11 +164,6 @@ class BuilderImpl {
     /// @returns true if successful, false otherwise
     utils::Result<Value*> EmitLiteral(const ast::LiteralExpression* lit);
 
-    /// Emits a type
-    /// @param ty the type to emit
-    /// @returns true if successful, false otherwise
-    bool EmitType(const ast::Type* ty);
-
     /// Emits a set of attributes
     /// @param attrs the attributes to emit
     /// @returns true if successful, false otherwise

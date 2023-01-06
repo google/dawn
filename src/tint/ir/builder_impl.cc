@@ -154,7 +154,7 @@ ResultType BuilderImpl::Build() {
 }
 
 bool BuilderImpl::EmitFunction(const ast::Function* ast_func) {
-    // The flow stack should have been emptied when the previous function finshed building.
+    // The flow stack should have been emptied when the previous function finished building.
     TINT_ASSERT(IR, flow_stack.IsEmpty());
 
     auto* ir_func = builder.CreateFunction(ast_func);
@@ -174,6 +174,10 @@ bool BuilderImpl::EmitFunction(const ast::Function* ast_func) {
         if (!EmitStatements(ast_func->body->statements)) {
             return false;
         }
+
+        // TODO(dsinclair): Store return type and attributes
+        // TODO(dsinclair): Store parameters
+        // TODO(dsinclair): Store attributes
 
         // If the branch target has already been set then a `return` was called. Only set in the
         // case where `return` wasn't called.
@@ -241,7 +245,7 @@ bool BuilderImpl::EmitBlock(const ast::BlockStatement* block) {
 bool BuilderImpl::EmitIf(const ast::IfStatement* stmt) {
     auto* if_node = builder.CreateIf(stmt);
 
-    // Emit the if condition into the end of the preceeding block
+    // Emit the if condition into the end of the preceding block
     auto reg = EmitExpression(stmt->condition);
     if (!reg) {
         return false;
@@ -339,7 +343,7 @@ bool BuilderImpl::EmitWhile(const ast::WhileStatement* stmt) {
             return false;
         }
 
-        // Create an if (cond) {} else {break;} control flow
+        // Create an `if (cond) {} else {break;}` control flow
         auto* if_node = builder.CreateIf(nullptr);
         builder.Branch(if_node->true_target, if_node->merge_target);
         builder.Branch(if_node->false_target, loop_node->merge_target);
@@ -387,7 +391,7 @@ bool BuilderImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
                 return false;
             }
 
-            // Create an if (cond) {} else {break;} control flow
+            // Create an `if (cond) {} else {break;}` control flow
             auto* if_node = builder.CreateIf(nullptr);
             builder.Branch(if_node->true_target, if_node->merge_target);
             builder.Branch(if_node->false_target, loop_node->merge_target);
@@ -419,7 +423,7 @@ bool BuilderImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
 bool BuilderImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     auto* switch_node = builder.CreateSwitch(stmt);
 
-    // Emit the condition into the preceeding block
+    // Emit the condition into the preceding block
     auto reg = EmitExpression(stmt->condition);
     if (!reg) {
         return false;
@@ -451,7 +455,9 @@ bool BuilderImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
 }
 
 bool BuilderImpl::EmitReturn(const ast::ReturnStatement*) {
-    // TODO(dsinclair): Emit the return value ....
+    // TODO(dsinclair): Emit the return value. Need to determine how we want to
+    // emit this. Emit a `return_value %yy` instruction? There is no `return`
+    // instruction as we just branch.
 
     BranchTo(current_function_->end_target);
     return true;
@@ -489,7 +495,7 @@ bool BuilderImpl::EmitContinue(const ast::ContinueStatement*) {
 bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
     auto* if_node = builder.CreateIf(stmt);
 
-    // Emit the break-if condition into the end of the preceeding block
+    // Emit the break-if condition into the end of the preceding block
     auto reg = EmitExpression(stmt->condition);
     if (!reg) {
         return false;
@@ -516,7 +522,6 @@ bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
 
     // The `break-if` has to be the last item in the continuing block. The false branch of the
     // `break-if` will always take us back to the start of the loop.
-    // break then we go back to the start of the loop.
     BranchTo(loop->start_target);
 
     return true;
@@ -669,45 +674,6 @@ utils::Result<Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit
         return utils::Failure;
     }
     return builder.Constant(cv);
-}
-
-bool BuilderImpl::EmitType(const ast::Type* ty) {
-    return tint::Switch(
-        ty,
-        // [&](const ast::Array* ary) { },
-        // [&](const ast::Bool* b) { },
-        // [&](const ast::F32* f) { },
-        // [&](const ast::F16* f) { },
-        // [&](const ast::I32* i) { },
-        // [&](const ast::U32* u) { },
-        // [&](const ast::Vector* v) { },
-        // [&](const ast::Matrix* mat) { },
-        // [&](const ast::Pointer* ptr) { },'
-        // [&](const ast::Atomic* a) { },
-        // [&](const ast::Sampler* s) { },
-        // [&](const ast::ExternalTexture* t) { },
-        // [&](const ast::Texture* t) {
-        //      return tint::Switch(
-        //          t,
-        //          [&](const ast::DepthTexture*) { },
-        //          [&](const ast::DepthMultisampledTexture*) { },
-        //          [&](const ast::SampledTexture*) { },
-        //          [&](const ast::MultisampledTexture*) { },
-        //          [&](const ast::StorageTexture*) {  },
-        //          [&](Default) {
-        //              diagnostics_.add_warning(tint::diag::System::IR,
-        //                  "unknown texture: " + std::string(t->TypeInfo().name), t->source);
-        //              return false;
-        //          });
-        // },
-        // [&](const ast::Void* v) { },
-        // [&](const ast::TypeName* tn) { },
-        [&](Default) {
-            diagnostics_.add_warning(tint::diag::System::IR,
-                                     "unknown type: " + std::string(ty->TypeInfo().name),
-                                     ty->source);
-            return false;
-        });
 }
 
 bool BuilderImpl::EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs) {
