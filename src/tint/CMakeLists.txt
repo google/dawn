@@ -441,6 +441,8 @@ list(APPEND TINT_LIB_SRCS
   transform/std140.h
   transform/substitute_override.cc
   transform/substitute_override.h
+  transform/texture_1d_to_2d.cc
+  transform/texture_1d_to_2d.h
   transform/transform.cc
   transform/transform.h
   transform/truncate_interstage_variables.cc
@@ -1261,6 +1263,7 @@ if(TINT_BUILD_TESTS)
       transform/std140_test.cc
       transform/substitute_override_test.cc
       transform/test_helper.h
+      transform/texture_1d_to_2d_test.cc
       transform/truncate_interstage_variables_test.cc
       transform/unshadow_test.cc
       transform/var_for_dynamic_index_test.cc
