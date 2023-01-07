@@ -1,7 +1,7 @@
 {
   "Test": {
     "Prefix": "ninja://chrome/test:telemetry_gpu_integration_test/gpu_tests.webgpu_cts_integration_test.WebGpuCtsIntegrationTest.",
-    "SlowThreshold": 15000000000 // 15 seconds
+    "SlowThreshold": 45000000000 // 45 seconds
   },
   "Gerrit": {
     "Host": "https://dawn-review.googlesource.com",
