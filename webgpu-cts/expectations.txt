@@ -134,14 +134,14 @@ crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:compute:isAs
 # KEEP
 ################################################################################
 crbug.com/dawn/0000 [ linux ] webgpu:web_platform,external_texture,* [ Failure ]
-
-################################################################################
-# Skip external_texture,video:* tests due to incorrect expectation values.
-# See cts issue https://github.com/gpuweb/cts/issues/2042
-# KEEP
-################################################################################
-crbug.com/dawn/1082 [ mac ] webgpu:web_platform,external_texture,video:* [ Skip ]
-################################################################################
+crbug.com/dawn/1631 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:sourceType="VideoElement";videoName="red-green.bt2020.vp9.webm" [ Skip ]
+crbug.com/dawn/1631 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:sourceType="VideoElement";videoName="red-green.bt601.vp9.webm" [ Skip ]
+crbug.com/dawn/1631 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:sourceType="VideoElement";videoName="red-green.bt709.vp9.webm" [ Skip ]
+crbug.com/dawn/1631 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:sourceType="VideoElement";videoName="red-green.theora.ogv" [ Skip ]
+crbug.com/dawn/1631 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:sourceType="VideoElement";videoName="red-green.webmvp8.webm" [ Skip ]
+crbug.com/dawn/1631 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:sourceType="VideoElement";videoName="red-green.bt601.vp9.webm" [ Skip ]
+crbug.com/dawn/1631 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:sourceType="VideoElement";videoName="red-green.theora.ogv" [ Skip ]
+crbug.com/dawn/1631 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:sourceType="VideoElement";videoName="red-green.webmvp8.webm" [ Skip ]
 
 ################################################################################
 # texel_data failures
