@@ -45,6 +45,7 @@
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/switch_statement.h"
+#include "src/tint/type/void.h"
 
 namespace tint::ir {
 namespace {
@@ -237,6 +238,8 @@ bool BuilderImpl::EmitStatement(const ast::Statement* stmt) {
             diagnostics_.add_warning(
                 tint::diag::System::IR,
                 "unknown statement type: " + std::string(stmt->TypeInfo().name), stmt->source);
+            // TODO(dsinclair): This should return `false`, switch back when all
+            // the cases are handled.
             return true;
         });
 }
@@ -461,7 +464,7 @@ bool BuilderImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
                 if (selector->IsDefault()) {
                     selectors.Push({nullptr});
                 } else {
-                    selectors.Push({selector->Value()->Clone(clone_ctx_)});
+                    selectors.Push({builder.Constant(selector->Value()->Clone(clone_ctx_))});
                 }
             }
 
@@ -575,7 +578,10 @@ utils::Result<Value*> BuilderImpl::EmitExpression(const ast::Expression* expr) {
             diagnostics_.add_warning(
                 tint::diag::System::IR,
                 "unknown expression type: " + std::string(expr->TypeInfo().name), expr->source);
-            return utils::Failure;
+            // TODO(dsinclair): This should return utils::Failure; Switch back
+            // once all the above cases are handled.
+            auto* v = builder.ir.types.Get<type::Void>();
+            return builder.Temp(v);
         });
 }
 
@@ -590,7 +596,10 @@ bool BuilderImpl::EmitVariable(const ast::Variable* var) {
             diagnostics_.add_warning(tint::diag::System::IR,
                                      "unknown variable: " + std::string(var->TypeInfo().name),
                                      var->source);
-            return false;
+
+            // TODO(dsinclair): This should return `false`, switch back when all
+            // the cases are handled.
+            return true;
         });
 }
 

@@ -62,6 +62,7 @@ std::ostream& Disassembler::Indent() {
 
 void Disassembler::EmitBlockInstructions(const Block* b) {
     for (const auto* instr : b->instructions) {
+        Indent();
         instr->ToString(out_, mod_.symbols) << std::endl;
     }
 }
@@ -85,7 +86,8 @@ void Disassembler::Walk(const FlowNode* node) {
     tint::Switch(
         node,
         [&](const ir::Function* f) {
-            Indent() << "%" << GetIdForNode(f) << " = Function" << std::endl;
+            Indent() << "%bb" << GetIdForNode(f) << " = Function " << mod_.symbols.NameFor(f->name)
+                     << std::endl;
 
             {
                 ScopedIndent func_indent(&indent_size_);
@@ -95,76 +97,92 @@ void Disassembler::Walk(const FlowNode* node) {
             Walk(f->end_target);
         },
         [&](const ir::Block* b) {
-            Indent() << "%" << GetIdForNode(b) << " = Block" << std::endl;
+            Indent() << "%bb" << GetIdForNode(b) << " = Block" << std::endl;
             EmitBlockInstructions(b);
 
             if (b->branch.target->Is<Terminator>()) {
-                Indent() << "Return ";
+                Indent() << "Return";
             } else {
-                Indent() << "Branch ";
+                Indent() << "BranchTo "
+                         << "%bb" << GetIdForNode(b->branch.target);
             }
-            out_ << GetIdForNode(b->branch.target);
-
+            out_ << " (";
             for (const auto* v : b->branch.args) {
-                out_ << " ";
+                if (v != b->branch.args.Front()) {
+                    out_ << ", ";
+                }
                 v->ToString(out_, mod_.symbols);
             }
-            out_ << std::endl;
+            out_ << ")" << std::endl << std::endl;
 
             Walk(b->branch.target);
         },
         [&](const ir::Switch* s) {
-            Indent() << "%" << GetIdForNode(s) << " = Switch (" << s->condition << ")" << std::endl;
+            Indent() << "%bb" << GetIdForNode(s) << " = Switch (";
+            s->condition->ToString(out_, mod_.symbols);
+            out_ << ")" << std::endl;
 
             {
                 ScopedIndent switch_indent(&indent_size_);
                 ScopedStopNode scope(&stop_nodes_, s->merge.target);
                 for (const auto& c : s->cases) {
-                    Indent() << "Case" << std::endl;
+                    Indent() << "# Case ";
+                    for (const auto& selector : c.selectors) {
+                        if (selector.IsDefault()) {
+                            out_ << "default ";
+                        } else {
+                            selector.val->ToString(out_, mod_.symbols);
+                        }
+                    }
+                    out_ << std::endl;
                     ScopedIndent case_indent(&indent_size_);
                     Walk(c.start.target);
                 }
             }
 
-            Indent() << "Switch Merge" << std::endl;
+            Indent() << "# Switch Merge" << std::endl;
             Walk(s->merge.target);
         },
         [&](const ir::If* i) {
-            Indent() << "%" << GetIdForNode(i) << " = if (" << i->condition << ")" << std::endl;
+            Indent() << "%bb" << GetIdForNode(i) << " = if (";
+            i->condition->ToString(out_, mod_.symbols);
+            out_ << ")" << std::endl;
+
             {
                 ScopedIndent if_indent(&indent_size_);
                 ScopedStopNode scope(&stop_nodes_, i->merge.target);
 
-                Indent() << "true branch" << std::endl;
+                Indent() << "# true branch" << std::endl;
                 Walk(i->true_.target);
 
-                Indent() << "false branch" << std::endl;
+                Indent() << "# false branch" << std::endl;
                 Walk(i->false_.target);
             }
 
-            Indent() << "if merge" << std::endl;
+            Indent() << "# if merge" << std::endl;
             Walk(i->merge.target);
         },
         [&](const ir::Loop* l) {
-            Indent() << "%" << GetIdForNode(l) << " = loop" << std::endl;
+            Indent() << "%bb" << GetIdForNode(l) << " = loop" << std::endl;
             {
                 ScopedStopNode loop_scope(&stop_nodes_, l->merge.target);
                 ScopedIndent loop_indent(&indent_size_);
                 {
                     ScopedStopNode inner_scope(&stop_nodes_, l->continuing.target);
-                    Indent() << "loop start" << std::endl;
+                    Indent() << "# loop start" << std::endl;
                     Walk(l->start.target);
                 }
 
-                Indent() << "loop continuing" << std::endl;
+                Indent() << "# loop continuing" << std::endl;
                 ScopedIndent continuing_indent(&indent_size_);
                 Walk(l->continuing.target);
             }
 
-            Indent() << "loop merge" << std::endl;
+            Indent() << "# loop merge" << std::endl;
             Walk(l->merge.target);
         },
-        [&](const ir::Terminator*) { Indent() << "Function end" << std::endl; });
+        [&](const ir::Terminator*) { Indent() << "FunctionEnd" << std::endl
+                                              << std::endl; });
 }
 
 std::string Disassembler::Disassemble() {

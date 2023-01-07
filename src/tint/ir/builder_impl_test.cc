@@ -1125,12 +1125,14 @@ TEST_F(IR_BuilderImplTest, Switch) {
     auto* func = m.functions[0];
 
     ASSERT_EQ(1u, flow->cases[0].selectors.Length());
-    ASSERT_TRUE(flow->cases[0].selectors[0].val->Is<constant::Scalar<tint::i32>>());
-    EXPECT_EQ(0_i, flow->cases[0].selectors[0].val->As<constant::Scalar<tint::i32>>()->ValueOf());
+    ASSERT_TRUE(flow->cases[0].selectors[0].val->value->Is<constant::Scalar<tint::i32>>());
+    EXPECT_EQ(0_i,
+              flow->cases[0].selectors[0].val->value->As<constant::Scalar<tint::i32>>()->ValueOf());
 
     ASSERT_EQ(1u, flow->cases[1].selectors.Length());
-    ASSERT_TRUE(flow->cases[1].selectors[0].val->Is<constant::Scalar<tint::i32>>());
-    EXPECT_EQ(1_i, flow->cases[1].selectors[0].val->As<constant::Scalar<tint::i32>>()->ValueOf());
+    ASSERT_TRUE(flow->cases[1].selectors[0].val->value->Is<constant::Scalar<tint::i32>>());
+    EXPECT_EQ(1_i,
+              flow->cases[1].selectors[0].val->value->As<constant::Scalar<tint::i32>>()->ValueOf());
 
     ASSERT_EQ(1u, flow->cases[2].selectors.Length());
     EXPECT_TRUE(flow->cases[2].selectors[0].IsDefault());
@@ -1227,8 +1229,9 @@ TEST_F(IR_BuilderImplTest, Switch_WithBreak) {
     auto* func = m.functions[0];
 
     ASSERT_EQ(1u, flow->cases[0].selectors.Length());
-    ASSERT_TRUE(flow->cases[0].selectors[0].val->Is<constant::Scalar<tint::i32>>());
-    EXPECT_EQ(0_i, flow->cases[0].selectors[0].val->As<constant::Scalar<tint::i32>>()->ValueOf());
+    ASSERT_TRUE(flow->cases[0].selectors[0].val->value->Is<constant::Scalar<tint::i32>>());
+    EXPECT_EQ(0_i,
+              flow->cases[0].selectors[0].val->value->As<constant::Scalar<tint::i32>>()->ValueOf());
 
     ASSERT_EQ(1u, flow->cases[1].selectors.Length());
     EXPECT_TRUE(flow->cases[1].selectors[0].IsDefault());
@@ -1291,8 +1294,9 @@ TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
     auto* func = m.functions[0];
 
     ASSERT_EQ(1u, flow->cases[0].selectors.Length());
-    ASSERT_TRUE(flow->cases[0].selectors[0].val->Is<constant::Scalar<tint::i32>>());
-    EXPECT_EQ(0_i, flow->cases[0].selectors[0].val->As<constant::Scalar<tint::i32>>()->ValueOf());
+    ASSERT_TRUE(flow->cases[0].selectors[0].val->value->Is<constant::Scalar<tint::i32>>());
+    EXPECT_EQ(0_i,
+              flow->cases[0].selectors[0].val->value->As<constant::Scalar<tint::i32>>()->ValueOf());
 
     ASSERT_EQ(1u, flow->cases[1].selectors.Length());
     EXPECT_TRUE(flow->cases[1].selectors[0].IsDefault());

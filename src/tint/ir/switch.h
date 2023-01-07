@@ -15,9 +15,9 @@
 #ifndef SRC_TINT_IR_SWITCH_H_
 #define SRC_TINT_IR_SWITCH_H_
 
-#include "src/tint/constant/value.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/branch.h"
+#include "src/tint/ir/constant.h"
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/value.h"
 
@@ -32,7 +32,7 @@ class Switch : public Castable<Switch, FlowNode> {
         bool IsDefault() const { return val == nullptr; }
 
         /// The selector value, or nullptr if this is the default selector
-        constant::Value* val = nullptr;
+        Constant* val = nullptr;
     };
 
     /// A case label in the struct
