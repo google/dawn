@@ -1,10 +1,8 @@
-SKIP: FAILED
-
 #version 310 es
 
-uniform highp isampler1D arg_0_1;
+uniform highp isampler2D arg_0_1;
 void textureLoad_62d1de() {
-  ivec4 res = texelFetch(arg_0_1, 1, int(1u));
+  ivec4 res = texelFetch(arg_0_1, ivec2(1, 0), int(1u));
 }
 
 vec4 vertex_main() {
@@ -20,19 +18,12 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'isampler1D' : Reserved word. 
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
-uniform highp isampler1D arg_0_1;
+uniform highp isampler2D arg_0_1;
 void textureLoad_62d1de() {
-  ivec4 res = texelFetch(arg_0_1, 1, int(1u));
+  ivec4 res = texelFetch(arg_0_1, ivec2(1, 0), int(1u));
 }
 
 void fragment_main() {
@@ -43,18 +34,11 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'isampler1D' : Reserved word. 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
-uniform highp isampler1D arg_0_1;
+uniform highp isampler2D arg_0_1;
 void textureLoad_62d1de() {
-  ivec4 res = texelFetch(arg_0_1, 1, int(1u));
+  ivec4 res = texelFetch(arg_0_1, ivec2(1, 0), int(1u));
 }
 
 void compute_main() {
@@ -66,10 +50,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'isampler1D' : Reserved word. 
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

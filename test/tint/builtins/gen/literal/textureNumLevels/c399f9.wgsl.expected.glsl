@@ -2,7 +2,7 @@ SKIP: FAILED
 
 #version 310 es
 
-uniform highp sampler1D arg_0_1;
+uniform highp sampler2D arg_0_1;
 void textureNumLevels_c399f9() {
   uint res = uint(textureQueryLevels(arg_0_1));
 }
@@ -21,8 +21,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:3: 'sampler1D' : Reserved word. 
-ERROR: 0:3: '' : compilation terminated 
+ERROR: 0:5: 'textureQueryLevels' : no matching overloaded function found
+ERROR: 0:5: '' : compilation terminated
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -30,7 +30,7 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp sampler1D arg_0_1;
+uniform highp sampler2D arg_0_1;
 void textureNumLevels_c399f9() {
   uint res = uint(textureQueryLevels(arg_0_1));
 }
@@ -44,15 +44,15 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'sampler1D' : Reserved word. 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:6: 'textureQueryLevels' : no matching overloaded function found
+ERROR: 0:6: '' : compilation terminated
 ERROR: 2 compilation errors.  No code generated.
 
 
 
 #version 310 es
 
-uniform highp sampler1D arg_0_1;
+uniform highp sampler2D arg_0_1;
 void textureNumLevels_c399f9() {
   uint res = uint(textureQueryLevels(arg_0_1));
 }
@@ -67,8 +67,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:3: 'sampler1D' : Reserved word. 
-ERROR: 0:3: '' : compilation terminated 
+ERROR: 0:5: 'textureQueryLevels' : no matching overloaded function found
+ERROR: 0:5: '' : compilation terminated
 ERROR: 2 compilation errors.  No code generated.
 
 

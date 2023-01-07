@@ -2,9 +2,9 @@ SKIP: FAILED
 
 #version 310 es
 
-layout(rg32f) uniform highp writeonly image1D arg_0;
+layout(rg32f) uniform highp writeonly image2D arg_0;
 void textureDimensions_b51345() {
-  uint res = uint(imageSize(arg_0));
+  uint res = uvec2(imageSize(arg_0)).x;
 }
 
 vec4 vertex_main() {
@@ -30,9 +30,9 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-layout(rg32f) uniform highp writeonly image1D arg_0;
+layout(rg32f) uniform highp writeonly image2D arg_0;
 void textureDimensions_b51345() {
-  uint res = uint(imageSize(arg_0));
+  uint res = uvec2(imageSize(arg_0)).x;
 }
 
 void fragment_main() {
@@ -52,9 +52,9 @@ ERROR: 2 compilation errors.  No code generated.
 
 #version 310 es
 
-layout(rg32f) uniform highp writeonly image1D arg_0;
+layout(rg32f) uniform highp writeonly image2D arg_0;
 void textureDimensions_b51345() {
-  uint res = uint(imageSize(arg_0));
+  uint res = uvec2(imageSize(arg_0)).x;
 }
 
 void compute_main() {

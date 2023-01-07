@@ -117,7 +117,7 @@ ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverloa
         case ValidTextureOverload::kNumSamplesMultisampled2d:
             return {"textureSamples"};
         case ValidTextureOverload::kSample1dF32:
-            return R"(texture(tint_symbol_sampler, 1.0f);)";
+            return R"(texture(tint_symbol_sampler, vec2(1.0f, 0.5f));)";
         case ValidTextureOverload::kSample2dF32:
             return R"(texture(tint_symbol_sampler, vec2(1.0f, 2.0f));)";
         case ValidTextureOverload::kSample2dOffsetF32:
@@ -231,10 +231,10 @@ ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverloa
         case ValidTextureOverload::kSampleCompareLevelDepthCubeArrayF32:
             return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, float(4)), 5.0f);)";
         case ValidTextureOverload::kLoad1dLevelF32:
-            return R"(texelFetch(tint_symbol_2, int(1u), int(3u));)";
+            return R"(texelFetch(tint_symbol_2, ivec2(uvec2(1u, 0u)), int(3u));)";
         case ValidTextureOverload::kLoad1dLevelU32:
         case ValidTextureOverload::kLoad1dLevelI32:
-            return R"(texelFetch(tint_symbol_2, 1, 3);)";
+            return R"(texelFetch(tint_symbol_2, ivec2(1, 0), 3);)";
         case ValidTextureOverload::kLoad2dLevelU32:
             return R"(texelFetch(tint_symbol_2, ivec2(1, 2), 3);)";
         case ValidTextureOverload::kLoad2dLevelF32:
@@ -260,7 +260,7 @@ ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverloa
         case ValidTextureOverload::kLoadDepthMultisampled2dF32:
             return R"(texelFetch(tint_symbol_2, ivec2(uvec2(1u, 2u)), int(3u)).x;)";
         case ValidTextureOverload::kStoreWO1dRgba32float:
-            return R"(imageStore(tint_symbol, 1, vec4(2.0f, 3.0f, 4.0f, 5.0f));)";
+            return R"(imageStore(tint_symbol, ivec2(1, 0), vec4(2.0f, 3.0f, 4.0f, 5.0f));)";
         case ValidTextureOverload::kStoreWO2dRgba32float:
             return R"(imageStore(tint_symbol, ivec2(1, 2), vec4(3.0f, 4.0f, 5.0f, 6.0f));)";
         case ValidTextureOverload::kStoreWO2dArrayRgba32float:

@@ -1,12 +1,10 @@
-SKIP: FAILED
-
 #version 310 es
 
-layout(rgba32f) uniform highp writeonly image1D arg_0;
+layout(rgba32f) uniform highp writeonly image2D arg_0;
 void textureStore_285218() {
   uint arg_1 = 1u;
   vec4 arg_2 = vec4(1.0f);
-  imageStore(arg_0, int(arg_1), arg_2);
+  imageStore(arg_0, ivec2(uvec2(arg_1, 0u)), arg_2);
 }
 
 vec4 vertex_main() {
@@ -22,22 +20,14 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'image1D' : Reserved word. 
-WARNING: 0:3: 'layout' : useless application of layout qualifier 
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
-layout(rgba32f) uniform highp writeonly image1D arg_0;
+layout(rgba32f) uniform highp writeonly image2D arg_0;
 void textureStore_285218() {
   uint arg_1 = 1u;
   vec4 arg_2 = vec4(1.0f);
-  imageStore(arg_0, int(arg_1), arg_2);
+  imageStore(arg_0, ivec2(uvec2(arg_1, 0u)), arg_2);
 }
 
 void fragment_main() {
@@ -48,21 +38,13 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'image1D' : Reserved word. 
-WARNING: 0:4: 'layout' : useless application of layout qualifier 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
-layout(rgba32f) uniform highp writeonly image1D arg_0;
+layout(rgba32f) uniform highp writeonly image2D arg_0;
 void textureStore_285218() {
   uint arg_1 = 1u;
   vec4 arg_2 = vec4(1.0f);
-  imageStore(arg_0, int(arg_1), arg_2);
+  imageStore(arg_0, ivec2(uvec2(arg_1, 0u)), arg_2);
 }
 
 void compute_main() {
@@ -74,11 +56,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'image1D' : Reserved word. 
-WARNING: 0:3: 'layout' : useless application of layout qualifier 
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

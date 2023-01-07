@@ -1,10 +1,8 @@
-SKIP: FAILED
-
 #version 310 es
 
-layout(rgba16f) uniform highp writeonly image1D arg_0;
+layout(rgba16f) uniform highp writeonly image2D arg_0;
 void textureDimensions_0c0b0c() {
-  uint res = uint(imageSize(arg_0));
+  uint res = uvec2(imageSize(arg_0)).x;
 }
 
 vec4 vertex_main() {
@@ -20,20 +18,12 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'image1D' : Reserved word. 
-WARNING: 0:3: 'layout' : useless application of layout qualifier 
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
-layout(rgba16f) uniform highp writeonly image1D arg_0;
+layout(rgba16f) uniform highp writeonly image2D arg_0;
 void textureDimensions_0c0b0c() {
-  uint res = uint(imageSize(arg_0));
+  uint res = uvec2(imageSize(arg_0)).x;
 }
 
 void fragment_main() {
@@ -44,19 +34,11 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'image1D' : Reserved word. 
-WARNING: 0:4: 'layout' : useless application of layout qualifier 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
-layout(rgba16f) uniform highp writeonly image1D arg_0;
+layout(rgba16f) uniform highp writeonly image2D arg_0;
 void textureDimensions_0c0b0c() {
-  uint res = uint(imageSize(arg_0));
+  uint res = uvec2(imageSize(arg_0)).x;
 }
 
 void compute_main() {
@@ -68,11 +50,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'image1D' : Reserved word. 
-WARNING: 0:3: 'layout' : useless application of layout qualifier 
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

@@ -2,9 +2,9 @@ SKIP: FAILED
 
 #version 310 es
 
-layout(rg32i) uniform highp writeonly iimage1D arg_0;
+layout(rg32i) uniform highp writeonly iimage2D arg_0;
 void textureStore_d73b5c() {
-  imageStore(arg_0, 1, ivec4(1));
+  imageStore(arg_0, ivec2(1, 0), ivec4(1));
 }
 
 vec4 vertex_main() {
@@ -30,9 +30,9 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-layout(rg32i) uniform highp writeonly iimage1D arg_0;
+layout(rg32i) uniform highp writeonly iimage2D arg_0;
 void textureStore_d73b5c() {
-  imageStore(arg_0, 1, ivec4(1));
+  imageStore(arg_0, ivec2(1, 0), ivec4(1));
 }
 
 void fragment_main() {
@@ -52,9 +52,9 @@ ERROR: 2 compilation errors.  No code generated.
 
 #version 310 es
 
-layout(rg32i) uniform highp writeonly iimage1D arg_0;
+layout(rg32i) uniform highp writeonly iimage2D arg_0;
 void textureStore_d73b5c() {
-  imageStore(arg_0, 1, ivec4(1));
+  imageStore(arg_0, ivec2(1, 0), ivec4(1));
 }
 
 void compute_main() {

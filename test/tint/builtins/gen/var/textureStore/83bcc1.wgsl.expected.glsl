@@ -2,11 +2,11 @@ SKIP: FAILED
 
 #version 310 es
 
-layout(rg32ui) uniform highp writeonly uimage1D arg_0;
+layout(rg32ui) uniform highp writeonly uimage2D arg_0;
 void textureStore_83bcc1() {
   int arg_1 = 1;
   uvec4 arg_2 = uvec4(1u);
-  imageStore(arg_0, arg_1, arg_2);
+  imageStore(arg_0, ivec2(arg_1, 0), arg_2);
 }
 
 vec4 vertex_main() {
@@ -32,11 +32,11 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-layout(rg32ui) uniform highp writeonly uimage1D arg_0;
+layout(rg32ui) uniform highp writeonly uimage2D arg_0;
 void textureStore_83bcc1() {
   int arg_1 = 1;
   uvec4 arg_2 = uvec4(1u);
-  imageStore(arg_0, arg_1, arg_2);
+  imageStore(arg_0, ivec2(arg_1, 0), arg_2);
 }
 
 void fragment_main() {
@@ -56,11 +56,11 @@ ERROR: 2 compilation errors.  No code generated.
 
 #version 310 es
 
-layout(rg32ui) uniform highp writeonly uimage1D arg_0;
+layout(rg32ui) uniform highp writeonly uimage2D arg_0;
 void textureStore_83bcc1() {
   int arg_1 = 1;
   uvec4 arg_2 = uvec4(1u);
-  imageStore(arg_0, arg_1, arg_2);
+  imageStore(arg_0, ivec2(arg_1, 0), arg_2);
 }
 
 void compute_main() {

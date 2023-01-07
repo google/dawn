@@ -1,11 +1,9 @@
-SKIP: FAILED
-
 #version 310 es
 
-uniform highp sampler1D arg_0_1;
+uniform highp sampler2D arg_0_1;
 void textureDimensions_aac604() {
   uint arg_1 = 1u;
-  uint res = uint(textureSize(arg_0_1, int(arg_1)));
+  uint res = uvec2(textureSize(arg_0_1, int(arg_1))).x;
 }
 
 vec4 vertex_main() {
@@ -21,20 +19,13 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'sampler1D' : Reserved word. 
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
-uniform highp sampler1D arg_0_1;
+uniform highp sampler2D arg_0_1;
 void textureDimensions_aac604() {
   uint arg_1 = 1u;
-  uint res = uint(textureSize(arg_0_1, int(arg_1)));
+  uint res = uvec2(textureSize(arg_0_1, int(arg_1))).x;
 }
 
 void fragment_main() {
@@ -45,19 +36,12 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'sampler1D' : Reserved word. 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
-uniform highp sampler1D arg_0_1;
+uniform highp sampler2D arg_0_1;
 void textureDimensions_aac604() {
   uint arg_1 = 1u;
-  uint res = uint(textureSize(arg_0_1, int(arg_1)));
+  uint res = uvec2(textureSize(arg_0_1, int(arg_1))).x;
 }
 
 void compute_main() {
@@ -69,10 +53,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'sampler1D' : Reserved word. 
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
