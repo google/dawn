@@ -318,6 +318,8 @@ function(common_compile_options TARGET)
     target_compile_options(${TARGET} PRIVATE
       -fno-exceptions
       -fno-rtti
+
+      -Wno-deprecated-builtins
     )
 
     if (${DAWN_ENABLE_MSAN})
@@ -540,6 +542,7 @@ function(tint_default_compile_options TARGET)
     -Wno-return-std-move-in-c++11
     -Wno-unknown-warning-option
     -Wno-undefined-var-template
+    -Wno-unsafe-buffer-usage
     -Wno-used-but-marked-unused
     -Weverything
   )

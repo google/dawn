@@ -64,6 +64,15 @@ endif()
 
 if (NOT TARGET libabsl)
     message(STATUS "Dawn: using Abseil at ${DAWN_ABSEIL_DIR}")
+    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
+        ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
+        add_compile_options(
+            -Wno-array-parameter
+            -Wno-deprecated-builtins
+            -Wno-unknown-warning-option
+        )
+    endif()
+
     add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
 endif()
 
