@@ -1113,4 +1113,9 @@ TEST_P(TextureView1DTest, Sampling) {
     EXPECT_PIXEL_RGBA8_EQ(data[3], rp.color, 3, 0);
 }
 
-DAWN_INSTANTIATE_TEST(TextureView1DTest, D3D12Backend(), MetalBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(TextureView1DTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      VulkanBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend());

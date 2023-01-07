@@ -31,6 +31,7 @@ namespace {
 
 GLenum TargetForTexture(const TextureDescriptor* descriptor) {
     switch (descriptor->dimension) {
+        case wgpu::TextureDimension::e1D:
         case wgpu::TextureDimension::e2D:
             if (descriptor->size.depthOrArrayLayers > 1) {
                 ASSERT(descriptor->sampleCount == 1);
@@ -45,9 +46,6 @@ GLenum TargetForTexture(const TextureDescriptor* descriptor) {
         case wgpu::TextureDimension::e3D:
             ASSERT(descriptor->sampleCount == 1);
             return GL_TEXTURE_3D;
-
-        case wgpu::TextureDimension::e1D:
-            break;
     }
     UNREACHABLE();
 }
@@ -56,6 +54,7 @@ GLenum TargetForTextureViewDimension(wgpu::TextureViewDimension dimension,
                                      uint32_t arrayLayerCount,
                                      uint32_t sampleCount) {
     switch (dimension) {
+        case wgpu::TextureViewDimension::e1D:
         case wgpu::TextureViewDimension::e2D:
             return (sampleCount > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
         case wgpu::TextureViewDimension::e2DArray:
@@ -76,7 +75,6 @@ GLenum TargetForTextureViewDimension(wgpu::TextureViewDimension dimension,
         case wgpu::TextureViewDimension::e3D:
             return GL_TEXTURE_3D;
 
-        case wgpu::TextureViewDimension::e1D:
         case wgpu::TextureViewDimension::Undefined:
             break;
     }
@@ -289,6 +287,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
                  ++level) {
                 switch (GetDimension()) {
+                    case wgpu::TextureDimension::e1D:
                     case wgpu::TextureDimension::e2D:
                         if (GetArrayLayers() == 1) {
                             Aspect aspectsToClear = Aspect::None;
@@ -305,7 +304,6 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
                             if (aspectsToClear == Aspect::None) {
                                 continue;
                             }
-
                             gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, GetGLTarget(),
                                                     GetHandle(), static_cast<GLint>(level));
                             DoClear(aspectsToClear);
@@ -336,7 +334,6 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
                         }
                         break;
 
-                    case wgpu::TextureDimension::e1D:
                     case wgpu::TextureDimension::e3D:
                         UNREACHABLE();
                 }
@@ -437,7 +434,6 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
                     if (GetArrayLayers() == 1) {
                         switch (GetDimension()) {
                             case wgpu::TextureDimension::e1D:
-                                UNREACHABLE();
                             case wgpu::TextureDimension::e2D:
                                 gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment,
                                                         GetGLTarget(), GetHandle(), level);

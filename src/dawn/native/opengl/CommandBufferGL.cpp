@@ -52,6 +52,10 @@ GLenum IndexFormatType(wgpu::IndexFormat format) {
     UNREACHABLE();
 }
 
+bool Is1DOr2D(wgpu::TextureDimension dimension) {
+    return dimension == wgpu::TextureDimension::e1D || dimension == wgpu::TextureDimension::e2D;
+}
+
 GLenum VertexFormatType(wgpu::VertexFormat format) {
     switch (format) {
         case wgpu::VertexFormat::Uint8x2:
@@ -586,7 +590,6 @@ MaybeError CommandBuffer::Execute() {
 
                 buffer->EnsureDataInitializedAsDestination(copy);
 
-                ASSERT(texture->GetDimension() != wgpu::TextureDimension::e1D);
                 SubresourceRange subresources = GetSubresourcesAffectedByCopy(src, copy->copySize);
                 texture->EnsureSubresourceContentInitialized(subresources);
                 // The only way to move data from a texture to a buffer in GL is via
@@ -631,6 +634,7 @@ MaybeError CommandBuffer::Execute() {
 
                 uint8_t* offset = reinterpret_cast<uint8_t*>(static_cast<uintptr_t>(dst.offset));
                 switch (texture->GetDimension()) {
+                    case wgpu::TextureDimension::e1D:
                     case wgpu::TextureDimension::e2D: {
                         if (texture->GetArrayLayers() == 1) {
                             gl.FramebufferTexture2D(GL_READ_FRAMEBUFFER, glAttachment, target,
@@ -656,9 +660,6 @@ MaybeError CommandBuffer::Execute() {
                         }
                         break;
                     }
-
-                    case wgpu::TextureDimension::e1D:
-                        UNREACHABLE();
                 }
 
                 gl.PixelStorei(GL_PACK_ROW_LENGTH, 0);
@@ -1227,7 +1228,6 @@ void DoTexSubImage(const OpenGLFunctions& gl,
                    const TextureDataLayout& dataLayout,
                    const Extent3D& copySize) {
     Texture* texture = ToBackend(destination.texture.Get());
-    ASSERT(texture->GetDimension() != wgpu::TextureDimension::e1D);
 
     const GLFormat& format = texture->GetGLFormat();
     GLenum target = texture->GetGLTarget();
@@ -1263,8 +1263,7 @@ void DoTexSubImage(const OpenGLFunctions& gl,
             gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT, blockInfo.height);
             gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_DEPTH, 1);
 
-            if (texture->GetArrayLayers() == 1 &&
-                texture->GetDimension() == wgpu::TextureDimension::e2D) {
+            if (texture->GetArrayLayers() == 1 && Is1DOr2D(texture->GetDimension())) {
                 gl.CompressedTexSubImage2D(target, destination.mipLevel, x, y, width, height,
                                            format.internalFormat, imageSize, data);
             } else {
@@ -1281,8 +1280,7 @@ void DoTexSubImage(const OpenGLFunctions& gl,
             gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT, 0);
             gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_DEPTH, 0);
         } else {
-            if (texture->GetArrayLayers() == 1 &&
-                texture->GetDimension() == wgpu::TextureDimension::e2D) {
+            if (texture->GetArrayLayers() == 1 && Is1DOr2D(texture->GetDimension())) {
                 const uint8_t* d = static_cast<const uint8_t*>(data);
 
                 for (; y < destination.origin.y + copySize.height; y += blockInfo.height) {
@@ -1315,8 +1313,7 @@ void DoTexSubImage(const OpenGLFunctions& gl,
         if (dataLayout.bytesPerRow % blockInfo.byteSize == 0) {
             gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
                            dataLayout.bytesPerRow / blockInfo.byteSize * blockInfo.width);
-            if (texture->GetArrayLayers() == 1 &&
-                texture->GetDimension() == wgpu::TextureDimension::e2D) {
+            if (texture->GetArrayLayers() == 1 && Is1DOr2D(texture->GetDimension())) {
                 gl.TexSubImage2D(target, destination.mipLevel, x, y, width, height, format.format,
                                  format.type, data);
             } else {
@@ -1327,8 +1324,7 @@ void DoTexSubImage(const OpenGLFunctions& gl,
             }
             gl.PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
         } else {
-            if (texture->GetArrayLayers() == 1 &&
-                texture->GetDimension() == wgpu::TextureDimension::e2D) {
+            if (texture->GetArrayLayers() == 1 && Is1DOr2D(texture->GetDimension())) {
                 const uint8_t* d = static_cast<const uint8_t*>(data);
                 for (; y < destination.origin.y + height; ++y) {
                     gl.TexSubImage2D(target, destination.mipLevel, x, y, width, 1, format.format,
