@@ -202,7 +202,7 @@ class BuilderImpl {
   private:
     enum class ControlFlags { kNone, kExcludeSwitch };
 
-    void BranchTo(ir::FlowNode* node);
+    void BranchTo(ir::FlowNode* node, utils::VectorRef<Value*> args = {});
     void BranchToIfNeeded(ir::FlowNode* node);
 
     FlowNode* FindEnclosingControl(ControlFlags flags);

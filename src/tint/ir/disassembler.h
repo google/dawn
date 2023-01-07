@@ -17,6 +17,7 @@
 
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "src/tint/ir/flow_node.h"
@@ -46,11 +47,14 @@ class Disassembler {
   private:
     std::ostream& Indent();
     void Walk(const FlowNode* node);
+    size_t GetIdForNode(const FlowNode* node);
 
     const Module& mod_;
     std::stringstream out_;
     std::unordered_set<const FlowNode*> visited_;
     std::unordered_set<const FlowNode*> stop_nodes_;
+    std::unordered_map<const FlowNode*, size_t> flow_node_to_id_;
+    size_t next_node_id_ = 0;
     uint32_t indent_size_ = 0;
 };
 

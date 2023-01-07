@@ -17,6 +17,7 @@
 
 #include "src/tint/constant/value.h"
 #include "src/tint/ir/block.h"
+#include "src/tint/ir/branch.h"
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/value.h"
 
@@ -39,7 +40,7 @@ class Switch : public Castable<Switch, FlowNode> {
         /// The case selector for this node
         utils::Vector<CaseSelector, 4> selectors;
         /// The start block for the case block.
-        Block* start_target;
+        Branch start = {};
     };
 
     /// Constructor
@@ -47,7 +48,7 @@ class Switch : public Castable<Switch, FlowNode> {
     ~Switch() override;
 
     /// The switch merge target
-    Block* merge_target;
+    Branch merge = {};
 
     /// The switch case statements
     utils::Vector<Case, 4> cases;

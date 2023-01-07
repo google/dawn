@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_IR_IF_H_
 #define SRC_TINT_IR_IF_H_
 
+#include "src/tint/ir/branch.h"
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/value.h"
 
@@ -33,12 +34,12 @@ class If : public Castable<If, FlowNode> {
     ~If() override;
 
     /// The true branch block
-    Block* true_target = nullptr;
+    Branch true_ = {};
     /// The false branch block
-    Block* false_target = nullptr;
+    Branch false_ = {};
     /// An block to reconvert the true/false barnches. The block always exists, but there maybe no
     /// branches into it. (e.g. if both branches `return`)
-    Block* merge_target = nullptr;
+    Branch merge = {};
     /// Value holding the condition result
     const Value* condition = nullptr;
 };

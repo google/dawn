@@ -16,6 +16,7 @@
 #define SRC_TINT_IR_LOOP_H_
 
 #include "src/tint/ir/block.h"
+#include "src/tint/ir/branch.h"
 #include "src/tint/ir/flow_node.h"
 
 namespace tint::ir {
@@ -28,13 +29,13 @@ class Loop : public Castable<Loop, FlowNode> {
     ~Loop() override;
 
     /// The start block is the first block in a loop.
-    Block* start_target = nullptr;
+    Branch start = {};
     /// The continue target of the block.
-    Block* continuing_target = nullptr;
+    Branch continuing = {};
     /// The loop merge target. If the `loop` does a `return` then this block may not actually
     /// end up in the control flow. We need it if the loop does a `break` we know where to break
     /// too.
-    Block* merge_target = nullptr;
+    Branch merge = {};
 };
 
 }  // namespace tint::ir

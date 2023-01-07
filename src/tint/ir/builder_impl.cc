@@ -64,7 +64,7 @@ class FlowStackScope {
 };
 
 bool IsBranched(const Block* b) {
-    return b->branch_target != nullptr;
+    return b->branch.target != nullptr;
 }
 
 bool IsConnected(const FlowNode* b) {
@@ -92,11 +92,11 @@ BuilderImpl::BuilderImpl(const Program* program)
 
 BuilderImpl::~BuilderImpl() = default;
 
-void BuilderImpl::BranchTo(FlowNode* node) {
+void BuilderImpl::BranchTo(FlowNode* node, utils::VectorRef<Value*> args) {
     TINT_ASSERT(IR, current_flow_block);
     TINT_ASSERT(IR, !IsBranched(current_flow_block));
 
-    builder.Branch(current_flow_block, node);
+    builder.Branch(current_flow_block, node, args);
     current_flow_block = nullptr;
 }
 
@@ -265,27 +265,27 @@ bool BuilderImpl::EmitIf(const ast::IfStatement* stmt) {
     {
         FlowStackScope scope(this, if_node);
 
-        current_flow_block = if_node->true_target;
+        current_flow_block = if_node->true_.target->As<Block>();
         if (!EmitStatement(stmt->body)) {
             return false;
         }
         // If the true branch did not execute control flow, then go to the merge target
-        BranchToIfNeeded(if_node->merge_target);
+        BranchToIfNeeded(if_node->merge.target);
 
-        current_flow_block = if_node->false_target;
+        current_flow_block = if_node->false_.target->As<Block>();
         if (stmt->else_statement && !EmitStatement(stmt->else_statement)) {
             return false;
         }
         // If the false branch did not execute control flow, then go to the merge target
-        BranchToIfNeeded(if_node->merge_target);
+        BranchToIfNeeded(if_node->merge.target);
     }
     current_flow_block = nullptr;
 
     // If both branches went somewhere, then they both returned, continued or broke. So,
     // there is no need for the if merge-block and there is nothing to branch to the merge
     // block anyway.
-    if (IsConnected(if_node->merge_target)) {
-        current_flow_block = if_node->merge_target;
+    if (IsConnected(if_node->merge.target)) {
+        current_flow_block = if_node->merge.target->As<Block>();
     }
 
     return true;
@@ -301,15 +301,15 @@ bool BuilderImpl::EmitLoop(const ast::LoopStatement* stmt) {
     {
         FlowStackScope scope(this, loop_node);
 
-        current_flow_block = loop_node->start_target;
+        current_flow_block = loop_node->start.target->As<Block>();
         if (!EmitStatement(stmt->body)) {
             return false;
         }
 
         // The current block didn't `break`, `return` or `continue`, go to the continuing block.
-        BranchToIfNeeded(loop_node->continuing_target);
+        BranchToIfNeeded(loop_node->continuing.target);
 
-        current_flow_block = loop_node->continuing_target;
+        current_flow_block = loop_node->continuing.target->As<Block>();
         if (stmt->continuing) {
             if (!EmitStatement(stmt->continuing)) {
                 return false;
@@ -317,13 +317,13 @@ bool BuilderImpl::EmitLoop(const ast::LoopStatement* stmt) {
         }
 
         // Branch back to the start node if the continue target didn't branch out already
-        BranchToIfNeeded(loop_node->start_target);
+        BranchToIfNeeded(loop_node->start.target);
     }
 
     // The loop merge can get disconnected if the loop returns directly, or the continuing target
     // branches, eventually, to the merge, but nothing branched to the continuing target.
-    current_flow_block = loop_node->merge_target;
-    if (!IsConnected(loop_node->merge_target)) {
+    current_flow_block = loop_node->merge.target->As<Block>();
+    if (!IsConnected(loop_node->merge.target)) {
         current_flow_block = nullptr;
     }
     return true;
@@ -332,7 +332,9 @@ bool BuilderImpl::EmitLoop(const ast::LoopStatement* stmt) {
 bool BuilderImpl::EmitWhile(const ast::WhileStatement* stmt) {
     auto* loop_node = builder.CreateLoop();
     // Continue is always empty, just go back to the start
-    builder.Branch(loop_node->continuing_target, loop_node->start_target);
+    TINT_ASSERT(IR, loop_node->continuing.target->Is<Block>());
+    builder.Branch(loop_node->continuing.target->As<Block>(), loop_node->start.target,
+                   utils::Empty);
 
     BranchTo(loop_node);
 
@@ -341,7 +343,7 @@ bool BuilderImpl::EmitWhile(const ast::WhileStatement* stmt) {
     {
         FlowStackScope scope(this, loop_node);
 
-        current_flow_block = loop_node->start_target;
+        current_flow_block = loop_node->start.target->As<Block>();
 
         // Emit the while condition into the start target of the loop
         auto reg = EmitExpression(stmt->condition);
@@ -351,28 +353,33 @@ bool BuilderImpl::EmitWhile(const ast::WhileStatement* stmt) {
 
         // Create an `if (cond) {} else {break;}` control flow
         auto* if_node = builder.CreateIf();
-        builder.Branch(if_node->true_target, if_node->merge_target);
-        builder.Branch(if_node->false_target, loop_node->merge_target);
+        TINT_ASSERT(IR, if_node->true_.target->Is<Block>());
+        builder.Branch(if_node->true_.target->As<Block>(), if_node->merge.target, utils::Empty);
+
+        TINT_ASSERT(IR, if_node->false_.target->Is<Block>());
+        builder.Branch(if_node->false_.target->As<Block>(), loop_node->merge.target, utils::Empty);
         if_node->condition = reg.Get();
 
         BranchTo(if_node);
 
-        current_flow_block = if_node->merge_target;
+        current_flow_block = if_node->merge.target->As<Block>();
         if (!EmitStatement(stmt->body)) {
             return false;
         }
 
-        BranchToIfNeeded(loop_node->continuing_target);
+        BranchToIfNeeded(loop_node->continuing.target);
     }
     // The while loop always has a path to the merge target as the break statement comes before
     // anything inside the loop.
-    current_flow_block = loop_node->merge_target;
+    current_flow_block = loop_node->merge.target->As<Block>();
     return true;
 }
 
 bool BuilderImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     auto* loop_node = builder.CreateLoop();
-    builder.Branch(loop_node->continuing_target, loop_node->start_target);
+    TINT_ASSERT(IR, loop_node->continuing.target->Is<Block>());
+    builder.Branch(loop_node->continuing.target->As<Block>(), loop_node->start.target,
+                   utils::Empty);
 
     if (stmt->initializer) {
         // Emit the for initializer before branching to the loop
@@ -388,7 +395,7 @@ bool BuilderImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     {
         FlowStackScope scope(this, loop_node);
 
-        current_flow_block = loop_node->start_target;
+        current_flow_block = loop_node->start.target->As<Block>();
 
         if (stmt->condition) {
             // Emit the condition into the target target of the loop
@@ -399,22 +406,26 @@ bool BuilderImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
 
             // Create an `if (cond) {} else {break;}` control flow
             auto* if_node = builder.CreateIf();
-            builder.Branch(if_node->true_target, if_node->merge_target);
-            builder.Branch(if_node->false_target, loop_node->merge_target);
+            TINT_ASSERT(IR, if_node->true_.target->Is<Block>());
+            builder.Branch(if_node->true_.target->As<Block>(), if_node->merge.target, utils::Empty);
+
+            TINT_ASSERT(IR, if_node->false_.target->Is<Block>());
+            builder.Branch(if_node->false_.target->As<Block>(), loop_node->merge.target,
+                           utils::Empty);
             if_node->condition = reg.Get();
 
             BranchTo(if_node);
-            current_flow_block = if_node->merge_target;
+            current_flow_block = if_node->merge.target->As<Block>();
         }
 
         if (!EmitStatement(stmt->body)) {
             return false;
         }
 
-        BranchToIfNeeded(loop_node->continuing_target);
+        BranchToIfNeeded(loop_node->continuing.target);
 
         if (stmt->continuing) {
-            current_flow_block = loop_node->continuing_target;
+            current_flow_block = loop_node->continuing.target->As<Block>();
             if (!EmitStatement(stmt->continuing)) {
                 return false;
             }
@@ -422,7 +433,7 @@ bool BuilderImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     }
     // The while loop always has a path to the merge target as the break statement comes before
     // anything inside the loop.
-    current_flow_block = loop_node->merge_target;
+    current_flow_block = loop_node->merge.target->As<Block>();
     return true;
 }
 
@@ -458,24 +469,29 @@ bool BuilderImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
             if (!EmitStatement(c->Body()->Declaration())) {
                 return false;
             }
-            BranchToIfNeeded(switch_node->merge_target);
+            BranchToIfNeeded(switch_node->merge.target);
         }
     }
     current_flow_block = nullptr;
 
-    if (IsConnected(switch_node->merge_target)) {
-        current_flow_block = switch_node->merge_target;
+    if (IsConnected(switch_node->merge.target)) {
+        current_flow_block = switch_node->merge.target->As<Block>();
     }
 
     return true;
 }
 
-bool BuilderImpl::EmitReturn(const ast::ReturnStatement*) {
-    // TODO(dsinclair): Emit the return value. Need to determine how we want to
-    // emit this. Emit a `return_value %yy` instruction? There is no `return`
-    // instruction as we just branch.
+bool BuilderImpl::EmitReturn(const ast::ReturnStatement* stmt) {
+    utils::Vector<Value*, 1> ret_value;
+    if (stmt->value) {
+        auto ret = EmitExpression(stmt->value);
+        if (!ret) {
+            return false;
+        }
+        ret_value.Push(ret.Get());
+    }
 
-    BranchTo(current_function_->end_target);
+    BranchTo(current_function_->end_target, std::move(ret_value));
     return true;
 }
 
@@ -484,9 +500,9 @@ bool BuilderImpl::EmitBreak(const ast::BreakStatement*) {
     TINT_ASSERT(IR, current_control);
 
     if (auto* c = current_control->As<Loop>()) {
-        BranchTo(c->merge_target);
+        BranchTo(c->merge.target);
     } else if (auto* s = current_control->As<Switch>()) {
-        BranchTo(s->merge_target);
+        BranchTo(s->merge.target);
     } else {
         TINT_UNREACHABLE(IR, diagnostics_);
         return false;
@@ -500,7 +516,7 @@ bool BuilderImpl::EmitContinue(const ast::ContinueStatement*) {
     TINT_ASSERT(IR, current_control);
 
     if (auto* c = current_control->As<Loop>()) {
-        BranchTo(c->continuing_target);
+        BranchTo(c->continuing.target);
     } else {
         TINT_UNREACHABLE(IR, diagnostics_);
     }
@@ -528,17 +544,17 @@ bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
 
     auto* loop = current_control->As<Loop>();
 
-    current_flow_block = if_node->true_target;
-    BranchTo(loop->merge_target);
+    current_flow_block = if_node->true_.target->As<Block>();
+    BranchTo(loop->merge.target);
 
-    current_flow_block = if_node->false_target;
-    BranchTo(if_node->merge_target);
+    current_flow_block = if_node->false_.target->As<Block>();
+    BranchTo(if_node->merge.target);
 
-    current_flow_block = if_node->merge_target;
+    current_flow_block = if_node->merge.target->As<Block>();
 
     // The `break-if` has to be the last item in the continuing block. The false branch of the
     // `break-if` will always take us back to the start of the loop.
-    BranchTo(loop->start_target);
+    BranchTo(loop->start.target);
 
     return true;
 }
