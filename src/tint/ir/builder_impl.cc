@@ -25,13 +25,18 @@
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/function.h"
+#include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/int_literal_expression.h"
 #include "src/tint/ast/literal_expression.h"
 #include "src/tint/ast/loop_statement.h"
+#include "src/tint/ast/override.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/statement.h"
 #include "src/tint/ast/static_assert.h"
+#include "src/tint/ast/struct.h"
+#include "src/tint/ast/struct_member_align_attribute.h"
+#include "src/tint/ast/struct_member_size_attribute.h"
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/while_statement.h"
@@ -133,14 +138,23 @@ ResultType BuilderImpl::Build() {
     for (auto* decl : sem->DependencyOrderedDeclarations()) {
         bool ok = tint::Switch(
             decl,  //
-            // [&](const ast::Struct* str) { },
+            [&](const ast::Struct*) {
+                // Will be encoded into the `type::Struct` when used. We will then hoist all
+                // used structs up to module scope when converting IR.
+                return true;
+            },
             [&](const ast::Alias*) {
                 // Folded away and doesn't appear in the IR.
                 return true;
             },
-            // [&](const ast::Variable* var) { },
+            // [&](const ast::Variable* var) {
+            // TODO(dsinclair): Implement
+            // },
             [&](const ast::Function* func) { return EmitFunction(func); },
-            // [&](const ast::Enable*) { },
+            // [&](const ast::Enable*) {
+            // TODO(dsinclair): Implement? I think these need to be passed along so further stages
+            // know what is enabled.
+            // },
             [&](const ast::StaticAssert*) {
                 // Evaluated by the resolver, drop from the IR.
                 return true;
@@ -216,14 +230,22 @@ bool BuilderImpl::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) 
 bool BuilderImpl::EmitStatement(const ast::Statement* stmt) {
     return tint::Switch(
         stmt,
-        // [&](const ast::AssignmentStatement* a) { },
+        // [&](const ast::AssignmentStatement* a) {
+        // TODO(dsinclair): Implement
+        // },
         [&](const ast::BlockStatement* b) { return EmitBlock(b); },
         [&](const ast::BreakStatement* b) { return EmitBreak(b); },
         [&](const ast::BreakIfStatement* b) { return EmitBreakIf(b); },
-        // [&](const ast::CallStatement* c) { },
-        // [&](const ast::CompoundAssignmentStatement* c) { },
+        // [&](const ast::CallStatement* c) {
+        // TODO(dsinclair): Implement
+        // },
+        // [&](const ast::CompoundAssignmentStatement* c) {
+        // TODO(dsinclair): Implement
+        // },
         [&](const ast::ContinueStatement* c) { return EmitContinue(c); },
-        // [&](const ast::DiscardStatement* d) { },
+        // [&](const ast::DiscardStatement* d) {
+        // TODO(dsinclair): Implement
+        // },
         [&](const ast::IfStatement* i) { return EmitIf(i); },
         [&](const ast::LoopStatement* l) { return EmitLoop(l); },
         [&](const ast::ForLoopStatement* l) { return EmitForLoop(l); },
@@ -565,15 +587,27 @@ bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
 utils::Result<Value*> BuilderImpl::EmitExpression(const ast::Expression* expr) {
     return tint::Switch(
         expr,
-        // [&](const ast::IndexAccessorExpression* a) { return EmitIndexAccessor(a); },
+        // [&](const ast::IndexAccessorExpression* a) {
+        // TODO(dsinclair): Implement
+        // },
         [&](const ast::BinaryExpression* b) { return EmitBinary(b); },
         [&](const ast::BitcastExpression* b) { return EmitBitcast(b); },
-        // [&](const ast::CallExpression* c) { return EmitCall(c); },
-        // [&](const ast::IdentifierExpression* i) { return EmitIdentifier(i); },
+        // [&](const ast::CallExpression* c) {
+        // TODO(dsinclair): Implement
+        // },
+        // [&](const ast::IdentifierExpression* i) {
+        // TODO(dsinclair): Implement
+        // },
         [&](const ast::LiteralExpression* l) { return EmitLiteral(l); },
-        // [&](const ast::MemberAccessorExpression* m) { return EmitMemberAccessor(m); },
-        // [&](const ast::PhonyExpression*) { return true; },
-        // [&](const ast::UnaryOpExpression* u) { return EmitUnaryOp(u); },
+        // [&](const ast::MemberAccessorExpression* m) {
+        // TODO(dsinclair): Implement
+        // },
+        // [&](const ast::PhonyExpression*) {
+        // TODO(dsinclair): Implement. The call may have side effects so has to be made.
+        // },
+        // [&](const ast::UnaryOpExpression* u) {
+        // TODO(dsinclair): Implement
+        // },
         [&](Default) {
             diagnostics_.add_warning(
                 tint::diag::System::IR,
@@ -588,10 +622,22 @@ utils::Result<Value*> BuilderImpl::EmitExpression(const ast::Expression* expr) {
 bool BuilderImpl::EmitVariable(const ast::Variable* var) {
     return tint::Switch(  //
         var,
-        // [&](const ast::Var* var) {},
-        // [&](const ast::Let*) {},
-        // [&](const ast::Override*) { },
-        // [&](const ast::Const* c) { },
+        // [&](const ast::Var* var) {
+        // TODO(dsinclair): Implement
+        // },
+        // [&](const ast::Let*) {
+        // TODO(dsinclair): Implement
+        // },
+        [&](const ast::Override*) {
+            diagnostics_.add_warning(tint::diag::System::IR,
+                                     "found an `Override` variable. The SubstituteOverrides "
+                                     "transform must be run before converting to IR",
+                                     var->source);
+            return false;
+        },
+        // [&](const ast::Const* c) {
+        // TODO(dsinclair): Implement
+        // },
         [&](Default) {
             diagnostics_.add_warning(tint::diag::System::IR,
                                      "unknown variable: " + std::string(var->TypeInfo().name),
@@ -729,19 +775,53 @@ bool BuilderImpl::EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs) 
 bool BuilderImpl::EmitAttribute(const ast::Attribute* attr) {
     return tint::Switch(  //
         attr,
-        // [&](const ast::WorkgroupAttribute* wg) {},
-        // [&](const ast::StageAttribute* s) {},
-        // [&](const ast::BindingAttribute* b) {},
-        // [&](const ast::GroupAttribute* g) {},
-        // [&](const ast::LocationAttribute* l) {},
-        // [&](const ast::BuiltinAttribute* b) {},
-        // [&](const ast::InterpolateAttribute* i) {},
-        // [&](const ast::InvariantAttribute* i) {},
-        // [&](const ast::IdAttribute* i) {},
-        // [&](const ast::StructMemberSizeAttribute* s) {},
-        // [&](const ast::StructMemberAlignAttribute* a) {},
-        // [&](const ast::StrideAttribute* s) {}
-        // [&](const ast::InternalAttribute *i) {},
+        // [&](const ast::WorkgroupAttribute* wg) {
+        // TODO(dsinclair): Implement
+        // },
+        // [&](const ast::StageAttribute* s) {
+        // TODO(dsinclair): Implement
+        // },
+        // [&](const ast::BindingAttribute* b) {
+        // TODO(dsinclair): Implement
+        // },
+        // [&](const ast::GroupAttribute* g) {
+        // TODO(dsinclair): Implement
+        // },
+        // [&](const ast::LocationAttribute* l) {
+        // TODO(dsinclair): Implement
+        // },
+        // [&](const ast::BuiltinAttribute* b) {
+        // TODO(dsinclair): Implement
+        // },
+        // [&](const ast::InterpolateAttribute* i) {
+        // TODO(dsinclair): Implement
+        // },
+        // [&](const ast::InvariantAttribute* i) {
+        // TODO(dsinclair): Implement
+        // },
+        [&](const ast::IdAttribute*) {
+            diagnostics_.add_warning(tint::diag::System::IR,
+                                     "found an `Id` attribute. The SubstituteOverrides transform "
+                                     "must be run before converting to IR",
+                                     attr->source);
+            return false;
+        },
+        [&](const ast::StructMemberSizeAttribute*) {
+            TINT_ICE(IR, diagnostics_)
+                << "StructMemberSizeAttribute encountered during IR conversion";
+            return false;
+        },
+        [&](const ast::StructMemberAlignAttribute*) {
+            TINT_ICE(IR, diagnostics_)
+                << "StructMemberAlignAttribute encountered during IR conversion";
+            return false;
+        },
+        // [&](const ast::StrideAttribute* s) {
+        // TODO(dsinclair): Implement
+        // },
+        // [&](const ast::InternalAttribute *i) {
+        // TODO(dsinclair): Implement
+        // },
         [&](Default) {
             diagnostics_.add_warning(tint::diag::System::IR,
                                      "unknown attribute: " + std::string(attr->TypeInfo().name),
