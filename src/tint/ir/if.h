@@ -37,7 +37,7 @@ class If : public Castable<If, FlowNode> {
     Branch true_ = {};
     /// The false branch block
     Branch false_ = {};
-    /// An block to reconvert the true/false barnches. The block always exists, but there maybe no
+    /// An block to converge the true/false branches. The block always exists, but there maybe no
     /// branches into it. (e.g. if both branches `return`)
     Branch merge = {};
     /// Value holding the condition result

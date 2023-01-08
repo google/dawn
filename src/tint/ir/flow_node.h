@@ -32,6 +32,9 @@ class FlowNode : public Castable<FlowNode> {
     ///   - Node is a continue target outside control flow (loop that returns)
     utils::Vector<FlowNode*, 2> inbound_branches;
 
+    /// @returns true if this node has no inbound branches
+    bool IsDisconnected() const { return inbound_branches.IsEmpty(); }
+
   protected:
     /// Constructor
     FlowNode();

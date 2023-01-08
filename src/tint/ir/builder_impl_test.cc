@@ -26,8 +26,6 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_BuilderImplTest = TestHelper;
 
 TEST_F(IR_BuilderImplTest, Func) {
-    // func -> start -> end
-
     Func("f", utils::Empty, ty.void_(), utils::Empty);
     auto r = Build();
     ASSERT_TRUE(r) << Error();
@@ -37,13 +35,18 @@ TEST_F(IR_BuilderImplTest, Func) {
     ASSERT_EQ(1u, m.functions.Length());
 
     auto* f = m.functions[0];
-    EXPECT_NE(f->start_target, nullptr);
-    EXPECT_NE(f->end_target, nullptr);
+    ASSERT_NE(f->start_target, nullptr);
+    ASSERT_NE(f->end_target, nullptr);
 
     EXPECT_EQ(1u, f->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, f->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(f->start_target->branch.target, f->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function f
+  %bb1 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, EntryPoint) {
@@ -58,15 +61,9 @@ TEST_F(IR_BuilderImplTest, EntryPoint) {
 }
 
 TEST_F(IR_BuilderImplTest, IfStatement) {
-    // func -> start -> if -> true block
-    //                     -> false block
-    //
-    //   [true block]  -> if merge
-    //   [false block] -> if merge
-    //   [if merge]    -> func end
-    //
     auto* ast_if = If(true, Block(), Else(Block()));
     WrapInFunction(ast_if);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -90,28 +87,31 @@ TEST_F(IR_BuilderImplTest, IfStatement) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, flow);
-    EXPECT_EQ(flow->true_.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(flow->false_.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
 
-    // Check condition
-    ASSERT_TRUE(flow->condition->Is<Constant>());
-    auto* instr = flow->condition->As<Constant>()->value;
-    ASSERT_TRUE(instr->Is<constant::Scalar<bool>>());
-    EXPECT_TRUE(instr->As<constant::Scalar<bool>>()->ValueAs<bool>());
+  %bb2 = if (true)
+    # true branch
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+    # false branch
+    %bb5 = Block
+    BranchTo %bb4 ()
+
+  # if merge
+  %bb4 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, IfStatement_TrueReturns) {
-    // func -> start -> if -> true block
-    //                     -> false block
-    //
-    //   [true block]  -> func end
-    //   [false block] -> if merge
-    //   [if merge]    -> func end
-    //
     auto* ast_if = If(true, Block(Return()));
     WrapInFunction(ast_if);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -135,22 +135,30 @@ TEST_F(IR_BuilderImplTest, IfStatement_TrueReturns) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, flow);
-    EXPECT_EQ(flow->true_.target->As<ir::Block>()->branch.target, func->end_target);
-    EXPECT_EQ(flow->false_.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
+
+  %bb2 = if (true)
+    # true branch
+    %bb3 = Block
+    Return ()
+    # false branch
+    %bb4 = Block
+    BranchTo %bb5 ()
+
+  # if merge
+  %bb5 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, IfStatement_FalseReturns) {
-    // func -> start -> if -> true block
-    //                     -> false block
-    //
-    //   [true block]  -> if merge
-    //   [false block] -> func end
-    //   [if merge]    -> func end
-    //
     auto* ast_if = If(true, Block(), Else(Block(Return())));
     WrapInFunction(ast_if);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -174,22 +182,30 @@ TEST_F(IR_BuilderImplTest, IfStatement_FalseReturns) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, flow);
-    EXPECT_EQ(flow->true_.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(flow->false_.target->As<ir::Block>()->branch.target, func->end_target);
-    EXPECT_EQ(flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
+
+  %bb2 = if (true)
+    # true branch
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+    # false branch
+    %bb5 = Block
+    Return ()
+  # if merge
+  %bb4 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, IfStatement_BothReturn) {
-    // func -> start -> if -> true block
-    //                     -> false block
-    //
-    //   [true block]  -> func end
-    //   [false block] -> func end
-    //   [if merge]    -> nullptr
-    //
     auto* ast_if = If(true, Block(Return()), Else(Block(Return())));
     WrapInFunction(ast_if);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -213,32 +229,27 @@ TEST_F(IR_BuilderImplTest, IfStatement_BothReturn) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, flow);
-    EXPECT_EQ(flow->true_.target->As<ir::Block>()->branch.target, func->end_target);
-    EXPECT_EQ(flow->false_.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
+
+  %bb2 = if (true)
+    # true branch
+    %bb3 = Block
+    Return ()
+    # false branch
+    %bb4 = Block
+    Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, IfStatement_JumpChainToMerge) {
-    // if (true) {
-    //   loop {
-    //     break;
-    //   }
-    // }
-    //
-    // func -> start -> if true
-    //               -> if false
-    //
-    //   [if true] -> loop
-    //   [if false] -> if merge
-    //   [if merge] -> func end
-    //   [loop] ->  loop start
-    //   [loop start] -> loop merge
-    //   [loop continuing] -> loop start
-    //   [loop merge] -> if merge
-    //
     auto* ast_loop = Loop(Block(Break()));
     auto* ast_if = If(true, Block(ast_loop));
     WrapInFunction(ast_if);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -261,26 +272,44 @@ TEST_F(IR_BuilderImplTest, IfStatement_JumpChainToMerge) {
     ASSERT_NE(loop_flow->continuing.target, nullptr);
     ASSERT_NE(loop_flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
 
-    EXPECT_EQ(func->start_target->branch.target, if_flow);
-    EXPECT_EQ(if_flow->true_.target->As<ir::Block>()->branch.target, loop_flow);
-    EXPECT_EQ(loop_flow->start.target->As<ir::Block>()->branch.target, loop_flow->merge.target);
-    EXPECT_EQ(loop_flow->merge.target->As<ir::Block>()->branch.target, if_flow->merge.target);
-    EXPECT_EQ(loop_flow->continuing.target->As<ir::Block>()->branch.target,
-              loop_flow->start.target);
-    EXPECT_EQ(if_flow->false_.target->As<ir::Block>()->branch.target, if_flow->merge.target);
-    EXPECT_EQ(if_flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+  %bb2 = if (true)
+    # true branch
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+    %bb4 = loop
+      # loop start
+      %bb5 = Block
+      BranchTo %bb6 ()
+
+      # loop continuing
+      %bb7 = Block
+      BranchTo %bb5 ()
+
+    # loop merge
+    %bb6 = Block
+    BranchTo %bb8 ()
+
+    # false branch
+    %bb9 = Block
+    BranchTo %bb8 ()
+
+  # if merge
+  %bb8 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, Loop_WithBreak) {
-    // func -> start -> loop -> loop start -> loop merge -> func end
-    //
-    //   [continuing] -> loop start
-    //
     auto* ast_loop = Loop(Block(Break()));
     WrapInFunction(ast_loop);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -304,25 +333,32 @@ TEST_F(IR_BuilderImplTest, Loop_WithBreak) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->As<ir::Block>()->branch.target, flow);
-    EXPECT_EQ(flow->start.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(flow->continuing.target->As<ir::Block>()->branch.target, flow->start.target);
-    EXPECT_EQ(flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
+
+  %bb2 = loop
+    # loop start
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+    # loop continuing
+    %bb5 = Block
+    BranchTo %bb3 ()
+
+  # loop merge
+  %bb4 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
-    // func -> start -> loop -> loop start -> if -> true block
-    //                                           -> false block
-    //
-    //   [if true]  -> loop merge
-    //   [if false] -> if merge
-    //   [if merge] -> loop continuing
-    //   [loop continuing] -> loop start
-    //   [loop merge] -> func end
-    //
     auto* ast_if = If(true, Block(Break()));
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -359,28 +395,45 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, loop_flow);
-    EXPECT_EQ(loop_flow->start.target->As<ir::Block>()->branch.target, if_flow);
-    EXPECT_EQ(if_flow->true_.target->As<ir::Block>()->branch.target, loop_flow->merge.target);
-    EXPECT_EQ(if_flow->false_.target->As<ir::Block>()->branch.target, if_flow->merge.target);
-    EXPECT_EQ(loop_flow->continuing.target->As<ir::Block>()->branch.target,
-              loop_flow->start.target);
-    EXPECT_EQ(loop_flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
+
+  %bb2 = loop
+    # loop start
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+    %bb4 = if (true)
+      # true branch
+      %bb5 = Block
+      BranchTo %bb6 ()
+
+      # false branch
+      %bb7 = Block
+      BranchTo %bb8 ()
+
+    # if merge
+    %bb8 = Block
+    BranchTo %bb9 ()
+
+    # loop continuing
+    %bb9 = Block
+    BranchTo %bb3 ()
+
+  # loop merge
+  %bb6 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
-    // func -> start -> loop -> loop start -> continuing
-    //
-    //   [loop continuing] -> if -> true branch
-    //                           -> false branch
-    //   [if true] -> loop merge
-    //   [if false] -> if merge
-    //   [if merge] -> loop start
-    //   [loop merge] -> func end
-    //
     auto* ast_break_if = BreakIf(true);
     auto* ast_loop = Loop(Block(), Block(ast_break_if));
     WrapInFunction(ast_loop);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -417,30 +470,45 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, loop_flow);
-    EXPECT_EQ(loop_flow->start.target->As<ir::Block>()->branch.target,
-              loop_flow->continuing.target);
-    EXPECT_EQ(loop_flow->continuing.target->As<ir::Block>()->branch.target, break_if_flow);
-    EXPECT_EQ(break_if_flow->true_.target->As<ir::Block>()->branch.target, loop_flow->merge.target);
-    EXPECT_EQ(break_if_flow->false_.target->As<ir::Block>()->branch.target,
-              break_if_flow->merge.target);
-    EXPECT_EQ(break_if_flow->merge.target->As<ir::Block>()->branch.target, loop_flow->start.target);
-    EXPECT_EQ(loop_flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
+
+  %bb2 = loop
+    # loop start
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+    # loop continuing
+    %bb4 = Block
+    BranchTo %bb5 ()
+
+    %bb5 = if (true)
+      # true branch
+      %bb6 = Block
+      BranchTo %bb7 ()
+
+      # false branch
+      %bb8 = Block
+      BranchTo %bb9 ()
+
+    # if merge
+    %bb9 = Block
+    BranchTo %bb3 ()
+
+  # loop merge
+  %bb7 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
-    // func -> start -> loop -> loop start -> if -> true block
-    //                                           -> false block
-    //
-    //   [if true]  -> func end
-    //   [if false] -> if merge
-    //   [if merge] -> loop continuing
-    //   [loop continuing] -> loop start
-    //   [loop merge] -> nullptr
-    //
     auto* ast_if = If(true, Block(Return()));
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -477,43 +545,42 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(loop_flow->start.target->As<ir::Block>()->branch.target, if_flow);
-    EXPECT_EQ(if_flow->true_.target->As<ir::Block>()->branch.target, func->end_target);
-    EXPECT_EQ(if_flow->false_.target->As<ir::Block>()->branch.target, if_flow->merge.target);
-    EXPECT_EQ(loop_flow->continuing.target->As<ir::Block>()->branch.target,
-              loop_flow->start.target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
 
-    EXPECT_EQ(func->start_target->branch.target, ir_loop);
-    EXPECT_EQ(loop_flow->merge.target->As<ir::Block>()->branch.target, nullptr);
+  %bb2 = loop
+    # loop start
+    %bb3 = Block
+    BranchTo %bb4 ()
 
-    // Check condition
-    ASSERT_TRUE(if_flow->condition->Is<Constant>());
-    auto* instr = if_flow->condition->As<Constant>()->value;
-    ASSERT_TRUE(instr->Is<constant::Scalar<bool>>());
-    EXPECT_TRUE(instr->As<constant::Scalar<bool>>()->ValueAs<bool>());
+    %bb4 = if (true)
+      # true branch
+      %bb5 = Block
+      Return ()
+      # false branch
+      %bb6 = Block
+      BranchTo %bb7 ()
+
+    # if merge
+    %bb7 = Block
+    BranchTo %bb8 ()
+
+    # loop continuing
+    %bb8 = Block
+    BranchTo %bb3 ()
+
+  # loop merge
+  # Dead
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
-    // {
-    //   loop {
-    //     return;
-    //     continue;
-    //   }
-    //   if true { return; }
-    // }
-    //
-    // func -> start -> loop -> loop start -> return -> func end
-    //
-    //   [loop continuing] -> loop start
-    //   [loop merge] -> nullptr
-    //
-    // Note, the continue; is here is a dead call, so we won't emit a branch to the continuing block
-    // so the inbound_branches will be zero for continuing.
-    //
-    // The `if` after the `loop` is also eliminated as there is no control-flow path reaching the
-    // block.
     auto* ast_loop = Loop(Block(Return(), Continue()));
     WrapInFunction(ast_loop, If(true, Block(Return())));
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -537,40 +604,35 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(loop_flow->start.target->As<ir::Block>()->branch.target, func->end_target);
-    EXPECT_EQ(loop_flow->continuing.target->As<ir::Block>()->branch.target,
-              loop_flow->start.target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
 
-    EXPECT_EQ(func->start_target->branch.target, ir_loop);
+  %bb2 = loop
+    # loop start
+    %bb3 = Block
+    Return ()
+    # loop continuing
+    %bb4 = Block
+    BranchTo %bb3 ()
+
+  # loop merge
+  # Dead
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
-    // {
-    //   loop {
-    //     return;
-    //     continuing {
-    //       break if true;
-    //     }
-    //   }
-    //   if (true) { return; }
-    // }
-    //
-    // func -> start -> loop -> loop start -> return -> func end
-    //
-    //   [loop continuing] -> break if true
-    //                     -> break if false
-    //   [break if true] -> loop merge
-    //   [break if false] -> if merge
-    //   [break if merge] -> loop start
-    //   [loop merge] -> nullptr
-    //
-    // In this case, the continuing block is dead code, but we don't really know that when parsing
-    // so we end up with a branch into the loop merge target. The loop merge can tell it's dead code
-    // so we can drop the if ater the loop.
+    // Note, even though there is code in the loop merge (specifically, the
+    // `ast_if` below), it doesn't get emitted as there is no way to reach the
+    // loop merge due to the loop itself doing a `return`. This is why the
+    // loop merge gets marked as Dead and the `ast_if` doesn't appear.
     auto* ast_break_if = BreakIf(true);
     auto* ast_loop = Loop(Block(Return()), Block(ast_break_if));
     auto* ast_if = If(true, Block(Return()));
     WrapInFunction(Block(ast_loop, ast_if));
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -607,25 +669,43 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     // This is 1 because only the loop branch happens. The subsequent if return is dead code.
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(loop_flow->start.target->As<ir::Block>()->branch.target, func->end_target);
-    EXPECT_EQ(loop_flow->continuing.target->As<ir::Block>()->branch.target, break_if_flow);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
 
-    EXPECT_EQ(func->start_target->branch.target, ir_loop);
+  %bb2 = loop
+    # loop start
+    %bb3 = Block
+    Return ()
+    # loop continuing
+    %bb4 = Block
+    BranchTo %bb5 ()
+
+    %bb5 = if (true)
+      # true branch
+      %bb6 = Block
+      BranchTo %bb7 ()
+
+      # false branch
+      %bb8 = Block
+      BranchTo %bb9 ()
+
+    # if merge
+    %bb9 = Block
+    BranchTo %bb3 ()
+
+  # loop merge
+  # Dead
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
-    // func -> start -> loop -> loop start -> if -> true branch
-    //                                           -> false branch
-    //
-    //   [if true] -> loop merge
-    //   [if false] -> loop merge
-    //   [if merge] -> nullptr
-    //   [loop continuing] -> loop start
-    //   [loop merge] -> func end
-    //
     auto* ast_if = If(true, Block(Break()), Else(Block(Break())));
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -662,66 +742,37 @@ TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    // Note, the `continue` is dead code because both if branches go out of loop, so it just gets
-    // dropped.
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
 
-    EXPECT_EQ(func->start_target->branch.target, loop_flow);
-    EXPECT_EQ(loop_flow->start.target->As<ir::Block>()->branch.target, if_flow);
-    EXPECT_EQ(if_flow->true_.target->As<ir::Block>()->branch.target, loop_flow->merge.target);
-    EXPECT_EQ(if_flow->false_.target->As<ir::Block>()->branch.target, loop_flow->merge.target);
-    EXPECT_EQ(loop_flow->continuing.target->As<ir::Block>()->branch.target,
-              loop_flow->start.target);
-    EXPECT_EQ(loop_flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+  %bb2 = loop
+    # loop start
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+    %bb4 = if (true)
+      # true branch
+      %bb5 = Block
+      BranchTo %bb6 ()
+
+      # false branch
+      %bb7 = Block
+      BranchTo %bb6 ()
+
+    # loop continuing
+    %bb8 = Block
+    BranchTo %bb3 ()
+
+  # loop merge
+  %bb6 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, Loop_Nested) {
-    // loop {   // loop_a
-    //   loop {  // loop_b
-    //      if (true) { break; }  // if_a
-    //      if (true) { continue; }  // if_b
-    //      continuing {
-    //        loop {  // loop_c
-    //          break;
-    //        }
-    //
-    //        loop {  // loop_d
-    //          continuing {
-    //            break if (true);  // if_c
-    //          }
-    //        }
-    //      }
-    //    }
-    //    if (true) { break; }  // if_d
-    //  }
-    //
-    // func -> start -> loop_a -> loop_a start
-    //
-    //   [loop_a start] -> loop_b
-    //   [loop_b start] -> if_a
-    //   [if_a true]  -> loop_b merge
-    //   [if_a false] -> if_a merge
-    //   [if_a merge] -> if_b
-    //   [if_b true] -> loop_b continuing
-    //   [if_b false] -> if_b merge
-    //   [if_b merge] -> loop_b continug
-    //   [loop_b continuing] -> loop_c
-    //   [loop_c start] -> loop_c merge
-    //   [loop_c continuing] -> loop_c start
-    //   [loop_c merge] -> loop_d
-    //   [loop_d start] -> loop_d continuing
-    //   [loop_d continuing] -> if_c
-    //   [if_c true]  -> loop_d merge
-    //   [if_c false] -> if_c merge
-    //   [if c merge] -> loop_d start
-    //   [loop_d merge] -> loop_b start
-    //   [loop_b merge] -> if_d
-    //   [if_d true]  -> loop_a merge
-    //   [if_d false] -> if_d merge
-    //   [if_d merge] -> loop_a continuing
-    //   [loop_a continuing] -> loop_a start
-    //   [loop_a merge] -> func end
-    //
-
     auto* ast_if_a = If(true, Block(Break()));
     auto* ast_if_b = If(true, Block(Continue()));
     auto* ast_if_c = BreakIf(true);
@@ -734,6 +785,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
     auto* ast_loop_a = Loop(Block(ast_loop_b, ast_if_d));
 
     WrapInFunction(ast_loop_a);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -840,56 +892,122 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, loop_flow_a);
-    EXPECT_EQ(loop_flow_a->start.target->As<ir::Block>()->branch.target, loop_flow_b);
-    EXPECT_EQ(loop_flow_b->start.target->As<ir::Block>()->branch.target, if_flow_a);
-    EXPECT_EQ(if_flow_a->true_.target->As<ir::Block>()->branch.target, loop_flow_b->merge.target);
-    EXPECT_EQ(if_flow_a->false_.target->As<ir::Block>()->branch.target, if_flow_a->merge.target);
-    EXPECT_EQ(if_flow_a->merge.target->As<ir::Block>()->branch.target, if_flow_b);
-    EXPECT_EQ(if_flow_b->true_.target->As<ir::Block>()->branch.target,
-              loop_flow_b->continuing.target);
-    EXPECT_EQ(if_flow_b->false_.target->As<ir::Block>()->branch.target, if_flow_b->merge.target);
-    EXPECT_EQ(if_flow_b->merge.target->As<ir::Block>()->branch.target,
-              loop_flow_b->continuing.target);
-    EXPECT_EQ(loop_flow_b->continuing.target->As<ir::Block>()->branch.target, loop_flow_c);
-    EXPECT_EQ(loop_flow_c->start.target->As<ir::Block>()->branch.target, loop_flow_c->merge.target);
-    EXPECT_EQ(loop_flow_c->continuing.target->As<ir::Block>()->branch.target,
-              loop_flow_c->start.target);
-    EXPECT_EQ(loop_flow_c->merge.target->As<ir::Block>()->branch.target, loop_flow_d);
-    EXPECT_EQ(loop_flow_d->start.target->As<ir::Block>()->branch.target,
-              loop_flow_d->continuing.target);
-    EXPECT_EQ(loop_flow_d->continuing.target->As<ir::Block>()->branch.target, if_flow_c);
-    EXPECT_EQ(if_flow_c->true_.target->As<ir::Block>()->branch.target, loop_flow_d->merge.target);
-    EXPECT_EQ(if_flow_c->false_.target->As<ir::Block>()->branch.target, if_flow_c->merge.target);
-    EXPECT_EQ(if_flow_c->merge.target->As<ir::Block>()->branch.target, loop_flow_d->start.target);
-    EXPECT_EQ(loop_flow_d->merge.target->As<ir::Block>()->branch.target, loop_flow_b->start.target);
-    EXPECT_EQ(loop_flow_b->merge.target->As<ir::Block>()->branch.target, if_flow_d);
-    EXPECT_EQ(if_flow_d->true_.target->As<ir::Block>()->branch.target, loop_flow_a->merge.target);
-    EXPECT_EQ(if_flow_d->false_.target->As<ir::Block>()->branch.target, if_flow_d->merge.target);
-    EXPECT_EQ(if_flow_d->merge.target->As<ir::Block>()->branch.target,
-              loop_flow_a->continuing.target);
-    EXPECT_EQ(loop_flow_a->continuing.target->As<ir::Block>()->branch.target,
-              loop_flow_a->start.target);
-    EXPECT_EQ(loop_flow_a->merge.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
+
+  %bb2 = loop
+    # loop start
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+    %bb4 = loop
+      # loop start
+      %bb5 = Block
+      BranchTo %bb6 ()
+
+      %bb6 = if (true)
+        # true branch
+        %bb7 = Block
+        BranchTo %bb8 ()
+
+        # false branch
+        %bb9 = Block
+        BranchTo %bb10 ()
+
+      # if merge
+      %bb10 = Block
+      BranchTo %bb11 ()
+
+      %bb11 = if (true)
+        # true branch
+        %bb12 = Block
+        BranchTo %bb13 ()
+
+        # false branch
+        %bb14 = Block
+        BranchTo %bb15 ()
+
+      # if merge
+      %bb15 = Block
+      BranchTo %bb13 ()
+
+      # loop continuing
+      %bb13 = Block
+      BranchTo %bb16 ()
+
+      %bb16 = loop
+        # loop start
+        %bb17 = Block
+        BranchTo %bb18 ()
+
+        # loop continuing
+        %bb19 = Block
+        BranchTo %bb17 ()
+
+      # loop merge
+      %bb18 = Block
+      BranchTo %bb20 ()
+
+      %bb20 = loop
+        # loop start
+        %bb21 = Block
+        BranchTo %bb22 ()
+
+        # loop continuing
+        %bb22 = Block
+        BranchTo %bb23 ()
+
+        %bb23 = if (true)
+          # true branch
+          %bb24 = Block
+          BranchTo %bb25 ()
+
+          # false branch
+          %bb26 = Block
+          BranchTo %bb27 ()
+
+        # if merge
+        %bb27 = Block
+        BranchTo %bb21 ()
+
+      # loop merge
+      %bb25 = Block
+      BranchTo %bb5 ()
+
+    # loop merge
+    %bb8 = Block
+    BranchTo %bb28 ()
+
+    %bb28 = if (true)
+      # true branch
+      %bb29 = Block
+      BranchTo %bb30 ()
+
+      # false branch
+      %bb31 = Block
+      BranchTo %bb32 ()
+
+    # if merge
+    %bb32 = Block
+    BranchTo %bb33 ()
+
+    # loop continuing
+    %bb33 = Block
+    BranchTo %bb3 ()
+
+  # loop merge
+  %bb30 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, While) {
-    // {
-    //   while false {
-    //   }
-    // }
-    //
-    // func -> while -> loop_start -> if true
-    //                             -> if false
-    //
-    //   [if true] -> if merge
-    //   [if false] -> while merge
-    //   [if merge] -> loop continuing
-    //   [loop continuing] -> loop start
-    //   [while merge] -> func end
-    //
     auto* ast_while = While(false, Block());
     WrapInFunction(ast_while);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -922,38 +1040,44 @@ TEST_F(IR_BuilderImplTest, While) {
     EXPECT_EQ(1u, if_flow->false_.target->inbound_branches.Length());
     EXPECT_EQ(1u, if_flow->merge.target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, flow);
-    EXPECT_EQ(flow->start.target->As<ir::Block>()->branch.target, if_flow);
-    EXPECT_EQ(if_flow->true_.target->As<ir::Block>()->branch.target, if_flow->merge.target);
-    EXPECT_EQ(if_flow->false_.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(if_flow->merge.target->As<ir::Block>()->branch.target, flow->continuing.target);
-    EXPECT_EQ(flow->continuing.target->As<ir::Block>()->branch.target, flow->start.target);
-    EXPECT_EQ(flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
 
-    // Check condition
-    ASSERT_TRUE(if_flow->condition->Is<Constant>());
-    auto* instr = if_flow->condition->As<Constant>()->value;
-    ASSERT_TRUE(instr->Is<constant::Scalar<bool>>());
-    EXPECT_FALSE(instr->As<constant::Scalar<bool>>()->ValueAs<bool>());
+  %bb2 = loop
+    # loop start
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+    %bb4 = if (false)
+      # true branch
+      %bb5 = Block
+      BranchTo %bb6 ()
+
+      # false branch
+      %bb7 = Block
+      BranchTo %bb8 ()
+
+    # if merge
+    %bb6 = Block
+    BranchTo %bb9 ()
+
+    # loop continuing
+    %bb9 = Block
+    BranchTo %bb3 ()
+
+  # loop merge
+  %bb8 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, While_Return) {
-    // {
-    //   while true {
-    //     return;
-    //   }
-    // }
-    //
-    // func -> while -> if true
-    //                  if false
-    //
-    //   [if true] -> if merge
-    //   [if false] -> while merge
-    //   [if merge] -> func end
-    //   [while merge] -> func end
-    //
     auto* ast_while = While(true, Block(Return()));
     WrapInFunction(ast_while);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -986,13 +1110,37 @@ TEST_F(IR_BuilderImplTest, While_Return) {
     EXPECT_EQ(1u, if_flow->false_.target->inbound_branches.Length());
     EXPECT_EQ(1u, if_flow->merge.target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, flow);
-    EXPECT_EQ(flow->start.target->As<ir::Block>()->branch.target, if_flow);
-    EXPECT_EQ(if_flow->true_.target->As<ir::Block>()->branch.target, if_flow->merge.target);
-    EXPECT_EQ(if_flow->false_.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(if_flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
-    EXPECT_EQ(flow->continuing.target->As<ir::Block>()->branch.target, flow->start.target);
-    EXPECT_EQ(flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
+
+  %bb2 = loop
+    # loop start
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+    %bb4 = if (true)
+      # true branch
+      %bb5 = Block
+      BranchTo %bb6 ()
+
+      # false branch
+      %bb7 = Block
+      BranchTo %bb8 ()
+
+    # if merge
+    %bb6 = Block
+    Return ()
+    # loop continuing
+    %bb9 = Block
+    BranchTo %bb3 ()
+
+  # loop merge
+  %bb8 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 // TODO(dsinclair): Enable when variable declarations and increment are supported
@@ -1011,6 +1159,7 @@ TEST_F(IR_BuilderImplTest, DISABLED_For) {
     //
     auto* ast_for = For(Decl(Var("i", ty.i32())), LessThan("i", 10_a), Increment("i"), Block());
     WrapInFunction(ast_for);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -1043,30 +1192,13 @@ TEST_F(IR_BuilderImplTest, DISABLED_For) {
     EXPECT_EQ(1u, if_flow->false_.target->inbound_branches.Length());
     EXPECT_EQ(1u, if_flow->merge.target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, flow);
-    EXPECT_EQ(flow->start.target->As<ir::Block>()->branch.target, if_flow);
-    EXPECT_EQ(if_flow->true_.target->As<ir::Block>()->branch.target, if_flow->merge.target);
-    EXPECT_EQ(if_flow->false_.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(if_flow->merge.target->As<ir::Block>()->branch.target, flow->continuing.target);
-    EXPECT_EQ(flow->continuing.target->As<ir::Block>()->branch.target, flow->start.target);
-    EXPECT_EQ(flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
-
-    // Check condition
-    ASSERT_TRUE(if_flow->condition->Is<Constant>());
-    auto* instr = if_flow->condition->As<Constant>()->value;
-    ASSERT_TRUE(instr->Is<constant::Scalar<bool>>());
-    EXPECT_FALSE(instr->As<constant::Scalar<bool>>()->ValueAs<bool>());
+    EXPECT_EQ(Disassemble(m), R"()");
 }
 
 TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
-    // for (;;) {
-    //   break;
-    // }
-    //
-    // func -> loop -> loop start -> loop merge -> func end
-    //
     auto* ast_for = For(nullptr, nullptr, nullptr, Block(Break()));
     WrapInFunction(ast_for);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -1089,26 +1221,34 @@ TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
     EXPECT_EQ(1u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(flow->start.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(flow->continuing.target->As<ir::Block>()->branch.target, flow->start.target);
-    EXPECT_EQ(flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
+
+  %bb2 = loop
+    # loop start
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+    # loop continuing
+    %bb5 = Block
+    BranchTo %bb3 ()
+
+  # loop merge
+  %bb4 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, Switch) {
-    // func -> switch -> case 1
-    //                -> case 2
-    //                -> default
-    //
-    //   [case 1] -> switch merge
-    //   [case 2] -> switch merge
-    //   [default] -> switch merge
-    //   [switch merge] -> func end
-    //
     auto* ast_switch = Switch(
         1_i, utils::Vector{Case(utils::Vector{CaseSelector(0_i)}, Block()),
                            Case(utils::Vector{CaseSelector(1_i)}, Block()), DefaultCase(Block())});
 
     WrapInFunction(ast_switch);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -1144,25 +1284,35 @@ TEST_F(IR_BuilderImplTest, Switch) {
     EXPECT_EQ(3u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, ir_switch);
-    EXPECT_EQ(flow->cases[0].start.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(flow->cases[1].start.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(flow->cases[2].start.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
 
-    // Check condition
-    ASSERT_TRUE(flow->condition->Is<Constant>());
-    auto* instr = flow->condition->As<Constant>()->value;
-    ASSERT_TRUE(instr->Is<constant::Scalar<i32>>());
-    EXPECT_EQ(1_i, instr->As<constant::Scalar<i32>>()->ValueAs<i32>());
+  %bb2 = Switch (1)
+    # Case 0
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+    # Case 1
+    %bb5 = Block
+    BranchTo %bb4 ()
+
+    # Case default
+    %bb6 = Block
+    BranchTo %bb4 ()
+
+  # Switch Merge
+  %bb4 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {
-    // func -> switch -> default -> switch merge -> func end
-    //
     auto* ast_switch = Switch(1_i, utils::Vector{DefaultCase(Block())});
-
     WrapInFunction(ast_switch);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -1186,33 +1336,29 @@ TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {
     EXPECT_EQ(1u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, ir_switch);
-    EXPECT_EQ(flow->cases[0].start.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
+
+  %bb2 = Switch (1)
+    # Case default
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+  # Switch Merge
+  %bb4 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, Switch_WithBreak) {
-    // {
-    //   switch(1) {
-    //     case 0: {
-    //       break;
-    //       if true { return;}   // Dead code
-    //     }
-    //     default: {}
-    //   }
-    // }
-    //
-    // func -> switch -> case 1
-    //                -> default
-    //
-    //   [case 1] -> switch merge
-    //   [default] -> switch merge
-    //   [switch merge] -> func end
     auto* ast_switch = Switch(1_i, utils::Vector{Case(utils::Vector{CaseSelector(0_i)},
                                                       Block(Break(), If(true, Block(Return())))),
                                                  DefaultCase(Block())});
-
     WrapInFunction(ast_switch);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -1243,39 +1389,34 @@ TEST_F(IR_BuilderImplTest, Switch_WithBreak) {
     // This is 1 because the if is dead-code eliminated and the return doesn't happen.
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, ir_switch);
-    EXPECT_EQ(flow->cases[0].start.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(flow->cases[1].start.target->As<ir::Block>()->branch.target, flow->merge.target);
-    EXPECT_EQ(flow->merge.target->As<ir::Block>()->branch.target, func->end_target);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
+
+  %bb2 = Switch (1)
+    # Case 0
+    %bb3 = Block
+    BranchTo %bb4 ()
+
+    # Case default
+    %bb5 = Block
+    BranchTo %bb4 ()
+
+  # Switch Merge
+  %bb4 = Block
+  Return ()
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
-    // {
-    //   switch(1) {
-    //     case 0: {
-    //       return;
-    //     }
-    //     default: {
-    //       return;
-    //     }
-    //   }
-    //   if true { return; }  // Dead code
-    // }
-    //
-    // func -> switch -> case 1
-    //                -> default
-    //
-    //   [case 1] -> func end
-    //   [default] -> func end
-    //   [switch merge] -> nullptr
-    //
     auto* ast_switch =
         Switch(1_i, utils::Vector{Case(utils::Vector{CaseSelector(0_i)}, Block(Return())),
                                   DefaultCase(Block(Return()))});
-
     auto* ast_if = If(true, Block(Return()));
-
     WrapInFunction(ast_switch, ast_if);
+
     auto r = Build();
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
@@ -1307,10 +1448,22 @@ TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
     EXPECT_EQ(0u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(func->start_target->branch.target, ir_switch);
-    EXPECT_EQ(flow->cases[0].start.target->As<ir::Block>()->branch.target, func->end_target);
-    EXPECT_EQ(flow->cases[1].start.target->As<ir::Block>()->branch.target, func->end_target);
-    EXPECT_EQ(flow->merge.target->As<ir::Block>()->branch.target, nullptr);
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  BranchTo %bb2 ()
+
+  %bb2 = Switch (1)
+    # Case 0
+    %bb3 = Block
+    Return ()
+    # Case default
+    %bb4 = Block
+    Return ()
+  # Switch Merge
+  # Dead
+FunctionEnd
+
+)");
 }
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_True) {

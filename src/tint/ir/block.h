@@ -31,6 +31,10 @@ class Block : public Castable<Block, FlowNode> {
     Block();
     ~Block() override;
 
+    /// @returns true if this is a dead block. This can happen in the case like a loop merge block
+    /// which is never reached.
+    bool IsDead() const { return branch.target == nullptr; }
+
     /// The node this block branches too.
     Branch branch = {};
 

@@ -68,6 +68,8 @@ void Disassembler::EmitBlockInstructions(const Block* b) {
 }
 
 size_t Disassembler::GetIdForNode(const FlowNode* node) {
+    TINT_ASSERT(IR, node);
+
     auto it = flow_node_to_id_.find(node);
     if (it != flow_node_to_id_.end()) {
         return it->second;
@@ -97,6 +99,12 @@ void Disassembler::Walk(const FlowNode* node) {
             Walk(f->end_target);
         },
         [&](const ir::Block* b) {
+            // If this block is dead, nothing to do
+            if (b->IsDead()) {
+                Indent() << "# Dead" << std::endl;
+                return;
+            }
+
             Indent() << "%bb" << GetIdForNode(b) << " = Block" << std::endl;
             EmitBlockInstructions(b);
 
@@ -113,7 +121,11 @@ void Disassembler::Walk(const FlowNode* node) {
                 }
                 v->ToString(out_, mod_.symbols);
             }
-            out_ << ")" << std::endl << std::endl;
+            out_ << ")" << std::endl;
+
+            if (!b->branch.target->Is<Terminator>()) {
+                out_ << std::endl;
+            }
 
             Walk(b->branch.target);
         },
@@ -128,14 +140,17 @@ void Disassembler::Walk(const FlowNode* node) {
                 for (const auto& c : s->cases) {
                     Indent() << "# Case ";
                     for (const auto& selector : c.selectors) {
+                        if (&selector != &c.selectors.Front()) {
+                            out_ << " ";
+                        }
+
                         if (selector.IsDefault()) {
-                            out_ << "default ";
+                            out_ << "default";
                         } else {
                             selector.val->ToString(out_, mod_.symbols);
                         }
                     }
                     out_ << std::endl;
-                    ScopedIndent case_indent(&indent_size_);
                     Walk(c.start.target);
                 }
             }
@@ -159,8 +174,10 @@ void Disassembler::Walk(const FlowNode* node) {
                 Walk(i->false_.target);
             }
 
-            Indent() << "# if merge" << std::endl;
-            Walk(i->merge.target);
+            if (!i->merge.target->IsDisconnected()) {
+                Indent() << "# if merge" << std::endl;
+                Walk(i->merge.target);
+            }
         },
         [&](const ir::Loop* l) {
             Indent() << "%bb" << GetIdForNode(l) << " = loop" << std::endl;
@@ -174,7 +191,6 @@ void Disassembler::Walk(const FlowNode* node) {
                 }
 
                 Indent() << "# loop continuing" << std::endl;
-                ScopedIndent continuing_indent(&indent_size_);
                 Walk(l->continuing.target);
             }
 

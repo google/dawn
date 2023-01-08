@@ -92,6 +92,13 @@ class TestHelperBase : public BASE, public ProgramBuilder {
         return gen_->FlowNodeForAstNode(node);
     }
 
+    /// @param mod the module
+    /// @returns the disassembly string of the module
+    std::string Disassemble(Module& mod) const {
+        Disassembler d(mod);
+        return d.Disassemble();
+    }
+
     /// @returns the error generated during build, if any
     std::string Error() const { return error_; }
 
