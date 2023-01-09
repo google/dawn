@@ -3914,6 +3914,93 @@ return;
     ASSERT_EQ(expect, got);
 }
 
+TEST_F(SpvParserHandleTest, ImageCoordinateCanBeHoistedVector) {
+    // Demonstrates fix for crbug.com/tint/1712
+    // The problem is the coordinate for an image operation
+    // can be a combinatorial value that has been hoisted out
+    // to a 'var' declaration.
+    //
+    // In this test (and the original case form the bug), the
+    // definition for the value is in an outer construct, and
+    // the image operation using it is in a doubly nested
+    // construct.
+    //
+    // The coordinate handling has to unwrap the ref type it
+    // made for the 'var' declaration.
+    const auto assembly = Preamble() + R"(
+
+OpEntryPoint Fragment %100 "main"
+OpExecutionMode %100 OriginUpperLeft
+OpDecorate %10 DescriptorSet 0
+OpDecorate %10 Binding 0
+OpDecorate %20 DescriptorSet 2
+OpDecorate %20 Binding 1
+
+%void = OpTypeVoid
+%voidfn = OpTypeFunction %void
+
+%bool = OpTypeBool
+%true = OpConstantTrue %bool
+%float = OpTypeFloat 32
+
+%v2float = OpTypeVector %float 2
+%v4float = OpTypeVector %float 4
+
+%v2float_null = OpConstantNull %v2float
+
+%sampler = OpTypeSampler
+%ptr_sampler = OpTypePointer UniformConstant %sampler
+%im_ty = OpTypeImage %float 1D 0 0 0 1 Unknown
+%ptr_im_ty = OpTypePointer UniformConstant %im_ty
+%si_ty = OpTypeSampledImage %im_ty
+
+%10 = OpVariable %ptr_sampler UniformConstant
+%20 = OpVariable %ptr_im_ty UniformConstant
+
+%100 = OpFunction %void None %voidfn
+%entry = OpLabel
+%900 = OpCopyObject %v2float %v2float_null        ; definition here
+OpSelectionMerge %99 None
+OpBranchConditional %true %40 %99
+
+  %40 = OpLabel
+  OpSelectionMerge %80 None
+  OpBranchConditional %true %50 %80
+
+    %50 = OpLabel
+    %sam = OpLoad %sampler %10
+    %im = OpLoad %im_ty %20
+    %sampled_image = OpSampledImage %si_ty %im %sam
+    %result = OpImageSampleImplicitLod %v4float %sampled_image %900 ; usage here
+    OpBranch %80
+
+  %80 = OpLabel
+  OpBranch %99
+
+%99 = OpLabel
+OpReturn
+OpFunctionEnd
+
+  )";
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    EXPECT_TRUE(p->error().empty()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(var x_900 : vec2<f32>;
+x_900 = vec2<f32>();
+if (true) {
+  if (true) {
+    let x_19 : vec4<f32> = textureSample(x_20, x_10, x_900.x);
+  }
+}
+return;
+)";
+    ASSERT_EQ(expect, got);
+}
+
 TEST_F(SpvParserHandleTest, TexelTypeWhenLoop) {
     // Demonstrates fix for crbug.com/tint/1642
     // The problem is the texel value for an image write
