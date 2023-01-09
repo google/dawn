@@ -266,7 +266,7 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,memory_model,* [ Failure ]
 ################################################################################
 crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="comment" [ Failure ]
 crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="eol" [ Failure ]
-crbug.com/tint/0000 webgpu:shader,validation,parse,identifiers:identifiers:* [ Failure ]
+crbug.com/tint/1791 webgpu:shader,validation,parse,identifiers:identifiers:* [ Failure ]
 crbug.com/tint/1771 [ ubuntu ] webgpu:api,validation,compute_pipeline:overrides,workgroup_size,limits,* [ Failure ]
 crbug.com/tint/1771 [ win10 ] webgpu:api,validation,compute_pipeline:overrides,workgroup_size,limits,* [ Failure ]
 
