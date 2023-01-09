@@ -320,6 +320,7 @@ function(common_compile_options TARGET)
       -fno-rtti
 
       -Wno-deprecated-builtins
+      -Wno-unknown-warning-option
     )
 
     if (${DAWN_ENABLE_MSAN})
