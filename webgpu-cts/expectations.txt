@@ -168,10 +168,8 @@ crbug.com/dawn/1357 webgpu:api,operation,shader_module,compilation_info:offset_a
 
 ################################################################################
 # atan2 shader execution failures
-# Very slow, many failing. Skip for now.
-# KEEP
 ################################################################################
-crbug.com/tint/1524 webgpu:shader,execution,expression,call,builtin,atan2:f32:* [ Skip ]
+crbug.com/tint/1524 webgpu:shader,execution,expression,call,builtin,atan2:f32:* [ Failure ]
 
 ################################################################################
 # shader execution failures
