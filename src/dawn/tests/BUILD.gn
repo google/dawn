@@ -301,6 +301,7 @@ dawn_test("dawn_unittests") {
     "unittests/SystemUtilsTests.cpp",
     "unittests/ToBackendTests.cpp",
     "unittests/TypedIntegerTests.cpp",
+    "unittests/UnicodeTests.cpp",
     "unittests/native/BlobTests.cpp",
     "unittests/native/CacheRequestTests.cpp",
     "unittests/native/CommandBufferEncodingTests.cpp",

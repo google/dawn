@@ -299,7 +299,7 @@ ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
 #if TINT_BUILD_WGSL_READER
     tint::Program program = tint::reader::wgsl::Parse(file);
     if (outMessages != nullptr) {
-        outMessages->AddMessages(program.Diagnostics());
+        DAWN_TRY(outMessages->AddMessages(program.Diagnostics()));
     }
     if (!program.IsValid()) {
         return DAWN_VALIDATION_ERROR("Tint WGSL reader failure: %s\n", program.Diagnostics().str());
@@ -316,7 +316,7 @@ ResultOrError<tint::Program> ParseSPIRV(const std::vector<uint32_t>& spirv,
 #if TINT_BUILD_SPV_READER
     tint::Program program = tint::reader::spirv::Parse(spirv);
     if (outMessages != nullptr) {
-        outMessages->AddMessages(program.Diagnostics());
+        DAWN_TRY(outMessages->AddMessages(program.Diagnostics()));
     }
     if (!program.IsValid()) {
         return DAWN_VALIDATION_ERROR("Tint SPIR-V reader failure:\nParser: %s\n",
@@ -789,7 +789,7 @@ MaybeError ValidateWGSLProgramExtension(const DeviceBase* device,
 
     if (hasDisallowedExtension) {
         if (outMessages != nullptr) {
-            outMessages->AddMessages(messages);
+            DAWN_TRY(outMessages->AddMessages(messages));
         }
         return DAWN_MAKE_ERROR(InternalErrorType::Validation,
                                "Shader module uses extension(s) not enabled for its device.");
@@ -983,7 +983,7 @@ ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform
                                            OwnedCompilationMessages* outMessages) {
     tint::transform::Output output = transform->Run(program, inputs);
     if (outMessages != nullptr) {
-        outMessages->AddMessages(output.program.Diagnostics());
+        DAWN_TRY(outMessages->AddMessages(output.program.Diagnostics()));
     }
     DAWN_INVALID_IF(!output.program.IsValid(), "Tint program failure: %s\n",
                     output.program.Diagnostics().str());

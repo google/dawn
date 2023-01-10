@@ -93,7 +93,7 @@ TEST_F(WireShaderModuleTests, GetCompilationInfo) {
     wgpuShaderModuleGetCompilationInfo(shaderModule, ToMockGetCompilationInfoCallback, nullptr);
 
     WGPUCompilationMessage message = {
-        nullptr, "Test Message", WGPUCompilationMessageType_Info, 2, 4, 6, 8};
+        nullptr, "Test Message", WGPUCompilationMessageType_Info, 2, 4, 6, 8, 4, 6, 8};
     WGPUCompilationInfo compilationInfo;
     compilationInfo.nextInChain = nullptr;
     compilationInfo.messageCount = 1;
@@ -133,7 +133,7 @@ TEST_F(WireShaderModuleTests, GetCompilationInfoBeforeDisconnect) {
     wgpuShaderModuleGetCompilationInfo(shaderModule, ToMockGetCompilationInfoCallback, nullptr);
 
     WGPUCompilationMessage message = {
-        nullptr, "Test Message", WGPUCompilationMessageType_Info, 2, 4, 6, 8};
+        nullptr, "Test Message", WGPUCompilationMessageType_Info, 2, 4, 6, 8, 4, 6, 8};
     WGPUCompilationInfo compilationInfo;
     compilationInfo.nextInChain = nullptr;
     compilationInfo.messageCount = 1;
@@ -193,7 +193,7 @@ TEST_F(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDisconnect) 
                                        &testData);
 
     WGPUCompilationMessage message = {
-        nullptr, "Test Message", WGPUCompilationMessageType_Info, 2, 4, 6, 8};
+        nullptr, "Test Message", WGPUCompilationMessageType_Info, 2, 4, 6, 8, 4, 6, 8};
     WGPUCompilationInfo compilationInfo;
     compilationInfo.nextInChain = nullptr;
     compilationInfo.messageCount = 1;
@@ -220,7 +220,7 @@ TEST_F(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDestruction)
                                        &testData);
 
     WGPUCompilationMessage message = {
-        nullptr, "Test Message", WGPUCompilationMessageType_Info, 2, 4, 6, 8};
+        nullptr, "Test Message", WGPUCompilationMessageType_Info, 2, 4, 6, 8, 4, 6, 8};
     WGPUCompilationInfo compilationInfo;
     compilationInfo.nextInChain = nullptr;
     compilationInfo.messageCount = 1;

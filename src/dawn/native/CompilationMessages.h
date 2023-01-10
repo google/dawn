@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 
+#include "dawn/native/Error.h"
 #include "dawn/native/dawn_platform.h"
 
 #include "dawn/common/NonCopyable.h"
@@ -28,6 +29,8 @@ class List;
 }  // namespace tint::diag
 
 namespace dawn::native {
+
+ResultOrError<uint64_t> CountUTF16CodeUnitsFromUTF8String(const std::string_view& utf8String);
 
 class OwnedCompilationMessages : public NonCopyable {
   public:
@@ -41,14 +44,14 @@ class OwnedCompilationMessages : public NonCopyable {
         uint64_t linePos = 0,
         uint64_t offset = 0,
         uint64_t length = 0);
-    void AddMessages(const tint::diag::List& diagnostics);
+    MaybeError AddMessages(const tint::diag::List& diagnostics);
     void ClearMessages();
 
     const WGPUCompilationInfo* GetCompilationInfo();
     const std::vector<std::string>& GetFormattedTintMessages();
 
   private:
-    void AddMessage(const tint::diag::Diagnostic& diagnostic);
+    MaybeError AddMessage(const tint::diag::Diagnostic& diagnostic);
     void AddFormattedTintMessages(const tint::diag::List& diagnostics);
 
     WGPUCompilationInfo mCompilationInfo;
