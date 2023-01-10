@@ -90,7 +90,7 @@ const (
 type dawnNodeFlags []string
 
 func (f *dawnNodeFlags) String() string {
-	return fmt.Sprint(strings.Join(*f, ""))
+	return strings.Join(*f, "")
 }
 
 func (f *dawnNodeFlags) Set(value string) error {
@@ -129,8 +129,10 @@ func run() error {
 		backendDefault = "vulkan"
 	}
 
+	unrollConstEvalLoopsDefault := runtime.GOOS != "windows"
+
 	var dawnNode, cts, node, npx, resultsPath, expectationsPath, logFilename, backend, coverageFile string
-	var printStdout, verbose, isolated, build, dumpShaders, genCoverage bool
+	var printStdout, verbose, isolated, build, dumpShaders, unrollConstEvalLoops, genCoverage bool
 	var numRunners int
 	var flags dawnNodeFlags
 	flag.StringVar(&dawnNode, "dawn-node", "", "path to dawn.node module")
@@ -150,6 +152,7 @@ func run() error {
 	flag.StringVar(&backend, "backend", backendDefault, "backend to use: default|null|webgpu|d3d11|d3d12|metal|vulkan|opengl|opengles."+
 		" set to 'vulkan' if VK_ICD_FILENAMES environment variable is set, 'default' otherwise")
 	flag.BoolVar(&dumpShaders, "dump-shaders", false, "dump WGSL shaders. Enables --verbose")
+	flag.BoolVar(&unrollConstEvalLoops, "unroll-const-eval-loops", unrollConstEvalLoopsDefault, "unroll loops in const-eval tests")
 	flag.BoolVar(&genCoverage, "coverage", false, "displays coverage data. Enables --isolated")
 	flag.StringVar(&coverageFile, "export-coverage", "", "write coverage data to the given path")
 	flag.Parse()
@@ -229,16 +232,17 @@ func run() error {
 	}
 
 	r := runner{
-		numRunners:  numRunners,
-		printStdout: printStdout,
-		verbose:     verbose,
-		node:        node,
-		npx:         npx,
-		dawnNode:    dawnNode,
-		cts:         cts,
-		tmpDir:      filepath.Join(os.TempDir(), "dawn-cts"),
-		flags:       flags,
-		results:     testcaseStatuses{},
+		numRunners:           numRunners,
+		printStdout:          printStdout,
+		verbose:              verbose,
+		node:                 node,
+		npx:                  npx,
+		dawnNode:             dawnNode,
+		cts:                  cts,
+		tmpDir:               filepath.Join(os.TempDir(), "dawn-cts"),
+		unrollConstEvalLoops: unrollConstEvalLoops,
+		flags:                flags,
+		results:              testcaseStatuses{},
 		evalScript: func(main string) string {
 			return fmt.Sprintf(`require('./src/common/tools/setup-ts-in-node.js');require('./src/common/runtime/%v.ts');`, main)
 		},
@@ -411,24 +415,25 @@ func (c *cache) save(path string) error {
 }
 
 type runner struct {
-	numRunners   int
-	printStdout  bool
-	verbose      bool
-	node         string
-	npx          string
-	dawnNode     string
-	cts          string
-	tmpDir       string
-	flags        dawnNodeFlags
-	covEnv       *cov.Env
-	coverageFile string
-	evalScript   func(string) string
-	testcases    []string
-	expectations testcaseStatuses
-	results      testcaseStatuses
-	log          logger
-	stdout       io.WriteCloser
-	colors       bool // Colors enabled?
+	numRunners           int
+	printStdout          bool
+	verbose              bool
+	node                 string
+	npx                  string
+	dawnNode             string
+	cts                  string
+	tmpDir               string
+	unrollConstEvalLoops bool
+	flags                dawnNodeFlags
+	covEnv               *cov.Env
+	coverageFile         string
+	evalScript           func(string) string
+	testcases            []string
+	expectations         testcaseStatuses
+	results              testcaseStatuses
+	log                  logger
+	stdout               io.WriteCloser
+	colors               bool // Colors enabled?
 }
 
 // scanSourceTimestamps scans all the .js and .ts files in all subdirectories of
@@ -653,6 +658,9 @@ func (r *runner) runServer(ctx context.Context, id int, caseIndices <-chan int, 
 		}
 		if r.verbose {
 			args = append(args, "--verbose")
+		}
+		if r.unrollConstEvalLoops {
+			args = append(args, "--unroll-const-eval-loops")
 		}
 		for _, f := range r.flags {
 			args = append(args, "--gpu-provider-flag", f)
@@ -1062,6 +1070,9 @@ func (r *runner) runTestcase(ctx context.Context, query string, profraw string) 
 	}
 	if r.colors {
 		args = append(args, "--colors")
+	}
+	if r.unrollConstEvalLoops {
+		args = append(args, "--unroll-const-eval-loops")
 	}
 	for _, f := range r.flags {
 		args = append(args, "--gpu-provider-flag", f)
