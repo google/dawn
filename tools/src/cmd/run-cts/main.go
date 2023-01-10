@@ -131,8 +131,8 @@ func run() error {
 
 	unrollConstEvalLoopsDefault := runtime.GOOS != "windows"
 
-	var dawnNode, cts, node, npx, resultsPath, expectationsPath, logFilename, backend, coverageFile string
-	var printStdout, verbose, isolated, build, dumpShaders, unrollConstEvalLoops, genCoverage bool
+	var dawnNode, cts, node, npx, resultsPath, expectationsPath, logFilename, backend, adapterName, coverageFile string
+	var verbose, isolated, build, dumpShaders, unrollConstEvalLoops, genCoverage bool
 	var numRunners int
 	var flags dawnNodeFlags
 	flag.StringVar(&dawnNode, "dawn-node", "", "path to dawn.node module")
@@ -141,7 +141,6 @@ func run() error {
 	flag.StringVar(&npx, "npx", "", "path to npx executable")
 	flag.StringVar(&resultsPath, "output", "", "path to write test results file")
 	flag.StringVar(&expectationsPath, "expect", "", "path to expectations file")
-	flag.BoolVar(&printStdout, "print-stdout", false, "print the stdout and stderr from each test runner server")
 	flag.BoolVar(&verbose, "verbose", false, "print extra information while testing")
 	flag.BoolVar(&build, "build", true, "attempt to build the CTS before running")
 	flag.BoolVar(&isolated, "isolate", false, "run each test in an isolated process")
@@ -151,6 +150,7 @@ func run() error {
 	flag.Var(&flags, "flag", "flag to pass to dawn-node as flag=value. multiple flags must be passed in individually")
 	flag.StringVar(&backend, "backend", backendDefault, "backend to use: default|null|webgpu|d3d11|d3d12|metal|vulkan|opengl|opengles."+
 		" set to 'vulkan' if VK_ICD_FILENAMES environment variable is set, 'default' otherwise")
+	flag.StringVar(&adapterName, "adapter", "", "name (or substring) of the GPU adapter to use")
 	flag.BoolVar(&dumpShaders, "dump-shaders", false, "dump WGSL shaders. Enables --verbose")
 	flag.BoolVar(&unrollConstEvalLoops, "unroll-const-eval-loops", unrollConstEvalLoopsDefault, "unroll loops in const-eval tests")
 	flag.BoolVar(&genCoverage, "coverage", false, "displays coverage data. Enables --isolated")
@@ -209,10 +209,13 @@ func run() error {
 		}
 	}
 
-	// Forward the backend to use, if specified.
+	// Forward the backend and adapter to use, if specified.
 	if backend != "default" {
 		fmt.Fprintln(stdout, "Forcing backend to", backend)
-		flags = append(flags, fmt.Sprint("dawn-backend=", backend))
+		flags.Set("backend=" + backend)
+	}
+	if adapterName != "" {
+		flags.Set("adapter=" + adapterName)
 	}
 
 	// While running the CTS, always allow unsafe APIs so they can be tested.
@@ -233,7 +236,6 @@ func run() error {
 
 	r := runner{
 		numRunners:           numRunners,
-		printStdout:          printStdout,
 		verbose:              verbose,
 		node:                 node,
 		npx:                  npx,
@@ -416,7 +418,6 @@ func (c *cache) save(path string) error {
 
 type runner struct {
 	numRunners           int
-	printStdout          bool
 	verbose              bool
 	node                 string
 	npx                  string
@@ -657,7 +658,9 @@ func (r *runner) runServer(ctx context.Context, id int, caseIndices <-chan int, 
 			args = append(args, "--colors")
 		}
 		if r.verbose {
-			args = append(args, "--verbose")
+			args = append(args,
+				"--verbose",
+				"--gpu-provider-flag", "verbose=1")
 		}
 		if r.unrollConstEvalLoops {
 			args = append(args, "--unroll-const-eval-loops")
@@ -669,7 +672,7 @@ func (r *runner) runServer(ctx context.Context, id int, caseIndices <-chan int, 
 		cmd := exec.CommandContext(ctx, r.node, args...)
 
 		writer := io.Writer(testCaseLog)
-		if r.printStdout {
+		if r.verbose {
 			pw := &prefixWriter{
 				prefix: fmt.Sprintf("[%d] ", id),
 				writer: r.stdout,
@@ -1065,8 +1068,11 @@ func (r *runner) runTestcase(ctx context.Context, query string, profraw string) 
 		"placeholder-arg",
 		// Actual arguments begin here
 		"--gpu-provider", r.dawnNode,
-		"--verbose",
+		"--verbose", // always required to emit test pass results
 		"--quiet",
+	}
+	if r.verbose {
+		args = append(args, "--gpu-provider-flag", "verbose=1")
 	}
 	if r.colors {
 		args = append(args, "--colors")
