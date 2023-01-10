@@ -99,6 +99,13 @@ crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextur
 crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="2d" [ Failure ]
 
 ################################################################################
+# Large and slow tests on intel-gen-9 win10
+# KEEP
+################################################################################
+crbug.com/1406064 [ intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Slow ]
+crbug.com/1406064 [ intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Slow ]
+
+################################################################################
 # entry_point_name_must_match failures
 ################################################################################
 crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
