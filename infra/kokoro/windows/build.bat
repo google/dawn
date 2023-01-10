@@ -151,8 +151,6 @@ cd /d %SRC_DIR% || goto :error
 rem Run tests with DXC, FXC and Metal validation
 set OLD_PATH=%PATH%
 set PATH=C:\Program Files\Metal Developer Tools\macos\bin;%PATH%
-where metal.exe
-set PATH=%DXC_PATH%;%D3DCOMPILER_PATH%;%OLD_PATH%
 call git bash -- ./test/tint/test-all.sh ../dawn-build/tint.exe --verbose || goto :error
 set PATH=%OLD_PATH%
 @echo off
