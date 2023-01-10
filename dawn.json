@@ -1229,6 +1229,13 @@
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
+            },
+            {
+                "name": "validate texture descriptor",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "descriptor", "type": "texture descriptor", "annotation": "const*"}
+                ]
             }
         ]
     },

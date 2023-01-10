@@ -1386,6 +1386,10 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, const char* message) {
     HandleError(FromWGPUErrorType(type), message);
 }
 
+void DeviceBase::APIValidateTextureDescriptor(const TextureDescriptor* desc) {
+    ConsumedError(ValidateTextureDescriptor(this, desc));
+}
+
 QueueBase* DeviceBase::GetQueue() const {
     ASSERT(mQueue != nullptr);
     return mQueue.Get();

@@ -284,6 +284,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     size_t APIEnumerateFeatures(wgpu::FeatureName* features) const;
     void APIInjectError(wgpu::ErrorType type, const char* message);
     bool APITick();
+    void APIValidateTextureDescriptor(const TextureDescriptor* desc);
 
     void APISetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata);
     void APISetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata);

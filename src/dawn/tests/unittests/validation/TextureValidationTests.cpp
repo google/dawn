@@ -997,4 +997,19 @@ TEST_F(TextureValidationTest, CreationParameterReflectionForCreateErrorTexture) 
     CheckTextureMatchesDescriptor(tex, desc);
 }
 
+// A tiny test that Device::ValidateTextureDescriptor works, under the assumption that all the
+// texture validation logic is implemented through it (so there is no need to re-test every possible
+// failure case).
+TEST_F(TextureValidationTest, APIValidateTextureDescriptor) {
+    wgpu::TextureDescriptor desc;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.size = {1, 1, 1};
+    desc.usage = wgpu::TextureUsage::RenderAttachment;
+
+    device.ValidateTextureDescriptor(&desc);
+
+    desc.size.width = 0;
+    ASSERT_DEVICE_ERROR(device.ValidateTextureDescriptor(&desc));
+}
+
 }  // namespace
