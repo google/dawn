@@ -77,12 +77,12 @@ const char* str(WGPUErrorType ty) {
 }
 
 // There's something broken with Node when attempting to write more than 65536 bytes to cout.
-// Split the string up into writes of 4k chunks .
+// Split the string up into writes of 4k chunks.
 // Likely related: https://github.com/nodejs/node/issues/12921
 void chunkedWrite(const char* msg) {
     while (true) {
         auto n = printf("%.4096s", msg);
-        if (n == 0) {
+        if (n <= 0) {
             break;
         }
         msg += n;
