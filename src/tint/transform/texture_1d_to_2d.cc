@@ -126,7 +126,10 @@ struct Texture1DTo2D::State {
                 return nullptr;
             }
             const auto& signature = builtin->Signature();
-            auto texture = signature.Parameter(sem::ParameterUsage::kTexture);
+            auto* texture = signature.Parameter(sem::ParameterUsage::kTexture);
+            if (!texture) {
+                return nullptr;
+            }
             auto* tex = texture->Type()->As<type::Texture>();
             if (tex->dim() != ast::TextureDimension::k1d) {
                 return nullptr;

@@ -275,5 +275,30 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(Texture1DTo2DTest, TextureAndNonTextureBuiltin) {
+    auto* src = R"(
+@group(0) @binding(0) var tex : texture_1d<i32>;
+
+fn d() {
+  textureLoad(tex, 1, 0);
+  let l = sin(3.0);
+}
+)";
+
+    auto* expect = R"(
+@group(0) @binding(0) var tex : texture_2d<i32>;
+
+fn d() {
+  textureLoad(tex, vec2<i32>(1, 0), 0);
+  let l = sin(3.0);
+}
+)";
+
+    DataMap data;
+    auto got = Run<Texture1DTo2D>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform
