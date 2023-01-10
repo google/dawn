@@ -153,7 +153,7 @@ func run() error {
 	flag.StringVar(&adapterName, "adapter", "", "name (or substring) of the GPU adapter to use")
 	flag.BoolVar(&dumpShaders, "dump-shaders", false, "dump WGSL shaders. Enables --verbose")
 	flag.BoolVar(&unrollConstEvalLoops, "unroll-const-eval-loops", unrollConstEvalLoopsDefault, "unroll loops in const-eval tests")
-	flag.BoolVar(&genCoverage, "coverage", false, "displays coverage data. Enables --isolated")
+	flag.BoolVar(&genCoverage, "coverage", false, "displays coverage data")
 	flag.StringVar(&coverageFile, "export-coverage", "", "write coverage data to the given path")
 	flag.Parse()
 
@@ -258,7 +258,6 @@ func run() error {
 	}
 
 	if genCoverage {
-		isolated = true
 		llvmCov, err := exec.LookPath("llvm-cov")
 		if err != nil {
 			return fmt.Errorf("failed to find LLVM, required for --coverage")
@@ -657,6 +656,9 @@ func (r *runner) runServer(ctx context.Context, id int, caseIndices <-chan int, 
 		if r.colors {
 			args = append(args, "--colors")
 		}
+		if r.covEnv != nil {
+			args = append(args, "--coverage")
+		}
 		if r.verbose {
 			args = append(args,
 				"--verbose",
@@ -720,8 +722,9 @@ func (r *runner) runServer(ctx context.Context, id int, caseIndices <-chan int, 
 		res := result{index: idx, testcase: r.testcases[idx]}
 
 		type Response struct {
-			Status  string
-			Message string
+			Status       string
+			Message      string
+			CoverageData string
 		}
 		postResp, err := http.Post(fmt.Sprintf("http://localhost:%v/run?%v", port, r.testcases[idx]), "", &bytes.Buffer{})
 		if err != nil {
@@ -757,6 +760,17 @@ func (r *runner) runServer(ctx context.Context, id int, caseIndices <-chan int, 
 			default:
 				res.status = fail
 				res.error = fmt.Errorf("unknown status: '%v'", resp.Status)
+			}
+
+			if resp.CoverageData != "" {
+				coverage, covErr := r.covEnv.Import(resp.CoverageData)
+				if covErr != nil {
+					if res.message != "" {
+						res.message += "\n"
+					}
+					res.message += fmt.Sprintf("could not import coverage data from '%v': %v", resp.CoverageData, covErr)
+				}
+				res.coverage = coverage
 			}
 		} else {
 			msg, err := ioutil.ReadAll(postResp.Body)
@@ -824,6 +838,11 @@ func (r *runner) runParallelIsolated(ctx context.Context) error {
 // Once all the results have been printed, a summary will be printed and the
 // function will return.
 func (r *runner) streamResults(ctx context.Context, wg *sync.WaitGroup, results chan result) error {
+	// If the context was already cancelled then just return
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	// Create another goroutine to close the results chan when all the runner
 	// goroutines have finished.
 	start := time.Now()

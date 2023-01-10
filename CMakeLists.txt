@@ -343,6 +343,7 @@ function(common_compile_options TARGET)
   endif()
 
   if (DAWN_EMIT_COVERAGE)
+    target_compile_definitions(${TARGET} PRIVATE "DAWN_EMIT_COVERAGE")
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
         target_compile_options(${TARGET} PRIVATE "--coverage")
         target_link_options(${TARGET} PRIVATE "gcov")
