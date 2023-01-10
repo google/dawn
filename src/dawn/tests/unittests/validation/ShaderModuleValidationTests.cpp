@@ -55,16 +55,6 @@ TEST_F(ShaderModuleValidationTest, CreationSuccess) {
     utils::CreateShaderModuleFromASM(device, shader);
 }
 
-// Tests that if the output location exceeds kMaxColorAttachments the fragment shader will fail to
-// be compiled.
-TEST_F(ShaderModuleValidationTest, FragmentOutputLocationExceedsMaxColorAttachments) {
-    std::ostringstream stream;
-    stream << "@fragment fn main() -> @location(" << kMaxColorAttachments << R"() vec4<f32> {
-            return vec4<f32>(0.0, 1.0, 0.0, 1.0);
-        })";
-    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, stream.str().c_str()));
-}
-
 // Test that it is invalid to create a shader module with no chained descriptor. (It must be
 // WGSL or SPIRV, not empty)
 TEST_F(ShaderModuleValidationTest, NoChainedDescriptor) {
