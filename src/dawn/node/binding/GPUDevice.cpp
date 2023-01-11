@@ -181,7 +181,9 @@ GPUDevice::~GPUDevice() {
 interop::Interface<interop::GPUSupportedFeatures> GPUDevice::getFeatures(Napi::Env env) {
     size_t count = device_.EnumerateFeatures(nullptr);
     std::vector<wgpu::FeatureName> features(count);
-    device_.EnumerateFeatures(&features[0]);
+    if (count > 0) {
+        device_.EnumerateFeatures(features.data());
+    }
     return interop::GPUSupportedFeatures::Create<GPUSupportedFeatures>(env, env,
                                                                        std::move(features));
 }
