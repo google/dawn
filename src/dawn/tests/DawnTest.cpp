@@ -477,14 +477,12 @@ void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo(
                  << properties.deviceID;
 
         // Preparing for outputting hex numbers
-        log << std::showbase << std::hex << std::setfill('0') << std::setw(4)
-
-            << " - \"" << properties.adapterName << "\" - \"" << properties.driverDescription
-            << "\"\n"
+        log << std::showbase << std::hex << std::setfill('0') << std::setw(4) << " - \""
+            << properties.adapterName << "\" - \"" << properties.driverDescription
+            << (properties.selected ? " [Selected]" : "") << "\"\n"
             << "   type: " << properties.AdapterTypeName()
             << ", backend: " << properties.ParamName() << "\n"
-            << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str()
-            << (properties.selected ? " [Selected]" : "") << "\n";
+            << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str() << "\n";
 
         if (strlen(properties.vendorName) || strlen(properties.architecture)) {
             log << "   vendorName: " << properties.vendorName
