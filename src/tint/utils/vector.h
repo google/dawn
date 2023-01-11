@@ -18,7 +18,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <algorithm>
-#include <array>
 #include <iterator>
 #include <ostream>
 #include <utility>
@@ -592,7 +591,7 @@ class Vector {
 
     /// The internal structure for the vector with a small array.
     struct ImplWithSmallArray {
-        std::array<TStorage, N> small_arr;
+        TStorage small_arr[N];
         Slice slice = {small_arr[0].Get(), 0, N};
 
         /// Allocates a new vector of `T` either from #small_arr, or from the heap, then assigns the
