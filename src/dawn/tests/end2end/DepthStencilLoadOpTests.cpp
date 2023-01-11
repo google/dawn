@@ -199,9 +199,6 @@ TEST_P(DepthStencilLoadOpTests, ClearMip1) {
 
 // Clear first mip then the second mip.  Check both mip levels.
 TEST_P(DepthStencilLoadOpTests, ClearBothMip0Then1) {
-    // TODO(crbug.com/dawn/838): Sampling from the non-zero mip does not work.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && GetParam().mCheck == Check::SampleDepth);
-
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[0]).End();
     encoder.BeginRenderPass(&renderPassDescriptors[1]).End();

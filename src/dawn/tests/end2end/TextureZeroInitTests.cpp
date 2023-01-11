@@ -600,10 +600,6 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
 
 // Test that clear state is tracked independently for depth/stencil textures.
 TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
-    // TODO(crbug.com/dawn/704): Readback after clear via stencil copy does not work
-    // on some Intel drivers.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
-
     // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
@@ -766,9 +762,6 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
 TEST_P(TextureZeroInitTest, IndependentDepthStencilCopyAfterDiscard) {
     // TODO(crbug.com/dawn/439): Implement stencil copies on other platforms
     DAWN_SUPPRESS_TEST_IF(!(IsMetal() || IsVulkan() || IsD3D12()));
-
-    // TODO(enga): Figure out why this fails on Metal Intel.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());

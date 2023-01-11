@@ -165,10 +165,6 @@ TEST_P(SubresourceRenderAttachmentTest, StencilTexture) {
     // stencil.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
 
-    // TODO(crbug.com/dawn/704): Readback after clear via stencil copy does not work
-    // on some Intel drivers.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
-
     // TODO(crbug.com/dawn/1497): glReadPixels: GL error: HIGH: Invalid format and type combination.
     DAWN_SUPPRESS_TEST_IF(IsANGLE());
 

@@ -258,12 +258,6 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
 
 // Test copying both aspects in a T2T copy, then copying only stencil.
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencil) {
-    // TODO(crbug.com/dawn/704): Readback after clear via stencil copy does not work
-    // on some Intel drivers.
-    // Maybe has to do with the RenderAttachment usage. Notably, a later test
-    // T2TBothAspectsThenCopyNonRenderableStencil does not use RenderAttachment and works correctly.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
-
     // TODO(crbug.com/dawn/1497): glReadPixels: GL error: HIGH: Invalid format and type combination.
     DAWN_SUPPRESS_TEST_IF(IsANGLE());
 
@@ -317,12 +311,6 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableStencil) {
 // Test that part of a non-renderable, non-zero mip stencil aspect can be copied. Notably,
 // this test has different behavior on some platforms than T2TBothAspectsThenCopyStencil.
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableNonZeroMipStencil) {
-    /// TODO(crbug.com/dawn/704): Readback after clear via stencil copy does not work
-    // on some Intel drivers.
-    // Maybe has to do with the non-zero mip. Notably, a previous test
-    // T2TBothAspectsThenCopyNonRenderableStencil works correctly.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
-
     // TODO(crbug.com/dawn/1497): glReadPixels: GL error: HIGH: Invalid format and type combination.
     DAWN_SUPPRESS_TEST_IF(IsANGLE());
 
@@ -417,14 +405,6 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencilThenDepth) {
 // Test copying both aspects in a T2T copy, then copying depth, then copying stencil
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepthThenStencil) {
     DAWN_TEST_UNSUPPORTED_IF(!IsValidDepthCopyTextureFormat());
-
-    // TODO(crbug.com/dawn/704): Readback after clear via stencil copy does not work
-    // on some Intel drivers.
-    // It seems like the depth readback copy mutates the stencil because the previous
-    // test T2TBothAspectsThenCopyStencil passes.
-    // T2TBothAspectsThenCopyStencilThenDepth which checks stencil first also passes.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
-
     // TODO(crbug.com/dawn/667): Work around the fact that some platforms are unable to read
     // stencil.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
@@ -724,10 +704,6 @@ class StencilCopyTests : public DepthStencilCopyTests {
         // Copies to a single aspect are unsupported on OpenGL.
         DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
         DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
-        // TODO(crbug.com/dawn/704): Readback after clear via stencil copy does not work
-        // on some Intel drivers.
-        DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
         // TODO(crbug.com/dawn/1273): Fails on Win11 with D3D12 debug layer and full validation
         DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());

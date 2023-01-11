@@ -89,13 +89,6 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
         DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::RGBA8Snorm &&
                                  HasToggleEnabled("disable_snorm_read"));
 
-        // TODO(crbug.com/dawn/791): Determine Intel specific platforms this occurs on, and
-        // implement a workaround on all backends (happens on Windows too, but not on our test
-        // machines).
-        DAWN_SUPPRESS_TEST_IF((GetParam().mFormat == wgpu::TextureFormat::Depth32Float ||
-                               GetParam().mFormat == wgpu::TextureFormat::Depth24PlusStencil8) &&
-                              IsMetal() && IsIntel() && GetParam().mMip != 0);
-
         // TODO(crbug.com/dawn/667): ANGLE claims to support NV_read_stencil, but won't read
         // correctly from a DEPTH32F_STENCIL8 texture.
         DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::Depth24PlusStencil8 &&
