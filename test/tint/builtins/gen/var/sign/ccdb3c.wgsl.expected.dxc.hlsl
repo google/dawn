@@ -1,6 +1,6 @@
 void sign_ccdb3c() {
   vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
-  vector<float16_t, 2> res = sign(arg_0);
+  vector<float16_t, 2> res = vector<float16_t, 2>(sign(arg_0));
 }
 
 struct tint_symbol {

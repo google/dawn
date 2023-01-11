@@ -1,6 +1,6 @@
 void sign_dd790e() {
   float arg_0 = 1.0f;
-  float res = sign(arg_0);
+  float res = float(sign(arg_0));
 }
 
 struct tint_symbol {

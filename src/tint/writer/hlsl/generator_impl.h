@@ -244,6 +244,12 @@ class GeneratorImpl : public TextGenerator {
     bool EmitRadiansCall(std::ostream& out,
                          const ast::CallExpression* expr,
                          const sem::Builtin* builtin);
+    /// Handles generating a call to the `sign()` builtin
+    /// @param out the output of the expression stream
+    /// @param call the call semantic node
+    /// @param builtin the semantic information for the builtin
+    /// @returns true if the call expression is emitted
+    bool EmitSignCall(std::ostream& out, const sem::Call* call, const sem::Builtin* builtin);
     /// Handles generating a call to data packing builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression

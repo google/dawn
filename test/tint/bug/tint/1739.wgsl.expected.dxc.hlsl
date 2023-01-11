@@ -31,8 +31,8 @@ RWTexture2D<float4> outImage : register(u1, space0);
 
 float3 gammaCorrection(float3 v, GammaTransferParams params) {
   const bool3 cond = (abs(v) < float3((params.D).xxx));
-  const float3 t_1 = (sign(v) * ((params.C * abs(v)) + params.F));
-  const float3 f = (sign(v) * (pow(((params.A * abs(v)) + params.B), float3((params.G).xxx)) + params.E));
+  const float3 t_1 = (float3(sign(v)) * ((params.C * abs(v)) + params.F));
+  const float3 f = (float3(sign(v)) * (pow(((params.A * abs(v)) + params.B), float3((params.G).xxx)) + params.E));
   return (cond ? t_1 : f);
 }
 

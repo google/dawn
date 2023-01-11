@@ -1,6 +1,6 @@
 void sign_5d283a() {
   vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
-  vector<float16_t, 3> res = sign(arg_0);
+  vector<float16_t, 3> res = vector<float16_t, 3>(sign(arg_0));
 }
 
 struct tint_symbol {

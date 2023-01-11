@@ -1,6 +1,6 @@
 void sign_3233fa() {
   int arg_0 = 1;
-  int res = sign(arg_0);
+  int res = int(sign(arg_0));
 }
 
 struct tint_symbol {

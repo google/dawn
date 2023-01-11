@@ -959,6 +959,9 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
     if (type == sem::BuiltinType::kRadians) {
         return EmitRadiansCall(out, expr, builtin);
     }
+    if (type == sem::BuiltinType::kSign) {
+        return EmitSignCall(out, call, builtin);
+    }
     if (type == sem::BuiltinType::kQuantizeToF16) {
         return EmitQuantizeToF16Call(out, expr, builtin);
     }
@@ -2065,6 +2068,22 @@ bool GeneratorImpl::EmitRadiansCall(std::ostream& out,
                              });
 }
 
+// The HLSL `sign` method always returns an `int` result (scalar or vector). In WGSL the result is
+// expected to be the same type as the argument. This injects a cast to the expected WGSL result
+// type after the call to `sign`.
+bool GeneratorImpl::EmitSignCall(std::ostream& out, const sem::Call* call, const sem::Builtin*) {
+    auto* arg = call->Arguments()[0];
+    if (!EmitType(out, arg->Type(), ast::AddressSpace::kNone, ast::Access::kReadWrite, "")) {
+        return false;
+    }
+    out << "(sign(";
+    if (!EmitExpression(out, arg->Declaration())) {
+        return false;
+    }
+    out << "))";
+    return true;
+}
+
 bool GeneratorImpl::EmitQuantizeToF16Call(std::ostream& out,
                                           const ast::CallExpression* expr,
                                           const sem::Builtin* builtin) {
@@ -2662,7 +2681,6 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
         case sem::BuiltinType::kRefract:
         case sem::BuiltinType::kRound:
         case sem::BuiltinType::kSaturate:
-        case sem::BuiltinType::kSign:
         case sem::BuiltinType::kSin:
         case sem::BuiltinType::kSinh:
         case sem::BuiltinType::kSqrt:

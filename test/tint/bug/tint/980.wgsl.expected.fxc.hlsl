@@ -4,7 +4,7 @@ void set_float3(inout float3 vec, int idx, float val) {
 
 float3 Bad(uint index, float3 rd) {
   float3 normal = (0.0f).xxx;
-  set_float3(normal, index, -(sign(rd[index])));
+  set_float3(normal, index, -(float(sign(rd[index]))));
   return normalize(normal);
 }
 

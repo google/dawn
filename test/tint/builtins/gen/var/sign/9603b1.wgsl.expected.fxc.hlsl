@@ -1,6 +1,6 @@
 void sign_9603b1() {
   int3 arg_0 = (1).xxx;
-  int3 res = sign(arg_0);
+  int3 res = int3(sign(arg_0));
 }
 
 struct tint_symbol {

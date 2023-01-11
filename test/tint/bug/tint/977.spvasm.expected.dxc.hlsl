@@ -21,7 +21,7 @@ float binaryOperation_f1_f1_(inout float a, inout float b) {
     const float x_34 = a;
     const float x_36 = a;
     const float x_38 = b;
-    x_26 = (sign(x_34) * pow(abs(x_36), x_38));
+    x_26 = (float(sign(x_34)) * pow(abs(x_36), x_38));
   }
   const float x_41 = x_26;
   return x_41;

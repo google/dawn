@@ -1,6 +1,6 @@
 void sign_b8f634() {
   float4 arg_0 = (1.0f).xxxx;
-  float4 res = sign(arg_0);
+  float4 res = float4(sign(arg_0));
 }
 
 struct tint_symbol {
