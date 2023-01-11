@@ -1154,7 +1154,7 @@ class Impl : public IntrinsicTable {
     Candidate ScoreOverload(const OverloadInfo* overload,
                             utils::VectorRef<const type::Type*> args,
                             sem::EvaluationStage earliest_eval_stage,
-                            TemplateState templates) const;
+                            const TemplateState& templates) const;
 
     /// Performs overload resolution given the list of candidates, by ranking the conversions of
     /// arguments to the each of the candidate's parameter types.
@@ -1560,7 +1560,7 @@ IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
 Impl::Candidate Impl::ScoreOverload(const OverloadInfo* overload,
                                     utils::VectorRef<const type::Type*> args,
                                     sem::EvaluationStage earliest_eval_stage,
-                                    TemplateState templates) const {
+                                    const TemplateState& in_templates) const {
     // Penalty weights for overload mismatching.
     // This scoring is used to order the suggested overloads in diagnostic on overload mismatch, and
     // has no impact for a correct program.
@@ -1579,6 +1579,10 @@ Impl::Candidate Impl::ScoreOverload(const OverloadInfo* overload,
         score += kMismatchedParamCountPenalty * (std::max(num_parameters, num_arguments) -
                                                  std::min(num_parameters, num_arguments));
     }
+
+    // Make a mutable copy of the input templates so we can implicitly match more templated
+    // arguments.
+    TemplateState templates(in_templates);
 
     // Invoke the matchers for each parameter <-> argument pair.
     // If any arguments cannot be matched, then `score` will be increased.
