@@ -96,12 +96,6 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
                                GetParam().mFormat == wgpu::TextureFormat::Depth24PlusStencil8) &&
                               IsMetal() && IsIntel() && GetParam().mMip != 0);
 
-        // TODO(crbug.com/dawn/1071): Implement a workaround on Intel/Metal backends.
-        DAWN_SUPPRESS_TEST_IF((GetParam().mFormat == wgpu::TextureFormat::R8Unorm ||
-                               GetParam().mFormat == wgpu::TextureFormat::RG8Unorm) &&
-                              GetParam().mMipCount > 1 &&
-                              HasToggleEnabled("disable_r8_rg8_mipmaps"));
-
         // TODO(crbug.com/dawn/667): ANGLE claims to support NV_read_stencil, but won't read
         // correctly from a DEPTH32F_STENCIL8 texture.
         DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::Depth24PlusStencil8 &&

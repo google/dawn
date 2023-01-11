@@ -2201,11 +2201,6 @@ TEST_P(CopyTests_T2T, CopyFromNonZeroMipLevelWithTexelBlockSizeLessThan4Bytes) {
             continue;
         }
 
-        if (HasToggleEnabled("disable_r8_rg8_mipmaps") &&
-            (format == wgpu::TextureFormat::R8Unorm || format == wgpu::TextureFormat::RG8Unorm)) {
-            continue;
-        }
-
         for (uint32_t textureLayer : kTestTextureLayer) {
             const wgpu::Extent3D kUploadSize = {4u, 4u, textureLayer};
 
