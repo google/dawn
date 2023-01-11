@@ -185,6 +185,7 @@ enum class PromiseState {
     Pending,
     Resolved,
     Rejected,
+    Discarded,
 };
 
 namespace detail {
@@ -205,6 +206,12 @@ class PromiseBase {
     void Reject(std::string err) const { Reject(Napi::Error::New(state_->deferred.Env(), err)); }
 
     PromiseState GetState() const { return state_->state; }
+
+    // Place the promise into the Discarded state.
+    // This state will not throw a fatal error if this promise has not been rejected or resolved by
+    // the time it is finalized. This is useful for Node tear-down where the attempting to create
+    // new objects will result in a fatal error.
+    void Discard() { state_->state = PromiseState::Discarded; }
 
   protected:
     void Resolve(Napi::Value value) const {

@@ -174,7 +174,9 @@ GPUDevice::~GPUDevice() {
     // lost_promise_ is left hanging. We'll also not clean up any GPU objects before terminating the
     // process, which is not a good idea.
     if (!destroyed_) {
-        destroy(env_);
+        lost_promise_.Discard();
+        device_.Destroy();
+        destroyed_ = true;
     }
 }
 
