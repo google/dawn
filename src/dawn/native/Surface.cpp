@@ -74,7 +74,8 @@ MaybeError ValidateSurfaceDescriptor(const InstanceBase* instance,
         wgpu::SType::SurfaceDescriptorFromMetalLayer, wgpu::SType::SurfaceDescriptorFromWindowsHWND,
         wgpu::SType::SurfaceDescriptorFromWindowsCoreWindow,
         wgpu::SType::SurfaceDescriptorFromWindowsSwapChainPanel,
-        wgpu::SType::SurfaceDescriptorFromXlibWindow));
+        wgpu::SType::SurfaceDescriptorFromXlibWindow,
+        wgpu::SType::SurfaceDescriptorFromWaylandSurface));
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
     const SurfaceDescriptorFromMetalLayer* metalDesc = nullptr;
@@ -188,6 +189,7 @@ Surface::Surface(InstanceBase* instance, const SurfaceDescriptor* descriptor)
     FindInChain(descriptor->nextInChain, &coreWindowDesc);
     FindInChain(descriptor->nextInChain, &swapChainPanelDesc);
     FindInChain(descriptor->nextInChain, &xDesc);
+    FindInChain(descriptor->nextInChain, &waylandDesc);
     if (metalDesc) {
         mType = Type::MetalLayer;
         mMetalLayer = metalDesc->layer;
