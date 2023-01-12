@@ -69,6 +69,7 @@
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
+#include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
@@ -2289,7 +2290,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     };
 
     auto* texture = arg(Usage::kTexture);
-    if (!texture) {
+    if (TINT_UNLIKELY(!texture)) {
         TINT_ICE(Writer, diagnostics_) << "missing texture argument";
         return false;
     }
@@ -2412,7 +2413,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                 }
             }
 
-            if (num_dimensions > 4) {
+            if (TINT_UNLIKELY(num_dimensions > 4)) {
                 TINT_ICE(Writer, diagnostics_) << "Texture query builtin temporary vector has "
                                                << num_dimensions << " dimensions";
                 return false;
@@ -2446,7 +2447,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                     pre << dims;
                 } else {
                     static constexpr char xyzw[] = {'x', 'y', 'z', 'w'};
-                    if (num_dimensions < 0 || num_dimensions > 4) {
+                    if (TINT_UNLIKELY(num_dimensions < 0 || num_dimensions > 4)) {
                         TINT_ICE(Writer, diagnostics_)
                             << "vector dimensions are " << num_dimensions;
                         return false;
@@ -2553,7 +2554,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     }
 
     auto* param_coords = arg(Usage::kCoords);
-    if (!param_coords) {
+    if (TINT_UNLIKELY(!param_coords)) {
         TINT_ICE(Writer, diagnostics_) << "missing coords argument";
         return false;
     }
@@ -2636,7 +2637,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                 out << "xyz"[i];
             }
         }
-        if (wgsl_ret_width > hlsl_ret_width) {
+        if (TINT_UNLIKELY(wgsl_ret_width > hlsl_ret_width)) {
             TINT_ICE(Writer, diagnostics_)
                 << "WGSL return width (" << wgsl_ret_width << ") is wider than HLSL return width ("
                 << hlsl_ret_width << ") for " << builtin->Type();
@@ -3241,7 +3242,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
         for (auto* var : func->params) {
             auto* sem = builder_.Sem().Get(var);
             auto* type = sem->Type();
-            if (!type->Is<sem::Struct>()) {
+            if (TINT_UNLIKELY(!type->Is<sem::Struct>())) {
                 // ICE likely indicates that the CanonicalizeEntryPointIO transform was
                 // not run, or a builtin parameter was added after it was run.
                 TINT_ICE(Writer, diagnostics_) << "Unsupported non-struct entry point parameter";
@@ -3944,7 +3945,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             const type::Type* base_type = ary;
             std::vector<uint32_t> sizes;
             while (auto* arr = base_type->As<type::Array>()) {
-                if (arr->Count()->Is<type::RuntimeArrayCount>()) {
+                if (TINT_UNLIKELY(arr->Count()->Is<type::RuntimeArrayCount>())) {
                     TINT_ICE(Writer, diagnostics_)
                         << "runtime arrays may only exist in storage buffers, which should have "
                            "been transformed into a ByteAddressBuffer";
@@ -4032,7 +4033,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             return true;
         },
         [&](const type::Texture* tex) {
-            if (tex->Is<type::ExternalTexture>()) {
+            if (TINT_UNLIKELY(tex->Is<type::ExternalTexture>())) {
                 TINT_ICE(Writer, diagnostics_)
                     << "Multiplanar external texture transform was not run.";
                 return false;
@@ -4075,7 +4076,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 
             if (storage) {
                 auto* component = image_format_to_rwtexture_type(storage->texel_format());
-                if (component == nullptr) {
+                if (TINT_UNLIKELY(!component)) {
                     TINT_ICE(Writer, diagnostics_) << "Unsupported StorageTexture TexelFormat: "
                                                    << static_cast<int>(storage->texel_format());
                     return false;
@@ -4090,7 +4091,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                     out << "float4";
                 } else if (subtype->Is<type::I32>()) {
                     out << "int4";
-                } else if (subtype->Is<type::U32>()) {
+                } else if (TINT_LIKELY(subtype->Is<type::U32>())) {
                     out << "uint4";
                 } else {
                     TINT_ICE(Writer, diagnostics_) << "Unsupported multisampled texture type";
@@ -4170,7 +4171,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
                 for (auto* attr : decl->attributes) {
                     if (attr->Is<ast::LocationAttribute>()) {
                         auto& pipeline_stage_uses = str->PipelineStageUses();
-                        if (pipeline_stage_uses.size() != 1) {
+                        if (TINT_UNLIKELY(pipeline_stage_uses.size() != 1)) {
                             TINT_ICE(Writer, diagnostics_) << "invalid entry point IO struct uses";
                         }
 
@@ -4183,8 +4184,8 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
                         } else if (pipeline_stage_uses.count(
                                        type::PipelineStageUsage::kFragmentInput)) {
                             post += " : TEXCOORD" + std::to_string(loc);
-                        } else if (pipeline_stage_uses.count(
-                                       type::PipelineStageUsage::kFragmentOutput)) {
+                        } else if (TINT_LIKELY(pipeline_stage_uses.count(
+                                       type::PipelineStageUsage::kFragmentOutput))) {
                             post += " : SV_Target" + std::to_string(loc);
                         } else {
                             TINT_ICE(Writer, diagnostics_) << "invalid use of location attribute";
@@ -4211,9 +4212,9 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
                         // stricter and therefore provides the necessary guarantees.
                         // See discussion here: https://github.com/gpuweb/gpuweb/issues/893
                         pre += "precise ";
-                    } else if (!attr->IsAnyOf<ast::StructMemberAlignAttribute,
-                                              ast::StructMemberOffsetAttribute,
-                                              ast::StructMemberSizeAttribute>()) {
+                    } else if (TINT_UNLIKELY((!attr->IsAnyOf<ast::StructMemberAlignAttribute,
+                                                             ast::StructMemberOffsetAttribute,
+                                                             ast::StructMemberSizeAttribute>()))) {
                         TINT_ICE(Writer, diagnostics_)
                             << "unhandled struct member attribute: " << attr->Name();
                         return false;

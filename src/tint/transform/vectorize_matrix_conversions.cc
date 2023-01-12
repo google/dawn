@@ -93,7 +93,8 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
         }
 
         // The source and destination type of a matrix conversion must have a same shape.
-        if (!(src_type->rows() == dst_type->rows() && src_type->columns() == dst_type->columns())) {
+        if (TINT_UNLIKELY(!(src_type->rows() == dst_type->rows() &&
+                            src_type->columns() == dst_type->columns()))) {
             TINT_ICE(Transform, b.Diagnostics())
                 << "source and destination matrix has different shape in matrix conversion";
             return nullptr;

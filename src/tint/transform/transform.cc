@@ -65,7 +65,7 @@ void Transform::RemoveStatement(CloneContext& ctx, const ast::Statement* stmt) {
         ctx.Remove(block->Declaration()->statements, stmt);
         return;
     }
-    if (tint::Is<sem::ForLoopStatement>(sem->Parent())) {
+    if (TINT_LIKELY(tint::Is<sem::ForLoopStatement>(sem->Parent()))) {
         ctx.Replace(stmt, static_cast<ast::Expression*>(nullptr));
         return;
     }
@@ -130,11 +130,12 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
             auto* count = ctx.Clone(override->expr->Declaration());
             return ctx.dst->ty.array(el, count, std::move(attrs));
         }
-        if (auto count = a->ConstantCount()) {
-            return ctx.dst->ty.array(el, u32(count.value()), std::move(attrs));
+        auto count = a->ConstantCount();
+        if (TINT_UNLIKELY(!count)) {
+            TINT_ICE(Transform, ctx.dst->Diagnostics()) << type::Array::kErrExpectedConstantCount;
+            return ctx.dst->ty.array(el, u32(1), std::move(attrs));
         }
-        TINT_ICE(Transform, ctx.dst->Diagnostics()) << type::Array::kErrExpectedConstantCount;
-        return ctx.dst->ty.array(el, u32(1), std::move(attrs));
+        return ctx.dst->ty.array(el, u32(count.value()), std::move(attrs));
     }
     if (auto* s = ty->As<sem::Struct>()) {
         return ctx.dst->create<ast::TypeName>(ctx.Clone(s->Declaration()->name));

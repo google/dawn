@@ -218,7 +218,7 @@ struct ArrayLengthFromUniform::State {
             //   arrayLength(&struct_var.array_member)
             //   arrayLength(&array_var)
             auto* param = call_expr->args[0]->As<ast::UnaryOpExpression>();
-            if (!param || param->op != ast::UnaryOp::kAddressOf) {
+            if (TINT_UNLIKELY(!param || param->op != ast::UnaryOp::kAddressOf)) {
                 TINT_ICE(Transform, b.Diagnostics())
                     << "expected form of arrayLength argument to be &array_var or "
                        "&struct_var.array_member";
@@ -229,7 +229,7 @@ struct ArrayLengthFromUniform::State {
                 storage_buffer_expr = accessor->structure;
             }
             auto* storage_buffer_sem = sem.Get<sem::VariableUser>(storage_buffer_expr);
-            if (!storage_buffer_sem) {
+            if (TINT_UNLIKELY(!storage_buffer_sem)) {
                 TINT_ICE(Transform, b.Diagnostics())
                     << "expected form of arrayLength argument to be &array_var or "
                        "&struct_var.array_member";
@@ -238,7 +238,7 @@ struct ArrayLengthFromUniform::State {
 
             // Get the index to use for the buffer size array.
             auto* var = tint::As<sem::GlobalVariable>(storage_buffer_sem->Variable());
-            if (!var) {
+            if (TINT_UNLIKELY(!var)) {
                 TINT_ICE(Transform, b.Diagnostics()) << "storage buffer is not a global variable";
                 break;
             }

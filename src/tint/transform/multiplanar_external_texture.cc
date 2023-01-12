@@ -402,7 +402,7 @@ struct MultiplanarExternalTexture::State {
                                                                   NewBindingSymbols syms) {
         const ast::Expression* plane_0_binding_param = ctx.Clone(expr->args[0]);
 
-        if (expr->args.Length() != 3) {
+        if (TINT_UNLIKELY(expr->args.Length() != 3)) {
             TINT_ICE(Transform, b.Diagnostics())
                 << "expected textureSampleBaseClampToEdge call with a "
                    "texture_external to have 3 parameters, found "
@@ -447,7 +447,7 @@ struct MultiplanarExternalTexture::State {
     /// @param syms the expanded symbols to be used in the new call
     /// @returns a call expression to textureLoadExternal
     const ast::CallExpression* createTextureLoad(const sem::Call* call, NewBindingSymbols syms) {
-        if (call->Arguments().Length() != 2) {
+        if (TINT_UNLIKELY(call->Arguments().Length() != 2)) {
             TINT_ICE(Transform, b.Diagnostics())
                 << "expected textureLoad call with a texture_external to have 2 arguments, found "
                 << call->Arguments().Length() << " arguments";

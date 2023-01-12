@@ -503,7 +503,7 @@ struct DecomposeMemoryAccess::State {
                     auto* i = b.Var(b.Symbols().New("i"), b.Expr(0_u));
                     auto* for_init = b.Decl(i);
                     auto arr_cnt = arr_ty->ConstantCount();
-                    if (!arr_cnt) {
+                    if (TINT_UNLIKELY(!arr_cnt)) {
                         // Non-constant counts should not be possible:
                         // * Override-expression counts can only be applied to workgroup arrays, and
                         //   this method only handles storage and uniform.
@@ -607,7 +607,7 @@ struct DecomposeMemoryAccess::State {
                             auto* i = b.Var(b.Symbols().New("i"), b.Expr(0_u));
                             auto* for_init = b.Decl(i);
                             auto arr_cnt = arr_ty->ConstantCount();
-                            if (!arr_cnt) {
+                            if (TINT_UNLIKELY(!arr_cnt)) {
                                 // Non-constant counts should not be possible:
                                 // * Override-expression counts can only be applied to workgroup
                                 //   arrays, and this method only handles storage and uniform.
@@ -700,7 +700,7 @@ struct DecomposeMemoryAccess::State {
             }
 
             auto* atomic = IntrinsicAtomicFor(ctx.dst, op, el_ty);
-            if (atomic == nullptr) {
+            if (TINT_UNLIKELY(!atomic)) {
                 TINT_ICE(Transform, b.Diagnostics())
                     << "IntrinsicAtomicFor() returned nullptr for op " << op << " and type "
                     << el_ty->TypeInfo().name;

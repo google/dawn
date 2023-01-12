@@ -71,6 +71,7 @@
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/short_name.h"
 #include "src/tint/utils/block_allocator.h"
+#include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
@@ -319,8 +320,8 @@ class DependencyScanner {
             },
             [&](const ast::StaticAssert* assertion) { TraverseExpression(assertion->condition); },
             [&](Default) {
-                if (!stmt->IsAnyOf<ast::BreakStatement, ast::ContinueStatement,
-                                   ast::DiscardStatement>()) {
+                if (TINT_UNLIKELY((!stmt->IsAnyOf<ast::BreakStatement, ast::ContinueStatement,
+                                                  ast::DiscardStatement>()))) {
                     UnhandledNode(diagnostics_, stmt);
                 }
             });
@@ -697,7 +698,7 @@ struct DependencyAnalysis {
 
             sorted_.Add(global->node);
 
-            if (!stack.IsEmpty()) {
+            if (TINT_UNLIKELY(!stack.IsEmpty())) {
                 // Each stack.push() must have a corresponding stack.pop_back().
                 TINT_ICE(Resolver, diagnostics_)
                     << "stack not empty after returning from TraverseDependencies()";
@@ -709,7 +710,8 @@ struct DependencyAnalysis {
     /// of global `from` depending on `to`.
     /// @note will raise an ICE if the edge is not found.
     DependencyInfo DepInfoFor(const Global* from, const Global* to) const {
-        if (auto info = dependency_edges_.Find(DependencyEdge{from, to})) {
+        auto info = dependency_edges_.Find(DependencyEdge{from, to});
+        if (TINT_LIKELY(info)) {
             return *info;
         }
         TINT_ICE(Resolver, diagnostics_)

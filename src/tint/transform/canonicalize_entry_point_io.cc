@@ -354,7 +354,7 @@ struct CanonicalizeEntryPointIO::State {
         // list to pass them through to the inner function.
         utils::Vector<const ast::Expression*, 8> inner_struct_values;
         for (auto* member : str->Members()) {
-            if (member->Type()->Is<sem::Struct>()) {
+            if (TINT_UNLIKELY(member->Type()->Is<sem::Struct>())) {
                 TINT_ICE(Transform, ctx.dst->Diagnostics()) << "nested IO struct";
                 continue;
             }
@@ -383,7 +383,7 @@ struct CanonicalizeEntryPointIO::State {
         bool do_interpolate = func_ast->PipelineStage() != ast::PipelineStage::kFragment;
         if (auto* str = inner_ret_type->As<sem::Struct>()) {
             for (auto* member : str->Members()) {
-                if (member->Type()->Is<sem::Struct>()) {
+                if (TINT_UNLIKELY(member->Type()->Is<sem::Struct>())) {
                     TINT_ICE(Transform, ctx.dst->Diagnostics()) << "nested IO struct";
                     continue;
                 }

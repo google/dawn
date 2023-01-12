@@ -45,6 +45,7 @@
 #include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/vector.h"
+#include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/writer/append_vector.h"
@@ -756,7 +757,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
     }
 
     auto* sem = builder_.Sem().Get<sem::GlobalVariable>(v);
-    if (!sem) {
+    if (TINT_UNLIKELY(!sem)) {
         TINT_ICE(Writer, builder_.Diagnostics())
             << "attempted to generate a global from a non-global variable";
         return false;
@@ -927,7 +928,7 @@ bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr, Ac
     }
 
     // If the source is a vector, we use OpVectorExtractDynamic.
-    if (info->source_type->Is<type::Vector>()) {
+    if (TINT_LIKELY(info->source_type->Is<type::Vector>())) {
         if (!push_function_inst(
                 spv::Op::OpVectorExtractDynamic,
                 {Operand(result_type_id), extract, Operand(info->source_id), Operand(idx_id)})) {
@@ -949,125 +950,128 @@ bool Builder::GenerateMemberAccessor(const ast::MemberAccessorExpression* expr,
     auto* expr_sem = builder_.Sem().Get(expr)->UnwrapLoad();
     auto* expr_type = expr_sem->Type();
 
-    if (auto* access = expr_sem->As<sem::StructMemberAccess>()) {
-        uint32_t idx = access->Member()->Index();
+    return Switch(
+        expr_sem,  //
+        [&](const sem::StructMemberAccess* access) {
+            uint32_t idx = access->Member()->Index();
 
-        if (info->source_type->Is<type::Reference>()) {
-            auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(idx));
-            if (idx_id == 0) {
-                return 0;
-            }
-            info->access_chain_indices.push_back(idx_id);
-            info->source_type = expr_type;
-        } else {
-            auto result_type_id = GenerateTypeIfNeeded(expr_type);
-            if (result_type_id == 0) {
-                return false;
-            }
-
-            auto extract = result_op();
-            auto extract_id = std::get<uint32_t>(extract);
-            if (!push_function_inst(
-                    spv::Op::OpCompositeExtract,
-                    {Operand(result_type_id), extract, Operand(info->source_id), Operand(idx)})) {
-                return false;
-            }
-
-            info->source_id = extract_id;
-            info->source_type = expr_type;
-        }
-
-        return true;
-    }
-
-    if (auto* swizzle = expr_sem->As<sem::Swizzle>()) {
-        // Single element swizzle is either an access chain or a composite extract
-        auto& indices = swizzle->Indices();
-        if (indices.Length() == 1) {
             if (info->source_type->Is<type::Reference>()) {
-                auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(indices[0]));
-                if (idx_id == 0) {
-                    return 0;
+                auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(idx));
+                if (TINT_UNLIKELY(idx_id == 0)) {
+                    return false;
                 }
                 info->access_chain_indices.push_back(idx_id);
+                info->source_type = expr_type;
             } else {
                 auto result_type_id = GenerateTypeIfNeeded(expr_type);
-                if (result_type_id == 0) {
-                    return 0;
+                if (TINT_UNLIKELY(result_type_id == 0)) {
+                    return false;
                 }
 
                 auto extract = result_op();
                 auto extract_id = std::get<uint32_t>(extract);
                 if (!push_function_inst(spv::Op::OpCompositeExtract,
                                         {Operand(result_type_id), extract, Operand(info->source_id),
-                                         Operand(indices[0])})) {
+                                         Operand(idx)})) {
                     return false;
                 }
 
                 info->source_id = extract_id;
                 info->source_type = expr_type;
             }
+
             return true;
-        }
+        },
+        [&](const sem::Swizzle* swizzle) {
+            // Single element swizzle is either an access chain or a composite extract
+            auto& indices = swizzle->Indices();
+            if (indices.Length() == 1) {
+                if (info->source_type->Is<type::Reference>()) {
+                    auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(indices[0]));
+                    if (TINT_UNLIKELY(idx_id == 0)) {
+                        return false;
+                    }
+                    info->access_chain_indices.push_back(idx_id);
+                } else {
+                    auto result_type_id = GenerateTypeIfNeeded(expr_type);
+                    if (TINT_UNLIKELY(result_type_id == 0)) {
+                        return false;
+                    }
 
-        // Store the type away as it may change if we run the access chain
-        auto* incoming_type = info->source_type;
+                    auto extract = result_op();
+                    auto extract_id = std::get<uint32_t>(extract);
+                    if (!push_function_inst(spv::Op::OpCompositeExtract,
+                                            {Operand(result_type_id), extract,
+                                             Operand(info->source_id), Operand(indices[0])})) {
+                        return false;
+                    }
 
-        // Multi-item extract is a VectorShuffle. We have to emit any existing
-        // access chain data, then load the access chain and shuffle that.
-        if (!info->access_chain_indices.empty()) {
-            auto result_type_id = GenerateTypeIfNeeded(info->source_type);
-            if (result_type_id == 0) {
-                return 0;
+                    info->source_id = extract_id;
+                    info->source_type = expr_type;
+                }
+                return true;
             }
-            auto extract = result_op();
-            auto extract_id = std::get<uint32_t>(extract);
 
-            OperandList ops = {Operand(result_type_id), extract, Operand(info->source_id)};
-            for (auto id : info->access_chain_indices) {
-                ops.push_back(Operand(id));
+            // Store the type away as it may change if we run the access chain
+            auto* incoming_type = info->source_type;
+
+            // Multi-item extract is a VectorShuffle. We have to emit any existing
+            // access chain data, then load the access chain and shuffle that.
+            if (!info->access_chain_indices.empty()) {
+                auto result_type_id = GenerateTypeIfNeeded(info->source_type);
+                if (TINT_UNLIKELY(result_type_id == 0)) {
+                    return false;
+                }
+                auto extract = result_op();
+                auto extract_id = std::get<uint32_t>(extract);
+
+                OperandList ops = {Operand(result_type_id), extract, Operand(info->source_id)};
+                for (auto id : info->access_chain_indices) {
+                    ops.push_back(Operand(id));
+                }
+
+                if (!push_function_inst(spv::Op::OpAccessChain, ops)) {
+                    return false;
+                }
+
+                info->source_id = GenerateLoadIfNeeded(expr_type, extract_id);
+                info->source_type = expr_type->UnwrapRef();
+                info->access_chain_indices.clear();
             }
 
-            if (!push_function_inst(spv::Op::OpAccessChain, ops)) {
+            auto result_type_id = GenerateTypeIfNeeded(expr_type);
+            if (TINT_UNLIKELY(result_type_id == 0)) {
                 return false;
             }
 
-            info->source_id = GenerateLoadIfNeeded(expr_type, extract_id);
-            info->source_type = expr_type->UnwrapRef();
-            info->access_chain_indices.clear();
-        }
+            auto vec_id = GenerateLoadIfNeeded(incoming_type, info->source_id);
 
-        auto result_type_id = GenerateTypeIfNeeded(expr_type);
-        if (result_type_id == 0) {
+            auto result = result_op();
+            auto result_id = std::get<uint32_t>(result);
+
+            OperandList ops = {Operand(result_type_id), result, Operand(vec_id), Operand(vec_id)};
+
+            for (auto idx : indices) {
+                ops.push_back(Operand(idx));
+            }
+
+            if (!push_function_inst(spv::Op::OpVectorShuffle, ops)) {
+                return false;
+            }
+            info->source_id = result_id;
+            info->source_type = expr_type;
+            return true;
+        },
+        [&](Default) {
+            TINT_ICE(Writer, builder_.Diagnostics())
+                << "unhandled member index type: " << expr_sem->TypeInfo().name;
             return false;
-        }
-
-        auto vec_id = GenerateLoadIfNeeded(incoming_type, info->source_id);
-
-        auto result = result_op();
-        auto result_id = std::get<uint32_t>(result);
-
-        OperandList ops = {Operand(result_type_id), result, Operand(vec_id), Operand(vec_id)};
-
-        for (auto idx : indices) {
-            ops.push_back(Operand(idx));
-        }
-
-        if (!push_function_inst(spv::Op::OpVectorShuffle, ops)) {
-            return false;
-        }
-        info->source_id = result_id;
-        info->source_type = expr_type;
-        return true;
-    }
-
-    TINT_ICE(Writer, builder_.Diagnostics())
-        << "unhandled member index type: " << expr_sem->TypeInfo().name;
-    return false;
+        });
 }
 
 uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
-    if (!expr->IsAnyOf<ast::IndexAccessorExpression, ast::MemberAccessorExpression>()) {
+    if (TINT_UNLIKELY(
+            (!expr->IsAnyOf<ast::IndexAccessorExpression, ast::MemberAccessorExpression>()))) {
         TINT_ICE(Writer, builder_.Diagnostics()) << "expression is not an accessor";
         return 0;
     }
@@ -1448,7 +1452,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
                                                   bool is_global_init) {
     // This should not happen as we rely on constant folding to obviate
     // casts/conversions for module-scope variables
-    if (is_global_init) {
+    if (TINT_UNLIKELY(is_global_init)) {
         TINT_ICE(Writer, builder_.Diagnostics())
             << "Module-level conversions are not supported. Conversions should "
                "have already been constant-folded by the FoldConstants transform.";
@@ -1565,13 +1569,13 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
         }
 
         return result_id;
-    } else if (from_type->Is<type::Matrix>() && to_type->Is<type::Matrix>()) {
+    } else if (TINT_LIKELY(from_type->Is<type::Matrix>() && to_type->Is<type::Matrix>())) {
         // SPIRV does not support matrix conversion, the only valid case is matrix identity
         // initializer. Matrix conversion between f32 and f16 should be transformed into vector
         // conversions for each column vectors by VectorizeMatrixConversions.
         auto* from_mat = from_type->As<type::Matrix>();
         auto* to_mat = to_type->As<type::Matrix>();
-        if (from_mat == to_mat) {
+        if (TINT_LIKELY(from_mat == to_mat)) {
             return val_id;
         }
         TINT_ICE(Writer, builder_.Diagnostics())
@@ -2631,7 +2635,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     // Generates the argument with the given usage, returning the operand ID
     auto gen_arg = [&](Usage usage) {
         auto* argument = arg(usage);
-        if (!argument) {
+        if (TINT_UNLIKELY(!argument)) {
             TINT_ICE(Writer, builder_.Diagnostics())
                 << "missing argument " << static_cast<int>(usage);
         }
@@ -2639,7 +2643,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     };
 
     auto* texture = arg(Usage::kTexture);
-    if (!texture) {
+    if (TINT_UNLIKELY(!texture)) {
         TINT_ICE(Writer, builder_.Diagnostics()) << "missing texture argument";
     }
 
@@ -3752,7 +3756,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
 }
 
 bool Builder::GenerateTextureType(const type::Texture* texture, const Operand& result) {
-    if (texture->Is<type::ExternalTexture>()) {
+    if (TINT_UNLIKELY(texture->Is<type::ExternalTexture>())) {
         TINT_ICE(Writer, builder_.Diagnostics())
             << "Multiplanar external texture transform was not run.";
         return false;
@@ -4008,7 +4012,7 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::BuiltinValue builtin, ast::AddressSpace 
         case ast::BuiltinValue::kPosition:
             if (storage == ast::AddressSpace::kIn) {
                 return SpvBuiltInFragCoord;
-            } else if (storage == ast::AddressSpace::kOut) {
+            } else if (TINT_LIKELY(storage == ast::AddressSpace::kOut)) {
                 return SpvBuiltInPosition;
             } else {
                 TINT_ICE(Writer, builder_.Diagnostics()) << "invalid address space for builtin";

@@ -128,7 +128,7 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
             return b.Call(fn, ctx.Clone(args[0]->Declaration()));
         }
 
-        if (args.Length() == mat_type->columns() * mat_type->rows()) {
+        if (TINT_LIKELY(args.Length() == mat_type->columns() * mat_type->rows())) {
             return build_mat([&](uint32_t c, uint32_t r) {
                 return ctx.Clone(args[c * mat_type->rows() + r]->Declaration());
             });

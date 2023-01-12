@@ -887,7 +887,7 @@ void Inspector::GenerateSamplerTargets() {
 
 template <size_t N, typename F>
 void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> exprs, F&& callback) {
-    if (!program_->IsValid()) {
+    if (TINT_UNLIKELY(!program_->IsValid())) {
         TINT_ICE(Inspector, diagnostics_)
             << "attempting to get originating resources in invalid program";
         return;

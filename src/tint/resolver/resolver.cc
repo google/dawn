@@ -83,6 +83,7 @@
 #include "src/tint/type/sampler.h"
 #include "src/tint/type/short_name.h"
 #include "src/tint/type/storage_texture.h"
+#include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/math.h"
 #include "src/tint/utils/reverse.h"
@@ -130,7 +131,7 @@ bool Resolver::Resolve() {
 
     bool result = ResolveInternal();
 
-    if (!result && !diagnostics_.contains_errors()) {
+    if (TINT_UNLIKELY(!result && !diagnostics_.contains_errors())) {
         TINT_ICE(Resolver, diagnostics_) << "resolving failed, but no error was raised";
         return false;
     }
@@ -188,7 +189,7 @@ bool Resolver::ResolveInternal() {
 
     bool result = true;
     for (auto* node : builder_->ASTNodes().Objects()) {
-        if (!marked_[node->node_id.value]) {
+        if (TINT_UNLIKELY(!marked_[node->node_id.value])) {
             TINT_ICE(Resolver, diagnostics_)
                 << "AST node '" << node->TypeInfo().name << "' was not reached by the resolver\n"
                 << "At: " << node->source << "\n"
@@ -884,7 +885,7 @@ bool Resolver::AllocateOverridableConstantIds() {
 void Resolver::SetShadows() {
     for (auto it : dependencies_.shadows) {
         CastableBase* b = sem_.Get(it.value);
-        if (!b) {
+        if (TINT_UNLIKELY(!b)) {
             TINT_ICE(Resolver, builder_->Diagnostics())
                 << "AST node '" << it.value->TypeInfo().name << "' had no semantic info\n"
                 << "At: " << it.value->source << "\n"
@@ -1073,7 +1074,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
 
     if (decl->body) {
         Mark(decl->body);
-        if (current_compound_statement_) {
+        if (TINT_UNLIKELY(current_compound_statement_)) {
             TINT_ICE(Resolver, diagnostics_)
                 << "Resolver::Function() called with a current compound statement";
             return nullptr;
@@ -1804,7 +1805,7 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
     const constant::Value* materialized_val = nullptr;
     if (!skip_const_eval_.Contains(decl)) {
         auto expr_val = expr->ConstantValue();
-        if (!expr_val) {
+        if (TINT_UNLIKELY(!expr_val)) {
             TINT_ICE(Resolver, builder_->Diagnostics())
                 << decl->source << "Materialize(" << decl->TypeInfo().name
                 << ") called on expression with no constant value";
@@ -1817,7 +1818,7 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
             return nullptr;
         }
         materialized_val = val.Get();
-        if (!materialized_val) {
+        if (TINT_UNLIKELY(!materialized_val)) {
             TINT_ICE(Resolver, builder_->Diagnostics())
                 << decl->source << "ConvertValue(" << builder_->FriendlyName(expr_val->Type())
                 << " -> " << builder_->FriendlyName(concrete_ty) << ") returned invalid value";
@@ -2488,7 +2489,7 @@ void Resolver::CollectTextureSamplerPairs(const sem::Builtin* builtin,
     // Collect a texture/sampler pair for this builtin.
     const auto& signature = builtin->Signature();
     int texture_index = signature.IndexOf(sem::ParameterUsage::kTexture);
-    if (texture_index == -1) {
+    if (TINT_UNLIKELY(texture_index == -1)) {
         TINT_ICE(Resolver, diagnostics_) << "texture builtin without texture parameter";
     }
     if (auto* user =
@@ -3445,7 +3446,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         AddError(msg.str(), str->source);
         return nullptr;
     }
-    if (struct_align > std::numeric_limits<uint32_t>::max()) {
+    if (TINT_UNLIKELY(struct_align > std::numeric_limits<uint32_t>::max())) {
         TINT_ICE(Resolver, diagnostics_) << "calculated struct stride exceeds uint32";
         return nullptr;
     }
@@ -3842,12 +3843,12 @@ SEM* Resolver::StatementScope(const ast::Statement* ast, SEM* sem, F&& callback)
 }
 
 bool Resolver::Mark(const ast::Node* node) {
-    if (node == nullptr) {
+    if (TINT_UNLIKELY(node == nullptr)) {
         TINT_ICE(Resolver, diagnostics_) << "Resolver::Mark() called with nullptr";
         return false;
     }
     auto marked_bit_ref = marked_[node->node_id.value];
-    if (!marked_bit_ref) {
+    if (TINT_LIKELY(!marked_bit_ref)) {
         marked_bit_ref = true;
         return true;
     }

@@ -77,7 +77,7 @@ void TextGenerator::TextBuffer::Append(const std::string& line) {
 }
 
 void TextGenerator::TextBuffer::Insert(const std::string& line, size_t before, uint32_t indent) {
-    if (before >= lines.size()) {
+    if (TINT_UNLIKELY(before >= lines.size())) {
         diag::List d;
         TINT_ICE(Writer, d) << "TextBuffer::Insert() called with before >= lines.size()\n"
                             << "  before:" << before << "\n"
@@ -96,7 +96,7 @@ void TextGenerator::TextBuffer::Append(const TextBuffer& tb) {
 }
 
 void TextGenerator::TextBuffer::Insert(const TextBuffer& tb, size_t before, uint32_t indent) {
-    if (before >= lines.size()) {
+    if (TINT_UNLIKELY(before >= lines.size())) {
         diag::List d;
         TINT_ICE(Writer, d) << "TextBuffer::Insert() called with before >= lines.size()\n"
                             << "  before:" << before << "\n"

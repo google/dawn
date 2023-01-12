@@ -40,7 +40,7 @@ class SemHelper {
     auto* Get(const AST_OR_TYPE* ast) const {
         using T = sem::Info::GetResultType<SEM, AST_OR_TYPE>;
         auto* sem = builder_->Sem().Get(ast);
-        if (!sem) {
+        if (TINT_UNLIKELY(!sem)) {
             TINT_ICE(Resolver, builder_->Diagnostics())
                 << "AST node '" << ast->TypeInfo().name << "' had no semantic info\n"
                 << "At: " << ast->source << "\n"

@@ -89,7 +89,7 @@ Transform::ApplyResult ClampFragDepth::Apply(const Program* src, const DataMap&,
     // Abort on any use of push constants in the module.
     for (auto* global : src->AST().GlobalVariables()) {
         if (auto* var = global->As<ast::Var>()) {
-            if (var->declared_address_space == ast::AddressSpace::kPushConstant) {
+            if (TINT_UNLIKELY(var->declared_address_space == ast::AddressSpace::kPushConstant)) {
                 TINT_ICE(Transform, b.Diagnostics())
                     << "ClampFragDepth doesn't know how to handle module that already use push "
                        "constants.";

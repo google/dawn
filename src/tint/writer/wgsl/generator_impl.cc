@@ -224,7 +224,7 @@ bool GeneratorImpl::EmitCall(std::ostream& out, const ast::CallExpression* expr)
         if (!EmitExpression(out, expr->target.name)) {
             return false;
         }
-    } else if (expr->target.type) {
+    } else if (TINT_LIKELY(expr->target.type)) {
         if (!EmitType(out, expr->target.type)) {
             return false;
         }

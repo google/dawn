@@ -1097,7 +1097,8 @@ struct DirectVariableAccess::State {
                 continue;
             }
 
-            if (auto* member = std::get_if<Symbol>(&op)) {
+            auto* member = std::get_if<Symbol>(&op);
+            if (TINT_LIKELY(member)) {
                 ss << sym.NameFor(*member);
                 continue;
             }
@@ -1145,7 +1146,8 @@ struct DirectVariableAccess::State {
             return b.IndexAccessor(expr, idx);
         }
 
-        if (auto* member = std::get_if<Symbol>(&access)) {
+        auto* member = std::get_if<Symbol>(&access);
+        if (TINT_LIKELY(member)) {
             /// The access is a member access.
             return b.MemberAccessor(expr, ctx.Clone(*member));
         }

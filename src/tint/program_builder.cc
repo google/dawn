@@ -21,6 +21,7 @@
 #include "src/tint/demangler.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/utils/compiler_macros.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -89,7 +90,7 @@ void ProgramBuilder::MarkAsMoved() {
 }
 
 void ProgramBuilder::AssertNotMoved() const {
-    if (moved_) {
+    if (TINT_UNLIKELY(moved_)) {
         TINT_ICE(ProgramBuilder, const_cast<ProgramBuilder*>(this)->diagnostics_)
             << "Attempting to use ProgramBuilder after it has been moved";
     }

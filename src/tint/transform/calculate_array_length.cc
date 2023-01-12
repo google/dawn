@@ -152,7 +152,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                     //   arrayLength(&array_var)
                     auto* arg = call_expr->args[0];
                     auto* address_of = arg->As<ast::UnaryOpExpression>();
-                    if (!address_of || address_of->op != ast::UnaryOp::kAddressOf) {
+                    if (TINT_UNLIKELY(!address_of || address_of->op != ast::UnaryOp::kAddressOf)) {
                         TINT_ICE(Transform, b.Diagnostics())
                             << "arrayLength() expected address-of, got " << arg->TypeInfo().name;
                     }
@@ -161,7 +161,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                         storage_buffer_expr = accessor->structure;
                     }
                     auto* storage_buffer_sem = sem.Get<sem::VariableUser>(storage_buffer_expr);
-                    if (!storage_buffer_sem) {
+                    if (TINT_UNLIKELY(!storage_buffer_sem)) {
                         TINT_ICE(Transform, b.Diagnostics())
                             << "expected form of arrayLength argument to be &array_var or "
                                "&struct_var.array_member";
@@ -213,7 +213,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                                 },
                                 [&](const type::Array* arr) { return arr; });
 
-                            if (!array_type) {
+                            if (TINT_UNLIKELY(!array_type)) {
                                 TINT_ICE(Transform, b.Diagnostics())
                                     << "expected form of arrayLength argument to be "
                                        "&array_var or &struct_var.array_member";

@@ -41,6 +41,9 @@
     __pragma(warning(pop))                   \
     TINT_REQUIRE_SEMICOLON
 // clang-format on
+
+#define TINT_UNLIKELY(x) x /* currently no-op */
+#define TINT_LIKELY(x) x   /* currently no-op */
 #elif defined(__clang__)
 ////////////////////////////////////////////////////////////////////////////////
 // Clang
@@ -64,6 +67,9 @@
     _Pragma("clang diagnostic pop")          \
     TINT_REQUIRE_SEMICOLON
 // clang-format on
+
+#define TINT_UNLIKELY(x) __builtin_expect(!!(x), false)
+#define TINT_LIKELY(x) __builtin_expect(!!(x), true)
 #elif defined(__GNUC__)
 ////////////////////////////////////////////////////////////////////////////////
 // GCC
@@ -87,12 +93,18 @@
     _Pragma("GCC diagnostic pop")            \
     TINT_REQUIRE_SEMICOLON
 // clang-format on
+
+#define TINT_UNLIKELY(x) __builtin_expect(!!(x), false)
+#define TINT_LIKELY(x) __builtin_expect(!!(x), true)
 #else
 ////////////////////////////////////////////////////////////////////////////////
 // Other
 ////////////////////////////////////////////////////////////////////////////////
 #define TINT_BEGIN_DISABLE_WARNING(name) TINT_REQUIRE_SEMICOLON
 #define TINT_END_DISABLE_WARNING(name) TINT_REQUIRE_SEMICOLON
+#define TINT_UNLIKELY(x) x
+#define TINT_LIKELY(x) x
+
 #endif
 
 #endif  // SRC_TINT_UTILS_COMPILER_MACROS_H_

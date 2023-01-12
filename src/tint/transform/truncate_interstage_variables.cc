@@ -83,7 +83,7 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
         auto* func_sem = sem.Get(func_ast);
         auto* str = func_sem->ReturnType()->As<sem::Struct>();
 
-        if (!str) {
+        if (TINT_UNLIKELY(!str)) {
             TINT_ICE(Transform, ctx.dst->Diagnostics())
                 << "Entrypoint function return type is non-struct.\n"
                 << "TruncateInterstageVariables transform needs to run after "

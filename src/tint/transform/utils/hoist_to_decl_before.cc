@@ -336,7 +336,8 @@ struct HoistToDeclBefore::State {
             return true;
         }
 
-        if (auto* fl = parent->As<sem::ForLoopStatement>()) {
+        auto* fl = parent->As<sem::ForLoopStatement>();
+        if (TINT_LIKELY(fl)) {
             // Insertion point is a for-loop initializer or continuing statement.
             // These require special care.
             if (fl->Declaration()->initializer == ip) {
@@ -349,7 +350,7 @@ struct HoistToDeclBefore::State {
                 return true;
             }
 
-            if (fl->Declaration()->continuing == ip) {
+            if (TINT_LIKELY(fl->Declaration()->continuing == ip)) {
                 // Insertion point is a for-loop continuing statement.
                 // For-loop needs to be decomposed to a loop.
 

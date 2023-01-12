@@ -993,7 +993,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     };
 
     auto* texture = arg(Usage::kTexture)->Declaration();
-    if (!texture) {
+    if (TINT_UNLIKELY(!texture)) {
         TINT_ICE(Writer, diagnostics_) << "missing texture arg";
         return false;
     }
@@ -1976,14 +1976,14 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     // attribute have a value of zero.
     const uint32_t kInvalidBindingIndex = std::numeric_limits<uint32_t>::max();
     auto get_binding_index = [&](const ast::Parameter* param) -> uint32_t {
-        if (!param->HasBindingPoint()) {
+        if (TINT_UNLIKELY(!param->HasBindingPoint())) {
             TINT_ICE(Writer, diagnostics_)
                 << "missing binding attributes for entry point parameter";
             return kInvalidBindingIndex;
         }
         auto* param_sem = program_->Sem().Get<sem::Parameter>(param);
         auto bp = param_sem->BindingPoint();
-        if (bp.group != 0) {
+        if (TINT_UNLIKELY(bp.group != 0)) {
             TINT_ICE(Writer, diagnostics_) << "encountered non-zero resource group index (use "
                                               "BindingRemapper to fix)";
             return kInvalidBindingIndex;
@@ -2026,7 +2026,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                 }
                 if (param->type->Is<ast::Sampler>()) {
                     out << " [[sampler(" << binding << ")]]";
-                } else if (param->type->Is<ast::Texture>()) {
+                } else if (TINT_LIKELY(param->type->Is<ast::Texture>())) {
                     out << " [[texture(" << binding << ")]]";
                 } else {
                     TINT_ICE(Writer, diagnostics_) << "invalid handle type entry point parameter";
@@ -2038,7 +2038,8 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                     auto& allocations = workgroup_allocations_[func_name];
                     out << " [[threadgroup(" << allocations.size() << ")]]";
                     allocations.push_back(program_->Sem().Get(ptr->type)->Size());
-                } else if (sc == ast::AddressSpace::kStorage || sc == ast::AddressSpace::kUniform) {
+                } else if (TINT_LIKELY(sc == ast::AddressSpace::kStorage ||
+                                       sc == ast::AddressSpace::kUniform)) {
                     uint32_t binding = get_binding_index(param);
                     if (binding == kInvalidBindingIndex) {
                         return false;
@@ -2067,7 +2068,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                     }
                     out << " [[" << name << "]]";
                 }
-                if (!builtin_found) {
+                if (TINT_UNLIKELY(!builtin_found)) {
                     TINT_ICE(Writer, diagnostics_) << "Unsupported entry point parameter";
                 }
             }
@@ -2530,7 +2531,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                 out << "atomic_int";
                 return true;
             }
-            if (atomic->Type()->Is<type::U32>()) {
+            if (TINT_LIKELY(atomic->Type()->Is<type::U32>())) {
                 out << "atomic_uint";
                 return true;
             }
@@ -2610,7 +2611,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             return true;
         },
         [&](const type::Texture* tex) {
-            if (tex->Is<type::ExternalTexture>()) {
+            if (TINT_UNLIKELY(tex->Is<type::ExternalTexture>())) {
                 TINT_ICE(Writer, diagnostics_)
                     << "Multiplanar external texture transform was not run.";
                 return false;
@@ -2793,7 +2794,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
         auto wgsl_offset = mem->Offset();
 
         if (is_host_shareable) {
-            if (wgsl_offset < msl_offset) {
+            if (TINT_UNLIKELY(wgsl_offset < msl_offset)) {
                 // Unimplementable layout
                 TINT_ICE(Writer, diagnostics_) << "Structure member WGSL offset (" << wgsl_offset
                                                << ") is behind MSL offset (" << msl_offset << ")";
@@ -2837,7 +2838,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
                     },
                     [&](const ast::LocationAttribute*) {
                         auto& pipeline_stage_uses = str->PipelineStageUses();
-                        if (pipeline_stage_uses.size() != 1) {
+                        if (TINT_UNLIKELY(pipeline_stage_uses.size() != 1)) {
                             TINT_ICE(Writer, diagnostics_) << "invalid entry point IO struct uses";
                             return false;
                         }
@@ -2851,8 +2852,8 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
                         } else if (pipeline_stage_uses.count(
                                        type::PipelineStageUsage::kFragmentInput)) {
                             out << " [[user(locn" + std::to_string(loc) + ")]]";
-                        } else if (pipeline_stage_uses.count(
-                                       type::PipelineStageUsage::kFragmentOutput)) {
+                        } else if (TINT_LIKELY(pipeline_stage_uses.count(
+                                       type::PipelineStageUsage::kFragmentOutput))) {
                             out << " [[color(" + std::to_string(loc) + ")]]";
                         } else {
                             TINT_ICE(Writer, diagnostics_) << "invalid use of location decoration";
@@ -2898,7 +2899,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
         if (is_host_shareable) {
             // Calculate new MSL offset
             auto size_align = MslPackedTypeSizeAndAlign(ty);
-            if (msl_offset % size_align.align) {
+            if (TINT_UNLIKELY(msl_offset % size_align.align)) {
                 TINT_ICE(Writer, diagnostics_)
                     << "Misaligned MSL structure member " << ty->FriendlyName(program_->Symbols())
                     << " " << mem_name;
@@ -3167,7 +3168,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const type:
         },
 
         [&](const type::Array* arr) {
-            if (!arr->IsStrideImplicit()) {
+            if (TINT_UNLIKELY(!arr->IsStrideImplicit())) {
                 TINT_ICE(Writer, diagnostics_)
                     << "arrays with explicit strides should not exist past the SPIR-V reader";
                 return SizeAndAlign{};

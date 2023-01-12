@@ -332,7 +332,7 @@ ConstEval::Result CompositeConvert(const constant::Composite* composite,
 
     std::function<const type::Type*(size_t idx)> target_el_ty;
     if (auto* str = target_ty->As<type::Struct>()) {
-        if (str->Members().Length() != composite->elements.Length()) {
+        if (TINT_UNLIKELY(str->Members().Length() != composite->elements.Length())) {
             TINT_ICE(Resolver, builder.Diagnostics())
                 << "const-eval conversion of structure has mismatched element counts";
             return utils::Failure;
@@ -1837,7 +1837,7 @@ ConstEval::Result ConstEval::OpShiftLeft(const type::Type* ty,
         return Dispatch_ia_iu32(create, c0, c1);
     };
 
-    if (!type::Type::DeepestElementOf(args[1]->Type())->Is<type::U32>()) {
+    if (TINT_UNLIKELY(!type::Type::DeepestElementOf(args[1]->Type())->Is<type::U32>())) {
         TINT_ICE(Resolver, builder.Diagnostics())
             << "Element type of rhs of ShiftLeft must be a u32";
         return utils::Failure;
@@ -1901,7 +1901,7 @@ ConstEval::Result ConstEval::OpShiftRight(const type::Type* ty,
         return Dispatch_ia_iu32(create, c0, c1);
     };
 
-    if (!type::Type::DeepestElementOf(args[1]->Type())->Is<type::U32>()) {
+    if (TINT_UNLIKELY(!type::Type::DeepestElementOf(args[1]->Type())->Is<type::U32>())) {
         TINT_ICE(Resolver, builder.Diagnostics())
             << "Element type of rhs of ShiftLeft must be a u32";
         return utils::Failure;

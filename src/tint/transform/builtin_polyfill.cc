@@ -480,7 +480,7 @@ struct BuiltinPolyfill::State {
         uint32_t width = WidthOf(ty);
 
         // Currently in WGSL parameters of insertBits must be i32, u32, vecN<i32> or vecN<u32>
-        if (!type::Type::DeepestElementOf(ty)->IsAnyOf<type::I32, type::U32>()) {
+        if (TINT_UNLIKELY(((!type::Type::DeepestElementOf(ty)->IsAnyOf<type::I32, type::U32>())))) {
             TINT_ICE(Transform, b.Diagnostics())
                 << "insertBits polyfill only support i32, u32, and vector of i32 or u32, got "
                 << b.FriendlyName(ty);

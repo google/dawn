@@ -22,6 +22,7 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/math.h"
 
@@ -766,12 +767,17 @@ struct VertexPulling::State {
             auto* sem = src->Sem().Get<sem::Parameter>(param);
             info.type = sem->Type();
 
-            if (!sem->Location().has_value()) {
+            if (TINT_UNLIKELY(!sem->Location().has_value())) {
                 TINT_ICE(Transform, b.Diagnostics()) << "Location missing value";
                 return;
             }
             location_info[sem->Location().value()] = info;
-        } else if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(param->attributes)) {
+        } else {
+            auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(param->attributes);
+            if (TINT_UNLIKELY(!builtin)) {
+                TINT_ICE(Transform, b.Diagnostics()) << "Invalid entry point parameter";
+                return;
+            }
             // Check for existing vertex_index and instance_index builtins.
             if (builtin->builtin == ast::BuiltinValue::kVertexIndex) {
                 vertex_index_expr = [this, param]() { return b.Expr(ctx.Clone(param->symbol)); };
@@ -779,8 +785,6 @@ struct VertexPulling::State {
                 instance_index_expr = [this, param]() { return b.Expr(ctx.Clone(param->symbol)); };
             }
             new_function_parameters.Push(ctx.Clone(param));
-        } else {
-            TINT_ICE(Transform, b.Diagnostics()) << "Invalid entry point parameter";
         }
     }
 
@@ -817,8 +821,12 @@ struct VertexPulling::State {
                 TINT_ASSERT(Transform, sem->Location().has_value());
                 location_info[sem->Location().value()] = info;
                 has_locations = true;
-            } else if (auto* builtin =
-                           ast::GetAttribute<ast::BuiltinAttribute>(member->attributes)) {
+            } else {
+                auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(member->attributes);
+                if (TINT_UNLIKELY(!builtin)) {
+                    TINT_ICE(Transform, b.Diagnostics()) << "Invalid entry point parameter";
+                    return;
+                }
                 // Check for existing vertex_index and instance_index builtins.
                 if (builtin->builtin == ast::BuiltinValue::kVertexIndex) {
                     vertex_index_expr = member_expr;
@@ -826,8 +834,6 @@ struct VertexPulling::State {
                     instance_index_expr = member_expr;
                 }
                 members_to_clone.Push(member);
-            } else {
-                TINT_ICE(Transform, b.Diagnostics()) << "Invalid entry point parameter";
             }
         }
 

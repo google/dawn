@@ -1007,8 +1007,8 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
                 AddError("missing return at end of function", decl->source);
                 return false;
             }
-        } else if (IsValidationEnabled(decl->attributes,
-                                       ast::DisabledValidation::kFunctionHasNoBody)) {
+        } else if (TINT_UNLIKELY(IsValidationEnabled(
+                       decl->attributes, ast::DisabledValidation::kFunctionHasNoBody))) {
             TINT_ICE(Resolver, diagnostics_)
                 << "Function " << symbols_.NameFor(decl->symbol) << " has no body";
         }
@@ -1040,7 +1040,8 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
 
     // https://www.w3.org/TR/WGSL/#behaviors-rules
     // a function behavior is always one of {}, or {Next}.
-    if (func->Behaviors() != sem::Behaviors{} && func->Behaviors() != sem::Behavior::kNext) {
+    if (TINT_UNLIKELY(func->Behaviors() != sem::Behaviors{} &&
+                      func->Behaviors() != sem::Behavior::kNext)) {
         auto name = symbols_.NameFor(decl->symbol);
         TINT_ICE(Resolver, diagnostics_)
             << "function '" << name << "' behaviors are: " << func->Behaviors();
@@ -1111,7 +1112,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
 
                 bool is_input = param_or_ret == ParamOrRetType::kParameter;
 
-                if (!location.has_value()) {
+                if (TINT_UNLIKELY(!location.has_value())) {
                     TINT_ICE(Resolver, diagnostics_) << "Location has no value";
                     return false;
                 }
@@ -1810,7 +1811,7 @@ bool Validator::ArrayInitializer(const ast::CallExpression* ctor,
         return false;
     }
 
-    if (!c->Is<type::ConstantArrayCount>()) {
+    if (TINT_UNLIKELY(!c->Is<type::ConstantArrayCount>())) {
         TINT_ICE(Resolver, diagnostics_) << "Invalid ArrayCount found";
         return false;
     }

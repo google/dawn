@@ -1546,7 +1546,7 @@ IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
         Any any;
         return_type =
             Match(match.templates, match.overload, indices, earliest_eval_stage).Type(&any);
-        if (!return_type) {
+        if (TINT_UNLIKELY(!return_type)) {
             TINT_ICE(Resolver, builder.Diagnostics()) << "MatchState.Match() returned null";
             return {};
         }

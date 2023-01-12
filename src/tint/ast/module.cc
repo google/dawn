@@ -134,7 +134,7 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
     enables_.Clear();
 
     for (auto* decl : global_declarations_) {
-        if (!decl) {
+        if (TINT_UNLIKELY(!decl)) {
             TINT_ICE(AST, ctx->dst->Diagnostics()) << "src global declaration was nullptr";
             continue;
         }
