@@ -1104,40 +1104,134 @@ TEST_F(BufferValidationTest, CreationParameterReflectionNoInternalUsage) {
 
 // Test that GetMapState() shows expected buffer map state
 TEST_F(BufferValidationTest, GetMapState) {
-    // MapRead
+    // MapRead + MapAsync + Unmap
     {
         wgpu::Buffer buf = CreateMapReadBuffer(4);
         EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
-        buf.MapAsync(wgpu::MapMode::Read, 0, 4, nullptr, nullptr);
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
+            .Times(1);
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
         EXPECT_EQ(wgpu::BufferMapState::Pending, buf.GetMapState());
         WaitForAllOperations(device);
         EXPECT_EQ(wgpu::BufferMapState::Mapped, buf.GetMapState());
         buf.Unmap();
         EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+    }
+
+    // MapRead + MapAsync + Unmap before the callback
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        EXPECT_CALL(*mockBufferMapAsyncCallback,
+                    Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, _))
+            .Times(1);
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        EXPECT_EQ(wgpu::BufferMapState::Pending, buf.GetMapState());
+        buf.Unmap();
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        WaitForAllOperations(device);
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+    }
+
+    // MapRead + MapAsync + Destroy
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
+            .Times(1);
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        EXPECT_EQ(wgpu::BufferMapState::Pending, buf.GetMapState());
+        WaitForAllOperations(device);
+        EXPECT_EQ(wgpu::BufferMapState::Mapped, buf.GetMapState());
         buf.Destroy();
         EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
     }
 
-    // MapWrite
+    // MapRead + MapAsync + Destroy before the callback
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        EXPECT_CALL(*mockBufferMapAsyncCallback,
+                    Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, _))
+            .Times(1);
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        EXPECT_EQ(wgpu::BufferMapState::Pending, buf.GetMapState());
+        buf.Destroy();
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        WaitForAllOperations(device);
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+    }
+
+    // MapWrite + MapAsync + Unmap
     {
         wgpu::Buffer buf = CreateMapWriteBuffer(4);
         EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
-        buf.MapAsync(wgpu::MapMode::Write, 0, 4, nullptr, nullptr);
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
+            .Times(1);
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
         EXPECT_EQ(wgpu::BufferMapState::Pending, buf.GetMapState());
         WaitForAllOperations(device);
         EXPECT_EQ(wgpu::BufferMapState::Mapped, buf.GetMapState());
         buf.Unmap();
         EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+    }
+
+    // MapWrite + MapAsync + Unmap before the callback
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        EXPECT_CALL(*mockBufferMapAsyncCallback,
+                    Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, _))
+            .Times(1);
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        EXPECT_EQ(wgpu::BufferMapState::Pending, buf.GetMapState());
+        buf.Unmap();
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        WaitForAllOperations(device);
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+    }
+
+    // MapWrite + MapAsync + Destroy
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
+            .Times(1);
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        EXPECT_EQ(wgpu::BufferMapState::Pending, buf.GetMapState());
+        WaitForAllOperations(device);
+        EXPECT_EQ(wgpu::BufferMapState::Mapped, buf.GetMapState());
         buf.Destroy();
         EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
     }
 
-    // MappedAtCreation
+    // MapWrite + MapAsync + Destroy before the callback
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        EXPECT_CALL(*mockBufferMapAsyncCallback,
+                    Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, _))
+            .Times(1);
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        EXPECT_EQ(wgpu::BufferMapState::Pending, buf.GetMapState());
+        buf.Destroy();
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+        WaitForAllOperations(device);
+        EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+    }
+
+    // MappedAtCreation + Unmap
     {
         wgpu::Buffer buf = BufferMappedAtCreation(4, wgpu::BufferUsage::CopySrc);
         EXPECT_EQ(wgpu::BufferMapState::Mapped, buf.GetMapState());
         buf.Unmap();
         EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
+    }
+
+    // MappedAtCreation + Destroy
+    {
+        wgpu::Buffer buf = BufferMappedAtCreation(4, wgpu::BufferUsage::CopySrc);
+        EXPECT_EQ(wgpu::BufferMapState::Mapped, buf.GetMapState());
         buf.Destroy();
         EXPECT_EQ(wgpu::BufferMapState::Unmapped, buf.GetMapState());
     }

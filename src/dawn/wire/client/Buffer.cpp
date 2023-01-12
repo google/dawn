@@ -370,6 +370,7 @@ void Buffer::Destroy() {
 
     // Remove the current mapping and destroy Read/WriteHandles.
     FreeMappedData();
+    mMapState = MapState::Unmapped;
 
     InvokeAndClearCallback(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
 
