@@ -81,19 +81,29 @@ struct Unshadow::State {
                 });
         };
 
-        ctx.ReplaceAll([&](const ast::Variable* v) -> const ast::Variable* {
-            if (auto* local = sem.Get<sem::LocalVariable>(v)) {
-                if (local->Shadows()) {
-                    return rename(local);
-                }
-            }
-            if (auto* param = sem.Get<sem::Parameter>(v)) {
-                if (param->Shadows()) {
-                    return rename(param);
-                }
-            }
-            return nullptr;
-        });
+        bool made_changes = false;
+
+        for (auto* node : ctx.src->SemNodes().Objects()) {
+            Switch(
+                node,  //
+                [&](const sem::LocalVariable* local) {
+                    if (local->Shadows()) {
+                        ctx.Replace(local->Declaration(), [&, local] { return rename(local); });
+                        made_changes = true;
+                    }
+                },
+                [&](const sem::Parameter* param) {
+                    if (param->Shadows()) {
+                        ctx.Replace(param->Declaration(), [&, param] { return rename(param); });
+                        made_changes = true;
+                    }
+                });
+        }
+
+        if (!made_changes) {
+            return SkipTransform;
+        }
+
         ctx.ReplaceAll(
             [&](const ast::IdentifierExpression* ident) -> const tint::ast::IdentifierExpression* {
                 if (auto* sem_ident = sem.Get(ident)) {

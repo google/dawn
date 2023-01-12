@@ -23,11 +23,8 @@ using UnshadowTest = TransformTest;
 
 TEST_F(UnshadowTest, EmptyModule) {
     auto* src = "";
-    auto* expect = "";
 
-    auto got = Run<Unshadow>(src);
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<Unshadow>(src));
 }
 
 TEST_F(UnshadowTest, Noop) {
@@ -48,11 +45,7 @@ fn F(c : i32) {
 }
 )";
 
-    auto* expect = src;
-
-    auto got = Run<Unshadow>(src);
-
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<Unshadow>(src));
 }
 
 TEST_F(UnshadowTest, LocalShadowsAlias) {
