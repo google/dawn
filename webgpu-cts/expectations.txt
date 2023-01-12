@@ -333,7 +333,6 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,render_pass,cl
 
 ################################################################################
 # Failures with depth/stencil textures on Intel Mac
-# KEEP
 ################################################################################
 crbug.com/dawn/1083 [ intel monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth16unorm" [ Failure ]
 crbug.com/dawn/1083 [ intel monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus" [ Failure ]
@@ -353,7 +352,6 @@ crbug.com/dawn/1500 [ intel-gen-9 monterey ] webgpu:api,operation,command_buffer
 ################################################################################
 # webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
 # Failures on Mac Intel, likely also due to crbug.com/dawn/1083
-# KEEP
 ################################################################################
 crbug.com/dawn/1389 [ intel monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth16unorm" [ Failure ]
 crbug.com/dawn/1389 [ intel monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth32float-stencil8" [ Failure ]
@@ -378,7 +376,6 @@ crbug.com/dawn/1628 [ intel-gen-9 win10 ] webgpu:api,operation,render_pass,store
 
 ################################################################################
 # untriaged failures
-# KEEP
 ################################################################################
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,render_pass,resolve:* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,component_count,blend:format="rg8unorm" [ Failure ]
