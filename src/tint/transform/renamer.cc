@@ -35,7 +35,7 @@ namespace tint::transform {
 namespace {
 
 // This list is used for a binary search and must be kept in sorted order.
-const char* kReservedKeywordsGLSL[] = {
+const char* const kReservedKeywordsGLSL[] = {
     "abs",
     "acos",
     "acosh",
@@ -395,7 +395,7 @@ const char* kReservedKeywordsGLSL[] = {
 };
 
 // This list is used for a binary search and must be kept in sorted order.
-const char* kReservedKeywordsHLSL[] = {
+const char* const kReservedKeywordsHLSL[] = {
     "AddressU",
     "AddressV",
     "AddressW",
@@ -969,7 +969,7 @@ const char* kReservedKeywordsHLSL[] = {
 };
 
 // This list is used for a binary search and must be kept in sorted order.
-const char* kReservedKeywordsMSL[] = {
+const char* const kReservedKeywordsMSL[] = {
     "HUGE_VALF",
     "HUGE_VALH",
     "INFINITY",
