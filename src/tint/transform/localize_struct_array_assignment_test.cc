@@ -25,9 +25,7 @@ using LocalizeStructArrayAssignmentTest = TransformTest;
 
 TEST_F(LocalizeStructArrayAssignmentTest, EmptyModule) {
     auto* src = R"()";
-    auto* expect = src;
-    auto got = Run<Unshadow, SimplifyPointers, LocalizeStructArrayAssignment>(src);
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<LocalizeStructArrayAssignment>(src));
 }
 
 TEST_F(LocalizeStructArrayAssignmentTest, StructArray) {
@@ -842,10 +840,7 @@ fn main() {
 
     // Transform does nothing here as we're not actually assigning to the array in
     // the struct.
-    auto* expect = src;
-
-    auto got = Run<Unshadow, SimplifyPointers, LocalizeStructArrayAssignment>(src);
-    EXPECT_EQ(expect, str(got));
+    EXPECT_FALSE(ShouldRun<LocalizeStructArrayAssignment>(src));
 }
 
 }  // namespace

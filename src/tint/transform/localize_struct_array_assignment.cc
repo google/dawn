@@ -47,43 +47,55 @@ struct LocalizeStructArrayAssignment::State {
             utils::Vector<const ast::Statement*, 4> insert_after_stmts;
         } s;
 
-        ctx.ReplaceAll([&](const ast::AssignmentStatement* assign_stmt) -> const ast::Statement* {
-            // Process if it's an assignment statement to a dynamically indexed array
-            // within a struct on a function or private storage variable. This
-            // specific use-case is what FXC fails to compile with:
-            // error X3500: array reference cannot be used as an l-value; not natively
-            // addressable
-            if (!ContainsStructArrayIndex(assign_stmt->lhs)) {
-                return nullptr;
+        bool made_changes = false;
+
+        for (auto* node : ctx.src->ASTNodes().Objects()) {
+            if (auto* assign_stmt = node->As<ast::AssignmentStatement>()) {
+                // Process if it's an assignment statement to a dynamically indexed array
+                // within a struct on a function or private storage variable. This
+                // specific use-case is what FXC fails to compile with:
+                // error X3500: array reference cannot be used as an l-value; not natively
+                // addressable
+                if (!ContainsStructArrayIndex(assign_stmt->lhs)) {
+                    continue;
+                }
+                auto og = GetOriginatingTypeAndAddressSpace(assign_stmt);
+                if (!(og.first->Is<sem::Struct>() && (og.second == ast::AddressSpace::kFunction ||
+                                                      og.second == ast::AddressSpace::kPrivate))) {
+                    continue;
+                }
+
+                ctx.Replace(assign_stmt, [&, assign_stmt] {
+                    // Reset shared state for this assignment statement
+                    s = Shared{};
+
+                    const ast::Expression* new_lhs = nullptr;
+                    {
+                        TINT_SCOPED_ASSIGNMENT(s.process_nested_nodes, true);
+                        new_lhs = ctx.Clone(assign_stmt->lhs);
+                    }
+
+                    auto* new_assign_stmt = b.Assign(new_lhs, ctx.Clone(assign_stmt->rhs));
+
+                    // Combine insert_before_stmts + new_assign_stmt + insert_after_stmts into
+                    // a block and return it
+                    auto stmts = std::move(s.insert_before_stmts);
+                    stmts.Reserve(1 + s.insert_after_stmts.Length());
+                    stmts.Push(new_assign_stmt);
+                    for (auto* stmt : s.insert_after_stmts) {
+                        stmts.Push(stmt);
+                    }
+
+                    return b.Block(std::move(stmts));
+                });
+
+                made_changes = true;
             }
-            auto og = GetOriginatingTypeAndAddressSpace(assign_stmt);
-            if (!(og.first->Is<sem::Struct>() && (og.second == ast::AddressSpace::kFunction ||
-                                                  og.second == ast::AddressSpace::kPrivate))) {
-                return nullptr;
-            }
+        }
 
-            // Reset shared state for this assignment statement
-            s = Shared{};
-
-            const ast::Expression* new_lhs = nullptr;
-            {
-                TINT_SCOPED_ASSIGNMENT(s.process_nested_nodes, true);
-                new_lhs = ctx.Clone(assign_stmt->lhs);
-            }
-
-            auto* new_assign_stmt = b.Assign(new_lhs, ctx.Clone(assign_stmt->rhs));
-
-            // Combine insert_before_stmts + new_assign_stmt + insert_after_stmts into
-            // a block and return it
-            auto stmts = std::move(s.insert_before_stmts);
-            stmts.Reserve(1 + s.insert_after_stmts.Length());
-            stmts.Push(new_assign_stmt);
-            for (auto* stmt : s.insert_after_stmts) {
-                stmts.Push(stmt);
-            }
-
-            return b.Block(std::move(stmts));
-        });
+        if (!made_changes) {
+            return SkipTransform;
+        }
 
         ctx.ReplaceAll(
             [&](const ast::IndexAccessorExpression* index_access) -> const ast::Expression* {
