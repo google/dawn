@@ -16,13 +16,13 @@ void main_inner(uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
       const uint i_1 = idx;
-      const str tint_symbol_2 = (str)0;
-      S[i_1] = tint_symbol_2;
+      const str tint_symbol_3 = (str)0;
+      S[i_1] = tint_symbol_3;
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  const uint tint_symbol_3[1] = {2u};
-  const str r = func_S_X(tint_symbol_3);
+  const uint tint_symbol_2[1] = {2u};
+  const str r = func_S_X(tint_symbol_2);
 }
 
 [numthreads(1, 1, 1)]

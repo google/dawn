@@ -24,11 +24,18 @@ using SimplifyPointersTest = TransformTest;
 
 TEST_F(SimplifyPointersTest, EmptyModule) {
     auto* src = "";
-    auto* expect = "";
 
-    auto got = Run<Unshadow, SimplifyPointers>(src);
+    EXPECT_FALSE(ShouldRun<SimplifyPointers>(src));
+}
 
-    EXPECT_EQ(expect, str(got));
+TEST_F(SimplifyPointersTest, NoAddressOf) {
+    auto* src = R"(
+fn f(p : ptr<function, i32>) {
+  var v : i32;
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<SimplifyPointers>(src));
 }
 
 TEST_F(SimplifyPointersTest, FoldPointer) {
