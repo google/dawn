@@ -1454,14 +1454,19 @@ void DawnTestBase::MapSlotsSynchronously() {
 
 // static
 void DawnTestBase::SlotMapCallback(WGPUBufferMapAsyncStatus status, void* userdata_) {
-    DAWN_ASSERT(status == WGPUBufferMapAsyncStatus_Success);
-
+    DAWN_ASSERT(status == WGPUBufferMapAsyncStatus_Success ||
+                status == WGPUBufferMapAsyncStatus_DeviceLost);
     std::unique_ptr<MapReadUserdata> userdata(static_cast<MapReadUserdata*>(userdata_));
     DawnTestBase* test = userdata->test;
-    ReadbackSlot* slot = &test->mReadbackSlots[userdata->slot];
-
-    slot->mappedData = slot->buffer.GetConstMappedRange();
     test->mNumPendingMapOperations--;
+
+    ReadbackSlot* slot = &test->mReadbackSlots[userdata->slot];
+    if (status == WGPUBufferMapAsyncStatus_Success) {
+        slot->mappedData = slot->buffer.GetConstMappedRange();
+        ASSERT(slot->mappedData != nullptr);
+    } else {
+        slot->mappedData = nullptr;
+    }
 }
 
 void DawnTestBase::ResolveExpectations() {
@@ -1471,6 +1476,13 @@ void DawnTestBase::ResolveExpectations() {
         // Get a pointer to the mapped copy of the data for the expectation.
         const char* data =
             static_cast<const char*>(mReadbackSlots[expectation.readbackSlot].mappedData);
+
+        // Handle the case where the device was lost so the expected data couldn't be read back.
+        if (data == nullptr) {
+            dawn::InfoLog() << "Skipping deferred expectation because the device was lost";
+            continue;
+        }
+
         data += expectation.readbackOffset;
 
         uint32_t size;
