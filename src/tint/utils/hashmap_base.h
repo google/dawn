@@ -291,24 +291,26 @@ class HashmapBase {
         // Shuffle the entries backwards until we either find a free slot, or a slot that has zero
         // distance.
         Slot* prev = nullptr;
-        Scan(start, [&](size_t, size_t index) {
+
+        const auto count = slots_.Length();
+        for (size_t distance = 0, index = start; distance < count; distance++) {
             auto& slot = slots_[index];
             if (prev) {
                 // note: `distance == 0` also includes empty slots.
                 if (slot.distance == 0) {
                     // Clear the previous slot, and stop shuffling.
                     *prev = {};
-                    return Action::kStop;
-                } else {
-                    // Shuffle the slot backwards.
-                    prev->entry = std::move(slot.entry);
-                    prev->hash = slot.hash;
-                    prev->distance = slot.distance - 1;
+                    break;
                 }
+                // Shuffle the slot backwards.
+                prev->entry = std::move(slot.entry);
+                prev->hash = slot.hash;
+                prev->distance = slot.distance - 1;
             }
             prev = &slot;
-            return Action::kContinue;
-        });
+
+            index = (index == count - 1) ? 0 : index + 1;
+        }
 
         // Entry was removed.
         count_--;
@@ -438,8 +440,8 @@ class HashmapBase {
             }
         };
 
-        PutResult result{};
-        Scan(hash.scan_start, [&](size_t distance, size_t index) {
+        const auto count = slots_.Length();
+        for (size_t distance = 0, index = hash.scan_start; distance < count; distance++) {
             auto& slot = slots_[index];
             if (!slot.entry.has_value()) {
                 // Found an empty slot.
@@ -449,8 +451,7 @@ class HashmapBase {
                 slot.distance = distance;
                 count_++;
                 generation_++;
-                result = PutResult{MapAction::kAdded, ValueOf(*slot.entry)};
-                return Action::kStop;
+                return PutResult{MapAction::kAdded, ValueOf(*slot.entry)};
             }
 
             // Slot has an entry
@@ -460,11 +461,10 @@ class HashmapBase {
                 if constexpr (MODE == PutMode::kReplace) {
                     slot.entry = make_entry();
                     generation_++;
-                    result = PutResult{MapAction::kReplaced, ValueOf(*slot.entry)};
+                    return PutResult{MapAction::kReplaced, ValueOf(*slot.entry)};
                 } else {
-                    result = PutResult{MapAction::kKeptExisting, ValueOf(*slot.entry)};
+                    return PutResult{MapAction::kKeptExisting, ValueOf(*slot.entry)};
                 }
-                return Action::kStop;
             }
 
             if (slot.distance < distance) {
@@ -480,47 +480,15 @@ class HashmapBase {
 
                 count_++;
                 generation_++;
-                result = PutResult{MapAction::kAdded, ValueOf(*slot.entry)};
-
-                return Action::kStop;
+                return PutResult{MapAction::kAdded, ValueOf(*slot.entry)};
             }
-            return Action::kContinue;
-        });
 
-        return result;
-    }
-
-    /// Return type of the Scan() callback.
-    enum class Action {
-        /// Continue scanning for a slot
-        kContinue,
-        /// Immediately stop scanning for a slot
-        kStop,
-    };
-
-    /// Sequentially visits each of the slots starting with the slot with the index @p start,
-    /// calling the callback function @p f for each slot until @p f returns Action::kStop.
-    /// @param start the index of the first slot to start scanning from.
-    /// @param f the callback function which:
-    /// * must be a function with the signature `Action(size_t distance, size_t index)`.
-    /// * must return Action::kStop within one whole cycle of the slots.
-    template <typename F>
-    void Scan(size_t start, F&& f) const {
-        size_t distance = 0;
-        for (size_t index = start; index < slots_.Length(); index++) {
-            if (f(distance, index) == Action::kStop) {
-                return;
-            }
-            distance++;
+            index = (index == count - 1) ? 0 : index + 1;
         }
-        for (size_t index = 0; index < start; index++) {
-            if (f(distance, index) == Action::kStop) {
-                return;
-            }
-            distance++;
-        }
+
         tint::diag::List diags;
-        TINT_ICE(Utils, diags) << "HashmapBase::Scan() looped entire map without finding a slot";
+        TINT_ICE(Utils, diags) << "HashmapBase::Put() looped entire map without finding a slot";
+        return PutResult{};
     }
 
     /// HashResult is the return value of Hash()
@@ -546,45 +514,44 @@ class HashmapBase {
     /// if found, the index of the slot that holds the key.
     std::tuple<bool, size_t> IndexOf(const Key& key) const {
         const auto hash = Hash(key);
-
-        bool found = false;
-        size_t idx = 0;
-
-        Scan(hash.scan_start, [&](size_t distance, size_t index) {
+        const auto count = slots_.Length();
+        for (size_t distance = 0, index = hash.scan_start; distance < count; distance++) {
             auto& slot = slots_[index];
             if (!slot.entry.has_value()) {
-                return Action::kStop;
+                return {/* found */ false, /* index */ 0};
             }
             if (slot.Equals(hash.code, key)) {
-                found = true;
-                idx = index;
-                return Action::kStop;
+                return {/* found */ true, index};
             }
             if (slot.distance < distance) {
-                // If the slot distance is less than the current probe distance, then the slot must
-                // be for entry that has an index that comes after key. In this situation, we know
-                // that the map does not contain the key, as it would have been found before this
-                // slot. The "Lookup" section of https://programming.guide/robin-hood-hashing.html
-                // suggests that the condition should inverted, but this is wrong.
-                return Action::kStop;
+                // If the slot distance is less than the current probe distance, then the slot
+                // must be for entry that has an index that comes after key. In this situation,
+                // we know that the map does not contain the key, as it would have been found
+                // before this slot. The "Lookup" section of
+                // https://programming.guide/robin-hood-hashing.html suggests that the condition
+                // should inverted, but this is wrong.
+                return {/* found */ false, /* index */ 0};
             }
-            return Action::kContinue;
-        });
+            index = (index == count - 1) ? 0 : index + 1;
+        }
 
-        return {found, idx};
+        tint::diag::List diags;
+        TINT_ICE(Utils, diags) << "HashmapBase::IndexOf() looped entire map without finding a slot";
+        return {/* found */ false, /* index */ 0};
     }
 
     /// Shuffles slots for an insertion that has been placed one slot before `start`.
     /// @param start the index of the first slot to start shuffling.
     /// @param evicted the slot content that was evicted for the insertion.
     void InsertShuffle(size_t start, Slot&& evicted) {
-        Scan(start, [&](size_t, size_t index) {
+        const auto count = slots_.Length();
+        for (size_t distance = 0, index = start; distance < count; distance++) {
             auto& slot = slots_[index];
 
             if (!slot.entry.has_value()) {
                 // Empty slot found for evicted.
                 slot = std::move(evicted);
-                return Action::kStop;  //  We're done.
+                return;  //  We're done.
             }
 
             if (slot.distance < evicted.distance) {
@@ -596,8 +563,8 @@ class HashmapBase {
             // evicted moves further from the target slot...
             evicted.distance++;
 
-            return Action::kContinue;
-        });
+            index = (index == count - 1) ? 0 : index + 1;
+        }
     }
 
     /// @param count the number of new entries in the map
