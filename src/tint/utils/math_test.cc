@@ -57,6 +57,70 @@ TEST(MathTests, IsPowerOfTwo) {
     EXPECT_EQ(IsPowerOfTwo(9), false);
 }
 
+TEST(MathTests, Log2) {
+    EXPECT_EQ(Log2(1), 0u);
+    EXPECT_EQ(Log2(2), 1u);
+    EXPECT_EQ(Log2(3), 1u);
+    EXPECT_EQ(Log2(4), 2u);
+    EXPECT_EQ(Log2(5), 2u);
+    EXPECT_EQ(Log2(6), 2u);
+    EXPECT_EQ(Log2(7), 2u);
+    EXPECT_EQ(Log2(8), 3u);
+    EXPECT_EQ(Log2(9), 3u);
+    EXPECT_EQ(Log2(0x7fffffffu), 30u);
+    EXPECT_EQ(Log2(0x80000000u), 31u);
+    EXPECT_EQ(Log2(0x80000001u), 31u);
+    EXPECT_EQ(Log2(0x7fffffffffffffffu), 62u);
+    EXPECT_EQ(Log2(0x8000000000000000u), 63u);
+
+    static_assert(Log2(1) == 0u);
+    static_assert(Log2(2) == 1u);
+    static_assert(Log2(3) == 1u);
+    static_assert(Log2(4) == 2u);
+    static_assert(Log2(5) == 2u);
+    static_assert(Log2(6) == 2u);
+    static_assert(Log2(7) == 2u);
+    static_assert(Log2(8) == 3u);
+    static_assert(Log2(9) == 3u);
+    static_assert(Log2(0x7fffffffu) == 30u);
+    static_assert(Log2(0x80000000u) == 31u);
+    static_assert(Log2(0x80000001u) == 31u);
+    static_assert(Log2(0x7fffffffffffffffu) == 62u);
+    static_assert(Log2(0x8000000000000000u) == 63u);
+}
+
+TEST(MathTests, NextPowerOfTwo) {
+    EXPECT_EQ(NextPowerOfTwo(0), 1u);
+    EXPECT_EQ(NextPowerOfTwo(1), 1u);
+    EXPECT_EQ(NextPowerOfTwo(2), 2u);
+    EXPECT_EQ(NextPowerOfTwo(3), 4u);
+    EXPECT_EQ(NextPowerOfTwo(4), 4u);
+    EXPECT_EQ(NextPowerOfTwo(5), 8u);
+    EXPECT_EQ(NextPowerOfTwo(6), 8u);
+    EXPECT_EQ(NextPowerOfTwo(7), 8u);
+    EXPECT_EQ(NextPowerOfTwo(8), 8u);
+    EXPECT_EQ(NextPowerOfTwo(9), 16u);
+    EXPECT_EQ(NextPowerOfTwo(0x7fffffffu), 0x80000000u);
+    EXPECT_EQ(NextPowerOfTwo(0x80000000u), 0x80000000u);
+    EXPECT_EQ(NextPowerOfTwo(0x80000001u), 0x100000000u);
+    EXPECT_EQ(NextPowerOfTwo(0x7fffffffffffffffu), 0x8000000000000000u);
+
+    static_assert(NextPowerOfTwo(0) == 1u);
+    static_assert(NextPowerOfTwo(1) == 1u);
+    static_assert(NextPowerOfTwo(2) == 2u);
+    static_assert(NextPowerOfTwo(3) == 4u);
+    static_assert(NextPowerOfTwo(4) == 4u);
+    static_assert(NextPowerOfTwo(5) == 8u);
+    static_assert(NextPowerOfTwo(6) == 8u);
+    static_assert(NextPowerOfTwo(7) == 8u);
+    static_assert(NextPowerOfTwo(8) == 8u);
+    static_assert(NextPowerOfTwo(9) == 16u);
+    static_assert(NextPowerOfTwo(0x7fffffffu) == 0x80000000u);
+    static_assert(NextPowerOfTwo(0x80000000u) == 0x80000000u);
+    static_assert(NextPowerOfTwo(0x80000001u) == 0x100000000u);
+    static_assert(NextPowerOfTwo(0x7fffffffffffffffu) == 0x8000000000000000u);
+}
+
 TEST(MathTests, MaxAlignOf) {
     EXPECT_EQ(MaxAlignOf(0u), 1u);
     EXPECT_EQ(MaxAlignOf(1u), 1u);
