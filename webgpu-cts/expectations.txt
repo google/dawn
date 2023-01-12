@@ -169,11 +169,6 @@ crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp
 crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
 
 ################################################################################
-# compilation_info failures
-################################################################################
-crbug.com/dawn/1357 webgpu:api,operation,shader_module,compilation_info:offset_and_length:valid=false;name="unicode" [ Failure ]
-
-################################################################################
 # atan2 shader execution failures
 ################################################################################
 crbug.com/tint/1524 [ monterey ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="const";vectorize="_undef_" [ Failure ]
