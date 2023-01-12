@@ -46,9 +46,11 @@ src/common/tools/gen_cache.ts
 src/common/tools/gen_listings.ts
 src/common/tools/gen_wpt_cts_html.ts
 src/common/tools/presubmit.ts
+src/common/tools/run_wpt_ref_tests.ts
 src/common/tools/version.ts
 src/common/util/collect_garbage.ts
 src/common/util/preprocessor.ts
+src/common/util/wpt_reftest_wait.ts
 src/unittests/unit_test.ts
 src/demo/a.spec.ts
 src/demo/json.spec.ts
