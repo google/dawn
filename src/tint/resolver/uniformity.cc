@@ -240,9 +240,9 @@ struct FunctionInfo {
         /// The type of this control flow construct.
         std::string type;
         /// The input values for local variables at the start of this construct.
-        utils::Hashmap<const sem::Variable*, Node*, 8> var_in_nodes;
+        utils::Hashmap<const sem::Variable*, Node*, 4> var_in_nodes;
         /// The exit values for local variables at the end of this construct.
-        utils::Hashmap<const sem::Variable*, Node*, 8> var_exit_nodes;
+        utils::Hashmap<const sem::Variable*, Node*, 4> var_exit_nodes;
     };
 
     /// @returns a LoopSwitchInfo for the given statement, allocating the LoopSwitchInfo if this is
@@ -497,7 +497,7 @@ class UniformityGraph {
             },
 
             [&](const ast::BlockStatement* b) {
-                utils::Hashmap<const sem::Variable*, Node*, 8> scoped_assignments;
+                utils::Hashmap<const sem::Variable*, Node*, 4> scoped_assignments;
                 {
                     // Push a new scope for variable assignments in the block.
                     current_function_->variables.Push();
@@ -819,15 +819,15 @@ class UniformityGraph {
                 v->affects_control_flow = true;
                 v->AddEdge(v_cond);
 
-                utils::Hashmap<const sem::Variable*, Node*, 8> true_vars;
-                utils::Hashmap<const sem::Variable*, Node*, 8> false_vars;
+                utils::Hashmap<const sem::Variable*, Node*, 4> true_vars;
+                utils::Hashmap<const sem::Variable*, Node*, 4> false_vars;
 
                 // Helper to process a statement with a new scope for variable assignments.
                 // Populates `assigned_vars` with new nodes for any variables that are assigned in
                 // this statement.
                 auto process_in_scope =
                     [&](Node* cf_in, const ast::Statement* s,
-                        utils::Hashmap<const sem::Variable*, Node*, 8>& assigned_vars) {
+                        utils::Hashmap<const sem::Variable*, Node*, 4>& assigned_vars) {
                         // Push a new scope for variable assignments.
                         current_function_->variables.Push();
 
