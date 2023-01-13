@@ -15,6 +15,7 @@
 #include "src/tint/resolver/uniformity.h"
 
 #include <limits>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -1651,9 +1652,9 @@ class UniformityGraph {
     /// @param function the function being analyzed
     /// @param required_to_be_uniform the node to traverse from
     /// @param may_be_non_uniform the node to traverse to
-    void ShowCauseOfNonUniformity(FunctionInfo& function,
-                                  Node* required_to_be_uniform,
-                                  Node* may_be_non_uniform) {
+    void ShowControlFlowDivergence(FunctionInfo& function,
+                                   Node* required_to_be_uniform,
+                                   Node* may_be_non_uniform) {
         // Traverse the graph to generate a path from the node to the source of non-uniformity.
         function.ResetVisited();
         Traverse(required_to_be_uniform);
@@ -1667,7 +1668,7 @@ class UniformityGraph {
             non_uniform_source, [](Node* node) { return node->affects_control_flow; });
         if (control_flow) {
             diagnostics_.add_note(diag::System::Resolver,
-                                  "control flow depends on non-uniform value",
+                                  "control flow depends on possibly non-uniform value",
                                   control_flow->ast->source);
             // TODO(jrprice): There are cases where the function with uniformity requirements is not
             // actually inside this control flow construct, for example:
@@ -1677,7 +1678,15 @@ class UniformityGraph {
             // the actual cause of divergence.
         }
 
-        auto get_var_type = [&](const sem::Variable* var) {
+        ShowSourceOfNonUniformity(non_uniform_source);
+    }
+
+    /// Add a diagnostic note to show the origin of a non-uniform value.
+    /// @param non_uniform_source the node that represents a non-uniform value
+    void ShowSourceOfNonUniformity(Node* non_uniform_source) {
+        TINT_ASSERT(Resolver, non_uniform_source);
+
+        auto var_type = [&](const sem::Variable* var) {
             switch (var->AddressSpace()) {
                 case ast::AddressSpace::kStorage:
                     return "read_write storage buffer ";
@@ -1686,17 +1695,18 @@ class UniformityGraph {
                 case ast::AddressSpace::kPrivate:
                     return "module-scope private variable ";
                 default:
-                    if (ast::HasAttribute<ast::BuiltinAttribute>(var->Declaration()->attributes)) {
-                        return "builtin ";
-                    } else if (ast::HasAttribute<ast::LocationAttribute>(
-                                   var->Declaration()->attributes)) {
-                        return "user-defined input ";
-                    } else {
-                        // TODO(jrprice): Provide more info for this case.
-                    }
-                    break;
+                    return "";
             }
-            return "";
+        };
+        auto param_type = [&](const sem::Parameter* param) {
+            if (ast::HasAttribute<ast::BuiltinAttribute>(param->Declaration()->attributes)) {
+                return "builtin ";
+            } else if (ast::HasAttribute<ast::LocationAttribute>(
+                           param->Declaration()->attributes)) {
+                return "user-defined input ";
+            } else {
+                return "parameter ";
+            }
         };
 
         // Show the source of the non-uniform value.
@@ -1704,19 +1714,23 @@ class UniformityGraph {
             non_uniform_source->ast,
             [&](const ast::IdentifierExpression* ident) {
                 auto* var = sem_.Get(ident)->UnwrapLoad()->As<sem::VariableUser>()->Variable();
-                std::string var_type = get_var_type(var);
-                diagnostics_.add_note(diag::System::Resolver,
-                                      "reading from " + var_type + "'" + NameFor(ident) +
-                                          "' may result in a non-uniform value",
-                                      ident->source);
+                std::ostringstream ss;
+                if (auto* param = var->As<sem::Parameter>()) {
+                    auto* func = param->Owner()->As<sem::Function>();
+                    ss << param_type(param) << "'" << NameFor(ident) << "' of '"
+                       << NameFor(func->Declaration()) << "' may be non-uniform";
+                } else {
+                    ss << "reading from " << var_type(var) << "'" << NameFor(ident)
+                       << "' may result in a non-uniform value";
+                }
+                diagnostics_.add_note(diag::System::Resolver, ss.str(), ident->source);
             },
             [&](const ast::Variable* v) {
                 auto* var = sem_.Get(v);
-                std::string var_type = get_var_type(var);
-                diagnostics_.add_note(diag::System::Resolver,
-                                      "reading from " + var_type + "'" + NameFor(v) +
-                                          "' may result in a non-uniform value",
-                                      v->source);
+                std::ostringstream ss;
+                ss << "reading from " << var_type(var) << "'" << NameFor(v)
+                   << "' may result in a non-uniform value";
+                diagnostics_.add_note(diag::System::Resolver, ss.str(), v->source);
             },
             [&](const ast::CallExpression* c) {
                 auto target_name = NameFor(c->target.name);
@@ -1730,11 +1744,10 @@ class UniformityGraph {
                     case Node::kFunctionCallArgumentContents: {
                         auto* arg = c->args[non_uniform_source->arg_index];
                         auto* var = sem_.Get(arg)->RootIdentifier();
-                        std::string var_type = get_var_type(var);
-                        diagnostics_.add_note(diag::System::Resolver,
-                                              "reading from " + var_type + "'" +
-                                                  NameFor(var->Declaration()) +
-                                                  "' may result in a non-uniform value",
+                        std::ostringstream ss;
+                        ss << "reading from " << var_type(var) << "'" << NameFor(var->Declaration())
+                           << "' may result in a non-uniform value";
+                        diagnostics_.add_note(diag::System::Resolver, ss.str(),
                                               var->Declaration()->source);
                         break;
                     }
@@ -1750,7 +1763,7 @@ class UniformityGraph {
                     case Node::kFunctionCallPointerArgumentResult: {
                         diagnostics_.add_note(
                             diag::System::Resolver,
-                            "pointer contents may become non-uniform after calling '" +
+                            "contents of pointer may become non-uniform after calling '" +
                                 target_name + "'",
                             c->args[non_uniform_source->arg_index]->source);
                         break;
@@ -1773,11 +1786,9 @@ class UniformityGraph {
     /// Generate an error message for a uniformity issue.
     /// @param function the function that the diagnostic is being produced for
     /// @param source_node the node that has caused a uniformity issue in `function`
-    /// @param note `true` if the diagnostic should be emitted as a note
-    void MakeError(FunctionInfo& function, Node* source_node, bool note = false) {
-        // Helper to produce a diagnostic message with the severity required by this invocation of
-        // the `MakeError` function.
-        auto report = [&](Source source, std::string msg) {
+    void MakeError(FunctionInfo& function, Node* source_node) {
+        // Helper to produce a diagnostic message, as a note or with the global failure severity.
+        auto report = [&](Source source, std::string msg, bool note) {
             diag::Diagnostic error{};
             auto failureSeverity =
                 kUniformityFailuresAsError ? diag::Severity::Error : diag::Severity::Warning;
@@ -1802,77 +1813,54 @@ class UniformityGraph {
         auto* call = cause->ast->As<ast::CallExpression>();
         TINT_ASSERT(Resolver, call);
         auto* target = SemCall(call)->Target();
+        auto func_name = NameFor(call->target.name);
 
-        std::string func_name;
-        if (auto* builtin = target->As<sem::Builtin>()) {
-            func_name = builtin->str();
-        } else if (auto* user = target->As<sem::Function>()) {
-            func_name = NameFor(user->Declaration());
-        }
+        if (cause->type == Node::kFunctionCallArgumentValue ||
+            cause->type == Node::kFunctionCallArgumentContents) {
+            bool is_value = (cause->type == Node::kFunctionCallArgumentValue);
 
-        if (cause->type == Node::kFunctionCallArgumentValue) {
-            // The requirement was on a function parameter.
-            auto* ast_param = target->Parameters()[cause->arg_index]->Declaration();
-            std::string param_name;
-            if (ast_param) {
-                param_name = " '" + NameFor(ast_param) + "'";
+            auto* user_func = target->As<sem::Function>();
+            if (user_func) {
+                // Recurse into the called function to show the reason for the requirement.
+                auto next_function = functions_.Find(user_func->Declaration());
+                auto& param_info = next_function->parameters[cause->arg_index];
+                MakeError(*next_function,
+                          is_value ? param_info.value : param_info.ptr_input_contents);
             }
-            report(call->args[cause->arg_index]->source,
-                   "parameter" + param_name + " of '" + func_name + "' must be uniform");
 
-            // If this is a call to a user-defined function, add a note to show the reason that the
-            // parameter is required to be uniform.
-            if (auto* user = target->As<sem::Function>()) {
-                auto next_function = functions_.Find(user->Declaration());
-                Node* next_cause = next_function->parameters[cause->arg_index].value;
-                MakeError(*next_function, next_cause, true);
-            }
-        } else if (cause->type == Node::kFunctionCallArgumentContents) {
-            // The requirement was on the contents of a function parameter.
-            auto param_name = NameFor(target->Parameters()[cause->arg_index]->Declaration());
-            report(call->args[cause->arg_index]->source, "contents of parameter '" + param_name +
-                                                             "' of '" + func_name +
-                                                             "' must be uniform");
+            // Show the place where the non-uniform argument was passed.
+            // If this is a builtin, this will be the trigger location for the failure.
+            std::ostringstream ss;
+            ss << "possibly non-uniform value passed" << (is_value ? "" : " via pointer")
+               << " here";
+            report(call->args[cause->arg_index]->source, ss.str(), /* note */ user_func != nullptr);
 
-            // If this is a call to a user-defined function, add a note to show the reason that the
-            // parameter is required to be uniform.
-            if (auto* user = target->As<sem::Function>()) {
-                auto next_function = functions_.Find(user->Declaration());
-                Node* next_cause = next_function->parameters[cause->arg_index].ptr_input_contents;
-                MakeError(*next_function, next_cause, true);
-            }
+            // Show the origin of non-uniformity for the value or data that is being passed.
+            ShowSourceOfNonUniformity(source_node->visited_from);
         } else {
-            // The requirement was on a function callsite.
-            report(call->source,
-                   "'" + func_name + "' must only be called from uniform control flow");
-
-            // If this is a call to a user-defined function, add a note to show the builtin that
-            // causes the uniformity requirement.
-            auto* innermost_call = FindBuiltinThatRequiresUniformity(call);
-            if (innermost_call != call) {
-                auto* sem_call = SemCall(call);
-                auto* sem_innermost_call = SemCall(innermost_call);
-
-                // Determine whether the builtin is being called directly or indirectly.
-                bool indirect = false;
-                if (sem_call->Target()->As<sem::Function>() !=
-                    sem_innermost_call->Stmt()->Function()) {
-                    indirect = true;
-                }
-
-                auto* builtin = sem_innermost_call->Target()->As<sem::Builtin>();
-                diagnostics_.add_note(diag::System::Resolver,
-                                      "'" + func_name + "' requires uniformity because it " +
-                                          (indirect ? "indirectly " : "") + "calls " +
-                                          builtin->str(),
-                                      innermost_call->source);
+            auto* builtin_call = FindBuiltinThatRequiresUniformity(call);
+            {
+                // Show a builtin was reachable from this call (which may be the call itself).
+                // This will be the trigger location for the failure.
+                std::ostringstream ss;
+                ss << "'" << NameFor(builtin_call->target.name)
+                   << "' must only be called from uniform control flow";
+                report(builtin_call->source, ss.str(), /* note */ false);
             }
-        }
 
-        // Show the cause of non-uniformity (starting at the top-level error).
-        if (!note) {
-            ShowCauseOfNonUniformity(function, function.required_to_be_uniform,
-                                     function.may_be_non_uniform);
+            if (builtin_call != call) {
+                // The call was to a user function, so show that call too.
+                std::ostringstream ss;
+                ss << "called ";
+                if (target->As<sem::Function>() != SemCall(builtin_call)->Stmt()->Function()) {
+                    ss << "indirectly ";
+                }
+                ss << "by '" << func_name << "' from '" << function.name << "'";
+                report(call->source, ss.str(), /* note */ true);
+            }
+
+            // Show the point at which control-flow depends on a non-uniform value.
+            ShowControlFlowDivergence(function, cause, source_node);
         }
     }
 

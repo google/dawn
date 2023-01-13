@@ -326,7 +326,6 @@ fn foo() {
     bool should_pass = !(MayBeNonUniform(condition) && RequiredToBeUniform(function));
     RunTest(src, should_pass);
     if (!should_pass) {
-        EXPECT_THAT(error_, ::testing::StartsWith("test:31:5 warning: "));
         EXPECT_THAT(error_, ::testing::HasSubstr("must only be called from uniform control flow"));
     }
 }
@@ -408,13 +407,21 @@ fn bar() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:11:7 warning: parameter 'i' of 'foo' must be uniform
-  foo(rw);
-      ^^
-
-test:6:5 note: 'workgroupBarrier' must only be called from uniform control flow
+              R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on possibly non-uniform value
+  if (i == 0) {
+  ^^
+
+test:5:7 note: parameter 'i' of 'foo' may be non-uniform
+  if (i == 0) {
+      ^
+
+test:11:7 note: possibly non-uniform value passed here
+  foo(rw);
+      ^^
 
 test:11:7 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   foo(rw);
@@ -465,7 +472,7 @@ fn bar() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (foo(rw) == 7) {
   ^^
 
@@ -508,11 +515,11 @@ fn main(@builtin()" + GetParam().name +
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:4:3 note: control flow depends on non-uniform value
+test:4:3 note: control flow depends on possibly non-uniform value
   if (all(vec3(b) == vec3(0u))) {
   ^^
 
-test:4:16 note: reading from builtin 'b' may result in a non-uniform value
+test:4:16 note: builtin 'b' of 'main' may be non-uniform
   if (all(vec3(b) == vec3(0u))) {
                ^
 )");
@@ -543,11 +550,11 @@ fn main(s : S) {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (all(vec3(s.b) == vec3(0u))) {
   ^^
 
-test:8:16 note: reading from 's' may result in a non-uniform value
+test:8:16 note: parameter 's' of 'main' may be non-uniform
   if (all(vec3(s.b) == vec3(0u))) {
                ^
 )");
@@ -588,11 +595,11 @@ fn main(s : S) {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (s.num_groups.x == 0u) {
   ^^
 
-test:9:7 note: reading from 's' may result in a non-uniform value
+test:9:7 note: parameter 's' of 'main' may be non-uniform
   if (s.num_groups.x == 0u) {
       ^
 )");
@@ -619,11 +626,11 @@ fn main(@builtin()" + GetParam().name +
     dpdx(0.5);
     ^^^^
 
-test:4:3 note: control flow depends on non-uniform value
+test:4:3 note: control flow depends on possibly non-uniform value
   if (u32(vec4(b).x) == 0u) {
   ^^
 
-test:4:16 note: reading from builtin 'b' may result in a non-uniform value
+test:4:16 note: builtin 'b' of 'main' may be non-uniform
   if (u32(vec4(b).x) == 0u) {
                ^
 )");
@@ -653,11 +660,11 @@ fn main(s : S) {
     dpdx(0.5);
     ^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (u32(vec4(s.b).x) == 0u) {
   ^^
 
-test:8:16 note: reading from 's' may result in a non-uniform value
+test:8:16 note: parameter 's' of 'main' may be non-uniform
   if (u32(vec4(s.b).x) == 0u) {
                ^
 )");
@@ -690,11 +697,11 @@ fn main(@location(0) l : f32) {
     dpdx(0.5);
     ^^^^
 
-test:4:3 note: control flow depends on non-uniform value
+test:4:3 note: control flow depends on possibly non-uniform value
   if (l == 0.0) {
   ^^
 
-test:4:7 note: reading from user-defined input 'l' may result in a non-uniform value
+test:4:7 note: user-defined input 'l' of 'main' may be non-uniform
   if (l == 0.0) {
       ^
 )");
@@ -720,11 +727,11 @@ fn main(s : S) {
     dpdx(0.5);
     ^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (s.l == 0.0) {
   ^^
 
-test:8:7 note: reading from 's' may result in a non-uniform value
+test:8:7 note: parameter 's' of 'main' may be non-uniform
   if (s.l == 0.0) {
       ^
 )");
@@ -961,7 +968,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:10:7 note: control flow depends on non-uniform value
+test:10:7 note: control flow depends on possibly non-uniform value
       break if (i == n);
       ^^^^^
 
@@ -1012,7 +1019,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:10:7 note: control flow depends on non-uniform value
+test:10:7 note: control flow depends on possibly non-uniform value
       break if (i == n);
       ^^^^^
 
@@ -1080,7 +1087,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:7:5 note: control flow depends on non-uniform value
+test:7:5 note: control flow depends on possibly non-uniform value
     if (v == 0) {
     ^^
 
@@ -1164,7 +1171,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:13:5 note: control flow depends on non-uniform value
+test:13:5 note: control flow depends on possibly non-uniform value
     if (v == 0) {
     ^^
 
@@ -1202,7 +1209,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:14:3 note: control flow depends on non-uniform value
+test:14:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -1245,7 +1252,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:19:3 note: control flow depends on non-uniform value
+test:19:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -1319,7 +1326,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:19:3 note: control flow depends on non-uniform value
+test:19:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -1360,7 +1367,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:7:5 note: control flow depends on non-uniform value
+test:7:5 note: control flow depends on possibly non-uniform value
     if (v == 0) {
     ^^
 
@@ -1404,7 +1411,7 @@ fn foo() {
         workgroupBarrier();
         ^^^^^^^^^^^^^^^^
 
-test:15:7 note: control flow depends on non-uniform value
+test:15:7 note: control flow depends on possibly non-uniform value
       if (v == 0) {
       ^^
 
@@ -1445,7 +1452,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:7:5 note: control flow depends on non-uniform value
+test:7:5 note: control flow depends on possibly non-uniform value
     if (v == 0) {
     ^^
 
@@ -1486,7 +1493,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:7:5 note: control flow depends on non-uniform value
+test:7:5 note: control flow depends on possibly non-uniform value
     if (v == 0) {
     ^^
 
@@ -1604,7 +1611,7 @@ fn foo() {
         workgroupBarrier();
         ^^^^^^^^^^^^^^^^
 
-test:15:7 note: control flow depends on non-uniform value
+test:15:7 note: control flow depends on possibly non-uniform value
       if (v == 0) {
       ^^
 
@@ -1666,7 +1673,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   for (var i = 0; i < n; i = i + 1) {
   ^^^
 
@@ -1699,7 +1706,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:7:5 note: control flow depends on non-uniform value
+test:7:5 note: control flow depends on possibly non-uniform value
     if (v == 0) {
     ^^
 
@@ -1754,7 +1761,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -1809,7 +1816,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:7:5 note: control flow depends on non-uniform value
+test:7:5 note: control flow depends on possibly non-uniform value
     if (v == 0) {
     ^^
 
@@ -1870,7 +1877,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:14:3 note: control flow depends on non-uniform value
+test:14:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -1915,7 +1922,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:20:3 note: control flow depends on non-uniform value
+test:20:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -1957,7 +1964,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:7:5 note: control flow depends on non-uniform value
+test:7:5 note: control flow depends on possibly non-uniform value
     if (v == 0) {
     ^^
 
@@ -1998,7 +2005,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:7:5 note: control flow depends on non-uniform value
+test:7:5 note: control flow depends on possibly non-uniform value
     if (v == 0) {
     ^^
 
@@ -2035,7 +2042,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   for (var i = 0; i < 10; i++) {
   ^^^
 
@@ -2131,7 +2138,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:6:3 note: control flow depends on non-uniform value
+test:6:3 note: control flow depends on possibly non-uniform value
   while (i < n) {
   ^^^^^
 
@@ -2168,7 +2175,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:8:5 note: control flow depends on non-uniform value
+test:8:5 note: control flow depends on possibly non-uniform value
     if (v == 0) {
     ^^
 
@@ -2233,7 +2240,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:16:3 note: control flow depends on non-uniform value
+test:16:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -2280,7 +2287,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:22:3 note: control flow depends on non-uniform value
+test:22:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -2323,7 +2330,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:8:5 note: control flow depends on non-uniform value
+test:8:5 note: control flow depends on possibly non-uniform value
     if (v == 0) {
     ^^
 
@@ -2366,7 +2373,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:8:5 note: control flow depends on non-uniform value
+test:8:5 note: control flow depends on possibly non-uniform value
     if (v == 0) {
     ^^
 
@@ -2461,7 +2468,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   if (non_uniform == 42) {
   ^^
 
@@ -2489,7 +2496,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   if (non_uniform == 42) {
   ^^
 
@@ -2518,7 +2525,7 @@ fn main() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:34 note: control flow depends on non-uniform value
+test:7:34 note: control flow depends on possibly non-uniform value
   if ((non_uniform_global == 42) && false) {
                                  ^^
 
@@ -2547,7 +2554,7 @@ fn main() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on non-uniform value
+test:7:3 note: control flow depends on possibly non-uniform value
   if (false && (non_uniform_global == 42)) {
   ^^
 
@@ -2576,7 +2583,7 @@ fn main() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:34 note: control flow depends on non-uniform value
+test:7:34 note: control flow depends on possibly non-uniform value
   if ((non_uniform_global == 42) || true) {
                                  ^^
 
@@ -2605,7 +2612,7 @@ fn main() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on non-uniform value
+test:7:3 note: control flow depends on possibly non-uniform value
   if (true || (non_uniform_global == 42)) {
   ^^
 
@@ -2633,7 +2640,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   if (non_uniform == 42) {
   ^^
 
@@ -2664,7 +2671,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on non-uniform value
+test:7:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -2741,7 +2748,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:14:3 note: control flow depends on non-uniform value
+test:14:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -2824,7 +2831,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:11:3 note: control flow depends on non-uniform value
+test:11:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -2861,7 +2868,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:12:3 note: control flow depends on non-uniform value
+test:12:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -3018,7 +3025,7 @@ fn foo() {
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   if (non_uniform == 42) {
   ^^
 
@@ -3055,7 +3062,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   switch (non_uniform) {
   ^^^^^^
 
@@ -3085,7 +3092,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   switch (non_uniform) {
   ^^^^^^
 
@@ -3120,7 +3127,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:8:7 note: control flow depends on non-uniform value
+test:8:7 note: control flow depends on possibly non-uniform value
       if (non_uniform == 42) {
       ^^
 
@@ -3209,7 +3216,7 @@ fn foo() {
         workgroupBarrier();
         ^^^^^^^^^^^^^^^^
 
-test:13:7 note: control flow depends on non-uniform value
+test:13:7 note: control flow depends on possibly non-uniform value
       if (x == 0) {
       ^^
 
@@ -3249,7 +3256,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:18:3 note: control flow depends on non-uniform value
+test:18:3 note: control flow depends on possibly non-uniform value
   if (x == 0) {
   ^^
 
@@ -3315,7 +3322,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:17:3 note: control flow depends on non-uniform value
+test:17:3 note: control flow depends on possibly non-uniform value
   if (x == 0) {
   ^^
 
@@ -3384,7 +3391,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:20:3 note: control flow depends on non-uniform value
+test:20:3 note: control flow depends on possibly non-uniform value
   if (x == 0) {
   ^^
 
@@ -3426,7 +3433,7 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:8:5 note: control flow depends on non-uniform value
+test:8:5 note: control flow depends on possibly non-uniform value
     if (x == 0) {
     ^^
 
@@ -3531,7 +3538,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on non-uniform value
+test:7:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -3561,7 +3568,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -3626,7 +3633,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on non-uniform value
+test:7:3 note: control flow depends on possibly non-uniform value
   if (non_uniform == 0) {
   ^^
 
@@ -3654,7 +3661,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:6:3 note: control flow depends on non-uniform value
+test:6:3 note: control flow depends on possibly non-uniform value
   if (*&v == 0) {
   ^^
 
@@ -3683,7 +3690,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on non-uniform value
+test:7:3 note: control flow depends on possibly non-uniform value
   if (*pv == 0) {
   ^^
 
@@ -3711,13 +3718,21 @@ fn foo() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:12:7 warning: contents of parameter 'p' of 'bar' must be uniform
-  bar(&v);
-      ^
-
-test:6:5 note: 'workgroupBarrier' must only be called from uniform control flow
+              R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on possibly non-uniform value
+  if (*p == 0) {
+  ^^
+
+test:5:8 note: parameter 'p' of 'bar' may be non-uniform
+  if (*p == 0) {
+       ^
+
+test:12:7 note: possibly non-uniform value passed via pointer here
+  bar(&v);
+      ^
 
 test:11:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var v = non_uniform;
@@ -3743,7 +3758,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:6:3 note: control flow depends on non-uniform value
+test:6:3 note: control flow depends on possibly non-uniform value
   if (*pv == 0) {
   ^^
 
@@ -3772,13 +3787,21 @@ fn foo() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:13:7 warning: contents of parameter 'p' of 'bar' must be uniform
-  bar(&non_uniform);
-      ^
-
-test:8:5 note: 'workgroupBarrier' must only be called from uniform control flow
+              R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on possibly non-uniform value
+  if (*p == 0) {
+  ^^
+
+test:7:8 note: parameter 'p' of 'bar' may be non-uniform
+  if (*p == 0) {
+       ^
+
+test:13:7 note: possibly non-uniform value passed via pointer here
+  bar(&non_uniform);
+      ^
 
 test:4:48 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
@@ -3809,7 +3832,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:11:3 note: control flow depends on non-uniform value
+test:11:3 note: control flow depends on possibly non-uniform value
   if (0 == bar(&non_uniform)) {
   ^^
 
@@ -3838,13 +3861,21 @@ fn foo() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:13:7 warning: contents of parameter 'p' of 'bar' must be uniform
-  bar(&v);
-      ^
-
-test:6:5 note: 'workgroupBarrier' must only be called from uniform control flow
+              R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on possibly non-uniform value
+  if (*p == 0) {
+  ^^
+
+test:5:8 note: parameter 'p' of 'bar' may be non-uniform
+  if (*p == 0) {
+       ^
+
+test:13:7 note: possibly non-uniform value passed via pointer here
+  bar(&v);
+      ^
 
 test:12:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var v = non_uniform;
@@ -3871,13 +3902,21 @@ fn foo() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:12:7 warning: contents of parameter 'p' of 'bar' must be uniform
-  bar(&v);
-      ^
-
-test:6:5 note: 'workgroupBarrier' must only be called from uniform control flow
+              R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on possibly non-uniform value
+  if (*p == 0) {
+  ^^
+
+test:5:8 note: parameter 'p' of 'bar' may be non-uniform
+  if (*p == 0) {
+       ^
+
+test:12:7 note: possibly non-uniform value passed via pointer here
+  bar(&v);
+      ^
 
 test:11:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var v = non_uniform;
@@ -3950,7 +3989,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (*p == 0) {
   ^^
 
@@ -3988,7 +4027,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (*local_p == 0) {
   ^^
 
@@ -4025,17 +4064,29 @@ fn foo() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:21:7 warning: contents of parameter 'p' of 'bar' must be uniform
-  bar(p);
-      ^
+              R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
 
-test:13:7 note: contents of parameter 'p' of 'zoo' must be uniform
+test:7:3 note: control flow depends on possibly non-uniform value
+  if (*p == 0) {
+  ^^
+
+test:7:8 note: parameter 'p' of 'zoo' may be non-uniform
+  if (*p == 0) {
+       ^
+
+test:13:7 note: possibly non-uniform value passed via pointer here
   zoo(p);
       ^
 
-test:8:5 note: 'workgroupBarrier' must only be called from uniform control flow
-    workgroupBarrier();
-    ^^^^^^^^^^^^^^^^
+test:12:8 note: reading from 'p' may result in a non-uniform value
+fn bar(p : ptr<function, i32>) {
+       ^
+
+test:21:7 note: possibly non-uniform value passed via pointer here
+  bar(p);
+      ^
 
 test:20:14 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   let p = &v[non_uniform];
@@ -4065,7 +4116,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:10:3 note: control flow depends on non-uniform value
+test:10:3 note: control flow depends on possibly non-uniform value
   if (*p == 0) {
   ^^
 
@@ -4103,17 +4154,29 @@ fn foo() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:22:7 warning: contents of parameter 'p' of 'bar' must be uniform
-  bar(p);
-      ^
+              R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
 
-test:14:7 note: contents of parameter 'p' of 'zoo' must be uniform
+test:8:3 note: control flow depends on possibly non-uniform value
+  if (*p == 0) {
+  ^^
+
+test:8:8 note: parameter 'p' of 'zoo' may be non-uniform
+  if (*p == 0) {
+       ^
+
+test:14:7 note: possibly non-uniform value passed via pointer here
   zoo(p);
       ^
 
-test:9:5 note: 'workgroupBarrier' must only be called from uniform control flow
-    workgroupBarrier();
-    ^^^^^^^^^^^^^^^^
+test:13:8 note: reading from 'p' may result in a non-uniform value
+fn bar(p : ptr<function, i32>) {
+       ^
+
+test:22:7 note: possibly non-uniform value passed via pointer here
+  bar(p);
+      ^
 
 test:19:34 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var v = array<i32, 4>(0, 0, 0, non_uniform);
@@ -4141,7 +4204,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (*pv == 0) {
   ^^
 
@@ -4189,7 +4252,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -4219,7 +4282,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (*&*&*pv2 == 0) {
   ^^
 
@@ -4251,7 +4314,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:10:3 note: control flow depends on non-uniform value
+test:10:3 note: control flow depends on possibly non-uniform value
   if (*pv1 == 0) {
   ^^
 
@@ -4302,7 +4365,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:10:3 note: control flow depends on non-uniform value
+test:10:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -4352,11 +4415,11 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:11:3 note: control flow depends on non-uniform value
+test:11:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
-test:10:7 note: pointer contents may become non-uniform after calling 'bar'
+test:10:7 note: contents of pointer may become non-uniform after calling 'bar'
   bar(&v);
       ^
 )");
@@ -4405,7 +4468,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:11:3 note: control flow depends on non-uniform value
+test:11:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -4439,7 +4502,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:12:3 note: control flow depends on non-uniform value
+test:12:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -4522,7 +4585,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:20:3 note: control flow depends on non-uniform value
+test:20:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -4616,11 +4679,11 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:17:3 note: control flow depends on non-uniform value
+test:17:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
-test:16:7 note: pointer contents may become non-uniform after calling 'bar'
+test:16:7 note: contents of pointer may become non-uniform after calling 'bar'
   bar(&v);
       ^
 )");
@@ -4653,11 +4716,11 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:15:3 note: control flow depends on non-uniform value
+test:15:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
-test:14:7 note: pointer contents may become non-uniform after calling 'bar'
+test:14:7 note: contents of pointer may become non-uniform after calling 'bar'
   bar(&v);
       ^
 )");
@@ -4690,11 +4753,11 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:15:3 note: control flow depends on non-uniform value
+test:15:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
-test:14:7 note: pointer contents may become non-uniform after calling 'bar'
+test:14:7 note: contents of pointer may become non-uniform after calling 'bar'
   bar(&v);
       ^
 )");
@@ -4735,11 +4798,11 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:23:3 note: control flow depends on non-uniform value
+test:23:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
-test:22:7 note: pointer contents may become non-uniform after calling 'bar'
+test:22:7 note: contents of pointer may become non-uniform after calling 'bar'
   bar(&v);
       ^
 )");
@@ -4774,11 +4837,11 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:17:3 note: control flow depends on non-uniform value
+test:17:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
-test:16:7 note: pointer contents may become non-uniform after calling 'bar'
+test:16:7 note: contents of pointer may become non-uniform after calling 'bar'
   bar(&v);
       ^
 )");
@@ -4810,7 +4873,7 @@ fn foo(p : ptr<function, i32>) {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
-test:6:5 note: control flow depends on non-uniform value
+test:6:5 note: control flow depends on possibly non-uniform value
     if (*p == 0) {
     ^^
 
@@ -4846,7 +4909,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:14:3 note: control flow depends on non-uniform value
+test:14:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -4883,7 +4946,7 @@ fn main() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:11:3 note: control flow depends on non-uniform value
+test:11:3 note: control flow depends on possibly non-uniform value
   if (non_uniform_global == 0) {
   ^^
 
@@ -4920,7 +4983,7 @@ fn main() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:11:3 note: control flow depends on non-uniform value
+test:11:3 note: control flow depends on possibly non-uniform value
   if (non_uniform_global == 0) {
   ^^
 
@@ -4961,7 +5024,7 @@ fn main() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:15:3 note: control flow depends on non-uniform value
+test:15:3 note: control flow depends on possibly non-uniform value
   if (non_uniform_global == 0) {
   ^^
 
@@ -5020,7 +5083,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:13:3 note: control flow depends on non-uniform value
+test:13:3 note: control flow depends on possibly non-uniform value
   if (b == 0) {
   ^^
 
@@ -5077,11 +5140,11 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:13:3 note: control flow depends on non-uniform value
+test:13:3 note: control flow depends on possibly non-uniform value
   if (b == 0) {
   ^^
 
-test:12:11 note: pointer contents may become non-uniform after calling 'bar'
+test:12:11 note: contents of pointer may become non-uniform after calling 'bar'
   bar(&a, &b);
           ^
 )");
@@ -5132,7 +5195,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:11:3 note: control flow depends on non-uniform value
+test:11:3 note: control flow depends on possibly non-uniform value
   if (v == 1) {
   ^^
 
@@ -5170,11 +5233,11 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:13:3 note: control flow depends on non-uniform value
+test:13:3 note: control flow depends on possibly non-uniform value
   if (b == 0) {
   ^^
 
-test:12:11 note: pointer contents may become non-uniform after calling 'bar'
+test:12:11 note: contents of pointer may become non-uniform after calling 'bar'
   bar(&a, &b);
           ^
 )");
@@ -5210,7 +5273,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:15:3 note: control flow depends on non-uniform value
+test:15:3 note: control flow depends on possibly non-uniform value
   if (c == 0) {
   ^^
 
@@ -5277,7 +5340,7 @@ TEST_F(UniformityAnalysisTest, MaximumNumberOfPointerParameters) {
     RunTest(std::move(b), false);
     EXPECT_EQ(error_,
               R"(warning: 'workgroupBarrier' must only be called from uniform control flow
-note: control flow depends on non-uniform value
+note: control flow depends on possibly non-uniform value
 note: reading from module-scope private variable 'non_uniform_global' may result in a non-uniform value)");
 }
 
@@ -5316,7 +5379,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   if (v[2] == 0) {
   ^^
 
@@ -5345,7 +5408,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on non-uniform value
+test:7:3 note: control flow depends on possibly non-uniform value
   if (v[2] == 0) {
   ^^
 
@@ -5390,7 +5453,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on non-uniform value
+test:7:3 note: control flow depends on possibly non-uniform value
   if (v[2] == 0) {
   ^^
 
@@ -5423,7 +5486,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (v[1] == 0) {
   ^^
 
@@ -5541,7 +5604,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (v[1] == 0) {
   ^^
 
@@ -5571,7 +5634,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (v.y == 0) {
   ^^
 
@@ -5604,7 +5667,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (v[1] == 0) {
   ^^
 
@@ -5633,7 +5696,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on non-uniform value
+test:7:3 note: control flow depends on possibly non-uniform value
   if (any(v == vec4(42))) {
   ^^
 
@@ -5666,7 +5729,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (m[1][1] == 0.0) {
   ^^
 
@@ -5770,7 +5833,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (m[1][1] == 0.0) {
   ^^
 
@@ -5803,7 +5866,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (m[1][1] == 0.0) {
   ^^
 
@@ -5836,7 +5899,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (m[1][1] == 0.0) {
   ^^
 
@@ -5870,7 +5933,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (m[1][1] == 0.0) {
   ^^
 
@@ -5905,7 +5968,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (m[1][1] == 0.0) {
   ^^
 
@@ -5939,7 +6002,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (m[1][1] == 0.0) {
   ^^
 
@@ -5969,7 +6032,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (m[1][1] == 0.0) {
   ^^
 
@@ -6000,7 +6063,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (m[1][1] == 0.0) {
   ^^
 
@@ -6032,7 +6095,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (m[1][1] == 0.0) {
   ^^
 
@@ -6064,7 +6127,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (m[1][1] == 0.0) {
   ^^
 
@@ -6094,7 +6157,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (m[1][1] == 0.0) {
   ^^
 
@@ -6143,7 +6206,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (s.b == 0) {
   ^^
 
@@ -6176,7 +6239,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:11:3 note: control flow depends on non-uniform value
+test:11:3 note: control flow depends on possibly non-uniform value
   if (s.b == 0) {
   ^^
 
@@ -6229,7 +6292,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:11:3 note: control flow depends on non-uniform value
+test:11:3 note: control flow depends on possibly non-uniform value
   if (s.b == 0) {
   ^^
 
@@ -6266,7 +6329,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:12:3 note: control flow depends on non-uniform value
+test:12:3 note: control flow depends on possibly non-uniform value
   if (s.a == 0) {
   ^^
 
@@ -6304,7 +6367,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:13:3 note: control flow depends on non-uniform value
+test:13:3 note: control flow depends on possibly non-uniform value
   if (s.a == 0) {
   ^^
 
@@ -6342,7 +6405,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:13:3 note: control flow depends on non-uniform value
+test:13:3 note: control flow depends on possibly non-uniform value
   if (s.a == 0) {
   ^^
 
@@ -6397,7 +6460,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:12:3 note: control flow depends on non-uniform value
+test:12:3 note: control flow depends on possibly non-uniform value
   if (s.a == 0) {
   ^^
 
@@ -6498,7 +6561,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:12:3 note: control flow depends on non-uniform value
+test:12:3 note: control flow depends on possibly non-uniform value
   if (s.a == 0) {
   ^^
 
@@ -6534,7 +6597,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:13:3 note: control flow depends on non-uniform value
+test:13:3 note: control flow depends on possibly non-uniform value
   if (s.a == 0) {
   ^^
 
@@ -6570,7 +6633,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:13:3 note: control flow depends on non-uniform value
+test:13:3 note: control flow depends on possibly non-uniform value
   if (s.a == 0) {
   ^^
 
@@ -6607,7 +6670,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:12:3 note: control flow depends on non-uniform value
+test:12:3 note: control flow depends on possibly non-uniform value
   if (s.a == 0) {
   ^^
 
@@ -6648,7 +6711,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   if (arr[7] == 0) {
   ^^
 
@@ -6677,7 +6740,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on non-uniform value
+test:7:3 note: control flow depends on possibly non-uniform value
   if (arr[2] == 0) {
   ^^
 
@@ -6722,7 +6785,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on non-uniform value
+test:7:3 note: control flow depends on possibly non-uniform value
   if (arr[2] == 0) {
   ^^
 
@@ -6753,7 +6816,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (arr[2] == 0) {
   ^^
 
@@ -6786,7 +6849,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (arr[1] == 0) {
   ^^
 
@@ -6833,7 +6896,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (arr[1] == 0) {
   ^^
 
@@ -6866,7 +6929,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (arr[1] == 0) {
   ^^
 
@@ -6899,7 +6962,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (arr[1] == 0) {
   ^^
 
@@ -6932,7 +6995,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on non-uniform value
+test:8:3 note: control flow depends on possibly non-uniform value
   if (arr[1] == 0) {
   ^^
 
@@ -6966,7 +7029,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (arr[1] == 0) {
   ^^
 
@@ -7001,7 +7064,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (arr[1] == 0) {
   ^^
 
@@ -7035,7 +7098,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (arr[1] == 0) {
   ^^
 
@@ -7181,7 +7244,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   if (i32(non_uniform_global) == 0) {
   ^^
 
@@ -7208,7 +7271,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   if (f32(non_uniform_global) == 0.0) {
   ^^
 
@@ -7235,7 +7298,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   if (bitcast<f32>(non_uniform_global) == 0.0) {
   ^^
 
@@ -7265,7 +7328,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on non-uniform value
+test:7:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -7295,7 +7358,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on non-uniform value
+test:7:3 note: control flow depends on possibly non-uniform value
   if (v == 0) {
   ^^
 
@@ -7332,7 +7395,7 @@ fn main() {
   let b = (non_uniform_global == 0) && (dpdx(1.0) == 0.0);
                                         ^^^^
 
-test:5:37 note: control flow depends on non-uniform value
+test:5:37 note: control flow depends on possibly non-uniform value
   let b = (non_uniform_global == 0) && (dpdx(1.0) == 0.0);
                                     ^^
 
@@ -7585,7 +7648,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:19:3 note: control flow depends on non-uniform value
+test:19:3 note: control flow depends on possibly non-uniform value
   if (0 == bar(p)) {
   ^^
 
@@ -7650,11 +7713,12 @@ fn main(@builtin(local_invocation_index) idx : u32) {
 )";
 
     RunTest(src, false);
-    EXPECT_EQ(error_, R"(test:8:28 warning: parameter of 'workgroupUniformLoad' must be uniform
+    EXPECT_EQ(error_,
+              R"(test:8:28 warning: possibly non-uniform value passed here
   if (workgroupUniformLoad(&data[idx]) > 0) {
                            ^
 
-test:8:34 note: reading from builtin 'idx' may result in a non-uniform value
+test:8:34 note: builtin 'idx' of 'main' may be non-uniform
   if (workgroupUniformLoad(&data[idx]) > 0) {
                                  ^^^
 )");
@@ -7681,15 +7745,20 @@ fn main(@builtin(local_invocation_index) idx : u32) {
 )";
 
     RunTest(src, false);
-    EXPECT_EQ(error_, R"(test:14:11 warning: parameter 'p' of 'foo' must be uniform
-  if (foo(&data[idx]) > 0) {
-          ^
-
-test:8:31 note: parameter of 'workgroupUniformLoad' must be uniform
+    EXPECT_EQ(error_,
+              R"(test:8:31 warning: possibly non-uniform value passed here
   return workgroupUniformLoad(p);
                               ^
 
-test:14:17 note: reading from builtin 'idx' may result in a non-uniform value
+test:8:31 note: parameter 'p' of 'foo' may be non-uniform
+  return workgroupUniformLoad(p);
+                              ^
+
+test:14:11 note: possibly non-uniform value passed here
+  if (foo(&data[idx]) > 0) {
+          ^
+
+test:14:17 note: builtin 'idx' of 'main' may be non-uniform
   if (foo(&data[idx]) > 0) {
                 ^^^
 )");
@@ -7712,7 +7781,7 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   if (atomicAdd(&a, 1) == 1) {
   ^^
 
@@ -7739,7 +7808,7 @@ fn foo() {
     storageBarrier();
     ^^^^^^^^^^^^^^
 
-test:5:3 note: control flow depends on non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   if (atomicAdd(&a, 1) == 1) {
   ^^
 
@@ -7795,7 +7864,7 @@ TEST_F(UniformityAnalysisTest, StressGraphTraversalDepth) {
     RunTest(std::move(b), false);
     EXPECT_EQ(error_,
               R"(warning: 'workgroupBarrier' must only be called from uniform control flow
-note: control flow depends on non-uniform value
+note: control flow depends on possibly non-uniform value
 note: reading from module-scope private variable 'v0' may result in a non-uniform value)");
 }
 
@@ -7820,15 +7889,15 @@ fn main() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:10:5 warning: 'foo' must only be called from uniform control flow
-    foo();
-    ^^^
-
-test:5:3 note: 'foo' requires uniformity because it calls workgroupBarrier
+              R"(test:5:3 warning: 'workgroupBarrier' must only be called from uniform control flow
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
 
-test:9:3 note: control flow depends on non-uniform value
+test:10:5 note: called by 'foo' from 'main'
+    foo();
+    ^^^
+
+test:9:3 note: control flow depends on possibly non-uniform value
   if (non_uniform == 42) {
   ^^
 
@@ -7863,15 +7932,15 @@ fn main() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:18:5 warning: 'foo' must only be called from uniform control flow
-    foo();
-    ^^^
-
-test:5:3 note: 'foo' requires uniformity because it indirectly calls workgroupBarrier
+              R"(test:5:3 warning: 'workgroupBarrier' must only be called from uniform control flow
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
 
-test:17:3 note: control flow depends on non-uniform value
+test:18:5 note: called indirectly by 'foo' from 'main'
+    foo();
+    ^^^
+
+test:17:3 note: control flow depends on possibly non-uniform value
   if (non_uniform == 42) {
   ^^
 
@@ -7906,21 +7975,37 @@ fn main() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:19:7 warning: parameter 'c' of 'foo' must be uniform
-  foo(non_uniform);
-      ^^^^^^^^^^^
+              R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
 
-test:15:7 note: parameter 'b' of 'bar' must be uniform
-  bar(c);
+test:5:3 note: control flow depends on possibly non-uniform value
+  if (a == 42) {
+  ^^
+
+test:5:7 note: parameter 'a' of 'zoo' may be non-uniform
+  if (a == 42) {
       ^
 
-test:11:7 note: parameter 'a' of 'zoo' must be uniform
+test:11:7 note: possibly non-uniform value passed here
   zoo(b);
       ^
 
-test:6:5 note: 'workgroupBarrier' must only be called from uniform control flow
-    workgroupBarrier();
-    ^^^^^^^^^^^^^^^^
+test:11:7 note: parameter 'b' of 'bar' may be non-uniform
+  zoo(b);
+      ^
+
+test:15:7 note: possibly non-uniform value passed here
+  bar(c);
+      ^
+
+test:15:7 note: parameter 'c' of 'foo' may be non-uniform
+  bar(c);
+      ^
+
+test:19:7 note: possibly non-uniform value passed here
+  foo(non_uniform);
+      ^^^^^^^^^^^
 
 test:19:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   foo(non_uniform);
@@ -7957,7 +8042,7 @@ fn main() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:17:3 note: control flow depends on non-uniform value
+test:17:3 note: control flow depends on possibly non-uniform value
   if (foo() == 42) {
   ^^
 
@@ -7988,15 +8073,15 @@ fn main() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:12:5 warning: 'foo' must only be called from uniform control flow
-    foo(0);
-    ^^^
-
-test:6:5 note: 'foo' requires uniformity because it calls workgroupBarrier
+              R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:11:3 note: control flow depends on non-uniform value
+test:12:5 note: called by 'foo' from 'main'
+    foo(0);
+    ^^^
+
+test:11:3 note: control flow depends on possibly non-uniform value
   if (non_uniform == 42) {
   ^^
 
