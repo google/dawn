@@ -80,7 +80,7 @@ template <typename Serial, typename Value>
 void SerialQueue<Serial, Value>::Enqueue(std::vector<Value>&& values, Serial serial) {
     DAWN_ASSERT(values.size() > 0);
     DAWN_ASSERT(this->Empty() || this->mStorage.back().first <= serial);
-    this->mStorage.emplace_back(serial, values);
+    this->mStorage.emplace_back(serial, std::move(values));
 }
 
 #endif  // SRC_DAWN_COMMON_SERIALQUEUE_H_
