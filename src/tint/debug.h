@@ -20,6 +20,7 @@
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/diagnostic/formatter.h"
 #include "src/tint/diagnostic/printer.h"
+#include "src/tint/utils/compiler_macros.h"
 
 namespace tint {
 
@@ -111,7 +112,7 @@ class InternalCompilerError {
 /// error handling.
 #define TINT_ASSERT(system, condition)                                                   \
     do {                                                                                 \
-        if (!(condition)) {                                                              \
+        if (TINT_UNLIKELY(!(condition))) {                                               \
             tint::diag::List diagnostics;                                                \
             TINT_ICE(system, diagnostics) << "TINT_ASSERT(" #system ", " #condition ")"; \
         }                                                                                \
