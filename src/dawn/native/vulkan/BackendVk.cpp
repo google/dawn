@@ -102,9 +102,6 @@ constexpr SkippedMessage kSkippedMessages[] = {
     {"VUID-vkCmdBindDescriptorSets-pDescriptorSets-00358",
      "is empty (has no bindings). Use VK_NULL_HANDLE to indicate this set is unused if using "
      "VK_PIPELINE_LAYOUT_CREATE_INDEPENDENT_SETS_BIT_EXT"},
-    // http://crbug.com/dawn/1615
-    {"VUID-vkUpdateDescriptorSets-None-03047",
-     "Cannot call vkUpdateDescriptorSets() to perform write update on VkDescriptorSet"},
 
     // A warning that's generated on valid usage of the WebGPU API where a fragment output doesn't
     // have a corresponding attachment

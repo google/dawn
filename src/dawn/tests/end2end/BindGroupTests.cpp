@@ -1231,8 +1231,6 @@ TEST_P(BindGroupTests, DynamicBindingNoneVisibility) {
 TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
     // TODO(crbug.com/dawn/736): Test output is wrong with D3D12 + WARP.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
-    // TODO(crbug.com/dawn/1617): VUID-vkUpdateDescriptorSets-None-03047 on Windows
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsBackendValidationEnabled());
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
