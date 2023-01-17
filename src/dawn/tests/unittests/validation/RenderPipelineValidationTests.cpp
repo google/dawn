@@ -193,6 +193,52 @@ TEST_F(RenderPipelineValidationTest, DepthStencilAspectRequirement) {
     // enabled when Stencil8 format is implemented
 }
 
+// Tests that depth attachment is required when frag_depth is written in fragment stage.
+TEST_F(RenderPipelineValidationTest, DepthAttachmentRequiredWhenFragDepthIsWritten) {
+    wgpu::ShaderModule fsModuleFragDepthOutput = utils::CreateShaderModule(device, R"(
+        struct Output {
+            @builtin(frag_depth) depth_out: f32,
+            @location(0) color : vec4<f32>,
+        }
+        @fragment fn main() -> Output {
+            var o: Output;
+            // We need to make sure this frag_depth isn't optimized out even its value equals "no op".
+            o.depth_out = 0.5;
+            o.color = vec4<f32>(1.0, 1.0, 1.0, 1.0);
+            return o;
+        }
+    )");
+
+    {
+        // Succeeds because there is depth stencil state.
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModuleFragDepthOutput;
+        descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth24PlusStencil8);
+
+        device.CreateRenderPipeline(&descriptor);
+    }
+
+    {
+        // Fails because there is no depth stencil state.
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModuleFragDepthOutput;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+
+    {
+        // Fails because there is depth stencil state but no depth aspect.
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModuleFragDepthOutput;
+        descriptor.EnableDepthStencil(wgpu::TextureFormat::Stencil8);
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+}
+
 // Tests that at least one color target state is required.
 TEST_F(RenderPipelineValidationTest, ColorTargetStateRequired) {
     {
