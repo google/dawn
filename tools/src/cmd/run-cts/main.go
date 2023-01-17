@@ -235,6 +235,7 @@ func run() error {
 	}
 
 	r := runner{
+		query:                query,
 		numRunners:           numRunners,
 		verbose:              verbose,
 		node:                 node,
@@ -328,8 +329,8 @@ func run() error {
 	}
 
 	if numRunners > 0 {
-		// Find all the test cases that match the given queries.
-		if err := r.gatherTestCases(query, verbose); err != nil {
+		// Find all the test cases that match r.query.
+		if err := r.gatherTestCases(verbose); err != nil {
 			return fmt.Errorf("failed to gather test cases: %w", err)
 		}
 
@@ -416,6 +417,7 @@ func (c *cache) save(path string) error {
 }
 
 type runner struct {
+	query                string
 	numRunners           int
 	verbose              bool
 	node                 string
@@ -486,9 +488,9 @@ func (r *runner) buildCTS(verbose bool) error {
 	return nil
 }
 
-// gatherTestCases() queries the CTS for all test cases that match the given
-// query. On success, gatherTestCases() populates r.testcases.
-func (r *runner) gatherTestCases(query string, verbose bool) error {
+// gatherTestCases() queries the CTS for all test cases that match r.query.
+// On success, gatherTestCases() populates r.testcases.
+func (r *runner) gatherTestCases(verbose bool) error {
 	if verbose {
 		start := time.Now()
 		fmt.Fprintln(r.stdout, "Gathering test cases...")
@@ -505,7 +507,7 @@ func (r *runner) gatherTestCases(query string, verbose bool) error {
 		// start at 1, so just inject a placeholder argument.
 		"placeholder-arg",
 		"--list",
-	}, query)
+	}, r.query)
 
 	cmd := exec.Command(r.node, args...)
 	cmd.Dir = r.cts
@@ -695,12 +697,27 @@ func (r *runner) runServer(ctx context.Context, id int, caseIndices <-chan int, 
 
 		select {
 		case port = <-pl.port:
-			return nil // success
+			break // success
 		case <-time.After(time.Second * 10):
 			return fmt.Errorf("timeout waiting for server port:\n%v", pl.buffer.String())
 		case <-ctx.Done(): // cancelled
 			return ctx.Err()
 		}
+
+		// Load the cases
+		postResp, postErr := http.Post(fmt.Sprintf("http://localhost:%v/load?%v", port, r.query), "", &bytes.Buffer{})
+		if postErr != nil || postResp.StatusCode != http.StatusOK {
+			msg := &strings.Builder{}
+			fmt.Println(msg, "failed to load test cases: ", postErr)
+			if body, err := ioutil.ReadAll(postResp.Body); err == nil {
+				fmt.Println(msg, string(body))
+			} else {
+				fmt.Println(msg, err)
+			}
+			return fmt.Errorf("%v", msg.String())
+		}
+
+		return nil
 	}
 	stopServer = func() {
 		if port > 0 {
