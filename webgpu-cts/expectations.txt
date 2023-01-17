@@ -405,8 +405,6 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 win
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,invalidBuffer: [ Failure ]
 
 # New failures. Please triage:
-crbug.com/dawn/0000 webgpu:api,operation,buffers,map_ArrayBuffer:postMessage:transfer=true;mapMode="READ" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,operation,buffers,map_ArrayBuffer:postMessage:transfer=true;mapMode="WRITE" [ Failure ]
 crbug.com/dawn/0000 [ intel-gen-9 ubuntu ] webgpu:api,operation,render_pipeline,sample_mask:final_output:sampleCount=1;rasterizationMask=15 [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=-8388608;biasSlopeScale=0;biasClamp=0.125 [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
