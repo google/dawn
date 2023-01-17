@@ -45,6 +45,7 @@ src/common/tools/dev_server.ts
 src/common/tools/gen_cache.ts
 src/common/tools/gen_listings.ts
 src/common/tools/gen_wpt_cts_html.ts
+src/common/tools/image_utils.ts
 src/common/tools/presubmit.ts
 src/common/tools/run_wpt_ref_tests.ts
 src/common/tools/version.ts
@@ -429,8 +430,12 @@ src/webgpu/shader/validation/parse/builtin.spec.ts
 src/webgpu/shader/validation/parse/comments.spec.ts
 src/webgpu/shader/validation/parse/identifiers.spec.ts
 src/webgpu/shader/validation/parse/literal.spec.ts
+src/webgpu/shader/validation/parse/semicolon.spec.ts
 src/webgpu/shader/validation/parse/source.spec.ts
+src/webgpu/shader/validation/parse/static_assert.spec.ts
 src/webgpu/shader/validation/parse/var_and_let.spec.ts
+src/webgpu/shader/validation/resource_interface/util.ts
+src/webgpu/shader/validation/resource_interface/bindings.spec.ts
 src/webgpu/shader/validation/shader_io/util.ts
 src/webgpu/shader/validation/shader_io/builtins.spec.ts
 src/webgpu/shader/validation/shader_io/entry_point.spec.ts
@@ -438,6 +443,7 @@ src/webgpu/shader/validation/shader_io/interpolate.spec.ts
 src/webgpu/shader/validation/shader_io/invariant.spec.ts
 src/webgpu/shader/validation/shader_io/locations.spec.ts
 src/webgpu/shader/validation/shader_io/shareable_types.spec.ts
+src/webgpu/shader/validation/static_assert/static_assert.spec.ts
 src/webgpu/util/color_space_conversion.ts
 src/webgpu/util/copy_to_texture.ts
 src/webgpu/util/texture/texel_data.spec.ts
