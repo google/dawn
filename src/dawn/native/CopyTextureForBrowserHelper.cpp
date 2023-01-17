@@ -96,26 +96,7 @@ static const char sCopyForBrowserShader[] = R"(
 
                 var output : VertexOutputs;
                 output.position = vec4<f32>((texcoord[VertexIndex] * 2.0 - vec2<f32>(1.0, 1.0)), 0.0, 1.0);
-
-                // Y component of scale is calculated by the copySizeHeight / textureHeight. Only
-                // flipY case can get negative number.
-                var flipY = uniforms.scale.y < 0.0;
-
-                // Texture coordinate takes top-left as origin point. We need to map the
-                // texture to triangle carefully.
-                if (flipY) {
-                    // We need to get the mirror positions(mirrored based on y = 0.5) on flip cases.
-                    // Adopt transform to src texture and then mapping it to triangle coord which
-                    // do a +1 shift on Y dimension will help us got that mirror position perfectly.
-                    output.texcoords = (texcoord[VertexIndex] * uniforms.scale + uniforms.offset) *
-                        vec2<f32>(1.0, -1.0) + vec2<f32>(0.0, 1.0);
-                } else {
-                    // For the normal case, we need to get the exact position.
-                    // So mapping texture to triangle firstly then adopt the transform.
-                    output.texcoords = (texcoord[VertexIndex] *
-                        vec2<f32>(1.0, -1.0) + vec2<f32>(0.0, 1.0)) *
-                        uniforms.scale + uniforms.offset;
-                }
+                output.texcoords = texcoord[VertexIndex] * uniforms.scale + uniforms.offset;
 
                 return output;
             }
@@ -435,10 +416,11 @@ MaybeError DoCopyForBrowser(DeviceBase* device,
         sourceInfo->origin.y / static_cast<float>(sourceInfo->size.height)  // offset
     };
 
-    // Handle flipY. FlipY here means we flip the source texture firstly and then
-    // do copy. This helps on the case which source texture is flipped and the copy
-    // need to unpack the flip.
-    if (options->flipY) {
+    // The NDC to framebuffer space transform maps inverts the Y coordinate such that NDC [-1, 1]
+    // (resp [-1, -1]) maps to framebuffer space [0, 0] (resp [0, height-1]). So we need to undo
+    // this flip when converting positions to texcoords.
+    // https://www.w3.org/TR/webgpu/#coordinate-systems
+    if (!options->flipY) {
         uniformData.scaleY *= -1.0;
         uniformData.offsetY += copySize->height / static_cast<float>(sourceInfo->size.height);
     }

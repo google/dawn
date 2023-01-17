@@ -124,17 +124,19 @@ class CopyExternalTextureForBrowserTests : public Parent {
     }
 
     std::vector<utils::RGBA8> GetDefaultExpectedData(bool flipY,
-                                                     wgpu::Origin3D origin,
+                                                     wgpu::Origin3D srcOrigin,
                                                      wgpu::Extent3D rect) {
         std::vector<utils::RGBA8> expected;
-        for (uint32_t row = origin.y; row < origin.y + rect.height; ++row) {
-            for (uint32_t col = origin.x; col < origin.x + rect.width; ++col) {
+        for (uint32_t rowInRect = 0; rowInRect < rect.height; ++rowInRect) {
+            for (uint32_t colInRect = 0; colInRect < rect.width; ++colInRect) {
+                uint32_t row = rowInRect + srcOrigin.y;
+                uint32_t col = colInRect + srcOrigin.x;
+
                 if (flipY) {
-                    uint32_t flippedRow = kHeight - row - 1;
-                    expected.push_back(kDefaultSourceRGBA[flippedRow][col]);
-                } else {
-                    expected.push_back(kDefaultSourceRGBA[row][col]);
+                    row = (rect.height - rowInRect - 1) + srcOrigin.y;
                 }
+
+                expected.push_back(kDefaultSourceRGBA[row][col]);
             }
         }
 
@@ -182,7 +184,7 @@ class CopyExternalTextureForBrowserTests_Basic
 };
 }  // anonymous namespace
 
-TEST_P(CopyExternalTextureForBrowserTests_Basic, FullCopy) {
+TEST_P(CopyExternalTextureForBrowserTests_Basic, Copy) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
 
