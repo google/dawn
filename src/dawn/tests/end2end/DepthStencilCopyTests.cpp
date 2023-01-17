@@ -899,13 +899,13 @@ DAWN_INSTANTIATE_TEST_P(DepthCopyFromBufferTests,
                         std::vector<wgpu::TextureFormat>(kValidDepthCopyFromBufferFormats.begin(),
                                                          kValidDepthCopyFromBufferFormats.end()));
 
-DAWN_INSTANTIATE_TEST_P(StencilCopyTests,
-                        {D3D12Backend(),
-                         D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
-                                       "copy_with_non_zero_buffer_offset"}),
-                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-                         // Test with the vulkan_use_s8 toggle forced on and off.
-                         VulkanBackend({"vulkan_use_s8"}, {}),
-                         VulkanBackend({}, {"vulkan_use_s8"})},
-                        std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(),
-                                                         utils::kStencilFormats.end()));
+DAWN_INSTANTIATE_TEST_P(
+    StencilCopyTests,
+    {D3D12Backend(),
+     D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
+                   "copy_with_non_zero_buffer_offset"}),
+     MetalBackend(), MetalBackend({"metal_use_combined_depth_stencil_format_for_stencil8"}),
+     OpenGLBackend(), OpenGLESBackend(),
+     // Test with the vulkan_use_s8 toggle forced on and off.
+     VulkanBackend({"vulkan_use_s8"}, {}), VulkanBackend({}, {"vulkan_use_s8"})},
+    std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(), utils::kStencilFormats.end()));

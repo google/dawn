@@ -79,8 +79,6 @@ void EnsureDestinationTextureInitialized(CommandRecordingContext* commandContext
                                          const TextureCopy& dst,
                                          const Extent3D& size);
 
-MTLBlitOption ComputeMTLBlitOption(const Format& format, Aspect aspect);
-
 // Allow use MTLStoreActionStoreAndMultismapleResolve because the logic in the backend is
 // first to compute what the "best" Metal render pass descriptor is, then fix it up if we
 // are not on macOS 10.12 (i.e. the EmulateStoreAndMSAAResolve toggle is on).

@@ -336,25 +336,6 @@ void EnsureDestinationTextureInitialized(CommandRecordingContext* commandContext
     }
 }
 
-MTLBlitOption ComputeMTLBlitOption(const Format& format, Aspect aspect) {
-    ASSERT(HasOneBit(aspect));
-    ASSERT(format.aspects & aspect);
-
-    if (IsSubset(Aspect::Depth | Aspect::Stencil, format.aspects)) {
-        // We only provide a blit option if the format has both depth and stencil.
-        // It is invalid to provide a blit option otherwise.
-        switch (aspect) {
-            case Aspect::Depth:
-                return MTLBlitOptionDepthFromDepthStencil;
-            case Aspect::Stencil:
-                return MTLBlitOptionStencilFromDepthStencil;
-            default:
-                UNREACHABLE();
-        }
-    }
-    return MTLBlitOptionNone;
-}
-
 MaybeError EncodeMetalRenderPass(Device* device,
                                  CommandRecordingContext* commandContext,
                                  MTLRenderPassDescriptor* mtlRenderPass,

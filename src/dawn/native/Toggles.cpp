@@ -326,6 +326,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "resources. This toggle is enabled by default on D3D12 backends using Intel Gen9.5 and Gen11 "
       "GPUs due to a driver issue on Intel D3D12 driver.",
       "https://crbug.com/1237175"}},
+    {Toggle::MetalUseCombinedDepthStencilFormatForStencil8,
+     {"metal_use_combined_depth_stencil_format_for_stencil8",
+      "Use a combined depth stencil format instead of stencil8. The stencil8 format alone does not "
+      "work correctly.",
+      "https://crbug.com/dawn/1389"}},
     {Toggle::DisallowDeprecatedAPIs,
      {"disallow_deprecated_apis",
       "Disallow all deprecated paths by changing the deprecation warnings to validation error for "

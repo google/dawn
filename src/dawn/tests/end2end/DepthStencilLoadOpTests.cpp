@@ -285,7 +285,9 @@ TEST_P(StencilClearValueOverflowTest, StencilClearValueOverFlowUint16) {
 
 DAWN_INSTANTIATE_TEST_P(StencilClearValueOverflowTest,
                         {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}),
-                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+                         MetalBackend(),
+                         MetalBackend({"metal_use_combined_depth_stencil_format_for_stencil8"}),
+                         OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
                         {wgpu::TextureFormat::Depth24PlusStencil8,
                          wgpu::TextureFormat::Depth32FloatStencil8, wgpu::TextureFormat::Stencil8},
                         {Check::CopyStencil, Check::StencilTest});

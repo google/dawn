@@ -106,7 +106,7 @@ MaybeError SwapChain::Initialize(NewSwapChainBase* previousSwapChain) {
 
     [*mLayer setFramebufferOnly:(GetUsage() == wgpu::TextureUsage::RenderAttachment)];
     [*mLayer setDevice:ToBackend(GetDevice())->GetMTLDevice()];
-    [*mLayer setPixelFormat:MetalPixelFormat(GetFormat())];
+    [*mLayer setPixelFormat:MetalPixelFormat(GetDevice(), GetFormat())];
 
 #if DAWN_PLATFORM_IS(MACOS)
     if (@available(macos 10.13, *)) {

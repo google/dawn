@@ -269,6 +269,9 @@ void Device::InitTogglesFromDriver() {
             ForceSetToggle(Toggle::NoWorkaroundIndirectBaseVertexNotApplied, true);
         }
     }
+    if (gpu_info::IsAMD(vendorId) || gpu_info::IsIntel(vendorId)) {
+        SetToggle(Toggle::MetalUseCombinedDepthStencilFormatForStencil8, true);
+    }
 #endif
 }
 

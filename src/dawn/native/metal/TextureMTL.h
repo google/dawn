@@ -32,7 +32,7 @@ class CommandRecordingContext;
 class Device;
 struct MTLSharedEventAndSignalValue;
 
-MTLPixelFormat MetalPixelFormat(wgpu::TextureFormat format);
+MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat format);
 MaybeError ValidateIOSurfaceCanBeWrapped(const DeviceBase* device,
                                          const TextureDescriptor* descriptor,
                                          IOSurfaceRef ioSurface);
@@ -55,6 +55,7 @@ class Texture final : public TextureBase {
     IOSurfaceRef GetIOSurface();
     NSPRef<id<MTLTexture>> CreateFormatView(wgpu::TextureFormat format);
 
+    MTLBlitOption ComputeMTLBlitOption(Aspect aspect) const;
     void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
                                              const SubresourceRange& range);
 

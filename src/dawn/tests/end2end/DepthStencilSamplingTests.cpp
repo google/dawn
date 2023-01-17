@@ -934,7 +934,8 @@ DAWN_INSTANTIATE_TEST_P(DepthSamplingTest,
                                                          utils::kDepthFormats.end()));
 
 DAWN_INSTANTIATE_TEST_P(StencilSamplingTest,
-                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-                         VulkanBackend()},
+                        {D3D12Backend(), MetalBackend(),
+                         MetalBackend({"metal_use_combined_depth_stencil_format_for_stencil8"}),
+                         OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(),
                                                          utils::kStencilFormats.end()));

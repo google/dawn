@@ -364,7 +364,7 @@ MaybeError RenderPipeline::Initialize() {
         const auto& fragmentOutputsWritten = fragmentStage.metadata->fragmentOutputsWritten;
         for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
             descriptorMTL.colorAttachments[static_cast<uint8_t>(i)].pixelFormat =
-                MetalPixelFormat(GetColorAttachmentFormat(i));
+                MetalPixelFormat(GetDevice(), GetColorAttachmentFormat(i));
             const ColorTargetState* descriptor = GetColorTargetState(i);
             ComputeBlendDesc(descriptorMTL.colorAttachments[static_cast<uint8_t>(i)], descriptor,
                              fragmentOutputsWritten[i]);
@@ -374,7 +374,7 @@ MaybeError RenderPipeline::Initialize() {
     if (HasDepthStencilAttachment()) {
         wgpu::TextureFormat depthStencilFormat = GetDepthStencilFormat();
         const Format& internalFormat = GetDevice()->GetValidInternalFormat(depthStencilFormat);
-        MTLPixelFormat metalFormat = MetalPixelFormat(depthStencilFormat);
+        MTLPixelFormat metalFormat = MetalPixelFormat(GetDevice(), depthStencilFormat);
 
         if (internalFormat.HasDepth()) {
             descriptorMTL.depthAttachmentPixelFormat = metalFormat;
