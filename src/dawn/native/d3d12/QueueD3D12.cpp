@@ -43,8 +43,6 @@ void Queue::Initialize() {
 MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
     Device* device = ToBackend(GetDevice());
 
-    DAWN_TRY(device->Tick());
-
     CommandRecordingContext* commandContext;
     DAWN_TRY_ASSIGN(commandContext, device->GetPendingCommandContext());
 
@@ -59,6 +57,10 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
     DAWN_TRY(device->ExecutePendingCommandContext());
 
     DAWN_TRY(device->NextSerial());
+
+    // Call Tick() to get a chance to resolve callbacks.
+    DAWN_TRY(device->Tick());
+
     return {};
 }
 
