@@ -331,6 +331,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use a combined depth stencil format instead of stencil8. The stencil8 format alone does not "
       "work correctly.",
       "https://crbug.com/dawn/1389"}},
+    {Toggle::UseTempTextureInStencilTextureToBufferCopy,
+     {"use_temp_texture_in_stencil_texture_to_buffer_copy",
+      "Use an intermediate temporary texture when copying the stencil aspect of a texture to a "
+      "buffer. Works around an issue where stencil writes from a render pass are not reflected in "
+      "the destination buffer.",
+      "https://crbug.com/dawn/1389"}},
     {Toggle::DisallowDeprecatedAPIs,
      {"disallow_deprecated_apis",
       "Disallow all deprecated paths by changing the deprecation warnings to validation error for "

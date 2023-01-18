@@ -1277,17 +1277,50 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
             TextureDataLayout dstLayout = destination->layout;
             ApplyDefaultTextureDataLayoutOptions(&dstLayout, blockInfo, *copySize);
 
-            CopyTextureToBufferCmd* copy =
+            TextureCopy copySrc;
+            copySrc.texture = source->texture;
+            copySrc.origin = source->origin;
+            copySrc.mipLevel = source->mipLevel;
+            copySrc.aspect = ConvertAspect(source->texture->GetFormat(), source->aspect);
+
+            if (copySrc.aspect == Aspect::Stencil &&
+                GetDevice()->IsToggleEnabled(Toggle::UseTempTextureInStencilTextureToBufferCopy)) {
+                // Encode a copy to an intermediate texture.
+                TextureDescriptor desc = {};
+                desc.format = source->texture->GetFormat().format;
+                desc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+                desc.size = *copySize;
+
+                Ref<TextureBase> intermediateTexture;
+                DAWN_TRY_ASSIGN(intermediateTexture, GetDevice()->CreateTexture(&desc));
+
+                // Allocate the intermediate t2t command.
+                Aspect aspect =
+                    ConvertAspect(source->texture->GetFormat(), wgpu::TextureAspect::All);
+                CopyTextureToTextureCmd* t2t =
+                    allocator->Allocate<CopyTextureToTextureCmd>(Command::CopyTextureToTexture);
+                t2t->source = copySrc;
+                t2t->source.aspect = aspect;
+                t2t->destination.texture = intermediateTexture;
+                t2t->destination.origin = {};
+                t2t->destination.mipLevel = 0;
+                t2t->destination.aspect = aspect;
+                t2t->copySize = *copySize;
+
+                // Replace the `copySrc` with the intermediate texture.
+                copySrc.texture = intermediateTexture;
+                copySrc.mipLevel = 0;
+                copySrc.origin = {};
+            }
+
+            CopyTextureToBufferCmd* t2b =
                 allocator->Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
-            copy->source.texture = source->texture;
-            copy->source.origin = source->origin;
-            copy->source.mipLevel = source->mipLevel;
-            copy->source.aspect = ConvertAspect(source->texture->GetFormat(), source->aspect);
-            copy->destination.buffer = destination->buffer;
-            copy->destination.offset = dstLayout.offset;
-            copy->destination.bytesPerRow = dstLayout.bytesPerRow;
-            copy->destination.rowsPerImage = dstLayout.rowsPerImage;
-            copy->copySize = *copySize;
+            t2b->source = copySrc;
+            t2b->destination.buffer = destination->buffer;
+            t2b->destination.offset = dstLayout.offset;
+            t2b->destination.bytesPerRow = dstLayout.bytesPerRow;
+            t2b->destination.rowsPerImage = dstLayout.rowsPerImage;
+            t2b->copySize = *copySize;
 
             return {};
         },

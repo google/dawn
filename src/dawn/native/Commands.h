@@ -150,6 +150,7 @@ struct BufferCopy {
 struct TextureCopy {
     TextureCopy();
     TextureCopy(const TextureCopy&);
+    TextureCopy& operator=(const TextureCopy&);
     ~TextureCopy();
 
     Ref<TextureBase> texture;

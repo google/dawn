@@ -384,6 +384,7 @@ BufferCopy::~BufferCopy() = default;
 
 TextureCopy::TextureCopy() = default;
 TextureCopy::TextureCopy(const TextureCopy&) = default;
+TextureCopy& TextureCopy::operator=(const TextureCopy&) = default;
 TextureCopy::~TextureCopy() = default;
 
 CopyBufferToBufferCmd::CopyBufferToBufferCmd() = default;

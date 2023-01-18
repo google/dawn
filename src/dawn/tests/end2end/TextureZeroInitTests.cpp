@@ -115,6 +115,36 @@ class TextureZeroInitTest : public DawnTest {
         )");
     }
 
+    wgpu::Texture CreateAndFillStencilTexture(wgpu::TextureFormat format) {
+        // Create the texture.
+        wgpu::TextureDescriptor depthStencilDescriptor =
+            CreateTextureDescriptor(1, 1,
+                                    wgpu::TextureUsage::RenderAttachment |
+                                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst,
+                                    format);
+        wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
+
+        // Prepare stencil data
+        const uint64_t dataSize =
+            utils::RequiredBytesInCopy(kSize, 0, {kSize, kSize, 1}, wgpu::TextureFormat::Stencil8);
+        std::vector<uint8_t> stencilData(dataSize);
+        for (size_t i = 0; i < stencilData.size(); ++i) {
+            stencilData[i] = i % 255;
+        }
+
+        wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
+            depthStencilTexture, 0u, {0, 0, 0}, wgpu::TextureAspect::StencilOnly);
+
+        wgpu::TextureDataLayout textureDataLayout = {};
+        textureDataLayout.bytesPerRow = kSize;
+
+        // Write the stencil data
+        queue.WriteTexture(&imageCopyTexture, stencilData.data(), stencilData.size(),
+                           &textureDataLayout, &depthStencilDescriptor.size);
+
+        return depthStencilTexture;
+    }
+
     constexpr static uint32_t kSize = 128;
     constexpr static uint32_t kUnalignedSize = 127;
     // All texture formats used (RGBA8Unorm, Depth24PlusStencil8, and RGBA8Snorm, BC formats)
@@ -754,6 +784,132 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
                 0u, EXPECT_TEXTURE_EQ(expected.data(), depthStencilTexture, {0, 0}, {kSize, kSize},
                                       0, wgpu::TextureAspect::StencilOnly));
         }
+    }
+}
+
+// Test that a stencil texture that is written via copy, then discarded, sees
+// zero contents when it is read by sampling.
+TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadBySampling) {
+    // Copies to a single aspect are unsupported on OpenGL.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    for (wgpu::TextureFormat format :
+         {wgpu::TextureFormat::Stencil8, wgpu::TextureFormat::Depth24PlusStencil8}) {
+        wgpu::Texture depthStencilTexture = CreateAndFillStencilTexture(format);
+
+        // Discard the stencil data.
+        {
+            utils::ComboRenderPassDescriptor renderPassDescriptor({},
+                                                                  depthStencilTexture.CreateView());
+            renderPassDescriptor.UnsetDepthStencilLoadStoreOpsForFormat(format);
+            renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+            renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp =
+                wgpu::StoreOp::Discard;
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            auto pass = encoder.BeginRenderPass(&renderPassDescriptor);
+            pass.End();
+            wgpu::CommandBuffer commandBuffer = encoder.Finish();
+            queue.Submit(1, &commandBuffer);
+        }
+
+        // Data should now be zero.
+        ExpectAttachmentStencilTestData(depthStencilTexture, format, kSize, kSize, 0u, 0u, 0u);
+    }
+}
+
+// Test that a stencil texture that is written via copy, then discarded, sees
+// zero contents when it is read via copy.
+TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadByCopy) {
+    // Copies to a single aspect are unsupported on OpenGL.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    for (wgpu::TextureFormat format :
+         {wgpu::TextureFormat::Stencil8, wgpu::TextureFormat::Depth24PlusStencil8}) {
+        wgpu::Texture depthStencilTexture = CreateAndFillStencilTexture(format);
+
+        // Discard the stencil data.
+        {
+            utils::ComboRenderPassDescriptor renderPassDescriptor({},
+                                                                  depthStencilTexture.CreateView());
+            renderPassDescriptor.UnsetDepthStencilLoadStoreOpsForFormat(format);
+            renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+            renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp =
+                wgpu::StoreOp::Discard;
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            auto pass = encoder.BeginRenderPass(&renderPassDescriptor);
+            pass.End();
+            wgpu::CommandBuffer commandBuffer = encoder.Finish();
+            queue.Submit(1, &commandBuffer);
+        }
+
+        // Data should now be zero.
+        std::vector<uint8_t> stencilData(kSize * kSize, 0);
+        EXPECT_TEXTURE_EQ(stencilData.data(), depthStencilTexture, {0, 0}, {kSize, kSize}, 0u,
+                          wgpu::TextureAspect::StencilOnly);
+    }
+}
+
+// Test that a stencil texture that is written via copy, then discarded, then copied to
+// another texture, sees zero contents when it is read via copy.
+TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndCopyToTextureThenReadByCopy) {
+    // Copies to a single aspect are unsupported on OpenGL.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    for (wgpu::TextureFormat format :
+         {wgpu::TextureFormat::Stencil8, wgpu::TextureFormat::Depth24PlusStencil8}) {
+        // Create the texture.
+        wgpu::TextureDescriptor depthStencilDescriptor =
+            CreateTextureDescriptor(1, 1,
+                                    wgpu::TextureUsage::RenderAttachment |
+                                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst,
+                                    format);
+        wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
+
+        // Prepare stencil data
+        const uint64_t dataSize =
+            utils::RequiredBytesInCopy(kSize, 0, {kSize, kSize, 1}, wgpu::TextureFormat::Stencil8);
+        std::vector<uint8_t> stencilData(dataSize);
+        for (size_t i = 0; i < stencilData.size(); ++i) {
+            stencilData[i] = i % 255;
+        }
+
+        wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
+            depthStencilTexture, 0, {0, 0, 0}, wgpu::TextureAspect::StencilOnly);
+
+        wgpu::TextureDataLayout textureDataLayout = {};
+        textureDataLayout.bytesPerRow = kSize;
+
+        // Write the stencil data
+        queue.WriteTexture(&imageCopyTexture, stencilData.data(), stencilData.size(),
+                           &textureDataLayout, &depthStencilDescriptor.size);
+
+        wgpu::Texture intermediate = device.CreateTexture(&depthStencilDescriptor);
+
+        // Discard the stencil data and copy to an intermediate texture.
+        {
+            utils::ComboRenderPassDescriptor renderPassDescriptor({},
+                                                                  depthStencilTexture.CreateView());
+            renderPassDescriptor.UnsetDepthStencilLoadStoreOpsForFormat(format);
+            renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+            renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp =
+                wgpu::StoreOp::Discard;
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            auto pass = encoder.BeginRenderPass(&renderPassDescriptor);
+            pass.End();
+            wgpu::ImageCopyTexture src = utils::CreateImageCopyTexture(depthStencilTexture);
+            wgpu::ImageCopyTexture dst = utils::CreateImageCopyTexture(intermediate);
+            encoder.CopyTextureToTexture(&src, &dst, &depthStencilDescriptor.size);
+            wgpu::CommandBuffer commandBuffer = encoder.Finish();
+            queue.Submit(1, &commandBuffer);
+        }
+
+        // Data should now be zero.
+        std::fill(stencilData.begin(), stencilData.end(), 0);
+        EXPECT_TEXTURE_EQ(stencilData.data(), intermediate, {0, 0}, {kSize, kSize}, 0u,
+                          wgpu::TextureAspect::StencilOnly);
     }
 }
 
@@ -2162,6 +2318,8 @@ TEST_P(CompressedTextureZeroInitTest, Copy2DArrayCompressedB2T2B) {
 DAWN_INSTANTIATE_TEST(CompressedTextureZeroInitTest,
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
                       MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      MetalBackend({"nonzero_clear_resources_on_creation_for_testing",
+                                    "use_temp_texture_in_stencil_texture_to_buffer_copy"}),
                       OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       OpenGLESBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));
