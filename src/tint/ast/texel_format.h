@@ -30,6 +30,7 @@ namespace tint::ast {
 /// Enumerator of texel formats
 enum class TexelFormat {
     kUndefined,
+    kBgra8Unorm,
     kR32Float,
     kR32Sint,
     kR32Uint,
@@ -59,9 +60,9 @@ std::ostream& operator<<(std::ostream& out, TexelFormat value);
 TexelFormat ParseTexelFormat(std::string_view str);
 
 constexpr const char* kTexelFormatStrings[] = {
-    "r32float",    "r32sint",    "r32uint",    "rg32float",   "rg32sint",   "rg32uint",
-    "rgba16float", "rgba16sint", "rgba16uint", "rgba32float", "rgba32sint", "rgba32uint",
-    "rgba8sint",   "rgba8snorm", "rgba8uint",  "rgba8unorm",
+    "bgra8unorm", "r32float",    "r32sint",    "r32uint",    "rg32float",   "rg32sint",
+    "rg32uint",   "rgba16float", "rgba16sint", "rgba16uint", "rgba32float", "rgba32sint",
+    "rgba32uint", "rgba8sint",   "rgba8snorm", "rgba8uint",  "rgba8unorm",
 };
 
 }  // namespace tint::ast

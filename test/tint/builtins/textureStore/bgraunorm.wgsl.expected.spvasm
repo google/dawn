@@ -1,0 +1,56 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 33
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vertex_main "vertex_main" %value_1 %vertex_point_size
+               OpName %value_1 "value_1"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %tex "tex"
+               OpName %vertex_main_inner "vertex_main_inner"
+               OpName %vertex_main "vertex_main"
+               OpDecorate %value_1 BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+               OpDecorate %tex NonReadable
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+    %value_1 = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Output_float = OpTypePointer Output %float
+          %8 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %8
+         %11 = OpTypeImage %float 2D 0 0 0 2 Rgba8
+%_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
+        %tex = OpVariable %_ptr_UniformConstant_11 UniformConstant
+         %12 = OpTypeFunction %v4float
+    %float_1 = OpConstant %float 1
+    %float_2 = OpConstant %float 2
+    %float_3 = OpConstant %float 3
+    %float_4 = OpConstant %float 4
+         %19 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+      %int_9 = OpConstant %int 9
+      %int_8 = OpConstant %int 8
+         %27 = OpConstantComposite %v2int %int_9 %int_8
+         %29 = OpTypeFunction %void
+%vertex_main_inner = OpFunction %v4float None %12
+         %14 = OpLabel
+         %22 = OpLoad %11 %tex
+         %28 = OpVectorShuffle %v4float %19 %19 2 1 0 3
+               OpImageWrite %22 %27 %28
+               OpReturnValue %5
+               OpFunctionEnd
+%vertex_main = OpFunction %void None %29
+         %31 = OpLabel
+         %32 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value_1 %32
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd

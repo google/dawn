@@ -51,6 +51,7 @@ struct ResourceBinding {
     enum class TexelFormat {
         kNone = -1,
 
+        kBgra8Unorm,
         kRgba8Unorm,
         kRgba8Snorm,
         kRgba8Uint,

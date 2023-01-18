@@ -67,6 +67,7 @@ Type* StorageTexture::SubtypeFor(TexelFormat format, ProgramBuilder& builder) {
             return builder.create<I32>();
         }
 
+        case TexelFormat::kBgra8Unorm:
         case TexelFormat::kRgba8Unorm:
         case TexelFormat::kRgba8Snorm:
         case TexelFormat::kR32Float:

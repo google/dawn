@@ -23,7 +23,7 @@ TEST_F(ParserImplTest, TexelFormat_Invalid) {
     EXPECT_TRUE(t.errored);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), R"(1:1: expected texel format for test
-Possible values: 'r32float', 'r32sint', 'r32uint', 'rg32float', 'rg32sint', 'rg32uint', 'rgba16float', 'rgba16sint', 'rgba16uint', 'rgba32float', 'rgba32sint', 'rgba32uint', 'rgba8sint', 'rgba8snorm', 'rgba8uint', 'rgba8unorm')");
+Possible values: 'bgra8unorm', 'r32float', 'r32sint', 'r32uint', 'rg32float', 'rg32sint', 'rg32uint', 'rgba16float', 'rgba16sint', 'rgba16uint', 'rgba32float', 'rgba32sint', 'rgba32uint', 'rgba8sint', 'rgba8snorm', 'rgba8uint', 'rgba8unorm')");
 }
 
 TEST_F(ParserImplTest, TexelFormat_R32Uint) {

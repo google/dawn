@@ -110,46 +110,6 @@ bool last_is_break(const ast::BlockStatement* stmts) {
     return IsAnyOf<ast::BreakStatement>(stmts->Last());
 }
 
-const char* convert_texel_format_to_glsl(const ast::TexelFormat format) {
-    switch (format) {
-        case ast::TexelFormat::kR32Uint:
-            return "r32ui";
-        case ast::TexelFormat::kR32Sint:
-            return "r32i";
-        case ast::TexelFormat::kR32Float:
-            return "r32f";
-        case ast::TexelFormat::kRgba8Unorm:
-            return "rgba8";
-        case ast::TexelFormat::kRgba8Snorm:
-            return "rgba8_snorm";
-        case ast::TexelFormat::kRgba8Uint:
-            return "rgba8ui";
-        case ast::TexelFormat::kRgba8Sint:
-            return "rgba8i";
-        case ast::TexelFormat::kRg32Uint:
-            return "rg32ui";
-        case ast::TexelFormat::kRg32Sint:
-            return "rg32i";
-        case ast::TexelFormat::kRg32Float:
-            return "rg32f";
-        case ast::TexelFormat::kRgba16Uint:
-            return "rgba16ui";
-        case ast::TexelFormat::kRgba16Sint:
-            return "rgba16i";
-        case ast::TexelFormat::kRgba16Float:
-            return "rgba16f";
-        case ast::TexelFormat::kRgba32Uint:
-            return "rgba32ui";
-        case ast::TexelFormat::kRgba32Sint:
-            return "rgba32i";
-        case ast::TexelFormat::kRgba32Float:
-            return "rgba32f";
-        case ast::TexelFormat::kUndefined:
-            return "unknown";
-    }
-    return "unknown";
-}
-
 void PrintF32(std::ostream& out, float value) {
     if (std::isinf(value)) {
         out << "0.0f " << (value >= 0 ? "/* inf */" : "/* -inf */");
@@ -191,6 +151,7 @@ SanitizedResult Sanitize(const Program* in,
         transform::BuiltinPolyfill::Builtins polyfills;
         polyfills.acosh = transform::BuiltinPolyfill::Level::kRangeCheck;
         polyfills.atanh = transform::BuiltinPolyfill::Level::kRangeCheck;
+        polyfills.bgra8unorm = true;
         polyfills.bitshift_modulo = true;
         polyfills.count_leading_zeros = true;
         polyfills.count_trailing_zeros = true;
@@ -2069,7 +2030,65 @@ bool GeneratorImpl::EmitHandleVariable(const ast::Var* var, const sem::Variable*
         return true;
     }
     if (auto* storage = type->As<type::StorageTexture>()) {
-        out << "layout(" << convert_texel_format_to_glsl(storage->texel_format()) << ") ";
+        out << "layout(";
+        switch (storage->texel_format()) {
+            case ast::TexelFormat::kBgra8Unorm:
+                TINT_ICE(Writer, diagnostics_)
+                    << "bgra8unorm should have been polyfilled to rgba8unorm";
+                break;
+            case ast::TexelFormat::kR32Uint:
+                out << "r32ui";
+                break;
+            case ast::TexelFormat::kR32Sint:
+                out << "r32i";
+                break;
+            case ast::TexelFormat::kR32Float:
+                out << "r32f";
+                break;
+            case ast::TexelFormat::kRgba8Unorm:
+                out << "rgba8";
+                break;
+            case ast::TexelFormat::kRgba8Snorm:
+                out << "rgba8_snorm";
+                break;
+            case ast::TexelFormat::kRgba8Uint:
+                out << "rgba8ui";
+                break;
+            case ast::TexelFormat::kRgba8Sint:
+                out << "rgba8i";
+                break;
+            case ast::TexelFormat::kRg32Uint:
+                out << "rg32ui";
+                break;
+            case ast::TexelFormat::kRg32Sint:
+                out << "rg32i";
+                break;
+            case ast::TexelFormat::kRg32Float:
+                out << "rg32f";
+                break;
+            case ast::TexelFormat::kRgba16Uint:
+                out << "rgba16ui";
+                break;
+            case ast::TexelFormat::kRgba16Sint:
+                out << "rgba16i";
+                break;
+            case ast::TexelFormat::kRgba16Float:
+                out << "rgba16f";
+                break;
+            case ast::TexelFormat::kRgba32Uint:
+                out << "rgba32ui";
+                break;
+            case ast::TexelFormat::kRgba32Sint:
+                out << "rgba32i";
+                break;
+            case ast::TexelFormat::kRgba32Float:
+                out << "rgba32f";
+                break;
+            case ast::TexelFormat::kUndefined:
+                TINT_ICE(Writer, diagnostics_) << "invalid texel format";
+                return false;
+        }
+        out << ") ";
     }
     if (!EmitTypeAndName(out, type, sem->AddressSpace(), sem->Access(), name)) {
         return false;

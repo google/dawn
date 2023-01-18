@@ -98,6 +98,7 @@ bool IsValidStorageTextureDimension(ast::TextureDimension dim) {
 
 bool IsValidStorageTextureTexelFormat(ast::TexelFormat format) {
     switch (format) {
+        case ast::TexelFormat::kBgra8Unorm:
         case ast::TexelFormat::kR32Uint:
         case ast::TexelFormat::kR32Sint:
         case ast::TexelFormat::kR32Float:

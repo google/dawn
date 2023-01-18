@@ -72,6 +72,8 @@ ResourceBinding::SampledKind BaseTypeToSampledKind(const type::Type* base_type) 
 ResourceBinding::TexelFormat TypeTexelFormatToResourceBindingTexelFormat(
     const ast::TexelFormat& image_format) {
     switch (image_format) {
+        case ast::TexelFormat::kBgra8Unorm:
+            return ResourceBinding::TexelFormat::kBgra8Unorm;
         case ast::TexelFormat::kR32Uint:
             return ResourceBinding::TexelFormat::kR32Uint;
         case ast::TexelFormat::kR32Sint:

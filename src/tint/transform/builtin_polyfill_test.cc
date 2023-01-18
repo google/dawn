@@ -381,6 +381,138 @@ fn f() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// bgra8unorm
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillBgra8unorm() {
+    BuiltinPolyfill::Builtins builtins;
+    builtins.bgra8unorm = true;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+    return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunBgra8unorm_StorageTextureVar) {
+    auto* src = R"(
+@group(0) @binding(0) var tex : texture_storage_3d<bgra8unorm, write>;
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillBgra8unorm()));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunBgra8unorm_StorageTextureParam) {
+    auto* src = R"(
+fn f(tex : texture_storage_3d<bgra8unorm, write>) {
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillBgra8unorm()));
+}
+
+TEST_F(BuiltinPolyfillTest, Bgra8unorm_StorageTextureVar) {
+    auto* src = R"(
+@group(0) @binding(0) var tex : texture_storage_3d<bgra8unorm, write>;
+)";
+
+    auto* expect = R"(
+@group(0) @binding(0) var tex : texture_storage_3d<rgba8unorm, write>;
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillBgra8unorm());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, Bgra8unorm_StorageTextureParam) {
+    auto* src = R"(
+fn f(tex : texture_storage_3d<bgra8unorm, write>) {
+}
+)";
+
+    auto* expect = R"(
+fn f(tex : texture_storage_3d<rgba8unorm, write>) {
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillBgra8unorm());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, Bgra8unorm_TextureStore) {
+    auto* src = R"(
+@group(0) @binding(0) var tex : texture_storage_2d<bgra8unorm, write>;
+
+fn f(coords : vec2<i32>, value : vec4<f32>) {
+  textureStore(tex, coords, value);
+}
+)";
+
+    auto* expect = R"(
+@group(0) @binding(0) var tex : texture_storage_2d<rgba8unorm, write>;
+
+fn f(coords : vec2<i32>, value : vec4<f32>) {
+  textureStore(tex, coords, value.bgra);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillBgra8unorm());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, Bgra8unorm_TextureStore_Param) {
+    auto* src = R"(
+fn f(tex : texture_storage_2d<bgra8unorm, write>, coords : vec2<i32>, value : vec4<f32>) {
+  textureStore(tex, coords, value);
+}
+)";
+
+    auto* expect = R"(
+fn f(tex : texture_storage_2d<rgba8unorm, write>, coords : vec2<i32>, value : vec4<f32>) {
+  textureStore(tex, coords, value.bgra);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillBgra8unorm());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, Bgra8unorm_TextureStore_WithAtanh) {
+    auto* src = R"(
+@group(0) @binding(0) var tex : texture_storage_2d<bgra8unorm, write>;
+
+fn f(coords : vec2<i32>, value : vec4<f32>) {
+  textureStore(tex, coords, atanh(value));
+}
+)";
+
+    auto* expect = R"(
+fn tint_atanh(x : vec4<f32>) -> vec4<f32> {
+  return (log(((1 + x) / (1 - x))) * 0.5);
+}
+
+@group(0) @binding(0) var tex : texture_storage_2d<rgba8unorm, write>;
+
+fn f(coords : vec2<i32>, value : vec4<f32>) {
+  textureStore(tex, coords, tint_atanh(value).bgra);
+}
+)";
+
+    BuiltinPolyfill::Builtins builtins;
+    builtins.atanh = BuiltinPolyfill::Level::kFull;
+    builtins.bgra8unorm = true;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+
+    auto got = Run<BuiltinPolyfill>(src, std::move(data));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // bitshiftModulo
 ////////////////////////////////////////////////////////////////////////////////
 DataMap polyfillBitshiftModulo() {

@@ -335,6 +335,8 @@ std::string TexelFormatToString(tint::inspector::ResourceBinding::TexelFormat fo
             return "R32Sint";
         case tint::inspector::ResourceBinding::TexelFormat::kR32Float:
             return "R32Float";
+        case tint::inspector::ResourceBinding::TexelFormat::kBgra8Unorm:
+            return "Bgra8Unorm";
         case tint::inspector::ResourceBinding::TexelFormat::kRgba8Unorm:
             return "Rgba8Unorm";
         case tint::inspector::ResourceBinding::TexelFormat::kRgba8Snorm:

@@ -4079,6 +4079,10 @@ void Builder::AddInterpolationDecorations(uint32_t id,
 
 SpvImageFormat Builder::convert_texel_format_to_spv(const ast::TexelFormat format) {
     switch (format) {
+        case ast::TexelFormat::kBgra8Unorm:
+            TINT_ICE(Writer, builder_.Diagnostics())
+                << "bgra8unorm should have been polyfilled to rgba8unorm";
+            return SpvImageFormatUnknown;
         case ast::TexelFormat::kR32Uint:
             return SpvImageFormatR32ui;
         case ast::TexelFormat::kR32Sint:

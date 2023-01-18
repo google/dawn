@@ -88,6 +88,7 @@ const char kTempNamePrefix[] = "tint_tmp";
 
 const char* image_format_to_rwtexture_type(ast::TexelFormat image_format) {
     switch (image_format) {
+        case ast::TexelFormat::kBgra8Unorm:
         case ast::TexelFormat::kRgba8Unorm:
         case ast::TexelFormat::kRgba8Snorm:
         case ast::TexelFormat::kRgba16Float:

@@ -47,6 +47,8 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         bool asinh = false;
         /// What level should `atanh` be polyfilled?
         Level atanh = Level::kNone;
+        /// Should storage textures of format 'bgra8unorm' be replaced with 'rgba8unorm'?
+        bool bgra8unorm = false;
         /// Should the RHS of `<<` and `>>` be wrapped in a modulo bit-width of LHS?
         bool bitshift_modulo = false;
         /// Should `clamp()` be polyfilled for integer values (scalar or vector)?

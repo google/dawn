@@ -2378,6 +2378,7 @@ class F32TexelFormat : public NumberMatcher {
 
 Number F32TexelFormat::Match(MatchState&, Number number) const {
   switch (static_cast<TexelFormat>(number.Value())) {
+    case TexelFormat::kBgra8Unorm:
     case TexelFormat::kRgba8Unorm:
     case TexelFormat::kRgba8Snorm:
     case TexelFormat::kRgba16Float:
@@ -2391,7 +2392,7 @@ Number F32TexelFormat::Match(MatchState&, Number number) const {
 }
 
 std::string F32TexelFormat::String(MatchState*) const {
-  return "rgba8unorm, rgba8snorm, rgba16float, r32float, rg32float or rgba32float";
+  return "bgra8unorm, rgba8unorm, rgba8snorm, rgba16float, r32float, rg32float or rgba32float";
 }
 
 /// EnumMatcher for 'match i32_texel_format'

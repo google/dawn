@@ -57,6 +57,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         transform::BuiltinPolyfill::Builtins polyfills;
         polyfills.acosh = transform::BuiltinPolyfill::Level::kRangeCheck;
         polyfills.atanh = transform::BuiltinPolyfill::Level::kRangeCheck;
+        polyfills.bgra8unorm = true;
         polyfills.bitshift_modulo = true;
         polyfills.clamp_int = true;
         polyfills.count_leading_zeros = true;

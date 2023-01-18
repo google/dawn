@@ -1126,7 +1126,8 @@ struct FormatParams {
     bool is_valid;
 };
 
-static constexpr FormatParams format_cases[] = {FormatParams{ast::TexelFormat::kR32Float, true},
+static constexpr FormatParams format_cases[] = {FormatParams{ast::TexelFormat::kBgra8Unorm, true},
+                                                FormatParams{ast::TexelFormat::kR32Float, true},
                                                 FormatParams{ast::TexelFormat::kR32Sint, true},
                                                 FormatParams{ast::TexelFormat::kR32Uint, true},
                                                 FormatParams{ast::TexelFormat::kRg32Float, true},
