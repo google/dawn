@@ -73,6 +73,7 @@ class BufferBase : public ApiObjectBase {
     bool NeedsInitialization() const;
     bool IsDataInitialized() const;
     void SetIsDataInitialized();
+    void SetLastUsageSerial(ExecutionSerial serial);
 
     virtual void* GetMappedPointer() = 0;
     void* GetMappedRange(size_t offset, size_t size, bool writable = true);
@@ -105,6 +106,8 @@ class BufferBase : public ApiObjectBase {
     MaybeError MapAtCreationInternal();
 
     uint64_t mAllocatedSize = 0;
+
+    ExecutionSerial mLastUsageSerial = ExecutionSerial(0);
 
   private:
     // A helper structure to enforce that the mapAsync callback is called only at the very end of

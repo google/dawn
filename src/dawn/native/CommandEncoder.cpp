@@ -1159,10 +1159,10 @@ void CommandEncoder::APICopyBufferToBuffer(BufferBase* source,
                                  "validating source %s usage.", source);
                 DAWN_TRY_CONTEXT(ValidateCanUseAs(destination, wgpu::BufferUsage::CopyDst),
                                  "validating destination %s usage.", destination);
-
-                mTopLevelBuffers.insert(source);
-                mTopLevelBuffers.insert(destination);
             }
+
+            mTopLevelBuffers.insert(source);
+            mTopLevelBuffers.insert(destination);
 
             CopyBufferToBufferCmd* copy =
                 allocator->Allocate<CopyBufferToBufferCmd>(Command::CopyBufferToBuffer);
@@ -1210,10 +1210,10 @@ void CommandEncoder::APICopyBufferToTexture(const ImageCopyBuffer* source,
                     destination->texture->GetFormat().HasDepthOrStencil()));
                 DAWN_TRY(ValidateLinearTextureData(source->layout, source->buffer->GetSize(),
                                                    blockInfo, *copySize));
-
-                mTopLevelBuffers.insert(source->buffer);
-                mTopLevelTextures.insert(destination->texture);
             }
+
+            mTopLevelBuffers.insert(source->buffer);
+            mTopLevelTextures.insert(destination->texture);
 
             TextureDataLayout srcLayout = source->layout;
             ApplyDefaultTextureDataLayoutOptions(&srcLayout, blockInfo, *copySize);
@@ -1269,10 +1269,10 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
                     source->texture->GetFormat().HasDepthOrStencil()));
                 DAWN_TRY(ValidateLinearTextureData(
                     destination->layout, destination->buffer->GetSize(), blockInfo, *copySize));
-
-                mTopLevelTextures.insert(source->texture);
-                mTopLevelBuffers.insert(destination->buffer);
             }
+
+            mTopLevelTextures.insert(source->texture);
+            mTopLevelBuffers.insert(destination->buffer);
 
             TextureDataLayout dstLayout = destination->layout;
             ApplyDefaultTextureDataLayoutOptions(&dstLayout, blockInfo, *copySize);
@@ -1377,10 +1377,10 @@ void CommandEncoder::APICopyTextureToTextureHelper(const ImageCopyTexture* sourc
                     DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst,
                                               mUsageValidationMode));
                 }
-
-                mTopLevelTextures.insert(source->texture);
-                mTopLevelTextures.insert(destination->texture);
             }
+
+            mTopLevelTextures.insert(source->texture);
+            mTopLevelTextures.insert(destination->texture);
 
             CopyTextureToTextureCmd* copy =
                 allocator->Allocate<CopyTextureToTextureCmd>(Command::CopyTextureToTexture);
@@ -1434,13 +1434,14 @@ void CommandEncoder::APIClearBuffer(BufferBase* buffer, uint64_t offset, uint64_
                 DAWN_INVALID_IF(offset % 4 != 0, "Offset (%u) is not a multiple of 4 bytes,",
                                 offset);
 
-                mTopLevelBuffers.insert(buffer);
             } else {
                 if (size == wgpu::kWholeSize) {
                     DAWN_ASSERT(buffer->GetSize() >= offset);
                     size = buffer->GetSize() - offset;
                 }
             }
+
+            mTopLevelBuffers.insert(buffer);
 
             ClearBufferCmd* cmd = allocator->Allocate<ClearBufferCmd>(Command::ClearBuffer);
             cmd->buffer = buffer;
@@ -1528,8 +1529,9 @@ void CommandEncoder::APIResolveQuerySet(QuerySetBase* querySet,
                 DAWN_TRY(ValidateCanUseAs(destination, wgpu::BufferUsage::QueryResolve));
 
                 TrackUsedQuerySet(querySet);
-                mTopLevelBuffers.insert(destination);
             }
+
+            mTopLevelBuffers.insert(destination);
 
             ResolveQuerySetCmd* cmd =
                 allocator->Allocate<ResolveQuerySetCmd>(Command::ResolveQuerySet);

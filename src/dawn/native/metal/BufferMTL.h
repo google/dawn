@@ -34,6 +34,7 @@ class Buffer final : public BufferBase {
 
     id<MTLBuffer> GetMTLBuffer() const;
 
+    void TrackUsage();
     bool EnsureDataInitialized(CommandRecordingContext* commandContext);
     bool EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
                                             uint64_t offset,

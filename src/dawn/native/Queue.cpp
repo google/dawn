@@ -218,22 +218,33 @@ void QueueBase::APIOnSubmittedWorkDone(uint64_t signalValue,
     // also used to make sure ALL queue work is finished in tests, so we also wait for pending
     // commands (this is non-observable outside of tests so it's ok to do deviate a bit from the
     // spec).
-    TrackTask(std::move(task));
+    TrackTaskAfterEventualFlush(std::move(task));
 
     TRACE_EVENT1(GetDevice()->GetPlatform(), General, "Queue::APIOnSubmittedWorkDone", "serial",
                  uint64_t(GetDevice()->GetPendingCommandSerial()));
 }
 
-void QueueBase::TrackTask(std::unique_ptr<TrackTaskCallback> task) {
-    GetDevice()->ForceEventualFlushOfCommands();
-    // we can move the task to the callback task manager, as it's ready to be called if there are no
-    // scheduled commands.
-    if (!GetDevice()->HasScheduledCommands()) {
+void QueueBase::TrackTask(std::unique_ptr<TrackTaskCallback> task, ExecutionSerial serial) {
+    // If the task depends on a serial which is not submitted yet, force a flush.
+    if (serial > GetDevice()->GetLastSubmittedCommandSerial()) {
+        GetDevice()->ForceEventualFlushOfCommands();
+    }
+
+    ASSERT(serial <= GetDevice()->GetScheduledWorkDoneSerial());
+
+    // If the serial indicated command has been completed, the task will be moved to callback task
+    // manager.
+    if (serial <= GetDevice()->GetCompletedCommandSerial()) {
         task->SetFinishedSerial(GetDevice()->GetCompletedCommandSerial());
         GetDevice()->GetCallbackTaskManager()->AddCallbackTask(std::move(task));
     } else {
-        mTasksInFlight.Enqueue(std::move(task), GetDevice()->GetScheduledWorkDoneSerial());
+        mTasksInFlight.Enqueue(std::move(task), serial);
     }
+}
+
+void QueueBase::TrackTaskAfterEventualFlush(std::unique_ptr<TrackTaskCallback> task) {
+    GetDevice()->ForceEventualFlushOfCommands();
+    TrackTask(std::move(task), GetDevice()->GetScheduledWorkDoneSerial());
 }
 
 void QueueBase::Tick(ExecutionSerial finishedSerial) {
@@ -427,9 +438,13 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
     for (uint32_t i = 0; i < commandCount; ++i) {
         DAWN_TRY(GetDevice()->ValidateObject(commands[i]));
         DAWN_TRY(commands[i]->ValidateCanUseInSubmitNow());
-
         const CommandBufferResourceUsage& usages = commands[i]->GetResourceUsages();
 
+        for (const BufferBase* buffer : usages.topLevelBuffers) {
+            DAWN_TRY(buffer->ValidateCanUseOnQueueNow());
+        }
+
+        // Maybe track last usage for other resources, and use it to release resources earlier?
         for (const SyncScopeResourceUsage& scope : usages.renderPasses) {
             for (const BufferBase* buffer : scope.buffers) {
                 DAWN_TRY(buffer->ValidateCanUseOnQueueNow());
@@ -456,9 +471,6 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
             }
         }
 
-        for (const BufferBase* buffer : usages.topLevelBuffers) {
-            DAWN_TRY(buffer->ValidateCanUseOnQueueNow());
-        }
         for (const TextureBase* texture : usages.topLevelTextures) {
             DAWN_TRY(texture->ValidateCanUseInSubmitNow());
         }
@@ -529,9 +541,10 @@ void QueueBase::SubmitInternal(uint32_t commandCount, CommandBufferBase* const* 
     }
 
     TRACE_EVENT0(device->GetPlatform(), General, "Queue::Submit");
-    if (device->IsValidationEnabled() &&
-        device->ConsumedError(ValidateSubmit(commandCount, commands))) {
-        return;
+    if (device->IsValidationEnabled()) {
+        if (device->ConsumedError(ValidateSubmit(commandCount, commands))) {
+            return;
+        }
     }
     ASSERT(!IsError());
 

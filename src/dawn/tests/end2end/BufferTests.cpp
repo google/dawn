@@ -541,6 +541,164 @@ DAWN_INSTANTIATE_TEST(BufferMappingTests,
                       OpenGLESBackend(),
                       VulkanBackend());
 
+class BufferMappingCallbackTests : public BufferMappingTests {
+  protected:
+    void SubmitCommandBuffer(wgpu::Buffer buffer) {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        {
+            // Record enough commands to make sure the submission cannot be completed by GPU too
+            // quick.
+            constexpr int kRepeatCount = 50;
+            constexpr int kBufferSize = 1024 * 1024 * 10;
+            wgpu::Buffer tempWriteBuffer = CreateMapWriteBuffer(kBufferSize);
+            wgpu::Buffer tempReadBuffer = CreateMapReadBuffer(kBufferSize);
+            for (int i = 0; i < kRepeatCount; ++i) {
+                encoder.CopyBufferToBuffer(tempWriteBuffer, 0, tempReadBuffer, 0, kBufferSize);
+            }
+        }
+
+        if (buffer) {
+            if (buffer.GetUsage() & wgpu::BufferUsage::CopyDst) {
+                encoder.ClearBuffer(buffer);
+            } else {
+                wgpu::Buffer tempBuffer = CreateMapReadBuffer(buffer.GetSize());
+                encoder.CopyBufferToBuffer(buffer, 0, tempBuffer, 0, buffer.GetSize());
+            }
+        }
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        queue.Submit(1, &commandBuffer);
+    }
+
+    void Wait(std::vector<bool>& done) {
+        do {
+            WaitABit();
+        } while (std::any_of(done.begin(), done.end(), [](bool done) { return !done; }));
+    }
+};
+
+TEST_P(BufferMappingCallbackTests, EmptySubmissionAndThenMap) {
+    wgpu::Buffer buffer = CreateMapWriteBuffer(4);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, wgpu::kWholeMapSize);
+    buffer.Unmap();
+
+    std::vector<bool> done = {false, false};
+
+    // 1. submission without using buffer.
+    SubmitCommandBuffer({});
+    queue.OnSubmittedWorkDone(
+        0,
+        [](WGPUQueueWorkDoneStatus status, void* userdata) {
+            EXPECT_EQ(status, WGPUQueueWorkDoneStatus_Success);
+            auto& done = *static_cast<std::vector<bool>*>(userdata);
+            done[0] = true;
+            // Step 2 callback should be called first, this is the second.
+            const std::vector<bool> kExpected = {true, true};
+            EXPECT_EQ(done, kExpected);
+        },
+        &done);
+
+    // 2.
+    buffer.MapAsync(
+        wgpu::MapMode::Write, 0, 4,
+        [](WGPUBufferMapAsyncStatus status, void* userdata) {
+            EXPECT_EQ(status, WGPUBufferMapAsyncStatus_Success);
+            auto& done = *static_cast<std::vector<bool>*>(userdata);
+            done[1] = true;
+            // The buffer is not used by step 1, so this callback is called first.
+            const std::vector<bool> kExpected = {false, true};
+            EXPECT_EQ(done, kExpected);
+        },
+        &done);
+
+    Wait(done);
+}
+
+TEST_P(BufferMappingCallbackTests, UseTheBufferAndThenMap) {
+    wgpu::Buffer buffer = CreateMapWriteBuffer(4);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, wgpu::kWholeMapSize);
+    buffer.Unmap();
+
+    std::vector<bool> done = {false, false};
+
+    // 1. Submit a command buffer which uses the buffer
+    SubmitCommandBuffer(buffer);
+    queue.OnSubmittedWorkDone(
+        0,
+        [](WGPUQueueWorkDoneStatus status, void* userdata) {
+            EXPECT_EQ(status, WGPUQueueWorkDoneStatus_Success);
+            auto& done = *static_cast<std::vector<bool>*>(userdata);
+            done[0] = true;
+            // This callback should be called first
+            const std::vector<bool> kExpected = {true, false};
+            EXPECT_EQ(done, kExpected);
+        },
+        &done);
+
+    // 2.
+    buffer.MapAsync(
+        wgpu::MapMode::Write, 0, 4,
+        [](WGPUBufferMapAsyncStatus status, void* userdata) {
+            EXPECT_EQ(status, WGPUBufferMapAsyncStatus_Success);
+            auto& done = *static_cast<std::vector<bool>*>(userdata);
+            done[1] = true;
+            // The buffer is used by step 1, so this callback is called second.
+            const std::vector<bool> kExpected = {true, true};
+            EXPECT_EQ(done, kExpected);
+        },
+        &done);
+
+    Wait(done);
+
+    buffer.Unmap();
+}
+
+TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
+    wgpu::Buffer buffer = CreateMapReadBuffer(4);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, wgpu::kWholeMapSize);
+    buffer.Unmap();
+
+    std::vector<bool> done = {false, false};
+
+    // 1. submission without using buffer.
+    SubmitCommandBuffer({});
+    queue.OnSubmittedWorkDone(
+        0,
+        [](WGPUQueueWorkDoneStatus status, void* userdata) {
+            EXPECT_EQ(status, WGPUQueueWorkDoneStatus_Success);
+            auto& done = *static_cast<std::vector<bool>*>(userdata);
+            done[0] = true;
+            // Step 2 callback should be called first, this is the second.
+            const std::vector<bool> kExpected = {true, false};
+            EXPECT_EQ(done, kExpected);
+        },
+        &done);
+
+    int32_t data = 0x12345678;
+    queue.WriteBuffer(buffer, 0, &data, sizeof(data));
+
+    // 2.
+    buffer.MapAsync(
+        wgpu::MapMode::Read, 0, 4,
+        [](WGPUBufferMapAsyncStatus status, void* userdata) {
+            EXPECT_EQ(status, WGPUBufferMapAsyncStatus_Success);
+            auto& done = *static_cast<std::vector<bool>*>(userdata);
+            done[1] = true;
+            // The buffer is not used by step 1, so this callback is called first.
+            const std::vector<bool> kExpected = {true, true};
+            EXPECT_EQ(done, kExpected);
+        },
+        &done);
+
+    Wait(done);
+
+    buffer.Unmap();
+}
+
+// MapAsync() will record pipeline barrier in pending command buffer with Vulkan.
+// TODO(penghuang): enable this test for Vulkan.
+DAWN_INSTANTIATE_TEST(BufferMappingCallbackTests, D3D12Backend(), MetalBackend());
+
 class BufferMappedAtCreationTests : public DawnTest {
   protected:
     static void MapCallback(WGPUBufferMapAsyncStatus status, void* userdata) {

@@ -178,6 +178,10 @@ void Buffer::DestroyImpl() {
     mMtlBuffer = nullptr;
 }
 
+void Buffer::TrackUsage() {
+    SetLastUsageSerial(GetDevice()->GetPendingCommandSerial());
+}
+
 bool Buffer::EnsureDataInitialized(CommandRecordingContext* commandContext) {
     if (!NeedsInitialization()) {
         return false;
@@ -234,6 +238,7 @@ void Buffer::ClearBuffer(CommandRecordingContext* commandContext,
     ASSERT(commandContext != nullptr);
     size = size > 0 ? size : GetAllocatedSize();
     ASSERT(size > 0);
+    TrackUsage();
     [commandContext->EnsureBlit() fillBuffer:mMtlBuffer.Get()
                                        range:NSMakeRange(offset, size)
                                        value:clearValue];

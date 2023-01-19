@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include "dawn/common/SerialQueue.h"
+#include "dawn/common/SerialMap.h"
 #include "dawn/native/CallbackTaskManager.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
@@ -77,7 +77,8 @@ class QueueBase : public ApiObjectBase {
                            uint64_t bufferOffset,
                            const void* data,
                            size_t size);
-    void TrackTask(std::unique_ptr<TrackTaskCallback> task);
+    void TrackTask(std::unique_ptr<TrackTaskCallback> task, ExecutionSerial serial);
+    void TrackTaskAfterEventualFlush(std::unique_ptr<TrackTaskCallback> task);
     void Tick(ExecutionSerial finishedSerial);
     void HandleDeviceLoss();
 
@@ -121,7 +122,7 @@ class QueueBase : public ApiObjectBase {
 
     void SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands);
 
-    SerialQueue<ExecutionSerial, std::unique_ptr<TrackTaskCallback>> mTasksInFlight;
+    SerialMap<ExecutionSerial, std::unique_ptr<TrackTaskCallback>> mTasksInFlight;
 };
 
 }  // namespace dawn::native

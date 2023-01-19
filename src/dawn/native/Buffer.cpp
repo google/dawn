@@ -455,8 +455,12 @@ void BufferBase::APIMapAsync(wgpu::MapMode mode,
     std::unique_ptr<MapRequestTask> request =
         std::make_unique<MapRequestTask>(GetDevice()->GetPlatform(), this, mLastMapID);
     TRACE_EVENT1(GetDevice()->GetPlatform(), General, "Buffer::APIMapAsync", "serial",
-                 uint64_t(GetDevice()->GetPendingCommandSerial()));
-    GetDevice()->GetQueue()->TrackTask(std::move(request));
+                 uint64_t(mLastUsageSerial));
+    if (mLastUsageSerial != kMaxExecutionSerial) {
+        GetDevice()->GetQueue()->TrackTask(std::move(request), mLastUsageSerial);
+    } else {
+        GetDevice()->GetQueue()->TrackTaskAfterEventualFlush(std::move(request));
+    }
 }
 
 void* BufferBase::APIGetMappedRange(size_t offset, size_t size) {
@@ -659,6 +663,11 @@ bool BufferBase::IsDataInitialized() const {
 
 void BufferBase::SetIsDataInitialized() {
     mIsDataInitialized = true;
+}
+
+void BufferBase::SetLastUsageSerial(ExecutionSerial serial) {
+    ASSERT(serial >= mLastUsageSerial);
+    mLastUsageSerial = serial;
 }
 
 bool BufferBase::IsFullBufferRange(uint64_t offset, uint64_t size) const {
