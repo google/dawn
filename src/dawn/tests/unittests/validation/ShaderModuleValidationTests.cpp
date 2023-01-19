@@ -23,6 +23,7 @@
 
 class ShaderModuleValidationTest : public ValidationTest {};
 
+#if TINT_BUILD_SPV_READER
 // Test case with a simpler shader that should successfully be created
 TEST_F(ShaderModuleValidationTest, CreationSuccess) {
     const char* shader = R"(
@@ -53,13 +54,6 @@ TEST_F(ShaderModuleValidationTest, CreationSuccess) {
                    OpFunctionEnd)";
 
     utils::CreateShaderModuleFromASM(device, shader);
-}
-
-// Test that it is invalid to create a shader module with no chained descriptor. (It must be
-// WGSL or SPIRV, not empty)
-TEST_F(ShaderModuleValidationTest, NoChainedDescriptor) {
-    wgpu::ShaderModuleDescriptor desc = {};
-    ASSERT_DEVICE_ERROR(device.CreateShaderModule(&desc));
 }
 
 // Test that it is not allowed to use combined texture and sampler.
@@ -142,6 +136,14 @@ TEST_F(ShaderModuleValidationTest, MultisampledArrayTexture) {
         )";
 
     ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromASM(device, shader));
+}
+#endif  // TINT_BUILD_SPV_READER
+
+// Test that it is invalid to create a shader module with no chained descriptor. (It must be
+// WGSL or SPIRV, not empty)
+TEST_F(ShaderModuleValidationTest, NoChainedDescriptor) {
+    wgpu::ShaderModuleDescriptor desc = {};
+    ASSERT_DEVICE_ERROR(device.CreateShaderModule(&desc));
 }
 
 // Tests that shader module compilation messages can be queried.

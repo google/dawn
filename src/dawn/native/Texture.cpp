@@ -84,14 +84,13 @@ MaybeError ValidateCanViewTextureAs(const DeviceBase* device,
             "The formats must be compatible, and the view format "
             "must be passed in the list of view formats on texture creation.",
             viewFormat.format, format.format);
-    } else {
-        // The view format is compatible, but not in the list.
-        return DAWN_VALIDATION_ERROR(
-            "%s was not created with the texture view format (%s) "
-            "in the list of compatible view formats.",
-            texture, viewFormat.format);
     }
-    return {};
+
+    // The view format is compatible, but not in the list.
+    return DAWN_VALIDATION_ERROR(
+        "%s was not created with the texture view format (%s) "
+        "in the list of compatible view formats.",
+        texture, viewFormat.format);
 }
 
 bool IsTextureViewDimensionCompatibleWithTextureDimension(

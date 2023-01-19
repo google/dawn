@@ -151,6 +151,9 @@ source_set("sources") {
     ":utils_gen",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/tint:libtint",
+
+    # TODO(dawn:286): These should only be necessary if SPIR-V validation is
+    # enabled with dawn_enable_spirv_validation
     "${dawn_spirv_tools_dir}:spvtools_opt",
     "${dawn_spirv_tools_dir}:spvtools_val",
   ]
@@ -158,7 +161,10 @@ source_set("sources") {
   libs = []
   data_deps = []
 
-  configs += [ ":internal" ]
+  configs += [
+    ":internal",
+    "${dawn_root}/src/tint:tint_public_config",
+  ]
 
   # Enable -Wglobal-constructors here only, instead of in internal_config,
   # because gtest and some other targets don't build with it.
@@ -527,7 +533,8 @@ source_set("sources") {
     ]
   }
 
-  if (dawn_enable_opengl || dawn_enable_vulkan) {
+  if ((dawn_enable_opengl || dawn_enable_vulkan) &&
+      dawn_enable_spirv_validation) {
     sources += [
       "SpirvValidation.cpp",
       "SpirvValidation.h",
@@ -725,6 +732,9 @@ source_set("sources") {
       data_deps +=
           [ "${dawn_swiftshader_dir}/src/Vulkan:swiftshader_libvulkan" ]
       defines += [ "DAWN_ENABLE_SWIFTSHADER" ]
+    }
+    if (dawn_enable_spirv_validation) {
+      defines += [ "DAWN_ENABLE_SPIRV_VALIDATION" ]
     }
   }
 

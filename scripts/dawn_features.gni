@@ -96,6 +96,10 @@ declare_args() {
   # assume to have one present at the system level.
   dawn_enable_vulkan_loader =
       dawn_enable_vulkan && (is_mac || (is_linux && !is_android))
+
+  # Disable SPIR-V validation on Android because it adds a significant amount
+  # to the binary size, and Tint's output should be well-formed.
+  dawn_enable_spirv_validation = dawn_enable_vulkan && !is_android
 }
 
 # UWP only supports CoreWindow for windowing

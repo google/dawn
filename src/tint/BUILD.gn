@@ -1024,12 +1024,19 @@ if (tint_build_unittests) {
     } else {
       sources = [ "test_main.cc" ]
       configs += [ ":tint_unittests_config" ]
-      deps += [
-        ":libtint",
-        ":tint_unittests_hlsl_writer_src",
-        ":tint_unittests_msl_writer_src",
-        ":tint_unittests_spv_reader_src",
-      ]
+      deps += [ ":libtint" ]
+
+      if (tint_build_hlsl_writer) {
+        deps += [ ":tint_unittests_hlsl_writer_src" ]
+      }
+
+      if (tint_build_msl_writer) {
+        deps += [ ":tint_unittests_msl_writer_src" ]
+      }
+
+      if (tint_build_spv_reader) {
+        deps += [ ":tint_unittests_spv_reader_src" ]
+      }
     }
   }
 

@@ -619,8 +619,9 @@ BlobCache* DeviceBase::GetBlobCache() {
     // generate cache keys. We can lift the dependency once we also cache frontend parsing,
     // transformations, and reflection.
     return mAdapter->GetInstance()->GetBlobCache(!IsToggleEnabled(Toggle::DisableBlobCache));
-#endif
+#else
     return mAdapter->GetInstance()->GetBlobCache(false);
+#endif
 }
 
 Blob DeviceBase::LoadCachedBlob(const CacheKey& key) {

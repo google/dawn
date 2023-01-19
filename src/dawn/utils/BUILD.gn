@@ -21,7 +21,10 @@ import("${dawn_root}/scripts/dawn_features.gni")
 ###############################################################################
 
 static_library("utils") {
-  configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
+  configs += [
+    "${dawn_root}/src/dawn/common:internal_config",
+    "${dawn_root}/src/tint:tint_public_config",
+  ]
 
   sources = [
     "ComboRenderBundleEncoderDescriptor.cpp",
@@ -51,6 +54,7 @@ static_library("utils") {
     "${dawn_root}/src/dawn/wire",
     "${dawn_spirv_tools_dir}:spvtools_opt",
   ]
+
   libs = []
   frameworks = []
 

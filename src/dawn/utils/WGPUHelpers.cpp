@@ -24,7 +24,9 @@
 #include "dawn/common/Log.h"
 #include "dawn/common/Numeric.h"
 
+#if TINT_BUILD_SPV_READER
 #include "spirv-tools/optimizer.hpp"
+#endif
 
 namespace {
 std::array<float, 12> kYuvToRGBMatrixBT709 = {1.164384f, 0.0f,       1.792741f,  -0.972945f,
@@ -38,6 +40,7 @@ std::array<float, 7> kGammaEncodeSrgb = {1 / 2.4, 1.137119, 0.0, 12.92, 0.003130
 }  // namespace
 
 namespace utils {
+#if TINT_BUILD_SPV_READER
 wgpu::ShaderModule CreateShaderModuleFromASM(const wgpu::Device& device, const char* source) {
     // Use SPIRV-Tools's C API to assemble the SPIR-V assembly text to binary. Because the types
     // aren't RAII, we don't return directly on success and instead always go through the code
@@ -73,6 +76,7 @@ wgpu::ShaderModule CreateShaderModuleFromASM(const wgpu::Device& device, const c
 
     return result;
 }
+#endif
 
 wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const char* source) {
     wgpu::ShaderModuleWGSLDescriptor wgslDesc;
