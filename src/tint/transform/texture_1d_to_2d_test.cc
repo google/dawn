@@ -13,10 +13,6 @@
 // limitations under the License.
 
 #include "src/tint/transform/texture_1d_to_2d.h"
-
-// #include <memory>
-// #include <utility>
-
 #include "src/tint/transform/test_helper.h"
 
 namespace tint::transform {
