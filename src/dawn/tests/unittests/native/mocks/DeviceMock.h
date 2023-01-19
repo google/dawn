@@ -34,17 +34,13 @@ class DeviceMock : public DeviceBase {
                 (CommandEncoder*, const CommandBufferDescriptor*),
                 (override));
 
-    MOCK_METHOD(ResultOrError<std::unique_ptr<StagingBufferBase>>,
-                CreateStagingBuffer,
-                (size_t),
-                (override));
     MOCK_METHOD(MaybeError,
                 CopyFromStagingToBufferImpl,
-                (StagingBufferBase*, uint64_t, BufferBase*, uint64_t, uint64_t),
+                (BufferBase*, uint64_t, BufferBase*, uint64_t, uint64_t),
                 (override));
     MOCK_METHOD(MaybeError,
                 CopyFromStagingToTextureImpl,
-                (const StagingBufferBase*, const TextureDataLayout&, TextureCopy*, const Extent3D&),
+                (const BufferBase*, const TextureDataLayout&, TextureCopy*, const Extent3D&),
                 (override));
 
     MOCK_METHOD(uint32_t, GetOptimalBytesPerRowAlignment, (), (const, override));

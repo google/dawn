@@ -33,7 +33,6 @@
 #include "dawn/native/RingBufferAllocator.h"
 #include "dawn/native/Sampler.h"
 #include "dawn/native/ShaderModule.h"
-#include "dawn/native/StagingBuffer.h"
 #include "dawn/native/SwapChain.h"
 #include "dawn/native/Texture.h"
 #include "dawn/native/ToBackend.h"
@@ -105,13 +104,12 @@ class Device final : public DeviceBase {
     void AddPendingOperation(std::unique_ptr<PendingOperation> operation);
     MaybeError SubmitPendingOperations();
 
-    ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
-    MaybeError CopyFromStagingToBufferImpl(StagingBufferBase* source,
+    MaybeError CopyFromStagingToBufferImpl(BufferBase* source,
                                            uint64_t sourceOffset,
                                            BufferBase* destination,
                                            uint64_t destinationOffset,
                                            uint64_t size) override;
-    MaybeError CopyFromStagingToTextureImpl(const StagingBufferBase* source,
+    MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
                                             const TextureDataLayout& src,
                                             TextureCopy* dst,
                                             const Extent3D& copySizePixels) override;
@@ -230,7 +228,7 @@ class Buffer final : public BufferBase {
   public:
     Buffer(Device* device, const BufferDescriptor* descriptor);
 
-    void CopyFromStaging(StagingBufferBase* staging,
+    void CopyFromStaging(BufferBase* staging,
                          uint64_t sourceOffset,
                          uint64_t destinationOffset,
                          uint64_t size);
@@ -243,7 +241,7 @@ class Buffer final : public BufferBase {
     void DestroyImpl() override;
     bool IsCPUWritableAtCreation() const override;
     MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointerImpl() override;
+    void* GetMappedPointer() override;
 
     std::unique_ptr<uint8_t[]> mBackingData;
 };
@@ -333,17 +331,6 @@ class NativeSwapChainImpl {
     DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);
     DawnSwapChainError Present();
     wgpu::TextureFormat GetPreferredFormat() const;
-};
-
-class StagingBuffer : public StagingBufferBase {
-  public:
-    StagingBuffer(size_t size, Device* device);
-    ~StagingBuffer() override;
-    MaybeError Initialize() override;
-
-  private:
-    Device* mDevice;
-    std::unique_ptr<uint8_t[]> mBuffer;
 };
 
 class Texture : public TextureBase {

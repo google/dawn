@@ -19,8 +19,8 @@
 #include "dawn/common/Platform.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/EnumMaskIterator.h"
+#include "dawn/native/metal/BufferMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
-#include "dawn/native/metal/StagingBufferMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
 
 #include <CoreVideo/CVPixelBuffer.h>
@@ -989,7 +989,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                                                blockInfo.byteSize));
             memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
 
-            id<MTLBuffer> uploadBuffer = ToBackend(uploadHandle.stagingBuffer)->GetBufferHandle();
+            id<MTLBuffer> uploadBuffer = ToBackend(uploadHandle.stagingBuffer)->GetMTLBuffer();
 
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
                  ++level) {

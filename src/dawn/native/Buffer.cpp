@@ -88,7 +88,7 @@ class ErrorBuffer final : public BufferBase {
         UNREACHABLE();
     }
 
-    void* GetMappedPointerImpl() override { return mFakeMappedData.get(); }
+    void* GetMappedPointer() override { return mFakeMappedData.get(); }
 
     void UnmapImpl() override { mFakeMappedData.reset(); }
 
@@ -238,7 +238,7 @@ void BufferBase::DestroyImpl() {
         toCall = UnmapInternal(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
     } else if (mState == BufferState::MappedAtCreation) {
         if (mStagingBuffer != nullptr) {
-            mStagingBuffer.reset();
+            mStagingBuffer = nullptr;
         } else if (mSize != 0) {
             toCall = UnmapInternal(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
         }
@@ -303,7 +303,7 @@ MaybeError BufferBase::MapAtCreation() {
     size_t size;
     if (mSize == 0) {
         return {};
-    } else if (mStagingBuffer) {
+    } else if (mStagingBuffer != nullptr) {
         // If there is a staging buffer for initialization, clear its contents directly.
         // It should be exactly as large as the buffer allocation.
         ptr = mStagingBuffer->GetMappedPointer();
@@ -311,7 +311,7 @@ MaybeError BufferBase::MapAtCreation() {
         ASSERT(size == GetAllocatedSize());
     } else {
         // Otherwise, the buffer is directly mappable on the CPU.
-        ptr = GetMappedPointerImpl();
+        ptr = GetMappedPointer();
         size = GetAllocatedSize();
     }
 
@@ -346,7 +346,14 @@ MaybeError BufferBase::MapAtCreationInternal() {
             // is initialized.
             // TODO(crbug.com/dawn/828): Suballocate and reuse memory from a larger staging
             // buffer so we don't create many small buffers.
-            DAWN_TRY_ASSIGN(mStagingBuffer, GetDevice()->CreateStagingBuffer(GetAllocatedSize()));
+            BufferDescriptor stagingBufferDesc = {};
+            stagingBufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
+            stagingBufferDesc.size = Align(GetAllocatedSize(), 4);
+            stagingBufferDesc.mappedAtCreation = true;
+            stagingBufferDesc.label = "Dawn_MappedAtCreationStaging";
+
+            IgnoreLazyClearCountScope scope(GetDevice());
+            DAWN_TRY_ASSIGN(mStagingBuffer, GetDevice()->CreateBuffer(&stagingBufferDesc));
         }
     }
 
@@ -471,7 +478,7 @@ void* BufferBase::GetMappedRange(size_t offset, size_t size, bool writable) {
     if (mSize == 0) {
         return reinterpret_cast<uint8_t*>(intptr_t(0xCAFED00D));
     }
-    uint8_t* start = static_cast<uint8_t*>(GetMappedPointerImpl());
+    uint8_t* start = static_cast<uint8_t*>(GetMappedPointer());
     return start == nullptr ? nullptr : start + offset;
 }
 
@@ -484,7 +491,7 @@ uint64_t BufferBase::APIGetSize() const {
 }
 
 MaybeError BufferBase::CopyFromStagingBuffer() {
-    ASSERT(mStagingBuffer);
+    ASSERT(mStagingBuffer != nullptr);
     if (mSize == 0) {
         // Staging buffer is not created if zero size.
         ASSERT(mStagingBuffer == nullptr);
@@ -492,7 +499,7 @@ MaybeError BufferBase::CopyFromStagingBuffer() {
     }
 
     DAWN_TRY(
-        GetDevice()->CopyFromStagingToBuffer(mStagingBuffer.get(), 0, this, 0, GetAllocatedSize()));
+        GetDevice()->CopyFromStagingToBuffer(mStagingBuffer.Get(), 0, this, 0, GetAllocatedSize()));
 
     DynamicUploader* uploader = GetDevice()->GetDynamicUploader();
     uploader->ReleaseStagingBuffer(std::move(mStagingBuffer));

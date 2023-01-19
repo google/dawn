@@ -28,7 +28,6 @@
 #include "dawn/native/metal/QuerySetMTL.h"
 #include "dawn/native/metal/RenderPipelineMTL.h"
 #include "dawn/native/metal/SamplerMTL.h"
-#include "dawn/native/metal/StagingBufferMTL.h"
 #include "dawn/native/metal/TextureMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
 
@@ -1144,7 +1143,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 dstBuffer->EnsureDataInitializedAsDestination(commandContext, offset, size);
 
                 [commandContext->EnsureBlit()
-                       copyFromBuffer:ToBackend(uploadHandle.stagingBuffer)->GetBufferHandle()
+                       copyFromBuffer:ToBackend(uploadHandle.stagingBuffer)->GetMTLBuffer()
                          sourceOffset:uploadHandle.startOffset
                              toBuffer:dstBuffer->GetMTLBuffer()
                     destinationOffset:offset

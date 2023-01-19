@@ -33,7 +33,6 @@
 #include "dawn/native/d3d12/Forward.h"
 #include "dawn/native/d3d12/HeapD3D12.h"
 #include "dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
-#include "dawn/native/d3d12/StagingBufferD3D12.h"
 #include "dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "dawn/native/d3d12/TextureCopySplitter.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
@@ -1189,7 +1188,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                     textureCopy.aspect = aspect;
                     RecordBufferTextureCopyWithBufferHandle(
                         BufferTextureCopyDirection::B2T, commandList,
-                        ToBackend(uploadHandle.stagingBuffer)->GetResource(),
+                        ToBackend(uploadHandle.stagingBuffer)->GetD3D12Resource(),
                         uploadHandle.startOffset, bytesPerRow, largestMipSize.height, textureCopy,
                         copySize);
                 }

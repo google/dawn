@@ -29,7 +29,6 @@
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/ResourceHeapVk.h"
 #include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
-#include "dawn/native/vulkan/StagingBufferVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
 
@@ -1255,10 +1254,9 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                 regions.push_back(ComputeBufferImageCopyRegion(dataLayout, textureCopy, copySize));
             }
         }
-        device->fn.CmdCopyBufferToImage(recordingContext->commandBuffer,
-                                        ToBackend(uploadHandle.stagingBuffer)->GetBufferHandle(),
-                                        GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                        regions.size(), regions.data());
+        device->fn.CmdCopyBufferToImage(
+            recordingContext->commandBuffer, ToBackend(uploadHandle.stagingBuffer)->GetHandle(),
+            GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, regions.size(), regions.data());
     } else {
         for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
              ++level) {

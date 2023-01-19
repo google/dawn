@@ -63,7 +63,7 @@ class Buffer final : public BufferBase {
     void DestroyImpl() override;
     bool IsCPUWritableAtCreation() const override;
     MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointerImpl() override;
+    void* GetMappedPointer() override;
 
     MaybeError MapInternal(bool isWrite, size_t start, size_t end, const char* contextInfo);
 

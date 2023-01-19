@@ -1924,7 +1924,7 @@ ExecutionSerial DeviceBase::GetScheduledWorkDoneSerial() const {
     return HasPendingCommands() ? GetPendingCommandSerial() : GetLastSubmittedCommandSerial();
 }
 
-MaybeError DeviceBase::CopyFromStagingToBuffer(StagingBufferBase* source,
+MaybeError DeviceBase::CopyFromStagingToBuffer(BufferBase* source,
                                                uint64_t sourceOffset,
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
@@ -1937,7 +1937,7 @@ MaybeError DeviceBase::CopyFromStagingToBuffer(StagingBufferBase* source,
     return {};
 }
 
-MaybeError DeviceBase::CopyFromStagingToTexture(const StagingBufferBase* source,
+MaybeError DeviceBase::CopyFromStagingToTexture(const BufferBase* source,
                                                 const TextureDataLayout& src,
                                                 TextureCopy* dst,
                                                 const Extent3D& copySizePixels) {
@@ -1946,6 +1946,13 @@ MaybeError DeviceBase::CopyFromStagingToTexture(const StagingBufferBase* source,
         ForceEventualFlushOfCommands();
     }
     return {};
+}
+
+IgnoreLazyClearCountScope::IgnoreLazyClearCountScope(DeviceBase* device)
+    : mDevice(device), mLazyClearCountForTesting(device->mLazyClearCountForTesting) {}
+
+IgnoreLazyClearCountScope::~IgnoreLazyClearCountScope() {
+    mDevice->mLazyClearCountForTesting = mLazyClearCountForTesting;
 }
 
 }  // namespace dawn::native

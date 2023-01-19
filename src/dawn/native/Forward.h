@@ -47,7 +47,6 @@ class ResourceHeapBase;
 class SamplerBase;
 class Surface;
 class ShaderModuleBase;
-class StagingBufferBase;
 class SwapChainBase;
 class NewSwapChainBase;
 class TextureBase;

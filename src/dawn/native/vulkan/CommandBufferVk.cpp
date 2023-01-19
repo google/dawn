@@ -35,7 +35,6 @@
 #include "dawn/native/vulkan/QuerySetVk.h"
 #include "dawn/native/vulkan/RenderPassCache.h"
 #include "dawn/native/vulkan/RenderPipelineVk.h"
-#include "dawn/native/vulkan/StagingBufferVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
@@ -870,7 +869,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                 copy.size = size;
 
                 device->fn.CmdCopyBuffer(commands,
-                                         ToBackend(uploadHandle.stagingBuffer)->GetBufferHandle(),
+                                         ToBackend(uploadHandle.stagingBuffer)->GetHandle(),
                                          dstBuffer->GetHandle(), 1, &copy);
                 break;
             }

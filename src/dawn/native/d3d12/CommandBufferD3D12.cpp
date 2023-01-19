@@ -33,7 +33,6 @@
 #include "dawn/native/d3d12/RenderPassBuilderD3D12.h"
 #include "dawn/native/d3d12/RenderPipelineD3D12.h"
 #include "dawn/native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
-#include "dawn/native/d3d12/StagingBufferD3D12.h"
 #include "dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
 
@@ -1103,9 +1102,10 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                                              commandContext, offset, size));
                 DAWN_UNUSED(cleared);
                 dstBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
-                commandList->CopyBufferRegion(dstBuffer->GetD3D12Resource(), offset,
-                                              ToBackend(uploadHandle.stagingBuffer)->GetResource(),
-                                              uploadHandle.startOffset, size);
+                commandList->CopyBufferRegion(
+                    dstBuffer->GetD3D12Resource(), offset,
+                    ToBackend(uploadHandle.stagingBuffer)->GetD3D12Resource(),
+                    uploadHandle.startOffset, size);
                 break;
             }
 

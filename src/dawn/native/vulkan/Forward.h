@@ -34,7 +34,6 @@ class RenderPipeline;
 class ResourceHeap;
 class Sampler;
 class ShaderModule;
-class StagingBuffer;
 class SwapChain;
 class Texture;
 class TextureView;
@@ -55,7 +54,6 @@ struct VulkanBackendTraits {
     using ResourceHeapType = ResourceHeap;
     using SamplerType = Sampler;
     using ShaderModuleType = ShaderModule;
-    using StagingBufferType = StagingBuffer;
     using SwapChainType = SwapChain;
     using TextureType = Texture;
     using TextureViewType = TextureView;

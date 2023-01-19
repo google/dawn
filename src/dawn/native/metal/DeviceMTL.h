@@ -63,13 +63,12 @@ class Device final : public DeviceBase {
         std::vector<MTLSharedEventAndSignalValue> waitEvents);
     void WaitForCommandsToBeScheduled();
 
-    ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
-    MaybeError CopyFromStagingToBufferImpl(StagingBufferBase* source,
+    MaybeError CopyFromStagingToBufferImpl(BufferBase* source,
                                            uint64_t sourceOffset,
                                            BufferBase* destination,
                                            uint64_t destinationOffset,
                                            uint64_t size) override;
-    MaybeError CopyFromStagingToTextureImpl(const StagingBufferBase* source,
+    MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
                                             const TextureDataLayout& dataLayout,
                                             TextureCopy* dst,
                                             const Extent3D& copySizePixels) override;

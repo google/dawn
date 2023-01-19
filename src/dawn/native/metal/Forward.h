@@ -33,7 +33,6 @@ class Queue;
 class RenderPipeline;
 class Sampler;
 class ShaderModule;
-class StagingBuffer;
 class SwapChain;
 class Texture;
 class TextureView;
@@ -52,7 +51,6 @@ struct MetalBackendTraits {
     using RenderPipelineType = RenderPipeline;
     using SamplerType = Sampler;
     using ShaderModuleType = ShaderModule;
-    using StagingBufferType = StagingBuffer;
     using SwapChainType = SwapChain;
     using TextureType = Texture;
     using TextureViewType = TextureView;

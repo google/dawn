@@ -33,7 +33,6 @@
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/RefCountedWithExternalCount.h"
-#include "dawn/native/StagingBuffer.h"
 #include "dawn/native/Toggles.h"
 #include "dawn/native/UsageValidationMode.h"
 
@@ -298,13 +297,12 @@ class DeviceBase : public RefCountedWithExternalCount {
     Blob LoadCachedBlob(const CacheKey& key);
     void StoreCachedBlob(const CacheKey& key, const Blob& blob);
 
-    virtual ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) = 0;
-    MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
+    MaybeError CopyFromStagingToBuffer(BufferBase* source,
                                        uint64_t sourceOffset,
                                        BufferBase* destination,
                                        uint64_t destinationOffset,
                                        uint64_t size);
-    MaybeError CopyFromStagingToTexture(const StagingBufferBase* source,
+    MaybeError CopyFromStagingToTexture(const BufferBase* source,
                                         const TextureDataLayout& src,
                                         TextureCopy* dst,
                                         const Extent3D& copySizePixels);
@@ -348,6 +346,8 @@ class DeviceBase : public RefCountedWithExternalCount {
     void EmitLog(WGPULoggingType loggingType, const char* message);
     void APIForceLoss(wgpu::DeviceLostReason reason, const char* message);
     QueueBase* GetQueue() const;
+
+    friend class IgnoreLazyClearCountScope;
 
     // Check for passed fences and set the new completed serial
     MaybeError CheckPassedSerials();
@@ -525,12 +525,12 @@ class DeviceBase : public RefCountedWithExternalCount {
     // Indicates whether the backend has pending commands to be submitted as soon as possible.
     virtual bool HasPendingCommands() const = 0;
 
-    virtual MaybeError CopyFromStagingToBufferImpl(StagingBufferBase* source,
+    virtual MaybeError CopyFromStagingToBufferImpl(BufferBase* source,
                                                    uint64_t sourceOffset,
                                                    BufferBase* destination,
                                                    uint64_t destinationOffset,
                                                    uint64_t size) = 0;
-    virtual MaybeError CopyFromStagingToTextureImpl(const StagingBufferBase* source,
+    virtual MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
                                                     const TextureDataLayout& src,
                                                     TextureCopy* dst,
                                                     const Extent3D& copySizePixels) = 0;
@@ -585,6 +585,19 @@ class DeviceBase : public RefCountedWithExternalCount {
     std::unique_ptr<dawn::platform::WorkerTaskPool> mWorkerTaskPool;
     std::string mLabel;
     CacheKey mDeviceCacheKey;
+};
+
+class IgnoreLazyClearCountScope : public NonMovable {
+  public:
+    explicit IgnoreLazyClearCountScope(DeviceBase* device);
+    ~IgnoreLazyClearCountScope();
+
+  private:
+    // Disable heap allocation
+    void* operator new(size_t) = delete;
+
+    DeviceBase* mDevice;
+    size_t mLazyClearCountForTesting;
 };
 
 }  // namespace dawn::native

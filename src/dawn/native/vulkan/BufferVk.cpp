@@ -325,7 +325,7 @@ void Buffer::UnmapImpl() {
     // No need to do anything, we keep CPU-visible memory mapped at all time.
 }
 
-void* Buffer::GetMappedPointerImpl() {
+void* Buffer::GetMappedPointer() {
     uint8_t* memory = mMemoryAllocation.GetMappedPointer();
     ASSERT(memory != nullptr);
     return memory;

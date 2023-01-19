@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "dawn/common/Math.h"
+#include "dawn/native/Buffer.h"
 #include "dawn/native/Device.h"
 
 namespace dawn::native {
@@ -26,7 +27,7 @@ DynamicUploader::DynamicUploader(DeviceBase* device) : mDevice(device) {
         std::unique_ptr<RingBuffer>(new RingBuffer{nullptr, RingBufferAllocator(kRingBufferSize)}));
 }
 
-void DynamicUploader::ReleaseStagingBuffer(std::unique_ptr<StagingBufferBase> stagingBuffer) {
+void DynamicUploader::ReleaseStagingBuffer(Ref<BufferBase> stagingBuffer) {
     mReleasedStagingBuffers.Enqueue(std::move(stagingBuffer), mDevice->GetPendingCommandSerial());
 }
 
@@ -34,12 +35,19 @@ ResultOrError<UploadHandle> DynamicUploader::AllocateInternal(uint64_t allocatio
                                                               ExecutionSerial serial) {
     // Disable further sub-allocation should the request be too large.
     if (allocationSize > kRingBufferSize) {
-        std::unique_ptr<StagingBufferBase> stagingBuffer;
-        DAWN_TRY_ASSIGN(stagingBuffer, mDevice->CreateStagingBuffer(allocationSize));
+        BufferDescriptor bufferDesc = {};
+        bufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
+        bufferDesc.size = Align(allocationSize, 4);
+        bufferDesc.mappedAtCreation = true;
+        bufferDesc.label = "Dawn_DynamicUploaderStaging";
+
+        IgnoreLazyClearCountScope scope(mDevice);
+        Ref<BufferBase> stagingBuffer;
+        DAWN_TRY_ASSIGN(stagingBuffer, mDevice->CreateBuffer(&bufferDesc));
 
         UploadHandle uploadHandle;
         uploadHandle.mappedBuffer = static_cast<uint8_t*>(stagingBuffer->GetMappedPointer());
-        uploadHandle.stagingBuffer = stagingBuffer.get();
+        uploadHandle.stagingBuffer = stagingBuffer.Get();
 
         ReleaseStagingBuffer(std::move(stagingBuffer));
         return uploadHandle;
@@ -80,16 +88,22 @@ ResultOrError<UploadHandle> DynamicUploader::AllocateInternal(uint64_t allocatio
     // Allocate the staging buffer backing the ringbuffer.
     // Note: the first ringbuffer will be lazily created.
     if (targetRingBuffer->mStagingBuffer == nullptr) {
-        std::unique_ptr<StagingBufferBase> stagingBuffer;
-        DAWN_TRY_ASSIGN(stagingBuffer,
-                        mDevice->CreateStagingBuffer(targetRingBuffer->mAllocator.GetSize()));
+        BufferDescriptor bufferDesc = {};
+        bufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
+        bufferDesc.size = Align(targetRingBuffer->mAllocator.GetSize(), 4);
+        bufferDesc.mappedAtCreation = true;
+        bufferDesc.label = "Dawn_DynamicUploaderStaging";
+
+        IgnoreLazyClearCountScope scope(mDevice);
+        Ref<BufferBase> stagingBuffer;
+        DAWN_TRY_ASSIGN(stagingBuffer, mDevice->CreateBuffer(&bufferDesc));
         targetRingBuffer->mStagingBuffer = std::move(stagingBuffer);
     }
 
     ASSERT(targetRingBuffer->mStagingBuffer != nullptr);
 
     UploadHandle uploadHandle;
-    uploadHandle.stagingBuffer = targetRingBuffer->mStagingBuffer.get();
+    uploadHandle.stagingBuffer = targetRingBuffer->mStagingBuffer.Get();
     uploadHandle.mappedBuffer =
         static_cast<uint8_t*>(uploadHandle.stagingBuffer->GetMappedPointer()) + startOffset;
     uploadHandle.startOffset = startOffset;

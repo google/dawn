@@ -20,7 +20,6 @@
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/Instance.h"
-#include "dawn/native/StagingBuffer.h"
 #include "dawn/native/opengl/BindGroupGL.h"
 #include "dawn/native/opengl/BindGroupLayoutGL.h"
 #include "dawn/native/opengl/BufferGL.h"
@@ -414,11 +413,7 @@ ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
     return fenceSerial;
 }
 
-ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
-    return DAWN_UNIMPLEMENTED_ERROR("Device unable to create staging buffer.");
-}
-
-MaybeError Device::CopyFromStagingToBufferImpl(StagingBufferBase* source,
+MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
                                                uint64_t sourceOffset,
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
@@ -426,7 +421,7 @@ MaybeError Device::CopyFromStagingToBufferImpl(StagingBufferBase* source,
     return DAWN_UNIMPLEMENTED_ERROR("Device unable to copy from staging buffer.");
 }
 
-MaybeError Device::CopyFromStagingToTextureImpl(const StagingBufferBase* source,
+MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
                                                 const TextureDataLayout& src,
                                                 TextureCopy* dst,
                                                 const Extent3D& copySizePixels) {

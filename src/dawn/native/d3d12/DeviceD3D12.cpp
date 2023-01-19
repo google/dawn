@@ -44,7 +44,6 @@
 #include "dawn/native/d3d12/SamplerHeapCacheD3D12.h"
 #include "dawn/native/d3d12/ShaderModuleD3D12.h"
 #include "dawn/native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
-#include "dawn/native/d3d12/StagingBufferD3D12.h"
 #include "dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "dawn/native/d3d12/SwapChainD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
@@ -486,13 +485,7 @@ void Device::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPip
     RenderPipeline::InitializeAsync(std::move(renderPipeline), callback, userdata);
 }
 
-ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
-    std::unique_ptr<StagingBufferBase> stagingBuffer = std::make_unique<StagingBuffer>(size, this);
-    DAWN_TRY(stagingBuffer->Initialize());
-    return std::move(stagingBuffer);
-}
-
-MaybeError Device::CopyFromStagingToBufferImpl(StagingBufferBase* source,
+MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
                                                uint64_t sourceOffset,
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
@@ -514,22 +507,22 @@ MaybeError Device::CopyFromStagingToBufferImpl(StagingBufferBase* source,
 }
 
 void Device::CopyFromStagingToBufferHelper(CommandRecordingContext* commandContext,
-                                           StagingBufferBase* source,
+                                           BufferBase* source,
                                            uint64_t sourceOffset,
                                            BufferBase* destination,
                                            uint64_t destinationOffset,
                                            uint64_t size) {
     ASSERT(commandContext != nullptr);
     Buffer* dstBuffer = ToBackend(destination);
-    StagingBuffer* srcBuffer = ToBackend(source);
+    Buffer* srcBuffer = ToBackend(source);
     dstBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
 
-    commandContext->GetCommandList()->CopyBufferRegion(dstBuffer->GetD3D12Resource(),
-                                                       destinationOffset, srcBuffer->GetResource(),
-                                                       sourceOffset, size);
+    commandContext->GetCommandList()->CopyBufferRegion(
+        dstBuffer->GetD3D12Resource(), destinationOffset, srcBuffer->GetD3D12Resource(),
+        sourceOffset, size);
 }
 
-MaybeError Device::CopyFromStagingToTextureImpl(const StagingBufferBase* source,
+MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
                                                 const TextureDataLayout& src,
                                                 TextureCopy* dst,
                                                 const Extent3D& copySizePixels) {
@@ -549,7 +542,7 @@ MaybeError Device::CopyFromStagingToTextureImpl(const StagingBufferBase* source,
 
     RecordBufferTextureCopyWithBufferHandle(
         BufferTextureCopyDirection::B2T, commandContext->GetCommandList(),
-        ToBackend(source)->GetResource(), src.offset, src.bytesPerRow, src.rowsPerImage, *dst,
+        ToBackend(source)->GetD3D12Resource(), src.offset, src.bytesPerRow, src.rowsPerImage, *dst,
         copySizePixels);
 
     return {};

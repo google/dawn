@@ -40,7 +40,6 @@
 #include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn/native/vulkan/SamplerVk.h"
 #include "dawn/native/vulkan/ShaderModuleVk.h"
-#include "dawn/native/vulkan/StagingBufferVk.h"
 #include "dawn/native/vulkan/SwapChainVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
@@ -823,13 +822,7 @@ void Device::RecycleCompletedCommands() {
     mCommandsInFlight.ClearUpTo(GetCompletedCommandSerial());
 }
 
-ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
-    std::unique_ptr<StagingBufferBase> stagingBuffer = std::make_unique<StagingBuffer>(size, this);
-    DAWN_TRY(stagingBuffer->Initialize());
-    return std::move(stagingBuffer);
-}
-
-MaybeError Device::CopyFromStagingToBufferImpl(StagingBufferBase* source,
+MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
                                                uint64_t sourceOffset,
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
@@ -857,13 +850,13 @@ MaybeError Device::CopyFromStagingToBufferImpl(StagingBufferBase* source,
     copy.dstOffset = destinationOffset;
     copy.size = size;
 
-    this->fn.CmdCopyBuffer(recordingContext->commandBuffer, ToBackend(source)->GetBufferHandle(),
+    this->fn.CmdCopyBuffer(recordingContext->commandBuffer, ToBackend(source)->GetHandle(),
                            ToBackend(destination)->GetHandle(), 1, &copy);
 
     return {};
 }
 
-MaybeError Device::CopyFromStagingToTextureImpl(const StagingBufferBase* source,
+MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
                                                 const TextureDataLayout& src,
                                                 TextureCopy* dst,
                                                 const Extent3D& copySizePixels) {
@@ -893,9 +886,8 @@ MaybeError Device::CopyFromStagingToTextureImpl(const StagingBufferBase* source,
 
     // Dawn guarantees dstImage be in the TRANSFER_DST_OPTIMAL layout after the
     // copy command.
-    this->fn.CmdCopyBufferToImage(recordingContext->commandBuffer,
-                                  ToBackend(source)->GetBufferHandle(), dstImage,
-                                  VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+    this->fn.CmdCopyBufferToImage(recordingContext->commandBuffer, ToBackend(source)->GetHandle(),
+                                  dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
     return {};
 }
 
