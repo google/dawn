@@ -282,6 +282,18 @@ crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shad
 crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":8,"y":4,"z":2} [ Failure ]
 crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":3,"y":7,"z":5};numGroups={"x":13,"y":9,"z":11} [ Failure ]
 crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":8,"y":4,"z":2};numGroups={"x":1,"y":1,"z":1} [ Failure ]
+crbug.com/tint/1524 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_r";vectorize="_undef_" [ Failure ]
+crbug.com/tint/1524 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_r";vectorize=2 [ Failure ]
+crbug.com/tint/1524 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_r";vectorize=3 [ Failure ]
+crbug.com/tint/1524 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_r";vectorize=4 [ Failure ]
+crbug.com/tint/1524 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
+crbug.com/tint/1524 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_rw";vectorize=2 [ Failure ]
+crbug.com/tint/1524 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_rw";vectorize=3 [ Failure ]
+crbug.com/tint/1524 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_rw";vectorize=4 [ Failure ]
+crbug.com/tint/1524 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="uniform";vectorize="_undef_" [ Failure ]
+crbug.com/tint/1524 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="uniform";vectorize=2 [ Failure ]
+crbug.com/tint/1524 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="uniform";vectorize=3 [ Failure ]
+crbug.com/tint/1524 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="uniform";vectorize=4 [ Failure ]
 
 ################################################################################
 # webgpu:shader,execution,memory_model
@@ -297,6 +309,7 @@ crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:co
 crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="eol" [ Failure ]
 crbug.com/tint/1771 [ ubuntu ] webgpu:api,validation,compute_pipeline:overrides,workgroup_size,limits,* [ Failure ]
 crbug.com/tint/1771 [ win10 ] webgpu:api,validation,compute_pipeline:overrides,workgroup_size,limits,* [ Failure ]
+crbug.com/tint/1805 webgpu:shader,validation,parse,align:align_required_alignment:* [ Failure ]
 
 ################################################################################
 # API operation failures
@@ -412,19 +425,6 @@ crbug.com/dawn/0000 [ ubuntu ] webgpu:shader,execution,expression,binary,i32_ari
 crbug.com/dawn/0000 [ ubuntu ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder:inputSource="uniform";vectorize=2 [ Failure ]
 crbug.com/dawn/0000 [ ubuntu ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder:inputSource="uniform";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ ubuntu ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder:inputSource="uniform";vectorize=4 [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_r";vectorize="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_r";vectorize=2 [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_r";vectorize=3 [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_r";vectorize=4 [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_rw";vectorize=2 [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_rw";vectorize=3 [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="storage_rw";vectorize=4 [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="uniform";vectorize="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="uniform";vectorize=2 [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="uniform";vectorize=3 [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="uniform";vectorize=4 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,parse,align:align_required_alignment:* [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:alpha_mode:* [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:defaults:* [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:device:* [ Failure ]
