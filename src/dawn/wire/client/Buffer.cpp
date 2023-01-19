@@ -159,8 +159,8 @@ Buffer::Buffer(const ObjectBaseParams& params,
       mDeviceIsAlive(device->GetAliveWeakPtr()) {}
 
 Buffer::~Buffer() {
-    InvokeAndClearCallback(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
     FreeMappedData();
+    InvokeAndClearCallback(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
 }
 
 void Buffer::CancelCallbacksForDisconnect() {
@@ -172,10 +172,10 @@ void Buffer::InvokeAndClearCallback(WGPUBufferMapAsyncStatus status) {
     void* userdata = mRequest.userdata;
     mRequest.callback = nullptr;
     mRequest.userdata = nullptr;
+    mPendingMap = false;
     if (callback != nullptr) {
         callback(status, userdata);
     }
-    mPendingMap = false;
 }
 
 void Buffer::MapAsync(WGPUMapModeFlags mode,
@@ -358,11 +358,11 @@ void Buffer::Unmap() {
     mMapOffset = 0;
     mMapSize = 0;
 
-    InvokeAndClearCallback(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback);
-
     BufferUnmapCmd cmd;
     cmd.self = ToAPI(this);
     client->SerializeCommand(cmd);
+
+    InvokeAndClearCallback(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback);
 }
 
 void Buffer::Destroy() {
@@ -372,11 +372,11 @@ void Buffer::Destroy() {
     FreeMappedData();
     mMapState = MapState::Unmapped;
 
-    InvokeAndClearCallback(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
-
     BufferDestroyCmd cmd;
     cmd.self = ToAPI(this);
     client->SerializeCommand(cmd);
+
+    InvokeAndClearCallback(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
 }
 
 WGPUBufferUsage Buffer::GetUsage() const {

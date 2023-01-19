@@ -523,6 +523,89 @@ TEST_F(BufferValidationTest, MapAsync_DestroyCalledInCallback) {
     }
 }
 
+// Test MapAsync call in MapAsync success callback
+// This test is disabled now because there seems to be a reeantrancy bug in the
+// FlushWire call. See https://dawn-review.googlesource.com/c/dawn/+/116220 for the details.
+TEST_F(BufferValidationTest, DISABLED_MapAsync_MapAsyncInMapAsyncSuccessCallback) {
+    // Test MapAsync call in MapAsync validation success callback
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
+            .WillOnce(InvokeWithoutArgs([&]() {
+                EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Error, _));
+                // Should cause validation error because of already mapped buffer
+                ASSERT_DEVICE_ERROR(
+                    buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr));
+            }));
+
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        WaitForAllOperations(device);
+        // we need another wire flush to make the MapAsync in the callback to the server
+        WaitForAllOperations(device);
+    }
+}
+
+// Test MapAsync call in MapAsync rejection callback
+TEST_F(BufferValidationTest, MapAsync_MapAsyncInMapAsyncRejectionCallback) {
+    // Test MapAsync call in MapAsync validation error callback
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Error, _))
+            .WillOnce(InvokeWithoutArgs([&]() {
+                // Retry with valid parameter and it should succeed
+                EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _));
+                buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+            }));
+
+        // Write map mode on read buffer is invalid and it should reject with validation error
+        ASSERT_DEVICE_ERROR(
+            buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr));
+
+        WaitForAllOperations(device);
+        // we need another wire flush to make the MapAsync in the callback to the server
+        WaitForAllOperations(device);
+    }
+
+    // Test MapAsync call in MapAsync Unmapped before callback callback
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback,
+                    Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, _))
+            .WillOnce(InvokeWithoutArgs([&]() {
+                // MapAsync call on unmapped buffer should be valid
+                EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _));
+                buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+            }));
+
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        buf.Unmap();
+        WaitForAllOperations(device);
+        WaitForAllOperations(device);
+    }
+
+    // Test MapAsync call in MapAsync Destroyed before callback callback
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback,
+                    Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, _))
+            .WillOnce(InvokeWithoutArgs([&]() {
+                // MapAsync call on destroyed buffer should be invalid
+                EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Error, _));
+                ASSERT_DEVICE_ERROR(
+                    buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr));
+            }));
+
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        buf.Destroy();
+        WaitForAllOperations(device);
+        WaitForAllOperations(device);
+    }
+}
+
 // Test the success case for mappedAtCreation
 TEST_F(BufferValidationTest, MappedAtCreationSuccess) {
     BufferMappedAtCreation(4, wgpu::BufferUsage::MapWrite);

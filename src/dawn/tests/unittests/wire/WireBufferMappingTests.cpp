@@ -859,9 +859,8 @@ TEST_F(WireBufferMappingTests, MapInsideCallbackBeforeDisconnect) {
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, this))
-        .Times(testData.numRequests);
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DeviceLost, this)).Times(1);
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DeviceLost, this))
+        .Times(testData.numRequests + 1);
     GetWireClient()->Disconnect();
 }
 
@@ -879,8 +878,9 @@ TEST_F(WireBufferMappingWriteTests, MapInsideCallbackBeforeDestruction) {
 
     FlushClient();
 
+    // Maybe this should be assert errors, see dawn:1624
     EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, this))
-        .Times(testData.numRequests);
+        .Times(testData.numRequests - 1);
     EXPECT_CALL(*mockBufferMapCallback,
                 Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, this))
         .Times(1);
