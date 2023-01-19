@@ -335,9 +335,7 @@ TEST_F(WireBufferMappingReadTests, UnmapInsideMapReadCallback) {
 
 // Test that the MapReadCallback isn't fired twice the buffer external refcount reaches 0 in the
 // callback
-// TODO(dawn:1621): Suppressed because the mapping handling still touches the buffer after it is
-// destroyed triggering an ASAN error.
-TEST_F(WireBufferMappingReadTests, DISABLED_DestroyInsideMapReadCallback) {
+TEST_F(WireBufferMappingReadTests, DestroyInsideMapReadCallback) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
