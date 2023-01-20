@@ -25,7 +25,6 @@
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/hashmap.h"
 
-#if TINT_BUILD_SPV_READER
 TINT_BEGIN_DISABLE_WARNING(NEWLINE_EOF);
 TINT_BEGIN_DISABLE_WARNING(OLD_STYLE_CAST);
 TINT_BEGIN_DISABLE_WARNING(SIGN_CONVERSION);
@@ -35,7 +34,6 @@ TINT_END_DISABLE_WARNING(WEAK_VTABLES);
 TINT_END_DISABLE_WARNING(SIGN_CONVERSION);
 TINT_END_DISABLE_WARNING(OLD_STYLE_CAST);
 TINT_END_DISABLE_WARNING(NEWLINE_EOF);
-#endif
 
 #include "src/tint/program_builder.h"
 #include "src/tint/reader/reader.h"

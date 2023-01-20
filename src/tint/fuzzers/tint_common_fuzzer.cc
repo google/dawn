@@ -149,8 +149,8 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #endif
 
     switch (input_) {
-#if TINT_BUILD_WGSL_READER
         case InputFormat::kWGSL: {
+#if TINT_BUILD_WGSL_READER
             // Clear any existing diagnostics, as these will hold pointers to file_,
             // which we are about to release.
             diagnostics_ = {};
@@ -160,11 +160,12 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
                 dump_input_data(str, ".wgsl");
             }
             program = reader::wgsl::Parse(file_.get());
+#endif  // TINT_BUILD_WGSL_READER
             break;
         }
-#endif  // TINT_BUILD_WGSL_READER
-#if TINT_BUILD_SPV_READER
+
         case InputFormat::kSpv: {
+#if TINT_BUILD_SPV_READER
             // `spirv_input` has been initialized with the capacity to store `size /
             // sizeof(uint32_t)` uint32_t values. If `size` is not a multiple of
             // sizeof(uint32_t) then not all of `data` can be copied into
@@ -177,9 +178,9 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
                 dump_input_data(spirv_input, ".spv");
             }
             program = reader::spirv::Parse(spirv_input);
+#endif  // TINT_BUILD_SPV_READER
             break;
         }
-#endif  // TINT_BUILD_SPV_READER
     }
 
     if (!program.IsValid()) {
