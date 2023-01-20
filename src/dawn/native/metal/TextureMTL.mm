@@ -139,6 +139,12 @@ bool RequiresCreatingNewTextureView(const TextureBase* texture,
 // rgba8Unorm_srgb texture view on rgab8Unorm texture.
 bool AllowFormatReinterpretationWithoutFlag(MTLPixelFormat origin,
                                             MTLPixelFormat reinterpretation) {
+#define SRGB_PAIR(a, b)               \
+    case a:                           \
+        return reinterpretation == b; \
+    case b:                           \
+        return reinterpretation == a
+
     switch (origin) {
         case MTLPixelFormatRGBA8Unorm:
             return reinterpretation == MTLPixelFormatBGRA8Unorm ||
@@ -152,28 +158,44 @@ bool AllowFormatReinterpretationWithoutFlag(MTLPixelFormat origin,
         case MTLPixelFormatBGRA8Unorm_sRGB:
             return reinterpretation == MTLPixelFormatRGBA8Unorm_sRGB ||
                    reinterpretation == MTLPixelFormatBGRA8Unorm;
-#if DAWN_PLATFORM_IS(MACOS)
-        case MTLPixelFormatBC1_RGBA:
-            return reinterpretation == MTLPixelFormatBC1_RGBA_sRGB;
-        case MTLPixelFormatBC1_RGBA_sRGB:
-            return reinterpretation == MTLPixelFormatBC1_RGBA;
-        case MTLPixelFormatBC2_RGBA:
-            return reinterpretation == MTLPixelFormatBC2_RGBA_sRGB;
-        case MTLPixelFormatBC2_RGBA_sRGB:
-            return reinterpretation == MTLPixelFormatBC2_RGBA;
-        case MTLPixelFormatBC3_RGBA:
-            return reinterpretation == MTLPixelFormatBC3_RGBA_sRGB;
-        case MTLPixelFormatBC3_RGBA_sRGB:
-            return reinterpretation == MTLPixelFormatBC3_RGBA;
-        case MTLPixelFormatBC7_RGBAUnorm:
-            return reinterpretation == MTLPixelFormatBC7_RGBAUnorm_sRGB;
-        case MTLPixelFormatBC7_RGBAUnorm_sRGB:
-            return reinterpretation == MTLPixelFormatBC7_RGBAUnorm;
-#endif
 
+#if DAWN_PLATFORM_IS(MACOS)
+            SRGB_PAIR(MTLPixelFormatBC1_RGBA, MTLPixelFormatBC1_RGBA_sRGB);
+            SRGB_PAIR(MTLPixelFormatBC2_RGBA, MTLPixelFormatBC2_RGBA_sRGB);
+            SRGB_PAIR(MTLPixelFormatBC3_RGBA, MTLPixelFormatBC3_RGBA_sRGB);
+            SRGB_PAIR(MTLPixelFormatBC7_RGBAUnorm, MTLPixelFormatBC7_RGBAUnorm_sRGB);
+#endif
         default:
+            if (@available(macOS 11.0, iOS 8.0, *)) {
+                switch (origin) {
+                    SRGB_PAIR(MTLPixelFormatEAC_RGBA8, MTLPixelFormatEAC_RGBA8_sRGB);
+
+                    SRGB_PAIR(MTLPixelFormatETC2_RGB8, MTLPixelFormatETC2_RGB8_sRGB);
+                    SRGB_PAIR(MTLPixelFormatETC2_RGB8A1, MTLPixelFormatETC2_RGB8A1_sRGB);
+
+                    SRGB_PAIR(MTLPixelFormatASTC_4x4_LDR, MTLPixelFormatASTC_4x4_sRGB);
+                    SRGB_PAIR(MTLPixelFormatASTC_5x4_LDR, MTLPixelFormatASTC_5x4_sRGB);
+                    SRGB_PAIR(MTLPixelFormatASTC_5x5_LDR, MTLPixelFormatASTC_5x5_sRGB);
+                    SRGB_PAIR(MTLPixelFormatASTC_6x5_LDR, MTLPixelFormatASTC_6x5_sRGB);
+                    SRGB_PAIR(MTLPixelFormatASTC_6x6_LDR, MTLPixelFormatASTC_6x6_sRGB);
+                    SRGB_PAIR(MTLPixelFormatASTC_8x5_LDR, MTLPixelFormatASTC_8x5_sRGB);
+                    SRGB_PAIR(MTLPixelFormatASTC_8x6_LDR, MTLPixelFormatASTC_8x6_sRGB);
+                    SRGB_PAIR(MTLPixelFormatASTC_8x8_LDR, MTLPixelFormatASTC_8x8_sRGB);
+                    SRGB_PAIR(MTLPixelFormatASTC_10x5_LDR, MTLPixelFormatASTC_10x5_sRGB);
+                    SRGB_PAIR(MTLPixelFormatASTC_10x6_LDR, MTLPixelFormatASTC_10x6_sRGB);
+                    SRGB_PAIR(MTLPixelFormatASTC_10x8_LDR, MTLPixelFormatASTC_10x8_sRGB);
+                    SRGB_PAIR(MTLPixelFormatASTC_10x10_LDR, MTLPixelFormatASTC_10x10_sRGB);
+                    SRGB_PAIR(MTLPixelFormatASTC_12x10_LDR, MTLPixelFormatASTC_12x10_sRGB);
+                    SRGB_PAIR(MTLPixelFormatASTC_12x12_LDR, MTLPixelFormatASTC_12x12_sRGB);
+
+                    default:
+                        break;
+                }
+            }
+
             return false;
     }
+#undef SRGB_PAIR
 }
 
 ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
