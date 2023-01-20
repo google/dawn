@@ -37,65 +37,6 @@ class UnsafeAPIValidationTest : public ValidationTest {
     }
 };
 
-class UnsafeQueryAPIValidationTest : public ValidationTest {
-  protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
-        wgpu::DeviceDescriptor descriptor;
-        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::PipelineStatisticsQuery,
-                                                 wgpu::FeatureName::TimestampQuery};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 2;
-
-        wgpu::DawnTogglesDeviceDescriptor togglesDesc;
-        descriptor.nextInChain = &togglesDesc;
-        const char* toggle = "disallow_unsafe_apis";
-        togglesDesc.forceEnabledToggles = &toggle;
-        togglesDesc.forceEnabledTogglesCount = 1;
-
-        return dawnAdapter.CreateDevice(&descriptor);
-    }
-};
-
-// Check that pipeline statistics query are disallowed.
-TEST_F(UnsafeQueryAPIValidationTest, PipelineStatisticsDisallowed) {
-    wgpu::QuerySetDescriptor descriptor;
-    descriptor.count = 1;
-
-    // Control case: occlusion query creation is allowed.
-    {
-        descriptor.type = wgpu::QueryType::Occlusion;
-        device.CreateQuerySet(&descriptor);
-    }
-
-    // Error case: pipeline statistics query creation is disallowed.
-    {
-        descriptor.type = wgpu::QueryType::PipelineStatistics;
-        std::vector<wgpu::PipelineStatisticName> pipelineStatistics = {
-            wgpu::PipelineStatisticName::VertexShaderInvocations};
-        descriptor.pipelineStatistics = pipelineStatistics.data();
-        descriptor.pipelineStatisticsCount = pipelineStatistics.size();
-        ASSERT_DEVICE_ERROR(device.CreateQuerySet(&descriptor));
-    }
-}
-
-// Check timestamp queries are disallowed.
-TEST_F(UnsafeQueryAPIValidationTest, TimestampQueryDisallowed) {
-    wgpu::QuerySetDescriptor descriptor;
-    descriptor.count = 1;
-
-    // Control case: occlusion query creation is allowed.
-    {
-        descriptor.type = wgpu::QueryType::Occlusion;
-        device.CreateQuerySet(&descriptor);
-    }
-
-    // Error case: timestamp query creation is disallowed.
-    {
-        descriptor.type = wgpu::QueryType::Timestamp;
-        ASSERT_DEVICE_ERROR(device.CreateQuerySet(&descriptor));
-    }
-}
-
 // Check chromium_disable_uniformity_analysis is an unsafe API.
 TEST_F(UnsafeAPIValidationTest, chromium_disable_uniformity_analysis) {
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(

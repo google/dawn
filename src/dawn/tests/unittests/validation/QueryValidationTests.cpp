@@ -45,6 +45,14 @@ TEST_F(QuerySetValidationTest, CreationWithoutFeatures) {
     // Creating a query set for other types of queries fails without features enabled.
     ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
                                        {wgpu::PipelineStatisticName::VertexShaderInvocations}));
+    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
+                                       {wgpu::PipelineStatisticName::ClipperPrimitivesOut}));
+    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
+                                       {wgpu::PipelineStatisticName::ComputeShaderInvocations}));
+    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
+                                       {wgpu::PipelineStatisticName::FragmentShaderInvocations}));
+    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
+                                       {wgpu::PipelineStatisticName::VertexShaderInvocations}));
     ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::Timestamp, 1));
 }
 
