@@ -234,7 +234,7 @@ struct CanonicalizeEntryPointIO::State {
             auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(attributes);
             if (cfg.shader_style == ShaderStyle::kGlsl && builtin) {
                 name = GLSLBuiltinToString(builtin->builtin, func_ast->PipelineStage(),
-                                           ast::AddressSpace::kIn);
+                                           type::AddressSpace::kIn);
             }
             auto symbol = ctx.dst->Symbols().New(name);
 
@@ -251,7 +251,7 @@ struct CanonicalizeEntryPointIO::State {
                     value = ctx.dst->IndexAccessor(value, 0_i);
                 }
             }
-            ctx.dst->GlobalVar(symbol, ast_type, ast::AddressSpace::kIn, std::move(attributes));
+            ctx.dst->GlobalVar(symbol, ast_type, type::AddressSpace::kIn, std::move(attributes));
             return value;
         } else if (cfg.shader_style == ShaderStyle::kMsl &&
                    ast::HasAttribute<ast::BuiltinAttribute>(attributes)) {
@@ -300,7 +300,7 @@ struct CanonicalizeEntryPointIO::State {
         if (cfg.shader_style == ShaderStyle::kGlsl) {
             if (auto* b = ast::GetAttribute<ast::BuiltinAttribute>(attributes)) {
                 name = GLSLBuiltinToString(b->builtin, func_ast->PipelineStage(),
-                                           ast::AddressSpace::kOut);
+                                           type::AddressSpace::kOut);
                 value = ToGLSLBuiltin(b->builtin, value, type);
             }
         }
@@ -530,7 +530,7 @@ struct CanonicalizeEntryPointIO::State {
                 type = ctx.dst->ty.array(type, 1_u);
                 lhs = ctx.dst->IndexAccessor(lhs, 0_i);
             }
-            ctx.dst->GlobalVar(name, type, ast::AddressSpace::kOut, std::move(attributes));
+            ctx.dst->GlobalVar(name, type, type::AddressSpace::kOut, std::move(attributes));
             wrapper_body.Push(ctx.dst->Assign(lhs, outval.value));
         }
     }
@@ -674,7 +674,7 @@ struct CanonicalizeEntryPointIO::State {
     /// @returns the gl_ string corresponding to that builtin
     const char* GLSLBuiltinToString(ast::BuiltinValue builtin,
                                     ast::PipelineStage stage,
-                                    ast::AddressSpace address_space) {
+                                    type::AddressSpace address_space) {
         switch (builtin) {
             case ast::BuiltinValue::kPosition:
                 switch (stage) {
@@ -706,7 +706,7 @@ struct CanonicalizeEntryPointIO::State {
             case ast::BuiltinValue::kSampleIndex:
                 return "gl_SampleID";
             case ast::BuiltinValue::kSampleMask:
-                if (address_space == ast::AddressSpace::kIn) {
+                if (address_space == type::AddressSpace::kIn) {
                     return "gl_SampleMaskIn";
                 } else {
                     return "gl_SampleMask";

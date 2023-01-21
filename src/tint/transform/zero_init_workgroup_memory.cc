@@ -36,7 +36,7 @@ namespace {
 bool ShouldRun(const Program* program) {
     for (auto* global : program->AST().GlobalVariables()) {
         if (auto* var = global->As<ast::Var>()) {
-            if (var->declared_address_space == ast::AddressSpace::kWorkgroup) {
+            if (var->declared_address_space == type::AddressSpace::kWorkgroup) {
                 return true;
             }
         }
@@ -139,7 +139,7 @@ struct ZeroInitWorkgroupMemory::State {
         // workgroup storage variables used by `fn`. This will populate #statements.
         auto* func = sem.Get(fn);
         for (auto* var : func->TransitivelyReferencedGlobals()) {
-            if (var->AddressSpace() == ast::AddressSpace::kWorkgroup) {
+            if (var->AddressSpace() == type::AddressSpace::kWorkgroup) {
                 auto get_expr = [&](uint32_t num_values) {
                     auto var_name = ctx.Clone(var->Declaration()->symbol);
                     return Expression{b.Expr(var_name), num_values, ArrayIndices{}};

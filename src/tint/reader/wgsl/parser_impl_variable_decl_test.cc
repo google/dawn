@@ -80,7 +80,7 @@ TEST_F(ParserImplTest, VariableDecl_WithAddressSpace) {
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(v->name, "my_var");
     EXPECT_TRUE(v->type->Is<ast::F32>());
-    EXPECT_EQ(v->address_space, ast::AddressSpace::kPrivate);
+    EXPECT_EQ(v->address_space, type::AddressSpace::kPrivate);
 
     EXPECT_EQ(v->source.range.begin.line, 1u);
     EXPECT_EQ(v->source.range.begin.column, 14u);
@@ -96,7 +96,7 @@ TEST_F(ParserImplTest, VariableDecl_WithPushConstant) {
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(v->name, "my_var");
     EXPECT_TRUE(v->type->Is<ast::F32>());
-    EXPECT_EQ(v->address_space, ast::AddressSpace::kPushConstant);
+    EXPECT_EQ(v->address_space, type::AddressSpace::kPushConstant);
 }
 
 TEST_F(ParserImplTest, VariableDecl_InvalidAddressSpace) {

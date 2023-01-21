@@ -24,14 +24,14 @@ Pointer::Pointer(ProgramID pid,
                  NodeID nid,
                  const Source& src,
                  const Type* const subtype,
-                 ast::AddressSpace addr_space,
+                 type::AddressSpace addr_space,
                  ast::Access ac)
     : Base(pid, nid, src), type(subtype), address_space(addr_space), access(ac) {}
 
 std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
     std::ostringstream out;
     out << "ptr<";
-    if (address_space != ast::AddressSpace::kNone) {
+    if (address_space != type::AddressSpace::kNone) {
         out << address_space << ", ";
     }
     out << type->FriendlyName(symbols);

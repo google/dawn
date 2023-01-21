@@ -378,11 +378,11 @@ class Resolver {
     /// given type and address space. Used for generating sensible error
     /// messages.
     /// @returns true on success, false on error
-    bool ApplyAddressSpaceUsageToType(ast::AddressSpace sc, type::Type* ty, const Source& usage);
+    bool ApplyAddressSpaceUsageToType(type::AddressSpace sc, type::Type* ty, const Source& usage);
 
     /// @param address_space the address space
     /// @returns the default access control for the given address space
-    ast::Access DefaultAccessForAddressSpace(ast::AddressSpace address_space);
+    ast::Access DefaultAccessForAddressSpace(type::AddressSpace address_space);
 
     /// Allocate constant IDs for pipeline-overridable constants.
     /// @returns true on success, false on error

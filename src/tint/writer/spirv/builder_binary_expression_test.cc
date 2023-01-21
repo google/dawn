@@ -1031,8 +1031,8 @@ OpBranch %17
 }
 
 TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
-    auto* a_var = GlobalVar("a", ty.bool_(), ast::AddressSpace::kPrivate, Expr(true));
-    auto* b_var = GlobalVar("b", ty.bool_(), ast::AddressSpace::kPrivate, Expr(false));
+    auto* a_var = GlobalVar("a", ty.bool_(), type::AddressSpace::kPrivate, Expr(true));
+    auto* b_var = GlobalVar("b", ty.bool_(), type::AddressSpace::kPrivate, Expr(false));
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b"));
 
     WrapInFunction(expr);
@@ -1207,8 +1207,8 @@ OpBranch %17
 }
 
 TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
-    auto* a_var = GlobalVar("a", ty.bool_(), ast::AddressSpace::kPrivate, Expr(true));
-    auto* b_var = GlobalVar("b", ty.bool_(), ast::AddressSpace::kPrivate, Expr(false));
+    auto* a_var = GlobalVar("a", ty.bool_(), type::AddressSpace::kPrivate, Expr(true));
+    auto* b_var = GlobalVar("b", ty.bool_(), type::AddressSpace::kPrivate, Expr(false));
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("a"), Expr("b"));
 
@@ -1251,19 +1251,19 @@ static const ast::Expression* MakeVectorExpr(ProgramBuilder* builder, Type type)
     switch (type) {
         case Type::f32:
             builder->GlobalVar(name, builder->ty.vec3<f32>(), builder->vec3<f32>(1_f, 1_f, 1_f),
-                               ast::AddressSpace::kPrivate);
+                               type::AddressSpace::kPrivate);
             break;
         case Type::f16:
             builder->GlobalVar(name, builder->ty.vec3<f16>(), builder->vec3<f16>(1_h, 1_h, 1_h),
-                               ast::AddressSpace::kPrivate);
+                               type::AddressSpace::kPrivate);
             break;
         case Type::i32:
             builder->GlobalVar(name, builder->ty.vec3<i32>(), builder->vec3<i32>(1_i, 1_i, 1_i),
-                               ast::AddressSpace::kPrivate);
+                               type::AddressSpace::kPrivate);
             break;
         case Type::u32:
             builder->GlobalVar(name, builder->ty.vec3<u32>(), builder->vec3<u32>(1_u, 1_u, 1_u),
-                               ast::AddressSpace::kPrivate);
+                               type::AddressSpace::kPrivate);
             break;
     }
     return builder->Expr(name);
@@ -1273,19 +1273,19 @@ static const ast::Expression* MakeScalarExpr(ProgramBuilder* builder, Type type)
     switch (type) {
         case Type::f32:
             builder->GlobalVar(name, builder->ty.f32(), builder->Expr(1_f),
-                               ast::AddressSpace::kPrivate);
+                               type::AddressSpace::kPrivate);
             break;
         case Type::f16:
             builder->GlobalVar(name, builder->ty.f16(), builder->Expr(1_h),
-                               ast::AddressSpace::kPrivate);
+                               type::AddressSpace::kPrivate);
             break;
         case Type::i32:
             builder->GlobalVar(name, builder->ty.i32(), builder->Expr(1_i),
-                               ast::AddressSpace::kPrivate);
+                               type::AddressSpace::kPrivate);
             break;
         case Type::u32:
             builder->GlobalVar(name, builder->ty.u32(), builder->Expr(1_u),
-                               ast::AddressSpace::kPrivate);
+                               type::AddressSpace::kPrivate);
             break;
     }
     return builder->Expr(name);
@@ -1580,11 +1580,11 @@ static const ast::Expression* MakeMat3x4Expr(ProgramBuilder* builder, Type type)
     switch (type) {
         case Type::f32:
             builder->GlobalVar(name, builder->ty.mat3x4<f32>(), builder->mat3x4<f32>(),
-                               ast::AddressSpace::kPrivate);
+                               type::AddressSpace::kPrivate);
             break;
         case Type::f16:
             builder->GlobalVar(name, builder->ty.mat3x4<f16>(), builder->mat3x4<f16>(),
-                               ast::AddressSpace::kPrivate);
+                               type::AddressSpace::kPrivate);
             break;
     }
     return builder->Expr(name);
@@ -1594,11 +1594,11 @@ static const ast::Expression* MakeMat4x3Expr(ProgramBuilder* builder, Type type)
     switch (type) {
         case Type::f32:
             builder->GlobalVar(name, builder->ty.mat4x3<f32>(), builder->mat4x3<f32>(),
-                               ast::AddressSpace::kPrivate);
+                               type::AddressSpace::kPrivate);
             break;
         case Type::f16:
             builder->GlobalVar(name, builder->ty.mat4x3<f16>(), builder->mat4x3<f16>(),
-                               ast::AddressSpace::kPrivate);
+                               type::AddressSpace::kPrivate);
     }
     return builder->Expr(name);
 }

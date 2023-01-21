@@ -743,7 +743,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedIndirectly) {
 
 TEST_F(InspectorGetEntryPointTest, OverrideReferencedIndirectly_ViaPrivateInitializer) {
     Override("foo", ty.f32());
-    GlobalVar("bar", ast::AddressSpace::kPrivate, ty.f32(), Mul(2_a, "foo"));
+    GlobalVar("bar", type::AddressSpace::kPrivate, ty.f32(), Mul(2_a, "foo"));
     MakePlainGlobalReferenceBodyFunction("ep_func", "bar", ty.f32(),
                                          utils::Vector{
                                              Stage(ast::PipelineStage::kCompute),
@@ -834,7 +834,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedByAttributeIndirectly) {
 
 TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySize) {
     Override("size", ty.u32());
-    GlobalVar("v", ast::AddressSpace::kWorkgroup, ty.array(ty.f32(), "size"));
+    GlobalVar("v", type::AddressSpace::kWorkgroup, ty.array(ty.f32(), "size"));
     Func("ep", utils::Empty, ty.void_(),
          utils::Vector{
              Assign(Phony(), IndexAccessor("v", 0_a)),
@@ -857,7 +857,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySize) {
 TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySizeIndirectly) {
     Override("foo", ty.u32());
     Override("bar", ty.u32(), Mul(2_a, "foo"));
-    GlobalVar("v", ast::AddressSpace::kWorkgroup, ty.array(ty.f32(), Mul(2_a, Expr("bar"))));
+    GlobalVar("v", type::AddressSpace::kWorkgroup, ty.array(ty.f32(), Mul(2_a, Expr("bar"))));
     Func("ep", utils::Empty, ty.void_(),
          utils::Vector{
              Assign(Phony(), IndexAccessor("v", 0_a)),
@@ -885,7 +885,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySizeViaAlias) {
     Alias("MyArray", ty.array(ty.f32(), Mul(2_a, Expr("bar"))));
     Override("zoo", ty.u32());
     Alias("MyArrayUnused", ty.array(ty.f32(), Mul(2_a, Expr("zoo"))));
-    GlobalVar("v", ast::AddressSpace::kWorkgroup, ty.type_name("MyArray"));
+    GlobalVar("v", type::AddressSpace::kWorkgroup, ty.type_name("MyArray"));
     Func("ep", utils::Empty, ty.void_(),
          utils::Vector{
              Assign(Phony(), IndexAccessor("v", 0_a)),

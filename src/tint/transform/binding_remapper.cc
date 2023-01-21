@@ -130,7 +130,7 @@ Transform::ApplyResult BindingRemapper::Apply(const Program* src,
                     return Program(std::move(b));
                 }
                 auto* sem = src->Sem().Get(var);
-                if (sem->AddressSpace() != ast::AddressSpace::kStorage) {
+                if (sem->AddressSpace() != type::AddressSpace::kStorage) {
                     b.Diagnostics().add_error(
                         diag::System::Transform,
                         "cannot apply access control to variable with address space " +

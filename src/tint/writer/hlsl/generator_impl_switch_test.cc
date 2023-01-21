@@ -22,7 +22,7 @@ namespace {
 using HlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
-    GlobalVar("cond", ty.i32(), ast::AddressSpace::kPrivate);
+    GlobalVar("cond", ty.i32(), type::AddressSpace::kPrivate);
     auto* s = Switch(                             //
         Expr("cond"),                             //
         Case(CaseSelector(5_i), Block(Break())),  //
@@ -46,7 +46,7 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
 }
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch_MixedDefault) {
-    GlobalVar("cond", ty.i32(), ast::AddressSpace::kPrivate);
+    GlobalVar("cond", ty.i32(), type::AddressSpace::kPrivate);
     auto* s = Switch(  //
         Expr("cond"),  //
         Case(utils::Vector{CaseSelector(5_i), DefaultCaseSelector()}, Block(Break())));
@@ -67,8 +67,8 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch_MixedDefault) {
 }
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch_OnlyDefaultCase) {
-    GlobalVar("cond", ty.i32(), ast::AddressSpace::kPrivate);
-    GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate);
+    GlobalVar("cond", ty.i32(), type::AddressSpace::kPrivate);
+    GlobalVar("a", ty.i32(), type::AddressSpace::kPrivate);
     auto* s = Switch(  //
         Expr("cond"),  //
         DefaultCase(Block(Assign(Expr("a"), Expr(42_i)))));

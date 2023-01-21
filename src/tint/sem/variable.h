@@ -22,11 +22,11 @@
 #include "tint/override_id.h"
 
 #include "src/tint/ast/access.h"
-#include "src/tint/ast/address_space.h"
 #include "src/tint/ast/parameter.h"
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/parameter_usage.h"
+#include "src/tint/type/address_space.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/unique_vector.h"
 
@@ -57,7 +57,7 @@ class Variable : public Castable<Variable, Node> {
     Variable(const ast::Variable* declaration,
              const type::Type* type,
              EvaluationStage stage,
-             ast::AddressSpace address_space,
+             type::AddressSpace address_space,
              ast::Access access,
              const constant::Value* constant_value);
 
@@ -74,7 +74,7 @@ class Variable : public Castable<Variable, Node> {
     EvaluationStage Stage() const { return stage_; }
 
     /// @returns the address space for the variable
-    ast::AddressSpace AddressSpace() const { return address_space_; }
+    type::AddressSpace AddressSpace() const { return address_space_; }
 
     /// @returns the access control for the variable
     ast::Access Access() const { return access_; }
@@ -100,7 +100,7 @@ class Variable : public Castable<Variable, Node> {
     const ast::Variable* const declaration_;
     const type::Type* const type_;
     const EvaluationStage stage_;
-    const ast::AddressSpace address_space_;
+    const type::AddressSpace address_space_;
     const ast::Access access_;
     const constant::Value* constant_value_;
     const Expression* initializer_ = nullptr;
@@ -121,7 +121,7 @@ class LocalVariable final : public Castable<LocalVariable, Variable> {
     LocalVariable(const ast::Variable* declaration,
                   const type::Type* type,
                   EvaluationStage stage,
-                  ast::AddressSpace address_space,
+                  type::AddressSpace address_space,
                   ast::Access access,
                   const sem::Statement* statement,
                   const constant::Value* constant_value);
@@ -162,7 +162,7 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     GlobalVariable(const ast::Variable* declaration,
                    const type::Type* type,
                    EvaluationStage stage,
-                   ast::AddressSpace address_space,
+                   type::AddressSpace address_space,
                    ast::Access access,
                    const constant::Value* constant_value,
                    sem::BindingPoint binding_point = {},
@@ -205,7 +205,7 @@ class Parameter final : public Castable<Parameter, Variable> {
     Parameter(const ast::Parameter* declaration,
               uint32_t index,
               const type::Type* type,
-              ast::AddressSpace address_space,
+              type::AddressSpace address_space,
               ast::Access access,
               const ParameterUsage usage = ParameterUsage::kNone,
               sem::BindingPoint binding_point = {},

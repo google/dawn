@@ -567,7 +567,6 @@ list(APPEND TINT_LIB_SRCS
 )
 
 tint_generated(ast/access BENCH TEST)
-tint_generated(ast/address_space BENCH TEST)
 tint_generated(ast/builtin_value BENCH TEST)
 tint_generated(ast/extension BENCH TEST)
 tint_generated(ast/interpolate_attribute BENCH TEST)
@@ -575,6 +574,7 @@ tint_generated(ast/texel_format BENCH TEST)
 tint_generated(resolver/init_conv_intrinsic)
 tint_generated(sem/builtin_type)
 tint_generated(sem/parameter_usage)
+tint_generated(type/address_space BENCH TEST)
 tint_generated(type/short_name BENCH TEST)
 
 if(UNIX)

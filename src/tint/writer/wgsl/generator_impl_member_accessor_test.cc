@@ -21,7 +21,7 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor) {
     auto* s = Structure("Data", utils::Vector{Member("mem", ty.f32())});
-    GlobalVar("str", ty.Of(s), ast::AddressSpace::kPrivate);
+    GlobalVar("str", ty.Of(s), type::AddressSpace::kPrivate);
 
     auto* expr = MemberAccessor("str", "mem");
     WrapInFunction(expr);
@@ -35,7 +35,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor) {
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor_OfDref) {
     auto* s = Structure("Data", utils::Vector{Member("mem", ty.f32())});
-    GlobalVar("str", ty.Of(s), ast::AddressSpace::kPrivate);
+    GlobalVar("str", ty.Of(s), type::AddressSpace::kPrivate);
 
     auto* p = Let("p", AddressOf("str"));
     auto* expr = MemberAccessor(Deref("p"), "mem");

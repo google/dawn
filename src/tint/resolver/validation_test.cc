@@ -62,8 +62,8 @@ class FakeExpr final : public Castable<FakeExpr, ast::Expression> {
 };
 
 TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInVertexStage) {
-    GlobalVar(Source{{1, 2}}, "wg", ty.vec4<f32>(), ast::AddressSpace::kWorkgroup);
-    GlobalVar("dst", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar(Source{{1, 2}}, "wg", ty.vec4<f32>(), type::AddressSpace::kWorkgroup);
+    GlobalVar("dst", ty.vec4<f32>(), type::AddressSpace::kPrivate);
     auto* stmt = Assign(Expr("dst"), Expr(Source{{3, 4}}, "wg"));
 
     Func(Source{{9, 10}}, "f0", utils::Empty, ty.vec4<f32>(),
@@ -94,8 +94,8 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
     //  f1();
     //}
 
-    GlobalVar(Source{{1, 2}}, "wg", ty.vec4<f32>(), ast::AddressSpace::kWorkgroup);
-    GlobalVar("dst", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar(Source{{1, 2}}, "wg", ty.vec4<f32>(), type::AddressSpace::kWorkgroup);
+    GlobalVar("dst", ty.vec4<f32>(), type::AddressSpace::kPrivate);
     auto* stmt = Assign(Expr("dst"), Expr(Source{{3, 4}}, "wg"));
 
     Func(Source{{5, 6}}, "f2", utils::Empty, ty.void_(), utils::Vector{stmt});
@@ -234,7 +234,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
     //   return;
     // }
 
-    GlobalVar("global_var", ty.f32(), ast::AddressSpace::kPrivate, Expr(2.1_f));
+    GlobalVar("global_var", ty.f32(), type::AddressSpace::kPrivate, Expr(2.1_f));
 
     Func("my_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -308,7 +308,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableDifferentScope_Fail) {
 }
 
 TEST_F(ResolverValidationTest, AddressSpace_FunctionVariableWorkgroupClass) {
-    auto* var = Var("var", ty.i32(), ast::AddressSpace::kWorkgroup);
+    auto* var = Var("var", ty.i32(), type::AddressSpace::kWorkgroup);
 
     Func("func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -322,7 +322,7 @@ TEST_F(ResolverValidationTest, AddressSpace_FunctionVariableWorkgroupClass) {
 }
 
 TEST_F(ResolverValidationTest, AddressSpace_FunctionVariableI32) {
-    auto* var = Var("s", ty.i32(), ast::AddressSpace::kPrivate);
+    auto* var = Var("s", ty.i32(), type::AddressSpace::kPrivate);
 
     Func("func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -337,7 +337,7 @@ TEST_F(ResolverValidationTest, AddressSpace_FunctionVariableI32) {
 
 TEST_F(ResolverValidationTest, AddressSpace_SamplerExplicitAddressSpace) {
     auto* t = ty.sampler(ast::SamplerKind::kSampler);
-    GlobalVar(Source{{12, 34}}, "var", t, ast::AddressSpace::kHandle, Binding(0_a), Group(0_a));
+    GlobalVar(Source{{12, 34}}, "var", t, type::AddressSpace::kHandle, Binding(0_a), Group(0_a));
 
     EXPECT_FALSE(r()->Resolve());
 
@@ -347,7 +347,7 @@ TEST_F(ResolverValidationTest, AddressSpace_SamplerExplicitAddressSpace) {
 
 TEST_F(ResolverValidationTest, AddressSpace_TextureExplicitAddressSpace) {
     auto* t = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
-    GlobalVar(Source{{12, 34}}, "var", t, ast::AddressSpace::kHandle, Binding(0_a), Group(0_a));
+    GlobalVar(Source{{12, 34}}, "var", t, type::AddressSpace::kHandle, Binding(0_a), Group(0_a));
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
 
@@ -356,7 +356,7 @@ TEST_F(ResolverValidationTest, AddressSpace_TextureExplicitAddressSpace) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
-    GlobalVar("my_vec", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("my_vec", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
     auto* ident = Expr(Source{{{3, 3}, {3, 7}}}, "xyqz");
 
@@ -368,7 +368,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
-    GlobalVar("my_vec", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("my_vec", ty.vec4<f32>(), type::AddressSpace::kPrivate);
 
     auto* ident = Expr(Source{{{3, 3}, {3, 7}}}, "rgyw");
 
@@ -381,7 +381,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
-    GlobalVar("my_vec", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("my_vec", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
     auto* ident = Expr(Source{{{3, 3}, {3, 8}}}, "zzzzz");
     auto* mem = MemberAccessor("my_vec", ident);
@@ -392,7 +392,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadIndex) {
-    GlobalVar("my_vec", ty.vec2<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("my_vec", ty.vec2<f32>(), type::AddressSpace::kPrivate);
 
     auto* ident = Expr(Source{{3, 3}}, "z");
     auto* mem = MemberAccessor("my_vec", ident);
@@ -425,7 +425,7 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncGoodParent) {
     //     let x: f32 = (*p).z;
     //     return x;
     // }
-    auto* p = Param("p", ty.pointer(ty.vec4<f32>(), ast::AddressSpace::kFunction));
+    auto* p = Param("p", ty.pointer(ty.vec4<f32>(), type::AddressSpace::kFunction));
     auto* star_p = Deref(p);
     auto* z = Expr("z");
     auto* accessor_expr = MemberAccessor(star_p, z);
@@ -443,7 +443,7 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncBadParent) {
     //     let x: f32 = *p.z;
     //     return x;
     // }
-    auto* p = Param("p", ty.pointer(ty.vec4<f32>(), ast::AddressSpace::kFunction));
+    auto* p = Param("p", ty.pointer(ty.vec4<f32>(), type::AddressSpace::kFunction));
     auto* z = Expr(Source{{12, 34}}, "z");
     auto* accessor_expr = MemberAccessor(p, z);
     auto* star_p = Deref(accessor_expr);
@@ -1277,8 +1277,8 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeAttribute) {
 TEST_F(ResolverTest, Expr_Initializer_Cast_Pointer) {
     auto* vf = Var("vf", ty.f32());
     auto* c =
-        Construct(Source{{12, 34}}, ty.pointer<i32>(ast::AddressSpace::kFunction), ExprList(vf));
-    auto* ip = Let("ip", ty.pointer<i32>(ast::AddressSpace::kFunction), c);
+        Construct(Source{{12, 34}}, ty.pointer<i32>(type::AddressSpace::kFunction), ExprList(vf));
+    auto* ip = Let("ip", ty.pointer<i32>(type::AddressSpace::kFunction), c);
     WrapInFunction(Decl(vf), Decl(ip));
 
     EXPECT_FALSE(r()->Resolve());
@@ -1286,21 +1286,21 @@ TEST_F(ResolverTest, Expr_Initializer_Cast_Pointer) {
 }
 
 TEST_F(ResolverTest, I32_Overflow) {
-    GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate, Expr(Source{{12, 24}}, 2147483648_a));
+    GlobalVar("v", ty.i32(), type::AddressSpace::kPrivate, Expr(Source{{12, 24}}, 2147483648_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:24 error: value 2147483648 cannot be represented as 'i32'");
 }
 
 TEST_F(ResolverTest, I32_Underflow) {
-    GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate, Expr(Source{{12, 24}}, -2147483649_a));
+    GlobalVar("v", ty.i32(), type::AddressSpace::kPrivate, Expr(Source{{12, 24}}, -2147483649_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:24 error: value -2147483649 cannot be represented as 'i32'");
 }
 
 TEST_F(ResolverTest, U32_Overflow) {
-    GlobalVar("v", ty.u32(), ast::AddressSpace::kPrivate, Expr(Source{{12, 24}}, 4294967296_a));
+    GlobalVar("v", ty.u32(), type::AddressSpace::kPrivate, Expr(Source{{12, 24}}, 4294967296_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:24 error: value 4294967296 cannot be represented as 'u32'");

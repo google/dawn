@@ -107,7 +107,7 @@ struct ArrayLengthFromUniform::State {
                                                      u32((max_buffer_size_index / 4) + 1))),
                              });
                 buffer_size_ubo =
-                    b.GlobalVar(b.Sym(), b.ty.Of(buffer_size_struct), ast::AddressSpace::kUniform,
+                    b.GlobalVar(b.Sym(), b.ty.Of(buffer_size_struct), type::AddressSpace::kUniform,
                                 b.Group(AInt(cfg->ubo_binding.group)),
                                 b.Binding(AInt(cfg->ubo_binding.binding)));
             }

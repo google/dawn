@@ -81,7 +81,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
 
     // Create a module-scope flag that indicates whether the current invocation has been discarded.
     auto flag = b.Symbols().New("tint_discarded");
-    b.GlobalVar(flag, ast::AddressSpace::kPrivate, b.Expr(false));
+    b.GlobalVar(flag, type::AddressSpace::kPrivate, b.Expr(false));
 
     // Replace all discard statements with a statement that marks the invocation as discarded.
     ctx.ReplaceAll([&](const ast::DiscardStatement*) -> const ast::Statement* {
@@ -125,12 +125,12 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                 // Skip writes to invocation-private address spaces.
                 auto* ref = sem.Get(assign->lhs)->Type()->As<type::Reference>();
                 switch (ref->AddressSpace()) {
-                    case ast::AddressSpace::kStorage:
+                    case type::AddressSpace::kStorage:
                         // Need to mask these.
                         break;
-                    case ast::AddressSpace::kFunction:
-                    case ast::AddressSpace::kPrivate:
-                    case ast::AddressSpace::kOut:
+                    case type::AddressSpace::kFunction:
+                    case type::AddressSpace::kPrivate:
+                    case type::AddressSpace::kOut:
                         // Skip these.
                         return;
                     default:

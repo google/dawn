@@ -24,7 +24,7 @@ using SpvBuilderInitializerTest = TestHelper;
 
 TEST_F(SpvBuilderInitializerTest, Const) {
     auto* c = Expr(42.2_f);
-    auto* g = GlobalVar("g", ty.f32(), c, ast::AddressSpace::kPrivate);
+    auto* g = GlobalVar("g", ty.f32(), c, type::AddressSpace::kPrivate);
 
     spirv::Builder& b = Build();
 
@@ -1935,7 +1935,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_F32_With_F32) {
     auto* ctor = Construct<f32>(2_f);
-    GlobalVar("g", ty.f32(), ast::AddressSpace::kPrivate, ctor);
+    GlobalVar("g", ty.f32(), type::AddressSpace::kPrivate, ctor);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -1954,7 +1954,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_F16_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* ctor = Construct<f16>(2_h);
-    GlobalVar("g", ty.f16(), ast::AddressSpace::kPrivate, ctor);
+    GlobalVar("g", ty.f16(), type::AddressSpace::kPrivate, ctor);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -2015,7 +2015,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_U32_With_F32) {
     auto* ctor = Construct<u32>(1.5_f);
-    GlobalVar("g", ty.u32(), ast::AddressSpace::kPrivate, ctor);
+    GlobalVar("g", ty.u32(), type::AddressSpace::kPrivate, ctor);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -2034,7 +2034,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_U32_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* ctor = Construct<u32>(1.5_h);
-    GlobalVar("g", ty.u32(), ast::AddressSpace::kPrivate, ctor);
+    GlobalVar("g", ty.u32(), type::AddressSpace::kPrivate, ctor);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -2099,7 +2099,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec2_With_F32) {
     auto* cast = vec2<f32>(2_f);
-    auto* g = GlobalVar("g", ty.vec2<f32>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec2<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2117,7 +2117,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec2_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec2<f16>(2_h);
-    auto* g = GlobalVar("g", ty.vec2<f16>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec2<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2181,7 +2181,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec2_F32_With_Vec2) {
     auto* cast = vec2<f32>(vec2<f32>(2_f, 2_f));
-    GlobalVar("a", ty.vec2<f32>(), ast::AddressSpace::kPrivate, cast);
+    GlobalVar("a", ty.vec2<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -2203,7 +2203,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec2_F16_With_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec2<f16>(vec2<f16>(2_h, 2_h));
-    GlobalVar("a", ty.vec2<f16>(), ast::AddressSpace::kPrivate, cast);
+    GlobalVar("a", ty.vec2<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -2271,7 +2271,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_F32_With_Vec3) {
     auto* cast = vec3<f32>(vec3<f32>(2_f, 2_f, 2_f));
-    GlobalVar("a", ty.vec3<f32>(), ast::AddressSpace::kPrivate, cast);
+    GlobalVar("a", ty.vec3<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -2293,7 +2293,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_F16_With_Vec3) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(vec3<f16>(2_h, 2_h, 2_h));
-    GlobalVar("a", ty.vec3<f16>(), ast::AddressSpace::kPrivate, cast);
+    GlobalVar("a", ty.vec3<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -2361,7 +2361,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_F32_With_Vec4) {
     auto* cast = vec4<f32>(vec4<f32>(2_f, 2_f, 2_f, 2_f));
-    GlobalVar("a", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
+    GlobalVar("a", ty.vec4<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -2383,7 +2383,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_F16_With_Vec4) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec4<f16>(2_h, 2_h, 2_h, 2_h));
-    GlobalVar("a", ty.vec4<f16>(), ast::AddressSpace::kPrivate, cast);
+    GlobalVar("a", ty.vec4<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -2451,7 +2451,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_With_F32) {
     auto* cast = vec3<f32>(2_f);
-    auto* g = GlobalVar("g", ty.vec3<f32>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec3<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2469,7 +2469,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(2_h);
-    auto* g = GlobalVar("g", ty.vec3<f16>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec3<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2533,7 +2533,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_With_F32_Vec2) {
     auto* cast = vec3<f32>(2_f, vec2<f32>(2_f, 2_f));
-    auto* g = GlobalVar("g", ty.vec3<f32>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec3<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2551,7 +2551,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_With_F16_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(2_h, vec2<f16>(2_h, 2_h));
-    auto* g = GlobalVar("g", ty.vec3<f16>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec3<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2615,7 +2615,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_With_Vec2_F32) {
     auto* cast = vec3<f32>(vec2<f32>(2_f, 2_f), 2_f);
-    auto* g = GlobalVar("g", ty.vec3<f32>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec3<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2633,7 +2633,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_With_Vec2_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(vec2<f16>(2_h, 2_h), 2_h);
-    auto* g = GlobalVar("g", ty.vec3<f16>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec3<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2697,7 +2697,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F32) {
     auto* cast = vec4<f32>(2_f);
-    auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2715,7 +2715,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(2_h);
-    auto* g = GlobalVar("g", ty.vec4<f16>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2779,7 +2779,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F32_F32_Vec2) {
     auto* cast = vec4<f32>(2_f, 2_f, vec2<f32>(2_f, 2_f));
-    auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2797,7 +2797,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F16_F16_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(2_h, 2_h, vec2<f16>(2_h, 2_h));
-    auto* g = GlobalVar("g", ty.vec4<f16>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2861,7 +2861,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F32_Vec2_F32) {
     auto* cast = vec4<f32>(2_f, vec2<f32>(2_f, 2_f), 2_f);
-    auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2879,7 +2879,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F16_Vec2_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(2_h, vec2<f16>(2_h, 2_h), 2_h);
-    auto* g = GlobalVar("g", ty.vec4<f16>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2943,7 +2943,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_Vec2_F32_F32) {
     auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), 2_f, 2_f);
-    auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -2961,7 +2961,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_Vec2_F16_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec2<f16>(2_h, 2_h), 2_h, 2_h);
-    auto* g = GlobalVar("g", ty.vec4<f16>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -3025,7 +3025,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_F32_With_Vec2_Vec2) {
     auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f));
-    auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -3043,7 +3043,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_F16_With_Vec2_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec2<f16>(2_h, 2_h), vec2<f16>(2_h, 2_h));
-    auto* g = GlobalVar("g", ty.vec4<f16>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -3082,7 +3082,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F32_Vec3) {
     auto* cast = vec4<f32>(2_f, vec3<f32>(2_f, 2_f, 2_f));
-    auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -3100,7 +3100,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F16_Vec3) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(2_h, vec3<f16>(2_h, 2_h, 2_h));
-    auto* g = GlobalVar("g", ty.vec4<f16>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -3164,7 +3164,7 @@ OpReturn
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_Vec3_F32) {
     auto* cast = vec4<f32>(vec3<f32>(2_f, 2_f, 2_f), 2_f);
-    auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -3182,7 +3182,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_Vec3_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec3<f16>(2_h, 2_h, 2_h), 2_h);
-    auto* g = GlobalVar("g", ty.vec4<f16>(), ast::AddressSpace::kPrivate, cast);
+    auto* g = GlobalVar("g", ty.vec4<f16>(), type::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
@@ -4204,7 +4204,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_F32_To_F16) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_U32_to_I32) {
-    auto* var = GlobalVar("i", ty.vec3<u32>(), ast::AddressSpace::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<u32>(), type::AddressSpace::kPrivate);
 
     auto* cast = vec3<i32>("i");
     WrapInFunction(cast);
@@ -4230,7 +4230,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_U32_to_I32) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F32_to_I32) {
-    auto* var = GlobalVar("i", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
     auto* cast = vec3<i32>("i");
     WrapInFunction(cast);
@@ -4258,7 +4258,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F32_to_I32) {
 TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F16_to_I32) {
     Enable(ast::Extension::kF16);
 
-    auto* var = GlobalVar("i", ty.vec3<f16>(), ast::AddressSpace::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<f16>(), type::AddressSpace::kPrivate);
 
     auto* cast = vec3<i32>("i");
     WrapInFunction(cast);
@@ -4284,7 +4284,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F16_to_I32) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_I32_to_U32) {
-    auto* var = GlobalVar("i", ty.vec3<i32>(), ast::AddressSpace::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<i32>(), type::AddressSpace::kPrivate);
 
     auto* cast = vec3<u32>("i");
     WrapInFunction(cast);
@@ -4310,7 +4310,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_I32_to_U32) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F32_to_U32) {
-    auto* var = GlobalVar("i", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
     auto* cast = vec3<u32>("i");
     WrapInFunction(cast);
@@ -4338,7 +4338,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F32_to_U32) {
 TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F16_to_U32) {
     Enable(ast::Extension::kF16);
 
-    auto* var = GlobalVar("i", ty.vec3<f16>(), ast::AddressSpace::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<f16>(), type::AddressSpace::kPrivate);
 
     auto* cast = vec3<u32>("i");
     WrapInFunction(cast);
@@ -4364,7 +4364,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F16_to_U32) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_I32_to_F32) {
-    auto* var = GlobalVar("i", ty.vec3<i32>(), ast::AddressSpace::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<i32>(), type::AddressSpace::kPrivate);
 
     auto* cast = vec3<f32>("i");
     WrapInFunction(cast);
@@ -4390,7 +4390,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_I32_to_F32) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_U32_to_F32) {
-    auto* var = GlobalVar("i", ty.vec3<u32>(), ast::AddressSpace::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<u32>(), type::AddressSpace::kPrivate);
 
     auto* cast = vec3<f32>("i");
     WrapInFunction(cast);
@@ -4418,7 +4418,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_U32_to_F32) {
 TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F16_to_F32) {
     Enable(ast::Extension::kF16);
 
-    auto* var = GlobalVar("i", ty.vec3<f16>(), ast::AddressSpace::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<f16>(), type::AddressSpace::kPrivate);
 
     auto* cast = vec3<f32>("i");
     WrapInFunction(cast);
@@ -4446,7 +4446,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F16_to_F32) {
 TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_I32_to_F16) {
     Enable(ast::Extension::kF16);
 
-    auto* var = GlobalVar("i", ty.vec3<i32>(), ast::AddressSpace::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<i32>(), type::AddressSpace::kPrivate);
 
     auto* cast = vec3<f16>("i");
     WrapInFunction(cast);
@@ -4474,7 +4474,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_I32_to_F16) {
 TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_U32_to_F16) {
     Enable(ast::Extension::kF16);
 
-    auto* var = GlobalVar("i", ty.vec3<u32>(), ast::AddressSpace::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<u32>(), type::AddressSpace::kPrivate);
 
     auto* cast = vec3<f16>("i");
     WrapInFunction(cast);
@@ -4502,7 +4502,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_U32_to_F16) {
 TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F32_to_F16) {
     Enable(ast::Extension::kF16);
 
-    auto* var = GlobalVar("i", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
     auto* cast = vec3<f16>("i");
     WrapInFunction(cast);
@@ -4590,9 +4590,9 @@ TEST_F(SpvBuilderInitializerTest, IsInitializerConst_VectorWithAllConstInitializ
 TEST_F(SpvBuilderInitializerTest, IsInitializerConst_Vector_WithIdent) {
     // vec3<f32>(a, b, c)  -> false
 
-    GlobalVar("a", ty.f32(), ast::AddressSpace::kPrivate);
-    GlobalVar("b", ty.f32(), ast::AddressSpace::kPrivate);
-    GlobalVar("c", ty.f32(), ast::AddressSpace::kPrivate);
+    GlobalVar("a", ty.f32(), type::AddressSpace::kPrivate);
+    GlobalVar("b", ty.f32(), type::AddressSpace::kPrivate);
+    GlobalVar("c", ty.f32(), type::AddressSpace::kPrivate);
 
     auto* t = vec3<f32>("a", "b", "c");
     WrapInFunction(t);
@@ -4662,8 +4662,8 @@ TEST_F(SpvBuilderInitializerTest, IsInitializerConst_Struct_WithIdentSubExpressi
                                          Member("b", ty.vec3<f32>()),
                                      });
 
-    GlobalVar("a", ty.f32(), ast::AddressSpace::kPrivate);
-    GlobalVar("b", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("a", ty.f32(), type::AddressSpace::kPrivate);
+    GlobalVar("b", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
     auto* t = Construct(ty.Of(s), "a", "b");
     WrapInFunction(t);

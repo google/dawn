@@ -80,7 +80,7 @@ using ResolverBuiltinTest_BoolMethod = ResolverTestWithParam<std::string>;
 TEST_P(ResolverBuiltinTest_BoolMethod, Scalar) {
     auto name = GetParam();
 
-    GlobalVar("my_var", ty.bool_(), ast::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.bool_(), type::AddressSpace::kPrivate);
 
     auto* expr = Call(name, "my_var");
     WrapInFunction(expr);
@@ -93,7 +93,7 @@ TEST_P(ResolverBuiltinTest_BoolMethod, Scalar) {
 TEST_P(ResolverBuiltinTest_BoolMethod, Vector) {
     auto name = GetParam();
 
-    GlobalVar("my_var", ty.vec3<bool>(), ast::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.vec3<bool>(), type::AddressSpace::kPrivate);
 
     auto* expr = Call(name, "my_var");
     WrapInFunction(expr);
@@ -108,9 +108,9 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          testing::Values("any", "all"));
 
 TEST_F(ResolverBuiltinTest, Select) {
-    GlobalVar("my_var", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
-    GlobalVar("bool_var", ty.vec3<bool>(), ast::AddressSpace::kPrivate);
+    GlobalVar("bool_var", ty.vec3<bool>(), type::AddressSpace::kPrivate);
 
     auto* expr = Call("select", "my_var", "my_var", "bool_var");
     WrapInFunction(expr);
@@ -214,7 +214,7 @@ using ResolverBuiltinArrayTest = ResolverTest;
 TEST_F(ResolverBuiltinArrayTest, ArrayLength_Vector) {
     auto* ary = ty.array<i32>();
     auto* str = Structure("S", utils::Vector{Member("x", ary)});
-    GlobalVar("a", ty.Of(str), ast::AddressSpace::kStorage, ast::Access::kRead, Binding(0_a),
+    GlobalVar("a", ty.Of(str), type::AddressSpace::kStorage, ast::Access::kRead, Binding(0_a),
               Group(0_a));
 
     auto* call = Call("arrayLength", AddressOf(MemberAccessor("a", "x")));
@@ -227,7 +227,7 @@ TEST_F(ResolverBuiltinArrayTest, ArrayLength_Vector) {
 }
 
 TEST_F(ResolverBuiltinArrayTest, ArrayLength_Error_ArraySized) {
-    GlobalVar("arr", ty.array<i32, 4>(), ast::AddressSpace::kPrivate);
+    GlobalVar("arr", ty.array<i32, 4>(), type::AddressSpace::kPrivate);
     auto* call = Call("arrayLength", AddressOf("arr"));
     WrapInFunction(call);
 
@@ -1070,7 +1070,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector_sig) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Frexp_Error_FirstParamInt) {
-    GlobalVar("v", ty.i32(), ast::AddressSpace::kWorkgroup);
+    GlobalVar("v", ty.i32(), type::AddressSpace::kWorkgroup);
     auto* call = Call("frexp", 1_i, AddressOf("v"));
     WrapInFunction(call);
 
@@ -1319,7 +1319,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfVector_f16) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Modf_Error_FirstParamInt) {
-    GlobalVar("whole", ty.f32(), ast::AddressSpace::kWorkgroup);
+    GlobalVar("whole", ty.f32(), type::AddressSpace::kWorkgroup);
     auto* call = Call("modf", 1_i, AddressOf("whole"));
     WrapInFunction(call);
 
@@ -1335,7 +1335,7 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_FirstParamInt) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Modf_Error_SecondParamIntPtr) {
-    GlobalVar("whole", ty.i32(), ast::AddressSpace::kWorkgroup);
+    GlobalVar("whole", ty.i32(), type::AddressSpace::kWorkgroup);
     auto* call = Call("modf", 1_f, AddressOf("whole"));
     WrapInFunction(call);
 
@@ -1365,7 +1365,7 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_SecondParamNotAPointer) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Modf_Error_VectorSizesDontMatch) {
-    GlobalVar("whole", ty.vec4<f32>(), ast::AddressSpace::kWorkgroup);
+    GlobalVar("whole", ty.vec4<f32>(), type::AddressSpace::kWorkgroup);
     auto* call = Call("modf", vec2<f32>(1_f, 2_f), AddressOf("whole"));
     WrapInFunction(call);
 
@@ -1845,7 +1845,7 @@ INSTANTIATE_TEST_SUITE_P(
 namespace matrix_builtin_tests {
 
 TEST_F(ResolverBuiltinTest, Determinant_2x2_f32) {
-    GlobalVar("var", ty.mat2x2<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat2x2<f32>(), type::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1859,7 +1859,7 @@ TEST_F(ResolverBuiltinTest, Determinant_2x2_f32) {
 TEST_F(ResolverBuiltinTest, Determinant_2x2_f16) {
     Enable(ast::Extension::kF16);
 
-    GlobalVar("var", ty.mat2x2<f16>(), ast::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat2x2<f16>(), type::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1871,7 +1871,7 @@ TEST_F(ResolverBuiltinTest, Determinant_2x2_f16) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_3x3_f32) {
-    GlobalVar("var", ty.mat3x3<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat3x3<f32>(), type::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1885,7 +1885,7 @@ TEST_F(ResolverBuiltinTest, Determinant_3x3_f32) {
 TEST_F(ResolverBuiltinTest, Determinant_3x3_f16) {
     Enable(ast::Extension::kF16);
 
-    GlobalVar("var", ty.mat3x3<f16>(), ast::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat3x3<f16>(), type::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1897,7 +1897,7 @@ TEST_F(ResolverBuiltinTest, Determinant_3x3_f16) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_4x4_f32) {
-    GlobalVar("var", ty.mat4x4<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat4x4<f32>(), type::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1911,7 +1911,7 @@ TEST_F(ResolverBuiltinTest, Determinant_4x4_f32) {
 TEST_F(ResolverBuiltinTest, Determinant_4x4_f16) {
     Enable(ast::Extension::kF16);
 
-    GlobalVar("var", ty.mat4x4<f16>(), ast::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat4x4<f16>(), type::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1923,7 +1923,7 @@ TEST_F(ResolverBuiltinTest, Determinant_4x4_f16) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_NotSquare) {
-    GlobalVar("var", ty.mat2x3<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat2x3<f32>(), type::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1938,7 +1938,7 @@ TEST_F(ResolverBuiltinTest, Determinant_NotSquare) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_NotMatrix) {
-    GlobalVar("var", ty.f32(), ast::AddressSpace::kPrivate);
+    GlobalVar("var", ty.f32(), type::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1958,7 +1958,7 @@ TEST_F(ResolverBuiltinTest, Determinant_NotMatrix) {
 namespace vector_builtin_tests {
 
 TEST_F(ResolverBuiltinTest, Dot_Vec2_f32) {
-    GlobalVar("my_var", ty.vec2<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.vec2<f32>(), type::AddressSpace::kPrivate);
 
     auto* expr = Call("dot", "my_var", "my_var");
     WrapInFunction(expr);
@@ -1972,7 +1972,7 @@ TEST_F(ResolverBuiltinTest, Dot_Vec2_f32) {
 TEST_F(ResolverBuiltinTest, Dot_Vec2_f16) {
     Enable(ast::Extension::kF16);
 
-    GlobalVar("my_var", ty.vec2<f16>(), ast::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.vec2<f16>(), type::AddressSpace::kPrivate);
 
     auto* expr = Call("dot", "my_var", "my_var");
     WrapInFunction(expr);
@@ -1984,7 +1984,7 @@ TEST_F(ResolverBuiltinTest, Dot_Vec2_f16) {
 }
 
 TEST_F(ResolverBuiltinTest, Dot_Vec3_i32) {
-    GlobalVar("my_var", ty.vec3<i32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.vec3<i32>(), type::AddressSpace::kPrivate);
 
     auto* expr = Call("dot", "my_var", "my_var");
     WrapInFunction(expr);
@@ -1996,7 +1996,7 @@ TEST_F(ResolverBuiltinTest, Dot_Vec3_i32) {
 }
 
 TEST_F(ResolverBuiltinTest, Dot_Vec4_u32) {
-    GlobalVar("my_var", ty.vec4<u32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.vec4<u32>(), type::AddressSpace::kPrivate);
 
     auto* expr = Call("dot", "my_var", "my_var");
     WrapInFunction(expr);
@@ -2031,7 +2031,7 @@ using ResolverBuiltinDerivativeTest = ResolverTestWithParam<std::string>;
 TEST_P(ResolverBuiltinDerivativeTest, Scalar) {
     auto name = GetParam();
 
-    GlobalVar("ident", ty.f32(), ast::AddressSpace::kPrivate);
+    GlobalVar("ident", ty.f32(), type::AddressSpace::kPrivate);
 
     auto* expr = Call(name, "ident");
     Func("func", utils::Empty, ty.void_(), utils::Vector{Ignore(expr)},
@@ -2045,7 +2045,7 @@ TEST_P(ResolverBuiltinDerivativeTest, Scalar) {
 
 TEST_P(ResolverBuiltinDerivativeTest, Vector) {
     auto name = GetParam();
-    GlobalVar("ident", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("ident", ty.vec4<f32>(), type::AddressSpace::kPrivate);
 
     auto* expr = Call(name, "ident");
     Func("func", utils::Empty, ty.void_(), utils::Vector{Ignore(expr)},
@@ -2141,7 +2141,7 @@ class ResolverBuiltinTest_TextureOperation : public ResolverTestWithParam<Textur
             GlobalVar(name, type, Binding(0_a), Group(0_a));
 
         } else {
-            GlobalVar(name, type, ast::AddressSpace::kPrivate);
+            GlobalVar(name, type, type::AddressSpace::kPrivate);
         }
 
         call_params->Push(Expr(name));

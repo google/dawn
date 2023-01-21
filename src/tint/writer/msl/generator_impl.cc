@@ -205,7 +205,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         // Use the SSBO binding numbers as the indices for the buffer size lookups.
         for (auto* var : in->AST().GlobalVariables()) {
             auto* global = in->Sem().Get<sem::GlobalVariable>(var);
-            if (global && global->AddressSpace() == ast::AddressSpace::kStorage) {
+            if (global && global->AddressSpace() == type::AddressSpace::kStorage) {
                 array_length_from_uniform_cfg.bindpoint_to_size_index.emplace(
                     global->BindingPoint(), global->BindingPoint().binding);
             }
@@ -2035,12 +2035,12 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                 }
             } else if (auto* ptr = param->type->As<ast::Pointer>()) {
                 auto sc = ptr->address_space;
-                if (sc == ast::AddressSpace::kWorkgroup) {
+                if (sc == type::AddressSpace::kWorkgroup) {
                     auto& allocations = workgroup_allocations_[func_name];
                     out << " [[threadgroup(" << allocations.size() << ")]]";
                     allocations.push_back(program_->Sem().Get(ptr->type)->Size());
-                } else if (TINT_LIKELY(sc == ast::AddressSpace::kStorage ||
-                                       sc == ast::AddressSpace::kUniform)) {
+                } else if (TINT_LIKELY(sc == type::AddressSpace::kStorage ||
+                                       sc == type::AddressSpace::kUniform)) {
                     uint32_t binding = get_binding_index(param);
                     if (binding == kInvalidBindingIndex) {
                         return false;
@@ -2735,20 +2735,20 @@ bool GeneratorImpl::EmitTypeAndName(std::ostream& out,
     return true;
 }
 
-bool GeneratorImpl::EmitAddressSpace(std::ostream& out, ast::AddressSpace sc) {
+bool GeneratorImpl::EmitAddressSpace(std::ostream& out, type::AddressSpace sc) {
     switch (sc) {
-        case ast::AddressSpace::kFunction:
-        case ast::AddressSpace::kPrivate:
-        case ast::AddressSpace::kHandle:
+        case type::AddressSpace::kFunction:
+        case type::AddressSpace::kPrivate:
+        case type::AddressSpace::kHandle:
             out << "thread";
             return true;
-        case ast::AddressSpace::kWorkgroup:
+        case type::AddressSpace::kWorkgroup:
             out << "threadgroup";
             return true;
-        case ast::AddressSpace::kStorage:
+        case type::AddressSpace::kStorage:
             out << "device";
             return true;
-        case ast::AddressSpace::kUniform:
+        case type::AddressSpace::kUniform:
             out << "constant";
             return true;
         default:
@@ -3000,14 +3000,14 @@ bool GeneratorImpl::EmitVar(const ast::Var* var) {
     auto out = line();
 
     switch (sem->AddressSpace()) {
-        case ast::AddressSpace::kFunction:
-        case ast::AddressSpace::kHandle:
-        case ast::AddressSpace::kNone:
+        case type::AddressSpace::kFunction:
+        case type::AddressSpace::kHandle:
+        case type::AddressSpace::kNone:
             break;
-        case ast::AddressSpace::kPrivate:
+        case type::AddressSpace::kPrivate:
             out << "thread ";
             break;
-        case ast::AddressSpace::kWorkgroup:
+        case type::AddressSpace::kWorkgroup:
             out << "threadgroup ";
             break;
         default:
@@ -3029,9 +3029,9 @@ bool GeneratorImpl::EmitVar(const ast::Var* var) {
         if (!EmitExpression(out, var->initializer)) {
             return false;
         }
-    } else if (sem->AddressSpace() == ast::AddressSpace::kPrivate ||
-               sem->AddressSpace() == ast::AddressSpace::kFunction ||
-               sem->AddressSpace() == ast::AddressSpace::kNone) {
+    } else if (sem->AddressSpace() == type::AddressSpace::kPrivate ||
+               sem->AddressSpace() == type::AddressSpace::kFunction ||
+               sem->AddressSpace() == type::AddressSpace::kNone) {
         out << " = ";
         if (!EmitZeroValue(out, type)) {
             return false;
@@ -3049,14 +3049,14 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
     auto out = line();
 
     switch (sem->AddressSpace()) {
-        case ast::AddressSpace::kFunction:
-        case ast::AddressSpace::kHandle:
-        case ast::AddressSpace::kNone:
+        case type::AddressSpace::kFunction:
+        case type::AddressSpace::kHandle:
+        case type::AddressSpace::kNone:
             break;
-        case ast::AddressSpace::kPrivate:
+        case type::AddressSpace::kPrivate:
             out << "thread ";
             break;
-        case ast::AddressSpace::kWorkgroup:
+        case type::AddressSpace::kWorkgroup:
             out << "threadgroup ";
             break;
         default:

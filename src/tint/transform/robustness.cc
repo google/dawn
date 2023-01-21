@@ -38,7 +38,7 @@ struct Robustness::State {
     /// Constructor
     /// @param program the source program
     /// @param omitted the omitted address spaces
-    State(const Program* program, std::unordered_set<ast::AddressSpace>&& omitted)
+    State(const Program* program, std::unordered_set<type::AddressSpace>&& omitted)
         : src(program), omitted_address_spaces(std::move(omitted)) {}
 
     /// Runs the transform
@@ -60,7 +60,7 @@ struct Robustness::State {
     CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
 
     /// Set of address spaces to not apply the transform to
-    std::unordered_set<ast::AddressSpace> omitted_address_spaces;
+    std::unordered_set<type::AddressSpace> omitted_address_spaces;
 
     /// Apply bounds clamping to array, vector and matrix indexing
     /// @param expr the array, vector or matrix index expression
@@ -294,14 +294,14 @@ Transform::ApplyResult Robustness::Apply(const Program* src,
         cfg = *cfg_data;
     }
 
-    std::unordered_set<ast::AddressSpace> omitted_address_spaces;
+    std::unordered_set<type::AddressSpace> omitted_address_spaces;
     for (auto sc : cfg.omitted_address_spaces) {
         switch (sc) {
             case AddressSpace::kUniform:
-                omitted_address_spaces.insert(ast::AddressSpace::kUniform);
+                omitted_address_spaces.insert(type::AddressSpace::kUniform);
                 break;
             case AddressSpace::kStorage:
-                omitted_address_spaces.insert(ast::AddressSpace::kStorage);
+                omitted_address_spaces.insert(type::AddressSpace::kStorage);
                 break;
         }
     }

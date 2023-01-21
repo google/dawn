@@ -100,7 +100,7 @@ using ResolverBuiltinsStageTest = ResolverTestWithParam<Params>;
 TEST_P(ResolverBuiltinsStageTest, All_input) {
     const Params& params = GetParam();
 
-    auto* p = GlobalVar("p", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
+    auto* p = GlobalVar("p", ty.vec4<f32>(), type::AddressSpace::kPrivate);
     auto* input = Param("input", params.type(*this),
                         utils::Vector{Builtin(Source{{12, 34}}, params.builtin)});
     switch (params.stage) {

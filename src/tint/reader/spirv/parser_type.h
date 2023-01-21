@@ -20,10 +20,10 @@
 #include <vector>
 
 #include "src/tint/ast/access.h"
-#include "src/tint/ast/address_space.h"
 #include "src/tint/ast/sampler.h"
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/castable.h"
+#include "src/tint/type/address_space.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/block_allocator.h"
 
@@ -163,7 +163,7 @@ struct Pointer final : public Castable<Pointer, Type> {
     /// @param ty the store type
     /// @param sc the pointer address space
     /// @param access the declared access mode
-    Pointer(const Type* ty, ast::AddressSpace sc, ast::Access access);
+    Pointer(const Type* ty, type::AddressSpace sc, ast::Access access);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -181,7 +181,7 @@ struct Pointer final : public Castable<Pointer, Type> {
     /// the store type
     Type const* const type;
     /// the pointer address space
-    ast::AddressSpace const address_space;
+    type::AddressSpace const address_space;
     /// the pointer declared access mode
     ast::Access const access;
 };
@@ -194,7 +194,7 @@ struct Reference final : public Castable<Reference, Type> {
     /// @param ty the referenced type
     /// @param sc the reference address space
     /// @param access the reference declared access mode
-    Reference(const Type* ty, ast::AddressSpace sc, ast::Access access);
+    Reference(const Type* ty, type::AddressSpace sc, ast::Access access);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -212,7 +212,7 @@ struct Reference final : public Castable<Reference, Type> {
     /// the store type
     Type const* const type;
     /// the pointer address space
-    ast::AddressSpace const address_space;
+    type::AddressSpace const address_space;
     /// the pointer declared access mode
     ast::Access const access;
 };
@@ -550,7 +550,7 @@ class TypeManager {
     /// @return a Pointer type. Repeated calls with the same arguments will return
     /// the same pointer.
     const spirv::Pointer* Pointer(const Type* ty,
-                                  ast::AddressSpace address_space,
+                                  type::AddressSpace address_space,
                                   ast::Access access = ast::Access::kUndefined);
     /// @param ty the referenced type
     /// @param address_space the reference address space
@@ -558,7 +558,7 @@ class TypeManager {
     /// @return a Reference type. Repeated calls with the same arguments will
     /// return the same pointer.
     const spirv::Reference* Reference(const Type* ty,
-                                      ast::AddressSpace address_space,
+                                      type::AddressSpace address_space,
                                       ast::Access access = ast::Access::kUndefined);
     /// @param ty the element type
     /// @param sz the number of elements in the vector

@@ -95,7 +95,7 @@ TEST_F(ResolverIsHostShareable, Matrix) {
 }
 
 TEST_F(ResolverIsHostShareable, Pointer) {
-    auto* ptr = create<type::Pointer>(create<type::I32>(), ast::AddressSpace::kPrivate,
+    auto* ptr = create<type::Pointer>(create<type::I32>(), type::AddressSpace::kPrivate,
                                       ast::Access::kReadWrite);
     EXPECT_FALSE(r()->IsHostShareable(ptr));
 }

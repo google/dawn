@@ -97,7 +97,7 @@ TEST_P(ResolverInferredTypeParamTest, GlobalVar_Pass) {
 
     // var a = <type initializer>;
     auto* ctor_expr = params.create_value(*this, 0);
-    auto* var = GlobalVar("a", ast::AddressSpace::kPrivate, ctor_expr);
+    auto* var = GlobalVar("a", type::AddressSpace::kPrivate, ctor_expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     EXPECT_EQ(TypeOf(var)->UnwrapRef(), expected_type);
@@ -124,7 +124,7 @@ TEST_P(ResolverInferredTypeParamTest, LocalVar_Pass) {
 
     // var a = <type initializer>;
     auto* ctor_expr = params.create_value(*this, 0);
-    auto* var = Var("a", ast::AddressSpace::kFunction, ctor_expr);
+    auto* var = Var("a", type::AddressSpace::kFunction, ctor_expr);
     WrapInFunction(var);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -139,7 +139,7 @@ TEST_F(ResolverInferredTypeTest, InferArray_Pass) {
         create<type::U32>(), create<type::ConstantArrayCount>(10u), 4u, 4u * 10u, 4u, 4u);
 
     auto* ctor_expr = Construct(type);
-    auto* var = Var("a", ast::AddressSpace::kFunction, ctor_expr);
+    auto* var = Var("a", type::AddressSpace::kFunction, ctor_expr);
     WrapInFunction(var);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -158,7 +158,7 @@ TEST_F(ResolverInferredTypeTest, InferStruct_Pass) {
 
     auto* ctor_expr = Construct(ty.Of(str));
 
-    auto* var = Var("a", ast::AddressSpace::kFunction, ctor_expr);
+    auto* var = Var("a", type::AddressSpace::kFunction, ctor_expr);
     WrapInFunction(var);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

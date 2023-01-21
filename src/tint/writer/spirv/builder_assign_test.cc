@@ -23,7 +23,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Assign_Var) {
-    auto* v = GlobalVar("var", ty.f32(), ast::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.f32(), type::AddressSpace::kPrivate);
 
     auto* assign = Assign("var", 1_f);
 
@@ -51,7 +51,7 @@ TEST_F(BuilderTest, Assign_Var) {
 }
 
 TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
-    auto* v = GlobalVar("var", ty.f32(), ast::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.f32(), type::AddressSpace::kPrivate);
 
     auto* assign = Assign("var", Expr(1_f));
 
@@ -70,7 +70,7 @@ TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
 }
 
 TEST_F(BuilderTest, Assign_Var_ZeroInitializer) {
-    auto* v = GlobalVar("var", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
     auto* val = vec3<f32>();
     auto* assign = Assign("var", val);
@@ -101,7 +101,7 @@ TEST_F(BuilderTest, Assign_Var_ZeroInitializer) {
 TEST_F(BuilderTest, Assign_Var_Complex_InitializerNestedVector) {
     auto* init = vec3<f32>(vec2<f32>(1_f, 2_f), 3_f);
 
-    auto* v = GlobalVar("var", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
     auto* assign = Assign("var", init);
 
@@ -134,7 +134,7 @@ TEST_F(BuilderTest, Assign_Var_Complex_InitializerNestedVector) {
 TEST_F(BuilderTest, Assign_Var_Complex_Initializer) {
     auto* init = vec3<f32>(1_f, 2_f, 3_f);
 
-    auto* v = GlobalVar("var", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
     auto* assign = Assign("var", init);
 
@@ -209,7 +209,7 @@ OpStore %9 %10
 }
 
 TEST_F(BuilderTest, Assign_Vector) {
-    auto* v = GlobalVar("var", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
     auto* val = vec3<f32>(1_f, 1_f, 3_f);
     auto* assign = Assign("var", val);
@@ -243,7 +243,7 @@ TEST_F(BuilderTest, Assign_Vector) {
 TEST_F(BuilderTest, Assign_Vector_MemberByName) {
     // var.y = 1
 
-    auto* v = GlobalVar("var", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
     auto* assign = Assign(MemberAccessor("var", "y"), Expr(1_f));
 
@@ -278,7 +278,7 @@ OpStore %9 %10
 TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
     // var[1] = 1
 
-    auto* v = GlobalVar("var", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
     auto* assign = Assign(IndexAccessor("var", 1_i), Expr(1_f));
 

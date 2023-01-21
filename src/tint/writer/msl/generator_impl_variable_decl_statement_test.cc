@@ -518,7 +518,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroMat_f16)
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
-    GlobalVar("a", ty.f32(), ast::AddressSpace::kPrivate);
+    GlobalVar("a", ty.f32(), type::AddressSpace::kPrivate);
 
     WrapInFunction(Expr("a"));
 
@@ -531,7 +531,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Workgroup) {
-    GlobalVar("a", ty.f32(), ast::AddressSpace::kWorkgroup);
+    GlobalVar("a", ty.f32(), type::AddressSpace::kWorkgroup);
 
     WrapInFunction(Expr("a"));
 

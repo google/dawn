@@ -159,7 +159,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
             }
 
             num_workgroups_ubo =
-                b.GlobalVar(b.Sym(), b.ty.Of(num_workgroups_struct), ast::AddressSpace::kUniform,
+                b.GlobalVar(b.Sym(), b.ty.Of(num_workgroups_struct), type::AddressSpace::kUniform,
                             b.Group(AInt(group)), b.Binding(AInt(binding)));
         }
         return num_workgroups_ubo;

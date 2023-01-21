@@ -163,7 +163,7 @@ vertex Out vert_main() {
 }
 
 TEST_F(MslGeneratorImplTest, WorkgroupMatrix) {
-    GlobalVar("m", ty.mat2x2<f32>(), ast::AddressSpace::kWorkgroup);
+    GlobalVar("m", ty.mat2x2<f32>(), type::AddressSpace::kWorkgroup);
     Func("comp_main", utils::Empty, ty.void_(), utils::Vector{Decl(Let("x", Expr("m")))},
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
@@ -203,7 +203,7 @@ kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]
 }
 
 TEST_F(MslGeneratorImplTest, WorkgroupMatrixInArray) {
-    GlobalVar("m", ty.array(ty.mat2x2<f32>(), 4_i), ast::AddressSpace::kWorkgroup);
+    GlobalVar("m", ty.array(ty.mat2x2<f32>(), 4_i), type::AddressSpace::kWorkgroup);
     Func("comp_main", utils::Empty, ty.void_(), utils::Vector{Decl(Let("x", Expr("m")))},
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
@@ -264,7 +264,7 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrixInStruct) {
     Structure("S2", utils::Vector{
                         Member("s", ty.type_name("S1")),
                     });
-    GlobalVar("s", ty.type_name("S2"), ast::AddressSpace::kWorkgroup);
+    GlobalVar("s", ty.type_name("S2"), type::AddressSpace::kWorkgroup);
     Func("comp_main", utils::Empty, ty.void_(), utils::Vector{Decl(Let("x", Expr("s")))},
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
@@ -314,15 +314,15 @@ kernel void comp_main(threadgroup tint_symbol_4* tint_symbol_3 [[threadgroup(0)]
 }
 
 TEST_F(MslGeneratorImplTest, WorkgroupMatrix_Multiples) {
-    GlobalVar("m1", ty.mat2x2<f32>(), ast::AddressSpace::kWorkgroup);
-    GlobalVar("m2", ty.mat2x3<f32>(), ast::AddressSpace::kWorkgroup);
-    GlobalVar("m3", ty.mat2x4<f32>(), ast::AddressSpace::kWorkgroup);
-    GlobalVar("m4", ty.mat3x2<f32>(), ast::AddressSpace::kWorkgroup);
-    GlobalVar("m5", ty.mat3x3<f32>(), ast::AddressSpace::kWorkgroup);
-    GlobalVar("m6", ty.mat3x4<f32>(), ast::AddressSpace::kWorkgroup);
-    GlobalVar("m7", ty.mat4x2<f32>(), ast::AddressSpace::kWorkgroup);
-    GlobalVar("m8", ty.mat4x3<f32>(), ast::AddressSpace::kWorkgroup);
-    GlobalVar("m9", ty.mat4x4<f32>(), ast::AddressSpace::kWorkgroup);
+    GlobalVar("m1", ty.mat2x2<f32>(), type::AddressSpace::kWorkgroup);
+    GlobalVar("m2", ty.mat2x3<f32>(), type::AddressSpace::kWorkgroup);
+    GlobalVar("m3", ty.mat2x4<f32>(), type::AddressSpace::kWorkgroup);
+    GlobalVar("m4", ty.mat3x2<f32>(), type::AddressSpace::kWorkgroup);
+    GlobalVar("m5", ty.mat3x3<f32>(), type::AddressSpace::kWorkgroup);
+    GlobalVar("m6", ty.mat3x4<f32>(), type::AddressSpace::kWorkgroup);
+    GlobalVar("m7", ty.mat4x2<f32>(), type::AddressSpace::kWorkgroup);
+    GlobalVar("m8", ty.mat4x3<f32>(), type::AddressSpace::kWorkgroup);
+    GlobalVar("m9", ty.mat4x4<f32>(), type::AddressSpace::kWorkgroup);
     Func("main1", utils::Empty, ty.void_(),
          utils::Vector{
              Decl(Let("a1", Expr("m1"))),

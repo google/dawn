@@ -1468,7 +1468,7 @@ FunctionEnd
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_True) {
     auto* expr = Expr(true);
-    GlobalVar("a", ty.bool_(), ast::AddressSpace::kPrivate, expr);
+    GlobalVar("a", ty.bool_(), type::AddressSpace::kPrivate, expr);
 
     auto& b = CreateBuilder();
     auto r = b.EmitLiteral(expr);
@@ -1482,7 +1482,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_True) {
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_False) {
     auto* expr = Expr(false);
-    GlobalVar("a", ty.bool_(), ast::AddressSpace::kPrivate, expr);
+    GlobalVar("a", ty.bool_(), type::AddressSpace::kPrivate, expr);
 
     auto& b = CreateBuilder();
     auto r = b.EmitLiteral(expr);
@@ -1496,7 +1496,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_False) {
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_F32) {
     auto* expr = Expr(1.2_f);
-    GlobalVar("a", ty.f32(), ast::AddressSpace::kPrivate, expr);
+    GlobalVar("a", ty.f32(), type::AddressSpace::kPrivate, expr);
 
     auto& b = CreateBuilder();
     auto r = b.EmitLiteral(expr);
@@ -1511,7 +1511,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_F32) {
 TEST_F(IR_BuilderImplTest, EmitLiteral_F16) {
     Enable(ast::Extension::kF16);
     auto* expr = Expr(1.2_h);
-    GlobalVar("a", ty.f16(), ast::AddressSpace::kPrivate, expr);
+    GlobalVar("a", ty.f16(), type::AddressSpace::kPrivate, expr);
 
     auto& b = CreateBuilder();
     auto r = b.EmitLiteral(expr);
@@ -1525,7 +1525,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_F16) {
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_I32) {
     auto* expr = Expr(-2_i);
-    GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate, expr);
+    GlobalVar("a", ty.i32(), type::AddressSpace::kPrivate, expr);
 
     auto& b = CreateBuilder();
     auto r = b.EmitLiteral(expr);
@@ -1539,7 +1539,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_I32) {
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_U32) {
     auto* expr = Expr(2_u);
-    GlobalVar("a", ty.u32(), ast::AddressSpace::kPrivate, expr);
+    GlobalVar("a", ty.u32(), type::AddressSpace::kPrivate, expr);
 
     auto& b = CreateBuilder();
     auto r = b.EmitLiteral(expr);

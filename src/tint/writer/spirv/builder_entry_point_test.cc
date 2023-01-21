@@ -15,7 +15,6 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/tint/ast/address_space.h"
 #include "src/tint/ast/builtin_attribute.h"
 #include "src/tint/ast/builtin_value.h"
 #include "src/tint/ast/location_attribute.h"
@@ -23,6 +22,7 @@
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/variable.h"
 #include "src/tint/program.h"
+#include "src/tint/type/address_space.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/writer/spirv/builder.h"

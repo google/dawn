@@ -679,7 +679,7 @@ struct BuiltinPolyfill::State {
         auto name = b.Symbols().New("tint_workgroupUniformLoad");
         b.Func(name,
                utils::Vector{
-                   b.Param("p", b.ty.pointer(T(type), ast::AddressSpace::kWorkgroup)),
+                   b.Param("p", b.ty.pointer(T(type), type::AddressSpace::kWorkgroup)),
                },
                T(type),
                utils::Vector{

@@ -253,7 +253,7 @@ INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Import,
                          testing::Values(GlslImportData{"clamp", "clamp"}));
 
 TEST_F(GlslGeneratorImplTest_Import, GlslImportData_Determinant) {
-    GlobalVar("var", ty.mat3x3<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat3x3<f32>(), type::AddressSpace::kPrivate);
 
     auto* expr = Call("determinant", "var");
     WrapInFunction(expr);

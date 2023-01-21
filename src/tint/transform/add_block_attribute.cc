@@ -47,7 +47,7 @@ Transform::ApplyResult AddBlockAttribute::Apply(const Program* src,
     bool made_changes = false;
     for (auto* global : src->AST().GlobalVariables()) {
         auto* var = sem.Get(global);
-        if (!ast::IsHostShareable(var->AddressSpace())) {
+        if (!type::IsHostShareable(var->AddressSpace())) {
             // Not declared in a host-sharable address space
             continue;
         }

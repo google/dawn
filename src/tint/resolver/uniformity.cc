@@ -1688,11 +1688,11 @@ class UniformityGraph {
 
         auto var_type = [&](const sem::Variable* var) {
             switch (var->AddressSpace()) {
-                case ast::AddressSpace::kStorage:
+                case type::AddressSpace::kStorage:
                     return "read_write storage buffer ";
-                case ast::AddressSpace::kWorkgroup:
+                case type::AddressSpace::kWorkgroup:
                     return "workgroup storage variable ";
-                case ast::AddressSpace::kPrivate:
+                case type::AddressSpace::kPrivate:
                     return "module-scope private variable ";
                 default:
                     return "";

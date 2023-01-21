@@ -232,7 +232,7 @@ TEST_F(IntrinsicTableTest, MatchPointer) {
     auto* i32 = create<type::I32>();
     auto* atomicI32 = create<type::Atomic>(i32);
     auto* ptr =
-        create<type::Pointer>(atomicI32, ast::AddressSpace::kWorkgroup, ast::Access::kReadWrite);
+        create<type::Pointer>(atomicI32, type::AddressSpace::kWorkgroup, ast::Access::kReadWrite);
     auto result = table->Lookup(BuiltinType::kAtomicLoad, utils::Vector{ptr},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
@@ -256,7 +256,7 @@ TEST_F(IntrinsicTableTest, MatchArray) {
     auto* arr =
         create<type::Array>(create<type::U32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
     auto* arr_ptr =
-        create<type::Pointer>(arr, ast::AddressSpace::kStorage, ast::Access::kReadWrite);
+        create<type::Pointer>(arr, type::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto result = table->Lookup(BuiltinType::kArrayLength, utils::Vector{arr_ptr},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
@@ -448,7 +448,7 @@ TEST_F(IntrinsicTableTest, ImplicitLoadOnReference) {
     auto result = table->Lookup(
         BuiltinType::kCos,
         utils::Vector{
-            create<type::Reference>(f32, ast::AddressSpace::kFunction, ast::Access::kReadWrite),
+            create<type::Reference>(f32, type::AddressSpace::kFunction, ast::Access::kReadWrite),
         },
         sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
@@ -548,7 +548,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_ConstantEval) {
 
 TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_RuntimeEval) {
     auto* af = create<type::AbstractFloat>();
-    auto* bool_ref = create<type::Reference>(create<type::Bool>(), ast::AddressSpace::kFunction,
+    auto* bool_ref = create<type::Reference>(create<type::Bool>(), type::AddressSpace::kFunction,
                                              ast::Access::kReadWrite);
     auto result = table->Lookup(BuiltinType::kSelect, utils::Vector{af, af, bool_ref},
                                 sem::EvaluationStage::kRuntime, Source{});

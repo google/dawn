@@ -38,7 +38,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_NoAddressSpace_Fail) {
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_NoAddressSpace_Fail) {
     // type g = ptr<f32>;
-    Alias("g", ty.pointer(Source{{12, 34}}, ty.f32(), ast::AddressSpace::kUndefined));
+    Alias("g", ty.pointer(Source{{12, 34}}, ty.f32(), type::AddressSpace::kUndefined));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: ptr missing address space");
@@ -46,7 +46,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_NoAddressSpace_Fail) {
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_FunctionAddressSpace_Fail) {
     // var<private> g : f32;
-    GlobalVar(Source{{12, 34}}, "g", ty.f32(), ast::AddressSpace::kFunction);
+    GlobalVar(Source{{12, 34}}, "g", ty.f32(), type::AddressSpace::kFunction);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -56,7 +56,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_FunctionAddressSpace_F
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Private_RuntimeArray) {
     // var<private> v : array<i32>;
     GlobalVar(Source{{56, 78}}, "v", ty.array(Source{{12, 34}}, ty.i32()),
-              ast::AddressSpace::kPrivate);
+              type::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -67,7 +67,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Private_RuntimeArray) 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Private_RuntimeArray) {
     // type t : ptr<private, array<i32>>;
     Alias("t", ty.pointer(Source{{56, 78}}, ty.array(Source{{12, 34}}, ty.i32()),
-                          ast::AddressSpace::kPrivate));
+                          type::AddressSpace::kPrivate));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -79,7 +79,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Private_RuntimeArrayIn
     // struct S { m : array<i32> };
     // var<private> v : S;
     Structure("S", utils::Vector{Member(Source{{12, 34}}, "m", ty.array(ty.i32()))});
-    GlobalVar(Source{{56, 78}}, "v", ty.type_name("S"), ast::AddressSpace::kPrivate);
+    GlobalVar(Source{{56, 78}}, "v", ty.type_name("S"), type::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -92,7 +92,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Private_RuntimeArrayInSt
     // struct S { m : array<i32> };
     // type t = ptr<private, S>;
     Structure("S", utils::Vector{Member(Source{{12, 34}}, "m", ty.array(ty.i32()))});
-    Alias("t", ty.pointer(ty.type_name("S"), ast::AddressSpace::kPrivate));
+    Alias("t", ty.pointer(ty.type_name("S"), type::AddressSpace::kPrivate));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -104,7 +104,7 @@ note: while instantiating ptr<private, S, read_write>)");
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Workgroup_RuntimeArray) {
     // var<workgroup> v : array<i32>;
     GlobalVar(Source{{56, 78}}, "v", ty.array(Source{{12, 34}}, ty.i32()),
-              ast::AddressSpace::kWorkgroup);
+              type::AddressSpace::kWorkgroup);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -114,7 +114,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Workgroup_RuntimeArray
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Workgroup_RuntimeArray) {
     // type t = ptr<workgroup, array<i32>>;
-    Alias("t", ty.pointer(ty.array(Source{{12, 34}}, ty.i32()), ast::AddressSpace::kWorkgroup));
+    Alias("t", ty.pointer(ty.array(Source{{12, 34}}, ty.i32()), type::AddressSpace::kWorkgroup));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -126,7 +126,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Workgroup_RuntimeArray
     // struct S { m : array<i32> };
     // var<workgroup> v : S;
     Structure("S", utils::Vector{Member(Source{{12, 34}}, "m", ty.array(ty.i32()))});
-    GlobalVar(Source{{56, 78}}, "v", ty.type_name("S"), ast::AddressSpace::kWorkgroup);
+    GlobalVar(Source{{56, 78}}, "v", ty.type_name("S"), type::AddressSpace::kWorkgroup);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -139,7 +139,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Workgroup_RuntimeArrayIn
     // struct S { m : array<i32> };
     // type t = ptr<workgroup, S>;
     Structure("S", utils::Vector{Member(Source{{12, 34}}, "m", ty.array(ty.i32()))});
-    Alias(Source{{56, 78}}, "t", ty.pointer(ty.type_name("S"), ast::AddressSpace::kWorkgroup));
+    Alias(Source{{56, 78}}, "t", ty.pointer(ty.type_name("S"), type::AddressSpace::kWorkgroup));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -150,7 +150,7 @@ note: while instantiating ptr<workgroup, S, read_write>)");
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_Bool) {
     // var<storage> g : bool;
-    GlobalVar(Source{{56, 78}}, "g", ty.bool_(Source{{12, 34}}), ast::AddressSpace::kStorage,
+    GlobalVar(Source{{56, 78}}, "g", ty.bool_(Source{{12, 34}}), type::AddressSpace::kStorage,
               Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -164,7 +164,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_Bool) {
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_Bool) {
     // type t = ptr<storage, bool>;
     Alias(Source{{56, 78}}, "t",
-          ty.pointer(ty.bool_(Source{{12, 34}}), ast::AddressSpace::kStorage));
+          ty.pointer(ty.bool_(Source{{12, 34}}), type::AddressSpace::kStorage));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -179,7 +179,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_BoolAlias) {
     // @binding(0) @group(0) var<storage, read> g : a;
     Alias("a", ty.bool_());
     GlobalVar(Source{{56, 78}}, "g", ty.type_name(Source{{12, 34}}, "a"),
-              ast::AddressSpace::kStorage, Binding(0_a), Group(0_a));
+              type::AddressSpace::kStorage, Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -194,7 +194,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_BoolAlias) {
     // type t = ptr<storage, a>;
     Alias("a", ty.bool_());
     Alias(Source{{56, 78}}, "t",
-          ty.pointer(ty.type_name(Source{{12, 34}}, "a"), ast::AddressSpace::kStorage));
+          ty.pointer(ty.type_name(Source{{12, 34}}, "a"), type::AddressSpace::kStorage));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -207,8 +207,8 @@ note: while instantiating ptr<storage, bool, read>)");
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_Pointer) {
     // var<storage> g : ptr<private, f32>;
     GlobalVar(Source{{56, 78}}, "g",
-              ty.pointer(Source{{12, 34}}, ty.f32(), ast::AddressSpace::kPrivate),
-              ast::AddressSpace::kStorage, Binding(0_a), Group(0_a));
+              ty.pointer(Source{{12, 34}}, ty.f32(), type::AddressSpace::kPrivate),
+              type::AddressSpace::kStorage, Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -221,8 +221,8 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_Pointer) {
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_Pointer) {
     // type t = ptr<storage, ptr<private, f32>>;
     Alias("t", ty.pointer(Source{{56, 78}},
-                          ty.pointer(Source{{12, 34}}, ty.f32(), ast::AddressSpace::kPrivate),
-                          ast::AddressSpace::kStorage));
+                          ty.pointer(Source{{12, 34}}, ty.f32(), type::AddressSpace::kPrivate),
+                          type::AddressSpace::kStorage));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -234,14 +234,14 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_Pointer) {
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_IntScalar) {
     // var<storage> g : i32;
-    GlobalVar("g", ty.i32(), ast::AddressSpace::kStorage, Binding(0_a), Group(0_a));
+    GlobalVar("g", ty.i32(), type::AddressSpace::kStorage, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_IntScalar) {
     // type t = ptr<storage, i32;
-    Alias("t", ty.pointer(ty.i32(), ast::AddressSpace::kStorage));
+    Alias("t", ty.pointer(ty.i32(), type::AddressSpace::kStorage));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -251,7 +251,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_F16) {
     // var<storage> g : f16;
     Enable(ast::Extension::kF16);
 
-    GlobalVar("g", ty.f16(), ast::AddressSpace::kStorage, Binding(0_a), Group(0_a));
+    GlobalVar("g", ty.f16(), type::AddressSpace::kStorage, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -261,7 +261,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_F16) {
     // type t = ptr<storage, f16>;
     Enable(ast::Extension::kF16);
 
-    Alias("t", ty.pointer(ty.f16(), ast::AddressSpace::kStorage));
+    Alias("t", ty.pointer(ty.f16(), type::AddressSpace::kStorage));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -273,7 +273,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_F16Alias) {
     Enable(ast::Extension::kF16);
 
     Alias("a", ty.f16());
-    GlobalVar("g", ty.type_name("a"), ast::AddressSpace::kStorage, Binding(0_a), Group(0_a));
+    GlobalVar("g", ty.type_name("a"), type::AddressSpace::kStorage, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -285,21 +285,21 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_F16Alias) {
     Enable(ast::Extension::kF16);
 
     Alias("a", ty.f16());
-    Alias("t", ty.pointer(ty.type_name("a"), ast::AddressSpace::kStorage));
+    Alias("t", ty.pointer(ty.type_name("a"), type::AddressSpace::kStorage));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_VectorF32) {
     // var<storage> g : vec4<f32>;
-    GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kStorage, Binding(0_a), Group(0_a));
+    GlobalVar("g", ty.vec4<f32>(), type::AddressSpace::kStorage, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_VectorF32) {
     // type t = ptr<storage, vec4<f32>>;
-    Alias("t", ty.pointer(ty.vec4<f32>(), ast::AddressSpace::kStorage));
+    Alias("t", ty.pointer(ty.vec4<f32>(), type::AddressSpace::kStorage));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -307,7 +307,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_VectorF32) {
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_VectorF16) {
     // var<storage> g : vec4<f16>;
     Enable(ast::Extension::kF16);
-    GlobalVar("g", ty.vec(ty.f16(), 4u), ast::AddressSpace::kStorage, Binding(0_a), Group(0_a));
+    GlobalVar("g", ty.vec(ty.f16(), 4u), type::AddressSpace::kStorage, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -315,7 +315,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_VectorF16) {
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_VectorF16) {
     // type t = ptr<storage, vec4<f16>>;
     Enable(ast::Extension::kF16);
-    Alias("t", ty.pointer(ty.vec(ty.f16(), 4u), ast::AddressSpace::kStorage));
+    Alias("t", ty.pointer(ty.vec(ty.f16(), 4u), type::AddressSpace::kStorage));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -324,7 +324,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_ArrayF32) {
     // struct S{ a : f32 };
     // var<storage, read> g : array<S, 3u>;
     Structure("S", utils::Vector{Member("a", ty.f32())});
-    GlobalVar("g", ty.array(ty.type_name("S"), 3_u), ast::AddressSpace::kStorage,
+    GlobalVar("g", ty.array(ty.type_name("S"), 3_u), type::AddressSpace::kStorage,
               ast::Access::kRead, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -334,7 +334,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_ArrayF32) {
     // struct S{ a : f32 };
     // type t = ptr<storage, array<S, 3u>>;
     Structure("S", utils::Vector{Member("a", ty.f32())});
-    Alias("t", ty.pointer(ty.array(ty.type_name("S"), 3_u), ast::AddressSpace::kStorage));
+    Alias("t", ty.pointer(ty.array(ty.type_name("S"), 3_u), type::AddressSpace::kStorage));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -346,7 +346,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_ArrayF16) {
     Enable(ast::Extension::kF16);
 
     Structure("S", utils::Vector{Member("a", ty.f16())});
-    GlobalVar("g", ty.array(ty.type_name("S"), 3_u), ast::AddressSpace::kStorage,
+    GlobalVar("g", ty.array(ty.type_name("S"), 3_u), type::AddressSpace::kStorage,
               ast::Access::kRead, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -359,7 +359,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_ArrayF16) {
     Enable(ast::Extension::kF16);
 
     Structure("S", utils::Vector{Member("a", ty.f16())});
-    Alias("t", ty.pointer(ty.array(ty.type_name("S"), 3_u), ast::AddressSpace::kStorage,
+    Alias("t", ty.pointer(ty.array(ty.type_name("S"), 3_u), type::AddressSpace::kStorage,
                           ast::Access::kRead));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -369,8 +369,8 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_StructI32) {
     // struct S { x : i32 };
     // var<storage, read> g : S;
     Structure("S", utils::Vector{Member("x", ty.i32())});
-    GlobalVar("g", ty.type_name("S"), ast::AddressSpace::kStorage, ast::Access::kRead, Binding(0_a),
-              Group(0_a));
+    GlobalVar("g", ty.type_name("S"), type::AddressSpace::kStorage, ast::Access::kRead,
+              Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -379,7 +379,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_StructI32) {
     // struct S { x : i32 };
     // type t = ptr<storage, read, S>;
     Structure("S", utils::Vector{Member("x", ty.i32())});
-    Alias("t", ty.pointer(ty.type_name("S"), ast::AddressSpace::kStorage, ast::Access::kRead));
+    Alias("t", ty.pointer(ty.type_name("S"), type::AddressSpace::kStorage, ast::Access::kRead));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -391,7 +391,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_StructI32Alias
     Structure("S", utils::Vector{Member("x", ty.i32())});
     Alias("a1", ty.type_name("S"));
     Alias("a2", ty.type_name("a1"));
-    GlobalVar("g", ty.type_name("a2"), ast::AddressSpace::kStorage, ast::Access::kRead,
+    GlobalVar("g", ty.type_name("a2"), type::AddressSpace::kStorage, ast::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -404,7 +404,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_StructI32Aliases
     Structure("S", utils::Vector{Member("x", ty.i32())});
     Alias("a1", ty.type_name("S"));
     Alias("a2", ty.type_name("a1"));
-    Alias("t", ty.pointer(ty.type_name("a2"), ast::AddressSpace::kStorage, ast::Access::kRead));
+    Alias("t", ty.pointer(ty.type_name("a2"), type::AddressSpace::kStorage, ast::Access::kRead));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -415,8 +415,8 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_StructF16) {
     Enable(ast::Extension::kF16);
 
     Structure("S", utils::Vector{Member("x", ty.f16())});
-    GlobalVar("g", ty.type_name("S"), ast::AddressSpace::kStorage, ast::Access::kRead, Binding(0_a),
-              Group(0_a));
+    GlobalVar("g", ty.type_name("S"), type::AddressSpace::kStorage, ast::Access::kRead,
+              Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -427,7 +427,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_StructF16) {
     Enable(ast::Extension::kF16);
 
     Structure("S", utils::Vector{Member("x", ty.f16())});
-    Alias("t", ty.pointer(ty.type_name("S"), ast::AddressSpace::kStorage, ast::Access::kRead));
+    Alias("t", ty.pointer(ty.type_name("S"), type::AddressSpace::kStorage, ast::Access::kRead));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -441,7 +441,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_StructF16Alias
     Structure("S", utils::Vector{Member("x", ty.f16())});
     Alias("a1", ty.type_name("S"));
     Alias("a2", ty.type_name("a1"));
-    GlobalVar("g", ty.type_name("a2"), ast::AddressSpace::kStorage, ast::Access::kRead,
+    GlobalVar("g", ty.type_name("a2"), type::AddressSpace::kStorage, ast::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -456,14 +456,14 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_StructF16Aliases
     Structure("S", utils::Vector{Member("x", ty.f16())});
     Alias("a1", ty.type_name("S"));
     Alias("a2", ty.type_name("a1"));
-    Alias("g", ty.pointer(ty.type_name("a2"), ast::AddressSpace::kStorage, ast::Access::kRead));
+    Alias("g", ty.pointer(ty.type_name("a2"), type::AddressSpace::kStorage, ast::Access::kRead));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_NotStorage_AccessMode) {
     // var<private, read> g : a;
-    GlobalVar(Source{{12, 34}}, "g", ty.i32(), ast::AddressSpace::kPrivate, ast::Access::kRead);
+    GlobalVar(Source{{12, 34}}, "g", ty.i32(), type::AddressSpace::kPrivate, ast::Access::kRead);
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -475,7 +475,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_NotStorage_AccessMode)
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_NotStorage_AccessMode) {
     // type t = ptr<private, read, a>;
     Alias("t",
-          ty.pointer(Source{{12, 34}}, ty.i32(), ast::AddressSpace::kPrivate, ast::Access::kRead));
+          ty.pointer(Source{{12, 34}}, ty.i32(), type::AddressSpace::kPrivate, ast::Access::kRead));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -486,7 +486,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_NotStorage_AccessMode) {
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_ReadAccessMode) {
     // @group(0) @binding(0) var<storage, read> a : i32;
-    GlobalVar("a", ty.i32(), ast::AddressSpace::kStorage, ast::Access::kRead, Group(0_a),
+    GlobalVar("a", ty.i32(), type::AddressSpace::kStorage, ast::Access::kRead, Group(0_a),
               Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -494,14 +494,14 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_ReadAccessMode
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_ReadAccessMode) {
     // type t = ptr<storage, read, i32>;
-    Alias("t", ty.pointer(ty.i32(), ast::AddressSpace::kStorage, ast::Access::kRead));
+    Alias("t", ty.pointer(ty.i32(), type::AddressSpace::kStorage, ast::Access::kRead));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_ReadWriteAccessMode) {
     // @group(0) @binding(0) var<storage, read_write> a : i32;
-    GlobalVar("a", ty.i32(), ast::AddressSpace::kStorage, ast::Access::kReadWrite, Group(0_a),
+    GlobalVar("a", ty.i32(), type::AddressSpace::kStorage, ast::Access::kReadWrite, Group(0_a),
               Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -509,14 +509,14 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_ReadWriteAcces
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_ReadWriteAccessMode) {
     // type t = ptr<storage, read_write, i32>;
-    Alias("t", ty.pointer(ty.i32(), ast::AddressSpace::kStorage, ast::Access::kReadWrite));
+    Alias("t", ty.pointer(ty.i32(), type::AddressSpace::kStorage, ast::Access::kReadWrite));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_WriteAccessMode) {
     // @group(0) @binding(0) var<storage, read_write> a : i32;
-    GlobalVar(Source{{12, 34}}, "a", ty.i32(), ast::AddressSpace::kStorage, ast::Access::kWrite,
+    GlobalVar(Source{{12, 34}}, "a", ty.i32(), type::AddressSpace::kStorage, ast::Access::kWrite,
               Group(0_a), Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -527,8 +527,8 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_WriteAccessMod
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_WriteAccessMode) {
     // type t = ptr<storage, read_write, i32>;
-    Alias("t",
-          ty.pointer(Source{{12, 34}}, ty.i32(), ast::AddressSpace::kStorage, ast::Access::kWrite));
+    Alias("t", ty.pointer(Source{{12, 34}}, ty.i32(), type::AddressSpace::kStorage,
+                          ast::Access::kWrite));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -543,7 +543,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBuffer_Struct_R
     Structure("S",
               utils::Vector{Member(Source{{56, 78}}, "m", ty.array(Source{{12, 34}}, ty.i32()))});
 
-    GlobalVar(Source{{90, 12}}, "svar", ty.type_name("S"), ast::AddressSpace::kUniform,
+    GlobalVar(Source{{90, 12}}, "svar", ty.type_name("S"), type::AddressSpace::kUniform,
               Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -560,7 +560,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBuffer_Struct_Run
     Structure("S",
               utils::Vector{Member(Source{{56, 78}}, "m", ty.array(Source{{12, 34}}, ty.i32()))});
 
-    Alias("t", ty.pointer(Source{{90, 12}}, ty.type_name("S"), ast::AddressSpace::kUniform));
+    Alias("t", ty.pointer(Source{{90, 12}}, ty.type_name("S"), type::AddressSpace::kUniform));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -575,7 +575,7 @@ note: see layout of struct:
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferBool) {
     // var<uniform> g : bool;
-    GlobalVar(Source{{56, 78}}, "g", ty.bool_(Source{{12, 34}}), ast::AddressSpace::kUniform,
+    GlobalVar(Source{{56, 78}}, "g", ty.bool_(Source{{12, 34}}), type::AddressSpace::kUniform,
               Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -589,7 +589,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferBool) {
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferBool) {
     // type t = ptr<uniform, bool>;
     Alias("t",
-          ty.pointer(Source{{56, 78}}, ty.bool_(Source{{12, 34}}), ast::AddressSpace::kUniform));
+          ty.pointer(Source{{56, 78}}, ty.bool_(Source{{12, 34}}), type::AddressSpace::kUniform));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -604,7 +604,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferBoolAlias
     // var<uniform> g : a;
     Alias("a", ty.bool_());
     GlobalVar(Source{{56, 78}}, "g", ty.type_name(Source{{12, 34}}, "a"),
-              ast::AddressSpace::kUniform, Binding(0_a), Group(0_a));
+              type::AddressSpace::kUniform, Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -619,7 +619,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferBoolAlias) 
     // type t = ptr<uniform, a>;
     Alias("a", ty.bool_());
     Alias("t", ty.pointer(Source{{56, 78}}, ty.type_name(Source{{12, 34}}, "a"),
-                          ast::AddressSpace::kUniform));
+                          type::AddressSpace::kUniform));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -632,8 +632,8 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferBoolAlias) 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformPointer) {
     // var<uniform> g : ptr<private, f32>;
     GlobalVar(Source{{56, 78}}, "g",
-              ty.pointer(Source{{12, 34}}, ty.f32(), ast::AddressSpace::kPrivate),
-              ast::AddressSpace::kUniform, Binding(0_a), Group(0_a));
+              ty.pointer(Source{{12, 34}}, ty.f32(), type::AddressSpace::kPrivate),
+              type::AddressSpace::kUniform, Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -646,8 +646,8 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformPointer) {
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformPointer) {
     // type t = ptr<uniform, ptr<private, f32>>;
     Alias("t", ty.pointer(Source{{56, 78}},
-                          ty.pointer(Source{{12, 34}}, ty.f32(), ast::AddressSpace::kPrivate),
-                          ast::AddressSpace::kUniform));
+                          ty.pointer(Source{{12, 34}}, ty.f32(), type::AddressSpace::kPrivate),
+                          type::AddressSpace::kUniform));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -659,7 +659,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformPointer) {
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferIntScalar) {
     // var<uniform> g : i32;
-    GlobalVar(Source{{56, 78}}, "g", ty.i32(), ast::AddressSpace::kUniform, Binding(0_a),
+    GlobalVar(Source{{56, 78}}, "g", ty.i32(), type::AddressSpace::kUniform, Binding(0_a),
               Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -667,7 +667,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferIntScalar
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferIntScalar) {
     // type t = ptr<uniform, i32>;
-    Alias("t", ty.pointer(ty.i32(), ast::AddressSpace::kUniform));
+    Alias("t", ty.pointer(ty.i32(), type::AddressSpace::kUniform));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -677,7 +677,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferF16) {
     // var<uniform> g : f16;
     Enable(ast::Extension::kF16);
 
-    GlobalVar("g", ty.f16(), ast::AddressSpace::kUniform, Binding(0_a), Group(0_a));
+    GlobalVar("g", ty.f16(), type::AddressSpace::kUniform, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -687,21 +687,21 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferF16) {
     // type t = ptr<uniform, f16>;
     Enable(ast::Extension::kF16);
 
-    Alias("t", ty.pointer(ty.f16(), ast::AddressSpace::kUniform));
+    Alias("t", ty.pointer(ty.f16(), type::AddressSpace::kUniform));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferVectorF32) {
     // var<uniform> g : vec4<f32>;
-    GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kUniform, Binding(0_a), Group(0_a));
+    GlobalVar("g", ty.vec4<f32>(), type::AddressSpace::kUniform, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferVectorF32) {
     // type t = ptr<uniform, vec4<f32>>;
-    Alias("t", ty.pointer(ty.vec4<f32>(), ast::AddressSpace::kUniform));
+    Alias("t", ty.pointer(ty.vec4<f32>(), type::AddressSpace::kUniform));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -711,7 +711,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferVectorF16
     // var<uniform> g : vec4<f16>;
     Enable(ast::Extension::kF16);
 
-    GlobalVar("g", ty.vec4<f16>(), ast::AddressSpace::kUniform, Binding(0_a), Group(0_a));
+    GlobalVar("g", ty.vec4<f16>(), type::AddressSpace::kUniform, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -721,7 +721,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferVectorF16) 
     // type t = ptr<uniform, vec4<f16>>;
     Enable(ast::Extension::kF16);
 
-    Alias("t", ty.pointer(ty.vec4<f16>(), ast::AddressSpace::kUniform));
+    Alias("t", ty.pointer(ty.vec4<f16>(), type::AddressSpace::kUniform));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -732,7 +732,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferArrayF32)
     // }
     // var<uniform> g : array<S, 3u>;
     Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(16_a)})});
-    GlobalVar("g", ty.array(ty.type_name("S"), 3_u), ast::AddressSpace::kUniform, Binding(0_a),
+    GlobalVar("g", ty.array(ty.type_name("S"), 3_u), type::AddressSpace::kUniform, Binding(0_a),
               Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -744,7 +744,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferArrayF32) {
     // }
     // type t = ptr<uniform, array<S, 3u>>;
     Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(16_a)})});
-    Alias("t", ty.pointer(ty.array(ty.type_name("S"), 3_u), ast::AddressSpace::kUniform));
+    Alias("t", ty.pointer(ty.array(ty.type_name("S"), 3_u), type::AddressSpace::kUniform));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -758,7 +758,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferArrayF16)
     Enable(ast::Extension::kF16);
 
     Structure("S", utils::Vector{Member("a", ty.f16(), utils::Vector{MemberSize(16_a)})});
-    GlobalVar("g", ty.array(ty.type_name("S"), 3_u), ast::AddressSpace::kUniform, Binding(0_a),
+    GlobalVar("g", ty.array(ty.type_name("S"), 3_u), type::AddressSpace::kUniform, Binding(0_a),
               Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -773,7 +773,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferArrayF16) {
     Enable(ast::Extension::kF16);
 
     Structure("S", utils::Vector{Member("a", ty.f16(), utils::Vector{MemberSize(16_a)})});
-    Alias("t", ty.pointer(ty.array(ty.type_name("S"), 3_u), ast::AddressSpace::kUniform));
+    Alias("t", ty.pointer(ty.array(ty.type_name("S"), 3_u), type::AddressSpace::kUniform));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -782,7 +782,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferStructI32
     // struct S { x : i32 };
     // var<uniform> g : S;
     Structure("S", utils::Vector{Member("x", ty.i32())});
-    GlobalVar("g", ty.type_name("S"), ast::AddressSpace::kUniform, Binding(0_a), Group(0_a));
+    GlobalVar("g", ty.type_name("S"), type::AddressSpace::kUniform, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -791,7 +791,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferStructI32) 
     // struct S { x : i32 };
     // type t = ptr<uniform, S>;
     Structure("S", utils::Vector{Member("x", ty.i32())});
-    Alias("t", ty.pointer(ty.type_name("S"), ast::AddressSpace::kUniform));
+    Alias("t", ty.pointer(ty.type_name("S"), type::AddressSpace::kUniform));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -802,7 +802,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferStructI32
     // var<uniform> g : a1;
     Structure("S", utils::Vector{Member("x", ty.i32())});
     Alias("a1", ty.type_name("S"));
-    GlobalVar("g", ty.type_name("a1"), ast::AddressSpace::kUniform, Binding(0_a), Group(0_a));
+    GlobalVar("g", ty.type_name("a1"), type::AddressSpace::kUniform, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -813,7 +813,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferStructI32Al
     // type t = ptr<uniform, a1>;
     Structure("S", utils::Vector{Member("x", ty.i32())});
     Alias("a1", ty.type_name("S"));
-    Alias("t", ty.pointer(ty.type_name("a1"), ast::AddressSpace::kUniform));
+    Alias("t", ty.pointer(ty.type_name("a1"), type::AddressSpace::kUniform));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -825,7 +825,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferStructF16
     Enable(ast::Extension::kF16);
 
     Structure("S", utils::Vector{Member("x", ty.f16())});
-    GlobalVar("g", ty.type_name("S"), ast::AddressSpace::kUniform, Binding(0_a), Group(0_a));
+    GlobalVar("g", ty.type_name("S"), type::AddressSpace::kUniform, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -837,7 +837,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferStructF16) 
     Enable(ast::Extension::kF16);
 
     Structure("S", utils::Vector{Member("x", ty.f16())});
-    Alias("t", ty.pointer(ty.type_name("S"), ast::AddressSpace::kUniform));
+    Alias("t", ty.pointer(ty.type_name("S"), type::AddressSpace::kUniform));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -851,7 +851,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferStructF16
 
     Structure("S", utils::Vector{Member("x", ty.f16())});
     Alias("a1", ty.type_name("S"));
-    GlobalVar("g", ty.type_name("a1"), ast::AddressSpace::kUniform, Binding(0_a), Group(0_a));
+    GlobalVar("g", ty.type_name("a1"), type::AddressSpace::kUniform, Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -865,7 +865,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferStructF16Al
 
     Structure("S", utils::Vector{Member("x", ty.f16())});
     Alias("a1", ty.type_name("S"));
-    Alias("t", ty.pointer(ty.type_name("a1"), ast::AddressSpace::kUniform));
+    Alias("t", ty.pointer(ty.type_name("a1"), type::AddressSpace::kUniform));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -874,7 +874,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_PushConstantBool) {
     // enable chromium_experimental_push_constant;
     // var<push_constant> g : bool;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
-    GlobalVar(Source{{56, 78}}, "g", ty.bool_(Source{{12, 34}}), ast::AddressSpace::kPushConstant);
+    GlobalVar(Source{{56, 78}}, "g", ty.bool_(Source{{12, 34}}), type::AddressSpace::kPushConstant);
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -888,7 +888,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_PushConstantBool) {
     // type t = ptr<push_constant, bool>;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
     Alias(Source{{56, 78}}, "t",
-          ty.pointer(ty.bool_(Source{{12, 34}}), ast::AddressSpace::kPushConstant));
+          ty.pointer(ty.bool_(Source{{12, 34}}), type::AddressSpace::kPushConstant));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -903,7 +903,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_PushConstantF16) {
     // var<push_constant> g : f16;
     Enable(ast::Extension::kF16);
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
-    GlobalVar("g", ty.f16(Source{{56, 78}}), ast::AddressSpace::kPushConstant);
+    GlobalVar("g", ty.f16(Source{{56, 78}}), type::AddressSpace::kPushConstant);
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -916,7 +916,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_PushConstantF16) {
     // type t = ptr<push_constant, f16>;
     Enable(ast::Extension::kF16);
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
-    Alias("t", ty.pointer(ty.f16(Source{{56, 78}}), ast::AddressSpace::kPushConstant));
+    Alias("t", ty.pointer(ty.f16(Source{{56, 78}}), type::AddressSpace::kPushConstant));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -928,8 +928,8 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_PushConstantPointer) {
     // var<push_constant> g : ptr<private, f32>;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
     GlobalVar(Source{{56, 78}}, "g",
-              ty.pointer(Source{{12, 34}}, ty.f32(), ast::AddressSpace::kPrivate),
-              ast::AddressSpace::kPushConstant);
+              ty.pointer(Source{{12, 34}}, ty.f32(), type::AddressSpace::kPrivate),
+              type::AddressSpace::kPushConstant);
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -943,8 +943,8 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_PushConstantPointer) {
     // type t = ptr<push_constant, ptr<private, f32>>;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
     Alias(Source{{56, 78}}, "t",
-          ty.pointer(ty.pointer(Source{{12, 34}}, ty.f32(), ast::AddressSpace::kPrivate),
-                     ast::AddressSpace::kPushConstant));
+          ty.pointer(ty.pointer(Source{{12, 34}}, ty.f32(), type::AddressSpace::kPrivate),
+                     type::AddressSpace::kPushConstant));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -957,7 +957,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_PushConstantIntScalar)
     // enable chromium_experimental_push_constant;
     // var<push_constant> g : i32;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
-    GlobalVar("g", ty.i32(), ast::AddressSpace::kPushConstant);
+    GlobalVar("g", ty.i32(), type::AddressSpace::kPushConstant);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -966,7 +966,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_PushConstantIntScalar) {
     // enable chromium_experimental_push_constant;
     // type t = ptr<push_constant, i32>;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
-    Alias("t", ty.pointer(ty.i32(), ast::AddressSpace::kPushConstant));
+    Alias("t", ty.pointer(ty.i32(), type::AddressSpace::kPushConstant));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -975,7 +975,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_PushConstantVectorF32)
     // enable chromium_experimental_push_constant;
     // var<push_constant> g : vec4<f32>;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
-    GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPushConstant);
+    GlobalVar("g", ty.vec4<f32>(), type::AddressSpace::kPushConstant);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -984,7 +984,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_PushConstantVectorF32) {
     // enable chromium_experimental_push_constant;
     // var<push_constant> g : vec4<f32>;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
-    Alias("t", ty.pointer(ty.vec4<f32>(), ast::AddressSpace::kPushConstant));
+    Alias("t", ty.pointer(ty.vec4<f32>(), type::AddressSpace::kPushConstant));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -995,7 +995,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_PushConstantArrayF32) 
     // var<push_constant> g : array<S, 3u>;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
     Structure("S", utils::Vector{Member("a", ty.f32())});
-    GlobalVar("g", ty.array(ty.type_name("S"), 3_u), ast::AddressSpace::kPushConstant);
+    GlobalVar("g", ty.array(ty.type_name("S"), 3_u), type::AddressSpace::kPushConstant);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -1006,7 +1006,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_PushConstantArrayF32) {
     // type t = ptr<push_constant, array<S, 3u>>;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
     Structure("S", utils::Vector{Member("a", ty.f32())});
-    Alias("t", ty.pointer(ty.array(ty.type_name("S"), 3_u), ast::AddressSpace::kPushConstant));
+    Alias("t", ty.pointer(ty.array(ty.type_name("S"), 3_u), type::AddressSpace::kPushConstant));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }

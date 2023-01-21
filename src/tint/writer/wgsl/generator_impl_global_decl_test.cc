@@ -29,7 +29,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
     auto* func_var = Var("a", ty.f32());
     WrapInFunction(func_var);
 
-    GlobalVar("a", ty.f32(), ast::AddressSpace::kPrivate);
+    GlobalVar("a", ty.f32(), type::AddressSpace::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -46,7 +46,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
-    GlobalVar("a0", ty.f32(), ast::AddressSpace::kPrivate);
+    GlobalVar("a0", ty.f32(), type::AddressSpace::kPrivate);
 
     auto* s0 = Structure("S0", utils::Vector{
                                    Member("a", ty.i32()),
@@ -58,7 +58,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
          },
          utils::Empty);
 
-    GlobalVar("a1", ty.f32(), ast::AddressSpace::kPrivate);
+    GlobalVar("a1", ty.f32(), type::AddressSpace::kPrivate);
 
     auto* s1 = Structure("S1", utils::Vector{
                                    Member("a", ty.i32()),

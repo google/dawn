@@ -326,7 +326,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output of the type stream
     /// @param sc the address space to generate
     /// @returns true if the address space is emitted
-    bool EmitAddressSpace(std::ostream& out, ast::AddressSpace sc);
+    bool EmitAddressSpace(std::ostream& out, type::AddressSpace sc);
     /// Handles generating a struct declaration. If the structure has already been emitted, then
     /// this function will simply return `true` without emitting anything.
     /// @param buffer the text buffer that the type declaration will be written to
@@ -410,7 +410,7 @@ class GeneratorImpl : public TextGenerator {
     /// Name of atomicCompareExchangeWeak() helper for the given pointer storage
     /// class and struct return type
     using ACEWKeyType =
-        utils::UnorderedKeyWrapper<std::tuple<ast::AddressSpace, const sem::Struct*>>;
+        utils::UnorderedKeyWrapper<std::tuple<type::AddressSpace, const sem::Struct*>>;
     std::unordered_map<ACEWKeyType, std::string> atomicCompareExchangeWeak_;
 
     /// Unique name of the 'TINT_INVARIANT' preprocessor define.

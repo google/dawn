@@ -84,7 +84,7 @@ TEST_F(ResolverStaticAssertTest, Local_Const_Fail) {
 }
 
 TEST_F(ResolverStaticAssertTest, Local_NonConst) {
-    GlobalVar("V", ty.bool_(), Expr(true), ast::AddressSpace::kPrivate);
+    GlobalVar("V", ty.bool_(), Expr(true), type::AddressSpace::kPrivate);
     WrapInFunction(StaticAssert(Expr(Source{{12, 34}}, "V")));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

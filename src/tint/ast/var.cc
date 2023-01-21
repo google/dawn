@@ -25,7 +25,7 @@ Var::Var(ProgramID pid,
          const Source& src,
          const Symbol& sym,
          const ast::Type* ty,
-         AddressSpace address_space,
+         type::AddressSpace address_space,
          Access access,
          const Expression* init,
          utils::VectorRef<const Attribute*> attrs)

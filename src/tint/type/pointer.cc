@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Pointer);
 
 namespace tint::type {
 
-Pointer::Pointer(const Type* subtype, ast::AddressSpace address_space, ast::Access access)
+Pointer::Pointer(const Type* subtype, type::AddressSpace address_space, ast::Access access)
     : Base(utils::Hash(TypeInfo::Of<Pointer>().full_hashcode, address_space, subtype, access),
            type::Flags{}),
       subtype_(subtype),
@@ -43,7 +43,7 @@ bool Pointer::Equals(const UniqueNode& other) const {
 std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
     std::ostringstream out;
     out << "ptr<";
-    if (address_space_ != ast::AddressSpace::kNone) {
+    if (address_space_ != AddressSpace::kNone) {
         out << address_space_ << ", ";
     }
     out << subtype_->FriendlyName(symbols) << ", " << access_;

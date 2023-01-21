@@ -331,7 +331,7 @@ struct DefInfo {
         /// buffer expressed in the old style (with Uniform address space)
         /// that needs to be remapped to StorageBuffer address space.
         /// This is kInvalid for non-pointers.
-        ast::AddressSpace address_space = ast::AddressSpace::kUndefined;
+        type::AddressSpace address_space = type::AddressSpace::kUndefined;
 
         /// The declared access mode.
         ast::Access access = ast::Access::kUndefined;
@@ -368,7 +368,7 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
     }
     o << " requires_named_let_def: " << (di.requires_named_let_def ? "true" : "false")
       << " requires_hoisted_var_def: " << (di.requires_hoisted_var_def ? "true" : "false");
-    if (di.pointer.address_space != ast::AddressSpace::kNone) {
+    if (di.pointer.address_space != type::AddressSpace::kNone) {
         o << " sc:" << int(di.pointer.address_space);
     }
     switch (di.skip) {

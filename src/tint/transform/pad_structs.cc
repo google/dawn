@@ -80,7 +80,7 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
             new_members.Push(b.Member(name, type));
 
             uint32_t size = ty->Size();
-            if (ty->Is<sem::Struct>() && str->UsedAs(ast::AddressSpace::kUniform)) {
+            if (ty->Is<sem::Struct>() && str->UsedAs(type::AddressSpace::kUniform)) {
                 // std140 structs should be padded out to 16 bytes.
                 size = utils::RoundUp(16u, size);
             } else if (auto* array_ty = ty->As<type::Array>()) {
@@ -93,7 +93,7 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
 
         // Add any required padding after the last member, if it's not a runtime-sized array.
         uint32_t struct_size = str->Size();
-        if (str->UsedAs(ast::AddressSpace::kUniform)) {
+        if (str->UsedAs(type::AddressSpace::kUniform)) {
             struct_size = utils::RoundUp(16u, struct_size);
         }
         if (offset < struct_size && !has_runtime_sized_array) {

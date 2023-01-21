@@ -166,7 +166,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsType) 
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsFunction) {
-    GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), ast::AddressSpace::kPrivate);
+    GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), type::AddressSpace::kPrivate);
     WrapInFunction(Call(Expr(Source{{56, 78}}, "mix"), 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
@@ -176,7 +176,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsFunction
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsVariable) {
     auto* mix =
-        GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), ast::AddressSpace::kPrivate);
+        GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), type::AddressSpace::kPrivate);
     auto* use = Expr("mix");
     WrapInFunction(Decl(Var("v", use)));
 
@@ -187,7 +187,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsVariable
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsType) {
-    GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), ast::AddressSpace::kPrivate);
+    GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), type::AddressSpace::kPrivate);
     WrapInFunction(Construct(ty.type_name(Source{{56, 78}}, "mix")));
 
     EXPECT_FALSE(r()->Resolve());
@@ -481,7 +481,7 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalVar) {
     overload.BuildSamplerVariable(this);
 
     // Build the module-scope var 'G' with the offset value
-    GlobalVar("G", expr({}, *this), ast::AddressSpace::kPrivate);
+    GlobalVar("G", expr({}, *this), type::AddressSpace::kPrivate);
 
     auto args = overload.args(this);
     auto*& arg_to_replace = (param.position == Position::kFirst) ? args.Front() : args.Back();
@@ -652,7 +652,7 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_WrongAddressSpace) {
     // fn foo() {
     //   workgroupUniformLoad(&v);
     // }
-    GlobalVar("v", ty.i32(), ast::AddressSpace::kStorage, ast::Access::kReadWrite,
+    GlobalVar("v", ty.i32(), type::AddressSpace::kStorage, ast::Access::kReadWrite,
               utils::Vector{Group(0_a), Binding(0_a)});
     WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf(Source{{12, 34}}, "v"))));
 
@@ -670,7 +670,7 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_Atomic) {
     // fn foo() {
     //   workgroupUniformLoad(&v);
     // }
-    GlobalVar("v", ty.atomic<i32>(), ast::AddressSpace::kWorkgroup);
+    GlobalVar("v", ty.atomic<i32>(), type::AddressSpace::kWorkgroup);
     WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf(Source{{12, 34}}, "v"))));
 
     EXPECT_FALSE(r()->Resolve());
@@ -684,7 +684,7 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInArray) {
     // fn foo() {
     //   workgroupUniformLoad(&v);
     // }
-    GlobalVar("v", ty.array(ty.atomic<i32>(), 4_a), ast::AddressSpace::kWorkgroup);
+    GlobalVar("v", ty.array(ty.atomic<i32>(), 4_a), type::AddressSpace::kWorkgroup);
     WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf(Source{{12, 34}}, "v"))));
 
     EXPECT_FALSE(r()->Resolve());
@@ -703,7 +703,7 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInStruct) {
     Structure("Inner", utils::Vector{Member("a", ty.array(ty.atomic<i32>(), 4_a))});
     Structure("S", utils::Vector{Member("i", ty.type_name("Inner"))});
     GlobalVar(Source{{12, 34}}, "v", ty.array(ty.type_name("S"), 4_a),
-              ast::AddressSpace::kWorkgroup);
+              type::AddressSpace::kWorkgroup);
     WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf("v"))));
 
     EXPECT_FALSE(r()->Resolve());

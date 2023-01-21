@@ -112,7 +112,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                     b.Param("buffer",
                             b.ty.pointer(type, buffer_type->AddressSpace(), buffer_type->Access()),
                             utils::Vector{disable_validation}),
-                    b.Param("result", b.ty.pointer(b.ty.u32(), ast::AddressSpace::kFunction)),
+                    b.Param("result", b.ty.pointer(b.ty.u32(), type::AddressSpace::kFunction)),
                 },
                 b.ty.void_(), nullptr,
                 utils::Vector{

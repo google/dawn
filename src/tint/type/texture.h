@@ -15,7 +15,6 @@
 #ifndef SRC_TINT_TYPE_TEXTURE_H_
 #define SRC_TINT_TYPE_TEXTURE_H_
 
-#include "src/tint/ast/texture.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/type/type.h"
 

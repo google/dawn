@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutInitializer) {
 
     EXPECT_EQ(var->symbol, p->builder().Symbols().Get("a"));
     EXPECT_TRUE(var->type->Is<ast::F32>());
-    EXPECT_EQ(var->declared_address_space, ast::AddressSpace::kPrivate);
+    EXPECT_EQ(var->declared_address_space, type::AddressSpace::kPrivate);
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 14u);
@@ -55,7 +55,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithInitializer) {
 
     EXPECT_EQ(var->symbol, p->builder().Symbols().Get("a"));
     EXPECT_TRUE(var->type->Is<ast::F32>());
-    EXPECT_EQ(var->declared_address_space, ast::AddressSpace::kPrivate);
+    EXPECT_EQ(var->declared_address_space, type::AddressSpace::kPrivate);
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 14u);
@@ -81,7 +81,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute) {
     EXPECT_EQ(var->symbol, p->builder().Symbols().Get("a"));
     ASSERT_NE(var->type, nullptr);
     EXPECT_TRUE(var->type->Is<ast::F32>());
-    EXPECT_EQ(var->declared_address_space, ast::AddressSpace::kUniform);
+    EXPECT_EQ(var->declared_address_space, type::AddressSpace::kUniform);
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 36u);
@@ -112,7 +112,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute_MulitpleGroups) {
     EXPECT_EQ(var->symbol, p->builder().Symbols().Get("a"));
     ASSERT_NE(var->type, nullptr);
     EXPECT_TRUE(var->type->Is<ast::F32>());
-    EXPECT_EQ(var->declared_address_space, ast::AddressSpace::kUniform);
+    EXPECT_EQ(var->declared_address_space, type::AddressSpace::kUniform);
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 36u);

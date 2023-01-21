@@ -21,8 +21,8 @@
 #include <string>
 #include <unordered_set>
 
-#include "src/tint/ast/address_space.h"
 #include "src/tint/symbol.h"
+#include "src/tint/type/address_space.h"
 #include "src/tint/type/node.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/vector.h"
@@ -100,22 +100,22 @@ class Struct : public Castable<Struct, Type> {
 
     /// Adds the AddressSpace usage to the structure.
     /// @param usage the storage usage
-    void AddUsage(ast::AddressSpace usage) { address_space_usage_.emplace(usage); }
+    void AddUsage(AddressSpace usage) { address_space_usage_.emplace(usage); }
 
     /// @returns the set of address space uses of this structure
-    const std::unordered_set<ast::AddressSpace>& AddressSpaceUsage() const {
+    const std::unordered_set<AddressSpace>& AddressSpaceUsage() const {
         return address_space_usage_;
     }
 
-    /// @param usage the ast::AddressSpace usage type to query
+    /// @param usage the AddressSpace usage type to query
     /// @returns true iff this structure has been used as the given address space
-    bool UsedAs(ast::AddressSpace usage) const { return address_space_usage_.count(usage) > 0; }
+    bool UsedAs(AddressSpace usage) const { return address_space_usage_.count(usage) > 0; }
 
     /// @returns true iff this structure has been used by address space that's
     /// host-shareable.
     bool IsHostShareable() const {
         for (auto sc : address_space_usage_) {
-            if (ast::IsHostShareable(sc)) {
+            if (type::IsHostShareable(sc)) {
                 return true;
             }
         }
@@ -160,7 +160,7 @@ class Struct : public Castable<Struct, Type> {
     const uint32_t align_;
     const uint32_t size_;
     const uint32_t size_no_padding_;
-    std::unordered_set<ast::AddressSpace> address_space_usage_;
+    std::unordered_set<AddressSpace> address_space_usage_;
     std::unordered_set<PipelineStageUsage> pipeline_stage_uses_;
     utils::Vector<const Struct*, 2> concrete_types_;
 };
