@@ -190,7 +190,7 @@ TEST_P(SideEffectsBuiltinTest, Test) {
         GlobalVar("t2d_multi", ty.multisampled_texture(type::TextureDimension::k2d, ty.f32()),
                   Group(0_a), Binding(AInt(next_binding++)));
         GlobalVar("tstorage2d",
-                  ty.storage_texture(type::TextureDimension::k2d, ast::TexelFormat::kR32Float,
+                  ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Float,
                                      type::Access::kWrite),
                   Group(0_a), Binding(AInt(next_binding++)));
         GlobalVar("s2d", ty.sampler(ast::SamplerKind::kSampler), Group(0_a),

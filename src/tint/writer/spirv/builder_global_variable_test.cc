@@ -472,7 +472,7 @@ OpName %9 "unused_entry_point"
 TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
     // var<uniform_constant> a : texture_storage_2d<r32uint, write>;
 
-    auto* type = ty.storage_texture(type::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
+    auto* type = ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Uint,
                                     type::Access::kWrite);
 
     auto* var_a = GlobalVar("a", type, Binding(0_a), Group(0_a));

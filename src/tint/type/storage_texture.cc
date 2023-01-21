@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::StorageTexture);
 namespace tint::type {
 
 StorageTexture::StorageTexture(TextureDimension dim,
-                               ast::TexelFormat format,
+                               type::TexelFormat format,
                                type::Access access,
                                Type* subtype)
     : Base(utils::Hash(TypeInfo::Of<StorageTexture>().full_hashcode, dim, format, access), dim),
@@ -45,35 +45,35 @@ std::string StorageTexture::FriendlyName(const SymbolTable&) const {
     return out.str();
 }
 
-Type* StorageTexture::SubtypeFor(ast::TexelFormat format, Manager& type_mgr) {
+Type* StorageTexture::SubtypeFor(type::TexelFormat format, Manager& type_mgr) {
     switch (format) {
-        case ast::TexelFormat::kR32Uint:
-        case ast::TexelFormat::kRgba8Uint:
-        case ast::TexelFormat::kRg32Uint:
-        case ast::TexelFormat::kRgba16Uint:
-        case ast::TexelFormat::kRgba32Uint: {
+        case type::TexelFormat::kR32Uint:
+        case type::TexelFormat::kRgba8Uint:
+        case type::TexelFormat::kRg32Uint:
+        case type::TexelFormat::kRgba16Uint:
+        case type::TexelFormat::kRgba32Uint: {
             return type_mgr.Get<U32>();
         }
 
-        case ast::TexelFormat::kR32Sint:
-        case ast::TexelFormat::kRgba8Sint:
-        case ast::TexelFormat::kRg32Sint:
-        case ast::TexelFormat::kRgba16Sint:
-        case ast::TexelFormat::kRgba32Sint: {
+        case type::TexelFormat::kR32Sint:
+        case type::TexelFormat::kRgba8Sint:
+        case type::TexelFormat::kRg32Sint:
+        case type::TexelFormat::kRgba16Sint:
+        case type::TexelFormat::kRgba32Sint: {
             return type_mgr.Get<I32>();
         }
 
-        case ast::TexelFormat::kBgra8Unorm:
-        case ast::TexelFormat::kRgba8Unorm:
-        case ast::TexelFormat::kRgba8Snorm:
-        case ast::TexelFormat::kR32Float:
-        case ast::TexelFormat::kRg32Float:
-        case ast::TexelFormat::kRgba16Float:
-        case ast::TexelFormat::kRgba32Float: {
+        case type::TexelFormat::kBgra8Unorm:
+        case type::TexelFormat::kRgba8Unorm:
+        case type::TexelFormat::kRgba8Snorm:
+        case type::TexelFormat::kR32Float:
+        case type::TexelFormat::kRg32Float:
+        case type::TexelFormat::kRgba16Float:
+        case type::TexelFormat::kRgba32Float: {
             return type_mgr.Get<F32>();
         }
 
-        case ast::TexelFormat::kUndefined:
+        case type::TexelFormat::kUndefined:
             break;
     }
 

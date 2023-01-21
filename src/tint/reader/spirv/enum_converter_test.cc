@@ -288,7 +288,7 @@ INSTANTIATE_TEST_SUITE_P(
 struct TexelFormatCase {
     spv::ImageFormat format;
     bool expect_success;
-    ast::TexelFormat expected;
+    type::TexelFormat expected;
 };
 inline std::ostream& operator<<(std::ostream& out, TexelFormatCase ifc) {
     out << "TexelFormatCase{ spv::ImageFormat:::" << int(ifc.format)
@@ -330,52 +330,52 @@ INSTANTIATE_TEST_SUITE_P(
     SpvImageFormatTest,
     testing::Values(
         // Unknown.  This is used for sampled images.
-        TexelFormatCase{spv::ImageFormat::Unknown, true, ast::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::Unknown, true, type::TexelFormat::kUndefined},
         // 8 bit channels
-        TexelFormatCase{spv::ImageFormat::Rgba8, true, ast::TexelFormat::kRgba8Unorm},
-        TexelFormatCase{spv::ImageFormat::Rgba8Snorm, true, ast::TexelFormat::kRgba8Snorm},
-        TexelFormatCase{spv::ImageFormat::Rgba8ui, true, ast::TexelFormat::kRgba8Uint},
-        TexelFormatCase{spv::ImageFormat::Rgba8i, true, ast::TexelFormat::kRgba8Sint},
+        TexelFormatCase{spv::ImageFormat::Rgba8, true, type::TexelFormat::kRgba8Unorm},
+        TexelFormatCase{spv::ImageFormat::Rgba8Snorm, true, type::TexelFormat::kRgba8Snorm},
+        TexelFormatCase{spv::ImageFormat::Rgba8ui, true, type::TexelFormat::kRgba8Uint},
+        TexelFormatCase{spv::ImageFormat::Rgba8i, true, type::TexelFormat::kRgba8Sint},
         // 16 bit channels
-        TexelFormatCase{spv::ImageFormat::Rgba16ui, true, ast::TexelFormat::kRgba16Uint},
-        TexelFormatCase{spv::ImageFormat::Rgba16i, true, ast::TexelFormat::kRgba16Sint},
-        TexelFormatCase{spv::ImageFormat::Rgba16f, true, ast::TexelFormat::kRgba16Float},
+        TexelFormatCase{spv::ImageFormat::Rgba16ui, true, type::TexelFormat::kRgba16Uint},
+        TexelFormatCase{spv::ImageFormat::Rgba16i, true, type::TexelFormat::kRgba16Sint},
+        TexelFormatCase{spv::ImageFormat::Rgba16f, true, type::TexelFormat::kRgba16Float},
         // 32 bit channels
         // ... 1 channel
-        TexelFormatCase{spv::ImageFormat::R32ui, true, ast::TexelFormat::kR32Uint},
-        TexelFormatCase{spv::ImageFormat::R32i, true, ast::TexelFormat::kR32Sint},
-        TexelFormatCase{spv::ImageFormat::R32f, true, ast::TexelFormat::kR32Float},
+        TexelFormatCase{spv::ImageFormat::R32ui, true, type::TexelFormat::kR32Uint},
+        TexelFormatCase{spv::ImageFormat::R32i, true, type::TexelFormat::kR32Sint},
+        TexelFormatCase{spv::ImageFormat::R32f, true, type::TexelFormat::kR32Float},
         // ... 2 channels
-        TexelFormatCase{spv::ImageFormat::Rg32ui, true, ast::TexelFormat::kRg32Uint},
-        TexelFormatCase{spv::ImageFormat::Rg32i, true, ast::TexelFormat::kRg32Sint},
-        TexelFormatCase{spv::ImageFormat::Rg32f, true, ast::TexelFormat::kRg32Float},
+        TexelFormatCase{spv::ImageFormat::Rg32ui, true, type::TexelFormat::kRg32Uint},
+        TexelFormatCase{spv::ImageFormat::Rg32i, true, type::TexelFormat::kRg32Sint},
+        TexelFormatCase{spv::ImageFormat::Rg32f, true, type::TexelFormat::kRg32Float},
         // ... 4 channels
-        TexelFormatCase{spv::ImageFormat::Rgba32ui, true, ast::TexelFormat::kRgba32Uint},
-        TexelFormatCase{spv::ImageFormat::Rgba32i, true, ast::TexelFormat::kRgba32Sint},
-        TexelFormatCase{spv::ImageFormat::Rgba32f, true, ast::TexelFormat::kRgba32Float}));
+        TexelFormatCase{spv::ImageFormat::Rgba32ui, true, type::TexelFormat::kRgba32Uint},
+        TexelFormatCase{spv::ImageFormat::Rgba32i, true, type::TexelFormat::kRgba32Sint},
+        TexelFormatCase{spv::ImageFormat::Rgba32f, true, type::TexelFormat::kRgba32Float}));
 
 INSTANTIATE_TEST_SUITE_P(
     EnumConverterBad,
     SpvImageFormatTest,
     testing::Values(
         // Scanning in order from the SPIR-V spec.
-        TexelFormatCase{spv::ImageFormat::Rg16f, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::R11fG11fB10f, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::R16f, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::Rgb10A2, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::Rg16, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::Rg8, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::R16, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::R8, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::Rgba16Snorm, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::Rg16Snorm, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::Rg8Snorm, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::Rg16i, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::Rg8i, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::R8i, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::Rgb10a2ui, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::Rg16ui, false, ast::TexelFormat::kUndefined},
-        TexelFormatCase{spv::ImageFormat::Rg8ui, false, ast::TexelFormat::kUndefined}));
+        TexelFormatCase{spv::ImageFormat::Rg16f, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::R11fG11fB10f, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::R16f, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::Rgb10A2, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::Rg16, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::Rg8, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::R16, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::R8, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::Rgba16Snorm, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::Rg16Snorm, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::Rg8Snorm, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::Rg16i, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::Rg8i, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::R8i, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::Rgb10a2ui, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::Rg16ui, false, type::TexelFormat::kUndefined},
+        TexelFormatCase{spv::ImageFormat::Rg8ui, false, type::TexelFormat::kUndefined}));
 
 }  // namespace
 }  // namespace tint::reader::spirv

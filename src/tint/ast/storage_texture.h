@@ -17,9 +17,9 @@
 
 #include <string>
 
-#include "src/tint/ast/texel_format.h"
 #include "src/tint/ast/texture.h"
 #include "src/tint/type/access.h"
+#include "src/tint/type/texel_format.h"
 #include "src/tint/type/texture_dimension.h"
 
 namespace tint::ast {
@@ -39,7 +39,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
                    NodeID nid,
                    const Source& src,
                    type::TextureDimension dim,
-                   TexelFormat format,
+                   type::TexelFormat format,
                    const Type* subtype,
                    type::Access access_control);
 
@@ -59,11 +59,11 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
 
     /// @param format the storage texture image format
     /// @param builder the ProgramBuilder used to build the returned type
-    /// @returns the storage texture subtype for the given TexelFormat
-    static Type* SubtypeFor(TexelFormat format, ProgramBuilder& builder);
+    /// @returns the storage texture subtype for the given type::TexelFormat
+    static Type* SubtypeFor(type::TexelFormat format, ProgramBuilder& builder);
 
     /// The image format
-    const TexelFormat format;
+    const type::TexelFormat format;
 
     /// The storage subtype
     const Type* const type;

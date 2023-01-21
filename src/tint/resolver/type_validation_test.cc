@@ -1113,7 +1113,7 @@ TEST_P(StorageTextureDimensionTest, All) {
     // var a : texture_storage_*<ru32int, write>;
     auto& params = GetParam();
 
-    auto* st = ty.storage_texture(Source{{12, 34}}, params.dim, ast::TexelFormat::kR32Uint,
+    auto* st = ty.storage_texture(Source{{12, 34}}, params.dim, type::TexelFormat::kR32Uint,
                                   type::Access::kWrite);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
@@ -1131,27 +1131,27 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          testing::ValuesIn(Dimension_cases));
 
 struct FormatParams {
-    ast::TexelFormat format;
+    type::TexelFormat format;
     bool is_valid;
 };
 
-static constexpr FormatParams format_cases[] = {FormatParams{ast::TexelFormat::kBgra8Unorm, true},
-                                                FormatParams{ast::TexelFormat::kR32Float, true},
-                                                FormatParams{ast::TexelFormat::kR32Sint, true},
-                                                FormatParams{ast::TexelFormat::kR32Uint, true},
-                                                FormatParams{ast::TexelFormat::kRg32Float, true},
-                                                FormatParams{ast::TexelFormat::kRg32Sint, true},
-                                                FormatParams{ast::TexelFormat::kRg32Uint, true},
-                                                FormatParams{ast::TexelFormat::kRgba16Float, true},
-                                                FormatParams{ast::TexelFormat::kRgba16Sint, true},
-                                                FormatParams{ast::TexelFormat::kRgba16Uint, true},
-                                                FormatParams{ast::TexelFormat::kRgba32Float, true},
-                                                FormatParams{ast::TexelFormat::kRgba32Sint, true},
-                                                FormatParams{ast::TexelFormat::kRgba32Uint, true},
-                                                FormatParams{ast::TexelFormat::kRgba8Sint, true},
-                                                FormatParams{ast::TexelFormat::kRgba8Snorm, true},
-                                                FormatParams{ast::TexelFormat::kRgba8Uint, true},
-                                                FormatParams{ast::TexelFormat::kRgba8Unorm, true}};
+static constexpr FormatParams format_cases[] = {FormatParams{type::TexelFormat::kBgra8Unorm, true},
+                                                FormatParams{type::TexelFormat::kR32Float, true},
+                                                FormatParams{type::TexelFormat::kR32Sint, true},
+                                                FormatParams{type::TexelFormat::kR32Uint, true},
+                                                FormatParams{type::TexelFormat::kRg32Float, true},
+                                                FormatParams{type::TexelFormat::kRg32Sint, true},
+                                                FormatParams{type::TexelFormat::kRg32Uint, true},
+                                                FormatParams{type::TexelFormat::kRgba16Float, true},
+                                                FormatParams{type::TexelFormat::kRgba16Sint, true},
+                                                FormatParams{type::TexelFormat::kRgba16Uint, true},
+                                                FormatParams{type::TexelFormat::kRgba32Float, true},
+                                                FormatParams{type::TexelFormat::kRgba32Sint, true},
+                                                FormatParams{type::TexelFormat::kRgba32Uint, true},
+                                                FormatParams{type::TexelFormat::kRgba8Sint, true},
+                                                FormatParams{type::TexelFormat::kRgba8Snorm, true},
+                                                FormatParams{type::TexelFormat::kRgba8Uint, true},
+                                                FormatParams{type::TexelFormat::kRgba8Unorm, true}};
 
 using StorageTextureFormatTest = ResolverTestWithParam<FormatParams>;
 TEST_P(StorageTextureFormatTest, All) {
@@ -1201,7 +1201,7 @@ TEST_F(StorageTextureAccessTest, MissingAccess_Fail) {
     // var a : texture_storage_1d<ru32int>;
 
     auto* st = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d,
-                                  ast::TexelFormat::kR32Uint, type::Access::kUndefined);
+                                  type::TexelFormat::kR32Uint, type::Access::kUndefined);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1214,7 +1214,7 @@ TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
     // var a : texture_storage_1d<ru32int, read_write>;
 
     auto* st = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d,
-                                  ast::TexelFormat::kR32Uint, type::Access::kReadWrite);
+                                  type::TexelFormat::kR32Uint, type::Access::kReadWrite);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1228,7 +1228,7 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
     // var a : texture_storage_1d<ru32int, read>;
 
     auto* st = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d,
-                                  ast::TexelFormat::kR32Uint, type::Access::kRead);
+                                  type::TexelFormat::kR32Uint, type::Access::kRead);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1241,7 +1241,7 @@ TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
     // @group(0) @binding(0)
     // var a : texture_storage_1d<ru32int, write>;
 
-    auto* st = ty.storage_texture(type::TextureDimension::k1d, ast::TexelFormat::kR32Uint,
+    auto* st = ty.storage_texture(type::TextureDimension::k1d, type::TexelFormat::kR32Uint,
                                   type::Access::kWrite);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));

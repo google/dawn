@@ -1296,7 +1296,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     GlobalVar(Sym(), ty.depth_multisampled_texture(type::TextureDimension::k2d));
     GlobalVar(Sym(), ty.external_texture());
     GlobalVar(Sym(), ty.multisampled_texture(type::TextureDimension::k2d, T));
-    GlobalVar(Sym(), ty.storage_texture(type::TextureDimension::k2d, ast::TexelFormat::kR32Float,
+    GlobalVar(Sym(), ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Float,
                                         type::Access::kRead));  //
     GlobalVar(Sym(), ty.sampler(ast::SamplerKind::kSampler));
 

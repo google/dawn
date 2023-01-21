@@ -202,7 +202,7 @@ struct TextureOverloadCase {
     TextureOverloadCase(ValidTextureOverload,
                         const char*,
                         type::Access,
-                        ast::TexelFormat,
+                        type::TexelFormat,
                         type::TextureDimension,
                         TextureDataType,
                         const char*,
@@ -242,7 +242,7 @@ struct TextureOverloadCase {
     type::Access const access = type::Access::kReadWrite;
     /// The image format for the storage texture
     /// Used only when texture_kind is kStorage
-    ast::TexelFormat const texel_format = ast::TexelFormat::kUndefined;
+    type::TexelFormat const texel_format = type::TexelFormat::kUndefined;
     /// The dimensions of the texture parameter
     type::TextureDimension const texture_dimension;
     /// The data type of the texture parameter

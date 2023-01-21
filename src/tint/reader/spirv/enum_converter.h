@@ -73,13 +73,13 @@ class EnumConverter {
     /// On failure, logs an error and returns kNone
     /// @param fmt the SPIR-V format
     /// @returns a Tint AST format
-    ast::TexelFormat ToTexelFormat(spv::ImageFormat fmt);
+    type::TexelFormat ToTexelFormat(spv::ImageFormat fmt);
 
     /// Converts a SPIR-V Image Format to a TexelFormat
     /// On failure, logs an error and returns kNone
     /// @param fmt the SPIR-V format
     /// @returns a Tint AST format
-    ast::TexelFormat ToTexelFormat(SpvImageFormat fmt) {
+    type::TexelFormat ToTexelFormat(SpvImageFormat fmt) {
         return ToTexelFormat(static_cast<spv::ImageFormat>(fmt));
     }
 

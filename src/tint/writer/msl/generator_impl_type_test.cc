@@ -847,7 +847,7 @@ using MslStorageTexturesTest = TestParamHelper<MslStorageTextureData>;
 TEST_P(MslStorageTexturesTest, Emit) {
     auto params = GetParam();
 
-    auto* s = ty.storage_texture(params.dim, ast::TexelFormat::kR32Float, type::Access::kWrite);
+    auto* s = ty.storage_texture(params.dim, type::TexelFormat::kR32Float, type::Access::kWrite);
     GlobalVar("test_var", s, Binding(0_a), Group(0_a));
 
     GeneratorImpl& gen = Build();

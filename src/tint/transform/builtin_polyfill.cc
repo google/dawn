@@ -946,7 +946,7 @@ Transform::ApplyResult BuiltinPolyfill::Apply(const Program* src,
                             auto& sig = builtin->Signature();
                             auto* tex = sig.Parameter(sem::ParameterUsage::kTexture);
                             if (auto* stex = tex->Type()->As<type::StorageTexture>()) {
-                                if (stex->texel_format() == ast::TexelFormat::kBgra8Unorm) {
+                                if (stex->texel_format() == type::TexelFormat::kBgra8Unorm) {
                                     size_t value_idx = static_cast<size_t>(
                                         sig.IndexOf(sem::ParameterUsage::kValue));
                                     ctx.Replace(expr, [&ctx, expr, value_idx] {
@@ -1026,9 +1026,9 @@ Transform::ApplyResult BuiltinPolyfill::Apply(const Program* src,
                 }
             },
             [&](const ast::StorageTexture* tex) {
-                if (polyfill.bgra8unorm && tex->format == ast::TexelFormat::kBgra8Unorm) {
+                if (polyfill.bgra8unorm && tex->format == type::TexelFormat::kBgra8Unorm) {
                     ctx.Replace(tex, [&ctx, tex] {
-                        return ctx.dst->ty.storage_texture(tex->dim, ast::TexelFormat::kRgba8Unorm,
+                        return ctx.dst->ty.storage_texture(tex->dim, type::TexelFormat::kRgba8Unorm,
                                                            tex->access);
                     });
                     made_changes = true;

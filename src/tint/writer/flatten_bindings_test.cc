@@ -101,7 +101,7 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
     b.GlobalVar("texture2", b.ty.multisampled_texture(type::TextureDimension::k2d, b.ty.f32()),
                 b.Group(6_a), b.Binding(6_a));
     b.GlobalVar("texture3",
-                b.ty.storage_texture(type::TextureDimension::k2d, ast::TexelFormat::kR32Float,
+                b.ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Float,
                                      type::Access::kWrite),
                 b.Group(7_a), b.Binding(7_a));
     b.GlobalVar("texture4", b.ty.depth_texture(type::TextureDimension::k2d), b.Group(8_a),

@@ -116,12 +116,12 @@ ResourceBinding::TextureDimension TypeTextureDimensionToResourceBindingTextureDi
 /// @returns the publicly visible equivalent
 ResourceBinding::SampledKind BaseTypeToSampledKind(const type::Type* base_type);
 
-/// Convert from internal ast::TexelFormat to public
+/// Convert from internal type::TexelFormat to public
 /// ResourceBinding::TexelFormat
 /// @param image_format internal value to convert from
 /// @returns the publicly visible equivalent
 ResourceBinding::TexelFormat TypeTexelFormatToResourceBindingTexelFormat(
-    const ast::TexelFormat& image_format);
+    const type::TexelFormat& image_format);
 
 }  // namespace tint::inspector
 

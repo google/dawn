@@ -27,7 +27,7 @@ StorageTexture::StorageTexture(ProgramID pid,
                                NodeID nid,
                                const Source& src,
                                type::TextureDimension d,
-                               TexelFormat fmt,
+                               type::TexelFormat fmt,
                                const Type* subtype,
                                type::Access ac)
     : Base(pid, nid, src, d), format(fmt), type(subtype), access(ac) {}
@@ -49,35 +49,35 @@ const StorageTexture* StorageTexture::Clone(CloneContext* ctx) const {
     return ctx->dst->create<StorageTexture>(src, dim, format, ty, access);
 }
 
-Type* StorageTexture::SubtypeFor(TexelFormat format, ProgramBuilder& builder) {
+Type* StorageTexture::SubtypeFor(type::TexelFormat format, ProgramBuilder& builder) {
     switch (format) {
-        case TexelFormat::kR32Uint:
-        case TexelFormat::kRgba8Uint:
-        case TexelFormat::kRg32Uint:
-        case TexelFormat::kRgba16Uint:
-        case TexelFormat::kRgba32Uint: {
+        case type::TexelFormat::kR32Uint:
+        case type::TexelFormat::kRgba8Uint:
+        case type::TexelFormat::kRg32Uint:
+        case type::TexelFormat::kRgba16Uint:
+        case type::TexelFormat::kRgba32Uint: {
             return builder.create<U32>();
         }
 
-        case TexelFormat::kR32Sint:
-        case TexelFormat::kRgba8Sint:
-        case TexelFormat::kRg32Sint:
-        case TexelFormat::kRgba16Sint:
-        case TexelFormat::kRgba32Sint: {
+        case type::TexelFormat::kR32Sint:
+        case type::TexelFormat::kRgba8Sint:
+        case type::TexelFormat::kRg32Sint:
+        case type::TexelFormat::kRgba16Sint:
+        case type::TexelFormat::kRgba32Sint: {
             return builder.create<I32>();
         }
 
-        case TexelFormat::kBgra8Unorm:
-        case TexelFormat::kRgba8Unorm:
-        case TexelFormat::kRgba8Snorm:
-        case TexelFormat::kR32Float:
-        case TexelFormat::kRg32Float:
-        case TexelFormat::kRgba16Float:
-        case TexelFormat::kRgba32Float: {
+        case type::TexelFormat::kBgra8Unorm:
+        case type::TexelFormat::kRgba8Unorm:
+        case type::TexelFormat::kRgba8Snorm:
+        case type::TexelFormat::kR32Float:
+        case type::TexelFormat::kRg32Float:
+        case type::TexelFormat::kRgba16Float:
+        case type::TexelFormat::kRgba32Float: {
             return builder.create<F32>();
         }
 
-        case TexelFormat::kUndefined:
+        case type::TexelFormat::kUndefined:
             break;
     }
 

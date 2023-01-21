@@ -1082,7 +1082,7 @@ class ProgramBuilder {
         /// @param access the access control of the texture
         /// @returns the storage texture
         const ast::StorageTexture* storage_texture(type::TextureDimension dims,
-                                                   ast::TexelFormat format,
+                                                   type::TexelFormat format,
                                                    type::Access access) const {
             auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
             return builder->create<ast::StorageTexture>(dims, format, subtype, access);
@@ -1095,7 +1095,7 @@ class ProgramBuilder {
         /// @returns the storage texture
         const ast::StorageTexture* storage_texture(const Source& source,
                                                    type::TextureDimension dims,
-                                                   ast::TexelFormat format,
+                                                   type::TexelFormat format,
                                                    type::Access access) const {
             auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
             return builder->create<ast::StorageTexture>(source, dims, format, subtype, access);

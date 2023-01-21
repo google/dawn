@@ -435,7 +435,7 @@ struct StorageTexture final : public Castable<StorageTexture, Texture> {
     /// @param d the texture dimensions
     /// @param f the storage image format
     /// @param a the access control
-    StorageTexture(type::TextureDimension d, ast::TexelFormat f, type::Access a);
+    StorageTexture(type::TextureDimension d, type::TexelFormat f, type::Access a);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -451,7 +451,7 @@ struct StorageTexture final : public Castable<StorageTexture, Texture> {
 #endif  // NDEBUG
 
     /// the storage image format
-    ast::TexelFormat const format;
+    type::TexelFormat const format;
 
     /// the access control
     type::Access const access;
@@ -616,7 +616,7 @@ class TypeManager {
     /// @return a StorageTexture type. Repeated calls with the same arguments will
     /// return the same pointer.
     const spirv::StorageTexture* StorageTexture(type::TextureDimension d,
-                                                ast::TexelFormat f,
+                                                type::TexelFormat f,
                                                 type::Access a);
 
   private:

@@ -328,7 +328,7 @@ class TemplateNumberMatcher : public NumberMatcher {
 // TODO(bclayton): See if we can move more of this hand-rolled code to the
 // template
 ////////////////////////////////////////////////////////////////////////////////
-using TexelFormat = ast::TexelFormat;
+using TexelFormat = type::TexelFormat;
 using Access = type::Access;
 using AddressSpace = type::AddressSpace;
 using ParameterUsage = sem::ParameterUsage;

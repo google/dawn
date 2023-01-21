@@ -672,19 +672,19 @@ class ParserImpl : Reader {
     /// format.
     /// @param format image texel format
     /// @returns the component type, one of f32, i32, u32
-    const Type* GetComponentTypeForFormat(ast::TexelFormat format);
+    const Type* GetComponentTypeForFormat(type::TexelFormat format);
 
     /// Returns the number of channels in the given image format.
     /// @param format image texel format
     /// @returns the number of channels in the format
-    unsigned GetChannelCountForFormat(ast::TexelFormat format);
+    unsigned GetChannelCountForFormat(type::TexelFormat format);
 
     /// Returns the texel type corresponding to the given image format.
     /// This the WGSL type used for the texel parameter to textureStore.
     /// It's always a 4-element vector.
     /// @param format image texel format
     /// @returns the texel format
-    const Type* GetTexelTypeForFormat(ast::TexelFormat format);
+    const Type* GetTexelTypeForFormat(type::TexelFormat format);
 
     /// Returns the SPIR-V instruction with the given ID, or nullptr.
     /// @param id the SPIR-V result ID

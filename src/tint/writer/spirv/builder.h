@@ -535,7 +535,7 @@ class Builder {
     /// Converts TexelFormat to SPIR-V and pushes an appropriate capability.
     /// @param format AST image format type
     /// @returns SPIR-V image format type
-    SpvImageFormat convert_texel_format_to_spv(const ast::TexelFormat format);
+    SpvImageFormat convert_texel_format_to_spv(const type::TexelFormat format);
 
     /// Determines if the given type initializer is created from constant values
     /// @param expr the expression to check
