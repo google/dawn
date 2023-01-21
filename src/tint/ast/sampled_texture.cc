@@ -23,7 +23,7 @@ namespace tint::ast {
 SampledTexture::SampledTexture(ProgramID pid,
                                NodeID nid,
                                const Source& src,
-                               TextureDimension d,
+                               type::TextureDimension d,
                                const Type* ty)
     : Base(pid, nid, src, d), type(ty) {
     TINT_ASSERT(AST, type);

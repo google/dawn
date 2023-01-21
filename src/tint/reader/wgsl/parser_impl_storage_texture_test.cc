@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::reader::wgsl {
 namespace {
@@ -30,7 +31,7 @@ TEST_F(ParserImplTest, StorageTextureType_1d) {
     auto t = p->storage_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
-    EXPECT_EQ(t.value, ast::TextureDimension::k1d);
+    EXPECT_EQ(t.value, type::TextureDimension::k1d);
     EXPECT_FALSE(p->has_error());
 }
 
@@ -39,7 +40,7 @@ TEST_F(ParserImplTest, StorageTextureType_2d) {
     auto t = p->storage_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
-    EXPECT_EQ(t.value, ast::TextureDimension::k2d);
+    EXPECT_EQ(t.value, type::TextureDimension::k2d);
     EXPECT_FALSE(p->has_error());
 }
 
@@ -48,7 +49,7 @@ TEST_F(ParserImplTest, StorageTextureType_2dArray) {
     auto t = p->storage_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
-    EXPECT_EQ(t.value, ast::TextureDimension::k2dArray);
+    EXPECT_EQ(t.value, type::TextureDimension::k2dArray);
     EXPECT_FALSE(p->has_error());
 }
 
@@ -57,7 +58,7 @@ TEST_F(ParserImplTest, StorageTextureType_3d) {
     auto t = p->storage_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
-    EXPECT_EQ(t.value, ast::TextureDimension::k3d);
+    EXPECT_EQ(t.value, type::TextureDimension::k3d);
     EXPECT_FALSE(p->has_error());
 }
 

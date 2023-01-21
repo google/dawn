@@ -16,10 +16,10 @@
 
 #include <string>
 
-#include "src/tint/ast/variable.h"
 #include "src/tint/debug.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/manager.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Array);

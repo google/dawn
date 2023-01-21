@@ -21,8 +21,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::DepthMultisampledTexture);
 namespace tint::ast {
 namespace {
 
-bool IsValidDepthDimension(TextureDimension dim) {
-    return dim == TextureDimension::k2d;
+bool IsValidDepthDimension(type::TextureDimension dim) {
+    return dim == type::TextureDimension::k2d;
 }
 
 }  // namespace
@@ -30,7 +30,7 @@ bool IsValidDepthDimension(TextureDimension dim) {
 DepthMultisampledTexture::DepthMultisampledTexture(ProgramID pid,
                                                    NodeID nid,
                                                    const Source& src,
-                                                   TextureDimension d)
+                                                   type::TextureDimension d)
     : Base(pid, nid, src, d) {
     TINT_ASSERT(AST, IsValidDepthDimension(dim));
 }

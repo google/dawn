@@ -34,6 +34,7 @@
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/math.h"
@@ -605,7 +606,7 @@ const type::Sampler* build_sampler_comparison(MatchState& state) {
 
 bool match_texture(MatchState&,
                    const type::Type* ty,
-                   ast::TextureDimension dim,
+                   type::TextureDimension dim,
                    const type::Type*& T) {
     if (ty->Is<Any>()) {
         T = ty;
@@ -632,17 +633,17 @@ bool match_texture(MatchState&,
         return state.builder.create<type::SampledTexture>(dim, T);                  \
     }
 
-DECLARE_SAMPLED_TEXTURE(1d, ast::TextureDimension::k1d)
-DECLARE_SAMPLED_TEXTURE(2d, ast::TextureDimension::k2d)
-DECLARE_SAMPLED_TEXTURE(2d_array, ast::TextureDimension::k2dArray)
-DECLARE_SAMPLED_TEXTURE(3d, ast::TextureDimension::k3d)
-DECLARE_SAMPLED_TEXTURE(cube, ast::TextureDimension::kCube)
-DECLARE_SAMPLED_TEXTURE(cube_array, ast::TextureDimension::kCubeArray)
+DECLARE_SAMPLED_TEXTURE(1d, type::TextureDimension::k1d)
+DECLARE_SAMPLED_TEXTURE(2d, type::TextureDimension::k2d)
+DECLARE_SAMPLED_TEXTURE(2d_array, type::TextureDimension::k2dArray)
+DECLARE_SAMPLED_TEXTURE(3d, type::TextureDimension::k3d)
+DECLARE_SAMPLED_TEXTURE(cube, type::TextureDimension::kCube)
+DECLARE_SAMPLED_TEXTURE(cube_array, type::TextureDimension::kCubeArray)
 #undef DECLARE_SAMPLED_TEXTURE
 
 bool match_texture_multisampled(MatchState&,
                                 const type::Type* ty,
-                                ast::TextureDimension dim,
+                                type::TextureDimension dim,
                                 const type::Type*& T) {
     if (ty->Is<Any>()) {
         T = ty;
@@ -667,10 +668,10 @@ bool match_texture_multisampled(MatchState&,
         return state.builder.create<type::MultisampledTexture>(dim, T);                      \
     }
 
-DECLARE_MULTISAMPLED_TEXTURE(2d, ast::TextureDimension::k2d)
+DECLARE_MULTISAMPLED_TEXTURE(2d, type::TextureDimension::k2d)
 #undef DECLARE_MULTISAMPLED_TEXTURE
 
-bool match_texture_depth(MatchState&, const type::Type* ty, ast::TextureDimension dim) {
+bool match_texture_depth(MatchState&, const type::Type* ty, type::TextureDimension dim) {
     if (ty->Is<Any>()) {
         return true;
     }
@@ -685,10 +686,10 @@ bool match_texture_depth(MatchState&, const type::Type* ty, ast::TextureDimensio
         return state.builder.create<type::DepthTexture>(dim);                           \
     }
 
-DECLARE_DEPTH_TEXTURE(2d, ast::TextureDimension::k2d)
-DECLARE_DEPTH_TEXTURE(2d_array, ast::TextureDimension::k2dArray)
-DECLARE_DEPTH_TEXTURE(cube, ast::TextureDimension::kCube)
-DECLARE_DEPTH_TEXTURE(cube_array, ast::TextureDimension::kCubeArray)
+DECLARE_DEPTH_TEXTURE(2d, type::TextureDimension::k2d)
+DECLARE_DEPTH_TEXTURE(2d_array, type::TextureDimension::k2dArray)
+DECLARE_DEPTH_TEXTURE(cube, type::TextureDimension::kCube)
+DECLARE_DEPTH_TEXTURE(cube_array, type::TextureDimension::kCubeArray)
 #undef DECLARE_DEPTH_TEXTURE
 
 bool match_texture_depth_multisampled_2d(MatchState&, const type::Type* ty) {
@@ -696,17 +697,17 @@ bool match_texture_depth_multisampled_2d(MatchState&, const type::Type* ty) {
         return true;
     }
     return ty->Is([&](const type::DepthMultisampledTexture* t) {
-        return t->dim() == ast::TextureDimension::k2d;
+        return t->dim() == type::TextureDimension::k2d;
     });
 }
 
 type::DepthMultisampledTexture* build_texture_depth_multisampled_2d(MatchState& state) {
-    return state.builder.create<type::DepthMultisampledTexture>(ast::TextureDimension::k2d);
+    return state.builder.create<type::DepthMultisampledTexture>(type::TextureDimension::k2d);
 }
 
 bool match_texture_storage(MatchState&,
                            const type::Type* ty,
-                           ast::TextureDimension dim,
+                           type::TextureDimension dim,
                            Number& F,
                            Number& A) {
     if (ty->Is<Any>()) {
@@ -737,10 +738,10 @@ bool match_texture_storage(MatchState&,
         return state.builder.create<type::StorageTexture>(dim, format, access, T);                 \
     }
 
-DECLARE_STORAGE_TEXTURE(1d, ast::TextureDimension::k1d)
-DECLARE_STORAGE_TEXTURE(2d, ast::TextureDimension::k2d)
-DECLARE_STORAGE_TEXTURE(2d_array, ast::TextureDimension::k2dArray)
-DECLARE_STORAGE_TEXTURE(3d, ast::TextureDimension::k3d)
+DECLARE_STORAGE_TEXTURE(1d, type::TextureDimension::k1d)
+DECLARE_STORAGE_TEXTURE(2d, type::TextureDimension::k2d)
+DECLARE_STORAGE_TEXTURE(2d_array, type::TextureDimension::k2dArray)
+DECLARE_STORAGE_TEXTURE(3d, type::TextureDimension::k3d)
 #undef DECLARE_STORAGE_TEXTURE
 
 bool match_texture_external(MatchState&, const type::Type* ty) {

@@ -44,6 +44,7 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/texture_dimension.h"
 
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
@@ -1886,7 +1887,7 @@ TEST_F(ResolverTest, AddressSpace_SetForSampler) {
 }
 
 TEST_F(ResolverTest, AddressSpace_SetForTexture) {
-    auto* t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
+    auto* t = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
     auto* var = GlobalVar("var", t, Binding(0_a), Group(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -2123,7 +2124,7 @@ TEST_F(ResolverTest, UnaryOp_Negation) {
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureSample) {
-    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1_a),
+    GlobalVar("t", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Group(1_a),
               Binding(1_a));
     GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(1_a), Binding(2_a));
 
@@ -2141,7 +2142,7 @@ TEST_F(ResolverTest, TextureSampler_TextureSample) {
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureSampleInFunction) {
-    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1_a),
+    GlobalVar("t", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Group(1_a),
               Binding(1_a));
     GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(1_a), Binding(2_a));
 
@@ -2167,7 +2168,7 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleInFunction) {
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondSameVariables) {
-    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1_a),
+    GlobalVar("t", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Group(1_a),
               Binding(1_a));
     GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(1_a), Binding(2_a));
 
@@ -2202,9 +2203,9 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondSameVariables) {
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondDifferentVariables) {
-    GlobalVar("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1_a),
+    GlobalVar("t1", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Group(1_a),
               Binding(1_a));
-    GlobalVar("t2", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1_a),
+    GlobalVar("t2", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Group(1_a),
               Binding(2_a));
     GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(1_a), Binding(3_a));
 
@@ -2241,7 +2242,7 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondDifferentVariabl
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureDimensions) {
-    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1_a),
+    GlobalVar("t", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Group(1_a),
               Binding(2_a));
 
     auto* call = Call("textureDimensions", "t");
@@ -2270,7 +2271,7 @@ TEST_F(ResolverTest, TextureSampler_Bug1715) {  // crbug.com/tint/1715
     //     return textureSampleLevel(*tl, *sl, c, 0.0);
     // }
     GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(0_a), Binding(0_a));
-    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(0_a),
+    GlobalVar("t", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Group(0_a),
               Binding(1_a));
     GlobalVar("c", ty.vec2<f32>(), ast::AddressSpace::kUniform, Group(0_a), Binding(2_a));
 
@@ -2289,7 +2290,7 @@ TEST_F(ResolverTest, TextureSampler_Bug1715) {  // crbug.com/tint/1715
          utils::Vector{
              Param("sl", ty.pointer(ty.sampler(ast::SamplerKind::kSampler),
                                     ast::AddressSpace::kFunction)),
-             Param("tl", ty.pointer(ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+             Param("tl", ty.pointer(ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
                                     ast::AddressSpace::kFunction)),
          },
          ty.vec4<f32>(),

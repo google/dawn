@@ -15,6 +15,7 @@
 #include "src/tint/type/external_texture.h"
 
 #include "src/tint/program_builder.h"
+#include "src/tint/type/texture_dimension.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::ExternalTexture);
 
@@ -22,7 +23,7 @@ namespace tint::type {
 
 ExternalTexture::ExternalTexture()
     : Base(static_cast<size_t>(TypeInfo::Of<ExternalTexture>().full_hashcode),
-           ast::TextureDimension::k2d) {}
+           TextureDimension::k2d) {}
 
 ExternalTexture::~ExternalTexture() = default;
 

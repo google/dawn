@@ -22,6 +22,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/call.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/map.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -638,7 +639,7 @@ struct BuiltinPolyfill::State {
         };
         b.Func(name,
                utils::Vector{
-                   b.Param("t", b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32())),
+                   b.Param("t", b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32())),
                    b.Param("s", b.ty.sampler(ast::SamplerKind::kSampler)),
                    b.Param("coord", b.ty.vec2<f32>()),
                },

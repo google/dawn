@@ -26,7 +26,7 @@ namespace tint::ast {
 StorageTexture::StorageTexture(ProgramID pid,
                                NodeID nid,
                                const Source& src,
-                               TextureDimension d,
+                               type::TextureDimension d,
                                TexelFormat fmt,
                                const Type* subtype,
                                Access ac)

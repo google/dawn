@@ -20,6 +20,7 @@
 #include "src/tint/ast/access.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/type/storage_texture.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::ast::builtin::test {
 
@@ -185,7 +186,7 @@ struct TextureOverloadCase {
                         const char*,
                         TextureKind,
                         ast::SamplerKind,
-                        ast::TextureDimension,
+                        type::TextureDimension,
                         TextureDataType,
                         const char*,
                         std::function<Args(ProgramBuilder*)>);
@@ -193,7 +194,7 @@ struct TextureOverloadCase {
     TextureOverloadCase(ValidTextureOverload,
                         const char*,
                         TextureKind,
-                        ast::TextureDimension,
+                        type::TextureDimension,
                         TextureDataType,
                         const char*,
                         std::function<Args(ProgramBuilder*)>);
@@ -202,7 +203,7 @@ struct TextureOverloadCase {
                         const char*,
                         Access,
                         ast::TexelFormat,
-                        ast::TextureDimension,
+                        type::TextureDimension,
                         TextureDataType,
                         const char*,
                         std::function<Args(ProgramBuilder*)>);
@@ -243,7 +244,7 @@ struct TextureOverloadCase {
     /// Used only when texture_kind is kStorage
     ast::TexelFormat const texel_format = ast::TexelFormat::kUndefined;
     /// The dimensions of the texture parameter
-    ast::TextureDimension const texture_dimension;
+    type::TextureDimension const texture_dimension;
     /// The data type of the texture parameter
     const TextureDataType texture_data_type;
     /// Name of the function. e.g. `textureSample`, `textureSampleGrad`, etc

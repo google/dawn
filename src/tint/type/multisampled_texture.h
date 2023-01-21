@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/tint/type/texture.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::type {
 
@@ -27,7 +28,7 @@ class MultisampledTexture final : public Castable<MultisampledTexture, Texture> 
     /// Constructor
     /// @param dim the dimensionality of the texture
     /// @param type the data type of the multisampled texture
-    MultisampledTexture(ast::TextureDimension dim, const Type* type);
+    MultisampledTexture(TextureDimension dim, const Type* type);
 
     /// Destructor
     ~MultisampledTexture() override;

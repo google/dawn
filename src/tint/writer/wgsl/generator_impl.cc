@@ -51,6 +51,7 @@
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/math.h"
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/writer/float_to_string.h"
@@ -500,22 +501,22 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
             }
 
             switch (texture->dim) {
-                case ast::TextureDimension::k1d:
+                case type::TextureDimension::k1d:
                     out << "1d";
                     break;
-                case ast::TextureDimension::k2d:
+                case type::TextureDimension::k2d:
                     out << "2d";
                     break;
-                case ast::TextureDimension::k2dArray:
+                case type::TextureDimension::k2dArray:
                     out << "2d_array";
                     break;
-                case ast::TextureDimension::k3d:
+                case type::TextureDimension::k3d:
                     out << "3d";
                     break;
-                case ast::TextureDimension::kCube:
+                case type::TextureDimension::kCube:
                     out << "cube";
                     break;
-                case ast::TextureDimension::kCubeArray:
+                case type::TextureDimension::kCubeArray:
                     out << "cube_array";
                     break;
                 default:

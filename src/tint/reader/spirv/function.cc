@@ -36,6 +36,7 @@
 #include "src/tint/transform/spirv_atomic.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/hashset.h"
 
@@ -5619,9 +5620,9 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
                           << inst.PrettyPrint();
         }
         switch (texture_type->dims) {
-            case ast::TextureDimension::k2d:
-            case ast::TextureDimension::k2dArray:
-            case ast::TextureDimension::k3d:
+            case type::TextureDimension::k2d:
+            case type::TextureDimension::k2dArray:
+            case type::TextureDimension::k3d:
                 break;
             default:
                 return Fail() << "ConstOffset is only permitted for 2D, 2D Arrayed, "
@@ -5749,8 +5750,8 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
             const ast::Expression* dims_call =
                 create<ast::CallExpression>(Source{}, dims_ident, dims_args);
             auto dims = texture_type->dims;
-            if ((dims == ast::TextureDimension::kCube) ||
-                (dims == ast::TextureDimension::kCubeArray)) {
+            if ((dims == type::TextureDimension::kCube) ||
+                (dims == type::TextureDimension::kCubeArray)) {
                 // textureDimension returns a 3-element vector but SPIR-V expects 2.
                 dims_call =
                     create<ast::MemberAccessorExpression>(Source{}, dims_call, PrefixSwizzle(2));
@@ -5952,7 +5953,7 @@ FunctionEmitter::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageA
     if (!texture_type) {
         return {};
     }
-    ast::TextureDimension dim = texture_type->dims;
+    type::TextureDimension dim = texture_type->dims;
     // Number of regular coordinates.
     uint32_t num_axes = static_cast<uint32_t>(ast::NumCoordinateAxes(dim));
     bool is_arrayed = ast::IsTextureArray(dim);

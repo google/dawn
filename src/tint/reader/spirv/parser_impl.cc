@@ -30,6 +30,7 @@
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/unique_vector.h"
 
 namespace tint::reader::spirv {
@@ -2481,9 +2482,9 @@ const Type* ParserImpl::GetHandleTypeForSpirvHandle(const spvtools::opt::Instruc
             }
         }
 
-        const ast::TextureDimension dim =
+        const type::TextureDimension dim =
             enum_converter_.ToDim(image_type->dim(), image_type->is_arrayed());
-        if (dim == ast::TextureDimension::kNone) {
+        if (dim == type::TextureDimension::kNone) {
             return nullptr;
         }
 
@@ -2506,7 +2507,7 @@ const Type* ParserImpl::GetHandleTypeForSpirvHandle(const spvtools::opt::Instruc
                     ast_handle_type = ty_.DepthTexture(dim);
                 }
             } else if (image_type->is_multisampled()) {
-                if (dim != ast::TextureDimension::k2d) {
+                if (dim != type::TextureDimension::k2d) {
                     Fail() << "WGSL multisampled textures must be 2d and non-arrayed: "
                               "invalid multisampled texture variable or function parameter "
                            << namer_.Name(obj.result_id()) << ": " << obj.PrettyPrint();

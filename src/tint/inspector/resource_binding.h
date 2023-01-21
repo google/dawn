@@ -18,7 +18,7 @@
 #include <cstdint>
 
 #include "src/tint/ast/storage_texture.h"
-#include "src/tint/ast/texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/type/type.h"
 
 namespace tint::inspector {
@@ -104,12 +104,12 @@ struct ResourceBinding {
     TexelFormat image_format;
 };
 
-/// Convert from internal ast::TextureDimension to public
+/// Convert from internal type::TextureDimension to public
 /// ResourceBinding::TextureDimension
 /// @param type_dim internal value to convert from
 /// @returns the publicly visible equivalent
 ResourceBinding::TextureDimension TypeTextureDimensionToResourceBindingTextureDimension(
-    const ast::TextureDimension& type_dim);
+    const type::TextureDimension& type_dim);
 
 /// Infer ResourceBinding::SampledKind for a given type::Type
 /// @param base_type internal type to infer from

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-
-#include "gmock/gmock.h"
+#include "src/tint/type/texture_dimension.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -123,8 +123,8 @@ TEST_F(ResolverVariableValidationTest, VarTypeNotConstructible) {
 TEST_F(ResolverVariableValidationTest, LetTypeNotConstructible) {
     // @group(0) @binding(0) var t1 : texture_2d<f32>;
     // let t2 : t1;
-    auto* t1 = GlobalVar("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(0_a),
-                         Binding(0_a));
+    auto* t1 = GlobalVar("t1", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
+                         Group(0_a), Binding(0_a));
     auto* t2 = Let(Source{{56, 78}}, "t2", Expr(t1));
     WrapInFunction(t2);
 

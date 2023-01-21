@@ -514,6 +514,8 @@ list(APPEND TINT_LIB_SRCS
   type/struct.h
   type/texture.cc
   type/texture.h
+  type/texture_dimension.cc
+  type/texture_dimension.h
   type/type.cc
   type/type.h
   type/u32.cc

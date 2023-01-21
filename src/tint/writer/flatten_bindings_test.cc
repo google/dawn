@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::writer {
 namespace {
@@ -95,17 +96,17 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
                 b.Binding(4_a));
 
     const size_t num_textures = 6;
-    b.GlobalVar("texture1", b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32()),
+    b.GlobalVar("texture1", b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32()),
                 b.Group(5_a), b.Binding(5_a));
-    b.GlobalVar("texture2", b.ty.multisampled_texture(ast::TextureDimension::k2d, b.ty.f32()),
+    b.GlobalVar("texture2", b.ty.multisampled_texture(type::TextureDimension::k2d, b.ty.f32()),
                 b.Group(6_a), b.Binding(6_a));
     b.GlobalVar("texture3",
-                b.ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Float,
+                b.ty.storage_texture(type::TextureDimension::k2d, ast::TexelFormat::kR32Float,
                                      ast::Access::kWrite),
                 b.Group(7_a), b.Binding(7_a));
-    b.GlobalVar("texture4", b.ty.depth_texture(ast::TextureDimension::k2d), b.Group(8_a),
+    b.GlobalVar("texture4", b.ty.depth_texture(type::TextureDimension::k2d), b.Group(8_a),
                 b.Binding(8_a));
-    b.GlobalVar("texture5", b.ty.depth_multisampled_texture(ast::TextureDimension::k2d),
+    b.GlobalVar("texture5", b.ty.depth_multisampled_texture(type::TextureDimension::k2d),
                 b.Group(9_a), b.Binding(9_a));
     b.GlobalVar("texture6", b.ty.external_texture(), b.Group(10_a), b.Binding(10_a));
 

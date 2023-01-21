@@ -15,6 +15,7 @@
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -116,7 +117,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
-    auto* st = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
+    auto* st = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
     GlobalVar("t", st, Group(0_a), Binding(0_a));
 
     GeneratorImpl& gen = Build();

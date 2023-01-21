@@ -15,13 +15,14 @@
 #include "src/tint/type/sampled_texture.h"
 
 #include "src/tint/program_builder.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::SampledTexture);
 
 namespace tint::type {
 
-SampledTexture::SampledTexture(ast::TextureDimension dim, const Type* type)
+SampledTexture::SampledTexture(TextureDimension dim, const Type* type)
     : Base(utils::Hash(TypeInfo::Of<SampledTexture>().full_hashcode, dim, type), dim), type_(type) {
     TINT_ASSERT(Type, type_);
 }

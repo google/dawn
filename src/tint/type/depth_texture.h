@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/tint/type/texture.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::type {
 
@@ -26,7 +27,7 @@ class DepthTexture final : public Castable<DepthTexture, Texture> {
   public:
     /// Constructor
     /// @param dim the dimensionality of the texture
-    explicit DepthTexture(ast::TextureDimension dim);
+    explicit DepthTexture(TextureDimension dim);
 
     /// Destructor
     ~DepthTexture() override;

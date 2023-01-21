@@ -44,6 +44,7 @@
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/defer.h"
@@ -2785,16 +2786,16 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             std::vector<uint32_t> swizzle;
             uint32_t spirv_dims = 0;
             switch (texture_type->dim()) {
-                case ast::TextureDimension::kNone:
+                case type::TextureDimension::kNone:
                     error_ = "texture dimension is kNone";
                     return false;
-                case ast::TextureDimension::k1d:
-                case ast::TextureDimension::k2d:
-                case ast::TextureDimension::k3d:
-                case ast::TextureDimension::kCube:
+                case type::TextureDimension::k1d:
+                case type::TextureDimension::k2d:
+                case type::TextureDimension::k3d:
+                case type::TextureDimension::kCube:
                     break;  // No swizzle needed
-                case ast::TextureDimension::kCubeArray:
-                case ast::TextureDimension::k2dArray:
+                case type::TextureDimension::kCubeArray:
+                case type::TextureDimension::k2dArray:
                     swizzle = {0, 1};  // Strip array index
                     spirv_dims = 3;    // [width, height, array_count]
                     break;
@@ -2825,8 +2826,8 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
                 default:
                     error_ = "texture is not arrayed";
                     return false;
-                case ast::TextureDimension::k2dArray:
-                case ast::TextureDimension::kCubeArray:
+                case type::TextureDimension::k2dArray:
+                case type::TextureDimension::kCubeArray:
                     spirv_dims = 3;
                     break;
             }
@@ -3764,12 +3765,12 @@ bool Builder::GenerateTextureType(const type::Texture* texture, const Operand& r
 
     uint32_t array_literal = 0u;
     const auto dim = texture->dim();
-    if (dim == ast::TextureDimension::k2dArray || dim == ast::TextureDimension::kCubeArray) {
+    if (dim == type::TextureDimension::k2dArray || dim == type::TextureDimension::kCubeArray) {
         array_literal = 1u;
     }
 
     uint32_t dim_literal = SpvDim2D;
-    if (dim == ast::TextureDimension::k1d) {
+    if (dim == type::TextureDimension::k1d) {
         dim_literal = SpvDim1D;
         if (texture->Is<type::SampledTexture>()) {
             push_capability(SpvCapabilitySampled1D);
@@ -3777,10 +3778,10 @@ bool Builder::GenerateTextureType(const type::Texture* texture, const Operand& r
             push_capability(SpvCapabilityImage1D);
         }
     }
-    if (dim == ast::TextureDimension::k3d) {
+    if (dim == type::TextureDimension::k3d) {
         dim_literal = SpvDim3D;
     }
-    if (dim == ast::TextureDimension::kCube || dim == ast::TextureDimension::kCubeArray) {
+    if (dim == type::TextureDimension::kCube || dim == type::TextureDimension::kCubeArray) {
         dim_literal = SpvDimCube;
     }
 
@@ -3800,7 +3801,7 @@ bool Builder::GenerateTextureType(const type::Texture* texture, const Operand& r
         sampled_literal = 1u;
     }
 
-    if (dim == ast::TextureDimension::kCubeArray) {
+    if (dim == type::TextureDimension::kCubeArray) {
         if (texture->IsAnyOf<type::SampledTexture, type::DepthTexture>()) {
             push_capability(SpvCapabilitySampledCubeArray);
         }

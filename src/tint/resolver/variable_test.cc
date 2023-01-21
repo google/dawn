@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/type/reference.h"
-
-#include "gmock/gmock.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::resolver {
 namespace {
@@ -1044,7 +1044,7 @@ TEST_F(ResolverVariableTest, GlobalVar_AddressSpace) {
     auto* storage =
         GlobalVar("sb", ty.Of(buf), ast::AddressSpace::kStorage, Binding(1_a), Group(0_a));
     auto* handle =
-        GlobalVar("h", ty.depth_texture(ast::TextureDimension::k2d), Binding(2_a), Group(0_a));
+        GlobalVar("h", ty.depth_texture(type::TextureDimension::k2d), Binding(2_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 

@@ -15,14 +15,15 @@
 #include "src/tint/ast/external_texture.h"
 
 #include "src/tint/program_builder.h"
+#include "src/tint/type/texture_dimension.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ExternalTexture);
 
 namespace tint::ast {
 
-// ExternalTexture::ExternalTexture() : Base(ast::TextureDimension::k2d) {}
+// ExternalTexture::ExternalTexture() : Base(type::TextureDimension::k2d) {}
 ExternalTexture::ExternalTexture(ProgramID pid, NodeID nid, const Source& src)
-    : Base(pid, nid, src, ast::TextureDimension::k2d) {}
+    : Base(pid, nid, src, type::TextureDimension::k2d) {}
 
 ExternalTexture::ExternalTexture(ExternalTexture&&) = default;
 

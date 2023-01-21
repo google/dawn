@@ -15,6 +15,7 @@
 #include "src/tint/type/depth_texture.h"
 
 #include "src/tint/program_builder.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::DepthTexture);
@@ -22,14 +23,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::DepthTexture);
 namespace tint::type {
 namespace {
 
-bool IsValidDepthDimension(ast::TextureDimension dim) {
-    return dim == ast::TextureDimension::k2d || dim == ast::TextureDimension::k2dArray ||
-           dim == ast::TextureDimension::kCube || dim == ast::TextureDimension::kCubeArray;
+bool IsValidDepthDimension(TextureDimension dim) {
+    return dim == TextureDimension::k2d || dim == TextureDimension::k2dArray ||
+           dim == TextureDimension::kCube || dim == TextureDimension::kCubeArray;
 }
 
 }  // namespace
 
-DepthTexture::DepthTexture(ast::TextureDimension dim)
+DepthTexture::DepthTexture(TextureDimension dim)
     : Base(utils::Hash(TypeInfo::Of<DepthTexture>().full_hashcode, dim), dim) {
     TINT_ASSERT(Type, IsValidDepthDimension(dim));
 }

@@ -36,6 +36,7 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/test_helper.h"
+#include "src/tint/type/texture_dimension.h"
 
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
@@ -2102,7 +2103,7 @@ inline std::ostream& operator<<(std::ostream& out, Texture data) {
 }
 
 struct TextureTestParams {
-    ast::TextureDimension dim;
+    type::TextureDimension dim;
     Texture type = Texture::kF32;
     ast::TexelFormat format = ast::TexelFormat::kR32Float;
 };
@@ -2118,16 +2119,16 @@ class ResolverBuiltinTest_TextureOperation : public ResolverTestWithParam<Textur
     /// @param dim dimensionality of the texture being sampled
     /// @param scalar the scalar type
     /// @returns a pointer to a type appropriate for the coord param
-    const ast::Type* GetCoordsType(ast::TextureDimension dim, const ast::Type* scalar) {
+    const ast::Type* GetCoordsType(type::TextureDimension dim, const ast::Type* scalar) {
         switch (dim) {
-            case ast::TextureDimension::k1d:
+            case type::TextureDimension::k1d:
                 return scalar;
-            case ast::TextureDimension::k2d:
-            case ast::TextureDimension::k2dArray:
+            case type::TextureDimension::k2d:
+            case type::TextureDimension::k2dArray:
                 return ty.vec(scalar, 2);
-            case ast::TextureDimension::k3d:
-            case ast::TextureDimension::kCube:
-            case ast::TextureDimension::kCubeArray:
+            case type::TextureDimension::k3d:
+            case type::TextureDimension::kCube:
+            case type::TextureDimension::kCubeArray:
                 return ty.vec(scalar, 3);
             default:
                 [=]() { FAIL() << "Unsupported texture dimension: " << dim; }();
@@ -2169,7 +2170,7 @@ TEST_P(ResolverBuiltinTest_SampledTextureOperation, TextureLoadSampled) {
 
     add_call_param("texture", texture_type, &call_params);
     add_call_param("coords", coords_type, &call_params);
-    if (dim == ast::TextureDimension::k2dArray) {
+    if (dim == type::TextureDimension::k2dArray) {
         add_call_param("array_index", ty.i32(), &call_params);
     }
     add_call_param("level", ty.i32(), &call_params);
@@ -2193,10 +2194,10 @@ TEST_P(ResolverBuiltinTest_SampledTextureOperation, TextureLoadSampled) {
 
 INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          ResolverBuiltinTest_SampledTextureOperation,
-                         testing::Values(TextureTestParams{ast::TextureDimension::k1d},
-                                         TextureTestParams{ast::TextureDimension::k2d},
-                                         TextureTestParams{ast::TextureDimension::k2dArray},
-                                         TextureTestParams{ast::TextureDimension::k3d}));
+                         testing::Values(TextureTestParams{type::TextureDimension::k1d},
+                                         TextureTestParams{type::TextureDimension::k2d},
+                                         TextureTestParams{type::TextureDimension::k2dArray},
+                                         TextureTestParams{type::TextureDimension::k3d}));
 
 using ResolverBuiltinTest_Texture = ResolverTestWithParam<ast::builtin::test::TextureOverloadCase>;
 
@@ -2469,20 +2470,20 @@ TEST_P(ResolverBuiltinTest_Texture, Call) {
         switch (param.texture_dimension) {
             default:
                 FAIL() << "invalid texture dimensions: " << param.texture_dimension;
-            case ast::TextureDimension::k1d:
+            case type::TextureDimension::k1d:
                 EXPECT_TRUE(TypeOf(call)->Is<type::U32>());
                 break;
-            case ast::TextureDimension::k2d:
-            case ast::TextureDimension::k2dArray:
-            case ast::TextureDimension::kCube:
-            case ast::TextureDimension::kCubeArray: {
+            case type::TextureDimension::k2d:
+            case type::TextureDimension::k2dArray:
+            case type::TextureDimension::kCube:
+            case type::TextureDimension::kCubeArray: {
                 auto* vec = As<type::Vector>(TypeOf(call));
                 ASSERT_NE(vec, nullptr);
                 EXPECT_EQ(vec->Width(), 2u);
                 EXPECT_TRUE(vec->type()->Is<type::U32>());
                 break;
             }
-            case ast::TextureDimension::k3d: {
+            case type::TextureDimension::k3d: {
                 auto* vec = As<type::Vector>(TypeOf(call));
                 ASSERT_NE(vec, nullptr);
                 EXPECT_EQ(vec->Width(), 3u);

@@ -18,6 +18,7 @@
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/test_helper.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::type {
 namespace {
@@ -25,25 +26,25 @@ namespace {
 using DepthTextureTest = TestHelper;
 
 TEST_F(DepthTextureTest, Creation) {
-    auto* a = create<DepthTexture>(ast::TextureDimension::k2d);
-    auto* b = create<DepthTexture>(ast::TextureDimension::k2d);
-    auto* c = create<DepthTexture>(ast::TextureDimension::k2dArray);
+    auto* a = create<DepthTexture>(TextureDimension::k2d);
+    auto* b = create<DepthTexture>(TextureDimension::k2d);
+    auto* c = create<DepthTexture>(TextureDimension::k2dArray);
 
     EXPECT_EQ(a, b);
     EXPECT_NE(a, c);
 }
 
 TEST_F(DepthTextureTest, Hash) {
-    auto* a = create<DepthTexture>(ast::TextureDimension::k2d);
-    auto* b = create<DepthTexture>(ast::TextureDimension::k2d);
+    auto* a = create<DepthTexture>(TextureDimension::k2d);
+    auto* b = create<DepthTexture>(TextureDimension::k2d);
 
     EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(DepthTextureTest, Equals) {
-    auto* a = create<DepthTexture>(ast::TextureDimension::k2d);
-    auto* b = create<DepthTexture>(ast::TextureDimension::k2d);
-    auto* c = create<DepthTexture>(ast::TextureDimension::k2dArray);
+    auto* a = create<DepthTexture>(TextureDimension::k2d);
+    auto* b = create<DepthTexture>(TextureDimension::k2d);
+    auto* c = create<DepthTexture>(TextureDimension::k2dArray);
 
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
@@ -51,7 +52,7 @@ TEST_F(DepthTextureTest, Equals) {
 }
 
 TEST_F(DepthTextureTest, IsTexture) {
-    DepthTexture d(ast::TextureDimension::kCube);
+    DepthTexture d(TextureDimension::kCube);
     Texture* ty = &d;
     EXPECT_TRUE(ty->Is<DepthTexture>());
     EXPECT_FALSE(ty->Is<ExternalTexture>());
@@ -60,23 +61,23 @@ TEST_F(DepthTextureTest, IsTexture) {
 }
 
 TEST_F(DepthTextureTest, Dim) {
-    DepthTexture d(ast::TextureDimension::kCube);
-    EXPECT_EQ(d.dim(), ast::TextureDimension::kCube);
+    DepthTexture d(TextureDimension::kCube);
+    EXPECT_EQ(d.dim(), TextureDimension::kCube);
 }
 
 TEST_F(DepthTextureTest, FriendlyName) {
-    DepthTexture d(ast::TextureDimension::kCube);
+    DepthTexture d(TextureDimension::kCube);
     EXPECT_EQ(d.FriendlyName(Symbols()), "texture_depth_cube");
 }
 
 TEST_F(DepthTextureTest, Clone) {
-    auto* a = create<DepthTexture>(ast::TextureDimension::k2d);
+    auto* a = create<DepthTexture>(TextureDimension::k2d);
 
     type::Manager mgr;
     type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* dt = a->Clone(ctx);
-    EXPECT_EQ(dt->dim(), ast::TextureDimension::k2d);
+    EXPECT_EQ(dt->dim(), TextureDimension::k2d);
 }
 
 }  // namespace

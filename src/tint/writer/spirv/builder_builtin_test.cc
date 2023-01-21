@@ -15,6 +15,7 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/type/depth_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
@@ -41,7 +42,7 @@ inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
 // This tests that we do not push OpTypeSampledImage and float_0 type twice.
 TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
     auto* s = ty.sampler(ast::SamplerKind::kComparisonSampler);
-    auto* t = ty.depth_texture(ast::TextureDimension::k2d);
+    auto* t = ty.depth_texture(type::TextureDimension::k2d);
 
     auto* tex = GlobalVar("texture", t, Binding(0_a), Group(0_a));
     auto* sampler = GlobalVar("sampler", s, Binding(1_a), Group(0_a));

@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/tint/type/texture.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::type {
 
@@ -27,7 +28,7 @@ class SampledTexture final : public Castable<SampledTexture, Texture> {
     /// Constructor
     /// @param dim the dimensionality of the texture
     /// @param type the data type of the sampled texture
-    SampledTexture(ast::TextureDimension dim, const Type* type);
+    SampledTexture(TextureDimension dim, const Type* type);
 
     /// Destructor
     ~SampledTexture() override;

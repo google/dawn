@@ -22,12 +22,12 @@ namespace {
 using AstDepthMultisampledTextureTest = TestHelper;
 
 TEST_F(AstDepthMultisampledTextureTest, Dim) {
-    auto* d = create<DepthMultisampledTexture>(TextureDimension::k2d);
-    EXPECT_EQ(d->dim, TextureDimension::k2d);
+    auto* d = create<DepthMultisampledTexture>(type::TextureDimension::k2d);
+    EXPECT_EQ(d->dim, type::TextureDimension::k2d);
 }
 
 TEST_F(AstDepthMultisampledTextureTest, FriendlyName) {
-    auto* d = create<DepthMultisampledTexture>(TextureDimension::k2d);
+    auto* d = create<DepthMultisampledTexture>(type::TextureDimension::k2d);
     EXPECT_EQ(d->FriendlyName(Symbols()), "texture_depth_multisampled_2d");
 }
 

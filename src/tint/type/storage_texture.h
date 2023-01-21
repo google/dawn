@@ -20,6 +20,7 @@
 #include "src/tint/ast/access.h"
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/type/texture.h"
+#include "src/tint/type/texture_dimension.h"
 
 // Forward declarations
 namespace tint::type {
@@ -36,7 +37,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     /// @param format the texel format of the texture
     /// @param access the access control type of the texture
     /// @param subtype the storage subtype. Use SubtypeFor() to calculate this.
-    StorageTexture(ast::TextureDimension dim,
+    StorageTexture(TextureDimension dim,
                    ast::TexelFormat format,
                    ast::Access access,
                    Type* subtype);

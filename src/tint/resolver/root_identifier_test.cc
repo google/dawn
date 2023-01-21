@@ -17,6 +17,7 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/index_accessor_expression.h"
 #include "src/tint/sem/member_accessor_expression.h"
+#include "src/tint/type/texture_dimension.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -70,7 +71,7 @@ TEST_F(ResolverRootIdentifierTest, GlobalUniformVar) {
 }
 
 TEST_F(ResolverRootIdentifierTest, GlobalTextureVar) {
-    auto* a = GlobalVar("a", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+    auto* a = GlobalVar("a", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
                         ast::AddressSpace::kNone, Group(0_a), Binding(0_a));
     auto* expr = Expr(a);
     WrapInFunction(Call("textureDimensions", expr));

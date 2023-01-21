@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/tint/ast/texture.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::ast {
 
@@ -33,7 +34,7 @@ class MultisampledTexture final : public Castable<MultisampledTexture, Texture> 
     MultisampledTexture(ProgramID pid,
                         NodeID nid,
                         const Source& src,
-                        TextureDimension dim,
+                        type::TextureDimension dim,
                         const Type* type);
     /// Move constructor
     MultisampledTexture(MultisampledTexture&&);

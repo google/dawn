@@ -20,7 +20,7 @@
 namespace tint::type {
 namespace {
 
-using TextureTypeDimTest = TestParamHelper<ast::TextureDimension>;
+using TextureTypeDimTest = TestParamHelper<TextureDimension>;
 
 TEST_P(TextureTypeDimTest, DimMustMatch) {
     // Check that the dim() query returns the right dimensionality.
@@ -33,12 +33,12 @@ TEST_P(TextureTypeDimTest, DimMustMatch) {
 
 INSTANTIATE_TEST_SUITE_P(Dimensions,
                          TextureTypeDimTest,
-                         ::testing::Values(ast::TextureDimension::k1d,
-                                           ast::TextureDimension::k2d,
-                                           ast::TextureDimension::k2dArray,
-                                           ast::TextureDimension::k3d,
-                                           ast::TextureDimension::kCube,
-                                           ast::TextureDimension::kCubeArray));
+                         ::testing::Values(TextureDimension::k1d,
+                                           TextureDimension::k2d,
+                                           TextureDimension::k2dArray,
+                                           TextureDimension::k3d,
+                                           TextureDimension::kCube,
+                                           TextureDimension::kCubeArray));
 
 }  // namespace
 }  // namespace tint::type

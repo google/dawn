@@ -18,6 +18,7 @@
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
 #include "src/tint/type/matrix.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
@@ -25,21 +26,21 @@
 namespace tint::inspector {
 
 ResourceBinding::TextureDimension TypeTextureDimensionToResourceBindingTextureDimension(
-    const ast::TextureDimension& type_dim) {
+    const type::TextureDimension& type_dim) {
     switch (type_dim) {
-        case ast::TextureDimension::k1d:
+        case type::TextureDimension::k1d:
             return ResourceBinding::TextureDimension::k1d;
-        case ast::TextureDimension::k2d:
+        case type::TextureDimension::k2d:
             return ResourceBinding::TextureDimension::k2d;
-        case ast::TextureDimension::k2dArray:
+        case type::TextureDimension::k2dArray:
             return ResourceBinding::TextureDimension::k2dArray;
-        case ast::TextureDimension::k3d:
+        case type::TextureDimension::k3d:
             return ResourceBinding::TextureDimension::k3d;
-        case ast::TextureDimension::kCube:
+        case type::TextureDimension::kCube:
             return ResourceBinding::TextureDimension::kCube;
-        case ast::TextureDimension::kCubeArray:
+        case type::TextureDimension::kCubeArray:
             return ResourceBinding::TextureDimension::kCubeArray;
-        case ast::TextureDimension::kNone:
+        case type::TextureDimension::kNone:
             return ResourceBinding::TextureDimension::kNone;
     }
     return ResourceBinding::TextureDimension::kNone;

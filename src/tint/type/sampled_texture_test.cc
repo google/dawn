@@ -18,6 +18,7 @@
 #include "src/tint/type/external_texture.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/test_helper.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::type {
 namespace {
@@ -25,13 +26,13 @@ namespace {
 using SampledTextureTest = TestHelper;
 
 TEST_F(SampledTextureTest, Creation) {
-    auto* a = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
-    auto* b = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
-    auto* c = create<SampledTexture>(ast::TextureDimension::k2d, create<F32>());
-    auto* d = create<SampledTexture>(ast::TextureDimension::kCube, create<I32>());
+    auto* a = create<SampledTexture>(TextureDimension::kCube, create<F32>());
+    auto* b = create<SampledTexture>(TextureDimension::kCube, create<F32>());
+    auto* c = create<SampledTexture>(TextureDimension::k2d, create<F32>());
+    auto* d = create<SampledTexture>(TextureDimension::kCube, create<I32>());
 
     EXPECT_TRUE(a->type()->Is<F32>());
-    EXPECT_EQ(a->dim(), ast::TextureDimension::kCube);
+    EXPECT_EQ(a->dim(), TextureDimension::kCube);
 
     EXPECT_EQ(a, b);
     EXPECT_NE(a, c);
@@ -39,17 +40,17 @@ TEST_F(SampledTextureTest, Creation) {
 }
 
 TEST_F(SampledTextureTest, Hash) {
-    auto* a = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
-    auto* b = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
+    auto* a = create<SampledTexture>(TextureDimension::kCube, create<F32>());
+    auto* b = create<SampledTexture>(TextureDimension::kCube, create<F32>());
 
     EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(SampledTextureTest, Equals) {
-    auto* a = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
-    auto* b = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
-    auto* c = create<SampledTexture>(ast::TextureDimension::k2d, create<F32>());
-    auto* d = create<SampledTexture>(ast::TextureDimension::kCube, create<I32>());
+    auto* a = create<SampledTexture>(TextureDimension::kCube, create<F32>());
+    auto* b = create<SampledTexture>(TextureDimension::kCube, create<F32>());
+    auto* c = create<SampledTexture>(TextureDimension::k2d, create<F32>());
+    auto* d = create<SampledTexture>(TextureDimension::kCube, create<I32>());
 
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
@@ -59,7 +60,7 @@ TEST_F(SampledTextureTest, Equals) {
 
 TEST_F(SampledTextureTest, IsTexture) {
     F32 f32;
-    SampledTexture s(ast::TextureDimension::kCube, &f32);
+    SampledTexture s(TextureDimension::kCube, &f32);
     Texture* ty = &s;
     EXPECT_FALSE(ty->Is<DepthTexture>());
     EXPECT_FALSE(ty->Is<ExternalTexture>());
@@ -69,30 +70,30 @@ TEST_F(SampledTextureTest, IsTexture) {
 
 TEST_F(SampledTextureTest, Dim) {
     F32 f32;
-    SampledTexture s(ast::TextureDimension::k3d, &f32);
-    EXPECT_EQ(s.dim(), ast::TextureDimension::k3d);
+    SampledTexture s(TextureDimension::k3d, &f32);
+    EXPECT_EQ(s.dim(), TextureDimension::k3d);
 }
 
 TEST_F(SampledTextureTest, Type) {
     F32 f32;
-    SampledTexture s(ast::TextureDimension::k3d, &f32);
+    SampledTexture s(TextureDimension::k3d, &f32);
     EXPECT_EQ(s.type(), &f32);
 }
 
 TEST_F(SampledTextureTest, FriendlyName) {
     F32 f32;
-    SampledTexture s(ast::TextureDimension::k3d, &f32);
+    SampledTexture s(TextureDimension::k3d, &f32);
     EXPECT_EQ(s.FriendlyName(Symbols()), "texture_3d<f32>");
 }
 
 TEST_F(SampledTextureTest, Clone) {
-    auto* a = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
+    auto* a = create<SampledTexture>(TextureDimension::kCube, create<F32>());
 
     type::Manager mgr;
     type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* mt = a->Clone(ctx);
-    EXPECT_EQ(mt->dim(), ast::TextureDimension::kCube);
+    EXPECT_EQ(mt->dim(), TextureDimension::kCube);
     EXPECT_TRUE(mt->type()->Is<F32>());
 }
 

@@ -21,14 +21,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::DepthTexture);
 namespace tint::ast {
 namespace {
 
-bool IsValidDepthDimension(TextureDimension dim) {
-    return dim == TextureDimension::k2d || dim == TextureDimension::k2dArray ||
-           dim == TextureDimension::kCube || dim == TextureDimension::kCubeArray;
+bool IsValidDepthDimension(type::TextureDimension dim) {
+    return dim == type::TextureDimension::k2d || dim == type::TextureDimension::k2dArray ||
+           dim == type::TextureDimension::kCube || dim == type::TextureDimension::kCubeArray;
 }
 
 }  // namespace
 
-DepthTexture::DepthTexture(ProgramID pid, NodeID nid, const Source& src, TextureDimension d)
+DepthTexture::DepthTexture(ProgramID pid, NodeID nid, const Source& src, type::TextureDimension d)
     : Base(pid, nid, src, d) {
     TINT_ASSERT(AST, IsValidDepthDimension(dim));
 }

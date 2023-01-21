@@ -15,6 +15,7 @@
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -329,7 +330,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Vector_F16) {
 }
 
 struct TextureData {
-    ast::TextureDimension dim;
+    type::TextureDimension dim;
     const char* name;
 };
 inline std::ostream& operator<<(std::ostream& out, TextureData data) {
@@ -353,10 +354,10 @@ TEST_P(WgslGenerator_DepthTextureTest, EmitType_DepthTexture) {
 INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
     WgslGenerator_DepthTextureTest,
-    testing::Values(TextureData{ast::TextureDimension::k2d, "texture_depth_2d"},
-                    TextureData{ast::TextureDimension::k2dArray, "texture_depth_2d_array"},
-                    TextureData{ast::TextureDimension::kCube, "texture_depth_cube"},
-                    TextureData{ast::TextureDimension::kCubeArray, "texture_depth_cube_array"}));
+    testing::Values(TextureData{type::TextureDimension::k2d, "texture_depth_2d"},
+                    TextureData{type::TextureDimension::k2dArray, "texture_depth_2d_array"},
+                    TextureData{type::TextureDimension::kCube, "texture_depth_cube"},
+                    TextureData{type::TextureDimension::kCubeArray, "texture_depth_cube_array"}));
 
 using WgslGenerator_SampledTextureTest = TestParamHelper<TextureData>;
 TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_F32) {
@@ -400,12 +401,12 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_U32) {
 INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
     WgslGenerator_SampledTextureTest,
-    testing::Values(TextureData{ast::TextureDimension::k1d, "texture_1d"},
-                    TextureData{ast::TextureDimension::k2d, "texture_2d"},
-                    TextureData{ast::TextureDimension::k2dArray, "texture_2d_array"},
-                    TextureData{ast::TextureDimension::k3d, "texture_3d"},
-                    TextureData{ast::TextureDimension::kCube, "texture_cube"},
-                    TextureData{ast::TextureDimension::kCubeArray, "texture_cube_array"}));
+    testing::Values(TextureData{type::TextureDimension::k1d, "texture_1d"},
+                    TextureData{type::TextureDimension::k2d, "texture_2d"},
+                    TextureData{type::TextureDimension::k2dArray, "texture_2d_array"},
+                    TextureData{type::TextureDimension::k3d, "texture_3d"},
+                    TextureData{type::TextureDimension::kCube, "texture_cube"},
+                    TextureData{type::TextureDimension::kCubeArray, "texture_cube_array"}));
 
 using WgslGenerator_MultiampledTextureTest = TestParamHelper<TextureData>;
 TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_F32) {
@@ -448,12 +449,12 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_U32) {
 }
 INSTANTIATE_TEST_SUITE_P(WgslGeneratorImplTest,
                          WgslGenerator_MultiampledTextureTest,
-                         testing::Values(TextureData{ast::TextureDimension::k2d,
+                         testing::Values(TextureData{type::TextureDimension::k2d,
                                                      "texture_multisampled_2d"}));
 
 struct StorageTextureData {
     ast::TexelFormat fmt;
-    ast::TextureDimension dim;
+    type::TextureDimension dim;
     ast::Access access;
     const char* name;
 };
@@ -477,14 +478,14 @@ TEST_P(WgslGenerator_StorageTextureTest, EmitType_StorageTexture) {
 INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
     WgslGenerator_StorageTextureTest,
-    testing::Values(StorageTextureData{ast::TexelFormat::kRgba8Sint, ast::TextureDimension::k1d,
+    testing::Values(StorageTextureData{ast::TexelFormat::kRgba8Sint, type::TextureDimension::k1d,
                                        ast::Access::kWrite, "texture_storage_1d<rgba8sint, write>"},
-                    StorageTextureData{ast::TexelFormat::kRgba8Sint, ast::TextureDimension::k2d,
+                    StorageTextureData{ast::TexelFormat::kRgba8Sint, type::TextureDimension::k2d,
                                        ast::Access::kWrite, "texture_storage_2d<rgba8sint, write>"},
                     StorageTextureData{ast::TexelFormat::kRgba8Sint,
-                                       ast::TextureDimension::k2dArray, ast::Access::kWrite,
+                                       type::TextureDimension::k2dArray, ast::Access::kWrite,
                                        "texture_storage_2d_array<rgba8sint, write>"},
-                    StorageTextureData{ast::TexelFormat::kRgba8Sint, ast::TextureDimension::k3d,
+                    StorageTextureData{ast::TexelFormat::kRgba8Sint, type::TextureDimension::k3d,
                                        ast::Access::kWrite,
                                        "texture_storage_3d<rgba8sint, write>"}));
 

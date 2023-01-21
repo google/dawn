@@ -17,6 +17,7 @@
 #include <string>
 
 #include "gmock/gmock.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::reader::spirv {
 namespace {
@@ -217,7 +218,7 @@ struct DimCase {
     spv::Dim dim;
     bool arrayed;
     bool expect_success;
-    ast::TextureDimension expected;
+    type::TextureDimension expected;
 };
 inline std::ostream& operator<<(std::ostream& out, DimCase dc) {
     out << "DimCase{ spv::Dim:::" << int(dc.dim) << " arrayed?:" << int(dc.arrayed)
@@ -256,31 +257,31 @@ INSTANTIATE_TEST_SUITE_P(EnumConverterGood,
                          SpvDimTest,
                          testing::Values(
                              // Non-arrayed
-                             DimCase{spv::Dim::Dim1D, false, true, ast::TextureDimension::k1d},
-                             DimCase{spv::Dim::Dim2D, false, true, ast::TextureDimension::k2d},
-                             DimCase{spv::Dim::Dim3D, false, true, ast::TextureDimension::k3d},
-                             DimCase{spv::Dim::Cube, false, true, ast::TextureDimension::kCube},
+                             DimCase{spv::Dim::Dim1D, false, true, type::TextureDimension::k1d},
+                             DimCase{spv::Dim::Dim2D, false, true, type::TextureDimension::k2d},
+                             DimCase{spv::Dim::Dim3D, false, true, type::TextureDimension::k3d},
+                             DimCase{spv::Dim::Cube, false, true, type::TextureDimension::kCube},
                              // Arrayed
-                             DimCase{spv::Dim::Dim2D, true, true, ast::TextureDimension::k2dArray},
+                             DimCase{spv::Dim::Dim2D, true, true, type::TextureDimension::k2dArray},
                              DimCase{spv::Dim::Cube, true, true,
-                                     ast::TextureDimension::kCubeArray}));
+                                     type::TextureDimension::kCubeArray}));
 
 INSTANTIATE_TEST_SUITE_P(
     EnumConverterBad,
     SpvDimTest,
     testing::Values(
         // Invalid SPIR-V dimensionality.
-        DimCase{spv::Dim::Max, false, false, ast::TextureDimension::kNone},
-        DimCase{spv::Dim::Max, true, false, ast::TextureDimension::kNone},
+        DimCase{spv::Dim::Max, false, false, type::TextureDimension::kNone},
+        DimCase{spv::Dim::Max, true, false, type::TextureDimension::kNone},
         // Vulkan non-arrayed dimensionalities not supported by WGSL.
-        DimCase{spv::Dim::Rect, false, false, ast::TextureDimension::kNone},
-        DimCase{spv::Dim::Buffer, false, false, ast::TextureDimension::kNone},
-        DimCase{spv::Dim::SubpassData, false, false, ast::TextureDimension::kNone},
+        DimCase{spv::Dim::Rect, false, false, type::TextureDimension::kNone},
+        DimCase{spv::Dim::Buffer, false, false, type::TextureDimension::kNone},
+        DimCase{spv::Dim::SubpassData, false, false, type::TextureDimension::kNone},
         // Arrayed dimensionalities not supported by WGSL
-        DimCase{spv::Dim::Dim3D, true, false, ast::TextureDimension::kNone},
-        DimCase{spv::Dim::Rect, true, false, ast::TextureDimension::kNone},
-        DimCase{spv::Dim::Buffer, true, false, ast::TextureDimension::kNone},
-        DimCase{spv::Dim::SubpassData, true, false, ast::TextureDimension::kNone}));
+        DimCase{spv::Dim::Dim3D, true, false, type::TextureDimension::kNone},
+        DimCase{spv::Dim::Rect, true, false, type::TextureDimension::kNone},
+        DimCase{spv::Dim::Buffer, true, false, type::TextureDimension::kNone},
+        DimCase{spv::Dim::SubpassData, true, false, type::TextureDimension::kNone}));
 
 // TexelFormat
 

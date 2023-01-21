@@ -14,6 +14,8 @@
 
 #include "src/tint/reader/spirv/enum_converter.h"
 
+#include "src/tint/type/texture_dimension.h"
+
 namespace tint::reader::spirv {
 
 EnumConverter::EnumConverter(const FailStream& fs) : fail_stream_(fs) {}
@@ -98,34 +100,34 @@ ast::BuiltinValue EnumConverter::ToBuiltin(spv::BuiltIn b) {
     return ast::BuiltinValue::kUndefined;
 }
 
-ast::TextureDimension EnumConverter::ToDim(spv::Dim dim, bool arrayed) {
+type::TextureDimension EnumConverter::ToDim(spv::Dim dim, bool arrayed) {
     if (arrayed) {
         switch (dim) {
             case spv::Dim::Dim2D:
-                return ast::TextureDimension::k2dArray;
+                return type::TextureDimension::k2dArray;
             case spv::Dim::Cube:
-                return ast::TextureDimension::kCubeArray;
+                return type::TextureDimension::kCubeArray;
             default:
                 break;
         }
         Fail() << "arrayed dimension must be 2D or Cube. Got " << int(dim);
-        return ast::TextureDimension::kNone;
+        return type::TextureDimension::kNone;
     }
     // Assume non-arrayed
     switch (dim) {
         case spv::Dim::Dim1D:
-            return ast::TextureDimension::k1d;
+            return type::TextureDimension::k1d;
         case spv::Dim::Dim2D:
-            return ast::TextureDimension::k2d;
+            return type::TextureDimension::k2d;
         case spv::Dim::Dim3D:
-            return ast::TextureDimension::k3d;
+            return type::TextureDimension::k3d;
         case spv::Dim::Cube:
-            return ast::TextureDimension::kCube;
+            return type::TextureDimension::kCube;
         default:
             break;
     }
     Fail() << "invalid dimension: " << int(dim);
-    return ast::TextureDimension::kNone;
+    return type::TextureDimension::kNone;
 }
 
 ast::TexelFormat EnumConverter::ToTexelFormat(spv::ImageFormat fmt) {

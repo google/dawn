@@ -43,6 +43,7 @@
 #include "src/tint/type/external_texture.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/reverse.h"
 #include "src/tint/utils/string.h"
 
@@ -806,29 +807,29 @@ Maybe<const ast::Type*> ParserImpl::sampler_type() {
 //  | TEXTURE_SAMPLED_3D
 //  | TEXTURE_SAMPLED_CUBE
 //  | TEXTURE_SAMPLED_CUBE_ARRAY
-Maybe<const ast::TextureDimension> ParserImpl::sampled_texture_type() {
+Maybe<const type::TextureDimension> ParserImpl::sampled_texture_type() {
     if (match(Token::Type::kTextureSampled1d)) {
-        return ast::TextureDimension::k1d;
+        return type::TextureDimension::k1d;
     }
 
     if (match(Token::Type::kTextureSampled2d)) {
-        return ast::TextureDimension::k2d;
+        return type::TextureDimension::k2d;
     }
 
     if (match(Token::Type::kTextureSampled2dArray)) {
-        return ast::TextureDimension::k2dArray;
+        return type::TextureDimension::k2dArray;
     }
 
     if (match(Token::Type::kTextureSampled3d)) {
-        return ast::TextureDimension::k3d;
+        return type::TextureDimension::k3d;
     }
 
     if (match(Token::Type::kTextureSampledCube)) {
-        return ast::TextureDimension::kCube;
+        return type::TextureDimension::kCube;
     }
 
     if (match(Token::Type::kTextureSampledCubeArray)) {
-        return ast::TextureDimension::kCubeArray;
+        return type::TextureDimension::kCubeArray;
     }
 
     return Failure::kNoMatch;
@@ -847,9 +848,9 @@ Maybe<const ast::Type*> ParserImpl::external_texture() {
 
 // multisampled_texture_type
 //  : TEXTURE_MULTISAMPLED_2D
-Maybe<const ast::TextureDimension> ParserImpl::multisampled_texture_type() {
+Maybe<const type::TextureDimension> ParserImpl::multisampled_texture_type() {
     if (match(Token::Type::kTextureMultisampled2d)) {
-        return ast::TextureDimension::k2d;
+        return type::TextureDimension::k2d;
     }
 
     return Failure::kNoMatch;
@@ -860,18 +861,18 @@ Maybe<const ast::TextureDimension> ParserImpl::multisampled_texture_type() {
 //  | TEXTURE_STORAGE_2D
 //  | TEXTURE_STORAGE_2D_ARRAY
 //  | TEXTURE_STORAGE_3D
-Maybe<const ast::TextureDimension> ParserImpl::storage_texture_type() {
+Maybe<const type::TextureDimension> ParserImpl::storage_texture_type() {
     if (match(Token::Type::kTextureStorage1d)) {
-        return ast::TextureDimension::k1d;
+        return type::TextureDimension::k1d;
     }
     if (match(Token::Type::kTextureStorage2d)) {
-        return ast::TextureDimension::k2d;
+        return type::TextureDimension::k2d;
     }
     if (match(Token::Type::kTextureStorage2dArray)) {
-        return ast::TextureDimension::k2dArray;
+        return type::TextureDimension::k2dArray;
     }
     if (match(Token::Type::kTextureStorage3d)) {
-        return ast::TextureDimension::k3d;
+        return type::TextureDimension::k3d;
     }
 
     return Failure::kNoMatch;
@@ -886,19 +887,19 @@ Maybe<const ast::TextureDimension> ParserImpl::storage_texture_type() {
 Maybe<const ast::Type*> ParserImpl::depth_texture_type() {
     Source source;
     if (match(Token::Type::kTextureDepth2d, &source)) {
-        return builder_.ty.depth_texture(source, ast::TextureDimension::k2d);
+        return builder_.ty.depth_texture(source, type::TextureDimension::k2d);
     }
     if (match(Token::Type::kTextureDepth2dArray, &source)) {
-        return builder_.ty.depth_texture(source, ast::TextureDimension::k2dArray);
+        return builder_.ty.depth_texture(source, type::TextureDimension::k2dArray);
     }
     if (match(Token::Type::kTextureDepthCube, &source)) {
-        return builder_.ty.depth_texture(source, ast::TextureDimension::kCube);
+        return builder_.ty.depth_texture(source, type::TextureDimension::kCube);
     }
     if (match(Token::Type::kTextureDepthCubeArray, &source)) {
-        return builder_.ty.depth_texture(source, ast::TextureDimension::kCubeArray);
+        return builder_.ty.depth_texture(source, type::TextureDimension::kCubeArray);
     }
     if (match(Token::Type::kTextureDepthMultisampled2d, &source)) {
-        return builder_.ty.depth_multisampled_texture(source, ast::TextureDimension::k2d);
+        return builder_.ty.depth_multisampled_texture(source, type::TextureDimension::k2d);
     }
     return Failure::kNoMatch;
 }

@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "src/tint/program_builder.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/string.h"
@@ -222,24 +223,24 @@ const ast::Type* Sampler::Build(ProgramBuilder& b) const {
     return b.ty.sampler(kind);
 }
 
-Texture::Texture(ast::TextureDimension d) : dims(d) {}
+Texture::Texture(type::TextureDimension d) : dims(d) {}
 Texture::Texture(const Texture&) = default;
 
-DepthTexture::DepthTexture(ast::TextureDimension d) : Base(d) {}
+DepthTexture::DepthTexture(type::TextureDimension d) : Base(d) {}
 DepthTexture::DepthTexture(const DepthTexture&) = default;
 
 const ast::Type* DepthTexture::Build(ProgramBuilder& b) const {
     return b.ty.depth_texture(dims);
 }
 
-DepthMultisampledTexture::DepthMultisampledTexture(ast::TextureDimension d) : Base(d) {}
+DepthMultisampledTexture::DepthMultisampledTexture(type::TextureDimension d) : Base(d) {}
 DepthMultisampledTexture::DepthMultisampledTexture(const DepthMultisampledTexture&) = default;
 
 const ast::Type* DepthMultisampledTexture::Build(ProgramBuilder& b) const {
     return b.ty.depth_multisampled_texture(dims);
 }
 
-MultisampledTexture::MultisampledTexture(ast::TextureDimension d, const Type* t)
+MultisampledTexture::MultisampledTexture(type::TextureDimension d, const Type* t)
     : Base(d), type(t) {}
 MultisampledTexture::MultisampledTexture(const MultisampledTexture&) = default;
 
@@ -247,14 +248,14 @@ const ast::Type* MultisampledTexture::Build(ProgramBuilder& b) const {
     return b.ty.multisampled_texture(dims, type->Build(b));
 }
 
-SampledTexture::SampledTexture(ast::TextureDimension d, const Type* t) : Base(d), type(t) {}
+SampledTexture::SampledTexture(type::TextureDimension d, const Type* t) : Base(d), type(t) {}
 SampledTexture::SampledTexture(const SampledTexture&) = default;
 
 const ast::Type* SampledTexture::Build(ProgramBuilder& b) const {
     return b.ty.sampled_texture(dims, type->Build(b));
 }
 
-StorageTexture::StorageTexture(ast::TextureDimension d, ast::TexelFormat f, ast::Access a)
+StorageTexture::StorageTexture(type::TextureDimension d, ast::TexelFormat f, ast::Access a)
     : Base(d), format(f), access(a) {}
 StorageTexture::StorageTexture(const StorageTexture&) = default;
 
@@ -494,26 +495,26 @@ const spirv::Sampler* TypeManager::Sampler(ast::SamplerKind kind) {
     return state->samplers_.Get(kind);
 }
 
-const spirv::DepthTexture* TypeManager::DepthTexture(ast::TextureDimension dims) {
+const spirv::DepthTexture* TypeManager::DepthTexture(type::TextureDimension dims) {
     return state->depth_textures_.Get(dims);
 }
 
 const spirv::DepthMultisampledTexture* TypeManager::DepthMultisampledTexture(
-    ast::TextureDimension dims) {
+    type::TextureDimension dims) {
     return state->depth_multisampled_textures_.Get(dims);
 }
 
-const spirv::MultisampledTexture* TypeManager::MultisampledTexture(ast::TextureDimension dims,
+const spirv::MultisampledTexture* TypeManager::MultisampledTexture(type::TextureDimension dims,
                                                                    const Type* ty) {
     return state->multisampled_textures_.Get(dims, ty);
 }
 
-const spirv::SampledTexture* TypeManager::SampledTexture(ast::TextureDimension dims,
+const spirv::SampledTexture* TypeManager::SampledTexture(type::TextureDimension dims,
                                                          const Type* ty) {
     return state->sampled_textures_.Get(dims, ty);
 }
 
-const spirv::StorageTexture* TypeManager::StorageTexture(ast::TextureDimension dims,
+const spirv::StorageTexture* TypeManager::StorageTexture(type::TextureDimension dims,
                                                          ast::TexelFormat fmt,
                                                          ast::Access access) {
     return state->storage_textures_.Get(dims, fmt, access);

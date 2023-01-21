@@ -17,6 +17,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/type/storage_texture.h"
+#include "src/tint/type/texture_dimension.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -230,7 +231,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Handle) {
     // a = b;
 
     auto make_type = [&] {
-        return ty.storage_texture(ast::TextureDimension::k1d, ast::TexelFormat::kRgba8Unorm,
+        return ty.storage_texture(type::TextureDimension::k1d, ast::TexelFormat::kRgba8Unorm,
                                   ast::Access::kWrite);
     };
 
@@ -360,7 +361,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
     auto* U = Structure("U", utils::Vector{
                                  Member("i", ty.i32()),
                              });
-    GlobalVar("tex", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(0_a),
+    GlobalVar("tex", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Group(0_a),
               Binding(0_a));
     GlobalVar("smp", ty.sampler(ast::SamplerKind::kSampler), Group(0_a), Binding(1_a));
     GlobalVar("u", ty.Of(U), ast::AddressSpace::kUniform, Group(0_a), Binding(2_a));

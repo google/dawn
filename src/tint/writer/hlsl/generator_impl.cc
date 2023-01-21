@@ -69,6 +69,7 @@
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
@@ -2312,27 +2313,27 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
             switch (builtin->Type()) {
                 case sem::BuiltinType::kTextureDimensions:
                     switch (texture_type->dim()) {
-                        case ast::TextureDimension::kNone:
+                        case type::TextureDimension::kNone:
                             TINT_ICE(Writer, diagnostics_) << "texture dimension is kNone";
                             return false;
-                        case ast::TextureDimension::k1d:
+                        case type::TextureDimension::k1d:
                             num_dimensions = 1;
                             break;
-                        case ast::TextureDimension::k2d:
+                        case type::TextureDimension::k2d:
                             num_dimensions = is_ms ? 3 : 2;
                             swizzle = is_ms ? ".xy" : "";
                             break;
-                        case ast::TextureDimension::k2dArray:
+                        case type::TextureDimension::k2dArray:
                             num_dimensions = is_ms ? 4 : 3;
                             swizzle = ".xy";
                             break;
-                        case ast::TextureDimension::k3d:
+                        case type::TextureDimension::k3d:
                             num_dimensions = 3;
                             break;
-                        case ast::TextureDimension::kCube:
+                        case type::TextureDimension::kCube:
                             num_dimensions = 2;
                             break;
-                        case ast::TextureDimension::kCubeArray:
+                        case type::TextureDimension::kCubeArray:
                             num_dimensions = 3;
                             swizzle = ".xy";
                             break;
@@ -2343,11 +2344,11 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                         default:
                             TINT_ICE(Writer, diagnostics_) << "texture dimension is not arrayed";
                             return false;
-                        case ast::TextureDimension::k2dArray:
+                        case type::TextureDimension::k2dArray:
                             num_dimensions = is_ms ? 4 : 3;
                             swizzle = ".z";
                             break;
-                        case ast::TextureDimension::kCubeArray:
+                        case type::TextureDimension::kCubeArray:
                             num_dimensions = 3;
                             swizzle = ".z";
                             break;
@@ -2359,18 +2360,18 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                             TINT_ICE(Writer, diagnostics_)
                                 << "texture dimension does not support mips";
                             return false;
-                        case ast::TextureDimension::k1d:
+                        case type::TextureDimension::k1d:
                             num_dimensions = 2;
                             swizzle = ".y";
                             break;
-                        case ast::TextureDimension::k2d:
-                        case ast::TextureDimension::kCube:
+                        case type::TextureDimension::k2d:
+                        case type::TextureDimension::kCube:
                             num_dimensions = 3;
                             swizzle = ".z";
                             break;
-                        case ast::TextureDimension::k2dArray:
-                        case ast::TextureDimension::k3d:
-                        case ast::TextureDimension::kCubeArray:
+                        case type::TextureDimension::k2dArray:
+                        case type::TextureDimension::k3d:
+                        case type::TextureDimension::kCubeArray:
                             num_dimensions = 4;
                             swizzle = ".w";
                             break;
@@ -2382,11 +2383,11 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                             TINT_ICE(Writer, diagnostics_)
                                 << "texture dimension does not support multisampling";
                             return false;
-                        case ast::TextureDimension::k2d:
+                        case type::TextureDimension::k2d:
                             num_dimensions = 3;
                             swizzle = ".z";
                             break;
-                        case ast::TextureDimension::k2dArray:
+                        case type::TextureDimension::k2dArray:
                             num_dimensions = 4;
                             swizzle = ".w";
                             break;
@@ -4051,22 +4052,22 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             out << "Texture";
 
             switch (tex->dim()) {
-                case ast::TextureDimension::k1d:
+                case type::TextureDimension::k1d:
                     out << "1D";
                     break;
-                case ast::TextureDimension::k2d:
+                case type::TextureDimension::k2d:
                     out << ((ms || depth_ms) ? "2DMS" : "2D");
                     break;
-                case ast::TextureDimension::k2dArray:
+                case type::TextureDimension::k2dArray:
                     out << ((ms || depth_ms) ? "2DMSArray" : "2DArray");
                     break;
-                case ast::TextureDimension::k3d:
+                case type::TextureDimension::k3d:
                     out << "3D";
                     break;
-                case ast::TextureDimension::kCube:
+                case type::TextureDimension::kCube:
                     out << "Cube";
                     break;
-                case ast::TextureDimension::kCubeArray:
+                case type::TextureDimension::kCubeArray:
                     out << "CubeArray";
                     break;
                 default:

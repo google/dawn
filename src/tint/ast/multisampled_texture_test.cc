@@ -39,7 +39,7 @@ using AstMultisampledTextureTest = TestHelper;
 
 TEST_F(AstMultisampledTextureTest, IsTexture) {
     auto* f32 = create<F32>();
-    Texture* ty = create<MultisampledTexture>(TextureDimension::kCube, f32);
+    Texture* ty = create<MultisampledTexture>(type::TextureDimension::kCube, f32);
     EXPECT_FALSE(ty->Is<DepthTexture>());
     EXPECT_TRUE(ty->Is<MultisampledTexture>());
     EXPECT_FALSE(ty->Is<SampledTexture>());
@@ -48,19 +48,19 @@ TEST_F(AstMultisampledTextureTest, IsTexture) {
 
 TEST_F(AstMultisampledTextureTest, Dim) {
     auto* f32 = create<F32>();
-    auto* s = create<MultisampledTexture>(TextureDimension::k3d, f32);
-    EXPECT_EQ(s->dim, TextureDimension::k3d);
+    auto* s = create<MultisampledTexture>(type::TextureDimension::k3d, f32);
+    EXPECT_EQ(s->dim, type::TextureDimension::k3d);
 }
 
 TEST_F(AstMultisampledTextureTest, Type) {
     auto* f32 = create<F32>();
-    auto* s = create<MultisampledTexture>(TextureDimension::k3d, f32);
+    auto* s = create<MultisampledTexture>(type::TextureDimension::k3d, f32);
     EXPECT_EQ(s->type, f32);
 }
 
 TEST_F(AstMultisampledTextureTest, FriendlyName) {
     auto* f32 = create<F32>();
-    auto* s = create<MultisampledTexture>(TextureDimension::k3d, f32);
+    auto* s = create<MultisampledTexture>(type::TextureDimension::k3d, f32);
     EXPECT_EQ(s->FriendlyName(Symbols()), "texture_multisampled_3d<f32>");
 }
 

@@ -15,6 +15,7 @@
 #include "src/tint/ast/external_texture.h"
 
 #include "src/tint/ast/test_helper.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::ast {
 namespace {
@@ -32,7 +33,7 @@ TEST_F(AstExternalTextureTest, IsTexture) {
 
 TEST_F(AstExternalTextureTest, Dim) {
     auto* ty = create<ExternalTexture>();
-    EXPECT_EQ(ty->dim, ast::TextureDimension::k2d);
+    EXPECT_EQ(ty->dim, type::TextureDimension::k2d);
 }
 
 TEST_F(AstExternalTextureTest, FriendlyName) {

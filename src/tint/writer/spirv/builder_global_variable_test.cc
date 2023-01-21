@@ -14,6 +14,7 @@
 
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/stage_attribute.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
@@ -469,7 +470,7 @@ OpName %9 "unused_entry_point"
 TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
     // var<uniform_constant> a : texture_storage_2d<r32uint, write>;
 
-    auto* type = ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
+    auto* type = ty.storage_texture(type::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
                                     ast::Access::kWrite);
 
     auto* var_a = GlobalVar("a", type, Binding(0_a), Group(0_a));

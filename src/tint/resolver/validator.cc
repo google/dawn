@@ -73,6 +73,7 @@
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/sampler.h"
 #include "src/tint/type/storage_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/math.h"
@@ -84,12 +85,12 @@
 namespace tint::resolver {
 namespace {
 
-bool IsValidStorageTextureDimension(ast::TextureDimension dim) {
+bool IsValidStorageTextureDimension(type::TextureDimension dim) {
     switch (dim) {
-        case ast::TextureDimension::k1d:
-        case ast::TextureDimension::k2d:
-        case ast::TextureDimension::k2dArray:
-        case ast::TextureDimension::k3d:
+        case type::TextureDimension::k1d:
+        case type::TextureDimension::k2d:
+        case type::TextureDimension::k2dArray:
+        case type::TextureDimension::k3d:
             return true;
         default:
             return false;
@@ -331,7 +332,7 @@ bool Validator::SampledTexture(const type::SampledTexture* t, const Source& sour
 
 bool Validator::MultisampledTexture(const type::MultisampledTexture* t,
                                     const Source& source) const {
-    if (t->dim() != ast::TextureDimension::k2d) {
+    if (t->dim() != type::TextureDimension::k2d) {
         AddError("only 2d multisampled textures are supported", source);
         return false;
     }

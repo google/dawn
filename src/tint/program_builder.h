@@ -107,6 +107,7 @@
 #include "src/tint/type/pointer.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
@@ -1012,7 +1013,7 @@ class ProgramBuilder {
 
         /// @param dims the dimensionality of the texture
         /// @returns the depth texture
-        const ast::DepthTexture* depth_texture(ast::TextureDimension dims) const {
+        const ast::DepthTexture* depth_texture(type::TextureDimension dims) const {
             return builder->create<ast::DepthTexture>(dims);
         }
 
@@ -1020,14 +1021,14 @@ class ProgramBuilder {
         /// @param dims the dimensionality of the texture
         /// @returns the depth texture
         const ast::DepthTexture* depth_texture(const Source& source,
-                                               ast::TextureDimension dims) const {
+                                               type::TextureDimension dims) const {
             return builder->create<ast::DepthTexture>(source, dims);
         }
 
         /// @param dims the dimensionality of the texture
         /// @returns the multisampled depth texture
         const ast::DepthMultisampledTexture* depth_multisampled_texture(
-            ast::TextureDimension dims) const {
+            type::TextureDimension dims) const {
             return builder->create<ast::DepthMultisampledTexture>(dims);
         }
 
@@ -1036,14 +1037,14 @@ class ProgramBuilder {
         /// @returns the multisampled depth texture
         const ast::DepthMultisampledTexture* depth_multisampled_texture(
             const Source& source,
-            ast::TextureDimension dims) const {
+            type::TextureDimension dims) const {
             return builder->create<ast::DepthMultisampledTexture>(source, dims);
         }
 
         /// @param dims the dimensionality of the texture
         /// @param subtype the texture subtype.
         /// @returns the sampled texture
-        const ast::SampledTexture* sampled_texture(ast::TextureDimension dims,
+        const ast::SampledTexture* sampled_texture(type::TextureDimension dims,
                                                    const ast::Type* subtype) const {
             return builder->create<ast::SampledTexture>(dims, subtype);
         }
@@ -1053,7 +1054,7 @@ class ProgramBuilder {
         /// @param subtype the texture subtype.
         /// @returns the sampled texture
         const ast::SampledTexture* sampled_texture(const Source& source,
-                                                   ast::TextureDimension dims,
+                                                   type::TextureDimension dims,
                                                    const ast::Type* subtype) const {
             return builder->create<ast::SampledTexture>(source, dims, subtype);
         }
@@ -1061,7 +1062,7 @@ class ProgramBuilder {
         /// @param dims the dimensionality of the texture
         /// @param subtype the texture subtype.
         /// @returns the multisampled texture
-        const ast::MultisampledTexture* multisampled_texture(ast::TextureDimension dims,
+        const ast::MultisampledTexture* multisampled_texture(type::TextureDimension dims,
                                                              const ast::Type* subtype) const {
             return builder->create<ast::MultisampledTexture>(dims, subtype);
         }
@@ -1071,7 +1072,7 @@ class ProgramBuilder {
         /// @param subtype the texture subtype.
         /// @returns the multisampled texture
         const ast::MultisampledTexture* multisampled_texture(const Source& source,
-                                                             ast::TextureDimension dims,
+                                                             type::TextureDimension dims,
                                                              const ast::Type* subtype) const {
             return builder->create<ast::MultisampledTexture>(source, dims, subtype);
         }
@@ -1080,7 +1081,7 @@ class ProgramBuilder {
         /// @param format the texel format of the texture
         /// @param access the access control of the texture
         /// @returns the storage texture
-        const ast::StorageTexture* storage_texture(ast::TextureDimension dims,
+        const ast::StorageTexture* storage_texture(type::TextureDimension dims,
                                                    ast::TexelFormat format,
                                                    ast::Access access) const {
             auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
@@ -1093,7 +1094,7 @@ class ProgramBuilder {
         /// @param access the access control of the texture
         /// @returns the storage texture
         const ast::StorageTexture* storage_texture(const Source& source,
-                                                   ast::TextureDimension dims,
+                                                   type::TextureDimension dims,
                                                    ast::TexelFormat format,
                                                    ast::Access access) const {
             auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);

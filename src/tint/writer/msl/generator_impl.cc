@@ -72,6 +72,7 @@
 #include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
@@ -1020,25 +1021,25 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     };
 
     // MSL requires that `lod` is a constant 0 for 1D textures.
-    bool level_is_constant_zero = texture_type->dim() == ast::TextureDimension::k1d;
+    bool level_is_constant_zero = texture_type->dim() == type::TextureDimension::k1d;
 
     switch (builtin->Type()) {
         case sem::BuiltinType::kTextureDimensions: {
             std::vector<const char*> dims;
             switch (texture_type->dim()) {
-                case ast::TextureDimension::kNone:
+                case type::TextureDimension::kNone:
                     diagnostics_.add_error(diag::System::Writer, "texture dimension is kNone");
                     return false;
-                case ast::TextureDimension::k1d:
+                case type::TextureDimension::k1d:
                     dims = {"width"};
                     break;
-                case ast::TextureDimension::k2d:
-                case ast::TextureDimension::k2dArray:
-                case ast::TextureDimension::kCube:
-                case ast::TextureDimension::kCubeArray:
+                case type::TextureDimension::k2d:
+                case type::TextureDimension::k2dArray:
+                case type::TextureDimension::kCube:
+                case type::TextureDimension::kCubeArray:
                     dims = {"width", "height"};
                     break;
-                case ast::TextureDimension::k3d:
+                case type::TextureDimension::k3d:
                     dims = {"width", "height", "depth"};
                     break;
             }
@@ -1155,14 +1156,14 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
             if (usage == Usage::kCoords && e->Type()->UnwrapRef()->is_integer_scalar_or_vector()) {
                 casted = true;
                 switch (texture_type->dim()) {
-                    case ast::TextureDimension::k1d:
+                    case type::TextureDimension::k1d:
                         out << "uint(";
                         break;
-                    case ast::TextureDimension::k2d:
-                    case ast::TextureDimension::k2dArray:
+                    case type::TextureDimension::k2d:
+                    case type::TextureDimension::k2dArray:
                         out << "uint2(";
                         break;
-                    case ast::TextureDimension::k3d:
+                    case type::TextureDimension::k3d:
                         out << "uint3(";
                         break;
                     default:
@@ -1212,17 +1213,17 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     if (auto* ddx = arg(Usage::kDdx)) {
         auto dim = texture_type->dim();
         switch (dim) {
-            case ast::TextureDimension::k2d:
-            case ast::TextureDimension::k2dArray:
+            case type::TextureDimension::k2d:
+            case type::TextureDimension::k2dArray:
                 maybe_write_comma();
                 out << "gradient2d(";
                 break;
-            case ast::TextureDimension::k3d:
+            case type::TextureDimension::k3d:
                 maybe_write_comma();
                 out << "gradient3d(";
                 break;
-            case ast::TextureDimension::kCube:
-            case ast::TextureDimension::kCubeArray:
+            case type::TextureDimension::kCube:
+            case type::TextureDimension::kCubeArray:
                 maybe_write_comma();
                 out << "gradientcube(";
                 break;
@@ -1257,8 +1258,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         if (!has_offset) {
             // offset argument may need to be provided if we have a component.
             switch (texture_type->dim()) {
-                case ast::TextureDimension::k2d:
-                case ast::TextureDimension::k2dArray:
+                case type::TextureDimension::k2d:
+                case type::TextureDimension::k2dArray:
                     out << "int2(0), ";
                     break;
                 default:
@@ -2624,22 +2625,22 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             }
 
             switch (tex->dim()) {
-                case ast::TextureDimension::k1d:
+                case type::TextureDimension::k1d:
                     out << "1d";
                     break;
-                case ast::TextureDimension::k2d:
+                case type::TextureDimension::k2d:
                     out << "2d";
                     break;
-                case ast::TextureDimension::k2dArray:
+                case type::TextureDimension::k2dArray:
                     out << "2d_array";
                     break;
-                case ast::TextureDimension::k3d:
+                case type::TextureDimension::k3d:
                     out << "3d";
                     break;
-                case ast::TextureDimension::kCube:
+                case type::TextureDimension::kCube:
                     out << "cube";
                     break;
-                case ast::TextureDimension::kCubeArray:
+                case type::TextureDimension::kCubeArray:
                     out << "cube_array";
                     break;
                 default:

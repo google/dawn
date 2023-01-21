@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::StorageTexture);
 
 namespace tint::type {
 
-StorageTexture::StorageTexture(ast::TextureDimension dim,
+StorageTexture::StorageTexture(TextureDimension dim,
                                ast::TexelFormat format,
                                ast::Access access,
                                Type* subtype)

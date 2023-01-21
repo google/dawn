@@ -27,6 +27,7 @@
 #include "src/tint/reader/wgsl/parser_impl_detail.h"
 #include "src/tint/reader/wgsl/token.h"
 #include "src/tint/type/storage_texture.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::ast {
 class BreakStatement;
@@ -486,14 +487,14 @@ class ParserImpl {
     /// Parses a `multisampled_texture_type` grammar element
     /// @returns returns the multisample texture dimension or kNone if none
     /// matched.
-    Maybe<const ast::TextureDimension> multisampled_texture_type();
+    Maybe<const type::TextureDimension> multisampled_texture_type();
     /// Parses a `sampled_texture_type` grammar element
     /// @returns returns the sample texture dimension or kNone if none matched.
-    Maybe<const ast::TextureDimension> sampled_texture_type();
+    Maybe<const type::TextureDimension> sampled_texture_type();
     /// Parses a `storage_texture_type` grammar element
     /// @returns returns the storage texture dimension.
     /// Returns kNone if none matched.
-    Maybe<const ast::TextureDimension> storage_texture_type();
+    Maybe<const type::TextureDimension> storage_texture_type();
     /// Parses a `depth_texture_type` grammar element
     /// @returns the parsed Type or nullptr if none matched.
     Maybe<const ast::Type*> depth_texture_type();

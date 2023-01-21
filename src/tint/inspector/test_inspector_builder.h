@@ -31,6 +31,7 @@
 #include "src/tint/type/external_texture.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "tint/tint.h"
 
 namespace tint::inspector {
@@ -287,13 +288,13 @@ class InspectorBuilder : public ProgramBuilder {
     /// @param dim dimensionality of the texture being sampled
     /// @param scalar the scalar type
     /// @returns a pointer to a type appropriate for the coord param
-    const ast::Type* GetCoordsType(ast::TextureDimension dim, const ast::Type* scalar);
+    const ast::Type* GetCoordsType(type::TextureDimension dim, const ast::Type* scalar);
 
     /// Generates appropriate types for a Read-Only StorageTexture
     /// @param dim the texture dimension of the storage texture
     /// @param format the texel format of the storage texture
     /// @returns the storage texture type
-    const ast::Type* MakeStorageTextureTypes(ast::TextureDimension dim, ast::TexelFormat format);
+    const ast::Type* MakeStorageTextureTypes(type::TextureDimension dim, ast::TexelFormat format);
 
     /// Adds a storage texture variable to the program
     /// @param name the name of the variable

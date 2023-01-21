@@ -18,6 +18,7 @@
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/test_helper.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::type {
 namespace {
@@ -25,22 +26,22 @@ namespace {
 using DepthMultisampledTextureTest = TestHelper;
 
 TEST_F(DepthMultisampledTextureTest, Creation) {
-    auto* a = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
-    auto* b = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
+    auto* a = create<DepthMultisampledTexture>(TextureDimension::k2d);
+    auto* b = create<DepthMultisampledTexture>(TextureDimension::k2d);
 
     EXPECT_EQ(a, b);
 }
 
 TEST_F(DepthMultisampledTextureTest, Hash) {
-    auto* a = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
-    auto* b = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
+    auto* a = create<DepthMultisampledTexture>(TextureDimension::k2d);
+    auto* b = create<DepthMultisampledTexture>(TextureDimension::k2d);
 
     EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(DepthMultisampledTextureTest, Equals) {
-    auto* a = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
-    auto* b = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
+    auto* a = create<DepthMultisampledTexture>(TextureDimension::k2d);
+    auto* b = create<DepthMultisampledTexture>(TextureDimension::k2d);
 
     EXPECT_TRUE(a->Equals(*a));
     EXPECT_TRUE(a->Equals(*b));
@@ -48,23 +49,23 @@ TEST_F(DepthMultisampledTextureTest, Equals) {
 }
 
 TEST_F(DepthMultisampledTextureTest, Dim) {
-    DepthMultisampledTexture d(ast::TextureDimension::k2d);
-    EXPECT_EQ(d.dim(), ast::TextureDimension::k2d);
+    DepthMultisampledTexture d(TextureDimension::k2d);
+    EXPECT_EQ(d.dim(), TextureDimension::k2d);
 }
 
 TEST_F(DepthMultisampledTextureTest, FriendlyName) {
-    DepthMultisampledTexture d(ast::TextureDimension::k2d);
+    DepthMultisampledTexture d(TextureDimension::k2d);
     EXPECT_EQ(d.FriendlyName(Symbols()), "texture_depth_multisampled_2d");
 }
 
 TEST_F(DepthMultisampledTextureTest, Clone) {
-    auto* a = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
+    auto* a = create<DepthMultisampledTexture>(TextureDimension::k2d);
 
     type::Manager mgr;
     type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* dt = a->Clone(ctx);
-    EXPECT_EQ(dt->dim(), ast::TextureDimension::k2d);
+    EXPECT_EQ(dt->dim(), TextureDimension::k2d);
 }
 
 }  // namespace

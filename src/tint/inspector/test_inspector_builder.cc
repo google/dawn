@@ -259,17 +259,17 @@ const ast::Type* InspectorBuilder::GetBaseType(ResourceBinding::SampledKind samp
     }
 }
 
-const ast::Type* InspectorBuilder::GetCoordsType(ast::TextureDimension dim,
+const ast::Type* InspectorBuilder::GetCoordsType(type::TextureDimension dim,
                                                  const ast::Type* scalar) {
     switch (dim) {
-        case ast::TextureDimension::k1d:
+        case type::TextureDimension::k1d:
             return scalar;
-        case ast::TextureDimension::k2d:
-        case ast::TextureDimension::k2dArray:
+        case type::TextureDimension::k2d:
+        case type::TextureDimension::k2dArray:
             return create<ast::Vector>(scalar, 2u);
-        case ast::TextureDimension::k3d:
-        case ast::TextureDimension::kCube:
-        case ast::TextureDimension::kCubeArray:
+        case type::TextureDimension::k3d:
+        case type::TextureDimension::kCube:
+        case type::TextureDimension::kCubeArray:
             return create<ast::Vector>(scalar, 3u);
         default:
             [=]() { FAIL() << "Unsupported texture dimension: " << dim; }();
@@ -277,7 +277,7 @@ const ast::Type* InspectorBuilder::GetCoordsType(ast::TextureDimension dim,
     return nullptr;
 }
 
-const ast::Type* InspectorBuilder::MakeStorageTextureTypes(ast::TextureDimension dim,
+const ast::Type* InspectorBuilder::MakeStorageTextureTypes(type::TextureDimension dim,
                                                            ast::TexelFormat format) {
     return ty.storage_texture(dim, format, ast::Access::kWrite);
 }

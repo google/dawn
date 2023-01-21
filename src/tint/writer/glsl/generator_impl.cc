@@ -70,6 +70,7 @@
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
@@ -1406,8 +1407,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
             out << ")";
             // textureSize() on array samplers returns the array size in the
             // final component, so strip it out.
-            if (texture_type->dim() == ast::TextureDimension::k2dArray ||
-                texture_type->dim() == ast::TextureDimension::kCubeArray) {
+            if (texture_type->dim() == type::TextureDimension::k2dArray ||
+                texture_type->dim() == type::TextureDimension::kCubeArray) {
                 out << ".xy";
             }
             return true;
@@ -1548,7 +1549,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     // GLSL requires Dref to be appended to the coordinates, *unless* it's
     // samplerCubeArrayShadow, in which case it will be handled as a separate
     // parameter.
-    if (texture_type->dim() == ast::TextureDimension::kCubeArray) {
+    if (texture_type->dim() == type::TextureDimension::kCubeArray) {
         append_depth_ref_to_coords = false;
     }
 
@@ -2949,22 +2950,22 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         out << (storage ? "image" : "sampler");
 
         switch (tex->dim()) {
-            case ast::TextureDimension::k1d:
+            case type::TextureDimension::k1d:
                 out << "1D";
                 break;
-            case ast::TextureDimension::k2d:
+            case type::TextureDimension::k2d:
                 out << ((ms || depth_ms) ? "2DMS" : "2D");
                 break;
-            case ast::TextureDimension::k2dArray:
+            case type::TextureDimension::k2dArray:
                 out << ((ms || depth_ms) ? "2DMSArray" : "2DArray");
                 break;
-            case ast::TextureDimension::k3d:
+            case type::TextureDimension::k3d:
                 out << "3D";
                 break;
-            case ast::TextureDimension::kCube:
+            case type::TextureDimension::kCube:
                 out << "Cube";
                 break;
-            case ast::TextureDimension::kCubeArray:
+            case type::TextureDimension::kCubeArray:
                 out << "CubeArray";
                 break;
             default:

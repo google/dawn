@@ -37,6 +37,7 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/texture_dimension.h"
 
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
@@ -345,7 +346,7 @@ TEST_F(ResolverValidationTest, AddressSpace_SamplerExplicitAddressSpace) {
 }
 
 TEST_F(ResolverValidationTest, AddressSpace_TextureExplicitAddressSpace) {
-    auto* t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
+    auto* t = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
     GlobalVar(Source{{12, 34}}, "var", t, ast::AddressSpace::kHandle, Binding(0_a), Group(0_a));
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();

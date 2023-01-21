@@ -20,6 +20,7 @@
 #include "src/tint/ast/access.h"
 #include "src/tint/ast/texel_format.h"
 #include "src/tint/ast/texture.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::ast {
 
@@ -37,7 +38,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     StorageTexture(ProgramID pid,
                    NodeID nid,
                    const Source& src,
-                   TextureDimension dim,
+                   type::TextureDimension dim,
                    TexelFormat format,
                    const Type* subtype,
                    Access access_control);

@@ -22,6 +22,7 @@
 #include "src/tint/ast/pipeline_stage.h"
 #include "src/tint/reader/spirv/fail_stream.h"
 #include "src/tint/type/storage_texture.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::reader::spirv {
 
@@ -57,14 +58,14 @@ class EnumConverter {
     /// @param dim the SPIR-V Dim value
     /// @param arrayed true if the texture is arrayed
     /// @returns a Tint AST texture dimension
-    ast::TextureDimension ToDim(spv::Dim dim, bool arrayed);
+    type::TextureDimension ToDim(spv::Dim dim, bool arrayed);
 
     /// Converts a possibly arrayed SPIR-V Dim to a Tint texture dimension.
     /// On failure, logs an error and returns kNone
     /// @param dim the SPIR-V Dim value
     /// @param arrayed true if the texture is arrayed
     /// @returns a Tint AST texture dimension
-    ast::TextureDimension ToDim(SpvDim dim, bool arrayed) {
+    type::TextureDimension ToDim(SpvDim dim, bool arrayed) {
         return ToDim(static_cast<spv::Dim>(dim), arrayed);
     }
 

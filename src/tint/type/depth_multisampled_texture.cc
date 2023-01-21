@@ -15,6 +15,7 @@
 #include "src/tint/type/depth_multisampled_texture.h"
 
 #include "src/tint/program_builder.h"
+#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::DepthMultisampledTexture);
@@ -22,13 +23,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::DepthMultisampledTexture);
 namespace tint::type {
 namespace {
 
-bool IsValidDepthDimension(ast::TextureDimension dim) {
-    return dim == ast::TextureDimension::k2d;
+bool IsValidDepthDimension(TextureDimension dim) {
+    return dim == TextureDimension::k2d;
 }
 
 }  // namespace
 
-DepthMultisampledTexture::DepthMultisampledTexture(ast::TextureDimension dim)
+DepthMultisampledTexture::DepthMultisampledTexture(TextureDimension dim)
     : Base(utils::Hash(TypeInfo::Of<DepthMultisampledTexture>().full_hashcode, dim), dim) {
     TINT_ASSERT(Type, IsValidDepthDimension(dim));
 }

@@ -30,6 +30,7 @@
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/test_helper.h"
+#include "src/tint/type/texture_dimension.h"
 
 namespace tint::resolver {
 namespace {
@@ -97,7 +98,7 @@ TEST_F(IntrinsicTableTest, MatchI32) {
     auto* f32 = create<type::F32>();
     auto* i32 = create<type::I32>();
     auto* vec4_f32 = create<type::Vector>(f32, 4u);
-    auto* tex = create<type::SampledTexture>(ast::TextureDimension::k1d, f32);
+    auto* tex = create<type::SampledTexture>(type::TextureDimension::k1d, f32);
     auto result = table->Lookup(BuiltinType::kTextureLoad, utils::Vector{tex, i32, i32},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
@@ -115,7 +116,7 @@ TEST_F(IntrinsicTableTest, MatchI32) {
 
 TEST_F(IntrinsicTableTest, MismatchI32) {
     auto* f32 = create<type::F32>();
-    auto* tex = create<type::SampledTexture>(ast::TextureDimension::k1d, f32);
+    auto* tex = create<type::SampledTexture>(type::TextureDimension::k1d, f32);
     auto result = table->Lookup(BuiltinType::kTextureLoad, utils::Vector{tex, f32},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_EQ(result.sem, nullptr);
@@ -280,7 +281,7 @@ TEST_F(IntrinsicTableTest, MatchSampler) {
     auto* f32 = create<type::F32>();
     auto* vec2_f32 = create<type::Vector>(f32, 2u);
     auto* vec4_f32 = create<type::Vector>(f32, 4u);
-    auto* tex = create<type::SampledTexture>(ast::TextureDimension::k2d, f32);
+    auto* tex = create<type::SampledTexture>(type::TextureDimension::k2d, f32);
     auto* sampler = create<type::Sampler>(ast::SamplerKind::kSampler);
     auto result = table->Lookup(BuiltinType::kTextureSample, utils::Vector{tex, sampler, vec2_f32},
                                 sem::EvaluationStage::kConstant, Source{});
@@ -300,7 +301,7 @@ TEST_F(IntrinsicTableTest, MatchSampler) {
 TEST_F(IntrinsicTableTest, MismatchSampler) {
     auto* f32 = create<type::F32>();
     auto* vec2_f32 = create<type::Vector>(f32, 2u);
-    auto* tex = create<type::SampledTexture>(ast::TextureDimension::k2d, f32);
+    auto* tex = create<type::SampledTexture>(type::TextureDimension::k2d, f32);
     auto result = table->Lookup(BuiltinType::kTextureSample, utils::Vector{tex, f32, vec2_f32},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_EQ(result.sem, nullptr);
@@ -312,7 +313,7 @@ TEST_F(IntrinsicTableTest, MatchSampledTexture) {
     auto* f32 = create<type::F32>();
     auto* vec2_i32 = create<type::Vector>(i32, 2u);
     auto* vec4_f32 = create<type::Vector>(f32, 4u);
-    auto* tex = create<type::SampledTexture>(ast::TextureDimension::k2d, f32);
+    auto* tex = create<type::SampledTexture>(type::TextureDimension::k2d, f32);
     auto result = table->Lookup(BuiltinType::kTextureLoad, utils::Vector{tex, vec2_i32, i32},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
@@ -333,7 +334,7 @@ TEST_F(IntrinsicTableTest, MatchMultisampledTexture) {
     auto* f32 = create<type::F32>();
     auto* vec2_i32 = create<type::Vector>(i32, 2u);
     auto* vec4_f32 = create<type::Vector>(f32, 4u);
-    auto* tex = create<type::MultisampledTexture>(ast::TextureDimension::k2d, f32);
+    auto* tex = create<type::MultisampledTexture>(type::TextureDimension::k2d, f32);
     auto result = table->Lookup(BuiltinType::kTextureLoad, utils::Vector{tex, vec2_i32, i32},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
@@ -353,7 +354,7 @@ TEST_F(IntrinsicTableTest, MatchDepthTexture) {
     auto* f32 = create<type::F32>();
     auto* i32 = create<type::I32>();
     auto* vec2_i32 = create<type::Vector>(i32, 2u);
-    auto* tex = create<type::DepthTexture>(ast::TextureDimension::k2d);
+    auto* tex = create<type::DepthTexture>(type::TextureDimension::k2d);
     auto result = table->Lookup(BuiltinType::kTextureLoad, utils::Vector{tex, vec2_i32, i32},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
@@ -373,7 +374,7 @@ TEST_F(IntrinsicTableTest, MatchDepthMultisampledTexture) {
     auto* f32 = create<type::F32>();
     auto* i32 = create<type::I32>();
     auto* vec2_i32 = create<type::Vector>(i32, 2u);
-    auto* tex = create<type::DepthMultisampledTexture>(ast::TextureDimension::k2d);
+    auto* tex = create<type::DepthMultisampledTexture>(type::TextureDimension::k2d);
     auto result = table->Lookup(BuiltinType::kTextureLoad, utils::Vector{tex, vec2_i32, i32},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
@@ -415,7 +416,7 @@ TEST_F(IntrinsicTableTest, MatchWOStorageTexture) {
     auto* vec4_f32 = create<type::Vector>(f32, 4u);
     auto* subtype = type::StorageTexture::SubtypeFor(ast::TexelFormat::kR32Float, Types());
     auto* tex = create<type::StorageTexture>(
-        ast::TextureDimension::k2d, ast::TexelFormat::kR32Float, ast::Access::kWrite, subtype);
+        type::TextureDimension::k2d, ast::TexelFormat::kR32Float, ast::Access::kWrite, subtype);
 
     auto result = table->Lookup(BuiltinType::kTextureStore, utils::Vector{tex, vec2_i32, vec4_f32},
                                 sem::EvaluationStage::kConstant, Source{});
@@ -629,7 +630,7 @@ TEST_F(IntrinsicTableTest, OverloadOrderByNumberOfParameters) {
 }
 
 TEST_F(IntrinsicTableTest, OverloadOrderByMatchingParameter) {
-    auto* tex = create<type::DepthTexture>(ast::TextureDimension::k2d);
+    auto* tex = create<type::DepthTexture>(type::TextureDimension::k2d);
     auto* bool_ = create<type::Bool>();
     table->Lookup(BuiltinType::kTextureDimensions, utils::Vector{tex, bool_},
                   sem::EvaluationStage::kConstant, Source{});
