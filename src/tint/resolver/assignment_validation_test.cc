@@ -33,7 +33,7 @@ TEST_F(ResolverAssignmentValidationTest, ReadOnlyBuffer) {
     auto* s = Structure("S", utils::Vector{
                                  Member("m", ty.i32()),
                              });
-    GlobalVar(Source{{12, 34}}, "a", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{12, 34}}, "a", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
               Binding(0_a), Group(0_a));
 
     WrapInFunction(Assign(Source{{56, 78}}, MemberAccessor("a", "m"), 1_i));
@@ -232,7 +232,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Handle) {
 
     auto make_type = [&] {
         return ty.storage_texture(type::TextureDimension::k1d, ast::TexelFormat::kRgba8Unorm,
-                                  ast::Access::kWrite);
+                                  type::Access::kWrite);
     };
 
     GlobalVar("a", make_type(), Binding(0_a), Group(0_a));
@@ -253,7 +253,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Atomic) {
                                  Member("a", ty.atomic(ty.i32())),
                              });
     GlobalVar(Source{{12, 34}}, "v", ty.Of(s), type::AddressSpace::kStorage,
-              ast::Access::kReadWrite, Binding(0_a), Group(0_a));
+              type::Access::kReadWrite, Binding(0_a), Group(0_a));
 
     WrapInFunction(Assign(Source{{56, 78}}, MemberAccessor("v", "a"), MemberAccessor("v", "a")));
 
@@ -270,7 +270,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_RuntimeArray) {
                                  Member("a", ty.array(ty.f32())),
                              });
     GlobalVar(Source{{12, 34}}, "v", ty.Of(s), type::AddressSpace::kStorage,
-              ast::Access::kReadWrite, Binding(0_a), Group(0_a));
+              type::Access::kReadWrite, Binding(0_a), Group(0_a));
 
     WrapInFunction(Assign(Source{{56, 78}}, MemberAccessor("v", "a"), MemberAccessor("v", "a")));
 

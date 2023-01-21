@@ -17,8 +17,8 @@
 
 #include <string>
 
-#include "src/tint/ast/access.h"
 #include "src/tint/ast/type.h"
+#include "src/tint/type/access.h"
 #include "src/tint/type/address_space.h"
 
 namespace tint::ast {
@@ -38,7 +38,7 @@ class Pointer final : public Castable<Pointer, Type> {
             const Source& src,
             const Type* const subtype,
             type::AddressSpace address_space,
-            ast::Access access);
+            type::Access access);
     /// Move constructor
     Pointer(Pointer&&);
     ~Pointer() override;
@@ -60,7 +60,7 @@ class Pointer final : public Castable<Pointer, Type> {
     type::AddressSpace const address_space;
 
     /// The access control of the pointer
-    ast::Access const access;
+    type::Access const access;
 };
 
 }  // namespace tint::ast

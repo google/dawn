@@ -14,12 +14,12 @@ See:
 {{- Import "src/tint/templates/enums.tmpl.inc" -}}
 {{- $enum := (Sem.Enum "access") -}}
 
-#include "src/tint/ast/access.h"
+#include "src/tint/type/access.h"
 
-namespace tint::ast {
+namespace tint::type {
 
 {{ Eval "ParseEnum" $enum}}
 
 {{ Eval "EnumOStream" $enum}}
 
-}  // namespace tint::ast
+}  // namespace tint::type

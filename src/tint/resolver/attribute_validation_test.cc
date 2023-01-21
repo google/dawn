@@ -723,7 +723,7 @@ TEST_F(StructMemberAttributeTest, Align_Attribute_ConstAFloat) {
 
 TEST_F(StructMemberAttributeTest, Align_Attribute_Var) {
     GlobalVar(Source{{1, 2}}, "val", ty.f32(), type::AddressSpace::kPrivate,
-              ast::Access::kUndefined, Expr(1.23_f));
+              type::Access::kUndefined, Expr(1.23_f));
 
     Structure(Source{{6, 4}}, "mystruct",
               utils::Vector{Member(Source{{12, 5}}, "a", ty.f32(),
@@ -797,7 +797,7 @@ TEST_F(StructMemberAttributeTest, Size_Attribute_ConstAFloat) {
 
 TEST_F(StructMemberAttributeTest, Size_Attribute_Var) {
     GlobalVar(Source{{1, 2}}, "val", ty.f32(), type::AddressSpace::kPrivate,
-              ast::Access::kUndefined, Expr(1.23_f));
+              type::Access::kUndefined, Expr(1.23_f));
 
     Structure(Source{{6, 4}}, "mystruct",
               utils::Vector{Member(Source{{12, 5}}, "a", ty.f32(),
@@ -1159,7 +1159,7 @@ TEST_F(ResourceAttributeTest, StorageBufferMissingBinding) {
     auto* s = Structure("S", utils::Vector{
                                  Member("x", ty.i32()),
                              });
-    GlobalVar(Source{{12, 34}}, "G", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kRead);
+    GlobalVar(Source{{12, 34}}, "G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

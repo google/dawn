@@ -1151,7 +1151,7 @@ class UniformityGraph {
             [&](const sem::GlobalVariable* global) {
                 // Loads from global read-write variables may be non-uniform.
                 if (global->Declaration()->Is<ast::Var>() &&
-                    global->Access() != ast::Access::kRead && load_rule) {
+                    global->Access() != type::Access::kRead && load_rule) {
                     node->AddEdge(current_function_->may_be_non_uniform);
                 } else {
                     node->AddEdge(cf);
@@ -1168,7 +1168,7 @@ class UniformityGraph {
                         // We are loading from the pointer, so add an edge to its contents.
                         auto* root = var_user->RootIdentifier();
                         if (root->Is<sem::GlobalVariable>()) {
-                            if (root->Access() != ast::Access::kRead) {
+                            if (root->Access() != type::Access::kRead) {
                                 // The contents of a mutable global variable is always non-uniform.
                                 node->AddEdge(current_function_->may_be_non_uniform);
                             }
@@ -1420,7 +1420,7 @@ class UniformityGraph {
 
                 auto* root = sem_arg->RootIdentifier();
                 if (root->Is<sem::GlobalVariable>()) {
-                    if (root->Access() != ast::Access::kRead) {
+                    if (root->Access() != type::Access::kRead) {
                         // The contents of a mutable global variable is always non-uniform.
                         arg_contents->AddEdge(current_function_->may_be_non_uniform);
                     }

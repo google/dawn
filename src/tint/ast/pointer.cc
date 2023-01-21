@@ -25,7 +25,7 @@ Pointer::Pointer(ProgramID pid,
                  const Source& src,
                  const Type* const subtype,
                  type::AddressSpace addr_space,
-                 ast::Access ac)
+                 type::Access ac)
     : Base(pid, nid, src), type(subtype), address_space(addr_space), access(ac) {}
 
 std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
@@ -35,7 +35,7 @@ std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
         out << address_space << ", ";
     }
     out << type->FriendlyName(symbols);
-    if (access != ast::Access::kUndefined) {
+    if (access != type::Access::kUndefined) {
         out << ", " << access;
     }
     out << ">";

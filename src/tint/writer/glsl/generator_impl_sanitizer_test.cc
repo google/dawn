@@ -26,7 +26,7 @@ using GlslSanitizerTest = TestHelper;
 
 TEST_F(GlslSanitizerTest, Call_ArrayLength) {
     auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>(4))});
-    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
               Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
@@ -66,7 +66,7 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
                                          Member(0, "z", ty.f32()),
                                          Member(4, "a", ty.array<f32>(4)),
                                      });
-    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
               Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
@@ -105,7 +105,7 @@ void main() {
 
 TEST_F(GlslSanitizerTest, Call_ArrayLength_ViaLets) {
     auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>(4))});
-    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
               Group(2_a));
 
     auto* p = Let("p", AddressOf("b"));

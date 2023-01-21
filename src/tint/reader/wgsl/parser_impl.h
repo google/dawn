@@ -22,10 +22,10 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/ast/access.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/reader/wgsl/parser_impl_detail.h"
 #include "src/tint/reader/wgsl/token.h"
+#include "src/tint/type/access.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/texture_dimension.h"
 
@@ -285,7 +285,7 @@ class ParserImpl {
         VarDeclInfo(Source source_in,
                     std::string name_in,
                     type::AddressSpace address_space_in,
-                    ast::Access access_in,
+                    type::Access access_in,
                     const ast::Type* type_in);
         /// Destructor
         ~VarDeclInfo();
@@ -297,7 +297,7 @@ class ParserImpl {
         /// Variable address space
         type::AddressSpace address_space = type::AddressSpace::kNone;
         /// Variable access control
-        ast::Access access = ast::Access::kUndefined;
+        type::Access access = type::Access::kUndefined;
         /// Variable type
         const ast::Type* type = nullptr;
     };
@@ -307,7 +307,7 @@ class ParserImpl {
         /// The variable's address space
         type::AddressSpace address_space = type::AddressSpace::kNone;
         /// The variable's access control
-        ast::Access access = ast::Access::kUndefined;
+        type::Access access = type::Access::kUndefined;
     };
 
     /// MatrixDimensions contains the column and row information for a matrix
@@ -525,7 +525,7 @@ class ParserImpl {
     /// match a valid access control.
     /// @param use a description of what was being parsed if an error was raised
     /// @returns the parsed access control.
-    Expect<ast::Access> expect_access_mode(std::string_view use);
+    Expect<type::Access> expect_access_mode(std::string_view use);
     /// Parses an interpolation sample name identifier, erroring if the next token does not match a
     /// valid sample name.
     /// @returns the parsed sample name.

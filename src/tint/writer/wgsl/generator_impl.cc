@@ -16,7 +16,6 @@
 
 #include <algorithm>
 
-#include "src/tint/ast/access.h"
 #include "src/tint/ast/alias.h"
 #include "src/tint/ast/array.h"
 #include "src/tint/ast/atomic.h"
@@ -51,6 +50,7 @@
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
+#include "src/tint/type/access.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/math.h"
 #include "src/tint/utils/scoped_assignment.h"
@@ -361,15 +361,15 @@ bool GeneratorImpl::EmitImageFormat(std::ostream& out, const ast::TexelFormat fm
     return true;
 }
 
-bool GeneratorImpl::EmitAccess(std::ostream& out, const ast::Access access) {
+bool GeneratorImpl::EmitAccess(std::ostream& out, const type::Access access) {
     switch (access) {
-        case ast::Access::kRead:
+        case type::Access::kRead:
             out << "read";
             return true;
-        case ast::Access::kWrite:
+        case type::Access::kWrite:
             out << "write";
             return true;
-        case ast::Access::kReadWrite:
+        case type::Access::kReadWrite:
             out << "read_write";
             return true;
         default:
@@ -439,7 +439,7 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
             if (!EmitType(out, ptr->type)) {
                 return false;
             }
-            if (ptr->access != ast::Access::kUndefined) {
+            if (ptr->access != type::Access::kUndefined) {
                 out << ", ";
                 if (!EmitAccess(out, ptr->access)) {
                     return false;
@@ -669,9 +669,9 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* v) {
             out << "var";
             auto address_space = var->declared_address_space;
             auto ac = var->declared_access;
-            if (address_space != type::AddressSpace::kNone || ac != ast::Access::kUndefined) {
+            if (address_space != type::AddressSpace::kNone || ac != type::Access::kUndefined) {
                 out << "<" << address_space;
-                if (ac != ast::Access::kUndefined) {
+                if (ac != type::Access::kUndefined) {
                     out << ", ";
                     if (!EmitAccess(out, ac)) {
                         return false;

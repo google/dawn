@@ -214,7 +214,7 @@ ParserImpl::VarDeclInfo::VarDeclInfo(const VarDeclInfo&) = default;
 ParserImpl::VarDeclInfo::VarDeclInfo(Source source_in,
                                      std::string name_in,
                                      type::AddressSpace address_space_in,
-                                     ast::Access access_in,
+                                     type::Access access_in,
                                      const ast::Type* type_in)
     : source(std::move(source_in)),
       name(std::move(name_in)),
@@ -754,7 +754,7 @@ Maybe<const ast::Type*> ParserImpl::texture_and_sampler_types() {
     auto storage = storage_texture_type();
     if (storage.matched) {
         const char* use = "storage texture type";
-        using StorageTextureInfo = std::pair<tint::ast::TexelFormat, tint::ast::Access>;
+        using StorageTextureInfo = std::pair<tint::ast::TexelFormat, tint::type::Access>;
         auto params = expect_lt_gt_block(use, [&]() -> Expect<StorageTextureInfo> {
             auto format = expect_texel_format(use);
             if (format.errored) {
@@ -971,8 +971,8 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_type_specifier
 //   : 'read'
 //   | 'write'
 //   | 'read_write'
-Expect<ast::Access> ParserImpl::expect_access_mode(std::string_view use) {
-    return expect_enum("access control", ast::ParseAccess, ast::kAccessStrings, use);
+Expect<type::Access> ParserImpl::expect_access_mode(std::string_view use) {
+    return expect_enum("access control", type::ParseAccess, type::kAccessStrings, use);
 }
 
 // variable_qualifier
@@ -996,7 +996,7 @@ Maybe<ParserImpl::VariableQualifier> ParserImpl::variable_qualifier() {
             }
             return VariableQualifier{sc.value, ac.value};
         }
-        return Expect<VariableQualifier>{VariableQualifier{sc.value, ast::Access::kUndefined},
+        return Expect<VariableQualifier>{VariableQualifier{sc.value, type::Access::kUndefined},
                                          source};
     });
 
@@ -1252,7 +1252,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_specifier_pointer(const Source&
     const char* use = "ptr declaration";
 
     auto address_space = type::AddressSpace::kNone;
-    auto access = ast::Access::kUndefined;
+    auto access = type::Access::kUndefined;
 
     auto subtype = expect_lt_gt_block(use, [&]() -> Expect<const ast::Type*> {
         auto sc = expect_address_space(use);

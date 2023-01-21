@@ -414,7 +414,7 @@ class GeneratorImpl : public TextGenerator {
     bool EmitType(std::ostream& out,
                   const type::Type* type,
                   type::AddressSpace address_space,
-                  ast::Access access,
+                  type::Access access,
                   const std::string& name,
                   bool* name_printed = nullptr);
     /// Handles generating type and name
@@ -427,7 +427,7 @@ class GeneratorImpl : public TextGenerator {
     bool EmitTypeAndName(std::ostream& out,
                          const type::Type* type,
                          type::AddressSpace address_space,
-                         ast::Access access,
+                         type::Access access,
                          const std::string& name);
     /// Handles generating a structure declaration. If the structure has already been emitted, then
     /// this function will simply return `true` without emitting anything.

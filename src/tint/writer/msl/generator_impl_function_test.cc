@@ -342,7 +342,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_EntryPoint_With_RW_StorageBu
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kReadWrite, Group(0_a),
+    GlobalVar("coord", ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite, Group(0_a),
               Binding(0_a));
 
     auto* var = Var("v", ty.f32(), MemberAccessor("coord", "b"));
@@ -381,7 +381,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_EntryPoint_With_RO_StorageBu
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kRead, Group(0_a),
+    GlobalVar("coord", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Group(0_a),
               Binding(0_a));
 
     auto* var = Var("v", ty.f32(), MemberAccessor("coord", "b"));
@@ -467,7 +467,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RW
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kReadWrite, Group(0_a),
+    GlobalVar("coord", ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite, Group(0_a),
               Binding(0_a));
 
     Func("sub_func",
@@ -519,7 +519,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RO
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kRead, Group(0_a),
+    GlobalVar("coord", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Group(0_a),
               Binding(0_a));
 
     Func("sub_func",
@@ -657,7 +657,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleV
 
     auto* s = Structure("Data", utils::Vector{Member("d", ty.f32())});
 
-    GlobalVar("data", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kReadWrite, Group(0_a),
+    GlobalVar("data", ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite, Group(0_a),
               Binding(0_a));
 
     {

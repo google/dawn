@@ -278,7 +278,7 @@ bool Validator::Pointer(const ast::Pointer* a, const type::Pointer* s) const {
         return false;
     }
 
-    if (a->access != ast::Access::kUndefined) {
+    if (a->access != type::Access::kUndefined) {
         // https://www.w3.org/TR/WGSL/#access-mode-defaults
         // When writing a variable declaration or a pointer type in WGSL source:
         // * For the storage address space, the access mode is optional, and defaults to read.
@@ -296,9 +296,9 @@ bool Validator::Pointer(const ast::Pointer* a, const type::Pointer* s) const {
 
 bool Validator::StorageTexture(const ast::StorageTexture* t) const {
     switch (t->access) {
-        case ast::Access::kWrite:
+        case type::Access::kWrite:
             break;
-        case ast::Access::kUndefined:
+        case type::Access::kUndefined:
             AddError("storage texture missing access control", t->source);
             return false;
         default:
@@ -693,7 +693,7 @@ bool Validator::Var(const sem::Variable* v) const {
         }
     }
 
-    if (var->declared_access != ast::Access::kUndefined) {
+    if (var->declared_access != type::Access::kUndefined) {
         // https://www.w3.org/TR/WGSL/#access-mode-defaults
         // When writing a variable declaration or a pointer type in WGSL source:
         // * For the storage address space, the access mode is optional, and defaults to read.
@@ -2353,7 +2353,7 @@ bool Validator::Assignment(const ast::Statement* a, const type::Type* rhs_ty) co
         AddError("storage type of assignment must be constructible", a->source);
         return false;
     }
-    if (lhs_ref->Access() == ast::Access::kRead) {
+    if (lhs_ref->Access() == type::Access::kRead) {
         AddError("cannot store into a read-only type '" + sem_.RawTypeNameOf(lhs_ty) + "'",
                  a->source);
         return false;
@@ -2394,7 +2394,7 @@ bool Validator::IncrementDecrementStatement(const ast::IncrementDecrementStateme
         return false;
     }
 
-    if (lhs_ref->Access() == ast::Access::kRead) {
+    if (lhs_ref->Access() == type::Access::kRead) {
         AddError("cannot modify read-only type '" + sem_.RawTypeNameOf(lhs_ty) + "'", inc->source);
         return false;
     }
@@ -2454,7 +2454,7 @@ std::string Validator::VectorPretty(uint32_t size, const type::Type* element_typ
 
 bool Validator::CheckTypeAccessAddressSpace(
     const type::Type* store_ty,
-    ast::Access access,
+    type::Access access,
     type::AddressSpace address_space,
     utils::VectorRef<const tint::ast::Attribute*> attributes,
     const Source& source) const {
@@ -2472,7 +2472,7 @@ bool Validator::CheckTypeAccessAddressSpace(
         return false;
     }
 
-    if (address_space == type::AddressSpace::kStorage && access == ast::Access::kWrite) {
+    if (address_space == type::AddressSpace::kStorage && access == type::Access::kWrite) {
         // The access mode for the storage address space can only be 'read' or
         // 'read_write'.
         AddError("access mode 'write' is not valid for the 'storage' address space", source);
@@ -2484,7 +2484,7 @@ bool Validator::CheckTypeAccessAddressSpace(
             address_space != type::AddressSpace::kWorkgroup) {
             return "atomic variables must have <storage> or <workgroup> address space";
         }
-        if (address_space == type::AddressSpace::kStorage && access != ast::Access::kReadWrite) {
+        if (address_space == type::AddressSpace::kStorage && access != type::Access::kReadWrite) {
             return "atomic variables in <storage> address space must have read_write access "
                    "mode";
         }

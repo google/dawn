@@ -23,7 +23,7 @@ namespace tint::type {
 
 StorageTexture::StorageTexture(TextureDimension dim,
                                ast::TexelFormat format,
-                               ast::Access access,
+                               type::Access access,
                                Type* subtype)
     : Base(utils::Hash(TypeInfo::Of<StorageTexture>().full_hashcode, dim, format, access), dim),
       texel_format_(format),

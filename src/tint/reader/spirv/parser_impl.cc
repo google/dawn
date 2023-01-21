@@ -1587,7 +1587,7 @@ ast::Var* ParserImpl::MakeVar(uint32_t id,
         return nullptr;
     }
 
-    ast::Access access = ast::Access::kUndefined;
+    type::Access access = type::Access::kUndefined;
     if (address_space == type::AddressSpace::kStorage) {
         bool read_only = false;
         if (auto* tn = storage_type->As<Named>()) {
@@ -1595,7 +1595,7 @@ ast::Var* ParserImpl::MakeVar(uint32_t id,
         }
 
         // Apply the access(read) or access(read_write) modifier.
-        access = read_only ? ast::Access::kRead : ast::Access::kReadWrite;
+        access = read_only ? type::Access::kRead : type::Access::kReadWrite;
     }
 
     // Handle variables (textures and samplers) are always in the handle
@@ -2518,7 +2518,7 @@ const Type* ParserImpl::GetHandleTypeForSpirvHandle(const spvtools::opt::Instruc
                 ast_handle_type = ty_.SampledTexture(dim, ast_sampled_component_type);
             }
         } else {
-            const auto access = ast::Access::kWrite;
+            const auto access = type::Access::kWrite;
             const auto format = enum_converter_.ToTexelFormat(image_type->format());
             if (format == ast::TexelFormat::kUndefined) {
                 return nullptr;

@@ -179,8 +179,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_Module
                                     Member("d", ty.f32()),
                                 });
 
-    GlobalVar("data", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kReadWrite, Binding(0_a),
-              Group(0_a));
+    GlobalVar("data", ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite,
+              Binding(0_a), Group(0_a));
 
     {
         auto* var = Var("v", ty.f32(), MemberAccessor("data", "d"));

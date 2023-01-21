@@ -4882,7 +4882,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
                 }
                 // Local variables are always Function storage class, with default
                 // access mode.
-                return DefInfo::Pointer{type::AddressSpace::kFunction, ast::Access::kUndefined};
+                return DefInfo::Pointer{type::AddressSpace::kFunction, type::Access::kUndefined};
             }
             case spv::Op::OpFunctionParameter: {
                 const auto* type = As<Pointer>(parser_impl_.ConvertType(inst.type_id()));
@@ -4895,7 +4895,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
                 // parameters.  In that case we need to do a global analysis to
                 // determine what the formal argument parameter type should be,
                 // whether it has read_only or read_write access mode.
-                return DefInfo::Pointer{type->address_space, ast::Access::kUndefined};
+                return DefInfo::Pointer{type->address_space, type::Access::kUndefined};
             }
             default:
                 break;

@@ -518,7 +518,7 @@ class Validator {
     /// @param source the source for the error
     /// @returns true on success, false if an error was raised.
     bool CheckTypeAccessAddressSpace(const type::Type* store_ty,
-                                     ast::Access access,
+                                     type::Access access,
                                      type::AddressSpace address_space,
                                      utils::VectorRef<const tint::ast::Attribute*> attributes,
                                      const Source& source) const;

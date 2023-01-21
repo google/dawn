@@ -121,7 +121,7 @@ struct PreservePadding::State {
                 utils::Vector<const ast::Parameter*, 2> params = {
                     b.Param(kDestParamName,
                             b.ty.pointer(CreateASTTypeFor(ctx, ty), type::AddressSpace::kStorage,
-                                         ast::Access::kReadWrite)),
+                                         type::Access::kReadWrite)),
                     b.Param(kValueParamName, CreateASTTypeFor(ctx, ty)),
                 };
                 b.Func(helper_name, params, b.ty.void_(), body());

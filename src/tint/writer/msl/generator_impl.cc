@@ -2585,7 +2585,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             return true;
         },
         [&](const type::Pointer* ptr) {
-            if (ptr->Access() == ast::Access::kRead) {
+            if (ptr->Access() == type::Access::kRead) {
                 out << "const ";
             }
             if (!EmitAddressSpace(out, ptr->AddressSpace())) {
@@ -2669,9 +2669,9 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                     }
 
                     std::string access_str;
-                    if (storage->access() == ast::Access::kRead) {
+                    if (storage->access() == type::Access::kRead) {
                         out << ", access::read";
-                    } else if (storage->access() == ast::Access::kWrite) {
+                    } else if (storage->access() == type::Access::kWrite) {
                         out << ", access::write";
                     } else {
                         diagnostics_.add_error(diag::System::Writer,

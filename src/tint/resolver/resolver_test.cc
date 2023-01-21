@@ -920,7 +920,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
     auto* s = Structure("S", utils::Vector{Member("m", ty.u32())});
 
     auto* sb_var = GlobalVar("sb_var", ty.Of(s), type::AddressSpace::kStorage,
-                             ast::Access::kReadWrite, Binding(0_a), Group(0_a));
+                             type::Access::kReadWrite, Binding(0_a), Group(0_a));
     auto* wg_var = GlobalVar("wg_var", ty.f32(), type::AddressSpace::kWorkgroup);
     auto* priv_var = GlobalVar("priv_var", ty.f32(), type::AddressSpace::kPrivate);
 
@@ -988,7 +988,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
     auto* s = Structure("S", utils::Vector{Member("m", ty.u32())});
 
     auto* sb_var = GlobalVar("sb_var", ty.Of(s), type::AddressSpace::kStorage,
-                             ast::Access::kReadWrite, Binding(0_a), Group(0_a));
+                             type::Access::kReadWrite, Binding(0_a), Group(0_a));
     auto* wg_var = GlobalVar("wg_var", ty.f32(), type::AddressSpace::kWorkgroup);
     auto* priv_var = GlobalVar("priv_var", ty.f32(), type::AddressSpace::kPrivate);
 
@@ -1914,7 +1914,7 @@ TEST_F(ResolverTest, Access_SetForStorageBuffer) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    EXPECT_EQ(Sem().Get(var)->Access(), ast::Access::kRead);
+    EXPECT_EQ(Sem().Get(var)->Access(), type::Access::kRead);
 }
 
 TEST_F(ResolverTest, BindingPoint_SetForResources) {

@@ -233,7 +233,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, ReadOnlyBuffer) {
     // {
     //   a += 1i;
     // }
-    GlobalVar(Source{{12, 34}}, "a", ty.i32(), type::AddressSpace::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{12, 34}}, "a", ty.i32(), type::AddressSpace::kStorage, type::Access::kRead,
               Group(0_a), Binding(0_a));
     WrapInFunction(CompoundAssign(Source{{56, 78}}, "a", 1_i, ast::BinaryOp::kAdd));
 

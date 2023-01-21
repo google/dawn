@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "src/tint/ast/alias.h"
-#include "src/tint/ast/access.h"
 #include "src/tint/ast/array.h"
 #include "src/tint/ast/bool.h"
 #include "src/tint/ast/f32.h"
@@ -26,6 +25,7 @@
 #include "src/tint/ast/texture.h"
 #include "src/tint/ast/u32.h"
 #include "src/tint/ast/vector.h"
+#include "src/tint/type/access.h"
 
 namespace tint::ast {
 namespace {

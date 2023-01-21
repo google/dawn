@@ -21,11 +21,11 @@
 
 #include "tint/override_id.h"
 
-#include "src/tint/ast/access.h"
 #include "src/tint/ast/parameter.h"
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/parameter_usage.h"
+#include "src/tint/type/access.h"
 #include "src/tint/type/address_space.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/unique_vector.h"
@@ -58,7 +58,7 @@ class Variable : public Castable<Variable, Node> {
              const type::Type* type,
              EvaluationStage stage,
              type::AddressSpace address_space,
-             ast::Access access,
+             type::Access access,
              const constant::Value* constant_value);
 
     /// Destructor
@@ -77,7 +77,7 @@ class Variable : public Castable<Variable, Node> {
     type::AddressSpace AddressSpace() const { return address_space_; }
 
     /// @returns the access control for the variable
-    ast::Access Access() const { return access_; }
+    type::Access Access() const { return access_; }
 
     /// @return the constant value of this expression
     const constant::Value* ConstantValue() const { return constant_value_; }
@@ -101,7 +101,7 @@ class Variable : public Castable<Variable, Node> {
     const type::Type* const type_;
     const EvaluationStage stage_;
     const type::AddressSpace address_space_;
-    const ast::Access access_;
+    const type::Access access_;
     const constant::Value* constant_value_;
     const Expression* initializer_ = nullptr;
     std::vector<const VariableUser*> users_;
@@ -122,7 +122,7 @@ class LocalVariable final : public Castable<LocalVariable, Variable> {
                   const type::Type* type,
                   EvaluationStage stage,
                   type::AddressSpace address_space,
-                  ast::Access access,
+                  type::Access access,
                   const sem::Statement* statement,
                   const constant::Value* constant_value);
 
@@ -163,7 +163,7 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
                    const type::Type* type,
                    EvaluationStage stage,
                    type::AddressSpace address_space,
-                   ast::Access access,
+                   type::Access access,
                    const constant::Value* constant_value,
                    sem::BindingPoint binding_point = {},
                    std::optional<uint32_t> location = std::nullopt);
@@ -206,7 +206,7 @@ class Parameter final : public Castable<Parameter, Variable> {
               uint32_t index,
               const type::Type* type,
               type::AddressSpace address_space,
-              ast::Access access,
+              type::Access access,
               const ParameterUsage usage = ParameterUsage::kNone,
               sem::BindingPoint binding_point = {},
               std::optional<uint32_t> location = std::nullopt);

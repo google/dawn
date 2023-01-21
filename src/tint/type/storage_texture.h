@@ -17,8 +17,8 @@
 
 #include <string>
 
-#include "src/tint/ast/access.h"
 #include "src/tint/ast/storage_texture.h"
+#include "src/tint/type/access.h"
 #include "src/tint/type/texture.h"
 #include "src/tint/type/texture_dimension.h"
 
@@ -39,7 +39,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     /// @param subtype the storage subtype. Use SubtypeFor() to calculate this.
     StorageTexture(TextureDimension dim,
                    ast::TexelFormat format,
-                   ast::Access access,
+                   type::Access access,
                    Type* subtype);
 
     /// Destructor
@@ -56,7 +56,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     ast::TexelFormat texel_format() const { return texel_format_; }
 
     /// @returns the access control
-    ast::Access access() const { return access_; }
+    type::Access access() const { return access_; }
 
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
@@ -74,7 +74,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
 
   private:
     ast::TexelFormat const texel_format_;
-    ast::Access const access_;
+    type::Access const access_;
     Type* const subtype_;
 };
 

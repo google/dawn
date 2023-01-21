@@ -29,7 +29,7 @@ TEST_F(ResolverHostShareableValidationTest, BoolMember) {
     auto* s =
         Structure("S", utils::Vector{Member(Source{{56, 78}}, "x", ty.bool_(Source{{12, 34}}))});
 
-    GlobalVar(Source{{90, 12}}, "g", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{90, 12}}, "g", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -45,7 +45,7 @@ TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
     auto* s = Structure(
         "S", utils::Vector{Member(Source{{56, 78}}, "x", ty.vec3<bool>(Source{{12, 34}}))});
 
-    GlobalVar(Source{{90, 12}}, "g", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{90, 12}}, "g", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -62,7 +62,7 @@ TEST_F(ResolverHostShareableValidationTest, Aliases) {
     auto* s = Structure(
         "S", utils::Vector{Member(Source{{56, 78}}, "x", ty.type_name(Source{{12, 34}}, "a1"))});
     auto* a2 = Alias("a2", ty.Of(s));
-    GlobalVar(Source{{90, 12}}, "g", ty.Of(a2), type::AddressSpace::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{90, 12}}, "g", ty.Of(a2), type::AddressSpace::kStorage, type::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -81,7 +81,7 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
 
     auto* s = Structure("S", utils::Vector{Member(Source{{7, 8}}, "m", ty.Of(i3))});
 
-    GlobalVar(Source{{9, 10}}, "g", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{9, 10}}, "g", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -120,7 +120,7 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
 
     auto* s = Structure("S", utils::Vector{Member(Source{{7, 8}}, "m", ty.Of(i3))});
 
-    GlobalVar(Source{{9, 10}}, "g", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{9, 10}}, "g", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

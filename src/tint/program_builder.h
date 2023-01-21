@@ -182,14 +182,14 @@ class ProgramBuilder {
 
         const ast::Type* type = nullptr;
         type::AddressSpace address_space = type::AddressSpace::kNone;
-        ast::Access access = ast::Access::kUndefined;
+        type::Access access = type::Access::kUndefined;
         const ast::Expression* initializer = nullptr;
         utils::Vector<const ast::Attribute*, 4> attributes;
 
       private:
         void Set(const ast::Type* t) { type = t; }
         void Set(type::AddressSpace addr_space) { address_space = addr_space; }
-        void Set(ast::Access ac) { access = ac; }
+        void Set(type::Access ac) { access = ac; }
         void Set(const ast::Expression* c) { initializer = c; }
         void Set(utils::VectorRef<const ast::Attribute*> l) { attributes = std::move(l); }
         void Set(const ast::Attribute* a) { attributes.Push(a); }
@@ -943,7 +943,7 @@ class ProgramBuilder {
         /// @return the pointer to `type` with the given type::AddressSpace
         const ast::Pointer* pointer(const ast::Type* type,
                                     type::AddressSpace address_space,
-                                    ast::Access access = ast::Access::kUndefined) const {
+                                    type::Access access = type::Access::kUndefined) const {
             return builder->create<ast::Pointer>(type, address_space, access);
         }
 
@@ -955,7 +955,7 @@ class ProgramBuilder {
         const ast::Pointer* pointer(const Source& source,
                                     const ast::Type* type,
                                     type::AddressSpace address_space,
-                                    ast::Access access = ast::Access::kUndefined) const {
+                                    type::Access access = type::Access::kUndefined) const {
             return builder->create<ast::Pointer>(source, type, address_space, access);
         }
 
@@ -964,7 +964,7 @@ class ProgramBuilder {
         /// @return the pointer to type `T` with the given type::AddressSpace.
         template <typename T>
         const ast::Pointer* pointer(type::AddressSpace address_space,
-                                    ast::Access access = ast::Access::kUndefined) const {
+                                    type::Access access = type::Access::kUndefined) const {
             return pointer(Of<T>(), address_space, access);
         }
 
@@ -975,7 +975,7 @@ class ProgramBuilder {
         template <typename T>
         const ast::Pointer* pointer(const Source& source,
                                     type::AddressSpace address_space,
-                                    ast::Access access = ast::Access::kUndefined) const {
+                                    type::Access access = type::Access::kUndefined) const {
             return pointer(source, Of<T>(), address_space, access);
         }
 
@@ -1083,7 +1083,7 @@ class ProgramBuilder {
         /// @returns the storage texture
         const ast::StorageTexture* storage_texture(type::TextureDimension dims,
                                                    ast::TexelFormat format,
-                                                   ast::Access access) const {
+                                                   type::Access access) const {
             auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
             return builder->create<ast::StorageTexture>(dims, format, subtype, access);
         }
@@ -1096,7 +1096,7 @@ class ProgramBuilder {
         const ast::StorageTexture* storage_texture(const Source& source,
                                                    type::TextureDimension dims,
                                                    ast::TexelFormat format,
-                                                   ast::Access access) const {
+                                                   type::Access access) const {
             auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
             return builder->create<ast::StorageTexture>(source, dims, format, subtype, access);
         }
@@ -1698,7 +1698,7 @@ class ProgramBuilder {
     /// Can be any of the following, in any order:
     ///   * ast::Type*          - specifies the variable type
     ///   * type::AddressSpace   - specifies the variable address space
-    ///   * ast::Access         - specifies the variable's access control
+    ///   * type::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
@@ -1717,7 +1717,7 @@ class ProgramBuilder {
     /// Can be any of the following, in any order:
     ///   * ast::Type*          - specifies the variable type
     ///   * type::AddressSpace   - specifies the variable address space
-    ///   * ast::Access         - specifies the variable's access control
+    ///   * type::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
@@ -1821,7 +1821,7 @@ class ProgramBuilder {
     /// Can be any of the following, in any order:
     ///   * ast::Type*          - specifies the variable type
     ///   * type::AddressSpace   - specifies the variable address space
-    ///   * ast::Access         - specifies the variable's access control
+    ///   * type::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
@@ -1840,7 +1840,7 @@ class ProgramBuilder {
     /// Can be any of the following, in any order:
     ///   * ast::Type*          - specifies the variable type
     ///   * type::AddressSpace   - specifies the variable address space
-    ///   * ast::Access         - specifies the variable's access control
+    ///   * type::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*    - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.

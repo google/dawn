@@ -652,7 +652,7 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_WrongAddressSpace) {
     // fn foo() {
     //   workgroupUniformLoad(&v);
     // }
-    GlobalVar("v", ty.i32(), type::AddressSpace::kStorage, ast::Access::kReadWrite,
+    GlobalVar("v", ty.i32(), type::AddressSpace::kStorage, type::Access::kReadWrite,
               utils::Vector{Group(0_a), Binding(0_a)});
     WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf(Source{{12, 34}}, "v"))));
 

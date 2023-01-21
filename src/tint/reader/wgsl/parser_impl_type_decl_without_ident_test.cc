@@ -183,7 +183,7 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Ptr_WithAccess) {
     auto* ptr = t.value->As<ast::Pointer>();
     ASSERT_TRUE(ptr->type->Is<ast::F32>());
     ASSERT_EQ(ptr->address_space, type::AddressSpace::kFunction);
-    ASSERT_EQ(ptr->access, ast::Access::kRead);
+    ASSERT_EQ(ptr->access, type::Access::kRead);
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 25u}}));
 }
 

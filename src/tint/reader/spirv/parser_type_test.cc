@@ -44,9 +44,9 @@ TEST(SpvParserTypeTest, SameArgumentsGivesSamePointer) {
     EXPECT_EQ(ty.SampledTexture(type::TextureDimension::k2d, ty.I32()),
               ty.SampledTexture(type::TextureDimension::k2d, ty.I32()));
     EXPECT_EQ(ty.StorageTexture(type::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
-                                ast::Access::kRead),
+                                type::Access::kRead),
               ty.StorageTexture(type::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
-                                ast::Access::kRead));
+                                type::Access::kRead));
 }
 
 TEST(SpvParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
@@ -81,17 +81,17 @@ TEST(SpvParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
     EXPECT_NE(ty.SampledTexture(type::TextureDimension::k2d, ty.I32()),
               ty.SampledTexture(type::TextureDimension::k2d, ty.U32()));
     EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
-                                ast::Access::kRead),
+                                type::Access::kRead),
               ty.StorageTexture(type::TextureDimension::k3d, ast::TexelFormat::kR32Uint,
-                                ast::Access::kRead));
+                                type::Access::kRead));
     EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
-                                ast::Access::kRead),
+                                type::Access::kRead),
               ty.StorageTexture(type::TextureDimension::k2d, ast::TexelFormat::kR32Sint,
-                                ast::Access::kRead));
+                                type::Access::kRead));
     EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
-                                ast::Access::kRead),
+                                type::Access::kRead),
               ty.StorageTexture(type::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
-                                ast::Access::kWrite));
+                                type::Access::kWrite));
 }
 
 }  // namespace

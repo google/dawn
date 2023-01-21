@@ -214,7 +214,7 @@ using ResolverBuiltinArrayTest = ResolverTest;
 TEST_F(ResolverBuiltinArrayTest, ArrayLength_Vector) {
     auto* ary = ty.array<i32>();
     auto* str = Structure("S", utils::Vector{Member("x", ary)});
-    GlobalVar("a", ty.Of(str), type::AddressSpace::kStorage, ast::Access::kRead, Binding(0_a),
+    GlobalVar("a", ty.Of(str), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
               Group(0_a));
 
     auto* call = Call("arrayLength", AddressOf(MemberAccessor("a", "x")));

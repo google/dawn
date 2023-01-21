@@ -57,7 +57,7 @@ class Var final : public Castable<Var, Variable> {
         const Symbol& sym,
         const ast::Type* type,
         type::AddressSpace declared_address_space,
-        Access declared_access,
+        type::Access declared_access,
         const Expression* initializer,
         utils::VectorRef<const Attribute*> attributes);
 
@@ -80,7 +80,7 @@ class Var final : public Castable<Var, Variable> {
     const type::AddressSpace declared_address_space;
 
     /// The declared access control
-    const Access declared_access;
+    const type::Access declared_access;
 };
 
 /// A list of `var` declarations

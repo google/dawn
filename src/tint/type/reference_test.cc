@@ -21,15 +21,15 @@ namespace {
 using ReferenceTest = TestHelper;
 
 TEST_F(ReferenceTest, Creation) {
-    auto* a = create<Reference>(create<I32>(), AddressSpace::kStorage, ast::Access::kReadWrite);
-    auto* b = create<Reference>(create<I32>(), AddressSpace::kStorage, ast::Access::kReadWrite);
-    auto* c = create<Reference>(create<F32>(), AddressSpace::kStorage, ast::Access::kReadWrite);
-    auto* d = create<Reference>(create<I32>(), AddressSpace::kPrivate, ast::Access::kReadWrite);
-    auto* e = create<Reference>(create<I32>(), AddressSpace::kStorage, ast::Access::kRead);
+    auto* a = create<Reference>(create<I32>(), AddressSpace::kStorage, type::Access::kReadWrite);
+    auto* b = create<Reference>(create<I32>(), AddressSpace::kStorage, type::Access::kReadWrite);
+    auto* c = create<Reference>(create<F32>(), AddressSpace::kStorage, type::Access::kReadWrite);
+    auto* d = create<Reference>(create<I32>(), AddressSpace::kPrivate, type::Access::kReadWrite);
+    auto* e = create<Reference>(create<I32>(), AddressSpace::kStorage, type::Access::kRead);
 
     EXPECT_TRUE(a->StoreType()->Is<I32>());
     EXPECT_EQ(a->AddressSpace(), AddressSpace::kStorage);
-    EXPECT_EQ(a->Access(), ast::Access::kReadWrite);
+    EXPECT_EQ(a->Access(), type::Access::kReadWrite);
 
     EXPECT_EQ(a, b);
     EXPECT_NE(a, c);
@@ -38,18 +38,18 @@ TEST_F(ReferenceTest, Creation) {
 }
 
 TEST_F(ReferenceTest, Hash) {
-    auto* a = create<Reference>(create<I32>(), AddressSpace::kStorage, ast::Access::kReadWrite);
-    auto* b = create<Reference>(create<I32>(), AddressSpace::kStorage, ast::Access::kReadWrite);
+    auto* a = create<Reference>(create<I32>(), AddressSpace::kStorage, type::Access::kReadWrite);
+    auto* b = create<Reference>(create<I32>(), AddressSpace::kStorage, type::Access::kReadWrite);
 
     EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(ReferenceTest, Equals) {
-    auto* a = create<Reference>(create<I32>(), AddressSpace::kStorage, ast::Access::kReadWrite);
-    auto* b = create<Reference>(create<I32>(), AddressSpace::kStorage, ast::Access::kReadWrite);
-    auto* c = create<Reference>(create<F32>(), AddressSpace::kStorage, ast::Access::kReadWrite);
-    auto* d = create<Reference>(create<I32>(), AddressSpace::kPrivate, ast::Access::kReadWrite);
-    auto* e = create<Reference>(create<I32>(), AddressSpace::kStorage, ast::Access::kRead);
+    auto* a = create<Reference>(create<I32>(), AddressSpace::kStorage, type::Access::kReadWrite);
+    auto* b = create<Reference>(create<I32>(), AddressSpace::kStorage, type::Access::kReadWrite);
+    auto* c = create<Reference>(create<F32>(), AddressSpace::kStorage, type::Access::kReadWrite);
+    auto* d = create<Reference>(create<I32>(), AddressSpace::kPrivate, type::Access::kReadWrite);
+    auto* e = create<Reference>(create<I32>(), AddressSpace::kStorage, type::Access::kRead);
 
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
@@ -59,17 +59,17 @@ TEST_F(ReferenceTest, Equals) {
 }
 
 TEST_F(ReferenceTest, FriendlyName) {
-    auto* r = create<Reference>(create<I32>(), AddressSpace::kNone, ast::Access::kRead);
+    auto* r = create<Reference>(create<I32>(), AddressSpace::kNone, type::Access::kRead);
     EXPECT_EQ(r->FriendlyName(Symbols()), "ref<i32, read>");
 }
 
 TEST_F(ReferenceTest, FriendlyNameWithAddressSpace) {
-    auto* r = create<Reference>(create<I32>(), AddressSpace::kWorkgroup, ast::Access::kRead);
+    auto* r = create<Reference>(create<I32>(), AddressSpace::kWorkgroup, type::Access::kRead);
     EXPECT_EQ(r->FriendlyName(Symbols()), "ref<workgroup, i32, read>");
 }
 
 TEST_F(ReferenceTest, Clone) {
-    auto* a = create<Reference>(create<I32>(), AddressSpace::kStorage, ast::Access::kReadWrite);
+    auto* a = create<Reference>(create<I32>(), AddressSpace::kStorage, type::Access::kReadWrite);
 
     type::Manager mgr;
     type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
@@ -77,7 +77,7 @@ TEST_F(ReferenceTest, Clone) {
     auto* ref = a->Clone(ctx);
     EXPECT_TRUE(ref->StoreType()->Is<I32>());
     EXPECT_EQ(ref->AddressSpace(), AddressSpace::kStorage);
-    EXPECT_EQ(ref->Access(), ast::Access::kReadWrite);
+    EXPECT_EQ(ref->Access(), type::Access::kReadWrite);
 }
 
 }  // namespace

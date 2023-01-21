@@ -101,11 +101,11 @@ TEST_F(ResolverPtrRefTest, DefaultPtrAddressSpace) {
     ASSERT_TRUE(TypeOf(storage_ptr)->Is<type::Pointer>())
         << "storage_ptr is " << TypeOf(storage_ptr)->TypeInfo().name;
 
-    EXPECT_EQ(TypeOf(function_ptr)->As<type::Pointer>()->Access(), ast::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(private_ptr)->As<type::Pointer>()->Access(), ast::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(workgroup_ptr)->As<type::Pointer>()->Access(), ast::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(uniform_ptr)->As<type::Pointer>()->Access(), ast::Access::kRead);
-    EXPECT_EQ(TypeOf(storage_ptr)->As<type::Pointer>()->Access(), ast::Access::kRead);
+    EXPECT_EQ(TypeOf(function_ptr)->As<type::Pointer>()->Access(), type::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(private_ptr)->As<type::Pointer>()->Access(), type::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(workgroup_ptr)->As<type::Pointer>()->Access(), type::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(uniform_ptr)->As<type::Pointer>()->Access(), type::Access::kRead);
+    EXPECT_EQ(TypeOf(storage_ptr)->As<type::Pointer>()->Access(), type::Access::kRead);
 }
 
 }  // namespace

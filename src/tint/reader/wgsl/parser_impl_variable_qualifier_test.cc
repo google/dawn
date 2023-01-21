@@ -20,7 +20,7 @@ namespace {
 struct VariableStorageData {
     const char* input;
     type::AddressSpace address_space;
-    ast::Access access;
+    type::Access access;
 };
 inline std::ostream& operator<<(std::ostream& out, VariableStorageData data) {
     out << std::string(data.input);
@@ -47,15 +47,15 @@ INSTANTIATE_TEST_SUITE_P(
     ParserImplTest,
     VariableQualifierTest,
     testing::Values(
-        VariableStorageData{"uniform", type::AddressSpace::kUniform, ast::Access::kUndefined},
-        VariableStorageData{"workgroup", type::AddressSpace::kWorkgroup, ast::Access::kUndefined},
-        VariableStorageData{"storage", type::AddressSpace::kStorage, ast::Access::kUndefined},
-        VariableStorageData{"private", type::AddressSpace::kPrivate, ast::Access::kUndefined},
-        VariableStorageData{"function", type::AddressSpace::kFunction, ast::Access::kUndefined},
-        VariableStorageData{"storage, read", type::AddressSpace::kStorage, ast::Access::kRead},
-        VariableStorageData{"storage, write", type::AddressSpace::kStorage, ast::Access::kWrite},
+        VariableStorageData{"uniform", type::AddressSpace::kUniform, type::Access::kUndefined},
+        VariableStorageData{"workgroup", type::AddressSpace::kWorkgroup, type::Access::kUndefined},
+        VariableStorageData{"storage", type::AddressSpace::kStorage, type::Access::kUndefined},
+        VariableStorageData{"private", type::AddressSpace::kPrivate, type::Access::kUndefined},
+        VariableStorageData{"function", type::AddressSpace::kFunction, type::Access::kUndefined},
+        VariableStorageData{"storage, read", type::AddressSpace::kStorage, type::Access::kRead},
+        VariableStorageData{"storage, write", type::AddressSpace::kStorage, type::Access::kWrite},
         VariableStorageData{"storage, read_write", type::AddressSpace::kStorage,
-                            ast::Access::kReadWrite}));
+                            type::Access::kReadWrite}));
 
 TEST_F(ParserImplTest, VariableQualifier_NoMatch) {
     auto p = parser("<not-a-storage-class>");

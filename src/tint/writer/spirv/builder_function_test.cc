@@ -198,8 +198,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
     auto* s = Structure("Data", utils::Vector{Member("d", ty.f32())});
 
-    GlobalVar("data", ty.Of(s), type::AddressSpace::kStorage, ast::Access::kReadWrite, Binding(0_a),
-              Group(0_a));
+    GlobalVar("data", ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite,
+              Binding(0_a), Group(0_a));
 
     {
         auto* var = Var("v", ty.f32(), MemberAccessor("data", "d"));

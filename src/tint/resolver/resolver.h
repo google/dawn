@@ -382,7 +382,7 @@ class Resolver {
 
     /// @param address_space the address space
     /// @returns the default access control for the given address space
-    ast::Access DefaultAccessForAddressSpace(type::AddressSpace address_space);
+    type::Access DefaultAccessForAddressSpace(type::AddressSpace address_space);
 
     /// Allocate constant IDs for pipeline-overridable constants.
     /// @returns true on success, false on error

@@ -17,9 +17,9 @@
 
 #include <string>
 
-#include "src/tint/ast/access.h"
 #include "src/tint/ast/texel_format.h"
 #include "src/tint/ast/texture.h"
+#include "src/tint/type/access.h"
 #include "src/tint/type/texture_dimension.h"
 
 namespace tint::ast {
@@ -41,7 +41,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
                    type::TextureDimension dim,
                    TexelFormat format,
                    const Type* subtype,
-                   Access access_control);
+                   type::Access access_control);
 
     /// Move constructor
     StorageTexture(StorageTexture&&);
@@ -69,7 +69,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     const Type* const type;
 
     /// The access control
-    const Access access;
+    const type::Access access;
 };
 
 }  // namespace tint::ast

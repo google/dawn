@@ -98,7 +98,7 @@ TEST_P(InferTypeTest_FromInitializerExpression, All) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* got = TypeOf(a_ident);
     auto* expected = create<type::Reference>(
-        params.create_rhs_sem_type(*this), type::AddressSpace::kFunction, ast::Access::kReadWrite);
+        params.create_rhs_sem_type(*this), type::AddressSpace::kFunction, type::Access::kReadWrite);
     ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                              << "expected: " << FriendlyName(expected) << "\n";
 }
@@ -152,7 +152,7 @@ TEST_P(InferTypeTest_FromArithmeticExpression, All) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* got = TypeOf(a_ident);
     auto* expected = create<type::Reference>(
-        params.create_rhs_sem_type(*this), type::AddressSpace::kFunction, ast::Access::kReadWrite);
+        params.create_rhs_sem_type(*this), type::AddressSpace::kFunction, type::Access::kReadWrite);
     ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                              << "expected: " << FriendlyName(expected) << "\n";
 }
@@ -200,7 +200,7 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* got = TypeOf(a_ident);
     auto* expected = create<type::Reference>(
-        params.create_rhs_sem_type(*this), type::AddressSpace::kFunction, ast::Access::kReadWrite);
+        params.create_rhs_sem_type(*this), type::AddressSpace::kFunction, type::Access::kReadWrite);
     ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                              << "expected: " << FriendlyName(expected) << "\n";
 }

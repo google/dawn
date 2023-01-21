@@ -26,7 +26,7 @@ Var::Var(ProgramID pid,
          const Symbol& sym,
          const ast::Type* ty,
          type::AddressSpace address_space,
-         Access access,
+         type::Access access,
          const Expression* init,
          utils::VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src, sym, ty, init, std::move(attrs)),

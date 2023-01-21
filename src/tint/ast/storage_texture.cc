@@ -29,7 +29,7 @@ StorageTexture::StorageTexture(ProgramID pid,
                                type::TextureDimension d,
                                TexelFormat fmt,
                                const Type* subtype,
-                               Access ac)
+                               type::Access ac)
     : Base(pid, nid, src, d), format(fmt), type(subtype), access(ac) {}
 
 StorageTexture::StorageTexture(StorageTexture&&) = default;

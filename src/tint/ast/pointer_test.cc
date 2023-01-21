@@ -24,21 +24,21 @@ using AstPointerTest = TestHelper;
 
 TEST_F(AstPointerTest, Creation) {
     auto* i32 = create<I32>();
-    auto* p = create<Pointer>(i32, type::AddressSpace::kStorage, Access::kRead);
+    auto* p = create<Pointer>(i32, type::AddressSpace::kStorage, type::Access::kRead);
     EXPECT_EQ(p->type, i32);
     EXPECT_EQ(p->address_space, type::AddressSpace::kStorage);
-    EXPECT_EQ(p->access, Access::kRead);
+    EXPECT_EQ(p->access, type::Access::kRead);
 }
 
 TEST_F(AstPointerTest, FriendlyName) {
     auto* i32 = create<I32>();
-    auto* p = create<Pointer>(i32, type::AddressSpace::kWorkgroup, Access::kUndefined);
+    auto* p = create<Pointer>(i32, type::AddressSpace::kWorkgroup, type::Access::kUndefined);
     EXPECT_EQ(p->FriendlyName(Symbols()), "ptr<workgroup, i32>");
 }
 
 TEST_F(AstPointerTest, FriendlyNameWithAccess) {
     auto* i32 = create<I32>();
-    auto* p = create<Pointer>(i32, type::AddressSpace::kStorage, Access::kReadWrite);
+    auto* p = create<Pointer>(i32, type::AddressSpace::kStorage, type::Access::kReadWrite);
     EXPECT_EQ(p->FriendlyName(Symbols()), "ptr<storage, i32, read_write>");
 }
 

@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/ast/access.h"
+#include "src/tint/type/access.h"
 #include "src/tint/type/address_space.h"
 #include "src/tint/type/type.h"
 
@@ -30,7 +30,7 @@ class Pointer final : public Castable<Pointer, Type> {
     /// @param subtype the pointee type
     /// @param address_space the address space of the pointer
     /// @param access the resolved access control of the reference
-    Pointer(const Type* subtype, type::AddressSpace address_space, ast::Access access);
+    Pointer(const Type* subtype, type::AddressSpace address_space, type::Access access);
 
     /// Destructor
     ~Pointer() override;
@@ -46,7 +46,7 @@ class Pointer final : public Castable<Pointer, Type> {
     type::AddressSpace AddressSpace() const { return address_space_; }
 
     /// @returns the access control of the reference
-    ast::Access Access() const { return access_; }
+    type::Access Access() const { return access_; }
 
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
@@ -60,7 +60,7 @@ class Pointer final : public Castable<Pointer, Type> {
   private:
     Type const* const subtype_;
     type::AddressSpace const address_space_;
-    ast::Access const access_;
+    type::Access const access_;
 };
 
 }  // namespace tint::type
