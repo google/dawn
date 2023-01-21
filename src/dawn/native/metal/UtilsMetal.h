@@ -32,6 +32,7 @@ enum class SingleShaderStage;
 
 namespace dawn::native::metal {
 
+Aspect GetDepthStencilAspects(MTLPixelFormat format);
 MTLCompareFunction ToMetalCompareFunction(wgpu::CompareFunction compareFunction);
 
 struct TextureBufferCopySplit {

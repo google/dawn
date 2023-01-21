@@ -328,8 +328,19 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "https://crbug.com/1237175"}},
     {Toggle::MetalUseCombinedDepthStencilFormatForStencil8,
      {"metal_use_combined_depth_stencil_format_for_stencil8",
-      "Use a combined depth stencil format instead of stencil8. The stencil8 format alone does not "
-      "work correctly.",
+      "Use a combined depth stencil format instead of stencil8. Works around an issue where the "
+      "stencil8 format alone does not work correctly. This toggle also causes depth stencil "
+      "attachments using a stencil8 format to also set the depth attachment in the Metal render "
+      "pass. This works around another issue where Metal fails to set the stencil attachment "
+      "correctly for a combined depth stencil format if the depth attachment is not also set.",
+      "https://crbug.com/dawn/1389"}},
+    {Toggle::MetalUseBothDepthAndStencilAttachmentsForCombinedDepthStencilFormats,
+     {"metal_use_both_depth_and_stencil_attachments_for_combined_depth_stencil_formats",
+      "In Metal, depth and stencil attachments are set separately. Setting just one without the "
+      "other does not work correctly for combined depth stencil formats on some Metal drivers. "
+      "This workarounds ensures that both are set. This situation arises during lazy clears, or "
+      "for stencil8 formats if metal_use_combined_depth_stencil_format_for_stencil8 is also "
+      "enabled.",
       "https://crbug.com/dawn/1389"}},
     {Toggle::UseTempTextureInStencilTextureToBufferCopy,
      {"use_temp_texture_in_stencil_texture_to_buffer_copy",

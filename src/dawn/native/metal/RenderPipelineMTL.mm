@@ -373,14 +373,24 @@ MaybeError RenderPipeline::Initialize() {
 
     if (HasDepthStencilAttachment()) {
         wgpu::TextureFormat depthStencilFormat = GetDepthStencilFormat();
-        const Format& internalFormat = GetDevice()->GetValidInternalFormat(depthStencilFormat);
         MTLPixelFormat metalFormat = MetalPixelFormat(GetDevice(), depthStencilFormat);
 
-        if (internalFormat.HasDepth()) {
-            descriptorMTL.depthAttachmentPixelFormat = metalFormat;
-        }
-        if (internalFormat.HasStencil()) {
-            descriptorMTL.stencilAttachmentPixelFormat = metalFormat;
+        if (GetDevice()->IsToggleEnabled(
+                Toggle::MetalUseBothDepthAndStencilAttachmentsForCombinedDepthStencilFormats)) {
+            if (GetDepthStencilAspects(metalFormat) & Aspect::Depth) {
+                descriptorMTL.depthAttachmentPixelFormat = metalFormat;
+            }
+            if (GetDepthStencilAspects(metalFormat) & Aspect::Stencil) {
+                descriptorMTL.stencilAttachmentPixelFormat = metalFormat;
+            }
+        } else {
+            const Format& internalFormat = GetDevice()->GetValidInternalFormat(depthStencilFormat);
+            if (internalFormat.HasDepth()) {
+                descriptorMTL.depthAttachmentPixelFormat = metalFormat;
+            }
+            if (internalFormat.HasStencil()) {
+                descriptorMTL.stencilAttachmentPixelFormat = metalFormat;
+            }
         }
     }
 

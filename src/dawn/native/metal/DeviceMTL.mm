@@ -260,6 +260,8 @@ void Device::InitTogglesFromDriver() {
 #if DAWN_PLATFORM_IS(MACOS)
     if (gpu_info::IsIntel(vendorId)) {
         SetToggle(Toggle::UseTempTextureInStencilTextureToBufferCopy, true);
+        SetToggle(Toggle::MetalUseBothDepthAndStencilAttachmentsForCombinedDepthStencilFormats,
+                  true);
 
         if ([NSProcessInfo.processInfo
                 isOperatingSystemAtLeastVersion:NSOperatingSystemVersion{12, 0, 0}]) {

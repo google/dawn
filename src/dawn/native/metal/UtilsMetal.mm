@@ -140,7 +140,28 @@ void ResolveInAnotherRenderPass(
     commandContext->BeginRender(mtlRenderPassForResolve);
     commandContext->EndRender();
 }
+
 }  // anonymous namespace
+
+Aspect GetDepthStencilAspects(MTLPixelFormat format) {
+    switch (format) {
+        case MTLPixelFormatDepth16Unorm:
+        case MTLPixelFormatDepth32Float:
+            return Aspect::Depth;
+
+#if DAWN_PLATFORM_IS(MACOS)
+        case MTLPixelFormatDepth24Unorm_Stencil8:
+#endif
+        case MTLPixelFormatDepth32Float_Stencil8:
+            return Aspect::Depth | Aspect::Stencil;
+
+        case MTLPixelFormatStencil8:
+            return Aspect::Stencil;
+
+        default:
+            UNREACHABLE();
+    }
+}
 
 MTLCompareFunction ToMetalCompareFunction(wgpu::CompareFunction compareFunction) {
     switch (compareFunction) {
@@ -346,6 +367,34 @@ MaybeError EncodeMetalRenderPass(Device* device,
     // This function handles multiple workarounds. Because some cases requires multiple
     // workarounds to happen at the same time, it handles workarounds one by one and calls
     // itself recursively to handle the next workaround if needed.
+
+    // Handle the workaround where both depth and stencil attachments must be set for a
+    // combined depth-stencil format, not just one.
+    if (device->IsToggleEnabled(
+            Toggle::MetalUseBothDepthAndStencilAttachmentsForCombinedDepthStencilFormats)) {
+        const bool hasDepthAttachment = mtlRenderPass.depthAttachment.texture != nil;
+        const bool hasStencilAttachment = mtlRenderPass.stencilAttachment.texture != nil;
+
+        if (hasDepthAttachment && !hasStencilAttachment) {
+            if (GetDepthStencilAspects([mtlRenderPass.depthAttachment.texture pixelFormat]) &
+                Aspect::Stencil) {
+                mtlRenderPass.stencilAttachment.texture = mtlRenderPass.depthAttachment.texture;
+                mtlRenderPass.stencilAttachment.level = mtlRenderPass.depthAttachment.level;
+                mtlRenderPass.stencilAttachment.slice = mtlRenderPass.depthAttachment.slice;
+                mtlRenderPass.stencilAttachment.loadAction = MTLLoadActionLoad;
+                mtlRenderPass.stencilAttachment.storeAction = MTLStoreActionStore;
+            }
+        } else if (hasStencilAttachment && !hasDepthAttachment) {
+            if (GetDepthStencilAspects([mtlRenderPass.stencilAttachment.texture pixelFormat]) &
+                Aspect::Depth) {
+                mtlRenderPass.depthAttachment.texture = mtlRenderPass.stencilAttachment.texture;
+                mtlRenderPass.depthAttachment.level = mtlRenderPass.stencilAttachment.level;
+                mtlRenderPass.depthAttachment.slice = mtlRenderPass.stencilAttachment.slice;
+                mtlRenderPass.depthAttachment.loadAction = MTLLoadActionLoad;
+                mtlRenderPass.depthAttachment.storeAction = MTLStoreActionStore;
+            }
+        }
+    }
 
     // Handles the workaround for r8unorm rg8unorm mipmap rendering being broken on some
     // devices. Render to a temporary texture instead and then copy back to the attachment.

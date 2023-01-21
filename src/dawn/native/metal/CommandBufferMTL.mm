@@ -169,6 +169,7 @@ NSRef<MTLComputePassDescriptor> CreateMTLComputePassDescriptor(BeginComputePassC
 }
 
 NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
+    const Device* device,
     BeginRenderPassCmd* renderPass,
     bool useCounterSamplingAtStageBoundary) {
     // Note that this creates a descriptor that's autoreleased so we don't use AcquireNSRef
@@ -801,11 +802,11 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 commandContext->EndBlit();
 
                 LazyClearRenderPassAttachments(cmd);
+                Device* device = ToBackend(GetDevice());
                 NSRef<MTLRenderPassDescriptor> descriptor = CreateMTLRenderPassDescriptor(
-                    cmd, ToBackend(GetDevice())->UseCounterSamplingAtStageBoundary());
+                    device, cmd, device->UseCounterSamplingAtStageBoundary());
                 DAWN_TRY(EncodeMetalRenderPass(
-                    ToBackend(GetDevice()), commandContext, descriptor.Get(), cmd->width,
-                    cmd->height,
+                    device, commandContext, descriptor.Get(), cmd->width, cmd->height,
                     [this](id<MTLRenderCommandEncoder> encoder, BeginRenderPassCmd* cmd)
                         -> MaybeError { return this->EncodeRenderPass(encoder, cmd); },
                     cmd));

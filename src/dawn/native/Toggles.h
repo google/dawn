@@ -83,6 +83,7 @@ enum class Toggle {
     VulkanSplitCommandBufferOnDepthStencilComputeSampleAfterRenderPass,
     D3D12Allocate2DTexturewithCopyDstAsCommittedResource,
     MetalUseCombinedDepthStencilFormatForStencil8,
+    MetalUseBothDepthAndStencilAttachmentsForCombinedDepthStencilFormats,
     UseTempTextureInStencilTextureToBufferCopy,
     DisallowDeprecatedAPIs,
 

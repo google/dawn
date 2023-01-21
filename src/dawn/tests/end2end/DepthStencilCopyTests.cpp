@@ -875,6 +875,47 @@ TEST_P(StencilCopyTests, ToStencilAspectAtNonZeroOffset) {
     }
 }
 
+// Test uploading to the non-zero mip, stencil-only aspect of a texture,
+// and then checking the contents with a stencil test.
+TEST_P(StencilCopyTests, CopyNonzeroMipThenReadWithStencilTest) {
+    // Copies to a single aspect are unsupported on OpenGL.
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
+
+    // Create a stencil texture
+    constexpr uint32_t kWidth = 4;
+    constexpr uint32_t kHeight = 4;
+    constexpr uint32_t kMipLevel = 1;
+
+    wgpu::Texture depthStencilTexture =
+        CreateDepthStencilTexture(kWidth, kHeight,
+                                  wgpu::TextureUsage::RenderAttachment |
+                                      wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst,
+                                  kMipLevel + 1);
+
+    std::vector<uint8_t> stencilData = {
+        7u, 7u,  //
+        7u, 7u,  //
+    };
+
+    // Upload the stencil data.
+    {
+        wgpu::TextureDataLayout dataLayout = {};
+        dataLayout.bytesPerRow = kWidth >> kMipLevel;
+
+        wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
+            depthStencilTexture, 1, {0, 0, 0}, wgpu::TextureAspect::StencilOnly);
+        wgpu::Extent3D copySize = {kWidth >> kMipLevel, kHeight >> kMipLevel, 1};
+
+        queue.WriteTexture(&imageCopyTexture, stencilData.data(), stencilData.size(), &dataLayout,
+                           &copySize);
+    }
+
+    // Check the stencil contents.
+    ExpectAttachmentStencilTestData(depthStencilTexture, GetParam().mTextureFormat,
+                                    kWidth >> kMipLevel, kWidth >> kMipLevel, 0u, kMipLevel, 7u);
+}
+
 DAWN_INSTANTIATE_TEST_P(DepthStencilCopyTests,
                         {D3D12Backend(), MetalBackend(),
                          MetalBackend({"use_temp_texture_in_stencil_texture_to_buffer_copy"}),
@@ -907,8 +948,10 @@ DAWN_INSTANTIATE_TEST_P(
      D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
                    "copy_with_non_zero_buffer_offset"}),
      MetalBackend(), MetalBackend({"metal_use_combined_depth_stencil_format_for_stencil8"}),
-     MetalBackend({"use_temp_texture_in_stencil_texture_to_buffer_copy"}), OpenGLBackend(),
-     OpenGLESBackend(),
+     MetalBackend({"use_temp_texture_in_stencil_texture_to_buffer_copy"}),
+     MetalBackend(
+         {"metal_use_both_depth_and_stencil_attachments_for_combined_depth_stencil_formats"}),
+     OpenGLBackend(), OpenGLESBackend(),
      // Test with the vulkan_use_s8 toggle forced on and off.
      VulkanBackend({"vulkan_use_s8"}, {}), VulkanBackend({}, {"vulkan_use_s8"})},
     std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(), utils::kStencilFormats.end()));
