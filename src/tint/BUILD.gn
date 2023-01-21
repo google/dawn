@@ -113,7 +113,7 @@ source_set("tint_utils_io") {
     sources += [ "utils/io/tmpfile_other.cc" ]
   }
 
-  public_deps = [ ":libtint_core_all_src" ]
+  deps = [ ":libtint_core_all_src" ]
 }
 
 ###############################################################################
@@ -127,7 +127,10 @@ source_set("tint_val") {
     "val/msl.cc",
     "val/val.h",
   ]
-  public_deps = [ ":tint_utils_io" ]
+  deps = [
+    ":libtint_core_all_src",
+    ":tint_utils_io",
+  ]
 }
 
 ###############################################################################
@@ -398,8 +401,6 @@ libtint_source_set("libtint_core_all_src") {
     "program_builder.h",
     "program_id.cc",
     "program_id.h",
-    "reader/reader.cc",
-    "reader/reader.h",
     "reflection.h",
     "resolver/const_eval.cc",
     "resolver/const_eval.h",
@@ -612,24 +613,6 @@ libtint_source_set("libtint_core_all_src") {
     "utils/unique_allocator.h",
     "utils/unique_vector.h",
     "utils/vector.h",
-    "writer/append_vector.cc",
-    "writer/append_vector.h",
-    "writer/array_length_from_uniform_options.cc",
-    "writer/array_length_from_uniform_options.h",
-    "writer/check_supported_extensions.cc",
-    "writer/check_supported_extensions.h",
-    "writer/flatten_bindings.cc",
-    "writer/flatten_bindings.h",
-    "writer/float_to_string.cc",
-    "writer/float_to_string.h",
-    "writer/generate_external_texture_bindings.cc",
-    "writer/generate_external_texture_bindings.h",
-    "writer/text.cc",
-    "writer/text.h",
-    "writer/text_generator.cc",
-    "writer/text_generator.h",
-    "writer/writer.cc",
-    "writer/writer.h",
   ]
 
   if (is_linux || is_mac) {
@@ -700,7 +683,7 @@ libtint_source_set("libtint_sem_src") {
     "sem/while_statement.h",
   ]
 
-  public_deps = [ ":libtint_core_all_src" ]
+  deps = [ ":libtint_core_all_src" ]
 }
 
 libtint_source_set("libtint_type_src") {
@@ -768,7 +751,7 @@ libtint_source_set("libtint_type_src") {
     "type/void.h",
   ]
 
-  public_deps = [ ":libtint_core_all_src" ]
+  deps = [ ":libtint_core_all_src" ]
 }
 
 libtint_source_set("libtint_constant_src") {
@@ -785,7 +768,7 @@ libtint_source_set("libtint_constant_src") {
     "constant/value.cc",
     "constant/value.h",
   ]
-  public_deps = [ ":libtint_core_all_src" ]
+  deps = [ ":libtint_core_all_src" ]
 }
 
 libtint_source_set("libtint_core_src") {
@@ -794,7 +777,17 @@ libtint_source_set("libtint_core_src") {
     ":libtint_core_all_src",
     ":libtint_sem_src",
     ":libtint_type_src",
+    ":libtint_writer_src",
   ]
+}
+
+libtint_source_set("libtint_reader_src") {
+  sources = [
+    "reader/reader.cc",
+    "reader/reader.h",
+  ]
+
+  deps = [ ":libtint_core_all_src" ]
 }
 
 libtint_source_set("libtint_spv_reader_src") {
@@ -820,12 +813,38 @@ libtint_source_set("libtint_spv_reader_src") {
     "reader/spirv/usage.h",
   ]
 
-  public_deps = [
-    ":libtint_core_src",
+  deps = [
+    ":libtint_core_all_src",
+    ":libtint_reader_src",
     "${tint_spirv_tools_dir}/:spvtools_opt",
   ]
 
   public_configs = [ "${tint_spirv_tools_dir}/:spvtools_internal_config" ]
+}
+
+libtint_source_set("libtint_writer_src") {
+  sources = [
+    "writer/append_vector.cc",
+    "writer/append_vector.h",
+    "writer/array_length_from_uniform_options.cc",
+    "writer/array_length_from_uniform_options.h",
+    "writer/check_supported_extensions.cc",
+    "writer/check_supported_extensions.h",
+    "writer/flatten_bindings.cc",
+    "writer/flatten_bindings.h",
+    "writer/float_to_string.cc",
+    "writer/float_to_string.h",
+    "writer/generate_external_texture_bindings.cc",
+    "writer/generate_external_texture_bindings.h",
+    "writer/text.cc",
+    "writer/text.h",
+    "writer/text_generator.cc",
+    "writer/text_generator.h",
+    "writer/writer.cc",
+    "writer/writer.h",
+  ]
+
+  deps = [ ":libtint_core_all_src" ]
 }
 
 libtint_source_set("libtint_spv_writer_src") {
@@ -847,7 +866,10 @@ libtint_source_set("libtint_spv_writer_src") {
     "writer/spirv/scalar_constant.h",
   ]
 
-  public_deps = [ ":libtint_core_src" ]
+  deps = [
+    ":libtint_core_src",
+    ":libtint_writer_src",
+  ]
 }
 
 libtint_source_set("libtint_wgsl_reader_src") {
@@ -863,7 +885,10 @@ libtint_source_set("libtint_wgsl_reader_src") {
     "reader/wgsl/token.h",
   ]
 
-  public_deps = [ ":libtint_core_src" ]
+  deps = [
+    ":libtint_core_all_src",
+    ":libtint_reader_src",
+  ]
 }
 
 libtint_source_set("libtint_wgsl_writer_src") {
@@ -874,7 +899,10 @@ libtint_source_set("libtint_wgsl_writer_src") {
     "writer/wgsl/generator_impl.h",
   ]
 
-  public_deps = [ ":libtint_core_src" ]
+  deps = [
+    ":libtint_core_src",
+    ":libtint_writer_src",
+  ]
 }
 
 libtint_source_set("libtint_msl_writer_src") {
@@ -885,7 +913,10 @@ libtint_source_set("libtint_msl_writer_src") {
     "writer/msl/generator_impl.h",
   ]
 
-  public_deps = [ ":libtint_core_src" ]
+  deps = [
+    ":libtint_core_src",
+    ":libtint_writer_src",
+  ]
 }
 
 libtint_source_set("libtint_hlsl_writer_src") {
@@ -896,7 +927,10 @@ libtint_source_set("libtint_hlsl_writer_src") {
     "writer/hlsl/generator_impl.h",
   ]
 
-  public_deps = [ ":libtint_core_src" ]
+  deps = [
+    ":libtint_core_src",
+    ":libtint_writer_src",
+  ]
 }
 
 libtint_source_set("libtint_glsl_writer_src") {
@@ -907,7 +941,10 @@ libtint_source_set("libtint_glsl_writer_src") {
     "writer/glsl/generator_impl.h",
   ]
 
-  public_deps = [ ":libtint_core_src" ]
+  deps = [
+    ":libtint_core_src",
+    ":libtint_writer_src",
+  ]
 }
 
 source_set("libtint") {
@@ -1386,6 +1423,7 @@ if (tint_build_unittests) {
       "writer/generate_external_texture_bindings_test.cc",
       "writer/text_generator_test.cc",
     ]
+    deps = [ ":libtint_writer_src" ]
   }
 
   tint_unittests_source_set("tint_unittests_spv_reader_src") {
@@ -1425,7 +1463,10 @@ if (tint_build_unittests) {
       "reader/spirv/usage_test.cc",
     ]
 
-    deps = [ ":libtint_spv_reader_src" ]
+    deps = [
+      ":libtint_spv_reader_src",
+      "${tint_spirv_tools_dir}/:spvtools_opt",
+    ]
   }
 
   tint_unittests_source_set("tint_unittests_spv_writer_src") {
