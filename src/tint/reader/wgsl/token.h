@@ -163,6 +163,8 @@ class Token {
         kContinue,
         /// A 'continuing'
         kContinuing,
+        /// A 'diagnostic'
+        kDiagnostic,
         /// A 'discard'
         kDiscard,
         /// A 'default'

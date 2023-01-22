@@ -153,6 +153,8 @@ std::string_view Token::TypeToName(Type type) {
             return "continue";
         case Token::Type::kContinuing:
             return "continuing";
+        case Token::Type::kDiagnostic:
+            return "diagnostic";
         case Token::Type::kDiscard:
             return "discard";
         case Token::Type::kDefault:

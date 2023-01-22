@@ -1141,6 +1141,9 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "continuing") {
         return {Token::Type::kContinuing, source, "continuing"};
     }
+    if (str == "diagnostic") {
+        return {Token::Type::kDiagnostic, source, "diagnostic"};
+    }
     if (str == "discard") {
         return {Token::Type::kDiscard, source, "discard"};
     }
