@@ -1,0 +1,45 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/src/cmd/gen to generate diagnostic_control_test.cc
+
+See:
+* tools/src/cmd/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+{{- Import "src/tint/templates/enums.tmpl.inc" -}}
+
+#include <string>
+
+#include "src/tint/ast/diagnostic_control.h"
+#include "src/tint/ast/test_helper.h"
+
+namespace tint::ast {
+namespace {
+
+using DiagnosticControlTest = TestHelper;
+
+TEST_F(DiagnosticControlTest, Creation) {
+    auto* name = Expr("foo");
+    Source source;
+    source.range.begin = Source::Location{20, 2};
+    source.range.end = Source::Location{20, 5};
+    auto* control = create<ast::DiagnosticControl>(source,
+                                                   DiagnosticSeverity::kWarning, name);
+    EXPECT_EQ(control->source.range.begin.line, 20u);
+    EXPECT_EQ(control->source.range.begin.column, 2u);
+    EXPECT_EQ(control->source.range.end.line, 20u);
+    EXPECT_EQ(control->source.range.end.column, 5u);
+    EXPECT_EQ(control->severity, DiagnosticSeverity::kWarning);
+    EXPECT_EQ(control->rule_name, name);
+}
+
+namespace diagnostic_severity_tests {
+
+{{ Eval "TestParsePrintEnum" (Sem.Enum "diagnostic_severity")}}
+
+}  // namespace diagnostic_severity_tests
+
+}  // namespace
+}  // namespace tint::ast

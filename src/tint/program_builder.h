@@ -40,6 +40,7 @@
 #include "src/tint/ast/continue_statement.h"
 #include "src/tint/ast/depth_multisampled_texture.h"
 #include "src/tint/ast/depth_texture.h"
+#include "src/tint/ast/diagnostic_control.h"
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/enable.h"
@@ -3218,6 +3219,26 @@ class ProgramBuilder {
     const ast::DisableValidationAttribute* Disable(ast::DisabledValidation validation) {
         return ASTNodes().Create<ast::DisableValidationAttribute>(ID(), AllocateNodeID(),
                                                                   validation);
+    }
+
+    /// Creates an ast::DiagnosticControl
+    /// @param source the source information
+    /// @param severity the diagnostic severity control
+    /// @param rule_name the diagnostic rule name
+    /// @returns the diagnostic control pointer
+    const ast::DiagnosticControl* DiagnosticControl(const Source& source,
+                                                    ast::DiagnosticSeverity severity,
+                                                    const ast::IdentifierExpression* rule_name) {
+        return create<ast::DiagnosticControl>(source, severity, rule_name);
+    }
+
+    /// Creates an ast::DiagnosticControl
+    /// @param severity the diagnostic severity control
+    /// @param rule_name the diagnostic rule name
+    /// @returns the diagnostic control pointer
+    const ast::DiagnosticControl* DiagnosticControl(ast::DiagnosticSeverity severity,
+                                                    const ast::IdentifierExpression* rule_name) {
+        return create<ast::DiagnosticControl>(source_, severity, rule_name);
     }
 
     /// Sets the current builder source to `src`
