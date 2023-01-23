@@ -14,7 +14,7 @@
 
 #include "src/tint/type/f32.h"
 
-#include "src/tint/program_builder.h"
+#include "src/tint/type/manager.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::F32);
 

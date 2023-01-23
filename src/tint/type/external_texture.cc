@@ -14,7 +14,7 @@
 
 #include "src/tint/type/external_texture.h"
 
-#include "src/tint/program_builder.h"
+#include "src/tint/type/manager.h"
 #include "src/tint/type/texture_dimension.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::ExternalTexture);

@@ -14,7 +14,9 @@
 
 #include "src/tint/type/matrix.h"
 
-#include "src/tint/program_builder.h"
+#include "src/tint/debug.h"
+#include "src/tint/diagnostic/diagnostic.h"
+#include "src/tint/type/manager.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/utils/hash.h"
 
