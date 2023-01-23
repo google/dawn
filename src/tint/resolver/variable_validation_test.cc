@@ -349,7 +349,7 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_InferredType) {
     // fn foo() {
     //   var v = s;
     // }
-    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(0_a), Binding(0_a));
+    GlobalVar("s", ty.sampler(type::SamplerKind::kSampler), Group(0_a), Binding(0_a));
     auto* v = Var(Source{{12, 34}}, "v", Expr("s"));
     WrapInFunction(v);
 

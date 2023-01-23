@@ -426,7 +426,7 @@ struct MultiplanarExternalTexture::State {
                                b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32())),
                        b.Param("plane1",
                                b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32())),
-                       b.Param("smp", b.ty.sampler(ast::SamplerKind::kSampler)),
+                       b.Param("smp", b.ty.sampler(type::SamplerKind::kSampler)),
                        b.Param("coord", b.ty.vec2(b.ty.f32())),
                        b.Param("params", b.ty.type_name(params_struct_sym)),
                    },

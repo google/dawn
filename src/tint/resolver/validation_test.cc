@@ -336,7 +336,7 @@ TEST_F(ResolverValidationTest, AddressSpace_FunctionVariableI32) {
 }
 
 TEST_F(ResolverValidationTest, AddressSpace_SamplerExplicitAddressSpace) {
-    auto* t = ty.sampler(ast::SamplerKind::kSampler);
+    auto* t = ty.sampler(type::SamplerKind::kSampler);
     GlobalVar(Source{{12, 34}}, "var", t, type::AddressSpace::kHandle, Binding(0_a), Group(0_a));
 
     EXPECT_FALSE(r()->Resolve());

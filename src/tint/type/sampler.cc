@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Sampler);
 
 namespace tint::type {
 
-Sampler::Sampler(ast::SamplerKind kind)
+Sampler::Sampler(SamplerKind kind)
     : Base(utils::Hash(TypeInfo::Of<Sampler>().full_hashcode, kind), type::Flags{}), kind_(kind) {}
 
 Sampler::~Sampler() = default;
@@ -34,7 +34,7 @@ bool Sampler::Equals(const UniqueNode& other) const {
 }
 
 std::string Sampler::FriendlyName(const SymbolTable&) const {
-    return kind_ == ast::SamplerKind::kSampler ? "sampler" : "sampler_comparison";
+    return kind_ == SamplerKind::kSampler ? "sampler" : "sampler_comparison";
 }
 
 Sampler* Sampler::Clone(CloneContext& ctx) const {

@@ -22,23 +22,23 @@ namespace {
 using AstSamplerTest = TestHelper;
 
 TEST_F(AstSamplerTest, Creation) {
-    auto* s = create<Sampler>(SamplerKind::kSampler);
-    EXPECT_EQ(s->kind, SamplerKind::kSampler);
+    auto* s = create<Sampler>(type::SamplerKind::kSampler);
+    EXPECT_EQ(s->kind, type::SamplerKind::kSampler);
 }
 
 TEST_F(AstSamplerTest, Creation_ComparisonSampler) {
-    auto* s = create<Sampler>(SamplerKind::kComparisonSampler);
-    EXPECT_EQ(s->kind, SamplerKind::kComparisonSampler);
+    auto* s = create<Sampler>(type::SamplerKind::kComparisonSampler);
+    EXPECT_EQ(s->kind, type::SamplerKind::kComparisonSampler);
     EXPECT_TRUE(s->IsComparison());
 }
 
 TEST_F(AstSamplerTest, FriendlyNameSampler) {
-    auto* s = create<Sampler>(SamplerKind::kSampler);
+    auto* s = create<Sampler>(type::SamplerKind::kSampler);
     EXPECT_EQ(s->FriendlyName(Symbols()), "sampler");
 }
 
 TEST_F(AstSamplerTest, FriendlyNameComparisonSampler) {
-    auto* s = create<Sampler>(SamplerKind::kComparisonSampler);
+    auto* s = create<Sampler>(type::SamplerKind::kComparisonSampler);
     EXPECT_EQ(s->FriendlyName(Symbols()), "sampler_comparison");
 }
 

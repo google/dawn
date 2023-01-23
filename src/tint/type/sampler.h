@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/ast/sampler.h"
+#include "src/tint/type/sampler_kind.h"
 #include "src/tint/type/type.h"
 
 namespace tint::type {
@@ -27,7 +27,7 @@ class Sampler final : public Castable<Sampler, Type> {
   public:
     /// Constructor
     /// @param kind the kind of sampler
-    explicit Sampler(ast::SamplerKind kind);
+    explicit Sampler(SamplerKind kind);
 
     /// Destructor
     ~Sampler() override;
@@ -37,10 +37,10 @@ class Sampler final : public Castable<Sampler, Type> {
     bool Equals(const UniqueNode& other) const override;
 
     /// @returns the sampler type
-    ast::SamplerKind kind() const { return kind_; }
+    SamplerKind kind() const { return kind_; }
 
     /// @returns true if this is a comparison sampler
-    bool IsComparison() const { return kind_ == ast::SamplerKind::kComparisonSampler; }
+    bool IsComparison() const { return kind_ == SamplerKind::kComparisonSampler; }
 
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
@@ -52,7 +52,7 @@ class Sampler final : public Castable<Sampler, Type> {
     Sampler* Clone(CloneContext& ctx) const override;
 
   private:
-    ast::SamplerKind const kind_;
+    SamplerKind const kind_;
 };
 
 }  // namespace tint::type

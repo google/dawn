@@ -363,7 +363,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
                              });
     GlobalVar("tex", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Group(0_a),
               Binding(0_a));
-    GlobalVar("smp", ty.sampler(ast::SamplerKind::kSampler), Group(0_a), Binding(1_a));
+    GlobalVar("smp", ty.sampler(type::SamplerKind::kSampler), Group(0_a), Binding(1_a));
     GlobalVar("u", ty.Of(U), type::AddressSpace::kUniform, Group(0_a), Binding(2_a));
     GlobalVar("s", ty.Of(S), type::AddressSpace::kStorage, Group(0_a), Binding(3_a));
     GlobalVar("wg", ty.array<f32, 10>(), type::AddressSpace::kWorkgroup);

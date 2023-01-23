@@ -640,7 +640,7 @@ struct BuiltinPolyfill::State {
         b.Func(name,
                utils::Vector{
                    b.Param("t", b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32())),
-                   b.Param("s", b.ty.sampler(ast::SamplerKind::kSampler)),
+                   b.Param("s", b.ty.sampler(type::SamplerKind::kSampler)),
                    b.Param("coord", b.ty.vec2<f32>()),
                },
                b.ty.vec4<f32>(), body);

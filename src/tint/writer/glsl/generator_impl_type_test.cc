@@ -280,7 +280,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Void) {
 }
 
 TEST_F(GlslGeneratorImplTest_Type, EmitSampler) {
-    auto* sampler = create<type::Sampler>(ast::SamplerKind::kSampler);
+    auto* sampler = create<type::Sampler>(type::SamplerKind::kSampler);
 
     GeneratorImpl& gen = Build();
 
@@ -291,7 +291,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitSampler) {
 }
 
 TEST_F(GlslGeneratorImplTest_Type, EmitSamplerComparison) {
-    auto* sampler = create<type::Sampler>(ast::SamplerKind::kComparisonSampler);
+    auto* sampler = create<type::Sampler>(type::SamplerKind::kComparisonSampler);
 
     GeneratorImpl& gen = Build();
 

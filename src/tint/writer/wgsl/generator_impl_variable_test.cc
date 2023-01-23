@@ -66,7 +66,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
-    auto* v = GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler), Group(1_a), Binding(2_a));
+    auto* v = GlobalVar("a", ty.sampler(type::SamplerKind::kSampler), Group(1_a), Binding(2_a));
 
     GeneratorImpl& gen = Build();
 

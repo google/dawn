@@ -3210,7 +3210,7 @@ TEST_F(ResolverTypeInitializerValidationTest, NonConstructibleType_AtomicStructM
 
 TEST_F(ResolverTypeInitializerValidationTest, NonConstructibleType_Sampler) {
     WrapInFunction(
-        Assign(Phony(), Construct(Source{{12, 34}}, ty.sampler(ast::SamplerKind::kSampler))));
+        Assign(Phony(), Construct(Source{{12, 34}}, ty.sampler(type::SamplerKind::kSampler))));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: type is not constructible");

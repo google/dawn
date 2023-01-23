@@ -528,7 +528,7 @@ INSTANTIATE_TEST_SUITE_P(
                     ImageFormatData{type::TexelFormat::kRgba32Float, "rgba32float"}));
 
 TEST_F(WgslGeneratorImplTest, EmitType_Sampler) {
-    auto* sampler = ty.sampler(ast::SamplerKind::kSampler);
+    auto* sampler = ty.sampler(type::SamplerKind::kSampler);
     Alias("make_type_reachable", sampler);
 
     GeneratorImpl& gen = Build();
@@ -539,7 +539,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Sampler) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_SamplerComparison) {
-    auto* sampler = ty.sampler(ast::SamplerKind::kComparisonSampler);
+    auto* sampler = ty.sampler(type::SamplerKind::kComparisonSampler);
     Alias("make_type_reachable", sampler);
 
     GeneratorImpl& gen = Build();

@@ -18,21 +18,9 @@
 #include <string>
 
 #include "src/tint/ast/type.h"
+#include "src/tint/type/sampler_kind.h"
 
 namespace tint::ast {
-
-/// The different kinds of samplers
-enum class SamplerKind {
-    /// A regular sampler
-    kSampler,
-    /// A comparison sampler
-    kComparisonSampler
-};
-
-/// @param out the std::ostream to write to
-/// @param kind the SamplerKind
-/// @return the std::ostream so calls can be chained
-std::ostream& operator<<(std::ostream& out, SamplerKind kind);
 
 /// A sampler type.
 class Sampler final : public Castable<Sampler, Type> {
@@ -42,13 +30,13 @@ class Sampler final : public Castable<Sampler, Type> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param kind the kind of sampler
-    Sampler(ProgramID pid, NodeID nid, const Source& src, SamplerKind kind);
+    Sampler(ProgramID pid, NodeID nid, const Source& src, type::SamplerKind kind);
     /// Move constructor
     Sampler(Sampler&&);
     ~Sampler() override;
 
     /// @returns true if this is a comparison sampler
-    bool IsComparison() const { return kind == SamplerKind::kComparisonSampler; }
+    bool IsComparison() const { return kind == type::SamplerKind::kComparisonSampler; }
 
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
@@ -61,7 +49,7 @@ class Sampler final : public Castable<Sampler, Type> {
     const Sampler* Clone(CloneContext* ctx) const override;
 
     /// The sampler type
-    const SamplerKind kind;
+    const type::SamplerKind kind;
 };
 
 }  // namespace tint::ast

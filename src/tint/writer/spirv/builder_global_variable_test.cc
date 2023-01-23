@@ -234,7 +234,7 @@ TEST_F(BuilderTest, GlobalConst_Nested_Vec_Initializer) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
-    auto* v = GlobalVar("var", ty.sampler(ast::SamplerKind::kSampler), Binding(2_a), Group(3_a));
+    auto* v = GlobalVar("var", ty.sampler(type::SamplerKind::kSampler), Binding(2_a), Group(3_a));
 
     spirv::Builder& b = Build();
 

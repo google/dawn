@@ -790,11 +790,11 @@ Maybe<const ast::Type*> ParserImpl::texture_and_sampler_types() {
 Maybe<const ast::Type*> ParserImpl::sampler_type() {
     Source source;
     if (match(Token::Type::kSampler, &source)) {
-        return builder_.ty.sampler(source, ast::SamplerKind::kSampler);
+        return builder_.ty.sampler(source, type::SamplerKind::kSampler);
     }
 
     if (match(Token::Type::kComparisonSampler, &source)) {
-        return builder_.ty.sampler(source, ast::SamplerKind::kComparisonSampler);
+        return builder_.ty.sampler(source, type::SamplerKind::kComparisonSampler);
     }
 
     return Failure::kNoMatch;

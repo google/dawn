@@ -216,7 +216,7 @@ const ast::Type* Array::Build(ProgramBuilder& b) const {
     }
 }
 
-Sampler::Sampler(ast::SamplerKind k) : kind(k) {}
+Sampler::Sampler(type::SamplerKind k) : kind(k) {}
 Sampler::Sampler(const Sampler&) = default;
 
 const ast::Type* Sampler::Build(ProgramBuilder& b) const {
@@ -491,7 +491,7 @@ const spirv::Struct* TypeManager::Struct(Symbol name, TypeList members) {
     return state->structs_.Get(name, std::move(members));
 }
 
-const spirv::Sampler* TypeManager::Sampler(ast::SamplerKind kind) {
+const spirv::Sampler* TypeManager::Sampler(type::SamplerKind kind) {
     return state->samplers_.Get(kind);
 }
 
@@ -574,9 +574,9 @@ std::string Array::String() const {
 
 std::string Sampler::String() const {
     switch (kind) {
-        case ast::SamplerKind::kSampler:
+        case type::SamplerKind::kSampler:
             return "sampler";
-        case ast::SamplerKind::kComparisonSampler:
+        case type::SamplerKind::kComparisonSampler:
             return "sampler_comparison";
     }
     return "<unknown sampler>";

@@ -333,11 +333,11 @@ class InspectorBuilder : public ProgramBuilder {
     Inspector& Build();
 
     /// @returns the type for a SamplerKind::kSampler
-    const ast::Sampler* sampler_type() { return ty.sampler(ast::SamplerKind::kSampler); }
+    const ast::Sampler* sampler_type() { return ty.sampler(type::SamplerKind::kSampler); }
 
     /// @returns the type for a SamplerKind::kComparison
     const ast::Sampler* comparison_sampler_type() {
-        return ty.sampler(ast::SamplerKind::kComparisonSampler);
+        return ty.sampler(type::SamplerKind::kComparisonSampler);
     }
 
   protected:

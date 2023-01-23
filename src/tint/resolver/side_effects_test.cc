@@ -193,9 +193,9 @@ TEST_P(SideEffectsBuiltinTest, Test) {
                   ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Float,
                                      type::Access::kWrite),
                   Group(0_a), Binding(AInt(next_binding++)));
-        GlobalVar("s2d", ty.sampler(ast::SamplerKind::kSampler), Group(0_a),
+        GlobalVar("s2d", ty.sampler(type::SamplerKind::kSampler), Group(0_a),
                   Binding(AInt(next_binding++)));
-        GlobalVar("scomp", ty.sampler(ast::SamplerKind::kComparisonSampler), Group(0_a),
+        GlobalVar("scomp", ty.sampler(type::SamplerKind::kComparisonSampler), Group(0_a),
                   Binding(AInt(next_binding++)));
     }
 

@@ -1000,14 +1000,14 @@ class ProgramBuilder {
 
         /// @param kind the kind of sampler
         /// @returns the sampler
-        const ast::Sampler* sampler(ast::SamplerKind kind) const {
+        const ast::Sampler* sampler(type::SamplerKind kind) const {
             return builder->create<ast::Sampler>(kind);
         }
 
         /// @param source the Source of the node
         /// @param kind the kind of sampler
         /// @returns the sampler
-        const ast::Sampler* sampler(const Source& source, ast::SamplerKind kind) const {
+        const ast::Sampler* sampler(const Source& source, type::SamplerKind kind) const {
             return builder->create<ast::Sampler>(source, kind);
         }
 

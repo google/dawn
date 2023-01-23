@@ -185,7 +185,7 @@ struct TextureOverloadCase {
     TextureOverloadCase(ValidTextureOverload,
                         const char*,
                         TextureKind,
-                        ast::SamplerKind,
+                        type::SamplerKind,
                         type::TextureDimension,
                         TextureDataType,
                         const char*,
@@ -236,7 +236,7 @@ struct TextureOverloadCase {
     const TextureKind texture_kind;
     /// The sampler kind for the sampler parameter
     /// Used only when texture_kind is not kStorage
-    ast::SamplerKind const sampler_kind = ast::SamplerKind::kSampler;
+    type::SamplerKind const sampler_kind = type::SamplerKind::kSampler;
     /// The access control for the storage texture
     /// Used only when texture_kind is kStorage
     type::Access const access = type::Access::kReadWrite;

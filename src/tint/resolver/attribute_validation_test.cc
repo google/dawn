@@ -507,7 +507,7 @@ TEST_F(EntryPointParameterAttributeTest, DuplicateAttribute) {
 }
 
 TEST_F(EntryPointParameterAttributeTest, DuplicateInternalAttribute) {
-    auto* s = Param("s", ty.sampler(ast::SamplerKind::kSampler),
+    auto* s = Param("s", ty.sampler(type::SamplerKind::kSampler),
                     utils::Vector{
                         Binding(0_a),
                         Group(0_a),
@@ -873,7 +873,7 @@ TEST_P(VariableAttributeTest, IsValid) {
     auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
     auto* attr = attrs[0];
     if (IsBindingAttribute(params.kind)) {
-        GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler), attrs);
+        GlobalVar("a", ty.sampler(type::SamplerKind::kSampler), attrs);
     } else {
         GlobalVar("a", ty.f32(), type::AddressSpace::kPrivate, attrs);
     }
@@ -906,7 +906,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kBindingAndGroup, true}));
 
 TEST_F(VariableAttributeTest, DuplicateAttribute) {
-    GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler), Binding(Source{{12, 34}}, 2_a),
+    GlobalVar("a", ty.sampler(type::SamplerKind::kSampler), Binding(Source{{12, 34}}, 2_a),
               Group(2_a), Binding(Source{{56, 78}}, 3_a));
 
     EXPECT_FALSE(r()->Resolve());
@@ -1175,7 +1175,7 @@ TEST_F(ResourceAttributeTest, TextureMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, SamplerMissingBinding) {
-    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler));
+    GlobalVar(Source{{12, 34}}, "G", ty.sampler(type::SamplerKind::kSampler));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1183,7 +1183,7 @@ TEST_F(ResourceAttributeTest, SamplerMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPairMissingBinding) {
-    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler), Group(1_a));
+    GlobalVar(Source{{12, 34}}, "G", ty.sampler(type::SamplerKind::kSampler), Group(1_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1191,7 +1191,7 @@ TEST_F(ResourceAttributeTest, BindingPairMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPairMissingGroup) {
-    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler), Binding(1_a));
+    GlobalVar(Source{{12, 34}}, "G", ty.sampler(type::SamplerKind::kSampler), Binding(1_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

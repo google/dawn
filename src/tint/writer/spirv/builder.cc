@@ -3735,11 +3735,11 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
 
                 // Register both of the sampler type names. In SPIR-V they're the same
                 // sampler type, so we need to match that when we do the dedup check.
-                if (s->kind() == ast::SamplerKind::kSampler) {
+                if (s->kind() == type::SamplerKind::kSampler) {
                     type_to_id_[builder_.create<type::Sampler>(
-                        ast::SamplerKind::kComparisonSampler)] = id;
+                        type::SamplerKind::kComparisonSampler)] = id;
                 } else {
-                    type_to_id_[builder_.create<type::Sampler>(ast::SamplerKind::kSampler)] = id;
+                    type_to_id_[builder_.create<type::Sampler>(type::SamplerKind::kSampler)] = id;
                 }
                 return true;
             },

@@ -508,6 +508,8 @@ list(APPEND TINT_LIB_SRCS
   type/sampled_texture.h
   type/sampler.cc
   type/sampler.h
+  type/sampler_kind.cc
+  type/sampler_kind.h
   type/storage_texture.cc
   type/storage_texture.h
   type/struct.cc

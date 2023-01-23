@@ -221,11 +221,12 @@ TEST_F(ResolverLoadTest, FunctionArg_Handles) {
     // f(t, s);
     GlobalVar("t", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
               utils::Vector{Group(0_a), Binding(0_a)});
-    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), utils::Vector{Group(0_a), Binding(1_a)});
+    GlobalVar("s", ty.sampler(type::SamplerKind::kSampler),
+              utils::Vector{Group(0_a), Binding(1_a)});
     Func("f",
          utils::Vector{
              Param("tp", ty.sampled_texture(type::TextureDimension::k2d, ty.f32())),
-             Param("sp", ty.sampler(ast::SamplerKind::kSampler)),
+             Param("sp", ty.sampler(type::SamplerKind::kSampler)),
          },
          ty.vec4<f32>(),
          utils::Vector{

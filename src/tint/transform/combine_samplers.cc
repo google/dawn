@@ -123,9 +123,9 @@ struct CombineSamplers::State {
     /// Creates placeholder global sampler variables.
     /// @param kind the sampler kind to create for
     /// @returns the newly-created global variable
-    const ast::Variable* CreatePlaceholder(ast::SamplerKind kind) {
+    const ast::Variable* CreatePlaceholder(type::SamplerKind kind) {
         const ast::Type* type = ctx.dst->ty.sampler(kind);
-        const char* name = kind == ast::SamplerKind::kComparisonSampler
+        const char* name = kind == type::SamplerKind::kComparisonSampler
                                ? "placeholder_comparison_sampler"
                                : "placeholder_sampler";
         Symbol symbol = ctx.dst->Symbols().New(name);
@@ -265,8 +265,8 @@ struct CombineSamplers::State {
                                                                          [new_pair];
                             args.Push(ctx.dst->Expr(var->symbol));
                         } else if (auto* sampler_type = type->As<type::Sampler>()) {
-                            ast::SamplerKind kind = sampler_type->kind();
-                            int index = (kind == ast::SamplerKind::kSampler) ? 0 : 1;
+                            type::SamplerKind kind = sampler_type->kind();
+                            int index = (kind == type::SamplerKind::kSampler) ? 0 : 1;
                             const ast::Variable*& p = placeholder_samplers_[index];
                             if (!p) {
                                 p = CreatePlaceholder(kind);

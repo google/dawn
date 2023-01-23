@@ -22,12 +22,12 @@ namespace {
 using SamplerTest = TestHelper;
 
 TEST_F(SamplerTest, Creation) {
-    auto* a = create<Sampler>(ast::SamplerKind::kSampler);
-    auto* b = create<Sampler>(ast::SamplerKind::kSampler);
-    auto* c = create<Sampler>(ast::SamplerKind::kComparisonSampler);
+    auto* a = create<Sampler>(SamplerKind::kSampler);
+    auto* b = create<Sampler>(SamplerKind::kSampler);
+    auto* c = create<Sampler>(SamplerKind::kComparisonSampler);
 
-    EXPECT_EQ(a->kind(), ast::SamplerKind::kSampler);
-    EXPECT_EQ(c->kind(), ast::SamplerKind::kComparisonSampler);
+    EXPECT_EQ(a->kind(), SamplerKind::kSampler);
+    EXPECT_EQ(c->kind(), SamplerKind::kComparisonSampler);
 
     EXPECT_FALSE(a->IsComparison());
     EXPECT_TRUE(c->IsComparison());
@@ -37,16 +37,16 @@ TEST_F(SamplerTest, Creation) {
 }
 
 TEST_F(SamplerTest, Hash) {
-    auto* a = create<Sampler>(ast::SamplerKind::kSampler);
-    auto* b = create<Sampler>(ast::SamplerKind::kSampler);
+    auto* a = create<Sampler>(SamplerKind::kSampler);
+    auto* b = create<Sampler>(SamplerKind::kSampler);
 
     EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(SamplerTest, Equals) {
-    auto* a = create<Sampler>(ast::SamplerKind::kSampler);
-    auto* b = create<Sampler>(ast::SamplerKind::kSampler);
-    auto* c = create<Sampler>(ast::SamplerKind::kComparisonSampler);
+    auto* a = create<Sampler>(SamplerKind::kSampler);
+    auto* b = create<Sampler>(SamplerKind::kSampler);
+    auto* c = create<Sampler>(SamplerKind::kComparisonSampler);
 
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
@@ -54,23 +54,23 @@ TEST_F(SamplerTest, Equals) {
 }
 
 TEST_F(SamplerTest, FriendlyNameSampler) {
-    Sampler s{ast::SamplerKind::kSampler};
+    Sampler s{SamplerKind::kSampler};
     EXPECT_EQ(s.FriendlyName(Symbols()), "sampler");
 }
 
 TEST_F(SamplerTest, FriendlyNameComparisonSampler) {
-    Sampler s{ast::SamplerKind::kComparisonSampler};
+    Sampler s{SamplerKind::kComparisonSampler};
     EXPECT_EQ(s.FriendlyName(Symbols()), "sampler_comparison");
 }
 
 TEST_F(SamplerTest, Clone) {
-    auto* a = create<Sampler>(ast::SamplerKind::kSampler);
+    auto* a = create<Sampler>(SamplerKind::kSampler);
 
     type::Manager mgr;
     type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* mt = a->Clone(ctx);
-    EXPECT_EQ(mt->kind(), ast::SamplerKind::kSampler);
+    EXPECT_EQ(mt->kind(), SamplerKind::kSampler);
 }
 
 }  // namespace

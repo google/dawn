@@ -91,8 +91,9 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
                 b.Group(2_a), b.Binding(2_a));
 
     const size_t num_samplers = 2;
-    b.GlobalVar("sampler1", b.ty.sampler(ast::SamplerKind::kSampler), b.Group(3_a), b.Binding(3_a));
-    b.GlobalVar("sampler2", b.ty.sampler(ast::SamplerKind::kComparisonSampler), b.Group(4_a),
+    b.GlobalVar("sampler1", b.ty.sampler(type::SamplerKind::kSampler), b.Group(3_a),
+                b.Binding(3_a));
+    b.GlobalVar("sampler2", b.ty.sampler(type::SamplerKind::kComparisonSampler), b.Group(4_a),
                 b.Binding(4_a));
 
     const size_t num_textures = 6;

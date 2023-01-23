@@ -306,7 +306,7 @@ struct Array final : public Castable<Array, Type> {
 struct Sampler final : public Castable<Sampler, Type> {
     /// Constructor
     /// @param k the sampler kind
-    explicit Sampler(ast::SamplerKind k);
+    explicit Sampler(type::SamplerKind k);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -322,7 +322,7 @@ struct Sampler final : public Castable<Sampler, Type> {
 #endif  // NDEBUG
 
     /// the sampler kind
-    ast::SamplerKind const kind;
+    type::SamplerKind const kind;
 };
 
 /// Base class for texture types
@@ -591,7 +591,7 @@ class TypeManager {
     /// @param k the sampler kind
     /// @return a Sampler type. Repeated calls with the same arguments will return
     /// the same pointer.
-    const spirv::Sampler* Sampler(ast::SamplerKind k);
+    const spirv::Sampler* Sampler(type::SamplerKind k);
     /// @param d the texture dimensions
     /// @return a DepthTexture type. Repeated calls with the same arguments will
     /// return the same pointer.

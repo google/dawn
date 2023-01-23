@@ -585,11 +585,11 @@ bool match_sampler(MatchState&, const type::Type* ty) {
     if (ty->Is<Any>()) {
         return true;
     }
-    return ty->Is([](const type::Sampler* s) { return s->kind() == ast::SamplerKind::kSampler; });
+    return ty->Is([](const type::Sampler* s) { return s->kind() == type::SamplerKind::kSampler; });
 }
 
 const type::Sampler* build_sampler(MatchState& state) {
-    return state.builder.create<type::Sampler>(ast::SamplerKind::kSampler);
+    return state.builder.create<type::Sampler>(type::SamplerKind::kSampler);
 }
 
 bool match_sampler_comparison(MatchState&, const type::Type* ty) {
@@ -597,11 +597,11 @@ bool match_sampler_comparison(MatchState&, const type::Type* ty) {
         return true;
     }
     return ty->Is(
-        [](const type::Sampler* s) { return s->kind() == ast::SamplerKind::kComparisonSampler; });
+        [](const type::Sampler* s) { return s->kind() == type::SamplerKind::kComparisonSampler; });
 }
 
 const type::Sampler* build_sampler_comparison(MatchState& state) {
-    return state.builder.create<type::Sampler>(ast::SamplerKind::kComparisonSampler);
+    return state.builder.create<type::Sampler>(type::SamplerKind::kComparisonSampler);
 }
 
 bool match_texture(MatchState&,

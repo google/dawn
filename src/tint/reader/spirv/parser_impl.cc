@@ -2456,8 +2456,8 @@ const Type* ParserImpl::GetHandleTypeForSpirvHandle(const spvtools::opt::Instruc
     const Type* ast_handle_type = nullptr;
     if (usage.IsSampler()) {
         ast_handle_type =
-            ty_.Sampler(usage.IsComparisonSampler() ? ast::SamplerKind::kComparisonSampler
-                                                    : ast::SamplerKind::kSampler);
+            ty_.Sampler(usage.IsComparisonSampler() ? type::SamplerKind::kComparisonSampler
+                                                    : type::SamplerKind::kSampler);
     } else if (usage.IsTexture()) {
         const spvtools::opt::analysis::Image* image_type =
             type_mgr_->GetType(raw_handle_type->result_id())->AsImage();
