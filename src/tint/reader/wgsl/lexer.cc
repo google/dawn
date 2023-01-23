@@ -96,9 +96,10 @@ std::vector<Token> Lexer::Lex() {
     while (true) {
         tokens.emplace_back(next());
 
-        // If the token can be split, we insert a placeholder element into
-        // the stream to hold the split character.
-        if (tokens.back().IsSplittable()) {
+        // If the token can be split, we insert a placeholder element(s) into the stream to hold the
+        // split character.
+        size_t num_placeholders = tokens.back().NumPlaceholders();
+        for (size_t i = 0; i < num_placeholders; i++) {
             auto src = tokens.back().source();
             src.range.begin.column++;
             tokens.emplace_back(Token(Token::Type::kPlaceholder, src));

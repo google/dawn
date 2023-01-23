@@ -989,7 +989,6 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          TokenData{"&=", Token::Type::kAndEqual},
                                          TokenData{"|=", Token::Type::kOrEqual},
                                          TokenData{"^=", Token::Type::kXorEqual},
-                                         TokenData{">>=", Token::Type::kShiftRightEqual},
                                          TokenData{"<<=", Token::Type::kShiftLeftEqual}));
 
 using SplittablePunctuationTest = testing::TestWithParam<TokenData>;
@@ -1010,18 +1009,23 @@ TEST_P(SplittablePunctuationTest, Parses) {
         EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
     }
 
-    {
-        auto& t = list[1];
+    const size_t num_placeholders = list[0].NumPlaceholders();
+    EXPECT_GT(num_placeholders, 0u);
+    ASSERT_EQ(list.size(), 2u + num_placeholders);
+
+    for (size_t i = 0; i < num_placeholders; i++) {
+        auto& t = list[1 + i];
         EXPECT_TRUE(t.Is(Token::Type::kPlaceholder));
         EXPECT_EQ(t.source().range.begin.line, 1u);
-        EXPECT_EQ(t.source().range.begin.column, 2u);
+        EXPECT_EQ(t.source().range.begin.column, 2u + i);
         EXPECT_EQ(t.source().range.end.line, 1u);
         EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
     }
 
     {
-        auto& t = list[2];
-        EXPECT_EQ(t.source().range.begin.column, 1 + std::string(params.input).size());
+        auto& t = list.back();
+        EXPECT_TRUE(t.Is(Token::Type::kEOF));
+        EXPECT_EQ(t.source().range.begin.column, 2u + num_placeholders);
     }
 }
 INSTANTIATE_TEST_SUITE_P(LexerTest,
@@ -1029,7 +1033,8 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                          testing::Values(TokenData{"&&", Token::Type::kAndAnd},
                                          TokenData{">=", Token::Type::kGreaterThanEqual},
                                          TokenData{"--", Token::Type::kMinusMinus},
-                                         TokenData{">>", Token::Type::kShiftRight}));
+                                         TokenData{">>", Token::Type::kShiftRight},
+                                         TokenData{">>=", Token::Type::kShiftRightEqual}));
 
 using KeywordTest = testing::TestWithParam<TokenData>;
 TEST_P(KeywordTest, Parses) {

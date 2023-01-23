@@ -379,10 +379,20 @@ class Token {
         return type_ == Type::kVec2 || type_ == Type::kVec3 || type_ == Type::kVec4;
     }
 
-    /// @returns true if the token can be split during parse into component tokens
-    bool IsSplittable() const {
-        return Is(Type::kShiftRight) || Is(Type::kGreaterThanEqual) || Is(Type::kAndAnd) ||
-               Is(Type::kMinusMinus);
+    /// @returns the number of placeholder tokens required to follow the token, in order to provide
+    /// space for token splitting.
+    size_t NumPlaceholders() const {
+        switch (type_) {
+            case Type::kShiftRightEqual:
+                return 2;
+            case Type::kShiftRight:
+            case Type::kGreaterThanEqual:
+            case Type::kAndAnd:
+            case Type::kMinusMinus:
+                return 1;
+            default:
+                return 0;
+        }
     }
 
     /// @returns true if the token is a binary operator
