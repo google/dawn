@@ -3503,6 +3503,7 @@ Expect<const ast::Attribute*> ParserImpl::expect_attribute() {
 //   | ATTR 'binding' PAREN_LEFT expression COMMA? PAREN_RIGHT
 //   | ATTR 'builtin' PAREN_LEFT builtin_value_name COMMA? PAREN_RIGHT
 //   | ATTR 'const'
+//   | ATTR 'diagnostic' diagnostic_control
 //   | ATTR 'group' PAREN_LEFT expression COMMA? PAREN_RIGHT
 //   | ATTR 'id' PAREN_LEFT expression COMMA? PAREN_RIGHT
 //   | ATTR 'interpolate' PAREN_LEFT interpolation_type_name COMMA? PAREN_RIGHT
@@ -3522,7 +3523,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
     using Result = Maybe<const ast::Attribute*>;
     auto& t = next();
 
-    if (!t.IsIdentifier()) {
+    if (!t.IsIdentifier() && !(t.Is(Token::Type::kDiagnostic))) {
         return Failure::kNoMatch;
     }
 
@@ -3575,6 +3576,14 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
     }
 
     // Note, `const` is not valid in a WGSL source file, it's internal only
+
+    if (t.Is(Token::Type::kDiagnostic)) {
+        auto control = expect_diagnostic_control();
+        if (control.errored) {
+            return Failure::kErrored;
+        }
+        return create<ast::DiagnosticAttribute>(t.source(), control.value);
+    }
 
     if (t == "fragment") {
         return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kFragment);
