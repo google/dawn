@@ -230,6 +230,7 @@ class Resolver {
     sem::CaseStatement* CaseStatement(const ast::CaseStatement*, const type::Type*);
     sem::Statement* CompoundAssignmentStatement(const ast::CompoundAssignmentStatement*);
     sem::Statement* ContinueStatement(const ast::ContinueStatement*);
+    sem::Statement* ConstAssert(const ast::ConstAssert*);
     sem::Statement* DiscardStatement(const ast::DiscardStatement*);
     sem::ForLoopStatement* ForLoopStatement(const ast::ForLoopStatement*);
     sem::WhileStatement* WhileStatement(const ast::WhileStatement*);
@@ -240,7 +241,6 @@ class Resolver {
     sem::LoopStatement* LoopStatement(const ast::LoopStatement*);
     sem::Statement* ReturnStatement(const ast::ReturnStatement*);
     sem::Statement* Statement(const ast::Statement*);
-    sem::Statement* StaticAssert(const ast::StaticAssert*);
     sem::SwitchStatement* SwitchStatement(const ast::SwitchStatement* s);
     sem::Statement* VariableDeclStatement(const ast::VariableDeclStatement*);
     bool Statements(utils::VectorRef<const ast::Statement*>);

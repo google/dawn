@@ -12,36 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/writer/wgsl/test_helper.h"
+#include "src/tint/writer/hlsl/test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::writer::wgsl {
+namespace tint::writer::hlsl {
 namespace {
 
-using WgslGeneratorImplTest = TestHelper;
+using HlslGeneratorImplTest = TestHelper;
 
-TEST_F(WgslGeneratorImplTest, Emit_GlobalStaticAssert) {
-    GlobalStaticAssert(true);
+TEST_F(HlslGeneratorImplTest, Emit_GlobalConstAssert) {
+    GlobalConstAssert(true);
 
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_EQ(gen.result(), R"(static_assert true;
-)");
+    // const asserts are not emitted
+    EXPECT_EQ(gen.result(), "");
 }
 
-TEST_F(WgslGeneratorImplTest, Emit_FunctionStaticAssert) {
-    Func("f", utils::Empty, ty.void_(), utils::Vector{StaticAssert(true)});
+TEST_F(HlslGeneratorImplTest, Emit_FunctionConstAssert) {
+    Func("f", utils::Empty, ty.void_(), utils::Vector{ConstAssert(true)});
 
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_EQ(gen.result(), R"(fn f() {
-  static_assert true;
+    // const asserts are not emitted
+    EXPECT_EQ(gen.result(), R"(void f() {
 }
 )");
 }
 
 }  // namespace
-}  // namespace tint::writer::wgsl
+}  // namespace tint::writer::hlsl

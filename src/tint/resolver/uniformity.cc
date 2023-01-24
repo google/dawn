@@ -1067,7 +1067,7 @@ class UniformityGraph {
                 return cf;
             },
 
-            [&](const ast::StaticAssert*) {
+            [&](const ast::ConstAssert*) {
                 return cf;  // No impact on uniformity
             },
 

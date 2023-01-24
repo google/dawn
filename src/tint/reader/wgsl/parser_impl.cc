@@ -427,7 +427,7 @@ Maybe<Void> ParserImpl::enable_directive() {
 //  | type_alias_decl SEMICOLON
 //  | struct_decl
 //  | function_decl
-//  | static_assert_statement SEMICOLON
+//  | const_assert_statement SEMICOLON
 Maybe<Void> ParserImpl::global_decl() {
     if (match(Token::Type::kSemicolon) || match(Token::Type::kEOF)) {
         return kSuccess;
@@ -486,13 +486,13 @@ Maybe<Void> ParserImpl::global_decl() {
             return kSuccess;
         }
 
-        auto assertion = static_assert_statement();
+        auto assertion = const_assert_statement();
         if (assertion.errored) {
             return Failure::kErrored;
         }
         if (assertion.matched) {
-            builder_.AST().AddStaticAssert(assertion.value);
-            if (!expect("static assertion declaration", Token::Type::kSemicolon)) {
+            builder_.AST().AddConstAssert(assertion.value);
+            if (!expect("const assertion declaration", Token::Type::kSemicolon)) {
                 return Failure::kErrored;
             }
             return kSuccess;
@@ -1455,11 +1455,15 @@ Expect<ast::StructMember*> ParserImpl::expect_struct_member() {
                                      decl->type, std::move(attrs.value));
 }
 
-// static_assert_statement
+// const_assert_statement
 //   : STATIC_ASSERT expression
-Maybe<const ast::StaticAssert*> ParserImpl::static_assert_statement() {
+Maybe<const ast::ConstAssert*> ParserImpl::const_assert_statement() {
     Source start;
-    if (!match(Token::Type::kStaticAssert, &start)) {
+    if (match(Token::Type::kConstAssert, &start)) {
+        // matched
+    } else if (match(Token::Type::kStaticAssert, &start)) {
+        deprecated(start, "'static_assert' has been renamed to 'const_assert'");
+    } else {
         return Failure::kNoMatch;
     }
 
@@ -1472,7 +1476,7 @@ Maybe<const ast::StaticAssert*> ParserImpl::static_assert_statement() {
     }
 
     Source source = make_source_range_from(start);
-    return create<ast::StaticAssert>(source, condition.value);
+    return create<ast::ConstAssert>(source, condition.value);
 }
 
 // function_decl
@@ -1786,7 +1790,7 @@ Maybe<const ast::Statement*> ParserImpl::statement() {
 //   | continue_statement SEMICOLON
 //   | DISCARD SEMICOLON
 //   | variable_updating_statement SEMICOLON
-//   | static_assert_statement SEMICOLON
+//   | const_assert_statement SEMICOLON
 Maybe<const ast::Statement*> ParserImpl::non_block_statement() {
     auto stmt = [&]() -> Maybe<const ast::Statement*> {
         auto ret_stmt = return_statement();
@@ -1843,7 +1847,7 @@ Maybe<const ast::Statement*> ParserImpl::non_block_statement() {
             return assign.value;
         }
 
-        auto stmt_static_assert = static_assert_statement();
+        auto stmt_static_assert = const_assert_statement();
         if (stmt_static_assert.errored) {
             return Failure::kErrored;
         }

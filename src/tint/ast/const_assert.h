@@ -12,34 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_AST_STATIC_ASSERT_H_
-#define SRC_TINT_AST_STATIC_ASSERT_H_
+#ifndef SRC_TINT_AST_CONST_ASSERT_H_
+#define SRC_TINT_AST_CONST_ASSERT_H_
 
 #include "src/tint/ast/statement.h"
 #include "src/tint/ast/variable.h"
 
 namespace tint::ast {
 
-/// A `static_assert` statement
-class StaticAssert final : public Castable<StaticAssert, Statement> {
+/// A `const_assert` statement
+class ConstAssert final : public Castable<ConstAssert, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param source the variable statement source
     /// @param condition the assertion condition
-    StaticAssert(ProgramID pid, NodeID nid, const Source& source, const Expression* condition);
+    ConstAssert(ProgramID pid, NodeID nid, const Source& source, const Expression* condition);
 
     /// Move constructor
-    StaticAssert(StaticAssert&&);
+    ConstAssert(ConstAssert&&);
 
     /// Destructor
-    ~StaticAssert() override;
+    ~ConstAssert() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const StaticAssert* Clone(CloneContext* ctx) const override;
+    const ConstAssert* Clone(CloneContext* ctx) const override;
 
     /// The assertion condition
     const Expression* const condition;
@@ -47,4 +47,4 @@ class StaticAssert final : public Castable<StaticAssert, Statement> {
 
 }  // namespace tint::ast
 
-#endif  // SRC_TINT_AST_STATIC_ASSERT_H_
+#endif  // SRC_TINT_AST_CONST_ASSERT_H_

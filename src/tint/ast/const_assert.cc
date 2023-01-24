@@ -12,29 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/static_assert.h"
+#include "src/tint/ast/const_assert.h"
 
 #include "src/tint/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::StaticAssert);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::ConstAssert);
 
 namespace tint::ast {
 
-StaticAssert::StaticAssert(ProgramID pid, NodeID nid, const Source& src, const Expression* cond)
+ConstAssert::ConstAssert(ProgramID pid, NodeID nid, const Source& src, const Expression* cond)
     : Base(pid, nid, src), condition(cond) {
     TINT_ASSERT(AST, cond);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, cond, program_id);
 }
 
-StaticAssert::StaticAssert(StaticAssert&&) = default;
+ConstAssert::ConstAssert(ConstAssert&&) = default;
 
-StaticAssert::~StaticAssert() = default;
+ConstAssert::~ConstAssert() = default;
 
-const StaticAssert* StaticAssert::Clone(CloneContext* ctx) const {
+const ConstAssert* ConstAssert::Clone(CloneContext* ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx->Clone(source);
     auto* cond = ctx->Clone(condition);
-    return ctx->dst->create<StaticAssert>(src, cond);
+    return ctx->dst->create<ConstAssert>(src, cond);
 }
 
 }  // namespace tint::ast

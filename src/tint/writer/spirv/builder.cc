@@ -3614,7 +3614,7 @@ bool Builder::GenerateStatement(const ast::Statement* stmt) {
         [&](const ast::ReturnStatement* r) { return GenerateReturnStatement(r); },
         [&](const ast::SwitchStatement* s) { return GenerateSwitchStatement(s); },
         [&](const ast::VariableDeclStatement* v) { return GenerateVariableDeclStatement(v); },
-        [&](const ast::StaticAssert*) {
+        [&](const ast::ConstAssert*) {
             return true;  // Not emitted
         },
         [&](Default) {

@@ -5,6 +5,7 @@
 ## Deprecated Features
 
 * The keyword to alias a type has been renamed from `type` to `alias`. [tint:1812](crbug.com/tint/1812)
+* `static_assert` has been renamed to `const_assert`. [tint:1807](crbug.com/tint/1807)
 
 ## Changes for M110
 

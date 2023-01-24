@@ -1139,6 +1139,9 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "const") {
         return {Token::Type::kConst, source, "const"};
     }
+    if (str == "const_assert") {
+        return {Token::Type::kConstAssert, source, "const_assert"};
+    }
     if (str == "continue") {
         return {Token::Type::kContinue, source, "continue"};
     }

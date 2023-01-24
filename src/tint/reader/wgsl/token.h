@@ -161,6 +161,8 @@ class Token {
         kCase,
         /// A 'const'
         kConst,
+        /// A 'const_assert'
+        kConstAssert,
         /// A 'continue'
         kContinue,
         /// A 'continuing'

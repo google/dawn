@@ -1064,6 +1064,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{"break", Token::Type::kBreak},
                     TokenData{"case", Token::Type::kCase},
                     TokenData{"const", Token::Type::kConst},
+                    TokenData{"const_assert", Token::Type::kConstAssert},
                     TokenData{"continue", Token::Type::kContinue},
                     TokenData{"continuing", Token::Type::kContinuing},
                     TokenData{"default", Token::Type::kDefault},

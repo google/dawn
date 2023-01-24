@@ -207,7 +207,7 @@ class DependencyScanner {
             [&](const ast::Enable*) {
                 // Enable directives do not effect the dependency graph.
             },
-            [&](const ast::StaticAssert* assertion) { TraverseExpression(assertion->condition); },
+            [&](const ast::ConstAssert* assertion) { TraverseExpression(assertion->condition); },
             [&](Default) { UnhandledNode(diagnostics_, global->node); });
     }
 
@@ -319,7 +319,7 @@ class DependencyScanner {
                 TraverseExpression(w->condition);
                 TraverseStatement(w->body);
             },
-            [&](const ast::StaticAssert* assertion) { TraverseExpression(assertion->condition); },
+            [&](const ast::ConstAssert* assertion) { TraverseExpression(assertion->condition); },
             [&](Default) {
                 if (TINT_UNLIKELY((!stmt->IsAnyOf<ast::BreakStatement, ast::ContinueStatement,
                                                   ast::DiscardStatement>()))) {
@@ -556,7 +556,7 @@ struct DependencyAnalysis {
             [&](const ast::Function* func) { return func->symbol; },
             [&](const ast::Variable* var) { return var->symbol; },
             [&](const ast::Enable*) { return Symbol(); },
-            [&](const ast::StaticAssert*) { return Symbol(); },
+            [&](const ast::ConstAssert*) { return Symbol(); },
             [&](Default) {
                 UnhandledNode(diagnostics_, node);
                 return Symbol{};
@@ -575,12 +575,12 @@ struct DependencyAnalysis {
     /// declaration
     std::string KindOf(const ast::Node* node) {
         return Switch(
-            node,                                                       //
-            [&](const ast::Struct*) { return "struct"; },               //
-            [&](const ast::Alias*) { return "alias"; },                 //
-            [&](const ast::Function*) { return "function"; },           //
-            [&](const ast::Variable* v) { return v->Kind(); },          //
-            [&](const ast::StaticAssert*) { return "static_assert"; },  //
+            node,                                                     //
+            [&](const ast::Struct*) { return "struct"; },             //
+            [&](const ast::Alias*) { return "alias"; },               //
+            [&](const ast::Function*) { return "function"; },         //
+            [&](const ast::Variable* v) { return v->Kind(); },        //
+            [&](const ast::ConstAssert*) { return "const_assert"; },  //
             [&](Default) {
                 UnhandledNode(diagnostics_, node);
                 return "<error>";

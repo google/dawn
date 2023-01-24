@@ -37,6 +37,7 @@
 #include "src/tint/ast/case_statement.h"
 #include "src/tint/ast/compound_assignment_statement.h"
 #include "src/tint/ast/const.h"
+#include "src/tint/ast/const_assert.h"
 #include "src/tint/ast/continue_statement.h"
 #include "src/tint/ast/depth_multisampled_texture.h"
 #include "src/tint/ast/depth_texture.h"
@@ -72,7 +73,6 @@
 #include "src/tint/ast/sampled_texture.h"
 #include "src/tint/ast/sampler.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/static_assert.h"
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/stride_attribute.h"
 #include "src/tint/ast/struct_member_align_attribute.h"
@@ -1926,38 +1926,38 @@ class ProgramBuilder {
 
     /// @param source the source information
     /// @param condition the assertion condition
-    /// @returns a new `ast::StaticAssert`, which is automatically registered as a global statement
+    /// @returns a new `ast::ConstAssert`, which is automatically registered as a global statement
     /// with the ast::Module.
     template <typename EXPR>
-    const ast::StaticAssert* GlobalStaticAssert(const Source& source, EXPR&& condition) {
-        auto* sa = StaticAssert(source, std::forward<EXPR>(condition));
-        AST().AddStaticAssert(sa);
+    const ast::ConstAssert* GlobalConstAssert(const Source& source, EXPR&& condition) {
+        auto* sa = ConstAssert(source, std::forward<EXPR>(condition));
+        AST().AddConstAssert(sa);
         return sa;
     }
 
     /// @param condition the assertion condition
-    /// @returns a new `ast::StaticAssert`, which is automatically registered as a global statement
+    /// @returns a new `ast::ConstAssert`, which is automatically registered as a global statement
     /// with the ast::Module.
     template <typename EXPR, typename = DisableIfSource<EXPR>>
-    const ast::StaticAssert* GlobalStaticAssert(EXPR&& condition) {
-        auto* sa = StaticAssert(std::forward<EXPR>(condition));
-        AST().AddStaticAssert(sa);
+    const ast::ConstAssert* GlobalConstAssert(EXPR&& condition) {
+        auto* sa = ConstAssert(std::forward<EXPR>(condition));
+        AST().AddConstAssert(sa);
         return sa;
     }
 
     /// @param source the source information
     /// @param condition the assertion condition
-    /// @returns a new `ast::StaticAssert` with the given assertion condition
+    /// @returns a new `ast::ConstAssert` with the given assertion condition
     template <typename EXPR>
-    const ast::StaticAssert* StaticAssert(const Source& source, EXPR&& condition) {
-        return create<ast::StaticAssert>(source, Expr(std::forward<EXPR>(condition)));
+    const ast::ConstAssert* ConstAssert(const Source& source, EXPR&& condition) {
+        return create<ast::ConstAssert>(source, Expr(std::forward<EXPR>(condition)));
     }
 
     /// @param condition the assertion condition
-    /// @returns a new `ast::StaticAssert` with the given assertion condition
+    /// @returns a new `ast::ConstAssert` with the given assertion condition
     template <typename EXPR, typename = DisableIfSource<EXPR>>
-    const ast::StaticAssert* StaticAssert(EXPR&& condition) {
-        return create<ast::StaticAssert>(Expr(std::forward<EXPR>(condition)));
+    const ast::ConstAssert* ConstAssert(EXPR&& condition) {
+        return create<ast::ConstAssert>(Expr(std::forward<EXPR>(condition)));
     }
 
     /// @param source the source information

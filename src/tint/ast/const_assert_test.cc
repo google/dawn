@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/static_assert.h"
+#include "src/tint/ast/const_assert.h"
 
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
@@ -20,44 +20,44 @@
 namespace tint::ast {
 namespace {
 
-using StaticAssertTest = TestHelper;
+using ConstAssertTest = TestHelper;
 
-TEST_F(StaticAssertTest, Creation) {
+TEST_F(ConstAssertTest, Creation) {
     auto* cond = Expr(true);
-    auto* stmt = StaticAssert(cond);
+    auto* stmt = ConstAssert(cond);
     EXPECT_EQ(stmt->condition, cond);
 }
 
-TEST_F(StaticAssertTest, Creation_WithSource) {
+TEST_F(ConstAssertTest, Creation_WithSource) {
     auto* cond = Expr(true);
-    auto* stmt = StaticAssert(Source{{20, 2}}, cond);
+    auto* stmt = ConstAssert(Source{{20, 2}}, cond);
     auto src = stmt->source;
     EXPECT_EQ(src.range.begin.line, 20u);
     EXPECT_EQ(src.range.begin.column, 2u);
 }
 
-TEST_F(StaticAssertTest, IsStaticAssert) {
+TEST_F(ConstAssertTest, IsConstAssert) {
     auto* cond = Expr(true);
 
-    auto* stmt = StaticAssert(cond);
-    EXPECT_TRUE(stmt->Is<ast::StaticAssert>());
+    auto* stmt = ConstAssert(cond);
+    EXPECT_TRUE(stmt->Is<ast::ConstAssert>());
 }
 
-TEST_F(StaticAssertTest, Assert_Null_Condition) {
+TEST_F(ConstAssertTest, Assert_Null_Condition) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.StaticAssert(nullptr);
+            b.ConstAssert(nullptr);
         },
         "internal compiler error");
 }
 
-TEST_F(StaticAssertTest, Assert_DifferentProgramID_Condition) {
+TEST_F(ConstAssertTest, Assert_DifferentProgramID_Condition) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.StaticAssert(b2.Expr(i32(123)));
+            b1.ConstAssert(b2.Expr(i32(123)));
         },
         "internal compiler error");
 }

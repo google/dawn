@@ -36,7 +36,7 @@ struct ResolverAliasAnalysisTest : public resolver::TestHelper, public testing::
 // }
 struct TwoPointerConfig {
     type::AddressSpace address_space;  // The address space for the pointers.
-    bool aliased;                     // Whether the pointers alias or not.
+    bool aliased;                      // Whether the pointers alias or not.
 };
 class TwoPointers : public ResolverTestWithParam<TwoPointerConfig> {
   protected:

@@ -17,9 +17,9 @@
 
 #include <string>
 
+#include "src/tint/ast/const_assert.h"
 #include "src/tint/ast/enable.h"
 #include "src/tint/ast/function.h"
-#include "src/tint/ast/static_assert.h"
 #include "src/tint/ast/type.h"
 #include "src/tint/utils/vector.h"
 
@@ -99,12 +99,12 @@ class Module final : public Castable<Module, Node> {
     /// @returns the extension set for the module
     const auto& Enables() const { return enables_; }
 
-    /// Add a global static assertion to the module
-    /// @param assertion the static assert to add
-    void AddStaticAssert(const StaticAssert* assertion);
+    /// Add a global const assertion to the module
+    /// @param assertion the const assert to add
+    void AddConstAssert(const ConstAssert* assertion);
 
-    /// @returns the list of global static assertions
-    const auto& StaticAsserts() const { return static_asserts_; }
+    /// @returns the list of global const assertions
+    const auto& ConstAsserts() const { return const_asserts_; }
 
     /// Adds a type declaration to the module
     /// @param decl the type declaration to add
@@ -147,7 +147,7 @@ class Module final : public Castable<Module, Node> {
     FunctionList functions_;
     utils::Vector<const Variable*, 32> global_variables_;
     utils::Vector<const Enable*, 8> enables_;
-    utils::Vector<const StaticAssert*, 8> static_asserts_;
+    utils::Vector<const ConstAssert*, 8> const_asserts_;
 };
 
 }  // namespace tint::ast

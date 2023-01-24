@@ -272,14 +272,57 @@ TEST_F(ParserImplTest, Statement_Body_Invalid) {
     EXPECT_EQ(p->error(), "1:3: expected '}'");
 }
 
-TEST_F(ParserImplTest, Statement_StaticAssert_WithParen) {
+TEST_F(ParserImplTest, Statement_ConstAssert_WithParen) {
+    auto p = parser("const_assert(true);");
+    auto e = p->statement();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+
+    auto* sa = As<ast::ConstAssert>(e.value);
+    ASSERT_NE(sa, nullptr);
+    EXPECT_EQ(sa->source.range.begin.line, 1u);
+    EXPECT_EQ(sa->source.range.begin.column, 1u);
+    EXPECT_EQ(sa->source.range.end.line, 1u);
+    EXPECT_EQ(sa->source.range.end.column, 19u);
+
+    EXPECT_TRUE(sa->condition->Is<ast::BoolLiteralExpression>());
+    EXPECT_EQ(sa->condition->source.range.begin.line, 1u);
+    EXPECT_EQ(sa->condition->source.range.begin.column, 14u);
+    EXPECT_EQ(sa->condition->source.range.end.line, 1u);
+    EXPECT_EQ(sa->condition->source.range.end.column, 18u);
+}
+
+TEST_F(ParserImplTest, Statement_ConstAssert_WithoutParen) {
+    auto p = parser("const_assert  true;");
+    auto e = p->statement();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+
+    auto* sa = As<ast::ConstAssert>(e.value);
+    ASSERT_NE(sa, nullptr);
+    EXPECT_EQ(sa->source.range.begin.line, 1u);
+    EXPECT_EQ(sa->source.range.begin.column, 1u);
+    EXPECT_EQ(sa->source.range.end.line, 1u);
+    EXPECT_EQ(sa->source.range.end.column, 19u);
+
+    EXPECT_TRUE(sa->condition->Is<ast::BoolLiteralExpression>());
+    EXPECT_EQ(sa->condition->source.range.begin.line, 1u);
+    EXPECT_EQ(sa->condition->source.range.begin.column, 15u);
+    EXPECT_EQ(sa->condition->source.range.end.line, 1u);
+    EXPECT_EQ(sa->condition->source.range.end.column, 19u);
+}
+
+// TODO(crbug.com/tint/1807)
+TEST_F(ParserImplTest, DEPRECATED_Statement_StaticAssert_WithParen) {
     auto p = parser("static_assert(true);");
     auto e = p->statement();
     ASSERT_FALSE(p->has_error()) << p->error();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
 
-    auto* sa = As<ast::StaticAssert>(e.value);
+    auto* sa = As<ast::ConstAssert>(e.value);
     ASSERT_NE(sa, nullptr);
     EXPECT_EQ(sa->source.range.begin.line, 1u);
     EXPECT_EQ(sa->source.range.begin.column, 1u);
@@ -293,14 +336,15 @@ TEST_F(ParserImplTest, Statement_StaticAssert_WithParen) {
     EXPECT_EQ(sa->condition->source.range.end.column, 19u);
 }
 
-TEST_F(ParserImplTest, Statement_StaticAssert_WithoutParen) {
+// TODO(crbug.com/tint/1807)
+TEST_F(ParserImplTest, DEPRECATED_Statement_StaticAssert_WithoutParen) {
     auto p = parser("static_assert  true;");
     auto e = p->statement();
     ASSERT_FALSE(p->has_error()) << p->error();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
 
-    auto* sa = As<ast::StaticAssert>(e.value);
+    auto* sa = As<ast::ConstAssert>(e.value);
     ASSERT_NE(sa, nullptr);
     EXPECT_EQ(sa->source.range.begin.line, 1u);
     EXPECT_EQ(sa->source.range.begin.column, 1u);

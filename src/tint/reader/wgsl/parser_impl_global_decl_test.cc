@@ -257,14 +257,57 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_UnexpectedAttribute) {
     EXPECT_EQ(p->error(), "1:2: unexpected attributes");
 }
 
-TEST_F(ParserImplTest, GlobalDecl_StaticAssert_WithParen) {
+TEST_F(ParserImplTest, GlobalDecl_ConstAssert_WithParen) {
+    auto p = parser("const_assert(true);");
+    p->global_decl();
+    ASSERT_FALSE(p->has_error()) << p->error();
+
+    auto program = p->program();
+    ASSERT_EQ(program.AST().ConstAsserts().Length(), 1u);
+    auto* sa = program.AST().ConstAsserts()[0];
+    EXPECT_EQ(sa->source.range.begin.line, 1u);
+    EXPECT_EQ(sa->source.range.begin.column, 1u);
+    EXPECT_EQ(sa->source.range.end.line, 1u);
+    EXPECT_EQ(sa->source.range.end.column, 19u);
+
+    EXPECT_TRUE(sa->condition->Is<ast::BoolLiteralExpression>());
+    EXPECT_EQ(sa->condition->source.range.begin.line, 1u);
+    EXPECT_EQ(sa->condition->source.range.begin.column, 14u);
+    EXPECT_EQ(sa->condition->source.range.end.line, 1u);
+    EXPECT_EQ(sa->condition->source.range.end.column, 18u);
+}
+
+TEST_F(ParserImplTest, GlobalDecl_ConstAssert_WithoutParen) {
+    auto p = parser("const_assert  true;");
+    p->global_decl();
+    ASSERT_FALSE(p->has_error()) << p->error();
+
+    auto program = p->program();
+    ASSERT_EQ(program.AST().ConstAsserts().Length(), 1u);
+    auto* sa = program.AST().ConstAsserts()[0];
+    EXPECT_TRUE(sa->condition->Is<ast::BoolLiteralExpression>());
+
+    EXPECT_EQ(sa->source.range.begin.line, 1u);
+    EXPECT_EQ(sa->source.range.begin.column, 1u);
+    EXPECT_EQ(sa->source.range.end.line, 1u);
+    EXPECT_EQ(sa->source.range.end.column, 19u);
+
+    EXPECT_TRUE(sa->condition->Is<ast::BoolLiteralExpression>());
+    EXPECT_EQ(sa->condition->source.range.begin.line, 1u);
+    EXPECT_EQ(sa->condition->source.range.begin.column, 15u);
+    EXPECT_EQ(sa->condition->source.range.end.line, 1u);
+    EXPECT_EQ(sa->condition->source.range.end.column, 19u);
+}
+
+// TODO(crbug.com/tint/1807)
+TEST_F(ParserImplTest, DEPRECATED_GlobalDecl_StaticAssert_WithParen) {
     auto p = parser("static_assert(true);");
     p->global_decl();
     ASSERT_FALSE(p->has_error()) << p->error();
 
     auto program = p->program();
-    ASSERT_EQ(program.AST().StaticAsserts().Length(), 1u);
-    auto* sa = program.AST().StaticAsserts()[0];
+    ASSERT_EQ(program.AST().ConstAsserts().Length(), 1u);
+    auto* sa = program.AST().ConstAsserts()[0];
     EXPECT_EQ(sa->source.range.begin.line, 1u);
     EXPECT_EQ(sa->source.range.begin.column, 1u);
     EXPECT_EQ(sa->source.range.end.line, 1u);
@@ -277,14 +320,15 @@ TEST_F(ParserImplTest, GlobalDecl_StaticAssert_WithParen) {
     EXPECT_EQ(sa->condition->source.range.end.column, 19u);
 }
 
-TEST_F(ParserImplTest, GlobalDecl_StaticAssert_WithoutParen) {
+// TODO(crbug.com/tint/1807)
+TEST_F(ParserImplTest, DEPRECATED_GlobalDecl_StaticAssert_WithoutParen) {
     auto p = parser("static_assert  true;");
     p->global_decl();
     ASSERT_FALSE(p->has_error()) << p->error();
 
     auto program = p->program();
-    ASSERT_EQ(program.AST().StaticAsserts().Length(), 1u);
-    auto* sa = program.AST().StaticAsserts()[0];
+    ASSERT_EQ(program.AST().ConstAsserts().Length(), 1u);
+    auto* sa = program.AST().ConstAsserts()[0];
     EXPECT_TRUE(sa->condition->Is<ast::BoolLiteralExpression>());
 
     EXPECT_EQ(sa->source.range.begin.line, 1u);

@@ -155,7 +155,7 @@ bool Resolver::ResolveInternal() {
                 [&](const ast::TypeDecl* td) { return TypeDecl(td); },
                 [&](const ast::Function* func) { return Function(func); },
                 [&](const ast::Variable* var) { return GlobalVariable(var); },
-                [&](const ast::StaticAssert* sa) { return StaticAssert(sa); },
+                [&](const ast::ConstAssert* ca) { return ConstAssert(ca); },
                 [&](Default) {
                     TINT_UNREACHABLE(Resolver, diagnostics_)
                         << "unhandled global declaration: " << decl->TypeInfo().name;
@@ -936,8 +936,8 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
     return sem;
 }
 
-sem::Statement* Resolver::StaticAssert(const ast::StaticAssert* assertion) {
-    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "static assertion"};
+sem::Statement* Resolver::ConstAssert(const ast::ConstAssert* assertion) {
+    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "const assertion"};
     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
     auto* expr = Expression(assertion->condition);
     if (!expr) {
@@ -946,12 +946,12 @@ sem::Statement* Resolver::StaticAssert(const ast::StaticAssert* assertion) {
     auto* cond = expr->ConstantValue();
     if (auto* ty = cond->Type(); !ty->Is<type::Bool>()) {
         AddError(
-            "static assertion condition must be a bool, got '" + builder_->FriendlyName(ty) + "'",
+            "const assertion condition must be a bool, got '" + builder_->FriendlyName(ty) + "'",
             assertion->condition->source);
         return nullptr;
     }
     if (!cond->ValueAs<bool>()) {
-        AddError("static assertion failed", assertion->source);
+        AddError("const assertion failed", assertion->source);
         return nullptr;
     }
     auto* sem =
@@ -1258,7 +1258,7 @@ sem::Statement* Resolver::Statement(const ast::Statement* stmt) {
         [&](const ast::IncrementDecrementStatement* i) { return IncrementDecrementStatement(i); },
         [&](const ast::ReturnStatement* r) { return ReturnStatement(r); },
         [&](const ast::VariableDeclStatement* v) { return VariableDeclStatement(v); },
-        [&](const ast::StaticAssert* sa) { return StaticAssert(sa); },
+        [&](const ast::ConstAssert* sa) { return ConstAssert(sa); },
 
         // Error cases
         [&](const ast::CaseStatement*) {

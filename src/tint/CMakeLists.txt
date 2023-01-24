@@ -119,6 +119,8 @@ list(APPEND TINT_LIB_SRCS
   ast/compound_assignment_statement.h
   ast/const.cc
   ast/const.h
+  ast/const_assert.cc
+  ast/const_assert.h
   ast/continue_statement.cc
   ast/continue_statement.h
   ast/depth_multisampled_texture.cc
@@ -206,8 +208,6 @@ list(APPEND TINT_LIB_SRCS
   ast/stage_attribute.h
   ast/statement.cc
   ast/statement.h
-  ast/static_assert.cc
-  ast/static_assert.h
   ast/storage_texture.cc
   ast/storage_texture.h
   ast/stride_attribute.cc
@@ -829,6 +829,7 @@ if(TINT_BUILD_TESTS)
     ast/case_selector_test.cc
     ast/case_statement_test.cc
     ast/compound_assignment_statement_test.cc
+    ast/const_assert_test.cc
     ast/continue_statement_test.cc
     ast/depth_multisampled_texture_test.cc
     ast/depth_texture_test.cc
@@ -863,7 +864,6 @@ if(TINT_BUILD_TESTS)
     ast/sampled_texture_test.cc
     ast/sampler_test.cc
     ast/stage_attribute_test.cc
-    ast/static_assert_test.cc
     ast/storage_texture_test.cc
     ast/stride_attribute_test.cc
     ast/struct_member_align_attribute_test.cc
@@ -910,6 +910,7 @@ if(TINT_BUILD_TESTS)
     resolver/call_validation_test.cc
     resolver/compound_assignment_validation_test.cc
     resolver/compound_statement_test.cc
+    resolver/const_assert_test.cc
     resolver/const_eval_binary_op_test.cc
     resolver/const_eval_bitcast_test.cc
     resolver/const_eval_builtin_test.cc
@@ -941,7 +942,6 @@ if(TINT_BUILD_TESTS)
     resolver/resolver_test_helper.h
     resolver/resolver_test.cc
     resolver/side_effects_test.cc
-    resolver/static_assert_test.cc
     resolver/root_identifier_test.cc
     resolver/address_space_layout_validation_test.cc
     resolver/address_space_validation_test.cc
@@ -1164,7 +1164,7 @@ if(TINT_BUILD_TESTS)
       writer/spirv/builder_builtin_test.cc
       writer/spirv/builder_builtin_texture_test.cc
       writer/spirv/builder_call_test.cc
-      writer/spirv/builder_initializer_expression_test.cc
+      writer/spirv/builder_const_assert_test.cc
       writer/spirv/builder_discard_test.cc
       writer/spirv/builder_entry_point_test.cc
       writer/spirv/builder_format_conversion_test.cc
@@ -1174,10 +1174,10 @@ if(TINT_BUILD_TESTS)
       writer/spirv/builder_global_variable_test.cc
       writer/spirv/builder_ident_expression_test.cc
       writer/spirv/builder_if_test.cc
+      writer/spirv/builder_initializer_expression_test.cc
       writer/spirv/builder_literal_test.cc
       writer/spirv/builder_loop_test.cc
       writer/spirv/builder_return_test.cc
-      writer/spirv/builder_static_assert_test.cc
       writer/spirv/builder_switch_test.cc
       writer/spirv/builder_test.cc
       writer/spirv/builder_type_test.cc
@@ -1204,7 +1204,7 @@ if(TINT_BUILD_TESTS)
       writer/wgsl/generator_impl_call_test.cc
       writer/wgsl/generator_impl_case_test.cc
       writer/wgsl/generator_impl_cast_test.cc
-      writer/wgsl/generator_impl_initializer_test.cc
+      writer/wgsl/generator_impl_const_assert_test.cc
       writer/wgsl/generator_impl_continue_test.cc
       writer/wgsl/generator_impl_discard_test.cc
       writer/wgsl/generator_impl_enable_test.cc
@@ -1212,11 +1212,11 @@ if(TINT_BUILD_TESTS)
       writer/wgsl/generator_impl_global_decl_test.cc
       writer/wgsl/generator_impl_identifier_test.cc
       writer/wgsl/generator_impl_if_test.cc
+      writer/wgsl/generator_impl_initializer_test.cc
       writer/wgsl/generator_impl_loop_test.cc
       writer/wgsl/generator_impl_literal_test.cc
       writer/wgsl/generator_impl_member_accessor_test.cc
       writer/wgsl/generator_impl_return_test.cc
-      writer/wgsl/generator_impl_static_assert_test.cc
       writer/wgsl/generator_impl_switch_test.cc
       writer/wgsl/generator_impl_type_test.cc
       writer/wgsl/generator_impl_unary_op_test.cc
@@ -1298,19 +1298,19 @@ if(TINT_BUILD_TESTS)
       writer/msl/generator_impl_call_test.cc
       writer/msl/generator_impl_case_test.cc
       writer/msl/generator_impl_cast_test.cc
-      writer/msl/generator_impl_initializer_test.cc
+      writer/msl/generator_impl_const_assert_test.cc
       writer/msl/generator_impl_continue_test.cc
       writer/msl/generator_impl_discard_test.cc
       writer/msl/generator_impl_function_test.cc
       writer/msl/generator_impl_identifier_test.cc
       writer/msl/generator_impl_if_test.cc
+      writer/msl/generator_impl_initializer_test.cc
       writer/msl/generator_impl_import_test.cc
       writer/msl/generator_impl_loop_test.cc
       writer/msl/generator_impl_member_accessor_test.cc
       writer/msl/generator_impl_module_constant_test.cc
       writer/msl/generator_impl_return_test.cc
       writer/msl/generator_impl_sanitizer_test.cc
-      writer/msl/generator_impl_static_assert_test.cc
       writer/msl/generator_impl_switch_test.cc
       writer/msl/generator_impl_test.cc
       writer/msl/generator_impl_type_test.cc
@@ -1370,19 +1370,19 @@ if(TINT_BUILD_TESTS)
       writer/hlsl/generator_impl_call_test.cc
       writer/hlsl/generator_impl_case_test.cc
       writer/hlsl/generator_impl_cast_test.cc
-      writer/hlsl/generator_impl_initializer_test.cc
+      writer/hlsl/generator_impl_const_assert_test.cc
       writer/hlsl/generator_impl_continue_test.cc
       writer/hlsl/generator_impl_discard_test.cc
       writer/hlsl/generator_impl_function_test.cc
       writer/hlsl/generator_impl_identifier_test.cc
       writer/hlsl/generator_impl_if_test.cc
+      writer/hlsl/generator_impl_initializer_test.cc
       writer/hlsl/generator_impl_import_test.cc
       writer/hlsl/generator_impl_loop_test.cc
       writer/hlsl/generator_impl_member_accessor_test.cc
       writer/hlsl/generator_impl_module_constant_test.cc
       writer/hlsl/generator_impl_return_test.cc
       writer/hlsl/generator_impl_sanitizer_test.cc
-      writer/hlsl/generator_impl_static_assert_test.cc
       writer/hlsl/generator_impl_switch_test.cc
       writer/hlsl/generator_impl_test.cc
       writer/hlsl/generator_impl_type_test.cc

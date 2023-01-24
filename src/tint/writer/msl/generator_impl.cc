@@ -317,7 +317,7 @@ bool GeneratorImpl::Generate() {
                 // Do nothing for enabling extension in MSL
                 return true;
             },
-            [&](const ast::StaticAssert*) {
+            [&](const ast::ConstAssert*) {
                 return true;  // Not emitted
             },
             [&](Default) {
@@ -2469,7 +2469,7 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
                     return false;
                 });
         },
-        [&](const ast::StaticAssert*) {
+        [&](const ast::ConstAssert*) {
             return true;  // Not emitted
         },
         [&](Default) {

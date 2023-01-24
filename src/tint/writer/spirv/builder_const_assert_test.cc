@@ -22,26 +22,26 @@ namespace {
 
 using BuilderTest = TestHelper;
 
-TEST_F(BuilderTest, GlobalStaticAssert) {
-    GlobalStaticAssert(true);
+TEST_F(BuilderTest, GlobalConstAssert) {
+    GlobalConstAssert(true);
 
     spirv::Builder& b = Build();
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    // static asserts are not emitted
+    // const asserts are not emitted
     EXPECT_EQ(DumpInstructions(b.types()), "");
     EXPECT_EQ(b.functions().size(), 0u);
 }
 
-TEST_F(BuilderTest, FunctionStaticAssert) {
-    Func("f", utils::Empty, ty.void_(), utils::Vector{StaticAssert(true)});
+TEST_F(BuilderTest, FunctionConstAssert) {
+    Func("f", utils::Empty, ty.void_(), utils::Vector{ConstAssert(true)});
 
     spirv::Builder& b = Build();
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    // static asserts are not emitted
+    // const asserts are not emitted
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 )");

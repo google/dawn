@@ -111,8 +111,8 @@ struct OffsetBinOp : Offset {
 struct LoadStoreKey {
     type::AddressSpace const address_space;  // buffer address space
     type::Access const access;               // buffer access
-    type::Type const* buf_ty = nullptr;     // buffer type
-    type::Type const* el_ty = nullptr;      // element type
+    type::Type const* buf_ty = nullptr;      // buffer type
+    type::Type const* el_ty = nullptr;       // element type
     bool operator==(const LoadStoreKey& rhs) const {
         return address_space == rhs.address_space && access == rhs.access && buf_ty == rhs.buf_ty &&
                el_ty == rhs.el_ty;

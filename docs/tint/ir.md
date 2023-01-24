@@ -20,7 +20,7 @@ This round-trip ability provides a few features:
 The IR helps with the complexity of the AST transforms by limiting the
 representations seen in the IR form. For example, instead of `for`,
 `while` and `loop` constructs there is a single `loop` construct.
-`alias` and `static_assert` nodes are not emitted into IR. Dead code is
+`alias` and `const_assert` nodes are not emitted into IR. Dead code is
 eliminated during the IR construction.
 
 As the IR can convert into AST, we could potentially simplify the
@@ -48,7 +48,7 @@ greatly simplifies the number of things to consider in the IR. For
 instance:
 
 * No `alias` nodes
-* No `static_assert` nodes
+* No `const_assert` nodes
 * All loops become `while` loops
 * `if` statements may all become `if/else`
 

@@ -21,6 +21,7 @@
 #include "src/tint/ast/bool_literal_expression.h"
 #include "src/tint/ast/break_if_statement.h"
 #include "src/tint/ast/break_statement.h"
+#include "src/tint/ast/const_assert.h"
 #include "src/tint/ast/continue_statement.h"
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/for_loop_statement.h"
@@ -33,7 +34,6 @@
 #include "src/tint/ast/override.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/statement.h"
-#include "src/tint/ast/static_assert.h"
 #include "src/tint/ast/struct.h"
 #include "src/tint/ast/struct_member_align_attribute.h"
 #include "src/tint/ast/struct_member_size_attribute.h"
@@ -155,7 +155,7 @@ ResultType BuilderImpl::Build() {
             // TODO(dsinclair): Implement? I think these need to be passed along so further stages
             // know what is enabled.
             // },
-            [&](const ast::StaticAssert*) {
+            [&](const ast::ConstAssert*) {
                 // Evaluated by the resolver, drop from the IR.
                 return true;
             },
@@ -253,7 +253,7 @@ bool BuilderImpl::EmitStatement(const ast::Statement* stmt) {
         [&](const ast::ReturnStatement* r) { return EmitReturn(r); },
         [&](const ast::SwitchStatement* s) { return EmitSwitch(s); },
         [&](const ast::VariableDeclStatement* v) { return EmitVariable(v->variable); },
-        [&](const ast::StaticAssert*) {
+        [&](const ast::ConstAssert*) {
             return true;  // Not emitted
         },
         [&](Default) {
