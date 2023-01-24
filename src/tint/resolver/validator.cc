@@ -1004,7 +1004,8 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
                          attr->source);
                 return false;
             }
-        } else if (!attr->IsAnyOf<ast::StageAttribute, ast::InternalAttribute>()) {
+        } else if (!attr->IsAnyOf<ast::DiagnosticAttribute, ast::StageAttribute,
+                                  ast::InternalAttribute>()) {
             AddError("attribute is not valid for functions", attr->source);
             return false;
         }

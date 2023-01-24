@@ -71,5 +71,115 @@ TEST_F(ResolverDiagnosticControlTest, UnreachableCode_OffViaDirective) {
     EXPECT_TRUE(r()->error().empty());
 }
 
+TEST_F(ResolverDiagnosticControlTest, UnreachableCode_ErrorViaAttribute) {
+    auto* attr =
+        DiagnosticAttribute(ast::DiagnosticSeverity::kError, Expr("chromium_unreachable_code"));
+
+    auto stmts = utils::Vector{Return(), Return()};
+    Func("foo", {}, ty.void_(), stmts, utils::Vector{attr});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(error: code is unreachable)");
+}
+
+TEST_F(ResolverDiagnosticControlTest, UnreachableCode_WarningViaAttribute) {
+    auto* attr =
+        DiagnosticAttribute(ast::DiagnosticSeverity::kWarning, Expr("chromium_unreachable_code"));
+
+    auto stmts = utils::Vector{Return(), Return()};
+    Func("foo", {}, ty.void_(), stmts, utils::Vector{attr});
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(warning: code is unreachable)");
+}
+
+TEST_F(ResolverDiagnosticControlTest, UnreachableCode_InfoViaAttribute) {
+    auto* attr =
+        DiagnosticAttribute(ast::DiagnosticSeverity::kInfo, Expr("chromium_unreachable_code"));
+
+    auto stmts = utils::Vector{Return(), Return()};
+    Func("foo", {}, ty.void_(), stmts, utils::Vector{attr});
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(note: code is unreachable)");
+}
+
+TEST_F(ResolverDiagnosticControlTest, UnreachableCode_OffViaAttribute) {
+    auto* attr =
+        DiagnosticAttribute(ast::DiagnosticSeverity::kOff, Expr("chromium_unreachable_code"));
+
+    auto stmts = utils::Vector{Return(), Return()};
+    Func("foo", {}, ty.void_(), stmts, utils::Vector{attr});
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_TRUE(r()->error().empty());
+}
+
+TEST_F(ResolverDiagnosticControlTest, UnreachableCode_ErrorViaDirective_OverriddenViaAttribute) {
+    // diagnostic(error, chromium_unreachable_code);
+    //
+    // @diagnostic(off, chromium_unreachable_code) fn foo() {
+    //   return;
+    //   return; // Should produce a warning
+    // }
+    DiagnosticDirective(ast::DiagnosticSeverity::kError, Expr("chromium_unreachable_code"));
+    auto* attr =
+        DiagnosticAttribute(ast::DiagnosticSeverity::kWarning, Expr("chromium_unreachable_code"));
+
+    auto stmts = utils::Vector{Return(), Return()};
+    Func("foo", {}, ty.void_(), stmts, utils::Vector{attr});
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(warning: code is unreachable)");
+}
+
+TEST_F(ResolverDiagnosticControlTest, FunctionAttributeScope) {
+    // @diagnostic(off, chromium_unreachable_code) fn foo() {
+    //   return;
+    //   return; // Should not produce a diagnostic
+    // }
+    //
+    // fn zoo() {
+    //   return;
+    //   return; // Should produce a warning (default severity)
+    // }
+    //
+    // @diagnostic(info, chromium_unreachable_code) fn bar() {
+    //   return;
+    //   return; // Should produce an info
+    // }
+    {
+        auto* attr =
+            DiagnosticAttribute(ast::DiagnosticSeverity::kOff, Expr("chromium_unreachable_code"));
+        Func("foo", {}, ty.void_(),
+             utils::Vector{
+                 Return(),
+                 Return(Source{{12, 34}}),
+             },
+             utils::Vector{attr});
+    }
+    {
+        Func("bar", {}, ty.void_(),
+             utils::Vector{
+                 Return(),
+                 Return(Source{{45, 67}}),
+             });
+    }
+    {
+        auto* attr =
+            DiagnosticAttribute(ast::DiagnosticSeverity::kInfo, Expr("chromium_unreachable_code"));
+        Func("zoo", {}, ty.void_(),
+             utils::Vector{
+                 Return(),
+                 Return(Source{{89, 10}}),
+             },
+             utils::Vector{attr});
+    }
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(45:67 warning: code is unreachable
+89:10 note: code is unreachable)");
+}
+
 }  // namespace
 }  // namespace tint::resolver
