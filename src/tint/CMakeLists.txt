@@ -127,6 +127,8 @@ list(APPEND TINT_LIB_SRCS
   ast/depth_multisampled_texture.h
   ast/depth_texture.cc
   ast/depth_texture.h
+  ast/diagnostic_attribute.cc
+  ast/diagnostic_attribute.h
   ast/diagnostic_control.cc
   ast/diagnostic_control.h
   ast/disable_validation_attribute.cc
@@ -835,6 +837,7 @@ if(TINT_BUILD_TESTS)
     ast/continue_statement_test.cc
     ast/depth_multisampled_texture_test.cc
     ast/depth_texture_test.cc
+    ast/diagnostic_attribute_test.cc
     ast/diagnostic_control_test.cc
     ast/discard_statement_test.cc
     ast/enable_test.cc
