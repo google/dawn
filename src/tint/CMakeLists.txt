@@ -926,6 +926,7 @@ if(TINT_BUILD_TESTS)
     resolver/const_eval_unary_op_test.cc
     resolver/control_block_validation_test.cc
     resolver/dependency_graph_test.cc
+    resolver/diagnostic_control_test.cc
     resolver/entry_point_validation_test.cc
     resolver/evaluation_stage_test.cc
     resolver/f16_extension_test.cc

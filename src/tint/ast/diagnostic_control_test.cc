@@ -100,5 +100,53 @@ INSTANTIATE_TEST_SUITE_P(ValidCases, DiagnosticSeverityPrintTest, testing::Value
 
 }  // namespace diagnostic_severity_tests
 
+namespace diagnostic_rule_tests {
+
+namespace parse_print_tests {
+
+struct Case {
+    const char* string;
+    DiagnosticRule value;
+};
+
+inline std::ostream& operator<<(std::ostream& out, Case c) {
+    return out << "'" << std::string(c.string) << "'";
+}
+
+static constexpr Case kValidCases[] = {
+    {"chromium_unreachable_code", DiagnosticRule::kChromiumUnreachableCode},
+};
+
+static constexpr Case kInvalidCases[] = {
+    {"cXromggum_unreachable_cde", DiagnosticRule::kUndefined},
+    {"chroVium_unruchble_codX", DiagnosticRule::kUndefined},
+    {"chromium_3nreachable_code", DiagnosticRule::kUndefined},
+};
+
+using DiagnosticRuleParseTest = testing::TestWithParam<Case>;
+
+TEST_P(DiagnosticRuleParseTest, Parse) {
+    const char* string = GetParam().string;
+    DiagnosticRule expect = GetParam().value;
+    EXPECT_EQ(expect, ParseDiagnosticRule(string));
+}
+
+INSTANTIATE_TEST_SUITE_P(ValidCases, DiagnosticRuleParseTest, testing::ValuesIn(kValidCases));
+INSTANTIATE_TEST_SUITE_P(InvalidCases, DiagnosticRuleParseTest, testing::ValuesIn(kInvalidCases));
+
+using DiagnosticRulePrintTest = testing::TestWithParam<Case>;
+
+TEST_P(DiagnosticRulePrintTest, Print) {
+    DiagnosticRule value = GetParam().value;
+    const char* expect = GetParam().string;
+    EXPECT_EQ(expect, utils::ToString(value));
+}
+
+INSTANTIATE_TEST_SUITE_P(ValidCases, DiagnosticRulePrintTest, testing::ValuesIn(kValidCases));
+
+}  // namespace parse_print_tests
+
+}  // namespace diagnostic_rule_tests
+
 }  // namespace
 }  // namespace tint::ast

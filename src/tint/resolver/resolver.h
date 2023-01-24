@@ -30,7 +30,6 @@
 #include "src/tint/resolver/intrinsic_table.h"
 #include "src/tint/resolver/sem_helper.h"
 #include "src/tint/resolver/validator.h"
-#include "src/tint/scope_stack.h"
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/function.h"
@@ -261,6 +260,10 @@ class Resolver {
     /// returned.
     /// @param ty the ast::Type
     type::Type* Type(const ast::Type* ty);
+
+    /// @param control the diagnostic control
+    /// @returns true on success, false on failure
+    bool DiagnosticControl(const ast::DiagnosticControl* control);
 
     /// @param enable the enable declaration
     /// @returns the resolved extension

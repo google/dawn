@@ -46,5 +46,21 @@ void DiagnosticSeverityParser(::benchmark::State& state) {
 
 BENCHMARK(DiagnosticSeverityParser);
 
+void DiagnosticRuleParser(::benchmark::State& state) {
+    std::array kStrings{
+        "hromium_unyeachable_code",   "chrorrillmGunnreachable_c77de", "chromium_unreachable4cod00",
+        "chromium_unreachable_code",  "chromium_unracaboo_code",       "chromium_unrzzchabl_code",
+        "ciipp11ium_unreachable_cod",
+    };
+    for (auto _ : state) {
+        for (auto& str : kStrings) {
+            auto result = ParseDiagnosticRule(str);
+            benchmark::DoNotOptimize(result);
+        }
+    }
+}
+
+BENCHMARK(DiagnosticRuleParser);
+
 }  // namespace
 }  // namespace tint::ast

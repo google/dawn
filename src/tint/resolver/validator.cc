@@ -166,7 +166,11 @@ Validator::Validator(
       sem_(sem),
       enabled_extensions_(enabled_extensions),
       atomic_composite_info_(atomic_composite_info),
-      valid_type_storage_layouts_(valid_type_storage_layouts) {}
+      valid_type_storage_layouts_(valid_type_storage_layouts) {
+    // Set default severities for filterable diagnostic rules.
+    diagnostic_filters_.Set(ast::DiagnosticRule::kChromiumUnreachableCode,
+                            ast::DiagnosticSeverity::kWarning);
+}
 
 Validator::~Validator() = default;
 
@@ -180,6 +184,24 @@ void Validator::AddWarning(const std::string& msg, const Source& source) const {
 
 void Validator::AddNote(const std::string& msg, const Source& source) const {
     diagnostics_.add_note(diag::System::Resolver, msg, source);
+}
+
+bool Validator::AddDiagnostic(ast::DiagnosticRule rule,
+                              const std::string& msg,
+                              const Source& source) const {
+    auto severity = diagnostic_filters_.Get(rule);
+    if (severity != ast::DiagnosticSeverity::kOff) {
+        diag::Diagnostic d{};
+        d.severity = ToSeverity(severity);
+        d.system = diag::System::Resolver;
+        d.source = source;
+        d.message = msg;
+        diagnostics_.add(std::move(d));
+        if (severity == ast::DiagnosticSeverity::kError) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
@@ -1358,9 +1380,10 @@ bool Validator::EvaluationStage(const sem::Expression* expr,
 bool Validator::Statements(utils::VectorRef<const ast::Statement*> stmts) const {
     for (auto* stmt : stmts) {
         if (!sem_.Get(stmt)->IsReachable()) {
-            /// TODO(https://github.com/gpuweb/gpuweb/issues/2378): This may need to
-            /// become an error.
-            AddWarning("code is unreachable", stmt->source);
+            if (!AddDiagnostic(ast::DiagnosticRule::kChromiumUnreachableCode, "code is unreachable",
+                               stmt->source)) {
+                return false;
+            }
             break;
         }
     }

@@ -40,6 +40,12 @@ enum builtin_value {
   @internal point_size
 }
 
+// https://gpuweb.github.io/gpuweb/wgsl/#filterable-triggering-rules
+enum diagnostic_rule {
+  // Chromium specific rules not defined in the spec.
+  chromium_unreachable_code
+}
+
 // https://gpuweb.github.io/gpuweb/wgsl/#syntax-severity_control_name
 enum diagnostic_severity {
   error

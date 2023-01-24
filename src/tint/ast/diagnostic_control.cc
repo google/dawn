@@ -38,6 +38,19 @@ const DiagnosticControl* DiagnosticControl::Clone(CloneContext* ctx) const {
     return ctx->dst->create<DiagnosticControl>(src, severity, rule);
 }
 
+diag::Severity ToSeverity(DiagnosticSeverity sc) {
+    switch (sc) {
+        case DiagnosticSeverity::kError:
+            return diag::Severity::Error;
+        case DiagnosticSeverity::kWarning:
+            return diag::Severity::Warning;
+        case DiagnosticSeverity::kInfo:
+            return diag::Severity::Note;
+        default:
+            return diag::Severity::InternalCompilerError;
+    }
+}
+
 /// ParseDiagnosticSeverity parses a DiagnosticSeverity from a string.
 /// @param str the string to parse
 /// @returns the parsed enum, or DiagnosticSeverity::kUndefined if the string could not be parsed.
@@ -69,6 +82,26 @@ std::ostream& operator<<(std::ostream& out, DiagnosticSeverity value) {
             return out << "off";
         case DiagnosticSeverity::kWarning:
             return out << "warning";
+    }
+    return out << "<unknown>";
+}
+
+/// ParseDiagnosticRule parses a DiagnosticRule from a string.
+/// @param str the string to parse
+/// @returns the parsed enum, or DiagnosticRule::kUndefined if the string could not be parsed.
+DiagnosticRule ParseDiagnosticRule(std::string_view str) {
+    if (str == "chromium_unreachable_code") {
+        return DiagnosticRule::kChromiumUnreachableCode;
+    }
+    return DiagnosticRule::kUndefined;
+}
+
+std::ostream& operator<<(std::ostream& out, DiagnosticRule value) {
+    switch (value) {
+        case DiagnosticRule::kUndefined:
+            return out << "undefined";
+        case DiagnosticRule::kChromiumUnreachableCode:
+            return out << "chromium_unreachable_code";
     }
     return out << "<unknown>";
 }

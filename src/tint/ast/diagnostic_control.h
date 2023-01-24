@@ -61,6 +61,29 @@ constexpr const char* kDiagnosticSeverityStrings[] = {
     "warning",
 };
 
+/// The diagnostic rule.
+enum class DiagnosticRule {
+    kUndefined,
+    kChromiumUnreachableCode,
+};
+
+/// @param out the std::ostream to write to
+/// @param value the DiagnosticRule
+/// @returns `out` so calls can be chained
+std::ostream& operator<<(std::ostream& out, DiagnosticRule value);
+
+/// ParseDiagnosticRule parses a DiagnosticRule from a string.
+/// @param str the string to parse
+/// @returns the parsed enum, or DiagnosticRule::kUndefined if the string could not be parsed.
+DiagnosticRule ParseDiagnosticRule(std::string_view str);
+
+constexpr const char* kDiagnosticRuleStrings[] = {
+    "chromium_unreachable_code",
+};
+
+/// Convert a DiagnosticSeverity to the corresponding diag::Severity.
+diag::Severity ToSeverity(DiagnosticSeverity sc);
+
 /// A diagnostic control used for diagnostic directives and attributes.
 class DiagnosticControl : public Castable<DiagnosticControl, Node> {
   public:

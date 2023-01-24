@@ -151,6 +151,7 @@ bool Resolver::ResolveInternal() {
         Mark(decl);
         if (!Switch<bool>(
                 decl,  //
+                [&](const ast::DiagnosticControl* dc) { return DiagnosticControl(dc); },
                 [&](const ast::Enable* e) { return Enable(e); },
                 [&](const ast::TypeDecl* td) { return TypeDecl(td); },
                 [&](const ast::Function* func) { return Function(func); },
@@ -3048,6 +3049,16 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
                                                   expr->HasSideEffects(), root_ident);
     sem->Behaviors() = expr->Behaviors();
     return sem;
+}
+
+bool Resolver::DiagnosticControl(const ast::DiagnosticControl* control) {
+    Mark(control->rule_name);
+    auto rule_name = builder_->Symbols().NameFor(control->rule_name->symbol);
+    auto rule = ast::ParseDiagnosticRule(rule_name);
+    if (rule != ast::DiagnosticRule::kUndefined) {
+        validator_.DiagnosticFilters().Set(rule, control->severity);
+    }
+    return true;
 }
 
 bool Resolver::Enable(const ast::Enable* enable) {
