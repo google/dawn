@@ -3266,6 +3266,30 @@ class ProgramBuilder {
         return create<ast::DiagnosticControl>(source_, severity, rule_name);
     }
 
+    /// Add a global diagnostic control to the module.
+    /// @param source the source information
+    /// @param severity the diagnostic severity control
+    /// @param rule_name the diagnostic rule name
+    /// @returns the diagnostic control pointer
+    const ast::DiagnosticControl* DiagnosticDirective(const Source& source,
+                                                      ast::DiagnosticSeverity severity,
+                                                      const ast::IdentifierExpression* rule_name) {
+        auto* control = DiagnosticControl(source, severity, rule_name);
+        AST().AddDiagnosticControl(control);
+        return control;
+    }
+
+    /// Add a global diagnostic control to the module.
+    /// @param severity the diagnostic severity control
+    /// @param rule_name the diagnostic rule name
+    /// @returns the diagnostic control pointer
+    const ast::DiagnosticControl* DiagnosticDirective(ast::DiagnosticSeverity severity,
+                                                      const ast::IdentifierExpression* rule_name) {
+        auto* control = DiagnosticControl(source_, severity, rule_name);
+        AST().AddDiagnosticControl(control);
+        return control;
+    }
+
     /// Sets the current builder source to `src`
     /// @param src the Source used for future create() calls
     void SetSource(const Source& src) {

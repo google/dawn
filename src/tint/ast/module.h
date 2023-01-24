@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/tint/ast/const_assert.h"
+#include "src/tint/ast/diagnostic_control.h"
 #include "src/tint/ast/enable.h"
 #include "src/tint/ast/function.h"
 #include "src/tint/ast/type.h"
@@ -92,9 +93,16 @@ class Module final : public Castable<Module, Node> {
         return out;
     }
 
+    /// Add a global diagnostic control to the module
+    /// @param control the diagnostic control to add
+    void AddDiagnosticControl(const DiagnosticControl* control);
+
     /// Add a enable directive to the module
     /// @param ext the enable directive to add
     void AddEnable(const Enable* ext);
+
+    /// @returns the global diagnostic controls for the module
+    const auto& DiagnosticControls() const { return diagnostic_controls_; }
 
     /// @returns the extension set for the module
     const auto& Enables() const { return enables_; }
@@ -146,6 +154,7 @@ class Module final : public Castable<Module, Node> {
     utils::Vector<const TypeDecl*, 16> type_decls_;
     FunctionList functions_;
     utils::Vector<const Variable*, 32> global_variables_;
+    utils::Vector<const DiagnosticControl*, 8> diagnostic_controls_;
     utils::Vector<const Enable*, 8> enables_;
     utils::Vector<const ConstAssert*, 8> const_asserts_;
 };
