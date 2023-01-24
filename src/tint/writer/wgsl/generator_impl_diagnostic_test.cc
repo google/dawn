@@ -30,5 +30,19 @@ TEST_F(WgslGeneratorImplTest, Emit_DiagnosticDirective) {
 )");
 }
 
+TEST_F(WgslGeneratorImplTest, Emit_DiagnosticAttribute) {
+    auto* attr =
+        DiagnosticAttribute(ast::DiagnosticSeverity::kError, Expr("chromium_unreachable_code"));
+    Func("foo", {}, ty.void_(), {}, utils::Vector{attr});
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate());
+    EXPECT_EQ(gen.result(), R"(@diagnostic(error, chromium_unreachable_code)
+fn foo() {
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::wgsl

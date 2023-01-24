@@ -797,6 +797,9 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
                 out << "builtin(" << builtin->builtin << ")";
                 return true;
             },
+            [&](const ast::DiagnosticAttribute* diagnostic) {
+                return EmitDiagnosticControl(out, diagnostic->control);
+            },
             [&](const ast::InterpolateAttribute* interpolate) {
                 out << "interpolate(" << interpolate->type;
                 if (interpolate->sampling != ast::InterpolationSampling::kUndefined) {
