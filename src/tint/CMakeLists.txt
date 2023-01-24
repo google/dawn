@@ -616,6 +616,8 @@ endif()
 
 if(${TINT_BUILD_WGSL_READER})
   list(APPEND TINT_LIB_SRCS
+    reader/wgsl/classify_template_args.cc
+    reader/wgsl/classify_template_args.h
     reader/wgsl/lexer.cc
     reader/wgsl/lexer.h
     reader/wgsl/parser.cc
@@ -1073,6 +1075,7 @@ if(TINT_BUILD_TESTS)
 
   if(${TINT_BUILD_WGSL_READER})
     list(APPEND TINT_TEST_SRCS
+      reader/wgsl/classify_template_args_test.cc
       reader/wgsl/lexer_test.cc
       reader/wgsl/parser_test.cc
       reader/wgsl/parser_impl_additive_expression_test.cc

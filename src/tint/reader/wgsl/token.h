@@ -32,7 +32,7 @@ class Token {
         kError = -2,
         /// Uninitialized token
         kUninitialized = 0,
-        /// Placeholder token which maybe fillled in later
+        /// Placeholder token which maybe filled in later
         kPlaceholder = 1,
         /// End of input string reached
         kEOF,
@@ -80,12 +80,16 @@ class Token {
         kEqual,
         /// A '=='
         kEqualEqual,
+        /// A '>' (post template-args classification)
+        kTemplateArgsRight,
         /// A '>'
         kGreaterThan,
         /// A '>='
         kGreaterThanEqual,
         /// A '>>'
         kShiftRight,
+        /// A '<' (post template-args classification)
+        kTemplateArgsLeft,
         /// A '<'
         kLessThan,
         /// A '<='
@@ -456,12 +460,10 @@ class Token {
     std::variant<int64_t, double, std::string, std::string_view> value_;
 };
 
-#ifndef NDEBUG
 inline std::ostream& operator<<(std::ostream& out, Token::Type type) {
     out << Token::TypeToName(type);
     return out;
 }
-#endif  // NDEBUG
 
 }  // namespace tint::reader::wgsl
 

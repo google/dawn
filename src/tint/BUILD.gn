@@ -908,6 +908,8 @@ libtint_source_set("libtint_spv_writer_src") {
 
 libtint_source_set("libtint_wgsl_reader_src") {
   sources = [
+    "reader/wgsl/classify_template_args.cc",
+    "reader/wgsl/classify_template_args.h",
     "reader/wgsl/lexer.cc",
     "reader/wgsl/lexer.h",
     "reader/wgsl/parser.cc",
@@ -1570,6 +1572,7 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_wgsl_reader_src") {
     sources = [
+      "reader/wgsl/classify_template_args_test.cc",
       "reader/wgsl/lexer_test.cc",
       "reader/wgsl/parser_impl_additive_expression_test.cc",
       "reader/wgsl/parser_impl_address_space_test.cc",
