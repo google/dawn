@@ -250,7 +250,7 @@ bool GeneratorImpl::Generate() {
 
     auto* mod = builder_.Sem().Module();
     for (auto* decl : mod->DependencyOrderedDeclarations()) {
-        if (decl->IsAnyOf<ast::Alias, ast::ConstAssert>()) {
+        if (decl->IsAnyOf<ast::Alias, ast::ConstAssert, ast::DiagnosticControl>()) {
             continue;  // These are not emitted.
         }
 

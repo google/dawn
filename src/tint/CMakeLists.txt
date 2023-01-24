@@ -1212,6 +1212,7 @@ if(TINT_BUILD_TESTS)
       writer/wgsl/generator_impl_cast_test.cc
       writer/wgsl/generator_impl_const_assert_test.cc
       writer/wgsl/generator_impl_continue_test.cc
+      writer/wgsl/generator_impl_diagnostic_test.cc
       writer/wgsl/generator_impl_discard_test.cc
       writer/wgsl/generator_impl_enable_test.cc
       writer/wgsl/generator_impl_function_test.cc

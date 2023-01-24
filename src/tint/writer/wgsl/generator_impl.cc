@@ -63,18 +63,28 @@ GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
-    // Generate enable directives before any other global declarations.
+    // Generate directives before any other global declarations.
+    bool has_directives = false;
     for (auto enable : program_->AST().Enables()) {
         if (!EmitEnable(enable)) {
             return false;
         }
+        has_directives = true;
     }
-    if (!program_->AST().Enables().IsEmpty()) {
+    for (auto diagnostic : program_->AST().DiagnosticControls()) {
+        auto out = line();
+        if (!EmitDiagnosticControl(out, diagnostic)) {
+            return false;
+        }
+        out << ";";
+        has_directives = true;
+    }
+    if (has_directives) {
         line();
     }
     // Generate global declarations in the order they appear in the module.
     for (auto* decl : program_->AST().GlobalDeclarations()) {
-        if (decl->Is<ast::Enable>()) {
+        if (decl->IsAnyOf<ast::DiagnosticControl, ast::Enable>()) {
             continue;
         }
         if (!Switch(
@@ -94,6 +104,13 @@ bool GeneratorImpl::Generate() {
         }
     }
 
+    return true;
+}
+
+bool GeneratorImpl::EmitDiagnosticControl(std::ostream& out,
+                                          const ast::DiagnosticControl* diagnostic) {
+    out << "diagnostic(" << diagnostic->severity << ", "
+        << program_->Symbols().NameFor(diagnostic->rule_name->symbol) << ")";
     return true;
 }
 
