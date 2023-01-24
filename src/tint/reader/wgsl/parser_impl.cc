@@ -360,14 +360,47 @@ void ParserImpl::translation_unit() {
 }
 
 // global_directive
-//  : enable_directive
+//  : diagnostic_directive
+//  | enable_directive
 Maybe<Void> ParserImpl::global_directive(bool have_parsed_decl) {
     auto& p = peek();
-    auto ed = enable_directive();
-    if (ed.matched && have_parsed_decl) {
-        return add_error(p, "enable directives must come before all global declarations");
+    Maybe<Void> result = diagnostic_directive();
+    if (!result.errored && !result.matched) {
+        result = enable_directive();
     }
-    return ed;
+
+    if (result.matched && have_parsed_decl) {
+        return add_error(p, "directives must come before all global declarations");
+    }
+    return result;
+}
+
+// diagnostic_directive
+//  : diagnostic diagnostic_control SEMICOLON
+Maybe<Void> ParserImpl::diagnostic_directive() {
+    auto decl = sync(Token::Type::kSemicolon, [&]() -> Maybe<Void> {
+        if (!match(Token::Type::kDiagnostic)) {
+            return Failure::kNoMatch;
+        }
+
+        auto control = expect_diagnostic_control();
+        if (control.errored) {
+            return Failure::kErrored;
+        }
+
+        if (!expect("diagnostic directive", Token::Type::kSemicolon)) {
+            return Failure::kErrored;
+        }
+
+        builder_.AST().AddDiagnosticControl(std::move(control.value));
+
+        return kSuccess;
+    });
+
+    if (decl.errored) {
+        return Failure::kErrored;
+    }
+    return decl;
 }
 
 // enable_directive
@@ -3695,6 +3728,43 @@ bool ParserImpl::expect_attributes_consumed(utils::VectorRef<const ast::Attribut
     }
     add_error(in[0]->source, "unexpected attributes");
     return false;
+}
+
+// severity_control_name
+//   : 'error'
+//   | 'warning'
+//   | 'info'
+//   | 'off'
+Expect<ast::DiagnosticSeverity> ParserImpl::expect_severity_control_name() {
+    return expect_enum("severity control", ast::ParseDiagnosticSeverity,
+                       ast::kDiagnosticSeverityStrings);
+}
+
+// diagnostic_control
+// : PAREN_LEFT severity_control_name COMMA ident_pattern_token COMMA ? PAREN_RIGHT
+Expect<const ast::DiagnosticControl*> ParserImpl::expect_diagnostic_control() {
+    auto source = last_source();
+    return expect_paren_block("diagnostic control", [&]() -> Expect<const ast::DiagnosticControl*> {
+        auto severity_control = expect_severity_control_name();
+        if (severity_control.errored) {
+            return Failure::kErrored;
+        }
+
+        if (!expect("diagnostic control", Token::Type::kComma)) {
+            return Failure::kErrored;
+        }
+
+        auto rule_name = expect_ident("diagnostic control");
+        if (rule_name.errored) {
+            return Failure::kErrored;
+        }
+        match(Token::Type::kComma);
+
+        return create<ast::DiagnosticControl>(
+            source, severity_control.value,
+            create<ast::IdentifierExpression>(rule_name.source,
+                                              builder_.Symbols().Register(rule_name.value)));
+    });
 }
 
 bool ParserImpl::match(Token::Type tok, Source* source /*= nullptr*/) {

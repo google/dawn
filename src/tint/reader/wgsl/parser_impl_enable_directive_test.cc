@@ -161,7 +161,7 @@ enable f16;
 )");
     p->translation_unit();
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "3:1: enable directives must come before all global declarations");
+    EXPECT_EQ(p->error(), "3:1: directives must come before all global declarations");
     auto program = p->program();
     auto& ast = program.AST();
     // Accept the enable directive although it caused an error
@@ -181,7 +181,7 @@ enable f16;
     p->translation_unit();
     // An empty semicolon is treated as a global declaration
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "3:1: enable directives must come before all global declarations");
+    EXPECT_EQ(p->error(), "3:1: directives must come before all global declarations");
     auto program = p->program();
     auto& ast = program.AST();
     // Accept the enable directive although it cause an error

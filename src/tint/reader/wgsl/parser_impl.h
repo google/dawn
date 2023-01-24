@@ -402,6 +402,9 @@ class ParserImpl {
     /// @param has_parsed_decl flag indicating if the parser has consumed a global declaration.
     /// @return true on parse success, otherwise an error or no-match.
     Maybe<Void> global_directive(bool has_parsed_decl);
+    /// Parses the `diagnostic_directive` grammar element, erroring on parse failure.
+    /// @return true on parse success, otherwise an error or no-match.
+    Maybe<Void> diagnostic_directive();
     /// Parses the `enable_directive` grammar element, erroring on parse failure.
     /// @return true on parse success, otherwise an error or no-match.
     Maybe<Void> enable_directive();
@@ -702,6 +705,12 @@ class ParserImpl {
     /// @see #attribute for the full list of attributes this method parses.
     /// @return the parsed attribute, or nullptr on error.
     Expect<const ast::Attribute*> expect_attribute();
+    /// Parses a severity_control_name grammar element.
+    /// @return the parsed severity control name, or nullptr on error.
+    Expect<ast::DiagnosticSeverity> expect_severity_control_name();
+    /// Parses a diagnostic_control grammar element.
+    /// @return the parsed diagnostic control, or nullptr on error.
+    Expect<const ast::DiagnosticControl*> expect_diagnostic_control();
 
     /// Splits a peekable token into to parts filling in the peekable fields.
     /// @param lhs the token to set in the current position
