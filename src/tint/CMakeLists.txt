@@ -855,7 +855,6 @@ if(TINT_BUILD_TESTS)
     ast/loop_statement_test.cc
     ast/matrix_test.cc
     ast/member_accessor_expression_test.cc
-    ast/module_clone_test.cc
     ast/module_test.cc
     ast/multisampled_texture_test.cc
     ast/phony_expression_test.cc
@@ -1228,6 +1227,7 @@ if(TINT_BUILD_TESTS)
 
   if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
+      ast/module_clone_test.cc
       transform/add_empty_entry_point_test.cc
       transform/add_block_attribute_test.cc
       transform/array_length_from_uniform_test.cc

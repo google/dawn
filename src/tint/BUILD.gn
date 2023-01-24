@@ -1205,7 +1205,6 @@ if (tint_build_unittests) {
       "ast/loop_statement_test.cc",
       "ast/matrix_test.cc",
       "ast/member_accessor_expression_test.cc",
-      "ast/module_clone_test.cc",
       "ast/module_test.cc",
       "ast/multisampled_texture_test.cc",
       "ast/phony_expression_test.cc",
@@ -1234,6 +1233,11 @@ if (tint_build_unittests) {
       "ast/workgroup_attribute_test.cc",
     ]
     deps = [ ":libtint_transform_src" ]
+
+    if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
+      # This AST test relies on the WGSL reader and writer
+      sources += [ "ast/module_clone_test.cc" ]
+    }
   }
 
   tint_unittests_source_set("tint_unittests_diagnostic_src") {
@@ -1432,7 +1436,11 @@ if (tint_build_unittests) {
       "transform/zero_init_workgroup_memory_test.cc",
     ]
 
-    deps = [ ":libtint_transform_src" ]
+    deps = [
+      ":libtint_transform_src",
+      ":libtint_wgsl_reader_src",
+      ":libtint_wgsl_writer_src",
+    ]
   }
 
   tint_unittests_source_set("tint_unittests_utils_src") {
@@ -1511,6 +1519,7 @@ if (tint_build_unittests) {
 
     deps = [
       ":libtint_spv_reader_src",
+      ":libtint_wgsl_writer_src",
       "${tint_spirv_tools_dir}/:spvtools_opt",
     ]
   }
@@ -1804,7 +1813,6 @@ if (tint_build_unittests) {
       ":libtint_glsl_writer_src",
       ":libtint_transform_src",
       ":tint_unittests_ast_src",
-      ":tint_unittests_transform_src",
     ]
   }
 

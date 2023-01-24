@@ -23,8 +23,6 @@
 #include <vector>
 
 #include "src/tint/fuzzers/random_generator.h"
-#include "src/tint/writer/hlsl/generator.h"
-#include "src/tint/writer/msl/generator.h"
 
 namespace tint::fuzzers {
 
