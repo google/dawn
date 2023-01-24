@@ -24,7 +24,10 @@ namespace {
 TEST(ModuleCloneTest, Clone) {
     // Shader that exercises the bulk of the AST nodes and types.
     // See also fuzzers/tint_ast_clone_fuzzer.cc for further coverage of cloning.
-    Source::File file("test.wgsl", R"(struct S0 {
+    Source::File file("test.wgsl", R"(enable f16;
+diagnostic(off, chromium_unreachable_code);
+
+struct S0 {
   @size(4)
   m0 : u32,
   m1 : array<u32>,
@@ -62,6 +65,7 @@ fn f0(p0 : bool) -> f32 {
   return 0.0;
 }
 
+@diagnostic(warning, chromium_unreachable_code)
 fn f1(p0 : f32, p1 : i32) -> f32 {
   var l0 : i32 = 3;
   var l1 : f32 = 8.0;
