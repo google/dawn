@@ -139,7 +139,7 @@ TEST_P(VecMissingGreaterThanTest, Handles_Missing_GreaterThan) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:9: expected '>' for vector");
+    ASSERT_EQ(p->error(), "1:5: missing closing '>' for vector");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecMissingGreaterThanTest,
@@ -222,7 +222,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingLessThan) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:5: expected '<' for ptr declaration");
+    ASSERT_EQ(p->error(), "1:5: expected '< (opening template argument list)' for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThanAfterType) {
@@ -232,7 +232,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThanAfterType) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:18: expected '>' for ptr declaration");
+    ASSERT_EQ(p->error(), "1:4: missing closing '>' for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThanAfterAccess) {
@@ -242,7 +242,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThanAfterAccess) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:24: expected '>' for ptr declaration");
+    ASSERT_EQ(p->error(), "1:4: missing closing '>' for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterAddressSpace) {
@@ -262,7 +262,8 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterAccess) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:19: expected '>' for ptr declaration");
+    ASSERT_EQ(p->error(),
+              "1:19: expected '> (closing template argument list)' for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingAddressSpace) {
@@ -370,7 +371,8 @@ TEST_F(ParserImplTest, TypeDecl_Atomic_MissingLessThan) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:8: expected '<' for atomic declaration");
+    ASSERT_EQ(p->error(),
+              "1:8: expected '< (opening template argument list)' for atomic declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Atomic_MissingGreaterThan) {
@@ -380,7 +382,7 @@ TEST_F(ParserImplTest, TypeDecl_Atomic_MissingGreaterThan) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:11: expected '>' for atomic declaration");
+    ASSERT_EQ(p->error(), "1:7: missing closing '>' for atomic declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Atomic_MissingType) {
@@ -561,7 +563,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_MissingGreaterThan) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:10: expected '>' for array declaration");
+    ASSERT_EQ(p->error(), "1:6: missing closing '>' for array declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_MissingComma) {
@@ -571,7 +573,8 @@ TEST_F(ParserImplTest, TypeDecl_Array_MissingComma) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:11: expected '>' for array declaration");
+    ASSERT_EQ(p->error(),
+              "1:11: expected '> (closing template argument list)' for array declaration");
 }
 
 struct MatrixData {
@@ -623,7 +626,7 @@ TEST_P(MatrixMissingGreaterThanTest, Handles_Missing_GreaterThan) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:11: expected '>' for matrix");
+    ASSERT_EQ(p->error(), "1:7: missing closing '>' for matrix");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          MatrixMissingGreaterThanTest,

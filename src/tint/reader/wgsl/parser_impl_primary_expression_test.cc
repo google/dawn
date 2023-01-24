@@ -266,7 +266,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingGreaterThan) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:12: expected '>' for bitcast expression");
+    EXPECT_EQ(p->error(), "1:8: missing closing '>' for bitcast expression");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingType) {
@@ -317,6 +317,19 @@ TEST_F(ParserImplTest, PrimaryExpression_bitcast_InvalidExpression) {
     EXPECT_EQ(e.value, nullptr);
     ASSERT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), "1:14: unable to parse expression");
+}
+
+TEST_F(ParserImplTest, PrimaryExpression_Template) {
+    auto p = parser("a<b>()");
+    auto e = p->primary_expression();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_EQ(e.value, nullptr);
+    ASSERT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(),
+              "1:2: '<' treated as the start of a template argument list, which is not supported "
+              "for user-declared types or functions. If you intended less-than, wrap the "
+              "expression in parentheses");
 }
 
 }  // namespace

@@ -799,6 +799,16 @@ class ParserImpl {
     /// an Expect with error state.
     template <typename F, typename T = ReturnType<F>>
     T expect_lt_gt_block(std::string_view use, F&& body);
+    /// A convenience function that calls `expect_block` passing
+    /// `Token::Type::kTemplateArgsLeft` and `Token::Type::kTemplateArgsRight` for the `start` and
+    /// `end` arguments, respectively.
+    /// @param use a description of what was being parsed if an error was raised
+    /// @param body a function or lambda that is called to parse the lexical block body, with the
+    /// signature: `Expect<Result>()` or `Maybe<Result>()`.
+    /// @return the value returned by `body` if no errors are raised, otherwise an Expect with error
+    /// state.
+    template <typename F, typename T = ReturnType<F>>
+    T expect_template_arg_block(std::string_view use, F&& body);
 
     /// sync() calls the function `func`, and attempts to resynchronize the
     /// parser to the next found resynchronization token if `func` fails. If the
