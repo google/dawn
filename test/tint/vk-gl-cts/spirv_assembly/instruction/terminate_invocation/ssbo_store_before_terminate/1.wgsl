@@ -1,4 +1,4 @@
-type RTArr = array<i32>;
+alias RTArr = array<i32>;
 
 struct S {
   field0 : RTArr,

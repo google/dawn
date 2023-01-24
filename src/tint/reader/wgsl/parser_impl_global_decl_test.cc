@@ -99,7 +99,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConst_MissingSemicolon) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
-    auto p = parser("type A = i32;");
+    auto p = parser("alias A = i32;");
     p->global_decl();
     ASSERT_FALSE(p->has_error()) << p->error();
 
@@ -110,6 +110,42 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
+    auto p = parser(R"(struct A {
+  a : f32,
+}
+alias B = A;)");
+    p->global_decl();
+    p->global_decl();
+    ASSERT_FALSE(p->has_error()) << p->error();
+
+    auto program = p->program();
+    ASSERT_EQ(program.AST().TypeDecls().Length(), 2u);
+    ASSERT_TRUE(program.AST().TypeDecls()[0]->Is<ast::Struct>());
+    auto* str = program.AST().TypeDecls()[0]->As<ast::Struct>();
+    EXPECT_EQ(str->name, program.Symbols().Get("A"));
+
+    ASSERT_TRUE(program.AST().TypeDecls()[1]->Is<ast::Alias>());
+    auto* alias = program.AST().TypeDecls()[1]->As<ast::Alias>();
+    EXPECT_EQ(alias->name, program.Symbols().Get("B"));
+    auto* tn = alias->type->As<ast::TypeName>();
+    EXPECT_NE(tn, nullptr);
+    EXPECT_EQ(tn->name, str->name);
+}
+
+// TODO(crbug.com/tint/1812): DEPRECATED
+TEST_F(ParserImplTest, DEPRECATED_GlobalDecl_TypeAlias) {
+    auto p = parser("type A = i32;");
+    p->global_decl();
+    ASSERT_FALSE(p->has_error()) << p->error();
+
+    auto program = p->program();
+    ASSERT_EQ(program.AST().TypeDecls().Length(), 1u);
+    ASSERT_TRUE(program.AST().TypeDecls()[0]->Is<ast::Alias>());
+    EXPECT_EQ(program.Symbols().NameFor(program.AST().TypeDecls()[0]->As<ast::Alias>()->name), "A");
+}
+
+// TODO(crbug.com/tint/1812): DEPRECATED
+TEST_F(ParserImplTest, DEPRECATED_GlobalDecl_TypeAlias_StructIdent) {
     auto p = parser(R"(struct A {
   a : f32,
 }
@@ -133,10 +169,20 @@ type B = A;)");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_MissingSemicolon) {
+    auto p = parser("alias A = i32");
+    p->global_decl();
+    ASSERT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:14: expected ';' for type alias");
+}
+
+// TODO(crbug.com/tint/1812): DEPRECATED
+TEST_F(ParserImplTest, DEPRECATED_GlobalDecl_TypeAlias_MissingSemicolon) {
     auto p = parser("type A = i32");
     p->global_decl();
     ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:13: expected ';' for type alias");
+    EXPECT_EQ(p->error(),
+              R"(1:1: use of deprecated language feature: 'type' has been renamed to 'alias'
+1:13: expected ';' for type alias)");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function) {

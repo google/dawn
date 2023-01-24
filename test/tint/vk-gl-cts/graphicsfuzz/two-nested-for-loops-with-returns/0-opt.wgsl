@@ -1,4 +1,4 @@
-type RTArr = array<f32>;
+alias RTArr = array<f32>;
 
 struct doesNotMatter {
   x_compute_data : RTArr,

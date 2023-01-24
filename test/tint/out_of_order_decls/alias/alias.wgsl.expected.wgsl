@@ -1,6 +1,6 @@
-type T1 = T2;
+alias T1 = T2;
 
-type T2 = i32;
+alias T2 = i32;
 
 @fragment
 fn f() {

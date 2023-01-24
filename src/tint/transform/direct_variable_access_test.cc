@@ -242,7 +242,7 @@ enable chromium_experimental_full_ptr_parameters;
 
 @group(0) @binding(0) var<uniform> U : array<array<array<vec4<i32>, 8>, 8>, 8>;
 
-type U_X_X_X = array<u32, 3u>;
+alias U_X_X_X = array<u32, 3u>;
 
 fn a_U_X_X_X(pre : i32, p : U_X_X_X, post : i32) -> vec4<i32> {
   return U[p[0]][p[1]][p[2]];
@@ -339,7 +339,7 @@ fn third() -> i32 {
   return i;
 }
 
-type U_X_X_X = array<u32, 3u>;
+alias U_X_X_X = array<u32, 3u>;
 
 fn a_U_X_X_X(pre : i32, p : U_X_X_X, post : i32) -> vec4<i32> {
   return U[p[0]][p[1]][p[2]];
@@ -429,7 +429,7 @@ fn second() -> i32 {
   return i;
 }
 
-type U_X_X = array<u32, 2u>;
+alias U_X_X = array<u32, 2u>;
 
 fn a_U_X_X(pre : i32, p : U_X_X, post : i32) -> vec4<i32> {
   return U[p[0]][p[1]];
@@ -515,7 +515,7 @@ fn second() -> i32 {
   return i;
 }
 
-type U_X_X = array<u32, 2u>;
+alias U_X_X = array<u32, 2u>;
 
 fn a_U_X_X(pre : i32, p : U_X_X, post : i32) -> vec4<i32> {
   return U[p[0]][p[1]];
@@ -605,7 +605,7 @@ fn second() -> i32 {
   return i;
 }
 
-type U_X_X = array<u32, 2u>;
+alias U_X_X = array<u32, 2u>;
 
 fn a_U_X_X(pre : i32, p : U_X_X, post : i32) -> vec4<i32> {
   return U[p[0]][p[1]];
@@ -695,7 +695,7 @@ fn second() -> i32 {
   return i;
 }
 
-type U_X_X = array<u32, 2u>;
+alias U_X_X = array<u32, 2u>;
 
 fn a_U_X_X(pre : i32, p : U_X_X, post : i32) -> vec4<i32> {
   return U[p[0]][p[1]];
@@ -793,7 +793,7 @@ enable chromium_experimental_full_ptr_parameters;
 
 @group(0) @binding(0) var<uniform> U : array<vec4<i32>, 8>;
 
-type U_X = array<u32, 1u>;
+alias U_X = array<u32, 1u>;
 
 fn a_U_X(pre : i32, p : U_X, post : i32) -> vec4<i32> {
   return U[p[0]];
@@ -880,7 +880,7 @@ struct Inner {
   mat : mat3x4<f32>,
 }
 
-type InnerArr = array<Inner, 4>;
+alias InnerArr = array<Inner, 4>;
 
 struct Outer {
   arr : InnerArr,
@@ -889,19 +889,19 @@ struct Outer {
 
 @group(0) @binding(0) var<uniform> U : Outer;
 
-type U_mat_X = array<u32, 1u>;
+alias U_mat_X = array<u32, 1u>;
 
 fn f0_U_mat_X(p : U_mat_X) -> f32 {
   return U.mat[p[0]].x;
 }
 
-type U_arr_X_mat_X = array<u32, 2u>;
+alias U_arr_X_mat_X = array<u32, 2u>;
 
 fn f0_U_arr_X_mat_X(p : U_arr_X_mat_X) -> f32 {
   return U.arr[p[0]].mat[p[0]].x;
 }
 
-type U_arr_X_mat_X_1 = array<u32, 2u>;
+alias U_arr_X_mat_X_1 = array<u32, 2u>;
 
 fn f0_U_arr_X_mat_X_1(p : U_arr_X_mat_X_1) -> f32 {
   return U.arr[p[0]].mat[p[1]].x;
@@ -926,7 +926,7 @@ fn f1_U_mat() -> f32 {
   return res;
 }
 
-type U_arr_X_mat = array<u32, 1u>;
+alias U_arr_X_mat = array<u32, 1u>;
 
 fn f1_U_arr_X_mat(p : U_arr_X_mat) -> f32 {
   var res : f32;
@@ -947,7 +947,7 @@ fn f1_U_arr_X_mat(p : U_arr_X_mat) -> f32 {
   return res;
 }
 
-type U_arr_X = array<u32, 1u>;
+alias U_arr_X = array<u32, 1u>;
 
 fn f2_U_arr_X(p : U_arr_X) -> f32 {
   let p_mat = &(U.arr[p[0]].mat);
@@ -1087,7 +1087,7 @@ enable chromium_experimental_full_ptr_parameters;
 
 @group(0) @binding(0) var<storage, read_write> S : array<vec4<i32>, 8>;
 
-type S_X = array<u32, 1u>;
+alias S_X = array<u32, 1u>;
 
 fn a_S_X(pre : i32, p : S_X, post : i32) {
   S[p[0]] = vec4<i32>();
@@ -1174,7 +1174,7 @@ struct Inner {
   mat : mat3x4<f32>,
 }
 
-type InnerArr = array<Inner, 4>;
+alias InnerArr = array<Inner, 4>;
 
 struct Outer {
   arr : InnerArr,
@@ -1183,19 +1183,19 @@ struct Outer {
 
 @group(0) @binding(0) var<storage> S : Outer;
 
-type S_mat_X = array<u32, 1u>;
+alias S_mat_X = array<u32, 1u>;
 
 fn f0_S_mat_X(p : S_mat_X) -> f32 {
   return S.mat[p[0]].x;
 }
 
-type S_arr_X_mat_X = array<u32, 2u>;
+alias S_arr_X_mat_X = array<u32, 2u>;
 
 fn f0_S_arr_X_mat_X(p : S_arr_X_mat_X) -> f32 {
   return S.arr[p[0]].mat[p[0]].x;
 }
 
-type S_arr_X_mat_X_1 = array<u32, 2u>;
+alias S_arr_X_mat_X_1 = array<u32, 2u>;
 
 fn f0_S_arr_X_mat_X_1(p : S_arr_X_mat_X_1) -> f32 {
   return S.arr[p[0]].mat[p[1]].x;
@@ -1220,7 +1220,7 @@ fn f1_S_mat() -> f32 {
   return res;
 }
 
-type S_arr_X_mat = array<u32, 1u>;
+alias S_arr_X_mat = array<u32, 1u>;
 
 fn f1_S_arr_X_mat(p : S_arr_X_mat) -> f32 {
   var res : f32;
@@ -1241,7 +1241,7 @@ fn f1_S_arr_X_mat(p : S_arr_X_mat) -> f32 {
   return res;
 }
 
-type S_arr_X = array<u32, 1u>;
+alias S_arr_X = array<u32, 1u>;
 
 fn f2_S_arr_X(p : S_arr_X) -> f32 {
   let p_mat = &(S.arr[p[0]].mat);
@@ -1296,7 +1296,7 @@ enable chromium_experimental_full_ptr_parameters;
 
 var<workgroup> W : array<vec4<i32>, 8>;
 
-type W_X = array<u32, 1u>;
+alias W_X = array<u32, 1u>;
 
 fn a_W_X(pre : i32, p : W_X, post : i32) -> vec4<i32> {
   return W[p[0]];
@@ -1332,7 +1332,7 @@ enable chromium_experimental_full_ptr_parameters;
 
 var<workgroup> W : array<vec4<i32>, 8>;
 
-type W_X = array<u32, 1u>;
+alias W_X = array<u32, 1u>;
 
 fn a_W_X(pre : i32, p : W_X, post : i32) {
   W[p[0]] = vec4<i32>();
@@ -1418,7 +1418,7 @@ struct Inner {
   mat : mat3x4<f32>,
 }
 
-type InnerArr = array<Inner, 4>;
+alias InnerArr = array<Inner, 4>;
 
 struct Outer {
   arr : InnerArr,
@@ -1427,19 +1427,19 @@ struct Outer {
 
 var<workgroup> W : Outer;
 
-type W_mat_X = array<u32, 1u>;
+alias W_mat_X = array<u32, 1u>;
 
 fn f0_W_mat_X(p : W_mat_X) -> f32 {
   return W.mat[p[0]].x;
 }
 
-type W_arr_X_mat_X = array<u32, 2u>;
+alias W_arr_X_mat_X = array<u32, 2u>;
 
 fn f0_W_arr_X_mat_X(p : W_arr_X_mat_X) -> f32 {
   return W.arr[p[0]].mat[p[0]].x;
 }
 
-type W_arr_X_mat_X_1 = array<u32, 2u>;
+alias W_arr_X_mat_X_1 = array<u32, 2u>;
 
 fn f0_W_arr_X_mat_X_1(p : W_arr_X_mat_X_1) -> f32 {
   return W.arr[p[0]].mat[p[1]].x;
@@ -1464,7 +1464,7 @@ fn f1_W_mat() -> f32 {
   return res;
 }
 
-type W_arr_X_mat = array<u32, 1u>;
+alias W_arr_X_mat = array<u32, 1u>;
 
 fn f1_W_arr_X_mat(p : W_arr_X_mat) -> f32 {
   var res : f32;
@@ -1485,7 +1485,7 @@ fn f1_W_arr_X_mat(p : W_arr_X_mat) -> f32 {
   return res;
 }
 
-type W_arr_X = array<u32, 1u>;
+alias W_arr_X = array<u32, 1u>;
 
 fn f2_W_arr_X(p : W_arr_X) -> f32 {
   let p_mat = &(W.arr[p[0]].mat);
@@ -1762,7 +1762,7 @@ fn a_F_i(pre : i32, p : ptr<private, str>, post : i32) -> i32 {
   return (*(p)).i;
 }
 
-type F_X = array<u32, 1u>;
+alias F_X = array<u32, 1u>;
 
 fn a_F_X(pre : i32, p_base : ptr<private, array<i32, 4u>>, p_indices : F_X, post : i32) -> i32 {
   return (*(p_base))[p_indices[0]];
@@ -1774,7 +1774,7 @@ var<private> Ps : str;
 
 var<private> Pa : array<i32, 4>;
 
-type F_X_1 = array<u32, 1u>;
+alias F_X_1 = array<u32, 1u>;
 
 fn b() {
   a_F(10, &(Pi), 20);
@@ -1890,7 +1890,7 @@ struct Inner {
   mat : mat3x4<f32>,
 }
 
-type InnerArr = array<Inner, 4>;
+alias InnerArr = array<Inner, 4>;
 
 struct Outer {
   arr : InnerArr,
@@ -1899,27 +1899,27 @@ struct Outer {
 
 var<private> P : Outer;
 
-type F_mat_X = array<u32, 1u>;
+alias F_mat_X = array<u32, 1u>;
 
 fn f0_F_mat_X(p_base : ptr<private, Outer>, p_indices : F_mat_X) -> f32 {
   return (*(p_base)).mat[p_indices[0]].x;
 }
 
-type F_arr_X_mat_X = array<u32, 2u>;
+alias F_arr_X_mat_X = array<u32, 2u>;
 
 fn f0_F_arr_X_mat_X(p_base : ptr<private, Outer>, p_indices : F_arr_X_mat_X) -> f32 {
   return (*(p_base)).arr[p_indices[0]].mat[p_indices[0]].x;
 }
 
-type F_arr_X_mat_X_1 = array<u32, 2u>;
+alias F_arr_X_mat_X_1 = array<u32, 2u>;
 
 fn f0_F_arr_X_mat_X_1(p_base : ptr<private, Outer>, p_indices : F_arr_X_mat_X_1) -> f32 {
   return (*(p_base)).arr[p_indices[0]].mat[p_indices[1]].x;
 }
 
-type F_mat_X_1 = array<u32, 1u>;
+alias F_mat_X_1 = array<u32, 1u>;
 
-type F_arr_X_mat_X_2 = array<u32, 2u>;
+alias F_arr_X_mat_X_2 = array<u32, 2u>;
 
 fn f1_F_mat(p : ptr<private, Outer>) -> f32 {
   var res : f32;
@@ -1940,9 +1940,9 @@ fn f1_F_mat(p : ptr<private, Outer>) -> f32 {
   return res;
 }
 
-type F_arr_X_mat = array<u32, 1u>;
+alias F_arr_X_mat = array<u32, 1u>;
 
-type F_arr_X_mat_X_3 = array<u32, 2u>;
+alias F_arr_X_mat_X_3 = array<u32, 2u>;
 
 fn f1_F_arr_X_mat(p_base : ptr<private, Outer>, p_indices : F_arr_X_mat) -> f32 {
   var res : f32;
@@ -1963,16 +1963,16 @@ fn f1_F_arr_X_mat(p_base : ptr<private, Outer>, p_indices : F_arr_X_mat) -> f32 
   return res;
 }
 
-type F_arr_X = array<u32, 1u>;
+alias F_arr_X = array<u32, 1u>;
 
-type F_arr_X_mat_1 = array<u32, 1u>;
+alias F_arr_X_mat_1 = array<u32, 1u>;
 
 fn f2_F_arr_X(p_base : ptr<private, Outer>, p_indices : F_arr_X) -> f32 {
   let p_mat = &((*(p_base)).arr[p_indices[0]].mat);
   return f1_F_arr_X_mat(p_base, F_arr_X_mat_1(p_indices[0u]));
 }
 
-type F_arr_X_1 = array<u32, 1u>;
+alias F_arr_X_1 = array<u32, 1u>;
 
 fn f3_F_arr_F_mat(p0 : ptr<private, Outer>, p1 : ptr<private, Outer>) -> f32 {
   let p0_inner = &((*(p0)).arr[3]);
@@ -2001,7 +2001,7 @@ struct Inner {
   mat : mat3x4<f32>,
 }
 
-type InnerArr = array<Inner, 4>;
+alias InnerArr = array<Inner, 4>;
 
 struct Outer {
   arr : InnerArr,
@@ -2268,13 +2268,13 @@ fn a_F_i(pre : i32, p : ptr<function, str>, post : i32) -> i32 {
   return (*(p)).i;
 }
 
-type F_X = array<u32, 1u>;
+alias F_X = array<u32, 1u>;
 
 fn a_F_X(pre : i32, p_base : ptr<function, array<i32, 4u>>, p_indices : F_X, post : i32) -> i32 {
   return (*(p_base))[p_indices[0]];
 }
 
-type F_X_1 = array<u32, 1u>;
+alias F_X_1 = array<u32, 1u>;
 
 fn b() {
   var Fi : i32;
@@ -2460,13 +2460,13 @@ fn fn_u_U_str_i() -> vec4<i32> {
   return U_str.i;
 }
 
-type U_arr_X = array<u32, 1u>;
+alias U_arr_X = array<u32, 1u>;
 
 fn fn_u_U_arr_X(p : U_arr_X) -> vec4<i32> {
   return U_arr[p[0]];
 }
 
-type U_arr_arr_X_X = array<u32, 2u>;
+alias U_arr_arr_X_X = array<u32, 2u>;
 
 fn fn_u_U_arr_arr_X_X(p : U_arr_arr_X_X) -> vec4<i32> {
   return U_arr_arr[p[0]][p[1]];
@@ -2480,13 +2480,13 @@ fn fn_s_S_str_i() -> vec4<i32> {
   return S_str.i;
 }
 
-type S_arr_X = array<u32, 1u>;
+alias S_arr_X = array<u32, 1u>;
 
 fn fn_s_S_arr_X(p : S_arr_X) -> vec4<i32> {
   return S_arr[p[0]];
 }
 
-type S_arr_arr_X_X = array<u32, 2u>;
+alias S_arr_arr_X_X = array<u32, 2u>;
 
 fn fn_s_S_arr_arr_X_X(p : S_arr_arr_X_X) -> vec4<i32> {
   return S_arr_arr[p[0]][p[1]];
@@ -2500,13 +2500,13 @@ fn fn_w_W_str_i() -> vec4<i32> {
   return W_str.i;
 }
 
-type W_arr_X = array<u32, 1u>;
+alias W_arr_X = array<u32, 1u>;
 
 fn fn_w_W_arr_X(p : W_arr_X) -> vec4<i32> {
   return W_arr[p[0]];
 }
 
-type W_arr_arr_X_X = array<u32, 2u>;
+alias W_arr_arr_X_X = array<u32, 2u>;
 
 fn fn_w_W_arr_arr_X_X(p : W_arr_arr_X_X) -> vec4<i32> {
   return W_arr_arr[p[0]][p[1]];
@@ -2578,7 +2578,7 @@ fn a(i : i32) -> i32 {
   return i;
 }
 
-type S_X = array<u32, 1u>;
+alias S_X = array<u32, 1u>;
 
 fn b_S_X(p : S_X) -> i32 {
   return S[p[0]][a(S[p[0]][0][1][2])][a(S[p[0]][a(3)][4][5])][a(S[p[0]][6][a(7)][8])];
@@ -2620,13 +2620,13 @@ enable chromium_experimental_full_ptr_parameters;
 
 @group(0) @binding(0) var<storage> S : array<array<array<array<i32, 9>, 9>, 9>, 50>;
 
-type S_X_X_X_X = array<u32, 4u>;
+alias S_X_X_X_X = array<u32, 4u>;
 
 fn a_S_X_X_X_X(pre : i32, i : S_X_X_X_X, post : i32) -> i32 {
   return S[i[0]][i[0]][i[1]][i[2]];
 }
 
-type S_X = array<u32, 1u>;
+alias S_X = array<u32, 1u>;
 
 fn b_S_X(p : S_X) -> i32 {
   return a_S_X_X_X_X(10, S_X_X_X_X(p[0u], u32(a_S_X_X_X_X(20, S_X_X_X_X(p[0u], 0, 1, 2), 30)), u32(a_S_X_X_X_X(40, S_X_X_X_X(p[0u], 3, 4, 5), 50)), u32(a_S_X_X_X_X(60, S_X_X_X_X(p[0u], 6, 7, 8), 70))), 80);
@@ -2673,9 +2673,9 @@ fn a(i : i32) -> i32 {
   return i;
 }
 
-type S_X = array<u32, 1u>;
+alias S_X = array<u32, 1u>;
 
-type U_X = array<u32, 1u>;
+alias U_X = array<u32, 1u>;
 
 fn b_S_X_U_X(s : S_X, u : U_X) -> i32 {
   return S[s[0]][a(U[u[0]][0][1].x)][a(U[u[0]][a(3)][4].y)];

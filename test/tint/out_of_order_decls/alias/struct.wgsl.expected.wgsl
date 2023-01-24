@@ -1,4 +1,4 @@
-type T = S;
+alias T = S;
 
 struct S {
   m : i32,

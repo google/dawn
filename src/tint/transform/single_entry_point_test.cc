@@ -389,7 +389,7 @@ TEST_F(SingleEntryPointTest, OverridableConstants_TransitiveUses) {
 
 @id(5) override c5 : u32 = (2 * c4);
 
-type arr_ty = array<i32, (2 * c5)>;
+alias arr_ty = array<i32, (2 * c5)>;
 
 var<workgroup> arr : arr_ty;
 
@@ -593,7 +593,7 @@ TEST_F(SingleEntryPointTest, GlobalConstUsedAsArraySize) {
     auto* src = R"(
 const MY_SIZE = 5u;
 
-type Arr = array<i32, MY_SIZE>;
+alias Arr = array<i32, MY_SIZE>;
 
 @fragment
 fn main() {

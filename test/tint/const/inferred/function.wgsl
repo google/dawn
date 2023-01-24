@@ -1,4 +1,4 @@
-type MyArray = array<f32, 10>;
+alias MyArray = array<f32, 10>;
 
 // Function-scope consts
 fn const_decls() {

@@ -1,10 +1,10 @@
-type A = i32;
+alias A = i32;
 
-type _A = i32;
+alias _A = i32;
 
-type B = A;
+alias B = A;
 
-type _B = _A;
+alias _B = _A;
 
 fn f() {
   var c : B;

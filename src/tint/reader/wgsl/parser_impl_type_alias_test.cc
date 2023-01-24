@@ -73,7 +73,9 @@ TEST_F(ParserImplTest, TypeDecl_MissingIdent) {
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(t.value, nullptr);
-    EXPECT_EQ(p->error(), "1:6: expected identifier for type alias");
+    EXPECT_EQ(p->error(),
+              R"(1:1: use of deprecated language feature: 'type' has been renamed to 'alias'
+1:6: expected identifier for type alias)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidIdent) {
@@ -83,7 +85,9 @@ TEST_F(ParserImplTest, TypeDecl_InvalidIdent) {
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(t.value, nullptr);
-    EXPECT_EQ(p->error(), "1:6: expected identifier for type alias");
+    EXPECT_EQ(p->error(),
+              R"(1:1: use of deprecated language feature: 'type' has been renamed to 'alias'
+1:6: expected identifier for type alias)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingEqual) {
@@ -93,7 +97,9 @@ TEST_F(ParserImplTest, TypeDecl_MissingEqual) {
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(t.value, nullptr);
-    EXPECT_EQ(p->error(), "1:8: expected '=' for type alias");
+    EXPECT_EQ(p->error(),
+              R"(1:1: use of deprecated language feature: 'type' has been renamed to 'alias'
+1:8: expected '=' for type alias)");
 }
 
 }  // namespace

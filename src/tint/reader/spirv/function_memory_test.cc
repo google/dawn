@@ -950,7 +950,7 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_TypesAndVarDeclarations) {
     auto p = parser(test::Assemble(assembly));
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
     const auto module_str = test::ToString(p->program());
-    EXPECT_THAT(module_str, HasSubstr(R"(type RTArr = @stride(4) array<u32>;
+    EXPECT_THAT(module_str, HasSubstr(R"(alias RTArr = @stride(4) array<u32>;
 
 struct S {
   /* @offset(0) */

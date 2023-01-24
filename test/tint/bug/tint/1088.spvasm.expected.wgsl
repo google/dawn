@@ -1,11 +1,11 @@
-type Arr = array<mat4x4<f32>, 2u>;
+alias Arr = array<mat4x4<f32>, 2u>;
 
 struct strided_arr {
   @size(16)
   el : f32,
 }
 
-type Arr_1 = array<strided_arr, 4u>;
+alias Arr_1 = array<strided_arr, 4u>;
 
 struct LeftOver {
   /* @offset(0) */

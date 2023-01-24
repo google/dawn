@@ -2,7 +2,7 @@ struct S {
   m : T,
 }
 
-type T = i32;
+alias T = i32;
 
 @fragment
 fn f() {

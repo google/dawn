@@ -3,16 +3,16 @@ struct strided_arr {
   el : f32,
 }
 
-type Arr = array<strided_arr, 2u>;
+alias Arr = array<strided_arr, 2u>;
 
-type Arr_1 = array<Arr, 3u>;
+alias Arr_1 = array<Arr, 3u>;
 
 struct strided_arr_1 {
   @size(128)
   el : Arr_1,
 }
 
-type Arr_2 = array<strided_arr_1, 4u>;
+alias Arr_2 = array<strided_arr_1, 4u>;
 
 struct S {
   /* @offset(0) */

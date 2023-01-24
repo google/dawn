@@ -173,7 +173,7 @@ fn frag_main(@location(1) loc1 : myf32) {
 )";
 
     auto* expect = R"(
-type myf32 = f32;
+alias myf32 = f32;
 
 struct tint_symbol_1 {
   @location(1)
@@ -222,7 +222,7 @@ fn frag_main(tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc1);
 }
 
-type myf32 = f32;
+alias myf32 = f32;
 )";
 
     DataMap data;
@@ -1589,7 +1589,7 @@ fn frag_main(inputs : MyFragmentInput) -> MyFragmentOutput {
 )";
 
     auto* expect = R"(
-type myf32 = f32;
+alias myf32 = f32;
 
 struct FragmentInput {
   col1 : myf32,
@@ -1601,9 +1601,9 @@ struct FragmentOutput {
   col2 : myf32,
 }
 
-type MyFragmentInput = FragmentInput;
+alias MyFragmentInput = FragmentInput;
 
-type MyFragmentOutput = FragmentOutput;
+alias MyFragmentOutput = FragmentOutput;
 
 fn foo(x : MyFragmentInput) -> myf32 {
   return x.col1;
@@ -1703,9 +1703,9 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   return wrapper_result;
 }
 
-type MyFragmentInput = FragmentInput;
+alias MyFragmentInput = FragmentInput;
 
-type MyFragmentOutput = FragmentOutput;
+alias MyFragmentOutput = FragmentOutput;
 
 fn foo(x : MyFragmentInput) -> myf32 {
   return x.col1;
@@ -1721,7 +1721,7 @@ struct FragmentOutput {
   col2 : myf32,
 }
 
-type myf32 = f32;
+alias myf32 = f32;
 )";
 
     DataMap data;

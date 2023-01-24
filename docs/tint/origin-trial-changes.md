@@ -1,5 +1,11 @@
 # Tint changes during Origin Trial
 
+## Changes for M111
+
+## Deprecated Features
+
+* The keyword to alias a type has been renamed from `type` to `alias`. [tint:1812](crbug.com/tint/1812)
+
 ## Changes for M110
 
 ### Breaking changes

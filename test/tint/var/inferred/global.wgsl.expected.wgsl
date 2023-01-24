@@ -2,7 +2,7 @@ struct MyStruct {
   f1 : f32,
 }
 
-type MyArray = array<f32, 10>;
+alias MyArray = array<f32, 10>;
 
 var<private> v1 = 1;
 

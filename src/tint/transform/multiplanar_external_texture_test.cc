@@ -1657,7 +1657,7 @@ struct ExternalTextureParams {
 
 @group(0) @binding(3) var<uniform> ext_tex_params : ExternalTextureParams;
 
-type ET = texture_external;
+alias ET = texture_external;
 
 fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
   let cond = (abs(v) < vec3<f32>(params.D));
@@ -1795,7 +1795,7 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 
 
 @group(0) @binding(1) var smp : sampler;
 
-type ET = texture_external;
+alias ET = texture_external;
 )";
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{

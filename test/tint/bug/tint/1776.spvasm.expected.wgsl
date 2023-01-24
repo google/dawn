@@ -5,7 +5,7 @@ struct S {
   b : i32,
 }
 
-type RTArr = array<S>;
+alias RTArr = array<S>;
 
 struct sb_block {
   /* @offset(0) */

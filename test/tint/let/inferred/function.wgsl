@@ -2,7 +2,7 @@ struct MyStruct {
     f1 : f32,
 };
 
-type MyArray = array<f32, 10>;
+alias MyArray = array<f32, 10>;
 
 fn ret_i32() -> i32 { return 1; }
 fn ret_u32() -> u32 { return 1u; }

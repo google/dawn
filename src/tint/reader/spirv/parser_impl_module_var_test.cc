@@ -1251,7 +1251,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructMember_NonReadableDecoration_Dropped) 
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
-    EXPECT_THAT(module_str, HasSubstr(R"(type Arr = @stride(4) array<u32, 2u>;
+    EXPECT_THAT(module_str, HasSubstr(R"(alias Arr = @stride(4) array<u32, 2u>;
 
 struct S {
   /* @offset(0) */
@@ -2424,13 +2424,13 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_WithStride) {
     ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
-    const std::string expected = R"(type Arr = @stride(4) array<u32, 1u>;
+    const std::string expected = R"(alias Arr = @stride(4) array<u32, 1u>;
 
-type Arr_1 = @stride(4) array<u32, 2u>;
+alias Arr_1 = @stride(4) array<u32, 2u>;
 
-type Arr_2 = @stride(4) array<i32, 1u>;
+alias Arr_2 = @stride(4) array<i32, 1u>;
 
-type Arr_3 = @stride(4) array<i32, 2u>;
+alias Arr_3 = @stride(4) array<i32, 2u>;
 
 var<private> x_1 : Arr;
 
@@ -2463,13 +2463,13 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_WithStride) {
     ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
-    const std::string expected = R"(type Arr = @stride(4) array<u32, 1u>;
+    const std::string expected = R"(alias Arr = @stride(4) array<u32, 1u>;
 
-type Arr_1 = @stride(4) array<u32, 2u>;
+alias Arr_1 = @stride(4) array<u32, 2u>;
 
-type Arr_2 = @stride(4) array<i32, 1u>;
+alias Arr_2 = @stride(4) array<i32, 1u>;
 
-type Arr_3 = @stride(4) array<i32, 2u>;
+alias Arr_3 = @stride(4) array<i32, 2u>;
 
 var<private> x_1 : Arr;
 

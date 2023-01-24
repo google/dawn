@@ -1,6 +1,6 @@
 const wgsize : i32 = 64i;
 
-type Array = array<i32, (wgsize * 2)>;
+alias Array = array<i32, (wgsize * 2)>;
 
 var<workgroup> v : Array;
 

@@ -25,7 +25,7 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.EmitTypeDecl(alias)) << gen.error();
-    EXPECT_EQ(gen.result(), R"(type a = f32;
+    EXPECT_EQ(gen.result(), R"(alias a = f32;
 )");
 }
 
@@ -45,7 +45,7 @@ TEST_F(WgslGeneratorImplTest, EmitTypeDecl_Struct) {
   a : f32,
   b : i32,
 }
-type B = A;
+alias B = A;
 )");
 }
 
@@ -60,7 +60,7 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.EmitTypeDecl(alias)) << gen.error();
-    EXPECT_EQ(gen.result(), R"(type B = A;
+    EXPECT_EQ(gen.result(), R"(alias B = A;
 )");
 }
 

@@ -1,4 +1,4 @@
-type Arr = array<u32, 4u>;
+alias Arr = array<u32, 4u>;
 
 var<private> local_invocation_index_1 : u32;
 

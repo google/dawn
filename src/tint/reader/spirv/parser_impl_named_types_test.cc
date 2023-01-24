@@ -89,9 +89,9 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
     %arr2 = OpTypeRuntimeArray %uint
   )"));
     EXPECT_TRUE(p->BuildAndParseInternalModule());
-    EXPECT_THAT(test::ToString(p->program()), HasSubstr(R"(type RTArr = @stride(8) array<u32>;
+    EXPECT_THAT(test::ToString(p->program()), HasSubstr(R"(alias RTArr = @stride(8) array<u32>;
 
-type RTArr_1 = @stride(8) array<u32>;
+alias RTArr_1 = @stride(8) array<u32>;
 )"));
 
     p->DeliberatelyInvalidSpirv();
@@ -135,9 +135,9 @@ TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
     %arr2 = OpTypeArray %uint %uint_5
   )"));
     EXPECT_TRUE(p->BuildAndParseInternalModule());
-    EXPECT_THAT(test::ToString(p->program()), HasSubstr(R"(type Arr = @stride(8) array<u32, 5u>;
+    EXPECT_THAT(test::ToString(p->program()), HasSubstr(R"(alias Arr = @stride(8) array<u32, 5u>;
 
-type Arr_1 = @stride(8) array<u32, 5u>;
+alias Arr_1 = @stride(8) array<u32, 5u>;
 )"));
 
     p->DeliberatelyInvalidSpirv();

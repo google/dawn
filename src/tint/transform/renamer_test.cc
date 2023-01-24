@@ -1673,7 +1673,7 @@ fn f() {
 )");
 
     auto expect = expand(R"(
-type tint_symbol = i32;
+alias tint_symbol = i32;
 
 @fragment
 fn tint_symbol_1() {

@@ -1,6 +1,6 @@
 // flags: --overrides wgsize=64
 override wgsize : i32;
-type Array = array<i32, wgsize * 2>;
+alias Array = array<i32, wgsize * 2>;
 var<workgroup> v : Array;
 
 fn foo() -> i32 {

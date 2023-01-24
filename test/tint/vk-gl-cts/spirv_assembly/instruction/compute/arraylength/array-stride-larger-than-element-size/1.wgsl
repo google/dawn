@@ -2,7 +2,7 @@ struct Buf1 {
   result : i32,
 }
 
-type RTArr = array<u32>;
+alias RTArr = array<u32>;
 
 struct Buf0 {
   values : RTArr,

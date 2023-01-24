@@ -1,8 +1,8 @@
-type Arr = array<u32, 1u>;
+alias Arr = array<u32, 1u>;
 
-type Arr_1 = array<Arr, 2u>;
+alias Arr_1 = array<Arr, 2u>;
 
-type Arr_2 = array<Arr_1, 3u>;
+alias Arr_2 = array<Arr_1, 3u>;
 
 var<private> local_invocation_index_1 : u32;
 

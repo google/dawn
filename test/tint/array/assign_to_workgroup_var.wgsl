@@ -1,4 +1,4 @@
-type ArrayType = array<vec4<i32>, 4>;
+alias ArrayType = array<vec4<i32>, 4>;
 
 struct S {
   arr : ArrayType,

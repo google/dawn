@@ -108,7 +108,7 @@ bool GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
         ty,
         [&](const ast::Alias* alias) {  //
             auto out = line();
-            out << "type " << program_->Symbols().NameFor(alias->name) << " = ";
+            out << "alias " << program_->Symbols().NameFor(alias->name) << " = ";
             if (!EmitType(out, alias->type)) {
                 return false;
             }

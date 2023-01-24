@@ -1,5 +1,5 @@
 var<private> A : array<T, 4>;
-type T = i32;
+alias T = i32;
 
 @fragment
 fn f() {

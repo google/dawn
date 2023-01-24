@@ -16,7 +16,7 @@ struct S {
   y : u32,
 }
 
-type Arr = array<S, 10u>;
+alias Arr = array<S, 10u>;
 
 var<private> local_invocation_index_1 : u32;
 

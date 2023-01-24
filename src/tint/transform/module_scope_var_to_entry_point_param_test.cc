@@ -621,7 +621,7 @@ struct tint_symbol_1 {
   arr : array<f32>,
 }
 
-type myarray = array<f32>;
+alias myarray = array<f32>;
 
 @compute @workgroup_size(1)
 fn main(@group(0) @binding(0) @internal(disable_validation__entry_point_parameter) @internal(disable_validation__ignore_address_space) tint_symbol : ptr<storage, tint_symbol_1>) {
@@ -656,7 +656,7 @@ fn main(@group(0) @binding(0) @internal(disable_validation__entry_point_paramete
   _ = (*(tint_symbol)).arr[0];
 }
 
-type myarray = array<f32>;
+alias myarray = array<f32>;
 )";
 
     auto got = Run<ModuleScopeVarToEntryPointParam>(src);

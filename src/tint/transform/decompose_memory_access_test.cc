@@ -3439,9 +3439,9 @@ struct S1 {
   c : i32,
 }
 
-type A1 = S1;
+alias A1 = S1;
 
-type A1_Array = array<S1, 3>;
+alias A1_Array = array<S1, 3>;
 
 struct S2 {
   a : i32,
@@ -3449,9 +3449,9 @@ struct S2 {
   c : i32,
 }
 
-type A2 = S2;
+alias A2 = S2;
 
-type A2_Array = array<S2>;
+alias A2_Array = array<S2>;
 
 struct SB {
   @size(128)
@@ -3537,9 +3537,9 @@ struct SB {
   b : A2_Array,
 }
 
-type A2_Array = array<S2>;
+alias A2_Array = array<S2>;
 
-type A2 = S2;
+alias A2 = S2;
 
 struct S2 {
   a : i32,
@@ -3547,9 +3547,9 @@ struct S2 {
   c : i32,
 }
 
-type A1 = S1;
+alias A1 = S1;
 
-type A1_Array = array<S1, 3>;
+alias A1_Array = array<S1, 3>;
 
 struct S1 {
   a : i32,

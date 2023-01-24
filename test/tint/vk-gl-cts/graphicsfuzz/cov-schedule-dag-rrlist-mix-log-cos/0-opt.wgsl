@@ -3,7 +3,7 @@ struct strided_arr {
   el : f32,
 }
 
-type Arr = array<strided_arr, 5u>;
+alias Arr = array<strided_arr, 5u>;
 
 struct buf0 {
   x_GLF_uniform_float_values : Arr,

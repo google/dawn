@@ -135,6 +135,8 @@ std::string_view Token::TypeToName(Type type) {
         case Token::Type::kShiftRightEqual:
             return ">>=";
 
+        case Token::Type::kAlias:
+            return "alias";
         case Token::Type::kArray:
             return "array";
         case Token::Type::kAtomic:

@@ -1,4 +1,4 @@
-type MyArray = array<f32, 10>;
+alias MyArray = array<f32, 10>;
 
 // Global consts
 const c1 = 1;

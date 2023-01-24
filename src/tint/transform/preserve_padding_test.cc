@@ -386,7 +386,7 @@ fn foo() {
     auto* expect = R"(
 enable chromium_experimental_full_ptr_parameters;
 
-type Array = array<array<vec3<u32>, 4>, 3>;
+alias Array = array<array<vec3<u32>, 4>, 3>;
 
 @group(0) @binding(0) var<storage, read_write> v : Array;
 

@@ -1,13 +1,13 @@
-type RTArr = array<f32>;
+alias RTArr = array<f32>;
 
-type RTArr_1 = array<f32>;
+alias RTArr_1 = array<f32>;
 
 struct ResultMatrix {
   /* @offset(0) */
   numbers : RTArr_1,
 }
 
-type RTArr_2 = array<f32>;
+alias RTArr_2 = array<f32>;
 
 struct FirstMatrix {
   /* @offset(0) */

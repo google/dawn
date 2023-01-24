@@ -1,4 +1,4 @@
-type Arr = array<i32, 6u>;
+alias Arr = array<i32, 6u>;
 
 struct sspp962805860buildInformationS {
   /* @offset(0) */

@@ -1,7 +1,7 @@
 // flags: --transform substitute_override
 
 override O = 123;
-type A = array<i32, O*2>;
+alias A = array<i32, O*2>;
 
 var<workgroup> W : A;
 

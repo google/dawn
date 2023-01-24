@@ -1,4 +1,4 @@
-type MyArray = array<f32, 10>;
+alias MyArray = array<f32, 10>;
 
 fn const_decls() {
   const v1 = 1;

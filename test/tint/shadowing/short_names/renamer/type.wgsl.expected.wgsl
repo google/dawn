@@ -2,9 +2,9 @@ struct tint_symbol {
   tint_symbol_1 : i32,
 }
 
-type tint_symbol_2 = f32;
+alias tint_symbol_2 = f32;
 
-type tint_symbol_3 = bool;
+alias tint_symbol_3 = bool;
 
 @vertex
 fn tint_symbol_4(@builtin(vertex_index) tint_symbol_5 : u32) -> @builtin(position) vec4<f32> {

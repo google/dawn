@@ -1,4 +1,4 @@
-type Arr = array<u32, 10u>;
+alias Arr = array<u32, 10u>;
 
 struct S_atomic {
   /* @offset(0) */

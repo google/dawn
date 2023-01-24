@@ -2,8 +2,8 @@
 
 // Evilness 😈. Don't go getting any ideas!
 struct vec4f { i : i32, }
-type vec2f = f32;
-type vec2i = bool;
+alias vec2f = f32;
+alias vec2i = bool;
 
 @vertex fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
     let s = vec4f(1);

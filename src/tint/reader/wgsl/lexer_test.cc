@@ -1057,7 +1057,8 @@ TEST_P(KeywordTest, Parses) {
 INSTANTIATE_TEST_SUITE_P(
     LexerTest,
     KeywordTest,
-    testing::Values(TokenData{"array", Token::Type::kArray},
+    testing::Values(TokenData{"alias", Token::Type::kAlias},
+                    TokenData{"array", Token::Type::kArray},
                     TokenData{"bitcast", Token::Type::kBitcast},
                     TokenData{"bool", Token::Type::kBool},
                     TokenData{"break", Token::Type::kBreak},

@@ -247,7 +247,7 @@ fn main() -> vec4<f32> {
 }
 )";
     auto* expect = R"(
-type Tex2d = texture_2d<f32>;
+alias Tex2d = texture_2d<f32>;
 
 @group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_sampler : sampler;
 
@@ -297,7 +297,7 @@ fn sample(t_s_1 : texture_2d<f32>, coords : vec2<f32>) -> vec4<f32> {
   return textureSample(t_s_1, placeholder_sampler, coords);
 }
 
-type Tex2d = texture_2d<f32>;
+alias Tex2d = texture_2d<f32>;
 )";
 
     DataMap data;

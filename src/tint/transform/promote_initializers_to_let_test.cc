@@ -1194,7 +1194,7 @@ struct S1 {
 
 TEST_F(PromoteInitializersToLetTest, NoChangeOnVarDecl) {
     auto* src = R"(
-type F = f32;
+alias F = f32;
 
 fn f() {
   var local_arr = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);
@@ -1222,7 +1222,7 @@ fn f() {
 
 const module_str : F = F(2.0);
 
-type F = f32;
+alias F = f32;
 
 const module_arr : array<f32, 4u> = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);
 )";

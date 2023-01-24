@@ -1,4 +1,4 @@
-type Arr = array<u32, 50>;
+alias Arr = array<u32, 50>;
 
 struct Buf{
   count : u32,

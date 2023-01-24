@@ -533,7 +533,7 @@ struct strided_arr {
   el : f32,
 }
 
-type ARR = array<strided_arr, 4u>;
+alias ARR = array<strided_arr, 4u>;
 
 struct S {
   a : ARR,
@@ -626,14 +626,14 @@ struct strided_arr {
   el : f32,
 }
 
-type ARR_A = array<strided_arr, 2u>;
+alias ARR_A = array<strided_arr, 2u>;
 
 struct strided_arr_1 {
   @size(128)
   el : array<ARR_A, 3u>,
 }
 
-type ARR_B = array<strided_arr_1, 4u>;
+alias ARR_B = array<strided_arr_1, 4u>;
 
 struct S {
   a : ARR_B,

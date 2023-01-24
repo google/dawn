@@ -145,6 +145,8 @@ class Token {
         /// A '<<='
         kShiftLeftEqual,
 
+        /// A 'alias'
+        kAlias,
         /// A 'array'
         kArray,
         /// A 'atomic'

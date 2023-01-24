@@ -52,8 +52,13 @@ fn f() { return 1 & >; }
 }
 
 TEST_F(ParserImplErrorTest, AliasDeclInvalidAttribute) {
-    EXPECT("@invariant type e=u32;",
-           R"(test.wgsl:1:2 error: unexpected attributes
+    EXPECT(
+        "@invariant type e=u32;",
+        R"(test.wgsl:1:12 warning: use of deprecated language feature: 'type' has been renamed to 'alias'
+@invariant type e=u32;
+           ^^^^
+
+test.wgsl:1:2 error: unexpected attributes
 @invariant type e=u32;
  ^^^^^^^^^
 )");
@@ -745,29 +750,80 @@ struct S { @size(if) i : i32, };
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingIdentifier) {
-    EXPECT("type 1 = f32;",
-           R"(test.wgsl:1:6 error: expected identifier for type alias
-type 1 = f32;
-     ^
+    EXPECT("alias 1 = f32;",
+           R"(test.wgsl:1:7 error: expected identifier for type alias
+alias 1 = f32;
+      ^
 )");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasInvalidType) {
-    EXPECT("type meow = 1;", R"(test.wgsl:1:13 error: invalid type alias
+    EXPECT("alias meow = 1;", R"(test.wgsl:1:14 error: invalid type alias
+alias meow = 1;
+             ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingAssignment) {
+    EXPECT("alias meow f32", R"(test.wgsl:1:12 error: expected '=' for type alias
+alias meow f32
+           ^^^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingSemicolon) {
+    EXPECT("alias meow = f32", R"(test.wgsl:1:17 error: expected ';' for type alias
+alias meow = f32
+                ^
+)");
+}
+
+// TODO(crbug.com/tint/1812): DEPRECATED
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclTypeAliasMissingIdentifier) {
+    EXPECT("alias 1 = f32;",
+           R"(test.wgsl:1:7 error: expected identifier for type alias
+alias 1 = f32;
+      ^
+)");
+}
+
+// TODO(crbug.com/tint/1812): DEPRECATED
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclTypeAliasInvalidType) {
+    EXPECT(
+        "type meow = 1;",
+        R"(test.wgsl:1:1 warning: use of deprecated language feature: 'type' has been renamed to 'alias'
+type meow = 1;
+^^^^
+
+test.wgsl:1:13 error: invalid type alias
 type meow = 1;
             ^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingAssignment) {
-    EXPECT("type meow f32", R"(test.wgsl:1:11 error: expected '=' for type alias
+// TODO(crbug.com/tint/1812): DEPRECATED
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclTypeAliasMissingAssignment) {
+    EXPECT(
+        "type meow f32",
+        R"(test.wgsl:1:1 warning: use of deprecated language feature: 'type' has been renamed to 'alias'
+type meow f32
+^^^^
+
+test.wgsl:1:11 error: expected '=' for type alias
 type meow f32
           ^^^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingSemicolon) {
-    EXPECT("type meow = f32", R"(test.wgsl:1:16 error: expected ';' for type alias
+// TODO(crbug.com/tint/1812): DEPRECATED
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclTypeAliasMissingSemicolon) {
+    EXPECT(
+        "type meow = f32",
+        R"(test.wgsl:1:1 warning: use of deprecated language feature: 'type' has been renamed to 'alias'
+type meow = f32
+^^^^
+
+test.wgsl:1:16 error: expected ';' for type alias
 type meow = f32
                ^
 )");

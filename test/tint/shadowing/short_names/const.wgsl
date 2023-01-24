@@ -1,4 +1,4 @@
-type a = vec3f;
+alias a = vec3f;
 
 fn f() {
   {
