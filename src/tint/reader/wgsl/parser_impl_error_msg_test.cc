@@ -120,9 +120,8 @@ fn f() { a = >; }
 }
 
 TEST_F(ParserImplErrorTest, BitcastExprMissingLessThan) {
-    EXPECT(
-        "fn f() { x = bitcast(y); }",
-        R"(test.wgsl:1:21 error: expected '< (opening template argument list)' for bitcast expression
+    EXPECT("fn f() { x = bitcast(y); }",
+           R"(test.wgsl:1:21 error: expected '<' for bitcast expression
 fn f() { x = bitcast(y); }
                     ^
 )");
@@ -660,9 +659,8 @@ TEST_F(ParserImplErrorTest, GlobalDeclInvalidAttribute) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingLessThan) {
-    EXPECT(
-        "var x : texture_1d;",
-        R"(test.wgsl:1:19 error: expected '< (opening template argument list)' for sampled texture type
+    EXPECT("var x : texture_1d;",
+           R"(test.wgsl:1:19 error: expected '<' for sampled texture type
 var x : texture_1d;
                   ^
 )");
@@ -685,9 +683,8 @@ var x : texture_1d<1>;
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureMissingLessThan) {
-    EXPECT(
-        "var x : texture_multisampled_2d;",
-        R"(test.wgsl:1:32 error: expected '< (opening template argument list)' for multisampled texture type
+    EXPECT("var x : texture_multisampled_2d;",
+           R"(test.wgsl:1:32 error: expected '<' for multisampled texture type
 var x : texture_multisampled_2d;
                                ^
 )");
@@ -833,9 +830,8 @@ static_assert true static_assert true;
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingLessThan) {
-    EXPECT(
-        "var x : texture_storage_2d;",
-        R"(test.wgsl:1:27 error: expected '< (opening template argument list)' for storage texture type
+    EXPECT("var x : texture_storage_2d;",
+           R"(test.wgsl:1:27 error: expected '<' for storage texture type
 var x : texture_storage_2d;
                           ^
 )");
@@ -1200,9 +1196,8 @@ var i : i32
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingLessThan) {
-    EXPECT(
-        "var i : ptr;",
-        R"(test.wgsl:1:12 error: expected '< (opening template argument list)' for ptr declaration
+    EXPECT("var i : ptr;",
+           R"(test.wgsl:1:12 error: expected '<' for ptr declaration
 var i : ptr;
            ^
 )");
@@ -1242,9 +1237,8 @@ var i : ptr<private, 1>;
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarAtomicMissingLessThan) {
-    EXPECT(
-        "var i : atomic;",
-        R"(test.wgsl:1:15 error: expected '< (opening template argument list)' for atomic declaration
+    EXPECT("var i : atomic;",
+           R"(test.wgsl:1:15 error: expected '<' for atomic declaration
 var i : atomic;
               ^
 )");
