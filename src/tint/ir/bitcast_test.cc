@@ -53,11 +53,11 @@ TEST_F(IR_InstructionTest, Bitcast_Usage) {
         b.builder.Bitcast(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i));
 
     ASSERT_NE(instr->Result(), nullptr);
-    ASSERT_EQ(instr->Result()->Usage().Length(), 1);
+    ASSERT_EQ(instr->Result()->Usage().Length(), 1u);
     EXPECT_EQ(instr->Result()->Usage()[0], instr);
 
     ASSERT_NE(instr->Val(), nullptr);
-    ASSERT_EQ(instr->Val()->Usage().Length(), 1);
+    ASSERT_EQ(instr->Val()->Usage().Length(), 1u);
     EXPECT_EQ(instr->Val()->Usage()[0], instr);
 }
 

@@ -66,10 +66,10 @@ inline constexpr uint32_t Log2(uint64_t value) {
 #endif
 
     // Non intrinsic (slow) path. Supports constexpr evaluation.
-    for (size_t clz = 0; clz < 64; clz++) {
-        size_t bit = 63 - clz;
-        if (value & (static_cast<size_t>(1u) << bit)) {
-            return bit;
+    for (uint64_t clz = 0; clz < 64; clz++) {
+        uint64_t bit = 63 - clz;
+        if (value & (static_cast<uint64_t>(1u) << bit)) {
+            return static_cast<uint32_t>(bit);
         }
     }
     return 64;

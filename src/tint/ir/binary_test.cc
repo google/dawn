@@ -521,15 +521,15 @@ TEST_F(IR_InstructionTest, Binary_Usage) {
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kAnd);
 
     ASSERT_NE(instr->Result(), nullptr);
-    ASSERT_EQ(instr->Result()->Usage().Length(), 1);
+    ASSERT_EQ(instr->Result()->Usage().Length(), 1u);
     EXPECT_EQ(instr->Result()->Usage()[0], instr);
 
     ASSERT_NE(instr->LHS(), nullptr);
-    ASSERT_EQ(instr->LHS()->Usage().Length(), 1);
+    ASSERT_EQ(instr->LHS()->Usage().Length(), 1u);
     EXPECT_EQ(instr->LHS()->Usage()[0], instr);
 
     ASSERT_NE(instr->RHS(), nullptr);
-    ASSERT_EQ(instr->RHS()->Usage().Length(), 1);
+    ASSERT_EQ(instr->RHS()->Usage().Length(), 1u);
     EXPECT_EQ(instr->RHS()->Usage()[0], instr);
 }
 
@@ -544,13 +544,13 @@ TEST_F(IR_InstructionTest, Binary_Usage_DuplicateValue) {
     EXPECT_EQ(instr->GetKind(), Binary::Kind::kAnd);
 
     ASSERT_NE(instr->Result(), nullptr);
-    ASSERT_EQ(instr->Result()->Usage().Length(), 1);
+    ASSERT_EQ(instr->Result()->Usage().Length(), 1u);
     EXPECT_EQ(instr->Result()->Usage()[0], instr);
 
     ASSERT_EQ(instr->LHS(), instr->RHS());
 
     ASSERT_NE(instr->LHS(), nullptr);
-    ASSERT_EQ(instr->LHS()->Usage().Length(), 1);
+    ASSERT_EQ(instr->LHS()->Usage().Length(), 1u);
     EXPECT_EQ(instr->LHS()->Usage()[0], instr);
 }
 
