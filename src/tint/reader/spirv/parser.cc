@@ -27,7 +27,7 @@
 
 namespace tint::reader::spirv {
 
-Program Parse(const std::vector<uint32_t>& input) {
+Program Parse(const std::vector<uint32_t>& input, const Options& options) {
     ParserImpl parser(input);
     bool parsed = parser.Parse();
 
@@ -36,6 +36,13 @@ Program Parse(const std::vector<uint32_t>& input) {
         // TODO(bclayton): Migrate spirv::ParserImpl to using diagnostics.
         builder.Diagnostics().add_error(diag::System::Reader, parser.error());
         return Program(std::move(builder));
+    }
+
+    if (options.allow_non_uniform_derivatives) {
+        // Suppress errors regarding non-uniform derivative operations if requested, by adding a
+        // diagnostic directive to the module.
+        builder.DiagnosticDirective(ast::DiagnosticSeverity::kOff,
+                                    builder.Expr("derivative_uniformity"));
     }
 
     // The SPIR-V parser can construct disjoint AST nodes, which is invalid for

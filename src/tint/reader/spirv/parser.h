@@ -21,13 +21,20 @@
 
 namespace tint::reader::spirv {
 
+/// Options that control how the SPIR-V parser should behave.
+struct Options {
+    /// Set to `true` to allow calls to derivative builtins in non-uniform control flow.
+    bool allow_non_uniform_derivatives = false;
+};
+
 /// Parses the SPIR-V source data, returning the parsed program.
 /// If the source data fails to parse then the returned
 /// `program.Diagnostics.contains_errors()` will be true, and the
 /// `program.Diagnostics()` will describe the error.
 /// @param input the source data
+/// @param options the parser options
 /// @returns the parsed program
-Program Parse(const std::vector<uint32_t>& input);
+Program Parse(const std::vector<uint32_t>& input, const Options& options = {});
 
 }  // namespace tint::reader::spirv
 

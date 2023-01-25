@@ -103,6 +103,10 @@ struct Options {
 
     bool rename_all = false;
 
+#if TINT_BUILD_SPV_READER
+    tint::reader::spirv::Options spirv_reader_options;
+#endif
+
     std::vector<std::string> transforms;
 
     std::string fxc_path;
@@ -135,6 +139,9 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
   --transform <name list>   -- Runs transforms, name list is comma separated
                                Available transforms:
 ${transforms} --parse-only              -- Stop after parsing the input
+  --allow-non-uniform-derivatives  -- When using SPIR-V input, allow non-uniform derivatives by
+                               inserting a module-scope directive to suppress any uniformity
+                               violations that may be produced.
   --disable-workgroup-init  -- Disable workgroup memory zero initialization.
   --demangle                -- Preserve original source names. Demangle them.
                                Affects AST dumping, and text-based output languages.
@@ -443,6 +450,13 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
             opts->transforms = split_on_comma(args[i]);
         } else if (arg == "--parse-only") {
             opts->parse_only = true;
+        } else if (arg == "--allow-non-uniform-derivatives") {
+#if TINT_BUILD_SPV_READER
+            opts->spirv_reader_options.allow_non_uniform_derivatives = true;
+#else
+            std::cerr << "Tint not built with the SPIR-V reader enabled" << std::endl;
+            return false;
+#endif
         } else if (arg == "--disable-workgroup-init") {
             opts->disable_workgroup_init = true;
         } else if (arg == "--demangle") {
@@ -1285,7 +1299,8 @@ int main(int argc, const char** argv) {
             if (!ReadFile<uint32_t>(options.input_filename, &data)) {
                 return 1;
             }
-            program = std::make_unique<tint::Program>(tint::reader::spirv::Parse(data));
+            program = std::make_unique<tint::Program>(
+                tint::reader::spirv::Parse(data, options.spirv_reader_options));
             break;
 #else
             std::cerr << "Tint not built with the SPIR-V reader enabled" << std::endl;
@@ -1309,7 +1324,8 @@ int main(int argc, const char** argv) {
                                 SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS)) {
                 return 1;
             }
-            program = std::make_unique<tint::Program>(tint::reader::spirv::Parse(data));
+            program = std::make_unique<tint::Program>(
+                tint::reader::spirv::Parse(data, options.spirv_reader_options));
             break;
 #else
             std::cerr << "Tint not built with the SPIR-V reader enabled" << std::endl;
