@@ -199,6 +199,8 @@ libtint_source_set("libtint_base_src") {
     "number.h",
     "program_id.cc",
     "program_id.h",
+    "reflection.h",
+    "scope_stack.h",
     "source.cc",
     "source.h",
     "symbol.cc",
@@ -434,7 +436,6 @@ libtint_source_set("libtint_core_all_src") {
     "program.h",
     "program_builder.cc",
     "program_builder.h",
-    "reflection.h",
     "resolver/const_eval.cc",
     "resolver/const_eval.h",
     "resolver/dependency_graph.cc",
@@ -452,7 +453,6 @@ libtint_source_set("libtint_core_all_src") {
     "resolver/uniformity.h",
     "resolver/validator.cc",
     "resolver/validator.h",
-    "scope_stack.h",
     "sem/array_count.h",
     "sem/behavior.h",
     "sem/binding_point.h",
@@ -481,7 +481,6 @@ libtint_source_set("libtint_core_all_src") {
     "sem/type_initializer.h",
     "sem/type_mappings.h",
     "sem/while_statement.h",
-    "tint.cc",
   ]
 
   deps = [
@@ -490,6 +489,10 @@ libtint_source_set("libtint_core_all_src") {
     ":libtint_text_src",
     ":libtint_type_src",
   ]
+}
+
+libtint_source_set("libtint_initializer_src") {
+  sources = [ "tint.cc" ]
 }
 
 libtint_source_set("libtint_inspector_src") {
@@ -800,6 +803,7 @@ libtint_source_set("libtint_core_src") {
     ":libtint_base_src",
     ":libtint_constant_src",
     ":libtint_core_all_src",
+    ":libtint_initializer_src",
     ":libtint_inspector_src",
     ":libtint_sem_src",
     ":libtint_text_src",
@@ -1861,6 +1865,8 @@ if (tint_build_unittests) {
       "castable_test.cc",
       "debug_test.cc",
       "number_test.cc",
+      "reflection_test.cc",
+      "scope_stack_test.cc",
       "source_test.cc",
       "symbol_table_test.cc",
       "symbol_test.cc",
@@ -1875,8 +1881,6 @@ if (tint_build_unittests) {
       "demangler_test.cc",
       "program_builder_test.cc",
       "program_test.cc",
-      "reflection_test.cc",
-      "scope_stack_test.cc",
     ]
 
     deps = [
