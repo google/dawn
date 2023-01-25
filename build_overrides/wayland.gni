@@ -15,5 +15,4 @@
 import("//build/config/ozone.gni")
 
 # Dawn has no wayland third-party dir
-use_system_libwayland = true
 wayland_gn_dir = ""
