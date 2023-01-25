@@ -307,7 +307,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Ptr_BadAddressSpace) {
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
     ASSERT_EQ(p->error(),
-              R"(1:5: expected address space for ptr declaration. Did you mean 'uniform'?
+              R"(1:5: expected address space for ptr declaration
+Did you mean 'uniform'?
 Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup')");
 }
 

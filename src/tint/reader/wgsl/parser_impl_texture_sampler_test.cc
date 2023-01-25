@@ -230,7 +230,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidTypeSuggest) {
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(t.errored);
     EXPECT_EQ(p->error(),
-              R"(1:20: expected texel format for storage texture type. Did you mean 'rg32float'?
+              R"(1:20: expected texel format for storage texture type
+Did you mean 'rg32float'?
 Possible values: 'bgra8unorm', 'r32float', 'r32sint', 'r32uint', 'rg32float', 'rg32sint', 'rg32uint', 'rgba16float', 'rgba16sint', 'rgba16uint', 'rgba32float', 'rgba32sint', 'rgba32uint', 'rgba8sint', 'rgba8snorm', 'rgba8uint', 'rgba8unorm')");
 }
 
@@ -241,7 +242,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidAccess) {
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(t.errored);
     EXPECT_EQ(p->error(),
-              R"(1:30: expected access control for storage texture type. Did you mean 'read'?
+              R"(1:30: expected access control for storage texture type
+Did you mean 'read'?
 Possible values: 'read', 'read_write', 'write')");
 }
 

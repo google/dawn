@@ -323,7 +323,8 @@ TEST_F(ParserImplTest, Attribute_Builtin_InvalidValueSuggest) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), R"(1:9: expected builtin. Did you mean 'front_facing'?
+    EXPECT_EQ(p->error(), R"(1:9: expected builtin
+Did you mean 'front_facing'?
 Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id')");
 }
 
@@ -494,7 +495,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_InvalidSecondValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), R"(1:26: expected interpolation sampling. Did you mean 'sample'?
+    EXPECT_EQ(p->error(), R"(1:26: expected interpolation sampling
+Did you mean 'sample'?
 Possible values: 'center', 'centroid', 'sample')");
 }
 

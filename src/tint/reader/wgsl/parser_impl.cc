@@ -1240,40 +1240,15 @@ Expect<ENUM> ParserImpl::expect_enum(std::string_view name,
     }
 
     /// Create a sensible error message
-    std::stringstream err;
+    std::ostringstream err;
     err << "expected " << name;
 
     if (!use.empty()) {
         err << " for " << use;
     }
+    err << "\n";
 
-    // If the string typed was within kSuggestionDistance of one of the possible enum values,
-    // suggest that. Don't bother with suggestions if the string was extremely long.
-    constexpr size_t kSuggestionDistance = 5;
-    constexpr size_t kSuggestionMaxLength = 64;
-    if (auto got = t.to_str(); !got.empty() && got.size() < kSuggestionMaxLength) {
-        size_t candidate_dist = kSuggestionDistance;
-        const char* candidate = nullptr;
-        for (auto* str : strings) {
-            auto dist = utils::Distance(str, got);
-            if (dist < candidate_dist) {
-                candidate = str;
-                candidate_dist = dist;
-            }
-        }
-        if (candidate) {
-            err << ". Did you mean '" << candidate << "'?";
-        }
-    }
-
-    // List all the possible enumerator values
-    err << "\nPossible values: ";
-    for (auto* str : strings) {
-        if (str != strings[0]) {
-            err << ", ";
-        }
-        err << "'" << str << "'";
-    }
+    utils::SuggestAlternatives(t.to_str(), strings, err);
 
     synchronized_ = false;
     return add_error(t.source(), err.str());

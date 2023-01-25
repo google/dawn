@@ -69,7 +69,8 @@ TEST_F(ParserImplTest, AttributeList_InvalidValueSuggest) {
     EXPECT_TRUE(attrs.errored);
     EXPECT_FALSE(attrs.matched);
     EXPECT_TRUE(attrs.value.IsEmpty());
-    EXPECT_EQ(p->error(), R"(1:10: expected builtin. Did you mean 'instance_index'?
+    EXPECT_EQ(p->error(), R"(1:10: expected builtin
+Did you mean 'instance_index'?
 Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id')");
 }
 }  // namespace

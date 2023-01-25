@@ -106,7 +106,8 @@ TEST_F(ParserImplTest, VariableDecl_InvalidAddressSpace) {
     EXPECT_TRUE(v.errored);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(),
-              R"(1:5: expected address space for variable declaration. Did you mean 'uniform'?
+              R"(1:5: expected address space for variable declaration
+Did you mean 'uniform'?
 Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup')");
 }
 
