@@ -203,7 +203,7 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* commandCon
     Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
     commandContext->TrackHeapUsage(heap, GetDevice()->GetPendingCommandSerial());
 
-    SetLastUsageSerial(GetDevice()->GetPendingCommandSerial());
+    MarkUsedInPendingCommands();
 
     // Resources in upload and readback heaps must be kept in the COPY_SOURCE/DEST state
     if (mFixedResourceState) {

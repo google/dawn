@@ -600,7 +600,7 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionAndThenMap) {
 
     // 2.
     buffer.MapAsync(
-        wgpu::MapMode::Write, 0, 4,
+        wgpu::MapMode::Write, 0, wgpu::kWholeMapSize,
         [](WGPUBufferMapAsyncStatus status, void* userdata) {
             EXPECT_EQ(status, WGPUBufferMapAsyncStatus_Success);
             auto& done = *static_cast<std::vector<bool>*>(userdata);
@@ -637,7 +637,7 @@ TEST_P(BufferMappingCallbackTests, UseTheBufferAndThenMap) {
 
     // 2.
     buffer.MapAsync(
-        wgpu::MapMode::Write, 0, 4,
+        wgpu::MapMode::Write, 0, wgpu::kWholeMapSize,
         [](WGPUBufferMapAsyncStatus status, void* userdata) {
             EXPECT_EQ(status, WGPUBufferMapAsyncStatus_Success);
             auto& done = *static_cast<std::vector<bool>*>(userdata);
@@ -679,7 +679,7 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
 
     // 2.
     buffer.MapAsync(
-        wgpu::MapMode::Read, 0, 4,
+        wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
         [](WGPUBufferMapAsyncStatus status, void* userdata) {
             EXPECT_EQ(status, WGPUBufferMapAsyncStatus_Success);
             auto& done = *static_cast<std::vector<bool>*>(userdata);
@@ -695,9 +695,7 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
     buffer.Unmap();
 }
 
-// MapAsync() will record pipeline barrier in pending command buffer with Vulkan.
-// TODO(penghuang): enable this test for Vulkan.
-DAWN_INSTANTIATE_TEST(BufferMappingCallbackTests, D3D12Backend(), MetalBackend());
+DAWN_INSTANTIATE_TEST(BufferMappingCallbackTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 class BufferMappedAtCreationTests : public DawnTest {
   protected:

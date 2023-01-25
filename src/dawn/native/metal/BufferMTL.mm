@@ -179,7 +179,7 @@ void Buffer::DestroyImpl() {
 }
 
 void Buffer::TrackUsage() {
-    SetLastUsageSerial(GetDevice()->GetPendingCommandSerial());
+    MarkUsedInPendingCommands();
 }
 
 bool Buffer::EnsureDataInitialized(CommandRecordingContext* commandContext) {

@@ -318,6 +318,12 @@ MaybeError Device::SubmitPendingCommands() {
         return {};
     }
 
+    if (!mRecordingContext.mappableBuffersForEagerTransition.empty()) {
+        // Transition mappable buffers back to map usages with the submit.
+        Buffer::TransitionMappableBuffersEagerly(
+            fn, &mRecordingContext, std::move(mRecordingContext.mappableBuffersForEagerTransition));
+    }
+
     ScopedSignalSemaphore scopedSignalSemaphore(this, VK_NULL_HANDLE);
     if (mRecordingContext.externalTexturesForEagerTransition.size() > 0) {
         // Create an external semaphore for all external textures that have been used in the pending

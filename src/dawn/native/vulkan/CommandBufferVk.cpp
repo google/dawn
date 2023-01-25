@@ -167,8 +167,8 @@ void TransitionAndClearForSyncScope(Device* device,
         buffer->EnsureDataInitialized(recordingContext);
 
         VkBufferMemoryBarrier bufferBarrier;
-        if (buffer->TrackUsageAndGetResourceBarrier(scope.bufferUsages[i], &bufferBarrier,
-                                                    &srcStages, &dstStages)) {
+        if (buffer->TrackUsageAndGetResourceBarrier(recordingContext, scope.bufferUsages[i],
+                                                    &bufferBarrier, &srcStages, &dstStages)) {
             bufferBarriers.push_back(bufferBarrier);
         }
     }

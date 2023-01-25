@@ -48,6 +48,10 @@ struct CommandRecordingContext {
     // kept alive by the CommandBuffer so they don't need to be Ref-ed.
     std::set<Texture*> externalTexturesForEagerTransition;
 
+    // Mappable buffers which will be eagerly transitioned to usage MapRead or MapWrite after
+    // VkSubmit.
+    std::set<Buffer*> mappableBuffersForEagerTransition;
+
     // For Device state tracking only.
     VkCommandPool commandPool = VK_NULL_HANDLE;
     bool needsSubmit = false;

@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_BUFFERVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_BUFFERVK_H_
 
+#include <set>
+
 #include "dawn/native/Buffer.h"
 
 #include "dawn/common/SerialQueue.h"
@@ -25,6 +27,7 @@ namespace dawn::native::vulkan {
 
 struct CommandRecordingContext;
 class Device;
+struct VulkanFunctions;
 
 class Buffer final : public BufferBase {
   public:
@@ -36,7 +39,8 @@ class Buffer final : public BufferBase {
     // `commands`.
     // TODO(crbug.com/dawn/851): coalesce barriers and do them early when possible.
     void TransitionUsageNow(CommandRecordingContext* recordingContext, wgpu::BufferUsage usage);
-    bool TrackUsageAndGetResourceBarrier(wgpu::BufferUsage usage,
+    bool TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingContext,
+                                         wgpu::BufferUsage usage,
                                          VkBufferMemoryBarrier* barrier,
                                          VkPipelineStageFlags* srcStages,
                                          VkPipelineStageFlags* dstStages);
@@ -51,6 +55,10 @@ class Buffer final : public BufferBase {
 
     // Dawn API
     void SetLabelImpl() override;
+
+    static void TransitionMappableBuffersEagerly(const VulkanFunctions& fn,
+                                                 CommandRecordingContext* recordingContext,
+                                                 std::set<Buffer*> buffers);
 
   private:
     ~Buffer() override;

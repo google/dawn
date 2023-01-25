@@ -665,7 +665,8 @@ void BufferBase::SetIsDataInitialized() {
     mIsDataInitialized = true;
 }
 
-void BufferBase::SetLastUsageSerial(ExecutionSerial serial) {
+void BufferBase::MarkUsedInPendingCommands() {
+    ExecutionSerial serial = GetDevice()->GetPendingCommandSerial();
     ASSERT(serial >= mLastUsageSerial);
     mLastUsageSerial = serial;
 }
