@@ -542,10 +542,10 @@ fn foo_discard(@location(0) in : f32, @location(1) coord : vec2<f32>) {
 
 @fragment
 fn foo_no_discard(@location(0) in : f32, @location(1) coord : vec2<f32>) {
+  let ret = bar_no_discard(in, coord);
   if (in == 0.0) {
     return;
   }
-  let ret = bar_no_discard(in, coord);
   v2 = ret;
 }
 )";
@@ -591,10 +591,10 @@ fn foo_discard(@location(0) in : f32, @location(1) coord : vec2<f32>) {
 
 @fragment
 fn foo_no_discard(@location(0) in : f32, @location(1) coord : vec2<f32>) {
+  let ret = bar_no_discard(in, coord);
   if ((in == 0.0)) {
     return;
   }
-  let ret = bar_no_discard(in, coord);
   v2 = ret;
 }
 )";
@@ -992,8 +992,9 @@ fn foo(@location(0) in : f32, @location(1) coord : vec2<f32>) -> @location(0) i3
   }
   var result = 0;
   for (var i = 0; i < 10; i = atomicAdd(&a, 1)) {
-    result += i32(textureSample(t, s, coord).x);
+    result += i;
   }
+  result += i32(textureSample(t, s, coord).x);
   return result;
 }
 )";
@@ -1020,7 +1021,7 @@ fn foo(@location(0) in : f32, @location(1) coord : vec2<f32>) -> @location(0) i3
         break;
       }
       {
-        result += i32(textureSample(t, s, coord).x);
+        result += i;
       }
 
       continuing {
@@ -1032,6 +1033,7 @@ fn foo(@location(0) in : f32, @location(1) coord : vec2<f32>) -> @location(0) i3
       }
     }
   }
+  result += i32(textureSample(t, s, coord).x);
   if (tint_discarded) {
     discard;
   }
@@ -1060,8 +1062,9 @@ fn foo(@location(0) in : f32, @location(1) coord : vec2<f32>) -> @location(0) i3
   var result = 0;
   if (!atomicCompareExchangeWeak(&a, i32(in), 42).exchanged) {
     let xchg = atomicCompareExchangeWeak(&a, i32(in), 42);
-    result = i32(textureSample(t, s, coord).x) * xchg.old_value;
+    result = xchg.old_value;
   }
+  result += i32(textureSample(t, s, coord).x);
   return result;
 }
 )";
@@ -1100,8 +1103,9 @@ fn foo(@location(0) in : f32, @location(1) coord : vec2<f32>) -> @location(0) i3
       tint_symbol_3.exchanged = tint_symbol_4.exchanged;
     }
     let xchg = tint_symbol_3;
-    result = (i32(textureSample(t, s, coord).x) * xchg.old_value);
+    result = xchg.old_value;
   }
+  result += i32(textureSample(t, s, coord).x);
   if (tint_discarded) {
     discard;
   }

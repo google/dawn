@@ -64,8 +64,7 @@ TEST_F(ParserTest, AllowNonUniformDerivatives_False) {
     options.allow_non_uniform_derivatives = false;
     auto program = Parse(spv, options);
     auto errs = diag::Formatter().format(program.Diagnostics());
-    // TODO(jrprice): This will become EXPECT_FALSE.
-    EXPECT_TRUE(program.IsValid()) << errs;
+    EXPECT_FALSE(program.IsValid()) << errs;
     EXPECT_THAT(errs, ::testing::HasSubstr("'dpdx' must only be called from uniform control flow"));
 }
 
