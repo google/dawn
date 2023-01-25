@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "src/tint/ast/diagnostic_control.h"
 #include "src/tint/ast/node.h"
 #include "src/tint/debug.h"
 #include "src/tint/sem/node.h"
@@ -143,6 +144,13 @@ class Info {
         }
         return &referenced_overrides_.at(from);
     }
+
+    /// Determines the severity of a filterable diagnostic rule for the AST node `ast_node`.
+    /// @param ast_node the AST node
+    /// @param rule the diagnostic rule
+    /// @returns the severity of the rule for that AST node
+    ast::DiagnosticSeverity DiagnosticSeverity(const ast::Node* ast_node,
+                                               ast::DiagnosticRule rule) const;
 
   private:
     // AST node index to semantic node

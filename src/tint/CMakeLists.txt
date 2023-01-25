@@ -961,6 +961,7 @@ if(TINT_BUILD_TESTS)
     resolver/variable_validation_test.cc
     scope_stack_test.cc
     sem/builtin_test.cc
+    sem/diagnostic_severity_test.cc
     sem/expression_test.cc
     sem/struct_test.cc
     source_test.cc

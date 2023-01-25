@@ -25,6 +25,7 @@
 
 #include <ostream>
 #include <string>
+#include <unordered_map>
 
 #include "src/tint/ast/node.h"
 
@@ -83,6 +84,9 @@ constexpr const char* kDiagnosticRuleStrings[] = {
 
 /// Convert a DiagnosticSeverity to the corresponding diag::Severity.
 diag::Severity ToSeverity(DiagnosticSeverity sc);
+
+/// DiagnosticRuleSeverities is a map from diagnostic rule to diagnostic severity.
+using DiagnosticRuleSeverities = std::unordered_map<DiagnosticRule, DiagnosticSeverity>;
 
 /// A diagnostic control used for diagnostic directives and attributes.
 class DiagnosticControl : public Castable<DiagnosticControl, Node> {

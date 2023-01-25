@@ -136,9 +136,11 @@ bool Resolver::Resolve() {
         return false;
     }
 
-    // Create the semantic module
-    builder_->Sem().SetModule(builder_->create<sem::Module>(
-        std::move(dependencies_.ordered_globals), std::move(enabled_extensions_)));
+    // Create the semantic module.
+    auto* mod = builder_->create<sem::Module>(std::move(dependencies_.ordered_globals),
+                                              std::move(enabled_extensions_));
+    ApplyDiagnosticSeverities(mod);
+    builder_->Sem().SetModule(mod);
 
     return result;
 }
@@ -1073,6 +1075,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
 
     auto* func =
         builder_->create<sem::Function>(decl, return_type, return_location, std::move(parameters));
+    ApplyDiagnosticSeverities(func);
     builder_->Sem().Add(decl, func);
 
     TINT_SCOPED_ASSIGNMENT(current_function_, func);
@@ -3876,6 +3879,13 @@ bool Resolver::Mark(const ast::Node* node) {
                                      << "At: " << node->source << "\n"
                                      << "Pointer: " << node;
     return false;
+}
+
+template <typename NODE>
+void Resolver::ApplyDiagnosticSeverities(NODE* node) {
+    for (auto itr : validator_.DiagnosticFilters().Top()) {
+        node->SetDiagnosticSeverity(itr.key, itr.value);
+    }
 }
 
 void Resolver::AddError(const std::string& msg, const Source& source) const {

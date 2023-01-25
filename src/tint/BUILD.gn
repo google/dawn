@@ -1335,6 +1335,7 @@ if (tint_build_unittests) {
   tint_unittests_source_set("tint_unittests_sem_src") {
     sources = [
       "sem/builtin_test.cc",
+      "sem/diagnostic_severity_test.cc",
       "sem/expression_test.cc",
       "sem/struct_test.cc",
     ]

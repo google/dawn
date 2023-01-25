@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/ast/diagnostic_control.h"
 #include "src/tint/ast/variable.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/utils/unique_vector.h"
@@ -256,6 +257,18 @@ class Function final : public Castable<Function, CallTarget> {
     /// @return the location for the return, if provided
     std::optional<uint32_t> ReturnLocation() const { return return_location_; }
 
+    /// Modifies the severity of a specific diagnostic rule for this function.
+    /// @param rule the diagnostic rule
+    /// @param severity the new diagnostic severity
+    void SetDiagnosticSeverity(ast::DiagnosticRule rule, ast::DiagnosticSeverity severity) {
+        diagnostic_severities_[rule] = severity;
+    }
+
+    /// @returns the diagnostic severity modifications applied to this function
+    const ast::DiagnosticRuleSeverities& DiagnosticSeverities() const {
+        return diagnostic_severities_;
+    }
+
   private:
     Function(const Function&) = delete;
     Function(Function&&) = delete;
@@ -276,6 +289,7 @@ class Function final : public Castable<Function, CallTarget> {
     std::vector<const Function*> ancestor_entry_points_;
     const Statement* discard_stmt_ = nullptr;
     sem::Behaviors behaviors_{sem::Behavior::kNext};
+    ast::DiagnosticRuleSeverities diagnostic_severities_;
 
     std::optional<uint32_t> return_location_;
 };
