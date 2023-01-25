@@ -430,14 +430,6 @@ libtint_source_set("libtint_core_all_src") {
     "clone_context.h",
     "demangler.cc",
     "demangler.h",
-    "inspector/entry_point.cc",
-    "inspector/entry_point.h",
-    "inspector/inspector.cc",
-    "inspector/inspector.h",
-    "inspector/resource_binding.cc",
-    "inspector/resource_binding.h",
-    "inspector/scalar.cc",
-    "inspector/scalar.h",
     "program.cc",
     "program.h",
     "program_builder.cc",
@@ -496,6 +488,24 @@ libtint_source_set("libtint_core_all_src") {
     ":libtint_base_src",
     ":libtint_constant_src",
     ":libtint_text_src",
+    ":libtint_type_src",
+  ]
+}
+
+libtint_source_set("libtint_inspector_src") {
+  sources = [
+    "inspector/entry_point.cc",
+    "inspector/entry_point.h",
+    "inspector/inspector.cc",
+    "inspector/inspector.h",
+    "inspector/resource_binding.cc",
+    "inspector/resource_binding.h",
+    "inspector/scalar.cc",
+    "inspector/scalar.h",
+  ]
+  deps = [
+    ":libtint_base_src",
+    ":libtint_core_all_src",
     ":libtint_type_src",
   ]
 }
@@ -790,6 +800,7 @@ libtint_source_set("libtint_core_src") {
     ":libtint_base_src",
     ":libtint_constant_src",
     ":libtint_core_all_src",
+    ":libtint_inspector_src",
     ":libtint_sem_src",
     ":libtint_text_src",
     ":libtint_transform_src",
@@ -867,6 +878,7 @@ libtint_source_set("libtint_writer_src") {
   deps = [
     ":libtint_base_src",
     ":libtint_core_all_src",
+    ":libtint_inspector_src",
     ":libtint_transform_src",
     ":libtint_type_src",
   ]
@@ -1262,6 +1274,7 @@ if (tint_build_unittests) {
       "inspector/test_inspector_runner.cc",
       "inspector/test_inspector_runner.h",
     ]
+    deps = [ ":libtint_inspector_src" ]
   }
 
   tint_unittests_source_set("tint_unittests_resolver_src") {
