@@ -50,7 +50,9 @@ void DiagnosticRuleParser(::benchmark::State& state) {
     std::array kStrings{
         "hromium_unyeachable_code",   "chrorrillmGunnreachable_c77de", "chromium_unreachable4cod00",
         "chromium_unreachable_code",  "chromium_unracaboo_code",       "chromium_unrzzchabl_code",
-        "ciipp11ium_unreachable_cod",
+        "ciipp11ium_unreachable_cod", "derivXXtive_uniformity",        "55erivativeIIunifonn99ity",
+        "derirratHHaae_YniforSSity",  "derivative_uniformity",         "erivtive_unHkkormit",
+        "jerivaive_uniforRgty",       "derivatbve_unformiy",
     };
     for (auto _ : state) {
         for (auto& str : kStrings) {

@@ -42,6 +42,8 @@ enum builtin_value {
 
 // https://gpuweb.github.io/gpuweb/wgsl/#filterable-triggering-rules
 enum diagnostic_rule {
+  // Rules defined in the spec.
+  derivative_uniformity
   // Chromium specific rules not defined in the spec.
   chromium_unreachable_code
 }

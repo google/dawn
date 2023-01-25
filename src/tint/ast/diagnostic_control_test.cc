@@ -115,12 +115,16 @@ inline std::ostream& operator<<(std::ostream& out, Case c) {
 
 static constexpr Case kValidCases[] = {
     {"chromium_unreachable_code", DiagnosticRule::kChromiumUnreachableCode},
+    {"derivative_uniformity", DiagnosticRule::kDerivativeUniformity},
 };
 
 static constexpr Case kInvalidCases[] = {
     {"cXromggum_unreachable_cde", DiagnosticRule::kUndefined},
     {"chroVium_unruchble_codX", DiagnosticRule::kUndefined},
     {"chromium_3nreachable_code", DiagnosticRule::kUndefined},
+    {"derivatEve_uniformity", DiagnosticRule::kUndefined},
+    {"deTTPivative_uniformit", DiagnosticRule::kUndefined},
+    {"derivtive_uddxxformity", DiagnosticRule::kUndefined},
 };
 
 using DiagnosticRuleParseTest = testing::TestWithParam<Case>;

@@ -168,6 +168,8 @@ Validator::Validator(
       atomic_composite_info_(atomic_composite_info),
       valid_type_storage_layouts_(valid_type_storage_layouts) {
     // Set default severities for filterable diagnostic rules.
+    diagnostic_filters_.Set(ast::DiagnosticRule::kDerivativeUniformity,
+                            ast::DiagnosticSeverity::kWarning);
     diagnostic_filters_.Set(ast::DiagnosticRule::kChromiumUnreachableCode,
                             ast::DiagnosticSeverity::kWarning);
 }

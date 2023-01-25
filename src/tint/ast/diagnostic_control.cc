@@ -93,6 +93,9 @@ DiagnosticRule ParseDiagnosticRule(std::string_view str) {
     if (str == "chromium_unreachable_code") {
         return DiagnosticRule::kChromiumUnreachableCode;
     }
+    if (str == "derivative_uniformity") {
+        return DiagnosticRule::kDerivativeUniformity;
+    }
     return DiagnosticRule::kUndefined;
 }
 
@@ -102,6 +105,8 @@ std::ostream& operator<<(std::ostream& out, DiagnosticRule value) {
             return out << "undefined";
         case DiagnosticRule::kChromiumUnreachableCode:
             return out << "chromium_unreachable_code";
+        case DiagnosticRule::kDerivativeUniformity:
+            return out << "derivative_uniformity";
     }
     return out << "<unknown>";
 }

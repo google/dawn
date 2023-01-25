@@ -66,6 +66,7 @@ constexpr const char* kDiagnosticSeverityStrings[] = {
 enum class DiagnosticRule {
     kUndefined,
     kChromiumUnreachableCode,
+    kDerivativeUniformity,
 };
 
 /// @param out the std::ostream to write to
@@ -80,6 +81,7 @@ DiagnosticRule ParseDiagnosticRule(std::string_view str);
 
 constexpr const char* kDiagnosticRuleStrings[] = {
     "chromium_unreachable_code",
+    "derivative_uniformity",
 };
 
 /// Convert a DiagnosticSeverity to the corresponding diag::Severity.
