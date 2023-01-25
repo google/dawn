@@ -180,7 +180,7 @@ void RenderPassEncoder::APISetStencilReference(uint32_t reference) {
         [&](CommandAllocator* allocator) -> MaybeError {
             SetStencilReferenceCmd* cmd =
                 allocator->Allocate<SetStencilReferenceCmd>(Command::SetStencilReference);
-            cmd->reference = reference;
+            cmd->reference = reference & 255;
 
             return {};
         },

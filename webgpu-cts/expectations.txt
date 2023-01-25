@@ -300,22 +300,6 @@ crbug.com/tint/1771 [ win10 ] webgpu:api,validation,compute_pipeline:overrides,w
 crbug.com/tint/1805 webgpu:shader,validation,parse,align:align_required_alignment:* [ Failure ]
 
 ################################################################################
-# API operation failures
-################################################################################
-crbug.com/dawn/0000 [ intel-gen-9 monterey ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="depth24plus-stencil8";stencilClearValue=258;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="depth24plus-stencil8";stencilClearValue=258;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="depth24plus-stencil8";stencilClearValue=65539;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="depth24plus-stencil8";stencilClearValue=65539;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="depth32float-stencil8";stencilClearValue=258;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="depth32float-stencil8";stencilClearValue=258;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="depth32float-stencil8";stencilClearValue=65539;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="depth32float-stencil8";stencilClearValue=65539;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="stencil8";stencilClearValue=258;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="stencil8";stencilClearValue=258;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="stencil8";stencilClearValue=65539;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="stencil8";stencilClearValue=65539;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
-
-################################################################################
 # Failures with depth/stencil textures on Intel Mac
 ################################################################################
 crbug.com/dawn/1083 [ monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth16unorm" [ Failure ]
