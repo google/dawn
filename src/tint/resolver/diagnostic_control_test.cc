@@ -181,5 +181,26 @@ TEST_F(ResolverDiagnosticControlTest, FunctionAttributeScope) {
 89:10 note: code is unreachable)");
 }
 
+TEST_F(ResolverDiagnosticControlTest, UnrecognizedRuleName_Directive) {
+    DiagnosticDirective(ast::DiagnosticSeverity::kError,
+                        Expr(Source{{12, 34}}, "chromium_unreachable_cod"));
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              R"(12:34 warning: unrecognized diagnostic rule 'chromium_unreachable_cod'
+Did you mean 'chromium_unreachable_code'?
+Possible values: 'chromium_unreachable_code', 'derivative_uniformity')");
+}
+
+TEST_F(ResolverDiagnosticControlTest, UnrecognizedRuleName_Attribute) {
+    auto* attr = DiagnosticAttribute(ast::DiagnosticSeverity::kError,
+                                     Expr(Source{{12, 34}}, "chromium_unreachable_cod"));
+    Func("foo", {}, ty.void_(), {}, utils::Vector{attr});
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              R"(12:34 warning: unrecognized diagnostic rule 'chromium_unreachable_cod'
+Did you mean 'chromium_unreachable_code'?
+Possible values: 'chromium_unreachable_code', 'derivative_uniformity')");
+}
+
 }  // namespace
 }  // namespace tint::resolver

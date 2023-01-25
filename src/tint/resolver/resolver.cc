@@ -3069,6 +3069,11 @@ bool Resolver::DiagnosticControl(const ast::DiagnosticControl* control) {
     auto rule = ast::ParseDiagnosticRule(rule_name);
     if (rule != ast::DiagnosticRule::kUndefined) {
         validator_.DiagnosticFilters().Set(rule, control->severity);
+    } else {
+        std::ostringstream ss;
+        ss << "unrecognized diagnostic rule '" << rule_name << "'\n";
+        utils::SuggestAlternatives(rule_name, ast::kDiagnosticRuleStrings, ss);
+        AddWarning(ss.str(), control->rule_name->source);
     }
     return true;
 }
