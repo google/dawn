@@ -213,67 +213,67 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
 
     // Gather general and extension features and properties
     //
-    // Use vkGetPhysicalDevice{Features,Properties}2 if required to gather information about
-    // the extensions. DeviceExt::GetPhysicalDeviceProperties2 is guaranteed to be available
-    // because these extensions (transitively) depend on it in `EnsureDependencies`
-    VkPhysicalDeviceFeatures2 features2 = {};
-    features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-    features2.pNext = nullptr;
-    PNextChainBuilder featuresChain(&features2);
-
-    VkPhysicalDeviceProperties2 properties2 = {};
-    properties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-
-    PNextChainBuilder propertiesChain(&properties2);
-
-    propertiesChain.Add(&info.propertiesMaintenance3,
-                        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES);
-
-    if (info.extensions[DeviceExt::ShaderFloat16Int8]) {
-        featuresChain.Add(&info.shaderFloat16Int8Features,
-                          VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR);
-    }
-
-    if (info.extensions[DeviceExt::_16BitStorage]) {
-        featuresChain.Add(&info._16BitStorageFeatures,
-                          VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES);
-    }
-
-    if (info.extensions[DeviceExt::SubgroupSizeControl]) {
-        featuresChain.Add(&info.subgroupSizeControlFeatures,
-                          VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES_EXT);
-        propertiesChain.Add(&info.subgroupSizeControlProperties,
-                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES_EXT);
-    }
-
-    if (info.extensions[DeviceExt::DriverProperties]) {
-        propertiesChain.Add(&info.driverProperties,
-                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES);
-    }
-
-    if (info.extensions[DeviceExt::ShaderIntegerDotProduct]) {
-        propertiesChain.Add(
-            &info.shaderIntegerDotProductProperties,
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_DOT_PRODUCT_PROPERTIES_KHR);
-    }
-
-    if (info.extensions[DeviceExt::DepthClipEnable]) {
-        featuresChain.Add(&info.depthClipEnableFeatures,
-                          VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLIP_ENABLE_FEATURES_EXT);
-    }
-
     // If we have DeviceExt::GetPhysicalDeviceProperties2, use features2 and properties2 so
-    // that features no covered by VkPhysicalDevice{Features,Properties} can be queried.
+    // that features not covered by VkPhysicalDevice{Features,Properties} can be queried.
     //
     // Note that info.properties has already been filled at the start of this function to get
     // `apiVersion`.
     ASSERT(info.properties.apiVersion != 0);
     if (info.extensions[DeviceExt::GetPhysicalDeviceProperties2]) {
+        VkPhysicalDeviceFeatures2 features2 = {};
+        features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        features2.pNext = nullptr;
+        PNextChainBuilder featuresChain(&features2);
+
+        VkPhysicalDeviceProperties2 properties2 = {};
+        properties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+
+        PNextChainBuilder propertiesChain(&properties2);
+
+        propertiesChain.Add(&info.propertiesMaintenance3,
+                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES);
+
+        if (info.extensions[DeviceExt::ShaderFloat16Int8]) {
+            featuresChain.Add(&info.shaderFloat16Int8Features,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR);
+        }
+
+        if (info.extensions[DeviceExt::_16BitStorage]) {
+            featuresChain.Add(&info._16BitStorageFeatures,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES);
+        }
+
+        if (info.extensions[DeviceExt::SubgroupSizeControl]) {
+            featuresChain.Add(&info.subgroupSizeControlFeatures,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES_EXT);
+            propertiesChain.Add(
+                &info.subgroupSizeControlProperties,
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES_EXT);
+        }
+
+        if (info.extensions[DeviceExt::DriverProperties]) {
+            propertiesChain.Add(&info.driverProperties,
+                                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES);
+        }
+
+        if (info.extensions[DeviceExt::ShaderIntegerDotProduct]) {
+            propertiesChain.Add(
+                &info.shaderIntegerDotProductProperties,
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_DOT_PRODUCT_PROPERTIES_KHR);
+        }
+
+        if (info.extensions[DeviceExt::DepthClipEnable]) {
+            featuresChain.Add(&info.depthClipEnableFeatures,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLIP_ENABLE_FEATURES_EXT);
+        }
+
+        // Use vkGetPhysicalDevice{Features,Properties}2 if required to gather information about
+        // the extensions. DeviceExt::GetPhysicalDeviceProperties2 is guaranteed to be available
+        // because these extensions (transitively) depend on it in `EnsureDependencies`
         vkFunctions.GetPhysicalDeviceProperties2(physicalDevice, &properties2);
         vkFunctions.GetPhysicalDeviceFeatures2(physicalDevice, &features2);
         info.features = features2.features;
     } else {
-        ASSERT(features2.pNext == nullptr && properties2.pNext == nullptr);
         vkFunctions.GetPhysicalDeviceFeatures(physicalDevice, &info.features);
     }
 
