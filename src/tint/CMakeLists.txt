@@ -84,7 +84,6 @@ list(APPEND TINT_LIB_SRCS
   ast/array.h
   ast/assignment_statement.cc
   ast/assignment_statement.h
-  ast/ast_type.cc  # TODO(bclayton) - rename to type.cc
   ast/atomic.cc
   ast/atomic.h
   ast/attribute.cc
@@ -233,6 +232,7 @@ list(APPEND TINT_LIB_SRCS
   ast/type_decl.h
   ast/type_name.cc
   ast/type_name.h
+  ast/type.cc
   ast/type.h
   ast/u32.cc
   ast/u32.h

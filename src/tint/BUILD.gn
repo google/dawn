@@ -547,7 +547,6 @@ libtint_source_set("libtint_ast_src") {
     "ast/array.h",
     "ast/assignment_statement.cc",
     "ast/assignment_statement.h",
-    "ast/ast_type.cc",  # TODO(bclayton) - rename to type.cc
     "ast/atomic.cc",
     "ast/atomic.h",
     "ast/attribute.cc",
@@ -698,6 +697,7 @@ libtint_source_set("libtint_ast_src") {
     "ast/texture.cc",
     "ast/texture.h",
     "ast/traverse_expressions.h",
+    "ast/type.cc",
     "ast/type.h",
     "ast/type_decl.cc",
     "ast/type_decl.h",
