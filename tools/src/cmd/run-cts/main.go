@@ -259,17 +259,36 @@ func run() error {
 	}
 
 	if genCoverage {
-		llvmCov, err := exec.LookPath("llvm-cov")
+		dawnOutDir := filepath.Dir(dawnNode)
+
+		profdata, err := exec.LookPath("llvm-profdata")
 		if err != nil {
-			return fmt.Errorf("failed to find LLVM, required for --coverage")
+			profdata = ""
+			if runtime.GOOS == "darwin" {
+				profdata = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/llvm-profdata"
+				if !fileutils.IsExe(profdata) {
+					profdata = ""
+				}
+			}
 		}
-		turboCov := filepath.Join(filepath.Dir(dawnNode), "turbo-cov"+fileutils.ExeExt)
+		if profdata == "" {
+			return fmt.Errorf("failed to find llvm-profdata, required for --coverage")
+		}
+
+		llvmCov := ""
+		turboCov := filepath.Join(dawnOutDir, "turbo-cov"+fileutils.ExeExt)
 		if !fileutils.IsExe(turboCov) {
 			turboCov = ""
+			if path, err := exec.LookPath("llvm-cov"); err == nil {
+				llvmCov = path
+			} else {
+				return fmt.Errorf("failed to find turbo-cov or llvm-cov")
+			}
 		}
 		r.covEnv = &cov.Env{
-			LLVMBin:  filepath.Dir(llvmCov),
+			Profdata: profdata,
 			Binary:   dawnNode,
+			Cov:      llvmCov,
 			TurboCov: turboCov,
 		}
 	}

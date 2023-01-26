@@ -102,8 +102,14 @@ if (WIN32)
     # Generate the NapiSymbols.lib from the NapiSymbols.def file
     set(NAPI_SYMBOLS_LIB "${DAWN_NODE_GEN_DIR}/NapiSymbols.lib")
     # Resolve path to lib.exe
-    get_filename_component(VS_BIN_DIR "${CMAKE_LINKER}" DIRECTORY)
-    set(LIB_EXE "${VS_BIN_DIR}/lib.exe")
+    get_filename_component(LINKER_BIN_DIR "${CMAKE_LINKER}" DIRECTORY)
+    if (EXISTS "${LINKER_BIN_DIR}/lib.exe")
+        set(LIB_EXE "${LINKER_BIN_DIR}/lib.exe")
+    elseif (EXISTS "${LINKER_BIN_DIR}/lld-link.exe")
+        set(LIB_EXE "${LINKER_BIN_DIR}/lld-link.exe")
+    else()
+        message(FATAL_ERROR "unable to find lib.exe or lld-link.exe")
+    endif()
     add_custom_command(
         COMMAND "${LIB_EXE}"
                 "/DEF:${NAPI_SYMBOLS_DEF}"

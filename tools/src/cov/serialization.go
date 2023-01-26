@@ -19,6 +19,7 @@ import (
 	"compress/zlib"
 	"fmt"
 	"io"
+	"path/filepath"
 	"runtime/debug"
 	"sort"
 	"strconv"
@@ -156,7 +157,7 @@ func (t *Tree) writeFilesJSON(spansByID map[SpanID]Span, sb *strings.Builder) {
 			sb.WriteString(`,`)
 		}
 		sb.WriteString(`"`)
-		sb.WriteString(path)
+		sb.WriteString(filepath.ToSlash(path))
 		sb.WriteString(`":`)
 		sb.WriteString(`{`)
 		if totalLines := file.allSpans.NumLines(); totalLines > 0 {

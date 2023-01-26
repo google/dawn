@@ -42,9 +42,10 @@ type Coverage struct {
 
 // Env holds the environment settings for performing coverage processing.
 type Env struct {
-	LLVMBin  string // path to the LLVM bin directory
+	Profdata string // path to the llvm-profdata tool
 	Binary   string // path to the executable binary
-	TurboCov string // path to turbo-cov (optional)
+	Cov      string // path to the llvm-cov tool (one of Cov or TurboCov must be supplied)
+	TurboCov string // path to the turbo-cov tool (one of Cov or TurboCov must be supplied)
 }
 
 // RuntimeEnv returns the environment variable key=value pair for setting
@@ -92,33 +93,37 @@ func (e Env) AllSourceFiles() *Coverage {
 // Import uses the llvm-profdata and llvm-cov tools to import the coverage
 // information from a .profraw file.
 func (e Env) Import(profrawPath string) (*Coverage, error) {
-	llvmProfdataExe := filepath.Join(e.LLVMBin, "llvm-profdata"+fileutils.ExeExt)
-	llvmCovExe := filepath.Join(e.LLVMBin, "llvm-cov"+fileutils.ExeExt)
-
 	profdata := profrawPath + ".profdata"
+	defer os.Remove(profdata)
 
-	if err := exec.Command(
-		llvmProfdataExe,
+	if e.Profdata == "" {
+		return nil, fmt.Errorf("cov.Env.Profdata must be specified")
+	}
+	if e.TurboCov == "" && e.Cov == "" {
+		return nil, fmt.Errorf("One of cov.Env.TurboCov or cov.Env.Cov must be specified")
+	}
+
+	if out, err := exec.Command(
+		e.Profdata,
 		"merge",
 		"-sparse",
 		profrawPath,
 		"-output",
-		profdata).Run(); err != nil {
-		return nil, fmt.Errorf("llvm-profdata errored: %w", err)
+		profdata).CombinedOutput(); err != nil {
+		return nil, fmt.Errorf("llvm-profdata errored: %w\n%v", err, string(out))
 	}
-	defer os.Remove(profdata)
 
 	if e.TurboCov == "" {
 		data, err := exec.Command(
-			llvmCovExe,
+			e.Cov,
 			"export",
 			e.Binary,
 			"-instr-profile="+profdata,
 			"-format=text",
 			"-skip-expansions",
-			"-skip-functions").Output()
+			"-skip-functions").CombinedOutput()
 		if err != nil {
-			return nil, fmt.Errorf("llvm-cov errored: %v\n%v", string(err.(*exec.ExitError).Stderr), err)
+			return nil, fmt.Errorf("llvm-cov errored: %v\n%v", string(data), err)
 		}
 		cov, err := e.parseCov(data)
 		if err != nil {
@@ -127,9 +132,9 @@ func (e Env) Import(profrawPath string) (*Coverage, error) {
 		return cov, nil
 	}
 
-	data, err := exec.Command(e.TurboCov, e.Binary, profdata).Output()
+	data, err := exec.Command(e.TurboCov, e.Binary, profdata).CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("turbo-cov errored: %v\n%v", string(err.(*exec.ExitError).Stderr), err)
+		return nil, fmt.Errorf("turbo-cov errored: %v\n%v", string(data), err)
 	}
 	cov, err := e.parseTurboCov(data)
 	if err != nil {

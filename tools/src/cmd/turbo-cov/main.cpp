@@ -24,6 +24,11 @@
 #include "llvm/ProfileData/Coverage/CoverageMapping.h"
 #include "llvm/ProfileData/InstrProfReader.h"
 
+#if defined(_MSC_VER)
+#include <fcntl.h>  // _O_BINARY
+#include <io.h>     // _setmode
+#endif
+
 namespace {
 
 template <typename T>
@@ -40,6 +45,13 @@ void emit(const llvm::StringRef& str) {
 }  // namespace
 
 int main(int argc, const char** argv) {
+#if defined(_MSC_VER)
+    // Change stdin & stdout from text mode to binary mode.
+    // This ensures sequences of \r\n are not changed to \n.
+    _setmode(_fileno(stdin), _O_BINARY);
+    _setmode(_fileno(stdout), _O_BINARY);
+#endif
+
     if (argc < 3) {
         fprintf(stderr, "turbo-cov <exe> <profdata>\n");
         return 1;

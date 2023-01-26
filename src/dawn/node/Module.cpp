@@ -62,7 +62,7 @@ Napi::Value CreateGPU(const Napi::CallbackInfo& info) {
 #ifdef DAWN_EMIT_COVERAGE
 struct Coverage {
     Coverage() : output_path_{GetOutputPath()} {
-        __llvm_profile_set_filename(output_path_.c_str());
+        __llvm_profile_set_filename(output_path_.string().c_str());
     }
     ~Coverage() { std::filesystem::remove(output_path_); }
 
@@ -75,7 +75,7 @@ struct Coverage {
     static Napi::Value End(const Napi::CallbackInfo& info) {
         __llvm_profile_write_file();
         auto* coverage = static_cast<Coverage*>(info.Data());
-        return Napi::String::New(info.Env(), coverage->output_path_.c_str());
+        return Napi::String::New(info.Env(), coverage->output_path_.string().c_str());
     }
 
   private:
