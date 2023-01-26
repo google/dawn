@@ -611,5 +611,25 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SingleEntryPointTest, Directives) {
+    // Make sure that directives are preserved.
+    auto* src = R"(
+enable f16;
+diagnostic(off, derivative_uniformity);
+
+@compute @workgroup_size(1)
+fn main() {
+}
+)";
+
+    SingleEntryPoint::Config cfg("main");
+
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
+
+    EXPECT_EQ(src, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform
