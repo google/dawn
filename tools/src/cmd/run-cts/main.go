@@ -132,7 +132,7 @@ func run() error {
 	unrollConstEvalLoopsDefault := runtime.GOOS != "windows"
 
 	var dawnNode, cts, node, npx, resultsPath, expectationsPath, logFilename, backend, adapterName, coverageFile string
-	var verbose, isolated, build, dumpShaders, unrollConstEvalLoops, genCoverage bool
+	var verbose, isolated, build, validate, dumpShaders, unrollConstEvalLoops, genCoverage bool
 	var numRunners int
 	var flags dawnNodeFlags
 	flag.StringVar(&dawnNode, "dawn-node", "", "path to dawn.node module")
@@ -142,8 +142,9 @@ func run() error {
 	flag.StringVar(&resultsPath, "output", "", "path to write test results file")
 	flag.StringVar(&expectationsPath, "expect", "", "path to expectations file")
 	flag.BoolVar(&verbose, "verbose", false, "print extra information while testing")
-	flag.BoolVar(&build, "build", true, "attempt to build the CTS before running")
 	flag.BoolVar(&isolated, "isolate", false, "run each test in an isolated process")
+	flag.BoolVar(&build, "build", true, "attempt to build the CTS before running")
+	flag.BoolVar(&validate, "validate", false, "enable backend validation")
 	flag.BoolVar(&colors, "colors", colors, "enable / disable colors")
 	flag.IntVar(&numRunners, "j", runtime.NumCPU()/2, "number of concurrent runners. 0 runs serially")
 	flag.StringVar(&logFilename, "log", "", "path to log file of tests run and result")
@@ -216,6 +217,9 @@ func run() error {
 	}
 	if adapterName != "" {
 		flags.Set("adapter=" + adapterName)
+	}
+	if validate {
+		flags.Set("validate=1")
 	}
 
 	// While running the CTS, always allow unsafe APIs so they can be tested.

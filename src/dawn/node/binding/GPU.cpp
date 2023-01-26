@@ -95,9 +95,10 @@ namespace wgpu::binding {
 // wgpu::bindings::GPU
 ////////////////////////////////////////////////////////////////////////////////
 GPU::GPU(Flags flags) : flags_(std::move(flags)) {
-    // TODO(dawn:1123): Disable in 'release'
-    instance_.EnableBackendValidation(true);
-    instance_.SetBackendValidationLevel(dawn::native::BackendValidationLevel::Full);
+    if (auto validate = flags_.Get("validate"); validate == "1" || validate == "true") {
+        instance_.EnableBackendValidation(true);
+        instance_.SetBackendValidationLevel(dawn::native::BackendValidationLevel::Full);
+    }
 
     // Setting the DllDir changes where we load adapter DLLs from (e.g. d3dcompiler_47.dll)
     if (auto dir = flags_.Get("dlldir")) {
