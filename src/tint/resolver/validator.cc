@@ -2429,11 +2429,42 @@ bool Validator::IncrementDecrementStatement(const ast::IncrementDecrementStateme
 
 bool Validator::NoDuplicateAttributes(utils::VectorRef<const ast::Attribute*> attributes) const {
     utils::Hashmap<const TypeInfo*, Source, 8> seen;
+    utils::Vector<const ast::DiagnosticControl*, 8> diagnostic_controls;
     for (auto* d : attributes) {
-        auto added = seen.Add(&d->TypeInfo(), d->source);
-        if (!added && !d->Is<ast::InternalAttribute>()) {
-            AddError("duplicate " + d->Name() + " attribute", d->source);
-            AddNote("first attribute declared here", *added.value);
+        if (auto* diag = d->As<ast::DiagnosticAttribute>()) {
+            // Allow duplicate diagnostic attributes, and check for conflicts later.
+            diagnostic_controls.Push(diag->control);
+        } else {
+            auto added = seen.Add(&d->TypeInfo(), d->source);
+            if (!added && !d->Is<ast::InternalAttribute>()) {
+                AddError("duplicate " + d->Name() + " attribute", d->source);
+                AddNote("first attribute declared here", *added.value);
+                return false;
+            }
+        }
+    }
+    return DiagnosticControls(diagnostic_controls, "attribute");
+}
+
+bool Validator::DiagnosticControls(utils::VectorRef<const ast::DiagnosticControl*> controls,
+                                   const char* use) const {
+    // Make sure that no two diagnostic controls conflict.
+    // They conflict if the rule name is the same and the severity is different.
+    utils::Hashmap<Symbol, const ast::DiagnosticControl*, 8> diagnostics;
+    for (auto* dc : controls) {
+        auto diag_added = diagnostics.Add(dc->rule_name->symbol, dc);
+        if (!diag_added && (*diag_added.value)->severity != dc->severity) {
+            {
+                std::ostringstream ss;
+                ss << "conflicting diagnostic " << use;
+                AddError(ss.str(), dc->source);
+            }
+            {
+                std::ostringstream ss;
+                ss << "severity of '" << symbols_.NameFor(dc->rule_name->symbol) << "' set to '"
+                   << dc->severity << "' here";
+                AddNote(ss.str(), (*diag_added.value)->source);
+            }
             return false;
         }
     }

@@ -475,6 +475,13 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool NoDuplicateAttributes(utils::VectorRef<const ast::Attribute*> attributes) const;
 
+    /// Validates a set of diagnostic controls.
+    /// @param controls the diagnostic controls to validate
+    /// @param use the place where the controls are being used ("directive" or "attribute")
+    /// @returns true on success, false otherwise.
+    bool DiagnosticControls(utils::VectorRef<const ast::DiagnosticControl*> controls,
+                            const char* use) const;
+
     /// Validates a address space layout
     /// @param type the type to validate
     /// @param sc the address space
