@@ -2,9 +2,17 @@
 
 ## Changes for M111
 
+### New features
+
+* The `workgroupUniformLoad` builtin function is now supported. [tint:1780](crbug.com/tint/1780)
+* The `diagnostic` directive and `@diagnostic` attribute are now supported. [tint:1809](crbug.com/tint/1809)
+  * The attribute is currently only supported on function declarations.
+
 ### Breaking changes
 
 * You may need to add parentheses to less-than or greater-than binary expressions that now parse as template lists. For example `a(b<c, d>e)` will need parentheses around `b<c` or `d>e`. [tint:1810](crbug.com/tint/1810).
+* Uniformity analysis failures are now an error [tint:880](crbug.com/tint/880)
+  * The `derivative_uniformity` diagnostic filter can be used to modify the severity if needed.
 
 ## Deprecated Features
 
