@@ -607,6 +607,7 @@ func (j job) run(cfg runConfig) {
 		validate := false
 		switch j.format {
 		case wgsl:
+			args = append(args, "--validate") // wgsl validation uses Tint, so is always available
 			validate = true
 		case spvasm, glsl:
 			args = append(args, "--validate") // spirv-val and glslang are statically linked, always available
