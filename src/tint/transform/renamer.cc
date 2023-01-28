@@ -1313,6 +1313,9 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
                         });
                 }
             },
+            [&](const ast::DiagnosticControl* diagnostic) {
+                preserved_identifiers.Add(diagnostic->rule_name);
+            },
             [&](const ast::TypeName* type_name) {
                 if (is_type_short_name(type_name->name)) {
                     preserved_type_names.Add(type_name);

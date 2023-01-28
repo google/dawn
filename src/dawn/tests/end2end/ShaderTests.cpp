@@ -1372,6 +1372,57 @@ struct ShaderIO {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 102, 255), renderPass.color, 0, 0);
 }
 
+// Test that the derivative_uniformity diagnostic filter is handled correctly through the full
+// shader compilation flow.
+TEST_P(ShaderTests, DerivativeUniformityDiagnosticFilter) {
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+struct VertexOut {
+  @builtin(position) pos : vec4<f32>,
+  @location(0) value : f32,
+}
+
+@vertex
+fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {
+  const pos = array(
+      vec2( 1.0, -1.0),
+      vec2(-1.0, -1.0),
+      vec2( 0.0,  1.0),
+  );
+  return VertexOut(vec4(pos[VertexIndex], 0.0, 1.0), 0.5);
+})");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+diagnostic(off, derivative_uniformity);
+
+@fragment
+fn main(@location(0) value : f32) -> @location(0) vec4<f32> {
+  if (value > 0) {
+    let intensity = 1.0 - dpdx(1.0);
+    return vec4(intensity, intensity, intensity, 1.0);
+  }
+  return vec4(1.0);
+})");
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    descriptor.cTargets[0].format = renderPass.colorFormat;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.Draw(3);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(255, 255, 255, 255), renderPass.color, 0, 0);
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D12Backend(),
                       D3D12Backend({"use_dxc"}),

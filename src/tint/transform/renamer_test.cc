@@ -189,6 +189,48 @@ fn tint_symbol() {
     EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
+TEST_F(RenamerTest, PreserveDiagnosticControls) {
+    auto* src = R"(
+diagnostic(off, unreachable_code);
+
+@diagnostic(off, derivative_uniformity)
+@fragment
+fn entry(@location(0) value : f32) -> @location(0) f32 {
+  if (value > 0) {
+    return dpdx(value);
+    return 0.0;
+  }
+  return 1.0;
+}
+)";
+
+    auto* expect = R"(
+diagnostic(off, unreachable_code);
+
+@diagnostic(off, derivative_uniformity) @fragment
+fn tint_symbol(@location(0) tint_symbol_1 : f32) -> @location(0) f32 {
+  if ((tint_symbol_1 > 0)) {
+    return dpdx(tint_symbol_1);
+    return 0.0;
+  }
+  return 1.0;
+}
+)";
+
+    auto got = Run<Renamer>(src);
+
+    EXPECT_EQ(expect, str(got));
+
+    auto* data = got.data.Get<Renamer::Data>();
+
+    ASSERT_NE(data, nullptr);
+    Renamer::Data::Remappings expected_remappings = {
+        {"entry", "tint_symbol"},
+        {"value", "tint_symbol_1"},
+    };
+    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
+}
+
 TEST_F(RenamerTest, PreserveUnicode) {
     auto src = R"(
 @fragment
