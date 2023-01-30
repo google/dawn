@@ -2045,60 +2045,6 @@ OpFunctionEnd
     Validate(b);
 }
 
-// TODO(crbug.com/tint/1757): Remove once deprecation period for `frexp().sig` is over
-TEST_F(BuiltinBuilderTest, Frexp_Sig_Deprecation) {
-    Func("a_func", utils::Empty, ty.void_(),
-         utils::Vector{
-             Decl(Var("vec", vec2<f32>(1_f, 2_f))),
-             Decl(Let("s", MemberAccessor(Call("frexp", "vec"), "sig"))),
-         },
-         utils::Vector{
-             Stage(ast::PipelineStage::kFragment),
-         });
-
-    spirv::Builder& b = Build();
-
-    ASSERT_TRUE(b.Build()) << b.error();
-    auto got = DumpBuilder(b);
-    auto* expect = R"(OpCapability Shader
-%17 = OpExtInstImport "GLSL.std.450"
-OpMemoryModel Logical GLSL450
-OpEntryPoint Fragment %3 "a_func"
-OpExecutionMode %3 OriginUpperLeft
-OpName %3 "a_func"
-OpName %10 "vec"
-OpName %14 "__frexp_result_vec2_f32"
-OpMemberName %14 0 "fract"
-OpMemberName %14 1 "exp"
-OpMemberDecorate %14 0 Offset 0
-OpMemberDecorate %14 1 Offset 8
-%2 = OpTypeVoid
-%1 = OpTypeFunction %2
-%6 = OpTypeFloat 32
-%5 = OpTypeVector %6 2
-%7 = OpConstant %6 1
-%8 = OpConstant %6 2
-%9 = OpConstantComposite %5 %7 %8
-%11 = OpTypePointer Function %5
-%12 = OpConstantNull %5
-%16 = OpTypeInt 32 1
-%15 = OpTypeVector %16 2
-%14 = OpTypeStruct %5 %15
-%3 = OpFunction %2 None %1
-%4 = OpLabel
-%10 = OpVariable %11 Function %12
-OpStore %10 %9
-%18 = OpLoad %5 %10
-%13 = OpExtInst %14 %17 FrexpStruct %18
-%19 = OpCompositeExtract %5 %13 0
-OpReturn
-OpFunctionEnd
-)";
-    EXPECT_EQ(expect, got);
-
-    Validate(b);
-}
-
 TEST_F(BuiltinBuilderTest, Call_QuantizeToF16_Scalar) {
     GlobalVar("v", Expr(2_f), type::AddressSpace::kPrivate);
 

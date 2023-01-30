@@ -1046,29 +1046,6 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector_f16) {
     EXPECT_EQ(ty->SizeNoPadding(), 28u);
 }
 
-// TODO(crbug.com/tint/1757): Remove once deprecation period for `frexp().sig` is over
-TEST_F(ResolverBuiltinFloatTest, FrexpVector_sig) {
-    Enable(ast::Extension::kF16);
-
-    auto* call = Call("frexp", vec3<f16>());
-    auto* expr = MemberAccessor(call, "sig");
-    WrapInFunction(expr);
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-    ASSERT_NE(TypeOf(call), nullptr);
-    auto* ty = TypeOf(call)->As<sem::Struct>();
-    ASSERT_NE(ty, nullptr);
-    ASSERT_EQ(ty->Members().Length(), 2u);
-
-    auto* sig = ty->Members()[0];
-    EXPECT_TYPE(sig->Type(), TypeOf(expr));
-
-    auto* access = Sem().Get<sem::StructMemberAccess>(expr);
-    ASSERT_NE(access, nullptr);
-    EXPECT_EQ(access->Member(), sig);
-}
-
 TEST_F(ResolverBuiltinFloatTest, Frexp_Error_FirstParamInt) {
     GlobalVar("v", ty.i32(), type::AddressSpace::kWorkgroup);
     auto* call = Call("frexp", 1_i, AddressOf("v"));

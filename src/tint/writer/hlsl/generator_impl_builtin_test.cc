@@ -802,27 +802,6 @@ void test_function() {
 )");
 }
 
-// TODO(crbug.com/tint/1757): Remove once deprecation period for `frexp().sig` is over
-TEST_F(HlslGeneratorImplTest_Builtin, Frexp_Sig_Deprecation) {
-    WrapInFunction(Var("v", Call("frexp", 1_f)),  //
-                   MemberAccessor("v", "sig"));
-
-    GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_EQ(gen.result(), R"(struct frexp_result_f32 {
-  float fract;
-  int exp;
-};
-[numthreads(1, 1, 1)]
-void test_function() {
-  frexp_result_f32 v = {0.5f, 1};
-  const float tint_symbol = v.fract;
-  return;
-}
-)");
-}
-
 TEST_F(HlslGeneratorImplTest_Builtin, Degrees_Scalar_f32) {
     auto* val = Var("val", ty.f32());
     auto* call = Call("degrees", val);

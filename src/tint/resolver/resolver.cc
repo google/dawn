@@ -2779,16 +2779,6 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
                 }
             }
 
-            // TODO(crbug.com/tint/1757): Remove
-            if (utils::HasPrefix(builder_->Symbols().NameFor(str->Name()), "__frexp_result")) {
-                if (builder_->Symbols().NameFor(symbol) == "sig") {
-                    AddWarning(
-                        "use of deprecated language feature: 'sig' has been renamed to 'fract'",
-                        expr->member->source);
-                    member = str->Members()[0];
-                }
-            }
-
             if (member == nullptr) {
                 AddError("struct member " + builder_->Symbols().NameFor(symbol) + " not found",
                          expr->source);

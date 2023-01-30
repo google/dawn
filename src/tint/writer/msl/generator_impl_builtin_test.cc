@@ -837,24 +837,6 @@ kernel void test_function() {
 )");
 }
 
-// TODO(crbug.com/tint/1757): Remove once deprecation period for `frexp().sig` is over
-TEST_F(MslGeneratorImplTest, Frexp_Sig_Deprecation) {
-    WrapInFunction(MemberAccessor(Call("frexp", 1_f), "sig"));
-
-    GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
-
-using namespace metal;
-kernel void test_function() {
-  float const tint_symbol = 0.5f;
-  return;
-}
-
-)");
-}
-
 TEST_F(MslGeneratorImplTest, Degrees_Scalar_f32) {
     auto* val = Var("val", ty.f32());
     auto* call = Call("degrees", val);

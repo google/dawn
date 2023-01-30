@@ -160,7 +160,7 @@ TEST_F(RenamerTest, PreserveBuiltinTypes) {
 fn entry() {
   var a = modf(1.0).whole;
   var b = modf(1.0).fract;
-  var c = frexp(1.0).sig;
+  var c = frexp(1.0).fract;
   var d = frexp(1.0).exp;
 }
 )";
@@ -170,7 +170,7 @@ fn entry() {
 fn tint_symbol() {
   var tint_symbol_1 = modf(1.0).whole;
   var tint_symbol_2 = modf(1.0).fract;
-  var tint_symbol_3 = frexp(1.0).sig;
+  var tint_symbol_3 = frexp(1.0).fract;
   var tint_symbol_4 = frexp(1.0).exp;
 }
 )";

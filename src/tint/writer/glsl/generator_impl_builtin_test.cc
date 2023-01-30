@@ -920,27 +920,6 @@ void main() {
 )");
 }
 
-// TODO(crbug.com/tint/1757): Remove once deprecation period for `frexp().sig` is over
-TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Sig_Deprecation) {
-    WrapInFunction(MemberAccessor(Call("frexp", 1_f), "sig"));
-
-    GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_EQ(gen.result(), R"(#version 310 es
-
-void test_function() {
-  float tint_symbol = 0.5f;
-}
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  test_function();
-  return;
-}
-)");
-}
-
 TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Scalar_f32) {
     auto* val = Var("val", ty.f32());
     auto* call = Call("degrees", val);
