@@ -19,6 +19,7 @@
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/GPUInfo.h"
+#include "dawn/common/Log.h"
 #include "dawn/native/ChainUtils_autogen.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Instance.h"
@@ -233,10 +234,38 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     // Check overriden toggles before creating device, as some device features may be guarded by
     // toggles, and requiring such features without using corresponding toggles should fails the
     // device creating.
-    const DawnTogglesDeviceDescriptor* togglesDesc = nullptr;
-    FindInChain(descriptor->nextInChain, &togglesDesc);
+    const DawnTogglesDescriptor* deviceTogglesDesc = nullptr;
+    FindInChain(descriptor->nextInChain, &deviceTogglesDesc);
+
+    // Handle the deprecated DawnTogglesDeviceDescriptor
+    // TODO(dawn:1495): Remove this fallback once Chromium is changed to use DawnToggleDescriptor
+    // and DawnTogglesDeviceDescriptor is removed.
+    const DawnTogglesDeviceDescriptor* deprecatedTogglesDeviceDesc = nullptr;
+    DawnTogglesDescriptor convertedDeviceTogglesDesc = {};
+    FindInChain(descriptor->nextInChain, &deprecatedTogglesDeviceDesc);
+
+    if (deprecatedTogglesDeviceDesc) {
+        // Emit the deprecation warning.
+        dawn::WarningLog()
+            << "DawnTogglesDeviceDescriptor is deprecated and replaced by DawnTogglesDescriptor.";
+        // Ensure that at most one toggles descriptor is used.
+        DAWN_INVALID_IF(
+            deviceTogglesDesc && deprecatedTogglesDeviceDesc,
+            "DawnTogglesDeviceDescriptor should not be used together with DawnTogglesDescriptor.");
+
+        convertedDeviceTogglesDesc.enabledToggles =
+            deprecatedTogglesDeviceDesc->forceEnabledToggles;
+        convertedDeviceTogglesDesc.enabledTogglesCount =
+            deprecatedTogglesDeviceDesc->forceEnabledTogglesCount;
+        convertedDeviceTogglesDesc.disabledToggles =
+            deprecatedTogglesDeviceDesc->forceDisabledToggles;
+        convertedDeviceTogglesDesc.disabledTogglesCount =
+            deprecatedTogglesDeviceDesc->forceDisabledTogglesCount;
+        deviceTogglesDesc = &convertedDeviceTogglesDesc;
+    }
+
     TripleStateTogglesSet userProvidedToggles =
-        TripleStateTogglesSet::CreateFromTogglesDeviceDescriptor(togglesDesc);
+        TripleStateTogglesSet::CreateFromTogglesDescriptor(deviceTogglesDesc);
 
     // Validate all required features are supported by the adapter and suitable under given toggles.
     for (uint32_t i = 0; i < descriptor->requiredFeaturesCount; ++i) {

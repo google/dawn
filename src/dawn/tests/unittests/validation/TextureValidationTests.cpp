@@ -731,11 +731,11 @@ class CompressedTextureFormatsValidationTests : public TextureValidationTest {
 
         // TODO(dawn:814): Remove when 1D texture support is complete.
         const char* kDisallowUnsafeApis = "disallow_unsafe_apis";
-        wgpu::DawnTogglesDeviceDescriptor togglesDesc;
-        togglesDesc.forceDisabledToggles = &kDisallowUnsafeApis;
-        togglesDesc.forceDisabledTogglesCount = 1;
+        wgpu::DawnTogglesDescriptor deviceTogglesDesc;
+        deviceTogglesDesc.disabledToggles = &kDisallowUnsafeApis;
+        deviceTogglesDesc.disabledTogglesCount = 1;
 
-        descriptor.nextInChain = &togglesDesc;
+        descriptor.nextInChain = &deviceTogglesDesc;
 
         return dawnAdapter.CreateDevice(&descriptor);
     }

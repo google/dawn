@@ -159,7 +159,7 @@
         ]
     },
     "dawn toggles device descriptor": {
-        "tags": ["dawn", "native"],
+        "tags": ["dawn", "native", "deprecated"],
         "category": "structure",
         "chained": "in",
         "chain roots": ["device descriptor"],
@@ -168,6 +168,18 @@
             {"name": "force enabled toggles", "type": "char", "annotation": "const*const*", "length": "force enabled toggles count"},
             {"name": "force disabled toggles count", "type": "uint32_t", "default": 0},
             {"name": "force disabled toggles", "type": "char", "annotation": "const*const*", "length": "force disabled toggles count"}
+        ]
+    },
+    "dawn toggles descriptor": {
+        "tags": ["dawn", "native"],
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["device descriptor"],
+        "members": [
+            {"name": "enabled toggles count", "type": "uint32_t", "default": 0},
+            {"name": "enabled toggles", "type": "char", "annotation": "const*const*", "length": "enabled toggles count"},
+            {"name": "disabled toggles count", "type": "uint32_t", "default": 0},
+            {"name": "disabled toggles", "type": "char", "annotation": "const*const*", "length": "disabled toggles count"}
         ]
     },
     "dawn cache device descriptor" : {
@@ -2601,12 +2613,13 @@
             {"value": 14, "name": "surface descriptor from windows swap chain panel", "tags": ["dawn"]},
             {"value": 15, "name": "render pass descriptor max draw count"},
             {"value": 1000, "name": "dawn texture internal usage descriptor", "tags": ["dawn"]},
-            {"value": 1002, "name": "dawn toggles device descriptor", "tags": ["dawn", "native"]},
+            {"value": 1002, "name": "dawn toggles device descriptor", "tags": ["dawn", "native", "deprecated"]},
             {"value": 1003, "name": "dawn encoder internal usage descriptor", "tags": ["dawn"]},
             {"value": 1004, "name": "dawn instance descriptor", "tags": ["dawn", "native"]},
             {"value": 1005, "name": "dawn cache device descriptor", "tags": ["dawn", "native"]},
             {"value": 1006, "name": "dawn adapter properties power preference", "tags": ["dawn", "native"]},
-            {"value": 1007, "name": "dawn buffer descriptor error info from wire client", "tags": ["dawn"]}
+            {"value": 1007, "name": "dawn buffer descriptor error info from wire client", "tags": ["dawn"]},
+            {"value": 1008, "name": "dawn toggles descriptor", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {

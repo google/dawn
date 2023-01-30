@@ -38,10 +38,10 @@ struct ComboDeprecatedDawnDeviceDescriptor : DeviceDescriptor {
 
         if (deviceDescriptor != nullptr) {
             desc->nextInChain = &mTogglesDesc;
-            mTogglesDesc.forceEnabledToggles = deviceDescriptor->forceEnabledToggles.data();
-            mTogglesDesc.forceEnabledTogglesCount = deviceDescriptor->forceEnabledToggles.size();
-            mTogglesDesc.forceDisabledToggles = deviceDescriptor->forceDisabledToggles.data();
-            mTogglesDesc.forceDisabledTogglesCount = deviceDescriptor->forceDisabledToggles.size();
+            mTogglesDesc.enabledToggles = deviceDescriptor->forceEnabledToggles.data();
+            mTogglesDesc.enabledTogglesCount = deviceDescriptor->forceEnabledToggles.size();
+            mTogglesDesc.disabledToggles = deviceDescriptor->forceDisabledToggles.data();
+            mTogglesDesc.disabledTogglesCount = deviceDescriptor->forceDisabledToggles.size();
 
             desc->requiredLimits =
                 reinterpret_cast<const RequiredLimits*>(deviceDescriptor->requiredLimits);
@@ -55,7 +55,7 @@ struct ComboDeprecatedDawnDeviceDescriptor : DeviceDescriptor {
         }
     }
 
-    DawnTogglesDeviceDescriptor mTogglesDesc = {};
+    DawnTogglesDescriptor mTogglesDesc = {};
     std::vector<wgpu::FeatureName> mRequiredFeatures = {};
 };
 }  // namespace

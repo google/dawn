@@ -23,13 +23,13 @@
 WGPUDevice DeprecationTests::CreateTestDevice(dawn::native::Adapter dawnAdapter) {
     wgpu::DeviceDescriptor descriptor = {};
 
-    wgpu::DawnTogglesDeviceDescriptor togglesDesc = {};
-    const char* forceEnabledToggles[1] = {kDisallowDeprecatedAPIsToggleName};
-    togglesDesc.forceEnabledToggles = forceEnabledToggles;
-    togglesDesc.forceEnabledTogglesCount = 1;
+    wgpu::DawnTogglesDescriptor deviceTogglesDesc = {};
+    const char* enabledToggles[1] = {kDisallowDeprecatedAPIsToggleName};
+    deviceTogglesDesc.enabledToggles = enabledToggles;
+    deviceTogglesDesc.enabledTogglesCount = 1;
 
     if (GetParam()) {
-        descriptor.nextInChain = &togglesDesc;
+        descriptor.nextInChain = &deviceTogglesDesc;
     }
     return dawnAdapter.CreateDevice(&descriptor);
 }

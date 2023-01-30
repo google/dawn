@@ -51,10 +51,10 @@ TEST_F(ToggleValidationTest, OverrideToggleUsage) {
     {
         const char* kValidToggleName = "emulate_store_and_msaa_resolve";
         wgpu::DeviceDescriptor descriptor;
-        wgpu::DawnTogglesDeviceDescriptor togglesDesc;
-        descriptor.nextInChain = &togglesDesc;
-        togglesDesc.forceEnabledToggles = &kValidToggleName;
-        togglesDesc.forceEnabledTogglesCount = 1;
+        wgpu::DawnTogglesDescriptor deviceTogglesDesc;
+        descriptor.nextInChain = &deviceTogglesDesc;
+        deviceTogglesDesc.enabledToggles = &kValidToggleName;
+        deviceTogglesDesc.enabledTogglesCount = 1;
 
         wgpu::Device deviceWithToggle =
             wgpu::Device::Acquire(GetBackendAdapter().CreateDevice(&descriptor));
@@ -72,10 +72,10 @@ TEST_F(ToggleValidationTest, OverrideToggleUsage) {
     {
         const char* kInvalidToggleName = "!@#$%^&*";
         wgpu::DeviceDescriptor descriptor;
-        wgpu::DawnTogglesDeviceDescriptor togglesDesc;
-        descriptor.nextInChain = &togglesDesc;
-        togglesDesc.forceEnabledToggles = &kInvalidToggleName;
-        togglesDesc.forceEnabledTogglesCount = 1;
+        wgpu::DawnTogglesDescriptor deviceTogglesDesc;
+        descriptor.nextInChain = &deviceTogglesDesc;
+        deviceTogglesDesc.enabledToggles = &kInvalidToggleName;
+        deviceTogglesDesc.enabledTogglesCount = 1;
 
         wgpu::Device deviceWithToggle =
             wgpu::Device::Acquire(GetBackendAdapter().CreateDevice(&descriptor));
@@ -93,10 +93,10 @@ TEST_F(ToggleValidationTest, OverrideToggleUsage) {
 TEST_F(ToggleValidationTest, TurnOffVsyncWithToggle) {
     const char* kValidToggleName = "turn_off_vsync";
     wgpu::DeviceDescriptor descriptor;
-    wgpu::DawnTogglesDeviceDescriptor togglesDesc;
-    descriptor.nextInChain = &togglesDesc;
-    togglesDesc.forceEnabledToggles = &kValidToggleName;
-    togglesDesc.forceEnabledTogglesCount = 1;
+    wgpu::DawnTogglesDescriptor deviceTogglesDesc;
+    descriptor.nextInChain = &deviceTogglesDesc;
+    deviceTogglesDesc.enabledToggles = &kValidToggleName;
+    deviceTogglesDesc.enabledTogglesCount = 1;
 
     wgpu::Device deviceWithToggle =
         wgpu::Device::Acquire(GetBackendAdapter().CreateDevice(&descriptor));

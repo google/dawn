@@ -267,11 +267,11 @@ class VulkanImageWrappingUsageTests : public VulkanImageWrappingTestBase {
         // Create another device based on the original
         backendAdapter =
             dawn::native::vulkan::ToBackend(dawn::native::FromAPI(device.Get())->GetAdapter());
-        deviceDescriptor.nextInChain = &togglesDesc;
-        togglesDesc.forceEnabledToggles = GetParam().forceEnabledWorkarounds.data();
-        togglesDesc.forceEnabledTogglesCount = GetParam().forceEnabledWorkarounds.size();
-        togglesDesc.forceDisabledToggles = GetParam().forceDisabledWorkarounds.data();
-        togglesDesc.forceDisabledTogglesCount = GetParam().forceDisabledWorkarounds.size();
+        deviceDescriptor.nextInChain = &deviceTogglesDesc;
+        deviceTogglesDesc.enabledToggles = GetParam().forceEnabledWorkarounds.data();
+        deviceTogglesDesc.enabledTogglesCount = GetParam().forceEnabledWorkarounds.size();
+        deviceTogglesDesc.disabledToggles = GetParam().forceDisabledWorkarounds.data();
+        deviceTogglesDesc.disabledTogglesCount = GetParam().forceDisabledWorkarounds.size();
 
         secondDeviceVk =
             dawn::native::vulkan::ToBackend(backendAdapter->APICreateDevice(&deviceDescriptor));
@@ -281,7 +281,7 @@ class VulkanImageWrappingUsageTests : public VulkanImageWrappingTestBase {
   protected:
     dawn::native::vulkan::Adapter* backendAdapter;
     dawn::native::DeviceDescriptor deviceDescriptor;
-    dawn::native::DawnTogglesDeviceDescriptor togglesDesc;
+    dawn::native::DawnTogglesDescriptor deviceTogglesDesc;
 
     wgpu::Device secondDevice;
     dawn::native::vulkan::Device* secondDeviceVk;

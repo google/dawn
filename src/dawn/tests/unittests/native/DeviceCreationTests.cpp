@@ -77,12 +77,12 @@ TEST_F(DeviceCreationTest, CreateDeviceSuccess) {
 // Test successful call to CreateDevice with toggle descriptor.
 TEST_F(DeviceCreationTest, CreateDeviceWithTogglesSuccess) {
     wgpu::DeviceDescriptor desc = {};
-    wgpu::DawnTogglesDeviceDescriptor togglesDesc = {};
-    desc.nextInChain = &togglesDesc;
+    wgpu::DawnTogglesDescriptor deviceTogglesDesc = {};
+    desc.nextInChain = &deviceTogglesDesc;
 
     const char* toggle = "skip_validation";
-    togglesDesc.forceEnabledToggles = &toggle;
-    togglesDesc.forceEnabledTogglesCount = 1;
+    deviceTogglesDesc.enabledToggles = &toggle;
+    deviceTogglesDesc.enabledTogglesCount = 1;
 
     wgpu::Device device = adapter.CreateDevice(&desc);
     EXPECT_NE(device, nullptr);
@@ -110,10 +110,10 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringFeaturesGuardedByToggle) {
         // Test creating device without DisallowUnsafeApis toggle disabled.
         {
             const char* const disableToggles[] = {"disallow_unsafe_apis"};
-            wgpu::DawnTogglesDeviceDescriptor toggleDesc;
-            toggleDesc.forceDisabledToggles = disableToggles;
-            toggleDesc.forceDisabledTogglesCount = 1;
-            deviceDescriptor.nextInChain = &toggleDesc;
+            wgpu::DawnTogglesDescriptor deviceTogglesDesc;
+            deviceTogglesDesc.disabledToggles = disableToggles;
+            deviceTogglesDesc.disabledTogglesCount = 1;
+            deviceDescriptor.nextInChain = &deviceTogglesDesc;
 
             wgpu::Device device = adapter.CreateDevice(&deviceDescriptor);
             EXPECT_NE(device, nullptr);

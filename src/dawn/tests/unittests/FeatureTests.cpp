@@ -77,11 +77,11 @@ TEST_F(FeatureTests, AdapterWithRequiredFeatureDisabled) {
             unsafeDeviceDescriptor.requiredFeatures = &featureName;
             unsafeDeviceDescriptor.requiredFeaturesCount = 1;
 
-            wgpu::DawnTogglesDeviceDescriptor togglesDesc;
-            unsafeDeviceDescriptor.nextInChain = &togglesDesc;
+            wgpu::DawnTogglesDescriptor deviceTogglesDesc;
+            unsafeDeviceDescriptor.nextInChain = &deviceTogglesDesc;
             const char* toggle = "disallow_unsafe_apis";
-            togglesDesc.forceDisabledToggles = &toggle;
-            togglesDesc.forceDisabledTogglesCount = 1;
+            deviceTogglesDesc.disabledToggles = &toggle;
+            deviceTogglesDesc.disabledTogglesCount = 1;
 
             WGPUDevice deviceWithFeature = adapterWithoutFeature.CreateDevice(
                 reinterpret_cast<const WGPUDeviceDescriptor*>(&unsafeDeviceDescriptor));
@@ -133,9 +133,9 @@ TEST_F(FeatureTests, RequireAndGetEnabledFeatures) {
             unsafeDeviceDescriptor.requiredFeaturesCount = 1;
 
             const char* const disableToggles[] = {"disallow_unsafe_apis"};
-            wgpu::DawnTogglesDeviceDescriptor toggleDesc;
-            toggleDesc.forceDisabledToggles = disableToggles;
-            toggleDesc.forceDisabledTogglesCount = 1;
+            wgpu::DawnTogglesDescriptor toggleDesc;
+            toggleDesc.disabledToggles = disableToggles;
+            toggleDesc.disabledTogglesCount = 1;
             unsafeDeviceDescriptor.nextInChain = &toggleDesc;
 
             dawn::native::DeviceBase* deviceBase = dawn::native::FromAPI(adapter.CreateDevice(

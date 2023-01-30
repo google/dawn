@@ -264,25 +264,25 @@ dawn::native::Adapter& ValidationTest::GetBackendAdapter() {
 
 WGPUDevice ValidationTest::CreateTestDevice(dawn::native::Adapter dawnAdapter) {
     // Disabled disallowing unsafe APIs so we can test them.
-    std::vector<const char*> forceEnabledToggles;
-    std::vector<const char*> forceDisabledToggles = {"disallow_unsafe_apis"};
+    std::vector<const char*> enabledToggles;
+    std::vector<const char*> disabledToggles = {"disallow_unsafe_apis"};
 
     for (const std::string& toggle : gToggleParser->GetEnabledToggles()) {
-        forceEnabledToggles.push_back(toggle.c_str());
+        enabledToggles.push_back(toggle.c_str());
     }
 
     for (const std::string& toggle : gToggleParser->GetDisabledToggles()) {
-        forceDisabledToggles.push_back(toggle.c_str());
+        disabledToggles.push_back(toggle.c_str());
     }
 
     wgpu::DeviceDescriptor deviceDescriptor;
-    wgpu::DawnTogglesDeviceDescriptor togglesDesc;
-    deviceDescriptor.nextInChain = &togglesDesc;
+    wgpu::DawnTogglesDescriptor deviceTogglesDesc;
+    deviceDescriptor.nextInChain = &deviceTogglesDesc;
 
-    togglesDesc.forceEnabledToggles = forceEnabledToggles.data();
-    togglesDesc.forceEnabledTogglesCount = forceEnabledToggles.size();
-    togglesDesc.forceDisabledToggles = forceDisabledToggles.data();
-    togglesDesc.forceDisabledTogglesCount = forceDisabledToggles.size();
+    deviceTogglesDesc.enabledToggles = enabledToggles.data();
+    deviceTogglesDesc.enabledTogglesCount = enabledToggles.size();
+    deviceTogglesDesc.disabledToggles = disabledToggles.data();
+    deviceTogglesDesc.disabledTogglesCount = disabledToggles.size();
 
     return dawnAdapter.CreateDevice(&deviceDescriptor);
 }

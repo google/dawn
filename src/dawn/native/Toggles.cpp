@@ -400,20 +400,20 @@ std::vector<const char*> TogglesSet::GetContainedToggleNames() const {
     return togglesNameInUse;
 }
 
-TripleStateTogglesSet TripleStateTogglesSet::CreateFromTogglesDeviceDescriptor(
-    const DawnTogglesDeviceDescriptor* togglesDesc) {
+TripleStateTogglesSet TripleStateTogglesSet::CreateFromTogglesDescriptor(
+    const DawnTogglesDescriptor* togglesDesc) {
     TripleStateTogglesSet userToggles;
     if (togglesDesc != nullptr) {
         TogglesInfo togglesInfo;
-        for (uint32_t i = 0; i < togglesDesc->forceEnabledTogglesCount; ++i) {
-            Toggle toggle = togglesInfo.ToggleNameToEnum(togglesDesc->forceEnabledToggles[i]);
+        for (uint32_t i = 0; i < togglesDesc->enabledTogglesCount; ++i) {
+            Toggle toggle = togglesInfo.ToggleNameToEnum(togglesDesc->enabledToggles[i]);
             if (toggle != Toggle::InvalidEnum) {
                 userToggles.togglesIsProvided.Set(toggle, true);
                 userToggles.providedTogglesEnabled.Set(toggle, true);
             }
         }
-        for (uint32_t i = 0; i < togglesDesc->forceDisabledTogglesCount; ++i) {
-            Toggle toggle = togglesInfo.ToggleNameToEnum(togglesDesc->forceDisabledToggles[i]);
+        for (uint32_t i = 0; i < togglesDesc->disabledTogglesCount; ++i) {
+            Toggle toggle = togglesInfo.ToggleNameToEnum(togglesDesc->disabledToggles[i]);
             if (toggle != Toggle::InvalidEnum) {
                 userToggles.togglesIsProvided.Set(toggle, true);
                 userToggles.providedTogglesEnabled.Set(toggle, false);
