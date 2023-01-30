@@ -47,6 +47,8 @@ target_sources(dawn_native PRIVATE
     "BindGroupTracker.h"
     "BindingInfo.cpp"
     "BindingInfo.h"
+    "BlitBufferToDepthStencil.cpp"
+    "BlitBufferToDepthStencil.h"
     "Blob.cpp"
     "Blob.h"
     "BlobCache.cpp"

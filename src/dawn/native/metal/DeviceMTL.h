@@ -70,7 +70,7 @@ class Device final : public DeviceBase {
                                            uint64_t size) override;
     MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
                                             const TextureDataLayout& dataLayout,
-                                            TextureCopy* dst,
+                                            const TextureCopy& dst,
                                             const Extent3D& copySizePixels) override;
 
     uint32_t GetOptimalBytesPerRowAlignment() const override;

@@ -775,6 +775,8 @@ DAWN_INSTANTIATE_TEST(QueueWriteTextureTests,
                       D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
                                     "copy_with_non_zero_buffer_offset"}),
                       MetalBackend(),
+                      MetalBackend({"use_blit_for_buffer_to_depth_texture_copy",
+                                    "use_blit_for_buffer_to_stencil_texture_copy"}),
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());

@@ -111,7 +111,7 @@ class Device final : public DeviceBase {
 
     MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
                                             const TextureDataLayout& src,
-                                            TextureCopy* dst,
+                                            const TextureCopy& dst,
                                             const Extent3D& copySizePixels) override;
 
     ResultOrError<ResourceHeapAllocation> AllocateMemory(

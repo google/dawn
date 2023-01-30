@@ -40,7 +40,7 @@ class DeviceMock : public DeviceBase {
                 (override));
     MOCK_METHOD(MaybeError,
                 CopyFromStagingToTextureImpl,
-                (const BufferBase*, const TextureDataLayout&, TextureCopy*, const Extent3D&),
+                (const BufferBase*, const TextureDataLayout&, const TextureCopy&, const Extent3D&),
                 (override));
 
     MOCK_METHOD(uint32_t, GetOptimalBytesPerRowAlignment, (), (const, override));

@@ -864,7 +864,7 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
 
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
                                                 const TextureDataLayout& src,
-                                                TextureCopy* dst,
+                                                const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
     // There is no need of a barrier to make host writes available and visible to the copy
     // operation for HOST_COHERENT memory. The Vulkan spec for vkQueueSubmit describes that it
@@ -873,22 +873,22 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
     CommandRecordingContext* recordingContext =
         GetPendingRecordingContext(DeviceBase::SubmitMode::Passive);
 
-    VkBufferImageCopy region = ComputeBufferImageCopyRegion(src, *dst, copySizePixels);
+    VkBufferImageCopy region = ComputeBufferImageCopyRegion(src, dst, copySizePixels);
     VkImageSubresourceLayers subresource = region.imageSubresource;
 
-    SubresourceRange range = GetSubresourcesAffectedByCopy(*dst, copySizePixels);
+    SubresourceRange range = GetSubresourcesAffectedByCopy(dst, copySizePixels);
 
-    if (IsCompleteSubresourceCopiedTo(dst->texture.Get(), copySizePixels, subresource.mipLevel)) {
+    if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copySizePixels, subresource.mipLevel)) {
         // Since texture has been overwritten, it has been "initialized"
-        dst->texture->SetIsSubresourceContentInitialized(true, range);
+        dst.texture->SetIsSubresourceContentInitialized(true, range);
     } else {
-        ToBackend(dst->texture)->EnsureSubresourceContentInitialized(recordingContext, range);
+        ToBackend(dst.texture)->EnsureSubresourceContentInitialized(recordingContext, range);
     }
     // Insert pipeline barrier to ensure correct ordering with previous memory operations on the
     // texture.
-    ToBackend(dst->texture)
+    ToBackend(dst.texture)
         ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst, range);
-    VkImage dstImage = ToBackend(dst->texture)->GetHandle();
+    VkImage dstImage = ToBackend(dst.texture)->GetHandle();
 
     // Dawn guarantees dstImage be in the TRANSFER_DST_OPTIMAL layout after the
     // copy command.

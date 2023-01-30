@@ -302,9 +302,9 @@ class DeviceBase : public RefCountedWithExternalCount {
                                        BufferBase* destination,
                                        uint64_t destinationOffset,
                                        uint64_t size);
-    MaybeError CopyFromStagingToTexture(const BufferBase* source,
+    MaybeError CopyFromStagingToTexture(BufferBase* source,
                                         const TextureDataLayout& src,
-                                        TextureCopy* dst,
+                                        const TextureCopy& dst,
                                         const Extent3D& copySizePixels);
 
     DynamicUploader* GetDynamicUploader() const;
@@ -532,7 +532,7 @@ class DeviceBase : public RefCountedWithExternalCount {
                                                    uint64_t size) = 0;
     virtual MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
                                                     const TextureDataLayout& src,
-                                                    TextureCopy* dst,
+                                                    const TextureCopy& dst,
                                                     const Extent3D& copySizePixels) = 0;
 
     wgpu::ErrorCallback mUncapturedErrorCallback = nullptr;

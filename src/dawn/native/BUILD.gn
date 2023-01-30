@@ -199,6 +199,8 @@ source_set("sources") {
     "BindGroupTracker.h",
     "BindingInfo.cpp",
     "BindingInfo.h",
+    "BlitBufferToDepthStencil.cpp",
+    "BlitBufferToDepthStencil.h",
     "Blob.cpp",
     "Blob.h",
     "BlobCache.cpp",

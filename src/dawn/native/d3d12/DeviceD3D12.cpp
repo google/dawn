@@ -524,15 +524,15 @@ void Device::CopyFromStagingToBufferHelper(CommandRecordingContext* commandConte
 
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
                                                 const TextureDataLayout& src,
-                                                TextureCopy* dst,
+                                                const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
     CommandRecordingContext* commandContext;
     DAWN_TRY_ASSIGN(commandContext, GetPendingCommandContext(Device::SubmitMode::Passive));
-    Texture* texture = ToBackend(dst->texture.Get());
+    Texture* texture = ToBackend(dst.texture.Get());
 
-    SubresourceRange range = GetSubresourcesAffectedByCopy(*dst, copySizePixels);
+    SubresourceRange range = GetSubresourcesAffectedByCopy(dst, copySizePixels);
 
-    if (IsCompleteSubresourceCopiedTo(texture, copySizePixels, dst->mipLevel)) {
+    if (IsCompleteSubresourceCopiedTo(texture, copySizePixels, dst.mipLevel)) {
         texture->SetIsSubresourceContentInitialized(true, range);
     } else {
         texture->EnsureSubresourceContentInitialized(commandContext, range);
@@ -540,10 +540,10 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
 
     texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopyDst, range);
 
-    RecordBufferTextureCopyWithBufferHandle(
-        BufferTextureCopyDirection::B2T, commandContext->GetCommandList(),
-        ToBackend(source)->GetD3D12Resource(), src.offset, src.bytesPerRow, src.rowsPerImage, *dst,
-        copySizePixels);
+    RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection::B2T,
+                                            commandContext->GetCommandList(),
+                                            ToBackend(source)->GetD3D12Resource(), src.offset,
+                                            src.bytesPerRow, src.rowsPerImage, dst, copySizePixels);
 
     return {};
 }

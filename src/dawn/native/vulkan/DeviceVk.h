@@ -96,7 +96,7 @@ class Device final : public DeviceBase {
                                            uint64_t size) override;
     MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
                                             const TextureDataLayout& src,
-                                            TextureCopy* dst,
+                                            const TextureCopy& dst,
                                             const Extent3D& copySizePixels) override;
 
     // Return the fixed subgroup size to use for compute shaders on this device or 0 if none

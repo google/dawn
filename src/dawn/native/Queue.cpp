@@ -381,8 +381,8 @@ MaybeError QueueBase::WriteTextureImpl(const ImageCopyTexture& destination,
 
     DeviceBase* device = GetDevice();
 
-    return device->CopyFromStagingToTexture(uploadHandle.stagingBuffer, passDataLayout,
-                                            &textureCopy, writeSizePixel);
+    return device->CopyFromStagingToTexture(uploadHandle.stagingBuffer, passDataLayout, textureCopy,
+                                            writeSizePixel);
 }
 
 void QueueBase::APICopyTextureForBrowser(const ImageCopyTexture* source,

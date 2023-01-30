@@ -562,6 +562,19 @@ TextureBase::TextureBase(DeviceBase* device,
     if (applyAlwaysResolveIntoZeroLevelAndLayerToggle) {
         AddInternalUsage(wgpu::TextureUsage::CopyDst);
     }
+
+    if (mFormat.HasStencil() && (mInternalUsage & wgpu::TextureUsage::CopyDst) &&
+        device->IsToggleEnabled(Toggle::UseBlitForBufferToStencilTextureCopy)) {
+        // Add render attachment usage so we can blit to the stencil texture
+        // in a render pass.
+        AddInternalUsage(wgpu::TextureUsage::RenderAttachment);
+    }
+    if (mFormat.HasDepth() && (mInternalUsage & wgpu::TextureUsage::CopyDst) &&
+        device->IsToggleEnabled(Toggle::UseBlitForBufferToDepthTextureCopy)) {
+        // Add render attachment usage so we can blit to the depth texture
+        // in a render pass.
+        AddInternalUsage(wgpu::TextureUsage::RenderAttachment);
+    }
 }
 
 TextureBase::~TextureBase() = default;

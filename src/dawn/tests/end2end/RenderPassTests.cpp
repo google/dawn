@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/DawnTest.h"
+#include <utility>
+#include <vector>
 
+#include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
@@ -163,8 +165,6 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderTarget, kRTSize - 1, 1);
 }
 
-class RenderPassTest_RegressionDawn1071 : public RenderPassTest {};
-
 DAWN_INSTANTIATE_TEST(RenderPassTest,
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_render_pass"}),
@@ -175,6 +175,7 @@ DAWN_INSTANTIATE_TEST(RenderPassTest,
 
 // Test that clearing the lower mips of an R8Unorm texture works. This is a regression test for
 // dawn:1071 where Intel Metal devices fail to do that correctly, requiring a workaround.
+class RenderPassTest_RegressionDawn1071 : public RenderPassTest {};
 TEST_P(RenderPassTest_RegressionDawn1071, ClearLowestMipOfR8Unorm) {
     const uint32_t kLastMipLevel = 2;
 
@@ -227,6 +228,140 @@ DAWN_INSTANTIATE_TEST(RenderPassTest_RegressionDawn1071,
                       D3D12Backend(),
                       MetalBackend(),
                       MetalBackend({"metal_render_r8_rg8_unorm_small_mip_to_temp_texture"}),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
+
+// Test that clearing a depth16unorm texture with multiple subresources works. This is a regression
+// test for dawn:1389 where Intel Metal devices fail to do that correctly, requiring a workaround.
+class RenderPassTest_RegressionDawn1389 : public RenderPassTest {};
+TEST_P(RenderPassTest_RegressionDawn1389, ClearMultisubresourceAfterWriteDepth16Unorm) {
+    // TODO(crbug.com/dawn/1492): Support copying to Depth16Unorm on GL.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    // Test all combinatons of multi-mip, multi-layer
+    for (uint32_t mipLevelCount : {1, 5}) {
+        for (uint32_t arrayLayerCount : {1, 7}) {
+            // Only clear some of the subresources.
+            const auto& clearedMips =
+                mipLevelCount == 1 ? std::vector<std::pair<uint32_t, uint32_t>>{{0, 1}}
+                                   : std::vector<std::pair<uint32_t, uint32_t>>{{0, 2}, {3, 4}};
+            const auto& clearedLayers =
+                arrayLayerCount == 1 ? std::vector<std::pair<uint32_t, uint32_t>>{{0, 1}}
+                                     : std::vector<std::pair<uint32_t, uint32_t>>{{2, 4}, {6, 7}};
+
+            // Compute the texture size.
+            uint32_t width = 1u << (mipLevelCount - 1);
+            uint32_t height = 1u << (mipLevelCount - 1);
+
+            // Create the texture.
+            wgpu::TextureDescriptor texDesc;
+            texDesc.format = wgpu::TextureFormat::Depth16Unorm;
+            texDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc |
+                            wgpu::TextureUsage::CopyDst;
+            texDesc.size = {width, height, arrayLayerCount};
+            texDesc.mipLevelCount = mipLevelCount;
+            wgpu::Texture tex = device.CreateTexture(&texDesc);
+
+            // Initialize all subresources with WriteTexture.
+            for (uint32_t level = 0; level < mipLevelCount; ++level) {
+                for (uint32_t layer = 0; layer < arrayLayerCount; ++layer) {
+                    wgpu::ImageCopyTexture imageCopyTexture =
+                        utils::CreateImageCopyTexture(tex, level, {0, 0, layer});
+                    wgpu::Extent3D copySize = {width >> level, height >> level, 1};
+
+                    wgpu::TextureDataLayout textureDataLayout;
+                    textureDataLayout.offset = 0;
+                    textureDataLayout.bytesPerRow = copySize.width * sizeof(uint16_t);
+                    textureDataLayout.rowsPerImage = copySize.height;
+
+                    // Use a distinct value for each subresource.
+                    uint16_t value = level * 10 + layer;
+                    std::vector<uint16_t> data(copySize.width * copySize.height, value);
+                    queue.WriteTexture(&imageCopyTexture, data.data(),
+                                       data.size() * sizeof(uint16_t), &textureDataLayout,
+                                       &copySize);
+                }
+            }
+
+            // Prep a viewDesc for rendering to depth. The base layer and level
+            // will be set later.
+            wgpu::TextureViewDescriptor viewDesc = {};
+            viewDesc.mipLevelCount = 1u;
+            viewDesc.arrayLayerCount = 1u;
+
+            // Overwrite some subresources with a render pass
+            {
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+                for (const auto& clearedMipRange : clearedMips) {
+                    for (const auto& clearedLayerRange : clearedLayers) {
+                        for (uint32_t level = clearedMipRange.first; level < clearedMipRange.second;
+                             ++level) {
+                            for (uint32_t layer = clearedLayerRange.first;
+                                 layer < clearedLayerRange.second; ++layer) {
+                                viewDesc.baseMipLevel = level;
+                                viewDesc.baseArrayLayer = layer;
+
+                                utils::ComboRenderPassDescriptor renderPass(
+                                    {}, tex.CreateView(&viewDesc));
+                                renderPass.UnsetDepthStencilLoadStoreOpsForFormat(texDesc.format);
+                                renderPass.cDepthStencilAttachmentInfo.depthClearValue = 0.8;
+                                renderPass.cDepthStencilAttachmentInfo.depthLoadOp =
+                                    wgpu::LoadOp::Clear;
+                                renderPass.cDepthStencilAttachmentInfo.depthStoreOp =
+                                    wgpu::StoreOp::Store;
+                                encoder.BeginRenderPass(&renderPass).End();
+                            }
+                        }
+                    }
+                }
+                wgpu::CommandBuffer commands = encoder.Finish();
+                queue.Submit(1, &commands);
+            }
+
+            // Iterate all subresources.
+            for (uint32_t level = 0; level < mipLevelCount; ++level) {
+                for (uint32_t layer = 0; layer < arrayLayerCount; ++layer) {
+                    bool cleared = false;
+                    for (const auto& clearedMipRange : clearedMips) {
+                        for (const auto& clearedLayerRange : clearedLayers) {
+                            if (level >= clearedMipRange.first && level < clearedMipRange.second &&
+                                layer >= clearedLayerRange.first &&
+                                layer < clearedLayerRange.second) {
+                                cleared = true;
+                            }
+                        }
+                    }
+                    uint32_t mipWidth = width >> level;
+                    uint32_t mipHeight = height >> level;
+                    if (cleared) {
+                        // Check the subresource is cleared as expected.
+                        std::vector<uint16_t> data(mipWidth * mipHeight, 0xCCCC);
+                        EXPECT_TEXTURE_EQ(data.data(), tex, {0, 0, layer}, {mipWidth, mipHeight},
+                                          level)
+                            << "cleared texture data should have been 0xCCCC at:"
+                            << "\nlayer: " << layer << "\nlevel: " << level;
+                    } else {
+                        // Otherwise, check the other subresources have the orignal contents.
+                        // Without the workaround, they are 0.
+                        uint16_t value =
+                            level * 10 + layer;  // Compute the expected value for the subresource.
+                        std::vector<uint16_t> data(mipWidth * mipHeight, value);
+                        EXPECT_TEXTURE_EQ(data.data(), tex, {0, 0, layer}, {mipWidth, mipHeight},
+                                          level)
+                            << "written texture data should still be " << value << " at:"
+                            << "\nlayer: " << layer << "\nlevel: " << level;
+                    }
+                }
+            }
+        }
+    }
+}
+
+DAWN_INSTANTIATE_TEST(RenderPassTest_RegressionDawn1389,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      MetalBackend({"use_blit_for_buffer_to_depth_texture_copy"}),
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());

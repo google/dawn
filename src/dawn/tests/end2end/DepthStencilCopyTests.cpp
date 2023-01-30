@@ -918,7 +918,8 @@ TEST_P(StencilCopyTests, CopyNonzeroMipThenReadWithStencilTest) {
 
 DAWN_INSTANTIATE_TEST_P(DepthStencilCopyTests,
                         {D3D12Backend(), MetalBackend(),
-                         MetalBackend({"use_temp_texture_in_stencil_texture_to_buffer_copy"}),
+                         MetalBackend({"use_blit_for_buffer_to_depth_texture_copy",
+                                       "use_blit_for_buffer_to_stencil_texture_copy"}),
                          OpenGLBackend(), OpenGLESBackend(),
                          // Test with the vulkan_use_s8 toggle forced on and off.
                          VulkanBackend({"vulkan_use_s8"}, {}),
@@ -938,7 +939,9 @@ DAWN_INSTANTIATE_TEST_P(DepthCopyFromBufferTests,
                         {D3D12Backend(),
                          D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
                                        "copy_with_non_zero_buffer_offset"}),
-                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+                         MetalBackend(),
+                         MetalBackend({"use_blit_for_buffer_to_depth_texture_copy"}),
+                         OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
                         std::vector<wgpu::TextureFormat>(kValidDepthCopyFromBufferFormats.begin(),
                                                          kValidDepthCopyFromBufferFormats.end()));
 
@@ -948,10 +951,10 @@ DAWN_INSTANTIATE_TEST_P(
      D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
                    "copy_with_non_zero_buffer_offset"}),
      MetalBackend(), MetalBackend({"metal_use_combined_depth_stencil_format_for_stencil8"}),
-     MetalBackend({"use_temp_texture_in_stencil_texture_to_buffer_copy"}),
      MetalBackend(
          {"metal_use_both_depth_and_stencil_attachments_for_combined_depth_stencil_formats"}),
-     OpenGLBackend(), OpenGLESBackend(),
+     MetalBackend({"use_blit_for_buffer_to_stencil_texture_copy"}), OpenGLBackend(),
+     OpenGLESBackend(),
      // Test with the vulkan_use_s8 toggle forced on and off.
      VulkanBackend({"vulkan_use_s8"}, {}), VulkanBackend({}, {"vulkan_use_s8"})},
     std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(), utils::kStencilFormats.end()));

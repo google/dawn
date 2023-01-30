@@ -259,9 +259,10 @@ void Device::InitTogglesFromDriver() {
 
 #if DAWN_PLATFORM_IS(MACOS)
     if (gpu_info::IsIntel(vendorId)) {
-        SetToggle(Toggle::UseTempTextureInStencilTextureToBufferCopy, true);
         SetToggle(Toggle::MetalUseBothDepthAndStencilAttachmentsForCombinedDepthStencilFormats,
                   true);
+        SetToggle(Toggle::UseBlitForBufferToStencilTextureCopy, true);
+        SetToggle(Toggle::UseBlitForBufferToDepthTextureCopy, true);
 
         if ([NSProcessInfo.processInfo
                 isOperatingSystemAtLeastVersion:NSOperatingSystemVersion{12, 0, 0}]) {
@@ -496,17 +497,17 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
 // sets the private storage mode by default for all textures except IOSurfaces on macOS.
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
                                                 const TextureDataLayout& dataLayout,
-                                                TextureCopy* dst,
+                                                const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
-    Texture* texture = ToBackend(dst->texture.Get());
+    Texture* texture = ToBackend(dst.texture.Get());
     texture->SynchronizeTextureBeforeUse(GetPendingCommandContext());
     EnsureDestinationTextureInitialized(GetPendingCommandContext(DeviceBase::SubmitMode::Passive),
-                                        texture, *dst, copySizePixels);
+                                        texture, dst, copySizePixels);
 
     RecordCopyBufferToTexture(GetPendingCommandContext(DeviceBase::SubmitMode::Passive),
                               ToBackend(source)->GetMTLBuffer(), source->GetSize(),
                               dataLayout.offset, dataLayout.bytesPerRow, dataLayout.rowsPerImage,
-                              texture, dst->mipLevel, dst->origin, dst->aspect, copySizePixels);
+                              texture, dst.mipLevel, dst.origin, dst.aspect, copySizePixels);
     return {};
 }
 

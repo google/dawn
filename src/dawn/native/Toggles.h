@@ -84,7 +84,8 @@ enum class Toggle {
     D3D12Allocate2DTexturewithCopyDstAsCommittedResource,
     MetalUseCombinedDepthStencilFormatForStencil8,
     MetalUseBothDepthAndStencilAttachmentsForCombinedDepthStencilFormats,
-    UseTempTextureInStencilTextureToBufferCopy,
+    UseBlitForBufferToDepthTextureCopy,
+    UseBlitForBufferToStencilTextureCopy,
     DisallowDeprecatedAPIs,
 
     // Unresolved issues.

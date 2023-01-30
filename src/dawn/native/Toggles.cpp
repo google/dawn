@@ -342,11 +342,17 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "for stencil8 formats if metal_use_combined_depth_stencil_format_for_stencil8 is also "
       "enabled.",
       "https://crbug.com/dawn/1389"}},
-    {Toggle::UseTempTextureInStencilTextureToBufferCopy,
-     {"use_temp_texture_in_stencil_texture_to_buffer_copy",
-      "Use an intermediate temporary texture when copying the stencil aspect of a texture to a "
-      "buffer. Works around an issue where stencil writes from a render pass are not reflected in "
-      "the destination buffer.",
+    {Toggle::UseBlitForBufferToDepthTextureCopy,
+     {"use_blit_for_buffer_to_depth_texture_copy",
+      "Use a blit instead of a copy command to copy buffer data to the depth aspect of a "
+      "texture. Works around an issue where depth writes by copy commands are not visible "
+      "to a render or compute pass.",
+      "https://crbug.com/dawn/1389"}},
+    {Toggle::UseBlitForBufferToStencilTextureCopy,
+     {"use_blit_for_buffer_to_stencil_texture_copy",
+      "Use a blit instead of a copy command to copy buffer data to the stencil aspect of a "
+      "texture. Works around an issue where stencil writes by copy commands are not visible "
+      "to a render or compute pass.",
       "https://crbug.com/dawn/1389"}},
     {Toggle::DisallowDeprecatedAPIs,
      {"disallow_deprecated_apis",

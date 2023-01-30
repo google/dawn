@@ -22,6 +22,7 @@
 #include "dawn/common/Math.h"
 #include "dawn/native/ApplyClearColorValueWithDrawHelper.h"
 #include "dawn/native/BindGroup.h"
+#include "dawn/native/BlitBufferToDepthStencil.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/ChainUtils_autogen.h"
 #include "dawn/native/CommandBuffer.h"
@@ -1218,17 +1219,35 @@ void CommandEncoder::APICopyBufferToTexture(const ImageCopyBuffer* source,
             TextureDataLayout srcLayout = source->layout;
             ApplyDefaultTextureDataLayoutOptions(&srcLayout, blockInfo, *copySize);
 
+            TextureCopy dst;
+            dst.texture = destination->texture;
+            dst.origin = destination->origin;
+            dst.mipLevel = destination->mipLevel;
+            dst.aspect = ConvertAspect(destination->texture->GetFormat(), destination->aspect);
+
+            if (dst.aspect == Aspect::Depth &&
+                GetDevice()->IsToggleEnabled(Toggle::UseBlitForBufferToDepthTextureCopy)) {
+                DAWN_TRY_CONTEXT(
+                    BlitBufferToDepth(GetDevice(), this, source->buffer, srcLayout, dst, *copySize),
+                    "copying from %s to depth aspect of %s using blit workaround.", source->buffer,
+                    dst.texture.Get());
+                return {};
+            } else if (dst.aspect == Aspect::Stencil &&
+                       GetDevice()->IsToggleEnabled(Toggle::UseBlitForBufferToStencilTextureCopy)) {
+                DAWN_TRY_CONTEXT(BlitBufferToStencil(GetDevice(), this, source->buffer, srcLayout,
+                                                     dst, *copySize),
+                                 "copying from %s to stencil aspect of %s using blit workaround.",
+                                 source->buffer, dst.texture.Get());
+                return {};
+            }
+
             CopyBufferToTextureCmd* copy =
                 allocator->Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
             copy->source.buffer = source->buffer;
             copy->source.offset = srcLayout.offset;
             copy->source.bytesPerRow = srcLayout.bytesPerRow;
             copy->source.rowsPerImage = srcLayout.rowsPerImage;
-            copy->destination.texture = destination->texture;
-            copy->destination.origin = destination->origin;
-            copy->destination.mipLevel = destination->mipLevel;
-            copy->destination.aspect =
-                ConvertAspect(destination->texture->GetFormat(), destination->aspect);
+            copy->destination = dst;
             copy->copySize = *copySize;
 
             return {};
@@ -1277,45 +1296,12 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
             TextureDataLayout dstLayout = destination->layout;
             ApplyDefaultTextureDataLayoutOptions(&dstLayout, blockInfo, *copySize);
 
-            TextureCopy copySrc;
-            copySrc.texture = source->texture;
-            copySrc.origin = source->origin;
-            copySrc.mipLevel = source->mipLevel;
-            copySrc.aspect = ConvertAspect(source->texture->GetFormat(), source->aspect);
-
-            if (copySrc.aspect == Aspect::Stencil &&
-                GetDevice()->IsToggleEnabled(Toggle::UseTempTextureInStencilTextureToBufferCopy)) {
-                // Encode a copy to an intermediate texture.
-                TextureDescriptor desc = {};
-                desc.format = source->texture->GetFormat().format;
-                desc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
-                desc.size = *copySize;
-
-                Ref<TextureBase> intermediateTexture;
-                DAWN_TRY_ASSIGN(intermediateTexture, GetDevice()->CreateTexture(&desc));
-
-                // Allocate the intermediate t2t command.
-                Aspect aspect =
-                    ConvertAspect(source->texture->GetFormat(), wgpu::TextureAspect::All);
-                CopyTextureToTextureCmd* t2t =
-                    allocator->Allocate<CopyTextureToTextureCmd>(Command::CopyTextureToTexture);
-                t2t->source = copySrc;
-                t2t->source.aspect = aspect;
-                t2t->destination.texture = intermediateTexture;
-                t2t->destination.origin = {};
-                t2t->destination.mipLevel = 0;
-                t2t->destination.aspect = aspect;
-                t2t->copySize = *copySize;
-
-                // Replace the `copySrc` with the intermediate texture.
-                copySrc.texture = intermediateTexture;
-                copySrc.mipLevel = 0;
-                copySrc.origin = {};
-            }
-
             CopyTextureToBufferCmd* t2b =
                 allocator->Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
-            t2b->source = copySrc;
+            t2b->source.texture = source->texture;
+            t2b->source.origin = source->origin;
+            t2b->source.mipLevel = source->mipLevel;
+            t2b->source.aspect = ConvertAspect(source->texture->GetFormat(), source->aspect);
             t2b->destination.buffer = destination->buffer;
             t2b->destination.offset = dstLayout.offset;
             t2b->destination.bytesPerRow = dstLayout.bytesPerRow;
@@ -1655,6 +1641,19 @@ MaybeError CommandEncoder::ValidateFinish() const {
         mDebugGroupStackSize);
 
     return {};
+}
+
+CommandEncoder::InternalUsageScope CommandEncoder::MakeInternalUsageScope() {
+    return InternalUsageScope(this);
+}
+
+CommandEncoder::InternalUsageScope::InternalUsageScope(CommandEncoder* encoder)
+    : mEncoder(encoder), mUsageValidationMode(mEncoder->mUsageValidationMode) {
+    mEncoder->mUsageValidationMode = UsageValidationMode::Internal;
+}
+
+CommandEncoder::InternalUsageScope::~InternalUsageScope() {
+    mEncoder->mUsageValidationMode = mUsageValidationMode;
 }
 
 }  // namespace dawn::native

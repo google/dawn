@@ -315,14 +315,6 @@ crbug.com/dawn/1083 [ monterey ] webgpu:api,operation,command_buffer,copyTexture
 crbug.com/dawn/1500 [ intel-gen-9 monterey ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="PartialCopyT2B";* [ RetryOnFailure ]
 
 ################################################################################
-# webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
-# Failures on Mac Intel, likely also due to crbug.com/dawn/1083
-################################################################################
-crbug.com/dawn/1389 [ monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth16unorm" [ Failure ]
-crbug.com/dawn/1389 [ monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth16unorm" [ Failure ]
-crbug.com/dawn/1389 [ monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth16unorm" [ Failure ]
-
-################################################################################
 # copyToTexture,canvas:color_space_conversion:* fail with swiftshader
 # The other tests about canvas and image bitmap fail with swiftshader on Linux
 # KEEP

@@ -26,6 +26,7 @@
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/BlitBufferToDepthStencil.h"
 #include "dawn/native/BlobCache.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/ChainUtils_autogen.h"
@@ -1938,11 +1939,25 @@ MaybeError DeviceBase::CopyFromStagingToBuffer(BufferBase* source,
     return {};
 }
 
-MaybeError DeviceBase::CopyFromStagingToTexture(const BufferBase* source,
+MaybeError DeviceBase::CopyFromStagingToTexture(BufferBase* source,
                                                 const TextureDataLayout& src,
-                                                TextureCopy* dst,
+                                                const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
-    DAWN_TRY(CopyFromStagingToTextureImpl(source, src, dst, copySizePixels));
+    if (dst.aspect == Aspect::Depth &&
+        IsToggleEnabled(Toggle::UseBlitForBufferToDepthTextureCopy)) {
+        DAWN_TRY_CONTEXT(BlitStagingBufferToDepth(this, source, src, dst, copySizePixels),
+                         "copying from staging buffer to depth aspect of %s using blit workaround.",
+                         dst.texture.Get());
+    } else if (dst.aspect == Aspect::Stencil &&
+               IsToggleEnabled(Toggle::UseBlitForBufferToStencilTextureCopy)) {
+        DAWN_TRY_CONTEXT(
+            BlitStagingBufferToStencil(this, source, src, dst, copySizePixels),
+            "copying from staging buffer to stencil aspect of %s using blit workaround.",
+            dst.texture.Get());
+    } else {
+        DAWN_TRY(CopyFromStagingToTextureImpl(source, src, dst, copySizePixels));
+    }
+
     if (GetDynamicUploader()->ShouldFlush()) {
         ForceEventualFlushOfCommands();
     }

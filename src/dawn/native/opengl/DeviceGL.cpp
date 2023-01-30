@@ -423,7 +423,7 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
 
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
                                                 const TextureDataLayout& src,
-                                                TextureCopy* dst,
+                                                const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
     return DAWN_UNIMPLEMENTED_ERROR("Device unable to copy from staging buffer to texture.");
 }
