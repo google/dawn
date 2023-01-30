@@ -112,8 +112,8 @@ struct PreservePadding::State {
         //
         // Since this requires passing pointers to the storage address space, this will also enable
         // the chromium_experimental_full_ptr_parameters extension.
-        constexpr const char* kDestParamName = "dest";
-        constexpr const char* kValueParamName = "value";
+        const char* kDestParamName = "dest";
+        const char* kValueParamName = "value";
         auto call_helper = [&](auto&& body) {
             EnableExtension();
             auto helper = helpers.GetOrCreate(ty, [&]() {

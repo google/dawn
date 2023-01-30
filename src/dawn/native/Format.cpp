@@ -69,19 +69,19 @@ bool Format::IsColor() const {
 }
 
 bool Format::HasDepth() const {
-    return (aspects & Aspect::Depth) != 0;
+    return aspects & Aspect::Depth;
 }
 
 bool Format::HasStencil() const {
-    return (aspects & Aspect::Stencil) != 0;
+    return aspects & Aspect::Stencil;
 }
 
 bool Format::HasDepthOrStencil() const {
-    return (aspects & (Aspect::Depth | Aspect::Stencil)) != 0;
+    return aspects & (Aspect::Depth | Aspect::Stencil);
 }
 
 bool Format::IsMultiPlanar() const {
-    return (aspects & (Aspect::Plane0 | Aspect::Plane1)) != 0;
+    return aspects & (Aspect::Plane0 | Aspect::Plane1);
 }
 
 bool Format::CopyCompatibleWith(const Format& format) const {
@@ -212,7 +212,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
                         UNREACHABLE();
                 }
             } else {
-                ASSERT((sampleTypes & SampleTypeBit::Float) != 0);
+                ASSERT(sampleTypes & SampleTypeBit::Float);
                 firstAspect->baseType = wgpu::TextureComponentType::Float;
             }
             firstAspect->supportedSampleTypes = sampleTypes;

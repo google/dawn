@@ -1854,7 +1854,7 @@ ConstEval::Result ConstEval::OpShiftRight(const type::Type* ty,
             using NumberT = decltype(e1);
             using T = UnwrapNumber<NumberT>;
             using UT = std::make_unsigned_t<T>;
-            constexpr size_t bit_width = BitWidth<NumberT>;
+            const size_t bit_width = BitWidth<NumberT>;
             const UT e1u = static_cast<UT>(e1);
             const UT e2u = static_cast<UT>(e2);
 

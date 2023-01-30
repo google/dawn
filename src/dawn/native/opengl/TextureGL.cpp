@@ -246,7 +246,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
     float fClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.f : 1.f;
 
     if (GetFormat().isRenderable) {
-        if ((range.aspects & (Aspect::Depth | Aspect::Stencil)) != 0) {
+        if (range.aspects & (Aspect::Depth | Aspect::Stencil)) {
             GLfloat depth = fClearColor;
             GLint stencil = clearColor;
             if (range.aspects & Aspect::Depth) {

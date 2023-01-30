@@ -415,8 +415,8 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                 layoutInfo.texture.multisampled, shaderInfo.texture.multisampled);
 
             // TODO(dawn:563): Provide info about the sample types.
-            DAWN_INVALID_IF((SampleTypeToSampleTypeBit(layoutInfo.texture.sampleType) &
-                             shaderInfo.texture.compatibleSampleTypes) == 0,
+            DAWN_INVALID_IF(!(SampleTypeToSampleTypeBit(layoutInfo.texture.sampleType) &
+                              shaderInfo.texture.compatibleSampleTypes),
                             "The sample type in the shader is not compatible with the "
                             "sample type of the layout.");
 

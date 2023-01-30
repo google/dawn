@@ -149,7 +149,7 @@ MaybeError ValidateTextureBinding(DeviceBase* device,
                             texture->GetSampleCount(), texture, bindingInfo.texture.multisampled);
 
             DAWN_INVALID_IF(
-                (supportedTypes & requiredType) == 0,
+                !(supportedTypes & requiredType),
                 "None of the supported sample types (%s) of %s match the expected sample "
                 "types (%s).",
                 supportedTypes, texture, requiredType);
