@@ -270,8 +270,8 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
         case wgpu::ExternalTextureRotation::Rotate0Degrees:
             break;
         case wgpu::ExternalTextureRotation::Rotate90Degrees:
-            coordTransformMatrix = Mul(mat2x3{0, +1, 0,   // x' = y
-                                              -1, 0, 0},  // y' = -x
+            coordTransformMatrix = Mul(mat2x3{0, -1, 0,   // x' = -y
+                                              +1, 0, 0},  // y' = x
                                        coordTransformMatrix);
             break;
         case wgpu::ExternalTextureRotation::Rotate180Degrees:
@@ -280,8 +280,8 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
                                        coordTransformMatrix);
             break;
         case wgpu::ExternalTextureRotation::Rotate270Degrees:
-            coordTransformMatrix = Mul(mat2x3{0, -1, 0,   // x' = -y
-                                              +1, 0, 0},  // y' = x
+            coordTransformMatrix = Mul(mat2x3{0, +1, 0,   // x' = y
+                                              -1, 0, 0},  // y' = -x
                                        coordTransformMatrix);
             break;
     }
