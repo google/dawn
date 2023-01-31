@@ -61,7 +61,7 @@
          %37 = OpLogicalAnd %bool %35 %36
          %38 = OpLogicalOr %bool %34 %37
          %33 = OpSelect %int %38 %int_1 %rhs_0
-         %39 = OpSMod %int %lhs_0 %33
+         %39 = OpSRem %int %lhs_0 %33
                OpReturnValue %39
                OpFunctionEnd
         %foo = OpFunction %void None %40

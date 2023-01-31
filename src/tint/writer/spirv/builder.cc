@@ -2129,7 +2129,7 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
         } else if (lhs_is_unsigned) {
             op = spv::Op::OpUMod;
         } else {
-            op = spv::Op::OpSMod;
+            op = spv::Op::OpSRem;
         }
     } else if (expr->IsMultiply()) {
         if (lhs_type->is_integer_scalar_or_vector()) {

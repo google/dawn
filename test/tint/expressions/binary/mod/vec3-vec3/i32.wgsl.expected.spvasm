@@ -42,7 +42,7 @@
          %19 = OpLogicalAnd %v3bool %15 %18
          %20 = OpLogicalOr %v3bool %10 %19
           %8 = OpSelect %v3int %20 %22 %rhs
-         %23 = OpSMod %v3int %lhs %8
+         %23 = OpSRem %v3int %lhs %8
                OpReturnValue %23
                OpFunctionEnd
           %f = OpFunction %void None %24
