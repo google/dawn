@@ -135,7 +135,8 @@ rem To use ninja with CMake requires VC env vars
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 @echo on
 rem Note that we need to specify the C and C++ compiler only because Cygwin is in PATH and CMake finds GCC and picks that over MSVC
-cmake %SRC_DIR% -G "Ninja" -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" %COMMON_CMAKE_FLAGS% || goto :error
+rem We also need to specify the Ninja binary is ninja.bat because the Ninja picked up otherwise is depot_tools' shell script.
+cmake %SRC_DIR% -G "Ninja" -DCMAKE_MAKE_PROGRAM="ninja.bat" -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" %COMMON_CMAKE_FLAGS% || goto :error
 cmake --build . || goto :error
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat" /clean_env
 @echo off
