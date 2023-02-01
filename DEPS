@@ -37,11 +37,11 @@ vars = {
 deps = {
   # Dependencies required to use GN/Clang in standalone
   'build': {
-    'url': '{chromium_git}/chromium/src/build@01569374d46a14b225586c564146a8e1749520b6',
+    'url': '{chromium_git}/chromium/src/build@6dc6eb47fb899a7d3ddbc6812d09ee9f7f1879ce',
     'condition': 'dawn_standalone',
   },
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@cccaf48c82bcf4ddafa6f8aa9f06014a1ef434bf',
+    'url': '{chromium_git}/chromium/src/buildtools@3c7e3f1b8b1e4c0b6ec693430379cea682de78d6',
     'condition': 'dawn_standalone',
   },
   'buildtools/clang_format/script': {
@@ -74,17 +74,17 @@ deps = {
   },
 
   'buildtools/third_party/libc++/trunk': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@26d0ab4151fd10c523fdbb5bbdb59aa5a5774820',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@bfaf65c48faadc153f3b31c42c5d7b5dc76b30a1',
     'condition': 'dawn_standalone',
   },
 
   'buildtools/third_party/libc++abi/trunk': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@5c3e02e92ae8bbc1bf1001bd9ef0d76e044ddb86',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@b74d7716111d7eda5c03cb8f5dfc940e1c2c0030',
     'condition': 'dawn_standalone',
   },
 
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@a5e0d72349d028a4023927d6d166a8478355fac3',
+    'url': '{chromium_git}/chromium/src/tools/clang@c272f2cdc17991d3298d6263a7a2326941b25129',
     'condition': 'dawn_standalone',
   },
   'tools/clang/dsymutil': {
@@ -98,16 +98,16 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@e3e8c19554e8f47da85d35e4f990cdc30a061196',
+    'url': '{chromium_git}/chromium/src/testing@a9787cefaec53e7c15bd2bf7f31cd913b640c871',
     'condition': 'dawn_standalone',
   },
   'third_party/googletest': {
-    'url': '{chromium_git}/external/github.com/google/googletest@d1a0039b97291dd1dc14f123b906bb7622ffe07c',
+    'url': '{chromium_git}/external/github.com/google/googletest@b72202078d0a7a2f2509eb5237685bcf1baea3b4',
     'condition': 'dawn_standalone',
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@4a0e6f034e9756605cfc837c8526588d6c13436b',
+    'url': '{chromium_git}/catapult.git@35952dc547f244194377541105ce1e5776200ae3',
     'condition': 'dawn_standalone',
   },
 
