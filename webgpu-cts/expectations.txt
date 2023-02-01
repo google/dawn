@@ -299,15 +299,6 @@ crbug.com/tint/1771 [ ubuntu ] webgpu:api,validation,compute_pipeline:overrides,
 crbug.com/tint/1771 [ win10 ] webgpu:api,validation,compute_pipeline:overrides,workgroup_size,limits,* [ Failure ]
 crbug.com/tint/1805 webgpu:shader,validation,parse,align:align_required_alignment:* [ Failure ]
 
-################################################################################
-# Failures with depth/stencil textures on Intel Mac
-################################################################################
-crbug.com/dawn/1083 [ monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth16unorm" [ Failure ]
-crbug.com/dawn/1083 [ monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus" [ Failure ]
-crbug.com/dawn/1083 [ monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus-stencil8" [ Failure ]
-crbug.com/dawn/1083 [ monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth32float" [ Failure ]
-crbug.com/dawn/1083 [ monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth32float-stencil8" [ Failure ]
-
 ############################################################################
 # Flaky on Intel Mac
 # KEEP

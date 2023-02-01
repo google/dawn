@@ -263,6 +263,7 @@ void Device::InitTogglesFromDriver() {
                   true);
         SetToggle(Toggle::UseBlitForBufferToStencilTextureCopy, true);
         SetToggle(Toggle::UseBlitForBufferToDepthTextureCopy, true);
+        SetToggle(Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource, true);
 
         if ([NSProcessInfo.processInfo
                 isOperatingSystemAtLeastVersion:NSOperatingSystemVersion{12, 0, 0}]) {

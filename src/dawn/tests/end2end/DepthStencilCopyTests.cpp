@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <algorithm>
 #include <array>
 #include <string>
 #include <vector>
@@ -130,7 +131,8 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
                                              float regionDepth,
                                              uint8_t clearStencil,
                                              uint8_t regionStencil,
-                                             uint32_t mipLevel = 0) {
+                                             uint32_t mipLevel = 0,
+                                             uint32_t arrayLayer = 0) {
         wgpu::TextureFormat format = GetParam().mTextureFormat;
         // Create the render pass used for the initialization.
         utils::ComboRenderPipelineDescriptor renderPipelineDesc;
@@ -162,6 +164,8 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
         wgpu::TextureViewDescriptor viewDesc = {};
         viewDesc.baseMipLevel = mipLevel;
         viewDesc.mipLevelCount = 1;
+        viewDesc.baseArrayLayer = arrayLayer;
+        viewDesc.arrayLayerCount = 1;
 
         utils::ComboRenderPassDescriptor renderPassDesc({}, texture.CreateView(&viewDesc));
         renderPassDesc.UnsetDepthStencilLoadStoreOpsForFormat(format);
@@ -916,24 +920,142 @@ TEST_P(StencilCopyTests, CopyNonzeroMipThenReadWithStencilTest) {
                                     kWidth >> kMipLevel, kWidth >> kMipLevel, 0u, kMipLevel, 7u);
 }
 
-DAWN_INSTANTIATE_TEST_P(DepthStencilCopyTests,
-                        {D3D12Backend(), MetalBackend(),
-                         MetalBackend({"use_blit_for_buffer_to_depth_texture_copy",
-                                       "use_blit_for_buffer_to_stencil_texture_copy"}),
-                         OpenGLBackend(), OpenGLESBackend(),
-                         // Test with the vulkan_use_s8 toggle forced on and off.
-                         VulkanBackend({"vulkan_use_s8"}, {}),
-                         VulkanBackend({}, {"vulkan_use_s8"})},
-                        std::vector<wgpu::TextureFormat>(utils::kDepthAndStencilFormats.begin(),
-                                                         utils::kDepthAndStencilFormats.end()));
+class DepthStencilCopyTests_RegressionDawn1083 : public DepthStencilCopyTests {};
 
-DAWN_INSTANTIATE_TEST_P(DepthCopyTests,
-                        {D3D12Backend(),
-                         D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
-                                       "copy_with_non_zero_buffer_offset"}),
-                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
-                        std::vector<wgpu::TextureFormat>(kValidDepthCopyTextureFormats.begin(),
-                                                         kValidDepthCopyTextureFormats.end()));
+// Regression test for crbug.com/dawn/1083. Checks that T2T copies with
+// various mip/layer counts/offsets works.
+TEST_P(DepthStencilCopyTests_RegressionDawn1083, Run) {
+    // TODO(crbug.com/dawn/1648): Diagnose failure on NVIDIA GLES.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsNvidia());
+
+    uint32_t mipLevelCount = 3;
+    uint32_t arrayLayerCount = 3;
+    wgpu::TextureDescriptor texDesc = {};
+    texDesc.size = {8, 8, arrayLayerCount};
+    texDesc.format = GetParam().mTextureFormat;
+    texDesc.mipLevelCount = mipLevelCount;
+
+    for (uint32_t mipLevel = 0; mipLevel < mipLevelCount; ++mipLevel) {
+        uint32_t mipWidth = texDesc.size.width >> mipLevel;
+        uint32_t mipHeight = texDesc.size.height >> mipLevel;
+        for (uint32_t srcArrayLayer = 0; srcArrayLayer < arrayLayerCount; ++srcArrayLayer) {
+            for (uint32_t dstArrayLayer = 0; dstArrayLayer < arrayLayerCount; ++dstArrayLayer) {
+                // Test copying 1 layer, and all possible layers.
+                for (uint32_t layerCount :
+                     {1u, arrayLayerCount - std::max(srcArrayLayer, dstArrayLayer)}) {
+                    texDesc.usage =
+                        wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+                    wgpu::Texture src = device.CreateTexture(&texDesc);
+
+                    texDesc.usage =
+                        wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopyDst;
+                    wgpu::Texture dst = device.CreateTexture(&texDesc);
+
+                    // Initialize texture data.
+                    uint8_t stencilValue = 42;
+                    float d1 = 0.1;
+                    float d2 = 0.01;
+                    for (uint32_t z = 0; z < layerCount; ++z) {
+                        InitializeDepthStencilTextureRegion(src, d1, d2, stencilValue, stencilValue,
+                                                            mipLevel, srcArrayLayer + z);
+                    }
+
+                    // Perform a T2T copy
+                    {
+                        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+                        wgpu::ImageCopyTexture srcView =
+                            utils::CreateImageCopyTexture(src, mipLevel, {0, 0, srcArrayLayer});
+                        wgpu::ImageCopyTexture dstView =
+                            utils::CreateImageCopyTexture(dst, mipLevel, {0, 0, dstArrayLayer});
+                        wgpu::Extent3D copySize = {mipWidth, mipHeight, layerCount};
+                        commandEncoder.CopyTextureToTexture(&srcView, &dstView, &copySize);
+
+                        wgpu::CommandBuffer commands = commandEncoder.Finish();
+                        queue.Submit(1, &commands);
+                    }
+
+                    // Helper to compute expected depth data.
+                    auto GetExpectedDepthData = [&](uint32_t mipLevel) -> std::vector<float> {
+                        if (mipLevel == 0) {
+                            return {
+                                d1, d1, d1, d1, d1, d1, d1, d1,  //
+                                d1, d1, d1, d1, d1, d1, d1, d1,  //
+                                d1, d1, d1, d1, d1, d1, d1, d1,  //
+                                d1, d1, d1, d1, d1, d1, d1, d1,  //
+                                d2, d2, d2, d2, d1, d1, d1, d1,  //
+                                d2, d2, d2, d2, d1, d1, d1, d1,  //
+                                d2, d2, d2, d2, d1, d1, d1, d1,  //
+                                d2, d2, d2, d2, d1, d1, d1, d1,  //
+                            };
+                        } else if (mipLevel == 1) {
+                            return {
+                                d1, d1, d1, d1,  //
+                                d1, d1, d1, d1,  //
+                                d2, d2, d1, d1,  //
+                                d2, d2, d1, d1,  //
+                            };
+                        } else if (mipLevel == 2) {
+                            return {
+                                d1, d1,  //
+                                d2, d1,  //
+                            };
+                        }
+                        UNREACHABLE();
+                    };
+
+                    // Check the depth
+                    for (uint32_t z = 0; z < layerCount; ++z) {
+                        ExpectAttachmentDepthTestData(dst, GetParam().mTextureFormat, mipWidth,
+                                                      mipHeight, dstArrayLayer + z, mipLevel,
+                                                      GetExpectedDepthData(mipLevel))
+                            << "depth aspect"
+                            << "\nmipLevelCount: " << mipLevelCount
+                            << "\narrayLayerCount: " << arrayLayerCount
+                            << "\nmipLevel: " << mipLevel
+                            << "\nsrcArrayLayer: " << srcArrayLayer + z
+                            << "\ndstArrayLayer: " << dstArrayLayer + z;
+
+                        // Check the stencil
+                        if (!utils::IsDepthOnlyFormat(GetParam().mTextureFormat)) {
+                            ExpectAttachmentStencilTestData(dst, GetParam().mTextureFormat,
+                                                            mipWidth, mipHeight, dstArrayLayer + z,
+                                                            mipLevel, stencilValue)
+                                << "stencil aspect"
+                                << "\nmipLevelCount: " << mipLevelCount
+                                << "\narrayLayerCount: " << arrayLayerCount
+                                << "\nmipLevel: " << mipLevel
+                                << "\nsrcArrayLayer: " << srcArrayLayer + z
+                                << "\ndstArrayLayer: " << dstArrayLayer + z;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+DAWN_INSTANTIATE_TEST_P(
+    DepthStencilCopyTests,
+    {D3D12Backend(), MetalBackend(),
+     MetalBackend({"use_blit_for_depth_texture_to_texture_copy_to_nonzero_subresource"}),
+     MetalBackend({"use_blit_for_buffer_to_depth_texture_copy",
+                   "use_blit_for_buffer_to_stencil_texture_copy"}),
+     OpenGLBackend(), OpenGLESBackend(),
+     // Test with the vulkan_use_s8 toggle forced on and off.
+     VulkanBackend({"vulkan_use_s8"}, {}), VulkanBackend({}, {"vulkan_use_s8"})},
+    std::vector<wgpu::TextureFormat>(utils::kDepthAndStencilFormats.begin(),
+                                     utils::kDepthAndStencilFormats.end()));
+
+DAWN_INSTANTIATE_TEST_P(
+    DepthCopyTests,
+    {D3D12Backend(),
+     D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
+                   "copy_with_non_zero_buffer_offset"}),
+     MetalBackend(),
+     MetalBackend({"use_blit_for_depth_texture_to_texture_copy_to_nonzero_subresource"}),
+     OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+    std::vector<wgpu::TextureFormat>(kValidDepthCopyTextureFormats.begin(),
+                                     kValidDepthCopyTextureFormats.end()));
 
 DAWN_INSTANTIATE_TEST_P(DepthCopyFromBufferTests,
                         {D3D12Backend(),
@@ -958,3 +1080,12 @@ DAWN_INSTANTIATE_TEST_P(
      // Test with the vulkan_use_s8 toggle forced on and off.
      VulkanBackend({"vulkan_use_s8"}, {}), VulkanBackend({}, {"vulkan_use_s8"})},
     std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(), utils::kStencilFormats.end()));
+
+DAWN_INSTANTIATE_TEST_P(
+    DepthStencilCopyTests_RegressionDawn1083,
+    {D3D12Backend(), MetalBackend(),
+     MetalBackend({"use_blit_for_depth_texture_to_texture_copy_to_nonzero_subresource"}),
+     OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+    std::vector<wgpu::TextureFormat>{wgpu::TextureFormat::Depth16Unorm,
+                                     wgpu::TextureFormat::Depth32FloatStencil8,
+                                     wgpu::TextureFormat::Depth24Plus});

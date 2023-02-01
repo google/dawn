@@ -65,6 +65,8 @@ struct InternalPipelineStore {
         std::array<Ref<RenderPipelineBase>, 8> setStencilPipelines;
     };
     std::unordered_map<wgpu::TextureFormat, BlitR8ToStencilPipelines> blitR8ToStencilPipelines;
+
+    std::unordered_map<wgpu::TextureFormat, Ref<RenderPipelineBase>> depthBlitPipelines;
 };
 
 }  // namespace dawn::native
