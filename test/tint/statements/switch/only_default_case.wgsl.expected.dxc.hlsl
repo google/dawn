@@ -2,7 +2,6 @@
 void f() {
   int i = 0;
   int result = 0;
-  i;
   do {
     result = 44;
     break;

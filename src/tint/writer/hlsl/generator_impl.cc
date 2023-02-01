@@ -3859,10 +3859,9 @@ bool GeneratorImpl::EmitDefaultOnlySwitch(const ast::SwitchStatement* stmt) {
     // default case body. We work around this here by emitting the default case
     // without the switch.
 
-    // Emit the switch condition as-is in case it has side-effects (e.g.
-    // function call). Note that's it's fine not to assign the result of the
-    // expression.
-    {
+    // Emit the switch condition as-is if it has side-effects (e.g.
+    // function call). Note that we can ignore the result of the expression (if any).
+    if (auto* sem_cond = builder_.Sem().Get(stmt->condition); sem_cond->HasSideEffects()) {
         auto out = line();
         if (!EmitExpression(out, stmt->condition)) {
             return false;

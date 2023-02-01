@@ -1,0 +1,28 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void foo(float x) {
+  switch(int(x)) {
+    default: {
+      break;
+    }
+  }
+}
+
+int baz(int x) {
+  thread int tint_symbol_1 = 0;
+  tint_symbol_1 = 42;
+  return x;
+}
+
+void bar(float x) {
+  switch(baz(int(x))) {
+    default: {
+      break;
+    }
+  }
+}
+
+void tint_symbol() {
+}
+
