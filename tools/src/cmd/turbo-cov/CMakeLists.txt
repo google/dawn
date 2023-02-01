@@ -34,6 +34,8 @@ if (LLVM_SOURCE_DIR)
             LLVMProfileData
             LLVMCoverage
     )
+
+    common_compile_options(turbo-cov)
 else (LLVM_SOURCE_DIR)
     message("not building turbo-cov as LLVM_SOURCE_DIR is undefined")
 endif (LLVM_SOURCE_DIR)
