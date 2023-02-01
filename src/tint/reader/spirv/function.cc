@@ -882,7 +882,7 @@ void FunctionEmitter::PushGuard(const std::string& guard_name, uint32_t end_id) 
     auto* builder = AddStatementBuilder<IfStatementBuilder>(cond);
 
     PushNewStatementBlock(top.GetConstruct(), end_id, [=](const StatementList& stmts) {
-        builder->body = create<ast::BlockStatement>(Source{}, stmts);
+        builder->body = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
     });
 }
 
@@ -894,7 +894,7 @@ void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
     auto* builder = AddStatementBuilder<IfStatementBuilder>(cond);
 
     PushNewStatementBlock(top.GetConstruct(), end_id, [=](const StatementList& stmts) {
-        builder->body = create<ast::BlockStatement>(Source{}, stmts);
+        builder->body = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
     });
 }
 
@@ -985,7 +985,7 @@ const ast::BlockStatement* FunctionEmitter::MakeFunctionBody() {
 
     statements_stack_[0].Finalize(&builder_);
     auto& statements = statements_stack_[0].GetStatements();
-    auto* body = create<ast::BlockStatement>(Source{}, statements);
+    auto* body = create<ast::BlockStatement>(Source{}, statements, utils::Empty);
 
     // Maintain the invariant by repopulating the one and only element.
     statements_stack_.Clear();
@@ -1407,7 +1407,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         }
     }
 
-    auto* body = create<ast::BlockStatement>(source, stmts);
+    auto* body = create<ast::BlockStatement>(source, stmts, utils::Empty);
     AttributeList fn_attrs;
     fn_attrs.Push(create<ast::StageAttribute>(source, ep_info_->stage));
 
@@ -2938,7 +2938,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
             if (!stmts.IsEmpty()) {
                 // The "else" consists of the statement list from the top of
                 // statements stack, without an "else if" condition.
-                builder->else_stmt = create<ast::BlockStatement>(Source{}, stmts);
+                builder->else_stmt = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
             }
         });
         if (false_is_break) {
@@ -2985,7 +2985,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
 
         // Push the then clause onto the stack.
         PushNewStatementBlock(construct, then_end, [=](const StatementList& stmts) {
-            builder->body = create<ast::BlockStatement>(Source{}, stmts);
+            builder->body = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
         });
         if (true_is_break) {
             AddStatement(create<ast::BreakStatement>(Source{}));
@@ -3098,7 +3098,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
         auto case_idx = swch->cases.Length();
         swch->cases.Push(nullptr);
         PushNewStatementBlock(construct, end_id, [=](const StatementList& stmts) {
-            auto* body = create<ast::BlockStatement>(Source{}, stmts);
+            auto* body = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
             swch->cases[case_idx] = create<ast::CaseStatement>(Source{}, selectors, body);
         });
 
@@ -3113,7 +3113,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
 bool FunctionEmitter::EmitLoopStart(const Construct* construct) {
     auto* builder = AddStatementBuilder<LoopStatementBuilder>();
     PushNewStatementBlock(construct, construct->end_id, [=](const StatementList& stmts) {
-        builder->body = create<ast::BlockStatement>(Source{}, stmts);
+        builder->body = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
     });
     return success();
 }
@@ -3128,7 +3128,7 @@ bool FunctionEmitter::EmitContinuingStart(const Construct* construct) {
                          "expected loop on top of stack";
     }
     PushNewStatementBlock(construct, construct->end_id, [=](const StatementList& stmts) {
-        loop->continuing = create<ast::BlockStatement>(Source{}, stmts);
+        loop->continuing = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
     });
 
     return success();
@@ -3354,11 +3354,11 @@ const ast::Statement* FunctionEmitter::MakeSimpleIf(const ast::Expression* condi
     if (then_stmt != nullptr) {
         if_stmts.Push(then_stmt);
     }
-    auto* if_block = create<ast::BlockStatement>(Source{}, if_stmts);
+    auto* if_block = create<ast::BlockStatement>(Source{}, if_stmts, utils::Empty);
 
     const ast::Statement* else_block = nullptr;
     if (else_stmt) {
-        else_block = create<ast::BlockStatement>(StatementList{else_stmt});
+        else_block = create<ast::BlockStatement>(StatementList{else_stmt}, utils::Empty);
     }
 
     auto* if_stmt = create<ast::IfStatement>(Source{}, condition, if_block, else_block);

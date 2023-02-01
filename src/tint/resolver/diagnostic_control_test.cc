@@ -181,6 +181,66 @@ TEST_F(ResolverDiagnosticControlTest, FunctionAttributeScope) {
 89:10 note: code is unreachable)");
 }
 
+TEST_F(ResolverDiagnosticControlTest, BlockAttributeScope) {
+    // fn foo() @diagnostic(off, chromium_unreachable_code) {
+    //   {
+    //     return;
+    //     return; // Should not produce a diagnostic
+    //   }
+    //   @diagnostic(warning, chromium_unreachable_code) {
+    //     if (true) @diagnostic(info, chromium_unreachable_code) {
+    //       return;
+    //       return; // Should produce an info
+    //     } else {
+    //       while (true) @diagnostic(off, chromium_unreachable_code) {
+    //         return;
+    //         return; // Should not produce a diagnostic
+    //       }
+    //       return;
+    //       return; // Should produce an warning
+    //     }
+    //   }
+    // }
+
+    auto attr = [&](auto severity) {
+        return utils::Vector{DiagnosticAttribute(severity, Expr("chromium_unreachable_code"))};
+    };
+    Func("foo", {}, ty.void_(),
+         utils::Vector{
+             Return(),
+             Return(Source{{12, 21}}),
+             Block(utils::Vector{
+                 Block(
+                     utils::Vector{
+                         If(Expr(true),
+                            Block(
+                                utils::Vector{
+                                    Return(),
+                                    Return(Source{{34, 43}}),
+                                },
+                                attr(ast::DiagnosticSeverity::kInfo)),
+                            Else(Block(utils::Vector{
+                                While(
+                                    Expr(true), Block(
+                                                    utils::Vector{
+                                                        Return(),
+                                                        Return(Source{{56, 65}}),
+                                                    },
+                                                    attr(ast::DiagnosticSeverity::kOff))),
+                                Return(),
+                                Return(Source{{78, 87}}),
+                            }))),
+                     },
+                     attr(ast::DiagnosticSeverity::kWarning)),
+             }),
+         },
+         attr(ast::DiagnosticSeverity::kOff));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(34:43 note: code is unreachable
+78:87 warning: code is unreachable)");
+}
+
 TEST_F(ResolverDiagnosticControlTest, UnrecognizedRuleName_Directive) {
     DiagnosticDirective(ast::DiagnosticSeverity::kError,
                         Expr(Source{{12, 34}}, "chromium_unreachable_cod"));

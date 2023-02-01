@@ -1030,6 +1030,104 @@ TEST_F(OverrideAttributeTest, DuplicateAttribute) {
 12:34 note: first attribute declared here)");
 }
 
+namespace BlockStatementTests {
+class BlockStatementTest : public TestWithParams {
+  protected:
+    void Check() {
+        if (GetParam().should_pass) {
+            EXPECT_TRUE(r()->Resolve()) << r()->error();
+        } else {
+            EXPECT_FALSE(r()->Resolve());
+            EXPECT_EQ(r()->error(), "error: attribute is not valid for block statements");
+        }
+    }
+};
+TEST_P(BlockStatementTest, CompoundStatement) {
+    Func("foo", utils::Empty, ty.void_(),
+         utils::Vector{
+             Block(utils::Vector{Return()}, createAttributes({}, *this, GetParam().kind)),
+         });
+    Check();
+}
+TEST_P(BlockStatementTest, FunctionBody) {
+    Func("foo", utils::Empty, ty.void_(),
+         utils::Vector{
+             Block(utils::Vector{Return()}),
+         },
+         utils::Empty, utils::Empty, createAttributes({}, *this, GetParam().kind));
+    Check();
+}
+TEST_P(BlockStatementTest, IfStatementBody) {
+    Func("foo", utils::Empty, ty.void_(),
+         utils::Vector{
+             If(Expr(true),
+                Block(utils::Vector{Return()}, createAttributes({}, *this, GetParam().kind))),
+         });
+    Check();
+}
+TEST_P(BlockStatementTest, ElseStatementBody) {
+    Func("foo", utils::Empty, ty.void_(),
+         utils::Vector{
+             If(Expr(true), Block(utils::Vector{Return()}),
+                Else(Block(utils::Vector{Return()}, createAttributes({}, *this, GetParam().kind)))),
+         });
+    Check();
+}
+TEST_P(BlockStatementTest, ForStatementBody) {
+    Func("foo", utils::Empty, ty.void_(),
+         utils::Vector{
+             For(nullptr, Expr(true), nullptr,
+                 Block(utils::Vector{Break()}, createAttributes({}, *this, GetParam().kind))),
+         });
+    Check();
+}
+TEST_P(BlockStatementTest, WhileStatementBody) {
+    Func("foo", utils::Empty, ty.void_(),
+         utils::Vector{
+             While(Expr(true),
+                   Block(utils::Vector{Break()}, createAttributes({}, *this, GetParam().kind))),
+         });
+    Check();
+}
+TEST_P(BlockStatementTest, CaseStatementBody) {
+    Func("foo", utils::Empty, ty.void_(),
+         utils::Vector{
+             Switch(1_a,
+                    Case(CaseSelector(1_a), Block(utils::Vector{Break()},
+                                                  createAttributes({}, *this, GetParam().kind))),
+                    DefaultCase(Block({}))),
+         });
+    Check();
+}
+TEST_P(BlockStatementTest, DefaultStatementBody) {
+    Func("foo", utils::Empty, ty.void_(),
+         utils::Vector{
+             Switch(1_a, Case(CaseSelector(1_a), Block()),
+                    DefaultCase(Block(utils::Vector{Break()},
+                                      createAttributes({}, *this, GetParam().kind)))),
+         });
+    Check();
+}
+INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
+                         BlockStatementTest,
+                         testing::Values(TestParams{AttributeKind::kAlign, false},
+                                         TestParams{AttributeKind::kBinding, false},
+                                         TestParams{AttributeKind::kBuiltin, false},
+                                         TestParams{AttributeKind::kDiagnostic, true},
+                                         TestParams{AttributeKind::kGroup, false},
+                                         TestParams{AttributeKind::kId, false},
+                                         TestParams{AttributeKind::kInterpolate, false},
+                                         TestParams{AttributeKind::kInvariant, false},
+                                         TestParams{AttributeKind::kLocation, false},
+                                         TestParams{AttributeKind::kOffset, false},
+                                         TestParams{AttributeKind::kSize, false},
+                                         TestParams{AttributeKind::kStage, false},
+                                         TestParams{AttributeKind::kStride, false},
+                                         TestParams{AttributeKind::kWorkgroup, false},
+                                         TestParams{AttributeKind::kBindingAndGroup, false}));
+
+}  // namespace BlockStatementTests
+
 }  // namespace
 }  // namespace AttributeTests
 

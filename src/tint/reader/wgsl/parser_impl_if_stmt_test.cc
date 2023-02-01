@@ -85,7 +85,7 @@ TEST_F(ParserImplTest, IfStmt_InvalidCondition) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:6: expected '{'");
+    EXPECT_EQ(p->error(), "1:6: expected '{' for if statement");
 }
 
 TEST_F(ParserImplTest, IfStmt_MissingCondition) {
@@ -105,7 +105,7 @@ TEST_F(ParserImplTest, IfStmt_InvalidBody) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:8: expected '}'");
+    EXPECT_EQ(p->error(), "1:8: expected '}' for if statement");
 }
 
 TEST_F(ParserImplTest, IfStmt_MissingBody) {
@@ -115,7 +115,7 @@ TEST_F(ParserImplTest, IfStmt_MissingBody) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:5: expected '{'");
+    EXPECT_EQ(p->error(), "1:5: expected '{' for if statement");
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidElseif) {
@@ -125,7 +125,7 @@ TEST_F(ParserImplTest, IfStmt_InvalidElseif) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:21: expected '}'");
+    EXPECT_EQ(p->error(), "1:21: expected '}' for if statement");
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidElse) {
@@ -135,7 +135,7 @@ TEST_F(ParserImplTest, IfStmt_InvalidElse) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:16: expected '}'");
+    EXPECT_EQ(p->error(), "1:16: expected '}' for else statement");
 }
 
 }  // namespace

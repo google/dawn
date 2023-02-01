@@ -305,7 +305,7 @@ TEST_F(ParserImplTest, FunctionDecl_MissingLeftBrace) {
     EXPECT_FALSE(f.matched);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(f.value, nullptr);
-    EXPECT_EQ(p->error(), "1:11: expected '{'");
+    EXPECT_EQ(p->error(), "1:11: expected '{' for function body");
 }
 
 }  // namespace

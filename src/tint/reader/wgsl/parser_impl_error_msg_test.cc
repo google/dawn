@@ -489,7 +489,7 @@ fn f( {}
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingArrow) {
-    EXPECT("fn f() f32 {}", R"(test.wgsl:1:8 error: expected '{'
+    EXPECT("fn f() f32 {}", R"(test.wgsl:1:8 error: expected '{' for function body
 fn f() f32 {}
        ^^^
 )");
@@ -526,14 +526,14 @@ fn f(x : i32, ,) {}
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingLBrace) {
-    EXPECT("fn f() }", R"(test.wgsl:1:8 error: expected '{'
+    EXPECT("fn f() }", R"(test.wgsl:1:8 error: expected '{' for function body
 fn f() }
        ^
 )");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingRBrace) {
-    EXPECT("fn f() {", R"(test.wgsl:1:9 error: expected '}'
+    EXPECT("fn f() {", R"(test.wgsl:1:9 error: expected '}' for function body
 fn f() {
         ^
 )");
@@ -541,9 +541,9 @@ fn f() {
 
 TEST_F(ParserImplErrorTest, FunctionScopeUnusedDecl) {
     EXPECT("fn f(a:i32)->i32{return a;@size(1)}",
-           R"(test.wgsl:1:27 error: expected '}'
+           R"(test.wgsl:1:28 error: unexpected attributes
 fn f(a:i32)->i32{return a;@size(1)}
-                          ^
+                           ^^^^
 )");
 }
 

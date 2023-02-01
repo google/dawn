@@ -353,7 +353,10 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
         }
 
         if (func->body) {
-            out << " {";
+            out << " ";
+            if (!EmitBlockHeader(out, func->body)) {
+                return false;
+            }
         }
     }
 
@@ -979,12 +982,28 @@ bool GeneratorImpl::EmitUnaryOp(std::ostream& out, const ast::UnaryOpExpression*
 }
 
 bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
-    line() << "{";
+    {
+        auto out = line();
+        if (!EmitBlockHeader(out, stmt)) {
+            return false;
+        }
+    }
     if (!EmitStatementsWithIndent(stmt->statements)) {
         return false;
     }
     line() << "}";
 
+    return true;
+}
+
+bool GeneratorImpl::EmitBlockHeader(std::ostream& out, const ast::BlockStatement* stmt) {
+    if (!stmt->attributes.IsEmpty()) {
+        if (!EmitAttributes(out, stmt->attributes)) {
+            return false;
+        }
+        out << " ";
+    }
+    out << "{";
     return true;
 }
 
@@ -1072,7 +1091,11 @@ bool GeneratorImpl::EmitBreakIf(const ast::BreakIfStatement* b) {
 
 bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
     if (stmt->selectors.Length() == 1 && stmt->ContainsDefault()) {
-        line() << "default: {";
+        auto out = line();
+        out << "default: ";
+        if (!EmitBlockHeader(out, stmt->body)) {
+            return false;
+        }
     } else {
         auto out = line();
         out << "case ";
@@ -1091,7 +1114,10 @@ bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
                 return false;
             }
         }
-        out << ": {";
+        out << ": ";
+        if (!EmitBlockHeader(out, stmt->body)) {
+            return false;
+        }
     }
     if (!EmitStatementsWithIndent(stmt->body->statements)) {
         return false;
@@ -1135,7 +1161,10 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
         if (!EmitExpression(out, stmt->condition)) {
             return false;
         }
-        out << ") {";
+        out << ") ";
+        if (!EmitBlockHeader(out, stmt->body)) {
+            return false;
+        }
     }
 
     if (!EmitStatementsWithIndent(stmt->body->statements)) {
@@ -1151,15 +1180,25 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
                 if (!EmitExpression(out, elseif->condition)) {
                     return false;
                 }
-                out << ") {";
+                out << ") ";
+                if (!EmitBlockHeader(out, elseif->body)) {
+                    return false;
+                }
             }
             if (!EmitStatementsWithIndent(elseif->body->statements)) {
                 return false;
             }
             e = elseif->else_statement;
         } else {
-            line() << "} else {";
-            if (!EmitStatementsWithIndent(e->As<ast::BlockStatement>()->statements)) {
+            auto* body = e->As<ast::BlockStatement>();
+            {
+                auto out = line();
+                out << "} else ";
+                if (!EmitBlockHeader(out, body)) {
+                    return false;
+                }
+            }
+            if (!EmitStatementsWithIndent(body->statements)) {
                 return false;
             }
             break;
@@ -1270,7 +1309,10 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
                     break;
             }
         }
-        out << " {";
+        out << " ";
+        if (!EmitBlockHeader(out, stmt->body)) {
+            return false;
+        }
     }
 
     if (!EmitStatementsWithIndent(stmt->body->statements)) {
@@ -1294,7 +1336,10 @@ bool GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
                 return false;
             }
         }
-        out << " {";
+        out << " ";
+        if (!EmitBlockHeader(out, stmt->body)) {
+            return false;
+        }
     }
 
     if (!EmitStatementsWithIndent(stmt->body->statements)) {

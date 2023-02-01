@@ -23,7 +23,7 @@ TEST_F(ParserImplTest, CompoundStmt) {
   discard;
   return 1 + b / 2;
 })");
-    auto e = p->expect_compound_statement();
+    auto e = p->expect_compound_statement("");
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
     ASSERT_EQ(e->statements.Length(), 2u);
@@ -33,7 +33,7 @@ TEST_F(ParserImplTest, CompoundStmt) {
 
 TEST_F(ParserImplTest, CompoundStmt_Empty) {
     auto p = parser("{}");
-    auto e = p->expect_compound_statement();
+    auto e = p->expect_compound_statement("");
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
     EXPECT_EQ(e->statements.Length(), 0u);
@@ -41,7 +41,7 @@ TEST_F(ParserImplTest, CompoundStmt_Empty) {
 
 TEST_F(ParserImplTest, CompoundStmt_InvalidStmt) {
     auto p = parser("{fn main() {}}");
-    auto e = p->expect_compound_statement();
+    auto e = p->expect_compound_statement("");
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(e.errored);
     EXPECT_EQ(p->error(), "1:2: expected '}'");
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, CompoundStmt_InvalidStmt) {
 
 TEST_F(ParserImplTest, CompoundStmt_MissingRightParen) {
     auto p = parser("{return;");
-    auto e = p->expect_compound_statement();
+    auto e = p->expect_compound_statement("");
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(e.errored);
     EXPECT_EQ(p->error(), "1:9: expected '}'");

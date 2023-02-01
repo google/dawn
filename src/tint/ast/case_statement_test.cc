@@ -31,7 +31,7 @@ TEST_F(CaseStatementTest, Creation_i32) {
     utils::Vector b{selector};
 
     auto* discard = create<DiscardStatement>();
-    auto* body = create<BlockStatement>(utils::Vector{discard});
+    auto* body = create<BlockStatement>(utils::Vector{discard}, utils::Empty);
 
     auto* c = create<CaseStatement>(b, body);
     ASSERT_EQ(c->selectors.Length(), 1u);
@@ -45,7 +45,7 @@ TEST_F(CaseStatementTest, Creation_u32) {
     utils::Vector b{selector};
 
     auto* discard = create<DiscardStatement>();
-    auto* body = create<BlockStatement>(utils::Vector{discard});
+    auto* body = create<BlockStatement>(utils::Vector{discard}, utils::Empty);
 
     auto* c = create<CaseStatement>(b, body);
     ASSERT_EQ(c->selectors.Length(), 1u);
@@ -56,22 +56,24 @@ TEST_F(CaseStatementTest, Creation_u32) {
 
 TEST_F(CaseStatementTest, ContainsDefault_WithDefault) {
     utils::Vector b{CaseSelector(2_u), DefaultCaseSelector()};
-    auto* c = create<CaseStatement>(b, create<BlockStatement>(utils::Empty));
+    auto* c = create<CaseStatement>(b, create<BlockStatement>(utils::Empty, utils::Empty));
     EXPECT_TRUE(c->ContainsDefault());
 }
 
 TEST_F(CaseStatementTest, ContainsDefault_WithOutDefault) {
     utils::Vector b{CaseSelector(2_u), CaseSelector(3_u)};
-    auto* c = create<CaseStatement>(b, create<BlockStatement>(utils::Empty));
+    auto* c = create<CaseStatement>(b, create<BlockStatement>(utils::Empty, utils::Empty));
     EXPECT_FALSE(c->ContainsDefault());
 }
 
 TEST_F(CaseStatementTest, Creation_WithSource) {
     utils::Vector b{CaseSelector(2_i)};
 
-    auto* body = create<BlockStatement>(utils::Vector{
-        create<DiscardStatement>(),
-    });
+    auto* body = create<BlockStatement>(
+        utils::Vector{
+            create<DiscardStatement>(),
+        },
+        utils::Empty);
     auto* c = create<CaseStatement>(Source{Source::Location{20, 2}}, b, body);
     auto src = c->source;
     EXPECT_EQ(src.range.begin.line, 20u);
@@ -80,7 +82,7 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
 
 TEST_F(CaseStatementTest, IsCase) {
     auto* c = create<CaseStatement>(utils::Vector{DefaultCaseSelector()},
-                                    create<BlockStatement>(utils::Empty));
+                                    create<BlockStatement>(utils::Empty, utils::Empty));
     EXPECT_TRUE(c->Is<CaseStatement>());
 }
 
@@ -98,7 +100,7 @@ TEST_F(CaseStatementTest, Assert_Null_Selector) {
         {
             ProgramBuilder b;
             b.create<CaseStatement>(utils::Vector<const ast::CaseSelector*, 1>{nullptr},
-                                    b.create<BlockStatement>(utils::Empty));
+                                    b.create<BlockStatement>(utils::Empty, utils::Empty));
         },
         "internal compiler error");
 }
@@ -109,7 +111,7 @@ TEST_F(CaseStatementTest, Assert_DifferentProgramID_Call) {
             ProgramBuilder b1;
             ProgramBuilder b2;
             b1.create<CaseStatement>(utils::Vector{b1.DefaultCaseSelector()},
-                                     b2.create<BlockStatement>(utils::Empty));
+                                     b2.create<BlockStatement>(utils::Empty, utils::Empty));
         },
         "internal compiler error");
 }
@@ -120,7 +122,7 @@ TEST_F(CaseStatementTest, Assert_DifferentProgramID_Selector) {
             ProgramBuilder b1;
             ProgramBuilder b2;
             b1.create<CaseStatement>(utils::Vector{b2.CaseSelector(b2.Expr(2_i))},
-                                     b1.create<BlockStatement>(utils::Empty));
+                                     b1.create<BlockStatement>(utils::Empty, utils::Empty));
         },
         "internal compiler error");
 }

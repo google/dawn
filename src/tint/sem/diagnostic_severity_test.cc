@@ -30,26 +30,44 @@ class DiagnosticSeverityTest : public TestHelper {
     void Run(ast::DiagnosticSeverity global_severity) {
         // @diagnostic(off, chromium_unreachable_code)
         // fn foo() {
-        //   return;
+        //   @diagnostic(info, chromium_unreachable_code) {
+        //     if (true) @diagnostic(warning, chromium_unreachable_code) {
+        //       return;
+        //     }
+        //   }
         // }
         //
         // fn bar() {
-        //   return;
+        //   {
+        //     if (true) {
+        //       return;
+        //     }
+        //   }
         // }
         auto rule = ast::DiagnosticRule::kChromiumUnreachableCode;
         auto func_severity = ast::DiagnosticSeverity::kOff;
+        auto block_severity = ast::DiagnosticSeverity::kInfo;
+        auto if_severity = ast::DiagnosticSeverity::kInfo;
+        auto attr = [&](auto severity) {
+            return utils::Vector{DiagnosticAttribute(severity, Expr("chromium_unreachable_code"))};
+        };
 
         auto* return_1 = Return();
-        auto* return_2 = Return();
+        auto* if_1 = If(Expr(true), Block(utils::Vector{return_1}, attr(if_severity)));
+        auto* block_1 = Block(utils::Vector{if_1}, attr(block_severity));
         auto* func_attr = DiagnosticAttribute(func_severity, Expr("chromium_unreachable_code"));
-        auto* foo = Func("foo", {}, ty.void_(), utils::Vector{return_1}, utils::Vector{func_attr});
+        auto* foo = Func("foo", {}, ty.void_(), utils::Vector{block_1}, utils::Vector{func_attr});
+
+        auto* return_2 = Return();
         auto* bar = Func("bar", {}, ty.void_(), utils::Vector{return_2});
 
         auto p = Build();
         EXPECT_TRUE(p.IsValid()) << p.Diagnostics().str();
 
         EXPECT_EQ(p.Sem().DiagnosticSeverity(foo, rule), func_severity);
-        EXPECT_EQ(p.Sem().DiagnosticSeverity(return_1, rule), func_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(block_1, rule), block_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(if_1, rule), block_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(return_1, rule), if_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(bar, rule), global_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(return_2, rule), global_severity);
     }

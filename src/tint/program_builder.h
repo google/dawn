@@ -2456,7 +2456,8 @@ class ProgramBuilder {
     /// @param type the function return type
     /// @param body the function body
     /// @param attributes the optional function attributes
-    /// @param return_type_attributes the optional function return type
+    /// @param return_type_attributes the optional function return type attributes
+    /// @param body_attributes the optional function body attributes
     /// attributes
     /// @returns the function pointer
     template <typename NAME>
@@ -2467,11 +2468,12 @@ class ProgramBuilder {
         const ast::Type* type,
         utils::VectorRef<const ast::Statement*> body,
         utils::VectorRef<const ast::Attribute*> attributes = utils::Empty,
-        utils::VectorRef<const ast::Attribute*> return_type_attributes = utils::Empty) {
-        auto* func =
-            create<ast::Function>(source, Sym(std::forward<NAME>(name)), std::move(params), type,
-                                  create<ast::BlockStatement>(std::move(body)),
-                                  std::move(attributes), std::move(return_type_attributes));
+        utils::VectorRef<const ast::Attribute*> return_type_attributes = utils::Empty,
+        utils::VectorRef<const ast::Attribute*> body_attributes = utils::Empty) {
+        auto* func = create<ast::Function>(
+            source, Sym(std::forward<NAME>(name)), std::move(params), type,
+            create<ast::BlockStatement>(std::move(body), std::move(body_attributes)),
+            std::move(attributes), std::move(return_type_attributes));
         AST().AddFunction(func);
         return func;
     }
@@ -2482,7 +2484,8 @@ class ProgramBuilder {
     /// @param type the function return type
     /// @param body the function body
     /// @param attributes the optional function attributes
-    /// @param return_type_attributes the optional function return type
+    /// @param return_type_attributes the optional function return type attributes
+    /// @param body_attributes the optional function body attributes
     /// attributes
     /// @returns the function pointer
     template <typename NAME>
@@ -2492,11 +2495,12 @@ class ProgramBuilder {
         const ast::Type* type,
         utils::VectorRef<const ast::Statement*> body,
         utils::VectorRef<const ast::Attribute*> attributes = utils::Empty,
-        utils::VectorRef<const ast::Attribute*> return_type_attributes = utils::Empty) {
-        auto* func =
-            create<ast::Function>(Sym(std::forward<NAME>(name)), std::move(params), type,
-                                  create<ast::BlockStatement>(std::move(body)),
-                                  std::move(attributes), std::move(return_type_attributes));
+        utils::VectorRef<const ast::Attribute*> return_type_attributes = utils::Empty,
+        utils::VectorRef<const ast::Attribute*> body_attributes = utils::Empty) {
+        auto* func = create<ast::Function>(
+            Sym(std::forward<NAME>(name)), std::move(params), type,
+            create<ast::BlockStatement>(std::move(body), std::move(body_attributes)),
+            std::move(attributes), std::move(return_type_attributes));
         AST().AddFunction(func);
         return func;
     }
@@ -2676,23 +2680,50 @@ class ProgramBuilder {
     /// @param source the source information for the block
     /// @param statements statements of block
     /// @returns the block statement pointer
-    template <typename... Statements>
-    const ast::BlockStatement* Block(const Source& source, Statements&&... statements) {
+    template <typename... STATEMENTS, typename = DisableIfVectorLike<STATEMENTS...>>
+    const ast::BlockStatement* Block(const Source& source, STATEMENTS&&... statements) {
         return create<ast::BlockStatement>(
-            source, utils::Vector<const ast::Statement*, sizeof...(statements)>{
-                        std::forward<Statements>(statements)...,
-                    });
+            source,
+            utils::Vector<const ast::Statement*, sizeof...(statements)>{
+                std::forward<STATEMENTS>(statements)...,
+            },
+            utils::Empty);
     }
 
     /// Creates a ast::BlockStatement with input statements
     /// @param statements statements of block
     /// @returns the block statement pointer
-    template <typename... STATEMENTS, typename = DisableIfSource<STATEMENTS...>>
+    template <typename... STATEMENTS,
+              typename = DisableIfSource<STATEMENTS...>,
+              typename = DisableIfVectorLike<STATEMENTS...>>
     const ast::BlockStatement* Block(STATEMENTS&&... statements) {
         return create<ast::BlockStatement>(
             utils::Vector<const ast::Statement*, sizeof...(statements)>{
                 std::forward<STATEMENTS>(statements)...,
-            });
+            },
+            utils::Empty);
+    }
+
+    /// Creates a ast::BlockStatement with input statements and attributes
+    /// @param source the source information for the block
+    /// @param statements statements of block
+    /// @param attributes the attributes
+    /// @returns the block statement pointer
+    const ast::BlockStatement* Block(
+        const Source& source,
+        utils::VectorRef<const ast::Statement*> statements,
+        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
+        return create<ast::BlockStatement>(source, std::move(statements), std::move(attributes));
+    }
+
+    /// Creates a ast::BlockStatement with input statements and attributes
+    /// @param statements statements of block
+    /// @param attributes the attributes
+    /// @returns the block statement pointer
+    const ast::BlockStatement* Block(
+        utils::VectorRef<const ast::Statement*> statements,
+        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
+        return create<ast::BlockStatement>(std::move(statements), std::move(attributes));
     }
 
     /// A wrapper type for the Else statement used to create If statements.

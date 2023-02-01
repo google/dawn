@@ -118,7 +118,7 @@ TEST_F(WhileStmtErrorTest, MissingRightParen) {
 // Test a while loop with missing left brace is invalid.
 TEST_F(WhileStmtErrorTest, MissingLeftBrace) {
     std::string while_str = "while (true) }";
-    std::string error_str = "1:14: expected '{'";
+    std::string error_str = "1:14: expected '{' for while loop";
 
     TestWhileWithError(while_str, error_str);
 }
@@ -126,7 +126,7 @@ TEST_F(WhileStmtErrorTest, MissingLeftBrace) {
 // Test a for loop with missing right brace is invalid.
 TEST_F(WhileStmtErrorTest, MissingRightBrace) {
     std::string while_str = "while (true) {";
-    std::string error_str = "1:15: expected '}'";
+    std::string error_str = "1:15: expected '}' for while loop";
 
     TestWhileWithError(while_str, error_str);
 }
@@ -159,7 +159,7 @@ TEST_F(WhileStmtErrorTest, InvalidBody) {
 // Test a for loop with a body not matching statements
 TEST_F(WhileStmtErrorTest, InvalidBodyMatch) {
     std::string while_str = "while (true) { fn main() {} }";
-    std::string error_str = "1:16: expected '}'";
+    std::string error_str = "1:16: expected '}' for while loop";
 
     TestWhileWithError(while_str, error_str);
 }

@@ -3845,6 +3845,43 @@ SEM* Resolver::StatementScope(const ast::Statement* ast, SEM* sem, F&& callback)
 
     auto* as_compound = As<sem::CompoundStatement, CastFlags::kDontErrorOnImpossibleCast>(sem);
 
+    // Helper to handle attributes that are supported on certain types of statement.
+    auto handle_attributes = [&](auto* stmt, sem::Statement* sem_stmt, const char* use) {
+        for (auto* attr : stmt->attributes) {
+            Mark(attr);
+            if (auto* dc = attr->template As<ast::DiagnosticAttribute>()) {
+                Mark(dc->control);
+                if (!DiagnosticControl(dc->control)) {
+                    return false;
+                }
+            } else {
+                std::ostringstream ss;
+                ss << "attribute is not valid for " << use;
+                AddError(ss.str(), attr->source);
+                return false;
+            }
+        }
+        if (!validator_.NoDuplicateAttributes(stmt->attributes)) {
+            return false;
+        }
+        ApplyDiagnosticSeverities(sem_stmt);
+        return true;
+    };
+
+    // Handle attributes, if necessary.
+    // Some statements can take diagnostic filtering attributes, so push a new diagnostic filter
+    // scope to capture them.
+    validator_.DiagnosticFilters().Push();
+    TINT_DEFER(validator_.DiagnosticFilters().Pop());
+    if (!Switch(
+            ast,  //
+            [&](const ast::BlockStatement* block) {
+                return handle_attributes(block, sem, "block statements");
+            },
+            [&](Default) { return true; })) {
+        return nullptr;
+    }
+
     TINT_SCOPED_ASSIGNMENT(current_statement_, sem);
     TINT_SCOPED_ASSIGNMENT(current_compound_statement_,
                            as_compound ? as_compound : current_compound_statement_);

@@ -93,6 +93,11 @@ class GeneratorImpl : public TextGenerator {
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
     bool EmitBlock(const ast::BlockStatement* stmt);
+    /// Handles emitting the start of a block statement (including attributes)
+    /// @param out the output stream to write the header to
+    /// @param stmt the block statement to emit the header for
+    /// @returns true if the statement was emitted successfully
+    bool EmitBlockHeader(std::ostream& out, const ast::BlockStatement* stmt);
     /// Handles a break statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
