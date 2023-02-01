@@ -92,6 +92,17 @@ call gclient || goto :error
 @echo off
 popd
 
+@REM Install Ninja after depot_tools to make sure it's in PATH before depot_tools
+call :status "Fetching and installing Ninja"
+@echo on
+@REM set WINSDK_DLL_INSTALLER=https://go.microsoft.com/fwlink/?linkid=2164145
+@REM set WINSDK_VERSION=10.0.20348.0
+set NINJA_ZIP=https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip
+curl -k -L %NINJA_ZIP% --output "%TEMP_DIR%\ninja.zip" || goto :error
+powershell.exe -Command "Expand-Archive -LiteralPath '%TEMP_DIR%\ninja.zip' -DestinationPath '%TEMP_DIR%\ninja'" || goto :error
+set PATH=%TEMP_DIR%\ninja;%PATH%
+@echo off
+
 call :status "Cloning to clean source directory"
 @echo on
 mkdir %SRC_DIR% || goto :error
@@ -135,8 +146,7 @@ rem To use ninja with CMake requires VC env vars
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 @echo on
 rem Note that we need to specify the C and C++ compiler only because Cygwin is in PATH and CMake finds GCC and picks that over MSVC
-rem We also need to specify the Ninja binary is ninja.bat because the Ninja picked up otherwise is depot_tools' shell script.
-cmake %SRC_DIR% -G "Ninja" -DCMAKE_MAKE_PROGRAM="ninja.bat" -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" %COMMON_CMAKE_FLAGS% || goto :error
+cmake %SRC_DIR% -G "Ninja" -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" %COMMON_CMAKE_FLAGS% || goto :error
 cmake --build . || goto :error
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat" /clean_env
 @echo off
