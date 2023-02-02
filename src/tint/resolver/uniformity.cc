@@ -474,6 +474,8 @@ class UniformityGraph {
 
         // If "Value_return" exists, look at which nodes are reachable from it.
         if (current_function_->value_return) {
+            current_function_->ResetVisited();
+
             utils::UniqueVector<Node*, 4> reachable;
             Traverse(current_function_->value_return, &reachable);
             if (reachable.Contains(current_function_->may_be_non_uniform)) {
