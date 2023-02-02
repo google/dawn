@@ -26,6 +26,11 @@ TEST_F(ParserImplTest, LoopStmt_BodyNoContinuing) {
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
+    EXPECT_EQ(e->body->source.range.begin.line, 1u);
+    EXPECT_EQ(e->body->source.range.begin.column, 6u);
+    EXPECT_EQ(e->body->source.range.end.line, 1u);
+    EXPECT_EQ(e->body->source.range.end.column, 18u);
+
     ASSERT_EQ(e->body->statements.Length(), 1u);
     EXPECT_TRUE(e->body->statements[0]->Is<ast::DiscardStatement>());
 
@@ -40,11 +45,21 @@ TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
+    EXPECT_EQ(e->body->source.range.begin.line, 1u);
+    EXPECT_EQ(e->body->source.range.begin.column, 6u);
+    EXPECT_EQ(e->body->source.range.end.line, 1u);
+    EXPECT_EQ(e->body->source.range.end.column, 41u);
+
     ASSERT_EQ(e->body->statements.Length(), 1u);
     EXPECT_TRUE(e->body->statements[0]->Is<ast::DiscardStatement>());
 
     EXPECT_EQ(e->continuing->statements.Length(), 1u);
     EXPECT_TRUE(e->continuing->statements[0]->Is<ast::DiscardStatement>());
+
+    EXPECT_EQ(e->continuing->source.range.begin.line, 1u);
+    EXPECT_EQ(e->continuing->source.range.begin.column, 28u);
+    EXPECT_EQ(e->continuing->source.range.end.line, 1u);
+    EXPECT_EQ(e->continuing->source.range.end.column, 40u);
 }
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyNoContinuing) {

@@ -2258,20 +2258,30 @@ Maybe<const ast::LoopStatement*> ParserImpl::loop_statement() {
         return Failure::kNoMatch;
     }
 
-    return expect_brace_block("loop", [&]() -> Maybe<const ast::LoopStatement*> {
+    Maybe<const ast::BlockStatement*> continuing(Failure::kErrored);
+    auto body_start = peek().source();
+    auto body = expect_brace_block("loop", [&]() -> Maybe<StatementList> {
         auto stmts = expect_statements();
         if (stmts.errored) {
             return Failure::kErrored;
         }
 
-        auto continuing = continuing_statement();
+        continuing = continuing_statement();
         if (continuing.errored) {
             return Failure::kErrored;
         }
-
-        auto* body = create<ast::BlockStatement>(source, stmts.value, utils::Empty);
-        return create<ast::LoopStatement>(source, body, continuing.value);
+        return stmts;
     });
+    if (body.errored) {
+        return Failure::kErrored;
+    }
+    auto body_end = last_source();
+
+    return create<ast::LoopStatement>(
+        source,
+        create<ast::BlockStatement>(Source::Combine(body_start, body_end), body.value,
+                                    utils::Empty),
+        continuing.value);
 }
 
 ForHeader::ForHeader(const ast::Statement* init,
@@ -2482,7 +2492,8 @@ Maybe<const ast::Statement*> ParserImpl::break_if_statement() {
 // continuing_compound_statement:
 //   brace_left statement* break_if_statement? brace_right
 Maybe<const ast::BlockStatement*> ParserImpl::continuing_compound_statement() {
-    return expect_brace_block("", [&]() -> Expect<ast::BlockStatement*> {
+    auto source_start = peek().source();
+    auto body = expect_brace_block("", [&]() -> Expect<StatementList> {
         StatementList stmts;
 
         while (continue_parsing()) {
@@ -2506,8 +2517,15 @@ Maybe<const ast::BlockStatement*> ParserImpl::continuing_compound_statement() {
             stmts.Push(stmt.value);
         }
 
-        return create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
+        return stmts;
     });
+    if (body.errored) {
+        return Failure::kErrored;
+    }
+    auto source_end = last_source();
+
+    return create<ast::BlockStatement>(Source::Combine(source_start, source_end), body.value,
+                                       utils::Empty);
 }
 
 // continuing_statement
