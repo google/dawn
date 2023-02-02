@@ -26,12 +26,12 @@ class StorageTextureValidationTests : public ValidationTest {
         ValidationTest::SetUp();
 
         mDefaultVSModule = utils::CreateShaderModule(device, R"(
-            @vertex fn main() -> @builtin(position) vec4<f32> {
-                return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            @vertex fn main() -> @builtin(position) vec4f {
+                return vec4f(0.0, 0.0, 0.0, 1.0);
             })");
         mDefaultFSModule = utils::CreateShaderModule(device, R"(
-            @fragment fn main() -> @location(0) vec4<f32> {
-                return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            @fragment fn main() -> @location(0) vec4f {
+                return vec4f(1.0, 0.0, 0.0, 1.0);
             })");
     }
 
@@ -121,9 +121,9 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             @group(0) @binding(0) var image0 : texture_storage_2d<rgba8unorm, write>;
             @vertex
-            fn main(@builtin(vertex_index) vertex_index : u32) -> @builtin(position) vec4<f32> {
-                textureStore(image0, vec2<i32>(i32(vertex_index), 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
-                return vec4<f32>(0.0);
+            fn main(@builtin(vertex_index) vertex_index : u32) -> @builtin(position) vec4f {
+                textureStore(image0, vec2i(i32(vertex_index), 0), vec4f(1.0, 0.0, 0.0, 1.0));
+                return vec4f(0.0);
             })");
 
         utils::ComboRenderPipelineDescriptor descriptor;
@@ -137,8 +137,8 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
     {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             @group(0) @binding(0) var image0 : texture_storage_2d<rgba8unorm, write>;
-            @fragment fn main(@builtin(position) position : vec4<f32>) {
-                textureStore(image0, vec2<i32>(position.xy), vec4<f32>(1.0, 0.0, 0.0, 1.0));
+            @fragment fn main(@builtin(position) position : vec4f) {
+                textureStore(image0, vec2i(position.xy), vec4f(1.0, 0.0, 0.0, 1.0));
             })");
 
         utils::ComboRenderPipelineDescriptor descriptor;
@@ -158,8 +158,8 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
             @group(0) @binding(0) var image0 : texture_storage_2d<rgba8unorm, write>;
 
-            @compute @workgroup_size(1) fn main(@builtin(local_invocation_id) LocalInvocationID : vec3<u32>) {
-                textureStore(image0, vec2<i32>(LocalInvocationID.xy), vec4<f32>(0.0, 0.0, 0.0, 0.0));
+            @compute @workgroup_size(1) fn main(@builtin(local_invocation_id) LocalInvocationID : vec3u) {
+                textureStore(image0, vec2i(LocalInvocationID.xy), vec4f(0.0, 0.0, 0.0, 0.0));
             })");
 
         wgpu::ComputePipelineDescriptor descriptor;

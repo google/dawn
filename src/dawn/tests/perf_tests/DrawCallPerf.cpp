@@ -35,23 +35,23 @@ constexpr float kVertexData[12] = {
 
 constexpr char kVertexShader[] = R"(
         @vertex fn main(
-            @location(0) pos : vec4<f32>
-        ) -> @builtin(position) vec4<f32> {
+            @location(0) pos : vec4f
+        ) -> @builtin(position) vec4f {
             return pos;
         })";
 
 constexpr char kFragmentShaderA[] = R"(
-        @group(0) @binding(0) var<uniform> color : vec3<f32>;
-        @fragment fn main() -> @location(0) vec4<f32> {
-            return vec4<f32>(color * (1.0 / 5000.0), 1.0);
+        @group(0) @binding(0) var<uniform> color : vec3f;
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(color * (1.0 / 5000.0), 1.0);
         })";
 
 constexpr char kFragmentShaderB[] = R"(
-        @group(0) @binding(0) var<uniform> constant_color : vec3<f32>;
-        @group(1) @binding(0) var<uniform> uniform_color : vec3<f32>;
+        @group(0) @binding(0) var<uniform> constant_color : vec3f;
+        @group(1) @binding(0) var<uniform> uniform_color : vec3f;
 
-        @fragment fn main() -> @location(0) vec4<f32> {
-            return vec4<f32>((constant_color + uniform_color) * (1.0 / 5000.0), 1.0);
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f((constant_color + uniform_color) * (1.0 / 5000.0), 1.0);
         })";
 
 enum class Pipeline {

@@ -35,15 +35,15 @@ namespace {
 // General helper functions and data structures for applying clear values with draw
 static const char kVSSource[] = R"(
 @vertex
-fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-    var pos = array<vec2<f32>, 6>(
-        vec2<f32>( 0.0, -1.0),
-        vec2<f32>( 1.0, -1.0),
-        vec2<f32>( 0.0,  1.0),
-        vec2<f32>( 0.0,  1.0),
-        vec2<f32>( 1.0, -1.0),
-        vec2<f32>( 1.0,  1.0));
-        return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+    var pos = array(
+        vec2f( 0.0, -1.0),
+        vec2f( 1.0, -1.0),
+        vec2f( 0.0,  1.0),
+        vec2f( 0.0,  1.0),
+        vec2f( 1.0, -1.0),
+        vec2f( 1.0,  1.0));
+        return vec4f(pos[VertexIndex], 0.0, 1.0);
 })";
 
 const char* GetTextureComponentTypeString(DeviceBase* device, wgpu::TextureFormat format) {

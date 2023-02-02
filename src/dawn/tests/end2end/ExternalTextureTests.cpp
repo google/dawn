@@ -41,14 +41,14 @@ class ExternalTextureTests : public DawnTest {
         DawnTest::SetUp();
 
         vsModule = utils::CreateShaderModule(device, R"(
-            @vertex fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-                var positions = array<vec4<f32>, 6>(
-                    vec4<f32>(-1.0, 1.0, 0.0, 1.0),
-                    vec4<f32>(-1.0, -1.0, 0.0, 1.0),
-                    vec4<f32>(1.0, 1.0, 0.0, 1.0),
-                    vec4<f32>(1.0, -1.0, 0.0, 1.0),
-                    vec4<f32>(-1.0, -1.0, 0.0, 1.0),
-                    vec4<f32>(1.0, 1.0, 0.0, 1.0)
+            @vertex fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var positions = array(
+                    vec4f(-1.0, 1.0, 0.0, 1.0),
+                    vec4f(-1.0, -1.0, 0.0, 1.0),
+                    vec4f(1.0, 1.0, 0.0, 1.0),
+                    vec4f(1.0, -1.0, 0.0, 1.0),
+                    vec4f(-1.0, -1.0, 0.0, 1.0),
+                    vec4f(1.0, 1.0, 0.0, 1.0)
                 );
                 return positions[VertexIndex];
             })");
@@ -57,9 +57,9 @@ class ExternalTextureTests : public DawnTest {
             @group(0) @binding(0) var s : sampler;
             @group(0) @binding(1) var t : texture_external;
 
-            @fragment fn main(@builtin(position) FragCoord : vec4<f32>)
-                                     -> @location(0) vec4<f32> {
-                return textureSampleBaseClampToEdge(t, s, FragCoord.xy / vec2<f32>(4.0, 4.0));
+            @fragment fn main(@builtin(position) FragCoord : vec4f)
+                                     -> @location(0) vec4f {
+                return textureSampleBaseClampToEdge(t, s, FragCoord.xy / vec2f(4.0, 4.0));
             })");
     }
 
@@ -300,21 +300,21 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     const wgpu::ShaderModule sourceTextureFsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) FragCoord : vec4<f32>)
-                                 -> @location(0) vec4<f32> {
+        @fragment fn main(@builtin(position) FragCoord : vec4f)
+                                 -> @location(0) vec4f {
             if(FragCoord.y < 2.0 && FragCoord.x < 2.0) {
-               return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+               return vec4f(0.0, 1.0, 0.0, 1.0);
             }
 
             if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-               return vec4<f32>(0.0, 0.0, 1.0, 1.0);
+               return vec4f(0.0, 0.0, 1.0, 1.0);
             }
 
             if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-               return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+               return vec4f(0.0, 0.0, 0.0, 1.0);
             }
 
-            return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            return vec4f(1.0, 0.0, 0.0, 1.0);
         })");
 
     wgpu::Texture sourceTexture =
@@ -461,41 +461,41 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     const wgpu::ShaderModule sourceTexturePlane0FsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) FragCoord : vec4<f32>)
-                                 -> @location(0) vec4<f32> {
+        @fragment fn main(@builtin(position) FragCoord : vec4f)
+                                 -> @location(0) vec4f {
 
             if(FragCoord.y < 2.0 && FragCoord.x < 2.0) {
-               return vec4<f32>(0.7152, 0.0, 0.0, 0.0);
+               return vec4f(0.7152, 0.0, 0.0, 0.0);
             }
 
             if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-               return vec4<f32>(0.0722, 0.0, 1.0, 1.0);
+               return vec4f(0.0722, 0.0, 1.0, 1.0);
             }
 
             if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-               return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+               return vec4f(0.0, 0.0, 0.0, 0.0);
             }
 
-            return vec4<f32>(0.2126, 0.0, 0.0, 0.0);
+            return vec4f(0.2126, 0.0, 0.0, 0.0);
         })");
 
     const wgpu::ShaderModule sourceTexturePlane1FsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) FragCoord : vec4<f32>)
-                                 -> @location(0) vec4<f32> {
+        @fragment fn main(@builtin(position) FragCoord : vec4f)
+                                 -> @location(0) vec4f {
 
             if(FragCoord.x < 2.0 && FragCoord.y < 2.0) {
-               return vec4<f32>(0.1402, 0.0175, 0.0, 0.0);
+               return vec4f(0.1402, 0.0175, 0.0, 0.0);
             }
 
             if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-               return vec4<f32>(1.0, 0.4937, 0.0, 0.0);
+               return vec4f(1.0, 0.4937, 0.0, 0.0);
             }
 
             if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-               return vec4<f32>(0.5, 0.5, 0.0, 0.0);
+               return vec4f(0.5, 0.5, 0.0, 0.0);
             }
 
-            return vec4<f32>(0.4172, 1.0, 0.0, 0.0);
+            return vec4f(0.4172, 1.0, 0.0, 0.0);
         })");
 
     wgpu::Texture sourceTexturePlane0 =
@@ -647,27 +647,27 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     const wgpu::ShaderModule sourceTextureFsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) FragCoord : vec4<f32>)
-                                 -> @location(0) vec4<f32> {
+        @fragment fn main(@builtin(position) FragCoord : vec4f)
+                                 -> @location(0) vec4f {
             if(FragCoord.x >= 1.0 && FragCoord.x < 3.0 && FragCoord.y >= 1.0 && FragCoord.y < 3.0) {
                 if(FragCoord.y < 2.0 && FragCoord.x < 2.0) {
-                   return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+                   return vec4f(0.0, 1.0, 0.0, 1.0);
                 }
 
                 if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-                   return vec4<f32>(1.0, 1.0, 1.0, 1.0);
+                   return vec4f(1.0, 1.0, 1.0, 1.0);
                 }
 
                 if(FragCoord.y >= 2.0 && FragCoord.x < 2.0) {
-                   return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+                   return vec4f(1.0, 0.0, 0.0, 1.0);
                 }
 
                 if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-                   return vec4<f32>(0.0, 0.0, 1.0, 1.0);
+                   return vec4f(0.0, 0.0, 1.0, 1.0);
                 }
             }
 
-            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            return vec4f(0.0, 0.0, 0.0, 1.0);
         })");
 
     wgpu::Texture sourceTexture =
@@ -811,51 +811,51 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     const wgpu::ShaderModule sourceTexturePlane0FsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) FragCoord : vec4<f32>)
-                                 -> @location(0) vec4<f32> {
+        @fragment fn main(@builtin(position) FragCoord : vec4f)
+                                 -> @location(0) vec4f {
             if(FragCoord.x >= 1.0 && FragCoord.x < 3.0 && FragCoord.y >= 1.0 && FragCoord.y < 3.0) {
                 if(FragCoord.y < 2.0 && FragCoord.x < 2.0) {
-                   return vec4<f32>(0.7152, 0.0, 0.0, 0.0);
+                   return vec4f(0.7152, 0.0, 0.0, 0.0);
                 }
 
                 if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-                   return vec4<f32>(1.0, 0.0, 0.0, 0.0);
+                   return vec4f(1.0, 0.0, 0.0, 0.0);
                 }
 
                 if(FragCoord.y >= 2.0 && FragCoord.x < 2.0) {
-                   return vec4<f32>(0.2126, 0.0, 0.0, 0.0);
+                   return vec4f(0.2126, 0.0, 0.0, 0.0);
                 }
 
                 if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-                   return vec4<f32>(0.0722, 0.0, 1.0, 1.0);
+                   return vec4f(0.0722, 0.0, 1.0, 1.0);
                 }
             }
 
-            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+            return vec4f(0.0, 0.0, 0.0, 0.0);
         })");
 
     const wgpu::ShaderModule sourceTexturePlane1FsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) FragCoord : vec4<f32>)
-                                 -> @location(0) vec4<f32> {
+        @fragment fn main(@builtin(position) FragCoord : vec4f)
+                                 -> @location(0) vec4f {
             if(FragCoord.x >= 1.0 && FragCoord.x < 3.0 && FragCoord.y >= 1.0 && FragCoord.y < 3.0) {
                 if(FragCoord.y < 2.0 && FragCoord.x < 2.0) {
-                    return vec4<f32>(0.1402, 0.0175, 0.0, 0.0);
+                    return vec4f(0.1402, 0.0175, 0.0, 0.0);
                 }
 
                 if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-                    return vec4<f32>(0.5, 0.5, 0.0, 0.0);
+                    return vec4f(0.5, 0.5, 0.0, 0.0);
                 }
 
                 if(FragCoord.y >= 2.0 && FragCoord.x < 2.0) {
-                    return vec4<f32>(0.4172, 1.0, 0.0, 0.0);
+                    return vec4f(0.4172, 1.0, 0.0, 0.0);
                 }
 
                 if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-                    return vec4<f32>(1.0, 0.4937, 0.0, 0.0);
+                    return vec4f(1.0, 0.4937, 0.0, 0.0);
                 }
             }
 
-            return vec4<f32>(0.5, 0.5, 0.0, 0.0);
+            return vec4f(0.5, 0.5, 0.0, 0.0);
         })");
 
     wgpu::Texture sourceTexturePlane0 =

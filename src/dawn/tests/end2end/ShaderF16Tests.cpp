@@ -147,13 +147,13 @@ TEST_P(ShaderF16Tests, RenderPipelineIOF16_RenderTarget) {
 enable f16;
 
 @vertex
-fn VSMain(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-    var pos = array<vec2<f32>, 3>(
-        vec2<f32>(-1.0,  1.0),
-        vec2<f32>( 1.0, -1.0),
-        vec2<f32>(-1.0, -1.0));
+fn VSMain(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+    var pos = array(
+        vec2f(-1.0,  1.0),
+        vec2f( 1.0, -1.0),
+        vec2f(-1.0, -1.0));
 
-    return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+    return vec4f(pos[VertexIndex], 0.0, 1.0);
 }
 
 @fragment
@@ -215,23 +215,23 @@ enable f16;
 
 struct VSOutput{
     @builtin(position)
-    pos: vec4<f32>,
+    pos: vec4f,
     @location(3)
     color_vsout: vec4<f16>,
 }
 
 @vertex
 fn VSMain(@builtin(vertex_index) VertexIndex : u32) -> VSOutput {
-    var pos = array<vec2<f32>, 3>(
-        vec2<f32>(-1.0,  1.0),
-        vec2<f32>( 1.0, -1.0),
-        vec2<f32>(-1.0, -1.0));
+    var pos = array(
+        vec2f(-1.0,  1.0),
+        vec2f( 1.0, -1.0),
+        vec2f(-1.0, -1.0));
 
     // Blue
     var color = vec4<f16>(0.0h, 0.0h, 1.0h, 1.0h);
 
     var result: VSOutput;
-    result.pos = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+    result.pos = vec4f(pos[VertexIndex], 0.0, 1.0);
     result.color_vsout = color;
 
     return result;
@@ -243,9 +243,9 @@ struct FSInput{
 }
 
 @fragment
-fn FSMain(fsInput: FSInput) -> @location(0) vec4<f32> {
+fn FSMain(fsInput: FSInput) -> @location(0) vec4f {
     // Paint it with given color
-    return vec4<f32>(fsInput.color_fsin);
+    return vec4f(fsInput.color_fsin);
 })";
 
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader);
@@ -307,17 +307,17 @@ struct VSInput {
 }
 
 struct VSOutput {
-    @builtin(position) pos : vec4<f32>,
-    @location(0) color : vec4<f32>,
+    @builtin(position) pos : vec4f,
+    @location(0) color : vec4f,
 }
 
 @vertex
 fn VSMain(in: VSInput) -> VSOutput {
-    return VSOutput(vec4<f32>(vec2<f32>(in.pos_half * 2.0h), 0.0, 1.0), vec4<f32>(in.color_quarter * 4.0h));
+    return VSOutput(vec4f(vec2f(in.pos_half * 2.0h), 0.0, 1.0), vec4f(in.color_quarter * 4.0h));
 }
 
 @fragment
-fn FSMain(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
+fn FSMain(@location(0) color : vec4f) -> @location(0) vec4f {
     return color;
 })";
 

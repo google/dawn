@@ -34,27 +34,27 @@ constexpr char kBlitRG8ToDepthShaders[] = R"(
 
 @vertex fn vert_fullscreen_quad(
   @builtin(vertex_index) vertex_index : u32
-) -> @builtin(position) vec4<f32> {
-  const pos = array<vec2<f32>, 3>(
-      vec2<f32>(-1.0, -1.0),
-      vec2<f32>( 3.0, -1.0),
-      vec2<f32>(-1.0,  3.0));
-  return vec4<f32>(pos[vertex_index], 0.0, 1.0);
+) -> @builtin(position) vec4f {
+  const pos = array(
+      vec2f(-1.0, -1.0),
+      vec2f( 3.0, -1.0),
+      vec2f(-1.0,  3.0));
+  return vec4f(pos[vertex_index], 0.0, 1.0);
 }
 
 struct Params {
-  origin : vec2<u32>
+  origin : vec2u
 };
 
 @group(0) @binding(0) var src_tex : texture_2d<u32>;
 @group(0) @binding(1) var<uniform> params : Params;
 
 @fragment fn blit_to_depth(
-    @builtin(position) position : vec4<f32>
+    @builtin(position) position : vec4f
 ) -> @builtin(frag_depth) f32 {
   // Load the source texel.
   let src_texel = textureLoad(
-    src_tex, vec2<u32>(position.xy) - params.origin, 0u);
+    src_tex, vec2u(position.xy) - params.origin, 0u);
 
   let depth_u16_val = (src_texel.y << 8u) + src_texel.x;
 
@@ -68,7 +68,7 @@ constexpr char kBlitStencilShaders[] = R"(
 
 struct VertexOutputs {
   @location(0) @interpolate(flat) stencil_val : u32,
-  @builtin(position) position : vec4<f32>,
+  @builtin(position) position : vec4f,
 };
 
 // The instance_index here is not used for instancing.
@@ -80,18 +80,18 @@ struct VertexOutputs {
   @builtin(vertex_index) vertex_index : u32,
   @builtin(instance_index) instance_index: u32,
 ) -> VertexOutputs {
-  const pos = array<vec2<f32>, 3>(
-      vec2<f32>(-1.0, -1.0),
-      vec2<f32>( 3.0, -1.0),
-      vec2<f32>(-1.0,  3.0));
+  const pos = array(
+      vec2f(-1.0, -1.0),
+      vec2f( 3.0, -1.0),
+      vec2f(-1.0,  3.0));
   return VertexOutputs(
     instance_index,
-    vec4<f32>(pos[vertex_index], 0.0, 1.0),
+    vec4f(pos[vertex_index], 0.0, 1.0),
   );
 }
 
 struct Params {
-  origin : vec2<u32>
+  origin : vec2u
 };
 
 @group(0) @binding(0) var src_tex : texture_2d<u32>;
@@ -106,7 +106,7 @@ struct Params {
 @fragment fn frag_check_src_stencil(input : VertexOutputs) {
   // Load the source stencil value.
   let src_val : u32 = textureLoad(
-    src_tex, vec2<u32>(input.position.xy) - params.origin, 0u)[0];
+    src_tex, vec2u(input.position.xy) - params.origin, 0u)[0];
 
   // Discard it if it doesn't contain the stencil reference.
   if ((src_val & input.stencil_val) == 0u) {

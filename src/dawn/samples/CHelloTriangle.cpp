@@ -34,19 +34,19 @@ void init() {
     const char* vs = R"(
         @vertex fn main(
             @builtin(vertex_index) VertexIndex : u32
-        ) -> @builtin(position) vec4<f32> {
-            var pos = array<vec2<f32>, 3>(
-                vec2<f32>( 0.0,  0.5),
-                vec2<f32>(-0.5, -0.5),
-                vec2<f32>( 0.5, -0.5)
+        ) -> @builtin(position) vec4f {
+            var pos = array(
+                vec2f( 0.0,  0.5),
+                vec2f(-0.5, -0.5),
+                vec2f( 0.5, -0.5)
             );
-            return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            return vec4f(pos[VertexIndex], 0.0, 1.0);
         })";
     WGPUShaderModule vsModule = utils::CreateShaderModule(device, vs).Release();
 
     const char* fs = R"(
-        @fragment fn main() -> @location(0) vec4<f32> {
-            return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(1.0, 0.0, 0.0, 1.0);
         })";
     WGPUShaderModule fsModule = utils::CreateShaderModule(device, fs).Release();
 

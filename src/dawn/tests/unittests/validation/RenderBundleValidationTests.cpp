@@ -36,13 +36,13 @@ class RenderBundleValidationTest : public ValidationTest {
                 }
                 @group(0) @binding(0) var<uniform> uniforms : S;
 
-                @vertex fn main(@location(0) pos : vec2<f32>) -> @builtin(position) vec4<f32> {
-                    return vec4<f32>();
+                @vertex fn main(@location(0) pos : vec2f) -> @builtin(position) vec4f {
+                    return vec4f();
                 })");
 
         fsModule = utils::CreateShaderModule(device, R"(
                 struct Uniforms {
-                    color : vec4<f32>
+                    color : vec4f
                 }
                 @group(1) @binding(0) var<uniform> uniforms : Uniforms;
 

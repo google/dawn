@@ -1115,7 +1115,7 @@ std::ostringstream& DawnTestBase::ExpectSampledFloatDataImpl(wgpu::TextureView t
     shaderSource << "const sampleCount : u32 = " << sampleCount << "u;\n";
 
     shaderSource << "fn doTextureLoad(t: " << wgslTextureType
-                 << ", coord: vec2<i32>, sample: u32, component: u32) -> f32";
+                 << ", coord: vec2i, sample: u32, component: u32) -> f32";
     if (sampleCount > 1) {
         shaderSource << R"({
             return textureLoad(tex, coord, i32(sample))[component];
@@ -1134,7 +1134,7 @@ std::ostringstream& DawnTestBase::ExpectSampledFloatDataImpl(wgpu::TextureView t
     }
     shaderSource << R"(
         @compute @workgroup_size(1) fn main(
-            @builtin(global_invocation_id) GlobalInvocationId : vec3<u32>
+            @builtin(global_invocation_id) GlobalInvocationId : vec3u
         ) {
             let baseOutIndex = GlobalInvocationId.y * width + GlobalInvocationId.x;
             for (var s = 0u; s < sampleCount; s = s + 1u) {
@@ -1143,7 +1143,7 @@ std::ostringstream& DawnTestBase::ExpectSampledFloatDataImpl(wgpu::TextureView t
                         baseOutIndex * sampleCount * componentCount +
                         s * componentCount +
                         c
-                    ] = doTextureLoad(tex, vec2<i32>(GlobalInvocationId.xy), s, c);
+                    ] = doTextureLoad(tex, vec2i(GlobalInvocationId.xy), s, c);
                 }
             }
         }
@@ -1278,12 +1278,12 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
 
     pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
         @vertex
-        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-            var pos = array<vec2<f32>, 3>(
-                vec2<f32>(-1.0, -1.0),
-                vec2<f32>( 3.0, -1.0),
-                vec2<f32>(-1.0,  3.0));
-            return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+            var pos = array(
+                vec2f(-1.0, -1.0),
+                vec2f( 3.0, -1.0),
+                vec2f(-1.0,  3.0));
+            return vec4f(pos[VertexIndex], 0.0, 1.0);
         })");
 
     if (depthDataTexture) {
@@ -1298,10 +1298,10 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
             }
 
             @fragment
-            fn main(@builtin(position) FragCoord : vec4<f32>) -> FragmentOut {
+            fn main(@builtin(position) FragCoord : vec4f) -> FragmentOut {
                 var output : FragmentOut;
                 output.result = 1u;
-                output.fragDepth = textureLoad(texture0, vec2<i32>(FragCoord.xy), 0)[0];
+                output.fragDepth = textureLoad(texture0, vec2i(FragCoord.xy), 0)[0];
                 return output;
             })");
     } else {

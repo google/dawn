@@ -43,7 +43,7 @@ TEST_F(UnsafeAPIValidationTest, chromium_disable_uniformity_analysis) {
         enable chromium_disable_uniformity_analysis;
 
         @compute @workgroup_size(8) fn uniformity_error(
-            @builtin(local_invocation_id) local_invocation_id : vec3<u32>
+            @builtin(local_invocation_id) local_invocation_id : vec3u
         ) {
             if (local_invocation_id.x == 0u) {
                 workgroupBarrier();

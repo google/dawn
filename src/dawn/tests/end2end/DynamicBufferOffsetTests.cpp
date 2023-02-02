@@ -105,12 +105,12 @@ class DynamicBufferOffsetTests : public DawnTest {
     wgpu::RenderPipeline CreateRenderPipeline(bool isInheritedPipeline = false) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             @vertex
-            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-                var pos = array<vec2<f32>, 3>(
-                    vec2<f32>(-1.0, 0.0),
-                    vec2<f32>(-1.0, 1.0),
-                    vec2<f32>( 0.0, 1.0));
-                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-1.0, 0.0),
+                    vec2f(-1.0, 1.0),
+                    vec2f( 0.0, 1.0));
+                return vec4f(pos[VertexIndex], 0.0, 1.0);
             })");
 
         // Construct fragment shader source
@@ -118,7 +118,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         std::string multipleNumber = isInheritedPipeline ? "2" : "1";
         fs << R"(
             struct Buf {
-                value : vec2<u32>
+                value : vec2u
             }
 
             @group(0) @binding(0) var<uniform> uBufferNotDynamic : Buf;
@@ -135,10 +135,10 @@ class DynamicBufferOffsetTests : public DawnTest {
 
         fs << "const multipleNumber : u32 = " << multipleNumber << "u;\n";
         fs << R"(
-            @fragment fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4f {
                 sBufferNotDynamic.value = uBufferNotDynamic.value.xy;
-                sBuffer.value = vec2<u32>(multipleNumber, multipleNumber) * (uBuffer.value.xy + uBufferNotDynamic.value.xy);
-                return vec4<f32>(f32(uBuffer.value.x) / 255.0, f32(uBuffer.value.y) / 255.0,
+                sBuffer.value = vec2u(multipleNumber, multipleNumber) * (uBuffer.value.xy + uBufferNotDynamic.value.xy);
+                return vec4f(f32(uBuffer.value.x) / 255.0, f32(uBuffer.value.y) / 255.0,
                                       1.0, 1.0);
             }
         )";
@@ -168,7 +168,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         std::string multipleNumber = isInheritedPipeline ? "2" : "1";
         cs << R"(
             struct Buf {
-                value : vec2<u32>
+                value : vec2u
             }
 
             @group(0) @binding(0) var<uniform> uBufferNotDynamic : Buf;
@@ -187,7 +187,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         cs << R"(
             @compute @workgroup_size(1) fn main() {
                 sBufferNotDynamic.value = uBufferNotDynamic.value.xy;
-                sBuffer.value = vec2<u32>(multipleNumber, multipleNumber) * (uBuffer.value.xy + uBufferNotDynamic.value.xy);
+                sBuffer.value = vec2u(multipleNumber, multipleNumber) * (uBuffer.value.xy + uBufferNotDynamic.value.xy);
             }
         )";
 
@@ -456,7 +456,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
             case wgpu::BufferUsage::Uniform:
                 shader << R"(
                     struct Src {
-                        values : array<vec4<u32>, kArrayLength>
+                        values : array<vec4u, kArrayLength>
                     }
                     @group(0) @binding(0) var<uniform> src : Src;
                 )";
@@ -464,7 +464,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
             case wgpu::BufferUsage::Storage:
                 shader << R"(
                     struct Src {
-                        values : array<vec4<u32>>
+                        values : array<vec4u>
                     }
                     @group(0) @binding(0) var<storage, read> src : Src;
                 )";
@@ -475,7 +475,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
 
         shader << R"(
             struct Dst {
-                values : array<vec4<u32>>
+                values : array<vec4u>
             }
             @group(0) @binding(1) var<storage, read_write> dst : Dst;
         )";

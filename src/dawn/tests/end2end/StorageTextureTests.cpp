@@ -197,51 +197,51 @@ class StorageTextureTests : public DawnTest {
         switch (format) {
             // non-normalized unsigned integer formats
             case wgpu::TextureFormat::R32Uint:
-                return "vec4<u32>(u32(value), 0u, 0u, 1u)";
+                return "vec4u(u32(value), 0u, 0u, 1u)";
 
             case wgpu::TextureFormat::RG32Uint:
-                return "vec4<u32>(u32(value), u32(value) * 2u, 0u, 1u)";
+                return "vec4u(u32(value), u32(value) * 2u, 0u, 1u)";
 
             case wgpu::TextureFormat::RGBA8Uint:
             case wgpu::TextureFormat::RGBA16Uint:
             case wgpu::TextureFormat::RGBA32Uint:
-                return "vec4<u32>(u32(value), u32(value) * 2u, "
+                return "vec4u(u32(value), u32(value) * 2u, "
                        "u32(value) * 3u, u32(value) * 4u)";
 
             // non-normalized signed integer formats
             case wgpu::TextureFormat::R32Sint:
-                return "vec4<i32>(i32(value), 0, 0, 1)";
+                return "vec4i(i32(value), 0, 0, 1)";
 
             case wgpu::TextureFormat::RG32Sint:
-                return "vec4<i32>(i32(value), -i32(value), 0, 1)";
+                return "vec4i(i32(value), -i32(value), 0, 1)";
 
             case wgpu::TextureFormat::RGBA8Sint:
             case wgpu::TextureFormat::RGBA16Sint:
             case wgpu::TextureFormat::RGBA32Sint:
-                return "vec4<i32>(i32(value), -i32(value), i32(value) * 2, -i32(value) * 2)";
+                return "vec4i(i32(value), -i32(value), i32(value) * 2, -i32(value) * 2)";
 
             // float formats
             case wgpu::TextureFormat::R32Float:
-                return "vec4<f32>(f32(value) * 1.1, 0.0, 0.0, 1.0)";
+                return "vec4f(f32(value) * 1.1, 0.0, 0.0, 1.0)";
 
             case wgpu::TextureFormat::RG32Float:
-                return "vec4<f32>(f32(value) * 1.1, -f32(value) * 2.2, 0.0, 1.0)";
+                return "vec4f(f32(value) * 1.1, -f32(value) * 2.2, 0.0, 1.0)";
 
             case wgpu::TextureFormat::RGBA16Float:
-                return "vec4<f32>(f32(value), -f32(value), "
+                return "vec4f(f32(value), -f32(value), "
                        "f32(value) * 2.0, -f32(value) * 2.0)";
 
             case wgpu::TextureFormat::RGBA32Float:
-                return "vec4<f32>(f32(value) * 1.1, -f32(value) * 1.1, "
+                return "vec4f(f32(value) * 1.1, -f32(value) * 1.1, "
                        "f32(value) * 2.2, -f32(value) * 2.2)";
 
             // normalized signed/unsigned integer formats
             case wgpu::TextureFormat::RGBA8Unorm:
-                return "vec4<f32>(f32(value) / 255.0, f32(value) / 255.0 * 2.0, "
+                return "vec4f(f32(value) / 255.0, f32(value) / 255.0 * 2.0, "
                        "f32(value) / 255.0 * 3.0, f32(value) / 255.0 * 4.0)";
 
             case wgpu::TextureFormat::RGBA8Snorm:
-                return "vec4<f32>(f32(value) / 127.0, -f32(value) / 127.0, "
+                return "vec4f(f32(value) / 127.0, -f32(value) / 127.0, "
                        "f32(value) * 2.0 / 127.0, -f32(value) * 2.0 / 127.0)";
 
             default:
@@ -259,7 +259,7 @@ class StorageTextureTests : public DawnTest {
             case wgpu::TextureFormat::RGBA16Uint:
             case wgpu::TextureFormat::RGBA32Uint:
                 return R"(
-fn IsEqualTo(pixel : vec4<u32>, expected : vec4<u32>) -> bool {
+fn IsEqualTo(pixel : vec4u, expected : vec4u) -> bool {
   return all(pixel == expected);
 })";
 
@@ -270,7 +270,7 @@ fn IsEqualTo(pixel : vec4<u32>, expected : vec4<u32>) -> bool {
             case wgpu::TextureFormat::RGBA16Sint:
             case wgpu::TextureFormat::RGBA32Sint:
                 return R"(
-fn IsEqualTo(pixel : vec4<i32>, expected : vec4<i32>) -> bool {
+fn IsEqualTo(pixel : vec4i, expected : vec4i) -> bool {
   return all(pixel == expected);
 })";
 
@@ -280,7 +280,7 @@ fn IsEqualTo(pixel : vec4<i32>, expected : vec4<i32>) -> bool {
             case wgpu::TextureFormat::RGBA16Float:
             case wgpu::TextureFormat::RGBA32Float:
                 return R"(
-fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
+fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
   return all(pixel == expected);
 })";
 
@@ -289,9 +289,9 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
             case wgpu::TextureFormat::RGBA8Snorm:
                 // On Windows Intel drivers the tests will fail if tolerance <= 0.00000001f.
                 return R"(
-fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
+fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
   let tolerance : f32 = 0.0000001;
-  return all(abs(pixel - expected) < vec4<f32>(tolerance, tolerance, tolerance, tolerance));
+  return all(abs(pixel - expected) < vec4f(tolerance, tolerance, tolerance, tolerance));
 })";
 
             default:
@@ -310,24 +310,24 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         auto texelType = "vec4<" + componentFmt + ">";
         std::string sliceCount;
         std::string textureStore;
-        std::string textureSize = "vec2<i32>(textureDimensions(storageImage0).xy)";
+        std::string textureSize = "vec2i(textureDimensions(storageImage0).xy)";
         switch (dimension) {
             case wgpu::TextureViewDimension::e1D:
                 sliceCount = "1";
                 textureStore = "textureStore(storageImage0, x, expected)";
-                textureSize = "vec2<i32>(i32(textureDimensions(storageImage0)), 1)";
+                textureSize = "vec2i(i32(textureDimensions(storageImage0)), 1)";
                 break;
             case wgpu::TextureViewDimension::e2D:
                 sliceCount = "1";
-                textureStore = "textureStore(storageImage0, vec2<i32>(x, y), expected)";
+                textureStore = "textureStore(storageImage0, vec2i(x, y), expected)";
                 break;
             case wgpu::TextureViewDimension::e2DArray:
                 sliceCount = "i32(textureNumLayers(storageImage0))";
-                textureStore = "textureStore(storageImage0, vec2<i32>(x, y), slice, expected)";
+                textureStore = "textureStore(storageImage0, vec2i(x, y), slice, expected)";
                 break;
             case wgpu::TextureViewDimension::e3D:
                 sliceCount = "i32(textureDimensions(storageImage0).z)";
-                textureStore = "textureStore(storageImage0, vec3<i32>(x, y, slice), expected)";
+                textureStore = "textureStore(storageImage0, vec3i(x, y, slice), expected)";
                 break;
             default:
                 UNREACHABLE();
@@ -341,10 +341,10 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         ostream << "@" << stage << workgroupSize << "\n";
         ostream << "fn main() ";
         if (isFragment) {
-            ostream << "-> @location(0) vec4<f32> ";
+            ostream << "-> @location(0) vec4f ";
         }
         ostream << "{\n";
-        ostream << "  let size : vec2<i32> = " << textureSize << ";\n";
+        ostream << "  let size : vec2i = " << textureSize << ";\n";
         ostream << "  let sliceCount : i32 = " << sliceCount << ";\n";
         ostream << "  for (var slice : i32 = 0; slice < sliceCount; slice = slice + 1) {\n";
         ostream << "    for (var y : i32 = 0; y < size.y; y = y + 1) {\n";
@@ -357,7 +357,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         ostream << "    }\n";
         ostream << "  }\n";
         if (isFragment) {
-            ostream << "return vec4<f32>();\n";
+            ostream << "return vec4f();\n";
         }
         ostream << "}\n";
 
@@ -649,8 +649,8 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
 
     const char* kSimpleVertexShader = R"(
 ;
-@vertex fn main() -> @builtin(position) vec4<f32> {
-  return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+@vertex fn main() -> @builtin(position) vec4f {
+  return vec4f(0.0, 0.0, 0.0, 1.0);
 })";
 
     const char* kComputeExpectedValue = "1 + x + size.x * (y + size.y * slice)";
@@ -798,9 +798,9 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
 @group(0) @binding(0) var Src : texture_2d<u32>;
 @group(0) @binding(1) var Dst : texture_storage_2d<r32uint, write>;
 @compute @workgroup_size(1) fn main() {
-  var srcValue : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0), 0);
+  var srcValue : vec4u = textureLoad(Src, vec2i(0, 0), 0);
   srcValue.x = srcValue.x + 1u;
-  textureStore(Dst, vec2<i32>(0, 0), srcValue);
+  textureStore(Dst, vec2i(0, 0), srcValue);
 }
     )");
 
@@ -884,8 +884,8 @@ class StorageTextureZeroInitTests : public StorageTextureTests {
 fn doTest() -> bool {
   for (var y : i32 = 0; y < 4; y = y + 1) {
     for (var x : i32 = 0; x < 4; x = x + 1) {
-      var pixel : vec4<u32> = textureLoad(srcImage, vec2<i32>(x, y));
-      if (any(pixel != vec4<u32>(0u, 0u, 0u, 1u))) {
+      var pixel : vec4u = textureLoad(srcImage, vec2i(x, y));
+      if (any(pixel != vec4u(0u, 0u, 0u, 1u))) {
         return false;
       }
     }
@@ -896,15 +896,15 @@ fn doTest() -> bool {
     const char* kCommonWriteOnlyZeroInitTestCodeFragment = R"(
 @group(0) @binding(0) var dstImage : texture_storage_2d<r32uint, write>;
 
-@fragment fn main() -> @location(0) vec4<f32> {
-  textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
-  return vec4<f32>();
+@fragment fn main() -> @location(0) vec4f {
+  textureStore(dstImage, vec2i(0, 0), vec4u(1u, 0u, 0u, 1u));
+  return vec4f();
 })";
     const char* kCommonWriteOnlyZeroInitTestCodeCompute = R"(
 @group(0) @binding(0) var dstImage : texture_storage_2d<r32uint, write>;
 
 @compute @workgroup_size(1) fn main() {
-  textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
+  textureStore(dstImage, vec2i(0, 0), vec4u(1u, 0u, 0u, 1u));
 })";
 };
 

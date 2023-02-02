@@ -97,25 +97,25 @@ void initBuffers() {
 void initRender() {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         struct VertexIn {
-            @location(0) a_particlePos : vec2<f32>,
-            @location(1) a_particleVel : vec2<f32>,
-            @location(2) a_pos : vec2<f32>,
+            @location(0) a_particlePos : vec2f,
+            @location(1) a_particleVel : vec2f,
+            @location(2) a_pos : vec2f,
         };
 
         @vertex
-        fn main(input : VertexIn) -> @builtin(position) vec4<f32> {
+        fn main(input : VertexIn) -> @builtin(position) vec4f {
             var angle : f32 = -atan2(input.a_particleVel.x, input.a_particleVel.y);
-            var pos : vec2<f32> = vec2<f32>(
+            var pos : vec2f = vec2f(
                 (input.a_pos.x * cos(angle)) - (input.a_pos.y * sin(angle)),
                 (input.a_pos.x * sin(angle)) + (input.a_pos.y * cos(angle)));
-            return vec4<f32>(pos + input.a_particlePos, 0.0, 1.0);
+            return vec4f(pos + input.a_particlePos, 0.0, 1.0);
         }
     )");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         @fragment
-        fn main() -> @location(0) vec4<f32> {
-            return vec4<f32>(1.0, 1.0, 1.0, 1.0);
+        fn main() -> @location(0) vec4f {
+            return vec4f(1.0, 1.0, 1.0, 1.0);
         }
     )");
 
@@ -149,8 +149,8 @@ void initRender() {
 void initSim() {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct Particle {
-            pos : vec2<f32>,
-            vel : vec2<f32>,
+            pos : vec2f,
+            vel : vec2f,
         };
         struct SimParams {
             deltaT : f32,
@@ -171,20 +171,20 @@ void initSim() {
 
         // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
         @compute @workgroup_size(1)
-        fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
+        fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3u) {
             var index : u32 = GlobalInvocationID.x;
             if (index >= params.particleCount) {
                 return;
             }
-            var vPos : vec2<f32> = particlesA.particles[index].pos;
-            var vVel : vec2<f32> = particlesA.particles[index].vel;
-            var cMass : vec2<f32> = vec2<f32>(0.0, 0.0);
-            var cVel : vec2<f32> = vec2<f32>(0.0, 0.0);
-            var colVel : vec2<f32> = vec2<f32>(0.0, 0.0);
+            var vPos : vec2f = particlesA.particles[index].pos;
+            var vVel : vec2f = particlesA.particles[index].vel;
+            var cMass : vec2f = vec2f(0.0, 0.0);
+            var cVel : vec2f = vec2f(0.0, 0.0);
+            var colVel : vec2f = vec2f(0.0, 0.0);
             var cMassCount : u32 = 0u;
             var cVelCount : u32 = 0u;
-            var pos : vec2<f32>;
-            var vel : vec2<f32>;
+            var pos : vec2f;
+            var vel : vec2f;
 
             for (var i : u32 = 0u; i < params.particleCount; i = i + 1u) {
                 if (i == index) {
@@ -207,11 +207,11 @@ void initSim() {
             }
 
             if (cMassCount > 0u) {
-                cMass = (cMass / vec2<f32>(f32(cMassCount), f32(cMassCount))) - vPos;
+                cMass = (cMass / vec2f(f32(cMassCount), f32(cMassCount))) - vPos;
             }
 
             if (cVelCount > 0u) {
-                cVel = cVel / vec2<f32>(f32(cVelCount), f32(cVelCount));
+                cVel = cVel / vec2f(f32(cVelCount), f32(cVelCount));
             }
             vVel = vVel + (cMass * params.rule1Scale) + (colVel * params.rule2Scale) +
                 (cVel * params.rule3Scale);

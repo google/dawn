@@ -27,15 +27,15 @@ class CullingTest : public DawnTest {
         // 2. The bottom-right one is clockwise (CW)
         pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
             @vertex
-            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-                var pos = array<vec2<f32>, 6>(
-                    vec2<f32>(-1.0,  1.0),
-                    vec2<f32>(-1.0,  0.0),
-                    vec2<f32>( 0.0,  1.0),
-                    vec2<f32>( 0.0, -1.0),
-                    vec2<f32>( 1.0,  0.0),
-                    vec2<f32>( 1.0, -1.0));
-                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-1.0,  1.0),
+                    vec2f(-1.0,  0.0),
+                    vec2f( 0.0,  1.0),
+                    vec2f( 0.0, -1.0),
+                    vec2f( 1.0,  0.0),
+                    vec2f( 1.0, -1.0));
+                return vec4f(pos[VertexIndex], 0.0, 1.0);
             })");
 
         // FragCoord of pixel(x, y) in framebuffer coordinate is (x + 0.5, y + 0.5). And we use
@@ -43,9 +43,9 @@ class CullingTest : public DawnTest {
         // will make the pixel's R and G channels exactly equal to the pixel's x and y coordinates.
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             @fragment
-            fn main(@builtin(position) FragCoord : vec4<f32>) -> @location(0) vec4<f32> {
-                return vec4<f32>(
-                    (FragCoord.xy - vec2<f32>(0.5, 0.5)) / vec2<f32>(255.0, 255.0),
+            fn main(@builtin(position) FragCoord : vec4f) -> @location(0) vec4f {
+                return vec4f(
+                    (FragCoord.xy - vec2f(0.5, 0.5)) / vec2f(255.0, 255.0),
                     0.0, 1.0);
             })");
 

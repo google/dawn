@@ -72,8 +72,8 @@ class TextureZeroInitTest : public DawnTest {
         pipelineDescriptor.vertex.module = CreateBasicVertexShaderForTest(depth);
         const char* fs = R"(
             ;
-            @fragment fn main() -> @location(0) vec4<f32> {
-               return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            @fragment fn main() -> @location(0) vec4f {
+               return vec4f(1.0, 0.0, 0.0, 1.0);
             }
         )";
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, fs);
@@ -86,16 +86,16 @@ class TextureZeroInitTest : public DawnTest {
     wgpu::ShaderModule CreateBasicVertexShaderForTest(float depth = 0.f) {
         std::string source = R"(
             @vertex
-            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-                var pos = array<vec2<f32>, 6>(
-                    vec2<f32>(-1.0, -1.0),
-                    vec2<f32>(-1.0,  1.0),
-                    vec2<f32>( 1.0, -1.0),
-                    vec2<f32>( 1.0,  1.0),
-                    vec2<f32>(-1.0,  1.0),
-                    vec2<f32>( 1.0, -1.0)
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-1.0, -1.0),
+                    vec2f(-1.0,  1.0),
+                    vec2f( 1.0, -1.0),
+                    vec2f( 1.0,  1.0),
+                    vec2f(-1.0,  1.0),
+                    vec2f( 1.0, -1.0)
                 );
-                return vec4<f32>(pos[VertexIndex], )" +
+                return vec4f(pos[VertexIndex], )" +
                              std::to_string(depth) + R"(, 1.0);
             })";
         return utils::CreateShaderModule(device, source.c_str());
@@ -104,12 +104,12 @@ class TextureZeroInitTest : public DawnTest {
         return utils::CreateShaderModule(device, R"(
             @group(0) @binding(0) var texture0 : texture_2d<f32>;
             struct FragmentOut {
-                @location(0) color : vec4<f32>
+                @location(0) color : vec4f
             }
             @fragment
-            fn main(@builtin(position) FragCoord : vec4<f32>) -> FragmentOut {
+            fn main(@builtin(position) FragCoord : vec4f) -> FragmentOut {
                 var output : FragmentOut;
-                output.color = textureLoad(texture0, vec2<i32>(FragCoord.xy), 0);
+                output.color = textureLoad(texture0, vec2i(FragCoord.xy), 0);
                 return output;
             }
         )");
@@ -1144,11 +1144,11 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     const char* cs = R"(
         @group(0) @binding(0) var tex : texture_2d<f32>;
         struct Result {
-            value : vec4<f32>
+            value : vec4f
         }
         @group(0) @binding(1) var<storage, read_write> result : Result;
         @compute @workgroup_size(1) fn main() {
-           result.value = textureLoad(tex, vec2<i32>(0,0), 0);
+           result.value = textureLoad(tex, vec2i(0,0), 0);
         }
     )";
     computePipelineDescriptor.compute.module = utils::CreateShaderModule(device, cs);

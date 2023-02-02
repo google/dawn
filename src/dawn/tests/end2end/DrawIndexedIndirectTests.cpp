@@ -38,13 +38,13 @@ class DrawIndexedIndirectTest : public DawnTest {
 
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             @vertex
-            fn main(@location(0) pos : vec4<f32>) -> @builtin(position) vec4<f32> {
+            fn main(@location(0) pos : vec4f) -> @builtin(position) vec4f {
                 return pos;
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            @fragment fn main() -> @location(0) vec4<f32> {
-                return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            @fragment fn main() -> @location(0) vec4f {
+                return vec4f(0.0, 1.0, 0.0, 1.0);
             })");
 
         utils::ComboRenderPipelineDescriptor descriptor;

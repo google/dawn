@@ -55,13 +55,13 @@ class BindGroupTests : public DawnTest {
     wgpu::ShaderModule MakeSimpleVSModule() const {
         return utils::CreateShaderModule(device, R"(
         @vertex
-        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-             var pos = array<vec2<f32>, 3>(
-                vec2<f32>(-1.0, 1.0),
-                vec2<f32>( 1.0, 1.0),
-                vec2<f32>(-1.0, -1.0));
+        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+             var pos = array(
+                vec2f(-1.0, 1.0),
+                vec2f( 1.0, 1.0),
+                vec2f(-1.0, -1.0));
 
-            return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            return vec4f(pos[VertexIndex], 0.0, 1.0);
         })");
     }
 
@@ -71,7 +71,7 @@ class BindGroupTests : public DawnTest {
         std::ostringstream fs;
         for (size_t i = 0; i < bindingTypes.size(); ++i) {
             fs << "struct Buffer" << i << R"( {
-                color : vec4<f32>
+                color : vec4f
             })";
 
             switch (bindingTypes[i]) {
@@ -88,8 +88,8 @@ class BindGroupTests : public DawnTest {
             }
         }
 
-        fs << "\n@fragment fn main() -> @location(0) vec4<f32>{\n";
-        fs << "var fragColor : vec4<f32> = vec4<f32>();\n";
+        fs << "\n@fragment fn main() -> @location(0) vec4f{\n";
+        fs << "var fragColor : vec4f = vec4f();\n";
         for (size_t i = 0; i < bindingTypes.size(); ++i) {
             fs << "fragColor = fragColor + buffer" << i << ".color;\n";
         }
@@ -168,29 +168,29 @@ TEST_P(BindGroupTests, ReusedUBO) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
         struct VertexUniformBuffer {
-            transform : vec4<f32>
+            transform : vec4f
         }
 
         @group(0) @binding(0) var <uniform> vertexUbo : VertexUniformBuffer;
 
         @vertex
-        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-            var pos = array<vec2<f32>, 3>(
-                vec2<f32>(-1.0, 1.0),
-                vec2<f32>( 1.0, 1.0),
-                vec2<f32>(-1.0, -1.0));
+        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+            var pos = array(
+                vec2f(-1.0, 1.0),
+                vec2f( 1.0, 1.0),
+                vec2f(-1.0, -1.0));
 
             var transform = mat2x2<f32>(vertexUbo.transform.xy, vertexUbo.transform.zw);
-            return vec4<f32>(transform * pos[VertexIndex], 0.0, 1.0);
+            return vec4f(transform * pos[VertexIndex], 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct FragmentUniformBuffer {
-            color : vec4<f32>
+            color : vec4f
         }
         @group(0) @binding(1) var <uniform> fragmentUbo : FragmentUniformBuffer;
 
-        @fragment fn main() -> @location(0) vec4<f32> {
+        @fragment fn main() -> @location(0) vec4f {
             return fragmentUbo.color;
         })");
 
@@ -246,19 +246,19 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
         struct VertexUniformBuffer {
-            transform : vec4<f32>
+            transform : vec4f
         }
         @group(0) @binding(0) var <uniform> vertexUbo : VertexUniformBuffer;
 
         @vertex
-        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-            var pos = array<vec2<f32>, 3>(
-                vec2<f32>(-1.0, 1.0),
-                vec2<f32>( 1.0, 1.0),
-                vec2<f32>(-1.0, -1.0));
+        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+            var pos = array(
+                vec2f(-1.0, 1.0),
+                vec2f( 1.0, 1.0),
+                vec2f(-1.0, -1.0));
 
             var transform = mat2x2<f32>(vertexUbo.transform.xy, vertexUbo.transform.zw);
-            return vec4<f32>(transform * pos[VertexIndex], 0.0, 1.0);
+            return vec4f(transform * pos[VertexIndex], 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -266,7 +266,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
         @group(0) @binding(2) var tex : texture_2d<f32>;
 
         @fragment
-        fn main(@builtin(position) FragCoord : vec4<f32>) -> @location(0) vec4<f32> {
+        fn main(@builtin(position) FragCoord : vec4f) -> @location(0) vec4f {
             return textureSample(tex, samp, FragCoord.xy);
         })");
 
@@ -349,20 +349,20 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
         struct VertexUniformBuffer {
-            transform : vec4<f32>
+            transform : vec4f
         }
 
         @group(0) @binding(0) var <uniform> vertexUbo1 : VertexUniformBuffer;
         @group(1) @binding(0) var <uniform> vertexUbo2 : VertexUniformBuffer;
 
         @vertex
-        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-            var pos = array<vec2<f32>, 3>(
-                vec2<f32>(-1.0, 1.0),
-                vec2<f32>( 1.0, 1.0),
-                vec2<f32>(-1.0, -1.0));
+        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+            var pos = array(
+                vec2f(-1.0, 1.0),
+                vec2f( 1.0, 1.0),
+                vec2f(-1.0, -1.0));
 
-            return vec4<f32>(mat2x2<f32>(
+            return vec4f(mat2x2<f32>(
                 vertexUbo1.transform.xy + vertexUbo2.transform.xy,
                 vertexUbo1.transform.zw + vertexUbo2.transform.zw
             ) * pos[VertexIndex], 0.0, 1.0);
@@ -370,13 +370,13 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct FragmentUniformBuffer {
-            color : vec4<f32>
+            color : vec4f
         }
 
         @group(0) @binding(1) var <uniform> fragmentUbo1 : FragmentUniformBuffer;
         @group(1) @binding(1) var <uniform> fragmentUbo2 : FragmentUniformBuffer;
 
-        @fragment fn main() -> @location(0) vec4<f32> {
+        @fragment fn main() -> @location(0) vec4f {
             return fragmentUbo1.color + fragmentUbo2.color;
         })");
 
@@ -1048,10 +1048,10 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
         @group(0) @binding(2) var<uniform> buffer2 : Buffer;
         @group(0) @binding(3) var<storage, read> buffer3 : Buffer;
         @group(0) @binding(0) var<storage, read> buffer0 : Buffer;
-        @group(0) @binding(4) var<storage, read_write> outputBuffer : vec3<u32>;
+        @group(0) @binding(4) var<storage, read_write> outputBuffer : vec3u;
 
         @compute @workgroup_size(1) fn main() {
-            outputBuffer = vec3<u32>(buffer0.value, buffer2.value, buffer3.value);
+            outputBuffer = vec3u(buffer0.value, buffer2.value, buffer3.value);
         })");
     pipelineDescriptor.compute.entryPoint = "main";
     pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
@@ -1125,7 +1125,7 @@ TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) 
         }
 
         struct OutputBuffer {
-            value : vec2<u32>
+            value : vec2u
         }
 
         @group(0) @binding(0) var<uniform> buffer0 : Buffer;
@@ -1133,7 +1133,7 @@ TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) 
         @group(0) @binding(2) var<storage, read_write> outputBuffer : OutputBuffer;
 
         @compute @workgroup_size(1) fn main() {
-            outputBuffer.value = vec2<u32>(buffer0.value, buffer1.value);
+            outputBuffer.value = vec2u(buffer0.value, buffer1.value);
         })");
         pipelineDescriptor.compute.entryPoint = "main";
         pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
@@ -1236,25 +1236,25 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         @vertex
-        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-            var pos = array<vec2<f32>, 3>(
-                vec2<f32>(-1.0, 1.0),
-                vec2<f32>( 1.0, 1.0),
-                vec2<f32>(-1.0, -1.0));
+        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+            var pos = array(
+                vec2f(-1.0, 1.0),
+                vec2f( 1.0, 1.0),
+                vec2f(-1.0, -1.0));
 
-            return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            return vec4f(pos[VertexIndex], 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct Ubo {
-            color : vec4<f32>
+            color : vec4f
         }
 
         @group(0) @binding(553) var <uniform> ubo1 : Ubo;
         @group(0) @binding(47) var <uniform> ubo2 : Ubo;
         @group(0) @binding(111) var <uniform> ubo3 : Ubo;
 
-        @fragment fn main() -> @location(0) vec4<f32> {
+        @fragment fn main() -> @location(0) vec4f {
             return ubo1.color + 2.0 * ubo2.color + 4.0 * ubo3.color;
         })");
 
@@ -1379,22 +1379,22 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
 
     pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
         @vertex
-        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-            var pos = array<vec2<f32>, 3>(
-                vec2<f32>(-1.0, 1.0),
-                vec2<f32>( 1.0, 1.0),
-                vec2<f32>(-1.0, -1.0));
+        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+            var pos = array(
+                vec2f(-1.0, 1.0),
+                vec2f( 1.0, 1.0),
+                vec2f(-1.0, -1.0));
 
-            return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            return vec4f(pos[VertexIndex], 0.0, 1.0);
         })");
 
     pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
         struct Buffer0 {
-            color : vec4<f32>
+            color : vec4f
         }
         @group(0) @binding(0) var<storage, read> buffer0 : Buffer0;
 
-        @fragment fn main() -> @location(0) vec4<f32> {
+        @fragment fn main() -> @location(0) vec4f {
             return buffer0.color;
         })");
 
@@ -1483,8 +1483,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
                   << "var samp" << i << " : sampler;\n";
 
         body << "if (abs(textureSampleLevel(tex" << i << ", samp" << i
-             << ", vec2<f32>(0.5, 0.5), 0.0).r - " << expectedValue++
-             << ".0 / 255.0) > 0.0001) {\n";
+             << ", vec2f(0.5, 0.5), 0.0).r - " << expectedValue++ << ".0 / 255.0) > 0.0001) {\n";
         body << "    return;\n";
         body << "}\n";
     }

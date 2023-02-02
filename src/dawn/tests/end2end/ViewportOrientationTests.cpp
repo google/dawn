@@ -24,13 +24,13 @@ TEST_P(ViewportOrientationTests, OriginAt0x0) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 2, 2);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        @vertex fn main() -> @builtin(position) vec4<f32> {
-            return vec4<f32>(-0.5, 0.5, 0.0, 1.0);
+        @vertex fn main() -> @builtin(position) vec4f {
+            return vec4f(-0.5, 0.5, 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main() -> @location(0) vec4<f32> {
-            return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(0.0, 1.0, 0.0, 1.0);
         })");
 
     utils::ComboRenderPipelineDescriptor descriptor;

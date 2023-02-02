@@ -41,12 +41,12 @@ class ColorStateTest : public DawnTest {
 
         vsModule = utils::CreateShaderModule(device, R"(
                 @vertex
-                fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-                    var pos = array<vec2<f32>, 3>(
-                        vec2<f32>(-1.0, -1.0),
-                        vec2<f32>(3.0, -1.0),
-                        vec2<f32>(-1.0, 3.0));
-                    return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                    var pos = array(
+                        vec2f(-1.0, -1.0),
+                        vec2f(3.0, -1.0),
+                        vec2f(-1.0, 3.0));
+                    return vec4f(pos[VertexIndex], 0.0, 1.0);
                 }
             )");
 
@@ -63,12 +63,12 @@ class ColorStateTest : public DawnTest {
     void SetupSingleSourcePipelines(wgpu::ColorTargetState colorTargetState) {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
                 struct MyBlock {
-                    color : vec4<f32>
+                    color : vec4f
                 }
 
                 @group(0) @binding(0) var<uniform> myUbo : MyBlock;
 
-                @fragment fn main() -> @location(0) vec4<f32> {
+                @fragment fn main() -> @location(0) vec4f {
                     return myUbo.color;
                 }
             )");
@@ -807,19 +807,19 @@ TEST_P(ColorStateTest, IndependentColorState) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct MyBlock {
-            color0 : vec4<f32>,
-            color1 : vec4<f32>,
-            color2 : vec4<f32>,
-            color3 : vec4<f32>,
+            color0 : vec4f,
+            color1 : vec4f,
+            color2 : vec4f,
+            color3 : vec4f,
         }
 
         @group(0) @binding(0) var<uniform> myUbo : MyBlock;
 
         struct FragmentOut {
-            @location(0) fragColor0 : vec4<f32>,
-            @location(1) fragColor1 : vec4<f32>,
-            @location(2) fragColor2 : vec4<f32>,
-            @location(3) fragColor3 : vec4<f32>,
+            @location(0) fragColor0 : vec4f,
+            @location(1) fragColor1 : vec4f,
+            @location(2) fragColor2 : vec4f,
+            @location(3) fragColor3 : vec4f,
         }
 
         @fragment fn main() -> FragmentOut {
@@ -931,12 +931,12 @@ TEST_P(ColorStateTest, IndependentColorState) {
 TEST_P(ColorStateTest, DefaultBlendColor) {
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct MyBlock {
-            color : vec4<f32>
+            color : vec4f
         }
 
         @group(0) @binding(0) var<uniform> myUbo : MyBlock;
 
-        @fragment fn main() -> @location(0) vec4<f32> {
+        @fragment fn main() -> @location(0) vec4f {
             return myUbo.color;
         }
     )");
@@ -1057,12 +1057,12 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
 TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct MyBlock {
-            color : vec4<f32>
+            color : vec4f
         }
 
         @group(0) @binding(0) var<uniform> myUbo : MyBlock;
 
-        @fragment fn main() -> @location(0) vec4<f32> {
+        @fragment fn main() -> @location(0) vec4f {
             return myUbo.color;
         }
     )");
@@ -1117,12 +1117,12 @@ TEST_P(ColorStateTest, SparseAttachmentsDifferentColorMask) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct Outputs {
-            @location(1) o1 : vec4<f32>,
-            @location(3) o3 : vec4<f32>,
+            @location(1) o1 : vec4f,
+            @location(3) o3 : vec4f,
         }
 
         @fragment fn main() -> Outputs {
-            return Outputs(vec4<f32>(1.0), vec4<f32>(0.0, 1.0, 1.0, 1.0));
+            return Outputs(vec4f(1.0), vec4f(0.0, 1.0, 1.0, 1.0));
         }
     )");
 

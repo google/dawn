@@ -33,17 +33,17 @@ class RenderBundleTest : public DawnTest {
 
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             @vertex
-            fn main(@location(0) pos : vec4<f32>) -> @builtin(position) vec4<f32> {
+            fn main(@location(0) pos : vec4f) -> @builtin(position) vec4f {
                 return pos;
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             struct Ubo {
-                color : vec4<f32>
+                color : vec4f
             }
             @group(0) @binding(0) var<uniform> fragmentUniformBuffer : Ubo;
 
-            @fragment fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4f {
                 return fragmentUniformBuffer.color;
             })");
 

@@ -131,7 +131,7 @@ static const char sRenderValidationShaderSource[] = R"(
             }
 
             @compute @workgroup_size(64, 1, 1)
-            fn main(@builtin(global_invocation_id) id : vec3<u32>) {
+            fn main(@builtin(global_invocation_id) id : vec3u) {
                 if (id.x >= batch.numDraws) {
                     return;
                 }

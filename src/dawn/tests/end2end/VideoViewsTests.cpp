@@ -174,22 +174,22 @@ wgpu::ShaderModule VideoViewsTests::GetTestVertexShaderModule() const {
     return utils::CreateShaderModule(device, R"(
                 struct VertexOut {
                     @location(0) texCoord : vec2 <f32>,
-                    @builtin(position) position : vec4<f32>,
+                    @builtin(position) position : vec4f,
                 }
 
                 @vertex
                 fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {
-                    var pos = array<vec2<f32>, 6>(
-                        vec2<f32>(-1.0, 1.0),
-                        vec2<f32>(-1.0, -1.0),
-                        vec2<f32>(1.0, -1.0),
-                        vec2<f32>(-1.0, 1.0),
-                        vec2<f32>(1.0, -1.0),
-                        vec2<f32>(1.0, 1.0)
+                    var pos = array(
+                        vec2f(-1.0, 1.0),
+                        vec2f(-1.0, -1.0),
+                        vec2f(1.0, -1.0),
+                        vec2f(-1.0, 1.0),
+                        vec2f(1.0, -1.0),
+                        vec2f(1.0, 1.0)
                     );
                     var output : VertexOut;
-                    output.position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
-                    output.texCoord = vec2<f32>(output.position.xy * 0.5) + vec2<f32>(0.5, 0.5);
+                    output.position = vec4f(pos[VertexIndex], 0.0, 1.0);
+                    output.texCoord = vec2f(output.position.xy * 0.5) + vec2f(0.5, 0.5);
                     return output;
             })");
 }
@@ -231,9 +231,9 @@ TEST_P(VideoViewsTests, NV12SampleYtoR) {
             @group(0) @binding(1) var texture : texture_2d<f32>;
 
             @fragment
-            fn main(@location(0) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
+            fn main(@location(0) texCoord : vec2f) -> @location(0) vec4f {
                let y : f32 = textureSample(texture, sampler0, texCoord).r;
-               return vec4<f32>(y, 0.0, 0.0, 1.0);
+               return vec4f(y, 0.0, 0.0, 1.0);
             })");
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(
@@ -290,10 +290,10 @@ TEST_P(VideoViewsTests, NV12SampleUVtoRG) {
             @group(0) @binding(1) var texture : texture_2d<f32>;
 
             @fragment
-            fn main(@location(0) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
+            fn main(@location(0) texCoord : vec2f) -> @location(0) vec4f {
                let u : f32 = textureSample(texture, sampler0, texCoord).r;
                let v : f32 = textureSample(texture, sampler0, texCoord).g;
-               return vec4<f32>(u, v, 0.0, 1.0);
+               return vec4f(u, v, 0.0, 1.0);
             })");
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(
@@ -356,11 +356,11 @@ TEST_P(VideoViewsTests, NV12SampleYUVtoRGB) {
             @group(0) @binding(2) var chromaTexture : texture_2d<f32>;
 
             @fragment
-            fn main(@location(0) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
+            fn main(@location(0) texCoord : vec2f) -> @location(0) vec4f {
                let y : f32 = textureSample(lumaTexture, sampler0, texCoord).r;
                let u : f32 = textureSample(chromaTexture, sampler0, texCoord).r;
                let v : f32 = textureSample(chromaTexture, sampler0, texCoord).g;
-               return vec4<f32>(y, u, v, 1.0);
+               return vec4f(y, u, v, 1.0);
             })");
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(

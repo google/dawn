@@ -46,22 +46,22 @@ class D3D12DescriptorHeapTests : public DawnTest {
 
             @vertex fn main(
                 @builtin(vertex_index) VertexIndex : u32
-            ) -> @builtin(position) vec4<f32> {
-                var pos = array<vec2<f32>, 3>(
-                    vec2<f32>(-1.0,  1.0),
-                    vec2<f32>( 1.0,  1.0),
-                    vec2<f32>(-1.0, -1.0)
+            ) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-1.0,  1.0),
+                    vec2f( 1.0,  1.0),
+                    vec2f(-1.0, -1.0)
                 );
-                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                return vec4f(pos[VertexIndex], 0.0, 1.0);
             })");
 
         mSimpleFSModule = utils::CreateShaderModule(device, R"(
             struct U {
-                color : vec4<f32>
+                color : vec4f
             }
             @group(0) @binding(0) var<uniform> colorBuffer : U;
 
-            @fragment fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4f {
                 return colorBuffer.color;
             })");
     }
@@ -176,15 +176,15 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
     // a sampler bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps WILL NOT switch over
     // because the sampler heap allocations are de-duplicated.
     renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-            @vertex fn main() -> @builtin(position) vec4<f32> {
-                return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            @vertex fn main() -> @builtin(position) vec4f {
+                return vec4f(0.0, 0.0, 0.0, 1.0);
             })");
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             @group(0) @binding(0) var sampler0 : sampler;
-            @fragment fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4f {
                 _ = sampler0;
-                return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+                return vec4f(0.0, 0.0, 0.0, 0.0);
             })");
 
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
@@ -447,8 +447,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
         }
         @group(0) @binding(0) var<uniform> buffer0 : U;
 
-        @fragment fn main() -> @location(0) vec4<f32> {
-            return vec4<f32>(buffer0.heapSize, 0.0, 0.0, 1.0);
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(buffer0.heapSize, 0.0, 0.0, 1.0);
         })");
 
     wgpu::BlendState blend;
@@ -782,25 +782,25 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
 
             @vertex fn main(
                 @builtin(vertex_index) VertexIndex : u32
-            ) -> @builtin(position) vec4<f32> {
-                var pos = array<vec2<f32>, 3>(
-                    vec2<f32>(-1.0,  1.0),
-                    vec2<f32>( 1.0,  1.0),
-                    vec2<f32>(-1.0, -1.0)
+            ) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-1.0,  1.0),
+                    vec2f( 1.0,  1.0),
+                    vec2f(-1.0, -1.0)
                 );
-                return vec4<f32>(buffer0.transform * (pos[VertexIndex]), 0.0, 1.0);
+                return vec4f(buffer0.transform * (pos[VertexIndex]), 0.0, 1.0);
             })");
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             struct U {
-                color : vec4<f32>
+                color : vec4f
             }
             @group(0) @binding(1) var sampler0 : sampler;
             @group(0) @binding(2) var texture0 : texture_2d<f32>;
             @group(0) @binding(3) var<uniform> buffer0 : U;
 
             @fragment fn main(
-                @builtin(position) FragCoord : vec4<f32>
-            ) -> @location(0) vec4<f32> {
+                @builtin(position) FragCoord : vec4f
+            ) -> @location(0) vec4f {
                 return textureSample(texture0, sampler0, FragCoord.xy) + buffer0.color;
             })");
 

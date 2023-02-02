@@ -221,13 +221,13 @@ class TextureFormatTest : public DawnTest {
 
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             @vertex
-            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-                var pos = array<vec2<f32>, 3>(
-                    vec2<f32>(-3.0, -1.0),
-                    vec2<f32>( 3.0, -1.0),
-                    vec2<f32>( 0.0,  2.0));
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-3.0, -1.0),
+                    vec2f( 3.0, -1.0),
+                    vec2f( 0.0,  2.0));
 
-                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                return vec4f(pos[VertexIndex], 0.0, 1.0);
             })");
 
         // Compute the WGSL type of the texture's data.
@@ -239,9 +239,9 @@ class TextureFormatTest : public DawnTest {
         fsSource << "   @location(0) color : vec4<" << type << ">\n";
         fsSource << R"(}
             @fragment
-            fn main(@builtin(position) FragCoord : vec4<f32>) -> FragmentOut {
+            fn main(@builtin(position) FragCoord : vec4f) -> FragmentOut {
                 var output : FragmentOut;
-                output.color = textureLoad(myTexture, vec2<i32>(FragCoord.xy), 0);
+                output.color = textureLoad(myTexture, vec2i(FragCoord.xy), 0);
                 return output;
             })";
 

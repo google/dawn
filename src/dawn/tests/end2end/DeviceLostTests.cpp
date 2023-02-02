@@ -108,7 +108,7 @@ TEST_P(DeviceLostTest, CreateBindGroupLayoutFails) {
 TEST_P(DeviceLostTest, GetBindGroupLayoutFails) {
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
         struct UniformBuffer {
-            pos : vec4<f32>
+            pos : vec4f
         }
         @group(0) @binding(0) var<uniform> ubo : UniformBuffer;
         @compute @workgroup_size(1) fn main() {
@@ -195,7 +195,7 @@ TEST_P(DeviceLostTest, CreateShaderModuleFails) {
 
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
         @fragment
-        fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
+        fn main(@location(0) color : vec4f) -> @location(0) vec4f {
             return color;
         })"));
 }
@@ -499,17 +499,17 @@ TEST_P(DeviceLostTest, DeviceLostInRenderPassWithDrawIndirect) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 4u, 4u);
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = utils::CreateShaderModule(device, R"(
-        @vertex fn main(@builtin(vertex_index) i : u32) -> @builtin(position) vec4<f32> {
-            var pos = array<vec2<f32>, 3>(
-                vec2<f32>(-1.0, -1.0),
-                vec2<f32>(3.0, -1.0),
-                vec2<f32>(-1.0, 3.0));
-            return vec4<f32>(pos[i], 0.0, 1.0);
+        @vertex fn main(@builtin(vertex_index) i : u32) -> @builtin(position) vec4f {
+            var pos = array(
+                vec2f(-1.0, -1.0),
+                vec2f(3.0, -1.0),
+                vec2f(-1.0, 3.0));
+            return vec4f(pos[i], 0.0, 1.0);
         }
     )");
     desc.cFragment.module = utils::CreateShaderModule(device, R"(
-        @fragment fn main() -> @location(0) vec4<f32> {
-            return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(0.0, 1.0, 0.0, 1.0);
         }
     )");
     desc.cTargets[0].format = renderPass.colorFormat;

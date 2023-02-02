@@ -36,37 +36,37 @@ static constexpr std::string_view kComputeShaderMultipleEntryPoints = R"(
     )";
 
 static constexpr std::string_view kVertexShaderDefault = R"(
-        @vertex fn main() -> @builtin(position) vec4<f32> {
-            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        @vertex fn main() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 0.0);
         }
     )";
 
 static constexpr std::string_view kVertexShaderMultipleEntryPoints = R"(
-        @vertex fn main() -> @builtin(position) vec4<f32> {
-            return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+        @vertex fn main() -> @builtin(position) vec4f {
+            return vec4f(1.0, 0.0, 0.0, 1.0);
         }
 
-        @vertex fn main2() -> @builtin(position) vec4<f32> {
-            return vec4<f32>(0.5, 0.5, 0.5, 1.0);
+        @vertex fn main2() -> @builtin(position) vec4f {
+            return vec4f(0.5, 0.5, 0.5, 1.0);
         }
     )";
 
 static constexpr std::string_view kFragmentShaderDefault = R"(
-        @fragment fn main() -> @location(0) vec4<f32> {
-            return vec4<f32>(0.1, 0.2, 0.3, 0.4);
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(0.1, 0.2, 0.3, 0.4);
         }
     )";
 
 static constexpr std::string_view kFragmentShaderMultipleOutput = R"(
         struct FragmentOut {
-            @location(0) fragColor0 : vec4<f32>,
-            @location(1) fragColor1 : vec4<f32>,
+            @location(0) fragColor0 : vec4f,
+            @location(1) fragColor1 : vec4f,
         }
 
         @fragment fn main() -> FragmentOut {
             var output : FragmentOut;
-            output.fragColor0 = vec4<f32>(0.1, 0.2, 0.3, 0.4);
-            output.fragColor1 = vec4<f32>(0.5, 0.6, 0.7, 0.8);
+            output.fragColor0 = vec4f(0.1, 0.2, 0.3, 0.4);
+            output.fragColor1 = vec4f(0.5, 0.6, 0.7, 0.8);
             return output;
         }
     )";
@@ -78,8 +78,8 @@ static constexpr std::string_view kFragmentShaderBindGroup00Uniform = R"(
 
         @group(0) @binding(0) var<uniform> uBuffer : S;
 
-        @fragment fn main() -> @location(0) vec4<f32> {
-            return vec4<f32>(uBuffer.value, 0.2, 0.3, 0.4);
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(uBuffer.value, 0.2, 0.3, 0.4);
         }
     )";
 
@@ -90,8 +90,8 @@ static constexpr std::string_view kFragmentShaderBindGroup01Uniform = R"(
 
         @group(0) @binding(1) var<uniform> uBuffer : S;
 
-        @fragment fn main() -> @location(0) vec4<f32> {
-            return vec4<f32>(uBuffer.value, 0.2, 0.3, 0.4);
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(uBuffer.value, 0.2, 0.3, 0.4);
         }
     )";
 

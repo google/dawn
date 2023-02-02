@@ -82,7 +82,7 @@ TEST_P(ComputeSharedMemoryTests, Basic) {
         var<workgroup> tmp : u32;
 
         @compute @workgroup_size(4,4,1)
-        fn main(@builtin(local_invocation_id) LocalInvocationID : vec3<u32>) {
+        fn main(@builtin(local_invocation_id) LocalInvocationID : vec3u) {
             let index : u32 = LocalInvocationID.y * kTileSize + LocalInvocationID.x;
             if (index == 0u) {
                 tmp = 0u;
@@ -114,7 +114,7 @@ TEST_P(ComputeSharedMemoryTests, AssortedTypes) {
             d_struct : StructValues,
             d_matrix : mat2x2<f32>,
             d_array : array<u32, 4>,
-            d_vector : vec4<f32>,
+            d_vector : vec4f,
         }
 
         @group(0) @binding(0) var<storage, read_write> dst : Dst;
@@ -122,27 +122,27 @@ TEST_P(ComputeSharedMemoryTests, AssortedTypes) {
         var<workgroup> wg_struct : StructValues;
         var<workgroup> wg_matrix : mat2x2<f32>;
         var<workgroup> wg_array : array<u32, 4>;
-        var<workgroup> wg_vector : vec4<f32>;
+        var<workgroup> wg_vector : vec4f;
 
         @compute @workgroup_size(4,1,1)
-        fn main(@builtin(local_invocation_id) LocalInvocationID : vec3<u32>) {
+        fn main(@builtin(local_invocation_id) LocalInvocationID : vec3u) {
 
             let i = 4u * LocalInvocationID.x;
             if (LocalInvocationID.x == 0u) {
                 wg_struct.m = mat2x2<f32>(
-                    vec2<f32>(f32(i), f32(i + 1u)),
-                    vec2<f32>(f32(i + 2u), f32(i + 3u)));
+                    vec2f(f32(i), f32(i + 1u)),
+                    vec2f(f32(i + 2u), f32(i + 3u)));
             } else if (LocalInvocationID.x == 1u) {
                 wg_matrix = mat2x2<f32>(
-                    vec2<f32>(f32(i), f32(i + 1u)),
-                    vec2<f32>(f32(i + 2u), f32(i + 3u)));
+                    vec2f(f32(i), f32(i + 1u)),
+                    vec2f(f32(i + 2u), f32(i + 3u)));
             } else if (LocalInvocationID.x == 2u) {
                 wg_array[0u] = i;
                 wg_array[1u] = i + 1u;
                 wg_array[2u] = i + 2u;
                 wg_array[3u] = i + 3u;
             } else if (LocalInvocationID.x == 3u) {
-                wg_vector = vec4<f32>(
+                wg_vector = vec4f(
                     f32(i), f32(i + 1u), f32(i + 2u), f32(i + 3u));
             }
 

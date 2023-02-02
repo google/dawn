@@ -35,21 +35,21 @@ class IndexFormatTest : public DawnTest {
         wgpu::PrimitiveTopology primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             struct VertexIn {
-                @location(0) pos : vec4<f32>,
+                @location(0) pos : vec4f,
                 @builtin(vertex_index) idx : u32,
             }
 
-            @vertex fn main(input : VertexIn) -> @builtin(position) vec4<f32> {
+            @vertex fn main(input : VertexIn) -> @builtin(position) vec4f {
                 // 0xFFFFFFFE is a designated invalid index used by some tests.
                 if (input.idx == 0xFFFFFFFEu) {
-                    return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                    return vec4f(0.0, 0.0, 0.0, 1.0);
                 }
                 return input.pos;
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            @fragment fn main() -> @location(0) vec4<f32> {
-                return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            @fragment fn main() -> @location(0) vec4f {
+                return vec4f(0.0, 1.0, 0.0, 1.0);
             })");
 
         utils::ComboRenderPipelineDescriptor descriptor;

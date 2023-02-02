@@ -76,8 +76,8 @@ const std::string& kMatMulFloatSharedArray2D = R"(
         var<workgroup> mm_Bsub : array<array<f32, 32>, 32>;)";
 const std::string& kMatMulFloatBodyPart1 = R"(
         @compute @workgroup_size(8, 8, 1)
-        fn main(@builtin(local_invocation_id) local_id : vec3<u32>,
-                @builtin(global_invocation_id) global_id  : vec3<u32>) {
+        fn main(@builtin(local_invocation_id) local_id : vec3u,
+                @builtin(global_invocation_id) global_id  : vec3u) {
             let tileRow : u32 = local_id.y * RowPerThread;
             let tileCol : u32 = local_id.x * ColPerThread;
 
@@ -195,7 +195,7 @@ const std::string& kMatMulVec4Header = R"(
             dimBOuter : u32,
         }
         struct Matrix {
-            numbers: array<vec4<f32>>
+            numbers: array<vec4f>
         }
 
         @group(0) @binding(0) var<storage, read> firstMatrix : Matrix;
@@ -203,25 +203,25 @@ const std::string& kMatMulVec4Header = R"(
         @group(0) @binding(2) var<storage, read_write> resultMatrix : Matrix;
         @group(0) @binding(3) var<uniform> uniforms : Uniforms;
 
-        fn mm_readA(row : u32, col : u32) -> vec4<f32>  {
+        fn mm_readA(row : u32, col : u32) -> vec4f  {
             if (row < uniforms.dimAOuter && col < uniforms.dimInner)
             {
-                let result : vec4<f32> = firstMatrix.numbers[row * uniforms.dimInner / 4u + col];
+                let result : vec4f = firstMatrix.numbers[row * uniforms.dimInner / 4u + col];
                 return result;
             }
-            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+            return vec4f(0.0, 0.0, 0.0, 0.0);
         }
 
-        fn mm_readB(row : u32, col : u32) -> vec4<f32> {
+        fn mm_readB(row : u32, col : u32) -> vec4f {
             if (row < uniforms.dimInner && col < uniforms.dimBOuter)
             {
-                let result : vec4<f32> = secondMatrix.numbers[row * uniforms.dimBOuter / 4u + col];
+                let result : vec4f = secondMatrix.numbers[row * uniforms.dimBOuter / 4u + col];
                 return result;
             }
-            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+            return vec4f(0.0, 0.0, 0.0, 0.0);
         }
 
-        fn mm_write(row : u32, col : u32, value : vec4<f32>) {
+        fn mm_write(row : u32, col : u32, value : vec4f) {
             if (row < uniforms.dimAOuter && col < uniforms.dimBOuter)
             {
                 let index : u32 = col + row * uniforms.dimBOuter / 4u;
@@ -234,15 +234,15 @@ const std::string& kMatMulVec4Header = R"(
         const TileOuter : u32 = 32u;
         const TileInner : u32 = 32u;)";
 const std::string& kMatMulVec4SharedArray1D = R"(
-        var<workgroup> mm_Asub : array<vec4<f32>, 256>;
-        var<workgroup> mm_Bsub : array<vec4<f32>, 256>;)";
+        var<workgroup> mm_Asub : array<vec4f, 256>;
+        var<workgroup> mm_Bsub : array<vec4f, 256>;)";
 const std::string& kMatMulVec4SharedArray2D = R"(
-        var<workgroup> mm_Asub : array<array<vec4<f32>, 8>, 32>;
-        var<workgroup> mm_Bsub : array<array<vec4<f32>, 8>, 32>;)";
+        var<workgroup> mm_Asub : array<array<vec4f, 8>, 32>;
+        var<workgroup> mm_Bsub : array<array<vec4f, 8>, 32>;)";
 const std::string& kMatMulVec4BodyPart1 = R"(
         @compute @workgroup_size(8, 8, 1)
-        fn main(@builtin(local_invocation_id) local_id : vec3<u32>,
-                @builtin(global_invocation_id) global_id  : vec3<u32>) {
+        fn main(@builtin(local_invocation_id) local_id : vec3u,
+                @builtin(global_invocation_id) global_id  : vec3u) {
             let tileRow : u32 = local_id.y * RowPerThread;
             let tileCol : u32 = local_id.x;
 
@@ -251,15 +251,15 @@ const std::string& kMatMulVec4BodyPart1 = R"(
 
             let numTiles : u32 = (uniforms.dimInner - 1u) / TileInner + 1u;
 
-            var acc: array<vec4<f32>, 4>;
-            var ACached : vec4<f32>;
-            var BCached : array<vec4<f32>, 4>;
+            var acc: array<vec4f, 4>;
+            var ACached : vec4f;
+            var BCached : array<vec4f, 4>;
 
             // Without this initialization strange values show up in acc.
             // TODO: Remove it once the following bug is fixed.
             // https://bugs.chromium.org/p/tint/issues/detail?id=759
             for (var index : u32 = 0u; index < RowPerThread; index = index + 1u) {
-                acc[index] = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+                acc[index] = vec4f(0.0, 0.0, 0.0, 0.0);
             }
 
             var globalColA : u32 = tileCol;

@@ -65,22 +65,22 @@ class ReadOnlyDepthStencilAttachmentTests
         // pipeline.
         pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
             @vertex
-            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-                var pos = array<vec3<f32>, 6>(
-                    vec3<f32>(-1.0,  1.0, 0.4),
-                    vec3<f32>(-1.0, -1.0, 0.0),
-                    vec3<f32>( 1.0,  1.0, 0.4),
-                    vec3<f32>( 1.0,  1.0, 0.4),
-                    vec3<f32>(-1.0, -1.0, 0.0),
-                    vec3<f32>( 1.0, -1.0, 0.0));
-                return vec4<f32>(pos[VertexIndex], 1.0);
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec3f(-1.0,  1.0, 0.4),
+                    vec3f(-1.0, -1.0, 0.0),
+                    vec3f( 1.0,  1.0, 0.4),
+                    vec3f( 1.0,  1.0, 0.4),
+                    vec3f(-1.0, -1.0, 0.0),
+                    vec3f( 1.0, -1.0, 0.0));
+                return vec4f(pos[VertexIndex], 1.0);
             })");
 
         if (!sampleFromAttachment) {
             // Draw a solid blue into color buffer if not sample from depth/stencil attachment.
             pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            @fragment fn main() -> @location(0) vec4<f32> {
-                return vec4<f32>(0.0, 0.0, 1.0, 0.0);
+            @fragment fn main() -> @location(0) vec4f {
+                return vec4f(0.0, 0.0, 1.0, 0.0);
             })");
         } else {
             // Sample from depth/stencil attachment and draw that sampled texel into color buffer.
@@ -90,8 +90,8 @@ class ReadOnlyDepthStencilAttachmentTests
                 @group(0) @binding(1) var tex : texture_depth_2d;
 
                 @fragment
-                fn main(@builtin(position) FragCoord : vec4<f32>) -> @location(0) vec4<f32> {
-                    return vec4<f32>(textureSample(tex, samp, FragCoord.xy), 0.0, 0.0, 0.0);
+                fn main(@builtin(position) FragCoord : vec4f) -> @location(0) vec4f {
+                    return vec4f(textureSample(tex, samp, FragCoord.xy), 0.0, 0.0, 0.0);
                 })");
             } else {
                 ASSERT(aspect == wgpu::TextureAspect::StencilOnly);
@@ -99,9 +99,9 @@ class ReadOnlyDepthStencilAttachmentTests
                 @group(0) @binding(0) var tex : texture_2d<u32>;
 
                 @fragment
-                fn main(@builtin(position) FragCoord : vec4<f32>) -> @location(0) vec4<f32> {
-                    var texel = textureLoad(tex, vec2<i32>(FragCoord.xy), 0);
-                    return vec4<f32>(f32(texel[0]) / 255.0, 0.0, 0.0, 0.0);
+                fn main(@builtin(position) FragCoord : vec4f) -> @location(0) vec4f {
+                    var texel = textureLoad(tex, vec2i(FragCoord.xy), 0);
+                    return vec4f(f32(texel[0]) / 255.0, 0.0, 0.0, 0.0);
                 })");
             }
         }

@@ -242,8 +242,8 @@ class MemoryDataBuilder {
 // offset and size are in units of bytes.
 using DataMatcherCallback = std::function<void(uint32_t offset, uint32_t size)>;
 
-// Field describe a type that has contiguous data bytes, e.g. `i32`, `vec2<f32>`, `mat4x4<f32>` or
-// `array<f32, 5>`, or have a fixed data stride, e.g. `mat3x3<f32>` or `array<vec3<f32>, 4>`.
+// Field describe a type that has contiguous data bytes, e.g. `i32`, `vec2f`, `mat4x4<f32>` or
+// `array<f32, 5>`, or have a fixed data stride, e.g. `mat3x3<f32>` or `array<vec3f, 4>`.
 // `@size` and `@align` attributes, when used as a struct member, can also described by this struct.
 class Field {
   public:
@@ -921,36 +921,36 @@ auto GenerateParams() {
                 .StorageBufferOnly(),
             Field("array<u32, 4>", /* align */ 4, /* size */ 16, /* requireF16Feature */ false)
                 .StorageBufferOnly(),
-            Field("array<vec2<u32>, 1>", /* align */ 8, /* size */ 8, /* requireF16Feature */ false)
+            Field("array<vec2u, 1>", /* align */ 8, /* size */ 8, /* requireF16Feature */ false)
                 .StorageBufferOnly(),
-            Field("array<vec2<u32>, 2>", /* align */ 8, /* size */ 16,
-                  /* requireF16Feature */ false)
-                .StorageBufferOnly(),
-            Field("array<vec2<u32>, 3>", /* align */ 8, /* size */ 24,
+            Field("array<vec2u, 2>", /* align */ 8, /* size */ 16,
                   /* requireF16Feature */ false)
                 .StorageBufferOnly(),
-            Field("array<vec2<u32>, 4>", /* align */ 8, /* size */ 32,
+            Field("array<vec2u, 3>", /* align */ 8, /* size */ 24,
                   /* requireF16Feature */ false)
                 .StorageBufferOnly(),
-            Field("array<vec3<u32>, 1>", /* align */ 16, /* size */ 16,
+            Field("array<vec2u, 4>", /* align */ 8, /* size */ 32,
+                  /* requireF16Feature */ false)
+                .StorageBufferOnly(),
+            Field("array<vec3u, 1>", /* align */ 16, /* size */ 16,
                   /* requireF16Feature */ false)
                 .Strided(12, 4),
-            Field("array<vec3<u32>, 2>", /* align */ 16, /* size */ 32,
+            Field("array<vec3u, 2>", /* align */ 16, /* size */ 32,
                   /* requireF16Feature */ false)
                 .Strided(12, 4),
-            Field("array<vec3<u32>, 3>", /* align */ 16, /* size */ 48,
+            Field("array<vec3u, 3>", /* align */ 16, /* size */ 48,
                   /* requireF16Feature */ false)
                 .Strided(12, 4),
-            Field("array<vec3<u32>, 4>", /* align */ 16, /* size */ 64,
+            Field("array<vec3u, 4>", /* align */ 16, /* size */ 64,
                   /* requireF16Feature */ false)
                 .Strided(12, 4),
-            Field("array<vec4<u32>, 1>", /* align */ 16, /* size */ 16,
+            Field("array<vec4u, 1>", /* align */ 16, /* size */ 16,
                   /* requireF16Feature */ false),
-            Field("array<vec4<u32>, 2>", /* align */ 16, /* size */ 32,
+            Field("array<vec4u, 2>", /* align */ 16, /* size */ 32,
                   /* requireF16Feature */ false),
-            Field("array<vec4<u32>, 3>", /* align */ 16, /* size */ 48,
+            Field("array<vec4u, 3>", /* align */ 16, /* size */ 48,
                   /* requireF16Feature */ false),
-            Field("array<vec4<u32>, 4>", /* align */ 16, /* size */ 64,
+            Field("array<vec4u, 4>", /* align */ 16, /* size */ 64,
                   /* requireF16Feature */ false),
 
             // Array types with custom alignment
@@ -966,47 +966,47 @@ auto GenerateParams() {
             Field("array<u32, 4>", /* align */ 4, /* size */ 16, /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .StorageBufferOnly(),
-            Field("array<vec2<u32>, 1>", /* align */ 8, /* size */ 8, /* requireF16Feature */ false)
+            Field("array<vec2u, 1>", /* align */ 8, /* size */ 8, /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .StorageBufferOnly(),
-            Field("array<vec2<u32>, 2>", /* align */ 8, /* size */ 16,
-                  /* requireF16Feature */ false)
-                .AlignAttribute(32)
-                .StorageBufferOnly(),
-            Field("array<vec2<u32>, 3>", /* align */ 8, /* size */ 24,
+            Field("array<vec2u, 2>", /* align */ 8, /* size */ 16,
                   /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .StorageBufferOnly(),
-            Field("array<vec2<u32>, 4>", /* align */ 8, /* size */ 32,
+            Field("array<vec2u, 3>", /* align */ 8, /* size */ 24,
                   /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .StorageBufferOnly(),
-            Field("array<vec3<u32>, 1>", /* align */ 16, /* size */ 16,
+            Field("array<vec2u, 4>", /* align */ 8, /* size */ 32,
+                  /* requireF16Feature */ false)
+                .AlignAttribute(32)
+                .StorageBufferOnly(),
+            Field("array<vec3u, 1>", /* align */ 16, /* size */ 16,
                   /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .Strided(12, 4),
-            Field("array<vec3<u32>, 2>", /* align */ 16, /* size */ 32,
+            Field("array<vec3u, 2>", /* align */ 16, /* size */ 32,
                   /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .Strided(12, 4),
-            Field("array<vec3<u32>, 3>", /* align */ 16, /* size */ 48,
+            Field("array<vec3u, 3>", /* align */ 16, /* size */ 48,
                   /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .Strided(12, 4),
-            Field("array<vec3<u32>, 4>", /* align */ 16, /* size */ 64,
+            Field("array<vec3u, 4>", /* align */ 16, /* size */ 64,
                   /* requireF16Feature */ false)
                 .AlignAttribute(32)
                 .Strided(12, 4),
-            Field("array<vec4<u32>, 1>", /* align */ 16, /* size */ 16,
+            Field("array<vec4u, 1>", /* align */ 16, /* size */ 16,
                   /* requireF16Feature */ false)
                 .AlignAttribute(32),
-            Field("array<vec4<u32>, 2>", /* align */ 16, /* size */ 32,
+            Field("array<vec4u, 2>", /* align */ 16, /* size */ 32,
                   /* requireF16Feature */ false)
                 .AlignAttribute(32),
-            Field("array<vec4<u32>, 3>", /* align */ 16, /* size */ 48,
+            Field("array<vec4u, 3>", /* align */ 16, /* size */ 48,
                   /* requireF16Feature */ false)
                 .AlignAttribute(32),
-            Field("array<vec4<u32>, 4>", /* align */ 16, /* size */ 64,
+            Field("array<vec4u, 4>", /* align */ 16, /* size */ 64,
                   /* requireF16Feature */ false)
                 .AlignAttribute(32),
 
@@ -1023,7 +1023,7 @@ auto GenerateParams() {
             Field("array<u32, 4>", /* align */ 4, /* size */ 16, /* requireF16Feature */ false)
                 .SizeAttribute(128)
                 .StorageBufferOnly(),
-            Field("array<vec3<u32>, 4>", /* align */ 16, /* size */ 64,
+            Field("array<vec3u, 4>", /* align */ 16, /* size */ 64,
                   /* requireF16Feature */ false)
                 .SizeAttribute(128)
                 .Strided(12, 4),

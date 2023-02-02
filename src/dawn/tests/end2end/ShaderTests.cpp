@@ -116,19 +116,19 @@ I am an invalid shader and should never pass validation!
 TEST_P(ShaderTests, WGSLParamIO) {
     std::string vertexShader = R"(
 @vertex
-fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-    var pos = array<vec2<f32>, 3>(
-        vec2<f32>(-1.0,  1.0),
-        vec2<f32>( 1.0,  1.0),
-        vec2<f32>( 0.0, -1.0));
-    return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+    var pos = array(
+        vec2f(-1.0,  1.0),
+        vec2f( 1.0,  1.0),
+        vec2f( 0.0, -1.0));
+    return vec4f(pos[VertexIndex], 0.0, 1.0);
 })";
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexShader.c_str());
 
     std::string fragmentShader = R"(
 @fragment
-fn main(@builtin(position) fragCoord : vec4<f32>) -> @location(0) vec4<f32> {
-    return vec4<f32>(fragCoord.xy, 0.0, 1.0);
+fn main(@builtin(position) fragCoord : vec4f) -> @location(0) vec4f {
+    return vec4f(fragCoord.xy, 0.0, 1.0);
 })";
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
 
@@ -143,19 +143,19 @@ fn main(@builtin(position) fragCoord : vec4<f32>) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLMixedStructParamIO) {
     std::string vertexShader = R"(
 struct VertexIn {
-    @location(0) position : vec3<f32>,
-    @location(1) color : vec4<f32>,
+    @location(0) position : vec3f,
+    @location(1) color : vec4f,
 }
 
 struct VertexOut {
-    @location(0) color : vec4<f32>,
-    @builtin(position) position : vec4<f32>,
+    @location(0) color : vec4f,
+    @builtin(position) position : vec4f,
 }
 
 @vertex
 fn main(input : VertexIn) -> VertexOut {
     var output : VertexOut;
-    output.position = vec4<f32>(input.position, 1.0);
+    output.position = vec4f(input.position, 1.0);
     output.color = input.color;
     return output;
 })";
@@ -163,7 +163,7 @@ fn main(input : VertexIn) -> VertexOut {
 
     std::string fragmentShader = R"(
 @fragment
-fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
+fn main(@location(0) color : vec4f) -> @location(0) vec4f {
     return color;
 })";
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
@@ -186,19 +186,19 @@ fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLStructIO) {
     std::string vertexShader = R"(
 struct VertexIn {
-    @location(0) position : vec3<f32>,
-    @location(1) color : vec4<f32>,
+    @location(0) position : vec3f,
+    @location(1) color : vec4f,
 }
 
 struct VertexOut {
-    @location(0) color : vec4<f32>,
-    @builtin(position) position : vec4<f32>,
+    @location(0) color : vec4f,
+    @builtin(position) position : vec4f,
 }
 
 @vertex
 fn main(input : VertexIn) -> VertexOut {
     var output : VertexOut;
-    output.position = vec4<f32>(input.position, 1.0);
+    output.position = vec4f(input.position, 1.0);
     output.color = input.color;
     return output;
 })";
@@ -206,12 +206,12 @@ fn main(input : VertexIn) -> VertexOut {
 
     std::string fragmentShader = R"(
 struct FragmentIn {
-    @location(0) color : vec4<f32>,
-    @builtin(position) fragCoord : vec4<f32>,
+    @location(0) color : vec4f,
+    @builtin(position) fragCoord : vec4f,
 }
 
 @fragment
-fn main(input : FragmentIn) -> @location(0) vec4<f32> {
+fn main(input : FragmentIn) -> @location(0) vec4f {
     return input.color * input.fragCoord;
 })";
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
@@ -233,19 +233,19 @@ fn main(input : FragmentIn) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLUnsortedStructIO) {
     std::string vertexShader = R"(
 struct VertexIn {
-    @location(0) position : vec3<f32>,
-    @location(1) color : vec4<f32>,
+    @location(0) position : vec3f,
+    @location(1) color : vec4f,
 }
 
 struct VertexOut {
-    @builtin(position) position : vec4<f32>,
-    @location(0) color : vec4<f32>,
+    @builtin(position) position : vec4f,
+    @location(0) color : vec4f,
 }
 
 @vertex
 fn main(input : VertexIn) -> VertexOut {
     var output : VertexOut;
-    output.position = vec4<f32>(input.position, 1.0);
+    output.position = vec4f(input.position, 1.0);
     output.color = input.color;
     return output;
 })";
@@ -253,12 +253,12 @@ fn main(input : VertexIn) -> VertexOut {
 
     std::string fragmentShader = R"(
 struct FragmentIn {
-    @location(0) color : vec4<f32>,
-    @builtin(position) fragCoord : vec4<f32>,
+    @location(0) color : vec4f,
+    @builtin(position) fragCoord : vec4f,
 }
 
 @fragment
-fn main(input : FragmentIn) -> @location(0) vec4<f32> {
+fn main(input : FragmentIn) -> @location(0) vec4f {
     return input.color * input.fragCoord;
 })";
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
@@ -280,25 +280,25 @@ fn main(input : FragmentIn) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLSharedStructIO) {
     std::string shader = R"(
 struct VertexIn {
-    @location(0) position : vec3<f32>,
-    @location(1) color : vec4<f32>,
+    @location(0) position : vec3f,
+    @location(1) color : vec4f,
 }
 
 struct VertexOut {
-    @location(0) color : vec4<f32>,
-    @builtin(position) position : vec4<f32>,
+    @location(0) color : vec4f,
+    @builtin(position) position : vec4f,
 }
 
 @vertex
 fn vertexMain(input : VertexIn) -> VertexOut {
     var output : VertexOut;
-    output.position = vec4<f32>(input.position, 1.0);
+    output.position = vec4f(input.position, 1.0);
     output.color = input.color;
     return output;
 }
 
 @fragment
-fn fragmentMain(input : VertexOut) -> @location(0) vec4<f32> {
+fn fragmentMain(input : VertexOut) -> @location(0) vec4f {
     return input.color;
 })";
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
@@ -324,22 +324,22 @@ fn fragmentMain(input : VertexOut) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLInterstageVariablesSparse) {
     std::string shader = R"(
 struct ShaderIO {
-    @builtin(position) position : vec4<f32>,
-    @location(1) attribute1 : vec4<f32>,
-    @location(3) attribute3 : vec4<f32>,
+    @builtin(position) position : vec4f,
+    @location(1) attribute1 : vec4f,
+    @location(3) attribute3 : vec4f,
 }
 
 @vertex
 fn vertexMain() -> ShaderIO {
     var output : ShaderIO;
-    output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
-    output.attribute1 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
-    output.attribute3 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.position = vec4f(0.0, 0.0, 0.0, 1.0);
+    output.attribute1 = vec4f(0.0, 0.0, 0.0, 1.0);
+    output.attribute3 = vec4f(0.0, 0.0, 0.0, 1.0);
     return output;
 }
 
 @fragment
-fn fragmentMain(input : ShaderIO) -> @location(0) vec4<f32> {
+fn fragmentMain(input : ShaderIO) -> @location(0) vec4f {
     return input.attribute1;
 })";
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
@@ -359,29 +359,29 @@ fn fragmentMain(input : ShaderIO) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLInterstageVariablesBuiltinsMismatched) {
     std::string shader = R"(
 struct VertexOut {
-    @builtin(position) position : vec4<f32>,
+    @builtin(position) position : vec4f,
     @location(1) attribute1 : f32,
-    @location(3) attribute3 : vec4<f32>,
+    @location(3) attribute3 : vec4f,
 }
 
 struct FragmentIn {
-    @location(3) attribute3 : vec4<f32>,
+    @location(3) attribute3 : vec4f,
     @builtin(front_facing) front_facing : bool,
     @location(1) attribute1 : f32,
-    @builtin(position) position : vec4<f32>,
+    @builtin(position) position : vec4f,
 }
 
 @vertex
 fn vertexMain() -> VertexOut {
     var output : VertexOut;
-    output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.position = vec4f(0.0, 0.0, 0.0, 1.0);
     output.attribute1 = 1.0;
-    output.attribute3 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.attribute3 = vec4f(0.0, 0.0, 0.0, 1.0);
     return output;
 }
 
 @fragment
-fn fragmentMain(input : FragmentIn) -> @location(0) vec4<f32> {
+fn fragmentMain(input : FragmentIn) -> @location(0) vec4f {
     _ = input.front_facing;
     _ = input.position.x;
     return input.attribute3;
@@ -402,29 +402,29 @@ fn fragmentMain(input : FragmentIn) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLInterstageVariablesPrefixSubset) {
     std::string shader = R"(
 struct VertexOut {
-    @builtin(position) position : vec4<f32>,
+    @builtin(position) position : vec4f,
     @location(1) attribute1 : f32,
-    @location(3) attribute3 : vec4<f32>,
+    @location(3) attribute3 : vec4f,
 }
 
 struct FragmentIn {
     @location(1) attribute1 : f32,
-    @builtin(position) position : vec4<f32>,
+    @builtin(position) position : vec4f,
 }
 
 @vertex
 fn vertexMain() -> VertexOut {
     var output : VertexOut;
-    output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.position = vec4f(0.0, 0.0, 0.0, 1.0);
     output.attribute1 = 1.0;
-    output.attribute3 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.attribute3 = vec4f(0.0, 0.0, 0.0, 1.0);
     return output;
 }
 
 @fragment
-fn fragmentMain(input : FragmentIn) -> @location(0) vec4<f32> {
+fn fragmentMain(input : FragmentIn) -> @location(0) vec4f {
     _ = input.position.x;
-    return vec4<f32>(input.attribute1, 0.0, 0.0, 1.0);
+    return vec4f(input.attribute1, 0.0, 0.0, 1.0);
 })";
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
 
@@ -442,27 +442,27 @@ fn fragmentMain(input : FragmentIn) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLInterstageVariablesSparseSubset) {
     std::string shader = R"(
 struct VertexOut {
-    @builtin(position) position : vec4<f32>,
+    @builtin(position) position : vec4f,
     @location(1) attribute1 : f32,
-    @location(3) attribute3 : vec4<f32>,
+    @location(3) attribute3 : vec4f,
 }
 
 struct FragmentIn {
-    @location(3) attribute3 : vec4<f32>,
-    @builtin(position) position : vec4<f32>,
+    @location(3) attribute3 : vec4f,
+    @builtin(position) position : vec4f,
 }
 
 @vertex
 fn vertexMain() -> VertexOut {
     var output : VertexOut;
-    output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.position = vec4f(0.0, 0.0, 0.0, 1.0);
     output.attribute1 = 1.0;
-    output.attribute3 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.attribute3 = vec4f(0.0, 0.0, 0.0, 1.0);
     return output;
 }
 
 @fragment
-fn fragmentMain(input : FragmentIn) -> @location(0) vec4<f32> {
+fn fragmentMain(input : FragmentIn) -> @location(0) vec4f {
     _ = input.position.x;
     return input.attribute3;
 })";
@@ -482,28 +482,28 @@ fn fragmentMain(input : FragmentIn) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLInterstageVariablesSparseSubsetUnused) {
     std::string shader = R"(
 struct VertexOut {
-    @builtin(position) position : vec4<f32>,
+    @builtin(position) position : vec4f,
     @location(1) attribute1 : f32,
-    @location(3) attribute3 : vec4<f32>,
+    @location(3) attribute3 : vec4f,
 }
 
 struct FragmentIn {
-    @location(3) attribute3 : vec4<f32>,
-    @builtin(position) position : vec4<f32>,
+    @location(3) attribute3 : vec4f,
+    @builtin(position) position : vec4f,
 }
 
 @vertex
 fn vertexMain() -> VertexOut {
     var output : VertexOut;
-    output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.position = vec4f(0.0, 0.0, 0.0, 1.0);
     output.attribute1 = 1.0;
-    output.attribute3 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.attribute3 = vec4f(0.0, 0.0, 0.0, 1.0);
     return output;
 }
 
 @fragment
-fn fragmentMain(input : FragmentIn) -> @location(0) vec4<f32> {
-    return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+fn fragmentMain(input : FragmentIn) -> @location(0) vec4f {
+    return vec4f(0.0, 0.0, 0.0, 1.0);
 })";
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
 
@@ -521,23 +521,23 @@ fn fragmentMain(input : FragmentIn) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLInterstageVariablesEmptySubset) {
     std::string shader = R"(
 struct VertexOut {
-    @builtin(position) position : vec4<f32>,
+    @builtin(position) position : vec4f,
     @location(1) attribute1 : f32,
-    @location(3) attribute3 : vec4<f32>,
+    @location(3) attribute3 : vec4f,
 }
 
 @vertex
 fn vertexMain() -> VertexOut {
     var output : VertexOut;
-    output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.position = vec4f(0.0, 0.0, 0.0, 1.0);
     output.attribute1 = 1.0;
-    output.attribute3 = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    output.attribute3 = vec4f(0.0, 0.0, 0.0, 1.0);
     return output;
 }
 
 @fragment
-fn fragmentMain() -> @location(0) vec4<f32> {
-    return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+fn fragmentMain() -> @location(0) vec4f {
+    return vec4f(0.0, 0.0, 0.0, 1.0);
 })";
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
 
@@ -566,16 +566,16 @@ struct Inputs {
 }
 
 // [1] a binding point that conflicts with the regitster
-struct S1 { data : array<vec4<u32>, 20> }
+struct S1 { data : array<vec4u, 20> }
 @group(0) @binding(1) var<uniform> providedData1 : S1;
 
-@vertex fn vsMain(input : Inputs) -> @builtin(position) vec4<f32> {
+@vertex fn vsMain(input : Inputs) -> @builtin(position) vec4f {
   _ = providedData1.data[input.vertexIndex][0];
-  return vec4<f32>();
+  return vec4f();
 }
 
-@fragment fn fsMain() -> @location(0) vec4<f32> {
-  return vec4<f32>();
+@fragment fn fsMain() -> @location(0) vec4f {
+  return vec4f();
 }
     )";
     auto module = utils::CreateShaderModule(device, shader);
@@ -601,14 +601,14 @@ TEST_P(ShaderTests, SampleIndex) {
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 @vertex
-fn main(@location(0) pos : vec4<f32>) -> @builtin(position) vec4<f32> {
+fn main(@location(0) pos : vec4f) -> @builtin(position) vec4f {
     return pos;
 })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
 @fragment fn main(@builtin(sample_index) sampleIndex : u32)
-    -> @location(0) vec4<f32> {
-    return vec4<f32>(f32(sampleIndex), 1.0, 0.0, 1.0);
+    -> @location(0) vec4f {
+    return vec4f(f32(sampleIndex), 1.0, 0.0, 1.0);
 })");
 
     utils::ComboRenderPipelineDescriptor descriptor;
@@ -765,7 +765,7 @@ struct Buf {
 @group(0) @binding(0) var<storage, read_write> buf : Buf;
 
 @compute @workgroup_size(x) fn main(
-    @builtin(local_invocation_id) local_invocation_id : vec3<u32>
+    @builtin(local_invocation_id) local_invocation_id : vec3u
 ) {
     if (local_invocation_id.x >= x - 1) {
         buf.data[0] = local_invocation_id.x + 1;
@@ -1025,20 +1025,20 @@ TEST_P(ShaderTests, OverridableConstantsRenderPipeline) {
 @id(2222) override ytop: f32;
 @vertex
 fn main(@builtin(vertex_index) VertexIndex : u32)
-     -> @builtin(position) vec4<f32> {
-  var pos = array<vec2<f32>, 3>(
-      vec2<f32>(-1.0, ytop),
-      vec2<f32>(-1.0, -ytop),
-      vec2<f32>(xright, 0.0));
+     -> @builtin(position) vec4f {
+  var pos = array(
+      vec2f(-1.0, ytop),
+      vec2f(-1.0, -ytop),
+      vec2f(xright, 0.0));
 
-  return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+  return vec4f(pos[VertexIndex], 0.0, 1.0);
 })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
 @id(1000) override intensity: f32 = 0.0;
 @fragment fn main()
-    -> @location(0) vec4<f32> {
-    return vec4<f32>(intensity, intensity, intensity, 1.0);
+    -> @location(0) vec4f {
+    return vec4f(intensity, intensity, intensity, 1.0);
 })");
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
@@ -1080,15 +1080,15 @@ TEST_P(ShaderTests, ConflictingBindingsDueToTransformOrder) {
         @group(0) @binding(0) var<uniform> b0 : u32;
         @group(0) @binding(1) var<uniform> b1 : u32;
 
-        @vertex fn vertex() -> @builtin(position) vec4<f32> {
+        @vertex fn vertex() -> @builtin(position) vec4f {
             _ = b0;
-            return vec4<f32>(0.0);
+            return vec4f(0.0);
         }
 
-        @fragment fn fragment() -> @location(0) vec4<f32> {
+        @fragment fn fragment() -> @location(0) vec4f {
             _ = b0;
             _ = b1;
-            return vec4<f32>(0.0);
+            return vec4f(0.0);
         }
     )");
 
@@ -1109,7 +1109,7 @@ TEST_P(ShaderTests, DISABLED_CheckUsageOf_chromium_disable_uniformity_analysis) 
         enable chromium_disable_uniformity_analysis;
 
         @compute @workgroup_size(8) fn uniformity_error(
-            @builtin(local_invocation_id) local_invocation_id : vec3<u32>
+            @builtin(local_invocation_id) local_invocation_id : vec3u
         ) {
             if (local_invocation_id.x == 0u) {
                 workgroupBarrier();
@@ -1118,7 +1118,7 @@ TEST_P(ShaderTests, DISABLED_CheckUsageOf_chromium_disable_uniformity_analysis) 
     )");
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
         @compute @workgroup_size(8) fn uniformity_error(
-            @builtin(local_invocation_id) local_invocation_id : vec3<u32>
+            @builtin(local_invocation_id) local_invocation_id : vec3u
         ) {
             if (local_invocation_id.x == 0u) {
                 workgroupBarrier();
@@ -1146,7 +1146,7 @@ TEST_P(ShaderTests, ShaderOverridingRobustnessBuiltins) {
             // Prevent the SingleEntryPoint transform from removing our min().
             let forceUseOfMin = min(0, 1);
 
-            let values = array<u32, 2>(1, 2);
+            let values = array(1u, 2u);
             let index = 1u;
             // Robustness adds transforms values[index] into values[min(index, 1u)].
             //  - If our min() is called, the this will be values[0] which is 1.
@@ -1193,15 +1193,15 @@ struct ShaderIO {
     @location(5) @interpolate(flat) var5: i32,
     @location(7) var7: f32,
     @location(9) @interpolate(flat) var9: u32,
-    @builtin(position) pos: vec4<f32>,
+    @builtin(position) pos: vec4f,
 }
 
 @vertex fn main(@builtin(vertex_index) VertexIndex : u32)
      -> ShaderIO {
-  var pos = array<vec2<f32>, 3>(
-      vec2<f32>(-1.0, 3.0),
-      vec2<f32>(-1.0, -3.0),
-      vec2<f32>(3.0, 0.0));
+  var pos = array(
+      vec2f(-1.0, 3.0),
+      vec2f(-1.0, -3.0),
+      vec2f(3.0, 0.0));
 
   var shaderIO: ShaderIO;
   shaderIO.var1 = 0.0;
@@ -1209,7 +1209,7 @@ struct ShaderIO {
   shaderIO.var5 = -9;
   shaderIO.var7 = 1.0;
   shaderIO.var9 = 0u;
-  shaderIO.pos = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+  shaderIO.pos = vec4f(pos[VertexIndex], 0.0, 1.0);
 
   return shaderIO;
 })");
@@ -1221,8 +1221,8 @@ struct ShaderIO {
 }
 
 @fragment fn main(io: ShaderIO)
-    -> @location(0) vec4<f32> {
-    return vec4<f32>(f32(io.var3), io.var7, 1.0, 1.0);
+    -> @location(0) vec4f {
+    return vec4f(f32(io.var3), io.var7, 1.0, 1.0);
 })");
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
@@ -1258,38 +1258,38 @@ struct ShaderIO {
     @location(1) var1: f32,
     @location(2) var2: f32,
     @location(3) @align(8) var3: f32,
-    @location(4) var4: vec4<f32>,
-    @builtin(position) pos: vec4<f32>,
+    @location(4) var4: vec4f,
+    @builtin(position) pos: vec4f,
 }
 
 @vertex fn main(@builtin(vertex_index) VertexIndex : u32)
      -> ShaderIO {
-  var pos = array<vec2<f32>, 3>(
-      vec2<f32>(-1.0, 3.0),
-      vec2<f32>(-1.0, -3.0),
-      vec2<f32>(3.0, 0.0));
+  var pos = array(
+      vec2f(-1.0, 3.0),
+      vec2f(-1.0, -3.0),
+      vec2f(3.0, 0.0));
 
   var shaderIO: ShaderIO;
   shaderIO.var1 = 0.0;
   shaderIO.var2 = 0.0;
   shaderIO.var3 = 1.0;
-  shaderIO.var4 = vec4<f32>(0.4, 0.4, 0.4, 0.4);
+  shaderIO.var4 = vec4f(0.4, 0.4, 0.4, 0.4);
   shaderIO.var5 = 1.0;
-  shaderIO.pos = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+  shaderIO.pos = vec4f(pos[VertexIndex], 0.0, 1.0);
 
   return shaderIO;
 })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
 struct ShaderIO {
-    @location(4) var4: vec4<f32>,
+    @location(4) var4: vec4f,
     @location(1) var1: f32,
     @location(5) @align(16) var5: f32,
 }
 
 @fragment fn main(io: ShaderIO)
-    -> @location(0) vec4<f32> {
-    return vec4<f32>(io.var1, io.var5, io.var4.x, 1.0);
+    -> @location(0) vec4f {
+    return vec4f(io.var1, io.var5, io.var4.x, 1.0);
 })");
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
@@ -1319,36 +1319,36 @@ TEST_P(ShaderTests, FragmentInputIsSubsetOfVertexOutputBuiltinOrder) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 struct ShaderIO {
     @location(1) var1: f32,
-    @builtin(position) pos: vec4<f32>,
-    @location(8) var8: vec3<f32>,
+    @builtin(position) pos: vec4f,
+    @location(8) var8: vec3f,
     @location(7) var7: f32,
 }
 
 @vertex fn main(@builtin(vertex_index) VertexIndex : u32)
      -> ShaderIO {
-  var pos = array<vec2<f32>, 3>(
-      vec2<f32>(-1.0, 3.0),
-      vec2<f32>(-1.0, -3.0),
-      vec2<f32>(3.0, 0.0));
+  var pos = array(
+      vec2f(-1.0, 3.0),
+      vec2f(-1.0, -3.0),
+      vec2f(3.0, 0.0));
 
   var shaderIO: ShaderIO;
   shaderIO.var1 = 0.0;
   shaderIO.var7 = 1.0;
-  shaderIO.var8 = vec3<f32>(1.0, 0.4, 0.0);
-  shaderIO.pos = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+  shaderIO.var8 = vec3f(1.0, 0.4, 0.0);
+  shaderIO.pos = vec4f(pos[VertexIndex], 0.0, 1.0);
 
   return shaderIO;
 })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
 struct ShaderIO {
-    @builtin(position) pos: vec4<f32>,
+    @builtin(position) pos: vec4f,
     @location(7) var7: f32,
 }
 
 @fragment fn main(io: ShaderIO)
-    -> @location(0) vec4<f32> {
-    return vec4<f32>(0.0, io.var7, 0.4, 1.0);
+    -> @location(0) vec4f {
+    return vec4f(0.0, io.var7, 0.4, 1.0);
 })");
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
@@ -1377,7 +1377,7 @@ struct ShaderIO {
 TEST_P(ShaderTests, DerivativeUniformityDiagnosticFilter) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 struct VertexOut {
-  @builtin(position) pos : vec4<f32>,
+  @builtin(position) pos : vec4f,
   @location(0) value : f32,
 }
 
@@ -1395,7 +1395,7 @@ fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {
 diagnostic(off, derivative_uniformity);
 
 @fragment
-fn main(@location(0) value : f32) -> @location(0) vec4<f32> {
+fn main(@location(0) value : f32) -> @location(0) vec4f {
   if (value > 0) {
     let intensity = 1.0 - dpdx(1.0);
     return vec4(intensity, intensity, intensity, 1.0);

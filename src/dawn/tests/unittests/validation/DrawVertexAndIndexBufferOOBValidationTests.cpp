@@ -83,8 +83,8 @@ class DrawVertexAndIndexBufferOOBValidationTests : public ValidationTest {
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         fsModule = utils::CreateShaderModule(device, R"(
-            @fragment fn main() -> @location(0) vec4<f32> {
-                return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            @fragment fn main() -> @location(0) vec4f {
+                return vec4f(0.0, 1.0, 0.0, 1.0);
             })");
     }
 
@@ -109,7 +109,7 @@ class DrawVertexAndIndexBufferOOBValidationTests : public ValidationTest {
             for (auto attr : buffer.attributes) {
                 // @location({shaderLocation}) var_{id} : {typeString},
                 inputStringStream << "@location(" << attr.shaderLocation << ") var_"
-                                  << attributeCount << " : vec4<f32>,";
+                                  << attributeCount << " : vec4f,";
                 attributeCount++;
             }
         }
@@ -119,8 +119,8 @@ class DrawVertexAndIndexBufferOOBValidationTests : public ValidationTest {
         shaderStringStream << R"(
             @vertex
             fn main()" << inputStringStream.str()
-                           << R"() -> @builtin(position) vec4<f32> {
-                return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+                           << R"() -> @builtin(position) vec4f {
+                return vec4f(0.0, 1.0, 0.0, 1.0);
             })";
 
         return utils::CreateShaderModule(device, shaderStringStream.str().c_str());

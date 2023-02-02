@@ -44,15 +44,15 @@ class SamplerFilterAnisotropicTest : public DawnTest {
             }
 
             struct VertexIn {
-                @location(0) position : vec4<f32>,
-                @location(1) uv : vec2<f32>,
+                @location(0) position : vec4f,
+                @location(1) uv : vec2f,
             }
 
             @group(0) @binding(2) var<uniform> uniforms : Uniforms;
 
             struct VertexOut {
-                @location(0) uv : vec2<f32>,
-                @builtin(position) position : vec4<f32>,
+                @location(0) uv : vec2f,
+                @builtin(position) position : vec4f,
             }
 
             @vertex
@@ -68,12 +68,12 @@ class SamplerFilterAnisotropicTest : public DawnTest {
             @group(0) @binding(1) var texture0 : texture_2d<f32>;
 
             struct FragmentIn {
-                @location(0) uv: vec2<f32>,
-                @builtin(position) fragCoord : vec4<f32>,
+                @location(0) uv: vec2f,
+                @builtin(position) fragCoord : vec4f,
             }
 
             @fragment
-            fn main(input : FragmentIn) -> @location(0) vec4<f32> {
+            fn main(input : FragmentIn) -> @location(0) vec4f {
                 return textureSample(texture0, sampler0, input.uv);
             })");
 

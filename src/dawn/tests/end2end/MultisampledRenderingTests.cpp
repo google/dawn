@@ -47,13 +47,13 @@ class MultisampledRenderingTest : public DawnTest {
         bool flipTriangle = false) {
         const char* kFsOneOutputWithDepth = R"(
             struct U {
-                color : vec4<f32>,
+                color : vec4f,
                 depth : f32,
             }
             @group(0) @binding(0) var<uniform> uBuffer : U;
 
             struct FragmentOut {
-                @location(0) color : vec4<f32>,
+                @location(0) color : vec4f,
                 @builtin(frag_depth) depth : f32,
             }
 
@@ -66,11 +66,11 @@ class MultisampledRenderingTest : public DawnTest {
 
         const char* kFsOneOutputWithoutDepth = R"(
             struct U {
-                color : vec4<f32>
+                color : vec4f
             }
             @group(0) @binding(0) var<uniform> uBuffer : U;
 
-            @fragment fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4f {
                 return uBuffer.color;
             })";
 
@@ -85,14 +85,14 @@ class MultisampledRenderingTest : public DawnTest {
         bool alphaToCoverageEnabled = false) {
         const char* kFsTwoOutputs = R"(
             struct U {
-                color0 : vec4<f32>,
-                color1 : vec4<f32>,
+                color0 : vec4f,
+                color1 : vec4f,
             }
             @group(0) @binding(0) var<uniform> uBuffer : U;
 
             struct FragmentOut {
-                @location(0) color0 : vec4<f32>,
-                @location(1) color1 : vec4<f32>,
+                @location(0) color0 : vec4f,
+                @location(1) color1 : vec4f,
             }
 
             @fragment fn main() -> FragmentOut {
@@ -226,25 +226,25 @@ class MultisampledRenderingTest : public DawnTest {
         // only two of the samples will be touched.
         const char* vs = R"(
             @vertex
-            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-                var pos = array<vec2<f32>, 3>(
-                    vec2<f32>(-1.0,  1.0),
-                    vec2<f32>( 1.0,  1.0),
-                    vec2<f32>( 1.0, -1.0)
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-1.0,  1.0),
+                    vec2f( 1.0,  1.0),
+                    vec2f( 1.0, -1.0)
                 );
-                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                return vec4f(pos[VertexIndex], 0.0, 1.0);
             })";
 
         // Draw a bottom-left triangle.
         const char* vsFlipped = R"(
             @vertex
-            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-                var pos = array<vec2<f32>, 3>(
-                    vec2<f32>(-1.0,  1.0),
-                    vec2<f32>( 1.0,  1.0),
-                    vec2<f32>(-1.0, -1.0)
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-1.0,  1.0),
+                    vec2f( 1.0,  1.0),
+                    vec2f(-1.0, -1.0)
                 );
-                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                return vec4f(pos[VertexIndex], 0.0, 1.0);
             })";
 
         if (flipTriangle) {
@@ -769,12 +769,12 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
     constexpr uint32_t kSampleMask = kFirstSampleMaskBit | kThirdSampleMaskBit;
     const char* fs = R"(
         struct U {
-            color : vec4<f32>
+            color : vec4f
         }
         @group(0) @binding(0) var<uniform> uBuffer : U;
 
         struct FragmentOut {
-            @location(0) color : vec4<f32>,
+            @location(0) color : vec4f,
             @builtin(sample_mask) sampleMask : u32,
         }
 
@@ -825,14 +825,14 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
     constexpr float kMSAACoverage = 0.25f;
     const char* fs = R"(
         struct U {
-            color0 : vec4<f32>,
-            color1 : vec4<f32>,
+            color0 : vec4f,
+            color1 : vec4f,
         }
         @group(0) @binding(0) var<uniform> uBuffer : U;
 
         struct FragmentOut {
-            @location(0) color0 : vec4<f32>,
-            @location(1) color1 : vec4<f32>,
+            @location(0) color0 : vec4f,
+            @location(1) color1 : vec4f,
             @builtin(sample_mask) sampleMask : u32,
         }
 

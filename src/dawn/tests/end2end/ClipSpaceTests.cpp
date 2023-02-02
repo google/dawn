@@ -27,20 +27,20 @@ class ClipSpaceTest : public DawnTest {
         // 2. The depth value of the bottom-right one is <= 0.5
         pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
             @vertex
-            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-                var pos = array<vec3<f32>, 6>(
-                    vec3<f32>(-1.0,  1.0, 1.0),
-                    vec3<f32>(-1.0, -1.0, 0.5),
-                    vec3<f32>( 1.0,  1.0, 0.5),
-                    vec3<f32>( 1.0,  1.0, 0.5),
-                    vec3<f32>(-1.0, -1.0, 0.5),
-                    vec3<f32>( 1.0, -1.0, 0.0));
-                return vec4<f32>(pos[VertexIndex], 1.0);
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec3f(-1.0,  1.0, 1.0),
+                    vec3f(-1.0, -1.0, 0.5),
+                    vec3f( 1.0,  1.0, 0.5),
+                    vec3f( 1.0,  1.0, 0.5),
+                    vec3f(-1.0, -1.0, 0.5),
+                    vec3f( 1.0, -1.0, 0.0));
+                return vec4f(pos[VertexIndex], 1.0);
             })");
 
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            @fragment fn main() -> @location(0) vec4<f32> {
-               return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            @fragment fn main() -> @location(0) vec4f {
+               return vec4f(1.0, 0.0, 0.0, 1.0);
             })");
 
         wgpu::DepthStencilState* depthStencil = pipelineDescriptor.EnableDepthStencil();

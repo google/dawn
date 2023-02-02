@@ -56,8 +56,8 @@ class MultisampledSamplingTest : public DawnTest {
 
             desc.vertex.module = utils::CreateShaderModule(device, R"(
                 @vertex
-                fn main(@location(0) pos : vec2<f32>) -> @builtin(position) vec4<f32> {
-                    return vec4<f32>(pos, 0.0, 1.0);
+                fn main(@location(0) pos : vec2f) -> @builtin(position) vec4f {
+                    return vec4f(pos, 0.0, 1.0);
                 })");
 
             desc.cFragment.module = utils::CreateShaderModule(device, R"(
@@ -105,8 +105,8 @@ class MultisampledSamplingTest : public DawnTest {
 
                 @compute @workgroup_size(1) fn main() {
                     for (var i : i32 = 0; i < 4; i = i + 1) {
-                        results.colorSamples[i] = textureLoad(texture0, vec2<i32>(0, 0), i).x;
-                        results.depthSamples[i] = textureLoad(texture1, vec2<i32>(0, 0), i);
+                        results.colorSamples[i] = textureLoad(texture0, vec2i(0, 0), i).x;
+                        results.depthSamples[i] = textureLoad(texture1, vec2i(0, 0), i);
                     }
                 })");
 

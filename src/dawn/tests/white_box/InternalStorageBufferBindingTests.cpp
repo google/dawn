@@ -39,7 +39,7 @@ class InternalStorageBufferBindingTests : public DawnTest {
             @group(0) @binding(0) var<storage, read_write> buf : Buf;
 
             @compute @workgroup_size(1)
-            fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
+            fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3u) {
                 buf.data[GlobalInvocationID.x] = buf.data[GlobalInvocationID.x] + 0x1234u;
             }
         )");

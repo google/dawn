@@ -73,8 +73,8 @@ class DestroyObjectTests : public Test {
         }
         DAWN_TRY_ASSIGN_WITH_CLEANUP(
             mVsModule, ShaderModuleMock::Create(&mDevice, R"(
-            @vertex fn main() -> @builtin(position) vec4<f32> {
-                return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            @vertex fn main() -> @builtin(position) vec4f {
+                return vec4f(0.0, 0.0, 0.0, 1.0);
             })"),
             { ASSERT(false); }, mVsModule);
         EXPECT_CALL(*mVsModule.Get(), DestroyImpl).Times(1);
@@ -759,8 +759,8 @@ static constexpr std::string_view kComputeShader = R"(
     )";
 
 static constexpr std::string_view kVertexShader = R"(
-        @vertex fn main() -> @builtin(position) vec4<f32> {
-            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        @vertex fn main() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 0.0);
         }
     )";
 

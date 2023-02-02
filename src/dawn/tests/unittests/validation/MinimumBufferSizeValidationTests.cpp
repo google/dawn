@@ -126,9 +126,9 @@ std::string CreateComputeShaderWithBindings(const std::vector<BindingDescriptor>
 // Creates a vertex shader with given bindings
 std::string CreateVertexShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
     return kStructs + GenerateBindingString(bindings) +
-           "@vertex fn main() -> @builtin(position) vec4<f32> {\n" +
-           GenerateReferenceString(bindings, wgpu::ShaderStage::Vertex) +
-           "\n   return vec4<f32>(); " + "}";
+           "@vertex fn main() -> @builtin(position) vec4f {\n" +
+           GenerateReferenceString(bindings, wgpu::ShaderStage::Vertex) + "\n   return vec4f(); " +
+           "}";
 }
 
 // Creates a fragment shader with given bindings
@@ -581,7 +581,7 @@ TEST_F(MinBufferSizeDefaultLayoutTests, RenderPassConsidersBothStages) {
     std::string vertexShader = CreateVertexShaderWithBindings(
         {{0, 0, "a : f32, b : f32,", "f32", "a", 8, wgpu::BufferBindingType::Uniform,
           wgpu::ShaderStage::Vertex},
-         {0, 1, "c : vec4<f32>,", "vec4<f32>", "c", 16, wgpu::BufferBindingType::Uniform,
+         {0, 1, "c : vec4f,", "vec4f", "c", 16, wgpu::BufferBindingType::Uniform,
           wgpu::ShaderStage::Vertex}});
     std::string fragShader = CreateFragmentShaderWithBindings(
         {{0, 0, "a : f32,", "f32", "a", 4, wgpu::BufferBindingType::Uniform,
@@ -600,7 +600,7 @@ TEST_F(MinBufferSizePipelineCreationTests, NonStructVec3) {
 
     auto MakeShader = [](const char* stageAttributes) {
         std::ostringstream ostream;
-        ostream << "@group(0) @binding(0) var<storage, read_write> buffer : vec3<u32>;\n";
+        ostream << "@group(0) @binding(0) var<storage, read_write> buffer : vec3u;\n";
         ostream << stageAttributes << " fn main() { buffer = vec3(42, 0, 7); }\n";
         return ostream.str();
     };

@@ -31,16 +31,16 @@ TEST_P(Texture3DTests, Sampling) {
     // color attachment with data sampled from 3D texture.
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         @vertex
-        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-            var pos = array<vec2<f32>, 6>(
-                vec2<f32>(-1.0, 1.0),
-                vec2<f32>( -1.0, -1.0),
-                vec2<f32>(1.0, 1.0),
-                vec2<f32>(1.0, 1.0),
-                vec2<f32>(-1.0, -1.0),
-                vec2<f32>(1.0, -1.0));
+        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+            var pos = array(
+                vec2f(-1.0, 1.0),
+                vec2f( -1.0, -1.0),
+                vec2f(1.0, 1.0),
+                vec2f(1.0, 1.0),
+                vec2f(-1.0, -1.0),
+                vec2f(1.0, -1.0));
 
-            return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            return vec4f(pos[VertexIndex], 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -48,8 +48,8 @@ TEST_P(Texture3DTests, Sampling) {
         @group(0) @binding(1) var tex : texture_3d<f32>;
 
         @fragment
-        fn main(@builtin(position) FragCoord : vec4<f32>) -> @location(0) vec4<f32> {
-            return textureSample(tex, samp, vec3<f32>(FragCoord.xy / 4.0, 1.5 / 4.0));
+        fn main(@builtin(position) FragCoord : vec4f) -> @location(0) vec4f {
+            return textureSample(tex, samp, vec3f(FragCoord.xy / 4.0, 1.5 / 4.0));
         })");
 
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;

@@ -26,8 +26,8 @@ class VertexStateTest : public ValidationTest {
                         const char* vertexSource) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexSource);
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            @fragment fn main() -> @location(0) vec4<f32> {
-                return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            @fragment fn main() -> @location(0) vec4f {
+                return vec4f(1.0, 0.0, 0.0, 1.0);
             }
         )");
 
@@ -46,8 +46,8 @@ class VertexStateTest : public ValidationTest {
     }
 
     const char* kPlaceholderVertexShader = R"(
-        @vertex fn main() -> @builtin(position) vec4<f32> {
-            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        @vertex fn main() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 0.0);
         }
     )";
 };
@@ -99,28 +99,28 @@ TEST_F(VertexStateTest, PipelineCompatibility) {
     // Control case: pipeline with one input per attribute
     CreatePipeline(true, state, R"(
         @vertex fn main(
-            @location(0) a : vec4<f32>,
-            @location(1) b : vec4<f32>
-        ) -> @builtin(position) vec4<f32> {
-            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+            @location(0) a : vec4f,
+            @location(1) b : vec4f
+        ) -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 0.0);
         }
     )");
 
     // Check it is valid for the pipeline to use a subset of the VertexState
     CreatePipeline(true, state, R"(
         @vertex fn main(
-            @location(0) a : vec4<f32>
-        ) -> @builtin(position) vec4<f32> {
-            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+            @location(0) a : vec4f
+        ) -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 0.0);
         }
     )");
 
     // Check for an error when the pipeline uses an attribute not in the vertex input
     CreatePipeline(false, state, R"(
         @vertex fn main(
-            @location(2) a : vec4<f32>
-        ) -> @builtin(position) vec4<f32> {
-            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+            @location(2) a : vec4f
+        ) -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 0.0);
         }
     )");
 }
@@ -361,8 +361,8 @@ TEST_F(VertexStateTest, BaseTypeMatching) {
         state.cAttributes[0].format = format;
 
         std::string shader = "@vertex fn main(@location(0) attrib : " + shaderType +
-                             R"() -> @builtin(position) vec4<f32> {
-            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+                             R"() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 0.0);
         })";
 
         CreatePipeline(success, state, shader.c_str());
@@ -395,14 +395,14 @@ TEST_F(VertexStateTest, BaseTypeMatching) {
 
     // Test that formats are compatible with any width of vectors.
     DoTest(wgpu::VertexFormat::Float32, "f32", true);
-    DoTest(wgpu::VertexFormat::Float32, "vec2<f32>", true);
-    DoTest(wgpu::VertexFormat::Float32, "vec3<f32>", true);
-    DoTest(wgpu::VertexFormat::Float32, "vec4<f32>", true);
+    DoTest(wgpu::VertexFormat::Float32, "vec2f", true);
+    DoTest(wgpu::VertexFormat::Float32, "vec3f", true);
+    DoTest(wgpu::VertexFormat::Float32, "vec4f", true);
 
     DoTest(wgpu::VertexFormat::Float32x4, "f32", true);
-    DoTest(wgpu::VertexFormat::Float32x4, "vec2<f32>", true);
-    DoTest(wgpu::VertexFormat::Float32x4, "vec3<f32>", true);
-    DoTest(wgpu::VertexFormat::Float32x4, "vec4<f32>", true);
+    DoTest(wgpu::VertexFormat::Float32x4, "vec2f", true);
+    DoTest(wgpu::VertexFormat::Float32x4, "vec3f", true);
+    DoTest(wgpu::VertexFormat::Float32x4, "vec4f", true);
 }
 
 // Check that we only check base type compatibility for vertex inputs the shader uses.
@@ -414,8 +414,8 @@ TEST_F(VertexStateTest, BaseTypeMatchingForInexistentInput) {
         state.cVertexBuffers[0].attributeCount = 1;
         state.cAttributes[0].format = format;
 
-        std::string shader = R"(@vertex fn main() -> @builtin(position) vec4<f32> {
-            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        std::string shader = R"(@vertex fn main() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 0.0);
         })";
 
         CreatePipeline(true, state, shader.c_str());

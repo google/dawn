@@ -28,17 +28,17 @@ class ComputeDispatchTests : public DawnTest {
         // Write workgroup number into the output buffer if we saw the biggest dispatch
         // To make sure the dispatch was not called, write maximum u32 value for 0 dispatches
         wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-            @group(0) @binding(0) var<storage, read_write> output : vec3<u32>;
+            @group(0) @binding(0) var<storage, read_write> output : vec3u;
 
             @compute @workgroup_size(1, 1, 1)
-            fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>,
-                    @builtin(num_workgroups) dispatch : vec3<u32>) {
+            fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3u,
+                    @builtin(num_workgroups) dispatch : vec3u) {
                 if (dispatch.x == 0u || dispatch.y == 0u || dispatch.z == 0u) {
-                    output = vec3<u32>(0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu);
+                    output = vec3u(0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu);
                     return;
                 }
 
-                if (all(GlobalInvocationID == dispatch - vec3<u32>(1u, 1u, 1u))) {
+                if (all(GlobalInvocationID == dispatch - vec3u(1u, 1u, 1u))) {
                     output = dispatch;
                 }
             })");
@@ -50,19 +50,19 @@ class ComputeDispatchTests : public DawnTest {
 
         // Test the use of the compute pipelines without using @num_workgroups
         wgpu::ShaderModule moduleWithoutNumWorkgroups = utils::CreateShaderModule(device, R"(
-            @group(0) @binding(0) var<uniform> input : vec3<u32>;
-            @group(0) @binding(1) var<storage, read_write> output : vec3<u32>;
+            @group(0) @binding(0) var<uniform> input : vec3u;
+            @group(0) @binding(1) var<storage, read_write> output : vec3u;
 
             @compute @workgroup_size(1, 1, 1)
-            fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
-                let dispatch : vec3<u32> = input;
+            fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3u) {
+                let dispatch : vec3u = input;
 
                 if (dispatch.x == 0u || dispatch.y == 0u || dispatch.z == 0u) {
-                    output = vec3<u32>(0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu);
+                    output = vec3u(0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu);
                     return;
                 }
 
-                if (all(GlobalInvocationID == dispatch - vec3<u32>(1u, 1u, 1u))) {
+                if (all(GlobalInvocationID == dispatch - vec3u(1u, 1u, 1u))) {
                     output = dispatch;
                 }
             })");

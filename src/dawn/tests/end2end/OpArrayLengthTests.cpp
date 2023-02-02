@@ -168,13 +168,13 @@ TEST_P(OpArrayLengthTest, Fragment) {
     // Create the pipeline that computes the length of the buffers and writes it to the only render
     // pass pixel.
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        @vertex fn main() -> @builtin(position) vec4<f32> {
-            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        @vertex fn main() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, (mShaderInterface + R"(
-        @fragment fn main() -> @location(0) vec4<f32> {
-            var fragColor : vec4<f32>;
+        @fragment fn main() -> @location(0) vec4f {
+            var fragColor : vec4f;
             fragColor.r = f32(arrayLength(&buffer1.data)) / 255.0;
             fragColor.g = f32(arrayLength(&buffer2.data)) / 255.0;
             fragColor.b = f32(arrayLength(&buffer3.data)) / 255.0;
@@ -226,8 +226,8 @@ TEST_P(OpArrayLengthTest, Vertex) {
     // pass pixel.
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, (mShaderInterface + R"(
         struct VertexOut {
-            @location(0) color : vec4<f32>,
-            @builtin(position) position : vec4<f32>,
+            @location(0) color : vec4f,
+            @builtin(position) position : vec4f,
         }
 
         @vertex fn main() -> VertexOut {
@@ -237,14 +237,14 @@ TEST_P(OpArrayLengthTest, Vertex) {
             output.color.b = f32(arrayLength(&buffer3.data)) / 255.0;
             output.color.a = 0.0;
 
-            output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            output.position = vec4f(0.0, 0.0, 0.0, 1.0);
             return output;
         })")
                                                                         .c_str());
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         @fragment
-        fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
+        fn main(@location(0) color : vec4f) -> @location(0) vec4f {
             return color;
         })");
 

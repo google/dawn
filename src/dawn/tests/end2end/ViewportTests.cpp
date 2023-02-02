@@ -25,20 +25,20 @@ class ViewportTest : public DawnTest {
 
         mQuadVS = utils::CreateShaderModule(device, R"(
             @vertex
-            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-                var pos = array<vec2<f32>, 6>(
-                    vec2<f32>(-1.0,  1.0),
-                    vec2<f32>(-1.0, -1.0),
-                    vec2<f32>( 1.0,  1.0),
-                    vec2<f32>( 1.0,  1.0),
-                    vec2<f32>(-1.0, -1.0),
-                    vec2<f32>( 1.0, -1.0));
-                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-1.0,  1.0),
+                    vec2f(-1.0, -1.0),
+                    vec2f( 1.0,  1.0),
+                    vec2f( 1.0,  1.0),
+                    vec2f(-1.0, -1.0),
+                    vec2f( 1.0, -1.0));
+                return vec4f(pos[VertexIndex], 0.0, 1.0);
             })");
 
         mQuadFS = utils::CreateShaderModule(device, R"(
-            @fragment fn main() -> @location(0) vec4<f32> {
-                return vec4<f32>(1.0, 1.0, 1.0, 1.0);
+            @fragment fn main() -> @location(0) vec4f {
+                return vec4f(1.0, 1.0, 1.0, 1.0);
             })");
     }
 
@@ -94,12 +94,12 @@ class ViewportTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor pipelineDesc;
         pipelineDesc.vertex.module = utils::CreateShaderModule(device, R"(
             @vertex
-            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-                var points : array<vec3<f32>, 3> = array<vec3<f32>, 3>(
-                    vec3<f32>(-0.9, 0.0, 1.0),
-                    vec3<f32>( 0.0, 0.0, 0.5),
-                    vec3<f32>( 0.9, 0.0, 0.0));
-                return vec4<f32>(points[VertexIndex], 1.0);
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var points : array<vec3f, 3> = array(
+                    vec3f(-0.9, 0.0, 1.0),
+                    vec3f( 0.0, 0.0, 0.5),
+                    vec3f( 0.9, 0.0, 0.0));
+                return vec4f(points[VertexIndex], 1.0);
             })");
         pipelineDesc.cFragment.module = mQuadFS;
         pipelineDesc.cFragment.targetCount = 0;

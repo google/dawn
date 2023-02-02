@@ -47,24 +47,24 @@ class DepthClippingTest : public DawnTest {
 
         vsModule = utils::CreateShaderModule(device, R"(
             struct UBO {
-                color : vec3<f32>,
+                color : vec3f,
                 depth : f32,
             }
             @group(0) @binding(0) var<uniform> ubo : UBO;
 
-            @vertex fn main() -> @builtin(position) vec4<f32> {
-                return vec4<f32>(0.0, 0.0, ubo.depth, 1.0);
+            @vertex fn main() -> @builtin(position) vec4f {
+                return vec4f(0.0, 0.0, ubo.depth, 1.0);
             })");
 
         fsModule = utils::CreateShaderModule(device, R"(
             struct UBO {
-                color : vec3<f32>,
+                color : vec3f,
                 depth : f32,
             }
             @group(0) @binding(0) var<uniform> ubo : UBO;
 
-            @fragment fn main() -> @location(0) vec4<f32> {
-                return vec4<f32>(ubo.color, 1.0);
+            @fragment fn main() -> @location(0) vec4f {
+                return vec4f(ubo.color, 1.0);
             })");
     }
 
@@ -326,14 +326,14 @@ TEST_P(DepthClippingTest, UnclippedNotClamped) {
     descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
     // Draw the point at (0, 0) with depth 2.0.
     descriptor.vertex.module = utils::CreateShaderModule(device, R"(
-        @vertex fn main() -> @builtin(position) vec4<f32> {
-            return vec4<f32>(0.0, 0.0, 2.0, 1.0);
+        @vertex fn main() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 2.0, 1.0);
         })");
     // Write frag_pos.z / 4.0 which should be about 0.5 to the red channel.
     // This is the depth output from the vertex shader which is not clamped to the viewport.
     descriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) frag_pos: vec4<f32>) -> @location(0) vec4<f32> {
-            return vec4<f32>(frag_pos.z / 4.0, 0.0, 0.0, 1.0);
+        @fragment fn main(@builtin(position) frag_pos: vec4f) -> @location(0) vec4f {
+            return vec4f(frag_pos.z / 4.0, 0.0, 0.0, 1.0);
         })");
     wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
     depthStencil->depthWriteEnabled = true;

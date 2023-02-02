@@ -75,10 +75,9 @@ class VertexStateTest : public DawnTest {
 
         // TODO(cwallez@chromium.org): this only handles float attributes, we should extend it to
         // other types Adds line of the form
-        //    @location(1) input1 : vec4<f32>;
+        //    @location(1) input1 : vec4f;
         for (const auto& input : testSpec) {
-            vs << "@location(" << input.location << ") input" << input.location
-               << " : vec4<f32>,\n";
+            vs << "@location(" << input.location << ") input" << input.location << " : vec4f,\n";
         }
 
         vs << R"(
@@ -87,8 +86,8 @@ class VertexStateTest : public DawnTest {
             }
 
             struct VertexOut {
-                @location(0) color : vec4<f32>,
-                @builtin(position) position : vec4<f32>,
+                @location(0) color : vec4f,
+                @builtin(position) position : vec4f,
             }
 
             @vertex fn main(input : VertexIn) -> VertexOut {
@@ -97,14 +96,14 @@ class VertexStateTest : public DawnTest {
 
         // Hard code the triangle in the shader so that we don't have to add a vertex input for it.
         // Also this places the triangle in the grid based on its VertexID and InstanceID
-        vs << "    var pos = array<vec2<f32>, 3>(\n"
-              "         vec2<f32>(0.5, 1.0), vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 0.0));\n";
-        vs << "    var offset : vec2<f32> = vec2<f32>(f32(input.VertexIndex / 3u), "
+        vs << "    var pos = array(\n"
+              "         vec2f(0.5, 1.0), vec2f(0.0, 0.0), vec2f(1.0, 0.0));\n";
+        vs << "    var offset : vec2f = vec2f(f32(input.VertexIndex / 3u), "
               "f32(input.InstanceIndex));\n";
         vs << "    var worldPos = pos[input.VertexIndex % 3u] + offset;\n";
-        vs << "    var position = vec4<f32>(0.5 * worldPos - vec2<f32>(1.0, 1.0), 0.0, "
+        vs << "    var position = vec4f(0.5 * worldPos - vec2f(1.0, 1.0), 0.0, "
               "1.0);\n";
-        vs << "    output.position = vec4<f32>(position.x, -position.y, position.z, position.w);\n";
+        vs << "    output.position = vec4f(position.x, -position.y, position.z, position.w);\n";
 
         // Perform the checks by successively ANDing a boolean
         vs << "    var success = true;\n";
@@ -130,9 +129,9 @@ class VertexStateTest : public DawnTest {
         // Choose the color
         vs << R"(
             if (success) {
-                output.color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+                output.color = vec4f(0.0, 1.0, 0.0, 1.0);
             } else {
-                output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+                output.color = vec4f(1.0, 0.0, 0.0, 1.0);
             }
             return output;
         })";
@@ -140,7 +139,7 @@ class VertexStateTest : public DawnTest {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vs.str().c_str());
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             @fragment
-            fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
+            fn main(@location(0) color : vec4f) -> @location(0) vec4f {
                 return color;
             }
         )");
@@ -591,20 +590,20 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
     utils::ComboRenderPipelineDescriptor pipelineDesc;
     pipelineDesc.vertex.module = utils::CreateShaderModule(device, R"(
         struct VertexIn {
-            @location(0) attr0 : vec4<f32>,
-            @location(1) attr1 : vec2<u32>,
-            @location(2) attr2 : vec4<f32>,
+            @location(0) attr0 : vec4f,
+            @location(1) attr1 : vec2u,
+            @location(2) attr2 : vec4f,
             @location(3) attr3 : f32,
         }
 
         struct VertexOut {
-            @location(0) color : vec4<f32>,
-            @builtin(position) position : vec4<f32>,
+            @location(0) color : vec4f,
+            @builtin(position) position : vec4f,
         }
 
         @vertex fn main(input : VertexIn) -> VertexOut {
             var output : VertexOut;
-            output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            output.position = vec4f(0.0, 0.0, 0.0, 1.0);
 
             var success : bool = (
                 input.attr0.x == 1.0 &&
@@ -615,15 +614,15 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
                 input.attr3 == 1.0
             );
             if (success) {
-                output.color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+                output.color = vec4f(0.0, 1.0, 0.0, 1.0);
             } else {
-                output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+                output.color = vec4f(1.0, 0.0, 0.0, 1.0);
             }
             return output;
         })");
     pipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
         @fragment
-        fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
+        fn main(@location(0) color : vec4f) -> @location(0) vec4f {
             return color;
         })");
     pipelineDesc.vertex.bufferCount = vertexState.vertexBufferCount;
@@ -659,13 +658,13 @@ TEST_P(OptionalVertexStateTest, Basic) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        @vertex fn main() -> @builtin(position) vec4<f32> {
-            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        @vertex fn main() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main() -> @location(0) vec4<f32> {
-            return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(0.0, 1.0, 0.0, 1.0);
         })");
 
     utils::ComboRenderPipelineDescriptor descriptor;

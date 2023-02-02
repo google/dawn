@@ -50,8 +50,8 @@ class ResourceUsageTrackingTest : public ValidationTest {
     // pipeline. But those bind groups in caller can be used for validation for other purposes.
     wgpu::RenderPipeline CreateNoOpRenderPipeline() {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-                @vertex fn main() -> @builtin(position) vec4<f32> {
-                    return vec4<f32>();
+                @vertex fn main() -> @builtin(position) vec4f {
+                    return vec4f();
                 })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -749,8 +749,8 @@ TEST_F(ResourceUsageTrackingTest, BufferUsageConflictWithUnusedPipelineBindings)
 
         // Create a passthrough render pipeline with a readonly buffer
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-                @vertex fn main() -> @builtin(position) vec4<f32> {
-                    return vec4<f32>();
+                @vertex fn main() -> @builtin(position) vec4f {
+                    return vec4f();
                 })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -1567,8 +1567,8 @@ TEST_F(ResourceUsageTrackingTest, TextureUsageConflictWithUnusedPipelineBindings
     {
         // Create a passthrough render pipeline with a sampled storage texture
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-                @vertex fn main() -> @builtin(position) vec4<f32> {
-                    return vec4<f32>();
+                @vertex fn main() -> @builtin(position) vec4f {
+                    return vec4f();
                 })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(

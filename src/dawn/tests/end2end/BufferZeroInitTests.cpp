@@ -213,7 +213,7 @@ class BufferZeroInitTest : public DawnTest {
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             @fragment
-            fn main(@location(0) i_color : vec4<f32>) -> @location(0) vec4<f32> {
+            fn main(@location(0) i_color : vec4f) -> @location(0) vec4f {
                 return i_color;
             })");
 
@@ -252,18 +252,18 @@ class BufferZeroInitTest : public DawnTest {
 
         wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                @location(0) color : vec4<f32>,
-                @builtin(position) position : vec4<f32>,
+                @location(0) color : vec4f,
+                @builtin(position) position : vec4f,
             }
 
-            @vertex fn main(@location(0) pos : vec4<f32>) -> VertexOut {
+            @vertex fn main(@location(0) pos : vec4f) -> VertexOut {
                 var output : VertexOut;
-                if (all(pos == vec4<f32>(0.0, 0.0, 0.0, 0.0))) {
-                    output.color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+                if (all(pos == vec4f(0.0, 0.0, 0.0, 0.0))) {
+                    output.color = vec4f(0.0, 1.0, 0.0, 1.0);
                 } else {
-                    output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+                    output.color = vec4f(1.0, 0.0, 0.0, 1.0);
                 }
-                output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                output.position = vec4f(0.0, 0.0, 0.0, 1.0);
                 return output;
             })");
 
@@ -296,19 +296,19 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::RenderPipeline renderPipeline =
             CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                @location(0) color : vec4<f32>,
-                @builtin(position) position : vec4<f32>,
+                @location(0) color : vec4f,
+                @builtin(position) position : vec4f,
             }
 
             @vertex
             fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {
                 var output : VertexOut;
                 if (VertexIndex == 0u) {
-                    output.color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+                    output.color = vec4f(0.0, 1.0, 0.0, 1.0);
                 } else {
-                    output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+                    output.color = vec4f(1.0, 0.0, 0.0, 1.0);
                 }
-                output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                output.position = vec4f(0.0, 0.0, 0.0, 1.0);
                 return output;
             })",
                                         0 /* vertexBufferCount */);
@@ -346,14 +346,14 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::RenderPipeline renderPipeline =
             CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                @location(0) color : vec4<f32>,
-                @builtin(position) position : vec4<f32>,
+                @location(0) color : vec4f,
+                @builtin(position) position : vec4f,
             }
 
             @vertex fn main() -> VertexOut {
                 var output : VertexOut;
-                output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-                output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                output.color = vec4f(1.0, 0.0, 0.0, 1.0);
+                output.position = vec4f(0.0, 0.0, 0.0, 1.0);
                 return output;
             })",
                                         0 /* vertexBufferCount */);
@@ -387,14 +387,14 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::RenderPipeline renderPipeline =
             CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                @location(0) color : vec4<f32>,
-                @builtin(position) position : vec4<f32>,
+                @location(0) color : vec4f,
+                @builtin(position) position : vec4f,
             }
 
             @vertex fn main() -> VertexOut {
                 var output : VertexOut;
-                output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-                output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                output.color = vec4f(1.0, 0.0, 0.0, 1.0);
+                output.position = vec4f(0.0, 0.0, 0.0, 1.0);
                 return output;
             })",
                                         0 /* vertexBufferCount */);
@@ -433,7 +433,7 @@ class BufferZeroInitTest : public DawnTest {
             @group(0) @binding(0) var outImage : texture_storage_2d<rgba8unorm, write>;
 
             @compute @workgroup_size(1) fn main() {
-                textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
+                textureStore(outImage, vec2i(0, 0), vec4f(1.0, 0.0, 0.0, 1.0));
             })";
 
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
@@ -996,16 +996,16 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
     constexpr uint32_t kBoundBufferSize = 16u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct UBO {
-            value : vec4<u32>
+            value : vec4u
         }
         @group(0) @binding(0) var<uniform> ubo : UBO;
         @group(0) @binding(1) var outImage : texture_storage_2d<rgba8unorm, write>;
 
         @compute @workgroup_size(1) fn main() {
-            if (all(ubo.value == vec4<u32>(0u, 0u, 0u, 0u))) {
-                textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));
+            if (all(ubo.value == vec4u(0u, 0u, 0u, 0u))) {
+                textureStore(outImage, vec2i(0, 0), vec4f(0.0, 1.0, 0.0, 1.0));
             } else {
-                textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
+                textureStore(outImage, vec2i(0, 0), vec4f(1.0, 0.0, 0.0, 1.0));
             }
         }
     )");
@@ -1035,16 +1035,16 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
     constexpr uint32_t kBoundBufferSize = 16u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct SSBO {
-            value : vec4<u32>
+            value : vec4u
         }
         @group(0) @binding(0) var<storage, read> ssbo : SSBO;
         @group(0) @binding(1) var outImage : texture_storage_2d<rgba8unorm, write>;
 
         @compute @workgroup_size(1) fn main() {
-            if (all(ssbo.value == vec4<u32>(0u, 0u, 0u, 0u))) {
-                textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));
+            if (all(ssbo.value == vec4u(0u, 0u, 0u, 0u))) {
+                textureStore(outImage, vec2i(0, 0), vec4f(0.0, 1.0, 0.0, 1.0));
             } else {
-                textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
+                textureStore(outImage, vec2i(0, 0), vec4f(1.0, 0.0, 0.0, 1.0));
             }
         }
     )");
@@ -1074,17 +1074,17 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
     constexpr uint32_t kBoundBufferSize = 32u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct SSBO {
-            value : array<vec4<u32>, 2>
+            value : array<vec4u, 2>
         }
         @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
         @group(0) @binding(1) var outImage : texture_storage_2d<rgba8unorm, write>;
 
         @compute @workgroup_size(1) fn main() {
-            if (all(ssbo.value[0] == vec4<u32>(0u, 0u, 0u, 0u)) &&
-                all(ssbo.value[1] == vec4<u32>(0u, 0u, 0u, 0u))) {
-                textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));
+            if (all(ssbo.value[0] == vec4u(0u, 0u, 0u, 0u)) &&
+                all(ssbo.value[1] == vec4u(0u, 0u, 0u, 0u))) {
+                textureStore(outImage, vec2i(0, 0), vec4f(0.0, 1.0, 0.0, 1.0));
             } else {
-                textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
+                textureStore(outImage, vec2i(0, 0), vec4f(1.0, 0.0, 0.0, 1.0));
             }
 
             storageBarrier();
@@ -1148,18 +1148,18 @@ TEST_P(BufferZeroInitTest, PaddingInitialized) {
         wgpu::RenderPipeline renderPipeline =
             CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                @location(0) color : vec4<f32>,
-                @builtin(position) position : vec4<f32>,
+                @location(0) color : vec4f,
+                @builtin(position) position : vec4f,
             }
 
-            @vertex fn main(@location(0) pos : vec2<f32>) -> VertexOut {
+            @vertex fn main(@location(0) pos : vec2f) -> VertexOut {
                 var output : VertexOut;
-                if (all(pos == vec2<f32>(0.0, 0.0))) {
-                    output.color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+                if (all(pos == vec2f(0.0, 0.0))) {
+                    output.color = vec4f(0.0, 1.0, 0.0, 1.0);
                 } else {
-                    output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+                    output.color = vec4f(1.0, 0.0, 0.0, 1.0);
                 }
-                output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                output.position = vec4f(0.0, 0.0, 0.0, 1.0);
                 return output;
             })",
                                         /* vertexBufferCount */ 1u, vertexFormat);

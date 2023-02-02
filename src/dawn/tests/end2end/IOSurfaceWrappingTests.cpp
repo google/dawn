@@ -225,30 +225,30 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         {
             wgpu::ShaderModule vs = utils::CreateShaderModule(device, R"(
                 struct VertexOut {
-                    @location(0) texCoord : vec2<f32>,
-                    @builtin(position) position : vec4<f32>,
+                    @location(0) texCoord : vec2f,
+                    @builtin(position) position : vec4f,
                 }
 
                 @vertex
                 fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {
-                    var pos = array<vec2<f32>, 6>(
-                        vec2<f32>(-2.0, -2.0),
-                        vec2<f32>(-2.0,  2.0),
-                        vec2<f32>( 2.0, -2.0),
-                        vec2<f32>(-2.0,  2.0),
-                        vec2<f32>( 2.0, -2.0),
-                        vec2<f32>( 2.0,  2.0));
+                    var pos = array(
+                        vec2f(-2.0, -2.0),
+                        vec2f(-2.0,  2.0),
+                        vec2f( 2.0, -2.0),
+                        vec2f(-2.0,  2.0),
+                        vec2f( 2.0, -2.0),
+                        vec2f( 2.0,  2.0));
 
-                    var texCoord = array<vec2<f32>, 6>(
-                        vec2<f32>(0.0, 0.0),
-                        vec2<f32>(0.0, 1.0),
-                        vec2<f32>(1.0, 0.0),
-                        vec2<f32>(0.0, 1.0),
-                        vec2<f32>(1.0, 0.0),
-                        vec2<f32>(1.0, 1.0));
+                    var texCoord = array(
+                        vec2f(0.0, 0.0),
+                        vec2f(0.0, 1.0),
+                        vec2f(1.0, 0.0),
+                        vec2f(0.0, 1.0),
+                        vec2f(1.0, 0.0),
+                        vec2f(1.0, 1.0));
 
                     var output : VertexOut;
-                    output.position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                    output.position = vec4f(pos[VertexIndex], 0.0, 1.0);
                     output.texCoord = texCoord[VertexIndex];
                     return output;
                 }
@@ -258,7 +258,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
                 @group(0) @binding(1) var texture0 : texture_2d<f32>;
 
                 @fragment
-                fn main(@location(0) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
+                fn main(@location(0) texCoord : vec2f) -> @location(0) vec4f {
                     return textureSample(texture0, sampler0, texCoord);
                 }
             )");

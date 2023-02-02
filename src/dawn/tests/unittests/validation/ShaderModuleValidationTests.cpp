@@ -153,8 +153,8 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main() -> @location(0) vec4<f32> {
-            return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(0.0, 1.0, 0.0, 1.0);
         })");
 
     dawn::native::ShaderModuleBase* shaderModuleBase = dawn::native::FromAPI(shaderModule.Get());
@@ -215,7 +215,7 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
         }
 
         if (failingShaderStage == wgpu::ShaderStage::Vertex) {
-            stream << " @builtin(position) pos: vec4<f32>,";
+            stream << " @builtin(position) pos: vec4f,";
         }
         stream << "}\n";
 
@@ -235,14 +235,14 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
                 pDesc.vertex.module = utils::CreateShaderModule(device, (ioStruct + R"(
                     @vertex fn failingVertex() -> ShaderIO {
                         var shaderIO : ShaderIO;
-                        shaderIO.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                        shaderIO.pos = vec4f(0.0, 0.0, 0.0, 1.0);
                         return shaderIO;
                      }
                 )")
                                                                             .c_str());
                 pDesc.cFragment.module = utils::CreateShaderModule(device, R"(
-                    @fragment fn main() -> @location(0) vec4<f32> {
-                        return vec4<f32>(0.0);
+                    @fragment fn main() -> @location(0) vec4f {
+                        return vec4f(0.0);
                     }
                 )");
                 break;
@@ -252,14 +252,14 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
                 errorMatcher = "failingFragment";
                 pDesc.cFragment.entryPoint = "failingFragment";
                 pDesc.cFragment.module = utils::CreateShaderModule(device, (ioStruct + R"(
-                    @fragment fn failingFragment(io : ShaderIO) -> @location(0) vec4<f32> {
-                        return vec4<f32>(0.0);
+                    @fragment fn failingFragment(io : ShaderIO) -> @location(0) vec4f {
+                        return vec4f(0.0);
                      }
                 )")
                                                                                .c_str());
                 pDesc.vertex.module = utils::CreateShaderModule(device, R"(
-                    @vertex fn main() -> @builtin(position) vec4<f32> {
-                        return vec4<f32>(0.0);
+                    @vertex fn main() -> @builtin(position) vec4f {
+                        return vec4f(0.0);
                     }
                 )");
                 break;
@@ -316,8 +316,7 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
         uint32_t vec4InputLocations = totalUserDefinedInterStageShaderComponentCount / 4;
 
         for (uint32_t location = 0; location < vec4InputLocations; ++location) {
-            stream << "@location(" << location << ") var" << location << ": vec4<f32>,"
-                   << std::endl;
+            stream << "@location(" << location << ") var" << location << ": vec4f," << std::endl;
         }
 
         uint32_t lastComponentCount = totalUserDefinedInterStageShaderComponentCount % 4;
@@ -332,7 +331,7 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
         }
 
         if (failingShaderStage == wgpu::ShaderStage::Vertex) {
-            stream << " @builtin(position) pos: vec4<f32>,";
+            stream << " @builtin(position) pos: vec4f,";
         }
         stream << "}\n";
 
@@ -361,14 +360,14 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
                 pDesc.vertex.module = utils::CreateShaderModule(device, (ioStruct + R"(
                     @vertex fn failingVertex() -> ShaderIO {
                         var shaderIO : ShaderIO;
-                        shaderIO.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                        shaderIO.pos = vec4f(0.0, 0.0, 0.0, 1.0);
                         return shaderIO;
                      }
                 )")
                                                                             .c_str());
                 pDesc.cFragment.module = utils::CreateShaderModule(device, R"(
-                    @fragment fn main() -> @location(0) vec4<f32> {
-                        return vec4<f32>(0.0);
+                    @fragment fn main() -> @location(0) vec4f {
+                        return vec4f(0.0);
                     }
                 )");
                 break;
@@ -378,14 +377,14 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
                 errorMatcher = "failingFragment";
                 pDesc.cFragment.entryPoint = "failingFragment";
                 pDesc.cFragment.module = utils::CreateShaderModule(device, (ioStruct + R"(
-                    @fragment fn failingFragment(io : ShaderIO) -> @location(0) vec4<f32> {
-                        return vec4<f32>(0.0);
+                    @fragment fn failingFragment(io : ShaderIO) -> @location(0) vec4f {
+                        return vec4f(0.0);
                      }
                 )")
                                                                                .c_str());
                 pDesc.vertex.module = utils::CreateShaderModule(device, R"(
-                    @vertex fn main() -> @builtin(position) vec4<f32> {
-                        return vec4<f32>(0.0);
+                    @vertex fn main() -> @builtin(position) vec4f {
+                        return vec4f(0.0);
                     }
                 )");
                 break;
@@ -438,7 +437,7 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
     // component count.
     {
         CheckTestPipeline(true, kMaxInterStageShaderComponents, wgpu::ShaderStage::Fragment,
-                          "@builtin(position) fragCoord : vec4<f32>,");
+                          "@builtin(position) fragCoord : vec4f,");
     }
 
     // @builtin(front_facing) should be counted into the maximum inter-stage component count.
@@ -515,12 +514,12 @@ TEST_F(ShaderModuleValidationTest, MaxBindingNumber) {
 TEST_F(ShaderModuleValidationTest, MissingDecorations) {
     // Vertex input.
     utils::CreateShaderModule(device, R"(
-        @vertex fn main(@location(0) a : vec4<f32>) -> @builtin(position) vec4<f32> {
+        @vertex fn main(@location(0) a : vec4f) -> @builtin(position) vec4f {
             return vec4(1.0);
         }
     )");
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
-        @vertex fn main(a : vec4<f32>) -> @builtin(position) vec4<f32> {
+        @vertex fn main(a : vec4f) -> @builtin(position) vec4f {
             return vec4(1.0);
         }
     )"));
@@ -528,7 +527,7 @@ TEST_F(ShaderModuleValidationTest, MissingDecorations) {
     // Vertex output
     utils::CreateShaderModule(device, R"(
         struct Output {
-            @builtin(position) pos : vec4<f32>,
+            @builtin(position) pos : vec4f,
             @location(0) a : f32,
         }
         @vertex fn main() -> Output {
@@ -538,7 +537,7 @@ TEST_F(ShaderModuleValidationTest, MissingDecorations) {
     )");
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
         struct Output {
-            @builtin(position) pos : vec4<f32>,
+            @builtin(position) pos : vec4f,
             a : f32,
         }
         @vertex fn main() -> Output {
@@ -549,12 +548,12 @@ TEST_F(ShaderModuleValidationTest, MissingDecorations) {
 
     // Fragment input
     utils::CreateShaderModule(device, R"(
-        @fragment fn main(@location(0) a : vec4<f32>) -> @location(0) f32 {
+        @fragment fn main(@location(0) a : vec4f) -> @location(0) f32 {
             return 1.0;
         }
     )");
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
-        @fragment fn main(a : vec4<f32>) -> @location(0) f32 {
+        @fragment fn main(a : vec4f) -> @location(0) f32 {
             return 1.0;
         }
     )"));
