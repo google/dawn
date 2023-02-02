@@ -2452,7 +2452,7 @@ bool Validator::DiagnosticControls(utils::VectorRef<const ast::DiagnosticControl
     // They conflict if the rule name is the same and the severity is different.
     utils::Hashmap<Symbol, const ast::DiagnosticControl*, 8> diagnostics;
     for (auto* dc : controls) {
-        auto diag_added = diagnostics.Add(dc->rule_name->identifier->symbol, dc);
+        auto diag_added = diagnostics.Add(dc->rule_name->symbol, dc);
         if (!diag_added && (*diag_added.value)->severity != dc->severity) {
             {
                 std::ostringstream ss;
@@ -2461,8 +2461,8 @@ bool Validator::DiagnosticControls(utils::VectorRef<const ast::DiagnosticControl
             }
             {
                 std::ostringstream ss;
-                ss << "severity of '" << symbols_.NameFor(dc->rule_name->identifier->symbol)
-                   << "' set to '" << dc->severity << "' here";
+                ss << "severity of '" << symbols_.NameFor(dc->rule_name->symbol) << "' set to '"
+                   << dc->severity << "' here";
                 AddNote(ss.str(), (*diag_added.value)->source);
             }
             return false;

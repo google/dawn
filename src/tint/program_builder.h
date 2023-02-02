@@ -3280,23 +3280,23 @@ class ProgramBuilder {
     /// @param severity the diagnostic severity control
     /// @param rule_name the diagnostic rule name
     /// @returns the diagnostic attribute pointer
-    const ast::DiagnosticAttribute* DiagnosticAttribute(
-        const Source& source,
-        ast::DiagnosticSeverity severity,
-        const ast::IdentifierExpression* rule_name) {
-        return create<ast::DiagnosticAttribute>(source,
-                                                DiagnosticControl(source, severity, rule_name));
+    template <typename NAME>
+    const ast::DiagnosticAttribute* DiagnosticAttribute(const Source& source,
+                                                        ast::DiagnosticSeverity severity,
+                                                        NAME&& rule_name) {
+        return create<ast::DiagnosticAttribute>(
+            source, DiagnosticControl(source, severity, std::forward<NAME>(rule_name)));
     }
 
     /// Creates an ast::DiagnosticAttribute
     /// @param severity the diagnostic severity control
     /// @param rule_name the diagnostic rule name
     /// @returns the diagnostic attribute pointer
-    const ast::DiagnosticAttribute* DiagnosticAttribute(
-        ast::DiagnosticSeverity severity,
-        const ast::IdentifierExpression* rule_name) {
-        return create<ast::DiagnosticAttribute>(source_,
-                                                DiagnosticControl(source_, severity, rule_name));
+    template <typename NAME>
+    const ast::DiagnosticAttribute* DiagnosticAttribute(ast::DiagnosticSeverity severity,
+                                                        NAME&& rule_name) {
+        return create<ast::DiagnosticAttribute>(
+            source_, DiagnosticControl(source_, severity, std::forward<NAME>(rule_name)));
     }
 
     /// Creates an ast::DiagnosticControl
@@ -3304,19 +3304,23 @@ class ProgramBuilder {
     /// @param severity the diagnostic severity control
     /// @param rule_name the diagnostic rule name
     /// @returns the diagnostic control pointer
+    template <typename NAME>
     const ast::DiagnosticControl* DiagnosticControl(const Source& source,
                                                     ast::DiagnosticSeverity severity,
-                                                    const ast::IdentifierExpression* rule_name) {
-        return create<ast::DiagnosticControl>(source, severity, rule_name);
+                                                    NAME&& rule_name) {
+        return create<ast::DiagnosticControl>(source, severity,
+                                              Ident(std::forward<NAME>(rule_name)));
     }
 
     /// Creates an ast::DiagnosticControl
     /// @param severity the diagnostic severity control
     /// @param rule_name the diagnostic rule name
     /// @returns the diagnostic control pointer
+    template <typename NAME>
     const ast::DiagnosticControl* DiagnosticControl(ast::DiagnosticSeverity severity,
-                                                    const ast::IdentifierExpression* rule_name) {
-        return create<ast::DiagnosticControl>(source_, severity, rule_name);
+                                                    NAME&& rule_name) {
+        return create<ast::DiagnosticControl>(source_, severity,
+                                              Ident(std::forward<NAME>(rule_name)));
     }
 
     /// Add a global diagnostic control to the module.
@@ -3324,10 +3328,11 @@ class ProgramBuilder {
     /// @param severity the diagnostic severity control
     /// @param rule_name the diagnostic rule name
     /// @returns the diagnostic control pointer
+    template <typename NAME>
     const ast::DiagnosticControl* DiagnosticDirective(const Source& source,
                                                       ast::DiagnosticSeverity severity,
-                                                      const ast::IdentifierExpression* rule_name) {
-        auto* control = DiagnosticControl(source, severity, rule_name);
+                                                      NAME&& rule_name) {
+        auto* control = DiagnosticControl(source, severity, Ident(std::forward<NAME>(rule_name)));
         AST().AddDiagnosticControl(control);
         return control;
     }
@@ -3336,9 +3341,10 @@ class ProgramBuilder {
     /// @param severity the diagnostic severity control
     /// @param rule_name the diagnostic rule name
     /// @returns the diagnostic control pointer
+    template <typename NAME>
     const ast::DiagnosticControl* DiagnosticDirective(ast::DiagnosticSeverity severity,
-                                                      const ast::IdentifierExpression* rule_name) {
-        auto* control = DiagnosticControl(source_, severity, rule_name);
+                                                      NAME&& rule_name) {
+        auto* control = DiagnosticControl(source_, severity, Ident(std::forward<NAME>(rule_name)));
         AST().AddDiagnosticControl(control);
         return control;
     }

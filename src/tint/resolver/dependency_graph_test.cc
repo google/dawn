@@ -1097,7 +1097,7 @@ TEST_F(ResolverDependencyGraphOrderedGlobalsTest, DirectiveFirst) {
     auto* var_1 = GlobalVar("SYMBOL1", ty.i32());
     auto* enable = Enable(ast::Extension::kF16);
     auto* var_2 = GlobalVar("SYMBOL2", ty.f32());
-    auto* diagnostic = DiagnosticControl(ast::DiagnosticSeverity::kWarning, Expr("foo"));
+    auto* diagnostic = DiagnosticControl(ast::DiagnosticSeverity::kWarning, "foo");
     AST().AddDiagnosticControl(diagnostic);
 
     EXPECT_THAT(AST().GlobalDeclarations(), ElementsAre(var_1, enable, var_2, diagnostic));

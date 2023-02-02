@@ -49,13 +49,13 @@ class DiagnosticSeverityTest : public TestHelper {
         auto block_severity = ast::DiagnosticSeverity::kInfo;
         auto if_severity = ast::DiagnosticSeverity::kInfo;
         auto attr = [&](auto severity) {
-            return utils::Vector{DiagnosticAttribute(severity, Expr("chromium_unreachable_code"))};
+            return utils::Vector{DiagnosticAttribute(severity, "chromium_unreachable_code")};
         };
 
         auto* return_1 = Return();
         auto* if_1 = If(Expr(true), Block(utils::Vector{return_1}, attr(if_severity)));
         auto* block_1 = Block(utils::Vector{if_1}, attr(block_severity));
-        auto* func_attr = DiagnosticAttribute(func_severity, Expr("chromium_unreachable_code"));
+        auto* func_attr = DiagnosticAttribute(func_severity, "chromium_unreachable_code");
         auto* foo = Func("foo", {}, ty.void_(), utils::Vector{block_1}, utils::Vector{func_attr});
 
         auto* return_2 = Return();
@@ -74,7 +74,7 @@ class DiagnosticSeverityTest : public TestHelper {
 };
 
 TEST_F(DiagnosticSeverityTest, WithDirective) {
-    DiagnosticDirective(ast::DiagnosticSeverity::kError, Expr("chromium_unreachable_code"));
+    DiagnosticDirective(ast::DiagnosticSeverity::kError, "chromium_unreachable_code");
     Run(ast::DiagnosticSeverity::kError);
 }
 

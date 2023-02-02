@@ -30,9 +30,9 @@ TEST_F(ParserImplTest, DiagnosticDirective_Valid) {
     ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
     EXPECT_EQ(ast.GlobalDeclarations()[0], control);
 
-    auto* r = As<ast::IdentifierExpression>(control->rule_name);
+    auto* r = control->rule_name;
     ASSERT_NE(r, nullptr);
-    EXPECT_EQ(p->builder().Symbols().NameFor(r->identifier->symbol), "foo");
+    EXPECT_EQ(p->builder().Symbols().NameFor(r->symbol), "foo");
 }
 
 TEST_F(ParserImplTest, DiagnosticDirective_MissingSemicolon) {

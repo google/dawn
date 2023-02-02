@@ -3775,7 +3775,7 @@ Expect<const ast::DiagnosticControl*> ParserImpl::expect_diagnostic_control() {
         match(Token::Type::kComma);
 
         return create<ast::DiagnosticControl>(source, severity_control.value,
-                                              builder_.Expr(rule_name.source, rule_name.value));
+                                              builder_.Ident(rule_name.source, rule_name.value));
     });
 }
 

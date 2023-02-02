@@ -3060,9 +3060,8 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
 bool Resolver::DiagnosticControl(const ast::DiagnosticControl* control) {
     Mark(control->rule_name);
-    Mark(control->rule_name->identifier);
 
-    auto rule_name = builder_->Symbols().NameFor(control->rule_name->identifier->symbol);
+    auto rule_name = builder_->Symbols().NameFor(control->rule_name->symbol);
     auto rule = ast::ParseDiagnosticRule(rule_name);
     if (rule != ast::DiagnosticRule::kUndefined) {
         validator_.DiagnosticFilters().Set(rule, control->severity);

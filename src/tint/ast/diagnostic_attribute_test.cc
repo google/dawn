@@ -21,7 +21,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using DiagnosticAttributeTest = TestHelper;
 
 TEST_F(DiagnosticAttributeTest, Creation) {
-    auto* name = Expr("foo");
+    auto* name = Ident("foo");
     auto* d = DiagnosticAttribute(DiagnosticSeverity::kWarning, name);
     EXPECT_EQ(d->Name(), "diagnostic");
     EXPECT_EQ(d->control->severity, DiagnosticSeverity::kWarning);

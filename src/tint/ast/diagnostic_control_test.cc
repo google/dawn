@@ -31,7 +31,7 @@ namespace {
 using DiagnosticControlTest = TestHelper;
 
 TEST_F(DiagnosticControlTest, Creation) {
-    auto* name = Expr("foo");
+    auto* name = Ident("foo");
     Source source;
     source.range.begin = Source::Location{20, 2};
     source.range.end = Source::Location{20, 5};

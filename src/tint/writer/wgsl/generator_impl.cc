@@ -110,7 +110,7 @@ bool GeneratorImpl::Generate() {
 bool GeneratorImpl::EmitDiagnosticControl(std::ostream& out,
                                           const ast::DiagnosticControl* diagnostic) {
     out << "diagnostic(" << diagnostic->severity << ", "
-        << program_->Symbols().NameFor(diagnostic->rule_name->identifier->symbol) << ")";
+        << program_->Symbols().NameFor(diagnostic->rule_name->symbol) << ")";
     return true;
 }
 

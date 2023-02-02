@@ -31,7 +31,7 @@
 
 // Forward declarations
 namespace tint::ast {
-class IdentifierExpression;
+class Identifier;
 }  // namespace tint::ast
 
 namespace tint::ast {
@@ -103,7 +103,7 @@ class DiagnosticControl : public Castable<DiagnosticControl, Node> {
                       NodeID nid,
                       const Source& src,
                       DiagnosticSeverity sev,
-                      const IdentifierExpression* rule)
+                      const Identifier* rule)
         : Base(pid, nid, src), severity(sev), rule_name(rule) {}
 
     ~DiagnosticControl() override;
@@ -117,7 +117,7 @@ class DiagnosticControl : public Castable<DiagnosticControl, Node> {
     DiagnosticSeverity severity;
 
     /// The diagnostic rule name.
-    const IdentifierExpression* rule_name;
+    const Identifier* rule_name;
 };
 
 }  // namespace tint::ast
