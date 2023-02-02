@@ -24,7 +24,7 @@ MemberAccessorExpression::MemberAccessorExpression(ProgramID pid,
                                                    NodeID nid,
                                                    const Source& src,
                                                    const Expression* str,
-                                                   const IdentifierExpression* mem)
+                                                   const Identifier* mem)
     : Base(pid, nid, src), structure(str), member(mem) {
     TINT_ASSERT(AST, structure);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, structure, program_id);

@@ -2731,7 +2731,7 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
         sem,
         [&](const sem::Swizzle*) {
             // Swizzles output the name directly
-            out << builder_.Symbols().NameFor(expr->member->identifier->symbol);
+            out << builder_.Symbols().NameFor(expr->member->symbol);
             return true;
         },
         [&](const sem::StructMemberAccess* member_access) {

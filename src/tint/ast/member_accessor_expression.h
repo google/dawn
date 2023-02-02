@@ -32,7 +32,7 @@ class MemberAccessorExpression final : public Castable<MemberAccessorExpression,
                              NodeID nid,
                              const Source& source,
                              const Expression* structure,
-                             const IdentifierExpression* member);
+                             const Identifier* member);
     /// Move constructor
     MemberAccessorExpression(MemberAccessorExpression&&);
     ~MemberAccessorExpression() override;
@@ -47,7 +47,7 @@ class MemberAccessorExpression final : public Castable<MemberAccessorExpression,
     const Expression* const structure;
 
     /// The member expression
-    const IdentifierExpression* const member;
+    const Identifier* const member;
 };
 
 }  // namespace tint::ast

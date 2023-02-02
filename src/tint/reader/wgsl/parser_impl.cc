@@ -2707,7 +2707,7 @@ Maybe<const ast::Expression*> ParserImpl::component_or_swizzle_specifier(
             }
 
             prefix = builder_.MemberAccessor(ident.source, prefix,
-                                             builder_.Expr(ident.source, ident.value));
+                                             builder_.Ident(ident.source, ident.value));
             continue;
         }
 

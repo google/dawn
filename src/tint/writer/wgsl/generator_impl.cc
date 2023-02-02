@@ -217,9 +217,8 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
         out << ")";
     }
 
-    out << ".";
-
-    return EmitExpression(out, expr->member);
+    out << "." << program_->Symbols().NameFor(expr->member->symbol);
+    return true;
 }
 
 bool GeneratorImpl::EmitBitcast(std::ostream& out, const ast::BitcastExpression* expr) {

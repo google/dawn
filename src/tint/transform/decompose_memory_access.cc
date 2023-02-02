@@ -915,7 +915,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
             } else {
                 if (auto access = state.TakeAccess(accessor->structure)) {
                     auto* str_ty = access.type->As<sem::Struct>();
-                    auto* member = str_ty->FindMember(accessor->member->identifier->symbol);
+                    auto* member = str_ty->FindMember(accessor->member->symbol);
                     auto offset = member->Offset();
                     state.AddAccess(accessor, {
                                                   access.var,

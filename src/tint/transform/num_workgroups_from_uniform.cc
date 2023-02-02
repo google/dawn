@@ -177,7 +177,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
             continue;
         }
 
-        if (to_replace.count({ident->identifier->symbol, accessor->member->identifier->symbol})) {
+        if (to_replace.count({ident->identifier->symbol, accessor->member->symbol})) {
             ctx.Replace(accessor, b.MemberAccessor(get_ubo()->symbol, kNumWorkgroupsMemberName));
         }
     }

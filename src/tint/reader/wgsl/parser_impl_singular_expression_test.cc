@@ -167,7 +167,7 @@ TEST_F(ParserImplTest, SingularExpression_MemberAccessor) {
     EXPECT_EQ(m->structure->As<ast::IdentifierExpression>()->identifier->symbol,
               p->builder().Symbols().Get("a"));
 
-    EXPECT_EQ(m->member->identifier->symbol, p->builder().Symbols().Get("b"));
+    EXPECT_EQ(m->member->symbol, p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, SingularExpression_MemberAccesssor_InvalidIdent) {

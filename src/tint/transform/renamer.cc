@@ -1287,11 +1287,11 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
             [&](const ast::MemberAccessorExpression* accessor) {
                 auto* sem = src->Sem().Get(accessor)->UnwrapLoad();
                 if (sem->Is<sem::Swizzle>()) {
-                    preserved_identifiers.Add(accessor->member->identifier);
+                    preserved_identifiers.Add(accessor->member);
                 } else if (auto* str_expr = src->Sem().Get(accessor->structure)) {
                     if (auto* ty = str_expr->Type()->UnwrapRef()->As<sem::Struct>()) {
                         if (ty->Declaration() == nullptr) {  // Builtin structure
-                            preserved_identifiers.Add(accessor->member->identifier);
+                            preserved_identifiers.Add(accessor->member);
                         }
                     }
                 }

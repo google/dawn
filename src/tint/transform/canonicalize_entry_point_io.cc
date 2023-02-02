@@ -439,7 +439,7 @@ struct CanonicalizeEntryPointIO::State {
     const ast::Expression* GLPosition(const char* component) {
         Symbol pos = ctx.dst->Symbols().Register("gl_Position");
         Symbol c = ctx.dst->Symbols().Register(component);
-        return ctx.dst->MemberAccessor(ctx.dst->Expr(pos), ctx.dst->Expr(c));
+        return ctx.dst->MemberAccessor(ctx.dst->Expr(pos), c);
     }
 
     /// Create the wrapper function's struct parameter and type objects.

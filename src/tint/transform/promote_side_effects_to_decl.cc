@@ -134,7 +134,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
                 return false;
             },
             [&](const ast::MemberAccessorExpression* e) {
-                if (HasSideEffects(e->structure) || HasSideEffects(e->member)) {
+                if (HasSideEffects(e->structure)) {
                     return true;
                 }
                 no_side_effects.insert(e);
@@ -216,7 +216,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
             return false;
         };
 
-        auto binary_process = [&](auto* lhs, auto* rhs) {
+        auto binary_process = [&](const ast::Expression* lhs, const ast::Expression* rhs) {
             // If neither side causes side-effects, but at least one receives them,
             // let parent node hoist. This avoids over-hoisting side-effect receivers
             // of compound binary expressions (e.g. for "((a && b) && c) && f()", we
@@ -236,7 +236,8 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
             return false;
         };
 
-        auto accessor_process = [&](auto* lhs, auto* rhs) {
+        auto accessor_process = [&](const ast::Expression* lhs,
+                                    const ast::Expression* rhs = nullptr) {
             auto maybe = process(lhs);
             // If lhs is a variable, let parent node hoist otherwise flush it right
             // away. This is to avoid over-hoisting the lhs of accessor chains (e.g.
@@ -247,7 +248,9 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
                 Flush(maybe_hoist);
                 maybe = false;
             }
-            default_process(rhs);
+            if (rhs) {
+                default_process(rhs);
+            }
             return maybe;
         };
 
@@ -320,9 +323,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
             [&](const ast::IndexAccessorExpression* e) {
                 return accessor_process(e->object, e->index);
             },
-            [&](const ast::MemberAccessorExpression* e) {
-                return accessor_process(e->structure, e->member);
-            },
+            [&](const ast::MemberAccessorExpression* e) { return accessor_process(e->structure); },
             [&](const ast::LiteralExpression*) {
                 // Leaf
                 return false;
@@ -519,7 +520,6 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
             },
             [&](const ast::MemberAccessorExpression* member) {
                 ctx.Replace(member->structure, decompose(member->structure));
-                ctx.Replace(member->member, decompose(member->member));
                 return clone_maybe_hoisted(member);
             },
             [&](const ast::UnaryOpExpression* unary) {

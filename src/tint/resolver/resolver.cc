@@ -2767,12 +2767,11 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
     bool has_side_effects = object && object->HasSideEffects();
 
     Mark(expr->member);
-    Mark(expr->member->identifier);
 
     return Switch(
         storage_ty,  //
         [&](const sem::Struct* str) -> sem::Expression* {
-            auto symbol = expr->member->identifier->symbol;
+            auto symbol = expr->member->symbol;
 
             const sem::StructMember* member = nullptr;
             for (auto* m : str->Members()) {
@@ -2805,7 +2804,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
         },
 
         [&](const type::Vector* vec) -> sem::Expression* {
-            std::string s = builder_->Symbols().NameFor(expr->member->identifier->symbol);
+            std::string s = builder_->Symbols().NameFor(expr->member->symbol);
             auto size = s.size();
             utils::Vector<uint32_t, 4> swizzle;
             swizzle.Reserve(s.size());

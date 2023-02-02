@@ -22,7 +22,7 @@ using MemberAccessorExpressionTest = TestHelper;
 
 TEST_F(MemberAccessorExpressionTest, Creation) {
     auto* str = Expr("structure");
-    auto* mem = Expr("member");
+    auto* mem = Ident("member");
 
     auto* stmt = create<MemberAccessorExpression>(str, mem);
     EXPECT_EQ(stmt->structure, str);
@@ -31,14 +31,14 @@ TEST_F(MemberAccessorExpressionTest, Creation) {
 
 TEST_F(MemberAccessorExpressionTest, Creation_WithSource) {
     auto* stmt = create<MemberAccessorExpression>(Source{Source::Location{20, 2}},
-                                                  Expr("structure"), Expr("member"));
+                                                  Expr("structure"), Ident("member"));
     auto src = stmt->source;
     EXPECT_EQ(src.range.begin.line, 20u);
     EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(MemberAccessorExpressionTest, IsMemberAccessor) {
-    auto* stmt = create<MemberAccessorExpression>(Expr("structure"), Expr("member"));
+    auto* stmt = create<MemberAccessorExpression>(Expr("structure"), Ident("member"));
     EXPECT_TRUE(stmt->Is<MemberAccessorExpression>());
 }
 
@@ -46,7 +46,7 @@ TEST_F(MemberAccessorExpressionTest, Assert_Null_Struct) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<MemberAccessorExpression>(nullptr, b.Expr("member"));
+            b.create<MemberAccessorExpression>(nullptr, b.Ident("member"));
         },
         "internal compiler error");
 }
@@ -65,7 +65,7 @@ TEST_F(MemberAccessorExpressionTest, Assert_DifferentProgramID_Struct) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<MemberAccessorExpression>(b2.Expr("structure"), b1.Expr("member"));
+            b1.create<MemberAccessorExpression>(b2.Expr("structure"), b1.Ident("member"));
         },
         "internal compiler error");
 }
@@ -75,7 +75,7 @@ TEST_F(MemberAccessorExpressionTest, Assert_DifferentProgramID_Member) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<MemberAccessorExpression>(b1.Expr("structure"), b2.Expr("member"));
+            b1.create<MemberAccessorExpression>(b1.Expr("structure"), b2.Ident("member"));
         },
         "internal compiler error");
 }

@@ -1096,8 +1096,7 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
                     },
                     [&](const Struct* struct_type) {
                         store_dest = builder_.MemberAccessor(
-                            store_dest,
-                            builder_.Expr(parser_impl_.GetMemberName(*struct_type, index)));
+                            store_dest, parser_impl_.GetMemberName(*struct_type, index));
                         current_type = struct_type->members[static_cast<size_t>(index)];
                     });
             }
@@ -1224,19 +1223,16 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
                 Switch(
                     current_type,
                     [&](const Matrix* matrix_type) {
-                        load_source =
-                            builder_.IndexAccessor(load_source, builder_.Expr(i32(index)));
+                        load_source = builder_.IndexAccessor(load_source, i32(index));
                         current_type = ty_.Vector(matrix_type->type, matrix_type->rows);
                     },
                     [&](const Array* array_type) {
-                        load_source =
-                            builder_.IndexAccessor(load_source, builder_.Expr(i32(index)));
+                        load_source = builder_.IndexAccessor(load_source, i32(index));
                         current_type = array_type->type->UnwrapAlias();
                     },
                     [&](const Struct* struct_type) {
                         load_source = builder_.MemberAccessor(
-                            load_source,
-                            builder_.Expr(parser_impl_.GetMemberName(*struct_type, index)));
+                            load_source, parser_impl_.GetMemberName(*struct_type, index));
                         current_type = struct_type->members[static_cast<size_t>(index)];
                     });
             }
@@ -4290,23 +4286,23 @@ TypedExpression FunctionEmitter::EmitGlslStd450MatrixInverse(
     return {};
 }
 
-const ast::IdentifierExpression* FunctionEmitter::Swizzle(uint32_t i) {
+const ast::Identifier* FunctionEmitter::Swizzle(uint32_t i) {
     if (i >= kMaxVectorLen) {
         Fail() << "vector component index is larger than " << kMaxVectorLen - 1 << ": " << i;
         return nullptr;
     }
     const char* names[] = {"x", "y", "z", "w"};
-    return builder_.Expr(names[i & 3]);
+    return builder_.Ident(names[i & 3]);
 }
 
-const ast::IdentifierExpression* FunctionEmitter::PrefixSwizzle(uint32_t n) {
+const ast::Identifier* FunctionEmitter::PrefixSwizzle(uint32_t n) {
     switch (n) {
         case 1:
-            return builder_.Expr("x");
+            return builder_.Ident("x");
         case 2:
-            return builder_.Expr("xy");
+            return builder_.Ident("xy");
         case 3:
-            return builder_.Expr("xyz");
+            return builder_.Ident("xyz");
         default:
             break;
     }
@@ -4510,10 +4506,8 @@ TypedExpression FunctionEmitter::MakeAccessChain(const spvtools::opt::Instructio
                     return {};
                 }
                 auto name = namer_.GetMemberName(pointee_type_id, uint32_t(index_const_val));
-                auto* member_access = builder_.Expr(name);
 
-                next_expr = create<ast::MemberAccessorExpression>(Source{}, current_expr.expr,
-                                                                  member_access);
+                next_expr = builder_.MemberAccessor(Source{}, current_expr.expr, name);
                 pointee_type_id = pointee_type_inst->GetSingleWordInOperand(
                     static_cast<uint32_t>(index_const_val));
                 break;
@@ -4673,10 +4667,8 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
                     return {};
                 }
                 auto name = namer_.GetMemberName(current_type_id, uint32_t(index_val));
-                auto* member_access = builder_.Expr(name);
 
-                next_expr = create<ast::MemberAccessorExpression>(Source{}, current_expr.expr,
-                                                                  member_access);
+                next_expr = builder_.MemberAccessor(Source{}, current_expr.expr, name);
                 current_type_id = current_type_inst->GetSingleWordInOperand(index_val);
                 break;
             }
@@ -6122,9 +6114,7 @@ TypedExpression FunctionEmitter::MakeArrayLength(const spvtools::opt::Instructio
     if (member_expr.type->Is<Pointer>()) {
         member_expr = Dereference(member_expr);
     }
-    auto* member_ident = builder_.Expr(field_name);
-    auto* member_access =
-        create<ast::MemberAccessorExpression>(Source{}, member_expr.expr, member_ident);
+    auto* member_access = builder_.MemberAccessor(Source{}, member_expr.expr, field_name);
 
     // Generate the builtin function call.
     auto* call_expr = builder_.Call(Source{}, "arrayLength", builder_.AddressOf(member_access));

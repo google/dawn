@@ -147,10 +147,7 @@ TEST_F(ParserImplTest, LHSExpression_PostfixExpression) {
 
     auto* struct_ident = access->structure->As<ast::IdentifierExpression>();
     EXPECT_EQ(struct_ident->identifier->symbol, p->builder().Symbols().Get("a"));
-
-    ASSERT_TRUE(access->member->Is<ast::IdentifierExpression>());
-    auto* member_ident = access->member->As<ast::IdentifierExpression>();
-    EXPECT_EQ(member_ident->identifier->symbol, p->builder().Symbols().Get("foo"));
+    EXPECT_EQ(access->member->symbol, p->builder().Symbols().Get("foo"));
 }
 
 TEST_F(ParserImplTest, LHSExpression_InvalidPostfixExpression) {

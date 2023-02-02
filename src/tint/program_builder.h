@@ -2374,7 +2374,7 @@ class ProgramBuilder {
                                                         OBJ&& obj,
                                                         IDX&& idx) {
         return create<ast::MemberAccessorExpression>(source, Expr(std::forward<OBJ>(obj)),
-                                                     Expr(std::forward<IDX>(idx)));
+                                                     Ident(std::forward<IDX>(idx)));
     }
 
     /// @param obj the object for the member accessor expression
@@ -2383,7 +2383,7 @@ class ProgramBuilder {
     template <typename OBJ, typename IDX>
     const ast::MemberAccessorExpression* MemberAccessor(OBJ&& obj, IDX&& idx) {
         return create<ast::MemberAccessorExpression>(Expr(std::forward<OBJ>(obj)),
-                                                     Expr(std::forward<IDX>(idx)));
+                                                     Ident(std::forward<IDX>(idx)));
     }
 
     /// Creates a ast::StructMemberOffsetAttribute

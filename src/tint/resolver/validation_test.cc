@@ -358,9 +358,7 @@ TEST_F(ResolverValidationTest, AddressSpace_TextureExplicitAddressSpace) {
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
     GlobalVar("my_vec", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
-    auto* ident = Expr(Source{{{3, 3}, {3, 7}}}, "xyqz");
-
-    auto* mem = MemberAccessor("my_vec", ident);
+    auto* mem = MemberAccessor("my_vec", Ident(Source{{{3, 3}, {3, 7}}}, "xyqz"));
     WrapInFunction(mem);
 
     EXPECT_FALSE(r()->Resolve());
@@ -370,9 +368,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
     GlobalVar("my_vec", ty.vec4<f32>(), type::AddressSpace::kPrivate);
 
-    auto* ident = Expr(Source{{{3, 3}, {3, 7}}}, "rgyw");
-
-    auto* mem = MemberAccessor("my_vec", ident);
+    auto* mem = MemberAccessor("my_vec", Ident(Source{{{3, 3}, {3, 7}}}, "rgyw"));
     WrapInFunction(mem);
 
     EXPECT_FALSE(r()->Resolve());
@@ -383,8 +379,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
     GlobalVar("my_vec", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
-    auto* ident = Expr(Source{{{3, 3}, {3, 8}}}, "zzzzz");
-    auto* mem = MemberAccessor("my_vec", ident);
+    auto* mem = MemberAccessor("my_vec", Ident(Source{{{3, 3}, {3, 8}}}, "zzzzz"));
     WrapInFunction(mem);
 
     EXPECT_FALSE(r()->Resolve());
@@ -394,8 +389,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadIndex) {
     GlobalVar("my_vec", ty.vec2<f32>(), type::AddressSpace::kPrivate);
 
-    auto* ident = Expr(Source{{3, 3}}, "z");
-    auto* mem = MemberAccessor("my_vec", ident);
+    auto* mem = MemberAccessor("my_vec", Ident(Source{{3, 3}}, "z"));
     WrapInFunction(mem);
 
     EXPECT_FALSE(r()->Resolve());
@@ -406,10 +400,9 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_BadParent) {
     // var param: vec4<f32>
     // let ret: f32 = *(&param).x;
     auto* param = Var("param", ty.vec4<f32>());
-    auto* x = Expr(Source{{12, 34}}, "x");
 
     auto* addressOf_expr = AddressOf(param);
-    auto* accessor_expr = MemberAccessor(addressOf_expr, x);
+    auto* accessor_expr = MemberAccessor(addressOf_expr, Ident(Source{{12, 34}}, "x"));
     auto* star_p = Deref(accessor_expr);
     auto* ret = Var("r", ty.f32(), star_p);
     WrapInFunction(Decl(param), Decl(ret));
@@ -427,8 +420,7 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncGoodParent) {
     // }
     auto* p = Param("p", ty.pointer(ty.vec4<f32>(), type::AddressSpace::kFunction));
     auto* star_p = Deref(p);
-    auto* z = Expr("z");
-    auto* accessor_expr = MemberAccessor(star_p, z);
+    auto* accessor_expr = MemberAccessor(star_p, "z");
     auto* x = Var("x", ty.f32(), accessor_expr);
     Func("func", utils::Vector{p}, ty.f32(),
          utils::Vector{
@@ -444,8 +436,7 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncBadParent) {
     //     return x;
     // }
     auto* p = Param("p", ty.pointer(ty.vec4<f32>(), type::AddressSpace::kFunction));
-    auto* z = Expr(Source{{12, 34}}, "z");
-    auto* accessor_expr = MemberAccessor(p, z);
+    auto* accessor_expr = MemberAccessor(p, Ident(Source{{12, 34}}, "z"));
     auto* star_p = Deref(accessor_expr);
     auto* x = Var("x", ty.f32(), star_p);
     Func("func", utils::Vector{p}, ty.f32(),

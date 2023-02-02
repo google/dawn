@@ -132,14 +132,10 @@ bool TraverseExpressions(const ast::Expression* root, diag::List& diags, CALLBAC
                 return true;
             },
             [&](const CallExpression* call) {
-                // TODO(crbug.com/tint/1257): Resolver breaks if we actually include
-                // the function name in the traversal. push_single(call->func);
                 push_list(call->args, p.depth + 1);
                 return true;
             },
             [&](const MemberAccessorExpression* member) {
-                // TODO(crbug.com/tint/1257): Resolver breaks if we actually include
-                // the member name in the traversal. push_pair(member->member, p.depth + 1);
                 push_single(member->structure, p.depth + 1);
                 return true;
             },

@@ -916,14 +916,14 @@ class FunctionEmitter {
     /// index is out of range, i.e. 4 or higher.
     /// @param i index of the subcomponent
     /// @returns the identifier expression for the `i`'th component
-    const ast::IdentifierExpression* Swizzle(uint32_t i);
+    const ast::Identifier* Swizzle(uint32_t i);
 
     /// Returns an identifier expression for the swizzle name of the first
     /// `n` elements of a vector.  Emits an error and returns nullptr if `n`
     /// is out of range, i.e. 4 or higher.
     /// @param n the number of components in the swizzle
     /// @returns the swizzle identifier for the first n elements of a vector
-    const ast::IdentifierExpression* PrefixSwizzle(uint32_t n);
+    const ast::Identifier* PrefixSwizzle(uint32_t n);
 
     /// Converts SPIR-V image coordinates from an image access instruction
     /// (e.g. OpImageSampledImplicitLod) into an expression list consisting of

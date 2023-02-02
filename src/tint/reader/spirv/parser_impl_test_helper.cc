@@ -51,26 +51,32 @@ std::string ToString(const Program& program, utils::VectorRef<const ast::Stateme
 
 std::string ToString(const Program& program, const ast::Node* node) {
     writer::wgsl::GeneratorImpl writer(&program);
-    if (auto* expr = node->As<ast::Expression>()) {
-        std::stringstream out;
-        if (!writer.EmitExpression(out, expr)) {
-            return "WGSL writer error: " + writer.error();
-        }
-        return out.str();
-    } else if (auto* stmt = node->As<ast::Statement>()) {
-        if (!writer.EmitStatement(stmt)) {
-            return "WGSL writer error: " + writer.error();
-        }
-    } else if (auto* ty = node->As<ast::Type>()) {
-        std::stringstream out;
-        if (!writer.EmitType(out, ty)) {
-            return "WGSL writer error: " + writer.error();
-        }
-        return out.str();
-    } else {
-        return "<unhandled AST node type " + std::string(node->TypeInfo().name) + ">";
-    }
-    return writer.result();
+    return Switch(
+        node,
+        [&](const ast::Expression* expr) {
+            std::stringstream out;
+            if (!writer.EmitExpression(out, expr)) {
+                return "WGSL writer error: " + writer.error();
+            }
+            return out.str();
+        },
+        [&](const ast::Statement* stmt) {
+            if (!writer.EmitStatement(stmt)) {
+                return "WGSL writer error: " + writer.error();
+            }
+            return writer.result();
+        },
+        [&](const ast::Type* ty) {
+            std::stringstream out;
+            if (!writer.EmitType(out, ty)) {
+                return "WGSL writer error: " + writer.error();
+            }
+            return out.str();
+        },
+        [&](const ast::Identifier* ident) { return program.Symbols().NameFor(ident->symbol); },
+        [&](Default) {
+            return "<unhandled AST node type " + std::string(node->TypeInfo().name) + ">";
+        });
 }
 
 }  // namespace tint::reader::spirv::test

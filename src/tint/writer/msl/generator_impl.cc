@@ -2369,7 +2369,7 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
                 if (!write_lhs()) {
                     return false;
                 }
-                out << ")." << program_->Symbols().NameFor(expr->member->identifier->symbol);
+                out << ")." << program_->Symbols().NameFor(expr->member->symbol);
             }
             return true;
         },
