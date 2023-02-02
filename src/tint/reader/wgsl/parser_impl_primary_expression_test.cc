@@ -26,8 +26,8 @@ TEST_F(ParserImplTest, PrimaryExpression_Ident) {
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
-    auto* ident = e->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = e->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {

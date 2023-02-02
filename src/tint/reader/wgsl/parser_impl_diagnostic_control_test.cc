@@ -34,7 +34,7 @@ TEST_P(DiagnosticControlParserTest, DiagnosticControl_Valid) {
 
     auto* r = As<ast::IdentifierExpression>(e->rule_name);
     ASSERT_NE(r, nullptr);
-    EXPECT_EQ(p->builder().Symbols().NameFor(r->symbol), "foo");
+    EXPECT_EQ(p->builder().Symbols().NameFor(r->identifier->symbol), "foo");
 }
 INSTANTIATE_TEST_SUITE_P(DiagnosticControlParserTest,
                          DiagnosticControlParserTest,
@@ -54,7 +54,7 @@ TEST_F(ParserImplTest, DiagnosticControl_Valid_TrailingComma) {
 
     auto* r = As<ast::IdentifierExpression>(e->rule_name);
     ASSERT_NE(r, nullptr);
-    EXPECT_EQ(p->builder().Symbols().NameFor(r->symbol), "foo");
+    EXPECT_EQ(p->builder().Symbols().NameFor(r->identifier->symbol), "foo");
 }
 
 TEST_F(ParserImplTest, DiagnosticControl_MissingOpenParen) {

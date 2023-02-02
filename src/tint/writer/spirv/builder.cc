@@ -1153,7 +1153,7 @@ uint32_t Builder::GenerateIdentifierExpression(const ast::IdentifierExpression* 
             return LookupVariableID(user->Variable());
         }
     }
-    error_ = "identifier '" + builder_.Symbols().NameFor(expr->symbol) +
+    error_ = "identifier '" + builder_.Symbols().NameFor(expr->identifier->symbol) +
              "' does not resolve to a variable";
     return 0;
 }

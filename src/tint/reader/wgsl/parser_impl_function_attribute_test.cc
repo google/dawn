@@ -312,7 +312,7 @@ TEST_F(ParserImplTest, Attribute_Workgroup_WithIdent) {
     ASSERT_NE(values[1], nullptr);
     auto* y_ident = values[1]->As<ast::IdentifierExpression>();
     ASSERT_NE(y_ident, nullptr);
-    EXPECT_EQ(p->builder().Symbols().NameFor(y_ident->symbol), "height");
+    EXPECT_EQ(p->builder().Symbols().NameFor(y_ident->identifier->symbol), "height");
 
     ASSERT_EQ(values[2], nullptr);
 }

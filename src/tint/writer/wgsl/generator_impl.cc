@@ -110,7 +110,7 @@ bool GeneratorImpl::Generate() {
 bool GeneratorImpl::EmitDiagnosticControl(std::ostream& out,
                                           const ast::DiagnosticControl* diagnostic) {
     out << "diagnostic(" << diagnostic->severity << ", "
-        << program_->Symbols().NameFor(diagnostic->rule_name->symbol) << ")";
+        << program_->Symbols().NameFor(diagnostic->rule_name->identifier->symbol) << ")";
     return true;
 }
 
@@ -298,7 +298,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
 }
 
 bool GeneratorImpl::EmitIdentifier(std::ostream& out, const ast::IdentifierExpression* expr) {
-    out << program_->Symbols().NameFor(expr->symbol);
+    out << program_->Symbols().NameFor(expr->identifier->symbol);
     return true;
 }
 

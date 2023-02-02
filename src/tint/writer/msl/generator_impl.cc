@@ -2101,7 +2101,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
 }
 
 bool GeneratorImpl::EmitIdentifier(std::ostream& out, const ast::IdentifierExpression* expr) {
-    out << program_->Symbols().NameFor(expr->symbol);
+    out << program_->Symbols().NameFor(expr->identifier->symbol);
     return true;
 }
 
@@ -2369,7 +2369,7 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
                 if (!write_lhs()) {
                     return false;
                 }
-                out << ")." << program_->Symbols().NameFor(expr->member->symbol);
+                out << ")." << program_->Symbols().NameFor(expr->member->identifier->symbol);
             }
             return true;
         },

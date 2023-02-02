@@ -29,7 +29,7 @@ TEST_F(ParserImplTest, DiagnosticAttribute_Valid) {
     EXPECT_EQ(d->control->severity, ast::DiagnosticSeverity::kOff);
     auto* r = As<ast::IdentifierExpression>(d->control->rule_name);
     ASSERT_NE(r, nullptr);
-    EXPECT_EQ(p->builder().Symbols().NameFor(r->symbol), "foo");
+    EXPECT_EQ(p->builder().Symbols().NameFor(r->identifier->symbol), "foo");
 }
 
 }  // namespace

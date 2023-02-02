@@ -35,8 +35,8 @@ TEST_F(ParserImplTest, RelationalExpression_PostUnary_Parses_LessThan) {
     EXPECT_EQ(ast::BinaryOp::kLessThan, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Register("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Register("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
@@ -60,8 +60,8 @@ TEST_F(ParserImplTest, RelationalExpression_PostUnary_Parses_GreaterThan) {
     EXPECT_EQ(ast::BinaryOp::kGreaterThan, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Register("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Register("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
@@ -85,8 +85,8 @@ TEST_F(ParserImplTest, RelationalExpression_PostUnary_Parses_LessThanEqual) {
     EXPECT_EQ(ast::BinaryOp::kLessThanEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Register("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Register("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
@@ -110,8 +110,8 @@ TEST_F(ParserImplTest, RelationalExpression_PostUnary_Parses_GreaterThanEqual) {
     EXPECT_EQ(ast::BinaryOp::kGreaterThanEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Register("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Register("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
@@ -135,8 +135,8 @@ TEST_F(ParserImplTest, RelationalExpression_PostUnary_Parses_Equal) {
     EXPECT_EQ(ast::BinaryOp::kEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
@@ -160,8 +160,8 @@ TEST_F(ParserImplTest, RelationalExpression_PostUnary_Parses_NotEqual) {
     EXPECT_EQ(ast::BinaryOp::kNotEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
@@ -199,8 +199,8 @@ TEST_F(ParserImplTest, RelationalExpression_Matches) {
     EXPECT_EQ(ast::BinaryOp::kGreaterThanEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Register("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Register("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
@@ -243,8 +243,8 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_Equal) {
     EXPECT_EQ(ast::BinaryOp::kEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
@@ -268,8 +268,8 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_NotEqual) {
     EXPECT_EQ(ast::BinaryOp::kNotEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);

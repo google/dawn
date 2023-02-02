@@ -27,7 +27,7 @@ namespace {
 // Returns the string representation of an array size expression.
 std::string SizeExprToString(const Expression* size, const SymbolTable& symbols) {
     if (auto* ident = size->As<IdentifierExpression>()) {
-        return symbols.NameFor(ident->symbol);
+        return symbols.NameFor(ident->identifier->symbol);
     }
     if (auto* literal = size->As<IntLiteralExpression>()) {
         return std::to_string(literal->value);

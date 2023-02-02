@@ -30,12 +30,12 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Multiply) {
     EXPECT_EQ(ast::BinaryOp::kMultiply, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
+    ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Multiply_UnaryIndirect) {
@@ -51,16 +51,16 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Multiply_UnaryIndirect) {
     EXPECT_EQ(ast::BinaryOp::kMultiply, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::UnaryOpExpression>());
     auto* unary = rel->rhs->As<ast::UnaryOpExpression>();
     EXPECT_EQ(ast::UnaryOp::kIndirection, unary->op);
 
     ASSERT_TRUE(unary->expr->Is<ast::IdentifierExpression>());
-    ident = unary->expr->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
+    ident_expr = unary->expr->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Divide) {
@@ -76,12 +76,12 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Divide) {
     EXPECT_EQ(ast::BinaryOp::kDivide, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
+    ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Modulo) {
@@ -97,12 +97,12 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Modulo) {
     EXPECT_EQ(ast::BinaryOp::kModulo, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
+    ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Grouping) {
@@ -121,8 +121,8 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Grouping) {
     EXPECT_EQ(ast::BinaryOp::kMultiply, rel->op);
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("e"));
+    auto* ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("e"));
 
     ASSERT_TRUE(rel->lhs->Is<ast::BinaryExpression>());
     // lhs: (a * b) / c
@@ -132,8 +132,8 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Grouping) {
     EXPECT_EQ(ast::BinaryOp::kModulo, rel->op);
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("d"));
+    ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("d"));
 
     ASSERT_TRUE(rel->lhs->Is<ast::BinaryExpression>());
     // lhs: a * b
@@ -143,8 +143,8 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Grouping) {
     EXPECT_EQ(ast::BinaryOp::kDivide, rel->op);
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("c"));
+    ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("c"));
 
     ASSERT_TRUE(rel->lhs->Is<ast::BinaryExpression>());
     // lhs: a
@@ -154,12 +154,12 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Grouping) {
     EXPECT_EQ(ast::BinaryOp::kMultiply, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
+    ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, MultiplicativeExpression_InvalidRHS) {

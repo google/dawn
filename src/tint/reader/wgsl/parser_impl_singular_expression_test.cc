@@ -29,8 +29,8 @@ TEST_F(ParserImplTest, SingularExpression_Array_ConstantIndex) {
     auto* idx = e->As<ast::IndexAccessorExpression>();
 
     ASSERT_TRUE(idx->object->Is<ast::IdentifierExpression>());
-    auto* ident = idx->object->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = idx->object->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(idx->index->Is<ast::IntLiteralExpression>());
     EXPECT_EQ(idx->index->As<ast::IntLiteralExpression>()->value, 1);
@@ -50,8 +50,8 @@ TEST_F(ParserImplTest, SingularExpression_Array_ExpressionIndex) {
     auto* idx = e->As<ast::IndexAccessorExpression>();
 
     ASSERT_TRUE(idx->object->Is<ast::IdentifierExpression>());
-    auto* ident = idx->object->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = idx->object->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(idx->index->Is<ast::BinaryExpression>());
 }
@@ -164,11 +164,10 @@ TEST_F(ParserImplTest, SingularExpression_MemberAccessor) {
 
     auto* m = e->As<ast::MemberAccessorExpression>();
     ASSERT_TRUE(m->structure->Is<ast::IdentifierExpression>());
-    EXPECT_EQ(m->structure->As<ast::IdentifierExpression>()->symbol,
+    EXPECT_EQ(m->structure->As<ast::IdentifierExpression>()->identifier->symbol,
               p->builder().Symbols().Get("a"));
 
-    ASSERT_TRUE(m->member->Is<ast::IdentifierExpression>());
-    EXPECT_EQ(m->member->As<ast::IdentifierExpression>()->symbol, p->builder().Symbols().Get("b"));
+    EXPECT_EQ(m->member->identifier->symbol, p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, SingularExpression_MemberAccesssor_InvalidIdent) {
@@ -214,18 +213,18 @@ TEST_F(ParserImplTest, SingularExpression_Array_NestedIndexAccessor) {
 
     const auto* outer_object = outer_accessor->object->As<ast::IdentifierExpression>();
     ASSERT_TRUE(outer_object);
-    EXPECT_EQ(outer_object->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(outer_object->identifier->symbol, p->builder().Symbols().Get("a"));
 
     const auto* inner_accessor = outer_accessor->index->As<ast::IndexAccessorExpression>();
     ASSERT_TRUE(inner_accessor);
 
     const auto* inner_object = inner_accessor->object->As<ast::IdentifierExpression>();
     ASSERT_TRUE(inner_object);
-    EXPECT_EQ(inner_object->symbol, p->builder().Symbols().Get("b"));
+    EXPECT_EQ(inner_object->identifier->symbol, p->builder().Symbols().Get("b"));
 
     const auto* index_expr = inner_accessor->index->As<ast::IdentifierExpression>();
     ASSERT_TRUE(index_expr);
-    EXPECT_EQ(index_expr->symbol, p->builder().Symbols().Get("c"));
+    EXPECT_EQ(index_expr->identifier->symbol, p->builder().Symbols().Get("c"));
 }
 
 }  // namespace

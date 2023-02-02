@@ -1144,7 +1144,7 @@ class UniformityGraph {
 
         auto* var_user = sem_.Get(ident)->Unwrap()->As<sem::VariableUser>();
         auto* sem = var_user->Variable();
-        auto* node = CreateNode({NameFor(ident), "_ident_expr"}, ident);
+        auto* node = CreateNode({NameFor(ident->identifier), "_ident_expr"}, ident);
         return Switch(
             sem,
 
@@ -1365,7 +1365,7 @@ class UniformityGraph {
                     return std::make_pair(cf, current_function_->may_be_non_uniform);
                 } else if (auto* local = sem->Variable()->As<sem::LocalVariable>()) {
                     // Create a new value node for this variable.
-                    auto* value = CreateNode({NameFor(i), "_lvalue"});
+                    auto* value = CreateNode({NameFor(i->identifier), "_lvalue"});
                     auto* old_value = current_function_->variables.Set(local, value);
 
                     // If i is part of an expression that is a partial reference to a variable (e.g.
@@ -1769,10 +1769,10 @@ class UniformityGraph {
                 std::ostringstream ss;
                 if (auto* param = var->As<sem::Parameter>()) {
                     auto* func = param->Owner()->As<sem::Function>();
-                    ss << param_type(param) << "'" << NameFor(ident) << "' of '"
+                    ss << param_type(param) << "'" << NameFor(ident->identifier) << "' of '"
                        << NameFor(func->Declaration()) << "' may be non-uniform";
                 } else {
-                    ss << "reading from " << var_type(var) << "'" << NameFor(ident)
+                    ss << "reading from " << var_type(var) << "'" << NameFor(ident->identifier)
                        << "' may result in a non-uniform value";
                 }
                 diagnostics_.add_note(diag::System::Resolver, ss.str(), ident->source);

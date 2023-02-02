@@ -35,12 +35,12 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_Plus) {
     EXPECT_EQ(ast::BinaryOp::kAdd, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
+    ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_Parses_Minus) {
@@ -56,12 +56,12 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_Minus) {
     EXPECT_EQ(ast::BinaryOp::kSubtract, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
+    ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_Parses_MinusMinus) {
@@ -77,16 +77,16 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_MinusMinus) {
     EXPECT_EQ(ast::BinaryOp::kSubtract, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::UnaryOpExpression>());
     auto* unary = rel->rhs->As<ast::UnaryOpExpression>();
     EXPECT_EQ(ast::UnaryOp::kNegation, unary->op);
 
     ASSERT_TRUE(unary->expr->Is<ast::IdentifierExpression>());
-    ident = unary->expr->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
+    ident_expr = unary->expr->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_Parses_MultipleOps) {
@@ -105,8 +105,8 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_MultipleOps) {
     EXPECT_EQ(ast::BinaryOp::kSubtract, rel->op);
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("d"));
+    auto* ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("d"));
 
     ASSERT_TRUE(rel->lhs->Is<ast::BinaryExpression>());
     // lhs: a - b
@@ -116,8 +116,8 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_MultipleOps) {
     EXPECT_EQ(ast::BinaryOp::kAdd, rel->op);
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("c"));
+    ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("c"));
 
     ASSERT_TRUE(rel->lhs->Is<ast::BinaryExpression>());
     // lhs: a
@@ -127,12 +127,12 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_MultipleOps) {
     EXPECT_EQ(ast::BinaryOp::kSubtract, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
+    ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_Parses_MultipleOps_MixedMultiplication) {
@@ -151,8 +151,8 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_MultipleOps_MixedMultiplication
     EXPECT_EQ(ast::BinaryOp::kSubtract, rel->op);
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    auto* ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("d"));
+    auto* ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("d"));
 
     ASSERT_TRUE(rel->lhs->Is<ast::BinaryExpression>());
     // lhs: a
@@ -162,8 +162,8 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_MultipleOps_MixedMultiplication
     EXPECT_EQ(ast::BinaryOp::kSubtract, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::BinaryExpression>());
     // lhs: b
@@ -173,12 +173,12 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_MultipleOps_MixedMultiplication
     EXPECT_EQ(ast::BinaryOp::kMultiply, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
+    ident_expr = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("b"));
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
-    ident = rel->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("c"));
+    ident_expr = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("c"));
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_InvalidRHS) {

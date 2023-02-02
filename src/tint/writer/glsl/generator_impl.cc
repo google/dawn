@@ -1837,7 +1837,7 @@ bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* exp
 }
 
 bool GeneratorImpl::EmitIdentifier(std::ostream& out, const ast::IdentifierExpression* expr) {
-    out << builder_.Symbols().NameFor(expr->symbol);
+    out << builder_.Symbols().NameFor(expr->identifier->symbol);
     return true;
 }
 
@@ -2731,7 +2731,7 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
         sem,
         [&](const sem::Swizzle*) {
             // Swizzles output the name directly
-            out << builder_.Symbols().NameFor(expr->member->symbol);
+            out << builder_.Symbols().NameFor(expr->member->identifier->symbol);
             return true;
         },
         [&](const sem::StructMemberAccess* member_access) {

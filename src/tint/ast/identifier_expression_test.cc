@@ -22,16 +22,15 @@ using IdentifierExpressionTest = TestHelper;
 
 TEST_F(IdentifierExpressionTest, Creation) {
     auto* i = Expr("ident");
-    EXPECT_EQ(i->symbol, Symbol(1, ID()));
+    EXPECT_EQ(i->identifier->symbol, Symbol(1, ID()));
 }
 
 TEST_F(IdentifierExpressionTest, Creation_WithSource) {
-    auto* i = Expr(Source{Source::Location{20, 2}}, "ident");
-    EXPECT_EQ(i->symbol, Symbol(1, ID()));
+    auto* i = Expr(Source{{20, 2}}, "ident");
+    EXPECT_EQ(i->identifier->symbol, Symbol(1, ID()));
 
-    auto src = i->source;
-    EXPECT_EQ(src.range.begin.line, 20u);
-    EXPECT_EQ(src.range.begin.column, 2u);
+    EXPECT_EQ(i->source.range, (Source::Range{{20, 2}}));
+    EXPECT_EQ(i->identifier->source.range, (Source::Range{{20, 2}}));
 }
 
 TEST_F(IdentifierExpressionTest, IsIdentifier) {

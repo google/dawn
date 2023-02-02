@@ -73,7 +73,7 @@ TEST_F(WorkgroupAttributeTest, Creation_WithIdentifier) {
 
     auto* z_ident = As<ast::IdentifierExpression>(values[2]);
     ASSERT_TRUE(z_ident);
-    EXPECT_EQ(Symbols().NameFor(z_ident->symbol), "depth");
+    EXPECT_EQ(Symbols().NameFor(z_ident->identifier->symbol), "depth");
 }
 
 }  // namespace

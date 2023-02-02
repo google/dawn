@@ -354,7 +354,7 @@ class DependencyScanner {
             Switch(
                 expr,
                 [&](const ast::IdentifierExpression* ident) {
-                    AddDependency(ident, ident->symbol, "identifier", "references");
+                    AddDependency(ident, ident->identifier->symbol, "identifier", "references");
                 },
                 [&](const ast::CallExpression* call) {
                     if (call->target.name) {

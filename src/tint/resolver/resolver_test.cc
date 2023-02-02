@@ -2074,11 +2074,11 @@ TEST_F(ResolverTest, ASTNodeNotReached) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.Expr("expr");
+            b.Ident("ident");
             Resolver(&b).Resolve();
         },
-        "internal compiler error: AST node 'tint::ast::IdentifierExpression' was not reached by "
-        "the resolver");
+        "internal compiler error: AST node 'tint::ast::Identifier' was not reached by the "
+        "resolver");
 }
 
 TEST_F(ResolverTest, ASTNodeReachedTwice) {

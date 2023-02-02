@@ -171,12 +171,12 @@ TEST_F(ParserImplTest, VariableStmt_Let_ComplexExpression) {
     EXPECT_EQ(expr->op, ast::BinaryOp::kAdd);
 
     ASSERT_TRUE(expr->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = expr->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("collide"));
+    auto* ident_expr = expr->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("collide"));
 
     ASSERT_TRUE(expr->rhs->Is<ast::IdentifierExpression>());
-    ident = expr->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("collide_1"));
+    ident_expr = expr->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("collide_1"));
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let_MissingEqual) {

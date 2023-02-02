@@ -34,8 +34,8 @@ TEST_F(ParserImplTest, CoreLHS_Ident) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
 
-    auto* ident = e->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("identifier"));
+    auto* ident_expr = e->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("identifier"));
 }
 
 TEST_F(ParserImplTest, CoreLHS_ParenStmt) {
@@ -47,8 +47,8 @@ TEST_F(ParserImplTest, CoreLHS_ParenStmt) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
 
-    auto* ident = e->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = e->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 }
 
 TEST_F(ParserImplTest, CoreLHS_MissingRightParen) {

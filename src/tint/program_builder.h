@@ -1184,52 +1184,52 @@ class ProgramBuilder {
     /// @param symbol the identifier symbol
     /// @return an ast::IdentifierExpression with the given symbol
     const ast::IdentifierExpression* Expr(const Source& source, Symbol symbol) {
-        return create<ast::IdentifierExpression>(source, symbol);
+        return create<ast::IdentifierExpression>(source, Ident(source, symbol));
     }
 
     /// @param symbol the identifier symbol
     /// @return an ast::IdentifierExpression with the given symbol
     const ast::IdentifierExpression* Expr(Symbol symbol) {
-        return create<ast::IdentifierExpression>(symbol);
-    }
-
-    /// @param source the source information
-    /// @param variable the AST variable
-    /// @return an ast::IdentifierExpression with the variable's symbol
-    const ast::IdentifierExpression* Expr(const Source& source, const ast::Variable* variable) {
-        return create<ast::IdentifierExpression>(source, variable->symbol);
-    }
-
-    /// @param variable the AST variable
-    /// @return an ast::IdentifierExpression with the variable's symbol
-    const ast::IdentifierExpression* Expr(const ast::Variable* variable) {
-        return create<ast::IdentifierExpression>(variable->symbol);
+        return create<ast::IdentifierExpression>(Ident(symbol));
     }
 
     /// @param source the source information
     /// @param name the identifier name
     /// @return an ast::IdentifierExpression with the given name
     const ast::IdentifierExpression* Expr(const Source& source, const char* name) {
-        return create<ast::IdentifierExpression>(source, Symbols().Register(name));
+        return create<ast::IdentifierExpression>(source, Ident(source, name));
     }
 
     /// @param name the identifier name
     /// @return an ast::IdentifierExpression with the given name
     const ast::IdentifierExpression* Expr(const char* name) {
-        return create<ast::IdentifierExpression>(Symbols().Register(name));
+        return create<ast::IdentifierExpression>(Ident(name));
     }
 
     /// @param source the source information
     /// @param name the identifier name
     /// @return an ast::IdentifierExpression with the given name
     const ast::IdentifierExpression* Expr(const Source& source, const std::string& name) {
-        return create<ast::IdentifierExpression>(source, Symbols().Register(name));
+        return create<ast::IdentifierExpression>(source, Ident(source, name));
     }
 
     /// @param name the identifier name
     /// @return an ast::IdentifierExpression with the given name
     const ast::IdentifierExpression* Expr(const std::string& name) {
-        return create<ast::IdentifierExpression>(Symbols().Register(name));
+        return create<ast::IdentifierExpression>(Ident(name));
+    }
+
+    /// @param source the source information
+    /// @param variable the AST variable
+    /// @return an ast::IdentifierExpression with the variable's symbol
+    const ast::IdentifierExpression* Expr(const Source& source, const ast::Variable* variable) {
+        return create<ast::IdentifierExpression>(source, Ident(source, variable->symbol));
+    }
+
+    /// @param variable the AST variable
+    /// @return an ast::IdentifierExpression with the variable's symbol
+    const ast::IdentifierExpression* Expr(const ast::Variable* variable) {
+        return create<ast::IdentifierExpression>(Ident(variable->symbol));
     }
 
     /// @param source the source information

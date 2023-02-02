@@ -30,8 +30,8 @@ TEST_F(ParserImplTest, IncrementDecrementStmt_Increment) {
     ASSERT_NE(i->lhs, nullptr);
 
     ASSERT_TRUE(i->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = i->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = i->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     EXPECT_TRUE(i->increment);
 }
@@ -49,8 +49,8 @@ TEST_F(ParserImplTest, IncrementDecrementStmt_Decrement) {
     ASSERT_NE(i->lhs, nullptr);
 
     ASSERT_TRUE(i->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = i->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = i->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     EXPECT_FALSE(i->increment);
 }
@@ -68,8 +68,8 @@ TEST_F(ParserImplTest, IncrementDecrementStmt_Parenthesized) {
     ASSERT_NE(i->lhs, nullptr);
 
     ASSERT_TRUE(i->lhs->Is<ast::IdentifierExpression>());
-    auto* ident = i->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    auto* ident_expr = i->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     EXPECT_TRUE(i->increment);
 }
@@ -91,8 +91,8 @@ TEST_F(ParserImplTest, IncrementDecrementStmt_ToMember) {
     auto* mem = i->lhs->As<ast::MemberAccessorExpression>();
 
     ASSERT_TRUE(mem->member->Is<ast::IdentifierExpression>());
-    auto* ident = mem->member->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("d"));
+    auto* ident_expr = mem->member->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("d"));
 
     ASSERT_TRUE(mem->structure->Is<ast::IndexAccessorExpression>());
     auto* idx = mem->structure->As<ast::IndexAccessorExpression>();
@@ -104,19 +104,19 @@ TEST_F(ParserImplTest, IncrementDecrementStmt_ToMember) {
     ASSERT_TRUE(idx->object->Is<ast::MemberAccessorExpression>());
     mem = idx->object->As<ast::MemberAccessorExpression>();
     ASSERT_TRUE(mem->member->Is<ast::IdentifierExpression>());
-    ident = mem->member->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("c"));
+    ident_expr = mem->member->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("c"));
 
     ASSERT_TRUE(mem->structure->Is<ast::MemberAccessorExpression>());
     mem = mem->structure->As<ast::MemberAccessorExpression>();
 
     ASSERT_TRUE(mem->structure->Is<ast::IdentifierExpression>());
-    ident = mem->structure->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    ident_expr = mem->structure->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_TRUE(mem->member->Is<ast::IdentifierExpression>());
-    ident = mem->member->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
+    ident_expr = mem->member->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, IncrementDecrementStmt_InvalidLHS) {

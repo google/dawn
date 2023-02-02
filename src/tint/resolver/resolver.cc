@@ -2660,7 +2660,8 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
 }
 
 sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
-    auto symbol = expr->symbol;
+    Mark(expr->identifier);
+    auto symbol = expr->identifier->symbol;
     auto* sem_resolved = sem_.ResolvedSymbol<sem::Node>(expr);
     if (auto* variable = As<sem::Variable>(sem_resolved)) {
         auto* user = builder_->create<sem::VariableUser>(expr, current_statement_, variable);
@@ -2765,11 +2766,13 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
     // Object may be a side-effecting expression (e.g. function call).
     bool has_side_effects = object && object->HasSideEffects();
 
+    Mark(expr->member);
+    Mark(expr->member->identifier);
+
     return Switch(
         storage_ty,  //
         [&](const sem::Struct* str) -> sem::Expression* {
-            Mark(expr->member);
-            auto symbol = expr->member->symbol;
+            auto symbol = expr->member->identifier->symbol;
 
             const sem::StructMember* member = nullptr;
             for (auto* m : str->Members()) {
@@ -2802,8 +2805,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
         },
 
         [&](const type::Vector* vec) -> sem::Expression* {
-            Mark(expr->member);
-            std::string s = builder_->Symbols().NameFor(expr->member->symbol);
+            std::string s = builder_->Symbols().NameFor(expr->member->identifier->symbol);
             auto size = s.size();
             utils::Vector<uint32_t, 4> swizzle;
             swizzle.Reserve(s.size());
@@ -3059,7 +3061,9 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
 bool Resolver::DiagnosticControl(const ast::DiagnosticControl* control) {
     Mark(control->rule_name);
-    auto rule_name = builder_->Symbols().NameFor(control->rule_name->symbol);
+    Mark(control->rule_name->identifier);
+
+    auto rule_name = builder_->Symbols().NameFor(control->rule_name->identifier->symbol);
     auto rule = ast::ParseDiagnosticRule(rule_name);
     if (rule != ast::DiagnosticRule::kUndefined) {
         validator_.DiagnosticFilters().Set(rule, control->severity);
