@@ -197,13 +197,16 @@ void fn() {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_LetIndex) {
+TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_LetIndices) {
+    auto* col = IndexAccessor("lhs", "col");
+    auto* el = IndexAccessor(col, "row");
     Func("fn", utils::Empty, ty.void_(),
          utils::Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.f32())),
-             Decl(Let("index", ty.u32(), Expr(0_u))),
-             Assign(IndexAccessor(IndexAccessor("lhs", "index"), "index"), "rhs"),
+             Decl(Let("col", ty.u32(), Expr(0_u))),
+             Decl(Let("row", ty.u32(), Expr(1_u))),
+             Assign(el, "rhs"),
          });
 
     GeneratorImpl& gen = Build();
@@ -230,19 +233,23 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_LetIndex) {
 void fn() {
   float4x2 lhs = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float rhs = 0.0f;
-  const uint index = 0u;
-  set_scalar_float4x2(lhs, index, index, rhs);
+  const uint col = 0u;
+  const uint row = 1u;
+  set_scalar_float4x2(lhs, col, row, rhs);
 }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_ConstIndex) {
+TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_ConstIndices) {
+    auto* col = IndexAccessor("lhs", "col");
+    auto* el = IndexAccessor(col, "row");
     Func("fn", utils::Empty, ty.void_(),
          utils::Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.f32())),
-             Decl(Const("index", ty.u32(), Expr(0_u))),
-             Assign(IndexAccessor(IndexAccessor("lhs", "index"), "index"), "rhs"),
+             Decl(Const("col", ty.u32(), Expr(0_u))),
+             Decl(Const("row", ty.u32(), Expr(1_u))),
+             Assign(el, "rhs"),
          });
 
     GeneratorImpl& gen = Build();
@@ -252,18 +259,21 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_ConstIndex) {
               R"(void fn() {
   float4x2 lhs = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float rhs = 0.0f;
-  lhs[0u][0u] = rhs;
+  lhs[0u][1u] = rhs;
 }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_DynamicIndex) {
+TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_DynamicIndices) {
+    auto* col = IndexAccessor("lhs", "col");
+    auto* el = IndexAccessor(col, "row");
     Func("fn", utils::Empty, ty.void_(),
          utils::Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.f32())),
-             Decl(Var("index", ty.u32())),
-             Assign(IndexAccessor(IndexAccessor("lhs", "index"), "index"), "rhs"),
+             Decl(Var("col", ty.u32())),
+             Decl(Var("row", ty.u32())),
+             Assign(el, "rhs"),
          });
 
     GeneratorImpl& gen = Build();
@@ -290,8 +300,9 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_DynamicIndex) {
 void fn() {
   float4x2 lhs = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float rhs = 0.0f;
-  uint index = 0u;
-  set_scalar_float4x2(lhs, index, index, rhs);
+  uint col = 0u;
+  uint row = 0u;
+  set_scalar_float4x2(lhs, col, row, rhs);
 }
 )");
 }

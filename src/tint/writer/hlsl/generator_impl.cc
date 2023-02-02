@@ -512,8 +512,8 @@ bool GeneratorImpl::EmitDynamicMatrixVectorAssignment(const ast::AssignmentState
 
 bool GeneratorImpl::EmitDynamicMatrixScalarAssignment(const ast::AssignmentStatement* stmt,
                                                       const type::Matrix* mat) {
-    auto* lhs_col_access = stmt->lhs->As<ast::IndexAccessorExpression>();
-    auto* lhs_row_access = lhs_col_access->object->As<ast::IndexAccessorExpression>();
+    auto* lhs_row_access = stmt->lhs->As<ast::IndexAccessorExpression>();
+    auto* lhs_col_access = lhs_row_access->object->As<ast::IndexAccessorExpression>();
 
     auto name = utils::GetOrCreate(dynamic_matrix_scalar_write_, mat, [&]() -> std::string {
         std::string fn;
@@ -544,7 +544,6 @@ bool GeneratorImpl::EmitDynamicMatrixScalarAssignment(const ast::AssignmentState
             line(&helpers_) << "switch (col) {";
             {
                 ScopedIndent si2(&helpers_);
-                auto* vec = TypeOf(lhs_row_access->object)->UnwrapRef()->As<type::Vector>();
                 for (uint32_t i = 0; i < mat->columns(); ++i) {
                     line(&helpers_) << "case " << i << ":";
                     {
@@ -568,10 +567,14 @@ bool GeneratorImpl::EmitDynamicMatrixScalarAssignment(const ast::AssignmentState
                                         << " = (row.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : "
                                         << vec_name << ";";
                                     break;
-                                default:
+                                default: {
+                                    auto* vec = TypeOf(lhs_row_access->object)
+                                                    ->UnwrapRef()
+                                                    ->As<type::Vector>();
                                     TINT_UNREACHABLE(Writer, diagnostics_)
                                         << "invalid vector size " << vec->Width();
                                     break;
+                                }
                             }
                         }
                         line(&helpers_) << "break;";
@@ -591,7 +594,7 @@ bool GeneratorImpl::EmitDynamicMatrixScalarAssignment(const ast::AssignmentState
 
     auto out = line();
     out << name << "(";
-    if (!EmitExpression(out, lhs_row_access->object)) {
+    if (!EmitExpression(out, lhs_col_access->object)) {
         return false;
     }
     out << ", ";
@@ -655,9 +658,9 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
         // with at least one dynamic index
         if (auto* lhs_sub_access = lhs_access->object->As<ast::IndexAccessorExpression>()) {
             if (auto* mat = TypeOf(lhs_sub_access->object)->UnwrapRef()->As<type::Matrix>()) {
-                auto* rhs_col_idx_sem = builder_.Sem().Get(lhs_access->index);
-                auto* rhs_row_idx_sem = builder_.Sem().Get(lhs_sub_access->index);
-                if (!rhs_col_idx_sem->ConstantValue() || !rhs_row_idx_sem->ConstantValue()) {
+                auto* rhs_row_idx_sem = builder_.Sem().Get(lhs_access->index);
+                auto* rhs_col_idx_sem = builder_.Sem().Get(lhs_sub_access->index);
+                if (!rhs_row_idx_sem->ConstantValue() || !rhs_col_idx_sem->ConstantValue()) {
                     return EmitDynamicMatrixScalarAssignment(stmt, mat);
                 }
             }
