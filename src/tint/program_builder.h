@@ -54,6 +54,7 @@
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/i32.h"
 #include "src/tint/ast/id_attribute.h"
+#include "src/tint/ast/identifier.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/increment_decrement_statement.h"
 #include "src/tint/ast/index_accessor_expression.h"
@@ -1146,6 +1147,21 @@ class ProgramBuilder {
     /// @param sym the symbol
     /// @return `sym`
     Symbol Sym(Symbol sym) { return sym; }
+
+    /// @param source the source information
+    /// @param identifier the identifier symbol
+    /// @return an ast::Identifier with the given symbol
+    template <typename IDENTIFIER>
+    const ast::Identifier* Ident(const Source& source, IDENTIFIER&& identifier) {
+        return create<ast::Identifier>(source, Sym(std::forward<IDENTIFIER>(identifier)));
+    }
+
+    /// @param identifier the identifier symbol
+    /// @return an ast::Identifier with the given symbol
+    template <typename IDENTIFIER>
+    const ast::Identifier* Ident(IDENTIFIER&& identifier) {
+        return create<ast::Identifier>(Sym(std::forward<IDENTIFIER>(identifier)));
+    }
 
     /// @param expr the expression
     /// @return expr

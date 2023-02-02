@@ -156,6 +156,8 @@ list(APPEND TINT_LIB_SRCS
   ast/i32.h
   ast/id_attribute.cc
   ast/id_attribute.h
+  ast/identifier.cc
+  ast/identifier.h
   ast/identifier_expression.cc
   ast/identifier_expression.h
   ast/if_statement.cc
@@ -850,6 +852,7 @@ if(TINT_BUILD_TESTS)
     ast/group_attribute_test.cc
     ast/i32_test.cc
     ast/id_attribute_test.cc
+    ast/identifier_test.cc
     ast/identifier_expression_test.cc
     ast/if_statement_test.cc
     ast/increment_decrement_statement_test.cc
