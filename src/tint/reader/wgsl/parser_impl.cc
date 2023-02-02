@@ -3364,6 +3364,7 @@ Maybe<const ast::Statement*> ParserImpl::variable_updating_statement() {
         return add_error(peek(0).source(), "expected 'var' for variable declaration");
     }
 
+    Source source;
     const ast::Expression* lhs = nullptr;
     ast::BinaryOp compound_op = ast::BinaryOp::kNone;
     if (peek_is(Token::Type::kUnderscore)) {
@@ -3372,6 +3373,7 @@ Maybe<const ast::Statement*> ParserImpl::variable_updating_statement() {
         if (!expect("assignment", Token::Type::kEqual)) {
             return Failure::kErrored;
         }
+        source = last_source();
 
         lhs = create<ast::PhonyExpression>(t.source());
 
@@ -3388,12 +3390,13 @@ Maybe<const ast::Statement*> ParserImpl::variable_updating_statement() {
 
         // Handle increment and decrement statements.
         if (match(Token::Type::kPlusPlus)) {
-            return create<ast::IncrementDecrementStatement>(t.source(), lhs, true);
+            return create<ast::IncrementDecrementStatement>(last_source(), lhs, true);
         }
         if (match(Token::Type::kMinusMinus)) {
-            return create<ast::IncrementDecrementStatement>(t.source(), lhs, false);
+            return create<ast::IncrementDecrementStatement>(last_source(), lhs, false);
         }
 
+        source = peek().source();
         auto compound_op_result = compound_assignment_operator();
         if (compound_op_result.errored) {
             return Failure::kErrored;
@@ -3416,9 +3419,9 @@ Maybe<const ast::Statement*> ParserImpl::variable_updating_statement() {
     }
 
     if (compound_op != ast::BinaryOp::kNone) {
-        return create<ast::CompoundAssignmentStatement>(t.source(), lhs, rhs.value, compound_op);
+        return create<ast::CompoundAssignmentStatement>(source, lhs, rhs.value, compound_op);
     }
-    return create<ast::AssignmentStatement>(t.source(), lhs, rhs.value);
+    return create<ast::AssignmentStatement>(source, lhs, rhs.value);
 }
 
 // const_literal

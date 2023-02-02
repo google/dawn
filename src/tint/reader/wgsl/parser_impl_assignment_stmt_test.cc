@@ -30,6 +30,11 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
     ASSERT_NE(a->lhs, nullptr);
     ASSERT_NE(a->rhs, nullptr);
 
+    EXPECT_EQ(a->source.range.begin.line, 1u);
+    EXPECT_EQ(a->source.range.begin.column, 3u);
+    EXPECT_EQ(a->source.range.end.line, 1u);
+    EXPECT_EQ(a->source.range.end.column, 4u);
+
     ASSERT_TRUE(a->lhs->Is<ast::IdentifierExpression>());
     auto* ident = a->lhs->As<ast::IdentifierExpression>();
     EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
@@ -52,6 +57,11 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
     ASSERT_NE(a, nullptr);
     ASSERT_NE(a->lhs, nullptr);
     ASSERT_NE(a->rhs, nullptr);
+
+    EXPECT_EQ(a->source.range.begin.line, 1u);
+    EXPECT_EQ(a->source.range.begin.column, 12u);
+    EXPECT_EQ(a->source.range.end.line, 1u);
+    EXPECT_EQ(a->source.range.end.column, 13u);
 
     ASSERT_TRUE(a->rhs->Is<ast::IntLiteralExpression>());
     EXPECT_EQ(a->rhs->As<ast::IntLiteralExpression>()->value, 123);
@@ -102,6 +112,11 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToPhony) {
     ASSERT_NE(a, nullptr);
     ASSERT_NE(a->lhs, nullptr);
     ASSERT_NE(a->rhs, nullptr);
+
+    EXPECT_EQ(a->source.range.begin.line, 1u);
+    EXPECT_EQ(a->source.range.begin.column, 3u);
+    EXPECT_EQ(a->source.range.end.line, 1u);
+    EXPECT_EQ(a->source.range.end.column, 4u);
 
     ASSERT_TRUE(a->rhs->Is<ast::IntLiteralExpression>());
     EXPECT_EQ(a->rhs->As<ast::IntLiteralExpression>()->value, 123);
@@ -162,6 +177,11 @@ TEST_P(CompoundOpTest, CompoundOp) {
     ASSERT_NE(a->lhs, nullptr);
     ASSERT_NE(a->rhs, nullptr);
     EXPECT_EQ(a->op, params.op);
+
+    EXPECT_EQ(a->source.range.begin.line, 1u);
+    EXPECT_EQ(a->source.range.begin.column, 3u);
+    EXPECT_EQ(a->source.range.end.line, 1u);
+    EXPECT_EQ(a->source.range.end.column, 3u + params.str.length());
 
     ASSERT_TRUE(a->lhs->Is<ast::IdentifierExpression>());
     auto* ident = a->lhs->As<ast::IdentifierExpression>();
