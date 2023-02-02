@@ -24,6 +24,12 @@ TEST_F(ParserImplTest, CompoundStmt) {
   return 1 + b / 2;
 })");
     auto e = p->expect_compound_statement("");
+
+    EXPECT_EQ(e->source.range.begin.line, 1u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
+    EXPECT_EQ(e->source.range.end.line, 4u);
+    EXPECT_EQ(e->source.range.end.column, 2u);
+
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
     ASSERT_EQ(e->statements.Length(), 2u);
@@ -34,6 +40,12 @@ TEST_F(ParserImplTest, CompoundStmt) {
 TEST_F(ParserImplTest, CompoundStmt_Empty) {
     auto p = parser("{}");
     auto e = p->expect_compound_statement("");
+
+    EXPECT_EQ(e->source.range.begin.line, 1u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
+    EXPECT_EQ(e->source.range.end.line, 1u);
+    EXPECT_EQ(e->source.range.end.column, 3u);
+
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
     EXPECT_EQ(e->statements.Length(), 0u);

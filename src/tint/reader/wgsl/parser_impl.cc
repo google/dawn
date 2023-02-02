@@ -1679,14 +1679,16 @@ Expect<ast::BlockStatement*> ParserImpl::expect_compound_statement(std::string_v
 //   : attribute* BRACE_LEFT statement* BRACE_RIGHT
 Expect<ast::BlockStatement*> ParserImpl::expect_compound_statement(AttributeList& attrs,
                                                                    std::string_view use) {
-    return expect_brace_block(use, [&]() -> Expect<ast::BlockStatement*> {
-        auto stmts = expect_statements();
-        if (stmts.errored) {
-            return Failure::kErrored;
-        }
-        TINT_DEFER(attrs.Clear());
-        return create<ast::BlockStatement>(Source{}, stmts.value, std::move(attrs));
-    });
+    auto source_start = peek().source();
+    auto stmts =
+        expect_brace_block(use, [&]() -> Expect<StatementList> { return expect_statements(); });
+    auto source_end = last_source();
+    if (stmts.errored) {
+        return Failure::kErrored;
+    }
+    TINT_DEFER(attrs.Clear());
+    return create<ast::BlockStatement>(Source::Combine(source_start, source_end), stmts.value,
+                                       std::move(attrs));
 }
 
 // paren_expression
