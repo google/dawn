@@ -1512,8 +1512,8 @@ class UniformityGraph {
                         sem_.DiagnosticSeverity(call, ast::DiagnosticRule::kDerivativeUniformity);
                     if (severity != ast::DiagnosticSeverity::kOff) {
                         callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, severity};
-                        function_tag = ReturnValueMayBeNonUniform;
                     }
+                    function_tag = ReturnValueMayBeNonUniform;
                 } else if (builtin->IsAtomic()) {
                     callsite_tag = {CallSiteTag::CallSiteNoRestriction};
                     function_tag = ReturnValueMayBeNonUniform;

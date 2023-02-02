@@ -8132,6 +8132,40 @@ test:35:7 note: reading from read_write storage buffer 'non_uniform' may result 
 )");
 }
 
+TEST_F(UniformityAnalysisDiagnosticFilterTest, BuiltinReturnValueNotAffected) {
+    // Make sure that a diagnostic filter does not affect the uniformity of the return value of a
+    // derivative builtin.
+    std::string src = R"(
+fn foo() {
+  var x: f32;
+
+  @diagnostic(off,derivative_uniformity) {
+    x = dpdx(1.0);
+  }
+
+  if (x < 0.5) {
+    _ = dpdy(1.0); // Should trigger an error
+  }
+}
+
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:10:9 error: 'dpdy' must only be called from uniform control flow
+    _ = dpdy(1.0); // Should trigger an error
+        ^^^^
+
+test:9:3 note: control flow depends on possibly non-uniform value
+  if (x < 0.5) {
+  ^^
+
+test:6:9 note: return value of 'dpdx' may be non-uniform
+    x = dpdx(1.0);
+        ^^^^
+)");
+}
+
 TEST_F(UniformityAnalysisDiagnosticFilterTest, BarriersNotAffected) {
     // Make sure that the diagnostic filter does not affect barriers.
     std::string src = R"(
