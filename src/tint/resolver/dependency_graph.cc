@@ -39,6 +39,7 @@
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/i32.h"
 #include "src/tint/ast/id_attribute.h"
+#include "src/tint/ast/identifier.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/increment_decrement_statement.h"
 #include "src/tint/ast/internal_attribute.h"

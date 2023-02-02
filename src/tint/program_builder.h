@@ -1160,7 +1160,13 @@ class ProgramBuilder {
     /// @return an ast::Identifier with the given symbol
     template <typename IDENTIFIER>
     const ast::Identifier* Ident(IDENTIFIER&& identifier) {
-        return create<ast::Identifier>(Sym(std::forward<IDENTIFIER>(identifier)));
+        if constexpr (traits::IsTypeOrDerived<
+                          std::decay_t<std::remove_pointer_t<std::decay_t<IDENTIFIER>>>,
+                          ast::Identifier>) {
+            return identifier;  // Pass-through
+        } else {
+            return create<ast::Identifier>(Sym(std::forward<IDENTIFIER>(identifier)));
+        }
     }
 
     /// @param expr the expression
@@ -2054,7 +2060,7 @@ class ProgramBuilder {
     /// arguments of `args` converted to `ast::Expression`s using `Expr()`.
     template <typename NAME, typename... ARGS>
     const ast::CallExpression* Call(const Source& source, NAME&& func, ARGS&&... args) {
-        return create<ast::CallExpression>(source, Expr(func),
+        return create<ast::CallExpression>(source, Ident(func),
                                            ExprList(std::forward<ARGS>(args)...));
     }
 
@@ -2064,7 +2070,7 @@ class ProgramBuilder {
     /// arguments of `args` converted to `ast::Expression`s using `Expr()`.
     template <typename NAME, typename... ARGS, typename = DisableIfSource<NAME>>
     const ast::CallExpression* Call(NAME&& func, ARGS&&... args) {
-        return create<ast::CallExpression>(Expr(func), ExprList(std::forward<ARGS>(args)...));
+        return create<ast::CallExpression>(Ident(func), ExprList(std::forward<ARGS>(args)...));
     }
 
     /// @param source the source information

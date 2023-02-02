@@ -239,9 +239,7 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out, const ast::BitcastExpression*
 
 bool GeneratorImpl::EmitCall(std::ostream& out, const ast::CallExpression* expr) {
     if (expr->target.name) {
-        if (!EmitExpression(out, expr->target.name)) {
-            return false;
-        }
+        out << program_->Symbols().NameFor(expr->target.name->symbol);
     } else if (TINT_LIKELY(expr->target.type)) {
         if (!EmitType(out, expr->target.type)) {
             return false;

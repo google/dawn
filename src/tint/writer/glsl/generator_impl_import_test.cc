@@ -34,8 +34,7 @@ using GlslImportData_SingleParamTest = TestParamHelper<GlslImportData>;
 TEST_P(GlslImportData_SingleParamTest, FloatScalar) {
     auto param = GetParam();
 
-    auto* ident = Expr(param.name);
-    auto* expr = Call(ident, 1_f);
+    auto* expr = Call(param.name, 1_f);
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -91,8 +90,7 @@ using GlslImportData_SingleVectorParamTest = TestParamHelper<GlslImportData>;
 TEST_P(GlslImportData_SingleVectorParamTest, FloatVector) {
     auto param = GetParam();
 
-    auto* ident = Expr(param.name);
-    auto* expr = Call(ident, vec3<f32>(0.1_f, 0.2_f, 0.3_f));
+    auto* expr = Call(param.name, vec3<f32>(0.1_f, 0.2_f, 0.3_f));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();

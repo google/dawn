@@ -23,7 +23,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CallExpression);
 namespace tint::ast {
 
 namespace {
-CallExpression::Target ToTarget(const IdentifierExpression* name) {
+CallExpression::Target ToTarget(const Identifier* name) {
     CallExpression::Target target;
     target.name = name;
     return target;
@@ -38,7 +38,7 @@ CallExpression::Target ToTarget(const Type* type) {
 CallExpression::CallExpression(ProgramID pid,
                                NodeID nid,
                                const Source& src,
-                               const IdentifierExpression* name,
+                               const Identifier* name,
                                utils::VectorRef<const Expression*> a)
     : Base(pid, nid, src), target(ToTarget(name)), args(std::move(a)) {
     TINT_ASSERT(AST, name);

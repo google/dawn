@@ -434,14 +434,13 @@ struct MultiplanarExternalTexture::State {
                    buildTextureBuiltinBody(sem::BuiltinType::kTextureSampleBaseClampToEdge));
         }
 
-        const ast::IdentifierExpression* exp = b.Expr(texture_sample_external_sym);
-        return b.Call(exp, utils::Vector{
-                               plane_0_binding_param,
-                               b.Expr(syms.plane_1),
-                               ctx.Clone(expr->args[1]),
-                               ctx.Clone(expr->args[2]),
-                               b.Expr(syms.params),
-                           });
+        return b.Call(texture_sample_external_sym, utils::Vector{
+                                                       plane_0_binding_param,
+                                                       b.Expr(syms.plane_1),
+                                                       ctx.Clone(expr->args[1]),
+                                                       ctx.Clone(expr->args[2]),
+                                                       b.Expr(syms.params),
+                                                   });
     }
 
     /// Creates the textureLoadExternal function if needed and returns a call expression to it.

@@ -512,9 +512,6 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 return clone_maybe_hoisted(bitcast);
             },
             [&](const ast::CallExpression* call) {
-                if (call->target.name) {
-                    ctx.Replace(call->target.name, decompose(call->target.name));
-                }
                 for (auto* a : call->args) {
                     ctx.Replace(a, decompose(a));
                 }

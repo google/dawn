@@ -20,7 +20,7 @@
 // Forward declarations
 namespace tint::ast {
 class Type;
-class IdentifierExpression;
+class Identifier;
 }  // namespace tint::ast
 
 namespace tint::ast {
@@ -41,7 +41,7 @@ class CallExpression final : public Castable<CallExpression, Expression> {
     CallExpression(ProgramID pid,
                    NodeID nid,
                    const Source& source,
-                   const IdentifierExpression* name,
+                   const Identifier* name,
                    utils::VectorRef<const Expression*> args);
 
     /// Constructor
@@ -71,7 +71,7 @@ class CallExpression final : public Castable<CallExpression, Expression> {
     struct Target {
         /// name is a function or builtin to call, or type name to construct or
         /// cast-to
-        const IdentifierExpression* name = nullptr;
+        const Identifier* name = nullptr;
         /// type to construct or cast-to
         const Type* type = nullptr;
     };

@@ -23,14 +23,14 @@ namespace {
 using CallStatementTest = TestHelper;
 
 TEST_F(CallStatementTest, Creation) {
-    auto* expr = create<CallExpression>(Expr("func"), utils::Empty);
+    auto* expr = Call("func");
 
-    auto* c = create<CallStatement>(expr);
+    auto* c = CallStmt(expr);
     EXPECT_EQ(c->expr, expr);
 }
 
 TEST_F(CallStatementTest, IsCall) {
-    auto* c = create<CallStatement>(Call("f"));
+    auto* c = CallStmt(Call("f"));
     EXPECT_TRUE(c->Is<CallStatement>());
 }
 
@@ -38,7 +38,7 @@ TEST_F(CallStatementTest, Assert_Null_Call) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<CallStatement>(nullptr);
+            b.CallStmt(nullptr);
         },
         "internal compiler error");
 }
@@ -48,7 +48,7 @@ TEST_F(CallStatementTest, Assert_DifferentProgramID_Call) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<CallStatement>(b2.create<CallExpression>(b2.Expr("func"), utils::Empty));
+            b1.CallStmt(b2.Call("func"));
         },
         "internal compiler error");
 }

@@ -548,7 +548,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
             return node;
         }
         case SymbolUseKind::CallFunction: {
-            auto* node = b.Expr(source, symbol);
+            auto* node = b.Ident(source, symbol);
             statements.Push(b.CallStmt(b.Call(node)));
             return node;
         }
@@ -651,7 +651,8 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, FuncCall) {
     // fn A() { B(); }
     // fn B() {}
 
-    Func("A", utils::Empty, ty.void_(), utils::Vector{CallStmt(Call(Expr(Source{{12, 34}}, "B")))});
+    Func("A", utils::Empty, ty.void_(),
+         utils::Vector{CallStmt(Call(Ident(Source{{12, 34}}, "B")))});
     Func(Source{{56, 78}}, "B", utils::Empty, ty.void_(), utils::Vector{Return()});
 
     Build();
@@ -812,7 +813,7 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, DirectCall) {
     // fn main() { main(); }
 
     Func(Source{{12, 34}}, "main", utils::Empty, ty.void_(),
-         utils::Vector{CallStmt(Call(Expr(Source{{56, 78}}, "main")))});
+         utils::Vector{CallStmt(Call(Ident(Source{{56, 78}}, "main")))});
 
     Build(R"(12:34 error: cyclic dependency found: 'main' -> 'main'
 56:78 note: function 'main' calls function 'main' here)");
@@ -826,17 +827,17 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, IndirectCall) {
     // 5: fn b() { c(); }
 
     Func(Source{{1, 1}}, "a", utils::Empty, ty.void_(),
-         utils::Vector{CallStmt(Call(Expr(Source{{1, 10}}, "b")))});
+         utils::Vector{CallStmt(Call(Ident(Source{{1, 10}}, "b")))});
     Func(Source{{2, 1}}, "e", utils::Empty, ty.void_(), utils::Empty);
     Func(Source{{3, 1}}, "d", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call(Expr(Source{{3, 10}}, "e"))),
-             CallStmt(Call(Expr(Source{{3, 10}}, "b"))),
+             CallStmt(Call(Ident(Source{{3, 10}}, "e"))),
+             CallStmt(Call(Ident(Source{{3, 10}}, "b"))),
          });
     Func(Source{{4, 1}}, "c", utils::Empty, ty.void_(),
-         utils::Vector{CallStmt(Call(Expr(Source{{4, 10}}, "d")))});
+         utils::Vector{CallStmt(Call(Ident(Source{{4, 10}}, "d")))});
     Func(Source{{5, 1}}, "b", utils::Empty, ty.void_(),
-         utils::Vector{CallStmt(Call(Expr(Source{{5, 10}}, "c")))});
+         utils::Vector{CallStmt(Call(Ident(Source{{5, 10}}, "c")))});
 
     Build(R"(5:1 error: cyclic dependency found: 'b' -> 'c' -> 'd' -> 'b'
 5:10 note: function 'b' calls function 'c' here
@@ -1232,7 +1233,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     };
 #define V add_use(value_decl, Expr(value_sym), __LINE__, "V()")
 #define T add_use(type_decl, ty.type_name(type_sym), __LINE__, "T()")
-#define F add_use(func_decl, Expr(func_sym), __LINE__, "F()")
+#define F add_use(func_decl, Ident(func_sym), __LINE__, "F()")
 
     Alias(Sym(), T);
     Structure(Sym(),  //

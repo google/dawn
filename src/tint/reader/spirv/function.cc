@@ -1316,10 +1316,10 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     // Call the inner function.  It has no parameters.
     stmts.Push(create<ast::CallStatement>(
         source,
-        create<ast::CallExpression>(source,
-                                    create<ast::IdentifierExpression>(
-                                        source, builder_.Symbols().Register(ep_info_->inner_name)),
-                                    utils::Empty)));
+        create<ast::CallExpression>(
+            source,
+            create<ast::Identifier>(source, builder_.Symbols().Register(ep_info_->inner_name)),
+            utils::Empty)));
 
     // Pipeline outputs are mapped to the return value.
     if (ep_info_->outputs.IsEmpty()) {
@@ -3854,7 +3854,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
         params.Push(MakeOperand(inst, 0).expr);
         return {ast_type, create<ast::CallExpression>(
                               Source{},
-                              create<ast::IdentifierExpression>(
+                              create<ast::Identifier>(
                                   Source{}, builder_.Symbols().Register(unary_builtin_name)),
                               std::move(params))};
     }
@@ -4106,7 +4106,7 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
         return {};
     }
 
-    auto* func = create<ast::IdentifierExpression>(Source{}, builder_.Symbols().Register(name));
+    auto* func = create<ast::Identifier>(Source{}, builder_.Symbols().Register(name));
     ExpressionList operands;
     const Type* first_operand_type = nullptr;
     // All parameters to GLSL.std.450 extended instructions are IDs.
@@ -5212,7 +5212,7 @@ TypedExpression FunctionEmitter::MakeNumericConversion(const spvtools::opt::Inst
 bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
     // We ignore function attributes such as Inline, DontInline, Pure, Const.
     auto name = namer_.Name(inst.GetSingleWordInOperand(0));
-    auto* function = create<ast::IdentifierExpression>(Source{}, builder_.Symbols().Register(name));
+    auto* function = create<ast::Identifier>(Source{}, builder_.Symbols().Register(name));
 
     ExpressionList args;
     for (uint32_t iarg = 1; iarg < inst.NumInOperands(); ++iarg) {
@@ -5302,7 +5302,7 @@ bool FunctionEmitter::EmitControlBarrier(const spvtools::opt::Instruction& inst)
 TypedExpression FunctionEmitter::MakeBuiltinCall(const spvtools::opt::Instruction& inst) {
     const auto builtin = GetBuiltin(opcode(inst));
     auto* name = sem::str(builtin);
-    auto* ident = create<ast::IdentifierExpression>(Source{}, builder_.Symbols().Register(name));
+    auto* ident = create<ast::Identifier>(Source{}, builder_.Symbols().Register(name));
 
     ExpressionList params;
     const Type* first_operand_type = nullptr;
@@ -5341,11 +5341,10 @@ TypedExpression FunctionEmitter::MakeSimpleSelect(const spvtools::opt::Instructi
         params.Push(true_value.expr);
         // The condition goes last.
         params.Push(condition.expr);
-        return {op_ty,
-                create<ast::CallExpression>(Source{},
-                                            create<ast::IdentifierExpression>(
-                                                Source{}, builder_.Symbols().Register("select")),
-                                            std::move(params))};
+        return {op_ty, create<ast::CallExpression>(
+                           Source{},
+                           create<ast::Identifier>(Source{}, builder_.Symbols().Register("select")),
+                           std::move(params))};
     }
     return {};
 }
@@ -5650,8 +5649,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
         return false;
     }
 
-    auto* ident =
-        create<ast::IdentifierExpression>(Source{}, builder_.Symbols().Register(builtin_name));
+    auto* ident = create<ast::Identifier>(Source{}, builder_.Symbols().Register(builtin_name));
     auto* call_expr = create<ast::CallExpression>(Source{}, ident, std::move(args));
 
     if (inst.type_id() != 0) {
@@ -5741,8 +5739,8 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
             // Invoke textureDimensions.
             // If the texture is arrayed, combine with the result from
             // textureNumLayers.
-            auto* dims_ident = create<ast::IdentifierExpression>(
-                Source{}, builder_.Symbols().Register("textureDimensions"));
+            auto* dims_ident =
+                create<ast::Identifier>(Source{}, builder_.Symbols().Register("textureDimensions"));
             ExpressionList dims_args{GetImageExpression(inst)};
             if (op == spv::Op::OpImageQuerySizeLod) {
                 dims_args.Push(MakeOperand(inst, 1).expr);
@@ -5758,7 +5756,7 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
             }
             exprs.Push(dims_call);
             if (ast::IsTextureArray(dims)) {
-                auto* layers_ident = create<ast::IdentifierExpression>(
+                auto* layers_ident = create<ast::Identifier>(
                     Source{}, builder_.Symbols().Register("textureNumLayers"));
                 auto num_layers = create<ast::CallExpression>(
                     Source{}, layers_ident, utils::Vector{GetImageExpression(inst)});
@@ -5789,7 +5787,7 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
             const auto* name =
                 (op == spv::Op::OpImageQueryLevels) ? "textureNumLevels" : "textureNumSamples";
             auto* levels_ident =
-                create<ast::IdentifierExpression>(Source{}, builder_.Symbols().Register(name));
+                create<ast::Identifier>(Source{}, builder_.Symbols().Register(name));
             const ast::Expression* ast_expr = create<ast::CallExpression>(
                 Source{}, levels_ident, utils::Vector{GetImageExpression(inst)});
             auto* result_type = parser_impl_.ConvertType(inst.type_id());
