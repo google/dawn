@@ -2426,6 +2426,15 @@
             {"name": "code", "type": "char", "annotation": "const*", "length": "strlen", "tags": ["upstream"]}
         ]
     },
+    "dawn shader module SPIRV options descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shader module descriptor"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "allow non uniform derivatives", "type": "bool", "default": "false"}
+        ]
+    },
     "shader stage": {
         "category": "bitmask",
         "values": [
@@ -2619,7 +2628,8 @@
             {"value": 1005, "name": "dawn cache device descriptor", "tags": ["dawn", "native"]},
             {"value": 1006, "name": "dawn adapter properties power preference", "tags": ["dawn", "native"]},
             {"value": 1007, "name": "dawn buffer descriptor error info from wire client", "tags": ["dawn"]},
-            {"value": 1008, "name": "dawn toggles descriptor", "tags": ["dawn", "native"]}
+            {"value": 1008, "name": "dawn toggles descriptor", "tags": ["dawn", "native"]},
+            {"value": 1009, "name": "dawn shader module SPIRV options descriptor", "tags": ["dawn"]}
         ]
     },
     "texture": {
