@@ -122,7 +122,7 @@ bool Adapter::AreTimestampQueriesSupported() const {
     return true;
 }
 
-MaybeError Adapter::InitializeSupportedFeaturesImpl() {
+void Adapter::InitializeSupportedFeaturesImpl() {
     if (AreTimestampQueriesSupported()) {
         mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
         mSupportedFeatures.EnableFeature(Feature::TimestampQueryInsidePasses);
@@ -144,8 +144,6 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
             mSupportedFeatures.EnableFeature(Feature::ShaderF16);
         }
     }
-
-    return {};
 }
 
 MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {

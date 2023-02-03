@@ -298,7 +298,7 @@ class Adapter : public AdapterBase {
 
     MaybeError InitializeImpl() override { return {}; }
 
-    MaybeError InitializeSupportedFeaturesImpl() override {
+    void InitializeSupportedFeaturesImpl() override {
         // Check compressed texture format with deprecated MTLFeatureSet way.
 #if DAWN_PLATFORM_IS(MACOS)
         if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
@@ -383,8 +383,6 @@ class Adapter : public AdapterBase {
         mSupportedFeatures.EnableFeature(Feature::IndirectFirstInstance);
         mSupportedFeatures.EnableFeature(Feature::ShaderF16);
         mSupportedFeatures.EnableFeature(Feature::RG11B10UfloatRenderable);
-
-        return {};
     }
 
     void InitializeVendorArchitectureImpl() override {

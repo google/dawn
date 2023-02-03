@@ -34,7 +34,7 @@ class Adapter : public AdapterBase {
 
   private:
     MaybeError InitializeImpl() override;
-    MaybeError InitializeSupportedFeaturesImpl() override;
+    void InitializeSupportedFeaturesImpl() override;
     MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
     ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
         const DeviceDescriptor* descriptor,

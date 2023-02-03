@@ -94,7 +94,7 @@ class AdapterBase : public RefCounted {
     virtual MaybeError InitializeImpl() = 0;
 
     // Check base WebGPU features and discover supported features.
-    virtual MaybeError InitializeSupportedFeaturesImpl() = 0;
+    virtual void InitializeSupportedFeaturesImpl() = 0;
 
     // Check base WebGPU limits and populate supported limits.
     virtual MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) = 0;

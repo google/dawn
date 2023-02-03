@@ -46,7 +46,7 @@ class Adapter : public AdapterBase {
     bool AreTimestampQueriesSupported() const;
 
     MaybeError InitializeImpl() override;
-    MaybeError InitializeSupportedFeaturesImpl() override;
+    void InitializeSupportedFeaturesImpl() override;
     MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
 
     MaybeError ValidateFeatureSupportedWithTogglesImpl(

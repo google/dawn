@@ -90,7 +90,7 @@ MaybeError Adapter::InitializeImpl() {
     return {};
 }
 
-MaybeError Adapter::InitializeSupportedFeaturesImpl() {
+void Adapter::InitializeSupportedFeaturesImpl() {
     // TextureCompressionBC
     {
         // BC1, BC2 and BC3 are not supported in OpenGL or OpenGL ES core features.
@@ -145,8 +145,6 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
     if (mFunctions.IsGLExtensionSupported("GL_AMD_gpu_shader_half_float")) {
         mSupportedFeatures.EnableFeature(Feature::ShaderF16);
     }
-
-    return {};
 }
 
 MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {

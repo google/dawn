@@ -39,11 +39,8 @@ MaybeError AdapterBase::Initialize() {
     DAWN_TRY_CONTEXT(InitializeImpl(), "initializing adapter (backend=%s)", mBackend);
     InitializeVendorArchitectureImpl();
 
-    DAWN_TRY_CONTEXT(
-        InitializeSupportedFeaturesImpl(),
-        "gathering supported features for \"%s\" - \"%s\" (vendorId=%#06x deviceId=%#06x "
-        "backend=%s type=%s)",
-        mName, mDriverDescription, mVendorId, mDeviceId, mBackend, mAdapterType);
+    InitializeSupportedFeaturesImpl();
+
     DAWN_TRY_CONTEXT(
         InitializeSupportedLimitsImpl(&mLimits),
         "gathering supported limits for \"%s\" - \"%s\" (vendorId=%#06x deviceId=%#06x "
