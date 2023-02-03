@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_TRAITS_H_
 #define SRC_TINT_TRAITS_H_
 
+#include <string>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -176,6 +177,16 @@ struct IsTypeIn<T, TypeContainer<Ts...>> : std::disjunction<std::is_same<T, Ts>.
 /// types.
 template <typename T, typename TypeContainer>
 static constexpr bool IsTypeIn = detail::IsTypeIn<T, TypeContainer>::value;
+
+/// Evaluates to the decayed pointer element type, or the decayed type T if T is not a pointer.
+template <typename T>
+using PtrElTy = Decay<std::remove_pointer_t<Decay<T>>>;
+
+/// Evaluates to true if `T` decayed is a `std::string`, `std::string_view` or `const char*`
+template <typename T>
+static constexpr bool IsStringLike =
+    std::is_same_v<Decay<T>, std::string> || std::is_same_v<Decay<T>, std::string_view> ||
+    std::is_same_v<Decay<T>, const char*>;
 
 }  // namespace tint::traits
 

@@ -61,6 +61,7 @@
 #include "src/tint/ast/struct_member_offset_attribute.h"
 #include "src/tint/ast/struct_member_size_attribute.h"
 #include "src/tint/ast/switch_statement.h"
+#include "src/tint/ast/templated_identifier.h"
 #include "src/tint/ast/traverse_expressions.h"
 #include "src/tint/ast/type_name.h"
 #include "src/tint/ast/u32.h"

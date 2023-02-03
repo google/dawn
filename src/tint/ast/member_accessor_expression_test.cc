@@ -80,5 +80,15 @@ TEST_F(MemberAccessorExpressionTest, Assert_DifferentProgramID_Member) {
         "internal compiler error");
 }
 
+TEST_F(MemberAccessorExpressionTest, Assert_MemberNotTemplated) {
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.create<MemberAccessorExpression>(b.Expr("structure"),
+                                               b.Ident("member", "a", "b", "c"));
+        },
+        "internal compiler error");
+}
+
 }  // namespace
 }  // namespace tint::ast

@@ -81,6 +81,7 @@
 #include "src/tint/ast/struct_member_offset_attribute.h"
 #include "src/tint/ast/struct_member_size_attribute.h"
 #include "src/tint/ast/switch_statement.h"
+#include "src/tint/ast/templated_identifier.h"
 #include "src/tint/ast/type_name.h"
 #include "src/tint/ast/u32.h"
 #include "src/tint/ast/unary_op_expression.h"
@@ -204,9 +205,7 @@ class ProgramBuilder {
         template <typename... ARGS>
         explicit LetOptions(ARGS&&... args) {
             static constexpr bool has_init =
-                (traits::IsTypeOrDerived<std::remove_pointer_t<std::remove_reference_t<ARGS>>,
-                                         ast::Expression> ||
-                 ...);
+                (traits::IsTypeOrDerived<traits::PtrElTy<ARGS>, ast::Expression> || ...);
             static_assert(has_init, "Let() must be constructed with an initializer expression");
             (Set(std::forward<ARGS>(args)), ...);
         }
@@ -229,9 +228,7 @@ class ProgramBuilder {
         template <typename... ARGS>
         explicit ConstOptions(ARGS&&... args) {
             static constexpr bool has_init =
-                (traits::IsTypeOrDerived<std::remove_pointer_t<std::remove_reference_t<ARGS>>,
-                                         ast::Expression> ||
-                 ...);
+                (traits::IsTypeOrDerived<traits::PtrElTy<ARGS>, ast::Expression> || ...);
             static_assert(has_init, "Const() must be constructed with an initializer expression");
             (Set(std::forward<ARGS>(args)), ...);
         }
@@ -904,19 +901,23 @@ class ProgramBuilder {
 
         /// Creates a type name
         /// @param name the name
+        /// @param args the optional template arguments
         /// @returns the type name
-        template <typename NAME>
-        const ast::TypeName* type_name(NAME&& name) const {
-            return builder->create<ast::TypeName>(builder->Ident(std::forward<NAME>(name)));
+        template <typename NAME, typename... ARGS, typename _ = DisableIfSource<NAME>>
+        const ast::TypeName* type_name(NAME&& name, ARGS&&... args) const {
+            return builder->create<ast::TypeName>(
+                builder->Ident(std::forward<NAME>(name), std::forward<ARGS>(args)...));
         }
 
         /// Creates a type name
         /// @param source the Source of the node
         /// @param name the name
+        /// @param args the optional template arguments
         /// @returns the type name
-        template <typename NAME>
-        const ast::TypeName* type_name(const Source& source, NAME&& name) const {
-            return builder->create<ast::TypeName>(source, builder->Ident(std::forward<NAME>(name)));
+        template <typename NAME, typename... ARGS>
+        const ast::TypeName* type_name(const Source& source, NAME&& name, ARGS&&... args) const {
+            return builder->create<ast::TypeName>(
+                source, builder->Ident(std::forward<NAME>(name), std::forward<ARGS>(args)...));
         }
 
         /// Creates an alias type
@@ -1150,22 +1151,30 @@ class ProgramBuilder {
 
     /// @param source the source information
     /// @param identifier the identifier symbol
+    /// @param args optional templated identifier arguments
     /// @return an ast::Identifier with the given symbol
-    template <typename IDENTIFIER>
-    const ast::Identifier* Ident(const Source& source, IDENTIFIER&& identifier) {
-        return create<ast::Identifier>(source, Sym(std::forward<IDENTIFIER>(identifier)));
+    template <typename IDENTIFIER, typename... ARGS>
+    const auto* Ident(const Source& source, IDENTIFIER&& identifier, ARGS&&... args) {
+        Symbol sym = Sym(std::forward<IDENTIFIER>(identifier));
+        if constexpr (sizeof...(args) > 0) {
+            return create<ast::TemplatedIdentifier>(source, sym,
+                                                    ExprList(std::forward<ARGS>(args)...));
+        } else {
+            return create<ast::Identifier>(source, sym);
+        }
     }
 
     /// @param identifier the identifier symbol
+    /// @param args optional templated identifier arguments
     /// @return an ast::Identifier with the given symbol
-    template <typename IDENTIFIER>
-    const ast::Identifier* Ident(IDENTIFIER&& identifier) {
-        if constexpr (traits::IsTypeOrDerived<
-                          std::decay_t<std::remove_pointer_t<std::decay_t<IDENTIFIER>>>,
-                          ast::Identifier>) {
+    template <typename IDENTIFIER, typename... ARGS, typename = DisableIfSource<IDENTIFIER>>
+    const auto* Ident(IDENTIFIER&& identifier, ARGS&&... args) {
+        if constexpr (traits::IsTypeOrDerived<traits::PtrElTy<IDENTIFIER>, ast::Identifier>) {
+            static_assert(sizeof...(args) == 0);
             return identifier;  // Pass-through
         } else {
-            return create<ast::Identifier>(Sym(std::forward<IDENTIFIER>(identifier)));
+            return Ident(source_, std::forward<IDENTIFIER>(identifier),
+                         std::forward<ARGS>(args)...);
         }
     }
 
@@ -1230,6 +1239,16 @@ class ProgramBuilder {
     /// @return an ast::IdentifierExpression with the variable's symbol
     const ast::IdentifierExpression* Expr(const ast::Variable* variable) {
         return create<ast::IdentifierExpression>(Ident(variable->symbol));
+    }
+
+    /// @param ident the identifier
+    /// @return an ast::IdentifierExpression with the given identifier
+    template <typename IDENTIFIER, typename = traits::EnableIfIsType<IDENTIFIER, ast::Identifier>>
+    const ast::IdentifierExpression* Expr(const IDENTIFIER* ident) {
+        static_assert(!traits::IsType<IDENTIFIER, ast::TemplatedIdentifier>,
+                      "it is currently invalid for a templated identifier expression to be used as "
+                      "an identifier expression, as this should parse as an ast::TypeName");
+        return create<ast::IdentifierExpression>(ident);
     }
 
     /// @param source the source information
@@ -2347,43 +2366,46 @@ class ProgramBuilder {
     }
 
     /// @param source the source information
-    /// @param obj the object for the index accessor expression
-    /// @param idx the index argument for the index accessor expression
-    /// @returns a `ast::IndexAccessorExpression` that indexes `arr` with `idx`
-    template <typename OBJ, typename IDX>
-    const ast::IndexAccessorExpression* IndexAccessor(const Source& source, OBJ&& obj, IDX&& idx) {
-        return create<ast::IndexAccessorExpression>(source, Expr(std::forward<OBJ>(obj)),
-                                                    Expr(std::forward<IDX>(idx)));
+    /// @param object the object for the index accessor expression
+    /// @param index the index argument for the index accessor expression
+    /// @returns a `ast::IndexAccessorExpression` that indexes @p object with @p index
+    template <typename OBJECT, typename INDEX>
+    const ast::IndexAccessorExpression* IndexAccessor(const Source& source,
+                                                      OBJECT&& object,
+                                                      INDEX&& index) {
+        return create<ast::IndexAccessorExpression>(source, Expr(std::forward<OBJECT>(object)),
+                                                    Expr(std::forward<INDEX>(index)));
     }
 
-    /// @param obj the object for the index accessor expression
-    /// @param idx the index argument for the index accessor expression
-    /// @returns a `ast::IndexAccessorExpression` that indexes `arr` with `idx`
-    template <typename OBJ, typename IDX>
-    const ast::IndexAccessorExpression* IndexAccessor(OBJ&& obj, IDX&& idx) {
-        return create<ast::IndexAccessorExpression>(Expr(std::forward<OBJ>(obj)),
-                                                    Expr(std::forward<IDX>(idx)));
+    /// @param object the object for the index accessor expression
+    /// @param index the index argument for the index accessor expression
+    /// @returns a `ast::IndexAccessorExpression` that indexes @p object with @p index
+    template <typename OBJECT, typename INDEX>
+    const ast::IndexAccessorExpression* IndexAccessor(OBJECT&& object, INDEX&& index) {
+        return create<ast::IndexAccessorExpression>(Expr(std::forward<OBJECT>(object)),
+                                                    Expr(std::forward<INDEX>(index)));
     }
 
     /// @param source the source information
-    /// @param obj the object for the member accessor expression
-    /// @param idx the index argument for the member accessor expression
-    /// @returns a `ast::MemberAccessorExpression` that indexes `obj` with `idx`
-    template <typename OBJ, typename IDX>
+    /// @param object the object for the member accessor expression
+    /// @param member the member argument for the member accessor expression
+    /// @returns a `ast::MemberAccessorExpression` that indexes @p object with @p member
+    template <typename OBJECT, typename MEMBER>
     const ast::MemberAccessorExpression* MemberAccessor(const Source& source,
-                                                        OBJ&& obj,
-                                                        IDX&& idx) {
-        return create<ast::MemberAccessorExpression>(source, Expr(std::forward<OBJ>(obj)),
-                                                     Ident(std::forward<IDX>(idx)));
+                                                        OBJECT&& object,
+                                                        MEMBER&& member) {
+        static_assert(!traits::IsType<traits::PtrElTy<MEMBER>, ast::TemplatedIdentifier>,
+                      "it is currently invalid for a structure to hold a templated member");
+        return create<ast::MemberAccessorExpression>(source, Expr(std::forward<OBJECT>(object)),
+                                                     Ident(std::forward<MEMBER>(member)));
     }
 
-    /// @param obj the object for the member accessor expression
-    /// @param idx the index argument for the member accessor expression
-    /// @returns a `ast::MemberAccessorExpression` that indexes `obj` with `idx`
-    template <typename OBJ, typename IDX>
-    const ast::MemberAccessorExpression* MemberAccessor(OBJ&& obj, IDX&& idx) {
-        return create<ast::MemberAccessorExpression>(Expr(std::forward<OBJ>(obj)),
-                                                     Ident(std::forward<IDX>(idx)));
+    /// @param object the object for the member accessor expression
+    /// @param member the member argument for the member accessor expression
+    /// @returns a `ast::MemberAccessorExpression` that indexes @p object with @p member
+    template <typename OBJECT, typename MEMBER>
+    const ast::MemberAccessorExpression* MemberAccessor(OBJECT&& object, MEMBER&& member) {
+        return MemberAccessor(source_, std::forward<OBJECT>(object), std::forward<MEMBER>(member));
     }
 
     /// Creates a ast::StructMemberOffsetAttribute
@@ -3284,6 +3306,8 @@ class ProgramBuilder {
     const ast::DiagnosticAttribute* DiagnosticAttribute(const Source& source,
                                                         ast::DiagnosticSeverity severity,
                                                         NAME&& rule_name) {
+        static_assert(!traits::IsType<traits::PtrElTy<NAME>, ast::TemplatedIdentifier>,
+                      "it is invalid for a diagnostic rule name to be templated");
         return create<ast::DiagnosticAttribute>(
             source, DiagnosticControl(source, severity, std::forward<NAME>(rule_name)));
     }

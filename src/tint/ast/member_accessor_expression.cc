@@ -30,6 +30,11 @@ MemberAccessorExpression::MemberAccessorExpression(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, structure, program_id);
     TINT_ASSERT(AST, member);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, member, program_id);
+
+    // It is currently invalid for a structure to hold a templated member
+    if (member) {
+        TINT_ASSERT(AST, !member->Is<TemplatedIdentifier>());
+    }
 }
 
 MemberAccessorExpression::MemberAccessorExpression(MemberAccessorExpression&&) = default;

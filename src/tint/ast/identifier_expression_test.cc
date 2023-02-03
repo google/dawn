@@ -57,5 +57,14 @@ TEST_F(IdentifierExpressionTest, Assert_DifferentProgramID_Symbol) {
         "internal compiler error");
 }
 
+TEST_F(IdentifierExpressionTest, Assert_IdentifierNotTemplated) {
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.create<IdentifierExpression>(b.Ident("ident", "a", "b", "c"));
+        },
+        "internal compiler error");
+}
+
 }  // namespace
 }  // namespace tint::ast

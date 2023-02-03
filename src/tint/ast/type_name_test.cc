@@ -28,6 +28,17 @@ TEST_F(TypeNameTest, Creation_NonTemplated) {
     EXPECT_EQ(t->name->symbol, Symbols().Get("ty"));
 }
 
+TEST_F(TypeNameTest, Creation_Templated) {
+    auto* t = ty.type_name("ty", 1_a, 2._a, false);
+    auto* name = As<ast::TemplatedIdentifier>(t->name);
+    ASSERT_NE(name, nullptr);
+    EXPECT_EQ(name->symbol, Symbols().Get("ty"));
+    ASSERT_EQ(name->arguments.Length(), 3u);
+    EXPECT_TRUE(name->arguments[0]->Is<ast::IntLiteralExpression>());
+    EXPECT_TRUE(name->arguments[1]->Is<ast::FloatLiteralExpression>());
+    EXPECT_TRUE(name->arguments[2]->Is<ast::BoolLiteralExpression>());
+}
+
 TEST_F(TypeNameTest, Creation_WithSource) {
     auto* t = ty.type_name(Source{{20, 2}}, "ty");
     ASSERT_NE(t->name, nullptr);

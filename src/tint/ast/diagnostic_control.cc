@@ -30,6 +30,19 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticControl);
 
 namespace tint::ast {
 
+DiagnosticControl::DiagnosticControl(ProgramID pid,
+                                     NodeID nid,
+                                     const Source& src,
+                                     DiagnosticSeverity sev,
+                                     const Identifier* rule)
+    : Base(pid, nid, src), severity(sev), rule_name(rule) {
+    TINT_ASSERT(AST, rule != nullptr);
+    if (rule) {
+        // It is invalid for a diagnostic rule name to be templated
+        TINT_ASSERT(AST, !rule->Is<TemplatedIdentifier>());
+    }
+}
+
 DiagnosticControl::~DiagnosticControl() = default;
 
 const DiagnosticControl* DiagnosticControl::Clone(CloneContext* ctx) const {

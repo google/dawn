@@ -227,6 +227,8 @@ list(APPEND TINT_LIB_SRCS
   ast/struct.h
   ast/switch_statement.cc
   ast/switch_statement.h
+  ast/templated_identifier.cc
+  ast/templated_identifier.h
   ast/texture.cc
   ast/texture.h
   ast/traverse_expressions.h
@@ -880,6 +882,7 @@ if(TINT_BUILD_TESTS)
     ast/struct_test.cc
     ast/switch_statement_test.cc
     ast/test_helper.h
+    ast/templated_identifier_test.cc
     ast/texture_test.cc
     ast/traverse_expressions_test.cc
     ast/type_name_test.cc

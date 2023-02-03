@@ -19,6 +19,25 @@
 namespace tint::traits {
 
 namespace {
+
+static_assert(std::is_same_v<PtrElTy<int*>, int>);
+static_assert(std::is_same_v<PtrElTy<int const*>, int>);
+static_assert(std::is_same_v<PtrElTy<int const* const>, int>);
+static_assert(std::is_same_v<PtrElTy<int const* const volatile>, int>);
+static_assert(std::is_same_v<PtrElTy<int>, int>);
+static_assert(std::is_same_v<PtrElTy<int const>, int>);
+static_assert(std::is_same_v<PtrElTy<int const volatile>, int>);
+
+static_assert(IsStringLike<std::string>);
+static_assert(IsStringLike<std::string_view>);
+static_assert(IsStringLike<const char*>);
+static_assert(IsStringLike<const std::string&>);
+static_assert(IsStringLike<const std::string_view&>);
+static_assert(IsStringLike<const char*>);
+static_assert(!IsStringLike<bool>);
+static_assert(!IsStringLike<int>);
+static_assert(!IsStringLike<const char**>);
+
 struct S {};
 void F1(S) {}
 void F3(int, S, float) {}

@@ -22,6 +22,7 @@
 
 #include <string>
 
+#include "gtest/gtest-spi.h"
 #include "src/tint/ast/diagnostic_control.h"
 #include "src/tint/ast/test_helper.h"
 
@@ -42,6 +43,16 @@ TEST_F(DiagnosticControlTest, Creation) {
     EXPECT_EQ(control->source.range.end.column, 5u);
     EXPECT_EQ(control->severity, DiagnosticSeverity::kWarning);
     EXPECT_EQ(control->rule_name, name);
+}
+
+TEST_F(DiagnosticControlTest, Assert_RuleNotTemplated) {
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.create<ast::DiagnosticControl>(DiagnosticSeverity::kWarning,
+                                             b.Ident("name", "a", "b", "c"));
+        },
+        "internal compiler error");
 }
 
 namespace diagnostic_severity_tests {

@@ -103,8 +103,7 @@ class DiagnosticControl : public Castable<DiagnosticControl, Node> {
                       NodeID nid,
                       const Source& src,
                       DiagnosticSeverity sev,
-                      const Identifier* rule)
-        : Base(pid, nid, src), severity(sev), rule_name(rule) {}
+                      const Identifier* rule);
 
     ~DiagnosticControl() override;
 
