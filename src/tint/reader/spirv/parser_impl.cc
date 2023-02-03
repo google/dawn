@@ -1953,11 +1953,20 @@ TypedExpression ParserImpl::MakeConstantExpressionForScalarSpirvConstant(
     // See https://bugs.chromium.org/p/tint/issues/detail?id=34
     return Switch(
         ast_type,
-        [&](const I32*) {
-            return TypedExpression{ty_.I32(),
-                                   create<ast::IntLiteralExpression>(
-                                       source, static_cast<int64_t>(spirv_const->GetS32()),
-                                       ast::IntLiteralExpression::Suffix::kI)};
+        [&](const I32*) -> TypedExpression {
+            const auto value = spirv_const->GetS32();
+            if (value == std::numeric_limits<int32_t>::min()) {
+                // Avoid overflowing i-suffixed literal.
+                return {ty_.I32(),
+                        builder_.Construct(
+                            source, builder_.ty.i32(),
+                            create<ast::IntLiteralExpression>(
+                                source, value, ast::IntLiteralExpression::Suffix::kNone))};
+            } else {
+                return {ty_.I32(),
+                        create<ast::IntLiteralExpression>(source, static_cast<int64_t>(value),
+                                                          ast::IntLiteralExpression::Suffix::kI)};
+            }
         },
         [&](const U32*) {
             return TypedExpression{ty_.U32(),

@@ -1065,6 +1065,7 @@ if(TINT_BUILD_TESTS)
       reader/spirv/function_var_test.cc
       reader/spirv/namer_test.cc
       reader/spirv/parser_impl_barrier_test.cc
+      reader/spirv/parser_impl_constant_test.cc
       reader/spirv/parser_impl_convert_member_decoration_test.cc
       reader/spirv/parser_impl_convert_type_test.cc
       reader/spirv/parser_impl_function_decl_test.cc
