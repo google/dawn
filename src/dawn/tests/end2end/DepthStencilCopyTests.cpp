@@ -928,6 +928,10 @@ TEST_P(DepthStencilCopyTests_RegressionDawn1083, Run) {
     // TODO(crbug.com/dawn/1648): Diagnose failure on NVIDIA GLES.
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsNvidia());
 
+    // TODO(crbug.com/dawn/1651): Failing on Mac AMD.
+    DAWN_SUPPRESS_TEST_IF(IsAMD() && IsMetal() &&
+                          GetParam().mTextureFormat == wgpu::TextureFormat::Depth32FloatStencil8);
+
     uint32_t mipLevelCount = 3;
     uint32_t arrayLayerCount = 3;
     wgpu::TextureDescriptor texDesc = {};
