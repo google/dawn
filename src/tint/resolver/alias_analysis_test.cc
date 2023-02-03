@@ -724,8 +724,8 @@ TEST_F(ResolverAliasAnalysisTest, NoAccess_MemberAccessor) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
     Func("f2",
          utils::Vector{
-             Param("p1", ty.pointer(ty.type_name("S"), type::AddressSpace::kFunction)),
-             Param("p2", ty.pointer(ty.type_name("S"), type::AddressSpace::kFunction)),
+             Param("p1", ty.pointer(ty("S"), type::AddressSpace::kFunction)),
+             Param("p2", ty.pointer(ty("S"), type::AddressSpace::kFunction)),
          },
          ty.void_(),
          utils::Vector{
@@ -734,7 +734,7 @@ TEST_F(ResolverAliasAnalysisTest, NoAccess_MemberAccessor) {
          });
     Func("f1", utils::Empty, ty.void_(),
          utils::Vector{
-             Decl(Var("v", ty.type_name("S"))),
+             Decl(Var("v", ty("S"))),
              CallStmt(Call("f2", AddressOf("v"), AddressOf("v"))),
          });
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -753,17 +753,17 @@ TEST_F(ResolverAliasAnalysisTest, Read_MemberAccessor) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
     Func("f2",
          utils::Vector{
-             Param("p1", ty.pointer(ty.type_name("S"), type::AddressSpace::kFunction)),
-             Param("p2", ty.pointer(ty.type_name("S"), type::AddressSpace::kFunction)),
+             Param("p1", ty.pointer(ty("S"), type::AddressSpace::kFunction)),
+             Param("p2", ty.pointer(ty("S"), type::AddressSpace::kFunction)),
          },
          ty.void_(),
          utils::Vector{
              Assign(Phony(), MemberAccessor(Deref("p2"), "a")),
-             Assign(Deref("p1"), Construct(ty.type_name("S"))),
+             Assign(Deref("p1"), Construct(ty("S"))),
          });
     Func("f1", utils::Empty, ty.void_(),
          utils::Vector{
-             Decl(Var("v", ty.type_name("S"))),
+             Decl(Var("v", ty("S"))),
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
          });
@@ -785,8 +785,8 @@ TEST_F(ResolverAliasAnalysisTest, Write_MemberAccessor) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
     Func("f2",
          utils::Vector{
-             Param("p1", ty.pointer(ty.type_name("S"), type::AddressSpace::kFunction)),
-             Param("p2", ty.pointer(ty.type_name("S"), type::AddressSpace::kFunction)),
+             Param("p1", ty.pointer(ty("S"), type::AddressSpace::kFunction)),
+             Param("p2", ty.pointer(ty("S"), type::AddressSpace::kFunction)),
          },
          ty.void_(),
          utils::Vector{
@@ -795,7 +795,7 @@ TEST_F(ResolverAliasAnalysisTest, Write_MemberAccessor) {
          });
     Func("f1", utils::Empty, ty.void_(),
          utils::Vector{
-             Decl(Var("v", ty.type_name("S"))),
+             Decl(Var("v", ty("S"))),
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
          });

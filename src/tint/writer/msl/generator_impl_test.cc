@@ -262,9 +262,9 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrixInStruct) {
                         Member("m2", ty.mat4x4<f32>()),
                     });
     Structure("S2", utils::Vector{
-                        Member("s", ty.type_name("S1")),
+                        Member("s", ty("S1")),
                     });
-    GlobalVar("s", ty.type_name("S2"), type::AddressSpace::kWorkgroup);
+    GlobalVar("s", ty("S2"), type::AddressSpace::kWorkgroup);
     Func("comp_main", utils::Empty, ty.void_(), utils::Vector{Decl(Let("x", Expr("s")))},
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),

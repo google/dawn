@@ -405,7 +405,7 @@ struct Std140::State {
             ty,  //
             [&](const sem::Struct* str) -> const ast::Type* {
                 if (auto std140 = std140_structs.Find(str)) {
-                    return b.ty.type_name(*std140);
+                    return b.ty(*std140);
                 }
                 return nullptr;
             },
@@ -423,7 +423,7 @@ struct Std140::State {
                             utils::Transform(members, [&](auto* member) { return member->symbol; }),
                         };
                     });
-                    return b.ty.type_name(std140_mat.name);
+                    return b.ty(std140_mat.name);
                 }
                 return nullptr;
             },

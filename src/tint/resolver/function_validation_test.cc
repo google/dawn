@@ -963,7 +963,7 @@ TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_StructOfAtomic) {
     Structure("S", utils::Vector{
                        Member("m", ty.atomic(ty.i32())),
                    });
-    auto* ret_type = ty.type_name(Source{{12, 34}}, "S");
+    auto* ret_type = ty(Source{{12, 34}}, "S");
     Func("f", utils::Empty, ret_type, utils::Empty);
 
     EXPECT_FALSE(r()->Resolve());
@@ -982,7 +982,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterStoreType_NonAtomicFree) {
     Structure("S", utils::Vector{
                        Member("m", ty.atomic(ty.i32())),
                    });
-    auto* ret_type = ty.type_name(Source{{12, 34}}, "S");
+    auto* ret_type = ty(Source{{12, 34}}, "S");
     auto* bar = Param("bar", ret_type);
     Func("f", utils::Vector{bar}, ty.void_(), utils::Empty);
 
@@ -994,7 +994,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterSotreType_AtomicFree) {
     Structure("S", utils::Vector{
                        Member("m", ty.i32()),
                    });
-    auto* ret_type = ty.type_name(Source{{12, 34}}, "S");
+    auto* ret_type = ty(Source{{12, 34}}, "S");
     auto* bar = Param(Source{{12, 34}}, "bar", ret_type);
     Func("f", utils::Vector{bar}, ty.void_(), utils::Empty);
 

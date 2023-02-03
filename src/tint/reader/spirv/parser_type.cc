@@ -271,7 +271,7 @@ Alias::Alias(Symbol n, const Type* ty) : Base(n), type(ty) {}
 Alias::Alias(const Alias&) = default;
 
 const ast::Type* Alias::Build(ProgramBuilder& b) const {
-    return b.ty.type_name(name);
+    return b.ty(name);
 }
 
 Struct::Struct(Symbol n, TypeList m) : Base(n), members(std::move(m)) {}
@@ -279,7 +279,7 @@ Struct::Struct(const Struct&) = default;
 Struct::~Struct() = default;
 
 const ast::Type* Struct::Build(ProgramBuilder& b) const {
-    return b.ty.type_name(name);
+    return b.ty(name);
 }
 
 /// The PIMPL state of the Types object.

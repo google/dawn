@@ -459,7 +459,7 @@ struct CanonicalizeEntryPointIO::State {
         ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast, in_struct);
 
         // Create a new function parameter using this struct type.
-        auto* param = ctx.dst->Param(InputStructSymbol(), ctx.dst->ty.type_name(struct_name));
+        auto* param = ctx.dst->Param(InputStructSymbol(), ctx.dst->ty(struct_name));
         wrapper_ep_parameters.Push(param);
     }
 
@@ -503,7 +503,7 @@ struct CanonicalizeEntryPointIO::State {
         ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast, out_struct);
 
         // Create the output struct object, assign its members, and return it.
-        auto* result_object = ctx.dst->Var(wrapper_result, ctx.dst->ty.type_name(out_struct->name));
+        auto* result_object = ctx.dst->Var(wrapper_result, ctx.dst->ty(out_struct->name));
         wrapper_body.Push(ctx.dst->Decl(result_object));
         for (auto* assignment : assignments) {
             wrapper_body.Push(assignment);
@@ -633,9 +633,7 @@ struct CanonicalizeEntryPointIO::State {
                 CreateGlobalOutputVariables();
             } else {
                 auto* output_struct = CreateOutputStruct();
-                wrapper_ret_type = [&, output_struct] {
-                    return ctx.dst->ty.type_name(output_struct->name);
-                };
+                wrapper_ret_type = [&, output_struct] { return ctx.dst->ty(output_struct->name); };
             }
         }
 

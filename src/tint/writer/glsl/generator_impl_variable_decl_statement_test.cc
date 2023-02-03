@@ -411,7 +411,7 @@ void f() {
 
 TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const_arr_struct_zero) {
     Structure("S", utils::Vector{Member("a", ty.i32()), Member("b", ty.f32())});
-    auto* C = Const("C", Construct(ty.array(ty.type_name("S"), 2_i)));
+    auto* C = Const("C", Construct(ty.array(ty("S"), 2_i)));
     Func("f", utils::Empty, ty.void_(),
          utils::Vector{
              Decl(C),

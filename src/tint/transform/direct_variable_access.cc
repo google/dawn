@@ -1075,7 +1075,7 @@ struct DirectVariableAccess::State {
             b.Alias(symbol, b.ty.array(b.ty.u32(), u32(num_dyn_indices)));
             return symbol;
         });
-        return name.IsValid() ? b.ty.type_name(name) : nullptr;
+        return name.IsValid() ? b.ty(name) : nullptr;
     }
 
     /// @returns a name describing the given shape

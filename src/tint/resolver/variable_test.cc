@@ -902,7 +902,7 @@ TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
     auto* c_vu32 = Const("e", ty.vec3<u32>(), vec3<u32>());
     auto* c_vf32 = Const("f", ty.vec3<f32>(), vec3<f32>());
     auto* c_mf32 = Const("g", ty.mat3x3<f32>(), mat3x3<f32>());
-    auto* c_s = Const("h", ty.type_name("S"), Construct(ty.type_name("S")));
+    auto* c_s = Const("h", ty("S"), Construct(ty("S")));
 
     WrapInFunction(c_i32, c_u32, c_f32, c_vi32, c_vu32, c_vf32, c_mf32, c_s);
 
@@ -954,7 +954,7 @@ TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
                                          Construct(ty.vec(nullptr, 3), Expr(0._a)),
                                          Construct(ty.vec(nullptr, 3), Expr(0._a)),
                                          Construct(ty.vec(nullptr, 3), Expr(0._a))));
-    auto* c_s = Const("m", Construct(ty.type_name("S")));
+    auto* c_s = Const("m", Construct(ty("S")));
 
     WrapInFunction(c_i32, c_u32, c_f32, c_ai, c_af, c_vi32, c_vu32, c_vf32, c_vai, c_vaf, c_mf32,
                    c_maf32, c_s);
@@ -1265,7 +1265,7 @@ TEST_F(ResolverVariableTest, Param_ShadowsAlias) {
     // }
 
     auto* a = Alias("a", ty.i32());
-    auto* p = Param("a", ty.type_name("a"));
+    auto* p = Param("a", ty("a"));
     Func("F", utils::Vector{p}, ty.void_(), utils::Empty);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

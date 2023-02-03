@@ -148,7 +148,7 @@ TEST_P(ResolverBitcastValidationTestInvalidDstTy, Test) {
 
     // Use an alias so we can put a Source on the bitcast type
     Alias("T", dst.ast(*this));
-    WrapInFunction(Bitcast(ty.type_name(Source{{12, 34}}, "T"), src.expr(*this, 0)));
+    WrapInFunction(Bitcast(ty(Source{{12, 34}}, "T"), src.expr(*this, 0)));
 
     auto expected =
         "12:34 error: cannot bitcast to '" + dst.sem(*this)->FriendlyName(Symbols()) + "'";

@@ -1213,7 +1213,7 @@ Maybe<const ast::Type*> ParserImpl::type_specifier() {
     auto& t = peek();
     Source source;
     if (match(Token::Type::kIdentifier, &source)) {
-        return builder_.ty.type_name(source, t.to_str());
+        return builder_.ty(source, t.to_str());
     }
 
     return type_specifier_without_ident();

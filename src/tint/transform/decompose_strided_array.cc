@@ -87,7 +87,7 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
                     return name;
                 });
                 auto* count = ctx.Clone(ast->count);
-                return b.ty.array(b.ty.type_name(el_ty), count);
+                return b.ty.array(b.ty(el_ty), count);
             }
             if (ast::GetAttribute<ast::StrideAttribute>(ast->attributes)) {
                 // Strip the @stride attribute

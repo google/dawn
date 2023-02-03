@@ -23,13 +23,13 @@ using namespace tint::number_suffixes;  // NOLINT
 using TypeNameTest = TestHelper;
 
 TEST_F(TypeNameTest, Creation_NonTemplated) {
-    auto* t = ty.type_name("ty");
+    auto* t = ty("ty");
     ASSERT_NE(t->name, nullptr);
     EXPECT_EQ(t->name->symbol, Symbols().Get("ty"));
 }
 
 TEST_F(TypeNameTest, Creation_Templated) {
-    auto* t = ty.type_name("ty", 1_a, 2._a, false);
+    auto* t = ty("ty", 1_a, 2._a, false);
     auto* name = As<ast::TemplatedIdentifier>(t->name);
     ASSERT_NE(name, nullptr);
     EXPECT_EQ(name->symbol, Symbols().Get("ty"));
@@ -40,7 +40,7 @@ TEST_F(TypeNameTest, Creation_Templated) {
 }
 
 TEST_F(TypeNameTest, Creation_WithSource) {
-    auto* t = ty.type_name(Source{{20, 2}}, "ty");
+    auto* t = ty(Source{{20, 2}}, "ty");
     ASSERT_NE(t->name, nullptr);
     EXPECT_EQ(t->name->symbol, Symbols().Get("ty"));
 
@@ -53,7 +53,7 @@ TEST_F(TypeNameTest, Assert_InvalidSymbol) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.ty.type_name("");
+            b.ty("");
         },
         "internal compiler error");
 }
@@ -63,7 +63,7 @@ TEST_F(TypeNameTest, Assert_DifferentProgramID_Symbol) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.ty.type_name(b2.Sym("b2"));
+            b1.ty(b2.Sym("b2"));
         },
         "internal compiler error");
 }

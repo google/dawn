@@ -468,12 +468,12 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
     auto& b = *builder;
     switch (kind) {
         case SymbolUseKind::GlobalVarType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             b.GlobalVar(b.Sym(), node, type::AddressSpace::kPrivate);
             return node;
         }
         case SymbolUseKind::GlobalVarArrayElemType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             b.GlobalVar(b.Sym(), b.ty.array(node, 4_i), type::AddressSpace::kPrivate);
             return node;
         }
@@ -483,22 +483,22 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
             return node;
         }
         case SymbolUseKind::GlobalVarVectorElemType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             b.GlobalVar(b.Sym(), b.ty.vec3(node), type::AddressSpace::kPrivate);
             return node;
         }
         case SymbolUseKind::GlobalVarMatrixElemType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             b.GlobalVar(b.Sym(), b.ty.mat3x4(node), type::AddressSpace::kPrivate);
             return node;
         }
         case SymbolUseKind::GlobalVarSampledTexElemType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             b.GlobalVar(b.Sym(), b.ty.sampled_texture(type::TextureDimension::k2d, node));
             return node;
         }
         case SymbolUseKind::GlobalVarMultisampledTexElemType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             b.GlobalVar(b.Sym(), b.ty.multisampled_texture(type::TextureDimension::k2d, node));
             return node;
         }
@@ -508,12 +508,12 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
             return node;
         }
         case SymbolUseKind::GlobalConstType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             b.GlobalConst(b.Sym(), node, b.Expr(1_i));
             return node;
         }
         case SymbolUseKind::GlobalConstArrayElemType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             b.GlobalConst(b.Sym(), b.ty.array(node, 4_i), b.Expr(1_i));
             return node;
         }
@@ -523,12 +523,12 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
             return node;
         }
         case SymbolUseKind::GlobalConstVectorElemType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             b.GlobalConst(b.Sym(), b.ty.vec3(node), b.Expr(1_i));
             return node;
         }
         case SymbolUseKind::GlobalConstMatrixElemType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             b.GlobalConst(b.Sym(), b.ty.mat3x4(node), b.Expr(1_i));
             return node;
         }
@@ -538,12 +538,12 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
             return node;
         }
         case SymbolUseKind::AliasType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             b.Alias(b.Sym(), node);
             return node;
         }
         case SymbolUseKind::StructMemberType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             b.Structure(b.Sym(), utils::Vector{b.Member("m", node)});
             return node;
         }
@@ -553,17 +553,17 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
             return node;
         }
         case SymbolUseKind::ParameterType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             parameters.Push(b.Param(b.Sym(), node));
             return node;
         }
         case SymbolUseKind::LocalVarType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             statements.Push(b.Decl(b.Var(b.Sym(), node)));
             return node;
         }
         case SymbolUseKind::LocalVarArrayElemType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             statements.Push(b.Decl(b.Var(b.Sym(), b.ty.array(node, 4_u), b.Expr(1_i))));
             return node;
         }
@@ -573,12 +573,12 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
             return node;
         }
         case SymbolUseKind::LocalVarVectorElemType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             statements.Push(b.Decl(b.Var(b.Sym(), b.ty.vec3(node))));
             return node;
         }
         case SymbolUseKind::LocalVarMatrixElemType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             statements.Push(b.Decl(b.Var(b.Sym(), b.ty.mat3x4(node))));
             return node;
         }
@@ -588,7 +588,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
             return node;
         }
         case SymbolUseKind::LocalLetType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             statements.Push(b.Decl(b.Let(b.Sym(), node, b.Expr(1_i))));
             return node;
         }
@@ -598,7 +598,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
             return node;
         }
         case SymbolUseKind::NestedLocalVarType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             nested_statements.Push(b.Decl(b.Var(b.Sym(), node)));
             return node;
         }
@@ -608,7 +608,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
             return node;
         }
         case SymbolUseKind::NestedLocalLetType: {
-            auto* node = b.ty.type_name(source, symbol);
+            auto* node = b.ty(source, symbol);
             nested_statements.Push(b.Decl(b.Let(b.Sym(), node, b.Expr(1_i))));
             return node;
         }
@@ -665,7 +665,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeConstructed) {
     // type T = i32;
 
     Func("F", utils::Empty, ty.void_(),
-         utils::Vector{Block(Ignore(Construct(ty.type_name(Source{{12, 34}}, "T"))))});
+         utils::Vector{Block(Ignore(Construct(ty(Source{{12, 34}}, "T"))))});
     Alias(Source{{56, 78}}, "T", ty.i32());
 
     Build();
@@ -678,7 +678,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeUsedByLocal) {
     // type T = i32;
 
     Func("F", utils::Empty, ty.void_(),
-         utils::Vector{Block(Decl(Var("v", ty.type_name(Source{{12, 34}}, "T"))))});
+         utils::Vector{Block(Decl(Var("v", ty(Source{{12, 34}}, "T"))))});
     Alias(Source{{56, 78}}, "T", ty.i32());
 
     Build();
@@ -688,8 +688,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeUsedByParam) {
     // fn F(p : T) {}
     // type T = i32;
 
-    Func("F", utils::Vector{Param("p", ty.type_name(Source{{12, 34}}, "T"))}, ty.void_(),
-         utils::Empty);
+    Func("F", utils::Vector{Param("p", ty(Source{{12, 34}}, "T"))}, ty.void_(), utils::Empty);
     Alias(Source{{56, 78}}, "T", ty.i32());
 
     Build();
@@ -699,7 +698,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeUsedAsReturnType) {
     // fn F() -> T {}
     // type T = i32;
 
-    Func("F", utils::Empty, ty.type_name(Source{{12, 34}}, "T"), utils::Empty);
+    Func("F", utils::Empty, ty(Source{{12, 34}}, "T"), utils::Empty);
     Alias(Source{{56, 78}}, "T", ty.i32());
 
     Build();
@@ -709,7 +708,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeByStructMember) {
     // struct S { m : T };
     // type T = i32;
 
-    Structure("S", utils::Vector{Member("m", ty.type_name(Source{{12, 34}}, "T"))});
+    Structure("S", utils::Vector{Member("m", ty(Source{{12, 34}}, "T"))});
     Alias(Source{{56, 78}}, "T", ty.i32());
 
     Build();
@@ -848,7 +847,7 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, IndirectCall) {
 TEST_F(ResolverDependencyGraphCyclicRefTest, Alias_Direct) {
     // type T = T;
 
-    Alias(Source{{12, 34}}, "T", ty.type_name(Source{{56, 78}}, "T"));
+    Alias(Source{{12, 34}}, "T", ty(Source{{56, 78}}, "T"));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -861,9 +860,9 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, Alias_Indirect) {
     // 2: type X = Y;
     // 3: type Z = X;
 
-    Alias(Source{{1, 1}}, "Y", ty.type_name(Source{{1, 10}}, "Z"));
-    Alias(Source{{2, 1}}, "X", ty.type_name(Source{{2, 10}}, "Y"));
-    Alias(Source{{3, 1}}, "Z", ty.type_name(Source{{3, 10}}, "X"));
+    Alias(Source{{1, 1}}, "Y", ty(Source{{1, 10}}, "Z"));
+    Alias(Source{{2, 1}}, "X", ty(Source{{2, 10}}, "Y"));
+    Alias(Source{{3, 1}}, "Z", ty(Source{{3, 10}}, "X"));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -878,8 +877,7 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, Struct_Direct) {
     //   a: S;
     // };
 
-    Structure(Source{{12, 34}}, "S",
-              utils::Vector{Member("a", ty.type_name(Source{{56, 78}}, "S"))});
+    Structure(Source{{12, 34}}, "S", utils::Vector{Member("a", ty(Source{{56, 78}}, "S"))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -892,9 +890,9 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, Struct_Indirect) {
     // 2: struct X { y: Y; };
     // 3: struct Z { x: X; };
 
-    Structure(Source{{1, 1}}, "Y", utils::Vector{Member("z", ty.type_name(Source{{1, 10}}, "Z"))});
-    Structure(Source{{2, 1}}, "X", utils::Vector{Member("y", ty.type_name(Source{{2, 10}}, "Y"))});
-    Structure(Source{{3, 1}}, "Z", utils::Vector{Member("x", ty.type_name(Source{{3, 10}}, "X"))});
+    Structure(Source{{1, 1}}, "Y", utils::Vector{Member("z", ty(Source{{1, 10}}, "Z"))});
+    Structure(Source{{2, 1}}, "X", utils::Vector{Member("y", ty(Source{{2, 10}}, "Y"))});
+    Structure(Source{{3, 1}}, "Z", utils::Vector{Member("x", ty(Source{{3, 10}}, "X"))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -968,13 +966,13 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, Mixed_RecursiveDependencies) {
     // 5: type R = A;
     // 6: const L : S = Z;
 
-    Func(Source{{1, 1}}, "F", utils::Empty, ty.type_name(Source{{1, 5}}, "R"),
+    Func(Source{{1, 1}}, "F", utils::Empty, ty(Source{{1, 5}}, "R"),
          utils::Vector{Return(Expr(Source{{1, 10}}, "Z"))});
-    Alias(Source{{2, 1}}, "A", ty.type_name(Source{{2, 10}}, "S"));
-    Structure(Source{{3, 1}}, "S", utils::Vector{Member("a", ty.type_name(Source{{3, 10}}, "A"))});
+    Alias(Source{{2, 1}}, "A", ty(Source{{2, 10}}, "S"));
+    Structure(Source{{3, 1}}, "S", utils::Vector{Member("a", ty(Source{{3, 10}}, "A"))});
     GlobalVar(Source{{4, 1}}, "Z", Expr(Source{{4, 10}}, "L"));
-    Alias(Source{{5, 1}}, "R", ty.type_name(Source{{5, 10}}, "A"));
-    GlobalConst(Source{{6, 1}}, "L", ty.type_name(Source{{5, 5}}, "S"), Expr(Source{{5, 10}}, "Z"));
+    Alias(Source{{5, 1}}, "R", ty(Source{{5, 10}}, "A"));
+    GlobalConst(Source{{6, 1}}, "L", ty(Source{{5, 5}}, "S"), Expr(Source{{5, 10}}, "Z"));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1232,7 +1230,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
         return use;
     };
 #define V add_use(value_decl, Expr(value_sym), __LINE__, "V()")
-#define T add_use(type_decl, ty.type_name(type_sym), __LINE__, "T()")
+#define T add_use(type_decl, ty(type_sym), __LINE__, "T()")
 #define F add_use(func_decl, Ident(func_sym), __LINE__, "F()")
 
     Alias(Sym(), T);
@@ -1334,9 +1332,9 @@ TEST_F(ResolverDependencyGraphTraversalTest, InferredType) {
 TEST_F(ResolverDependencyGraphTraversalTest, chromium_1273451) {
     Structure("A", utils::Vector{Member("a", ty.i32())});
     Structure("B", utils::Vector{Member("b", ty.i32())});
-    Func("f", utils::Vector{Param("a", ty.type_name("A"))}, ty.type_name("B"),
+    Func("f", utils::Vector{Param("a", ty("A"))}, ty("B"),
          utils::Vector{
-             Return(Construct(ty.type_name("B"))),
+             Return(Construct(ty("B"))),
          });
     Build();
 }

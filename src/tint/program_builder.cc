@@ -128,7 +128,7 @@ std::string ProgramBuilder::FriendlyName(std::nullptr_t) const {
 }
 
 const ast::TypeName* ProgramBuilder::TypesBuilder::Of(const ast::TypeDecl* decl) const {
-    return type_name(decl->name);
+    return (*this)(decl->name);
 }
 
 ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}

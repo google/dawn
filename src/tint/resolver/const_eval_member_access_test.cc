@@ -28,12 +28,12 @@ TEST_F(ResolverConstEvalTest, StructMemberAccess) {
                        });
 
     Structure("Outer", utils::Vector{
-                           Member("o1", ty.type_name("Inner")),
-                           Member("o2", ty.type_name("Inner")),
+                           Member("o1", ty("Inner")),
+                           Member("o2", ty("Inner")),
                        });
-    auto* outer_expr = Construct(ty.type_name("Outer"),  //
-                                 Construct(ty.type_name("Inner"), 1_i, 2_u, 3_f, true),
-                                 Construct(ty.type_name("Inner")));
+    auto* outer_expr =
+        Construct(ty("Outer"),  //
+                  Construct(ty("Inner"), 1_i, 2_u, 3_f, true), Construct(ty("Inner")));
     auto* o1_expr = MemberAccessor(outer_expr, "o1");
     auto* i2_expr = MemberAccessor(o1_expr, "i2");
     WrapInFunction(i2_expr);

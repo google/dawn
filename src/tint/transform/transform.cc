@@ -122,7 +122,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
                 if (auto* alias = type_decl->As<ast::Alias>()) {
                     if (ty == ctx.src->Sem().Get(alias)) {
                         // Alias found. Use the alias name to ensure types compare equal.
-                        return ctx.dst->ty.type_name(ctx.Clone(alias->name));
+                        return ctx.dst->ty(ctx.Clone(alias->name));
                     }
                 }
             }
@@ -138,7 +138,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
         return ctx.dst->ty.array(el, u32(count.value()), std::move(attrs));
     }
     if (auto* s = ty->As<sem::Struct>()) {
-        return ctx.dst->ty.type_name(ctx.Clone(s->Declaration()->name));
+        return ctx.dst->ty(ctx.Clone(s->Declaration()->name));
     }
     if (auto* s = ty->As<type::Reference>()) {
         return CreateASTTypeFor(ctx, s->StoreType());

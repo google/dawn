@@ -124,7 +124,7 @@ Transform::ApplyResult ClampFragDepth::Apply(const Program* src, const DataMap&,
                 utils::Vector{b.Member("min", b.ty.f32()), b.Member("max", b.ty.f32())});
 
     auto args_sym = b.Symbols().New("frag_depth_clamp_args");
-    b.GlobalVar(args_sym, b.ty.type_name("FragDepthClampArgs"), type::AddressSpace::kPushConstant);
+    b.GlobalVar(args_sym, b.ty("FragDepthClampArgs"), type::AddressSpace::kPushConstant);
 
     auto base_fn_sym = b.Symbols().New("clamp_frag_depth");
     b.Func(base_fn_sym, utils::Vector{b.Param("v", b.ty.f32())}, b.ty.f32(),

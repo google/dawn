@@ -270,7 +270,7 @@ TEST_F(ResolverEvaluationStageTest, MemberAccessor_Const) {
     // const str = S();
     // str.m
     Structure("S", utils::Vector{Member("m", ty.i32())});
-    auto* str = Const("str", Construct(ty.type_name("S")));
+    auto* str = Const("str", Construct(ty("S")));
     auto* expr = MemberAccessor(str, "m");
     WrapInFunction(str, expr);
 
@@ -284,7 +284,7 @@ TEST_F(ResolverEvaluationStageTest, MemberAccessor_Runtime) {
     // var str = S();
     // str.m
     Structure("S", utils::Vector{Member("m", ty.i32())});
-    auto* str = Var("str", Construct(ty.type_name("S")));
+    auto* str = Var("str", Construct(ty("S")));
     auto* expr = MemberAccessor(str, "m");
     WrapInFunction(str, expr);
 

@@ -119,7 +119,7 @@ std::function<const ast::TypeName*()> InspectorBuilder::MakeStorageBufferTypes(
     const std::string& name,
     utils::VectorRef<const ast::Type*> member_types) {
     MakeStructType(name, member_types);
-    return [this, name] { return ty.type_name(name); };
+    return [this, name] { return ty(name); };
 }
 
 void InspectorBuilder::AddUniformBuffer(const std::string& name,

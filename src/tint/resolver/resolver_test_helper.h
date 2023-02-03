@@ -565,7 +565,7 @@ struct DataType<alias<T, ID>> {
             auto* type = DataType<T>::AST(b);
             b.AST().AddTypeDecl(b.ty.alias(name, type));
         }
-        return b.ty.type_name(name);
+        return b.ty(name);
     }
     /// @param b the ProgramBuilder
     /// @return the semantic aliased type

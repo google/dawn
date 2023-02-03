@@ -60,7 +60,7 @@ TEST_F(TypeStructTest, Layout) {
                            });
 
     auto* outer_st = Structure("Outer", utils::Vector{
-                                            Member("inner", ty.type_name("Inner")),
+                                            Member("inner", ty("Inner")),
                                             Member("a", ty.i32()),
                                         });
 
@@ -118,13 +118,13 @@ TEST_F(TypeStructTest, IsConstructable) {
                            });
 
     auto* outer = Structure("Outer", utils::Vector{
-                                         Member("inner", ty.type_name("Inner")),
+                                         Member("inner", ty("Inner")),
                                          Member("a", ty.i32()),
                                      });
 
     auto* outer_runtime_sized_array =
         Structure("OuterRuntimeSizedArray", utils::Vector{
-                                                Member("inner", ty.type_name("Inner")),
+                                                Member("inner", ty("Inner")),
                                                 Member("a", ty.i32()),
                                                 Member("runtime_sized_array", ty.array<i32>()),
                                             });
@@ -152,12 +152,12 @@ TEST_F(TypeStructTest, HasCreationFixedFootprint) {
                            });
 
     auto* outer = Structure("Outer", utils::Vector{
-                                         Member("inner", ty.type_name("Inner")),
+                                         Member("inner", ty("Inner")),
                                      });
 
     auto* outer_with_runtime_sized_array =
         Structure("OuterRuntimeSizedArray", utils::Vector{
-                                                Member("inner", ty.type_name("Inner")),
+                                                Member("inner", ty("Inner")),
                                                 Member("runtime_sized_array", ty.array<i32>()),
                                             });
 
@@ -185,12 +185,12 @@ TEST_F(TypeStructTest, HasFixedFootprint) {
                            });
 
     auto* outer = Structure("Outer", utils::Vector{
-                                         Member("inner", ty.type_name("Inner")),
+                                         Member("inner", ty("Inner")),
                                      });
 
     auto* outer_with_runtime_sized_array =
         Structure("OuterRuntimeSizedArray", utils::Vector{
-                                                Member("inner", ty.type_name("Inner")),
+                                                Member("inner", ty("Inner")),
                                                 Member("runtime_sized_array", ty.array<i32>()),
                                             });
 

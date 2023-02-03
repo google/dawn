@@ -123,7 +123,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsFunctionUsedAsType) {
          utils::Vector{
              Return(1_i),
          });
-    WrapInFunction(Construct(ty.type_name(Source{{56, 78}}, "mix")));
+    WrapInFunction(Construct(ty(Source{{56, 78}}, "mix")));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: cannot use function 'mix' as type
@@ -152,7 +152,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsVariab
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsType) {
     GlobalConst(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i));
-    WrapInFunction(Construct(ty.type_name(Source{{56, 78}}, "mix")));
+    WrapInFunction(Construct(ty(Source{{56, 78}}, "mix")));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: cannot use variable 'mix' as type
@@ -182,7 +182,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsVariable
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsType) {
     GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), type::AddressSpace::kPrivate);
-    WrapInFunction(Construct(ty.type_name(Source{{56, 78}}, "mix")));
+    WrapInFunction(Construct(ty(Source{{56, 78}}, "mix")));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: cannot use variable 'mix' as type
@@ -215,7 +215,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsVariable) {
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsType) {
     auto* mix = Alias(Source{{12, 34}}, "mix", ty.i32());
-    auto* use = Construct(ty.type_name("mix"));
+    auto* use = Construct(ty("mix"));
     WrapInFunction(use);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -249,7 +249,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStructUsedAsType) {
     auto* mix = Structure("mix", utils::Vector{
                                      Member("m", ty.i32()),
                                  });
-    auto* use = Construct(ty.type_name("mix"));
+    auto* use = Construct(ty("mix"));
     WrapInFunction(use);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -695,9 +695,8 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInStruct) {
     //   workgroupUniformLoad(&v);
     // }
     Structure("Inner", utils::Vector{Member("a", ty.array(ty.atomic<i32>(), 4_a))});
-    Structure("S", utils::Vector{Member("i", ty.type_name("Inner"))});
-    GlobalVar(Source{{12, 34}}, "v", ty.array(ty.type_name("S"), 4_a),
-              type::AddressSpace::kWorkgroup);
+    Structure("S", utils::Vector{Member("i", ty("Inner"))});
+    GlobalVar(Source{{12, 34}}, "v", ty.array(ty("S"), 4_a), type::AddressSpace::kWorkgroup);
     WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf("v"))));
 
     EXPECT_FALSE(r()->Resolve());

@@ -350,7 +350,7 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
             break;
         case Method::kStruct:
             Structure("S", utils::Vector{Member("v", target_ty())});
-            WrapInFunction(Construct(ty.type_name("S"), abstract_expr));
+            WrapInFunction(Construct(ty("S"), abstract_expr));
             break;
         case Method::kBinaryOp: {
             // Add 0 to ensure no overflow with max float values
@@ -1218,7 +1218,7 @@ using MaterializeAbstractNumericToUnrelatedType = resolver::ResolverTest;
 
 TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructVarInit) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
-    WrapInFunction(Decl(Var("v", ty.type_name("S"), Expr(Source{{12, 34}}, 1_a))));
+    WrapInFunction(Decl(Var("v", ty("S"), Expr(Source{{12, 34}}, 1_a))));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
@@ -1227,7 +1227,7 @@ TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructVarInit) {
 
 TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructLetInit) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
-    WrapInFunction(Decl(Let("v", ty.type_name("S"), Expr(Source{{12, 34}}, 1_a))));
+    WrapInFunction(Decl(Let("v", ty("S"), Expr(Source{{12, 34}}, 1_a))));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),

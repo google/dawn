@@ -39,7 +39,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, StorageBuffer_UnalignedMember) 
                   Member(Source{{34, 56}}, "b", ty.f32(), utils::Vector{MemberAlign(1_i)}),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("S"), type::AddressSpace::kStorage, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty("S"), type::AddressSpace::kStorage, Group(0_a),
               Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -69,7 +69,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, StorageBuffer_UnalignedMember_S
                   Member(Source{{34, 56}}, "b", ty.f32(), utils::Vector{MemberAlign(4_i)}),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("S"), type::AddressSpace::kStorage, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty("S"), type::AddressSpace::kStorage, Group(0_a),
               Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -97,11 +97,11 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_S
     Structure(Source{{34, 56}}, "Outer",
               utils::Vector{
                   Member("scalar", ty.f32()),
-                  Member(Source{{56, 78}}, "inner", ty.type_name("Inner")),
+                  Member(Source{{56, 78}}, "inner", ty("Inner")),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), type::AddressSpace::kUniform,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), type::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -141,12 +141,11 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
     Structure(Source{{34, 56}}, "Outer",
               utils::Vector{
                   Member("scalar", ty.f32()),
-                  Member(Source{{56, 78}}, "inner", ty.type_name("Inner"),
-                         utils::Vector{MemberAlign(16_i)}),
+                  Member(Source{{56, 78}}, "inner", ty("Inner"), utils::Vector{MemberAlign(16_i)}),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), type::AddressSpace::kUniform,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), type::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -167,11 +166,11 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_A
     Structure(Source{{12, 34}}, "Outer",
               utils::Vector{
                   Member("scalar", ty.f32()),
-                  Member(Source{{56, 78}}, "inner", ty.type_name("Inner")),
+                  Member(Source{{56, 78}}, "inner", ty("Inner")),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), type::AddressSpace::kUniform,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), type::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -200,12 +199,11 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_A
     Structure(Source{{12, 34}}, "Outer",
               utils::Vector{
                   Member("scalar", ty.f32()),
-                  Member(Source{{34, 56}}, "inner", ty.type_name("Inner"),
-                         utils::Vector{MemberAlign(16_i)}),
+                  Member(Source{{34, 56}}, "inner", ty("Inner"), utils::Vector{MemberAlign(16_i)}),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), type::AddressSpace::kUniform,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), type::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -232,12 +230,12 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_MembersOffsetNotM
 
     Structure(Source{{34, 56}}, "Outer",
               utils::Vector{
-                  Member(Source{{56, 78}}, "inner", ty.type_name("Inner")),
+                  Member(Source{{56, 78}}, "inner", ty("Inner")),
                   Member(Source{{78, 90}}, "scalar", ty.i32()),
               });
 
-    GlobalVar(Source{{22, 24}}, "a", ty.type_name("Outer"), type::AddressSpace::kUniform,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{22, 24}}, "a", ty("Outer"), type::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -284,12 +282,12 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
 
     Structure(Source{{34, 56}}, "Outer",
               utils::Vector{
-                  Member(Source{{56, 78}}, "inner", ty.type_name("Inner")),
+                  Member(Source{{56, 78}}, "inner", ty("Inner")),
                   Member(Source{{78, 90}}, "scalar", ty.i32()),
               });
 
-    GlobalVar(Source{{22, 24}}, "a", ty.type_name("Outer"), type::AddressSpace::kUniform,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{22, 24}}, "a", ty("Outer"), type::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -332,12 +330,12 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
 
     Structure(Source{{34, 56}}, "Outer",
               utils::Vector{
-                  Member(Source{{56, 78}}, "inner", ty.type_name("Inner")),
+                  Member(Source{{56, 78}}, "inner", ty("Inner")),
                   Member(Source{{78, 90}}, "scalar", ty.i32(), utils::Vector{MemberAlign(16_i)}),
               });
 
-    GlobalVar(Source{{22, 34}}, "a", ty.type_name("Outer"), type::AddressSpace::kUniform,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{22, 34}}, "a", ty("Outer"), type::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -357,8 +355,8 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_Vec3MemberOffset_
                                              Member("s", ty.f32()),
                                          });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("ScalarPackedAtEndOfVec3"),
-              type::AddressSpace::kUniform, Group(0_a), Binding(0_a));
+    GlobalVar(Source{{78, 90}}, "a", ty("ScalarPackedAtEndOfVec3"), type::AddressSpace::kUniform,
+              Group(0_a), Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -380,8 +378,8 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_Vec3F16MemberOffs
                                              Member("s", ty.f16()),
                                          });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("ScalarPackedAtEndOfVec3"),
-              type::AddressSpace::kUniform, Group(0_a), Binding(0_a));
+    GlobalVar(Source{{78, 90}}, "a", ty("ScalarPackedAtEndOfVec3"), type::AddressSpace::kUniform,
+              Group(0_a), Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -402,12 +400,12 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 
     Structure(Source{{12, 34}}, "Outer",
               utils::Vector{
-                  Member("inner", ty.type_name(Source{{34, 56}}, "Inner")),
+                  Member("inner", ty(Source{{34, 56}}, "Inner")),
                   Member("scalar", ty.i32()),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), type::AddressSpace::kUniform,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), type::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -436,12 +434,12 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 
     Structure(Source{{12, 34}}, "Outer",
               utils::Vector{
-                  Member("inner", ty.type_name(Source{{34, 56}}, "Inner")),
+                  Member("inner", ty(Source{{34, 56}}, "Inner")),
                   Member("scalar", ty.i32()),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), type::AddressSpace::kUniform,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), type::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -479,12 +477,12 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 
     Structure(Source{{12, 34}}, "Outer",
               utils::Vector{
-                  Member("inner", ty.type_name(Source{{34, 56}}, "Inner")),
+                  Member("inner", ty(Source{{34, 56}}, "Inner")),
                   Member("scalar", ty.i32()),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), type::AddressSpace::kUniform,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), type::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -523,8 +521,8 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
                   Member("inner", ty.array(Source{{34, 56}}, ty.array(ty.f32(), 4_u), 4_u)),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), type::AddressSpace::kUniform,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), type::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -552,12 +550,12 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 
     Structure(Source{{12, 34}}, "Outer",
               utils::Vector{
-                  Member("inner", ty.type_name(Source{{34, 56}}, "Inner")),
+                  Member("inner", ty(Source{{34, 56}}, "Inner")),
                   Member("scalar", ty.i32()),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), type::AddressSpace::kUniform,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), type::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -575,7 +573,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_UnalignedMember) {
         Source{{12, 34}}, "S",
         utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
                       Member(Source{{34, 56}}, "b", ty.f32(), utils::Vector{MemberAlign(1_i)})});
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("S"), type::AddressSpace::kPushConstant);
+    GlobalVar(Source{{78, 90}}, "a", ty("S"), type::AddressSpace::kPushConstant);
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -600,7 +598,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_Aligned) {
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
     Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
                                  Member("b", ty.f32(), utils::Vector{MemberAlign(4_i)})});
-    GlobalVar("a", ty.type_name("S"), type::AddressSpace::kPushConstant);
+    GlobalVar("a", ty("S"), type::AddressSpace::kPushConstant);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
