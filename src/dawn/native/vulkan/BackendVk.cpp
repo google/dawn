@@ -95,25 +95,6 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "(usage: SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
      "SYNC_FRAGMENT_SHADER_SHADER_SAMPLED_READ, read_barriers: VkPipelineStageFlags2KHR(0)"},
 
-    // The same messages but with the previous formatting of pipeline stages.
-    // TODO(dawn:1225) remove after VVL commit ea1305065a11754ac6c93936e025996fcf08b543 is rolled
-    {"SYNC-HAZARD-WRITE-AFTER-READ",
-     "depth aspect during store with storeOp VK_ATTACHMENT_STORE_OP_STORE. Access info (usage: "
-     "SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE"},
-    {"SYNC-HAZARD-WRITE-AFTER-READ",
-     "depth aspect during store with storeOp VK_ATTACHMENT_STORE_OP_STORE. Access info (usage: "
-     "SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_SAMPLED_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE"},
-    {"SYNC-HAZARD-WRITE-AFTER-READ",
-     "stencil aspect during store with stencilStoreOp VK_ATTACHMENT_STORE_OP_STORE. Access info "
-     "(usage: SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE"},
-    {"SYNC-HAZARD-WRITE-AFTER-READ",
-     "stencil aspect during store with stencilStoreOp VK_ATTACHMENT_STORE_OP_STORE. Access info "
-     "(usage: SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_SAMPLED_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE"},
-
     // http://anglebug.com/7513
     {"VUID-VkGraphicsPipelineCreateInfo-pStages-06896",
      "contains fragment shader state, but stages"},
