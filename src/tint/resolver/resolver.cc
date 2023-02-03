@@ -318,8 +318,18 @@ type::Type* Resolver::Type(const ast::Type* ty) {
             return nullptr;
         },
         [&](const ast::ExternalTexture*) { return builder_->create<type::ExternalTexture>(); },
-        [&](Default) {
-            auto* resolved = sem_.ResolvedSymbol(ty);
+        [&](const ast::TypeName* t) -> type::Type* {
+            Mark(t->name);
+
+            auto* resolved = sem_.ResolvedSymbol(t);
+            if (resolved == nullptr) {
+                if (IsBuiltin(t->name->symbol)) {
+                    auto name = builder_->Symbols().NameFor(t->name->symbol);
+                    AddError("cannot use builtin '" + name + "' as type", ty->source);
+                    return nullptr;
+                }
+                return ShortName(t->name->symbol, t->source);
+            }
             return Switch(
                 resolved,  //
                 [&](type::Type* type) { return type; },
@@ -336,20 +346,17 @@ type::Type* Resolver::Type(const ast::Type* ty) {
                     return nullptr;
                 },
                 [&](Default) -> type::Type* {
-                    if (auto* tn = ty->As<ast::TypeName>()) {
-                        if (IsBuiltin(tn->name)) {
-                            auto name = builder_->Symbols().NameFor(tn->name);
-                            AddError("cannot use builtin '" + name + "' as type", ty->source);
-                            return nullptr;
-                        }
-                        return ShortName(tn->name, tn->source);
-                    }
                     TINT_UNREACHABLE(Resolver, diagnostics_)
                         << "Unhandled resolved type '"
                         << (resolved ? resolved->TypeInfo().name : "<null>")
                         << "' resolved from ast::Type '" << ty->TypeInfo().name << "'";
                     return nullptr;
                 });
+        },
+        [&](Default) {
+            TINT_UNREACHABLE(Resolver, diagnostics_)
+                << "Unhandled type: '" << ty->TypeInfo().name << "'";
+            return nullptr;
         });
 
     if (s) {

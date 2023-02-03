@@ -40,7 +40,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
     ASSERT_NE(t.value, nullptr) << p->error();
     auto* type_name = t.value->As<ast::TypeName>();
     ASSERT_NE(type_name, nullptr);
-    EXPECT_EQ(p->builder().Symbols().Get("A"), type_name->name);
+    EXPECT_EQ(p->builder().Symbols().Get("A"), type_name->name->symbol);
     EXPECT_EQ(type_name->source.range, (Source::Range{{1u, 1u}, {1u, 2u}}));
 }
 

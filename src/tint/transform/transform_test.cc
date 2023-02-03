@@ -116,7 +116,7 @@ TEST_F(CreateASTTypeForTest, AliasedArrayWithComplexOverrideLength) {
     CloneContext ctx(&ast_type_builder, &program, false);
     auto* ast_ty = tint::As<ast::TypeName>(CreateASTTypeFor(ctx, arr_ty));
     ASSERT_NE(ast_ty, nullptr);
-    EXPECT_EQ(ast_type_builder.Symbols().NameFor(ast_ty->name), "A");
+    EXPECT_EQ(ast_type_builder.Symbols().NameFor(ast_ty->name->symbol), "A");
 }
 
 TEST_F(CreateASTTypeForTest, Struct) {
@@ -126,7 +126,7 @@ TEST_F(CreateASTTypeForTest, Struct) {
                                      4u /* size */, 4u /* size_no_padding */);
     });
     ASSERT_TRUE(str->Is<ast::TypeName>());
-    EXPECT_EQ(ast_type_builder.Symbols().NameFor(str->As<ast::TypeName>()->name), "S");
+    EXPECT_EQ(ast_type_builder.Symbols().NameFor(str->As<ast::TypeName>()->name->symbol), "S");
 }
 
 }  // namespace

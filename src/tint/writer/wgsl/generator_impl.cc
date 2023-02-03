@@ -595,7 +595,7 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
             return true;
         },
         [&](const ast::TypeName* tn) {
-            out << program_->Symbols().NameFor(tn->name);
+            out << program_->Symbols().NameFor(tn->name->symbol);
             return true;
         },
         [&](Default) {

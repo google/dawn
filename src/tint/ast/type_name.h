@@ -19,6 +19,11 @@
 
 #include "src/tint/ast/type.h"
 
+// Forward declarations
+namespace tint::ast {
+class Identifier;
+}  // namespace tint::ast
+
 namespace tint::ast {
 
 /// A named type (i.e. struct or alias)
@@ -29,7 +34,7 @@ class TypeName final : public Castable<TypeName, Type> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param name the type name
-    TypeName(ProgramID pid, NodeID nid, const Source& src, Symbol name);
+    TypeName(ProgramID pid, NodeID nid, const Source& src, const Identifier* name);
     /// Move constructor
     TypeName(TypeName&&);
     /// Destructor
@@ -46,7 +51,7 @@ class TypeName final : public Castable<TypeName, Type> {
     const TypeName* Clone(CloneContext* ctx) const override;
 
     /// The type name
-    Symbol name;
+    Identifier const* const name;
 };
 
 }  // namespace tint::ast

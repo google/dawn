@@ -164,8 +164,9 @@ Transform::ApplyResult ClampFragDepth::Apply(const Program* src, const DataMap&,
             auto* struct_ty = sem.Get(fn)->ReturnType()->As<sem::Struct>()->Declaration();
             auto helper = io_structs_clamp_helpers.GetOrCreate(struct_ty, [&] {
                 auto* return_ty = fn->return_type;
-                auto fn_sym = b.Symbols().New("clamp_frag_depth_" +
-                                              sym.NameFor(return_ty->As<ast::TypeName>()->name));
+                auto fn_sym =
+                    b.Symbols().New("clamp_frag_depth_" +
+                                    sym.NameFor(return_ty->As<ast::TypeName>()->name->symbol));
 
                 utils::Vector<const ast::Expression*, 8u> initializer_args;
                 for (auto* member : struct_ty->members) {

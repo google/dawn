@@ -882,6 +882,7 @@ if(TINT_BUILD_TESTS)
     ast/test_helper.h
     ast/texture_test.cc
     ast/traverse_expressions_test.cc
+    ast/type_name_test.cc
     ast/u32_test.cc
     ast/unary_op_expression_test.cc
     ast/variable_decl_statement_test.cc

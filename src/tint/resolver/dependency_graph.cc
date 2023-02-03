@@ -392,7 +392,7 @@ class DependencyScanner {
                 TraverseType(ptr->type);
             },
             [&](const ast::TypeName* tn) {  //
-                AddDependency(tn, tn->name, "type", "references");
+                AddDependency(tn, tn->name->symbol, "type", "references");
             },
             [&](const ast::Vector* vec) {  //
                 TraverseType(vec->type);

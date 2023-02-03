@@ -138,7 +138,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
         return ctx.dst->ty.array(el, u32(count.value()), std::move(attrs));
     }
     if (auto* s = ty->As<sem::Struct>()) {
-        return ctx.dst->create<ast::TypeName>(ctx.Clone(s->Declaration()->name));
+        return ctx.dst->ty.type_name(ctx.Clone(s->Declaration()->name));
     }
     if (auto* s = ty->As<type::Reference>()) {
         return CreateASTTypeFor(ctx, s->StoreType());

@@ -907,7 +907,7 @@ class ProgramBuilder {
         /// @returns the type name
         template <typename NAME>
         const ast::TypeName* type_name(NAME&& name) const {
-            return builder->create<ast::TypeName>(builder->Sym(std::forward<NAME>(name)));
+            return builder->create<ast::TypeName>(builder->Ident(std::forward<NAME>(name)));
         }
 
         /// Creates a type name
@@ -916,7 +916,7 @@ class ProgramBuilder {
         /// @returns the type name
         template <typename NAME>
         const ast::TypeName* type_name(const Source& source, NAME&& name) const {
-            return builder->create<ast::TypeName>(source, builder->Sym(std::forward<NAME>(name)));
+            return builder->create<ast::TypeName>(source, builder->Ident(std::forward<NAME>(name)));
         }
 
         /// Creates an alias type

@@ -129,7 +129,7 @@ alias B = A;)");
     EXPECT_EQ(alias->name, program.Symbols().Get("B"));
     auto* tn = alias->type->As<ast::TypeName>();
     EXPECT_NE(tn, nullptr);
-    EXPECT_EQ(tn->name, str->name);
+    EXPECT_EQ(tn->name->symbol, str->name);
 }
 
 // TODO(crbug.com/tint/1812): DEPRECATED
@@ -165,7 +165,7 @@ type B = A;)");
     EXPECT_EQ(alias->name, program.Symbols().Get("B"));
     auto* tn = alias->type->As<ast::TypeName>();
     EXPECT_NE(tn, nullptr);
-    EXPECT_EQ(tn->name, str->name);
+    EXPECT_EQ(tn->name->symbol, str->name);
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_MissingSemicolon) {
