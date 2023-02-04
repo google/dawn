@@ -24,13 +24,13 @@ TEST_F(ParserImplTest, DiagnosticDirective_Valid) {
     p->diagnostic_directive();
     EXPECT_FALSE(p->has_error()) << p->error();
     auto& ast = p->builder().AST();
-    ASSERT_EQ(ast.DiagnosticControls().Length(), 1u);
-    auto* control = ast.DiagnosticControls()[0];
-    EXPECT_EQ(control->severity, ast::DiagnosticSeverity::kOff);
+    ASSERT_EQ(ast.DiagnosticDirectives().Length(), 1u);
+    auto* directive = ast.DiagnosticDirectives()[0];
+    EXPECT_EQ(directive->control.severity, ast::DiagnosticSeverity::kOff);
     ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
-    EXPECT_EQ(ast.GlobalDeclarations()[0], control);
+    EXPECT_EQ(ast.GlobalDeclarations()[0], directive);
 
-    auto* r = control->rule_name;
+    auto* r = directive->control.rule_name;
     ASSERT_NE(r, nullptr);
     EXPECT_EQ(p->builder().Symbols().NameFor(r->symbol), "foo");
 }
@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, DiagnosticDirective_MissingSemicolon) {
     EXPECT_EQ(p->error(), "1:21: expected ';' for diagnostic directive");
     auto program = p->program();
     auto& ast = program.AST();
-    EXPECT_EQ(ast.DiagnosticControls().Length(), 0u);
+    EXPECT_EQ(ast.DiagnosticDirectives().Length(), 0u);
     EXPECT_EQ(ast.GlobalDeclarations().Length(), 0u);
 }
 

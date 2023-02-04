@@ -1,4 +1,4 @@
-// Copyright 2023 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ast/diagnostic_directive.h"
+
 #include "src/tint/ast/test_helper.h"
 
 namespace tint::ast {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
-using DiagnosticAttributeTest = TestHelper;
+using DiagnosticDirectiveTest = TestHelper;
 
-TEST_F(DiagnosticAttributeTest, Creation) {
+TEST_F(DiagnosticDirectiveTest, Creation) {
     auto* name = Ident("foo");
-    auto* d = DiagnosticAttribute(DiagnosticSeverity::kWarning, name);
-    EXPECT_EQ(d->Name(), "diagnostic");
-    EXPECT_EQ(d->control.severity, DiagnosticSeverity::kWarning);
-    EXPECT_EQ(d->control.rule_name, name);
+    DiagnosticControl control(ast::DiagnosticSeverity::kWarning, name);
+    auto* diag = create<ast::DiagnosticDirective>(Source{{{10, 5}, {10, 15}}}, std::move(control));
+    EXPECT_EQ(diag->source.range.begin.line, 10u);
+    EXPECT_EQ(diag->source.range.begin.column, 5u);
+    EXPECT_EQ(diag->source.range.end.line, 10u);
+    EXPECT_EQ(diag->source.range.end.column, 15u);
+    EXPECT_EQ(diag->control.severity, ast::DiagnosticSeverity::kWarning);
+    EXPECT_EQ(diag->control.rule_name, name);
 }
 
 }  // namespace

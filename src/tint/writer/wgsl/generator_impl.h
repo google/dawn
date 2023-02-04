@@ -56,7 +56,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output of the expression stream
     /// @param diagnostic the diagnostic control node
     /// @returns true if the diagnostic control was emitted
-    bool EmitDiagnosticControl(std::ostream& out, const ast::DiagnosticControl* diagnostic);
+    bool EmitDiagnosticControl(std::ostream& out, const ast::DiagnosticControl& diagnostic);
     /// Handles generating an enable directive
     /// @param enable the enable node
     /// @returns true if the enable directive was emitted

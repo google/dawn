@@ -21,26 +21,12 @@ namespace {
 
 using DiagnosticControlTest = TestHelper;
 
-TEST_F(DiagnosticControlTest, Creation) {
-    auto* name = Ident("foo");
-    Source source;
-    source.range.begin = Source::Location{20, 2};
-    source.range.end = Source::Location{20, 5};
-    auto* control = create<ast::DiagnosticControl>(source, DiagnosticSeverity::kWarning, name);
-    EXPECT_EQ(control->source.range.begin.line, 20u);
-    EXPECT_EQ(control->source.range.begin.column, 2u);
-    EXPECT_EQ(control->source.range.end.line, 20u);
-    EXPECT_EQ(control->source.range.end.column, 5u);
-    EXPECT_EQ(control->severity, DiagnosticSeverity::kWarning);
-    EXPECT_EQ(control->rule_name, name);
-}
-
 TEST_F(DiagnosticControlTest, Assert_RuleNotTemplated) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<ast::DiagnosticControl>(DiagnosticSeverity::kWarning,
-                                             b.Ident("name", "a", "b", "c"));
+            ast::DiagnosticControl control(DiagnosticSeverity::kWarning,
+                                           b.Ident("name", "a", "b", "c"));
         },
         "internal compiler error");
 }

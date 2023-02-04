@@ -130,6 +130,8 @@ list(APPEND TINT_LIB_SRCS
   ast/diagnostic_attribute.h
   ast/diagnostic_control.cc
   ast/diagnostic_control.h
+  ast/diagnostic_directive.cc
+  ast/diagnostic_directive.h
   ast/disable_validation_attribute.cc
   ast/disable_validation_attribute.h
   ast/discard_statement.cc
@@ -843,6 +845,7 @@ if(TINT_BUILD_TESTS)
     ast/depth_texture_test.cc
     ast/diagnostic_attribute_test.cc
     ast/diagnostic_control_test.cc
+    ast/diagnostic_directive_test.cc
     ast/discard_statement_test.cc
     ast/enable_test.cc
     ast/external_texture_test.cc

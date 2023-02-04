@@ -313,7 +313,7 @@ bool GeneratorImpl::Generate() {
                 }
                 return EmitFunction(func);
             },
-            [&](const ast::DiagnosticControl*) {
+            [&](const ast::DiagnosticDirective*) {
                 // Do nothing for diagnostic directives in MSL
                 return true;
             },

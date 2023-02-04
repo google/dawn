@@ -24,31 +24,18 @@
 
 #include <string>
 
-#include "src/tint/program_builder.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticControl);
+#include "src/tint/ast/identifier.h"
+#include "src/tint/ast/templated_identifier.h"
 
 namespace tint::ast {
 
-DiagnosticControl::DiagnosticControl(ProgramID pid,
-                                     NodeID nid,
-                                     const Source& src,
-                                     DiagnosticSeverity sev,
-                                     const Identifier* rule)
-    : Base(pid, nid, src), severity(sev), rule_name(rule) {
+DiagnosticControl::DiagnosticControl(DiagnosticSeverity sev, const Identifier* rule)
+    : severity(sev), rule_name(rule) {
     TINT_ASSERT(AST, rule != nullptr);
     if (rule) {
         // It is invalid for a diagnostic rule name to be templated
         TINT_ASSERT(AST, !rule->Is<TemplatedIdentifier>());
     }
-}
-
-DiagnosticControl::~DiagnosticControl() = default;
-
-const DiagnosticControl* DiagnosticControl::Clone(CloneContext* ctx) const {
-    auto src = ctx->Clone(source);
-    auto rule = ctx->Clone(rule_name);
-    return ctx->dst->create<DiagnosticControl>(src, severity, rule);
 }
 
 diag::Severity ToSeverity(DiagnosticSeverity sc) {

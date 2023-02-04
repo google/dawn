@@ -114,7 +114,9 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
                 }
             },
             [&](const ast::Enable* ext) { b.AST().AddEnable(ctx.Clone(ext)); },
-            [&](const ast::DiagnosticControl* dc) { b.AST().AddDiagnosticControl(ctx.Clone(dc)); },
+            [&](const ast::DiagnosticDirective* d) {
+                b.AST().AddDiagnosticDirective(ctx.Clone(d));
+            },
             [&](Default) {
                 TINT_UNREACHABLE(Transform, b.Diagnostics())
                     << "unhandled global declaration: " << decl->TypeInfo().name;

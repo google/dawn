@@ -207,8 +207,8 @@ class DependencyScanner {
                     TraverseExpression(var->initializer);
                 }
             },
-            [&](const ast::DiagnosticControl*) {
-                // Diagnostic control directives do not affect the dependency graph.
+            [&](const ast::DiagnosticDirective*) {
+                // Diagnostic directives do not affect the dependency graph.
             },
             [&](const ast::Enable*) {
                 // Enable directives do not affect the dependency graph.
@@ -561,7 +561,7 @@ struct DependencyAnalysis {
             [&](const ast::TypeDecl* td) { return td->name; },
             [&](const ast::Function* func) { return func->symbol; },
             [&](const ast::Variable* var) { return var->symbol; },
-            [&](const ast::DiagnosticControl*) { return Symbol(); },
+            [&](const ast::DiagnosticDirective*) { return Symbol(); },
             [&](const ast::Enable*) { return Symbol(); },
             [&](const ast::ConstAssert*) { return Symbol(); },
             [&](Default) {
@@ -672,13 +672,13 @@ struct DependencyAnalysis {
 
         // Make sure all directives go before any other global declarations.
         for (auto* global : declaration_order_) {
-            if (global->node->IsAnyOf<ast::DiagnosticControl, ast::Enable>()) {
+            if (global->node->IsAnyOf<ast::DiagnosticDirective, ast::Enable>()) {
                 sorted_.Add(global->node);
             }
         }
 
         for (auto* global : declaration_order_) {
-            if (global->node->IsAnyOf<ast::DiagnosticControl, ast::Enable>()) {
+            if (global->node->IsAnyOf<ast::DiagnosticDirective, ast::Enable>()) {
                 // Skip directives here, as they are already added.
                 continue;
             }

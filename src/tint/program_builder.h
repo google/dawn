@@ -43,6 +43,7 @@
 #include "src/tint/ast/depth_texture.h"
 #include "src/tint/ast/diagnostic_attribute.h"
 #include "src/tint/ast/diagnostic_control.h"
+#include "src/tint/ast/diagnostic_directive.h"
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/enable.h"
@@ -3309,7 +3310,7 @@ class ProgramBuilder {
         static_assert(!traits::IsType<traits::PtrElTy<NAME>, ast::TemplatedIdentifier>,
                       "it is invalid for a diagnostic rule name to be templated");
         return create<ast::DiagnosticAttribute>(
-            source, DiagnosticControl(source, severity, std::forward<NAME>(rule_name)));
+            source, ast::DiagnosticControl(severity, Ident(std::forward<NAME>(rule_name))));
     }
 
     /// Creates an ast::DiagnosticAttribute
@@ -3320,57 +3321,35 @@ class ProgramBuilder {
     const ast::DiagnosticAttribute* DiagnosticAttribute(ast::DiagnosticSeverity severity,
                                                         NAME&& rule_name) {
         return create<ast::DiagnosticAttribute>(
-            source_, DiagnosticControl(source_, severity, std::forward<NAME>(rule_name)));
+            source_, ast::DiagnosticControl(severity, Ident(std::forward<NAME>(rule_name))));
     }
 
-    /// Creates an ast::DiagnosticControl
+    /// Add a diagnostic directive to the module.
     /// @param source the source information
     /// @param severity the diagnostic severity control
     /// @param rule_name the diagnostic rule name
-    /// @returns the diagnostic control pointer
+    /// @returns the diagnostic directive pointer
     template <typename NAME>
-    const ast::DiagnosticControl* DiagnosticControl(const Source& source,
-                                                    ast::DiagnosticSeverity severity,
-                                                    NAME&& rule_name) {
-        return create<ast::DiagnosticControl>(source, severity,
-                                              Ident(std::forward<NAME>(rule_name)));
+    const ast::DiagnosticDirective* DiagnosticDirective(const Source& source,
+                                                        ast::DiagnosticSeverity severity,
+                                                        NAME&& rule_name) {
+        auto* directive = create<ast::DiagnosticDirective>(
+            source, ast::DiagnosticControl(severity, Ident(std::forward<NAME>(rule_name))));
+        AST().AddDiagnosticDirective(directive);
+        return directive;
     }
 
-    /// Creates an ast::DiagnosticControl
+    /// Add a diagnostic directive to the module.
     /// @param severity the diagnostic severity control
     /// @param rule_name the diagnostic rule name
-    /// @returns the diagnostic control pointer
+    /// @returns the diagnostic directive pointer
     template <typename NAME>
-    const ast::DiagnosticControl* DiagnosticControl(ast::DiagnosticSeverity severity,
-                                                    NAME&& rule_name) {
-        return create<ast::DiagnosticControl>(source_, severity,
-                                              Ident(std::forward<NAME>(rule_name)));
-    }
-
-    /// Add a global diagnostic control to the module.
-    /// @param source the source information
-    /// @param severity the diagnostic severity control
-    /// @param rule_name the diagnostic rule name
-    /// @returns the diagnostic control pointer
-    template <typename NAME>
-    const ast::DiagnosticControl* DiagnosticDirective(const Source& source,
-                                                      ast::DiagnosticSeverity severity,
-                                                      NAME&& rule_name) {
-        auto* control = DiagnosticControl(source, severity, Ident(std::forward<NAME>(rule_name)));
-        AST().AddDiagnosticControl(control);
-        return control;
-    }
-
-    /// Add a global diagnostic control to the module.
-    /// @param severity the diagnostic severity control
-    /// @param rule_name the diagnostic rule name
-    /// @returns the diagnostic control pointer
-    template <typename NAME>
-    const ast::DiagnosticControl* DiagnosticDirective(ast::DiagnosticSeverity severity,
-                                                      NAME&& rule_name) {
-        auto* control = DiagnosticControl(source_, severity, Ident(std::forward<NAME>(rule_name)));
-        AST().AddDiagnosticControl(control);
-        return control;
+    const ast::DiagnosticDirective* DiagnosticDirective(ast::DiagnosticSeverity severity,
+                                                        NAME&& rule_name) {
+        auto* directive = create<ast::DiagnosticDirective>(
+            source_, ast::DiagnosticControl(severity, Ident(std::forward<NAME>(rule_name))));
+        AST().AddDiagnosticDirective(directive);
+        return directive;
     }
 
     /// Sets the current builder source to `src`

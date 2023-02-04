@@ -158,11 +158,15 @@ bool Resolver::ResolveInternal() {
     Mark(&builder_->AST());
 
     // Process all module-scope declarations in dependency order.
+    utils::Vector<const ast::DiagnosticControl*, 4> diagnostic_controls;
     for (auto* decl : dependencies_.ordered_globals) {
         Mark(decl);
         if (!Switch<bool>(
                 decl,  //
-                [&](const ast::DiagnosticControl* dc) { return DiagnosticControl(dc); },
+                [&](const ast::DiagnosticDirective* d) {
+                    diagnostic_controls.Push(&d->control);
+                    return DiagnosticControl(d->control);
+                },
                 [&](const ast::Enable* e) { return Enable(e); },
                 [&](const ast::TypeDecl* td) { return TypeDecl(td); },
                 [&](const ast::Function* func) { return Function(func); },
@@ -183,7 +187,7 @@ bool Resolver::ResolveInternal() {
 
     SetShadows();
 
-    if (!validator_.DiagnosticControls(builder_->AST().DiagnosticControls(), "directive")) {
+    if (!validator_.DiagnosticControls(diagnostic_controls, "directive")) {
         return false;
     }
 
@@ -989,7 +993,6 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     for (auto* attr : decl->attributes) {
         Mark(attr);
         if (auto* dc = attr->As<ast::DiagnosticAttribute>()) {
-            Mark(dc->control);
             if (!DiagnosticControl(dc->control)) {
                 return nullptr;
             }
@@ -3069,18 +3072,18 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
     return sem;
 }
 
-bool Resolver::DiagnosticControl(const ast::DiagnosticControl* control) {
-    Mark(control->rule_name);
+bool Resolver::DiagnosticControl(const ast::DiagnosticControl& control) {
+    Mark(control.rule_name);
 
-    auto rule_name = builder_->Symbols().NameFor(control->rule_name->symbol);
+    auto rule_name = builder_->Symbols().NameFor(control.rule_name->symbol);
     auto rule = ast::ParseDiagnosticRule(rule_name);
     if (rule != ast::DiagnosticRule::kUndefined) {
-        validator_.DiagnosticFilters().Set(rule, control->severity);
+        validator_.DiagnosticFilters().Set(rule, control.severity);
     } else {
         std::ostringstream ss;
         ss << "unrecognized diagnostic rule '" << rule_name << "'\n";
         utils::SuggestAlternatives(rule_name, ast::kDiagnosticRuleStrings, ss);
-        AddWarning(ss.str(), control->rule_name->source);
+        AddWarning(ss.str(), control.rule_name->source);
     }
     return true;
 }
@@ -3863,7 +3866,6 @@ SEM* Resolver::StatementScope(const ast::Statement* ast, SEM* sem, F&& callback)
         for (auto* attr : stmt->attributes) {
             Mark(attr);
             if (auto* dc = attr->template As<ast::DiagnosticAttribute>()) {
-                Mark(dc->control);
                 if (!DiagnosticControl(dc->control)) {
                     return false;
                 }

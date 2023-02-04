@@ -149,10 +149,10 @@ TEST_F(ModuleTest, Directives) {
                                              enable_1,
                                              enable_2,
                                          }));
-    EXPECT_THAT(program.AST().DiagnosticControls(), ::testing::ContainerEq(utils::Vector{
-                                                        diagnostic_1,
-                                                        diagnostic_2,
-                                                    }));
+    EXPECT_THAT(program.AST().DiagnosticDirectives(), ::testing::ContainerEq(utils::Vector{
+                                                          diagnostic_1,
+                                                          diagnostic_2,
+                                                      }));
 }
 
 }  // namespace

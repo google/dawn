@@ -263,7 +263,7 @@ class Resolver {
 
     /// @param control the diagnostic control
     /// @returns true on success, false on failure
-    bool DiagnosticControl(const ast::DiagnosticControl* control);
+    bool DiagnosticControl(const ast::DiagnosticControl& control);
 
     /// @param enable the enable declaration
     /// @returns the resolved extension

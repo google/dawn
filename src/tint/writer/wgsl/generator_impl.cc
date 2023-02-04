@@ -71,9 +71,9 @@ bool GeneratorImpl::Generate() {
         }
         has_directives = true;
     }
-    for (auto diagnostic : program_->AST().DiagnosticControls()) {
+    for (auto diagnostic : program_->AST().DiagnosticDirectives()) {
         auto out = line();
-        if (!EmitDiagnosticControl(out, diagnostic)) {
+        if (!EmitDiagnosticControl(out, diagnostic->control)) {
             return false;
         }
         out << ";";
@@ -84,7 +84,7 @@ bool GeneratorImpl::Generate() {
     }
     // Generate global declarations in the order they appear in the module.
     for (auto* decl : program_->AST().GlobalDeclarations()) {
-        if (decl->IsAnyOf<ast::DiagnosticControl, ast::Enable>()) {
+        if (decl->IsAnyOf<ast::DiagnosticDirective, ast::Enable>()) {
             continue;
         }
         if (!Switch(
@@ -108,9 +108,9 @@ bool GeneratorImpl::Generate() {
 }
 
 bool GeneratorImpl::EmitDiagnosticControl(std::ostream& out,
-                                          const ast::DiagnosticControl* diagnostic) {
-    out << "diagnostic(" << diagnostic->severity << ", "
-        << program_->Symbols().NameFor(diagnostic->rule_name->symbol) << ")";
+                                          const ast::DiagnosticControl& diagnostic) {
+    out << "diagnostic(" << diagnostic.severity << ", "
+        << program_->Symbols().NameFor(diagnostic.rule_name->symbol) << ")";
     return true;
 }
 

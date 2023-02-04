@@ -12,39 +12,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_AST_DIAGNOSTIC_ATTRIBUTE_H_
-#define SRC_TINT_AST_DIAGNOSTIC_ATTRIBUTE_H_
+#ifndef SRC_TINT_AST_DIAGNOSTIC_DIRECTIVE_H_
+#define SRC_TINT_AST_DIAGNOSTIC_DIRECTIVE_H_
 
 #include <string>
+#include <utility>
+#include <vector>
 
-#include "src/tint/ast/attribute.h"
 #include "src/tint/ast/diagnostic_control.h"
+#include "src/tint/ast/node.h"
 
 namespace tint::ast {
 
-/// A diagnostic attribute
-class DiagnosticAttribute final : public Castable<DiagnosticAttribute, Attribute> {
+/// A "diagnostic" directive. Example:
+/// ```
+///   // Turn off diagnostics for derivative uniformity violations.
+///   diagnostic(off, derivative_uniformity);
+/// ```
+class DiagnosticDirective final : public Castable<DiagnosticDirective, Node> {
   public:
-    /// constructor
+    /// Create a extension
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param dc the diagnostic control
-    DiagnosticAttribute(ProgramID pid, NodeID nid, const Source& src, ast::DiagnosticControl&& dc);
-    ~DiagnosticAttribute() override;
+    DiagnosticDirective(ProgramID pid, NodeID nid, const Source& src, DiagnosticControl&& dc);
 
-    /// @returns the WGSL name for the attribute
-    std::string Name() const override;
+    /// Move constructor
+    DiagnosticDirective(DiagnosticDirective&&);
+
+    /// Destructor
+    ~DiagnosticDirective() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const DiagnosticAttribute* Clone(CloneContext* ctx) const override;
+    const DiagnosticDirective* Clone(CloneContext* ctx) const override;
 
     /// The diagnostic control.
-    const ast::DiagnosticControl control;
+    const DiagnosticControl control;
 };
 
 }  // namespace tint::ast
 
-#endif  // SRC_TINT_AST_DIAGNOSTIC_ATTRIBUTE_H_
+#endif  // SRC_TINT_AST_DIAGNOSTIC_DIRECTIVE_H_

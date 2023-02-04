@@ -717,7 +717,7 @@ class ParserImpl {
     Expect<ast::DiagnosticSeverity> expect_severity_control_name();
     /// Parses a diagnostic_control grammar element.
     /// @return the parsed diagnostic control, or nullptr on error.
-    Expect<const ast::DiagnosticControl*> expect_diagnostic_control();
+    Expect<ast::DiagnosticControl> expect_diagnostic_control();
 
     /// Splits a peekable token into to parts filling in the peekable fields.
     /// @param lhs the token to set in the current position

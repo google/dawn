@@ -12,35 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/diagnostic_attribute.h"
-
-#include <string>
-#include <utility>
+#include "src/tint/ast/diagnostic_directive.h"
 
 #include "src/tint/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticAttribute);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticDirective);
 
 namespace tint::ast {
 
-DiagnosticAttribute::DiagnosticAttribute(ProgramID pid,
+DiagnosticDirective::DiagnosticDirective(ProgramID pid,
                                          NodeID nid,
                                          const Source& src,
-                                         ast::DiagnosticControl&& dc)
+                                         DiagnosticControl&& dc)
     : Base(pid, nid, src), control(std::move(dc)) {}
 
-DiagnosticAttribute::~DiagnosticAttribute() = default;
+DiagnosticDirective::DiagnosticDirective(DiagnosticDirective&&) = default;
 
-std::string DiagnosticAttribute::Name() const {
-    return "diagnostic";
-}
+DiagnosticDirective::~DiagnosticDirective() = default;
 
-const DiagnosticAttribute* DiagnosticAttribute::Clone(CloneContext* ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
+const DiagnosticDirective* DiagnosticDirective::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto rule = ctx->Clone(control.rule_name);
     DiagnosticControl dc(control.severity, rule);
-    return ctx->dst->create<DiagnosticAttribute>(src, std::move(dc));
+    return ctx->dst->create<DiagnosticDirective>(src, std::move(dc));
 }
-
 }  // namespace tint::ast

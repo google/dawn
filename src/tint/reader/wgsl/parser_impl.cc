@@ -383,6 +383,7 @@ Maybe<Void> ParserImpl::diagnostic_directive() {
             return Failure::kNoMatch;
         }
 
+        auto source = last_source();
         auto control = expect_diagnostic_control();
         if (control.errored) {
             return Failure::kErrored;
@@ -392,7 +393,8 @@ Maybe<Void> ParserImpl::diagnostic_directive() {
             return Failure::kErrored;
         }
 
-        builder_.AST().AddDiagnosticControl(std::move(control.value));
+        auto* directive = create<ast::DiagnosticDirective>(source, std::move(control.value));
+        builder_.AST().AddDiagnosticDirective(directive);
 
         return kSuccess;
     });
@@ -3587,7 +3589,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
         if (control.errored) {
             return Failure::kErrored;
         }
-        return create<ast::DiagnosticAttribute>(t.source(), control.value);
+        return create<ast::DiagnosticAttribute>(t.source(), std::move(control.value));
     }
 
     if (t == "fragment") {
@@ -3756,9 +3758,8 @@ Expect<ast::DiagnosticSeverity> ParserImpl::expect_severity_control_name() {
 
 // diagnostic_control
 // : PAREN_LEFT severity_control_name COMMA ident_pattern_token COMMA ? PAREN_RIGHT
-Expect<const ast::DiagnosticControl*> ParserImpl::expect_diagnostic_control() {
-    auto source = last_source();
-    return expect_paren_block("diagnostic control", [&]() -> Expect<const ast::DiagnosticControl*> {
+Expect<ast::DiagnosticControl> ParserImpl::expect_diagnostic_control() {
+    return expect_paren_block("diagnostic control", [&]() -> Expect<ast::DiagnosticControl> {
         auto severity_control = expect_severity_control_name();
         if (severity_control.errored) {
             return Failure::kErrored;
@@ -3774,8 +3775,8 @@ Expect<const ast::DiagnosticControl*> ParserImpl::expect_diagnostic_control() {
         }
         match(Token::Type::kComma);
 
-        return create<ast::DiagnosticControl>(source, severity_control.value,
-                                              builder_.Ident(rule_name.source, rule_name.value));
+        return ast::DiagnosticControl(severity_control.value,
+                                      builder_.Ident(rule_name.source, rule_name.value));
     });
 }
 

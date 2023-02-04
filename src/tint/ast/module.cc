@@ -71,9 +71,9 @@ void Module::BinGlobalDeclaration(const tint::ast::Node* decl, diag::List& diags
             TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id);
             global_variables_.Push(var);
         },
-        [&](const DiagnosticControl* diag_control) {
-            TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, diag_control, program_id);
-            diagnostic_controls_.Push(diag_control);
+        [&](const DiagnosticDirective* diagnostic) {
+            TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, diagnostic, program_id);
+            diagnostic_directives_.Push(diagnostic);
         },
         [&](const Enable* enable) {
             TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, enable, program_id);
@@ -86,11 +86,11 @@ void Module::BinGlobalDeclaration(const tint::ast::Node* decl, diag::List& diags
         [&](Default) { TINT_ICE(AST, diags) << "Unknown global declaration type"; });
 }
 
-void Module::AddDiagnosticControl(const ast::DiagnosticControl* control) {
-    TINT_ASSERT(AST, control);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, control, program_id);
-    global_declarations_.Push(control);
-    diagnostic_controls_.Push(control);
+void Module::AddDiagnosticDirective(const ast::DiagnosticDirective* directive) {
+    TINT_ASSERT(AST, directive);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, directive, program_id);
+    global_declarations_.Push(directive);
+    diagnostic_directives_.Push(directive);
 }
 
 void Module::AddEnable(const ast::Enable* enable) {
@@ -143,6 +143,7 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
     functions_.Clear();
     global_variables_.Clear();
     enables_.Clear();
+    diagnostic_directives_.Clear();
 
     for (auto* decl : global_declarations_) {
         if (TINT_UNLIKELY(!decl)) {
