@@ -558,7 +558,7 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
     return true;
 }
 
-uint32_t Builder::GenerateExpression(const sem::Expression* expr) {
+uint32_t Builder::GenerateExpression(const sem::ValueExpression* expr) {
     if (auto* constant = expr->ConstantValue()) {
         return GenerateConstantIfNeeded(constant);
     }
@@ -2625,7 +2625,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     auto& arguments = call->Arguments();
 
     // Generates the given expression, returning the operand ID
-    auto gen = [&](const sem::Expression* expr) { return Operand(GenerateExpression(expr)); };
+    auto gen = [&](const sem::ValueExpression* expr) { return Operand(GenerateExpression(expr)); };
 
     // Returns the argument with the given usage
     auto arg = [&](Usage usage) {

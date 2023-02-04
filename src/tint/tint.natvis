@@ -260,7 +260,7 @@
 		<DisplayString>Type={*Type()} Value={Value()}</DisplayString>
 	</Type>
 
-	<Type Name="tint::sem::Expression">
+	<Type Name="tint::sem::ValueExpression">
 		<DisplayString>Decl={*declaration_}</DisplayString>
 	</Type>
 

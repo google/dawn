@@ -41,7 +41,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
 
     // Returns true if the expression should be hoisted to a new let statement before the
     // expression's statement.
-    auto should_hoist = [&](const sem::Expression* expr) {
+    auto should_hoist = [&](const sem::ValueExpression* expr) {
         if (!expr->Type()->IsAnyOf<type::Array, type::Struct>()) {
             // We only care about array and struct initializers
             return false;
@@ -77,13 +77,13 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
     };
 
     // A list of expressions that should be hoisted.
-    utils::Vector<const sem::Expression*, 32> to_hoist;
+    utils::Vector<const sem::ValueExpression*, 32> to_hoist;
     // A set of expressions that are constant, which _may_ need to be hoisted.
     utils::Hashset<const ast::Expression*, 32> const_chains;
 
     // Walk the AST nodes. This order guarantees that leaf-expressions are visited first.
     for (auto* node : src->ASTNodes().Objects()) {
-        if (auto* sem = src->Sem().Get<sem::Expression>(node)) {
+        if (auto* sem = src->Sem().Get<sem::ValueExpression>(node)) {
             auto* stmt = sem->Stmt();
             if (!stmt) {
                 // Expression is outside of a statement. This usually means the expression is part

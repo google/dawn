@@ -18,7 +18,7 @@
 #include <functional>
 #include <memory>
 
-#include "src/tint/sem/expression.h"
+#include "src/tint/sem/value_expression.h"
 #include "src/tint/transform/transform.h"
 
 namespace tint::transform {
@@ -52,7 +52,7 @@ class HoistToDeclBefore {
     /// @param kind variable kind to hoist to
     /// @param decl_name optional name to use for the variable/constant name
     /// @return true on success
-    bool Add(const sem::Expression* before_expr,
+    bool Add(const sem::ValueExpression* before_expr,
              const ast::Expression* expr,
              VariableKind kind,
              const char* decl_name = "");
@@ -81,7 +81,7 @@ class HoistToDeclBefore {
     /// needed.
     /// @param before_expr expression we would hoist a decl before
     /// @return true on success
-    bool Prepare(const sem::Expression* before_expr);
+    bool Prepare(const sem::ValueExpression* before_expr);
 
   private:
     struct State;

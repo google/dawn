@@ -18,7 +18,7 @@
 
 #include "src/tint/demangler.h"
 #include "src/tint/resolver/resolver.h"
-#include "src/tint/sem/expression.h"
+#include "src/tint/sem/value_expression.h"
 
 namespace tint {
 namespace {

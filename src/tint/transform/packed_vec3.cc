@@ -72,11 +72,11 @@ struct PackedVec3::State {
 
         // Walk the nodes, starting with the most deeply nested, finding all the AST expressions
         // that load a whole packed vector (not a scalar / swizzle of the vector).
-        utils::Hashset<const sem::Expression*, 16> refs;
+        utils::Hashset<const sem::ValueExpression*, 16> refs;
         for (auto* node : ctx.src->ASTNodes().Objects()) {
             auto* sem_node = sem.Get(node);
             if (sem_node) {
-                if (auto* expr = sem_node->As<sem::Expression>()) {
+                if (auto* expr = sem_node->As<sem::ValueExpression>()) {
                     sem_node = expr->UnwrapLoad();
                 }
             }
@@ -104,7 +104,7 @@ struct PackedVec3::State {
                         refs.Add(user);  // then propagate tracking to pointer usage
                     }
                 },
-                [&](const sem::Expression* expr) {
+                [&](const sem::ValueExpression* expr) {
                     if (auto* unary = expr->Declaration()->As<ast::UnaryOpExpression>()) {
                         if (unary->op == ast::UnaryOp::kAddressOf ||
                             unary->op == ast::UnaryOp::kIndirection) {

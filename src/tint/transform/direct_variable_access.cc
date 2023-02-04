@@ -151,7 +151,7 @@ bool operator!=(const AccessShape& a, const AccessShape& b) {
 struct AccessChain : AccessShape {
     /// The array accessor index expressions. This vector is indexed by the `DynamicIndex`s in
     /// #indices.
-    tint::utils::Vector<const tint::sem::Expression*, 8> dynamic_indices;
+    tint::utils::Vector<const tint::sem::ValueExpression*, 8> dynamic_indices;
     /// If true, then this access chain is used as an argument to call a variant.
     bool used_in_call = false;
 };
@@ -216,7 +216,7 @@ struct DirectVariableAccess::State {
         // are grown and moved up the expression tree. After this stage, we are left with all the
         // expression access chains to variables that we may need to transform.
         for (auto* node : ctx.src->ASTNodes().Objects()) {
-            if (auto* expr = sem.Get<sem::Expression>(node)) {
+            if (auto* expr = sem.Get<sem::ValueExpression>(node)) {
                 AppendAccessChain(expr);
             }
         }
@@ -361,7 +361,7 @@ struct DirectVariableAccess::State {
         /// A map of variant signature to the variant data.
         utils::Hashmap<FnVariant::Signature, FnVariant, 8> variants;
         /// A map of expressions that have been hoisted to a 'let' declaration in the function.
-        utils::Hashmap<const sem::Expression*, Symbol, 8> hoisted_exprs;
+        utils::Hashmap<const sem::ValueExpression*, Symbol, 8> hoisted_exprs;
 
         /// @returns the variants of the function in a deterministically ordered vector.
         utils::Vector<std::pair<const FnVariant::Signature*, FnVariant*>, 8> SortedVariants() {
@@ -392,7 +392,7 @@ struct DirectVariableAccess::State {
     /// pointer parameter.
     utils::Hashmap<AccessShape, Symbol, 8> dynamic_index_array_aliases;
     /// Map of semantic expression to AccessChain
-    utils::Hashmap<const sem::Expression*, AccessChain*, 32> access_chains;
+    utils::Hashmap<const sem::ValueExpression*, AccessChain*, 32> access_chains;
     /// Allocator for FnInfo
     utils::BlockAllocator<FnInfo> fn_info_allocator;
     /// Allocator for AccessChain
@@ -418,10 +418,10 @@ struct DirectVariableAccess::State {
 
     /// AppendAccessChain creates or extends an existing AccessChain for the given expression,
     /// modifying the #access_chains map.
-    void AppendAccessChain(const sem::Expression* expr) {
+    void AppendAccessChain(const sem::ValueExpression* expr) {
         // take_chain moves the AccessChain from the expression `from` to the expression `expr`.
         // Returns nullptr if `from` did not hold an access chain.
-        auto take_chain = [&](const sem::Expression* from) -> AccessChain* {
+        auto take_chain = [&](const sem::ValueExpression* from) -> AccessChain* {
             if (auto* chain = AccessChainFor(from)) {
                 access_chains.Remove(from);
                 access_chains.Add(expr, chain);
@@ -492,7 +492,7 @@ struct DirectVariableAccess::State {
                     chain->dynamic_indices.Push(a->Index());
                 }
             },
-            [&](const sem::Expression* e) {
+            [&](const sem::ValueExpression* e) {
                 if (auto* unary = e->Declaration()->As<ast::UnaryOpExpression>()) {
                     // Unary op.
                     // If this is a '&' or '*', simply move the chain to the unary op expression.
@@ -556,7 +556,7 @@ struct DirectVariableAccess::State {
     /// * Casts the resulting expression to a u32 if @p cast_to_u32 is true, and the expression type
     ///   isn't implicitly usable as a u32. This is to help feed the expression into a
     ///   `array<u32, N>` argument passed to a callee variant function.
-    const ast::Expression* BuildDynamicIndex(const sem::Expression* idx, bool cast_to_u32) {
+    const ast::Expression* BuildDynamicIndex(const sem::ValueExpression* idx, bool cast_to_u32) {
         if (auto* val = idx->ConstantValue()) {
             // Expression evaluated to a constant value. Just emit that constant.
             return b.Expr(val->ValueAs<AInt>());
@@ -766,7 +766,7 @@ struct DirectVariableAccess::State {
 
     /// @returns the AccessChain for the expression @p expr, or nullptr if the expression does
     /// not hold an access chain.
-    AccessChain* AccessChainFor(const sem::Expression* expr) const {
+    AccessChain* AccessChainFor(const sem::ValueExpression* expr) const {
         if (auto chain = access_chains.Find(expr)) {
             return *chain;
         }
@@ -990,7 +990,7 @@ struct DirectVariableAccess::State {
                 return nullptr;  // Just clone the expression.
             }
 
-            auto* expr = sem.Get<sem::Expression>(ast_expr);
+            auto* expr = sem.Get<sem::ValueExpression>(ast_expr);
             if (!expr) {
                 // No semantic node for the expression.
                 return nullptr;  // Just clone the expression.

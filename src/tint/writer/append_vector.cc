@@ -18,9 +18,9 @@
 #include <vector>
 
 #include "src/tint/sem/call.h"
-#include "src/tint/sem/expression.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_expression.h"
 #include "src/tint/utils/transform.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -33,7 +33,7 @@ struct VectorInitializerInfo {
     const sem::TypeInitializer* ctor = nullptr;
     operator bool() const { return call != nullptr; }
 };
-VectorInitializerInfo AsVectorInitializer(const sem::Expression* expr) {
+VectorInitializerInfo AsVectorInitializer(const sem::ValueExpression* expr) {
     if (auto* call = expr->As<sem::Call>()) {
         if (auto* ctor = call->Target()->As<sem::TypeInitializer>()) {
             if (ctor->ReturnType()->Is<type::Vector>()) {
@@ -44,7 +44,9 @@ VectorInitializerInfo AsVectorInitializer(const sem::Expression* expr) {
     return {};
 }
 
-const sem::Expression* Zero(ProgramBuilder& b, const type::Type* ty, const sem::Statement* stmt) {
+const sem::ValueExpression* Zero(ProgramBuilder& b,
+                                 const type::Type* ty,
+                                 const sem::Statement* stmt) {
     const ast::Expression* expr = nullptr;
     if (ty->Is<type::I32>()) {
         expr = b.Expr(0_i);
@@ -59,9 +61,9 @@ const sem::Expression* Zero(ProgramBuilder& b, const type::Type* ty, const sem::
             << "unsupported vector element type: " << ty->TypeInfo().name;
         return nullptr;
     }
-    auto* sem = b.create<sem::Expression>(expr, ty, sem::EvaluationStage::kRuntime, stmt,
-                                          /* constant_value */ nullptr,
-                                          /* has_side_effects */ false);
+    auto* sem = b.create<sem::ValueExpression>(expr, ty, sem::EvaluationStage::kRuntime, stmt,
+                                               /* constant_value */ nullptr,
+                                               /* has_side_effects */ false);
     b.Sem().Add(expr, sem);
     return sem;
 }
@@ -112,7 +114,7 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     // to convert a vector of a different type, e.g. vec2<i32>(vec2<u32>()).
     // In that case, preserve the original argument, or you'll get a type error.
 
-    utils::Vector<const sem::Expression*, 4> packed;
+    utils::Vector<const sem::ValueExpression*, 4> packed;
     if (auto vc = AsVectorInitializer(vector_sem)) {
         const auto num_supplied = vc.call->Arguments().Length();
         if (num_supplied == 0) {
@@ -141,7 +143,7 @@ const sem::Call* AppendVector(ProgramBuilder* b,
             sem::EvaluationStage::kRuntime);
         auto* scalar_cast_sem = b->create<sem::Call>(
             scalar_cast_ast, scalar_cast_target, sem::EvaluationStage::kRuntime,
-            utils::Vector<const sem::Expression*, 1>{scalar_sem}, statement,
+            utils::Vector<const sem::ValueExpression*, 1>{scalar_sem}, statement,
             /* constant_value */ nullptr, /* has_side_effects */ false);
         b->Sem().Add(scalar_cast_ast, scalar_cast_sem);
         packed.Push(scalar_cast_sem);
@@ -149,17 +151,19 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         packed.Push(scalar_sem);
     }
 
-    auto* initializer_ast = b->Construct(
-        packed_ast_ty,
-        utils::Transform(packed, [&](const sem::Expression* expr) { return expr->Declaration(); }));
+    auto* initializer_ast =
+        b->Construct(packed_ast_ty, utils::Transform(packed, [&](const sem::ValueExpression* expr) {
+                         return expr->Declaration();
+                     }));
     auto* initializer_target = b->create<sem::TypeInitializer>(
         packed_sem_ty,
-        utils::Transform(packed,
-                         [&](const tint::sem::Expression* arg, size_t i) -> const sem::Parameter* {
-                             return b->create<sem::Parameter>(
-                                 nullptr, static_cast<uint32_t>(i), arg->Type()->UnwrapRef(),
-                                 type::AddressSpace::kNone, type::Access::kUndefined);
-                         }),
+        utils::Transform(
+            packed,
+            [&](const tint::sem::ValueExpression* arg, size_t i) -> const sem::Parameter* {
+                return b->create<sem::Parameter>(
+                    nullptr, static_cast<uint32_t>(i), arg->Type()->UnwrapRef(),
+                    type::AddressSpace::kNone, type::Access::kUndefined);
+            }),
         sem::EvaluationStage::kRuntime);
     auto* initializer_sem =
         b->create<sem::Call>(initializer_ast, initializer_target, sem::EvaluationStage::kRuntime,

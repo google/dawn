@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/sem/expression.h"
+#include "src/tint/sem/value_expression.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/type/array_count.h"
 
@@ -63,7 +63,7 @@ class UnnamedOverrideArrayCount final
   public:
     /// Constructor
     /// @param e the override expression
-    explicit UnnamedOverrideArrayCount(const Expression* e);
+    explicit UnnamedOverrideArrayCount(const ValueExpression* e);
     ~UnnamedOverrideArrayCount() override;
 
     /// @param other the other node
@@ -90,7 +90,7 @@ class UnnamedOverrideArrayCount final
     /// ```
     // The array count for `a` and `b` have equivalent AST expressions, but the types for `a` and
     // `b` must not compare equal.
-    const Expression* expr;
+    const ValueExpression* expr;
 };
 
 }  // namespace tint::sem

@@ -275,7 +275,7 @@ class Builder {
     /// Generates an expression
     /// @param expr the expression to generate
     /// @returns the resulting ID of the expression or 0 on error
-    uint32_t GenerateExpression(const sem::Expression* expr);
+    uint32_t GenerateExpression(const sem::ValueExpression* expr);
     /// Generates an expression
     /// @param expr the expression to generate
     /// @returns the resulting ID of the expression or 0 on error

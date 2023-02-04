@@ -34,7 +34,7 @@ namespace tint::constant {
 class Value;
 }  // namespace tint::constant
 namespace tint::sem {
-class Expression;
+class ValueExpression;
 }  // namespace tint::sem
 namespace tint::type {
 class StructMember;
@@ -77,7 +77,8 @@ class ConstEval {
     /// @param ty the target type - must be an array or initializer
     /// @param args the input arguments
     /// @return the constructed value, or null if the value cannot be calculated
-    Result ArrayOrStructInit(const type::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    Result ArrayOrStructInit(const type::Type* ty,
+                             utils::VectorRef<const sem::ValueExpression*> args);
 
     /// @param ty the target type
     /// @param value the value being converted
@@ -89,7 +90,7 @@ class ConstEval {
     /// @param obj the object being indexed
     /// @param idx the index expression
     /// @return the result of the index, or null if the value cannot be calculated
-    Result Index(const sem::Expression* obj, const sem::Expression* idx);
+    Result Index(const sem::ValueExpression* obj, const sem::ValueExpression* idx);
 
     /// @param ty the result type
     /// @param lit the literal AST node
@@ -99,14 +100,14 @@ class ConstEval {
     /// @param obj the object being accessed
     /// @param member the member
     /// @return the result of the member access, or null if the value cannot be calculated
-    Result MemberAccess(const sem::Expression* obj, const type::StructMember* member);
+    Result MemberAccess(const sem::ValueExpression* obj, const type::StructMember* member);
 
     /// @param ty the result type
     /// @param vector the vector being swizzled
     /// @param indices the swizzle indices
     /// @return the result of the swizzle, or null if the value cannot be calculated
     Result Swizzle(const type::Type* ty,
-                   const sem::Expression* vector,
+                   const sem::ValueExpression* vector,
                    utils::VectorRef<uint32_t> indices);
 
     /// Convert the `value` to `target_type`

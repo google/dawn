@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_SEM_LOAD_H_
 #define SRC_TINT_SEM_LOAD_H_
 
-#include "src/tint/sem/expression.h"
+#include "src/tint/sem/value_expression.h"
 #include "src/tint/type/reference.h"
 
 namespace tint::sem {
@@ -23,18 +23,18 @@ namespace tint::sem {
 /// Load is a semantic expression which represents the load of a reference to a non-reference value.
 /// Loads from reference types are implicit in WGSL, so the Load semantic node shares the same AST
 /// node as the inner semantic node.
-class Load final : public Castable<Load, Expression> {
+class Load final : public Castable<Load, ValueExpression> {
   public:
     /// Constructor
     /// @param reference the reference expression being loaded
     /// @param statement the statement that owns this expression
-    Load(const Expression* reference, const Statement* statement);
+    Load(const ValueExpression* reference, const Statement* statement);
 
     /// Destructor
     ~Load() override;
 
     /// @return the reference being loaded
-    const Expression* Reference() const { return reference_; }
+    const ValueExpression* Reference() const { return reference_; }
 
     /// @returns the type of the loaded reference.
     const type::Reference* ReferenceType() const {
@@ -42,7 +42,7 @@ class Load final : public Castable<Load, Expression> {
     }
 
   private:
-    Expression const* const reference_;
+    ValueExpression const* const reference_;
 };
 
 }  // namespace tint::sem

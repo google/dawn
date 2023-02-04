@@ -31,7 +31,7 @@ class Value;
 namespace tint::sem {
 class CaseStatement;
 class CaseSelector;
-class Expression;
+class ValueExpression;
 }  // namespace tint::sem
 
 namespace tint::sem {

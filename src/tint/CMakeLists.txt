@@ -328,8 +328,6 @@ list(APPEND TINT_LIB_SRCS
   sem/call.cc
   sem/call.h
   sem/evaluation_stage.h
-  sem/expression.cc
-  sem/expression.h
   sem/for_loop_statement.cc
   sem/for_loop_statement.h
   sem/function.cc
@@ -363,6 +361,8 @@ list(APPEND TINT_LIB_SRCS
   sem/type_conversion.h
   sem/type_mappings.h
   sem/variable.cc
+  sem/value_expression.cc
+  sem/value_expression.h
   sem/while_statement.cc
   sem/while_statement.h
   symbol_table.cc
@@ -972,8 +972,8 @@ if(TINT_BUILD_TESTS)
     scope_stack_test.cc
     sem/builtin_test.cc
     sem/diagnostic_severity_test.cc
-    sem/expression_test.cc
     sem/struct_test.cc
+    sem/value_expression_test.cc
     source_test.cc
     symbol_table_test.cc
     symbol_test.cc

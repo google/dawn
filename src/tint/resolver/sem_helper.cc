@@ -14,7 +14,7 @@
 
 #include "src/tint/resolver/sem_helper.h"
 
-#include "src/tint/sem/expression.h"
+#include "src/tint/sem/value_expression.h"
 
 namespace tint::resolver {
 

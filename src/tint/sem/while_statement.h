@@ -22,7 +22,7 @@ namespace tint::ast {
 class WhileStatement;
 }  // namespace tint::ast
 namespace tint::sem {
-class Expression;
+class ValueExpression;
 }  // namespace tint::sem
 
 namespace tint::sem {
@@ -45,14 +45,14 @@ class WhileStatement final : public Castable<WhileStatement, CompoundStatement> 
     const ast::WhileStatement* Declaration() const;
 
     /// @returns the whilecondition expression
-    const Expression* Condition() const { return condition_; }
+    const ValueExpression* Condition() const { return condition_; }
 
     /// Sets the while condition expression
     /// @param condition the while condition expression
-    void SetCondition(const Expression* condition) { condition_ = condition; }
+    void SetCondition(const ValueExpression* condition) { condition_ = condition; }
 
   private:
-    const Expression* condition_ = nullptr;
+    const ValueExpression* condition_ = nullptr;
 };
 
 }  // namespace tint::sem

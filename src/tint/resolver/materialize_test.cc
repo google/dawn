@@ -76,7 +76,7 @@ class MaterializeTest : public resolver::ResolverTestWithParam<CASE> {
   protected:
     using ProgramBuilder::FriendlyName;
 
-    void CheckTypesAndValues(const sem::Expression* expr,
+    void CheckTypesAndValues(const sem::ValueExpression* expr,
                              const tint::type::Type* expected_sem_ty,
                              const std::variant<AInt, AFloat>& expected_value) {
         std::visit([&](auto v) { CheckTypesAndValuesImpl(expr, expected_sem_ty, v); },
@@ -85,7 +85,7 @@ class MaterializeTest : public resolver::ResolverTestWithParam<CASE> {
 
   private:
     template <typename T>
-    void CheckTypesAndValuesImpl(const sem::Expression* expr,
+    void CheckTypesAndValuesImpl(const sem::ValueExpression* expr,
                                  const tint::type::Type* expected_sem_ty,
                                  T expected_value) {
         EXPECT_TYPE(expr->Type(), expected_sem_ty);

@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_SEM_MEMBER_ACCESSOR_EXPRESSION_H_
 #define SRC_TINT_SEM_MEMBER_ACCESSOR_EXPRESSION_H_
 
-#include "src/tint/sem/expression.h"
+#include "src/tint/sem/value_expression.h"
 #include "src/tint/utils/vector.h"
 
 // Forward declarations
@@ -30,13 +30,13 @@ namespace tint::sem {
 
 /// MemberAccessorExpression holds the semantic information for a
 /// ast::MemberAccessorExpression node.
-class MemberAccessorExpression : public Castable<MemberAccessorExpression, Expression> {
+class MemberAccessorExpression : public Castable<MemberAccessorExpression, ValueExpression> {
   public:
     /// Destructor
     ~MemberAccessorExpression() override;
 
     /// @returns the object that holds the member being accessed
-    const Expression* Object() const { return object_; }
+    const ValueExpression* Object() const { return object_; }
 
   protected:
     /// Constructor
@@ -53,12 +53,12 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Expre
                              EvaluationStage stage,
                              const Statement* statement,
                              const constant::Value* constant,
-                             const Expression* object,
+                             const ValueExpression* object,
                              bool has_side_effects,
                              const Variable* root_ident = nullptr);
 
   private:
-    Expression const* const object_;
+    ValueExpression const* const object_;
 };
 
 /// StructMemberAccess holds the semantic information for a
@@ -79,7 +79,7 @@ class StructMemberAccess final : public Castable<StructMemberAccess, MemberAcces
                        const type::Type* type,
                        const Statement* statement,
                        const constant::Value* constant,
-                       const Expression* object,
+                       const ValueExpression* object,
                        const StructMember* member,
                        bool has_side_effects,
                        const Variable* root_ident = nullptr);
@@ -111,7 +111,7 @@ class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
             const type::Type* type,
             const Statement* statement,
             const constant::Value* constant,
-            const Expression* object,
+            const ValueExpression* object,
             utils::VectorRef<uint32_t> indices,
             bool has_side_effects,
             const Variable* root_ident = nullptr);

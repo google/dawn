@@ -23,8 +23,8 @@
 
 #include "src/tint/ast/parameter.h"
 #include "src/tint/sem/binding_point.h"
-#include "src/tint/sem/expression.h"
 #include "src/tint/sem/parameter_usage.h"
+#include "src/tint/sem/value_expression.h"
 #include "src/tint/type/access.h"
 #include "src/tint/type/address_space.h"
 #include "src/tint/type/type.h"
@@ -84,11 +84,11 @@ class Variable : public Castable<Variable, Node> {
 
     /// @returns the variable initializer expression, or nullptr if the variable
     /// does not have one.
-    const Expression* Initializer() const { return initializer_; }
+    const ValueExpression* Initializer() const { return initializer_; }
 
     /// Sets the variable initializer expression.
     /// @param initializer the initializer expression to assign to this variable.
-    void SetInitializer(const Expression* initializer) { initializer_ = initializer; }
+    void SetInitializer(const ValueExpression* initializer) { initializer_ = initializer; }
 
     /// @returns the expressions that use the variable
     const std::vector<const VariableUser*>& Users() const { return users_; }
@@ -103,7 +103,7 @@ class Variable : public Castable<Variable, Node> {
     const type::AddressSpace address_space_;
     const type::Access access_;
     const constant::Value* constant_value_;
-    const Expression* initializer_ = nullptr;
+    const ValueExpression* initializer_ = nullptr;
     std::vector<const VariableUser*> users_;
 };
 
@@ -255,7 +255,7 @@ class Parameter final : public Castable<Parameter, Variable> {
 
 /// VariableUser holds the semantic information for an identifier expression
 /// node that resolves to a variable.
-class VariableUser final : public Castable<VariableUser, Expression> {
+class VariableUser final : public Castable<VariableUser, ValueExpression> {
   public:
     /// Constructor
     /// @param declaration the AST identifier node

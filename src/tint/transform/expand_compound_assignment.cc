@@ -20,9 +20,9 @@
 #include "src/tint/ast/increment_decrement_statement.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/block_statement.h"
-#include "src/tint/sem/expression.h"
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/statement.h"
+#include "src/tint/sem/value_expression.h"
 #include "src/tint/transform/utils/hoist_to_decl_before.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ExpandCompoundAssignment);

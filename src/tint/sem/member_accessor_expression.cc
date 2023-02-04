@@ -28,7 +28,7 @@ MemberAccessorExpression::MemberAccessorExpression(const ast::MemberAccessorExpr
                                                    EvaluationStage stage,
                                                    const Statement* statement,
                                                    const constant::Value* constant,
-                                                   const Expression* object,
+                                                   const ValueExpression* object,
                                                    bool has_side_effects,
                                                    const Variable* root_ident /* = nullptr */)
     : Base(declaration, type, stage, statement, constant, has_side_effects, root_ident),
@@ -40,7 +40,7 @@ StructMemberAccess::StructMemberAccess(const ast::MemberAccessorExpression* decl
                                        const type::Type* type,
                                        const Statement* statement,
                                        const constant::Value* constant,
-                                       const Expression* object,
+                                       const ValueExpression* object,
                                        const StructMember* member,
                                        bool has_side_effects,
                                        const Variable* root_ident /* = nullptr */)
@@ -60,7 +60,7 @@ Swizzle::Swizzle(const ast::MemberAccessorExpression* declaration,
                  const type::Type* type,
                  const Statement* statement,
                  const constant::Value* constant,
-                 const Expression* object,
+                 const ValueExpression* object,
                  utils::VectorRef<uint32_t> indices,
                  bool has_side_effects,
                  const Variable* root_ident /* = nullptr */)

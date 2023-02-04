@@ -1165,7 +1165,7 @@ ConstEval::Result ConstEval::Literal(const type::Type* ty, const ast::LiteralExp
 }
 
 ConstEval::Result ConstEval::ArrayOrStructInit(const type::Type* ty,
-                                               utils::VectorRef<const sem::Expression*> args) {
+                                               utils::VectorRef<const sem::ValueExpression*> args) {
     if (args.IsEmpty()) {
         return ZeroValue(builder, ty);
     }
@@ -1277,8 +1277,8 @@ ConstEval::Result ConstEval::MatInitV(const type::Type* ty,
     return builder.create<constant::Composite>(ty, args);
 }
 
-ConstEval::Result ConstEval::Index(const sem::Expression* obj_expr,
-                                   const sem::Expression* idx_expr) {
+ConstEval::Result ConstEval::Index(const sem::ValueExpression* obj_expr,
+                                   const sem::ValueExpression* idx_expr) {
     auto idx_val = idx_expr->ConstantValue();
     if (!idx_val) {
         return nullptr;
@@ -1306,7 +1306,7 @@ ConstEval::Result ConstEval::Index(const sem::Expression* obj_expr,
     return obj_val->Index(static_cast<size_t>(idx));
 }
 
-ConstEval::Result ConstEval::MemberAccess(const sem::Expression* obj_expr,
+ConstEval::Result ConstEval::MemberAccess(const sem::ValueExpression* obj_expr,
                                           const type::StructMember* member) {
     auto obj_val = obj_expr->ConstantValue();
     if (!obj_val) {
@@ -1316,7 +1316,7 @@ ConstEval::Result ConstEval::MemberAccess(const sem::Expression* obj_expr,
 }
 
 ConstEval::Result ConstEval::Swizzle(const type::Type* ty,
-                                     const sem::Expression* vec_expr,
+                                     const sem::ValueExpression* vec_expr,
                                      utils::VectorRef<uint32_t> indices) {
     auto* vec_val = vec_expr->ConstantValue();
     if (!vec_val) {

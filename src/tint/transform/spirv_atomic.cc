@@ -54,7 +54,7 @@ struct SpirvAtomic::State {
     CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
     std::unordered_map<const ast::Struct*, ForkedStruct> forked_structs;
     std::unordered_set<const sem::Variable*> atomic_variables;
-    utils::UniqueVector<const sem::Expression*, 8> atomic_expressions;
+    utils::UniqueVector<const sem::ValueExpression*, 8> atomic_expressions;
 
   public:
     /// Constructor
@@ -184,7 +184,7 @@ struct SpirvAtomic::State {
                 [&](const sem::IndexAccessorExpression* index) {
                     atomic_expressions.Add(index->Object());
                 },
-                [&](const sem::Expression* e) {
+                [&](const sem::ValueExpression* e) {
                     if (auto* unary = e->Declaration()->As<ast::UnaryOpExpression>()) {
                         atomic_expressions.Add(ctx.src->Sem().Get(unary->expr));
                     }
@@ -226,7 +226,7 @@ struct SpirvAtomic::State {
 
     void ReplaceLoadsAndStores() {
         // Returns true if 'e' is a reference to an atomic variable or struct member
-        auto is_ref_to_atomic_var = [&](const sem::Expression* e) {
+        auto is_ref_to_atomic_var = [&](const sem::ValueExpression* e) {
             if (tint::Is<type::Reference>(e->Type()) && e->RootIdentifier() &&
                 (atomic_variables.count(e->RootIdentifier()) != 0)) {
                 // If it's a struct member, make sure it's one we marked as atomic

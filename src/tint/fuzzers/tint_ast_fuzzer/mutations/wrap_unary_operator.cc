@@ -50,8 +50,7 @@ bool MutationWrapUnaryOperator::IsApplicable(const tint::Program& program,
         return false;
     }
 
-    const auto* expression_sem_node =
-        tint::As<sem::Expression>(program.Sem().Get(expression_ast_node));
+    const auto* expression_sem_node = program.Sem().Get<sem::ValueExpression>(expression_ast_node);
 
     if (!expression_sem_node) {
         // Semantic information for the expression ast node is not present
@@ -94,7 +93,7 @@ protobufs::Mutation MutationWrapUnaryOperator::ToMessage() const {
 }
 
 std::vector<ast::UnaryOp> MutationWrapUnaryOperator::GetValidUnaryWrapper(
-    const sem::Expression& expr) {
+    const sem::ValueExpression& expr) {
     const auto* expr_type = expr.Type();
     if (expr_type->is_bool_scalar_or_vector()) {
         return {ast::UnaryOp::kNot};

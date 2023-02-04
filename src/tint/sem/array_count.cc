@@ -40,7 +40,7 @@ type::ArrayCount* NamedOverrideArrayCount::Clone(type::CloneContext&) const {
     return nullptr;
 }
 
-UnnamedOverrideArrayCount::UnnamedOverrideArrayCount(const Expression* e)
+UnnamedOverrideArrayCount::UnnamedOverrideArrayCount(const ValueExpression* e)
     : Base(static_cast<size_t>(TypeInfo::Of<UnnamedOverrideArrayCount>().full_hashcode)), expr(e) {}
 UnnamedOverrideArrayCount::~UnnamedOverrideArrayCount() = default;
 

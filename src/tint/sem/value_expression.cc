@@ -12,24 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/expression.h"
+#include "src/tint/sem/value_expression.h"
 
 #include <utility>
 
 #include "src/tint/sem/load.h"
 #include "src/tint/sem/materialize.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::Expression);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::ValueExpression);
 
 namespace tint::sem {
 
-Expression::Expression(const ast::Expression* declaration,
-                       const type::Type* type,
-                       EvaluationStage stage,
-                       const Statement* statement,
-                       const constant::Value* constant,
-                       bool has_side_effects,
-                       const Variable* root_ident /* = nullptr */)
+ValueExpression::ValueExpression(const ast::Expression* declaration,
+                                 const type::Type* type,
+                                 EvaluationStage stage,
+                                 const Statement* statement,
+                                 const constant::Value* constant,
+                                 bool has_side_effects,
+                                 const Variable* root_ident /* = nullptr */)
     : declaration_(declaration),
       root_identifier_(root_ident),
       type_(type),
@@ -44,23 +44,23 @@ Expression::Expression(const ast::Expression* declaration,
     }
 }
 
-Expression::~Expression() = default;
+ValueExpression::~ValueExpression() = default;
 
-const Expression* Expression::UnwrapMaterialize() const {
+const ValueExpression* ValueExpression::UnwrapMaterialize() const {
     if (auto* m = As<Materialize>()) {
         return m->Expr();
     }
     return this;
 }
 
-const Expression* Expression::UnwrapLoad() const {
+const ValueExpression* ValueExpression::UnwrapLoad() const {
     if (auto* l = As<Load>()) {
         return l->Reference();
     }
     return this;
 }
 
-const Expression* Expression::Unwrap() const {
+const ValueExpression* ValueExpression::Unwrap() const {
     return Switch(
         this,  // note: An expression can only be wrapped by a Load or Materialize, not both.
         [&](const Load* load) { return load->Reference(); },

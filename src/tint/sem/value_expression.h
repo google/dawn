@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_EXPRESSION_H_
-#define SRC_TINT_SEM_EXPRESSION_H_
+#ifndef SRC_TINT_SEM_VALUE_EXPRESSION_H_
+#define SRC_TINT_SEM_VALUE_EXPRESSION_H_
 
 #include "src/tint/ast/expression.h"
 #include "src/tint/constant/value.h"
@@ -29,8 +29,8 @@ class Variable;
 
 namespace tint::sem {
 
-/// Expression holds the semantic information for expression nodes.
-class Expression : public Castable<Expression, Node> {
+/// ValueExpression holds the semantic information for expression nodes.
+class ValueExpression : public Castable<ValueExpression, Node> {
   public:
     /// Constructor
     /// @param declaration the AST node
@@ -40,16 +40,16 @@ class Expression : public Castable<Expression, Node> {
     /// @param constant the constant value of the expression. May be null
     /// @param has_side_effects true if this expression may have side-effects
     /// @param root_ident the (optional) root identifier for this expression
-    Expression(const ast::Expression* declaration,
-               const type::Type* type,
-               EvaluationStage stage,
-               const Statement* statement,
-               const constant::Value* constant,
-               bool has_side_effects,
-               const Variable* root_ident = nullptr);
+    ValueExpression(const ast::Expression* declaration,
+                    const type::Type* type,
+                    EvaluationStage stage,
+                    const Statement* statement,
+                    const constant::Value* constant,
+                    bool has_side_effects,
+                    const Variable* root_ident = nullptr);
 
     /// Destructor
-    ~Expression() override;
+    ~ValueExpression() override;
 
     /// @returns the AST node
     const ast::Expression* Declaration() const { return declaration_; }
@@ -83,13 +83,13 @@ class Expression : public Castable<Expression, Node> {
     bool HasSideEffects() const { return has_side_effects_; }
 
     /// @return the inner expression node if this is a Materialize, otherwise this.
-    const Expression* UnwrapMaterialize() const;
+    const ValueExpression* UnwrapMaterialize() const;
 
     /// @return the inner reference expression if this is a Load, otherwise this.
-    const Expression* UnwrapLoad() const;
+    const ValueExpression* UnwrapLoad() const;
 
     /// @return the inner expression node if this is a Materialize or Load, otherwise this.
-    const Expression* Unwrap() const;
+    const ValueExpression* Unwrap() const;
 
   protected:
     /// The AST expression node for this semantic expression
@@ -108,4 +108,4 @@ class Expression : public Castable<Expression, Node> {
 
 }  // namespace tint::sem
 
-#endif  // SRC_TINT_SEM_EXPRESSION_H_
+#endif  // SRC_TINT_SEM_VALUE_EXPRESSION_H_

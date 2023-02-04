@@ -68,7 +68,7 @@ class MutationWrapUnaryOperator : public Mutation {
     /// expression.
     /// @param expr - an `ast::Expression` instance from node id map.
     /// @return a list of unary operators.
-    static std::vector<ast::UnaryOp> GetValidUnaryWrapper(const sem::Expression& expr);
+    static std::vector<ast::UnaryOp> GetValidUnaryWrapper(const sem::ValueExpression& expr);
 
   private:
     protobufs::MutationWrapUnaryOperator message_;

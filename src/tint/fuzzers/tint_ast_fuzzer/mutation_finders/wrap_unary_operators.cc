@@ -20,8 +20,8 @@
 #include "src/tint/fuzzers/tint_ast_fuzzer/expression_size.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/wrap_unary_operator.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/util.h"
-#include "src/tint/sem/expression.h"
 #include "src/tint/sem/statement.h"
+#include "src/tint/sem/value_expression.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 
@@ -51,7 +51,7 @@ MutationList MutationFinderWrapUnaryOperators::FindMutations(
             continue;
         }
 
-        const auto* expr_sem_node = tint::As<sem::Expression>(program.Sem().Get(expr_ast_node));
+        const auto* expr_sem_node = program.Sem().Get<sem::ValueExpression>(expr_ast_node);
 
         // Transformation applies only when the semantic node for the given
         // expression is present.

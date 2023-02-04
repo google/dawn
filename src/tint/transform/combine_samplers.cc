@@ -240,14 +240,14 @@ struct CombineSamplers::State {
                     if (texture_index == -1) {
                         return nullptr;
                     }
-                    const sem::Expression* texture =
+                    const sem::ValueExpression* texture =
                         call->Arguments()[static_cast<size_t>(texture_index)];
                     // We don't want to combine storage textures with anything, since
                     // they never have associated samplers in GLSL.
                     if (texture->Type()->UnwrapRef()->Is<type::StorageTexture>()) {
                         return nullptr;
                     }
-                    const sem::Expression* sampler =
+                    const sem::ValueExpression* sampler =
                         sampler_index != -1 ? call->Arguments()[static_cast<size_t>(sampler_index)]
                                             : nullptr;
                     auto* texture_var = texture->UnwrapLoad()->As<sem::VariableUser>()->Variable();
@@ -296,13 +296,14 @@ struct CombineSamplers::State {
                         const sem::Variable* texture_var = pair.first;
                         const sem::Variable* sampler_var = pair.second;
                         if (auto* param = texture_var->As<sem::Parameter>()) {
-                            const sem::Expression* texture = call->Arguments()[param->Index()];
+                            const sem::ValueExpression* texture = call->Arguments()[param->Index()];
                             texture_var =
                                 texture->UnwrapLoad()->As<sem::VariableUser>()->Variable();
                         }
                         if (sampler_var) {
                             if (auto* param = sampler_var->As<sem::Parameter>()) {
-                                const sem::Expression* sampler = call->Arguments()[param->Index()];
+                                const sem::ValueExpression* sampler =
+                                    call->Arguments()[param->Index()];
                                 sampler_var =
                                     sampler->UnwrapLoad()->As<sem::VariableUser>()->Variable();
                             }

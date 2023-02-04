@@ -107,7 +107,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
     std::unordered_set<const ast::Expression*> no_side_effects;
 
     // Returns true if `expr` has side-effects. Unlike invoking
-    // sem::Expression::HasSideEffects(), this function takes into account whether
+    // sem::ValueExpression::HasSideEffects(), this function takes into account whether
     // `expr` has been hoisted, returning false in that case. Furthermore, it
     // returns the correct result on parent expression nodes by traversing the
     // expression tree, memoizing the results to ensure O(1) amortized lookup.

@@ -21,9 +21,9 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
-#include "src/tint/sem/expression.h"
 #include "src/tint/sem/index_accessor_expression.h"
 #include "src/tint/sem/statement.h"
+#include "src/tint/sem/value_expression.h"
 #include "src/tint/type/reference.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Robustness);

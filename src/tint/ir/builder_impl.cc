@@ -47,9 +47,9 @@
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/terminator.h"
 #include "src/tint/program.h"
-#include "src/tint/sem/expression.h"
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/switch_statement.h"
+#include "src/tint/sem/value_expression.h"
 #include "src/tint/type/void.h"
 
 namespace tint::ir {

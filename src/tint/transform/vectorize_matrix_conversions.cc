@@ -20,8 +20,8 @@
 
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/call.h"
-#include "src/tint/sem/expression.h"
 #include "src/tint/sem/type_conversion.h"
+#include "src/tint/sem/value_expression.h"
 #include "src/tint/type/abstract_numeric.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
@@ -34,7 +34,7 @@ namespace {
 
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
-        if (auto* sem = program->Sem().Get<sem::Expression>(node)) {
+        if (auto* sem = program->Sem().Get<sem::ValueExpression>(node)) {
             if (auto* call = sem->UnwrapMaterialize()->As<sem::Call>()) {
                 if (call->Target()->Is<sem::TypeConversion>() && call->Type()->Is<type::Matrix>()) {
                     auto& args = call->Arguments();

@@ -16,9 +16,9 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/expression.h"
 #include "src/tint/sem/index_accessor_expression.h"
 #include "src/tint/sem/member_accessor_expression.h"
+#include "src/tint/sem/value_expression.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/vector.h"
 

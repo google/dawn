@@ -19,8 +19,8 @@
 #include <vector>
 
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/expression.h"
 #include "src/tint/sem/member_accessor_expression.h"
+#include "src/tint/sem/value_expression.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"

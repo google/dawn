@@ -384,7 +384,7 @@ bool Validator::Materialize(const type::Type* to,
 bool Validator::VariableInitializer(const ast::Variable* v,
                                     type::AddressSpace address_space,
                                     const type::Type* storage_ty,
-                                    const sem::Expression* initializer) const {
+                                    const sem::ValueExpression* initializer) const {
     auto* initializer_ty = initializer->Type();
     auto* value_type = initializer_ty->UnwrapRef();  // Implicit load of RHS
 
@@ -1343,7 +1343,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     return true;
 }
 
-bool Validator::EvaluationStage(const sem::Expression* expr,
+bool Validator::EvaluationStage(const sem::ValueExpression* expr,
                                 sem::EvaluationStage latest_stage,
                                 std::string_view constraint) const {
     if (expr->Stage() == sem::EvaluationStage::kNotEvaluated) {

@@ -245,7 +245,7 @@ class Validator {
     /// @param latest_stage the latest evaluation stage that the expression can be evaluated
     /// @param constraint the 'thing' that is imposing the contraint. e.g. "var declaration"
     /// @returns true if @p expr is evaluated in or before @p latest_stage, false otherwise
-    bool EvaluationStage(const sem::Expression* expr,
+    bool EvaluationStage(const sem::ValueExpression* expr,
                          sem::EvaluationStage latest_stage,
                          std::string_view constraint) const;
 
@@ -436,7 +436,7 @@ class Validator {
     bool VariableInitializer(const ast::Variable* v,
                              type::AddressSpace address_space,
                              const type::Type* storage_type,
-                             const sem::Expression* initializer) const;
+                             const sem::ValueExpression* initializer) const;
 
     /// Validates a vector
     /// @param ty the vector to validate

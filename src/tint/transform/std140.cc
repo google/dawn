@@ -251,7 +251,7 @@ struct Std140::State {
         /// The chain of access indices, starting with the first access on #var.
         AccessIndices indices;
         /// The runtime-evaluated expressions. This vector is indexed by the DynamicIndex::slot
-        utils::Vector<const sem::Expression*, 8> dynamic_indices;
+        utils::Vector<const sem::ValueExpression*, 8> dynamic_indices;
         /// The type of the std140-decomposed matrix being accessed.
         /// May be nullptr if the chain does not pass through a std140-decomposed matrix.
         const type::Matrix* std140_mat_ty = nullptr;
@@ -573,7 +573,7 @@ struct Std140::State {
                     expr = s->Object();
                     return Action::kContinue;
                 },
-                [&](const sem::Expression* e) {
+                [&](const sem::ValueExpression* e) {
                     // Walk past indirection and address-of unary ops.
                     return Switch(e->Declaration(),  //
                                   [&](const ast::UnaryOpExpression* u) {
@@ -797,7 +797,7 @@ struct Std140::State {
         });
 
         // Build the arguments
-        auto args = utils::Transform(access.dynamic_indices, [&](const sem::Expression* e) {
+        auto args = utils::Transform(access.dynamic_indices, [&](const sem::ValueExpression* e) {
             return b.Construct(b.ty.u32(), ctx.Clone(e->Declaration()));
         });
 

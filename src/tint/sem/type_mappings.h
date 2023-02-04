@@ -39,16 +39,16 @@ class Variable;
 class WhileStatement;
 }  // namespace tint::ast
 namespace tint::sem {
-class Expression;
 class ForLoopStatement;
 class Function;
+class GlobalVariable;
 class IfStatement;
 class Node;
-class GlobalVariable;
 class Statement;
 class Struct;
 class StructMember;
 class SwitchStatement;
+class ValueExpression;
 class Variable;
 class WhileStatement;
 }  // namespace tint::sem
@@ -66,7 +66,6 @@ namespace tint::sem {
 struct TypeMappings {
     //! @cond Doxygen_Suppress
     type::Array* operator()(ast::Array*);
-    Expression* operator()(ast::Expression*);
     ForLoopStatement* operator()(ast::ForLoopStatement*);
     Function* operator()(ast::Function*);
     IfStatement* operator()(ast::IfStatement*);
@@ -78,6 +77,7 @@ struct TypeMappings {
     SwitchStatement* operator()(ast::SwitchStatement*);
     type::Type* operator()(ast::Type*);
     type::Type* operator()(ast::TypeDecl*);
+    ValueExpression* operator()(ast::Expression*);
     Variable* operator()(ast::Variable*);
     WhileStatement* operator()(ast::WhileStatement*);
     //! @endcond

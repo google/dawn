@@ -14,10 +14,10 @@
 
 #include "src/tint/sem/info.h"
 
-#include "src/tint/sem/expression.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/statement.h"
+#include "src/tint/sem/value_expression.h"
 
 namespace tint::sem {
 
@@ -75,7 +75,7 @@ ast::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
     TINT_ASSERT(Resolver, sem != nullptr);
     auto severity = Switch(
         sem,  //
-        [&](const sem::Expression* expr) { return check_stmt(expr->Stmt()); },
+        [&](const sem::ValueExpression* expr) { return check_stmt(expr->Stmt()); },
         [&](const sem::Statement* stmt) { return check_stmt(stmt); },
         [&](const sem::Function* func) { return check_func(func); },
         [&](Default) {
