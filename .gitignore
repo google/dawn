@@ -33,7 +33,6 @@
 /third_party/vulkan_memory_allocator
 /third_party/webgpu-cts
 /third_party/zlib
-/tools/bin
 /tools/clang
 /tools/cmake*
 /tools/golang
