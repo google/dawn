@@ -50,7 +50,7 @@ bool MutationWrapUnaryOperator::IsApplicable(const tint::Program& program,
         return false;
     }
 
-    const auto* expression_sem_node = program.Sem().Get<sem::ValueExpression>(expression_ast_node);
+    const auto* expression_sem_node = program.Sem().Get(expression_ast_node);
 
     if (!expression_sem_node) {
         // Semantic information for the expression ast node is not present

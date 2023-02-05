@@ -499,7 +499,7 @@ TEST_F(ResolverTest, ArraySize_NamedOverride) {
     auto* ref = TypeOf(a)->As<type::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<type::Array>();
-    auto* sem_override = Sem().Get<sem::GlobalVariable>(override);
+    auto* sem_override = Sem().Get(override);
     ASSERT_NE(sem_override, nullptr);
     EXPECT_EQ(ary->Count(), create<sem::NamedOverrideArrayCount>(sem_override));
 }
@@ -524,7 +524,7 @@ TEST_F(ResolverTest, ArraySize_NamedOverride_Equivalence) {
     ASSERT_NE(ref_b, nullptr);
     auto* ary_b = ref_b->StoreType()->As<type::Array>();
 
-    auto* sem_override = Sem().Get<sem::GlobalVariable>(override);
+    auto* sem_override = Sem().Get(override);
     ASSERT_NE(sem_override, nullptr);
     EXPECT_EQ(ary_a->Count(), create<sem::NamedOverrideArrayCount>(sem_override));
     EXPECT_EQ(ary_b->Count(), create<sem::NamedOverrideArrayCount>(sem_override));
@@ -544,7 +544,7 @@ TEST_F(ResolverTest, ArraySize_UnnamedOverride) {
     auto* ref = TypeOf(a)->As<type::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<type::Array>();
-    auto* sem_override = Sem().Get<sem::GlobalVariable>(override);
+    auto* sem_override = Sem().Get(override);
     ASSERT_NE(sem_override, nullptr);
     EXPECT_EQ(ary->Count(), create<sem::UnnamedOverrideArrayCount>(Sem().Get(cnt)));
 }
@@ -571,7 +571,7 @@ TEST_F(ResolverTest, ArraySize_UnamedOverride_Equivalence) {
     ASSERT_NE(ref_b, nullptr);
     auto* ary_b = ref_b->StoreType()->As<type::Array>();
 
-    auto* sem_override = Sem().Get<sem::GlobalVariable>(override);
+    auto* sem_override = Sem().Get(override);
     ASSERT_NE(sem_override, nullptr);
     EXPECT_EQ(ary_a->Count(), create<sem::UnnamedOverrideArrayCount>(Sem().Get(a_cnt)));
     EXPECT_EQ(ary_b->Count(), create<sem::UnnamedOverrideArrayCount>(Sem().Get(b_cnt)));

@@ -881,9 +881,11 @@ bool Resolver::AllocateOverridableConstantIds() {
             continue;
         }
 
+        auto* sem = sem_.Get(override);
+
         OverrideId id;
         if (ast::HasAttribute<ast::IdAttribute>(override->attributes)) {
-            id = builder_->Sem().Get<sem::GlobalVariable>(override)->OverrideId();
+            id = sem->OverrideId();
         } else {
             // No ID was specified, so allocate the next available ID.
             while (!ids_exhausted && override_ids_.Contains(next_id)) {
@@ -899,7 +901,6 @@ bool Resolver::AllocateOverridableConstantIds() {
             increment_next_id();
         }
 
-        auto* sem = sem_.Get<sem::GlobalVariable>(override);
         const_cast<sem::GlobalVariable*>(sem)->SetOverrideId(id);
     }
     return true;

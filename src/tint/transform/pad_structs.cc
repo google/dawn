@@ -59,7 +59,7 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
     utils::Hashset<const ast::StructMember*, 8> padding_members;
 
     ctx.ReplaceAll([&](const ast::Struct* ast_str) -> const ast::Struct* {
-        auto* str = sem.Get<sem::Struct>(ast_str);
+        auto* str = sem.Get(ast_str);
         if (!str || !str->IsHostShareable()) {
             return nullptr;
         }

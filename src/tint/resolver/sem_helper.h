@@ -52,10 +52,13 @@ class SemHelper {
     /// @returns the resolved symbol (function, type or variable) for the given ast::Identifier or
     /// ast::TypeName cast to the given semantic type.
     /// @param node the node to retrieve
-    template <typename SEM = CastableBase>
-    SEM* ResolvedSymbol(const ast::Node* node) const {
-        auto resolved = dependencies_.resolved_symbols.Find(node);
-        return resolved ? const_cast<SEM*>(builder_->Sem().Get<SEM>(*resolved)) : nullptr;
+    template <typename SEM = sem::Info::InferFromAST>
+    sem::Info::GetResultType<SEM, ast::Node>* ResolvedSymbol(const ast::Node* node) const {
+        if (auto resolved = dependencies_.resolved_symbols.Find(node)) {
+            auto* sem = builder_->Sem().Get<SEM>(*resolved);
+            return const_cast<sem::Info::GetResultType<SEM, ast::Node>*>(sem);
+        }
+        return nullptr;
     }
 
     /// @returns the resolved type of the ast::Expression `expr`

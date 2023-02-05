@@ -1628,16 +1628,16 @@ TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
     EXPECT_EQ(result["v300"].value, 300u);
 
     ASSERT_TRUE(result.count("a"));
-    ASSERT_TRUE(program_->Sem().Get<sem::GlobalVariable>(a));
-    EXPECT_EQ(result["a"], program_->Sem().Get<sem::GlobalVariable>(a)->OverrideId());
+    ASSERT_TRUE(program_->Sem().Get(a));
+    EXPECT_EQ(result["a"], program_->Sem().Get(a)->OverrideId());
 
     ASSERT_TRUE(result.count("b"));
-    ASSERT_TRUE(program_->Sem().Get<sem::GlobalVariable>(b));
-    EXPECT_EQ(result["b"], program_->Sem().Get<sem::GlobalVariable>(b)->OverrideId());
+    ASSERT_TRUE(program_->Sem().Get(b));
+    EXPECT_EQ(result["b"], program_->Sem().Get(b)->OverrideId());
 
     ASSERT_TRUE(result.count("c"));
-    ASSERT_TRUE(program_->Sem().Get<sem::GlobalVariable>(c));
-    EXPECT_EQ(result["c"], program_->Sem().Get<sem::GlobalVariable>(c)->OverrideId());
+    ASSERT_TRUE(program_->Sem().Get(c));
+    EXPECT_EQ(result["c"], program_->Sem().Get(c)->OverrideId());
 }
 
 TEST_F(InspectorGetStorageSizeTest, Empty) {

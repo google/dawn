@@ -990,7 +990,7 @@ struct DirectVariableAccess::State {
                 return nullptr;  // Just clone the expression.
             }
 
-            auto* expr = sem.Get<sem::ValueExpression>(ast_expr);
+            auto* expr = sem.Get(ast_expr);
             if (!expr) {
                 // No semantic node for the expression.
                 return nullptr;  // Just clone the expression.

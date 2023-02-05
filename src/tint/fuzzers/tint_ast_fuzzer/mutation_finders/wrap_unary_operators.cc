@@ -51,7 +51,7 @@ MutationList MutationFinderWrapUnaryOperators::FindMutations(
             continue;
         }
 
-        const auto* expr_sem_node = program.Sem().Get<sem::ValueExpression>(expr_ast_node);
+        const auto* expr_sem_node = program.Sem().Get(expr_ast_node);
 
         // Transformation applies only when the semantic node for the given
         // expression is present.
