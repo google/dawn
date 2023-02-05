@@ -330,6 +330,8 @@ list(APPEND TINT_LIB_SRCS
   sem/call.cc
   sem/call.h
   sem/evaluation_stage.h
+  sem/expression.cc
+  sem/expression.h
   sem/for_loop_statement.cc
   sem/for_loop_statement.h
   sem/function.cc

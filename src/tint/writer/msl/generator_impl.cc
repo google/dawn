@@ -733,7 +733,7 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
         }
 
         case sem::BuiltinType::kLength: {
-            auto* sem = builder_.Sem().Get(expr->args[0]);
+            auto* sem = builder_.Sem().GetVal(expr->args[0]);
             if (sem->Type()->UnwrapRef()->is_scalar()) {
                 // Emulate scalar overload using fabs(x).
                 name = "fabs";
@@ -742,7 +742,7 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
         }
 
         case sem::BuiltinType::kDistance: {
-            auto* sem = builder_.Sem().Get(expr->args[0]);
+            auto* sem = builder_.Sem().GetVal(expr->args[0]);
             if (sem->Type()->UnwrapRef()->is_scalar()) {
                 // Emulate scalar overload using fabs(x - y);
                 out << "fabs";
@@ -1827,7 +1827,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
 }
 
 bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* expr) {
-    if (auto* sem = builder_.Sem().Get(expr)) {
+    if (auto* sem = builder_.Sem().GetVal(expr)) {
         if (auto* constant = sem->ConstantValue()) {
             return EmitConstant(out, constant);
         }

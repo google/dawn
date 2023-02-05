@@ -108,7 +108,7 @@ TEST_F(HoistToDeclBeforeTest, ForLoopCond) {
     CloneContext ctx(&cloned_b, &original);
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
-    auto* sem_expr = ctx.src->Sem().Get(expr);
+    auto* sem_expr = ctx.src->Sem().GetVal(expr);
     hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kConst);
 
     ctx.Clone();
@@ -189,7 +189,7 @@ TEST_F(HoistToDeclBeforeTest, WhileCond) {
     CloneContext ctx(&cloned_b, &original);
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
-    auto* sem_expr = ctx.src->Sem().Get(expr);
+    auto* sem_expr = ctx.src->Sem().GetVal(expr);
     hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kVar);
 
     ctx.Clone();
@@ -233,7 +233,7 @@ TEST_F(HoistToDeclBeforeTest, ElseIf) {
     CloneContext ctx(&cloned_b, &original);
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
-    auto* sem_expr = ctx.src->Sem().Get(expr);
+    auto* sem_expr = ctx.src->Sem().GetVal(expr);
     hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kConst);
 
     ctx.Clone();
@@ -339,7 +339,7 @@ TEST_F(HoistToDeclBeforeTest, Prepare_ForLoopCond) {
     CloneContext ctx(&cloned_b, &original);
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
-    auto* sem_expr = ctx.src->Sem().Get(expr);
+    auto* sem_expr = ctx.src->Sem().GetVal(expr);
     hoistToDeclBefore.Prepare(sem_expr);
 
     ctx.Clone();
@@ -422,7 +422,7 @@ TEST_F(HoistToDeclBeforeTest, Prepare_ElseIf) {
     CloneContext ctx(&cloned_b, &original);
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
-    auto* sem_expr = ctx.src->Sem().Get(expr);
+    auto* sem_expr = ctx.src->Sem().GetVal(expr);
     hoistToDeclBefore.Prepare(sem_expr);
 
     ctx.Clone();

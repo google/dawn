@@ -658,8 +658,8 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
         // with at least one dynamic index
         if (auto* lhs_sub_access = lhs_access->object->As<ast::IndexAccessorExpression>()) {
             if (auto* mat = TypeOf(lhs_sub_access->object)->UnwrapRef()->As<type::Matrix>()) {
-                auto* rhs_row_idx_sem = builder_.Sem().Get(lhs_access->index);
-                auto* rhs_col_idx_sem = builder_.Sem().Get(lhs_sub_access->index);
+                auto* rhs_row_idx_sem = builder_.Sem().GetVal(lhs_access->index);
+                auto* rhs_col_idx_sem = builder_.Sem().GetVal(lhs_sub_access->index);
                 if (!rhs_row_idx_sem->ConstantValue() || !rhs_col_idx_sem->ConstantValue()) {
                     return EmitDynamicMatrixScalarAssignment(stmt, mat);
                 }
@@ -669,7 +669,7 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
         // with dynamic indices
         const auto* lhs_access_type = TypeOf(lhs_access->object)->UnwrapRef();
         if (auto* mat = lhs_access_type->As<type::Matrix>()) {
-            auto* lhs_index_sem = builder_.Sem().Get(lhs_access->index);
+            auto* lhs_index_sem = builder_.Sem().GetVal(lhs_access->index);
             if (!lhs_index_sem->ConstantValue()) {
                 return EmitDynamicMatrixVectorAssignment(stmt, mat);
             }
@@ -677,7 +677,7 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
         // BUG(crbug.com/tint/534): work around assignment to vectors with dynamic
         // indices
         if (auto* vec = lhs_access_type->As<type::Vector>()) {
-            auto* rhs_sem = builder_.Sem().Get(lhs_access->index);
+            auto* rhs_sem = builder_.Sem().GetVal(lhs_access->index);
             if (!rhs_sem->ConstantValue()) {
                 return EmitDynamicVectorAssignment(stmt, vec);
             }
@@ -1109,7 +1109,7 @@ bool GeneratorImpl::EmitUniformBufferAccess(
     const ast::CallExpression* expr,
     const transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
     const auto& args = expr->args;
-    auto* offset_arg = builder_.Sem().Get(args[1]);
+    auto* offset_arg = builder_.Sem().GetVal(args[1]);
 
     // offset in bytes
     uint32_t scalar_offset_bytes = 0;
@@ -2790,7 +2790,7 @@ bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
 }
 
 bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* expr) {
-    if (auto* sem = builder_.Sem().Get(expr)) {
+    if (auto* sem = builder_.Sem().GetVal(expr)) {
         if (auto* constant = sem->ConstantValue()) {
             bool is_variable_initializer = false;
             if (auto* stmt = sem->Stmt()) {
@@ -3864,7 +3864,7 @@ bool GeneratorImpl::EmitDefaultOnlySwitch(const ast::SwitchStatement* stmt) {
 
     // Emit the switch condition as-is if it has side-effects (e.g.
     // function call). Note that we can ignore the result of the expression (if any).
-    if (auto* sem_cond = builder_.Sem().Get(stmt->condition); sem_cond->HasSideEffects()) {
+    if (auto* sem_cond = builder_.Sem().GetVal(stmt->condition); sem_cond->HasSideEffects()) {
         auto out = line();
         if (!EmitExpression(out, stmt->condition)) {
             return false;

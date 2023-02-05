@@ -123,7 +123,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                 }
 
                 // Skip writes to invocation-private address spaces.
-                auto* ref = sem.Get(assign->lhs)->Type()->As<type::Reference>();
+                auto* ref = sem.GetVal(assign->lhs)->Type()->As<type::Reference>();
                 switch (ref->AddressSpace()) {
                     case type::AddressSpace::kStorage:
                         // Need to mask these.

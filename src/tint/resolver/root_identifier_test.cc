@@ -34,7 +34,7 @@ TEST_F(ResolverRootIdentifierTest, GlobalPrivateVar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().GetVal(expr)->RootIdentifier(), sem_a);
 }
 
 TEST_F(ResolverRootIdentifierTest, GlobalWorkgroupVar) {
@@ -45,7 +45,7 @@ TEST_F(ResolverRootIdentifierTest, GlobalWorkgroupVar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().GetVal(expr)->RootIdentifier(), sem_a);
 }
 
 TEST_F(ResolverRootIdentifierTest, GlobalStorageVar) {
@@ -56,7 +56,7 @@ TEST_F(ResolverRootIdentifierTest, GlobalStorageVar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().GetVal(expr)->RootIdentifier(), sem_a);
 }
 
 TEST_F(ResolverRootIdentifierTest, GlobalUniformVar) {
@@ -67,7 +67,7 @@ TEST_F(ResolverRootIdentifierTest, GlobalUniformVar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().GetVal(expr)->RootIdentifier(), sem_a);
 }
 
 TEST_F(ResolverRootIdentifierTest, GlobalTextureVar) {
@@ -79,7 +79,7 @@ TEST_F(ResolverRootIdentifierTest, GlobalTextureVar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().GetVal(expr)->RootIdentifier(), sem_a);
 }
 
 TEST_F(ResolverRootIdentifierTest, GlobalOverride) {
@@ -90,7 +90,7 @@ TEST_F(ResolverRootIdentifierTest, GlobalOverride) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().GetVal(expr)->RootIdentifier(), sem_a);
 }
 
 TEST_F(ResolverRootIdentifierTest, GlobalConst) {
@@ -101,7 +101,7 @@ TEST_F(ResolverRootIdentifierTest, GlobalConst) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().GetVal(expr)->RootIdentifier(), sem_a);
 }
 
 TEST_F(ResolverRootIdentifierTest, FunctionVar) {
@@ -112,7 +112,7 @@ TEST_F(ResolverRootIdentifierTest, FunctionVar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().GetVal(expr)->RootIdentifier(), sem_a);
 }
 
 TEST_F(ResolverRootIdentifierTest, FunctionLet) {
@@ -123,7 +123,7 @@ TEST_F(ResolverRootIdentifierTest, FunctionLet) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().GetVal(expr)->RootIdentifier(), sem_a);
 }
 
 TEST_F(ResolverRootIdentifierTest, Parameter) {
@@ -134,7 +134,7 @@ TEST_F(ResolverRootIdentifierTest, Parameter) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().GetVal(expr)->RootIdentifier(), sem_a);
 }
 
 TEST_F(ResolverRootIdentifierTest, PointerParameter) {
@@ -152,8 +152,8 @@ TEST_F(ResolverRootIdentifierTest, PointerParameter) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_param = Sem().Get(param);
-    EXPECT_EQ(Sem().Get(expr_param)->RootIdentifier(), sem_param);
-    EXPECT_EQ(Sem().Get(expr_let)->RootIdentifier(), sem_param);
+    EXPECT_EQ(Sem().GetVal(expr_param)->RootIdentifier(), sem_param);
+    EXPECT_EQ(Sem().GetVal(expr_let)->RootIdentifier(), sem_param);
 }
 
 TEST_F(ResolverRootIdentifierTest, VarCopyVar) {
@@ -171,8 +171,8 @@ TEST_F(ResolverRootIdentifierTest, VarCopyVar) {
 
     auto* sem_a = Sem().Get(a);
     auto* sem_b = Sem().Get(b);
-    EXPECT_EQ(Sem().Get(expr_a)->RootIdentifier(), sem_a);
-    EXPECT_EQ(Sem().Get(expr_b)->RootIdentifier(), sem_b);
+    EXPECT_EQ(Sem().GetVal(expr_a)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().GetVal(expr_b)->RootIdentifier(), sem_b);
 }
 
 TEST_F(ResolverRootIdentifierTest, LetCopyVar) {
@@ -190,8 +190,8 @@ TEST_F(ResolverRootIdentifierTest, LetCopyVar) {
 
     auto* sem_a = Sem().Get(a);
     auto* sem_b = Sem().Get(b);
-    EXPECT_EQ(Sem().Get(expr_a)->RootIdentifier(), sem_a);
-    EXPECT_EQ(Sem().Get(expr_b)->RootIdentifier(), sem_b);
+    EXPECT_EQ(Sem().GetVal(expr_a)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().GetVal(expr_b)->RootIdentifier(), sem_b);
 }
 
 TEST_F(ResolverRootIdentifierTest, ThroughIndexAccessor) {

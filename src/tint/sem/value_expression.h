@@ -15,11 +15,10 @@
 #ifndef SRC_TINT_SEM_VALUE_EXPRESSION_H_
 #define SRC_TINT_SEM_VALUE_EXPRESSION_H_
 
-#include "src/tint/ast/expression.h"
 #include "src/tint/constant/value.h"
 #include "src/tint/sem/behavior.h"
 #include "src/tint/sem/evaluation_stage.h"
-#include "src/tint/sem/node.h"
+#include "src/tint/sem/expression.h"
 
 // Forward declarations
 namespace tint::sem {
@@ -30,7 +29,7 @@ class Variable;
 namespace tint::sem {
 
 /// ValueExpression holds the semantic information for expression nodes.
-class ValueExpression : public Castable<ValueExpression, Node> {
+class ValueExpression : public Castable<ValueExpression, Expression> {
   public:
     /// Constructor
     /// @param declaration the AST node
@@ -51,17 +50,11 @@ class ValueExpression : public Castable<ValueExpression, Node> {
     /// Destructor
     ~ValueExpression() override;
 
-    /// @returns the AST node
-    const ast::Expression* Declaration() const { return declaration_; }
-
     /// @return the resolved type of the expression
     const type::Type* Type() const { return type_; }
 
     /// @return the earliest evaluation stage for the expression
     EvaluationStage Stage() const { return stage_; }
-
-    /// @return the statement that owns this expression
-    const Statement* Stmt() const { return statement_; }
 
     /// @return the constant value of this expression
     const constant::Value* ConstantValue() const { return constant_; }
@@ -92,15 +85,12 @@ class ValueExpression : public Castable<ValueExpression, Node> {
     const ValueExpression* Unwrap() const;
 
   protected:
-    /// The AST expression node for this semantic expression
-    const ast::Expression* const declaration_;
     /// The root identifier for this semantic expression, or nullptr
     const Variable* root_identifier_;
 
   private:
     const type::Type* const type_;
     const EvaluationStage stage_;
-    const Statement* const statement_;
     const constant::Value* const constant_;
     sem::Behaviors behaviors_{sem::Behavior::kNext};
     const bool has_side_effects_;

@@ -1141,9 +1141,11 @@ class UniformityGraph {
             return true;
         };
 
-        auto* var_user = sem_.Get(ident)->Unwrap()->As<sem::VariableUser>();
-        auto* sem = var_user->Variable();
         auto* node = CreateNode({NameFor(ident->identifier), "_ident_expr"}, ident);
+        auto* sem_ident = sem_.GetVal(ident);
+        TINT_ASSERT(Resolver, sem_ident);
+        auto* var_user = sem_ident->Unwrap()->As<sem::VariableUser>();
+        auto* sem = var_user->Variable();
         return Switch(
             sem,
 
@@ -1357,7 +1359,7 @@ class UniformityGraph {
             expr,
 
             [&](const ast::IdentifierExpression* i) {
-                auto* sem = sem_.Get(i)->UnwrapLoad()->As<sem::VariableUser>();
+                auto* sem = sem_.GetVal(i)->UnwrapLoad()->As<sem::VariableUser>();
                 if (sem->Variable()->Is<sem::GlobalVariable>()) {
                     return std::make_pair(cf, current_function_->may_be_non_uniform);
                 } else if (auto* local = sem->Variable()->As<sem::LocalVariable>()) {
@@ -1452,7 +1454,7 @@ class UniformityGraph {
 
             // For pointer arguments, create an additional node to represent the contents of that
             // pointer prior to the function call.
-            auto* sem_arg = sem_.Get(call->args[i]);
+            auto* sem_arg = sem_.GetVal(call->args[i]);
             if (sem_arg->Type()->Is<type::Pointer>()) {
                 auto* arg_contents =
                     CreateNode({name, "_ptrarg_", std::to_string(i), "_contents"}, call);
@@ -1581,7 +1583,7 @@ class UniformityGraph {
 
                 // Capture the effects of other call parameters on the contents of this parameter
                 // after the call returns.
-                auto* sem_arg = sem_.Get(call->args[i]);
+                auto* sem_arg = sem_.GetVal(call->args[i]);
                 if (sem_arg->Type()->Is<type::Pointer>()) {
                     auto* ptr_result =
                         CreateNode({name, "_ptrarg_", std::to_string(i), "_result"}, call);
@@ -1762,7 +1764,7 @@ class UniformityGraph {
         Switch(
             non_uniform_source->ast,
             [&](const ast::IdentifierExpression* ident) {
-                auto* var = sem_.Get(ident)->UnwrapLoad()->As<sem::VariableUser>()->Variable();
+                auto* var = sem_.GetVal(ident)->UnwrapLoad()->As<sem::VariableUser>()->Variable();
                 std::ostringstream ss;
                 if (auto* param = var->As<sem::Parameter>()) {
                     auto* func = param->Owner()->As<sem::Function>();
@@ -1792,7 +1794,7 @@ class UniformityGraph {
                     }
                     case Node::kFunctionCallArgumentContents: {
                         auto* arg = c->args[non_uniform_source->arg_index];
-                        auto* var = sem_.Get(arg)->RootIdentifier();
+                        auto* var = sem_.GetVal(arg)->RootIdentifier();
                         std::ostringstream ss;
                         ss << "reading from " << var_type(var) << "'" << NameFor(var->Declaration())
                            << "' may result in a non-uniform value";

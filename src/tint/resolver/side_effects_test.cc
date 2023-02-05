@@ -82,7 +82,7 @@ TEST_F(SideEffectsTest, VariableUser) {
     WrapInFunction(var, expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* sem = Sem().Get(expr);
+    auto* sem = Sem().GetVal(expr);
     ASSERT_NE(sem, nullptr);
     EXPECT_TRUE(sem->UnwrapLoad()->Is<sem::VariableUser>());
     EXPECT_FALSE(sem->HasSideEffects());

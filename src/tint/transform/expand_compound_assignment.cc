@@ -86,7 +86,10 @@ struct ExpandCompoundAssignment::State {
 
         // Helper function that returns `true` if the type of `expr` is a vector.
         auto is_vec = [&](const ast::Expression* expr) {
-            return ctx.src->Sem().Get(expr)->Type()->UnwrapRef()->Is<type::Vector>();
+            if (auto* val_expr = ctx.src->Sem().GetVal(expr)) {
+                return val_expr->Type()->UnwrapRef()->Is<type::Vector>();
+            }
+            return false;
         };
 
         // Hoist the LHS expression subtree into local constants to produce a new

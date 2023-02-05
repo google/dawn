@@ -109,7 +109,7 @@ struct PackedVec3::State {
                         if (unary->op == ast::UnaryOp::kAddressOf ||
                             unary->op == ast::UnaryOp::kIndirection) {
                             // Memory access on the packed vector. Track these.
-                            auto* inner = sem.Get(unary->expr);
+                            auto* inner = sem.GetVal(unary->expr);
                             if (refs.Remove(inner)) {
                                 refs.Add(expr);
                             }
@@ -121,7 +121,7 @@ struct PackedVec3::State {
                 [&](const sem::Statement* e) {
                     if (auto* assign = e->Declaration()->As<ast::AssignmentStatement>()) {
                         // We don't want to cast packed_vectors if they're being assigned to.
-                        refs.Remove(sem.Get(assign->lhs));
+                        refs.Remove(sem.GetVal(assign->lhs));
                     }
                 });
         }

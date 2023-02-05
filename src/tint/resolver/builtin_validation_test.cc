@@ -175,7 +175,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsVariable
     WrapInFunction(Decl(Var("v", use)));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    auto* sem = Sem().Get(use)->UnwrapLoad()->As<sem::VariableUser>();
+    auto* sem = Sem().GetVal(use)->UnwrapLoad()->As<sem::VariableUser>();
     ASSERT_NE(sem, nullptr);
     EXPECT_EQ(sem->Variable(), Sem().Get(mix));
 }

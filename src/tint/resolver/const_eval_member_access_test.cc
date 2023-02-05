@@ -287,7 +287,7 @@ TEST_P(ResolverConstEvalArrayAccessTest, Test) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = Sem().Get(expr);
+    auto* sem = Sem().GetVal(expr);
     ASSERT_NE(sem, nullptr);
     auto* arr = sem->Type()->As<type::Array>();
     ASSERT_NE(arr, nullptr);
@@ -362,7 +362,7 @@ TEST_P(ResolverConstEvalVectorAccessTest, Test) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = Sem().Get(expr);
+    auto* sem = Sem().GetVal(expr);
     ASSERT_NE(sem, nullptr);
     auto* vec = sem->Type()->As<type::Vector>();
     ASSERT_NE(vec, nullptr);

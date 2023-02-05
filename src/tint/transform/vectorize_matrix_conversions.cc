@@ -34,7 +34,7 @@ namespace {
 
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
-        if (auto* sem = program->Sem().Get<sem::ValueExpression>(node)) {
+        if (auto* sem = program->Sem().GetVal(node)) {
             if (auto* call = sem->UnwrapMaterialize()->As<sem::Call>()) {
                 if (call->Target()->Is<sem::TypeConversion>() && call->Type()->Is<type::Matrix>()) {
                     auto& args = call->Arguments();

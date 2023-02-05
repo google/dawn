@@ -297,8 +297,8 @@ bool MutationChangeBinaryOperator::CanReplaceBinaryOperator(
     }
 
     // Get the types of the operators.
-    const auto* lhs_type = program.Sem().Get(binary_expr.lhs)->Type();
-    const auto* rhs_type = program.Sem().Get(binary_expr.rhs)->Type();
+    const auto* lhs_type = program.Sem().GetVal(binary_expr.lhs)->Type();
+    const auto* rhs_type = program.Sem().GetVal(binary_expr.rhs)->Type();
 
     // If these are reference types, unwrap them to get the pointee type.
     const type::Type* lhs_basic_type =

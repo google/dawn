@@ -102,7 +102,7 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
                     ctx.Replace(stmt, [&, side_effects] {
                         SinkSignature sig;
                         for (auto* arg : side_effects) {
-                            sig.push_back(sem.Get(arg)->Type()->UnwrapRef());
+                            sig.push_back(sem.GetVal(arg)->Type()->UnwrapRef());
                         }
                         auto sink = sinks.GetOrCreate(sig, [&] {
                             auto name = b.Symbols().New("phony_sink");

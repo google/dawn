@@ -494,7 +494,7 @@ struct Std140::State {
     /// @returns an AccessChain if the expression is an access to a std140-forked uniform buffer,
     ///          otherwise returns a std::nullopt.
     std::optional<AccessChain> AccessChainFor(const ast::Expression* ast_expr) {
-        auto* expr = sem.Get(ast_expr);
+        auto* expr = sem.GetVal(ast_expr);
         if (!expr) {
             return std::nullopt;
         }
@@ -580,7 +580,7 @@ struct Std140::State {
                                       switch (u->op) {
                                           case ast::UnaryOp::kAddressOf:
                                           case ast::UnaryOp::kIndirection:
-                                              expr = sem.Get(u->expr);
+                                              expr = sem.GetVal(u->expr);
                                               return Action::kContinue;
                                           default:
                                               TINT_ICE(Transform, b.Diagnostics())

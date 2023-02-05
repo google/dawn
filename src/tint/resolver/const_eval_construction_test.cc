@@ -1712,7 +1712,7 @@ TEST_P(ResolverConstEvalArrayInitTest, Test) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = Sem().Get(expr);
+    auto* sem = Sem().GetVal(expr);
     ASSERT_NE(sem, nullptr);
     auto* arr = sem->Type()->As<type::Array>();
     ASSERT_NE(arr, nullptr);

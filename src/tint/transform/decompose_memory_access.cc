@@ -74,7 +74,7 @@ struct OffsetExpr : Offset {
     explicit OffsetExpr(const ast::Expression* e) : expr(e) {}
 
     const ast::Expression* Build(CloneContext& ctx) const override {
-        auto* type = ctx.src->Sem().Get(expr)->Type()->UnwrapRef();
+        auto* type = ctx.src->Sem().GetVal(expr)->Type()->UnwrapRef();
         auto* res = ctx.Clone(expr);
         if (!type->Is<type::U32>()) {
             res = ctx.dst->Construct<u32>(res);
@@ -881,7 +881,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
     for (auto* node : src->ASTNodes().Objects()) {
         if (auto* ident = node->As<ast::IdentifierExpression>()) {
             // X
-            if (auto* sem_ident = sem.Get(ident)) {
+            if (auto* sem_ident = sem.GetVal(ident)) {
                 if (auto* var = sem_ident->UnwrapLoad()->As<sem::VariableUser>()) {
                     if (var->Variable()->AddressSpace() == type::AddressSpace::kStorage ||
                         var->Variable()->AddressSpace() == type::AddressSpace::kUniform) {

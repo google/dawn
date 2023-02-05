@@ -75,8 +75,8 @@ const sem::Call* AppendVector(ProgramBuilder* b,
                               const ast::Expression* scalar_ast) {
     uint32_t packed_size;
     const type::Type* packed_el_sem_ty;
-    auto* vector_sem = b->Sem().Get(vector_ast);
-    auto* scalar_sem = b->Sem().Get(scalar_ast);
+    auto* vector_sem = b->Sem().GetVal(vector_ast);
+    auto* scalar_sem = b->Sem().GetVal(scalar_ast);
     auto* vector_ty = vector_sem->Type()->UnwrapRef();
     if (auto* vec = vector_ty->As<type::Vector>()) {
         packed_size = vec->Width() + 1;

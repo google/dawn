@@ -896,7 +896,7 @@ TEST_F(ResolverConstEvalTest, NotAndOrOfVecs) {
     ASSERT_NE(value, nullptr);
     EXPECT_TYPE(value->Type(), sem->Type());
 
-    auto* expected_sem = Sem().Get(expected_expr);
+    auto* expected_sem = Sem().GetVal(expected_expr);
     const constant::Value* expected_value = expected_sem->ConstantValue();
     ASSERT_NE(expected_value, nullptr);
     EXPECT_TYPE(expected_value->Type(), expected_sem->Type());
@@ -1374,12 +1374,12 @@ static void ValidateAnd(const sem::Info& sem, const ast::BinaryExpression* binar
     auto* lhs = binary->lhs;
     auto* rhs = binary->rhs;
 
-    auto* lhs_sem = sem.Get(lhs);
+    auto* lhs_sem = sem.GetVal(lhs);
     ASSERT_TRUE(lhs_sem->ConstantValue());
     EXPECT_EQ(lhs_sem->ConstantValue()->ValueAs<bool>(), false);
     EXPECT_EQ(lhs_sem->Stage(), sem::EvaluationStage::kConstant);
 
-    auto* rhs_sem = sem.Get(rhs);
+    auto* rhs_sem = sem.GetVal(rhs);
     EXPECT_EQ(rhs_sem->ConstantValue(), nullptr);
     EXPECT_EQ(rhs_sem->Stage(), sem::EvaluationStage::kNotEvaluated);
 
@@ -1394,12 +1394,12 @@ static void ValidateOr(const sem::Info& sem, const ast::BinaryExpression* binary
     auto* lhs = binary->lhs;
     auto* rhs = binary->rhs;
 
-    auto* lhs_sem = sem.Get(lhs);
+    auto* lhs_sem = sem.GetVal(lhs);
     ASSERT_TRUE(lhs_sem->ConstantValue());
     EXPECT_EQ(lhs_sem->ConstantValue()->ValueAs<bool>(), true);
     EXPECT_EQ(lhs_sem->Stage(), sem::EvaluationStage::kConstant);
 
-    auto* rhs_sem = sem.Get(rhs);
+    auto* rhs_sem = sem.GetVal(rhs);
     EXPECT_EQ(rhs_sem->ConstantValue(), nullptr);
     EXPECT_EQ(rhs_sem->Stage(), sem::EvaluationStage::kNotEvaluated);
 

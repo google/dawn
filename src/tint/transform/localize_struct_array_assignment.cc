@@ -164,7 +164,7 @@ struct LocalizeStructArrayAssignment::State {
         ast::TraverseExpressions(
             expr, b.Diagnostics(), [&](const ast::IndexAccessorExpression* ia) {
                 // Indexing using a runtime value?
-                auto* idx_sem = src->Sem().Get(ia->index);
+                auto* idx_sem = src->Sem().GetVal(ia->index);
                 if (!idx_sem->ConstantValue()) {
                     // Indexing a member access expr?
                     if (auto* ma = ia->object->As<ast::MemberAccessorExpression>()) {
@@ -186,7 +186,7 @@ struct LocalizeStructArrayAssignment::State {
     // See https://www.w3.org/TR/WGSL/#originating-variable-section
     std::pair<const type::Type*, type::AddressSpace> GetOriginatingTypeAndAddressSpace(
         const ast::AssignmentStatement* assign_stmt) {
-        auto* root_ident = src->Sem().Get(assign_stmt->lhs)->RootIdentifier();
+        auto* root_ident = src->Sem().GetVal(assign_stmt->lhs)->RootIdentifier();
         if (TINT_UNLIKELY(!root_ident)) {
             TINT_ICE(Transform, b.Diagnostics())
                 << "Unable to determine originating variable for lhs of assignment "

@@ -403,7 +403,7 @@ struct ZeroInitWorkgroupMemory::State {
             if (!expr) {
                 continue;
             }
-            auto* sem = ctx.src->Sem().Get(expr);
+            auto* sem = ctx.src->Sem().GetVal(expr);
             if (auto* c = sem->ConstantValue()) {
                 workgroup_size_const *= c->ValueAs<AInt>();
                 continue;

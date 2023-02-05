@@ -40,13 +40,13 @@ Transform::ApplyResult VarForDynamicIndex::Apply(const Program* src,
         auto* object_expr = access_expr->object;
         auto& sem = src->Sem();
 
-        if (sem.Get(index_expr)->ConstantValue()) {
+        if (sem.GetVal(index_expr)->ConstantValue()) {
             // Index expression resolves to a compile time value.
             // As this isn't a dynamic index, we can ignore this.
             return true;
         }
 
-        auto* indexed = sem.Get(object_expr);
+        auto* indexed = sem.GetVal(object_expr);
         if (!indexed->Type()->IsAnyOf<type::Array, type::Matrix>()) {
             // We only care about array and matrices.
             return true;

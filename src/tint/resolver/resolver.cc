@@ -1318,7 +1318,7 @@ sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt, cons
             if (!sel->IsDefault()) {
                 // The sem statement was created in the switch when attempting to determine the
                 // common type.
-                auto* materialized = Materialize(sem_.Get(sel->expr), ty);
+                auto* materialized = Materialize(sem_.GetVal(sel->expr), ty);
                 if (!materialized) {
                     return false;
                 }
@@ -1923,11 +1923,11 @@ utils::Result<utils::Vector<const constant::Value*, N>> Resolver::ConvertArgumen
 }
 
 sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* expr) {
-    auto* idx = Load(Materialize(sem_.Get(expr->index)));
+    auto* idx = Load(Materialize(sem_.GetVal(expr->index)));
     if (!idx) {
         return nullptr;
     }
-    const auto* obj = sem_.Get(expr->object);
+    const auto* obj = sem_.GetVal(expr->object);
     if (idx->Stage() != sem::EvaluationStage::kConstant) {
         // If the index is non-constant, then the resulting expression is non-constant, so we'll
         // have to materialize the object. For example, consider:
@@ -1986,7 +1986,7 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
 }
 
 sem::ValueExpression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
-    auto* inner = Load(Materialize(sem_.Get(expr->expr)));
+    auto* inner = Load(Materialize(sem_.GetVal(expr->expr)));
     if (!inner) {
         return nullptr;
     }
@@ -2031,7 +2031,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     auto args_stage = sem::EvaluationStage::kConstant;
     sem::Behaviors arg_behaviors;
     for (size_t i = 0; i < expr->args.Length(); i++) {
-        auto* arg = sem_.Get(expr->args[i]);
+        auto* arg = sem_.GetVal(expr->args[i]);
         if (!arg) {
             return nullptr;
         }
@@ -2780,13 +2780,17 @@ sem::ValueExpression* Resolver::Identifier(const ast::IdentifierExpression* expr
 sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* expr) {
     auto* structure = sem_.TypeOf(expr->object);
     auto* storage_ty = structure->UnwrapRef();
-    auto* object = sem_.Get(expr->object);
+    auto* object = sem_.GetVal(expr->object);
+    if (!object) {
+        return nullptr;
+    }
+
     auto* root_ident = object->RootIdentifier();
 
     const type::Type* ty = nullptr;
 
     // Object may be a side-effecting expression (e.g. function call).
-    bool has_side_effects = object && object->HasSideEffects();
+    bool has_side_effects = object->HasSideEffects();
 
     Mark(expr->member);
 
@@ -2909,8 +2913,8 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
 }
 
 sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
-    const auto* lhs = sem_.Get(expr->lhs);
-    const auto* rhs = sem_.Get(expr->rhs);
+    const auto* lhs = sem_.GetVal(expr->lhs);
+    const auto* rhs = sem_.GetVal(expr->rhs);
     auto* lhs_ty = lhs->Type()->UnwrapRef();
     auto* rhs_ty = rhs->Type()->UnwrapRef();
 
@@ -2986,7 +2990,7 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
 }
 
 sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
-    const auto* expr = sem_.Get(unary->expr);
+    const auto* expr = sem_.GetVal(unary->expr);
     auto* expr_ty = expr->Type();
     if (!expr_ty) {
         return nullptr;

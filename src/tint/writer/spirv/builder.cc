@@ -424,7 +424,7 @@ bool Builder::GenerateLabel(uint32_t id) {
 
 bool Builder::GenerateAssignStatement(const ast::AssignmentStatement* assign) {
     if (assign->lhs->Is<ast::PhonyExpression>()) {
-        if (builder_.Sem().Get(assign->rhs)->ConstantValue()) {
+        if (builder_.Sem().GetVal(assign->rhs)->ConstantValue()) {
             // RHS of phony assignment is constant.
             // Constants can't have side-effects, so just drop this.
             return true;
@@ -558,9 +558,11 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
     return true;
 }
 
-uint32_t Builder::GenerateExpression(const sem::ValueExpression* expr) {
-    if (auto* constant = expr->ConstantValue()) {
-        return GenerateConstantIfNeeded(constant);
+uint32_t Builder::GenerateExpression(const sem::Expression* expr) {
+    if (auto* val_expr = expr->As<sem::ValueExpression>()) {
+        if (auto* constant = val_expr->ConstantValue()) {
+            return GenerateConstantIfNeeded(constant);
+        }
     }
     if (auto* load = expr->As<sem::Load>()) {
         auto ref_id = GenerateExpression(load->Reference());
@@ -909,7 +911,7 @@ bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr, Ac
     auto extract_id = std::get<uint32_t>(extract);
 
     // If the index is compile-time constant, we use OpCompositeExtract.
-    auto* idx = builder_.Sem().Get(expr->index);
+    auto* idx = builder_.Sem().GetVal(expr->index);
     if (auto idx_constval = idx->ConstantValue()) {
         if (!push_function_inst(spv::Op::OpCompositeExtract,
                                 {
@@ -1140,8 +1142,7 @@ uint32_t Builder::GenerateAccessorExpression(const ast::AccessorExpression* expr
 }
 
 uint32_t Builder::GenerateIdentifierExpression(const ast::IdentifierExpression* expr) {
-    auto* sem = builder_.Sem().Get(expr);
-    if (sem) {
+    if (auto* sem = builder_.Sem().GetVal(expr); sem) {
         if (auto* user = sem->UnwrapLoad()->As<sem::VariableUser>()) {
             return LookupVariableID(user->Variable());
         }
@@ -1231,7 +1232,7 @@ uint32_t Builder::GetGLSLstd450Import() {
 
 uint32_t Builder::GenerateInitializerExpression(const ast::Variable* var,
                                                 const ast::Expression* expr) {
-    if (auto* sem = builder_.Sem().Get(expr)) {
+    if (auto* sem = builder_.Sem().GetVal(expr)) {
         if (auto constant = sem->ConstantValue()) {
             return GenerateConstantIfNeeded(constant);
         }

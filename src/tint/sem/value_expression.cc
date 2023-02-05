@@ -30,11 +30,10 @@ ValueExpression::ValueExpression(const ast::Expression* declaration,
                                  const constant::Value* constant,
                                  bool has_side_effects,
                                  const Variable* root_ident /* = nullptr */)
-    : declaration_(declaration),
+    : Base(declaration, statement),
       root_identifier_(root_ident),
       type_(type),
       stage_(stage),
-      statement_(statement),
       constant_(std::move(constant)),
       has_side_effects_(has_side_effects) {
     TINT_ASSERT(Semantic, type_);

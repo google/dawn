@@ -361,7 +361,7 @@ TEST_F(ResolverLoadTest, AddressOf) {
                    Let("l", AddressOf(ident)));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    auto* no_load = Sem().Get(ident);
+    auto* no_load = Sem().GetVal(ident);
     ASSERT_NE(no_load, nullptr);
     EXPECT_TRUE(no_load->Type()->Is<type::Reference>());  // No load
 }

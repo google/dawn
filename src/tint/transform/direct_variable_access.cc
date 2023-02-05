@@ -216,7 +216,7 @@ struct DirectVariableAccess::State {
         // are grown and moved up the expression tree. After this stage, we are left with all the
         // expression access chains to variables that we may need to transform.
         for (auto* node : ctx.src->ASTNodes().Objects()) {
-            if (auto* expr = sem.Get<sem::ValueExpression>(node)) {
+            if (auto* expr = sem.GetVal(node)) {
                 AppendAccessChain(expr);
             }
         }
@@ -464,7 +464,7 @@ struct DirectVariableAccess::State {
                     [&](const ast::Let*) {
                         if (variable->Type()->Is<type::Pointer>()) {
                             // variable is a pointer-let.
-                            auto* init = sem.Get(variable->Declaration()->initializer);
+                            auto* init = sem.GetVal(variable->Declaration()->initializer);
                             // Note: We do not use take_chain() here, as we need to preserve the
                             // AccessChain on the let's initializer, as the let needs its
                             // initializer updated, and the let may be used multiple times. Instead
@@ -498,7 +498,7 @@ struct DirectVariableAccess::State {
                     // If this is a '&' or '*', simply move the chain to the unary op expression.
                     if (unary->op == ast::UnaryOp::kAddressOf ||
                         unary->op == ast::UnaryOp::kIndirection) {
-                        take_chain(sem.Get(unary->expr));
+                        take_chain(sem.GetVal(unary->expr));
                     }
                 }
             });
@@ -990,7 +990,7 @@ struct DirectVariableAccess::State {
                 return nullptr;  // Just clone the expression.
             }
 
-            auto* expr = sem.Get(ast_expr);
+            auto* expr = sem.GetVal(ast_expr);
             if (!expr) {
                 // No semantic node for the expression.
                 return nullptr;  // Just clone the expression.

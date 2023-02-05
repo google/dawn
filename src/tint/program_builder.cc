@@ -97,7 +97,7 @@ void ProgramBuilder::AssertNotMoved() const {
 }
 
 const type::Type* ProgramBuilder::TypeOf(const ast::Expression* expr) const {
-    auto* sem = Sem().Get(expr);
+    auto* sem = Sem().GetVal(expr);
     return sem ? sem->Type() : nullptr;
 }
 

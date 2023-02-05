@@ -30,6 +30,7 @@
 // Forward declarations
 namespace tint::sem {
 class Module;
+class ValueExpression;
 }  // namespace tint::sem
 namespace tint::type {
 class Node;
@@ -86,6 +87,14 @@ class Info {
             return As<RESULT>(nodes_[ast_node->node_id.value]);
         }
         return nullptr;
+    }
+
+    /// Convenience function that's an alias for Get<ValueExpression>()
+    /// @param ast_node the AST node
+    /// @returns a pointer to the semantic node if found, otherwise nullptr
+    template <typename AST>
+    const sem::ValueExpression* GetVal(const AST* ast_node) const {
+        return Get<ValueExpression>(ast_node);
     }
 
     /// Add registers the semantic node `sem_node` for the AST node `ast_node`.

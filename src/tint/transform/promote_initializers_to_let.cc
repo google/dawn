@@ -83,7 +83,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
 
     // Walk the AST nodes. This order guarantees that leaf-expressions are visited first.
     for (auto* node : src->ASTNodes().Objects()) {
-        if (auto* sem = src->Sem().Get<sem::ValueExpression>(node)) {
+        if (auto* sem = src->Sem().GetVal(node)) {
             auto* stmt = sem->Stmt();
             if (!stmt) {
                 // Expression is outside of a statement. This usually means the expression is part
@@ -118,7 +118,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
     // After walking the full AST, const_chains only contains the outer-most constant expressions.
     // Check if any of these need hoisting, and append those to to_hoist.
     for (auto* expr : const_chains) {
-        if (auto* sem = src->Sem().Get(expr); should_hoist(sem)) {
+        if (auto* sem = src->Sem().GetVal(expr); should_hoist(sem)) {
             to_hoist.Push(sem);
         }
     }

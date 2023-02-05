@@ -106,7 +106,7 @@ struct Unshadow::State {
 
         ctx.ReplaceAll(
             [&](const ast::IdentifierExpression* ident) -> const tint::ast::IdentifierExpression* {
-                if (auto* sem_ident = sem.Get(ident)) {
+                if (auto* sem_ident = sem.GetVal(ident)) {
                     if (auto* user = sem_ident->UnwrapLoad()->As<sem::VariableUser>()) {
                         if (auto renamed = renamed_to.Find(user->Variable())) {
                             return b.Expr(*renamed);

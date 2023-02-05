@@ -66,9 +66,8 @@ Transform::ApplyResult SimplifySideEffectStatements::Apply(const Program* src,
 
     HoistToDeclBefore hoist_to_decl_before(ctx);
     for (auto* node : ctx.src->ASTNodes().Objects()) {
-        if (auto* expr = node->As<ast::Expression>()) {
-            auto* sem_expr = src->Sem().Get(expr);
-            if (!sem_expr || !sem_expr->HasSideEffects()) {
+        if (auto* sem_expr = src->Sem().GetVal(node)) {
+            if (!sem_expr->HasSideEffects()) {
                 continue;
             }
 
@@ -278,7 +277,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
                 return true;
             },
             [&](const ast::IdentifierExpression* e) {
-                if (auto* sem_e = sem.Get(e)) {
+                if (auto* sem_e = sem.GetVal(e)) {
                     if (auto* var_user = sem_e->UnwrapLoad()->As<sem::VariableUser>()) {
                         // Don't hoist constants.
                         if (var_user->ConstantValue()) {
@@ -417,8 +416,8 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
 
     // Returns true if `binary_expr` should be decomposed for short-circuit eval.
     bool IsLogicalWithSideEffects(const ast::BinaryExpression* binary_expr) {
-        return binary_expr->IsLogical() && (sem.Get(binary_expr->lhs)->HasSideEffects() ||
-                                            sem.Get(binary_expr->rhs)->HasSideEffects());
+        return binary_expr->IsLogical() && (sem.GetVal(binary_expr->lhs)->HasSideEffects() ||
+                                            sem.GetVal(binary_expr->rhs)->HasSideEffects());
     }
 
     // Recursive function used to decompose an expression for short-circuit eval.
@@ -560,7 +559,8 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
         return Switch(
             stmt,
             [&](const ast::AssignmentStatement* s) -> const ast::Statement* {
-                if (!sem.Get(s->lhs)->HasSideEffects() && !sem.Get(s->rhs)->HasSideEffects()) {
+                if (!sem.GetVal(s->lhs)->HasSideEffects() &&
+                    !sem.GetVal(s->rhs)->HasSideEffects()) {
                     return nullptr;
                 }
                 // rhs before lhs
@@ -580,7 +580,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 return ctx.CloneWithoutTransform(s);
             },
             [&](const ast::ForLoopStatement* s) -> const ast::Statement* {
-                if (!s->condition || !sem.Get(s->condition)->HasSideEffects()) {
+                if (!s->condition || !sem.GetVal(s->condition)->HasSideEffects()) {
                     return nullptr;
                 }
                 tint::utils::Vector<const ast::Statement*, 8> stmts;
@@ -589,7 +589,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 return ctx.CloneWithoutTransform(s);
             },
             [&](const ast::WhileStatement* s) -> const ast::Statement* {
-                if (!sem.Get(s->condition)->HasSideEffects()) {
+                if (!sem.GetVal(s->condition)->HasSideEffects()) {
                     return nullptr;
                 }
                 tint::utils::Vector<const ast::Statement*, 8> stmts;
@@ -598,7 +598,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 return ctx.CloneWithoutTransform(s);
             },
             [&](const ast::IfStatement* s) -> const ast::Statement* {
-                if (!sem.Get(s->condition)->HasSideEffects()) {
+                if (!sem.GetVal(s->condition)->HasSideEffects()) {
                     return nullptr;
                 }
                 tint::utils::Vector<const ast::Statement*, 8> stmts;
@@ -607,7 +607,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 return ctx.CloneWithoutTransform(s);
             },
             [&](const ast::ReturnStatement* s) -> const ast::Statement* {
-                if (!s->value || !sem.Get(s->value)->HasSideEffects()) {
+                if (!s->value || !sem.GetVal(s->value)->HasSideEffects()) {
                     return nullptr;
                 }
                 tint::utils::Vector<const ast::Statement*, 8> stmts;
@@ -626,7 +626,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
             },
             [&](const ast::VariableDeclStatement* s) -> const ast::Statement* {
                 auto* var = s->variable;
-                if (!var->initializer || !sem.Get(var->initializer)->HasSideEffects()) {
+                if (!var->initializer || !sem.GetVal(var->initializer)->HasSideEffects()) {
                     return nullptr;
                 }
                 tint::utils::Vector<const ast::Statement*, 8> stmts;

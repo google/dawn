@@ -76,7 +76,7 @@ TEST_P(ResolverConstEvalBitcastTest, Test) {
     if (expected) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-        auto* sem = Sem().Get(expr);
+        auto* sem = Sem().GetVal(expr);
         ASSERT_NE(sem, nullptr);
         EXPECT_TYPE(sem->Type(), target_sem_ty);
         ASSERT_NE(sem->ConstantValue(), nullptr);

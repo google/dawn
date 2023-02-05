@@ -404,7 +404,7 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
         }
         case Expectation::kNoMaterialize: {
             ASSERT_TRUE(r()->Resolve()) << r()->error();
-            auto* sem = Sem().Get(abstract_expr);
+            auto* sem = Sem().GetVal(abstract_expr);
             ASSERT_NE(sem, nullptr);
             EXPECT_FALSE(sem->Is<sem::Materialize>());
             CheckTypesAndValues(sem, data.target_sem_ty(*this), data.materialized_value);
