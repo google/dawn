@@ -45,6 +45,6 @@ if [ ! -d "${SCRIPT_DIR}/src/cmd/${TOOL}" ]; then
   show_usage
 fi
 
-pushd "${SCRIPT_DIR}/src" > /dev/null
-    go run "./cmd/${TOOL}" "${@:2}"
+pushd "${SCRIPT_DIR}/.." > /dev/null
+    go run "${SCRIPT_DIR}/src/cmd/${TOOL}" "${@:2}"
 popd > /dev/null
