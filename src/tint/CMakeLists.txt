@@ -78,6 +78,8 @@ endif()
 
 list(APPEND TINT_LIB_SRCS
   ../../include/tint/tint.h
+  ast/accessor_expression.cc
+  ast/accessor_expression.h
   ast/alias.cc
   ast/alias.h
   ast/array.cc

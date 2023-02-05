@@ -25,9 +25,7 @@ IndexAccessorExpression::IndexAccessorExpression(ProgramID pid,
                                                  const Source& src,
                                                  const Expression* obj,
                                                  const Expression* idx)
-    : Base(pid, nid, src), object(obj), index(idx) {
-    TINT_ASSERT(AST, object);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, object, program_id);
+    : Base(pid, nid, src, obj), index(idx) {
     TINT_ASSERT(AST, idx);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, idx, program_id);
 }

@@ -25,7 +25,7 @@ TEST_F(MemberAccessorExpressionTest, Creation) {
     auto* mem = Ident("member");
 
     auto* stmt = create<MemberAccessorExpression>(str, mem);
-    EXPECT_EQ(stmt->structure, str);
+    EXPECT_EQ(stmt->object, str);
     EXPECT_EQ(stmt->member, mem);
 }
 

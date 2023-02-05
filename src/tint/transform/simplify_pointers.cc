@@ -76,7 +76,7 @@ struct SimplifyPointers::State {
         }
 
         if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
-            CollectSavedArrayIndices(m->structure, cb);
+            CollectSavedArrayIndices(m->object, cb);
             return;
         }
 

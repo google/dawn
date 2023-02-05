@@ -23,11 +23,9 @@ namespace tint::ast {
 MemberAccessorExpression::MemberAccessorExpression(ProgramID pid,
                                                    NodeID nid,
                                                    const Source& src,
-                                                   const Expression* str,
+                                                   const Expression* obj,
                                                    const Identifier* mem)
-    : Base(pid, nid, src), structure(str), member(mem) {
-    TINT_ASSERT(AST, structure);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, structure, program_id);
+    : Base(pid, nid, src, obj), member(mem) {
     TINT_ASSERT(AST, member);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, member, program_id);
 
@@ -44,9 +42,9 @@ MemberAccessorExpression::~MemberAccessorExpression() = default;
 const MemberAccessorExpression* MemberAccessorExpression::Clone(CloneContext* ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx->Clone(source);
-    auto* str = ctx->Clone(structure);
+    auto* obj = ctx->Clone(object);
     auto* mem = ctx->Clone(member);
-    return ctx->dst->create<MemberAccessorExpression>(src, str, mem);
+    return ctx->dst->create<MemberAccessorExpression>(src, obj, mem);
 }
 
 }  // namespace tint::ast

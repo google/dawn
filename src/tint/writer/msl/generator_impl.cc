@@ -370,8 +370,8 @@ bool GeneratorImpl::EmitTypeDecl(const type::Type* ty) {
 
 bool GeneratorImpl::EmitIndexAccessor(std::ostream& out, const ast::IndexAccessorExpression* expr) {
     bool paren_lhs =
-        !expr->object->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
-                               ast::IdentifierExpression, ast::MemberAccessorExpression>();
+        !expr->object
+             ->IsAnyOf<ast::AccessorExpression, ast::CallExpression, ast::IdentifierExpression>();
 
     if (paren_lhs) {
         out << "(";
@@ -1009,9 +1009,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     // expression includes an operator with lower precedence than the member
     // accessor used for the function calls.
     auto texture_expr = [&]() {
-        bool paren_lhs =
-            !texture->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
-                              ast::IdentifierExpression, ast::MemberAccessorExpression>();
+        bool paren_lhs = !texture->IsAnyOf<ast::AccessorExpression, ast::CallExpression,
+                                           ast::IdentifierExpression>();
         if (paren_lhs) {
             out << "(";
         }
@@ -2331,13 +2330,12 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
 bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
                                        const ast::MemberAccessorExpression* expr) {
     auto write_lhs = [&] {
-        bool paren_lhs =
-            !expr->structure->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
-                                      ast::IdentifierExpression, ast::MemberAccessorExpression>();
+        bool paren_lhs = !expr->object->IsAnyOf<ast::AccessorExpression, ast::CallExpression,
+                                                ast::IdentifierExpression>();
         if (paren_lhs) {
             out << "(";
         }
-        if (!EmitExpression(out, expr->structure)) {
+        if (!EmitExpression(out, expr->object)) {
             return false;
         }
         if (paren_lhs) {

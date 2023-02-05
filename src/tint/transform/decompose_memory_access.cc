@@ -902,7 +902,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
             auto* accessor_sem = sem.Get(accessor)->UnwrapLoad();
             if (auto* swizzle = accessor_sem->As<sem::Swizzle>()) {
                 if (swizzle->Indices().Length() == 1) {
-                    if (auto access = state.TakeAccess(accessor->structure)) {
+                    if (auto access = state.TakeAccess(accessor->object)) {
                         auto* vec_ty = access.type->As<type::Vector>();
                         auto* offset = state.Mul(vec_ty->type()->Size(), swizzle->Indices()[0u]);
                         state.AddAccess(accessor, {
@@ -913,7 +913,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
                     }
                 }
             } else {
-                if (auto access = state.TakeAccess(accessor->structure)) {
+                if (auto access = state.TakeAccess(accessor->object)) {
                     auto* str_ty = access.type->As<sem::Struct>();
                     auto* member = str_ty->FindMember(accessor->member->symbol);
                     auto offset = member->Offset();

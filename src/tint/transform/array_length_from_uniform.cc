@@ -226,7 +226,7 @@ struct ArrayLengthFromUniform::State {
             }
             auto* storage_buffer_expr = param->expr;
             if (auto* accessor = param->expr->As<ast::MemberAccessorExpression>()) {
-                storage_buffer_expr = accessor->structure;
+                storage_buffer_expr = accessor->object;
             }
             auto* storage_buffer_sem = sem.Get<sem::VariableUser>(storage_buffer_expr);
             if (TINT_UNLIKELY(!storage_buffer_sem)) {

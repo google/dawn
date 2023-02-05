@@ -2777,9 +2777,9 @@ sem::ValueExpression* Resolver::Identifier(const ast::IdentifierExpression* expr
 }
 
 sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* expr) {
-    auto* structure = sem_.TypeOf(expr->structure);
+    auto* structure = sem_.TypeOf(expr->object);
     auto* storage_ty = structure->UnwrapRef();
-    auto* object = sem_.Get(expr->structure);
+    auto* object = sem_.Get(expr->object);
     auto* root_ident = object->RootIdentifier();
 
     const type::Type* ty = nullptr;
@@ -3008,7 +3008,7 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
                 auto* array = unary->expr->As<ast::IndexAccessorExpression>();
                 auto* member = unary->expr->As<ast::MemberAccessorExpression>();
                 if ((array && sem_.TypeOf(array->object)->UnwrapRef()->Is<type::Vector>()) ||
-                    (member && sem_.TypeOf(member->structure)->UnwrapRef()->Is<type::Vector>())) {
+                    (member && sem_.TypeOf(member->object)->UnwrapRef()->Is<type::Vector>())) {
                     AddError("cannot take the address of a vector component", unary->expr->source);
                     return nullptr;
                 }

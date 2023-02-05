@@ -73,8 +73,8 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
 
     EXPECT_EQ(mem->member->symbol, p->builder().Symbols().Get("d"));
 
-    ASSERT_TRUE(mem->structure->Is<ast::IndexAccessorExpression>());
-    auto* idx = mem->structure->As<ast::IndexAccessorExpression>();
+    ASSERT_TRUE(mem->object->Is<ast::IndexAccessorExpression>());
+    auto* idx = mem->object->As<ast::IndexAccessorExpression>();
 
     ASSERT_NE(idx->index, nullptr);
     ASSERT_TRUE(idx->index->Is<ast::IntLiteralExpression>());
@@ -84,11 +84,11 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
     mem = idx->object->As<ast::MemberAccessorExpression>();
     EXPECT_EQ(mem->member->symbol, p->builder().Symbols().Get("c"));
 
-    ASSERT_TRUE(mem->structure->Is<ast::MemberAccessorExpression>());
+    ASSERT_TRUE(mem->object->Is<ast::MemberAccessorExpression>());
 
-    mem = mem->structure->As<ast::MemberAccessorExpression>();
-    ASSERT_TRUE(mem->structure->Is<ast::IdentifierExpression>());
-    auto* ident_expr = mem->structure->As<ast::IdentifierExpression>();
+    mem = mem->object->As<ast::MemberAccessorExpression>();
+    ASSERT_TRUE(mem->object->Is<ast::IdentifierExpression>());
+    auto* ident_expr = mem->object->As<ast::IdentifierExpression>();
     EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("a"));
     EXPECT_EQ(mem->member->symbol, p->builder().Symbols().Get("b"));
 }

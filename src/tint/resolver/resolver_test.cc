@@ -1253,7 +1253,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
     auto* sma = Sem().Get(mem)->UnwrapLoad()->As<sem::StructMemberAccess>();
     ASSERT_NE(sma, nullptr);
     EXPECT_TRUE(sma->Member()->Type()->Is<type::F32>());
-    EXPECT_EQ(sma->Object()->Declaration(), mem->structure);
+    EXPECT_EQ(sma->Object()->Declaration(), mem->object);
     EXPECT_EQ(sma->Member()->Index(), 1u);
     EXPECT_EQ(sma->Member()->Declaration()->symbol, Symbols().Get("second_member"));
 }
@@ -1273,7 +1273,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
     EXPECT_TRUE(TypeOf(mem)->Is<type::F32>());
     auto* sma = Sem().Get(mem)->UnwrapLoad()->As<sem::StructMemberAccess>();
     ASSERT_NE(sma, nullptr);
-    EXPECT_EQ(sma->Object()->Declaration(), mem->structure);
+    EXPECT_EQ(sma->Object()->Declaration(), mem->object);
     EXPECT_TRUE(sma->Member()->Type()->Is<type::F32>());
     EXPECT_EQ(sma->Member()->Index(), 1u);
 }
@@ -1292,7 +1292,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
     EXPECT_EQ(TypeOf(mem)->As<type::Vector>()->Width(), 4u);
     auto* sma = Sem().Get(mem)->As<sem::Swizzle>();
     ASSERT_NE(sma, nullptr);
-    EXPECT_EQ(sma->Object()->Declaration(), mem->structure);
+    EXPECT_EQ(sma->Object()->Declaration(), mem->object);
     EXPECT_THAT(sma->Indices(), ElementsAre(0, 2, 1, 3));
 }
 
@@ -1308,7 +1308,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
     ASSERT_TRUE(TypeOf(mem)->Is<type::F32>());
     auto* sma = Sem().Get(mem)->UnwrapLoad()->As<sem::Swizzle>();
     ASSERT_NE(sma, nullptr);
-    EXPECT_EQ(sma->Object()->Declaration(), mem->structure);
+    EXPECT_EQ(sma->Object()->Declaration(), mem->object);
     EXPECT_THAT(sma->Indices(), ElementsAre(2));
 }
 

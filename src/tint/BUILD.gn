@@ -237,6 +237,7 @@ libtint_source_set("libtint_base_src") {
 
 libtint_source_set("libtint_syntax_tree_src") {
   sources = [
+    "ast/accessor_expression.h",
     "ast/alias.h",
     "ast/array.h",
     "ast/assignment_statement.h",
@@ -544,6 +545,8 @@ libtint_source_set("libtint_transform_src") {
 
 libtint_source_set("libtint_ast_src") {
   sources = [
+    "ast/accessor_expression.cc",
+    "ast/accessor_expression.h",
     "ast/alias.cc",
     "ast/alias.h",
     "ast/array.cc",

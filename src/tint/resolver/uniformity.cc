@@ -1092,8 +1092,7 @@ class UniformityGraph {
                         auto* init = sem_.Get(decl->variable->initializer);
                         if (auto* unary_init = init->Declaration()->As<ast::UnaryOpExpression>()) {
                             auto* e = UnwrapIndirectAndAddressOfChain(unary_init);
-                            if (e->IsAnyOf<ast::IndexAccessorExpression,
-                                           ast::MemberAccessorExpression>()) {
+                            if (e->Is<ast::AccessorExpression>()) {
                                 current_function_->partial_ptrs.Add(sem_var);
                             }
                         }
@@ -1311,7 +1310,7 @@ class UniformityGraph {
             [&](const ast::LiteralExpression*) { return std::make_pair(cf, cf); },
 
             [&](const ast::MemberAccessorExpression* m) {
-                return ProcessExpression(cf, m->structure, load_rule);
+                return ProcessExpression(cf, m->object, load_rule);
             },
 
             [&](const ast::UnaryOpExpression* u) {
@@ -1341,9 +1340,7 @@ class UniformityGraph {
                 return true;
             }
         } else {
-            TINT_ASSERT(
-                Resolver,
-                (e->IsAnyOf<ast::IndexAccessorExpression, ast::MemberAccessorExpression>()));
+            TINT_ASSERT(Resolver, e->Is<ast::IndexAccessorExpression>());
             return true;
         }
         return false;
@@ -1394,7 +1391,7 @@ class UniformityGraph {
             },
 
             [&](const ast::MemberAccessorExpression* m) {
-                return ProcessLValueExpression(cf, m->structure, /*is_partial_reference*/ true);
+                return ProcessLValueExpression(cf, m->object, /*is_partial_reference*/ true);
             },
 
             [&](const ast::UnaryOpExpression* u) {

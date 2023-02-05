@@ -134,7 +134,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
                 return false;
             },
             [&](const ast::MemberAccessorExpression* e) {
-                if (HasSideEffects(e->structure)) {
+                if (HasSideEffects(e->object)) {
                     return true;
                 }
                 no_side_effects.insert(e);
@@ -323,7 +323,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
             [&](const ast::IndexAccessorExpression* e) {
                 return accessor_process(e->object, e->index);
             },
-            [&](const ast::MemberAccessorExpression* e) { return accessor_process(e->structure); },
+            [&](const ast::MemberAccessorExpression* e) { return accessor_process(e->object); },
             [&](const ast::LiteralExpression*) {
                 // Leaf
                 return false;
@@ -519,7 +519,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 return clone_maybe_hoisted(call);
             },
             [&](const ast::MemberAccessorExpression* member) {
-                ctx.Replace(member->structure, decompose(member->structure));
+                ctx.Replace(member->object, decompose(member->object));
                 return clone_maybe_hoisted(member);
             },
             [&](const ast::UnaryOpExpression* unary) {

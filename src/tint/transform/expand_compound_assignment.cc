@@ -96,7 +96,7 @@ struct ExpandCompoundAssignment::State {
         auto* index_accessor = lhs->As<ast::IndexAccessorExpression>();
         auto* member_accessor = lhs->As<ast::MemberAccessorExpression>();
         if (lhs->Is<ast::IdentifierExpression>() ||
-            (member_accessor && member_accessor->structure->Is<ast::IdentifierExpression>())) {
+            (member_accessor && member_accessor->object->Is<ast::IdentifierExpression>())) {
             // This is the simple case with no side effects, so we can just use the
             // original LHS expression directly.
             // Before:
@@ -116,7 +116,7 @@ struct ExpandCompoundAssignment::State {
             auto lhs_ptr = hoist_pointer_to(index_accessor->object);
             auto index = hoist_expr_to_let(index_accessor->index);
             new_lhs = [&, lhs_ptr, index]() { return b.IndexAccessor(b.Deref(lhs_ptr), index); };
-        } else if (member_accessor && is_vec(member_accessor->structure)) {
+        } else if (member_accessor && is_vec(member_accessor->object)) {
             // This is the case for vector component via a member accessor. We just
             // need to capture a pointer to the vector.
             // Before:
@@ -124,7 +124,7 @@ struct ExpandCompoundAssignment::State {
             // After:
             //     let vec_ptr = &a[idx()];
             //     (*vec_ptr).y = (*vec_ptr).y + rhs;
-            auto lhs_ptr = hoist_pointer_to(member_accessor->structure);
+            auto lhs_ptr = hoist_pointer_to(member_accessor->object);
             new_lhs = [&, lhs_ptr]() {
                 return b.MemberAccessor(b.Deref(lhs_ptr), ctx.Clone(member_accessor->member));
             };

@@ -143,9 +143,9 @@ TEST_F(ParserImplTest, LHSExpression_PostfixExpression) {
     ASSERT_TRUE(u->expr->Is<ast::MemberAccessorExpression>());
 
     auto* access = u->expr->As<ast::MemberAccessorExpression>();
-    ASSERT_TRUE(access->structure->Is<ast::IdentifierExpression>());
+    ASSERT_TRUE(access->object->Is<ast::IdentifierExpression>());
 
-    auto* struct_ident = access->structure->As<ast::IdentifierExpression>();
+    auto* struct_ident = access->object->As<ast::IdentifierExpression>();
     EXPECT_EQ(struct_ident->identifier->symbol, p->builder().Symbols().Get("a"));
     EXPECT_EQ(access->member->symbol, p->builder().Symbols().Get("foo"));
 }

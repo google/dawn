@@ -163,8 +163,8 @@ TEST_F(ParserImplTest, SingularExpression_MemberAccessor) {
     ASSERT_TRUE(e->Is<ast::MemberAccessorExpression>());
 
     auto* m = e->As<ast::MemberAccessorExpression>();
-    ASSERT_TRUE(m->structure->Is<ast::IdentifierExpression>());
-    EXPECT_EQ(m->structure->As<ast::IdentifierExpression>()->identifier->symbol,
+    ASSERT_TRUE(m->object->Is<ast::IdentifierExpression>());
+    EXPECT_EQ(m->object->As<ast::IdentifierExpression>()->identifier->symbol,
               p->builder().Symbols().Get("a"));
 
     EXPECT_EQ(m->member->symbol, p->builder().Symbols().Get("b"));

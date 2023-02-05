@@ -172,7 +172,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
         if (!accessor) {
             continue;
         }
-        auto* ident = accessor->structure->As<ast::IdentifierExpression>();
+        auto* ident = accessor->object->As<ast::IdentifierExpression>();
         if (!ident) {
             continue;
         }

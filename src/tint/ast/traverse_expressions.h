@@ -136,7 +136,7 @@ bool TraverseExpressions(const ast::Expression* root, diag::List& diags, CALLBAC
                 return true;
             },
             [&](const MemberAccessorExpression* member) {
-                push_single(member->structure, p.depth + 1);
+                push_single(member->object, p.depth + 1);
                 return true;
             },
             [&](const UnaryOpExpression* unary) {

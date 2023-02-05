@@ -571,13 +571,12 @@ uint32_t Builder::GenerateExpression(const sem::ValueExpression* expr) {
     }
     return Switch(
         expr->Declaration(),  //
-        [&](const ast::IndexAccessorExpression* a) { return GenerateAccessorExpression(a); },
+        [&](const ast::AccessorExpression* a) { return GenerateAccessorExpression(a); },
         [&](const ast::BinaryExpression* b) { return GenerateBinaryExpression(b); },
         [&](const ast::BitcastExpression* b) { return GenerateBitcastExpression(b); },
         [&](const ast::CallExpression* c) { return GenerateCallExpression(c); },
         [&](const ast::IdentifierExpression* i) { return GenerateIdentifierExpression(i); },
         [&](const ast::LiteralExpression* l) { return GenerateLiteralIfNeeded(l); },
-        [&](const ast::MemberAccessorExpression* m) { return GenerateAccessorExpression(m); },
         [&](const ast::UnaryOpExpression* u) { return GenerateUnaryOpExpression(u); },
         [&](Default) {
             error_ = "unknown expression type: " + std::string(expr->TypeInfo().name);
@@ -1070,13 +1069,7 @@ bool Builder::GenerateMemberAccessor(const ast::MemberAccessorExpression* expr,
         });
 }
 
-uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
-    if (TINT_UNLIKELY(
-            (!expr->IsAnyOf<ast::IndexAccessorExpression, ast::MemberAccessorExpression>()))) {
-        TINT_ICE(Writer, builder_.Diagnostics()) << "expression is not an accessor";
-        return 0;
-    }
-
+uint32_t Builder::GenerateAccessorExpression(const ast::AccessorExpression* expr) {
     // Gather a list of all the member and index accessors that are in this chain.
     // The list is built in reverse order as that's the order we need to access
     // the chain.
@@ -1088,7 +1081,7 @@ uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
             source = array->object;
         } else if (auto* member = source->As<ast::MemberAccessorExpression>()) {
             accessors.insert(accessors.begin(), source);
-            source = member->structure;
+            source = member->object;
         } else {
             break;
         }
@@ -2380,13 +2373,13 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
                 return 0;
             }
 
-            auto struct_id = GenerateExpression(accessor->structure);
+            auto struct_id = GenerateExpression(accessor->object);
             if (struct_id == 0) {
                 return 0;
             }
             params.push_back(Operand(struct_id));
 
-            auto* type = TypeOf(accessor->structure)->UnwrapRef();
+            auto* type = TypeOf(accessor->object)->UnwrapRef();
             if (!type->Is<sem::Struct>()) {
                 error_ = "invalid type (" + type->FriendlyName(builder_.Symbols()) +
                          ") for runtime array length";

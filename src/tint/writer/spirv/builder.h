@@ -308,9 +308,9 @@ class Builder {
     /// For more information on accessors see the "Pointer evaluation" section of
     /// the WGSL specification.
     ///
-    /// @param expr the expresssion to generate
+    /// @param expr the expression to generate
     /// @returns the id of the expression or 0 on failure
-    uint32_t GenerateAccessorExpression(const ast::Expression* expr);
+    uint32_t GenerateAccessorExpression(const ast::AccessorExpression* expr);
     /// Generates an index accessor
     /// @param expr the accessor to generate
     /// @param info the current accessor information
@@ -322,7 +322,7 @@ class Builder {
     /// @returns true if the accessor was generated successfully
     bool GenerateMemberAccessor(const ast::MemberAccessorExpression* expr, AccessorInfo* info);
     /// Generates an identifier expression
-    /// @param expr the expresssion to generate
+    /// @param expr the expression to generate
     /// @returns the id of the expression or 0 on failure
     uint32_t GenerateIdentifierExpression(const ast::IdentifierExpression* expr);
     /// Generates a unary op expression
