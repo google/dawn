@@ -936,6 +936,7 @@ if(TINT_BUILD_TESTS)
     resolver/const_eval_conversion_test.cc
     resolver/const_eval_indexing_test.cc
     resolver/const_eval_member_access_test.cc
+    resolver/const_eval_runtime_semantics_test.cc
     resolver/const_eval_test.h
     resolver/const_eval_unary_op_test.cc
     resolver/control_block_validation_test.cc

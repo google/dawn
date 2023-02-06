@@ -1971,7 +1971,7 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
         stage = sem::EvaluationStage::kNotEvaluated;
     } else {
-        if (auto r = const_eval_.Index(obj, idx)) {
+        if (auto r = const_eval_.Index(ty, obj, idx)) {
             val = r.Get();
         } else {
             return nullptr;

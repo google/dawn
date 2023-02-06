@@ -68,7 +68,9 @@ class ConstEval {
 
     /// Constructor
     /// @param b the program builder
-    explicit ConstEval(ProgramBuilder& b);
+    /// @param use_runtime_semantics if `true`, use the behavior defined for runtime evaluation, and
+    ///                              emit overflow and range errors as warnings instead of errors
+    explicit ConstEval(ProgramBuilder& b, bool use_runtime_semantics = false);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Constant value evaluation methods, to be called directly from Resolver
@@ -87,10 +89,13 @@ class ConstEval {
     ///         be calculated
     Result Bitcast(const type::Type* ty, const constant::Value* value, const Source& source);
 
+    /// @param ty the target type
     /// @param obj the object being indexed
     /// @param idx the index expression
     /// @return the result of the index, or null if the value cannot be calculated
-    Result Index(const sem::ValueExpression* obj, const sem::ValueExpression* idx);
+    Result Index(const type::Type* ty,
+                 const sem::ValueExpression* obj,
+                 const sem::ValueExpression* idx);
 
     /// @param ty the result type
     /// @param lit the literal AST node
@@ -1404,6 +1409,7 @@ class ConstEval {
                const constant::Value* v2);
 
     ProgramBuilder& builder;
+    bool use_runtime_semantics_ = false;
 };
 
 }  // namespace tint::resolver
