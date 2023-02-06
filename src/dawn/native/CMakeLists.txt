@@ -400,6 +400,7 @@ if (DAWN_ENABLE_NULL)
 endif()
 
 if (DAWN_ENABLE_OPENGL OR DAWN_ENABLE_VULKAN)
+    target_compile_definitions(dawn_native PRIVATE "DAWN_ENABLE_SPIRV_VALIDATION")
     target_sources(dawn_native PRIVATE
         "SpirvValidation.cpp"
         "SpirvValidation.h"
