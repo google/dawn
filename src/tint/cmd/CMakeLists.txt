@@ -12,23 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(TINT_SRCS
-  main.cc
-)
-
 ## Tint executable
-add_executable(tint ${TINT_SRCS})
+add_executable(tint "")
+target_sources(tint PRIVATE
+  "helper.cc"
+  "helper.h"
+  "main.cc"
+)
 tint_default_compile_options(tint)
 target_link_libraries(tint libtint tint_val)
 
-if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
+if (${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
   target_link_libraries(tint SPIRV-Tools)
 endif()
 
-if(${TINT_BUILD_GLSL_WRITER})
+if (${TINT_BUILD_GLSL_WRITER})
   target_link_libraries(tint glslang)
   target_link_libraries(tint glslang-default-resource-limits)
-  if(NOT MSVC)
+  if (NOT MSVC)
     target_compile_options(tint PRIVATE
       -Wno-reserved-id-macro
       -Wno-shadow-field-in-constructor
@@ -36,4 +37,17 @@ if(${TINT_BUILD_GLSL_WRITER})
       -Wno-weak-vtables
     )
   endif()
+endif()
+
+add_executable(tint_info "")
+target_sources(tint_info PRIVATE
+  "helper.cc"
+  "helper.h"
+  "info.cc"
+)
+tint_default_compile_options(tint_info)
+target_link_libraries(tint_info libtint tint_val)
+
+if (${TINT_BUILD_SPV_READER})
+    target_link_libraries(tint_info SPIRV-Tools)
 endif()

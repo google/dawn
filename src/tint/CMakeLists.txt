@@ -66,6 +66,8 @@ add_library(tint_diagnostic_utils
   diagnostic/formatter.h
   diagnostic/printer.cc
   diagnostic/printer.h
+  text/unicode.cc
+  text/unicode.h
   utils/debugger.cc
   utils/debugger.h
 )
@@ -374,8 +376,6 @@ list(APPEND TINT_LIB_SRCS
   symbol.cc
   symbol.h
   tint.cc
-  text/unicode.cc
-  text/unicode.h
   traits.h
   transform/add_empty_entry_point.cc
   transform/add_empty_entry_point.h

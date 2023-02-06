@@ -15,9 +15,19 @@
 import("//build_overrides/build.gni")
 import("../../../tint_overrides_with_defaults.gni")
 
+source_set("tint_cmd_helper") {
+  sources = [
+    "helper.cc",
+    "helper.h",
+  ]
+
+  deps = [ "${tint_root_dir}/src/tint:libtint" ]
+}
+
 executable("tint") {
   sources = [ "main.cc" ]
   deps = [
+    ":tint_cmd_helper",
     "${tint_root_dir}/src/tint:libtint",
     "${tint_root_dir}/src/tint:libtint_base_src",
     "${tint_root_dir}/src/tint:tint_utils_io",
@@ -33,6 +43,30 @@ executable("tint") {
       "${tint_root_dir}/third_party/vulkan-deps/glslang/src:glslang_lib_sources",
     ]
   }
+
+  configs += [
+    "${tint_root_dir}/src/tint:tint_common_config",
+    "${tint_root_dir}/src/tint:tint_config",
+  ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
+executable("tint_info") {
+  sources = [ "info.cc" ]
+  deps = [
+    ":tint_cmd_helper",
+    "${tint_root_dir}/src/tint:libtint",
+    "${tint_root_dir}/src/tint:libtint_base_src",
+    "${tint_root_dir}/src/tint:tint_utils_io",
+    "${tint_root_dir}/src/tint:tint_val",
+    "${tint_spirv_tools_dir}/:spvtools",
+    "${tint_spirv_tools_dir}/:spvtools_opt",
+    "${tint_spirv_tools_dir}/:spvtools_val",
+  ]
 
   configs += [
     "${tint_root_dir}/src/tint:tint_common_config",
