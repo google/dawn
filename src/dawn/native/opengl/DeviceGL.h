@@ -140,6 +140,8 @@ class Device final : public DeviceBase {
 
     GLFormatTable mFormatTable;
     std::unique_ptr<Context> mContext = nullptr;
+    // Has pending GL commands which are not associated with a fence.
+    mutable bool mHasPendingCommands = false;
 };
 
 }  // namespace dawn::native::opengl

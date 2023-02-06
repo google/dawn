@@ -48,6 +48,7 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
 
     gl.BindBuffer(GL_ARRAY_BUFFER, ToBackend(buffer)->GetHandle());
     gl.BufferSubData(GL_ARRAY_BUFFER, bufferOffset, size, data);
+    buffer->MarkUsedInPendingCommands();
     return {};
 }
 

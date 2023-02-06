@@ -520,6 +520,9 @@ MaybeError CommandBuffer::Execute() {
 
                 gl.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
                 gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+                ToBackend(copy->source)->TrackUsage();
+                ToBackend(copy->destination)->TrackUsage();
                 break;
             }
 
@@ -560,6 +563,8 @@ MaybeError CommandBuffer::Execute() {
                               copy->copySize);
                 gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
                 ToBackend(dst.texture)->Touch();
+
+                buffer->TrackUsage();
                 break;
             }
 
@@ -666,6 +671,8 @@ MaybeError CommandBuffer::Execute() {
 
                 gl.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
                 gl.DeleteFramebuffers(1, &readFBO);
+
+                buffer->TrackUsage();
                 break;
             }
 
@@ -720,6 +727,7 @@ MaybeError CommandBuffer::Execute() {
                     gl.BufferSubData(GL_ARRAY_BUFFER, cmd->offset, cmd->size, clearValues.data());
                 }
 
+                dstBuffer->TrackUsage();
                 break;
             }
 
@@ -756,6 +764,8 @@ MaybeError CommandBuffer::Execute() {
 
                 gl.BindBuffer(GL_ARRAY_BUFFER, dstBuffer->GetHandle());
                 gl.BufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+
+                dstBuffer->TrackUsage();
                 break;
             }
 
@@ -799,6 +809,8 @@ MaybeError CommandBuffer::ExecuteComputePass() {
                 gl.BindBuffer(GL_DISPATCH_INDIRECT_BUFFER, indirectBuffer->GetHandle());
                 gl.DispatchComputeIndirect(static_cast<GLintptr>(indirectBufferOffset));
                 gl.MemoryBarrier(GL_ALL_BARRIER_BITS);
+
+                indirectBuffer->TrackUsage();
                 break;
             }
 
@@ -1056,6 +1068,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 gl.DrawArraysIndirect(
                     lastPipeline->GetGLPrimitiveTopology(),
                     reinterpret_cast<void*>(static_cast<intptr_t>(indirectBufferOffset)));
+                indirectBuffer->TrackUsage();
                 break;
             }
 
@@ -1072,6 +1085,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 gl.DrawElementsIndirect(
                     lastPipeline->GetGLPrimitiveTopology(), indexBufferFormat,
                     reinterpret_cast<void*>(static_cast<intptr_t>(draw->indirectOffset)));
+                indirectBuffer->TrackUsage();
                 break;
             }
 
@@ -1112,6 +1126,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 indexBufferFormat = IndexFormatType(cmd->format);
                 indexFormatSize = IndexFormatSize(cmd->format);
                 vertexStateBufferBindingTracker.OnSetIndexBuffer(cmd->buffer.Get());
+                ToBackend(cmd->buffer)->TrackUsage();
                 break;
             }
 
@@ -1119,6 +1134,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
                 vertexStateBufferBindingTracker.OnSetVertexBuffer(cmd->slot, cmd->buffer.Get(),
                                                                   cmd->offset);
+                ToBackend(cmd->buffer)->TrackUsage();
                 break;
             }
 

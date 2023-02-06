@@ -315,10 +315,17 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
 }
 
 void Device::SubmitFenceSync() {
+    if (!mHasPendingCommands) {
+        return;
+    }
+
     const OpenGLFunctions& gl = GetGL();
     GLsync sync = gl.FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     IncrementLastSubmittedCommandSerial();
     mFencesInFlight.emplace(sync, GetLastSubmittedCommandSerial());
+
+    // Reset mHasPendingCommands after GetGL() which will set mHasPendingCommands to true.
+    mHasPendingCommands = false;
 }
 
 MaybeError Device::ValidateEGLImageCanBeWrapped(const TextureDescriptor* descriptor,
@@ -381,6 +388,7 @@ TextureBase* Device::CreateTextureWrappingEGLImage(const ExternalImageDescriptor
 }
 
 MaybeError Device::TickImpl() {
+    SubmitFenceSync();
     return {};
 }
 
@@ -442,9 +450,7 @@ MaybeError Device::WaitForIdleForDestruction() {
 }
 
 bool Device::HasPendingCommands() const {
-    // Technically we could have scheduled commands inside the GL driver that are waiting for a
-    // glFlush but we can't know for sure so we might as well pretend there are no commands.
-    return false;
+    return mHasPendingCommands;
 }
 
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {
@@ -465,6 +471,7 @@ const OpenGLFunctions& Device::GetGL() const {
     if (mContext) {
         mContext->MakeCurrent();
     }
+    mHasPendingCommands = true;
     return mGL;
 }
 

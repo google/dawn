@@ -39,8 +39,6 @@ ResultOrError<Ref<Buffer>> Buffer::CreateInternalBuffer(Device* device,
 
 Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
     : BufferBase(device, descriptor) {
-    // TODO(penghuang): track usage for GL.
-    mLastUsageSerial = kMaxExecutionSerial;
     const OpenGLFunctions& gl = device->GetGL();
     // Allocate at least 4 bytes so clamped accesses are always in bounds.
     mAllocatedSize = std::max(GetSize(), uint64_t(4u));
@@ -55,9 +53,10 @@ Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
         std::vector<uint8_t> clearValues(mAllocatedSize, 1u);
         gl.BufferData(GL_ARRAY_BUFFER, mAllocatedSize, clearValues.data(), GL_STATIC_DRAW);
     } else {
-        // Buffers start zeroed if you pass nullptr to glBufferData.
+        // Buffers start uninitialized if you pass nullptr to glBufferData.
         gl.BufferData(GL_ARRAY_BUFFER, mAllocatedSize, nullptr, GL_STATIC_DRAW);
     }
+    TrackUsage();
 }
 
 Buffer::Buffer(Device* device, const BufferDescriptor* descriptor, bool shouldLazyClear)
@@ -122,6 +121,7 @@ void Buffer::InitializeToZero() {
     gl.BufferSubData(GL_ARRAY_BUFFER, 0, size, clearValues.data());
     device->IncrementLazyClearCountForTesting();
 
+    TrackUsage();
     SetIsDataInitialized();
 }
 
@@ -160,7 +160,8 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
         mappedData = gl.MapBufferRange(GL_ARRAY_BUFFER, offset, size, GL_MAP_READ_BIT);
     } else {
         ASSERT(mode & wgpu::MapMode::Write);
-        mappedData = gl.MapBufferRange(GL_ARRAY_BUFFER, offset, size, GL_MAP_WRITE_BIT);
+        mappedData = gl.MapBufferRange(GL_ARRAY_BUFFER, offset, size,
+                                       GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
     }
 
     // The frontend asks that the pointer returned by GetMappedPointer is from the start of
