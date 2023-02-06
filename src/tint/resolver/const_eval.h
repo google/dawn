@@ -18,6 +18,7 @@
 #include <stddef.h>
 #include <string>
 
+#include "src/tint/number.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/result.h"
 #include "src/tint/utils/vector.h"
@@ -1092,6 +1093,17 @@ class ConstEval {
 
     /// Adds the given note message to the diagnostics
     void AddNote(const std::string& msg, const Source& source) const;
+
+    /// CreateScalar constructs and returns a constant::Scalar<T>.
+    /// @param source the source location
+    /// @param t the result type
+    /// @param v the scalar value
+    /// @return the constant value with the same type and value
+    template <typename T>
+    ConstEval::Result CreateScalar(const Source& source, const type::Type* t, T v);
+
+    /// ZeroValue returns a Constant for the zero-value of the type `type`.
+    const constant::Value* ZeroValue(const type::Type* type);
 
     /// Adds two Number<T>s
     /// @param source the source location
