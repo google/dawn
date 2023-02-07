@@ -116,9 +116,9 @@ TEST_F(ResolverF16ExtensionTest, F16LiteralUsedWithoutExtension) {
     EXPECT_EQ(r()->error(), "12:34 error: f16 type used without 'f16' extension enabled");
 }
 
-using ResolverF16ExtensionShortNameTest = ResolverTestWithParam<const char*>;
+using ResolverF16ExtensionBuiltinTypeAliasTest = ResolverTestWithParam<const char*>;
 
-TEST_P(ResolverF16ExtensionShortNameTest, Vec2hTypeUsedWithExtension) {
+TEST_P(ResolverF16ExtensionBuiltinTypeAliasTest, Vec2hTypeUsedWithExtension) {
     // enable f16;
     // var<private> v : vec2h;
     Enable(ast::Extension::kF16);
@@ -128,7 +128,7 @@ TEST_P(ResolverF16ExtensionShortNameTest, Vec2hTypeUsedWithExtension) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_P(ResolverF16ExtensionShortNameTest, Vec2hTypeUsedWithoutExtension) {
+TEST_P(ResolverF16ExtensionBuiltinTypeAliasTest, Vec2hTypeUsedWithoutExtension) {
     // var<private> v : vec2h;
     GlobalVar("v", ty(Source{{12, 34}}, GetParam()), type::AddressSpace::kPrivate);
 
@@ -136,8 +136,8 @@ TEST_P(ResolverF16ExtensionShortNameTest, Vec2hTypeUsedWithoutExtension) {
     EXPECT_EQ(r()->error(), "12:34 error: f16 type used without 'f16' extension enabled");
 }
 
-INSTANTIATE_TEST_SUITE_P(ResolverF16ExtensionShortNameTest,
-                         ResolverF16ExtensionShortNameTest,
+INSTANTIATE_TEST_SUITE_P(ResolverF16ExtensionBuiltinTypeAliasTest,
+                         ResolverF16ExtensionBuiltinTypeAliasTest,
                          testing::Values("mat2x2h",
                                          "mat2x3h",
                                          "mat2x4h",

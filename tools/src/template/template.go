@@ -40,10 +40,13 @@ func Run(tmpl string, w io.Writer, funcs Functions) error {
 		template: template.New("<template>"),
 	}
 
+	globals := newMap()
+
 	// Add a bunch of generic useful functions
 	g.funcs = Functions{
 		"Contains":   strings.Contains,
 		"Eval":       g.eval,
+		"Globals":    func() Map { return globals },
 		"HasPrefix":  strings.HasPrefix,
 		"HasSuffix":  strings.HasSuffix,
 		"Import":     g.importTmpl,
@@ -128,8 +131,12 @@ func (g *generator) importTmpl(path string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to open '%v': %w", path, err)
 	}
-	if err := g.bindAndParse(g.template.New(""), string(data)); err != nil {
+	t := g.template.New("")
+	if err := g.bindAndParse(t, string(data)); err != nil {
 		return "", fmt.Errorf("failed to parse '%v': %w", path, err)
+	}
+	if err := t.Execute(ioutil.Discard, nil); err != nil {
+		return "", fmt.Errorf("failed to execute '%v': %w", path, err)
 	}
 	return "", nil
 }

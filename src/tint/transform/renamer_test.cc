@@ -18,7 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/transform/test_helper.h"
-#include "src/tint/type/short_name.h"
+#include "src/tint/type/builtin.h"
 
 namespace tint::transform {
 namespace {
@@ -1500,7 +1500,7 @@ INSTANTIATE_TEST_SUITE_P(
         // "while"  // WGSL reserved keyword
         kUnicodeIdentifier));
 
-const char* ExpandShortName(std::string_view name) {
+const char* ExpandBuiltinType(std::string_view name) {
     if (name == "mat2x2f") {
         return "mat2x2<f32>";
     }
@@ -1591,16 +1591,16 @@ const char* ExpandShortName(std::string_view name) {
     if (name == "vec4u") {
         return "vec4<u32>";
     }
-    ADD_FAILURE() << "unhandled type short-name: " << name;
+    ADD_FAILURE() << "unhandled type: " << name;
     return "<invalid>";
 }
 
-using RenamerTypeShortNamesTest = TransformTestWithParam<const char*>;
+using RenamerTypeBuiltinTypesTest = TransformTestWithParam<const char*>;
 
-TEST_P(RenamerTypeShortNamesTest, PreserveTypeUsage) {
+TEST_P(RenamerTypeBuiltinTypesTest, PreserveTypeUsage) {
     auto expand = [&](const char* source) {
         auto out = utils::ReplaceAll(source, "$name", GetParam());
-        out = utils::ReplaceAll(out, "$type", ExpandShortName(GetParam()));
+        out = utils::ReplaceAll(out, "$type", ExpandBuiltinType(GetParam()));
         return out;
     };
 
@@ -1638,10 +1638,10 @@ struct tint_symbol_5 {
 
     EXPECT_EQ(expect, str(got));
 }
-TEST_P(RenamerTypeShortNamesTest, PreserveTypeInitializer) {
+TEST_P(RenamerTypeBuiltinTypesTest, PreserveTypeInitializer) {
     auto expand = [&](const char* source) {
         auto out = utils::ReplaceAll(source, "$name", GetParam());
-        out = utils::ReplaceAll(out, "$type", ExpandShortName(GetParam()));
+        out = utils::ReplaceAll(out, "$type", ExpandBuiltinType(GetParam()));
         return out;
     };
 
@@ -1668,10 +1668,10 @@ fn tint_symbol() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_P(RenamerTypeShortNamesTest, PreserveTypeConversion) {
+TEST_P(RenamerTypeBuiltinTypesTest, PreserveTypeConversion) {
     auto expand = [&](const char* source) {
         auto out = utils::ReplaceAll(source, "$name", GetParam());
-        out = utils::ReplaceAll(out, "$type", ExpandShortName(GetParam()));
+        out = utils::ReplaceAll(out, "$type", ExpandBuiltinType(GetParam()));
         return out;
     };
 
@@ -1698,10 +1698,10 @@ fn tint_symbol() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_P(RenamerTypeShortNamesTest, RenameShadowedByAlias) {
+TEST_P(RenamerTypeBuiltinTypesTest, RenameShadowedByAlias) {
     auto expand = [&](const char* source) {
         auto out = utils::ReplaceAll(source, "$name", GetParam());
-        out = utils::ReplaceAll(out, "$type", ExpandShortName(GetParam()));
+        out = utils::ReplaceAll(out, "$type", ExpandBuiltinType(GetParam()));
         return out;
     };
 
@@ -1728,10 +1728,10 @@ fn tint_symbol_1() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_P(RenamerTypeShortNamesTest, RenameShadowedByStruct) {
+TEST_P(RenamerTypeBuiltinTypesTest, RenameShadowedByStruct) {
     auto expand = [&](const char* source) {
         auto out = utils::ReplaceAll(source, "$name", GetParam());
-        out = utils::ReplaceAll(out, "$type", ExpandShortName(GetParam()));
+        out = utils::ReplaceAll(out, "$type", ExpandBuiltinType(GetParam()));
         return out;
     };
 
@@ -1764,9 +1764,9 @@ fn tint_symbol_2() {
     EXPECT_EQ(expect, str(got));
 }
 
-INSTANTIATE_TEST_SUITE_P(RenamerTypeShortNamesTest,
-                         RenamerTypeShortNamesTest,
-                         testing::ValuesIn(type::kShortNameStrings));
+INSTANTIATE_TEST_SUITE_P(RenamerTypeBuiltinTypesTest,
+                         RenamerTypeBuiltinTypesTest,
+                         testing::ValuesIn(type::kBuiltinStrings));
 
 }  // namespace
 }  // namespace tint::transform

@@ -128,7 +128,7 @@ enum interpolation_sampling {
   sample
 }
 
-enum short_name {
+enum builtin_type {
   // https://www.w3.org/TR/WGSL/#matrix-types
   mat2x2f
   mat2x2h

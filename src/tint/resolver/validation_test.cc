@@ -181,7 +181,7 @@ TEST_F(ResolverValidationTest, Expr_DontCall_Type) {
     EXPECT_EQ(r()->error(), "12:34 error: missing '(' for type initializer or cast");
 }
 
-TEST_F(ResolverValidationTest, Expr_DontCall_ShortName) {
+TEST_F(ResolverValidationTest, Expr_DontCall_BuiltinType) {
     WrapInFunction(Expr(Source{{12, 34}}, "vec3f"));
 
     EXPECT_FALSE(r()->Resolve());

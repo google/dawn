@@ -591,7 +591,7 @@ tint_generated(sem/builtin_type)
 tint_generated(sem/parameter_usage)
 tint_generated(type/access BENCH TEST)
 tint_generated(type/address_space BENCH TEST)
-tint_generated(type/short_name BENCH TEST)
+tint_generated(type/builtin BENCH TEST)
 tint_generated(type/texel_format BENCH TEST)
 
 if(UNIX)

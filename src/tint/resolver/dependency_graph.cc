@@ -73,7 +73,7 @@
 #include "src/tint/scope_stack.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/symbol_table.h"
-#include "src/tint/type/short_name.h"
+#include "src/tint/type/builtin.h"
 #include "src/tint/utils/block_allocator.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/defer.h"
@@ -494,7 +494,7 @@ class DependencyScanner {
     bool IsBuiltin(Symbol name) const {
         auto s = symbols_.NameFor(name);
         if (sem::ParseBuiltinType(s) != sem::BuiltinType::kNone ||
-            type::ParseShortName(s) != type::ShortName::kUndefined) {
+            type::ParseBuiltin(s) != type::Builtin::kUndefined) {
             return true;
         }
         return false;

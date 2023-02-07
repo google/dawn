@@ -74,6 +74,7 @@
 #include "src/tint/type/abstract_int.h"
 #include "src/tint/type/array.h"
 #include "src/tint/type/atomic.h"
+#include "src/tint/type/builtin.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
@@ -81,7 +82,6 @@
 #include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/sampler.h"
-#include "src/tint/type/short_name.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/defer.h"
@@ -336,7 +336,7 @@ type::Type* Resolver::Type(const ast::Type* ty) {
                     AddError("cannot use builtin '" + name + "' as type", ty->source);
                     return nullptr;
                 }
-                return ShortName(t->name->symbol, t->source);
+                return BuiltinType(t->name->symbol, t->source);
             }
             return Switch(
                 resolved,  //
@@ -2332,7 +2332,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     builtin_type != sem::BuiltinType::kNone) {
                     return BuiltinCall(expr, builtin_type, args);
                 }
-                if (auto* alias = ShortName(ident->symbol, ident->source)) {
+                if (auto* alias = BuiltinType(ident->symbol, ident->source)) {
                     return ty_init_or_conv(alias);
                 }
                 return nullptr;
@@ -2436,87 +2436,87 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     return call;
 }
 
-type::Type* Resolver::ShortName(Symbol sym, const Source& source) const {
+type::Type* Resolver::BuiltinType(Symbol sym, const Source& source) const {
     auto name = builder_->Symbols().NameFor(sym);
     auto& b = *builder_;
     auto vec_f32 = [&](uint32_t n) { return b.create<type::Vector>(b.create<type::F32>(), n); };
     auto vec_f16 = [&](uint32_t n) { return b.create<type::Vector>(b.create<type::F16>(), n); };
 
-    switch (type::ParseShortName(name)) {
-        case type::ShortName::kMat2X2F:
+    switch (type::ParseBuiltin(name)) {
+        case type::Builtin::kMat2X2F:
             return b.create<type::Matrix>(vec_f32(2u), 2u);
-        case type::ShortName::kMat2X3F:
+        case type::Builtin::kMat2X3F:
             return b.create<type::Matrix>(vec_f32(3u), 2u);
-        case type::ShortName::kMat2X4F:
+        case type::Builtin::kMat2X4F:
             return b.create<type::Matrix>(vec_f32(4u), 2u);
-        case type::ShortName::kMat3X2F:
+        case type::Builtin::kMat3X2F:
             return b.create<type::Matrix>(vec_f32(2u), 3u);
-        case type::ShortName::kMat3X3F:
+        case type::Builtin::kMat3X3F:
             return b.create<type::Matrix>(vec_f32(3u), 3u);
-        case type::ShortName::kMat3X4F:
+        case type::Builtin::kMat3X4F:
             return b.create<type::Matrix>(vec_f32(4u), 3u);
-        case type::ShortName::kMat4X2F:
+        case type::Builtin::kMat4X2F:
             return b.create<type::Matrix>(vec_f32(2u), 4u);
-        case type::ShortName::kMat4X3F:
+        case type::Builtin::kMat4X3F:
             return b.create<type::Matrix>(vec_f32(3u), 4u);
-        case type::ShortName::kMat4X4F:
+        case type::Builtin::kMat4X4F:
             return b.create<type::Matrix>(vec_f32(4u), 4u);
-        case type::ShortName::kMat2X2H:
+        case type::Builtin::kMat2X2H:
             return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(2u), 2u)
                                                       : nullptr;
-        case type::ShortName::kMat2X3H:
+        case type::Builtin::kMat2X3H:
             return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(3u), 2u)
                                                       : nullptr;
-        case type::ShortName::kMat2X4H:
+        case type::Builtin::kMat2X4H:
             return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(4u), 2u)
                                                       : nullptr;
-        case type::ShortName::kMat3X2H:
+        case type::Builtin::kMat3X2H:
             return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(2u), 3u)
                                                       : nullptr;
-        case type::ShortName::kMat3X3H:
+        case type::Builtin::kMat3X3H:
             return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(3u), 3u)
                                                       : nullptr;
-        case type::ShortName::kMat3X4H:
+        case type::Builtin::kMat3X4H:
             return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(4u), 3u)
                                                       : nullptr;
-        case type::ShortName::kMat4X2H:
+        case type::Builtin::kMat4X2H:
             return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(2u), 4u)
                                                       : nullptr;
-        case type::ShortName::kMat4X3H:
+        case type::Builtin::kMat4X3H:
             return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(3u), 4u)
                                                       : nullptr;
-        case type::ShortName::kMat4X4H:
+        case type::Builtin::kMat4X4H:
             return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(4u), 4u)
                                                       : nullptr;
-        case type::ShortName::kVec2F:
+        case type::Builtin::kVec2F:
             return vec_f32(2u);
-        case type::ShortName::kVec3F:
+        case type::Builtin::kVec3F:
             return vec_f32(3u);
-        case type::ShortName::kVec4F:
+        case type::Builtin::kVec4F:
             return vec_f32(4u);
-        case type::ShortName::kVec2H:
+        case type::Builtin::kVec2H:
             return validator_.CheckF16Enabled(source) ? vec_f16(2u) : nullptr;
-        case type::ShortName::kVec3H:
+        case type::Builtin::kVec3H:
             return validator_.CheckF16Enabled(source) ? vec_f16(3u) : nullptr;
-        case type::ShortName::kVec4H:
+        case type::Builtin::kVec4H:
             return validator_.CheckF16Enabled(source) ? vec_f16(4u) : nullptr;
-        case type::ShortName::kVec2I:
+        case type::Builtin::kVec2I:
             return b.create<type::Vector>(b.create<type::I32>(), 2u);
-        case type::ShortName::kVec3I:
+        case type::Builtin::kVec3I:
             return b.create<type::Vector>(b.create<type::I32>(), 3u);
-        case type::ShortName::kVec4I:
+        case type::Builtin::kVec4I:
             return b.create<type::Vector>(b.create<type::I32>(), 4u);
-        case type::ShortName::kVec2U:
+        case type::Builtin::kVec2U:
             return b.create<type::Vector>(b.create<type::U32>(), 2u);
-        case type::ShortName::kVec3U:
+        case type::Builtin::kVec3U:
             return b.create<type::Vector>(b.create<type::U32>(), 3u);
-        case type::ShortName::kVec4U:
+        case type::Builtin::kVec4U:
             return b.create<type::Vector>(b.create<type::U32>(), 4u);
-        case type::ShortName::kUndefined:
+        case type::Builtin::kUndefined:
             break;
     }
 
-    TINT_ICE(Resolver, diagnostics_) << source << " unhandled type short name '" << name << "'";
+    TINT_ICE(Resolver, diagnostics_) << source << " unhandled builtin type '" << name << "'";
     return nullptr;
 }
 
@@ -2764,7 +2764,7 @@ sem::ValueExpression* Resolver::Identifier(const ast::IdentifierExpression* expr
     }
 
     if (sem_.ResolvedSymbol<type::Type>(expr) ||
-        type::ParseShortName(builder_->Symbols().NameFor(symbol)) != type::ShortName::kUndefined) {
+        type::ParseBuiltin(builder_->Symbols().NameFor(symbol)) != type::Builtin::kUndefined) {
         AddError("missing '(' for type initializer or cast", expr->source.End());
         return nullptr;
     }
