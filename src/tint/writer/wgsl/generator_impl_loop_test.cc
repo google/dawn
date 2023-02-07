@@ -68,7 +68,7 @@ TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
 TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing_BreakIf) {
     Func("a_statement", {}, ty.void_(), {});
 
-    auto* body = Block(create<ast::DiscardStatement>());
+    auto* body = Block(Discard());
     auto* continuing = Block(CallStmt(Call("a_statement")), BreakIf(true));
     auto* l = Loop(body, continuing);
 

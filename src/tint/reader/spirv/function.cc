@@ -3137,7 +3137,7 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
         case spv::Op::OpKill:
             // For now, assume SPIR-V OpKill has same semantics as WGSL discard.
             // TODO(dneto): https://github.com/gpuweb/gpuweb/issues/676
-            AddStatement(create<ast::DiscardStatement>(Source{}));
+            AddStatement(builder_.Discard(Source{}));
             return true;
         case spv::Op::OpUnreachable:
             // Translate as if it's a return. This avoids the problem where WGSL

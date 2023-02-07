@@ -1866,7 +1866,7 @@ Maybe<const ast::Statement*> ParserImpl::non_block_statement() {
 
         Source source;
         if (match(Token::Type::kDiscard, &source)) {
-            return create<ast::DiscardStatement>(source);
+            return builder_.Discard(source);
         }
 
         // Note, this covers assignment, increment and decrement

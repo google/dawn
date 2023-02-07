@@ -90,7 +90,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_Terminator_Discard) {
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
-             create<ast::DiscardStatement>(),
+             Discard(),
          });
 
     spirv::Builder& b = Build();

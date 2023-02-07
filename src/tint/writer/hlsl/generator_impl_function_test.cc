@@ -769,7 +769,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithDiscardAndVoidReturn) {
     Func("my_func", utils::Vector{Param("a", ty.i32())}, ty.void_(),
          utils::Vector{
              If(Equal("a", 0_i),  //
-                Block(create<ast::DiscardStatement>())),
+                Block(Discard())),
              Return(),
          });
 
@@ -789,7 +789,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithDiscardAndNonVoidReturn
     Func("my_func", utils::Vector{Param("a", ty.i32())}, ty.i32(),
          utils::Vector{
              If(Equal("a", 0_i),  //
-                Block(create<ast::DiscardStatement>())),
+                Block(Discard())),
              Return(42_i),
          });
 
