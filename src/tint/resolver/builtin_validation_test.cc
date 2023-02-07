@@ -123,7 +123,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsFunctionUsedAsType) {
          utils::Vector{
              Return(1_i),
          });
-    WrapInFunction(Construct(ty(Source{{56, 78}}, "mix")));
+    WrapInFunction(Call(ty(Source{{56, 78}}, "mix")));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: cannot use function 'mix' as type
@@ -152,7 +152,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsVariab
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsType) {
     GlobalConst(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i));
-    WrapInFunction(Construct(ty(Source{{56, 78}}, "mix")));
+    WrapInFunction(Call(ty(Source{{56, 78}}, "mix")));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: cannot use variable 'mix' as type
@@ -182,7 +182,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsVariable
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsType) {
     GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), type::AddressSpace::kPrivate);
-    WrapInFunction(Construct(ty(Source{{56, 78}}, "mix")));
+    WrapInFunction(Call(ty(Source{{56, 78}}, "mix")));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: cannot use variable 'mix' as type
@@ -215,7 +215,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsVariable) {
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsType) {
     auto* mix = Alias(Source{{12, 34}}, "mix", ty.i32());
-    auto* use = Construct(ty("mix"));
+    auto* use = Call(ty("mix"));
     WrapInFunction(use);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -249,7 +249,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStructUsedAsType) {
     auto* mix = Structure("mix", utils::Vector{
                                      Member("m", ty.i32()),
                                  });
-    auto* use = Construct(ty("mix"));
+    auto* use = Call(ty("mix"));
     WrapInFunction(use);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -308,20 +308,20 @@ class Constexpr {
             case Kind::kScalar:
                 return b.Expr(src, i32(values[0]));
             case Kind::kVec2:
-                return b.Construct(src, b.ty.vec2<i32>(), i32(values[0]), i32(values[1]));
+                return b.Call(src, b.ty.vec2<i32>(), i32(values[0]), i32(values[1]));
             case Kind::kVec3:
-                return b.Construct(src, b.ty.vec3<i32>(), i32(values[0]), i32(values[1]),
-                                   i32(values[2]));
+                return b.Call(src, b.ty.vec3<i32>(), i32(values[0]), i32(values[1]),
+                              i32(values[2]));
             case Kind::kVec3_Scalar_Vec2:
-                return b.Construct(src, b.ty.vec3<i32>(), i32(values[0]),
-                                   b.vec2<i32>(i32(values[1]), i32(values[2])));
+                return b.Call(src, b.ty.vec3<i32>(), i32(values[0]),
+                              b.vec2<i32>(i32(values[1]), i32(values[2])));
             case Kind::kVec3_Vec2_Scalar:
-                return b.Construct(src, b.ty.vec3<i32>(),
-                                   b.vec2<i32>(i32(values[0]), i32(values[1])), i32(values[2]));
+                return b.Call(src, b.ty.vec3<i32>(), b.vec2<i32>(i32(values[0]), i32(values[1])),
+                              i32(values[2]));
             case Kind::kEmptyVec2:
-                return b.Construct(src, b.ty.vec2<i32>());
+                return b.Call(src, b.ty.vec2<i32>());
             case Kind::kEmptyVec3:
-                return b.Construct(src, b.ty.vec3<i32>());
+                return b.Call(src, b.ty.vec3<i32>());
         }
         return nullptr;
     }

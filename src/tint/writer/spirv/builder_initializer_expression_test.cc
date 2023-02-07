@@ -54,7 +54,7 @@ TEST_F(SpvBuilderInitializerTest, Type) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_WithCasts) {
-    auto* t = vec2<f32>(Construct<f32>(1_i), Construct<f32>(1_i));
+    auto* t = vec2<f32>(Call<f32>(1_i), Call<f32>(1_i));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -77,7 +77,7 @@ TEST_F(SpvBuilderInitializerTest, Type_WithAlias) {
     // cast<Int>(2.3f)
 
     auto* alias = Alias("Int", ty.i32());
-    auto* cast = Construct(ty.Of(alias), 2.3_f);
+    auto* cast = Call(ty.Of(alias), 2.3_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -151,7 +151,7 @@ TEST_F(SpvBuilderInitializerTest, Vector_Bitcast_Params) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_Bool_With_Bool) {
-    auto* cast = Construct<bool>(true);
+    auto* cast = Call<bool>(true);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -168,7 +168,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Bool_With_Bool) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_I32_With_I32) {
-    auto* cast = Construct<i32>(2_i);
+    auto* cast = Call<i32>(2_i);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -183,7 +183,7 @@ TEST_F(SpvBuilderInitializerTest, Type_I32_With_I32) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_U32_With_U32) {
-    auto* cast = Construct<u32>(2_u);
+    auto* cast = Call<u32>(2_u);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -198,7 +198,7 @@ TEST_F(SpvBuilderInitializerTest, Type_U32_With_U32) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_F32_With_F32) {
-    auto* cast = Construct<f32>(2_f);
+    auto* cast = Call<f32>(2_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -215,7 +215,7 @@ TEST_F(SpvBuilderInitializerTest, Type_F32_With_F32) {
 TEST_F(SpvBuilderInitializerTest, Type_F16_With_F16) {
     Enable(ast::Extension::kF16);
 
-    auto* cast = Construct<f16>(2_h);
+    auto* cast = Call<f16>(2_h);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -1890,7 +1890,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Vec4_F16_With_Vec4) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_F32_With_F32) {
-    auto* ctor = Construct<f32>(2_f);
+    auto* ctor = Call<f32>(2_f);
     GlobalConst("g", ty.f32(), ctor);
     WrapInFunction(Decl(Var("l", Expr("g"))));
 
@@ -1913,7 +1913,7 @@ OpReturn
 TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_F16_With_F16) {
     Enable(ast::Extension::kF16);
 
-    auto* ctor = Construct<f16>(2_h);
+    auto* ctor = Call<f16>(2_h);
     GlobalConst("g", ty.f16(), ctor);
     WrapInFunction(Decl(Var("l", Expr("g"))));
 
@@ -1934,7 +1934,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_F32_With_F32) {
-    auto* ctor = Construct<f32>(2_f);
+    auto* ctor = Call<f32>(2_f);
     GlobalVar("g", ty.f32(), type::AddressSpace::kPrivate, ctor);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -1953,7 +1953,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_F32_With_F32) {
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_F16_With_F16) {
     Enable(ast::Extension::kF16);
 
-    auto* ctor = Construct<f16>(2_h);
+    auto* ctor = Call<f16>(2_h);
     GlobalVar("g", ty.f16(), type::AddressSpace::kPrivate, ctor);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -1970,7 +1970,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_F16_With_F16) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_U32_With_F32) {
-    auto* ctor = Construct<u32>(1.5_f);
+    auto* ctor = Call<u32>(1.5_f);
     GlobalConst("g", ty.u32(), ctor);
     WrapInFunction(Decl(Var("l", Expr("g"))));
 
@@ -1993,7 +1993,7 @@ OpReturn
 TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_U32_With_F16) {
     Enable(ast::Extension::kF16);
 
-    auto* ctor = Construct<u32>(1.5_h);
+    auto* ctor = Call<u32>(1.5_h);
     GlobalConst("g", ty.u32(), ctor);
     WrapInFunction(Decl(Var("l", Expr("g"))));
 
@@ -2014,7 +2014,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_U32_With_F32) {
-    auto* ctor = Construct<u32>(1.5_f);
+    auto* ctor = Call<u32>(1.5_f);
     GlobalVar("g", ty.u32(), type::AddressSpace::kPrivate, ctor);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -2033,7 +2033,7 @@ TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_U32_With_F32) {
 TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_U32_With_F16) {
     Enable(ast::Extension::kF16);
 
-    auto* ctor = Construct<u32>(1.5_h);
+    auto* ctor = Call<u32>(1.5_h);
     GlobalVar("g", ty.u32(), type::AddressSpace::kPrivate, ctor);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -3589,7 +3589,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Array_5_F16) {
 TEST_F(SpvBuilderInitializerTest, Type_Array_2_Vec3_F32) {
     auto* first = vec3<f32>(1_f, 2_f, 3_f);
     auto* second = vec3<f32>(1_f, 2_f, 3_f);
-    auto* t = Construct(ty.array(ty.vec3<f32>(), 2_u), first, second);
+    auto* t = Call(ty.array(ty.vec3<f32>(), 2_u), first, second);
     WrapInFunction(t);
     spirv::Builder& b = Build();
 
@@ -3613,7 +3613,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Array_2_Vec3_F16) {
 
     auto* first = vec3<f16>(1_h, 2_h, 3_h);
     auto* second = vec3<f16>(1_h, 2_h, 3_h);
-    auto* t = Construct(ty.array(ty.vec3<f16>(), 2_u), first, second);
+    auto* t = Call(ty.array(ty.vec3<f16>(), 2_u), first, second);
     WrapInFunction(t);
     spirv::Builder& b = Build();
 
@@ -3701,7 +3701,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Struct) {
                                          Member("b", ty.vec3<f32>()),
                                      });
 
-    auto* t = Construct(ty.Of(s), 2_f, vec3<f32>(2_f, 2_f, 2_f));
+    auto* t = Call(ty.Of(s), 2_f, vec3<f32>(2_f, 2_f, 2_f));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -3721,7 +3721,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Struct) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_F32) {
-    auto* t = Construct<f32>();
+    auto* t = Call<f32>();
 
     WrapInFunction(t);
 
@@ -3740,7 +3740,7 @@ TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_F32) {
 TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_F16) {
     Enable(ast::Extension::kF16);
 
-    auto* t = Construct<f16>();
+    auto* t = Call<f16>();
 
     WrapInFunction(t);
 
@@ -3757,7 +3757,7 @@ TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_F16) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_I32) {
-    auto* t = Construct<i32>();
+    auto* t = Call<i32>();
 
     WrapInFunction(t);
 
@@ -3774,7 +3774,7 @@ TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_I32) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_U32) {
-    auto* t = Construct<u32>();
+    auto* t = Call<u32>();
 
     WrapInFunction(t);
 
@@ -3791,7 +3791,7 @@ TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_U32) {
 }
 
 TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_Bool) {
-    auto* t = Construct<bool>();
+    auto* t = Call<bool>();
 
     WrapInFunction(t);
 
@@ -3887,7 +3887,7 @@ TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_Array) {
 
 TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_Struct) {
     auto* s = Structure("my_struct", utils::Vector{Member("a", ty.f32())});
-    auto* t = Construct(ty.Of(s));
+    auto* t = Call(ty.Of(s));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -3905,7 +3905,7 @@ TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_Struct) {
 
 TEST_F(SpvBuilderInitializerTest, Type_Convert_U32_To_I32) {
     auto* var = Decl(Var("x", ty.u32(), Expr(2_u)));
-    auto* cast = Construct<i32>("x");
+    auto* cast = Call<i32>("x");
     WrapInFunction(var, cast);
 
     spirv::Builder& b = Build();
@@ -3929,7 +3929,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_U32_To_I32) {
 
 TEST_F(SpvBuilderInitializerTest, Type_Convert_F32_To_I32) {
     auto* var = Decl(Var("x", ty.f32(), Expr(2.4_f)));
-    auto* cast = Construct<i32>("x");
+    auto* cast = Call<i32>("x");
     WrapInFunction(var, cast);
 
     spirv::Builder& b = Build();
@@ -3955,7 +3955,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_F16_To_I32) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2.4_h)));
-    auto* cast = Construct<i32>("x");
+    auto* cast = Call<i32>("x");
     WrapInFunction(var, cast);
 
     spirv::Builder& b = Build();
@@ -3979,7 +3979,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_F16_To_I32) {
 
 TEST_F(SpvBuilderInitializerTest, Type_Convert_I32_To_U32) {
     auto* var = Decl(Var("x", ty.i32(), Expr(2_i)));
-    auto* cast = Construct<u32>("x");
+    auto* cast = Call<u32>("x");
     WrapInFunction(var, cast);
 
     spirv::Builder& b = Build();
@@ -4003,7 +4003,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_I32_To_U32) {
 
 TEST_F(SpvBuilderInitializerTest, Type_Convert_F32_To_U32) {
     auto* var = Decl(Var("x", ty.f32(), Expr(2.4_f)));
-    auto* cast = Construct<u32>("x");
+    auto* cast = Call<u32>("x");
     WrapInFunction(var, cast);
 
     spirv::Builder& b = Build();
@@ -4029,7 +4029,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_F16_To_U32) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2.4_h)));
-    auto* cast = Construct<u32>("x");
+    auto* cast = Call<u32>("x");
     WrapInFunction(var, cast);
 
     spirv::Builder& b = Build();
@@ -4053,7 +4053,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_F16_To_U32) {
 
 TEST_F(SpvBuilderInitializerTest, Type_Convert_I32_To_F32) {
     auto* var = Decl(Var("x", ty.i32(), Expr(2_i)));
-    auto* cast = Construct<f32>("x");
+    auto* cast = Call<f32>("x");
     WrapInFunction(var, cast);
 
     spirv::Builder& b = Build();
@@ -4077,7 +4077,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_I32_To_F32) {
 
 TEST_F(SpvBuilderInitializerTest, Type_Convert_U32_To_F32) {
     auto* var = Decl(Var("x", ty.u32(), Expr(2_u)));
-    auto* cast = Construct<f32>("x");
+    auto* cast = Call<f32>("x");
     WrapInFunction(var, cast);
 
     spirv::Builder& b = Build();
@@ -4103,7 +4103,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_F16_To_F32) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
-    auto* cast = Construct<f32>("x");
+    auto* cast = Call<f32>("x");
     WrapInFunction(var, cast);
 
     spirv::Builder& b = Build();
@@ -4129,7 +4129,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_I32_To_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.i32(), Expr(2_i)));
-    auto* cast = Construct<f16>("x");
+    auto* cast = Call<f16>("x");
     WrapInFunction(var, cast);
 
     spirv::Builder& b = Build();
@@ -4155,7 +4155,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_U32_To_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.u32(), Expr(2_u)));
-    auto* cast = Construct<f16>("x");
+    auto* cast = Call<f16>("x");
     WrapInFunction(var, cast);
 
     spirv::Builder& b = Build();
@@ -4181,7 +4181,7 @@ TEST_F(SpvBuilderInitializerTest, Type_Convert_F32_To_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f32(), Expr(2_f)));
-    auto* cast = Construct<f16>("x");
+    auto* cast = Call<f16>("x");
     WrapInFunction(var, cast);
 
     spirv::Builder& b = Build();
@@ -4541,8 +4541,8 @@ TEST_F(SpvBuilderInitializerTest, IsInitializerConst_GlobalVectorWithAllConstIni
 TEST_F(SpvBuilderInitializerTest, IsInitializerConst_GlobalArrayWithAllConstInitializers) {
     // array<vec3<f32>, 2u>(vec3<f32>(1.0, 2.0, 3.0), vec3<f32>(1.0, 2.0, 3.0))
     //   -> true
-    auto* t = Construct(ty.array(ty.vec3<f32>(), 2_u), vec3<f32>(1_f, 2_f, 3_f),
-                        vec3<f32>(1_f, 2_f, 3_f));
+    auto* t =
+        Call(ty.array(ty.vec3<f32>(), 2_u), vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(1_f, 2_f, 3_f));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -4554,7 +4554,7 @@ TEST_F(SpvBuilderInitializerTest, IsInitializerConst_GlobalArrayWithAllConstInit
 TEST_F(SpvBuilderInitializerTest, IsInitializerConst_GlobalVectorWithMatchingTypeInitializers) {
     // vec2<f32>(f32(1.0), f32(2.0))  -> false
 
-    auto* t = vec2<f32>(Construct<f32>(1_f), Construct<f32>(2_f));
+    auto* t = vec2<f32>(Call<f32>(1_f), Call<f32>(2_f));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -4566,7 +4566,7 @@ TEST_F(SpvBuilderInitializerTest, IsInitializerConst_GlobalVectorWithMatchingTyp
 TEST_F(SpvBuilderInitializerTest, IsInitializerConst_GlobalWithTypeConversionInitializer) {
     // vec2<f32>(f32(1), f32(2)) -> false
 
-    auto* t = vec2<f32>(Construct<f32>(1_i), Construct<f32>(2_i));
+    auto* t = vec2<f32>(Call<f32>(1_i), Call<f32>(2_i));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -4610,7 +4610,7 @@ TEST_F(SpvBuilderInitializerTest, IsInitializerConst_ArrayWithAllConstInitialize
     auto* first = vec3<f32>(1_f, 2_f, 3_f);
     auto* second = vec3<f32>(1_f, 2_f, 3_f);
 
-    auto* t = Construct(ty.array(ty.vec3<f32>(), 2_u), first, second);
+    auto* t = Call(ty.array(ty.vec3<f32>(), 2_u), first, second);
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -4622,7 +4622,7 @@ TEST_F(SpvBuilderInitializerTest, IsInitializerConst_ArrayWithAllConstInitialize
 TEST_F(SpvBuilderInitializerTest, IsInitializerConst_VectorWithTypeConversionConstInitializers) {
     // vec2<f32>(f32(1), f32(2))  -> false
 
-    auto* t = vec2<f32>(Construct<f32>(1_i), Construct<f32>(2_i));
+    auto* t = vec2<f32>(Call<f32>(1_i), Call<f32>(2_i));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -4632,7 +4632,7 @@ TEST_F(SpvBuilderInitializerTest, IsInitializerConst_VectorWithTypeConversionCon
 }
 
 TEST_F(SpvBuilderInitializerTest, IsInitializerConst_BitCastScalars) {
-    auto* t = vec2<u32>(Construct<u32>(1_i), Construct<u32>(1_i));
+    auto* t = vec2<u32>(Call<u32>(1_i), Call<u32>(1_i));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -4647,7 +4647,7 @@ TEST_F(SpvBuilderInitializerTest, IsInitializerConst_Struct) {
                                          Member("b", ty.vec3<f32>()),
                                      });
 
-    auto* t = Construct(ty.Of(s), 2_f, vec3<f32>(2_f, 2_f, 2_f));
+    auto* t = Call(ty.Of(s), 2_f, vec3<f32>(2_f, 2_f, 2_f));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -4665,7 +4665,7 @@ TEST_F(SpvBuilderInitializerTest, IsInitializerConst_Struct_WithIdentSubExpressi
     GlobalVar("a", ty.f32(), type::AddressSpace::kPrivate);
     GlobalVar("b", ty.vec3<f32>(), type::AddressSpace::kPrivate);
 
-    auto* t = Construct(ty.Of(s), "a", "b");
+    auto* t = Call(ty.Of(s), "a", "b");
     WrapInFunction(t);
 
     spirv::Builder& b = Build();

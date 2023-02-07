@@ -77,7 +77,7 @@ struct OffsetExpr : Offset {
         auto* type = ctx.src->Sem().GetVal(expr)->Type()->UnwrapRef();
         auto* res = ctx.Clone(expr);
         if (!type->Is<type::U32>()) {
-            res = ctx.dst->Construct<u32>(res);
+            res = ctx.dst->Call<u32>(res);
         }
         return res;
     }
@@ -545,7 +545,7 @@ struct DecomposeMemoryAccess::State {
                     }
                     b.Func(name, params, CreateASTTypeFor(ctx, el_ty),
                            utils::Vector{
-                               b.Return(b.Construct(CreateASTTypeFor(ctx, el_ty), values)),
+                               b.Return(b.Call(CreateASTTypeFor(ctx, el_ty), values)),
                            });
                 }
                 return name;

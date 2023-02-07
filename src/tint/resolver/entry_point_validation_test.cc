@@ -68,7 +68,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Builtin) {
     // fn main() -> @builtin(position) vec4<f32> { return vec4<f32>(); }
     Func(Source{{12, 34}}, "main", utils::Empty, ty.vec4<f32>(),
          utils::Vector{
-             Return(Construct(ty.vec4<f32>())),
+             Return(Call(ty.vec4<f32>())),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kVertex),
@@ -87,7 +87,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Missing) {
     // }
     Func(Source{{12, 34}}, "main", utils::Empty, ty.vec4<f32>(),
          utils::Vector{
-             Return(Construct(ty.vec4<f32>())),
+             Return(Call(ty.vec4<f32>())),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kVertex),
@@ -104,7 +104,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Multiple) {
     // }
     Func(Source{{12, 34}}, "main", utils::Empty, ty.vec4<f32>(),
          utils::Vector{
-             Return(Construct(ty.vec4<f32>())),
+             Return(Call(ty.vec4<f32>())),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kVertex),
@@ -135,7 +135,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_Valid) {
                   });
     Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
          utils::Vector{
-             Return(Construct(ty.Of(output))),
+             Return(Call(ty.Of(output))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -161,7 +161,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_MemberMultipleAttribu
         });
     Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
          utils::Vector{
-             Return(Construct(ty.Of(output))),
+             Return(Call(ty.Of(output))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -189,7 +189,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_MemberMissingAttribut
                   });
     Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
          utils::Vector{
-             Return(Construct(ty.Of(output))),
+             Return(Call(ty.Of(output))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -217,7 +217,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
                   });
     Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
          utils::Vector{
-             Return(Construct(ty.Of(output))),
+             Return(Call(ty.Of(output))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -686,7 +686,7 @@ TEST_P(TypeValidationTest, BareOutputs) {
 
     Func(Source{{12, 34}}, "main", utils::Empty, params.create_ast_type(*this),
          utils::Vector{
-             Return(Construct(params.create_ast_type(*this))),
+             Return(Call(params.create_ast_type(*this))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -720,7 +720,7 @@ TEST_P(TypeValidationTest, StructOutputs) {
                   });
     Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
          utils::Vector{
-             Return(Construct(ty.Of(output))),
+             Return(Call(ty.Of(output))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -794,7 +794,7 @@ TEST_F(LocationAttributeTests, BadType_Output_Array) {
 
     Func(Source{{12, 34}}, "frag_main", utils::Empty, ty.array<f32, 2>(),
          utils::Vector{
-             Return(Construct(ty.array<f32, 2>())),
+             Return(Call(ty.array<f32, 2>())),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -942,7 +942,7 @@ TEST_F(LocationAttributeTests, BadMemberType_Output) {
 
     Func("frag_main", utils::Empty, ty.Of(s),
          utils::Vector{
-             Return(Construct(ty.Of(s))),
+             Return(Call(ty.Of(s))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -990,7 +990,7 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_Valid) {
                   });
     Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
          utils::Vector{
-             Return(Construct(ty.Of(output))),
+             Return(Call(ty.Of(output))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -1012,7 +1012,7 @@ TEST_F(LocationAttributeTests, ReturnType_Struct) {
                                        });
     Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
          utils::Vector{
-             Return(Construct(ty.Of(output))),
+             Return(Call(ty.Of(output))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kVertex),
@@ -1047,7 +1047,7 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_NestedStruct) {
                                        });
     Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
          utils::Vector{
-             Return(Construct(ty.Of(output))),
+             Return(Call(ty.Of(output))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -1073,7 +1073,7 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_RuntimeArray) {
                                        });
     Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
          utils::Vector{
-             Return(Construct(ty.Of(output))),
+             Return(Call(ty.Of(output))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -1127,7 +1127,7 @@ TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Output) {
     auto* s = Structure("S", utils::Vector{m});
     Func(Source{{56, 78}}, "main", utils::Empty, ty.Of(s),
          utils::Vector{
-             Return(Expr(Construct(ty.Of(s)))),
+             Return(Expr(Call(ty.Of(s)))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),

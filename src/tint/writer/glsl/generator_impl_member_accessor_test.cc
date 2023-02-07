@@ -219,7 +219,7 @@ TEST_P(GlslGeneratorImplTest_MemberAccessor_StorageBufferStore, Test) {
     });
 
     SetupFunction(utils::Vector{
-        Decl(Var("value", p.member_type(ty), Construct(p.member_type(ty)))),
+        Decl(Var("value", p.member_type(ty), Call(p.member_type(ty)))),
         Assign(MemberAccessor("data", "b"), Expr("value")),
     });
 
@@ -267,7 +267,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
     });
 
     SetupFunction(utils::Vector{
-        Assign(MemberAccessor("data", "b"), Construct(ty.mat2x3<f32>())),
+        Assign(MemberAccessor("data", "b"), Call(ty.mat2x3<f32>())),
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();

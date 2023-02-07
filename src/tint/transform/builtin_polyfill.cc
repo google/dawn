@@ -65,7 +65,7 @@ struct BuiltinPolyfill::State {
             if (width == 1) {
                 return expr;
             }
-            return b.Construct(T(ty), expr);
+            return b.Call(T(ty), expr);
         };
 
         utils::Vector<const ast::Statement*, 4> body;
@@ -119,7 +119,7 @@ struct BuiltinPolyfill::State {
             if (width == 1) {
                 return expr;
             }
-            return b.Construct(T(ty), expr);
+            return b.Call(T(ty), expr);
         };
 
         utils::Vector<const ast::Statement*, 1> body;
@@ -183,44 +183,44 @@ struct BuiltinPolyfill::State {
         auto V = [&](uint32_t value) -> const ast::Expression* {
             return ScalarOrVector(width, u32(value));
         };
-        b.Func(name,
-               utils::Vector{
-                   b.Param("v", T(ty)),
-               },
-               T(ty),
-               utils::Vector{
-                   // var x = U(v);
-                   b.Decl(b.Var("x", b.Construct(U(), b.Expr("v")))),
-                   // let b16 = select(0, 16, x <= 0x0000ffff);
-                   b.Decl(b.Let(
-                       "b16", b.Call("select", V(0), V(16), b.LessThanEqual("x", V(0x0000ffff))))),
-                   // x = x << b16;
-                   b.Assign("x", b.Shl("x", "b16")),
-                   // let b8  = select(0, 8,  x <= 0x00ffffff);
-                   b.Decl(b.Let("b8",
-                                b.Call("select", V(0), V(8), b.LessThanEqual("x", V(0x00ffffff))))),
-                   // x = x << b8;
-                   b.Assign("x", b.Shl("x", "b8")),
-                   // let b4  = select(0, 4,  x <= 0x0fffffff);
-                   b.Decl(b.Let("b4",
-                                b.Call("select", V(0), V(4), b.LessThanEqual("x", V(0x0fffffff))))),
-                   // x = x << b4;
-                   b.Assign("x", b.Shl("x", "b4")),
-                   // let b2  = select(0, 2,  x <= 0x3fffffff);
-                   b.Decl(b.Let("b2",
-                                b.Call("select", V(0), V(2), b.LessThanEqual("x", V(0x3fffffff))))),
-                   // x = x << b2;
-                   b.Assign("x", b.Shl("x", "b2")),
-                   // let b1  = select(0, 1,  x <= 0x7fffffff);
-                   b.Decl(b.Let("b1",
-                                b.Call("select", V(0), V(1), b.LessThanEqual("x", V(0x7fffffff))))),
-                   // let is_zero  = select(0, 1, x == 0);
-                   b.Decl(b.Let("is_zero", b.Call("select", V(0), V(1), b.Equal("x", V(0))))),
-                   // return R((b16 | b8 | b4 | b2 | b1) + zero);
-                   b.Return(b.Construct(
-                       T(ty),
-                       b.Add(b.Or(b.Or(b.Or(b.Or("b16", "b8"), "b4"), "b2"), "b1"), "is_zero"))),
-               });
+        b.Func(
+            name,
+            utils::Vector{
+                b.Param("v", T(ty)),
+            },
+            T(ty),
+            utils::Vector{
+                // var x = U(v);
+                b.Decl(b.Var("x", b.Call(U(), b.Expr("v")))),
+                // let b16 = select(0, 16, x <= 0x0000ffff);
+                b.Decl(b.Let("b16",
+                             b.Call("select", V(0), V(16), b.LessThanEqual("x", V(0x0000ffff))))),
+                // x = x << b16;
+                b.Assign("x", b.Shl("x", "b16")),
+                // let b8  = select(0, 8,  x <= 0x00ffffff);
+                b.Decl(
+                    b.Let("b8", b.Call("select", V(0), V(8), b.LessThanEqual("x", V(0x00ffffff))))),
+                // x = x << b8;
+                b.Assign("x", b.Shl("x", "b8")),
+                // let b4  = select(0, 4,  x <= 0x0fffffff);
+                b.Decl(
+                    b.Let("b4", b.Call("select", V(0), V(4), b.LessThanEqual("x", V(0x0fffffff))))),
+                // x = x << b4;
+                b.Assign("x", b.Shl("x", "b4")),
+                // let b2  = select(0, 2,  x <= 0x3fffffff);
+                b.Decl(
+                    b.Let("b2", b.Call("select", V(0), V(2), b.LessThanEqual("x", V(0x3fffffff))))),
+                // x = x << b2;
+                b.Assign("x", b.Shl("x", "b2")),
+                // let b1  = select(0, 1,  x <= 0x7fffffff);
+                b.Decl(
+                    b.Let("b1", b.Call("select", V(0), V(1), b.LessThanEqual("x", V(0x7fffffff))))),
+                // let is_zero  = select(0, 1, x == 0);
+                b.Decl(b.Let("is_zero", b.Call("select", V(0), V(1), b.Equal("x", V(0))))),
+                // return R((b16 | b8 | b4 | b2 | b1) + zero);
+                b.Return(b.Call(T(ty), b.Add(b.Or(b.Or(b.Or(b.Or("b16", "b8"), "b4"), "b2"), "b1"),
+                                             "is_zero"))),
+            });
         return name;
     }
 
@@ -243,9 +243,9 @@ struct BuiltinPolyfill::State {
         };
         auto B = [&](const ast::Expression* value) -> const ast::Expression* {
             if (width == 1) {
-                return b.Construct<bool>(value);
+                return b.Call<bool>(value);
             }
-            return b.Construct(b.ty.vec<bool>(width), value);
+            return b.Call(b.ty.vec<bool>(width), value);
         };
         b.Func(
             name,
@@ -255,7 +255,7 @@ struct BuiltinPolyfill::State {
             T(ty),
             utils::Vector{
                 // var x = U(v);
-                b.Decl(b.Var("x", b.Construct(U(), b.Expr("v")))),
+                b.Decl(b.Var("x", b.Call(U(), b.Expr("v")))),
                 // let b16 = select(16, 0, bool(x & 0x0000ffff));
                 b.Decl(b.Let("b16", b.Call("select", V(16), V(0), B(b.And("x", V(0x0000ffff)))))),
                 // x = x >> b16;
@@ -277,9 +277,8 @@ struct BuiltinPolyfill::State {
                 // let is_zero  = select(0, 1, x == 0);
                 b.Decl(b.Let("is_zero", b.Call("select", V(0), V(1), b.Equal("x", V(0))))),
                 // return R((b16 | b8 | b4 | b2 | b1) + zero);
-                b.Return(b.Construct(
-                    T(ty),
-                    b.Add(b.Or(b.Or(b.Or(b.Or("b16", "b8"), "b4"), "b2"), "b1"), "is_zero"))),
+                b.Return(b.Call(T(ty), b.Add(b.Or(b.Or(b.Or(b.Or("b16", "b8"), "b4"), "b2"), "b1"),
+                                             "is_zero"))),
             });
         return name;
     }
@@ -297,7 +296,7 @@ struct BuiltinPolyfill::State {
             if (width == 1) {
                 return value;
             }
-            return b.Construct(b.ty.vec<u32>(width), value);
+            return b.Call(b.ty.vec<u32>(width), value);
         };
 
         utils::Vector<const ast::Statement*, 8> body{
@@ -312,7 +311,7 @@ struct BuiltinPolyfill::State {
                 // Here we don't want the shl and shr modulos the rhs, so handle the `rhs >= 32u`
                 // cases using `select`. In order to handle the signed shr `lhs >> rhs` corrently,
                 // use `(lhs >> 31u) >> 1u` if `rhs >= 32u`.
-                body.Push(b.Decl(b.Let("shl_result", b.Call("select", b.Construct(T(ty)),
+                body.Push(b.Decl(b.Let("shl_result", b.Call("select", b.Call(T(ty)),
                                                             b.Shl("v", vecN_u32(b.Expr("shl"))),
                                                             b.LessThan("shl", 32_u)))));
                 body.Push(b.Return(b.Call(
@@ -361,9 +360,9 @@ struct BuiltinPolyfill::State {
         };
         auto B = [&](const ast::Expression* value) -> const ast::Expression* {
             if (width == 1) {
-                return b.Construct<bool>(value);
+                return b.Call<bool>(value);
             }
-            return b.Construct(b.ty.vec<bool>(width), value);
+            return b.Call(b.ty.vec<bool>(width), value);
         };
 
         const ast::Expression* x = nullptr;
@@ -371,9 +370,9 @@ struct BuiltinPolyfill::State {
             x = b.Expr("v");
         } else {
             // If ty is signed, then the value is inverted if the sign is negative
-            x = b.Call("select",                             //
-                       b.Construct(U(), "v"),                //
-                       b.Construct(U(), b.Complement("v")),  //
+            x = b.Call("select",                        //
+                       b.Call(U(), "v"),                //
+                       b.Call(U(), b.Complement("v")),  //
                        b.LessThan("v", ScalarOrVector(width, 0_i)));
         }
 
@@ -408,7 +407,7 @@ struct BuiltinPolyfill::State {
                 // let is_zero  = select(0, 0xffffffff, x == 0);
                 b.Decl(b.Let("is_zero", b.Call("select", V(0), V(0xffffffff), b.Equal("x", V(0))))),
                 // return R(b16 | b8 | b4 | b2 | b1 | zero);
-                b.Return(b.Construct(
+                b.Return(b.Call(
                     T(ty), b.Or(b.Or(b.Or(b.Or(b.Or("b16", "b8"), "b4"), "b2"), "b1"), "is_zero"))),
             });
         return name;
@@ -433,9 +432,9 @@ struct BuiltinPolyfill::State {
         };
         auto B = [&](const ast::Expression* value) -> const ast::Expression* {
             if (width == 1) {
-                return b.Construct<bool>(value);
+                return b.Call<bool>(value);
             }
-            return b.Construct(b.ty.vec<bool>(width), value);
+            return b.Call(b.ty.vec<bool>(width), value);
         };
         b.Func(
             name,
@@ -445,7 +444,7 @@ struct BuiltinPolyfill::State {
             T(ty),
             utils::Vector{
                 // var x = U(v);
-                b.Decl(b.Var("x", b.Construct(U(), b.Expr("v")))),
+                b.Decl(b.Var("x", b.Call(U(), b.Expr("v")))),
                 // let b16 = select(16, 0, bool(x & 0x0000ffff));
                 b.Decl(b.Let("b16", b.Call("select", V(16), V(0), B(b.And("x", V(0x0000ffff)))))),
                 // x = x >> b16;
@@ -467,7 +466,7 @@ struct BuiltinPolyfill::State {
                 // let is_zero  = select(0, 0xffffffff, x == 0);
                 b.Decl(b.Let("is_zero", b.Call("select", V(0), V(0xffffffff), b.Equal("x", V(0))))),
                 // return R(b16 | b8 | b4 | b2 | b1 | is_zero);
-                b.Return(b.Construct(
+                b.Return(b.Call(
                     T(ty), b.Or(b.Or(b.Or(b.Or(b.Or("b16", "b8"), "b4"), "b2"), "b1"), "is_zero"))),
             });
         return name;
@@ -493,10 +492,10 @@ struct BuiltinPolyfill::State {
         auto V = [&](auto value) -> const ast::Expression* {
             const ast::Expression* expr = b.Expr(value);
             if (!ty->is_unsigned_integer_scalar_or_vector()) {
-                expr = b.Construct<i32>(expr);
+                expr = b.Call<i32>(expr);
             }
             if (ty->Is<type::Vector>()) {
-                expr = b.Construct(T(ty), expr);
+                expr = b.Call(T(ty), expr);
             }
             return expr;
         };
@@ -552,8 +551,8 @@ struct BuiltinPolyfill::State {
 
                 // return ((select(T(), n << offset, offset < 32u) & mask) | (v & ~(mask)));
                 body.Push(
-                    b.Return(b.Or(b.And(b.Call("select", b.Construct(T(ty)),
-                                               b.Shl("n", U("offset")), b.LessThan("offset", 32_u)),
+                    b.Return(b.Or(b.And(b.Call("select", b.Call(T(ty)), b.Shl("n", U("offset")),
+                                               b.LessThan("offset", 32_u)),
                                         V("mask")),
                                   b.And("v", V(b.Complement("mask"))))));
 
@@ -587,7 +586,7 @@ struct BuiltinPolyfill::State {
     Symbol saturate(const type::Type* ty) {
         auto name = b.Symbols().New("tint_saturate");
         auto body = utils::Vector{
-            b.Return(b.Call("clamp", "v", b.Construct(T(ty), 0_a), b.Construct(T(ty), 1_a))),
+            b.Return(b.Call("clamp", "v", b.Call(T(ty), 0_a), b.Call(T(ty), 1_a))),
         };
         b.Func(name,
                utils::Vector{
@@ -630,8 +629,7 @@ struct BuiltinPolyfill::State {
     Symbol textureSampleBaseClampToEdge_2d_f32() {
         auto name = b.Symbols().New("tint_textureSampleBaseClampToEdge");
         auto body = utils::Vector{
-            b.Decl(b.Let("dims",
-                         b.Construct(b.ty.vec2<f32>(), b.Call("textureDimensions", "t", 0_a)))),
+            b.Decl(b.Let("dims", b.Call(b.ty.vec2<f32>(), b.Call("textureDimensions", "t", 0_a)))),
             b.Decl(b.Let("half_texel", b.Div(b.vec2<f32>(0.5_a), "dims"))),
             b.Decl(
                 b.Let("clamped", b.Call("clamp", "coord", "half_texel", b.Sub(1_a, "half_texel")))),
@@ -663,7 +661,7 @@ struct BuiltinPolyfill::State {
                },
                T(vec),
                utils::Vector{
-                   b.Return(b.Construct(T(vec), std::move(args))),
+                   b.Return(b.Call(T(vec), std::move(args))),
                });
         return name;
     }
@@ -705,7 +703,7 @@ struct BuiltinPolyfill::State {
         auto* lhs_el_ty = type::Type::DeepestElementOf(lhs_ty);
         const ast::Expression* mask = b.Expr(AInt(lhs_el_ty->Size() * 8 - 1));
         if (rhs_ty->Is<type::Vector>()) {
-            mask = b.Construct(CreateASTTypeFor(ctx, rhs_ty), mask);
+            mask = b.Call(CreateASTTypeFor(ctx, rhs_ty), mask);
         }
         auto* lhs = ctx.Clone(bin_op->lhs);
         auto* rhs = b.And(ctx.Clone(bin_op->rhs), mask);
@@ -808,7 +806,7 @@ struct BuiltinPolyfill::State {
         if (width == 1) {
             return b.Expr(value);
         }
-        return b.Construct(b.ty.vec<T>(width), value);
+        return b.Call(b.ty.vec<T>(width), value);
     }
 };
 

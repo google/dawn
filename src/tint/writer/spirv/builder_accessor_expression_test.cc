@@ -580,8 +580,8 @@ TEST_F(BuilderTest, Let_IndexAccessor_Nested_Array_f32) {
     // var x = pos[1u][0u];
 
     auto* pos = Let("pos", ty.array(ty.vec2<f32>(), 3_u),
-                    Construct(ty.array(ty.vec2<f32>(), 3_u), vec2<f32>(0_f, 0.5_f),
-                              vec2<f32>(-0.5_f, -0.5_f), vec2<f32>(0.5_f, -0.5_f)));
+                    Call(ty.array(ty.vec2<f32>(), 3_u), vec2<f32>(0_f, 0.5_f),
+                         vec2<f32>(-0.5_f, -0.5_f), vec2<f32>(0.5_f, -0.5_f)));
     auto* x = Var("x", IndexAccessor(IndexAccessor(pos, 1_u), 0_u));
     WrapInFunction(pos, x);
 
@@ -627,8 +627,8 @@ TEST_F(BuilderTest, Const_IndexAccessor_Nested_Array_f32) {
     // var x = pos[1u][0u];
 
     auto* pos = Const("pos", ty.array(ty.vec2<f32>(), 3_u),
-                      Construct(ty.array(ty.vec2<f32>(), 3_u), vec2<f32>(0_f, 0.5_f),
-                                vec2<f32>(-0.5_f, -0.5_f), vec2<f32>(0.5_f, -0.5_f)));
+                      Call(ty.array(ty.vec2<f32>(), 3_u), vec2<f32>(0_f, 0.5_f),
+                           vec2<f32>(-0.5_f, -0.5_f), vec2<f32>(0.5_f, -0.5_f)));
     auto* x = Var("x", IndexAccessor(IndexAccessor(pos, 1_u), 0_u));
     WrapInFunction(pos, x);
 
@@ -741,9 +741,9 @@ TEST_F(BuilderTest, Let_IndexAccessor_Matrix) {
     // let a : mat2x2<f32>(vec2<f32>(1., 2.), vec2<f32>(3., 4.));
     // var x = a[1i]
 
-    auto* a = Let("a", ty.mat2x2<f32>(),
-                  Construct(ty.mat2x2<f32>(), Construct(ty.vec2<f32>(), 1_f, 2_f),
-                            Construct(ty.vec2<f32>(), 3_f, 4_f)));
+    auto* a =
+        Let("a", ty.mat2x2<f32>(),
+            Call(ty.mat2x2<f32>(), Call(ty.vec2<f32>(), 1_f, 2_f), Call(ty.vec2<f32>(), 3_f, 4_f)));
     auto* x = Var("x", IndexAccessor("a", 1_i));
     WrapInFunction(a, x);
 
@@ -783,9 +783,9 @@ TEST_F(BuilderTest, Const_IndexAccessor_Matrix) {
     // const a : mat2x2<f32>(vec2<f32>(1., 2.), vec2<f32>(3., 4.));
     // var x = a[1i]
 
-    auto* a = Const("a", ty.mat2x2<f32>(),
-                    Construct(ty.mat2x2<f32>(), Construct(ty.vec2<f32>(), 1_f, 2_f),
-                              Construct(ty.vec2<f32>(), 3_f, 4_f)));
+    auto* a = Const(
+        "a", ty.mat2x2<f32>(),
+        Call(ty.mat2x2<f32>(), Call(ty.vec2<f32>(), 1_f, 2_f), Call(ty.vec2<f32>(), 3_f, 4_f)));
     auto* x = Var("x", IndexAccessor("a", 1_i));
     WrapInFunction(a, x);
 
@@ -994,7 +994,7 @@ TEST_F(BuilderTest, MemberAccessor_NonPointer) {
                                          Member("b", ty.f32()),
                                      });
 
-    auto* var = Let("ident", ty.Of(s), Construct(ty.Of(s), 0_f, 0_f));
+    auto* var = Let("ident", ty.Of(s), Call(ty.Of(s), 0_f, 0_f));
 
     auto* expr = MemberAccessor("ident", "b");
     WrapInFunction(var, expr);
@@ -1035,8 +1035,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_NonPointer) {
 
     auto* s_type = Structure("my_struct", utils::Vector{Member("inner", ty.Of(inner_struct))});
 
-    auto* var = Let("ident", ty.Of(s_type),
-                    Construct(ty.Of(s_type), Construct(ty.Of(inner_struct), 0_f, 0_f)));
+    auto* var =
+        Let("ident", ty.Of(s_type), Call(ty.Of(s_type), Call(ty.Of(inner_struct), 0_f, 0_f)));
     auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "b");
     WrapInFunction(var, expr);
 

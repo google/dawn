@@ -706,7 +706,7 @@ struct Std140::State {
                                 utils::Transform(*col_members, [&](const ast::StructMember* m) {
                                     return b.MemberAccessor(param, m->symbol);
                                 });
-                            args.Push(b.Construct(mat_ty, std::move(mat_args)));
+                            args.Push(b.Call(mat_ty, std::move(mat_args)));
                         } else {
                             // Convert the member
                             args.Push(
@@ -714,7 +714,7 @@ struct Std140::State {
                                         b.MemberAccessor(param, sym.NameFor(member->Name()))));
                         }
                     }
-                    stmts.Push(b.Return(b.Construct(CreateASTTypeFor(ctx, ty), std::move(args))));
+                    stmts.Push(b.Return(b.Call(CreateASTTypeFor(ctx, ty), std::move(args))));
                 },  //
                 [&](const type::Matrix* mat) {
                     // Reassemble a std140 matrix from the structure of column vector members.
@@ -726,7 +726,7 @@ struct Std140::State {
                         auto mat_args = utils::Transform(std140_mat->columns, [&](Symbol name) {
                             return b.MemberAccessor(param, name);
                         });
-                        stmts.Push(b.Return(b.Construct(mat_ty, std::move(mat_args))));
+                        stmts.Push(b.Return(b.Call(mat_ty, std::move(mat_args))));
                     } else {
                         TINT_ICE(Transform, b.Diagnostics())
                             << "failed to find std140 matrix info for: " << src->FriendlyName(ty);
@@ -798,7 +798,7 @@ struct Std140::State {
 
         // Build the arguments
         auto args = utils::Transform(access.dynamic_indices, [&](const sem::ValueExpression* e) {
-            return b.Construct(b.ty.u32(), ctx.Clone(e->Declaration()));
+            return b.Call<u32>(ctx.Clone(e->Declaration()));
         });
 
         // Call the helper
@@ -962,7 +962,7 @@ struct Std140::State {
         // Build the default case (required in WGSL).
         // This just returns a zero value of the return type, as the index must be out of
         // bounds.
-        cases.Push(b.DefaultCase(b.Block(b.Return(b.Construct(CreateASTTypeFor(ctx, ret_ty))))));
+        cases.Push(b.DefaultCase(b.Block(b.Return(b.Call(CreateASTTypeFor(ctx, ret_ty))))));
 
         auto* column_selector = dynamic_index(column_param_idx);
         auto* stmt = b.Switch(column_selector, std::move(cases));
@@ -1035,7 +1035,7 @@ struct Std140::State {
         }
 
         // Reconstruct the matrix from the columns
-        expr = b.Construct(CreateASTTypeFor(ctx, chain.std140_mat_ty), std::move(columns));
+        expr = b.Call(CreateASTTypeFor(ctx, chain.std140_mat_ty), std::move(columns));
 
         // Have the function return the constructed matrix
         stmts.Push(b.Return(expr));

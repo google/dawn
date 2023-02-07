@@ -320,17 +320,17 @@ struct MultiplanarExternalTexture::State {
                     "modifiedCoords", b.Mul(b.MemberAccessor("params", "coordTransformationMatrix"),
                                             b.vec3<f32>("coord", 1_a)))));
 
-                stmts.Push(b.Decl(b.Let(
-                    "plane0_dims",
-                    b.Construct(b.ty.vec2<f32>(), b.Call("textureDimensions", "plane0", 0_a)))));
+                stmts.Push(b.Decl(
+                    b.Let("plane0_dims",
+                          b.Call(b.ty.vec2<f32>(), b.Call("textureDimensions", "plane0", 0_a)))));
                 stmts.Push(
                     b.Decl(b.Let("plane0_half_texel", b.Div(b.vec2<f32>(0.5_a), "plane0_dims"))));
                 stmts.Push(b.Decl(
                     b.Let("plane0_clamped", b.Call("clamp", "modifiedCoords", "plane0_half_texel",
                                                    b.Sub(1_a, "plane0_half_texel")))));
-                stmts.Push(b.Decl(b.Let(
-                    "plane1_dims",
-                    b.Construct(b.ty.vec2<f32>(), b.Call("textureDimensions", "plane1", 0_a)))));
+                stmts.Push(b.Decl(
+                    b.Let("plane1_dims",
+                          b.Call(b.ty.vec2<f32>(), b.Call("textureDimensions", "plane1", 0_a)))));
                 stmts.Push(
                     b.Decl(b.Let("plane1_half_texel", b.Div(b.vec2<f32>(0.5_a), "plane1_dims"))));
                 stmts.Push(b.Decl(

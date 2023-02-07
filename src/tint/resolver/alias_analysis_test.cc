@@ -570,7 +570,7 @@ TEST_P(Use, Read_Bitcast) {
 
 TEST_P(Use, Read_Convert) {
     // _ = f32(*p2);
-    Run(Assign(Phony(), Construct<f32>(Deref("p2"))),
+    Run(Assign(Phony(), Call<f32>(Deref("p2"))),
         R"(56:78 warning: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
@@ -759,7 +759,7 @@ TEST_F(ResolverAliasAnalysisTest, Read_MemberAccessor) {
          ty.void_(),
          utils::Vector{
              Assign(Phony(), MemberAccessor(Deref("p2"), "a")),
-             Assign(Deref("p1"), Construct(ty("S"))),
+             Assign(Deref("p1"), Call(ty("S"))),
          });
     Func("f1", utils::Empty, ty.void_(),
          utils::Vector{
@@ -822,7 +822,7 @@ TEST_F(ResolverAliasAnalysisTest, Read_MultiComponentSwizzle) {
          ty.void_(),
          utils::Vector{
              Assign(Phony(), MemberAccessor(Deref("p2"), "zy")),
-             Assign(Deref("p1"), Construct(ty.vec4<f32>())),
+             Assign(Deref("p1"), Call(ty.vec4<f32>())),
          });
     Func("f1", utils::Empty, ty.void_(),
          utils::Vector{

@@ -150,7 +150,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
                            },
                            array(),
                            utils::Vector{
-                               b.Return(b.Construct(array(), columns)),
+                               b.Return(b.Call(array(), columns)),
                            });
                     return name;
                 });
@@ -189,7 +189,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
                            },
                            matrix(),
                            utils::Vector{
-                               b.Return(b.Construct(matrix(), columns)),
+                               b.Return(b.Call(matrix(), columns)),
                            });
                     return name;
                 });

@@ -139,7 +139,7 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
                 arg++;
             }
         }
-        return b.Construct(CreateASTTypeFor(ctx, str), new_args);
+        return b.Call(CreateASTTypeFor(ctx, str), new_args);
     });
 
     ctx.Clone();

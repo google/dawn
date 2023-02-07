@@ -102,7 +102,7 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
                 columns.Push(b.vec(CreateASTTypeFor(ctx, mat_type->type()), mat_type->rows(),
                                    std::move(row_values)));
             }
-            return b.Construct(CreateASTTypeFor(ctx, mat_type), columns);
+            return b.Call(CreateASTTypeFor(ctx, mat_type), columns);
         };
 
         if (args.Length() == 1) {

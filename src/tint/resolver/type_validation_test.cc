@@ -102,7 +102,7 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableWithAddressSpace_Pass) {
 
 TEST_F(ResolverTypeValidationTest, GlobalConstNoAddressSpace_Pass) {
     // const global_const: f32 = f32();
-    GlobalConst(Source{{12, 34}}, "global_const", ty.f32(), Construct(ty.f32()));
+    GlobalConst(Source{{12, 34}}, "global_const", ty.f32(), Call<f32>());
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -297,7 +297,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FloatLiteral) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_IVecLiteral) {
     // var<private> a : array<f32, vec2<i32>(10, 10)>;
-    GlobalVar("a", ty.array(ty.f32(), Construct(Source{{12, 34}}, ty.vec2<i32>(), 10_i, 10_i)),
+    GlobalVar("a", ty.array(ty.f32(), Call(Source{{12, 34}}, ty.vec2<i32>(), 10_i, 10_i)),
               type::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -322,7 +322,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FloatConst) {
 TEST_F(ResolverTypeValidationTest, ArraySize_IVecConst) {
     // const size = vec2<i32>(100, 100);
     // var<private> a : array<f32, size>;
-    GlobalConst("size", Construct(ty.vec2<i32>(), 100_i, 100_i));
+    GlobalConst("size", Call(ty.vec2<i32>(), 100_i, 100_i));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")),
               type::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
@@ -580,7 +580,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FunctionLet) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_ComplexExpr) {
     // var a : array<f32, i32(4i)>;
-    auto* a = Var("a", ty.array(ty.f32(), Construct(Source{{12, 34}}, ty.i32(), 4_i)));
+    auto* a = Var("a", ty.array(ty.f32(), Call(Source{{12, 34}}, ty.i32(), 4_i)));
     WrapInFunction(a);
     EXPECT_TRUE(r()->Resolve());
 }
@@ -1437,7 +1437,7 @@ TEST_P(BuiltinTypeAliasTest, Construct) {
 
     Enable(ast::Extension::kF16);
 
-    WrapInFunction(Decl(Var("v", params.type(*this), Construct(ty(params.alias)))));
+    WrapInFunction(Decl(Var("v", params.type(*this), Call(ty(params.alias)))));
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,

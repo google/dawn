@@ -133,7 +133,7 @@ void f() {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_GlobalConst_vec3_AInt) {
-    auto* var = GlobalConst("G", Construct(ty.vec3(nullptr), 1_a, 2_a, 3_a));
+    auto* var = GlobalConst("G", Call(ty.vec3(nullptr), 1_a, 2_a, 3_a));
     Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
 
     GeneratorImpl& gen = Build();
@@ -151,7 +151,7 @@ void f() {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_GlobalConst_vec3_AFloat) {
-    auto* var = GlobalConst("G", Construct(ty.vec3(nullptr), 1._a, 2._a, 3._a));
+    auto* var = GlobalConst("G", Call(ty.vec3(nullptr), 1._a, 2._a, 3._a));
     Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
 
     GeneratorImpl& gen = Build();
@@ -207,8 +207,7 @@ void f() {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_GlobalConst_mat2x3_AFloat) {
-    auto* var =
-        GlobalConst("G", Construct(ty.mat(nullptr, 2, 3), 1._a, 2._a, 3._a, 4._a, 5._a, 6._a));
+    auto* var = GlobalConst("G", Call(ty.mat(nullptr, 2, 3), 1._a, 2._a, 3._a, 4._a, 5._a, 6._a));
     Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
 
     GeneratorImpl& gen = Build();
@@ -264,7 +263,7 @@ void f() {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_GlobalConst_arr_f32) {
-    auto* var = GlobalConst("G", Construct(ty.array<f32, 3>(), 1_f, 2_f, 3_f));
+    auto* var = GlobalConst("G", Call(ty.array<f32, 3>(), 1_f, 2_f, 3_f));
     Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
 
     GeneratorImpl& gen = Build();
@@ -295,10 +294,10 @@ void f() {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_GlobalConst_arr_vec2_bool) {
-    auto* var = GlobalConst("G", Construct(ty.array(ty.vec2<bool>(), 3_u),  //
-                                           vec2<bool>(true, false),         //
-                                           vec2<bool>(false, true),         //
-                                           vec2<bool>(true, true)));
+    auto* var = GlobalConst("G", Call(ty.array(ty.vec2<bool>(), 3_u),  //
+                                      vec2<bool>(true, false),         //
+                                      vec2<bool>(false, true),         //
+                                      vec2<bool>(true, true)));
     Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
 
     GeneratorImpl& gen = Build();

@@ -102,7 +102,7 @@ TEST_F(MslGeneratorImplTest, HasInvariantAttribute_True) {
                                                 Invariant(),
                                             }),
                                  });
-    Func("vert_main", utils::Empty, ty.Of(out), utils::Vector{Return(Construct(ty.Of(out)))},
+    Func("vert_main", utils::Empty, ty.Of(out), utils::Vector{Return(Call(ty.Of(out)))},
          utils::Vector{
              Stage(ast::PipelineStage::kVertex),
          });
@@ -139,7 +139,7 @@ TEST_F(MslGeneratorImplTest, HasInvariantAttribute_False) {
                                                 Builtin(ast::BuiltinValue::kPosition),
                                             }),
                                  });
-    Func("vert_main", utils::Empty, ty.Of(out), utils::Vector{Return(Construct(ty.Of(out)))},
+    Func("vert_main", utils::Empty, ty.Of(out), utils::Vector{Return(Call(ty.Of(out)))},
          utils::Vector{
              Stage(ast::PipelineStage::kVertex),
          });

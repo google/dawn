@@ -370,7 +370,7 @@ struct CanonicalizeEntryPointIO::State {
 
         // Construct the original structure using the new shader input objects.
         inner_call_parameters.Push(
-            ctx.dst->Construct(ctx.Clone(param->Declaration()->type), inner_struct_values));
+            ctx.dst->Call(ctx.Clone(param->Declaration()->type), inner_struct_values));
     }
 
     /// Process the entry point return type.

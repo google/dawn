@@ -547,7 +547,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutSharedStruct) {
                                                    });
     Func("foo", utils::Empty, ty.Of(interface),
          utils::Vector{
-             Return(Construct(ty.Of(interface))),
+             Return(Call(ty.Of(interface))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),

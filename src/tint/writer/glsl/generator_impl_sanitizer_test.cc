@@ -187,7 +187,7 @@ TEST_F(GlslSanitizerTest, PromoteStructInitializerToConstVar) {
                                    Member("c", ty.i32()),
                                });
     auto* runtime_value = Var("runtime_value", Expr(3_f));
-    auto* struct_init = Construct(ty.Of(str), 1_i, vec3<f32>(2_f, runtime_value, 4_f), 4_i);
+    auto* struct_init = Call(ty.Of(str), 1_i, vec3<f32>(2_f, runtime_value, 4_f), 4_i);
     auto* struct_access = MemberAccessor(struct_init, "b");
     auto* pos = Var("pos", ty.vec3<f32>(), struct_access);
 

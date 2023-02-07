@@ -467,7 +467,7 @@ struct DataType<vec<N, T>> {
     /// @param args args of size 1 or N with values of type T to initialize with
     /// @return a new AST vector value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, utils::VectorRef<Scalar> args) {
-        return b.Construct(AST(b), ExprArgs(b, std::move(args)));
+        return b.Call(AST(b), ExprArgs(b, std::move(args)));
     }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 or N with values of type T to initialize with
@@ -516,7 +516,7 @@ struct DataType<mat<N, M, T>> {
     /// @param args args of size 1 or N*M with values of type T to initialize with
     /// @return a new AST matrix value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, utils::VectorRef<Scalar> args) {
-        return b.Construct(AST(b), ExprArgs(b, std::move(args)));
+        return b.Call(AST(b), ExprArgs(b, std::move(args)));
     }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 or N*M with values of type T to initialize with
@@ -582,7 +582,7 @@ struct DataType<alias<T, ID>> {
         ProgramBuilder& b,
         utils::VectorRef<Scalar> args) {
         // Cast
-        return b.Construct(AST(b), DataType<T>::Expr(b, std::move(args)));
+        return b.Call(AST(b), DataType<T>::Expr(b, std::move(args)));
     }
 
     /// @param b the ProgramBuilder
@@ -593,7 +593,7 @@ struct DataType<alias<T, ID>> {
         ProgramBuilder& b,
         utils::VectorRef<Scalar> args) {
         // Construct
-        return b.Construct(AST(b), DataType<T>::ExprArgs(b, std::move(args)));
+        return b.Call(AST(b), DataType<T>::ExprArgs(b, std::move(args)));
     }
 
     /// @param b the ProgramBuilder
@@ -689,7 +689,7 @@ struct DataType<array<N, T>> {
     /// with
     /// @return a new AST array value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, utils::VectorRef<Scalar> args) {
-        return b.Construct(AST(b), ExprArgs(b, std::move(args)));
+        return b.Call(AST(b), ExprArgs(b, std::move(args)));
     }
     /// @param b the ProgramBuilder
     /// @param args args of size 1 or N with values of type T to initialize with

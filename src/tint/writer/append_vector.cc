@@ -135,7 +135,7 @@ const sem::Call* AppendVector(ProgramBuilder* b,
 
     if (packed_el_sem_ty != scalar_sem->Type()->UnwrapRef()) {
         // Cast scalar to the vector element type
-        auto* scalar_cast_ast = b->Construct(packed_el_ast_ty, scalar_ast);
+        auto* scalar_cast_ast = b->Call(packed_el_ast_ty, scalar_ast);
         auto* scalar_cast_target = b->create<sem::TypeConversion>(
             packed_el_sem_ty,
             b->create<sem::Parameter>(nullptr, 0u, scalar_sem->Type()->UnwrapRef(),
@@ -152,9 +152,9 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     }
 
     auto* initializer_ast =
-        b->Construct(packed_ast_ty, utils::Transform(packed, [&](const sem::ValueExpression* expr) {
-                         return expr->Declaration();
-                     }));
+        b->Call(packed_ast_ty, utils::Transform(packed, [&](const sem::ValueExpression* expr) {
+                    return expr->Declaration();
+                }));
     auto* initializer_target = b->create<sem::TypeInitializer>(
         packed_sem_ty,
         utils::Transform(

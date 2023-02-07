@@ -71,9 +71,9 @@ TEST_P(ResolverConstEvalConvTest, Test) {
     const auto unrepresentable = std::get<1>(GetParam()).unrepresentable;
 
     auto* input_val = input.Expr(*this);
-    auto* expr = Construct(type.ast(*this), input_val);
+    auto* expr = Call(type.ast(*this), input_val);
     if (kind == Kind::kVector) {
-        expr = Construct(ty.vec(nullptr, 3), expr);
+        expr = Call(ty.vec(nullptr, 3), expr);
     }
     WrapInFunction(expr);
 

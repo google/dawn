@@ -402,7 +402,7 @@ struct VertexPulling::State {
                         loaded_data_target_type = b.ty.vec(b.ty.f16(), fmt_dt.width);
                     }
 
-                    fetch = b.Construct(loaded_data_target_type, fetch);
+                    fetch = b.Call(loaded_data_target_type, fetch);
                 }
 
                 // The attribute value may not be of the desired vector width. If it is not, we'll
@@ -444,7 +444,7 @@ struct VertexPulling::State {
                     }
 
                     const ast::Type* target_ty = CreateASTTypeFor(ctx, var.type);
-                    value = b.Construct(target_ty, values);
+                    value = b.Call(target_ty, values);
                 }
 
                 // Assign the value to the WGSL variable
@@ -745,7 +745,7 @@ struct VertexPulling::State {
             expr_list.Push(LoadPrimitive(array_base, primitive_offset, buffer, base_format));
         }
 
-        return b.Construct(b.create<ast::Vector>(base_type, count), std::move(expr_list));
+        return b.Call(b.create<ast::Vector>(base_type, count), std::move(expr_list));
     }
 
     /// Process a non-struct entry point parameter.

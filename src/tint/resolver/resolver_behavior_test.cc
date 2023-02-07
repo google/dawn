@@ -82,7 +82,7 @@ TEST_F(ResolverBehaviorTest, ExprIndex_Arr) {
     Func("ArrayDiscardOrNext", utils::Empty, ty.array<i32, 4>(),
          utils::Vector{
              If(true, Block(Discard())),
-             Return(Construct(ty.array<i32, 4>())),
+             Return(Call(ty.array<i32, 4>())),
          });
 
     auto* stmt = Decl(Var("lhs", ty.i32(), IndexAccessor(Call("ArrayDiscardOrNext"), 1_i)));

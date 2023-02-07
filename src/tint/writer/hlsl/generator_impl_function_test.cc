@@ -216,8 +216,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_SharedStruct_Di
 
     Func("vert_main", utils::Empty, ty.Of(interface_struct),
          utils::Vector{
-             Return(Construct(ty.Of(interface_struct), Construct(ty.vec4<f32>()), Expr(0.5_f),
-                              Expr(0.25_f))),
+             Return(Call(ty.Of(interface_struct), Call(ty.vec4<f32>()), Expr(0.5_f), Expr(0.25_f))),
          },
          utils::Vector{Stage(ast::PipelineStage::kVertex)});
 
@@ -297,8 +296,8 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_SharedStruct_He
 
     Func("foo", utils::Vector{Param("x", ty.f32())}, ty.Of(vertex_output_struct),
          utils::Vector{
-             Return(Construct(ty.Of(vertex_output_struct),
-                              Construct(ty.vec4<f32>(), "x", "x", "x", Expr(1_f)))),
+             Return(
+                 Call(ty.Of(vertex_output_struct), Call(ty.vec4<f32>(), "x", "x", "x", Expr(1_f)))),
          },
          utils::Empty);
 
@@ -693,9 +692,9 @@ void main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute_WithWorkgroup_Const) {
-    GlobalConst("width", ty.i32(), Construct(ty.i32(), 2_i));
-    GlobalConst("height", ty.i32(), Construct(ty.i32(), 3_i));
-    GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4_i));
+    GlobalConst("width", ty.i32(), Call<i32>(2_i));
+    GlobalConst("height", ty.i32(), Call<i32>(3_i));
+    GlobalConst("depth", ty.i32(), Call<i32>(4_i));
     Func("main", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
@@ -714,9 +713,9 @@ void main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Attribute_EntryPoint_Compute_WithWorkgroup_OverridableConst) {
-    Override("width", ty.i32(), Construct(ty.i32(), 2_i), Id(7_u));
-    Override("height", ty.i32(), Construct(ty.i32(), 3_i), Id(8_u));
-    Override("depth", ty.i32(), Construct(ty.i32(), 4_i), Id(9_u));
+    Override("width", ty.i32(), Call<i32>(2_i), Id(7_u));
+    Override("height", ty.i32(), Call<i32>(3_i), Id(8_u));
+    Override("depth", ty.i32(), Call<i32>(4_i), Id(9_u));
     Func("main", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
@@ -753,7 +752,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
 TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayReturn) {
     Func("my_func", utils::Empty, ty.array<f32, 5>(),
          utils::Vector{
-             Return(Construct(ty.array<f32, 5>())),
+             Return(Call(ty.array<f32, 5>())),
          });
 
     GeneratorImpl& gen = Build();

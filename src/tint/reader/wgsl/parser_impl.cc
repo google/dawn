@@ -2622,7 +2622,7 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
             return Failure::kErrored;
         }
 
-        return builder_.Construct(t.source(), call.value, std::move(params.value));
+        return builder_.Call(t.source(), call.value, std::move(params.value));
     }
 
     auto lit = const_literal();

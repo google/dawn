@@ -135,7 +135,7 @@ struct PackedVec3::State {
                 auto* expr = ref->Declaration();
                 ctx.Replace(expr, [this, vec_ty, expr] {  //
                     auto* packed = ctx.CloneWithoutTransform(expr);
-                    return b.Construct(CreateASTTypeFor(ctx, vec_ty), packed);
+                    return b.Call(CreateASTTypeFor(ctx, vec_ty), packed);
                 });
             }
         }

@@ -138,7 +138,7 @@ TEST_F(ResolverInferredTypeTest, InferArray_Pass) {
     auto* expected_type = create<type::Array>(
         create<type::U32>(), create<type::ConstantArrayCount>(10u), 4u, 4u * 10u, 4u, 4u);
 
-    auto* ctor_expr = Construct(type);
+    auto* ctor_expr = Call(type);
     auto* var = Var("a", type::AddressSpace::kFunction, ctor_expr);
     WrapInFunction(var);
 
@@ -156,7 +156,7 @@ TEST_F(ResolverInferredTypeTest, InferStruct_Pass) {
                                                 create<type::I32>(), 0u, 0u, 0u, 4u, std::nullopt)},
         0u, 4u, 4u);
 
-    auto* ctor_expr = Construct(ty.Of(str));
+    auto* ctor_expr = Call(ty.Of(str));
 
     auto* var = Var("a", type::AddressSpace::kFunction, ctor_expr);
     WrapInFunction(var);

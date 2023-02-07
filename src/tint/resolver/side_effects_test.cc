@@ -370,7 +370,7 @@ TEST_F(SideEffectsTest, Call_Function) {
 
 TEST_F(SideEffectsTest, Call_TypeConversion_NoSE) {
     auto* var = Decl(Var("a", ty.i32()));
-    auto* expr = Construct(ty.f32(), "a");
+    auto* expr = Call<f32>("a");
     WrapInFunction(var, expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -382,7 +382,7 @@ TEST_F(SideEffectsTest, Call_TypeConversion_NoSE) {
 
 TEST_F(SideEffectsTest, Call_TypeConversion_SE) {
     MakeSideEffectFunc<i32>("se");
-    auto* expr = Construct(ty.f32(), Call("se"));
+    auto* expr = Call<f32>(Call("se"));
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -394,7 +394,7 @@ TEST_F(SideEffectsTest, Call_TypeConversion_SE) {
 
 TEST_F(SideEffectsTest, Call_TypeInitializer_NoSE) {
     auto* var = Decl(Var("a", ty.f32()));
-    auto* expr = Construct(ty.f32(), "a");
+    auto* expr = Call<f32>("a");
     WrapInFunction(var, expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -406,7 +406,7 @@ TEST_F(SideEffectsTest, Call_TypeInitializer_NoSE) {
 
 TEST_F(SideEffectsTest, Call_TypeInitializer_SE) {
     MakeSideEffectFunc<f32>("se");
-    auto* expr = Construct(ty.f32(), Call("se"));
+    auto* expr = Call<f32>(Call("se"));
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

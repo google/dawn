@@ -1393,7 +1393,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
 
             // Add the return-value statement.
             stmts.Push(create<ast::ReturnStatement>(
-                source, builder_.Construct(source, return_type, std::move(return_exprs))));
+                source, builder_.Call(source, return_type, std::move(return_exprs))));
         }
     }
 
@@ -3912,8 +3912,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
             }
             operands.Push(operand.expr);
         }
-        return {ast_type,
-                builder_.Construct(Source{}, ast_type->Build(builder_), std::move(operands))};
+        return {ast_type, builder_.Call(Source{}, ast_type->Build(builder_), std::move(operands))};
     }
 
     if (op == spv::Op::OpCompositeExtract) {
@@ -4731,8 +4730,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(const spvtools::opt::Instruct
             return {};
         }
     }
-    return {result_type,
-            builder_.Construct(source, result_type->Build(builder_), std::move(values))};
+    return {result_type, builder_.Call(source, result_type->Build(builder_), std::move(values))};
 }
 
 bool FunctionEmitter::RegisterSpecialBuiltInVariables() {
@@ -5164,9 +5162,8 @@ TypedExpression FunctionEmitter::MakeNumericConversion(const spvtools::opt::Inst
 
     ExpressionList params;
     params.Push(arg_expr.expr);
-    TypedExpression result{
-        expr_type,
-        builder_.Construct(GetSourceForInst(inst), expr_type->Build(builder_), std::move(params))};
+    TypedExpression result{expr_type, builder_.Call(GetSourceForInst(inst),
+                                                    expr_type->Build(builder_), std::move(params))};
 
     if (requested_type == expr_type) {
         return result;
@@ -5640,14 +5637,14 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
         // first component.
         if (texture_type->IsAnyOf<DepthTexture, DepthMultisampledTexture>()) {
             if (is_non_dref_sample || (op == spv::Op::OpImageFetch)) {
-                value = builder_.Construct(Source{},
-                                           result_type->Build(builder_),  // a vec4
-                                           utils::Vector{
-                                               value,
-                                               parser_impl_.MakeNullValue(result_component_type),
-                                               parser_impl_.MakeNullValue(result_component_type),
-                                               parser_impl_.MakeNullValue(result_component_type),
-                                           });
+                value = builder_.Call(Source{},
+                                      result_type->Build(builder_),  // a vec4
+                                      utils::Vector{
+                                          value,
+                                          parser_impl_.MakeNullValue(result_component_type),
+                                          parser_impl_.MakeNullValue(result_component_type),
+                                          parser_impl_.MakeNullValue(result_component_type),
+                                      });
             }
         }
 
@@ -5731,7 +5728,7 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
                 // vector initializer - otherwise, just emit the single expression to omit an
                 // unnecessary cast.
                 (exprs.Length() > 1)
-                    ? builder_.Construct(Source{}, unsigned_type->Build(builder_), std::move(exprs))
+                    ? builder_.Call(Source{}, unsigned_type->Build(builder_), std::move(exprs))
                     : exprs[0],
             };
 
@@ -5753,8 +5750,8 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
             // The WGSL bulitin returns u32.
             // If they aren't the same then convert the result.
             if (!result_type->Is<U32>()) {
-                ast_expr = builder_.Construct(Source{}, result_type->Build(builder_),
-                                              utils::Vector{ast_expr});
+                ast_expr =
+                    builder_.Call(Source{}, result_type->Build(builder_), utils::Vector{ast_expr});
             }
             TypedExpression expr{result_type, ast_expr};
             return EmitConstDefOrWriteToHoistedVar(inst, expr);
@@ -6066,7 +6063,7 @@ const ast::Expression* FunctionEmitter::ConvertTexelForStorage(
         for (auto i = src_count; i < dest_count; i++) {
             exprs.Push(parser_impl_.MakeNullExpression(component_type).expr);
         }
-        texel.expr = builder_.Construct(Source{}, src_type->Build(builder_), std::move(exprs));
+        texel.expr = builder_.Call(Source{}, src_type->Build(builder_), std::move(exprs));
     }
 
     return texel.expr;
@@ -6076,7 +6073,7 @@ TypedExpression FunctionEmitter::ToI32(TypedExpression value) {
     if (!value || value.type->Is<I32>()) {
         return value;
     }
-    return {ty_.I32(), builder_.Construct(Source{}, builder_.ty.i32(), utils::Vector{value.expr})};
+    return {ty_.I32(), builder_.Call(Source{}, builder_.ty.i32(), utils::Vector{value.expr})};
 }
 
 TypedExpression FunctionEmitter::ToSignedIfUnsigned(TypedExpression value) {
@@ -6085,7 +6082,7 @@ TypedExpression FunctionEmitter::ToSignedIfUnsigned(TypedExpression value) {
     }
     if (auto* vec_type = value.type->As<Vector>()) {
         auto* new_type = ty_.Vector(ty_.I32(), vec_type->size);
-        return {new_type, builder_.Construct(new_type->Build(builder_), utils::Vector{value.expr})};
+        return {new_type, builder_.Call(new_type->Build(builder_), utils::Vector{value.expr})};
     }
     return ToI32(value);
 }
@@ -6157,10 +6154,10 @@ TypedExpression FunctionEmitter::MakeOuterProduct(const spvtools::opt::Instructi
             result_row.Push(elem);
         }
         result_columns.Push(
-            builder_.Construct(Source{}, col_ty->Build(builder_), std::move(result_row)));
+            builder_.Call(Source{}, col_ty->Build(builder_), std::move(result_row)));
     }
     return {result_ty,
-            builder_.Construct(Source{}, result_ty->Build(builder_), std::move(result_columns))};
+            builder_.Call(Source{}, result_ty->Build(builder_), std::move(result_columns))};
 }
 
 bool FunctionEmitter::MakeVectorInsertDynamic(const spvtools::opt::Instruction& inst) {

@@ -139,11 +139,11 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
 
                 // Create the mapping function to truncate the shader io.
                 auto mapping_fn_sym = b.Symbols().New("truncate_shader_output");
-                b.Func(
-                    mapping_fn_sym, utils::Vector{b.Param("io", ctx.Clone(func_ast->return_type))},
-                    b.ty(new_struct_sym),
-                    utils::Vector{
-                        b.Return(b.Construct(b.ty(new_struct_sym), std::move(initializer_exprs)))});
+                b.Func(mapping_fn_sym,
+                       utils::Vector{b.Param("io", ctx.Clone(func_ast->return_type))},
+                       b.ty(new_struct_sym),
+                       utils::Vector{
+                           b.Return(b.Call(b.ty(new_struct_sym), std::move(initializer_exprs)))});
                 return TruncatedStructAndConverter{new_struct_sym, mapping_fn_sym};
             });
 

@@ -1229,7 +1229,7 @@ TEST_P(IntegerAllMatching, ScalarUnsigned) {
 
     utils::Vector<const ast::Expression*, 8> params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.Push(Construct<u32>(1_i));
+        params.Push(Call<u32>(1_i));
     }
     auto* builtin = Call(name, params);
     WrapInFunction(builtin);
@@ -1289,7 +1289,7 @@ TEST_P(IntegerAllMatching, ScalarSigned) {
 
     utils::Vector<const ast::Expression*, 8> params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.Push(Construct<i32>(1_i));
+        params.Push(Call<i32>(1_i));
     }
     auto* builtin = Call(name, params);
     WrapInFunction(builtin);

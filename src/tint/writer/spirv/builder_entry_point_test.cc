@@ -215,7 +215,7 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
             Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(ast::BuiltinValue::kPosition)}),
         });
 
-    auto* vert_retval = Construct(ty.Of(interface), 42_f, Construct(ty.vec4<f32>()));
+    auto* vert_retval = Call(ty.Of(interface), 42_f, Call(ty.vec4<f32>()));
     Func("vert_main", utils::Empty, ty.Of(interface), utils::Vector{Return(vert_retval)},
          utils::Vector{
              Stage(ast::PipelineStage::kVertex),

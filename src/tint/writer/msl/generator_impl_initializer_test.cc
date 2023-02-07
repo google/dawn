@@ -74,7 +74,7 @@ TEST_F(MslGeneratorImplTest, EmitInitializer_F16) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitInitializer_Type_Float) {
-    WrapInFunction(Construct<f32>(-1.2e-5_f));
+    WrapInFunction(Call<f32>(-1.2e-5_f));
 
     GeneratorImpl& gen = Build();
 
@@ -85,7 +85,7 @@ TEST_F(MslGeneratorImplTest, EmitInitializer_Type_Float) {
 TEST_F(MslGeneratorImplTest, EmitInitializer_Type_F16) {
     Enable(ast::Extension::kF16);
 
-    WrapInFunction(Construct<f16>(-1.2e-3_h));
+    WrapInFunction(Call<f16>(-1.2e-3_h));
 
     GeneratorImpl& gen = Build();
 
@@ -94,7 +94,7 @@ TEST_F(MslGeneratorImplTest, EmitInitializer_Type_F16) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitInitializer_Type_Bool) {
-    WrapInFunction(Construct<bool>(true));
+    WrapInFunction(Call<bool>(true));
 
     GeneratorImpl& gen = Build();
 
@@ -103,7 +103,7 @@ TEST_F(MslGeneratorImplTest, EmitInitializer_Type_Bool) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitInitializer_Type_Int) {
-    WrapInFunction(Construct<i32>(-12345_i));
+    WrapInFunction(Call<i32>(-12345_i));
 
     GeneratorImpl& gen = Build();
 
@@ -112,7 +112,7 @@ TEST_F(MslGeneratorImplTest, EmitInitializer_Type_Int) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitInitializer_Type_Uint) {
-    WrapInFunction(Construct<u32>(12345_u));
+    WrapInFunction(Call<u32>(12345_u));
 
     GeneratorImpl& gen = Build();
 
@@ -376,8 +376,8 @@ TEST_F(MslGeneratorImplTest, EmitInitializer_Type_Mat_Identity_F16) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitInitializer_Type_Array) {
-    WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3_u), vec3<f32>(1_f, 2_f, 3_f),
-                             vec3<f32>(4_f, 5_f, 6_f), vec3<f32>(7_f, 8_f, 9_f)));
+    WrapInFunction(Call(ty.array(ty.vec3<f32>(), 3_u), vec3<f32>(1_f, 2_f, 3_f),
+                        vec3<f32>(4_f, 5_f, 6_f), vec3<f32>(7_f, 8_f, 9_f)));
 
     GeneratorImpl& gen = Build();
 
@@ -393,7 +393,7 @@ TEST_F(MslGeneratorImplTest, EmitInitializer_Type_Struct) {
                                    Member("c", ty.vec3<i32>()),
                                });
 
-    WrapInFunction(Construct(ty.Of(str), 1_i, 2_f, vec3<i32>(3_i, 4_i, 5_i)));
+    WrapInFunction(Call(ty.Of(str), 1_i, 2_f, vec3<i32>(3_i, 4_i, 5_i)));
 
     GeneratorImpl& gen = Build();
 
@@ -408,7 +408,7 @@ TEST_F(MslGeneratorImplTest, EmitInitializer_Type_Struct_Empty) {
                                    Member("c", ty.vec3<i32>()),
                                });
 
-    WrapInFunction(Construct(ty.Of(str)));
+    WrapInFunction(Call(ty.Of(str)));
 
     GeneratorImpl& gen = Build();
 

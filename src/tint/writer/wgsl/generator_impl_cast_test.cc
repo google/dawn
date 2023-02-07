@@ -22,7 +22,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Scalar_F32_From_I32) {
-    auto* cast = Construct<f32>(1_i);
+    auto* cast = Call<f32>(1_i);
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();
@@ -35,7 +35,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Scalar_F32_From_I32) {
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Scalar_F16_From_I32) {
     Enable(ast::Extension::kF16);
 
-    auto* cast = Construct<f16>(1_i);
+    auto* cast = Call<f16>(1_i);
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();

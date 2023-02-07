@@ -189,7 +189,7 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
     Enable(ast::Extension::kF16);
 
     Func("foo", utils::Empty, params.create_rhs_ast_type(*this),
-         utils::Vector{Return(Construct(params.create_rhs_ast_type(*this)))}, {});
+         utils::Vector{Return(Call(params.create_rhs_ast_type(*this)))}, {});
 
     auto* a = Var("a", Call("foo"));
     // Self-assign 'a' to force the expression to be resolved so we can test its
@@ -356,8 +356,8 @@ TEST_P(ConversionInitializerValidTest, All) {
        << FriendlyName(rhs_type) << "(<rhs value expr>))";
     SCOPED_TRACE(ss.str());
 
-    auto* arg = Construct(rhs_type, rhs_value_expr);
-    auto* tc = Construct(lhs_type2, arg);
+    auto* arg = Call(rhs_type, rhs_value_expr);
+    auto* tc = Call(lhs_type2, arg);
     auto* a = Var("a", lhs_type1, tc);
 
     // Self-assign 'a' to force the expression to be resolved so we can test its
@@ -451,7 +451,7 @@ TEST_P(ConversionInitializerInvalidTest, All) {
 
     Enable(ast::Extension::kF16);
 
-    auto* a = Var("a", lhs_type1, Construct(lhs_type2, Construct(rhs_type, rhs_value_expr)));
+    auto* a = Var("a", lhs_type1, Call(lhs_type2, Call(rhs_type, rhs_value_expr)));
 
     // Self-assign 'a' to force the expression to be resolved so we can test its
     // type below
@@ -466,7 +466,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeInitializerValidationTest,
                                           testing::ValuesIn(all_types)));
 
 TEST_F(ResolverTypeInitializerValidationTest, ConversionInitializerInvalid_TooManyInitializers) {
-    auto* a = Var("a", ty.f32(), Construct(Source{{12, 34}}, ty.f32(), Expr(1_f), Expr(2_f)));
+    auto* a = Var("a", ty.f32(), Call(Source{{12, 34}}, ty.f32(), Expr(1_f), Expr(2_f)));
     WrapInFunction(a);
 
     ASSERT_FALSE(r()->Resolve());
@@ -474,8 +474,7 @@ TEST_F(ResolverTypeInitializerValidationTest, ConversionInitializerInvalid_TooMa
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, ConversionInitializerInvalid_InvalidInitializer) {
-    auto* a =
-        Var("a", ty.f32(), Construct(Source{{12, 34}}, ty.f32(), Construct(ty.array<f32, 4>())));
+    auto* a = Var("a", ty.f32(), Call(Source{{12, 34}}, ty.f32(), Call(ty.array<f32, 4>())));
     WrapInFunction(a);
 
     ASSERT_FALSE(r()->Resolve());
@@ -619,9 +618,9 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArray_AIAIAI) {
 
 TEST_F(ResolverTypeInitializerValidationTest, InferredArrayU32_VecI32_VecAI) {
     // array(vec2(10i), vec2(20));
-    auto* tc = array(Source{{12, 34}}, nullptr, nullptr,   //
-                     Construct(ty.vec(nullptr, 2), 20_i),  //
-                     Construct(ty.vec(nullptr, 2), 20_a));
+    auto* tc = array(Source{{12, 34}}, nullptr, nullptr,  //
+                     Call(ty.vec(nullptr, 2), 20_i),      //
+                     Call(ty.vec(nullptr, 2), 20_a));
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -641,9 +640,9 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArrayU32_VecI32_VecAI) {
 
 TEST_F(ResolverTypeInitializerValidationTest, InferredArrayU32_VecAI_VecF32) {
     // array(vec2(20), vec2(10f));
-    auto* tc = array(Source{{12, 34}}, nullptr, nullptr,   //
-                     Construct(ty.vec(nullptr, 2), 20_a),  //
-                     Construct(ty.vec(nullptr, 2), 20_f));
+    auto* tc = array(Source{{12, 34}}, nullptr, nullptr,  //
+                     Call(ty.vec(nullptr, 2), 20_a),      //
+                     Call(ty.vec(nullptr, 2), 20_f));
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -768,8 +767,7 @@ note: argument 1 is of type 'vec3<u32>')");
 
 TEST_F(ResolverTypeInitializerValidationTest, InferredArrayArgumentTypeMismatch_Vec3i32_Vec3AF) {
     // array(vec3<i32>(), vec3(1.0));
-    auto* t =
-        array(Source{{12, 34}}, nullptr, nullptr, vec3<i32>(), Construct(ty.vec3(nullptr), 1._a));
+    auto* t = array(Source{{12, 34}}, nullptr, nullptr, vec3<i32>(), Call(ty.vec3(nullptr), 1._a));
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
@@ -892,7 +890,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Array_RuntimeZeroValue) {
 namespace ScalarInitializer {
 
 TEST_F(ResolverTypeInitializerValidationTest, I32_Success) {
-    auto* expr = Construct<i32>(Expr(123_i));
+    auto* expr = Call<i32>(Expr(123_i));
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -910,7 +908,7 @@ TEST_F(ResolverTypeInitializerValidationTest, I32_Success) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, U32_Success) {
-    auto* expr = Construct<u32>(Expr(123_u));
+    auto* expr = Call<u32>(Expr(123_u));
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -928,7 +926,7 @@ TEST_F(ResolverTypeInitializerValidationTest, U32_Success) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, F32_Success) {
-    auto* expr = Construct<f32>(Expr(1.23_f));
+    auto* expr = Call<f32>(Expr(1.23_f));
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -948,7 +946,7 @@ TEST_F(ResolverTypeInitializerValidationTest, F32_Success) {
 TEST_F(ResolverTypeInitializerValidationTest, F16_Success) {
     Enable(ast::Extension::kF16);
 
-    auto* expr = Construct<f16>(Expr(1.5_h));
+    auto* expr = Call<f16>(Expr(1.5_h));
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -966,7 +964,7 @@ TEST_F(ResolverTypeInitializerValidationTest, F16_Success) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, Convert_f32_to_i32_Success) {
-    auto* expr = Construct<i32>(1.23_f);
+    auto* expr = Call<i32>(1.23_f);
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -984,7 +982,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Convert_f32_to_i32_Success) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, Convert_i32_to_u32_Success) {
-    auto* expr = Construct<u32>(123_i);
+    auto* expr = Call<u32>(123_i);
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1004,7 +1002,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Convert_i32_to_u32_Success) {
 TEST_F(ResolverTypeInitializerValidationTest, Convert_u32_to_f16_Success) {
     Enable(ast::Extension::kF16);
 
-    auto* expr = Construct<f16>(123_u);
+    auto* expr = Call<f16>(123_u);
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1024,7 +1022,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Convert_u32_to_f16_Success) {
 TEST_F(ResolverTypeInitializerValidationTest, Convert_f16_to_f32_Success) {
     Enable(ast::Extension::kF16);
 
-    auto* expr = Construct<f32>(123_h);
+    auto* expr = Call<f32>(123_h);
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1995,7 +1993,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vector_ElementTypeAlias_Error) {
 
     // vec2<Float32>(1.0f, 1u)
     auto* vec_type = ty.vec(ty.Of(f32_alias), 2);
-    WrapInFunction(Construct(Source{{12, 34}}, vec_type, 1_f, 1_u));
+    WrapInFunction(Call(Source{{12, 34}}, vec_type, 1_f, 1_u));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -2007,7 +2005,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vector_ElementTypeAlias_Success) {
 
     // vec2<Float32>(1.0f, 1.0f)
     auto* vec_type = ty.vec(ty.Of(f32_alias), 2);
-    auto* tc = Construct(Source{{12, 34}}, vec_type, 1_f, 1_f);
+    auto* tc = Call(Source{{12, 34}}, vec_type, 1_f, 1_f);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2018,7 +2016,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vector_ArgumentElementTypeAlias_Er
 
     // vec3<u32>(vec<Float32>(), 1.0f)
     auto* vec_type = ty.vec(ty.Of(f32_alias), 2);
-    WrapInFunction(vec3<u32>(Source{{12, 34}}, Construct(vec_type), 1_f));
+    WrapInFunction(vec3<u32>(Source{{12, 34}}, Call(vec_type), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -2030,7 +2028,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vector_ArgumentElementTypeAlias_Su
 
     // vec3<f32>(vec<Float32>(), 1.0f)
     auto* vec_type = ty.vec(ty.Of(f32_alias), 2);
-    auto* tc = vec3<f32>(Construct(Source{{12, 34}}, vec_type), 1_f);
+    auto* tc = vec3<f32>(Call(Source{{12, 34}}, vec_type), 1_f);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2039,11 +2037,11 @@ TEST_F(ResolverTypeInitializerValidationTest, Vector_ArgumentElementTypeAlias_Su
 TEST_F(ResolverTypeInitializerValidationTest, InferVec2ElementTypeFromScalars) {
     Enable(ast::Extension::kF16);
 
-    auto* vec2_bool = Construct(create<ast::Vector>(nullptr, 2u), Expr(true), Expr(false));
-    auto* vec2_i32 = Construct(create<ast::Vector>(nullptr, 2u), Expr(1_i), Expr(2_i));
-    auto* vec2_u32 = Construct(create<ast::Vector>(nullptr, 2u), Expr(1_u), Expr(2_u));
-    auto* vec2_f32 = Construct(create<ast::Vector>(nullptr, 2u), Expr(1_f), Expr(2_f));
-    auto* vec2_f16 = Construct(create<ast::Vector>(nullptr, 2u), Expr(1_h), Expr(2_h));
+    auto* vec2_bool = Call(create<ast::Vector>(nullptr, 2u), Expr(true), Expr(false));
+    auto* vec2_i32 = Call(create<ast::Vector>(nullptr, 2u), Expr(1_i), Expr(2_i));
+    auto* vec2_u32 = Call(create<ast::Vector>(nullptr, 2u), Expr(1_u), Expr(2_u));
+    auto* vec2_f32 = Call(create<ast::Vector>(nullptr, 2u), Expr(1_f), Expr(2_f));
+    auto* vec2_f16 = Call(create<ast::Vector>(nullptr, 2u), Expr(1_h), Expr(2_h));
     WrapInFunction(vec2_bool, vec2_i32, vec2_u32, vec2_f32, vec2_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2073,11 +2071,11 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec2ElementTypeFromScalars) {
 TEST_F(ResolverTypeInitializerValidationTest, InferVec2ElementTypeFromVec2) {
     Enable(ast::Extension::kF16);
 
-    auto* vec2_bool = Construct(create<ast::Vector>(nullptr, 2u), vec2<bool>(true, false));
-    auto* vec2_i32 = Construct(create<ast::Vector>(nullptr, 2u), vec2<i32>(1_i, 2_i));
-    auto* vec2_u32 = Construct(create<ast::Vector>(nullptr, 2u), vec2<u32>(1_u, 2_u));
-    auto* vec2_f32 = Construct(create<ast::Vector>(nullptr, 2u), vec2<f32>(1_f, 2_f));
-    auto* vec2_f16 = Construct(create<ast::Vector>(nullptr, 2u), vec2<f16>(1_h, 2_h));
+    auto* vec2_bool = Call(create<ast::Vector>(nullptr, 2u), vec2<bool>(true, false));
+    auto* vec2_i32 = Call(create<ast::Vector>(nullptr, 2u), vec2<i32>(1_i, 2_i));
+    auto* vec2_u32 = Call(create<ast::Vector>(nullptr, 2u), vec2<u32>(1_u, 2_u));
+    auto* vec2_f32 = Call(create<ast::Vector>(nullptr, 2u), vec2<f32>(1_f, 2_f));
+    auto* vec2_f16 = Call(create<ast::Vector>(nullptr, 2u), vec2<f16>(1_h, 2_h));
     WrapInFunction(vec2_bool, vec2_i32, vec2_u32, vec2_f32, vec2_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2107,12 +2105,11 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec2ElementTypeFromVec2) {
 TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromScalars) {
     Enable(ast::Extension::kF16);
 
-    auto* vec3_bool =
-        Construct(create<ast::Vector>(nullptr, 3u), Expr(true), Expr(false), Expr(true));
-    auto* vec3_i32 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_i), Expr(2_i), Expr(3_i));
-    auto* vec3_u32 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_u), Expr(2_u), Expr(3_u));
-    auto* vec3_f32 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_f), Expr(2_f), Expr(3_f));
-    auto* vec3_f16 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_h), Expr(2_h), Expr(3_h));
+    auto* vec3_bool = Call(create<ast::Vector>(nullptr, 3u), Expr(true), Expr(false), Expr(true));
+    auto* vec3_i32 = Call(create<ast::Vector>(nullptr, 3u), Expr(1_i), Expr(2_i), Expr(3_i));
+    auto* vec3_u32 = Call(create<ast::Vector>(nullptr, 3u), Expr(1_u), Expr(2_u), Expr(3_u));
+    auto* vec3_f32 = Call(create<ast::Vector>(nullptr, 3u), Expr(1_f), Expr(2_f), Expr(3_f));
+    auto* vec3_f16 = Call(create<ast::Vector>(nullptr, 3u), Expr(1_h), Expr(2_h), Expr(3_h));
     WrapInFunction(vec3_bool, vec3_i32, vec3_u32, vec3_f32, vec3_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2142,11 +2139,11 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromScalars) {
 TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromVec3) {
     Enable(ast::Extension::kF16);
 
-    auto* vec3_bool = Construct(create<ast::Vector>(nullptr, 3u), vec3<bool>(true, false, true));
-    auto* vec3_i32 = Construct(create<ast::Vector>(nullptr, 3u), vec3<i32>(1_i, 2_i, 3_i));
-    auto* vec3_u32 = Construct(create<ast::Vector>(nullptr, 3u), vec3<u32>(1_u, 2_u, 3_u));
-    auto* vec3_f32 = Construct(create<ast::Vector>(nullptr, 3u), vec3<f32>(1_f, 2_f, 3_f));
-    auto* vec3_f16 = Construct(create<ast::Vector>(nullptr, 3u), vec3<f16>(1_h, 2_h, 3_h));
+    auto* vec3_bool = Call(create<ast::Vector>(nullptr, 3u), vec3<bool>(true, false, true));
+    auto* vec3_i32 = Call(create<ast::Vector>(nullptr, 3u), vec3<i32>(1_i, 2_i, 3_i));
+    auto* vec3_u32 = Call(create<ast::Vector>(nullptr, 3u), vec3<u32>(1_u, 2_u, 3_u));
+    auto* vec3_f32 = Call(create<ast::Vector>(nullptr, 3u), vec3<f32>(1_f, 2_f, 3_f));
+    auto* vec3_f16 = Call(create<ast::Vector>(nullptr, 3u), vec3<f16>(1_h, 2_h, 3_h));
     WrapInFunction(vec3_bool, vec3_i32, vec3_u32, vec3_f32, vec3_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2176,12 +2173,11 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromVec3) {
 TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromScalarAndVec2) {
     Enable(ast::Extension::kF16);
 
-    auto* vec3_bool =
-        Construct(create<ast::Vector>(nullptr, 3u), Expr(true), vec2<bool>(false, true));
-    auto* vec3_i32 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_i), vec2<i32>(2_i, 3_i));
-    auto* vec3_u32 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_u), vec2<u32>(2_u, 3_u));
-    auto* vec3_f32 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_f), vec2<f32>(2_f, 3_f));
-    auto* vec3_f16 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_h), vec2<f16>(2_h, 3_h));
+    auto* vec3_bool = Call(create<ast::Vector>(nullptr, 3u), Expr(true), vec2<bool>(false, true));
+    auto* vec3_i32 = Call(create<ast::Vector>(nullptr, 3u), Expr(1_i), vec2<i32>(2_i, 3_i));
+    auto* vec3_u32 = Call(create<ast::Vector>(nullptr, 3u), Expr(1_u), vec2<u32>(2_u, 3_u));
+    auto* vec3_f32 = Call(create<ast::Vector>(nullptr, 3u), Expr(1_f), vec2<f32>(2_f, 3_f));
+    auto* vec3_f16 = Call(create<ast::Vector>(nullptr, 3u), Expr(1_h), vec2<f16>(2_h, 3_h));
     WrapInFunction(vec3_bool, vec3_i32, vec3_u32, vec3_f32, vec3_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2211,16 +2207,16 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromScalarAndV
 TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromScalars) {
     Enable(ast::Extension::kF16);
 
-    auto* vec4_bool = Construct(create<ast::Vector>(nullptr, 4u), Expr(true), Expr(false),
-                                Expr(true), Expr(false));
+    auto* vec4_bool =
+        Call(create<ast::Vector>(nullptr, 4u), Expr(true), Expr(false), Expr(true), Expr(false));
     auto* vec4_i32 =
-        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_i), Expr(2_i), Expr(3_i), Expr(4_i));
+        Call(create<ast::Vector>(nullptr, 4u), Expr(1_i), Expr(2_i), Expr(3_i), Expr(4_i));
     auto* vec4_u32 =
-        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_u), Expr(2_u), Expr(3_u), Expr(4_u));
+        Call(create<ast::Vector>(nullptr, 4u), Expr(1_u), Expr(2_u), Expr(3_u), Expr(4_u));
     auto* vec4_f32 =
-        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_f), Expr(2_f), Expr(3_f), Expr(4_f));
+        Call(create<ast::Vector>(nullptr, 4u), Expr(1_f), Expr(2_f), Expr(3_f), Expr(4_f));
     auto* vec4_f16 =
-        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_h), Expr(2_h), Expr(3_h), Expr(4_h));
+        Call(create<ast::Vector>(nullptr, 4u), Expr(1_h), Expr(2_h), Expr(3_h), Expr(4_h));
     WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32, vec4_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2250,12 +2246,11 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromScalars) {
 TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromVec4) {
     Enable(ast::Extension::kF16);
 
-    auto* vec4_bool =
-        Construct(create<ast::Vector>(nullptr, 4u), vec4<bool>(true, false, true, false));
-    auto* vec4_i32 = Construct(create<ast::Vector>(nullptr, 4u), vec4<i32>(1_i, 2_i, 3_i, 4_i));
-    auto* vec4_u32 = Construct(create<ast::Vector>(nullptr, 4u), vec4<u32>(1_u, 2_u, 3_u, 4_u));
-    auto* vec4_f32 = Construct(create<ast::Vector>(nullptr, 4u), vec4<f32>(1_f, 2_f, 3_f, 4_f));
-    auto* vec4_f16 = Construct(create<ast::Vector>(nullptr, 4u), vec4<f16>(1_h, 2_h, 3_h, 4_h));
+    auto* vec4_bool = Call(create<ast::Vector>(nullptr, 4u), vec4<bool>(true, false, true, false));
+    auto* vec4_i32 = Call(create<ast::Vector>(nullptr, 4u), vec4<i32>(1_i, 2_i, 3_i, 4_i));
+    auto* vec4_u32 = Call(create<ast::Vector>(nullptr, 4u), vec4<u32>(1_u, 2_u, 3_u, 4_u));
+    auto* vec4_f32 = Call(create<ast::Vector>(nullptr, 4u), vec4<f32>(1_f, 2_f, 3_f, 4_f));
+    auto* vec4_f16 = Call(create<ast::Vector>(nullptr, 4u), vec4<f16>(1_h, 2_h, 3_h, 4_h));
     WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32, vec4_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2286,15 +2281,11 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromScalarAndV
     Enable(ast::Extension::kF16);
 
     auto* vec4_bool =
-        Construct(create<ast::Vector>(nullptr, 4u), Expr(true), vec3<bool>(false, true, false));
-    auto* vec4_i32 =
-        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_i), vec3<i32>(2_i, 3_i, 4_i));
-    auto* vec4_u32 =
-        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_u), vec3<u32>(2_u, 3_u, 4_u));
-    auto* vec4_f32 =
-        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_f), vec3<f32>(2_f, 3_f, 4_f));
-    auto* vec4_f16 =
-        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_h), vec3<f16>(2_h, 3_h, 4_h));
+        Call(create<ast::Vector>(nullptr, 4u), Expr(true), vec3<bool>(false, true, false));
+    auto* vec4_i32 = Call(create<ast::Vector>(nullptr, 4u), Expr(1_i), vec3<i32>(2_i, 3_i, 4_i));
+    auto* vec4_u32 = Call(create<ast::Vector>(nullptr, 4u), Expr(1_u), vec3<u32>(2_u, 3_u, 4_u));
+    auto* vec4_f32 = Call(create<ast::Vector>(nullptr, 4u), Expr(1_f), vec3<f32>(2_f, 3_f, 4_f));
+    auto* vec4_f16 = Call(create<ast::Vector>(nullptr, 4u), Expr(1_h), vec3<f16>(2_h, 3_h, 4_h));
     WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32, vec4_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2324,16 +2315,16 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromScalarAndV
 TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromVec2AndVec2) {
     Enable(ast::Extension::kF16);
 
-    auto* vec4_bool = Construct(create<ast::Vector>(nullptr, 4u), vec2<bool>(true, false),
-                                vec2<bool>(true, false));
+    auto* vec4_bool =
+        Call(create<ast::Vector>(nullptr, 4u), vec2<bool>(true, false), vec2<bool>(true, false));
     auto* vec4_i32 =
-        Construct(create<ast::Vector>(nullptr, 4u), vec2<i32>(1_i, 2_i), vec2<i32>(3_i, 4_i));
+        Call(create<ast::Vector>(nullptr, 4u), vec2<i32>(1_i, 2_i), vec2<i32>(3_i, 4_i));
     auto* vec4_u32 =
-        Construct(create<ast::Vector>(nullptr, 4u), vec2<u32>(1_u, 2_u), vec2<u32>(3_u, 4_u));
+        Call(create<ast::Vector>(nullptr, 4u), vec2<u32>(1_u, 2_u), vec2<u32>(3_u, 4_u));
     auto* vec4_f32 =
-        Construct(create<ast::Vector>(nullptr, 4u), vec2<f32>(1_f, 2_f), vec2<f32>(3_f, 4_f));
+        Call(create<ast::Vector>(nullptr, 4u), vec2<f32>(1_f, 2_f), vec2<f32>(3_f, 4_f));
     auto* vec4_f16 =
-        Construct(create<ast::Vector>(nullptr, 4u), vec2<f16>(1_h, 2_h), vec2<f16>(3_h, 4_h));
+        Call(create<ast::Vector>(nullptr, 4u), vec2<f16>(1_h, 2_h), vec2<f16>(3_h, 4_h));
     WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32, vec4_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2361,26 +2352,26 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromVec2AndVec
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, CannotInferVectorElementTypeWithoutArgs) {
-    WrapInFunction(Construct(Source{{12, 34}}, create<ast::Vector>(nullptr, 3u)));
+    WrapInFunction(Call(Source{{12, 34}}, create<ast::Vector>(nullptr, 3u)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for vec3()"));
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec2ElementTypeFromScalarsMismatch) {
-    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 2u),
-                             Expr(Source{{1, 2}}, 1_i),  //
-                             Expr(Source{{1, 3}}, 2_u)));
+    WrapInFunction(Call(Source{{1, 1}}, create<ast::Vector>(nullptr, 2u),
+                        Expr(Source{{1, 2}}, 1_i),  //
+                        Expr(Source{{1, 3}}, 2_u)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(), HasSubstr("1:1 error: no matching initializer for vec2(i32, u32)"));
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec3ElementTypeFromScalarsMismatch) {
-    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 3u),
-                             Expr(Source{{1, 2}}, 1_i),  //
-                             Expr(Source{{1, 3}}, 2_u),  //
-                             Expr(Source{{1, 4}}, 3_i)));
+    WrapInFunction(Call(Source{{1, 1}}, create<ast::Vector>(nullptr, 3u),
+                        Expr(Source{{1, 2}}, 1_i),  //
+                        Expr(Source{{1, 3}}, 2_u),  //
+                        Expr(Source{{1, 4}}, 3_i)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -2388,9 +2379,9 @@ TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec3ElementTypeFromScal
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec3ElementTypeFromScalarAndVec2Mismatch) {
-    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 3u),
-                             Expr(Source{{1, 2}}, 1_i),  //
-                             Construct(Source{{1, 3}}, ty.vec2<f32>(), 2_f, 3_f)));
+    WrapInFunction(Call(Source{{1, 1}}, create<ast::Vector>(nullptr, 3u),
+                        Expr(Source{{1, 2}}, 1_i),  //
+                        Call(Source{{1, 3}}, ty.vec2<f32>(), 2_f, 3_f)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -2398,11 +2389,11 @@ TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec3ElementTypeFromScal
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec4ElementTypeFromScalarsMismatch) {
-    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 4u),
-                             Expr(Source{{1, 2}}, 1_i),  //
-                             Expr(Source{{1, 3}}, 2_i),  //
-                             Expr(Source{{1, 4}}, 3_f),  //
-                             Expr(Source{{1, 5}}, 4_i)));
+    WrapInFunction(Call(Source{{1, 1}}, create<ast::Vector>(nullptr, 4u),
+                        Expr(Source{{1, 2}}, 1_i),  //
+                        Expr(Source{{1, 3}}, 2_i),  //
+                        Expr(Source{{1, 4}}, 3_f),  //
+                        Expr(Source{{1, 5}}, 4_i)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -2410,9 +2401,9 @@ TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec4ElementTypeFromScal
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec4ElementTypeFromScalarAndVec3Mismatch) {
-    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 4u),
-                             Expr(Source{{1, 2}}, 1_i),  //
-                             Construct(Source{{1, 3}}, ty.vec3<u32>(), 2_u, 3_u, 4_u)));
+    WrapInFunction(Call(Source{{1, 1}}, create<ast::Vector>(nullptr, 4u),
+                        Expr(Source{{1, 2}}, 1_i),  //
+                        Call(Source{{1, 3}}, ty.vec3<u32>(), 2_u, 3_u, 4_u)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -2420,9 +2411,9 @@ TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec4ElementTypeFromScal
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec4ElementTypeFromVec2AndVec2Mismatch) {
-    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 4u),
-                             Construct(Source{{1, 2}}, ty.vec2<i32>(), 3_i, 4_i),  //
-                             Construct(Source{{1, 3}}, ty.vec2<u32>(), 3_u, 4_u)));
+    WrapInFunction(Call(Source{{1, 1}}, create<ast::Vector>(nullptr, 4u),
+                        Call(Source{{1, 2}}, ty.vec2<i32>(), 3_i, 4_i),  //
+                        Call(Source{{1, 3}}, ty.vec2<u32>(), 3_u, 4_u)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -2478,7 +2469,7 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooFewArguments) {
     utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns - 1; i++) {
         auto* vec_type = param.create_column_ast_type(*this);
-        args.Push(Construct(vec_type));
+        args.Push(Call(vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2486,7 +2477,7 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooFewArguments) {
     }
 
     auto* matrix_type = param.create_mat_ast_type(*this);
-    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
+    auto* tc = Call(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2506,7 +2497,7 @@ TEST_P(MatrixInitializerTest, ElementInitializer_Error_TooFewArguments) {
     std::stringstream args_tys;
     utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns * param.rows - 1; i++) {
-        args.Push(Construct(param.create_element_ast_type(*this)));
+        args.Push(Call(param.create_element_ast_type(*this)));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2514,7 +2505,7 @@ TEST_P(MatrixInitializerTest, ElementInitializer_Error_TooFewArguments) {
     }
 
     auto* matrix_type = param.create_mat_ast_type(*this);
-    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
+    auto* tc = Call(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2535,7 +2526,7 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooManyArguments) {
     utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns + 1; i++) {
         auto* vec_type = param.create_column_ast_type(*this);
-        args.Push(Construct(vec_type));
+        args.Push(Call(vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2543,7 +2534,7 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooManyArguments) {
     }
 
     auto* matrix_type = param.create_mat_ast_type(*this);
-    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
+    auto* tc = Call(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2563,7 +2554,7 @@ TEST_P(MatrixInitializerTest, ElementInitializer_Error_TooManyArguments) {
     std::stringstream args_tys;
     utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns * param.rows + 1; i++) {
-        args.Push(Construct(param.create_element_ast_type(*this)));
+        args.Push(Call(param.create_element_ast_type(*this)));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2571,7 +2562,7 @@ TEST_P(MatrixInitializerTest, ElementInitializer_Error_TooManyArguments) {
     }
 
     auto* matrix_type = param.create_mat_ast_type(*this);
-    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
+    auto* tc = Call(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2591,7 +2582,7 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_InvalidArgumentType) {
     utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec<u32>(param.rows);
-        args.Push(Construct(vec_type));
+        args.Push(Call(vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2599,7 +2590,7 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_InvalidArgumentType) {
     }
 
     auto* matrix_type = param.create_mat_ast_type(*this);
-    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
+    auto* tc = Call(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2626,7 +2617,7 @@ TEST_P(MatrixInitializerTest, ElementInitializer_Error_InvalidArgumentType) {
     }
 
     auto* matrix_type = param.create_mat_ast_type(*this);
-    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
+    auto* tc = Call(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2652,7 +2643,7 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooFewRowsInVectorArgument
     utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* valid_vec_type = param.create_column_ast_type(*this);
-        args.Push(Construct(valid_vec_type));
+        args.Push(Call(valid_vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2660,11 +2651,11 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooFewRowsInVectorArgument
     }
     const size_t kInvalidLoc = 2 * (param.columns - 1);
     auto* invalid_vec_type = ty.vec(param.create_element_ast_type(*this), param.rows - 1);
-    args.Push(Construct(Source{{12, kInvalidLoc}}, invalid_vec_type));
+    args.Push(Call(Source{{12, kInvalidLoc}}, invalid_vec_type));
     args_tys << ", vec" << (param.rows - 1) << "<" + element_type_name + ">";
 
     auto* matrix_type = param.create_mat_ast_type(*this);
-    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
+    auto* tc = Call(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2690,18 +2681,18 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooManyRowsInVectorArgumen
     utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* valid_vec_type = param.create_column_ast_type(*this);
-        args.Push(Construct(valid_vec_type));
+        args.Push(Call(valid_vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
         args_tys << "vec" << param.rows << "<" + element_type_name + ">";
     }
     auto* invalid_vec_type = ty.vec(param.create_element_ast_type(*this), param.rows + 1);
-    args.Push(Construct(invalid_vec_type));
+    args.Push(Call(invalid_vec_type));
     args_tys << ", vec" << (param.rows + 1) << "<" + element_type_name + ">";
 
     auto* matrix_type = param.create_mat_ast_type(*this);
-    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
+    auto* tc = Call(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2718,7 +2709,7 @@ TEST_P(MatrixInitializerTest, ZeroValue_Success) {
     Enable(ast::Extension::kF16);
 
     auto* matrix_type = param.create_mat_ast_type(*this);
-    auto* tc = Construct(Source{{12, 40}}, matrix_type);
+    auto* tc = Call(Source{{12, 40}}, matrix_type);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2735,11 +2726,11 @@ TEST_P(MatrixInitializerTest, WithColumns_Success) {
     utils::Vector<const ast::Expression*, 4> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = param.create_column_ast_type(*this);
-        args.Push(Construct(vec_type));
+        args.Push(Call(vec_type));
     }
 
     auto* matrix_type = param.create_mat_ast_type(*this);
-    auto* tc = Construct(matrix_type, std::move(args));
+    auto* tc = Call(matrix_type, std::move(args));
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2755,11 +2746,11 @@ TEST_P(MatrixInitializerTest, WithElements_Success) {
 
     utils::Vector<const ast::Expression*, 16> args;
     for (uint32_t i = 0; i < param.columns * param.rows; i++) {
-        args.Push(Construct(param.create_element_ast_type(*this)));
+        args.Push(Call(param.create_element_ast_type(*this)));
     }
 
     auto* matrix_type = param.create_mat_ast_type(*this);
-    auto* tc = Construct(matrix_type, std::move(args));
+    auto* tc = Call(matrix_type, std::move(args));
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2779,7 +2770,7 @@ TEST_P(MatrixInitializerTest, ElementTypeAlias_Error) {
     utils::Vector<const ast::Expression*, 4> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec(ty.u32(), param.rows);
-        args.Push(Construct(vec_type));
+        args.Push(Call(vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2787,7 +2778,7 @@ TEST_P(MatrixInitializerTest, ElementTypeAlias_Error) {
     }
 
     auto* matrix_type = ty.mat(ty.Of(elem_type_alias), param.columns, param.rows);
-    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
+    auto* tc = Call(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2808,11 +2799,11 @@ TEST_P(MatrixInitializerTest, ElementTypeAlias_Success) {
     utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = param.create_column_ast_type(*this);
-        args.Push(Construct(vec_type));
+        args.Push(Call(vec_type));
     }
 
     auto* matrix_type = ty.mat(ty.Of(elem_type_alias), param.columns, param.rows);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Call(Source{}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2820,7 +2811,7 @@ TEST_P(MatrixInitializerTest, ElementTypeAlias_Success) {
 
 TEST_F(ResolverTypeInitializerValidationTest, MatrixInitializer_ArgumentTypeAlias_Error) {
     auto* alias = Alias("VectorUnsigned2", ty.vec2<u32>());
-    auto* tc = Construct(Source{{12, 34}}, ty.mat2x2<f32>(), Construct(ty.Of(alias)), vec2<f32>());
+    auto* tc = Call(Source{{12, 34}}, ty.mat2x2<f32>(), Call(ty.Of(alias)), vec2<f32>());
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2840,10 +2831,10 @@ TEST_P(MatrixInitializerTest, ArgumentTypeAlias_Success) {
 
     utils::Vector<const ast::Expression*, 4> args;
     for (uint32_t i = 0; i < param.columns; i++) {
-        args.Push(Construct(ty.Of(vec_alias)));
+        args.Push(Call(ty.Of(vec_alias)));
     }
 
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Call(Source{}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2861,14 +2852,14 @@ TEST_P(MatrixInitializerTest, ArgumentElementTypeAlias_Error) {
     utils::Vector<const ast::Expression*, 4> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec(ty.Of(u32_type_alias), param.rows);
-        args.Push(Construct(vec_type));
+        args.Push(Call(vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
         args_tys << "vec" << param.rows << "<u32>";
     }
 
-    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
+    auto* tc = Call(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2886,11 +2877,11 @@ TEST_P(MatrixInitializerTest, ArgumentElementTypeAlias_Success) {
     utils::Vector<const ast::Expression*, 4> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec(ty.Of(elem_type_alias), param.rows);
-        args.Push(Construct(vec_type));
+        args.Push(Call(vec_type));
     }
 
     auto* matrix_type = param.create_mat_ast_type(*this);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Call(Source{}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2903,11 +2894,11 @@ TEST_P(MatrixInitializerTest, InferElementTypeFromVectors) {
 
     utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
-        args.Push(Construct(param.create_column_ast_type(*this)));
+        args.Push(Call(param.create_column_ast_type(*this)));
     }
 
     auto* matrix_type = create<ast::Matrix>(nullptr, param.rows, param.columns);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Call(Source{}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2924,7 +2915,7 @@ TEST_P(MatrixInitializerTest, InferElementTypeFromScalars) {
     }
 
     auto* matrix_type = create<ast::Matrix>(nullptr, param.rows, param.columns);
-    WrapInFunction(Construct(Source{{12, 34}}, matrix_type, std::move(args)));
+    WrapInFunction(Call(Source{{12, 34}}, matrix_type, std::move(args)));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -2945,16 +2936,16 @@ TEST_P(MatrixInitializerTest, CannotInferElementTypeFromVectors_Mismatch) {
         }
         if (i == 1) {
             // Odd one out
-            args.Push(Construct(ty.vec<i32>(param.rows)));
+            args.Push(Call(ty.vec<i32>(param.rows)));
             err << "vec" << param.rows << "<i32>";
         } else {
-            args.Push(Construct(param.create_column_ast_type(*this)));
+            args.Push(Call(param.create_column_ast_type(*this)));
             err << "vec" << param.rows << "<" + param.get_element_type_name() + ">";
         }
     }
 
     auto* matrix_type = create<ast::Matrix>(nullptr, param.rows, param.columns);
-    WrapInFunction(Construct(Source{{12, 34}}, matrix_type, std::move(args)));
+    WrapInFunction(Call(Source{{12, 34}}, matrix_type, std::move(args)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(), HasSubstr(err.str()));
@@ -2986,7 +2977,7 @@ TEST_P(MatrixInitializerTest, CannotInferElementTypeFromScalars_Mismatch) {
     err << ")";
 
     auto* matrix_type = create<ast::Matrix>(nullptr, param.rows, param.columns);
-    WrapInFunction(Construct(Source{{12, 34}}, matrix_type, std::move(args)));
+    WrapInFunction(Call(Source{{12, 34}}, matrix_type, std::move(args)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(), HasSubstr(err.str()));
@@ -3066,7 +3057,7 @@ TEST_P(StructInitializerInputsTest, TooFew) {
         }
     }
     auto* s = Structure("s", members);
-    auto* tc = Construct(Source{{12, 34}}, ty.Of(s), values);
+    auto* tc = Call(Source{{12, 34}}, ty.Of(s), values);
     WrapInFunction(tc);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: struct initializer has too few inputs: expected " +
@@ -3091,7 +3082,7 @@ TEST_P(StructInitializerInputsTest, TooMany) {
         values.Push(ctor_value_expr);
     }
     auto* s = Structure("s", members);
-    auto* tc = Construct(Source{{12, 34}}, ty.Of(s), values);
+    auto* tc = Call(Source{{12, 34}}, ty.Of(s), values);
     WrapInFunction(tc);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: struct initializer has too many inputs: expected " +
@@ -3130,7 +3121,7 @@ TEST_P(StructInitializerTypeTest, AllTypes) {
         values.Push(ctor_value_expr);
     }
     auto* s = Structure("s", members);
-    auto* tc = Construct(ty.Of(s), values);
+    auto* tc = Call(ty.Of(s), values);
     WrapInFunction(tc);
 
     std::string found = FriendlyName(ctor_params.ast(*this));
@@ -3157,7 +3148,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Struct_Nested) {
     auto* m2 = Member("m2", ty.i32());
     auto* s = Structure("s", utils::Vector{m0, m1, m2});
 
-    auto* tc = Construct(Source{{12, 34}}, ty.Of(s), 1_i, 1_i, 1_i);
+    auto* tc = Call(Source{{12, 34}}, ty.Of(s), 1_i, 1_i, 1_i);
     WrapInFunction(tc);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -3168,7 +3159,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Struct_Nested) {
 TEST_F(ResolverTypeInitializerValidationTest, Struct) {
     auto* m = Member("m", ty.i32());
     auto* s = Structure("MyInputs", utils::Vector{m});
-    auto* tc = Construct(Source{{12, 34}}, ty.Of(s));
+    auto* tc = Call(Source{{12, 34}}, ty.Of(s));
     WrapInFunction(tc);
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -3180,21 +3171,20 @@ TEST_F(ResolverTypeInitializerValidationTest, Struct_Empty) {
                                    Member("c", ty.vec3<i32>()),
                                });
 
-    WrapInFunction(Construct(ty.Of(str)));
+    WrapInFunction(Call(ty.Of(str)));
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 }  // namespace StructInitializer
 
 TEST_F(ResolverTypeInitializerValidationTest, NonConstructibleType_Atomic) {
-    WrapInFunction(Assign(Phony(), Construct(Source{{12, 34}}, ty.atomic(ty.i32()))));
+    WrapInFunction(Assign(Phony(), Call(Source{{12, 34}}, ty.atomic(ty.i32()))));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: type is not constructible");
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, NonConstructibleType_AtomicArray) {
-    WrapInFunction(
-        Assign(Phony(), Construct(Source{{12, 34}}, ty.array(ty.atomic(ty.i32()), 4_i))));
+    WrapInFunction(Assign(Phony(), Call(Source{{12, 34}}, ty.array(ty.atomic(ty.i32()), 4_i))));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array initializer has non-constructible element type");
@@ -3202,7 +3192,7 @@ TEST_F(ResolverTypeInitializerValidationTest, NonConstructibleType_AtomicArray) 
 
 TEST_F(ResolverTypeInitializerValidationTest, NonConstructibleType_AtomicStructMember) {
     auto* str = Structure("S", utils::Vector{Member("a", ty.atomic(ty.i32()))});
-    WrapInFunction(Assign(Phony(), Construct(Source{{12, 34}}, ty.Of(str))));
+    WrapInFunction(Assign(Phony(), Call(Source{{12, 34}}, ty.Of(str))));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: struct initializer has non-constructible type");
@@ -3210,7 +3200,7 @@ TEST_F(ResolverTypeInitializerValidationTest, NonConstructibleType_AtomicStructM
 
 TEST_F(ResolverTypeInitializerValidationTest, NonConstructibleType_Sampler) {
     WrapInFunction(
-        Assign(Phony(), Construct(Source{{12, 34}}, ty.sampler(type::SamplerKind::kSampler))));
+        Assign(Phony(), Call(Source{{12, 34}}, ty.sampler(type::SamplerKind::kSampler))));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: type is not constructible");
@@ -3224,7 +3214,7 @@ TEST_F(ResolverTypeInitializerValidationTest, TypeInitializerAsStatement) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, TypeConversionAsStatement) {
-    WrapInFunction(CallStmt(Construct(Source{{12, 34}}, ty.f32(), 1_i)));
+    WrapInFunction(CallStmt(Call(Source{{12, 34}}, ty.f32(), 1_i)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: type conversion evaluated but not used");

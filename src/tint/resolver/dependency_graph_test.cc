@@ -665,7 +665,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeConstructed) {
     // type T = i32;
 
     Func("F", utils::Empty, ty.void_(),
-         utils::Vector{Block(Ignore(Construct(ty(Source{{12, 34}}, "T"))))});
+         utils::Vector{Block(Ignore(Call(ty(Source{{12, 34}}, "T"))))});
     Alias(Source{{56, 78}}, "T", ty.i32());
 
     Build();
@@ -1333,7 +1333,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, chromium_1273451) {
     Structure("B", utils::Vector{Member("b", ty.i32())});
     Func("f", utils::Vector{Param("a", ty("A"))}, ty("B"),
          utils::Vector{
-             Return(Construct(ty("B"))),
+             Return(Call(ty("B"))),
          });
     Build();
 }

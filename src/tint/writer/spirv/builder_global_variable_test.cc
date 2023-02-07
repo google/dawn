@@ -150,7 +150,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_AInt_Initializer) {
     // const c = vec3(1, 2, 3);
     // var v = c;
 
-    auto* c = GlobalConst("c", Construct(ty.vec3(nullptr), 1_a, 2_a, 3_a));
+    auto* c = GlobalConst("c", Call(ty.vec3(nullptr), 1_a, 2_a, 3_a));
     GlobalVar("v", type::AddressSpace::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -179,7 +179,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_AFloat_Initializer) {
     // const c = vec3(1.0, 2.0, 3.0);
     // var v = c;
 
-    auto* c = GlobalConst("c", Construct(ty.vec3(nullptr), 1._a, 2._a, 3._a));
+    auto* c = GlobalConst("c", Call(ty.vec3(nullptr), 1._a, 2._a, 3._a));
     GlobalVar("v", type::AddressSpace::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();

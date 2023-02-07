@@ -574,7 +574,7 @@ struct DirectVariableAccess::State {
                      ->Type()
                      ->UnwrapRef()
                      ->IsAnyOf<type::U32, type::AbstractInt>()) {
-                expr = b.Construct(b.ty.u32(), expr);
+                expr = b.Call<u32>(expr);
             }
         }
 
@@ -937,7 +937,7 @@ struct DirectVariableAccess::State {
                         dyn_idx_args.Push(BuildDynamicIndex(dyn_idx, /* cast_to_u32 */ true));
                     }
                     // Construct the dynamic index array, and push as an argument.
-                    new_args.Push(b.Construct(dyn_idx_arr_ty, std::move(dyn_idx_args)));
+                    new_args.Push(b.Call(dyn_idx_arr_ty, std::move(dyn_idx_args)));
                 }
             }
 

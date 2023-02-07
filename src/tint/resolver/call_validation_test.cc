@@ -193,7 +193,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_AddressOfLetMember) {
     Func("foo", utils::Vector{param}, ty.void_(), utils::Empty);
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
-             Decl(Let("v", ty.Of(S), Construct(ty.Of(S)))),
+             Decl(Let("v", ty.Of(S), Call(ty.Of(S)))),
              CallStmt(Call("foo", AddressOf(MemberAccessor(Source{{12, 34}}, "v", "m")))),
          });
 

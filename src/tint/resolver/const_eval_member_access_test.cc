@@ -31,9 +31,8 @@ TEST_F(ResolverConstEvalTest, StructMemberAccess) {
                            Member("o1", ty("Inner")),
                            Member("o2", ty("Inner")),
                        });
-    auto* outer_expr =
-        Construct(ty("Outer"),  //
-                  Construct(ty("Inner"), 1_i, 2_u, 3_f, true), Construct(ty("Inner")));
+    auto* outer_expr = Call(ty("Outer"),  //
+                            Call(ty("Inner"), 1_i, 2_u, 3_f, true), Call(ty("Inner")));
     auto* o1_expr = MemberAccessor(outer_expr, "o1");
     auto* i2_expr = MemberAccessor(o1_expr, "i2");
     WrapInFunction(i2_expr);
@@ -72,9 +71,9 @@ TEST_F(ResolverConstEvalTest, StructMemberAccess) {
 }
 
 TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
-    auto* c = Const("a", Construct(ty.mat(nullptr, 2, 2),  //
-                                   Construct(ty.vec(nullptr, 2), Expr(1_a), Expr(2_a)),
-                                   Construct(ty.vec(nullptr, 2), Expr(3_a), Expr(4_a))));
+    auto* c = Const("a", Call(ty.mat(nullptr, 2, 2),  //
+                              Call(ty.vec(nullptr, 2), Expr(1_a), Expr(2_a)),
+                              Call(ty.vec(nullptr, 2), Expr(3_a), Expr(4_a))));
     WrapInFunction(c);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -98,10 +97,9 @@ TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
 }
 
 TEST_F(ResolverConstEvalTest, MatrixMemberAccess_AFloat) {
-    auto* c =
-        Const("a", Construct(ty.mat(nullptr, 2, 3),  //
-                             Construct(ty.vec(nullptr, 3), Expr(1.0_a), Expr(2.0_a), Expr(3.0_a)),
-                             Construct(ty.vec(nullptr, 3), Expr(4.0_a), Expr(5.0_a), Expr(6.0_a))));
+    auto* c = Const("a", Call(ty.mat(nullptr, 2, 3),  //
+                              Call(ty.vec(nullptr, 3), Expr(1.0_a), Expr(2.0_a), Expr(3.0_a)),
+                              Call(ty.vec(nullptr, 3), Expr(4.0_a), Expr(5.0_a), Expr(6.0_a))));
 
     auto* col_0 = Const("col_0", IndexAccessor("a", Expr(0_i)));
     auto* col_1 = Const("col_1", IndexAccessor("a", Expr(1_i)));
@@ -176,10 +174,9 @@ TEST_F(ResolverConstEvalTest, MatrixMemberAccess_AFloat) {
 }
 
 TEST_F(ResolverConstEvalTest, MatrixMemberAccess_f32) {
-    auto* c =
-        Const("a", Construct(ty.mat(nullptr, 2, 3),  //
-                             Construct(ty.vec(nullptr, 3), Expr(1.0_f), Expr(2.0_f), Expr(3.0_f)),
-                             Construct(ty.vec(nullptr, 3), Expr(4.0_f), Expr(5.0_f), Expr(6.0_f))));
+    auto* c = Const("a", Call(ty.mat(nullptr, 2, 3),  //
+                              Call(ty.vec(nullptr, 3), Expr(1.0_f), Expr(2.0_f), Expr(3.0_f)),
+                              Call(ty.vec(nullptr, 3), Expr(4.0_f), Expr(5.0_f), Expr(6.0_f))));
 
     auto* col_0 = Const("col_0", IndexAccessor("a", Expr(0_i)));
     auto* col_1 = Const("col_1", IndexAccessor("a", Expr(1_i)));

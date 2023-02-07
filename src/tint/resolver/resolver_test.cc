@@ -644,7 +644,7 @@ TEST_F(ResolverTest, Expr_Call_Builtin) {
 TEST_F(ResolverTest, Expr_Cast) {
     GlobalVar("name", ty.f32(), type::AddressSpace::kPrivate);
 
-    auto* cast = Construct(ty.f32(), "name");
+    auto* cast = Call<f32>("name");
     WrapInFunction(cast);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -715,7 +715,7 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
 }
 
 TEST_F(ResolverTest, Expr_Identifier_GlobalConst) {
-    auto* my_var = GlobalConst("my_var", ty.f32(), Construct(ty.f32()));
+    auto* my_var = GlobalConst("my_var", ty.f32(), Call<f32>());
 
     auto* ident = Expr("my_var");
     WrapInFunction(ident);
@@ -731,7 +731,7 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalConst) {
 
 TEST_F(ResolverTest, Expr_Identifier_FunctionVariable_Const) {
     auto* my_var_a = Expr("my_var");
-    auto* var = Let("my_var", ty.f32(), Construct(ty.f32()));
+    auto* var = Let("my_var", ty.f32(), Call<f32>());
     auto* decl = Decl(Var("b", ty.f32(), my_var_a));
 
     Func("my_func", utils::Empty, ty.void_(),
@@ -755,7 +755,7 @@ TEST_F(ResolverTest, IndexAccessor_Dynamic_Ref_F32) {
     // var idx : f32 = f32();
     // var f : f32 = a[idx];
     auto* a = Var("a", ty.array<bool, 10>(), array<bool, 10>());
-    auto* idx = Var("idx", ty.f32(), Construct(ty.f32()));
+    auto* idx = Var("idx", ty.f32(), Call<f32>());
     auto* f = Var("f", ty.f32(), IndexAccessor("a", Expr(Source{{12, 34}}, idx)));
     Func("my_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -1034,7 +1034,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
 TEST_F(ResolverTest, Function_NotRegisterFunctionConstant) {
     auto* func = Func("my_func", utils::Empty, ty.void_(),
                       utils::Vector{
-                          Decl(Let("var", ty.f32(), Construct(ty.f32()))),
+                          Decl(Let("var", ty.f32(), Call<f32>())),
                       });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1145,10 +1145,8 @@ TEST_F(ResolverTest, Function_WorkgroupSize_ViaConst_NestedInitializer) {
     // const height = i32(i32(i32(4i)));
     // @compute @workgroup_size(width, height)
     // fn main() {}
-    GlobalConst("width", ty.i32(),
-                Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 8_i))));
-    GlobalConst("height", ty.i32(),
-                Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 4_i))));
+    GlobalConst("width", ty.i32(), Call<i32>(Call<i32>(Call<i32>(8_i))));
+    GlobalConst("height", ty.i32(), Call<i32>(Call<i32>(Call<i32>(4_i))));
     auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
                       utils::Vector{
                           Stage(ast::PipelineStage::kCompute),
@@ -1896,7 +1894,7 @@ TEST_F(ResolverTest, AddressSpace_SetForTexture) {
 }
 
 TEST_F(ResolverTest, AddressSpace_DoesNotSetOnConst) {
-    auto* var = Let("var", ty.i32(), Construct(ty.i32()));
+    auto* var = Let("var", ty.i32(), Call<i32>());
     auto* stmt = Decl(var);
     Func("func", utils::Empty, ty.void_(), utils::Vector{stmt});
 

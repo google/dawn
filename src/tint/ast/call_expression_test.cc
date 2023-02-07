@@ -55,7 +55,7 @@ TEST_F(CallExpressionTest, CreationType) {
         Expr("param2"),
     };
 
-    auto* stmt = Construct(type, params);
+    auto* stmt = Call(type, params);
     EXPECT_EQ(stmt->target.name, nullptr);
     EXPECT_EQ(stmt->target.type, type);
 
@@ -67,7 +67,7 @@ TEST_F(CallExpressionTest, CreationType) {
 
 TEST_F(CallExpressionTest, CreationType_WithSource) {
     auto* type = ty.f32();
-    auto* stmt = Construct(Source{{20, 2}}, type);
+    auto* stmt = Call(Source{{20, 2}}, type);
     EXPECT_EQ(stmt->target.name, nullptr);
     EXPECT_EQ(stmt->target.type, type);
 
@@ -95,7 +95,7 @@ TEST_F(CallExpressionTest, Assert_Null_Type) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.Construct(static_cast<Type*>(nullptr));
+            b.Call(static_cast<Type*>(nullptr));
         },
         "internal compiler error");
 }
@@ -128,7 +128,7 @@ TEST_F(CallExpressionTest, Assert_DifferentProgramID_Type) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.Construct(b2.ty.f32());
+            b1.Call(b2.ty.f32());
         },
         "internal compiler error");
 }

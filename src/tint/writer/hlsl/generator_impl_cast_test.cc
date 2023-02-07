@@ -22,7 +22,7 @@ namespace {
 using HlslGeneratorImplTest_Cast = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
-    auto* cast = Construct<f32>(1_i);
+    auto* cast = Call<f32>(1_i);
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();

@@ -22,7 +22,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Scalar) {
-    auto* cast = Construct<f32>(1_i);
+    auto* cast = Call<f32>(1_i);
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();
@@ -44,7 +44,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Vector) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_IntMin) {
-    auto* cast = Construct<u32>(i32(std::numeric_limits<int32_t>::min()));
+    auto* cast = Call<u32>(i32(std::numeric_limits<int32_t>::min()));
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();

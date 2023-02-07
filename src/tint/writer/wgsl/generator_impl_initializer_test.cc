@@ -74,7 +74,7 @@ TEST_F(WgslGeneratorImplTest, EmitInitializer_F16) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_F32) {
-    WrapInFunction(Construct<f32>(Expr(-1.2e-5_f)));
+    WrapInFunction(Call<f32>(Expr(-1.2e-5_f)));
 
     GeneratorImpl& gen = Build();
 
@@ -85,7 +85,7 @@ TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_F32) {
 TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_F16) {
     Enable(ast::Extension::kF16);
 
-    WrapInFunction(Construct<f16>(Expr(-1.2e-5_h)));
+    WrapInFunction(Call<f16>(Expr(-1.2e-5_h)));
 
     GeneratorImpl& gen = Build();
 
@@ -94,7 +94,7 @@ TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_F16) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_Bool) {
-    WrapInFunction(Construct<bool>(true));
+    WrapInFunction(Call<bool>(true));
 
     GeneratorImpl& gen = Build();
 
@@ -103,7 +103,7 @@ TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_Bool) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_Int) {
-    WrapInFunction(Construct<i32>(-12345_i));
+    WrapInFunction(Call<i32>(-12345_i));
 
     GeneratorImpl& gen = Build();
 
@@ -112,7 +112,7 @@ TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_Int) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_Uint) {
-    WrapInFunction(Construct<u32>(12345_u));
+    WrapInFunction(Call<u32>(12345_u));
 
     GeneratorImpl& gen = Build();
 
@@ -163,8 +163,8 @@ TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_Mat_F16) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_Array) {
-    WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3_u), vec3<f32>(1_f, 2_f, 3_f),
-                             vec3<f32>(4_f, 5_f, 6_f), vec3<f32>(7_f, 8_f, 9_f)));
+    WrapInFunction(Call(ty.array(ty.vec3<f32>(), 3_u), vec3<f32>(1_f, 2_f, 3_f),
+                        vec3<f32>(4_f, 5_f, 6_f), vec3<f32>(7_f, 8_f, 9_f)));
 
     GeneratorImpl& gen = Build();
 
@@ -175,8 +175,8 @@ TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_Array) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_ImplicitArray) {
-    WrapInFunction(Construct(ty.array(nullptr, nullptr), vec3<f32>(1_f, 2_f, 3_f),
-                             vec3<f32>(4_f, 5_f, 6_f), vec3<f32>(7_f, 8_f, 9_f)));
+    WrapInFunction(Call(ty.array(nullptr, nullptr), vec3<f32>(1_f, 2_f, 3_f),
+                        vec3<f32>(4_f, 5_f, 6_f), vec3<f32>(7_f, 8_f, 9_f)));
 
     GeneratorImpl& gen = Build();
 

@@ -1267,8 +1267,7 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeAttribute) {
 
 TEST_F(ResolverTest, Expr_Initializer_Cast_Pointer) {
     auto* vf = Var("vf", ty.f32());
-    auto* c =
-        Construct(Source{{12, 34}}, ty.pointer<i32>(type::AddressSpace::kFunction), ExprList(vf));
+    auto* c = Call(Source{{12, 34}}, ty.pointer<i32>(type::AddressSpace::kFunction), ExprList(vf));
     auto* ip = Let("ip", ty.pointer<i32>(type::AddressSpace::kFunction), c);
     WrapInFunction(Decl(vf), Decl(ip));
 

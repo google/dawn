@@ -1860,8 +1860,8 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
         auto y = MakeConstantExpression(workgroup_size_builtin_.y_id);
         auto z = MakeConstantExpression(workgroup_size_builtin_.z_id);
         auto* ast_type = ty_.Vector(x.type, 3);
-        return {ast_type, builder_.Construct(Source{}, ast_type->Build(builder_),
-                                             utils::Vector{x.expr, y.expr, z.expr})};
+        return {ast_type, builder_.Call(Source{}, ast_type->Build(builder_),
+                                        utils::Vector{x.expr, y.expr, z.expr})};
     } else if (id == workgroup_size_builtin_.x_id) {
         return MakeConstantExpressionForScalarSpirvConstant(
             Source{}, ConvertType(workgroup_size_builtin_.component_type_id),
@@ -1930,9 +1930,8 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
                 // We've already emitted a diagnostic.
                 return {};
             }
-            return {original_ast_type,
-                    builder_.Construct(source, original_ast_type->Build(builder_),
-                                       std::move(ast_components))};
+            return {original_ast_type, builder_.Call(source, original_ast_type->Build(builder_),
+                                                     std::move(ast_components))};
         }
         default:
             break;
@@ -1957,11 +1956,10 @@ TypedExpression ParserImpl::MakeConstantExpressionForScalarSpirvConstant(
             const auto value = spirv_const->GetS32();
             if (value == std::numeric_limits<int32_t>::min()) {
                 // Avoid overflowing i-suffixed literal.
-                return {ty_.I32(),
-                        builder_.Construct(
-                            source, builder_.ty.i32(),
-                            create<ast::IntLiteralExpression>(
-                                source, value, ast::IntLiteralExpression::Suffix::kNone))};
+                return {ty_.I32(), builder_.Call(source, builder_.ty.i32(),
+                                                 create<ast::IntLiteralExpression>(
+                                                     source, value,
+                                                     ast::IntLiteralExpression::Suffix::kNone))};
             } else {
                 return {ty_.I32(),
                         create<ast::IntLiteralExpression>(source, static_cast<int64_t>(value),
@@ -2024,17 +2022,17 @@ const ast::Expression* ParserImpl::MakeNullValue(const Type* type) {
             return create<ast::FloatLiteralExpression>(Source{}, 0,
                                                        ast::FloatLiteralExpression::Suffix::kF);
         },
-        [&](const Vector*) { return builder_.Construct(Source{}, type->Build(builder_)); },
-        [&](const Matrix*) { return builder_.Construct(Source{}, type->Build(builder_)); },
-        [&](const Array*) { return builder_.Construct(Source{}, type->Build(builder_)); },
+        [&](const Vector*) { return builder_.Call(Source{}, type->Build(builder_)); },
+        [&](const Matrix*) { return builder_.Call(Source{}, type->Build(builder_)); },
+        [&](const Array*) { return builder_.Call(Source{}, type->Build(builder_)); },
         [&](const Bool*) { return create<ast::BoolLiteralExpression>(Source{}, false); },
         [&](const Struct* struct_ty) {
             ExpressionList ast_components;
             for (auto* member : struct_ty->members) {
                 ast_components.Push(MakeNullValue(member));
             }
-            return builder_.Construct(Source{}, original_type->Build(builder_),
-                                      std::move(ast_components));
+            return builder_.Call(Source{}, original_type->Build(builder_),
+                                 std::move(ast_components));
         },
         [&](Default) {
             Fail() << "can't make null value for type: " << type->TypeInfo().name;

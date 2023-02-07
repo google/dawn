@@ -106,9 +106,9 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
                 auto* src_matrix_expr = src_expression_builder();
                 auto* src_column_expr = b.IndexAccessor(src_matrix_expr, b.Expr(tint::AInt(c)));
                 columns.Push(
-                    b.Construct(CreateASTTypeFor(ctx, dst_type->ColumnType()), src_column_expr));
+                    b.Call(CreateASTTypeFor(ctx, dst_type->ColumnType()), src_column_expr));
             }
-            return b.Construct(CreateASTTypeFor(ctx, dst_type), columns);
+            return b.Call(CreateASTTypeFor(ctx, dst_type), columns);
         };
 
         // Replace the matrix conversion to column vector conversions and a matrix construction.

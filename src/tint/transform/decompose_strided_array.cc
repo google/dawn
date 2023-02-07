@@ -150,7 +150,7 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
                             args = ctx.Clone(expr->args);
                         }
 
-                        return target.type ? b.Construct(target.type, std::move(args))
+                        return target.type ? b.Call(target.type, std::move(args))
                                            : b.Call(target.name, std::move(args));
                     }
                 }
