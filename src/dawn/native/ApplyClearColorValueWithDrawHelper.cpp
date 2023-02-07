@@ -167,7 +167,7 @@ ResultOrError<RenderPipelineBase*> GetOrCreateApplyClearValueWithDrawPipeline(
 }
 
 Color GetClearColorValue(const RenderPassColorAttachment& attachment) {
-    return HasDeprecatedColor(attachment) ? attachment.clearColor : attachment.clearValue;
+    return attachment.clearValue;
 }
 
 ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(

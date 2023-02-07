@@ -107,7 +107,6 @@ void frame() {
         colorAttachment.view = backbufferView;
         colorAttachment.resolveTarget = nullptr;
         colorAttachment.clearValue = {0.0f, 0.0f, 0.0f, 0.0f};
-        colorAttachment.clearColor = {NAN, NAN, NAN, NAN};
         colorAttachment.loadOp = WGPULoadOp_Clear;
         colorAttachment.storeOp = WGPUStoreOp_Store;
         renderpassInfo.colorAttachmentCount = 1;

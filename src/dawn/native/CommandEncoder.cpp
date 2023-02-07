@@ -239,16 +239,7 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
     DAWN_INVALID_IF(colorAttachment.loadOp == wgpu::LoadOp::Undefined, "loadOp must be set.");
     DAWN_INVALID_IF(colorAttachment.storeOp == wgpu::StoreOp::Undefined, "storeOp must be set.");
 
-    // TODO(dawn:1269): Remove after the deprecation period.
-    bool useClearColor = HasDeprecatedColor(colorAttachment);
-    const dawn::native::Color& clearValue =
-        useClearColor ? colorAttachment.clearColor : colorAttachment.clearValue;
-
-    if (useClearColor) {
-        DAWN_TRY(DAWN_MAKE_DEPRECATION_ERROR(
-            device, "clearColor is deprecated, prefer using clearValue instead."));
-    }
-
+    const dawn::native::Color& clearValue = colorAttachment.clearValue;
     if (colorAttachment.loadOp == wgpu::LoadOp::Clear) {
         DAWN_INVALID_IF(std::isnan(clearValue.r) || std::isnan(clearValue.g) ||
                             std::isnan(clearValue.b) || std::isnan(clearValue.a),
@@ -380,25 +371,12 @@ MaybeError ValidateRenderPassDepthStencilAttachment(
                         depthStencilAttachment->stencilReadOnly);
     }
 
-    if (!std::isnan(depthStencilAttachment->clearDepth)) {
-        DAWN_TRY(DAWN_MAKE_DEPRECATION_ERROR(
-            device, "clearDepth is deprecated, prefer depthClearValue instead."));
-        DAWN_INVALID_IF(
-            depthStencilAttachment->clearDepth < 0.0f || depthStencilAttachment->clearDepth > 1.0f,
-            "clearDepth is not between 0.0 and 1.0");
-
-    } else if (depthStencilAttachment->depthLoadOp == wgpu::LoadOp::Clear) {
+    if (depthStencilAttachment->depthLoadOp == wgpu::LoadOp::Clear) {
         DAWN_INVALID_IF(std::isnan(depthStencilAttachment->depthClearValue),
                         "depthClearValue is NaN.");
         DAWN_INVALID_IF(depthStencilAttachment->depthClearValue < 0.0f ||
                             depthStencilAttachment->depthClearValue > 1.0f,
                         "depthClearValue is not between 0.0 and 1.0");
-    }
-
-    if (depthStencilAttachment->stencilClearValue == 0 &&
-        depthStencilAttachment->clearStencil != 0) {
-        DAWN_TRY(DAWN_MAKE_DEPRECATION_ERROR(
-            device, "clearStencil is deprecated, prefer stencilClearValue instead."));
     }
 
     // *sampleCount == 0 must only happen when there is no color attachment. In that case we
@@ -671,11 +649,6 @@ struct TemporaryResolveAttachment {
 
 }  // namespace
 
-bool HasDeprecatedColor(const RenderPassColorAttachment& attachment) {
-    return !std::isnan(attachment.clearColor.r) || !std::isnan(attachment.clearColor.g) ||
-           !std::isnan(attachment.clearColor.b) || !std::isnan(attachment.clearColor.a);
-}
-
 Color ClampClearColorValueToLegalRange(const Color& originalColor, const Format& format) {
     const AspectInfo& aspectInfo = format.GetAspectInfo(Aspect::Color);
     double minValue = 0;
@@ -894,10 +867,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                 cmd->colorAttachments[index].loadOp = descriptor->colorAttachments[i].loadOp;
                 cmd->colorAttachments[index].storeOp = descriptor->colorAttachments[i].storeOp;
 
-                Color color = HasDeprecatedColor(descriptor->colorAttachments[i])
-                                  ? descriptor->colorAttachments[i].clearColor
-                                  : descriptor->colorAttachments[i].clearValue;
-
+                Color color = descriptor->colorAttachments[i].clearValue;
                 cmd->colorAttachments[index].clearColor =
                     ClampClearColorValueToLegalRange(color, view->GetFormat());
 
@@ -914,24 +884,10 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
 
                 cmd->depthStencilAttachment.view = view;
 
-                if (!std::isnan(descriptor->depthStencilAttachment->clearDepth)) {
-                    // TODO(dawn:1269): Remove this branch after the deprecation period.
-                    cmd->depthStencilAttachment.clearDepth =
-                        descriptor->depthStencilAttachment->clearDepth;
-                } else {
-                    cmd->depthStencilAttachment.clearDepth =
-                        descriptor->depthStencilAttachment->depthClearValue;
-                }
-
-                if (descriptor->depthStencilAttachment->stencilClearValue == 0 &&
-                    descriptor->depthStencilAttachment->clearStencil != 0) {
-                    // TODO(dawn:1269): Remove this branch after the deprecation period.
-                    cmd->depthStencilAttachment.clearStencil =
-                        descriptor->depthStencilAttachment->clearStencil;
-                } else {
-                    cmd->depthStencilAttachment.clearStencil =
-                        descriptor->depthStencilAttachment->stencilClearValue;
-                }
+                cmd->depthStencilAttachment.clearDepth =
+                    descriptor->depthStencilAttachment->depthClearValue;
+                cmd->depthStencilAttachment.clearStencil =
+                    descriptor->depthStencilAttachment->stencilClearValue;
 
                 // Copy parameters for the depth, reyifing the values when it is not present or
                 // readonly.
