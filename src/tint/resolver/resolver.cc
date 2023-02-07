@@ -1653,8 +1653,7 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
         std::string access;                   // the access performed for the "other" expression
     };
     auto make_error = [&](const sem::ValueExpression* arg, Alias&& var) {
-        // TODO(crbug.com/tint/1675): Switch to error and return false after deprecation period.
-        AddWarning("invalid aliased pointer argument", arg->Declaration()->source);
+        AddError("invalid aliased pointer argument", arg->Declaration()->source);
         switch (var.type) {
             case Alias::Argument:
                 AddNote("aliases with another argument passed here",
@@ -1669,7 +1668,7 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
                 break;
             }
         }
-        return true;
+        return false;
     };
 
     auto& args = call->Arguments();

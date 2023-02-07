@@ -63,7 +63,7 @@ class TwoPointers : public ResolverTestWithParam<TwoPointerConfig> {
              },
              ty.void_(), std::move(body));
         if (GetParam().aliased && err) {
-            EXPECT_TRUE(r()->Resolve());
+            EXPECT_FALSE(r()->Resolve());
             EXPECT_EQ(r()->error(), err);
         } else {
             EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -88,7 +88,7 @@ TEST_P(TwoPointers, ReadWrite) {
             Assign(Phony(), Deref("p1")),
             Assign(Deref("p2"), 42_a),
         },
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -100,7 +100,7 @@ TEST_P(TwoPointers, WriteRead) {
             Assign(Deref("p1"), 42_a),
             Assign(Phony(), Deref("p2")),
         },
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -112,7 +112,7 @@ TEST_P(TwoPointers, WriteWrite) {
             Assign(Deref("p1"), 42_a),
             Assign(Deref("p2"), 42_a),
         },
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -149,7 +149,7 @@ TEST_P(TwoPointers, ReadWriteThroughChain) {
         {
             CallStmt(Call("f1", "p1", "p2")),
         },
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -184,7 +184,7 @@ TEST_P(TwoPointers, ReadWriteAcrossDifferentFunctions) {
             CallStmt(Call("f1", "p1")),
             CallStmt(Call("f2", "p2")),
         },
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -230,7 +230,7 @@ class OnePointerOneModuleScope : public ResolverTestWithParam<bool> {
              },
              ty.void_(), std::move(body));
         if (GetParam() && err) {
-            EXPECT_TRUE(r()->Resolve());
+            EXPECT_FALSE(r()->Resolve());
             EXPECT_EQ(r()->error(), err);
         } else {
             EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -255,7 +255,7 @@ TEST_P(OnePointerOneModuleScope, ReadWrite) {
             Assign(Phony(), Deref("p1")),
             Assign(Expr(Source{{56, 78}}, "global_1"), 42_a),
         },
-        R"(12:34 warning: invalid aliased pointer argument
+        R"(12:34 error: invalid aliased pointer argument
 56:78 note: aliases with module-scope variable write in 'target')");
 }
 
@@ -267,7 +267,7 @@ TEST_P(OnePointerOneModuleScope, WriteRead) {
             Assign(Deref("p1"), 42_a),
             Assign(Phony(), Expr(Source{{56, 78}}, "global_1")),
         },
-        R"(12:34 warning: invalid aliased pointer argument
+        R"(12:34 error: invalid aliased pointer argument
 56:78 note: aliases with module-scope variable read in 'target')");
 }
 
@@ -279,7 +279,7 @@ TEST_P(OnePointerOneModuleScope, WriteWrite) {
             Assign(Deref("p1"), 42_a),
             Assign(Expr(Source{{56, 78}}, "global_1"), 42_a),
         },
-        R"(12:34 warning: invalid aliased pointer argument
+        R"(12:34 error: invalid aliased pointer argument
 56:78 note: aliases with module-scope variable write in 'target')");
 }
 
@@ -314,7 +314,7 @@ TEST_P(OnePointerOneModuleScope, ReadWriteThroughChain_GlobalViaArg) {
         {
             CallStmt(Call("f1", "p1")),
         },
-        R"(12:34 warning: invalid aliased pointer argument
+        R"(12:34 error: invalid aliased pointer argument
 56:78 note: aliases with module-scope variable write in 'f1')");
 }
 
@@ -349,7 +349,7 @@ TEST_P(OnePointerOneModuleScope, ReadWriteThroughChain_Both) {
         {
             CallStmt(Call("f1", "p1")),
         },
-        R"(12:34 warning: invalid aliased pointer argument
+        R"(12:34 error: invalid aliased pointer argument
 56:78 note: aliases with module-scope variable write in 'f2')");
 }
 
@@ -384,7 +384,7 @@ TEST_P(OnePointerOneModuleScope, WriteReadThroughChain_GlobalViaArg) {
         {
             CallStmt(Call("f1", "p1")),
         },
-        R"(12:34 warning: invalid aliased pointer argument
+        R"(12:34 error: invalid aliased pointer argument
 56:78 note: aliases with module-scope variable read in 'f1')");
 }
 
@@ -419,7 +419,7 @@ TEST_P(OnePointerOneModuleScope, WriteReadThroughChain_Both) {
         {
             CallStmt(Call("f1", "p1")),
         },
-        R"(12:34 warning: invalid aliased pointer argument
+        R"(12:34 error: invalid aliased pointer argument
 56:78 note: aliases with module-scope variable read in 'f2')");
 }
 
@@ -450,7 +450,7 @@ TEST_P(OnePointerOneModuleScope, ReadWriteAcrossDifferentFunctions) {
             CallStmt(Call("f1", "p1")),
             CallStmt(Call("f2")),
         },
-        R"(12:34 warning: invalid aliased pointer argument
+        R"(12:34 error: invalid aliased pointer argument
 56:78 note: aliases with module-scope variable write in 'f2')");
 }
 
@@ -496,7 +496,7 @@ class Use : public ResolverTestWithParam<bool> {
                  stmt,
              });
         if (GetParam() && err) {
-            EXPECT_TRUE(r()->Resolve());
+            EXPECT_FALSE(r()->Resolve());
             EXPECT_EQ(r()->error(), err);
         } else {
             EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -511,20 +511,20 @@ TEST_P(Use, NoAccess) {
 
 TEST_P(Use, Write_Increment) {
     // (*p2)++;
-    Run(Increment(Deref("p2")), R"(56:78 warning: invalid aliased pointer argument
+    Run(Increment(Deref("p2")), R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(Use, Write_Decrement) {
     // (*p2)--;
-    Run(Decrement(Deref("p2")), R"(56:78 warning: invalid aliased pointer argument
+    Run(Decrement(Deref("p2")), R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(Use, Write_CompoundAssignment_LHS) {
     // *p2 += 42;
     Run(CompoundAssign(Deref("p2"), 42_a, ast::BinaryOp::kAdd),
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -533,45 +533,45 @@ TEST_P(Use, Read_CompoundAssignment_RHS) {
     // global += *p2;
     GlobalVar("global", type::AddressSpace::kPrivate, ty.i32());
     Run(CompoundAssign("global", Deref("p2"), ast::BinaryOp::kAdd),
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(Use, Read_BinaryOp_LHS) {
     // _ = (*p2) + 1;
-    Run(Assign(Phony(), Add(Deref("p2"), 1_a)), R"(56:78 warning: invalid aliased pointer argument
+    Run(Assign(Phony(), Add(Deref("p2"), 1_a)), R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(Use, Read_BinaryOp_RHS) {
     // _ = 1 + (*p2);
-    Run(Assign(Phony(), Add(1_a, Deref("p2"))), R"(56:78 warning: invalid aliased pointer argument
+    Run(Assign(Phony(), Add(1_a, Deref("p2"))), R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(Use, Read_UnaryMinus) {
     // _ = -(*p2);
-    Run(Assign(Phony(), Negation(Deref("p2"))), R"(56:78 warning: invalid aliased pointer argument
+    Run(Assign(Phony(), Negation(Deref("p2"))), R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(Use, Read_FunctionCallArg) {
     // abs(*p2);
-    Run(CallStmt(Call("abs", Deref("p2"))), R"(56:78 warning: invalid aliased pointer argument
+    Run(CallStmt(Call("abs", Deref("p2"))), R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(Use, Read_Bitcast) {
     // _ = bitcast<f32>(*p2);
     Run(Assign(Phony(), Bitcast<f32>(Deref("p2"))),
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(Use, Read_Convert) {
     // _ = f32(*p2);
     Run(Assign(Phony(), Call<f32>(Deref("p2"))),
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -580,20 +580,20 @@ TEST_P(Use, Read_IndexAccessor) {
     // _ = data[*p2];
     GlobalVar("data", type::AddressSpace::kPrivate, ty.array<f32, 4>());
     Run(Assign(Phony(), IndexAccessor("data", Deref("p2"))),
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(Use, Read_LetInitializer) {
     // let x = *p2;
-    Run(Decl(Let("x", Deref("p2"))), R"(56:78 warning: invalid aliased pointer argument
+    Run(Decl(Let("x", Deref("p2"))), R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(Use, Read_VarInitializer) {
     // var x = *p2;
     Run(Decl(Var("x", type::AddressSpace::kFunction, Deref("p2"))),
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -608,14 +608,14 @@ TEST_P(Use, Read_ReturnValue) {
          utils::Vector{
              Return(Deref("p")),
          });
-    Run(Assign(Phony(), Call("foo", "p2")), R"(56:78 warning: invalid aliased pointer argument
+    Run(Assign(Phony(), Call("foo", "p2")), R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(Use, Read_Switch) {
     // Switch (*p2) { default {} }
     Run(Switch(Deref("p2"), utils::Vector{DefaultCase(Block())}),
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -668,7 +668,7 @@ class UseBool : public ResolverTestWithParam<bool> {
                  stmt,
              });
         if (GetParam() && err) {
-            EXPECT_TRUE(r()->Resolve());
+            EXPECT_FALSE(r()->Resolve());
             EXPECT_EQ(r()->error(), err);
         } else {
             EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -678,27 +678,27 @@ class UseBool : public ResolverTestWithParam<bool> {
 
 TEST_P(UseBool, Read_IfCond) {
     // if (*p2) {}
-    Run(If(Deref("p2"), Block()), R"(56:78 warning: invalid aliased pointer argument
+    Run(If(Deref("p2"), Block()), R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(UseBool, Read_WhileCond) {
     // while (*p2) {}
-    Run(While(Deref("p2"), Block()), R"(56:78 warning: invalid aliased pointer argument
+    Run(While(Deref("p2"), Block()), R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(UseBool, Read_ForCond) {
     // for (; *p2; ) {}
     Run(For(nullptr, Deref("p2"), nullptr, Block()),
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
 TEST_P(UseBool, Read_BreakIf) {
     // loop { continuing { break if (*p2); } }
     Run(Loop(Block(), Block(BreakIf(Deref("p2")))),
-        R"(56:78 warning: invalid aliased pointer argument
+        R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -767,8 +767,8 @@ TEST_F(ResolverAliasAnalysisTest, Read_MemberAccessor) {
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
          });
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), R"(56:76 warning: invalid aliased pointer argument
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(56:76 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -799,8 +799,8 @@ TEST_F(ResolverAliasAnalysisTest, Write_MemberAccessor) {
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
          });
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), R"(56:76 warning: invalid aliased pointer argument
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(56:76 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -830,8 +830,8 @@ TEST_F(ResolverAliasAnalysisTest, Read_MultiComponentSwizzle) {
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
          });
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), R"(56:76 warning: invalid aliased pointer argument
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(56:76 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
