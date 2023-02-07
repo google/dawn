@@ -2058,9 +2058,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
     AddReferenceFunc("ub_bar_func", "ub_bar");
     AddReferenceFunc("ub_baz_func", "ub_baz");
 
-    auto FuncCall = [&](const std::string& callee) {
-        return create<ast::CallStatement>(Call(callee));
-    };
+    auto FuncCall = [&](const std::string& callee) { return CallStmt(Call(callee)); };
 
     Func("ep_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -2239,9 +2237,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
     AddReferenceFunc("sb_bar_func", "sb_bar");
     AddReferenceFunc("sb_baz_func", "sb_baz");
 
-    auto FuncCall = [&](const std::string& callee) {
-        return create<ast::CallStatement>(Call(callee));
-    };
+    auto FuncCall = [&](const std::string& callee) { return CallStmt(Call(callee)); };
 
     Func("ep_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -2464,9 +2460,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, MultipleStorageBuf
     AddReferenceFunc("sb_bar_func", "sb_bar");
     AddReferenceFunc("sb_baz_func", "sb_baz");
 
-    auto FuncCall = [&](const std::string& callee) {
-        return create<ast::CallStatement>(Call(callee));
-    };
+    auto FuncCall = [&](const std::string& callee) { return CallStmt(Call(callee)); };
 
     Func("ep_func", utils::Empty, ty.void_(),
          utils::Vector{

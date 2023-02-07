@@ -5212,7 +5212,7 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
     }
 
     if (result_type->Is<Void>()) {
-        return nullptr != AddStatement(create<ast::CallStatement>(Source{}, call_expr));
+        return nullptr != AddStatement(builder_.CallStmt(Source{}, call_expr));
     }
 
     return EmitConstDefOrWriteToHoistedVar(inst, {result_type, call_expr});
@@ -5246,14 +5246,14 @@ bool FunctionEmitter::EmitControlBarrier(const spvtools::opt::Instruction& inst)
         if (memory != uint32_t(spv::Scope::Workgroup)) {
             return Fail() << "workgroupBarrier requires workgroup memory scope";
         }
-        AddStatement(create<ast::CallStatement>(builder_.Call("workgroupBarrier")));
+        AddStatement(builder_.CallStmt(builder_.Call("workgroupBarrier")));
         semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::WorkgroupMemory);
     }
     if (semantics & uint32_t(spv::MemorySemanticsMask::UniformMemory)) {
         if (memory != uint32_t(spv::Scope::Device)) {
             return Fail() << "storageBarrier requires device memory scope";
         }
-        AddStatement(create<ast::CallStatement>(builder_.Call("storageBarrier")));
+        AddStatement(builder_.CallStmt(builder_.Call("storageBarrier")));
         semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::UniformMemory);
     }
     if (semantics) {
@@ -5675,7 +5675,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     } else {
         // It's an image write. No value is returned, so make a statement out
         // of the call.
-        AddStatement(create<ast::CallStatement>(Source{}, call_expr));
+        AddStatement(builder_.CallStmt(Source{}, call_expr));
     }
     return success();
 }
@@ -5803,7 +5803,7 @@ bool FunctionEmitter::EmitAtomicOp(const spvtools::opt::Instruction& inst) {
             TypedExpression expr{result_type, call};
             return EmitConstDefOrWriteToHoistedVar(inst, expr);
         }
-        AddStatement(create<ast::CallStatement>(call));
+        AddStatement(builder_.CallStmt(call));
 
         return true;
     };

@@ -2434,7 +2434,7 @@ Maybe<const ast::CallStatement*> ParserImpl::func_call_statement() {
         return Failure::kErrored;
     }
 
-    return create<ast::CallStatement>(
+    return builder_.CallStmt(
         t.source(),
         create<ast::CallExpression>(
             t.source(),

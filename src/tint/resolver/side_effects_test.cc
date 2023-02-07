@@ -218,7 +218,7 @@ TEST_P(SideEffectsBuiltinTest, Test) {
         attrs.Push(WorkgroupSize(Expr(1_u)));
     }
 
-    stmts.Push(create<ast::CallStatement>(expr));
+    stmts.Push(CallStmt(expr));
 
     Func("func", utils::Empty, ty.void_(), stmts, attrs);
 
