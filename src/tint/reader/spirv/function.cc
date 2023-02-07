@@ -1392,7 +1392,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
             return_type = builder_.ty.Of(str);
 
             // Add the return-value statement.
-            stmts.Push(create<ast::ReturnStatement>(
+            stmts.Push(builder_.Return(
                 source, builder_.Call(source, return_type, std::move(return_exprs))));
         }
     }
@@ -3124,14 +3124,14 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
     const auto& terminator = *(block_info.basic_block->terminator());
     switch (opcode(terminator)) {
         case spv::Op::OpReturn:
-            AddStatement(create<ast::ReturnStatement>(Source{}));
+            AddStatement(builder_.Return(Source{}));
             return true;
         case spv::Op::OpReturnValue: {
             auto value = MakeExpression(terminator.GetSingleWordInOperand(0));
             if (!value) {
                 return false;
             }
-            AddStatement(create<ast::ReturnStatement>(Source{}, value.expr));
+            AddStatement(builder_.Return(Source{}, value.expr));
             return true;
         }
         case spv::Op::OpKill:
@@ -3145,11 +3145,10 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
             {
                 const auto* result_type = type_mgr_->GetType(function_.type_id());
                 if (result_type->AsVoid() != nullptr) {
-                    AddStatement(create<ast::ReturnStatement>(Source{}));
+                    AddStatement(builder_.Return(Source{}));
                 } else {
                     auto* ast_type = parser_impl_.ConvertType(function_.type_id());
-                    AddStatement(create<ast::ReturnStatement>(
-                        Source{}, parser_impl_.MakeNullValue(ast_type)));
+                    AddStatement(builder_.Return(Source{}, parser_impl_.MakeNullValue(ast_type)));
                 }
             }
             return true;

@@ -1904,7 +1904,7 @@ Maybe<const ast::ReturnStatement*> ParserImpl::return_statement() {
     }
 
     if (peek_is(Token::Type::kSemicolon)) {
-        return create<ast::ReturnStatement>(source, nullptr);
+        return builder_.Return(source, nullptr);
     }
 
     auto expr = expression();
@@ -1913,7 +1913,7 @@ Maybe<const ast::ReturnStatement*> ParserImpl::return_statement() {
     }
 
     // TODO(bclayton): Check matched?
-    return create<ast::ReturnStatement>(source, expr.value);
+    return builder_.Return(source, expr.value);
 }
 
 // variable_statement
