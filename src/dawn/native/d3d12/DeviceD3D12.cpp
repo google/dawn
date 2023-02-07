@@ -721,11 +721,12 @@ void Device::InitTogglesFromDriver() {
         }
     }
 
-    // Currently this workaround is only needed on Intel Gen9.5 and Gen11 GPUs.
-    // See http://crbug.com/1237175 for more information.
+    // Currently these workarounds are only needed on Intel Gen9.5 and Gen11 GPUs.
+    // See http://crbug.com/1237175 and http://crbug.com/dawn/1628 for more information.
     if ((gpu_info::IsIntelGen9(vendorId, deviceId) && !gpu_info::IsSkylake(deviceId)) ||
         gpu_info::IsIntelGen11(vendorId, deviceId)) {
-        SetToggle(Toggle::D3D12Allocate2DTexturewithCopyDstAsCommittedResource, true);
+        SetToggle(Toggle::D3D12Allocate2DTextureWithCopyDstOrRenderAttachmentAsCommittedResource,
+                  true);
         // Now we don't need to force clearing depth stencil textures with CopyDst as all the depth
         // stencil textures (can only be 2D textures) will be created with CreateCommittedResource()
         // instead of CreatePlacedResource().

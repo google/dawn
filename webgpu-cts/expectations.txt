@@ -313,12 +313,6 @@ crbug.com/dawn/1500 [ intel-gen-9 monterey ] webgpu:api,operation,command_buffer
 crbug.com/dawn/1599 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Failure ]
 
 ################################################################################
-# webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:* fail on win10 Intel
-# KEEP
-################################################################################
-crbug.com/dawn/1628 [ intel-gen-9 win10 ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:* [ Failure ]
-
-################################################################################
 # untriaged failures
 ################################################################################
 crbug.com/dawn/0000 [ dawn-backend-validation win10 ] webgpu:api,operation,render_pass,resolve:* [ Failure ]
