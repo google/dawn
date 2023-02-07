@@ -46,7 +46,6 @@
 #include "src/tint/ast/u32.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
-#include "src/tint/ast/void.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
@@ -334,7 +333,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
 
         out << ")";
 
-        if (!func->return_type->Is<ast::Void>() || !func->return_type_attributes.IsEmpty()) {
+        if (func->return_type || !func->return_type_attributes.IsEmpty()) {
             out << " -> ";
 
             if (!func->return_type_attributes.IsEmpty()) {
@@ -588,10 +587,6 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
                 }
                 out << ">";
             }
-            return true;
-        },
-        [&](const ast::Void*) {
-            out << "void";
             return true;
         },
         [&](const ast::TypeName* tn) {

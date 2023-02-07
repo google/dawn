@@ -30,7 +30,6 @@
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/module.h"
 #include "src/tint/ast/variable_decl_statement.h"
-#include "src/tint/ast/void.h"
 #include "src/tint/constant/value.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
@@ -1974,6 +1973,8 @@ std::string GeneratorImpl::interpolation_to_attribute(ast::InterpolationType typ
 }
 
 bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
+    auto* func_sem = builder_.Sem().Get(func);
+
     auto func_name = program_->Symbols().NameFor(func->symbol);
 
     // Returns the binding index of a variable, requiring that the group
@@ -1999,8 +2000,11 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
         auto out = line();
 
         EmitStage(out, func->PipelineStage());
-        out << " " << func->return_type->FriendlyName(program_->Symbols());
-        out << " " << func_name << "(";
+        out << " ";
+        if (!EmitTypeAndName(out, func_sem->ReturnType(), func_name)) {
+            return false;
+        }
+        out << "(";
 
         // Emit entry point parameters.
         bool first = true;

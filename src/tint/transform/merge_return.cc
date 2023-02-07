@@ -154,7 +154,7 @@ class State {
             flag = b.Symbols().New("tint_return_flag");
             new_stmts[0].Push(b.Decl(b.Var(flag, b.ty.bool_())));
 
-            if (!function->return_type->Is<ast::Void>()) {
+            if (function->return_type) {
                 retval = b.Symbols().New("tint_return_value");
                 new_stmts[0].Push(b.Decl(b.Var(retval, ctx.Clone(function->return_type))));
             }

@@ -39,13 +39,13 @@ Function::Function(ProgramID pid,
       attributes(std::move(attrs)),
       return_type_attributes(std::move(return_type_attrs)) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, return_ty, program_id);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
     for (auto* param : params) {
         TINT_ASSERT(AST, tint::Is<Parameter>(param));
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, param, program_id);
     }
     TINT_ASSERT(AST, symbol.IsValid());
-    TINT_ASSERT(AST, return_type);
     for (auto* attr : attributes) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
     }

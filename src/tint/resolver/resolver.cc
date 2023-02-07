@@ -214,10 +214,13 @@ bool Resolver::ResolveInternal() {
 }
 
 type::Type* Resolver::Type(const ast::Type* ty) {
+    if (ty == nullptr) {
+        return builder_->create<type::Void>();
+    }
+
     Mark(ty);
     auto* s = Switch(
         ty,  //
-        [&](const ast::Void*) { return builder_->create<type::Void>(); },
         [&](const ast::Bool*) { return builder_->create<type::Bool>(); },
         [&](const ast::I32*) { return builder_->create<type::I32>(); },
         [&](const ast::U32*) { return builder_->create<type::U32>(); },

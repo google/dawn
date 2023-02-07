@@ -89,7 +89,6 @@
 #include "src/tint/ast/var.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
-#include "src/tint/ast/void.h"
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/constant/composite.h"
@@ -567,6 +566,9 @@ class ProgramBuilder {
             return CToAST<T>::get(this);
         }
 
+        /// @returns nullptr ast::Type
+        const ast::Type* void_() const { return nullptr; }
+
         /// @returns a boolean type
         const ast::Bool* bool_() const { return builder->create<ast::Bool>(); }
 
@@ -610,15 +612,6 @@ class ProgramBuilder {
         /// @returns a u32 type
         const ast::U32* u32(const Source& source) const {
             return builder->create<ast::U32>(source);
-        }
-
-        /// @returns a void type
-        const ast::Void* void_() const { return builder->create<ast::Void>(); }
-
-        /// @param source the Source of the node
-        /// @returns a void type
-        const ast::Void* void_(const Source& source) const {
-            return builder->create<ast::Void>(source);
         }
 
         /// @param type vector subtype

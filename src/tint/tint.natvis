@@ -149,10 +149,6 @@
 		<DisplayString>{value}</DisplayString>
 	</Type>
 
-	<Type Name="tint::ast::Void">
-		<DisplayString>void</DisplayString>
-	</Type>
-
 	<Type Name="tint::ast::UnaryOpExpression">
 		<DisplayString Condition="op==tint::ast::UnaryOp::kAddressOf">&amp;({*expr})</DisplayString>
 		<DisplayString Condition="op==tint::ast::UnaryOp::kComplement">~({*expr})</DisplayString>

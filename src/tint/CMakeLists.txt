@@ -258,8 +258,6 @@ list(APPEND TINT_LIB_SRCS
   ast/variable.h
   ast/vector.cc
   ast/vector.h
-  ast/void.cc
-  ast/void.h
   ast/while_statement.cc
   ast/while_statement.h
   ast/workgroup_attribute.cc

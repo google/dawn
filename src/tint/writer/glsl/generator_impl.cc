@@ -2260,8 +2260,11 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     // Emit original entry point signature
     {
         auto out = line();
-        out << func->return_type->FriendlyName(builder_.Symbols()) << " "
-            << builder_.Symbols().NameFor(func->symbol) << "(";
+        if (!EmitTypeAndName(out, func_sem->ReturnType(), type::AddressSpace::kUndefined,
+                             type::Access::kUndefined, builder_.Symbols().NameFor(func->symbol))) {
+            return false;
+        }
+        out << "(";
 
         bool first = true;
 

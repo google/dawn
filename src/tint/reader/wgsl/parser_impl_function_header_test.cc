@@ -28,7 +28,7 @@ TEST_F(ParserImplTest, FunctionHeader) {
     ASSERT_EQ(f->params.Length(), 2u);
     EXPECT_EQ(f->params[0]->symbol, p->builder().Symbols().Get("a"));
     EXPECT_EQ(f->params[1]->symbol, p->builder().Symbols().Get("b"));
-    EXPECT_TRUE(f->return_type->Is<ast::Void>());
+    EXPECT_EQ(f->return_type, nullptr);
 }
 
 TEST_F(ParserImplTest, FunctionHeader_TrailingComma) {
@@ -40,7 +40,7 @@ TEST_F(ParserImplTest, FunctionHeader_TrailingComma) {
     EXPECT_EQ(f->name, "main");
     ASSERT_EQ(f->params.Length(), 1u);
     EXPECT_EQ(f->params[0]->symbol, p->builder().Symbols().Get("a"));
-    EXPECT_TRUE(f->return_type->Is<ast::Void>());
+    EXPECT_EQ(f->return_type, nullptr);
 }
 
 TEST_F(ParserImplTest, FunctionHeader_AttributeReturnType) {

@@ -75,7 +75,7 @@ void Transform::RemoveStatement(CloneContext& ctx, const ast::Statement* stmt) {
 
 const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
     if (ty->Is<type::Void>()) {
-        return ctx.dst->create<ast::Void>();
+        return nullptr;
     }
     if (ty->Is<type::I32>()) {
         return ctx.dst->create<ast::I32>();

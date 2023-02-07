@@ -67,7 +67,6 @@
 #include "src/tint/ast/u32.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
-#include "src/tint/ast/void.h"
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/scope_stack.h"
@@ -405,7 +404,7 @@ class DependencyScanner {
                 TraverseType(tex->type);
             },
             [&](Default) {
-                if (!ty->IsAnyOf<ast::Void, ast::Bool, ast::I32, ast::U32, ast::F16, ast::F32,
+                if (!ty->IsAnyOf<ast::Bool, ast::I32, ast::U32, ast::F16, ast::F32,
                                  ast::DepthTexture, ast::DepthMultisampledTexture,
                                  ast::StorageTexture, ast::ExternalTexture, ast::Sampler>()) {
                     UnhandledNode(diagnostics_, ty);

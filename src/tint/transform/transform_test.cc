@@ -45,7 +45,7 @@ TEST_F(CreateASTTypeForTest, Basic) {
     EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<type::U32>(); })->Is<ast::U32>());
     EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<type::F32>(); })->Is<ast::F32>());
     EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<type::Bool>(); })->Is<ast::Bool>());
-    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<type::Void>(); })->Is<ast::Void>());
+    EXPECT_EQ(create([](ProgramBuilder& b) { return b.create<type::Void>(); }), nullptr);
 }
 
 TEST_F(CreateASTTypeForTest, Matrix) {
