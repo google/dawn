@@ -169,6 +169,19 @@ crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp
 crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
 
 ################################################################################
+# f32_arithmetic tests are slow on code-coverage builders
+# KEEP
+################################################################################
+crbug.com/1399354 webgpu:shader,execution,expression,binary,f32_arithmetic:addition:* [ Slow ]
+crbug.com/1399354 webgpu:shader,execution,expression,binary,f32_arithmetic:division:* [ Slow ]
+crbug.com/1399354 webgpu:shader,execution,expression,binary,f32_arithmetic:multiplication:* [ Slow ]
+crbug.com/1399354 webgpu:shader,execution,expression,binary,f32_arithmetic:subtraction:* [ Slow ]
+# TODO(crbug.com/dawn/1799): Remove platform filter here when conflicting expectations are removed
+crbug.com/1399354 [ linux ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:* [ Slow ]
+crbug.com/1399354 [ mac ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:* [ Slow ]
+crbug.com/1399354 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="const";* [ Slow ]
+
+################################################################################
 # shader execution failures
 ################################################################################
 crbug.com/dawn/1799 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="storage_r";vectorize="_undef_" [ Failure ]
