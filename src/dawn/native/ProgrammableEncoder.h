@@ -59,6 +59,8 @@ class ProgrammableEncoder : public ApiObjectBase {
 
     uint64_t mDebugGroupStackSize = 0;
 
+    bool mEnded = false;
+
   private:
     const bool mValidationEnabled;
 };

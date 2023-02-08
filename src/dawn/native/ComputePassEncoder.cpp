@@ -150,6 +150,13 @@ ObjectType ComputePassEncoder::GetType() const {
 }
 
 void ComputePassEncoder::APIEnd() {
+    if (mEnded && IsValidationEnabled()) {
+        GetDevice()->ConsumedError(DAWN_VALIDATION_ERROR("%s was already ended.", this));
+        return;
+    }
+
+    mEnded = true;
+
     if (mEncodingContext->TryEncode(
             this,
             [&](CommandAllocator* allocator) -> MaybeError {
