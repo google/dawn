@@ -41,6 +41,13 @@ const char* str(BuiltinType i);
 /// matches the name in the WGSL spec.
 std::ostream& operator<<(std::ostream& out, BuiltinType i);
 
+/// All builtin types
+constexpr BuiltinType kBuiltinTypes[] = {
+{{- range Sem.Builtins }}
+    BuiltinType::k{{PascalCase .Name}},
+{{- end }}
+};
+
 }  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_BUILTIN_TYPE_H_

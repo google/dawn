@@ -29,8 +29,7 @@ class SemHelper {
   public:
     /// Constructor
     /// @param builder the program builder
-    /// @param dependencies the program dependency graph
-    explicit SemHelper(ProgramBuilder* builder, DependencyGraph& dependencies);
+    explicit SemHelper(ProgramBuilder* builder);
     ~SemHelper();
 
     /// Get is a helper for obtaining the semantic node for the given AST node.
@@ -76,18 +75,6 @@ class SemHelper {
         }
     }
 
-    /// @returns the resolved symbol (function, type or variable) for the given ast::Identifier or
-    /// ast::TypeName cast to the given semantic type.
-    /// @param node the node to retrieve
-    template <typename SEM = sem::Info::InferFromAST>
-    sem::Info::GetResultType<SEM, ast::Node>* ResolvedSymbol(const ast::Node* node) const {
-        if (auto resolved = dependencies_.resolved_symbols.Find(node)) {
-            auto* sem = builder_->Sem().Get<SEM>(*resolved);
-            return const_cast<sem::Info::GetResultType<SEM, ast::Node>*>(sem);
-        }
-        return nullptr;
-    }
-
     /// @returns the resolved type of the ast::Expression `expr`
     /// @param expr the expression
     type::Type* TypeOf(const ast::Expression* expr) const;
@@ -104,7 +91,6 @@ class SemHelper {
 
   private:
     ProgramBuilder* builder_;
-    DependencyGraph& dependencies_;
 };
 
 }  // namespace tint::resolver

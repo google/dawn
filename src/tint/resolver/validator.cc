@@ -2344,8 +2344,8 @@ bool Validator::Assignment(const ast::Statement* a, const type::Type* rhs_ty) co
     // https://gpuweb.github.io/gpuweb/wgsl/#assignment-statement
     auto const* lhs_ty = sem_.TypeOf(lhs);
 
-    if (auto* variable = sem_.ResolvedSymbol<sem::Variable>(lhs)) {
-        auto* v = variable->Declaration();
+    if (auto* var_user = sem_.Get<sem::VariableUser>(lhs)) {
+        auto* v = var_user->Variable()->Declaration();
         const char* err = Switch(
             v,  //
             [&](const ast::Parameter*) { return "cannot assign to function parameter"; },
@@ -2392,8 +2392,8 @@ bool Validator::IncrementDecrementStatement(const ast::IncrementDecrementStateme
 
     // https://gpuweb.github.io/gpuweb/wgsl/#increment-decrement
 
-    if (auto* variable = sem_.ResolvedSymbol<sem::Variable>(lhs)) {
-        auto* v = variable->Declaration();
+    if (auto* var_user = sem_.Get<sem::VariableUser>(lhs)) {
+        auto* v = var_user->Variable()->Declaration();
         const char* err = Switch(
             v,  //
             [&](const ast::Parameter*) { return "cannot modify function parameter"; },

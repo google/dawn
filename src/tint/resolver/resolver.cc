@@ -105,7 +105,7 @@ Resolver::Resolver(ProgramBuilder* builder)
       diagnostics_(builder->Diagnostics()),
       const_eval_(*builder),
       intrinsic_table_(IntrinsicTable::Create(*builder)),
-      sem_(builder, dependencies_),
+      sem_(builder),
       validator_(builder,
                  sem_,
                  enabled_extensions_,
@@ -332,41 +332,45 @@ type::Type* Resolver::Type(const ast::Type* ty) {
                 TINT_UNREACHABLE(Resolver, builder_->Diagnostics()) << "TODO(crbug.com/tint/1810)";
             }
 
-            auto* resolved = sem_.ResolvedSymbol(t);
-            if (resolved == nullptr) {
-                if (IsBuiltin(t->name->symbol)) {
-                    auto name = builder_->Symbols().NameFor(t->name->symbol);
-                    AddError("cannot use builtin '" + name + "' as type", ty->source);
-                    return nullptr;
-                }
-                return BuiltinType(t->name->symbol, t->source);
+            auto resolved = dependencies_.resolved_identifiers.Get(t->name);
+            if (!resolved) {
+                TINT_ICE(Resolver, builder_->Diagnostics()) << "identifier was not resolved";
+                return nullptr;
             }
-            return Switch(
-                resolved,  //
-                [&](type::Type* type) { return type; },
-                [&](sem::Variable* var) {
-                    auto name = builder_->Symbols().NameFor(var->Declaration()->symbol);
-                    AddError("cannot use variable '" + name + "' as type", ty->source);
-                    AddNote("'" + name + "' declared here", var->Declaration()->source);
-                    return nullptr;
-                },
-                [&](sem::Function* func) {
-                    auto name = builder_->Symbols().NameFor(func->Declaration()->symbol);
-                    AddError("cannot use function '" + name + "' as type", ty->source);
-                    AddNote("'" + name + "' declared here", func->Declaration()->source);
-                    return nullptr;
-                },
-                [&](Default) -> type::Type* {
-                    TINT_UNREACHABLE(Resolver, diagnostics_)
-                        << "Unhandled resolved type '"
-                        << (resolved ? resolved->TypeInfo().name : "<null>")
-                        << "' resolved from ast::Type '" << ty->TypeInfo().name << "'";
-                    return nullptr;
-                });
-        },
-        [&](Default) {
+
+            if (auto* ast_node = resolved->Node()) {
+                auto* resolved_node = sem_.Get(ast_node);
+                return Switch(
+                    resolved_node,  //
+                    [&](type::Type* type) { return type; },
+                    [&](sem::Variable* variable) {
+                        auto name = builder_->Symbols().NameFor(variable->Declaration()->symbol);
+                        AddError("cannot use variable '" + name + "' as type", ty->source);
+                        AddNote("'" + name + "' declared here", variable->Declaration()->source);
+                        return nullptr;
+                    },
+                    [&](sem::Function* func) {
+                        auto name = builder_->Symbols().NameFor(func->Declaration()->symbol);
+                        AddError("cannot use function '" + name + "' as type", ty->source);
+                        AddNote("'" + name + "' declared here", func->Declaration()->source);
+                        return nullptr;
+                    });
+            }
+
+            if (auto builtin_ty = resolved->BuiltinType();
+                builtin_ty != type::Builtin::kUndefined) {
+                return BuiltinType(builtin_ty, t->name);
+            }
+
+            if (auto builtin_fn = resolved->BuiltinFunction();
+                builtin_fn != sem::BuiltinType::kNone) {
+                auto name = builder_->Symbols().NameFor(t->name->symbol);
+                AddError("cannot use builtin '" + name + "' as type", ty->source);
+                return nullptr;
+            }
+
             TINT_UNREACHABLE(Resolver, diagnostics_)
-                << "Unhandled type: '" << ty->TypeInfo().name << "'";
+                << "unhandled resolved identifier: " << *resolved;
             return nullptr;
         });
 
@@ -947,7 +951,8 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
         return nullptr;
     }
 
-    // Track the pipeline-overridable constants that are transitively referenced by this variable.
+    // Track the pipeline-overridable constants that are transitively referenced by this
+    // variable.
     for (auto* var : transitively_referenced_overrides) {
         builder_->Sem().AddTransitivelyReferencedOverride(sem, var);
     }
@@ -1176,8 +1181,8 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         "abstract-integer, i32 or u32";
 
     for (size_t i = 0; i < 3; i++) {
-        // Each argument to this attribute can either be a literal, an identifier for a module-scope
-        // constants, a const-expression, or nullptr if not specified.
+        // Each argument to this attribute can either be a literal, an identifier for a
+        // module-scope constants, a const-expression, or nullptr if not specified.
         auto* value = values[i];
         if (!value) {
             break;
@@ -1604,8 +1609,8 @@ sem::ValueExpression* Resolver::Expression(const ast::Expression* root) {
             return sem_expr;
         }
 
-        // If we just processed the lhs of a constexpr logical binary expression, mark the rhs for
-        // short-circuiting.
+        // If we just processed the lhs of a constexpr logical binary expression, mark the rhs
+        // for short-circuiting.
         if (sem_expr->ConstantValue()) {
             if (auto binary = logical_binary_lhs_to_parent_.Find(expr)) {
                 const bool lhs_is_true = sem_expr->ConstantValue()->ValueAs<bool>();
@@ -1678,7 +1683,8 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
     auto& target_info = alias_analysis_infos_[target];
     auto& caller_info = alias_analysis_infos_[current_function_];
 
-    // Track the set of root identifiers that are read and written by arguments passed in this call.
+    // Track the set of root identifiers that are read and written by arguments passed in this
+    // call.
     std::unordered_map<const sem::Variable*, const sem::ValueExpression*> arg_reads;
     std::unordered_map<const sem::Variable*, const sem::ValueExpression*> arg_writes;
     for (size_t i = 0; i < args.Length(); i++) {
@@ -1715,8 +1721,8 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
                 },
                 [&](const sem::Parameter* param) { caller_info.parameter_writes.insert(param); });
         } else if (target_info.parameter_reads.count(target->Parameters()[i])) {
-            // Arguments that are read from can alias with arguments or module-scope variables that
-            // are written to.
+            // Arguments that are read from can alias with arguments or module-scope variables
+            // that are written to.
             if (arg_writes.count(root)) {
                 return make_error(arg, {arg_writes.at(root), Alias::Argument, "write"});
             }
@@ -2101,8 +2107,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 // Constant evaluation failed.
                 // Can happen for expressions that will fail validation (later).
                 // Use the kRuntime EvaluationStage, as kConstant will trigger an assertion in
-                // the sem::ValueExpression initializer, which checks that kConstant is paired with
-                // a constant value.
+                // the sem::ValueExpression initializer, which checks that kConstant is paired
+                // with a constant value.
                 stage = sem::EvaluationStage::kRuntime;
             }
         }
@@ -2310,35 +2316,44 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         // conversion.
         auto* ident = expr->target.name;
         Mark(ident);
-        if (auto* resolved = sem_.ResolvedSymbol<type::Type>(ident)) {
-            // A type initializer or conversions.
-            // Note: Unlike the code path where we're resolving the call target from an
-            // ast::Type, all types must already have the element type explicitly specified,
-            // so there's no need to infer element types.
-            return ty_init_or_conv(resolved);
+
+        auto resolved = dependencies_.resolved_identifiers.Get(ident);
+        if (!resolved) {
+            TINT_ICE(Resolver, builder_->Diagnostics()) << "identifier was not resolved";
+            return nullptr;
         }
 
-        auto* resolved = sem_.ResolvedSymbol<sem::Node>(ident);
-        call = Switch<sem::Call*>(
-            resolved,  //
-            [&](sem::Function* func) { return FunctionCall(expr, func, args, arg_behaviors); },
-            [&](sem::Variable* var) {
-                auto name = builder_->Symbols().NameFor(var->Declaration()->symbol);
-                AddError("cannot call variable '" + name + "'", ident->source);
-                AddNote("'" + name + "' declared here", var->Declaration()->source);
-                return nullptr;
-            },
-            [&](Default) -> sem::Call* {
-                auto name = builder_->Symbols().NameFor(ident->symbol);
-                if (auto builtin_type = sem::ParseBuiltinType(name);
-                    builtin_type != sem::BuiltinType::kNone) {
-                    return BuiltinCall(expr, builtin_type, args);
-                }
-                if (auto* alias = BuiltinType(ident->symbol, ident->source)) {
-                    return ty_init_or_conv(alias);
-                }
-                return nullptr;
-            });
+        if (auto* ast_node = resolved->Node()) {
+            auto* resolved_node = sem_.Get(ast_node);
+            return Switch(
+                resolved_node,  //
+                [&](const type::Type* ty) {
+                    // A type initializer or conversions.
+                    // Note: Unlike the code path where we're resolving the call target from an
+                    // ast::Type, all types must already have the element type explicitly
+                    // specified, so there's no need to infer element types.
+                    return ty_init_or_conv(ty);
+                },
+                [&](sem::Function* func) { return FunctionCall(expr, func, args, arg_behaviors); },
+                [&](sem::Variable* var) {
+                    auto name = builder_->Symbols().NameFor(var->Declaration()->symbol);
+                    AddError("cannot call variable '" + name + "'", ident->source);
+                    AddNote("'" + name + "' declared here", var->Declaration()->source);
+                    return nullptr;
+                });
+        }
+
+        if (auto builtin_fn = resolved->BuiltinFunction(); builtin_fn != sem::BuiltinType::kNone) {
+            return BuiltinCall(expr, builtin_fn, args);
+        }
+
+        if (auto builtin_ty = resolved->BuiltinType(); builtin_ty != type::Builtin::kUndefined) {
+            auto* ty = BuiltinType(builtin_ty, expr->target.name);
+            return ty ? ty_init_or_conv(ty) : nullptr;
+        }
+
+        TINT_UNREACHABLE(Resolver, diagnostics_) << "unhandled resolved identifier: " << *resolved;
+        return nullptr;
     }
 
     if (!call) {
@@ -2438,13 +2453,12 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     return call;
 }
 
-type::Type* Resolver::BuiltinType(Symbol sym, const Source& source) const {
-    auto name = builder_->Symbols().NameFor(sym);
+type::Type* Resolver::BuiltinType(type::Builtin builtin_ty, const ast::Identifier* ident) const {
     auto& b = *builder_;
     auto vec_f32 = [&](uint32_t n) { return b.create<type::Vector>(b.create<type::F32>(), n); };
     auto vec_f16 = [&](uint32_t n) { return b.create<type::Vector>(b.create<type::F16>(), n); };
 
-    switch (type::ParseBuiltin(name)) {
+    switch (builtin_ty) {
         case type::Builtin::kMat2X2F:
             return b.create<type::Matrix>(vec_f32(2u), 2u);
         case type::Builtin::kMat2X3F:
@@ -2464,32 +2478,41 @@ type::Type* Resolver::BuiltinType(Symbol sym, const Source& source) const {
         case type::Builtin::kMat4X4F:
             return b.create<type::Matrix>(vec_f32(4u), 4u);
         case type::Builtin::kMat2X2H:
-            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(2u), 2u)
-                                                      : nullptr;
+            return validator_.CheckF16Enabled(ident->source)
+                       ? b.create<type::Matrix>(vec_f16(2u), 2u)
+                       : nullptr;
         case type::Builtin::kMat2X3H:
-            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(3u), 2u)
-                                                      : nullptr;
+            return validator_.CheckF16Enabled(ident->source)
+                       ? b.create<type::Matrix>(vec_f16(3u), 2u)
+                       : nullptr;
         case type::Builtin::kMat2X4H:
-            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(4u), 2u)
-                                                      : nullptr;
+            return validator_.CheckF16Enabled(ident->source)
+                       ? b.create<type::Matrix>(vec_f16(4u), 2u)
+                       : nullptr;
         case type::Builtin::kMat3X2H:
-            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(2u), 3u)
-                                                      : nullptr;
+            return validator_.CheckF16Enabled(ident->source)
+                       ? b.create<type::Matrix>(vec_f16(2u), 3u)
+                       : nullptr;
         case type::Builtin::kMat3X3H:
-            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(3u), 3u)
-                                                      : nullptr;
+            return validator_.CheckF16Enabled(ident->source)
+                       ? b.create<type::Matrix>(vec_f16(3u), 3u)
+                       : nullptr;
         case type::Builtin::kMat3X4H:
-            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(4u), 3u)
-                                                      : nullptr;
+            return validator_.CheckF16Enabled(ident->source)
+                       ? b.create<type::Matrix>(vec_f16(4u), 3u)
+                       : nullptr;
         case type::Builtin::kMat4X2H:
-            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(2u), 4u)
-                                                      : nullptr;
+            return validator_.CheckF16Enabled(ident->source)
+                       ? b.create<type::Matrix>(vec_f16(2u), 4u)
+                       : nullptr;
         case type::Builtin::kMat4X3H:
-            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(3u), 4u)
-                                                      : nullptr;
+            return validator_.CheckF16Enabled(ident->source)
+                       ? b.create<type::Matrix>(vec_f16(3u), 4u)
+                       : nullptr;
         case type::Builtin::kMat4X4H:
-            return validator_.CheckF16Enabled(source) ? b.create<type::Matrix>(vec_f16(4u), 4u)
-                                                      : nullptr;
+            return validator_.CheckF16Enabled(ident->source)
+                       ? b.create<type::Matrix>(vec_f16(4u), 4u)
+                       : nullptr;
         case type::Builtin::kVec2F:
             return vec_f32(2u);
         case type::Builtin::kVec3F:
@@ -2497,11 +2520,11 @@ type::Type* Resolver::BuiltinType(Symbol sym, const Source& source) const {
         case type::Builtin::kVec4F:
             return vec_f32(4u);
         case type::Builtin::kVec2H:
-            return validator_.CheckF16Enabled(source) ? vec_f16(2u) : nullptr;
+            return validator_.CheckF16Enabled(ident->source) ? vec_f16(2u) : nullptr;
         case type::Builtin::kVec3H:
-            return validator_.CheckF16Enabled(source) ? vec_f16(3u) : nullptr;
+            return validator_.CheckF16Enabled(ident->source) ? vec_f16(3u) : nullptr;
         case type::Builtin::kVec4H:
-            return validator_.CheckF16Enabled(source) ? vec_f16(4u) : nullptr;
+            return validator_.CheckF16Enabled(ident->source) ? vec_f16(4u) : nullptr;
         case type::Builtin::kVec2I:
             return b.create<type::Vector>(b.create<type::I32>(), 2u);
         case type::Builtin::kVec3I:
@@ -2518,7 +2541,8 @@ type::Type* Resolver::BuiltinType(Symbol sym, const Source& source) const {
             break;
     }
 
-    TINT_ICE(Resolver, diagnostics_) << source << " unhandled builtin type '" << name << "'";
+    auto name = builder_->Symbols().NameFor(ident->symbol);
+    TINT_ICE(Resolver, diagnostics_) << ident->source << " unhandled builtin type '" << name << "'";
     return nullptr;
 }
 
@@ -2685,97 +2709,110 @@ sem::ValueExpression* Resolver::Literal(const ast::LiteralExpression* literal) {
 
 sem::ValueExpression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
     Mark(expr->identifier);
-    auto symbol = expr->identifier->symbol;
-    auto* sem_resolved = sem_.ResolvedSymbol<sem::Node>(expr);
-    if (auto* variable = As<sem::Variable>(sem_resolved)) {
-        auto* user = builder_->create<sem::VariableUser>(expr, current_statement_, variable);
 
-        if (current_statement_) {
-            // If identifier is part of a loop continuing block, make sure it
-            // doesn't refer to a variable that is bypassed by a continue statement
-            // in the loop's body block.
-            if (auto* continuing_block =
-                    current_statement_->FindFirstParent<sem::LoopContinuingBlockStatement>()) {
-                auto* loop_block = continuing_block->FindFirstParent<sem::LoopBlockStatement>();
-                if (loop_block->FirstContinue()) {
-                    // If our identifier is in loop_block->decls, make sure its index is
-                    // less than first_continue
-                    if (auto decl = loop_block->Decls().Find(symbol)) {
-                        if (decl->order >= loop_block->NumDeclsAtFirstContinue()) {
-                            AddError("continue statement bypasses declaration of '" +
-                                         builder_->Symbols().NameFor(symbol) + "'",
-                                     loop_block->FirstContinue()->source);
-                            AddNote("identifier '" + builder_->Symbols().NameFor(symbol) +
-                                        "' declared here",
-                                    decl->variable->Declaration()->source);
-                            AddNote("identifier '" + builder_->Symbols().NameFor(symbol) +
-                                        "' referenced in continuing block here",
-                                    expr->source);
-                            return nullptr;
+    auto resolved = dependencies_.resolved_identifiers.Get(expr->identifier);
+    if (!resolved) {
+        TINT_ICE(Resolver, builder_->Diagnostics()) << "identifier was not resolved";
+        return nullptr;
+    }
+
+    if (auto* ast_node = resolved->Node()) {
+        auto* resolved_node = sem_.Get(ast_node);
+        return Switch(
+            resolved_node,  //
+            [&](sem::Variable* variable) -> sem::VariableUser* {
+                auto symbol = expr->identifier->symbol;
+                auto* user =
+                    builder_->create<sem::VariableUser>(expr, current_statement_, variable);
+
+                if (current_statement_) {
+                    // If identifier is part of a loop continuing block, make sure it
+                    // doesn't refer to a variable that is bypassed by a continue statement
+                    // in the loop's body block.
+                    if (auto* continuing_block =
+                            current_statement_
+                                ->FindFirstParent<sem::LoopContinuingBlockStatement>()) {
+                        auto* loop_block =
+                            continuing_block->FindFirstParent<sem::LoopBlockStatement>();
+                        if (loop_block->FirstContinue()) {
+                            // If our identifier is in loop_block->decls, make sure its index is
+                            // less than first_continue
+                            if (auto decl = loop_block->Decls().Find(symbol)) {
+                                if (decl->order >= loop_block->NumDeclsAtFirstContinue()) {
+                                    AddError("continue statement bypasses declaration of '" +
+                                                 builder_->Symbols().NameFor(symbol) + "'",
+                                             loop_block->FirstContinue()->source);
+                                    AddNote("identifier '" + builder_->Symbols().NameFor(symbol) +
+                                                "' declared here",
+                                            decl->variable->Declaration()->source);
+                                    AddNote("identifier '" + builder_->Symbols().NameFor(symbol) +
+                                                "' referenced in continuing block here",
+                                            expr->source);
+                                    return nullptr;
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
 
-        auto* global = variable->As<sem::GlobalVariable>();
-        if (current_function_) {
-            if (global) {
-                current_function_->AddDirectlyReferencedGlobal(global);
-                auto* refs = builder_->Sem().TransitivelyReferencedOverrides(global);
-                if (refs) {
-                    for (auto* var : *refs) {
-                        current_function_->AddTransitivelyReferencedGlobal(var);
+                auto* global = variable->As<sem::GlobalVariable>();
+                if (current_function_) {
+                    if (global) {
+                        current_function_->AddDirectlyReferencedGlobal(global);
+                        auto* refs = builder_->Sem().TransitivelyReferencedOverrides(global);
+                        if (refs) {
+                            for (auto* var : *refs) {
+                                current_function_->AddTransitivelyReferencedGlobal(var);
+                            }
+                        }
                     }
-                }
-            }
-        } else if (variable->Declaration()->Is<ast::Override>()) {
-            if (resolved_overrides_) {
-                // Track the reference to this pipeline-overridable constant and any other
-                // pipeline-overridable constants that it references.
-                resolved_overrides_->Add(global);
-                auto* refs = builder_->Sem().TransitivelyReferencedOverrides(global);
-                if (refs) {
-                    for (auto* var : *refs) {
-                        resolved_overrides_->Add(var);
+                } else if (variable->Declaration()->Is<ast::Override>()) {
+                    if (resolved_overrides_) {
+                        // Track the reference to this pipeline-overridable constant and any other
+                        // pipeline-overridable constants that it references.
+                        resolved_overrides_->Add(global);
+                        auto* refs = builder_->Sem().TransitivelyReferencedOverrides(global);
+                        if (refs) {
+                            for (auto* var : *refs) {
+                                resolved_overrides_->Add(var);
+                            }
+                        }
                     }
+                } else if (variable->Declaration()->Is<ast::Var>()) {
+                    // Use of a module-scope 'var' outside of a function.
+                    // Note: The spec is currently vague around the rules here. See
+                    // https://github.com/gpuweb/gpuweb/issues/3081. Remove this comment when
+                    // resolved.
+                    std::string desc = "var '" + builder_->Symbols().NameFor(symbol) + "' ";
+                    AddError(desc + "cannot be referenced at module-scope", expr->source);
+                    AddNote(desc + "declared here", variable->Declaration()->source);
+                    return nullptr;
                 }
-            }
-        } else if (variable->Declaration()->Is<ast::Var>()) {
-            // Use of a module-scope 'var' outside of a function.
-            // Note: The spec is currently vague around the rules here. See
-            // https://github.com/gpuweb/gpuweb/issues/3081. Remove this comment when resolved.
-            std::string desc = "var '" + builder_->Symbols().NameFor(symbol) + "' ";
-            AddError(desc + "cannot be referenced at module-scope", expr->source);
-            AddNote(desc + "declared here", variable->Declaration()->source);
-            return nullptr;
-        }
 
-        variable->AddUser(user);
-        return user;
+                variable->AddUser(user);
+                return user;
+            },
+            [&](const type::Type*) {
+                AddError("missing '(' for type initializer or cast", expr->source.End());
+                return nullptr;
+            },
+            [&](const sem::Function*) {
+                AddError("missing '(' for function call", expr->source.End());
+                return nullptr;
+            });
     }
 
-    if (Is<sem::Function>(sem_resolved)) {
-        AddError("missing '(' for function call", expr->source.End());
-        return nullptr;
-    }
-
-    if (IsBuiltin(symbol)) {
-        AddError("missing '(' for builtin call", expr->source.End());
-        return nullptr;
-    }
-
-    if (sem_.ResolvedSymbol<type::Type>(expr) ||
-        type::ParseBuiltin(builder_->Symbols().NameFor(symbol)) != type::Builtin::kUndefined) {
+    if (resolved->BuiltinType() != type::Builtin::kUndefined) {
         AddError("missing '(' for type initializer or cast", expr->source.End());
         return nullptr;
     }
 
-    // The dependency graph should have errored on this unresolved identifier before reaching here.
-    TINT_ICE(Resolver, diagnostics_)
-        << expr->source << " unresolved identifier:\n"
-        << "resolved: " << (sem_resolved ? sem_resolved->TypeInfo().name : "<null>") << "\n"
-        << "name: " << builder_->Symbols().NameFor(symbol);
+    if (resolved->BuiltinFunction() != sem::BuiltinType::kNone) {
+        AddError("missing '(' for builtin call", expr->source.End());
+        return nullptr;
+    }
+
+    TINT_UNREACHABLE(Resolver, diagnostics_) << "unhandled resolved identifier: " << *resolved;
     return nullptr;
 }
 
@@ -2977,8 +3014,8 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
                 return nullptr;
             }
         } else {
-            // The arguments have constant values, but the operator cannot be const-evaluated. This
-            // can only be evaluated at runtime.
+            // The arguments have constant values, but the operator cannot be const-evaluated.
+            // This can only be evaluated at runtime.
             stage = sem::EvaluationStage::kRuntime;
         }
     }
@@ -3964,11 +4001,6 @@ void Resolver::AddWarning(const std::string& msg, const Source& source) const {
 
 void Resolver::AddNote(const std::string& msg, const Source& source) const {
     diagnostics_.add_note(diag::System::Resolver, msg, source);
-}
-
-bool Resolver::IsBuiltin(Symbol symbol) const {
-    std::string name = builder_->Symbols().NameFor(symbol);
-    return sem::ParseBuiltinType(name) != sem::BuiltinType::kNone;
 }
 
 }  // namespace tint::resolver

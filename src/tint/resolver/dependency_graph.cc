@@ -354,7 +354,8 @@ class DependencyScanner {
             Switch(
                 expr,
                 [&](const ast::IdentifierExpression* ident) {
-                    AddDependency(ident, ident->identifier->symbol, "identifier", "references");
+                    AddDependency(ident->identifier, ident->identifier->symbol, "identifier",
+                                  "references");
                 },
                 [&](const ast::CallExpression* call) {
                     if (call->target.name) {
@@ -392,7 +393,7 @@ class DependencyScanner {
                 TraverseType(ptr->type);
             },
             [&](const ast::TypeName* tn) {  //
-                AddDependency(tn, tn->name->symbol, "type", "references");
+                AddDependency(tn->name, tn->name->symbol, "type", "references");
             },
             [&](const ast::Vector* vec) {  //
                 TraverseType(vec->type);
@@ -468,15 +469,25 @@ class DependencyScanner {
         UnhandledNode(diagnostics_, attr);
     }
 
-    /// Adds the dependency from `from` to `to`, erroring if `to` cannot be
-    /// resolved.
-    void AddDependency(const ast::Node* from, Symbol to, const char* use, const char* action) {
+    /// Adds the dependency from @p from to @p to, erroring if @p to cannot be resolved.
+    void AddDependency(const ast::Identifier* from,
+                       Symbol to,
+                       const char* use,
+                       const char* action) {
         auto* resolved = scope_stack_.Get(to);
         if (!resolved) {
-            if (!IsBuiltin(to)) {
-                UnknownSymbol(to, from->source, use);
+            auto s = symbols_.NameFor(to);
+            if (auto builtin_fn = sem::ParseBuiltinType(s); builtin_fn != sem::BuiltinType::kNone) {
+                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(builtin_fn));
                 return;
             }
+            if (auto builtin_ty = type::ParseBuiltin(s); builtin_ty != type::Builtin::kUndefined) {
+                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(builtin_ty));
+                return;
+            }
+
+            UnknownSymbol(to, from->source, use);
+            return;
         }
 
         if (auto global = globals_.Find(to); global && (*global)->node == resolved) {
@@ -486,17 +497,7 @@ class DependencyScanner {
             }
         }
 
-        graph_.resolved_symbols.Add(from, resolved);
-    }
-
-    /// @returns true if `name` is the name of a builtin function, or builtin type alias
-    bool IsBuiltin(Symbol name) const {
-        auto s = symbols_.NameFor(name);
-        if (sem::ParseBuiltinType(s) != sem::BuiltinType::kNone ||
-            type::ParseBuiltin(s) != type::Builtin::kUndefined) {
-            return true;
-        }
-        return false;
+        graph_.resolved_identifiers.Add(from, ResolvedIdentifier(resolved));
     }
 
     /// Appends an error to the diagnostics that the given symbol cannot be
@@ -529,7 +530,7 @@ struct DependencyAnalysis {
     /// @returns true if analysis found no errors, otherwise false.
     bool Run(const ast::Module& module) {
         // Reserve container memory
-        graph_.resolved_symbols.Reserve(module.GlobalDeclarations().Length());
+        graph_.resolved_identifiers.Reserve(module.GlobalDeclarations().Length());
         sorted_.Reserve(module.GlobalDeclarations().Length());
 
         // Collect all the named globals from the AST module
@@ -819,6 +820,22 @@ bool DependencyGraph::Build(const ast::Module& module,
                             DependencyGraph& output) {
     DependencyAnalysis da{symbols, diagnostics, output};
     return da.Run(module);
+}
+
+std::ostream& operator<<(std::ostream& out, const ResolvedIdentifier& ri) {
+    if (!ri) {
+        return out << "<unresolved symbol>";
+    }
+    if (auto* node = ri.Node()) {
+        return out << "'" << node->TypeInfo().name << "' at " << node->source;
+    }
+    if (auto builtin_fn = ri.BuiltinFunction(); builtin_fn != sem::BuiltinType::kNone) {
+        return out << "builtin function '" << builtin_fn << "'";
+    }
+    if (auto builtin_ty = ri.BuiltinType(); builtin_ty != type::Builtin::kUndefined) {
+        return out << "builtin function '" << builtin_ty << "'";
+    }
+    return out << "<unhandled ResolvedIdentifier value>";
 }
 
 }  // namespace tint::resolver

@@ -428,12 +428,9 @@ class Resolver {
     /// Adds the given note message to the diagnostics
     void AddNote(const std::string& msg, const Source& source) const;
 
-    /// @returns true if the symbol is the name of a builtin function.
-    bool IsBuiltin(Symbol) const;
-
-    /// @returns the builtin type for the symbol @p symbol at @p source
+    /// @returns the type::Type for the builtin type @p builtin_ty with the identifier @p ident
     /// @note: Will raise an ICE if @p symbol is not a builtin type.
-    type::Type* BuiltinType(Symbol symbol, const Source& source) const;
+    type::Type* BuiltinType(type::Builtin builtin_ty, const ast::Identifier* ident) const;
 
     // ArrayInitializerSig represents a unique array initializer signature.
     // It is a tuple of the array type, number of arguments provided and earliest evaluation stage.

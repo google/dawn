@@ -879,8 +879,7 @@ class ProgramBuilder {
         /// @returns the type name
         template <typename NAME, typename... ARGS, typename _ = DisableIfSource<NAME>>
         const ast::TypeName* operator()(NAME&& name, ARGS&&... args) const {
-            return builder->create<ast::TypeName>(
-                builder->Ident(std::forward<NAME>(name), std::forward<ARGS>(args)...));
+            return (*this)(builder->source_, std::forward<NAME>(name), std::forward<ARGS>(args)...);
         }
 
         /// Creates a type name
@@ -891,7 +890,8 @@ class ProgramBuilder {
         template <typename NAME, typename... ARGS>
         const ast::TypeName* operator()(const Source& source, NAME&& name, ARGS&&... args) const {
             return builder->create<ast::TypeName>(
-                source, builder->Ident(std::forward<NAME>(name), std::forward<ARGS>(args)...));
+                source,
+                builder->Ident(source, std::forward<NAME>(name), std::forward<ARGS>(args)...));
         }
 
         /// Creates an alias type

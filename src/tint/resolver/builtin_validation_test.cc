@@ -210,7 +210,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsVariable) {
     WrapInFunction(Decl(Var("v", Expr(Source{{56, 78}}, "mix"))));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: missing '(' for builtin call)");
+    EXPECT_EQ(r()->error(), R"(56:78 error: missing '(' for type initializer or cast)");
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsType) {
@@ -242,7 +242,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStructUsedAsVariable) {
     WrapInFunction(Decl(Var("v", Expr(Source{{12, 34}}, "mix"))));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: missing '(' for builtin call)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: missing '(' for type initializer or cast)");
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStructUsedAsType) {
