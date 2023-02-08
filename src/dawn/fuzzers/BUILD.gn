@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build_overrides/build.gni")
 import("../../../scripts/dawn_overrides_with_defaults.gni")
+
+import("//build_overrides/build.gni")
+import("${dawn_root}/scripts/dawn_features.gni")
+import("${dawn_root}/src/dawn/fuzzers/dawn_fuzzers.gni")
 
 # We only have libfuzzer in Chromium builds but if we build fuzzer targets only
 # there, we would risk breaking fuzzer targets all the time when making changes
@@ -108,6 +111,68 @@ dawn_fuzzer_test("dawn_wire_server_and_vulkan_backend_fuzzer") {
   deps = [ ":dawn_wire_server_fuzzer_common" ]
 
   additional_configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
+}
+
+if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader) {
+  import("//third_party/protobuf/proto_library.gni")
+  import("${dawn_root}/generator/dawn_generator.gni")
+
+  dawn_json_lpm_generator("dawn_lpmfuzz_cpp") {
+    target = "dawn_lpmfuzz_cpp"
+    outputs = [
+      "src/dawn/fuzzers/lpmfuzz/DawnLPMSerializer_autogen.cpp",
+      "src/dawn/fuzzers/lpmfuzz/DawnLPMSerializer_autogen.h",
+    ]
+  }
+
+  dawn_json_lpm_generator("dawn_lpmfuzz_proto") {
+    target = "dawn_lpmfuzz_proto"
+    outputs = [ "src/dawn/fuzzers/lpmfuzz/dawn_lpm_autogen.proto" ]
+  }
+
+  proto_library("dawn_lpm_proto") {
+    proto_in_dir = "//"
+    sources = get_target_outputs(":dawn_lpmfuzz_proto")
+
+    use_protobuf_full = true
+    deps = [
+      ":dawn_lpmfuzz_proto",
+      "//third_party/protobuf:protobuf_full",
+    ]
+  }
+
+  copy("copy_dawn_lpm_proto_outputs") {
+    # Hardcoded filenames because we can't get_target_outputs from a proto_library
+    # TODO(tiszka): crbug.com/1410213
+    sources = [
+      "$root_out_dir/gen/$root_out_dir/gen/third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_lpm_autogen.pb.cc",
+      "$root_out_dir/gen/$root_out_dir/gen/third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_lpm_autogen.pb.h",
+    ]
+    outputs = [ "$root_out_dir/gen/third_party/dawn/src/dawn/fuzzers/lpmfuzz/{{source_file_part}}" ]
+    deps = [ ":dawn_lpm_proto" ]
+  }
+
+  dawn_fuzzer_test("dawn_lpm_fuzzer_and_vulkan_backend") {
+    sources = get_target_outputs(":dawn_lpmfuzz_cpp")
+    sources += [
+      "lpmfuzz/DawnLPMFuzzer.cpp",
+      "lpmfuzz/DawnLPMFuzzer.h",
+      "lpmfuzz/DawnLPMFuzzerAndVulkanBackend.cpp",
+    ]
+
+    deps = [
+      ":copy_dawn_lpm_proto_outputs",
+      ":dawn_lpmfuzz_cpp",
+      "${dawn_root}/src/dawn:cpp",
+      "${dawn_root}/src/dawn:proc",
+      "${dawn_root}/src/dawn/common",
+      "${dawn_root}/src/dawn/native:static",
+      "${dawn_root}/src/dawn/utils",
+      "${dawn_root}/src/dawn/wire:static",
+      "//third_party/dawn/src/dawn/fuzzers:dawn_lpm_proto",
+      "//third_party/libprotobuf-mutator",
+    ]
+  }
 }
 
 # A group target to build all the fuzzers

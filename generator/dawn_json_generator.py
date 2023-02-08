@@ -777,7 +777,7 @@ class MultiGeneratorFromDawnJSON(Generator):
     def add_commandline_arguments(self, parser):
         allowed_targets = [
             'dawn_headers', 'cpp_headers', 'cpp', 'proc', 'mock_api', 'wire',
-            'native_utils'
+            'native_utils', 'dawn_lpmfuzz_cpp', 'dawn_lpmfuzz_proto'
         ]
 
         parser.add_argument('--dawn-json',
@@ -788,6 +788,10 @@ class MultiGeneratorFromDawnJSON(Generator):
                             default=None,
                             type=str,
                             help='The DAWN WIRE JSON definition to use.')
+        parser.add_argument("--lpm-json",
+                            default=None,
+                            type=str,
+                            help='The DAWN LPM FUZZER definitions to use.')
         parser.add_argument(
             '--targets',
             required=True,
@@ -795,6 +799,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             help=
             'Comma-separated subset of targets to output. Available targets: '
             + ', '.join(allowed_targets))
+
     def get_file_renders(self, args):
         with open(args.dawn_json) as f:
             loaded_json = json.loads(f.read())
@@ -805,6 +810,11 @@ class MultiGeneratorFromDawnJSON(Generator):
         if args.wire_json:
             with open(args.wire_json) as f:
                 wire_json = json.loads(f.read())
+
+        lpm_json = None
+        if args.lpm_json:
+            with open(args.lpm_json) as f:
+                lpm_json = json.loads(f.read())
 
         renders = []
 
@@ -1025,12 +1035,53 @@ class MultiGeneratorFromDawnJSON(Generator):
                     'src/dawn/wire/server/ServerPrototypes_autogen.inc',
                     wire_params))
 
+        if 'dawn_lpmfuzz_proto' in targets:
+            params_dawn_wire = parse_json(loaded_json,
+                                          enabled_tags=['dawn', 'deprecated'],
+                                          disabled_tags=['native'])
+            additional_params = compute_wire_params(params_dawn_wire,
+                                                    wire_json)
+
+            lpm_params = [
+                RENDER_PARAMS_BASE, params_dawn_wire, {}, additional_params
+            ]
+
+            renders.append(
+                FileRender('dawn/fuzzers/lpmfuzz/dawn_lpm.proto',
+                           'src/dawn/fuzzers/lpmfuzz/dawn_lpm_autogen.proto',
+                           lpm_params))
+
+        if 'dawn_lpmfuzz_cpp' in targets:
+            params_dawn_wire = parse_json(loaded_json,
+                                          enabled_tags=['dawn', 'deprecated'],
+                                          disabled_tags=['native'])
+            additional_params = compute_wire_params(params_dawn_wire,
+                                                    wire_json)
+
+            lpm_params = [
+                RENDER_PARAMS_BASE, params_dawn_wire, {}, additional_params
+            ]
+
+            renders.append(
+                FileRender(
+                    'dawn/fuzzers/lpmfuzz/DawnLPMSerializer.cpp',
+                    'src/dawn/fuzzers/lpmfuzz/DawnLPMSerializer_autogen.cpp',
+                    lpm_params))
+
+            renders.append(
+                FileRender(
+                    'dawn/fuzzers/lpmfuzz/DawnLPMSerializer.h',
+                    'src/dawn/fuzzers/lpmfuzz/DawnLPMSerializer_autogen.h',
+                    lpm_params))
+
         return renders
 
     def get_dependencies(self, args):
         deps = [os.path.abspath(args.dawn_json)]
         if args.wire_json != None:
             deps += [os.path.abspath(args.wire_json)]
+        if args.lpm_json != None:
+            deps += [os.path.abspath(args.lpm_json)]
         return deps
 
 

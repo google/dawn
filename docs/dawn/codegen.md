@@ -111,3 +111,12 @@ The schema of `dawn_wire.json` is a dictionary with the following keys:
 ## OpenGL loader generator
 
 The code to load OpenGL entrypoints from a `GetProcAddress` function is generated from [`gl.xml`](../third_party/khronos/gl.xml) and the [list of extensions](../src/dawn/native/opengl/supported_extensions.json) it supports.
+
+
+## Dawn lpmfuzz generator
+One of Dawn's Fuzzers utilizes the information in [`dawn.json`, `dawn_wire.json`, `dawn_lpm.json`] to generate  the `.proto` and `.cpp` files required for a [libprotobuf-mutator fuzzer](https://github.com/google/libprotobuf-mutator) that fuzzes Dawn Wire Server's stack with more effectiveness in some areas than plain libfuzzer.
+
+At this time it is used to generate:
+
+ - the `dawn_lpm.proto` file used to describe the grammar for the fuzzer
+ - the serializer `DawnLPMSerializer.cpp` that takes an arbitrary number of protobuf structures that were defined in `dawn_lpm.proto` and serializes them to be passed to `DawnWireServer::HandleCommands`.
