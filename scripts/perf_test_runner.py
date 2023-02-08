@@ -22,8 +22,12 @@ import sys
 import os
 import re
 
+# Assume running the dawn_perf_tests build in Chromium checkout
+# Dawn locates at /path/to/Chromium/src/third_party/dawn/
+# Chromium build usually locates at /path/to/Chromium/src/out/Release/
+# You might want to change the base_path if you want to run dawn_perf_tests build from a Dawn standalone build.
 base_path = os.path.abspath(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../'))
 
 # Look for a [Rr]elease build.
 perftests_paths = glob.glob('out/*elease*')
@@ -112,17 +116,19 @@ def get_results(metric, extra_args=[]):
         stderr=subprocess.PIPE)
     output, err = process.communicate()
 
-    m = re.search(r'Running (\d+) tests', output)
+    output_string = output.decode('utf-8')
+
+    m = re.search(r"Running (\d+) tests", output_string)
     if m and int(m.group(1)) > 1:
         print("Found more than one test result in output:")
-        print(output)
+        print(output_string)
         sys.exit(3)
 
     pattern = metric + r'.*= ([0-9.]+)'
-    m = re.findall(pattern, output)
+    m = re.findall(pattern, output_string)
     if not m:
         print("Did not find the metric '%s' in the test output:" % metric)
-        print(output)
+        print(output_string)
         sys.exit(1)
 
     return [float(value) for value in m]
