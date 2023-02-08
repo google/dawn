@@ -210,9 +210,17 @@ Array::Array(const Array&) = default;
 
 const ast::Type* Array::Build(ProgramBuilder& b) const {
     if (size > 0) {
-        return b.ty.array(type->Build(b), u32(size), stride);
+        if (stride > 0) {
+            return b.ty.array(type->Build(b), u32(size), utils::Vector{b.Stride(stride)});
+        } else {
+            return b.ty.array(type->Build(b), u32(size));
+        }
     } else {
-        return b.ty.array(type->Build(b), nullptr, stride);
+        if (stride > 0) {
+            return b.ty.array(type->Build(b), nullptr, utils::Vector{b.Stride(stride)});
+        } else {
+            return b.ty.array(type->Build(b), nullptr);
+        }
     }
 }
 

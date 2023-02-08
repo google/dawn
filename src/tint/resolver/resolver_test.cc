@@ -2063,8 +2063,8 @@ TEST_F(ResolverTest, Function_EntryPoints_LinearTime) {
 
 // Test for crbug.com/tint/728
 TEST_F(ResolverTest, ASTNodesAreReached) {
-    Structure("A", utils::Vector{Member("x", ty.array<f32, 4>(4))});
-    Structure("B", utils::Vector{Member("x", ty.array<f32, 4>(4))});
+    Structure("A", utils::Vector{Member("x", ty.array<f32, 4>(utils::Vector{Stride(4)}))});
+    Structure("B", utils::Vector{Member("x", ty.array<f32, 4>(utils::Vector{Stride(4)}))});
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 

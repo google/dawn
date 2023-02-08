@@ -72,9 +72,9 @@ TEST_F(ResolverIncrementDecrementValidationTest, ThroughPointer) {
 }
 
 TEST_F(ResolverIncrementDecrementValidationTest, ThroughArray) {
-    // var a : array<i32, 4_u>;
+    // var a : array<i32, 4u>;
     // a[1i]++;
-    auto* var_a = Var("a", ty.array(ty.i32(), 4_u));
+    auto* var_a = Var("a", ty.array<i32, 4>());
     WrapInFunction(var_a, Increment(Source{{12, 34}}, IndexAccessor("a", 1_i)));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

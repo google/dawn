@@ -1299,7 +1299,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
     SetupStorageBuffer(utils::Vector{
         Member("z", ty.f32()),
-        Member("a", ty.array(ty.i32(), 5_i)),
+        Member("a", ty.array<i32, 5>()),
     });
 
     SetupFunction(utils::Vector{
@@ -1468,7 +1468,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
     SetupStorageBuffer(utils::Vector{
         Member("z", ty.f32()),
-        Member("a", ty.array(ty.i32(), 5_i)),
+        Member("a", ty.array<i32, 5>()),
     });
 
     SetupFunction(utils::Vector{
@@ -1545,7 +1545,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
 
     SetupStorageBuffer(utils::Vector{
         Member("z", ty.f32()),
-        Member("a", ty.array(ty.i32(), 5_i)),
+        Member("a", ty.array<i32, 5>()),
     });
 
     SetupFunction(utils::Vector{

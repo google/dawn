@@ -134,7 +134,7 @@ TEST_P(ResolverInferredTypeParamTest, LocalVar_Pass) {
 INSTANTIATE_TEST_SUITE_P(ResolverTest, ResolverInferredTypeParamTest, testing::ValuesIn(all_cases));
 
 TEST_F(ResolverInferredTypeTest, InferArray_Pass) {
-    auto* type = ty.array(ty.u32(), 10_u);
+    auto* type = ty.array<u32, 10>();
     auto* expected_type = create<type::Array>(
         create<type::U32>(), create<type::ConstantArrayCount>(10u), 4u, 4u * 10u, 4u, 4u);
 

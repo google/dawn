@@ -173,7 +173,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Complex) {
     // var<private> g : S0;
 
     auto* atomic_array = Alias("AtomicArray", ty.atomic(ty.i32()));
-    auto* array_i32_4 = ty.array(ty.i32(), 4_u);
+    auto* array_i32_4 = ty.array<i32, 4>();
     auto* array_atomic_u32_8 = ty.array(ty.atomic(ty.u32()), 8_u);
     auto* array_atomic_i32_4 = ty.array(ty.atomic(ty.i32()), 4_u);
 
@@ -272,7 +272,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_Complex) {
     // var<storage, read> g : S0;
 
     auto* atomic_array = Alias("AtomicArray", ty.atomic(ty.i32()));
-    auto* array_i32_4 = ty.array(ty.i32(), 4_u);
+    auto* array_i32_4 = ty.array<i32, 4>();
     auto* array_atomic_u32_8 = ty.array(ty.atomic(ty.u32()), 8_u);
     auto* array_atomic_i32_4 = ty.array(ty.atomic(ty.i32()), 4_u);
 

@@ -49,7 +49,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_Attribute) {
-    auto* a = ty.array(ty.bool_(), 4_u, 16u);
+    auto* a = ty.array(ty.bool_(), 4_u, utils::Vector{Stride(16)});
     Alias("make_type_reachable", a);
 
     GeneratorImpl& gen = Build();

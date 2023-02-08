@@ -383,7 +383,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
     // var<private> a : @stride(8000000) array<f32, 65535>;
-    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 65535_a), 8000000),
+    GlobalVar("a",
+              ty.array(ty.f32(), Expr(Source{{12, 34}}, 65535_a), utils::Vector{Stride(8000000)}),
               type::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -874,7 +875,8 @@ TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
 
 TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableTypeWithStride) {
     auto* ptr_ty = ty.pointer<u32>(Source{{12, 34}}, type::AddressSpace::kUniform);
-    GlobalVar("arr", ty.array(ptr_ty, 4_i, 16), type::AddressSpace::kPrivate);
+    GlobalVar("arr", ty.array(ptr_ty, 4_i, utils::Vector{Stride(16)}),
+              type::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

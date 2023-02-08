@@ -61,7 +61,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateArray) {
-    auto* ary = ty.array(ty.i32(), 4_u);
+    auto* ary = ty.array<i32, 4>();
     GlobalVar("a", ary, type::AddressSpace::kPrivate);
 
     spirv::Builder& b = Build();
@@ -78,7 +78,7 @@ TEST_F(BuilderTest_Type, GenerateArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
-    auto* ary = ty.array(ty.i32(), 4_u, 16u);
+    auto* ary = ty.array<i32, 4>(utils::Vector{Stride(16)});
     GlobalVar("a", ary, type::AddressSpace::kPrivate);
 
     spirv::Builder& b = Build();
@@ -98,7 +98,7 @@ TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
-    auto* ary = ty.array(ty.i32(), 4_u);
+    auto* ary = ty.array<i32, 4>();
     GlobalVar("a", ary, type::AddressSpace::kPrivate);
 
     spirv::Builder& b = Build();

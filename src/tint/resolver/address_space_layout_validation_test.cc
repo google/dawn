@@ -161,7 +161,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_A
     //
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
-    Alias("Inner", ty.array(ty.f32(), 10_u, 16));
+    Alias("Inner", ty.array<f32, 10>(utils::Vector{Stride(16)}));
 
     Structure(Source{{12, 34}}, "Outer",
               utils::Vector{
@@ -194,7 +194,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_A
     //
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
-    Alias("Inner", ty.array(ty.f32(), 10_u, 16));
+    Alias("Inner", ty.array<f32, 10>(utils::Vector{Stride(16)}));
 
     Structure(Source{{12, 34}}, "Outer",
               utils::Vector{
@@ -396,7 +396,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
 
-    Alias("Inner", ty.array(ty.f32(), 10_u));
+    Alias("Inner", ty.array<f32, 10>());
 
     Structure(Source{{12, 34}}, "Outer",
               utils::Vector{
@@ -518,7 +518,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 
     Structure(Source{{12, 34}}, "Outer",
               utils::Vector{
-                  Member("inner", ty.array(Source{{34, 56}}, ty.array(ty.f32(), 4_u), 4_u)),
+                  Member("inner", ty.array(Source{{34, 56}}, ty.array<f32, 4>(), 4_u)),
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty("Outer"), type::AddressSpace::kUniform, Group(0_a),
@@ -546,7 +546,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
 
-    Alias("Inner", ty.array(ty.f32(), 10_u, 16));
+    Alias("Inner", ty.array<f32, 10>(utils::Vector{Stride(16)}));
 
     Structure(Source{{12, 34}}, "Outer",
               utils::Vector{

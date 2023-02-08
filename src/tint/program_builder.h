@@ -829,85 +829,48 @@ class ProgramBuilder {
         /// @param subtype the array element type
         /// @param n the array size. nullptr represents a runtime-array
         /// @param attrs the optional attributes for the array
-        /// @return the tint AST type for a array of size `n` of type `T`
-        template <typename EXPR = ast::Expression*>
+        /// @return the array of size `n` of type `T`
+        template <typename COUNT = std::nullptr_t>
         const ast::Array* array(
             const ast::Type* subtype,
-            EXPR&& n = nullptr,
+            COUNT&& n = nullptr,
             utils::VectorRef<const ast::Attribute*> attrs = utils::Empty) const {
-            return builder->create<ast::Array>(subtype, builder->Expr(std::forward<EXPR>(n)),
-                                               std::move(attrs));
+            return array(builder->source_, subtype, std::forward<COUNT>(n), std::move(attrs));
         }
 
         /// @param source the Source of the node
         /// @param subtype the array element type
         /// @param n the array size. nullptr represents a runtime-array
         /// @param attrs the optional attributes for the array
-        /// @return the tint AST type for a array of size `n` of type `T`
-        template <typename EXPR = ast::Expression*>
+        /// @return the array of size `n` of type `T`
+        template <typename COUNT = std::nullptr_t>
         const ast::Array* array(
             const Source& source,
             const ast::Type* subtype,
-            EXPR&& n = nullptr,
+            COUNT&& n = nullptr,
             utils::VectorRef<const ast::Attribute*> attrs = utils::Empty) const {
-            return builder->create<ast::Array>(
-                source, subtype, builder->Expr(std::forward<EXPR>(n)), std::move(attrs));
-        }
-
-        /// @param subtype the array element type
-        /// @param n the array size. nullptr represents a runtime-array
-        /// @param stride the array stride. 0 represents implicit stride
-        /// @return the tint AST type for a array of size `n` of type `T`
-        template <typename EXPR>
-        const ast::Array* array(const ast::Type* subtype, EXPR&& n, uint32_t stride) const {
-            utils::Vector<const ast::Attribute*, 2> attrs;
-            if (stride) {
-                attrs.Push(builder->create<ast::StrideAttribute>(stride));
+            if constexpr (std::is_same_v<traits::Decay<COUNT>, std::nullptr_t>) {
+                return builder->create<ast::Array>(source, subtype, nullptr, std::move(attrs));
+            } else {
+                return builder->create<ast::Array>(
+                    source, subtype, builder->Expr(std::forward<COUNT>(n)), std::move(attrs));
             }
-            return array(subtype, std::forward<EXPR>(n), std::move(attrs));
         }
 
-        /// @param source the Source of the node
-        /// @param subtype the array element type
-        /// @param n the array size. nullptr represents a runtime-array
-        /// @param stride the array stride. 0 represents implicit stride
-        /// @return the tint AST type for a array of size `n` of type `T`
-        template <typename EXPR>
-        const ast::Array* array(const Source& source,
-                                const ast::Type* subtype,
-                                EXPR&& n,
-                                uint32_t stride) const {
-            utils::Vector<const ast::Attribute*, 2> attrs;
-            if (stride) {
-                attrs.Push(builder->create<ast::StrideAttribute>(stride));
-            }
-            return array(source, subtype, std::forward<EXPR>(n), std::move(attrs));
-        }
-
-        /// @return the tint AST type for a runtime-sized array of type `T`
+        /// @param attrs the optional attributes for the array
+        /// @return the runtime-sized array of type `T`
         template <typename T>
-        const ast::Array* array() const {
-            return array(Of<T>(), nullptr);
+        const ast::Array* array(
+            utils::VectorRef<const ast::Attribute*> attrs = utils::Empty) const {
+            return array(Of<T>(), nullptr, std::move(attrs));
         }
 
-        /// @return the tint AST type for an array of size `N` of type `T`
+        /// @param attrs the optional attributes for the array
+        /// @return the array of size `N` of type `T`
         template <typename T, int N>
-        const ast::Array* array() const {
-            return array(Of<T>(), builder->Expr(tint::u32(N)));
-        }
-
-        /// @param stride the array stride
-        /// @return the tint AST type for a runtime-sized array of type `T`
-        template <typename T>
-        const ast::Array* array(uint32_t stride) const {
-            return array(Of<T>(), nullptr, stride);
-        }
-
-        /// @param stride the array stride
-        /// @return the tint AST type for an array of size `N` of type `T`
-        template <typename T, int N>
-        const ast::Array* array(uint32_t stride) const {
-            return array(Of<T>(), builder->Expr(tint::u32(N)), stride);
+        const ast::Array* array(
+            utils::VectorRef<const ast::Attribute*> attrs = utils::Empty) const {
+            return array(Of<T>(), tint::u32(N), std::move(attrs));
         }
 
         /// Creates a type name
@@ -2455,6 +2418,13 @@ class ProgramBuilder {
     template <typename EXPR>
     const ast::StructMemberAlignAttribute* MemberAlign(EXPR&& val) {
         return create<ast::StructMemberAlignAttribute>(source_, Expr(std::forward<EXPR>(val)));
+    }
+
+    /// Creates a ast::StrideAttribute
+    /// @param stride the array stride
+    /// @returns the ast::StrideAttribute attribute
+    const ast::StrideAttribute* Stride(uint32_t stride) {
+        return create<ast::StrideAttribute>(source_, stride);
     }
 
     /// Creates the ast::GroupAttribute

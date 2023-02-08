@@ -199,7 +199,7 @@ TEST_F(ResolverRootIdentifierTest, ThroughIndexAccessor) {
     // {
     //   a[2i]
     // }
-    auto* a = GlobalVar("a", ty.array(ty.f32(), 4_u), type::AddressSpace::kPrivate);
+    auto* a = GlobalVar("a", ty.array<f32, 4>(), type::AddressSpace::kPrivate);
     auto* expr = IndexAccessor(a, 2_i);
     WrapInFunction(expr);
 

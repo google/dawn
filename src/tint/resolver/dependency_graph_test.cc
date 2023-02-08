@@ -1286,7 +1286,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     GlobalVar(Sym(), ty.i32());
     GlobalVar(Sym(), ty.u32());
     GlobalVar(Sym(), ty.f32());
-    GlobalVar(Sym(), ty.array(T, V, 4));
+    GlobalVar(Sym(), ty.array(T, V));
     GlobalVar(Sym(), ty.vec3(T));
     GlobalVar(Sym(), ty.mat3x2(T));
     GlobalVar(Sym(), ty.pointer(T, type::AddressSpace::kPrivate));

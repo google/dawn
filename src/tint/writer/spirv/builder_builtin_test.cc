@@ -276,7 +276,7 @@ namespace array_builtin_tests {
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength) {
     auto* s = Structure("my_struct", utils::Vector{
-                                         Member("a", ty.array<f32>(4)),
+                                         Member("a", ty.array<f32>()),
                                      });
     GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
               Group(2_a));
@@ -320,7 +320,7 @@ OpReturn
 TEST_F(BuiltinBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
     auto* s = Structure("my_struct", utils::Vector{
                                          Member("z", ty.f32()),
-                                         Member(4, "a", ty.array<f32>(4)),
+                                         Member(4, "a", ty.array<f32>()),
                                      });
     GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
               Group(2_a));
@@ -363,7 +363,7 @@ OpReturn
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets) {
     auto* s = Structure("my_struct", utils::Vector{
-                                         Member("a", ty.array<f32>(4)),
+                                         Member("a", ty.array<f32>()),
                                      });
     GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
               Group(2_a));
@@ -422,7 +422,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
     //   arrayLength(&*p3);
     // }
     auto* s = Structure("my_struct", utils::Vector{
-                                         Member("a", ty.array<f32>(4)),
+                                         Member("a", ty.array<f32>()),
                                      });
     GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
               Group(2_a));

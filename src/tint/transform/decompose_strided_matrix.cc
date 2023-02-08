@@ -40,7 +40,10 @@ struct MatrixInfo {
     /// @returns a new ast::Array that holds an vector column for each row of the
     /// matrix.
     const ast::Array* array(ProgramBuilder* b) const {
-        return b->ty.array(b->ty.vec<f32>(matrix->rows()), u32(matrix->columns()), stride);
+        return b->ty.array(b->ty.vec<f32>(matrix->rows()), u32(matrix->columns()),
+                           utils::Vector{
+                               b->Stride(stride),
+                           });
     }
 
     /// Equality operator
