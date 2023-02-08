@@ -27,10 +27,6 @@ IdentifierExpression::IdentifierExpression(ProgramID pid,
     : Base(pid, nid, src), identifier(ident) {
     TINT_ASSERT(AST, identifier != nullptr);
     TINT_ASSERT_PROGRAM_IDS_EQUAL(AST, identifier, program_id);
-
-    // It is currently invalid for a templated identifier expression to be used as an identifier
-    // expression, as this should parse as a ast::TypeName.
-    TINT_ASSERT(AST, !ident->Is<TemplatedIdentifier>());
 }
 
 IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;

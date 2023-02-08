@@ -1219,9 +1219,6 @@ class ProgramBuilder {
     /// @return an ast::IdentifierExpression with the given identifier
     template <typename IDENTIFIER, typename = traits::EnableIfIsType<IDENTIFIER, ast::Identifier>>
     const ast::IdentifierExpression* Expr(const IDENTIFIER* ident) {
-        static_assert(!traits::IsType<IDENTIFIER, ast::TemplatedIdentifier>,
-                      "it is currently invalid for a templated identifier expression to be used as "
-                      "an identifier expression, as this should parse as an ast::TypeName");
         return create<ast::IdentifierExpression>(ident);
     }
 
