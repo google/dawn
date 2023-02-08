@@ -1167,9 +1167,9 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
             ++num_non_writable_members;
         }
         const auto member_name = namer_.GetMemberName(type_id, member_index);
-        auto* ast_struct_member = create<ast::StructMember>(
-            Source{}, builder_.Symbols().Register(member_name), ast_member_ty->Build(builder_),
-            std::move(ast_member_decorations));
+        auto* ast_struct_member =
+            builder_.Member(Source{}, member_name, ast_member_ty->Build(builder_),
+                            std::move(ast_member_decorations));
         ast_members.Push(ast_struct_member);
     }
 
@@ -1390,7 +1390,6 @@ bool ParserImpl::EmitScalarSpecConstants() {
             auto* ast_var =
                 MakeOverride(inst.result_id(), ast_type, ast_expr, std::move(spec_id_decos));
             if (ast_var) {
-                builder_.AST().AddGlobalVariable(ast_var);
                 scalar_spec_constants_.insert(inst.result_id());
             }
         }
@@ -1577,11 +1576,11 @@ const spvtools::opt::analysis::IntConstant* ParserImpl::GetArraySize(uint32_t va
     return size->AsIntConstant();
 }
 
-ast::Var* ParserImpl::MakeVar(uint32_t id,
-                              type::AddressSpace address_space,
-                              const Type* storage_type,
-                              const ast::Expression* initializer,
-                              AttributeList decorations) {
+const ast::Var* ParserImpl::MakeVar(uint32_t id,
+                                    type::AddressSpace address_space,
+                                    const Type* storage_type,
+                                    const ast::Expression* initializer,
+                                    AttributeList decorations) {
     if (storage_type == nullptr) {
         Fail() << "internal error: can't make ast::Variable for null type";
         return nullptr;
@@ -1610,35 +1609,37 @@ ast::Var* ParserImpl::MakeVar(uint32_t id,
     }
 
     auto sym = builder_.Symbols().Register(namer_.Name(id));
-    return create<ast::Var>(Source{}, sym, storage_type->Build(builder_), address_space, access,
-                            initializer, decorations);
+    return builder_.Var(Source{}, sym, storage_type->Build(builder_), address_space, access,
+                        initializer, decorations);
 }
 
-ast::Let* ParserImpl::MakeLet(uint32_t id, const Type* type, const ast::Expression* initializer) {
+const ast::Let* ParserImpl::MakeLet(uint32_t id,
+                                    const Type* type,
+                                    const ast::Expression* initializer) {
     auto sym = builder_.Symbols().Register(namer_.Name(id));
-    return create<ast::Let>(Source{}, sym, type->Build(builder_), initializer, utils::Empty);
+    return builder_.Let(Source{}, sym, type->Build(builder_), initializer, utils::Empty);
 }
 
-ast::Override* ParserImpl::MakeOverride(uint32_t id,
-                                        const Type* type,
-                                        const ast::Expression* initializer,
-                                        AttributeList decorations) {
+const ast::Override* ParserImpl::MakeOverride(uint32_t id,
+                                              const Type* type,
+                                              const ast::Expression* initializer,
+                                              AttributeList decorations) {
     if (!ConvertDecorationsForVariable(id, &type, &decorations, false)) {
         return nullptr;
     }
     auto sym = builder_.Symbols().Register(namer_.Name(id));
-    return create<ast::Override>(Source{}, sym, type->Build(builder_), initializer, decorations);
+    return builder_.Override(Source{}, sym, type->Build(builder_), initializer, decorations);
 }
 
-ast::Parameter* ParserImpl::MakeParameter(uint32_t id,
-                                          const Type* type,
-                                          AttributeList decorations) {
+const ast::Parameter* ParserImpl::MakeParameter(uint32_t id,
+                                                const Type* type,
+                                                AttributeList decorations) {
     if (!ConvertDecorationsForVariable(id, &type, &decorations, false)) {
         return nullptr;
     }
 
     auto sym = builder_.Symbols().Register(namer_.Name(id));
-    return create<ast::Parameter>(Source{}, sym, type->Build(builder_), decorations);
+    return builder_.Param(Source{}, sym, type->Build(builder_), decorations);
 }
 
 bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,

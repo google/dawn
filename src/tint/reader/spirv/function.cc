@@ -955,9 +955,8 @@ bool FunctionEmitter::Emit() {
             return false;
         }
 
-        builder_.AST().AddFunction(create<ast::Function>(
-            decl.source, builder_.Symbols().Register(decl.name), std::move(decl.params),
-            decl.return_type->Build(builder_), body, std::move(decl.attributes), utils::Empty));
+        builder_.Func(decl.source, decl.name, std::move(decl.params),
+                      decl.return_type->Build(builder_), body, std::move(decl.attributes));
     }
 
     if (ep_info_ && !ep_info_->inner_name.empty()) {
@@ -1395,7 +1394,6 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         }
     }
 
-    auto* body = create<ast::BlockStatement>(source, stmts, utils::Empty);
     AttributeList fn_attrs;
     fn_attrs.Push(create<ast::StageAttribute>(source, ep_info_->stage));
 
@@ -1409,9 +1407,8 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         }
     }
 
-    builder_.AST().AddFunction(create<ast::Function>(
-        source, builder_.Symbols().Register(ep_info_->name), std::move(decl.params), return_type,
-        body, std::move(fn_attrs), AttributeList{}));
+    builder_.Func(source, ep_info_->name, std::move(decl.params), return_type, std::move(stmts),
+                  std::move(fn_attrs));
 
     return true;
 }
@@ -5779,21 +5776,18 @@ bool FunctionEmitter::EmitAtomicOp(const spvtools::opt::Instruction& inst) {
         }
 
         // Emit stub, will be removed by transform::SpirvAtomic
-        auto sym = builder_.Symbols().New(std::string("stub_") + sem::str(builtin));
-        auto* stub_deco = builder_.ASTNodes().Create<transform::SpirvAtomic::Stub>(
-            builder_.ID(), builder_.AllocateNodeID(), builtin);
-        auto* stub =
-            create<ast::Function>(Source{}, sym, std::move(params), ret_type,
-                                  /* body */ nullptr,
-                                  AttributeList{
-                                      stub_deco,
-                                      builder_.Disable(ast::DisabledValidation::kFunctionHasNoBody),
-                                  },
-                                  AttributeList{});
-        builder_.AST().AddFunction(stub);
+        auto* stub = builder_.Func(
+            Source{}, builder_.Symbols().New(std::string("stub_") + sem::str(builtin)),
+            std::move(params), ret_type,
+            /* body */ nullptr,
+            utils::Vector{
+                builder_.ASTNodes().Create<transform::SpirvAtomic::Stub>(
+                    builder_.ID(), builder_.AllocateNodeID(), builtin),
+                builder_.Disable(ast::DisabledValidation::kFunctionHasNoBody),
+            });
 
         // Emit call to stub, will be replaced with call to atomic builtin by transform::SpirvAtomic
-        auto* call = builder_.Call(Source{}, sym, std::move(exprs));
+        auto* call = builder_.Call(Source{}, stub->symbol, std::move(exprs));
         if (inst.type_id() != 0) {
             auto* result_type = parser_impl_.ConvertType(inst.type_id());
             TypedExpression expr{result_type, call};

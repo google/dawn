@@ -429,18 +429,18 @@ class ParserImpl : Reader {
     /// @param decorations the variable decorations
     /// @returns a new Variable node, or null in the ignorable variable case and
     /// in the error case
-    ast::Var* MakeVar(uint32_t id,
-                      type::AddressSpace address_space,
-                      const Type* storage_type,
-                      const ast::Expression* initializer,
-                      AttributeList decorations);
+    const ast::Var* MakeVar(uint32_t id,
+                            type::AddressSpace address_space,
+                            const Type* storage_type,
+                            const ast::Expression* initializer,
+                            AttributeList decorations);
 
     /// Creates an AST 'let' node for a SPIR-V ID, including any attached decorations,.
     /// @param id the SPIR-V result ID
     /// @param type the type of the variable
     /// @param initializer the variable initializer
     /// @returns the AST 'let' node
-    ast::Let* MakeLet(uint32_t id, const Type* type, const ast::Expression* initializer);
+    const ast::Let* MakeLet(uint32_t id, const Type* type, const ast::Expression* initializer);
 
     /// Creates an AST 'override' node for a SPIR-V ID, including any attached decorations.
     /// @param id the SPIR-V result ID
@@ -448,10 +448,10 @@ class ParserImpl : Reader {
     /// @param initializer the variable initializer
     /// @param decorations the variable decorations
     /// @returns the AST 'override' node
-    ast::Override* MakeOverride(uint32_t id,
-                                const Type* type,
-                                const ast::Expression* initializer,
-                                AttributeList decorations);
+    const ast::Override* MakeOverride(uint32_t id,
+                                      const Type* type,
+                                      const ast::Expression* initializer,
+                                      AttributeList decorations);
 
     /// Creates an AST parameter node for a SPIR-V ID, including any attached decorations, unless
     /// it's an ignorable builtin variable.
@@ -459,7 +459,7 @@ class ParserImpl : Reader {
     /// @param type the type of the parameter
     /// @param decorations the parameter decorations
     /// @returns the AST parameter node
-    ast::Parameter* MakeParameter(uint32_t id, const Type* type, AttributeList decorations);
+    const ast::Parameter* MakeParameter(uint32_t id, const Type* type, AttributeList decorations);
 
     /// Returns true if a constant expression can be generated.
     /// @param id the SPIR-V ID of the value
@@ -885,7 +885,7 @@ class ParserImpl : Reader {
     std::unordered_map<const spvtools::opt::Instruction*, const Type*> handle_type_;
 
     /// Maps the SPIR-V ID of a module-scope variable to its AST variable.
-    utils::Hashmap<uint32_t, ast::Var*, 16> module_variable_;
+    utils::Hashmap<uint32_t, const ast::Var*, 16> module_variable_;
 
     // Set of symbols of declared type that have been added, used to avoid
     // adding duplicates.

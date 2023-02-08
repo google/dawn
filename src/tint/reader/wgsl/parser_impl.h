@@ -474,7 +474,7 @@ class ParserImpl {
     Expect<StructMemberList> expect_struct_body_decl();
     /// Parses a `struct_member` grammar element, erroring on parse failure.
     /// @returns the struct member or nullptr
-    Expect<ast::StructMember*> expect_struct_member();
+    Expect<const ast::StructMember*> expect_struct_member();
     /// Parses a `function_decl` grammar element with the initial
     /// `function_attribute_decl*` provided as `attrs`.
     /// @param attrs the list of attributes for the function declaration. If attributes are consumed
@@ -519,7 +519,7 @@ class ParserImpl {
     Expect<ParameterList> expect_param_list();
     /// Parses a `param` grammar element, erroring on parse failure.
     /// @returns the parsed variable
-    Expect<ast::Parameter*> expect_param();
+    Expect<const ast::Parameter*> expect_param();
     /// Parses a `pipeline_stage` grammar element, erroring if the next token does
     /// not match a stage name.
     /// @returns the pipeline stage.
