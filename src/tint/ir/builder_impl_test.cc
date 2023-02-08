@@ -1844,7 +1844,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Bitcast) {
-    auto* expr = Bitcast(ty.f32(), 3_u);
+    auto* expr = Bitcast<f32>(3_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();

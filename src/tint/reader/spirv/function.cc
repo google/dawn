@@ -1104,8 +1104,7 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
             if (is_builtin && (tip_type != forced_param_type)) {
                 // The parameter will have the WGSL type, but we need bitcast to
                 // the variable store type.
-                param_value =
-                    create<ast::BitcastExpression>(tip_type->Build(builder_), param_value);
+                param_value = builder_.Bitcast(tip_type->Build(builder_), param_value);
             }
 
             statements->Push(builder_.Assign(store_dest, param_value));
@@ -1240,8 +1239,7 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
             if (is_builtin && (tip_type != forced_member_type)) {
                 // The member will have the WGSL type, but we need bitcast to
                 // the variable store type.
-                load_source = create<ast::BitcastExpression>(forced_member_type->Build(builder_),
-                                                             load_source);
+                load_source = builder_.Bitcast(forced_member_type->Build(builder_), load_source);
             }
             return_exprs->Push(load_source);
 
@@ -3847,8 +3845,8 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     }
 
     if (op == spv::Op::OpBitcast) {
-        return {ast_type, create<ast::BitcastExpression>(Source{}, ast_type->Build(builder_),
-                                                         MakeOperand(inst, 0).expr)};
+        return {ast_type,
+                builder_.Bitcast(Source{}, ast_type->Build(builder_), MakeOperand(inst, 0).expr)};
     }
 
     if (op == spv::Op::OpShiftLeftLogical || op == spv::Op::OpShiftRightLogical ||
@@ -5168,8 +5166,7 @@ TypedExpression FunctionEmitter::MakeNumericConversion(const spvtools::opt::Inst
         return result;
     }
     return {requested_type,
-            create<ast::BitcastExpression>(GetSourceForInst(inst), requested_type->Build(builder_),
-                                           result.expr)};
+            builder_.Bitcast(GetSourceForInst(inst), requested_type->Build(builder_), result.expr)};
 }
 
 bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
@@ -5661,8 +5658,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
         if (expected_component_type != result_component_type) {
             // This occurs if one is signed integer and the other is unsigned integer,
             // or vice versa. Perform a bitcast.
-            value =
-                create<ast::BitcastExpression>(Source{}, result_type->Build(builder_), call_expr);
+            value = builder_.Bitcast(Source{}, result_type->Build(builder_), call_expr);
         }
         if (!expected_component_type->Is<F32>() && IsSampledImageAccess(op)) {
             // WGSL permits sampled image access only on float textures.

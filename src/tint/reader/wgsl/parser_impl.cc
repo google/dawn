@@ -2609,7 +2609,7 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
             return Failure::kErrored;
         }
 
-        return create<ast::BitcastExpression>(t.source(), type.value, params.value);
+        return builder_.Bitcast(t.source(), type.value, params.value);
     }
 
     auto call = callable();

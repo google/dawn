@@ -23,7 +23,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Bitcast) {
-    auto* bitcast = create<ast::BitcastExpression>(ty.u32(), Expr(2.4_f));
+    auto* bitcast = Bitcast<u32>(Expr(2.4_f));
 
     WrapInFunction(bitcast);
 
@@ -42,7 +42,7 @@ TEST_F(BuilderTest, Bitcast) {
 }
 
 TEST_F(BuilderTest, Bitcast_DuplicateType) {
-    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(2.4_f));
+    auto* bitcast = Bitcast<f32>(Expr(2.4_f));
 
     WrapInFunction(bitcast);
 

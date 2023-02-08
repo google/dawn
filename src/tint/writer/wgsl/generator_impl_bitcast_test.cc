@@ -22,7 +22,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Bitcast) {
-    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(1_i));
+    auto* bitcast = Bitcast<f32>(Expr(1_i));
     WrapInFunction(bitcast);
 
     GeneratorImpl& gen = Build();

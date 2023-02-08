@@ -1812,7 +1812,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Bitcast) {
     GlobalConst("one", Expr(1_a));
     GlobalConst("a", Expr(0x7F800000_a));
     auto* lhs = Equal("one", 0_a);
-    auto* rhs = Equal(Source{{12, 34}}, Bitcast(ty.f32(), "a"), 0_i);
+    auto* rhs = Equal(Source{{12, 34}}, Bitcast<f32>("a"), 0_i);
     auto* binary = LogicalAnd(lhs, rhs);
     GlobalConst("result", binary);
 
@@ -1862,7 +1862,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Bitcast) {
     GlobalConst("one", Expr(1_a));
     GlobalConst("a", Expr(0x7F800000_a));
     auto* lhs = Equal("one", 1_a);
-    auto* rhs = Equal(Source{{12, 34}}, Bitcast(ty.f32(), "a"), 0_i);
+    auto* rhs = Equal(Source{{12, 34}}, Bitcast<f32>("a"), 0_i);
     auto* binary = LogicalOr(lhs, rhs);
     GlobalConst("result", binary);
 

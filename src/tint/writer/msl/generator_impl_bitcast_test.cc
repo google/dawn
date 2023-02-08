@@ -23,7 +23,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Bitcast) {
     auto* a = Let("a", Expr(1_i));
-    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr("a"));
+    auto* bitcast = Bitcast<f32>(Expr("a"));
     WrapInFunction(a, bitcast);
 
     GeneratorImpl& gen = Build();

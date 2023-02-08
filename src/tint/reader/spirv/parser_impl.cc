@@ -2098,14 +2098,13 @@ TypedExpression ParserImpl::RectifyOperandSignedness(const spvtools::opt::Instru
     if (requires_unsigned) {
         if (auto* unsigned_ty = UnsignedTypeFor(type)) {
             // Conversion is required.
-            return {unsigned_ty, create<ast::BitcastExpression>(
-                                     Source{}, unsigned_ty->Build(builder_), expr.expr)};
+            return {unsigned_ty,
+                    builder_.Bitcast(Source{}, unsigned_ty->Build(builder_), expr.expr)};
         }
     } else if (requires_signed) {
         if (auto* signed_ty = SignedTypeFor(type)) {
             // Conversion is required.
-            return {signed_ty, create<ast::BitcastExpression>(Source{}, signed_ty->Build(builder_),
-                                                              expr.expr)};
+            return {signed_ty, builder_.Bitcast(Source{}, signed_ty->Build(builder_), expr.expr)};
         }
     }
     // We should not reach here.
@@ -2119,8 +2118,8 @@ TypedExpression ParserImpl::RectifySecondOperandSignedness(const spvtools::opt::
     if ((target_type != second_operand_expr.type->UnwrapRef()) &&
         AssumesSecondOperandSignednessMatchesFirstOperand(opcode(inst))) {
         // Conversion is required.
-        return {target_type, create<ast::BitcastExpression>(Source{}, target_type->Build(builder_),
-                                                            second_operand_expr.expr)};
+        return {target_type,
+                builder_.Bitcast(Source{}, target_type->Build(builder_), second_operand_expr.expr)};
     }
     // No conversion necessary.
     return std::move(second_operand_expr);
@@ -2178,15 +2177,13 @@ TypedExpression ParserImpl::RectifyForcedResultType(TypedExpression expr,
     if ((!forced_result_ty) || (forced_result_ty == expr.type)) {
         return expr;
     }
-    return {expr.type,
-            create<ast::BitcastExpression>(Source{}, expr.type->Build(builder_), expr.expr)};
+    return {expr.type, builder_.Bitcast(Source{}, expr.type->Build(builder_), expr.expr)};
 }
 
 TypedExpression ParserImpl::AsUnsigned(TypedExpression expr) {
     if (expr.type && expr.type->IsSignedScalarOrVector()) {
         auto* new_type = GetUnsignedIntMatchingShape(expr.type);
-        return {new_type,
-                create<ast::BitcastExpression>(Source{}, new_type->Build(builder_), expr.expr)};
+        return {new_type, builder_.Bitcast(Source{}, new_type->Build(builder_), expr.expr)};
     }
     return expr;
 }
@@ -2194,8 +2191,7 @@ TypedExpression ParserImpl::AsUnsigned(TypedExpression expr) {
 TypedExpression ParserImpl::AsSigned(TypedExpression expr) {
     if (expr.type && expr.type->IsUnsignedScalarOrVector()) {
         auto* new_type = GetSignedIntMatchingShape(expr.type);
-        return {new_type,
-                create<ast::BitcastExpression>(Source{}, new_type->Build(builder_), expr.expr)};
+        return {new_type, builder_.Bitcast(Source{}, new_type->Build(builder_), expr.expr)};
     }
     return expr;
 }

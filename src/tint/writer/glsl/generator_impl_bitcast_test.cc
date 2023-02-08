@@ -23,7 +23,7 @@ using GlslGeneratorImplTest_Bitcast = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
     auto* a = Let("a", Expr(1_i));
-    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr("a"));
+    auto* bitcast = Bitcast<f32>(Expr("a"));
     WrapInFunction(a, bitcast);
 
     GeneratorImpl& gen = Build();
@@ -35,7 +35,7 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
 
 TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
     auto* a = Let("a", Expr(1_u));
-    auto* bitcast = create<ast::BitcastExpression>(ty.i32(), Expr("a"));
+    auto* bitcast = Bitcast<i32>(Expr("a"));
     WrapInFunction(a, bitcast);
 
     GeneratorImpl& gen = Build();
@@ -47,7 +47,7 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
 
 TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
     auto* a = Let("a", Expr(1_i));
-    auto* bitcast = create<ast::BitcastExpression>(ty.u32(), Expr("a"));
+    auto* bitcast = Bitcast<u32>(Expr("a"));
     WrapInFunction(a, bitcast);
 
     GeneratorImpl& gen = Build();

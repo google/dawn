@@ -581,7 +581,7 @@ TEST_F(ResolverTest, ArraySize_UnamedOverride_Equivalence) {
 TEST_F(ResolverTest, Expr_Bitcast) {
     GlobalVar("name", ty.f32(), type::AddressSpace::kPrivate);
 
-    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr("name"));
+    auto* bitcast = Bitcast<f32>(Expr("name"));
     WrapInFunction(bitcast);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
