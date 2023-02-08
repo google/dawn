@@ -971,10 +971,12 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "success"},
-            {"value": 1, "name": "error"},
-            {"value": 2, "name": "device lost"},
-            {"value": 3, "name": "device destroyed"},
-            {"value": 4, "name": "unknown"}
+            {"value": 1, "name": "validation error"},
+            {"value": 2, "name": "internal error"},
+            {"value": 3, "name": "device lost"},
+            {"value": 4, "name": "device destroyed"},
+            {"value": 5, "name": "unknown"},
+            {"value": 6, "name": "error"}
         ]
     },
     "create render pipeline async callback": {
