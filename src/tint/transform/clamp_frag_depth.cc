@@ -170,7 +170,8 @@ Transform::ApplyResult ClampFragDepth::Apply(const Program* src, const DataMap&,
 
                 utils::Vector<const ast::Expression*, 8u> initializer_args;
                 for (auto* member : struct_ty->members) {
-                    const ast::Expression* arg = b.MemberAccessor("s", ctx.Clone(member->symbol));
+                    const ast::Expression* arg =
+                        b.MemberAccessor("s", ctx.Clone(member->name->symbol));
                     if (ContainsFragDepth(member->attributes)) {
                         arg = b.Call(base_fn_sym, arg);
                     }

@@ -384,7 +384,7 @@ struct Std140::State {
             bool unique = true;
             for (auto* member : str->members) {
                 // The member name must be unique over the entire set of `count` suffixed names.
-                if (strings.Contains(sym.NameFor(member->symbol))) {
+                if (strings.Contains(sym.NameFor(member->name->symbol))) {
                     unique = false;
                     break;
                 }
@@ -420,7 +420,8 @@ struct Std140::State {
                         b.Structure(name, members);
                         return Std140Matrix{
                             name,
-                            utils::Transform(members, [&](auto* member) { return member->symbol; }),
+                            utils::Transform(members,
+                                             [&](auto* member) { return member->name->symbol; }),
                         };
                     });
                     return b.ty(std140_mat.name);
@@ -704,7 +705,7 @@ struct Std140::State {
                             auto* mat_ty = CreateASTTypeFor(ctx, member->Type());
                             auto mat_args =
                                 utils::Transform(*col_members, [&](const ast::StructMember* m) {
-                                    return b.MemberAccessor(param, m->symbol);
+                                    return b.MemberAccessor(param, m->name->symbol);
                                 });
                             args.Push(b.Call(mat_ty, std::move(mat_args)));
                         } else {
@@ -838,7 +839,7 @@ struct Std140::State {
             auto mat_member_idx = std::get<u32>(chain.indices[std140_mat_idx]);
             auto* mat_member = str->Members()[mat_member_idx];
             auto mat_columns = *std140_mat_members.Get(mat_member);
-            expr = b.MemberAccessor(expr, mat_columns[column_idx]->symbol);
+            expr = b.MemberAccessor(expr, mat_columns[column_idx]->name->symbol);
             ty = mat_member->Type()->As<type::Matrix>()->ColumnType();
         } else {
             // Non-structure-member matrix. The columns are decomposed into a new, bespoke std140
@@ -921,7 +922,7 @@ struct Std140::State {
                             std::to_string(column_param_idx);
                 }
                 auto mat_columns = *std140_mat_members.Get(mat_member);
-                expr = b.MemberAccessor(expr, mat_columns[column_idx]->symbol);
+                expr = b.MemberAccessor(expr, mat_columns[column_idx]->name->symbol);
                 ty = mat_member->Type()->As<type::Matrix>()->ColumnType();
             } else {
                 // Non-structure-member matrix. The columns are decomposed into a new, bespoke
@@ -1015,7 +1016,7 @@ struct Std140::State {
             auto* mat_member = str->Members()[mat_member_idx];
             auto mat_columns = *std140_mat_members.Get(mat_member);
             columns = utils::Transform(mat_columns, [&](auto* column_member) {
-                return b.MemberAccessor(b.Deref(let), column_member->symbol);
+                return b.MemberAccessor(b.Deref(let), column_member->name->symbol);
             });
             ty = mat_member->Type();
             name += "_" + sym.NameFor(mat_member->Name());

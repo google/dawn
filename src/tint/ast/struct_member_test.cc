@@ -23,7 +23,7 @@ using StructMemberTest = TestHelper;
 
 TEST_F(StructMemberTest, Creation) {
     auto* st = Member("a", ty.i32(), utils::Vector{MemberSize(4_a)});
-    EXPECT_EQ(st->symbol, Symbol(1, ID()));
+    EXPECT_EQ(st->name->symbol, Symbol(1, ID()));
     EXPECT_TRUE(st->type->Is<ast::I32>());
     EXPECT_EQ(st->attributes.Length(), 1u);
     EXPECT_TRUE(st->attributes[0]->Is<StructMemberSizeAttribute>());
@@ -36,7 +36,7 @@ TEST_F(StructMemberTest, Creation) {
 TEST_F(StructMemberTest, CreationWithSource) {
     auto* st = Member(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}}, "a",
                       ty.i32());
-    EXPECT_EQ(st->symbol, Symbol(1, ID()));
+    EXPECT_EQ(st->name->symbol, Symbol(1, ID()));
     EXPECT_TRUE(st->type->Is<ast::I32>());
     EXPECT_EQ(st->attributes.Length(), 0u);
     EXPECT_EQ(st->source.range.begin.line, 27u);
@@ -45,11 +45,11 @@ TEST_F(StructMemberTest, CreationWithSource) {
     EXPECT_EQ(st->source.range.end.column, 8u);
 }
 
-TEST_F(StructMemberTest, Assert_Empty_Symbol) {
+TEST_F(StructMemberTest, Assert_Null_Name) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.Member("", b.ty.i32());
+            b.Member(static_cast<Identifier*>(nullptr), b.ty.i32());
         },
         "internal compiler error");
 }

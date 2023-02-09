@@ -27,7 +27,7 @@ TEST_F(ParserImplTest, StructMember_Parses) {
     ASSERT_FALSE(m.errored);
     ASSERT_NE(m.value, nullptr);
 
-    EXPECT_EQ(m->symbol, builder.Symbols().Get("a"));
+    EXPECT_EQ(m->name->symbol, builder.Symbols().Get("a"));
     EXPECT_TRUE(m->type->Is<ast::I32>());
     EXPECT_EQ(m->attributes.Length(), 0u);
 
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithAlignAttribute) {
     ASSERT_FALSE(m.errored);
     ASSERT_NE(m.value, nullptr);
 
-    EXPECT_EQ(m->symbol, builder.Symbols().Get("a"));
+    EXPECT_EQ(m->name->symbol, builder.Symbols().Get("a"));
     EXPECT_TRUE(m->type->Is<ast::I32>());
     EXPECT_EQ(m->attributes.Length(), 1u);
     EXPECT_TRUE(m->attributes[0]->Is<ast::StructMemberAlignAttribute>());
@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithSizeAttribute) {
     ASSERT_FALSE(m.errored);
     ASSERT_NE(m.value, nullptr);
 
-    EXPECT_EQ(m->symbol, builder.Symbols().Get("a"));
+    EXPECT_EQ(m->name->symbol, builder.Symbols().Get("a"));
     EXPECT_TRUE(m->type->Is<ast::I32>());
     EXPECT_EQ(m->attributes.Length(), 1u);
     ASSERT_TRUE(m->attributes[0]->Is<ast::StructMemberSizeAttribute>());
@@ -94,7 +94,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleattributes) {
     ASSERT_FALSE(m.errored);
     ASSERT_NE(m.value, nullptr);
 
-    EXPECT_EQ(m->symbol, builder.Symbols().Get("a"));
+    EXPECT_EQ(m->name->symbol, builder.Symbols().Get("a"));
     EXPECT_TRUE(m->type->Is<ast::I32>());
     EXPECT_EQ(m->attributes.Length(), 2u);
     ASSERT_TRUE(m->attributes[0]->Is<ast::StructMemberSizeAttribute>());

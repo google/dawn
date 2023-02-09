@@ -805,7 +805,7 @@ struct VertexPulling::State {
         bool has_locations = false;
         utils::Vector<const ast::StructMember*, 8> members_to_clone;
         for (auto* member : struct_ty->members) {
-            auto member_sym = ctx.Clone(member->symbol);
+            auto member_sym = ctx.Clone(member->name->symbol);
             std::function<const ast::Expression*()> member_expr = [this, param_sym, member_sym]() {
                 return b.MemberAccessor(param_sym, member_sym);
             };
@@ -851,10 +851,10 @@ struct VertexPulling::State {
             // Create a new struct without the location attributes.
             utils::Vector<const ast::StructMember*, 8> new_members;
             for (auto* member : members_to_clone) {
-                auto member_sym = ctx.Clone(member->symbol);
+                auto member_name = ctx.Clone(member->name);
                 auto* member_type = ctx.Clone(member->type);
                 auto member_attrs = ctx.Clone(member->attributes);
-                new_members.Push(b.Member(member_sym, member_type, std::move(member_attrs)));
+                new_members.Push(b.Member(member_name, member_type, std::move(member_attrs)));
             }
             auto* new_struct = b.Structure(b.Sym(), new_members);
 
@@ -864,7 +864,7 @@ struct VertexPulling::State {
 
             // Copy values from the new parameter to the function-scope variable.
             for (auto* member : members_to_clone) {
-                auto member_name = ctx.Clone(member->symbol);
+                auto member_name = ctx.Clone(member->name->symbol);
                 ctx.InsertFront(func->body->statements,
                                 b.Assign(b.MemberAccessor(func_var, member_name),
                                          b.MemberAccessor(new_param, member_name)));

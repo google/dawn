@@ -152,7 +152,7 @@ TEST_F(ResolverInferredTypeTest, InferStruct_Pass) {
 
     auto* expected_type = create<sem::Struct>(
         str, str->source, str->name,
-        utils::Vector{create<sem::StructMember>(member, member->source, member->symbol,
+        utils::Vector{create<sem::StructMember>(member, member->source, member->name->symbol,
                                                 create<type::I32>(), 0u, 0u, 0u, 4u, std::nullopt)},
         0u, 4u, 4u);
 

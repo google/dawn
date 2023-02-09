@@ -21,6 +21,7 @@
 
 // Forward declarations
 namespace tint::ast {
+class Identifier;
 class Type;
 }  // namespace tint::ast
 
@@ -33,13 +34,13 @@ class StructMember final : public Castable<StructMember, Node> {
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node for the struct member statement
-    /// @param sym The struct member symbol
+    /// @param name The struct member name
     /// @param type The struct member type
     /// @param attributes The struct member attributes
     StructMember(ProgramID pid,
                  NodeID nid,
                  const Source& src,
-                 const Symbol& sym,
+                 const Identifier* name,
                  const ast::Type* type,
                  utils::VectorRef<const Attribute*> attributes);
     /// Move constructor
@@ -53,8 +54,8 @@ class StructMember final : public Castable<StructMember, Node> {
     /// @return the newly cloned node
     const StructMember* Clone(CloneContext* ctx) const override;
 
-    /// The symbol
-    const Symbol symbol;
+    /// The member name
+    const Identifier* const name;
 
     /// The type
     const ast::Type* const type;

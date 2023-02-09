@@ -2645,6 +2645,19 @@ class ProgramBuilder {
     }
 
     /// Creates a ast::StructMember
+    /// @param name the struct member name
+    /// @param type the struct member type
+    /// @param attributes the optional struct member attributes
+    /// @returns the struct member pointer
+    template <typename NAME>
+    const ast::StructMember* Member(
+        NAME&& name,
+        const ast::Type* type,
+        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
+        return Member(source_, std::forward<NAME>(name), type, std::move(attributes));
+    }
+
+    /// Creates a ast::StructMember
     /// @param source the source information
     /// @param name the struct member name
     /// @param type the struct member type
@@ -2656,21 +2669,7 @@ class ProgramBuilder {
         NAME&& name,
         const ast::Type* type,
         utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
-        return create<ast::StructMember>(source, Sym(std::forward<NAME>(name)), type,
-                                         std::move(attributes));
-    }
-
-    /// Creates a ast::StructMember
-    /// @param name the struct member name
-    /// @param type the struct member type
-    /// @param attributes the optional struct member attributes
-    /// @returns the struct member pointer
-    template <typename NAME>
-    const ast::StructMember* Member(
-        NAME&& name,
-        const ast::Type* type,
-        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
-        return create<ast::StructMember>(source_, Sym(std::forward<NAME>(name)), type,
+        return create<ast::StructMember>(source, Ident(std::forward<NAME>(name)), type,
                                          std::move(attributes));
     }
 
@@ -2681,7 +2680,7 @@ class ProgramBuilder {
     /// @returns the struct member pointer
     template <typename NAME>
     const ast::StructMember* Member(uint32_t offset, NAME&& name, const ast::Type* type) {
-        return create<ast::StructMember>(source_, Sym(std::forward<NAME>(name)), type,
+        return create<ast::StructMember>(source_, Ident(std::forward<NAME>(name)), type,
                                          utils::Vector<const ast::Attribute*, 1>{
                                              MemberOffset(AInt(offset)),
                                          });

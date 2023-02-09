@@ -172,7 +172,7 @@ struct ZeroInitWorkgroupMemory::State {
                         if (builtin->builtin == ast::BuiltinValue::kLocalInvocationIndex) {
                             local_index = [=] {
                                 auto* param_expr = b.Expr(ctx.Clone(param->symbol));
-                                auto member_name = ctx.Clone(member->Declaration()->symbol);
+                                auto* member_name = ctx.Clone(member->Declaration()->name);
                                 return b.MemberAccessor(param_expr, member_name);
                             };
                             break;
@@ -317,7 +317,7 @@ struct ZeroInitWorkgroupMemory::State {
 
         if (auto* str = ty->As<sem::Struct>()) {
             for (auto* member : str->Members()) {
-                auto name = ctx.Clone(member->Declaration()->symbol);
+                auto name = ctx.Clone(member->Declaration()->name->symbol);
                 auto get_member = [&](uint32_t num_values) {
                     auto s = get_expr(num_values);
                     if (!s) {

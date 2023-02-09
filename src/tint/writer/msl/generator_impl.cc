@@ -843,7 +843,7 @@ bool GeneratorImpl::EmitTypeInitializer(std::ostream& out,
         if (auto* struct_ty = type->As<sem::Struct>()) {
             // Emit field designators for structures to account for padding members.
             auto* member = struct_ty->Members()[i]->Declaration();
-            auto name = program_->Symbols().NameFor(member->symbol);
+            auto name = program_->Symbols().NameFor(member->name->symbol);
             out << "." << name << "=";
         }
 

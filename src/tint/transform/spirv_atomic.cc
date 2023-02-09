@@ -132,7 +132,7 @@ struct SpirvAtomic::State {
                         auto* member = str->members[i];
                         if (forked.atomic_members.count(i)) {
                             auto* type = AtomicTypeFor(ctx.src->Sem().Get(member)->Type());
-                            auto name = ctx.src->Symbols().NameFor(member->symbol);
+                            auto name = ctx.src->Symbols().NameFor(member->name->symbol);
                             members.Push(b.Member(name, type, ctx.Clone(member->attributes)));
                         } else {
                             members.Push(ctx.Clone(member));

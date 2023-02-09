@@ -655,7 +655,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
         }
 
         auto out = line();
-        out << program_->Symbols().NameFor(mem->symbol) << " : ";
+        out << program_->Symbols().NameFor(mem->name->symbol) << " : ";
         if (!EmitType(out, mem->type)) {
             return false;
         }

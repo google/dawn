@@ -3360,8 +3360,9 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
 
     for (auto* member : str->members) {
         Mark(member);
-        if (auto added = member_map.Add(member->symbol, member); !added) {
-            AddError("redefinition of '" + builder_->Symbols().NameFor(member->symbol) + "'",
+        Mark(member->name);
+        if (auto added = member_map.Add(member->name->symbol, member); !added) {
+            AddError("redefinition of '" + builder_->Symbols().NameFor(member->name->symbol) + "'",
                      member->source);
             AddNote("previous definition is here", (*added.value)->source);
             return nullptr;
@@ -3518,7 +3519,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         }
 
         auto* sem_member = builder_->create<sem::StructMember>(
-            member, member->source, member->symbol, type,
+            member, member->source, member->name->symbol, type,
             static_cast<uint32_t>(sem_members.Length()), static_cast<uint32_t>(offset),
             static_cast<uint32_t>(align), static_cast<uint32_t>(size), location);
         builder_->Sem().Add(member, sem_member);
