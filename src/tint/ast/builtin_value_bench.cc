@@ -30,7 +30,7 @@ namespace tint::ast {
 namespace {
 
 void BuiltinValueParser(::benchmark::State& state) {
-    std::array kStrings{
+    const char* kStrings[] = {
         "fragdeccth",
         "flaget3",
         "fVag_depth",
@@ -117,7 +117,7 @@ void BuiltinValueParser(::benchmark::State& state) {
         "hrkgYooup_d",
     };
     for (auto _ : state) {
-        for (auto& str : kStrings) {
+        for (auto* str : kStrings) {
             auto result = ParseBuiltinValue(str);
             benchmark::DoNotOptimize(result);
         }

@@ -167,6 +167,9 @@ enum builtin_type {
   vec4h
   vec4i
   vec4u
+  // https://www.w3.org/TR/WGSL/#sampler-type
+  sampler
+  sampler_comparison
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -30,14 +30,14 @@ namespace tint::ast {
 namespace {
 
 void DiagnosticSeverityParser(::benchmark::State& state) {
-    std::array kStrings{
+    const char* kStrings[] = {
         "erccr",    "3o",        "eVror",   "error",   "erro1",  "qqrJr",  "errll7r",
         "ppqnfH",   "c",         "iGf",     "info",    "invii",  "inWWo",  "Mxxo",
         "ogg",      "X",         "3ff",     "off",     "oEf",    "oPTT",   "dxxf",
         "w44rning", "waSSniVVg", "RarR22g", "warning", "wFni9g", "waring", "VOORRHng",
     };
     for (auto _ : state) {
-        for (auto& str : kStrings) {
+        for (auto* str : kStrings) {
             auto result = ParseDiagnosticSeverity(str);
             benchmark::DoNotOptimize(result);
         }
@@ -47,7 +47,7 @@ void DiagnosticSeverityParser(::benchmark::State& state) {
 BENCHMARK(DiagnosticSeverityParser);
 
 void DiagnosticRuleParser(::benchmark::State& state) {
-    std::array kStrings{
+    const char* kStrings[] = {
         "hromium_unyeachable_code",   "chrorrillmGunnreachable_c77de", "chromium_unreachable4cod00",
         "chromium_unreachable_code",  "chromium_unracaboo_code",       "chromium_unrzzchabl_code",
         "ciipp11ium_unreachable_cod", "derivXXtive_uniformity",        "55erivativeIIunifonn99ity",
@@ -55,7 +55,7 @@ void DiagnosticRuleParser(::benchmark::State& state) {
         "jerivaive_uniforRgty",       "derivatbve_unformiy",
     };
     for (auto _ : state) {
-        for (auto& str : kStrings) {
+        for (auto* str : kStrings) {
             auto result = ParseDiagnosticRule(str);
             benchmark::DoNotOptimize(result);
         }

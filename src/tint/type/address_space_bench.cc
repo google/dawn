@@ -30,7 +30,7 @@ namespace tint::type {
 namespace {
 
 void AddressSpaceParser(::benchmark::State& state) {
-    std::array kStrings{
+    const char* kStrings[] = {
         "fccnctin",       "ucti3",         "functVon",      "function",      "1unction",
         "unJtqqon",       "llun77tion",    "ppqqivtHH",     "prcv",          "bivaGe",
         "private",        "priviive",      "8WWivate",      "pxxvate",       "pXh_cggnstant",
@@ -42,7 +42,7 @@ void AddressSpaceParser(::benchmark::State& state) {
         "jgkrouRR",       "wokroub",
     };
     for (auto _ : state) {
-        for (auto& str : kStrings) {
+        for (auto* str : kStrings) {
             auto result = ParseAddressSpace(str);
             benchmark::DoNotOptimize(result);
         }

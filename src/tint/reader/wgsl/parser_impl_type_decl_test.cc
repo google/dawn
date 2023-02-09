@@ -15,7 +15,6 @@
 #include "src/tint/ast/alias.h"
 #include "src/tint/ast/array.h"
 #include "src/tint/ast/matrix.h"
-#include "src/tint/ast/sampler.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 #include "src/tint/type/sampled_texture.h"
 
@@ -689,8 +688,8 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
-    ASSERT_TRUE(t.value->Is<ast::Sampler>());
-    ASSERT_FALSE(t.value->As<ast::Sampler>()->IsComparison());
+    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol),
+              "sampler");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 8u}}));
 }
 

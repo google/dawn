@@ -30,7 +30,7 @@ namespace tint::type {
 namespace {
 
 void TexelFormatParser(::benchmark::State& state) {
-    std::array kStrings{
+    const char* kStrings[] = {
         "bgraunccrm",     "blranr3",      "bVra8unorm",   "bgra8unorm",   "bgra1unorm",
         "bgrJqqnorm",     "bgr7ll8unorm", "qq32lppHat",   "c2fov",        "r32Goat",
         "r32float",       "r3viiloat",    "r3WWflo8t",    "rxxfMoat",     "rXsingg",
@@ -57,7 +57,7 @@ void TexelFormatParser(::benchmark::State& state) {
         "rgba8unorm",     "ba8unoqqHHA",  "rga8unorm",    "rgfa8uKKo",
     };
     for (auto _ : state) {
-        for (auto& str : kStrings) {
+        for (auto* str : kStrings) {
             auto result = ParseTexelFormat(str);
             benchmark::DoNotOptimize(result);
         }

@@ -173,7 +173,7 @@ INSTANTIATE_TEST_SUITE_P(ValidCases, {{$enum}}PrintTest, testing::ValuesIn(kVali
 {{- /* ------------------------------------------------------------------ */ -}}
 {{- $enum := Eval "EnumName" $ -}}
 void {{$enum}}Parser(::benchmark::State& state) {
-    std::array kStrings{
+    const char* kStrings[] = {
 {{-   $exclude := $.NameSet -}}
 {{-   range $entry := $.PublicEntries }}
         "{{Scramble $entry.Name $exclude}}",
@@ -186,7 +186,7 @@ void {{$enum}}Parser(::benchmark::State& state) {
 {{-   end }}
     };
     for (auto _ : state) {
-        for (auto& str : kStrings) {
+        for (auto* str : kStrings) {
             auto result = Parse{{$enum}}(str);
             benchmark::DoNotOptimize(result);
         }

@@ -18,7 +18,6 @@
 #include "src/tint/ast/array.h"
 #include "src/tint/ast/matrix.h"
 #include "src/tint/ast/pointer.h"
-#include "src/tint/ast/sampler.h"
 #include "src/tint/ast/test_helper.h"
 #include "src/tint/ast/texture.h"
 #include "src/tint/ast/vector.h"

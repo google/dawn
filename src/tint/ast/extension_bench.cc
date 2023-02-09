@@ -30,7 +30,7 @@ namespace tint::ast {
 namespace {
 
 void ExtensionParser(::benchmark::State& state) {
-    std::array kStrings{
+    const char* kStrings[] = {
         "chromium_disableuniformiccy_analysis",
         "chromil3_disable_unifority_analss",
         "chromium_disable_Vniformity_analysis",
@@ -68,7 +68,7 @@ void ExtensionParser(::benchmark::State& state) {
         "f",
     };
     for (auto _ : state) {
-        for (auto& str : kStrings) {
+        for (auto* str : kStrings) {
             auto result = ParseExtension(str);
             benchmark::DoNotOptimize(result);
         }

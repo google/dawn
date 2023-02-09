@@ -203,8 +203,6 @@ list(APPEND TINT_LIB_SRCS
   ast/return_statement.h
   ast/sampled_texture.cc
   ast/sampled_texture.h
-  ast/sampler.cc
-  ast/sampler.h
   ast/stage_attribute.cc
   ast/stage_attribute.h
   ast/statement.cc
@@ -866,7 +864,6 @@ if(TINT_BUILD_TESTS)
     ast/pointer_test.cc
     ast/return_statement_test.cc
     ast/sampled_texture_test.cc
-    ast/sampler_test.cc
     ast/stage_attribute_test.cc
     ast/storage_texture_test.cc
     ast/stride_attribute_test.cc

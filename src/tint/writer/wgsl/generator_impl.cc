@@ -452,14 +452,6 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
             out << ">";
             return true;
         },
-        [&](const ast::Sampler* sampler) {
-            out << "sampler";
-
-            if (sampler->IsComparison()) {
-                out << "_comparison";
-            }
-            return true;
-        },
         [&](const ast::ExternalTexture*) {
             out << "texture_external";
             return true;

@@ -30,7 +30,7 @@ namespace tint::ast {
 namespace {
 
 void InterpolationTypeParser(::benchmark::State& state) {
-    std::array kStrings{
+    const char* kStrings[] = {
         "ccat",         "3",           "fVat",        "flat",        "1lat",
         "fqaJ",         "flla77",      "lippeHHr",    "cin",         "lbGea",
         "linear",       "liveaii",     "liWWe8r",     "xxiner",      "perggpctXve",
@@ -38,7 +38,7 @@ void InterpolationTypeParser(::benchmark::State& state) {
         "pxxdrspectve",
     };
     for (auto _ : state) {
-        for (auto& str : kStrings) {
+        for (auto* str : kStrings) {
             auto result = ParseInterpolationType(str);
             benchmark::DoNotOptimize(result);
         }
@@ -48,13 +48,13 @@ void InterpolationTypeParser(::benchmark::State& state) {
 BENCHMARK(InterpolationTypeParser);
 
 void InterpolationSamplingParser(::benchmark::State& state) {
-    std::array kStrings{
+    const char* kStrings[] = {
         "44enter", "cSSVVter",     "centRr",     "center",   "ent9r",  "cente",   "VentORr",
         "cenyroi", "77errtrllnid", "04entroid",  "centroid", "enooid", "centzzd", "ceiippr1i",
         "saXXple", "55IImpnn99",   "aHHrrmplSS", "sample",   "kkle",   "jagRR",   "smbe",
     };
     for (auto _ : state) {
-        for (auto& str : kStrings) {
+        for (auto* str : kStrings) {
             auto result = ParseInterpolationSampling(str);
             benchmark::DoNotOptimize(result);
         }

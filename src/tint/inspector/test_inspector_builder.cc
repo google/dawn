@@ -171,13 +171,15 @@ void InspectorBuilder::MakeStructVariableReferenceBodyFunction(
 }
 
 void InspectorBuilder::AddSampler(const std::string& name, uint32_t group, uint32_t binding) {
-    GlobalVar(name, sampler_type(), Binding(AInt(binding)), Group(AInt(group)));
+    GlobalVar(name, ty.sampler(type::SamplerKind::kSampler), Binding(AInt(binding)),
+              Group(AInt(group)));
 }
 
 void InspectorBuilder::AddComparisonSampler(const std::string& name,
                                             uint32_t group,
                                             uint32_t binding) {
-    GlobalVar(name, comparison_sampler_type(), Binding(AInt(binding)), Group(AInt(group)));
+    GlobalVar(name, ty.sampler(type::SamplerKind::kComparisonSampler), Binding(AInt(binding)),
+              Group(AInt(group)));
 }
 
 void InspectorBuilder::AddResource(const std::string& name,

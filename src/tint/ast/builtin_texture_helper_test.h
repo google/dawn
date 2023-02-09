@@ -24,6 +24,12 @@
 
 namespace tint::ast::builtin::test {
 
+/// The name of the texture global variable used by the tests.
+static constexpr const char* kTextureName = "Texture";
+
+/// The name of the sampler global variable used by the tests.
+static constexpr const char* kSamplerName = "Sampler";
+
 enum class TextureKind { kRegular, kDepth, kDepthMultisampled, kMultisampled, kStorage };
 enum class TextureDataType { kF32, kU32, kI32 };
 

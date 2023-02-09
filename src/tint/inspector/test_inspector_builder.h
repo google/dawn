@@ -332,14 +332,6 @@ class InspectorBuilder : public ProgramBuilder {
     /// @returns a reference to the Inspector for the built Program.
     Inspector& Build();
 
-    /// @returns the type for a SamplerKind::kSampler
-    const ast::Sampler* sampler_type() { return ty.sampler(type::SamplerKind::kSampler); }
-
-    /// @returns the type for a SamplerKind::kComparison
-    const ast::Sampler* comparison_sampler_type() {
-        return ty.sampler(type::SamplerKind::kComparisonSampler);
-    }
-
   protected:
     /// Program built by this builder.
     std::unique_ptr<Program> program_;

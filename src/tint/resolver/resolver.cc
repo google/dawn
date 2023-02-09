@@ -41,7 +41,6 @@
 #include "src/tint/ast/pointer.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/sampled_texture.h"
-#include "src/tint/ast/sampler.h"
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/traverse_expressions.h"
@@ -289,7 +288,6 @@ type::Type* Resolver::Type(const ast::Type* ty) {
             }
             return nullptr;
         },
-        [&](const ast::Sampler* t) { return builder_->create<type::Sampler>(t->kind); },
         [&](const ast::SampledTexture* t) -> type::SampledTexture* {
             if (auto* el = Type(t->type)) {
                 auto* sem = builder_->create<type::SampledTexture>(t->dim, el);
@@ -2525,6 +2523,10 @@ type::Type* Resolver::BuiltinType(type::Builtin builtin_ty, const ast::Identifie
             return vec(u32(), 3u);
         case type::Builtin::kVec4U:
             return vec(u32(), 4u);
+        case type::Builtin::kSampler:
+            return builder_->create<type::Sampler>(type::SamplerKind::kSampler);
+        case type::Builtin::kSamplerComparison:
+            return builder_->create<type::Sampler>(type::SamplerKind::kComparisonSampler);
         case type::Builtin::kUndefined:
             break;
     }

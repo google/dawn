@@ -70,7 +70,6 @@
 #include "src/tint/ast/pointer.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/sampled_texture.h"
-#include "src/tint/ast/sampler.h"
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/stride_attribute.h"
@@ -105,6 +104,7 @@
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/pointer.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/sampler_kind.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/type/u32.h"
@@ -961,16 +961,23 @@ class ProgramBuilder {
         }
 
         /// @param kind the kind of sampler
-        /// @returns the sampler
-        const ast::Sampler* sampler(type::SamplerKind kind) const {
-            return builder->create<ast::Sampler>(kind);
+        /// @returns the sampler typename
+        const ast::TypeName* sampler(type::SamplerKind kind) const {
+            return sampler(builder->source_, kind);
         }
 
         /// @param source the Source of the node
         /// @param kind the kind of sampler
-        /// @returns the sampler
-        const ast::Sampler* sampler(const Source& source, type::SamplerKind kind) const {
-            return builder->create<ast::Sampler>(source, kind);
+        /// @returns the sampler typename
+        const ast::TypeName* sampler(const Source& source, type::SamplerKind kind) const {
+            switch (kind) {
+                case type::SamplerKind::kSampler:
+                    return (*this)(source, "sampler");
+                case type::SamplerKind::kComparisonSampler:
+                    return (*this)(source, "sampler_comparison");
+            }
+            TINT_ICE(ProgramBuilder, builder->Diagnostics()) << "invalid sampler kind " << kind;
+            return nullptr;
         }
 
         /// @param dims the dimensionality of the texture

@@ -167,7 +167,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
                                                     CreateASTTypeFor(ctx, t->type()), t->access());
     }
     if (auto* s = ty->As<type::Sampler>()) {
-        return ctx.dst->create<ast::Sampler>(s->kind());
+        return ctx.dst->ty.sampler(s->kind());
     }
     TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())
         << "Unhandled type: " << ty->TypeInfo().name;

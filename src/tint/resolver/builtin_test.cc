@@ -37,6 +37,7 @@
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/test_helper.h"
 #include "src/tint/type/texture_dimension.h"
+#include "src/tint/utils/string.h"
 
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
@@ -2114,9 +2115,15 @@ class ResolverBuiltinTest_TextureOperation : public ResolverTestWithParam<Textur
     }
 
     void add_call_param(std::string name, const ast::Type* type, ExpressionList* call_params) {
-        if (type->IsAnyOf<ast::Texture, ast::Sampler>()) {
-            GlobalVar(name, type, Binding(0_a), Group(0_a));
+        if (auto* type_name = type->As<ast::TypeName>()) {
+            if (utils::HasPrefix(Symbols().NameFor(type_name->name->symbol), "sampler")) {
+                GlobalVar(name, type, Binding(0_a), Group(0_a));
+                return;
+            }
+        }
 
+        if (type->Is<ast::Texture>()) {
+            GlobalVar(name, type, Binding(0_a), Group(0_a));
         } else {
             GlobalVar(name, type, type::AddressSpace::kPrivate);
         }

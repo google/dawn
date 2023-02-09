@@ -94,6 +94,12 @@ Builtin ParseBuiltin(std::string_view str) {
     if (str == "mat4x4h") {
         return Builtin::kMat4X4H;
     }
+    if (str == "sampler") {
+        return Builtin::kSampler;
+    }
+    if (str == "sampler_comparison") {
+        return Builtin::kSamplerComparison;
+    }
     if (str == "u32") {
         return Builtin::kU32;
     }
@@ -184,6 +190,10 @@ std::ostream& operator<<(std::ostream& out, Builtin value) {
             return out << "mat4x4f";
         case Builtin::kMat4X4H:
             return out << "mat4x4h";
+        case Builtin::kSampler:
+            return out << "sampler";
+        case Builtin::kSamplerComparison:
+            return out << "sampler_comparison";
         case Builtin::kU32:
             return out << "u32";
         case Builtin::kVec2F:

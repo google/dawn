@@ -30,7 +30,7 @@ namespace tint::type {
 namespace {
 
 void AccessParser(::benchmark::State& state) {
-    std::array kStrings{
+    const char* kStrings[] = {
         "ccad",       "3",           "rVad",         "read",       "1ead",
         "rqaJ",       "rlla77",      "reqqdppriHHe", "rv_wcit",    "reabGwrte",
         "read_write", "read_vriite", "re8d_wriWWe",  "Meadxxrite", "wggte",
@@ -38,7 +38,7 @@ void AccessParser(::benchmark::State& state) {
         "wxxidd",
     };
     for (auto _ : state) {
-        for (auto& str : kStrings) {
+        for (auto* str : kStrings) {
             auto result = ParseAccess(str);
             benchmark::DoNotOptimize(result);
         }
