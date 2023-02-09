@@ -127,18 +127,19 @@ if (build_with_chromium && is_win &&
   # The windows_sdk_path is acquired in visual_studio_version.gni.
   import("//build/config/win/visual_studio_version.gni")
 
-  # Windows 10 SDK version 10.0.20348.0 is required for building Chromium, and
-  # it provided DXC compiler and validator both of v1.6.
+  # Windows 10 SDK version 10.0.20348.0 provides DXC compiler and validator both
+  # of v1.6 and Chromium builds require this SDK version or higher.
   assert(defined(windows_sdk_path))
+  assert(defined(windows_sdk_version))
   assert(windows_sdk_path != "")
 
   # Declare a copy target to copy DXC binary from Windows SDK for running Dawn
   # end-to-end test in Chromium.
   copy("copy_dxc_binary") {
     sources = [
-      "$windows_sdk_path/bin/10.0.20348.0/$target_cpu/dxc.exe",
-      "$windows_sdk_path/bin/10.0.20348.0/$target_cpu/dxcompiler.dll",
-      "$windows_sdk_path/bin/10.0.20348.0/$target_cpu/dxil.dll",
+      "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxc.exe",
+      "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxcompiler.dll",
+      "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxil.dll",
     ]
 
     outputs = [ "$root_out_dir/{{source_file_part}}" ]
