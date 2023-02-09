@@ -233,7 +233,6 @@ INSTANTIATE_TEST_SUITE_P(
         {Def::kBuiltinType, Use::kAccess, kPass},
         {Def::kBuiltinType, Use::kAddressSpace, kPass},
         {Def::kBuiltinType, Use::kCallExpr, kPass},
-        {Def::kBuiltinType, Use::kCallStmt, kPass},
         {Def::kBuiltinType, Use::kFunctionReturnType, kPass},
         {Def::kBuiltinType, Use::kMemberType, kPass},
         {Def::kBuiltinType, Use::kTexelFormat, R"(TODO(crbug.com/tint/1810))"},
@@ -260,7 +259,6 @@ INSTANTIATE_TEST_SUITE_P(
 
         {Def::kStruct, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
         {Def::kStruct, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
-        {Def::kStruct, Use::kCallStmt, kPass},
         {Def::kStruct, Use::kFunctionReturnType, kPass},
         {Def::kStruct, Use::kMemberType, kPass},
         {Def::kStruct, Use::kTexelFormat, R"(TODO(crbug.com/tint/1810))"},
@@ -289,7 +287,6 @@ INSTANTIATE_TEST_SUITE_P(
         {Def::kTypeAlias, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
         {Def::kTypeAlias, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
         {Def::kTypeAlias, Use::kCallExpr, kPass},
-        {Def::kTypeAlias, Use::kCallStmt, kPass},
         {Def::kTypeAlias, Use::kFunctionReturnType, kPass},
         {Def::kTypeAlias, Use::kMemberType, kPass},
         {Def::kTypeAlias, Use::kTexelFormat, R"(TODO(crbug.com/tint/1810))"},

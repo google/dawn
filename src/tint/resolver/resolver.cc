@@ -2190,159 +2190,163 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
     // ast::CallExpression has a target which is either an ast::Type or an
     // ast::IdentifierExpression
-    sem::Call* call = nullptr;
-    if (expr->target.type) {
-        // ast::CallExpression has an ast::Type as the target.
-        // This call is either a type initializer or type conversion.
-        call = Switch(
-            expr->target.type,
-            [&](const ast::Vector* v) -> sem::Call* {
-                Mark(v);
-                // vector element type must be inferred if it was not specified.
-                type::Type* template_arg = nullptr;
-                if (v->type) {
-                    template_arg = Type(v->type);
-                    if (!template_arg) {
-                        return nullptr;
-                    }
-                }
-                if (auto* c = ct_init_or_conv(VectorInitConvIntrinsic(v->width), template_arg)) {
-                    builder_->Sem().Add(expr->target.type, c->Target()->ReturnType());
-                    return c;
-                }
-                return nullptr;
-            },
-            [&](const ast::Matrix* m) -> sem::Call* {
-                Mark(m);
-                // matrix element type must be inferred if it was not specified.
-                type::Type* template_arg = nullptr;
-                if (m->type) {
-                    template_arg = Type(m->type);
-                    if (!template_arg) {
-                        return nullptr;
-                    }
-                }
-                if (auto* c = ct_init_or_conv(MatrixInitConvIntrinsic(m->columns, m->rows),
-                                              template_arg)) {
-                    builder_->Sem().Add(expr->target.type, c->Target()->ReturnType());
-                    return c;
-                }
-                return nullptr;
-            },
-            [&](const ast::Array* a) -> sem::Call* {
-                Mark(a);
-                // array element type must be inferred if it was not specified.
-                const type::ArrayCount* el_count = nullptr;
-                const type::Type* el_ty = nullptr;
-                if (a->type) {
-                    el_ty = Type(a->type);
-                    if (!el_ty) {
-                        return nullptr;
-                    }
-                    if (!a->count) {
-                        AddError("cannot construct a runtime-sized array", expr->source);
-                        return nullptr;
-                    }
-                    el_count = ArrayCount(a->count);
-                    if (!el_count) {
-                        return nullptr;
-                    }
-                    // Note: validation later will detect any mismatches between explicit array
-                    // size and number of initializer expressions.
-                } else {
-                    el_count = builder_->create<type::ConstantArrayCount>(
-                        static_cast<uint32_t>(args.Length()));
-                    auto arg_tys =
-                        utils::Transform(args, [](auto* arg) { return arg->Type()->UnwrapRef(); });
-                    el_ty = type::Type::Common(arg_tys);
-                    if (!el_ty) {
-                        AddError(
-                            "cannot infer common array element type from initializer arguments",
-                            expr->source);
-                        utils::Hashset<const type::Type*, 8> types;
-                        for (size_t i = 0; i < args.Length(); i++) {
-                            if (types.Add(args[i]->Type())) {
-                                AddNote("argument " + std::to_string(i) + " is of type '" +
-                                            sem_.TypeNameOf(args[i]->Type()) + "'",
-                                        args[i]->Declaration()->source);
-                            }
-                        }
-                        return nullptr;
-                    }
-                }
-                uint32_t explicit_stride = 0;
-                if (!ArrayAttributes(a->attributes, el_ty, explicit_stride)) {
-                    return nullptr;
-                }
-
-                auto* arr = Array(a->type ? a->type->source : a->source,
-                                  a->count ? a->count->source : a->source,  //
-                                  el_ty, el_count, explicit_stride);
-                if (!arr) {
-                    return nullptr;
-                }
-                builder_->Sem().Add(a, arr);
-
-                return ty_init_or_conv(arr);
-            },
-            [&](const ast::Type* ast) -> sem::Call* {
-                // Handler for AST types that do not have an optional element type.
-                if (auto* ty = Type(ast)) {
-                    return ty_init_or_conv(ty);
-                }
-                return nullptr;
-            },
-            [&](Default) {
-                TINT_ICE(Resolver, diagnostics_)
-                    << expr->source << " unhandled CallExpression target:\n"
-                    << "type: "
-                    << (expr->target.type ? expr->target.type->TypeInfo().name : "<null>");
-                return nullptr;
-            });
-    } else {
-        // ast::CallExpression has an ast::IdentifierExpression as the target.
-        // This call is either a function call, builtin call, type initializer or type
-        // conversion.
-        auto* ident = expr->target.name;
-        Mark(ident);
-
-        auto resolved = dependencies_.resolved_identifiers.Get(ident);
-        if (!resolved) {
-            TINT_ICE(Resolver, diagnostics_)
-                << "identifier '" << builder_->Symbols().NameFor(ident->symbol)
-                << "' was not resolved";
-            return nullptr;
-        }
-
-        if (auto* ast_node = resolved->Node()) {
+    auto call = [&]() -> sem::Call* {
+        if (expr->target.type) {
+            // ast::CallExpression has an ast::Type as the target.
+            // This call is either a type initializer or type conversion.
             return Switch(
-                sem_.Get(ast_node),  //
-                [&](const type::Type* ty) {
-                    // A type initializer or conversions.
-                    // Note: Unlike the code path where we're resolving the call target from an
-                    // ast::Type, all types must already have the element type explicitly
-                    // specified, so there's no need to infer element types.
-                    return ty_init_or_conv(ty);
+                expr->target.type,
+                [&](const ast::Vector* v) -> sem::Call* {
+                    Mark(v);
+                    // vector element type must be inferred if it was not specified.
+                    type::Type* template_arg = nullptr;
+                    if (v->type) {
+                        template_arg = Type(v->type);
+                        if (!template_arg) {
+                            return nullptr;
+                        }
+                    }
+                    if (auto* c =
+                            ct_init_or_conv(VectorInitConvIntrinsic(v->width), template_arg)) {
+                        builder_->Sem().Add(expr->target.type, c->Target()->ReturnType());
+                        return c;
+                    }
+                    return nullptr;
                 },
-                [&](sem::Function* func) { return FunctionCall(expr, func, args, arg_behaviors); },
+                [&](const ast::Matrix* m) -> sem::Call* {
+                    Mark(m);
+                    // matrix element type must be inferred if it was not specified.
+                    type::Type* template_arg = nullptr;
+                    if (m->type) {
+                        template_arg = Type(m->type);
+                        if (!template_arg) {
+                            return nullptr;
+                        }
+                    }
+                    if (auto* c = ct_init_or_conv(MatrixInitConvIntrinsic(m->columns, m->rows),
+                                                  template_arg)) {
+                        builder_->Sem().Add(expr->target.type, c->Target()->ReturnType());
+                        return c;
+                    }
+                    return nullptr;
+                },
+                [&](const ast::Array* a) -> sem::Call* {
+                    Mark(a);
+                    // array element type must be inferred if it was not specified.
+                    const type::ArrayCount* el_count = nullptr;
+                    const type::Type* el_ty = nullptr;
+                    if (a->type) {
+                        el_ty = Type(a->type);
+                        if (!el_ty) {
+                            return nullptr;
+                        }
+                        if (!a->count) {
+                            AddError("cannot construct a runtime-sized array", expr->source);
+                            return nullptr;
+                        }
+                        el_count = ArrayCount(a->count);
+                        if (!el_count) {
+                            return nullptr;
+                        }
+                        // Note: validation later will detect any mismatches between explicit array
+                        // size and number of initializer expressions.
+                    } else {
+                        el_count = builder_->create<type::ConstantArrayCount>(
+                            static_cast<uint32_t>(args.Length()));
+                        auto arg_tys = utils::Transform(
+                            args, [](auto* arg) { return arg->Type()->UnwrapRef(); });
+                        el_ty = type::Type::Common(arg_tys);
+                        if (!el_ty) {
+                            AddError(
+                                "cannot infer common array element type from initializer arguments",
+                                expr->source);
+                            utils::Hashset<const type::Type*, 8> types;
+                            for (size_t i = 0; i < args.Length(); i++) {
+                                if (types.Add(args[i]->Type())) {
+                                    AddNote("argument " + std::to_string(i) + " is of type '" +
+                                                sem_.TypeNameOf(args[i]->Type()) + "'",
+                                            args[i]->Declaration()->source);
+                                }
+                            }
+                            return nullptr;
+                        }
+                    }
+                    uint32_t explicit_stride = 0;
+                    if (!ArrayAttributes(a->attributes, el_ty, explicit_stride)) {
+                        return nullptr;
+                    }
+
+                    auto* arr = Array(a->type ? a->type->source : a->source,
+                                      a->count ? a->count->source : a->source,  //
+                                      el_ty, el_count, explicit_stride);
+                    if (!arr) {
+                        return nullptr;
+                    }
+                    builder_->Sem().Add(a, arr);
+
+                    return ty_init_or_conv(arr);
+                },
+                [&](const ast::Type* ast) -> sem::Call* {
+                    // Handler for AST types that do not have an optional element type.
+                    if (auto* ty = Type(ast)) {
+                        return ty_init_or_conv(ty);
+                    }
+                    return nullptr;
+                },
                 [&](Default) {
-                    ErrorMismatchedResolvedIdentifier(ident->source, *resolved, "call target");
+                    TINT_ICE(Resolver, diagnostics_)
+                        << expr->source << " unhandled CallExpression target:\n"
+                        << "type: "
+                        << (expr->target.type ? expr->target.type->TypeInfo().name : "<null>");
                     return nullptr;
                 });
-        }
+        } else {
+            // ast::CallExpression has an ast::IdentifierExpression as the target.
+            // This call is either a function call, builtin call, type initializer or type
+            // conversion.
+            auto* ident = expr->target.name;
+            Mark(ident);
 
-        if (auto f = resolved->BuiltinFunction(); f != sem::BuiltinType::kNone) {
-            return BuiltinCall(expr, f, args);
-        }
+            auto resolved = dependencies_.resolved_identifiers.Get(ident);
+            if (!resolved) {
+                TINT_ICE(Resolver, diagnostics_)
+                    << "identifier '" << builder_->Symbols().NameFor(ident->symbol)
+                    << "' was not resolved";
+                return nullptr;
+            }
 
-        if (auto b = resolved->BuiltinType(); b != type::Builtin::kUndefined) {
-            auto* ty = BuiltinType(b, expr->target.name);
-            return ty ? ty_init_or_conv(ty) : nullptr;
-        }
+            if (auto* ast_node = resolved->Node()) {
+                return Switch(
+                    sem_.Get(ast_node),  //
+                    [&](const type::Type* ty) {
+                        // A type initializer or conversions.
+                        // Note: Unlike the code path where we're resolving the call target from an
+                        // ast::Type, all types must already have the element type explicitly
+                        // specified, so there's no need to infer element types.
+                        return ty_init_or_conv(ty);
+                    },
+                    [&](sem::Function* func) {
+                        return FunctionCall(expr, func, args, arg_behaviors);
+                    },
+                    [&](Default) {
+                        ErrorMismatchedResolvedIdentifier(ident->source, *resolved, "call target");
+                        return nullptr;
+                    });
+            }
 
-        ErrorMismatchedResolvedIdentifier(ident->source, *resolved, "call target");
-        return nullptr;
-    }
+            if (auto f = resolved->BuiltinFunction(); f != sem::BuiltinType::kNone) {
+                return BuiltinCall(expr, f, args);
+            }
+
+            if (auto b = resolved->BuiltinType(); b != type::Builtin::kUndefined) {
+                auto* ty = BuiltinType(b, expr->target.name);
+                return ty ? ty_init_or_conv(ty) : nullptr;
+            }
+
+            ErrorMismatchedResolvedIdentifier(ident->source, *resolved, "call target");
+            return nullptr;
+        }
+    }();
 
     if (!call) {
         return nullptr;
