@@ -923,7 +923,7 @@ bool GeneratorImpl::EmitFunctionCall(std::ostream& out,
         }
     }
 
-    out << builder_.Symbols().NameFor(func->Declaration()->symbol) << "(";
+    out << builder_.Symbols().NameFor(func->Declaration()->name->symbol) << "(";
 
     bool first = true;
     for (auto* arg : call->Arguments()) {
@@ -1585,7 +1585,7 @@ bool GeneratorImpl::EmitStorageAtomicIntrinsic(
     const sem::Function* sem_func = builder_.Sem().Get(func);
     auto* result_ty = sem_func->ReturnType();
     const auto& params = sem_func->Parameters();
-    const auto name = builder_.Symbols().NameFor(func->symbol);
+    const auto name = builder_.Symbols().NameFor(func->name->symbol);
     auto& buf = *current_buffer_;
 
     auto rmw = [&](const char* hlsl) -> bool {
@@ -2875,7 +2875,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
 
     {
         auto out = line();
-        auto name = builder_.Symbols().NameFor(func->symbol);
+        auto name = builder_.Symbols().NameFor(func->name->symbol);
         // If the function returns an array, then we need to declare a typedef for
         // this.
         if (sem->ReturnType()->Is<type::Array>()) {
@@ -3239,7 +3239,8 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
         }
 
         if (!EmitTypeAndName(out, func_sem->ReturnType(), type::AddressSpace::kUndefined,
-                             type::Access::kUndefined, builder_.Symbols().NameFor(func->symbol))) {
+                             type::Access::kUndefined,
+                             builder_.Symbols().NameFor(func->name->symbol))) {
             return false;
         }
         out << "(";

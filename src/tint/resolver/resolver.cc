@@ -350,7 +350,7 @@ type::Type* Resolver::Type(const ast::Type* ty) {
                         return nullptr;
                     },
                     [&](sem::Function* func) {
-                        auto name = builder_->Symbols().NameFor(func->Declaration()->symbol);
+                        auto name = builder_->Symbols().NameFor(func->Declaration()->name->symbol);
                         AddError("cannot use function '" + name + "' as type", ty->source);
                         AddNote("'" + name + "' declared here", func->Declaration()->source);
                         return nullptr;
@@ -993,6 +993,8 @@ sem::Statement* Resolver::ConstAssert(const ast::ConstAssert* assertion) {
 }
 
 sem::Function* Resolver::Function(const ast::Function* decl) {
+    Mark(decl->name);
+
     uint32_t parameter_index = 0;
     utils::Hashmap<Symbol, Source, 8> parameter_names;
     utils::Vector<sem::Parameter*, 8> parameters;
@@ -1080,9 +1082,9 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
 
     if (auto* str = return_type->As<sem::Struct>()) {
         if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kNone, str, decl->source)) {
-            AddNote(
-                "while instantiating return type for " + builder_->Symbols().NameFor(decl->symbol),
-                decl->source);
+            AddNote("while instantiating return type for " +
+                        builder_->Symbols().NameFor(decl->name->symbol),
+                    decl->source);
             return nullptr;
         }
 
@@ -1669,7 +1671,7 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
                 break;
             case Alias::ModuleScope: {
                 auto* func = var.expr->Stmt()->Function();
-                auto func_name = builder_->Symbols().NameFor(func->Declaration()->symbol);
+                auto func_name = builder_->Symbols().NameFor(func->Declaration()->name->symbol);
                 AddNote(
                     "aliases with module-scope variable " + var.access + " in '" + func_name + "'",
                     var.expr->Declaration()->source);

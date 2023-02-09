@@ -14,6 +14,7 @@
 
 #include <string>
 
+#include "src/tint/ast/identifier.h"
 #include "src/tint/ast/module.h"
 #include "src/tint/bench/benchmark.h"
 
@@ -30,7 +31,7 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
     std::vector<std::string> entry_points;
     for (auto& fn : program.AST().Functions()) {
         if (fn->IsEntryPoint()) {
-            entry_points.emplace_back(program.Symbols().NameFor(fn->symbol));
+            entry_points.emplace_back(program.Symbols().NameFor(fn->name->symbol));
         }
     }
 

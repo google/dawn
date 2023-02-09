@@ -27,6 +27,7 @@
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/function.h"
 #include "src/tint/ast/id_attribute.h"
+#include "src/tint/ast/identifier.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/int_literal_expression.h"
 #include "src/tint/ast/literal_expression.h"
@@ -178,7 +179,7 @@ bool BuilderImpl::EmitFunction(const ast::Function* ast_func) {
     TINT_ASSERT(IR, flow_stack.IsEmpty());
 
     auto* ir_func = builder.CreateFunction();
-    ir_func->name = CloneSymbol(ast_func->symbol);
+    ir_func->name = CloneSymbol(ast_func->name->symbol);
     current_function_ = ir_func;
     builder.ir.functions.Push(ir_func);
 

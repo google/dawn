@@ -600,7 +600,7 @@ struct DirectVariableAccess::State {
 
             // Function was not called. Create a single variant with an empty signature.
             FnVariant variant;
-            variant.name = ctx.Clone(fn->Declaration()->symbol);
+            variant.name = ctx.Clone(fn->Declaration()->name->symbol);
             variant.order = 0;  // Unaltered comes first.
             fn_info->variants.Add(FnVariant::Signature{}, std::move(variant));
         }
@@ -679,7 +679,7 @@ struct DirectVariableAccess::State {
                 if (target_signature.IsEmpty()) {
                     // Call target does not require any argument changes.
                     FnVariant variant;
-                    variant.name = ctx.Clone(target->Declaration()->symbol);
+                    variant.name = ctx.Clone(target->Declaration()->name->symbol);
                     variant.order = 0;  // Unaltered comes first.
                     return variant;
                 }
@@ -688,7 +688,7 @@ struct DirectVariableAccess::State {
                 // This is derived from the original function name and the pointer parameter
                 // chains.
                 std::stringstream ss;
-                ss << ctx.src->Symbols().NameFor(target->Declaration()->symbol);
+                ss << ctx.src->Symbols().NameFor(target->Declaration()->name->symbol);
                 for (auto* param : target->Parameters()) {
                     if (auto indices = target_signature.Find(param)) {
                         ss << "_" << AccessShapeName(*indices);
@@ -855,7 +855,7 @@ struct DirectVariableAccess::State {
                 auto attrs = ctx.Clone(fn->Declaration()->attributes);
                 auto ret_attrs = ctx.Clone(fn->Declaration()->return_type_attributes);
                 pending_variant =
-                    b.create<ast::Function>(variant.name, std::move(params), ret_ty, body,
+                    b.create<ast::Function>(b.Ident(variant.name), std::move(params), ret_ty, body,
                                             std::move(attrs), std::move(ret_attrs));
             }
 

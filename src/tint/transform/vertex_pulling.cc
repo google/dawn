@@ -921,14 +921,14 @@ struct VertexPulling::State {
         }
 
         // Rewrite the function header with the new parameters.
-        auto func_sym = ctx.Clone(func->symbol);
+        auto func_sym = ctx.Clone(func->name->symbol);
         auto* ret_type = ctx.Clone(func->return_type);
         auto* body = ctx.Clone(func->body);
         auto attrs = ctx.Clone(func->attributes);
         auto ret_attrs = ctx.Clone(func->return_type_attributes);
         auto* new_func =
-            b.create<ast::Function>(func->source, func_sym, new_function_parameters, ret_type, body,
-                                    std::move(attrs), std::move(ret_attrs));
+            b.create<ast::Function>(func->source, b.Ident(func_sym), new_function_parameters,
+                                    ret_type, body, std::move(attrs), std::move(ret_attrs));
         ctx.Replace(func, new_func);
     }
 };

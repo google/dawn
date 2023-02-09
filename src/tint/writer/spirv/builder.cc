@@ -500,7 +500,7 @@ bool Builder::GenerateEntryPoint(const ast::Function* func, uint32_t id) {
     }
 
     OperandList operands = {Operand(stage), Operand(id),
-                            Operand(builder_.Symbols().NameFor(func->symbol))};
+                            Operand(builder_.Symbols().NameFor(func->name->symbol))};
 
     auto* func_sem = builder_.Sem().Get(func);
     for (const auto* var : func_sem->TransitivelyReferencedGlobals()) {
@@ -602,7 +602,7 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
     auto func_id = std::get<uint32_t>(func_op);
 
     push_debug(spv::Op::OpName,
-               {Operand(func_id), Operand(builder_.Symbols().NameFor(func_ast->symbol))});
+               {Operand(func_id), Operand(builder_.Symbols().NameFor(func_ast->name->symbol))});
 
     auto ret_id = GenerateTypeIfNeeded(func->ReturnType());
     if (ret_id == 0) {
@@ -661,7 +661,7 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
         }
     }
 
-    func_symbol_to_id_[func_ast->symbol] = func_id;
+    func_symbol_to_id_[func_ast->name->symbol] = func_id;
 
     return true;
 }

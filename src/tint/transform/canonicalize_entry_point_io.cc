@@ -542,24 +542,25 @@ struct CanonicalizeEntryPointIO::State {
         if (cfg.shader_style == ShaderStyle::kGlsl) {
             // In GLSL, clone the original entry point name, as the wrapper will be
             // called "main".
-            inner_name = ctx.Clone(func_ast->symbol);
+            inner_name = ctx.Clone(func_ast->name->symbol);
         } else {
             // Add a suffix to the function name, as the wrapper function will take
             // the original entry point name.
-            auto ep_name = ctx.src->Symbols().NameFor(func_ast->symbol);
+            auto ep_name = ctx.src->Symbols().NameFor(func_ast->name->symbol);
             inner_name = ctx.dst->Symbols().New(ep_name + "_inner");
         }
 
         // Clone everything, dropping the function and return type attributes.
         // The parameter attributes will have already been stripped during
         // processing.
-        auto* inner_function = ctx.dst->create<ast::Function>(
-            inner_name, ctx.Clone(func_ast->params), ctx.Clone(func_ast->return_type),
-            ctx.Clone(func_ast->body), utils::Empty, utils::Empty);
+        auto* inner_function =
+            ctx.dst->create<ast::Function>(ctx.dst->Ident(inner_name), ctx.Clone(func_ast->params),
+                                           ctx.Clone(func_ast->return_type),
+                                           ctx.Clone(func_ast->body), utils::Empty, utils::Empty);
         ctx.Replace(func_ast, inner_function);
 
         // Call the function.
-        return ctx.dst->Call(inner_function->symbol, inner_call_parameters);
+        return ctx.dst->Call(inner_function->name->symbol, inner_call_parameters);
     }
 
     /// Process the entry point function.
@@ -656,12 +657,12 @@ struct CanonicalizeEntryPointIO::State {
         if (cfg.shader_style == ShaderStyle::kGlsl) {
             name = ctx.dst->Symbols().New("main");
         } else {
-            name = ctx.Clone(func_ast->symbol);
+            name = ctx.Clone(func_ast->name->symbol);
         }
 
         auto* wrapper_func = ctx.dst->create<ast::Function>(
-            name, wrapper_ep_parameters, wrapper_ret_type(), ctx.dst->Block(wrapper_body),
-            ctx.Clone(func_ast->attributes), utils::Empty);
+            ctx.dst->Ident(name), wrapper_ep_parameters, wrapper_ret_type(),
+            ctx.dst->Block(wrapper_body), ctx.Clone(func_ast->attributes), utils::Empty);
         ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(), func_ast, wrapper_func);
     }
 

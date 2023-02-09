@@ -308,7 +308,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
     }
     {
         auto out = line();
-        out << "fn " << program_->Symbols().NameFor(func->symbol) << "(";
+        out << "fn " << program_->Symbols().NameFor(func->name->symbol) << "(";
 
         bool first = true;
         for (auto* v : func->params) {

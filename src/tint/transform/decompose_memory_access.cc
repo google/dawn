@@ -483,7 +483,7 @@ struct DecomposeMemoryAccess::State {
                 if (auto* intrinsic = IntrinsicLoadFor(ctx.dst, address_space, el_ty)) {
                     auto* el_ast_ty = CreateASTTypeFor(ctx, el_ty);
                     auto* func = b.create<ast::Function>(
-                        name, params, el_ast_ty, nullptr,
+                        b.Ident(name), params, el_ast_ty, nullptr,
                         utils::Vector{
                             intrinsic,
                             b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
@@ -582,7 +582,7 @@ struct DecomposeMemoryAccess::State {
 
                 if (auto* intrinsic = IntrinsicStoreFor(ctx.dst, address_space, el_ty)) {
                     auto* func = b.create<ast::Function>(
-                        name, params, b.ty.void_(), nullptr,
+                        b.Ident(name), params, b.ty.void_(), nullptr,
                         utils::Vector{
                             intrinsic,
                             b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
@@ -728,7 +728,8 @@ struct DecomposeMemoryAccess::State {
             }
 
             auto* func = b.create<ast::Function>(
-                b.Symbols().New(std::string{"tint_"} + intrinsic->str()), params, ret_ty, nullptr,
+                b.Ident(b.Symbols().New(std::string{"tint_"} + intrinsic->str())), params, ret_ty,
+                nullptr,
                 utils::Vector{
                     atomic,
                     b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
@@ -736,7 +737,7 @@ struct DecomposeMemoryAccess::State {
                 utils::Empty);
 
             b.AST().AddFunction(func);
-            return func->symbol;
+            return func->name->symbol;
         });
     }
 };

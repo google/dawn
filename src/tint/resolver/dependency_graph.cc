@@ -195,7 +195,7 @@ class DependencyScanner {
                 TraverseType(alias->type);
             },
             [&](const ast::Function* func) {
-                Declare(func->symbol, func);
+                Declare(func->name->symbol, func);
                 TraverseFunction(func);
             },
             [&](const ast::Variable* var) {
@@ -559,7 +559,7 @@ struct DependencyAnalysis {
         return Switch(
             node,  //
             [&](const ast::TypeDecl* td) { return td->name; },
-            [&](const ast::Function* func) { return func->symbol; },
+            [&](const ast::Function* func) { return func->name->symbol; },
             [&](const ast::Variable* var) { return var->symbol; },
             [&](const ast::DiagnosticDirective*) { return Symbol(); },
             [&](const ast::Enable*) { return Symbol(); },

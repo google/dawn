@@ -22,6 +22,7 @@
 #include "src/tint/ast/extension.h"
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/id_attribute.h"
+#include "src/tint/ast/identifier.h"
 #include "src/tint/ast/int_literal_expression.h"
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/location_attribute.h"
@@ -180,8 +181,8 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
 
     auto* sem = program_->Sem().Get(func);
 
-    entry_point.name = program_->Symbols().NameFor(func->symbol);
-    entry_point.remapped_name = program_->Symbols().NameFor(func->symbol);
+    entry_point.name = program_->Symbols().NameFor(func->name->symbol);
+    entry_point.remapped_name = program_->Symbols().NameFor(func->name->symbol);
 
     switch (func->PipelineStage()) {
         case ast::PipelineStage::kCompute: {
@@ -877,7 +878,7 @@ void Inspector::GenerateSamplerTargets() {
 
                                     for (auto* entry_point : entry_points) {
                                         const auto& ep_name = program_->Symbols().NameFor(
-                                            entry_point->Declaration()->symbol);
+                                            entry_point->Declaration()->name->symbol);
                                         (*sampler_targets_)[ep_name].Add(
                                             {sampler_binding_point, texture_binding_point});
                                     }

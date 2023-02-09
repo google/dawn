@@ -107,7 +107,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
             auto* type = CreateASTTypeFor(ctx, buffer_type);
             auto* disable_validation = b.Disable(ast::DisabledValidation::kFunctionParameter);
             b.AST().AddFunction(b.create<ast::Function>(
-                name,
+                b.Ident(name),
                 utils::Vector{
                     b.Param("buffer",
                             b.ty.pointer(type, buffer_type->AddressSpace(), buffer_type->Access()),

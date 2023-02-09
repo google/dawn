@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, FunctionDecl) {
     EXPECT_TRUE(f.matched);
     ASSERT_NE(f.value, nullptr);
 
-    EXPECT_EQ(f->symbol, p->builder().Symbols().Get("main"));
+    EXPECT_EQ(f->name->symbol, p->builder().Symbols().Get("main"));
     EXPECT_EQ(f->return_type, nullptr);
 
     ASSERT_EQ(f->params.Length(), 2u);
@@ -74,7 +74,7 @@ TEST_F(ParserImplTest, FunctionDecl_Unicode) {
     EXPECT_TRUE(f.matched);
     ASSERT_NE(f.value, nullptr);
 
-    EXPECT_EQ(f->symbol, p->builder().Symbols().Get(function_ident));
+    EXPECT_EQ(f->name->symbol, p->builder().Symbols().Get(function_ident));
     EXPECT_EQ(f->return_type, nullptr);
 
     ASSERT_EQ(f->params.Length(), 2u);
@@ -100,7 +100,7 @@ TEST_F(ParserImplTest, FunctionDecl_AttributeList) {
     EXPECT_TRUE(f.matched);
     ASSERT_NE(f.value, nullptr);
 
-    EXPECT_EQ(f->symbol, p->builder().Symbols().Get("main"));
+    EXPECT_EQ(f->name->symbol, p->builder().Symbols().Get("main"));
     EXPECT_EQ(f->return_type, nullptr);
     ASSERT_EQ(f->params.Length(), 0u);
 
@@ -144,7 +144,7 @@ fn main() { return; })");
     EXPECT_TRUE(f.matched);
     ASSERT_NE(f.value, nullptr);
 
-    EXPECT_EQ(f->symbol, p->builder().Symbols().Get("main"));
+    EXPECT_EQ(f->name->symbol, p->builder().Symbols().Get("main"));
     EXPECT_EQ(f->return_type, nullptr);
     ASSERT_EQ(f->params.Length(), 0u);
 
@@ -192,7 +192,7 @@ fn main() { return; })");
     EXPECT_TRUE(f.matched);
     ASSERT_NE(f.value, nullptr);
 
-    EXPECT_EQ(f->symbol, p->builder().Symbols().Get("main"));
+    EXPECT_EQ(f->name->symbol, p->builder().Symbols().Get("main"));
     EXPECT_EQ(f->return_type, nullptr);
     ASSERT_EQ(f->params.Length(), 0u);
 
@@ -237,7 +237,7 @@ TEST_F(ParserImplTest, FunctionDecl_ReturnTypeAttributeList) {
     EXPECT_TRUE(f.matched);
     ASSERT_NE(f.value, nullptr);
 
-    EXPECT_EQ(f->symbol, p->builder().Symbols().Get("main"));
+    EXPECT_EQ(f->name->symbol, p->builder().Symbols().Get("main"));
     ASSERT_NE(f->return_type, nullptr);
     EXPECT_TRUE(f->return_type->Is<ast::F32>());
     ASSERT_EQ(f->params.Length(), 0u);

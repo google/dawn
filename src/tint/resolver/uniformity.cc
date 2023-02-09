@@ -171,7 +171,7 @@ struct FunctionInfo {
     /// @param func the AST function
     /// @param builder the program builder
     FunctionInfo(const ast::Function* func, const ProgramBuilder* builder) {
-        name = builder->Symbols().NameFor(func->symbol);
+        name = builder->Symbols().NameFor(func->name->symbol);
         callsite_tag = {CallSiteTag::CallSiteNoRestriction};
         function_tag = NoRestriction;
 
@@ -1769,7 +1769,7 @@ class UniformityGraph {
                 if (auto* param = var->As<sem::Parameter>()) {
                     auto* func = param->Owner()->As<sem::Function>();
                     ss << param_type(param) << "'" << NameFor(ident->identifier) << "' of '"
-                       << NameFor(func->Declaration()) << "' may be non-uniform";
+                       << NameFor(func->Declaration()->name) << "' may be non-uniform";
                 } else {
                     ss << "reading from " << var_type(var) << "'" << NameFor(ident->identifier)
                        << "' may result in a non-uniform value";

@@ -192,7 +192,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
 
     auto program = p->program();
     ASSERT_EQ(program.AST().Functions().Length(), 1u);
-    EXPECT_EQ(program.Symbols().NameFor(program.AST().Functions()[0]->symbol), "main");
+    EXPECT_EQ(program.Symbols().NameFor(program.AST().Functions()[0]->name->symbol), "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_WithAttribute) {
@@ -202,7 +202,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function_WithAttribute) {
 
     auto program = p->program();
     ASSERT_EQ(program.AST().Functions().Length(), 1u);
-    EXPECT_EQ(program.Symbols().NameFor(program.AST().Functions()[0]->symbol), "main");
+    EXPECT_EQ(program.Symbols().NameFor(program.AST().Functions()[0]->name->symbol), "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {

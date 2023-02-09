@@ -1873,7 +1873,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
         if (!EmitType(out, func_sem->ReturnType(), "")) {
             return false;
         }
-        out << " " << program_->Symbols().NameFor(func->symbol) << "(";
+        out << " " << program_->Symbols().NameFor(func->name->symbol) << "(";
 
         bool first = true;
         for (auto* v : func->params) {
@@ -1975,7 +1975,7 @@ std::string GeneratorImpl::interpolation_to_attribute(ast::InterpolationType typ
 bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     auto* func_sem = builder_.Sem().Get(func);
 
-    auto func_name = program_->Symbols().NameFor(func->symbol);
+    auto func_name = program_->Symbols().NameFor(func->name->symbol);
 
     // Returns the binding index of a variable, requiring that the group
     // attribute have a value of zero.

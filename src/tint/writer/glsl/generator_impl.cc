@@ -1882,7 +1882,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
 
     {
         auto out = line();
-        auto name = builder_.Symbols().NameFor(func->symbol);
+        auto name = builder_.Symbols().NameFor(func->name->symbol);
         if (!EmitType(out, sem->ReturnType(), type::AddressSpace::kNone, type::Access::kReadWrite,
                       "")) {
             return false;
@@ -2261,7 +2261,8 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     {
         auto out = line();
         if (!EmitTypeAndName(out, func_sem->ReturnType(), type::AddressSpace::kUndefined,
-                             type::Access::kUndefined, builder_.Symbols().NameFor(func->symbol))) {
+                             type::Access::kUndefined,
+                             builder_.Symbols().NameFor(func->name->symbol))) {
             return false;
         }
         out << "(";

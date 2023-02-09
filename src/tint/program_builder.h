@@ -2510,7 +2510,7 @@ class ProgramBuilder {
             block = Block(std::forward<BODY>(body));
         }
         auto* func =
-            create<ast::Function>(source, Sym(std::forward<NAME>(name)), std::move(params), type,
+            create<ast::Function>(source, Ident(std::forward<NAME>(name)), std::move(params), type,
                                   block, std::move(attributes), std::move(return_type_attributes));
         AST().AddFunction(func);
         return func;

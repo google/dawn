@@ -31,7 +31,7 @@ TEST_F(FunctionTest, Creation_i32ReturnType) {
     auto* var = params[0];
 
     auto* f = Func("func", params, i32, utils::Empty);
-    EXPECT_EQ(f->symbol, Symbols().Get("func"));
+    EXPECT_EQ(f->name->symbol, Symbols().Get("func"));
     ASSERT_EQ(f->params.Length(), 1u);
     EXPECT_EQ(f->return_type, i32);
     EXPECT_EQ(f->params[0], var);
@@ -42,7 +42,7 @@ TEST_F(FunctionTest, Creation_NoReturnType) {
     auto* var = params[0];
 
     auto* f = Func("func", params, ty.void_(), utils::Empty);
-    EXPECT_EQ(f->symbol, Symbols().Get("func"));
+    EXPECT_EQ(f->name->symbol, Symbols().Get("func"));
     ASSERT_EQ(f->params.Length(), 1u);
     EXPECT_EQ(f->return_type, nullptr);
     EXPECT_EQ(f->params[0], var);
@@ -53,7 +53,7 @@ TEST_F(FunctionTest, Creation_SingleParam) {
     auto* var = params[0];
 
     auto* f = Func("func", params, ty.void_(), utils::Empty);
-    EXPECT_EQ(f->symbol, Symbols().Get("func"));
+    EXPECT_EQ(f->name->symbol, Symbols().Get("func"));
     ASSERT_EQ(f->params.Length(), 1u);
     EXPECT_EQ(f->return_type, nullptr);
     EXPECT_EQ(f->params[0], var);
@@ -98,6 +98,24 @@ TEST_F(FunctionTest, Creation_WithSource) {
     EXPECT_EQ(src.range.begin.column, 2u);
 }
 
+TEST_F(FunctionTest, Assert_NullName) {
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.Func(static_cast<Identifier*>(nullptr), utils::Empty, b.ty.void_(), utils::Empty);
+        },
+        "internal compiler error");
+}
+
+TEST_F(FunctionTest, Assert_TemplatedName) {
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.Func(b.Ident("a", "b"), utils::Empty, b.ty.void_(), utils::Empty);
+        },
+        "internal compiler error");
+}
+
 TEST_F(FunctionTest, Assert_InvalidName) {
     EXPECT_FATAL_FAILURE(
         {
@@ -107,7 +125,7 @@ TEST_F(FunctionTest, Assert_InvalidName) {
         "internal compiler error");
 }
 
-TEST_F(FunctionTest, Assert_Null_Param) {
+TEST_F(FunctionTest, Assert_NullParam) {
     using ParamList = utils::Vector<const ast::Parameter*, 2>;
     EXPECT_FATAL_FAILURE(
         {

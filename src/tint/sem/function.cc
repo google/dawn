@@ -15,6 +15,7 @@
 #include "src/tint/sem/function.h"
 
 #include "src/tint/ast/function.h"
+#include "src/tint/ast/identifier.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/external_texture.h"
@@ -141,7 +142,7 @@ Function::VariableBindings Function::TransitivelyReferencedVariablesOfType(
 
 bool Function::HasAncestorEntryPoint(Symbol symbol) const {
     for (const auto* point : ancestor_entry_points_) {
-        if (point->Declaration()->symbol == symbol) {
+        if (point->Declaration()->name->symbol == symbol) {
             return true;
         }
     }

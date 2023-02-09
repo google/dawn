@@ -214,12 +214,12 @@ struct CombineSamplers::State {
                 }
                 // Create a new function signature that differs only in the parameter
                 // list.
-                auto symbol = ctx.Clone(ast_fn->symbol);
+                auto name = ctx.Clone(ast_fn->name);
                 auto* return_type = ctx.Clone(ast_fn->return_type);
                 auto* body = ctx.Clone(ast_fn->body);
                 auto attributes = ctx.Clone(ast_fn->attributes);
                 auto return_type_attributes = ctx.Clone(ast_fn->return_type_attributes);
-                return ctx.dst->create<ast::Function>(symbol, params, return_type, body,
+                return ctx.dst->create<ast::Function>(name, params, return_type, body,
                                                       std::move(attributes),
                                                       std::move(return_type_attributes));
             }

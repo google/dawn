@@ -49,7 +49,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
         if (!f->IsEntryPoint()) {
             continue;
         }
-        if (src->Symbols().NameFor(f->symbol) == cfg->entry_point_name) {
+        if (src->Symbols().NameFor(f->name->symbol) == cfg->entry_point_name) {
             entry_point = f;
             break;
         }
@@ -109,7 +109,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
                 b.AST().AddGlobalVariable(ctx.Clone(c));
             },
             [&](const ast::Function* func) {
-                if (sem.Get(func)->HasAncestorEntryPoint(entry_point->symbol)) {
+                if (sem.Get(func)->HasAncestorEntryPoint(entry_point->name->symbol)) {
                     b.AST().AddFunction(ctx.Clone(func));
                 }
             },

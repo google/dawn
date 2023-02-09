@@ -1037,7 +1037,7 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
         } else if (TINT_UNLIKELY(IsValidationEnabled(
                        decl->attributes, ast::DisabledValidation::kFunctionHasNoBody))) {
             TINT_ICE(Resolver, diagnostics_)
-                << "Function " << symbols_.NameFor(decl->symbol) << " has no body";
+                << "Function " << symbols_.NameFor(decl->name->symbol) << " has no body";
         }
 
         for (auto* attr : decl->return_type_attributes) {
@@ -1069,7 +1069,7 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
     // a function behavior is always one of {}, or {Next}.
     if (TINT_UNLIKELY(func->Behaviors() != sem::Behaviors{} &&
                       func->Behaviors() != sem::Behavior::kNext)) {
-        auto name = symbols_.NameFor(decl->symbol);
+        auto name = symbols_.NameFor(decl->name->symbol);
         TINT_ICE(Resolver, diagnostics_)
             << "function '" << name << "' behaviors are: " << func->Behaviors();
     }
@@ -1236,30 +1236,30 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     };
 
     // Outer lambda for validating the entry point attributes for a type.
-    auto validate_entry_point_attributes = [&](utils::VectorRef<const ast::Attribute*> attrs,
-                                               const type::Type* ty, Source source,
-                                               ParamOrRetType param_or_ret,
-                                               std::optional<uint32_t> location) {
-        if (!validate_entry_point_attributes_inner(attrs, ty, source, param_or_ret,
-                                                   /*is_struct_member*/ false, location)) {
-            return false;
-        }
+    auto validate_entry_point_attributes =
+        [&](utils::VectorRef<const ast::Attribute*> attrs, const type::Type* ty, Source source,
+            ParamOrRetType param_or_ret, std::optional<uint32_t> location) {
+            if (!validate_entry_point_attributes_inner(attrs, ty, source, param_or_ret,
+                                                       /*is_struct_member*/ false, location)) {
+                return false;
+            }
 
-        if (auto* str = ty->As<sem::Struct>()) {
-            for (auto* member : str->Members()) {
-                if (!validate_entry_point_attributes_inner(
-                        member->Declaration()->attributes, member->Type(), member->Source(),
-                        param_or_ret,
-                        /*is_struct_member*/ true, member->Location())) {
-                    AddNote("while analyzing entry point '" + symbols_.NameFor(decl->symbol) + "'",
-                            decl->source);
-                    return false;
+            if (auto* str = ty->As<sem::Struct>()) {
+                for (auto* member : str->Members()) {
+                    if (!validate_entry_point_attributes_inner(
+                            member->Declaration()->attributes, member->Type(), member->Source(),
+                            param_or_ret,
+                            /*is_struct_member*/ true, member->Location())) {
+                        AddNote("while analyzing entry point '" +
+                                    symbols_.NameFor(decl->name->symbol) + "'",
+                                decl->source);
+                        return false;
+                    }
                 }
             }
-        }
 
-        return true;
-    };
+            return true;
+        };
 
     for (auto* param : func->Parameters()) {
         auto* param_decl = param->Declaration();
@@ -1329,7 +1329,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
             // Bindings must not alias within a shader stage: two different variables in the
             // resource interface of a given shader must not have the same group and binding values,
             // when considered as a pair of values.
-            auto func_name = symbols_.NameFor(decl->symbol);
+            auto func_name = symbols_.NameFor(decl->name->symbol);
             AddError(
                 "entry point '" + func_name +
                     "' references multiple variables that use the same resource binding @group(" +
@@ -1875,11 +1875,12 @@ bool Validator::PipelineStages(utils::VectorRef<sem::Function*> entry_points) co
     auto backtrace = [&](const sem::Function* func, const sem::Function* entry_point) {
         if (func != entry_point) {
             TraverseCallChain(diagnostics_, entry_point, func, [&](const sem::Function* f) {
-                AddNote("called by function '" + symbols_.NameFor(f->Declaration()->symbol) + "'",
-                        f->Declaration()->source);
+                AddNote(
+                    "called by function '" + symbols_.NameFor(f->Declaration()->name->symbol) + "'",
+                    f->Declaration()->source);
             });
             AddNote("called by entry point '" +
-                        symbols_.NameFor(entry_point->Declaration()->symbol) + "'",
+                        symbols_.NameFor(entry_point->Declaration()->name->symbol) + "'",
                     entry_point->Declaration()->source);
         }
     };
@@ -1986,7 +1987,7 @@ bool Validator::PushConstants(utils::VectorRef<sem::Function*> entry_points) con
                     continue;
                 }
 
-                AddError("entry point '" + symbols_.NameFor(ep->Declaration()->symbol) +
+                AddError("entry point '" + symbols_.NameFor(ep->Declaration()->name->symbol) +
                              "' uses two different 'push_constant' variables.",
                          ep->Declaration()->source);
                 AddNote("first 'push_constant' variable declaration is here",
@@ -1994,11 +1995,11 @@ bool Validator::PushConstants(utils::VectorRef<sem::Function*> entry_points) con
                 if (func != ep) {
                     TraverseCallChain(diagnostics_, ep, func, [&](const sem::Function* f) {
                         AddNote("called by function '" +
-                                    symbols_.NameFor(f->Declaration()->symbol) + "'",
+                                    symbols_.NameFor(f->Declaration()->name->symbol) + "'",
                                 f->Declaration()->source);
                     });
                     AddNote("called by entry point '" +
-                                symbols_.NameFor(ep->Declaration()->symbol) + "'",
+                                symbols_.NameFor(ep->Declaration()->name->symbol) + "'",
                             ep->Declaration()->source);
                 }
                 AddNote("second 'push_constant' variable declaration is here",
@@ -2007,11 +2008,11 @@ bool Validator::PushConstants(utils::VectorRef<sem::Function*> entry_points) con
                     TraverseCallChain(
                         diagnostics_, ep, push_constant_func, [&](const sem::Function* f) {
                             AddNote("called by function '" +
-                                        symbols_.NameFor(f->Declaration()->symbol) + "'",
+                                        symbols_.NameFor(f->Declaration()->name->symbol) + "'",
                                     f->Declaration()->source);
                         });
                     AddNote("called by entry point '" +
-                                symbols_.NameFor(ep->Declaration()->symbol) + "'",
+                                symbols_.NameFor(ep->Declaration()->name->symbol) + "'",
                             ep->Declaration()->source);
                 }
                 return false;
