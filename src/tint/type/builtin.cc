@@ -100,6 +100,9 @@ Builtin ParseBuiltin(std::string_view str) {
     if (str == "sampler_comparison") {
         return Builtin::kSamplerComparison;
     }
+    if (str == "texture_external") {
+        return Builtin::kTextureExternal;
+    }
     if (str == "u32") {
         return Builtin::kU32;
     }
@@ -194,6 +197,8 @@ std::ostream& operator<<(std::ostream& out, Builtin value) {
             return out << "sampler";
         case Builtin::kSamplerComparison:
             return out << "sampler_comparison";
+        case Builtin::kTextureExternal:
+            return out << "texture_external";
         case Builtin::kU32:
             return out << "u32";
         case Builtin::kVec2F:

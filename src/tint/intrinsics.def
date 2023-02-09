@@ -170,6 +170,8 @@ enum builtin_type {
   // https://www.w3.org/TR/WGSL/#sampler-type
   sampler
   sampler_comparison
+  // https://www.w3.org/TR/WGSL/#external-texture-type
+  texture_external
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -47,7 +47,6 @@
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/enable.h"
 #include "src/tint/ast/extension.h"
-#include "src/tint/ast/external_texture.h"
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/id_attribute.h"
@@ -1071,14 +1070,12 @@ class ProgramBuilder {
         }
 
         /// @returns the external texture
-        const ast::ExternalTexture* external_texture() const {
-            return builder->create<ast::ExternalTexture>();
-        }
+        const ast::TypeName* external_texture() const { return external_texture(builder->source_); }
 
         /// @param source the Source of the node
-        /// @returns the external texture
-        const ast::ExternalTexture* external_texture(const Source& source) const {
-            return builder->create<ast::ExternalTexture>(source);
+        /// @returns the external texture typename
+        const ast::TypeName* external_texture(const Source& source) const {
+            return (*this)(source, "texture_external");
         }
 
         /// Constructs a TypeName for the type declaration.

@@ -22,7 +22,6 @@
 #include "src/tint/ast/bool_literal_expression.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/depth_texture.h"
-#include "src/tint/ast/external_texture.h"
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/internal_attribute.h"
@@ -450,10 +449,6 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
                 return false;
             }
             out << ">";
-            return true;
-        },
-        [&](const ast::ExternalTexture*) {
-            out << "texture_external";
             return true;
         },
         [&](const ast::Texture* texture) {
