@@ -589,7 +589,7 @@ func (r *roller) findExistingRolls() ([]gerrit.ChangeInfo, error) {
 // checkout performs a git checkout of the repo at host to dir at the given hash
 func (r *roller) checkout(project, dir, host, hash string) (*git.Repository, error) {
 	log.Printf("cloning %v to '%v'...", project, dir)
-	repo, err := r.git.Clone(dir, host, nil)
+	repo, err := r.git.Clone(dir, host, &git.CloneOptions{Timeout: time.Minute * 10})
 	if err != nil {
 		return nil, fmt.Errorf("failed to clone %v: %v", project, err)
 	}
