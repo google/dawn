@@ -54,10 +54,10 @@ void main_inner(uint3 GlobalInvocationID) {
   const int TILE_COUNT_X = 2;
   const int TILE_COUNT_Y = 2;
   {
-    for(int y_1 = 0; (y_1 < TILE_COUNT_Y); y_1 = (y_1 + 1)) {
+    for(int y = 0; (y < TILE_COUNT_Y); y = (y + 1)) {
       {
-        for(int x_1 = 0; (x_1 < TILE_COUNT_X); x_1 = (x_1 + 1)) {
-          int2 tilePixel0Idx = int2((x_1 * TILE_SIZE), (y_1 * TILE_SIZE));
+        for(int x = 0; (x < TILE_COUNT_X); x = (x + 1)) {
+          int2 tilePixel0Idx = int2((x * TILE_SIZE), (y * TILE_SIZE));
           float2 floorCoord = (((2.0f * float2(tilePixel0Idx)) / asfloat(uniforms[10]).xy) - (1.0f).xx);
           float2 ceilCoord = (((2.0f * float2((tilePixel0Idx + int2((TILE_SIZE).xx)))) / asfloat(uniforms[10]).xy) - (1.0f).xx);
           float2 viewFloorCoord = float2((((-(viewNear) * floorCoord.x) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * floorCoord.y) - (M[2][1] * viewNear)) / M[1][1]));
@@ -90,7 +90,7 @@ void main_inner(uint3 GlobalInvocationID) {
             }
           }
           if ((dp >= 0.0f)) {
-            uint tileId = uint((x_1 + (y_1 * TILE_COUNT_X)));
+            uint tileId = uint((x + (y * TILE_COUNT_X)));
             bool tint_tmp = (tileId < 0u);
             if (!tint_tmp) {
               tint_tmp = (tileId >= config[0].y);

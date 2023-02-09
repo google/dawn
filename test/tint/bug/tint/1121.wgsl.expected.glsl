@@ -75,10 +75,10 @@ void tint_symbol_2(uvec3 GlobalInvocationID) {
   int TILE_COUNT_X = 2;
   int TILE_COUNT_Y = 2;
   {
-    for(int y_1 = 0; (y_1 < TILE_COUNT_Y); y_1 = (y_1 + 1)) {
+    for(int y = 0; (y < TILE_COUNT_Y); y = (y + 1)) {
       {
-        for(int x_1 = 0; (x_1 < TILE_COUNT_X); x_1 = (x_1 + 1)) {
-          ivec2 tilePixel0Idx = ivec2((x_1 * TILE_SIZE), (y_1 * TILE_SIZE));
+        for(int x = 0; (x < TILE_COUNT_X); x = (x + 1)) {
+          ivec2 tilePixel0Idx = ivec2((x * TILE_SIZE), (y * TILE_SIZE));
           vec2 floorCoord = (((2.0f * vec2(tilePixel0Idx)) / uniforms.inner.fullScreenSize.xy) - vec2(1.0f));
           vec2 ceilCoord = (((2.0f * vec2((tilePixel0Idx + ivec2(TILE_SIZE)))) / uniforms.inner.fullScreenSize.xy) - vec2(1.0f));
           vec2 viewFloorCoord = vec2((((-(viewNear) * floorCoord.x) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * floorCoord.y) - (M[2][1] * viewNear)) / M[1][1]));
@@ -111,7 +111,7 @@ void tint_symbol_2(uvec3 GlobalInvocationID) {
             }
           }
           if ((dp >= 0.0f)) {
-            uint tileId = uint((x_1 + (y_1 * TILE_COUNT_X)));
+            uint tileId = uint((x + (y * TILE_COUNT_X)));
             bool tint_tmp = (tileId < 0u);
             if (!tint_tmp) {
               tint_tmp = (tileId >= config.inner.numTiles);

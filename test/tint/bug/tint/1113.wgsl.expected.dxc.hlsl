@@ -33,10 +33,10 @@ uint tint_mod(uint lhs, uint rhs) {
 }
 
 uint3 toIndex3D(uint gridSize, uint index) {
-  uint z_1 = tint_div(index, (gridSize * gridSize));
-  uint y_1 = tint_div((index - ((gridSize * gridSize) * z_1)), gridSize);
-  uint x_1 = tint_mod(index, gridSize);
-  return uint3(x_1, y_1, z_1);
+  uint z = tint_div(index, (gridSize * gridSize));
+  uint y = tint_div((index - ((gridSize * gridSize) * z)), gridSize);
+  uint x = tint_mod(index, gridSize);
+  return uint3(x, y, z);
 }
 
 float3 loadPosition(uint vertexIndex) {

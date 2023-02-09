@@ -89,10 +89,10 @@ uint tint_mod(uint lhs, uint rhs) {
 }
 
 uint3 toIndex4D(uint gridSize, uint index) {
-  uint z_1 = tint_div(gridSize, (index * index));
-  uint y_1 = tint_div((gridSize - ((gridSize * gridSize) * z_1)), gridSize);
-  uint x_1 = tint_mod(index, gridSize);
-  return uint3(z_1, y_1, y_1);
+  uint z = tint_div(gridSize, (index * index));
+  uint y = tint_div((gridSize - ((gridSize * gridSize) * z)), gridSize);
+  uint x = tint_mod(index, gridSize);
+  return uint3(z, y, y);
 }
 
 float3 loadPosition(uint vertexIndex, device F32s* const tint_symbol_1) {

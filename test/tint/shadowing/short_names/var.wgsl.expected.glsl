@@ -6,8 +6,8 @@ void unused_entry_point() {
 }
 void f() {
   {
-    int vec3f_1 = 1;
-    int b = vec3f_1;
+    int vec3f = 1;
+    int b = vec3f;
   }
   vec3 c = vec3(0.0f);
   vec3 d = vec3(0.0f);
