@@ -37,11 +37,11 @@ vars = {
 deps = {
   # Dependencies required to use GN/Clang in standalone
   'build': {
-    'url': '{chromium_git}/chromium/src/build@6dc6eb47fb899a7d3ddbc6812d09ee9f7f1879ce',
+    'url': '{chromium_git}/chromium/src/build@8cbb95464bb7f05b442f3ece4951efbe0825a131',
     'condition': 'dawn_standalone',
   },
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@3c7e3f1b8b1e4c0b6ec693430379cea682de78d6',
+    'url': '{chromium_git}/chromium/src/buildtools@70e9f44cbc8bc4c3dff18800ba5d962154a4f2a6',
     'condition': 'dawn_standalone',
   },
   'buildtools/clang_format/script': {
@@ -74,7 +74,7 @@ deps = {
   },
 
   'buildtools/third_party/libc++/trunk': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@bfaf65c48faadc153f3b31c42c5d7b5dc76b30a1',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@035440c7077237787869cb08ab99bcc8b5ddc97e',
     'condition': 'dawn_standalone',
   },
 
@@ -84,7 +84,7 @@ deps = {
   },
 
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@c272f2cdc17991d3298d6263a7a2326941b25129',
+    'url': '{chromium_git}/chromium/src/tools/clang@fff7f04d30a0687029ddc7e174d5548a525ddf0b',
     'condition': 'dawn_standalone',
   },
   'tools/clang/dsymutil': {
@@ -98,16 +98,16 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@a9787cefaec53e7c15bd2bf7f31cd913b640c871',
+    'url': '{chromium_git}/chromium/src/testing@d5ea1bf4b64781cfe38f207f56f264eb080d06b2',
     'condition': 'dawn_standalone',
   },
   'third_party/googletest': {
-    'url': '{chromium_git}/external/github.com/google/googletest@b72202078d0a7a2f2509eb5237685bcf1baea3b4',
+    'url': '{chromium_git}/external/github.com/google/googletest@b73f27fd164456fea9aba56163f5511355a03272',
     'condition': 'dawn_standalone',
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@35952dc547f244194377541105ce1e5776200ae3',
+    'url': '{chromium_git}/catapult.git@37e879a7d13cbaa4925e09fc02b0f9276e060f0a',
     'condition': 'dawn_standalone',
   },
 
