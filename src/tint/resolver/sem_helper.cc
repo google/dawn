@@ -14,6 +14,7 @@
 
 #include "src/tint/resolver/sem_helper.h"
 
+#include "src/tint/sem/builtin_enum_expression.h"
 #include "src/tint/sem/type_expression.h"
 #include "src/tint/sem/value_expression.h"
 
@@ -49,6 +50,18 @@ void SemHelper::ErrorExpectedValueExpr(const sem::Expression* expr) const {
             if (auto* str = ty_expr->Type()->As<type::Struct>()) {
                 AddNote("'" + name + "' declared here", str->Source());
             }
+        },
+        [&](const sem::BuiltinEnumExpression<type::Access>* access) {
+            AddError("cannot use access '" + utils::ToString(access->Value()) + "' as value",
+                     access->Declaration()->source);
+        },
+        [&](const sem::BuiltinEnumExpression<type::AddressSpace>* addr) {
+            AddError("cannot use address space '" + utils::ToString(addr->Value()) + "' as value",
+                     addr->Declaration()->source);
+        },
+        [&](const sem::BuiltinEnumExpression<type::TexelFormat>* fmt) {
+            AddError("cannot use texel format '" + utils::ToString(fmt->Value()) + "' as value",
+                     fmt->Declaration()->source);
         },
         [&](Default) {
             TINT_ICE(Resolver, builder_->Diagnostics())

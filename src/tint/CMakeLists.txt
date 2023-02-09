@@ -325,6 +325,8 @@ list(APPEND TINT_LIB_SRCS
   sem/break_if_statement.h
   sem/builtin.cc
   sem/builtin.h
+  sem/builtin_enum_expression.cc
+  sem/builtin_enum_expression.h
   sem/call_target.cc
   sem/call_target.h
   sem/call.cc

@@ -1325,6 +1325,261 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 }  // namespace resolve_to_builtin_type
 
 ////////////////////////////////////////////////////////////////////////////////
+// Resolve to type::Access tests
+////////////////////////////////////////////////////////////////////////////////
+namespace resolve_to_access {
+
+using ResolverDependencyGraphResolveToAccess =
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, const char*>>;
+
+TEST_P(ResolverDependencyGraphResolveToAccess, Resolve) {
+    const auto use = std::get<0>(GetParam());
+    const auto name = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(name);
+
+    SymbolTestHelper helper(this);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->Access(), type::ParseAccess(name))
+        << resolved->String(Symbols(), Diagnostics());
+}
+
+TEST_P(ResolverDependencyGraphResolveToAccess, ShadowedByGlobalVar) {
+    const auto use = std::get<0>(GetParam());
+    const auto builtin = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(utils::ToString(builtin));
+
+    SymbolTestHelper helper(this);
+    auto* decl = helper.Add(SymbolDeclKind::GlobalVar, symbol);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
+}
+
+TEST_P(ResolverDependencyGraphResolveToAccess, ShadowedByStruct) {
+    const auto use = std::get<0>(GetParam());
+    const auto builtin = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(utils::ToString(builtin));
+
+    SymbolTestHelper helper(this);
+    auto* decl = helper.Add(SymbolDeclKind::Struct, symbol);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
+}
+
+TEST_P(ResolverDependencyGraphResolveToAccess, ShadowedByFunc) {
+    const auto use = std::get<0>(GetParam());
+    const auto builtin = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(utils::ToString(builtin));
+
+    SymbolTestHelper helper(this);
+    auto* decl = helper.Add(SymbolDeclKind::Function, symbol);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
+}
+
+INSTANTIATE_TEST_SUITE_P(Types,
+                         ResolverDependencyGraphResolveToAccess,
+                         testing::Combine(testing::ValuesIn(kTypeUseKinds),
+                                          testing::ValuesIn(type::kAccessStrings)));
+
+INSTANTIATE_TEST_SUITE_P(Values,
+                         ResolverDependencyGraphResolveToAccess,
+                         testing::Combine(testing::ValuesIn(kValueUseKinds),
+                                          testing::ValuesIn(type::kAccessStrings)));
+
+INSTANTIATE_TEST_SUITE_P(Functions,
+                         ResolverDependencyGraphResolveToAccess,
+                         testing::Combine(testing::ValuesIn(kFuncUseKinds),
+                                          testing::ValuesIn(type::kAccessStrings)));
+
+}  // namespace resolve_to_access
+
+////////////////////////////////////////////////////////////////////////////////
+// Resolve to type::AddressSpace tests
+////////////////////////////////////////////////////////////////////////////////
+namespace resolve_to_address_space {
+
+using ResolverDependencyGraphResolveToAddressSpace =
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, const char*>>;
+
+TEST_P(ResolverDependencyGraphResolveToAddressSpace, Resolve) {
+    const auto use = std::get<0>(GetParam());
+    const auto name = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(name);
+
+    SymbolTestHelper helper(this);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->AddressSpace(), type::ParseAddressSpace(name))
+        << resolved->String(Symbols(), Diagnostics());
+}
+
+TEST_P(ResolverDependencyGraphResolveToAddressSpace, ShadowedByGlobalVar) {
+    const auto use = std::get<0>(GetParam());
+    const auto builtin = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(utils::ToString(builtin));
+
+    SymbolTestHelper helper(this);
+    auto* decl = helper.Add(SymbolDeclKind::GlobalVar, symbol);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
+}
+
+TEST_P(ResolverDependencyGraphResolveToAddressSpace, ShadowedByStruct) {
+    const auto use = std::get<0>(GetParam());
+    const auto builtin = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(utils::ToString(builtin));
+
+    SymbolTestHelper helper(this);
+    auto* decl = helper.Add(SymbolDeclKind::Struct, symbol);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
+}
+
+TEST_P(ResolverDependencyGraphResolveToAddressSpace, ShadowedByFunc) {
+    const auto use = std::get<0>(GetParam());
+    const auto builtin = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(utils::ToString(builtin));
+
+    SymbolTestHelper helper(this);
+    auto* decl = helper.Add(SymbolDeclKind::Function, symbol);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
+}
+
+INSTANTIATE_TEST_SUITE_P(Types,
+                         ResolverDependencyGraphResolveToAddressSpace,
+                         testing::Combine(testing::ValuesIn(kTypeUseKinds),
+                                          testing::ValuesIn(type::kAddressSpaceStrings)));
+
+INSTANTIATE_TEST_SUITE_P(Values,
+                         ResolverDependencyGraphResolveToAddressSpace,
+                         testing::Combine(testing::ValuesIn(kValueUseKinds),
+                                          testing::ValuesIn(type::kAddressSpaceStrings)));
+
+INSTANTIATE_TEST_SUITE_P(Functions,
+                         ResolverDependencyGraphResolveToAddressSpace,
+                         testing::Combine(testing::ValuesIn(kFuncUseKinds),
+                                          testing::ValuesIn(type::kAddressSpaceStrings)));
+
+}  // namespace resolve_to_address_space
+
+////////////////////////////////////////////////////////////////////////////////
+// Resolve to type::TexelFormat tests
+////////////////////////////////////////////////////////////////////////////////
+namespace resolve_to_texel_format {
+
+using ResolverDependencyGraphResolveToTexelFormat =
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, const char*>>;
+
+TEST_P(ResolverDependencyGraphResolveToTexelFormat, Resolve) {
+    const auto use = std::get<0>(GetParam());
+    const auto name = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(name);
+
+    SymbolTestHelper helper(this);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->TexelFormat(), type::ParseTexelFormat(name))
+        << resolved->String(Symbols(), Diagnostics());
+}
+
+TEST_P(ResolverDependencyGraphResolveToTexelFormat, ShadowedByGlobalVar) {
+    const auto use = std::get<0>(GetParam());
+    const auto builtin = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(utils::ToString(builtin));
+
+    SymbolTestHelper helper(this);
+    auto* decl = helper.Add(SymbolDeclKind::GlobalVar, symbol);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
+}
+
+TEST_P(ResolverDependencyGraphResolveToTexelFormat, ShadowedByStruct) {
+    const auto use = std::get<0>(GetParam());
+    const auto builtin = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(utils::ToString(builtin));
+
+    SymbolTestHelper helper(this);
+    auto* decl = helper.Add(SymbolDeclKind::Struct, symbol);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
+}
+
+TEST_P(ResolverDependencyGraphResolveToTexelFormat, ShadowedByFunc) {
+    const auto use = std::get<0>(GetParam());
+    const auto builtin = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(utils::ToString(builtin));
+
+    SymbolTestHelper helper(this);
+    auto* decl = helper.Add(SymbolDeclKind::Function, symbol);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
+}
+
+INSTANTIATE_TEST_SUITE_P(Types,
+                         ResolverDependencyGraphResolveToTexelFormat,
+                         testing::Combine(testing::ValuesIn(kTypeUseKinds),
+                                          testing::ValuesIn(type::kTexelFormatStrings)));
+
+INSTANTIATE_TEST_SUITE_P(Values,
+                         ResolverDependencyGraphResolveToTexelFormat,
+                         testing::Combine(testing::ValuesIn(kValueUseKinds),
+                                          testing::ValuesIn(type::kTexelFormatStrings)));
+
+INSTANTIATE_TEST_SUITE_P(Functions,
+                         ResolverDependencyGraphResolveToTexelFormat,
+                         testing::Combine(testing::ValuesIn(kFuncUseKinds),
+                                          testing::ValuesIn(type::kTexelFormatStrings)));
+
+}  // namespace resolve_to_texel_format
+
+////////////////////////////////////////////////////////////////////////////////
 // Shadowing tests
 ////////////////////////////////////////////////////////////////////////////////
 namespace shadowing {

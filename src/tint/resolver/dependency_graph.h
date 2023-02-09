@@ -21,7 +21,9 @@
 #include "src/tint/ast/module.h"
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/sem/builtin_type.h"
+#include "src/tint/type/access.h"
 #include "src/tint/type/builtin.h"
+#include "src/tint/type/texel_format.h"
 #include "src/tint/utils/hashmap.h"
 
 namespace tint::resolver {
@@ -32,7 +34,10 @@ namespace tint::resolver {
 /// - const ast::Variable*  (as const ast::Node*)
 /// - const ast::Function*  (as const ast::Node*)
 /// - sem::BuiltinType
+/// - type::Access
+/// - type::AddressSpace
 /// - type::Builtin
+/// - type::TexelFormat
 class ResolvedIdentifier {
   public:
     ResolvedIdentifier() = default;
@@ -62,6 +67,24 @@ class ResolvedIdentifier {
         return sem::BuiltinType::kNone;
     }
 
+    /// @return the access if the ResolvedIdentifier holds type::Access, otherwise
+    /// type::Access::kUndefined
+    type::Access Access() const {
+        if (auto n = std::get_if<type::Access>(&value_)) {
+            return *n;
+        }
+        return type::Access::kUndefined;
+    }
+
+    /// @return the address space if the ResolvedIdentifier holds type::AddressSpace, otherwise
+    /// type::AddressSpace::kUndefined
+    type::AddressSpace AddressSpace() const {
+        if (auto n = std::get_if<type::AddressSpace>(&value_)) {
+            return *n;
+        }
+        return type::AddressSpace::kUndefined;
+    }
+
     /// @return the builtin type if the ResolvedIdentifier holds type::Builtin, otherwise
     /// type::Builtin::kUndefined
     type::Builtin BuiltinType() const {
@@ -69,6 +92,15 @@ class ResolvedIdentifier {
             return *n;
         }
         return type::Builtin::kUndefined;
+    }
+
+    /// @return the texel format if the ResolvedIdentifier holds type::TexelFormat, otherwise
+    /// type::TexelFormat::kUndefined
+    type::TexelFormat TexelFormat() const {
+        if (auto n = std::get_if<type::TexelFormat>(&value_)) {
+            return *n;
+        }
+        return type::TexelFormat::kUndefined;
     }
 
     /// @param value the value to compare the ResolvedIdentifier to
@@ -94,7 +126,14 @@ class ResolvedIdentifier {
     std::string String(const SymbolTable& symbols, diag::List& diagnostics) const;
 
   private:
-    std::variant<std::monostate, const ast::Node*, sem::BuiltinType, type::Builtin> value_;
+    std::variant<std::monostate,
+                 const ast::Node*,
+                 sem::BuiltinType,
+                 type::Access,
+                 type::AddressSpace,
+                 type::Builtin,
+                 type::TexelFormat>
+        value_;
 };
 
 /// DependencyGraph holds information about module-scope declaration dependency

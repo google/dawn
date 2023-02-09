@@ -23,16 +23,23 @@ namespace tint::resolver {
 namespace {
 
 enum class Def {
+    kAccess,
+    kAddressSpace,
     kBuiltinFunction,
     kBuiltinType,
     kFunction,
     kStruct,
+    kTexelFormat,
     kTypeAlias,
     kVariable,
 };
 
 std::ostream& operator<<(std::ostream& out, Def def) {
     switch (def) {
+        case Def::kAccess:
+            return out << "Def::kAccess";
+        case Def::kAddressSpace:
+            return out << "Def::kAddressSpace";
         case Def::kBuiltinFunction:
             return out << "Def::kBuiltinFunction";
         case Def::kBuiltinType:
@@ -41,6 +48,8 @@ std::ostream& operator<<(std::ostream& out, Def def) {
             return out << "Def::kFunction";
         case Def::kStruct:
             return out << "Def::kStruct";
+        case Def::kTexelFormat:
+            return out << "Def::kTexelFormat";
         case Def::kTypeAlias:
             return out << "Def::kTypeAlias";
         case Def::kVariable:
@@ -50,16 +59,23 @@ std::ostream& operator<<(std::ostream& out, Def def) {
 }
 
 enum class Use {
+    kAccess,
+    kAddressSpace,
     kCallExpr,
     kCallStmt,
     kFunctionReturnType,
     kMemberType,
+    kTexelFormat,
     kValueExpression,
     kVariableType,
 };
 
 std::ostream& operator<<(std::ostream& out, Use use) {
     switch (use) {
+        case Use::kAccess:
+            return out << "Use::kAccess";
+        case Use::kAddressSpace:
+            return out << "Use::kAddressSpace";
         case Use::kCallExpr:
             return out << "Use::kCallExpr";
         case Use::kCallStmt:
@@ -68,6 +84,8 @@ std::ostream& operator<<(std::ostream& out, Use use) {
             return out << "Use::kFunctionReturnType";
         case Use::kMemberType:
             return out << "Use::kMemberType";
+        case Use::kTexelFormat:
+            return out << "Use::kTexelFormat";
         case Use::kValueExpression:
             return out << "Use::kValueExpression";
         case Use::kVariableType:
@@ -96,6 +114,12 @@ using ResolverExpressionKindTest = ResolverTestWithParam<Case>;
 TEST_P(ResolverExpressionKindTest, Test) {
     Symbol sym;
     switch (GetParam().def) {
+        case Def::kAccess:
+            sym = Sym("read_write");
+            break;
+        case Def::kAddressSpace:
+            sym = Sym("workgroup");
+            break;
         case Def::kBuiltinFunction:
             sym = Sym("workgroupBarrier");
             break;
@@ -110,6 +134,9 @@ TEST_P(ResolverExpressionKindTest, Test) {
             Structure(kDefSource, "STRUCT", utils::Vector{Member("m", ty.i32())});
             sym = Sym("STRUCT");
             break;
+        case Def::kTexelFormat:
+            sym = Sym("rgba8unorm");
+            break;
         case Def::kTypeAlias:
             Alias(kDefSource, "ALIAS", ty.i32());
             sym = Sym("ALIAS");
@@ -121,6 +148,10 @@ TEST_P(ResolverExpressionKindTest, Test) {
     }
 
     switch (GetParam().use) {
+        case Use::kAccess:
+            return;  // TODO(crbug.com/tint/1810)
+        case Use::kAddressSpace:
+            return;  // TODO(crbug.com/tint/1810)
         case Use::kCallExpr:
             Func("f", utils::Empty, ty.void_(), Decl(Var("v", Call(Ident(kUseSource, sym)))));
             break;
@@ -133,6 +164,8 @@ TEST_P(ResolverExpressionKindTest, Test) {
         case Use::kMemberType:
             Structure("s", utils::Vector{Member("m", ty(kUseSource, sym))});
             break;
+        case Use::kTexelFormat:
+            return;  // TODO(crbug.com/tint/1810)
         case Use::kValueExpression:
             GlobalVar("v", type::AddressSpace::kPrivate, Expr(kUseSource, sym));
             break;
@@ -154,26 +187,64 @@ INSTANTIATE_TEST_SUITE_P(
     ,
     ResolverExpressionKindTest,
     testing::ValuesIn(std::vector<Case>{
+        {Def::kAccess, Use::kAccess, kPass},
+        {Def::kAccess, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kAccess, Use::kCallExpr,
+         R"(5:6 error: cannot use access 'read_write' as call target)"},
+        {Def::kAccess, Use::kCallStmt,
+         R"(5:6 error: cannot use access 'read_write' as call target)"},
+        {Def::kAccess, Use::kFunctionReturnType,
+         R"(5:6 error: cannot use access 'read_write' as type)"},
+        {Def::kAccess, Use::kMemberType, R"(5:6 error: cannot use access 'read_write' as type)"},
+        {Def::kAccess, Use::kTexelFormat, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kAccess, Use::kValueExpression,
+         R"(5:6 error: cannot use access 'read_write' as value)"},
+        {Def::kAccess, Use::kVariableType, R"(5:6 error: cannot use access 'read_write' as type)"},
+
+        {Def::kAddressSpace, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kAddressSpace, Use::kAddressSpace, kPass},
+        {Def::kAddressSpace, Use::kCallExpr,
+         R"(5:6 error: cannot use address space 'workgroup' as call target)"},
+        {Def::kAddressSpace, Use::kCallStmt,
+         R"(5:6 error: cannot use address space 'workgroup' as call target)"},
+        {Def::kAddressSpace, Use::kFunctionReturnType,
+         R"(5:6 error: cannot use address space 'workgroup' as type)"},
+        {Def::kAddressSpace, Use::kMemberType,
+         R"(5:6 error: cannot use address space 'workgroup' as type)"},
+        {Def::kAddressSpace, Use::kTexelFormat, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kAddressSpace, Use::kValueExpression,
+         R"(5:6 error: cannot use address space 'workgroup' as value)"},
+        {Def::kAddressSpace, Use::kVariableType,
+         R"(5:6 error: cannot use address space 'workgroup' as type)"},
+
+        {Def::kBuiltinFunction, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kBuiltinFunction, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
         {Def::kBuiltinFunction, Use::kCallStmt, kPass},
         {Def::kBuiltinFunction, Use::kFunctionReturnType,
          R"(5:6 error: cannot use builtin function 'workgroupBarrier' as type)"},
         {Def::kBuiltinFunction, Use::kMemberType,
          R"(5:6 error: cannot use builtin function 'workgroupBarrier' as type)"},
+        {Def::kBuiltinFunction, Use::kTexelFormat, R"(TODO(crbug.com/tint/1810))"},
         {Def::kBuiltinFunction, Use::kValueExpression,
          R"(7:8 error: missing '(' for builtin function call)"},
         {Def::kBuiltinFunction, Use::kVariableType,
          R"(5:6 error: cannot use builtin function 'workgroupBarrier' as type)"},
 
+        {Def::kBuiltinType, Use::kAccess, kPass},
+        {Def::kBuiltinType, Use::kAddressSpace, kPass},
         {Def::kBuiltinType, Use::kCallExpr, kPass},
         {Def::kBuiltinType, Use::kCallStmt, kPass},
         {Def::kBuiltinType, Use::kFunctionReturnType, kPass},
         {Def::kBuiltinType, Use::kMemberType, kPass},
+        {Def::kBuiltinType, Use::kTexelFormat, R"(TODO(crbug.com/tint/1810))"},
         {Def::kBuiltinType, Use::kValueExpression,
          R"(5:6 error: cannot use type 'vec4<f32>' as value
 7:8 note: are you missing '()' for type initializer?)"},
         {Def::kBuiltinType, Use::kVariableType, kPass},
 
         {Def::kFunction, Use::kCallExpr, kPass},
+        {Def::kFunction, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kFunction, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
         {Def::kFunction, Use::kCallStmt, kPass},
         {Def::kFunction, Use::kFunctionReturnType,
          R"(5:6 error: cannot use function 'FUNCTION' as type
@@ -181,30 +252,54 @@ INSTANTIATE_TEST_SUITE_P(
         {Def::kFunction, Use::kMemberType,
          R"(5:6 error: cannot use function 'FUNCTION' as type
 1:2 note: 'FUNCTION' declared here)"},
+        {Def::kFunction, Use::kTexelFormat, R"(TODO(crbug.com/tint/1810))"},
         {Def::kFunction, Use::kValueExpression, R"(7:8 error: missing '(' for function call)"},
         {Def::kFunction, Use::kVariableType,
          R"(5:6 error: cannot use function 'FUNCTION' as type
 1:2 note: 'FUNCTION' declared here)"},
 
-        {Def::kStruct, Use::kCallExpr, kPass},
+        {Def::kStruct, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kStruct, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
         {Def::kStruct, Use::kCallStmt, kPass},
         {Def::kStruct, Use::kFunctionReturnType, kPass},
         {Def::kStruct, Use::kMemberType, kPass},
+        {Def::kStruct, Use::kTexelFormat, R"(TODO(crbug.com/tint/1810))"},
         {Def::kStruct, Use::kValueExpression,
          R"(5:6 error: cannot use type 'STRUCT' as value
 7:8 note: are you missing '()' for type initializer?
 1:2 note: 'STRUCT' declared here)"},
         {Def::kStruct, Use::kVariableType, kPass},
 
+        {Def::kTexelFormat, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kTexelFormat, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kTexelFormat, Use::kCallExpr,
+         R"(5:6 error: cannot use texel format 'rgba8unorm' as call target)"},
+        {Def::kTexelFormat, Use::kCallStmt,
+         R"(5:6 error: cannot use texel format 'rgba8unorm' as call target)"},
+        {Def::kTexelFormat, Use::kFunctionReturnType,
+         R"(5:6 error: cannot use texel format 'rgba8unorm' as type)"},
+        {Def::kTexelFormat, Use::kMemberType,
+         R"(5:6 error: cannot use texel format 'rgba8unorm' as type)"},
+        {Def::kTexelFormat, Use::kTexelFormat, kPass},
+        {Def::kTexelFormat, Use::kValueExpression,
+         R"(5:6 error: cannot use texel format 'rgba8unorm' as value)"},
+        {Def::kTexelFormat, Use::kVariableType,
+         R"(5:6 error: cannot use texel format 'rgba8unorm' as type)"},
+
+        {Def::kTypeAlias, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kTypeAlias, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
         {Def::kTypeAlias, Use::kCallExpr, kPass},
         {Def::kTypeAlias, Use::kCallStmt, kPass},
         {Def::kTypeAlias, Use::kFunctionReturnType, kPass},
         {Def::kTypeAlias, Use::kMemberType, kPass},
+        {Def::kTypeAlias, Use::kTexelFormat, R"(TODO(crbug.com/tint/1810))"},
         {Def::kTypeAlias, Use::kValueExpression,
          R"(5:6 error: cannot use type 'i32' as value
 7:8 note: are you missing '()' for type initializer?)"},
         {Def::kTypeAlias, Use::kVariableType, kPass},
 
+        {Def::kVariable, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kVariable, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
         {Def::kVariable, Use::kCallStmt,
          R"(5:6 error: cannot use const 'VARIABLE' as call target
 1:2 note: 'VARIABLE' declared here)"},
@@ -217,6 +312,7 @@ INSTANTIATE_TEST_SUITE_P(
         {Def::kVariable, Use::kMemberType,
          R"(5:6 error: cannot use const 'VARIABLE' as type
 1:2 note: 'VARIABLE' declared here)"},
+        {Def::kVariable, Use::kTexelFormat, R"(TODO(crbug.com/tint/1810))"},
         {Def::kVariable, Use::kValueExpression, kPass},
         {Def::kVariable, Use::kVariableType,
          R"(5:6 error: cannot use const 'VARIABLE' as type

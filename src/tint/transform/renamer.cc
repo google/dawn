@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "src/tint/program_builder.h"
+#include "src/tint/sem/builtin_enum_expression.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/type_conversion.h"
@@ -1292,6 +1293,11 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
                 preserved_identifiers.Add(diagnostic->control.rule_name);
             },
             [&](const ast::TypeName* ty) { preserve_if_builtin_type(ty->name); },
+            [&](const ast::IdentifierExpression* expr) {
+                if (src->Sem().Get<sem::BuiltinEnumExpressionBase>(expr)) {
+                    preserved_identifiers.Add(expr->identifier);
+                }
+            },
             [&](const ast::CallExpression* call) {
                 if (auto* ident = call->target.name) {
                     Switch(

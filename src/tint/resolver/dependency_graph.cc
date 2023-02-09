@@ -488,6 +488,18 @@ class DependencyScanner {
                 graph_.resolved_identifiers.Add(from, ResolvedIdentifier(builtin_ty));
                 return;
             }
+            if (auto addr = type::ParseAddressSpace(s); addr != type::AddressSpace::kUndefined) {
+                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(addr));
+                return;
+            }
+            if (auto fmt = type::ParseTexelFormat(s); fmt != type::TexelFormat::kUndefined) {
+                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(fmt));
+                return;
+            }
+            if (auto access = type::ParseAccess(s); access != type::Access::kUndefined) {
+                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(access));
+                return;
+            }
 
             UnknownSymbol(to, from->source, use);
             return;
@@ -858,6 +870,15 @@ std::string ResolvedIdentifier::String(const SymbolTable& symbols, diag::List& d
     }
     if (auto builtin_ty = BuiltinType(); builtin_ty != type::Builtin::kUndefined) {
         return "builtin type '" + utils::ToString(builtin_ty) + "'";
+    }
+    if (auto access = Access(); access != type::Access::kUndefined) {
+        return "access '" + utils::ToString(access) + "'";
+    }
+    if (auto addr = AddressSpace(); addr != type::AddressSpace::kUndefined) {
+        return "address space '" + utils::ToString(addr) + "'";
+    }
+    if (auto fmt = TexelFormat(); fmt != type::TexelFormat::kUndefined) {
+        return "texel format '" + utils::ToString(fmt) + "'";
     }
     TINT_UNREACHABLE(Resolver, diagnostics) << "unhandled ResolvedIdentifier";
     return "<unknown>";
