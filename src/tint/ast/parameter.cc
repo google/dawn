@@ -25,10 +25,10 @@ namespace tint::ast {
 Parameter::Parameter(ProgramID pid,
                      NodeID nid,
                      const Source& src,
-                     const Symbol& sym,
+                     const Identifier* n,
                      const ast::Type* ty,
                      utils::VectorRef<const Attribute*> attrs)
-    : Base(pid, nid, src, sym, ty, nullptr, std::move(attrs)) {}
+    : Base(pid, nid, src, n, ty, nullptr, std::move(attrs)) {}
 
 Parameter::Parameter(Parameter&&) = default;
 
@@ -40,10 +40,10 @@ const char* Parameter::Kind() const {
 
 const Parameter* Parameter::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
-    auto sym = ctx->Clone(symbol);
+    auto* n = ctx->Clone(name);
     auto* ty = ctx->Clone(type);
     auto attrs = ctx->Clone(attributes);
-    return ctx->dst->create<Parameter>(src, sym, ty, std::move(attrs));
+    return ctx->dst->create<Parameter>(src, n, ty, std::move(attrs));
 }
 
 }  // namespace tint::ast

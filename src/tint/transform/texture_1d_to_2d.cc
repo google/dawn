@@ -85,9 +85,9 @@ struct Texture1DTo2D::State {
 
         auto create_var = [&](const ast::Variable* v, ast::Type* type) -> const ast::Variable* {
             if (v->As<ast::Parameter>()) {
-                return ctx.dst->Param(ctx.Clone(v->symbol), type, ctx.Clone(v->attributes));
+                return ctx.dst->Param(ctx.Clone(v->name->symbol), type, ctx.Clone(v->attributes));
             } else {
-                return ctx.dst->Var(ctx.Clone(v->symbol), type, ctx.Clone(v->attributes));
+                return ctx.dst->Var(ctx.Clone(v->name->symbol), type, ctx.Clone(v->attributes));
             }
         };
 

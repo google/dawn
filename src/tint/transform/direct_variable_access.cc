@@ -711,13 +711,13 @@ struct DirectVariableAccess::State {
 
                     PtrParamSymbols symbols;
                     if (requires_base_ptr_param && requires_indices_param) {
-                        auto original_name = param->Declaration()->symbol;
+                        auto original_name = param->Declaration()->name->symbol;
                         symbols.base_ptr = UniqueSymbolWithSuffix(original_name, "_base");
                         symbols.indices = UniqueSymbolWithSuffix(original_name, "_indices");
                     } else if (requires_base_ptr_param) {
-                        symbols.base_ptr = ctx.Clone(param->Declaration()->symbol);
+                        symbols.base_ptr = ctx.Clone(param->Declaration()->name->symbol);
                     } else if (requires_indices_param) {
-                        symbols.indices = ctx.Clone(param->Declaration()->symbol);
+                        symbols.indices = ctx.Clone(param->Declaration()->name->symbol);
                     }
 
                     // Remember this base pointer name.
@@ -1085,7 +1085,7 @@ struct DirectVariableAccess::State {
         if (IsPrivateOrFunction(shape.root.address_space)) {
             ss << "F";
         } else {
-            ss << ctx.src->Symbols().NameFor(shape.root.variable->Declaration()->symbol);
+            ss << ctx.src->Symbols().NameFor(shape.root.variable->Declaration()->name->symbol);
         }
 
         for (auto& op : shape.ops) {
@@ -1122,7 +1122,7 @@ struct DirectVariableAccess::State {
             }
         }
 
-        const ast::Expression* expr = b.Expr(ctx.Clone(root.variable->Declaration()->symbol));
+        const ast::Expression* expr = b.Expr(ctx.Clone(root.variable->Declaration()->name->symbol));
         if (deref) {
             if (root.variable->Type()->Is<type::Pointer>()) {
                 expr = b.Deref(expr);

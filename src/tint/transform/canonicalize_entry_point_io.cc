@@ -334,7 +334,7 @@ struct CanonicalizeEntryPointIO::State {
             }
         }
 
-        auto name = ctx.src->Symbols().NameFor(param->Declaration()->symbol);
+        auto name = ctx.src->Symbols().NameFor(param->Declaration()->name->symbol);
         auto* input_expr = AddInput(name, param->Type(), param->Location(), std::move(attributes));
         inner_call_parameters.Push(input_expr);
     }
@@ -615,7 +615,7 @@ struct CanonicalizeEntryPointIO::State {
 
             // Process the original return type to determine the outputs that the
             // outer function needs to produce.
-            ProcessReturnType(func_sem->ReturnType(), inner_result->symbol);
+            ProcessReturnType(func_sem->ReturnType(), inner_result->name->symbol);
         }
 
         // Add a fixed sample mask, if necessary.

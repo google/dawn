@@ -63,7 +63,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program* src,
         auto* sem = ctx.src->Sem().Get(w);
 
         auto source = ctx.Clone(w->source);
-        auto sym = ctx.Clone(w->symbol);
+        auto sym = ctx.Clone(w->name->symbol);
         auto* ty = ctx.Clone(w->type);
 
         // No replacement provided, just clone the override node as a const.

@@ -26,7 +26,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
     ASSERT_NE(e->variable, nullptr);
-    EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(e->variable->name->symbol, p->builder().Symbols().Get("a"));
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
     EXPECT_EQ(e->source.range.begin.column, 1u);
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
     ASSERT_NE(e->variable, nullptr);
-    EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(e->variable->name->symbol, p->builder().Symbols().Get("a"));
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
     EXPECT_EQ(e->source.range.begin.column, 1u);
@@ -75,7 +75,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
     ASSERT_NE(e->variable, nullptr);
-    EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(e->variable->name->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_NE(e->variable->initializer, nullptr);
     auto* call = e->variable->initializer->As<ast::CallExpression>();
@@ -93,7 +93,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit_NoSpace) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
     ASSERT_NE(e->variable, nullptr);
-    EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(e->variable->name->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_NE(e->variable->initializer, nullptr);
     auto* call = e->variable->initializer->As<ast::CallExpression>();
@@ -111,7 +111,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
     ASSERT_NE(e->variable, nullptr);
-    EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(e->variable->name->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_NE(e->variable->initializer, nullptr);
     auto* call = e->variable->initializer->As<ast::CallExpression>();
@@ -129,7 +129,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
     ASSERT_NE(e->variable, nullptr);
-    EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(e->variable->name->symbol, p->builder().Symbols().Get("a"));
 
     ASSERT_NE(e->variable->initializer, nullptr);
     auto* call = e->variable->initializer->As<ast::CallExpression>();

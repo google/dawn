@@ -27,6 +27,7 @@
 
 // Forward declarations
 namespace tint::ast {
+class Identifier;
 class LocationAttribute;
 class Type;
 }  // namespace tint::ast
@@ -44,15 +45,15 @@ class Variable : public Castable<Variable, Node> {
     /// Constructor
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
-    /// @param source the variable source
-    /// @param sym the variable symbol
+    /// @param src the variable source
+    /// @param name The struct member name
     /// @param type the declared variable type
     /// @param initializer the initializer expression
     /// @param attributes the variable attributes
     Variable(ProgramID pid,
              NodeID nid,
-             const Source& source,
-             const Symbol& sym,
+             const Source& src,
+             const Identifier* name,
              const ast::Type* type,
              const Expression* initializer,
              utils::VectorRef<const Attribute*> attributes);
@@ -73,8 +74,8 @@ class Variable : public Castable<Variable, Node> {
     ///          e.g. "var", "let", "const", etc
     virtual const char* Kind() const = 0;
 
-    /// The variable symbol
-    const Symbol symbol;
+    /// The variable name
+    const Identifier* const name;
 
     /// The declared variable type. This is null if the type is inferred, e.g.:
     ///   let f = 1.0;

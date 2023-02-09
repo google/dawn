@@ -80,8 +80,9 @@ void MutationReplaceIdentifier::Apply(const NodeIdMap& node_id_map,
     const auto* replacement_var =
         tint::As<ast::Variable>(node_id_map.GetNode(message_.replacement_id()));
 
-    auto* cloned_replacement = clone_context->dst->Expr(
-        clone_context->Clone(use_node->source), clone_context->Clone(replacement_var->symbol));
+    auto* cloned_replacement =
+        clone_context->dst->Expr(clone_context->Clone(use_node->source),
+                                 clone_context->Clone(replacement_var->name->symbol));
     clone_context->Replace(use_node, cloned_replacement);
     new_node_id_map->Add(cloned_replacement, message_.use_id());
 }

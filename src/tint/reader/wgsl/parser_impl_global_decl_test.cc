@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
     ASSERT_EQ(program.AST().GlobalVariables().Length(), 1u);
 
     auto* v = program.AST().GlobalVariables()[0];
-    EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
+    EXPECT_EQ(v->name->symbol, program.Symbols().Get("a"));
     EXPECT_TRUE(Is<ast::Vector>(v->type));
 }
 
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Inferred) {
     ASSERT_EQ(program.AST().GlobalVariables().Length(), 1u);
 
     auto* v = program.AST().GlobalVariables()[0];
-    EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
+    EXPECT_EQ(v->name->symbol, program.Symbols().Get("a"));
     EXPECT_EQ(v->type, nullptr);
 }
 
@@ -74,7 +74,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConst) {
     ASSERT_EQ(program.AST().GlobalVariables().Length(), 1u);
 
     auto* v = program.AST().GlobalVariables()[0];
-    EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
+    EXPECT_EQ(v->name->symbol, program.Symbols().Get("a"));
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConst_MissingInitializer) {

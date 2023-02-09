@@ -174,7 +174,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                     // TODO(jrprice): Do this for all other workgroup variables too.
 
                     // Create a member in the workgroup parameter struct.
-                    auto member = ctx.Clone(var->Declaration()->symbol);
+                    auto member = ctx.Clone(var->Declaration()->name->symbol);
                     workgroup_parameter_members.Push(ctx.dst->Member(member, store_type()));
                     CloneStructTypes(var->Type()->UnwrapRef());
 

@@ -158,7 +158,8 @@ struct SimplifyPointers::State {
                             // We have a sub-expression that needs to be saved.
                             // Create a new variable
                             auto saved_name = ctx.dst->Symbols().New(
-                                ctx.src->Symbols().NameFor(var->Declaration()->symbol) + "_save");
+                                ctx.src->Symbols().NameFor(var->Declaration()->name->symbol) +
+                                "_save");
                             auto* decl =
                                 ctx.dst->Decl(ctx.dst->Let(saved_name, ctx.Clone(idx_expr)));
                             saved.Push(decl);

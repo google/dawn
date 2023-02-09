@@ -1884,13 +1884,13 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
 
             auto* type = program_->Sem().Get(v)->Type();
 
-            std::string param_name = "const " + program_->Symbols().NameFor(v->symbol);
+            std::string param_name = "const " + program_->Symbols().NameFor(v->name->symbol);
             if (!EmitType(out, type, param_name)) {
                 return false;
             }
             // Parameter name is output as part of the type for pointers.
             if (!type->Is<type::Pointer>()) {
-                out << " " << program_->Symbols().NameFor(v->symbol);
+                out << " " << program_->Symbols().NameFor(v->name->symbol);
             }
         }
 
@@ -2016,7 +2016,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
 
             auto* type = program_->Sem().Get(param)->Type()->UnwrapRef();
 
-            auto param_name = program_->Symbols().NameFor(param->symbol);
+            auto param_name = program_->Symbols().NameFor(param->name->symbol);
             if (!EmitType(out, type, param_name)) {
                 return false;
             }
@@ -3021,7 +3021,7 @@ bool GeneratorImpl::EmitVar(const ast::Var* var) {
             return false;
     }
 
-    std::string name = program_->Symbols().NameFor(var->symbol);
+    std::string name = program_->Symbols().NameFor(var->name->symbol);
     if (!EmitType(out, type, name)) {
         return false;
     }
@@ -3070,7 +3070,7 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
             return false;
     }
 
-    std::string name = "const " + program_->Symbols().NameFor(let->symbol);
+    std::string name = "const " + program_->Symbols().NameFor(let->name->symbol);
     if (!EmitType(out, type, name)) {
         return false;
     }

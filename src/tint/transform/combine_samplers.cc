@@ -185,10 +185,10 @@ struct CombineSamplers::State {
                     const sem::Variable* texture_var = pair.first;
                     const sem::Variable* sampler_var = pair.second;
                     std::string name =
-                        ctx.src->Symbols().NameFor(texture_var->Declaration()->symbol);
+                        ctx.src->Symbols().NameFor(texture_var->Declaration()->name->symbol);
                     if (sampler_var) {
-                        name +=
-                            "_" + ctx.src->Symbols().NameFor(sampler_var->Declaration()->symbol);
+                        name += "_" + ctx.src->Symbols().NameFor(
+                                          sampler_var->Declaration()->name->symbol);
                     }
                     if (IsGlobal(pair)) {
                         // Both texture and sampler are global; add a new global variable
@@ -263,7 +263,7 @@ struct CombineSamplers::State {
                                     ? global_combined_texture_samplers_[new_pair]
                                     : function_combined_texture_samplers_[call->Stmt()->Function()]
                                                                          [new_pair];
-                            args.Push(ctx.dst->Expr(var->symbol));
+                            args.Push(ctx.dst->Expr(var->name->symbol));
                         } else if (auto* sampler_type = type->As<type::Sampler>()) {
                             type::SamplerKind kind = sampler_type->kind();
                             int index = (kind == type::SamplerKind::kSampler) ? 0 : 1;
@@ -271,7 +271,7 @@ struct CombineSamplers::State {
                             if (!p) {
                                 p = CreatePlaceholder(kind);
                             }
-                            args.Push(ctx.dst->Expr(p->symbol));
+                            args.Push(ctx.dst->Expr(p->name->symbol));
                         } else {
                             args.Push(ctx.Clone(arg));
                         }
@@ -317,7 +317,7 @@ struct CombineSamplers::State {
                                 ? global_combined_texture_samplers_[new_pair]
                                 : function_combined_texture_samplers_[call->Stmt()->Function()]
                                                                      [new_pair];
-                        auto* arg = ctx.dst->Expr(var->symbol);
+                        auto* arg = ctx.dst->Expr(var->name->symbol);
                         args.Push(arg);
                     }
                     // Append all of the remaining non-texture and non-sampler

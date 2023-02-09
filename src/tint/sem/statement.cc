@@ -15,6 +15,7 @@
 #include <algorithm>
 
 #include "src/tint/ast/block_statement.h"
+#include "src/tint/ast/identifier.h"
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/statement.h"
 #include "src/tint/ast/variable.h"
@@ -46,7 +47,7 @@ CompoundStatement::CompoundStatement(const ast::Statement* declaration,
 CompoundStatement::~CompoundStatement() = default;
 
 void CompoundStatement::AddDecl(const sem::LocalVariable* var) {
-    decls_.Add(var->Declaration()->symbol, OrderedLocalVariable{decls_.Count(), var});
+    decls_.Add(var->Declaration()->name->symbol, OrderedLocalVariable{decls_.Count(), var});
 }
 
 }  // namespace tint::sem

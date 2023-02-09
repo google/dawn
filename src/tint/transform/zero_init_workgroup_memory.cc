@@ -141,7 +141,7 @@ struct ZeroInitWorkgroupMemory::State {
         for (auto* var : func->TransitivelyReferencedGlobals()) {
             if (var->AddressSpace() == type::AddressSpace::kWorkgroup) {
                 auto get_expr = [&](uint32_t num_values) {
-                    auto var_name = ctx.Clone(var->Declaration()->symbol);
+                    auto var_name = ctx.Clone(var->Declaration()->name->symbol);
                     return Expression{b.Expr(var_name), num_values, ArrayIndices{}};
                 };
                 if (!BuildZeroingStatements(var->Type()->UnwrapRef(), get_expr)) {
@@ -160,7 +160,7 @@ struct ZeroInitWorkgroupMemory::State {
         for (auto* param : fn->params) {
             if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(param->attributes)) {
                 if (builtin->builtin == ast::BuiltinValue::kLocalInvocationIndex) {
-                    local_index = [=] { return b.Expr(ctx.Clone(param->symbol)); };
+                    local_index = [=] { return b.Expr(ctx.Clone(param->name->symbol)); };
                     break;
                 }
             }
@@ -171,7 +171,7 @@ struct ZeroInitWorkgroupMemory::State {
                             member->Declaration()->attributes)) {
                         if (builtin->builtin == ast::BuiltinValue::kLocalInvocationIndex) {
                             local_index = [=] {
-                                auto* param_expr = b.Expr(ctx.Clone(param->symbol));
+                                auto* param_expr = b.Expr(ctx.Clone(param->name->symbol));
                                 auto* member_name = ctx.Clone(member->Declaration()->name);
                                 return b.MemberAccessor(param_expr, member_name);
                             };
@@ -188,7 +188,7 @@ struct ZeroInitWorkgroupMemory::State {
                                       b.Builtin(ast::BuiltinValue::kLocalInvocationIndex),
                                   });
             ctx.InsertBack(fn->params, param);
-            local_index = [=] { return b.Expr(param->symbol); };
+            local_index = [=] { return b.Expr(param->name->symbol); };
         }
 
         // Take the zeroing statements and bin them by the number of iterations

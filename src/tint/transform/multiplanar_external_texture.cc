@@ -139,7 +139,7 @@ struct MultiplanarExternalTexture::State {
             // with the texture_external binding that corresponds with the new destination bindings.
             // NewBindingSymbols new_binding_syms;
             auto& syms = new_binding_symbols[sem_var];
-            syms.plane_0 = ctx.Clone(global->symbol);
+            syms.plane_0 = ctx.Clone(global->name->symbol);
             syms.plane_1 = b.Symbols().New("ext_tex_plane_1");
             b.GlobalVar(syms.plane_1, b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32()),
                         b.Group(AInt(bps.plane_1.group)), b.Binding(AInt(bps.plane_1.binding)));
@@ -174,7 +174,7 @@ struct MultiplanarExternalTexture::State {
                     // into the transform state so they can be used when transforming function
                     // calls.
                     auto& syms = new_binding_symbols[sem_var];
-                    syms.plane_0 = ctx.Clone(param->symbol);
+                    syms.plane_0 = ctx.Clone(param->name->symbol);
                     syms.plane_1 = b.Symbols().New("ext_tex_plane_1");
                     syms.params = b.Symbols().New("ext_tex_params");
                     auto tex2d_f32 = [&] {

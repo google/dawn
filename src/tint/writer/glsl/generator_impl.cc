@@ -1916,7 +1916,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
             // correctly translate the parameter to a [RW]ByteAddressBuffer for
             // storage buffers and a uint4[N] for uniform buffers.
             if (!EmitTypeAndName(out, type, v->AddressSpace(), v->Access(),
-                                 builder_.Symbols().NameFor(v->Declaration()->symbol))) {
+                                 builder_.Symbols().NameFor(v->Declaration()->name->symbol))) {
                 return false;
             }
         }
@@ -1996,7 +1996,7 @@ bool GeneratorImpl::EmitUniformVariable(const ast::Var* var, const sem::Variable
         out << ") uniform " << UniqueIdentifier(StructName(str) + "_ubo") << " {";
     }
     EmitStructMembers(current_buffer_, str);
-    auto name = builder_.Symbols().NameFor(var->symbol);
+    auto name = builder_.Symbols().NameFor(var->name->symbol);
     line() << "} " << name << ";";
     line();
 
@@ -2014,7 +2014,7 @@ bool GeneratorImpl::EmitStorageVariable(const ast::Var* var, const sem::Variable
     line() << "layout(binding = " << bp.binding << ", std430) buffer "
            << UniqueIdentifier(StructName(str) + "_ssbo") << " {";
     EmitStructMembers(current_buffer_, str);
-    auto name = builder_.Symbols().NameFor(var->symbol);
+    auto name = builder_.Symbols().NameFor(var->name->symbol);
     line() << "} " << name << ";";
     line();
 
@@ -2024,7 +2024,7 @@ bool GeneratorImpl::EmitStorageVariable(const ast::Var* var, const sem::Variable
 bool GeneratorImpl::EmitHandleVariable(const ast::Var* var, const sem::Variable* sem) {
     auto out = line();
 
-    auto name = builder_.Symbols().NameFor(var->symbol);
+    auto name = builder_.Symbols().NameFor(var->name->symbol);
     auto* type = sem->Type()->UnwrapRef();
     if (type->Is<type::Sampler>()) {
         // GLSL ignores Sampler variables.
@@ -2103,7 +2103,7 @@ bool GeneratorImpl::EmitPrivateVariable(const sem::Variable* var) {
     auto* decl = var->Declaration();
     auto out = line();
 
-    auto name = builder_.Symbols().NameFor(decl->symbol);
+    auto name = builder_.Symbols().NameFor(decl->name->symbol);
     auto* type = var->Type()->UnwrapRef();
     if (!EmitTypeAndName(out, type, var->AddressSpace(), var->Access(), name)) {
         return false;
@@ -2130,7 +2130,7 @@ bool GeneratorImpl::EmitWorkgroupVariable(const sem::Variable* var) {
 
     out << "shared ";
 
-    auto name = builder_.Symbols().NameFor(decl->symbol);
+    auto name = builder_.Symbols().NameFor(decl->name->symbol);
     auto* type = var->Type()->UnwrapRef();
     if (!EmitTypeAndName(out, type, var->AddressSpace(), var->Access(), name)) {
         return false;
@@ -2163,7 +2163,7 @@ bool GeneratorImpl::EmitIOVariable(const sem::GlobalVariable* var) {
     EmitAttributes(out, var, decl->attributes);
     EmitInterpolationQualifiers(out, decl->attributes);
 
-    auto name = builder_.Symbols().NameFor(decl->symbol);
+    auto name = builder_.Symbols().NameFor(decl->name->symbol);
     auto* type = var->Type()->UnwrapRef();
     if (!EmitTypeAndName(out, type, var->AddressSpace(), var->Access(), name)) {
         return false;
@@ -2285,7 +2285,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
             first = false;
 
             if (!EmitTypeAndName(out, type, sem->AddressSpace(), sem->Access(),
-                                 builder_.Symbols().NameFor(var->symbol))) {
+                                 builder_.Symbols().NameFor(var->name->symbol))) {
                 return false;
             }
         }
@@ -3096,7 +3096,7 @@ bool GeneratorImpl::EmitVar(const ast::Var* var) {
 
     auto out = line();
     if (!EmitTypeAndName(out, type, sem->AddressSpace(), sem->Access(),
-                         builder_.Symbols().NameFor(var->symbol))) {
+                         builder_.Symbols().NameFor(var->name->symbol))) {
         return false;
     }
 
@@ -3123,7 +3123,7 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
     auto out = line();
     // TODO(senorblanco): handle const
     if (!EmitTypeAndName(out, type, type::AddressSpace::kNone, type::Access::kUndefined,
-                         builder_.Symbols().NameFor(let->symbol))) {
+                         builder_.Symbols().NameFor(let->name->symbol))) {
         return false;
     }
 
@@ -3145,7 +3145,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
     auto out = line();
     out << "const ";
     if (!EmitTypeAndName(out, type, type::AddressSpace::kNone, type::Access::kUndefined,
-                         builder_.Symbols().NameFor(var->symbol))) {
+                         builder_.Symbols().NameFor(var->name->symbol))) {
         return false;
     }
     out << " = ";

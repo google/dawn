@@ -324,7 +324,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
                 out << " ";
             }
 
-            out << program_->Symbols().NameFor(v->symbol) << " : ";
+            out << program_->Symbols().NameFor(v->name->symbol) << " : ";
 
             if (!EmitType(out, v->type)) {
                 return false;
@@ -713,7 +713,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* v) {
         return false;
     }
 
-    out << " " << program_->Symbols().NameFor(v->symbol);
+    out << " " << program_->Symbols().NameFor(v->name->symbol);
 
     if (auto* ty = v->type) {
         out << " : ";

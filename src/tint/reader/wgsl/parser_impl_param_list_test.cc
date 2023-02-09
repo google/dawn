@@ -25,7 +25,7 @@ TEST_F(ParserImplTest, ParamList_Single) {
     ASSERT_FALSE(e.errored);
     EXPECT_EQ(e.value.Length(), 1u);
 
-    EXPECT_EQ(e.value[0]->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(e.value[0]->name->symbol, p->builder().Symbols().Get("a"));
     EXPECT_TRUE(e.value[0]->type->Is<ast::I32>());
     EXPECT_TRUE(e.value[0]->Is<ast::Parameter>());
 
@@ -43,7 +43,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
     ASSERT_FALSE(e.errored);
     EXPECT_EQ(e.value.Length(), 3u);
 
-    EXPECT_EQ(e.value[0]->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(e.value[0]->name->symbol, p->builder().Symbols().Get("a"));
     EXPECT_TRUE(e.value[0]->type->Is<ast::I32>());
     EXPECT_TRUE(e.value[0]->Is<ast::Parameter>());
 
@@ -52,7 +52,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
     ASSERT_EQ(e.value[0]->source.range.end.line, 1u);
     ASSERT_EQ(e.value[0]->source.range.end.column, 2u);
 
-    EXPECT_EQ(e.value[1]->symbol, p->builder().Symbols().Get("b"));
+    EXPECT_EQ(e.value[1]->name->symbol, p->builder().Symbols().Get("b"));
     EXPECT_TRUE(e.value[1]->type->Is<ast::F32>());
     EXPECT_TRUE(e.value[1]->Is<ast::Parameter>());
 
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
     ASSERT_EQ(e.value[1]->source.range.end.line, 1u);
     ASSERT_EQ(e.value[1]->source.range.end.column, 11u);
 
-    EXPECT_EQ(e.value[2]->symbol, p->builder().Symbols().Get("c"));
+    EXPECT_EQ(e.value[2]->name->symbol, p->builder().Symbols().Get("c"));
     ASSERT_TRUE(e.value[2]->type->Is<ast::Vector>());
     ASSERT_TRUE(e.value[2]->type->As<ast::Vector>()->type->Is<ast::F32>());
     EXPECT_EQ(e.value[2]->type->As<ast::Vector>()->width, 2u);
@@ -97,7 +97,7 @@ TEST_F(ParserImplTest, ParamList_Attributes) {
     ASSERT_FALSE(e.errored);
     ASSERT_EQ(e.value.Length(), 2u);
 
-    EXPECT_EQ(e.value[0]->symbol, p->builder().Symbols().Get("coord"));
+    EXPECT_EQ(e.value[0]->name->symbol, p->builder().Symbols().Get("coord"));
     ASSERT_TRUE(e.value[0]->type->Is<ast::Vector>());
     EXPECT_TRUE(e.value[0]->type->As<ast::Vector>()->type->Is<ast::F32>());
     EXPECT_EQ(e.value[0]->type->As<ast::Vector>()->width, 4u);
@@ -112,7 +112,7 @@ TEST_F(ParserImplTest, ParamList_Attributes) {
     ASSERT_EQ(e.value[0]->source.range.end.line, 1u);
     ASSERT_EQ(e.value[0]->source.range.end.column, 25u);
 
-    EXPECT_EQ(e.value[1]->symbol, p->builder().Symbols().Get("loc1"));
+    EXPECT_EQ(e.value[1]->name->symbol, p->builder().Symbols().Get("loc1"));
     EXPECT_TRUE(e.value[1]->type->Is<ast::F32>());
     EXPECT_TRUE(e.value[1]->Is<ast::Parameter>());
     auto attrs_1 = e.value[1]->attributes;

@@ -35,8 +35,8 @@ TEST_F(ParserImplTest, FunctionDecl) {
     EXPECT_EQ(f->return_type, nullptr);
 
     ASSERT_EQ(f->params.Length(), 2u);
-    EXPECT_EQ(f->params[0]->symbol, p->builder().Symbols().Get("a"));
-    EXPECT_EQ(f->params[1]->symbol, p->builder().Symbols().Get("b"));
+    EXPECT_EQ(f->params[0]->name->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(f->params[1]->name->symbol, p->builder().Symbols().Get("b"));
 
     EXPECT_EQ(f->return_type, nullptr);
 
@@ -78,8 +78,8 @@ TEST_F(ParserImplTest, FunctionDecl_Unicode) {
     EXPECT_EQ(f->return_type, nullptr);
 
     ASSERT_EQ(f->params.Length(), 2u);
-    EXPECT_EQ(f->params[0]->symbol, p->builder().Symbols().Get(param_a_ident));
-    EXPECT_EQ(f->params[1]->symbol, p->builder().Symbols().Get(param_b_ident));
+    EXPECT_EQ(f->params[0]->name->symbol, p->builder().Symbols().Get(param_a_ident));
+    EXPECT_EQ(f->params[1]->name->symbol, p->builder().Symbols().Get(param_b_ident));
 
     EXPECT_EQ(f->return_type, nullptr);
 

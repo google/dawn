@@ -192,7 +192,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                                 // translated to:
                                 //  X.GetDimensions(ARGS..) by the writer
                                 buffer_size, b.AddressOf(ctx.Clone(storage_buffer_expr)),
-                                b.AddressOf(b.Expr(buffer_size_result->variable->symbol))));
+                                b.AddressOf(b.Expr(buffer_size_result->variable->name->symbol))));
 
                             // Calculate actual array length
                             //                total_storage_buffer_size - array_offset

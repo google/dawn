@@ -14,6 +14,8 @@
 
 #include "src/tint/sem/array_count.h"
 
+#include "src/tint/ast/identifier.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::sem::NamedOverrideArrayCount);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::UnnamedOverrideArrayCount);
 
@@ -32,7 +34,7 @@ bool NamedOverrideArrayCount::Equals(const UniqueNode& other) const {
 }
 
 std::string NamedOverrideArrayCount::FriendlyName(const SymbolTable& symbols) const {
-    return symbols.NameFor(variable->Declaration()->symbol);
+    return symbols.NameFor(variable->Declaration()->name->symbol);
 }
 
 type::ArrayCount* NamedOverrideArrayCount::Clone(type::CloneContext&) const {

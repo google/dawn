@@ -756,7 +756,7 @@ struct VertexPulling::State {
     void ProcessNonStructParameter(const ast::Function* func, const ast::Parameter* param) {
         if (ast::HasAttribute<ast::LocationAttribute>(param->attributes)) {
             // Create a function-scope variable to replace the parameter.
-            auto func_var_sym = ctx.Clone(param->symbol);
+            auto func_var_sym = ctx.Clone(param->name->symbol);
             auto* func_var_type = ctx.Clone(param->type);
             auto* func_var = b.Var(func_var_sym, func_var_type);
             ctx.InsertFront(func->body->statements, b.Decl(func_var));
@@ -780,9 +780,13 @@ struct VertexPulling::State {
             }
             // Check for existing vertex_index and instance_index builtins.
             if (builtin->builtin == ast::BuiltinValue::kVertexIndex) {
-                vertex_index_expr = [this, param]() { return b.Expr(ctx.Clone(param->symbol)); };
+                vertex_index_expr = [this, param]() {
+                    return b.Expr(ctx.Clone(param->name->symbol));
+                };
             } else if (builtin->builtin == ast::BuiltinValue::kInstanceIndex) {
-                instance_index_expr = [this, param]() { return b.Expr(ctx.Clone(param->symbol)); };
+                instance_index_expr = [this, param]() {
+                    return b.Expr(ctx.Clone(param->name->symbol));
+                };
             }
             new_function_parameters.Push(ctx.Clone(param));
         }
@@ -799,7 +803,7 @@ struct VertexPulling::State {
     void ProcessStructParameter(const ast::Function* func,
                                 const ast::Parameter* param,
                                 const ast::Struct* struct_ty) {
-        auto param_sym = ctx.Clone(param->symbol);
+        auto param_sym = ctx.Clone(param->name->symbol);
 
         // Process the struct members.
         bool has_locations = false;

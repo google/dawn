@@ -529,7 +529,7 @@ struct Std140::State {
                     }
                     TINT_ICE(Transform, b.Diagnostics())
                         << "unexpected variable found walking access chain: "
-                        << sym.NameFor(user->Variable()->Declaration()->symbol);
+                        << sym.NameFor(user->Variable()->Declaration()->name->symbol);
                     return Action::kError;
                 },
                 [&](const sem::StructMemberAccess* a) {
@@ -879,7 +879,9 @@ struct Std140::State {
         });
         // Method for generating dynamic index expressions.
         // These are passed in as arguments to the function.
-        auto dynamic_index = [&](size_t idx) { return b.Expr(dynamic_index_params[idx]->symbol); };
+        auto dynamic_index = [&](size_t idx) {
+            return b.Expr(dynamic_index_params[idx]->name->symbol);
+        };
 
         // Fetch the access chain indices of the matrix access and the parameter index that
         // holds the matrix column index.
@@ -987,7 +989,9 @@ struct Std140::State {
         });
         // Method for generating dynamic index expressions.
         // These are passed in as arguments to the function.
-        auto dynamic_index = [&](size_t idx) { return b.Expr(dynamic_index_params[idx]->symbol); };
+        auto dynamic_index = [&](size_t idx) {
+            return b.Expr(dynamic_index_params[idx]->name->symbol);
+        };
 
         const ast::Expression* expr = nullptr;
         const type::Type* ty = nullptr;
@@ -1073,8 +1077,9 @@ struct Std140::State {
         auto& access = chain.indices[index];
 
         if (std::get_if<UniformVariable>(&access)) {
-            const auto* expr = b.Expr(ctx.Clone(chain.var->Declaration()->symbol));
-            const auto name = src->Symbols().NameFor(chain.var->Declaration()->symbol);
+            const auto symbol = chain.var->Declaration()->name->symbol;
+            const auto* expr = b.Expr(ctx.Clone(symbol));
+            const auto name = src->Symbols().NameFor(symbol);
             ty = chain.var->Type()->UnwrapRef();
             return {expr, ty, name};
         }

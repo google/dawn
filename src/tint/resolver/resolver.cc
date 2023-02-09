@@ -344,7 +344,8 @@ type::Type* Resolver::Type(const ast::Type* ty) {
                     resolved_node,  //
                     [&](type::Type* type) { return type; },
                     [&](sem::Variable* variable) {
-                        auto name = builder_->Symbols().NameFor(variable->Declaration()->symbol);
+                        auto name =
+                            builder_->Symbols().NameFor(variable->Declaration()->name->symbol);
                         AddError("cannot use variable '" + name + "' as type", ty->source);
                         AddNote("'" + name + "' declared here", variable->Declaration()->source);
                         return nullptr;
@@ -381,6 +382,8 @@ type::Type* Resolver::Type(const ast::Type* ty) {
 }
 
 sem::Variable* Resolver::Variable(const ast::Variable* v, bool is_global) {
+    Mark(v->name);
+
     return Switch(
         v,  //
         [&](const ast::Var* var) { return Var(var, is_global); },
@@ -427,7 +430,8 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
 
     if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kNone, const_cast<type::Type*>(ty),
                                       v->source)) {
-        AddNote("while instantiating 'let' " + builder_->Symbols().NameFor(v->symbol), v->source);
+        AddNote("while instantiating 'let' " + builder_->Symbols().NameFor(v->name->symbol),
+                v->source);
         return nullptr;
     }
 
@@ -489,7 +493,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
 
     if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kNone, const_cast<type::Type*>(ty),
                                       v->source)) {
-        AddNote("while instantiating 'override' " + builder_->Symbols().NameFor(v->symbol),
+        AddNote("while instantiating 'override' " + builder_->Symbols().NameFor(v->name->symbol),
                 v->source);
         return nullptr;
     }
@@ -582,7 +586,8 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
 
     if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kNone, const_cast<type::Type*>(ty),
                                       c->source)) {
-        AddNote("while instantiating 'const' " + builder_->Symbols().NameFor(c->symbol), c->source);
+        AddNote("while instantiating 'const' " + builder_->Symbols().NameFor(c->name->symbol),
+                c->source);
         return nullptr;
     }
 
@@ -669,7 +674,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
 
     if (!ApplyAddressSpaceUsageToType(address_space, var_ty,
                                       var->type ? var->type->source : var->source)) {
-        AddNote("while instantiating 'var' " + builder_->Symbols().NameFor(var->symbol),
+        AddNote("while instantiating 'var' " + builder_->Symbols().NameFor(var->name->symbol),
                 var->source);
         return nullptr;
     }
@@ -753,8 +758,10 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
 }
 
 sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index) {
+    Mark(param->name);
+
     auto add_note = [&] {
-        AddNote("while instantiating parameter " + builder_->Symbols().NameFor(param->symbol),
+        AddNote("while instantiating parameter " + builder_->Symbols().NameFor(param->name->symbol),
                 param->source);
     };
 
@@ -1018,8 +1025,8 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
         Mark(param);
 
         {  // Check the parameter name is unique for the function
-            if (auto added = parameter_names.Add(param->symbol, param->source); !added) {
-                auto name = builder_->Symbols().NameFor(param->symbol);
+            if (auto added = parameter_names.Add(param->name->symbol, param->source); !added) {
+                auto name = builder_->Symbols().NameFor(param->name->symbol);
                 AddError("redefinition of parameter '" + name + "'", param->source);
                 AddNote("previous definition is here", *added.value);
                 return nullptr;
@@ -2338,7 +2345,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 },
                 [&](sem::Function* func) { return FunctionCall(expr, func, args, arg_behaviors); },
                 [&](sem::Variable* var) {
-                    auto name = builder_->Symbols().NameFor(var->Declaration()->symbol);
+                    auto name = builder_->Symbols().NameFor(var->Declaration()->name->symbol);
                     AddError("cannot call variable '" + name + "'", ident->source);
                     AddNote("'" + name + "' declared here", var->Declaration()->source);
                     return nullptr;

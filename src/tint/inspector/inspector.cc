@@ -211,7 +211,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
     }
 
     for (auto* param : sem->Parameters()) {
-        AddEntryPointInOutVariables(program_->Symbols().NameFor(param->Declaration()->symbol),
+        AddEntryPointInOutVariables(program_->Symbols().NameFor(param->Declaration()->name->symbol),
                                     param->Type(), param->Declaration()->attributes,
                                     param->Location(), entry_point.input_variables);
 
@@ -240,7 +240,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
     for (auto* var : sem->TransitivelyReferencedGlobals()) {
         auto* decl = var->Declaration();
 
-        auto name = program_->Symbols().NameFor(decl->symbol);
+        auto name = program_->Symbols().NameFor(decl->name->symbol);
 
         auto* global = var->As<sem::GlobalVariable>();
         if (global && global->Declaration()->Is<ast::Override>()) {
@@ -335,7 +335,7 @@ std::map<std::string, OverrideId> Inspector::GetNamedOverrideIds() {
     for (auto* var : program_->AST().GlobalVariables()) {
         auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
         if (global && global->Declaration()->Is<ast::Override>()) {
-            auto name = program_->Symbols().NameFor(var->symbol);
+            auto name = program_->Symbols().NameFor(var->name->symbol);
             result[name] = global->OverrideId();
         }
     }

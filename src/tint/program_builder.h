@@ -1206,13 +1206,13 @@ class ProgramBuilder {
     /// @param variable the AST variable
     /// @return an ast::IdentifierExpression with the variable's symbol
     const ast::IdentifierExpression* Expr(const Source& source, const ast::Variable* variable) {
-        return create<ast::IdentifierExpression>(source, Ident(source, variable->symbol));
+        return create<ast::IdentifierExpression>(source, Ident(source, variable->name->symbol));
     }
 
     /// @param variable the AST variable
     /// @return an ast::IdentifierExpression with the variable's symbol
     const ast::IdentifierExpression* Expr(const ast::Variable* variable) {
-        return create<ast::IdentifierExpression>(Ident(variable->symbol));
+        return create<ast::IdentifierExpression>(Ident(variable->name->symbol));
     }
 
     /// @param ident the identifier
@@ -1690,9 +1690,7 @@ class ProgramBuilder {
     /// options
     template <typename NAME, typename... OPTIONS, typename = DisableIfSource<NAME>>
     const ast::Var* Var(NAME&& name, OPTIONS&&... options) {
-        VarOptions opts(std::forward<OPTIONS>(options)...);
-        return create<ast::Var>(Sym(std::forward<NAME>(name)), opts.type, opts.address_space,
-                                opts.access, opts.initializer, std::move(opts.attributes));
+        return Var(source_, std::forward<NAME>(name), std::forward<OPTIONS>(options)...);
     }
 
     /// @param source the variable source
@@ -1709,7 +1707,7 @@ class ProgramBuilder {
     template <typename NAME, typename... OPTIONS>
     const ast::Var* Var(const Source& source, NAME&& name, OPTIONS&&... options) {
         VarOptions opts(std::forward<OPTIONS>(options)...);
-        return create<ast::Var>(source, Sym(std::forward<NAME>(name)), opts.type,
+        return create<ast::Var>(source, Ident(std::forward<NAME>(name)), opts.type,
                                 opts.address_space, opts.access, opts.initializer,
                                 std::move(opts.attributes));
     }
@@ -1724,9 +1722,7 @@ class ProgramBuilder {
     /// @returns an `ast::Const` with the given name, type and additional options
     template <typename NAME, typename... OPTIONS, typename = DisableIfSource<NAME>>
     const ast::Const* Const(NAME&& name, OPTIONS&&... options) {
-        ConstOptions opts(std::forward<OPTIONS>(options)...);
-        return create<ast::Const>(Sym(std::forward<NAME>(name)), opts.type, opts.initializer,
-                                  std::move(opts.attributes));
+        return Const(source_, std::forward<NAME>(name), std::forward<OPTIONS>(options)...);
     }
 
     /// @param source the variable source
@@ -1741,7 +1737,7 @@ class ProgramBuilder {
     template <typename NAME, typename... OPTIONS>
     const ast::Const* Const(const Source& source, NAME&& name, OPTIONS&&... options) {
         ConstOptions opts(std::forward<OPTIONS>(options)...);
-        return create<ast::Const>(source, Sym(std::forward<NAME>(name)), opts.type,
+        return create<ast::Const>(source, Ident(std::forward<NAME>(name)), opts.type,
                                   opts.initializer, std::move(opts.attributes));
     }
 
@@ -1755,9 +1751,7 @@ class ProgramBuilder {
     /// @returns an `ast::Let` with the given name, type and additional options
     template <typename NAME, typename... OPTIONS, typename = DisableIfSource<NAME>>
     const ast::Let* Let(NAME&& name, OPTIONS&&... options) {
-        LetOptions opts(std::forward<OPTIONS>(options)...);
-        return create<ast::Let>(Sym(std::forward<NAME>(name)), opts.type, opts.initializer,
-                                std::move(opts.attributes));
+        return Let(source_, std::forward<NAME>(name), std::forward<OPTIONS>(options)...);
     }
 
     /// @param source the variable source
@@ -1772,8 +1766,8 @@ class ProgramBuilder {
     template <typename NAME, typename... OPTIONS>
     const ast::Let* Let(const Source& source, NAME&& name, OPTIONS&&... options) {
         LetOptions opts(std::forward<OPTIONS>(options)...);
-        return create<ast::Let>(source, Sym(std::forward<NAME>(name)), opts.type, opts.initializer,
-                                std::move(opts.attributes));
+        return create<ast::Let>(source, Ident(std::forward<NAME>(name)), opts.type,
+                                opts.initializer, std::move(opts.attributes));
     }
 
     /// @param name the parameter name
@@ -1784,7 +1778,7 @@ class ProgramBuilder {
     const ast::Parameter* Param(NAME&& name,
                                 const ast::Type* type,
                                 utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
-        return create<ast::Parameter>(Sym(std::forward<NAME>(name)), type, attributes);
+        return Param(source_, std::forward<NAME>(name), type, std::move(attributes));
     }
 
     /// @param source the parameter source
@@ -1797,7 +1791,7 @@ class ProgramBuilder {
                                 NAME&& name,
                                 const ast::Type* type,
                                 utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
-        return create<ast::Parameter>(source, Sym(std::forward<NAME>(name)), type, attributes);
+        return create<ast::Parameter>(source, Ident(std::forward<NAME>(name)), type, attributes);
     }
 
     /// @param name the variable name
@@ -1813,9 +1807,7 @@ class ProgramBuilder {
     /// ast::Module.
     template <typename NAME, typename... OPTIONS, typename = DisableIfSource<NAME>>
     const ast::Var* GlobalVar(NAME&& name, OPTIONS&&... options) {
-        auto* variable = Var(std::forward<NAME>(name), std::forward<OPTIONS>(options)...);
-        AST().AddGlobalVariable(variable);
-        return variable;
+        return GlobalVar(source_, std::forward<NAME>(name), std::forward<OPTIONS>(options)...);
     }
 
     /// @param source the variable source
@@ -1848,9 +1840,7 @@ class ProgramBuilder {
     /// automatically registered as a global variable with the ast::Module.
     template <typename NAME, typename... OPTIONS, typename = DisableIfSource<NAME>>
     const ast::Const* GlobalConst(NAME&& name, OPTIONS&&... options) {
-        auto* variable = Const(std::forward<NAME>(name), std::forward<OPTIONS>(options)...);
-        AST().AddGlobalVariable(variable);
-        return variable;
+        return GlobalConst(source_, std::forward<NAME>(name), std::forward<OPTIONS>(options)...);
     }
 
     /// @param source the variable source
@@ -1881,11 +1871,7 @@ class ProgramBuilder {
     /// automatically registered as a global variable with the ast::Module.
     template <typename NAME, typename... OPTIONS, typename = DisableIfSource<NAME>>
     const ast::Override* Override(NAME&& name, OPTIONS&&... options) {
-        OverrideOptions opts(std::forward<OPTIONS>(options)...);
-        auto* variable = create<ast::Override>(Sym(std::forward<NAME>(name)), opts.type,
-                                               opts.initializer, std::move(opts.attributes));
-        AST().AddGlobalVariable(variable);
-        return variable;
+        return Override(source_, std::forward<NAME>(name), std::forward<OPTIONS>(options)...);
     }
 
     /// @param source the variable source
@@ -1901,7 +1887,7 @@ class ProgramBuilder {
     template <typename NAME, typename... OPTIONS>
     const ast::Override* Override(const Source& source, NAME&& name, OPTIONS&&... options) {
         OverrideOptions opts(std::forward<OPTIONS>(options)...);
-        auto* variable = create<ast::Override>(source, Sym(std::forward<NAME>(name)), opts.type,
+        auto* variable = create<ast::Override>(source, Ident(std::forward<NAME>(name)), opts.type,
                                                opts.initializer, std::move(opts.attributes));
         AST().AddGlobalVariable(variable);
         return variable;

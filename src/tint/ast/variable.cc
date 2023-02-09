@@ -15,6 +15,7 @@
 #include "src/tint/ast/variable.h"
 #include "src/tint/ast/binding_attribute.h"
 #include "src/tint/ast/group_attribute.h"
+#include "src/tint/ast/templated_identifier.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Variable);
 
@@ -23,13 +24,15 @@ namespace tint::ast {
 Variable::Variable(ProgramID pid,
                    NodeID nid,
                    const Source& src,
-                   const Symbol& sym,
+                   const Identifier* n,
                    const ast::Type* ty,
                    const Expression* init,
                    utils::VectorRef<const Attribute*> attrs)
-    : Base(pid, nid, src), symbol(sym), type(ty), initializer(init), attributes(std::move(attrs)) {
-    TINT_ASSERT(AST, symbol.IsValid());
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
+    : Base(pid, nid, src), name(n), type(ty), initializer(init), attributes(std::move(attrs)) {
+    TINT_ASSERT(AST, name);
+    if (name) {
+        TINT_ASSERT(AST, !name->Is<TemplatedIdentifier>());
+    }
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, initializer, program_id);
 }
 

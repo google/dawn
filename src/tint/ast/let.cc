@@ -25,11 +25,11 @@ namespace tint::ast {
 Let::Let(ProgramID pid,
          NodeID nid,
          const Source& src,
-         const Symbol& sym,
+         const Identifier* n,
          const ast::Type* ty,
          const Expression* init,
          utils::VectorRef<const Attribute*> attrs)
-    : Base(pid, nid, src, sym, ty, init, std::move(attrs)) {
+    : Base(pid, nid, src, n, ty, init, std::move(attrs)) {
     TINT_ASSERT(AST, init != nullptr);
 }
 
@@ -43,11 +43,11 @@ const char* Let::Kind() const {
 
 const Let* Let::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
-    auto sym = ctx->Clone(symbol);
+    auto* n = ctx->Clone(name);
     auto* ty = ctx->Clone(type);
     auto* init = ctx->Clone(initializer);
     auto attrs = ctx->Clone(attributes);
-    return ctx->dst->create<Let>(src, sym, ty, init, std::move(attrs));
+    return ctx->dst->create<Let>(src, n, ty, init, std::move(attrs));
 }
 
 }  // namespace tint::ast

@@ -199,7 +199,7 @@ class DependencyScanner {
                 TraverseFunction(func);
             },
             [&](const ast::Variable* var) {
-                Declare(var->symbol, var);
+                Declare(var->name->symbol, var);
                 TraverseType(var->type);
                 TraverseAttributes(var->attributes);
                 if (var->initializer) {
@@ -237,10 +237,10 @@ class DependencyScanner {
         TINT_DEFER(scope_stack_.Pop());
 
         for (auto* param : func->params) {
-            if (auto* shadows = scope_stack_.Get(param->symbol)) {
+            if (auto* shadows = scope_stack_.Get(param->name->symbol)) {
                 graph_.shadows.Add(param, shadows);
             }
-            Declare(param->symbol, param);
+            Declare(param->name->symbol, param);
         }
         if (func->body) {
             TraverseStatements(func->body->statements);
@@ -311,12 +311,12 @@ class DependencyScanner {
                 }
             },
             [&](const ast::VariableDeclStatement* v) {
-                if (auto* shadows = scope_stack_.Get(v->variable->symbol)) {
+                if (auto* shadows = scope_stack_.Get(v->variable->name->symbol)) {
                     graph_.shadows.Add(v->variable, shadows);
                 }
                 TraverseType(v->variable->type);
                 TraverseExpression(v->variable->initializer);
-                Declare(v->variable->symbol, v->variable);
+                Declare(v->variable->name->symbol, v->variable);
             },
             [&](const ast::WhileStatement* w) {
                 scope_stack_.Push();
@@ -560,7 +560,7 @@ struct DependencyAnalysis {
             node,  //
             [&](const ast::TypeDecl* td) { return td->name; },
             [&](const ast::Function* func) { return func->name->symbol; },
-            [&](const ast::Variable* var) { return var->symbol; },
+            [&](const ast::Variable* var) { return var->name->symbol; },
             [&](const ast::DiagnosticDirective*) { return Symbol(); },
             [&](const ast::Enable*) { return Symbol(); },
             [&](const ast::ConstAssert*) { return Symbol(); },

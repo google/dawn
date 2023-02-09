@@ -51,7 +51,7 @@ struct Unshadow::State {
 
         auto rename = [&](const sem::Variable* v) -> const ast::Variable* {
             auto* decl = v->Declaration();
-            auto name = src->Symbols().NameFor(decl->symbol);
+            auto name = src->Symbols().NameFor(decl->name->symbol);
             auto symbol = b.Symbols().New(name);
             renamed_to.Add(v, symbol);
 

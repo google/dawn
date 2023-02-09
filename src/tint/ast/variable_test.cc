@@ -27,7 +27,7 @@ using VariableTest = TestHelper;
 TEST_F(VariableTest, Creation) {
     auto* v = Var("my_var", ty.i32(), type::AddressSpace::kFunction);
 
-    EXPECT_EQ(v->symbol, Symbol(1, ID()));
+    EXPECT_EQ(v->name->symbol, Symbol(1, ID()));
     EXPECT_EQ(v->declared_address_space, type::AddressSpace::kFunction);
     EXPECT_TRUE(v->type->Is<ast::I32>());
     EXPECT_EQ(v->source.range.begin.line, 0u);
@@ -40,7 +40,7 @@ TEST_F(VariableTest, CreationWithSource) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}}, "i",
                   ty.f32(), type::AddressSpace::kPrivate, utils::Empty);
 
-    EXPECT_EQ(v->symbol, Symbol(1, ID()));
+    EXPECT_EQ(v->name->symbol, Symbol(1, ID()));
     EXPECT_EQ(v->declared_address_space, type::AddressSpace::kPrivate);
     EXPECT_TRUE(v->type->Is<ast::F32>());
     EXPECT_EQ(v->source.range.begin.line, 27u);
@@ -53,7 +53,7 @@ TEST_F(VariableTest, CreationEmpty) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}}, "a_var",
                   ty.i32(), type::AddressSpace::kWorkgroup, utils::Empty);
 
-    EXPECT_EQ(v->symbol, Symbol(1, ID()));
+    EXPECT_EQ(v->name->symbol, Symbol(1, ID()));
     EXPECT_EQ(v->declared_address_space, type::AddressSpace::kWorkgroup);
     EXPECT_TRUE(v->type->Is<ast::I32>());
     EXPECT_EQ(v->source.range.begin.line, 27u);
@@ -62,11 +62,11 @@ TEST_F(VariableTest, CreationEmpty) {
     EXPECT_EQ(v->source.range.end.column, 7u);
 }
 
-TEST_F(VariableTest, Assert_MissingSymbol) {
+TEST_F(VariableTest, Assert_Null_Name) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.Var("", b.ty.i32());
+            b.Var(static_cast<Identifier*>(nullptr), b.ty.i32());
         },
         "internal compiler error");
 }

@@ -2354,7 +2354,7 @@ bool Validator::Assignment(const ast::Statement* a, const type::Type* rhs_ty) co
             [&](const ast::Override*) { return "cannot assign to 'override'"; });
         if (err) {
             AddError(err, lhs->source);
-            AddNote("'" + symbols_.NameFor(v->symbol) + "' is declared here:", v->source);
+            AddNote("'" + symbols_.NameFor(v->name->symbol) + "' is declared here:", v->source);
             return false;
         }
     }
@@ -2402,7 +2402,7 @@ bool Validator::IncrementDecrementStatement(const ast::IncrementDecrementStateme
             [&](const ast::Override*) { return "cannot modify 'override'"; });
         if (err) {
             AddError(err, lhs->source);
-            AddNote("'" + symbols_.NameFor(v->symbol) + "' is declared here:", v->source);
+            AddNote("'" + symbols_.NameFor(v->name->symbol) + "' is declared here:", v->source);
             return false;
         }
     }
