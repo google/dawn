@@ -102,8 +102,6 @@ list(APPEND TINT_LIB_SRCS
   ast/block_statement.h
   ast/bool_literal_expression.cc
   ast/bool_literal_expression.h
-  ast/bool.cc
-  ast/bool.h
   ast/break_if_statement.cc
   ast/break_if_statement.h
   ast/break_statement.cc
@@ -146,10 +144,6 @@ list(APPEND TINT_LIB_SRCS
   ast/expression.h
   ast/external_texture.cc
   ast/external_texture.h
-  ast/f16.cc
-  ast/f16.h
-  ast/f32.cc
-  ast/f32.h
   ast/float_literal_expression.cc
   ast/float_literal_expression.h
   ast/for_loop_statement.cc
@@ -158,8 +152,6 @@ list(APPEND TINT_LIB_SRCS
   ast/function.h
   ast/group_attribute.cc
   ast/group_attribute.h
-  ast/i32.cc
-  ast/i32.h
   ast/id_attribute.cc
   ast/id_attribute.h
   ast/identifier.cc
@@ -244,8 +236,6 @@ list(APPEND TINT_LIB_SRCS
   ast/type_name.h
   ast/type.cc
   ast/type.h
-  ast/u32.cc
-  ast/u32.h
   ast/unary_op_expression.cc
   ast/unary_op_expression.h
   ast/unary_op.cc
@@ -834,7 +824,6 @@ if(TINT_BUILD_TESTS)
     ast/bitcast_expression_test.cc
     ast/block_statement_test.cc
     ast/bool_literal_expression_test.cc
-    ast/bool_test.cc
     ast/break_if_statement_test.cc
     ast/break_statement_test.cc
     ast/builtin_attribute_test.cc
@@ -855,13 +844,10 @@ if(TINT_BUILD_TESTS)
     ast/discard_statement_test.cc
     ast/enable_test.cc
     ast/external_texture_test.cc
-    ast/f16_test.cc
-    ast/f32_test.cc
     ast/float_literal_expression_test.cc
     ast/for_loop_statement_test.cc
     ast/function_test.cc
     ast/group_attribute_test.cc
-    ast/i32_test.cc
     ast/id_attribute_test.cc
     ast/identifier_test.cc
     ast/identifier_expression_test.cc
@@ -896,7 +882,6 @@ if(TINT_BUILD_TESTS)
     ast/texture_test.cc
     ast/traverse_expressions_test.cc
     ast/type_name_test.cc
-    ast/u32_test.cc
     ast/unary_op_expression_test.cc
     ast/variable_decl_statement_test.cc
     ast/variable_test.cc

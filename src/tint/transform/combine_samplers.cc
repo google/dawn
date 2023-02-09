@@ -143,7 +143,7 @@ struct CombineSamplers::State {
         const type::Type* texture_type = texture->Type()->UnwrapRef();
         const type::DepthTexture* depth = texture_type->As<type::DepthTexture>();
         if (depth && !sampler) {
-            return ctx.dst->create<ast::SampledTexture>(depth->dim(), ctx.dst->create<ast::F32>());
+            return ctx.dst->create<ast::SampledTexture>(depth->dim(), ctx.dst->ty.f32());
         } else {
             return CreateASTTypeFor(ctx, texture_type);
         }

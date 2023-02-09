@@ -46,7 +46,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Bool) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
-    ASSERT_TRUE(t.value->Is<ast::Bool>());
+    ASSERT_TRUE(t.value->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol), "bool");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 5u}}));
 }
 
@@ -56,7 +57,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_F16) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
-    ASSERT_TRUE(t.value->Is<ast::F16>());
+    ASSERT_TRUE(t.value->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol), "f16");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
@@ -66,7 +68,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_F32) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
-    ASSERT_TRUE(t.value->Is<ast::F32>());
+    ASSERT_TRUE(t.value->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol), "f32");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
@@ -76,7 +79,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_I32) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
-    ASSERT_TRUE(t.value->Is<ast::I32>());
+    ASSERT_TRUE(t.value->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol), "i32");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
@@ -86,7 +90,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_U32) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
-    ASSERT_TRUE(t.value->Is<ast::U32>());
+    ASSERT_TRUE(t.value->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol), "u32");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
@@ -166,7 +171,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Ptr) {
     ASSERT_TRUE(t.value->Is<ast::Pointer>());
 
     auto* ptr = t.value->As<ast::Pointer>();
-    ASSERT_TRUE(ptr->type->Is<ast::F32>());
+    ASSERT_TRUE(ptr->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(ptr->type->As<ast::TypeName>()->name->symbol), "f32");
     ASSERT_EQ(ptr->address_space, type::AddressSpace::kFunction);
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 19u}}));
 }
@@ -181,7 +187,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Ptr_WithAccess) {
     ASSERT_TRUE(t.value->Is<ast::Pointer>());
 
     auto* ptr = t.value->As<ast::Pointer>();
-    ASSERT_TRUE(ptr->type->Is<ast::F32>());
+    ASSERT_TRUE(ptr->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(ptr->type->As<ast::TypeName>()->name->symbol), "f32");
     ASSERT_EQ(ptr->address_space, type::AddressSpace::kFunction);
     ASSERT_EQ(ptr->access, type::Access::kRead);
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 25u}}));
@@ -202,7 +209,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Ptr_ToVec) {
 
     auto* vec = ptr->type->As<ast::Vector>();
     ASSERT_EQ(vec->width, 2u);
-    ASSERT_TRUE(vec->type->Is<ast::F32>());
+    ASSERT_TRUE(vec->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(vec->type->As<ast::TypeName>()->name->symbol), "f32");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 25}}));
 }
 
@@ -333,7 +341,9 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Atomic) {
     ASSERT_TRUE(t.value->Is<ast::Atomic>());
 
     auto* atomic = t.value->As<ast::Atomic>();
-    ASSERT_TRUE(atomic->type->Is<ast::F32>());
+    ASSERT_TRUE(atomic->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(atomic->type->As<ast::TypeName>()->name->symbol),
+              "f32");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 12u}}));
 }
 
@@ -351,7 +361,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Atomic_ToVec) {
 
     auto* vec = atomic->type->As<ast::Vector>();
     ASSERT_EQ(vec->width, 2u);
-    ASSERT_TRUE(vec->type->Is<ast::F32>());
+    ASSERT_TRUE(vec->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(vec->type->As<ast::TypeName>()->name->symbol), "f32");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 18u}}));
 }
 
@@ -396,7 +407,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Array_AbstractIntLiteralSize) {
 
     auto* a = t.value->As<ast::Array>();
     ASSERT_FALSE(a->IsRuntimeArray());
-    ASSERT_TRUE(a->type->Is<ast::F32>());
+    ASSERT_TRUE(a->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(a->type->As<ast::TypeName>()->name->symbol), "f32");
     EXPECT_EQ(a->attributes.Length(), 0u);
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 14u}}));
 
@@ -417,7 +429,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Array_SintLiteralSize) {
 
     auto* a = t.value->As<ast::Array>();
     ASSERT_FALSE(a->IsRuntimeArray());
-    ASSERT_TRUE(a->type->Is<ast::F32>());
+    ASSERT_TRUE(a->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(a->type->As<ast::TypeName>()->name->symbol), "f32");
     EXPECT_EQ(a->attributes.Length(), 0u);
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 15u}}));
 
@@ -438,7 +451,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Array_UintLiteralSize) {
 
     auto* a = t.value->As<ast::Array>();
     ASSERT_FALSE(a->IsRuntimeArray());
-    ASSERT_TRUE(a->type->Is<ast::F32>());
+    ASSERT_TRUE(a->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(a->type->As<ast::TypeName>()->name->symbol), "f32");
     EXPECT_EQ(a->attributes.Length(), 0u);
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 15u}}));
 
@@ -458,7 +472,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Array_ConstantSize) {
 
     auto* a = t.value->As<ast::Array>();
     ASSERT_FALSE(a->IsRuntimeArray());
-    ASSERT_TRUE(a->type->Is<ast::F32>());
+    ASSERT_TRUE(a->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(a->type->As<ast::TypeName>()->name->symbol), "f32");
     EXPECT_EQ(a->attributes.Length(), 0u);
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 
@@ -478,7 +493,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Array_ExpressionSize) {
 
     auto* a = t.value->As<ast::Array>();
     ASSERT_FALSE(a->IsRuntimeArray());
-    ASSERT_TRUE(a->type->Is<ast::F32>());
+    ASSERT_TRUE(a->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(a->type->As<ast::TypeName>()->name->symbol), "f32");
     EXPECT_EQ(a->attributes.Length(), 0u);
 
     ASSERT_TRUE(a->count->Is<ast::BinaryExpression>());
@@ -505,7 +521,9 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Array_Runtime) {
 
     auto* a = t.value->As<ast::Array>();
     ASSERT_TRUE(a->IsRuntimeArray());
-    ASSERT_TRUE(a->type->Is<ast::U32>());
+
+    ASSERT_TRUE(a->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(a->type->As<ast::TypeName>()->name->symbol), "u32");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 11u}}));
 }
 
@@ -522,7 +540,10 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Array_Runtime_Vec) {
     ASSERT_TRUE(a->IsRuntimeArray());
     ASSERT_TRUE(a->type->Is<ast::Vector>());
     EXPECT_EQ(a->type->As<ast::Vector>()->width, 4u);
-    EXPECT_TRUE(a->type->As<ast::Vector>()->type->Is<ast::U32>());
+    ASSERT_TRUE(a->type->As<ast::Vector>()->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(
+                  a->type->As<ast::Vector>()->type->As<ast::TypeName>()->name->symbol),
+              "u32");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 }
 
@@ -675,7 +696,10 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Texture) {
     ASSERT_NE(t.value, nullptr);
     ASSERT_TRUE(t.value->Is<ast::Texture>());
     ASSERT_TRUE(t.value->Is<ast::SampledTexture>());
-    ASSERT_TRUE(t.value->As<ast::SampledTexture>()->type->Is<ast::F32>());
+    ASSERT_TRUE(t.value->As<ast::SampledTexture>()->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(
+                  t.value->As<ast::SampledTexture>()->type->As<ast::TypeName>()->name->symbol),
+              "f32");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 18u}}));
 }
 

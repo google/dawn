@@ -26,7 +26,8 @@ TEST_F(BitcastExpressionTest, Create) {
     auto* expr = Expr("expr");
 
     auto* exp = create<BitcastExpression>(ty.f32(), expr);
-    EXPECT_TRUE(exp->type->Is<ast::F32>());
+    ASSERT_TRUE(exp->type->Is<ast::TypeName>());
+    EXPECT_EQ(Symbols().NameFor(exp->type->As<ast::TypeName>()->name->symbol), "f32");
     ASSERT_EQ(exp->expr, expr);
 }
 

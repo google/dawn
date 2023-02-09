@@ -78,19 +78,19 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
         return nullptr;
     }
     if (ty->Is<type::I32>()) {
-        return ctx.dst->create<ast::I32>();
+        return ctx.dst->ty.i32();
     }
     if (ty->Is<type::U32>()) {
-        return ctx.dst->create<ast::U32>();
+        return ctx.dst->ty.u32();
     }
     if (ty->Is<type::F16>()) {
-        return ctx.dst->create<ast::F16>();
+        return ctx.dst->ty.f16();
     }
     if (ty->Is<type::F32>()) {
-        return ctx.dst->create<ast::F32>();
+        return ctx.dst->ty.f32();
     }
     if (ty->Is<type::Bool>()) {
-        return ctx.dst->create<ast::Bool>();
+        return ctx.dst->ty.bool_();
     }
     if (auto* m = ty->As<type::Matrix>()) {
         auto* el = CreateASTTypeFor(ctx, m->type());

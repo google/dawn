@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/transform/transform.h"
+#include <string>
+
 #include "src/tint/clone_context.h"
 #include "src/tint/program_builder.h"
+#include "src/tint/transform/transform.h"
 
 #include "gtest/gtest.h"
 
@@ -37,14 +39,21 @@ struct CreateASTTypeForTest : public testing::Test, public Transform {
         return CreateASTTypeFor(ctx, sem_type);
     }
 
+    std::string TypeNameOf(const ast::Type* ty) const {
+        if (auto* type_name = ty->As<ast::TypeName>()) {
+            return ast_type_builder.Symbols().NameFor(type_name->name->symbol);
+        }
+        return "<not-a-typename>";
+    }
+
     ProgramBuilder ast_type_builder;
 };
 
 TEST_F(CreateASTTypeForTest, Basic) {
-    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<type::I32>(); })->Is<ast::I32>());
-    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<type::U32>(); })->Is<ast::U32>());
-    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<type::F32>(); })->Is<ast::F32>());
-    EXPECT_TRUE(create([](ProgramBuilder& b) { return b.create<type::Bool>(); })->Is<ast::Bool>());
+    EXPECT_EQ(TypeNameOf(create([](ProgramBuilder& b) { return b.create<type::I32>(); })), "i32");
+    EXPECT_EQ(TypeNameOf(create([](ProgramBuilder& b) { return b.create<type::U32>(); })), "u32");
+    EXPECT_EQ(TypeNameOf(create([](ProgramBuilder& b) { return b.create<type::F32>(); })), "f32");
+    EXPECT_EQ(TypeNameOf(create([](ProgramBuilder& b) { return b.create<type::Bool>(); })), "bool");
     EXPECT_EQ(create([](ProgramBuilder& b) { return b.create<type::Void>(); }), nullptr);
 }
 
@@ -54,7 +63,7 @@ TEST_F(CreateASTTypeForTest, Matrix) {
         return b.create<type::Matrix>(column_type, 3u);
     });
     ASSERT_TRUE(mat->Is<ast::Matrix>());
-    ASSERT_TRUE(mat->As<ast::Matrix>()->type->Is<ast::F32>());
+    EXPECT_EQ(TypeNameOf(mat->As<ast::Matrix>()->type), "f32");
     ASSERT_EQ(mat->As<ast::Matrix>()->columns, 3u);
     ASSERT_EQ(mat->As<ast::Matrix>()->rows, 2u);
 }
@@ -63,7 +72,7 @@ TEST_F(CreateASTTypeForTest, Vector) {
     auto* vec =
         create([](ProgramBuilder& b) { return b.create<type::Vector>(b.create<type::F32>(), 2u); });
     ASSERT_TRUE(vec->Is<ast::Vector>());
-    ASSERT_TRUE(vec->As<ast::Vector>()->type->Is<ast::F32>());
+    EXPECT_EQ(TypeNameOf(vec->As<ast::Vector>()->type), "f32");
     ASSERT_EQ(vec->As<ast::Vector>()->width, 2u);
 }
 
@@ -73,7 +82,7 @@ TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
                                      4u, 4u, 32u, 32u);
     });
     ASSERT_TRUE(arr->Is<ast::Array>());
-    ASSERT_TRUE(arr->As<ast::Array>()->type->Is<ast::F32>());
+    EXPECT_EQ(TypeNameOf(arr->As<ast::Array>()->type), "f32");
     ASSERT_EQ(arr->As<ast::Array>()->attributes.Length(), 0u);
 
     auto* size = arr->As<ast::Array>()->count->As<ast::IntLiteralExpression>();
@@ -87,7 +96,7 @@ TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
                                      4u, 4u, 64u, 32u);
     });
     ASSERT_TRUE(arr->Is<ast::Array>());
-    ASSERT_TRUE(arr->As<ast::Array>()->type->Is<ast::F32>());
+    EXPECT_EQ(TypeNameOf(arr->As<ast::Array>()->type), "f32");
     ASSERT_EQ(arr->As<ast::Array>()->attributes.Length(), 1u);
     ASSERT_TRUE(arr->As<ast::Array>()->attributes[0]->Is<ast::StrideAttribute>());
     ASSERT_EQ(arr->As<ast::Array>()->attributes[0]->As<ast::StrideAttribute>()->stride, 64u);

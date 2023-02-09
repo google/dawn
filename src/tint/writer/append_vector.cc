@@ -86,19 +86,17 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         packed_el_sem_ty = vector_ty;
     }
 
-    const ast::Type* packed_el_ast_ty = nullptr;
-    if (packed_el_sem_ty->Is<type::I32>()) {
-        packed_el_ast_ty = b->create<ast::I32>();
-    } else if (packed_el_sem_ty->Is<type::U32>()) {
-        packed_el_ast_ty = b->create<ast::U32>();
-    } else if (packed_el_sem_ty->Is<type::F32>()) {
-        packed_el_ast_ty = b->create<ast::F32>();
-    } else if (packed_el_sem_ty->Is<type::Bool>()) {
-        packed_el_ast_ty = b->create<ast::Bool>();
-    } else {
-        TINT_UNREACHABLE(Writer, b->Diagnostics())
-            << "unsupported vector element type: " << packed_el_sem_ty->TypeInfo().name;
-    }
+    const ast::Type* packed_el_ast_ty = Switch(
+        packed_el_sem_ty,  //
+        [&](const type::I32*) { return b->ty.i32(); },
+        [&](const type::U32*) { return b->ty.u32(); },
+        [&](const type::F32*) { return b->ty.f32(); },
+        [&](const type::Bool*) { return b->ty.bool_(); },
+        [&](Default) {
+            TINT_UNREACHABLE(Writer, b->Diagnostics())
+                << "unsupported vector element type: " << packed_el_sem_ty->TypeInfo().name;
+            return nullptr;
+        });
 
     auto* statement = vector_sem->Stmt();
 

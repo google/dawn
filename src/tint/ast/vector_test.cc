@@ -14,7 +14,6 @@
 
 #include "src/tint/ast/vector.h"
 
-#include "src/tint/ast/i32.h"
 #include "src/tint/ast/test_helper.h"
 
 namespace tint::ast {
@@ -23,15 +22,14 @@ namespace {
 using AstVectorTest = TestHelper;
 
 TEST_F(AstVectorTest, Creation) {
-    auto* i32 = create<I32>();
-    auto* v = create<Vector>(i32, 2u);
-    EXPECT_EQ(v->type, i32);
+    auto* v = create<Vector>(ty.i32(), 2u);
+    ASSERT_TRUE(v->type->Is<ast::TypeName>());
+    EXPECT_EQ(Symbols().NameFor(v->type->As<ast::TypeName>()->name->symbol), "i32");
     EXPECT_EQ(v->width, 2u);
 }
 
 TEST_F(AstVectorTest, FriendlyName) {
-    auto* f32 = create<F32>();
-    auto* v = create<Vector>(f32, 3u);
+    auto* v = create<Vector>(ty.f32(), 3u);
     EXPECT_EQ(v->FriendlyName(Symbols()), "vec3<f32>");
 }
 

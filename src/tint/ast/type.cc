@@ -15,14 +15,10 @@
 #include "src/tint/ast/type.h"
 
 #include "src/tint/ast/alias.h"
-#include "src/tint/ast/bool.h"
-#include "src/tint/ast/f32.h"
-#include "src/tint/ast/i32.h"
 #include "src/tint/ast/matrix.h"
 #include "src/tint/ast/pointer.h"
 #include "src/tint/ast/sampler.h"
 #include "src/tint/ast/texture.h"
-#include "src/tint/ast/u32.h"
 #include "src/tint/ast/vector.h"
 #include "src/tint/symbol_table.h"
 

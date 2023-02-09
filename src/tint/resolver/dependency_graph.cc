@@ -23,7 +23,6 @@
 #include "src/tint/ast/assignment_statement.h"
 #include "src/tint/ast/atomic.h"
 #include "src/tint/ast/block_statement.h"
-#include "src/tint/ast/bool.h"
 #include "src/tint/ast/break_if_statement.h"
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/ast/call_statement.h"
@@ -35,10 +34,7 @@
 #include "src/tint/ast/diagnostic_attribute.h"
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/external_texture.h"
-#include "src/tint/ast/f16.h"
-#include "src/tint/ast/f32.h"
 #include "src/tint/ast/for_loop_statement.h"
-#include "src/tint/ast/i32.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/identifier.h"
 #include "src/tint/ast/if_statement.h"
@@ -66,7 +62,6 @@
 #include "src/tint/ast/templated_identifier.h"
 #include "src/tint/ast/traverse_expressions.h"
 #include "src/tint/ast/type_name.h"
-#include "src/tint/ast/u32.h"
 #include "src/tint/ast/var.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
@@ -407,10 +402,12 @@ class DependencyScanner {
             [&](const ast::MultisampledTexture* tex) {  //
                 TraverseType(tex->type);
             },
+            [&](const ast::StorageTexture* tex) {  //
+                TraverseType(tex->type);
+            },
             [&](Default) {
-                if (!ty->IsAnyOf<ast::Bool, ast::I32, ast::U32, ast::F16, ast::F32,
-                                 ast::DepthTexture, ast::DepthMultisampledTexture,
-                                 ast::StorageTexture, ast::ExternalTexture, ast::Sampler>()) {
+                if (!ty->IsAnyOf<ast::DepthTexture, ast::DepthMultisampledTexture,
+                                 ast::ExternalTexture, ast::Sampler>()) {
                     UnhandledNode(diagnostics_, ty);
                 }
             });

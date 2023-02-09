@@ -26,7 +26,7 @@
 namespace tint::reader::wgsl {
 
 /// WGSL Parser test class
-class ParserImplTest : public testing::Test, public ProgramBuilder {
+class ParserImplTest : public testing::Test {
   public:
     /// Constructor
     ParserImplTest();

@@ -30,6 +30,10 @@ namespace tint::type {
 /// An enumerator of builtin types.
 enum class Builtin {
     kUndefined,
+    kBool,
+    kF16,
+    kF32,
+    kI32,
     kMat2X2F,
     kMat2X2H,
     kMat2X3F,
@@ -48,6 +52,7 @@ enum class Builtin {
     kMat4X3H,
     kMat4X4F,
     kMat4X4H,
+    kU32,
     kVec2F,
     kVec2H,
     kVec2I,
@@ -73,10 +78,11 @@ std::ostream& operator<<(std::ostream& out, Builtin value);
 Builtin ParseBuiltin(std::string_view str);
 
 constexpr const char* kBuiltinStrings[] = {
-    "mat2x2f", "mat2x2h", "mat2x3f", "mat2x3h", "mat2x4f", "mat2x4h", "mat3x2f", "mat3x2h",
-    "mat3x3f", "mat3x3h", "mat3x4f", "mat3x4h", "mat4x2f", "mat4x2h", "mat4x3f", "mat4x3h",
-    "mat4x4f", "mat4x4h", "vec2f",   "vec2h",   "vec2i",   "vec2u",   "vec3f",   "vec3h",
-    "vec3i",   "vec3u",   "vec4f",   "vec4h",   "vec4i",   "vec4u",
+    "bool",    "f16",     "f32",     "i32",     "mat2x2f", "mat2x2h", "mat2x3f",
+    "mat2x3h", "mat2x4f", "mat2x4h", "mat3x2f", "mat3x2h", "mat3x3f", "mat3x3h",
+    "mat3x4f", "mat3x4h", "mat4x2f", "mat4x2h", "mat4x3f", "mat4x3h", "mat4x4f",
+    "mat4x4h", "u32",     "vec2f",   "vec2h",   "vec2i",   "vec2u",   "vec3f",
+    "vec3h",   "vec3i",   "vec3u",   "vec4f",   "vec4h",   "vec4i",   "vec4u",
 };
 
 }  // namespace tint::type

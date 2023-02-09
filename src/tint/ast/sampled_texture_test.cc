@@ -14,7 +14,6 @@
 
 #include "src/tint/ast/sampled_texture.h"
 
-#include "src/tint/ast/f32.h"
 #include "src/tint/ast/test_helper.h"
 
 namespace tint::ast {
@@ -23,28 +22,25 @@ namespace {
 using AstSampledTextureTest = TestHelper;
 
 TEST_F(AstSampledTextureTest, IsTexture) {
-    auto* f32 = create<F32>();
-    Texture* ty = create<SampledTexture>(type::TextureDimension::kCube, f32);
-    EXPECT_FALSE(ty->Is<DepthTexture>());
-    EXPECT_TRUE(ty->Is<SampledTexture>());
-    EXPECT_FALSE(ty->Is<StorageTexture>());
+    Texture* t = create<SampledTexture>(type::TextureDimension::kCube, ty.f32());
+    EXPECT_FALSE(t->Is<DepthTexture>());
+    EXPECT_TRUE(t->Is<SampledTexture>());
+    EXPECT_FALSE(t->Is<StorageTexture>());
 }
 
 TEST_F(AstSampledTextureTest, Dim) {
-    auto* f32 = create<F32>();
-    auto* s = create<SampledTexture>(type::TextureDimension::k3d, f32);
+    auto* s = create<SampledTexture>(type::TextureDimension::k3d, ty.f32());
     EXPECT_EQ(s->dim, type::TextureDimension::k3d);
 }
 
 TEST_F(AstSampledTextureTest, Type) {
-    auto* f32 = create<F32>();
-    auto* s = create<SampledTexture>(type::TextureDimension::k3d, f32);
-    EXPECT_EQ(s->type, f32);
+    auto* s = create<SampledTexture>(type::TextureDimension::k3d, ty.f32());
+    ASSERT_TRUE(s->type->Is<ast::TypeName>());
+    EXPECT_EQ(Symbols().NameFor(s->type->As<ast::TypeName>()->name->symbol), "f32");
 }
 
 TEST_F(AstSampledTextureTest, FriendlyName) {
-    auto* f32 = create<F32>();
-    auto* s = create<SampledTexture>(type::TextureDimension::k3d, f32);
+    auto* s = create<SampledTexture>(type::TextureDimension::k3d, ty.f32());
     EXPECT_EQ(s->FriendlyName(Symbols()), "texture_3d<f32>");
 }
 

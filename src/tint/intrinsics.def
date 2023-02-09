@@ -129,6 +129,12 @@ enum interpolation_sampling {
 }
 
 enum builtin_type {
+  // https://www.w3.org/TR/WGSL/#scalar-types
+  bool
+  f16
+  f32
+  i32
+  u32
   // https://www.w3.org/TR/WGSL/#matrix-types
   mat2x2f
   mat2x2h

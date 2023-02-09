@@ -15,15 +15,11 @@
 #include "src/tint/ast/matrix.h"
 #include "src/tint/ast/alias.h"
 #include "src/tint/ast/array.h"
-#include "src/tint/ast/bool.h"
-#include "src/tint/ast/f32.h"
-#include "src/tint/ast/i32.h"
 #include "src/tint/ast/pointer.h"
 #include "src/tint/ast/sampler.h"
 #include "src/tint/ast/struct.h"
 #include "src/tint/ast/test_helper.h"
 #include "src/tint/ast/texture.h"
-#include "src/tint/ast/u32.h"
 #include "src/tint/ast/vector.h"
 #include "src/tint/type/access.h"
 
@@ -33,16 +29,15 @@ namespace {
 using AstMatrixTest = TestHelper;
 
 TEST_F(AstMatrixTest, Creation) {
-    auto* i32 = create<I32>();
-    auto* m = create<Matrix>(i32, 2u, 4u);
-    EXPECT_EQ(m->type, i32);
+    auto* m = create<Matrix>(ty.i32(), 2u, 4u);
+    ASSERT_TRUE(m->type->Is<ast::TypeName>());
+    EXPECT_EQ(Symbols().NameFor(m->type->As<ast::TypeName>()->name->symbol), "i32");
     EXPECT_EQ(m->rows, 2u);
     EXPECT_EQ(m->columns, 4u);
 }
 
 TEST_F(AstMatrixTest, FriendlyName) {
-    auto* i32 = create<I32>();
-    auto* m = create<Matrix>(i32, 3u, 2u);
+    auto* m = create<Matrix>(ty.i32(), 3u, 2u);
     EXPECT_EQ(m->FriendlyName(Symbols()), "mat2x3<i32>");
 }
 

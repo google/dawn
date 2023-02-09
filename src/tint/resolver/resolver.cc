@@ -227,13 +227,6 @@ type::Type* Resolver::Type(const ast::Type* ty) {
     Mark(ty);
     auto* s = Switch(
         ty,  //
-        [&](const ast::Bool*) { return builder_->create<type::Bool>(); },
-        [&](const ast::I32*) { return builder_->create<type::I32>(); },
-        [&](const ast::U32*) { return builder_->create<type::U32>(); },
-        [&](const ast::F16* t) -> type::F16* {
-            return validator_.CheckF16Enabled(t->source) ? builder_->create<type::F16>() : nullptr;
-        },
-        [&](const ast::F32*) { return builder_->create<type::F32>(); },
         [&](const ast::Vector* t) -> type::Vector* {
             if (!t->type) {
                 AddError("missing vector element type", t->source.End());
@@ -2447,88 +2440,91 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
 
 type::Type* Resolver::BuiltinType(type::Builtin builtin_ty, const ast::Identifier* ident) const {
     auto& b = *builder_;
-    auto vec_f32 = [&](uint32_t n) { return b.create<type::Vector>(b.create<type::F32>(), n); };
-    auto vec_f16 = [&](uint32_t n) { return b.create<type::Vector>(b.create<type::F16>(), n); };
+
+    auto f32 = [&] { return b.create<type::F32>(); };
+    auto i32 = [&] { return b.create<type::I32>(); };
+    auto u32 = [&] { return b.create<type::U32>(); };
+    auto f16 = [&] {
+        return validator_.CheckF16Enabled(ident->source) ? b.create<type::F16>() : nullptr;
+    };
+    auto vec = [&](type::Type* el, uint32_t n) {
+        return el ? b.create<type::Vector>(el, n) : nullptr;
+    };
+    auto mat = [&](type::Type* el, uint32_t num_columns, uint32_t num_rows) {
+        return el ? b.create<type::Matrix>(vec(el, num_rows), num_columns) : nullptr;
+    };
 
     switch (builtin_ty) {
+        case type::Builtin::kBool:
+            return b.create<type::Bool>();
+        case type::Builtin::kI32:
+            return i32();
+        case type::Builtin::kU32:
+            return u32();
+        case type::Builtin::kF16:
+            return f16();
+        case type::Builtin::kF32:
+            return b.create<type::F32>();
         case type::Builtin::kMat2X2F:
-            return b.create<type::Matrix>(vec_f32(2u), 2u);
+            return mat(f32(), 2u, 2u);
         case type::Builtin::kMat2X3F:
-            return b.create<type::Matrix>(vec_f32(3u), 2u);
+            return mat(f32(), 2u, 3u);
         case type::Builtin::kMat2X4F:
-            return b.create<type::Matrix>(vec_f32(4u), 2u);
+            return mat(f32(), 2u, 4u);
         case type::Builtin::kMat3X2F:
-            return b.create<type::Matrix>(vec_f32(2u), 3u);
+            return mat(f32(), 3u, 2u);
         case type::Builtin::kMat3X3F:
-            return b.create<type::Matrix>(vec_f32(3u), 3u);
+            return mat(f32(), 3u, 3u);
         case type::Builtin::kMat3X4F:
-            return b.create<type::Matrix>(vec_f32(4u), 3u);
+            return mat(f32(), 3u, 4u);
         case type::Builtin::kMat4X2F:
-            return b.create<type::Matrix>(vec_f32(2u), 4u);
+            return mat(f32(), 4u, 2u);
         case type::Builtin::kMat4X3F:
-            return b.create<type::Matrix>(vec_f32(3u), 4u);
+            return mat(f32(), 4u, 3u);
         case type::Builtin::kMat4X4F:
-            return b.create<type::Matrix>(vec_f32(4u), 4u);
+            return mat(f32(), 4u, 4u);
         case type::Builtin::kMat2X2H:
-            return validator_.CheckF16Enabled(ident->source)
-                       ? b.create<type::Matrix>(vec_f16(2u), 2u)
-                       : nullptr;
+            return mat(f16(), 2u, 2u);
         case type::Builtin::kMat2X3H:
-            return validator_.CheckF16Enabled(ident->source)
-                       ? b.create<type::Matrix>(vec_f16(3u), 2u)
-                       : nullptr;
+            return mat(f16(), 2u, 3u);
         case type::Builtin::kMat2X4H:
-            return validator_.CheckF16Enabled(ident->source)
-                       ? b.create<type::Matrix>(vec_f16(4u), 2u)
-                       : nullptr;
+            return mat(f16(), 2u, 4u);
         case type::Builtin::kMat3X2H:
-            return validator_.CheckF16Enabled(ident->source)
-                       ? b.create<type::Matrix>(vec_f16(2u), 3u)
-                       : nullptr;
+            return mat(f16(), 3u, 2u);
         case type::Builtin::kMat3X3H:
-            return validator_.CheckF16Enabled(ident->source)
-                       ? b.create<type::Matrix>(vec_f16(3u), 3u)
-                       : nullptr;
+            return mat(f16(), 3u, 3u);
         case type::Builtin::kMat3X4H:
-            return validator_.CheckF16Enabled(ident->source)
-                       ? b.create<type::Matrix>(vec_f16(4u), 3u)
-                       : nullptr;
+            return mat(f16(), 3u, 4u);
         case type::Builtin::kMat4X2H:
-            return validator_.CheckF16Enabled(ident->source)
-                       ? b.create<type::Matrix>(vec_f16(2u), 4u)
-                       : nullptr;
+            return mat(f16(), 4u, 2u);
         case type::Builtin::kMat4X3H:
-            return validator_.CheckF16Enabled(ident->source)
-                       ? b.create<type::Matrix>(vec_f16(3u), 4u)
-                       : nullptr;
+            return mat(f16(), 4u, 3u);
         case type::Builtin::kMat4X4H:
-            return validator_.CheckF16Enabled(ident->source)
-                       ? b.create<type::Matrix>(vec_f16(4u), 4u)
-                       : nullptr;
+            return mat(f16(), 4u, 4u);
         case type::Builtin::kVec2F:
-            return vec_f32(2u);
+            return vec(f32(), 2u);
         case type::Builtin::kVec3F:
-            return vec_f32(3u);
+            return vec(f32(), 3u);
         case type::Builtin::kVec4F:
-            return vec_f32(4u);
+            return vec(f32(), 4u);
         case type::Builtin::kVec2H:
-            return validator_.CheckF16Enabled(ident->source) ? vec_f16(2u) : nullptr;
+            return vec(f16(), 2u);
         case type::Builtin::kVec3H:
-            return validator_.CheckF16Enabled(ident->source) ? vec_f16(3u) : nullptr;
+            return vec(f16(), 3u);
         case type::Builtin::kVec4H:
-            return validator_.CheckF16Enabled(ident->source) ? vec_f16(4u) : nullptr;
+            return vec(f16(), 4u);
         case type::Builtin::kVec2I:
-            return b.create<type::Vector>(b.create<type::I32>(), 2u);
+            return vec(i32(), 2u);
         case type::Builtin::kVec3I:
-            return b.create<type::Vector>(b.create<type::I32>(), 3u);
+            return vec(i32(), 3u);
         case type::Builtin::kVec4I:
-            return b.create<type::Vector>(b.create<type::I32>(), 4u);
+            return vec(i32(), 4u);
         case type::Builtin::kVec2U:
-            return b.create<type::Vector>(b.create<type::U32>(), 2u);
+            return vec(u32(), 2u);
         case type::Builtin::kVec3U:
-            return b.create<type::Vector>(b.create<type::U32>(), 3u);
+            return vec(u32(), 3u);
         case type::Builtin::kVec4U:
-            return b.create<type::Vector>(b.create<type::U32>(), 4u);
+            return vec(u32(), 4u);
         case type::Builtin::kUndefined:
             break;
     }

@@ -14,7 +14,6 @@
 
 #include "src/tint/ast/atomic.h"
 
-#include "src/tint/ast/i32.h"
 #include "src/tint/ast/test_helper.h"
 
 namespace tint::ast {
@@ -23,13 +22,14 @@ namespace {
 using AstAtomicTest = TestHelper;
 
 TEST_F(AstAtomicTest, Creation) {
-    auto* i32 = create<I32>();
+    auto* i32 = ty.i32();
     auto* p = create<Atomic>(i32);
-    EXPECT_EQ(p->type, i32);
+    ASSERT_TRUE(p->type->Is<ast::TypeName>());
+    EXPECT_EQ(Symbols().NameFor(p->type->As<ast::TypeName>()->name->symbol), "i32");
 }
 
 TEST_F(AstAtomicTest, FriendlyName) {
-    auto* i32 = create<I32>();
+    auto* i32 = ty.i32();
     auto* p = create<Atomic>(i32);
     EXPECT_EQ(p->FriendlyName(Symbols()), "atomic<i32>");
 }

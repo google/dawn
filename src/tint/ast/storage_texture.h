@@ -59,8 +59,8 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
 
     /// @param format the storage texture image format
     /// @param builder the ProgramBuilder used to build the returned type
-    /// @returns the storage texture subtype for the given type::TexelFormat
-    static Type* SubtypeFor(type::TexelFormat format, ProgramBuilder& builder);
+    /// @returns the storage texture subtype for the given TexelFormat
+    static const Type* SubtypeFor(type::TexelFormat format, ProgramBuilder& builder);
 
     /// The image format
     const type::TexelFormat format;

@@ -19,14 +19,11 @@
 #include "src/tint/ast/alias.h"
 #include "src/tint/ast/array.h"
 #include "src/tint/ast/atomic.h"
-#include "src/tint/ast/bool.h"
 #include "src/tint/ast/bool_literal_expression.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/depth_texture.h"
 #include "src/tint/ast/external_texture.h"
-#include "src/tint/ast/f32.h"
 #include "src/tint/ast/float_literal_expression.h"
-#include "src/tint/ast/i32.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/ast/interpolate_attribute.h"
@@ -43,7 +40,6 @@
 #include "src/tint/ast/struct_member_offset_attribute.h"
 #include "src/tint/ast/struct_member_size_attribute.h"
 #include "src/tint/ast/type_name.h"
-#include "src/tint/ast/u32.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
 #include "src/tint/ast/workgroup_attribute.h"
@@ -423,22 +419,6 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
             }
             return true;
         },
-        [&](const ast::Bool*) {
-            out << "bool";
-            return true;
-        },
-        [&](const ast::F32*) {
-            out << "f32";
-            return true;
-        },
-        [&](const ast::F16*) {
-            out << "f16";
-            return true;
-        },
-        [&](const ast::I32*) {
-            out << "i32";
-            return true;
-        },
         [&](const ast::Matrix* mat) {
             out << "mat" << mat->columns << "x" << mat->rows;
             if (auto* el_ty = mat->type) {
@@ -573,10 +553,6 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
                 [&](Default) {  //
                     return true;
                 });
-        },
-        [&](const ast::U32*) {
-            out << "u32";
-            return true;
         },
         [&](const ast::Vector* vec) {
             out << "vec" << vec->width;

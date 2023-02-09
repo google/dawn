@@ -28,7 +28,6 @@
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/ast/binding_attribute.h"
 #include "src/tint/ast/bitcast_expression.h"
-#include "src/tint/ast/bool.h"
 #include "src/tint/ast/bool_literal_expression.h"
 #include "src/tint/ast/break_if_statement.h"
 #include "src/tint/ast/break_statement.h"
@@ -49,11 +48,8 @@
 #include "src/tint/ast/enable.h"
 #include "src/tint/ast/extension.h"
 #include "src/tint/ast/external_texture.h"
-#include "src/tint/ast/f16.h"
-#include "src/tint/ast/f32.h"
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/for_loop_statement.h"
-#include "src/tint/ast/i32.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/identifier.h"
 #include "src/tint/ast/if_statement.h"
@@ -84,7 +80,6 @@
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/templated_identifier.h"
 #include "src/tint/ast/type_name.h"
-#include "src/tint/ast/u32.h"
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/ast/var.h"
 #include "src/tint/ast/variable_decl_statement.h"
@@ -569,50 +564,40 @@ class ProgramBuilder {
         /// @returns nullptr ast::Type
         const ast::Type* void_() const { return nullptr; }
 
-        /// @returns a boolean type
-        const ast::Bool* bool_() const { return builder->create<ast::Bool>(); }
+        /// @returns a 'bool' typename
+        const ast::TypeName* bool_() const { return (*this)("bool"); }
 
         /// @param source the Source of the node
-        /// @returns a boolean type
-        const ast::Bool* bool_(const Source& source) const {
-            return builder->create<ast::Bool>(source);
-        }
+        /// @returns a 'bool' typename
+        const ast::TypeName* bool_(const Source& source) const { return (*this)(source, "bool"); }
 
-        /// @returns a f16 type
-        const ast::F16* f16() const { return builder->create<ast::F16>(); }
+        /// @returns a 'f16' typename
+        const ast::TypeName* f16() const { return (*this)("f16"); }
 
         /// @param source the Source of the node
-        /// @returns a f16 type
-        const ast::F16* f16(const Source& source) const {
-            return builder->create<ast::F16>(source);
-        }
+        /// @returns a 'f16' typename
+        const ast::TypeName* f16(const Source& source) const { return (*this)(source, "f16"); }
 
-        /// @returns a f32 type
-        const ast::F32* f32() const { return builder->create<ast::F32>(); }
+        /// @returns a 'f32' typename
+        const ast::TypeName* f32() const { return (*this)("f32"); }
 
         /// @param source the Source of the node
-        /// @returns a f32 type
-        const ast::F32* f32(const Source& source) const {
-            return builder->create<ast::F32>(source);
-        }
+        /// @returns a 'f32' typename
+        const ast::TypeName* f32(const Source& source) const { return (*this)(source, "f32"); }
 
-        /// @returns a i32 type
-        const ast::I32* i32() const { return builder->create<ast::I32>(); }
+        /// @returns a 'i32' typename
+        const ast::TypeName* i32() const { return (*this)("i32"); }
 
         /// @param source the Source of the node
-        /// @returns a i32 type
-        const ast::I32* i32(const Source& source) const {
-            return builder->create<ast::I32>(source);
-        }
+        /// @returns a 'i32' typename
+        const ast::TypeName* i32(const Source& source) const { return (*this)(source, "i32"); }
 
-        /// @returns a u32 type
-        const ast::U32* u32() const { return builder->create<ast::U32>(); }
+        /// @returns a 'u32' typename
+        const ast::TypeName* u32() const { return (*this)("u32"); }
 
         /// @param source the Source of the node
-        /// @returns a u32 type
-        const ast::U32* u32(const Source& source) const {
-            return builder->create<ast::U32>(source);
-        }
+        /// @returns a 'u32' typename
+        const ast::TypeName* u32(const Source& source) const { return (*this)(source, "u32"); }
 
         /// @param type vector subtype
         /// @param n vector width in elements

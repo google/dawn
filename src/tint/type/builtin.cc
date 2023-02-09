@@ -28,6 +28,18 @@ namespace tint::type {
 /// @param str the string to parse
 /// @returns the parsed enum, or Builtin::kUndefined if the string could not be parsed.
 Builtin ParseBuiltin(std::string_view str) {
+    if (str == "bool") {
+        return Builtin::kBool;
+    }
+    if (str == "f16") {
+        return Builtin::kF16;
+    }
+    if (str == "f32") {
+        return Builtin::kF32;
+    }
+    if (str == "i32") {
+        return Builtin::kI32;
+    }
     if (str == "mat2x2f") {
         return Builtin::kMat2X2F;
     }
@@ -82,6 +94,9 @@ Builtin ParseBuiltin(std::string_view str) {
     if (str == "mat4x4h") {
         return Builtin::kMat4X4H;
     }
+    if (str == "u32") {
+        return Builtin::kU32;
+    }
     if (str == "vec2f") {
         return Builtin::kVec2F;
     }
@@ -125,6 +140,14 @@ std::ostream& operator<<(std::ostream& out, Builtin value) {
     switch (value) {
         case Builtin::kUndefined:
             return out << "undefined";
+        case Builtin::kBool:
+            return out << "bool";
+        case Builtin::kF16:
+            return out << "f16";
+        case Builtin::kF32:
+            return out << "f32";
+        case Builtin::kI32:
+            return out << "i32";
         case Builtin::kMat2X2F:
             return out << "mat2x2f";
         case Builtin::kMat2X2H:
@@ -161,6 +184,8 @@ std::ostream& operator<<(std::ostream& out, Builtin value) {
             return out << "mat4x4f";
         case Builtin::kMat4X4H:
             return out << "mat4x4h";
+        case Builtin::kU32:
+            return out << "u32";
         case Builtin::kVec2F:
             return out << "vec2f";
         case Builtin::kVec2H:

@@ -24,7 +24,9 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
     EXPECT_FALSE(v.errored);
     EXPECT_EQ(v->name, "my_var");
     EXPECT_NE(v->type, nullptr);
-    EXPECT_TRUE(v->type->Is<ast::F32>());
+
+    ASSERT_TRUE(v->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(v->type->As<ast::TypeName>()->name->symbol), "f32");
 
     EXPECT_EQ(v->source.range, (Source::Range{{1u, 5u}, {1u, 11u}}));
     EXPECT_EQ(v->type->source.range, (Source::Range{{1u, 14u}, {1u, 17u}}));
@@ -43,7 +45,9 @@ TEST_F(ParserImplTest, VariableDecl_Unicode_Parses) {
     EXPECT_FALSE(v.errored);
     EXPECT_EQ(v->name, ident);
     EXPECT_NE(v->type, nullptr);
-    EXPECT_TRUE(v->type->Is<ast::F32>());
+
+    ASSERT_TRUE(v->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(v->type->As<ast::TypeName>()->name->symbol), "f32");
 
     EXPECT_EQ(v->source.range, (Source::Range{{1u, 5u}, {1u, 48u}}));
     EXPECT_EQ(v->type->source.range, (Source::Range{{1u, 51u}, {1u, 54u}}));
@@ -79,7 +83,10 @@ TEST_F(ParserImplTest, VariableDecl_WithAddressSpace) {
     EXPECT_FALSE(v.errored);
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(v->name, "my_var");
-    EXPECT_TRUE(v->type->Is<ast::F32>());
+
+    ASSERT_TRUE(v->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(v->type->As<ast::TypeName>()->name->symbol), "f32");
+
     EXPECT_EQ(v->address_space, type::AddressSpace::kPrivate);
 
     EXPECT_EQ(v->source.range.begin.line, 1u);
@@ -95,7 +102,10 @@ TEST_F(ParserImplTest, VariableDecl_WithPushConstant) {
     EXPECT_FALSE(v.errored);
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(v->name, "my_var");
-    EXPECT_TRUE(v->type->Is<ast::F32>());
+
+    ASSERT_TRUE(v->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(v->type->As<ast::TypeName>()->name->symbol), "f32");
+
     EXPECT_EQ(v->address_space, type::AddressSpace::kPushConstant);
 }
 

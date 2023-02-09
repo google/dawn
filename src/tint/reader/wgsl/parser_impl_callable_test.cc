@@ -64,17 +64,6 @@ TEST_F(ParserImplTest, Callable_MatPrefix) {
     EXPECT_EQ(m->rows, 2u);
 }
 
-TEST_F(ParserImplTest, Callable_TypeDecl_F32) {
-    auto p = parser("f32");
-    auto t = p->callable();
-    ASSERT_TRUE(p->peek_is(Token::Type::kEOF));
-    EXPECT_TRUE(t.matched);
-    EXPECT_FALSE(t.errored);
-    ASSERT_FALSE(p->has_error()) << p->error();
-    ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t.value->Is<ast::F32>());
-}
-
 TEST_F(ParserImplTest, Callable_TypeDecl_Array) {
     auto p = parser("array<f32, 2>");
     auto t = p->callable();
@@ -87,7 +76,9 @@ TEST_F(ParserImplTest, Callable_TypeDecl_Array) {
 
     auto* a = t.value->As<ast::Array>();
     EXPECT_FALSE(a->IsRuntimeArray());
-    EXPECT_TRUE(a->type->Is<ast::F32>());
+
+    ASSERT_TRUE(a->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(a->type->As<ast::TypeName>()->name->symbol), "f32");
 
     auto* size = a->count->As<ast::IntLiteralExpression>();
     ASSERT_NE(size, nullptr);
@@ -107,7 +98,9 @@ TEST_F(ParserImplTest, Callable_TypeDecl_Array_Runtime) {
 
     auto* a = t.value->As<ast::Array>();
     EXPECT_TRUE(a->IsRuntimeArray());
-    EXPECT_TRUE(a->type->Is<ast::F32>());
+
+    ASSERT_TRUE(a->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(a->type->As<ast::TypeName>()->name->symbol), "f32");
 
     ASSERT_EQ(a->count, nullptr);
 }
@@ -123,7 +116,10 @@ TEST_F(ParserImplTest, Callable_TypeDecl_VecPrefix) {
     ASSERT_TRUE(t.value->Is<ast::Vector>());
 
     auto* v = t.value->As<ast::Vector>();
-    EXPECT_TRUE(v->type->Is<ast::F32>());
+
+    ASSERT_TRUE(v->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(v->type->As<ast::TypeName>()->name->symbol), "f32");
+
     EXPECT_EQ(v->width, 3u);
 }
 
@@ -138,7 +134,10 @@ TEST_F(ParserImplTest, Callable_TypeDecl_MatPrefix) {
     ASSERT_TRUE(t.value->Is<ast::Matrix>());
 
     auto* m = t.value->As<ast::Matrix>();
-    EXPECT_TRUE(m->type->Is<ast::F32>());
+
+    ASSERT_TRUE(m->type->Is<ast::TypeName>());
+    EXPECT_EQ(p->builder().Symbols().NameFor(m->type->As<ast::TypeName>()->name->symbol), "f32");
+
     EXPECT_EQ(m->columns, 3u);
     EXPECT_EQ(m->rows, 2u);
 }

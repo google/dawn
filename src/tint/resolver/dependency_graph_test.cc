@@ -1264,11 +1264,13 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinType, Resolve) {
 
 TEST_P(ResolverDependencyGraphResolveToBuiltinType, ShadowedByGlobalVar) {
     const auto use = std::get<0>(GetParam());
-    const auto name = std::get<1>(GetParam());
+    const std::string name = std::get<1>(GetParam());
     const auto symbol = Symbols().New(name);
 
+    auto* decl =
+        GlobalVar(symbol, name == "i32" ? ty.u32() : ty.i32(), type::AddressSpace::kPrivate);
+
     SymbolTestHelper helper(this);
-    auto* decl = helper.Add(SymbolDeclKind::GlobalVar, symbol);
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 
@@ -1279,11 +1281,14 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinType, ShadowedByGlobalVar) {
 
 TEST_P(ResolverDependencyGraphResolveToBuiltinType, ShadowedByStruct) {
     const auto use = std::get<0>(GetParam());
-    const auto name = std::get<1>(GetParam());
+    const std::string name = std::get<1>(GetParam());
     const auto symbol = Symbols().New(name);
 
+    auto* decl = Structure(symbol, utils::Vector{
+                                       Member("m", name == "i32" ? ty.u32() : ty.i32()),
+                                   });
+
     SymbolTestHelper helper(this);
-    auto* decl = helper.Add(SymbolDeclKind::Struct, symbol);
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 
@@ -1734,7 +1739,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     GlobalVar(Sym(), ty.external_texture());
     GlobalVar(Sym(), ty.multisampled_texture(type::TextureDimension::k2d, T));
     GlobalVar(Sym(), ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Float,
-                                        type::Access::kRead));  //
+                                        type::Access::kRead));
     GlobalVar(Sym(), ty.sampler(type::SamplerKind::kSampler));
 
     GlobalVar(Sym(), ty.i32(), utils::Vector{Binding(V), Group(V)});
