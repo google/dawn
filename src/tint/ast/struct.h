@@ -38,7 +38,7 @@ class Struct final : public Castable<Struct, TypeDecl> {
     Struct(ProgramID pid,
            NodeID nid,
            const Source& src,
-           Symbol name,
+           const Identifier* name,
            utils::VectorRef<const ast::StructMember*> members,
            utils::VectorRef<const ast::Attribute*> attributes);
     /// Move constructor

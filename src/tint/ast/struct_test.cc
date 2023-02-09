@@ -36,8 +36,8 @@ using BlockAttribute = transform::AddBlockAttribute::BlockAttribute;
 
 TEST_F(AstStructTest, Creation) {
     auto name = Sym("s");
-    auto* s = create<Struct>(name, utils::Vector{Member("a", ty.i32())}, utils::Empty);
-    EXPECT_EQ(s->name, name);
+    auto* s = Structure(name, utils::Vector{Member("a", ty.i32())});
+    EXPECT_EQ(s->name->symbol, name);
     EXPECT_EQ(s->members.Length(), 1u);
     EXPECT_TRUE(s->attributes.IsEmpty());
     EXPECT_EQ(s->source.range.begin.line, 0u);
@@ -49,11 +49,11 @@ TEST_F(AstStructTest, Creation) {
 TEST_F(AstStructTest, Creation_WithAttributes) {
     auto name = Sym("s");
 
-    auto* s = create<Struct>(name, utils::Vector{Member("a", ty.i32())},
-                             utils::Vector{
-                                 ASTNodes().Create<BlockAttribute>(ID(), AllocateNodeID()),
-                             });
-    EXPECT_EQ(s->name, name);
+    auto* s = Structure(name, utils::Vector{Member("a", ty.i32())},
+                        utils::Vector{
+                            ASTNodes().Create<BlockAttribute>(ID(), AllocateNodeID()),
+                        });
+    EXPECT_EQ(s->name->symbol, name);
     EXPECT_EQ(s->members.Length(), 1u);
     ASSERT_EQ(s->attributes.Length(), 1u);
     EXPECT_TRUE(s->attributes[0]->Is<BlockAttribute>());
@@ -65,11 +65,10 @@ TEST_F(AstStructTest, Creation_WithAttributes) {
 
 TEST_F(AstStructTest, CreationWithSourceAndAttributes) {
     auto name = Sym("s");
-    auto* s =
-        create<Struct>(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
-                       name, utils::Vector{Member("a", ty.i32())},
-                       utils::Vector{ASTNodes().Create<BlockAttribute>(ID(), AllocateNodeID())});
-    EXPECT_EQ(s->name, name);
+    auto* s = Structure(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
+                        name, utils::Vector{Member("a", ty.i32())},
+                        utils::Vector{ASTNodes().Create<BlockAttribute>(ID(), AllocateNodeID())});
+    EXPECT_EQ(s->name->symbol, name);
     EXPECT_EQ(s->members.Length(), 1u);
     ASSERT_EQ(s->attributes.Length(), 1u);
     EXPECT_TRUE(s->attributes[0]->Is<BlockAttribute>());
@@ -83,8 +82,8 @@ TEST_F(AstStructTest, Assert_Null_StructMember) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<Struct>(b.Sym("S"), utils::Vector{b.Member("a", b.ty.i32()), nullptr},
-                             utils::Empty);
+            b.Structure(b.Sym("S"), utils::Vector{b.Member("a", b.ty.i32()), nullptr},
+                        utils::Empty);
         },
         "internal compiler error");
 }
@@ -93,8 +92,8 @@ TEST_F(AstStructTest, Assert_Null_Attribute) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<Struct>(b.Sym("S"), utils::Vector{b.Member("a", b.ty.i32())},
-                             utils::Vector<const ast::Attribute*, 1>{nullptr});
+            b.Structure(b.Sym("S"), utils::Vector{b.Member("a", b.ty.i32())},
+                        utils::Vector<const ast::Attribute*, 1>{nullptr});
         },
         "internal compiler error");
 }
@@ -104,8 +103,7 @@ TEST_F(AstStructTest, Assert_DifferentProgramID_StructMember) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<Struct>(b1.Sym("S"), utils::Vector{b2.Member("a", b2.ty.i32())},
-                              utils::Empty);
+            b1.Structure(b1.Sym("S"), utils::Vector{b2.Member("a", b2.ty.i32())});
         },
         "internal compiler error");
 }
@@ -115,7 +113,7 @@ TEST_F(AstStructTest, Assert_DifferentProgramID_Attribute) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<Struct>(
+            b1.Structure(
                 b1.Sym("S"), utils::Vector{b1.Member("a", b1.ty.i32())},
                 utils::Vector{b2.ASTNodes().Create<BlockAttribute>(b2.ID(), b2.AllocateNodeID())});
         },

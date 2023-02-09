@@ -156,7 +156,8 @@ struct SpirvAtomic::State {
     ForkedStruct& Fork(const ast::Struct* str) {
         auto& forked = forked_structs[str];
         if (!forked.name.IsValid()) {
-            forked.name = b.Symbols().New(ctx.src->Symbols().NameFor(str->name) + "_atomic");
+            forked.name =
+                b.Symbols().New(ctx.src->Symbols().NameFor(str->name->symbol) + "_atomic");
         }
         return forked;
     }

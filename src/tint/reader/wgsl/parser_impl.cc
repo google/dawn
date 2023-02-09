@@ -551,7 +551,6 @@ Maybe<Void> ParserImpl::global_decl() {
         errored = true;
     }
     if (str.matched) {
-        builder_.AST().AddTypeDecl(str.value);
         if (!expect_attributes_consumed(attrs.value)) {
             return Failure::kErrored;
         }
@@ -1400,8 +1399,7 @@ Maybe<const ast::Struct*> ParserImpl::struct_decl() {
         return Failure::kErrored;
     }
 
-    auto sym = builder_.Symbols().Register(name.value);
-    return create<ast::Struct>(t.source(), sym, std::move(body.value), utils::Empty);
+    return builder_.Structure(t.source(), name.value, std::move(body.value));
 }
 
 // struct_body_decl

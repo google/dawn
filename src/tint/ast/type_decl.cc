@@ -14,15 +14,18 @@
 
 #include "src/tint/ast/type_decl.h"
 
-#include "src/tint/program_builder.h"
+#include "src/tint/ast/templated_identifier.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::TypeDecl);
 
 namespace tint::ast {
 
-TypeDecl::TypeDecl(ProgramID pid, NodeID nid, const Source& src, Symbol n)
+TypeDecl::TypeDecl(ProgramID pid, NodeID nid, const Source& src, const Identifier* n)
     : Base(pid, nid, src), name(n) {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, name, program_id);
+    TINT_ASSERT(AST, name);
+    if (name) {
+        TINT_ASSERT(AST, !name->Is<TemplatedIdentifier>());
+    }
 }
 
 TypeDecl::TypeDecl(TypeDecl&&) = default;

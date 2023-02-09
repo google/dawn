@@ -1383,8 +1383,8 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
             return_type = ty_.Void()->Build(builder_);
         } else {
             // Create and register the result type.
-            auto* str =
-                create<ast::Struct>(Source{}, return_struct_sym, return_members, AttributeList{});
+            auto* str = create<ast::Struct>(Source{}, builder_.Ident(return_struct_sym),
+                                            return_members, AttributeList{});
             parser_impl_.AddTypeDecl(return_struct_sym, str);
             return_type = builder_.ty.Of(str);
 

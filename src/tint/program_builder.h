@@ -900,8 +900,7 @@ class ProgramBuilder {
         /// @returns the alias pointer
         template <typename NAME>
         const ast::Alias* alias(NAME&& name, const ast::Type* type) const {
-            auto sym = builder->Sym(std::forward<NAME>(name));
-            return builder->create<ast::Alias>(sym, type);
+            return alias(builder->source_, std::forward<NAME>(name), type);
         }
 
         /// Creates an alias type
@@ -911,8 +910,8 @@ class ProgramBuilder {
         /// @returns the alias pointer
         template <typename NAME>
         const ast::Alias* alias(const Source& source, NAME&& name, const ast::Type* type) const {
-            auto sym = builder->Sym(std::forward<NAME>(name));
-            return builder->create<ast::Alias>(source, sym, type);
+            return builder->create<ast::Alias>(source, builder->Ident(std::forward<NAME>(name)),
+                                               type);
         }
 
         /// @param type the type of the pointer
@@ -2581,6 +2580,15 @@ class ProgramBuilder {
     const ast::DiscardStatement* Discard() { return create<ast::DiscardStatement>(); }
 
     /// Creates a ast::Alias registering it with the AST().TypeDecls().
+    /// @param name the alias name
+    /// @param type the alias target type
+    /// @returns the alias type
+    template <typename NAME>
+    const ast::Alias* Alias(NAME&& name, const ast::Type* type) {
+        return Alias(source_, std::forward<NAME>(name), type);
+    }
+
+    /// Creates a ast::Alias registering it with the AST().TypeDecls().
     /// @param source the source information
     /// @param name the alias name
     /// @param type the alias target type
@@ -2592,40 +2600,34 @@ class ProgramBuilder {
         return out;
     }
 
-    /// Creates a ast::Alias registering it with the AST().TypeDecls().
-    /// @param name the alias name
-    /// @param type the alias target type
-    /// @returns the alias type
+    /// Creates a ast::Struct registering it with the AST().TypeDecls().
+    /// @param name the struct name
+    /// @param members the struct members
+    /// @param attributes the optional struct attributes
+    /// @returns the struct type
     template <typename NAME>
-    const ast::Alias* Alias(NAME&& name, const ast::Type* type) {
-        auto* out = ty.alias(std::forward<NAME>(name), type);
-        AST().AddTypeDecl(out);
-        return out;
+    const ast::Struct* Structure(
+        NAME&& name,
+        utils::VectorRef<const ast::StructMember*> members,
+        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
+        return Structure(source_, std::forward<NAME>(name), std::move(members),
+                         std::move(attributes));
     }
 
     /// Creates a ast::Struct registering it with the AST().TypeDecls().
     /// @param source the source information
     /// @param name the struct name
     /// @param members the struct members
+    /// @param attributes the optional struct attributes
     /// @returns the struct type
     template <typename NAME>
-    const ast::Struct* Structure(const Source& source,
-                                 NAME&& name,
-                                 utils::VectorRef<const ast::StructMember*> members) {
-        auto sym = Sym(std::forward<NAME>(name));
-        auto* type = create<ast::Struct>(source, sym, std::move(members), utils::Empty);
-        AST().AddTypeDecl(type);
-        return type;
-    }
-
-    /// Creates a ast::Struct registering it with the AST().TypeDecls().
-    /// @param name the struct name
-    /// @param members the struct members
-    /// @returns the struct type
-    template <typename NAME>
-    const ast::Struct* Structure(NAME&& name, utils::VectorRef<const ast::StructMember*> members) {
-        auto sym = Sym(std::forward<NAME>(name));
-        auto* type = create<ast::Struct>(sym, std::move(members), utils::Empty);
+    const ast::Struct* Structure(
+        const Source& source,
+        NAME&& name,
+        utils::VectorRef<const ast::StructMember*> members,
+        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
+        auto* type = create<ast::Struct>(source, Ident(std::forward<NAME>(name)),
+                                         std::move(members), std::move(attributes));
         AST().AddTypeDecl(type);
         return type;
     }

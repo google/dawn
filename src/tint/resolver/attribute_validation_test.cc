@@ -573,9 +573,8 @@ using SpirvBlockAttribute = transform::AddBlockAttribute::BlockAttribute;
 TEST_P(StructAttributeTest, IsValid) {
     auto& params = GetParam();
 
-    auto* str = create<ast::Struct>(Sym("mystruct"), utils::Vector{Member("a", ty.f32())},
-                                    createAttributes(Source{{12, 34}}, *this, params.kind));
-    AST().AddGlobalDeclaration(str);
+    Structure("mystruct", utils::Vector{Member("a", ty.f32())},
+              createAttributes(Source{{12, 34}}, *this, params.kind));
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();

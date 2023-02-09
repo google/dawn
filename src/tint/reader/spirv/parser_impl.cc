@@ -1184,9 +1184,10 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
 
     // Now make the struct.
     auto sym = builder_.Symbols().Register(name);
-    auto* ast_struct = create<ast::Struct>(Source{}, sym, std::move(ast_members), utils::Empty);
+    auto* ast_struct =
+        create<ast::Struct>(Source{}, builder_.Ident(sym), std::move(ast_members), utils::Empty);
     if (num_non_writable_members == members.size()) {
-        read_only_struct_types_.insert(ast_struct->name);
+        read_only_struct_types_.insert(ast_struct->name->symbol);
     }
     AddTypeDecl(sym, ast_struct);
     const auto* result = ty_.Struct(sym, std::move(ast_member_types));

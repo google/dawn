@@ -3154,6 +3154,8 @@ bool Resolver::Enable(const ast::Enable* enable) {
 }
 
 type::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
+    Mark(named_type->name);
+
     type::Type* result = nullptr;
     if (auto* alias = named_type->As<ast::Alias>()) {
         result = Alias(alias);
@@ -3551,8 +3553,9 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     }
 
     auto* out = builder_->create<sem::Struct>(
-        str, str->source, str->name, std::move(sem_members), static_cast<uint32_t>(struct_align),
-        static_cast<uint32_t>(struct_size), static_cast<uint32_t>(size_no_padding));
+        str, str->source, str->name->symbol, std::move(sem_members),
+        static_cast<uint32_t>(struct_align), static_cast<uint32_t>(struct_size),
+        static_cast<uint32_t>(size_no_padding));
 
     for (size_t i = 0; i < sem_members.Length(); i++) {
         auto* mem_type = sem_members[i]->Type();

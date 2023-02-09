@@ -335,7 +335,7 @@ struct Std140::State {
                     // Create a new forked structure, and insert it just under the original
                     // structure.
                     auto name = b.Symbols().New(sym.NameFor(str->Name()) + "_std140");
-                    auto* std140 = b.create<ast::Struct>(name, std::move(members),
+                    auto* std140 = b.create<ast::Struct>(b.Ident(name), std::move(members),
                                                          ctx.Clone(str->Declaration()->attributes));
                     ctx.InsertAfter(src->AST().GlobalDeclarations(), global, std140);
                     std140_structs.Add(str, name);

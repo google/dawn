@@ -1270,7 +1270,7 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
             // Identifier *looks* like a builtin type, but check that the builtin type isn't being
             // shadowed with a user declared type.
             for (auto* decl : src->AST().TypeDecls()) {
-                if (decl->name == symbol) {
+                if (decl->name->symbol == symbol) {
                     return false;
                 }
             }

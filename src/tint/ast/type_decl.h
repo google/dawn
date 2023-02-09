@@ -15,9 +15,12 @@
 #ifndef SRC_TINT_AST_TYPE_DECL_H_
 #define SRC_TINT_AST_TYPE_DECL_H_
 
-#include <string>
+#include "src/tint/ast/node.h"
 
-#include "src/tint/ast/type.h"
+// Forward declarations
+namespace tint::ast {
+class Identifier;
+}  // namespace tint::ast
 
 namespace tint::ast {
 
@@ -28,15 +31,15 @@ class TypeDecl : public Castable<TypeDecl, Node> {
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node for the import statement
-    /// @param name The name of the structure
-    TypeDecl(ProgramID pid, NodeID nid, const Source& src, Symbol name);
+    /// @param name The name of the type
+    TypeDecl(ProgramID pid, NodeID nid, const Source& src, const Identifier* name);
     /// Move constructor
     TypeDecl(TypeDecl&&);
 
     ~TypeDecl() override;
 
     /// The name of the type declaration
-    const Symbol name;
+    const Identifier* const name;
 };
 
 }  // namespace tint::ast

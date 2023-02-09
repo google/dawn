@@ -19,6 +19,11 @@
 
 #include "src/tint/ast/type_decl.h"
 
+// Forward declarations
+namespace tint::ast {
+class Type;
+}  // namespace tint::ast
+
 namespace tint::ast {
 
 /// A type alias type. Holds a name and pointer to another type.
@@ -30,7 +35,11 @@ class Alias final : public Castable<Alias, TypeDecl> {
     /// @param src the source of this node
     /// @param name the symbol for the alias
     /// @param subtype the alias'd type
-    Alias(ProgramID pid, NodeID nid, const Source& src, const Symbol& name, const Type* subtype);
+    Alias(ProgramID pid,
+          NodeID nid,
+          const Source& src,
+          const Identifier* name,
+          const Type* subtype);
     /// Move constructor
     Alias(Alias&&);
     /// Destructor

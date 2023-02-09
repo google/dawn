@@ -184,14 +184,14 @@ class DependencyScanner {
         Switch(
             global->node,
             [&](const ast::Struct* str) {
-                Declare(str->name, str);
+                Declare(str->name->symbol, str);
                 for (auto* member : str->members) {
                     TraverseAttributes(member->attributes);
                     TraverseType(member->type);
                 }
             },
             [&](const ast::Alias* alias) {
-                Declare(alias->name, alias);
+                Declare(alias->name->symbol, alias);
                 TraverseType(alias->type);
             },
             [&](const ast::Function* func) {
@@ -558,7 +558,7 @@ struct DependencyAnalysis {
     Symbol SymbolOf(const ast::Node* node) const {
         return Switch(
             node,  //
-            [&](const ast::TypeDecl* td) { return td->name; },
+            [&](const ast::TypeDecl* td) { return td->name->symbol; },
             [&](const ast::Function* func) { return func->name->symbol; },
             [&](const ast::Variable* var) { return var->name->symbol; },
             [&](const ast::DiagnosticDirective*) { return Symbol(); },

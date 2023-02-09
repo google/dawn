@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Alias);
 
 namespace tint::ast {
 
-Alias::Alias(ProgramID pid, NodeID nid, const Source& src, const Symbol& n, const Type* subtype)
+Alias::Alias(ProgramID pid, NodeID nid, const Source& src, const Identifier* n, const Type* subtype)
     : Base(pid, nid, src, n), type(subtype) {
     TINT_ASSERT(AST, type);
 }

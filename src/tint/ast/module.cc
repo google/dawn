@@ -43,7 +43,7 @@ Module::~Module() = default;
 
 const ast::TypeDecl* Module::LookupType(Symbol name) const {
     for (auto* ty : TypeDecls()) {
-        if (ty->name == name) {
+        if (ty->name->symbol == name) {
             return ty;
         }
     }

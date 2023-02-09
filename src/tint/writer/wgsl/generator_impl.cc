@@ -124,7 +124,7 @@ bool GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
         ty,
         [&](const ast::Alias* alias) {  //
             auto out = line();
-            out << "alias " << program_->Symbols().NameFor(alias->name) << " = ";
+            out << "alias " << program_->Symbols().NameFor(alias->name->symbol) << " = ";
             if (!EmitType(out, alias->type)) {
                 return false;
             }
@@ -606,7 +606,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
             return false;
         }
     }
-    line() << "struct " << program_->Symbols().NameFor(str->name) << " {";
+    line() << "struct " << program_->Symbols().NameFor(str->name->symbol) << " {";
 
     auto add_padding = [&](uint32_t size) {
         line() << "@size(" << size << ")";

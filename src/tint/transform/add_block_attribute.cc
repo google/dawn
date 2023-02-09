@@ -72,7 +72,7 @@ Transform::ApplyResult AddBlockAttribute::Apply(const Program* src,
                 auto* block = b.ASTNodes().Create<BlockAttribute>(b.ID(), b.AllocateNodeID());
                 auto wrapper_name = src->Symbols().NameFor(global->name->symbol) + "_block";
                 auto* ret = b.create<ast::Struct>(
-                    b.Symbols().New(wrapper_name),
+                    b.Ident(b.Symbols().New(wrapper_name)),
                     utils::Vector{b.Member(kMemberName, CreateASTTypeFor(ctx, ty))},
                     utils::Vector{block});
                 ctx.InsertBefore(src->AST().GlobalDeclarations(), global, ret);
