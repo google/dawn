@@ -122,11 +122,15 @@ class Resolver {
     /// ProgramBuilder.
     void CreateSemanticNodes() const;
 
+    /// @returns the call of Expression() cast to a sem::ValueExpression. If the sem::Expression is
+    /// not a sem::ValueExpression, then an error diagnostic is raised and nullptr is returned.
+    sem::ValueExpression* ValueExpression(const ast::Expression* expr);
+
     /// Expression traverses the graph of expressions starting at `expr`, building a postordered
     /// list (leaf-first) of all the expression nodes. Each of the expressions are then resolved by
     /// dispatching to the appropriate expression handlers below.
     /// @returns the resolved semantic node for the expression `expr`, or nullptr on failure.
-    sem::ValueExpression* Expression(const ast::Expression* expr);
+    sem::Expression* Expression(const ast::Expression* expr);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Expression resolving methods
@@ -147,7 +151,7 @@ class Resolver {
                             sem::Function* target,
                             utils::Vector<const sem::ValueExpression*, N>& args,
                             sem::Behaviors arg_behaviors);
-    sem::ValueExpression* Identifier(const ast::IdentifierExpression*);
+    sem::Expression* Identifier(const ast::IdentifierExpression*);
     template <size_t N>
     sem::Call* BuiltinCall(const ast::CallExpression*,
                            sem::BuiltinType,
@@ -418,6 +422,15 @@ class Resolver {
     /// @param node the semantic node to apply the diagnostic severities to
     template <typename NODE>
     void ApplyDiagnosticSeverities(NODE* node);
+
+    /// Raises an error diagnostic that the resolved identifier @p resolved was not of the expected
+    /// kind.
+    /// @param source the source of the error diagnostic
+    /// @param resolved the resolved identifier
+    /// @param wanted the expected kind
+    void ErrorMismatchedResolvedIdentifier(const Source& source,
+                                           const ResolvedIdentifier& resolved,
+                                           std::string_view wanted);
 
     /// Adds the given error message to the diagnostics
     void AddError(const std::string& msg, const Source& source) const;

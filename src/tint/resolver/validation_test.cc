@@ -134,7 +134,7 @@ TEST_F(ResolverValidationTest, Stmt_If_NonBool) {
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), "12:34 error: if statement condition must be bool, got f32");
+    EXPECT_EQ(r()->error(), R"(12:34 error: if statement condition must be bool, got f32)");
 }
 
 TEST_F(ResolverValidationTest, Stmt_ElseIf_NonBool) {
@@ -144,7 +144,7 @@ TEST_F(ResolverValidationTest, Stmt_ElseIf_NonBool) {
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), "12:34 error: if statement condition must be bool, got f32");
+    EXPECT_EQ(r()->error(), R"(12:34 error: if statement condition must be bool, got f32)");
 }
 
 TEST_F(ResolverValidationTest, Expr_ErrUnknownExprType) {
@@ -158,48 +158,6 @@ TEST_F(ResolverValidationTest, Expr_ErrUnknownExprType) {
         "tint::resolver::FakeExpr");
 }
 
-TEST_F(ResolverValidationTest, Expr_DontCall_Function) {
-    Func("func", utils::Empty, ty.void_(), utils::Empty, {});
-    WrapInFunction(Expr(Source{{12, 34}}, "func"));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing '(' for function call");
-}
-
-TEST_F(ResolverValidationTest, Expr_DontCall_Builtin) {
-    WrapInFunction(Expr(Source{{12, 34}}, "round"));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing '(' for builtin call");
-}
-
-TEST_F(ResolverValidationTest, Expr_DontCall_Type) {
-    Alias("T", ty.u32());
-    WrapInFunction(Expr(Source{{12, 34}}, "T"));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing '(' for type initializer or cast");
-}
-
-TEST_F(ResolverValidationTest, Expr_DontCall_BuiltinType) {
-    WrapInFunction(Expr(Source{{12, 34}}, "vec3f"));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing '(' for type initializer or cast");
-}
-
-TEST_F(ResolverValidationTest, AssignmentStmt_InvalidLHS_BuiltinFunctionName) {
-    // normalize = 2;
-
-    auto* lhs = Expr(Source{{12, 34}}, "normalize");
-    auto* rhs = Expr(2_i);
-    auto* assign = Assign(lhs, rhs);
-    WrapInFunction(assign);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing '(' for builtin call");
-}
-
 TEST_F(ResolverValidationTest, UsingUndefinedVariable_Fail) {
     // b = 2;
 
@@ -209,7 +167,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariable_Fail) {
     WrapInFunction(assign);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: unknown identifier: 'b'");
+    EXPECT_EQ(r()->error(), R"(12:34 error: unknown identifier: 'b')");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableInBlockStatement_Fail) {
@@ -224,7 +182,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInBlockStatement_Fail) {
     WrapInFunction(body);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: unknown identifier: 'b'");
+    EXPECT_EQ(r()->error(), R"(12:34 error: unknown identifier: 'b')");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
@@ -264,7 +222,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInnerScope_Fail) {
     WrapInFunction(outer_body);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: unknown identifier: 'a'");
+    EXPECT_EQ(r()->error(), R"(12:34 error: unknown identifier: 'a')");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableOuterScope_Pass) {
@@ -304,7 +262,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableDifferentScope_Fail) {
     WrapInFunction(outer_body);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: unknown identifier: 'a'");
+    EXPECT_EQ(r()->error(), R"(12:34 error: unknown identifier: 'a')");
 }
 
 TEST_F(ResolverValidationTest, AddressSpace_FunctionVariableWorkgroupClass) {
@@ -362,7 +320,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
     WrapInFunction(mem);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "3:5 error: invalid vector swizzle character");
+    EXPECT_EQ(r()->error(), R"(3:5 error: invalid vector swizzle character)");
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
@@ -383,7 +341,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
     WrapInFunction(mem);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "3:3 error: invalid vector swizzle size");
+    EXPECT_EQ(r()->error(), R"(3:3 error: invalid vector swizzle size)");
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadIndex) {
@@ -393,7 +351,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadIndex) {
     WrapInFunction(mem);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "3:3 error: invalid vector swizzle member");
+    EXPECT_EQ(r()->error(), R"(3:3 error: invalid vector swizzle member)");
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_BadParent) {
@@ -791,7 +749,8 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInContinuing_Direct) {
               Continue(Source{{12, 34}}))));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: continuing blocks must not contain a continue statement");
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: continuing blocks must not contain a continue statement)");
 }
 
 TEST_F(ResolverTest, Stmt_Loop_ContinueInContinuing_Indirect) {
@@ -938,7 +897,8 @@ TEST_F(ResolverTest, Stmt_ForLoop_ContinueInContinuing_Direct) {
                        Block(Break())));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: continuing blocks must not contain a continue statement");
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: continuing blocks must not contain a continue statement)");
 }
 
 TEST_F(ResolverTest, Stmt_ForLoop_ContinueInContinuing_Indirect) {
@@ -972,7 +932,7 @@ TEST_F(ResolverTest, Stmt_ForLoop_CondIsNotBool) {
     WrapInFunction(For(nullptr, Expr(Source{{12, 34}}, 1_f), nullptr, Block()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: for-loop condition must be bool, got f32");
+    EXPECT_EQ(r()->error(), R"(12:34 error: for-loop condition must be bool, got f32)");
 }
 
 TEST_F(ResolverTest, Stmt_While_CondIsBoolRef) {
@@ -992,7 +952,7 @@ TEST_F(ResolverTest, Stmt_While_CondIsNotBool) {
     WrapInFunction(While(Expr(Source{{12, 34}}, 1_f), Block()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: while condition must be bool, got f32");
+    EXPECT_EQ(r()->error(), R"(12:34 error: while condition must be bool, got f32)");
 }
 
 TEST_F(ResolverValidationTest, Stmt_ContinueInLoop) {
@@ -1004,7 +964,7 @@ TEST_F(ResolverValidationTest, Stmt_ContinueInLoop) {
 TEST_F(ResolverValidationTest, Stmt_ContinueNotInLoop) {
     WrapInFunction(Continue(Source{{12, 34}}));
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: continue statement must be in a loop");
+    EXPECT_EQ(r()->error(), R"(12:34 error: continue statement must be in a loop)");
 }
 
 TEST_F(ResolverValidationTest, Stmt_BreakInLoop) {
@@ -1164,7 +1124,7 @@ TEST_F(ResolverValidationTest, Stmt_BreakInIfInContinuingNotLast) {
 TEST_F(ResolverValidationTest, Stmt_BreakNotInLoopOrSwitch) {
     WrapInFunction(Break(Source{{12, 34}}));
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: break statement must be in a loop or switch case");
+    EXPECT_EQ(r()->error(), R"(12:34 error: break statement must be in a loop or switch case)");
 }
 
 TEST_F(ResolverValidationTest, StructMemberDuplicateName) {
@@ -1205,7 +1165,8 @@ TEST_F(ResolverValidationTest, NegativeStructMemberAlignAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @align value must be a positive, power-of-two integer");
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: @align value must be a positive, power-of-two integer)");
 }
 
 TEST_F(ResolverValidationTest, NonPOTStructMemberAlignAttribute) {
@@ -1214,7 +1175,8 @@ TEST_F(ResolverValidationTest, NonPOTStructMemberAlignAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @align value must be a positive, power-of-two integer");
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: @align value must be a positive, power-of-two integer)");
 }
 
 TEST_F(ResolverValidationTest, ZeroStructMemberAlignAttribute) {
@@ -1223,7 +1185,8 @@ TEST_F(ResolverValidationTest, ZeroStructMemberAlignAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @align value must be a positive, power-of-two integer");
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: @align value must be a positive, power-of-two integer)");
 }
 
 TEST_F(ResolverValidationTest, ZeroStructMemberSizeAttribute) {
@@ -1232,7 +1195,7 @@ TEST_F(ResolverValidationTest, ZeroStructMemberSizeAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @size must be at least as big as the type's size (4)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @size must be at least as big as the type's size (4))");
 }
 
 TEST_F(ResolverValidationTest, OffsetAndSizeAttribute) {
@@ -1242,7 +1205,7 @@ TEST_F(ResolverValidationTest, OffsetAndSizeAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @offset cannot be used with @align or @size");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @offset cannot be used with @align or @size)");
 }
 
 TEST_F(ResolverValidationTest, OffsetAndAlignAttribute) {
@@ -1252,7 +1215,7 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @offset cannot be used with @align or @size");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @offset cannot be used with @align or @size)");
 }
 
 TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeAttribute) {
@@ -1262,7 +1225,7 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @offset cannot be used with @align or @size");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @offset cannot be used with @align or @size)");
 }
 
 TEST_F(ResolverTest, Expr_Initializer_Cast_Pointer) {
@@ -1272,28 +1235,28 @@ TEST_F(ResolverTest, Expr_Initializer_Cast_Pointer) {
     WrapInFunction(Decl(vf), Decl(ip));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: type is not constructible");
+    EXPECT_EQ(r()->error(), R"(12:34 error: type is not constructible)");
 }
 
 TEST_F(ResolverTest, I32_Overflow) {
     GlobalVar("v", ty.i32(), type::AddressSpace::kPrivate, Expr(Source{{12, 24}}, 2147483648_a));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: value 2147483648 cannot be represented as 'i32'");
+    EXPECT_EQ(r()->error(), R"(12:24 error: value 2147483648 cannot be represented as 'i32')");
 }
 
 TEST_F(ResolverTest, I32_Underflow) {
     GlobalVar("v", ty.i32(), type::AddressSpace::kPrivate, Expr(Source{{12, 24}}, -2147483649_a));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: value -2147483649 cannot be represented as 'i32'");
+    EXPECT_EQ(r()->error(), R"(12:24 error: value -2147483649 cannot be represented as 'i32')");
 }
 
 TEST_F(ResolverTest, U32_Overflow) {
     GlobalVar("v", ty.u32(), type::AddressSpace::kPrivate, Expr(Source{{12, 24}}, 4294967296_a));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: value 4294967296 cannot be represented as 'u32'");
+    EXPECT_EQ(r()->error(), R"(12:24 error: value 4294967296 cannot be represented as 'u32')");
 }
 
 //    var a: array<i32,2>;
@@ -1310,7 +1273,8 @@ TEST_F(ResolverTest, PointerIndexing_Fail) {
     WrapInFunction(a, idx);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "error: cannot index type 'ptr<function, array<i32, 2>, read_write>'");
+    EXPECT_EQ(r()->error(),
+              R"(error: cannot index type 'ptr<function, array<i32, 2>, read_write>')");
 }
 
 }  // namespace

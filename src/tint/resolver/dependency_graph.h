@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_RESOLVER_DEPENDENCY_GRAPH_H_
 #define SRC_TINT_RESOLVER_DEPENDENCY_GRAPH_H_
 
+#include <string>
 #include <vector>
 
 #include "src/tint/ast/module.h"
@@ -42,7 +43,7 @@ class ResolvedIdentifier {
     ResolvedIdentifier(T value) : value_(value) {}  // NOLINT(runtime/explicit)
 
     /// @return true if the ResolvedIdentifier holds a value (successfully resolved)
-    operator bool() const { return !std::holds_alternative<std::monostate>(value_); }
+    bool Resolved() const { return !std::holds_alternative<std::monostate>(value_); }
 
     /// @return the node pointer if the ResolvedIdentifier holds an AST node, otherwise nullptr
     const ast::Node* Node() const {
@@ -87,14 +88,14 @@ class ResolvedIdentifier {
         return !(*this == other);
     }
 
+    /// @param symbols the program's symbol table
+    /// @param diagnostics diagnostics used to report ICEs
+    /// @return a description of the resolved symbol
+    std::string String(const SymbolTable& symbols, diag::List& diagnostics) const;
+
   private:
     std::variant<std::monostate, const ast::Node*, sem::BuiltinType, type::Builtin> value_;
 };
-
-/// @param out the std::ostream to write to
-/// @param ri the ResolvedIdentifier
-/// @returns `out` so calls can be chained
-std::ostream& operator<<(std::ostream& out, const ResolvedIdentifier& ri);
 
 /// DependencyGraph holds information about module-scope declaration dependency
 /// analysis and symbol resolutions.

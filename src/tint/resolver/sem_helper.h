@@ -57,39 +57,58 @@ class SemHelper {
     /// @returns the sem node for @p ast
     template <typename AST = ast::Node>
     auto* GetVal(const AST* ast) const {
-        if constexpr (traits::IsTypeOrDerived<sem::SemanticNodeTypeFor<AST>,
-                                              sem::ValueExpression>) {
-            return Get(ast);
+        return AsValue(Get(ast));
+    }
+
+    /// @param expr the semantic node
+    /// @returns one of:
+    /// * nullptr if @p expr is nullptr
+    /// * @p expr if the static pointer type already derives from sem::ValueExpression
+    /// * @p expr cast to sem::ValueExpression if the cast is successful
+    /// * nullptr if @p expr is not a sem::ValueExpression. In this case an error diagnostic is
+    ///   raised.
+    template <typename EXPR>
+    auto* AsValue(EXPR* expr) const {
+        if constexpr (traits::IsTypeOrDerived<EXPR, sem::ValueExpression>) {
+            return expr;
         } else {
-            if (auto* sem = Get(ast); TINT_LIKELY(sem)) {
-                auto* val = sem->template As<sem::ValueExpression>();
-                if (TINT_LIKELY(val)) {
+            if (TINT_LIKELY(expr)) {
+                if (auto* val = expr->template As<sem::ValueExpression>(); TINT_LIKELY(val)) {
                     return val;
                 }
-                // TODO(crbug.com/tint/1810): Improve error
-                builder_->Diagnostics().add_error(diag::System::Resolver,
-                                                  "required value expression, got something else",
-                                                  ast->source);
+                ErrorExpectedValueExpr(expr);
             }
             return static_cast<sem::ValueExpression*>(nullptr);
         }
     }
 
-    /// @returns the resolved type of the ast::Expression `expr`
+    /// @returns the resolved type of the ast::Expression @p expr
     /// @param expr the expression
     type::Type* TypeOf(const ast::Expression* expr) const;
 
-    /// @returns the type name of the given semantic type, unwrapping
-    /// references.
+    /// @returns the type name of the given semantic type, unwrapping references.
     /// @param ty the type to look up
     std::string TypeNameOf(const type::Type* ty) const;
 
-    /// @returns the type name of the given semantic type, without unwrapping
-    /// references.
+    /// @returns the type name of the given semantic type, without unwrapping references.
     /// @param ty the type to look up
     std::string RawTypeNameOf(const type::Type* ty) const;
 
+    /// Raises an error diagnostic that the expression @p got was expected to be a
+    /// sem::ValueExpression, but the expression evaluated to something different.
+    /// @param expr the expression
+    void ErrorExpectedValueExpr(const sem::Expression* expr) const;
+
   private:
+    /// Adds the given error message to the diagnostics
+    void AddError(const std::string& msg, const Source& source) const;
+
+    /// Adds the given warning message to the diagnostics
+    void AddWarning(const std::string& msg, const Source& source) const;
+
+    /// Adds the given note message to the diagnostics
+    void AddNote(const std::string& msg, const Source& source) const;
+
     ProgramBuilder* builder_;
 };
 

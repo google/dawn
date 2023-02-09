@@ -883,38 +883,6 @@ TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableTypeWithStride) {
               "12:34 error: ptr<uniform, u32, read> cannot be used as an element type of an array");
 }
 
-TEST_F(ResolverTypeValidationTest, VariableAsType) {
-    // var<private> a : i32;
-    // var<private> b : a;
-    GlobalVar("a", ty.i32(), type::AddressSpace::kPrivate);
-    GlobalVar("b", ty("a"), type::AddressSpace::kPrivate);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(error: cannot use variable 'a' as type
-note: 'a' declared here)");
-}
-
-TEST_F(ResolverTypeValidationTest, FunctionAsType) {
-    // fn f() {}
-    // var<private> v : f;
-    Func("f", utils::Empty, ty.void_(), {});
-    GlobalVar("v", ty("f"), type::AddressSpace::kPrivate);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(error: cannot use function 'f' as type
-note: 'f' declared here)");
-}
-
-TEST_F(ResolverTypeValidationTest, BuiltinAsType) {
-    // var<private> v : max;
-    GlobalVar("v", ty("max"), type::AddressSpace::kPrivate);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "error: cannot use builtin 'max' as type");
-}
-
 namespace GetCanonicalTests {
 struct Params {
     builder::ast_type_func_ptr create_ast_type;

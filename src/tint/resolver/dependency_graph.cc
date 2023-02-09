@@ -28,6 +28,7 @@
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/compound_assignment_statement.h"
+#include "src/tint/ast/const.h"
 #include "src/tint/ast/continue_statement.h"
 #include "src/tint/ast/depth_multisampled_texture.h"
 #include "src/tint/ast/depth_texture.h"
@@ -49,6 +50,7 @@
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/matrix.h"
 #include "src/tint/ast/multisampled_texture.h"
+#include "src/tint/ast/override.h"
 #include "src/tint/ast/pointer.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/sampled_texture.h"
@@ -65,6 +67,7 @@
 #include "src/tint/ast/traverse_expressions.h"
 #include "src/tint/ast/type_name.h"
 #include "src/tint/ast/u32.h"
+#include "src/tint/ast/var.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
 #include "src/tint/ast/while_statement.h"
@@ -822,20 +825,42 @@ bool DependencyGraph::Build(const ast::Module& module,
     return da.Run(module);
 }
 
-std::ostream& operator<<(std::ostream& out, const ResolvedIdentifier& ri) {
-    if (!ri) {
-        return out << "<unresolved symbol>";
+std::string ResolvedIdentifier::String(const SymbolTable& symbols, diag::List& diagnostics) const {
+    if (!Resolved()) {
+        return "<unresolved symbol>";
     }
-    if (auto* node = ri.Node()) {
-        return out << "'" << node->TypeInfo().name << "' at " << node->source;
+    if (auto* node = Node()) {
+        return Switch(
+            node,
+            [&](const ast::TypeDecl* n) {  //
+                return "type '" + symbols.NameFor(n->name->symbol) + "'";
+            },
+            [&](const ast::Var* n) {  //
+                return "var '" + symbols.NameFor(n->name->symbol) + "'";
+            },
+            [&](const ast::Const* n) {  //
+                return "const '" + symbols.NameFor(n->name->symbol) + "'";
+            },
+            [&](const ast::Override* n) {  //
+                return "override '" + symbols.NameFor(n->name->symbol) + "'";
+            },
+            [&](const ast::Function* n) {  //
+                return "function '" + symbols.NameFor(n->name->symbol) + "'";
+            },
+            [&](Default) {
+                TINT_UNREACHABLE(Resolver, diagnostics)
+                    << "unhandled ast::Node: " << node->TypeInfo().name;
+                return "<unknown>";
+            });
     }
-    if (auto builtin_fn = ri.BuiltinFunction(); builtin_fn != sem::BuiltinType::kNone) {
-        return out << "builtin function '" << builtin_fn << "'";
+    if (auto builtin_fn = BuiltinFunction(); builtin_fn != sem::BuiltinType::kNone) {
+        return "builtin function '" + utils::ToString(builtin_fn) + "'";
     }
-    if (auto builtin_ty = ri.BuiltinType(); builtin_ty != type::Builtin::kUndefined) {
-        return out << "builtin function '" << builtin_ty << "'";
+    if (auto builtin_ty = BuiltinType(); builtin_ty != type::Builtin::kUndefined) {
+        return "builtin type '" + utils::ToString(builtin_ty) + "'";
     }
-    return out << "<unhandled ResolvedIdentifier value>";
+    TINT_UNREACHABLE(Resolver, diagnostics) << "unhandled ResolvedIdentifier";
+    return "<unknown>";
 }
 
 }  // namespace tint::resolver

@@ -118,27 +118,6 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsFunctionUsedAsVariable)
     EXPECT_EQ(r()->error(), R"(56:78 error: missing '(' for function call)");
 }
 
-TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsFunctionUsedAsType) {
-    Func(Source{{12, 34}}, "mix", utils::Empty, ty.i32(),
-         utils::Vector{
-             Return(1_i),
-         });
-    WrapInFunction(Call(ty(Source{{56, 78}}, "mix")));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: cannot use function 'mix' as type
-12:34 note: 'mix' declared here)");
-}
-
-TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsFunction) {
-    GlobalConst(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i));
-    WrapInFunction(Call(Ident(Source{{56, 78}}, "mix"), 1_f, 2_f, 3_f));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: cannot call variable 'mix'
-12:34 note: 'mix' declared here)");
-}
-
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsVariable) {
     auto* mix = GlobalConst(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i));
     auto* use = Expr("mix");
@@ -148,24 +127,6 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsVariab
     auto* sem = Sem().Get<sem::VariableUser>(use);
     ASSERT_NE(sem, nullptr);
     EXPECT_EQ(sem->Variable(), Sem().Get(mix));
-}
-
-TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsType) {
-    GlobalConst(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i));
-    WrapInFunction(Call(ty(Source{{56, 78}}, "mix")));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: cannot use variable 'mix' as type
-12:34 note: 'mix' declared here)");
-}
-
-TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsFunction) {
-    GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), type::AddressSpace::kPrivate);
-    WrapInFunction(Call(Ident(Source{{56, 78}}, "mix"), 1_f, 2_f, 3_f));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: cannot call variable 'mix'
-12:34 note: 'mix' declared here)");
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsVariable) {
@@ -178,15 +139,6 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsVariable
     auto* sem = Sem().GetVal(use)->UnwrapLoad()->As<sem::VariableUser>();
     ASSERT_NE(sem, nullptr);
     EXPECT_EQ(sem->Variable(), Sem().Get(mix));
-}
-
-TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsType) {
-    GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), type::AddressSpace::kPrivate);
-    WrapInFunction(Call(ty(Source{{56, 78}}, "mix")));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: cannot use variable 'mix' as type
-12:34 note: 'mix' declared here)");
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsFunction) {
@@ -203,14 +155,6 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsFunction) {
 1 candidate conversion:
   i32<T>(T) -> i32  where: T is abstract-int, abstract-float, f32, f16, u32 or bool
 )");
-}
-
-TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsVariable) {
-    Alias(Source{{12, 34}}, "mix", ty.i32());
-    WrapInFunction(Decl(Var("v", Expr(Source{{56, 78}}, "mix"))));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: missing '(' for type initializer or cast)");
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsType) {
@@ -233,16 +177,6 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStructUsedAsFunction) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(12:34 error: struct initializer has too many inputs: expected 1, found 3)");
-}
-
-TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStructUsedAsVariable) {
-    Structure("mix", utils::Vector{
-                         Member("m", ty.i32()),
-                     });
-    WrapInFunction(Decl(Var("v", Expr(Source{{12, 34}}, "mix"))));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: missing '(' for type initializer or cast)");
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStructUsedAsType) {

@@ -1174,7 +1174,7 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinFunc, Resolve) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->BuiltinFunction(), builtin) << *resolved;
+    EXPECT_EQ(resolved->BuiltinFunction(), builtin) << resolved->String(Symbols(), Diagnostics());
 }
 
 TEST_P(ResolverDependencyGraphResolveToBuiltinFunc, ShadowedByGlobalVar) {
@@ -1189,7 +1189,7 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinFunc, ShadowedByGlobalVar) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->Node(), decl) << *resolved;
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
 }
 
 TEST_P(ResolverDependencyGraphResolveToBuiltinFunc, ShadowedByStruct) {
@@ -1204,7 +1204,7 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinFunc, ShadowedByStruct) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->Node(), decl) << *resolved;
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
 }
 
 TEST_P(ResolverDependencyGraphResolveToBuiltinFunc, ShadowedByFunc) {
@@ -1219,7 +1219,7 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinFunc, ShadowedByFunc) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->Node(), decl) << *resolved;
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
 }
 
 INSTANTIATE_TEST_SUITE_P(Types,
@@ -1258,7 +1258,8 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinType, Resolve) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->BuiltinType(), type::ParseBuiltin(name)) << *resolved;
+    EXPECT_EQ(resolved->BuiltinType(), type::ParseBuiltin(name))
+        << resolved->String(Symbols(), Diagnostics());
 }
 
 TEST_P(ResolverDependencyGraphResolveToBuiltinType, ShadowedByGlobalVar) {
@@ -1273,7 +1274,7 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinType, ShadowedByGlobalVar) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->Node(), decl) << *resolved;
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
 }
 
 TEST_P(ResolverDependencyGraphResolveToBuiltinType, ShadowedByStruct) {
@@ -1288,7 +1289,7 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinType, ShadowedByStruct) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->Node(), decl) << *resolved;
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
 }
 
 TEST_P(ResolverDependencyGraphResolveToBuiltinType, ShadowedByFunc) {
@@ -1303,7 +1304,7 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinType, ShadowedByFunc) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->Node(), decl) << *resolved;
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
 }
 
 INSTANTIATE_TEST_SUITE_P(Types,

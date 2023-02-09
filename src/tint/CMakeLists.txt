@@ -359,6 +359,8 @@ list(APPEND TINT_LIB_SRCS
   sem/struct.h
   sem/switch_statement.cc
   sem/switch_statement.h
+  sem/type_expression.cc
+  sem/type_expression.h
   sem/type_initializer.cc
   sem/type_initializer.h
   sem/type_conversion.cc
@@ -943,6 +945,7 @@ if(TINT_BUILD_TESTS)
     resolver/diagnostic_control_test.cc
     resolver/entry_point_validation_test.cc
     resolver/evaluation_stage_test.cc
+    resolver/expression_kind_test.cc
     resolver/f16_extension_test.cc
     resolver/function_validation_test.cc
     resolver/host_shareable_validation_test.cc
