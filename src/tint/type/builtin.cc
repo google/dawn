@@ -100,6 +100,21 @@ Builtin ParseBuiltin(std::string_view str) {
     if (str == "sampler_comparison") {
         return Builtin::kSamplerComparison;
     }
+    if (str == "texture_depth_2d") {
+        return Builtin::kTextureDepth2D;
+    }
+    if (str == "texture_depth_2d_array") {
+        return Builtin::kTextureDepth2DArray;
+    }
+    if (str == "texture_depth_cube") {
+        return Builtin::kTextureDepthCube;
+    }
+    if (str == "texture_depth_cube_array") {
+        return Builtin::kTextureDepthCubeArray;
+    }
+    if (str == "texture_depth_multisampled_2d") {
+        return Builtin::kTextureDepthMultisampled2D;
+    }
     if (str == "texture_external") {
         return Builtin::kTextureExternal;
     }
@@ -197,6 +212,16 @@ std::ostream& operator<<(std::ostream& out, Builtin value) {
             return out << "sampler";
         case Builtin::kSamplerComparison:
             return out << "sampler_comparison";
+        case Builtin::kTextureDepth2D:
+            return out << "texture_depth_2d";
+        case Builtin::kTextureDepth2DArray:
+            return out << "texture_depth_2d_array";
+        case Builtin::kTextureDepthCube:
+            return out << "texture_depth_cube";
+        case Builtin::kTextureDepthCubeArray:
+            return out << "texture_depth_cube_array";
+        case Builtin::kTextureDepthMultisampled2D:
+            return out << "texture_depth_multisampled_2d";
         case Builtin::kTextureExternal:
             return out << "texture_external";
         case Builtin::kU32:

@@ -170,6 +170,12 @@ enum builtin_type {
   // https://www.w3.org/TR/WGSL/#sampler-type
   sampler
   sampler_comparison
+  // https://www.w3.org/TR/WGSL/#texture-depth
+  texture_depth_2d
+  texture_depth_2d_array
+  texture_depth_cube
+  texture_depth_cube_array
+  texture_depth_multisampled_2d
   // https://www.w3.org/TR/WGSL/#external-texture-type
   texture_external
 }

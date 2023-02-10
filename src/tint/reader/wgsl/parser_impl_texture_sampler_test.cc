@@ -61,9 +61,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_DepthTexture) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t->Is<ast::Texture>());
-    ASSERT_TRUE(t->Is<ast::DepthTexture>());
-    EXPECT_EQ(t->As<ast::Texture>()->dim, type::TextureDimension::k2d);
+    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol),
+              "texture_depth_2d");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 }
 

@@ -38,8 +38,6 @@
 #include "src/tint/ast/const.h"
 #include "src/tint/ast/const_assert.h"
 #include "src/tint/ast/continue_statement.h"
-#include "src/tint/ast/depth_multisampled_texture.h"
-#include "src/tint/ast/depth_texture.h"
 #include "src/tint/ast/diagnostic_attribute.h"
 #include "src/tint/ast/diagnostic_control.h"
 #include "src/tint/ast/diagnostic_directive.h"
@@ -980,33 +978,50 @@ class ProgramBuilder {
         }
 
         /// @param dims the dimensionality of the texture
-        /// @returns the depth texture
-        const ast::DepthTexture* depth_texture(type::TextureDimension dims) const {
-            return builder->create<ast::DepthTexture>(dims);
+        /// @returns the depth texture typename
+        const ast::TypeName* depth_texture(type::TextureDimension dims) const {
+            return depth_texture(builder->source_, dims);
         }
 
         /// @param source the Source of the node
         /// @param dims the dimensionality of the texture
-        /// @returns the depth texture
-        const ast::DepthTexture* depth_texture(const Source& source,
-                                               type::TextureDimension dims) const {
-            return builder->create<ast::DepthTexture>(source, dims);
+        /// @returns the depth texture typename
+        const ast::TypeName* depth_texture(const Source& source,
+                                           type::TextureDimension dims) const {
+            switch (dims) {
+                case type::TextureDimension::k2d:
+                    return (*this)(source, "texture_depth_2d");
+                case type::TextureDimension::k2dArray:
+                    return (*this)(source, "texture_depth_2d_array");
+                case type::TextureDimension::kCube:
+                    return (*this)(source, "texture_depth_cube");
+                case type::TextureDimension::kCubeArray:
+                    return (*this)(source, "texture_depth_cube_array");
+                default:
+                    break;
+            }
+            TINT_ICE(ProgramBuilder, builder->Diagnostics())
+                << "invalid depth_texture dimensions: " << dims;
+            return nullptr;
         }
 
         /// @param dims the dimensionality of the texture
-        /// @returns the multisampled depth texture
-        const ast::DepthMultisampledTexture* depth_multisampled_texture(
-            type::TextureDimension dims) const {
-            return builder->create<ast::DepthMultisampledTexture>(dims);
+        /// @returns the multisampled depth texture typename
+        const ast::TypeName* depth_multisampled_texture(type::TextureDimension dims) const {
+            return depth_multisampled_texture(builder->source_, dims);
         }
 
         /// @param source the Source of the node
         /// @param dims the dimensionality of the texture
-        /// @returns the multisampled depth texture
-        const ast::DepthMultisampledTexture* depth_multisampled_texture(
-            const Source& source,
-            type::TextureDimension dims) const {
-            return builder->create<ast::DepthMultisampledTexture>(source, dims);
+        /// @returns the multisampled depth texture typename
+        const ast::TypeName* depth_multisampled_texture(const Source& source,
+                                                        type::TextureDimension dims) const {
+            if (dims == type::TextureDimension::k2d) {
+                return (*this)(source, "texture_depth_multisampled_2d");
+            }
+            TINT_ICE(ProgramBuilder, builder->Diagnostics())
+                << "invalid depth_multisampled_texture dimensions: " << dims;
+            return nullptr;
         }
 
         /// @param dims the dimensionality of the texture

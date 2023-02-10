@@ -26,7 +26,6 @@ TEST_F(AstStorageTextureTest, IsTexture) {
     Texture* ty =
         create<StorageTexture>(type::TextureDimension::k2dArray, type::TexelFormat::kRgba32Float,
                                subtype, type::Access::kRead);
-    EXPECT_FALSE(ty->Is<DepthTexture>());
     EXPECT_FALSE(ty->Is<SampledTexture>());
     EXPECT_TRUE(ty->Is<StorageTexture>());
 }

@@ -16,7 +16,6 @@
 
 #include "src/tint/ast/alias.h"
 #include "src/tint/ast/array.h"
-#include "src/tint/ast/depth_texture.h"
 #include "src/tint/ast/matrix.h"
 #include "src/tint/ast/pointer.h"
 #include "src/tint/ast/sampled_texture.h"
@@ -34,7 +33,6 @@ using AstMultisampledTextureTest = TestHelper;
 
 TEST_F(AstMultisampledTextureTest, IsTexture) {
     Texture* t = create<MultisampledTexture>(type::TextureDimension::kCube, ty.f32());
-    EXPECT_FALSE(t->Is<DepthTexture>());
     EXPECT_TRUE(t->Is<MultisampledTexture>());
     EXPECT_FALSE(t->Is<SampledTexture>());
     EXPECT_FALSE(t->Is<StorageTexture>());

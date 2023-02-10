@@ -21,7 +21,6 @@
 #include "src/tint/ast/atomic.h"
 #include "src/tint/ast/bool_literal_expression.h"
 #include "src/tint/ast/call_statement.h"
-#include "src/tint/ast/depth_texture.h"
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/internal_attribute.h"
@@ -455,14 +454,6 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
             out << "texture_";
             bool ok = Switch(
                 texture,
-                [&](const ast::DepthTexture*) {  //
-                    out << "depth_";
-                    return true;
-                },
-                [&](const ast::DepthMultisampledTexture*) {  //
-                    out << "depth_multisampled_";
-                    return true;
-                },
                 [&](const ast::SampledTexture*) {  //
                     /* nothing to emit */
                     return true;

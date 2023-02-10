@@ -124,10 +124,6 @@ list(APPEND TINT_LIB_SRCS
   ast/const_assert.h
   ast/continue_statement.cc
   ast/continue_statement.h
-  ast/depth_multisampled_texture.cc
-  ast/depth_multisampled_texture.h
-  ast/depth_texture.cc
-  ast/depth_texture.h
   ast/diagnostic_attribute.cc
   ast/diagnostic_attribute.h
   ast/diagnostic_control.cc
@@ -832,8 +828,6 @@ if(TINT_BUILD_TESTS)
     ast/compound_assignment_statement_test.cc
     ast/const_assert_test.cc
     ast/continue_statement_test.cc
-    ast/depth_multisampled_texture_test.cc
-    ast/depth_texture_test.cc
     ast/diagnostic_attribute_test.cc
     ast/diagnostic_control_test.cc
     ast/diagnostic_directive_test.cc

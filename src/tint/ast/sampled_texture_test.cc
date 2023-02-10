@@ -23,7 +23,6 @@ using AstSampledTextureTest = TestHelper;
 
 TEST_F(AstSampledTextureTest, IsTexture) {
     Texture* t = create<SampledTexture>(type::TextureDimension::kCube, ty.f32());
-    EXPECT_FALSE(t->Is<DepthTexture>());
     EXPECT_TRUE(t->Is<SampledTexture>());
     EXPECT_FALSE(t->Is<StorageTexture>());
 }

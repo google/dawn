@@ -28,7 +28,6 @@
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/continue_statement.h"
-#include "src/tint/ast/depth_texture.h"
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/for_loop_statement.h"
@@ -308,10 +307,6 @@ type::Type* Resolver::Type(const ast::Type* ty) {
                 return sem;
             }
             return nullptr;
-        },
-        [&](const ast::DepthTexture* t) { return builder_->create<type::DepthTexture>(t->dim); },
-        [&](const ast::DepthMultisampledTexture* t) {
-            return builder_->create<type::DepthMultisampledTexture>(t->dim);
         },
         [&](const ast::StorageTexture* t) -> type::StorageTexture* {
             if (auto* el = Type(t->type)) {
@@ -2527,6 +2522,16 @@ type::Type* Resolver::BuiltinType(type::Builtin builtin_ty, const ast::Identifie
             return builder_->create<type::Sampler>(type::SamplerKind::kSampler);
         case type::Builtin::kSamplerComparison:
             return builder_->create<type::Sampler>(type::SamplerKind::kComparisonSampler);
+        case type::Builtin::kTextureDepth2D:
+            return builder_->create<type::DepthTexture>(type::TextureDimension::k2d);
+        case type::Builtin::kTextureDepth2DArray:
+            return builder_->create<type::DepthTexture>(type::TextureDimension::k2dArray);
+        case type::Builtin::kTextureDepthCube:
+            return builder_->create<type::DepthTexture>(type::TextureDimension::kCube);
+        case type::Builtin::kTextureDepthCubeArray:
+            return builder_->create<type::DepthTexture>(type::TextureDimension::kCubeArray);
+        case type::Builtin::kTextureDepthMultisampled2D:
+            return builder_->create<type::DepthMultisampledTexture>(type::TextureDimension::k2d);
         case type::Builtin::kTextureExternal:
             return builder_->create<type::ExternalTexture>();
         case type::Builtin::kUndefined:

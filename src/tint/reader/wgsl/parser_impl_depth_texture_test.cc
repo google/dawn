@@ -33,9 +33,8 @@ TEST_F(ParserImplTest, DepthTextureType_2d) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t->Is<ast::Texture>());
-    ASSERT_TRUE(t->Is<ast::DepthTexture>());
-    EXPECT_EQ(t->As<ast::Texture>()->dim, type::TextureDimension::k2d);
+    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol),
+              "texture_depth_2d");
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 }
@@ -46,9 +45,8 @@ TEST_F(ParserImplTest, DepthTextureType_2dArray) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t->Is<ast::Texture>());
-    ASSERT_TRUE(t->Is<ast::DepthTexture>());
-    EXPECT_EQ(t->As<ast::Texture>()->dim, type::TextureDimension::k2dArray);
+    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol),
+              "texture_depth_2d_array");
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 23u}}));
 }
@@ -59,9 +57,8 @@ TEST_F(ParserImplTest, DepthTextureType_Cube) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t->Is<ast::Texture>());
-    ASSERT_TRUE(t->Is<ast::DepthTexture>());
-    EXPECT_EQ(t->As<ast::Texture>()->dim, type::TextureDimension::kCube);
+    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol),
+              "texture_depth_cube");
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 19u}}));
 }
@@ -72,9 +69,8 @@ TEST_F(ParserImplTest, DepthTextureType_CubeArray) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t->Is<ast::Texture>());
-    ASSERT_TRUE(t->Is<ast::DepthTexture>());
-    EXPECT_EQ(t->As<ast::Texture>()->dim, type::TextureDimension::kCubeArray);
+    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol),
+              "texture_depth_cube_array");
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 25u}}));
 }
@@ -85,9 +81,8 @@ TEST_F(ParserImplTest, DepthTextureType_Multisampled2d) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t->Is<ast::Texture>());
-    ASSERT_TRUE(t->Is<ast::DepthMultisampledTexture>());
-    EXPECT_EQ(t->As<ast::Texture>()->dim, type::TextureDimension::k2d);
+    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol),
+              "texture_depth_multisampled_2d");
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 30u}}));
 }
