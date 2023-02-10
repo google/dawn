@@ -142,6 +142,11 @@ class GeneratorImpl : public TextGenerator {
     /// @param expr the identifier expression
     /// @returns true if the identifier was emitted
     bool EmitIdentifier(std::ostream& out, const ast::IdentifierExpression* expr);
+    /// Handles generating an identifier
+    /// @param out the output of the expression stream
+    /// @param ident the identifier
+    /// @returns true if the identifier was emitted
+    bool EmitIdentifier(std::ostream& out, const ast::Identifier* ident);
     /// Handles an if statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was successfully emitted

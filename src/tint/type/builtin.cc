@@ -118,6 +118,18 @@ Builtin ParseBuiltin(std::string_view str) {
     if (str == "texture_external") {
         return Builtin::kTextureExternal;
     }
+    if (str == "texture_storage_1d") {
+        return Builtin::kTextureStorage1D;
+    }
+    if (str == "texture_storage_2d") {
+        return Builtin::kTextureStorage2D;
+    }
+    if (str == "texture_storage_2d_array") {
+        return Builtin::kTextureStorage2DArray;
+    }
+    if (str == "texture_storage_3d") {
+        return Builtin::kTextureStorage3D;
+    }
     if (str == "u32") {
         return Builtin::kU32;
     }
@@ -224,6 +236,14 @@ std::ostream& operator<<(std::ostream& out, Builtin value) {
             return out << "texture_depth_multisampled_2d";
         case Builtin::kTextureExternal:
             return out << "texture_external";
+        case Builtin::kTextureStorage1D:
+            return out << "texture_storage_1d";
+        case Builtin::kTextureStorage2D:
+            return out << "texture_storage_2d";
+        case Builtin::kTextureStorage2DArray:
+            return out << "texture_storage_2d_array";
+        case Builtin::kTextureStorage3D:
+            return out << "texture_storage_3d";
         case Builtin::kU32:
             return out << "u32";
         case Builtin::kVec2F:

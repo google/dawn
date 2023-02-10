@@ -372,8 +372,9 @@ class Validator {
 
     /// Validates a storage texture
     /// @param t the texture to validate
+    /// @param source the source of the texture
     /// @returns true on success, false otherwise
-    bool StorageTexture(const ast::StorageTexture* t) const;
+    bool StorageTexture(const type::StorageTexture* t, const Source& source) const;
 
     /// Validates a sampled texture
     /// @param t the texture to validate

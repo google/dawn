@@ -201,8 +201,6 @@ list(APPEND TINT_LIB_SRCS
   ast/stage_attribute.h
   ast/statement.cc
   ast/statement.h
-  ast/storage_texture.cc
-  ast/storage_texture.h
   ast/stride_attribute.cc
   ast/stride_attribute.h
   ast/struct_member_align_attribute.cc
@@ -856,7 +854,6 @@ if(TINT_BUILD_TESTS)
     ast/return_statement_test.cc
     ast/sampled_texture_test.cc
     ast/stage_attribute_test.cc
-    ast/storage_texture_test.cc
     ast/stride_attribute_test.cc
     ast/struct_member_align_attribute_test.cc
     ast/struct_member_offset_attribute_test.cc

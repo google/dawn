@@ -176,6 +176,11 @@ enum builtin_type {
   texture_depth_cube
   texture_depth_cube_array
   texture_depth_multisampled_2d
+  // https://www.w3.org/TR/WGSL/#texture-storage
+  texture_storage_1d
+  texture_storage_2d
+  texture_storage_2d_array
+  texture_storage_3d
   // https://www.w3.org/TR/WGSL/#external-texture-type
   texture_external
 }

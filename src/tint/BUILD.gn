@@ -301,7 +301,6 @@ libtint_source_set("libtint_syntax_tree_src") {
     "ast/sampled_texture.h",
     "ast/stage_attribute.h",
     "ast/statement.h",
-    "ast/storage_texture.h",
     "ast/stride_attribute.h",
     "ast/struct.h",
     "ast/struct_member.h",
@@ -665,8 +664,6 @@ libtint_source_set("libtint_ast_src") {
     "ast/stage_attribute.h",
     "ast/statement.cc",
     "ast/statement.h",
-    "ast/storage_texture.cc",
-    "ast/storage_texture.h",
     "ast/stride_attribute.cc",
     "ast/stride_attribute.h",
     "ast/struct.cc",
@@ -1279,6 +1276,18 @@ if (tint_build_unittests) {
     }
   }
 
+  tint_unittests_source_set("libtint_unittests_ast_helper") {
+    sources = [
+      "ast/test_helper.h",
+      "ast/test_helper_test.cc",
+    ]
+    deps = [
+      ":libtint_ast_src",
+      ":libtint_base_src",
+      ":libtint_syntax_tree_src",
+    ]
+  }
+
   tint_unittests_source_set("tint_unittests_ast_src") {
     sources = [
       "ast/alias_test.cc",
@@ -1333,7 +1342,6 @@ if (tint_build_unittests) {
       "ast/return_statement_test.cc",
       "ast/sampled_texture_test.cc",
       "ast/stage_attribute_test.cc",
-      "ast/storage_texture_test.cc",
       "ast/stride_attribute_test.cc",
       "ast/struct_member_align_attribute_test.cc",
       "ast/struct_member_offset_attribute_test.cc",
@@ -1342,8 +1350,6 @@ if (tint_build_unittests) {
       "ast/struct_test.cc",
       "ast/switch_statement_test.cc",
       "ast/templated_identifier_test.cc",
-      "ast/test_helper.h",
-      "ast/test_helper_test.cc",
       "ast/texture_test.cc",
       "ast/traverse_expressions_test.cc",
       "ast/type_name_test.cc",
@@ -1358,6 +1364,7 @@ if (tint_build_unittests) {
       ":libtint_ast_src",
       ":libtint_base_src",
       ":libtint_transform_src",
+      ":libtint_unittests_ast_helper",
     ]
 
     if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
@@ -1797,6 +1804,7 @@ if (tint_build_unittests) {
 
     deps = [
       ":libtint_base_src",
+      ":libtint_unittests_ast_helper",
       ":libtint_wgsl_reader_src",
     ]
   }
@@ -1993,6 +2001,7 @@ if (tint_build_unittests) {
 
     deps = [
       ":libtint_base_src",
+      ":libtint_unittests_ast_helper",
       ":tint_unittests_ast_src",
     ]
   }

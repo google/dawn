@@ -40,7 +40,6 @@
 #include "src/tint/ast/pointer.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/sampled_texture.h"
-#include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/traverse_expressions.h"
 #include "src/tint/ast/type_name.h"
@@ -308,21 +307,8 @@ type::Type* Resolver::Type(const ast::Type* ty) {
             }
             return nullptr;
         },
-        [&](const ast::StorageTexture* t) -> type::StorageTexture* {
-            if (auto* el = Type(t->type)) {
-                if (!validator_.StorageTexture(t)) {
-                    return nullptr;
-                }
-                return builder_->create<type::StorageTexture>(t->dim, t->format, t->access, el);
-            }
-            return nullptr;
-        },
         [&](const ast::TypeName* t) -> type::Type* {
             Mark(t->name);
-
-            if (t->name->Is<ast::TemplatedIdentifier>()) {
-                TINT_UNREACHABLE(Resolver, diagnostics_) << "TODO(crbug.com/tint/1810)";
-            }
 
             auto resolved = dependencies_.resolved_identifiers.Get(t->name);
             if (!resolved) {
@@ -338,6 +324,15 @@ type::Type* Resolver::Type(const ast::Type* ty) {
                     ErrorMismatchedResolvedIdentifier(t->source, *resolved, "type");
                     return nullptr;
                 }
+
+                if (TINT_UNLIKELY(t->name->Is<ast::TemplatedIdentifier>())) {
+                    AddError("type '" + builder_->Symbols().NameFor(t->name->symbol) +
+                                 "' does not take template arguments",
+                             t->source);
+                    NoteDeclarationSource(ast_node);
+                    return nullptr;
+                }
+
                 return type;
             }
             if (auto b = resolved->BuiltinType(); b != type::Builtin::kUndefined) {
@@ -2431,9 +2426,18 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     return call;
 }
 
-type::Type* Resolver::BuiltinType(type::Builtin builtin_ty, const ast::Identifier* ident) const {
+type::Type* Resolver::BuiltinType(type::Builtin builtin_ty, const ast::Identifier* ident) {
     auto& b = *builder_;
 
+    auto check_no_tmpl_args = [&](type::Type* ty) -> type::Type* {
+        if (TINT_UNLIKELY(ident->Is<ast::TemplatedIdentifier>())) {
+            AddError("type '" + b.Symbols().NameFor(ident->symbol) +
+                         "' does not take template arguments",
+                     ident->source);
+            return nullptr;
+        }
+        return ty;
+    };
     auto f32 = [&] { return b.create<type::F32>(); };
     auto i32 = [&] { return b.create<type::I32>(); };
     auto u32 = [&] { return b.create<type::U32>(); };
@@ -2446,94 +2450,143 @@ type::Type* Resolver::BuiltinType(type::Builtin builtin_ty, const ast::Identifie
     auto mat = [&](type::Type* el, uint32_t num_columns, uint32_t num_rows) {
         return el ? b.create<type::Matrix>(vec(el, num_rows), num_columns) : nullptr;
     };
+    auto templated_identifier = [&](size_t num_args) -> const ast::TemplatedIdentifier* {
+        auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>();
+        if (TINT_UNLIKELY(!tmpl_ident)) {
+            AddError("expected '<' for '" + b.Symbols().NameFor(ident->symbol) + "'",
+                     Source{ident->source.range.end});
+            return nullptr;
+        }
+        if (TINT_UNLIKELY(tmpl_ident->arguments.Length() != num_args)) {
+            AddError("'" + b.Symbols().NameFor(ident->symbol) + "' requires " +
+                         std::to_string(num_args) + " template arguments",
+                     ident->source);
+            return nullptr;
+        }
+        return tmpl_ident;
+    };
+    auto storage_texture = [&](type::TextureDimension dim) -> type::StorageTexture* {
+        auto* tmpl_ident = templated_identifier(2);
+        if (TINT_UNLIKELY(!tmpl_ident)) {
+            return nullptr;
+        }
+        auto* format = sem_.AsTexelFormat(Expression(tmpl_ident->arguments[0]));
+        if (TINT_UNLIKELY(!format)) {
+            return nullptr;
+        }
+        auto* access = sem_.AsAccess(Expression(tmpl_ident->arguments[1]));
+        if (TINT_UNLIKELY(!access)) {
+            return nullptr;
+        }
+        auto* subtype = type::StorageTexture::SubtypeFor(format->Value(), builder_->Types());
+        auto* tex = b.create<type::StorageTexture>(dim, format->Value(), access->Value(), subtype);
+        if (!validator_.StorageTexture(tex, ident->source)) {
+            return nullptr;
+        }
+        return tex;
+    };
 
     switch (builtin_ty) {
         case type::Builtin::kBool:
-            return b.create<type::Bool>();
+            return check_no_tmpl_args(b.create<type::Bool>());
         case type::Builtin::kI32:
-            return i32();
+            return check_no_tmpl_args(i32());
         case type::Builtin::kU32:
-            return u32();
+            return check_no_tmpl_args(u32());
         case type::Builtin::kF16:
-            return f16();
+            return check_no_tmpl_args(f16());
         case type::Builtin::kF32:
-            return b.create<type::F32>();
+            return check_no_tmpl_args(b.create<type::F32>());
         case type::Builtin::kMat2X2F:
-            return mat(f32(), 2u, 2u);
+            return check_no_tmpl_args(mat(f32(), 2u, 2u));
         case type::Builtin::kMat2X3F:
-            return mat(f32(), 2u, 3u);
+            return check_no_tmpl_args(mat(f32(), 2u, 3u));
         case type::Builtin::kMat2X4F:
-            return mat(f32(), 2u, 4u);
+            return check_no_tmpl_args(mat(f32(), 2u, 4u));
         case type::Builtin::kMat3X2F:
-            return mat(f32(), 3u, 2u);
+            return check_no_tmpl_args(mat(f32(), 3u, 2u));
         case type::Builtin::kMat3X3F:
-            return mat(f32(), 3u, 3u);
+            return check_no_tmpl_args(mat(f32(), 3u, 3u));
         case type::Builtin::kMat3X4F:
-            return mat(f32(), 3u, 4u);
+            return check_no_tmpl_args(mat(f32(), 3u, 4u));
         case type::Builtin::kMat4X2F:
-            return mat(f32(), 4u, 2u);
+            return check_no_tmpl_args(mat(f32(), 4u, 2u));
         case type::Builtin::kMat4X3F:
-            return mat(f32(), 4u, 3u);
+            return check_no_tmpl_args(mat(f32(), 4u, 3u));
         case type::Builtin::kMat4X4F:
-            return mat(f32(), 4u, 4u);
+            return check_no_tmpl_args(mat(f32(), 4u, 4u));
         case type::Builtin::kMat2X2H:
-            return mat(f16(), 2u, 2u);
+            return check_no_tmpl_args(mat(f16(), 2u, 2u));
         case type::Builtin::kMat2X3H:
-            return mat(f16(), 2u, 3u);
+            return check_no_tmpl_args(mat(f16(), 2u, 3u));
         case type::Builtin::kMat2X4H:
-            return mat(f16(), 2u, 4u);
+            return check_no_tmpl_args(mat(f16(), 2u, 4u));
         case type::Builtin::kMat3X2H:
-            return mat(f16(), 3u, 2u);
+            return check_no_tmpl_args(mat(f16(), 3u, 2u));
         case type::Builtin::kMat3X3H:
-            return mat(f16(), 3u, 3u);
+            return check_no_tmpl_args(mat(f16(), 3u, 3u));
         case type::Builtin::kMat3X4H:
-            return mat(f16(), 3u, 4u);
+            return check_no_tmpl_args(mat(f16(), 3u, 4u));
         case type::Builtin::kMat4X2H:
-            return mat(f16(), 4u, 2u);
+            return check_no_tmpl_args(mat(f16(), 4u, 2u));
         case type::Builtin::kMat4X3H:
-            return mat(f16(), 4u, 3u);
+            return check_no_tmpl_args(mat(f16(), 4u, 3u));
         case type::Builtin::kMat4X4H:
-            return mat(f16(), 4u, 4u);
+            return check_no_tmpl_args(mat(f16(), 4u, 4u));
         case type::Builtin::kVec2F:
-            return vec(f32(), 2u);
+            return check_no_tmpl_args(vec(f32(), 2u));
         case type::Builtin::kVec3F:
-            return vec(f32(), 3u);
+            return check_no_tmpl_args(vec(f32(), 3u));
         case type::Builtin::kVec4F:
-            return vec(f32(), 4u);
+            return check_no_tmpl_args(vec(f32(), 4u));
         case type::Builtin::kVec2H:
-            return vec(f16(), 2u);
+            return check_no_tmpl_args(vec(f16(), 2u));
         case type::Builtin::kVec3H:
-            return vec(f16(), 3u);
+            return check_no_tmpl_args(vec(f16(), 3u));
         case type::Builtin::kVec4H:
-            return vec(f16(), 4u);
+            return check_no_tmpl_args(vec(f16(), 4u));
         case type::Builtin::kVec2I:
-            return vec(i32(), 2u);
+            return check_no_tmpl_args(vec(i32(), 2u));
         case type::Builtin::kVec3I:
-            return vec(i32(), 3u);
+            return check_no_tmpl_args(vec(i32(), 3u));
         case type::Builtin::kVec4I:
-            return vec(i32(), 4u);
+            return check_no_tmpl_args(vec(i32(), 4u));
         case type::Builtin::kVec2U:
-            return vec(u32(), 2u);
+            return check_no_tmpl_args(vec(u32(), 2u));
         case type::Builtin::kVec3U:
-            return vec(u32(), 3u);
+            return check_no_tmpl_args(vec(u32(), 3u));
         case type::Builtin::kVec4U:
-            return vec(u32(), 4u);
+            return check_no_tmpl_args(vec(u32(), 4u));
         case type::Builtin::kSampler:
-            return builder_->create<type::Sampler>(type::SamplerKind::kSampler);
+            return check_no_tmpl_args(builder_->create<type::Sampler>(type::SamplerKind::kSampler));
         case type::Builtin::kSamplerComparison:
-            return builder_->create<type::Sampler>(type::SamplerKind::kComparisonSampler);
+            return check_no_tmpl_args(
+                builder_->create<type::Sampler>(type::SamplerKind::kComparisonSampler));
         case type::Builtin::kTextureDepth2D:
-            return builder_->create<type::DepthTexture>(type::TextureDimension::k2d);
+            return check_no_tmpl_args(
+                builder_->create<type::DepthTexture>(type::TextureDimension::k2d));
         case type::Builtin::kTextureDepth2DArray:
-            return builder_->create<type::DepthTexture>(type::TextureDimension::k2dArray);
+            return check_no_tmpl_args(
+                builder_->create<type::DepthTexture>(type::TextureDimension::k2dArray));
         case type::Builtin::kTextureDepthCube:
-            return builder_->create<type::DepthTexture>(type::TextureDimension::kCube);
+            return check_no_tmpl_args(
+                builder_->create<type::DepthTexture>(type::TextureDimension::kCube));
         case type::Builtin::kTextureDepthCubeArray:
-            return builder_->create<type::DepthTexture>(type::TextureDimension::kCubeArray);
+            return check_no_tmpl_args(
+                builder_->create<type::DepthTexture>(type::TextureDimension::kCubeArray));
         case type::Builtin::kTextureDepthMultisampled2D:
-            return builder_->create<type::DepthMultisampledTexture>(type::TextureDimension::k2d);
+            return check_no_tmpl_args(
+                builder_->create<type::DepthMultisampledTexture>(type::TextureDimension::k2d));
         case type::Builtin::kTextureExternal:
-            return builder_->create<type::ExternalTexture>();
+            return check_no_tmpl_args(builder_->create<type::ExternalTexture>());
+        case type::Builtin::kTextureStorage1D:
+            return storage_texture(type::TextureDimension::k1d);
+        case type::Builtin::kTextureStorage2D:
+            return storage_texture(type::TextureDimension::k2d);
+        case type::Builtin::kTextureStorage2DArray:
+            return storage_texture(type::TextureDimension::k2dArray);
+        case type::Builtin::kTextureStorage3D:
+            return storage_texture(type::TextureDimension::k3d);
         case type::Builtin::kUndefined:
             break;
     }
@@ -4021,19 +4074,43 @@ void Resolver::ErrorMismatchedResolvedIdentifier(const Source& source,
     AddError("cannot use " + resolved.String(builder_->Symbols(), diagnostics_) + " as " +
                  std::string(wanted),
              source);
+    NoteDeclarationSource(resolved.Node());
+}
 
+void Resolver::NoteDeclarationSource(const ast::Node* node) {
     Switch(
-        resolved.Node(),
-        [&](const ast::TypeDecl* n) {
-            AddNote("'" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+        node,
+        [&](const ast::Struct* n) {
+            AddNote("struct '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
                     n->source);
         },
-        [&](const ast::Variable* n) {
-            AddNote("'" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+        [&](const ast::Alias* n) {
+            AddNote("alias '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
                     n->source);
+        },
+        [&](const ast::Var* n) {
+            AddNote("var '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+                    n->source);
+        },
+        [&](const ast::Let* n) {
+            AddNote("let '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+                    n->source);
+        },
+        [&](const ast::Override* n) {
+            AddNote("override '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+                    n->source);
+        },
+        [&](const ast::Const* n) {
+            AddNote("const '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+                    n->source);
+        },
+        [&](const ast::Parameter* n) {
+            AddNote(
+                "parameter '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+                n->source);
         },
         [&](const ast::Function* n) {
-            AddNote("'" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+            AddNote("function '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
                     n->source);
         });
 }

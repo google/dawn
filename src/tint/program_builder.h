@@ -68,7 +68,6 @@
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/sampled_texture.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/stride_attribute.h"
 #include "src/tint/ast/struct_member_align_attribute.h"
 #include "src/tint/ast/struct_member_offset_attribute.h"
@@ -1063,25 +1062,41 @@ class ProgramBuilder {
         /// @param dims the dimensionality of the texture
         /// @param format the texel format of the texture
         /// @param access the access control of the texture
-        /// @returns the storage texture
-        const ast::StorageTexture* storage_texture(type::TextureDimension dims,
-                                                   type::TexelFormat format,
-                                                   type::Access access) const {
-            auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
-            return builder->create<ast::StorageTexture>(dims, format, subtype, access);
+        /// @returns the storage texture typename
+        const ast::TypeName* storage_texture(type::TextureDimension dims,
+                                             type::TexelFormat format,
+                                             type::Access access) const {
+            return storage_texture(builder->source_, dims, format, access);
         }
 
         /// @param source the Source of the node
         /// @param dims the dimensionality of the texture
         /// @param format the texel format of the texture
         /// @param access the access control of the texture
-        /// @returns the storage texture
-        const ast::StorageTexture* storage_texture(const Source& source,
-                                                   type::TextureDimension dims,
-                                                   type::TexelFormat format,
-                                                   type::Access access) const {
-            auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
-            return builder->create<ast::StorageTexture>(source, dims, format, subtype, access);
+        /// @returns the storage texture typename
+        const ast::TypeName* storage_texture(const Source& source,
+                                             type::TextureDimension dims,
+                                             type::TexelFormat format,
+                                             type::Access access) const {
+            switch (dims) {
+                case type::TextureDimension::k1d:
+                    return (*this)(source, "texture_storage_1d", utils::ToString(format),
+                                   utils::ToString(access));
+                case type::TextureDimension::k2d:
+                    return (*this)(source, "texture_storage_2d", utils::ToString(format),
+                                   utils::ToString(access));
+                case type::TextureDimension::k2dArray:
+                    return (*this)(source, "texture_storage_2d_array", utils::ToString(format),
+                                   utils::ToString(access));
+                case type::TextureDimension::k3d:
+                    return (*this)(source, "texture_storage_3d", utils::ToString(format),
+                                   utils::ToString(access));
+                default:
+                    break;
+            }
+            TINT_ICE(ProgramBuilder, builder->Diagnostics())
+                << "invalid sampled_texture dimensions: " << dims;
+            return nullptr;
         }
 
         /// @returns the external texture

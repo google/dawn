@@ -22,6 +22,8 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/call.h"
+#include "src/tint/sem/type_expression.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/map.h"
 
@@ -1065,13 +1067,17 @@ Transform::ApplyResult BuiltinPolyfill::Apply(const Program* src,
                         break;
                 }
             },
-            [&](const ast::StorageTexture* tex) {
-                if (polyfill.bgra8unorm && tex->format == type::TexelFormat::kBgra8Unorm) {
-                    ctx.Replace(tex, [&ctx, tex] {
-                        return ctx.dst->ty.storage_texture(tex->dim, type::TexelFormat::kRgba8Unorm,
-                                                           tex->access);
-                    });
-                    made_changes = true;
+            [&](const ast::TypeName* type_name) {
+                if (polyfill.bgra8unorm) {
+                    if (auto* tex = src->Sem().Get<type::StorageTexture>(type_name)) {
+                        if (tex->texel_format() == type::TexelFormat::kBgra8Unorm) {
+                            ctx.Replace(type_name, [&ctx, tex] {
+                                return ctx.dst->ty.storage_texture(
+                                    tex->dim(), type::TexelFormat::kRgba8Unorm, tex->access());
+                            });
+                            made_changes = true;
+                        }
+                    }
                 }
             });
     }

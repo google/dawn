@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
@@ -195,11 +196,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dRg32Float) {
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr);
 
-    ASSERT_TRUE(t->Is<ast::Texture>());
-    ASSERT_TRUE(t->Is<ast::StorageTexture>());
-    EXPECT_EQ(t->As<ast::StorageTexture>()->format, type::TexelFormat::kRg32Float);
-    EXPECT_EQ(t->As<ast::StorageTexture>()->access, type::Access::kRead);
-    EXPECT_EQ(t->As<ast::Texture>()->dim, type::TextureDimension::k1d);
+    ast::CheckIdentifier(p->builder().Symbols(), t->As<ast::TypeName>()->name,
+                         ast::Template("texture_storage_1d", "rg32float", "read"));
     EXPECT_EQ(t->source.range, (Source::Range{{1u, 1u}, {1u, 36u}}));
 }
 
@@ -211,11 +209,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR32Uint) {
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr);
 
-    ASSERT_TRUE(t->Is<ast::Texture>());
-    ASSERT_TRUE(t->Is<ast::StorageTexture>());
-    EXPECT_EQ(t->As<ast::StorageTexture>()->format, type::TexelFormat::kR32Uint);
-    EXPECT_EQ(t->As<ast::StorageTexture>()->access, type::Access::kWrite);
-    EXPECT_EQ(t->As<ast::Texture>()->dim, type::TextureDimension::k2d);
+    ast::CheckIdentifier(p->builder().Symbols(), t->As<ast::TypeName>()->name,
+                         ast::Template("texture_storage_2d", "r32uint", "write"));
     EXPECT_EQ(t->source.range, (Source::Range{{1u, 1u}, {1u, 35u}}));
 }
 

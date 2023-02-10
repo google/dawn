@@ -24,7 +24,6 @@ using AstSampledTextureTest = TestHelper;
 TEST_F(AstSampledTextureTest, IsTexture) {
     Texture* t = create<SampledTexture>(type::TextureDimension::kCube, ty.f32());
     EXPECT_TRUE(t->Is<SampledTexture>());
-    EXPECT_FALSE(t->Is<StorageTexture>());
 }
 
 TEST_F(AstSampledTextureTest, Dim) {

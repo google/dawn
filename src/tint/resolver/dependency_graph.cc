@@ -48,7 +48,6 @@
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/sampled_texture.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/stride_attribute.h"
 #include "src/tint/ast/struct.h"
 #include "src/tint/ast/struct_member_align_attribute.h"
@@ -338,31 +337,44 @@ class DependencyScanner {
         }
     }
 
-    /// Traverses the expression, performing symbol resolution and determining
-    /// global dependencies.
+    /// Traverses the expression, performing symbol resolution and determining global dependencies.
     void TraverseExpression(const ast::Expression* root) {
         if (!root) {
             return;
         }
-        ast::TraverseExpressions(root, diagnostics_, [&](const ast::Expression* expr) {
-            Switch(
-                expr,
-                [&](const ast::IdentifierExpression* ident) {
-                    AddDependency(ident->identifier, ident->identifier->symbol, "identifier",
-                                  "references");
-                },
-                [&](const ast::CallExpression* call) {
-                    if (call->target.name) {
-                        AddDependency(call->target.name, call->target.name->symbol, "function",
-                                      "calls");
-                    }
-                    if (call->target.type) {
-                        TraverseType(call->target.type);
-                    }
-                },
-                [&](const ast::BitcastExpression* cast) { TraverseType(cast->type); });
-            return ast::TraverseAction::Descend;
-        });
+        utils::Vector<const ast::Expression*, 8> pending{root};
+        while (!pending.IsEmpty()) {
+            ast::TraverseExpressions(pending.Pop(), diagnostics_, [&](const ast::Expression* expr) {
+                Switch(
+                    expr,
+                    [&](const ast::IdentifierExpression* e) {
+                        AddDependency(e->identifier, e->identifier->symbol, "identifier",
+                                      "references");
+                        if (auto* tmpl_ident = e->identifier->As<ast::TemplatedIdentifier>()) {
+                            for (auto* arg : tmpl_ident->arguments) {
+                                pending.Push(arg);
+                            }
+                        }
+                    },
+                    [&](const ast::CallExpression* call) {
+                        if (call->target.name) {
+                            AddDependency(call->target.name, call->target.name->symbol, "function",
+                                          "calls");
+                            if (auto* tmpl_ident =
+                                    call->target.name->As<ast::TemplatedIdentifier>()) {
+                                for (auto* arg : tmpl_ident->arguments) {
+                                    pending.Push(arg);
+                                }
+                            }
+                        }
+                        if (call->target.type) {
+                            TraverseType(call->target.type);
+                        }
+                    },
+                    [&](const ast::BitcastExpression* cast) { TraverseType(cast->type); });
+                return ast::TraverseAction::Descend;
+            });
+        }
     }
 
     /// Traverses the type node, performing symbol resolution and determining
@@ -388,6 +400,11 @@ class DependencyScanner {
             },
             [&](const ast::TypeName* tn) {  //
                 AddDependency(tn->name, tn->name->symbol, "type", "references");
+                if (auto* tmpl_ident = tn->name->As<ast::TemplatedIdentifier>()) {
+                    for (auto* arg : tmpl_ident->arguments) {
+                        TraverseExpression(arg);
+                    }
+                }
             },
             [&](const ast::Vector* vec) {  //
                 TraverseType(vec->type);
@@ -396,9 +413,6 @@ class DependencyScanner {
                 TraverseType(tex->type);
             },
             [&](const ast::MultisampledTexture* tex) {  //
-                TraverseType(tex->type);
-            },
-            [&](const ast::StorageTexture* tex) {  //
                 TraverseType(tex->type);
             },
             [&](Default) { UnhandledNode(diagnostics_, ty); });

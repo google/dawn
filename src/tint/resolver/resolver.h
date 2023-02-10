@@ -432,6 +432,11 @@ class Resolver {
                                            const ResolvedIdentifier& resolved,
                                            std::string_view wanted);
 
+    /// If @p node is a module-scope type, variable or function declaration, then appends a note
+    /// diagnostic where this declaration was declared, otherwise the function does nothing.
+    /// @param node the AST node.
+    void NoteDeclarationSource(const ast::Node* node);
+
     /// Adds the given error message to the diagnostics
     void AddError(const std::string& msg, const Source& source) const;
 
@@ -443,7 +448,7 @@ class Resolver {
 
     /// @returns the type::Type for the builtin type @p builtin_ty with the identifier @p ident
     /// @note: Will raise an ICE if @p symbol is not a builtin type.
-    type::Type* BuiltinType(type::Builtin builtin_ty, const ast::Identifier* ident) const;
+    type::Type* BuiltinType(type::Builtin builtin_ty, const ast::Identifier* ident);
 
     // ArrayInitializerSig represents a unique array initializer signature.
     // It is a tuple of the array type, number of arguments provided and earliest evaluation stage.

@@ -20,6 +20,7 @@
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/dependency_graph.h"
+#include "src/tint/sem/builtin_enum_expression.h"
 #include "src/tint/utils/map.h"
 
 namespace tint::resolver {
@@ -61,25 +62,46 @@ class SemHelper {
     }
 
     /// @param expr the semantic node
-    /// @returns one of:
-    /// * nullptr if @p expr is nullptr
-    /// * @p expr if the static pointer type already derives from sem::ValueExpression
-    /// * @p expr cast to sem::ValueExpression if the cast is successful
-    /// * nullptr if @p expr is not a sem::ValueExpression. In this case an error diagnostic is
-    ///   raised.
-    template <typename EXPR>
-    auto* AsValue(EXPR* expr) const {
-        if constexpr (traits::IsTypeOrDerived<EXPR, sem::ValueExpression>) {
-            return expr;
-        } else {
-            if (TINT_LIKELY(expr)) {
-                if (auto* val = expr->template As<sem::ValueExpression>(); TINT_LIKELY(val)) {
-                    return val;
-                }
-                ErrorExpectedValueExpr(expr);
+    /// @returns nullptr if @p expr is nullptr, or @p expr cast to sem::ValueExpression if the cast
+    /// is successful, otherwise an error diagnostic is raised.
+    sem::ValueExpression* AsValue(sem::Expression* expr) const {
+        if (TINT_LIKELY(expr)) {
+            if (auto* val = expr->As<sem::ValueExpression>(); TINT_LIKELY(val)) {
+                return val;
             }
-            return static_cast<sem::ValueExpression*>(nullptr);
+            ErrorExpectedValueExpr(expr);
         }
+        return nullptr;
+    }
+
+    /// @param expr the semantic node
+    /// @returns nullptr if @p expr is nullptr, or @p expr cast to
+    /// sem::BuiltinEnumExpression<type::TexelFormat> if the cast is successful, otherwise an error
+    /// diagnostic is raised.
+    sem::BuiltinEnumExpression<type::TexelFormat>* AsTexelFormat(sem::Expression* expr) const {
+        if (TINT_LIKELY(expr)) {
+            if (auto* val = expr->As<sem::BuiltinEnumExpression<type::TexelFormat>>();
+                TINT_LIKELY(val)) {
+                return val;
+            }
+            ErrorUnexpectedExprKind(expr, "texel format");
+        }
+        return nullptr;
+    }
+
+    /// @param expr the semantic node
+    /// @returns nullptr if @p expr is nullptr, or @p expr cast to
+    /// sem::BuiltinEnumExpression<type::Access> if the cast is successful, otherwise an error
+    /// diagnostic is raised.
+    sem::BuiltinEnumExpression<type::Access>* AsAccess(sem::Expression* expr) const {
+        if (TINT_LIKELY(expr)) {
+            if (auto* val = expr->As<sem::BuiltinEnumExpression<type::Access>>();
+                TINT_LIKELY(val)) {
+                return val;
+            }
+            ErrorUnexpectedExprKind(expr, "access");
+        }
+        return nullptr;
     }
 
     /// @returns the resolved type of the ast::Expression @p expr
@@ -100,6 +122,10 @@ class SemHelper {
     void ErrorExpectedValueExpr(const sem::Expression* expr) const;
 
   private:
+    /// Raises an error diagnostic that the expression @p got was not of the kind @p wanted.
+    /// @param expr the expression
+    void ErrorUnexpectedExprKind(const sem::Expression* expr, std::string_view wanted) const;
+
     /// Adds the given error message to the diagnostics
     void AddError(const std::string& msg, const Source& source) const;
 

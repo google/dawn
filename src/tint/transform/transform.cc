@@ -163,8 +163,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
         return ctx.dst->create<ast::SampledTexture>(t->dim(), CreateASTTypeFor(ctx, t->type()));
     }
     if (auto* t = ty->As<type::StorageTexture>()) {
-        return ctx.dst->create<ast::StorageTexture>(t->dim(), t->texel_format(),
-                                                    CreateASTTypeFor(ctx, t->type()), t->access());
+        return ctx.dst->ty.storage_texture(t->dim(), t->texel_format(), t->access());
     }
     if (auto* s = ty->As<type::Sampler>()) {
         return ctx.dst->ty.sampler(s->kind());

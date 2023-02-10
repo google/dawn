@@ -37,7 +37,6 @@
 #include "src/tint/ast/pointer.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/sampled_texture.h"
-#include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/traverse_expressions.h"
 #include "src/tint/ast/type_name.h"
@@ -316,28 +315,28 @@ bool Validator::Pointer(const ast::Pointer* a, const type::Pointer* s) const {
                                        a->source);
 }
 
-bool Validator::StorageTexture(const ast::StorageTexture* t) const {
-    switch (t->access) {
+bool Validator::StorageTexture(const type::StorageTexture* t, const Source& source) const {
+    switch (t->access()) {
         case type::Access::kWrite:
             break;
         case type::Access::kUndefined:
-            AddError("storage texture missing access control", t->source);
+            AddError("storage texture missing access control", source);
             return false;
         default:
-            AddError("storage textures currently only support 'write' access control", t->source);
+            AddError("storage textures currently only support 'write' access control", source);
             return false;
     }
 
-    if (!IsValidStorageTextureDimension(t->dim)) {
-        AddError("cube dimensions for storage textures are not supported", t->source);
+    if (!IsValidStorageTextureDimension(t->dim())) {
+        AddError("cube dimensions for storage textures are not supported", source);
         return false;
     }
 
-    if (!IsValidStorageTextureTexelFormat(t->format)) {
+    if (!IsValidStorageTextureTexelFormat(t->texel_format())) {
         AddError(
             "image format must be one of the texel formats specified for storage "
             "textues in https://gpuweb.github.io/gpuweb/wgsl/#texel-formats",
-            t->source);
+            source);
         return false;
     }
     return true;

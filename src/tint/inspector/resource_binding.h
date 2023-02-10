@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-#include "src/tint/ast/storage_texture.h"
+#include "src/tint/type/texel_format.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/type/type.h"
 

@@ -19,7 +19,6 @@
 #include "src/tint/ast/matrix.h"
 #include "src/tint/ast/pointer.h"
 #include "src/tint/ast/sampled_texture.h"
-#include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/struct.h"
 #include "src/tint/ast/test_helper.h"
 #include "src/tint/ast/texture.h"
@@ -35,7 +34,6 @@ TEST_F(AstMultisampledTextureTest, IsTexture) {
     Texture* t = create<MultisampledTexture>(type::TextureDimension::kCube, ty.f32());
     EXPECT_TRUE(t->Is<MultisampledTexture>());
     EXPECT_FALSE(t->Is<SampledTexture>());
-    EXPECT_FALSE(t->Is<StorageTexture>());
 }
 
 TEST_F(AstMultisampledTextureTest, Dim) {

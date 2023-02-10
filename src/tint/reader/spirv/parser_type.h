@@ -19,11 +19,12 @@
 #include <string>
 #include <vector>
 
-#include "src/tint/ast/storage_texture.h"
 #include "src/tint/castable.h"
+#include "src/tint/symbol.h"
 #include "src/tint/type/access.h"
 #include "src/tint/type/address_space.h"
 #include "src/tint/type/sampler_kind.h"
+#include "src/tint/type/texel_format.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/block_allocator.h"
 

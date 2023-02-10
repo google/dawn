@@ -32,7 +32,6 @@
 #include "src/tint/ast/pointer.h"
 #include "src/tint/ast/sampled_texture.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/stride_attribute.h"
 #include "src/tint/ast/struct_member_align_attribute.h"
 #include "src/tint/ast/struct_member_offset_attribute.h"
@@ -290,7 +289,23 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
 }
 
 bool GeneratorImpl::EmitIdentifier(std::ostream& out, const ast::IdentifierExpression* expr) {
-    out << program_->Symbols().NameFor(expr->identifier->symbol);
+    return EmitIdentifier(out, expr->identifier);
+}
+
+bool GeneratorImpl::EmitIdentifier(std::ostream& out, const ast::Identifier* ident) {
+    out << program_->Symbols().NameFor(ident->symbol);
+    if (auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>()) {
+        out << "<";
+        TINT_DEFER(out << ">");
+        for (auto* expr : tmpl_ident->arguments) {
+            if (expr != tmpl_ident->arguments.Front()) {
+                out << ", ";
+            }
+            if (!EmitExpression(out, expr)) {
+                return false;
+            }
+        }
+    }
     return true;
 }
 
@@ -462,10 +477,6 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
                     out << "multisampled_";
                     return true;
                 },
-                [&](const ast::StorageTexture*) {  //
-                    out << "storage_";
-                    return true;
-                },
                 [&](Default) {  //
                     diagnostics_.add_error(diag::System::Writer, "unknown texture type");
                     return false;
@@ -516,18 +527,6 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
                     out << ">";
                     return true;
                 },
-                [&](const ast::StorageTexture* storage) {  //
-                    out << "<";
-                    if (!EmitImageFormat(out, storage->format)) {
-                        return false;
-                    }
-                    out << ", ";
-                    if (!EmitAccess(out, storage->access)) {
-                        return false;
-                    }
-                    out << ">";
-                    return true;
-                },
                 [&](Default) {  //
                     return true;
                 });
@@ -543,10 +542,7 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
             }
             return true;
         },
-        [&](const ast::TypeName* tn) {
-            out << program_->Symbols().NameFor(tn->name->symbol);
-            return true;
-        },
+        [&](const ast::TypeName* tn) { return EmitIdentifier(out, tn->name); },
         [&](Default) {
             diagnostics_.add_error(diag::System::Writer,
                                    "unknown type in EmitType: " + std::string(ty->TypeInfo().name));
