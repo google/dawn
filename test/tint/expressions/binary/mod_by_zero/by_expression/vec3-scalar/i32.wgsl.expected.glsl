@@ -2,7 +2,12 @@
 
 ivec3 tint_mod(ivec3 lhs, int rhs) {
   ivec3 r = ivec3(rhs);
-  return (lhs % mix(r, ivec3(1), bvec3(uvec3(equal(r, ivec3(0))) | uvec3(bvec3(uvec3(equal(lhs, ivec3(-2147483648))) & uvec3(equal(r, ivec3(-1))))))));
+  ivec3 rhs_or_one = mix(r, ivec3(1), bvec3(uvec3(equal(r, ivec3(0))) | uvec3(bvec3(uvec3(equal(lhs, ivec3(-2147483648))) & uvec3(equal(r, ivec3(-1)))))));
+  if (any(notEqual((uvec3((lhs | rhs_or_one)) & uvec3(2147483648u)), uvec3(0u)))) {
+    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
+  } else {
+    return (lhs % rhs_or_one);
+  }
 }
 
 void f() {

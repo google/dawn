@@ -6,7 +6,12 @@ void unused_entry_point() {
 RWByteAddressBuffer v : register(u0, space0);
 
 int tint_mod(int lhs, int rhs) {
-  return (lhs % (((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))) ? 1 : rhs));
+  const int rhs_or_one = (((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))) ? 1 : rhs);
+  if (any(((uint((lhs | rhs_or_one)) & 2147483648u) != 0u))) {
+    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
+  } else {
+    return (lhs % rhs_or_one);
+  }
 }
 
 void foo() {

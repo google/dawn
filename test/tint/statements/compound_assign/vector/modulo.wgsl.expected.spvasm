@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 43
+; Bound: 65
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -16,6 +16,8 @@
                OpName %tint_mod "tint_mod"
                OpName %lhs "lhs"
                OpName %rhs "rhs"
+               OpName %tint_return_flag "tint_return_flag"
+               OpName %tint_return_value "tint_return_value"
                OpName %foo "foo"
                OpDecorate %v_block Block
                OpMemberDecorate %v_block 0 Offset 0
@@ -31,20 +33,28 @@
        %void = OpTypeVoid
           %7 = OpTypeFunction %void
          %11 = OpTypeFunction %v4int %v4int %v4int
-         %17 = OpConstantNull %v4int
        %bool = OpTypeBool
+%_ptr_Function_bool = OpTypePointer Function %bool
+         %19 = OpConstantNull %bool
+%_ptr_Function_v4int = OpTypePointer Function %v4int
+         %22 = OpConstantNull %v4int
      %v4bool = OpTypeVector %bool 4
 %int_n2147483648 = OpConstant %int -2147483648
-         %22 = OpConstantComposite %v4int %int_n2147483648 %int_n2147483648 %int_n2147483648 %int_n2147483648
+         %27 = OpConstantComposite %v4int %int_n2147483648 %int_n2147483648 %int_n2147483648 %int_n2147483648
      %int_n1 = OpConstant %int -1
-         %25 = OpConstantComposite %v4int %int_n1 %int_n1 %int_n1 %int_n1
+         %30 = OpConstantComposite %v4int %int_n1 %int_n1 %int_n1 %int_n1
       %int_1 = OpConstant %int 1
-         %30 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
+         %35 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
        %uint = OpTypeInt 32 0
+     %v4uint = OpTypeVector %uint 4
+%uint_2147483648 = OpConstant %uint 2147483648
+         %42 = OpConstantComposite %v4uint %uint_2147483648 %uint_2147483648 %uint_2147483648 %uint_2147483648
+         %44 = OpConstantNull %v4uint
+       %true = OpConstantTrue %bool
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_v4int = OpTypePointer StorageBuffer %v4int
       %int_2 = OpConstant %int 2
-         %41 = OpConstantComposite %v4int %int_2 %int_2 %int_2 %int_2
+         %63 = OpConstantComposite %v4int %int_2 %int_2 %int_2 %int_2
 %unused_entry_point = OpFunction %void None %7
          %10 = OpLabel
                OpReturn
@@ -53,21 +63,43 @@
         %lhs = OpFunctionParameter %v4int
         %rhs = OpFunctionParameter %v4int
          %15 = OpLabel
-         %18 = OpIEqual %v4bool %rhs %17
-         %23 = OpIEqual %v4bool %lhs %22
-         %26 = OpIEqual %v4bool %rhs %25
-         %27 = OpLogicalAnd %v4bool %23 %26
-         %28 = OpLogicalOr %v4bool %18 %27
-         %16 = OpSelect %v4int %28 %30 %rhs
-         %31 = OpSRem %v4int %lhs %16
-               OpReturnValue %31
+%tint_return_flag = OpVariable %_ptr_Function_bool Function %19
+%tint_return_value = OpVariable %_ptr_Function_v4int Function %22
+         %24 = OpIEqual %v4bool %rhs %22
+         %28 = OpIEqual %v4bool %lhs %27
+         %31 = OpIEqual %v4bool %rhs %30
+         %32 = OpLogicalAnd %v4bool %28 %31
+         %33 = OpLogicalOr %v4bool %24 %32
+         %23 = OpSelect %v4int %33 %35 %rhs
+         %40 = OpBitwiseOr %v4int %lhs %23
+         %37 = OpBitcast %v4uint %40
+         %43 = OpBitwiseAnd %v4uint %37 %42
+         %45 = OpINotEqual %v4bool %43 %44
+         %36 = OpAny %bool %45
+               OpSelectionMerge %46 None
+               OpBranchConditional %36 %47 %48
+         %47 = OpLabel
+               OpStore %tint_return_flag %true
+         %50 = OpSDiv %v4int %lhs %23
+         %51 = OpIMul %v4int %50 %23
+         %52 = OpISub %v4int %lhs %51
+               OpStore %tint_return_value %52
+               OpBranch %46
+         %48 = OpLabel
+               OpStore %tint_return_flag %true
+         %53 = OpSRem %v4int %lhs %23
+               OpStore %tint_return_value %53
+               OpBranch %46
+         %46 = OpLabel
+         %54 = OpLoad %v4int %tint_return_value
+               OpReturnValue %54
                OpFunctionEnd
         %foo = OpFunction %void None %7
-         %33 = OpLabel
-         %38 = OpAccessChain %_ptr_StorageBuffer_v4int %v %uint_0 %uint_0
-         %39 = OpLoad %v4int %38
-         %34 = OpFunctionCall %v4int %tint_mod %39 %41
-         %42 = OpAccessChain %_ptr_StorageBuffer_v4int %v %uint_0 %uint_0
-               OpStore %42 %34
+         %56 = OpLabel
+         %60 = OpAccessChain %_ptr_StorageBuffer_v4int %v %uint_0 %uint_0
+         %61 = OpLoad %v4int %60
+         %57 = OpFunctionCall %v4int %tint_mod %61 %63
+         %64 = OpAccessChain %_ptr_StorageBuffer_v4int %v %uint_0 %uint_0
+               OpStore %64 %57
                OpReturn
                OpFunctionEnd

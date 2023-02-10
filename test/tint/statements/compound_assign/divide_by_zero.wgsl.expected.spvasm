@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 62
+; Bound: 83
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -16,6 +16,8 @@
                OpName %tint_mod "tint_mod"
                OpName %lhs_0 "lhs"
                OpName %rhs_0 "rhs"
+               OpName %tint_return_flag "tint_return_flag"
+               OpName %tint_return_value "tint_return_value"
                OpName %foo "foo"
                OpName %maybe_zero "maybe_zero"
         %int = OpTypeInt 32 1
@@ -33,7 +35,14 @@
 %int_n2147483648 = OpConstant %int -2147483648
      %int_n1 = OpConstant %int -1
       %int_1 = OpConstant %int 1
-         %40 = OpTypeFunction %void %int
+%_ptr_Function_bool = OpTypePointer Function %bool
+         %35 = OpConstantNull %bool
+%_ptr_Function_int = OpTypePointer Function %int
+       %uint = OpTypeInt 32 0
+%uint_2147483648 = OpConstant %uint 2147483648
+         %50 = OpConstantNull %uint
+       %true = OpConstantTrue %bool
+         %61 = OpTypeFunction %void %int
 %unused_entry_point = OpFunction %void None %9
          %12 = OpLabel
                OpReturn
@@ -55,43 +64,64 @@
       %lhs_0 = OpFunctionParameter %int
       %rhs_0 = OpFunctionParameter %int
          %32 = OpLabel
-         %34 = OpIEqual %bool %rhs_0 %4
-         %35 = OpIEqual %bool %lhs_0 %int_n2147483648
-         %36 = OpIEqual %bool %rhs_0 %int_n1
-         %37 = OpLogicalAnd %bool %35 %36
-         %38 = OpLogicalOr %bool %34 %37
-         %33 = OpSelect %int %38 %int_1 %rhs_0
-         %39 = OpSRem %int %lhs_0 %33
-               OpReturnValue %39
+%tint_return_flag = OpVariable %_ptr_Function_bool Function %35
+%tint_return_value = OpVariable %_ptr_Function_int Function %4
+         %39 = OpIEqual %bool %rhs_0 %4
+         %40 = OpIEqual %bool %lhs_0 %int_n2147483648
+         %41 = OpIEqual %bool %rhs_0 %int_n1
+         %42 = OpLogicalAnd %bool %40 %41
+         %43 = OpLogicalOr %bool %39 %42
+         %38 = OpSelect %int %43 %int_1 %rhs_0
+         %47 = OpBitwiseOr %int %lhs_0 %38
+         %45 = OpBitcast %uint %47
+         %49 = OpBitwiseAnd %uint %45 %uint_2147483648
+         %51 = OpINotEqual %bool %49 %50
+               OpSelectionMerge %52 None
+               OpBranchConditional %51 %53 %54
+         %53 = OpLabel
+               OpStore %tint_return_flag %true
+         %56 = OpSDiv %int %lhs_0 %38
+         %57 = OpIMul %int %56 %38
+         %58 = OpISub %int %lhs_0 %57
+               OpStore %tint_return_value %58
+               OpBranch %52
+         %54 = OpLabel
+               OpStore %tint_return_flag %true
+         %59 = OpSRem %int %lhs_0 %38
+               OpStore %tint_return_value %59
+               OpBranch %52
+         %52 = OpLabel
+         %60 = OpLoad %int %tint_return_value
+               OpReturnValue %60
                OpFunctionEnd
-        %foo = OpFunction %void None %40
+        %foo = OpFunction %void None %61
  %maybe_zero = OpFunctionParameter %int
-         %43 = OpLabel
-         %45 = OpLoad %int %a
-         %44 = OpFunctionCall %int %tint_div %45 %4
-               OpStore %a %44
-         %47 = OpLoad %int %a
-         %46 = OpFunctionCall %int %tint_mod %47 %4
-               OpStore %a %46
-         %49 = OpLoad %int %a
-         %48 = OpFunctionCall %int %tint_div %49 %maybe_zero
-               OpStore %a %48
-         %51 = OpLoad %int %a
-         %50 = OpFunctionCall %int %tint_mod %51 %maybe_zero
-               OpStore %a %50
-         %52 = OpLoad %float %b
-         %53 = OpFDiv %float %52 %8
-               OpStore %b %53
-         %54 = OpLoad %float %b
-         %55 = OpFRem %float %54 %8
-               OpStore %b %55
-         %56 = OpLoad %float %b
-         %57 = OpConvertSToF %float %maybe_zero
-         %58 = OpFDiv %float %56 %57
-               OpStore %b %58
-         %59 = OpLoad %float %b
-         %60 = OpConvertSToF %float %maybe_zero
-         %61 = OpFRem %float %59 %60
-               OpStore %b %61
+         %64 = OpLabel
+         %66 = OpLoad %int %a
+         %65 = OpFunctionCall %int %tint_div %66 %4
+               OpStore %a %65
+         %68 = OpLoad %int %a
+         %67 = OpFunctionCall %int %tint_mod %68 %4
+               OpStore %a %67
+         %70 = OpLoad %int %a
+         %69 = OpFunctionCall %int %tint_div %70 %maybe_zero
+               OpStore %a %69
+         %72 = OpLoad %int %a
+         %71 = OpFunctionCall %int %tint_mod %72 %maybe_zero
+               OpStore %a %71
+         %73 = OpLoad %float %b
+         %74 = OpFDiv %float %73 %8
+               OpStore %b %74
+         %75 = OpLoad %float %b
+         %76 = OpFRem %float %75 %8
+               OpStore %b %76
+         %77 = OpLoad %float %b
+         %78 = OpConvertSToF %float %maybe_zero
+         %79 = OpFDiv %float %77 %78
+               OpStore %b %79
+         %80 = OpLoad %float %b
+         %81 = OpConvertSToF %float %maybe_zero
+         %82 = OpFRem %float %80 %81
+               OpStore %b %82
                OpReturn
                OpFunctionEnd

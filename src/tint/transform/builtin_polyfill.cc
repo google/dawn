@@ -745,18 +745,52 @@ struct BuiltinPolyfill::State {
             }
 
             auto name = b.Symbols().New(is_div ? "tint_div" : "tint_mod");
-            auto* use_one = b.Equal(rhs, ScalarOrVector(width, 0_a));
+
+            auto* rhs_is_zero = b.Equal(rhs, ScalarOrVector(width, 0_a));
+
             if (lhs_ty->is_signed_integer_scalar_or_vector()) {
                 const auto bits = lhs_el_ty->Size() * 8;
                 auto min_int = AInt(AInt::kLowestValue >> (AInt::kNumBits - bits));
                 const ast::Expression* lhs_is_min = b.Equal(lhs, ScalarOrVector(width, min_int));
                 const ast::Expression* rhs_is_minus_one = b.Equal(rhs, ScalarOrVector(width, -1_a));
-                // use_one = use_one | ((lhs == MIN_INT) & (rhs == -1))
-                use_one = b.Or(use_one, b.And(lhs_is_min, rhs_is_minus_one));
-            }
-            auto* select = b.Call("select", rhs, ScalarOrVector(width, 1_a), use_one);
+                // use_one = rhs_is_zero | ((lhs == MIN_INT) & (rhs == -1))
+                auto* use_one = b.Or(rhs_is_zero, b.And(lhs_is_min, rhs_is_minus_one));
 
-            body.Push(b.Return(is_div ? b.Div(lhs, select) : b.Mod(lhs, select)));
+                // Special handling for mod in case either operand is negative, as negative operands
+                // for % is undefined behaviour for most backends (HLSL, MSL, GLSL, SPIR-V).
+                if (!is_div) {
+                    const char* rhs_or_one = "rhs_or_one";
+                    body.Push(b.Decl(b.Let(
+                        rhs_or_one, b.Call("select", rhs, ScalarOrVector(width, 1_a), use_one))));
+
+                    // Is either operand negative?
+                    // (lhs | rhs) & (1<<31)
+                    auto sign_bit_mask = ScalarOrVector(width, u32(1 << (bits - 1)));
+                    auto* lhs_or_rhs = CastScalarOrVector<u32>(width, b.Or(lhs, rhs_or_one));
+                    auto* lhs_or_rhs_is_neg =
+                        b.NotEqual(b.And(lhs_or_rhs, sign_bit_mask), ScalarOrVector(width, 0_u));
+
+                    // lhs - trunc(lhs / rhs) * rhs (note: integral division truncates)
+                    auto* slow_mod = b.Sub(lhs, b.Mul(b.Div(lhs, rhs_or_one), rhs_or_one));
+
+                    // lhs % rhs
+                    auto* fast_mod = b.Mod(lhs, rhs_or_one);
+
+                    auto* use_slow = b.Call("any", lhs_or_rhs_is_neg);
+
+                    body.Push(b.If(use_slow, b.Block(b.Return(slow_mod)),
+                                   b.Else(b.Block(b.Return(fast_mod)))));
+
+                } else {
+                    auto* rhs_or_one = b.Call("select", rhs, ScalarOrVector(width, 1_a), use_one);
+                    body.Push(b.Return(is_div ? b.Div(lhs, rhs_or_one) : b.Mod(lhs, rhs_or_one)));
+                }
+
+            } else {
+                auto* rhs_or_one = b.Call("select", rhs, ScalarOrVector(width, 1_a), rhs_is_zero);
+                body.Push(b.Return(is_div ? b.Div(lhs, rhs_or_one) : b.Mod(lhs, rhs_or_one)));
+            }
+
             b.Func(name,
                    utils::Vector{
                        b.Param("lhs", T(lhs_ty)),
@@ -807,6 +841,14 @@ struct BuiltinPolyfill::State {
             return b.Expr(value);
         }
         return b.Call(b.ty.vec<T>(width), value);
+    }
+
+    template <typename To>
+    const ast::Expression* CastScalarOrVector(uint32_t width, const ast::Expression* e) {
+        if (width == 1) {
+            return b.Call(b.ty.Of<To>(), e);
+        }
+        return b.Call(b.ty.vec<To>(width), e);
     }
 };
 

@@ -14,7 +14,12 @@ layout(binding = 0, std430) buffer v_block_ssbo {
 
 ivec4 tint_mod(ivec4 lhs, int rhs) {
   ivec4 r = ivec4(rhs);
-  return (lhs % mix(r, ivec4(1), bvec4(uvec4(equal(r, ivec4(0))) | uvec4(bvec4(uvec4(equal(lhs, ivec4(-2147483648))) & uvec4(equal(r, ivec4(-1))))))));
+  ivec4 rhs_or_one = mix(r, ivec4(1), bvec4(uvec4(equal(r, ivec4(0))) | uvec4(bvec4(uvec4(equal(lhs, ivec4(-2147483648))) & uvec4(equal(r, ivec4(-1)))))));
+  if (any(notEqual((uvec4((lhs | rhs_or_one)) & uvec4(2147483648u)), uvec4(0u)))) {
+    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
+  } else {
+    return (lhs % rhs_or_one);
+  }
 }
 
 void foo() {

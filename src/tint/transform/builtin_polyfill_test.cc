@@ -2073,7 +2073,12 @@ fn f() {
 
     auto* expect = R"(
 fn tint_mod(lhs : i32, rhs : i32) -> i32 {
-  return (lhs % select(rhs, 1, ((rhs == 0) | ((lhs == -2147483648) & (rhs == -1)))));
+  let rhs_or_one = select(rhs, 1, ((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))));
+  if (any(((u32((lhs | rhs_or_one)) & 2147483648u) != 0u))) {
+    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
+  } else {
+    return (lhs % rhs_or_one);
+  }
 }
 
 fn f() {
@@ -2121,7 +2126,12 @@ fn f() {
 
     auto* expect = R"(
 fn tint_mod(lhs : i32, rhs : i32) -> i32 {
-  return (lhs % select(rhs, 1, ((rhs == 0) | ((lhs == -2147483648) & (rhs == -1)))));
+  let rhs_or_one = select(rhs, 1, ((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))));
+  if (any(((u32((lhs | rhs_or_one)) & 2147483648u) != 0u))) {
+    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
+  } else {
+    return (lhs % rhs_or_one);
+  }
 }
 
 fn f() {
@@ -2169,7 +2179,12 @@ fn f() {
 
     auto* expect = R"(
 fn tint_mod(lhs : i32, rhs : i32) -> i32 {
-  return (lhs % select(rhs, 1, ((rhs == 0) | ((lhs == -2147483648) & (rhs == -1)))));
+  let rhs_or_one = select(rhs, 1, ((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))));
+  if (any(((u32((lhs | rhs_or_one)) & 2147483648u) != 0u))) {
+    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
+  } else {
+    return (lhs % rhs_or_one);
+  }
 }
 
 fn f() {
@@ -2363,7 +2378,12 @@ fn f() {
     auto* expect = R"(
 fn tint_mod(lhs : vec3<i32>, rhs : i32) -> vec3<i32> {
   let r = vec3<i32>(rhs);
-  return (lhs % select(r, vec3(1), ((r == vec3(0)) | ((lhs == vec3(-2147483648)) & (r == vec3(-1))))));
+  let rhs_or_one = select(r, vec3(1), ((r == vec3(0)) | ((lhs == vec3(-2147483648)) & (r == vec3(-1)))));
+  if (any(((vec3<u32>((lhs | rhs_or_one)) & vec3<u32>(2147483648u)) != vec3<u32>(0u)))) {
+    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
+  } else {
+    return (lhs % rhs_or_one);
+  }
 }
 
 fn f() {
@@ -2413,7 +2433,12 @@ fn f() {
     auto* expect = R"(
 fn tint_mod(lhs : vec3<i32>, rhs : i32) -> vec3<i32> {
   let r = vec3<i32>(rhs);
-  return (lhs % select(r, vec3(1), ((r == vec3(0)) | ((lhs == vec3(-2147483648)) & (r == vec3(-1))))));
+  let rhs_or_one = select(r, vec3(1), ((r == vec3(0)) | ((lhs == vec3(-2147483648)) & (r == vec3(-1)))));
+  if (any(((vec3<u32>((lhs | rhs_or_one)) & vec3<u32>(2147483648u)) != vec3<u32>(0u)))) {
+    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
+  } else {
+    return (lhs % rhs_or_one);
+  }
 }
 
 fn f() {
@@ -2463,7 +2488,12 @@ fn f() {
     auto* expect = R"(
 fn tint_mod(lhs : vec3<i32>, rhs : i32) -> vec3<i32> {
   let r = vec3<i32>(rhs);
-  return (lhs % select(r, vec3(1), ((r == vec3(0)) | ((lhs == vec3(-2147483648)) & (r == vec3(-1))))));
+  let rhs_or_one = select(r, vec3(1), ((r == vec3(0)) | ((lhs == vec3(-2147483648)) & (r == vec3(-1)))));
+  if (any(((vec3<u32>((lhs | rhs_or_one)) & vec3<u32>(2147483648u)) != vec3<u32>(0u)))) {
+    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
+  } else {
+    return (lhs % rhs_or_one);
+  }
 }
 
 fn f() {
@@ -2563,7 +2593,12 @@ fn f() {
     auto* expect = R"(
 fn tint_mod(lhs : i32, rhs : vec3<i32>) -> vec3<i32> {
   let l = vec3<i32>(lhs);
-  return (l % select(rhs, vec3(1), ((rhs == vec3(0)) | ((l == vec3(-2147483648)) & (rhs == vec3(-1))))));
+  let rhs_or_one = select(rhs, vec3(1), ((rhs == vec3(0)) | ((l == vec3(-2147483648)) & (rhs == vec3(-1)))));
+  if (any(((vec3<u32>((l | rhs_or_one)) & vec3<u32>(2147483648u)) != vec3<u32>(0u)))) {
+    return (l - ((l / rhs_or_one) * rhs_or_one));
+  } else {
+    return (l % rhs_or_one);
+  }
 }
 
 fn f() {
@@ -2613,7 +2648,12 @@ fn f() {
     auto* expect = R"(
 fn tint_mod(lhs : i32, rhs : vec3<i32>) -> vec3<i32> {
   let l = vec3<i32>(lhs);
-  return (l % select(rhs, vec3(1), ((rhs == vec3(0)) | ((l == vec3(-2147483648)) & (rhs == vec3(-1))))));
+  let rhs_or_one = select(rhs, vec3(1), ((rhs == vec3(0)) | ((l == vec3(-2147483648)) & (rhs == vec3(-1)))));
+  if (any(((vec3<u32>((l | rhs_or_one)) & vec3<u32>(2147483648u)) != vec3<u32>(0u)))) {
+    return (l - ((l / rhs_or_one) * rhs_or_one));
+  } else {
+    return (l % rhs_or_one);
+  }
 }
 
 fn f() {
@@ -2711,7 +2751,12 @@ fn f() {
 
     auto* expect = R"(
 fn tint_mod(lhs : vec3<i32>, rhs : vec3<i32>) -> vec3<i32> {
-  return (lhs % select(rhs, vec3(1), ((rhs == vec3(0)) | ((lhs == vec3(-2147483648)) & (rhs == vec3(-1))))));
+  let rhs_or_one = select(rhs, vec3(1), ((rhs == vec3(0)) | ((lhs == vec3(-2147483648)) & (rhs == vec3(-1)))));
+  if (any(((vec3<u32>((lhs | rhs_or_one)) & vec3<u32>(2147483648u)) != vec3<u32>(0u)))) {
+    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
+  } else {
+    return (lhs % rhs_or_one);
+  }
 }
 
 fn f() {
