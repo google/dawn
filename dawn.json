@@ -1971,7 +1971,6 @@
             {"name": "resolve target", "type": "texture view", "optional": true},
             {"name": "load op", "type": "load op"},
             {"name": "store op", "type": "store op"},
-            {"name": "clear color", "type": "color", "default": "{ NAN, NAN, NAN, NAN }", "tags": ["deprecated"]},
             {"name": "clear value", "type": "color"}
         ]
     },
@@ -1982,12 +1981,10 @@
             {"name": "view", "type": "texture view"},
             {"name": "depth load op", "type": "load op", "default": "undefined"},
             {"name": "depth store op", "type": "store op", "default": "undefined"},
-            {"name": "clear depth", "type": "float", "default": "NAN", "tags": ["deprecated"]},
             {"name": "depth clear value", "type": "float", "default": "0"},
             {"name": "depth read only", "type": "bool", "default": "false"},
             {"name": "stencil load op", "type": "load op", "default": "undefined"},
             {"name": "stencil store op", "type": "store op", "default": "undefined"},
-            {"name": "clear stencil", "type": "uint32_t", "default": "0", "tags": ["deprecated"]},
             {"name": "stencil clear value", "type": "uint32_t", "default": "0"},
             {"name": "stencil read only", "type": "bool", "default": "false"}
         ]
