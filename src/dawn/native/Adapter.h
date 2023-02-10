@@ -82,14 +82,17 @@ class AdapterBase : public RefCounted {
     // validation error if proper toggles are not enabled/disabled.
     FeaturesSet mSupportedFeatures;
     // Check if a feature os supported by this adapter AND suitable with given toggles.
-    MaybeError ValidateFeatureSupportedWithToggles(
-        wgpu::FeatureName feature,
-        const TripleStateTogglesSet& userProvidedToggles);
+    // TODO(dawn:1495): After implementing adapter toggles, remove this and use adapter toggles
+    // instead of device toggles to validate supported features.
+    MaybeError ValidateFeatureSupportedWithDeviceToggles(wgpu::FeatureName feature,
+                                                         const TogglesState& deviceTogglesState);
 
   private:
-    virtual ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
-        const DeviceDescriptor* descriptor,
-        const TripleStateTogglesSet& userProvidedToggles) = 0;
+    // Backend-specific force-setting and defaulting device toggles
+    virtual void SetupBackendDeviceToggles(TogglesState* deviceToggles) const = 0;
+
+    virtual ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(const DeviceDescriptor* descriptor,
+                                                            const TogglesState& deviceToggles) = 0;
 
     virtual MaybeError InitializeImpl() = 0;
 
@@ -101,9 +104,9 @@ class AdapterBase : public RefCounted {
 
     virtual void InitializeVendorArchitectureImpl();
 
-    virtual MaybeError ValidateFeatureSupportedWithTogglesImpl(
+    virtual MaybeError ValidateFeatureSupportedWithDeviceTogglesImpl(
         wgpu::FeatureName feature,
-        const TripleStateTogglesSet& userProvidedToggles) = 0;
+        const TogglesState& deviceTogglesState) = 0;
 
     ResultOrError<Ref<DeviceBase>> CreateDeviceInternal(const DeviceDescriptor* descriptor);
 

@@ -152,20 +152,76 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     return {};
 }
 
-ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(
-    const DeviceDescriptor* descriptor,
-    const TripleStateTogglesSet& userProvidedToggles) {
+void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
+    const OpenGLFunctions& gl = mFunctions;
+
+    bool supportsBaseVertex = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(3, 2);
+
+    bool supportsBaseInstance = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(4, 2);
+
+    // TODO(crbug.com/dawn/582): Use OES_draw_buffers_indexed where available.
+    bool supportsIndexedDrawBuffers = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(3, 0);
+
+    bool supportsSnormRead =
+        gl.IsAtLeastGL(4, 4) || gl.IsGLExtensionSupported("GL_EXT_render_snorm");
+
+    bool supportsDepthRead = gl.IsAtLeastGL(3, 0) || gl.IsGLExtensionSupported("GL_NV_read_depth");
+
+    bool supportsStencilRead =
+        gl.IsAtLeastGL(3, 0) || gl.IsGLExtensionSupported("GL_NV_read_stencil");
+
+    bool supportsDepthStencilRead =
+        gl.IsAtLeastGL(3, 0) || gl.IsGLExtensionSupported("GL_NV_read_depth_stencil");
+
+    // Desktop GL supports BGRA textures via swizzling in the driver; ES requires an extension.
+    bool supportsBGRARead =
+        gl.GetVersion().IsDesktop() || gl.IsGLExtensionSupported("GL_EXT_read_format_bgra");
+
+    bool supportsSampleVariables = gl.IsAtLeastGL(4, 0) || gl.IsAtLeastGLES(3, 2) ||
+                                   gl.IsGLExtensionSupported("GL_OES_sample_variables");
+
+    // TODO(crbug.com/dawn/343): We can support the extension variants, but need to load the EXT
+    // procs without the extension suffix.
+    // We'll also need emulation of shader builtins gl_BaseVertex and gl_BaseInstance.
+
+    // supportsBaseVertex |=
+    //     (gl.IsAtLeastGLES(2, 0) &&
+    //      (gl.IsGLExtensionSupported("OES_draw_elements_base_vertex") ||
+    //       gl.IsGLExtensionSupported("EXT_draw_elements_base_vertex"))) ||
+    //     (gl.IsAtLeastGL(3, 1) && gl.IsGLExtensionSupported("ARB_draw_elements_base_vertex"));
+
+    // supportsBaseInstance |=
+    //     (gl.IsAtLeastGLES(3, 1) && gl.IsGLExtensionSupported("EXT_base_instance")) ||
+    //     (gl.IsAtLeastGL(3, 1) && gl.IsGLExtensionSupported("ARB_base_instance"));
+
+    // TODO(crbug.com/dawn/343): Investigate emulation.
+    deviceToggles->Default(Toggle::DisableBaseVertex, !supportsBaseVertex);
+    deviceToggles->Default(Toggle::DisableBaseInstance, !supportsBaseInstance);
+    deviceToggles->Default(Toggle::DisableIndexedDrawBuffers, !supportsIndexedDrawBuffers);
+    deviceToggles->Default(Toggle::DisableSnormRead, !supportsSnormRead);
+    deviceToggles->Default(Toggle::DisableDepthRead, !supportsDepthRead);
+    deviceToggles->Default(Toggle::DisableStencilRead, !supportsStencilRead);
+    deviceToggles->Default(Toggle::DisableDepthStencilRead, !supportsDepthStencilRead);
+    deviceToggles->Default(Toggle::DisableBGRARead, !supportsBGRARead);
+    deviceToggles->Default(Toggle::DisableSampleVariables, !supportsSampleVariables);
+    deviceToggles->Default(Toggle::FlushBeforeClientWaitSync, gl.GetVersion().IsES());
+    // For OpenGL ES, we must use a placeholder fragment shader for vertex-only render pipeline.
+    deviceToggles->Default(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline,
+                           gl.GetVersion().IsES());
+}
+
+ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor,
+                                                         const TogglesState& deviceToggles) {
     EGLenum api =
         GetBackendType() == wgpu::BackendType::OpenGL ? EGL_OPENGL_API : EGL_OPENGL_ES_API;
     std::unique_ptr<Device::Context> context;
     DAWN_TRY_ASSIGN(context, ContextEGL::Create(mEGLFunctions, api));
-    return Device::Create(this, descriptor, mFunctions, std::move(context), userProvidedToggles);
+    return Device::Create(this, descriptor, mFunctions, std::move(context), deviceToggles);
 }
 
-MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(
+MaybeError Adapter::ValidateFeatureSupportedWithDeviceTogglesImpl(
     wgpu::FeatureName feature,
-    const TripleStateTogglesSet& userProvidedToggles) {
+    const TogglesState& deviceToggles) {
     return {};
 }
-
 }  // namespace dawn::native::opengl

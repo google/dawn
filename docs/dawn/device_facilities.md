@@ -63,23 +63,23 @@ bool useRenderPass = device->IsToggleEnabled(Toggle::UseD3D12RenderPass);
 ```
 
 Toggles are defined in a table in [Toggles.cpp](../src/dawn/native/Toggles.cpp) that also includes their name and description.
-The name can be used to force enabling of a toggle or, at the contrary, force the disabling of a toogle.
+The name can be used to require enabling of a toggle or, at the contrary, require the disabling of a toogle.
 This is particularly useful in tests so that the two sides of a code path can be tested (for example using D3D12 render passes and not).
 
-Here's an example of a test that is run in the D3D12 backend both with the D3D12 render passes forcibly disabled, and in the default configuration.
+Here's an example of a test that is run in the D3D12 backend both with the D3D12 render passes required to be disabled, and in the default configuration.
 ```
 DAWN_INSTANTIATE_TEST(RenderPassTest,
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_render_pass"}));
-// The {} is the list of force enabled toggles, {"..."} the force disabled ones.
+// The {} is the list of required enabled toggles, {"..."} the required disabled ones.
 ```
 
-The initialization order of toggles looks as follows:
+The toggles state of a device is decided by the adapter when creating it. The steps of device toggles state decision looks as follows:
 
- - The toggles overrides from the device descriptor are applied.
- - The frontend device default toggles are applied (unless already overriden).
- - The backend device default toggles are applied (unless already overriden) using `DeviceBase::SetToggle`
- - The backend device can ignore overriden toggles if it can't support them by using `DeviceBase::ForceSetToggle`
+ - The device toggles state initialized to required device toggles from the DawnTogglesDescriptor chained in device descriptor.
+ - The frontend (i.e. not backend-specific) default toggles are set (unless already required) using `TogglesState::Default`.
+ - Any backend device toggle that not supported is forced set to a proper state in `Adapter::SetupBackendDeviceToggles` using `TogglesState::ForceSet`.
+ - The backend device default toggles are applied (unless already set) in `Adapter::SetupBackendDeviceToggles` using `TogglesState::Default`.
 
 Forcing toggles should only be done when there is no "safe" option for the toggle.
 This is to avoid crashes during testing when the tests try to use both sides of a toggle.

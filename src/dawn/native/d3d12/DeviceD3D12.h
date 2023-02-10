@@ -48,7 +48,7 @@ class Device final : public DeviceBase {
   public:
     static ResultOrError<Ref<Device>> Create(Adapter* adapter,
                                              const DeviceDescriptor* descriptor,
-                                             const TripleStateTogglesSet& userProvidedToggles);
+                                             const TogglesState& deviceToggles);
     ~Device() override;
 
     MaybeError Initialize(const DeviceDescriptor* descriptor);
@@ -150,8 +150,6 @@ class Device final : public DeviceBase {
 
     ComPtr<ID3D11On12Device> GetOrCreateD3D11on12Device();
 
-    void InitTogglesFromDriver();
-
     uint32_t GetOptimalBytesPerRowAlignment() const override;
     uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
 
@@ -216,7 +214,7 @@ class Device final : public DeviceBase {
     MaybeError CheckDebugLayerAndGenerateErrors();
     void AppendDebugLayerMessages(ErrorData* error) override;
 
-    MaybeError ApplyUseDxcToggle();
+    MaybeError EnsureDXCIfRequired();
 
     MaybeError CreateZeroBuffer();
 

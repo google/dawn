@@ -108,9 +108,9 @@ ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           const DeviceDescriptor* descriptor,
                                           const OpenGLFunctions& functions,
                                           std::unique_ptr<Context> context,
-                                          const TripleStateTogglesSet& userProvidedToggles) {
-    Ref<Device> device = AcquireRef(
-        new Device(adapter, descriptor, functions, std::move(context), userProvidedToggles));
+                                          const TogglesState& deviceToggles) {
+    Ref<Device> device =
+        AcquireRef(new Device(adapter, descriptor, functions, std::move(context), deviceToggles));
     DAWN_TRY(device->Initialize(descriptor));
     return device;
 }
@@ -119,8 +119,8 @@ Device::Device(AdapterBase* adapter,
                const DeviceDescriptor* descriptor,
                const OpenGLFunctions& functions,
                std::unique_ptr<Context> context,
-               const TripleStateTogglesSet& userProvidedToggles)
-    : DeviceBase(adapter, descriptor, userProvidedToggles),
+               const TogglesState& deviceToggles)
+    : DeviceBase(adapter, descriptor, deviceToggles),
       mGL(functions),
       mContext(std::move(context)) {}
 
@@ -130,7 +130,7 @@ Device::~Device() {
 
 MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     const OpenGLFunctions& gl = GetGL();
-    InitTogglesFromDriver();
+
     mFormatTable = BuildGLFormatTable(GetBGRAInternalFormat());
 
     // Use the debug output functionality to get notified about GL errors
@@ -175,62 +175,6 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     gl.Enable(GL_SAMPLE_MASK);
 
     return DeviceBase::Initialize(AcquireRef(new Queue(this, &descriptor->defaultQueue)));
-}
-
-void Device::InitTogglesFromDriver() {
-    const OpenGLFunctions& gl = GetGL();
-    bool supportsBaseVertex = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(3, 2);
-
-    bool supportsBaseInstance = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(4, 2);
-
-    // TODO(crbug.com/dawn/582): Use OES_draw_buffers_indexed where available.
-    bool supportsIndexedDrawBuffers = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(3, 0);
-
-    bool supportsSnormRead =
-        gl.IsAtLeastGL(4, 4) || gl.IsGLExtensionSupported("GL_EXT_render_snorm");
-
-    bool supportsDepthRead = gl.IsAtLeastGL(3, 0) || gl.IsGLExtensionSupported("GL_NV_read_depth");
-
-    bool supportsStencilRead =
-        gl.IsAtLeastGL(3, 0) || gl.IsGLExtensionSupported("GL_NV_read_stencil");
-
-    bool supportsDepthStencilRead =
-        gl.IsAtLeastGL(3, 0) || gl.IsGLExtensionSupported("GL_NV_read_depth_stencil");
-
-    // Desktop GL supports BGRA textures via swizzling in the driver; ES requires an extension.
-    bool supportsBGRARead =
-        gl.GetVersion().IsDesktop() || gl.IsGLExtensionSupported("GL_EXT_read_format_bgra");
-
-    bool supportsSampleVariables = gl.IsAtLeastGL(4, 0) || gl.IsAtLeastGLES(3, 2) ||
-                                   gl.IsGLExtensionSupported("GL_OES_sample_variables");
-
-    // TODO(crbug.com/dawn/343): We can support the extension variants, but need to load the EXT
-    // procs without the extension suffix.
-    // We'll also need emulation of shader builtins gl_BaseVertex and gl_BaseInstance.
-
-    // supportsBaseVertex |=
-    //     (gl.IsAtLeastGLES(2, 0) &&
-    //      (gl.IsGLExtensionSupported("OES_draw_elements_base_vertex") ||
-    //       gl.IsGLExtensionSupported("EXT_draw_elements_base_vertex"))) ||
-    //     (gl.IsAtLeastGL(3, 1) && gl.IsGLExtensionSupported("ARB_draw_elements_base_vertex"));
-
-    // supportsBaseInstance |=
-    //     (gl.IsAtLeastGLES(3, 1) && gl.IsGLExtensionSupported("EXT_base_instance")) ||
-    //     (gl.IsAtLeastGL(3, 1) && gl.IsGLExtensionSupported("ARB_base_instance"));
-
-    // TODO(crbug.com/dawn/343): Investigate emulation.
-    SetToggle(Toggle::DisableBaseVertex, !supportsBaseVertex);
-    SetToggle(Toggle::DisableBaseInstance, !supportsBaseInstance);
-    SetToggle(Toggle::DisableIndexedDrawBuffers, !supportsIndexedDrawBuffers);
-    SetToggle(Toggle::DisableSnormRead, !supportsSnormRead);
-    SetToggle(Toggle::DisableDepthRead, !supportsDepthRead);
-    SetToggle(Toggle::DisableStencilRead, !supportsStencilRead);
-    SetToggle(Toggle::DisableDepthStencilRead, !supportsDepthStencilRead);
-    SetToggle(Toggle::DisableBGRARead, !supportsBGRARead);
-    SetToggle(Toggle::DisableSampleVariables, !supportsSampleVariables);
-    SetToggle(Toggle::FlushBeforeClientWaitSync, gl.GetVersion().IsES());
-    // For OpenGL ES, we must use a placeholder fragment shader for vertex-only render pipeline.
-    SetToggle(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline, gl.GetVersion().IsES());
 }
 
 const GLFormat& Device::GetGLFormat(const Format& format) {

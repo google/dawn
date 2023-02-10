@@ -44,7 +44,7 @@ class Device final : public DeviceBase {
                                              const DeviceDescriptor* descriptor,
                                              const OpenGLFunctions& functions,
                                              std::unique_ptr<Context> context,
-                                             const TripleStateTogglesSet& userProvidedToggles);
+                                             const TogglesState& deviceToggles);
     ~Device() override;
 
     MaybeError Initialize(const DeviceDescriptor* descriptor);
@@ -95,7 +95,7 @@ class Device final : public DeviceBase {
            const DeviceDescriptor* descriptor,
            const OpenGLFunctions& functions,
            std::unique_ptr<Context> context,
-           const TripleStateTogglesSet& userProvidedToggles);
+           const TogglesState& deviceToggless);
 
     ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
         const BindGroupDescriptor* descriptor) override;
@@ -127,7 +127,6 @@ class Device final : public DeviceBase {
     Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) override;
 
-    void InitTogglesFromDriver();
     GLenum GetBGRAInternalFormat() const;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void DestroyImpl() override;

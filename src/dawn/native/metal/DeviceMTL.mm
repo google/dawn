@@ -107,9 +107,9 @@ void API_AVAILABLE(macos(10.15), ios(14)) UpdateTimestampPeriod(id<MTLDevice> de
 ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           NSPRef<id<MTLDevice>> mtlDevice,
                                           const DeviceDescriptor* descriptor,
-                                          const TripleStateTogglesSet& userProvidedToggles) {
+                                          const TogglesState& deviceToggles) {
     Ref<Device> device =
-        AcquireRef(new Device(adapter, std::move(mtlDevice), descriptor, userProvidedToggles));
+        AcquireRef(new Device(adapter, std::move(mtlDevice), descriptor, deviceToggles));
     DAWN_TRY(device->Initialize(descriptor));
     return device;
 }
@@ -117,8 +117,8 @@ ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
 Device::Device(AdapterBase* adapter,
                NSPRef<id<MTLDevice>> mtlDevice,
                const DeviceDescriptor* descriptor,
-               const TripleStateTogglesSet& userProvidedToggles)
-    : DeviceBase(adapter, descriptor, userProvidedToggles),
+               const TogglesState& deviceToggles)
+    : DeviceBase(adapter, descriptor, deviceToggles),
       mMtlDevice(std::move(mtlDevice)),
       mCompletedSerial(0) {
     // On macOS < 11.0, we only can check whether counter sampling is supported, and the counter
@@ -138,8 +138,6 @@ Device::~Device() {
 }
 
 MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
-    InitTogglesFromDriver();
-
     mCommandQueue.Acquire([*mMtlDevice newCommandQueue]);
     if (mCommandQueue == nil) {
         return DAWN_INTERNAL_ERROR("Failed to allocate MTLCommandQueue.");
@@ -172,131 +170,6 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     }
 
     return DeviceBase::Initialize(AcquireRef(new Queue(this, &descriptor->defaultQueue)));
-}
-
-void Device::InitTogglesFromDriver() {
-    {
-        bool haveStoreAndMSAAResolve = false;
-#if DAWN_PLATFORM_IS(MACOS)
-        if (@available(macOS 10.12, *)) {
-            haveStoreAndMSAAResolve =
-                [*mMtlDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v2];
-        }
-#elif DAWN_PLATFORM_IS(IOS)
-        haveStoreAndMSAAResolve = [*mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v2];
-#endif
-        // On tvOS, we would need MTLFeatureSet_tvOS_GPUFamily2_v1.
-        SetToggle(Toggle::EmulateStoreAndMSAAResolve, !haveStoreAndMSAAResolve);
-
-        bool haveSamplerCompare = true;
-#if DAWN_PLATFORM_IS(IOS)
-        haveSamplerCompare = [*mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v1];
-#endif
-        // TODO(crbug.com/dawn/342): Investigate emulation -- possibly expensive.
-        SetToggle(Toggle::MetalDisableSamplerCompare, !haveSamplerCompare);
-
-        bool haveBaseVertexBaseInstance = true;
-#if DAWN_PLATFORM_IS(IOS)
-        haveBaseVertexBaseInstance =
-            [*mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v1];
-#endif
-        // TODO(crbug.com/dawn/343): Investigate emulation.
-        SetToggle(Toggle::DisableBaseVertex, !haveBaseVertexBaseInstance);
-        SetToggle(Toggle::DisableBaseInstance, !haveBaseVertexBaseInstance);
-    }
-
-    // Vertex buffer robustness is implemented by using programmable vertex pulling. Enable
-    // that code path if it isn't explicitly disabled.
-    if (IsRobustnessEnabled()) {
-        SetToggle(Toggle::MetalEnableVertexPulling, true);
-    }
-
-    // TODO(crbug.com/dawn/846): tighten this workaround when the driver bug is fixed.
-    SetToggle(Toggle::AlwaysResolveIntoZeroLevelAndLayer, true);
-
-    uint32_t deviceId = GetAdapter()->GetDeviceId();
-    uint32_t vendorId = GetAdapter()->GetVendorId();
-
-    // TODO(crbug.com/dawn/847): Use MTLStorageModeShared instead of MTLStorageModePrivate when
-    // creating MTLCounterSampleBuffer in QuerySet on Intel platforms, otherwise it fails to
-    // create the buffer. Change to use MTLStorageModePrivate when the bug is fixed.
-    if (@available(macOS 10.15, iOS 14.0, *)) {
-        bool useSharedMode = gpu_info::IsIntel(vendorId);
-        SetToggle(Toggle::MetalUseSharedModeForCounterSampleBuffer, useSharedMode);
-    }
-
-    // Rendering R8Unorm and RG8Unorm to small mip doesn't work properly on Intel.
-    // TODO(crbug.com/dawn/1071): Tighten the workaround when this issue is fixed.
-    if (gpu_info::IsIntel(vendorId)) {
-        SetToggle(Toggle::MetalRenderR8RG8UnormSmallMipToTempTexture, true);
-    }
-
-    // On some Intel GPUs vertex only render pipeline get wrong depth result if no fragment
-    // shader provided. Create a placeholder fragment shader module to work around this issue.
-    if (gpu_info::IsIntel(vendorId)) {
-        bool usePlaceholderFragmentShader = true;
-        if (gpu_info::IsSkylake(deviceId)) {
-            usePlaceholderFragmentShader = false;
-        }
-        SetToggle(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline, usePlaceholderFragmentShader);
-    }
-
-    // On some Intel GPUs using big integer values as clear values in render pass doesn't work
-    // correctly. Currently we have to add workaround for this issue by enabling the toggle
-    // "apply_clear_big_integer_color_value_with_draw". See https://crbug.com/dawn/1109 and
-    // https://crbug.com/dawn/1463 for more details.
-    if (gpu_info::IsIntel(vendorId)) {
-        SetToggle(Toggle::ApplyClearBigIntegerColorValueWithDraw, true);
-    }
-
-    // TODO(dawn:1473): Metal fails to store GPU counters to sampleBufferAttachments on empty
-    // encoders on macOS 11.0+, we need to add mock blit command to blit encoder when encoding
-    // writeTimestamp as workaround by enabling the toggle
-    // "metal_use_mock_blit_encoder_for_write_timestamp".
-    if (@available(macos 11.0, iOS 14.0, *)) {
-        SetToggle(Toggle::MetalUseMockBlitEncoderForWriteTimestamp, true);
-    }
-
-#if DAWN_PLATFORM_IS(MACOS)
-    if (gpu_info::IsIntel(vendorId)) {
-        SetToggle(Toggle::MetalUseBothDepthAndStencilAttachmentsForCombinedDepthStencilFormats,
-                  true);
-        SetToggle(Toggle::UseBlitForBufferToStencilTextureCopy, true);
-        SetToggle(Toggle::UseBlitForBufferToDepthTextureCopy, true);
-        SetToggle(Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource, true);
-
-        if ([NSProcessInfo.processInfo
-                isOperatingSystemAtLeastVersion:NSOperatingSystemVersion{12, 0, 0}]) {
-            ForceSetToggle(Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget, true);
-        }
-        if (gpu_info::IsIntelGen7(vendorId, deviceId) ||
-            gpu_info::IsIntelGen8(vendorId, deviceId)) {
-            ForceSetToggle(Toggle::NoWorkaroundIndirectBaseVertexNotApplied, true);
-        }
-    }
-    if (gpu_info::IsAMD(vendorId) || gpu_info::IsIntel(vendorId)) {
-        SetToggle(Toggle::MetalUseCombinedDepthStencilFormatForStencil8, true);
-    }
-
-    // Local testing shows the workaround is needed on AMD Radeon HD 8870M (gcn-1) MacOS 12.1;
-    // not on AMD Radeon Pro 555 (gcn-4) MacOS 13.1.
-    // Conservatively enable the workaround on AMD unless the system is MacOS 13.1+
-    // with architecture at least AMD gcn-4.
-    bool isLessThanAMDGN4OrMac13Dot1 = false;
-    if (gpu_info::IsAMDGCN1(vendorId, deviceId) || gpu_info::IsAMDGCN2(vendorId, deviceId) ||
-        gpu_info::IsAMDGCN3(vendorId, deviceId)) {
-        isLessThanAMDGN4OrMac13Dot1 = true;
-    } else if (gpu_info::IsAMD(vendorId)) {
-        if (@available(macos 13.1, *)) {
-        } else {
-            isLessThanAMDGN4OrMac13Dot1 = true;
-        }
-    }
-    if (isLessThanAMDGN4OrMac13Dot1) {
-        SetToggle(Toggle::MetalUseBothDepthAndStencilAttachmentsForCombinedDepthStencilFormats,
-                  true);
-    }
-#endif
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(

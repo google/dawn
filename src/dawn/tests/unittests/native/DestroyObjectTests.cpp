@@ -46,7 +46,7 @@ class DestroyObjectTests : public Test {
   public:
     DestroyObjectTests() : Test() {
         // Skipping validation on descriptors as coverage for validation is already present.
-        mDevice.SetToggle(Toggle::SkipValidation, true);
+        mDevice.ForceSetToggleForTesting(Toggle::SkipValidation, true);
     }
 
     Ref<TextureMock> GetTexture() {

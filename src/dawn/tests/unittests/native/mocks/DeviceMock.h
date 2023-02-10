@@ -27,7 +27,7 @@ class DeviceMock : public DeviceBase {
   public:
     // Exposes some protected functions for testing purposes.
     using DeviceBase::DestroyObjects;
-    using DeviceBase::SetToggle;
+    using DeviceBase::ForceSetToggleForTesting;
 
     MOCK_METHOD(ResultOrError<Ref<CommandBufferBase>>,
                 CreateCommandBuffer,
