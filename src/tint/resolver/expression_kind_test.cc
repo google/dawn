@@ -61,6 +61,7 @@ std::ostream& operator<<(std::ostream& out, Def def) {
 enum class Use {
     kAccess,
     kAddressSpace,
+    kBinaryOp,
     kCallExpr,
     kCallStmt,
     kFunctionReturnType,
@@ -68,6 +69,7 @@ enum class Use {
     kTexelFormat,
     kValueExpression,
     kVariableType,
+    kUnaryOp
 };
 
 std::ostream& operator<<(std::ostream& out, Use use) {
@@ -76,6 +78,8 @@ std::ostream& operator<<(std::ostream& out, Use use) {
             return out << "Use::kAccess";
         case Use::kAddressSpace:
             return out << "Use::kAddressSpace";
+        case Use::kBinaryOp:
+            return out << "Use::kBinaryOp";
         case Use::kCallExpr:
             return out << "Use::kCallExpr";
         case Use::kCallStmt:
@@ -90,6 +94,8 @@ std::ostream& operator<<(std::ostream& out, Use use) {
             return out << "Use::kValueExpression";
         case Use::kVariableType:
             return out << "Use::kVariableType";
+        case Use::kUnaryOp:
+            return out << "Use::kUnaryOp";
     }
     return out << "<unknown>";
 }
@@ -158,6 +164,9 @@ TEST_P(ResolverExpressionKindTest, Test) {
         case Use::kCallStmt:
             Func("f", utils::Empty, ty.void_(), CallStmt(Call(Ident(kUseSource, sym))));
             break;
+        case Use::kBinaryOp:
+            GlobalVar("v", type::AddressSpace::kPrivate, Mul(1_a, Expr(kUseSource, sym)));
+            break;
         case Use::kFunctionReturnType:
             Func("f", utils::Empty, ty(kUseSource, sym), Return(Call(sym)));
             break;
@@ -171,6 +180,9 @@ TEST_P(ResolverExpressionKindTest, Test) {
             break;
         case Use::kVariableType:
             GlobalVar("v", type::AddressSpace::kPrivate, ty(kUseSource, sym));
+            break;
+        case Use::kUnaryOp:
+            GlobalVar("v", type::AddressSpace::kPrivate, Negation(Expr(kUseSource, sym)));
             break;
     }
 
@@ -189,6 +201,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn(std::vector<Case>{
         {Def::kAccess, Use::kAccess, kPass},
         {Def::kAccess, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kAccess, Use::kBinaryOp, R"(5:6 error: cannot use access 'read_write' as value)"},
         {Def::kAccess, Use::kCallExpr,
          R"(5:6 error: cannot use access 'read_write' as call target)"},
         {Def::kAccess, Use::kCallStmt,
@@ -200,9 +213,12 @@ INSTANTIATE_TEST_SUITE_P(
         {Def::kAccess, Use::kValueExpression,
          R"(5:6 error: cannot use access 'read_write' as value)"},
         {Def::kAccess, Use::kVariableType, R"(5:6 error: cannot use access 'read_write' as type)"},
+        {Def::kAccess, Use::kUnaryOp, R"(5:6 error: cannot use access 'read_write' as value)"},
 
         {Def::kAddressSpace, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
         {Def::kAddressSpace, Use::kAddressSpace, kPass},
+        {Def::kAddressSpace, Use::kBinaryOp,
+         R"(5:6 error: cannot use address space 'workgroup' as value)"},
         {Def::kAddressSpace, Use::kCallExpr,
          R"(5:6 error: cannot use address space 'workgroup' as call target)"},
         {Def::kAddressSpace, Use::kCallStmt,
@@ -216,9 +232,13 @@ INSTANTIATE_TEST_SUITE_P(
          R"(5:6 error: cannot use address space 'workgroup' as value)"},
         {Def::kAddressSpace, Use::kVariableType,
          R"(5:6 error: cannot use address space 'workgroup' as type)"},
+        {Def::kAddressSpace, Use::kUnaryOp,
+         R"(5:6 error: cannot use address space 'workgroup' as value)"},
 
         {Def::kBuiltinFunction, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
         {Def::kBuiltinFunction, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kBuiltinFunction, Use::kBinaryOp,
+         R"(7:8 error: missing '(' for builtin function call)"},
         {Def::kBuiltinFunction, Use::kCallStmt, kPass},
         {Def::kBuiltinFunction, Use::kFunctionReturnType,
          R"(5:6 error: cannot use builtin function 'workgroupBarrier' as type)"},
@@ -229,9 +249,14 @@ INSTANTIATE_TEST_SUITE_P(
          R"(7:8 error: missing '(' for builtin function call)"},
         {Def::kBuiltinFunction, Use::kVariableType,
          R"(5:6 error: cannot use builtin function 'workgroupBarrier' as type)"},
+        {Def::kBuiltinFunction, Use::kUnaryOp,
+         R"(7:8 error: missing '(' for builtin function call)"},
 
         {Def::kBuiltinType, Use::kAccess, kPass},
         {Def::kBuiltinType, Use::kAddressSpace, kPass},
+        {Def::kBuiltinType, Use::kBinaryOp,
+         R"(5:6 error: cannot use type 'vec4<f32>' as value
+7:8 note: are you missing '()' for type initializer?)"},
         {Def::kBuiltinType, Use::kCallExpr, kPass},
         {Def::kBuiltinType, Use::kFunctionReturnType, kPass},
         {Def::kBuiltinType, Use::kMemberType, kPass},
@@ -240,10 +265,14 @@ INSTANTIATE_TEST_SUITE_P(
          R"(5:6 error: cannot use type 'vec4<f32>' as value
 7:8 note: are you missing '()' for type initializer?)"},
         {Def::kBuiltinType, Use::kVariableType, kPass},
+        {Def::kBuiltinType, Use::kUnaryOp,
+         R"(5:6 error: cannot use type 'vec4<f32>' as value
+7:8 note: are you missing '()' for type initializer?)"},
 
-        {Def::kFunction, Use::kCallExpr, kPass},
         {Def::kFunction, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
         {Def::kFunction, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kFunction, Use::kBinaryOp, R"(7:8 error: missing '(' for function call)"},
+        {Def::kFunction, Use::kCallExpr, kPass},
         {Def::kFunction, Use::kCallStmt, kPass},
         {Def::kFunction, Use::kFunctionReturnType,
          R"(5:6 error: cannot use function 'FUNCTION' as type
@@ -256,9 +285,13 @@ INSTANTIATE_TEST_SUITE_P(
         {Def::kFunction, Use::kVariableType,
          R"(5:6 error: cannot use function 'FUNCTION' as type
 1:2 note: 'FUNCTION' declared here)"},
+        {Def::kFunction, Use::kUnaryOp, R"(7:8 error: missing '(' for function call)"},
 
         {Def::kStruct, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
         {Def::kStruct, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kStruct, Use::kBinaryOp, R"(5:6 error: cannot use type 'STRUCT' as value
+7:8 note: are you missing '()' for type initializer?
+1:2 note: 'STRUCT' declared here)"},
         {Def::kStruct, Use::kFunctionReturnType, kPass},
         {Def::kStruct, Use::kMemberType, kPass},
         {Def::kStruct, Use::kTexelFormat, R"(TODO(crbug.com/tint/1810))"},
@@ -267,9 +300,15 @@ INSTANTIATE_TEST_SUITE_P(
 7:8 note: are you missing '()' for type initializer?
 1:2 note: 'STRUCT' declared here)"},
         {Def::kStruct, Use::kVariableType, kPass},
+        {Def::kStruct, Use::kUnaryOp,
+         R"(5:6 error: cannot use type 'STRUCT' as value
+7:8 note: are you missing '()' for type initializer?
+1:2 note: 'STRUCT' declared here)"},
 
         {Def::kTexelFormat, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
         {Def::kTexelFormat, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kTexelFormat, Use::kBinaryOp,
+         R"(5:6 error: cannot use texel format 'rgba8unorm' as value)"},
         {Def::kTexelFormat, Use::kCallExpr,
          R"(5:6 error: cannot use texel format 'rgba8unorm' as call target)"},
         {Def::kTexelFormat, Use::kCallStmt,
@@ -283,9 +322,14 @@ INSTANTIATE_TEST_SUITE_P(
          R"(5:6 error: cannot use texel format 'rgba8unorm' as value)"},
         {Def::kTexelFormat, Use::kVariableType,
          R"(5:6 error: cannot use texel format 'rgba8unorm' as type)"},
+        {Def::kTexelFormat, Use::kUnaryOp,
+         R"(5:6 error: cannot use texel format 'rgba8unorm' as value)"},
 
         {Def::kTypeAlias, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
         {Def::kTypeAlias, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kTypeAlias, Use::kBinaryOp,
+         R"(5:6 error: cannot use type 'i32' as value
+7:8 note: are you missing '()' for type initializer?)"},
         {Def::kTypeAlias, Use::kCallExpr, kPass},
         {Def::kTypeAlias, Use::kFunctionReturnType, kPass},
         {Def::kTypeAlias, Use::kMemberType, kPass},
@@ -294,9 +338,13 @@ INSTANTIATE_TEST_SUITE_P(
          R"(5:6 error: cannot use type 'i32' as value
 7:8 note: are you missing '()' for type initializer?)"},
         {Def::kTypeAlias, Use::kVariableType, kPass},
+        {Def::kTypeAlias, Use::kUnaryOp,
+         R"(5:6 error: cannot use type 'i32' as value
+7:8 note: are you missing '()' for type initializer?)"},
 
         {Def::kVariable, Use::kAccess, R"(TODO(crbug.com/tint/1810))"},
         {Def::kVariable, Use::kAddressSpace, R"(TODO(crbug.com/tint/1810))"},
+        {Def::kVariable, Use::kBinaryOp, kPass},
         {Def::kVariable, Use::kCallStmt,
          R"(5:6 error: cannot use const 'VARIABLE' as call target
 1:2 note: 'VARIABLE' declared here)"},
@@ -314,6 +362,7 @@ INSTANTIATE_TEST_SUITE_P(
         {Def::kVariable, Use::kVariableType,
          R"(5:6 error: cannot use const 'VARIABLE' as type
 1:2 note: 'VARIABLE' declared here)"},
+        {Def::kVariable, Use::kUnaryOp, kPass},
     }));
 
 }  // namespace

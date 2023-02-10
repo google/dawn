@@ -2971,6 +2971,9 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
 sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
     const auto* lhs = sem_.GetVal(expr->lhs);
     const auto* rhs = sem_.GetVal(expr->rhs);
+    if (!lhs || !rhs) {
+        return nullptr;
+    }
     auto* lhs_ty = lhs->Type()->UnwrapRef();
     auto* rhs_ty = rhs->Type()->UnwrapRef();
 
@@ -3047,10 +3050,10 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
 
 sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
     const auto* expr = sem_.GetVal(unary->expr);
-    auto* expr_ty = expr->Type();
-    if (!expr_ty) {
+    if (!expr) {
         return nullptr;
     }
+    auto* expr_ty = expr->Type();
 
     const type::Type* ty = nullptr;
     const sem::Variable* root_ident = nullptr;
