@@ -344,6 +344,13 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "for stencil8 formats if metal_use_combined_depth_stencil_format_for_stencil8 is also "
       "enabled.",
       "https://crbug.com/dawn/1389", ToggleStage::Device}},
+    {Toggle::MetalKeepMultisubresourceDepthStencilTexturesInitialized,
+     {"metal_keep_multisubresource_depth_stencil_textures_initialized",
+      "Some platforms have bugs where the wrong depth stencil subresource is read/written. To "
+      "avoid reads of uninitialized data, ensure that depth stencil textures with more than one "
+      "subresource are completely initialized, and StoreOp::Discard is always translated as a "
+      "Store.",
+      "https://crbug.com/dawn/838", ToggleStage::Device}},
     {Toggle::UseBlitForBufferToDepthTextureCopy,
      {"use_blit_for_buffer_to_depth_texture_copy",
       "Use a blit instead of a copy command to copy buffer data to the depth aspect of a "

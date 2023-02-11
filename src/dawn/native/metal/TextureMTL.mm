@@ -759,6 +759,9 @@ MaybeError Texture::InitializeAsInternalTexture(const TextureDescriptor* descrip
     if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
         DAWN_TRY(ClearTexture(device->GetPendingCommandContext(), GetAllSubresources(),
                               TextureBase::ClearValue::NonZero));
+    } else if (ShouldKeepInitialized()) {
+        DAWN_TRY(ClearTexture(device->GetPendingCommandContext(), GetAllSubresources(),
+                              TextureBase::ClearValue::Zero));
     }
 
     return {};
@@ -852,6 +855,13 @@ NSPRef<id<MTLTexture>> Texture::CreateFormatView(wgpu::TextureFormat format) {
                                                   MetalPixelFormat(GetDevice(), format)));
     return AcquireNSPRef(
         [mMtlTexture.Get() newTextureViewWithPixelFormat:MetalPixelFormat(GetDevice(), format)]);
+}
+
+bool Texture::ShouldKeepInitialized() const {
+    return GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
+           GetDevice()->IsToggleEnabled(
+               Toggle::MetalKeepMultisubresourceDepthStencilTexturesInitialized) &&
+           GetFormat().HasDepthOrStencil() && (GetArrayLayers() > 1 || GetNumMipLevels() > 1);
 }
 
 MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
@@ -1043,11 +1053,6 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
             }
         }
     }
-
-    if (clearValue == TextureBase::ClearValue::Zero) {
-        SetIsSubresourceContentInitialized(true, range);
-        device->IncrementLazyClearCountForTesting();
-    }
     return {};
 }
 
@@ -1081,6 +1086,8 @@ void Texture::EnsureSubresourceContentInitialized(CommandRecordingContext* comma
         // contain dirty bits from recycled memory
         GetDevice()->ConsumedError(
             ClearTexture(commandContext, range, TextureBase::ClearValue::Zero));
+        SetIsSubresourceContentInitialized(true, range);
+        GetDevice()->IncrementLazyClearCountForTesting();
     }
 }
 

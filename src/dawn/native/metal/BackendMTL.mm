@@ -400,6 +400,8 @@ class Adapter : public AdapterBase {
         }
         if (gpu_info::IsAMD(vendorId) || gpu_info::IsIntel(vendorId)) {
             deviceToggles->Default(Toggle::MetalUseCombinedDepthStencilFormatForStencil8, true);
+            deviceToggles->Default(Toggle::MetalKeepMultisubresourceDepthStencilTexturesInitialized,
+                                   true);
         }
 
         // Local testing shows the workaround is needed on AMD Radeon HD 8870M (gcn-1) MacOS 12.1;

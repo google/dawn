@@ -802,6 +802,15 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 commandContext->EndBlit();
 
                 LazyClearRenderPassAttachments(cmd);
+                if (cmd->attachmentState->HasDepthStencilAttachment() &&
+                    ToBackend(cmd->depthStencilAttachment.view->GetTexture())
+                        ->ShouldKeepInitialized()) {
+                    // Ensure that depth and stencil never become uninitialized again if
+                    // the attachment must stay initialized.
+                    // For Toggle MetalKeepMultisubresourceDepthStencilTexturesInitialized.
+                    cmd->depthStencilAttachment.depthStoreOp = wgpu::StoreOp::Store;
+                    cmd->depthStencilAttachment.stencilStoreOp = wgpu::StoreOp::Store;
+                }
                 Device* device = ToBackend(GetDevice());
                 NSRef<MTLRenderPassDescriptor> descriptor = CreateMTLRenderPassDescriptor(
                     device, cmd, device->UseCounterSamplingAtStageBoundary());

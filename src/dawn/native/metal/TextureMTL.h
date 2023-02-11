@@ -55,6 +55,8 @@ class Texture final : public TextureBase {
     IOSurfaceRef GetIOSurface();
     NSPRef<id<MTLTexture>> CreateFormatView(wgpu::TextureFormat format);
 
+    bool ShouldKeepInitialized() const;
+
     MTLBlitOption ComputeMTLBlitOption(Aspect aspect) const;
     void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
                                              const SubresourceRange& range);

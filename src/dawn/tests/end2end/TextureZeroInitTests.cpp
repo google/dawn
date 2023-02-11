@@ -1876,14 +1876,20 @@ TEST_P(TextureZeroInitTest, ErrorTextureIsUninitialized) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(TextureZeroInitTest,
-                      D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
-                      D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
-                                   {"use_d3d12_render_pass"}),
-                      OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
-                      OpenGLESBackend({"nonzero_clear_resources_on_creation_for_testing"}),
-                      MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
-                      VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));
+DAWN_INSTANTIATE_TEST(
+    TextureZeroInitTest,
+    D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
+    D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}, {"use_d3d12_render_pass"}),
+    OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+    OpenGLESBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+    MetalBackend({"nonzero_clear_resources_on_creation_for_testing",
+                  "metal_keep_multisubresource_depth_stencil_textures_initialized"}),
+    MetalBackend({"nonzero_clear_resources_on_creation_for_testing"},
+                 {"metal_keep_multisubresource_depth_stencil_textures_initialized"}),
+    MetalBackend({"nonzero_clear_resources_on_creation_for_testing",
+                  "use_blit_for_buffer_to_depth_texture_copy",
+                  "use_blit_for_buffer_to_stencil_texture_copy"}),
+    VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));
 
 class CompressedTextureZeroInitTest : public TextureZeroInitTest {
   protected:
@@ -2318,9 +2324,6 @@ TEST_P(CompressedTextureZeroInitTest, Copy2DArrayCompressedB2T2B) {
 DAWN_INSTANTIATE_TEST(CompressedTextureZeroInitTest,
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
                       MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
-                      MetalBackend({"nonzero_clear_resources_on_creation_for_testing",
-                                    "use_blit_for_buffer_to_depth_texture_copy",
-                                    "use_blit_for_buffer_to_stencil_texture_copy"}),
                       OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       OpenGLESBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));
