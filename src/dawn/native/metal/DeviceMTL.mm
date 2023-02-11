@@ -131,6 +131,9 @@ Device::Device(AdapterBase* adapter,
         mCounterSamplingAtCommandBoundary = true;
         mCounterSamplingAtStageBoundary = false;
     }
+
+    mIsTimestampQueryEnabled =
+        HasFeature(Feature::TimestampQuery) || HasFeature(Feature::TimestampQueryInsidePasses);
 }
 
 Device::~Device() {
@@ -149,8 +152,7 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
 
     DAWN_TRY(mCommandContext.PrepareNextCommandBuffer(*mCommandQueue));
 
-    if (HasFeature(Feature::TimestampQuery) &&
-        !IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
+    if (mIsTimestampQueryEnabled && !IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
         // Make a best guess of timestamp period based on device vendor info, and converge it to
         // an accurate value by the following calculations.
         mTimestampPeriod = gpu_info::IsIntel(GetAdapter()->GetVendorId()) ? 83.333f : 1.0f;
@@ -266,8 +268,7 @@ MaybeError Device::TickImpl() {
 
     // Just run timestamp period calculation when timestamp feature is enabled and timestamp
     // conversion is not disabled.
-    if ((HasFeature(Feature::TimestampQuery) || HasFeature(Feature::TimestampQueryInsidePasses)) &&
-        !IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
+    if (mIsTimestampQueryEnabled && !IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
         if (@available(macos 10.15, iOS 14.0, *)) {
             UpdateTimestampPeriod(GetMTLDevice(), mKalmanInfo.get(), &mCpuTimestamp, &mGpuTimestamp,
                                   &mTimestampPeriod);

@@ -647,14 +647,21 @@ source_set("white_box_tests_sources") {
   if (dawn_enable_d3d12) {
     sources += [
       "white_box/D3D12DescriptorHeapTests.cpp",
-      "white_box/D3D12GPUTimestampCalibrationTests.cpp",
       "white_box/D3D12ResidencyTests.cpp",
       "white_box/D3D12ResourceHeapTests.cpp",
+      "white_box/GPUTimestampCalibrationTests.cpp",
+      "white_box/GPUTimestampCalibrationTests.h",
+      "white_box/GPUTimestampCalibrationTests_D3D12.cpp",
     ]
   }
 
   if (dawn_enable_metal) {
-    sources += [ "white_box/MetalAutoreleasePoolTests.mm" ]
+    sources += [
+      "white_box/GPUTimestampCalibrationTests.cpp",
+      "white_box/GPUTimestampCalibrationTests.h",
+      "white_box/GPUTimestampCalibrationTests_Metal.mm",
+      "white_box/MetalAutoreleasePoolTests.mm",
+    ]
   }
 
   if (dawn_enable_opengles) {

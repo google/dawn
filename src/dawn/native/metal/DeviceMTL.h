@@ -160,6 +160,7 @@ class Device final : public DeviceBase {
     MTLTimestamp mGpuTimestamp API_AVAILABLE(macos(10.15), ios(14.0)) = 0;
     // The parameters for kalman filter
     std::unique_ptr<KalmanInfo> mKalmanInfo;
+    bool mIsTimestampQueryEnabled = false;
 
     // Support counter sampling between blit commands, dispatches and draw calls
     bool mCounterSamplingAtCommandBoundary;

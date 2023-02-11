@@ -16,11 +16,11 @@
 
 #include "dawn/native/Buffer.h"
 #include "dawn/native/CommandEncoder.h"
-#include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/tests/DawnTest.h"
+#include "dawn/tests/white_box/GPUTimestampCalibrationTests.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
-namespace dawn::native::d3d12 {
 namespace {
 
 using FeatureName = wgpu::FeatureName;
@@ -84,8 +84,7 @@ class ExpectBetweenTimestamps : public ::detail::Expectation {
 
 }  // anonymous namespace
 
-class D3D12GPUTimestampCalibrationTests
-    : public DawnTestWithParams<GPUTimestampCalibrationTestParams> {
+class GPUTimestampCalibrationTests : public DawnTestWithParams<GPUTimestampCalibrationTestParams> {
   protected:
     void SetUp() override {
         DawnTestWithParams<GPUTimestampCalibrationTestParams>::SetUp();
@@ -98,6 +97,14 @@ class D3D12GPUTimestampCalibrationTests
         DAWN_TEST_UNSUPPORTED_IF(GetParam().mFeatureName ==
                                      wgpu::FeatureName::TimestampQueryInsidePasses &&
                                  GetParam().mEncoderType == EncoderType::NonPass);
+
+        mBackend = GPUTimestampCalibrationTestBackend::Create(device);
+        DAWN_TEST_UNSUPPORTED_IF(!mBackend->IsSupported());
+    }
+
+    void TearDown() override {
+        mBackend = nullptr;
+        DawnTestWithParams::TearDown();
     }
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
@@ -107,6 +114,38 @@ class D3D12GPUTimestampCalibrationTests
             mIsFeatureSupported = true;
         }
         return requiredFeatures;
+    }
+
+    wgpu::ComputePipeline CreateComputePipeline() {
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+            @compute @workgroup_size(1)
+            fn main() {
+            })");
+
+        wgpu::ComputePipelineDescriptor descriptor;
+        descriptor.compute.module = module;
+        descriptor.compute.entryPoint = "main";
+
+        return device.CreateComputePipeline(&descriptor);
+    }
+
+    wgpu::RenderPipeline CreateRenderPipeline() {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = utils::CreateShaderModule(device, R"(
+                @vertex
+                fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                    var pos = array(
+                        vec2f( 1.0,  1.0),
+                        vec2f(-1.0, -1.0),
+                        vec2f( 1.0, -1.0));
+                    return vec4f(pos[VertexIndex], 0.0, 1.0);
+                })");
+        descriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+                @fragment fn main() -> @location(0) vec4f {
+                    return vec4f(0.0, 1.0, 0.0, 1.0);
+                })");
+
+        return device.CreateRenderPipeline(&descriptor);
     }
 
     void EncodeTimestampQueryOnComputePass(const wgpu::CommandEncoder& encoder,
@@ -123,12 +162,16 @@ class D3D12GPUTimestampCalibrationTests
                 descriptor.timestampWrites = timestampWrites.data();
 
                 wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&descriptor);
+                pass.SetPipeline(CreateComputePipeline());
+                pass.DispatchWorkgroups(1);
                 pass.End();
                 break;
             }
             case wgpu::FeatureName::TimestampQueryInsidePasses: {
                 wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
                 pass.WriteTimestamp(querySet, 0);
+                pass.SetPipeline(CreateComputePipeline());
+                pass.DispatchWorkgroups(1);
                 pass.WriteTimestamp(querySet, 1);
                 pass.End();
                 break;
@@ -154,12 +197,16 @@ class D3D12GPUTimestampCalibrationTests
                 renderPass.renderPassInfo.timestampWrites = timestampWrites.data();
 
                 wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+                pass.SetPipeline(CreateRenderPipeline());
+                pass.Draw(3);
                 pass.End();
                 break;
             }
             case wgpu::FeatureName::TimestampQueryInsidePasses: {
                 wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
                 pass.WriteTimestamp(querySet, 0);
+                pass.SetPipeline(CreateRenderPipeline());
+                pass.Draw(3);
                 pass.WriteTimestamp(querySet, 1);
                 pass.End();
                 break;
@@ -207,13 +254,12 @@ class D3D12GPUTimestampCalibrationTests
         wgpu::CommandBuffer commands = encoder.Finish();
 
         // Start calibration between GPU timestamp and CPU timestamp
-        Device* d3DDevice = reinterpret_cast<Device*>(device.Get());
         uint64_t gpuTimestamp0, gpuTimestamp1;
         uint64_t cpuTimestamp0, cpuTimestamp1;
-        d3DDevice->GetCommandQueue()->GetClockCalibration(&gpuTimestamp0, &cpuTimestamp0);
+        mBackend->GetTimestampCalibration(&gpuTimestamp0, &cpuTimestamp0);
         queue.Submit(1, &commands);
         WaitForAllOperations();
-        d3DDevice->GetCommandQueue()->GetClockCalibration(&gpuTimestamp1, &cpuTimestamp1);
+        mBackend->GetTimestampCalibration(&gpuTimestamp1, &cpuTimestamp1);
 
         // Separate resolve queryset to reduce the execution time of the queue with WriteTimestamp,
         // so that the timestamp in the querySet will be closer to both gpuTimestamps from
@@ -225,9 +271,7 @@ class D3D12GPUTimestampCalibrationTests
 
         float errorToleranceRatio = 0.0f;
         if (!HasToggleEnabled("disable_timestamp_query_conversion")) {
-            uint64_t gpuFrequency;
-            d3DDevice->GetCommandQueue()->GetTimestampFrequency(&gpuFrequency);
-            float period = static_cast<float>(1e9) / gpuFrequency;
+            float period = mBackend->GetTimestampPeriod();
             gpuTimestamp0 = static_cast<uint64_t>(static_cast<double>(gpuTimestamp0 * period));
             gpuTimestamp1 = static_cast<uint64_t>(static_cast<double>(gpuTimestamp1 * period));
 
@@ -242,21 +286,22 @@ class D3D12GPUTimestampCalibrationTests
     }
 
   private:
+    std::unique_ptr<GPUTimestampCalibrationTestBackend> mBackend;
     bool mIsFeatureSupported = false;
 };
 
 // Check that the timestamps got by timestamp query are between the two timestamps from
 // GetClockCalibration() with the 'disable_timestamp_query_conversion' toggle disabled or enabled.
-TEST_P(D3D12GPUTimestampCalibrationTests, TimestampsCalibration) {
+TEST_P(GPUTimestampCalibrationTests, TimestampsCalibration) {
     RunTest();
 }
 
 DAWN_INSTANTIATE_TEST_P(
-    D3D12GPUTimestampCalibrationTests,
+    GPUTimestampCalibrationTests,
     // Test with the disable_timestamp_query_conversion toggle forced on and off.
     {D3D12Backend({"disable_timestamp_query_conversion"}, {}),
-     D3D12Backend({}, {"disable_timestamp_query_conversion"})},
+     D3D12Backend({}, {"disable_timestamp_query_conversion"}),
+     MetalBackend({"disable_timestamp_query_conversion"}, {}),
+     MetalBackend({}, {"disable_timestamp_query_conversion"})},
     {wgpu::FeatureName::TimestampQuery, wgpu::FeatureName::TimestampQueryInsidePasses},
     {EncoderType::NonPass, EncoderType::ComputePass, EncoderType::RenderPass});
-
-}  // namespace dawn::native::d3d12
