@@ -148,6 +148,13 @@ class StorageTextureTests : public DawnTest {
                 break;
             }
 
+            case wgpu::TextureFormat::BGRA8Unorm: {
+                utils::RGBA8* valuePtr = static_cast<utils::RGBA8*>(pixelValuePtr);
+                *valuePtr =
+                    utils::RGBA8(pixelValue * 3, pixelValue * 2, pixelValue, pixelValue * 4);
+                break;
+            }
+
             case wgpu::TextureFormat::RGBA8Snorm:
             case wgpu::TextureFormat::RGBA8Sint: {
                 int8_t* valuePtr = static_cast<int8_t*>(pixelValuePtr);
@@ -237,6 +244,7 @@ class StorageTextureTests : public DawnTest {
 
             // normalized signed/unsigned integer formats
             case wgpu::TextureFormat::RGBA8Unorm:
+            case wgpu::TextureFormat::BGRA8Unorm:
                 return "vec4f(f32(value) / 255.0, f32(value) / 255.0 * 2.0, "
                        "f32(value) / 255.0 * 3.0, f32(value) / 255.0 * 4.0)";
 
@@ -859,6 +867,70 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
 }
 
 DAWN_INSTANTIATE_TEST(StorageTextureTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
+
+class BGRA8UnormStorageTextureTests : public StorageTextureTests {
+  public:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        if (SupportsFeatures({wgpu::FeatureName::BGRA8UnormStorage})) {
+            mIsBGRA8UnormStorageSupported = true;
+            return {wgpu::FeatureName::BGRA8UnormStorage};
+        } else {
+            mIsBGRA8UnormStorageSupported = false;
+            return {};
+        }
+    }
+
+    bool IsBGRA8UnormStorageSupported() { return mIsBGRA8UnormStorageSupported; }
+
+  private:
+    bool mIsBGRA8UnormStorageSupported = false;
+};
+
+// Test that BGRA8Unorm is supported to be used as storage texture in compute shaders when the
+// optional feature 'bgra8unorm-storage' is supported.
+TEST_P(BGRA8UnormStorageTextureTests, WriteonlyStorageTextureInComputeShader) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsBGRA8UnormStorageSupported());
+
+    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::BGRA8Unorm;
+    wgpu::Texture writeonlyStorageTexture =
+        CreateTexture(kFormat, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc,
+                      {kWidth, kHeight});
+
+    // Write the expected pixel values into the write-only storage texture.
+    const std::string computeShader = CommonWriteOnlyTestCode("compute", kFormat);
+    WriteIntoStorageTextureInComputePass(writeonlyStorageTexture, computeShader.c_str());
+
+    // Verify the pixel data in the write-only storage texture is expected.
+    CheckOutputStorageTexture(writeonlyStorageTexture, kFormat, {kWidth, kHeight});
+}
+
+// Test that BGRA8Unorm is supported to be used as storage texture in fragment shaders when the
+// optional feature 'bgra8unorm-storage' is supported.
+TEST_P(BGRA8UnormStorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsBGRA8UnormStorageSupported());
+
+    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::BGRA8Unorm;
+
+    // Prepare the write-only storage texture.
+    wgpu::Texture writeonlyStorageTexture =
+        CreateTexture(kFormat, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc,
+                      {kWidth, kHeight});
+
+    // Write the expected pixel values into the write-only storage texture.
+    const std::string fragmentShader = CommonWriteOnlyTestCode("fragment", kFormat);
+    WriteIntoStorageTextureInRenderPass(writeonlyStorageTexture, kSimpleVertexShader,
+                                        fragmentShader.c_str());
+
+    // Verify the pixel data in the write-only storage texture is expected.
+    CheckOutputStorageTexture(writeonlyStorageTexture, kFormat, {kWidth, kHeight});
+}
+
+DAWN_INSTANTIATE_TEST(BGRA8UnormStorageTextureTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

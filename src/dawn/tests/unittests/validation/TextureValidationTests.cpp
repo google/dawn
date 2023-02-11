@@ -908,6 +908,27 @@ TEST_F(RG11B10UfloatTextureFormatsValidationTests, RenderableFeature) {
     device.CreateTexture(&descriptor);
 }
 
+class BGRA8UnormTextureFormatsValidationTests : public TextureValidationTest {
+  protected:
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::BGRA8UnormStorage};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 1;
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+};
+
+// Test that BGRA8Unorm format is valid as storage texture if 'bgra8unorm-storage' is enabled.
+TEST_F(BGRA8UnormTextureFormatsValidationTests, StorageFeature) {
+    wgpu::TextureDescriptor descriptor;
+    descriptor.size = {1, 1, 1};
+    descriptor.usage = wgpu::TextureUsage::StorageBinding;
+
+    descriptor.format = wgpu::TextureFormat::BGRA8Unorm;
+    device.CreateTexture(&descriptor);
+}
+
 static void CheckTextureMatchesDescriptor(const wgpu::Texture& tex,
                                           const wgpu::TextureDescriptor& desc) {
     EXPECT_EQ(desc.size.width, tex.GetWidth());

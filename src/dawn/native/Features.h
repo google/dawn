@@ -39,6 +39,7 @@ enum class Feature {
     IndirectFirstInstance,
     ShaderF16,
     RG11B10UfloatRenderable,
+    BGRA8UnormStorage,
 
     // Dawn-specific
     DawnInternalUsages,

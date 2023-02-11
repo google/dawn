@@ -39,6 +39,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_ChromiumExperimentalDp4a:
         case WGPUFeatureName_ShaderF16:
         case WGPUFeatureName_RG11B10UfloatRenderable:
+        case WGPUFeatureName_BGRA8UnormStorage:
             return true;
     }
 

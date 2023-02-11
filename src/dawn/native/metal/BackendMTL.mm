@@ -512,6 +512,7 @@ class Adapter : public AdapterBase {
         mSupportedFeatures.EnableFeature(Feature::IndirectFirstInstance);
         mSupportedFeatures.EnableFeature(Feature::ShaderF16);
         mSupportedFeatures.EnableFeature(Feature::RG11B10UfloatRenderable);
+        mSupportedFeatures.EnableFeature(Feature::BGRA8UnormStorage);
     }
 
     void InitializeVendorArchitectureImpl() override {

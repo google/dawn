@@ -1652,8 +1652,8 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
             out = wgpu::FeatureName::RG11B10UfloatRenderable;
             return true;
         case interop::GPUFeatureName::kBgra8UnormStorage:
-            // TODO(dawn:1123) Add support for these extensions when possible.
-            return false;
+            out = wgpu::FeatureName::BGRA8UnormStorage;
+            return true;
     }
     return false;
 }
@@ -1686,6 +1686,9 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
             return true;
         case wgpu::FeatureName::RG11B10UfloatRenderable:
             out = interop::GPUFeatureName::kRg11B10UfloatRenderable;
+            return true;
+        case wgpu::FeatureName::BGRA8UnormStorage:
+            out = interop::GPUFeatureName::kBgra8UnormStorage;
             return true;
 
         case wgpu::FeatureName::PipelineStatisticsQuery:

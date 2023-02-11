@@ -233,9 +233,9 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingTy
 // Validate it is an error to declare a read-only or write-only storage texture in shaders with any
 // format that doesn't support TextureUsage::StorageBinding texture usages.
 TEST_F(StorageTextureValidationTests, StorageTextureFormatInShaders) {
-    // Not include RGBA8UnormSrgb, BGRA8Unorm, BGRA8UnormSrgb because they are not related to any
-    // SPIR-V Image Formats.
-    constexpr std::array<wgpu::TextureFormat, 32> kWGPUTextureFormatSupportedAsSPIRVImageFormats = {
+    // Not include RGBA8UnormSrgb, BGRA8UnormSrgb because they are neither related to any SPIR-V
+    // Image Formats nor WGSL texture formats.
+    constexpr std::array<wgpu::TextureFormat, 33> kWGPUTextureFormatSupportedAsSPIRVImageFormats = {
         wgpu::TextureFormat::R32Uint,      wgpu::TextureFormat::R32Sint,
         wgpu::TextureFormat::R32Float,     wgpu::TextureFormat::RGBA8Unorm,
         wgpu::TextureFormat::RGBA8Snorm,   wgpu::TextureFormat::RGBA8Uint,
@@ -251,7 +251,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInShaders) {
         wgpu::TextureFormat::RG8Snorm,     wgpu::TextureFormat::RG8Uint,
         wgpu::TextureFormat::RG8Sint,      wgpu::TextureFormat::RG16Uint,
         wgpu::TextureFormat::RG16Sint,     wgpu::TextureFormat::RG16Float,
-        wgpu::TextureFormat::RGB10A2Unorm, wgpu::TextureFormat::RG11B10Ufloat};
+        wgpu::TextureFormat::RGB10A2Unorm, wgpu::TextureFormat::RG11B10Ufloat,
+        wgpu::TextureFormat::BGRA8Unorm};
 
     for (wgpu::StorageTextureAccess storageTextureBindingType : kSupportedStorageTextureAccess) {
         for (wgpu::TextureFormat format : kWGPUTextureFormatSupportedAsSPIRVImageFormats) {
@@ -263,6 +264,26 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInShaders) {
                 ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, computeShader.c_str()));
             }
         }
+    }
+}
+
+class BGRA8UnormStorageTextureInShaderValidationTests : public StorageTextureValidationTests {
+  protected:
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::BGRA8UnormStorage};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 1;
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+};
+
+// Test that 'bgra8unorm' is a valid storage texture format if 'bgra8unorm-storage' is enabled.
+TEST_F(BGRA8UnormStorageTextureInShaderValidationTests, BGRA8UnormAsStorageInShader) {
+    for (wgpu::StorageTextureAccess storageTextureBindingType : kSupportedStorageTextureAccess) {
+        std::string computeShader = CreateComputeShaderWithStorageTexture(
+            storageTextureBindingType, wgpu::TextureFormat::BGRA8Unorm);
+        utils::CreateShaderModule(device, computeShader.c_str());
     }
 }
 
@@ -401,6 +422,32 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroupLayout) {
                 ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding}));
             }
         }
+    }
+}
+
+class BGRA8UnormStorageBindGroupLayoutTest : public StorageTextureValidationTests {
+  protected:
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::BGRA8UnormStorage};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 1;
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+};
+
+// Test that creating a bind group layout with BGRA8Unorm as storage texture format is valid when
+// The optional feature bgra8unorm-storage is supported.
+TEST_F(BGRA8UnormStorageBindGroupLayoutTest, BGRA8UnormAsStorage) {
+    wgpu::BindGroupLayoutEntry bindGroupLayoutBinding;
+    bindGroupLayoutBinding.binding = 0;
+    bindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
+    bindGroupLayoutBinding.storageTexture.format = wgpu::TextureFormat::BGRA8Unorm;
+    bindGroupLayoutBinding.storageTexture.viewDimension = wgpu::TextureViewDimension::e2D;
+
+    for (wgpu::StorageTextureAccess bindingType : kSupportedStorageTextureAccess) {
+        bindGroupLayoutBinding.storageTexture.access = bindingType;
+        utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
     }
 }
 

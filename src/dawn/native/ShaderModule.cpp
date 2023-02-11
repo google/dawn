@@ -730,8 +730,10 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                 info.storageTexture.viewDimension =
                     TintTextureDimensionToTextureViewDimension(resource.dim);
 
-                DAWN_INVALID_IF(info.storageTexture.format == wgpu::TextureFormat::BGRA8Unorm,
-                                "BGRA8Unorm storage textures are not yet supported.");
+                DAWN_INVALID_IF(info.storageTexture.format == wgpu::TextureFormat::BGRA8Unorm &&
+                                    !device->HasFeature(Feature::BGRA8UnormStorage),
+                                "BGRA8Unorm storage textures are not supported if optional feature "
+                                "bgra8unorm-storage is not supported.");
 
                 break;
             case BindingInfoType::ExternalTexture:

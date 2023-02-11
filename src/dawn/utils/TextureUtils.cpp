@@ -656,6 +656,8 @@ const char* GetWGSLImageFormatQualifier(wgpu::TextureFormat textureFormat) {
             return "rgba8uint";
         case wgpu::TextureFormat::RGBA8Sint:
             return "rgba8sint";
+        case wgpu::TextureFormat::BGRA8Unorm:
+            return "bgra8unorm";
         case wgpu::TextureFormat::RGBA16Uint:
             return "rgba16uint";
         case wgpu::TextureFormat::RGBA16Sint:
