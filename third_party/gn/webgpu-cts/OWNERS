@@ -1,0 +1,3 @@
+per-file cache_list.txt=*
+per-file test_list.txt=*
+per-file ts_sources.txt=*
