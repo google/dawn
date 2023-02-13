@@ -180,6 +180,12 @@ Pointer::Pointer(const Type* t, type::AddressSpace s, type::Access a)
 Pointer::Pointer(const Pointer&) = default;
 
 const ast::Type* Pointer::Build(ProgramBuilder& b) const {
+    auto store_type = type->Build(b);
+    if (!store_type) {
+        // TODO(crbug.com/tint/1838): We should not be constructing pointers with 'void' store
+        // types.
+        return b.ty("invalid_spirv_ptr_type");
+    }
     return b.ty.pointer(type->Build(b), address_space, access);
 }
 
