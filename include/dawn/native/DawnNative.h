@@ -181,6 +181,9 @@ class DAWN_NATIVE_EXPORT Instance {
     // Enable debug capture on Dawn startup
     void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
 
+    // Enable / disable the adapter blocklist.
+    void EnableAdapterBlocklist(bool enable);
+
     // TODO(dawn:1374) Deprecate this once it is passed via the descriptor.
     void SetPlatform(dawn::platform::Platform* platform);
 

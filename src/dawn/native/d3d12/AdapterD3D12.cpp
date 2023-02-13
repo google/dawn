@@ -17,6 +17,7 @@
 #include <string>
 
 #include "dawn/common/Constants.h"
+#include "dawn/common/Platform.h"
 #include "dawn/common/WindowsUtils.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/d3d12/BackendD3D12.h"
@@ -98,6 +99,16 @@ MaybeError Adapter::InitializeImpl() {
         mDriverDescription = std::string("D3D12 driver version ") + mDriverVersion.ToString();
     }
 
+    if (GetInstance()->IsAdapterBlocklistEnabled()) {
+#if DAWN_PLATFORM_IS(X86)
+        DAWN_INVALID_IF(mDeviceInfo.shaderModel >= 60,
+                        "D3D12 x86 adapter is blocklisted. See https://crbug.com/tint/1753.");
+
+        DAWN_INVALID_IF(
+            gpu_info::IsNvidia(mVendorId),
+            "D3D12 NVIDIA x86 adapter is blocklisted. See https://crbug.com/dawn/1196.");
+#endif
+    }
     return {};
 }
 

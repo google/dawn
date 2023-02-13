@@ -439,6 +439,14 @@ bool InstanceBase::IsBeginCaptureOnStartupEnabled() const {
     return mBeginCaptureOnStartup;
 }
 
+void InstanceBase::EnableAdapterBlocklist(bool enable) {
+    mEnableAdapterBlocklist = enable;
+}
+
+bool InstanceBase::IsAdapterBlocklistEnabled() const {
+    return mEnableAdapterBlocklist;
+}
+
 void InstanceBase::SetPlatform(dawn::platform::Platform* platform) {
     if (platform == nullptr) {
         mPlatform = mDefaultPlatform.get();

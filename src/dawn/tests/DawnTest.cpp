@@ -306,6 +306,7 @@ std::unique_ptr<dawn::native::Instance> DawnTestEnvironment::CreateInstanceAndDi
     auto instance = std::make_unique<dawn::native::Instance>();
     instance->EnableBeginCaptureOnStartup(mBeginCaptureOnStartup);
     instance->SetBackendValidationLevel(mBackendValidationLevel);
+    instance->EnableAdapterBlocklist(false);
 
 #ifdef DAWN_ENABLE_BACKEND_OPENGLES
     if (GetEnvironmentVar("ANGLE_DEFAULT_PLATFORM").first.empty()) {

@@ -46,6 +46,7 @@ DawnNativeTest::~DawnNativeTest() {
 
 void DawnNativeTest::SetUp() {
     instance = std::make_unique<dawn::native::Instance>();
+    instance->EnableAdapterBlocklist(false);
     platform = CreateTestPlatform();
     dawn::native::FromAPI(instance->Get())->SetPlatformForTesting(platform.get());
 

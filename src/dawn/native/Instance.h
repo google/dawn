@@ -88,6 +88,11 @@ class InstanceBase final : public RefCountedWithExternalCount {
     void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
     bool IsBeginCaptureOnStartupEnabled() const;
 
+    // TODO(crbug.com/dawn/1495): Move this to a Toggle, perhaps on RequestAdapterOptions
+    // after Toggle refactor is complete.
+    void EnableAdapterBlocklist(bool enable);
+    bool IsAdapterBlocklistEnabled() const;
+
     // TODO(dawn:1374): SetPlatform should become a private helper, and SetPlatformForTesting
     // will become the NOT thread-safe testing version exposed for special testing cases.
     void SetPlatform(dawn::platform::Platform* platform);
@@ -134,6 +139,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
     bool mDiscoveredDefaultAdapters = false;
 
     bool mBeginCaptureOnStartup = false;
+    bool mEnableAdapterBlocklist = false;
     BackendValidationLevel mBackendValidationLevel = BackendValidationLevel::Disabled;
 
     dawn::platform::Platform* mPlatform = nullptr;
