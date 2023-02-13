@@ -376,15 +376,6 @@ MaybeError ValidateTextureDescriptor(const DeviceBase* device,
                     descriptor->dimension, format->format);
 
     DAWN_TRY(ValidateTextureSize(device, descriptor, format));
-
-    // TODO(crbug.com/dawn/838): Implement a workaround for this issue.
-    // Readbacks from the non-zero mip of a stencil texture may contain garbage data.
-    DAWN_INVALID_IF(device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs) && format->HasStencil() &&
-                        descriptor->mipLevelCount > 1 &&
-                        device->GetAdapter()->GetBackendType() == wgpu::BackendType::Metal,
-                    "https://crbug.com/dawn/838: Stencil textures with more than one mip level are "
-                    "disabled on Metal.");
-
     return {};
 }
 
