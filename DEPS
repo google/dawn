@@ -242,7 +242,7 @@ hooks = [
     # Case-insensitivity for the Win SDK. Must run before win_toolchain below.
     'name': 'ciopfs_linux',
     'pattern': '.',
-    'condition': 'checkout_win and host_os == "linux"',
+    'condition': 'dawn_standalone and checkout_win and host_os == "linux"',
     'action': [ 'download_from_google_storage',
                 '--no_resume',
                 '--no_auth',
@@ -288,7 +288,7 @@ hooks = [
   {
     'name': 'rc_linux',
     'pattern': '.',
-    'condition': 'checkout_win and host_os == "linux"',
+    'condition': 'dawn_standalone and checkout_win and host_os == "linux"',
     'action': [ 'download_from_google_storage',
                 '--no_resume',
                 '--no_auth',
