@@ -74,6 +74,13 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
 
         ASSERT_GE(featureOptions5.SharedResourceTier, D3D11_SHARED_RESOURCE_TIER_2);
 
+        // Not all D3D11 devices support NV12 textures.
+        UINT formatSupport;
+        hr = d3d11Device->CheckFormatSupport(DXGI_FORMAT_NV12, &formatSupport);
+        ASSERT_EQ(hr, S_OK);
+
+        ASSERT_TRUE(formatSupport & D3D11_FORMAT_SUPPORT_TEXTURE2D);
+
         mD3d11Device = std::move(d3d11Device);
     }
 
