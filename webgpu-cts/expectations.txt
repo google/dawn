@@ -57,6 +57,8 @@
 # tags: [ webgpu-adapter-default webgpu-adapter-swiftshader ]
 # Target CPU Bits
 # tags: [ target-cpu-32 target-cpu-64 ]
+# Clang coverage
+# tags: [ clang-coverage no-clang-coverage ]
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
@@ -169,17 +171,22 @@ crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp
 crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
 
 ################################################################################
-# f32_arithmetic tests are slow on code-coverage builders
+# Some tests are slow on code-coverage builders. These expectations prevent
+# tests from timing out before they generate full code coverage data.
+# Note, it's generally not important to suppress tests that are _failing_ on
+# code-coverage, because even failing tests provide coverage (though any
+# failures should hopefully be the same as other builders anyway).
 # KEEP
 ################################################################################
-crbug.com/1399354 webgpu:shader,execution,expression,binary,f32_arithmetic:addition:* [ Slow ]
-crbug.com/1399354 webgpu:shader,execution,expression,binary,f32_arithmetic:division:* [ Slow ]
-crbug.com/1399354 webgpu:shader,execution,expression,binary,f32_arithmetic:multiplication:* [ Slow ]
-crbug.com/1399354 webgpu:shader,execution,expression,binary,f32_arithmetic:subtraction:* [ Slow ]
+crbug.com/1399354 [ clang-coverage ] webgpu:shader,execution,expression,binary,i32_arithmetic:* [ Slow ]
+crbug.com/1399354 [ clang-coverage ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition:* [ Slow ]
+crbug.com/1399354 [ clang-coverage ] webgpu:shader,execution,expression,binary,f32_arithmetic:division:* [ Slow ]
+crbug.com/1399354 [ clang-coverage ] webgpu:shader,execution,expression,binary,f32_arithmetic:multiplication:* [ Slow ]
+crbug.com/1399354 [ clang-coverage ] webgpu:shader,execution,expression,binary,f32_arithmetic:subtraction:* [ Slow ]
 # TODO(crbug.com/dawn/1799): Remove platform filter here when conflicting expectations are removed
-crbug.com/1399354 [ linux ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:* [ Slow ]
-crbug.com/1399354 [ mac ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:* [ Slow ]
-crbug.com/1399354 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="const";* [ Slow ]
+crbug.com/1399354 [ clang-coverage linux ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:* [ Slow ]
+crbug.com/1399354 [ clang-coverage mac ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:* [ Slow ]
+crbug.com/1399354 [ clang-coverage win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="const";* [ Slow ]
 
 ################################################################################
 # shader execution failures
