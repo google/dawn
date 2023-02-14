@@ -1143,7 +1143,7 @@ class Impl : public IntrinsicTable {
                                       utils::VectorRef<const type::Type*> args,
                                       sem::EvaluationStage earliest_eval_stage,
                                       TemplateState templates,
-                                      OnNoMatch on_no_match) const;
+                                      const OnNoMatch& on_no_match) const;
 
     /// Evaluates the single overload for the provided argument types.
     /// @param overload the overload being considered
@@ -1505,7 +1505,7 @@ IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
                                         utils::VectorRef<const type::Type*> args,
                                         sem::EvaluationStage earliest_eval_stage,
                                         TemplateState templates,
-                                        OnNoMatch on_no_match) const {
+                                        const OnNoMatch& on_no_match) const {
     size_t num_matched = 0;
     size_t match_idx = 0;
     utils::Vector<Candidate, kNumFixedCandidates> candidates;
