@@ -33,6 +33,10 @@ float4x4 getFrameData_f1_(inout float frameID) {
   return float4x4(float4(x_40.x, x_40.y, x_40.z, x_40.w), float4(x_47.x, x_47.y, x_47.z, x_47.w), float4(x_54.x, x_54.y, x_54.z, x_54.w), (0.0f).xxxx);
 }
 
+float tint_float_mod(float lhs, float rhs) {
+  return (lhs - (trunc((lhs / rhs)) * rhs));
+}
+
 void main_1() {
   float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
   float2 tileUV = float2(0.0f, 0.0f);
@@ -100,7 +104,7 @@ void main_1() {
     if ((x_174 > 0.0f)) {
       const float x_181 = asfloat(x_20[0].x);
       const float x_184 = animationData.z;
-      mt = ((x_181 * x_184) % 1.0f);
+      mt = tint_float_mod((x_181 * x_184), 1.0f);
       f = 0.0f;
       while (true) {
         const float x_193 = f;

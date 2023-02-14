@@ -19,13 +19,17 @@ int tint_mod(int lhs, int rhs) {
   }
 }
 
+float tint_float_mod(float lhs, float rhs) {
+  return (lhs - (trunc((lhs / rhs)) * rhs));
+}
+
 void foo(int maybe_zero) {
   a = tint_div(a, 0);
   a = tint_mod(a, 0);
   a = tint_div(a, maybe_zero);
   a = tint_mod(a, maybe_zero);
   b = (b / 0.0f);
-  b = (b % 0.0f);
+  b = tint_float_mod(b, 0.0f);
   b = (b / float(maybe_zero));
-  b = (b % float(maybe_zero));
+  b = tint_float_mod(b, float(maybe_zero));
 }

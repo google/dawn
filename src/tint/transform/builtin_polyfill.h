@@ -68,6 +68,8 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         /// Should integer scalar / vector divides and modulos be polyfilled to avoid DBZ and
         /// integer overflows?
         bool int_div_mod = false;
+        /// Should float modulos be polyfilled to emit a precise modulo operation as per the spec?
+        bool precise_float_mod = false;
         /// Should `saturate()` be polyfilled?
         bool saturate = false;
         /// Should `sign()` be polyfilled for integer types?
