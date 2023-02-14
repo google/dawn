@@ -316,6 +316,8 @@ list(APPEND TINT_LIB_SRCS
   sem/expression.h
   sem/for_loop_statement.cc
   sem/for_loop_statement.h
+  sem/function_expression.cc
+  sem/function_expression.h
   sem/function.cc
   sem/if_statement.cc
   sem/if_statement.h
