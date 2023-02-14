@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {
@@ -97,7 +98,7 @@ TEST_F(ParserImplTest, SingularExpression_Call_Empty) {
     ASSERT_TRUE(e->Is<ast::CallExpression>());
     auto* c = e->As<ast::CallExpression>();
 
-    EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("a"));
+    ast::CheckIdentifier(p->builder().Symbols(), c->target, "a");
 
     EXPECT_EQ(c->args.Length(), 0u);
 }
@@ -113,7 +114,7 @@ TEST_F(ParserImplTest, SingularExpression_Call_WithArgs) {
     ASSERT_TRUE(e->Is<ast::CallExpression>());
     auto* c = e->As<ast::CallExpression>();
 
-    EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("test"));
+    ast::CheckIdentifier(p->builder().Symbols(), c->target, "test");
 
     EXPECT_EQ(c->args.Length(), 3u);
     EXPECT_TRUE(c->args[0]->Is<ast::IntLiteralExpression>());

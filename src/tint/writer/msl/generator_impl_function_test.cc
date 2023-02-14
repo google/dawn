@@ -179,7 +179,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_SharedStruct_DifferentSta
     //   @builtin(position) pos : vec4<f32>;
     // };
     // fn vert_main() -> Interface {
-    //   return Interface(0.4, 0.6, vec4<f32>());
+    //   return Interface(0.5, 0.25, vec4<f32>());
     // }
     // fn frag_main(colors : Interface) {
     //   const r = colors.col1;
@@ -194,8 +194,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_SharedStruct_DifferentSta
         });
 
     Func("vert_main", utils::Empty, ty.Of(interface_struct),
-         utils::Vector{Return(
-             Call(ty.Of(interface_struct), Expr(0.5_f), Expr(0.25_f), Call(ty.vec4<f32>())))},
+         utils::Vector{Return(Call(ty.Of(interface_struct), 0.5_f, 0.25_f, vec4<f32>()))},
          utils::Vector{Stage(ast::PipelineStage::kVertex)});
 
     Func("frag_main", utils::Vector{Param("colors", ty.Of(interface_struct))}, ty.void_(),

@@ -373,8 +373,8 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
                    Assign(Phony(), 3_f),                                    //
                    Assign(Phony(), 4_a),                                    //
                    Assign(Phony(), 5.0_a),                                  //
-                   Assign(Phony(), vec(nullptr, 2u, 6_a)),                  //
-                   Assign(Phony(), vec(nullptr, 3u, 7.0_a)),                //
+                   Assign(Phony(), vec2<Infer>(6_a)),                       //
+                   Assign(Phony(), vec3<Infer>(7.0_a)),                     //
                    Assign(Phony(), vec4<bool>()),                           //
                    Assign(Phony(), "tex"),                                  //
                    Assign(Phony(), "smp"),                                  //

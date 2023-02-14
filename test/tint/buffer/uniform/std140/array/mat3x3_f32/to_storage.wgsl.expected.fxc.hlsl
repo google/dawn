@@ -10,10 +10,10 @@ void tint_symbol_1(RWByteAddressBuffer buffer, uint offset, float3x3 value) {
 }
 
 void tint_symbol(RWByteAddressBuffer buffer, uint offset, float3x3 value[4]) {
-  float3x3 array[4] = value;
+  float3x3 array_1[4] = value;
   {
     for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      tint_symbol_1(buffer, (offset + (i * 48u)), array[i]);
+      tint_symbol_1(buffer, (offset + (i * 48u)), array_1[i]);
     }
   }
 }

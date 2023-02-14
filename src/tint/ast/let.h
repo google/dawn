@@ -41,7 +41,7 @@ class Let final : public Castable<Let, Variable> {
         NodeID nid,
         const Source& source,
         const Identifier* name,
-        const ast::Type* type,
+        Type type,
         const Expression* initializer,
         utils::VectorRef<const Attribute*> attributes);
 

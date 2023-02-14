@@ -1953,8 +1953,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_StructInit) {
     Structure("S", utils::Vector{Member("a", ty.i32()), Member("b", ty.f32())});
     GlobalConst("one", Expr(1_a));
     auto* lhs = Equal("one", 0_a);
-    auto* rhs =
-        Equal(MemberAccessor(Call(ty("S"), Expr(1_a), Expr(Source{{12, 34}}, true)), "a"), 0_a);
+    auto* rhs = Equal(MemberAccessor(Call("S", Expr(1_a), Expr(Source{{12, 34}}, true)), "a"), 0_a);
     GlobalConst("result", LogicalAnd(lhs, rhs));
 
     EXPECT_FALSE(r()->Resolve());
@@ -1973,8 +1972,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_StructInit) {
     Structure("S", utils::Vector{Member("a", ty.i32()), Member("b", ty.f32())});
     GlobalConst("one", Expr(1_a));
     auto* lhs = Equal("one", 1_a);
-    auto* rhs =
-        Equal(MemberAccessor(Call(ty("S"), Expr(1_a), Expr(Source{{12, 34}}, true)), "a"), 0_a);
+    auto* rhs = Equal(MemberAccessor(Call("S", Expr(1_a), Expr(Source{{12, 34}}, true)), "a"), 0_a);
     GlobalConst("result", LogicalOr(lhs, rhs));
 
     EXPECT_FALSE(r()->Resolve());
@@ -2146,7 +2144,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_MemberAccess) {
     // const one = 1;
     // const result = (one == 0) && (s.c == 0);
     Structure("S", utils::Vector{Member("a", ty.i32()), Member("b", ty.f32())});
-    GlobalConst("s", Call(ty("S"), Expr(1_a), Expr(2.0_a)));
+    GlobalConst("s", Call("S", Expr(1_a), Expr(2.0_a)));
     GlobalConst("one", Expr(1_a));
     auto* lhs = Equal("one", 0_a);
     auto* rhs = Equal(MemberAccessor(Source{{12, 34}}, "s", "c"), 0_a);
@@ -2165,7 +2163,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_MemberAccess) {
     // const one = 1;
     // const result = (one == 1) || (s.c == 0);
     Structure("S", utils::Vector{Member("a", ty.i32()), Member("b", ty.f32())});
-    GlobalConst("s", Call(ty("S"), Expr(1_a), Expr(2.0_a)));
+    GlobalConst("s", Call("S", Expr(1_a), Expr(2.0_a)));
     GlobalConst("one", Expr(1_a));
     auto* lhs = Equal("one", 1_a);
     auto* rhs = Equal(MemberAccessor(Source{{12, 34}}, "s", "c"), 0_a);
@@ -2187,7 +2185,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Swizzle) {
     // const result = (one == 0) && (vec2(1, 2).z == 0);
     GlobalConst("one", Expr(1_a));
     auto* lhs = Equal("one", 0_a);
-    auto* rhs = Equal(MemberAccessor(vec2<AInt>(1_a, 2_a), Ident(Source{{12, 34}}, "z")), 0_a);
+    auto* rhs = Equal(MemberAccessor(vec2<Infer>(1_a, 2_a), Ident(Source{{12, 34}}, "z")), 0_a);
     GlobalConst("result", LogicalAnd(lhs, rhs));
 
     EXPECT_FALSE(r()->Resolve());
@@ -2199,7 +2197,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Swizzle) {
     // const result = (one == 1) || (vec2(1, 2).z == 0);
     GlobalConst("one", Expr(1_a));
     auto* lhs = Equal("one", 1_a);
-    auto* rhs = Equal(MemberAccessor(vec2<AInt>(1_a, 2_a), Ident(Source{{12, 34}}, "z")), 0_a);
+    auto* rhs = Equal(MemberAccessor(vec2<Infer>(1_a, 2_a), Ident(Source{{12, 34}}, "z")), 0_a);
     GlobalConst("result", LogicalOr(lhs, rhs));
 
     EXPECT_FALSE(r()->Resolve());

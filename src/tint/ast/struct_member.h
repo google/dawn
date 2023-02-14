@@ -18,11 +18,11 @@
 #include <utility>
 
 #include "src/tint/ast/attribute.h"
+#include "src/tint/ast/type.h"
 
 // Forward declarations
 namespace tint::ast {
 class Identifier;
-class Type;
 }  // namespace tint::ast
 
 namespace tint::ast {
@@ -41,7 +41,7 @@ class StructMember final : public Castable<StructMember, Node> {
                  NodeID nid,
                  const Source& src,
                  const Identifier* name,
-                 const ast::Type* type,
+                 Type type,
                  utils::VectorRef<const Attribute*> attributes);
     /// Move constructor
     StructMember(StructMember&&);
@@ -58,7 +58,7 @@ class StructMember final : public Castable<StructMember, Node> {
     const Identifier* const name;
 
     /// The type
-    const ast::Type* const type;
+    const Type type;
 
     /// The attributes
     const utils::Vector<const Attribute*, 4> attributes;

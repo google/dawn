@@ -176,7 +176,7 @@ struct BuiltinPolyfill::State {
         uint32_t width = WidthOf(ty);
 
         // Returns either u32 or vecN<u32>
-        auto U = [&]() -> const ast::Type* {
+        auto U = [&]() {
             if (width == 1) {
                 return b.ty.u32();
             }
@@ -234,7 +234,7 @@ struct BuiltinPolyfill::State {
         uint32_t width = WidthOf(ty);
 
         // Returns either u32 or vecN<u32>
-        auto U = [&]() -> const ast::Type* {
+        auto U = [&]() {
             if (width == 1) {
                 return b.ty.u32();
             }
@@ -351,7 +351,7 @@ struct BuiltinPolyfill::State {
         uint32_t width = WidthOf(ty);
 
         // Returns either u32 or vecN<u32>
-        auto U = [&]() -> const ast::Type* {
+        auto U = [&]() {
             if (width == 1) {
                 return b.ty.u32();
             }
@@ -423,7 +423,7 @@ struct BuiltinPolyfill::State {
         uint32_t width = WidthOf(ty);
 
         // Returns either u32 or vecN<u32>
-        auto U = [&]() -> const ast::Type* {
+        auto U = [&]() {
             if (width == 1) {
                 return b.ty.u32();
             }
@@ -825,7 +825,7 @@ struct BuiltinPolyfill::State {
     bool has_full_ptr_params;
 
     /// @returns the AST type for the given sem type
-    const ast::Type* T(const type::Type* ty) const { return CreateASTTypeFor(ctx, ty); }
+    ast::Type T(const type::Type* ty) const { return CreateASTTypeFor(ctx, ty); }
 
     /// @returns 1 if `ty` is not a vector, otherwise the vector width
     uint32_t WidthOf(const type::Type* ty) const {
@@ -1067,15 +1067,17 @@ Transform::ApplyResult BuiltinPolyfill::Apply(const Program* src,
                         break;
                 }
             },
-            [&](const ast::TypeName* type_name) {
+            [&](const ast::Expression* expr) {
                 if (polyfill.bgra8unorm) {
-                    if (auto* tex = src->Sem().Get<type::StorageTexture>(type_name)) {
-                        if (tex->texel_format() == type::TexelFormat::kBgra8Unorm) {
-                            ctx.Replace(type_name, [&ctx, tex] {
-                                return ctx.dst->ty.storage_texture(
-                                    tex->dim(), type::TexelFormat::kRgba8Unorm, tex->access());
-                            });
-                            made_changes = true;
+                    if (auto* ty_expr = src->Sem().Get<sem::TypeExpression>(expr)) {
+                        if (auto* tex = ty_expr->Type()->As<type::StorageTexture>()) {
+                            if (tex->texel_format() == type::TexelFormat::kBgra8Unorm) {
+                                ctx.Replace(expr, [&ctx, tex] {
+                                    return ctx.dst->Expr(ctx.dst->ty.storage_texture(
+                                        tex->dim(), type::TexelFormat::kRgba8Unorm, tex->access()));
+                                });
+                                made_changes = true;
+                            }
                         }
                     }
                 }

@@ -150,8 +150,9 @@ class GeneratorImpl : public TextGenerator {
     /// Handles generating a function call expression
     /// @param out the output of the expression stream
     /// @param call the call expression
+    /// @param fn the function being called
     /// @returns true if the expression is emitted
-    bool EmitFunctionCall(std::ostream& out, const sem::Call* call);
+    bool EmitFunctionCall(std::ostream& out, const sem::Call* call, const sem::Function* fn);
     /// Handles generating a builtin call expression
     /// @param out the output of the expression stream
     /// @param call the call expression

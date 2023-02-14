@@ -185,13 +185,13 @@ class Validator {
     /// @param a the atomic ast node
     /// @param s the atomic sem node
     /// @returns true on success, false otherwise.
-    bool Atomic(const ast::Atomic* a, const type::Atomic* s) const;
+    bool Atomic(const ast::TemplatedIdentifier* a, const type::Atomic* s) const;
 
     /// Validates a pointer type
     /// @param a the pointer ast node
     /// @param s the pointer sem node
     /// @returns true on success, false otherwise.
-    bool Pointer(const ast::Pointer* a, const type::Pointer* s) const;
+    bool Pointer(const ast::TemplatedIdentifier* a, const type::Pointer* s) const;
 
     /// Validates an assignment
     /// @param a the assignment statement
@@ -343,10 +343,10 @@ class Validator {
     bool Materialize(const type::Type* to, const type::Type* from, const Source& source) const;
 
     /// Validates a matrix
-    /// @param ty the matrix to validate
+    /// @param el_ty the matrix element type to validate
     /// @param source the source of the matrix
     /// @returns true on success, false otherwise
-    bool Matrix(const type::Matrix* ty, const Source& source) const;
+    bool Matrix(const type::Type* el_ty, const Source& source) const;
 
     /// Validates a function parameter
     /// @param func the function the variable is for
@@ -440,10 +440,10 @@ class Validator {
                              const sem::ValueExpression* initializer) const;
 
     /// Validates a vector
-    /// @param ty the vector to validate
+    /// @param el_ty the vector element type to validate
     /// @param source the source of the vector
     /// @returns true on success, false otherwise
-    bool Vector(const type::Vector* ty, const Source& source) const;
+    bool Vector(const type::Type* el_ty, const Source& source) const;
 
     /// Validates an array initializer
     /// @param ctor the call expresion to validate

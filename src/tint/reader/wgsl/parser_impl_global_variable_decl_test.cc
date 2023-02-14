@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {
@@ -29,10 +30,9 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutInitializer) {
     auto* var = e.value->As<ast::Var>();
     ASSERT_NE(var, nullptr);
 
-    EXPECT_EQ(var->name->symbol, p->builder().Symbols().Get("a"));
+    ast::CheckIdentifier(p->builder().Symbols(), var->name, "a");
 
-    ASSERT_TRUE(var->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(var->type->As<ast::TypeName>()->name->symbol), "f32");
+    ast::CheckIdentifier(p->builder().Symbols(), var->type, "f32");
 
     EXPECT_EQ(var->declared_address_space, type::AddressSpace::kPrivate);
 
@@ -56,10 +56,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithInitializer) {
     auto* var = e.value->As<ast::Var>();
     ASSERT_NE(var, nullptr);
 
-    EXPECT_EQ(var->name->symbol, p->builder().Symbols().Get("a"));
-
-    ASSERT_TRUE(var->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(var->type->As<ast::TypeName>()->name->symbol), "f32");
+    ast::CheckIdentifier(p->builder().Symbols(), var->name, "a");
+    ast::CheckIdentifier(p->builder().Symbols(), var->type, "f32");
 
     EXPECT_EQ(var->declared_address_space, type::AddressSpace::kPrivate);
 
@@ -84,11 +82,10 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute) {
     auto* var = e.value->As<ast::Var>();
     ASSERT_NE(var, nullptr);
 
-    EXPECT_EQ(var->name->symbol, p->builder().Symbols().Get("a"));
+    ast::CheckIdentifier(p->builder().Symbols(), var->name, "a");
     ASSERT_NE(var->type, nullptr);
 
-    ASSERT_TRUE(var->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(var->type->As<ast::TypeName>()->name->symbol), "f32");
+    ast::CheckIdentifier(p->builder().Symbols(), var->type, "f32");
 
     EXPECT_EQ(var->declared_address_space, type::AddressSpace::kUniform);
 
@@ -118,11 +115,9 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute_MulitpleGroups) {
     auto* var = e.value->As<ast::Var>();
     ASSERT_NE(var, nullptr);
 
-    EXPECT_EQ(var->name->symbol, p->builder().Symbols().Get("a"));
+    ast::CheckIdentifier(p->builder().Symbols(), var->name, "a");
     ASSERT_NE(var->type, nullptr);
-
-    ASSERT_TRUE(var->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(var->type->As<ast::TypeName>()->name->symbol), "f32");
+    ast::CheckIdentifier(p->builder().Symbols(), var->type, "f32");
 
     EXPECT_EQ(var->declared_address_space, type::AddressSpace::kUniform);
 

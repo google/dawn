@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {
 namespace {
+
+using namespace tint::number_suffixes;  // NOLINT
 
 TEST_F(ParserImplTest, Callable_Array) {
     auto p = parser("array");
@@ -25,12 +28,8 @@ TEST_F(ParserImplTest, Callable_Array) {
     EXPECT_FALSE(t.errored);
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t.value->Is<ast::Array>());
 
-    auto* a = t.value->As<ast::Array>();
-    EXPECT_FALSE(a->IsRuntimeArray());
-    EXPECT_EQ(a->type, nullptr);
-    EXPECT_EQ(a->count, nullptr);
+    ast::CheckIdentifier(p->builder().Symbols(), t.value, "array");
 }
 
 TEST_F(ParserImplTest, Callable_VecPrefix) {
@@ -41,11 +40,8 @@ TEST_F(ParserImplTest, Callable_VecPrefix) {
     EXPECT_FALSE(t.errored);
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t.value->Is<ast::Vector>());
 
-    auto* v = t.value->As<ast::Vector>();
-    EXPECT_EQ(v->type, nullptr);
-    EXPECT_EQ(v->width, 3u);
+    ast::CheckIdentifier(p->builder().Symbols(), t.value, "vec3");
 }
 
 TEST_F(ParserImplTest, Callable_MatPrefix) {
@@ -56,12 +52,8 @@ TEST_F(ParserImplTest, Callable_MatPrefix) {
     EXPECT_FALSE(t.errored);
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t.value->Is<ast::Matrix>());
 
-    auto* m = t.value->As<ast::Matrix>();
-    EXPECT_EQ(m->type, nullptr);
-    EXPECT_EQ(m->columns, 3u);
-    EXPECT_EQ(m->rows, 2u);
+    ast::CheckIdentifier(p->builder().Symbols(), t.value, "mat3x2");
 }
 
 TEST_F(ParserImplTest, Callable_TypeDecl_Array) {
@@ -72,18 +64,8 @@ TEST_F(ParserImplTest, Callable_TypeDecl_Array) {
     EXPECT_FALSE(t.errored);
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t.value->Is<ast::Array>());
 
-    auto* a = t.value->As<ast::Array>();
-    EXPECT_FALSE(a->IsRuntimeArray());
-
-    ASSERT_TRUE(a->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(a->type->As<ast::TypeName>()->name->symbol), "f32");
-
-    auto* size = a->count->As<ast::IntLiteralExpression>();
-    ASSERT_NE(size, nullptr);
-    EXPECT_EQ(size->value, 2);
-    EXPECT_EQ(size->suffix, ast::IntLiteralExpression::Suffix::kNone);
+    ast::CheckIdentifier(p->builder().Symbols(), t.value, ast::Template("array", "f32", 2_a));
 }
 
 TEST_F(ParserImplTest, Callable_TypeDecl_Array_Runtime) {
@@ -94,15 +76,8 @@ TEST_F(ParserImplTest, Callable_TypeDecl_Array_Runtime) {
     EXPECT_FALSE(t.errored);
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t.value->Is<ast::Array>());
 
-    auto* a = t.value->As<ast::Array>();
-    EXPECT_TRUE(a->IsRuntimeArray());
-
-    ASSERT_TRUE(a->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(a->type->As<ast::TypeName>()->name->symbol), "f32");
-
-    ASSERT_EQ(a->count, nullptr);
+    ast::CheckIdentifier(p->builder().Symbols(), t.value, ast::Template("array", "f32"));
 }
 
 TEST_F(ParserImplTest, Callable_TypeDecl_VecPrefix) {
@@ -113,14 +88,8 @@ TEST_F(ParserImplTest, Callable_TypeDecl_VecPrefix) {
     EXPECT_FALSE(t.errored);
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t.value->Is<ast::Vector>());
 
-    auto* v = t.value->As<ast::Vector>();
-
-    ASSERT_TRUE(v->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(v->type->As<ast::TypeName>()->name->symbol), "f32");
-
-    EXPECT_EQ(v->width, 3u);
+    ast::CheckIdentifier(p->builder().Symbols(), t.value, ast::Template("vec3", "f32"));
 }
 
 TEST_F(ParserImplTest, Callable_TypeDecl_MatPrefix) {
@@ -131,15 +100,8 @@ TEST_F(ParserImplTest, Callable_TypeDecl_MatPrefix) {
     EXPECT_FALSE(t.errored);
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(t.value, nullptr);
-    ASSERT_TRUE(t.value->Is<ast::Matrix>());
 
-    auto* m = t.value->As<ast::Matrix>();
-
-    ASSERT_TRUE(m->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(m->type->As<ast::TypeName>()->name->symbol), "f32");
-
-    EXPECT_EQ(m->columns, 3u);
-    EXPECT_EQ(m->rows, 2u);
+    ast::CheckIdentifier(p->builder().Symbols(), t.value, ast::Template("mat3x2", "f32"));
 }
 
 TEST_F(ParserImplTest, Callable_NoMatch) {

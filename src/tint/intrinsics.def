@@ -136,6 +136,15 @@ enum builtin_type {
   i32
   u32
   // https://www.w3.org/TR/WGSL/#matrix-types
+  mat2x2
+  mat2x3
+  mat2x4
+  mat3x2
+  mat3x3
+  mat3x4
+  mat4x2
+  mat4x3
+  mat4x4
   mat2x2f
   mat2x2h
   mat2x3f
@@ -155,6 +164,9 @@ enum builtin_type {
   mat4x4f
   mat4x4h
   // https://www.w3.org/TR/WGSL/#vector-types
+  vec2
+  vec3
+  vec4
   vec2f
   vec2h
   vec2i
@@ -167,6 +179,12 @@ enum builtin_type {
   vec4h
   vec4i
   vec4u
+  // https://www.w3.org/TR/WGSL/#array-types
+  array
+  // https://www.w3.org/TR/WGSL/#atomic-types
+  atomic
+  // https://www.w3.org/TR/WGSL/#ref-ptr-types
+  ptr
   // https://www.w3.org/TR/WGSL/#sampler-type
   sampler
   sampler_comparison
@@ -176,6 +194,15 @@ enum builtin_type {
   texture_depth_cube
   texture_depth_cube_array
   texture_depth_multisampled_2d
+  // https://www.w3.org/TR/WGSL/#sampled-texture-type
+  texture_1d
+  texture_2d
+  texture_2d_array
+  texture_3d
+  texture_cube
+  texture_cube_array
+  // https://www.w3.org/TR/WGSL/#multisampled-texture-type
+  texture_multisampled_2d
   // https://www.w3.org/TR/WGSL/#texture-storage
   texture_storage_1d
   texture_storage_2d

@@ -706,7 +706,7 @@ bool GeneratorImpl::EmitCall(std::ostream& out, const ast::CallExpression* expr)
     auto* call = builder_.Sem().Get<sem::Call>(expr);
     return Switch(
         call->Target(),  //
-        [&](const sem::Function*) { return EmitFunctionCall(out, call); },
+        [&](const sem::Function* fn) { return EmitFunctionCall(out, call, fn); },
         [&](const sem::Builtin* builtin) { return EmitBuiltinCall(out, call, builtin); },
         [&](const sem::TypeConversion* conv) { return EmitTypeConversion(out, call, conv); },
         [&](const sem::TypeInitializer* init) { return EmitTypeInitializer(out, call, init); },
@@ -717,15 +717,13 @@ bool GeneratorImpl::EmitCall(std::ostream& out, const ast::CallExpression* expr)
         });
 }
 
-bool GeneratorImpl::EmitFunctionCall(std::ostream& out, const sem::Call* call) {
+bool GeneratorImpl::EmitFunctionCall(std::ostream& out,
+                                     const sem::Call* call,
+                                     const sem::Function* fn) {
     const auto& args = call->Arguments();
-    auto* decl = call->Declaration();
-    auto* ident = decl->target.name;
+    auto* ident = fn->Declaration()->name;
 
-    auto name = builder_.Symbols().NameFor(ident->symbol);
-    auto caller_sym = ident->symbol;
-
-    out << name;
+    out << builder_.Symbols().NameFor(ident->symbol);
     ScopedParen sp(out);
 
     bool first = true;

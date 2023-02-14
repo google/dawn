@@ -28,10 +28,10 @@ S ret_struct_arr() {
 }
 
 void tint_symbol_3(RWByteAddressBuffer buffer, uint offset, int4 value[4]) {
-  int4 array[4] = value;
+  int4 array_1[4] = value;
   {
     for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      buffer.Store4((offset + (i * 16u)), asuint(array[i]));
+      buffer.Store4((offset + (i * 16u)), asuint(array_1[i]));
     }
   }
 }
@@ -60,28 +60,28 @@ tint_symbol_7_ret tint_symbol_7(RWByteAddressBuffer buffer, uint offset) {
 }
 
 void tint_symbol_11(RWByteAddressBuffer buffer, uint offset, int value[2]) {
-  int array_3[2] = value;
+  int array_4[2] = value;
   {
     for(uint i_3 = 0u; (i_3 < 2u); i_3 = (i_3 + 1u)) {
-      buffer.Store((offset + (i_3 * 4u)), asuint(array_3[i_3]));
+      buffer.Store((offset + (i_3 * 4u)), asuint(array_4[i_3]));
     }
   }
 }
 
 void tint_symbol_10(RWByteAddressBuffer buffer, uint offset, int value[3][2]) {
-  int array_2[3][2] = value;
+  int array_3[3][2] = value;
   {
     for(uint i_4 = 0u; (i_4 < 3u); i_4 = (i_4 + 1u)) {
-      tint_symbol_11(buffer, (offset + (i_4 * 8u)), array_2[i_4]);
+      tint_symbol_11(buffer, (offset + (i_4 * 8u)), array_3[i_4]);
     }
   }
 }
 
 void tint_symbol_9(RWByteAddressBuffer buffer, uint offset, int value[4][3][2]) {
-  int array_1[4][3][2] = value;
+  int array_2[4][3][2] = value;
   {
     for(uint i_5 = 0u; (i_5 < 4u); i_5 = (i_5 + 1u)) {
-      tint_symbol_10(buffer, (offset + (i_5 * 24u)), array_1[i_5]);
+      tint_symbol_10(buffer, (offset + (i_5 * 24u)), array_2[i_5]);
     }
   }
 }

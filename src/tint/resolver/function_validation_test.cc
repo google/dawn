@@ -936,7 +936,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_z) {
 }
 
 TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_NonPlain) {
-    auto* ret_type = ty.pointer(Source{{12, 34}}, ty.i32(), type::AddressSpace::kFunction);
+    auto ret_type = ty.pointer(Source{{12, 34}}, ty.i32(), type::AddressSpace::kFunction);
     Func("f", utils::Empty, ret_type, utils::Empty);
 
     EXPECT_FALSE(r()->Resolve());
@@ -944,7 +944,7 @@ TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_NonPlain) {
 }
 
 TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_AtomicInt) {
-    auto* ret_type = ty.atomic(Source{{12, 34}}, ty.i32());
+    auto ret_type = ty.atomic(Source{{12, 34}}, ty.i32());
     Func("f", utils::Empty, ret_type, utils::Empty);
 
     EXPECT_FALSE(r()->Resolve());
@@ -952,7 +952,7 @@ TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_AtomicInt) {
 }
 
 TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_ArrayOfAtomic) {
-    auto* ret_type = ty.array(Source{{12, 34}}, ty.atomic(ty.i32()), 10_u);
+    auto ret_type = ty.array(Source{{12, 34}}, ty.atomic(ty.i32()), 10_u);
     Func("f", utils::Empty, ret_type, utils::Empty);
 
     EXPECT_FALSE(r()->Resolve());
@@ -963,7 +963,7 @@ TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_StructOfAtomic) {
     Structure("S", utils::Vector{
                        Member("m", ty.atomic(ty.i32())),
                    });
-    auto* ret_type = ty(Source{{12, 34}}, "S");
+    auto ret_type = ty(Source{{12, 34}}, "S");
     Func("f", utils::Empty, ret_type, utils::Empty);
 
     EXPECT_FALSE(r()->Resolve());
@@ -971,7 +971,7 @@ TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_StructOfAtomic) {
 }
 
 TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_RuntimeArray) {
-    auto* ret_type = ty.array(Source{{12, 34}}, ty.i32());
+    auto ret_type = ty.array(Source{{12, 34}}, ty.i32());
     Func("f", utils::Empty, ret_type, utils::Empty);
 
     EXPECT_FALSE(r()->Resolve());
@@ -982,7 +982,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterStoreType_NonAtomicFree) {
     Structure("S", utils::Vector{
                        Member("m", ty.atomic(ty.i32())),
                    });
-    auto* ret_type = ty(Source{{12, 34}}, "S");
+    auto ret_type = ty(Source{{12, 34}}, "S");
     auto* bar = Param("bar", ret_type);
     Func("f", utils::Vector{bar}, ty.void_(), utils::Empty);
 
@@ -994,7 +994,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterSotreType_AtomicFree) {
     Structure("S", utils::Vector{
                        Member("m", ty.i32()),
                    });
-    auto* ret_type = ty(Source{{12, 34}}, "S");
+    auto ret_type = ty(Source{{12, 34}}, "S");
     auto* bar = Param(Source{{12, 34}}, "bar", ret_type);
     Func("f", utils::Vector{bar}, ty.void_(), utils::Empty);
 
@@ -1025,29 +1025,28 @@ TEST_F(ResolverFunctionValidationTest, ParametersOverLimit) {
 TEST_F(ResolverFunctionValidationTest, ParameterVectorNoType) {
     // fn f(p : vec3) {}
 
-    Func(Source{{12, 34}}, "f",
-         utils::Vector{Param("p", create<ast::Vector>(Source{{12, 34}}, nullptr, 3u))}, ty.void_(),
-         utils::Empty);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
-}
-
-TEST_F(ResolverFunctionValidationTest, ParameterMatrixNoType) {
-    // fn f(p : vec3) {}
-
-    Func(Source{{12, 34}}, "f",
-         utils::Vector{Param("p", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3u, 3u))},
+    Func(Source{{12, 34}}, "f", utils::Vector{Param("p", ty.vec3<Infer>(Source{{12, 34}}))},
          ty.void_(), utils::Empty);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
+    EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'vec3'");
+}
+
+TEST_F(ResolverFunctionValidationTest, ParameterMatrixNoType) {
+    // fn f(p : mat3x3) {}
+
+    Func(Source{{12, 34}}, "f", utils::Vector{Param("p", ty.mat3x3<Infer>(Source{{12, 34}}))},
+         ty.void_(), utils::Empty);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'mat3x3'");
 }
 
 enum class Expectation {
     kAlwaysPass,
     kPassWithFullPtrParameterExtension,
     kAlwaysFail,
+    kInvalid,
 };
 struct TestParams {
     type::AddressSpace address_space;
@@ -1059,7 +1058,7 @@ struct TestWithParams : ResolverTestWithParam<TestParams> {};
 using ResolverFunctionParameterValidationTest = TestWithParams;
 TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceNoExtension) {
     auto& param = GetParam();
-    auto* ptr_type = ty.pointer(Source{{12, 34}}, ty.i32(), param.address_space);
+    auto ptr_type = ty("ptr", Ident(Source{{12, 34}}, param.address_space), ty.i32());
     auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
     Func("f", utils::Vector{arg}, ty.void_(), utils::Empty);
 
@@ -1069,37 +1068,48 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceNoExtension) {
         std::stringstream ss;
         ss << param.address_space;
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: function parameter of pointer type cannot be in '" +
-                                    ss.str() + "' address space");
+        if (param.expectation == Expectation::kInvalid) {
+            EXPECT_EQ(r()->error(), "12:34 error: unknown identifier: '" + ss.str() + "'");
+        } else {
+            EXPECT_EQ(r()->error(),
+                      "12:34 error: function parameter of pointer type cannot be in '" + ss.str() +
+                          "' address space");
+        }
     }
 }
 TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithExtension) {
     auto& param = GetParam();
-    auto* ptr_type = ty.pointer(Source{{12, 34}}, ty.i32(), param.address_space);
+    auto ptr_type = ty("ptr", Ident(Source{{12, 34}}, param.address_space), ty.i32());
     auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
     Enable(ast::Extension::kChromiumExperimentalFullPtrParameters);
     Func("f", utils::Vector{arg}, ty.void_(), utils::Empty);
 
-    if (param.expectation != Expectation::kAlwaysFail) {
+    if (param.expectation == Expectation::kAlwaysPass ||
+        param.expectation == Expectation::kPassWithFullPtrParameterExtension) {
         ASSERT_TRUE(r()->Resolve()) << r()->error();
     } else {
         std::stringstream ss;
         ss << param.address_space;
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: function parameter of pointer type cannot be in '" +
-                                    ss.str() + "' address space");
+        if (param.expectation == Expectation::kInvalid) {
+            EXPECT_EQ(r()->error(), "12:34 error: unknown identifier: '" + ss.str() + "'");
+        } else {
+            EXPECT_EQ(r()->error(),
+                      "12:34 error: function parameter of pointer type cannot be in '" + ss.str() +
+                          "' address space");
+        }
     }
 }
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverFunctionParameterValidationTest,
     testing::Values(
-        TestParams{type::AddressSpace::kNone, Expectation::kAlwaysFail},
-        TestParams{type::AddressSpace::kIn, Expectation::kAlwaysFail},
-        TestParams{type::AddressSpace::kOut, Expectation::kAlwaysFail},
+        TestParams{type::AddressSpace::kNone, Expectation::kInvalid},
+        TestParams{type::AddressSpace::kIn, Expectation::kInvalid},
+        TestParams{type::AddressSpace::kOut, Expectation::kInvalid},
         TestParams{type::AddressSpace::kUniform, Expectation::kPassWithFullPtrParameterExtension},
         TestParams{type::AddressSpace::kWorkgroup, Expectation::kPassWithFullPtrParameterExtension},
-        TestParams{type::AddressSpace::kHandle, Expectation::kAlwaysFail},
+        TestParams{type::AddressSpace::kHandle, Expectation::kInvalid},
         TestParams{type::AddressSpace::kStorage, Expectation::kPassWithFullPtrParameterExtension},
         TestParams{type::AddressSpace::kPrivate, Expectation::kAlwaysPass},
         TestParams{type::AddressSpace::kFunction, Expectation::kAlwaysPass}));

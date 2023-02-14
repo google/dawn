@@ -37,9 +37,8 @@ struct MatrixInfo {
     /// The type of the matrix
     const type::Matrix* matrix = nullptr;
 
-    /// @returns a new ast::Array that holds an vector column for each row of the
-    /// matrix.
-    const ast::Array* array(ProgramBuilder* b) const {
+    /// @returns the identifier of an array that holds an vector column for each row of the matrix.
+    ast::Type array(ProgramBuilder* b) const {
         return b->ty.array(b->ty.vec<f32>(matrix->rows()), u32(matrix->columns()),
                            utils::Vector{
                                b->Stride(stride),

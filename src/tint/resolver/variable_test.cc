@@ -902,7 +902,7 @@ TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
     auto* c_vu32 = Const("e", ty.vec3<u32>(), vec3<u32>());
     auto* c_vf32 = Const("f", ty.vec3<f32>(), vec3<f32>());
     auto* c_mf32 = Const("g", ty.mat3x3<f32>(), mat3x3<f32>());
-    auto* c_s = Const("h", ty("S"), Call(ty("S")));
+    auto* c_s = Const("h", ty("S"), Call("S"));
 
     WrapInFunction(c_i32, c_u32, c_f32, c_vi32, c_vu32, c_vf32, c_mf32, c_s);
 
@@ -947,14 +947,14 @@ TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
     auto* c_vi32 = Const("f", vec3<i32>());
     auto* c_vu32 = Const("g", vec3<u32>());
     auto* c_vf32 = Const("h", vec3<f32>());
-    auto* c_vai = Const("i", Call(ty.vec(nullptr, 3), Expr(0_a)));
-    auto* c_vaf = Const("j", Call(ty.vec(nullptr, 3), Expr(0._a)));
+    auto* c_vai = Const("i", Call(ty.vec<Infer>(3), Expr(0_a)));
+    auto* c_vaf = Const("j", Call(ty.vec<Infer>(3), Expr(0._a)));
     auto* c_mf32 = Const("k", mat3x3<f32>());
     auto* c_maf32 =
-        Const("l", Call(ty.mat(nullptr, 3, 3),  //
-                        Call(ty.vec(nullptr, 3), Expr(0._a)), Call(ty.vec(nullptr, 3), Expr(0._a)),
-                        Call(ty.vec(nullptr, 3), Expr(0._a))));
-    auto* c_s = Const("m", Call(ty("S")));
+        Const("l", Call(ty.mat3x3<Infer>(),  //
+                        Call(ty.vec<Infer>(3), Expr(0._a)), Call(ty.vec<Infer>(3), Expr(0._a)),
+                        Call(ty.vec<Infer>(3), Expr(0._a))));
+    auto* c_s = Const("m", Call("S"));
 
     WrapInFunction(c_i32, c_u32, c_f32, c_ai, c_af, c_vi32, c_vu32, c_vf32, c_vai, c_vaf, c_mf32,
                    c_maf32, c_s);
@@ -1123,13 +1123,13 @@ TEST_F(ResolverVariableTest, GlobalConst_ImplicitType_Decls) {
     auto* c_vi32 = GlobalConst("f", vec3<i32>());
     auto* c_vu32 = GlobalConst("g", vec3<u32>());
     auto* c_vf32 = GlobalConst("h", vec3<f32>());
-    auto* c_vai = GlobalConst("i", Call(ty.vec(nullptr, 3), Expr(0_a)));
-    auto* c_vaf = GlobalConst("j", Call(ty.vec(nullptr, 3), Expr(0._a)));
+    auto* c_vai = GlobalConst("i", Call(ty.vec<Infer>(3), Expr(0_a)));
+    auto* c_vaf = GlobalConst("j", Call(ty.vec<Infer>(3), Expr(0._a)));
     auto* c_mf32 = GlobalConst("k", mat3x3<f32>());
     auto* c_maf32 = GlobalConst(
-        "l", Call(ty.mat(nullptr, 3, 3),  //
-                  Call(ty.vec(nullptr, 3), Expr(0._a)), Call(ty.vec(nullptr, 3), Expr(0._a)),
-                  Call(ty.vec(nullptr, 3), Expr(0._a))));
+        "l", Call(ty.mat3x3<Infer>(),  //
+                  Call(ty.vec<Infer>(3), Expr(0._a)), Call(ty.vec<Infer>(3), Expr(0._a)),
+                  Call(ty.vec<Infer>(3), Expr(0._a))));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 

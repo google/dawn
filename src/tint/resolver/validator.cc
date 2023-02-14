@@ -19,7 +19,6 @@
 #include <utility>
 
 #include "src/tint/ast/alias.h"
-#include "src/tint/ast/array.h"
 #include "src/tint/ast/assignment_statement.h"
 #include "src/tint/ast/bitcast_expression.h"
 #include "src/tint/ast/break_statement.h"
@@ -33,16 +32,11 @@
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/loop_statement.h"
-#include "src/tint/ast/matrix.h"
-#include "src/tint/ast/pointer.h"
 #include "src/tint/ast/return_statement.h"
-#include "src/tint/ast/sampled_texture.h"
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/traverse_expressions.h"
-#include "src/tint/ast/type_name.h"
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/ast/variable_decl_statement.h"
-#include "src/tint/ast/vector.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/sem/break_if_statement.h"
 #include "src/tint/sem/call.h"
@@ -283,28 +277,28 @@ const ast::Statement* Validator::ClosestContinuing(bool stop_at_loop,
     return nullptr;
 }
 
-bool Validator::Atomic(const ast::Atomic* a, const type::Atomic* s) const {
+bool Validator::Atomic(const ast::TemplatedIdentifier* a, const type::Atomic* s) const {
     // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
     // T must be either u32 or i32.
     if (!s->Type()->IsAnyOf<type::U32, type::I32>()) {
-        AddError("atomic only supports i32 or u32 types", a->type ? a->type->source : a->source);
+        AddError("atomic only supports i32 or u32 types", a->arguments[0]->source);
         return false;
     }
     return true;
 }
 
-bool Validator::Pointer(const ast::Pointer* a, const type::Pointer* s) const {
+bool Validator::Pointer(const ast::TemplatedIdentifier* a, const type::Pointer* s) const {
     if (s->AddressSpace() == type::AddressSpace::kUndefined) {
         AddError("ptr missing address space", a->source);
         return false;
     }
 
-    if (a->access != type::Access::kUndefined) {
+    if (a->arguments.Length() > 2) {  // ptr<address-space, type [, access]>
         // https://www.w3.org/TR/WGSL/#access-mode-defaults
         // When writing a variable declaration or a pointer type in WGSL source:
         // * For the storage address space, the access mode is optional, and defaults to read.
         // * For other address spaces, the access mode must not be written.
-        if (a->address_space != type::AddressSpace::kStorage) {
+        if (s->AddressSpace() != type::AddressSpace::kStorage) {
             AddError("only pointers in <storage> address space may declare an access mode",
                      a->source);
             return false;
@@ -1567,10 +1561,10 @@ bool Validator::BuiltinCall(const sem::Call* call) const {
         }
         if (!is_call_statement) {
             // https://gpuweb.github.io/gpuweb/wgsl/#function-call-expr
-            // If the called function does not return a value, a function call
-            // statement should be used instead.
-            auto* ident = call->Declaration()->target.name;
-            auto name = symbols_.NameFor(ident->symbol);
+            // If the called function does not return a value, a function call statement should be
+            // used instead.
+            auto* builtin = call->Target()->As<sem::Builtin>();
+            auto name = utils::ToString(builtin->Type());
             AddError("builtin '" + name + "' does not return a value", call->Declaration()->source);
             return false;
         }
@@ -1685,7 +1679,7 @@ bool Validator::CheckF16Enabled(const Source& source) const {
 bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_statement) const {
     auto* decl = call->Declaration();
     auto* target = call->Target()->As<sem::Function>();
-    auto sym = decl->target.name->symbol;
+    auto sym = target->Declaration()->name->symbol;
     auto name = symbols_.NameFor(sym);
 
     if (!current_statement) {  // Function call at module-scope.
@@ -1852,16 +1846,16 @@ bool Validator::ArrayInitializer(const ast::CallExpression* ctor,
     return true;
 }
 
-bool Validator::Vector(const type::Vector* ty, const Source& source) const {
-    if (!ty->type()->is_scalar()) {
+bool Validator::Vector(const type::Type* el_ty, const Source& source) const {
+    if (!el_ty->is_scalar()) {
         AddError("vector element type must be 'bool', 'f32', 'f16', 'i32' or 'u32'", source);
         return false;
     }
     return true;
 }
 
-bool Validator::Matrix(const type::Matrix* ty, const Source& source) const {
-    if (!ty->is_float_matrix()) {
+bool Validator::Matrix(const type::Type* el_ty, const Source& source) const {
+    if (!el_ty->is_float_scalar()) {
         AddError("matrix element type must be 'f32' or 'f16'", source);
         return false;
     }

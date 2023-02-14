@@ -369,52 +369,51 @@ TEST_F(ResolverVariableValidationTest, InvalidAddressSpaceForInitializer) {
 }
 
 TEST_F(ResolverVariableValidationTest, VectorConstNoType) {
-    // const a : mat3x3 = mat3x3<f32>();
-    WrapInFunction(Const("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3u), vec3<f32>()));
+    // const a vec3 = vec3<f32>();
+    WrapInFunction(Const("a", ty.vec3<Infer>(Source{{12, 34}}), vec3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
+    EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'vec3'");
 }
 
 TEST_F(ResolverVariableValidationTest, VectorLetNoType) {
-    // let a : mat3x3 = mat3x3<f32>();
-    WrapInFunction(Let("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3u), vec3<f32>()));
+    // let a : vec3 = vec3<f32>();
+    WrapInFunction(Let("a", ty.vec3<Infer>(Source{{12, 34}}), vec3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
+    EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'vec3'");
 }
 
 TEST_F(ResolverVariableValidationTest, VectorVarNoType) {
-    // var a : mat3x3;
-    WrapInFunction(Var("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3u)));
+    // var a : vec3;
+    WrapInFunction(Var("a", ty.vec3<Infer>(Source{{12, 34}})));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
+    EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'vec3'");
 }
 
 TEST_F(ResolverVariableValidationTest, MatrixConstNoType) {
     // const a : mat3x3 = mat3x3<f32>();
-    WrapInFunction(
-        Const("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3u, 3u), mat3x3<f32>()));
+    WrapInFunction(Const("a", ty.mat3x3<Infer>(Source{{12, 34}}), mat3x3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
+    EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'mat3x3'");
 }
 
 TEST_F(ResolverVariableValidationTest, MatrixLetNoType) {
     // let a : mat3x3 = mat3x3<f32>();
-    WrapInFunction(Let("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3u, 3u), mat3x3<f32>()));
+    WrapInFunction(Let("a", ty.mat3x3<Infer>(Source{{12, 34}}), mat3x3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
+    EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'mat3x3'");
 }
 
 TEST_F(ResolverVariableValidationTest, MatrixVarNoType) {
     // var a : mat3x3;
-    WrapInFunction(Var("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3u, 3u)));
+    WrapInFunction(Var("a", ty.mat3x3<Infer>(Source{{12, 34}})));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
+    EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'mat3x3'");
 }
 
 TEST_F(ResolverVariableValidationTest, GlobalConstWithRuntimeExpression) {

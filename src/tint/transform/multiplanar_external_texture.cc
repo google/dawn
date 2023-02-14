@@ -34,8 +34,8 @@ namespace {
 
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
-        if (auto* ty = node->As<ast::Type>()) {
-            if (program->Sem().Get<type::ExternalTexture>(ty)) {
+        if (auto* expr = node->As<ast::Expression>()) {
+            if (Is<type::ExternalTexture>(program->TypeOf(expr))) {
                 return true;
             }
         }
@@ -263,7 +263,8 @@ struct MultiplanarExternalTexture::State {
             b.Member("gammaDecodeParams", b.ty("GammaTransferParams")),
             b.Member("gammaEncodeParams", b.ty("GammaTransferParams")),
             b.Member("gamutConversionMatrix", b.ty.mat3x3<f32>()),
-            b.Member("coordTransformationMatrix", b.ty.mat3x2<f32>())};
+            b.Member("coordTransformationMatrix", b.ty.mat3x2<f32>()),
+        };
 
         params_struct_sym = b.Symbols().New("ExternalTextureParams");
 

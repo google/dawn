@@ -88,7 +88,7 @@ TEST_F(ResolverPtrRefTest, DefaultPtrAddressSpace) {
 
     WrapInFunction(function, function_ptr, private_ptr, workgroup_ptr, uniform_ptr, storage_ptr);
 
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_TRUE(TypeOf(function_ptr)->Is<type::Pointer>())
         << "function_ptr is " << TypeOf(function_ptr)->TypeInfo().name;

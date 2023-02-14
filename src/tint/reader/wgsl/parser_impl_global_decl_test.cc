@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {
@@ -33,7 +34,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
 
     auto* v = program.AST().GlobalVariables()[0];
     EXPECT_EQ(v->name->symbol, program.Symbols().Get("a"));
-    EXPECT_TRUE(Is<ast::Vector>(v->type));
+    ast::CheckIdentifier(program.Symbols(), v->type, ast::Template("vec2", "i32"));
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Inferred) {
@@ -106,9 +107,8 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
     auto program = p->program();
     ASSERT_EQ(program.AST().TypeDecls().Length(), 1u);
     ASSERT_TRUE(program.AST().TypeDecls()[0]->Is<ast::Alias>());
-    EXPECT_EQ(
-        program.Symbols().NameFor(program.AST().TypeDecls()[0]->As<ast::Alias>()->name->symbol),
-        "A");
+    ast::CheckIdentifier(program.Symbols(), program.AST().TypeDecls()[0]->As<ast::Alias>()->name,
+                         "A");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
@@ -129,9 +129,7 @@ alias B = A;)");
     ASSERT_TRUE(program.AST().TypeDecls()[1]->Is<ast::Alias>());
     auto* alias = program.AST().TypeDecls()[1]->As<ast::Alias>();
     EXPECT_EQ(alias->name->symbol, program.Symbols().Get("B"));
-    auto* tn = alias->type->As<ast::TypeName>();
-    EXPECT_NE(tn, nullptr);
-    EXPECT_EQ(tn->name->symbol, str->name->symbol);
+    ast::CheckIdentifier(program.Symbols(), alias->type, "A");
 }
 
 // TODO(crbug.com/tint/1812): DEPRECATED
@@ -143,9 +141,8 @@ TEST_F(ParserImplTest, DEPRECATED_GlobalDecl_TypeAlias) {
     auto program = p->program();
     ASSERT_EQ(program.AST().TypeDecls().Length(), 1u);
     ASSERT_TRUE(program.AST().TypeDecls()[0]->Is<ast::Alias>());
-    EXPECT_EQ(
-        program.Symbols().NameFor(program.AST().TypeDecls()[0]->As<ast::Alias>()->name->symbol),
-        "A");
+    ast::CheckIdentifier(program.Symbols(), program.AST().TypeDecls()[0]->As<ast::Alias>()->name,
+                         "A");
 }
 
 // TODO(crbug.com/tint/1812): DEPRECATED
@@ -167,9 +164,7 @@ type B = A;)");
     ASSERT_TRUE(program.AST().TypeDecls()[1]->Is<ast::Alias>());
     auto* alias = program.AST().TypeDecls()[1]->As<ast::Alias>();
     EXPECT_EQ(alias->name->symbol, program.Symbols().Get("B"));
-    auto* tn = alias->type->As<ast::TypeName>();
-    EXPECT_NE(tn, nullptr);
-    EXPECT_EQ(tn->name->symbol, str->name->symbol);
+    ast::CheckIdentifier(program.Symbols(), alias->type, "A");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_MissingSemicolon) {
@@ -196,7 +191,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
 
     auto program = p->program();
     ASSERT_EQ(program.AST().Functions().Length(), 1u);
-    EXPECT_EQ(program.Symbols().NameFor(program.AST().Functions()[0]->name->symbol), "main");
+    ast::CheckIdentifier(program.Symbols(), program.AST().Functions()[0]->name, "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_WithAttribute) {
@@ -206,7 +201,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function_WithAttribute) {
 
     auto program = p->program();
     ASSERT_EQ(program.AST().Functions().Length(), 1u);
-    EXPECT_EQ(program.Symbols().NameFor(program.AST().Functions()[0]->name->symbol), "main");
+    ast::CheckIdentifier(program.Symbols(), program.AST().Functions()[0]->name, "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {

@@ -154,7 +154,7 @@ TEST_F(ResolverLoadTest, MultiComponentSwizzle) {
     // var ref = vec4(1);
     // var v = ref.xyz;
     auto* ident = Expr("ref");
-    WrapInFunction(Var("ref", Call(ty.vec4<i32>(), 1_i)),  //
+    WrapInFunction(Var("ref", vec4<i32>(1_i)),  //
                    Var("v", MemberAccessor(ident, "xyz")));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -230,7 +230,7 @@ TEST_F(ResolverLoadTest, FunctionArg_Handles) {
          },
          ty.vec4<f32>(),
          utils::Vector{
-             Return(Call("textureSampleLevel", "tp", "sp", Call(ty.vec2<f32>()), 0_a)),
+             Return(Call("textureSampleLevel", "tp", "sp", vec2<f32>(), 0_a)),
          });
     auto* t_ident = Expr("t");
     auto* s_ident = Expr("s");

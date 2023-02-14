@@ -17,12 +17,8 @@
 
 #include <string>
 
+#include "src/tint/ast/type.h"
 #include "src/tint/ast/type_decl.h"
-
-// Forward declarations
-namespace tint::ast {
-class Type;
-}  // namespace tint::ast
 
 namespace tint::ast {
 
@@ -35,11 +31,7 @@ class Alias final : public Castable<Alias, TypeDecl> {
     /// @param src the source of this node
     /// @param name the symbol for the alias
     /// @param subtype the alias'd type
-    Alias(ProgramID pid,
-          NodeID nid,
-          const Source& src,
-          const Identifier* name,
-          const Type* subtype);
+    Alias(ProgramID pid, NodeID nid, const Source& src, const Identifier* name, Type subtype);
     /// Move constructor
     Alias(Alias&&);
     /// Destructor
@@ -51,7 +43,7 @@ class Alias final : public Castable<Alias, TypeDecl> {
     const Alias* Clone(CloneContext* ctx) const override;
 
     /// the alias type
-    const Type* const type;
+    const Type type;
 };
 
 }  // namespace tint::ast

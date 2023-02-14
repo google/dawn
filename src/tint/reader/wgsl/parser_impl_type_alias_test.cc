@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {
@@ -27,9 +28,7 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
     ASSERT_NE(t.value, nullptr);
     ASSERT_TRUE(t->Is<ast::Alias>());
     auto* alias = t->As<ast::Alias>();
-    ASSERT_TRUE(alias->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(alias->type->As<ast::TypeName>()->name->symbol),
-              "i32");
+    ast::CheckIdentifier(p->builder().Symbols(), alias->type, "i32");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 13u}}));
 }
 
@@ -43,8 +42,8 @@ TEST_F(ParserImplTest, TypeDecl_Parses_Ident) {
     ASSERT_NE(t.value, nullptr);
     ASSERT_TRUE(t.value->Is<ast::Alias>());
     auto* alias = t.value->As<ast::Alias>();
-    EXPECT_EQ(p->builder().Symbols().NameFor(alias->name->symbol), "a");
-    EXPECT_TRUE(alias->type->Is<ast::TypeName>());
+    ast::CheckIdentifier(p->builder().Symbols(), alias->name, "a");
+    ast::CheckIdentifier(p->builder().Symbols(), alias->type, "B");
     EXPECT_EQ(alias->source.range, (Source::Range{{1u, 1u}, {1u, 11u}}));
 }
 
@@ -62,10 +61,8 @@ TEST_F(ParserImplTest, TypeDecl_Unicode_Parses_Ident) {
     ASSERT_NE(t.value, nullptr);
     ASSERT_TRUE(t.value->Is<ast::Alias>());
     auto* alias = t.value->As<ast::Alias>();
-    EXPECT_EQ(p->builder().Symbols().NameFor(alias->name->symbol), ident);
-    ASSERT_TRUE(alias->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(alias->type->As<ast::TypeName>()->name->symbol),
-              "i32");
+    ast::CheckIdentifier(p->builder().Symbols(), alias->name, ident);
+    ast::CheckIdentifier(p->builder().Symbols(), alias->type, "i32");
     EXPECT_EQ(alias->source.range, (Source::Range{{1u, 1u}, {1u, 37u}}));
 }
 

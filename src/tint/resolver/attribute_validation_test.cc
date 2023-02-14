@@ -849,7 +849,7 @@ using ArrayAttributeTest = TestWithParams;
 TEST_P(ArrayAttributeTest, IsValid) {
     auto& params = GetParam();
 
-    auto* arr = ty.array(ty.f32(), nullptr, createAttributes(Source{{12, 34}}, *this, params.kind));
+    auto arr = ty.array(ty.f32(), createAttributes(Source{{12, 34}}, *this, params.kind));
     Structure("mystruct", utils::Vector{
                               Member("a", arr),
                           });
@@ -1145,17 +1145,17 @@ struct TestWithParams : ResolverTestWithParam<Params> {};
 using ArrayStrideTest = TestWithParams;
 TEST_P(ArrayStrideTest, All) {
     auto& params = GetParam();
-    auto* el_ty = params.create_el_type(*this);
+    ast::Type el_ty = params.create_el_type(*this);
 
     std::stringstream ss;
     ss << "el_ty: " << FriendlyName(el_ty) << ", stride: " << params.stride
        << ", should_pass: " << params.should_pass;
     SCOPED_TRACE(ss.str());
 
-    auto* arr = ty.array(el_ty, 4_u,
-                         utils::Vector{
-                             create<ast::StrideAttribute>(Source{{12, 34}}, params.stride),
-                         });
+    auto arr = ty.array(el_ty, 4_u,
+                        utils::Vector{
+                            create<ast::StrideAttribute>(Source{{12, 34}}, params.stride),
+                        });
 
     GlobalVar("myarray", arr, type::AddressSpace::kPrivate);
 
@@ -1234,11 +1234,11 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                              ParamsFor<mat4x4<f32>>((default_mat4x4.align - 1) * 7, false)));
 
 TEST_F(ArrayStrideTest, DuplicateAttribute) {
-    auto* arr = ty.array(Source{{12, 34}}, ty.i32(), 4_u,
-                         utils::Vector{
-                             create<ast::StrideAttribute>(Source{{12, 34}}, 4u),
-                             create<ast::StrideAttribute>(Source{{56, 78}}, 4u),
-                         });
+    auto arr = ty.array(Source{{12, 34}}, ty.i32(), 4_u,
+                        utils::Vector{
+                            create<ast::StrideAttribute>(Source{{12, 34}}, 4u),
+                            create<ast::StrideAttribute>(Source{{56, 78}}, 4u),
+                        });
 
     GlobalVar("myarray", arr, type::AddressSpace::kPrivate);
 

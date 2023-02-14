@@ -196,10 +196,6 @@ class TextGenerator {
     /// @param expr the expression
     const type::Type* TypeOf(const ast::Expression* expr) const { return builder_.TypeOf(expr); }
 
-    /// @returns the resolved type of the ast::Type `type`
-    /// @param type the type
-    const type::Type* TypeOf(const ast::Type* type) const { return builder_.TypeOf(type); }
-
     /// @returns the resolved type of the ast::TypeDecl `type_decl`
     /// @param type_decl the type
     const type::Type* TypeOf(const ast::TypeDecl* type_decl) const {

@@ -21,6 +21,7 @@
 #include "src/tint/ast/module.h"
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/sem/builtin_type.h"
+#include "src/tint/symbol_table.h"
 #include "src/tint/type/access.h"
 #include "src/tint/type/builtin.h"
 #include "src/tint/type/texel_format.h"

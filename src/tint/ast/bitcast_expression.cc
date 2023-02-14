@@ -23,7 +23,7 @@ namespace tint::ast {
 BitcastExpression::BitcastExpression(ProgramID pid,
                                      NodeID nid,
                                      const Source& src,
-                                     const Type* t,
+                                     Type t,
                                      const Expression* e)
     : Base(pid, nid, src), type(t), expr(e) {
     TINT_ASSERT(AST, type);
@@ -37,7 +37,7 @@ BitcastExpression::~BitcastExpression() = default;
 const BitcastExpression* BitcastExpression::Clone(CloneContext* ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx->Clone(source);
-    auto* t = ctx->Clone(type);
+    auto t = ctx->Clone(type);
     auto* e = ctx->Clone(expr);
     return ctx->dst->create<BitcastExpression>(src, t, e);
 }

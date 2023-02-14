@@ -44,11 +44,6 @@ TEST_F(IdentifierExpressionTest, Creation_WithSource) {
     EXPECT_EQ(i->identifier->source.range, (Source::Range{{20, 2}}));
 }
 
-TEST_F(IdentifierExpressionTest, IsIdentifier) {
-    auto* i = Expr("ident");
-    EXPECT_TRUE(i->Is<IdentifierExpression>());
-}
-
 TEST_F(IdentifierExpressionTest, Assert_InvalidSymbol) {
     EXPECT_FATAL_FAILURE(
         {

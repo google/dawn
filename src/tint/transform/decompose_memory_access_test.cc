@@ -1584,16 +1584,16 @@ fn tint_symbol_33(@internal(disable_validation__function_parameter) buffer : ptr
 }
 
 fn tint_symbol_34(@internal(disable_validation__function_parameter) buffer : ptr<storage, SB, read_write>, offset : u32, value : array<vec3<f32>, 2u>) {
-  var array = value;
+  var array_1 = value;
   for(var i = 0u; (i < 2u); i = (i + 1u)) {
-    tint_symbol_8(buffer, (offset + (i * 16u)), array[i]);
+    tint_symbol_8(buffer, (offset + (i * 16u)), array_1[i]);
   }
 }
 
 fn tint_symbol_35(@internal(disable_validation__function_parameter) buffer : ptr<storage, SB, read_write>, offset : u32, value : array<mat4x2<f16>, 2u>) {
-  var array_1 = value;
+  var array_2 = value;
   for(var i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
-    tint_symbol_31(buffer, (offset + (i_1 * 16u)), array_1[i_1]);
+    tint_symbol_31(buffer, (offset + (i_1 * 16u)), array_2[i_1]);
   }
 }
 
@@ -1889,16 +1889,16 @@ fn tint_symbol_33(@internal(disable_validation__function_parameter) buffer : ptr
 }
 
 fn tint_symbol_34(@internal(disable_validation__function_parameter) buffer : ptr<storage, SB, read_write>, offset : u32, value : array<vec3<f32>, 2u>) {
-  var array = value;
+  var array_1 = value;
   for(var i = 0u; (i < 2u); i = (i + 1u)) {
-    tint_symbol_8(buffer, (offset + (i * 16u)), array[i]);
+    tint_symbol_8(buffer, (offset + (i * 16u)), array_1[i]);
   }
 }
 
 fn tint_symbol_35(@internal(disable_validation__function_parameter) buffer : ptr<storage, SB, read_write>, offset : u32, value : array<mat4x2<f16>, 2u>) {
-  var array_1 = value;
+  var array_2 = value;
   for(var i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
-    tint_symbol_31(buffer, (offset + (i_1 * 16u)), array_1[i_1]);
+    tint_symbol_31(buffer, (offset + (i_1 * 16u)), array_2[i_1]);
   }
 }
 
@@ -2733,16 +2733,16 @@ fn tint_symbol_34(@internal(disable_validation__function_parameter) buffer : ptr
 }
 
 fn tint_symbol_35(@internal(disable_validation__function_parameter) buffer : ptr<storage, SB, read_write>, offset : u32, value : array<vec3<f32>, 2u>) {
-  var array = value;
+  var array_1 = value;
   for(var i = 0u; (i < 2u); i = (i + 1u)) {
-    tint_symbol_9(buffer, (offset + (i * 16u)), array[i]);
+    tint_symbol_9(buffer, (offset + (i * 16u)), array_1[i]);
   }
 }
 
 fn tint_symbol_36(@internal(disable_validation__function_parameter) buffer : ptr<storage, SB, read_write>, offset : u32, value : array<mat4x2<f16>, 2u>) {
-  var array_1 = value;
+  var array_2 = value;
   for(var i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
-    tint_symbol_32(buffer, (offset + (i_1 * 16u)), array_1[i_1]);
+    tint_symbol_32(buffer, (offset + (i_1 * 16u)), array_2[i_1]);
   }
 }
 
@@ -3007,16 +3007,16 @@ fn tint_symbol_34(@internal(disable_validation__function_parameter) buffer : ptr
 }
 
 fn tint_symbol_35(@internal(disable_validation__function_parameter) buffer : ptr<storage, SB, read_write>, offset : u32, value : array<vec3<f32>, 2u>) {
-  var array = value;
+  var array_1 = value;
   for(var i = 0u; (i < 2u); i = (i + 1u)) {
-    tint_symbol_9(buffer, (offset + (i * 16u)), array[i]);
+    tint_symbol_9(buffer, (offset + (i * 16u)), array_1[i]);
   }
 }
 
 fn tint_symbol_36(@internal(disable_validation__function_parameter) buffer : ptr<storage, SB, read_write>, offset : u32, value : array<mat4x2<f16>, 2u>) {
-  var array_1 = value;
+  var array_2 = value;
   for(var i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
-    tint_symbol_32(buffer, (offset + (i_1 * 16u)), array_1[i_1]);
+    tint_symbol_32(buffer, (offset + (i_1 * 16u)), array_2[i_1]);
   }
 }
 

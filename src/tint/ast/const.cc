@@ -26,7 +26,7 @@ Const::Const(ProgramID pid,
              NodeID nid,
              const Source& src,
              const Identifier* n,
-             const ast::Type* ty,
+             Type ty,
              const Expression* init,
              utils::VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src, n, ty, init, std::move(attrs)) {
@@ -44,7 +44,7 @@ const char* Const::Kind() const {
 const Const* Const::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto n = ctx->Clone(name);
-    auto* ty = ctx->Clone(type);
+    auto ty = ctx->Clone(type);
     auto* init = ctx->Clone(initializer);
     auto attrs = ctx->Clone(attributes);
     return ctx->dst->create<Const>(src, n, ty, init, std::move(attrs));

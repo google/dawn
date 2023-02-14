@@ -22,6 +22,7 @@
 #include "src/tint/ast/binding_attribute.h"
 #include "src/tint/ast/expression.h"
 #include "src/tint/ast/group_attribute.h"
+#include "src/tint/ast/type.h"
 #include "src/tint/type/access.h"
 #include "src/tint/type/address_space.h"
 
@@ -29,7 +30,6 @@
 namespace tint::ast {
 class Identifier;
 class LocationAttribute;
-class Type;
 }  // namespace tint::ast
 
 namespace tint::ast {
@@ -54,7 +54,7 @@ class Variable : public Castable<Variable, Node> {
              NodeID nid,
              const Source& src,
              const Identifier* name,
-             const ast::Type* type,
+             Type type,
              const Expression* initializer,
              utils::VectorRef<const Attribute*> attributes);
 
@@ -80,7 +80,7 @@ class Variable : public Castable<Variable, Node> {
     /// The declared variable type. This is null if the type is inferred, e.g.:
     ///   let f = 1.0;
     ///   var i = 1;
-    const ast::Type* const type;
+    const Type type;
 
     /// The initializer expression or nullptr if none set
     const Expression* const initializer;

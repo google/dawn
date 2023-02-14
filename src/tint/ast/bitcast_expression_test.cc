@@ -24,17 +24,15 @@ using BitcastExpressionTest = TestHelper;
 
 TEST_F(BitcastExpressionTest, Create) {
     auto* expr = Expr("expr");
-
-    auto* exp = create<BitcastExpression>(ty.f32(), expr);
-    ASSERT_TRUE(exp->type->Is<ast::TypeName>());
-    EXPECT_EQ(Symbols().NameFor(exp->type->As<ast::TypeName>()->name->symbol), "f32");
+    auto* exp = Bitcast(ty.f32(), expr);
+    CheckIdentifier(Symbols(), exp->type, "f32");
     ASSERT_EQ(exp->expr, expr);
 }
 
 TEST_F(BitcastExpressionTest, CreateWithSource) {
     auto* expr = Expr("expr");
 
-    auto* exp = create<BitcastExpression>(Source{Source::Location{20, 2}}, ty.f32(), expr);
+    auto* exp = Bitcast(Source{Source::Location{20, 2}}, ty.f32(), expr);
     auto src = exp->source;
     EXPECT_EQ(src.range.begin.line, 20u);
     EXPECT_EQ(src.range.begin.column, 2u);
@@ -43,7 +41,7 @@ TEST_F(BitcastExpressionTest, CreateWithSource) {
 TEST_F(BitcastExpressionTest, IsBitcast) {
     auto* expr = Expr("expr");
 
-    auto* exp = create<BitcastExpression>(ty.f32(), expr);
+    auto* exp = Bitcast(ty.f32(), expr);
     EXPECT_TRUE(exp->Is<BitcastExpression>());
 }
 
@@ -51,7 +49,7 @@ TEST_F(BitcastExpressionTest, Assert_Null_Type) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<BitcastExpression>(nullptr, b.Expr("idx"));
+            b.Bitcast(ast::Type(), "idx");
         },
         "internal compiler error");
 }
@@ -60,7 +58,7 @@ TEST_F(BitcastExpressionTest, Assert_Null_Expr) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<BitcastExpression>(b.ty.f32(), nullptr);
+            b.Bitcast(b.ty.f32(), nullptr);
         },
         "internal compiler error");
 }
@@ -70,7 +68,7 @@ TEST_F(BitcastExpressionTest, Assert_DifferentProgramID_Expr) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<BitcastExpression>(b1.ty.f32(), b2.Expr("idx"));
+            b1.Bitcast(b1.ty.f32(), b2.Expr("idx"));
         },
         "internal compiler error");
 }

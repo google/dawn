@@ -15,6 +15,7 @@
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 #include "src/tint/ast/diagnostic_control.h"
+#include "src/tint/ast/test_helper.h"
 
 namespace tint::reader::wgsl {
 namespace {
@@ -32,7 +33,7 @@ TEST_P(DiagnosticControlParserTest, DiagnosticControl_Valid) {
 
     auto* r = e->rule_name;
     ASSERT_NE(r, nullptr);
-    EXPECT_EQ(p->builder().Symbols().NameFor(r->symbol), "foo");
+    ast::CheckIdentifier(p->builder().Symbols(), r, "foo");
 }
 INSTANTIATE_TEST_SUITE_P(DiagnosticControlParserTest,
                          DiagnosticControlParserTest,
@@ -50,7 +51,7 @@ TEST_F(ParserImplTest, DiagnosticControl_Valid_TrailingComma) {
 
     auto* r = e->rule_name;
     ASSERT_NE(r, nullptr);
-    EXPECT_EQ(p->builder().Symbols().NameFor(r->symbol), "foo");
+    ast::CheckIdentifier(p->builder().Symbols(), r, "foo");
 }
 
 TEST_F(ParserImplTest, DiagnosticControl_MissingOpenParen) {

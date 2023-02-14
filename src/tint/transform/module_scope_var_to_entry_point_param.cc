@@ -145,7 +145,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                 attributes.Push(ctx.dst->Disable(ast::DisabledValidation::kEntryPointParameter));
                 attributes.Push(ctx.dst->Disable(ast::DisabledValidation::kIgnoreAddressSpace));
 
-                auto* param_type = store_type();
+                auto param_type = store_type();
                 if (auto* arr = ty->As<type::Array>();
                     arr && arr->Count()->Is<type::RuntimeArrayCount>()) {
                     // Wrap runtime-sized arrays in structures, so that we can declare pointers to
@@ -230,7 +230,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                                        bool& is_pointer) {
         auto* var_ast = var->Declaration()->As<ast::Var>();
         auto* ty = var->Type()->UnwrapRef();
-        auto* param_type = CreateASTTypeFor(ctx, ty);
+        auto param_type = CreateASTTypeFor(ctx, ty);
         auto sc = var->AddressSpace();
         switch (sc) {
             case type::AddressSpace::kPrivate:
@@ -450,7 +450,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                 // The parameter is a struct that contains members for each workgroup variable.
                 auto* str =
                     ctx.dst->Structure(ctx.dst->Sym(), std::move(workgroup_parameter_members));
-                auto* param_type =
+                auto param_type =
                     ctx.dst->ty.pointer(ctx.dst->ty.Of(str), type::AddressSpace::kWorkgroup);
                 auto* param = ctx.dst->Param(
                     workgroup_param(), param_type,
@@ -463,8 +463,8 @@ struct ModuleScopeVarToEntryPointParam::State {
 
             // Pass the variables as pointers to any functions that need them.
             for (auto* call : calls_to_replace[func_ast]) {
-                auto* target = ctx.src->AST().Functions().Find(call->target.name->symbol);
-                auto* target_sem = ctx.src->Sem().Get(target);
+                auto* call_sem = ctx.src->Sem().Get(call)->Unwrap()->As<sem::Call>();
+                auto* target_sem = call_sem->Target()->As<sem::Function>();
 
                 // Add new arguments for any variables that are needed by the callee.
                 // For entry points, pass non-handle types as pointers.

@@ -15,6 +15,7 @@
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 #include "src/tint/ast/diagnostic_control.h"
+#include "src/tint/ast/test_helper.h"
 
 namespace tint::reader::wgsl {
 namespace {
@@ -29,7 +30,7 @@ TEST_F(ParserImplTest, DiagnosticAttribute_Valid) {
     EXPECT_EQ(d->control.severity, ast::DiagnosticSeverity::kOff);
     auto* r = d->control.rule_name;
     ASSERT_NE(r, nullptr);
-    EXPECT_EQ(p->builder().Symbols().NameFor(r->symbol), "foo");
+    ast::CheckIdentifier(p->builder().Symbols(), r, "foo");
 }
 
 }  // namespace

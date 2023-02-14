@@ -27,7 +27,7 @@ Function::Function(ProgramID pid,
                    const Source& src,
                    const Identifier* n,
                    utils::VectorRef<const Parameter*> parameters,
-                   const Type* return_ty,
+                   Type return_ty,
                    const BlockStatement* b,
                    utils::VectorRef<const Attribute*> attrs,
                    utils::VectorRef<const Attribute*> return_type_attrs)
@@ -73,7 +73,7 @@ const Function* Function::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto n = ctx->Clone(name);
     auto p = ctx->Clone(params);
-    auto* ret = ctx->Clone(return_type);
+    auto ret = ctx->Clone(return_type);
     auto* b = ctx->Clone(body);
     auto attrs = ctx->Clone(attributes);
     auto ret_attrs = ctx->Clone(return_type_attributes);

@@ -177,7 +177,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                         //   }
                         //   let y = x + tmp;
                         auto result = b.Sym();
-                        const ast::Type* result_ty = nullptr;
+                        ast::Type result_ty;
                         const ast::Statement* masked_call = nullptr;
                         if (builtin->Type() == sem::BuiltinType::kAtomicCompareExchangeWeak) {
                             // Special case for atomicCompareExchangeWeak as we cannot name its

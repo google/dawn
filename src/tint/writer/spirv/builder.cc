@@ -2243,9 +2243,9 @@ uint32_t Builder::GenerateCallExpression(const ast::CallExpression* expr) {
         });
 }
 
-uint32_t Builder::GenerateFunctionCall(const sem::Call* call, const sem::Function*) {
+uint32_t Builder::GenerateFunctionCall(const sem::Call* call, const sem::Function* fn) {
     auto* expr = call->Declaration();
-    auto* ident = expr->target.name;
+    auto* ident = fn->Declaration()->name;
 
     auto type_id = GenerateTypeIfNeeded(call->Type());
     if (type_id == 0) {

@@ -96,7 +96,7 @@ TEST_F(StorageTextureTest, FriendlyName) {
 }
 
 TEST_F(StorageTextureTest, F32) {
-    Type* s = Create(TextureDimension::k2dArray, type::TexelFormat::kRgba32Float,
+    auto* s = Create(TextureDimension::k2dArray, type::TexelFormat::kRgba32Float,
                      type::Access::kReadWrite);
 
     auto program = Build();
@@ -109,7 +109,7 @@ TEST_F(StorageTextureTest, F32) {
 
 TEST_F(StorageTextureTest, U32) {
     auto* subtype = StorageTexture::SubtypeFor(type::TexelFormat::kRg32Uint, Types());
-    Type* s = create<StorageTexture>(TextureDimension::k2dArray, type::TexelFormat::kRg32Uint,
+    auto* s = create<StorageTexture>(TextureDimension::k2dArray, type::TexelFormat::kRg32Uint,
                                      type::Access::kReadWrite, subtype);
 
     auto program = Build();
@@ -122,7 +122,7 @@ TEST_F(StorageTextureTest, U32) {
 
 TEST_F(StorageTextureTest, I32) {
     auto* subtype = StorageTexture::SubtypeFor(type::TexelFormat::kRgba32Sint, Types());
-    Type* s = create<StorageTexture>(TextureDimension::k2dArray, type::TexelFormat::kRgba32Sint,
+    auto* s = create<StorageTexture>(TextureDimension::k2dArray, type::TexelFormat::kRgba32Sint,
                                      type::Access::kReadWrite, subtype);
 
     auto program = Build();

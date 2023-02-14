@@ -1384,10 +1384,10 @@ TEST_F(BuilderTest, IndexAccessor_Mixed_ArrayAndMember) {
     auto* c_type = Structure("C", utils::Vector{Member("baz", ty.vec3<f32>())});
 
     auto* b_type = Structure("B", utils::Vector{Member("bar", ty.Of(c_type))});
-    auto* b_ary_type = ty.array(ty.Of(b_type), 3_u);
+    auto b_ary_type = ty.array(ty.Of(b_type), 3_u);
     auto* a_type = Structure("A", utils::Vector{Member("foo", b_ary_type)});
 
-    auto* a_ary_type = ty.array(ty.Of(a_type), 2_u);
+    auto a_ary_type = ty.array(ty.Of(a_type), 2_u);
     auto* var = Var("index", a_ary_type);
     auto* expr = MemberAccessor(
         MemberAccessor(

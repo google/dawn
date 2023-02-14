@@ -759,7 +759,7 @@ TEST_F(ResolverAliasAnalysisTest, Read_MemberAccessor) {
          ty.void_(),
          utils::Vector{
              Assign(Phony(), MemberAccessor(Deref("p2"), "a")),
-             Assign(Deref("p1"), Call(ty("S"))),
+             Assign(Deref("p1"), Call("S")),
          });
     Func("f1", utils::Empty, ty.void_(),
          utils::Vector{

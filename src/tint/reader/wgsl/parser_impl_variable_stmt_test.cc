@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {
@@ -80,8 +81,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit) {
     ASSERT_NE(e->variable->initializer, nullptr);
     auto* call = e->variable->initializer->As<ast::CallExpression>();
     ASSERT_NE(call, nullptr);
-    EXPECT_EQ(call->target.name, nullptr);
-    EXPECT_NE(call->target.type, nullptr);
+    ast::CheckIdentifier(p->builder().Symbols(), call->target, ast::Template("array", "i32"));
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit_NoSpace) {
@@ -98,8 +98,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit_NoSpace) {
     ASSERT_NE(e->variable->initializer, nullptr);
     auto* call = e->variable->initializer->As<ast::CallExpression>();
     ASSERT_NE(call, nullptr);
-    EXPECT_EQ(call->target.name, nullptr);
-    EXPECT_NE(call->target.type, nullptr);
+    ast::CheckIdentifier(p->builder().Symbols(), call->target, ast::Template("array", "i32"));
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit) {
@@ -115,9 +114,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit) {
 
     ASSERT_NE(e->variable->initializer, nullptr);
     auto* call = e->variable->initializer->As<ast::CallExpression>();
-    ASSERT_NE(call, nullptr);
-    EXPECT_EQ(call->target.name, nullptr);
-    EXPECT_NE(call->target.type, nullptr);
+    ast::CheckIdentifier(p->builder().Symbols(), call->target, ast::Template("vec2", "i32"));
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
@@ -134,8 +131,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
     ASSERT_NE(e->variable->initializer, nullptr);
     auto* call = e->variable->initializer->As<ast::CallExpression>();
     ASSERT_NE(call, nullptr);
-    EXPECT_EQ(call->target.name, nullptr);
-    EXPECT_NE(call->target.type, nullptr);
+    ast::CheckIdentifier(p->builder().Symbols(), call->target, ast::Template("vec2", "i32"));
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let) {
@@ -172,11 +168,11 @@ TEST_F(ParserImplTest, VariableStmt_Let_ComplexExpression) {
 
     ASSERT_TRUE(expr->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = expr->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("collide"));
+    ast::CheckIdentifier(p->builder().Symbols(), ident_expr->identifier, "collide");
 
     ASSERT_TRUE(expr->rhs->Is<ast::IdentifierExpression>());
     ident_expr = expr->rhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident_expr->identifier->symbol, p->builder().Symbols().Get("collide_1"));
+    ast::CheckIdentifier(p->builder().Symbols(), ident_expr->identifier, "collide_1");
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let_MissingEqual) {

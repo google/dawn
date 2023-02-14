@@ -546,7 +546,7 @@ TEST_F(SpvParserTest, ConvertType_StructTwoMembers) {
     ASSERT_NE(type, nullptr);
     EXPECT_TRUE(type->Is<Struct>());
 
-    auto* str = type->Build(p->builder());
+    auto str = type->Build(p->builder());
     Program program = p->program();
     EXPECT_EQ(test::ToString(program, str), "S");
 }
@@ -564,7 +564,7 @@ TEST_F(SpvParserTest, ConvertType_StructWithBlockDecoration) {
     ASSERT_NE(type, nullptr);
     EXPECT_TRUE(type->Is<Struct>());
 
-    auto* str = type->Build(p->builder());
+    auto str = type->Build(p->builder());
     Program program = p->program();
     EXPECT_EQ(test::ToString(program, str), "S");
 }
@@ -586,7 +586,7 @@ TEST_F(SpvParserTest, ConvertType_StructWithMemberDecorations) {
     ASSERT_NE(type, nullptr);
     EXPECT_TRUE(type->Is<Struct>());
 
-    auto* str = type->Build(p->builder());
+    auto str = type->Build(p->builder());
     Program program = p->program();
     EXPECT_EQ(test::ToString(program, str), "S");
 }

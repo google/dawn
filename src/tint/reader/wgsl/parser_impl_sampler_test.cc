@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {
@@ -32,8 +33,7 @@ TEST_F(ParserImplTest, SamplerType_Sampler) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr);
-    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol),
-              "sampler");
+    ast::CheckIdentifier(p->builder().Symbols(), t.value, "sampler");
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 8u}}));
 }
@@ -44,8 +44,7 @@ TEST_F(ParserImplTest, SamplerType_ComparisonSampler) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr);
-    EXPECT_EQ(p->builder().Symbols().NameFor(t.value->As<ast::TypeName>()->name->symbol),
-              "sampler_comparison");
+    ast::CheckIdentifier(p->builder().Symbols(), t.value, "sampler_comparison");
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 19u}}));
 }

@@ -294,7 +294,7 @@ TEST_F(ResolverValidationTest, AddressSpace_FunctionVariableI32) {
 }
 
 TEST_F(ResolverValidationTest, AddressSpace_SamplerExplicitAddressSpace) {
-    auto* t = ty.sampler(type::SamplerKind::kSampler);
+    auto t = ty.sampler(type::SamplerKind::kSampler);
     GlobalVar(Source{{12, 34}}, "var", t, type::AddressSpace::kHandle, Binding(0_a), Group(0_a));
 
     EXPECT_FALSE(r()->Resolve());
@@ -304,7 +304,7 @@ TEST_F(ResolverValidationTest, AddressSpace_SamplerExplicitAddressSpace) {
 }
 
 TEST_F(ResolverValidationTest, AddressSpace_TextureExplicitAddressSpace) {
-    auto* t = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
+    auto t = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
     GlobalVar(Source{{12, 34}}, "var", t, type::AddressSpace::kHandle, Binding(0_a), Group(0_a));
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();

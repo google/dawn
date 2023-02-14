@@ -64,7 +64,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program* src,
 
         auto source = ctx.Clone(w->source);
         auto sym = ctx.Clone(w->name->symbol);
-        auto* ty = ctx.Clone(w->type);
+        ast::Type ty = w->type ? ctx.Clone(w->type) : ast::Type{};
 
         // No replacement provided, just clone the override node as a const.
         auto iter = data->map.find(sem->OverrideId());

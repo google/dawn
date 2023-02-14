@@ -64,7 +64,7 @@ TEST_P(ResolverConstEvalBitcastTest, Test) {
         target_create_ptrs = expected.Failure().create_ptrs;
     }
 
-    auto* target_ty = target_create_ptrs.ast(*this);
+    auto target_ty = target_create_ptrs.ast(*this);
     ASSERT_NE(target_ty, nullptr);
     auto* input_val = input.Expr(*this);
     const ast::Expression* expr = Bitcast(Source{{12, 34}}, target_ty, input_val);

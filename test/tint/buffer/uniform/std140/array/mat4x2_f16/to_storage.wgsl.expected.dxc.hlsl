@@ -11,10 +11,10 @@ void tint_symbol_1(RWByteAddressBuffer buffer, uint offset, matrix<float16_t, 4,
 }
 
 void tint_symbol(RWByteAddressBuffer buffer, uint offset, matrix<float16_t, 4, 2> value[4]) {
-  matrix<float16_t, 4, 2> array[4] = value;
+  matrix<float16_t, 4, 2> array_1[4] = value;
   {
     for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      tint_symbol_1(buffer, (offset + (i * 16u)), array[i]);
+      tint_symbol_1(buffer, (offset + (i * 16u)), array_1[i]);
     }
   }
 }

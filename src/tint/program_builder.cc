@@ -19,6 +19,7 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/debug.h"
 #include "src/tint/demangler.h"
+#include "src/tint/sem/type_expression.h"
 #include "src/tint/sem/value_expression.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/utils/compiler_macros.h"
@@ -97,8 +98,10 @@ void ProgramBuilder::AssertNotMoved() const {
 }
 
 const type::Type* ProgramBuilder::TypeOf(const ast::Expression* expr) const {
-    auto* sem = Sem().GetVal(expr);
-    return sem ? sem->Type() : nullptr;
+    return tint::Switch(
+        Sem().Get(expr),  //
+        [](const sem::ValueExpression* e) { return e->Type(); },
+        [](const sem::TypeExpression* e) { return e->Type(); });
 }
 
 const type::Type* ProgramBuilder::TypeOf(const ast::Variable* var) const {
@@ -106,17 +109,13 @@ const type::Type* ProgramBuilder::TypeOf(const ast::Variable* var) const {
     return sem ? sem->Type() : nullptr;
 }
 
-const type::Type* ProgramBuilder::TypeOf(const ast::Type* type) const {
-    return Sem().Get(type);
-}
-
 const type::Type* ProgramBuilder::TypeOf(const ast::TypeDecl* type_decl) const {
     return Sem().Get(type_decl);
 }
 
-std::string ProgramBuilder::FriendlyName(const ast::Type* type) const {
+std::string ProgramBuilder::FriendlyName(ast::Type type) const {
     TINT_ASSERT_PROGRAM_IDS_EQUAL(ProgramBuilder, type, ID());
-    return type ? type->FriendlyName(Symbols()) : "<null>";
+    return type.expr ? Symbols().NameFor(type->identifier->symbol) : "<null>";
 }
 
 std::string ProgramBuilder::FriendlyName(const type::Type* type) const {
@@ -125,10 +124,6 @@ std::string ProgramBuilder::FriendlyName(const type::Type* type) const {
 
 std::string ProgramBuilder::FriendlyName(std::nullptr_t) const {
     return "<null>";
-}
-
-const ast::TypeName* ProgramBuilder::TypesBuilder::Of(const ast::TypeDecl* decl) const {
-    return (*this)(decl->name->symbol);
 }
 
 ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}

@@ -1641,8 +1641,8 @@ using Expr_Binary_Test_Valid = ResolverTestWithParam<Params>;
 TEST_P(Expr_Binary_Test_Valid, All) {
     auto& params = GetParam();
 
-    auto* lhs_type = params.create_lhs_type(*this);
-    auto* rhs_type = params.create_rhs_type(*this);
+    ast::Type lhs_type = params.create_lhs_type(*this);
+    ast::Type rhs_type = params.create_rhs_type(*this);
     auto* result_type = params.create_result_type(*this);
 
     std::stringstream ss;
@@ -1674,8 +1674,8 @@ TEST_P(Expr_Binary_Test_WithAlias_Valid, All) {
                                 ? params.create_rhs_alias_type
                                 : params.create_rhs_type;
 
-    auto* lhs_type = create_lhs_type(*this);
-    auto* rhs_type = create_rhs_type(*this);
+    ast::Type lhs_type = create_lhs_type(*this);
+    ast::Type rhs_type = create_rhs_type(*this);
 
     std::stringstream ss;
     ss << FriendlyName(lhs_type) << " " << params.op << " " << FriendlyName(rhs_type);
@@ -1723,8 +1723,8 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
         }
     }
 
-    auto* lhs_type = lhs_create_type_func(*this);
-    auto* rhs_type = rhs_create_type_func(*this);
+    ast::Type lhs_type = lhs_create_type_func(*this);
+    ast::Type rhs_type = rhs_create_type_func(*this);
 
     std::stringstream ss;
     ss << FriendlyName(lhs_type) << " " << op << " " << FriendlyName(rhs_type);
@@ -1753,8 +1753,8 @@ TEST_P(Expr_Binary_Test_Invalid_VectorMatrixMultiply, All) {
     uint32_t mat_rows = std::get<2>(GetParam());
     uint32_t mat_cols = std::get<3>(GetParam());
 
-    const ast::Type* lhs_type = nullptr;
-    const ast::Type* rhs_type = nullptr;
+    ast::Type lhs_type;
+    ast::Type rhs_type;
     const type::Type* result_type = nullptr;
     bool is_valid_expr;
 
@@ -1800,8 +1800,8 @@ TEST_P(Expr_Binary_Test_Invalid_MatrixMatrixMultiply, All) {
     uint32_t rhs_mat_rows = std::get<2>(GetParam());
     uint32_t rhs_mat_cols = std::get<3>(GetParam());
 
-    auto* lhs_type = ty.mat<f32>(lhs_mat_cols, lhs_mat_rows);
-    auto* rhs_type = ty.mat<f32>(rhs_mat_cols, rhs_mat_rows);
+    auto lhs_type = ty.mat<f32>(lhs_mat_cols, lhs_mat_rows);
+    auto rhs_type = ty.mat<f32>(rhs_mat_cols, rhs_mat_rows);
 
     auto* f32 = create<type::F32>();
     auto* col = create<type::Vector>(f32, lhs_mat_rows);
@@ -1876,7 +1876,7 @@ TEST_F(ResolverTest, AddressSpace_SetsIfMissing) {
 }
 
 TEST_F(ResolverTest, AddressSpace_SetForSampler) {
-    auto* t = ty.sampler(type::SamplerKind::kSampler);
+    auto t = ty.sampler(type::SamplerKind::kSampler);
     auto* var = GlobalVar("var", t, Binding(0_a), Group(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1885,7 +1885,7 @@ TEST_F(ResolverTest, AddressSpace_SetForSampler) {
 }
 
 TEST_F(ResolverTest, AddressSpace_SetForTexture) {
-    auto* t = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
+    auto t = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
     auto* var = GlobalVar("var", t, Binding(0_a), Group(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

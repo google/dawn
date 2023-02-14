@@ -56,7 +56,7 @@ struct Unshadow::State {
             renamed_to.Add(v, symbol);
 
             auto source = ctx.Clone(decl->source);
-            auto* type = ctx.Clone(decl->type);
+            auto type = decl->type ? ctx.Clone(decl->type) : ast::Type{};
             auto* initializer = ctx.Clone(decl->initializer);
             auto attributes = ctx.Clone(decl->attributes);
             return Switch(

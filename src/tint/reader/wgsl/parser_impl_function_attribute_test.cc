@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/ast/stage_attribute.h"
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
@@ -310,9 +311,7 @@ TEST_F(ParserImplTest, Attribute_Workgroup_WithIdent) {
               ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_NE(values[1], nullptr);
-    auto* y_ident = values[1]->As<ast::IdentifierExpression>();
-    ASSERT_NE(y_ident, nullptr);
-    EXPECT_EQ(p->builder().Symbols().NameFor(y_ident->identifier->symbol), "height");
+    ast::CheckIdentifier(p->builder().Symbols(), values[1], "height");
 
     ASSERT_EQ(values[2], nullptr);
 }

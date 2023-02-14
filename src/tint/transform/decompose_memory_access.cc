@@ -23,7 +23,6 @@
 #include "src/tint/ast/assignment_statement.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/disable_validation_attribute.h"
-#include "src/tint/ast/type_name.h"
 #include "src/tint/ast/unary_op.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/call.h"
@@ -481,15 +480,12 @@ struct DecomposeMemoryAccess::State {
                 auto name = b.Sym();
 
                 if (auto* intrinsic = IntrinsicLoadFor(ctx.dst, address_space, el_ty)) {
-                    auto* el_ast_ty = CreateASTTypeFor(ctx, el_ty);
-                    auto* func = b.create<ast::Function>(
-                        b.Ident(name), params, el_ast_ty, nullptr,
-                        utils::Vector{
-                            intrinsic,
-                            b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
-                        },
-                        utils::Empty);
-                    b.AST().AddFunction(func);
+                    auto el_ast_ty = CreateASTTypeFor(ctx, el_ty);
+                    b.Func(name, params, el_ast_ty, nullptr,
+                           utils::Vector{
+                               intrinsic,
+                               b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
+                           });
                 } else if (auto* arr_ty = el_ty->As<type::Array>()) {
                     // fn load_func(buffer : buf_ty, offset : u32) -> array<T, N> {
                     //   var arr : array<T, N>;
@@ -581,14 +577,11 @@ struct DecomposeMemoryAccess::State {
                 auto name = b.Sym();
 
                 if (auto* intrinsic = IntrinsicStoreFor(ctx.dst, address_space, el_ty)) {
-                    auto* func = b.create<ast::Function>(
-                        b.Ident(name), params, b.ty.void_(), nullptr,
-                        utils::Vector{
-                            intrinsic,
-                            b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
-                        },
-                        utils::Empty);
-                    b.AST().AddFunction(func);
+                    b.Func(name, params, b.ty.void_(), nullptr,
+                           utils::Vector{
+                               intrinsic,
+                               b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
+                           });
                 } else {
                     auto body = Switch<utils::Vector<const ast::Statement*, 8>>(
                         el_ty,  //
@@ -695,7 +688,7 @@ struct DecomposeMemoryAccess::State {
             // Other parameters are copied as-is:
             for (size_t i = 1; i < intrinsic->Parameters().Length(); i++) {
                 auto* param = intrinsic->Parameters()[i];
-                auto* ty = CreateASTTypeFor(ctx, param->Type());
+                auto ty = CreateASTTypeFor(ctx, param->Type());
                 params.Push(b.Param("param_" + std::to_string(i), ty));
             }
 
@@ -706,7 +699,7 @@ struct DecomposeMemoryAccess::State {
                     << el_ty->TypeInfo().name;
             }
 
-            const ast::Type* ret_ty = nullptr;
+            ast::Type ret_ty;
 
             // For intrinsics that return a struct, there is no AST node for it, so create one now.
             if (intrinsic->Type() == sem::BuiltinType::kAtomicCompareExchangeWeak) {
@@ -727,17 +720,13 @@ struct DecomposeMemoryAccess::State {
                 ret_ty = CreateASTTypeFor(ctx, intrinsic->ReturnType());
             }
 
-            auto* func = b.create<ast::Function>(
-                b.Ident(b.Symbols().New(std::string{"tint_"} + intrinsic->str())), params, ret_ty,
-                nullptr,
-                utils::Vector{
-                    atomic,
-                    b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
-                },
-                utils::Empty);
-
-            b.AST().AddFunction(func);
-            return func->name->symbol;
+            auto name = b.Symbols().New(std::string{"tint_"} + intrinsic->str());
+            b.Func(name, std::move(params), ret_ty, nullptr,
+                   utils::Vector{
+                       atomic,
+                       b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
+                   });
+            return name;
         });
     }
 };

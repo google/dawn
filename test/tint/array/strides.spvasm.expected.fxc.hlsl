@@ -55,19 +55,19 @@ void tint_symbol_10(RWByteAddressBuffer buffer, uint offset, strided_arr value) 
 }
 
 void tint_symbol_9(RWByteAddressBuffer buffer, uint offset, strided_arr value[2]) {
-  strided_arr array_2[2] = value;
+  strided_arr array_3[2] = value;
   {
     for(uint i_3 = 0u; (i_3 < 2u); i_3 = (i_3 + 1u)) {
-      tint_symbol_10(buffer, (offset + (i_3 * 8u)), array_2[i_3]);
+      tint_symbol_10(buffer, (offset + (i_3 * 8u)), array_3[i_3]);
     }
   }
 }
 
 void tint_symbol_8(RWByteAddressBuffer buffer, uint offset, strided_arr value[3][2]) {
-  strided_arr array_1[3][2] = value;
+  strided_arr array_2[3][2] = value;
   {
     for(uint i_4 = 0u; (i_4 < 3u); i_4 = (i_4 + 1u)) {
-      tint_symbol_9(buffer, (offset + (i_4 * 16u)), array_1[i_4]);
+      tint_symbol_9(buffer, (offset + (i_4 * 16u)), array_2[i_4]);
     }
   }
 }
@@ -77,10 +77,10 @@ void tint_symbol_7(RWByteAddressBuffer buffer, uint offset, strided_arr_1 value)
 }
 
 void tint_symbol_6(RWByteAddressBuffer buffer, uint offset, strided_arr_1 value[4]) {
-  strided_arr_1 array[4] = value;
+  strided_arr_1 array_1[4] = value;
   {
     for(uint i_5 = 0u; (i_5 < 4u); i_5 = (i_5 + 1u)) {
-      tint_symbol_7(buffer, (offset + (i_5 * 128u)), array[i_5]);
+      tint_symbol_7(buffer, (offset + (i_5 * 128u)), array_1[i_5]);
     }
   }
 }

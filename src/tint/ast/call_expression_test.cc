@@ -21,15 +21,14 @@ namespace {
 using CallExpressionTest = TestHelper;
 
 TEST_F(CallExpressionTest, CreationIdentifier) {
-    auto* func = Ident("func");
+    auto* func = Expr("func");
     utils::Vector params{
         Expr("param1"),
         Expr("param2"),
     };
 
     auto* stmt = Call(func, params);
-    EXPECT_EQ(stmt->target.name, func);
-    EXPECT_EQ(stmt->target.type, nullptr);
+    EXPECT_EQ(stmt->target, func);
 
     const auto& vec = stmt->args;
     ASSERT_EQ(vec.Length(), 2u);
@@ -38,10 +37,9 @@ TEST_F(CallExpressionTest, CreationIdentifier) {
 }
 
 TEST_F(CallExpressionTest, CreationIdentifier_WithSource) {
-    auto* func = Ident("func");
+    auto* func = Expr("func");
     auto* stmt = Call(Source{{20, 2}}, func);
-    EXPECT_EQ(stmt->target.name, func);
-    EXPECT_EQ(stmt->target.type, nullptr);
+    EXPECT_EQ(stmt->target, func);
 
     auto src = stmt->source;
     EXPECT_EQ(src.range.begin.line, 20u);
@@ -49,15 +47,14 @@ TEST_F(CallExpressionTest, CreationIdentifier_WithSource) {
 }
 
 TEST_F(CallExpressionTest, CreationType) {
-    auto* type = ty.f32();
+    auto* type = Expr(ty.f32());
     utils::Vector params{
         Expr("param1"),
         Expr("param2"),
     };
 
     auto* stmt = Call(type, params);
-    EXPECT_EQ(stmt->target.name, nullptr);
-    EXPECT_EQ(stmt->target.type, type);
+    EXPECT_EQ(stmt->target, type);
 
     const auto& vec = stmt->args;
     ASSERT_EQ(vec.Length(), 2u);
@@ -66,10 +63,9 @@ TEST_F(CallExpressionTest, CreationType) {
 }
 
 TEST_F(CallExpressionTest, CreationType_WithSource) {
-    auto* type = ty.f32();
+    auto* type = Expr(ty.f32());
     auto* stmt = Call(Source{{20, 2}}, type);
-    EXPECT_EQ(stmt->target.name, nullptr);
-    EXPECT_EQ(stmt->target.type, type);
+    EXPECT_EQ(stmt->target, type);
 
     auto src = stmt->source;
     EXPECT_EQ(src.range.begin.line, 20u);
@@ -77,7 +73,7 @@ TEST_F(CallExpressionTest, CreationType_WithSource) {
 }
 
 TEST_F(CallExpressionTest, IsCall) {
-    auto* func = Ident("func");
+    auto* func = Expr("func");
     auto* stmt = Call(func);
     EXPECT_TRUE(stmt->Is<CallExpression>());
 }
@@ -87,15 +83,6 @@ TEST_F(CallExpressionTest, Assert_Null_Identifier) {
         {
             ProgramBuilder b;
             b.Call(static_cast<Identifier*>(nullptr));
-        },
-        "internal compiler error");
-}
-
-TEST_F(CallExpressionTest, Assert_Null_Type) {
-    EXPECT_FATAL_FAILURE(
-        {
-            ProgramBuilder b;
-            b.Call(static_cast<Type*>(nullptr));
         },
         "internal compiler error");
 }

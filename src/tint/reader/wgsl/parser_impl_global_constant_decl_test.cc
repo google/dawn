@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/ast/id_attribute.h"
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {
@@ -44,8 +45,7 @@ TEST_F(ParserImplTest, GlobalConstDecl) {
 
     EXPECT_EQ(c->name->symbol, p->builder().Symbols().Get("a"));
     ASSERT_NE(c->type, nullptr);
-    ASSERT_TRUE(c->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(c->type->As<ast::TypeName>()->name->symbol), "f32");
+    ast::CheckIdentifier(p->builder().Symbols(), c->type, "f32");
 
     EXPECT_EQ(c->source.range.begin.line, 1u);
     EXPECT_EQ(c->source.range.begin.column, 7u);
@@ -121,9 +121,7 @@ TEST_F(ParserImplTest, GlobalOverrideDecl_WithId) {
 
     EXPECT_EQ(override->name->symbol, p->builder().Symbols().Get("a"));
     ASSERT_NE(override->type, nullptr);
-    ASSERT_TRUE(override->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(override->type->As<ast::TypeName>()->name->symbol),
-              "f32");
+    ast::CheckIdentifier(p->builder().Symbols(), override->type, "f32");
 
     EXPECT_EQ(override->source.range.begin.line, 1u);
     EXPECT_EQ(override->source.range.begin.column, 17u);
@@ -153,9 +151,7 @@ TEST_F(ParserImplTest, GlobalOverrideDecl_WithId_TrailingComma) {
 
     EXPECT_EQ(override->name->symbol, p->builder().Symbols().Get("a"));
     ASSERT_NE(override->type, nullptr);
-    ASSERT_TRUE(override->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(override->type->As<ast::TypeName>()->name->symbol),
-              "f32");
+    ast::CheckIdentifier(p->builder().Symbols(), override->type, "f32");
 
     EXPECT_EQ(override->source.range.begin.line, 1u);
     EXPECT_EQ(override->source.range.begin.column, 18u);
@@ -185,9 +181,7 @@ TEST_F(ParserImplTest, GlobalOverrideDecl_WithoutId) {
 
     EXPECT_EQ(override->name->symbol, p->builder().Symbols().Get("a"));
     ASSERT_NE(override->type, nullptr);
-    ASSERT_TRUE(override->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(override->type->As<ast::TypeName>()->name->symbol),
-              "f32");
+    ast::CheckIdentifier(p->builder().Symbols(), override->type, "f32");
 
     EXPECT_EQ(override->source.range.begin.line, 1u);
     EXPECT_EQ(override->source.range.begin.column, 10u);

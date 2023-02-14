@@ -28,6 +28,12 @@ namespace tint::type {
 /// @param str the string to parse
 /// @returns the parsed enum, or Builtin::kUndefined if the string could not be parsed.
 Builtin ParseBuiltin(std::string_view str) {
+    if (str == "array") {
+        return Builtin::kArray;
+    }
+    if (str == "atomic") {
+        return Builtin::kAtomic;
+    }
     if (str == "bool") {
         return Builtin::kBool;
     }
@@ -40,11 +46,17 @@ Builtin ParseBuiltin(std::string_view str) {
     if (str == "i32") {
         return Builtin::kI32;
     }
+    if (str == "mat2x2") {
+        return Builtin::kMat2X2;
+    }
     if (str == "mat2x2f") {
         return Builtin::kMat2X2F;
     }
     if (str == "mat2x2h") {
         return Builtin::kMat2X2H;
+    }
+    if (str == "mat2x3") {
+        return Builtin::kMat2X3;
     }
     if (str == "mat2x3f") {
         return Builtin::kMat2X3F;
@@ -52,11 +64,17 @@ Builtin ParseBuiltin(std::string_view str) {
     if (str == "mat2x3h") {
         return Builtin::kMat2X3H;
     }
+    if (str == "mat2x4") {
+        return Builtin::kMat2X4;
+    }
     if (str == "mat2x4f") {
         return Builtin::kMat2X4F;
     }
     if (str == "mat2x4h") {
         return Builtin::kMat2X4H;
+    }
+    if (str == "mat3x2") {
+        return Builtin::kMat3X2;
     }
     if (str == "mat3x2f") {
         return Builtin::kMat3X2F;
@@ -64,11 +82,17 @@ Builtin ParseBuiltin(std::string_view str) {
     if (str == "mat3x2h") {
         return Builtin::kMat3X2H;
     }
+    if (str == "mat3x3") {
+        return Builtin::kMat3X3;
+    }
     if (str == "mat3x3f") {
         return Builtin::kMat3X3F;
     }
     if (str == "mat3x3h") {
         return Builtin::kMat3X3H;
+    }
+    if (str == "mat3x4") {
+        return Builtin::kMat3X4;
     }
     if (str == "mat3x4f") {
         return Builtin::kMat3X4F;
@@ -76,11 +100,17 @@ Builtin ParseBuiltin(std::string_view str) {
     if (str == "mat3x4h") {
         return Builtin::kMat3X4H;
     }
+    if (str == "mat4x2") {
+        return Builtin::kMat4X2;
+    }
     if (str == "mat4x2f") {
         return Builtin::kMat4X2F;
     }
     if (str == "mat4x2h") {
         return Builtin::kMat4X2H;
+    }
+    if (str == "mat4x3") {
+        return Builtin::kMat4X3;
     }
     if (str == "mat4x3f") {
         return Builtin::kMat4X3F;
@@ -88,17 +118,41 @@ Builtin ParseBuiltin(std::string_view str) {
     if (str == "mat4x3h") {
         return Builtin::kMat4X3H;
     }
+    if (str == "mat4x4") {
+        return Builtin::kMat4X4;
+    }
     if (str == "mat4x4f") {
         return Builtin::kMat4X4F;
     }
     if (str == "mat4x4h") {
         return Builtin::kMat4X4H;
     }
+    if (str == "ptr") {
+        return Builtin::kPtr;
+    }
     if (str == "sampler") {
         return Builtin::kSampler;
     }
     if (str == "sampler_comparison") {
         return Builtin::kSamplerComparison;
+    }
+    if (str == "texture_1d") {
+        return Builtin::kTexture1D;
+    }
+    if (str == "texture_2d") {
+        return Builtin::kTexture2D;
+    }
+    if (str == "texture_2d_array") {
+        return Builtin::kTexture2DArray;
+    }
+    if (str == "texture_3d") {
+        return Builtin::kTexture3D;
+    }
+    if (str == "texture_cube") {
+        return Builtin::kTextureCube;
+    }
+    if (str == "texture_cube_array") {
+        return Builtin::kTextureCubeArray;
     }
     if (str == "texture_depth_2d") {
         return Builtin::kTextureDepth2D;
@@ -118,6 +172,9 @@ Builtin ParseBuiltin(std::string_view str) {
     if (str == "texture_external") {
         return Builtin::kTextureExternal;
     }
+    if (str == "texture_multisampled_2d") {
+        return Builtin::kTextureMultisampled2D;
+    }
     if (str == "texture_storage_1d") {
         return Builtin::kTextureStorage1D;
     }
@@ -133,6 +190,9 @@ Builtin ParseBuiltin(std::string_view str) {
     if (str == "u32") {
         return Builtin::kU32;
     }
+    if (str == "vec2") {
+        return Builtin::kVec2;
+    }
     if (str == "vec2f") {
         return Builtin::kVec2F;
     }
@@ -145,6 +205,9 @@ Builtin ParseBuiltin(std::string_view str) {
     if (str == "vec2u") {
         return Builtin::kVec2U;
     }
+    if (str == "vec3") {
+        return Builtin::kVec3;
+    }
     if (str == "vec3f") {
         return Builtin::kVec3F;
     }
@@ -156,6 +219,9 @@ Builtin ParseBuiltin(std::string_view str) {
     }
     if (str == "vec3u") {
         return Builtin::kVec3U;
+    }
+    if (str == "vec4") {
+        return Builtin::kVec4;
     }
     if (str == "vec4f") {
         return Builtin::kVec4F;
@@ -176,6 +242,10 @@ std::ostream& operator<<(std::ostream& out, Builtin value) {
     switch (value) {
         case Builtin::kUndefined:
             return out << "undefined";
+        case Builtin::kArray:
+            return out << "array";
+        case Builtin::kAtomic:
+            return out << "atomic";
         case Builtin::kBool:
             return out << "bool";
         case Builtin::kF16:
@@ -184,46 +254,78 @@ std::ostream& operator<<(std::ostream& out, Builtin value) {
             return out << "f32";
         case Builtin::kI32:
             return out << "i32";
+        case Builtin::kMat2X2:
+            return out << "mat2x2";
         case Builtin::kMat2X2F:
             return out << "mat2x2f";
         case Builtin::kMat2X2H:
             return out << "mat2x2h";
+        case Builtin::kMat2X3:
+            return out << "mat2x3";
         case Builtin::kMat2X3F:
             return out << "mat2x3f";
         case Builtin::kMat2X3H:
             return out << "mat2x3h";
+        case Builtin::kMat2X4:
+            return out << "mat2x4";
         case Builtin::kMat2X4F:
             return out << "mat2x4f";
         case Builtin::kMat2X4H:
             return out << "mat2x4h";
+        case Builtin::kMat3X2:
+            return out << "mat3x2";
         case Builtin::kMat3X2F:
             return out << "mat3x2f";
         case Builtin::kMat3X2H:
             return out << "mat3x2h";
+        case Builtin::kMat3X3:
+            return out << "mat3x3";
         case Builtin::kMat3X3F:
             return out << "mat3x3f";
         case Builtin::kMat3X3H:
             return out << "mat3x3h";
+        case Builtin::kMat3X4:
+            return out << "mat3x4";
         case Builtin::kMat3X4F:
             return out << "mat3x4f";
         case Builtin::kMat3X4H:
             return out << "mat3x4h";
+        case Builtin::kMat4X2:
+            return out << "mat4x2";
         case Builtin::kMat4X2F:
             return out << "mat4x2f";
         case Builtin::kMat4X2H:
             return out << "mat4x2h";
+        case Builtin::kMat4X3:
+            return out << "mat4x3";
         case Builtin::kMat4X3F:
             return out << "mat4x3f";
         case Builtin::kMat4X3H:
             return out << "mat4x3h";
+        case Builtin::kMat4X4:
+            return out << "mat4x4";
         case Builtin::kMat4X4F:
             return out << "mat4x4f";
         case Builtin::kMat4X4H:
             return out << "mat4x4h";
+        case Builtin::kPtr:
+            return out << "ptr";
         case Builtin::kSampler:
             return out << "sampler";
         case Builtin::kSamplerComparison:
             return out << "sampler_comparison";
+        case Builtin::kTexture1D:
+            return out << "texture_1d";
+        case Builtin::kTexture2D:
+            return out << "texture_2d";
+        case Builtin::kTexture2DArray:
+            return out << "texture_2d_array";
+        case Builtin::kTexture3D:
+            return out << "texture_3d";
+        case Builtin::kTextureCube:
+            return out << "texture_cube";
+        case Builtin::kTextureCubeArray:
+            return out << "texture_cube_array";
         case Builtin::kTextureDepth2D:
             return out << "texture_depth_2d";
         case Builtin::kTextureDepth2DArray:
@@ -236,6 +338,8 @@ std::ostream& operator<<(std::ostream& out, Builtin value) {
             return out << "texture_depth_multisampled_2d";
         case Builtin::kTextureExternal:
             return out << "texture_external";
+        case Builtin::kTextureMultisampled2D:
+            return out << "texture_multisampled_2d";
         case Builtin::kTextureStorage1D:
             return out << "texture_storage_1d";
         case Builtin::kTextureStorage2D:
@@ -246,6 +350,8 @@ std::ostream& operator<<(std::ostream& out, Builtin value) {
             return out << "texture_storage_3d";
         case Builtin::kU32:
             return out << "u32";
+        case Builtin::kVec2:
+            return out << "vec2";
         case Builtin::kVec2F:
             return out << "vec2f";
         case Builtin::kVec2H:
@@ -254,6 +360,8 @@ std::ostream& operator<<(std::ostream& out, Builtin value) {
             return out << "vec2i";
         case Builtin::kVec2U:
             return out << "vec2u";
+        case Builtin::kVec3:
+            return out << "vec3";
         case Builtin::kVec3F:
             return out << "vec3f";
         case Builtin::kVec3H:
@@ -262,6 +370,8 @@ std::ostream& operator<<(std::ostream& out, Builtin value) {
             return out << "vec3i";
         case Builtin::kVec3U:
             return out << "vec3u";
+        case Builtin::kVec4:
+            return out << "vec4";
         case Builtin::kVec4F:
             return out << "vec4f";
         case Builtin::kVec4H:

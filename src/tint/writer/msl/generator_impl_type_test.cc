@@ -89,60 +89,60 @@ using uint = unsigned int;
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitType_Array) {
-    auto* arr = ty.array<bool, 4>();
-    GlobalVar("G", arr, type::AddressSpace::kPrivate);
+    auto arr = ty.array<bool, 4>();
+    ast::Type type = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), "ary")) << gen.error();
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type), "ary")) << gen.error();
     EXPECT_EQ(out.str(), "tint_array<bool, 4>");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
-    auto* a = ty.array<bool, 4>();
-    auto* b = ty.array(a, 5_u);
-    GlobalVar("G", b, type::AddressSpace::kPrivate);
+    auto a = ty.array<bool, 4>();
+    auto b = ty.array(a, 5_u);
+    ast::Type type = GlobalVar("G", b, type::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(b), "ary")) << gen.error();
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type), "ary")) << gen.error();
     EXPECT_EQ(out.str(), "tint_array<tint_array<bool, 4>, 5>");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
-    auto* a = ty.array<bool, 4>();
-    auto* b = ty.array(a, 5_u);
-    auto* c = ty.array(b, 6_u);
-    GlobalVar("G", c, type::AddressSpace::kPrivate);
+    auto a = ty.array<bool, 4>();
+    auto b = ty.array(a, 5_u);
+    auto c = ty.array(b, 6_u);
+    ast::Type type = GlobalVar("G", c, type::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(c), "ary")) << gen.error();
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type), "ary")) << gen.error();
     EXPECT_EQ(out.str(), "tint_array<tint_array<tint_array<bool, 4>, 5>, 6>");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
-    auto* arr = ty.array<bool, 4>();
-    GlobalVar("G", arr, type::AddressSpace::kPrivate);
+    auto arr = ty.array<bool, 4>();
+    ast::Type type = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), "")) << gen.error();
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type), "")) << gen.error();
     EXPECT_EQ(out.str(), "tint_array<bool, 4>");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
-    auto* arr = ty.array<bool, 1>();
-    GlobalVar("G", arr, type::AddressSpace::kPrivate);
+    auto arr = ty.array<bool, 1>();
+    ast::Type type = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), "ary")) << gen.error();
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type), "ary")) << gen.error();
     EXPECT_EQ(out.str(), "tint_array<bool, 1>");
 }
 
@@ -283,13 +283,14 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
                  Member("z", ty.f32()),
              });
 
-    GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
-              Group(0_a));
+    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
+                               Binding(0_a), Group(0_a))
+                         ->type;
 
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+    auto* sem_s = program->TypeOf(type)->As<sem::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
 
     // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, ARRAY_COUNT, NAME)
@@ -391,13 +392,14 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
                                  Member("e", ty.f32()),
                              });
 
-    GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
-              Group(0_a));
+    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
+                               Binding(0_a), Group(0_a))
+                         ->type;
 
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+    auto* sem_s = program->TypeOf(type)->As<sem::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
 
     // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, ARRAY_COUNT, NAME)
@@ -465,13 +467,13 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
                                      });
 
     // array_x: size(28), align(4)
-    auto* array_x = ty.array<f32, 7>();
+    auto array_x = ty.array<f32, 7>();
 
     // array_y: size(4096), align(512)
-    auto* array_y = ty.array(ty.Of(inner), 4_u);
+    auto array_y = ty.array(ty.Of(inner), 4_u);
 
     // array_z: size(4), align(4)
-    auto* array_z = ty.array<f32>();
+    auto array_z = ty.array<f32>();
 
     auto* s = Structure("S", utils::Vector{
                                  Member("a", ty.i32()),
@@ -482,13 +484,14 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
                                  Member("f", array_z),
                              });
 
-    GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
-              Group(0_a));
+    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
+                               Binding(0_a), Group(0_a))
+                         ->type;
 
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+    auto* sem_s = program->TypeOf(type)->As<sem::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
 
     // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, ARRAY_COUNT, NAME)
@@ -557,7 +560,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
     // array: size(64), align(16)
-    auto* array = ty.array(ty.vec3<f32>(), 4_u);
+    auto array = ty.array(ty.vec3<f32>(), 4_u);
 
     auto* s = Structure("S", utils::Vector{
                                  Member("a", ty.i32()),
@@ -565,13 +568,14 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
                                  Member("c", ty.i32()),
                              });
 
-    GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
-              Group(0_a));
+    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
+                               Binding(0_a), Group(0_a))
+                         ->type;
 
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+    auto* sem_s = program->TypeOf(type)->As<sem::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
 
     // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, ARRAY_COUNT, NAME)
@@ -626,13 +630,14 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
                                  Member("tint_pad_21", ty.f32()),
                              });
 
-    GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
-              Group(0_a));
+    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
+                               Binding(0_a), Group(0_a))
+                         ->type;
 
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+    auto* sem_s = program->TypeOf(type)->As<sem::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
     EXPECT_EQ(buf.String(), R"(struct S {
   /* 0x0000 */ int tint_pad_2;
@@ -684,13 +689,14 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_WithAttribute) {
                                  Member("b", ty.f32()),
                              });
 
-    GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
-              Group(0_a));
+    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
+                               Binding(0_a), Group(0_a))
+                         ->type;
 
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+    auto* sem_s = program->TypeOf(type)->As<sem::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
     EXPECT_EQ(buf.String(), R"(struct S {
   /* 0x0000 */ int a;
@@ -847,13 +853,13 @@ using MslStorageTexturesTest = TestParamHelper<MslStorageTextureData>;
 TEST_P(MslStorageTexturesTest, Emit) {
     auto params = GetParam();
 
-    auto* s = ty.storage_texture(params.dim, type::TexelFormat::kR32Float, type::Access::kWrite);
-    GlobalVar("test_var", s, Binding(0_a), Group(0_a));
+    auto s = ty.storage_texture(params.dim, type::TexelFormat::kR32Float, type::Access::kWrite);
+    ast::Type type = GlobalVar("test_var", s, Binding(0_a), Group(0_a))->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(s), "")) << gen.error();
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type), "")) << gen.error();
     EXPECT_EQ(out.str(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

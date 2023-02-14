@@ -24,7 +24,7 @@ StructMember::StructMember(ProgramID pid,
                            NodeID nid,
                            const Source& src,
                            const Identifier* n,
-                           const ast::Type* ty,
+                           Type ty,
                            utils::VectorRef<const Attribute*> attrs)
 
     : Base(pid, nid, src), name(n), type(ty), attributes(std::move(attrs)) {
@@ -47,7 +47,7 @@ const StructMember* StructMember::Clone(CloneContext* ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx->Clone(source);
     auto n = ctx->Clone(name);
-    auto* ty = ctx->Clone(type);
+    auto ty = ctx->Clone(type);
     auto attrs = ctx->Clone(attributes);
     return ctx->dst->create<StructMember>(src, n, ty, std::move(attrs));
 }

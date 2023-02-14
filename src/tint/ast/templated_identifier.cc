@@ -26,10 +26,15 @@ TemplatedIdentifier::TemplatedIdentifier(ProgramID pid,
                                          NodeID nid,
                                          const Source& src,
                                          const Symbol& sym,
-                                         utils::VectorRef<const ast::Expression*> args)
-    : Base(pid, nid, src, sym), arguments(std::move(args)) {
+                                         utils::VectorRef<const Expression*> args,
+                                         utils::VectorRef<const Attribute*> attrs)
+    : Base(pid, nid, src, sym), arguments(std::move(args)), attributes(std::move(attrs)) {
+    TINT_ASSERT(AST, !arguments.IsEmpty());  // Should have been an Identifier if this fires.
     for (auto* arg : arguments) {
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, arg, program_id);
+        TINT_ASSERT_PROGRAM_IDS_EQUAL(AST, arg, program_id);
+    }
+    for (auto* attr : attributes) {
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
     }
 }
 
@@ -42,7 +47,8 @@ const TemplatedIdentifier* TemplatedIdentifier::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto sym = ctx->Clone(symbol);
     auto args = ctx->Clone(arguments);
-    return ctx->dst->create<TemplatedIdentifier>(src, sym, args);
+    auto attrs = ctx->Clone(attributes);
+    return ctx->dst->create<TemplatedIdentifier>(src, sym, std::move(args), std::move(attrs));
 }
 
 }  // namespace tint::ast

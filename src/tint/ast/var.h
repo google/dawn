@@ -55,7 +55,7 @@ class Var final : public Castable<Var, Variable> {
         NodeID nid,
         const Source& source,
         const Identifier* name,
-        const ast::Type* type,
+        Type type,
         type::AddressSpace declared_address_space,
         type::Access declared_access,
         const Expression* initializer,

@@ -64,7 +64,7 @@ const ast::Struct* InspectorBuilder::MakeInOutStruct(std::string name,
 const ast::Function* InspectorBuilder::MakePlainGlobalReferenceBodyFunction(
     std::string func,
     std::string var,
-    const ast::Type* type,
+    ast::Type type,
     utils::VectorRef<const ast::Attribute*> attributes) {
     utils::Vector<const ast::Statement*, 3> stmts;
     stmts.Push(Decl(Var("local_" + var, type)));
@@ -82,15 +82,14 @@ bool InspectorBuilder::ContainsName(utils::VectorRef<StageVariable> vec, const s
     return false;
 }
 
-std::string InspectorBuilder::StructMemberName(size_t idx, const ast::Type* type) {
-    return std::to_string(idx) + type->FriendlyName(Symbols());
+std::string InspectorBuilder::StructMemberName(size_t idx, ast::Type type) {
+    return std::to_string(idx) + Symbols().NameFor(type->identifier->symbol);
 }
 
-const ast::Struct* InspectorBuilder::MakeStructType(
-    const std::string& name,
-    utils::VectorRef<const ast::Type*> member_types) {
+const ast::Struct* InspectorBuilder::MakeStructType(const std::string& name,
+                                                    utils::VectorRef<ast::Type> member_types) {
     utils::Vector<const ast::StructMember*, 8> members;
-    for (auto* type : member_types) {
+    for (auto type : member_types) {
         members.Push(MakeStructMember(members.Length(), type, {}));
     }
     return MakeStructTypeFromMembers(name, std::move(members));
@@ -104,37 +103,37 @@ const ast::Struct* InspectorBuilder::MakeStructTypeFromMembers(
 
 const ast::StructMember* InspectorBuilder::MakeStructMember(
     size_t index,
-    const ast::Type* type,
+    ast::Type type,
     utils::VectorRef<const ast::Attribute*> attributes) {
     return Member(StructMemberName(index, type), type, std::move(attributes));
 }
 
 const ast::Struct* InspectorBuilder::MakeUniformBufferType(
     const std::string& name,
-    utils::VectorRef<const ast::Type*> member_types) {
+    utils::VectorRef<ast::Type> member_types) {
     return MakeStructType(name, member_types);
 }
 
-std::function<const ast::TypeName*()> InspectorBuilder::MakeStorageBufferTypes(
+std::function<ast::Type()> InspectorBuilder::MakeStorageBufferTypes(
     const std::string& name,
-    utils::VectorRef<const ast::Type*> member_types) {
+    utils::VectorRef<ast::Type> member_types) {
     MakeStructType(name, member_types);
     return [this, name] { return ty(name); };
 }
 
 void InspectorBuilder::AddUniformBuffer(const std::string& name,
-                                        const ast::Type* type,
+                                        ast::Type type,
                                         uint32_t group,
                                         uint32_t binding) {
     GlobalVar(name, type, type::AddressSpace::kUniform, Binding(AInt(binding)), Group(AInt(group)));
 }
 
-void InspectorBuilder::AddWorkgroupStorage(const std::string& name, const ast::Type* type) {
+void InspectorBuilder::AddWorkgroupStorage(const std::string& name, ast::Type type) {
     GlobalVar(name, type, type::AddressSpace::kWorkgroup);
 }
 
 void InspectorBuilder::AddStorageBuffer(const std::string& name,
-                                        const ast::Type* type,
+                                        ast::Type type,
                                         type::Access access,
                                         uint32_t group,
                                         uint32_t binding) {
@@ -145,11 +144,11 @@ void InspectorBuilder::AddStorageBuffer(const std::string& name,
 void InspectorBuilder::MakeStructVariableReferenceBodyFunction(
     std::string func_name,
     std::string struct_name,
-    utils::VectorRef<std::tuple<size_t, const ast::Type*>> members) {
+    utils::VectorRef<std::tuple<size_t, ast::Type>> members) {
     utils::Vector<const ast::Statement*, 8> stmts;
     for (auto member : members) {
         size_t member_idx;
-        const ast::Type* member_type;
+        ast::Type member_type;
         std::tie(member_idx, member_type) = member;
         std::string member_name = StructMemberName(member_idx, member_type);
 
@@ -158,7 +157,7 @@ void InspectorBuilder::MakeStructVariableReferenceBodyFunction(
 
     for (auto member : members) {
         size_t member_idx;
-        const ast::Type* member_type;
+        ast::Type member_type;
         std::tie(member_idx, member_type) = member;
         std::string member_name = StructMemberName(member_idx, member_type);
 
@@ -183,13 +182,13 @@ void InspectorBuilder::AddComparisonSampler(const std::string& name,
 }
 
 void InspectorBuilder::AddResource(const std::string& name,
-                                   const ast::Type* type,
+                                   ast::Type type,
                                    uint32_t group,
                                    uint32_t binding) {
     GlobalVar(name, type, Binding(AInt(binding)), Group(AInt(group)));
 }
 
-void InspectorBuilder::AddGlobalVariable(const std::string& name, const ast::Type* type) {
+void InspectorBuilder::AddGlobalVariable(const std::string& name, ast::Type type) {
     GlobalVar(name, type, type::AddressSpace::kPrivate);
 }
 
@@ -198,7 +197,7 @@ const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(
     const std::string& texture_name,
     const std::string& sampler_name,
     const std::string& coords_name,
-    const ast::Type* base_type,
+    ast::Type base_type,
     utils::VectorRef<const ast::Attribute*> attributes) {
     std::string result_name = "sampler_result";
 
@@ -216,7 +215,7 @@ const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(
     const std::string& sampler_name,
     const std::string& coords_name,
     const std::string& array_index,
-    const ast::Type* base_type,
+    ast::Type base_type,
     utils::VectorRef<const ast::Attribute*> attributes) {
     std::string result_name = "sampler_result";
 
@@ -235,7 +234,7 @@ const ast::Function* InspectorBuilder::MakeComparisonSamplerReferenceBodyFunctio
     const std::string& sampler_name,
     const std::string& coords_name,
     const std::string& depth_name,
-    const ast::Type* base_type,
+    ast::Type base_type,
     utils::VectorRef<const ast::Attribute*> attributes) {
     std::string result_name = "sampler_result";
 
@@ -248,7 +247,7 @@ const ast::Function* InspectorBuilder::MakeComparisonSamplerReferenceBodyFunctio
     return Func(func_name, utils::Empty, ty.void_(), std::move(stmts), std::move(attributes));
 }
 
-const ast::Type* InspectorBuilder::GetBaseType(ResourceBinding::SampledKind sampled_kind) {
+ast::Type InspectorBuilder::GetBaseType(ResourceBinding::SampledKind sampled_kind) {
     switch (sampled_kind) {
         case ResourceBinding::SampledKind::kFloat:
             return ty.f32();
@@ -257,35 +256,34 @@ const ast::Type* InspectorBuilder::GetBaseType(ResourceBinding::SampledKind samp
         case ResourceBinding::SampledKind::kUInt:
             return ty.u32();
         default:
-            return nullptr;
+            return ast::Type{};
     }
 }
 
-const ast::Type* InspectorBuilder::GetCoordsType(type::TextureDimension dim,
-                                                 const ast::Type* scalar) {
+ast::Type InspectorBuilder::GetCoordsType(type::TextureDimension dim, ast::Type scalar) {
     switch (dim) {
         case type::TextureDimension::k1d:
             return scalar;
         case type::TextureDimension::k2d:
         case type::TextureDimension::k2dArray:
-            return create<ast::Vector>(scalar, 2u);
+            return ty.vec2(scalar);
         case type::TextureDimension::k3d:
         case type::TextureDimension::kCube:
         case type::TextureDimension::kCubeArray:
-            return create<ast::Vector>(scalar, 3u);
+            return ty.vec3(scalar);
         default:
             [=]() { FAIL() << "Unsupported texture dimension: " << dim; }();
     }
-    return nullptr;
+    return ast::Type{};
 }
 
-const ast::Type* InspectorBuilder::MakeStorageTextureTypes(type::TextureDimension dim,
-                                                           type::TexelFormat format) {
+ast::Type InspectorBuilder::MakeStorageTextureTypes(type::TextureDimension dim,
+                                                    type::TexelFormat format) {
     return ty.storage_texture(dim, format, type::Access::kWrite);
 }
 
 void InspectorBuilder::AddStorageTexture(const std::string& name,
-                                         const ast::Type* type,
+                                         ast::Type type,
                                          uint32_t group,
                                          uint32_t binding) {
     GlobalVar(name, type, Binding(AInt(binding)), Group(AInt(group)));
@@ -294,7 +292,7 @@ void InspectorBuilder::AddStorageTexture(const std::string& name,
 const ast::Function* InspectorBuilder::MakeStorageTextureBodyFunction(
     const std::string& func_name,
     const std::string& st_name,
-    const ast::Type* dim_type,
+    ast::Type dim_type,
     utils::VectorRef<const ast::Attribute*> attributes) {
     utils::Vector stmts{
         Decl(Var("dim", dim_type)),
@@ -305,24 +303,24 @@ const ast::Function* InspectorBuilder::MakeStorageTextureBodyFunction(
     return Func(func_name, utils::Empty, ty.void_(), std::move(stmts), std::move(attributes));
 }
 
-std::function<const ast::Type*()> InspectorBuilder::GetTypeFunction(ComponentType component,
-                                                                    CompositionType composition) {
-    std::function<const ast::Type*()> func;
+std::function<ast::Type()> InspectorBuilder::GetTypeFunction(ComponentType component,
+                                                             CompositionType composition) {
+    std::function<ast::Type()> func;
     switch (component) {
         case ComponentType::kF32:
-            func = [this]() -> const ast::Type* { return ty.f32(); };
+            func = [this]() { return ty.f32(); };
             break;
         case ComponentType::kI32:
-            func = [this]() -> const ast::Type* { return ty.i32(); };
+            func = [this]() { return ty.i32(); };
             break;
         case ComponentType::kU32:
-            func = [this]() -> const ast::Type* { return ty.u32(); };
+            func = [this]() { return ty.u32(); };
             break;
         case ComponentType::kF16:
-            func = [this]() -> const ast::Type* { return ty.f16(); };
+            func = [this]() { return ty.f16(); };
             break;
         case ComponentType::kUnknown:
-            return []() -> const ast::Type* { return nullptr; };
+            return []() { return ast::Type{}; };
     }
 
     uint32_t n;
@@ -339,10 +337,10 @@ std::function<const ast::Type*()> InspectorBuilder::GetTypeFunction(ComponentTyp
             n = 4;
             break;
         default:
-            return []() -> ast::Type* { return nullptr; };
+            return []() { return ast::Type{}; };
     }
 
-    return [this, func, n]() -> const ast::Type* { return ty.vec(func(), n); };
+    return [this, func, n]() { return ty.vec(func(), n); };
 }
 
 Inspector& InspectorBuilder::Build() {

@@ -189,13 +189,11 @@ class Transform : public Castable<Transform> {
     /// @param stmt the statement to remove when the program is cloned
     static void RemoveStatement(CloneContext& ctx, const ast::Statement* stmt);
 
-    /// CreateASTTypeFor constructs new ast::Type nodes that reconstructs the
-    /// semantic type `ty`.
+    /// CreateASTTypeFor constructs new ast::Type that reconstructs the semantic type `ty`.
     /// @param ctx the clone context
     /// @param ty the semantic type to reconstruct
-    /// @returns a ast::Type that when resolved, will produce the semantic type
-    /// `ty`.
-    static const ast::Type* CreateASTTypeFor(CloneContext& ctx, const type::Type* ty);
+    /// @returns an ast::Type that when resolved, will produce the semantic type `ty`.
+    static ast::Type CreateASTTypeFor(CloneContext& ctx, const type::Type* ty);
 };
 
 }  // namespace tint::transform

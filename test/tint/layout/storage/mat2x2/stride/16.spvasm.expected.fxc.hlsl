@@ -37,10 +37,10 @@ void tint_symbol_5(RWByteAddressBuffer buffer, uint offset, strided_arr value) {
 }
 
 void tint_symbol_4(RWByteAddressBuffer buffer, uint offset, strided_arr value[2]) {
-  strided_arr array[2] = value;
+  strided_arr array_1[2] = value;
   {
     for(uint i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
-      tint_symbol_5(buffer, (offset + (i_1 * 16u)), array[i_1]);
+      tint_symbol_5(buffer, (offset + (i_1 * 16u)), array_1[i_1]);
     }
   }
 }

@@ -18,6 +18,7 @@
 
 #include "src/tint/demangler.h"
 #include "src/tint/resolver/resolver.h"
+#include "src/tint/sem/type_expression.h"
 #include "src/tint/sem/value_expression.h"
 
 namespace tint {
@@ -118,21 +119,24 @@ bool Program::IsValid() const {
 }
 
 const type::Type* Program::TypeOf(const ast::Expression* expr) const {
-    auto* sem = Sem().GetVal(expr);
-    return sem ? sem->Type() : nullptr;
+    return tint::Switch(
+        Sem().Get(expr),  //
+        [](const sem::ValueExpression* ty_expr) { return ty_expr->Type(); },
+        [](const sem::TypeExpression* ty_expr) { return ty_expr->Type(); });
 }
 
-const type::Type* Program::TypeOf(const ast::Type* type) const {
-    return Sem().Get(type);
+const type::Type* Program::TypeOf(const ast::Variable* var) const {
+    auto* sem = Sem().Get(var);
+    return sem ? sem->Type() : nullptr;
 }
 
 const type::Type* Program::TypeOf(const ast::TypeDecl* type_decl) const {
     return Sem().Get(type_decl);
 }
 
-std::string Program::FriendlyName(const ast::Type* type) const {
+std::string Program::FriendlyName(ast::Type type) const {
     TINT_ASSERT_PROGRAM_IDS_EQUAL(Program, type, ID());
-    return type ? type->FriendlyName(Symbols()) : "<null>";
+    return type ? Symbols().NameFor(type->identifier->symbol) : "<null>";
 }
 
 std::string Program::FriendlyName(const type::Type* type) const {

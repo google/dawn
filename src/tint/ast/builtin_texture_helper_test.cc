@@ -127,7 +127,7 @@ std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data) {
     return out;
 }
 
-const ast::Type* TextureOverloadCase::BuildResultVectorComponentType(ProgramBuilder* b) const {
+ast::Type TextureOverloadCase::BuildResultVectorComponentType(ProgramBuilder* b) const {
     switch (texture_data_type) {
         case ast::builtin::test::TextureDataType::kF32:
             return b->ty.f32();
@@ -166,7 +166,7 @@ const ast::Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b
                 attrs);
 
         case ast::builtin::test::TextureKind::kStorage: {
-            auto* st = b->ty.storage_texture(texture_dimension, texel_format, access);
+            auto st = b->ty.storage_texture(texture_dimension, texel_format, access);
             return b->GlobalVar(kTextureName, st, attrs);
         }
     }

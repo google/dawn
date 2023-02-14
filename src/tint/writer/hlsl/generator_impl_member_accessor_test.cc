@@ -23,66 +23,66 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::writer::hlsl {
 namespace {
 
-using create_type_func_ptr = const ast::Type* (*)(const ProgramBuilder::TypesBuilder& ty);
+using create_type_func_ptr = ast::Type (*)(const ProgramBuilder::TypesBuilder& ty);
 
-inline const ast::Type* ty_i32(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_i32(const ProgramBuilder::TypesBuilder& ty) {
     return ty.i32();
 }
-inline const ast::Type* ty_u32(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_u32(const ProgramBuilder::TypesBuilder& ty) {
     return ty.u32();
 }
-inline const ast::Type* ty_f32(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_f32(const ProgramBuilder::TypesBuilder& ty) {
     return ty.f32();
 }
-inline const ast::Type* ty_f16(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_f16(const ProgramBuilder::TypesBuilder& ty) {
     return ty.f16();
 }
 template <typename T>
-inline const ast::Type* ty_vec2(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_vec2(const ProgramBuilder::TypesBuilder& ty) {
     return ty.vec2<T>();
 }
 template <typename T>
-inline const ast::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
     return ty.vec3<T>();
 }
 template <typename T>
-inline const ast::Type* ty_vec4(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_vec4(const ProgramBuilder::TypesBuilder& ty) {
     return ty.vec4<T>();
 }
 template <typename T>
-inline const ast::Type* ty_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
     return ty.mat2x2<T>();
 }
 template <typename T>
-inline const ast::Type* ty_mat2x3(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_mat2x3(const ProgramBuilder::TypesBuilder& ty) {
     return ty.mat2x3<T>();
 }
 template <typename T>
-inline const ast::Type* ty_mat2x4(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_mat2x4(const ProgramBuilder::TypesBuilder& ty) {
     return ty.mat2x4<T>();
 }
 template <typename T>
-inline const ast::Type* ty_mat3x2(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_mat3x2(const ProgramBuilder::TypesBuilder& ty) {
     return ty.mat3x2<T>();
 }
 template <typename T>
-inline const ast::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
     return ty.mat3x3<T>();
 }
 template <typename T>
-inline const ast::Type* ty_mat3x4(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_mat3x4(const ProgramBuilder::TypesBuilder& ty) {
     return ty.mat3x4<T>();
 }
 template <typename T>
-inline const ast::Type* ty_mat4x2(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_mat4x2(const ProgramBuilder::TypesBuilder& ty) {
     return ty.mat4x2<T>();
 }
 template <typename T>
-inline const ast::Type* ty_mat4x3(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_mat4x3(const ProgramBuilder::TypesBuilder& ty) {
     return ty.mat4x3<T>();
 }
 template <typename T>
-inline const ast::Type* ty_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
+inline ast::Type ty_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
     return ty.mat4x4<T>();
 }
 
@@ -149,10 +149,7 @@ struct TypeCase {
     std::string expected;
 };
 inline std::ostream& operator<<(std::ostream& out, TypeCase c) {
-    ProgramBuilder b;
-    auto* ty = c.member_type(b.ty);
-    out << ty->FriendlyName(b.Symbols());
-    return out;
+    return out << c.expected;
 }
 
 using HlslGeneratorImplTest_MemberAccessor_StorageBufferLoad_ConstantOffset =

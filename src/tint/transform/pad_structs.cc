@@ -75,7 +75,7 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
             }
 
             auto* ty = mem->Type();
-            const ast::Type* type = CreateASTTypeFor(ctx, ty);
+            auto type = CreateASTTypeFor(ctx, ty);
 
             new_members.Push(b.Member(name, type));
 

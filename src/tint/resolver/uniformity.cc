@@ -386,12 +386,27 @@ class UniformityGraph {
         return current_function_->CreateNode(std::move(tag_list), ast);
     }
 
-    /// Get the symbol name of an AST node.
-    /// @param ast the AST node to get the symbol name of
+    /// Get the symbol name of an AST expression.
+    /// @param expr the expression to get the symbol name of
     /// @returns the symbol name
-    template <typename T>
-    inline std::string NameFor(const T* ast) {
-        return builder_->Symbols().NameFor(ast->symbol);
+    inline std::string NameFor(const ast::IdentifierExpression* expr) {
+        return builder_->Symbols().NameFor(expr->identifier->symbol);
+    }
+
+    /// @param var the variable to get the name of
+    /// @returns the name of the variable @p var
+    inline std::string NameFor(const ast::Variable* var) {
+        return builder_->Symbols().NameFor(var->name->symbol);
+    }
+
+    /// @param var the variable to get the name of
+    /// @returns the name of the variable @p var
+    inline std::string NameFor(const sem::Variable* var) { return NameFor(var->Declaration()); }
+
+    /// @param fn the function to get the name of
+    /// @returns the name of the function @p fn
+    inline std::string NameFor(const sem::Function* fn) {
+        return builder_->Symbols().NameFor(fn->Declaration()->name->symbol);
     }
 
     /// Process a function.
@@ -621,7 +636,7 @@ class UniformityGraph {
 
                     // Add an edge from the variable exit node to its value at this point.
                     auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&]() {
-                        auto name = NameFor(var->Declaration()->name);
+                        auto name = NameFor(var);
                         return CreateNode({name, "_value_", info.type, "_exit"});
                     });
                     exit_node->AddEdge(current_function_->variables.Get(var));
@@ -657,7 +672,7 @@ class UniformityGraph {
 
                         // Add an edge from the variable exit node to its value at this point.
                         auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&]() {
-                            auto name = NameFor(var->Declaration()->name);
+                            auto name = NameFor(var);
                             return CreateNode({name, "_value_", info.type, "_exit"});
                         });
 
@@ -730,8 +745,7 @@ class UniformityGraph {
 
                 // Create input nodes for any variables declared before this loop.
                 for (auto* v : current_function_->local_var_decls) {
-                    auto* in_node =
-                        CreateNode({NameFor(v->Declaration()->name), "_value_forloop_in"});
+                    auto* in_node = CreateNode({NameFor(v), "_value_forloop_in"});
                     in_node->AddEdge(current_function_->variables.Get(v));
                     info.var_in_nodes.Replace(v, in_node);
                     current_function_->variables.Set(v, in_node);
@@ -748,7 +762,7 @@ class UniformityGraph {
                     // Propagate assignments to the loop exit nodes.
                     for (auto* var : current_function_->local_var_decls) {
                         auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&]() {
-                            auto name = NameFor(var->Declaration()->name);
+                            auto name = NameFor(var);
                             return CreateNode({name, "_value_", info.type, "_exit"});
                         });
                         exit_node->AddEdge(current_function_->variables.Get(var));
@@ -806,8 +820,7 @@ class UniformityGraph {
 
                 // Create input nodes for any variables declared before this loop.
                 for (auto* v : current_function_->local_var_decls) {
-                    auto* in_node =
-                        CreateNode({NameFor(v->Declaration()->name), "_value_forloop_in"});
+                    auto* in_node = CreateNode({NameFor(v), "_value_forloop_in"});
                     in_node->AddEdge(current_function_->variables.Get(v));
                     info.var_in_nodes.Replace(v, in_node);
                     current_function_->variables.Set(v, in_node);
@@ -825,7 +838,7 @@ class UniformityGraph {
                 // Propagate assignments to the loop exit nodes.
                 for (auto* var : current_function_->local_var_decls) {
                     auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&]() {
-                        auto name = NameFor(var->Declaration()->name);
+                        auto name = NameFor(var);
                         return CreateNode({name, "_value_", info.type, "_exit"});
                     });
                     exit_node->AddEdge(current_function_->variables.Get(var));
@@ -909,8 +922,7 @@ class UniformityGraph {
                     }
 
                     // Create an exit node for the variable.
-                    auto* out_node =
-                        CreateNode({NameFor(var->Declaration()->name), "_value_if_exit"});
+                    auto* out_node = CreateNode({NameFor(var), "_value_if_exit"});
 
                     // Add edges to the assigned value or the initial value.
                     // Only add edges if the behavior for that block contains 'Next'.
@@ -966,7 +978,7 @@ class UniformityGraph {
 
                 // Create input nodes for any variables declared before this loop.
                 for (auto* v : current_function_->local_var_decls) {
-                    auto name = NameFor(v->Declaration()->name);
+                    auto name = NameFor(v);
                     auto* in_node = CreateNode({name, "_value_loop_in"}, v->Declaration());
                     in_node->AddEdge(current_function_->variables.Get(v));
                     info.var_in_nodes.Replace(v, in_node);
@@ -1065,7 +1077,7 @@ class UniformityGraph {
 
                             // Add an edge from the variable exit node to its new value.
                             auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&]() {
-                                auto name = NameFor(var->Declaration()->name);
+                                auto name = NameFor(var);
                                 return CreateNode({name, "_value_", info.type, "_exit"});
                             });
                             exit_node->AddEdge(current_function_->variables.Get(var));
@@ -1144,7 +1156,7 @@ class UniformityGraph {
             return true;
         };
 
-        auto* node = CreateNode({NameFor(ident->identifier), "_ident_expr"}, ident);
+        auto* node = CreateNode({NameFor(ident), "_ident_expr"}, ident);
         auto* sem_ident = sem_.GetVal(ident);
         TINT_ASSERT(Resolver, sem_ident);
         auto* var_user = sem_ident->Unwrap()->As<sem::VariableUser>();
@@ -1367,7 +1379,7 @@ class UniformityGraph {
                     return std::make_pair(cf, current_function_->may_be_non_uniform);
                 } else if (auto* local = sem->Variable()->As<sem::LocalVariable>()) {
                     // Create a new value node for this variable.
-                    auto* value = CreateNode({NameFor(i->identifier), "_lvalue"});
+                    auto* value = CreateNode({NameFor(i), "_lvalue"});
                     auto* old_value = current_function_->variables.Set(local, value);
 
                     // If i is part of an expression that is a partial reference to a variable (e.g.
@@ -1404,7 +1416,7 @@ class UniformityGraph {
                     // Cut the analysis short, since we only need to know the originating variable
                     // that is being written to.
                     auto* root_ident = sem_.Get(u)->RootIdentifier();
-                    auto* deref = CreateNode({NameFor(root_ident->Declaration()->name), "_deref"});
+                    auto* deref = CreateNode({NameFor(root_ident), "_deref"});
                     auto* old_value = current_function_->variables.Set(root_ident, deref);
 
                     if (old_value) {
@@ -1432,12 +1444,7 @@ class UniformityGraph {
     /// @param call the function call to process
     /// @returns a pair of (control flow node, value node)
     std::pair<Node*, Node*> ProcessCall(Node* cf, const ast::CallExpression* call) {
-        std::string name;
-        if (call->target.name) {
-            name = NameFor(call->target.name);
-        } else {
-            name = call->target.type->FriendlyName(builder_->Symbols());
-        }
+        std::string name = NameFor(call->target);
 
         // Process call arguments
         Node* cf_last_arg = cf;
@@ -1771,10 +1778,10 @@ class UniformityGraph {
                 std::ostringstream ss;
                 if (auto* param = var->As<sem::Parameter>()) {
                     auto* func = param->Owner()->As<sem::Function>();
-                    ss << param_type(param) << "'" << NameFor(ident->identifier) << "' of '"
-                       << NameFor(func->Declaration()->name) << "' may be non-uniform";
+                    ss << param_type(param) << "'" << NameFor(ident) << "' of '" << NameFor(func)
+                       << "' may be non-uniform";
                 } else {
-                    ss << "reading from " << var_type(var) << "'" << NameFor(ident->identifier)
+                    ss << "reading from " << var_type(var) << "'" << NameFor(ident)
                        << "' may result in a non-uniform value";
                 }
                 diagnostics_.add_note(diag::System::Resolver, ss.str(), ident->source);
@@ -1782,12 +1789,12 @@ class UniformityGraph {
             [&](const ast::Variable* v) {
                 auto* var = sem_.Get(v);
                 std::ostringstream ss;
-                ss << "reading from " << var_type(var) << "'" << NameFor(v->name)
+                ss << "reading from " << var_type(var) << "'" << NameFor(v)
                    << "' may result in a non-uniform value";
                 diagnostics_.add_note(diag::System::Resolver, ss.str(), v->source);
             },
             [&](const ast::CallExpression* c) {
-                auto target_name = NameFor(c->target.name);
+                auto target_name = NameFor(c->target);
                 switch (non_uniform_source->type) {
                     case Node::kFunctionCallReturnValue: {
                         diagnostics_.add_note(
@@ -1799,8 +1806,7 @@ class UniformityGraph {
                         auto* arg = c->args[non_uniform_source->arg_index];
                         auto* var = sem_.GetVal(arg)->RootIdentifier();
                         std::ostringstream ss;
-                        ss << "reading from " << var_type(var) << "'"
-                           << NameFor(var->Declaration()->name)
+                        ss << "reading from " << var_type(var) << "'" << NameFor(var)
                            << "' may result in a non-uniform value";
                         diagnostics_.add_note(diag::System::Resolver, ss.str(),
                                               var->Declaration()->source);
@@ -1867,7 +1873,7 @@ class UniformityGraph {
         auto* call = cause->ast->As<ast::CallExpression>();
         TINT_ASSERT(Resolver, call);
         auto* target = SemCall(call)->Target();
-        auto func_name = NameFor(call->target.name);
+        auto func_name = NameFor(call->target);
 
         if (cause->type == Node::kFunctionCallArgumentValue ||
             cause->type == Node::kFunctionCallArgumentContents) {
@@ -1897,7 +1903,7 @@ class UniformityGraph {
                 // Show a builtin was reachable from this call (which may be the call itself).
                 // This will be the trigger location for the failure.
                 std::ostringstream ss;
-                ss << "'" << NameFor(builtin_call->target.name)
+                ss << "'" << NameFor(builtin_call->target)
                    << "' must only be called from uniform control flow";
                 report(builtin_call->source, ss.str(), /* note */ false);
             }

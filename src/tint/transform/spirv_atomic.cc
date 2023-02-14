@@ -131,7 +131,7 @@ struct SpirvAtomic::State {
                     for (size_t i = 0; i < str->members.Length(); i++) {
                         auto* member = str->members[i];
                         if (forked.atomic_members.count(i)) {
-                            auto* type = AtomicTypeFor(ctx.src->Sem().Get(member)->Type());
+                            auto type = AtomicTypeFor(ctx.src->Sem().Get(member)->Type());
                             auto name = ctx.src->Symbols().NameFor(member->name->symbol);
                             members.Push(b.Member(name, type, ctx.Clone(member->attributes)));
                         } else {
@@ -169,7 +169,7 @@ struct SpirvAtomic::State {
                 [&](const sem::VariableUser* user) {
                     auto* v = user->Variable()->Declaration();
                     if (v->type && atomic_variables.emplace(user->Variable()).second) {
-                        ctx.Replace(v->type, AtomicTypeFor(user->Variable()->Type()));
+                        ctx.Replace(v->type.expr, b.Expr(AtomicTypeFor(user->Variable()->Type())));
                     }
                     if (auto* ctor = user->Variable()->Initializer()) {
                         atomic_expressions.Add(ctor);
@@ -193,13 +193,13 @@ struct SpirvAtomic::State {
         }
     }
 
-    const ast::Type* AtomicTypeFor(const type::Type* ty) {
+    ast::Type AtomicTypeFor(const type::Type* ty) {
         return Switch(
             ty,  //
             [&](const type::I32*) { return b.ty.atomic(CreateASTTypeFor(ctx, ty)); },
             [&](const type::U32*) { return b.ty.atomic(CreateASTTypeFor(ctx, ty)); },
             [&](const sem::Struct* str) { return b.ty(Fork(str->Declaration()).name); },
-            [&](const type::Array* arr) -> const ast::Type* {
+            [&](const type::Array* arr) {
                 if (arr->Count()->Is<type::RuntimeArrayCount>()) {
                     return b.ty.array(AtomicTypeFor(arr->ElemType()));
                 }
@@ -221,7 +221,7 @@ struct SpirvAtomic::State {
             [&](Default) {
                 TINT_ICE(Transform, b.Diagnostics())
                     << "unhandled type: " << ty->FriendlyName(ctx.src->Symbols());
-                return nullptr;
+                return ast::Type{};
             });
     }
 

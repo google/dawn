@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {
@@ -52,9 +53,7 @@ TEST_F(ParserImplTest, FunctionHeader_AttributeReturnType) {
 
     EXPECT_EQ(f->name, "main");
     EXPECT_EQ(f->params.Length(), 0u);
-    ASSERT_TRUE(f->return_type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(f->return_type->As<ast::TypeName>()->name->symbol),
-              "f32");
+    ast::CheckIdentifier(p->builder().Symbols(), f->return_type, "f32");
     ASSERT_EQ(f->return_type_attributes.Length(), 1u);
 
     auto* loc = f->return_type_attributes[0]->As<ast::LocationAttribute>();
@@ -73,9 +72,7 @@ TEST_F(ParserImplTest, FunctionHeader_InvariantReturnType) {
 
     EXPECT_EQ(f->name, "main");
     EXPECT_EQ(f->params.Length(), 0u);
-    ASSERT_TRUE(f->return_type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(f->return_type->As<ast::TypeName>()->name->symbol),
-              "f32");
+    ast::CheckIdentifier(p->builder().Symbols(), f->return_type, "f32");
     ASSERT_EQ(f->return_type_attributes.Length(), 1u);
     EXPECT_TRUE(f->return_type_attributes[0]->Is<ast::InvariantAttribute>());
 }

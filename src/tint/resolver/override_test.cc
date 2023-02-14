@@ -208,8 +208,8 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaAttribute) {
 TEST_F(ResolverOverrideTest, TransitiveReferences_ViaArraySize) {
     auto* a = Override("a", ty.i32());
     auto* b = Override("b", ty.i32(), Mul(2_a, "a"));
-    auto* arr_ty = ty.array(ty.i32(), Mul(2_a, "b"));
-    auto* arr = GlobalVar("arr", type::AddressSpace::kWorkgroup, arr_ty);
+    auto* arr = GlobalVar("arr", type::AddressSpace::kWorkgroup, ty.array(ty.i32(), Mul(2_a, "b")));
+    auto arr_ty = arr->type;
     Override("unused", ty.i32(), Expr(1_a));
     auto* func = Func("foo", utils::Empty, ty.void_(),
                       utils::Vector{
@@ -219,7 +219,7 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaArraySize) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     {
-        auto* r = Sem().TransitivelyReferencedOverrides(Sem().Get(arr_ty));
+        auto* r = Sem().TransitivelyReferencedOverrides(TypeOf(arr_ty));
         ASSERT_NE(r, nullptr);
         auto& refs = *r;
         ASSERT_EQ(refs.Length(), 2u);
@@ -248,8 +248,9 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaArraySize) {
 TEST_F(ResolverOverrideTest, TransitiveReferences_ViaArraySize_Alias) {
     auto* a = Override("a", ty.i32());
     auto* b = Override("b", ty.i32(), Mul(2_a, "a"));
-    auto* arr_ty = Alias("arr_ty", ty.array(ty.i32(), Mul(2_a, "b")));
+    Alias("arr_ty", ty.array(ty.i32(), Mul(2_a, "b")));
     auto* arr = GlobalVar("arr", type::AddressSpace::kWorkgroup, ty("arr_ty"));
+    auto arr_ty = arr->type;
     Override("unused", ty.i32(), Expr(1_a));
     auto* func = Func("foo", utils::Empty, ty.void_(),
                       utils::Vector{
@@ -259,7 +260,7 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaArraySize_Alias) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     {
-        auto* r = Sem().TransitivelyReferencedOverrides(Sem().Get<type::Array>(arr_ty->type));
+        auto* r = Sem().TransitivelyReferencedOverrides(TypeOf(arr_ty));
         ASSERT_NE(r, nullptr);
         auto& refs = *r;
         ASSERT_EQ(refs.Length(), 2u);

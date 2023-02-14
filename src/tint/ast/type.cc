@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,22 +13,12 @@
 // limitations under the License.
 
 #include "src/tint/ast/type.h"
+#include "src/tint/ast/identifier_expression.h"
 
-#include "src/tint/ast/alias.h"
-#include "src/tint/ast/matrix.h"
-#include "src/tint/ast/pointer.h"
-#include "src/tint/ast/texture.h"
-#include "src/tint/ast/vector.h"
-#include "src/tint/symbol_table.h"
+namespace tint {
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::Type);
+ProgramID ProgramIDOf(ast::Type type) {
+    return ProgramIDOf(type.expr);
+}
 
-namespace tint::ast {
-
-Type::Type(ProgramID pid, NodeID nid, const Source& src) : Base(pid, nid, src) {}
-
-Type::Type(Type&&) = default;
-
-Type::~Type() = default;
-
-}  // namespace tint::ast
+}  // namespace tint

@@ -150,7 +150,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_AInt_Initializer) {
     // const c = vec3(1, 2, 3);
     // var v = c;
 
-    auto* c = GlobalConst("c", Call(ty.vec3(nullptr), 1_a, 2_a, 3_a));
+    auto* c = GlobalConst("c", Call(ty.vec3<Infer>(), 1_a, 2_a, 3_a));
     GlobalVar("v", type::AddressSpace::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -179,7 +179,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_AFloat_Initializer) {
     // const c = vec3(1.0, 2.0, 3.0);
     // var v = c;
 
-    auto* c = GlobalConst("c", Call(ty.vec3(nullptr), 1._a, 2._a, 3._a));
+    auto* c = GlobalConst("c", Call(ty.vec3<Infer>(), 1._a, 2._a, 3._a));
     GlobalVar("v", type::AddressSpace::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -472,8 +472,8 @@ OpName %9 "unused_entry_point"
 TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
     // var<uniform_constant> a : texture_storage_2d<r32uint, write>;
 
-    auto* type = ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Uint,
-                                    type::Access::kWrite);
+    auto type = ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Uint,
+                                   type::Access::kWrite);
 
     auto* var_a = GlobalVar("a", type, Binding(0_a), Group(0_a));
 
@@ -493,10 +493,10 @@ OpDecorate %1 DescriptorSet 0
 }
 
 TEST_F(BuilderTest, GlobalVar_WorkgroupWithZeroInit) {
-    auto* type_scalar = ty.i32();
+    auto type_scalar = ty.i32();
     auto* var_scalar = GlobalVar("a", type_scalar, type::AddressSpace::kWorkgroup);
 
-    auto* type_array = ty.array<f32, 16>();
+    auto type_array = ty.array<f32, 16>();
     auto* var_array = GlobalVar("b", type_array, type::AddressSpace::kWorkgroup);
 
     auto* type_struct = Structure("C", utils::Vector{

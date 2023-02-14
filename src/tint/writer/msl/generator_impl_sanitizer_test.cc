@@ -27,9 +27,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using MslSanitizerTest = TestHelper;
 
 TEST_F(MslSanitizerTest, Call_ArrayLength) {
-    auto* s = Structure("my_struct", utils::Vector{
-                                         Member(0, "a", ty.array<f32>()),
-                                     });
+    auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>())});
     GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
               Group(2_a));
 
@@ -136,9 +134,7 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(30)]]) {
 }
 
 TEST_F(MslSanitizerTest, Call_ArrayLength_ViaLets) {
-    auto* s = Structure("my_struct", utils::Vector{
-                                         Member(0, "a", ty.array<f32>()),
-                                     });
+    auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>())});
     GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
               Group(2_a));
 
@@ -195,9 +191,7 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(30)]]) {
 }
 
 TEST_F(MslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
-    auto* s = Structure("my_struct", utils::Vector{
-                                         Member(0, "a", ty.array<f32>()),
-                                     });
+    auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>())});
     GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
               Group(0_a));
     GlobalVar("c", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(2_a),
@@ -256,9 +250,7 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(29)]]) {
 }
 
 TEST_F(MslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniformMissingBinding) {
-    auto* s = Structure("my_struct", utils::Vector{
-                                         Member(0, "a", ty.array<f32>()),
-                                     });
+    auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>())});
     GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
               Group(0_a));
     GlobalVar("c", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(2_a),

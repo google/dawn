@@ -194,7 +194,7 @@ void f() {
 }
 
 TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const_vec3_AInt) {
-    auto* C = Const("C", Call(ty.vec3(nullptr), 1_a, 2_a, 3_a));
+    auto* C = Const("C", Call(ty.vec3<Infer>(), 1_a, 2_a, 3_a));
     Func("f", utils::Empty, ty.void_(),
          utils::Vector{
              Decl(C),
@@ -215,7 +215,7 @@ void f() {
 }
 
 TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const_vec3_AFloat) {
-    auto* C = Const("C", Call(ty.vec3(nullptr), 1._a, 2._a, 3._a));
+    auto* C = Const("C", Call(ty.vec3<Infer>(), 1._a, 2._a, 3._a));
     Func("f", utils::Empty, ty.void_(),
          utils::Vector{
              Decl(C),
@@ -281,7 +281,7 @@ void f() {
 }
 
 TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const_mat2x3_AFloat) {
-    auto* C = Const("C", Call(ty.mat(nullptr, 2, 3), 1._a, 2._a, 3._a, 4._a, 5._a, 6._a));
+    auto* C = Const("C", Call(ty.mat2x3<Infer>(), 1._a, 2._a, 3._a, 4._a, 5._a, 6._a));
     Func("f", utils::Empty, ty.void_(),
          utils::Vector{
              Decl(C),

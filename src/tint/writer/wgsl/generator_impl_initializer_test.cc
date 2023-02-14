@@ -175,8 +175,8 @@ TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_Array) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitInitializer_Type_ImplicitArray) {
-    WrapInFunction(Call(ty.array(nullptr, nullptr), vec3<f32>(1_f, 2_f, 3_f),
-                        vec3<f32>(4_f, 5_f, 6_f), vec3<f32>(7_f, 8_f, 9_f)));
+    WrapInFunction(Call(ty.array<Infer>(), vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(4_f, 5_f, 6_f),
+                        vec3<f32>(7_f, 8_f, 9_f)));
 
     GeneratorImpl& gen = Build();
 

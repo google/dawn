@@ -33,52 +33,52 @@ namespace {
 using HlslGeneratorImplTest_Type = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
-    auto* arr = ty.array<bool, 4>();
-    GlobalVar("G", arr, type::AddressSpace::kPrivate);
+    auto arr = ty.array<bool, 4>();
+    ast::Type ty = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), type::AddressSpace::kNone,
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), type::AddressSpace::kNone,
                              type::Access::kReadWrite, "ary"))
         << gen.error();
     EXPECT_EQ(out.str(), "bool ary[4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
-    auto* arr = ty.array(ty.array<bool, 4>(), 5_u);
-    GlobalVar("G", arr, type::AddressSpace::kPrivate);
+    auto arr = ty.array(ty.array<bool, 4>(), 5_u);
+    ast::Type ty = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), type::AddressSpace::kNone,
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), type::AddressSpace::kNone,
                              type::Access::kReadWrite, "ary"))
         << gen.error();
     EXPECT_EQ(out.str(), "bool ary[5][4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
-    auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5_u), 6_u);
-    GlobalVar("G", arr, type::AddressSpace::kPrivate);
+    auto arr = ty.array(ty.array(ty.array<bool, 4>(), 5_u), 6_u);
+    ast::Type ty = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), type::AddressSpace::kNone,
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), type::AddressSpace::kNone,
                              type::Access::kReadWrite, "ary"))
         << gen.error();
     EXPECT_EQ(out.str(), "bool ary[6][5][4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
-    auto* arr = ty.array<bool, 4>();
-    GlobalVar("G", arr, type::AddressSpace::kPrivate);
+    auto arr = ty.array<bool, 4>();
+    ast::Type ty = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), type::AddressSpace::kNone,
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), type::AddressSpace::kNone,
                              type::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "bool[4]");
@@ -307,7 +307,7 @@ using HlslDepthTexturesTest = TestParamHelper<HlslDepthTextureData>;
 TEST_P(HlslDepthTexturesTest, Emit) {
     auto params = GetParam();
 
-    auto* t = ty.depth_texture(params.dim);
+    auto t = ty.depth_texture(params.dim);
 
     GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
@@ -338,7 +338,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 using HlslDepthMultisampledTexturesTest = TestHelper;
 TEST_F(HlslDepthMultisampledTexturesTest, Emit) {
-    auto* t = ty.depth_multisampled_texture(type::TextureDimension::k2d);
+    auto t = ty.depth_multisampled_texture(type::TextureDimension::k2d);
 
     GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
@@ -370,7 +370,7 @@ using HlslSampledTexturesTest = TestParamHelper<HlslSampledTextureData>;
 TEST_P(HlslSampledTexturesTest, Emit) {
     auto params = GetParam();
 
-    const ast::Type* datatype = nullptr;
+    ast::Type datatype;
     switch (params.datatype) {
         case TextureDataType::F32:
             datatype = ty.f32();
@@ -382,7 +382,7 @@ TEST_P(HlslSampledTexturesTest, Emit) {
             datatype = ty.i32();
             break;
     }
-    auto* t = ty.sampled_texture(params.dim, datatype);
+    ast::Type t = ty.sampled_texture(params.dim, datatype);
 
     GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
@@ -518,7 +518,7 @@ using HlslStorageTexturesTest = TestParamHelper<HlslStorageTextureData>;
 TEST_P(HlslStorageTexturesTest, Emit) {
     auto params = GetParam();
 
-    auto* t = ty.storage_texture(params.dim, params.imgfmt, type::Access::kWrite);
+    auto t = ty.storage_texture(params.dim, params.imgfmt, type::Access::kWrite);
 
     GlobalVar("tex", t,
               utils::Vector{

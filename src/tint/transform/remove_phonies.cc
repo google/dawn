@@ -108,7 +108,7 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
                             auto name = b.Symbols().New("phony_sink");
                             utils::Vector<const ast::Parameter*, 8> params;
                             for (auto* ty : sig) {
-                                auto* ast_ty = CreateASTTypeFor(ctx, ty);
+                                auto ast_ty = CreateASTTypeFor(ctx, ty);
                                 params.Push(b.Param("p" + std::to_string(params.Length()), ast_ty));
                             }
                             b.Func(name, params, b.ty.void_(), {});

@@ -32,8 +32,8 @@ TEST_P(MslBinaryTest, Emit) {
     auto type = [&] {
         return ((params.op == ast::BinaryOp::kLogicalAnd) ||
                 (params.op == ast::BinaryOp::kLogicalOr))
-                   ? static_cast<const ast::Type*>(ty.bool_())
-                   : static_cast<const ast::Type*>(ty.u32());
+                   ? ty.bool_()
+                   : ty.u32();
     };
 
     auto* left = Var("left", type());
@@ -74,10 +74,10 @@ using MslBinaryTest_SignedOverflowDefinedBehaviour = TestParamHelper<BinaryData>
 TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour, Emit) {
     auto params = GetParam();
 
-    auto* a_type = ty.i32();
-    auto* b_type =
+    auto a_type = ty.i32();
+    auto b_type =
         (params.op == ast::BinaryOp::kShiftLeft || params.op == ast::BinaryOp::kShiftRight)
-            ? static_cast<const ast::Type*>(ty.u32())
+            ? ty.u32()
             : ty.i32();
 
     auto* a = Var("a", a_type);
@@ -107,10 +107,10 @@ using MslBinaryTest_SignedOverflowDefinedBehaviour_Chained = TestParamHelper<Bin
 TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour_Chained, Emit) {
     auto params = GetParam();
 
-    auto* a_type = ty.i32();
-    auto* b_type =
+    auto a_type = ty.i32();
+    auto b_type =
         (params.op == ast::BinaryOp::kShiftLeft || params.op == ast::BinaryOp::kShiftRight)
-            ? static_cast<const ast::Type*>(ty.u32())
+            ? ty.u32()
             : ty.i32();
 
     auto* a = Var("a", a_type);

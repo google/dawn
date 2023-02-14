@@ -86,7 +86,7 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         packed_el_sem_ty = vector_ty;
     }
 
-    const ast::Type* packed_el_ast_ty = Switch(
+    auto packed_el_ast_ty = Switch(
         packed_el_sem_ty,  //
         [&](const type::I32*) { return b->ty.i32(); },
         [&](const type::U32*) { return b->ty.u32(); },
@@ -95,12 +95,12 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         [&](Default) {
             TINT_UNREACHABLE(Writer, b->Diagnostics())
                 << "unsupported vector element type: " << packed_el_sem_ty->TypeInfo().name;
-            return nullptr;
+            return ast::Type{};
         });
 
     auto* statement = vector_sem->Stmt();
 
-    auto* packed_ast_ty = b->create<ast::Vector>(packed_el_ast_ty, packed_size);
+    auto packed_ast_ty = b->ty.vec(packed_el_ast_ty, packed_size);
     auto* packed_sem_ty = b->create<type::Vector>(packed_el_sem_ty, packed_size);
 
     // If the coordinates are already passed in a vector initializer, with only

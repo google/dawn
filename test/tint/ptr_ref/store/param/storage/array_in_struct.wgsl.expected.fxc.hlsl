@@ -1,10 +1,10 @@
 RWByteAddressBuffer S : register(u0, space0);
 
 void tint_symbol(RWByteAddressBuffer buffer, uint offset, int value[4]) {
-  int array[4] = value;
+  int array_1[4] = value;
   {
     for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      buffer.Store((offset + (i * 4u)), asuint(array[i]));
+      buffer.Store((offset + (i * 4u)), asuint(array_1[i]));
     }
   }
 }

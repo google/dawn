@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "src/tint/ast/type.h"
 #include "src/tint/constant/clone_context.h"
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/ir/builder.h"
@@ -49,7 +50,6 @@ class Node;
 class ReturnStatement;
 class Statement;
 class SwitchStatement;
-class Type;
 class WhileStatement;
 class Variable;
 }  // namespace tint::ast

@@ -26,7 +26,7 @@ Parameter::Parameter(ProgramID pid,
                      NodeID nid,
                      const Source& src,
                      const Identifier* n,
-                     const ast::Type* ty,
+                     Type ty,
                      utils::VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src, n, ty, nullptr, std::move(attrs)) {}
 
@@ -41,7 +41,7 @@ const char* Parameter::Kind() const {
 const Parameter* Parameter::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto* n = ctx->Clone(name);
-    auto* ty = ctx->Clone(type);
+    auto ty = ctx->Clone(type);
     auto attrs = ctx->Clone(attributes);
     return ctx->dst->create<Parameter>(src, n, ty, std::move(attrs));
 }

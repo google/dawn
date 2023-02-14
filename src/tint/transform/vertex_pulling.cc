@@ -395,7 +395,7 @@ struct VertexPulling::State {
                 // Convert the fetched scalar/vector if WGSL variable is of `f16` types
                 if (var_dt.base_type == BaseWGSLType::kF16) {
                     // The type of the same element number of base type of target WGSL variable
-                    const ast::Type* loaded_data_target_type;
+                    ast::Type loaded_data_target_type;
                     if (fmt_dt.width == 1) {
                         loaded_data_target_type = b.ty.f16();
                     } else {
@@ -443,8 +443,7 @@ struct VertexPulling::State {
                         }
                     }
 
-                    const ast::Type* target_ty = CreateASTTypeFor(ctx, var.type);
-                    value = b.Call(target_ty, values);
+                    value = b.Call(CreateASTTypeFor(ctx, var.type), values);
                 }
 
                 // Assign the value to the WGSL variable
@@ -735,7 +734,7 @@ struct VertexPulling::State {
                                    uint32_t offset,
                                    uint32_t buffer,
                                    uint32_t element_stride,
-                                   const ast::Type* base_type,
+                                   ast::Type base_type,
                                    VertexFormat base_format,
                                    uint32_t count) {
         utils::Vector<const ast::Expression*, 8> expr_list;
@@ -745,7 +744,7 @@ struct VertexPulling::State {
             expr_list.Push(LoadPrimitive(array_base, primitive_offset, buffer, base_format));
         }
 
-        return b.Call(b.create<ast::Vector>(base_type, count), std::move(expr_list));
+        return b.Call(b.ty.vec(base_type, count), std::move(expr_list));
     }
 
     /// Process a non-struct entry point parameter.
@@ -757,7 +756,7 @@ struct VertexPulling::State {
         if (ast::HasAttribute<ast::LocationAttribute>(param->attributes)) {
             // Create a function-scope variable to replace the parameter.
             auto func_var_sym = ctx.Clone(param->name->symbol);
-            auto* func_var_type = ctx.Clone(param->type);
+            auto func_var_type = ctx.Clone(param->type);
             auto* func_var = b.Var(func_var_sym, func_var_type);
             ctx.InsertFront(func->body->statements, b.Decl(func_var));
             // Capture mapping from location to the new variable.
@@ -856,7 +855,7 @@ struct VertexPulling::State {
             utils::Vector<const ast::StructMember*, 8> new_members;
             for (auto* member : members_to_clone) {
                 auto member_name = ctx.Clone(member->name);
-                auto* member_type = ctx.Clone(member->type);
+                auto member_type = ctx.Clone(member->type);
                 auto member_attrs = ctx.Clone(member->attributes);
                 new_members.Push(b.Member(member_name, member_type, std::move(member_attrs)));
             }
@@ -926,7 +925,7 @@ struct VertexPulling::State {
 
         // Rewrite the function header with the new parameters.
         auto func_sym = ctx.Clone(func->name->symbol);
-        auto* ret_type = ctx.Clone(func->return_type);
+        auto ret_type = ctx.Clone(func->return_type);
         auto* body = ctx.Clone(func->body);
         auto attrs = ctx.Clone(func->attributes);
         auto ret_attrs = ctx.Clone(func->return_type_attributes);

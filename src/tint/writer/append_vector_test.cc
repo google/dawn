@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/writer/append_vector.h"
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/sem/type_initializer.h"
@@ -86,8 +87,7 @@ TEST_F(AppendVectorTest, Vec2i32_u32) {
     EXPECT_EQ(vec_123->args[1], scalar_2);
     auto* u32_to_i32 = vec_123->args[2]->As<ast::CallExpression>();
     ASSERT_NE(u32_to_i32, nullptr);
-    ASSERT_TRUE(u32_to_i32->target.type->Is<ast::TypeName>());
-    EXPECT_EQ(Symbols().NameFor(u32_to_i32->target.type->As<ast::TypeName>()->name->symbol), "i32");
+    ast::CheckIdentifier(Symbols(), u32_to_i32->target, "i32");
 
     ASSERT_EQ(u32_to_i32->args.Length(), 1u);
     EXPECT_EQ(u32_to_i32->args[0], scalar_3);
@@ -132,20 +132,14 @@ TEST_F(AppendVectorTest, Vec2i32FromVec2u32_u32) {
     ASSERT_EQ(vec_123->args.Length(), 2u);
     auto* v2u32_to_v2i32 = vec_123->args[0]->As<ast::CallExpression>();
     ASSERT_NE(v2u32_to_v2i32, nullptr);
-    ASSERT_TRUE(v2u32_to_v2i32->target.type->Is<ast::Vector>());
-    EXPECT_EQ(v2u32_to_v2i32->target.type->As<ast::Vector>()->width, 2u);
-    ASSERT_TRUE(v2u32_to_v2i32->target.type->As<ast::Vector>()->type->Is<ast::TypeName>());
-    EXPECT_EQ(Symbols().NameFor(v2u32_to_v2i32->target.type->As<ast::Vector>()
-                                    ->type->As<ast::TypeName>()
-                                    ->name->symbol),
-              "i32");
+
+    ast::CheckIdentifier(Symbols(), v2u32_to_v2i32->target, ast::Template("vec2", "i32"));
     EXPECT_EQ(v2u32_to_v2i32->args.Length(), 1u);
     EXPECT_EQ(v2u32_to_v2i32->args[0], uvec_12);
 
     auto* u32_to_i32 = vec_123->args[1]->As<ast::CallExpression>();
     ASSERT_NE(u32_to_i32, nullptr);
-    ASSERT_TRUE(u32_to_i32->target.type->Is<ast::TypeName>());
-    EXPECT_EQ(Symbols().NameFor(u32_to_i32->target.type->As<ast::TypeName>()->name->symbol), "i32");
+    ast::CheckIdentifier(Symbols(), u32_to_i32->target, "i32");
     ASSERT_EQ(u32_to_i32->args.Length(), 1u);
     EXPECT_EQ(u32_to_i32->args[0], scalar_3);
 
@@ -157,6 +151,7 @@ TEST_F(AppendVectorTest, Vec2i32FromVec2u32_u32) {
 
     auto* ctor = call->Target()->As<sem::TypeInitializer>();
     ASSERT_NE(ctor, nullptr);
+
     ASSERT_TRUE(ctor->ReturnType()->Is<type::Vector>());
     EXPECT_EQ(ctor->ReturnType()->As<type::Vector>()->Width(), 3u);
     EXPECT_TRUE(ctor->ReturnType()->As<type::Vector>()->type()->Is<type::I32>());
@@ -187,8 +182,7 @@ TEST_F(AppendVectorTest, Vec2i32_f32) {
     EXPECT_EQ(vec_123->args[1], scalar_2);
     auto* f32_to_i32 = vec_123->args[2]->As<ast::CallExpression>();
     ASSERT_NE(f32_to_i32, nullptr);
-    ASSERT_TRUE(f32_to_i32->target.type->Is<ast::TypeName>());
-    EXPECT_EQ(Symbols().NameFor(f32_to_i32->target.type->As<ast::TypeName>()->name->symbol), "i32");
+    ast::CheckIdentifier(Symbols(), f32_to_i32->target, "i32");
     ASSERT_EQ(f32_to_i32->args.Length(), 1u);
     EXPECT_EQ(f32_to_i32->args[0], scalar_3);
 
@@ -389,8 +383,7 @@ TEST_F(AppendVectorTest, Vec2i32Var_f32Var) {
     EXPECT_EQ(vec_123->args[0], vec_12);
     auto* f32_to_i32 = vec_123->args[1]->As<ast::CallExpression>();
     ASSERT_NE(f32_to_i32, nullptr);
-    ASSERT_TRUE(f32_to_i32->target.type->Is<ast::TypeName>());
-    EXPECT_EQ(Symbols().NameFor(f32_to_i32->target.type->As<ast::TypeName>()->name->symbol), "i32");
+    ast::CheckIdentifier(Symbols(), f32_to_i32->target, "i32");
     ASSERT_EQ(f32_to_i32->args.Length(), 1u);
     EXPECT_EQ(f32_to_i32->args[0], scalar_3);
 

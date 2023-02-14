@@ -40,6 +40,7 @@ class ProgramBuilder;
 namespace tint::ast {
 class FunctionList;
 class Node;
+struct Type;
 }  // namespace tint::ast
 
 namespace tint {
@@ -141,6 +142,11 @@ class CloneContext {
         auto* c = a->Clone(this);
         return CheckedCast<T>(c);
     }
+
+    /// Clones the ast::Type `ty` into the ProgramBuilder #dst
+    /// @param ty the AST type.
+    /// @return the cloned node
+    ast::Type Clone(const ast::Type& ty);
 
     /// Clones the Source `s` into #dst
     /// TODO(bclayton) - Currently this 'clone' is a shallow copy. If/when

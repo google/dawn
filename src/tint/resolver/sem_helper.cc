@@ -15,6 +15,8 @@
 #include "src/tint/resolver/sem_helper.h"
 
 #include "src/tint/sem/builtin_enum_expression.h"
+#include "src/tint/sem/function.h"
+#include "src/tint/sem/function_expression.h"
 #include "src/tint/sem/type_expression.h"
 #include "src/tint/sem/value_expression.h"
 
@@ -42,11 +44,18 @@ void SemHelper::ErrorUnexpectedExprKind(const sem::Expression* expr,
     Switch(
         expr,  //
         [&](const sem::VariableUser* var_expr) {
-            auto name =
-                builder_->Symbols().NameFor(var_expr->Variable()->Declaration()->name->symbol);
-            auto type = var_expr->Type()->FriendlyName(builder_->Symbols());
-            AddError("cannot use '" + name + "' of type '" + type + "' as " + std::string(wanted),
+            auto* variable = var_expr->Variable()->Declaration();
+            auto name = builder_->Symbols().NameFor(variable->name->symbol);
+            std::string kind = Switch(
+                variable,                                            //
+                [&](const ast::Var*) { return "var"; },              //
+                [&](const ast::Const*) { return "const"; },          //
+                [&](const ast::Parameter*) { return "parameter"; },  //
+                [&](const ast::Override*) { return "override"; },    //
+                [&](Default) { return "variable"; });
+            AddError("cannot use " + kind + " '" + name + "' as " + std::string(wanted),
                      var_expr->Declaration()->source);
+            NoteDeclarationSource(variable);
         },
         [&](const sem::ValueExpression* val_expr) {
             auto type = val_expr->Type()->FriendlyName(builder_->Symbols());
@@ -57,6 +66,13 @@ void SemHelper::ErrorUnexpectedExprKind(const sem::Expression* expr,
             auto name = ty_expr->Type()->FriendlyName(builder_->Symbols());
             AddError("cannot use type '" + name + "' as " + std::string(wanted),
                      ty_expr->Declaration()->source);
+        },
+        [&](const sem::FunctionExpression* fn_expr) {
+            auto* fn = fn_expr->Function()->Declaration();
+            auto name = builder_->Symbols().NameFor(fn->name->symbol);
+            AddError("cannot use function '" + name + "' as " + std::string(wanted),
+                     fn_expr->Declaration()->source);
+            NoteDeclarationSource(fn);
         },
         [&](const sem::BuiltinEnumExpression<type::Access>* access) {
             AddError("cannot use access '" + utils::ToString(access->Value()) + "' as " +
@@ -91,6 +107,44 @@ void SemHelper::ErrorExpectedValueExpr(const sem::Expression* expr) const {
                     str->Source());
         }
     }
+}
+
+void SemHelper::NoteDeclarationSource(const ast::Node* node) const {
+    Switch(
+        node,
+        [&](const ast::Struct* n) {
+            AddNote("struct '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+                    n->source);
+        },
+        [&](const ast::Alias* n) {
+            AddNote("alias '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+                    n->source);
+        },
+        [&](const ast::Var* n) {
+            AddNote("var '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+                    n->source);
+        },
+        [&](const ast::Let* n) {
+            AddNote("let '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+                    n->source);
+        },
+        [&](const ast::Override* n) {
+            AddNote("override '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+                    n->source);
+        },
+        [&](const ast::Const* n) {
+            AddNote("const '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+                    n->source);
+        },
+        [&](const ast::Parameter* n) {
+            AddNote(
+                "parameter '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+                n->source);
+        },
+        [&](const ast::Function* n) {
+            AddNote("function '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
+                    n->source);
+        });
 }
 
 void SemHelper::AddError(const std::string& msg, const Source& source) const {

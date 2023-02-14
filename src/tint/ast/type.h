@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,38 +15,38 @@
 #ifndef SRC_TINT_AST_TYPE_H_
 #define SRC_TINT_AST_TYPE_H_
 
-#include <string>
-
-#include "src/tint/ast/node.h"
-#include "src/tint/clone_context.h"
+#include "src/tint/program_id.h"
 
 // Forward declarations
-namespace tint {
-class ProgramBuilder;
-class SymbolTable;
-}  // namespace tint
+namespace tint::ast {
+class IdentifierExpression;
+}  // namespace tint::ast
 
 namespace tint::ast {
-/// Base class for a type in the system
-class Type : public Castable<Type, Node> {
-  public:
-    /// Move constructor
-    Type(Type&&);
-    ~Type() override;
 
-    /// @param symbols the program's symbol table
-    /// @returns the name for this type that closely resembles how it would be
-    /// declared in WGSL.
-    virtual std::string FriendlyName(const SymbolTable& symbols) const = 0;
+/// Type is a thin wrapper around an IdentifierExpression, to help statically disambiguate known
+/// type expressions from other expressions.
+struct Type {
+    /// The type expression
+    const IdentifierExpression* expr = nullptr;
 
-  protected:
-    /// Constructor
-    /// @param pid the identifier of the program that owns this node
-    /// @param nid the unique node identifier
-    /// @param src the source of this node
-    Type(ProgramID pid, NodeID nid, const Source& src);
+    /// Indirection operator for accessing the type's expression
+    /// @return #expr
+    const IdentifierExpression* operator->() const { return expr; }
+
+    /// Implicit conversion operator to the type's expression
+    /// @return #expr
+    operator const IdentifierExpression*() const { return expr; }
 };
 
 }  // namespace tint::ast
+
+namespace tint {
+
+/// @param type an AST type
+/// @returns the ProgramID of the given AST type.
+ProgramID ProgramIDOf(ast::Type type);
+
+}  // namespace tint
 
 #endif  // SRC_TINT_AST_TYPE_H_

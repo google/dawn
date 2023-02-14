@@ -71,14 +71,13 @@ struct IsTemplatedIdentifierMatcher<TemplatedIdentifierMatcher<ARGS...>> {
     static constexpr bool value = true;
 };
 
-/// A testing utility for checking that an Identifier and any optional templated arguments match the
-/// expected values.
+/// A testing utility for checking that an Identifier matches the expected values.
 /// @param symbols the symbol table
 /// @param got the identifier
 /// @param expected the expected identifier name
 template <typename... ARGS>
 void CheckIdentifier(const SymbolTable& symbols, const Identifier* got, std::string_view expected) {
-    EXPECT_FALSE(got->Is<ast::TemplatedIdentifier>());
+    EXPECT_FALSE(got->Is<TemplatedIdentifier>());
     EXPECT_EQ(symbols.NameFor(got->symbol), expected);
 }
 
@@ -92,8 +91,8 @@ void CheckIdentifier(const SymbolTable& symbols,
                      const Identifier* ident,
                      const TemplatedIdentifierMatcher<ARGS...>& expected) {
     EXPECT_EQ(symbols.NameFor(ident->symbol), expected.name);
-    ASSERT_TRUE(ident->Is<ast::TemplatedIdentifier>());
-    auto* got = ident->As<ast::TemplatedIdentifier>();
+    ASSERT_TRUE(ident->Is<TemplatedIdentifier>());
+    auto* got = ident->As<TemplatedIdentifier>();
     ASSERT_EQ(got->arguments.Length(), std::tuple_size_v<decltype(expected.args)>);
 
     size_t arg_idx = 0;
@@ -103,8 +102,7 @@ void CheckIdentifier(const SymbolTable& symbols,
         using T = std::decay_t<decltype(expected_arg)>;
         if constexpr (traits::IsStringLike<T>) {
             ASSERT_TRUE(got_arg->Is<IdentifierExpression>());
-            ast::CheckIdentifier(symbols, got_arg->As<IdentifierExpression>()->identifier,
-                                 expected_arg);
+            CheckIdentifier(symbols, got_arg->As<IdentifierExpression>()->identifier, expected_arg);
         } else if constexpr (IsTemplatedIdentifierMatcher<T>::value) {
             ASSERT_TRUE(got_arg->Is<IdentifierExpression>());
             auto* got_ident = got_arg->As<IdentifierExpression>()->identifier;
@@ -148,6 +146,33 @@ void CheckIdentifier(const SymbolTable& symbols,
         }
     };
     std::apply([&](auto&&... args) { ((check_arg(args)), ...); }, expected.args);
+}
+
+/// A testing utility for checking that an IdentifierExpression matches the expected values.
+/// @param symbols the symbol table
+/// @param expr the IdentifierExpression
+/// @param expected the expected identifier name
+template <typename... ARGS>
+void CheckIdentifier(const SymbolTable& symbols,
+                     const Expression* expr,
+                     std::string_view expected) {
+    auto* expr_ident = expr->As<IdentifierExpression>();
+    ASSERT_NE(expr_ident, nullptr) << "expression is not a IdentifierExpression";
+    CheckIdentifier(symbols, expr_ident->identifier, expected);
+}
+
+/// A testing utility for checking that an IdentifierExpression matches the expected name and
+/// template arguments.
+/// @param symbols the symbol table
+/// @param expr the IdentifierExpression
+/// @param expected the expected identifier name and arguments
+template <typename... ARGS>
+void CheckIdentifier(const SymbolTable& symbols,
+                     const Expression* expr,
+                     const TemplatedIdentifierMatcher<ARGS...>& expected) {
+    auto* expr_ident = expr->As<IdentifierExpression>();
+    ASSERT_NE(expr_ident, nullptr) << "expression is not a IdentifierExpression";
+    CheckIdentifier(symbols, expr_ident->identifier, expected);
 }
 
 }  // namespace tint::ast

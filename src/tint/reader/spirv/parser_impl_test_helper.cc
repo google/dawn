@@ -66,13 +66,6 @@ std::string ToString(const Program& program, const ast::Node* node) {
             }
             return writer.result();
         },
-        [&](const ast::Type* ty) {
-            std::stringstream out;
-            if (!writer.EmitType(out, ty)) {
-                return "WGSL writer error: " + writer.error();
-            }
-            return out.str();
-        },
         [&](const ast::Identifier* ident) { return program.Symbols().NameFor(ident->symbol); },
         [&](Default) {
             return "<unhandled AST node type " + std::string(node->TypeInfo().name) + ">";

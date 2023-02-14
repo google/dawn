@@ -308,7 +308,7 @@ struct Std140::State {
 
                             continue;  // Next member
                         }
-                    } else if (auto* std140_ty = Std140Type(member->Type())) {
+                    } else if (auto std140_ty = Std140Type(member->Type())) {
                         // Member is of a type that requires forking for std140-layout
                         fork_std140 = true;
                         auto attrs = ctx.Clone(member->Declaration()->attributes);
@@ -352,8 +352,8 @@ struct Std140::State {
             if (auto* var = global->As<ast::Var>()) {
                 if (var->declared_address_space == type::AddressSpace::kUniform) {
                     auto* v = sem.Get(var);
-                    if (auto* std140_ty = Std140Type(v->Type()->UnwrapRef())) {
-                        ctx.Replace(global->type, std140_ty);
+                    if (auto std140_ty = Std140Type(v->Type()->UnwrapRef())) {
+                        ctx.Replace(global->type.expr, b.Expr(std140_ty));
                         std140_uniforms.Add(v);
                     }
                 }
@@ -400,16 +400,16 @@ struct Std140::State {
     ///          If the semantic type is not split for std140-layout, then nullptr is returned.
     /// @note will construct new std140 structures to hold decomposed matrices, populating
     ///       #std140_mats.
-    const ast::Type* Std140Type(const type::Type* ty) {
+    ast::Type Std140Type(const type::Type* ty) {
         return Switch(
             ty,  //
-            [&](const sem::Struct* str) -> const ast::Type* {
+            [&](const sem::Struct* str) {
                 if (auto std140 = std140_structs.Find(str)) {
                     return b.ty(*std140);
                 }
-                return nullptr;
+                return ast::Type{};
             },
-            [&](const type::Matrix* mat) -> const ast::Type* {
+            [&](const type::Matrix* mat) {
                 if (MatrixNeedsDecomposing(mat)) {
                     auto std140_mat = std140_mats.GetOrCreate(mat, [&] {
                         auto name = b.Symbols().New("mat" + std::to_string(mat->columns()) + "x" +
@@ -426,10 +426,10 @@ struct Std140::State {
                     });
                     return b.ty(std140_mat.name);
                 }
-                return nullptr;
+                return ast::Type{};
             },
-            [&](const type::Array* arr) -> const ast::Type* {
-                if (auto* std140 = Std140Type(arr->ElemType())) {
+            [&](const type::Array* arr) {
+                if (auto std140 = Std140Type(arr->ElemType())) {
                     utils::Vector<const ast::Attribute*, 1> attrs;
                     if (!arr->IsStrideImplicit()) {
                         attrs.Push(b.create<ast::StrideAttribute>(arr->Stride()));
@@ -444,10 +444,9 @@ struct Std140::State {
                             << "unexpected non-constant array count";
                         count = 1;
                     }
-                    return b.create<ast::Array>(std140, b.Expr(u32(count.value())),
-                                                std::move(attrs));
+                    return b.ty.array(std140, b.Expr(u32(count.value())), std::move(attrs));
                 }
-                return nullptr;
+                return ast::Type{};
             });
     }
 
@@ -483,7 +482,7 @@ struct Std140::State {
 
             // Build the member
             const auto col_name = name_prefix + std::to_string(i);
-            const auto* col_ty = CreateASTTypeFor(ctx, mat->ColumnType());
+            const auto col_ty = CreateASTTypeFor(ctx, mat->ColumnType());
             const auto* col_member = b.Member(col_name, col_ty, std::move(attributes));
             // Record the member for std140_mat_members
             out.Push(col_member);
@@ -702,7 +701,7 @@ struct Std140::State {
                     for (auto* member : str->Members()) {
                         if (auto col_members = std140_mat_members.Find(member)) {
                             // std140 decomposed matrix. Reassemble.
-                            auto* mat_ty = CreateASTTypeFor(ctx, member->Type());
+                            auto mat_ty = CreateASTTypeFor(ctx, member->Type());
                             auto mat_args =
                                 utils::Transform(*col_members, [&](const ast::StructMember* m) {
                                     return b.MemberAccessor(param, m->name->symbol);
@@ -723,7 +722,7 @@ struct Std140::State {
                     if (TINT_LIKELY(std140_mat)) {
                         utils::Vector<const ast::Expression*, 8> args;
                         // std140 decomposed matrix. Reassemble.
-                        auto* mat_ty = CreateASTTypeFor(ctx, mat);
+                        auto mat_ty = CreateASTTypeFor(ctx, mat);
                         auto mat_args = utils::Transform(std140_mat->columns, [&](Symbol name) {
                             return b.MemberAccessor(param, name);
                         });
@@ -764,7 +763,7 @@ struct Std140::State {
                 });
 
             // Generate the function
-            auto* ret_ty = CreateASTTypeFor(ctx, ty);
+            auto ret_ty = CreateASTTypeFor(ctx, ty);
             auto fn_sym = b.Symbols().New("conv_" + ConvertSuffix(ty));
             b.Func(fn_sym, utils::Vector{param}, ret_ty, std::move(stmts));
             return fn_sym;
@@ -1046,7 +1045,7 @@ struct Std140::State {
         stmts.Push(b.Return(expr));
 
         // Build the function
-        auto* ret_ty = CreateASTTypeFor(ctx, ty);
+        auto ret_ty = CreateASTTypeFor(ctx, ty);
         auto fn_sym = b.Symbols().New(name);
         b.Func(fn_sym, std::move(dynamic_index_params), ret_ty, std::move(stmts));
         return fn_sym;

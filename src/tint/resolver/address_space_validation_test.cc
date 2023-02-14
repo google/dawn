@@ -38,10 +38,10 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_NoAddressSpace_Fail) {
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_NoAddressSpace_Fail) {
     // type g = ptr<f32>;
-    Alias("g", ty.pointer(Source{{12, 34}}, ty.f32(), type::AddressSpace::kUndefined));
+    Alias("g", ty(Source{{12, 34}}, "ptr", ty.f32()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: ptr missing address space");
+    EXPECT_EQ(r()->error(), "12:34 error: 'ptr' requires at least 2 template arguments");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_FunctionAddressSpace_Fail) {
@@ -473,7 +473,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_NotStorage_AccessMode)
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_NotStorage_AccessMode) {
-    // type t = ptr<private, read, a>;
+    // type t = ptr<private, i32, read>;
     Alias("t", ty.pointer(Source{{12, 34}}, ty.i32(), type::AddressSpace::kPrivate,
                           type::Access::kRead));
 

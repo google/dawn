@@ -32,6 +32,7 @@
 // Forward declarations
 namespace tint::ast {
 class Identifier;
+class IdentifierExpression;
 }  // namespace tint::ast
 
 namespace tint::ast {
@@ -54,7 +55,7 @@ class Function final : public Castable<Function, Node> {
              const Source& source,
              const Identifier* name,
              utils::VectorRef<const Parameter*> params,
-             const Type* return_type,
+             Type return_type,
              const BlockStatement* body,
              utils::VectorRef<const Attribute*> attributes,
              utils::VectorRef<const Attribute*> return_type_attributes);
@@ -82,7 +83,7 @@ class Function final : public Castable<Function, Node> {
     const utils::Vector<const Parameter*, 8> params;
 
     /// The function return type
-    const Type* const return_type;
+    const Type return_type;
 
     /// The function body
     const BlockStatement* const body;

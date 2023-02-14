@@ -113,19 +113,19 @@ void tint_symbol_35(RWByteAddressBuffer buffer, uint offset, matrix<float16_t, 4
 }
 
 void tint_symbol_36(RWByteAddressBuffer buffer, uint offset, float3 value[2]) {
-  float3 array[2] = value;
+  float3 array_1[2] = value;
   {
     for(uint i = 0u; (i < 2u); i = (i + 1u)) {
-      buffer.Store3((offset + (i * 16u)), asuint(array[i]));
+      buffer.Store3((offset + (i * 16u)), asuint(array_1[i]));
     }
   }
 }
 
 void tint_symbol_37(RWByteAddressBuffer buffer, uint offset, matrix<float16_t, 4, 2> value[2]) {
-  matrix<float16_t, 4, 2> array_1[2] = value;
+  matrix<float16_t, 4, 2> array_2[2] = value;
   {
     for(uint i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
-      tint_symbol_33(buffer, (offset + (i_1 * 16u)), array_1[i_1]);
+      tint_symbol_33(buffer, (offset + (i_1 * 16u)), array_2[i_1]);
     }
   }
 }

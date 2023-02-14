@@ -22,41 +22,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CallExpression);
 
 namespace tint::ast {
 
-namespace {
-CallExpression::Target ToTarget(const Identifier* name) {
-    CallExpression::Target target;
-    target.name = name;
-    return target;
-}
-CallExpression::Target ToTarget(const Type* type) {
-    CallExpression::Target target;
-    target.type = type;
-    return target;
-}
-}  // namespace
-
 CallExpression::CallExpression(ProgramID pid,
                                NodeID nid,
                                const Source& src,
-                               const Identifier* name,
+                               const IdentifierExpression* t,
                                utils::VectorRef<const Expression*> a)
-    : Base(pid, nid, src), target(ToTarget(name)), args(std::move(a)) {
-    TINT_ASSERT(AST, name);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, name, program_id);
-    for (auto* arg : args) {
-        TINT_ASSERT(AST, arg);
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, arg, program_id);
-    }
-}
-
-CallExpression::CallExpression(ProgramID pid,
-                               NodeID nid,
-                               const Source& src,
-                               const Type* type,
-                               utils::VectorRef<const Expression*> a)
-    : Base(pid, nid, src), target(ToTarget(type)), args(std::move(a)) {
-    TINT_ASSERT(AST, type);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
+    : Base(pid, nid, src), target(t), args(std::move(a)) {
+    TINT_ASSERT(AST, target);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, target, program_id);
     for (auto* arg : args) {
         TINT_ASSERT(AST, arg);
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, arg, program_id);
@@ -71,9 +44,8 @@ const CallExpression* CallExpression::Clone(CloneContext* ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx->Clone(source);
     auto p = ctx->Clone(args);
-    return target.name
-               ? ctx->dst->create<CallExpression>(src, ctx->Clone(target.name), std::move(p))
-               : ctx->dst->create<CallExpression>(src, ctx->Clone(target.type), std::move(p));
+    auto t = ctx->Clone(target);
+    return ctx->dst->create<CallExpression>(src, t, std::move(p));
 }
 
 }  // namespace tint::ast

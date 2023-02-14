@@ -73,9 +73,9 @@ void Transform::RemoveStatement(CloneContext& ctx, const ast::Statement* stmt) {
         << "unable to remove statement from parent of type " << sem->TypeInfo().name;
 }
 
-const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
+ast::Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
     if (ty->Is<type::Void>()) {
-        return nullptr;
+        return ast::Type{};
     }
     if (ty->Is<type::I32>()) {
         return ctx.dst->ty.i32();
@@ -93,21 +93,21 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
         return ctx.dst->ty.bool_();
     }
     if (auto* m = ty->As<type::Matrix>()) {
-        auto* el = CreateASTTypeFor(ctx, m->type());
-        return ctx.dst->create<ast::Matrix>(el, m->rows(), m->columns());
+        auto el = CreateASTTypeFor(ctx, m->type());
+        return ctx.dst->ty.mat(el, m->columns(), m->rows());
     }
     if (auto* v = ty->As<type::Vector>()) {
-        auto* el = CreateASTTypeFor(ctx, v->type());
-        return ctx.dst->create<ast::Vector>(el, v->Width());
+        auto el = CreateASTTypeFor(ctx, v->type());
+        return ctx.dst->ty.vec(el, v->Width());
     }
     if (auto* a = ty->As<type::Array>()) {
-        auto* el = CreateASTTypeFor(ctx, a->ElemType());
+        auto el = CreateASTTypeFor(ctx, a->ElemType());
         utils::Vector<const ast::Attribute*, 1> attrs;
         if (!a->IsStrideImplicit()) {
             attrs.Push(ctx.dst->create<ast::StrideAttribute>(a->Stride()));
         }
         if (a->Count()->Is<type::RuntimeArrayCount>()) {
-            return ctx.dst->ty.array(el, nullptr, std::move(attrs));
+            return ctx.dst->ty.array(el, std::move(attrs));
         }
         if (auto* override = a->Count()->As<sem::NamedOverrideArrayCount>()) {
             auto* count = ctx.Clone(override->variable->Declaration());
@@ -144,7 +144,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
         return CreateASTTypeFor(ctx, s->StoreType());
     }
     if (auto* a = ty->As<type::Atomic>()) {
-        return ctx.dst->create<ast::Atomic>(CreateASTTypeFor(ctx, a->Type()));
+        return ctx.dst->ty.atomic(CreateASTTypeFor(ctx, a->Type()));
     }
     if (auto* t = ty->As<type::DepthTexture>()) {
         return ctx.dst->ty.depth_texture(t->dim());
@@ -156,11 +156,10 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
         return ctx.dst->ty.external_texture();
     }
     if (auto* t = ty->As<type::MultisampledTexture>()) {
-        return ctx.dst->create<ast::MultisampledTexture>(t->dim(),
-                                                         CreateASTTypeFor(ctx, t->type()));
+        return ctx.dst->ty.multisampled_texture(t->dim(), CreateASTTypeFor(ctx, t->type()));
     }
     if (auto* t = ty->As<type::SampledTexture>()) {
-        return ctx.dst->create<ast::SampledTexture>(t->dim(), CreateASTTypeFor(ctx, t->type()));
+        return ctx.dst->ty.sampled_texture(t->dim(), CreateASTTypeFor(ctx, t->type()));
     }
     if (auto* t = ty->As<type::StorageTexture>()) {
         return ctx.dst->ty.storage_texture(t->dim(), t->texel_format(), t->access());
@@ -170,7 +169,7 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type
     }
     TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())
         << "Unhandled type: " << ty->TypeInfo().name;
-    return nullptr;
+    return ast::Type{};
 }
 
 }  // namespace tint::transform

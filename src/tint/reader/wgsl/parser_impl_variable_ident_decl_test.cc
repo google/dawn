@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {
@@ -24,8 +25,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
     ASSERT_FALSE(decl.errored);
     ASSERT_EQ(decl->name, "my_var");
     ASSERT_NE(decl->type, nullptr);
-    ASSERT_TRUE(decl->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(decl->type->As<ast::TypeName>()->name->symbol), "f32");
+    ast::CheckIdentifier(p->builder().Symbols(), decl->type, "f32");
 
     EXPECT_EQ(decl->source.range, (Source::Range{{1u, 1u}, {1u, 7u}}));
     EXPECT_EQ(decl->type->source.range, (Source::Range{{1u, 10u}, {1u, 13u}}));
@@ -38,8 +38,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses_AllowInferredType) {
     ASSERT_FALSE(decl.errored);
     ASSERT_EQ(decl->name, "my_var");
     ASSERT_NE(decl->type, nullptr);
-    ASSERT_TRUE(decl->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(decl->type->As<ast::TypeName>()->name->symbol), "f32");
+    ast::CheckIdentifier(p->builder().Symbols(), decl->type, "f32");
 
     EXPECT_EQ(decl->source.range, (Source::Range{{1u, 1u}, {1u, 7u}}));
     EXPECT_EQ(decl->type->source.range, (Source::Range{{1u, 10u}, {1u, 13u}}));

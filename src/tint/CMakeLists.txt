@@ -84,12 +84,8 @@ list(APPEND TINT_LIB_SRCS
   ast/accessor_expression.h
   ast/alias.cc
   ast/alias.h
-  ast/array.cc
-  ast/array.h
   ast/assignment_statement.cc
   ast/assignment_statement.h
-  ast/atomic.cc
-  ast/atomic.h
   ast/attribute.cc
   ast/attribute.h
   ast/binary_expression.cc
@@ -172,14 +168,10 @@ list(APPEND TINT_LIB_SRCS
   ast/location_attribute.h
   ast/loop_statement.cc
   ast/loop_statement.h
-  ast/matrix.cc
-  ast/matrix.h
   ast/member_accessor_expression.cc
   ast/member_accessor_expression.h
   ast/module.cc
   ast/module.h
-  ast/multisampled_texture.cc
-  ast/multisampled_texture.h
   ast/node_id.h
   ast/node.cc
   ast/node.h
@@ -191,12 +183,8 @@ list(APPEND TINT_LIB_SRCS
   ast/phony_expression.h
   ast/pipeline_stage.cc
   ast/pipeline_stage.h
-  ast/pointer.cc
-  ast/pointer.h
   ast/return_statement.cc
   ast/return_statement.h
-  ast/sampled_texture.cc
-  ast/sampled_texture.h
   ast/stage_attribute.cc
   ast/stage_attribute.h
   ast/statement.cc
@@ -217,15 +205,11 @@ list(APPEND TINT_LIB_SRCS
   ast/switch_statement.h
   ast/templated_identifier.cc
   ast/templated_identifier.h
-  ast/texture.cc
-  ast/texture.h
   ast/traverse_expressions.h
-  ast/type_decl.cc
-  ast/type_decl.h
-  ast/type_name.cc
-  ast/type_name.h
   ast/type.cc
   ast/type.h
+  ast/type_decl.cc
+  ast/type_decl.h
   ast/unary_op_expression.cc
   ast/unary_op_expression.h
   ast/unary_op.cc
@@ -236,8 +220,6 @@ list(APPEND TINT_LIB_SRCS
   ast/variable_decl_statement.h
   ast/variable.cc
   ast/variable.h
-  ast/vector.cc
-  ast/vector.h
   ast/while_statement.cc
   ast/while_statement.h
   ast/workgroup_attribute.cc
@@ -808,9 +790,7 @@ endif()
 if(TINT_BUILD_TESTS)
   list(APPEND TINT_TEST_SRCS
     ast/alias_test.cc
-    ast/array_test.cc
     ast/assignment_statement_test.cc
-    ast/atomic_test.cc
     ast/binary_expression_test.cc
     ast/binding_attribute_test.cc
     ast/bitcast_expression_test.cc
@@ -847,14 +827,10 @@ if(TINT_BUILD_TESTS)
     ast/invariant_attribute_test.cc
     ast/location_attribute_test.cc
     ast/loop_statement_test.cc
-    ast/matrix_test.cc
     ast/member_accessor_expression_test.cc
     ast/module_test.cc
-    ast/multisampled_texture_test.cc
     ast/phony_expression_test.cc
-    ast/pointer_test.cc
     ast/return_statement_test.cc
-    ast/sampled_texture_test.cc
     ast/stage_attribute_test.cc
     ast/stride_attribute_test.cc
     ast/struct_member_align_attribute_test.cc
@@ -866,13 +842,10 @@ if(TINT_BUILD_TESTS)
     ast/templated_identifier_test.cc
     ast/test_helper.h
     ast/test_helper_test.cc
-    ast/texture_test.cc
     ast/traverse_expressions_test.cc
-    ast/type_name_test.cc
     ast/unary_op_expression_test.cc
     ast/variable_decl_statement_test.cc
     ast/variable_test.cc
-    ast/vector_test.cc
     ast/while_statement_test.cc
     ast/workgroup_attribute_test.cc
     castable_test.cc

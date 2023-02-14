@@ -1667,23 +1667,45 @@ std::string ExpandBuiltinType(std::string_view name) {
 /// @return all the identifiers parsed as keywords
 std::unordered_set<std::string> Keywords() {
     return {
+        "array",
+        "atomic",
         "bool",
         "f16",
         "f32",
         "i32",
+        "mat2x2",
+        "mat2x3",
+        "mat2x4",
+        "mat3x2",
+        "mat3x3",
+        "mat3x4",
+        "mat4x2",
+        "mat4x3",
+        "mat4x4",
+        "ptr",
         "sampler_comparison",
         "sampler",
+        "texture_1d",
+        "texture_2d_array",
+        "texture_2d",
+        "texture_3d",
+        "texture_cube_array",
+        "texture_cube",
         "texture_depth_2d_array",
         "texture_depth_2d",
         "texture_depth_cube_array",
         "texture_depth_cube",
         "texture_depth_multisampled_2d",
         "texture_external",
+        "texture_multisampled_2d",
         "texture_storage_1d",
-        "texture_storage_2d",
         "texture_storage_2d_array",
+        "texture_storage_2d",
         "texture_storage_3d",
         "u32",
+        "vec2",
+        "vec3",
+        "vec4",
     };
 }
 
@@ -1796,6 +1818,30 @@ fn tint_symbol() {
   var tint_symbol_1 : $type = $name($type());
 }
 )");
+
+    auto got = Run<Renamer>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(RenamerBuiltinTypeTest, PreserveTypeExpression) {
+    auto src = R"(
+enable f16;
+
+@fragment
+fn f() {
+  var v : array<f32, 2> = array<f32, 2>();
+}
+)";
+
+    auto expect = R"(
+enable f16;
+
+@fragment
+fn tint_symbol() {
+  var tint_symbol_1 : array<f32, 2> = array<f32, 2>();
+}
+)";
 
     auto got = Run<Renamer>(src);
 

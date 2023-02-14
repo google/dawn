@@ -16,7 +16,6 @@
 
 #include <limits>
 
-#include "src/tint/ast/array.h"
 #include "src/tint/ast/assignment_statement.h"
 #include "src/tint/ast/bitcast_expression.h"
 #include "src/tint/ast/break_if_statement.h"
@@ -32,10 +31,8 @@
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/switch_statement.h"
-#include "src/tint/ast/type_name.h"
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/ast/variable_decl_statement.h"
-#include "src/tint/ast/vector.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/reader/wgsl/classify_template_args.h"
 #include "src/tint/reader/wgsl/lexer.h"
@@ -180,7 +177,7 @@ ParserImpl::TypedIdentifier::TypedIdentifier() = default;
 
 ParserImpl::TypedIdentifier::TypedIdentifier(const TypedIdentifier&) = default;
 
-ParserImpl::TypedIdentifier::TypedIdentifier(const ast::Type* type_in,
+ParserImpl::TypedIdentifier::TypedIdentifier(ast::Type type_in,
                                              std::string name_in,
                                              Source source_in)
     : type(type_in), name(std::move(name_in)), source(std::move(source_in)) {}
@@ -194,7 +191,7 @@ ParserImpl::FunctionHeader::FunctionHeader(const FunctionHeader&) = default;
 ParserImpl::FunctionHeader::FunctionHeader(Source src,
                                            std::string n,
                                            utils::VectorRef<const ast::Parameter*> p,
-                                           const ast::Type* ret_ty,
+                                           ast::Type ret_ty,
                                            utils::VectorRef<const ast::Attribute*> ret_attrs)
     : source(src),
       name(n),
@@ -215,7 +212,7 @@ ParserImpl::VarDeclInfo::VarDeclInfo(Source source_in,
                                      std::string name_in,
                                      type::AddressSpace address_space_in,
                                      type::Access access_in,
-                                     const ast::Type* type_in)
+                                     ast::Type type_in)
     : source(std::move(source_in)),
       name(std::move(name_in)),
       address_space(address_space_in),
@@ -733,7 +730,7 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
 //  | multisampled_texture_type LESS_THAN type_specifier GREATER_THAN
 //  | storage_texture_type LESS_THAN texel_format
 //                         COMMA access_mode GREATER_THAN
-Maybe<const ast::Type*> ParserImpl::texture_and_sampler_types() {
+Maybe<ast::Type> ParserImpl::texture_and_sampler_types() {
     auto type = sampler_type();
     if (type.matched) {
         return type;
@@ -811,7 +808,7 @@ Maybe<const ast::Type*> ParserImpl::texture_and_sampler_types() {
 // sampler_type
 //  : SAMPLER
 //  | SAMPLER_COMPARISON
-Maybe<const ast::Type*> ParserImpl::sampler_type() {
+Maybe<ast::Type> ParserImpl::sampler_type() {
     Source source;
     if (match(Token::Type::kSampler, &source)) {
         return builder_.ty.sampler(source, type::SamplerKind::kSampler);
@@ -861,7 +858,7 @@ Maybe<const type::TextureDimension> ParserImpl::sampled_texture_type() {
 
 // external_texture
 //  : TEXTURE_EXTERNAL
-Maybe<const ast::Type*> ParserImpl::external_texture() {
+Maybe<ast::Type> ParserImpl::external_texture() {
     Source source;
     if (match(Token::Type::kTextureExternal, &source)) {
         return builder_.ty.external_texture(source);
@@ -908,7 +905,7 @@ Maybe<const type::TextureDimension> ParserImpl::storage_texture_type() {
 //  | TEXTURE_DEPTH_CUBE
 //  | TEXTURE_DEPTH_CUBE_ARRAY
 //  | TEXTURE_DEPTH_MULTISAMPLED_2D
-Maybe<const ast::Type*> ParserImpl::depth_texture_type() {
+Maybe<ast::Type> ParserImpl::depth_texture_type() {
     Source source;
     if (match(Token::Type::kTextureDepth2d, &source)) {
         return builder_.ty.depth_texture(source, type::TextureDimension::k2d);
@@ -958,7 +955,7 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_optional_type_
     }
 
     if (allow_inferred && !peek_is(Token::Type::kColon)) {
-        return TypedIdentifier{nullptr, ident.value, ident.source};
+        return TypedIdentifier{ast::Type{}, ident.value, ident.source};
     }
 
     if (!expect(use, Token::Type::kColon)) {
@@ -1130,7 +1127,7 @@ Maybe<ParserImpl::MatrixDimensions> ParserImpl::mat_prefix() {
 //   | mat_prefix LESS_THAN type_specifier GREATER_THAN
 //   | vec_prefix LESS_THAN type_specifier GREATER_THAN
 //   | texture_and_sampler_types
-Maybe<const ast::Type*> ParserImpl::type_specifier_without_ident() {
+Maybe<ast::Type> ParserImpl::type_specifier_without_ident() {
     auto& t = peek();
 
     if (match(Token::Type::kBool)) {
@@ -1198,7 +1195,7 @@ Maybe<const ast::Type*> ParserImpl::type_specifier_without_ident() {
 // type_specifier
 //   : IDENTIFIER
 //   | type_specifier_without_ident
-Maybe<const ast::Type*> ParserImpl::type_specifier() {
+Maybe<ast::Type> ParserImpl::type_specifier() {
     auto& t = peek();
     Source source;
     if (match(Token::Type::kIdentifier, &source)) {
@@ -1243,7 +1240,7 @@ Expect<ENUM> ParserImpl::expect_enum(std::string_view name,
     return add_error(t.source(), err.str());
 }
 
-Expect<const ast::Type*> ParserImpl::expect_type(std::string_view use) {
+Expect<ast::Type> ParserImpl::expect_type(std::string_view use) {
     auto type = type_specifier();
     if (type.errored) {
         return Failure::kErrored;
@@ -1255,13 +1252,13 @@ Expect<const ast::Type*> ParserImpl::expect_type(std::string_view use) {
 }
 
 // LESS_THAN address_space COMMA type_specifier ( COMMA access_mode )? GREATER_THAN
-Expect<const ast::Type*> ParserImpl::expect_type_specifier_pointer(const Source& s) {
+Expect<ast::Type> ParserImpl::expect_type_specifier_pointer(const Source& s) {
     const char* use = "ptr declaration";
 
     auto address_space = type::AddressSpace::kNone;
     auto access = type::Access::kUndefined;
 
-    auto subtype = expect_template_arg_block(use, [&]() -> Expect<const ast::Type*> {
+    auto subtype = expect_template_arg_block(use, [&]() -> Expect<ast::Type> {
         auto sc = expect_address_space(use);
         if (sc.errored) {
             return Failure::kErrored;
@@ -1296,7 +1293,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_specifier_pointer(const Source&
 }
 
 // LESS_THAN type_specifier GREATER_THAN
-Expect<const ast::Type*> ParserImpl::expect_type_specifier_atomic(const Source& s) {
+Expect<ast::Type> ParserImpl::expect_type_specifier_atomic(const Source& s) {
     const char* use = "atomic declaration";
 
     auto subtype = expect_template_arg_block(use, [&] { return expect_type(use); });
@@ -1308,7 +1305,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_specifier_atomic(const Source& 
 }
 
 // LESS_THAN type_specifier GREATER_THAN
-Expect<const ast::Type*> ParserImpl::expect_type_specifier_vector(const Source& s, uint32_t count) {
+Expect<ast::Type> ParserImpl::expect_type_specifier_vector(const Source& s, uint32_t count) {
     const char* use = "vector";
     auto ty = expect_template_arg_block(use, [&] { return expect_type(use); });
     if (ty.errored) {
@@ -1319,11 +1316,11 @@ Expect<const ast::Type*> ParserImpl::expect_type_specifier_vector(const Source& 
 }
 
 // LESS_THAN type_specifier ( COMMA element_count_expression )? GREATER_THAN
-Expect<const ast::Type*> ParserImpl::expect_type_specifier_array(const Source& s) {
+Expect<ast::Type> ParserImpl::expect_type_specifier_array(const Source& s) {
     const char* use = "array declaration";
 
     struct TypeAndSize {
-        const ast::Type* type = nullptr;
+        ast::Type type;
         const ast::Expression* size = nullptr;
     };
 
@@ -1352,12 +1349,16 @@ Expect<const ast::Type*> ParserImpl::expect_type_specifier_array(const Source& s
         return Failure::kErrored;
     }
 
-    return builder_.ty.array(make_source_range_from(s), type_size->type, type_size->size);
+    if (type_size->size) {
+        return builder_.ty.array(make_source_range_from(s), type_size->type, type_size->size);
+    } else {
+        return builder_.ty.array(make_source_range_from(s), type_size->type);
+    }
 }
 
 // LESS_THAN type_specifier GREATER_THAN
-Expect<const ast::Type*> ParserImpl::expect_type_specifier_matrix(const Source& s,
-                                                                  const MatrixDimensions& dims) {
+Expect<ast::Type> ParserImpl::expect_type_specifier_matrix(const Source& s,
+                                                           const MatrixDimensions& dims) {
     const char* use = "matrix";
     auto ty = expect_template_arg_block(use, [&] { return expect_type(use); });
     if (ty.errored) {
@@ -1542,7 +1543,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
         }
     }
 
-    const ast::Type* return_type = nullptr;
+    ast::Type return_type;
     AttributeList return_attributes;
 
     if (match(Token::Type::kArrow)) {
@@ -2417,10 +2418,7 @@ Maybe<const ast::CallStatement*> ParserImpl::func_call_statement() {
 
     return builder_.CallStmt(
         t.source(),
-        create<ast::CallExpression>(
-            t.source(),
-            create<ast::Identifier>(t.source(), builder_.Symbols().Register(t.to_str())),
-            std::move(params.value)));
+        builder_.Call(t.source(), builder_.Expr(t.source(), t.to_str()), std::move(params.value)));
 }
 
 // break_statement
@@ -2530,7 +2528,7 @@ Maybe<const ast::BlockStatement*> ParserImpl::continuing_statement() {
 //  Note, `ident` is pulled out to `primary_expression` as it's the only one that
 //  doesn't create a `type`. Then we can just return a `type` from here on match and
 //  deal with `ident` in `primary_expression.
-Maybe<const ast::Type*> ParserImpl::callable() {
+Maybe<const ast::IdentifierExpression*> ParserImpl::callable() {
     auto& t = peek();
 
     //  This _must_ match `type_specifier_without_ident` before any of the other types as they're
@@ -2541,22 +2539,22 @@ Maybe<const ast::Type*> ParserImpl::callable() {
         return Failure::kErrored;
     }
     if (ty.matched) {
-        return ty.value;
+        return ty->expr;
     }
 
     if (match(Token::Type::kArray)) {
-        return builder_.ty.array(make_source_range_from(t.source()), nullptr, nullptr);
+        return builder_.ty.array<Infer>(make_source_range_from(t.source()));
     }
 
     auto vec = vec_prefix();
     if (vec.matched) {
-        return builder_.ty.vec(make_source_range_from(t.source()), nullptr, vec.value);
+        return builder_.ty.vec<Infer>(make_source_range_from(t.source()), vec.value);
     }
 
     auto mat = mat_prefix();
     if (mat.matched) {
-        return builder_.ty.mat(make_source_range_from(t.source()), nullptr, mat.value.columns,
-                               mat.value.rows);
+        return builder_.ty.mat<Infer>(make_source_range_from(t.source()), mat.value.columns,
+                                      mat.value.rows);
     }
 
     return Failure::kNoMatch;

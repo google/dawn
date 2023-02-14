@@ -109,7 +109,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize_WithIden
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
-    auto* vec4 = ty.vec4<f32>();
+    auto vec4 = ty.vec4<f32>();
     auto* coord = Param("coord", vec4,
                         utils::Vector{
                             Builtin(ast::BuiltinValue::kPosition),

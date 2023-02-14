@@ -23,7 +23,6 @@ class CastableBase;
 }  // namespace tint
 namespace tint::ast {
 class AccessorExpression;
-class Array;
 class BinaryExpression;
 class BitcastExpression;
 class CallExpression;
@@ -39,7 +38,6 @@ class Statement;
 class Struct;
 class StructMember;
 class SwitchStatement;
-class Type;
 class TypeDecl;
 class Variable;
 class WhileStatement;
@@ -73,7 +71,6 @@ namespace tint::sem {
 /// rules will be used to infer the return type based on the argument type.
 struct TypeMappings {
     //! @cond Doxygen_Suppress
-    type::Array* operator()(ast::Array*);
     ForLoopStatement* operator()(ast::ForLoopStatement*);
     Function* operator()(ast::Function*);
     IfStatement* operator()(ast::IfStatement*);
@@ -83,7 +80,6 @@ struct TypeMappings {
     Struct* operator()(ast::Struct*);
     StructMember* operator()(ast::StructMember*);
     SwitchStatement* operator()(ast::SwitchStatement*);
-    type::Type* operator()(ast::Type*);
     type::Type* operator()(ast::TypeDecl*);
     Expression* operator()(ast::Expression*);
     ValueExpression* operator()(ast::AccessorExpression*);

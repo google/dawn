@@ -24,7 +24,7 @@ Var::Var(ProgramID pid,
          NodeID nid,
          const Source& src,
          const Identifier* n,
-         const ast::Type* ty,
+         Type ty,
          type::AddressSpace address_space,
          type::Access access,
          const Expression* init,
@@ -44,7 +44,7 @@ const char* Var::Kind() const {
 const Var* Var::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto* n = ctx->Clone(name);
-    auto* ty = ctx->Clone(type);
+    auto ty = ctx->Clone(type);
     auto* init = ctx->Clone(initializer);
     auto attrs = ctx->Clone(attributes);
     return ctx->dst->create<Var>(src, n, ty, declared_address_space, declared_access, init,

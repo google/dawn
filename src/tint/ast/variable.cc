@@ -25,7 +25,7 @@ Variable::Variable(ProgramID pid,
                    NodeID nid,
                    const Source& src,
                    const Identifier* n,
-                   const ast::Type* ty,
+                   Type ty,
                    const Expression* init,
                    utils::VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src), name(n), type(ty), initializer(init), attributes(std::move(attrs)) {

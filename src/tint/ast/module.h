@@ -21,7 +21,6 @@
 #include "src/tint/ast/diagnostic_directive.h"
 #include "src/tint/ast/enable.h"
 #include "src/tint/ast/function.h"
-#include "src/tint/ast/type.h"
 #include "src/tint/utils/vector.h"
 
 namespace tint::ast {

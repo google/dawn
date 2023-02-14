@@ -33,7 +33,7 @@ TEST_F(ProgramBuilderTest, IDsAreUnique) {
 TEST_F(ProgramBuilderTest, WrapDoesntAffectInner) {
     Program inner([] {
         ProgramBuilder builder;
-        auto* ty = builder.ty.f32();
+        auto ty = builder.ty.f32();
         builder.Func("a", {}, ty, {}, {});
         return builder;
     }());
@@ -54,7 +54,7 @@ TEST_F(ProgramBuilderTest, WrapDoesntAffectInner) {
     EXPECT_FALSE(inner.Symbols().Get("b").IsValid());
     EXPECT_FALSE(outer.Symbols().Get("b").IsValid());
 
-    auto* ty = outer.ty.f32();
+    auto ty = outer.ty.f32();
     outer.Func("b", {}, ty, {}, {});
 
     ASSERT_EQ(inner.AST().Functions().Length(), 1u);

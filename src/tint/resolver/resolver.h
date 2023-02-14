@@ -126,7 +126,36 @@ class Resolver {
     /// not a sem::ValueExpression, then an error diagnostic is raised and nullptr is returned.
     sem::ValueExpression* ValueExpression(const ast::Expression* expr);
 
-    /// Expression traverses the graph of expressions starting at `expr`, building a postordered
+    /// @returns the call of Expression() cast to a sem::TypeExpression. If the sem::Expression is
+    /// not a sem::TypeExpression, then an error diagnostic is raised and nullptr is returned.
+    sem::TypeExpression* TypeExpression(const ast::Expression* expr);
+
+    /// @returns the call of Expression() cast to a sem::FunctionExpression. If the sem::Expression
+    /// is not a sem::FunctionExpression, then an error diagnostic is raised and nullptr is
+    /// returned.
+    sem::FunctionExpression* FunctionExpression(const ast::Expression* expr);
+
+    /// @returns the resolved type from an expression, or nullptr on error
+    type::Type* Type(const ast::Expression* ast);
+
+    /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<type::AddressSpace>.
+    /// If the sem::Expression is not a sem::BuiltinEnumExpression<type::AddressSpace>, then an
+    /// error diagnostic is raised and nullptr is returned.
+    sem::BuiltinEnumExpression<type::AddressSpace>* AddressSpaceExpression(
+        const ast::Expression* expr);
+
+    /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<type::TexelFormat>.
+    /// If the sem::Expression is not a sem::BuiltinEnumExpression<type::TexelFormat>, then an error
+    /// diagnostic is raised and nullptr is returned.
+    sem::BuiltinEnumExpression<type::TexelFormat>* TexelFormatExpression(
+        const ast::Expression* expr);
+
+    /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<type::Access>*.
+    /// If the sem::Expression is not a sem::BuiltinEnumExpression<type::Access>*, then an error
+    /// diagnostic is raised and nullptr is returned.
+    sem::BuiltinEnumExpression<type::Access>* AccessExpression(const ast::Expression* expr);
+
+    /// Expression traverses the graph of expressions starting at `expr`, building a post-ordered
     /// list (leaf-first) of all the expression nodes. Each of the expressions are then resolved by
     /// dispatching to the appropriate expression handlers below.
     /// @returns the resolved semantic node for the expression `expr`, or nullptr on failure.
@@ -259,12 +288,6 @@ class Resolver {
     /// current_function_
     bool WorkgroupSize(const ast::Function*);
 
-    /// @returns the type::Type for the ast::Type `ty`, building it if it
-    /// hasn't been constructed already. If an error is raised, nullptr is
-    /// returned.
-    /// @param ty the ast::Type
-    type::Type* Type(const ast::Type* ty);
-
     /// @param control the diagnostic control
     /// @returns true on success, false on failure
     bool DiagnosticControl(const ast::DiagnosticControl& control);
@@ -276,13 +299,6 @@ class Resolver {
     /// @param named_type the named type to resolve
     /// @returns the resolved semantic type
     type::Type* TypeDecl(const ast::TypeDecl* named_type);
-
-    /// Builds and returns the semantic information for the AST array `arr`.
-    /// This method does not mark the ast::Array node, nor attach the generated semantic information
-    /// to the AST node.
-    /// @returns the semantic Array information, or nullptr if an error is raised.
-    /// @param arr the Array to get semantic information for
-    type::Array* Array(const ast::Array* arr);
 
     /// Resolves and validates the expression used as the count parameter of an array.
     /// @param count_expr the expression used as the second template parameter to an array<>.
@@ -431,11 +447,6 @@ class Resolver {
     void ErrorMismatchedResolvedIdentifier(const Source& source,
                                            const ResolvedIdentifier& resolved,
                                            std::string_view wanted);
-
-    /// If @p node is a module-scope type, variable or function declaration, then appends a note
-    /// diagnostic where this declaration was declared, otherwise the function does nothing.
-    /// @param node the AST node.
-    void NoteDeclarationSource(const ast::Node* node);
 
     /// Adds the given error message to the diagnostics
     void AddError(const std::string& msg, const Source& source) const;

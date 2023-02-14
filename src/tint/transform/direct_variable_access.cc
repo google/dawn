@@ -831,14 +831,14 @@ struct DirectVariableAccess::State {
                     if (auto incoming_shape = variant_sig.Find(param)) {
                         auto& symbols = *variant.ptr_param_symbols.Find(param);
                         if (symbols.base_ptr.IsValid()) {
-                            auto* base_ptr_ty =
+                            auto base_ptr_ty =
                                 b.ty.pointer(CreateASTTypeFor(ctx, incoming_shape->root.type),
                                              incoming_shape->root.address_space);
                             params.Push(b.Param(symbols.base_ptr, base_ptr_ty));
                         }
                         if (symbols.indices.IsValid()) {
                             // Variant has dynamic indices for this variant, replace it.
-                            auto* dyn_idx_arr_type = DynamicIndexArrayType(*incoming_shape);
+                            auto dyn_idx_arr_type = DynamicIndexArrayType(*incoming_shape);
                             params.Push(b.Param(symbols.indices, dyn_idx_arr_type));
                         }
                     } else {
@@ -850,7 +850,7 @@ struct DirectVariableAccess::State {
                 // Build the variant by cloning the source function. The other clone callbacks will
                 // use clone_state->current_variant and clone_state->current_variant_sig to produce
                 // the variant.
-                auto* ret_ty = ctx.Clone(fn->Declaration()->return_type);
+                auto ret_ty = ctx.Clone(fn->Declaration()->return_type);
                 auto body = ctx.Clone(fn->Declaration()->body);
                 auto attrs = ctx.Clone(fn->Declaration()->attributes);
                 auto ret_attrs = ctx.Clone(fn->Declaration()->return_type_attributes);
@@ -912,7 +912,7 @@ struct DirectVariableAccess::State {
                 }
 
                 // Get or create the dynamic indices array.
-                if (auto* dyn_idx_arr_ty = DynamicIndexArrayType(full_indices)) {
+                if (auto dyn_idx_arr_ty = DynamicIndexArrayType(full_indices)) {
                     // Build an array of dynamic indices to pass as the replacement for the pointer.
                     utils::Vector<const ast::Expression*, 8> dyn_idx_args;
                     if (auto* root_param = chain->root.variable->As<sem::Parameter>()) {
@@ -1064,7 +1064,7 @@ struct DirectVariableAccess::State {
 
     /// @returns the type alias used to hold the dynamic indices for @p shape, declaring a new alias
     /// if this is the first call for the given shape.
-    const ast::TypeName* DynamicIndexArrayType(const AccessShape& shape) {
+    ast::Type DynamicIndexArrayType(const AccessShape& shape) {
         auto name = dynamic_index_array_aliases.GetOrCreate(shape, [&] {
             // Count the number of dynamic indices
             uint32_t num_dyn_indices = shape.NumDynamicIndices();
@@ -1075,7 +1075,7 @@ struct DirectVariableAccess::State {
             b.Alias(symbol, b.ty.array(b.ty.u32(), u32(num_dyn_indices)));
             return symbol;
         });
-        return name.IsValid() ? b.ty(name) : nullptr;
+        return name.IsValid() ? b.ty(name) : ast::Type{};
     }
 
     /// @returns a name describing the given shape

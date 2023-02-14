@@ -27,10 +27,9 @@ using VariableTest = TestHelper;
 TEST_F(VariableTest, Creation) {
     auto* v = Var("my_var", ty.i32(), type::AddressSpace::kFunction);
 
-    EXPECT_EQ(Symbols().NameFor(v->name->symbol), "my_var");
+    CheckIdentifier(Symbols(), v->name, "my_var");
     EXPECT_EQ(v->declared_address_space, type::AddressSpace::kFunction);
-    ASSERT_TRUE(v->type->Is<ast::TypeName>());
-    EXPECT_EQ(Symbols().NameFor(v->type->As<ast::TypeName>()->name->symbol), "i32");
+    CheckIdentifier(Symbols(), v->type, "i32");
     EXPECT_EQ(v->source.range.begin.line, 0u);
     EXPECT_EQ(v->source.range.begin.column, 0u);
     EXPECT_EQ(v->source.range.end.line, 0u);
@@ -41,10 +40,9 @@ TEST_F(VariableTest, CreationWithSource) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}}, "i",
                   ty.f32(), type::AddressSpace::kPrivate, utils::Empty);
 
-    EXPECT_EQ(Symbols().NameFor(v->name->symbol), "i");
+    CheckIdentifier(Symbols(), v->name, "i");
     EXPECT_EQ(v->declared_address_space, type::AddressSpace::kPrivate);
-    ASSERT_TRUE(v->type->Is<ast::TypeName>());
-    EXPECT_EQ(Symbols().NameFor(v->type->As<ast::TypeName>()->name->symbol), "f32");
+    CheckIdentifier(Symbols(), v->type, "f32");
     EXPECT_EQ(v->source.range.begin.line, 27u);
     EXPECT_EQ(v->source.range.begin.column, 4u);
     EXPECT_EQ(v->source.range.end.line, 27u);
@@ -55,10 +53,9 @@ TEST_F(VariableTest, CreationEmpty) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}}, "a_var",
                   ty.i32(), type::AddressSpace::kWorkgroup, utils::Empty);
 
-    EXPECT_EQ(Symbols().NameFor(v->name->symbol), "a_var");
+    CheckIdentifier(Symbols(), v->name, "a_var");
     EXPECT_EQ(v->declared_address_space, type::AddressSpace::kWorkgroup);
-    ASSERT_TRUE(v->type->Is<ast::TypeName>());
-    EXPECT_EQ(Symbols().NameFor(v->type->As<ast::TypeName>()->name->symbol), "i32");
+    CheckIdentifier(Symbols(), v->type, "i32");
     EXPECT_EQ(v->source.range.begin.line, 27u);
     EXPECT_EQ(v->source.range.begin.column, 4u);
     EXPECT_EQ(v->source.range.end.line, 27u);

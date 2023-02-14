@@ -66,6 +66,10 @@ ast::FunctionList CloneContext::Clone(const ast::FunctionList& v) {
     return out;
 }
 
+ast::Type CloneContext::Clone(const ast::Type& ty) {
+    return {Clone(ty.expr)};
+}
+
 const tint::Cloneable* CloneContext::CloneCloneable(const Cloneable* object) {
     // If the input is nullptr, there's nothing to clone - just return nullptr.
     if (object == nullptr) {

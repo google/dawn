@@ -22,6 +22,7 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/type_conversion.h"
+#include "src/tint/sem/type_expression.h"
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/text/unicode.h"
 
@@ -1292,20 +1293,28 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
             [&](const ast::DiagnosticDirective* diagnostic) {
                 preserved_identifiers.Add(diagnostic->control.rule_name);
             },
-            [&](const ast::TypeName* ty) { preserve_if_builtin_type(ty->name); },
             [&](const ast::IdentifierExpression* expr) {
-                if (src->Sem().Get<sem::BuiltinEnumExpressionBase>(expr)) {
-                    preserved_identifiers.Add(expr->identifier);
-                }
+                Switch(
+                    src->Sem().Get(expr),  //
+                    [&](const sem::BuiltinEnumExpressionBase*) {
+                        preserved_identifiers.Add(expr->identifier);
+                    },
+                    [&](const sem::TypeExpression*) {
+                        preserve_if_builtin_type(expr->identifier);
+                    });
             },
             [&](const ast::CallExpression* call) {
-                if (auto* ident = call->target.name) {
-                    Switch(
-                        src->Sem().Get(call)->UnwrapMaterialize()->As<sem::Call>()->Target(),
-                        [&](const sem::Builtin*) { preserved_identifiers.Add(ident); },
-                        [&](const sem::TypeConversion*) { preserve_if_builtin_type(ident); },
-                        [&](const sem::TypeInitializer*) { preserve_if_builtin_type(ident); });
-                }
+                Switch(
+                    src->Sem().Get(call)->UnwrapMaterialize()->As<sem::Call>()->Target(),
+                    [&](const sem::Builtin*) {
+                        preserved_identifiers.Add(call->target->identifier);
+                    },
+                    [&](const sem::TypeConversion*) {
+                        preserve_if_builtin_type(call->target->identifier);
+                    },
+                    [&](const sem::TypeInitializer*) {
+                        preserve_if_builtin_type(call->target->identifier);
+                    });
             });
     }
 
@@ -1369,7 +1378,7 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
         if (auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>()) {
             auto args = ctx.Clone(tmpl_ident->arguments);
             return ctx.dst->create<ast::TemplatedIdentifier>(ctx.Clone(ident->source), replacement,
-                                                             std::move(args));
+                                                             std::move(args), utils::Empty);
         }
         return ctx.dst->create<ast::Identifier>(ctx.Clone(ident->source), replacement);
     });

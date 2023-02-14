@@ -277,26 +277,26 @@ std::ostream& operator<<(std::ostream& out, SymbolUseKind kind) {
 std::string DiagString(SymbolUseKind kind) {
     switch (kind) {
         case SymbolUseKind::GlobalVarType:
+        case SymbolUseKind::GlobalConstType:
+        case SymbolUseKind::AliasType:
+        case SymbolUseKind::StructMemberType:
+        case SymbolUseKind::ParameterType:
+        case SymbolUseKind::LocalVarType:
+        case SymbolUseKind::LocalLetType:
+        case SymbolUseKind::NestedLocalVarType:
+        case SymbolUseKind::NestedLocalLetType:
+            return "type";
         case SymbolUseKind::GlobalVarArrayElemType:
         case SymbolUseKind::GlobalVarVectorElemType:
         case SymbolUseKind::GlobalVarMatrixElemType:
         case SymbolUseKind::GlobalVarSampledTexElemType:
         case SymbolUseKind::GlobalVarMultisampledTexElemType:
-        case SymbolUseKind::GlobalConstType:
         case SymbolUseKind::GlobalConstArrayElemType:
         case SymbolUseKind::GlobalConstVectorElemType:
         case SymbolUseKind::GlobalConstMatrixElemType:
-        case SymbolUseKind::AliasType:
-        case SymbolUseKind::StructMemberType:
-        case SymbolUseKind::ParameterType:
-        case SymbolUseKind::LocalVarType:
         case SymbolUseKind::LocalVarArrayElemType:
         case SymbolUseKind::LocalVarVectorElemType:
         case SymbolUseKind::LocalVarMatrixElemType:
-        case SymbolUseKind::LocalLetType:
-        case SymbolUseKind::NestedLocalVarType:
-        case SymbolUseKind::NestedLocalLetType:
-            return "type";
         case SymbolUseKind::GlobalVarValue:
         case SymbolUseKind::GlobalVarArraySizeValue:
         case SymbolUseKind::GlobalConstValue:
@@ -469,14 +469,14 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
     auto& b = *builder;
     switch (kind) {
         case SymbolUseKind::GlobalVarType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             b.GlobalVar(b.Sym(), node, type::AddressSpace::kPrivate);
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::GlobalVarArrayElemType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             b.GlobalVar(b.Sym(), b.ty.array(node, 4_i), type::AddressSpace::kPrivate);
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::GlobalVarArraySizeValue: {
             auto* node = b.Expr(source, symbol);
@@ -484,24 +484,24 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
             return node->identifier;
         }
         case SymbolUseKind::GlobalVarVectorElemType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             b.GlobalVar(b.Sym(), b.ty.vec3(node), type::AddressSpace::kPrivate);
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::GlobalVarMatrixElemType: {
-            auto* node = b.ty(source, symbol);
+            ast::Type node = b.ty(source, symbol);
             b.GlobalVar(b.Sym(), b.ty.mat3x4(node), type::AddressSpace::kPrivate);
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::GlobalVarSampledTexElemType: {
-            auto* node = b.ty(source, symbol);
+            ast::Type node = b.ty(source, symbol);
             b.GlobalVar(b.Sym(), b.ty.sampled_texture(type::TextureDimension::k2d, node));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::GlobalVarMultisampledTexElemType: {
-            auto* node = b.ty(source, symbol);
+            ast::Type node = b.ty(source, symbol);
             b.GlobalVar(b.Sym(), b.ty.multisampled_texture(type::TextureDimension::k2d, node));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::GlobalVarValue: {
             auto* node = b.Expr(source, symbol);
@@ -509,14 +509,14 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
             return node->identifier;
         }
         case SymbolUseKind::GlobalConstType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             b.GlobalConst(b.Sym(), node, b.Expr(1_i));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::GlobalConstArrayElemType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             b.GlobalConst(b.Sym(), b.ty.array(node, 4_i), b.Expr(1_i));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::GlobalConstArraySizeValue: {
             auto* node = b.Expr(source, symbol);
@@ -524,14 +524,14 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
             return node->identifier;
         }
         case SymbolUseKind::GlobalConstVectorElemType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             b.GlobalConst(b.Sym(), b.ty.vec3(node), b.Expr(1_i));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::GlobalConstMatrixElemType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             b.GlobalConst(b.Sym(), b.ty.mat3x4(node), b.Expr(1_i));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::GlobalConstValue: {
             auto* node = b.Expr(source, symbol);
@@ -539,14 +539,14 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
             return node->identifier;
         }
         case SymbolUseKind::AliasType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             b.Alias(b.Sym(), node);
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::StructMemberType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             b.Structure(b.Sym(), utils::Vector{b.Member("m", node)});
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::CallFunction: {
             auto* node = b.Ident(source, symbol);
@@ -554,19 +554,19 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
             return node;
         }
         case SymbolUseKind::ParameterType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             parameters.Push(b.Param(b.Sym(), node));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::LocalVarType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             statements.Push(b.Decl(b.Var(b.Sym(), node)));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::LocalVarArrayElemType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             statements.Push(b.Decl(b.Var(b.Sym(), b.ty.array(node, 4_u), b.Expr(1_i))));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::LocalVarArraySizeValue: {
             auto* node = b.Expr(source, symbol);
@@ -574,14 +574,14 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
             return node->identifier;
         }
         case SymbolUseKind::LocalVarVectorElemType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             statements.Push(b.Decl(b.Var(b.Sym(), b.ty.vec3(node))));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::LocalVarMatrixElemType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             statements.Push(b.Decl(b.Var(b.Sym(), b.ty.mat3x4(node))));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::LocalVarValue: {
             auto* node = b.Expr(source, symbol);
@@ -589,9 +589,9 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
             return node->identifier;
         }
         case SymbolUseKind::LocalLetType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             statements.Push(b.Decl(b.Let(b.Sym(), node, b.Expr(1_i))));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::LocalLetValue: {
             auto* node = b.Expr(source, symbol);
@@ -599,9 +599,9 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
             return node->identifier;
         }
         case SymbolUseKind::NestedLocalVarType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             nested_statements.Push(b.Decl(b.Var(b.Sym(), node)));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::NestedLocalVarValue: {
             auto* node = b.Expr(source, symbol);
@@ -609,9 +609,9 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
             return node->identifier;
         }
         case SymbolUseKind::NestedLocalLetType: {
-            auto* node = b.ty(source, symbol);
+            auto node = b.ty(source, symbol);
             nested_statements.Push(b.Decl(b.Let(b.Sym(), node, b.Expr(1_i))));
-            return node->name;
+            return node->identifier;
         }
         case SymbolUseKind::NestedLocalLetValue: {
             auto* node = b.Expr(source, symbol);
@@ -666,7 +666,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeConstructed) {
     // type T = i32;
 
     Func("F", utils::Empty, ty.void_(),
-         utils::Vector{Block(Ignore(Call(ty(Source{{12, 34}}, "T"))))});
+         utils::Vector{Block(Ignore(Call(Ident(Source{{12, 34}}, "T"))))});
     Alias(Source{{56, 78}}, "T", ty.i32());
 
     Build();
@@ -1638,10 +1638,6 @@ static const ast::Identifier* IdentifierOf(const ast::IdentifierExpression* expr
     return expr->identifier;
 }
 
-static const ast::Identifier* IdentifierOf(const ast::TypeName* ty) {
-    return ty->name;
-}
-
 static const ast::Identifier* IdentifierOf(const ast::Identifier* ident) {
     return ident;
 }
@@ -1665,7 +1661,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
 
     utils::Vector<SymbolUse, 64> symbol_uses;
 
-    auto add_use = [&](const ast::Node* decl, auto* use, int line, const char* kind) {
+    auto add_use = [&](const ast::Node* decl, auto use, int line, const char* kind) {
         symbol_uses.Push(
             SymbolUse{decl, IdentifierOf(use),
                       std::string(__FILE__) + ":" + std::to_string(line) + ": " + kind});
@@ -1776,7 +1772,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, chromium_1273451) {
     Structure("B", utils::Vector{Member("b", ty.i32())});
     Func("f", utils::Vector{Param("a", ty("A"))}, ty("B"),
          utils::Vector{
-             Return(Call(ty("B"))),
+             Return(Call("B")),
          });
     Build();
 }

@@ -143,11 +143,12 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
                        utils::Vector{b.Param("io", ctx.Clone(func_ast->return_type))},
                        b.ty(new_struct_sym),
                        utils::Vector{
-                           b.Return(b.Call(b.ty(new_struct_sym), std::move(initializer_exprs)))});
+                           b.Return(b.Call(new_struct_sym, std::move(initializer_exprs))),
+                       });
                 return TruncatedStructAndConverter{new_struct_sym, mapping_fn_sym};
             });
 
-        ctx.Replace(func_ast->return_type, b.ty(entry.truncated_struct));
+        ctx.Replace(func_ast->return_type.expr, b.Expr(entry.truncated_struct));
 
         entry_point_functions_to_truncate_functions.Add(func_sem, entry.truncate_fn);
     }

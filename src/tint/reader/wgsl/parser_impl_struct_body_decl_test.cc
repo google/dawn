@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ast/test_helper.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {
@@ -29,8 +30,7 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
 
     const auto* mem = m.value[0];
     EXPECT_EQ(mem->name->symbol, builder.Symbols().Get("a"));
-    ASSERT_TRUE(mem->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(mem->type->As<ast::TypeName>()->name->symbol), "i32");
+    ast::CheckIdentifier(p->builder().Symbols(), mem->type, "i32");
     EXPECT_EQ(mem->attributes.Length(), 0u);
 }
 
@@ -46,8 +46,7 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses_TrailingComma) {
 
     const auto* mem = m.value[0];
     EXPECT_EQ(mem->name->symbol, builder.Symbols().Get("a"));
-    ASSERT_TRUE(mem->type->Is<ast::TypeName>());
-    EXPECT_EQ(p->builder().Symbols().NameFor(mem->type->As<ast::TypeName>()->name->symbol), "i32");
+    ast::CheckIdentifier(p->builder().Symbols(), mem->type, "i32");
     EXPECT_EQ(mem->attributes.Length(), 0u);
 }
 

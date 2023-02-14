@@ -27,13 +27,13 @@ using FunctionTest = TestHelper;
 
 TEST_F(FunctionTest, Creation_i32ReturnType) {
     utils::Vector params{Param("var", ty.i32())};
-    auto* i32 = ty.i32();
+    auto i32 = ty.i32();
     auto* var = params[0];
 
     auto* f = Func("func", params, i32, utils::Empty);
     EXPECT_EQ(f->name->symbol, Symbols().Get("func"));
     ASSERT_EQ(f->params.Length(), 1u);
-    EXPECT_EQ(f->return_type, i32);
+    CheckIdentifier(Symbols(), f->return_type, "i32");
     EXPECT_EQ(f->params[0], var);
 }
 
@@ -112,15 +112,6 @@ TEST_F(FunctionTest, Assert_TemplatedName) {
         {
             ProgramBuilder b;
             b.Func(b.Ident("a", "b"), utils::Empty, b.ty.void_(), utils::Empty);
-        },
-        "internal compiler error");
-}
-
-TEST_F(FunctionTest, Assert_InvalidName) {
-    EXPECT_FATAL_FAILURE(
-        {
-            ProgramBuilder b;
-            b.Func("", utils::Empty, b.ty.void_(), utils::Empty);
         },
         "internal compiler error");
 }

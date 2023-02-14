@@ -73,7 +73,7 @@ TEST_P(ResolverConstEvalConvTest, Test) {
     auto* input_val = input.Expr(*this);
     auto* expr = Call(type.ast(*this), input_val);
     if (kind == Kind::kVector) {
-        expr = Call(ty.vec(nullptr, 3), expr);
+        expr = Call(ty.vec<Infer>(3), expr);
     }
     WrapInFunction(expr);
 

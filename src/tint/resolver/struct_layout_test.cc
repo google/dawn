@@ -256,8 +256,8 @@ TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayRuntimeSized) {
 }
 
 TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayOfExplicitStrideArray) {
-    auto* inner = ty.array<i32, 2>(utils::Vector{Stride(16)});  // size: 32
-    auto* outer = ty.array(inner, 12_u);                        // size: 12 * 32
+    auto inner = ty.array<i32, 2>(utils::Vector{Stride(16)});  // size: 32
+    auto outer = ty.array(inner, 12_u);                        // size: 12 * 32
     auto* s = Structure("S", utils::Vector{
                                  Member("c", outer),
                              });
@@ -283,8 +283,8 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayOfStructure) {
                                          Member("a", ty.vec2<i32>()),
                                          Member("b", ty.vec3<i32>()),
                                          Member("c", ty.vec4<i32>()),
-                                     });         // size: 48
-    auto* outer = ty.array(ty.Of(inner), 12_u);  // size: 12 * 48
+                                     });        // size: 48
+    auto outer = ty.array(ty.Of(inner), 12_u);  // size: 12 * 48
     auto* s = Structure("S", utils::Vector{
                                  Member("c", outer),
                              });
