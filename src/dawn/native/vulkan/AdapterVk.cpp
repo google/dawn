@@ -240,14 +240,21 @@ void Adapter::InitializeSupportedFeaturesImpl() {
         mSupportedFeatures.EnableFeature(Feature::DepthClipControl);
     }
 
-    VkFormatProperties properties;
+    VkFormatProperties rg11b10Properties;
     mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(
-        mPhysicalDevice, VK_FORMAT_B10G11R11_UFLOAT_PACK32, &properties);
+        mPhysicalDevice, VK_FORMAT_B10G11R11_UFLOAT_PACK32, &rg11b10Properties);
 
     if (IsSubset(static_cast<VkFormatFeatureFlags>(VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT |
                                                    VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT),
-                 properties.optimalTilingFeatures)) {
+                 rg11b10Properties.optimalTilingFeatures)) {
         mSupportedFeatures.EnableFeature(Feature::RG11B10UfloatRenderable);
+    }
+
+    VkFormatProperties bgra8unormProperties;
+    mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(
+        mPhysicalDevice, VK_FORMAT_B8G8R8A8_UNORM, &bgra8unormProperties);
+    if (bgra8unormProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT) {
+        mSupportedFeatures.EnableFeature(Feature::BGRA8UnormStorage);
     }
 
 #if defined(DAWN_USE_SYNC_FDS)

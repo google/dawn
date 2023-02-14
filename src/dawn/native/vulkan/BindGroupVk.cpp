@@ -113,7 +113,12 @@ BindGroup::BindGroup(Device* device,
             case BindingInfoType::StorageTexture: {
                 TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
-                VkImageView handle = view->GetHandle();
+                VkImageView handle = VK_NULL_HANDLE;
+                if (view->GetTexture()->GetFormat().format == wgpu::TextureFormat::BGRA8Unorm) {
+                    handle = view->GetHandleForBGRA8UnormStorage();
+                } else {
+                    handle = view->GetHandle();
+                }
                 if (handle == VK_NULL_HANDLE) {
                     // The Texture was destroyed before the TextureView was created.
                     // Skip this descriptor write since it would be

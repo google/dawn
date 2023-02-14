@@ -684,7 +684,17 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
 
     VkImageFormatListCreateInfo imageFormatListInfo = {};
     std::vector<VkFormat> viewFormats;
-    if (GetViewFormats().any()) {
+    bool requiresCreateMutableFormatBit = GetViewFormats().any();
+    // As current SPIR-V SPEC doesn't support 'bgra8' as a valid image format, to support the
+    // STORAGE usage of BGRA8Unorm we have to create an RGBA8Unorm image view on the BGRA8Unorm
+    // storage texture and polyfill it as RGBA8Unorm in Tint. See http://crbug.com/dawn/1641 for
+    // more details.
+    if (createInfo.format == VK_FORMAT_B8G8R8A8_UNORM &&
+        createInfo.usage & VK_IMAGE_USAGE_STORAGE_BIT) {
+        viewFormats.push_back(VK_FORMAT_R8G8B8A8_UNORM);
+        requiresCreateMutableFormatBit = true;
+    }
+    if (requiresCreateMutableFormatBit) {
         createInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
         if (device->GetDeviceInfo().HasExt(DeviceExt::ImageFormatList)) {
             createInfoChain.Add(&imageFormatListInfo,
@@ -1423,6 +1433,16 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
         device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
         "CreateImageView"));
 
+    // We should create an image view with format RGBA8Unorm on the BGRA8Unorm texture when the
+    // texture is used as storage texture. See http://crbug.com/dawn/1641 for more details.
+    if (createInfo.format == VK_FORMAT_B8G8R8A8_UNORM &&
+        (GetTexture()->GetInternalUsage() & wgpu::TextureUsage::StorageBinding)) {
+        createInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+        DAWN_TRY(CheckVkSuccess(device->fn.CreateImageView(device->GetVkDevice(), &createInfo,
+                                                           nullptr, &*mHandleForBGRA8UnormStorage),
+                                "CreateImageView for BGRA8Unorm storage"));
+    }
+
     SetLabelImpl();
 
     return {};
@@ -1437,10 +1457,19 @@ void TextureView::DestroyImpl() {
         device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
         mHandle = VK_NULL_HANDLE;
     }
+
+    if (mHandleForBGRA8UnormStorage != VK_NULL_HANDLE) {
+        device->GetFencedDeleter()->DeleteWhenUnused(mHandleForBGRA8UnormStorage);
+        mHandleForBGRA8UnormStorage = VK_NULL_HANDLE;
+    }
 }
 
 VkImageView TextureView::GetHandle() const {
     return mHandle;
+}
+
+VkImageView TextureView::GetHandleForBGRA8UnormStorage() const {
+    return mHandleForBGRA8UnormStorage;
 }
 
 void TextureView::SetLabelImpl() {
