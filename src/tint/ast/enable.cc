@@ -15,7 +15,6 @@
 #include "src/tint/ast/enable.h"
 
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/variable.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Enable);
 

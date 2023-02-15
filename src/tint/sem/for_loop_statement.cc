@@ -14,7 +14,7 @@
 
 #include "src/tint/sem/for_loop_statement.h"
 
-#include "src/tint/program_builder.h"
+#include "src/tint/ast/for_loop_statement.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::ForLoopStatement);
 

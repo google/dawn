@@ -14,7 +14,7 @@
 
 #include "src/tint/sem/if_statement.h"
 
-#include "src/tint/program_builder.h"
+#include "src/tint/ast/if_statement.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::IfStatement);
 
