@@ -1112,8 +1112,6 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
 
 TEST_P(ColorStateTest, SparseAttachmentsDifferentColorMask) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_indexed_draw_buffers"));
-    // TODO(crbug.com/dawn/1625): device lost on ASAN
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsD3D12());
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct Outputs {
