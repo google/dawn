@@ -18,7 +18,6 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/debug.h"
-#include "src/tint/demangler.h"
 #include "src/tint/sem/type_expression.h"
 #include "src/tint/sem/value_expression.h"
 #include "src/tint/sem/variable.h"

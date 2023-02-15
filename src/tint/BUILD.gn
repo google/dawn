@@ -315,8 +315,6 @@ libtint_source_set("libtint_syntax_tree_src") {
     "ast/workgroup_attribute.h",
     "clone_context.cc",
     "clone_context.h",
-    "demangler.cc",
-    "demangler.h",
     "program.cc",
     "program.h",
     "program_builder.cc",
@@ -383,6 +381,14 @@ libtint_source_set("libtint_syntax_tree_src") {
     ":libtint_text_src",
     ":libtint_type_src",
   ]
+}
+
+libtint_source_set("libtint_demangler_src") {
+  sources = [
+    "demangler.cc",
+    "demangler.h",
+  ]
+  deps = [ ":libtint_syntax_tree_src" ]
 }
 
 libtint_source_set("libtint_initializer_src") {
@@ -1074,6 +1080,7 @@ source_set("libtint") {
     ":libtint_ast_src",
     ":libtint_base_src",
     ":libtint_constant_src",
+    ":libtint_demangler_src",
     ":libtint_initializer_src",
     ":libtint_inspector_src",
     ":libtint_sem_src",
@@ -1962,7 +1969,6 @@ if (tint_build_unittests) {
   tint_unittests_source_set("tint_unittests_core_src") {
     sources = [
       "clone_context_test.cc",
-      "demangler_test.cc",
       "program_builder_test.cc",
       "program_test.cc",
     ]
@@ -1972,6 +1978,11 @@ if (tint_build_unittests) {
       ":libtint_unittests_ast_helper",
       ":tint_unittests_ast_src",
     ]
+  }
+
+  tint_unittests_source_set("tint_unittests_demangler_src") {
+    sources = [ "demangler_test.cc" ]
+    deps = [ ":libtint_demangler_src" ]
   }
 
   if (build_with_chromium) {
@@ -1995,6 +2006,7 @@ if (tint_build_unittests) {
       ":tint_unittests_base_src",
       ":tint_unittests_constant_src",
       ":tint_unittests_core_src",
+      ":tint_unittests_demangler_src",
       ":tint_unittests_diagnostic_src",
       ":tint_unittests_inspector_src",
       ":tint_unittests_resolver_src",
