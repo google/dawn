@@ -100,9 +100,10 @@ MaybeError Adapter::InitializeImpl() {
     }
 
     if (GetInstance()->IsAdapterBlocklistEnabled()) {
-#if DAWN_PLATFORM_IS(X86)
-        DAWN_INVALID_IF(mDeviceInfo.shaderModel >= 60,
-                        "D3D12 x86 adapter is blocklisted. See https://crbug.com/tint/1753.");
+#if DAWN_PLATFORM_IS(I386)
+        DAWN_INVALID_IF(
+            mDeviceInfo.shaderModel >= 60,
+            "D3D12 x86 SM6.0+ adapter is blocklisted. See https://crbug.com/tint/1753.");
 
         DAWN_INVALID_IF(
             gpu_info::IsNvidia(mVendorId),
