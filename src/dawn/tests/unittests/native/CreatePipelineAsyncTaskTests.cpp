@@ -22,7 +22,7 @@ class CreatePipelineAsyncTaskTests : public DawnNativeTest {};
 
 // A regression test for a null pointer issue in CreateRenderPipelineAsyncTask::Run().
 // See crbug.com/dawn/1310 for more details.
-TEST_F(CreatePipelineAsyncTaskTests, InitializationErrorInCreateRenderPipelineAsync) {
+TEST_F(CreatePipelineAsyncTaskTests, InitializationValidationErrorInCreateRenderPipelineAsync) {
     dawn::native::DeviceBase* deviceBase =
         reinterpret_cast<dawn::native::DeviceBase*>(device.Get());
     Ref<dawn::native::RenderPipelineMock> renderPipelineMock =
@@ -36,7 +36,35 @@ TEST_F(CreatePipelineAsyncTaskTests, InitializationErrorInCreateRenderPipelineAs
         renderPipelineMock,
         [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
            const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Error, status);
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_ValidationError,
+                      status);
+        },
+        nullptr);
+
+    asyncTask.Run();
+    device.Tick();
+
+    EXPECT_CALL(*renderPipelineMock.Get(), DestroyImpl).Times(1);
+}
+
+// Test that Internal error are converted to the InternalError status in async pipeline creation
+// callbacks.
+TEST_F(CreatePipelineAsyncTaskTests, InitializationInternalErrorInCreateRenderPipelineAsync) {
+    dawn::native::DeviceBase* deviceBase =
+        reinterpret_cast<dawn::native::DeviceBase*>(device.Get());
+    Ref<dawn::native::RenderPipelineMock> renderPipelineMock =
+        AcquireRef(new dawn::native::RenderPipelineMock(deviceBase));
+
+    ON_CALL(*renderPipelineMock.Get(), Initialize)
+        .WillByDefault(testing::Return(testing::ByMove(
+            DAWN_MAKE_ERROR(dawn::native::InternalErrorType::Internal, "Initialization Error"))));
+
+    dawn::native::CreateRenderPipelineAsyncTask asyncTask(
+        renderPipelineMock,
+        [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
+           const char* message, void* userdata) {
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_InternalError,
+                      status);
         },
         nullptr);
 
@@ -48,7 +76,7 @@ TEST_F(CreatePipelineAsyncTaskTests, InitializationErrorInCreateRenderPipelineAs
 
 // A regression test for a null pointer issue in CreateComputePipelineAsyncTask::Run().
 // See crbug.com/dawn/1310 for more details.
-TEST_F(CreatePipelineAsyncTaskTests, InitializationErrorInCreateComputePipelineAsync) {
+TEST_F(CreatePipelineAsyncTaskTests, InitializationValidationErrorInCreateComputePipelineAsync) {
     dawn::native::DeviceBase* deviceBase =
         reinterpret_cast<dawn::native::DeviceBase*>(device.Get());
     Ref<dawn::native::ComputePipelineMock> computePipelineMock =
@@ -62,7 +90,35 @@ TEST_F(CreatePipelineAsyncTaskTests, InitializationErrorInCreateComputePipelineA
         computePipelineMock,
         [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
            const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Error, status);
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_ValidationError,
+                      status);
+        },
+        nullptr);
+
+    asyncTask.Run();
+    device.Tick();
+
+    EXPECT_CALL(*computePipelineMock.Get(), DestroyImpl).Times(1);
+}
+
+// Test that Internal error are converted to the InternalError status in async pipeline creation
+// callbacks.
+TEST_F(CreatePipelineAsyncTaskTests, InitializationInternalErrorInCreateComputePipelineAsync) {
+    dawn::native::DeviceBase* deviceBase =
+        reinterpret_cast<dawn::native::DeviceBase*>(device.Get());
+    Ref<dawn::native::ComputePipelineMock> computePipelineMock =
+        AcquireRef(new dawn::native::ComputePipelineMock(deviceBase));
+
+    ON_CALL(*computePipelineMock.Get(), Initialize)
+        .WillByDefault(testing::Return(testing::ByMove(
+            DAWN_MAKE_ERROR(dawn::native::InternalErrorType::Internal, "Initialization Error"))));
+
+    dawn::native::CreateComputePipelineAsyncTask asyncTask(
+        computePipelineMock,
+        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
+           const char* message, void* userdata) {
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_InternalError,
+                      status);
         },
         nullptr);
 

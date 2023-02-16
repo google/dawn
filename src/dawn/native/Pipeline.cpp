@@ -139,6 +139,18 @@ MaybeError ValidateProgrammableStage(DeviceBase* device,
     return {};
 }
 
+WGPUCreatePipelineAsyncStatus CreatePipelineAsyncStatusFromErrorType(InternalErrorType error) {
+    switch (error) {
+        case InternalErrorType::Validation:
+            return WGPUCreatePipelineAsyncStatus_ValidationError;
+        case InternalErrorType::DeviceLost:
+            return WGPUCreatePipelineAsyncStatus_DeviceLost;
+        case InternalErrorType::Internal:
+        case InternalErrorType::OutOfMemory:
+            return WGPUCreatePipelineAsyncStatus_InternalError;
+    }
+}
+
 // PipelineBase
 
 PipelineBase::PipelineBase(DeviceBase* device,

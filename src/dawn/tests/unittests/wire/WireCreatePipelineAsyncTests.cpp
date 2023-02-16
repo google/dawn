@@ -145,13 +145,15 @@ TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncError) {
     EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallDeviceCreateComputePipelineAsyncCallback(
-                apiDevice, WGPUCreatePipelineAsyncStatus_Error, nullptr, "Some error message");
+                apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
+                "Some error message");
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockCreateComputePipelineAsyncCallback,
-                Call(WGPUCreatePipelineAsyncStatus_Error, _, StrEq("Some error message"), this))
+    EXPECT_CALL(
+        *mockCreateComputePipelineAsyncCallback,
+        Call(WGPUCreatePipelineAsyncStatus_ValidationError, _, StrEq("Some error message"), this))
         .Times(1);
 
     FlushServer();
@@ -211,13 +213,15 @@ TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncError) {
     EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallDeviceCreateRenderPipelineAsyncCallback(
-                apiDevice, WGPUCreatePipelineAsyncStatus_Error, nullptr, "Some error message");
+                apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
+                "Some error message");
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockCreateRenderPipelineAsyncCallback,
-                Call(WGPUCreatePipelineAsyncStatus_Error, _, StrEq("Some error message"), this))
+    EXPECT_CALL(
+        *mockCreateRenderPipelineAsyncCallback,
+        Call(WGPUCreatePipelineAsyncStatus_ValidationError, _, StrEq("Some error message"), this))
         .Times(1);
 
     FlushServer();

@@ -213,7 +213,8 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
         &csDesc,
         [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
            const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Error, status);
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_ValidationError,
+                      status);
 
             CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
             task->computePipeline = wgpu::ComputePipeline::Acquire(returnPipeline);
@@ -341,7 +342,8 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineFailed) {
         &renderPipelineDescriptor,
         [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
            const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Error, status);
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_ValidationError,
+                      status);
 
             CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
             task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);

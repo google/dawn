@@ -379,11 +379,9 @@ class DeviceBase : public RefCountedWithExternalCount {
     dawn::platform::WorkerTaskPool* GetWorkerTaskPool() const;
 
     void AddComputePipelineAsyncCallbackTask(Ref<ComputePipelineBase> pipeline,
-                                             std::string errorMessage,
                                              WGPUCreateComputePipelineAsyncCallback callback,
                                              void* userdata);
     void AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
-                                            std::string errorMessage,
                                             WGPUCreateRenderPipelineAsyncCallback callback,
                                             void* userdata);
 

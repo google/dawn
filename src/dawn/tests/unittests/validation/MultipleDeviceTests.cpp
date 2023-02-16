@@ -75,7 +75,7 @@ TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreatePipelineAsync) {
 
         StrictMock<MockCallback<WGPUCreateComputePipelineAsyncCallback>> creationCallback;
         EXPECT_CALL(creationCallback,
-                    Call(WGPUCreatePipelineAsyncStatus_Error, nullptr, _, this + 1))
+                    Call(WGPUCreatePipelineAsyncStatus_ValidationError, nullptr, _, this + 1))
             .Times(1);
         device.CreateComputePipelineAsync(&pipelineDesc, creationCallback.Callback(),
                                           creationCallback.MakeUserdata(this + 1));

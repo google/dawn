@@ -33,16 +33,23 @@ class ShaderModuleBase;
 struct FlatComputePipelineDescriptor;
 
 struct CreatePipelineAsyncCallbackTaskBase : CallbackTask {
-    CreatePipelineAsyncCallbackTaskBase(std::string errorMessage, void* userData);
+    explicit CreatePipelineAsyncCallbackTaskBase(void* userData);
+    CreatePipelineAsyncCallbackTaskBase(WGPUCreatePipelineAsyncStatus status,
+                                        std::string errorMessage,
+                                        void* userData);
     ~CreatePipelineAsyncCallbackTaskBase() override;
 
   protected:
     std::string mErrorMessage;
+    WGPUCreatePipelineAsyncStatus mStatus;
     void* mUserData;
 };
 
 struct CreateComputePipelineAsyncCallbackTask : CreatePipelineAsyncCallbackTaskBase {
     CreateComputePipelineAsyncCallbackTask(Ref<ComputePipelineBase> pipeline,
+                                           WGPUCreateComputePipelineAsyncCallback callback,
+                                           void* userdata);
+    CreateComputePipelineAsyncCallbackTask(WGPUCreatePipelineAsyncStatus status,
                                            std::string errorMessage,
                                            WGPUCreateComputePipelineAsyncCallback callback,
                                            void* userdata);
@@ -59,6 +66,9 @@ struct CreateComputePipelineAsyncCallbackTask : CreatePipelineAsyncCallbackTaskB
 
 struct CreateRenderPipelineAsyncCallbackTask : CreatePipelineAsyncCallbackTaskBase {
     CreateRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
+                                          WGPUCreateRenderPipelineAsyncCallback callback,
+                                          void* userdata);
+    CreateRenderPipelineAsyncCallbackTask(WGPUCreatePipelineAsyncStatus status,
                                           std::string errorMessage,
                                           WGPUCreateRenderPipelineAsyncCallback callback,
                                           void* userdata);
