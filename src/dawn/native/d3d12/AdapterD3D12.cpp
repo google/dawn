@@ -553,6 +553,11 @@ void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     if (gpu_info::IsIntelGen9(vendorId, deviceId)) {
         deviceToggles->ForceSet(Toggle::NoWorkaroundDstAlphaBlendDoesNotWork, true);
     }
+
+    // TODO(http://crbug.com/dawn/1216): Actually query D3D12_FEATURE_DATA_D3D12_OPTIONS13.
+    // This is blocked on updating the Windows SDK.
+    deviceToggles->ForceSet(
+        Toggle::D3D12UseTempBufferInTextureToTextureCopyBetweenDifferentDimensions, true);
 }
 
 ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor,

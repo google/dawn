@@ -299,6 +299,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "0, then copy from the temporary buffer to the destination. Now this toggle must be enabled "
       "on the D3D12 platforms where programmable MSAA is not supported.",
       "https://crbug.com/dawn/727", ToggleStage::Device}},
+    {Toggle::D3D12UseTempBufferInTextureToTextureCopyBetweenDifferentDimensions,
+     {"d3d12_use_temp_buffer_in_texture_to_texture_copy_between_different_dimensions",
+      "Use an intermediate temporary buffer when copying between textures of different dimensions. "
+      "Force-enabled on D3D12 when the driver does not have the "
+      "TextureCopyBetweenDimensionsSupported feature.",
+      "https://crbug.com/dawn/1216", ToggleStage::Device}},
     {Toggle::ApplyClearBigIntegerColorValueWithDraw,
      {"apply_clear_big_integer_color_value_with_draw",
       "Apply the clear value of the color attachment with a draw call when load op is 'clear'. "
