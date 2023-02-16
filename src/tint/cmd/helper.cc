@@ -20,125 +20,6 @@
 namespace tint::cmd {
 namespace {
 
-std::string TextureDimensionToString(tint::inspector::ResourceBinding::TextureDimension dim) {
-    switch (dim) {
-        case tint::inspector::ResourceBinding::TextureDimension::kNone:
-            return "None";
-        case tint::inspector::ResourceBinding::TextureDimension::k1d:
-            return "1d";
-        case tint::inspector::ResourceBinding::TextureDimension::k2d:
-            return "2d";
-        case tint::inspector::ResourceBinding::TextureDimension::k2dArray:
-            return "2dArray";
-        case tint::inspector::ResourceBinding::TextureDimension::k3d:
-            return "3d";
-        case tint::inspector::ResourceBinding::TextureDimension::kCube:
-            return "Cube";
-        case tint::inspector::ResourceBinding::TextureDimension::kCubeArray:
-            return "CubeArray";
-    }
-
-    return "Unknown";
-}
-
-std::string SampledKindToString(tint::inspector::ResourceBinding::SampledKind kind) {
-    switch (kind) {
-        case tint::inspector::ResourceBinding::SampledKind::kFloat:
-            return "Float";
-        case tint::inspector::ResourceBinding::SampledKind::kUInt:
-            return "UInt";
-        case tint::inspector::ResourceBinding::SampledKind::kSInt:
-            return "SInt";
-        case tint::inspector::ResourceBinding::SampledKind::kUnknown:
-            break;
-    }
-
-    return "Unknown";
-}
-
-std::string TexelFormatToString(tint::inspector::ResourceBinding::TexelFormat format) {
-    switch (format) {
-        case tint::inspector::ResourceBinding::TexelFormat::kR32Uint:
-            return "R32Uint";
-        case tint::inspector::ResourceBinding::TexelFormat::kR32Sint:
-            return "R32Sint";
-        case tint::inspector::ResourceBinding::TexelFormat::kR32Float:
-            return "R32Float";
-        case tint::inspector::ResourceBinding::TexelFormat::kBgra8Unorm:
-            return "Bgra8Unorm";
-        case tint::inspector::ResourceBinding::TexelFormat::kRgba8Unorm:
-            return "Rgba8Unorm";
-        case tint::inspector::ResourceBinding::TexelFormat::kRgba8Snorm:
-            return "Rgba8Snorm";
-        case tint::inspector::ResourceBinding::TexelFormat::kRgba8Uint:
-            return "Rgba8Uint";
-        case tint::inspector::ResourceBinding::TexelFormat::kRgba8Sint:
-            return "Rgba8Sint";
-        case tint::inspector::ResourceBinding::TexelFormat::kRg32Uint:
-            return "Rg32Uint";
-        case tint::inspector::ResourceBinding::TexelFormat::kRg32Sint:
-            return "Rg32Sint";
-        case tint::inspector::ResourceBinding::TexelFormat::kRg32Float:
-            return "Rg32Float";
-        case tint::inspector::ResourceBinding::TexelFormat::kRgba16Uint:
-            return "Rgba16Uint";
-        case tint::inspector::ResourceBinding::TexelFormat::kRgba16Sint:
-            return "Rgba16Sint";
-        case tint::inspector::ResourceBinding::TexelFormat::kRgba16Float:
-            return "Rgba16Float";
-        case tint::inspector::ResourceBinding::TexelFormat::kRgba32Uint:
-            return "Rgba32Uint";
-        case tint::inspector::ResourceBinding::TexelFormat::kRgba32Sint:
-            return "Rgba32Sint";
-        case tint::inspector::ResourceBinding::TexelFormat::kRgba32Float:
-            return "Rgba32Float";
-        case tint::inspector::ResourceBinding::TexelFormat::kNone:
-            return "None";
-    }
-    return "Unknown";
-}
-
-std::string ResourceTypeToString(tint::inspector::ResourceBinding::ResourceType type) {
-    switch (type) {
-        case tint::inspector::ResourceBinding::ResourceType::kUniformBuffer:
-            return "UniformBuffer";
-        case tint::inspector::ResourceBinding::ResourceType::kStorageBuffer:
-            return "StorageBuffer";
-        case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageBuffer:
-            return "ReadOnlyStorageBuffer";
-        case tint::inspector::ResourceBinding::ResourceType::kSampler:
-            return "Sampler";
-        case tint::inspector::ResourceBinding::ResourceType::kComparisonSampler:
-            return "ComparisonSampler";
-        case tint::inspector::ResourceBinding::ResourceType::kSampledTexture:
-            return "SampledTexture";
-        case tint::inspector::ResourceBinding::ResourceType::kMultisampledTexture:
-            return "MultisampledTexture";
-        case tint::inspector::ResourceBinding::ResourceType::kWriteOnlyStorageTexture:
-            return "WriteOnlyStorageTexture";
-        case tint::inspector::ResourceBinding::ResourceType::kDepthTexture:
-            return "DepthTexture";
-        case tint::inspector::ResourceBinding::ResourceType::kDepthMultisampledTexture:
-            return "DepthMultisampledTexture";
-        case tint::inspector::ResourceBinding::ResourceType::kExternalTexture:
-            return "ExternalTexture";
-    }
-
-    return "Unknown";
-}
-
-std::string EntryPointStageToString(tint::inspector::PipelineStage stage) {
-    switch (stage) {
-        case tint::inspector::PipelineStage::kVertex:
-            return "Vertex Shader";
-        case tint::inspector::PipelineStage::kFragment:
-            return "Fragment Shader";
-        case tint::inspector::PipelineStage::kCompute:
-            return "Compute Shader";
-    }
-    return "Unknown";
-}
-
 enum class InputFormat {
     kUnknown,
     kWgsl,
@@ -430,6 +311,201 @@ void PrintInspectorBindings(tint::inspector::Inspector& inspector) {
         PrintBindings(inspector, entry_point.name);
     }
     std::cout << std::string(80, '-') << std::endl;
+}
+
+std::string EntryPointStageToString(tint::inspector::PipelineStage stage) {
+    switch (stage) {
+        case tint::inspector::PipelineStage::kVertex:
+            return "vertex";
+        case tint::inspector::PipelineStage::kFragment:
+            return "fragment";
+        case tint::inspector::PipelineStage::kCompute:
+            return "compute";
+    }
+    return "Unknown";
+}
+
+std::string TextureDimensionToString(tint::inspector::ResourceBinding::TextureDimension dim) {
+    switch (dim) {
+        case tint::inspector::ResourceBinding::TextureDimension::kNone:
+            return "None";
+        case tint::inspector::ResourceBinding::TextureDimension::k1d:
+            return "1d";
+        case tint::inspector::ResourceBinding::TextureDimension::k2d:
+            return "2d";
+        case tint::inspector::ResourceBinding::TextureDimension::k2dArray:
+            return "2dArray";
+        case tint::inspector::ResourceBinding::TextureDimension::k3d:
+            return "3d";
+        case tint::inspector::ResourceBinding::TextureDimension::kCube:
+            return "Cube";
+        case tint::inspector::ResourceBinding::TextureDimension::kCubeArray:
+            return "CubeArray";
+    }
+
+    return "Unknown";
+}
+
+std::string SampledKindToString(tint::inspector::ResourceBinding::SampledKind kind) {
+    switch (kind) {
+        case tint::inspector::ResourceBinding::SampledKind::kFloat:
+            return "Float";
+        case tint::inspector::ResourceBinding::SampledKind::kUInt:
+            return "UInt";
+        case tint::inspector::ResourceBinding::SampledKind::kSInt:
+            return "SInt";
+        case tint::inspector::ResourceBinding::SampledKind::kUnknown:
+            break;
+    }
+
+    return "Unknown";
+}
+
+std::string TexelFormatToString(tint::inspector::ResourceBinding::TexelFormat format) {
+    switch (format) {
+        case tint::inspector::ResourceBinding::TexelFormat::kR32Uint:
+            return "R32Uint";
+        case tint::inspector::ResourceBinding::TexelFormat::kR32Sint:
+            return "R32Sint";
+        case tint::inspector::ResourceBinding::TexelFormat::kR32Float:
+            return "R32Float";
+        case tint::inspector::ResourceBinding::TexelFormat::kBgra8Unorm:
+            return "Bgra8Unorm";
+        case tint::inspector::ResourceBinding::TexelFormat::kRgba8Unorm:
+            return "Rgba8Unorm";
+        case tint::inspector::ResourceBinding::TexelFormat::kRgba8Snorm:
+            return "Rgba8Snorm";
+        case tint::inspector::ResourceBinding::TexelFormat::kRgba8Uint:
+            return "Rgba8Uint";
+        case tint::inspector::ResourceBinding::TexelFormat::kRgba8Sint:
+            return "Rgba8Sint";
+        case tint::inspector::ResourceBinding::TexelFormat::kRg32Uint:
+            return "Rg32Uint";
+        case tint::inspector::ResourceBinding::TexelFormat::kRg32Sint:
+            return "Rg32Sint";
+        case tint::inspector::ResourceBinding::TexelFormat::kRg32Float:
+            return "Rg32Float";
+        case tint::inspector::ResourceBinding::TexelFormat::kRgba16Uint:
+            return "Rgba16Uint";
+        case tint::inspector::ResourceBinding::TexelFormat::kRgba16Sint:
+            return "Rgba16Sint";
+        case tint::inspector::ResourceBinding::TexelFormat::kRgba16Float:
+            return "Rgba16Float";
+        case tint::inspector::ResourceBinding::TexelFormat::kRgba32Uint:
+            return "Rgba32Uint";
+        case tint::inspector::ResourceBinding::TexelFormat::kRgba32Sint:
+            return "Rgba32Sint";
+        case tint::inspector::ResourceBinding::TexelFormat::kRgba32Float:
+            return "Rgba32Float";
+        case tint::inspector::ResourceBinding::TexelFormat::kNone:
+            return "None";
+    }
+    return "Unknown";
+}
+
+std::string ResourceTypeToString(tint::inspector::ResourceBinding::ResourceType type) {
+    switch (type) {
+        case tint::inspector::ResourceBinding::ResourceType::kUniformBuffer:
+            return "UniformBuffer";
+        case tint::inspector::ResourceBinding::ResourceType::kStorageBuffer:
+            return "StorageBuffer";
+        case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageBuffer:
+            return "ReadOnlyStorageBuffer";
+        case tint::inspector::ResourceBinding::ResourceType::kSampler:
+            return "Sampler";
+        case tint::inspector::ResourceBinding::ResourceType::kComparisonSampler:
+            return "ComparisonSampler";
+        case tint::inspector::ResourceBinding::ResourceType::kSampledTexture:
+            return "SampledTexture";
+        case tint::inspector::ResourceBinding::ResourceType::kMultisampledTexture:
+            return "MultisampledTexture";
+        case tint::inspector::ResourceBinding::ResourceType::kWriteOnlyStorageTexture:
+            return "WriteOnlyStorageTexture";
+        case tint::inspector::ResourceBinding::ResourceType::kDepthTexture:
+            return "DepthTexture";
+        case tint::inspector::ResourceBinding::ResourceType::kDepthMultisampledTexture:
+            return "DepthMultisampledTexture";
+        case tint::inspector::ResourceBinding::ResourceType::kExternalTexture:
+            return "ExternalTexture";
+    }
+
+    return "Unknown";
+}
+
+std::string ComponentTypeToString(tint::inspector::ComponentType type) {
+    switch (type) {
+        case tint::inspector::ComponentType::kUnknown:
+            return "unknown";
+        case tint::inspector::ComponentType::kF32:
+            return "f32";
+        case tint::inspector::ComponentType::kU32:
+            return "u32";
+        case tint::inspector::ComponentType::kI32:
+            return "i32";
+        case tint::inspector::ComponentType::kF16:
+            return "f16";
+    }
+    return "unknown";
+}
+
+std::string CompositionTypeToString(tint::inspector::CompositionType type) {
+    switch (type) {
+        case tint::inspector::CompositionType::kUnknown:
+            return "unknown";
+        case tint::inspector::CompositionType::kScalar:
+            return "scalar";
+        case tint::inspector::CompositionType::kVec2:
+            return "vec2";
+        case tint::inspector::CompositionType::kVec3:
+            return "vec3";
+        case tint::inspector::CompositionType::kVec4:
+            return "vec4";
+    }
+    return "unknown";
+}
+
+std::string InterpolationTypeToString(tint::inspector::InterpolationType type) {
+    switch (type) {
+        case tint::inspector::InterpolationType::kUnknown:
+            return "unknown";
+        case tint::inspector::InterpolationType::kPerspective:
+            return "perspective";
+        case tint::inspector::InterpolationType::kLinear:
+            return "linear";
+        case tint::inspector::InterpolationType::kFlat:
+            return "flat";
+    }
+    return "unknown";
+}
+
+std::string InterpolationSamplingToString(tint::inspector::InterpolationSampling type) {
+    switch (type) {
+        case tint::inspector::InterpolationSampling::kUnknown:
+            return "unknown";
+        case tint::inspector::InterpolationSampling::kNone:
+            return "none";
+        case tint::inspector::InterpolationSampling::kCenter:
+            return "center";
+        case tint::inspector::InterpolationSampling::kCentroid:
+            return "centroid";
+        case tint::inspector::InterpolationSampling::kSample:
+            return "sample";
+    }
+    return "unknown";
+}
+
+std::string OverrideTypeToString(tint::inspector::Override::Type type) {
+    switch (type) {
+        case tint::inspector::Override::Type::kBool:
+            return "bool";
+        case tint::inspector::Override::Type::kFloat32:
+            return "f32";
+        case tint::inspector::Override::Type::kUint32:
+            return "u32";
+        case tint::inspector::Override::Type::kInt32:
+            return "i32";
+    }
+    return "unknown";
 }
 
 }  // namespace tint::cmd

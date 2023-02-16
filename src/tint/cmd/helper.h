@@ -62,6 +62,46 @@ struct LoadProgramOptions {
 /// @param opts the loading options
 ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts);
 
+/// @param stage the pipeline stage
+/// @returns the string representation
+std::string EntryPointStageToString(tint::inspector::PipelineStage stage);
+
+/// @param dim the dimension
+/// @returns the text name
+std::string TextureDimensionToString(tint::inspector::ResourceBinding::TextureDimension dim);
+
+/// @param kind the sample kind
+/// @returns the text name
+std::string SampledKindToString(tint::inspector::ResourceBinding::SampledKind kind);
+
+/// @param format the texel format
+/// @returns the text name
+std::string TexelFormatToString(tint::inspector::ResourceBinding::TexelFormat format);
+
+/// @param type the resource type
+/// @returns the text name
+std::string ResourceTypeToString(tint::inspector::ResourceBinding::ResourceType type);
+
+/// @param type the composition type
+/// @return the text name
+std::string CompositionTypeToString(tint::inspector::CompositionType type);
+
+/// @param type the component type
+/// @return the text name
+std::string ComponentTypeToString(tint::inspector::ComponentType type);
+
+/// @param type the interpolation sampling type
+/// @return the text name
+std::string InterpolationSamplingToString(tint::inspector::InterpolationSampling type);
+
+/// @param type the interpolation type
+/// @return the text name
+std::string InterpolationTypeToString(tint::inspector::InterpolationType type);
+
+/// @param type the override type
+/// @return the text name
+std::string OverrideTypeToString(tint::inspector::Override::Type type);
+
 }  // namespace tint::cmd
 
 #endif  // SRC_TINT_CMD_HELPER_H_
