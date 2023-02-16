@@ -1,4 +1,4 @@
-// Copyright 2019 The Dawn Authors
+// Copyright 2023 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,53 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SEMAPHORESERVICE_H_
-#define SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SEMAPHORESERVICE_H_
-
-#include <memory>
+#ifndef SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SERVICEIMPLEMENTATION_H_
+#define SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SERVICEIMPLEMENTATION_H_
 
 #include "dawn/native/Error.h"
 #include "dawn/native/vulkan/ExternalHandle.h"
 
 namespace dawn::native::vulkan {
 class Device;
-struct VulkanDeviceInfo;
-struct VulkanFunctions;
 }  // namespace dawn::native::vulkan
 
 namespace dawn::native::vulkan::external_semaphore {
-class ServiceImplementation;
 
-class Service {
+class ServiceImplementation {
   public:
-    explicit Service(Device* device);
-    ~Service();
-
-    static bool CheckSupport(const VulkanDeviceInfo& deviceInfo,
-                             VkPhysicalDevice physicalDevice,
-                             const VulkanFunctions& fn);
-    void CloseHandle(ExternalSemaphoreHandle handle);
+    explicit ServiceImplementation(Device* device);
+    virtual ~ServiceImplementation();
 
     // True if the device reports it supports this feature
-    bool Supported();
+    virtual bool Supported() = 0;
 
     // Given an external handle, import it into a VkSemaphore
-    ResultOrError<VkSemaphore> ImportSemaphore(ExternalSemaphoreHandle handle);
+    virtual ResultOrError<VkSemaphore> ImportSemaphore(ExternalSemaphoreHandle handle) = 0;
 
     // Create a VkSemaphore that is exportable into an external handle later
-    ResultOrError<VkSemaphore> CreateExportableSemaphore();
+    virtual ResultOrError<VkSemaphore> CreateExportableSemaphore() = 0;
 
     // Export a VkSemaphore into an external handle
-    ResultOrError<ExternalSemaphoreHandle> ExportSemaphore(VkSemaphore semaphore);
+    virtual ResultOrError<ExternalSemaphoreHandle> ExportSemaphore(VkSemaphore semaphore) = 0;
 
     // Duplicate a new external handle from the given one.
-    ExternalSemaphoreHandle DuplicateHandle(ExternalSemaphoreHandle handle);
+    virtual ExternalSemaphoreHandle DuplicateHandle(ExternalSemaphoreHandle handle) = 0;
 
-  private:
-    // Linux, ChromeOS and Android use FD semaphore and Fuchia uses ZirconHandle.
-    std::unique_ptr<ServiceImplementation> mServiceImpl;
+    // Close external handle to release it.
+    virtual void CloseHandle(ExternalSemaphoreHandle handle) = 0;
+
+  protected:
+    Device* mDevice = nullptr;
 };
 
 }  // namespace dawn::native::vulkan::external_semaphore
 
-#endif  // SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SEMAPHORESERVICE_H_
+#endif  // SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SERVICEIMPLEMENTATION_H_

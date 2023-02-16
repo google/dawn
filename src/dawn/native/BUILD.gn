@@ -678,36 +678,34 @@ source_set("sources") {
       "vulkan/VulkanInfo.h",
       "vulkan/external_memory/MemoryService.cpp",
       "vulkan/external_memory/MemoryService.h",
+      "vulkan/external_semaphore/SemaphoreService.cpp",
       "vulkan/external_semaphore/SemaphoreService.h",
+      "vulkan/external_semaphore/ServiceImplementation.cpp",
+      "vulkan/external_semaphore/ServiceImplementation.h",
     ]
 
-    if (is_chromeos) {
+    if (is_android || is_linux || is_chromeos) {
       sources += [
-        "vulkan/external_memory/MemoryServiceDmaBuf.cpp",
-        "vulkan/external_semaphore/SemaphoreServiceFD.cpp",
-      ]
-      defines += [ "DAWN_USE_SYNC_FDS" ]
-    } else if (is_linux) {
-      sources += [
-        "vulkan/external_memory/MemoryServiceOpaqueFD.cpp",
-        "vulkan/external_semaphore/SemaphoreServiceFD.cpp",
+        "vulkan/external_semaphore/ServiceImplementationFD.cpp",
+        "vulkan/external_semaphore/ServiceImplementationFD.h",
       ]
     } else if (is_fuchsia) {
       sources += [
-        "vulkan/external_memory/MemoryServiceZirconHandle.cpp",
-        "vulkan/external_semaphore/SemaphoreServiceZirconHandle.cpp",
+        "vulkan/external_semaphore/ServiceImplementationZirconHandle.cpp",
+        "vulkan/external_semaphore/ServiceImplementationZirconHandle.h",
       ]
+    }
+
+    if (is_chromeos) {
+      sources += [ "vulkan/external_memory/MemoryServiceDmaBuf.cpp" ]
+    } else if (is_linux) {
+      sources += [ "vulkan/external_memory/MemoryServiceOpaqueFD.cpp" ]
+    } else if (is_fuchsia) {
+      sources += [ "vulkan/external_memory/MemoryServiceZirconHandle.cpp" ]
     } else if (is_android) {
-      sources += [
-        "vulkan/external_memory/MemoryServiceAHardwareBuffer.cpp",
-        "vulkan/external_semaphore/SemaphoreServiceFD.cpp",
-      ]
-      defines += [ "DAWN_USE_SYNC_FDS" ]
+      sources += [ "vulkan/external_memory/MemoryServiceAHardwareBuffer.cpp" ]
     } else {
-      sources += [
-        "vulkan/external_memory/MemoryServiceNull.cpp",
-        "vulkan/external_semaphore/SemaphoreServiceNull.cpp",
-      ]
+      sources += [ "vulkan/external_memory/MemoryServiceNull.cpp" ]
     }
     if (build_with_chromium && is_fuchsia) {
       # Necessary to ensure that the Vulkan libraries will be in the

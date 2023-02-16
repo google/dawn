@@ -257,11 +257,11 @@ void Adapter::InitializeSupportedFeaturesImpl() {
         mSupportedFeatures.EnableFeature(Feature::BGRA8UnormStorage);
     }
 
-#if defined(DAWN_USE_SYNC_FDS)
+#if DAWN_PLATFORM_IS(ANDROID) || DAWN_PLATFORM_IS(CHROMEOS)
     // TODO(chromium:1258986): Precisely enable the feature by querying the device's format
     // features.
     mSupportedFeatures.EnableFeature(Feature::MultiPlanarFormats);
-#endif
+#endif  // DAWN_PLATFORM_IS(ANDROID) || DAWN_PLATFORM_IS(CHROMEOS)
 }
 
 MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {

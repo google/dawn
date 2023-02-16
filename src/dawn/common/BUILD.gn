@@ -80,6 +80,13 @@ config("internal_config") {
     defines += [ "DAWN_ENABLE_BACKEND_VULKAN" ]
   }
 
+  # OS_CHROMEOS cannot be autodetected in runtime and
+  # cannot be detected with regular compiler macros either.
+  # Inject it from the build system
+  if (is_chromeos) {
+    defines += [ "DAWN_OS_CHROMEOS" ]
+  }
+
   if (dawn_use_wayland) {
     defines += [ "DAWN_USE_WAYLAND" ]
   }
