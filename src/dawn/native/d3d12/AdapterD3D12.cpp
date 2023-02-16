@@ -108,6 +108,9 @@ MaybeError Adapter::InitializeImpl() {
         DAWN_INVALID_IF(
             gpu_info::IsNvidia(mVendorId),
             "D3D12 NVIDIA x86 adapter is blocklisted. See https://crbug.com/dawn/1196.");
+#elif DAWN_PLATFORM_IS(ARM)
+        return DAWN_VALIDATION_ERROR(
+            "D3D12 on ARM CPU is blocklisted. See https://crbug.com/dawn/884.");
 #endif
     }
     return {};
