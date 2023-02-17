@@ -33,7 +33,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Scalar_F32_From_I32) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Scalar_F16_From_I32) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* cast = Call<f16>(1_i);
     WrapInFunction(cast);
@@ -57,7 +57,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Vector_F32_From_I32) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Vector_F16_From_I32) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* cast = vec3<f16>(vec3<i32>(1_i, 2_i, 3_i));
     WrapInFunction(cast);

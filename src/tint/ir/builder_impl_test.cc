@@ -1509,7 +1509,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_F32) {
 }
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
     auto* expr = Expr(1.2_h);
     GlobalVar("a", ty.f16(), type::AddressSpace::kPrivate, expr);
 

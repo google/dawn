@@ -135,9 +135,9 @@ TEST_F(ModuleTest, CloneOrder) {
 }
 
 TEST_F(ModuleTest, Directives) {
-    auto* enable_1 = Enable(ast::Extension::kF16);
+    auto* enable_1 = Enable(builtin::Extension::kF16);
     auto* diagnostic_1 = DiagnosticDirective(DiagnosticSeverity::kWarning, "foo");
-    auto* enable_2 = Enable(ast::Extension::kChromiumExperimentalFullPtrParameters);
+    auto* enable_2 = Enable(builtin::Extension::kChromiumExperimentalFullPtrParameters);
     auto* diagnostic_2 = DiagnosticDirective(DiagnosticSeverity::kOff, "bar");
 
     this->SetResolveOnBuild(false);

@@ -289,7 +289,7 @@ TEST_P(InspectorGetEntryPointComponentAndCompositionTest, Test) {
     std::function<ast::Type()> tint_type = GetTypeFunction(component, composition);
 
     if (component == ComponentType::kF16) {
-        Enable(ast::Extension::kF16);
+        Enable(builtin::Extension::kF16);
     }
 
     auto* in_var = Param("in_var", tint_type(),

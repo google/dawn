@@ -263,7 +263,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 
 using ResolverConstEvalArrayAccessTest = ResolverTestWithParam<Case>;
 TEST_P(ResolverConstEvalArrayAccessTest, Test) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto& param = GetParam();
     auto* expr = param.input.Expr(*this);
@@ -338,7 +338,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 
 using ResolverConstEvalVectorAccessTest = ResolverTestWithParam<Case>;
 TEST_P(ResolverConstEvalVectorAccessTest, Test) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto& param = GetParam();
     auto* expr = param.input.Expr(*this);

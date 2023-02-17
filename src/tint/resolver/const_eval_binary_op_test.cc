@@ -83,7 +83,7 @@ std::ostream& operator<<(std::ostream& o, const ErrorCase& c) {
 
 using ResolverConstEvalBinaryOpTest = ResolverTestWithParam<std::tuple<ast::BinaryOp, Case>>;
 TEST_P(ResolverConstEvalBinaryOpTest, Test) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
     auto op = std::get<0>(GetParam());
     auto& c = std::get<1>(GetParam());
 

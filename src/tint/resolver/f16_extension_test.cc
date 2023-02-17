@@ -27,7 +27,7 @@ using ResolverF16ExtensionTest = ResolverTest;
 TEST_F(ResolverF16ExtensionTest, TypeUsedWithExtension) {
     // enable f16;
     // var<private> v : f16;
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("v", ty.f16(), type::AddressSpace::kPrivate);
 
@@ -45,7 +45,7 @@ TEST_F(ResolverF16ExtensionTest, TypeUsedWithoutExtension) {
 TEST_F(ResolverF16ExtensionTest, Vec2TypeUsedWithExtension) {
     // enable f16;
     // var<private> v : vec2<f16>;
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("v", ty.vec2<f16>(), type::AddressSpace::kPrivate);
 
@@ -63,7 +63,7 @@ TEST_F(ResolverF16ExtensionTest, Vec2TypeUsedWithoutExtension) {
 TEST_F(ResolverF16ExtensionTest, Vec2TypeInitUsedWithExtension) {
     // enable f16;
     // var<private> v = vec2<f16>();
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("v", vec2<f16>(), type::AddressSpace::kPrivate);
 
@@ -81,7 +81,7 @@ TEST_F(ResolverF16ExtensionTest, Vec2TypeInitUsedWithoutExtension) {
 TEST_F(ResolverF16ExtensionTest, Vec2TypeConvUsedWithExtension) {
     // enable f16;
     // var<private> v = vec2<f16>(vec2<f32>());
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("v", vec2<f16>(vec2<f32>()), type::AddressSpace::kPrivate);
 
@@ -99,7 +99,7 @@ TEST_F(ResolverF16ExtensionTest, Vec2TypeConvUsedWithoutExtension) {
 TEST_F(ResolverF16ExtensionTest, F16LiteralUsedWithExtension) {
     // enable f16;
     // var<private> v = 16h;
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("v", Expr(16_h), type::AddressSpace::kPrivate);
 
@@ -119,7 +119,7 @@ using ResolverF16ExtensionBuiltinTypeAliasTest = ResolverTestWithParam<const cha
 TEST_P(ResolverF16ExtensionBuiltinTypeAliasTest, Vec2hTypeUsedWithExtension) {
     // enable f16;
     // var<private> v : vec2h;
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("v", ty(Source{{12, 34}}, GetParam()), type::AddressSpace::kPrivate);
 

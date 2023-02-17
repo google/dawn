@@ -30,7 +30,7 @@ TEST_F(EnableDirectiveTest, Valid) {
     auto& ast = program.AST();
     ASSERT_EQ(ast.Enables().Length(), 1u);
     auto* enable = ast.Enables()[0];
-    EXPECT_EQ(enable->extension, ast::Extension::kF16);
+    EXPECT_EQ(enable->extension, builtin::Extension::kF16);
     ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
     EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
 }
@@ -48,8 +48,8 @@ enable f16;
     ASSERT_EQ(ast.Enables().Length(), 2u);
     auto* enable_a = ast.Enables()[0];
     auto* enable_b = ast.Enables()[1];
-    EXPECT_EQ(enable_a->extension, ast::Extension::kF16);
-    EXPECT_EQ(enable_b->extension, ast::Extension::kF16);
+    EXPECT_EQ(enable_a->extension, builtin::Extension::kF16);
+    EXPECT_EQ(enable_b->extension, builtin::Extension::kF16);
     ASSERT_EQ(ast.GlobalDeclarations().Length(), 2u);
     EXPECT_EQ(ast.GlobalDeclarations()[0], enable_a);
     EXPECT_EQ(ast.GlobalDeclarations()[1], enable_b);
@@ -168,7 +168,7 @@ enable f16;
     // Accept the enable directive although it caused an error
     ASSERT_EQ(ast.Enables().Length(), 1u);
     auto* enable = ast.Enables()[0];
-    EXPECT_EQ(enable->extension, ast::Extension::kF16);
+    EXPECT_EQ(enable->extension, builtin::Extension::kF16);
     ASSERT_EQ(ast.GlobalDeclarations().Length(), 2u);
     EXPECT_EQ(ast.GlobalDeclarations()[1], enable);
 }
@@ -188,7 +188,7 @@ enable f16;
     // Accept the enable directive although it cause an error
     ASSERT_EQ(ast.Enables().Length(), 1u);
     auto* enable = ast.Enables()[0];
-    EXPECT_EQ(enable->extension, ast::Extension::kF16);
+    EXPECT_EQ(enable->extension, builtin::Extension::kF16);
     ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
     EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
 }

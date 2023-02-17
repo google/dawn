@@ -66,7 +66,7 @@ struct PreservePadding::State {
                 [&](const ast::Enable* enable) {
                     // Check if the full pointer parameters extension is already enabled.
                     if (enable->extension ==
-                        ast::Extension::kChromiumExperimentalFullPtrParameters) {
+                        builtin::Extension::kChromiumExperimentalFullPtrParameters) {
                         ext_enabled = true;
                     }
                 });
@@ -197,7 +197,7 @@ struct PreservePadding::State {
     /// Enable the full pointer parameters extension, if we have not already done so.
     void EnableExtension() {
         if (!ext_enabled) {
-            b.Enable(ast::Extension::kChromiumExperimentalFullPtrParameters);
+            b.Enable(builtin::Extension::kChromiumExperimentalFullPtrParameters);
             ext_enabled = true;
         }
     }

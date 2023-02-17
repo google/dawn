@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "src/tint/ast/extension.h"
+#include "src/tint/builtin/extension.h"
 #include "src/tint/sem/builtin_type.h"
 #include "src/tint/sem/call_target.h"
 #include "src/tint/sem/pipeline_stage_set.h"
@@ -147,8 +147,8 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     bool HasSideEffects() const;
 
     /// @returns the required extension of this builtin function. Returns
-    /// ast::Extension::kNone if no extension is required.
-    ast::Extension RequiredExtension() const;
+    /// builtin::Extension::kNone if no extension is required.
+    builtin::Extension RequiredExtension() const;
 
   private:
     const BuiltinType type_;

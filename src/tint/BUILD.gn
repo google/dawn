@@ -277,6 +277,7 @@ libtint_source_set("libtint_program_src") {
   deps = [
     ":libtint_ast_hdrs",
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_constant_src",
     ":libtint_sem_src",
     ":libtint_text_src",
@@ -310,6 +311,7 @@ libtint_source_set("libtint_inspector_src") {
   deps = [
     ":libtint_ast_src",
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_program_src",
     ":libtint_sem_src",
     ":libtint_type_src",
@@ -468,7 +470,6 @@ libtint_source_set("libtint_ast_hdrs") {
     "ast/discard_statement.h",
     "ast/enable.h",
     "ast/expression.h",
-    "ast/extension.h",
     "ast/float_literal_expression.h",
     "ast/for_loop_statement.h",
     "ast/function.h",
@@ -554,7 +555,6 @@ libtint_source_set("libtint_ast_src") {
     "ast/discard_statement.cc",
     "ast/enable.cc",
     "ast/expression.cc",
-    "ast/extension.cc",
     "ast/float_literal_expression.cc",
     "ast/for_loop_statement.cc",
     "ast/function.cc",
@@ -685,6 +685,7 @@ libtint_source_set("libtint_sem_src") {
   deps = [
     ":libtint_ast_hdrs",
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_constant_src",
     ":libtint_type_src",
   ]
@@ -694,7 +695,10 @@ libtint_source_set("libtint_builtins_src") {
   sources = [
     "builtin/builtin_value.cc",
     "builtin/builtin_value.h",
+    "builtin/extension.cc",
+    "builtin/extension.h",
   ]
+  deps = [ ":libtint_base_src" ]
 }
 
 libtint_source_set("libtint_type_src") {
@@ -869,6 +873,7 @@ libtint_source_set("libtint_writer_src") {
   deps = [
     ":libtint_ast_src",
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_inspector_src",
     ":libtint_program_src",
     ":libtint_sem_src",
@@ -1232,7 +1237,6 @@ if (tint_build_unittests) {
       "ast/diagnostic_directive_test.cc",
       "ast/discard_statement_test.cc",
       "ast/enable_test.cc",
-      "ast/extension_test.cc",
       "ast/float_literal_expression_test.cc",
       "ast/for_loop_statement_test.cc",
       "ast/function_test.cc",
@@ -1282,7 +1286,10 @@ if (tint_build_unittests) {
   }
 
   tint_unittests_source_set("tint_unittests_builtins_src") {
-    sources = [ "builtin/builtin_value_test.cc" ]
+    sources = [
+      "builtin/builtin_value_test.cc",
+      "builtin/extension_test.cc",
+    ]
     deps = [ ":libtint_builtins_src" ]
   }
 
@@ -1373,6 +1380,7 @@ if (tint_build_unittests) {
     ]
     deps = [
       ":libtint_base_src",
+      ":libtint_builtins_src",
       ":libtint_transform_src",
       ":tint_unittests_ast_src",
     ]

@@ -97,7 +97,7 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
 }
 
 TEST_F(ResolverHostShareableValidationTest, NoError) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* i1 = Structure("I1", utils::Vector{
                                    Member(Source{{1, 1}}, "w1", ty.f32()),

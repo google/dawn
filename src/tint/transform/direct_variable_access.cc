@@ -203,7 +203,7 @@ struct DirectVariableAccess::State {
     /// @returns the ApplyResult
     ApplyResult Run() {
         if (!ctx.src->Sem().Module()->Extensions().Contains(
-                ast::Extension::kChromiumExperimentalFullPtrParameters)) {
+                builtin::Extension::kChromiumExperimentalFullPtrParameters)) {
             // If the 'chromium_experimental_full_ptr_parameters' extension is not enabled, then
             // there's nothing for this transform to do.
             return SkipTransform;

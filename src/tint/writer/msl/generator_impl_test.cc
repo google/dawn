@@ -32,7 +32,7 @@ TEST_F(MslGeneratorImplTest, InvalidProgram) {
 }
 
 TEST_F(MslGeneratorImplTest, UnsupportedExtension) {
-    Enable(Source{{12, 34}}, ast::Extension::kUndefined);
+    Enable(Source{{12, 34}}, builtin::Extension::kUndefined);
 
     GeneratorImpl& gen = Build();
 

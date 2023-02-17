@@ -42,7 +42,6 @@
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/enable.h"
-#include "src/tint/ast/extension.h"
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/id_attribute.h"
@@ -74,6 +73,7 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/builtin/extension.h"
 #include "src/tint/constant/composite.h"
 #include "src/tint/constant/splat.h"
 #include "src/tint/constant/value.h"
@@ -2036,7 +2036,7 @@ class ProgramBuilder {
     /// Adds the extension to the list of enable directives at the top of the module.
     /// @param ext the extension to enable
     /// @return an `ast::Enable` enabling the given extension.
-    const ast::Enable* Enable(ast::Extension ext) {
+    const ast::Enable* Enable(builtin::Extension ext) {
         auto* enable = create<ast::Enable>(ext);
         AST().AddEnable(enable);
         return enable;
@@ -2046,7 +2046,7 @@ class ProgramBuilder {
     /// @param source the enable source
     /// @param ext the extension to enable
     /// @return an `ast::Enable` enabling the given extension.
-    const ast::Enable* Enable(const Source& source, ast::Extension ext) {
+    const ast::Enable* Enable(const Source& source, builtin::Extension ext) {
         auto* enable = create<ast::Enable>(source, ext);
         AST().AddEnable(enable);
         return enable;

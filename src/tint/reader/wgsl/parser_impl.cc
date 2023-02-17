@@ -422,14 +422,15 @@ Maybe<Void> ParserImpl::enable_directive() {
             return add_error(t.source(), "enable directives don't take parenthesis");
         }
 
-        auto extension = ast::Extension::kUndefined;
+        auto extension = builtin::Extension::kUndefined;
         if (t.Is(Token::Type::kF16)) {
             // `f16` is a valid extension name and also a keyword
             synchronized_ = true;
             next();
-            extension = ast::Extension::kF16;
+            extension = builtin::Extension::kF16;
         } else {
-            auto ext = expect_enum("extension", ast::ParseExtension, ast::kExtensionStrings);
+            auto ext =
+                expect_enum("extension", builtin::ParseExtension, builtin::kExtensionStrings);
             if (ext.errored) {
                 return Failure::kErrored;
             }

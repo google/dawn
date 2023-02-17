@@ -270,10 +270,10 @@ GeneratorImpl::~GeneratorImpl() = default;
 bool GeneratorImpl::Generate() {
     if (!CheckSupportedExtensions("MSL", program_->AST(), diagnostics_,
                                   utils::Vector{
-                                      ast::Extension::kChromiumDisableUniformityAnalysis,
-                                      ast::Extension::kChromiumExperimentalFullPtrParameters,
-                                      ast::Extension::kChromiumExperimentalPushConstant,
-                                      ast::Extension::kF16,
+                                      builtin::Extension::kChromiumDisableUniformityAnalysis,
+                                      builtin::Extension::kChromiumExperimentalFullPtrParameters,
+                                      builtin::Extension::kChromiumExperimentalPushConstant,
+                                      builtin::Extension::kF16,
                                   })) {
         return false;
     }

@@ -69,7 +69,7 @@ TEST_P(GlslBinaryTest, Emit_f16) {
         return;
     }
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("left", ty.f16(), type::AddressSpace::kPrivate);
     GlobalVar("right", ty.f16(), type::AddressSpace::kPrivate);
@@ -167,7 +167,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_VectorScalar_f32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_VectorScalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("a", vec3<f16>(1_h, 1_h, 1_h), type::AddressSpace::kPrivate);
     auto* lhs = Expr("a");
@@ -201,7 +201,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_ScalarVector_f32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_ScalarVector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("a", vec3<f16>(1_h, 1_h, 1_h), type::AddressSpace::kPrivate);
     auto* lhs = Expr(1_h);
@@ -234,7 +234,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_MatrixScalar_f32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_MatrixScalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("mat", ty.mat3x3<f16>(), type::AddressSpace::kPrivate);
     auto* lhs = Expr("mat");
@@ -266,7 +266,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_ScalarMatrix_f32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_ScalarMatrix_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("mat", ty.mat3x3<f16>(), type::AddressSpace::kPrivate);
     auto* lhs = Expr(1_h);
@@ -298,7 +298,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_MatrixVector_f32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_MatrixVector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("mat", ty.mat3x3<f16>(), type::AddressSpace::kPrivate);
     auto* lhs = Expr("mat");
@@ -330,7 +330,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_VectorMatrix_f32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_VectorMatrix_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("mat", ty.mat3x3<f16>(), type::AddressSpace::kPrivate);
     auto* lhs = vec3<f16>(1_h, 1_h, 1_h);
@@ -361,7 +361,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_MatrixMatrix_f32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_MatrixMatrix_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("lhs", ty.mat3x3<f16>(), type::AddressSpace::kPrivate);
     GlobalVar("rhs", ty.mat3x3<f16>(), type::AddressSpace::kPrivate);
@@ -391,7 +391,7 @@ TEST_F(GlslGeneratorImplTest_Binary, ModF32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, ModF16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("a", ty.f16(), type::AddressSpace::kPrivate);
     GlobalVar("b", ty.f16(), type::AddressSpace::kPrivate);
@@ -421,7 +421,7 @@ TEST_F(GlslGeneratorImplTest_Binary, ModVec3F32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, ModVec3F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("a", ty.vec3<f16>(), type::AddressSpace::kPrivate);
     GlobalVar("b", ty.vec3<f16>(), type::AddressSpace::kPrivate);
@@ -451,7 +451,7 @@ TEST_F(GlslGeneratorImplTest_Binary, ModVec3F32ScalarF32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, ModVec3F16ScalarF16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("a", ty.vec3<f16>(), type::AddressSpace::kPrivate);
     GlobalVar("b", ty.f16(), type::AddressSpace::kPrivate);
@@ -481,7 +481,7 @@ TEST_F(GlslGeneratorImplTest_Binary, ModScalarF32Vec3F32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, ModScalarF16Vec3F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("a", ty.f16(), type::AddressSpace::kPrivate);
     GlobalVar("b", ty.vec3<f16>(), type::AddressSpace::kPrivate);
@@ -539,7 +539,7 @@ void test_function() {
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, ModMixedVec3ScalarF16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("a", ty.vec3<f16>(), type::AddressSpace::kPrivate);
     GlobalVar("b", ty.f16(), type::AddressSpace::kPrivate);

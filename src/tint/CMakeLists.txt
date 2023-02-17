@@ -549,8 +549,8 @@ list(APPEND TINT_LIB_SRCS
 )
 
 tint_generated(builtin/builtin_value BENCH TEST)
+tint_generated(builtin/extension BENCH TEST)
 tint_generated(ast/diagnostic_control BENCH TEST)
-tint_generated(ast/extension BENCH TEST)
 tint_generated(ast/interpolate_attribute BENCH TEST)
 tint_generated(resolver/init_conv_intrinsic)
 tint_generated(sem/builtin_type)

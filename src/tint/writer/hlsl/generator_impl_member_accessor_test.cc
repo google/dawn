@@ -165,7 +165,7 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferLoad_ConstantOffset, Te
 
     auto p = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     SetupStorageBuffer(utils::Vector{
         Member("a", ty.i32()),
@@ -300,7 +300,7 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferLoad_DynamicOffset, Tes
 
     auto p = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* inner = Structure("Inner", utils::Vector{
                                          Member("a", ty.i32()),
@@ -439,7 +439,7 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_UniformBufferLoad_ConstantOffset, Te
 
     auto p = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     SetupUniformBuffer(utils::Vector{
         Member("a", ty.i32()),
@@ -707,7 +707,7 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_UniformBufferLoad_DynamicOffset, Tes
 
     auto p = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* inner = Structure("Inner", utils::Vector{
                                          Member("a", ty.i32()),
@@ -989,7 +989,7 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferStore, Test) {
 
     auto p = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     SetupStorageBuffer(utils::Vector{
         Member("a", ty.i32()),
@@ -1192,7 +1192,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_Matrix_F16_Singl
     // var<storage> data : Data;
     // data.a[2i][1i];
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     SetupStorageBuffer(utils::Vector{
         Member("z", ty.f16()),
@@ -1258,7 +1258,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, UniformBuffer_Load_Matrix_F16_Singl
     // var<uniform> data : Data;
     // data.a[2i][1i];
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     SetupUniformBuffer(utils::Vector{
         Member("z", ty.f16()),

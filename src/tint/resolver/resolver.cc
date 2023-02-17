@@ -143,7 +143,7 @@ bool Resolver::Resolve() {
 
     if (result) {
         // Run the uniformity analysis, which requires a complete semantic module.
-        if (!enabled_extensions_.Contains(ast::Extension::kChromiumDisableUniformityAnalysis)) {
+        if (!enabled_extensions_.Contains(builtin::Extension::kChromiumDisableUniformityAnalysis)) {
             if (!AnalyzeUniformity(builder_, dependencies_)) {
                 return false;
             }

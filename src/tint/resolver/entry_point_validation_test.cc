@@ -455,7 +455,7 @@ TEST_F(ResolverEntryPointValidationTest, VertexShaderMustReturnPosition) {
 TEST_F(ResolverEntryPointValidationTest, PushConstantAllowedWithEnable) {
     // enable chromium_experimental_push_constant;
     // var<push_constant> a : u32;
-    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    Enable(builtin::Extension::kChromiumExperimentalPushConstant);
     GlobalVar("a", ty.u32(), type::AddressSpace::kPushConstant);
 
     EXPECT_TRUE(r()->Resolve());
@@ -485,7 +485,7 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantOneVariableUsedInEntryPoint
     // @compute @workgroup_size(1) fn main() {
     //   _ = a;
     // }
-    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    Enable(builtin::Extension::kChromiumExperimentalPushConstant);
     GlobalVar("a", ty.u32(), type::AddressSpace::kPushConstant);
 
     Func("main", {}, ty.void_(), utils::Vector{Assign(Phony(), "a")},
@@ -503,7 +503,7 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantTwoVariablesUsedInEntryPoin
     //   _ = a;
     //   _ = b;
     // }
-    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    Enable(builtin::Extension::kChromiumExperimentalPushConstant);
     GlobalVar(Source{{1, 2}}, "a", ty.u32(), type::AddressSpace::kPushConstant);
     GlobalVar(Source{{3, 4}}, "b", ty.u32(), type::AddressSpace::kPushConstant);
 
@@ -534,7 +534,7 @@ TEST_F(ResolverEntryPointValidationTest,
     //   uses_a();
     //   uses_b();
     // }
-    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    Enable(builtin::Extension::kChromiumExperimentalPushConstant);
     GlobalVar(Source{{1, 2}}, "a", ty.u32(), type::AddressSpace::kPushConstant);
     GlobalVar(Source{{3, 4}}, "b", ty.u32(), type::AddressSpace::kPushConstant);
 
@@ -567,7 +567,7 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantTwoVariablesUsedInDifferent
     // @compute @workgroup_size(1) fn uses_b() {
     //   _ = a;
     // }
-    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    Enable(builtin::Extension::kChromiumExperimentalPushConstant);
     GlobalVar("a", ty.u32(), type::AddressSpace::kPushConstant);
     GlobalVar("b", ty.u32(), type::AddressSpace::kPushConstant);
 
@@ -624,7 +624,7 @@ TEST_P(TypeValidationTest, BareInputs) {
     // fn main(@location(0) @interpolate(flat) a : *) {}
     auto params = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* a = Param("a", params.create_ast_type(*this),
                     utils::Vector{
@@ -655,7 +655,7 @@ TEST_P(TypeValidationTest, StructInputs) {
     // fn main(a : Input) {}
     auto params = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* input = Structure("Input", utils::Vector{
                                          Member("a", params.create_ast_type(*this),
@@ -685,7 +685,7 @@ TEST_P(TypeValidationTest, BareOutputs) {
     // }
     auto params = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     Func(Source{{12, 34}}, "main", utils::Empty, params.create_ast_type(*this),
          utils::Vector{
@@ -715,7 +715,7 @@ TEST_P(TypeValidationTest, StructOutputs) {
     // }
     auto params = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* output = Structure(
         "Output", utils::Vector{

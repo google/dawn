@@ -320,7 +320,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* s = Structure("my_struct", utils::Vector{Member("a", ty.f32()), Member("b", ty.f16())});
 
@@ -341,7 +341,7 @@ OpMemberName %1 1 "b"
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* s = Structure("S", utils::Vector{
                                  Member("a", ty.f32()),
@@ -374,7 +374,7 @@ OpMemberDecorate %1 3 Offset 18
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_Matrix) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* s =
         Structure("S", utils::Vector{
@@ -438,7 +438,7 @@ OpMemberDecorate %1 5 MatrixStride 8
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_ArraysOfMatrix) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto arr_mat2x2_f32 = ty.array(ty.mat2x2<f32>(), 1_u);  // Singly nested array
     auto arr_mat2x2_f16 = ty.array(ty.mat2x2<f16>(), 1_u);  // Singly nested array

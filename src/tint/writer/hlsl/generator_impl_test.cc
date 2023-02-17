@@ -29,7 +29,7 @@ TEST_F(HlslGeneratorImplTest, InvalidProgram) {
 }
 
 TEST_F(HlslGeneratorImplTest, UnsupportedExtension) {
-    Enable(Source{{12, 34}}, ast::Extension::kUndefined);
+    Enable(Source{{12, 34}}, builtin::Extension::kUndefined);
 
     GeneratorImpl& gen = Build();
 

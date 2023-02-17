@@ -102,7 +102,7 @@ TEST_F(ResolverConstEvalTest, Scalar_f32) {
 }
 
 TEST_F(ResolverConstEvalTest, Scalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = Expr(9.9_h);
     WrapInFunction(expr);
@@ -146,7 +146,7 @@ Case C() {
 }
 using ResolverConstEvalZeroInitTest = ResolverTestWithParam<Case>;
 TEST_P(ResolverConstEvalZeroInitTest, Test) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
     auto& param = GetParam();
     auto ty = param.type(*this);
     auto* expr = Call(ty);
@@ -316,7 +316,7 @@ TEST_F(ResolverConstEvalTest, Vec3_ZeroInit_f32) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_ZeroInit_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = vec3<f16>();
     WrapInFunction(expr);
@@ -483,7 +483,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Splat_f32) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Splat_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = vec3<f16>(9.9_h);
     WrapInFunction(expr);
@@ -719,7 +719,7 @@ TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_f32) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = vec3<f16>(1_h, 2_h, 3_h);
     WrapInFunction(expr);
@@ -1018,7 +1018,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f32_mixed_sign_0) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = vec3<f16>(1_h, vec2<f16>(2_h, 3_h));
     WrapInFunction(expr);
@@ -1053,7 +1053,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_all_10) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = vec3<f16>(10_h, vec2<f16>(10_h, 10_h));
     WrapInFunction(expr);
@@ -1088,7 +1088,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_all_10) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_all_positive_0) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = vec3<f16>(0_h, vec2<f16>(0_h, 0_h));
     WrapInFunction(expr);
@@ -1123,7 +1123,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_all_positive_0) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_all_negative_0) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = vec3<f16>(vec2<f16>(-0_h, -0_h), -0_h);
     WrapInFunction(expr);
@@ -1158,7 +1158,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_all_negative_0) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_mixed_sign_0) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = vec3<f16>(0_h, vec2<f16>(-0_h, 0_h));
     WrapInFunction(expr);
@@ -1341,7 +1341,7 @@ TEST_F(ResolverConstEvalTest, Mat2x3_ZeroInit_f32) {
 }
 
 TEST_F(ResolverConstEvalTest, Mat2x3_ZeroInit_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = mat2x3<f16>();
     WrapInFunction(expr);
@@ -1704,7 +1704,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 
 using ResolverConstEvalArrayInitTest = ResolverTestWithParam<Case>;
 TEST_P(ResolverConstEvalArrayInitTest, Test) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
     auto& param = GetParam();
     auto* expr = param.input.Expr(*this);
     auto* a = Const("a", expr);
@@ -1892,7 +1892,7 @@ TEST_F(ResolverConstEvalTest, Array_Struct_f32_Elements) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_ZeroInit) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
     auto* s = Structure("S", utils::Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.u32()),
@@ -1937,7 +1937,7 @@ TEST_F(ResolverConstEvalTest, Struct_ZeroInit) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_Nested_ZeroInit) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
     auto* inner = Structure("Inner", utils::Vector{
                                          Member("a", ty.i32()),
                                          Member("b", ty.u32()),
@@ -2028,7 +2028,7 @@ TEST_F(ResolverConstEvalTest, Struct_I32s_ZeroInit) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_MixedScalars_ZeroInit) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     Structure("S", utils::Vector{
                        Member("m1", ty.i32()),
@@ -2138,7 +2138,7 @@ TEST_F(ResolverConstEvalTest, Struct_VectorF32s_ZeroInit) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_MixedVectors_ZeroInit) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     Structure("S", utils::Vector{
                        Member("m1", ty.vec2<i32>()),
@@ -2258,7 +2258,7 @@ TEST_F(ResolverConstEvalTest, Struct_Struct_ZeroInit) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_MixedScalars_Construct) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     Structure("S", utils::Vector{
                        Member("m1", ty.i32()),
@@ -2315,7 +2315,7 @@ TEST_F(ResolverConstEvalTest, Struct_MixedScalars_Construct) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_MixedVectors_Construct) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     Structure("S", utils::Vector{
                        Member("m1", ty.vec2<i32>()),

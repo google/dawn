@@ -103,7 +103,7 @@ TEST_F(ResolverOverrideTest, IdTooLarge) {
 }
 
 TEST_F(ResolverOverrideTest, F16_TemporallyBan) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     Override(Source{{12, 34}}, "a", ty.f16(), Expr(1_h), Id(1_u));
 

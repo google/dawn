@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_WRITER_CHECK_SUPPORTED_EXTENSIONS_H_
 #define SRC_TINT_WRITER_CHECK_SUPPORTED_EXTENSIONS_H_
 
-#include "src/tint/ast/extension.h"
+#include "src/tint/builtin/extension.h"
 #include "src/tint/utils/vector.h"
 
 namespace tint::ast {
@@ -36,7 +36,7 @@ namespace tint::writer {
 bool CheckSupportedExtensions(std::string_view writer_name,
                               const ast::Module& module,
                               diag::List& diags,
-                              utils::VectorRef<ast::Extension> supported);
+                              utils::VectorRef<builtin::Extension> supported);
 
 }  // namespace tint::writer
 

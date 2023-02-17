@@ -15,6 +15,7 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gtest/gtest.h"
+#include "src/tint/builtin/extension.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/index_accessor_expression.h"
 #include "src/tint/sem/member_accessor_expression.h"
@@ -160,7 +161,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 using SideEffectsBuiltinTest = resolver::ResolverTestWithParam<Case>;
 
 TEST_P(SideEffectsBuiltinTest, Test) {
-    Enable(ast::Extension::kChromiumExperimentalDp4A);
+    Enable(tint::builtin::Extension::kChromiumExperimentalDp4A);
     auto& c = GetParam();
 
     uint32_t next_binding = 0;

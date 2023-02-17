@@ -196,7 +196,7 @@ TEST_P(GlslBuiltinTest, Emit) {
     auto param = GetParam();
 
     if (param.type == CallParamType::kF16) {
-        Enable(ast::Extension::kF16);
+        Enable(builtin::Extension::kF16);
 
         GlobalVar("h2", ty.vec2<f16>(), type::AddressSpace::kPrivate);
         GlobalVar("h3", ty.vec3<f16>(), type::AddressSpace::kPrivate);
@@ -399,7 +399,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, FMA_f32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, FMA_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("a", ty.vec3<f16>(), type::AddressSpace::kPrivate);
     GlobalVar("b", ty.vec3<f16>(), type::AddressSpace::kPrivate);
@@ -451,7 +451,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Modf_Scalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(Decl(Let("f", Expr(1.5_h))),  //
                    Decl(Let("v", Call("modf", "f"))));
@@ -522,7 +522,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Modf_Vector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(Decl(Let("f", vec3<f16>(1.5_h, 2.5_h, 3.5_h))),  //
                    Decl(Let("v", Call("modf", "f"))));
@@ -585,7 +585,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Const_Modf_Scalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(Decl(Let("v", Call("modf", 1.5_h))));
 
@@ -640,7 +640,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Const_Modf_Vector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(Decl(Let("v", Call("modf", vec3<f16>(1.5_h, 2.5_h, 3.5_h)))));
 
@@ -703,7 +703,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Frexp_Scalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(Var("f", Expr(1_h)),  //
                    Var("v", Call("frexp", "f")));
@@ -774,7 +774,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Frexp_Vector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(Var("f", Expr(vec3<f16>())),  //
                    Var("v", Call("frexp", "f")));
@@ -837,7 +837,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Const_Frexp_Scalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(Decl(Let("v", Call("frexp", 1_h))));
 
@@ -892,7 +892,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Const_Frexp_Vector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(Decl(Let("v", Call("frexp", vec3<f16>()))));
 
@@ -977,7 +977,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Scalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* val = Var("val", ty.f16());
     auto* call = Call("degrees", val);
@@ -1008,7 +1008,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Vector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* val = Var("val", ty.vec3<f16>());
     auto* call = Call("degrees", val);
@@ -1095,7 +1095,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Radians_Scalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* val = Var("val", ty.f16());
     auto* call = Call("radians", val);
@@ -1126,7 +1126,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Radians_Vector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* val = Var("val", ty.vec3<f16>());
     auto* call = Call("radians", val);

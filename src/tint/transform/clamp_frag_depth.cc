@@ -117,7 +117,7 @@ Transform::ApplyResult ClampFragDepth::Apply(const Program* src, const DataMap&,
     //   fn clamp_frag_depth(v : f32) -> f32 {
     //       return clamp(v, frag_depth_clamp_args.min, frag_depth_clamp_args.max);
     //   }
-    b.Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    b.Enable(builtin::Extension::kChromiumExperimentalPushConstant);
 
     b.Structure(b.Symbols().New("FragDepthClampArgs"),
                 utils::Vector{b.Member("min", b.ty.f32()), b.Member("max", b.ty.f32())});

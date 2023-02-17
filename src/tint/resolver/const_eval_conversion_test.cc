@@ -289,7 +289,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f32) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_f16_to_i32) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = vec3<i32>(vec3<f16>(1.1_h, 2.2_h, 3.3_h));
     WrapInFunction(expr);
@@ -324,7 +324,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_f16_to_i32) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = vec3<f16>(vec3<u32>(10_u, 20_u, 30_u));
     WrapInFunction(expr);
@@ -425,7 +425,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = vec3<f16>(Source{{12, 34}}, vec3<f32>(1e10_f, 0_f, 0_f));
     WrapInFunction(expr);
@@ -435,7 +435,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Small_f32_to_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = vec3<f16>(vec3<f32>(1e-20_f, -2e-30_f, 3e-40_f));
     WrapInFunction(expr);

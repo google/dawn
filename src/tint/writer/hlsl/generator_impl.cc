@@ -297,11 +297,11 @@ GeneratorImpl::~GeneratorImpl() = default;
 bool GeneratorImpl::Generate() {
     if (!CheckSupportedExtensions("HLSL", program_->AST(), diagnostics_,
                                   utils::Vector{
-                                      ast::Extension::kChromiumDisableUniformityAnalysis,
-                                      ast::Extension::kChromiumExperimentalDp4A,
-                                      ast::Extension::kChromiumExperimentalFullPtrParameters,
-                                      ast::Extension::kChromiumExperimentalPushConstant,
-                                      ast::Extension::kF16,
+                                      builtin::Extension::kChromiumDisableUniformityAnalysis,
+                                      builtin::Extension::kChromiumExperimentalDp4A,
+                                      builtin::Extension::kChromiumExperimentalFullPtrParameters,
+                                      builtin::Extension::kChromiumExperimentalPushConstant,
+                                      builtin::Extension::kF16,
                                   })) {
         return false;
     }

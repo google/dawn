@@ -265,11 +265,11 @@ Builder::~Builder() = default;
 bool Builder::Build() {
     if (!CheckSupportedExtensions("SPIR-V", builder_.AST(), builder_.Diagnostics(),
                                   utils::Vector{
-                                      ast::Extension::kChromiumDisableUniformityAnalysis,
-                                      ast::Extension::kChromiumExperimentalDp4A,
-                                      ast::Extension::kChromiumExperimentalFullPtrParameters,
-                                      ast::Extension::kChromiumExperimentalPushConstant,
-                                      ast::Extension::kF16,
+                                      builtin::Extension::kChromiumDisableUniformityAnalysis,
+                                      builtin::Extension::kChromiumExperimentalDp4A,
+                                      builtin::Extension::kChromiumExperimentalFullPtrParameters,
+                                      builtin::Extension::kChromiumExperimentalPushConstant,
+                                      builtin::Extension::kF16,
                                   })) {
         error_ = builder_.Diagnostics().str();
         return false;
@@ -394,14 +394,14 @@ void Builder::push_extension(const char* extension) {
     extensions_.push_back(Instruction{spv::Op::OpExtension, {Operand(extension)}});
 }
 
-bool Builder::GenerateExtension(ast::Extension extension) {
+bool Builder::GenerateExtension(builtin::Extension extension) {
     switch (extension) {
-        case ast::Extension::kChromiumExperimentalDp4A:
+        case builtin::Extension::kChromiumExperimentalDp4A:
             push_extension("SPV_KHR_integer_dot_product");
             push_capability(SpvCapabilityDotProductKHR);
             push_capability(SpvCapabilityDotProductInput4x8BitPackedKHR);
             break;
-        case ast::Extension::kF16:
+        case builtin::Extension::kF16:
             push_capability(SpvCapabilityFloat16);
             push_capability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
             push_capability(SpvCapabilityStorageBuffer16BitAccess);

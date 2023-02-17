@@ -93,7 +93,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_f32) {
 }
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* var = GlobalConst("G", Expr(1_h));
     Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
@@ -151,7 +151,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_f32) {
 }
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* var = GlobalConst("G", vec3<f16>(1_h, 2_h, 3_h));
     Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
@@ -195,7 +195,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_f32) {
 }
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* var = GlobalConst("G", mat2x3<f16>(1_h, 2_h, 3_h, 4_h, 5_h, 6_h));
     Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});

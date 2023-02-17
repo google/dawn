@@ -19,7 +19,6 @@
 
 #include "src/tint/ast/bool_literal_expression.h"
 #include "src/tint/ast/call_expression.h"
-#include "src/tint/ast/extension.h"
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/identifier.h"
@@ -29,6 +28,7 @@
 #include "src/tint/ast/module.h"
 #include "src/tint/ast/override.h"
 #include "src/tint/ast/var.h"
+#include "src/tint/builtin/extension.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/module.h"

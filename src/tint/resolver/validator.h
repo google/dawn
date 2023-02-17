@@ -102,7 +102,7 @@ class Validator {
     /// @param valid_type_storage_layouts a set of validated type layouts by address space
     Validator(ProgramBuilder* builder,
               SemHelper& helper,
-              const ast::Extensions& enabled_extensions,
+              const builtin::Extensions& enabled_extensions,
               const utils::Hashmap<const type::Type*, const Source*, 8>& atomic_composite_info,
               utils::Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts);
     ~Validator();
@@ -550,7 +550,7 @@ class Validator {
     diag::List& diagnostics_;
     SemHelper& sem_;
     DiagnosticFilterStack diagnostic_filters_;
-    const ast::Extensions& enabled_extensions_;
+    const builtin::Extensions& enabled_extensions_;
     const utils::Hashmap<const type::Type*, const Source*, 8>& atomic_composite_info_;
     utils::Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts_;
 };

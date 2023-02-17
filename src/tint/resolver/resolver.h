@@ -501,7 +501,7 @@ class Resolver {
     DependencyGraph dependencies_;
     SemHelper sem_;
     Validator validator_;
-    ast::Extensions enabled_extensions_;
+    builtin::Extensions enabled_extensions_;
     utils::Vector<sem::Function*, 8> entry_points_;
     utils::Hashmap<const type::Type*, const Source*, 8> atomic_composite_info_;
     utils::Bitset<0> marked_;

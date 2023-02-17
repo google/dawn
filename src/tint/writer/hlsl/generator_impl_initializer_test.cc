@@ -62,7 +62,7 @@ TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Float) {
 }
 
 TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     // Use a number close to 1<<16 but whose decimal representation ends in 0.
     WrapInFunction(Expr(f16((1 << 15) - 8)));
@@ -83,7 +83,7 @@ TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Float) {
 }
 
 TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(Call<f16>(-1.2e-3_h));
 
@@ -130,7 +130,7 @@ TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Vec_F32) {
 }
 
 TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Vec_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(vec3<f16>(1_h, 2_h, 3_h));
 
@@ -152,7 +152,7 @@ TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Vec_Empty_F32) {
 }
 
 TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Vec_Empty_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(vec3<f16>());
 
@@ -172,7 +172,7 @@ TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Vec_SingleScalar_
 }
 
 TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Vec_SingleScalar_F16_Literal) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(vec3<f16>(2_h));
 
@@ -195,7 +195,7 @@ TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Vec_SingleScalar_
 }
 
 TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Vec_SingleScalar_F16_Var) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* var = Var("v", Expr(2_h));
     auto* cast = vec3<f16>(var);
@@ -259,7 +259,7 @@ TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Mat_F32) {
 }
 
 TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Mat_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(mat2x3<f16>(vec3<f16>(1_h, 2_h, 3_h), vec3<f16>(3_h, 4_h, 5_h)));
 
@@ -307,7 +307,7 @@ TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Mat_Complex_F16) 
     //     vec4<f16>(7.0h),
     //     vec4<f16>(vec4<f16>(42.0h, 21.0h, 6.0h, -5.0h)),
     //   );
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vector_literal =
         vec4<f16>(Expr(f16(2.0)), Expr(f16(3.0)), Expr(f16(4.0)), Expr(f16(8.0)));
@@ -344,7 +344,7 @@ TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Mat_Empty_F32) {
 }
 
 TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Mat_Empty_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(mat2x3<f16>());
 
@@ -380,7 +380,7 @@ TEST_F(HlslGeneratorImplTest_Initializer, EmitInitializer_Type_Mat_Identity_F16)
     //     var m_2: mat4x4<f16> = mat4x4<f16>(m_1);
     // }
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* m_1 = Var("m_1", ty.mat4x4(ty.f16()), mat4x4<f16>());
     auto* m_2 = Var("m_2", ty.mat4x4(ty.f16()), mat4x4<f16>(m_1));

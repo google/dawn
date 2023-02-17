@@ -248,7 +248,7 @@ INSTANTIATE_TEST_SUITE_P(BuilderTest,
 
 using BinaryArithF16Test = TestParamHelper<BinaryData>;
 TEST_P(BinaryArithF16Test, Scalar) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto param = GetParam();
 
@@ -273,7 +273,7 @@ TEST_P(BinaryArithF16Test, Scalar) {
 }
 
 TEST_P(BinaryArithF16Test, Vector) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto param = GetParam();
 
@@ -543,7 +543,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 using BinaryCompareF16Test = TestParamHelper<BinaryData>;
 TEST_P(BinaryCompareF16Test, Scalar) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto param = GetParam();
 
@@ -569,7 +569,7 @@ TEST_P(BinaryCompareF16Test, Scalar) {
 }
 
 TEST_P(BinaryCompareF16Test, Vector) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto param = GetParam();
 
@@ -629,7 +629,7 @@ TEST_F(BuilderTest, Binary_Multiply_VectorScalar_F32) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_VectorScalar_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* lhs = vec3<f16>(1_h, 1_h, 1_h);
     auto* rhs = Expr(1_h);
@@ -677,7 +677,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector_F32) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_ScalarVector_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* lhs = Expr(1_h);
     auto* rhs = vec3<f16>(1_h, 1_h, 1_h);
@@ -728,7 +728,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar_F32) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixScalar_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* var = Var("mat", ty.mat3x3<f16>());
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), Expr(1_h));
@@ -782,7 +782,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix_F32) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* var = Var("mat", ty.mat3x3<f16>());
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr(1_h), Expr("mat"));
@@ -838,7 +838,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector_F32) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixVector_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* var = Var("mat", ty.mat3x3<f16>());
     auto* rhs = vec3<f16>(1_h, 1_h, 1_h);
@@ -896,7 +896,7 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix_F32) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_VectorMatrix_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* var = Var("mat", ty.mat3x3<f16>());
     auto* lhs = vec3<f16>(1_h, 1_h, 1_h);
@@ -953,7 +953,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix_F32) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* var = Var("mat", ty.mat3x3<f16>());
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), Expr("mat"));
@@ -1341,7 +1341,7 @@ TEST_P(BinaryArithVectorScalarTest, VectorScalar) {
     auto& param = GetParam();
 
     if (param.type == Type::f16) {
-        Enable(ast::Extension::kF16);
+        Enable(builtin::Extension::kF16);
     }
 
     const ast::Expression* lhs = MakeVectorExpr(this, param.type);
@@ -1393,7 +1393,7 @@ TEST_P(BinaryArithVectorScalarTest, ScalarVector) {
     auto& param = GetParam();
 
     if (param.type == Type::f16) {
-        Enable(ast::Extension::kF16);
+        Enable(builtin::Extension::kF16);
     }
 
     const ast::Expression* lhs = MakeScalarExpr(this, param.type);
@@ -1473,7 +1473,7 @@ TEST_P(BinaryArithVectorScalarMultiplyTest, VectorScalar) {
     auto& param = GetParam();
 
     if (param.type == Type::f16) {
-        Enable(ast::Extension::kF16);
+        Enable(builtin::Extension::kF16);
     }
 
     const ast::Expression* lhs = MakeVectorExpr(this, param.type);
@@ -1521,7 +1521,7 @@ TEST_P(BinaryArithVectorScalarMultiplyTest, ScalarVector) {
     auto& param = GetParam();
 
     if (param.type == Type::f16) {
-        Enable(ast::Extension::kF16);
+        Enable(builtin::Extension::kF16);
     }
 
     const ast::Expression* lhs = MakeScalarExpr(this, param.type);
@@ -1636,7 +1636,7 @@ TEST_P(BinaryArithMatrixMatrix, AddOrSubtract) {
     auto& param = GetParam();
 
     if (param.type == Type::f16) {
-        Enable(ast::Extension::kF16);
+        Enable(builtin::Extension::kF16);
     }
 
     const ast::Expression* lhs = MakeMat3x4Expr(this, param.type);
@@ -1699,7 +1699,7 @@ TEST_P(BinaryArithMatrixMatrixMultiply, Multiply) {
     auto& param = GetParam();
 
     if (param.type == Type::f16) {
-        Enable(ast::Extension::kF16);
+        Enable(builtin::Extension::kF16);
     }
 
     const ast::Expression* lhs = MakeMat3x4Expr(this, param.type);

@@ -85,7 +85,7 @@ TEST_P(InferTypeTest_FromInitializerExpression, All) {
     // }
     auto& params = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* initializer_expr = params.create_rhs_ast_value(*this, 0);
 
@@ -186,7 +186,7 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
     // }
     auto& params = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     Func("foo", utils::Empty, params.create_rhs_ast_type(*this),
          utils::Vector{Return(Call(params.create_rhs_ast_type(*this)))}, {});
@@ -343,7 +343,7 @@ using ConversionInitializerValidTest = ResolverTestWithParam<Params>;
 TEST_P(ConversionInitializerValidTest, All) {
     auto& params = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     // var a : <lhs_type1> = <lhs_type2>(<rhs_type>(<rhs_value_expr>));
     auto lhs_type1 = params.lhs_type(*this);
@@ -449,7 +449,7 @@ TEST_P(ConversionInitializerInvalidTest, All) {
        << FriendlyName(rhs_type) << "(<rhs value expr>))";
     SCOPED_TRACE(ss.str());
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* a = Var("a", lhs_type1, Call(lhs_type2, Call(rhs_type, rhs_value_expr)));
 
@@ -944,7 +944,7 @@ TEST_F(ResolverTypeInitializerValidationTest, F32_Success) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, F16_Success) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = Call<f16>(Expr(1.5_h));
     WrapInFunction(expr);
@@ -1000,7 +1000,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Convert_i32_to_u32_Success) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, Convert_u32_to_f16_Success) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = Call<f16>(123_u);
     WrapInFunction(expr);
@@ -1020,7 +1020,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Convert_u32_to_f16_Success) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, Convert_f16_to_f32_Success) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = Call<f32>(123_h);
     WrapInFunction(expr);
@@ -1052,7 +1052,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2F32_Error_ScalarArgumentTypeMi
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, Vec2F16_Error_ScalarArgumentTypeMismatch) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(vec2<f16>(Source{{12, 34}}, 1_h, 2_f));
 
@@ -1175,7 +1175,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2F32_Success_Scalar) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, Vec2F16_Success_Scalar) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* tc = vec2<f16>(1_h, 1_h);
     WrapInFunction(tc);
@@ -1309,7 +1309,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3F32_Error_ScalarArgumentTypeMi
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, Vec3F16_Error_ScalarArgumentTypeMismatch) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(vec3<f16>(Source{{12, 34}}, 1_h, 2_h, 3_f));
 
@@ -1451,7 +1451,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3F32_Success_Scalar) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, Vec3F16_Success_Scalar) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* tc = vec3<f16>(1_h, 1_h, 1_h);
     WrapInFunction(tc);
@@ -1632,7 +1632,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4F32_Error_ScalarArgumentTypeMi
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, Vec4F16_Error_ScalarArgumentTypeMismatch) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(vec4<f16>(Source{{12, 34}}, 1_h, 1_h, 1_f, 1_h));
 
@@ -1799,7 +1799,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4F32_Success_Scalar) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, Vec4F16_Success_Scalar) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* tc = vec4<f16>(1_h, 1_h, 1_h, 1_h);
     WrapInFunction(tc);
@@ -2035,7 +2035,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vector_ArgumentElementTypeAlias_Su
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, InferVec2ElementTypeFromScalars) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec2_bool = vec2<Infer>(true, false);
     auto* vec2_i32 = vec2<Infer>(1_i, 2_i);
@@ -2064,7 +2064,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec2ElementTypeFromScalars) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, InferVec2ElementTypeFromVec2) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec2_bool = vec2<Infer>(vec2<bool>(true, false));
     auto* vec2_i32 = vec2<Infer>(vec2<i32>(1_i, 2_i));
@@ -2093,7 +2093,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec2ElementTypeFromVec2) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromScalars) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec3_bool = vec3<Infer>(Expr(true), Expr(false), Expr(true));
     auto* vec3_i32 = vec3<Infer>(Expr(1_i), Expr(2_i), Expr(3_i));
@@ -2122,7 +2122,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromScalars) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromVec3) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec3_bool = vec3<Infer>(vec3<bool>(true, false, true));
     auto* vec3_i32 = vec3<Infer>(vec3<i32>(1_i, 2_i, 3_i));
@@ -2151,7 +2151,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromVec3) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromScalarAndVec2) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec3_bool = vec3<Infer>(Expr(true), vec2<bool>(false, true));
     auto* vec3_i32 = vec3<Infer>(Expr(1_i), vec2<i32>(2_i, 3_i));
@@ -2180,7 +2180,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromScalarAndV
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromScalars) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec4_bool = vec4<Infer>(Expr(true), Expr(false), Expr(true), Expr(false));
     auto* vec4_i32 = vec4<Infer>(Expr(1_i), Expr(2_i), Expr(3_i), Expr(4_i));
@@ -2209,7 +2209,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromScalars) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromVec4) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec4_bool = vec4<Infer>(vec4<bool>(true, false, true, false));
     auto* vec4_i32 = vec4<Infer>(vec4<i32>(1_i, 2_i, 3_i, 4_i));
@@ -2238,7 +2238,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromVec4) {
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromScalarAndVec3) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec4_bool = vec4<Infer>(Expr(true), vec3<bool>(false, true, false));
     auto* vec4_i32 = vec4<Infer>(Expr(1_i), vec3<i32>(2_i, 3_i, 4_i));
@@ -2267,7 +2267,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromScalarAndV
 }
 
 TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromVec2AndVec2) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec4_bool = vec4<Infer>(vec2<bool>(true, false), vec2<bool>(true, false));
     auto* vec4_i32 = vec4<Infer>(vec2<i32>(1_i, 2_i), vec2<i32>(3_i, 4_i));
@@ -2406,7 +2406,7 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooFewArguments) {
 
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     const std::string element_type_name = param.get_element_type_name();
     std::stringstream args_tys;
@@ -2435,7 +2435,7 @@ TEST_P(MatrixInitializerTest, ElementInitializer_Error_TooFewArguments) {
 
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     const std::string element_type_name = param.get_element_type_name();
     std::stringstream args_tys;
@@ -2463,7 +2463,7 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooManyArguments) {
 
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     const std::string element_type_name = param.get_element_type_name();
     std::stringstream args_tys;
@@ -2492,7 +2492,7 @@ TEST_P(MatrixInitializerTest, ElementInitializer_Error_TooManyArguments) {
 
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     const std::string element_type_name = param.get_element_type_name();
     std::stringstream args_tys;
@@ -2520,7 +2520,7 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_InvalidArgumentType) {
 
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     std::stringstream args_tys;
     utils::Vector<const ast::Expression*, 8> args;
@@ -2548,7 +2548,7 @@ TEST_P(MatrixInitializerTest, ElementInitializer_Error_InvalidArgumentType) {
 
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     std::stringstream args_tys;
     utils::Vector<const ast::Expression*, 8> args;
@@ -2580,7 +2580,7 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooFewRowsInVectorArgument
         return;
     }
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     const std::string element_type_name = param.get_element_type_name();
     std::stringstream args_tys;
@@ -2618,7 +2618,7 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooManyRowsInVectorArgumen
         return;
     }
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     const std::string element_type_name = param.get_element_type_name();
     std::stringstream args_tys;
@@ -2650,7 +2650,7 @@ TEST_P(MatrixInitializerTest, ZeroValue_Success) {
 
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     ast::Type matrix_type = param.create_mat_ast_type(*this);
     auto* tc = Call(Source{{12, 40}}, matrix_type);
@@ -2665,7 +2665,7 @@ TEST_P(MatrixInitializerTest, WithColumns_Success) {
 
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     utils::Vector<const ast::Expression*, 4> args;
     for (uint32_t i = 0; i < param.columns; i++) {
@@ -2686,7 +2686,7 @@ TEST_P(MatrixInitializerTest, WithElements_Success) {
 
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     utils::Vector<const ast::Expression*, 16> args;
     for (uint32_t i = 0; i < param.columns * param.rows; i++) {
@@ -2706,7 +2706,7 @@ TEST_P(MatrixInitializerTest, ElementTypeAlias_Error) {
 
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* elem_type_alias = Alias("ElemType", param.create_element_ast_type(*this));
 
@@ -2736,7 +2736,7 @@ TEST_P(MatrixInitializerTest, ElementTypeAlias_Success) {
 
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* elem_type_alias = Alias("ElemType", param.create_element_ast_type(*this));
 
@@ -2767,7 +2767,7 @@ TEST_F(ResolverTypeInitializerValidationTest, MatrixInitializer_ArgumentTypeAlia
 TEST_P(MatrixInitializerTest, ArgumentTypeAlias_Success) {
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     ast::Type matrix_type = param.create_mat_ast_type(*this);
     ast::Type vec_type = param.create_column_ast_type(*this);
@@ -2787,7 +2787,7 @@ TEST_P(MatrixInitializerTest, ArgumentTypeAlias_Success) {
 TEST_P(MatrixInitializerTest, ArgumentElementTypeAlias_Error) {
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     ast::Type matrix_type = param.create_mat_ast_type(*this);
     auto* u32_type_alias = Alias("UnsignedInt", ty.u32());
@@ -2814,7 +2814,7 @@ TEST_P(MatrixInitializerTest, ArgumentElementTypeAlias_Error) {
 TEST_P(MatrixInitializerTest, ArgumentElementTypeAlias_Success) {
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* elem_type_alias = Alias("ElemType", param.create_element_ast_type(*this));
 
@@ -2834,7 +2834,7 @@ TEST_P(MatrixInitializerTest, ArgumentElementTypeAlias_Success) {
 TEST_P(MatrixInitializerTest, InferElementTypeFromVectors) {
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
@@ -2851,7 +2851,7 @@ TEST_P(MatrixInitializerTest, InferElementTypeFromVectors) {
 TEST_P(MatrixInitializerTest, InferElementTypeFromScalars) {
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.rows * param.columns; i++) {
@@ -2867,7 +2867,7 @@ TEST_P(MatrixInitializerTest, InferElementTypeFromScalars) {
 TEST_P(MatrixInitializerTest, CannotInferElementTypeFromVectors_Mismatch) {
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     std::stringstream err;
     err << "12:34 error: no matching initializer for mat" << param.columns << "x" << param.rows
@@ -2898,7 +2898,7 @@ TEST_P(MatrixInitializerTest, CannotInferElementTypeFromVectors_Mismatch) {
 TEST_P(MatrixInitializerTest, CannotInferElementTypeFromScalars_Mismatch) {
     const auto param = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     std::stringstream err;
     err << "12:34 error: no matching initializer for mat" << param.columns << "x" << param.rows
@@ -2988,7 +2988,7 @@ TEST_P(StructInitializerInputsTest, TooFew) {
     auto& str_params = std::get<0>(param);
     uint32_t N = std::get<1>(param);
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     utils::Vector<const ast::StructMember*, 16> members;
     utils::Vector<const ast::Expression*, 16> values;
@@ -3013,7 +3013,7 @@ TEST_P(StructInitializerInputsTest, TooMany) {
     auto& str_params = std::get<0>(param);
     uint32_t N = std::get<1>(param);
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     utils::Vector<const ast::StructMember*, 16> members;
     utils::Vector<const ast::Expression*, 8> values;
@@ -3046,7 +3046,7 @@ TEST_P(StructInitializerTypeTest, AllTypes) {
     auto& ctor_params = std::get<1>(param);
     uint32_t N = std::get<2>(param);
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     if (str_params.ast == ctor_params.ast) {
         return;

@@ -82,7 +82,7 @@ static constexpr Params all_param_types[] = {
 };
 
 TEST_F(ResolverCallTest, Valid) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     utils::Vector<const ast::Parameter*, 4> params;
     utils::Vector<const ast::Expression*, 4> args;

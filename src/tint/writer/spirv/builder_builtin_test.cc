@@ -132,7 +132,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_GLSLMethod_WithLoad_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* var = GlobalVar("ident", ty.f16(), type::AddressSpace::kPrivate);
     auto* expr = Call("round", "ident");
@@ -516,7 +516,7 @@ OpFunctionEnd
 }
 
 TEST_P(Builtin_Builder_SingleParam_Float_Test, Call_Scalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto param = GetParam();
     // Use a variable to prevent the function being evaluated as constant.
@@ -599,7 +599,7 @@ OpFunctionEnd
 }
 
 TEST_P(Builtin_Builder_SingleParam_Float_Test, Call_Vector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto param = GetParam();
 
@@ -705,7 +705,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Length_Scalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* scalar = Var("a", Expr(1_h));
     auto* expr = Call("length", scalar);
@@ -779,7 +779,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Length_Vector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec = Var("a", vec2<f16>(1_h, 1_h));
     auto* expr = Call("length", vec);
@@ -855,7 +855,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Normalize_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec = Var("a", vec2<f16>(1_h, 1_h));
     auto* expr = Call("normalize", vec);
@@ -934,7 +934,7 @@ OpFunctionEnd
 }
 
 TEST_P(Builtin_Builder_DualParam_Float_Test, Call_Scalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto param = GetParam();
     auto* scalar = Var("scalar", Expr(1_h));
@@ -1016,7 +1016,7 @@ OpFunctionEnd
 }
 
 TEST_P(Builtin_Builder_DualParam_Float_Test, Call_Vector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto param = GetParam();
     auto* vec = Var("vec", vec2<f16>(1_h, 1_h));
@@ -1105,7 +1105,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Reflect_Vector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec = Var("vec", vec2<f16>(1_h, 1_h));
     auto* expr = Call("reflect", vec, vec);
@@ -1181,7 +1181,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Distance_Scalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* scalar = Var("scalar", Expr(1_h));
     auto* expr = Call("distance", scalar, scalar);
@@ -1257,7 +1257,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Distance_Vector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec = Var("vec", vec2<f16>(1_h, 1_h));
     auto* expr = Call("distance", vec, vec);
@@ -1335,7 +1335,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Cross_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec = Var("vec", vec3<f16>(1_h, 1_h, 1_h));
     auto* expr = Call("cross", vec, vec);
@@ -1416,7 +1416,7 @@ OpFunctionEnd
 }
 
 TEST_P(Builtin_Builder_ThreeParam_Float_Test, Call_Scalar_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto param = GetParam();
     auto* scalar = Var("scalar", Expr(1_h));
@@ -1500,7 +1500,7 @@ OpFunctionEnd
 }
 
 TEST_P(Builtin_Builder_ThreeParam_Float_Test, Call_Vector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto param = GetParam();
     auto* vec = Var("vec", vec2<f16>(1_h, 1_h));
@@ -1591,7 +1591,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_FaceForward_Vector_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec = Var("vec", vec2<f16>(1_h, 1_h));
     auto* expr = Call("faceForward", vec, vec, vec);
@@ -1684,7 +1684,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Runtime_Call_Modf_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec = Var("vec", vec2<f16>(1_h, 2_h));
     auto* expr = Call("modf", vec);
@@ -1786,7 +1786,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Const_Call_Modf_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* expr = Call("modf", vec2<f16>(1_h, 2_h));
     Func("a_func", utils::Empty, ty.void_(),
@@ -1890,7 +1890,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Runtime_Call_Frexp_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* vec = Var("vec", vec2<f16>(1_h, 2_h));
     auto* expr = Call("frexp", vec);
@@ -1995,7 +1995,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Const_Call_Frexp_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -3149,7 +3149,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Determinant_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* var = GlobalVar("var", ty.mat3x3<f16>(), type::AddressSpace::kPrivate);
     auto* expr = Call("determinant", "var");
@@ -3222,7 +3222,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Transpose_f16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* var = GlobalVar("var", ty.mat2x3<f16>(), type::AddressSpace::kPrivate);
     auto* expr = Call("transpose", "var");
@@ -3294,7 +3294,7 @@ OpReturn
 }
 
 TEST_F(BuiltinBuilderTest, Call_Dot_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* var = GlobalVar("v", ty.vec3<f16>(), type::AddressSpace::kPrivate);
     auto* expr = Call("dot", "v", "v");
@@ -4153,7 +4153,7 @@ namespace DP4A_builtin_tests {
 TEST_F(BuiltinBuilderTest, Call_Dot4I8Packed) {
     auto* ext =
         create<ast::Enable>(Source{Source::Range{Source::Location{10, 2}, Source::Location{10, 5}}},
-                            ast::Extension::kChromiumExperimentalDp4A);
+                            builtin::Extension::kChromiumExperimentalDp4A);
     AST().AddEnable(ext);
 
     auto* val1 = Var("val1", ty.u32());
@@ -4193,7 +4193,7 @@ OpFunctionEnd
 TEST_F(BuiltinBuilderTest, Call_Dot4U8Packed) {
     auto* ext =
         create<ast::Enable>(Source{Source::Range{Source::Location{10, 2}, Source::Location{10, 5}}},
-                            ast::Extension::kChromiumExperimentalDp4A);
+                            builtin::Extension::kChromiumExperimentalDp4A);
     AST().AddEnable(ext);
 
     auto* val1 = Var("val1", ty.u32());

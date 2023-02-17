@@ -1094,7 +1094,7 @@ TEST_F(ResolverDependencyGraphOrderedGlobalsTest, DirectiveFirst) {
     // a transform may produce such a AST tree that has some declarations before directive nodes.
     // DependencyGraph should deal with these cases.
     auto* var_1 = GlobalVar("SYMBOL1", ty.i32());
-    auto* enable = Enable(ast::Extension::kF16);
+    auto* enable = Enable(builtin::Extension::kF16);
     auto* var_2 = GlobalVar("SYMBOL2", ty.f32());
     auto* diagnostic = DiagnosticDirective(ast::DiagnosticSeverity::kWarning, "foo");
 

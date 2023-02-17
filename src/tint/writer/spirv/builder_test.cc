@@ -30,7 +30,7 @@ TEST_F(BuilderTest, InvalidProgram) {
 }
 
 TEST_F(BuilderTest, UnsupportedExtension) {
-    Enable(Source{{12, 34}}, ast::Extension::kUndefined);
+    Enable(Source{{12, 34}}, builtin::Extension::kUndefined);
 
     auto program = std::make_unique<Program>(std::move(*this));
     auto result = Generate(program.get(), Options{});

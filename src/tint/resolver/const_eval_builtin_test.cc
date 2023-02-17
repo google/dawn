@@ -142,7 +142,7 @@ static Case E(std::initializer_list<ScalarTypes> sargs, std::string err) {
 using ResolverConstEvalBuiltinTest = ResolverTestWithParam<std::tuple<sem::BuiltinType, Case>>;
 
 TEST_P(ResolverConstEvalBuiltinTest, Test) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto builtin = std::get<0>(GetParam());
     auto& c = std::get<1>(GetParam());

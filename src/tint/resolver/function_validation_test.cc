@@ -1081,7 +1081,7 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithExtension) {
     auto& param = GetParam();
     auto ptr_type = ty("ptr", Ident(Source{{12, 34}}, param.address_space), ty.i32());
     auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
-    Enable(ast::Extension::kChromiumExperimentalFullPtrParameters);
+    Enable(builtin::Extension::kChromiumExperimentalFullPtrParameters);
     Func("f", utils::Vector{arg}, ty.void_(), utils::Empty);
 
     if (param.expectation == Expectation::kAlwaysPass ||

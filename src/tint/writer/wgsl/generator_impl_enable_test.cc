@@ -20,7 +20,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Enable) {
-    auto* enable = Enable(ast::Extension::kF16);
+    auto* enable = Enable(builtin::Extension::kF16);
 
     GeneratorImpl& gen = Build();
 

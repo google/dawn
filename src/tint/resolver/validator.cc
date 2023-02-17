@@ -149,7 +149,7 @@ void TraverseCallChain(diag::List& diagnostics,
 Validator::Validator(
     ProgramBuilder* builder,
     SemHelper& sem,
-    const ast::Extensions& enabled_extensions,
+    const builtin::Extensions& enabled_extensions,
     const utils::Hashmap<const type::Type*, const Source*, 8>& atomic_composite_info,
     utils::Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts)
     : symbols_(builder->Symbols()),
@@ -829,7 +829,7 @@ bool Validator::Parameter(const ast::Function* func, const sem::Variable* var) c
                 case type::AddressSpace::kUniform:
                 case type::AddressSpace::kWorkgroup:
                     ok = enabled_extensions_.Contains(
-                        ast::Extension::kChromiumExperimentalFullPtrParameters);
+                        builtin::Extension::kChromiumExperimentalFullPtrParameters);
                     break;
                 default:
                     break;
@@ -1653,7 +1653,7 @@ bool Validator::RequiredExtensionForBuiltinFunction(const sem::Call* call) const
     }
 
     const auto extension = builtin->RequiredExtension();
-    if (extension == ast::Extension::kUndefined) {
+    if (extension == builtin::Extension::kUndefined) {
         return true;
     }
 
@@ -1669,7 +1669,7 @@ bool Validator::RequiredExtensionForBuiltinFunction(const sem::Call* call) const
 
 bool Validator::CheckF16Enabled(const Source& source) const {
     // Validate if f16 type is allowed.
-    if (!enabled_extensions_.Contains(ast::Extension::kF16)) {
+    if (!enabled_extensions_.Contains(builtin::Extension::kF16)) {
         AddError("f16 type used without 'f16' extension enabled", source);
         return false;
     }
@@ -1719,7 +1719,8 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
         }
 
         if (param_type->Is<type::Pointer>() &&
-            !enabled_extensions_.Contains(ast::Extension::kChromiumExperimentalFullPtrParameters)) {
+            !enabled_extensions_.Contains(
+                builtin::Extension::kChromiumExperimentalFullPtrParameters)) {
             // https://gpuweb.github.io/gpuweb/wgsl/#function-restriction
             // Each argument of pointer type to a user-defined function must have the same memory
             // view as its root identifier.
@@ -2512,7 +2513,7 @@ bool Validator::CheckTypeAccessAddressSpace(
     }
 
     if (address_space == type::AddressSpace::kPushConstant &&
-        !enabled_extensions_.Contains(ast::Extension::kChromiumExperimentalPushConstant) &&
+        !enabled_extensions_.Contains(builtin::Extension::kChromiumExperimentalPushConstant) &&
         IsValidationEnabled(attributes, ast::DisabledValidation::kIgnoreAddressSpace)) {
         AddError(
             "use of variable address space 'push_constant' requires enabling extension "

@@ -371,7 +371,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_Vec3F16MemberOffs
     // @group(0) @binding(0)
     // var<uniform> a : ScalarPackedAtEndOfVec3;
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     Structure("ScalarPackedAtEndOfVec3", utils::Vector{
                                              Member("v", ty.vec3(ty.f16())),
@@ -568,7 +568,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_UnalignedMember) {
     //     @align(1) b : f32;
     // };
     // var<push_constant> a : S;
-    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    Enable(builtin::Extension::kChromiumExperimentalPushConstant);
     Structure(
         Source{{12, 34}}, "S",
         utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
@@ -595,7 +595,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_Aligned) {
     //     @align(4) b : f32;
     // };
     // var<push_constant> a : S;
-    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    Enable(builtin::Extension::kChromiumExperimentalPushConstant);
     Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
                                  Member("b", ty.f32(), utils::Vector{MemberAlign(4_i)})});
     GlobalVar("a", ty("S"), type::AddressSpace::kPushConstant);

@@ -1005,7 +1005,7 @@ static constexpr TypeParams type_cases[] = {
 using SampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(SampledTextureTypeTest, All) {
     auto& params = GetParam();
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
     GlobalVar(
         "a",
         ty.sampled_texture(Source{{12, 34}}, type::TextureDimension::k2d, params.type_func(*this)),
@@ -1025,7 +1025,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
 using MultisampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(MultisampledTextureTypeTest, All) {
     auto& params = GetParam();
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
     GlobalVar("a",
               ty.multisampled_texture(Source{{12, 34}}, type::TextureDimension::k2d,
                                       params.type_func(*this)),
@@ -1231,7 +1231,7 @@ TEST_P(ValidMatrixTypes, Okay) {
     // var a : matNxM<EL_TY>;
     auto& params = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     ast::Type el_ty = params.elem_ty(*this);
 
@@ -1271,7 +1271,7 @@ TEST_P(InvalidMatrixElementTypes, InvalidElementType) {
     // var a : matNxM<EL_TY>;
     auto& params = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     ast::Type el_ty = params.elem_ty(*this);
 
@@ -1316,7 +1316,7 @@ TEST_P(ValidVectorTypes, Okay) {
     // var a : vecN<EL_TY>;
     auto& params = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("a", ty.vec(params.elem_ty(*this), params.width), type::AddressSpace::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1350,7 +1350,7 @@ TEST_P(InvalidVectorElementTypes, InvalidElementType) {
     // var a : vecN<EL_TY>;
     auto& params = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     GlobalVar("a", ty.vec(Source{{12, 34}}, params.elem_ty(*this), params.width),
               type::AddressSpace::kPrivate);
@@ -1389,7 +1389,7 @@ TEST_P(BuiltinTypeAliasTest, CheckEquivalent) {
     // explicit = aliased;
     auto& params = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(Decl(Var("aliased", ty(params.alias))),
                    Decl(Var("explicit", params.type(*this))),  //
@@ -1401,7 +1401,7 @@ TEST_P(BuiltinTypeAliasTest, Construct) {
     // var v : vecN<T> = vecTN();
     auto& params = GetParam();
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     WrapInFunction(Decl(Var("v", params.type(*this), Call(params.alias))));
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1449,7 +1449,7 @@ TEST_P(ResolverUntemplatedTypeUsedWithTemplateArgs, Builtin_UseWithTemplateArgs)
     // enable f16;
     // var<private> v : f32<true>;
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
     GlobalVar("v", type::AddressSpace::kPrivate, ty(Source{{12, 34}}, GetParam(), true));
 
     EXPECT_FALSE(r()->Resolve());
@@ -1462,7 +1462,7 @@ TEST_P(ResolverUntemplatedTypeUsedWithTemplateArgs, BuiltinAlias_UseWithTemplate
     // alias A = f32;
     // var<private> v : A<true>;
 
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
     Alias(Source{{56, 78}}, "A", ty(GetParam()));
     GlobalVar("v", type::AddressSpace::kPrivate, ty(Source{{12, 34}}, "A", true));
 

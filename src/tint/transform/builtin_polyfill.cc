@@ -45,7 +45,7 @@ struct BuiltinPolyfill::State {
     State(CloneContext& c, Builtins p) : ctx(c), polyfill(p) {
         has_full_ptr_params = false;
         for (auto* enable : c.src->AST().Enables()) {
-            if (enable->extension == ast::Extension::kChromiumExperimentalFullPtrParameters) {
+            if (enable->extension == builtin::Extension::kChromiumExperimentalFullPtrParameters) {
                 has_full_ptr_params = true;
             }
         }
@@ -673,7 +673,7 @@ struct BuiltinPolyfill::State {
     /// @return the polyfill function name
     Symbol workgroupUniformLoad(const type::Type* type) {
         if (!has_full_ptr_params) {
-            b.Enable(ast::Extension::kChromiumExperimentalFullPtrParameters);
+            b.Enable(builtin::Extension::kChromiumExperimentalFullPtrParameters);
             has_full_ptr_params = true;
         }
         auto name = b.Symbols().New("tint_workgroupUniformLoad");

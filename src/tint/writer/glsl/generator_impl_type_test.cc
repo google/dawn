@@ -107,7 +107,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_F32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* f16 = create<type::F16>();
 
@@ -144,7 +144,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Matrix_F32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_Matrix_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* f16 = create<type::F16>();
     auto* vec3 = create<type::Vector>(f16, 3u);
@@ -255,7 +255,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Vector_F32) {
 }
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_Vector_F16) {
-    Enable(ast::Extension::kF16);
+    Enable(builtin::Extension::kF16);
 
     auto* f16 = create<type::F16>();
     auto* vec3 = create<type::Vector>(f16, 3u);
