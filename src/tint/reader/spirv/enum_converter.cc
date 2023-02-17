@@ -64,40 +64,40 @@ type::AddressSpace EnumConverter::ToAddressSpace(const spv::StorageClass sc) {
     return type::AddressSpace::kUndefined;
 }
 
-ast::BuiltinValue EnumConverter::ToBuiltin(spv::BuiltIn b) {
+builtin::BuiltinValue EnumConverter::ToBuiltin(spv::BuiltIn b) {
     switch (b) {
         case spv::BuiltIn::Position:
-            return ast::BuiltinValue::kPosition;
+            return builtin::BuiltinValue::kPosition;
         case spv::BuiltIn::VertexIndex:
-            return ast::BuiltinValue::kVertexIndex;
+            return builtin::BuiltinValue::kVertexIndex;
         case spv::BuiltIn::InstanceIndex:
-            return ast::BuiltinValue::kInstanceIndex;
+            return builtin::BuiltinValue::kInstanceIndex;
         case spv::BuiltIn::FrontFacing:
-            return ast::BuiltinValue::kFrontFacing;
+            return builtin::BuiltinValue::kFrontFacing;
         case spv::BuiltIn::FragCoord:
-            return ast::BuiltinValue::kPosition;
+            return builtin::BuiltinValue::kPosition;
         case spv::BuiltIn::FragDepth:
-            return ast::BuiltinValue::kFragDepth;
+            return builtin::BuiltinValue::kFragDepth;
         case spv::BuiltIn::LocalInvocationId:
-            return ast::BuiltinValue::kLocalInvocationId;
+            return builtin::BuiltinValue::kLocalInvocationId;
         case spv::BuiltIn::LocalInvocationIndex:
-            return ast::BuiltinValue::kLocalInvocationIndex;
+            return builtin::BuiltinValue::kLocalInvocationIndex;
         case spv::BuiltIn::GlobalInvocationId:
-            return ast::BuiltinValue::kGlobalInvocationId;
+            return builtin::BuiltinValue::kGlobalInvocationId;
         case spv::BuiltIn::NumWorkgroups:
-            return ast::BuiltinValue::kNumWorkgroups;
+            return builtin::BuiltinValue::kNumWorkgroups;
         case spv::BuiltIn::WorkgroupId:
-            return ast::BuiltinValue::kWorkgroupId;
+            return builtin::BuiltinValue::kWorkgroupId;
         case spv::BuiltIn::SampleId:
-            return ast::BuiltinValue::kSampleIndex;
+            return builtin::BuiltinValue::kSampleIndex;
         case spv::BuiltIn::SampleMask:
-            return ast::BuiltinValue::kSampleMask;
+            return builtin::BuiltinValue::kSampleMask;
         default:
             break;
     }
 
     Fail() << "unknown SPIR-V builtin: " << uint32_t(b);
-    return ast::BuiltinValue::kUndefined;
+    return builtin::BuiltinValue::kUndefined;
 }
 
 type::TextureDimension EnumConverter::ToDim(spv::Dim dim, bool arrayed) {

@@ -216,15 +216,15 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
                                     param->Location(), entry_point.input_variables);
 
         entry_point.input_position_used |= ContainsBuiltin(
-            ast::BuiltinValue::kPosition, param->Type(), param->Declaration()->attributes);
+            builtin::BuiltinValue::kPosition, param->Type(), param->Declaration()->attributes);
         entry_point.front_facing_used |= ContainsBuiltin(
-            ast::BuiltinValue::kFrontFacing, param->Type(), param->Declaration()->attributes);
+            builtin::BuiltinValue::kFrontFacing, param->Type(), param->Declaration()->attributes);
         entry_point.sample_index_used |= ContainsBuiltin(
-            ast::BuiltinValue::kSampleIndex, param->Type(), param->Declaration()->attributes);
+            builtin::BuiltinValue::kSampleIndex, param->Type(), param->Declaration()->attributes);
         entry_point.input_sample_mask_used |= ContainsBuiltin(
-            ast::BuiltinValue::kSampleMask, param->Type(), param->Declaration()->attributes);
+            builtin::BuiltinValue::kSampleMask, param->Type(), param->Declaration()->attributes);
         entry_point.num_workgroups_used |= ContainsBuiltin(
-            ast::BuiltinValue::kNumWorkgroups, param->Type(), param->Declaration()->attributes);
+            builtin::BuiltinValue::kNumWorkgroups, param->Type(), param->Declaration()->attributes);
     }
 
     if (!sem->ReturnType()->Is<type::Void>()) {
@@ -232,9 +232,9 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
                                     sem->ReturnLocation(), entry_point.output_variables);
 
         entry_point.output_sample_mask_used = ContainsBuiltin(
-            ast::BuiltinValue::kSampleMask, sem->ReturnType(), func->return_type_attributes);
+            builtin::BuiltinValue::kSampleMask, sem->ReturnType(), func->return_type_attributes);
         entry_point.frag_depth_used = ContainsBuiltin(
-            ast::BuiltinValue::kFragDepth, sem->ReturnType(), func->return_type_attributes);
+            builtin::BuiltinValue::kFragDepth, sem->ReturnType(), func->return_type_attributes);
     }
 
     for (auto* var : sem->TransitivelyReferencedGlobals()) {
@@ -681,7 +681,7 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
     variables.push_back(stage_variable);
 }
 
-bool Inspector::ContainsBuiltin(ast::BuiltinValue builtin,
+bool Inspector::ContainsBuiltin(builtin::BuiltinValue builtin,
                                 const type::Type* type,
                                 utils::VectorRef<const ast::Attribute*> attributes) const {
     auto* unwrapped_type = type->UnwrapRef();

@@ -16,11 +16,11 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/ast/builtin_attribute.h"
-#include "src/tint/ast/builtin_value.h"
 #include "src/tint/ast/location_attribute.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/variable.h"
+#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/program.h"
 #include "src/tint/type/address_space.h"
 #include "src/tint/type/f32.h"
@@ -44,7 +44,7 @@ TEST_F(BuilderTest, EntryPoint_Parameters) {
     // }
     auto* coord = Param("coord", ty.vec4<f32>(),
                         utils::Vector{
-                            Builtin(ast::BuiltinValue::kPosition),
+                            Builtin(builtin::BuiltinValue::kPosition),
                         });
     auto* loc1 = Param("loc1", ty.f32(),
                        utils::Vector{
@@ -212,7 +212,7 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
         "Interface",
         utils::Vector{
             Member("value", ty.f32(), utils::Vector{Location(1_u)}),
-            Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(ast::BuiltinValue::kPosition)}),
+            Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(builtin::BuiltinValue::kPosition)}),
         });
 
     auto* vert_retval = Call(ty.Of(interface), 42_f, vec4<f32>());
@@ -228,7 +228,7 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
          },
          utils::Vector{Stage(ast::PipelineStage::kFragment)},
          utils::Vector{
-             Builtin(ast::BuiltinValue::kFragDepth),
+             Builtin(builtin::BuiltinValue::kFragDepth),
          });
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -322,7 +322,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, SampleIndex_SampleRateShadingCapability) {
     Func("main",
          utils::Vector{Param("sample_index", ty.u32(),
-                             utils::Vector{Builtin(ast::BuiltinValue::kSampleIndex)})},
+                             utils::Vector{Builtin(builtin::BuiltinValue::kSampleIndex)})},
          ty.void_(), utils::Empty,
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),

@@ -18,10 +18,10 @@
 
 #include "src/tint/ast/attribute.h"
 #include "src/tint/ast/builtin_attribute.h"
-#include "src/tint/ast/builtin_value.h"
 #include "src/tint/ast/function.h"
 #include "src/tint/ast/module.h"
 #include "src/tint/ast/struct.h"
+#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/statement.h"
@@ -38,7 +38,7 @@ namespace {
 bool ContainsFragDepth(utils::VectorRef<const ast::Attribute*> attributes) {
     for (auto* attribute : attributes) {
         if (auto* builtin_attribute = attribute->As<ast::BuiltinAttribute>()) {
-            if (builtin_attribute->builtin == ast::BuiltinValue::kFragDepth) {
+            if (builtin_attribute->builtin == builtin::BuiltinValue::kFragDepth) {
                 return true;
             }
         }

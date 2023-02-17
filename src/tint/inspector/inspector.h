@@ -183,7 +183,7 @@ class Inspector {
     /// Recursively determine if the type contains builtin.
     /// If `type` is a struct, recurse into members to check for the attribute.
     /// Otherwise, check `attributes` for the attribute.
-    bool ContainsBuiltin(ast::BuiltinValue builtin,
+    bool ContainsBuiltin(builtin::BuiltinValue builtin,
                          const type::Type* type,
                          utils::VectorRef<const ast::Attribute*> attributes) const;
 

@@ -1699,7 +1699,7 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
                     break;
             }
             auto ast_builtin = enum_converter_.ToBuiltin(spv_builtin);
-            if (ast_builtin == ast::BuiltinValue::kUndefined) {
+            if (ast_builtin == builtin::BuiltinValue::kUndefined) {
                 // A diagnostic has already been emitted.
                 return false;
             }

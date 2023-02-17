@@ -69,7 +69,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderParam) {
     Func("main", utils::Vector{Param("param", ty.Of(s))}, ty.vec4<f32>(),
          utils::Vector{Return(Call(ty.vec4<f32>()))},
          utils::Vector{Stage(ast::PipelineStage::kVertex)},
-         utils::Vector{Builtin(ast::BuiltinValue::kPosition)});
+         utils::Vector{Builtin(builtin::BuiltinValue::kPosition)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -80,9 +80,9 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderParam) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderReturnType) {
-    auto* s =
-        Structure("S", utils::Vector{Member("a", ty.vec4<f32>(),
-                                            utils::Vector{Builtin(ast::BuiltinValue::kPosition)})});
+    auto* s = Structure(
+        "S", utils::Vector{Member("a", ty.vec4<f32>(),
+                                  utils::Vector{Builtin(builtin::BuiltinValue::kPosition)})});
 
     Func("main", utils::Empty, ty.Of(s), utils::Vector{Return(Call(ty.Of(s)))},
          utils::Vector{Stage(ast::PipelineStage::kVertex)});
@@ -125,8 +125,9 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderReturnType) {
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsComputeShaderParam) {
     auto* s = Structure(
-        "S", utils::Vector{Member(
-                 "a", ty.u32(), utils::Vector{Builtin(ast::BuiltinValue::kLocalInvocationIndex)})});
+        "S",
+        utils::Vector{Member(
+            "a", ty.u32(), utils::Vector{Builtin(builtin::BuiltinValue::kLocalInvocationIndex)})});
 
     Func("main", utils::Vector{Param("param", ty.Of(s))}, ty.void_(), utils::Empty,
          utils::Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
@@ -140,9 +141,9 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsComputeShaderParam) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
-    auto* s =
-        Structure("S", utils::Vector{Member("a", ty.vec4<f32>(),
-                                            utils::Vector{Builtin(ast::BuiltinValue::kPosition)})});
+    auto* s = Structure(
+        "S", utils::Vector{Member("a", ty.vec4<f32>(),
+                                  utils::Vector{Builtin(builtin::BuiltinValue::kPosition)})});
 
     Func("vert_main", utils::Empty, ty.Of(s), utils::Vector{Return(Call(ty.Of(s)))},
          utils::Vector{Stage(ast::PipelineStage::kVertex)});

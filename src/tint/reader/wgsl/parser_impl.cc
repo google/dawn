@@ -1648,8 +1648,8 @@ Expect<ast::InterpolationType> ParserImpl::expect_interpolation_type_name() {
 //   | sample_mask
 //   | vertex_index
 //   | workgroup_id
-Expect<ast::BuiltinValue> ParserImpl::expect_builtin() {
-    return expect_enum("builtin", ast::ParseBuiltinValue, ast::kBuiltinValueStrings);
+Expect<builtin::BuiltinValue> ParserImpl::expect_builtin() {
+    return expect_enum("builtin", builtin::ParseBuiltinValue, builtin::kBuiltinValueStrings);
 }
 
 // compound_statement

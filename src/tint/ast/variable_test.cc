@@ -93,7 +93,7 @@ TEST_F(VariableTest, Assert_DifferentProgramID_Initializer) {
 
 TEST_F(VariableTest, WithAttributes) {
     auto* var = Var("my_var", ty.i32(), type::AddressSpace::kFunction, Location(1_u),
-                    Builtin(BuiltinValue::kPosition), Id(1200_u));
+                    Builtin(builtin::BuiltinValue::kPosition), Id(1200_u));
 
     auto& attributes = var->attributes;
     EXPECT_TRUE(ast::HasAttribute<ast::LocationAttribute>(attributes));

@@ -1905,33 +1905,33 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
     return true;
 }
 
-std::string GeneratorImpl::builtin_to_attribute(ast::BuiltinValue builtin) const {
+std::string GeneratorImpl::builtin_to_attribute(builtin::BuiltinValue builtin) const {
     switch (builtin) {
-        case ast::BuiltinValue::kPosition:
+        case builtin::BuiltinValue::kPosition:
             return "position";
-        case ast::BuiltinValue::kVertexIndex:
+        case builtin::BuiltinValue::kVertexIndex:
             return "vertex_id";
-        case ast::BuiltinValue::kInstanceIndex:
+        case builtin::BuiltinValue::kInstanceIndex:
             return "instance_id";
-        case ast::BuiltinValue::kFrontFacing:
+        case builtin::BuiltinValue::kFrontFacing:
             return "front_facing";
-        case ast::BuiltinValue::kFragDepth:
+        case builtin::BuiltinValue::kFragDepth:
             return "depth(any)";
-        case ast::BuiltinValue::kLocalInvocationId:
+        case builtin::BuiltinValue::kLocalInvocationId:
             return "thread_position_in_threadgroup";
-        case ast::BuiltinValue::kLocalInvocationIndex:
+        case builtin::BuiltinValue::kLocalInvocationIndex:
             return "thread_index_in_threadgroup";
-        case ast::BuiltinValue::kGlobalInvocationId:
+        case builtin::BuiltinValue::kGlobalInvocationId:
             return "thread_position_in_grid";
-        case ast::BuiltinValue::kWorkgroupId:
+        case builtin::BuiltinValue::kWorkgroupId:
             return "threadgroup_position_in_grid";
-        case ast::BuiltinValue::kNumWorkgroups:
+        case builtin::BuiltinValue::kNumWorkgroups:
             return "threadgroups_per_grid";
-        case ast::BuiltinValue::kSampleIndex:
+        case builtin::BuiltinValue::kSampleIndex:
             return "sample_id";
-        case ast::BuiltinValue::kSampleMask:
+        case builtin::BuiltinValue::kSampleMask:
             return "sample_mask";
-        case ast::BuiltinValue::kPointSize:
+        case builtin::BuiltinValue::kPointSize:
             return "point_size";
         default:
             break;

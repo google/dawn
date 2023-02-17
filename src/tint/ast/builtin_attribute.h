@@ -18,7 +18,7 @@
 #include <string>
 
 #include "src/tint/ast/attribute.h"
-#include "src/tint/ast/builtin_value.h"
+#include "src/tint/builtin/builtin_value.h"
 
 namespace tint::ast {
 
@@ -30,7 +30,7 @@ class BuiltinAttribute final : public Castable<BuiltinAttribute, Attribute> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param builtin the builtin value
-    BuiltinAttribute(ProgramID pid, NodeID nid, const Source& src, BuiltinValue builtin);
+    BuiltinAttribute(ProgramID pid, NodeID nid, const Source& src, builtin::BuiltinValue builtin);
     ~BuiltinAttribute() override;
 
     /// @returns the WGSL name for the attribute
@@ -43,7 +43,7 @@ class BuiltinAttribute final : public Castable<BuiltinAttribute, Attribute> {
     const BuiltinAttribute* Clone(CloneContext* ctx) const override;
 
     /// The builtin value
-    const BuiltinValue builtin;
+    const builtin::BuiltinValue builtin;
 };
 
 }  // namespace tint::ast

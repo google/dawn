@@ -431,6 +431,7 @@ libtint_source_set("libtint_transform_src") {
   deps = [
     ":libtint_ast_src",
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_program_src",
     ":libtint_sem_src",
     ":libtint_text_src",
@@ -452,7 +453,6 @@ libtint_source_set("libtint_ast_hdrs") {
     "ast/break_if_statement.h",
     "ast/break_statement.h",
     "ast/builtin_attribute.h",
-    "ast/builtin_value.h",
     "ast/call_expression.h",
     "ast/call_statement.h",
     "ast/case_selector.h",
@@ -519,6 +519,7 @@ libtint_source_set("libtint_ast_hdrs") {
   ]
   deps = [
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_clone_context_hdrs",
     ":libtint_type_src",
   ]
@@ -538,7 +539,6 @@ libtint_source_set("libtint_ast_src") {
     "ast/break_if_statement.cc",
     "ast/break_statement.cc",
     "ast/builtin_attribute.cc",
-    "ast/builtin_value.cc",
     "ast/call_expression.cc",
     "ast/call_statement.cc",
     "ast/case_selector.cc",
@@ -690,6 +690,13 @@ libtint_source_set("libtint_sem_src") {
   ]
 }
 
+libtint_source_set("libtint_builtins_src") {
+  sources = [
+    "builtin/builtin_value.cc",
+    "builtin/builtin_value.h",
+  ]
+}
+
 libtint_source_set("libtint_type_src") {
   sources = [
     "type/abstract_float.cc",
@@ -826,6 +833,7 @@ libtint_source_set("libtint_spv_reader_src") {
   deps = [
     ":libtint_ast_src",
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_program_src",
     ":libtint_reader_src",
     ":libtint_sem_src",
@@ -1212,7 +1220,6 @@ if (tint_build_unittests) {
       "ast/builtin_attribute_test.cc",
       "ast/builtin_texture_helper_test.cc",
       "ast/builtin_texture_helper_test.h",
-      "ast/builtin_value_test.cc",
       "ast/call_expression_test.cc",
       "ast/call_statement_test.cc",
       "ast/case_selector_test.cc",
@@ -1272,6 +1279,11 @@ if (tint_build_unittests) {
       # This AST test relies on the WGSL reader and writer
       sources += [ "ast/module_clone_test.cc" ]
     }
+  }
+
+  tint_unittests_source_set("tint_unittests_builtins_src") {
+    sources = [ "builtin/builtin_value_test.cc" ]
+    deps = [ ":libtint_builtins_src" ]
   }
 
   tint_unittests_source_set("tint_unittests_diagnostic_src") {
@@ -1614,6 +1626,7 @@ if (tint_build_unittests) {
 
     deps = [
       ":libtint_base_src",
+      ":libtint_builtins_src",
       ":libtint_spv_writer_src",
       ":tint_unittests_ast_src",
       "${tint_spirv_tools_dir}/:spvtools",
@@ -1931,6 +1944,7 @@ if (tint_build_unittests) {
       ":libtint_wgsl_writer_src",
       ":tint_unittests_ast_src",
       ":tint_unittests_base_src",
+      ":tint_unittests_builtins_src",
       ":tint_unittests_constant_src",
       ":tint_unittests_core_src",
       ":tint_unittests_demangler_src",

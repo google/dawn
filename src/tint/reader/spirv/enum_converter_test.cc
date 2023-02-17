@@ -145,7 +145,7 @@ INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
 struct BuiltinCase {
     spv::BuiltIn builtin;
     bool expect_success;
-    ast::BuiltinValue expected;
+    builtin::BuiltinValue expected;
 };
 inline std::ostream& operator<<(std::ostream& out, BuiltinCase bc) {
     out << "BuiltinCase{ spv::BuiltIn::" << int(bc.builtin)
@@ -185,32 +185,35 @@ INSTANTIATE_TEST_SUITE_P(
     EnumConverterGood_Input,
     SpvBuiltinTest,
     testing::Values(
-        BuiltinCase{spv::BuiltIn::Position, true, ast::BuiltinValue::kPosition},
-        BuiltinCase{spv::BuiltIn::InstanceIndex, true, ast::BuiltinValue::kInstanceIndex},
-        BuiltinCase{spv::BuiltIn::FrontFacing, true, ast::BuiltinValue::kFrontFacing},
-        BuiltinCase{spv::BuiltIn::FragCoord, true, ast::BuiltinValue::kPosition},
-        BuiltinCase{spv::BuiltIn::LocalInvocationId, true, ast::BuiltinValue::kLocalInvocationId},
+        BuiltinCase{spv::BuiltIn::Position, true, builtin::BuiltinValue::kPosition},
+        BuiltinCase{spv::BuiltIn::InstanceIndex, true, builtin::BuiltinValue::kInstanceIndex},
+        BuiltinCase{spv::BuiltIn::FrontFacing, true, builtin::BuiltinValue::kFrontFacing},
+        BuiltinCase{spv::BuiltIn::FragCoord, true, builtin::BuiltinValue::kPosition},
+        BuiltinCase{spv::BuiltIn::LocalInvocationId, true,
+                    builtin::BuiltinValue::kLocalInvocationId},
         BuiltinCase{spv::BuiltIn::LocalInvocationIndex, true,
-                    ast::BuiltinValue::kLocalInvocationIndex},
-        BuiltinCase{spv::BuiltIn::GlobalInvocationId, true, ast::BuiltinValue::kGlobalInvocationId},
-        BuiltinCase{spv::BuiltIn::NumWorkgroups, true, ast::BuiltinValue::kNumWorkgroups},
-        BuiltinCase{spv::BuiltIn::WorkgroupId, true, ast::BuiltinValue::kWorkgroupId},
-        BuiltinCase{spv::BuiltIn::SampleId, true, ast::BuiltinValue::kSampleIndex},
-        BuiltinCase{spv::BuiltIn::SampleMask, true, ast::BuiltinValue::kSampleMask}));
+                    builtin::BuiltinValue::kLocalInvocationIndex},
+        BuiltinCase{spv::BuiltIn::GlobalInvocationId, true,
+                    builtin::BuiltinValue::kGlobalInvocationId},
+        BuiltinCase{spv::BuiltIn::NumWorkgroups, true, builtin::BuiltinValue::kNumWorkgroups},
+        BuiltinCase{spv::BuiltIn::WorkgroupId, true, builtin::BuiltinValue::kWorkgroupId},
+        BuiltinCase{spv::BuiltIn::SampleId, true, builtin::BuiltinValue::kSampleIndex},
+        BuiltinCase{spv::BuiltIn::SampleMask, true, builtin::BuiltinValue::kSampleMask}));
 
 INSTANTIATE_TEST_SUITE_P(
     EnumConverterGood_Output,
     SpvBuiltinTest,
-    testing::Values(BuiltinCase{spv::BuiltIn::Position, true, ast::BuiltinValue::kPosition},
-                    BuiltinCase{spv::BuiltIn::FragDepth, true, ast::BuiltinValue::kFragDepth},
-                    BuiltinCase{spv::BuiltIn::SampleMask, true, ast::BuiltinValue::kSampleMask}));
+    testing::Values(BuiltinCase{spv::BuiltIn::Position, true, builtin::BuiltinValue::kPosition},
+                    BuiltinCase{spv::BuiltIn::FragDepth, true, builtin::BuiltinValue::kFragDepth},
+                    BuiltinCase{spv::BuiltIn::SampleMask, true,
+                                builtin::BuiltinValue::kSampleMask}));
 
 INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
                          SpvBuiltinTest,
                          testing::Values(BuiltinCase{static_cast<spv::BuiltIn>(9999), false,
-                                                     ast::BuiltinValue::kUndefined},
+                                                     builtin::BuiltinValue::kUndefined},
                                          BuiltinCase{static_cast<spv::BuiltIn>(9999), false,
-                                                     ast::BuiltinValue::kUndefined}));
+                                                     builtin::BuiltinValue::kUndefined}));
 
 // Dim
 

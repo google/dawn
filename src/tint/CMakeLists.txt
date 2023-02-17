@@ -548,7 +548,7 @@ list(APPEND TINT_LIB_SRCS
   writer/writer.h
 )
 
-tint_generated(ast/builtin_value BENCH TEST)
+tint_generated(builtin/builtin_value BENCH TEST)
 tint_generated(ast/diagnostic_control BENCH TEST)
 tint_generated(ast/extension BENCH TEST)
 tint_generated(ast/interpolate_attribute BENCH TEST)

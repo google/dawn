@@ -868,7 +868,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
     bool is_stage_mismatch = false;
     bool is_output = !is_input;
     switch (attr->builtin) {
-        case ast::BuiltinValue::kPosition:
+        case builtin::BuiltinValue::kPosition:
             if (stage != ast::PipelineStage::kNone &&
                 !((is_input && stage == ast::PipelineStage::kFragment) ||
                   (is_output && stage == ast::PipelineStage::kVertex))) {
@@ -880,10 +880,10 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::BuiltinValue::kGlobalInvocationId:
-        case ast::BuiltinValue::kLocalInvocationId:
-        case ast::BuiltinValue::kNumWorkgroups:
-        case ast::BuiltinValue::kWorkgroupId:
+        case builtin::BuiltinValue::kGlobalInvocationId:
+        case builtin::BuiltinValue::kLocalInvocationId:
+        case builtin::BuiltinValue::kNumWorkgroups:
+        case builtin::BuiltinValue::kWorkgroupId:
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kCompute && is_input)) {
                 is_stage_mismatch = true;
@@ -894,7 +894,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::BuiltinValue::kFragDepth:
+        case builtin::BuiltinValue::kFragDepth:
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kFragment && !is_input)) {
                 is_stage_mismatch = true;
@@ -904,7 +904,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::BuiltinValue::kFrontFacing:
+        case builtin::BuiltinValue::kFrontFacing:
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kFragment && is_input)) {
                 is_stage_mismatch = true;
@@ -914,7 +914,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::BuiltinValue::kLocalInvocationIndex:
+        case builtin::BuiltinValue::kLocalInvocationIndex:
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kCompute && is_input)) {
                 is_stage_mismatch = true;
@@ -924,8 +924,8 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::BuiltinValue::kVertexIndex:
-        case ast::BuiltinValue::kInstanceIndex:
+        case builtin::BuiltinValue::kVertexIndex:
+        case builtin::BuiltinValue::kInstanceIndex:
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kVertex && is_input)) {
                 is_stage_mismatch = true;
@@ -935,7 +935,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::BuiltinValue::kSampleMask:
+        case builtin::BuiltinValue::kSampleMask:
             if (stage != ast::PipelineStage::kNone && !(stage == ast::PipelineStage::kFragment)) {
                 is_stage_mismatch = true;
             }
@@ -944,7 +944,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::BuiltinValue::kSampleIndex:
+        case builtin::BuiltinValue::kSampleIndex:
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kFragment && is_input)) {
                 is_stage_mismatch = true;
@@ -1076,7 +1076,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // order to catch conflicts.
     // TODO(jrprice): This state could be stored in sem::Function instead, and then passed to
     // sem::Function since it would be useful there too.
-    utils::Hashset<ast::BuiltinValue, 4> builtins;
+    utils::Hashset<builtin::BuiltinValue, 4> builtins;
     utils::Hashset<uint32_t, 8> locations;
     enum class ParamOrRetType {
         kParameter,
@@ -1211,7 +1211,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                 bool has_position = false;
                 if (pipeline_io_attribute) {
                     if (auto* builtin = pipeline_io_attribute->As<ast::BuiltinAttribute>()) {
-                        has_position = (builtin->builtin == ast::BuiltinValue::kPosition);
+                        has_position = (builtin->builtin == builtin::BuiltinValue::kPosition);
                     }
                 }
                 if (!has_position) {
@@ -1275,13 +1275,13 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     }
 
     if (decl->PipelineStage() == ast::PipelineStage::kVertex &&
-        !builtins.Contains(ast::BuiltinValue::kPosition)) {
+        !builtins.Contains(builtin::BuiltinValue::kPosition)) {
         // Check module-scope variables, as the SPIR-V sanitizer generates these.
         bool found = false;
         for (auto* global : func->TransitivelyReferencedGlobals()) {
             if (auto* builtin =
                     ast::GetAttribute<ast::BuiltinAttribute>(global->Declaration()->attributes)) {
-                if (builtin->builtin == ast::BuiltinValue::kPosition) {
+                if (builtin->builtin == builtin::BuiltinValue::kPosition) {
                     found = true;
                     break;
                 }
@@ -2123,7 +2123,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                                           /* is_input */ false)) {
                         return false;
                     }
-                    if (builtin->builtin == ast::BuiltinValue::kPosition) {
+                    if (builtin->builtin == builtin::BuiltinValue::kPosition) {
                         has_position = true;
                     }
                     return true;

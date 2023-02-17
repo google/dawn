@@ -112,7 +112,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
     auto vec4 = ty.vec4<f32>();
     auto* coord = Param("coord", vec4,
                         utils::Vector{
-                            Builtin(ast::BuiltinValue::kPosition),
+                            Builtin(builtin::BuiltinValue::kPosition),
                         });
     auto* loc1 = Param("loc1", ty.f32(),
                        utils::Vector{

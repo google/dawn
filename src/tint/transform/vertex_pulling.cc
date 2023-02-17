@@ -778,11 +778,11 @@ struct VertexPulling::State {
                 return;
             }
             // Check for existing vertex_index and instance_index builtins.
-            if (builtin->builtin == ast::BuiltinValue::kVertexIndex) {
+            if (builtin->builtin == builtin::BuiltinValue::kVertexIndex) {
                 vertex_index_expr = [this, param]() {
                     return b.Expr(ctx.Clone(param->name->symbol));
                 };
-            } else if (builtin->builtin == ast::BuiltinValue::kInstanceIndex) {
+            } else if (builtin->builtin == builtin::BuiltinValue::kInstanceIndex) {
                 instance_index_expr = [this, param]() {
                     return b.Expr(ctx.Clone(param->name->symbol));
                 };
@@ -831,9 +831,9 @@ struct VertexPulling::State {
                     return;
                 }
                 // Check for existing vertex_index and instance_index builtins.
-                if (builtin->builtin == ast::BuiltinValue::kVertexIndex) {
+                if (builtin->builtin == builtin::BuiltinValue::kVertexIndex) {
                     vertex_index_expr = member_expr;
-                } else if (builtin->builtin == ast::BuiltinValue::kInstanceIndex) {
+                } else if (builtin->builtin == builtin::BuiltinValue::kInstanceIndex) {
                     instance_index_expr = member_expr;
                 }
                 members_to_clone.Push(member);
@@ -899,7 +899,7 @@ struct VertexPulling::State {
                     auto name = b.Symbols().New("tint_pulling_vertex_index");
                     new_function_parameters.Push(
                         b.Param(name, b.ty.u32(),
-                                utils::Vector{b.Builtin(ast::BuiltinValue::kVertexIndex)}));
+                                utils::Vector{b.Builtin(builtin::BuiltinValue::kVertexIndex)}));
                     vertex_index_expr = [this, name]() { return b.Expr(name); };
                     break;
                 }
@@ -911,7 +911,7 @@ struct VertexPulling::State {
                     auto name = b.Symbols().New("tint_pulling_instance_index");
                     new_function_parameters.Push(
                         b.Param(name, b.ty.u32(),
-                                utils::Vector{b.Builtin(ast::BuiltinValue::kInstanceIndex)}));
+                                utils::Vector{b.Builtin(builtin::BuiltinValue::kInstanceIndex)}));
                     instance_index_expr = [this, name]() { return b.Expr(name); };
                     break;
                 }

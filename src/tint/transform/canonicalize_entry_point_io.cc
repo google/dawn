@@ -47,33 +47,33 @@ struct MemberInfo {
 
 /// FXC is sensitive to field order in structures, this is used by StructMemberComparator to ensure
 /// that FXC is happy with the order of emitted fields.
-uint32_t BuiltinOrder(ast::BuiltinValue builtin) {
+uint32_t BuiltinOrder(builtin::BuiltinValue builtin) {
     switch (builtin) {
-        case ast::BuiltinValue::kPosition:
+        case builtin::BuiltinValue::kPosition:
             return 1;
-        case ast::BuiltinValue::kVertexIndex:
+        case builtin::BuiltinValue::kVertexIndex:
             return 2;
-        case ast::BuiltinValue::kInstanceIndex:
+        case builtin::BuiltinValue::kInstanceIndex:
             return 3;
-        case ast::BuiltinValue::kFrontFacing:
+        case builtin::BuiltinValue::kFrontFacing:
             return 4;
-        case ast::BuiltinValue::kFragDepth:
+        case builtin::BuiltinValue::kFragDepth:
             return 5;
-        case ast::BuiltinValue::kLocalInvocationId:
+        case builtin::BuiltinValue::kLocalInvocationId:
             return 6;
-        case ast::BuiltinValue::kLocalInvocationIndex:
+        case builtin::BuiltinValue::kLocalInvocationIndex:
             return 7;
-        case ast::BuiltinValue::kGlobalInvocationId:
+        case builtin::BuiltinValue::kGlobalInvocationId:
             return 8;
-        case ast::BuiltinValue::kWorkgroupId:
+        case builtin::BuiltinValue::kWorkgroupId:
             return 9;
-        case ast::BuiltinValue::kNumWorkgroups:
+        case builtin::BuiltinValue::kNumWorkgroups:
             return 10;
-        case ast::BuiltinValue::kSampleIndex:
+        case builtin::BuiltinValue::kSampleIndex:
             return 11;
-        case ast::BuiltinValue::kSampleMask:
+        case builtin::BuiltinValue::kSampleMask:
             return 12;
-        case ast::BuiltinValue::kPointSize:
+        case builtin::BuiltinValue::kPointSize:
             return 13;
         default:
             break;
@@ -118,7 +118,7 @@ bool IsShaderIOAttribute(const ast::Attribute* attr) {
 // Returns true if `attrs` contains a `sample_mask` builtin.
 bool HasSampleMask(utils::VectorRef<const ast::Attribute*> attrs) {
     auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(attrs);
-    return builtin && builtin->builtin == ast::BuiltinValue::kSampleMask;
+    return builtin && builtin->builtin == builtin::BuiltinValue::kSampleMask;
 }
 
 }  // namespace
@@ -244,7 +244,7 @@ struct CanonicalizeEntryPointIO::State {
             if (builtin) {
                 if (cfg.shader_style == ShaderStyle::kGlsl) {
                     value = FromGLSLBuiltin(builtin->builtin, value, ast_type);
-                } else if (builtin->builtin == ast::BuiltinValue::kSampleMask) {
+                } else if (builtin->builtin == builtin::BuiltinValue::kSampleMask) {
                     // Vulkan requires the type of a SampleMask builtin to be an array.
                     // Declare it as array<u32, 1> and then load the first element.
                     ast_type = ctx.dst->ty.array(ast_type, 1_u);
@@ -422,7 +422,7 @@ struct CanonicalizeEntryPointIO::State {
         // No existing sample mask builtin was found, so create a new output value
         // using the fixed sample mask.
         AddOutput("fixed_sample_mask", ctx.dst->create<type::U32>(), std::nullopt,
-                  {ctx.dst->Builtin(ast::BuiltinValue::kSampleMask)},
+                  {ctx.dst->Builtin(builtin::BuiltinValue::kSampleMask)},
                   ctx.dst->Expr(u32(cfg.fixed_sample_mask)));
     }
 
@@ -430,7 +430,7 @@ struct CanonicalizeEntryPointIO::State {
     void AddVertexPointSize() {
         // Create a new output value and assign it a literal 1.0 value.
         AddOutput("vertex_point_size", ctx.dst->create<type::F32>(), std::nullopt,
-                  {ctx.dst->Builtin(ast::BuiltinValue::kPointSize)}, ctx.dst->Expr(1_f));
+                  {ctx.dst->Builtin(builtin::BuiltinValue::kPointSize)}, ctx.dst->Expr(1_f));
     }
 
     /// Create an expression for gl_Position.[component]
@@ -675,11 +675,11 @@ struct CanonicalizeEntryPointIO::State {
     /// @param stage the current pipeline stage
     /// @param address_space the address space (input or output)
     /// @returns the gl_ string corresponding to that builtin
-    const char* GLSLBuiltinToString(ast::BuiltinValue builtin,
+    const char* GLSLBuiltinToString(builtin::BuiltinValue builtin,
                                     ast::PipelineStage stage,
                                     type::AddressSpace address_space) {
         switch (builtin) {
-            case ast::BuiltinValue::kPosition:
+            case builtin::BuiltinValue::kPosition:
                 switch (stage) {
                     case ast::PipelineStage::kVertex:
                         return "gl_Position";
@@ -688,27 +688,27 @@ struct CanonicalizeEntryPointIO::State {
                     default:
                         return "";
                 }
-            case ast::BuiltinValue::kVertexIndex:
+            case builtin::BuiltinValue::kVertexIndex:
                 return "gl_VertexID";
-            case ast::BuiltinValue::kInstanceIndex:
+            case builtin::BuiltinValue::kInstanceIndex:
                 return "gl_InstanceID";
-            case ast::BuiltinValue::kFrontFacing:
+            case builtin::BuiltinValue::kFrontFacing:
                 return "gl_FrontFacing";
-            case ast::BuiltinValue::kFragDepth:
+            case builtin::BuiltinValue::kFragDepth:
                 return "gl_FragDepth";
-            case ast::BuiltinValue::kLocalInvocationId:
+            case builtin::BuiltinValue::kLocalInvocationId:
                 return "gl_LocalInvocationID";
-            case ast::BuiltinValue::kLocalInvocationIndex:
+            case builtin::BuiltinValue::kLocalInvocationIndex:
                 return "gl_LocalInvocationIndex";
-            case ast::BuiltinValue::kGlobalInvocationId:
+            case builtin::BuiltinValue::kGlobalInvocationId:
                 return "gl_GlobalInvocationID";
-            case ast::BuiltinValue::kNumWorkgroups:
+            case builtin::BuiltinValue::kNumWorkgroups:
                 return "gl_NumWorkGroups";
-            case ast::BuiltinValue::kWorkgroupId:
+            case builtin::BuiltinValue::kWorkgroupId:
                 return "gl_WorkGroupID";
-            case ast::BuiltinValue::kSampleIndex:
+            case builtin::BuiltinValue::kSampleIndex:
                 return "gl_SampleID";
-            case ast::BuiltinValue::kSampleMask:
+            case builtin::BuiltinValue::kSampleMask:
                 if (address_space == type::AddressSpace::kIn) {
                     return "gl_SampleMaskIn";
                 } else {
@@ -725,18 +725,18 @@ struct CanonicalizeEntryPointIO::State {
     /// @param ast_type (inout) the incoming WGSL and outgoing GLSL types
     /// @returns an expression representing the GLSL builtin converted to what
     /// WGSL expects
-    const ast::Expression* FromGLSLBuiltin(ast::BuiltinValue builtin,
+    const ast::Expression* FromGLSLBuiltin(builtin::BuiltinValue builtin,
                                            const ast::Expression* value,
                                            ast::Type& ast_type) {
         switch (builtin) {
-            case ast::BuiltinValue::kVertexIndex:
-            case ast::BuiltinValue::kInstanceIndex:
-            case ast::BuiltinValue::kSampleIndex:
+            case builtin::BuiltinValue::kVertexIndex:
+            case builtin::BuiltinValue::kInstanceIndex:
+            case builtin::BuiltinValue::kSampleIndex:
                 // GLSL uses i32 for these, so bitcast to u32.
                 value = ctx.dst->Bitcast(ast_type, value);
                 ast_type = ctx.dst->ty.i32();
                 break;
-            case ast::BuiltinValue::kSampleMask:
+            case builtin::BuiltinValue::kSampleMask:
                 // gl_SampleMask is an array of i32. Retrieve the first element and
                 // bitcast it to u32.
                 value = ctx.dst->IndexAccessor(value, 0_i);
@@ -755,14 +755,14 @@ struct CanonicalizeEntryPointIO::State {
     /// @param value the value to convert
     /// @param type (out) the type to which the value was converted
     /// @returns the converted value which can be assigned to the GLSL builtin
-    const ast::Expression* ToGLSLBuiltin(ast::BuiltinValue builtin,
+    const ast::Expression* ToGLSLBuiltin(builtin::BuiltinValue builtin,
                                          const ast::Expression* value,
                                          const type::Type*& type) {
         switch (builtin) {
-            case ast::BuiltinValue::kVertexIndex:
-            case ast::BuiltinValue::kInstanceIndex:
-            case ast::BuiltinValue::kSampleIndex:
-            case ast::BuiltinValue::kSampleMask:
+            case builtin::BuiltinValue::kVertexIndex:
+            case builtin::BuiltinValue::kInstanceIndex:
+            case builtin::BuiltinValue::kSampleIndex:
+            case builtin::BuiltinValue::kSampleMask:
                 type = ctx.dst->create<type::I32>();
                 value = ctx.dst->Bitcast(CreateASTTypeFor(ctx, type), value);
                 break;

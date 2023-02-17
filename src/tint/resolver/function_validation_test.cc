@@ -188,7 +188,7 @@ TEST_F(ResolverFunctionValidationTest, DiscardCalledDirectlyFromVertexEntryPoint
              Return(Call(ty.vec4<f32>())),
          },
          utils::Vector{Stage(ast::PipelineStage::kVertex)},
-         utils::Vector{Builtin(ast::BuiltinValue::kPosition)});
+         utils::Vector{Builtin(builtin::BuiltinValue::kPosition)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

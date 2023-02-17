@@ -213,7 +213,7 @@ class Builder {
     /// @param builtin the builtin to convert
     /// @param storage the address space that this builtin is being used with
     /// @returns the SPIR-V builtin or SpvBuiltInMax on error.
-    SpvBuiltIn ConvertBuiltin(ast::BuiltinValue builtin, type::AddressSpace storage);
+    SpvBuiltIn ConvertBuiltin(builtin::BuiltinValue builtin, type::AddressSpace storage);
 
     /// Converts an interpolate attribute to SPIR-V decorations and pushes a
     /// capability if needed.

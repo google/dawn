@@ -251,7 +251,7 @@ OpDecorate %1 DescriptorSet 3
 }
 
 struct BuiltinData {
-    ast::BuiltinValue builtin;
+    builtin::BuiltinValue builtin;
     type::AddressSpace storage;
     SpvBuiltIn result;
 };
@@ -271,32 +271,35 @@ INSTANTIATE_TEST_SUITE_P(
     BuilderTest_Type,
     BuiltinDataTest,
     testing::Values(
-        BuiltinData{ast::BuiltinValue::kUndefined, type::AddressSpace::kNone, SpvBuiltInMax},
-        BuiltinData{ast::BuiltinValue::kPosition, type::AddressSpace::kIn, SpvBuiltInFragCoord},
-        BuiltinData{ast::BuiltinValue::kPosition, type::AddressSpace::kOut, SpvBuiltInPosition},
+        BuiltinData{builtin::BuiltinValue::kUndefined, type::AddressSpace::kNone, SpvBuiltInMax},
+        BuiltinData{builtin::BuiltinValue::kPosition, type::AddressSpace::kIn, SpvBuiltInFragCoord},
+        BuiltinData{builtin::BuiltinValue::kPosition, type::AddressSpace::kOut, SpvBuiltInPosition},
         BuiltinData{
-            ast::BuiltinValue::kVertexIndex,
+            builtin::BuiltinValue::kVertexIndex,
             type::AddressSpace::kIn,
             SpvBuiltInVertexIndex,
         },
-        BuiltinData{ast::BuiltinValue::kInstanceIndex, type::AddressSpace::kIn,
+        BuiltinData{builtin::BuiltinValue::kInstanceIndex, type::AddressSpace::kIn,
                     SpvBuiltInInstanceIndex},
-        BuiltinData{ast::BuiltinValue::kFrontFacing, type::AddressSpace::kIn,
+        BuiltinData{builtin::BuiltinValue::kFrontFacing, type::AddressSpace::kIn,
                     SpvBuiltInFrontFacing},
-        BuiltinData{ast::BuiltinValue::kFragDepth, type::AddressSpace::kOut, SpvBuiltInFragDepth},
-        BuiltinData{ast::BuiltinValue::kLocalInvocationId, type::AddressSpace::kIn,
+        BuiltinData{builtin::BuiltinValue::kFragDepth, type::AddressSpace::kOut,
+                    SpvBuiltInFragDepth},
+        BuiltinData{builtin::BuiltinValue::kLocalInvocationId, type::AddressSpace::kIn,
                     SpvBuiltInLocalInvocationId},
-        BuiltinData{ast::BuiltinValue::kLocalInvocationIndex, type::AddressSpace::kIn,
+        BuiltinData{builtin::BuiltinValue::kLocalInvocationIndex, type::AddressSpace::kIn,
                     SpvBuiltInLocalInvocationIndex},
-        BuiltinData{ast::BuiltinValue::kGlobalInvocationId, type::AddressSpace::kIn,
+        BuiltinData{builtin::BuiltinValue::kGlobalInvocationId, type::AddressSpace::kIn,
                     SpvBuiltInGlobalInvocationId},
-        BuiltinData{ast::BuiltinValue::kWorkgroupId, type::AddressSpace::kIn,
+        BuiltinData{builtin::BuiltinValue::kWorkgroupId, type::AddressSpace::kIn,
                     SpvBuiltInWorkgroupId},
-        BuiltinData{ast::BuiltinValue::kNumWorkgroups, type::AddressSpace::kIn,
+        BuiltinData{builtin::BuiltinValue::kNumWorkgroups, type::AddressSpace::kIn,
                     SpvBuiltInNumWorkgroups},
-        BuiltinData{ast::BuiltinValue::kSampleIndex, type::AddressSpace::kIn, SpvBuiltInSampleId},
-        BuiltinData{ast::BuiltinValue::kSampleMask, type::AddressSpace::kIn, SpvBuiltInSampleMask},
-        BuiltinData{ast::BuiltinValue::kSampleMask, type::AddressSpace::kOut,
+        BuiltinData{builtin::BuiltinValue::kSampleIndex, type::AddressSpace::kIn,
+                    SpvBuiltInSampleId},
+        BuiltinData{builtin::BuiltinValue::kSampleMask, type::AddressSpace::kIn,
+                    SpvBuiltInSampleMask},
+        BuiltinData{builtin::BuiltinValue::kSampleMask, type::AddressSpace::kOut,
                     SpvBuiltInSampleMask}));
 
 TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {

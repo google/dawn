@@ -136,7 +136,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_WithInOut_Builtins) {
     //   return coord.x;
     // }
     auto* coord_in =
-        Param("coord", ty.vec4<f32>(), utils::Vector{Builtin(ast::BuiltinValue::kPosition)});
+        Param("coord", ty.vec4<f32>(), utils::Vector{Builtin(builtin::BuiltinValue::kPosition)});
     Func("frag_main", utils::Vector{coord_in}, ty.f32(),
          utils::Vector{
              Return(MemberAccessor("coord", "x")),
@@ -145,7 +145,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_WithInOut_Builtins) {
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Builtin(ast::BuiltinValue::kFragDepth),
+             Builtin(builtin::BuiltinValue::kFragDepth),
          });
 
     GeneratorImpl& gen = SanitizeAndBuild();
@@ -190,7 +190,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_SharedStruct_DifferentSta
         utils::Vector{
             Member("col1", ty.f32(), utils::Vector{Location(1_a)}),
             Member("col2", ty.f32(), utils::Vector{Location(2_a)}),
-            Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(ast::BuiltinValue::kPosition)}),
+            Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(builtin::BuiltinValue::kPosition)}),
         });
 
     Func("vert_main", utils::Empty, ty.Of(interface_struct),
@@ -271,7 +271,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_SharedStruct_HelperFuncti
     auto* vertex_output_struct = Structure(
         "VertexOutput",
         utils::Vector{
-            Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(ast::BuiltinValue::kPosition)}),
+            Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(builtin::BuiltinValue::kPosition)}),
         });
 
     Func("foo", utils::Vector{Param("x", ty.f32())}, ty.Of(vertex_output_struct),

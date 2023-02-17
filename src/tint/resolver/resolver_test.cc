@@ -873,7 +873,8 @@ TEST_F(ResolverTest, Function_Parameters) {
 
 TEST_F(ResolverTest, Function_Parameters_Locations) {
     auto* param_a = Param("a", ty.f32(), utils::Vector{Location(3_a)});
-    auto* param_b = Param("b", ty.u32(), utils::Vector{Builtin(ast::BuiltinValue::kVertexIndex)});
+    auto* param_b =
+        Param("b", ty.u32(), utils::Vector{Builtin(builtin::BuiltinValue::kVertexIndex)});
     auto* param_c = Param("c", ty.u32(), utils::Vector{Location(1_a)});
 
     GlobalVar("my_vec", ty.vec4<f32>(), type::AddressSpace::kPrivate);
@@ -891,7 +892,7 @@ TEST_F(ResolverTest, Function_Parameters_Locations) {
                           Stage(ast::PipelineStage::kVertex),
                       },
                       utils::Vector{
-                          Builtin(ast::BuiltinValue::kPosition),
+                          Builtin(builtin::BuiltinValue::kPosition),
                       });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -974,7 +975,7 @@ TEST_F(ResolverTest, Function_ReturnType_NoLocation) {
                           Stage(ast::PipelineStage::kVertex),
                       },
                       utils::Vector{
-                          Builtin(ast::BuiltinValue::kPosition),
+                          Builtin(builtin::BuiltinValue::kPosition),
                       });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

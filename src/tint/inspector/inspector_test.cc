@@ -464,7 +464,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
 TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
     auto* in_var0 = Param("in_var0", ty.u32(),
                           utils::Vector{
-                              Builtin(ast::BuiltinValue::kSampleIndex),
+                              Builtin(builtin::BuiltinValue::kSampleIndex),
                           });
     auto* in_var1 = Param("in_var1", ty.f32(),
                           utils::Vector{
@@ -478,7 +478,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Builtin(ast::BuiltinValue::kFragDepth),
+             Builtin(builtin::BuiltinValue::kFragDepth),
          });
     Inspector& inspector = Build();
 
@@ -1049,7 +1049,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltinNotReferenced) {
 TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
     auto* in_var = Param("in_var", ty.u32(),
                          utils::Vector{
-                             Builtin(ast::BuiltinValue::kSampleMask),
+                             Builtin(builtin::BuiltinValue::kSampleMask),
                          });
     Func("ep_func", utils::Vector{in_var}, ty.void_(),
          utils::Vector{
@@ -1069,7 +1069,8 @@ TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
 
 TEST_F(InspectorGetEntryPointTest, InputSampleMaskStructReferenced) {
     utils::Vector members{
-        Member("inner_position", ty.u32(), utils::Vector{Builtin(ast::BuiltinValue::kSampleMask)}),
+        Member("inner_position", ty.u32(),
+               utils::Vector{Builtin(builtin::BuiltinValue::kSampleMask)}),
     };
 
     Structure("in_struct", members);
@@ -1097,7 +1098,7 @@ TEST_F(InspectorGetEntryPointTest, InputSampleMaskStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, OutputSampleMaskSimpleReferenced) {
     Func("ep_func",
          utils::Vector{
-             Param("in_var", ty.u32(), utils::Vector{Builtin(ast::BuiltinValue::kSampleMask)}),
+             Param("in_var", ty.u32(), utils::Vector{Builtin(builtin::BuiltinValue::kSampleMask)}),
          },
          ty.u32(),
          utils::Vector{
@@ -1107,7 +1108,7 @@ TEST_F(InspectorGetEntryPointTest, OutputSampleMaskSimpleReferenced) {
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Builtin(ast::BuiltinValue::kSampleMask),
+             Builtin(builtin::BuiltinValue::kSampleMask),
          });
 
     Inspector& inspector = Build();
@@ -1121,7 +1122,7 @@ TEST_F(InspectorGetEntryPointTest, OutputSampleMaskSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, OutputSampleMaskStructReferenced) {
     Structure("out_struct", utils::Vector{
                                 Member("inner_sample_mask", ty.u32(),
-                                       utils::Vector{Builtin(ast::BuiltinValue::kSampleMask)}),
+                                       utils::Vector{Builtin(builtin::BuiltinValue::kSampleMask)}),
                             });
 
     Func("ep_func", utils::Empty, ty("out_struct"),
@@ -1144,7 +1145,8 @@ TEST_F(InspectorGetEntryPointTest, OutputSampleMaskStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, InputPositionSimpleReferenced) {
     Func("ep_func",
          utils::Vector{
-             Param("in_var", ty.vec4<f32>(), utils::Vector{Builtin(ast::BuiltinValue::kPosition)}),
+             Param("in_var", ty.vec4<f32>(),
+                   utils::Vector{Builtin(builtin::BuiltinValue::kPosition)}),
          },
          ty.void_(),
          utils::Vector{
@@ -1165,7 +1167,7 @@ TEST_F(InspectorGetEntryPointTest, InputPositionSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, InputPositionStructReferenced) {
     Structure("in_struct", utils::Vector{
                                Member("inner_position", ty.vec4<f32>(),
-                                      utils::Vector{Builtin(ast::BuiltinValue::kPosition)}),
+                                      utils::Vector{Builtin(builtin::BuiltinValue::kPosition)}),
                            });
 
     Func("ep_func",
@@ -1191,7 +1193,8 @@ TEST_F(InspectorGetEntryPointTest, InputPositionStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, FrontFacingSimpleReferenced) {
     Func("ep_func",
          utils::Vector{
-             Param("in_var", ty.bool_(), utils::Vector{Builtin(ast::BuiltinValue::kFrontFacing)}),
+             Param("in_var", ty.bool_(),
+                   utils::Vector{Builtin(builtin::BuiltinValue::kFrontFacing)}),
          },
          ty.void_(),
          utils::Vector{
@@ -1212,7 +1215,7 @@ TEST_F(InspectorGetEntryPointTest, FrontFacingSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, FrontFacingStructReferenced) {
     Structure("in_struct", utils::Vector{
                                Member("inner_position", ty.bool_(),
-                                      utils::Vector{Builtin(ast::BuiltinValue::kFrontFacing)}),
+                                      utils::Vector{Builtin(builtin::BuiltinValue::kFrontFacing)}),
                            });
 
     Func("ep_func",
@@ -1238,7 +1241,7 @@ TEST_F(InspectorGetEntryPointTest, FrontFacingStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, SampleIndexSimpleReferenced) {
     Func("ep_func",
          utils::Vector{
-             Param("in_var", ty.u32(), utils::Vector{Builtin(ast::BuiltinValue::kSampleIndex)}),
+             Param("in_var", ty.u32(), utils::Vector{Builtin(builtin::BuiltinValue::kSampleIndex)}),
          },
          ty.void_(),
          utils::Vector{
@@ -1259,7 +1262,7 @@ TEST_F(InspectorGetEntryPointTest, SampleIndexSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, SampleIndexStructReferenced) {
     Structure("in_struct", utils::Vector{
                                Member("inner_position", ty.u32(),
-                                      utils::Vector{Builtin(ast::BuiltinValue::kSampleIndex)}),
+                                      utils::Vector{Builtin(builtin::BuiltinValue::kSampleIndex)}),
                            });
 
     Func("ep_func",
@@ -1286,7 +1289,7 @@ TEST_F(InspectorGetEntryPointTest, NumWorkgroupsSimpleReferenced) {
     Func("ep_func",
          utils::Vector{
              Param("in_var", ty.vec3<u32>(),
-                   utils::Vector{Builtin(ast::BuiltinValue::kNumWorkgroups)}),
+                   utils::Vector{Builtin(builtin::BuiltinValue::kNumWorkgroups)}),
          },
          ty.void_(),
          utils::Vector{
@@ -1303,10 +1306,11 @@ TEST_F(InspectorGetEntryPointTest, NumWorkgroupsSimpleReferenced) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NumWorkgroupsStructReferenced) {
-    Structure("in_struct", utils::Vector{
-                               Member("inner_position", ty.vec3<u32>(),
-                                      utils::Vector{Builtin(ast::BuiltinValue::kNumWorkgroups)}),
-                           });
+    Structure("in_struct",
+              utils::Vector{
+                  Member("inner_position", ty.vec3<u32>(),
+                         utils::Vector{Builtin(builtin::BuiltinValue::kNumWorkgroups)}),
+              });
 
     Func("ep_func",
          utils::Vector{
@@ -1335,7 +1339,7 @@ TEST_F(InspectorGetEntryPointTest, FragDepthSimpleReferenced) {
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Builtin(ast::BuiltinValue::kFragDepth),
+             Builtin(builtin::BuiltinValue::kFragDepth),
          });
 
     Inspector& inspector = Build();
@@ -1349,7 +1353,7 @@ TEST_F(InspectorGetEntryPointTest, FragDepthSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, FragDepthStructReferenced) {
     Structure("out_struct", utils::Vector{
                                 Member("inner_frag_depth", ty.f32(),
-                                       utils::Vector{Builtin(ast::BuiltinValue::kFragDepth)}),
+                                       utils::Vector{Builtin(builtin::BuiltinValue::kFragDepth)}),
                             });
 
     Func("ep_func", utils::Empty, ty("out_struct"),

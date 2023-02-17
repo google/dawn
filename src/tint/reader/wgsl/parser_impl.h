@@ -540,7 +540,7 @@ class ParserImpl {
     /// Parses a builtin identifier, erroring if the next token does not match a
     /// valid builtin name.
     /// @returns the parsed builtin.
-    Expect<ast::BuiltinValue> expect_builtin();
+    Expect<builtin::BuiltinValue> expect_builtin();
     /// Parses a `compound_statement` grammar element, erroring on parse failure.
     /// @param use a description of what was being parsed if an error was raised
     /// @returns the parsed statements

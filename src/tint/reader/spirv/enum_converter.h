@@ -17,8 +17,8 @@
 
 #include "spirv/unified1/spirv.h"
 #include "spirv/unified1/spirv.hpp11"
-#include "src/tint/ast/builtin_value.h"
 #include "src/tint/ast/pipeline_stage.h"
+#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/reader/spirv/fail_stream.h"
 #include "src/tint/type/address_space.h"
 #include "src/tint/type/storage_texture.h"
@@ -51,7 +51,7 @@ class EnumConverter {
     /// On failure, logs an error and returns kNone
     /// @param b the SPIR-V builtin
     /// @returns a Tint AST builtin
-    ast::BuiltinValue ToBuiltin(spv::BuiltIn b);
+    builtin::BuiltinValue ToBuiltin(spv::BuiltIn b);
 
     /// Converts a possibly arrayed SPIR-V Dim to a Tint texture dimension.
     /// On failure, logs an error and returns kNone

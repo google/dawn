@@ -217,7 +217,7 @@ TEST_F(ParserImplTest, Attribute_Location_MissingInvalid) {
 
 struct BuiltinData {
     const char* input;
-    ast::BuiltinValue result;
+    builtin::BuiltinValue result;
 };
 inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
     out << std::string(data.input);
@@ -261,18 +261,19 @@ TEST_P(BuiltinTest, Attribute_Builtin_TrailingComma) {
 INSTANTIATE_TEST_SUITE_P(
     ParserImplTest,
     BuiltinTest,
-    testing::Values(BuiltinData{"position", ast::BuiltinValue::kPosition},
-                    BuiltinData{"vertex_index", ast::BuiltinValue::kVertexIndex},
-                    BuiltinData{"instance_index", ast::BuiltinValue::kInstanceIndex},
-                    BuiltinData{"front_facing", ast::BuiltinValue::kFrontFacing},
-                    BuiltinData{"frag_depth", ast::BuiltinValue::kFragDepth},
-                    BuiltinData{"local_invocation_id", ast::BuiltinValue::kLocalInvocationId},
-                    BuiltinData{"local_invocation_index", ast::BuiltinValue::kLocalInvocationIndex},
-                    BuiltinData{"global_invocation_id", ast::BuiltinValue::kGlobalInvocationId},
-                    BuiltinData{"workgroup_id", ast::BuiltinValue::kWorkgroupId},
-                    BuiltinData{"num_workgroups", ast::BuiltinValue::kNumWorkgroups},
-                    BuiltinData{"sample_index", ast::BuiltinValue::kSampleIndex},
-                    BuiltinData{"sample_mask", ast::BuiltinValue::kSampleMask}));
+    testing::Values(BuiltinData{"position", builtin::BuiltinValue::kPosition},
+                    BuiltinData{"vertex_index", builtin::BuiltinValue::kVertexIndex},
+                    BuiltinData{"instance_index", builtin::BuiltinValue::kInstanceIndex},
+                    BuiltinData{"front_facing", builtin::BuiltinValue::kFrontFacing},
+                    BuiltinData{"frag_depth", builtin::BuiltinValue::kFragDepth},
+                    BuiltinData{"local_invocation_id", builtin::BuiltinValue::kLocalInvocationId},
+                    BuiltinData{"local_invocation_index",
+                                builtin::BuiltinValue::kLocalInvocationIndex},
+                    BuiltinData{"global_invocation_id", builtin::BuiltinValue::kGlobalInvocationId},
+                    BuiltinData{"workgroup_id", builtin::BuiltinValue::kWorkgroupId},
+                    BuiltinData{"num_workgroups", builtin::BuiltinValue::kNumWorkgroups},
+                    BuiltinData{"sample_index", builtin::BuiltinValue::kSampleIndex},
+                    BuiltinData{"sample_mask", builtin::BuiltinValue::kSampleMask}));
 
 TEST_F(ParserImplTest, Attribute_Builtin_MissingLeftParen) {
     auto p = parser("builtin position)");

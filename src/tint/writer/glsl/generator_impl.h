@@ -471,11 +471,11 @@ class GeneratorImpl : public TextGenerator {
     /// @param builtin the builtin to convert
     /// @param stage pipeline stage in which this builtin is used
     /// @returns the string name of the builtin or blank on error
-    const char* builtin_to_string(ast::BuiltinValue builtin, ast::PipelineStage stage);
+    const char* builtin_to_string(builtin::BuiltinValue builtin, ast::PipelineStage stage);
     /// Converts a builtin to a type::Type appropriate for GLSL.
     /// @param builtin the builtin to convert
     /// @returns the appropriate semantic type or null on error.
-    type::Type* builtin_type(ast::BuiltinValue builtin);
+    type::Type* builtin_type(builtin::BuiltinValue builtin);
 
   private:
     enum class VarType { kIn, kOut };
