@@ -56,8 +56,8 @@ class Var final : public Castable<Var, Variable> {
         const Source& source,
         const Identifier* name,
         Type type,
-        type::AddressSpace declared_address_space,
-        type::Access declared_access,
+        const Expression* declared_address_space,
+        const Expression* declared_access,
         const Expression* initializer,
         utils::VectorRef<const Attribute*> attributes);
 
@@ -77,10 +77,10 @@ class Var final : public Castable<Var, Variable> {
     const Var* Clone(CloneContext* ctx) const override;
 
     /// The declared address space
-    const type::AddressSpace declared_address_space;
+    const Expression* const declared_address_space = nullptr;
 
     /// The declared access control
-    const type::Access declared_access;
+    const Expression* const declared_access = nullptr;
 };
 
 /// A list of `var` declarations

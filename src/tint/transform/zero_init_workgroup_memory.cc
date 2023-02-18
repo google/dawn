@@ -36,7 +36,8 @@ namespace {
 bool ShouldRun(const Program* program) {
     for (auto* global : program->AST().GlobalVariables()) {
         if (auto* var = global->As<ast::Var>()) {
-            if (var->declared_address_space == type::AddressSpace::kWorkgroup) {
+            auto* v = program->Sem().Get(var);
+            if (v->AddressSpace() == type::AddressSpace::kWorkgroup) {
                 return true;
             }
         }

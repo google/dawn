@@ -1088,15 +1088,14 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithExtension) {
         param.expectation == Expectation::kPassWithFullPtrParameterExtension) {
         ASSERT_TRUE(r()->Resolve()) << r()->error();
     } else {
-        std::stringstream ss;
-        ss << param.address_space;
         EXPECT_FALSE(r()->Resolve());
         if (param.expectation == Expectation::kInvalid) {
-            EXPECT_EQ(r()->error(), "12:34 error: unknown identifier: '" + ss.str() + "'");
+            EXPECT_EQ(r()->error(), "12:34 error: unknown identifier: '" +
+                                        utils::ToString(param.address_space) + "'");
         } else {
             EXPECT_EQ(r()->error(),
-                      "12:34 error: function parameter of pointer type cannot be in '" + ss.str() +
-                          "' address space");
+                      "12:34 error: function parameter of pointer type cannot be in '" +
+                          utils::ToString(param.address_space) + "' address space");
         }
     }
 }
@@ -1105,8 +1104,8 @@ INSTANTIATE_TEST_SUITE_P(
     ResolverFunctionParameterValidationTest,
     testing::Values(
         TestParams{type::AddressSpace::kUndefined, Expectation::kInvalid},
-        TestParams{type::AddressSpace::kIn, Expectation::kInvalid},
-        TestParams{type::AddressSpace::kOut, Expectation::kInvalid},
+        TestParams{type::AddressSpace::kIn, Expectation::kAlwaysFail},
+        TestParams{type::AddressSpace::kOut, Expectation::kAlwaysFail},
         TestParams{type::AddressSpace::kUniform, Expectation::kPassWithFullPtrParameterExtension},
         TestParams{type::AddressSpace::kWorkgroup, Expectation::kPassWithFullPtrParameterExtension},
         TestParams{type::AddressSpace::kHandle, Expectation::kInvalid},

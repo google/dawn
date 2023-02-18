@@ -420,10 +420,17 @@ class ParserImpl : Reader {
     /// @returns a list of SPIR-V decorations.
     DecorationList GetMemberPipelineDecorations(const Struct& struct_type, int member_index);
 
+    /// @param storage_type the 'var' storage type
+    /// @param address_space the 'var' address space
+    /// @returns the access mode for a 'var' declaration with the given storage type and address
+    /// space.
+    type::Access VarAccess(const Type* storage_type, type::AddressSpace address_space);
+
     /// Creates an AST 'var' node for a SPIR-V ID, including any attached decorations, unless it's
     /// an ignorable builtin variable.
     /// @param id the SPIR-V result ID
     /// @param address_space the address space, which cannot be type::AddressSpace::kUndefined
+    /// @param access the access
     /// @param storage_type the storage type of the variable
     /// @param initializer the variable initializer
     /// @param decorations the variable decorations
@@ -431,6 +438,7 @@ class ParserImpl : Reader {
     /// in the error case
     const ast::Var* MakeVar(uint32_t id,
                             type::AddressSpace address_space,
+                            type::Access access,
                             const Type* storage_type,
                             const ast::Expression* initializer,
                             AttributeList decorations);
@@ -659,13 +667,23 @@ class ParserImpl : Reader {
     /// error
     const Type* GetHandleTypeForSpirvHandle(const spvtools::opt::Instruction& obj);
 
+    /// ModuleVariable describes a module scope variable
+    struct ModuleVariable {
+        /// The AST variable node.
+        const ast::Var* var = nullptr;
+        /// The address space of the var
+        type::AddressSpace address_space = type::AddressSpace::kUndefined;
+        /// The access mode of the var
+        type::Access access = type::Access::kUndefined;
+    };
+
     /// Returns the AST variable for the SPIR-V ID of a module-scope variable,
     /// or null if there isn't one.
     /// @param id a SPIR-V ID
     /// @returns the AST variable or null.
-    const ast::Var* GetModuleVariable(uint32_t id) {
+    ModuleVariable GetModuleVariable(uint32_t id) {
         auto entry = module_variable_.Find(id);
-        return entry ? *entry : nullptr;
+        return entry ? *entry : ModuleVariable{};
     }
 
     /// Returns the channel component type corresponding to the given image
@@ -885,7 +903,7 @@ class ParserImpl : Reader {
     std::unordered_map<const spvtools::opt::Instruction*, const Type*> handle_type_;
 
     /// Maps the SPIR-V ID of a module-scope variable to its AST variable.
-    utils::Hashmap<uint32_t, const ast::Var*, 16> module_variable_;
+    utils::Hashmap<uint32_t, ModuleVariable, 16> module_variable_;
 
     // Set of symbols of declared type that have been added, used to avoid
     // adding duplicates.

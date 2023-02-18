@@ -122,11 +122,12 @@ Transform::ApplyResult BindingRemapper::Apply(const Program* src,
             // Replace any access controls.
             auto ac_it = remappings->access_controls.find(from);
             if (ac_it != remappings->access_controls.end()) {
-                type::Access ac = ac_it->second;
-                if (ac == type::Access::kUndefined) {
-                    b.Diagnostics().add_error(
-                        diag::System::Transform,
-                        "invalid access mode (" + std::to_string(static_cast<uint32_t>(ac)) + ")");
+                type::Access access = ac_it->second;
+                if (access == type::Access::kUndefined) {
+                    b.Diagnostics().add_error(diag::System::Transform,
+                                              "invalid access mode (" +
+                                                  std::to_string(static_cast<uint32_t>(access)) +
+                                                  ")");
                     return Program(std::move(b));
                 }
                 auto* sem = src->Sem().Get(var);
@@ -139,9 +140,14 @@ Transform::ApplyResult BindingRemapper::Apply(const Program* src,
                 }
                 auto* ty = sem->Type()->UnwrapRef();
                 auto inner_ty = CreateASTTypeFor(ctx, ty);
-                auto* new_var = b.Var(ctx.Clone(var->source), ctx.Clone(var->name->symbol),
-                                      inner_ty, var->declared_address_space, ac,
-                                      ctx.Clone(var->initializer), ctx.Clone(var->attributes));
+                auto* new_var =
+                    b.create<ast::Var>(ctx.Clone(var->source),                  // source
+                                       b.Ident(ctx.Clone(var->name->symbol)),   // name
+                                       inner_ty,                                // type
+                                       ctx.Clone(var->declared_address_space),  // address space
+                                       b.Expr(access),                          // access
+                                       ctx.Clone(var->initializer),             // initializer
+                                       ctx.Clone(var->attributes));             // attributes
                 ctx.Replace(var, new_var);
             }
 

@@ -34,8 +34,6 @@
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
-#include "src/tint/type/access.h"
-#include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/math.h"
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/writer/float_to_string.h"
@@ -376,24 +374,6 @@ bool GeneratorImpl::EmitImageFormat(std::ostream& out, const type::TexelFormat f
     return true;
 }
 
-bool GeneratorImpl::EmitAccess(std::ostream& out, const type::Access access) {
-    switch (access) {
-        case type::Access::kRead:
-            out << "read";
-            return true;
-        case type::Access::kWrite:
-            out << "write";
-            return true;
-        case type::Access::kReadWrite:
-            out << "read_write";
-            return true;
-        default:
-            break;
-    }
-    diagnostics_.add_error(diag::System::Writer, "unknown access");
-    return false;
-}
-
 bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
     if (str->attributes.Length()) {
         if (!EmitAttributes(line(), str->attributes)) {
@@ -473,17 +453,18 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* v) {
         v,  //
         [&](const ast::Var* var) {
             out << "var";
-            auto address_space = var->declared_address_space;
-            auto ac = var->declared_access;
-            if (address_space != type::AddressSpace::kUndefined || ac != type::Access::kUndefined) {
-                out << "<" << address_space;
-                if (ac != type::Access::kUndefined) {
+            if (var->declared_address_space || var->declared_access) {
+                out << "<";
+                TINT_DEFER(out << ">");
+                if (!EmitExpression(out, var->declared_address_space)) {
+                    return false;
+                }
+                if (var->declared_access) {
                     out << ", ";
-                    if (!EmitAccess(out, ac)) {
+                    if (!EmitExpression(out, var->declared_access)) {
                         return false;
                     }
                 }
-                out << ">";
             }
             return true;
         },

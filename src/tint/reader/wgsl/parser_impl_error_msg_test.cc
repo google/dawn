@@ -799,7 +799,7 @@ var x : texture_storage_2d<r32uint, read;
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingSubtype) {
     EXPECT("var x : texture_storage_2d<>;",
-           R"(test.wgsl:1:28 error: expected expression
+           R"(test.wgsl:1:28 error: expected expression for type template argument list
 var x : texture_storage_2d<>;
                            ^
 )");
@@ -1123,20 +1123,11 @@ var i : ptr<private, u32;
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarStorageDeclInvalidClass) {
-    EXPECT("var<fish> i : i32",
-           R"(test.wgsl:1:5 error: expected address space for variable declaration
-Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup'
-var<fish> i : i32
-    ^^^^
-)");
-}
-
 TEST_F(ParserImplErrorTest, GlobalDeclVarStorageDeclMissingGThan) {
     EXPECT("var<private i : i32",
-           R"(test.wgsl:1:13 error: expected '>' for variable declaration
+           R"(test.wgsl:1:4 error: missing closing '>' for variable declaration
 var<private i : i32
-            ^
+   ^
 )");
 }
 

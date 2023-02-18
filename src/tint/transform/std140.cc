@@ -350,8 +350,8 @@ struct Std140::State {
     void ReplaceUniformVarTypes() {
         for (auto* global : src->AST().GlobalVariables()) {
             if (auto* var = global->As<ast::Var>()) {
-                if (var->declared_address_space == type::AddressSpace::kUniform) {
-                    auto* v = sem.Get(var);
+                auto* v = sem.Get(var);
+                if (v->AddressSpace() == type::AddressSpace::kUniform) {
                     if (auto std140_ty = Std140Type(v->Type()->UnwrapRef())) {
                         ctx.Replace(global->type.expr, b.Expr(std140_ty));
                         std140_uniforms.Add(v);

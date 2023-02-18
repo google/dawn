@@ -1927,7 +1927,9 @@ std::vector<const char*> Identifiers() {
         out.push_back(ident);
     }
     for (auto* ident : type::kAddressSpaceStrings) {
-        out.push_back(ident);
+        if (!utils::HasPrefix(ident, "_")) {
+            out.push_back(ident);
+        }
     }
     for (auto* ident : type::kTexelFormatStrings) {
         out.push_back(ident);
@@ -1940,24 +1942,24 @@ std::vector<const char*> Identifiers() {
 
 using RenamerBuiltinIdentifierTest = TransformTestWithParam<const char*>;
 
-TEST_P(RenamerBuiltinIdentifierTest, GlobalVarName) {
+TEST_P(RenamerBuiltinIdentifierTest, GlobalConstName) {
     auto expand = [&](const char* source) {
         return utils::ReplaceAll(source, "$name", GetParam());
     };
 
     auto src = expand(R"(
-var<private> $name = 42;
+const $name = 42;
 
 fn f() {
-  var v = $name;
+  const v = $name;
 }
 )");
 
     auto expect = expand(R"(
-var<private> tint_symbol = 42;
+const tint_symbol = 42;
 
 fn tint_symbol_1() {
-  var tint_symbol_2 = tint_symbol;
+  const tint_symbol_2 = tint_symbol;
 }
 )");
 

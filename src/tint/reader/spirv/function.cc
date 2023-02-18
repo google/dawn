@@ -2522,7 +2522,8 @@ bool FunctionEmitter::EmitFunctionVariables() {
             }
         }
         auto* var = parser_impl_.MakeVar(inst.result_id(), type::AddressSpace::kUndefined,
-                                         var_store_type, initializer, AttributeList{});
+                                         type::Access::kUndefined, var_store_type, initializer,
+                                         AttributeList{});
         auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
         AddStatement(var_decl_stmt);
         auto* var_type = ty_.Reference(var_store_type, type::AddressSpace::kUndefined);
@@ -3367,8 +3368,9 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         // no need to remap pointer properties.
         auto* store_type = parser_impl_.ConvertType(def_inst->type_id());
         AddStatement(create<ast::VariableDeclStatement>(
-            Source{}, parser_impl_.MakeVar(id, type::AddressSpace::kUndefined, store_type, nullptr,
-                                           AttributeList{})));
+            Source{},
+            parser_impl_.MakeVar(id, type::AddressSpace::kUndefined, type::Access::kUndefined,
+                                 store_type, nullptr, AttributeList{})));
         auto* type = ty_.Reference(store_type, type::AddressSpace::kUndefined);
         identifier_types_.emplace(id, type);
     }
@@ -4835,9 +4837,8 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
         // either variables or function parameters.
         switch (opcode(inst)) {
             case spv::Op::OpVariable: {
-                if (const auto* module_var = parser_impl_.GetModuleVariable(id)) {
-                    return DefInfo::Pointer{module_var->declared_address_space,
-                                            module_var->declared_access};
+                if (auto v = parser_impl_.GetModuleVariable(id); v.var) {
+                    return DefInfo::Pointer{v.address_space, v.access};
                 }
                 // Local variables are always Function storage class, with default
                 // access mode.

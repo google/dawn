@@ -28,7 +28,8 @@ TEST_F(VariableTest, Creation) {
     auto* v = Var("my_var", ty.i32(), type::AddressSpace::kFunction);
 
     CheckIdentifier(Symbols(), v->name, "my_var");
-    EXPECT_EQ(v->declared_address_space, type::AddressSpace::kFunction);
+    CheckIdentifier(Symbols(), v->declared_address_space, "function");
+    EXPECT_EQ(v->declared_access, nullptr);
     CheckIdentifier(Symbols(), v->type, "i32");
     EXPECT_EQ(v->source.range.begin.line, 0u);
     EXPECT_EQ(v->source.range.begin.column, 0u);
@@ -41,7 +42,7 @@ TEST_F(VariableTest, CreationWithSource) {
                   ty.f32(), type::AddressSpace::kPrivate, utils::Empty);
 
     CheckIdentifier(Symbols(), v->name, "i");
-    EXPECT_EQ(v->declared_address_space, type::AddressSpace::kPrivate);
+    CheckIdentifier(Symbols(), v->declared_address_space, "private");
     CheckIdentifier(Symbols(), v->type, "f32");
     EXPECT_EQ(v->source.range.begin.line, 27u);
     EXPECT_EQ(v->source.range.begin.column, 4u);
@@ -54,7 +55,7 @@ TEST_F(VariableTest, CreationEmpty) {
                   ty.i32(), type::AddressSpace::kWorkgroup, utils::Empty);
 
     CheckIdentifier(Symbols(), v->name, "a_var");
-    EXPECT_EQ(v->declared_address_space, type::AddressSpace::kWorkgroup);
+    CheckIdentifier(Symbols(), v->declared_address_space, "workgroup");
     CheckIdentifier(Symbols(), v->type, "i32");
     EXPECT_EQ(v->source.range.begin.line, 27u);
     EXPECT_EQ(v->source.range.begin.column, 4u);

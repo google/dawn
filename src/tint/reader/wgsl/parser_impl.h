@@ -148,10 +148,9 @@ class ParserImpl {
 
         /// Constructor for a successful parse.
         /// @param val the result value of the parse
-        /// @param s the optional source of the value
         template <typename U>
-        inline Maybe(U&& val, const Source& s = {})  // NOLINT
-            : value(std::forward<U>(val)), source(s), matched(true) {}
+        inline Maybe(U&& val)  // NOLINT
+            : value(std::forward<U>(val)), matched(true) {}
 
         /// Constructor for parse error state.
         inline Maybe(Failure::Errored) : errored(true) {}  // NOLINT
@@ -163,16 +162,13 @@ class ParserImpl {
         /// @param e the Expect to copy this Maybe from
         template <typename U>
         inline Maybe(const Expect<U>& e)  // NOLINT
-            : value(e.value), source(e.value), errored(e.errored), matched(!e.errored) {}
+            : value(e.value), errored(e.errored), matched(!e.errored) {}
 
         /// Move from an Expect.
         /// @param e the Expect to move this Maybe from
         template <typename U>
         inline Maybe(Expect<U>&& e)  // NOLINT
-            : value(std::move(e.value)),
-              source(std::move(e.source)),
-              errored(e.errored),
-              matched(!e.errored) {}
+            : value(std::move(e.value)), errored(e.errored), matched(!e.errored) {}
 
         /// Copy constructor
         inline Maybe(const Maybe&) = default;
@@ -197,8 +193,6 @@ class ParserImpl {
         /// The value of a successful parse.
         /// Zero-initialized when there was a parse error.
         T value{};
-        /// Optional source of the value.
-        Source source;
         /// True if there was a error parsing.
         bool errored = false;
         /// True if there was a error parsing.
@@ -268,33 +262,14 @@ class ParserImpl {
 
     /// VarDeclInfo contains the parsed information for variable declaration.
     struct VarDeclInfo {
-        /// Constructor
-        VarDeclInfo();
-        /// Copy constructor
-        /// @param other the VarDeclInfo to copy
-        VarDeclInfo(const VarDeclInfo& other);
-        /// Constructor
-        /// @param source_in variable declaration source
-        /// @param name_in variable name
-        /// @param address_space_in variable address space
-        /// @param access_in variable access control
-        /// @param type_in variable type
-        VarDeclInfo(Source source_in,
-                    std::string name_in,
-                    type::AddressSpace address_space_in,
-                    type::Access access_in,
-                    ast::Type type_in);
-        /// Destructor
-        ~VarDeclInfo();
-
         /// Variable declaration source
         Source source;
         /// Variable name
         std::string name;
         /// Variable address space
-        type::AddressSpace address_space = type::AddressSpace::kUndefined;
+        const ast::Expression* address_space = nullptr;
         /// Variable access control
-        type::Access access = type::Access::kUndefined;
+        const ast::Expression* access = nullptr;
         /// Variable type
         ast::Type type;
     };
@@ -302,9 +277,9 @@ class ParserImpl {
     /// VariableQualifier contains the parsed information for a variable qualifier
     struct VariableQualifier {
         /// The variable's address space
-        type::AddressSpace address_space = type::AddressSpace::kUndefined;
+        const ast::Expression* address_space = nullptr;
         /// The variable's access control
-        type::Access access = type::Access::kUndefined;
+        const ast::Expression* access = nullptr;
     };
 
     /// MatrixDimensions contains the column and row information for a matrix
@@ -447,10 +422,6 @@ class ParserImpl {
     /// Parses a `type_specifier` grammar element
     /// @returns the parsed Type or nullptr if none matched.
     Maybe<ast::Type> type_specifier();
-    /// Parses an `address_space` grammar element, erroring on parse failure.
-    /// @param use a description of what was being parsed if an error was raised.
-    /// @returns the address space or type::AddressSpace::kUndefined if none matched
-    Expect<type::AddressSpace> expect_address_space(std::string_view use);
     /// Parses a `struct_decl` grammar element.
     /// @returns the struct type or nullptr on error
     Maybe<const ast::Struct*> struct_decl();
@@ -482,11 +453,6 @@ class ParserImpl {
     /// not match a stage name.
     /// @returns the pipeline stage.
     Expect<ast::PipelineStage> expect_pipeline_stage();
-    /// Parses an access control identifier, erroring if the next token does not
-    /// match a valid access control.
-    /// @param use a description of what was being parsed if an error was raised
-    /// @returns the parsed access control.
-    Expect<type::Access> expect_access_mode(std::string_view use);
     /// Parses an interpolation sample name identifier, erroring if the next token does not match a
     /// valid sample name.
     /// @returns the parsed sample name.
@@ -597,8 +563,9 @@ class ParserImpl {
     /// @returns the parsed expression or nullptr
     Maybe<const ast::Expression*> expression();
     /// Parses the `expression` grammar rule
+    /// @param use the use of the expression
     /// @returns the parsed expression or error
-    Expect<const ast::Expression*> expect_expression();
+    Expect<const ast::Expression*> expect_expression(std::string_view use);
     /// Parses a comma separated expression list
     /// @param use the use of the expression list
     /// @param terminator the terminating token for the list

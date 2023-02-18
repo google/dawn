@@ -137,7 +137,7 @@ TEST_P(VecMissingType, Handles_Missing_Type) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:6: expected expression");
+    ASSERT_EQ(p->error(), "1:6: expected expression for type template argument list");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecMissingType,
@@ -211,7 +211,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingAddressSpace) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), R"(1:5: expected expression)");
+    ASSERT_EQ(p->error(), R"(1:5: expected expression for type template argument list)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
@@ -221,7 +221,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), R"(1:5: expected expression)");
+    ASSERT_EQ(p->error(), R"(1:5: expected expression for type template argument list)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Atomic) {
@@ -256,7 +256,7 @@ TEST_F(ParserImplTest, TypeDecl_Atomic_MissingType) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:8: expected expression");
+    ASSERT_EQ(p->error(), "1:8: expected expression for type template argument list");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_AbstractIntLiteralSize) {
@@ -431,7 +431,7 @@ TEST_P(MatrixMissingType, Handles_Missing_Type) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:8: expected expression");
+    ASSERT_EQ(p->error(), "1:8: expected expression for type template argument list");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          MatrixMissingType,

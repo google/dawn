@@ -295,22 +295,23 @@ TEST_F(ResolverValidationTest, AddressSpace_FunctionVariableI32) {
 
 TEST_F(ResolverValidationTest, AddressSpace_SamplerExplicitAddressSpace) {
     auto t = ty.sampler(type::SamplerKind::kSampler);
-    GlobalVar(Source{{12, 34}}, "var", t, type::AddressSpace::kHandle, Binding(0_a), Group(0_a));
+    GlobalVar(Source{{12, 34}}, "var", t, type::AddressSpace::kPrivate, Binding(0_a), Group(0_a));
 
     EXPECT_FALSE(r()->Resolve());
 
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: variables of type 'sampler' must not have a address space)");
+              R"(12:34 error: variables of type 'sampler' must not specifiy an address space)");
 }
 
 TEST_F(ResolverValidationTest, AddressSpace_TextureExplicitAddressSpace) {
     auto t = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
-    GlobalVar(Source{{12, 34}}, "var", t, type::AddressSpace::kHandle, Binding(0_a), Group(0_a));
+    GlobalVar(Source{{12, 34}}, "var", t, type::AddressSpace::kFunction, Binding(0_a), Group(0_a));
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
 
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: variables of type 'texture_1d<f32>' must not have a address space)");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: variables of type 'texture_1d<f32>' must not specifiy an address space)");
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {

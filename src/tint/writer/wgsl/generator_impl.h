@@ -35,7 +35,6 @@
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/program.h"
 #include "src/tint/sem/struct.h"
-#include "src/tint/type/storage_texture.h"
 #include "src/tint/writer/text_generator.h"
 
 namespace tint::writer::wgsl {
@@ -209,11 +208,6 @@ class GeneratorImpl : public TextGenerator {
     /// @param fmt the format to generate
     /// @returns true if the format is emitted
     bool EmitImageFormat(std::ostream& out, const type::TexelFormat fmt);
-    /// Handles emitting an access control
-    /// @param out the output stream
-    /// @param access the access to generate
-    /// @returns true if the access is emitted
-    bool EmitAccess(std::ostream& out, const type::Access access);
     /// Handles a unary op expression
     /// @param out the output stream
     /// @param expr the expression to emit

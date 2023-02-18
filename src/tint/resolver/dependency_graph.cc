@@ -183,13 +183,9 @@ class DependencyScanner {
                 Declare(func->name->symbol, func);
                 TraverseFunction(func);
             },
-            [&](const ast::Variable* var) {
-                Declare(var->name->symbol, var);
-                TraverseTypeExpression(var->type);
-                TraverseAttributes(var->attributes);
-                if (var->initializer) {
-                    TraverseValueExpression(var->initializer);
-                }
+            [&](const ast::Variable* v) {
+                Declare(v->name->symbol, v);
+                TraverseVariable(v);
             },
             [&](const ast::DiagnosticDirective*) {
                 // Diagnostic directives do not affect the dependency graph.
@@ -204,8 +200,18 @@ class DependencyScanner {
     }
 
   private:
-    /// Traverses the function, performing symbol resolution and determining
-    /// global dependencies.
+    /// Traverses the variable, performing symbol resolution.
+    void TraverseVariable(const ast::Variable* v) {
+        if (auto* var = v->As<ast::Var>()) {
+            TraverseAddressSpaceExpression(var->declared_address_space);
+            TraverseAccessExpression(var->declared_access);
+        }
+        TraverseTypeExpression(v->type);
+        TraverseAttributes(v->attributes);
+        TraverseValueExpression(v->initializer);
+    }
+
+    /// Traverses the function, performing symbol resolution and determining global dependencies.
     void TraverseFunction(const ast::Function* func) {
         TraverseAttributes(func->attributes);
         TraverseAttributes(func->return_type_attributes);
@@ -301,8 +307,7 @@ class DependencyScanner {
                 if (auto* shadows = scope_stack_.Get(v->variable->name->symbol)) {
                     graph_.shadows.Add(v->variable, shadows);
                 }
-                TraverseTypeExpression(v->variable->type);
-                TraverseValueExpression(v->variable->initializer);
+                TraverseVariable(v->variable);
                 Declare(v->variable->name->symbol, v->variable);
             },
             [&](const ast::WhileStatement* w) {
@@ -343,6 +348,18 @@ class DependencyScanner {
     /// resolution and determining global dependencies.
     void TraverseTypeExpression(const ast::Expression* root) {
         TraverseExpression(root, "type", "references");
+    }
+
+    /// Traverses the expression @p root_expr for the intended use as an address space, performing
+    /// symbol resolution and determining global dependencies.
+    void TraverseAddressSpaceExpression(const ast::Expression* root) {
+        TraverseExpression(root, "address space", "references");
+    }
+
+    /// Traverses the expression @p root_expr for the intended use as an access, performing symbol
+    /// resolution and determining global dependencies.
+    void TraverseAccessExpression(const ast::Expression* root) {
+        TraverseExpression(root, "access", "references");
     }
 
     /// Traverses the expression @p root_expr for the intended use as a call target, performing

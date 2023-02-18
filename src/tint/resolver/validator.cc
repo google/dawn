@@ -299,7 +299,7 @@ bool Validator::Pointer(const ast::TemplatedIdentifier* a, const type::Pointer* 
         // * For the storage address space, the access mode is optional, and defaults to read.
         // * For other address spaces, the access mode must not be written.
         if (s->AddressSpace() != type::AddressSpace::kStorage) {
-            AddError("only pointers in <storage> address space may declare an access mode",
+            AddError("only pointers in <storage> address space may specify an access mode",
                      a->source);
             return false;
         }
@@ -604,7 +604,7 @@ bool Validator::GlobalVariable(
     }
     bool ok = Switch(
         decl,  //
-        [&](const ast::Var*) {
+        [&](const ast::Var* var) {
             if (auto* init = global->Initializer();
                 init && init->Stage() > sem::EvaluationStage::kOverride) {
                 AddError("module-scope 'var' initializer must be a constant or override-expression",
@@ -612,8 +612,11 @@ bool Validator::GlobalVariable(
                 return false;
             }
 
-            if (global->AddressSpace() == type::AddressSpace::kUndefined) {
-                AddError("module-scope 'var' declaration must have a address space", decl->source);
+            if (!var->declared_address_space && !global->Type()->UnwrapRef()->is_handle()) {
+                AddError(
+                    "module-scope 'var' declarations that are not of texture or sampler types must "
+                    "provide an address space",
+                    decl->source);
                 return false;
             }
 
@@ -696,25 +699,23 @@ bool Validator::Var(const sem::Variable* v) const {
         return false;
     }
 
-    if (store_ty->is_handle()) {
-        if (var->declared_address_space != type::AddressSpace::kUndefined) {
-            // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
-            // If the store type is a texture type or a sampler type, then the variable declaration
-            // must not have a address space attribute. The address space will always be handle.
-            AddError("variables of type '" + sem_.TypeNameOf(store_ty) +
-                         "' must not have a address space",
-                     var->source);
-            return false;
-        }
+    if (store_ty->is_handle() && var->declared_address_space) {
+        // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
+        // If the store type is a texture type or a sampler type, then the variable declaration must
+        // not have a address space attribute. The address space will always be handle.
+        AddError("variables of type '" + sem_.TypeNameOf(store_ty) +
+                     "' must not specifiy an address space",
+                 var->source);
+        return false;
     }
 
-    if (var->declared_access != type::Access::kUndefined) {
+    if (var->declared_access) {
         // https://www.w3.org/TR/WGSL/#access-mode-defaults
         // When writing a variable declaration or a pointer type in WGSL source:
         // * For the storage address space, the access mode is optional, and defaults to read.
         // * For other address spaces, the access mode must not be written.
-        if (var->declared_address_space != type::AddressSpace::kStorage) {
-            AddError("only variables in <storage> address space may declare an access mode",
+        if (v->AddressSpace() != type::AddressSpace::kStorage) {
+            AddError("only variables in <storage> address space may specify an access mode",
                      var->source);
             return false;
         }
@@ -726,8 +727,8 @@ bool Validator::Var(const sem::Variable* v) const {
     }
 
     if (IsValidationEnabled(var->attributes, ast::DisabledValidation::kIgnoreAddressSpace) &&
-        (var->declared_address_space == type::AddressSpace::kIn ||
-         var->declared_address_space == type::AddressSpace::kOut)) {
+        (v->AddressSpace() == type::AddressSpace::kIn ||
+         v->AddressSpace() == type::AddressSpace::kOut)) {
         AddError("invalid use of input/output address space", var->source);
         return false;
     }

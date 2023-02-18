@@ -32,8 +32,9 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_NoAddressSpace_Fail) {
     GlobalVar(Source{{12, 34}}, "g", ty.f32());
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: module-scope 'var' declaration must have a address space");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: module-scope 'var' declarations that are not of texture or sampler types must provide an address space)");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_NoAddressSpace_Fail) {
@@ -469,7 +470,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_NotStorage_AccessMode)
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: only variables in <storage> address space may declare an access mode)");
+        R"(12:34 error: only variables in <storage> address space may specify an access mode)");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_NotStorage_AccessMode) {
@@ -481,7 +482,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_NotStorage_AccessMode) {
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: only pointers in <storage> address space may declare an access mode)");
+        R"(12:34 error: only pointers in <storage> address space may specify an access mode)");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_ReadAccessMode) {

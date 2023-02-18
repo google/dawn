@@ -117,7 +117,6 @@ struct ModuleScopeVarToEntryPointParam::State {
                                      WorkgroupParameterMemberList& workgroup_parameter_members,
                                      bool& is_pointer,
                                      bool& is_wrapped) {
-        auto* var_ast = var->Declaration()->As<ast::Var>();
         auto* ty = var->Type()->UnwrapRef();
 
         // Helper to create an AST node for the store type of the variable.
@@ -160,7 +159,9 @@ struct ModuleScopeVarToEntryPointParam::State {
                     is_wrapped = true;
                 }
 
-                param_type = ctx.dst->ty.pointer(param_type, sc, var_ast->declared_access);
+                param_type = sc == type::AddressSpace::kStorage
+                                 ? ctx.dst->ty.pointer(param_type, sc, var->Access())
+                                 : ctx.dst->ty.pointer(param_type, sc);
                 auto* param = ctx.dst->Param(new_var_symbol, param_type, attributes);
                 ctx.InsertFront(func->params, param);
                 is_pointer = true;
@@ -228,7 +229,6 @@ struct ModuleScopeVarToEntryPointParam::State {
                                        const sem::Variable* var,
                                        Symbol new_var_symbol,
                                        bool& is_pointer) {
-        auto* var_ast = var->Declaration()->As<ast::Var>();
         auto* ty = var->Type()->UnwrapRef();
         auto param_type = CreateASTTypeFor(ctx, ty);
         auto sc = var->AddressSpace();
@@ -254,7 +254,9 @@ struct ModuleScopeVarToEntryPointParam::State {
         // Use a pointer for non-handle types.
         utils::Vector<const ast::Attribute*, 2> attributes;
         if (!ty->is_handle()) {
-            param_type = ctx.dst->ty.pointer(param_type, sc, var_ast->declared_access);
+            param_type = sc == type::AddressSpace::kStorage
+                             ? ctx.dst->ty.pointer(param_type, sc, var->Access())
+                             : ctx.dst->ty.pointer(param_type, sc);
             is_pointer = true;
 
             // Disable validation of the parameter's address space and of arguments passed to it.

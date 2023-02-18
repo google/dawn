@@ -219,24 +219,34 @@ class ProgramBuilder {
     /// constructing an ast::Var.
     struct VarOptions {
         template <typename... ARGS>
-        explicit VarOptions(ARGS&&... args) {
-            (Set(std::forward<ARGS>(args)), ...);
+        explicit VarOptions(ProgramBuilder& b, ARGS&&... args) {
+            (Set(b, std::forward<ARGS>(args)), ...);
         }
         ~VarOptions();
 
         ast::Type type;
-        type::AddressSpace address_space = type::AddressSpace::kUndefined;
-        type::Access access = type::Access::kUndefined;
+        const ast::Expression* address_space = nullptr;
+        const ast::Expression* access = nullptr;
         const ast::Expression* initializer = nullptr;
         utils::Vector<const ast::Attribute*, 4> attributes;
 
       private:
-        void Set(ast::Type t) { type = t; }
-        void Set(type::AddressSpace addr_space) { address_space = addr_space; }
-        void Set(type::Access ac) { access = ac; }
-        void Set(const ast::Expression* c) { initializer = c; }
-        void Set(utils::VectorRef<const ast::Attribute*> l) { attributes = std::move(l); }
-        void Set(const ast::Attribute* a) { attributes.Push(a); }
+        void Set(ProgramBuilder&, ast::Type t) { type = t; }
+        void Set(ProgramBuilder& b, type::AddressSpace addr_space) {
+            if (addr_space != type::AddressSpace::kUndefined) {
+                address_space = b.Expr(addr_space);
+            }
+        }
+        void Set(ProgramBuilder& b, type::Access ac) {
+            if (ac != type::Access::kUndefined) {
+                access = b.Expr(ac);
+            }
+        }
+        void Set(ProgramBuilder&, const ast::Expression* c) { initializer = c; }
+        void Set(ProgramBuilder&, utils::VectorRef<const ast::Attribute*> l) {
+            attributes = std::move(l);
+        }
+        void Set(ProgramBuilder&, const ast::Attribute* a) { attributes.Push(a); }
     };
 
     /// LetOptions is a helper for accepting an arbitrary number of order independent options for
@@ -2055,9 +2065,9 @@ class ProgramBuilder {
     /// @param name the variable name
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
-    ///   * ast::Type*          - specifies the variable type
-    ///   * type::AddressSpace   - specifies the variable address space
-    ///   * type::Access         - specifies the variable's access control
+    ///   * ast::Type           - specifies the variable's type
+    ///   * type::AddressSpace  - specifies the variable's address space
+    ///   * type::Access        - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
@@ -2072,16 +2082,16 @@ class ProgramBuilder {
     /// @param name the variable name
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
-    ///   * ast::Type*          - specifies the variable type
-    ///   * type::AddressSpace   - specifies the variable address space
-    ///   * type::Access         - specifies the variable's access control
+    ///   * ast::Type           - specifies the variable's type
+    ///   * type::AddressSpace  - specifies the variable's address space
+    ///   * type::Access        - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns a `ast::Var` with the given name, address_space and type
     template <typename NAME, typename... OPTIONS>
     const ast::Var* Var(const Source& source, NAME&& name, OPTIONS&&... options) {
-        VarOptions opts(std::forward<OPTIONS>(options)...);
+        VarOptions opts(*this, std::forward<OPTIONS>(options)...);
         return create<ast::Var>(source, Ident(std::forward<NAME>(name)), opts.type,
                                 opts.address_space, opts.access, opts.initializer,
                                 std::move(opts.attributes));
@@ -2091,8 +2101,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Expression*    - specifies the variable's initializer expression (required)
-    ///   * ast::Identifier*    - specifies the variable type
-    ///   * ast::Type*          - specifies the variable type
+    ///   * ast::Type           - specifies the variable's type
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns an `ast::Const` with the given name, type and additional options
@@ -2106,8 +2115,8 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Expression*    - specifies the variable's initializer expression (required)
-    ///   * ast::Identifier*    - specifies the variable type
-    ///   * ast::Type*          - specifies the variable type
+    ///   * ast::Identifier*    - specifies the variable's type
+    ///   * ast::Type           - specifies the variable's type
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns an `ast::Const` with the given name, type and additional options
@@ -2122,7 +2131,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Expression*    - specifies the variable's initializer expression (required)
-    ///   * ast::Type*          - specifies the variable type
+    ///   * ast::Type           - specifies the variable's type
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns an `ast::Let` with the given name, type and additional options
@@ -2136,7 +2145,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Expression*    - specifies the variable's initializer expression (required)
-    ///   * ast::Type*          - specifies the variable type
+    ///   * ast::Type           - specifies the variable's type
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns an `ast::Let` with the given name, type and additional options
@@ -2175,7 +2184,7 @@ class ProgramBuilder {
     /// @param name the variable name
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
-    ///   * ast::Type*          - specifies the variable type
+    ///   * ast::Type           - specifies the variable's type
     ///   * type::AddressSpace   - specifies the variable address space
     ///   * type::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
@@ -2192,7 +2201,7 @@ class ProgramBuilder {
     /// @param name the variable name
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
-    ///   * ast::Type*          - specifies the variable type
+    ///   * ast::Type           - specifies the variable's type
     ///   * type::AddressSpace   - specifies the variable address space
     ///   * type::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
@@ -2211,7 +2220,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Const initializer
     /// Can be any of the following, in any order:
     ///   * ast::Expression*    - specifies the variable's initializer expression (required)
-    ///   * ast::Type*          - specifies the variable type
+    ///   * ast::Type           - specifies the variable's type
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns an `ast::Const` with the given name, type and additional options, which is
@@ -2226,7 +2235,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Const initializer
     /// Can be any of the following, in any order:
     ///   * ast::Expression*    - specifies the variable's initializer expression (required)
-    ///   * ast::Type*          - specifies the variable type
+    ///   * ast::Type           - specifies the variable's type
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns an `ast::Const` with the given name, type and additional options, which is
@@ -2242,7 +2251,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Override initializer
     /// Can be any of the following, in any order:
     ///   * ast::Expression*    - specifies the variable's initializer expression (required)
-    ///   * ast::Type*          - specifies the variable type
+    ///   * ast::Type           - specifies the variable's type
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns an `ast::Override` with the given name, type and additional options, which is
@@ -2257,7 +2266,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Override initializer
     /// Can be any of the following, in any order:
     ///   * ast::Expression*    - specifies the variable's initializer expression (required)
-    ///   * ast::Type*          - specifies the variable type
+    ///   * ast::Type           - specifies the variable's type
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns an `ast::Override` with the given name, type and additional options, which is

@@ -1646,7 +1646,6 @@ if (tint_build_unittests) {
       "reader/wgsl/classify_template_args_test.cc",
       "reader/wgsl/lexer_test.cc",
       "reader/wgsl/parser_impl_additive_expression_test.cc",
-      "reader/wgsl/parser_impl_address_space_test.cc",
       "reader/wgsl/parser_impl_argument_expression_list_test.cc",
       "reader/wgsl/parser_impl_assignment_stmt_test.cc",
       "reader/wgsl/parser_impl_bitwise_expression_test.cc",

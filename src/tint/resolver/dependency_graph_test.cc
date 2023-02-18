@@ -1437,13 +1437,13 @@ TEST_P(ResolverDependencyGraphResolveToAddressSpace, Resolve) {
         << resolved->String(Symbols(), Diagnostics());
 }
 
-TEST_P(ResolverDependencyGraphResolveToAddressSpace, ShadowedByGlobalVar) {
+TEST_P(ResolverDependencyGraphResolveToAddressSpace, ShadowedByGlobalConst) {
     const auto use = std::get<0>(GetParam());
     const auto builtin = std::get<1>(GetParam());
     const auto symbol = Symbols().New(utils::ToString(builtin));
 
     SymbolTestHelper helper(this);
-    auto* decl = helper.Add(SymbolDeclKind::GlobalVar, symbol);
+    auto* decl = helper.Add(SymbolDeclKind::GlobalConst, symbol);
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 

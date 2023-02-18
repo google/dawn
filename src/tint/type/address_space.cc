@@ -28,6 +28,12 @@ namespace tint::type {
 /// @param str the string to parse
 /// @returns the parsed enum, or AddressSpace::kUndefined if the string could not be parsed.
 AddressSpace ParseAddressSpace(std::string_view str) {
+    if (str == "__in") {
+        return AddressSpace::kIn;
+    }
+    if (str == "__out") {
+        return AddressSpace::kOut;
+    }
     if (str == "function") {
         return AddressSpace::kFunction;
     }
@@ -53,14 +59,14 @@ std::ostream& operator<<(std::ostream& out, AddressSpace value) {
     switch (value) {
         case AddressSpace::kUndefined:
             return out << "undefined";
+        case AddressSpace::kIn:
+            return out << "__in";
+        case AddressSpace::kOut:
+            return out << "__out";
         case AddressSpace::kFunction:
             return out << "function";
         case AddressSpace::kHandle:
             return out << "handle";
-        case AddressSpace::kIn:
-            return out << "in";
-        case AddressSpace::kOut:
-            return out << "out";
         case AddressSpace::kPrivate:
             return out << "private";
         case AddressSpace::kPushConstant:

@@ -204,23 +204,6 @@ ParserImpl::FunctionHeader::~FunctionHeader() = default;
 ParserImpl::FunctionHeader& ParserImpl::FunctionHeader::operator=(const FunctionHeader& rhs) =
     default;
 
-ParserImpl::VarDeclInfo::VarDeclInfo() = default;
-
-ParserImpl::VarDeclInfo::VarDeclInfo(const VarDeclInfo&) = default;
-
-ParserImpl::VarDeclInfo::VarDeclInfo(Source source_in,
-                                     std::string name_in,
-                                     type::AddressSpace address_space_in,
-                                     type::Access access_in,
-                                     ast::Type type_in)
-    : source(std::move(source_in)),
-      name(std::move(name_in)),
-      address_space(address_space_in),
-      access(access_in),
-      type(type_in) {}
-
-ParserImpl::VarDeclInfo::~VarDeclInfo() = default;
-
 ParserImpl::ParserImpl(Source::File const* file) : file_(file) {}
 
 ParserImpl::~ParserImpl() = default;
@@ -614,13 +597,13 @@ Maybe<const ast::Variable*> ParserImpl::global_variable_decl(AttributeList& attr
 
     TINT_DEFER(attrs.Clear());
 
-    return builder_.Var(decl->source,         // source
-                        decl->name,           // symbol
-                        decl->type,           // type
-                        decl->address_space,  // address space
-                        decl->access,         // access control
-                        initializer,          // initializer
-                        std::move(attrs));    // attributes
+    return builder_.create<ast::Var>(decl->source,                // source
+                                     builder_.Ident(decl->name),  // symbol
+                                     decl->type,                  // type
+                                     decl->address_space,         // address space
+                                     decl->access,                // access control
+                                     initializer,                 // initializer
+                                     std::move(attrs));           // attributes
 }
 
 // global_constant_decl :
@@ -756,37 +739,28 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_type_specifier
     return expect_ident_with_optional_type_specifier(use, /* allow_inferred */ false);
 }
 
-// access_mode
-//   : 'read'
-//   | 'write'
-//   | 'read_write'
-Expect<type::Access> ParserImpl::expect_access_mode(std::string_view use) {
-    return expect_enum("access control", type::ParseAccess, type::kAccessStrings, use);
-}
-
 // variable_qualifier
-//   : LESS_THAN address_spaces (COMMA access_mode)? GREATER_THAN
+//   : _template_args_start expression (COMMA expression)? _template_args_end
 Maybe<ParserImpl::VariableQualifier> ParserImpl::variable_qualifier() {
-    if (!peek_is(Token::Type::kLessThan)) {
+    if (!peek_is(Token::Type::kTemplateArgsLeft) && !peek_is(Token::Type::kLessThan)) {
+        // Note: kLessThan will give a sensible error at expect_template_arg_block()
         return Failure::kNoMatch;
     }
 
     auto* use = "variable declaration";
-    auto vq = expect_lt_gt_block(use, [&]() -> Expect<VariableQualifier> {
-        auto source = make_source_range();
-        auto sc = expect_address_space(use);
-        if (sc.errored) {
+    auto vq = expect_template_arg_block(use, [&]() -> Expect<VariableQualifier> {
+        auto address_space = expect_expression("'var' address space");
+        if (address_space.errored) {
             return Failure::kErrored;
         }
         if (match(Token::Type::kComma)) {
-            auto ac = expect_access_mode(use);
-            if (ac.errored) {
+            auto access = expect_expression("'var' access mode");
+            if (access.errored) {
                 return Failure::kErrored;
             }
-            return VariableQualifier{sc.value, ac.value};
+            return VariableQualifier{address_space.value, access.value};
         }
-        return Expect<VariableQualifier>{VariableQualifier{sc.value, type::Access::kUndefined},
-                                         source};
+        return VariableQualifier{address_space.value};
     });
 
     if (vq.errored) {
@@ -898,18 +872,6 @@ Expect<ast::Type> ParserImpl::expect_type(std::string_view use) {
         return add_error(peek().source(), "invalid type", use);
     }
     return type.value;
-}
-
-// address_space
-//   : 'function'
-//   | 'private'
-//   | 'workgroup'
-//   | 'uniform'
-//   | 'storage'
-//
-// Note, we also parse `push_constant` from the experimental extension
-Expect<type::AddressSpace> ParserImpl::expect_address_space(std::string_view use) {
-    return expect_enum("address space", type::ParseAddressSpace, type::kAddressSpaceStrings, use);
 }
 
 // struct_decl
@@ -1519,12 +1481,13 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
         initializer = initializer_expr.value;
     }
 
-    auto* var = builder_.Var(decl_source,          // source
-                             decl->name,           // symbol
-                             decl->type,           // type
-                             decl->address_space,  // address space
-                             decl->access,         // access control
-                             initializer);         // initializer
+    auto* var = builder_.create<ast::Var>(decl_source,                 // source
+                                          builder_.Ident(decl->name),  // symbol
+                                          decl->type,                  // type
+                                          decl->address_space,         // address space
+                                          decl->access,                // access control
+                                          initializer,                 // initializer
+                                          utils::Empty);               // attributes
 
     return create<ast::VariableDeclStatement>(var->source, var);
 }
@@ -2520,7 +2483,7 @@ Expect<const ast::Expression*> ParserImpl::expect_relational_expression_post_una
     return create<ast::BinaryExpression>(tok_op.source(), op, lhs, rhs.value);
 }
 
-Expect<const ast::Expression*> ParserImpl::expect_expression() {
+Expect<const ast::Expression*> ParserImpl::expect_expression(std::string_view use) {
     auto& t = peek();
     auto expr = expression();
     if (expr.errored) {
@@ -2529,7 +2492,7 @@ Expect<const ast::Expression*> ParserImpl::expect_expression() {
     if (expr.matched) {
         return expr.value;
     }
-    return add_error(t, "expected expression");
+    return add_error(t, "expected expression for " + std::string(use));
 }
 
 Expect<utils::Vector<const ast::Expression*, 3>> ParserImpl::expect_expression_list(
@@ -2537,7 +2500,7 @@ Expect<utils::Vector<const ast::Expression*, 3>> ParserImpl::expect_expression_l
     Token::Type terminator) {
     utils::Vector<const ast::Expression*, 3> exprs;
     while (continue_parsing()) {
-        auto expr = expect_expression();
+        auto expr = expect_expression(use);
         if (expr.errored) {
             return Failure::kErrored;
         }

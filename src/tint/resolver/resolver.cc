@@ -473,8 +473,14 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         return nullptr;
     }
 
-    auto address_space = var->declared_address_space;
-    if (address_space == type::AddressSpace::kUndefined) {
+    auto address_space = type::AddressSpace::kUndefined;
+    if (var->declared_address_space) {
+        auto expr = AddressSpaceExpression(var->declared_address_space);
+        if (!expr) {
+            return nullptr;
+        }
+        address_space = expr->Value();
+    } else {
         // No declared address space. Infer from usage / type.
         if (!is_global) {
             address_space = type::AddressSpace::kFunction;
@@ -494,8 +500,14 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         return nullptr;
     }
 
-    auto access = var->declared_access;
-    if (access == type::Access::kUndefined) {
+    auto access = type::Access::kUndefined;
+    if (var->declared_access) {
+        auto expr = AccessExpression(var->declared_access);
+        if (!expr) {
+            return nullptr;
+        }
+        access = expr->Value();
+    } else {
         access = DefaultAccessForAddressSpace(address_space);
     }
 

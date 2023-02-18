@@ -70,8 +70,8 @@ void ClassifyTemplateArguments(std::vector<Token>& tokens) {
 
     for (size_t i = 0; i < count - 1; i++) {
         switch (tokens[i].type()) {
-            // <identifier> + all type / builtin keywords that will become identifiers.
             case Token::Type::kIdentifier:
+            case Token::Type::kVar:
             case Token::Type::kBitcast: {
                 auto& next = tokens[i + 1];
                 if (next.type() == Token::Type::kLessThan) {

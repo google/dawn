@@ -31,10 +31,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutInitializer) {
     ASSERT_NE(var, nullptr);
 
     ast::CheckIdentifier(p->builder().Symbols(), var->name, "a");
-
     ast::CheckIdentifier(p->builder().Symbols(), var->type, "f32");
-
-    EXPECT_EQ(var->declared_address_space, type::AddressSpace::kPrivate);
+    ast::CheckIdentifier(p->builder().Symbols(), var->declared_address_space, "private");
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 14u);
@@ -58,8 +56,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithInitializer) {
 
     ast::CheckIdentifier(p->builder().Symbols(), var->name, "a");
     ast::CheckIdentifier(p->builder().Symbols(), var->type, "f32");
-
-    EXPECT_EQ(var->declared_address_space, type::AddressSpace::kPrivate);
+    ast::CheckIdentifier(p->builder().Symbols(), var->declared_address_space, "private");
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 14u);
@@ -83,11 +80,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute) {
     ASSERT_NE(var, nullptr);
 
     ast::CheckIdentifier(p->builder().Symbols(), var->name, "a");
-    ASSERT_NE(var->type, nullptr);
-
     ast::CheckIdentifier(p->builder().Symbols(), var->type, "f32");
-
-    EXPECT_EQ(var->declared_address_space, type::AddressSpace::kUniform);
+    ast::CheckIdentifier(p->builder().Symbols(), var->declared_address_space, "uniform");
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 36u);
@@ -116,10 +110,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute_MulitpleGroups) {
     ASSERT_NE(var, nullptr);
 
     ast::CheckIdentifier(p->builder().Symbols(), var->name, "a");
-    ASSERT_NE(var->type, nullptr);
     ast::CheckIdentifier(p->builder().Symbols(), var->type, "f32");
-
-    EXPECT_EQ(var->declared_address_space, type::AddressSpace::kUniform);
+    ast::CheckIdentifier(p->builder().Symbols(), var->declared_address_space, "uniform");
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 36u);
@@ -160,20 +152,6 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {
     EXPECT_FALSE(e.matched);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_EQ(p->error(), "1:24: missing initializer for 'var' declaration");
-}
-
-TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {
-    auto p = parser("var<invalid> a : f32;");
-    auto attrs = p->attribute_list();
-    EXPECT_FALSE(attrs.errored);
-    EXPECT_FALSE(attrs.matched);
-    auto e = p->global_variable_decl(attrs.value);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_TRUE(e.errored);
-    EXPECT_FALSE(e.matched);
-    EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), R"(1:5: expected address space for variable declaration
-Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup')");
 }
 
 }  // namespace

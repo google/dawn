@@ -30,10 +30,10 @@ namespace tint::type {
 /// Address space of a given pointer.
 enum class AddressSpace {
     kUndefined,
+    kIn,
+    kOut,
     kFunction,
     kHandle,  // Tint-internal enum entry - not parsed
-    kIn,      // Tint-internal enum entry - not parsed
-    kOut,     // Tint-internal enum entry - not parsed
     kPrivate,
     kPushConstant,
     kStorage,
@@ -52,7 +52,7 @@ std::ostream& operator<<(std::ostream& out, AddressSpace value);
 AddressSpace ParseAddressSpace(std::string_view str);
 
 constexpr const char* kAddressSpaceStrings[] = {
-    "function", "private", "push_constant", "storage", "uniform", "workgroup",
+    "__in", "__out", "function", "private", "push_constant", "storage", "uniform", "workgroup",
 };
 
 /// @returns true if the AddressSpace is host-shareable

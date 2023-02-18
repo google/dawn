@@ -1504,12 +1504,15 @@ bool ParserImpl::EmitModuleScopeVariables() {
             // here.)
             ast_initializer = MakeConstantExpression(var.GetSingleWordInOperand(1)).expr;
         }
-        auto* ast_var = MakeVar(var.result_id(), ast_address_space, ast_store_type, ast_initializer,
-                                utils::Empty);
+        auto ast_access = VarAccess(ast_store_type, ast_address_space);
+        auto* ast_var = MakeVar(var.result_id(), ast_address_space, ast_access, ast_store_type,
+                                ast_initializer, utils::Empty);
         // TODO(dneto): initializers (a.k.a. initializer expression)
         if (ast_var) {
             builder_.AST().AddGlobalVariable(ast_var);
-            module_variable_.GetOrCreate(var.result_id(), [ast_var] { return ast_var; });
+            module_variable_.GetOrCreate(var.result_id(), [&] {
+                return ModuleVariable{ast_var, ast_address_space, ast_access};
+            });
         }
     }
 
@@ -1536,14 +1539,16 @@ bool ParserImpl::EmitModuleScopeVariables() {
                                   << init->PrettyPrint();
             }
         }
-        auto* ast_var =
-            MakeVar(builtin_position_.per_vertex_var_id,
-                    enum_converter_.ToAddressSpace(builtin_position_.storage_class),
-                    ConvertType(builtin_position_.position_member_type_id), ast_initializer, {});
+        auto storage_type = ConvertType(builtin_position_.position_member_type_id);
+        auto ast_address_space = enum_converter_.ToAddressSpace(builtin_position_.storage_class);
+        auto ast_access = VarAccess(storage_type, ast_address_space);
+        auto* ast_var = MakeVar(builtin_position_.per_vertex_var_id, ast_address_space, ast_access,
+                                storage_type, ast_initializer, {});
 
         builder_.AST().AddGlobalVariable(ast_var);
-        module_variable_.GetOrCreate(builtin_position_.per_vertex_var_id,
-                                     [ast_var] { return ast_var; });
+        module_variable_.GetOrCreate(builtin_position_.per_vertex_var_id, [&] {
+            return ModuleVariable{ast_var, ast_address_space};
+        });
     }
     return success_;
 }
@@ -1571,25 +1576,29 @@ const spvtools::opt::analysis::IntConstant* ParserImpl::GetArraySize(uint32_t va
     return size->AsIntConstant();
 }
 
+type::Access ParserImpl::VarAccess(const Type* storage_type, type::AddressSpace address_space) {
+    if (address_space != type::AddressSpace::kStorage) {
+        return type::Access::kUndefined;
+    }
+
+    bool read_only = false;
+    if (auto* tn = storage_type->As<Named>()) {
+        read_only = read_only_struct_types_.count(tn->name) > 0;
+    }
+
+    // Apply the access(read) or access(read_write) modifier.
+    return read_only ? type::Access::kRead : type::Access::kReadWrite;
+}
+
 const ast::Var* ParserImpl::MakeVar(uint32_t id,
                                     type::AddressSpace address_space,
+                                    type::Access access,
                                     const Type* storage_type,
                                     const ast::Expression* initializer,
                                     AttributeList decorations) {
     if (storage_type == nullptr) {
         Fail() << "internal error: can't make ast::Variable for null type";
         return nullptr;
-    }
-
-    type::Access access = type::Access::kUndefined;
-    if (address_space == type::AddressSpace::kStorage) {
-        bool read_only = false;
-        if (auto* tn = storage_type->As<Named>()) {
-            read_only = read_only_struct_types_.count(tn->name) > 0;
-        }
-
-        // Apply the access(read) or access(read_write) modifier.
-        access = read_only ? type::Access::kRead : type::Access::kReadWrite;
     }
 
     // Handle variables (textures and samplers) are always in the handle
