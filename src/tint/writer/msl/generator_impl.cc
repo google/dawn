@@ -3027,7 +3027,6 @@ bool GeneratorImpl::EmitVar(const ast::Var* var) {
     switch (sem->AddressSpace()) {
         case type::AddressSpace::kFunction:
         case type::AddressSpace::kHandle:
-        case type::AddressSpace::kNone:
             break;
         case type::AddressSpace::kPrivate:
             out << "thread ";
@@ -3056,7 +3055,7 @@ bool GeneratorImpl::EmitVar(const ast::Var* var) {
         }
     } else if (sem->AddressSpace() == type::AddressSpace::kPrivate ||
                sem->AddressSpace() == type::AddressSpace::kFunction ||
-               sem->AddressSpace() == type::AddressSpace::kNone) {
+               sem->AddressSpace() == type::AddressSpace::kUndefined) {
         out << " = ";
         if (!EmitZeroValue(out, type)) {
             return false;
@@ -3076,7 +3075,7 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
     switch (sem->AddressSpace()) {
         case type::AddressSpace::kFunction:
         case type::AddressSpace::kHandle:
-        case type::AddressSpace::kNone:
+        case type::AddressSpace::kUndefined:
             break;
         case type::AddressSpace::kPrivate:
             out << "thread ";

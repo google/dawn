@@ -778,8 +778,8 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
     auto result = result_op();
     auto var_id = std::get<uint32_t>(result);
 
-    auto sc = sem->AddressSpace() == type::AddressSpace::kNone ? type::AddressSpace::kPrivate
-                                                               : sem->AddressSpace();
+    auto sc = sem->AddressSpace() == type::AddressSpace::kUndefined ? type::AddressSpace::kPrivate
+                                                                    : sem->AddressSpace();
 
     auto type_id = GenerateTypeIfNeeded(sem->Type());
     if (type_id == 0) {
@@ -3978,8 +3978,6 @@ bool Builder::GenerateVectorType(const type::Vector* vec, const Operand& result)
 
 SpvStorageClass Builder::ConvertAddressSpace(type::AddressSpace klass) const {
     switch (klass) {
-        case type::AddressSpace::kUndefined:
-            return SpvStorageClassMax;
         case type::AddressSpace::kIn:
             return SpvStorageClassInput;
         case type::AddressSpace::kOut:
@@ -3998,7 +3996,7 @@ SpvStorageClass Builder::ConvertAddressSpace(type::AddressSpace klass) const {
             return SpvStorageClassPrivate;
         case type::AddressSpace::kFunction:
             return SpvStorageClassFunction;
-        case type::AddressSpace::kNone:
+        case type::AddressSpace::kUndefined:
             break;
     }
     return SpvStorageClassMax;

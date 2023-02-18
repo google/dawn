@@ -33,7 +33,6 @@ enum class AddressSpace {
     kFunction,
     kHandle,  // Tint-internal enum entry - not parsed
     kIn,      // Tint-internal enum entry - not parsed
-    kNone,    // Tint-internal enum entry - not parsed
     kOut,     // Tint-internal enum entry - not parsed
     kPrivate,
     kPushConstant,

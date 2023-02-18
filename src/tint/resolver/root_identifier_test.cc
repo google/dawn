@@ -72,7 +72,7 @@ TEST_F(ResolverRootIdentifierTest, GlobalUniformVar) {
 
 TEST_F(ResolverRootIdentifierTest, GlobalTextureVar) {
     auto* a = GlobalVar("a", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
-                        type::AddressSpace::kNone, Group(0_a), Binding(0_a));
+                        type::AddressSpace::kUndefined, Group(0_a), Binding(0_a));
     auto* expr = Expr(a);
     WrapInFunction(Call("textureDimensions", expr));
 

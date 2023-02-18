@@ -1104,7 +1104,7 @@ INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverFunctionParameterValidationTest,
     testing::Values(
-        TestParams{type::AddressSpace::kNone, Expectation::kInvalid},
+        TestParams{type::AddressSpace::kUndefined, Expectation::kInvalid},
         TestParams{type::AddressSpace::kIn, Expectation::kInvalid},
         TestParams{type::AddressSpace::kOut, Expectation::kInvalid},
         TestParams{type::AddressSpace::kUniform, Expectation::kPassWithFullPtrParameterExtension},

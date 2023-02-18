@@ -130,7 +130,7 @@ INSTANTIATE_TEST_SUITE_P(
         StorageClassCase{spv::StorageClass::Output, true, type::AddressSpace::kOut},
         StorageClassCase{spv::StorageClass::Uniform, true, type::AddressSpace::kUniform},
         StorageClassCase{spv::StorageClass::Workgroup, true, type::AddressSpace::kWorkgroup},
-        StorageClassCase{spv::StorageClass::UniformConstant, true, type::AddressSpace::kNone},
+        StorageClassCase{spv::StorageClass::UniformConstant, true, type::AddressSpace::kUndefined},
         StorageClassCase{spv::StorageClass::StorageBuffer, true, type::AddressSpace::kStorage},
         StorageClassCase{spv::StorageClass::Private, true, type::AddressSpace::kPrivate},
         StorageClassCase{spv::StorageClass::Function, true, type::AddressSpace::kFunction}));

@@ -1222,11 +1222,6 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
     }
 
     auto ast_address_space = enum_converter_.ToAddressSpace(storage_class);
-    if (ast_address_space == type::AddressSpace::kUndefined) {
-        Fail() << "SPIR-V pointer type with ID " << type_id << " has invalid storage class "
-               << static_cast<uint32_t>(storage_class);
-        return nullptr;
-    }
     if (ast_address_space == type::AddressSpace::kUniform &&
         remap_buffer_block_type_.count(pointee_type_id)) {
         ast_address_space = type::AddressSpace::kStorage;
@@ -1459,7 +1454,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
             continue;
         }
         switch (enum_converter_.ToAddressSpace(spirv_storage_class)) {
-            case type::AddressSpace::kNone:
+            case type::AddressSpace::kUndefined:
             case type::AddressSpace::kIn:
             case type::AddressSpace::kOut:
             case type::AddressSpace::kUniform:
@@ -1476,7 +1471,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
             return false;
         }
         const Type* ast_store_type = nullptr;
-        type::AddressSpace ast_address_space = type::AddressSpace::kNone;
+        type::AddressSpace ast_address_space = type::AddressSpace::kUndefined;
         if (spirv_storage_class == spv::StorageClass::UniformConstant) {
             // These are opaque handles: samplers or textures
             ast_store_type = GetHandleTypeForSpirvHandle(var);
@@ -1600,7 +1595,7 @@ const ast::Var* ParserImpl::MakeVar(uint32_t id,
     // Handle variables (textures and samplers) are always in the handle
     // address space, so we don't mention the address space.
     if (address_space == type::AddressSpace::kHandle) {
-        address_space = type::AddressSpace::kNone;
+        address_space = type::AddressSpace::kUndefined;
     }
 
     if (!ConvertDecorationsForVariable(id, &storage_type, &decorations,

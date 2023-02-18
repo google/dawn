@@ -423,7 +423,7 @@ class ParserImpl : Reader {
     /// Creates an AST 'var' node for a SPIR-V ID, including any attached decorations, unless it's
     /// an ignorable builtin variable.
     /// @param id the SPIR-V result ID
-    /// @param address_space the address space, which cannot be type::AddressSpace::kNone
+    /// @param address_space the address space, which cannot be type::AddressSpace::kUndefined
     /// @param storage_type the storage type of the variable
     /// @param initializer the variable initializer
     /// @param decorations the variable decorations

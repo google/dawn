@@ -368,7 +368,7 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
     }
     o << " requires_named_let_def: " << (di.requires_named_let_def ? "true" : "false")
       << " requires_hoisted_var_def: " << (di.requires_hoisted_var_def ? "true" : "false");
-    if (di.pointer.address_space != type::AddressSpace::kNone) {
+    if (di.pointer.address_space != type::AddressSpace::kUndefined) {
         o << " sc:" << int(di.pointer.address_space);
     }
     switch (di.skip) {

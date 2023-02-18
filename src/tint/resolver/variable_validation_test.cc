@@ -113,7 +113,7 @@ TEST_F(ResolverVariableValidationTest, VarTypeNotConstructible) {
     // var p : pointer<function, i32> = &v;
     auto* i = Var("i", ty.i32());
     auto* p = Var("a", ty.pointer<i32>(Source{{56, 78}}, type::AddressSpace::kFunction),
-                  type::AddressSpace::kNone, AddressOf(Source{{12, 34}}, "i"));
+                  type::AddressSpace::kUndefined, AddressOf(Source{{12, 34}}, "i"));
     WrapInFunction(i, p);
 
     EXPECT_FALSE(r()->Resolve());

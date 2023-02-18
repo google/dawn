@@ -374,7 +374,8 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out, const ast::BitcastExpression*
                dst_type->is_float_scalar_or_vector()) {
         out << "uintBitsToFloat";
     } else {
-        if (!EmitType(out, dst_type, type::AddressSpace::kNone, type::Access::kReadWrite, "")) {
+        if (!EmitType(out, dst_type, type::AddressSpace::kUndefined, type::Access::kReadWrite,
+                      "")) {
             return false;
         }
     }
@@ -437,12 +438,12 @@ bool GeneratorImpl::EmitBitwiseBoolOp(std::ostream& out, const ast::BinaryExpres
     auto* uint_type = BoolTypeToUint(bool_type);
 
     // Cast result to bool scalar or vector type.
-    if (!EmitType(out, bool_type, type::AddressSpace::kNone, type::Access::kReadWrite, "")) {
+    if (!EmitType(out, bool_type, type::AddressSpace::kUndefined, type::Access::kReadWrite, "")) {
         return false;
     }
     ScopedParen outerCastParen(out);
     // Cast LHS to uint scalar or vector type.
-    if (!EmitType(out, uint_type, type::AddressSpace::kNone, type::Access::kReadWrite, "")) {
+    if (!EmitType(out, uint_type, type::AddressSpace::kUndefined, type::Access::kReadWrite, "")) {
         return false;
     }
     {
@@ -462,7 +463,7 @@ bool GeneratorImpl::EmitBitwiseBoolOp(std::ostream& out, const ast::BinaryExpres
         return false;
     }
     // Cast RHS to uint scalar or vector type.
-    if (!EmitType(out, uint_type, type::AddressSpace::kNone, type::Access::kReadWrite, "")) {
+    if (!EmitType(out, uint_type, type::AddressSpace::kUndefined, type::Access::kReadWrite, "")) {
         return false;
     }
     {
@@ -480,43 +481,43 @@ bool GeneratorImpl::EmitFloatModulo(std::ostream& out, const ast::BinaryExpressi
     auto* ret_ty = TypeOf(expr)->UnwrapRef();
     auto* lhs_ty = TypeOf(expr->lhs)->UnwrapRef();
     auto* rhs_ty = TypeOf(expr->rhs)->UnwrapRef();
-    fn = utils::GetOrCreate(float_modulo_funcs_, BinaryOperandType{{lhs_ty, rhs_ty}},
-                            [&]() -> std::string {
-                                TextBuffer b;
-                                TINT_DEFER(helpers_.Append(b));
+    fn = utils::GetOrCreate(
+        float_modulo_funcs_, BinaryOperandType{{lhs_ty, rhs_ty}}, [&]() -> std::string {
+            TextBuffer b;
+            TINT_DEFER(helpers_.Append(b));
 
-                                auto fn_name = UniqueIdentifier("tint_float_modulo");
-                                std::vector<std::string> parameter_names;
-                                {
-                                    auto decl = line(&b);
-                                    if (!EmitTypeAndName(decl, ret_ty, type::AddressSpace::kNone,
-                                                         type::Access::kUndefined, fn_name)) {
-                                        return "";
-                                    }
-                                    {
-                                        ScopedParen sp(decl);
-                                        const auto* ty = TypeOf(expr->lhs)->UnwrapRef();
-                                        if (!EmitTypeAndName(decl, ty, type::AddressSpace::kNone,
-                                                             type::Access::kUndefined, "lhs")) {
-                                            return "";
-                                        }
-                                        decl << ", ";
-                                        ty = TypeOf(expr->rhs)->UnwrapRef();
-                                        if (!EmitTypeAndName(decl, ty, type::AddressSpace::kNone,
-                                                             type::Access::kUndefined, "rhs")) {
-                                            return "";
-                                        }
-                                    }
-                                    decl << " {";
-                                }
-                                {
-                                    ScopedIndent si(&b);
-                                    line(&b) << "return (lhs - rhs * trunc(lhs / rhs));";
-                                }
-                                line(&b) << "}";
-                                line(&b);
-                                return fn_name;
-                            });
+            auto fn_name = UniqueIdentifier("tint_float_modulo");
+            std::vector<std::string> parameter_names;
+            {
+                auto decl = line(&b);
+                if (!EmitTypeAndName(decl, ret_ty, type::AddressSpace::kUndefined,
+                                     type::Access::kUndefined, fn_name)) {
+                    return "";
+                }
+                {
+                    ScopedParen sp(decl);
+                    const auto* ty = TypeOf(expr->lhs)->UnwrapRef();
+                    if (!EmitTypeAndName(decl, ty, type::AddressSpace::kUndefined,
+                                         type::Access::kUndefined, "lhs")) {
+                        return "";
+                    }
+                    decl << ", ";
+                    ty = TypeOf(expr->rhs)->UnwrapRef();
+                    if (!EmitTypeAndName(decl, ty, type::AddressSpace::kUndefined,
+                                         type::Access::kUndefined, "rhs")) {
+                        return "";
+                    }
+                }
+                decl << " {";
+            }
+            {
+                ScopedIndent si(&b);
+                line(&b) << "return (lhs - rhs * trunc(lhs / rhs));";
+            }
+            line(&b) << "}";
+            line(&b);
+            return fn_name;
+        });
 
     if (fn.empty()) {
         return false;
@@ -826,7 +827,8 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
 bool GeneratorImpl::EmitTypeConversion(std::ostream& out,
                                        const sem::Call* call,
                                        const sem::TypeConversion* conv) {
-    if (!EmitType(out, conv->Target(), type::AddressSpace::kNone, type::Access::kReadWrite, "")) {
+    if (!EmitType(out, conv->Target(), type::AddressSpace::kUndefined, type::Access::kReadWrite,
+                  "")) {
         return false;
     }
     ScopedParen sp(out);
@@ -849,7 +851,7 @@ bool GeneratorImpl::EmitTypeInitializer(std::ostream& out,
         return EmitZeroValue(out, type);
     }
 
-    if (!EmitType(out, type, type::AddressSpace::kNone, type::Access::kReadWrite, "")) {
+    if (!EmitType(out, type, type::AddressSpace::kUndefined, type::Access::kReadWrite, "")) {
         return false;
     }
     ScopedParen sp(out);
@@ -919,7 +921,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
 
             {
                 auto pre = line();
-                if (!EmitTypeAndName(pre, builtin->ReturnType(), type::AddressSpace::kNone,
+                if (!EmitTypeAndName(pre, builtin->ReturnType(), type::AddressSpace::kUndefined,
                                      type::Access::kUndefined, result)) {
                     return false;
                 }
@@ -1057,7 +1059,7 @@ bool GeneratorImpl::EmitEmulatedFMA(std::ostream& out, const ast::CallExpression
 bool GeneratorImpl::EmitCountOneBitsCall(std::ostream& out, const ast::CallExpression* expr) {
     // GLSL's bitCount returns an integer type, so cast it to the appropriate
     // unsigned type.
-    if (!EmitType(out, TypeOf(expr)->UnwrapRef(), type::AddressSpace::kNone,
+    if (!EmitType(out, TypeOf(expr)->UnwrapRef(), type::AddressSpace::kUndefined,
                   type::Access::kReadWrite, "")) {
         return false;
     }
@@ -1129,24 +1131,24 @@ bool GeneratorImpl::EmitDotCall(std::ostream& out,
             std::string v;
             {
                 std::stringstream s;
-                if (!EmitType(s, vec_ty->type(), type::AddressSpace::kNone, type::Access::kRead,
-                              "")) {
+                if (!EmitType(s, vec_ty->type(), type::AddressSpace::kUndefined,
+                              type::Access::kRead, "")) {
                     return "";
                 }
                 v = s.str();
             }
             {  // (u)int tint_int_dot([i|u]vecN a, [i|u]vecN b) {
                 auto l = line(&b);
-                if (!EmitType(l, vec_ty->type(), type::AddressSpace::kNone, type::Access::kRead,
-                              "")) {
+                if (!EmitType(l, vec_ty->type(), type::AddressSpace::kUndefined,
+                              type::Access::kRead, "")) {
                     return "";
                 }
                 l << " " << fn_name << "(";
-                if (!EmitType(l, vec_ty, type::AddressSpace::kNone, type::Access::kRead, "")) {
+                if (!EmitType(l, vec_ty, type::AddressSpace::kUndefined, type::Access::kRead, "")) {
                     return "";
                 }
                 l << " a, ";
-                if (!EmitType(l, vec_ty, type::AddressSpace::kNone, type::Access::kRead, "")) {
+                if (!EmitType(l, vec_ty, type::AddressSpace::kUndefined, type::Access::kRead, "")) {
                     return "";
                 }
                 l << " b) {";
@@ -1197,7 +1199,7 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
 
             {
                 auto l = line(b);
-                if (!EmitType(l, builtin->ReturnType(), type::AddressSpace::kNone,
+                if (!EmitType(l, builtin->ReturnType(), type::AddressSpace::kUndefined,
                               type::Access::kUndefined, "")) {
                     return false;
                 }
@@ -1223,7 +1225,7 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
 
             {
                 auto l = line(b);
-                if (!EmitType(l, builtin->ReturnType(), type::AddressSpace::kNone,
+                if (!EmitType(l, builtin->ReturnType(), type::AddressSpace::kUndefined,
                               type::Access::kUndefined, "")) {
                     return false;
                 }
@@ -1881,8 +1883,8 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
     {
         auto out = line();
         auto name = builder_.Symbols().NameFor(func->name->symbol);
-        if (!EmitType(out, sem->ReturnType(), type::AddressSpace::kNone, type::Access::kReadWrite,
-                      "")) {
+        if (!EmitType(out, sem->ReturnType(), type::AddressSpace::kUndefined,
+                      type::Access::kReadWrite, "")) {
             return false;
         }
 
@@ -1907,7 +1909,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
                 type = ptr->StoreType();
             }
 
-            // Note: WGSL only allows for AddressSpace::kNone on parameters, however
+            // Note: WGSL only allows for AddressSpace::kUndefined on parameters, however
             // the sanitizer transforms generates load / store functions for storage
             // or uniform buffers. These functions have a buffer parameter with
             // AddressSpace::kStorage or AddressSpace::kUniform. This is required to
@@ -2339,7 +2341,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const constant::Value* const
             return true;
         },
         [&](const type::Vector* v) {
-            if (!EmitType(out, v, type::AddressSpace::kNone, type::Access::kUndefined, "")) {
+            if (!EmitType(out, v, type::AddressSpace::kUndefined, type::Access::kUndefined, "")) {
                 return false;
             }
 
@@ -2360,7 +2362,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const constant::Value* const
             return true;
         },
         [&](const type::Matrix* m) {
-            if (!EmitType(out, m, type::AddressSpace::kNone, type::Access::kUndefined, "")) {
+            if (!EmitType(out, m, type::AddressSpace::kUndefined, type::Access::kUndefined, "")) {
                 return false;
             }
 
@@ -2377,7 +2379,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const constant::Value* const
             return true;
         },
         [&](const type::Array* a) {
-            if (!EmitType(out, a, type::AddressSpace::kNone, type::Access::kUndefined, "")) {
+            if (!EmitType(out, a, type::AddressSpace::kUndefined, type::Access::kUndefined, "")) {
                 return false;
             }
 
@@ -2469,7 +2471,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const type::Type* type) {
     } else if (type->Is<type::U32>()) {
         out << "0u";
     } else if (auto* vec = type->As<type::Vector>()) {
-        if (!EmitType(out, type, type::AddressSpace::kNone, type::Access::kReadWrite, "")) {
+        if (!EmitType(out, type, type::AddressSpace::kUndefined, type::Access::kReadWrite, "")) {
             return false;
         }
         ScopedParen sp(out);
@@ -2482,7 +2484,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const type::Type* type) {
             }
         }
     } else if (auto* mat = type->As<type::Matrix>()) {
-        if (!EmitType(out, type, type::AddressSpace::kNone, type::Access::kReadWrite, "")) {
+        if (!EmitType(out, type, type::AddressSpace::kUndefined, type::Access::kReadWrite, "")) {
             return false;
         }
         ScopedParen sp(out);
@@ -2495,7 +2497,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const type::Type* type) {
             }
         }
     } else if (auto* str = type->As<sem::Struct>()) {
-        if (!EmitType(out, type, type::AddressSpace::kNone, type::Access::kUndefined, "")) {
+        if (!EmitType(out, type, type::AddressSpace::kUndefined, type::Access::kUndefined, "")) {
             return false;
         }
         bool first = true;
@@ -2509,7 +2511,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const type::Type* type) {
             EmitZeroValue(out, member->Type());
         }
     } else if (auto* arr = type->As<type::Array>()) {
-        if (!EmitType(out, type, type::AddressSpace::kNone, type::Access::kUndefined, "")) {
+        if (!EmitType(out, type, type::AddressSpace::kUndefined, type::Access::kUndefined, "")) {
             return false;
         }
         ScopedParen sp(out);
@@ -3052,7 +3054,8 @@ bool GeneratorImpl::EmitStructMembers(TextBuffer* b, const sem::Struct* str) {
 
         auto out = line(b);
 
-        if (!EmitTypeAndName(out, ty, type::AddressSpace::kNone, type::Access::kReadWrite, name)) {
+        if (!EmitTypeAndName(out, ty, type::AddressSpace::kUndefined, type::Access::kReadWrite,
+                             name)) {
             return false;
         }
         out << ";";
@@ -3120,7 +3123,7 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
 
     auto out = line();
     // TODO(senorblanco): handle const
-    if (!EmitTypeAndName(out, type, type::AddressSpace::kNone, type::Access::kUndefined,
+    if (!EmitTypeAndName(out, type, type::AddressSpace::kUndefined, type::Access::kUndefined,
                          builder_.Symbols().NameFor(let->name->symbol))) {
         return false;
     }
@@ -3142,7 +3145,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
 
     auto out = line();
     out << "const ";
-    if (!EmitTypeAndName(out, type, type::AddressSpace::kNone, type::Access::kUndefined,
+    if (!EmitTypeAndName(out, type, type::AddressSpace::kUndefined, type::Access::kUndefined,
                          builder_.Symbols().NameFor(var->name->symbol))) {
         return false;
     }
@@ -3169,7 +3172,7 @@ bool GeneratorImpl::CallBuiltinHelper(std::ostream& out,
         std::vector<std::string> parameter_names;
         {
             auto decl = line(&b);
-            if (!EmitTypeAndName(decl, builtin->ReturnType(), type::AddressSpace::kNone,
+            if (!EmitTypeAndName(decl, builtin->ReturnType(), type::AddressSpace::kUndefined,
                                  type::Access::kUndefined, fn_name)) {
                 return "";
             }
@@ -3185,7 +3188,7 @@ bool GeneratorImpl::CallBuiltinHelper(std::ostream& out,
                         decl << "inout ";
                         ty = ptr->StoreType();
                     }
-                    if (!EmitTypeAndName(decl, ty, type::AddressSpace::kNone,
+                    if (!EmitTypeAndName(decl, ty, type::AddressSpace::kUndefined,
                                          type::Access::kUndefined, param_name)) {
                         return "";
                     }

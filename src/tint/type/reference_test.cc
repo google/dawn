@@ -59,7 +59,7 @@ TEST_F(ReferenceTest, Equals) {
 }
 
 TEST_F(ReferenceTest, FriendlyName) {
-    auto* r = create<Reference>(create<I32>(), AddressSpace::kNone, type::Access::kRead);
+    auto* r = create<Reference>(create<I32>(), AddressSpace::kUndefined, type::Access::kRead);
     EXPECT_EQ(r->FriendlyName(Symbols()), "ref<i32, read>");
 }
 

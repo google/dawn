@@ -623,7 +623,7 @@ TEST_P(PtrDataTest, ConvertAddressSpace) {
 INSTANTIATE_TEST_SUITE_P(
     BuilderTest_Type,
     PtrDataTest,
-    testing::Values(PtrData{type::AddressSpace::kNone, SpvStorageClassMax},
+    testing::Values(PtrData{type::AddressSpace::kUndefined, SpvStorageClassMax},
                     PtrData{type::AddressSpace::kIn, SpvStorageClassInput},
                     PtrData{type::AddressSpace::kOut, SpvStorageClassOutput},
                     PtrData{type::AddressSpace::kUniform, SpvStorageClassUniform},

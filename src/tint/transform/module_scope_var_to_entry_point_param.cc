@@ -321,7 +321,7 @@ struct ModuleScopeVarToEntryPointParam::State {
 
             bool needs_processing = false;
             for (auto* var : func_sem->TransitivelyReferencedGlobals()) {
-                if (var->AddressSpace() != type::AddressSpace::kNone) {
+                if (var->AddressSpace() != type::AddressSpace::kUndefined) {
                     needs_processing = true;
                     break;
                 }
@@ -378,7 +378,7 @@ struct ModuleScopeVarToEntryPointParam::State {
 
             // Process and redeclare all variables referenced by the function.
             for (auto* var : func_sem->TransitivelyReferencedGlobals()) {
-                if (var->AddressSpace() == type::AddressSpace::kNone) {
+                if (var->AddressSpace() == type::AddressSpace::kUndefined) {
                     continue;
                 }
                 if (local_private_vars_.count(var)) {
@@ -470,7 +470,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                 // For entry points, pass non-handle types as pointers.
                 for (auto* target_var : target_sem->TransitivelyReferencedGlobals()) {
                     auto sc = target_var->AddressSpace();
-                    if (sc == type::AddressSpace::kNone) {
+                    if (sc == type::AddressSpace::kUndefined) {
                         continue;
                     }
 
@@ -501,7 +501,7 @@ struct ModuleScopeVarToEntryPointParam::State {
         // Now remove all module-scope variables with these address spaces.
         for (auto* var_ast : ctx.src->AST().GlobalVariables()) {
             auto* var_sem = ctx.src->Sem().Get(var_ast);
-            if (var_sem->AddressSpace() != type::AddressSpace::kNone) {
+            if (var_sem->AddressSpace() != type::AddressSpace::kUndefined) {
                 ctx.Remove(ctx.src->AST().GlobalDeclarations(), var_ast);
             }
         }

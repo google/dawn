@@ -255,11 +255,11 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
         ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
     }
 
-    if (rhs && !validator_.VariableInitializer(v, type::AddressSpace::kNone, ty, rhs)) {
+    if (rhs && !validator_.VariableInitializer(v, type::AddressSpace::kUndefined, ty, rhs)) {
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kNone, const_cast<type::Type*>(ty),
+    if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kUndefined, const_cast<type::Type*>(ty),
                                       v->source)) {
         AddNote("while instantiating 'let' " + builder_->Symbols().NameFor(v->name->symbol),
                 v->source);
@@ -269,12 +269,12 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
     sem::Variable* sem = nullptr;
     if (is_global) {
         sem = builder_->create<sem::GlobalVariable>(
-            v, ty, sem::EvaluationStage::kRuntime, type::AddressSpace::kNone,
+            v, ty, sem::EvaluationStage::kRuntime, type::AddressSpace::kUndefined,
             type::Access::kUndefined,
             /* constant_value */ nullptr, sem::BindingPoint{}, std::nullopt);
     } else {
         sem = builder_->create<sem::LocalVariable>(v, ty, sem::EvaluationStage::kRuntime,
-                                                   type::AddressSpace::kNone,
+                                                   type::AddressSpace::kUndefined,
                                                    type::Access::kUndefined, current_statement_,
                                                    /* constant_value */ nullptr);
     }
@@ -318,11 +318,11 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         return nullptr;
     }
 
-    if (rhs && !validator_.VariableInitializer(v, type::AddressSpace::kNone, ty, rhs)) {
+    if (rhs && !validator_.VariableInitializer(v, type::AddressSpace::kUndefined, ty, rhs)) {
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kNone, const_cast<type::Type*>(ty),
+    if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kUndefined, const_cast<type::Type*>(ty),
                                       v->source)) {
         AddNote("while instantiating 'override' " + builder_->Symbols().NameFor(v->name->symbol),
                 v->source);
@@ -330,7 +330,8 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
     }
 
     auto* sem = builder_->create<sem::GlobalVariable>(
-        v, ty, sem::EvaluationStage::kOverride, type::AddressSpace::kNone, type::Access::kUndefined,
+        v, ty, sem::EvaluationStage::kOverride, type::AddressSpace::kUndefined,
+        type::Access::kUndefined,
         /* constant_value */ nullptr, sem::BindingPoint{}, std::nullopt);
     sem->SetInitializer(rhs);
 
@@ -411,11 +412,11 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
         ty = rhs->Type();
     }
 
-    if (!validator_.VariableInitializer(c, type::AddressSpace::kNone, ty, rhs)) {
+    if (!validator_.VariableInitializer(c, type::AddressSpace::kUndefined, ty, rhs)) {
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kNone, const_cast<type::Type*>(ty),
+    if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kUndefined, const_cast<type::Type*>(ty),
                                       c->source)) {
         AddNote("while instantiating 'const' " + builder_->Symbols().NameFor(c->name->symbol),
                 c->source);
@@ -423,12 +424,13 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
     }
 
     const auto value = rhs->ConstantValue();
-    auto* sem = is_global ? static_cast<sem::Variable*>(builder_->create<sem::GlobalVariable>(
-                                c, ty, sem::EvaluationStage::kConstant, type::AddressSpace::kNone,
-                                type::Access::kUndefined, value, sem::BindingPoint{}, std::nullopt))
-                          : static_cast<sem::Variable*>(builder_->create<sem::LocalVariable>(
-                                c, ty, sem::EvaluationStage::kConstant, type::AddressSpace::kNone,
-                                type::Access::kUndefined, current_statement_, value));
+    auto* sem = is_global
+                    ? static_cast<sem::Variable*>(builder_->create<sem::GlobalVariable>(
+                          c, ty, sem::EvaluationStage::kConstant, type::AddressSpace::kUndefined,
+                          type::Access::kUndefined, value, sem::BindingPoint{}, std::nullopt))
+                    : static_cast<sem::Variable*>(builder_->create<sem::LocalVariable>(
+                          c, ty, sem::EvaluationStage::kConstant, type::AddressSpace::kUndefined,
+                          type::Access::kUndefined, current_statement_, value));
 
     sem->SetInitializer(rhs);
     builder_->Sem().Add(c, sem);
@@ -472,7 +474,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
     }
 
     auto address_space = var->declared_address_space;
-    if (address_space == type::AddressSpace::kNone) {
+    if (address_space == type::AddressSpace::kUndefined) {
         // No declared address space. Infer from usage / type.
         if (!is_global) {
             address_space = type::AddressSpace::kFunction;
@@ -608,7 +610,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kNone, ty, param->type->source)) {
+    if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kUndefined, ty, param->type->source)) {
         add_note();
         return nullptr;
     }
@@ -659,7 +661,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
     }
 
     auto* sem = builder_->create<sem::Parameter>(
-        param, index, ty, type::AddressSpace::kNone, type::Access::kUndefined,
+        param, index, ty, type::AddressSpace::kUndefined, type::Access::kUndefined,
         sem::ParameterUsage::kNone, binding_point, location);
     builder_->Sem().Add(param, sem);
     return sem;
@@ -919,7 +921,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     }
 
     if (auto* str = return_type->As<sem::Struct>()) {
-        if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kNone, str, decl->source)) {
+        if (!ApplyAddressSpaceUsageToType(type::AddressSpace::kUndefined, str, decl->source)) {
             AddNote("while instantiating return type for " +
                         builder_->Symbols().NameFor(decl->name->symbol),
                     decl->source);
@@ -2009,10 +2011,10 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     [&]() -> sem::TypeInitializer* {
                         auto params = utils::Transform(args, [&](auto, size_t i) {
                             return builder_->create<sem::Parameter>(
-                                nullptr,                    // declaration
-                                static_cast<uint32_t>(i),   // index
-                                arr->ElemType(),            // type
-                                type::AddressSpace::kNone,  // address_space
+                                nullptr,                         // declaration
+                                static_cast<uint32_t>(i),        // index
+                                arr->ElemType(),                 // type
+                                type::AddressSpace::kUndefined,  // address_space
                                 type::Access::kUndefined);
                         });
                         return builder_->create<sem::TypeInitializer>(arr, std::move(params),
@@ -2038,11 +2040,11 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                         params.Resize(std::min(args.Length(), str->Members().Length()));
                         for (size_t i = 0, n = params.Length(); i < n; i++) {
                             params[i] = builder_->create<sem::Parameter>(
-                                nullptr,                    // declaration
-                                static_cast<uint32_t>(i),   // index
-                                str->Members()[i]->Type(),  // type
-                                type::AddressSpace::kNone,  // address_space
-                                type::Access::kUndefined);  // access
+                                nullptr,                         // declaration
+                                static_cast<uint32_t>(i),        // index
+                                str->Members()[i]->Type(),       // type
+                                type::AddressSpace::kUndefined,  // address_space
+                                type::Access::kUndefined);       // access
                         }
                         return builder_->create<sem::TypeInitializer>(str, std::move(params),
                                                                       args_stage);

@@ -59,7 +59,7 @@ TEST_F(PointerTest, Equals) {
 }
 
 TEST_F(PointerTest, FriendlyName) {
-    auto* r = create<Pointer>(create<I32>(), AddressSpace::kNone, type::Access::kRead);
+    auto* r = create<Pointer>(create<I32>(), AddressSpace::kUndefined, type::Access::kRead);
     EXPECT_EQ(r->FriendlyName(Symbols()), "ptr<i32, read>");
 }
 

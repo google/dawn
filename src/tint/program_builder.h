@@ -225,7 +225,7 @@ class ProgramBuilder {
         ~VarOptions();
 
         ast::Type type;
-        type::AddressSpace address_space = type::AddressSpace::kNone;
+        type::AddressSpace address_space = type::AddressSpace::kUndefined;
         type::Access access = type::Access::kUndefined;
         const ast::Expression* initializer = nullptr;
         utils::Vector<const ast::Attribute*, 4> attributes;

@@ -2521,11 +2521,11 @@ bool FunctionEmitter::EmitFunctionVariables() {
                 return false;
             }
         }
-        auto* var = parser_impl_.MakeVar(inst.result_id(), type::AddressSpace::kNone,
+        auto* var = parser_impl_.MakeVar(inst.result_id(), type::AddressSpace::kUndefined,
                                          var_store_type, initializer, AttributeList{});
         auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
         AddStatement(var_decl_stmt);
-        auto* var_type = ty_.Reference(var_store_type, type::AddressSpace::kNone);
+        auto* var_type = ty_.Reference(var_store_type, type::AddressSpace::kUndefined);
         identifier_types_.emplace(inst.result_id(), var_type);
     }
     return success();
@@ -3367,9 +3367,9 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         // no need to remap pointer properties.
         auto* store_type = parser_impl_.ConvertType(def_inst->type_id());
         AddStatement(create<ast::VariableDeclStatement>(
-            Source{}, parser_impl_.MakeVar(id, type::AddressSpace::kNone, store_type, nullptr,
+            Source{}, parser_impl_.MakeVar(id, type::AddressSpace::kUndefined, store_type, nullptr,
                                            AttributeList{})));
-        auto* type = ty_.Reference(store_type, type::AddressSpace::kNone);
+        auto* type = ty_.Reference(store_type, type::AddressSpace::kUndefined);
         identifier_types_.emplace(id, type);
     }
 
@@ -6190,8 +6190,8 @@ bool FunctionEmitter::MakeVectorInsertDynamic(const spvtools::opt::Instruction& 
         // API in parser_impl_.
         var_name = namer_.MakeDerivedName(original_value_name);
 
-        auto* temp_var = builder_.Var(var_name, type->Build(builder_), type::AddressSpace::kNone,
-                                      src_vector.expr);
+        auto* temp_var = builder_.Var(var_name, type->Build(builder_),
+                                      type::AddressSpace::kUndefined, src_vector.expr);
 
         AddStatement(builder_.Decl({}, temp_var));
     }
@@ -6260,8 +6260,8 @@ bool FunctionEmitter::MakeCompositeInsert(const spvtools::opt::Instruction& inst
         // It doesn't correspond to a SPIR-V ID, so we don't use the ordinary
         // API in parser_impl_.
         var_name = namer_.MakeDerivedName(original_value_name);
-        auto* temp_var = builder_.Var(var_name, type->Build(builder_), type::AddressSpace::kNone,
-                                      src_composite.expr);
+        auto* temp_var = builder_.Var(var_name, type->Build(builder_),
+                                      type::AddressSpace::kUndefined, src_composite.expr);
         AddStatement(builder_.Decl({}, temp_var));
     }
 

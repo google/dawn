@@ -612,7 +612,7 @@ bool Validator::GlobalVariable(
                 return false;
             }
 
-            if (global->AddressSpace() == type::AddressSpace::kNone) {
+            if (global->AddressSpace() == type::AddressSpace::kUndefined) {
                 AddError("module-scope 'var' declaration must have a address space", decl->source);
                 return false;
             }
@@ -697,7 +697,7 @@ bool Validator::Var(const sem::Variable* v) const {
     }
 
     if (store_ty->is_handle()) {
-        if (var->declared_address_space != type::AddressSpace::kNone) {
+        if (var->declared_address_space != type::AddressSpace::kUndefined) {
             // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
             // If the store type is a texture type or a sampler type, then the variable declaration
             // must not have a address space attribute. The address space will always be handle.

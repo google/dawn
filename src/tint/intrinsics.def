@@ -74,7 +74,6 @@ enum extension {
 
 // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 enum address_space {
-  @internal none
   function
   private
   workgroup

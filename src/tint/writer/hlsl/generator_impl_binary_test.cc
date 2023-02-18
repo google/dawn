@@ -575,7 +575,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
     GlobalVar("d", ty.bool_(), type::AddressSpace::kPrivate);
 
     auto* var =
-        Var("a", ty.bool_(), type::AddressSpace::kNone,
+        Var("a", ty.bool_(), type::AddressSpace::kUndefined,
             create<ast::BinaryExpression>(
                 ast::BinaryOp::kLogicalOr,
                 create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("b"), Expr("c")),

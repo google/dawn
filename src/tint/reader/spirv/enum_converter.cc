@@ -49,7 +49,7 @@ type::AddressSpace EnumConverter::ToAddressSpace(const spv::StorageClass sc) {
         case spv::StorageClass::Workgroup:
             return type::AddressSpace::kWorkgroup;
         case spv::StorageClass::UniformConstant:
-            return type::AddressSpace::kNone;
+            return type::AddressSpace::kUndefined;
         case spv::StorageClass::StorageBuffer:
             return type::AddressSpace::kStorage;
         case spv::StorageClass::Private:

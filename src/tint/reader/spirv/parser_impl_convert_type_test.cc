@@ -783,22 +783,6 @@ TEST_F(SpvParserTest, ConvertType_PointerWorkgroup) {
     EXPECT_TRUE(p->error().empty());
 }
 
-TEST_F(SpvParserTest, ConvertType_PointerUniformConstant) {
-    auto p = parser(test::Assemble(Preamble() + R"(
-  %float = OpTypeFloat 32
-  %3 = OpTypePointer UniformConstant %float
-  )" + MainBody()));
-    EXPECT_TRUE(p->BuildInternalModule());
-
-    auto* type = p->ConvertType(3);
-    EXPECT_TRUE(type->Is<Pointer>());
-    auto* ptr_ty = type->As<Pointer>();
-    EXPECT_NE(ptr_ty, nullptr);
-    EXPECT_TRUE(ptr_ty->type->Is<F32>());
-    EXPECT_EQ(ptr_ty->address_space, type::AddressSpace::kNone);
-    EXPECT_TRUE(p->error().empty());
-}
-
 TEST_F(SpvParserTest, ConvertType_PointerStorageBuffer) {
     auto p = parser(test::Assemble(Preamble() + R"(
   %float = OpTypeFloat 32

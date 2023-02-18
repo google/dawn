@@ -46,7 +46,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableFromParameter) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kNone));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kUndefined));
 }
 
 TEST_F(ResolverAddressSpaceUseTest, StructReachableFromReturnType) {
@@ -58,7 +58,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableFromReturnType) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kNone));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kUndefined));
 }
 
 TEST_F(ResolverAddressSpaceUseTest, StructReachableFromGlobal) {

@@ -1275,8 +1275,8 @@ Impl::Builtin Impl::Lookup(sem::BuiltinType builtin_type,
         params.Reserve(match.parameters.Length());
         for (auto& p : match.parameters) {
             params.Push(builder.create<sem::Parameter>(
-                nullptr, static_cast<uint32_t>(params.Length()), p.type, type::AddressSpace::kNone,
-                type::Access::kUndefined, p.usage));
+                nullptr, static_cast<uint32_t>(params.Length()), p.type,
+                type::AddressSpace::kUndefined, type::Access::kUndefined, p.usage));
         }
         sem::PipelineStageSet supported_stages;
         if (match.overload->flags.Contains(OverloadFlag::kSupportsVertexPipeline)) {
@@ -1476,8 +1476,8 @@ IntrinsicTable::InitOrConv Impl::Lookup(InitConvIntrinsic type,
         params.Reserve(match.parameters.Length());
         for (auto& p : match.parameters) {
             params.Push(builder.create<sem::Parameter>(
-                nullptr, static_cast<uint32_t>(params.Length()), p.type, type::AddressSpace::kNone,
-                type::Access::kUndefined, p.usage));
+                nullptr, static_cast<uint32_t>(params.Length()), p.type,
+                type::AddressSpace::kUndefined, type::Access::kUndefined, p.usage));
         }
         auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
                                                         : sem::EvaluationStage::kRuntime;
@@ -1491,7 +1491,7 @@ IntrinsicTable::InitOrConv Impl::Lookup(InitConvIntrinsic type,
     // Conversion.
     auto* target = converters.GetOrCreate(match, [&]() {
         auto param = builder.create<sem::Parameter>(
-            nullptr, 0u, match.parameters[0].type, type::AddressSpace::kNone,
+            nullptr, 0u, match.parameters[0].type, type::AddressSpace::kUndefined,
             type::Access::kUndefined, match.parameters[0].usage);
         auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
                                                         : sem::EvaluationStage::kRuntime;

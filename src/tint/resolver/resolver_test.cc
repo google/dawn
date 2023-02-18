@@ -1901,7 +1901,7 @@ TEST_F(ResolverTest, AddressSpace_DoesNotSetOnConst) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    EXPECT_EQ(Sem().Get(var)->AddressSpace(), type::AddressSpace::kNone);
+    EXPECT_EQ(Sem().Get(var)->AddressSpace(), type::AddressSpace::kUndefined);
 }
 
 TEST_F(ResolverTest, Access_SetForStorageBuffer) {

@@ -59,8 +59,6 @@ std::ostream& operator<<(std::ostream& out, AddressSpace value) {
             return out << "handle";
         case AddressSpace::kIn:
             return out << "in";
-        case AddressSpace::kNone:
-            return out << "none";
         case AddressSpace::kOut:
             return out << "out";
         case AddressSpace::kPrivate:

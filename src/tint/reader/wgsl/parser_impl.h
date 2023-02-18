@@ -292,7 +292,7 @@ class ParserImpl {
         /// Variable name
         std::string name;
         /// Variable address space
-        type::AddressSpace address_space = type::AddressSpace::kNone;
+        type::AddressSpace address_space = type::AddressSpace::kUndefined;
         /// Variable access control
         type::Access access = type::Access::kUndefined;
         /// Variable type
@@ -302,7 +302,7 @@ class ParserImpl {
     /// VariableQualifier contains the parsed information for a variable qualifier
     struct VariableQualifier {
         /// The variable's address space
-        type::AddressSpace address_space = type::AddressSpace::kNone;
+        type::AddressSpace address_space = type::AddressSpace::kUndefined;
         /// The variable's access control
         type::Access access = type::Access::kUndefined;
     };
@@ -449,7 +449,7 @@ class ParserImpl {
     Maybe<ast::Type> type_specifier();
     /// Parses an `address_space` grammar element, erroring on parse failure.
     /// @param use a description of what was being parsed if an error was raised.
-    /// @returns the address space or type::AddressSpace::kNone if none matched
+    /// @returns the address space or type::AddressSpace::kUndefined if none matched
     Expect<type::AddressSpace> expect_address_space(std::string_view use);
     /// Parses a `struct_decl` grammar element.
     /// @returns the struct type or nullptr on error

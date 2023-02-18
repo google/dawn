@@ -45,7 +45,7 @@ bool Pointer::Equals(const UniqueNode& other) const {
 std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
     std::ostringstream out;
     out << "ptr<";
-    if (address_space_ != AddressSpace::kNone) {
+    if (address_space_ != AddressSpace::kUndefined) {
         out << address_space_ << ", ";
     }
     out << subtype_->FriendlyName(symbols) << ", " << access_;
