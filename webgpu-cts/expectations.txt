@@ -62,7 +62,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2023-01-25 02:46:43PM
+# Last rolled: 2023-02-17 06:07:07AM
 
 ################################################################################
 # copyToTexture failures on Linux
@@ -76,14 +76,14 @@ crbug.com/1236130 [ linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:
 # Skipped instead of just Crash because of the number of failures
 # KEEP
 ################################################################################
+crbug.com/1344876 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Skip ]
+crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Skip ]
 crbug.com/1344876 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Skip ]
 crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Skip ]
 crbug.com/1344876 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ]
 crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ]
 crbug.com/1344876 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
 crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
-crbug.com/1344876 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Skip ]
-crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Skip ]
 
 ################################################################################
 # copyToTexture failures with incorrect values on Mac Intel
@@ -108,24 +108,6 @@ crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextur
 ################################################################################
 crbug.com/1406064 [ intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Slow ]
 crbug.com/1406064 [ intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Slow ]
-
-################################################################################
-# entry_point_name_must_match failures
-################################################################################
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
-
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
-
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:compute:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:compute:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:compute:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:compute:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
 
 ################################################################################
 # external_texture failures
@@ -173,38 +155,8 @@ crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp
 crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
 
 ################################################################################
-# Some tests are slow on code-coverage builders. These expectations prevent
-# tests from timing out before they generate full code coverage data.
-# Note, it's generally not important to suppress tests that are _failing_ on
-# code-coverage, because even failing tests provide coverage (though any
-# failures should hopefully be the same as other builders anyway).
-# KEEP
-################################################################################
-crbug.com/1399354 [ clang-coverage ] webgpu:shader,execution,expression,binary,i32_arithmetic:* [ Slow ]
-crbug.com/1399354 [ clang-coverage ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition:* [ Slow ]
-crbug.com/1399354 [ clang-coverage ] webgpu:shader,execution,expression,binary,f32_arithmetic:division:* [ Slow ]
-crbug.com/1399354 [ clang-coverage ] webgpu:shader,execution,expression,binary,f32_arithmetic:multiplication:* [ Slow ]
-crbug.com/1399354 [ clang-coverage ] webgpu:shader,execution,expression,binary,f32_arithmetic:subtraction:* [ Slow ]
-# TODO(crbug.com/dawn/1799): Remove platform filter here when conflicting expectations are removed
-crbug.com/1399354 [ clang-coverage linux ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:* [ Slow ]
-crbug.com/1399354 [ clang-coverage mac ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:* [ Slow ]
-crbug.com/1399354 [ clang-coverage win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="const";* [ Slow ]
-
-################################################################################
 # shader execution failures
 ################################################################################
-crbug.com/dawn/1799 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="storage_r";vectorize="_undef_" [ Failure ]
-crbug.com/dawn/1799 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="storage_r";vectorize=2 [ Failure ]
-crbug.com/dawn/1799 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="storage_r";vectorize=3 [ Failure ]
-crbug.com/dawn/1799 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="storage_r";vectorize=4 [ Failure ]
-crbug.com/dawn/1799 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
-crbug.com/dawn/1799 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="storage_rw";vectorize=2 [ Failure ]
-crbug.com/dawn/1799 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="storage_rw";vectorize=3 [ Failure ]
-crbug.com/dawn/1799 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="storage_rw";vectorize=4 [ Failure ]
-crbug.com/dawn/1799 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="uniform";vectorize="_undef_" [ Failure ]
-crbug.com/dawn/1799 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="uniform";vectorize=2 [ Failure ]
-crbug.com/dawn/1799 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="uniform";vectorize=3 [ Failure ]
-crbug.com/dawn/1799 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="uniform";vectorize=4 [ Failure ]
 crbug.com/tint/1794 [ intel-gen-9 ubuntu ] webgpu:shader,execution,expression,call,builtin,countTrailingZeros:i32:inputSource="storage_r";vectorize="_undef_" [ Failure ]
 crbug.com/tint/1794 [ intel-gen-9 ubuntu ] webgpu:shader,execution,expression,call,builtin,countTrailingZeros:i32:inputSource="storage_r";vectorize=2 [ Failure ]
 crbug.com/tint/1794 [ intel-gen-9 ubuntu ] webgpu:shader,execution,expression,call,builtin,countTrailingZeros:i32:inputSource="storage_r";vectorize=3 [ Failure ]
@@ -316,10 +268,8 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,memory_model,* [ Failure ]
 # shader validation failures
 ################################################################################
 crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="comment" [ Failure ]
-crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="eol" [ Failure ]
 crbug.com/tint/1771 [ ubuntu ] webgpu:api,validation,compute_pipeline:overrides,workgroup_size,limits,* [ Failure ]
 crbug.com/tint/1771 [ win10 ] webgpu:api,validation,compute_pipeline:overrides,workgroup_size,limits,* [ Failure ]
-crbug.com/tint/1805 webgpu:shader,validation,parse,align:align_required_alignment:* [ Failure ]
 
 ############################################################################
 # Flaky on Intel Mac
@@ -333,15 +283,6 @@ crbug.com/dawn/1500 [ intel-gen-9 monterey ] webgpu:api,operation,command_buffer
 # KEEP
 ################################################################################
 crbug.com/dawn/1599 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Failure ]
-
-################################################################################
-# Failures about the validation on the storage usage of bgra8unorm
-################################################################################
-crbug.com/dawn/1641 webgpu:api,validation,createBindGroupLayout:storage_texture,formats:format="bgra8unorm" [ Failure ]
-crbug.com/dawn/1641 webgpu:api,validation,createTexture:texture_usage:dimension="1d";format="bgra8unorm" [ Failure ]
-crbug.com/dawn/1641 webgpu:api,validation,createTexture:texture_usage:dimension="2d";format="bgra8unorm" [ Failure ]
-crbug.com/dawn/1641 webgpu:api,validation,createTexture:texture_usage:dimension="3d";format="bgra8unorm" [ Failure ]
-crbug.com/dawn/1641 webgpu:api,validation,createTexture:texture_usage:dimension="_undef_";format="bgra8unorm" [ Failure ]
 
 ################################################################################
 # untriaged failures
@@ -408,106 +349,90 @@ crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,readbackFromWebGPUCa
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba8unorm";alphaMode="premultiplied";webgl="webgl2";upload="texSubImage2D" [ Failure ]
 
 # New flakes. Please triage:
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-32 win10 ] worker_webgpu:api,operation,rendering,basic:large_draw:indexed=false;indirect=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 win10 ] worker_webgpu:api,validation,buffer,mapping:getMappedRange,offsetAndSizeAlignment,mappedAtCreation: [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-32 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-32 win10 ] worker_webgpu:api,validation,buffer,mapping:unmap,state,unmapped: [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 win10 ] worker_webgpu:api,validation,buffer,mapping:unmap,state,unmapped: [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 ubuntu ] webgpu:api,validation,render_pipeline,inter_stage:interpolation_type:isAsync=true;output="%40interpolate(perspective)";input="" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 ] webgpu:shader,execution,expression,binary,f32_arithmetic:division:inputSource="uniform";vectorize="_undef_" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 ] webgpu:shader,execution,expression,binary,f32_arithmetic:multiplication:inputSource="const";vectorize=3 [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 ] webgpu:shader,execution,expression,binary,f32_arithmetic:multiplication:inputSource="storage_r";vectorize="_undef_" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";srcDoFlipYDuringCopy=false;dstPremultiplied=false [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=true;dstColorFormat="rgba32float";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ RetryOnFailure ]
 
 # New failures. Please triage:
-crbug.com/dawn/0000 [ intel-gen-9 ubuntu ] webgpu:api,operation,render_pipeline,sample_mask:final_output:sampleCount=1;rasterizationMask=1 [ Failure ]
+crbug.com/dawn/0000 webgpu:api,operation,labels:object_has_descriptor_label:name="createComputePipelineAsync" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,operation,labels:object_has_descriptor_label:name="createRenderPipelineAsync" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,operation,labels:object_has_descriptor_label:name="finish" [ Failure ]
+crbug.com/dawn/0000 [ intel-gen-9 ubuntu ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:sampleCount=1;rasterizationMask=1 [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=-8388608;biasSlopeScale=0;biasClamp=0.125 [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,buffer,create:limit: [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending: [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,capability_checks,limits,maxBufferSize:* [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,compute_pipeline:overrides,identifier:isAsync=false;constants={"s%C3%A9quen%C3%A7age":0} [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,compute_pipeline:overrides,identifier:isAsync=true;constants={"s%C3%A9quen%C3%A7age":0} [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,createBindGroupLayout:multisampled_validation:viewDimension="2d" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,createBindGroupLayout:multisampled_validation:viewDimension="_undef_" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,encoding,encoder_state:pass_end_invalid_order:* [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="bgra8unorm" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="bgra8unorm-srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="rg32float" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="rg32sint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="rg32uint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="rgb10a2unorm" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba16float" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba16sint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba16uint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba32float" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba32sint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba32uint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba8unorm" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba8unorm-srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,createRenderBundleEncoder:attachment_state,limits,maxColorAttachmentBytesPerSample,unaligned:formats=["r32float","rgba8unorm","rgba32float","r8unorm","r8unorm"] [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,query_set,destroy:invalid_queryset: [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="bgra8unorm" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="bgra8unorm-srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="rg32float" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="rg32sint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="rg32uint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="rgb10a2unorm" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba16float" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba16sint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba16uint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba32float" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba32sint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba32uint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba8unorm" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,aligned:format="rgba8unorm-srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:color_attachments,limits,maxColorAttachmentBytesPerSample,unaligned:formats=["r32float","rgba8unorm","rgba32float","r8unorm","r8unorm"] [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="bgra8unorm" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="bgra8unorm-srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rg32float" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rg32sint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rg32uint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rgb10a2unorm" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rgba16float" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rgba16sint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rgba16uint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rgba32float" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rgba32sint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rgba32uint" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rgba8unorm" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rgba8unorm-srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,unaligned:formats=["r32float","rgba8unorm","rgba32float","r8unorm","r8unorm"] [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,overrides:identifier,fragment:isAsync=false;fragmentConstants={"s%C3%A9quen%C3%A7age":0} [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,overrides:identifier,fragment:isAsync=true;fragmentConstants={"s%C3%A9quen%C3%A7age":0} [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,overrides:identifier,vertex:isAsync=false;vertexConstants={"s%C3%A9quen%C3%A7age":0} [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,overrides:identifier,vertex:isAsync=true;vertexConstants={"s%C3%A9quen%C3%A7age":0} [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,texture,destroy:invalid_texture: [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:alpha_mode:* [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:defaults:* [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:device:* [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rgba8unorm" [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:format:canvasType="onscreen";format="rgba8unorm" [ Failure ]
-crbug.com/dawn/0000 webgpu:web_platform,canvas,configure:size_zero_after_configure:* [ Failure ]
 crbug.com/dawn/0000 [ monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/0000 [ monterey webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/0000 [ ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:usage:* [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 ubuntu webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-swiftshader win10 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-swiftshader win10 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="bgra8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="bgra8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="bgra8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="bgra8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="bgra8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="bgra8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="bgra8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="bgra8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="bgra8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="bgra8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="bgra8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="bgra8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="texture-compression-bc" [ Failure ]
+crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
+crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";snapshotType="convertToBlob" [ Failure ]
 crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";snapshotType="convertToBlob" [ Failure ]
@@ -552,3 +477,8 @@ crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,readbackFromWebGPUCa
 crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="display-p3";snapshotType="toBlob" [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="display-p3";snapshotType="toDataURL" [ Failure ]
 crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="display-p3";snapshotType="toDataURL" [ Failure ]
+crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";srcDoFlipYDuringCopy=false;dstPremultiplied=false [ Failure ]
+crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";srcDoFlipYDuringCopy=false;dstPremultiplied=false [ Failure ]
+crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";srcDoFlipYDuringCopy=true;dstPremultiplied=false [ Failure ]
+crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="premultiply";orientation="none";srcDoFlipYDuringCopy=true;dstPremultiplied=false [ Failure ]
+crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="premultiply";orientation="none";srcDoFlipYDuringCopy=true;dstPremultiplied=false [ Failure ]
