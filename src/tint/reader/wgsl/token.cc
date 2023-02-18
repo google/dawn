@@ -139,14 +139,8 @@ std::string_view Token::TypeToName(Type type) {
 
         case Token::Type::kAlias:
             return "alias";
-        case Token::Type::kArray:
-            return "array";
-        case Token::Type::kAtomic:
-            return "atomic";
         case Token::Type::kBitcast:
             return "bitcast";
-        case Token::Type::kBool:
-            return "bool";
         case Token::Type::kBreak:
             return "break";
         case Token::Type::kCase:
@@ -169,10 +163,6 @@ std::string_view Token::TypeToName(Type type) {
             return "else";
         case Token::Type::kEnable:
             return "enable";
-        case Token::Type::kF16:
-            return "f16";
-        case Token::Type::kF32:
-            return "f32";
         case Token::Type::kFallthrough:
             return "fallthrough";
         case Token::Type::kFalse:
@@ -181,96 +171,28 @@ std::string_view Token::TypeToName(Type type) {
             return "fn";
         case Token::Type::kFor:
             return "for";
-        case Token::Type::kI32:
-            return "i32";
         case Token::Type::kIf:
             return "if";
         case Token::Type::kLet:
             return "let";
         case Token::Type::kLoop:
             return "loop";
-        case Token::Type::kMat2x2:
-            return "mat2x2";
-        case Token::Type::kMat2x3:
-            return "mat2x3";
-        case Token::Type::kMat2x4:
-            return "mat2x4";
-        case Token::Type::kMat3x2:
-            return "mat3x2";
-        case Token::Type::kMat3x3:
-            return "mat3x3";
-        case Token::Type::kMat3x4:
-            return "mat3x4";
-        case Token::Type::kMat4x2:
-            return "mat4x2";
-        case Token::Type::kMat4x3:
-            return "mat4x3";
-        case Token::Type::kMat4x4:
-            return "mat4x4";
         case Token::Type::kOverride:
             return "override";
-        case Token::Type::kPtr:
-            return "ptr";
         case Token::Type::kReturn:
             return "return";
-        case Token::Type::kSampler:
-            return "sampler";
-        case Token::Type::kComparisonSampler:
-            return "sampler_comparison";
         case Token::Type::kStaticAssert:
             return "static_assert";
         case Token::Type::kStruct:
             return "struct";
         case Token::Type::kSwitch:
             return "switch";
-        case Token::Type::kTextureDepth2d:
-            return "texture_depth_2d";
-        case Token::Type::kTextureDepth2dArray:
-            return "texture_depth_2d_array";
-        case Token::Type::kTextureDepthCube:
-            return "texture_depth_cube";
-        case Token::Type::kTextureDepthCubeArray:
-            return "texture_depth_cube_array";
-        case Token::Type::kTextureDepthMultisampled2d:
-            return "texture_depth_multisampled_2d";
-        case Token::Type::kTextureExternal:
-            return "texture_external";
-        case Token::Type::kTextureMultisampled2d:
-            return "texture_multisampled_2d";
-        case Token::Type::kTextureSampled1d:
-            return "texture_1d";
-        case Token::Type::kTextureSampled2d:
-            return "texture_2d";
-        case Token::Type::kTextureSampled2dArray:
-            return "texture_2d_array";
-        case Token::Type::kTextureSampled3d:
-            return "texture_3d";
-        case Token::Type::kTextureSampledCube:
-            return "texture_cube";
-        case Token::Type::kTextureSampledCubeArray:
-            return "texture_cube_array";
-        case Token::Type::kTextureStorage1d:
-            return "texture_storage_1d";
-        case Token::Type::kTextureStorage2d:
-            return "texture_storage_2d";
-        case Token::Type::kTextureStorage2dArray:
-            return "texture_storage_2d_array";
-        case Token::Type::kTextureStorage3d:
-            return "texture_storage_3d";
         case Token::Type::kTrue:
             return "true";
         case Token::Type::kType:
             return "type";
-        case Token::Type::kU32:
-            return "u32";
         case Token::Type::kVar:
             return "var";
-        case Token::Type::kVec2:
-            return "vec2";
-        case Token::Type::kVec3:
-            return "vec3";
-        case Token::Type::kVec4:
-            return "vec4";
         case Token::Type::kWhile:
             return "while";
     }

@@ -1,6 +1,6 @@
 diagnostic_filtering/function_attribute.wgsl:7:9 warning: 'textureSample' must only be called from uniform control flow
     _ = textureSample(t, s, vec2(0, 0));
-        ^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 diagnostic_filtering/function_attribute.wgsl:6:3 note: control flow depends on possibly non-uniform value
   if (x > 0) {

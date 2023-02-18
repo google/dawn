@@ -1571,11 +1571,23 @@ INSTANTIATE_TEST_SUITE_P(
         kUnicodeIdentifier));
 
 std::string ExpandBuiltinType(std::string_view name) {
+    if (name == "array") {
+        return "array<i32, 4>";
+    }
+    if (name == "atomic") {
+        return "atomic<i32>";
+    }
+    if (name == "mat2x2") {
+        return "mat2x2<f32>";
+    }
     if (name == "mat2x2f") {
         return "mat2x2<f32>";
     }
     if (name == "mat2x2h") {
         return "mat2x2<f16>";
+    }
+    if (name == "mat2x3") {
+        return "mat2x3<f32>";
     }
     if (name == "mat2x3f") {
         return "mat2x3<f32>";
@@ -1583,11 +1595,17 @@ std::string ExpandBuiltinType(std::string_view name) {
     if (name == "mat2x3h") {
         return "mat2x3<f16>";
     }
+    if (name == "mat2x4") {
+        return "mat2x4<f32>";
+    }
     if (name == "mat2x4f") {
         return "mat2x4<f32>";
     }
     if (name == "mat2x4h") {
         return "mat2x4<f16>";
+    }
+    if (name == "mat3x2") {
+        return "mat3x2<f32>";
     }
     if (name == "mat3x2f") {
         return "mat3x2<f32>";
@@ -1595,11 +1613,17 @@ std::string ExpandBuiltinType(std::string_view name) {
     if (name == "mat3x2h") {
         return "mat3x2<f16>";
     }
+    if (name == "mat3x3") {
+        return "mat3x3<f32>";
+    }
     if (name == "mat3x3f") {
         return "mat3x3<f32>";
     }
     if (name == "mat3x3h") {
         return "mat3x3<f16>";
+    }
+    if (name == "mat3x4") {
+        return "mat3x4<f32>";
     }
     if (name == "mat3x4f") {
         return "mat3x4<f32>";
@@ -1607,11 +1631,17 @@ std::string ExpandBuiltinType(std::string_view name) {
     if (name == "mat3x4h") {
         return "mat3x4<f16>";
     }
+    if (name == "mat4x2") {
+        return "mat4x2<f32>";
+    }
     if (name == "mat4x2f") {
         return "mat4x2<f32>";
     }
     if (name == "mat4x2h") {
         return "mat4x2<f16>";
+    }
+    if (name == "mat4x3") {
+        return "mat4x3<f32>";
     }
     if (name == "mat4x3f") {
         return "mat4x3<f32>";
@@ -1619,11 +1649,20 @@ std::string ExpandBuiltinType(std::string_view name) {
     if (name == "mat4x3h") {
         return "mat4x3<f16>";
     }
+    if (name == "mat4x4") {
+        return "mat4x4<f32>";
+    }
     if (name == "mat4x4f") {
         return "mat4x4<f32>";
     }
     if (name == "mat4x4h") {
         return "mat4x4<f16>";
+    }
+    if (name == "ptr") {
+        return "ptr<function, i32>";
+    }
+    if (name == "vec2") {
+        return "vec2<f32>";
     }
     if (name == "vec2f") {
         return "vec2<f32>";
@@ -1637,6 +1676,9 @@ std::string ExpandBuiltinType(std::string_view name) {
     if (name == "vec2u") {
         return "vec2<u32>";
     }
+    if (name == "vec3") {
+        return "vec3<f32>";
+    }
     if (name == "vec3f") {
         return "vec3<f32>";
     }
@@ -1648,6 +1690,9 @@ std::string ExpandBuiltinType(std::string_view name) {
     }
     if (name == "vec3u") {
         return "vec3<u32>";
+    }
+    if (name == "vec4") {
+        return "vec4<f32>";
     }
     if (name == "vec4f") {
         return "vec4<f32>";
@@ -1664,58 +1709,13 @@ std::string ExpandBuiltinType(std::string_view name) {
     return std::string(name);
 }
 
-/// @return all the identifiers parsed as keywords
-std::unordered_set<std::string> Keywords() {
-    return {
-        "array",
-        "atomic",
-        "bool",
-        "f16",
-        "f32",
-        "i32",
-        "mat2x2",
-        "mat2x3",
-        "mat2x4",
-        "mat3x2",
-        "mat3x3",
-        "mat3x4",
-        "mat4x2",
-        "mat4x3",
-        "mat4x4",
-        "ptr",
-        "sampler_comparison",
-        "sampler",
-        "texture_1d",
-        "texture_2d_array",
-        "texture_2d",
-        "texture_3d",
-        "texture_cube_array",
-        "texture_cube",
-        "texture_depth_2d_array",
-        "texture_depth_2d",
-        "texture_depth_cube_array",
-        "texture_depth_cube",
-        "texture_depth_multisampled_2d",
-        "texture_external",
-        "texture_multisampled_2d",
-        "texture_storage_1d",
-        "texture_storage_2d_array",
-        "texture_storage_2d",
-        "texture_storage_3d",
-        "u32",
-        "vec2",
-        "vec3",
-        "vec4",
-    };
-}
-
-/// @return WGSL builtin types that aren't keywords
-std::vector<const char*> NonKeywordBuiltinTypes() {
-    auto keywords = Keywords();
+std::vector<const char*> ConstructableTypes() {
     std::vector<const char*> out;
-    for (auto* ident : type::kBuiltinStrings) {
-        if (!keywords.count(ident)) {
-            out.push_back(ident);
+    for (auto* ty : type::kBuiltinStrings) {
+        std::string_view type(ty);
+        if (type != "ptr" && type != "atomic" && !utils::HasPrefix(type, "sampler") &&
+            !utils::HasPrefix(type, "texture")) {
+            out.push_back(ty);
         }
     }
     return out;
@@ -1725,38 +1725,36 @@ using RenamerBuiltinTypeTest = TransformTestWithParam<const char*>;
 
 TEST_P(RenamerBuiltinTypeTest, PreserveTypeUsage) {
     auto expand = [&](const char* source) {
-        auto out = utils::ReplaceAll(source, "$name", GetParam());
-        out = utils::ReplaceAll(out, "$type", ExpandBuiltinType(GetParam()));
-        return out;
+        return utils::ReplaceAll(source, "$type", ExpandBuiltinType(GetParam()));
     };
 
     auto src = expand(R"(
 enable f16;
 
-fn x(v : $name) -> $name {
-  const a : $name = $name();
-  let b : $name = a;
-  var c : $name = b;
+fn x(v : $type) -> $type {
+  const a : $type = $type();
+  let b : $type = a;
+  var c : $type = b;
   return c;
 }
 
 struct y {
-  a : $name,
+  a : $type,
 }
 )");
 
     auto expect = expand(R"(
 enable f16;
 
-fn tint_symbol(tint_symbol_1 : $name) -> $name {
-  const tint_symbol_2 : $name = $name();
-  let tint_symbol_3 : $name = tint_symbol_2;
-  var tint_symbol_4 : $name = tint_symbol_3;
+fn tint_symbol(tint_symbol_1 : $type) -> $type {
+  const tint_symbol_2 : $type = $type();
+  let tint_symbol_3 : $type = tint_symbol_2;
+  var tint_symbol_4 : $type = tint_symbol_3;
   return tint_symbol_4;
 }
 
 struct tint_symbol_5 {
-  tint_symbol_2 : $name,
+  tint_symbol_2 : $type,
 }
 )");
 
@@ -1766,9 +1764,7 @@ struct tint_symbol_5 {
 }
 TEST_P(RenamerBuiltinTypeTest, PreserveTypeInitializer) {
     auto expand = [&](const char* source) {
-        auto out = utils::ReplaceAll(source, "$name", GetParam());
-        out = utils::ReplaceAll(out, "$type", ExpandBuiltinType(GetParam()));
-        return out;
+        return utils::ReplaceAll(source, "$type", ExpandBuiltinType(GetParam()));
     };
 
     auto src = expand(R"(
@@ -1776,7 +1772,7 @@ enable f16;
 
 @fragment
 fn f() {
-  var v : $type = $name();
+  var v : $type = $type();
 }
 )");
 
@@ -1785,7 +1781,7 @@ enable f16;
 
 @fragment
 fn tint_symbol() {
-  var tint_symbol_1 : $type = $name();
+  var tint_symbol_1 : $type = $type();
 }
 )");
 
@@ -1795,10 +1791,12 @@ fn tint_symbol() {
 }
 
 TEST_P(RenamerBuiltinTypeTest, PreserveTypeConversion) {
+    if (std::string_view(GetParam()) == "array") {
+        return;  // Cannot type convert arrays.
+    }
+
     auto expand = [&](const char* source) {
-        auto out = utils::ReplaceAll(source, "$name", GetParam());
-        out = utils::ReplaceAll(out, "$type", ExpandBuiltinType(GetParam()));
-        return out;
+        return utils::ReplaceAll(source, "$type", ExpandBuiltinType(GetParam()));
     };
 
     auto src = expand(R"(
@@ -1806,7 +1804,7 @@ enable f16;
 
 @fragment
 fn f() {
-  var v : $type = $name($type());
+  var v : $type = $type($type());
 }
 )");
 
@@ -1815,7 +1813,7 @@ enable f16;
 
 @fragment
 fn tint_symbol() {
-  var tint_symbol_1 : $type = $name($type());
+  var tint_symbol_1 : $type = $type($type());
 }
 )");
 
@@ -1850,26 +1848,28 @@ fn tint_symbol() {
 
 TEST_P(RenamerBuiltinTypeTest, RenameShadowedByAlias) {
     auto expand = [&](const char* source) {
-        auto out = utils::ReplaceAll(source, "$name", GetParam());
-        out = utils::ReplaceAll(out, "$type", ExpandBuiltinType(GetParam()));
+        std::string_view ty = GetParam();
+        auto out = utils::ReplaceAll(source, "$name", ty);
+        out = utils::ReplaceAll(out, "$type", ExpandBuiltinType(ty));
+        out = utils::ReplaceAll(out, "$other_type", ty == "i32" ? "u32" : "i32");
         return out;
     };
 
     auto src = expand(R"(
-type $name = i32;
+type $name = $other_type;
 
 @fragment
 fn f() {
-  var v : i32 = $name();
+  var v : $other_type = $name();
 }
 )");
 
     auto expect = expand(R"(
-alias tint_symbol = i32;
+alias tint_symbol = $other_type;
 
 @fragment
 fn tint_symbol_1() {
-  var tint_symbol_2 : i32 = tint_symbol();
+  var tint_symbol_2 : $other_type = tint_symbol();
 }
 )");
 
@@ -1880,14 +1880,16 @@ fn tint_symbol_1() {
 
 TEST_P(RenamerBuiltinTypeTest, RenameShadowedByStruct) {
     auto expand = [&](const char* source) {
-        auto out = utils::ReplaceAll(source, "$name", GetParam());
-        out = utils::ReplaceAll(out, "$type", ExpandBuiltinType(GetParam()));
+        std::string_view ty = GetParam();
+        auto out = utils::ReplaceAll(source, "$name", ty);
+        out = utils::ReplaceAll(out, "$type", ExpandBuiltinType(ty));
+        out = utils::ReplaceAll(out, "$other_type", ty == "i32" ? "u32" : "i32");
         return out;
     };
 
     auto src = expand(R"(
 struct $name {
-  i : i32,
+  i : $other_type,
 }
 
 @fragment
@@ -1899,7 +1901,7 @@ fn f() {
 
     auto expect = expand(R"(
 struct tint_symbol {
-  tint_symbol_1 : i32,
+  tint_symbol_1 : $other_type,
 }
 
 @fragment
@@ -1916,31 +1918,22 @@ fn tint_symbol_2() {
 
 INSTANTIATE_TEST_SUITE_P(RenamerBuiltinTypeTest,
                          RenamerBuiltinTypeTest,
-                         testing::ValuesIn(NonKeywordBuiltinTypes()));
+                         testing::ValuesIn(ConstructableTypes()));
 
-/// @return WGSL builtin identifiers keywords
-std::vector<const char*> NonKeywordIdentifiers() {
-    auto keywords = Keywords();
+/// @return WGSL builtin identifier keywords
+std::vector<const char*> Identifiers() {
     std::vector<const char*> out;
     for (auto* ident : type::kBuiltinStrings) {
-        if (!keywords.count(ident)) {
-            out.push_back(ident);
-        }
+        out.push_back(ident);
     }
     for (auto* ident : type::kAddressSpaceStrings) {
-        if (!keywords.count(ident)) {
-            out.push_back(ident);
-        }
+        out.push_back(ident);
     }
     for (auto* ident : type::kTexelFormatStrings) {
-        if (!keywords.count(ident)) {
-            out.push_back(ident);
-        }
+        out.push_back(ident);
     }
     for (auto* ident : type::kAccessStrings) {
-        if (!keywords.count(ident)) {
-            out.push_back(ident);
-        }
+        out.push_back(ident);
     }
     return out;
 }
@@ -2025,12 +2018,14 @@ fn tint_symbol_1() {
 
 TEST_P(RenamerBuiltinIdentifierTest, StructName) {
     auto expand = [&](const char* source) {
-        return utils::ReplaceAll(source, "$name", GetParam());
+        std::string_view name = GetParam();
+        auto out = utils::ReplaceAll(source, "$name", name);
+        return utils::ReplaceAll(out, "$other_type", name == "i32" ? "u32" : "i32");
     };
 
     auto src = expand(R"(
 struct $name {
-  i : i32,
+  i : $other_type,
 }
 
 fn f() {
@@ -2040,7 +2035,7 @@ fn f() {
 
     auto expect = expand(R"(
 struct tint_symbol {
-  tint_symbol_1 : i32,
+  tint_symbol_1 : $other_type,
 }
 
 fn tint_symbol_2() {
@@ -2055,7 +2050,7 @@ fn tint_symbol_2() {
 
 INSTANTIATE_TEST_SUITE_P(RenamerBuiltinIdentifierTest,
                          RenamerBuiltinIdentifierTest,
-                         testing::ValuesIn(NonKeywordIdentifiers()));
+                         testing::ValuesIn(Identifiers()));
 
 }  // namespace
 }  // namespace tint::transform

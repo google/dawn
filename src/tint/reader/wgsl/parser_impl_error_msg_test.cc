@@ -193,7 +193,7 @@ fn f() { f() }
 
 TEST_F(ParserImplErrorTest, InitializerExprMissingLParen) {
     EXPECT("fn f() { x = vec2<u32>1,2); }",
-           R"(test.wgsl:1:23 error: expected '(' for type initializer
+           R"(test.wgsl:1:23 error: expected ';' for assignment statement
 fn f() { x = vec2<u32>1,2); }
                       ^
 )");
@@ -201,7 +201,7 @@ fn f() { x = vec2<u32>1,2); }
 
 TEST_F(ParserImplErrorTest, InitializerExprMissingRParen) {
     EXPECT("fn f() { x = vec2<u32>(1,2; }",
-           R"(test.wgsl:1:27 error: expected ')' for type initializer
+           R"(test.wgsl:1:27 error: expected ')' for function call
 fn f() { x = vec2<u32>(1,2; }
                           ^
 )");
@@ -575,17 +575,9 @@ const i : i32 = 1
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclConstMissingLParen) {
-    EXPECT("const i : vec2<i32> = vec2<i32>;",
-           R"(test.wgsl:1:32 error: expected '(' for type initializer
-const i : vec2<i32> = vec2<i32>;
-                               ^
-)");
-}
-
 TEST_F(ParserImplErrorTest, GlobalDeclConstMissingRParen) {
     EXPECT("const i : vec2<i32> = vec2<i32>(1., 2.;",
-           R"(test.wgsl:1:39 error: expected ')' for type initializer
+           R"(test.wgsl:1:39 error: expected ')' for function call
 const i : vec2<i32> = vec2<i32>(1., 2.;
                                       ^
 )");
@@ -628,7 +620,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstExprMissingLParen) {
     EXPECT("const i : vec2<i32> = vec2<i32> 1, 2);",
-           R"(test.wgsl:1:33 error: expected '(' for type initializer
+           R"(test.wgsl:1:33 error: expected ';' for 'const' declaration
 const i : vec2<i32> = vec2<i32> 1, 2);
                                 ^
 )");
@@ -636,7 +628,7 @@ const i : vec2<i32> = vec2<i32> 1, 2);
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstExprMissingRParen) {
     EXPECT("const i : vec2<i32> = vec2<i32>(1, 2;",
-           R"(test.wgsl:1:37 error: expected ')' for type initializer
+           R"(test.wgsl:1:37 error: expected ')' for function call
 const i : vec2<i32> = vec2<i32>(1, 2;
                                     ^
 )");
@@ -658,51 +650,19 @@ TEST_F(ParserImplErrorTest, GlobalDeclInvalidAttribute) {
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingLessThan) {
-    EXPECT("var x : texture_1d;",
-           R"(test.wgsl:1:19 error: expected '<' for sampled texture type
-var x : texture_1d;
-                  ^
-)");
-}
-
 TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingGreaterThan) {
     EXPECT("var x : texture_1d<f32;",
-           R"(test.wgsl:1:19 error: missing closing '>' for sampled texture type
+           R"(test.wgsl:1:19 error: expected ';' for variable declaration
 var x : texture_1d<f32;
                   ^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureInvalidSubtype) {
-    EXPECT("var x : texture_1d<1>;",
-           R"(test.wgsl:1:20 error: invalid type for sampled texture type
-var x : texture_1d<1>;
-                   ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureMissingLessThan) {
-    EXPECT("var x : texture_multisampled_2d;",
-           R"(test.wgsl:1:32 error: expected '<' for multisampled texture type
-var x : texture_multisampled_2d;
-                               ^
-)");
-}
-
 TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureMissingGreaterThan) {
     EXPECT("var x : texture_multisampled_2d<f32;",
-           R"(test.wgsl:1:32 error: missing closing '>' for multisampled texture type
+           R"(test.wgsl:1:32 error: expected ';' for variable declaration
 var x : texture_multisampled_2d<f32;
                                ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureInvalidSubtype) {
-    EXPECT("var x : texture_multisampled_2d<1>;",
-           R"(test.wgsl:1:33 error: invalid type for multisampled texture type
-var x : texture_multisampled_2d<1>;
-                                ^
 )");
 }
 
@@ -829,17 +789,9 @@ static_assert true static_assert true;
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingLessThan) {
-    EXPECT("var x : texture_storage_2d;",
-           R"(test.wgsl:1:27 error: expected '<' for storage texture type
-var x : texture_storage_2d;
-                          ^
-)");
-}
-
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingGreaterThan) {
     EXPECT("var x : texture_storage_2d<r32uint, read;",
-           R"(test.wgsl:1:27 error: missing closing '>' for storage texture type
+           R"(test.wgsl:1:27 error: expected ';' for variable declaration
 var x : texture_storage_2d<r32uint, read;
                           ^
 )");
@@ -847,18 +799,8 @@ var x : texture_storage_2d<r32uint, read;
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingSubtype) {
     EXPECT("var x : texture_storage_2d<>;",
-           R"(test.wgsl:1:28 error: expected texel format for storage texture type
-Possible values: 'bgra8unorm', 'r32float', 'r32sint', 'r32uint', 'rg32float', 'rg32sint', 'rg32uint', 'rgba16float', 'rgba16sint', 'rgba16uint', 'rgba32float', 'rgba32sint', 'rgba32uint', 'rgba8sint', 'rgba8snorm', 'rgba8uint', 'rgba8unorm'
+           R"(test.wgsl:1:28 error: expected expression
 var x : texture_storage_2d<>;
-                           ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingInvalidSubtype) {
-    EXPECT("var x : texture_storage_2d<1>;",
-           R"(test.wgsl:1:28 error: expected texel format for storage texture type
-Possible values: 'bgra8unorm', 'r32float', 'r32sint', 'r32uint', 'rg32float', 'rg32sint', 'rg32uint', 'rgba16float', 'rgba16sint', 'rgba16uint', 'rgba32float', 'rgba32sint', 'rgba32uint', 'rgba8sint', 'rgba8snorm', 'rgba8uint', 'rgba8unorm'
-var x : texture_storage_2d<1>;
                            ^
 )");
 }
@@ -993,25 +935,9 @@ type meow = f32
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingGreaterThan) {
     EXPECT("var i : array<u32, 3;",
-           R"(test.wgsl:1:14 error: missing closing '>' for array declaration
+           R"(test.wgsl:1:14 error: expected ';' for variable declaration
 var i : array<u32, 3;
              ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingType) {
-    EXPECT("var i : array<1, 3>;",
-           R"(test.wgsl:1:15 error: invalid type for array declaration
-var i : array<1, 3>;
-              ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingSize) {
-    EXPECT("var i : array<u32, >;",
-           R"(test.wgsl:1:20 error: expected array size expression
-var i : array<u32, >;
-                   ^
 )");
 }
 
@@ -1175,16 +1101,9 @@ var ^ : mat4x4;
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarMatrixMissingGreaterThan) {
-    EXPECT("var i : mat4x4<u32;", R"(test.wgsl:1:15 error: missing closing '>' for matrix
+    EXPECT("var i : mat4x4<u32;", R"(test.wgsl:1:15 error: expected ';' for variable declaration
 var i : mat4x4<u32;
               ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarMatrixMissingType) {
-    EXPECT("var i : mat4x4<1>;", R"(test.wgsl:1:16 error: invalid type for matrix
-var i : mat4x4<1>;
-               ^
 )");
 }
 
@@ -1196,60 +1115,11 @@ var i : i32
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingLessThan) {
-    EXPECT("var i : ptr;",
-           R"(test.wgsl:1:12 error: expected '<' for ptr declaration
-var i : ptr;
-           ^
-)");
-}
-
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingGreaterThan) {
     EXPECT("var i : ptr<private, u32;",
-           R"(test.wgsl:1:12 error: missing closing '>' for ptr declaration
+           R"(test.wgsl:1:12 error: expected ';' for variable declaration
 var i : ptr<private, u32;
            ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingComma) {
-    EXPECT("var i : ptr<private u32>;",
-           R"(test.wgsl:1:21 error: expected ',' for ptr declaration
-var i : ptr<private u32>;
-                    ^^^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingAddressSpace) {
-    EXPECT("var i : ptr<meow, u32>;",
-           R"(test.wgsl:1:13 error: expected address space for ptr declaration
-Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup'
-var i : ptr<meow, u32>;
-            ^^^^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingType) {
-    EXPECT("var i : ptr<private, 1>;",
-           R"(test.wgsl:1:22 error: invalid type for ptr declaration
-var i : ptr<private, 1>;
-                     ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarAtomicMissingLessThan) {
-    EXPECT("var i : atomic;",
-           R"(test.wgsl:1:15 error: expected '<' for atomic declaration
-var i : atomic;
-              ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarAtomicMissingGreaterThan) {
-    EXPECT("var i : atomic<u32 x;",
-           R"(test.wgsl:1:15 error: missing closing '>' for atomic declaration
-var i : atomic<u32 x;
-              ^
 )");
 }
 
@@ -1271,16 +1141,9 @@ var<private i : i32
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarVectorMissingGreaterThan) {
-    EXPECT("var i : vec3<u32;", R"(test.wgsl:1:13 error: missing closing '>' for vector
+    EXPECT("var i : vec3<u32;", R"(test.wgsl:1:13 error: expected ';' for variable declaration
 var i : vec3<u32;
             ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarVectorMissingType) {
-    EXPECT("var i : vec3<1>;", R"(test.wgsl:1:14 error: invalid type for vector
-var i : vec3<1>;
-             ^
 )");
 }
 

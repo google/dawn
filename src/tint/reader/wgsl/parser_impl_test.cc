@@ -153,7 +153,8 @@ TEST_F(ParserImplTest, Peek_PastPlaceholder) {
     auto p = parser(">= vec2<u32>");
     auto& n = p->next();
     ASSERT_TRUE(n.Is(Token::Type::kGreaterThanEqual));
-    EXPECT_TRUE(p->peek_is(Token::Type::kVec2)) << "expected: vec2 got: " << p->peek().to_name();
+    EXPECT_TRUE(p->peek_is(Token::Type::kIdentifier))
+        << "expected: vec2 got: " << p->peek().to_name();
     EXPECT_TRUE(p->peek_is(Token::Type::kTemplateArgsLeft, 1))
         << "expected: < got: " << p->peek(1).to_name();
 }
@@ -164,7 +165,7 @@ TEST_F(ParserImplTest, Peek_MultiplePlaceholder) {
     ASSERT_TRUE(n.Is(Token::Type::kGreaterThanEqual));
     EXPECT_TRUE(p->peek_is(Token::Type::kGreaterThanEqual))
         << "expected: >= got: " << p->peek().to_name();
-    EXPECT_TRUE(p->peek_is(Token::Type::kVec2, 1))
+    EXPECT_TRUE(p->peek_is(Token::Type::kIdentifier, 1))
         << "expected: vec2 got: " << p->peek(1).to_name();
     EXPECT_TRUE(p->peek_is(Token::Type::kTemplateArgsLeft, 2))
         << "expected: < got: " << p->peek(2).to_name();
@@ -190,7 +191,8 @@ TEST_F(ParserImplTest, Peek_AfterSplit) {
     auto p = parser(">= vec2<u32>");
     auto& n = p->next();
     ASSERT_TRUE(n.Is(Token::Type::kGreaterThanEqual));
-    EXPECT_TRUE(p->peek_is(Token::Type::kVec2)) << "expected: vec2 got: " << p->peek().to_name();
+    EXPECT_TRUE(p->peek_is(Token::Type::kIdentifier))
+        << "expected: vec2 got: " << p->peek().to_name();
 
     p->split_token(Token::Type::kGreaterThan, Token::Type::kEqual);
     ASSERT_TRUE(n.Is(Token::Type::kGreaterThan));

@@ -7390,7 +7390,7 @@ fn main() {
     EXPECT_EQ(error_,
               R"(test:5:41 error: 'dpdx' must only be called from uniform control flow
   let b = (non_uniform_global == 0) && (dpdx(1.0) == 0.0);
-                                        ^^^^
+                                        ^^^^^^^^^
 
 test:5:37 note: control flow depends on possibly non-uniform value
   let b = (non_uniform_global == 0) && (dpdx(1.0) == 0.0);
@@ -7784,7 +7784,7 @@ test:5:3 note: control flow depends on possibly non-uniform value
 
 test:5:7 note: return value of 'atomicAdd' may be non-uniform
   if (atomicAdd(&a, 1) == 1) {
-      ^^^^^^^^^
+      ^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -7811,7 +7811,7 @@ test:5:3 note: control flow depends on possibly non-uniform value
 
 test:5:7 note: return value of 'atomicAdd' may be non-uniform
   if (atomicAdd(&a, 1) == 1) {
-      ^^^^^^^^^
+      ^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -8154,7 +8154,7 @@ fn foo() {
     EXPECT_EQ(error_,
               R"(test:10:9 error: 'dpdy' must only be called from uniform control flow
     _ = dpdy(1.0); // Should trigger an error
-        ^^^^
+        ^^^^^^^^^
 
 test:9:3 note: control flow depends on possibly non-uniform value
   if (x < 0.5) {
@@ -8162,7 +8162,7 @@ test:9:3 note: control flow depends on possibly non-uniform value
 
 test:6:9 note: return value of 'dpdx' may be non-uniform
     x = dpdx(1.0);
-        ^^^^
+        ^^^^^^^^^
 )");
 }
 
@@ -8194,7 +8194,7 @@ fn bar() {
     EXPECT_EQ(error_,
               R"(test:16:9 error: 'dpdy' must only be called from uniform control flow
     _ = dpdy(1.0); // Should trigger an error
-        ^^^^
+        ^^^^^^^^^
 
 test:15:3 note: control flow depends on possibly non-uniform value
   if (ret) {
@@ -8423,7 +8423,7 @@ test:17:3 note: control flow depends on possibly non-uniform value
 
 test:17:7 note: return value of 'foo' may be non-uniform
   if (foo() == 42) {
-      ^^^
+      ^^^^^
 )");
 }
 

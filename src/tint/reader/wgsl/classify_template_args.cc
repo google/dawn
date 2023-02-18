@@ -72,33 +72,7 @@ void ClassifyTemplateArguments(std::vector<Token>& tokens) {
         switch (tokens[i].type()) {
             // <identifier> + all type / builtin keywords that will become identifiers.
             case Token::Type::kIdentifier:
-            case Token::Type::kArray:
-            case Token::Type::kAtomic:
-            case Token::Type::kBitcast:
-            case Token::Type::kMat2x2:
-            case Token::Type::kMat2x3:
-            case Token::Type::kMat2x4:
-            case Token::Type::kMat3x2:
-            case Token::Type::kMat3x3:
-            case Token::Type::kMat3x4:
-            case Token::Type::kMat4x2:
-            case Token::Type::kMat4x3:
-            case Token::Type::kMat4x4:
-            case Token::Type::kPtr:
-            case Token::Type::kTextureMultisampled2d:
-            case Token::Type::kTextureSampled1d:
-            case Token::Type::kTextureSampled2d:
-            case Token::Type::kTextureSampled2dArray:
-            case Token::Type::kTextureSampled3d:
-            case Token::Type::kTextureSampledCube:
-            case Token::Type::kTextureSampledCubeArray:
-            case Token::Type::kTextureStorage1d:
-            case Token::Type::kTextureStorage2d:
-            case Token::Type::kTextureStorage2dArray:
-            case Token::Type::kVec2:
-            case Token::Type::kVec3:
-            case Token::Type::kVec4:
-            case Token::Type::kTextureStorage3d: {
+            case Token::Type::kBitcast: {
                 auto& next = tokens[i + 1];
                 if (next.type() == Token::Type::kLessThan) {
                     // ident '<'

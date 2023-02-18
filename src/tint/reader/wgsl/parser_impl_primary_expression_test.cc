@@ -77,26 +77,6 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroInitializer) {
     ASSERT_EQ(call->args.Length(), 0u);
 }
 
-TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidTypeDecl) {
-    auto p = parser("vec4<if>(2., 3., 4., 5.)");
-    auto e = p->primary_expression();
-    EXPECT_FALSE(e.matched);
-    EXPECT_TRUE(e.errored);
-    EXPECT_EQ(e.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:6: invalid type for vector");
-}
-
-TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingLeftParen) {
-    auto p = parser("vec4<f32> 2., 3., 4., 5.)");
-    auto e = p->primary_expression();
-    EXPECT_FALSE(e.matched);
-    EXPECT_TRUE(e.errored);
-    EXPECT_EQ(e.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:11: expected '(' for type initializer");
-}
-
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingRightParen) {
     auto p = parser("vec4<f32>(2., 3., 4., 5.");
     auto e = p->primary_expression();
@@ -104,7 +84,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingRightParen) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:25: expected ')' for type initializer");
+    EXPECT_EQ(p->error(), "1:25: expected ')' for function call");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
@@ -114,7 +94,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:5: expected ')' for type initializer");
+    EXPECT_EQ(p->error(), "1:5: expected ')' for function call");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructInitializer_Empty) {
@@ -316,19 +296,6 @@ TEST_F(ParserImplTest, PrimaryExpression_bitcast_InvalidExpression) {
     EXPECT_EQ(e.value, nullptr);
     ASSERT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), "1:14: unable to parse expression");
-}
-
-TEST_F(ParserImplTest, PrimaryExpression_Template) {
-    auto p = parser("a<b>()");
-    auto e = p->primary_expression();
-    EXPECT_FALSE(e.matched);
-    EXPECT_TRUE(e.errored);
-    EXPECT_EQ(e.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(),
-              "1:2: '<' treated as the start of a template argument list, which is not supported "
-              "for user-declared types or functions. If you intended less-than, wrap the "
-              "expression in parentheses");
 }
 
 }  // namespace

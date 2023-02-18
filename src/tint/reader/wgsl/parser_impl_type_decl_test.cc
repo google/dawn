@@ -127,24 +127,6 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          VecData{"vec3<f32>", 3, {{1u, 1u}, {1u, 10u}}},
                                          VecData{"vec4<f32>", 4, {{1u, 1u}, {1u, 10u}}}));
 
-class VecMissingGreaterThanTest : public ParserImplTestWithParam<VecData> {};
-
-TEST_P(VecMissingGreaterThanTest, Handles_Missing_GreaterThan) {
-    auto params = GetParam();
-    auto p = parser(params.input);
-    auto t = p->type_specifier();
-    EXPECT_TRUE(t.errored);
-    EXPECT_FALSE(t.matched);
-    ASSERT_EQ(t.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:5: missing closing '>' for vector");
-}
-INSTANTIATE_TEST_SUITE_P(ParserImplTest,
-                         VecMissingGreaterThanTest,
-                         testing::Values(VecData{"vec2<f32", 2, {}},
-                                         VecData{"vec3<f32", 3, {}},
-                                         VecData{"vec4<f32", 4, {}}));
-
 class VecMissingType : public ParserImplTestWithParam<VecData> {};
 
 TEST_P(VecMissingType, Handles_Missing_Type) {
@@ -155,7 +137,7 @@ TEST_P(VecMissingType, Handles_Missing_Type) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:6: invalid type for vector");
+    ASSERT_EQ(p->error(), "1:6: expected expression");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecMissingType,
@@ -202,36 +184,6 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 25}}));
 }
 
-TEST_F(ParserImplTest, TypeDecl_Ptr_MissingLessThan) {
-    auto p = parser("ptr private, f32>");
-    auto t = p->type_specifier();
-    EXPECT_TRUE(t.errored);
-    EXPECT_FALSE(t.matched);
-    ASSERT_EQ(t.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:5: expected '<' for ptr declaration");
-}
-
-TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThanAfterType) {
-    auto p = parser("ptr<function, f32");
-    auto t = p->type_specifier();
-    EXPECT_TRUE(t.errored);
-    EXPECT_FALSE(t.matched);
-    ASSERT_EQ(t.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:4: missing closing '>' for ptr declaration");
-}
-
-TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThanAfterAccess) {
-    auto p = parser("ptr<function, f32, read");
-    auto t = p->type_specifier();
-    EXPECT_TRUE(t.errored);
-    EXPECT_FALSE(t.matched);
-    ASSERT_EQ(t.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:4: missing closing '>' for ptr declaration");
-}
-
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterAddressSpace) {
     auto p = parser("ptr<function f32>");
     auto t = p->type_specifier();
@@ -239,7 +191,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterAddressSpace) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:14: expected ',' for ptr declaration");
+    ASSERT_EQ(p->error(), "1:14: expected ',' for type template argument list");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterAccess) {
@@ -249,7 +201,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterAccess) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:19: expected '>' for ptr declaration");
+    ASSERT_EQ(p->error(), "1:19: expected ',' for type template argument list");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingAddressSpace) {
@@ -259,29 +211,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingAddressSpace) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), R"(1:5: expected address space for ptr declaration
-Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup')");
-}
-
-TEST_F(ParserImplTest, TypeDecl_Ptr_MissingType) {
-    auto p = parser("ptr<function,>");
-    auto t = p->type_specifier();
-    EXPECT_TRUE(t.errored);
-    EXPECT_FALSE(t.matched);
-    ASSERT_EQ(t.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:14: invalid type for ptr declaration");
-}
-
-TEST_F(ParserImplTest, TypeDecl_Ptr_MissingAccess) {
-    auto p = parser("ptr<function, i32, >");
-    auto t = p->type_specifier();
-    EXPECT_TRUE(t.errored);
-    EXPECT_FALSE(t.matched);
-    ASSERT_EQ(t.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), R"(1:20: expected access control for ptr declaration
-Possible values: 'read', 'read_write', 'write')");
+    ASSERT_EQ(p->error(), R"(1:5: expected expression)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
@@ -291,32 +221,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), R"(1:5: expected address space for ptr declaration
-Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup')");
-}
-
-TEST_F(ParserImplTest, TypeDecl_Ptr_BadAddressSpace) {
-    auto p = parser("ptr<unknown, f32>");
-    auto t = p->type_specifier();
-    EXPECT_TRUE(t.errored);
-    EXPECT_FALSE(t.matched);
-    ASSERT_EQ(t.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(),
-              R"(1:5: expected address space for ptr declaration
-Did you mean 'uniform'?
-Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup')");
-}
-
-TEST_F(ParserImplTest, TypeDecl_Ptr_BadAccess) {
-    auto p = parser("ptr<function, i32, unknown>");
-    auto t = p->type_specifier();
-    EXPECT_TRUE(t.errored);
-    EXPECT_FALSE(t.matched);
-    ASSERT_EQ(t.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), R"(1:20: expected access control for ptr declaration
-Possible values: 'read', 'read_write', 'write')");
+    ASSERT_EQ(p->error(), R"(1:5: expected expression)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Atomic) {
@@ -344,26 +249,6 @@ TEST_F(ParserImplTest, TypeDecl_Atomic_ToVec) {
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 18u}}));
 }
 
-TEST_F(ParserImplTest, TypeDecl_Atomic_MissingLessThan) {
-    auto p = parser("atomic f32>");
-    auto t = p->type_specifier();
-    EXPECT_TRUE(t.errored);
-    EXPECT_FALSE(t.matched);
-    ASSERT_EQ(t.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:8: expected '<' for atomic declaration");
-}
-
-TEST_F(ParserImplTest, TypeDecl_Atomic_MissingGreaterThan) {
-    auto p = parser("atomic<f32");
-    auto t = p->type_specifier();
-    EXPECT_TRUE(t.errored);
-    EXPECT_FALSE(t.matched);
-    ASSERT_EQ(t.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:7: missing closing '>' for atomic declaration");
-}
-
 TEST_F(ParserImplTest, TypeDecl_Atomic_MissingType) {
     auto p = parser("atomic<>");
     auto t = p->type_specifier();
@@ -371,7 +256,7 @@ TEST_F(ParserImplTest, TypeDecl_Atomic_MissingType) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:8: invalid type for atomic declaration");
+    ASSERT_EQ(p->error(), "1:8: expected expression");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_AbstractIntLiteralSize) {
@@ -486,26 +371,6 @@ TEST_F(ParserImplTest, TypeDecl_Array_BadSize) {
     ASSERT_EQ(p->error(), "1:13: unable to parse right side of ! expression");
 }
 
-TEST_F(ParserImplTest, TypeDecl_Array_MissingSize) {
-    auto p = parser("array<f32,>");
-    auto t = p->type_specifier();
-    EXPECT_TRUE(t.errored);
-    EXPECT_FALSE(t.matched);
-    ASSERT_EQ(t.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:11: expected array size expression");
-}
-
-TEST_F(ParserImplTest, TypeDecl_Array_MissingGreaterThan) {
-    auto p = parser("array<f32");
-    auto t = p->type_specifier();
-    EXPECT_TRUE(t.errored);
-    EXPECT_FALSE(t.matched);
-    ASSERT_EQ(t.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:6: missing closing '>' for array declaration");
-}
-
 TEST_F(ParserImplTest, TypeDecl_Array_MissingComma) {
     auto p = parser("array<f32 3>");
     auto t = p->type_specifier();
@@ -513,7 +378,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_MissingComma) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:11: expected '>' for array declaration");
+    ASSERT_EQ(p->error(), "1:11: expected ',' for type template argument list");
 }
 
 struct MatrixData {
@@ -556,30 +421,6 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          MatrixData{"mat4x3<f32>", 4, 3, {{1u, 1u}, {1u, 12u}}},
                                          MatrixData{"mat4x4<f32>", 4, 4, {{1u, 1u}, {1u, 12u}}}));
 
-class MatrixMissingGreaterThanTest : public ParserImplTestWithParam<MatrixData> {};
-
-TEST_P(MatrixMissingGreaterThanTest, Handles_Missing_GreaterThan) {
-    auto params = GetParam();
-    auto p = parser(params.input);
-    auto t = p->type_specifier();
-    EXPECT_TRUE(t.errored);
-    EXPECT_FALSE(t.matched);
-    ASSERT_EQ(t.value, nullptr);
-    ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:7: missing closing '>' for matrix");
-}
-INSTANTIATE_TEST_SUITE_P(ParserImplTest,
-                         MatrixMissingGreaterThanTest,
-                         testing::Values(MatrixData{"mat2x2<f32", 2, 2, {}},
-                                         MatrixData{"mat2x3<f32", 2, 3, {}},
-                                         MatrixData{"mat2x4<f32", 2, 4, {}},
-                                         MatrixData{"mat3x2<f32", 3, 2, {}},
-                                         MatrixData{"mat3x3<f32", 3, 3, {}},
-                                         MatrixData{"mat3x4<f32", 3, 4, {}},
-                                         MatrixData{"mat4x2<f32", 4, 2, {}},
-                                         MatrixData{"mat4x3<f32", 4, 3, {}},
-                                         MatrixData{"mat4x4<f32", 4, 4, {}}));
-
 class MatrixMissingType : public ParserImplTestWithParam<MatrixData> {};
 
 TEST_P(MatrixMissingType, Handles_Missing_Type) {
@@ -590,7 +431,7 @@ TEST_P(MatrixMissingType, Handles_Missing_Type) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:8: invalid type for matrix");
+    ASSERT_EQ(p->error(), "1:8: expected expression");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          MatrixMissingType,

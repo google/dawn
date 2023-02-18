@@ -25,9 +25,6 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/reader/wgsl/parser_impl_detail.h"
 #include "src/tint/reader/wgsl/token.h"
-#include "src/tint/type/access.h"
-#include "src/tint/type/storage_texture.h"
-#include "src/tint/type/texture_dimension.h"
 
 namespace tint::ast {
 class BreakStatement;
@@ -447,18 +444,6 @@ class ParserImpl {
     /// Parses a `type_alias_decl` grammar element
     /// @returns the type alias or nullptr on error
     Maybe<const ast::Alias*> type_alias_decl();
-    /// Parses a `callable` grammar element
-    /// @returns the type or nullptr
-    Maybe<const ast::IdentifierExpression*> callable();
-    /// Parses a `vec_prefix` grammar element
-    /// @returns the vector size or nullptr
-    Maybe<uint32_t> vec_prefix();
-    /// Parses a `mat_prefix` grammar element
-    /// @returns the matrix dimensions or nullptr
-    Maybe<MatrixDimensions> mat_prefix();
-    /// Parses a `type_specifier_without_ident` grammar element
-    /// @returns the parsed Type or nullptr if none matched.
-    Maybe<ast::Type> type_specifier_without_ident();
     /// Parses a `type_specifier` grammar element
     /// @returns the parsed Type or nullptr if none matched.
     Maybe<ast::Type> type_specifier();
@@ -481,33 +466,6 @@ class ParserImpl {
     ///        by the declaration, then this vector is cleared before returning.
     /// @returns the parsed function, nullptr otherwise
     Maybe<const ast::Function*> function_decl(AttributeList& attrs);
-    /// Parses a `texture_and_sampler_types` grammar element
-    /// @returns the parsed Type or nullptr if none matched.
-    Maybe<ast::Type> texture_and_sampler_types();
-    /// Parses a `sampler_type` grammar element
-    /// @returns the parsed Type or nullptr if none matched.
-    Maybe<ast::Type> sampler_type();
-    /// Parses a `multisampled_texture_type` grammar element
-    /// @returns returns the multisample texture dimension or kNone if none
-    /// matched.
-    Maybe<const type::TextureDimension> multisampled_texture_type();
-    /// Parses a `sampled_texture_type` grammar element
-    /// @returns returns the sample texture dimension or kNone if none matched.
-    Maybe<const type::TextureDimension> sampled_texture_type();
-    /// Parses a `storage_texture_type` grammar element
-    /// @returns returns the storage texture dimension.
-    /// Returns kNone if none matched.
-    Maybe<const type::TextureDimension> storage_texture_type();
-    /// Parses a `depth_texture_type` grammar element
-    /// @returns the parsed Type or nullptr if none matched.
-    Maybe<ast::Type> depth_texture_type();
-    /// Parses a 'texture_external_type' grammar element
-    /// @returns the parsed Type or nullptr if none matched
-    Maybe<ast::Type> external_texture();
-    /// Parses a `texel_format` grammar element
-    /// @param use a description of what was being parsed if an error was raised
-    /// @returns returns the texel format or kNone if none matched.
-    Expect<type::TexelFormat> expect_texel_format(std::string_view use);
     /// Parses a `const_assert_statement` grammar element
     /// @returns returns the const assert, if it matched.
     Maybe<const ast::ConstAssert*> const_assert_statement();
@@ -638,6 +596,15 @@ class ParserImpl {
     /// Parses the `expression` grammar rule
     /// @returns the parsed expression or nullptr
     Maybe<const ast::Expression*> expression();
+    /// Parses the `expression` grammar rule
+    /// @returns the parsed expression or error
+    Expect<const ast::Expression*> expect_expression();
+    /// Parses a comma separated expression list
+    /// @param use the use of the expression list
+    /// @param terminator the terminating token for the list
+    /// @returns the parsed expression list or error
+    Expect<utils::Vector<const ast::Expression*, 3>> expect_expression_list(std::string_view use,
+                                                                            Token::Type terminator);
     /// Parses the `bitwise_expression.post.unary_expression` grammar element
     /// @param lhs the left side of the expression
     /// @returns the parsed expression or nullptr
@@ -890,12 +857,6 @@ class ParserImpl {
     /// Reports an error if the attribute list `list` is not empty.
     /// Used to ensure that all attributes are consumed.
     bool expect_attributes_consumed(utils::VectorRef<const ast::Attribute*> list);
-
-    Expect<ast::Type> expect_type_specifier_pointer(const Source& s);
-    Expect<ast::Type> expect_type_specifier_atomic(const Source& s);
-    Expect<ast::Type> expect_type_specifier_vector(const Source& s, uint32_t count);
-    Expect<ast::Type> expect_type_specifier_array(const Source& s);
-    Expect<ast::Type> expect_type_specifier_matrix(const Source& s, const MatrixDimensions& dims);
 
     /// Parses the given enum, providing sensible error messages if the next token does not match
     /// any of the enum values.

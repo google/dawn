@@ -1118,17 +1118,8 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "alias") {
         return {Token::Type::kAlias, source, "alias"};
     }
-    if (str == "array") {
-        return {Token::Type::kArray, source, "array"};
-    }
-    if (str == "atomic") {
-        return {Token::Type::kAtomic, source, "atomic"};
-    }
     if (str == "bitcast") {
         return {Token::Type::kBitcast, source, "bitcast"};
-    }
-    if (str == "bool") {
-        return {Token::Type::kBool, source, "bool"};
     }
     if (str == "break") {
         return {Token::Type::kBreak, source, "break"};
@@ -1163,12 +1154,6 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "enable") {
         return {Token::Type::kEnable, source, "enable"};
     }
-    if (str == "f16") {
-        return {Token::Type::kF16, source, "f16"};
-    }
-    if (str == "f32") {
-        return {Token::Type::kF32, source, "f32"};
-    }
     if (str == "fallthrough") {
         return {Token::Type::kFallthrough, source, "fallthrough"};
     }
@@ -1181,9 +1166,6 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "for") {
         return {Token::Type::kFor, source, "for"};
     }
-    if (str == "i32") {
-        return {Token::Type::kI32, source, "i32"};
-    }
     if (str == "if") {
         return {Token::Type::kIf, source, "if"};
     }
@@ -1193,47 +1175,11 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "loop") {
         return {Token::Type::kLoop, source, "loop"};
     }
-    if (str == "mat2x2") {
-        return {Token::Type::kMat2x2, source, "mat2x2"};
-    }
-    if (str == "mat2x3") {
-        return {Token::Type::kMat2x3, source, "mat2x3"};
-    }
-    if (str == "mat2x4") {
-        return {Token::Type::kMat2x4, source, "mat2x4"};
-    }
-    if (str == "mat3x2") {
-        return {Token::Type::kMat3x2, source, "mat3x2"};
-    }
-    if (str == "mat3x3") {
-        return {Token::Type::kMat3x3, source, "mat3x3"};
-    }
-    if (str == "mat3x4") {
-        return {Token::Type::kMat3x4, source, "mat3x4"};
-    }
-    if (str == "mat4x2") {
-        return {Token::Type::kMat4x2, source, "mat4x2"};
-    }
-    if (str == "mat4x3") {
-        return {Token::Type::kMat4x3, source, "mat4x3"};
-    }
-    if (str == "mat4x4") {
-        return {Token::Type::kMat4x4, source, "mat4x4"};
-    }
     if (str == "override") {
         return {Token::Type::kOverride, source, "override"};
     }
-    if (str == "ptr") {
-        return {Token::Type::kPtr, source, "ptr"};
-    }
     if (str == "return") {
         return {Token::Type::kReturn, source, "return"};
-    }
-    if (str == "sampler") {
-        return {Token::Type::kSampler, source, "sampler"};
-    }
-    if (str == "sampler_comparison") {
-        return {Token::Type::kComparisonSampler, source, "sampler_comparison"};
     }
     if (str == "static_assert") {
         return {Token::Type::kStaticAssert, source, "static_assert"};
@@ -1244,77 +1190,14 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "switch") {
         return {Token::Type::kSwitch, source, "switch"};
     }
-    if (str == "texture_1d") {
-        return {Token::Type::kTextureSampled1d, source, "texture_1d"};
-    }
-    if (str == "texture_2d") {
-        return {Token::Type::kTextureSampled2d, source, "texture_2d"};
-    }
-    if (str == "texture_2d_array") {
-        return {Token::Type::kTextureSampled2dArray, source, "texture_2d_array"};
-    }
-    if (str == "texture_3d") {
-        return {Token::Type::kTextureSampled3d, source, "texture_3d"};
-    }
-    if (str == "texture_cube") {
-        return {Token::Type::kTextureSampledCube, source, "texture_cube"};
-    }
-    if (str == "texture_cube_array") {
-        return {Token::Type::kTextureSampledCubeArray, source, "texture_cube_array"};
-    }
-    if (str == "texture_depth_2d") {
-        return {Token::Type::kTextureDepth2d, source, "texture_depth_2d"};
-    }
-    if (str == "texture_depth_2d_array") {
-        return {Token::Type::kTextureDepth2dArray, source, "texture_depth_2d_array"};
-    }
-    if (str == "texture_depth_cube") {
-        return {Token::Type::kTextureDepthCube, source, "texture_depth_cube"};
-    }
-    if (str == "texture_depth_cube_array") {
-        return {Token::Type::kTextureDepthCubeArray, source, "texture_depth_cube_array"};
-    }
-    if (str == "texture_depth_multisampled_2d") {
-        return {Token::Type::kTextureDepthMultisampled2d, source, "texture_depth_multisampled_2d"};
-    }
-    if (str == "texture_external") {
-        return {Token::Type::kTextureExternal, source, "texture_external"};
-    }
-    if (str == "texture_multisampled_2d") {
-        return {Token::Type::kTextureMultisampled2d, source, "texture_multisampled_2d"};
-    }
-    if (str == "texture_storage_1d") {
-        return {Token::Type::kTextureStorage1d, source, "texture_storage_1d"};
-    }
-    if (str == "texture_storage_2d") {
-        return {Token::Type::kTextureStorage2d, source, "texture_storage_2d"};
-    }
-    if (str == "texture_storage_2d_array") {
-        return {Token::Type::kTextureStorage2dArray, source, "texture_storage_2d_array"};
-    }
-    if (str == "texture_storage_3d") {
-        return {Token::Type::kTextureStorage3d, source, "texture_storage_3d"};
-    }
     if (str == "true") {
         return {Token::Type::kTrue, source, "true"};
     }
     if (str == "type") {
         return {Token::Type::kType, source, "type"};
     }
-    if (str == "u32") {
-        return {Token::Type::kU32, source, "u32"};
-    }
     if (str == "var") {
         return {Token::Type::kVar, source, "var"};
-    }
-    if (str == "vec2") {
-        return {Token::Type::kVec2, source, "vec2"};
-    }
-    if (str == "vec3") {
-        return {Token::Type::kVec3, source, "vec3"};
-    }
-    if (str == "vec4") {
-        return {Token::Type::kVec4, source, "vec4"};
     }
     if (str == "while") {
         return {Token::Type::kWhile, source, "while"};

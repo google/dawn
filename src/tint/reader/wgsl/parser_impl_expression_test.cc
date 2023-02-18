@@ -474,9 +474,10 @@ static std::vector<Case> Cases() {
     std::vector<Case> out;
     for (auto& lhs_op : kBinaryOperators) {
         for (auto& rhs_op : kBinaryOperators) {
-            bool should_parse = (lhs_op.can_follow_without_paren & rhs_op.bit) &&
-                                !ParsedAsTemplateArgumentList(lhs_op, rhs_op);
-            out.push_back({lhs_op, rhs_op, should_parse});
+            if (!ParsedAsTemplateArgumentList(lhs_op, rhs_op)) {
+                bool should_parse = lhs_op.can_follow_without_paren & rhs_op.bit;
+                out.push_back({lhs_op, rhs_op, should_parse});
+            }
         }
     }
     return out;
@@ -498,14 +499,8 @@ TEST_P(ParserImplMixedBinaryOpTest, Test) {
         EXPECT_EQ(e.value, nullptr);
         EXPECT_TRUE(p->has_error());
         std::stringstream expected;
-        if (ParsedAsTemplateArgumentList(GetParam().lhs_op, GetParam().rhs_op)) {
-            expected << "1:3: '<' treated as the start of a template argument list, which is not "
-                        "supported for user-declared types or functions. If you intended "
-                        "less-than, wrap the expression in parentheses";
-        } else {
-            expected << "1:3: mixing '" << GetParam().lhs_op.symbol << "' and '"
-                     << GetParam().rhs_op.symbol << "' requires parenthesis";
-        }
+        expected << "1:3: mixing '" << GetParam().lhs_op.symbol << "' and '"
+                 << GetParam().rhs_op.symbol << "' requires parenthesis";
         EXPECT_EQ(p->error(), expected.str());
     }
 }
