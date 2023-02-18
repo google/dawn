@@ -5038,6 +5038,11 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
             // private variables.
             continue;
         }
+        if (def_info->skip == SkipReason::kOpaqueObject) {
+            // Intermediate values are never emitted for opaque objects. So they
+            // need neither hoisted let or var declarations.
+            continue;
+        }
         auto& local_def = def_info->local.value();
 
         if (local_def.num_uses == 0) {
