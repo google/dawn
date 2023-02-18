@@ -1166,7 +1166,7 @@ bool GeneratorImpl::EmitUniformBufferAccess(
         }
     }
 
-    constexpr const char swizzle[] = {'x', 'y', 'z', 'w'};
+    const char swizzle[] = {'x', 'y', 'z', 'w'};
 
     using Op = transform::DecomposeMemoryAccess::Intrinsic::Op;
     using DataType = transform::DecomposeMemoryAccess::Intrinsic::DataType;
