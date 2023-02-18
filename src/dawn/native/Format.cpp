@@ -375,7 +375,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
         AddColorFormat(wgpu::TextureFormat::RGB10A2Unorm, true, false, true, true, 4, kAnyFloat, 4, 8, 4);
 
         bool isRG11B10UfloatRenderable = device->HasFeature(Feature::RG11B10UfloatRenderable);
-        AddColorFormat(wgpu::TextureFormat::RG11B10Ufloat, isRG11B10UfloatRenderable, false, isRG11B10UfloatRenderable, false, 4, kAnyFloat, 3, 8, 4);
+        AddColorFormat(wgpu::TextureFormat::RG11B10Ufloat, isRG11B10UfloatRenderable, false, isRG11B10UfloatRenderable, isRG11B10UfloatRenderable, 4, kAnyFloat, 3, 8, 4);
         AddColorFormat(wgpu::TextureFormat::RGB9E5Ufloat, false, false, false, false, 4, kAnyFloat, 3);
 
         // 8 bytes color formats
