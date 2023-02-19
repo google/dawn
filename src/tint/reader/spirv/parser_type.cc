@@ -269,7 +269,7 @@ ast::Type SampledTexture::Build(ProgramBuilder& b) const {
     return b.ty.sampled_texture(dims, type->Build(b));
 }
 
-StorageTexture::StorageTexture(type::TextureDimension d, type::TexelFormat f, builtin::Access a)
+StorageTexture::StorageTexture(type::TextureDimension d, builtin::TexelFormat f, builtin::Access a)
     : Base(d), format(f), access(a) {}
 StorageTexture::StorageTexture(const StorageTexture&) = default;
 
@@ -529,7 +529,7 @@ const spirv::SampledTexture* TypeManager::SampledTexture(type::TextureDimension 
 }
 
 const spirv::StorageTexture* TypeManager::StorageTexture(type::TextureDimension dims,
-                                                         type::TexelFormat fmt,
+                                                         builtin::TexelFormat fmt,
                                                          builtin::Access access) {
     return state->storage_textures_.Get(dims, fmt, access);
 }

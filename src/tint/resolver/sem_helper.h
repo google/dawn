@@ -120,11 +120,11 @@ class SemHelper {
 
     /// @param expr the semantic node
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to
-    /// sem::BuiltinEnumExpression<type::TexelFormat> if the cast is successful, otherwise an error
-    /// diagnostic is raised.
-    sem::BuiltinEnumExpression<type::TexelFormat>* AsTexelFormat(sem::Expression* expr) const {
+    /// sem::BuiltinEnumExpression<builtin::TexelFormat> if the cast is successful, otherwise an
+    /// error diagnostic is raised.
+    sem::BuiltinEnumExpression<builtin::TexelFormat>* AsTexelFormat(sem::Expression* expr) const {
         if (TINT_LIKELY(expr)) {
-            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<type::TexelFormat>>();
+            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::TexelFormat>>();
             if (TINT_LIKELY(enum_expr)) {
                 return enum_expr;
             }

@@ -1074,7 +1074,7 @@ TEST_P(StorageTextureDimensionTest, All) {
     // var a : texture_storage_*<r32uint, write>;
     auto& params = GetParam();
 
-    auto st = ty(Source{{12, 34}}, params.name, utils::ToString(type::TexelFormat::kR32Uint),
+    auto st = ty(Source{{12, 34}}, params.name, utils::ToString(builtin::TexelFormat::kR32Uint),
                  utils::ToString(builtin::Access::kWrite));
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
@@ -1091,27 +1091,28 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          testing::ValuesIn(Dimension_cases));
 
 struct FormatParams {
-    type::TexelFormat format;
+    builtin::TexelFormat format;
     bool is_valid;
 };
 
-static constexpr FormatParams format_cases[] = {FormatParams{type::TexelFormat::kBgra8Unorm, true},
-                                                FormatParams{type::TexelFormat::kR32Float, true},
-                                                FormatParams{type::TexelFormat::kR32Sint, true},
-                                                FormatParams{type::TexelFormat::kR32Uint, true},
-                                                FormatParams{type::TexelFormat::kRg32Float, true},
-                                                FormatParams{type::TexelFormat::kRg32Sint, true},
-                                                FormatParams{type::TexelFormat::kRg32Uint, true},
-                                                FormatParams{type::TexelFormat::kRgba16Float, true},
-                                                FormatParams{type::TexelFormat::kRgba16Sint, true},
-                                                FormatParams{type::TexelFormat::kRgba16Uint, true},
-                                                FormatParams{type::TexelFormat::kRgba32Float, true},
-                                                FormatParams{type::TexelFormat::kRgba32Sint, true},
-                                                FormatParams{type::TexelFormat::kRgba32Uint, true},
-                                                FormatParams{type::TexelFormat::kRgba8Sint, true},
-                                                FormatParams{type::TexelFormat::kRgba8Snorm, true},
-                                                FormatParams{type::TexelFormat::kRgba8Uint, true},
-                                                FormatParams{type::TexelFormat::kRgba8Unorm, true}};
+static constexpr FormatParams format_cases[] = {
+    FormatParams{builtin::TexelFormat::kBgra8Unorm, true},
+    FormatParams{builtin::TexelFormat::kR32Float, true},
+    FormatParams{builtin::TexelFormat::kR32Sint, true},
+    FormatParams{builtin::TexelFormat::kR32Uint, true},
+    FormatParams{builtin::TexelFormat::kRg32Float, true},
+    FormatParams{builtin::TexelFormat::kRg32Sint, true},
+    FormatParams{builtin::TexelFormat::kRg32Uint, true},
+    FormatParams{builtin::TexelFormat::kRgba16Float, true},
+    FormatParams{builtin::TexelFormat::kRgba16Sint, true},
+    FormatParams{builtin::TexelFormat::kRgba16Uint, true},
+    FormatParams{builtin::TexelFormat::kRgba32Float, true},
+    FormatParams{builtin::TexelFormat::kRgba32Sint, true},
+    FormatParams{builtin::TexelFormat::kRgba32Uint, true},
+    FormatParams{builtin::TexelFormat::kRgba8Sint, true},
+    FormatParams{builtin::TexelFormat::kRgba8Snorm, true},
+    FormatParams{builtin::TexelFormat::kRgba8Uint, true},
+    FormatParams{builtin::TexelFormat::kRgba8Unorm, true}};
 
 using StorageTextureFormatTest = ResolverTestWithParam<FormatParams>;
 TEST_P(StorageTextureFormatTest, All) {
@@ -1185,7 +1186,7 @@ TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
     // var a : texture_storage_1d<r32uint, read_write>;
 
     auto st = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d,
-                                 type::TexelFormat::kR32Uint, builtin::Access::kReadWrite);
+                                 builtin::TexelFormat::kR32Uint, builtin::Access::kReadWrite);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1199,7 +1200,7 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
     // var a : texture_storage_1d<r32uint, read>;
 
     auto st = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d,
-                                 type::TexelFormat::kR32Uint, builtin::Access::kRead);
+                                 builtin::TexelFormat::kR32Uint, builtin::Access::kRead);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1212,7 +1213,7 @@ TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
     // @group(0) @binding(0)
     // var a : texture_storage_1d<r32uint, write>;
 
-    auto st = ty.storage_texture(type::TextureDimension::k1d, type::TexelFormat::kR32Uint,
+    auto st = ty.storage_texture(type::TextureDimension::k1d, builtin::TexelFormat::kR32Uint,
                                  builtin::Access::kWrite);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));

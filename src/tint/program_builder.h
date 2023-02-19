@@ -1389,7 +1389,7 @@ class ProgramBuilder {
         /// @param access the access control of the texture
         /// @returns the storage texture
         ast::Type storage_texture(type::TextureDimension dims,
-                                  type::TexelFormat format,
+                                  builtin::TexelFormat format,
                                   builtin::Access access) const {
             return storage_texture(builder->source_, dims, format, access);
         }
@@ -1401,7 +1401,7 @@ class ProgramBuilder {
         /// @returns the storage texture
         ast::Type storage_texture(const Source& source,
                                   type::TextureDimension dims,
-                                  type::TexelFormat format,
+                                  builtin::TexelFormat format,
                                   builtin::Access access) const {
             switch (dims) {
                 case type::TextureDimension::k1d:

@@ -440,7 +440,7 @@ INSTANTIATE_TEST_SUITE_P(WgslGeneratorImplTest,
                                                      "texture_multisampled_2d"}));
 
 struct StorageTextureData {
-    type::TexelFormat fmt;
+    builtin::TexelFormat fmt;
     type::TextureDimension dim;
     builtin::Access access;
     const char* name;
@@ -466,17 +466,17 @@ INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
     WgslGenerator_StorageTextureTest,
     testing::Values(
-        StorageTextureData{type::TexelFormat::kRgba8Sint, type::TextureDimension::k1d,
+        StorageTextureData{builtin::TexelFormat::kRgba8Sint, type::TextureDimension::k1d,
                            builtin::Access::kWrite, "texture_storage_1d<rgba8sint, write>"},
-        StorageTextureData{type::TexelFormat::kRgba8Sint, type::TextureDimension::k2d,
+        StorageTextureData{builtin::TexelFormat::kRgba8Sint, type::TextureDimension::k2d,
                            builtin::Access::kWrite, "texture_storage_2d<rgba8sint, write>"},
-        StorageTextureData{type::TexelFormat::kRgba8Sint, type::TextureDimension::k2dArray,
+        StorageTextureData{builtin::TexelFormat::kRgba8Sint, type::TextureDimension::k2dArray,
                            builtin::Access::kWrite, "texture_storage_2d_array<rgba8sint, write>"},
-        StorageTextureData{type::TexelFormat::kRgba8Sint, type::TextureDimension::k3d,
+        StorageTextureData{builtin::TexelFormat::kRgba8Sint, type::TextureDimension::k3d,
                            builtin::Access::kWrite, "texture_storage_3d<rgba8sint, write>"}));
 
 struct ImageFormatData {
-    type::TexelFormat fmt;
+    builtin::TexelFormat fmt;
     const char* name;
 };
 inline std::ostream& operator<<(std::ostream& out, ImageFormatData data) {
@@ -497,22 +497,22 @@ TEST_P(WgslGenerator_ImageFormatTest, EmitType_StorageTexture_ImageFormat) {
 INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
     WgslGenerator_ImageFormatTest,
-    testing::Values(ImageFormatData{type::TexelFormat::kR32Uint, "r32uint"},
-                    ImageFormatData{type::TexelFormat::kR32Sint, "r32sint"},
-                    ImageFormatData{type::TexelFormat::kR32Float, "r32float"},
-                    ImageFormatData{type::TexelFormat::kRgba8Unorm, "rgba8unorm"},
-                    ImageFormatData{type::TexelFormat::kRgba8Snorm, "rgba8snorm"},
-                    ImageFormatData{type::TexelFormat::kRgba8Uint, "rgba8uint"},
-                    ImageFormatData{type::TexelFormat::kRgba8Sint, "rgba8sint"},
-                    ImageFormatData{type::TexelFormat::kRg32Uint, "rg32uint"},
-                    ImageFormatData{type::TexelFormat::kRg32Sint, "rg32sint"},
-                    ImageFormatData{type::TexelFormat::kRg32Float, "rg32float"},
-                    ImageFormatData{type::TexelFormat::kRgba16Uint, "rgba16uint"},
-                    ImageFormatData{type::TexelFormat::kRgba16Sint, "rgba16sint"},
-                    ImageFormatData{type::TexelFormat::kRgba16Float, "rgba16float"},
-                    ImageFormatData{type::TexelFormat::kRgba32Uint, "rgba32uint"},
-                    ImageFormatData{type::TexelFormat::kRgba32Sint, "rgba32sint"},
-                    ImageFormatData{type::TexelFormat::kRgba32Float, "rgba32float"}));
+    testing::Values(ImageFormatData{builtin::TexelFormat::kR32Uint, "r32uint"},
+                    ImageFormatData{builtin::TexelFormat::kR32Sint, "r32sint"},
+                    ImageFormatData{builtin::TexelFormat::kR32Float, "r32float"},
+                    ImageFormatData{builtin::TexelFormat::kRgba8Unorm, "rgba8unorm"},
+                    ImageFormatData{builtin::TexelFormat::kRgba8Snorm, "rgba8snorm"},
+                    ImageFormatData{builtin::TexelFormat::kRgba8Uint, "rgba8uint"},
+                    ImageFormatData{builtin::TexelFormat::kRgba8Sint, "rgba8sint"},
+                    ImageFormatData{builtin::TexelFormat::kRg32Uint, "rg32uint"},
+                    ImageFormatData{builtin::TexelFormat::kRg32Sint, "rg32sint"},
+                    ImageFormatData{builtin::TexelFormat::kRg32Float, "rg32float"},
+                    ImageFormatData{builtin::TexelFormat::kRgba16Uint, "rgba16uint"},
+                    ImageFormatData{builtin::TexelFormat::kRgba16Sint, "rgba16sint"},
+                    ImageFormatData{builtin::TexelFormat::kRgba16Float, "rgba16float"},
+                    ImageFormatData{builtin::TexelFormat::kRgba32Uint, "rgba32uint"},
+                    ImageFormatData{builtin::TexelFormat::kRgba32Sint, "rgba32sint"},
+                    ImageFormatData{builtin::TexelFormat::kRgba32Float, "rgba32float"}));
 
 TEST_F(WgslGeneratorImplTest, EmitType_Sampler) {
     auto sampler = ty.sampler(type::SamplerKind::kSampler);

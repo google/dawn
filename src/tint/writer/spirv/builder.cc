@@ -4074,48 +4074,48 @@ void Builder::AddInterpolationDecorations(uint32_t id,
     }
 }
 
-SpvImageFormat Builder::convert_texel_format_to_spv(const type::TexelFormat format) {
+SpvImageFormat Builder::convert_texel_format_to_spv(const builtin::TexelFormat format) {
     switch (format) {
-        case type::TexelFormat::kBgra8Unorm:
+        case builtin::TexelFormat::kBgra8Unorm:
             TINT_ICE(Writer, builder_.Diagnostics())
                 << "bgra8unorm should have been polyfilled to rgba8unorm";
             return SpvImageFormatUnknown;
-        case type::TexelFormat::kR32Uint:
+        case builtin::TexelFormat::kR32Uint:
             return SpvImageFormatR32ui;
-        case type::TexelFormat::kR32Sint:
+        case builtin::TexelFormat::kR32Sint:
             return SpvImageFormatR32i;
-        case type::TexelFormat::kR32Float:
+        case builtin::TexelFormat::kR32Float:
             return SpvImageFormatR32f;
-        case type::TexelFormat::kRgba8Unorm:
+        case builtin::TexelFormat::kRgba8Unorm:
             return SpvImageFormatRgba8;
-        case type::TexelFormat::kRgba8Snorm:
+        case builtin::TexelFormat::kRgba8Snorm:
             return SpvImageFormatRgba8Snorm;
-        case type::TexelFormat::kRgba8Uint:
+        case builtin::TexelFormat::kRgba8Uint:
             return SpvImageFormatRgba8ui;
-        case type::TexelFormat::kRgba8Sint:
+        case builtin::TexelFormat::kRgba8Sint:
             return SpvImageFormatRgba8i;
-        case type::TexelFormat::kRg32Uint:
+        case builtin::TexelFormat::kRg32Uint:
             push_capability(SpvCapabilityStorageImageExtendedFormats);
             return SpvImageFormatRg32ui;
-        case type::TexelFormat::kRg32Sint:
+        case builtin::TexelFormat::kRg32Sint:
             push_capability(SpvCapabilityStorageImageExtendedFormats);
             return SpvImageFormatRg32i;
-        case type::TexelFormat::kRg32Float:
+        case builtin::TexelFormat::kRg32Float:
             push_capability(SpvCapabilityStorageImageExtendedFormats);
             return SpvImageFormatRg32f;
-        case type::TexelFormat::kRgba16Uint:
+        case builtin::TexelFormat::kRgba16Uint:
             return SpvImageFormatRgba16ui;
-        case type::TexelFormat::kRgba16Sint:
+        case builtin::TexelFormat::kRgba16Sint:
             return SpvImageFormatRgba16i;
-        case type::TexelFormat::kRgba16Float:
+        case builtin::TexelFormat::kRgba16Float:
             return SpvImageFormatRgba16f;
-        case type::TexelFormat::kRgba32Uint:
+        case builtin::TexelFormat::kRgba32Uint:
             return SpvImageFormatRgba32ui;
-        case type::TexelFormat::kRgba32Sint:
+        case builtin::TexelFormat::kRgba32Sint:
             return SpvImageFormatRgba32i;
-        case type::TexelFormat::kRgba32Float:
+        case builtin::TexelFormat::kRgba32Float:
             return SpvImageFormatRgba32f;
-        case type::TexelFormat::kUndefined:
+        case builtin::TexelFormat::kUndefined:
             return SpvImageFormatUnknown;
     }
     return SpvImageFormatUnknown;

@@ -363,9 +363,9 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
     return true;
 }
 
-bool GeneratorImpl::EmitImageFormat(std::ostream& out, const type::TexelFormat fmt) {
+bool GeneratorImpl::EmitImageFormat(std::ostream& out, const builtin::TexelFormat fmt) {
     switch (fmt) {
-        case type::TexelFormat::kUndefined:
+        case builtin::TexelFormat::kUndefined:
             diagnostics_.add_error(diag::System::Writer, "unknown image format");
             return false;
         default:

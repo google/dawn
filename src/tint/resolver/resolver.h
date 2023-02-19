@@ -145,10 +145,11 @@ class Resolver {
     sem::BuiltinEnumExpression<builtin::AddressSpace>* AddressSpaceExpression(
         const ast::Expression* expr);
 
-    /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<type::TexelFormat>.
-    /// If the sem::Expression is not a sem::BuiltinEnumExpression<type::TexelFormat>, then an error
-    /// diagnostic is raised and nullptr is returned.
-    sem::BuiltinEnumExpression<type::TexelFormat>* TexelFormatExpression(
+    /// @returns the call of Expression() cast to a
+    /// sem::BuiltinEnumExpression<builtin::TexelFormat>. If the sem::Expression is not a
+    /// sem::BuiltinEnumExpression<builtin::TexelFormat>, then an error diagnostic is raised and
+    /// nullptr is returned.
+    sem::BuiltinEnumExpression<builtin::TexelFormat>* TexelFormatExpression(
         const ast::Expression* expr);
 
     /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<builtin::Access>*.

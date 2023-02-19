@@ -89,7 +89,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::Access>);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::AddressSpace>);
-TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::type::TexelFormat>);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::TexelFormat>);
 
 namespace tint::resolver {
 namespace {
@@ -1502,7 +1502,7 @@ sem::BuiltinEnumExpression<builtin::AddressSpace>* Resolver::AddressSpaceExpress
     return sem_.AsAddressSpace(Expression(expr));
 }
 
-sem::BuiltinEnumExpression<type::TexelFormat>* Resolver::TexelFormatExpression(
+sem::BuiltinEnumExpression<builtin::TexelFormat>* Resolver::TexelFormatExpression(
     const ast::Expression* expr) {
     return sem_.AsTexelFormat(Expression(expr));
 }
@@ -2987,8 +2987,8 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
             expr, current_statement_, addr);
     }
 
-    if (auto fmt = resolved->TexelFormat(); fmt != type::TexelFormat::kUndefined) {
-        return builder_->create<sem::BuiltinEnumExpression<type::TexelFormat>>(
+    if (auto fmt = resolved->TexelFormat(); fmt != builtin::TexelFormat::kUndefined) {
+        return builder_->create<sem::BuiltinEnumExpression<builtin::TexelFormat>>(
             expr, current_statement_, fmt);
     }
 

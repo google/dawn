@@ -88,25 +88,25 @@ bool IsValidStorageTextureDimension(type::TextureDimension dim) {
     }
 }
 
-bool IsValidStorageTextureTexelFormat(type::TexelFormat format) {
+bool IsValidStorageTextureTexelFormat(builtin::TexelFormat format) {
     switch (format) {
-        case type::TexelFormat::kBgra8Unorm:
-        case type::TexelFormat::kR32Uint:
-        case type::TexelFormat::kR32Sint:
-        case type::TexelFormat::kR32Float:
-        case type::TexelFormat::kRg32Uint:
-        case type::TexelFormat::kRg32Sint:
-        case type::TexelFormat::kRg32Float:
-        case type::TexelFormat::kRgba8Unorm:
-        case type::TexelFormat::kRgba8Snorm:
-        case type::TexelFormat::kRgba8Uint:
-        case type::TexelFormat::kRgba8Sint:
-        case type::TexelFormat::kRgba16Uint:
-        case type::TexelFormat::kRgba16Sint:
-        case type::TexelFormat::kRgba16Float:
-        case type::TexelFormat::kRgba32Uint:
-        case type::TexelFormat::kRgba32Sint:
-        case type::TexelFormat::kRgba32Float:
+        case builtin::TexelFormat::kBgra8Unorm:
+        case builtin::TexelFormat::kR32Uint:
+        case builtin::TexelFormat::kR32Sint:
+        case builtin::TexelFormat::kR32Float:
+        case builtin::TexelFormat::kRg32Uint:
+        case builtin::TexelFormat::kRg32Sint:
+        case builtin::TexelFormat::kRg32Float:
+        case builtin::TexelFormat::kRgba8Unorm:
+        case builtin::TexelFormat::kRgba8Snorm:
+        case builtin::TexelFormat::kRgba8Uint:
+        case builtin::TexelFormat::kRgba8Sint:
+        case builtin::TexelFormat::kRgba16Uint:
+        case builtin::TexelFormat::kRgba16Sint:
+        case builtin::TexelFormat::kRgba16Float:
+        case builtin::TexelFormat::kRgba32Uint:
+        case builtin::TexelFormat::kRgba32Sint:
+        case builtin::TexelFormat::kRgba32Float:
             return true;
         default:
             return false;

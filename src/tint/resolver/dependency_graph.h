@@ -20,11 +20,11 @@
 
 #include "src/tint/ast/module.h"
 #include "src/tint/builtin/access.h"
+#include "src/tint/builtin/texel_format.h"
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/sem/builtin_type.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/builtin.h"
-#include "src/tint/type/texel_format.h"
 #include "src/tint/utils/hashmap.h"
 
 namespace tint::resolver {
@@ -38,7 +38,7 @@ namespace tint::resolver {
 /// - builtin::Access
 /// - builtin::AddressSpace
 /// - type::Builtin
-/// - type::TexelFormat
+/// - builtin::TexelFormat
 class ResolvedIdentifier {
   public:
     ResolvedIdentifier() = default;
@@ -95,13 +95,13 @@ class ResolvedIdentifier {
         return type::Builtin::kUndefined;
     }
 
-    /// @return the texel format if the ResolvedIdentifier holds type::TexelFormat, otherwise
-    /// type::TexelFormat::kUndefined
-    type::TexelFormat TexelFormat() const {
-        if (auto n = std::get_if<type::TexelFormat>(&value_)) {
+    /// @return the texel format if the ResolvedIdentifier holds builtin::TexelFormat, otherwise
+    /// builtin::TexelFormat::kUndefined
+    builtin::TexelFormat TexelFormat() const {
+        if (auto n = std::get_if<builtin::TexelFormat>(&value_)) {
             return *n;
         }
-        return type::TexelFormat::kUndefined;
+        return builtin::TexelFormat::kUndefined;
     }
 
     /// @param value the value to compare the ResolvedIdentifier to
@@ -133,7 +133,7 @@ class ResolvedIdentifier {
                  builtin::Access,
                  builtin::AddressSpace,
                  type::Builtin,
-                 type::TexelFormat>
+                 builtin::TexelFormat>
         value_;
 };
 

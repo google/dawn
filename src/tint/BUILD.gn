@@ -701,6 +701,8 @@ libtint_source_set("libtint_builtins_src") {
     "builtin/builtin_value.h",
     "builtin/extension.cc",
     "builtin/extension.h",
+    "builtin/texel_format.cc",
+    "builtin/texel_format.h",
   ]
   deps = [ ":libtint_base_src" ]
 }
@@ -758,8 +760,6 @@ libtint_source_set("libtint_type_src") {
     "type/storage_texture.h",
     "type/struct.cc",
     "type/struct.h",
-    "type/texel_format.cc",
-    "type/texel_format.h",
     "type/texture.cc",
     "type/texture.h",
     "type/texture_dimension.cc",
@@ -1298,6 +1298,7 @@ if (tint_build_unittests) {
       "builtin/address_space_test.cc",
       "builtin/builtin_value_test.cc",
       "builtin/extension_test.cc",
+      "builtin/texel_format_test.cc",
     ]
     deps = [ ":libtint_builtins_src" ]
   }
@@ -1432,7 +1433,6 @@ if (tint_build_unittests) {
       "type/sampler_test.cc",
       "type/storage_texture_test.cc",
       "type/struct_test.cc",
-      "type/texel_format_test.cc",
       "type/texture_test.cc",
       "type/type_test.cc",
       "type/u32_test.cc",
@@ -1509,6 +1509,7 @@ if (tint_build_unittests) {
 
     deps = [
       ":libtint_base_src",
+      ":libtint_builtins_src",
       ":libtint_transform_src",
       ":libtint_unittests_ast_helper",
       ":libtint_wgsl_reader_src",

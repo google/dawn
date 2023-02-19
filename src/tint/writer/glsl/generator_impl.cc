@@ -2038,59 +2038,59 @@ bool GeneratorImpl::EmitHandleVariable(const ast::Var* var, const sem::Variable*
     if (auto* storage = type->As<type::StorageTexture>()) {
         out << "layout(";
         switch (storage->texel_format()) {
-            case type::TexelFormat::kBgra8Unorm:
+            case builtin::TexelFormat::kBgra8Unorm:
                 TINT_ICE(Writer, diagnostics_)
                     << "bgra8unorm should have been polyfilled to rgba8unorm";
                 break;
-            case type::TexelFormat::kR32Uint:
+            case builtin::TexelFormat::kR32Uint:
                 out << "r32ui";
                 break;
-            case type::TexelFormat::kR32Sint:
+            case builtin::TexelFormat::kR32Sint:
                 out << "r32i";
                 break;
-            case type::TexelFormat::kR32Float:
+            case builtin::TexelFormat::kR32Float:
                 out << "r32f";
                 break;
-            case type::TexelFormat::kRgba8Unorm:
+            case builtin::TexelFormat::kRgba8Unorm:
                 out << "rgba8";
                 break;
-            case type::TexelFormat::kRgba8Snorm:
+            case builtin::TexelFormat::kRgba8Snorm:
                 out << "rgba8_snorm";
                 break;
-            case type::TexelFormat::kRgba8Uint:
+            case builtin::TexelFormat::kRgba8Uint:
                 out << "rgba8ui";
                 break;
-            case type::TexelFormat::kRgba8Sint:
+            case builtin::TexelFormat::kRgba8Sint:
                 out << "rgba8i";
                 break;
-            case type::TexelFormat::kRg32Uint:
+            case builtin::TexelFormat::kRg32Uint:
                 out << "rg32ui";
                 break;
-            case type::TexelFormat::kRg32Sint:
+            case builtin::TexelFormat::kRg32Sint:
                 out << "rg32i";
                 break;
-            case type::TexelFormat::kRg32Float:
+            case builtin::TexelFormat::kRg32Float:
                 out << "rg32f";
                 break;
-            case type::TexelFormat::kRgba16Uint:
+            case builtin::TexelFormat::kRgba16Uint:
                 out << "rgba16ui";
                 break;
-            case type::TexelFormat::kRgba16Sint:
+            case builtin::TexelFormat::kRgba16Sint:
                 out << "rgba16i";
                 break;
-            case type::TexelFormat::kRgba16Float:
+            case builtin::TexelFormat::kRgba16Float:
                 out << "rgba16f";
                 break;
-            case type::TexelFormat::kRgba32Uint:
+            case builtin::TexelFormat::kRgba32Uint:
                 out << "rgba32ui";
                 break;
-            case type::TexelFormat::kRgba32Sint:
+            case builtin::TexelFormat::kRgba32Sint:
                 out << "rgba32i";
                 break;
-            case type::TexelFormat::kRgba32Float:
+            case builtin::TexelFormat::kRgba32Float:
                 out << "rgba32f";
                 break;
-            case type::TexelFormat::kUndefined:
+            case builtin::TexelFormat::kUndefined:
                 TINT_ICE(Writer, diagnostics_) << "invalid texel format";
                 return false;
         }

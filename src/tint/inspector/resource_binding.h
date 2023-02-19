@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-#include "src/tint/type/texel_format.h"
+#include "src/tint/builtin/texel_format.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/type/type.h"
 
@@ -116,12 +116,12 @@ ResourceBinding::TextureDimension TypeTextureDimensionToResourceBindingTextureDi
 /// @returns the publicly visible equivalent
 ResourceBinding::SampledKind BaseTypeToSampledKind(const type::Type* base_type);
 
-/// Convert from internal type::TexelFormat to public
+/// Convert from internal builtin::TexelFormat to public
 /// ResourceBinding::TexelFormat
 /// @param image_format internal value to convert from
 /// @returns the publicly visible equivalent
 ResourceBinding::TexelFormat TypeTexelFormatToResourceBindingTexelFormat(
-    const type::TexelFormat& image_format);
+    const builtin::TexelFormat& image_format);
 
 }  // namespace tint::inspector
 

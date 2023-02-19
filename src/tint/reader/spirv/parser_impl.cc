@@ -2529,7 +2529,7 @@ const Type* ParserImpl::GetHandleTypeForSpirvHandle(const spvtools::opt::Instruc
         } else {
             const auto access = builtin::Access::kWrite;
             const auto format = enum_converter_.ToTexelFormat(image_type->format());
-            if (format == type::TexelFormat::kUndefined) {
+            if (format == builtin::TexelFormat::kUndefined) {
                 return nullptr;
             }
             ast_handle_type = ty_.StorageTexture(dim, format, access);
@@ -2546,28 +2546,28 @@ const Type* ParserImpl::GetHandleTypeForSpirvHandle(const spvtools::opt::Instruc
     return ast_handle_type;
 }
 
-const Type* ParserImpl::GetComponentTypeForFormat(type::TexelFormat format) {
+const Type* ParserImpl::GetComponentTypeForFormat(builtin::TexelFormat format) {
     switch (format) {
-        case type::TexelFormat::kR32Uint:
-        case type::TexelFormat::kRgba8Uint:
-        case type::TexelFormat::kRg32Uint:
-        case type::TexelFormat::kRgba16Uint:
-        case type::TexelFormat::kRgba32Uint:
+        case builtin::TexelFormat::kR32Uint:
+        case builtin::TexelFormat::kRgba8Uint:
+        case builtin::TexelFormat::kRg32Uint:
+        case builtin::TexelFormat::kRgba16Uint:
+        case builtin::TexelFormat::kRgba32Uint:
             return ty_.U32();
 
-        case type::TexelFormat::kR32Sint:
-        case type::TexelFormat::kRgba8Sint:
-        case type::TexelFormat::kRg32Sint:
-        case type::TexelFormat::kRgba16Sint:
-        case type::TexelFormat::kRgba32Sint:
+        case builtin::TexelFormat::kR32Sint:
+        case builtin::TexelFormat::kRgba8Sint:
+        case builtin::TexelFormat::kRg32Sint:
+        case builtin::TexelFormat::kRgba16Sint:
+        case builtin::TexelFormat::kRgba32Sint:
             return ty_.I32();
 
-        case type::TexelFormat::kRgba8Unorm:
-        case type::TexelFormat::kRgba8Snorm:
-        case type::TexelFormat::kR32Float:
-        case type::TexelFormat::kRg32Float:
-        case type::TexelFormat::kRgba16Float:
-        case type::TexelFormat::kRgba32Float:
+        case builtin::TexelFormat::kRgba8Unorm:
+        case builtin::TexelFormat::kRgba8Snorm:
+        case builtin::TexelFormat::kR32Float:
+        case builtin::TexelFormat::kRg32Float:
+        case builtin::TexelFormat::kRgba16Float:
+        case builtin::TexelFormat::kRgba32Float:
             return ty_.F32();
         default:
             break;
@@ -2576,30 +2576,30 @@ const Type* ParserImpl::GetComponentTypeForFormat(type::TexelFormat format) {
     return nullptr;
 }
 
-unsigned ParserImpl::GetChannelCountForFormat(type::TexelFormat format) {
+unsigned ParserImpl::GetChannelCountForFormat(builtin::TexelFormat format) {
     switch (format) {
-        case type::TexelFormat::kR32Float:
-        case type::TexelFormat::kR32Sint:
-        case type::TexelFormat::kR32Uint:
+        case builtin::TexelFormat::kR32Float:
+        case builtin::TexelFormat::kR32Sint:
+        case builtin::TexelFormat::kR32Uint:
             // One channel
             return 1;
 
-        case type::TexelFormat::kRg32Float:
-        case type::TexelFormat::kRg32Sint:
-        case type::TexelFormat::kRg32Uint:
+        case builtin::TexelFormat::kRg32Float:
+        case builtin::TexelFormat::kRg32Sint:
+        case builtin::TexelFormat::kRg32Uint:
             // Two channels
             return 2;
 
-        case type::TexelFormat::kRgba16Float:
-        case type::TexelFormat::kRgba16Sint:
-        case type::TexelFormat::kRgba16Uint:
-        case type::TexelFormat::kRgba32Float:
-        case type::TexelFormat::kRgba32Sint:
-        case type::TexelFormat::kRgba32Uint:
-        case type::TexelFormat::kRgba8Sint:
-        case type::TexelFormat::kRgba8Snorm:
-        case type::TexelFormat::kRgba8Uint:
-        case type::TexelFormat::kRgba8Unorm:
+        case builtin::TexelFormat::kRgba16Float:
+        case builtin::TexelFormat::kRgba16Sint:
+        case builtin::TexelFormat::kRgba16Uint:
+        case builtin::TexelFormat::kRgba32Float:
+        case builtin::TexelFormat::kRgba32Sint:
+        case builtin::TexelFormat::kRgba32Uint:
+        case builtin::TexelFormat::kRgba8Sint:
+        case builtin::TexelFormat::kRgba8Snorm:
+        case builtin::TexelFormat::kRgba8Uint:
+        case builtin::TexelFormat::kRgba8Unorm:
             // Four channels
             return 4;
 
@@ -2610,7 +2610,7 @@ unsigned ParserImpl::GetChannelCountForFormat(type::TexelFormat format) {
     return 0;
 }
 
-const Type* ParserImpl::GetTexelTypeForFormat(type::TexelFormat format) {
+const Type* ParserImpl::GetTexelTypeForFormat(builtin::TexelFormat format) {
     const auto* component_type = GetComponentTypeForFormat(format);
     if (!component_type) {
         return nullptr;

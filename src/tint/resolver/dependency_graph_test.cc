@@ -1501,7 +1501,7 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 }  // namespace resolve_to_address_space
 
 ////////////////////////////////////////////////////////////////////////////////
-// Resolve to type::TexelFormat tests
+// Resolve to builtin::TexelFormat tests
 ////////////////////////////////////////////////////////////////////////////////
 namespace resolve_to_texel_format {
 
@@ -1519,7 +1519,7 @@ TEST_P(ResolverDependencyGraphResolveToTexelFormat, Resolve) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->TexelFormat(), type::ParseTexelFormat(name))
+    EXPECT_EQ(resolved->TexelFormat(), builtin::ParseTexelFormat(name))
         << resolved->String(Symbols(), Diagnostics());
 }
 
@@ -1571,17 +1571,17 @@ TEST_P(ResolverDependencyGraphResolveToTexelFormat, ShadowedByFunc) {
 INSTANTIATE_TEST_SUITE_P(Types,
                          ResolverDependencyGraphResolveToTexelFormat,
                          testing::Combine(testing::ValuesIn(kTypeUseKinds),
-                                          testing::ValuesIn(type::kTexelFormatStrings)));
+                                          testing::ValuesIn(builtin::kTexelFormatStrings)));
 
 INSTANTIATE_TEST_SUITE_P(Values,
                          ResolverDependencyGraphResolveToTexelFormat,
                          testing::Combine(testing::ValuesIn(kValueUseKinds),
-                                          testing::ValuesIn(type::kTexelFormatStrings)));
+                                          testing::ValuesIn(builtin::kTexelFormatStrings)));
 
 INSTANTIATE_TEST_SUITE_P(Functions,
                          ResolverDependencyGraphResolveToTexelFormat,
                          testing::Combine(testing::ValuesIn(kFuncUseKinds),
-                                          testing::ValuesIn(type::kTexelFormatStrings)));
+                                          testing::ValuesIn(builtin::kTexelFormatStrings)));
 
 }  // namespace resolve_to_texel_format
 
@@ -1735,8 +1735,8 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     GlobalVar(Sym(), ty.depth_multisampled_texture(type::TextureDimension::k2d));
     GlobalVar(Sym(), ty.external_texture());
     GlobalVar(Sym(), ty.multisampled_texture(type::TextureDimension::k2d, T));
-    GlobalVar(Sym(), ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Float,
-                                        builtin::Access::kRead));
+    GlobalVar(Sym(), ty.storage_texture(type::TextureDimension::k2d,
+                                        builtin::TexelFormat::kR32Float, builtin::Access::kRead));
     GlobalVar(Sym(), ty.sampler(type::SamplerKind::kSampler));
 
     GlobalVar(Sym(), ty.i32(), utils::Vector{Binding(V), Group(V)});

@@ -290,7 +290,7 @@ class InspectorBuilder : public ProgramBuilder {
     /// @param dim the texture dimension of the storage texture
     /// @param format the texel format of the storage texture
     /// @returns the storage texture type
-    ast::Type MakeStorageTextureTypes(type::TextureDimension dim, type::TexelFormat format);
+    ast::Type MakeStorageTextureTypes(type::TextureDimension dim, builtin::TexelFormat format);
 
     /// Adds a storage texture variable to the program
     /// @param name the name of the variable

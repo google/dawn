@@ -22,10 +22,10 @@
 #include "src/tint/ast/type.h"
 #include "src/tint/builtin/access.h"
 #include "src/tint/builtin/address_space.h"
+#include "src/tint/builtin/texel_format.h"
 #include "src/tint/castable.h"
 #include "src/tint/symbol.h"
 #include "src/tint/type/sampler_kind.h"
-#include "src/tint/type/texel_format.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/block_allocator.h"
 
@@ -434,7 +434,7 @@ struct StorageTexture final : public Castable<StorageTexture, Texture> {
     /// @param d the texture dimensions
     /// @param f the storage image format
     /// @param a the access control
-    StorageTexture(type::TextureDimension d, type::TexelFormat f, builtin::Access a);
+    StorageTexture(type::TextureDimension d, builtin::TexelFormat f, builtin::Access a);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -450,7 +450,7 @@ struct StorageTexture final : public Castable<StorageTexture, Texture> {
 #endif  // NDEBUG
 
     /// the storage image format
-    type::TexelFormat const format;
+    builtin::TexelFormat const format;
 
     /// the access control
     builtin::Access const access;
@@ -615,7 +615,7 @@ class TypeManager {
     /// @return a StorageTexture type. Repeated calls with the same arguments will
     /// return the same pointer.
     const spirv::StorageTexture* StorageTexture(type::TextureDimension d,
-                                                type::TexelFormat f,
+                                                builtin::TexelFormat f,
                                                 builtin::Access a);
 
   private:

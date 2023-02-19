@@ -19,9 +19,9 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "src/tint/builtin/texel_format.h"
 #include "src/tint/transform/test_helper.h"
 #include "src/tint/type/builtin.h"
-#include "src/tint/type/texel_format.h"
 
 namespace tint::transform {
 namespace {
@@ -1931,7 +1931,7 @@ std::vector<const char*> Identifiers() {
             out.push_back(ident);
         }
     }
-    for (auto* ident : type::kTexelFormatStrings) {
+    for (auto* ident : builtin::kTexelFormatStrings) {
         out.push_back(ident);
     }
     for (auto* ident : builtin::kAccessStrings) {

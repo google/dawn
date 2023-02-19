@@ -184,9 +184,9 @@ TEST_P(ResolverExpressionKindTest, Test) {
             sym = Sym("rgba8unorm");
             check_expr = [](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
-                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<type::TexelFormat>>();
+                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::TexelFormat>>();
                 ASSERT_NE(enum_expr, nullptr);
-                EXPECT_EQ(enum_expr->Value(), type::TexelFormat::kRgba8Unorm);
+                EXPECT_EQ(enum_expr->Value(), builtin::TexelFormat::kRgba8Unorm);
             };
             break;
         }

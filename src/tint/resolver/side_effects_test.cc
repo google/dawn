@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/builtin/address_space.h"
 #include "src/tint/builtin/extension.h"
+#include "src/tint/builtin/texel_format.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/index_accessor_expression.h"
 #include "src/tint/sem/member_accessor_expression.h"
@@ -191,10 +192,11 @@ TEST_P(SideEffectsBuiltinTest, Test) {
                   Group(0_a), Binding(AInt(next_binding++)));
         GlobalVar("t2d_multi", ty.multisampled_texture(type::TextureDimension::k2d, ty.f32()),
                   Group(0_a), Binding(AInt(next_binding++)));
-        GlobalVar("tstorage2d",
-                  ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Float,
-                                     tint::builtin::Access::kWrite),
-                  Group(0_a), Binding(AInt(next_binding++)));
+        GlobalVar(
+            "tstorage2d",
+            ty.storage_texture(type::TextureDimension::k2d, tint::builtin::TexelFormat::kR32Float,
+                               tint::builtin::Access::kWrite),
+            Group(0_a), Binding(AInt(next_binding++)));
         GlobalVar("s2d", ty.sampler(type::SamplerKind::kSampler), Group(0_a),
                   Binding(AInt(next_binding++)));
         GlobalVar("scomp", ty.sampler(type::SamplerKind::kComparisonSampler), Group(0_a),

@@ -84,7 +84,7 @@ void SemHelper::ErrorUnexpectedExprKind(const sem::Expression* expr,
                          std::string(wanted),
                      addr->Declaration()->source);
         },
-        [&](const sem::BuiltinEnumExpression<type::TexelFormat>* fmt) {
+        [&](const sem::BuiltinEnumExpression<builtin::TexelFormat>* fmt) {
             AddError("cannot use texel format '" + utils::ToString(fmt->Value()) + "' as " +
                          std::string(wanted),
                      fmt->Declaration()->source);

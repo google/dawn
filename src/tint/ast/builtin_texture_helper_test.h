@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "src/tint/builtin/access.h"
+#include "src/tint/builtin/texel_format.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/texture_dimension.h"
@@ -208,7 +209,7 @@ struct TextureOverloadCase {
     TextureOverloadCase(ValidTextureOverload,
                         const char*,
                         tint::builtin::Access,
-                        type::TexelFormat,
+                        tint::builtin::TexelFormat,
                         type::TextureDimension,
                         TextureDataType,
                         const char*,
@@ -248,7 +249,7 @@ struct TextureOverloadCase {
     tint::builtin::Access const access = tint::builtin::Access::kReadWrite;
     /// The image format for the storage texture
     /// Used only when texture_kind is kStorage
-    type::TexelFormat const texel_format = type::TexelFormat::kUndefined;
+    tint::builtin::TexelFormat const texel_format = tint::builtin::TexelFormat::kUndefined;
     /// The dimensions of the texture parameter
     type::TextureDimension const texture_dimension;
     /// The data type of the texture parameter

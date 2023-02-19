@@ -207,7 +207,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream
     /// @param fmt the format to generate
     /// @returns true if the format is emitted
-    bool EmitImageFormat(std::ostream& out, const type::TexelFormat fmt);
+    bool EmitImageFormat(std::ostream& out, const builtin::TexelFormat fmt);
     /// Handles a unary op expression
     /// @param out the output stream
     /// @param expr the expression to emit

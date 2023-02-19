@@ -279,7 +279,7 @@ ast::Type InspectorBuilder::GetCoordsType(type::TextureDimension dim, ast::Type 
 }
 
 ast::Type InspectorBuilder::MakeStorageTextureTypes(type::TextureDimension dim,
-                                                    type::TexelFormat format) {
+                                                    builtin::TexelFormat format) {
     return ty.storage_texture(dim, format, builtin::Access::kWrite);
 }
 
