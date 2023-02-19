@@ -10,23 +10,11 @@ See:
 
 {{- Import "src/tint/templates/enums.tmpl.inc" -}}
 
-#include "src/tint/ast/diagnostic_control.h"
+#include "src/tint/builtin/diagnostic_severity.h"
 
 #include <string>
 
-#include "src/tint/ast/identifier.h"
-#include "src/tint/ast/templated_identifier.h"
-
-namespace tint::ast {
-
-DiagnosticControl::DiagnosticControl(DiagnosticSeverity sev, const Identifier* rule)
-        : severity(sev), rule_name(rule) {
-    TINT_ASSERT(AST, rule != nullptr);
-    if (rule) {
-        // It is invalid for a diagnostic rule name to be templated
-        TINT_ASSERT(AST, !rule->Is<TemplatedIdentifier>());
-    }
-}
+namespace tint::builtin {
 
 diag::Severity ToSeverity(DiagnosticSeverity sc) {
     switch (sc) {
@@ -45,8 +33,4 @@ diag::Severity ToSeverity(DiagnosticSeverity sc) {
 
 {{ Eval "EnumOStream" (Sem.Enum "diagnostic_severity")}}
 
-{{ Eval "ParseEnum" (Sem.Enum "diagnostic_rule")}}
-
-{{ Eval "EnumOStream" (Sem.Enum "diagnostic_rule")}}
-
-}  // namespace tint::ast
+}  // namespace tint::builtin

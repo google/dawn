@@ -86,7 +86,7 @@ struct TypeAndAddressSpace {
 };
 
 /// DiagnosticFilterStack is a scoped stack of diagnostic filters.
-using DiagnosticFilterStack = ScopeStack<ast::DiagnosticRule, ast::DiagnosticSeverity>;
+using DiagnosticFilterStack = ScopeStack<builtin::DiagnosticRule, builtin::DiagnosticSeverity>;
 
 /// Validation logic for various ast nodes. The validations in general should
 /// be shallow and depend on the resolver to call on children. The validations
@@ -127,7 +127,7 @@ class Validator {
     /// @param msg the diagnostic message
     /// @param source the diagnostic source
     /// @returns false if the diagnostic is an error for the given trigger rule
-    bool AddDiagnostic(ast::DiagnosticRule rule,
+    bool AddDiagnostic(builtin::DiagnosticRule rule,
                        const std::string& msg,
                        const Source& source) const;
 

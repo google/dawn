@@ -22,9 +22,9 @@ using DiagnosticAttributeTest = TestHelper;
 
 TEST_F(DiagnosticAttributeTest, Creation) {
     auto* name = Ident("foo");
-    auto* d = DiagnosticAttribute(DiagnosticSeverity::kWarning, name);
+    auto* d = DiagnosticAttribute(builtin::DiagnosticSeverity::kWarning, name);
     EXPECT_EQ(d->Name(), "diagnostic");
-    EXPECT_EQ(d->control.severity, DiagnosticSeverity::kWarning);
+    EXPECT_EQ(d->control.severity, builtin::DiagnosticSeverity::kWarning);
     EXPECT_EQ(d->control.rule_name, name);
 }
 

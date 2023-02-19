@@ -159,10 +159,10 @@ Validator::Validator(
       atomic_composite_info_(atomic_composite_info),
       valid_type_storage_layouts_(valid_type_storage_layouts) {
     // Set default severities for filterable diagnostic rules.
-    diagnostic_filters_.Set(ast::DiagnosticRule::kDerivativeUniformity,
-                            ast::DiagnosticSeverity::kError);
-    diagnostic_filters_.Set(ast::DiagnosticRule::kChromiumUnreachableCode,
-                            ast::DiagnosticSeverity::kWarning);
+    diagnostic_filters_.Set(builtin::DiagnosticRule::kDerivativeUniformity,
+                            builtin::DiagnosticSeverity::kError);
+    diagnostic_filters_.Set(builtin::DiagnosticRule::kChromiumUnreachableCode,
+                            builtin::DiagnosticSeverity::kWarning);
 }
 
 Validator::~Validator() = default;
@@ -179,18 +179,18 @@ void Validator::AddNote(const std::string& msg, const Source& source) const {
     diagnostics_.add_note(diag::System::Resolver, msg, source);
 }
 
-bool Validator::AddDiagnostic(ast::DiagnosticRule rule,
+bool Validator::AddDiagnostic(builtin::DiagnosticRule rule,
                               const std::string& msg,
                               const Source& source) const {
     auto severity = diagnostic_filters_.Get(rule);
-    if (severity != ast::DiagnosticSeverity::kOff) {
+    if (severity != builtin::DiagnosticSeverity::kOff) {
         diag::Diagnostic d{};
         d.severity = ToSeverity(severity);
         d.system = diag::System::Resolver;
         d.source = source;
         d.message = msg;
         diagnostics_.add(std::move(d));
-        if (severity == ast::DiagnosticSeverity::kError) {
+        if (severity == builtin::DiagnosticSeverity::kError) {
             return false;
         }
     }
@@ -1375,8 +1375,8 @@ bool Validator::EvaluationStage(const sem::ValueExpression* expr,
 bool Validator::Statements(utils::VectorRef<const ast::Statement*> stmts) const {
     for (auto* stmt : stmts) {
         if (!sem_.Get(stmt)->IsReachable()) {
-            if (!AddDiagnostic(ast::DiagnosticRule::kChromiumUnreachableCode, "code is unreachable",
-                               stmt->source)) {
+            if (!AddDiagnostic(builtin::DiagnosticRule::kChromiumUnreachableCode,
+                               "code is unreachable", stmt->source)) {
                 return false;
             }
             break;

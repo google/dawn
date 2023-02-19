@@ -71,7 +71,7 @@ struct CallSiteTag {
         CallSiteRequiredToBeUniform,
         CallSiteNoRestriction,
     } tag;
-    ast::DiagnosticSeverity severity = ast::DiagnosticSeverity::kUndefined;
+    builtin::DiagnosticSeverity severity = builtin::DiagnosticSeverity::kUndefined;
 };
 
 /// FunctionTag describes a functions effects on uniformity.
@@ -87,7 +87,7 @@ struct ParameterTag {
         ParameterContentsRequiredToBeUniform,
         ParameterNoRestriction,
     } tag;
-    ast::DiagnosticSeverity severity = ast::DiagnosticSeverity::kUndefined;
+    builtin::DiagnosticSeverity severity = builtin::DiagnosticSeverity::kUndefined;
 };
 
 /// Node represents a node in the graph of control flow and value nodes within the analysis of a
@@ -257,13 +257,13 @@ struct FunctionInfo {
     };
 
     /// @returns the RequiredToBeUniform node that corresponds to `severity`
-    Node* RequiredToBeUniform(ast::DiagnosticSeverity severity) {
+    Node* RequiredToBeUniform(builtin::DiagnosticSeverity severity) {
         switch (severity) {
-            case ast::DiagnosticSeverity::kError:
+            case builtin::DiagnosticSeverity::kError:
                 return required_to_be_uniform_error;
-            case ast::DiagnosticSeverity::kWarning:
+            case builtin::DiagnosticSeverity::kWarning:
                 return required_to_be_uniform_warning;
-            case ast::DiagnosticSeverity::kInfo:
+            case builtin::DiagnosticSeverity::kInfo:
                 return required_to_be_uniform_info;
             default:
                 TINT_ASSERT(Resolver, false && "unhandled severity");
@@ -455,7 +455,7 @@ class UniformityGraph {
         // Look at which nodes are reachable from "RequiredToBeUniform".
         {
             utils::UniqueVector<Node*, 4> reachable;
-            auto traverse = [&](ast::DiagnosticSeverity severity) {
+            auto traverse = [&](builtin::DiagnosticSeverity severity) {
                 Traverse(current_function_->RequiredToBeUniform(severity), &reachable);
                 if (reachable.Contains(current_function_->may_be_non_uniform)) {
                     MakeError(*current_function_, current_function_->may_be_non_uniform, severity);
@@ -478,11 +478,11 @@ class UniformityGraph {
                 }
                 return true;
             };
-            if (!traverse(ast::DiagnosticSeverity::kError)) {
+            if (!traverse(builtin::DiagnosticSeverity::kError)) {
                 return false;
             } else {
-                if (traverse(ast::DiagnosticSeverity::kWarning)) {
-                    traverse(ast::DiagnosticSeverity::kInfo);
+                if (traverse(builtin::DiagnosticSeverity::kWarning)) {
+                    traverse(builtin::DiagnosticSeverity::kInfo);
                 }
             }
         }
@@ -1497,8 +1497,8 @@ class UniformityGraph {
         result->type = Node::kFunctionCallReturnValue;
         Node* cf_after = CreateNode({"CF_after_", name}, call);
 
-        auto default_severity = kUniformityFailuresAsError ? ast::DiagnosticSeverity::kError
-                                                           : ast::DiagnosticSeverity::kWarning;
+        auto default_severity = kUniformityFailuresAsError ? builtin::DiagnosticSeverity::kError
+                                                           : builtin::DiagnosticSeverity::kWarning;
 
         // Get tags for the callee.
         CallSiteTag callsite_tag = {CallSiteTag::CallSiteNoRestriction};
@@ -1519,9 +1519,9 @@ class UniformityGraph {
                            builtin->Type() == sem::BuiltinType::kTextureSampleBias ||
                            builtin->Type() == sem::BuiltinType::kTextureSampleCompare) {
                     // Get the severity of derivative uniformity violations in this context.
-                    auto severity =
-                        sem_.DiagnosticSeverity(call, ast::DiagnosticRule::kDerivativeUniformity);
-                    if (severity != ast::DiagnosticSeverity::kOff) {
+                    auto severity = sem_.DiagnosticSeverity(
+                        call, builtin::DiagnosticRule::kDerivativeUniformity);
+                    if (severity != builtin::DiagnosticSeverity::kOff) {
                         callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, severity};
                     }
                     function_tag = ReturnValueMayBeNonUniform;
@@ -1686,8 +1686,9 @@ class UniformityGraph {
 
     /// Recursively descend through the function called by `call` and the functions that it calls in
     /// order to find a call to a builtin function that requires uniformity with the given severity.
-    const ast::CallExpression* FindBuiltinThatRequiresUniformity(const ast::CallExpression* call,
-                                                                 ast::DiagnosticSeverity severity) {
+    const ast::CallExpression* FindBuiltinThatRequiresUniformity(
+        const ast::CallExpression* call,
+        builtin::DiagnosticSeverity severity) {
         auto* target = SemCall(call)->Target();
         if (target->Is<sem::Builtin>()) {
             // This is a call to a builtin, so we must be done.
@@ -1848,11 +1849,13 @@ class UniformityGraph {
     /// @param function the function that the diagnostic is being produced for
     /// @param source_node the node that has caused a uniformity issue in `function`
     /// @param severity the severity of the diagnostic
-    void MakeError(FunctionInfo& function, Node* source_node, ast::DiagnosticSeverity severity) {
+    void MakeError(FunctionInfo& function,
+                   Node* source_node,
+                   builtin::DiagnosticSeverity severity) {
         // Helper to produce a diagnostic message, as a note or with the global failure severity.
         auto report = [&](Source source, std::string msg, bool note) {
             diag::Diagnostic error{};
-            error.severity = note ? diag::Severity::Note : ast::ToSeverity(severity);
+            error.severity = note ? diag::Severity::Note : builtin::ToSeverity(severity);
             error.system = diag::System::Resolver;
             error.source = source;
             error.message = msg;

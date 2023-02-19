@@ -97,7 +97,7 @@ static utils::Vector<const ast::Attribute*, 2> createAttributes(const Source& so
         case AttributeKind::kBuiltin:
             return {builder.Builtin(source, builtin::BuiltinValue::kPosition)};
         case AttributeKind::kDiagnostic:
-            return {builder.DiagnosticAttribute(source, ast::DiagnosticSeverity::kInfo,
+            return {builder.DiagnosticAttribute(source, builtin::DiagnosticSeverity::kInfo,
                                                 "chromium_unreachable_code")};
         case AttributeKind::kGroup:
             return {builder.Group(source, 1_a)};

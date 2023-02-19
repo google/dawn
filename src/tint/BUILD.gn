@@ -604,6 +604,7 @@ libtint_source_set("libtint_ast_src") {
   public_deps = [ ":libtint_ast_hdrs" ]
   deps = [
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_program_src",
     ":libtint_type_src",
   ]
@@ -701,6 +702,10 @@ libtint_source_set("libtint_builtins_src") {
     "builtin/builtin.h",
     "builtin/builtin_value.cc",
     "builtin/builtin_value.h",
+    "builtin/diagnostic_rule.cc",
+    "builtin/diagnostic_rule.h",
+    "builtin/diagnostic_severity.cc",
+    "builtin/diagnostic_severity.h",
     "builtin/extension.cc",
     "builtin/extension.h",
     "builtin/texel_format.cc",
@@ -1298,6 +1303,8 @@ if (tint_build_unittests) {
       "builtin/address_space_test.cc",
       "builtin/builtin_test.cc",
       "builtin/builtin_value_test.cc",
+      "builtin/diagnostic_rule_test.cc",
+      "builtin/diagnostic_severity_test.cc",
       "builtin/extension_test.cc",
       "builtin/texel_format_test.cc",
     ]

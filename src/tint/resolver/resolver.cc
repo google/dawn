@@ -3311,13 +3311,13 @@ bool Resolver::DiagnosticControl(const ast::DiagnosticControl& control) {
     Mark(control.rule_name);
 
     auto rule_name = builder_->Symbols().NameFor(control.rule_name->symbol);
-    auto rule = ast::ParseDiagnosticRule(rule_name);
-    if (rule != ast::DiagnosticRule::kUndefined) {
+    auto rule = builtin::ParseDiagnosticRule(rule_name);
+    if (rule != builtin::DiagnosticRule::kUndefined) {
         validator_.DiagnosticFilters().Set(rule, control.severity);
     } else {
         std::ostringstream ss;
         ss << "unrecognized diagnostic rule '" << rule_name << "'\n";
-        utils::SuggestAlternatives(rule_name, ast::kDiagnosticRuleStrings, ss);
+        utils::SuggestAlternatives(rule_name, builtin::kDiagnosticRuleStrings, ss);
         AddWarning(ss.str(), control.rule_name->source);
     }
     return true;

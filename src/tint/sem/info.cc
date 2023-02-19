@@ -29,8 +29,8 @@ Info::~Info() = default;
 
 Info& Info::operator=(Info&&) = default;
 
-ast::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
-                                                 ast::DiagnosticRule rule) const {
+builtin::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
+                                                     builtin::DiagnosticRule rule) const {
     // Get the diagnostic severity modification for a node.
     auto check = [&](auto* node) {
         auto& severities = node->DiagnosticSeverities();
@@ -38,13 +38,13 @@ ast::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
         if (itr != severities.end()) {
             return itr->second;
         }
-        return ast::DiagnosticSeverity::kUndefined;
+        return builtin::DiagnosticSeverity::kUndefined;
     };
 
     // Get the diagnostic severity modification for a function.
     auto check_func = [&](const sem::Function* func) {
         auto severity = check(func);
-        if (severity != ast::DiagnosticSeverity::kUndefined) {
+        if (severity != builtin::DiagnosticSeverity::kUndefined) {
             return severity;
         }
 
@@ -57,7 +57,7 @@ ast::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
         // Walk up the statement hierarchy, checking for diagnostic severity modifications.
         while (true) {
             auto severity = check(stmt);
-            if (severity != ast::DiagnosticSeverity::kUndefined) {
+            if (severity != builtin::DiagnosticSeverity::kUndefined) {
                 return severity;
             }
             if (!stmt->Parent()) {
@@ -82,7 +82,7 @@ ast::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
             // Use the global severity set on the module.
             return check(module_);
         });
-    TINT_ASSERT(Resolver, severity != ast::DiagnosticSeverity::kUndefined);
+    TINT_ASSERT(Resolver, severity != builtin::DiagnosticSeverity::kUndefined);
     return severity;
 }
 

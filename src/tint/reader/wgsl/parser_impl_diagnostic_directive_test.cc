@@ -27,7 +27,7 @@ TEST_F(ParserImplTest, DiagnosticDirective_Valid) {
     auto& ast = p->builder().AST();
     ASSERT_EQ(ast.DiagnosticDirectives().Length(), 1u);
     auto* directive = ast.DiagnosticDirectives()[0];
-    EXPECT_EQ(directive->control.severity, ast::DiagnosticSeverity::kOff);
+    EXPECT_EQ(directive->control.severity, builtin::DiagnosticSeverity::kOff);
     ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
     EXPECT_EQ(ast.GlobalDeclarations()[0], directive);
 

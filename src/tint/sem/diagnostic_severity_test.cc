@@ -27,7 +27,7 @@ class DiagnosticSeverityTest : public TestHelper {
     /// using an attribute. Test that we correctly track the severity of the filter for the
     /// functions and the statements with them.
     /// @param global_severity the global severity of the "chromium_unreachable_code" filter
-    void Run(ast::DiagnosticSeverity global_severity) {
+    void Run(builtin::DiagnosticSeverity global_severity) {
         // @diagnostic(off, chromium_unreachable_code)
         // fn foo() {
         //   @diagnostic(info, chromium_unreachable_code) {
@@ -44,10 +44,10 @@ class DiagnosticSeverityTest : public TestHelper {
         //     }
         //   }
         // }
-        auto rule = ast::DiagnosticRule::kChromiumUnreachableCode;
-        auto func_severity = ast::DiagnosticSeverity::kOff;
-        auto block_severity = ast::DiagnosticSeverity::kInfo;
-        auto if_severity = ast::DiagnosticSeverity::kInfo;
+        auto rule = builtin::DiagnosticRule::kChromiumUnreachableCode;
+        auto func_severity = builtin::DiagnosticSeverity::kOff;
+        auto block_severity = builtin::DiagnosticSeverity::kInfo;
+        auto if_severity = builtin::DiagnosticSeverity::kInfo;
         auto attr = [&](auto severity) {
             return utils::Vector{DiagnosticAttribute(severity, "chromium_unreachable_code")};
         };
@@ -74,12 +74,12 @@ class DiagnosticSeverityTest : public TestHelper {
 };
 
 TEST_F(DiagnosticSeverityTest, WithDirective) {
-    DiagnosticDirective(ast::DiagnosticSeverity::kError, "chromium_unreachable_code");
-    Run(ast::DiagnosticSeverity::kError);
+    DiagnosticDirective(builtin::DiagnosticSeverity::kError, "chromium_unreachable_code");
+    Run(builtin::DiagnosticSeverity::kError);
 }
 
 TEST_F(DiagnosticSeverityTest, WithoutDirective) {
-    Run(ast::DiagnosticSeverity::kWarning);
+    Run(builtin::DiagnosticSeverity::kWarning);
 }
 
 }  // namespace

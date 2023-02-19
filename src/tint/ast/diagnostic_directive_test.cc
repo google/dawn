@@ -23,13 +23,13 @@ using DiagnosticDirectiveTest = TestHelper;
 
 TEST_F(DiagnosticDirectiveTest, Creation) {
     auto* name = Ident("foo");
-    DiagnosticControl control(ast::DiagnosticSeverity::kWarning, name);
+    DiagnosticControl control(builtin::DiagnosticSeverity::kWarning, name);
     auto* diag = create<ast::DiagnosticDirective>(Source{{{10, 5}, {10, 15}}}, std::move(control));
     EXPECT_EQ(diag->source.range.begin.line, 10u);
     EXPECT_EQ(diag->source.range.begin.column, 5u);
     EXPECT_EQ(diag->source.range.end.line, 10u);
     EXPECT_EQ(diag->source.range.end.column, 15u);
-    EXPECT_EQ(diag->control.severity, ast::DiagnosticSeverity::kWarning);
+    EXPECT_EQ(diag->control.severity, builtin::DiagnosticSeverity::kWarning);
     EXPECT_EQ(diag->control.rule_name, name);
 }
 

@@ -50,19 +50,19 @@ class Module final : public Castable<Module, Node> {
     /// Modifies the severity of a specific diagnostic rule for this module.
     /// @param rule the diagnostic rule
     /// @param severity the new diagnostic severity
-    void SetDiagnosticSeverity(ast::DiagnosticRule rule, ast::DiagnosticSeverity severity) {
+    void SetDiagnosticSeverity(builtin::DiagnosticRule rule, builtin::DiagnosticSeverity severity) {
         diagnostic_severities_[rule] = severity;
     }
 
     /// @returns the diagnostic severity modifications applied to this module
-    const ast::DiagnosticRuleSeverities& DiagnosticSeverities() const {
+    const builtin::DiagnosticRuleSeverities& DiagnosticSeverities() const {
         return diagnostic_severities_;
     }
 
   private:
     const utils::Vector<const ast::Node*, 64> dep_ordered_decls_;
     builtin::Extensions extensions_;
-    ast::DiagnosticRuleSeverities diagnostic_severities_;
+    builtin::DiagnosticRuleSeverities diagnostic_severities_;
 };
 
 }  // namespace tint::sem
