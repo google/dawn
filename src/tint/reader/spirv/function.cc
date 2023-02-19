@@ -2522,7 +2522,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
             }
         }
         auto* var = parser_impl_.MakeVar(inst.result_id(), type::AddressSpace::kUndefined,
-                                         type::Access::kUndefined, var_store_type, initializer,
+                                         builtin::Access::kUndefined, var_store_type, initializer,
                                          AttributeList{});
         auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
         AddStatement(var_decl_stmt);
@@ -3369,7 +3369,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         auto* store_type = parser_impl_.ConvertType(def_inst->type_id());
         AddStatement(create<ast::VariableDeclStatement>(
             Source{},
-            parser_impl_.MakeVar(id, type::AddressSpace::kUndefined, type::Access::kUndefined,
+            parser_impl_.MakeVar(id, type::AddressSpace::kUndefined, builtin::Access::kUndefined,
                                  store_type, nullptr, AttributeList{})));
         auto* type = ty_.Reference(store_type, type::AddressSpace::kUndefined);
         identifier_types_.emplace(id, type);
@@ -4842,7 +4842,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
                 }
                 // Local variables are always Function storage class, with default
                 // access mode.
-                return DefInfo::Pointer{type::AddressSpace::kFunction, type::Access::kUndefined};
+                return DefInfo::Pointer{type::AddressSpace::kFunction, builtin::Access::kUndefined};
             }
             case spv::Op::OpFunctionParameter: {
                 const auto* type = As<Pointer>(parser_impl_.ConvertType(inst.type_id()));
@@ -4855,7 +4855,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
                 // parameters.  In that case we need to do a global analysis to
                 // determine what the formal argument parameter type should be,
                 // whether it has read_only or read_write access mode.
-                return DefInfo::Pointer{type->address_space, type::Access::kUndefined};
+                return DefInfo::Pointer{type->address_space, builtin::Access::kUndefined};
             }
             default:
                 break;

@@ -562,7 +562,7 @@ ResultOrError<CompiledShader> ShaderModule::Compile(
                       wgpu::BufferBindingType::Storage ||
                   bgl->GetBindingInfo(bindingIndex).buffer.type == kInternalStorageBufferBinding));
             if (forceStorageBufferAsUAV) {
-                remappedAccessControls.emplace(srcBindingPoint, tint::type::Access::kReadWrite);
+                remappedAccessControls.emplace(srcBindingPoint, tint::builtin::Access::kReadWrite);
             }
         }
 

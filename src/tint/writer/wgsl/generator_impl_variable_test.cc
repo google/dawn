@@ -43,7 +43,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_AddressSpace) {
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.i32())});
-    auto* v = GlobalVar("a", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
+    auto* v = GlobalVar("a", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead,
                         Binding(0_a), Group(0_a));
 
     GeneratorImpl& gen = Build();
@@ -55,7 +55,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.i32())});
-    auto* v = GlobalVar("a", ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite,
+    auto* v = GlobalVar("a", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
                         Binding(0_a), Group(0_a));
 
     GeneratorImpl& gen = Build();

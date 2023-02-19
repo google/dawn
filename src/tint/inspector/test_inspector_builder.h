@@ -182,7 +182,7 @@ class InspectorBuilder : public ProgramBuilder {
     /// @param binding the binding number to use for the storage buffer
     void AddStorageBuffer(const std::string& name,
                           ast::Type type,
-                          type::Access access,
+                          builtin::Access access,
                           uint32_t group,
                           uint32_t binding);
 

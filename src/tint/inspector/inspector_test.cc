@@ -1655,8 +1655,8 @@ TEST_F(InspectorGetStorageSizeTest, Empty) {
 
 TEST_F(InspectorGetStorageSizeTest, Simple_NonStruct) {
     AddUniformBuffer("ub_var", ty.i32(), 0, 0);
-    AddStorageBuffer("sb_var", ty.i32(), type::Access::kReadWrite, 1, 0);
-    AddStorageBuffer("rosb_var", ty.i32(), type::Access::kRead, 1, 1);
+    AddStorageBuffer("sb_var", ty.i32(), builtin::Access::kReadWrite, 1, 0);
+    AddStorageBuffer("rosb_var", ty.i32(), builtin::Access::kRead, 1, 1);
     Func("ep_func", utils::Empty, ty.void_(),
          utils::Vector{
              Decl(Let("ub", Expr("ub_var"))),
@@ -1687,7 +1687,7 @@ TEST_F(InspectorGetStorageSizeTest, Simple_Struct) {
     auto sb = MakeStorageBufferTypes("sb_type", utils::Vector{
                                                     ty.i32(),
                                                 });
-    AddStorageBuffer("sb_var", sb(), type::Access::kReadWrite, 1, 0);
+    AddStorageBuffer("sb_var", sb(), builtin::Access::kReadWrite, 1, 0);
     MakeStructVariableReferenceBodyFunction("sb_func", "sb_var",
                                             utils::Vector{
                                                 MemberInfo{0, ty.i32()},
@@ -1696,7 +1696,7 @@ TEST_F(InspectorGetStorageSizeTest, Simple_Struct) {
     auto ro_sb = MakeStorageBufferTypes("rosb_type", utils::Vector{
                                                          ty.i32(),
                                                      });
-    AddStorageBuffer("rosb_var", ro_sb(), type::Access::kRead, 1, 1);
+    AddStorageBuffer("rosb_var", ro_sb(), builtin::Access::kRead, 1, 1);
     MakeStructVariableReferenceBodyFunction("rosb_func", "rosb_var",
                                             utils::Vector{
                                                 MemberInfo{0, ty.i32()},
@@ -1774,7 +1774,7 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
     auto sb = MakeStorageBufferTypes("sb_type", utils::Vector{
                                                     ty.i32(),
                                                 });
-    AddStorageBuffer("sb_var", sb(), type::Access::kReadWrite, 1, 0);
+    AddStorageBuffer("sb_var", sb(), builtin::Access::kReadWrite, 1, 0);
     MakeStructVariableReferenceBodyFunction("sb_func", "sb_var",
                                             utils::Vector{
                                                 MemberInfo{0, ty.i32()},
@@ -1783,7 +1783,7 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
     auto ro_sb = MakeStorageBufferTypes("rosb_type", utils::Vector{
                                                          ty.i32(),
                                                      });
-    AddStorageBuffer("rosb_var", ro_sb(), type::Access::kRead, 1, 1);
+    AddStorageBuffer("rosb_var", ro_sb(), builtin::Access::kRead, 1, 1);
     MakeStructVariableReferenceBodyFunction("rosb_func", "rosb_var",
                                             utils::Vector{
                                                 MemberInfo{0, ty.i32()},
@@ -2140,7 +2140,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_NonStruct) {
-    AddStorageBuffer("foo_sb", ty.i32(), type::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", ty.i32(), builtin::Access::kReadWrite, 0, 0);
     MakePlainGlobalReferenceBodyFunction("sb_func", "foo_sb", ty.i32(), utils::Empty);
 
     MakeCallerBodyFunction("ep_func", utils::Vector{std::string("sb_func")},
@@ -2165,7 +2165,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_Struct) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
                                                                   ty.i32(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), type::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kReadWrite, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             utils::Vector{
@@ -2196,7 +2196,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
                                                                   ty.u32(),
                                                                   ty.f32(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), type::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kReadWrite, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             utils::Vector{
@@ -2229,9 +2229,9 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
                                                                 ty.u32(),
                                                                 ty.f32(),
                                                             });
-    AddStorageBuffer("sb_foo", sb_struct_type(), type::Access::kReadWrite, 0, 0);
-    AddStorageBuffer("sb_bar", sb_struct_type(), type::Access::kReadWrite, 0, 1);
-    AddStorageBuffer("sb_baz", sb_struct_type(), type::Access::kReadWrite, 2, 0);
+    AddStorageBuffer("sb_foo", sb_struct_type(), builtin::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("sb_bar", sb_struct_type(), builtin::Access::kReadWrite, 0, 1);
+    AddStorageBuffer("sb_baz", sb_struct_type(), builtin::Access::kReadWrite, 2, 0);
 
     auto AddReferenceFunc = [this](const std::string& func_name, const std::string& var_name) {
         MakeStructVariableReferenceBodyFunction(func_name, var_name,
@@ -2288,7 +2288,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
                                                                   ty.i32(),
                                                                   ty.array<u32, 4>(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), type::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kReadWrite, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             utils::Vector{
@@ -2318,7 +2318,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
                                                                   ty.i32(),
                                                                   ty.array<u32>(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), type::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kReadWrite, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             utils::Vector{
@@ -2347,7 +2347,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
                                                                   ty.vec3<f32>(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), type::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kReadWrite, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             utils::Vector{
@@ -2373,7 +2373,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, NonStructVec3) {
-    AddStorageBuffer("foo_ub", ty.vec3<f32>(), type::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_ub", ty.vec3<f32>(), builtin::Access::kReadWrite, 0, 0);
     MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.vec3<f32>(), utils::Empty);
 
     MakeCallerBodyFunction("ep_func", utils::Vector{std::string("ub_func")},
@@ -2398,7 +2398,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
                                                                   ty.i32(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), type::Access::kRead, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kRead, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             utils::Vector{
@@ -2421,7 +2421,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
                                                                   ty.i32(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), type::Access::kRead, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kRead, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             utils::Vector{
@@ -2452,9 +2452,9 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, MultipleStorageBuf
                                                                 ty.u32(),
                                                                 ty.f32(),
                                                             });
-    AddStorageBuffer("sb_foo", sb_struct_type(), type::Access::kRead, 0, 0);
-    AddStorageBuffer("sb_bar", sb_struct_type(), type::Access::kRead, 0, 1);
-    AddStorageBuffer("sb_baz", sb_struct_type(), type::Access::kRead, 2, 0);
+    AddStorageBuffer("sb_foo", sb_struct_type(), builtin::Access::kRead, 0, 0);
+    AddStorageBuffer("sb_bar", sb_struct_type(), builtin::Access::kRead, 0, 1);
+    AddStorageBuffer("sb_baz", sb_struct_type(), builtin::Access::kRead, 2, 0);
 
     auto AddReferenceFunc = [this](const std::string& func_name, const std::string& var_name) {
         MakeStructVariableReferenceBodyFunction(func_name, var_name,
@@ -2511,7 +2511,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
                                                                   ty.i32(),
                                                                   ty.array<u32, 4>(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), type::Access::kRead, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kRead, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             utils::Vector{
@@ -2541,7 +2541,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingRuntimeA
                                                                   ty.i32(),
                                                                   ty.array<u32>(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), type::Access::kRead, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kRead, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             utils::Vector{
@@ -2570,7 +2570,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
                                                                   ty.i32(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), type::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kReadWrite, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             utils::Vector{

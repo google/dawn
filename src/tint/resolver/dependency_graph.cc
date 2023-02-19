@@ -487,7 +487,7 @@ class DependencyScanner {
                 graph_.resolved_identifiers.Add(from, ResolvedIdentifier(fmt));
                 return;
             }
-            if (auto access = type::ParseAccess(s); access != type::Access::kUndefined) {
+            if (auto access = builtin::ParseAccess(s); access != builtin::Access::kUndefined) {
                 graph_.resolved_identifiers.Add(from, ResolvedIdentifier(access));
                 return;
             }
@@ -861,7 +861,7 @@ std::string ResolvedIdentifier::String(const SymbolTable& symbols, diag::List& d
     if (auto builtin_ty = BuiltinType(); builtin_ty != type::Builtin::kUndefined) {
         return "builtin type '" + utils::ToString(builtin_ty) + "'";
     }
-    if (auto access = Access(); access != type::Access::kUndefined) {
+    if (auto access = Access(); access != builtin::Access::kUndefined) {
         return "access '" + utils::ToString(access) + "'";
     }
     if (auto addr = AddressSpace(); addr != type::AddressSpace::kUndefined) {

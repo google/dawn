@@ -212,7 +212,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Matrix_F16) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Pointer) {
     auto* f32 = create<type::F32>();
-    auto* p = create<type::Pointer>(f32, type::AddressSpace::kWorkgroup, type::Access::kReadWrite);
+    auto* p =
+        create<type::Pointer>(f32, type::AddressSpace::kWorkgroup, builtin::Access::kReadWrite);
 
     GeneratorImpl& gen = Build();
 
@@ -283,7 +284,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
                  Member("z", ty.f32()),
              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
+    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead,
                                Binding(0_a), Group(0_a))
                          ->type;
 
@@ -392,7 +393,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
                                  Member("e", ty.f32()),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
+    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead,
                                Binding(0_a), Group(0_a))
                          ->type;
 
@@ -484,7 +485,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
                                  Member("f", array_z),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
+    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead,
                                Binding(0_a), Group(0_a))
                          ->type;
 
@@ -568,7 +569,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
                                  Member("c", ty.i32()),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
+    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead,
                                Binding(0_a), Group(0_a))
                          ->type;
 
@@ -630,7 +631,7 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
                                  Member("tint_pad_21", ty.f32()),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
+    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead,
                                Binding(0_a), Group(0_a))
                          ->type;
 
@@ -689,7 +690,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_WithAttribute) {
                                  Member("b", ty.f32()),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead,
+    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead,
                                Binding(0_a), Group(0_a))
                          ->type;
 
@@ -853,7 +854,7 @@ using MslStorageTexturesTest = TestParamHelper<MslStorageTextureData>;
 TEST_P(MslStorageTexturesTest, Emit) {
     auto params = GetParam();
 
-    auto s = ty.storage_texture(params.dim, type::TexelFormat::kR32Float, type::Access::kWrite);
+    auto s = ty.storage_texture(params.dim, type::TexelFormat::kR32Float, builtin::Access::kWrite);
     ast::Type type = GlobalVar("test_var", s, Binding(0_a), Group(0_a))->type;
 
     GeneratorImpl& gen = Build();

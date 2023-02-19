@@ -1066,7 +1066,7 @@ TEST_P(StorageTextureDimensionTest, All) {
     auto& params = GetParam();
 
     auto st = ty(Source{{12, 34}}, params.name, utils::ToString(type::TexelFormat::kR32Uint),
-                 utils::ToString(type::Access::kWrite));
+                 utils::ToString(builtin::Access::kWrite));
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1117,19 +1117,19 @@ TEST_P(StorageTextureFormatTest, All) {
     // var d : texture_storage_3d<*, write>;
 
     auto st_a = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d, params.format,
-                                   type::Access::kWrite);
+                                   builtin::Access::kWrite);
     GlobalVar("a", st_a, Group(0_a), Binding(0_a));
 
     ast::Type st_b =
-        ty.storage_texture(type::TextureDimension::k2d, params.format, type::Access::kWrite);
+        ty.storage_texture(type::TextureDimension::k2d, params.format, builtin::Access::kWrite);
     GlobalVar("b", st_b, Group(0_a), Binding(1_a));
 
-    ast::Type st_c =
-        ty.storage_texture(type::TextureDimension::k2dArray, params.format, type::Access::kWrite);
+    ast::Type st_c = ty.storage_texture(type::TextureDimension::k2dArray, params.format,
+                                        builtin::Access::kWrite);
     GlobalVar("c", st_c, Group(0_a), Binding(2_a));
 
     ast::Type st_d =
-        ty.storage_texture(type::TextureDimension::k3d, params.format, type::Access::kWrite);
+        ty.storage_texture(type::TextureDimension::k3d, params.format, builtin::Access::kWrite);
     GlobalVar("d", st_d, Group(0_a), Binding(3_a));
 
     if (params.is_valid) {
@@ -1176,7 +1176,7 @@ TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
     // var a : texture_storage_1d<r32uint, read_write>;
 
     auto st = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d,
-                                 type::TexelFormat::kR32Uint, type::Access::kReadWrite);
+                                 type::TexelFormat::kR32Uint, builtin::Access::kReadWrite);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1190,7 +1190,7 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
     // var a : texture_storage_1d<r32uint, read>;
 
     auto st = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d,
-                                 type::TexelFormat::kR32Uint, type::Access::kRead);
+                                 type::TexelFormat::kR32Uint, builtin::Access::kRead);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1204,7 +1204,7 @@ TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
     // var a : texture_storage_1d<r32uint, write>;
 
     auto st = ty.storage_texture(type::TextureDimension::k1d, type::TexelFormat::kR32Uint,
-                                 type::Access::kWrite);
+                                 builtin::Access::kWrite);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 

@@ -87,7 +87,7 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
     const size_t num_buffers = 3;
     b.GlobalVar("buffer1", b.ty.i32(), type::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
     b.GlobalVar("buffer2", b.ty.i32(), type::AddressSpace::kStorage, b.Group(1_a), b.Binding(1_a));
-    b.GlobalVar("buffer3", b.ty.i32(), type::AddressSpace::kStorage, type::Access::kRead,
+    b.GlobalVar("buffer3", b.ty.i32(), type::AddressSpace::kStorage, builtin::Access::kRead,
                 b.Group(2_a), b.Binding(2_a));
 
     const size_t num_samplers = 2;
@@ -103,7 +103,7 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
                 b.Group(6_a), b.Binding(6_a));
     b.GlobalVar("texture3",
                 b.ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Float,
-                                     type::Access::kWrite),
+                                     builtin::Access::kWrite),
                 b.Group(7_a), b.Binding(7_a));
     b.GlobalVar("texture4", b.ty.depth_texture(type::TextureDimension::k2d), b.Group(8_a),
                 b.Binding(8_a));

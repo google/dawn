@@ -14,7 +14,7 @@
 
 #include "src/tint/ast/alias.h"
 #include "src/tint/ast/test_helper.h"
-#include "src/tint/type/access.h"
+#include "src/tint/builtin/access.h"
 
 namespace tint::ast {
 namespace {

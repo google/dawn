@@ -1,6 +1,6 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate access.cc
+Template file for use with tools/src/cmd/gen to generate access_bench.cc
 
 To update the generated file, run:
     ./tools/run gen
@@ -14,12 +14,16 @@ See:
 {{- Import "src/tint/templates/enums.tmpl.inc" -}}
 {{- $enum := (Sem.Enum "access") -}}
 
-#include "src/tint/type/access.h"
+#include "src/tint/builtin/access.h"
 
-namespace tint::type {
+#include <array>
 
-{{ Eval "ParseEnum" $enum}}
+#include "benchmark/benchmark.h"
 
-{{ Eval "EnumOStream" $enum}}
+namespace tint::builtin {
+namespace {
 
-}  // namespace tint::type
+{{ Eval "BenchmarkParseEnum" $enum }}
+
+}  // namespace
+}  // namespace tint::builtin

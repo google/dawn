@@ -314,7 +314,7 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
                                  Member("b", ty.i32()),
                              });
 
-    GlobalVar("b", ty.Of(A), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
+    GlobalVar("b", ty.Of(A), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(0_a),
               Group(0_a));
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -356,7 +356,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
     auto* A = Structure("A", utils::Vector{Member("a", ty.i32())});
     auto* B = Alias("B", ty.Of(A));
-    GlobalVar("b", ty.Of(B), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
+    GlobalVar("b", ty.Of(B), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(0_a),
               Group(0_a));
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -396,7 +396,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
     auto* A = Structure("A", utils::Vector{Member("a", ty.i32())});
     auto* B = Alias("B", ty.Of(A));
-    GlobalVar("b", ty.Of(B), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
+    GlobalVar("b", ty.Of(B), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(0_a),
               Group(0_a));
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -435,9 +435,9 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
     // var<storage, read_write> c : A
 
     auto* A = Structure("A", utils::Vector{Member("a", ty.i32())});
-    GlobalVar("b", ty.Of(A), type::AddressSpace::kStorage, type::Access::kRead, Group(0_a),
+    GlobalVar("b", ty.Of(A), type::AddressSpace::kStorage, builtin::Access::kRead, Group(0_a),
               Binding(0_a));
-    GlobalVar("c", ty.Of(A), type::AddressSpace::kStorage, type::Access::kReadWrite, Group(1_a),
+    GlobalVar("c", ty.Of(A), type::AddressSpace::kStorage, builtin::Access::kReadWrite, Group(1_a),
               Binding(0_a));
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -477,7 +477,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
     // var<uniform_constant> a : texture_storage_2d<r32uint, write>;
 
     auto type = ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Uint,
-                                   type::Access::kWrite);
+                                   builtin::Access::kWrite);
 
     auto* var_a = GlobalVar("a", type, Binding(0_a), Group(0_a));
 

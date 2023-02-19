@@ -193,7 +193,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, ReadOnlyBuffer) {
     // {
     //   a++;
     // }
-    GlobalVar(Source{{12, 34}}, "a", ty.i32(), type::AddressSpace::kStorage, type::Access::kRead,
+    GlobalVar(Source{{12, 34}}, "a", ty.i32(), type::AddressSpace::kStorage, builtin::Access::kRead,
               Group(0_a), Binding(0_a));
     WrapInFunction(Increment(Source{{56, 78}}, "a"));
 

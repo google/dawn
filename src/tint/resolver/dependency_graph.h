@@ -19,10 +19,10 @@
 #include <vector>
 
 #include "src/tint/ast/module.h"
+#include "src/tint/builtin/access.h"
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/sem/builtin_type.h"
 #include "src/tint/symbol_table.h"
-#include "src/tint/type/access.h"
 #include "src/tint/type/builtin.h"
 #include "src/tint/type/texel_format.h"
 #include "src/tint/utils/hashmap.h"
@@ -35,7 +35,7 @@ namespace tint::resolver {
 /// - const ast::Variable*  (as const ast::Node*)
 /// - const ast::Function*  (as const ast::Node*)
 /// - sem::BuiltinType
-/// - type::Access
+/// - builtin::Access
 /// - type::AddressSpace
 /// - type::Builtin
 /// - type::TexelFormat
@@ -68,13 +68,13 @@ class ResolvedIdentifier {
         return sem::BuiltinType::kNone;
     }
 
-    /// @return the access if the ResolvedIdentifier holds type::Access, otherwise
-    /// type::Access::kUndefined
-    type::Access Access() const {
-        if (auto n = std::get_if<type::Access>(&value_)) {
+    /// @return the access if the ResolvedIdentifier holds builtin::Access, otherwise
+    /// builtin::Access::kUndefined
+    builtin::Access Access() const {
+        if (auto n = std::get_if<builtin::Access>(&value_)) {
             return *n;
         }
-        return type::Access::kUndefined;
+        return builtin::Access::kUndefined;
     }
 
     /// @return the address space if the ResolvedIdentifier holds type::AddressSpace, otherwise
@@ -130,7 +130,7 @@ class ResolvedIdentifier {
     std::variant<std::monostate,
                  const ast::Node*,
                  sem::BuiltinType,
-                 type::Access,
+                 builtin::Access,
                  type::AddressSpace,
                  type::Builtin,
                  type::TexelFormat>

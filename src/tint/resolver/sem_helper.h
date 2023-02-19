@@ -135,11 +135,11 @@ class SemHelper {
 
     /// @param expr the semantic node
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to
-    /// sem::BuiltinEnumExpression<type::Access> if the cast is successful, otherwise an error
+    /// sem::BuiltinEnumExpression<builtin::Access> if the cast is successful, otherwise an error
     /// diagnostic is raised.
-    sem::BuiltinEnumExpression<type::Access>* AsAccess(sem::Expression* expr) const {
+    sem::BuiltinEnumExpression<builtin::Access>* AsAccess(sem::Expression* expr) const {
         if (TINT_LIKELY(expr)) {
-            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<type::Access>>();
+            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::Access>>();
             if (TINT_LIKELY(enum_expr)) {
                 return enum_expr;
             }

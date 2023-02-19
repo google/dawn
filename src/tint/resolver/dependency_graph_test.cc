@@ -1330,7 +1330,7 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 }  // namespace resolve_to_builtin_type
 
 ////////////////////////////////////////////////////////////////////////////////
-// Resolve to type::Access tests
+// Resolve to builtin::Access tests
 ////////////////////////////////////////////////////////////////////////////////
 namespace resolve_to_access {
 
@@ -1348,7 +1348,7 @@ TEST_P(ResolverDependencyGraphResolveToAccess, Resolve) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->Access(), type::ParseAccess(name))
+    EXPECT_EQ(resolved->Access(), builtin::ParseAccess(name))
         << resolved->String(Symbols(), Diagnostics());
 }
 
@@ -1400,17 +1400,17 @@ TEST_P(ResolverDependencyGraphResolveToAccess, ShadowedByFunc) {
 INSTANTIATE_TEST_SUITE_P(Types,
                          ResolverDependencyGraphResolveToAccess,
                          testing::Combine(testing::ValuesIn(kTypeUseKinds),
-                                          testing::ValuesIn(type::kAccessStrings)));
+                                          testing::ValuesIn(builtin::kAccessStrings)));
 
 INSTANTIATE_TEST_SUITE_P(Values,
                          ResolverDependencyGraphResolveToAccess,
                          testing::Combine(testing::ValuesIn(kValueUseKinds),
-                                          testing::ValuesIn(type::kAccessStrings)));
+                                          testing::ValuesIn(builtin::kAccessStrings)));
 
 INSTANTIATE_TEST_SUITE_P(Functions,
                          ResolverDependencyGraphResolveToAccess,
                          testing::Combine(testing::ValuesIn(kFuncUseKinds),
-                                          testing::ValuesIn(type::kAccessStrings)));
+                                          testing::ValuesIn(builtin::kAccessStrings)));
 
 }  // namespace resolve_to_access
 
@@ -1735,7 +1735,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     GlobalVar(Sym(), ty.external_texture());
     GlobalVar(Sym(), ty.multisampled_texture(type::TextureDimension::k2d, T));
     GlobalVar(Sym(), ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Float,
-                                        type::Access::kRead));
+                                        builtin::Access::kRead));
     GlobalVar(Sym(), ty.sampler(type::SamplerKind::kSampler));
 
     GlobalVar(Sym(), ty.i32(), utils::Vector{Binding(V), Group(V)});

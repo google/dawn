@@ -44,9 +44,9 @@ TEST(SpvParserTypeTest, SameArgumentsGivesSamePointer) {
     EXPECT_EQ(ty.SampledTexture(type::TextureDimension::k2d, ty.I32()),
               ty.SampledTexture(type::TextureDimension::k2d, ty.I32()));
     EXPECT_EQ(ty.StorageTexture(type::TextureDimension::k2d, type::TexelFormat::kR32Uint,
-                                type::Access::kRead),
+                                builtin::Access::kRead),
               ty.StorageTexture(type::TextureDimension::k2d, type::TexelFormat::kR32Uint,
-                                type::Access::kRead));
+                                builtin::Access::kRead));
 }
 
 TEST(SpvParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
@@ -81,17 +81,17 @@ TEST(SpvParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
     EXPECT_NE(ty.SampledTexture(type::TextureDimension::k2d, ty.I32()),
               ty.SampledTexture(type::TextureDimension::k2d, ty.U32()));
     EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, type::TexelFormat::kR32Uint,
-                                type::Access::kRead),
+                                builtin::Access::kRead),
               ty.StorageTexture(type::TextureDimension::k3d, type::TexelFormat::kR32Uint,
-                                type::Access::kRead));
+                                builtin::Access::kRead));
     EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, type::TexelFormat::kR32Uint,
-                                type::Access::kRead),
+                                builtin::Access::kRead),
               ty.StorageTexture(type::TextureDimension::k2d, type::TexelFormat::kR32Sint,
-                                type::Access::kRead));
+                                builtin::Access::kRead));
     EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, type::TexelFormat::kR32Uint,
-                                type::Access::kRead),
+                                builtin::Access::kRead),
               ty.StorageTexture(type::TextureDimension::k2d, type::TexelFormat::kR32Uint,
-                                type::Access::kWrite));
+                                builtin::Access::kWrite));
 }
 
 }  // namespace

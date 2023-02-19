@@ -1934,7 +1934,7 @@ std::vector<const char*> Identifiers() {
     for (auto* ident : type::kTexelFormatStrings) {
         out.push_back(ident);
     }
-    for (auto* ident : type::kAccessStrings) {
+    for (auto* ident : builtin::kAccessStrings) {
         out.push_back(ident);
     }
     return out;

@@ -17,9 +17,9 @@
 
 #include <unordered_map>
 
+#include "src/tint/builtin/access.h"
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/transform/transform.h"
-#include "src/tint/type/access.h"
 
 namespace tint::transform {
 
@@ -34,7 +34,7 @@ class BindingRemapper final : public Castable<BindingRemapper, Transform> {
     using BindingPoints = std::unordered_map<BindingPoint, BindingPoint>;
 
     /// AccessControls is a map of old binding point to new access control
-    using AccessControls = std::unordered_map<BindingPoint, type::Access>;
+    using AccessControls = std::unordered_map<BindingPoint, builtin::Access>;
 
     /// Remappings is consumed by the BindingRemapper transform.
     /// Data holds information about shader usage and constant buffer offsets.

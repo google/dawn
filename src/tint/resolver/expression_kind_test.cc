@@ -125,9 +125,9 @@ TEST_P(ResolverExpressionKindTest, Test) {
             sym = Sym("write");
             check_expr = [](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
-                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<type::Access>>();
+                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::Access>>();
                 ASSERT_NE(enum_expr, nullptr);
-                EXPECT_EQ(enum_expr->Value(), type::Access::kWrite);
+                EXPECT_EQ(enum_expr->Value(), builtin::Access::kWrite);
             };
             break;
         }

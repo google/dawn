@@ -79,7 +79,7 @@ TEST_F(ResolverIsStorableTest, Matrix) {
 
 TEST_F(ResolverIsStorableTest, Pointer) {
     auto* ptr = create<type::Pointer>(create<type::I32>(), type::AddressSpace::kPrivate,
-                                      type::Access::kReadWrite);
+                                      builtin::Access::kReadWrite);
     EXPECT_FALSE(r()->IsStorable(ptr));
 }
 

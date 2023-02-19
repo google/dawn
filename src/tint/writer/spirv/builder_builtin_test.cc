@@ -278,7 +278,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength) {
     auto* s = Structure("my_struct", utils::Vector{
                                          Member("a", ty.array<f32>()),
                                      });
-    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
               Group(2_a));
     auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
@@ -322,7 +322,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
                                          Member("z", ty.f32()),
                                          Member(4, "a", ty.array<f32>()),
                                      });
-    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
               Group(2_a));
     auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
@@ -365,7 +365,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets) {
     auto* s = Structure("my_struct", utils::Vector{
                                          Member("a", ty.array<f32>()),
                                      });
-    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
               Group(2_a));
 
     auto* p = Let("p", AddressOf("b"));
@@ -424,7 +424,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
     auto* s = Structure("my_struct", utils::Vector{
                                          Member("a", ty.array<f32>()),
                                      });
-    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
               Group(2_a));
 
     auto* p = Let("p", AddressOf(Deref(AddressOf("b"))));
@@ -3513,8 +3513,8 @@ TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
                                  Member("u", ty.atomic<u32>()),
                                  Member("i", ty.atomic<i32>()),
                              });
-    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite, Binding(1_a),
-              Group(2_a));
+    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
+              Binding(1_a), Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -3577,8 +3577,8 @@ TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
                                  Member("u", ty.atomic<u32>()),
                                  Member("i", ty.atomic<i32>()),
                              });
-    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite, Binding(1_a),
-              Group(2_a));
+    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
+              Binding(1_a), Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -3649,8 +3649,8 @@ TEST_P(Builtin_Builder_AtomicRMW_i32, Test) {
     auto* s = Structure("S", utils::Vector{
                                  Member("v", ty.atomic<i32>()),
                              });
-    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite, Binding(1_a),
-              Group(2_a));
+    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
+              Binding(1_a), Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -3722,8 +3722,8 @@ TEST_P(Builtin_Builder_AtomicRMW_u32, Test) {
     auto* s = Structure("S", utils::Vector{
                                  Member("v", ty.atomic<u32>()),
                              });
-    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite, Binding(1_a),
-              Group(2_a));
+    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
+              Binding(1_a), Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -3797,8 +3797,8 @@ TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
                                  Member("u", ty.atomic<u32>()),
                                  Member("i", ty.atomic<i32>()),
                              });
-    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite, Binding(1_a),
-              Group(2_a));
+    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
+              Binding(1_a), Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -3873,8 +3873,8 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
                                  Member("u", ty.atomic<u32>()),
                                  Member("i", ty.atomic<i32>()),
                              });
-    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite, Binding(1_a),
-              Group(2_a));
+    GlobalVar("b", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
+              Binding(1_a), Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{

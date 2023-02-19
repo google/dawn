@@ -325,7 +325,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_ArrayF32) {
     // struct S{ a : f32 };
     // var<storage, read> g : array<S, 3u>;
     Structure("S", utils::Vector{Member("a", ty.f32())});
-    GlobalVar("g", ty.array(ty("S"), 3_u), type::AddressSpace::kStorage, type::Access::kRead,
+    GlobalVar("g", ty.array(ty("S"), 3_u), type::AddressSpace::kStorage, builtin::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -347,7 +347,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_ArrayF16) {
     Enable(builtin::Extension::kF16);
 
     Structure("S", utils::Vector{Member("a", ty.f16())});
-    GlobalVar("g", ty.array(ty("S"), 3_u), type::AddressSpace::kStorage, type::Access::kRead,
+    GlobalVar("g", ty.array(ty("S"), 3_u), type::AddressSpace::kStorage, builtin::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -361,7 +361,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_ArrayF16) {
 
     Structure("S", utils::Vector{Member("a", ty.f16())});
     Alias("t",
-          ty.pointer(ty.array(ty("S"), 3_u), type::AddressSpace::kStorage, type::Access::kRead));
+          ty.pointer(ty.array(ty("S"), 3_u), type::AddressSpace::kStorage, builtin::Access::kRead));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -370,7 +370,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_StructI32) {
     // struct S { x : i32 };
     // var<storage, read> g : S;
     Structure("S", utils::Vector{Member("x", ty.i32())});
-    GlobalVar("g", ty("S"), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
+    GlobalVar("g", ty("S"), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(0_a),
               Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -380,7 +380,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_StructI32) {
     // struct S { x : i32 };
     // type t = ptr<storage, read, S>;
     Structure("S", utils::Vector{Member("x", ty.i32())});
-    Alias("t", ty.pointer(ty("S"), type::AddressSpace::kStorage, type::Access::kRead));
+    Alias("t", ty.pointer(ty("S"), type::AddressSpace::kStorage, builtin::Access::kRead));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -392,7 +392,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_StructI32Alias
     Structure("S", utils::Vector{Member("x", ty.i32())});
     Alias("a1", ty("S"));
     Alias("a2", ty("a1"));
-    GlobalVar("g", ty("a2"), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
+    GlobalVar("g", ty("a2"), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(0_a),
               Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -405,7 +405,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_StructI32Aliases
     Structure("S", utils::Vector{Member("x", ty.i32())});
     Alias("a1", ty("S"));
     Alias("a2", ty("a1"));
-    Alias("t", ty.pointer(ty("a2"), type::AddressSpace::kStorage, type::Access::kRead));
+    Alias("t", ty.pointer(ty("a2"), type::AddressSpace::kStorage, builtin::Access::kRead));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -416,7 +416,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_StructF16) {
     Enable(builtin::Extension::kF16);
 
     Structure("S", utils::Vector{Member("x", ty.f16())});
-    GlobalVar("g", ty("S"), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
+    GlobalVar("g", ty("S"), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(0_a),
               Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -428,7 +428,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_StructF16) {
     Enable(builtin::Extension::kF16);
 
     Structure("S", utils::Vector{Member("x", ty.f16())});
-    Alias("t", ty.pointer(ty("S"), type::AddressSpace::kStorage, type::Access::kRead));
+    Alias("t", ty.pointer(ty("S"), type::AddressSpace::kStorage, builtin::Access::kRead));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -442,7 +442,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_StructF16Alias
     Structure("S", utils::Vector{Member("x", ty.f16())});
     Alias("a1", ty("S"));
     Alias("a2", ty("a1"));
-    GlobalVar("g", ty("a2"), type::AddressSpace::kStorage, type::Access::kRead, Binding(0_a),
+    GlobalVar("g", ty("a2"), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(0_a),
               Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -457,14 +457,15 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_StructF16Aliases
     Structure("S", utils::Vector{Member("x", ty.f16())});
     Alias("a1", ty("S"));
     Alias("a2", ty("a1"));
-    Alias("g", ty.pointer(ty("a2"), type::AddressSpace::kStorage, type::Access::kRead));
+    Alias("g", ty.pointer(ty("a2"), type::AddressSpace::kStorage, builtin::Access::kRead));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_NotStorage_AccessMode) {
     // var<private, read> g : a;
-    GlobalVar(Source{{12, 34}}, "g", ty.i32(), type::AddressSpace::kPrivate, type::Access::kRead);
+    GlobalVar(Source{{12, 34}}, "g", ty.i32(), type::AddressSpace::kPrivate,
+              builtin::Access::kRead);
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -476,7 +477,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_NotStorage_AccessMode)
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_NotStorage_AccessMode) {
     // type t = ptr<private, i32, read>;
     Alias("t", ty.pointer(Source{{12, 34}}, ty.i32(), type::AddressSpace::kPrivate,
-                          type::Access::kRead));
+                          builtin::Access::kRead));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -487,7 +488,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_NotStorage_AccessMode) {
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_ReadAccessMode) {
     // @group(0) @binding(0) var<storage, read> a : i32;
-    GlobalVar("a", ty.i32(), type::AddressSpace::kStorage, type::Access::kRead, Group(0_a),
+    GlobalVar("a", ty.i32(), type::AddressSpace::kStorage, builtin::Access::kRead, Group(0_a),
               Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -495,14 +496,14 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_ReadAccessMode
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_ReadAccessMode) {
     // type t = ptr<storage, read, i32>;
-    Alias("t", ty.pointer(ty.i32(), type::AddressSpace::kStorage, type::Access::kRead));
+    Alias("t", ty.pointer(ty.i32(), type::AddressSpace::kStorage, builtin::Access::kRead));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_ReadWriteAccessMode) {
     // @group(0) @binding(0) var<storage, read_write> a : i32;
-    GlobalVar("a", ty.i32(), type::AddressSpace::kStorage, type::Access::kReadWrite, Group(0_a),
+    GlobalVar("a", ty.i32(), type::AddressSpace::kStorage, builtin::Access::kReadWrite, Group(0_a),
               Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -510,15 +511,15 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_ReadWriteAcces
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_ReadWriteAccessMode) {
     // type t = ptr<storage, read_write, i32>;
-    Alias("t", ty.pointer(ty.i32(), type::AddressSpace::kStorage, type::Access::kReadWrite));
+    Alias("t", ty.pointer(ty.i32(), type::AddressSpace::kStorage, builtin::Access::kReadWrite));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_WriteAccessMode) {
     // @group(0) @binding(0) var<storage, read_write> a : i32;
-    GlobalVar(Source{{12, 34}}, "a", ty.i32(), type::AddressSpace::kStorage, type::Access::kWrite,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{12, 34}}, "a", ty.i32(), type::AddressSpace::kStorage,
+              builtin::Access::kWrite, Group(0_a), Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -529,7 +530,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_WriteAccessMod
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_WriteAccessMode) {
     // type t = ptr<storage, read_write, i32>;
     Alias("t", ty.pointer(Source{{12, 34}}, ty.i32(), type::AddressSpace::kStorage,
-                          type::Access::kWrite));
+                          builtin::Access::kWrite));
 
     ASSERT_FALSE(r()->Resolve());
 

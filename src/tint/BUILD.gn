@@ -693,6 +693,8 @@ libtint_source_set("libtint_sem_src") {
 
 libtint_source_set("libtint_builtins_src") {
   sources = [
+    "builtin/access.cc",
+    "builtin/access.h",
     "builtin/builtin_value.cc",
     "builtin/builtin_value.h",
     "builtin/extension.cc",
@@ -709,8 +711,6 @@ libtint_source_set("libtint_type_src") {
     "type/abstract_int.h",
     "type/abstract_numeric.cc",
     "type/abstract_numeric.h",
-    "type/access.cc",
-    "type/access.h",
     "type/address_space.cc",
     "type/address_space.h",
     "type/array.cc",
@@ -776,7 +776,10 @@ libtint_source_set("libtint_type_src") {
     "type/void.h",
   ]
 
-  deps = [ ":libtint_base_src" ]
+  deps = [
+    ":libtint_base_src",
+    ":libtint_builtins_src",
+  ]
 }
 
 libtint_source_set("libtint_constant_src") {
@@ -931,6 +934,7 @@ libtint_source_set("libtint_wgsl_reader_src") {
   deps = [
     ":libtint_ast_src",
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_program_src",
     ":libtint_reader_src",
     ":libtint_text_src",
@@ -949,6 +953,7 @@ libtint_source_set("libtint_wgsl_writer_src") {
   deps = [
     ":libtint_ast_src",
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_program_src",
     ":libtint_sem_src",
     ":libtint_type_src",
@@ -1007,6 +1012,7 @@ libtint_source_set("libtint_glsl_writer_src") {
   deps = [
     ":libtint_ast_src",
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_constant_src",
     ":libtint_program_src",
     ":libtint_sem_src",
@@ -1275,6 +1281,7 @@ if (tint_build_unittests) {
     deps = [
       ":libtint_ast_src",
       ":libtint_base_src",
+      ":libtint_builtins_src",
       ":libtint_transform_src",
       ":libtint_unittests_ast_helper",
     ]
@@ -1287,6 +1294,7 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_builtins_src") {
     sources = [
+      "builtin/access_test.cc",
       "builtin/builtin_value_test.cc",
       "builtin/extension_test.cc",
     ]
@@ -1405,7 +1413,6 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_type_src") {
     sources = [
-      "type/access_test.cc",
       "type/address_space_test.cc",
       "type/atomic_test.cc",
       "type/bool_test.cc",

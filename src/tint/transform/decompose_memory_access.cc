@@ -109,7 +109,7 @@ struct OffsetBinOp : Offset {
 /// LoadStoreKey is the unordered map key to a load or store intrinsic.
 struct LoadStoreKey {
     type::AddressSpace const address_space;  // buffer address space
-    type::Access const access;               // buffer access
+    builtin::Access const access;            // buffer access
     type::Type const* buf_ty = nullptr;      // buffer type
     type::Type const* el_ty = nullptr;       // element type
     bool operator==(const LoadStoreKey& rhs) const {
@@ -125,7 +125,7 @@ struct LoadStoreKey {
 
 /// AtomicKey is the unordered map key to an atomic intrinsic.
 struct AtomicKey {
-    type::Access const access;           // buffer access
+    builtin::Access const access;        // buffer access
     type::Type const* buf_ty = nullptr;  // buffer type
     type::Type const* el_ty = nullptr;   // element type
     sem::BuiltinType const op;           // atomic op
@@ -466,7 +466,7 @@ struct DecomposeMemoryAccess::State {
         auto address_space = var_user->Variable()->AddressSpace();
         auto access = var_user->Variable()->Access();
         if (address_space != type::AddressSpace::kStorage) {
-            access = type::Access::kUndefined;
+            access = builtin::Access::kUndefined;
         }
         return utils::GetOrCreate(
             load_funcs, LoadStoreKey{address_space, access, buf_ty, el_ty}, [&] {
@@ -562,7 +562,7 @@ struct DecomposeMemoryAccess::State {
         auto address_space = var_user->Variable()->AddressSpace();
         auto access = var_user->Variable()->Access();
         if (address_space != type::AddressSpace::kStorage) {
-            access = type::Access::kUndefined;
+            access = builtin::Access::kUndefined;
         }
         return utils::GetOrCreate(
             store_funcs, LoadStoreKey{address_space, access, buf_ty, el_ty}, [&] {
@@ -672,7 +672,7 @@ struct DecomposeMemoryAccess::State {
         auto address_space = var_user->Variable()->AddressSpace();
         auto access = var_user->Variable()->Access();
         if (address_space != type::AddressSpace::kStorage) {
-            access = type::Access::kUndefined;
+            access = builtin::Access::kUndefined;
         }
         return utils::GetOrCreate(atomic_funcs, AtomicKey{access, buf_ty, el_ty, op}, [&] {
             // The first parameter to all WGSL atomics is the expression to the

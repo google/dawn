@@ -150,10 +150,10 @@ class Resolver {
     sem::BuiltinEnumExpression<type::TexelFormat>* TexelFormatExpression(
         const ast::Expression* expr);
 
-    /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<type::Access>*.
-    /// If the sem::Expression is not a sem::BuiltinEnumExpression<type::Access>*, then an error
+    /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<builtin::Access>*.
+    /// If the sem::Expression is not a sem::BuiltinEnumExpression<builtin::Access>*, then an error
     /// diagnostic is raised and nullptr is returned.
-    sem::BuiltinEnumExpression<type::Access>* AccessExpression(const ast::Expression* expr);
+    sem::BuiltinEnumExpression<builtin::Access>* AccessExpression(const ast::Expression* expr);
 
     /// Expression traverses the graph of expressions starting at `expr`, building a post-ordered
     /// list (leaf-first) of all the expression nodes. Each of the expressions are then resolved by
@@ -405,7 +405,7 @@ class Resolver {
 
     /// @param address_space the address space
     /// @returns the default access control for the given address space
-    type::Access DefaultAccessForAddressSpace(type::AddressSpace address_space);
+    builtin::Access DefaultAccessForAddressSpace(type::AddressSpace address_space);
 
     /// Allocate constant IDs for pipeline-overridable constants.
     /// @returns true on success, false on error

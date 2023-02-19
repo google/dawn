@@ -23,7 +23,7 @@
 #include "src/tint/ast/expression.h"
 #include "src/tint/ast/group_attribute.h"
 #include "src/tint/ast/type.h"
-#include "src/tint/type/access.h"
+#include "src/tint/builtin/access.h"
 #include "src/tint/type/address_space.h"
 
 // Forward declarations

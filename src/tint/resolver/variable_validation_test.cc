@@ -299,7 +299,7 @@ TEST_F(ResolverVariableValidationTest, InferredPtrStorageAccessMismatch) {
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 2_i);
     auto* ptr = Let(Source{{12, 34}}, "p",
-                    ty.pointer<i32>(type::AddressSpace::kStorage, type::Access::kReadWrite),
+                    ty.pointer<i32>(type::AddressSpace::kStorage, builtin::Access::kReadWrite),
                     AddressOf(expr));
 
     WrapInFunction(ptr);

@@ -396,7 +396,7 @@ TEST_F(DecomposeStridedArrayTest, WriteStorageStridedArray) {
     auto* S = b.Structure("S", utils::Vector{b.Member("a", b.ty.array<f32, 4u>(utils::Vector{
                                                                b.Stride(32),
                                                            }))});
-    b.GlobalVar("s", b.ty.Of(S), type::AddressSpace::kStorage, type::Access::kReadWrite,
+    b.GlobalVar("s", b.ty.Of(S), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func("f", utils::Empty, b.ty.void_(),
            utils::Vector{
@@ -458,7 +458,7 @@ TEST_F(DecomposeStridedArrayTest, WriteStorageDefaultStridedArray) {
                                                      b.Stride(4),
                                                  })),
                                });
-    b.GlobalVar("s", b.ty.Of(S), type::AddressSpace::kStorage, type::Access::kReadWrite,
+    b.GlobalVar("s", b.ty.Of(S), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func("f", utils::Empty, b.ty.void_(),
            utils::Vector{
@@ -516,7 +516,7 @@ TEST_F(DecomposeStridedArrayTest, ReadWriteViaPointerLets) {
     auto* S = b.Structure("S", utils::Vector{b.Member("a", b.ty.array<f32, 4u>(utils::Vector{
                                                                b.Stride(32),
                                                            }))});
-    b.GlobalVar("s", b.ty.Of(S), type::AddressSpace::kStorage, type::Access::kReadWrite,
+    b.GlobalVar("s", b.ty.Of(S), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func("f", utils::Empty, b.ty.void_(),
            utils::Vector{
@@ -582,7 +582,7 @@ TEST_F(DecomposeStridedArrayTest, PrivateAliasedStridedArray) {
                        b.Stride(32),
                    }));
     auto* S = b.Structure("S", utils::Vector{b.Member("a", b.ty("ARR"))});
-    b.GlobalVar("s", b.ty.Of(S), type::AddressSpace::kStorage, type::Access::kReadWrite,
+    b.GlobalVar("s", b.ty.Of(S), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func("f", utils::Empty, b.ty.void_(),
            utils::Vector{
@@ -658,7 +658,7 @@ TEST_F(DecomposeStridedArrayTest, PrivateNestedStridedArray) {
                              b.Stride(128),
                          }));
     auto* S = b.Structure("S", utils::Vector{b.Member("a", b.ty("ARR_B"))});
-    b.GlobalVar("s", b.ty.Of(S), type::AddressSpace::kStorage, type::Access::kReadWrite,
+    b.GlobalVar("s", b.ty.Of(S), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func("f", utils::Empty, b.ty.void_(),
            utils::Vector{

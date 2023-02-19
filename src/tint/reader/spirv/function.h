@@ -334,7 +334,7 @@ struct DefInfo {
         type::AddressSpace address_space = type::AddressSpace::kUndefined;
 
         /// The declared access mode.
-        type::Access access = type::Access::kUndefined;
+        builtin::Access access = builtin::Access::kUndefined;
     };
 
     /// The expression to use when sinking pointers into their use.

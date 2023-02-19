@@ -1576,9 +1576,9 @@ const spvtools::opt::analysis::IntConstant* ParserImpl::GetArraySize(uint32_t va
     return size->AsIntConstant();
 }
 
-type::Access ParserImpl::VarAccess(const Type* storage_type, type::AddressSpace address_space) {
+builtin::Access ParserImpl::VarAccess(const Type* storage_type, type::AddressSpace address_space) {
     if (address_space != type::AddressSpace::kStorage) {
-        return type::Access::kUndefined;
+        return builtin::Access::kUndefined;
     }
 
     bool read_only = false;
@@ -1587,12 +1587,12 @@ type::Access ParserImpl::VarAccess(const Type* storage_type, type::AddressSpace 
     }
 
     // Apply the access(read) or access(read_write) modifier.
-    return read_only ? type::Access::kRead : type::Access::kReadWrite;
+    return read_only ? builtin::Access::kRead : builtin::Access::kReadWrite;
 }
 
 const ast::Var* ParserImpl::MakeVar(uint32_t id,
                                     type::AddressSpace address_space,
-                                    type::Access access,
+                                    builtin::Access access,
                                     const Type* storage_type,
                                     const ast::Expression* initializer,
                                     AttributeList decorations) {
@@ -2526,7 +2526,7 @@ const Type* ParserImpl::GetHandleTypeForSpirvHandle(const spvtools::opt::Instruc
                 ast_handle_type = ty_.SampledTexture(dim, ast_sampled_component_type);
             }
         } else {
-            const auto access = type::Access::kWrite;
+            const auto access = builtin::Access::kWrite;
             const auto format = enum_converter_.ToTexelFormat(image_type->format());
             if (format == type::TexelFormat::kUndefined) {
                 return nullptr;

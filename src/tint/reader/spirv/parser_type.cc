@@ -175,7 +175,7 @@ Type::~Type() = default;
 
 Texture::~Texture() = default;
 
-Pointer::Pointer(const Type* t, type::AddressSpace s, type::Access a)
+Pointer::Pointer(const Type* t, type::AddressSpace s, builtin::Access a)
     : type(t), address_space(s), access(a) {}
 Pointer::Pointer(const Pointer&) = default;
 
@@ -189,7 +189,7 @@ ast::Type Pointer::Build(ProgramBuilder& b) const {
     return b.ty.pointer(type->Build(b), address_space, access);
 }
 
-Reference::Reference(const Type* t, type::AddressSpace s, type::Access a)
+Reference::Reference(const Type* t, type::AddressSpace s, builtin::Access a)
     : type(t), address_space(s), access(a) {}
 Reference::Reference(const Reference&) = default;
 
@@ -269,7 +269,7 @@ ast::Type SampledTexture::Build(ProgramBuilder& b) const {
     return b.ty.sampled_texture(dims, type->Build(b));
 }
 
-StorageTexture::StorageTexture(type::TextureDimension d, type::TexelFormat f, type::Access a)
+StorageTexture::StorageTexture(type::TextureDimension d, type::TexelFormat f, builtin::Access a)
     : Base(d), format(f), access(a) {}
 StorageTexture::StorageTexture(const StorageTexture&) = default;
 
@@ -475,13 +475,13 @@ const Type* TypeManager::AsUnsigned(const Type* ty) {
 
 const spirv::Pointer* TypeManager::Pointer(const Type* el,
                                            type::AddressSpace address_space,
-                                           type::Access access) {
+                                           builtin::Access access) {
     return state->pointers_.Get(el, address_space, access);
 }
 
 const spirv::Reference* TypeManager::Reference(const Type* el,
                                                type::AddressSpace address_space,
-                                               type::Access access) {
+                                               builtin::Access access) {
     return state->references_.Get(el, address_space, access);
 }
 
@@ -530,7 +530,7 @@ const spirv::SampledTexture* TypeManager::SampledTexture(type::TextureDimension 
 
 const spirv::StorageTexture* TypeManager::StorageTexture(type::TextureDimension dims,
                                                          type::TexelFormat fmt,
-                                                         type::Access access) {
+                                                         builtin::Access access) {
     return state->storage_textures_.Get(dims, fmt, access);
 }
 

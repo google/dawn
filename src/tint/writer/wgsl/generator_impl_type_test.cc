@@ -143,7 +143,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_PointerAccessMode) {
     auto type = Alias("make_type_reachable",
-                      ty.pointer<f32>(type::AddressSpace::kStorage, type::Access::kReadWrite))
+                      ty.pointer<f32>(type::AddressSpace::kStorage, builtin::Access::kReadWrite))
                     ->type;
 
     GeneratorImpl& gen = Build();
@@ -441,7 +441,7 @@ INSTANTIATE_TEST_SUITE_P(WgslGeneratorImplTest,
 struct StorageTextureData {
     type::TexelFormat fmt;
     type::TextureDimension dim;
-    type::Access access;
+    builtin::Access access;
     const char* name;
 };
 inline std::ostream& operator<<(std::ostream& out, StorageTextureData data) {
@@ -466,13 +466,13 @@ INSTANTIATE_TEST_SUITE_P(
     WgslGenerator_StorageTextureTest,
     testing::Values(
         StorageTextureData{type::TexelFormat::kRgba8Sint, type::TextureDimension::k1d,
-                           type::Access::kWrite, "texture_storage_1d<rgba8sint, write>"},
+                           builtin::Access::kWrite, "texture_storage_1d<rgba8sint, write>"},
         StorageTextureData{type::TexelFormat::kRgba8Sint, type::TextureDimension::k2d,
-                           type::Access::kWrite, "texture_storage_2d<rgba8sint, write>"},
+                           builtin::Access::kWrite, "texture_storage_2d<rgba8sint, write>"},
         StorageTextureData{type::TexelFormat::kRgba8Sint, type::TextureDimension::k2dArray,
-                           type::Access::kWrite, "texture_storage_2d_array<rgba8sint, write>"},
+                           builtin::Access::kWrite, "texture_storage_2d_array<rgba8sint, write>"},
         StorageTextureData{type::TexelFormat::kRgba8Sint, type::TextureDimension::k3d,
-                           type::Access::kWrite, "texture_storage_3d<rgba8sint, write>"}));
+                           builtin::Access::kWrite, "texture_storage_3d<rgba8sint, write>"}));
 
 struct ImageFormatData {
     type::TexelFormat fmt;

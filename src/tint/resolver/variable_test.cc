@@ -149,12 +149,12 @@ TEST_F(ResolverVariableTest, LocalVar_WithInitializer) {
     ASSERT_TRUE(TypeOf(s)->Is<type::Reference>());
     ASSERT_TRUE(TypeOf(a)->Is<type::Reference>());
 
-    EXPECT_EQ(TypeOf(i)->As<type::Reference>()->Access(), type::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(u)->As<type::Reference>()->Access(), type::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(f)->As<type::Reference>()->Access(), type::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(b)->As<type::Reference>()->Access(), type::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(s)->As<type::Reference>()->Access(), type::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(a)->As<type::Reference>()->Access(), type::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(i)->As<type::Reference>()->Access(), builtin::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(u)->As<type::Reference>()->Access(), builtin::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(f)->As<type::Reference>()->Access(), builtin::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(b)->As<type::Reference>()->Access(), builtin::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(s)->As<type::Reference>()->Access(), builtin::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(a)->As<type::Reference>()->Access(), builtin::Access::kReadWrite);
 
     EXPECT_TRUE(TypeOf(i)->As<type::Reference>()->StoreType()->Is<type::I32>());
     EXPECT_TRUE(TypeOf(u)->As<type::Reference>()->StoreType()->Is<type::U32>());
@@ -473,7 +473,7 @@ TEST_F(ResolverVariableTest, LocalLet_InheritsAccessFromOriginatingVariable) {
     auto* inner = Structure("Inner", utils::Vector{Member("arr", ty.array<i32, 4>())});
     auto* buf = Structure("S", utils::Vector{Member("inner", ty.Of(inner))});
     auto* storage = GlobalVar("s", ty.Of(buf), type::AddressSpace::kStorage,
-                              type::Access::kReadWrite, Binding(0_a), Group(0_a));
+                              builtin::Access::kReadWrite, Binding(0_a), Group(0_a));
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 3_i);
     auto* ptr = Let("p", AddressOf(expr));
@@ -485,8 +485,8 @@ TEST_F(ResolverVariableTest, LocalLet_InheritsAccessFromOriginatingVariable) {
     ASSERT_TRUE(TypeOf(expr)->Is<type::Reference>());
     ASSERT_TRUE(TypeOf(ptr)->Is<type::Pointer>());
 
-    EXPECT_EQ(TypeOf(expr)->As<type::Reference>()->Access(), type::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(ptr)->As<type::Pointer>()->Access(), type::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(expr)->As<type::Reference>()->Access(), builtin::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(ptr)->As<type::Pointer>()->Access(), builtin::Access::kReadWrite);
 }
 
 TEST_F(ResolverVariableTest, LocalLet_ShadowsAlias) {
@@ -1054,11 +1054,11 @@ TEST_F(ResolverVariableTest, GlobalVar_AddressSpace) {
     ASSERT_TRUE(TypeOf(storage)->Is<type::Reference>());
     ASSERT_TRUE(TypeOf(handle)->Is<type::Reference>());
 
-    EXPECT_EQ(TypeOf(private_)->As<type::Reference>()->Access(), type::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(workgroup)->As<type::Reference>()->Access(), type::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(uniform)->As<type::Reference>()->Access(), type::Access::kRead);
-    EXPECT_EQ(TypeOf(storage)->As<type::Reference>()->Access(), type::Access::kRead);
-    EXPECT_EQ(TypeOf(handle)->As<type::Reference>()->Access(), type::Access::kRead);
+    EXPECT_EQ(TypeOf(private_)->As<type::Reference>()->Access(), builtin::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(workgroup)->As<type::Reference>()->Access(), builtin::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(uniform)->As<type::Reference>()->Access(), builtin::Access::kRead);
+    EXPECT_EQ(TypeOf(storage)->As<type::Reference>()->Access(), builtin::Access::kRead);
+    EXPECT_EQ(TypeOf(handle)->As<type::Reference>()->Access(), builtin::Access::kRead);
 }
 
 TEST_F(ResolverVariableTest, GlobalVar_ExplicitAddressSpace) {
@@ -1066,13 +1066,13 @@ TEST_F(ResolverVariableTest, GlobalVar_ExplicitAddressSpace) {
 
     auto* buf = Structure("S", utils::Vector{Member("m", ty.i32())});
     auto* storage = GlobalVar("sb", ty.Of(buf), type::AddressSpace::kStorage,
-                              type::Access::kReadWrite, Binding(1_a), Group(0_a));
+                              builtin::Access::kReadWrite, Binding(1_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_TRUE(TypeOf(storage)->Is<type::Reference>());
 
-    EXPECT_EQ(TypeOf(storage)->As<type::Reference>()->Access(), type::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(storage)->As<type::Reference>()->Access(), builtin::Access::kReadWrite);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -91,7 +91,7 @@ class GlslGeneratorImplTest_MemberAccessorBase : public BASE {
 
         auto* s = b.Structure("Data", members);
 
-        b.GlobalVar("data", b.ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite,
+        b.GlobalVar("data", b.ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
                     b.Group(1_a), b.Binding(0_a));
     }
 

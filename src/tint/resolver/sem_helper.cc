@@ -74,7 +74,7 @@ void SemHelper::ErrorUnexpectedExprKind(const sem::Expression* expr,
                      fn_expr->Declaration()->source);
             NoteDeclarationSource(fn);
         },
-        [&](const sem::BuiltinEnumExpression<type::Access>* access) {
+        [&](const sem::BuiltinEnumExpression<builtin::Access>* access) {
             AddError("cannot use access '" + utils::ToString(access->Value()) + "' as " +
                          std::string(wanted),
                      access->Declaration()->source);

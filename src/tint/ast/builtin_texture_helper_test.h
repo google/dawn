@@ -17,8 +17,8 @@
 
 #include <vector>
 
+#include "src/tint/builtin/access.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/type/access.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/texture_dimension.h"
 
@@ -207,7 +207,7 @@ struct TextureOverloadCase {
     /// Constructor for textureLoad() with storage textures
     TextureOverloadCase(ValidTextureOverload,
                         const char*,
-                        type::Access,
+                        tint::builtin::Access,
                         type::TexelFormat,
                         type::TextureDimension,
                         TextureDataType,
@@ -245,7 +245,7 @@ struct TextureOverloadCase {
     type::SamplerKind const sampler_kind = type::SamplerKind::kSampler;
     /// The access control for the storage texture
     /// Used only when texture_kind is kStorage
-    type::Access const access = type::Access::kReadWrite;
+    tint::builtin::Access const access = tint::builtin::Access::kReadWrite;
     /// The image format for the storage texture
     /// Used only when texture_kind is kStorage
     type::TexelFormat const texel_format = type::TexelFormat::kUndefined;

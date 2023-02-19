@@ -93,7 +93,7 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
         ProgramBuilder& b = *this;
         auto* s = b.Structure("Data", members);
 
-        b.GlobalVar("data", b.ty.Of(s), type::AddressSpace::kStorage, type::Access::kReadWrite,
+        b.GlobalVar("data", b.ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
                     b.Group(1_a), b.Binding(0_a));
     }
 
@@ -101,7 +101,7 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
         ProgramBuilder& b = *this;
         auto* s = b.Structure("Data", members);
 
-        b.GlobalVar("data", b.ty.Of(s), type::AddressSpace::kUniform, type::Access::kUndefined,
+        b.GlobalVar("data", b.ty.Of(s), type::AddressSpace::kUniform, builtin::Access::kUndefined,
                     b.Group(1_a), b.Binding(1_a));
     }
 

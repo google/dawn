@@ -799,16 +799,16 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
             // type is a sem::Struct or a type::StorageTexture
             auto access = st ? st->access() : sem->Access();
             switch (access) {
-                case type::Access::kWrite:
+                case builtin::Access::kWrite:
                     push_annot(spv::Op::OpDecorate,
                                {Operand(var_id), U32Operand(SpvDecorationNonReadable)});
                     break;
-                case type::Access::kRead:
+                case builtin::Access::kRead:
                     push_annot(spv::Op::OpDecorate,
                                {Operand(var_id), U32Operand(SpvDecorationNonWritable)});
                     break;
-                case type::Access::kUndefined:
-                case type::Access::kReadWrite:
+                case builtin::Access::kUndefined:
+                case builtin::Access::kReadWrite:
                     break;
             }
         }
@@ -1900,7 +1900,7 @@ uint32_t Builder::GenerateSplat(uint32_t scalar_id, const type::Type* vec_type) 
     // Create a new vector to splat scalar into
     auto splat_vector = result_op();
     auto* splat_vector_type = builder_.create<type::Pointer>(
-        vec_type, type::AddressSpace::kFunction, type::Access::kReadWrite);
+        vec_type, type::AddressSpace::kFunction, builtin::Access::kReadWrite);
     push_function_var({Operand(GenerateTypeIfNeeded(splat_vector_type)), splat_vector,
                        U32Operand(ConvertAddressSpace(type::AddressSpace::kFunction)),
                        Operand(GenerateConstantNullIfNeeded(vec_type))});
@@ -3656,10 +3656,10 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
     // fine.
     if (auto* ptr = type->As<type::Pointer>()) {
         type = builder_.create<type::Pointer>(ptr->StoreType(), ptr->AddressSpace(),
-                                              type::Access::kReadWrite);
+                                              builtin::Access::kReadWrite);
     } else if (auto* ref = type->As<type::Reference>()) {
         type = builder_.create<type::Pointer>(ref->StoreType(), ref->AddressSpace(),
-                                              type::Access::kReadWrite);
+                                              builtin::Access::kReadWrite);
     }
 
     return utils::GetOrCreate(type_to_id_, type, [&]() -> uint32_t {
@@ -3718,11 +3718,12 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
                 // SPIR-V, we must output a single type, while the variable is
                 // annotated with the access type. Doing this ensures we de-dupe.
                 type_to_id_[builder_.create<type::StorageTexture>(
-                    tex->dim(), tex->texel_format(), type::Access::kRead, tex->type())] = id;
+                    tex->dim(), tex->texel_format(), builtin::Access::kRead, tex->type())] = id;
                 type_to_id_[builder_.create<type::StorageTexture>(
-                    tex->dim(), tex->texel_format(), type::Access::kWrite, tex->type())] = id;
+                    tex->dim(), tex->texel_format(), builtin::Access::kWrite, tex->type())] = id;
                 type_to_id_[builder_.create<type::StorageTexture>(
-                    tex->dim(), tex->texel_format(), type::Access::kReadWrite, tex->type())] = id;
+                    tex->dim(), tex->texel_format(), builtin::Access::kReadWrite, tex->type())] =
+                    id;
                 return true;
             },
             [&](const type::Texture* tex) { return GenerateTextureType(tex, result); },

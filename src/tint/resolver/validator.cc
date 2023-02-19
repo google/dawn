@@ -311,9 +311,9 @@ bool Validator::Pointer(const ast::TemplatedIdentifier* a, const type::Pointer* 
 
 bool Validator::StorageTexture(const type::StorageTexture* t, const Source& source) const {
     switch (t->access()) {
-        case type::Access::kWrite:
+        case builtin::Access::kWrite:
             break;
-        case type::Access::kUndefined:
+        case builtin::Access::kUndefined:
             AddError("storage texture missing access control", source);
             return false;
         default:
@@ -2373,7 +2373,7 @@ bool Validator::Assignment(const ast::Statement* a, const type::Type* rhs_ty) co
         AddError("storage type of assignment must be constructible", a->source);
         return false;
     }
-    if (lhs_ref->Access() == type::Access::kRead) {
+    if (lhs_ref->Access() == builtin::Access::kRead) {
         AddError("cannot store into a read-only type '" + sem_.RawTypeNameOf(lhs_ty) + "'",
                  a->source);
         return false;
@@ -2414,7 +2414,7 @@ bool Validator::IncrementDecrementStatement(const ast::IncrementDecrementStateme
         return false;
     }
 
-    if (lhs_ref->Access() == type::Access::kRead) {
+    if (lhs_ref->Access() == builtin::Access::kRead) {
         AddError("cannot modify read-only type '" + sem_.RawTypeNameOf(lhs_ty) + "'", inc->source);
         return false;
     }
@@ -2505,7 +2505,7 @@ std::string Validator::VectorPretty(uint32_t size, const type::Type* element_typ
 
 bool Validator::CheckTypeAccessAddressSpace(
     const type::Type* store_ty,
-    type::Access access,
+    builtin::Access access,
     type::AddressSpace address_space,
     utils::VectorRef<const tint::ast::Attribute*> attributes,
     const Source& source) const {
@@ -2523,7 +2523,7 @@ bool Validator::CheckTypeAccessAddressSpace(
         return false;
     }
 
-    if (address_space == type::AddressSpace::kStorage && access == type::Access::kWrite) {
+    if (address_space == type::AddressSpace::kStorage && access == builtin::Access::kWrite) {
         // The access mode for the storage address space can only be 'read' or
         // 'read_write'.
         AddError("access mode 'write' is not valid for the 'storage' address space", source);
@@ -2535,7 +2535,8 @@ bool Validator::CheckTypeAccessAddressSpace(
             address_space != type::AddressSpace::kWorkgroup) {
             return "atomic variables must have <storage> or <workgroup> address space";
         }
-        if (address_space == type::AddressSpace::kStorage && access != type::Access::kReadWrite) {
+        if (address_space == type::AddressSpace::kStorage &&
+            access != builtin::Access::kReadWrite) {
             return "atomic variables in <storage> address space must have read_write access "
                    "mode";
         }

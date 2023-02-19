@@ -144,7 +144,7 @@ TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
     auto* inner = Structure("Inner", utils::Vector{Member("arr", ty.array<i32, 4>())});
     auto* buf = Structure("S", utils::Vector{Member("inner", ty.Of(inner))});
     auto* storage = GlobalVar("s", ty.Of(buf), type::AddressSpace::kStorage,
-                              type::Access::kReadWrite, Binding(0_a), Group(0_a));
+                              builtin::Access::kReadWrite, Binding(0_a), Group(0_a));
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 2_i);
     auto* ptr =

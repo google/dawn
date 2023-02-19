@@ -160,7 +160,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableViaLocalArray) {
 TEST_F(ResolverAddressSpaceUseTest, StructMultipleAddressSpaceUses) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
     GlobalVar("x", ty.Of(s), type::AddressSpace::kUniform, Binding(0_a), Group(0_a));
-    GlobalVar("y", ty.Of(s), type::AddressSpace::kStorage, type::Access::kRead, Binding(1_a),
+    GlobalVar("y", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
               Group(0_a));
     WrapInFunction(Var("g", ty.Of(s)));
 

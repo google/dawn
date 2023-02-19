@@ -134,7 +134,7 @@ void InspectorBuilder::AddWorkgroupStorage(const std::string& name, ast::Type ty
 
 void InspectorBuilder::AddStorageBuffer(const std::string& name,
                                         ast::Type type,
-                                        type::Access access,
+                                        builtin::Access access,
                                         uint32_t group,
                                         uint32_t binding) {
     GlobalVar(name, type, type::AddressSpace::kStorage, access, Binding(AInt(binding)),
@@ -279,7 +279,7 @@ ast::Type InspectorBuilder::GetCoordsType(type::TextureDimension dim, ast::Type 
 
 ast::Type InspectorBuilder::MakeStorageTextureTypes(type::TextureDimension dim,
                                                     type::TexelFormat format) {
-    return ty.storage_texture(dim, format, type::Access::kWrite);
+    return ty.storage_texture(dim, format, builtin::Access::kWrite);
 }
 
 void InspectorBuilder::AddStorageTexture(const std::string& name,

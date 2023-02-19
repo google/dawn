@@ -329,7 +329,7 @@ class TemplateNumberMatcher : public NumberMatcher {
 // template
 ////////////////////////////////////////////////////////////////////////////////
 using TexelFormat = type::TexelFormat;
-using Access = type::Access;
+using Access = builtin::Access;
 using AddressSpace = type::AddressSpace;
 using ParameterUsage = sem::ParameterUsage;
 using PipelineStage = ast::PipelineStage;
@@ -561,7 +561,7 @@ bool match_ptr(MatchState&, const type::Type* ty, Number& S, const type::Type*& 
 
 const type::Pointer* build_ptr(MatchState& state, Number S, const type::Type* T, Number& A) {
     return state.builder.create<type::Pointer>(T, static_cast<type::AddressSpace>(S.Value()),
-                                               static_cast<type::Access>(A.Value()));
+                                               static_cast<builtin::Access>(A.Value()));
 }
 
 bool match_atomic(MatchState&, const type::Type* ty, const type::Type*& T) {
@@ -1276,7 +1276,7 @@ Impl::Builtin Impl::Lookup(sem::BuiltinType builtin_type,
         for (auto& p : match.parameters) {
             params.Push(builder.create<sem::Parameter>(
                 nullptr, static_cast<uint32_t>(params.Length()), p.type,
-                type::AddressSpace::kUndefined, type::Access::kUndefined, p.usage));
+                type::AddressSpace::kUndefined, builtin::Access::kUndefined, p.usage));
         }
         sem::PipelineStageSet supported_stages;
         if (match.overload->flags.Contains(OverloadFlag::kSupportsVertexPipeline)) {
@@ -1477,7 +1477,7 @@ IntrinsicTable::InitOrConv Impl::Lookup(InitConvIntrinsic type,
         for (auto& p : match.parameters) {
             params.Push(builder.create<sem::Parameter>(
                 nullptr, static_cast<uint32_t>(params.Length()), p.type,
-                type::AddressSpace::kUndefined, type::Access::kUndefined, p.usage));
+                type::AddressSpace::kUndefined, builtin::Access::kUndefined, p.usage));
         }
         auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
                                                         : sem::EvaluationStage::kRuntime;
@@ -1492,7 +1492,7 @@ IntrinsicTable::InitOrConv Impl::Lookup(InitConvIntrinsic type,
     auto* target = converters.GetOrCreate(match, [&]() {
         auto param = builder.create<sem::Parameter>(
             nullptr, 0u, match.parameters[0].type, type::AddressSpace::kUndefined,
-            type::Access::kUndefined, match.parameters[0].usage);
+            builtin::Access::kUndefined, match.parameters[0].usage);
         auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
                                                         : sem::EvaluationStage::kRuntime;
         return builder.create<sem::TypeConversion>(match.return_type, param, eval_stage);

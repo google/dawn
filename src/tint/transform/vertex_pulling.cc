@@ -322,7 +322,8 @@ struct VertexPulling::State {
         for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
             // The decorated variable with struct type
             b.GlobalVar(GetVertexBufferName(i), b.ty.Of(struct_type), type::AddressSpace::kStorage,
-                        type::Access::kRead, b.Binding(AInt(i)), b.Group(AInt(cfg.pulling_group)));
+                        builtin::Access::kRead, b.Binding(AInt(i)),
+                        b.Group(AInt(cfg.pulling_group)));
         }
     }
 

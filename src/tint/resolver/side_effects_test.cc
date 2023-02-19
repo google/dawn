@@ -179,8 +179,8 @@ TEST_P(SideEffectsBuiltinTest, Test) {
     GlobalVar("storage_arr", ty.array<f32>(), type::AddressSpace::kStorage, Group(0_a),
               Binding(AInt(next_binding++)));
     GlobalVar("workgroup_arr", ty.array<f32, 4>(), type::AddressSpace::kWorkgroup);
-    GlobalVar("a", ty.atomic(ty.i32()), type::AddressSpace::kStorage, type::Access::kReadWrite,
-              Group(0_a), Binding(AInt(next_binding++)));
+    GlobalVar("a", ty.atomic(ty.i32()), type::AddressSpace::kStorage,
+              tint::builtin::Access::kReadWrite, Group(0_a), Binding(AInt(next_binding++)));
     if (c.pipeline_stage != ast::PipelineStage::kCompute) {
         GlobalVar("t2d", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Group(0_a),
                   Binding(AInt(next_binding++)));
@@ -192,7 +192,7 @@ TEST_P(SideEffectsBuiltinTest, Test) {
                   Group(0_a), Binding(AInt(next_binding++)));
         GlobalVar("tstorage2d",
                   ty.storage_texture(type::TextureDimension::k2d, type::TexelFormat::kR32Float,
-                                     type::Access::kWrite),
+                                     tint::builtin::Access::kWrite),
                   Group(0_a), Binding(AInt(next_binding++)));
         GlobalVar("s2d", ty.sampler(type::SamplerKind::kSampler), Group(0_a),
                   Binding(AInt(next_binding++)));

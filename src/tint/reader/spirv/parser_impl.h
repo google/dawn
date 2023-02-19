@@ -424,7 +424,7 @@ class ParserImpl : Reader {
     /// @param address_space the 'var' address space
     /// @returns the access mode for a 'var' declaration with the given storage type and address
     /// space.
-    type::Access VarAccess(const Type* storage_type, type::AddressSpace address_space);
+    builtin::Access VarAccess(const Type* storage_type, type::AddressSpace address_space);
 
     /// Creates an AST 'var' node for a SPIR-V ID, including any attached decorations, unless it's
     /// an ignorable builtin variable.
@@ -438,7 +438,7 @@ class ParserImpl : Reader {
     /// in the error case
     const ast::Var* MakeVar(uint32_t id,
                             type::AddressSpace address_space,
-                            type::Access access,
+                            builtin::Access access,
                             const Type* storage_type,
                             const ast::Expression* initializer,
                             AttributeList decorations);
@@ -674,7 +674,7 @@ class ParserImpl : Reader {
         /// The address space of the var
         type::AddressSpace address_space = type::AddressSpace::kUndefined;
         /// The access mode of the var
-        type::Access access = type::Access::kUndefined;
+        builtin::Access access = builtin::Access::kUndefined;
     };
 
     /// Returns the AST variable for the SPIR-V ID of a module-scope variable,
