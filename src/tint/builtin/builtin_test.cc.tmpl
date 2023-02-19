@@ -15,7 +15,7 @@ See:
 {{- $enum := (Sem.Enum "builtin_type") -}}
 {{- Eval "OverrideEnumName" "Enum" $enum "Name" "Builtin" -}}
 
-#include "src/tint/type/builtin.h"
+#include "src/tint/builtin/builtin.h"
 
 #include <string>
 
@@ -23,10 +23,10 @@ See:
 
 #include "src/tint/utils/string.h"
 
-namespace tint::type {
+namespace tint::builtin {
 namespace {
 
 {{ Eval "TestParsePrintEnum" $enum}}
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::builtin

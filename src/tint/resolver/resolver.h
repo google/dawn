@@ -463,7 +463,7 @@ class Resolver {
 
     /// @returns the type::Type for the builtin type @p builtin_ty with the identifier @p ident
     /// @note: Will raise an ICE if @p symbol is not a builtin type.
-    type::Type* BuiltinType(type::Builtin builtin_ty, const ast::Identifier* ident);
+    type::Type* BuiltinType(builtin::Builtin builtin_ty, const ast::Identifier* ident);
 
     // ArrayInitializerSig represents a unique array initializer signature.
     // It is a tuple of the array type, number of arguments provided and earliest evaluation stage.

@@ -54,10 +54,10 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/builtin/builtin.h"
 #include "src/tint/scope_stack.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/symbol_table.h"
-#include "src/tint/type/builtin.h"
 #include "src/tint/utils/block_allocator.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/defer.h"
@@ -475,7 +475,8 @@ class DependencyScanner {
                 graph_.resolved_identifiers.Add(from, ResolvedIdentifier(builtin_fn));
                 return;
             }
-            if (auto builtin_ty = type::ParseBuiltin(s); builtin_ty != type::Builtin::kUndefined) {
+            if (auto builtin_ty = builtin::ParseBuiltin(s);
+                builtin_ty != builtin::Builtin::kUndefined) {
                 graph_.resolved_identifiers.Add(from, ResolvedIdentifier(builtin_ty));
                 return;
             }
@@ -859,7 +860,7 @@ std::string ResolvedIdentifier::String(const SymbolTable& symbols, diag::List& d
     if (auto builtin_fn = BuiltinFunction(); builtin_fn != sem::BuiltinType::kNone) {
         return "builtin function '" + utils::ToString(builtin_fn) + "'";
     }
-    if (auto builtin_ty = BuiltinType(); builtin_ty != type::Builtin::kUndefined) {
+    if (auto builtin_ty = BuiltinType(); builtin_ty != builtin::Builtin::kUndefined) {
         return "builtin type '" + utils::ToString(builtin_ty) + "'";
     }
     if (auto access = Access(); access != builtin::Access::kUndefined) {

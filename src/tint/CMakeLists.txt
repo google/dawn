@@ -550,6 +550,7 @@ list(APPEND TINT_LIB_SRCS
 
 tint_generated(builtin/access BENCH TEST)
 tint_generated(builtin/address_space BENCH TEST)
+tint_generated(builtin/builtin BENCH TEST)
 tint_generated(builtin/builtin_value BENCH TEST)
 tint_generated(builtin/extension BENCH TEST)
 tint_generated(builtin/texel_format BENCH TEST)
@@ -558,7 +559,6 @@ tint_generated(ast/interpolate_attribute BENCH TEST)
 tint_generated(resolver/init_conv_intrinsic)
 tint_generated(sem/builtin_type)
 tint_generated(sem/parameter_usage)
-tint_generated(type/builtin BENCH TEST)
 
 if(UNIX)
   list(APPEND TINT_LIB_SRCS diagnostic/printer_posix.cc)

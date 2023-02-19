@@ -697,6 +697,8 @@ libtint_source_set("libtint_builtins_src") {
     "builtin/access.h",
     "builtin/address_space.cc",
     "builtin/address_space.h",
+    "builtin/builtin.cc",
+    "builtin/builtin.h",
     "builtin/builtin_value.cc",
     "builtin/builtin_value.h",
     "builtin/extension.cc",
@@ -723,8 +725,6 @@ libtint_source_set("libtint_type_src") {
     "type/atomic.h",
     "type/bool.cc",
     "type/bool.h",
-    "type/builtin.cc",
-    "type/builtin.h",
     "type/clone_context.h",
     "type/depth_multisampled_texture.cc",
     "type/depth_multisampled_texture.h",
@@ -1296,6 +1296,7 @@ if (tint_build_unittests) {
     sources = [
       "builtin/access_test.cc",
       "builtin/address_space_test.cc",
+      "builtin/builtin_test.cc",
       "builtin/builtin_value_test.cc",
       "builtin/extension_test.cc",
       "builtin/texel_format_test.cc",
@@ -1417,7 +1418,6 @@ if (tint_build_unittests) {
     sources = [
       "type/atomic_test.cc",
       "type/bool_test.cc",
-      "type/builtin_test.cc",
       "type/depth_multisampled_texture_test.cc",
       "type/depth_texture_test.cc",
       "type/external_texture_test.cc",

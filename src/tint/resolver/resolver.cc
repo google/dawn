@@ -42,6 +42,7 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/builtin/builtin.h"
 #include "src/tint/resolver/uniformity.h"
 #include "src/tint/sem/break_if_statement.h"
 #include "src/tint/sem/builtin_enum_expression.h"
@@ -68,7 +69,6 @@
 #include "src/tint/type/abstract_int.h"
 #include "src/tint/type/array.h"
 #include "src/tint/type/atomic.h"
-#include "src/tint/type/builtin.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/external_texture.h"
@@ -2133,36 +2133,36 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             return BuiltinCall(expr, f, args);
         }
 
-        if (auto b = resolved->BuiltinType(); b != type::Builtin::kUndefined) {
+        if (auto b = resolved->BuiltinType(); b != builtin::Builtin::kUndefined) {
             if (!ident->Is<ast::TemplatedIdentifier>()) {
                 // No template arguments provided.
                 // Check to see if this is an inferred-element-type call.
                 switch (b) {
-                    case type::Builtin::kArray:
+                    case builtin::Builtin::kArray:
                         return inferred_array();
-                    case type::Builtin::kVec2:
+                    case builtin::Builtin::kVec2:
                         return init_or_conv(InitConvIntrinsic::kVec2, nullptr);
-                    case type::Builtin::kVec3:
+                    case builtin::Builtin::kVec3:
                         return init_or_conv(InitConvIntrinsic::kVec3, nullptr);
-                    case type::Builtin::kVec4:
+                    case builtin::Builtin::kVec4:
                         return init_or_conv(InitConvIntrinsic::kVec4, nullptr);
-                    case type::Builtin::kMat2X2:
+                    case builtin::Builtin::kMat2X2:
                         return init_or_conv(InitConvIntrinsic::kMat2x2, nullptr);
-                    case type::Builtin::kMat2X3:
+                    case builtin::Builtin::kMat2X3:
                         return init_or_conv(InitConvIntrinsic::kMat2x3, nullptr);
-                    case type::Builtin::kMat2X4:
+                    case builtin::Builtin::kMat2X4:
                         return init_or_conv(InitConvIntrinsic::kMat2x4, nullptr);
-                    case type::Builtin::kMat3X2:
+                    case builtin::Builtin::kMat3X2:
                         return init_or_conv(InitConvIntrinsic::kMat3x2, nullptr);
-                    case type::Builtin::kMat3X3:
+                    case builtin::Builtin::kMat3X3:
                         return init_or_conv(InitConvIntrinsic::kMat3x3, nullptr);
-                    case type::Builtin::kMat3X4:
+                    case builtin::Builtin::kMat3X4:
                         return init_or_conv(InitConvIntrinsic::kMat3x4, nullptr);
-                    case type::Builtin::kMat4X2:
+                    case builtin::Builtin::kMat4X2:
                         return init_or_conv(InitConvIntrinsic::kMat4x2, nullptr);
-                    case type::Builtin::kMat4X3:
+                    case builtin::Builtin::kMat4X3:
                         return init_or_conv(InitConvIntrinsic::kMat4x3, nullptr);
-                    case type::Builtin::kMat4X4:
+                    case builtin::Builtin::kMat4X4:
                         return init_or_conv(InitConvIntrinsic::kMat4x4, nullptr);
                     default:
                         break;
@@ -2284,7 +2284,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     return call;
 }
 
-type::Type* Resolver::BuiltinType(type::Builtin builtin_ty, const ast::Identifier* ident) {
+type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identifier* ident) {
     auto& b = *builder_;
 
     auto check_no_tmpl_args = [&](type::Type* ty) -> type::Type* {
@@ -2537,151 +2537,151 @@ type::Type* Resolver::BuiltinType(type::Builtin builtin_ty, const ast::Identifie
     };
 
     switch (builtin_ty) {
-        case type::Builtin::kBool:
+        case builtin::Builtin::kBool:
             return check_no_tmpl_args(b.create<type::Bool>());
-        case type::Builtin::kI32:
+        case builtin::Builtin::kI32:
             return check_no_tmpl_args(i32());
-        case type::Builtin::kU32:
+        case builtin::Builtin::kU32:
             return check_no_tmpl_args(u32());
-        case type::Builtin::kF16:
+        case builtin::Builtin::kF16:
             return check_no_tmpl_args(f16());
-        case type::Builtin::kF32:
+        case builtin::Builtin::kF32:
             return check_no_tmpl_args(b.create<type::F32>());
-        case type::Builtin::kVec2:
+        case builtin::Builtin::kVec2:
             return vec_t(2);
-        case type::Builtin::kVec3:
+        case builtin::Builtin::kVec3:
             return vec_t(3);
-        case type::Builtin::kVec4:
+        case builtin::Builtin::kVec4:
             return vec_t(4);
-        case type::Builtin::kMat2X2:
+        case builtin::Builtin::kMat2X2:
             return mat_t(2, 2);
-        case type::Builtin::kMat2X3:
+        case builtin::Builtin::kMat2X3:
             return mat_t(2, 3);
-        case type::Builtin::kMat2X4:
+        case builtin::Builtin::kMat2X4:
             return mat_t(2, 4);
-        case type::Builtin::kMat3X2:
+        case builtin::Builtin::kMat3X2:
             return mat_t(3, 2);
-        case type::Builtin::kMat3X3:
+        case builtin::Builtin::kMat3X3:
             return mat_t(3, 3);
-        case type::Builtin::kMat3X4:
+        case builtin::Builtin::kMat3X4:
             return mat_t(3, 4);
-        case type::Builtin::kMat4X2:
+        case builtin::Builtin::kMat4X2:
             return mat_t(4, 2);
-        case type::Builtin::kMat4X3:
+        case builtin::Builtin::kMat4X3:
             return mat_t(4, 3);
-        case type::Builtin::kMat4X4:
+        case builtin::Builtin::kMat4X4:
             return mat_t(4, 4);
-        case type::Builtin::kMat2X2F:
+        case builtin::Builtin::kMat2X2F:
             return check_no_tmpl_args(mat(f32(), 2u, 2u));
-        case type::Builtin::kMat2X3F:
+        case builtin::Builtin::kMat2X3F:
             return check_no_tmpl_args(mat(f32(), 2u, 3u));
-        case type::Builtin::kMat2X4F:
+        case builtin::Builtin::kMat2X4F:
             return check_no_tmpl_args(mat(f32(), 2u, 4u));
-        case type::Builtin::kMat3X2F:
+        case builtin::Builtin::kMat3X2F:
             return check_no_tmpl_args(mat(f32(), 3u, 2u));
-        case type::Builtin::kMat3X3F:
+        case builtin::Builtin::kMat3X3F:
             return check_no_tmpl_args(mat(f32(), 3u, 3u));
-        case type::Builtin::kMat3X4F:
+        case builtin::Builtin::kMat3X4F:
             return check_no_tmpl_args(mat(f32(), 3u, 4u));
-        case type::Builtin::kMat4X2F:
+        case builtin::Builtin::kMat4X2F:
             return check_no_tmpl_args(mat(f32(), 4u, 2u));
-        case type::Builtin::kMat4X3F:
+        case builtin::Builtin::kMat4X3F:
             return check_no_tmpl_args(mat(f32(), 4u, 3u));
-        case type::Builtin::kMat4X4F:
+        case builtin::Builtin::kMat4X4F:
             return check_no_tmpl_args(mat(f32(), 4u, 4u));
-        case type::Builtin::kMat2X2H:
+        case builtin::Builtin::kMat2X2H:
             return check_no_tmpl_args(mat(f16(), 2u, 2u));
-        case type::Builtin::kMat2X3H:
+        case builtin::Builtin::kMat2X3H:
             return check_no_tmpl_args(mat(f16(), 2u, 3u));
-        case type::Builtin::kMat2X4H:
+        case builtin::Builtin::kMat2X4H:
             return check_no_tmpl_args(mat(f16(), 2u, 4u));
-        case type::Builtin::kMat3X2H:
+        case builtin::Builtin::kMat3X2H:
             return check_no_tmpl_args(mat(f16(), 3u, 2u));
-        case type::Builtin::kMat3X3H:
+        case builtin::Builtin::kMat3X3H:
             return check_no_tmpl_args(mat(f16(), 3u, 3u));
-        case type::Builtin::kMat3X4H:
+        case builtin::Builtin::kMat3X4H:
             return check_no_tmpl_args(mat(f16(), 3u, 4u));
-        case type::Builtin::kMat4X2H:
+        case builtin::Builtin::kMat4X2H:
             return check_no_tmpl_args(mat(f16(), 4u, 2u));
-        case type::Builtin::kMat4X3H:
+        case builtin::Builtin::kMat4X3H:
             return check_no_tmpl_args(mat(f16(), 4u, 3u));
-        case type::Builtin::kMat4X4H:
+        case builtin::Builtin::kMat4X4H:
             return check_no_tmpl_args(mat(f16(), 4u, 4u));
-        case type::Builtin::kVec2F:
+        case builtin::Builtin::kVec2F:
             return check_no_tmpl_args(vec(f32(), 2u));
-        case type::Builtin::kVec3F:
+        case builtin::Builtin::kVec3F:
             return check_no_tmpl_args(vec(f32(), 3u));
-        case type::Builtin::kVec4F:
+        case builtin::Builtin::kVec4F:
             return check_no_tmpl_args(vec(f32(), 4u));
-        case type::Builtin::kVec2H:
+        case builtin::Builtin::kVec2H:
             return check_no_tmpl_args(vec(f16(), 2u));
-        case type::Builtin::kVec3H:
+        case builtin::Builtin::kVec3H:
             return check_no_tmpl_args(vec(f16(), 3u));
-        case type::Builtin::kVec4H:
+        case builtin::Builtin::kVec4H:
             return check_no_tmpl_args(vec(f16(), 4u));
-        case type::Builtin::kVec2I:
+        case builtin::Builtin::kVec2I:
             return check_no_tmpl_args(vec(i32(), 2u));
-        case type::Builtin::kVec3I:
+        case builtin::Builtin::kVec3I:
             return check_no_tmpl_args(vec(i32(), 3u));
-        case type::Builtin::kVec4I:
+        case builtin::Builtin::kVec4I:
             return check_no_tmpl_args(vec(i32(), 4u));
-        case type::Builtin::kVec2U:
+        case builtin::Builtin::kVec2U:
             return check_no_tmpl_args(vec(u32(), 2u));
-        case type::Builtin::kVec3U:
+        case builtin::Builtin::kVec3U:
             return check_no_tmpl_args(vec(u32(), 3u));
-        case type::Builtin::kVec4U:
+        case builtin::Builtin::kVec4U:
             return check_no_tmpl_args(vec(u32(), 4u));
-        case type::Builtin::kArray:
+        case builtin::Builtin::kArray:
             return array();
-        case type::Builtin::kAtomic:
+        case builtin::Builtin::kAtomic:
             return atomic();
-        case type::Builtin::kPtr:
+        case builtin::Builtin::kPtr:
             return ptr();
-        case type::Builtin::kSampler:
+        case builtin::Builtin::kSampler:
             return check_no_tmpl_args(builder_->create<type::Sampler>(type::SamplerKind::kSampler));
-        case type::Builtin::kSamplerComparison:
+        case builtin::Builtin::kSamplerComparison:
             return check_no_tmpl_args(
                 builder_->create<type::Sampler>(type::SamplerKind::kComparisonSampler));
-        case type::Builtin::kTexture1D:
+        case builtin::Builtin::kTexture1D:
             return sampled_texture(type::TextureDimension::k1d);
-        case type::Builtin::kTexture2D:
+        case builtin::Builtin::kTexture2D:
             return sampled_texture(type::TextureDimension::k2d);
-        case type::Builtin::kTexture2DArray:
+        case builtin::Builtin::kTexture2DArray:
             return sampled_texture(type::TextureDimension::k2dArray);
-        case type::Builtin::kTexture3D:
+        case builtin::Builtin::kTexture3D:
             return sampled_texture(type::TextureDimension::k3d);
-        case type::Builtin::kTextureCube:
+        case builtin::Builtin::kTextureCube:
             return sampled_texture(type::TextureDimension::kCube);
-        case type::Builtin::kTextureCubeArray:
+        case builtin::Builtin::kTextureCubeArray:
             return sampled_texture(type::TextureDimension::kCubeArray);
-        case type::Builtin::kTextureDepth2D:
+        case builtin::Builtin::kTextureDepth2D:
             return check_no_tmpl_args(
                 builder_->create<type::DepthTexture>(type::TextureDimension::k2d));
-        case type::Builtin::kTextureDepth2DArray:
+        case builtin::Builtin::kTextureDepth2DArray:
             return check_no_tmpl_args(
                 builder_->create<type::DepthTexture>(type::TextureDimension::k2dArray));
-        case type::Builtin::kTextureDepthCube:
+        case builtin::Builtin::kTextureDepthCube:
             return check_no_tmpl_args(
                 builder_->create<type::DepthTexture>(type::TextureDimension::kCube));
-        case type::Builtin::kTextureDepthCubeArray:
+        case builtin::Builtin::kTextureDepthCubeArray:
             return check_no_tmpl_args(
                 builder_->create<type::DepthTexture>(type::TextureDimension::kCubeArray));
-        case type::Builtin::kTextureDepthMultisampled2D:
+        case builtin::Builtin::kTextureDepthMultisampled2D:
             return check_no_tmpl_args(
                 builder_->create<type::DepthMultisampledTexture>(type::TextureDimension::k2d));
-        case type::Builtin::kTextureExternal:
+        case builtin::Builtin::kTextureExternal:
             return check_no_tmpl_args(builder_->create<type::ExternalTexture>());
-        case type::Builtin::kTextureMultisampled2D:
+        case builtin::Builtin::kTextureMultisampled2D:
             return multisampled_texture(type::TextureDimension::k2d);
-        case type::Builtin::kTextureStorage1D:
+        case builtin::Builtin::kTextureStorage1D:
             return storage_texture(type::TextureDimension::k1d);
-        case type::Builtin::kTextureStorage2D:
+        case builtin::Builtin::kTextureStorage2D:
             return storage_texture(type::TextureDimension::k2d);
-        case type::Builtin::kTextureStorage2DArray:
+        case builtin::Builtin::kTextureStorage2DArray:
             return storage_texture(type::TextureDimension::k2dArray);
-        case type::Builtin::kTextureStorage3D:
+        case builtin::Builtin::kTextureStorage3D:
             return storage_texture(type::TextureDimension::k3d);
-        case type::Builtin::kUndefined:
+        case builtin::Builtin::kUndefined:
             break;
     }
 
@@ -2964,7 +2964,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
             });
     }
 
-    if (auto builtin_ty = resolved->BuiltinType(); builtin_ty != type::Builtin::kUndefined) {
+    if (auto builtin_ty = resolved->BuiltinType(); builtin_ty != builtin::Builtin::kUndefined) {
         auto* ty = BuiltinType(builtin_ty, ident);
         if (!ty) {
             return nullptr;

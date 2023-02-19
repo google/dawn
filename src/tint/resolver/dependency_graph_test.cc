@@ -1259,7 +1259,7 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinType, Resolve) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->BuiltinType(), type::ParseBuiltin(name))
+    EXPECT_EQ(resolved->BuiltinType(), builtin::ParseBuiltin(name))
         << resolved->String(Symbols(), Diagnostics());
 }
 
@@ -1316,17 +1316,17 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinType, ShadowedByFunc) {
 INSTANTIATE_TEST_SUITE_P(Types,
                          ResolverDependencyGraphResolveToBuiltinType,
                          testing::Combine(testing::ValuesIn(kTypeUseKinds),
-                                          testing::ValuesIn(type::kBuiltinStrings)));
+                                          testing::ValuesIn(builtin::kBuiltinStrings)));
 
 INSTANTIATE_TEST_SUITE_P(Values,
                          ResolverDependencyGraphResolveToBuiltinType,
                          testing::Combine(testing::ValuesIn(kValueUseKinds),
-                                          testing::ValuesIn(type::kBuiltinStrings)));
+                                          testing::ValuesIn(builtin::kBuiltinStrings)));
 
 INSTANTIATE_TEST_SUITE_P(Functions,
                          ResolverDependencyGraphResolveToBuiltinType,
                          testing::Combine(testing::ValuesIn(kFuncUseKinds),
-                                          testing::ValuesIn(type::kBuiltinStrings)));
+                                          testing::ValuesIn(builtin::kBuiltinStrings)));
 
 }  // namespace resolve_to_builtin_type
 

@@ -1,6 +1,6 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate builtin.h
+Template file for use with tools/src/cmd/gen to generate builtin_bench.cc
 
 To update the generated file, run:
     ./tools/run gen
@@ -15,16 +15,16 @@ See:
 {{- $enum := (Sem.Enum "builtin_type") -}}
 {{- Eval "OverrideEnumName" "Enum" $enum "Name" "Builtin" -}}
 
-#ifndef SRC_TINT_TYPE_BUILTIN_H_
-#define SRC_TINT_TYPE_BUILTIN_H_
+#include "src/tint/builtin/builtin.h"
 
-#include <ostream>
+#include <array>
 
-namespace tint::type {
+#include "benchmark/benchmark.h"
 
-/// An enumerator of builtin types.
-{{ Eval "DeclareEnum" $enum}}
+namespace tint::builtin {
+namespace {
 
-}  // namespace tint::type
+{{ Eval "BenchmarkParseEnum" $enum }}
 
-#endif  // SRC_TINT_TYPE_BUILTIN_H_
+}  // namespace
+}  // namespace tint::builtin

@@ -19,9 +19,9 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "src/tint/builtin/builtin.h"
 #include "src/tint/builtin/texel_format.h"
 #include "src/tint/transform/test_helper.h"
-#include "src/tint/type/builtin.h"
 
 namespace tint::transform {
 namespace {
@@ -1711,7 +1711,7 @@ std::string ExpandBuiltinType(std::string_view name) {
 
 std::vector<const char*> ConstructableTypes() {
     std::vector<const char*> out;
-    for (auto* ty : type::kBuiltinStrings) {
+    for (auto* ty : builtin::kBuiltinStrings) {
         std::string_view type(ty);
         if (type != "ptr" && type != "atomic" && !utils::HasPrefix(type, "sampler") &&
             !utils::HasPrefix(type, "texture")) {
@@ -1923,7 +1923,7 @@ INSTANTIATE_TEST_SUITE_P(RenamerBuiltinTypeTest,
 /// @return WGSL builtin identifier keywords
 std::vector<const char*> Identifiers() {
     std::vector<const char*> out;
-    for (auto* ident : type::kBuiltinStrings) {
+    for (auto* ident : builtin::kBuiltinStrings) {
         out.push_back(ident);
     }
     for (auto* ident : builtin::kAddressSpaceStrings) {
