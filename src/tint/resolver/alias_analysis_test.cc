@@ -35,19 +35,19 @@ struct ResolverAliasAnalysisTest : public resolver::TestHelper, public testing::
 //   target(&v1, aliased ? &v1 : &v2);
 // }
 struct TwoPointerConfig {
-    type::AddressSpace address_space;  // The address space for the pointers.
-    bool aliased;                      // Whether the pointers alias or not.
+    builtin::AddressSpace address_space;  // The address space for the pointers.
+    bool aliased;                         // Whether the pointers alias or not.
 };
 class TwoPointers : public ResolverTestWithParam<TwoPointerConfig> {
   protected:
     void SetUp() override {
         utils::Vector<const ast::Statement*, 4> body;
-        if (GetParam().address_space == type::AddressSpace::kFunction) {
+        if (GetParam().address_space == builtin::AddressSpace::kFunction) {
             body.Push(Decl(Var("v1", ty.i32())));
             body.Push(Decl(Var("v2", ty.i32())));
         } else {
-            GlobalVar("v1", type::AddressSpace::kPrivate, ty.i32());
-            GlobalVar("v2", type::AddressSpace::kPrivate, ty.i32());
+            GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.i32());
+            GlobalVar("v2", builtin::AddressSpace::kPrivate, ty.i32());
         }
         body.Push(CallStmt(Call("target", AddressOf(Source{{12, 34}}, "v1"),
                                 AddressOf(Source{{56, 78}}, GetParam().aliased ? "v1" : "v2"))));
@@ -190,10 +190,11 @@ TEST_P(TwoPointers, ReadWriteAcrossDifferentFunctions) {
 
 INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
                          TwoPointers,
-                         ::testing::Values(TwoPointerConfig{type::AddressSpace::kFunction, false},
-                                           TwoPointerConfig{type::AddressSpace::kFunction, true},
-                                           TwoPointerConfig{type::AddressSpace::kPrivate, false},
-                                           TwoPointerConfig{type::AddressSpace::kPrivate, true}),
+                         ::testing::Values(TwoPointerConfig{builtin::AddressSpace::kFunction,
+                                                            false},
+                                           TwoPointerConfig{builtin::AddressSpace::kFunction, true},
+                                           TwoPointerConfig{builtin::AddressSpace::kPrivate, false},
+                                           TwoPointerConfig{builtin::AddressSpace::kPrivate, true}),
                          [](const ::testing::TestParamInfo<TwoPointers::ParamType>& p) {
                              std::stringstream ss;
                              ss << (p.param.aliased ? "Aliased" : "Unaliased") << "_"
@@ -214,8 +215,8 @@ INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
 class OnePointerOneModuleScope : public ResolverTestWithParam<bool> {
   protected:
     void SetUp() override {
-        GlobalVar("global_1", type::AddressSpace::kPrivate, ty.i32());
-        GlobalVar("global_2", type::AddressSpace::kPrivate, ty.i32());
+        GlobalVar("global_1", builtin::AddressSpace::kPrivate, ty.i32());
+        GlobalVar("global_2", builtin::AddressSpace::kPrivate, ty.i32());
         Func("caller", utils::Empty, ty.void_(),
              utils::Vector{
                  CallStmt(Call("target",
@@ -226,7 +227,7 @@ class OnePointerOneModuleScope : public ResolverTestWithParam<bool> {
     void Run(utils::Vector<const ast::Statement*, 4>&& body, const char* err = nullptr) {
         Func("target",
              utils::Vector<const ast::Parameter*, 4>{
-                 Param("p1", ty.pointer<i32>(type::AddressSpace::kPrivate)),
+                 Param("p1", ty.pointer<i32>(builtin::AddressSpace::kPrivate)),
              },
              ty.void_(), std::move(body));
         if (GetParam() && err) {
@@ -295,7 +296,7 @@ TEST_P(OnePointerOneModuleScope, ReadWriteThroughChain_GlobalViaArg) {
     // f1(p1);
     Func("f2",
          utils::Vector<const ast::Parameter*, 4>{
-             Param("p1", ty.pointer<i32>(type::AddressSpace::kPrivate)),
+             Param("p1", ty.pointer<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
          utils::Vector{
@@ -303,7 +304,7 @@ TEST_P(OnePointerOneModuleScope, ReadWriteThroughChain_GlobalViaArg) {
          });
     Func("f1",
          utils::Vector<const ast::Parameter*, 4>{
-             Param("p1", ty.pointer<i32>(type::AddressSpace::kPrivate)),
+             Param("p1", ty.pointer<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
          utils::Vector{
@@ -330,7 +331,7 @@ TEST_P(OnePointerOneModuleScope, ReadWriteThroughChain_Both) {
     // f1(p1);
     Func("f2",
          utils::Vector<const ast::Parameter*, 4>{
-             Param("p1", ty.pointer<i32>(type::AddressSpace::kPrivate)),
+             Param("p1", ty.pointer<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
          utils::Vector{
@@ -339,7 +340,7 @@ TEST_P(OnePointerOneModuleScope, ReadWriteThroughChain_Both) {
          });
     Func("f1",
          utils::Vector<const ast::Parameter*, 4>{
-             Param("p1", ty.pointer<i32>(type::AddressSpace::kPrivate)),
+             Param("p1", ty.pointer<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
          utils::Vector{
@@ -365,7 +366,7 @@ TEST_P(OnePointerOneModuleScope, WriteReadThroughChain_GlobalViaArg) {
     // f1(p1);
     Func("f2",
          utils::Vector<const ast::Parameter*, 4>{
-             Param("p1", ty.pointer<i32>(type::AddressSpace::kPrivate)),
+             Param("p1", ty.pointer<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
          utils::Vector{
@@ -373,7 +374,7 @@ TEST_P(OnePointerOneModuleScope, WriteReadThroughChain_GlobalViaArg) {
          });
     Func("f1",
          utils::Vector<const ast::Parameter*, 4>{
-             Param("p1", ty.pointer<i32>(type::AddressSpace::kPrivate)),
+             Param("p1", ty.pointer<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
          utils::Vector{
@@ -400,7 +401,7 @@ TEST_P(OnePointerOneModuleScope, WriteReadThroughChain_Both) {
     // f1(p1);
     Func("f2",
          utils::Vector{
-             Param("p1", ty.pointer<i32>(type::AddressSpace::kPrivate)),
+             Param("p1", ty.pointer<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
          utils::Vector{
@@ -409,7 +410,7 @@ TEST_P(OnePointerOneModuleScope, WriteReadThroughChain_Both) {
          });
     Func("f1",
          utils::Vector{
-             Param("p1", ty.pointer<i32>(type::AddressSpace::kPrivate)),
+             Param("p1", ty.pointer<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
          utils::Vector{
@@ -435,7 +436,7 @@ TEST_P(OnePointerOneModuleScope, ReadWriteAcrossDifferentFunctions) {
     // f2();
     Func("f1",
          utils::Vector{
-             Param("p1", ty.pointer<i32>(type::AddressSpace::kPrivate)),
+             Param("p1", ty.pointer<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
          utils::Vector{
@@ -487,8 +488,8 @@ class Use : public ResolverTestWithParam<bool> {
     void Run(const ast::Statement* stmt, const char* err = nullptr) {
         Func("target",
              utils::Vector{
-                 Param("p1", ty.pointer<i32>(type::AddressSpace::kFunction)),
-                 Param("p2", ty.pointer<i32>(type::AddressSpace::kFunction)),
+                 Param("p1", ty.pointer<i32>(builtin::AddressSpace::kFunction)),
+                 Param("p2", ty.pointer<i32>(builtin::AddressSpace::kFunction)),
              },
              ty.void_(),
              utils::Vector{
@@ -531,7 +532,7 @@ TEST_P(Use, Write_CompoundAssignment_LHS) {
 TEST_P(Use, Read_CompoundAssignment_RHS) {
     // var<private> global : i32;
     // global += *p2;
-    GlobalVar("global", type::AddressSpace::kPrivate, ty.i32());
+    GlobalVar("global", builtin::AddressSpace::kPrivate, ty.i32());
     Run(CompoundAssign("global", Deref("p2"), ast::BinaryOp::kAdd),
         R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
@@ -578,7 +579,7 @@ TEST_P(Use, Read_Convert) {
 TEST_P(Use, Read_IndexAccessor) {
     // var<private> data : array<f32, 4>;
     // _ = data[*p2];
-    GlobalVar("data", type::AddressSpace::kPrivate, ty.array<f32, 4>());
+    GlobalVar("data", builtin::AddressSpace::kPrivate, ty.array<f32, 4>());
     Run(Assign(Phony(), IndexAccessor("data", Deref("p2"))),
         R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
@@ -592,7 +593,7 @@ TEST_P(Use, Read_LetInitializer) {
 
 TEST_P(Use, Read_VarInitializer) {
     // var x = *p2;
-    Run(Decl(Var("x", type::AddressSpace::kFunction, Deref("p2"))),
+    Run(Decl(Var("x", builtin::AddressSpace::kFunction, Deref("p2"))),
         R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
@@ -602,7 +603,7 @@ TEST_P(Use, Read_ReturnValue) {
     // foo(p2);
     Func("foo",
          utils::Vector{
-             Param("p", ty.pointer<i32>(type::AddressSpace::kFunction)),
+             Param("p", ty.pointer<i32>(builtin::AddressSpace::kFunction)),
          },
          ty.i32(),
          utils::Vector{
@@ -659,8 +660,8 @@ class UseBool : public ResolverTestWithParam<bool> {
     void Run(const ast::Statement* stmt, const char* err = nullptr) {
         Func("target",
              utils::Vector{
-                 Param("p1", ty.pointer<bool>(type::AddressSpace::kFunction)),
-                 Param("p2", ty.pointer<bool>(type::AddressSpace::kFunction)),
+                 Param("p1", ty.pointer<bool>(builtin::AddressSpace::kFunction)),
+                 Param("p2", ty.pointer<bool>(builtin::AddressSpace::kFunction)),
              },
              ty.void_(),
              utils::Vector{
@@ -724,8 +725,8 @@ TEST_F(ResolverAliasAnalysisTest, NoAccess_MemberAccessor) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
     Func("f2",
          utils::Vector{
-             Param("p1", ty.pointer(ty("S"), type::AddressSpace::kFunction)),
-             Param("p2", ty.pointer(ty("S"), type::AddressSpace::kFunction)),
+             Param("p1", ty.pointer(ty("S"), builtin::AddressSpace::kFunction)),
+             Param("p2", ty.pointer(ty("S"), builtin::AddressSpace::kFunction)),
          },
          ty.void_(),
          utils::Vector{
@@ -753,8 +754,8 @@ TEST_F(ResolverAliasAnalysisTest, Read_MemberAccessor) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
     Func("f2",
          utils::Vector{
-             Param("p1", ty.pointer(ty("S"), type::AddressSpace::kFunction)),
-             Param("p2", ty.pointer(ty("S"), type::AddressSpace::kFunction)),
+             Param("p1", ty.pointer(ty("S"), builtin::AddressSpace::kFunction)),
+             Param("p2", ty.pointer(ty("S"), builtin::AddressSpace::kFunction)),
          },
          ty.void_(),
          utils::Vector{
@@ -785,8 +786,8 @@ TEST_F(ResolverAliasAnalysisTest, Write_MemberAccessor) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
     Func("f2",
          utils::Vector{
-             Param("p1", ty.pointer(ty("S"), type::AddressSpace::kFunction)),
-             Param("p2", ty.pointer(ty("S"), type::AddressSpace::kFunction)),
+             Param("p1", ty.pointer(ty("S"), builtin::AddressSpace::kFunction)),
+             Param("p2", ty.pointer(ty("S"), builtin::AddressSpace::kFunction)),
          },
          ty.void_(),
          utils::Vector{
@@ -816,8 +817,8 @@ TEST_F(ResolverAliasAnalysisTest, Read_MultiComponentSwizzle) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
     Func("f2",
          utils::Vector{
-             Param("p1", ty.pointer(ty.vec4<f32>(), type::AddressSpace::kFunction)),
-             Param("p2", ty.pointer(ty.vec4<f32>(), type::AddressSpace::kFunction)),
+             Param("p1", ty.pointer(ty.vec4<f32>(), builtin::AddressSpace::kFunction)),
+             Param("p2", ty.pointer(ty.vec4<f32>(), builtin::AddressSpace::kFunction)),
          },
          ty.void_(),
          utils::Vector{
@@ -848,7 +849,7 @@ TEST_F(ResolverAliasAnalysisTest, SinglePointerReadWrite) {
     // }
     Func("f1",
          utils::Vector{
-             Param("p", ty.pointer<i32>(type::AddressSpace::kFunction)),
+             Param("p", ty.pointer<i32>(builtin::AddressSpace::kFunction)),
          },
          ty.void_(),
          utils::Vector{
@@ -901,7 +902,7 @@ TEST_F(ResolverAliasAnalysisTest, NonOverlappingCalls) {
     // }
     Func("f2",
          utils::Vector{
-             Param("p", ty.pointer<i32>(type::AddressSpace::kFunction)),
+             Param("p", ty.pointer<i32>(builtin::AddressSpace::kFunction)),
          },
          ty.void_(),
          utils::Vector{
@@ -909,7 +910,7 @@ TEST_F(ResolverAliasAnalysisTest, NonOverlappingCalls) {
          });
     Func("f3",
          utils::Vector{
-             Param("p", ty.pointer<i32>(type::AddressSpace::kFunction)),
+             Param("p", ty.pointer<i32>(builtin::AddressSpace::kFunction)),
          },
          ty.void_(),
          utils::Vector{

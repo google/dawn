@@ -232,8 +232,8 @@ class ProgramBuilder {
 
       private:
         void Set(ProgramBuilder&, ast::Type t) { type = t; }
-        void Set(ProgramBuilder& b, type::AddressSpace addr_space) {
-            if (addr_space != type::AddressSpace::kUndefined) {
+        void Set(ProgramBuilder& b, builtin::AddressSpace addr_space) {
+            if (addr_space != builtin::AddressSpace::kUndefined) {
                 address_space = b.Expr(addr_space);
             }
         }
@@ -1199,9 +1199,9 @@ class ProgramBuilder {
         /// @param type the type of the pointer
         /// @param address_space the address space of the pointer
         /// @param access the optional access control of the pointer
-        /// @return the pointer to `type` with the given type::AddressSpace
+        /// @return the pointer to `type` with the given builtin::AddressSpace
         ast::Type pointer(ast::Type type,
-                          type::AddressSpace address_space,
+                          builtin::AddressSpace address_space,
                           builtin::Access access = builtin::Access::kUndefined) const {
             return pointer(builder->source_, type, address_space, access);
         }
@@ -1210,10 +1210,10 @@ class ProgramBuilder {
         /// @param type the type of the pointer
         /// @param address_space the address space of the pointer
         /// @param access the optional access control of the pointer
-        /// @return the pointer to `type` with the given type::AddressSpace
+        /// @return the pointer to `type` with the given builtin::AddressSpace
         ast::Type pointer(const Source& source,
                           ast::Type type,
-                          type::AddressSpace address_space,
+                          builtin::AddressSpace address_space,
                           builtin::Access access = builtin::Access::kUndefined) const {
             if (access != builtin::Access::kUndefined) {
                 return (*this)(source, "ptr", address_space, type, access);
@@ -1224,9 +1224,9 @@ class ProgramBuilder {
 
         /// @param address_space the address space of the pointer
         /// @param access the optional access control of the pointer
-        /// @return the pointer to type `T` with the given type::AddressSpace.
+        /// @return the pointer to type `T` with the given builtin::AddressSpace.
         template <typename T>
-        ast::Type pointer(type::AddressSpace address_space,
+        ast::Type pointer(builtin::AddressSpace address_space,
                           builtin::Access access = builtin::Access::kUndefined) const {
             return pointer<T>(builder->source_, address_space, access);
         }
@@ -1234,10 +1234,10 @@ class ProgramBuilder {
         /// @param source the Source of the node
         /// @param address_space the address space of the pointer
         /// @param access the optional access control of the pointer
-        /// @return the pointer to type `T` with the given type::AddressSpace.
+        /// @return the pointer to type `T` with the given builtin::AddressSpace.
         template <typename T>
         ast::Type pointer(const Source& source,
-                          type::AddressSpace address_space,
+                          builtin::AddressSpace address_space,
                           builtin::Access access = builtin::Access::kUndefined) const {
             if (access != builtin::Access::kUndefined) {
                 return (*this)(source, "ptr", address_space, Of<T>(), access);
@@ -2066,7 +2066,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Type           - specifies the variable's type
-    ///   * type::AddressSpace  - specifies the variable's address space
+    ///   * builtin::AddressSpace  - specifies the variable's address space
     ///   * builtin::Access        - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
@@ -2083,7 +2083,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Type           - specifies the variable's type
-    ///   * type::AddressSpace  - specifies the variable's address space
+    ///   * builtin::AddressSpace  - specifies the variable's address space
     ///   * builtin::Access        - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
@@ -2185,7 +2185,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Type           - specifies the variable's type
-    ///   * type::AddressSpace   - specifies the variable address space
+    ///   * builtin::AddressSpace   - specifies the variable address space
     ///   * builtin::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
@@ -2202,7 +2202,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Type           - specifies the variable's type
-    ///   * type::AddressSpace   - specifies the variable address space
+    ///   * builtin::AddressSpace   - specifies the variable address space
     ///   * builtin::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*    - specifies the variable's attributes (repeatable, or vector)

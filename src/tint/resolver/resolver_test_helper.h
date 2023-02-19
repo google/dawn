@@ -628,13 +628,13 @@ struct DataType<ptr<T>> {
     /// @param b the ProgramBuilder
     /// @return a new AST alias type
     static inline ast::Type AST(ProgramBuilder& b) {
-        return b.ty.pointer(DataType<T>::AST(b), type::AddressSpace::kPrivate,
+        return b.ty.pointer(DataType<T>::AST(b), builtin::AddressSpace::kPrivate,
                             builtin::Access::kUndefined);
     }
     /// @param b the ProgramBuilder
     /// @return the semantic aliased type
     static inline const type::Type* Sem(ProgramBuilder& b) {
-        return b.create<type::Pointer>(DataType<T>::Sem(b), type::AddressSpace::kPrivate,
+        return b.create<type::Pointer>(DataType<T>::Sem(b), builtin::AddressSpace::kPrivate,
                                        builtin::Access::kReadWrite);
     }
 
@@ -643,7 +643,7 @@ struct DataType<ptr<T>> {
     static inline const ast::Expression* Expr(ProgramBuilder& b,
                                               utils::VectorRef<Scalar> /*unused*/) {
         auto sym = b.Symbols().New("global_for_ptr");
-        b.GlobalVar(sym, DataType<T>::AST(b), type::AddressSpace::kPrivate);
+        b.GlobalVar(sym, DataType<T>::AST(b), builtin::AddressSpace::kPrivate);
         return b.AddressOf(sym);
     }
 

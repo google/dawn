@@ -90,7 +90,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitType_Array) {
     auto arr = ty.array<bool, 4>();
-    ast::Type type = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
+    ast::Type type = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
@@ -102,7 +102,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Array) {
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
     auto a = ty.array<bool, 4>();
     auto b = ty.array(a, 5_u);
-    ast::Type type = GlobalVar("G", b, type::AddressSpace::kPrivate)->type;
+    ast::Type type = GlobalVar("G", b, builtin::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
@@ -115,7 +115,7 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
     auto a = ty.array<bool, 4>();
     auto b = ty.array(a, 5_u);
     auto c = ty.array(b, 6_u);
-    ast::Type type = GlobalVar("G", c, type::AddressSpace::kPrivate)->type;
+    ast::Type type = GlobalVar("G", c, builtin::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
@@ -126,7 +126,7 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
     auto arr = ty.array<bool, 4>();
-    ast::Type type = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
+    ast::Type type = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
@@ -137,7 +137,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
 
 TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
     auto arr = ty.array<bool, 1>();
-    ast::Type type = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
+    ast::Type type = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
@@ -213,7 +213,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Matrix_F16) {
 TEST_F(MslGeneratorImplTest, EmitType_Pointer) {
     auto* f32 = create<type::F32>();
     auto* p =
-        create<type::Pointer>(f32, type::AddressSpace::kWorkgroup, builtin::Access::kReadWrite);
+        create<type::Pointer>(f32, builtin::AddressSpace::kWorkgroup, builtin::Access::kReadWrite);
 
     GeneratorImpl& gen = Build();
 
@@ -284,8 +284,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
                  Member("z", ty.f32()),
              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead,
-                               Binding(0_a), Group(0_a))
+    ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
+                               builtin::Access::kRead, Binding(0_a), Group(0_a))
                          ->type;
 
     GeneratorImpl& gen = Build();
@@ -393,8 +393,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
                                  Member("e", ty.f32()),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead,
-                               Binding(0_a), Group(0_a))
+    ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
+                               builtin::Access::kRead, Binding(0_a), Group(0_a))
                          ->type;
 
     GeneratorImpl& gen = Build();
@@ -485,8 +485,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
                                  Member("f", array_z),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead,
-                               Binding(0_a), Group(0_a))
+    ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
+                               builtin::Access::kRead, Binding(0_a), Group(0_a))
                          ->type;
 
     GeneratorImpl& gen = Build();
@@ -569,8 +569,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
                                  Member("c", ty.i32()),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead,
-                               Binding(0_a), Group(0_a))
+    ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
+                               builtin::Access::kRead, Binding(0_a), Group(0_a))
                          ->type;
 
     GeneratorImpl& gen = Build();
@@ -631,8 +631,8 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
                                  Member("tint_pad_21", ty.f32()),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead,
-                               Binding(0_a), Group(0_a))
+    ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
+                               builtin::Access::kRead, Binding(0_a), Group(0_a))
                          ->type;
 
     GeneratorImpl& gen = Build();
@@ -690,8 +690,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_WithAttribute) {
                                  Member("b", ty.f32()),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead,
-                               Binding(0_a), Group(0_a))
+    ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
+                               builtin::Access::kRead, Binding(0_a), Group(0_a))
                          ->type;
 
     GeneratorImpl& gen = Build();

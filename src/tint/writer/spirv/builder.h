@@ -208,12 +208,12 @@ class Builder {
     /// Converts a address space to a SPIR-V address space.
     /// @param klass the address space to convert
     /// @returns the SPIR-V address space or SpvStorageClassMax on error.
-    SpvStorageClass ConvertAddressSpace(type::AddressSpace klass) const;
+    SpvStorageClass ConvertAddressSpace(builtin::AddressSpace klass) const;
     /// Converts a builtin to a SPIR-V builtin and pushes a capability if needed.
     /// @param builtin the builtin to convert
     /// @param storage the address space that this builtin is being used with
     /// @returns the SPIR-V builtin or SpvBuiltInMax on error.
-    SpvBuiltIn ConvertBuiltin(builtin::BuiltinValue builtin, type::AddressSpace storage);
+    SpvBuiltIn ConvertBuiltin(builtin::BuiltinValue builtin, builtin::AddressSpace storage);
 
     /// Converts an interpolate attribute to SPIR-V decorations and pushes a
     /// capability if needed.

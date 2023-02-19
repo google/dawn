@@ -20,8 +20,8 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Assign) {
-    auto* lhs = GlobalVar("lhs", ty.i32(), type::AddressSpace::kPrivate);
-    auto* rhs = GlobalVar("rhs", ty.i32(), type::AddressSpace::kPrivate);
+    auto* lhs = GlobalVar("lhs", ty.i32(), builtin::AddressSpace::kPrivate);
+    auto* rhs = GlobalVar("rhs", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* assign = Assign(lhs, rhs);
     WrapInFunction(assign);
 

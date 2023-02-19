@@ -456,14 +456,14 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantAllowedWithEnable) {
     // enable chromium_experimental_push_constant;
     // var<push_constant> a : u32;
     Enable(builtin::Extension::kChromiumExperimentalPushConstant);
-    GlobalVar("a", ty.u32(), type::AddressSpace::kPushConstant);
+    GlobalVar("a", ty.u32(), builtin::AddressSpace::kPushConstant);
 
     EXPECT_TRUE(r()->Resolve());
 }
 
 TEST_F(ResolverEntryPointValidationTest, PushConstantDisallowedWithoutEnable) {
     // var<push_constant> a : u32;
-    GlobalVar(Source{{1, 2}}, "a", ty.u32(), type::AddressSpace::kPushConstant);
+    GlobalVar(Source{{1, 2}}, "a", ty.u32(), builtin::AddressSpace::kPushConstant);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -473,7 +473,7 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantDisallowedWithoutEnable) {
 
 TEST_F(ResolverEntryPointValidationTest, PushConstantAllowedWithIgnoreAddressSpaceAttribute) {
     // var<push_constant> a : u32; // With ast::DisabledValidation::kIgnoreAddressSpace
-    GlobalVar("a", ty.u32(), type::AddressSpace::kPushConstant,
+    GlobalVar("a", ty.u32(), builtin::AddressSpace::kPushConstant,
               utils::Vector{Disable(ast::DisabledValidation::kIgnoreAddressSpace)});
 
     EXPECT_TRUE(r()->Resolve());
@@ -486,7 +486,7 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantOneVariableUsedInEntryPoint
     //   _ = a;
     // }
     Enable(builtin::Extension::kChromiumExperimentalPushConstant);
-    GlobalVar("a", ty.u32(), type::AddressSpace::kPushConstant);
+    GlobalVar("a", ty.u32(), builtin::AddressSpace::kPushConstant);
 
     Func("main", {}, ty.void_(), utils::Vector{Assign(Phony(), "a")},
          utils::Vector{Stage(ast::PipelineStage::kCompute),
@@ -504,8 +504,8 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantTwoVariablesUsedInEntryPoin
     //   _ = b;
     // }
     Enable(builtin::Extension::kChromiumExperimentalPushConstant);
-    GlobalVar(Source{{1, 2}}, "a", ty.u32(), type::AddressSpace::kPushConstant);
-    GlobalVar(Source{{3, 4}}, "b", ty.u32(), type::AddressSpace::kPushConstant);
+    GlobalVar(Source{{1, 2}}, "a", ty.u32(), builtin::AddressSpace::kPushConstant);
+    GlobalVar(Source{{3, 4}}, "b", ty.u32(), builtin::AddressSpace::kPushConstant);
 
     Func(Source{{5, 6}}, "main", {}, ty.void_(),
          utils::Vector{Assign(Phony(), "a"), Assign(Phony(), "b")},
@@ -535,8 +535,8 @@ TEST_F(ResolverEntryPointValidationTest,
     //   uses_b();
     // }
     Enable(builtin::Extension::kChromiumExperimentalPushConstant);
-    GlobalVar(Source{{1, 2}}, "a", ty.u32(), type::AddressSpace::kPushConstant);
-    GlobalVar(Source{{3, 4}}, "b", ty.u32(), type::AddressSpace::kPushConstant);
+    GlobalVar(Source{{1, 2}}, "a", ty.u32(), builtin::AddressSpace::kPushConstant);
+    GlobalVar(Source{{3, 4}}, "b", ty.u32(), builtin::AddressSpace::kPushConstant);
 
     Func(Source{{5, 6}}, "uses_a", {}, ty.void_(), utils::Vector{Assign(Phony(), "a")});
     Func(Source{{7, 8}}, "uses_b", {}, ty.void_(), utils::Vector{Assign(Phony(), "b")});
@@ -568,8 +568,8 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantTwoVariablesUsedInDifferent
     //   _ = a;
     // }
     Enable(builtin::Extension::kChromiumExperimentalPushConstant);
-    GlobalVar("a", ty.u32(), type::AddressSpace::kPushConstant);
-    GlobalVar("b", ty.u32(), type::AddressSpace::kPushConstant);
+    GlobalVar("a", ty.u32(), builtin::AddressSpace::kPushConstant);
+    GlobalVar("b", ty.u32(), builtin::AddressSpace::kPushConstant);
 
     Func("uses_a", {}, ty.void_(), utils::Vector{Assign(Phony(), "a")},
          utils::Vector{Stage(ast::PipelineStage::kCompute),

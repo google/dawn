@@ -695,6 +695,8 @@ libtint_source_set("libtint_builtins_src") {
   sources = [
     "builtin/access.cc",
     "builtin/access.h",
+    "builtin/address_space.cc",
+    "builtin/address_space.h",
     "builtin/builtin_value.cc",
     "builtin/builtin_value.h",
     "builtin/extension.cc",
@@ -711,8 +713,6 @@ libtint_source_set("libtint_type_src") {
     "type/abstract_int.h",
     "type/abstract_numeric.cc",
     "type/abstract_numeric.h",
-    "type/address_space.cc",
-    "type/address_space.h",
     "type/array.cc",
     "type/array.h",
     "type/array_count.cc",
@@ -1295,6 +1295,7 @@ if (tint_build_unittests) {
   tint_unittests_source_set("tint_unittests_builtins_src") {
     sources = [
       "builtin/access_test.cc",
+      "builtin/address_space_test.cc",
       "builtin/builtin_value_test.cc",
       "builtin/extension_test.cc",
     ]
@@ -1413,7 +1414,6 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_type_src") {
     sources = [
-      "type/address_space_test.cc",
       "type/atomic_test.cc",
       "type/bool_test.cc",
       "type/builtin_test.cc",
@@ -1438,7 +1438,10 @@ if (tint_build_unittests) {
       "type/u32_test.cc",
       "type/vector_test.cc",
     ]
-    deps = [ ":libtint_base_src" ]
+    deps = [
+      ":libtint_base_src",
+      ":libtint_builtins_src",
+    ]
   }
 
   tint_unittests_source_set("tint_unittests_text_src") {

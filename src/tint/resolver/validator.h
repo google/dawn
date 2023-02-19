@@ -75,7 +75,7 @@ struct TypeAndAddressSpace {
     /// The type
     const type::Type* type;
     /// The address space
-    type::AddressSpace address_space;
+    builtin::AddressSpace address_space;
 
     /// Equality operator
     /// @param other the other TypeAndAddressSpace to compare this TypeAndAddressSpace to
@@ -435,7 +435,7 @@ class Validator {
     /// @param initializer the RHS initializer expression
     /// @returns true on succes, false otherwise
     bool VariableInitializer(const ast::Variable* v,
-                             type::AddressSpace address_space,
+                             builtin::AddressSpace address_space,
                              const type::Type* storage_type,
                              const sem::ValueExpression* initializer) const;
 
@@ -488,7 +488,7 @@ class Validator {
     /// @param sc the address space
     /// @param source the source of the type
     /// @returns true on success, false otherwise
-    bool AddressSpaceLayout(const type::Type* type, type::AddressSpace sc, Source source) const;
+    bool AddressSpaceLayout(const type::Type* type, builtin::AddressSpace sc, Source source) const;
 
     /// @returns true if the attribute list contains a
     /// ast::DisableValidationAttribute with the validation mode equal to
@@ -543,7 +543,7 @@ class Validator {
     /// @returns true on success, false if an error was raised.
     bool CheckTypeAccessAddressSpace(const type::Type* store_ty,
                                      builtin::Access access,
-                                     type::AddressSpace address_space,
+                                     builtin::AddressSpace address_space,
                                      utils::VectorRef<const tint::ast::Attribute*> attributes,
                                      const Source& source) const;
     SymbolTable& symbols_;

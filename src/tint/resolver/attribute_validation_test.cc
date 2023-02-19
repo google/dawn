@@ -734,7 +734,7 @@ TEST_F(StructMemberAttributeTest, Align_Attribute_ConstAFloat) {
 }
 
 TEST_F(StructMemberAttributeTest, Align_Attribute_Var) {
-    GlobalVar(Source{{1, 2}}, "val", ty.f32(), type::AddressSpace::kPrivate,
+    GlobalVar(Source{{1, 2}}, "val", ty.f32(), builtin::AddressSpace::kPrivate,
               builtin::Access::kUndefined, Expr(1.23_f));
 
     Structure(Source{{6, 4}}, "mystruct",
@@ -808,7 +808,7 @@ TEST_F(StructMemberAttributeTest, Size_Attribute_ConstAFloat) {
 }
 
 TEST_F(StructMemberAttributeTest, Size_Attribute_Var) {
-    GlobalVar(Source{{1, 2}}, "val", ty.f32(), type::AddressSpace::kPrivate,
+    GlobalVar(Source{{1, 2}}, "val", ty.f32(), builtin::AddressSpace::kPrivate,
               builtin::Access::kUndefined, Expr(1.23_f));
 
     Structure(Source{{6, 4}}, "mystruct",
@@ -888,7 +888,7 @@ TEST_P(VariableAttributeTest, IsValid) {
     if (IsBindingAttribute(params.kind)) {
         GlobalVar("a", ty.sampler(type::SamplerKind::kSampler), attrs);
     } else {
-        GlobalVar("a", ty.f32(), type::AddressSpace::kPrivate, attrs);
+        GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate, attrs);
     }
 
     if (params.should_pass) {
@@ -1157,7 +1157,7 @@ TEST_P(ArrayStrideTest, All) {
                             create<ast::StrideAttribute>(Source{{12, 34}}, params.stride),
                         });
 
-    GlobalVar("myarray", arr, type::AddressSpace::kPrivate);
+    GlobalVar("myarray", arr, builtin::AddressSpace::kPrivate);
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1240,7 +1240,7 @@ TEST_F(ArrayStrideTest, DuplicateAttribute) {
                             create<ast::StrideAttribute>(Source{{56, 78}}, 4u),
                         });
 
-    GlobalVar("myarray", arr, type::AddressSpace::kPrivate);
+    GlobalVar("myarray", arr, builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1259,7 +1259,7 @@ TEST_F(ResourceAttributeTest, UniformBufferMissingBinding) {
     auto* s = Structure("S", utils::Vector{
                                  Member("x", ty.i32()),
                              });
-    GlobalVar(Source{{12, 34}}, "G", ty.Of(s), type::AddressSpace::kUniform);
+    GlobalVar(Source{{12, 34}}, "G", ty.Of(s), builtin::AddressSpace::kUniform);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1270,7 +1270,7 @@ TEST_F(ResourceAttributeTest, StorageBufferMissingBinding) {
     auto* s = Structure("S", utils::Vector{
                                  Member("x", ty.i32()),
                              });
-    GlobalVar(Source{{12, 34}}, "G", ty.Of(s), type::AddressSpace::kStorage,
+    GlobalVar(Source{{12, 34}}, "G", ty.Of(s), builtin::AddressSpace::kStorage,
               builtin::Access::kRead);
 
     EXPECT_FALSE(r()->Resolve());
@@ -1357,7 +1357,7 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByDifferentEntryPoints) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPointOnNonResource) {
-    GlobalVar(Source{{12, 34}}, "G", ty.f32(), type::AddressSpace::kPrivate, Binding(1_a),
+    GlobalVar(Source{{12, 34}}, "G", ty.f32(), builtin::AddressSpace::kPrivate, Binding(1_a),
               Group(2_a));
 
     EXPECT_FALSE(r()->Resolve());

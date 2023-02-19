@@ -34,12 +34,12 @@ using HlslGeneratorImplTest_Type = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
     auto arr = ty.array<bool, 4>();
-    ast::Type ty = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), type::AddressSpace::kUndefined,
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, "ary"))
         << gen.error();
     EXPECT_EQ(out.str(), "bool ary[4]");
@@ -47,12 +47,12 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
     auto arr = ty.array(ty.array<bool, 4>(), 5_u);
-    ast::Type ty = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), type::AddressSpace::kUndefined,
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, "ary"))
         << gen.error();
     EXPECT_EQ(out.str(), "bool ary[5][4]");
@@ -60,12 +60,12 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
     auto arr = ty.array(ty.array(ty.array<bool, 4>(), 5_u), 6_u);
-    ast::Type ty = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), type::AddressSpace::kUndefined,
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, "ary"))
         << gen.error();
     EXPECT_EQ(out.str(), "bool ary[6][5][4]");
@@ -73,12 +73,12 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
     auto arr = ty.array<bool, 4>();
-    ast::Type ty = GlobalVar("G", arr, type::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), type::AddressSpace::kUndefined,
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "bool[4]");
@@ -90,8 +90,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(
-        gen.EmitType(out, bool_, type::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, bool_, builtin::AddressSpace::kUndefined,
+                             builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "bool");
 }
@@ -103,7 +103,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_F16) {
 
     std::stringstream out;
     ASSERT_TRUE(
-        gen.EmitType(out, f16, type::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+        gen.EmitType(out, f16, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "float16_t");
 }
@@ -115,7 +115,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_F32) {
 
     std::stringstream out;
     ASSERT_TRUE(
-        gen.EmitType(out, f32, type::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+        gen.EmitType(out, f32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "float");
 }
@@ -127,7 +127,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_I32) {
 
     std::stringstream out;
     ASSERT_TRUE(
-        gen.EmitType(out, i32, type::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+        gen.EmitType(out, i32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "int");
 }
@@ -140,8 +140,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix_F16) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(
-        gen.EmitType(out, mat2x3, type::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, mat2x3, builtin::AddressSpace::kUndefined,
+                             builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "matrix<float16_t, 2, 3>");
 }
@@ -154,8 +154,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix_F32) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(
-        gen.EmitType(out, mat2x3, type::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, mat2x3, builtin::AddressSpace::kUndefined,
+                             builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "float2x3");
 }
@@ -165,7 +165,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), type::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -184,7 +184,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
               Binding(0_a), Group(0_a));
 
     GeneratorImpl& gen = Build();
@@ -198,14 +198,14 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), type::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
 
     GeneratorImpl& gen = Build();
 
     auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
     std::stringstream out;
-    ASSERT_TRUE(
-        gen.EmitType(out, sem_s, type::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, sem_s, builtin::AddressSpace::kUndefined,
+                             builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "S");
 }
@@ -215,7 +215,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
                                  Member("double", ty.i32()),
                                  Member("float", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), type::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -232,7 +232,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_WithOffsetAttributes) {
                                  Member("a", ty.i32(), utils::Vector{MemberOffset(0_a)}),
                                  Member("b", ty.f32(), utils::Vector{MemberOffset(8_a)}),
                              });
-    GlobalVar("g", ty.Of(s), type::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -253,7 +253,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_U32) {
 
     std::stringstream out;
     ASSERT_TRUE(
-        gen.EmitType(out, u32, type::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+        gen.EmitType(out, u32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "uint");
 }
@@ -266,7 +266,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Vector) {
 
     std::stringstream out;
     ASSERT_TRUE(
-        gen.EmitType(out, vec3, type::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+        gen.EmitType(out, vec3, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "float3");
 }
@@ -277,8 +277,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Void) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(
-        gen.EmitType(out, void_, type::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, void_, builtin::AddressSpace::kUndefined,
+                             builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "void");
 }
@@ -289,8 +289,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitSampler) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(
-        gen.EmitType(out, sampler, type::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, sampler, builtin::AddressSpace::kUndefined,
+                             builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "SamplerState");
 }
@@ -301,8 +301,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitSamplerComparison) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(
-        gen.EmitType(out, sampler, type::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, sampler, builtin::AddressSpace::kUndefined,
+                             builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "SamplerComparisonState");
 }
@@ -513,7 +513,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitMultisampledTexture) {
 
     std::stringstream out;
     ASSERT_TRUE(
-        gen.EmitType(out, s, type::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+        gen.EmitType(out, s, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "Texture2DMS<float4>");
 }

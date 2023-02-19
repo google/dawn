@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "gmock/gmock.h"
+#include "src/tint/builtin/address_space.h"
 #include "src/tint/resolver/dependency_graph.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/type/texture_dimension.h"
@@ -425,7 +426,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolDeclKind kind, Symbol symbol, Sourc
     auto& b = *builder;
     switch (kind) {
         case SymbolDeclKind::GlobalVar:
-            return b.GlobalVar(source, symbol, b.ty.i32(), type::AddressSpace::kPrivate);
+            return b.GlobalVar(source, symbol, b.ty.i32(), builtin::AddressSpace::kPrivate);
         case SymbolDeclKind::GlobalConst:
             return b.GlobalConst(source, symbol, b.ty.i32(), b.Expr(1_i));
         case SymbolDeclKind::Alias:
@@ -470,27 +471,27 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
     switch (kind) {
         case SymbolUseKind::GlobalVarType: {
             auto node = b.ty(source, symbol);
-            b.GlobalVar(b.Sym(), node, type::AddressSpace::kPrivate);
+            b.GlobalVar(b.Sym(), node, builtin::AddressSpace::kPrivate);
             return node->identifier;
         }
         case SymbolUseKind::GlobalVarArrayElemType: {
             auto node = b.ty(source, symbol);
-            b.GlobalVar(b.Sym(), b.ty.array(node, 4_i), type::AddressSpace::kPrivate);
+            b.GlobalVar(b.Sym(), b.ty.array(node, 4_i), builtin::AddressSpace::kPrivate);
             return node->identifier;
         }
         case SymbolUseKind::GlobalVarArraySizeValue: {
             auto* node = b.Expr(source, symbol);
-            b.GlobalVar(b.Sym(), b.ty.array(b.ty.i32(), node), type::AddressSpace::kPrivate);
+            b.GlobalVar(b.Sym(), b.ty.array(b.ty.i32(), node), builtin::AddressSpace::kPrivate);
             return node->identifier;
         }
         case SymbolUseKind::GlobalVarVectorElemType: {
             auto node = b.ty(source, symbol);
-            b.GlobalVar(b.Sym(), b.ty.vec3(node), type::AddressSpace::kPrivate);
+            b.GlobalVar(b.Sym(), b.ty.vec3(node), builtin::AddressSpace::kPrivate);
             return node->identifier;
         }
         case SymbolUseKind::GlobalVarMatrixElemType: {
             ast::Type node = b.ty(source, symbol);
-            b.GlobalVar(b.Sym(), b.ty.mat3x4(node), type::AddressSpace::kPrivate);
+            b.GlobalVar(b.Sym(), b.ty.mat3x4(node), builtin::AddressSpace::kPrivate);
             return node->identifier;
         }
         case SymbolUseKind::GlobalVarSampledTexElemType: {
@@ -505,7 +506,7 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
         }
         case SymbolUseKind::GlobalVarValue: {
             auto* node = b.Expr(source, symbol);
-            b.GlobalVar(b.Sym(), b.ty.i32(), type::AddressSpace::kPrivate, node);
+            b.GlobalVar(b.Sym(), b.ty.i32(), builtin::AddressSpace::kPrivate, node);
             return node->identifier;
         }
         case SymbolUseKind::GlobalConstType: {
@@ -726,7 +727,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, VarUsed) {
              Block(Assign(Expr(Source{{12, 34}}, "G"), 3.14_f)),
          });
 
-    GlobalVar(Source{{56, 78}}, "G", ty.f32(), type::AddressSpace::kPrivate, Expr(2.1_f));
+    GlobalVar(Source{{56, 78}}, "G", ty.f32(), builtin::AddressSpace::kPrivate, Expr(2.1_f));
 
     Build();
 }
@@ -1268,7 +1269,7 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinType, ShadowedByGlobalVar) {
     const auto symbol = Symbols().New(name);
 
     auto* decl =
-        GlobalVar(symbol, name == "i32" ? ty.u32() : ty.i32(), type::AddressSpace::kPrivate);
+        GlobalVar(symbol, name == "i32" ? ty.u32() : ty.i32(), builtin::AddressSpace::kPrivate);
 
     SymbolTestHelper helper(this);
     auto* ident = helper.Add(use, symbol);
@@ -1415,7 +1416,7 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 }  // namespace resolve_to_access
 
 ////////////////////////////////////////////////////////////////////////////////
-// Resolve to type::AddressSpace tests
+// Resolve to builtin::AddressSpace tests
 ////////////////////////////////////////////////////////////////////////////////
 namespace resolve_to_address_space {
 
@@ -1433,7 +1434,7 @@ TEST_P(ResolverDependencyGraphResolveToAddressSpace, Resolve) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->AddressSpace(), type::ParseAddressSpace(name))
+    EXPECT_EQ(resolved->AddressSpace(), builtin::ParseAddressSpace(name))
         << resolved->String(Symbols(), Diagnostics());
 }
 
@@ -1485,17 +1486,17 @@ TEST_P(ResolverDependencyGraphResolveToAddressSpace, ShadowedByFunc) {
 INSTANTIATE_TEST_SUITE_P(Types,
                          ResolverDependencyGraphResolveToAddressSpace,
                          testing::Combine(testing::ValuesIn(kTypeUseKinds),
-                                          testing::ValuesIn(type::kAddressSpaceStrings)));
+                                          testing::ValuesIn(builtin::kAddressSpaceStrings)));
 
 INSTANTIATE_TEST_SUITE_P(Values,
                          ResolverDependencyGraphResolveToAddressSpace,
                          testing::Combine(testing::ValuesIn(kValueUseKinds),
-                                          testing::ValuesIn(type::kAddressSpaceStrings)));
+                                          testing::ValuesIn(builtin::kAddressSpaceStrings)));
 
 INSTANTIATE_TEST_SUITE_P(Functions,
                          ResolverDependencyGraphResolveToAddressSpace,
                          testing::Combine(testing::ValuesIn(kFuncUseKinds),
-                                          testing::ValuesIn(type::kAddressSpaceStrings)));
+                                          testing::ValuesIn(builtin::kAddressSpaceStrings)));
 
 }  // namespace resolve_to_address_space
 
@@ -1649,7 +1650,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     const auto type_sym = Sym("TYPE");
     const auto func_sym = Sym("FUNC");
 
-    const auto* value_decl = GlobalVar(value_sym, ty.i32(), type::AddressSpace::kPrivate);
+    const auto* value_decl = GlobalVar(value_sym, ty.i32(), builtin::AddressSpace::kPrivate);
     const auto* type_decl = Alias(type_sym, ty.i32());
     const auto* func_decl = Func(func_sym, utils::Empty, ty.void_(), utils::Empty);
 
@@ -1728,7 +1729,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     GlobalVar(Sym(), ty.array(T, V));
     GlobalVar(Sym(), ty.vec3(T));
     GlobalVar(Sym(), ty.mat3x2(T));
-    GlobalVar(Sym(), ty.pointer(T, type::AddressSpace::kPrivate));
+    GlobalVar(Sym(), ty.pointer(T, builtin::AddressSpace::kPrivate));
     GlobalVar(Sym(), ty.sampled_texture(type::TextureDimension::k2d, T));
     GlobalVar(Sym(), ty.depth_texture(type::TextureDimension::k2d));
     GlobalVar(Sym(), ty.depth_multisampled_texture(type::TextureDimension::k2d));

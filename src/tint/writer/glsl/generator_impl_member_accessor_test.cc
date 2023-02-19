@@ -91,8 +91,8 @@ class GlslGeneratorImplTest_MemberAccessorBase : public BASE {
 
         auto* s = b.Structure("Data", members);
 
-        b.GlobalVar("data", b.ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
-                    b.Group(1_a), b.Binding(0_a));
+        b.GlobalVar("data", b.ty.Of(s), builtin::AddressSpace::kStorage,
+                    builtin::Access::kReadWrite, b.Group(1_a), b.Binding(0_a));
     }
 
     void SetupFunction(utils::VectorRef<const ast::Statement*> statements) {
@@ -112,7 +112,7 @@ using GlslGeneratorImplTest_MemberAccessorWithParam =
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
     auto* s = Structure("Data", utils::Vector{Member("mem", ty.f32())});
-    GlobalVar("str", ty.Of(s), type::AddressSpace::kPrivate);
+    GlobalVar("str", ty.Of(s), builtin::AddressSpace::kPrivate);
 
     auto* expr = MemberAccessor("str", "mem");
     WrapInFunction(Var("expr", ty.f32(), expr));

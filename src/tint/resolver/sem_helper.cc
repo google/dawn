@@ -79,7 +79,7 @@ void SemHelper::ErrorUnexpectedExprKind(const sem::Expression* expr,
                          std::string(wanted),
                      access->Declaration()->source);
         },
-        [&](const sem::BuiltinEnumExpression<type::AddressSpace>* addr) {
+        [&](const sem::BuiltinEnumExpression<builtin::AddressSpace>* addr) {
             AddError("cannot use address space '" + utils::ToString(addr->Value()) + "' as " +
                          std::string(wanted),
                      addr->Declaration()->source);

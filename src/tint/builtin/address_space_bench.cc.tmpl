@@ -14,16 +14,16 @@ See:
 {{- Import "src/tint/templates/enums.tmpl.inc" -}}
 {{- $enum := (Sem.Enum "address_space") -}}
 
-#include "src/tint/type/address_space.h"
+#include "src/tint/builtin/address_space.h"
 
 #include <array>
 
 #include "benchmark/benchmark.h"
 
-namespace tint::type {
+namespace tint::builtin {
 namespace {
 
 {{ Eval "BenchmarkParseEnum" $enum }}
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::builtin

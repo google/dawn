@@ -252,7 +252,7 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          testing::Values(HlslImportData{"clamp", "clamp"}));
 
 TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
-    GlobalVar("var", ty.mat3x3<f32>(), type::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat3x3<f32>(), builtin::AddressSpace::kPrivate);
 
     auto* expr = Call("determinant", "var");
     WrapInFunction(expr);
@@ -265,7 +265,7 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
 }
 
 TEST_F(HlslGeneratorImplTest_Import, HlslImportData_QuantizeToF16_Scalar) {
-    GlobalVar("v", Expr(2_f), type::AddressSpace::kPrivate);
+    GlobalVar("v", Expr(2_f), builtin::AddressSpace::kPrivate);
 
     auto* expr = Call("quantizeToF16", "v");
     WrapInFunction(expr);
@@ -278,7 +278,7 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_QuantizeToF16_Scalar) {
 }
 
 TEST_F(HlslGeneratorImplTest_Import, HlslImportData_QuantizeToF16_Vector) {
-    GlobalVar("v", vec3<f32>(2_f), type::AddressSpace::kPrivate);
+    GlobalVar("v", vec3<f32>(2_f), builtin::AddressSpace::kPrivate);
 
     auto* expr = Call("quantizeToF16", "v");
     WrapInFunction(expr);

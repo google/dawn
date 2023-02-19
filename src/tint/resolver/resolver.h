@@ -138,10 +138,11 @@ class Resolver {
     /// @returns the resolved type from an expression, or nullptr on error
     type::Type* Type(const ast::Expression* ast);
 
-    /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<type::AddressSpace>.
-    /// If the sem::Expression is not a sem::BuiltinEnumExpression<type::AddressSpace>, then an
-    /// error diagnostic is raised and nullptr is returned.
-    sem::BuiltinEnumExpression<type::AddressSpace>* AddressSpaceExpression(
+    /// @returns the call of Expression() cast to a
+    /// sem::BuiltinEnumExpression<builtin::AddressSpace>. If the sem::Expression is not a
+    /// sem::BuiltinEnumExpression<builtin::AddressSpace>, then an error diagnostic is raised and
+    /// nullptr is returned.
+    sem::BuiltinEnumExpression<builtin::AddressSpace>* AddressSpaceExpression(
         const ast::Expression* expr);
 
     /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<type::TexelFormat>.
@@ -401,11 +402,13 @@ class Resolver {
     /// given type and address space. Used for generating sensible error
     /// messages.
     /// @returns true on success, false on error
-    bool ApplyAddressSpaceUsageToType(type::AddressSpace sc, type::Type* ty, const Source& usage);
+    bool ApplyAddressSpaceUsageToType(builtin::AddressSpace sc,
+                                      type::Type* ty,
+                                      const Source& usage);
 
     /// @param address_space the address space
     /// @returns the default access control for the given address space
-    builtin::Access DefaultAccessForAddressSpace(type::AddressSpace address_space);
+    builtin::Access DefaultAccessForAddressSpace(builtin::AddressSpace address_space);
 
     /// Allocate constant IDs for pipeline-overridable constants.
     /// @returns true on success, false on error

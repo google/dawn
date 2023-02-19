@@ -51,7 +51,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, CompatibleTypesAssignThroughPoi
     // var a : i32;
     // let b : ptr<function,i32> = &a;
     // *b += 2;
-    const auto func = type::AddressSpace::kFunction;
+    const auto func = builtin::AddressSpace::kFunction;
     auto* var_a = Var("a", ty.i32(), func, Expr(2_i));
     auto* var_b = Let("b", ty.pointer<i32>(func), AddressOf(Expr("a")));
     WrapInFunction(var_a, var_b,
@@ -233,8 +233,8 @@ TEST_F(ResolverCompoundAssignmentValidationTest, ReadOnlyBuffer) {
     // {
     //   a += 1i;
     // }
-    GlobalVar(Source{{12, 34}}, "a", ty.i32(), type::AddressSpace::kStorage, builtin::Access::kRead,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{12, 34}}, "a", ty.i32(), builtin::AddressSpace::kStorage,
+              builtin::Access::kRead, Group(0_a), Binding(0_a));
     WrapInFunction(CompoundAssign(Source{{56, 78}}, "a", 1_i, ast::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
@@ -264,7 +264,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, LhsLiteral) {
 TEST_F(ResolverCompoundAssignmentValidationTest, LhsAtomic) {
     // var<workgroup> a : atomic<i32>;
     // a += a;
-    GlobalVar(Source{{12, 34}}, "a", ty.atomic(ty.i32()), type::AddressSpace::kWorkgroup);
+    GlobalVar(Source{{12, 34}}, "a", ty.atomic(ty.i32()), builtin::AddressSpace::kWorkgroup);
     WrapInFunction(CompoundAssign(Source{{56, 78}}, "a", "a", ast::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());

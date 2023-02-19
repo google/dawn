@@ -39,7 +39,7 @@ TEST_F(ResolverFunctionValidationTest, DuplicateParameterName) {
 TEST_F(ResolverFunctionValidationTest, ParameterMayShadowGlobal) {
     // var<private> common_name : f32;
     // fn func(common_name : f32) { }
-    GlobalVar("common_name", ty.f32(), type::AddressSpace::kPrivate);
+    GlobalVar("common_name", ty.f32(), builtin::AddressSpace::kPrivate);
     Func("func", utils::Vector{Param("common_name", ty.f32())}, ty.void_(), utils::Empty);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -420,7 +420,7 @@ TEST_F(ResolverFunctionValidationTest, CannotCallFunctionAtModuleScope) {
          utils::Vector{
              Return(1_i),
          });
-    GlobalVar("x", Call(Source{{12, 34}}, "F"), type::AddressSpace::kPrivate);
+    GlobalVar("x", Call(Source{{12, 34}}, "F"), builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: functions cannot be called at module-scope)");
@@ -874,7 +874,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
     // var<private> x = 64i;
     // @compute @workgroup_size(x)
     // fn main() {}
-    GlobalVar("x", ty.i32(), type::AddressSpace::kPrivate, Expr(64_i));
+    GlobalVar("x", ty.i32(), builtin::AddressSpace::kPrivate, Expr(64_i));
     Func("main", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
@@ -890,7 +890,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_x) {
     // @compute @workgroup_size(1 << 2 + 4)
     // fn main() {}
-    GlobalVar("x", ty.i32(), type::AddressSpace::kPrivate, Expr(0_i));
+    GlobalVar("x", ty.i32(), builtin::AddressSpace::kPrivate, Expr(0_i));
     Func("main", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
@@ -906,7 +906,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_x) {
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_y) {
     // @compute @workgroup_size(1, 1 << 2 + 4)
     // fn main() {}
-    GlobalVar("x", ty.i32(), type::AddressSpace::kPrivate, Expr(0_i));
+    GlobalVar("x", ty.i32(), builtin::AddressSpace::kPrivate, Expr(0_i));
     Func("main", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
@@ -922,7 +922,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_y) {
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_z) {
     // @compute @workgroup_size(1, 1, 1 << 2 + 4)
     // fn main() {}
-    GlobalVar("x", ty.i32(), type::AddressSpace::kPrivate, Expr(0_i));
+    GlobalVar("x", ty.i32(), builtin::AddressSpace::kPrivate, Expr(0_i));
     Func("main", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
@@ -936,7 +936,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_z) {
 }
 
 TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_NonPlain) {
-    auto ret_type = ty.pointer(Source{{12, 34}}, ty.i32(), type::AddressSpace::kFunction);
+    auto ret_type = ty.pointer(Source{{12, 34}}, ty.i32(), builtin::AddressSpace::kFunction);
     Func("f", utils::Empty, ret_type, utils::Empty);
 
     EXPECT_FALSE(r()->Resolve());
@@ -1049,7 +1049,7 @@ enum class Expectation {
     kInvalid,
 };
 struct TestParams {
-    type::AddressSpace address_space;
+    builtin::AddressSpace address_space;
     Expectation expectation;
 };
 
@@ -1102,16 +1102,18 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithExtension) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverFunctionParameterValidationTest,
-    testing::Values(
-        TestParams{type::AddressSpace::kUndefined, Expectation::kInvalid},
-        TestParams{type::AddressSpace::kIn, Expectation::kAlwaysFail},
-        TestParams{type::AddressSpace::kOut, Expectation::kAlwaysFail},
-        TestParams{type::AddressSpace::kUniform, Expectation::kPassWithFullPtrParameterExtension},
-        TestParams{type::AddressSpace::kWorkgroup, Expectation::kPassWithFullPtrParameterExtension},
-        TestParams{type::AddressSpace::kHandle, Expectation::kInvalid},
-        TestParams{type::AddressSpace::kStorage, Expectation::kPassWithFullPtrParameterExtension},
-        TestParams{type::AddressSpace::kPrivate, Expectation::kAlwaysPass},
-        TestParams{type::AddressSpace::kFunction, Expectation::kAlwaysPass}));
+    testing::Values(TestParams{builtin::AddressSpace::kUndefined, Expectation::kInvalid},
+                    TestParams{builtin::AddressSpace::kIn, Expectation::kAlwaysFail},
+                    TestParams{builtin::AddressSpace::kOut, Expectation::kAlwaysFail},
+                    TestParams{builtin::AddressSpace::kUniform,
+                               Expectation::kPassWithFullPtrParameterExtension},
+                    TestParams{builtin::AddressSpace::kWorkgroup,
+                               Expectation::kPassWithFullPtrParameterExtension},
+                    TestParams{builtin::AddressSpace::kHandle, Expectation::kInvalid},
+                    TestParams{builtin::AddressSpace::kStorage,
+                               Expectation::kPassWithFullPtrParameterExtension},
+                    TestParams{builtin::AddressSpace::kPrivate, Expectation::kAlwaysPass},
+                    TestParams{builtin::AddressSpace::kFunction, Expectation::kAlwaysPass}));
 
 }  // namespace
 }  // namespace tint::resolver

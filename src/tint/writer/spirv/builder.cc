@@ -506,8 +506,8 @@ bool Builder::GenerateEntryPoint(const ast::Function* func, uint32_t id) {
     for (const auto* var : func_sem->TransitivelyReferencedGlobals()) {
         // For SPIR-V 1.3 we only output Input/output variables. If we update to
         // SPIR-V 1.4 or later this should be all variables.
-        if (var->AddressSpace() != type::AddressSpace::kIn &&
-            var->AddressSpace() != type::AddressSpace::kOut) {
+        if (var->AddressSpace() != builtin::AddressSpace::kIn &&
+            var->AddressSpace() != builtin::AddressSpace::kOut) {
             continue;
         }
 
@@ -718,7 +718,7 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* v) {
 
     auto result = result_op();
     auto var_id = std::get<uint32_t>(result);
-    auto sc = type::AddressSpace::kFunction;
+    auto sc = builtin::AddressSpace::kFunction;
     auto* type = sem->Type();
     auto type_id = GenerateTypeIfNeeded(type);
     if (type_id == 0) {
@@ -778,8 +778,9 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
     auto result = result_op();
     auto var_id = std::get<uint32_t>(result);
 
-    auto sc = sem->AddressSpace() == type::AddressSpace::kUndefined ? type::AddressSpace::kPrivate
-                                                                    : sem->AddressSpace();
+    auto sc = sem->AddressSpace() == builtin::AddressSpace::kUndefined
+                  ? builtin::AddressSpace::kPrivate
+                  : sem->AddressSpace();
 
     auto type_id = GenerateTypeIfNeeded(sem->Type());
     if (type_id == 0) {
@@ -818,10 +819,10 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
             // If we're a Workgroup variable, and the
             // VK_KHR_zero_initialize_workgroup_memory extension is enabled, we should
             // also zero-initialize.
-            if (sem->AddressSpace() == type::AddressSpace::kPrivate ||
-                sem->AddressSpace() == type::AddressSpace::kOut ||
+            if (sem->AddressSpace() == builtin::AddressSpace::kPrivate ||
+                sem->AddressSpace() == builtin::AddressSpace::kOut ||
                 (zero_initialize_workgroup_memory_ &&
-                 sem->AddressSpace() == type::AddressSpace::kWorkgroup)) {
+                 sem->AddressSpace() == builtin::AddressSpace::kWorkgroup)) {
                 init_id = GenerateConstantNullIfNeeded(type);
                 if (init_id == 0) {
                     return 0;
@@ -1900,9 +1901,9 @@ uint32_t Builder::GenerateSplat(uint32_t scalar_id, const type::Type* vec_type) 
     // Create a new vector to splat scalar into
     auto splat_vector = result_op();
     auto* splat_vector_type = builder_.create<type::Pointer>(
-        vec_type, type::AddressSpace::kFunction, builtin::Access::kReadWrite);
+        vec_type, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
     push_function_var({Operand(GenerateTypeIfNeeded(splat_vector_type)), splat_vector,
-                       U32Operand(ConvertAddressSpace(type::AddressSpace::kFunction)),
+                       U32Operand(ConvertAddressSpace(builtin::AddressSpace::kFunction)),
                        Operand(GenerateConstantNullIfNeeded(vec_type))});
 
     // Splat scalar into vector
@@ -3069,11 +3070,11 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
 
     uint32_t memory_id = 0;
     switch (builtin->Parameters()[0]->Type()->As<type::Pointer>()->AddressSpace()) {
-        case type::AddressSpace::kWorkgroup:
+        case builtin::AddressSpace::kWorkgroup:
             memory_id = GenerateConstantIfNeeded(
                 ScalarConstant::U32(static_cast<uint32_t>(spv::Scope::Workgroup)));
             break;
-        case type::AddressSpace::kStorage:
+        case builtin::AddressSpace::kStorage:
             memory_id = GenerateConstantIfNeeded(
                 ScalarConstant::U32(static_cast<uint32_t>(spv::Scope::Device)));
             break;
@@ -3977,38 +3978,38 @@ bool Builder::GenerateVectorType(const type::Vector* vec, const Operand& result)
     return true;
 }
 
-SpvStorageClass Builder::ConvertAddressSpace(type::AddressSpace klass) const {
+SpvStorageClass Builder::ConvertAddressSpace(builtin::AddressSpace klass) const {
     switch (klass) {
-        case type::AddressSpace::kIn:
+        case builtin::AddressSpace::kIn:
             return SpvStorageClassInput;
-        case type::AddressSpace::kOut:
+        case builtin::AddressSpace::kOut:
             return SpvStorageClassOutput;
-        case type::AddressSpace::kUniform:
+        case builtin::AddressSpace::kUniform:
             return SpvStorageClassUniform;
-        case type::AddressSpace::kWorkgroup:
+        case builtin::AddressSpace::kWorkgroup:
             return SpvStorageClassWorkgroup;
-        case type::AddressSpace::kPushConstant:
+        case builtin::AddressSpace::kPushConstant:
             return SpvStorageClassPushConstant;
-        case type::AddressSpace::kHandle:
+        case builtin::AddressSpace::kHandle:
             return SpvStorageClassUniformConstant;
-        case type::AddressSpace::kStorage:
+        case builtin::AddressSpace::kStorage:
             return SpvStorageClassStorageBuffer;
-        case type::AddressSpace::kPrivate:
+        case builtin::AddressSpace::kPrivate:
             return SpvStorageClassPrivate;
-        case type::AddressSpace::kFunction:
+        case builtin::AddressSpace::kFunction:
             return SpvStorageClassFunction;
-        case type::AddressSpace::kUndefined:
+        case builtin::AddressSpace::kUndefined:
             break;
     }
     return SpvStorageClassMax;
 }
 
-SpvBuiltIn Builder::ConvertBuiltin(builtin::BuiltinValue builtin, type::AddressSpace storage) {
+SpvBuiltIn Builder::ConvertBuiltin(builtin::BuiltinValue builtin, builtin::AddressSpace storage) {
     switch (builtin) {
         case builtin::BuiltinValue::kPosition:
-            if (storage == type::AddressSpace::kIn) {
+            if (storage == builtin::AddressSpace::kIn) {
                 return SpvBuiltInFragCoord;
-            } else if (TINT_LIKELY(storage == type::AddressSpace::kOut)) {
+            } else if (TINT_LIKELY(storage == builtin::AddressSpace::kOut)) {
                 return SpvBuiltInPosition;
             } else {
                 TINT_ICE(Writer, builder_.Diagnostics()) << "invalid address space for builtin";

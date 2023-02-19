@@ -137,7 +137,8 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         auto* scalar_cast_target = b->create<sem::TypeConversion>(
             packed_el_sem_ty,
             b->create<sem::Parameter>(nullptr, 0u, scalar_sem->Type()->UnwrapRef(),
-                                      type::AddressSpace::kUndefined, builtin::Access::kUndefined),
+                                      builtin::AddressSpace::kUndefined,
+                                      builtin::Access::kUndefined),
             sem::EvaluationStage::kRuntime);
         auto* scalar_cast_sem = b->create<sem::Call>(
             scalar_cast_ast, scalar_cast_target, sem::EvaluationStage::kRuntime,
@@ -160,7 +161,7 @@ const sem::Call* AppendVector(ProgramBuilder* b,
             [&](const tint::sem::ValueExpression* arg, size_t i) -> const sem::Parameter* {
                 return b->create<sem::Parameter>(
                     nullptr, static_cast<uint32_t>(i), arg->Type()->UnwrapRef(),
-                    type::AddressSpace::kUndefined, builtin::Access::kUndefined);
+                    builtin::AddressSpace::kUndefined, builtin::Access::kUndefined);
             }),
         sem::EvaluationStage::kRuntime);
     auto* initializer_sem =

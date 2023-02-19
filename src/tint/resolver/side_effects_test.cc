@@ -15,6 +15,7 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gtest/gtest.h"
+#include "src/tint/builtin/address_space.h"
 #include "src/tint/builtin/extension.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/index_accessor_expression.h"
@@ -32,7 +33,7 @@ struct SideEffectsTest : ResolverTest {
     template <typename T>
     void MakeSideEffectFunc(const char* name) {
         auto global = Sym();
-        GlobalVar(global, ty.Of<T>(), type::AddressSpace::kPrivate);
+        GlobalVar(global, ty.Of<T>(), builtin::AddressSpace::kPrivate);
         auto local = Sym();
         Func(name, utils::Empty, ty.Of<T>(),
              utils::Vector{
@@ -45,7 +46,7 @@ struct SideEffectsTest : ResolverTest {
     template <typename MAKE_TYPE_FUNC>
     void MakeSideEffectFunc(const char* name, MAKE_TYPE_FUNC make_type) {
         auto global = Sym();
-        GlobalVar(global, make_type(), type::AddressSpace::kPrivate);
+        GlobalVar(global, make_type(), builtin::AddressSpace::kPrivate);
         auto local = Sym();
         Func(name, utils::Empty, make_type(),
              utils::Vector{
@@ -90,7 +91,7 @@ TEST_F(SideEffectsTest, VariableUser) {
 }
 
 TEST_F(SideEffectsTest, Call_Builtin_NoSE) {
-    GlobalVar("a", ty.f32(), type::AddressSpace::kPrivate);
+    GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate);
     auto* expr = Call("dpdx", "a");
     Func("f", utils::Empty, ty.void_(), utils::Vector{Ignore(expr)},
          utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
@@ -116,7 +117,7 @@ TEST_F(SideEffectsTest, Call_Builtin_NoSE_WithSEArg) {
 }
 
 TEST_F(SideEffectsTest, Call_Builtin_SE) {
-    GlobalVar("a", ty.atomic(ty.i32()), type::AddressSpace::kWorkgroup);
+    GlobalVar("a", ty.atomic(ty.i32()), builtin::AddressSpace::kWorkgroup);
     auto* expr = Call("atomicAdd", AddressOf("a"), 1_i);
     WrapInFunction(expr);
 
@@ -165,21 +166,21 @@ TEST_P(SideEffectsBuiltinTest, Test) {
     auto& c = GetParam();
 
     uint32_t next_binding = 0;
-    GlobalVar("f", ty.f32(), type::AddressSpace::kPrivate);
-    GlobalVar("i", ty.i32(), type::AddressSpace::kPrivate);
-    GlobalVar("u", ty.u32(), type::AddressSpace::kPrivate);
-    GlobalVar("b", ty.bool_(), type::AddressSpace::kPrivate);
-    GlobalVar("vf", ty.vec3<f32>(), type::AddressSpace::kPrivate);
-    GlobalVar("vf2", ty.vec2<f32>(), type::AddressSpace::kPrivate);
-    GlobalVar("vi2", ty.vec2<i32>(), type::AddressSpace::kPrivate);
-    GlobalVar("vf4", ty.vec4<f32>(), type::AddressSpace::kPrivate);
-    GlobalVar("vb", ty.vec3<bool>(), type::AddressSpace::kPrivate);
-    GlobalVar("m", ty.mat3x3<f32>(), type::AddressSpace::kPrivate);
-    GlobalVar("arr", ty.array<f32, 10>(), type::AddressSpace::kPrivate);
-    GlobalVar("storage_arr", ty.array<f32>(), type::AddressSpace::kStorage, Group(0_a),
+    GlobalVar("f", ty.f32(), tint::builtin::AddressSpace::kPrivate);
+    GlobalVar("i", ty.i32(), tint::builtin::AddressSpace::kPrivate);
+    GlobalVar("u", ty.u32(), tint::builtin::AddressSpace::kPrivate);
+    GlobalVar("b", ty.bool_(), tint::builtin::AddressSpace::kPrivate);
+    GlobalVar("vf", ty.vec3<f32>(), tint::builtin::AddressSpace::kPrivate);
+    GlobalVar("vf2", ty.vec2<f32>(), tint::builtin::AddressSpace::kPrivate);
+    GlobalVar("vi2", ty.vec2<i32>(), tint::builtin::AddressSpace::kPrivate);
+    GlobalVar("vf4", ty.vec4<f32>(), tint::builtin::AddressSpace::kPrivate);
+    GlobalVar("vb", ty.vec3<bool>(), tint::builtin::AddressSpace::kPrivate);
+    GlobalVar("m", ty.mat3x3<f32>(), tint::builtin::AddressSpace::kPrivate);
+    GlobalVar("arr", ty.array<f32, 10>(), tint::builtin::AddressSpace::kPrivate);
+    GlobalVar("storage_arr", ty.array<f32>(), tint::builtin::AddressSpace::kStorage, Group(0_a),
               Binding(AInt(next_binding++)));
-    GlobalVar("workgroup_arr", ty.array<f32, 4>(), type::AddressSpace::kWorkgroup);
-    GlobalVar("a", ty.atomic(ty.i32()), type::AddressSpace::kStorage,
+    GlobalVar("workgroup_arr", ty.array<f32, 4>(), tint::builtin::AddressSpace::kWorkgroup);
+    GlobalVar("a", ty.atomic(ty.i32()), tint::builtin::AddressSpace::kStorage,
               tint::builtin::Access::kReadWrite, Group(0_a), Binding(AInt(next_binding++)));
     if (c.pipeline_stage != ast::PipelineStage::kCompute) {
         GlobalVar("t2d", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Group(0_a),

@@ -53,7 +53,8 @@ struct PreservePadding::State {
                         // Ignore phony assignment.
                         return;
                     }
-                    if (ty->As<type::Reference>()->AddressSpace() != type::AddressSpace::kStorage) {
+                    if (ty->As<type::Reference>()->AddressSpace() !=
+                        builtin::AddressSpace::kStorage) {
                         // We only care about assignments that write to variables in the storage
                         // address space, as nothing else is host-visible.
                         return;
@@ -120,7 +121,7 @@ struct PreservePadding::State {
                 auto helper_name = b.Symbols().New("assign_and_preserve_padding");
                 utils::Vector<const ast::Parameter*, 2> params = {
                     b.Param(kDestParamName,
-                            b.ty.pointer(CreateASTTypeFor(ctx, ty), type::AddressSpace::kStorage,
+                            b.ty.pointer(CreateASTTypeFor(ctx, ty), builtin::AddressSpace::kStorage,
                                          builtin::Access::kReadWrite)),
                     b.Param(kValueParamName, CreateASTTypeFor(ctx, ty)),
                 };

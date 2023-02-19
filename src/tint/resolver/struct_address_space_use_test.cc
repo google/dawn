@@ -46,7 +46,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableFromParameter) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kUndefined));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kUndefined));
 }
 
 TEST_F(ResolverAddressSpaceUseTest, StructReachableFromReturnType) {
@@ -58,55 +58,55 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableFromReturnType) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kUndefined));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kUndefined));
 }
 
 TEST_F(ResolverAddressSpaceUseTest, StructReachableFromGlobal) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
 
-    GlobalVar("g", ty.Of(s), type::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kPrivate));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kPrivate));
 }
 
 TEST_F(ResolverAddressSpaceUseTest, StructReachableViaGlobalAlias) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
     auto* a = Alias("A", ty.Of(s));
-    GlobalVar("g", ty.Of(a), type::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(a), builtin::AddressSpace::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kPrivate));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kPrivate));
 }
 
 TEST_F(ResolverAddressSpaceUseTest, StructReachableViaGlobalStruct) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
     auto* o = Structure("O", utils::Vector{Member("a", ty.Of(s))});
-    GlobalVar("g", ty.Of(o), type::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(o), builtin::AddressSpace::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kPrivate));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kPrivate));
 }
 
 TEST_F(ResolverAddressSpaceUseTest, StructReachableViaGlobalArray) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
     auto a = ty.array(ty.Of(s), 3_u);
-    GlobalVar("g", a, type::AddressSpace::kPrivate);
+    GlobalVar("g", a, builtin::AddressSpace::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kPrivate));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kPrivate));
 }
 
 TEST_F(ResolverAddressSpaceUseTest, StructReachableFromLocal) {
@@ -118,7 +118,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableFromLocal) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kFunction));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kFunction));
 }
 
 TEST_F(ResolverAddressSpaceUseTest, StructReachableViaLocalAlias) {
@@ -130,7 +130,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableViaLocalAlias) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kFunction));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kFunction));
 }
 
 TEST_F(ResolverAddressSpaceUseTest, StructReachableViaLocalStruct) {
@@ -142,7 +142,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableViaLocalStruct) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kFunction));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kFunction));
 }
 
 TEST_F(ResolverAddressSpaceUseTest, StructReachableViaLocalArray) {
@@ -154,13 +154,13 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableViaLocalArray) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(type::AddressSpace::kFunction));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kFunction));
 }
 
 TEST_F(ResolverAddressSpaceUseTest, StructMultipleAddressSpaceUses) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
-    GlobalVar("x", ty.Of(s), type::AddressSpace::kUniform, Binding(0_a), Group(0_a));
-    GlobalVar("y", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
+    GlobalVar("x", ty.Of(s), builtin::AddressSpace::kUniform, Binding(0_a), Group(0_a));
+    GlobalVar("y", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
               Group(0_a));
     WrapInFunction(Var("g", ty.Of(s)));
 
@@ -168,9 +168,9 @@ TEST_F(ResolverAddressSpaceUseTest, StructMultipleAddressSpaceUses) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->AddressSpaceUsage(),
-                UnorderedElementsAre(type::AddressSpace::kUniform, type::AddressSpace::kStorage,
-                                     type::AddressSpace::kFunction));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kUniform,
+                                                               builtin::AddressSpace::kStorage,
+                                                               builtin::AddressSpace::kFunction));
 }
 
 }  // namespace

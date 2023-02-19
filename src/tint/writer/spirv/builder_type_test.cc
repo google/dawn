@@ -29,8 +29,8 @@ using BuilderTest_Type = TestHelper;
 TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
     auto ary = ty.array(ty.i32());
     auto* str = Structure("S", utils::Vector{Member("x", ary)});
-    GlobalVar("a", ty.Of(str), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(0_a),
-              Group(0_a));
+    GlobalVar("a", ty.Of(str), builtin::AddressSpace::kStorage, builtin::Access::kRead,
+              Binding(0_a), Group(0_a));
     ast::Type type = str->members[0]->type;
 
     spirv::Builder& b = Build();
@@ -47,8 +47,8 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
 TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
     auto ary = ty.array(ty.i32());
     auto* str = Structure("S", utils::Vector{Member("x", ary)});
-    GlobalVar("a", ty.Of(str), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(0_a),
-              Group(0_a));
+    GlobalVar("a", ty.Of(str), builtin::AddressSpace::kStorage, builtin::Access::kRead,
+              Binding(0_a), Group(0_a));
     ast::Type type = str->members[0]->type;
 
     spirv::Builder& b = Build();
@@ -64,7 +64,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
 
 TEST_F(BuilderTest_Type, GenerateArray) {
     auto ary = ty.array<i32, 4>();
-    ast::Type type = GlobalVar("a", ary, type::AddressSpace::kPrivate)->type;
+    ast::Type type = GlobalVar("a", ary, builtin::AddressSpace::kPrivate)->type;
 
     spirv::Builder& b = Build();
 
@@ -81,7 +81,7 @@ TEST_F(BuilderTest_Type, GenerateArray) {
 
 TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
     auto ary = ty.array<i32, 4>(utils::Vector{Stride(16)});
-    ast::Type ty = GlobalVar("a", ary, type::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("a", ary, builtin::AddressSpace::kPrivate)->type;
 
     spirv::Builder& b = Build();
 
@@ -101,7 +101,7 @@ TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
     auto ary = ty.array<i32, 4>();
-    ast::Type ty = GlobalVar("a", ary, type::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("a", ary, builtin::AddressSpace::kPrivate)->type;
 
     spirv::Builder& b = Build();
 
@@ -296,7 +296,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedF16Matrix) {
 
 TEST_F(BuilderTest_Type, GeneratePtr) {
     auto* i32 = create<type::I32>();
-    auto* ptr = create<type::Pointer>(i32, type::AddressSpace::kOut, builtin::Access::kReadWrite);
+    auto* ptr =
+        create<type::Pointer>(i32, builtin::AddressSpace::kOut, builtin::Access::kReadWrite);
 
     spirv::Builder& b = Build();
 
@@ -311,7 +312,8 @@ TEST_F(BuilderTest_Type, GeneratePtr) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
     auto* i32 = create<type::I32>();
-    auto* ptr = create<type::Pointer>(i32, type::AddressSpace::kOut, builtin::Access::kReadWrite);
+    auto* ptr =
+        create<type::Pointer>(i32, builtin::AddressSpace::kOut, builtin::Access::kReadWrite);
 
     spirv::Builder& b = Build();
 
@@ -605,7 +607,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedVoid) {
 }
 
 struct PtrData {
-    type::AddressSpace ast_class;
+    builtin::AddressSpace ast_class;
     SpvStorageClass result;
 };
 inline std::ostream& operator<<(std::ostream& out, PtrData data) {
@@ -623,15 +625,15 @@ TEST_P(PtrDataTest, ConvertAddressSpace) {
 INSTANTIATE_TEST_SUITE_P(
     BuilderTest_Type,
     PtrDataTest,
-    testing::Values(PtrData{type::AddressSpace::kUndefined, SpvStorageClassMax},
-                    PtrData{type::AddressSpace::kIn, SpvStorageClassInput},
-                    PtrData{type::AddressSpace::kOut, SpvStorageClassOutput},
-                    PtrData{type::AddressSpace::kUniform, SpvStorageClassUniform},
-                    PtrData{type::AddressSpace::kWorkgroup, SpvStorageClassWorkgroup},
-                    PtrData{type::AddressSpace::kHandle, SpvStorageClassUniformConstant},
-                    PtrData{type::AddressSpace::kStorage, SpvStorageClassStorageBuffer},
-                    PtrData{type::AddressSpace::kPrivate, SpvStorageClassPrivate},
-                    PtrData{type::AddressSpace::kFunction, SpvStorageClassFunction}));
+    testing::Values(PtrData{builtin::AddressSpace::kUndefined, SpvStorageClassMax},
+                    PtrData{builtin::AddressSpace::kIn, SpvStorageClassInput},
+                    PtrData{builtin::AddressSpace::kOut, SpvStorageClassOutput},
+                    PtrData{builtin::AddressSpace::kUniform, SpvStorageClassUniform},
+                    PtrData{builtin::AddressSpace::kWorkgroup, SpvStorageClassWorkgroup},
+                    PtrData{builtin::AddressSpace::kHandle, SpvStorageClassUniformConstant},
+                    PtrData{builtin::AddressSpace::kStorage, SpvStorageClassStorageBuffer},
+                    PtrData{builtin::AddressSpace::kPrivate, SpvStorageClassPrivate},
+                    PtrData{builtin::AddressSpace::kFunction, SpvStorageClassFunction}));
 
 TEST_F(BuilderTest_Type, DepthTexture_Generate_2d) {
     auto* two_d = create<type::DepthTexture>(type::TextureDimension::k2d);

@@ -38,30 +38,30 @@ ast::PipelineStage EnumConverter::ToPipelineStage(spv::ExecutionModel model) {
     return ast::PipelineStage::kNone;
 }
 
-type::AddressSpace EnumConverter::ToAddressSpace(const spv::StorageClass sc) {
+builtin::AddressSpace EnumConverter::ToAddressSpace(const spv::StorageClass sc) {
     switch (sc) {
         case spv::StorageClass::Input:
-            return type::AddressSpace::kIn;
+            return builtin::AddressSpace::kIn;
         case spv::StorageClass::Output:
-            return type::AddressSpace::kOut;
+            return builtin::AddressSpace::kOut;
         case spv::StorageClass::Uniform:
-            return type::AddressSpace::kUniform;
+            return builtin::AddressSpace::kUniform;
         case spv::StorageClass::Workgroup:
-            return type::AddressSpace::kWorkgroup;
+            return builtin::AddressSpace::kWorkgroup;
         case spv::StorageClass::UniformConstant:
-            return type::AddressSpace::kUndefined;
+            return builtin::AddressSpace::kUndefined;
         case spv::StorageClass::StorageBuffer:
-            return type::AddressSpace::kStorage;
+            return builtin::AddressSpace::kStorage;
         case spv::StorageClass::Private:
-            return type::AddressSpace::kPrivate;
+            return builtin::AddressSpace::kPrivate;
         case spv::StorageClass::Function:
-            return type::AddressSpace::kFunction;
+            return builtin::AddressSpace::kFunction;
         default:
             break;
     }
 
     Fail() << "unknown SPIR-V storage class: " << uint32_t(sc);
-    return type::AddressSpace::kUndefined;
+    return builtin::AddressSpace::kUndefined;
 }
 
 builtin::BuiltinValue EnumConverter::ToBuiltin(spv::BuiltIn b) {

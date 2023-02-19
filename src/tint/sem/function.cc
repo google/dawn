@@ -69,7 +69,7 @@ Function::VariableBindings Function::TransitivelyReferencedUniformVariables() co
     VariableBindings ret;
 
     for (auto* global : TransitivelyReferencedGlobals()) {
-        if (global->AddressSpace() != type::AddressSpace::kUniform) {
+        if (global->AddressSpace() != builtin::AddressSpace::kUniform) {
             continue;
         }
 
@@ -84,7 +84,7 @@ Function::VariableBindings Function::TransitivelyReferencedStorageBufferVariable
     VariableBindings ret;
 
     for (auto* global : TransitivelyReferencedGlobals()) {
-        if (global->AddressSpace() != type::AddressSpace::kStorage) {
+        if (global->AddressSpace() != builtin::AddressSpace::kStorage) {
             continue;
         }
 

@@ -29,14 +29,14 @@ TEST_F(ResolverF16ExtensionTest, TypeUsedWithExtension) {
     // var<private> v : f16;
     Enable(builtin::Extension::kF16);
 
-    GlobalVar("v", ty.f16(), type::AddressSpace::kPrivate);
+    GlobalVar("v", ty.f16(), builtin::AddressSpace::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverF16ExtensionTest, TypeUsedWithoutExtension) {
     // var<private> v : f16;
-    GlobalVar("v", ty.f16(Source{{12, 34}}), type::AddressSpace::kPrivate);
+    GlobalVar("v", ty.f16(Source{{12, 34}}), builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: f16 type used without 'f16' extension enabled");
@@ -47,14 +47,14 @@ TEST_F(ResolverF16ExtensionTest, Vec2TypeUsedWithExtension) {
     // var<private> v : vec2<f16>;
     Enable(builtin::Extension::kF16);
 
-    GlobalVar("v", ty.vec2<f16>(), type::AddressSpace::kPrivate);
+    GlobalVar("v", ty.vec2<f16>(), builtin::AddressSpace::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverF16ExtensionTest, Vec2TypeUsedWithoutExtension) {
     // var<private> v : vec2<f16>;
-    GlobalVar("v", ty.vec2(ty.f16(Source{{12, 34}})), type::AddressSpace::kPrivate);
+    GlobalVar("v", ty.vec2(ty.f16(Source{{12, 34}})), builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: f16 type used without 'f16' extension enabled");
@@ -65,14 +65,14 @@ TEST_F(ResolverF16ExtensionTest, Vec2TypeInitUsedWithExtension) {
     // var<private> v = vec2<f16>();
     Enable(builtin::Extension::kF16);
 
-    GlobalVar("v", vec2<f16>(), type::AddressSpace::kPrivate);
+    GlobalVar("v", vec2<f16>(), builtin::AddressSpace::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverF16ExtensionTest, Vec2TypeInitUsedWithoutExtension) {
     // var<private> v = vec2<f16>();
-    GlobalVar("v", Call(ty.vec2(ty.f16(Source{{12, 34}}))), type::AddressSpace::kPrivate);
+    GlobalVar("v", Call(ty.vec2(ty.f16(Source{{12, 34}}))), builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: f16 type used without 'f16' extension enabled");
@@ -83,14 +83,14 @@ TEST_F(ResolverF16ExtensionTest, Vec2TypeConvUsedWithExtension) {
     // var<private> v = vec2<f16>(vec2<f32>());
     Enable(builtin::Extension::kF16);
 
-    GlobalVar("v", vec2<f16>(vec2<f32>()), type::AddressSpace::kPrivate);
+    GlobalVar("v", vec2<f16>(vec2<f32>()), builtin::AddressSpace::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverF16ExtensionTest, Vec2TypeConvUsedWithoutExtension) {
     // var<private> v = vec2<f16>(vec2<f32>());
-    GlobalVar("v", vec2(ty.f16(Source{{12, 34}}), vec2<f32>()), type::AddressSpace::kPrivate);
+    GlobalVar("v", vec2(ty.f16(Source{{12, 34}}), vec2<f32>()), builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: f16 type used without 'f16' extension enabled");
@@ -101,14 +101,14 @@ TEST_F(ResolverF16ExtensionTest, F16LiteralUsedWithExtension) {
     // var<private> v = 16h;
     Enable(builtin::Extension::kF16);
 
-    GlobalVar("v", Expr(16_h), type::AddressSpace::kPrivate);
+    GlobalVar("v", Expr(16_h), builtin::AddressSpace::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverF16ExtensionTest, F16LiteralUsedWithoutExtension) {
     // var<private> v = 16h;
-    GlobalVar("v", Expr(Source{{12, 34}}, 16_h), type::AddressSpace::kPrivate);
+    GlobalVar("v", Expr(Source{{12, 34}}, 16_h), builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: f16 type used without 'f16' extension enabled");
@@ -121,14 +121,14 @@ TEST_P(ResolverF16ExtensionBuiltinTypeAliasTest, Vec2hTypeUsedWithExtension) {
     // var<private> v : vec2h;
     Enable(builtin::Extension::kF16);
 
-    GlobalVar("v", ty(Source{{12, 34}}, GetParam()), type::AddressSpace::kPrivate);
+    GlobalVar("v", ty(Source{{12, 34}}, GetParam()), builtin::AddressSpace::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_P(ResolverF16ExtensionBuiltinTypeAliasTest, Vec2hTypeUsedWithoutExtension) {
     // var<private> v : vec2h;
-    GlobalVar("v", ty(Source{{12, 34}}, GetParam()), type::AddressSpace::kPrivate);
+    GlobalVar("v", ty(Source{{12, 34}}, GetParam()), builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: f16 type used without 'f16' extension enabled");

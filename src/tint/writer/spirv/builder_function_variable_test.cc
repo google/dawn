@@ -23,7 +23,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, FunctionVar_NoAddressSpace) {
-    auto* v = Var("var", ty.f32(), type::AddressSpace::kFunction);
+    auto* v = Var("var", ty.f32(), builtin::AddressSpace::kFunction);
     WrapInFunction(v);
 
     spirv::Builder& b = Build();
@@ -45,7 +45,7 @@ TEST_F(BuilderTest, FunctionVar_NoAddressSpace) {
 
 TEST_F(BuilderTest, FunctionVar_WithConstantInitializer) {
     auto* init = vec3<f32>(1_f, 1_f, 3_f);
-    auto* v = Var("var", ty.vec3<f32>(), type::AddressSpace::kFunction, init);
+    auto* v = Var("var", ty.vec3<f32>(), builtin::AddressSpace::kFunction, init);
     WrapInFunction(v);
 
     spirv::Builder& b = Build();

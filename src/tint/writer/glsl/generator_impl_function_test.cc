@@ -110,8 +110,8 @@ TEST_F(GlslGeneratorImplTest_Function, PtrParameter) {
     // fn f(foo : ptr<function, f32>) -> f32 {
     //   return *foo;
     // }
-    Func("f", utils::Vector{Param("foo", ty.pointer<f32>(type::AddressSpace::kFunction))}, ty.f32(),
-         utils::Vector{Return(Deref("foo"))});
+    Func("f", utils::Vector{Param("foo", ty.pointer<f32>(builtin::AddressSpace::kFunction))},
+         ty.f32(), utils::Vector{Return(Deref("foo"))});
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -352,7 +352,7 @@ tint_symbol_2 vert_main2() {
 TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_Uniform) {
     auto* ubo_ty = Structure("UBO", utils::Vector{Member("coord", ty.vec4<f32>())});
     auto* ubo =
-        GlobalVar("ubo", ty.Of(ubo_ty), type::AddressSpace::kUniform, Binding(0_a), Group(1_a));
+        GlobalVar("ubo", ty.Of(ubo_ty), builtin::AddressSpace::kUniform, Binding(0_a), Group(1_a));
 
     Func("sub_func",
          utils::Vector{
@@ -402,7 +402,7 @@ void frag_main() {
 TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_UniformStruct) {
     auto* s = Structure("Uniforms", utils::Vector{Member("coord", ty.vec4<f32>())});
 
-    GlobalVar("uniforms", ty.Of(s), type::AddressSpace::kUniform, Binding(0_a), Group(1_a));
+    GlobalVar("uniforms", ty.Of(s), builtin::AddressSpace::kUniform, Binding(0_a), Group(1_a));
 
     auto* var = Var("v", ty.f32(), MemberAccessor(MemberAccessor("uniforms", "coord"), "x"));
 
@@ -442,7 +442,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RW_Storage
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
               Binding(0_a), Group(1_a));
 
     auto* var = Var("v", ty.f32(), MemberAccessor("coord", "b"));
@@ -489,8 +489,8 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RO_Storage
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kRead, Binding(0_a),
-              Group(1_a));
+    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead,
+              Binding(0_a), Group(1_a));
 
     auto* var = Var("v", ty.f32(), MemberAccessor("coord", "b"));
 
@@ -537,7 +537,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_WO_Storage
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
               Binding(0_a), Group(1_a));
 
     Func("frag_main", utils::Empty, ty.void_(),
@@ -582,7 +582,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_StorageBuf
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
               Binding(0_a), Group(1_a));
 
     Func("frag_main", utils::Empty, ty.void_(),
@@ -623,7 +623,7 @@ void main() {
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_Uniform) {
     auto* s = Structure("S", utils::Vector{Member("x", ty.f32())});
-    GlobalVar("coord", ty.Of(s), type::AddressSpace::kUniform, Binding(0_a), Group(1_a));
+    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kUniform, Binding(0_a), Group(1_a));
 
     Func("sub_func", utils::Vector{Param("param", ty.f32())}, ty.f32(),
          utils::Vector{
@@ -668,7 +668,7 @@ void frag_main() {
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_StorageBuffer) {
     auto* s = Structure("S", utils::Vector{Member("x", ty.f32())});
-    GlobalVar("coord", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
               Binding(0_a), Group(1_a));
 
     Func("sub_func", utils::Vector{Param("param", ty.f32())}, ty.f32(),
@@ -879,7 +879,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Multiple_EntryPoint_With_Same_Module
 
     auto* s = Structure("Data", utils::Vector{Member("d", ty.f32())});
 
-    GlobalVar("data", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("data", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
               Binding(0_a), Group(0_a));
 
     {

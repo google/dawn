@@ -50,7 +50,7 @@ struct AccessRoot {
     /// function-scope variable ('function'), or pointer parameter in the source program.
     tint::sem::Variable const* variable = nullptr;
     /// The address space of the variable or pointer type.
-    tint::type::AddressSpace address_space = tint::type::AddressSpace::kUndefined;
+    tint::builtin::AddressSpace address_space = tint::builtin::AddressSpace::kUndefined;
 };
 
 /// Inequality operator for AccessRoot
@@ -450,7 +450,7 @@ struct DirectVariableAccess::State {
                 Switch(
                     variable->Declaration(),
                     [&](const ast::Var*) {
-                        if (variable->AddressSpace() != type::AddressSpace::kHandle) {
+                        if (variable->AddressSpace() != builtin::AddressSpace::kHandle) {
                             // Start a new access chain for the non-handle 'var' access
                             create_new_chain();
                         }
@@ -749,15 +749,15 @@ struct DirectVariableAccess::State {
 
     /// @returns true if the address space @p address_space requires transforming given the
     /// transform's options.
-    bool AddressSpaceRequiresTransform(type::AddressSpace address_space) const {
+    bool AddressSpaceRequiresTransform(builtin::AddressSpace address_space) const {
         switch (address_space) {
-            case type::AddressSpace::kUniform:
-            case type::AddressSpace::kStorage:
-            case type::AddressSpace::kWorkgroup:
+            case builtin::AddressSpace::kUniform:
+            case builtin::AddressSpace::kStorage:
+            case builtin::AddressSpace::kWorkgroup:
                 return true;
-            case type::AddressSpace::kPrivate:
+            case builtin::AddressSpace::kPrivate:
                 return opts.transform_private;
-            case type::AddressSpace::kFunction:
+            case builtin::AddressSpace::kFunction:
                 return opts.transform_function;
             default:
                 return false;
@@ -1180,9 +1180,9 @@ struct DirectVariableAccess::State {
         for (auto* param : fn->Parameters()) {
             if (auto* ptr = param->Type()->As<type::Pointer>()) {
                 switch (ptr->AddressSpace()) {
-                    case type::AddressSpace::kUniform:
-                    case type::AddressSpace::kStorage:
-                    case type::AddressSpace::kWorkgroup:
+                    case builtin::AddressSpace::kUniform:
+                    case builtin::AddressSpace::kStorage:
+                    case builtin::AddressSpace::kWorkgroup:
                         return true;
                     default:
                         return false;
@@ -1193,8 +1193,8 @@ struct DirectVariableAccess::State {
     }
 
     /// @returns true if the given address space is 'private' or 'function'.
-    static bool IsPrivateOrFunction(const type::AddressSpace sc) {
-        return sc == type::AddressSpace::kPrivate || sc == type::AddressSpace::kFunction;
+    static bool IsPrivateOrFunction(const builtin::AddressSpace sc) {
+        return sc == builtin::AddressSpace::kPrivate || sc == builtin::AddressSpace::kFunction;
     }
 };
 

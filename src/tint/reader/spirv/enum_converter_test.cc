@@ -85,7 +85,7 @@ INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
 struct StorageClassCase {
     spv::StorageClass sc;
     bool expect_success;
-    type::AddressSpace expected;
+    builtin::AddressSpace expected;
 };
 inline std::ostream& operator<<(std::ostream& out, StorageClassCase scc) {
     out << "StorageClassCase{ spv::StorageClass:::" << int(scc.sc)
@@ -126,19 +126,21 @@ INSTANTIATE_TEST_SUITE_P(
     EnumConverterGood,
     SpvStorageClassTest,
     testing::Values(
-        StorageClassCase{spv::StorageClass::Input, true, type::AddressSpace::kIn},
-        StorageClassCase{spv::StorageClass::Output, true, type::AddressSpace::kOut},
-        StorageClassCase{spv::StorageClass::Uniform, true, type::AddressSpace::kUniform},
-        StorageClassCase{spv::StorageClass::Workgroup, true, type::AddressSpace::kWorkgroup},
-        StorageClassCase{spv::StorageClass::UniformConstant, true, type::AddressSpace::kUndefined},
-        StorageClassCase{spv::StorageClass::StorageBuffer, true, type::AddressSpace::kStorage},
-        StorageClassCase{spv::StorageClass::Private, true, type::AddressSpace::kPrivate},
-        StorageClassCase{spv::StorageClass::Function, true, type::AddressSpace::kFunction}));
+        StorageClassCase{spv::StorageClass::Input, true, builtin::AddressSpace::kIn},
+        StorageClassCase{spv::StorageClass::Output, true, builtin::AddressSpace::kOut},
+        StorageClassCase{spv::StorageClass::Uniform, true, builtin::AddressSpace::kUniform},
+        StorageClassCase{spv::StorageClass::Workgroup, true, builtin::AddressSpace::kWorkgroup},
+        StorageClassCase{spv::StorageClass::UniformConstant, true,
+                         builtin::AddressSpace::kUndefined},
+        StorageClassCase{spv::StorageClass::StorageBuffer, true, builtin::AddressSpace::kStorage},
+        StorageClassCase{spv::StorageClass::Private, true, builtin::AddressSpace::kPrivate},
+        StorageClassCase{spv::StorageClass::Function, true, builtin::AddressSpace::kFunction}));
 
 INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
                          SpvStorageClassTest,
                          testing::Values(StorageClassCase{static_cast<spv::StorageClass>(9999),
-                                                          false, type::AddressSpace::kUndefined}));
+                                                          false,
+                                                          builtin::AddressSpace::kUndefined}));
 
 // Builtin
 

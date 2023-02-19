@@ -125,11 +125,12 @@ void InspectorBuilder::AddUniformBuffer(const std::string& name,
                                         ast::Type type,
                                         uint32_t group,
                                         uint32_t binding) {
-    GlobalVar(name, type, type::AddressSpace::kUniform, Binding(AInt(binding)), Group(AInt(group)));
+    GlobalVar(name, type, builtin::AddressSpace::kUniform, Binding(AInt(binding)),
+              Group(AInt(group)));
 }
 
 void InspectorBuilder::AddWorkgroupStorage(const std::string& name, ast::Type type) {
-    GlobalVar(name, type, type::AddressSpace::kWorkgroup);
+    GlobalVar(name, type, builtin::AddressSpace::kWorkgroup);
 }
 
 void InspectorBuilder::AddStorageBuffer(const std::string& name,
@@ -137,7 +138,7 @@ void InspectorBuilder::AddStorageBuffer(const std::string& name,
                                         builtin::Access access,
                                         uint32_t group,
                                         uint32_t binding) {
-    GlobalVar(name, type, type::AddressSpace::kStorage, access, Binding(AInt(binding)),
+    GlobalVar(name, type, builtin::AddressSpace::kStorage, access, Binding(AInt(binding)),
               Group(AInt(group)));
 }
 
@@ -189,7 +190,7 @@ void InspectorBuilder::AddResource(const std::string& name,
 }
 
 void InspectorBuilder::AddGlobalVariable(const std::string& name, ast::Type type) {
-    GlobalVar(name, type, type::AddressSpace::kPrivate);
+    GlobalVar(name, type, builtin::AddressSpace::kPrivate);
 }
 
 const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(

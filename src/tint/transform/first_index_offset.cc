@@ -130,7 +130,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
 
         // Create a global to hold the uniform buffer
         Symbol buffer_name = b.Sym();
-        b.GlobalVar(buffer_name, b.ty.Of(struct_), type::AddressSpace::kUniform,
+        b.GlobalVar(buffer_name, b.ty.Of(struct_), builtin::AddressSpace::kUniform,
                     utils::Vector{
                         b.Binding(AInt(ub_binding)),
                         b.Group(AInt(ub_group)),

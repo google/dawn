@@ -288,7 +288,7 @@ bool Validator::Atomic(const ast::TemplatedIdentifier* a, const type::Atomic* s)
 }
 
 bool Validator::Pointer(const ast::TemplatedIdentifier* a, const type::Pointer* s) const {
-    if (s->AddressSpace() == type::AddressSpace::kUndefined) {
+    if (s->AddressSpace() == builtin::AddressSpace::kUndefined) {
         AddError("ptr missing address space", a->source);
         return false;
     }
@@ -298,7 +298,7 @@ bool Validator::Pointer(const ast::TemplatedIdentifier* a, const type::Pointer* 
         // When writing a variable declaration or a pointer type in WGSL source:
         // * For the storage address space, the access mode is optional, and defaults to read.
         // * For other address spaces, the access mode must not be written.
-        if (s->AddressSpace() != type::AddressSpace::kStorage) {
+        if (s->AddressSpace() != builtin::AddressSpace::kStorage) {
             AddError("only pointers in <storage> address space may specify an access mode",
                      a->source);
             return false;
@@ -373,7 +373,7 @@ bool Validator::Materialize(const type::Type* to,
 }
 
 bool Validator::VariableInitializer(const ast::Variable* v,
-                                    type::AddressSpace address_space,
+                                    builtin::AddressSpace address_space,
                                     const type::Type* storage_ty,
                                     const sem::ValueExpression* initializer) const {
     auto* initializer_ty = initializer->Type();
@@ -390,8 +390,8 @@ bool Validator::VariableInitializer(const ast::Variable* v,
 
     if (v->Is<ast::Var>()) {
         switch (address_space) {
-            case type::AddressSpace::kPrivate:
-            case type::AddressSpace::kFunction:
+            case builtin::AddressSpace::kPrivate:
+            case builtin::AddressSpace::kFunction:
                 break;  // Allowed an initializer
             default:
                 // https://gpuweb.github.io/gpuweb/wgsl/#var-and-let
@@ -409,17 +409,17 @@ bool Validator::VariableInitializer(const ast::Variable* v,
 }
 
 bool Validator::AddressSpaceLayout(const type::Type* store_ty,
-                                   type::AddressSpace address_space,
+                                   builtin::AddressSpace address_space,
                                    Source source) const {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class-layout-constraints
 
     auto is_uniform_struct_or_array = [address_space](const type::Type* ty) {
-        return address_space == type::AddressSpace::kUniform &&
+        return address_space == builtin::AddressSpace::kUniform &&
                ty->IsAnyOf<type::Array, sem::Struct>();
     };
 
     auto is_uniform_struct = [address_space](const type::Type* ty) {
-        return address_space == type::AddressSpace::kUniform && ty->Is<sem::Struct>();
+        return address_space == builtin::AddressSpace::kUniform && ty->Is<sem::Struct>();
     };
 
     auto required_alignment_of = [&](const type::Type* ty) {
@@ -440,7 +440,7 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
         return true;
     }
 
-    if (!type::IsHostShareable(address_space)) {
+    if (!builtin::IsHostShareable(address_space)) {
         return true;
     }
 
@@ -453,7 +453,7 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
     // Among three host-shareable address spaces, f16 is supported in "uniform" and
     // "storage" address space, but not "push_constant" address space yet.
     if (Is<type::F16>(type::Type::DeepestElementOf(store_ty)) &&
-        address_space == type::AddressSpace::kPushConstant) {
+        address_space == builtin::AddressSpace::kPushConstant) {
         AddError("using f16 types in 'push_constant' address space is not implemented yet", source);
         return false;
     }
@@ -530,7 +530,7 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
             return false;
         }
 
-        if (address_space == type::AddressSpace::kUniform) {
+        if (address_space == builtin::AddressSpace::kUniform) {
             // We already validated that this array member is itself aligned to 16 bytes above, so
             // we only need to validate that stride is a multiple of 16 bytes.
             if (arr->Stride() % 16 != 0) {
@@ -596,7 +596,7 @@ bool Validator::GlobalVariable(
     const sem::GlobalVariable* global,
     const utils::Hashmap<OverrideId, const sem::Variable*, 8>& override_ids) const {
     auto* decl = global->Declaration();
-    if (global->AddressSpace() != type::AddressSpace::kWorkgroup &&
+    if (global->AddressSpace() != builtin::AddressSpace::kWorkgroup &&
         IsArrayWithOverrideCount(global->Type())) {
         RaiseArrayWithOverrideCountError(decl->type ? decl->type->source
                                                     : decl->initializer->source);
@@ -624,8 +624,8 @@ bool Validator::GlobalVariable(
                 bool is_shader_io_attribute =
                     attr->IsAnyOf<ast::BuiltinAttribute, ast::InterpolateAttribute,
                                   ast::InvariantAttribute, ast::LocationAttribute>();
-                bool has_io_address_space = global->AddressSpace() == type::AddressSpace::kIn ||
-                                            global->AddressSpace() == type::AddressSpace::kOut;
+                bool has_io_address_space = global->AddressSpace() == builtin::AddressSpace::kIn ||
+                                            global->AddressSpace() == builtin::AddressSpace::kOut;
                 if (!attr->IsAnyOf<ast::BindingAttribute, ast::GroupAttribute,
                                    ast::InternalAttribute>() &&
                     (!is_shader_io_attribute || !has_io_address_space)) {
@@ -657,15 +657,15 @@ bool Validator::GlobalVariable(
         return false;
     }
 
-    if (global->AddressSpace() == type::AddressSpace::kFunction) {
+    if (global->AddressSpace() == builtin::AddressSpace::kFunction) {
         AddError("module-scope 'var' must not use address space 'function'", decl->source);
         return false;
     }
 
     switch (global->AddressSpace()) {
-        case type::AddressSpace::kUniform:
-        case type::AddressSpace::kStorage:
-        case type::AddressSpace::kHandle: {
+        case builtin::AddressSpace::kUniform:
+        case builtin::AddressSpace::kStorage:
+        case builtin::AddressSpace::kHandle: {
             // https://gpuweb.github.io/gpuweb/wgsl/#resource-interface
             // Each resource variable must be declared with both group and binding attributes.
             if (!decl->HasBindingPoint()) {
@@ -714,7 +714,7 @@ bool Validator::Var(const sem::Variable* v) const {
         // When writing a variable declaration or a pointer type in WGSL source:
         // * For the storage address space, the access mode is optional, and defaults to read.
         // * For other address spaces, the access mode must not be written.
-        if (v->AddressSpace() != type::AddressSpace::kStorage) {
+        if (v->AddressSpace() != builtin::AddressSpace::kStorage) {
             AddError("only variables in <storage> address space may specify an access mode",
                      var->source);
             return false;
@@ -727,8 +727,8 @@ bool Validator::Var(const sem::Variable* v) const {
     }
 
     if (IsValidationEnabled(var->attributes, ast::DisabledValidation::kIgnoreAddressSpace) &&
-        (v->AddressSpace() == type::AddressSpace::kIn ||
-         v->AddressSpace() == type::AddressSpace::kOut)) {
+        (v->AddressSpace() == builtin::AddressSpace::kIn ||
+         v->AddressSpace() == builtin::AddressSpace::kOut)) {
         AddError("invalid use of input/output address space", var->source);
         return false;
     }
@@ -822,13 +822,13 @@ bool Validator::Parameter(const ast::Function* func, const sem::Variable* var) c
 
             auto sc = ref->AddressSpace();
             switch (sc) {
-                case type::AddressSpace::kFunction:
-                case type::AddressSpace::kPrivate:
+                case builtin::AddressSpace::kFunction:
+                case builtin::AddressSpace::kPrivate:
                     ok = true;
                     break;
-                case type::AddressSpace::kStorage:
-                case type::AddressSpace::kUniform:
-                case type::AddressSpace::kWorkgroup:
+                case builtin::AddressSpace::kStorage:
+                case builtin::AddressSpace::kUniform:
+                case builtin::AddressSpace::kWorkgroup:
                     ok = enabled_extensions_.Contains(
                         builtin::Extension::kChromiumExperimentalFullPtrParameters);
                     break;
@@ -1883,7 +1883,7 @@ bool Validator::PipelineStages(utils::VectorRef<sem::Function*> entry_points) co
         auto stage = entry_point->Declaration()->PipelineStage();
         if (stage != ast::PipelineStage::kCompute) {
             for (auto* var : func->DirectlyReferencedGlobals()) {
-                if (var->AddressSpace() == type::AddressSpace::kWorkgroup) {
+                if (var->AddressSpace() == builtin::AddressSpace::kWorkgroup) {
                     std::stringstream stage_name;
                     stage_name << stage;
                     for (auto* user : var->Users()) {
@@ -1969,7 +1969,7 @@ bool Validator::PushConstants(utils::VectorRef<sem::Function*> entry_points) con
 
         auto check_push_constant = [&](const sem::Function* func, const sem::Function* ep) {
             for (auto* var : func->DirectlyReferencedGlobals()) {
-                if (var->AddressSpace() != type::AddressSpace::kPushConstant ||
+                if (var->AddressSpace() != builtin::AddressSpace::kPushConstant ||
                     var == push_constant_var) {
                     continue;
                 }
@@ -2506,14 +2506,14 @@ std::string Validator::VectorPretty(uint32_t size, const type::Type* element_typ
 bool Validator::CheckTypeAccessAddressSpace(
     const type::Type* store_ty,
     builtin::Access access,
-    type::AddressSpace address_space,
+    builtin::AddressSpace address_space,
     utils::VectorRef<const tint::ast::Attribute*> attributes,
     const Source& source) const {
     if (!AddressSpaceLayout(store_ty, address_space, source)) {
         return false;
     }
 
-    if (address_space == type::AddressSpace::kPushConstant &&
+    if (address_space == builtin::AddressSpace::kPushConstant &&
         !enabled_extensions_.Contains(builtin::Extension::kChromiumExperimentalPushConstant) &&
         IsValidationEnabled(attributes, ast::DisabledValidation::kIgnoreAddressSpace)) {
         AddError(
@@ -2523,7 +2523,7 @@ bool Validator::CheckTypeAccessAddressSpace(
         return false;
     }
 
-    if (address_space == type::AddressSpace::kStorage && access == builtin::Access::kWrite) {
+    if (address_space == builtin::AddressSpace::kStorage && access == builtin::Access::kWrite) {
         // The access mode for the storage address space can only be 'read' or
         // 'read_write'.
         AddError("access mode 'write' is not valid for the 'storage' address space", source);
@@ -2531,11 +2531,11 @@ bool Validator::CheckTypeAccessAddressSpace(
     }
 
     auto atomic_error = [&]() -> const char* {
-        if (address_space != type::AddressSpace::kStorage &&
-            address_space != type::AddressSpace::kWorkgroup) {
+        if (address_space != builtin::AddressSpace::kStorage &&
+            address_space != builtin::AddressSpace::kWorkgroup) {
             return "atomic variables must have <storage> or <workgroup> address space";
         }
-        if (address_space == type::AddressSpace::kStorage &&
+        if (address_space == builtin::AddressSpace::kStorage &&
             access != builtin::Access::kReadWrite) {
             return "atomic variables in <storage> address space must have read_write access "
                    "mode";

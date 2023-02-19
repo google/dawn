@@ -89,7 +89,7 @@ Transform::ApplyResult ClampFragDepth::Apply(const Program* src, const DataMap&,
     for (auto* global : src->AST().GlobalVariables()) {
         if (auto* var = global->As<ast::Var>()) {
             auto* v = src->Sem().Get(var);
-            if (TINT_UNLIKELY(v->AddressSpace() == type::AddressSpace::kPushConstant)) {
+            if (TINT_UNLIKELY(v->AddressSpace() == builtin::AddressSpace::kPushConstant)) {
                 TINT_ICE(Transform, b.Diagnostics())
                     << "ClampFragDepth doesn't know how to handle module that already use push "
                        "constants";
@@ -124,7 +124,7 @@ Transform::ApplyResult ClampFragDepth::Apply(const Program* src, const DataMap&,
                 utils::Vector{b.Member("min", b.ty.f32()), b.Member("max", b.ty.f32())});
 
     auto args_sym = b.Symbols().New("frag_depth_clamp_args");
-    b.GlobalVar(args_sym, b.ty("FragDepthClampArgs"), type::AddressSpace::kPushConstant);
+    b.GlobalVar(args_sym, b.ty("FragDepthClampArgs"), builtin::AddressSpace::kPushConstant);
 
     auto base_fn_sym = b.Symbols().New("clamp_frag_depth");
     b.Func(base_fn_sym, utils::Vector{b.Param("v", b.ty.f32())}, b.ty.f32(),

@@ -41,7 +41,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
-    auto* v = GlobalVar("var", ty.f32(), type::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.f32(), builtin::AddressSpace::kPrivate);
 
     auto* expr = Expr("var");
     WrapInFunction(expr);
@@ -85,7 +85,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
-    auto* v = Var("var", ty.f32(), type::AddressSpace::kFunction);
+    auto* v = Var("var", ty.f32(), builtin::AddressSpace::kFunction);
     auto* expr = Expr("var");
     WrapInFunction(v, expr);
 
@@ -109,7 +109,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_Load) {
-    auto* var = GlobalVar("var", ty.i32(), type::AddressSpace::kPrivate);
+    auto* var = GlobalVar("var", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* expr = Add("var", "var");
     WrapInFunction(expr);
 

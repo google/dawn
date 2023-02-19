@@ -20,7 +20,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitIdentifierExpression_Single) {
-    GlobalVar("glsl", ty.f32(), type::AddressSpace::kPrivate);
+    GlobalVar("glsl", ty.f32(), builtin::AddressSpace::kPrivate);
     auto* i = Expr("glsl");
     WrapInFunction(i);
 

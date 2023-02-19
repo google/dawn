@@ -175,7 +175,7 @@ Type::~Type() = default;
 
 Texture::~Texture() = default;
 
-Pointer::Pointer(const Type* t, type::AddressSpace s, builtin::Access a)
+Pointer::Pointer(const Type* t, builtin::AddressSpace s, builtin::Access a)
     : type(t), address_space(s), access(a) {}
 Pointer::Pointer(const Pointer&) = default;
 
@@ -189,7 +189,7 @@ ast::Type Pointer::Build(ProgramBuilder& b) const {
     return b.ty.pointer(type->Build(b), address_space, access);
 }
 
-Reference::Reference(const Type* t, type::AddressSpace s, builtin::Access a)
+Reference::Reference(const Type* t, builtin::AddressSpace s, builtin::Access a)
     : type(t), address_space(s), access(a) {}
 Reference::Reference(const Reference&) = default;
 
@@ -474,13 +474,13 @@ const Type* TypeManager::AsUnsigned(const Type* ty) {
 }
 
 const spirv::Pointer* TypeManager::Pointer(const Type* el,
-                                           type::AddressSpace address_space,
+                                           builtin::AddressSpace address_space,
                                            builtin::Access access) {
     return state->pointers_.Get(el, address_space, access);
 }
 
 const spirv::Reference* TypeManager::Reference(const Type* el,
-                                               type::AddressSpace address_space,
+                                               builtin::AddressSpace address_space,
                                                builtin::Access access) {
     return state->references_.Get(el, address_space, access);
 }

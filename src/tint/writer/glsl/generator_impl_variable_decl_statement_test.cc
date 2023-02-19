@@ -475,7 +475,7 @@ TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
 }
 
 TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
-    GlobalVar("a", ty.f32(), type::AddressSpace::kPrivate);
+    GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate);
 
     WrapInFunction(Expr("a"));
 

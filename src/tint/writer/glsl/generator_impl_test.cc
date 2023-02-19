@@ -62,7 +62,7 @@ TEST_F(GlslGeneratorImplTest, GenerateSampleIndexES) {
                   Builtin(builtin::BuiltinValue::kSampleIndex),
                   Disable(ast::DisabledValidation::kIgnoreAddressSpace),
               },
-              type::AddressSpace::kIn);
+              builtin::AddressSpace::kIn);
     Func("my_func", utils::Empty, ty.i32(),
          utils::Vector{
              Return(Expr("gl_SampleID")),
@@ -87,7 +87,7 @@ TEST_F(GlslGeneratorImplTest, GenerateSampleIndexDesktop) {
                   Builtin(builtin::BuiltinValue::kSampleIndex),
                   Disable(ast::DisabledValidation::kIgnoreAddressSpace),
               },
-              type::AddressSpace::kIn);
+              builtin::AddressSpace::kIn);
     Func("my_func", utils::Empty, ty.i32(),
          utils::Vector{
              Return(Expr("gl_SampleID")),

@@ -21,9 +21,9 @@
 
 #include "src/tint/ast/type.h"
 #include "src/tint/builtin/access.h"
+#include "src/tint/builtin/address_space.h"
 #include "src/tint/castable.h"
 #include "src/tint/symbol.h"
-#include "src/tint/type/address_space.h"
 #include "src/tint/type/sampler_kind.h"
 #include "src/tint/type/texel_format.h"
 #include "src/tint/type/texture_dimension.h"
@@ -162,7 +162,7 @@ struct Pointer final : public Castable<Pointer, Type> {
     /// @param ty the store type
     /// @param sc the pointer address space
     /// @param access the declared access mode
-    Pointer(const Type* ty, type::AddressSpace sc, builtin::Access access);
+    Pointer(const Type* ty, builtin::AddressSpace sc, builtin::Access access);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -180,7 +180,7 @@ struct Pointer final : public Castable<Pointer, Type> {
     /// the store type
     Type const* const type;
     /// the pointer address space
-    type::AddressSpace const address_space;
+    builtin::AddressSpace const address_space;
     /// the pointer declared access mode
     builtin::Access const access;
 };
@@ -193,7 +193,7 @@ struct Reference final : public Castable<Reference, Type> {
     /// @param ty the referenced type
     /// @param sc the reference address space
     /// @param access the reference declared access mode
-    Reference(const Type* ty, type::AddressSpace sc, builtin::Access access);
+    Reference(const Type* ty, builtin::AddressSpace sc, builtin::Access access);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -211,7 +211,7 @@ struct Reference final : public Castable<Reference, Type> {
     /// the store type
     Type const* const type;
     /// the pointer address space
-    type::AddressSpace const address_space;
+    builtin::AddressSpace const address_space;
     /// the pointer declared access mode
     builtin::Access const access;
 };
@@ -549,7 +549,7 @@ class TypeManager {
     /// @return a Pointer type. Repeated calls with the same arguments will return
     /// the same pointer.
     const spirv::Pointer* Pointer(const Type* ty,
-                                  type::AddressSpace address_space,
+                                  builtin::AddressSpace address_space,
                                   builtin::Access access = builtin::Access::kUndefined);
     /// @param ty the referenced type
     /// @param address_space the reference address space
@@ -557,7 +557,7 @@ class TypeManager {
     /// @return a Reference type. Repeated calls with the same arguments will
     /// return the same pointer.
     const spirv::Reference* Reference(const Type* ty,
-                                      type::AddressSpace address_space,
+                                      builtin::AddressSpace address_space,
                                       builtin::Access access = builtin::Access::kUndefined);
     /// @param ty the element type
     /// @param sz the number of elements in the vector

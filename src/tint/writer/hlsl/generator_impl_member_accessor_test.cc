@@ -93,16 +93,16 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
         ProgramBuilder& b = *this;
         auto* s = b.Structure("Data", members);
 
-        b.GlobalVar("data", b.ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
-                    b.Group(1_a), b.Binding(0_a));
+        b.GlobalVar("data", b.ty.Of(s), builtin::AddressSpace::kStorage,
+                    builtin::Access::kReadWrite, b.Group(1_a), b.Binding(0_a));
     }
 
     void SetupUniformBuffer(utils::VectorRef<const ast::StructMember*> members) {
         ProgramBuilder& b = *this;
         auto* s = b.Structure("Data", members);
 
-        b.GlobalVar("data", b.ty.Of(s), type::AddressSpace::kUniform, builtin::Access::kUndefined,
-                    b.Group(1_a), b.Binding(1_a));
+        b.GlobalVar("data", b.ty.Of(s), builtin::AddressSpace::kUniform,
+                    builtin::Access::kUndefined, b.Group(1_a), b.Binding(1_a));
     }
 
     void SetupFunction(utils::VectorRef<const ast::Statement*> statements) {
@@ -122,7 +122,7 @@ using HlslGeneratorImplTest_MemberAccessorWithParam =
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
     auto* s = Structure("Data", utils::Vector{Member("mem", ty.f32())});
-    GlobalVar("str", ty.Of(s), type::AddressSpace::kPrivate);
+    GlobalVar("str", ty.Of(s), builtin::AddressSpace::kPrivate);
 
     auto* expr = MemberAccessor("str", "mem");
     WrapInFunction(Var("expr", ty.f32(), expr));

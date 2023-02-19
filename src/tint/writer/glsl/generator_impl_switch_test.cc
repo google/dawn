@@ -22,7 +22,7 @@ namespace {
 using GlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch) {
-    GlobalVar("cond", ty.i32(), type::AddressSpace::kPrivate);
+    GlobalVar("cond", ty.i32(), builtin::AddressSpace::kPrivate);
 
     auto* def_body = Block(create<ast::BreakStatement>());
     auto* def = create<ast::CaseStatement>(utils::Vector{DefaultCaseSelector()}, def_body);
@@ -51,7 +51,7 @@ TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch) {
 }
 
 TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch_MixedDefault) {
-    GlobalVar("cond", ty.i32(), type::AddressSpace::kPrivate);
+    GlobalVar("cond", ty.i32(), builtin::AddressSpace::kPrivate);
 
     auto* def_body = Block(create<ast::BreakStatement>());
     auto* def = create<ast::CaseStatement>(utils::Vector{CaseSelector(5_i), DefaultCaseSelector()},

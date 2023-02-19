@@ -64,8 +64,8 @@ TEST_F(ResolverIncrementDecrementValidationTest, ThroughPointer) {
     // var a : i32;
     // let b : ptr<function,i32> = &a;
     // *b++;
-    auto* var_a = Var("a", ty.i32(), type::AddressSpace::kFunction);
-    auto* var_b = Let("b", ty.pointer<i32>(type::AddressSpace::kFunction), AddressOf(Expr("a")));
+    auto* var_a = Var("a", ty.i32(), builtin::AddressSpace::kFunction);
+    auto* var_b = Let("b", ty.pointer<i32>(builtin::AddressSpace::kFunction), AddressOf(Expr("a")));
     WrapInFunction(var_a, var_b, Increment(Source{{12, 34}}, Deref("b")));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -127,7 +127,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, Vector) {
 TEST_F(ResolverIncrementDecrementValidationTest, Atomic) {
     // var<workgroup> a : atomic<i32>;
     // a++;
-    GlobalVar(Source{{12, 34}}, "a", ty.atomic(ty.i32()), type::AddressSpace::kWorkgroup);
+    GlobalVar(Source{{12, 34}}, "a", ty.atomic(ty.i32()), builtin::AddressSpace::kWorkgroup);
     WrapInFunction(Increment(Expr(Source{{56, 78}}, "a")));
 
     EXPECT_FALSE(r()->Resolve());
@@ -193,8 +193,8 @@ TEST_F(ResolverIncrementDecrementValidationTest, ReadOnlyBuffer) {
     // {
     //   a++;
     // }
-    GlobalVar(Source{{12, 34}}, "a", ty.i32(), type::AddressSpace::kStorage, builtin::Access::kRead,
-              Group(0_a), Binding(0_a));
+    GlobalVar(Source{{12, 34}}, "a", ty.i32(), builtin::AddressSpace::kStorage,
+              builtin::Access::kRead, Group(0_a), Binding(0_a));
     WrapInFunction(Increment(Source{{56, 78}}, "a"));
 
     EXPECT_FALSE(r()->Resolve());

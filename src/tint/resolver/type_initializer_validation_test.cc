@@ -70,11 +70,11 @@ TEST_F(ResolverTypeInitializerValidationTest, InferTypeTest_Simple) {
     ASSERT_TRUE(TypeOf(a_ident)->Is<type::Reference>());
     EXPECT_TRUE(TypeOf(a_ident)->As<type::Reference>()->StoreType()->Is<type::I32>());
     EXPECT_EQ(TypeOf(a_ident)->As<type::Reference>()->AddressSpace(),
-              type::AddressSpace::kFunction);
+              builtin::AddressSpace::kFunction);
     ASSERT_TRUE(TypeOf(b_ident)->Is<type::Reference>());
     EXPECT_TRUE(TypeOf(b_ident)->As<type::Reference>()->StoreType()->Is<type::I32>());
     EXPECT_EQ(TypeOf(b_ident)->As<type::Reference>()->AddressSpace(),
-              type::AddressSpace::kFunction);
+              builtin::AddressSpace::kFunction);
 }
 
 using InferTypeTest_FromInitializerExpression = ResolverTestWithParam<Params>;
@@ -98,7 +98,7 @@ TEST_P(InferTypeTest_FromInitializerExpression, All) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* got = TypeOf(a_ident);
     auto* expected =
-        create<type::Reference>(params.create_rhs_sem_type(*this), type::AddressSpace::kFunction,
+        create<type::Reference>(params.create_rhs_sem_type(*this), builtin::AddressSpace::kFunction,
                                 builtin::Access::kReadWrite);
     ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                              << "expected: " << FriendlyName(expected) << "\n";
@@ -153,7 +153,7 @@ TEST_P(InferTypeTest_FromArithmeticExpression, All) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* got = TypeOf(a_ident);
     auto* expected =
-        create<type::Reference>(params.create_rhs_sem_type(*this), type::AddressSpace::kFunction,
+        create<type::Reference>(params.create_rhs_sem_type(*this), builtin::AddressSpace::kFunction,
                                 builtin::Access::kReadWrite);
     ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                              << "expected: " << FriendlyName(expected) << "\n";
@@ -202,7 +202,7 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* got = TypeOf(a_ident);
     auto* expected =
-        create<type::Reference>(params.create_rhs_sem_type(*this), type::AddressSpace::kFunction,
+        create<type::Reference>(params.create_rhs_sem_type(*this), builtin::AddressSpace::kFunction,
                                 builtin::Access::kReadWrite);
     ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                              << "expected: " << FriendlyName(expected) << "\n";
@@ -1971,7 +1971,7 @@ TEST_F(ResolverTypeInitializerValidationTest, NestedVectorInitializers_Success) 
 
 TEST_F(ResolverTypeInitializerValidationTest, Vector_Alias_Argument_Error) {
     auto* alias = Alias("UnsignedInt", ty.u32());
-    GlobalVar("uint_var", ty.Of(alias), type::AddressSpace::kPrivate);
+    GlobalVar("uint_var", ty.Of(alias), builtin::AddressSpace::kPrivate);
 
     auto* tc = vec2<f32>(Source{{12, 34}}, "uint_var");
     WrapInFunction(tc);
@@ -1983,8 +1983,8 @@ TEST_F(ResolverTypeInitializerValidationTest, Vector_Alias_Argument_Error) {
 TEST_F(ResolverTypeInitializerValidationTest, Vector_Alias_Argument_Success) {
     auto* f32_alias = Alias("Float32", ty.f32());
     auto* vec2_alias = Alias("VectorFloat2", ty.vec2<f32>());
-    GlobalVar("my_f32", ty.Of(f32_alias), type::AddressSpace::kPrivate);
-    GlobalVar("my_vec2", ty.Of(vec2_alias), type::AddressSpace::kPrivate);
+    GlobalVar("my_f32", ty.Of(f32_alias), builtin::AddressSpace::kPrivate);
+    GlobalVar("my_vec2", ty.Of(vec2_alias), builtin::AddressSpace::kPrivate);
 
     auto* tc = vec3<f32>("my_vec2", "my_f32");
     WrapInFunction(tc);

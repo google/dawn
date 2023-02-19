@@ -61,7 +61,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
-    GlobalVar("a", ty.f32(), type::AddressSpace::kPrivate);
+    GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate);
 
     Func("a_func", utils::Empty, ty.f32(), utils::Vector{Return("a")}, utils::Empty);
 
@@ -198,7 +198,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
     auto* s = Structure("Data", utils::Vector{Member("d", ty.f32())});
 
-    GlobalVar("data", ty.Of(s), type::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("data", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
               Binding(0_a), Group(0_a));
 
     {

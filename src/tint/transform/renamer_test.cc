@@ -1926,7 +1926,7 @@ std::vector<const char*> Identifiers() {
     for (auto* ident : type::kBuiltinStrings) {
         out.push_back(ident);
     }
-    for (auto* ident : type::kAddressSpaceStrings) {
+    for (auto* ident : builtin::kAddressSpaceStrings) {
         if (!utils::HasPrefix(ident, "_")) {
             out.push_back(ident);
         }

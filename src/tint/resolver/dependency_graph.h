@@ -36,7 +36,7 @@ namespace tint::resolver {
 /// - const ast::Function*  (as const ast::Node*)
 /// - sem::BuiltinType
 /// - builtin::Access
-/// - type::AddressSpace
+/// - builtin::AddressSpace
 /// - type::Builtin
 /// - type::TexelFormat
 class ResolvedIdentifier {
@@ -77,13 +77,13 @@ class ResolvedIdentifier {
         return builtin::Access::kUndefined;
     }
 
-    /// @return the address space if the ResolvedIdentifier holds type::AddressSpace, otherwise
-    /// type::AddressSpace::kUndefined
-    type::AddressSpace AddressSpace() const {
-        if (auto n = std::get_if<type::AddressSpace>(&value_)) {
+    /// @return the address space if the ResolvedIdentifier holds builtin::AddressSpace, otherwise
+    /// builtin::AddressSpace::kUndefined
+    builtin::AddressSpace AddressSpace() const {
+        if (auto n = std::get_if<builtin::AddressSpace>(&value_)) {
             return *n;
         }
-        return type::AddressSpace::kUndefined;
+        return builtin::AddressSpace::kUndefined;
     }
 
     /// @return the builtin type if the ResolvedIdentifier holds type::Builtin, otherwise
@@ -131,7 +131,7 @@ class ResolvedIdentifier {
                  const ast::Node*,
                  sem::BuiltinType,
                  builtin::Access,
-                 type::AddressSpace,
+                 builtin::AddressSpace,
                  type::Builtin,
                  type::TexelFormat>
         value_;

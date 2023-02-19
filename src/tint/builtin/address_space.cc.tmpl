@@ -14,12 +14,12 @@ See:
 {{- Import "src/tint/templates/enums.tmpl.inc" -}}
 {{- $enum := (Sem.Enum "address_space") -}}
 
-#include "src/tint/type/address_space.h"
+#include "src/tint/builtin/address_space.h"
 
-namespace tint::type {
+namespace tint::builtin {
 
 {{ Eval "ParseEnum" $enum}}
 
 {{ Eval "EnumOStream" $enum}}
 
-}  // namespace tint::type
+}  // namespace tint::builtin

@@ -14,12 +14,12 @@ See:
 {{- Import "src/tint/templates/enums.tmpl.inc" -}}
 {{- $enum := (Sem.Enum "address_space") -}}
 
-#ifndef SRC_TINT_TYPE_ADDRESS_SPACE_H_
-#define SRC_TINT_TYPE_ADDRESS_SPACE_H_
+#ifndef SRC_TINT_BUILTIN_ADDRESS_SPACE_H_
+#define SRC_TINT_BUILTIN_ADDRESS_SPACE_H_
 
 #include <ostream>
 
-namespace tint::type {
+namespace tint::builtin {
 
 /// Address space of a given pointer.
 {{ Eval "DeclareEnum" $enum}}
@@ -33,6 +33,6 @@ inline bool IsHostShareable(AddressSpace address_space) {
            address_space == AddressSpace::kPushConstant;
 }
 
-}  // namespace tint::type
+}  // namespace tint::builtin
 
-#endif  // SRC_TINT_TYPE_ADDRESS_SPACE_H_
+#endif  // SRC_TINT_BUILTIN_ADDRESS_SPACE_H_

@@ -105,11 +105,11 @@ class SemHelper {
 
     /// @param expr the semantic node
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to
-    /// sem::BuiltinEnumExpression<type::AddressSpace> if the cast is successful, otherwise an error
-    /// diagnostic is raised.
-    sem::BuiltinEnumExpression<type::AddressSpace>* AsAddressSpace(sem::Expression* expr) const {
+    /// sem::BuiltinEnumExpression<builtin::AddressSpace> if the cast is successful, otherwise an
+    /// error diagnostic is raised.
+    sem::BuiltinEnumExpression<builtin::AddressSpace>* AsAddressSpace(sem::Expression* expr) const {
         if (TINT_LIKELY(expr)) {
-            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<type::AddressSpace>>();
+            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::AddressSpace>>();
             if (TINT_LIKELY(enum_expr)) {
                 return enum_expr;
             }

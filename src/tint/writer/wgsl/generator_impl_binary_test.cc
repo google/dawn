@@ -37,8 +37,8 @@ TEST_P(WgslBinaryTest, Emit) {
         }
     };
 
-    GlobalVar("left", op_ty(), type::AddressSpace::kPrivate);
-    GlobalVar("right", op_ty(), type::AddressSpace::kPrivate);
+    GlobalVar("left", op_ty(), builtin::AddressSpace::kPrivate);
+    GlobalVar("right", op_ty(), builtin::AddressSpace::kPrivate);
     auto* left = Expr("left");
     auto* right = Expr("right");
 

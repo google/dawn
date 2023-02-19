@@ -135,9 +135,9 @@ TEST_P(ResolverExpressionKindTest, Test) {
             sym = Sym("workgroup");
             check_expr = [](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
-                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<type::AddressSpace>>();
+                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::AddressSpace>>();
                 ASSERT_NE(enum_expr, nullptr);
-                EXPECT_EQ(enum_expr->Value(), type::AddressSpace::kWorkgroup);
+                EXPECT_EQ(enum_expr->Value(), builtin::AddressSpace::kWorkgroup);
             };
             break;
         }
@@ -231,7 +231,7 @@ TEST_P(ResolverExpressionKindTest, Test) {
             Func("f", utils::Empty, ty.void_(), CallStmt(Call(expr)));
             break;
         case Use::kBinaryOp:
-            GlobalVar("v", type::AddressSpace::kPrivate, Mul(1_a, expr));
+            GlobalVar("v", builtin::AddressSpace::kPrivate, Mul(1_a, expr));
             break;
         case Use::kFunctionReturnType:
             Func("f", utils::Empty, ty(expr), Return(Call(sym)));
@@ -243,13 +243,13 @@ TEST_P(ResolverExpressionKindTest, Test) {
             GlobalVar("v", ty("texture_storage_2d", ty(expr), "write"), Group(0_u), Binding(0_u));
             break;
         case Use::kValueExpression:
-            GlobalVar("v", type::AddressSpace::kPrivate, expr);
+            GlobalVar("v", builtin::AddressSpace::kPrivate, expr);
             break;
         case Use::kVariableType:
-            GlobalVar("v", type::AddressSpace::kPrivate, ty(expr));
+            GlobalVar("v", builtin::AddressSpace::kPrivate, ty(expr));
             break;
         case Use::kUnaryOp:
-            GlobalVar("v", type::AddressSpace::kPrivate, Negation(expr));
+            GlobalVar("v", builtin::AddressSpace::kPrivate, Negation(expr));
             break;
     }
 
