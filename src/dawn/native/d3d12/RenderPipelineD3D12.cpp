@@ -234,11 +234,24 @@ uint8_t D3D12RenderTargetWriteMask(wgpu::ColorWriteMask writeMask) {
     return static_cast<uint8_t>(writeMask);
 }
 
-D3D12_RENDER_TARGET_BLEND_DESC ComputeColorDesc(const ColorTargetState* state) {
+D3D12_RENDER_TARGET_BLEND_DESC ComputeColorDesc(const DeviceBase* device,
+                                                const ColorTargetState* state) {
     D3D12_RENDER_TARGET_BLEND_DESC blendDesc = {};
     blendDesc.BlendEnable = state->blend != nullptr;
     if (blendDesc.BlendEnable) {
         blendDesc.SrcBlend = D3D12Blend(state->blend->color.srcFactor);
+        if (device->GetValidInternalFormat(state->format).componentCount < 4 &&
+            blendDesc.SrcBlend == D3D12_BLEND_DEST_ALPHA) {
+            // According to the D3D SPEC, the default value for missing components in an element
+            // format is "0" for any component except A, which gets "1". So here
+            // D3D12_BLEND_DEST_ALPHA should have same effect as D3D12_BLEND_ONE.
+            // Note that this replacement can be an optimization as using D3D12_BLEND_ONE means the
+            // GPU hardware no longer needs to get pixels from the destination texture. It can also
+            // be served as a workaround against an Intel driver issue about alpha blending (see
+            // http://crbug.com/dawn/1579 for more details).
+            blendDesc.SrcBlend = D3D12_BLEND_ONE;
+        }
+
         blendDesc.DestBlend = D3D12Blend(state->blend->color.dstFactor);
         blendDesc.BlendOp = D3D12BlendOperation(state->blend->color.operation);
         blendDesc.SrcBlendAlpha = D3D12AlphaBlend(state->blend->alpha.srcFactor);
@@ -419,7 +432,7 @@ MaybeError RenderPipeline::Initialize() {
         descriptorD3D12.RTVFormats[static_cast<uint8_t>(i)] =
             D3D12TextureFormat(GetColorAttachmentFormat(i));
         descriptorD3D12.BlendState.RenderTarget[static_cast<uint8_t>(i)] =
-            ComputeColorDesc(GetColorTargetState(i));
+            ComputeColorDesc(device, GetColorTargetState(i));
     }
     ASSERT(highestColorAttachmentIndexPlusOne <= kMaxColorAttachmentsTyped);
     descriptorD3D12.NumRenderTargets = static_cast<uint8_t>(highestColorAttachmentIndexPlusOne);
