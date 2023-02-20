@@ -129,38 +129,38 @@ std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
 
     auto ast_interpolation_type = interpolation_attribute->type;
     auto ast_sampling_type = interpolation_attribute->sampling;
-    if (ast_interpolation_type != ast::InterpolationType::kFlat &&
-        ast_sampling_type == ast::InterpolationSampling::kUndefined) {
-        ast_sampling_type = ast::InterpolationSampling::kCenter;
+    if (ast_interpolation_type != builtin::InterpolationType::kFlat &&
+        ast_sampling_type == builtin::InterpolationSampling::kUndefined) {
+        ast_sampling_type = builtin::InterpolationSampling::kCenter;
     }
 
     auto interpolation_type = InterpolationType::kUnknown;
     switch (ast_interpolation_type) {
-        case ast::InterpolationType::kPerspective:
+        case builtin::InterpolationType::kPerspective:
             interpolation_type = InterpolationType::kPerspective;
             break;
-        case ast::InterpolationType::kLinear:
+        case builtin::InterpolationType::kLinear:
             interpolation_type = InterpolationType::kLinear;
             break;
-        case ast::InterpolationType::kFlat:
+        case builtin::InterpolationType::kFlat:
             interpolation_type = InterpolationType::kFlat;
             break;
-        case ast::InterpolationType::kUndefined:
+        case builtin::InterpolationType::kUndefined:
             break;
     }
 
     auto sampling_type = InterpolationSampling::kUnknown;
     switch (ast_sampling_type) {
-        case ast::InterpolationSampling::kUndefined:
+        case builtin::InterpolationSampling::kUndefined:
             sampling_type = InterpolationSampling::kNone;
             break;
-        case ast::InterpolationSampling::kCenter:
+        case builtin::InterpolationSampling::kCenter:
             sampling_type = InterpolationSampling::kCenter;
             break;
-        case ast::InterpolationSampling::kCentroid:
+        case builtin::InterpolationSampling::kCentroid:
             sampling_type = InterpolationSampling::kCentroid;
             break;
-        case ast::InterpolationSampling::kSample:
+        case builtin::InterpolationSampling::kSample:
             sampling_type = InterpolationSampling::kSample;
             break;
     }

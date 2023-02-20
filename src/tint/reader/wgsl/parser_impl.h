@@ -457,11 +457,11 @@ class ParserImpl {
     /// Parses an interpolation sample name identifier, erroring if the next token does not match a
     /// valid sample name.
     /// @returns the parsed sample name.
-    Expect<ast::InterpolationSampling> expect_interpolation_sample_name();
+    Expect<builtin::InterpolationSampling> expect_interpolation_sample_name();
     /// Parses an interpolation type name identifier, erroring if the next token does not match a
     /// value type name.
     /// @returns the parsed type name
-    Expect<ast::InterpolationType> expect_interpolation_type_name();
+    Expect<builtin::InterpolationType> expect_interpolation_type_name();
     /// Parses a builtin identifier, erroring if the next token does not match a
     /// valid builtin name.
     /// @returns the parsed builtin.

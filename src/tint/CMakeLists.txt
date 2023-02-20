@@ -158,6 +158,8 @@ list(APPEND TINT_LIB_SRCS
   ast/int_literal_expression.h
   ast/internal_attribute.cc
   ast/internal_attribute.h
+  ast/interpolate_attribute.cc
+  ast/interpolate_attribute.h
   ast/invariant_attribute.cc
   ast/invariant_attribute.h
   ast/let.cc
@@ -555,9 +557,10 @@ tint_generated(builtin/builtin_value BENCH TEST)
 tint_generated(builtin/diagnostic_rule BENCH TEST)
 tint_generated(builtin/diagnostic_severity BENCH TEST)
 tint_generated(builtin/extension BENCH TEST)
+tint_generated(builtin/interpolation_sampling BENCH TEST)
+tint_generated(builtin/interpolation_type BENCH TEST)
 tint_generated(builtin/texel_format BENCH TEST)
-tint_generated(ast/diagnostic_control TEST)
-tint_generated(ast/interpolate_attribute BENCH TEST)
+
 tint_generated(resolver/init_conv_intrinsic)
 tint_generated(sem/builtin_type)
 tint_generated(sem/parameter_usage)
@@ -826,6 +829,7 @@ if(TINT_BUILD_TESTS)
     ast/increment_decrement_statement_test.cc
     ast/index_accessor_expression_test.cc
     ast/int_literal_expression_test.cc
+    ast/interpolate_attribute_test.cc
     ast/invariant_attribute_test.cc
     ast/location_attribute_test.cc
     ast/loop_statement_test.cc

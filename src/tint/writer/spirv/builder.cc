@@ -4047,29 +4047,29 @@ SpvBuiltIn Builder::ConvertBuiltin(builtin::BuiltinValue builtin, builtin::Addre
 }
 
 void Builder::AddInterpolationDecorations(uint32_t id,
-                                          ast::InterpolationType type,
-                                          ast::InterpolationSampling sampling) {
+                                          builtin::InterpolationType type,
+                                          builtin::InterpolationSampling sampling) {
     switch (type) {
-        case ast::InterpolationType::kLinear:
+        case builtin::InterpolationType::kLinear:
             push_annot(spv::Op::OpDecorate, {Operand(id), U32Operand(SpvDecorationNoPerspective)});
             break;
-        case ast::InterpolationType::kFlat:
+        case builtin::InterpolationType::kFlat:
             push_annot(spv::Op::OpDecorate, {Operand(id), U32Operand(SpvDecorationFlat)});
             break;
-        case ast::InterpolationType::kPerspective:
-        case ast::InterpolationType::kUndefined:
+        case builtin::InterpolationType::kPerspective:
+        case builtin::InterpolationType::kUndefined:
             break;
     }
     switch (sampling) {
-        case ast::InterpolationSampling::kCentroid:
+        case builtin::InterpolationSampling::kCentroid:
             push_annot(spv::Op::OpDecorate, {Operand(id), U32Operand(SpvDecorationCentroid)});
             break;
-        case ast::InterpolationSampling::kSample:
+        case builtin::InterpolationSampling::kSample:
             push_capability(SpvCapabilitySampleRateShading);
             push_annot(spv::Op::OpDecorate, {Operand(id), U32Operand(SpvDecorationSample)});
             break;
-        case ast::InterpolationSampling::kCenter:
-        case ast::InterpolationSampling::kUndefined:
+        case builtin::InterpolationSampling::kCenter:
+        case builtin::InterpolationSampling::kUndefined:
             break;
     }
 }

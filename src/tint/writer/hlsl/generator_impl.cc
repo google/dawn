@@ -3187,31 +3187,32 @@ std::string GeneratorImpl::builtin_to_attribute(builtin::BuiltinValue builtin) c
     return "";
 }
 
-std::string GeneratorImpl::interpolation_to_modifiers(ast::InterpolationType type,
-                                                      ast::InterpolationSampling sampling) const {
+std::string GeneratorImpl::interpolation_to_modifiers(
+    builtin::InterpolationType type,
+    builtin::InterpolationSampling sampling) const {
     std::string modifiers;
     switch (type) {
-        case ast::InterpolationType::kPerspective:
+        case builtin::InterpolationType::kPerspective:
             modifiers += "linear ";
             break;
-        case ast::InterpolationType::kLinear:
+        case builtin::InterpolationType::kLinear:
             modifiers += "noperspective ";
             break;
-        case ast::InterpolationType::kFlat:
+        case builtin::InterpolationType::kFlat:
             modifiers += "nointerpolation ";
             break;
-        case ast::InterpolationType::kUndefined:
+        case builtin::InterpolationType::kUndefined:
             break;
     }
     switch (sampling) {
-        case ast::InterpolationSampling::kCentroid:
+        case builtin::InterpolationSampling::kCentroid:
             modifiers += "centroid ";
             break;
-        case ast::InterpolationSampling::kSample:
+        case builtin::InterpolationSampling::kSample:
             modifiers += "sample ";
             break;
-        case ast::InterpolationSampling::kCenter:
-        case ast::InterpolationSampling::kUndefined:
+        case builtin::InterpolationSampling::kCenter:
+        case builtin::InterpolationSampling::kUndefined:
             break;
     }
     return modifiers;

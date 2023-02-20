@@ -366,8 +366,8 @@ class GeneratorImpl : public TextGenerator {
     /// @param type the interpolation type
     /// @param sampling the interpolation sampling
     /// @returns the string name of the attribute or blank on error
-    std::string interpolation_to_attribute(ast::InterpolationType type,
-                                           ast::InterpolationSampling sampling) const;
+    std::string interpolation_to_attribute(builtin::InterpolationType type,
+                                           builtin::InterpolationSampling sampling) const;
 
   private:
     // A pair of byte size and alignment `uint32_t`s.

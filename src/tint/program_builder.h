@@ -3463,8 +3463,8 @@ class ProgramBuilder {
     /// @returns the interpolate attribute pointer
     const ast::InterpolateAttribute* Interpolate(
         const Source& source,
-        ast::InterpolationType type,
-        ast::InterpolationSampling sampling = ast::InterpolationSampling::kUndefined) {
+        builtin::InterpolationType type,
+        builtin::InterpolationSampling sampling = builtin::InterpolationSampling::kUndefined) {
         return create<ast::InterpolateAttribute>(source, type, sampling);
     }
 
@@ -3473,8 +3473,8 @@ class ProgramBuilder {
     /// @param sampling the interpolation sampling
     /// @returns the interpolate attribute pointer
     const ast::InterpolateAttribute* Interpolate(
-        ast::InterpolationType type,
-        ast::InterpolationSampling sampling = ast::InterpolationSampling::kUndefined) {
+        builtin::InterpolationType type,
+        builtin::InterpolationSampling sampling = builtin::InterpolationSampling::kUndefined) {
         return create<ast::InterpolateAttribute>(source_, type, sampling);
     }
 
@@ -3482,12 +3482,14 @@ class ProgramBuilder {
     /// @param source the source information
     /// @returns the interpolate attribute pointer
     const ast::InterpolateAttribute* Flat(const Source& source) {
-        return Interpolate(source, ast::InterpolationType::kFlat);
+        return Interpolate(source, builtin::InterpolationType::kFlat);
     }
 
     /// Creates an ast::InterpolateAttribute using flat interpolation
     /// @returns the interpolate attribute pointer
-    const ast::InterpolateAttribute* Flat() { return Interpolate(ast::InterpolationType::kFlat); }
+    const ast::InterpolateAttribute* Flat() {
+        return Interpolate(builtin::InterpolationType::kFlat);
+    }
 
     /// Creates an ast::InvariantAttribute
     /// @param source the source information

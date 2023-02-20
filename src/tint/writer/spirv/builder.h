@@ -221,8 +221,8 @@ class Builder {
     /// @param type the interpolation type
     /// @param sampling the interpolation sampling
     void AddInterpolationDecorations(uint32_t id,
-                                     ast::InterpolationType type,
-                                     ast::InterpolationSampling sampling);
+                                     builtin::InterpolationType type,
+                                     builtin::InterpolationSampling sampling);
 
     /// Generates the enabling of an extension. Emits an error and returns false if the extension is
     /// not supported.

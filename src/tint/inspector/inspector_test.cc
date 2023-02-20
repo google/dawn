@@ -51,8 +51,8 @@ class InspectorGetEntryPointComponentAndCompositionTest
     : public InspectorBuilder,
       public testing::TestWithParam<InspectorGetEntryPointComponentAndCompositionTestParams> {};
 struct InspectorGetEntryPointInterpolateTestParams {
-    ast::InterpolationType in_type;
-    ast::InterpolationSampling in_sampling;
+    builtin::InterpolationType in_type;
+    builtin::InterpolationSampling in_sampling;
     inspector::InterpolationType out_type;
     inspector::InterpolationSampling out_sampling;
 };
@@ -1436,31 +1436,31 @@ INSTANTIATE_TEST_SUITE_P(
     InspectorGetEntryPointInterpolateTest,
     testing::Values(
         InspectorGetEntryPointInterpolateTestParams{
-            ast::InterpolationType::kPerspective, ast::InterpolationSampling::kCenter,
+            builtin::InterpolationType::kPerspective, builtin::InterpolationSampling::kCenter,
             InterpolationType::kPerspective, InterpolationSampling::kCenter},
         InspectorGetEntryPointInterpolateTestParams{
-            ast::InterpolationType::kPerspective, ast::InterpolationSampling::kCentroid,
+            builtin::InterpolationType::kPerspective, builtin::InterpolationSampling::kCentroid,
             InterpolationType::kPerspective, InterpolationSampling::kCentroid},
         InspectorGetEntryPointInterpolateTestParams{
-            ast::InterpolationType::kPerspective, ast::InterpolationSampling::kSample,
+            builtin::InterpolationType::kPerspective, builtin::InterpolationSampling::kSample,
             InterpolationType::kPerspective, InterpolationSampling::kSample},
         InspectorGetEntryPointInterpolateTestParams{
-            ast::InterpolationType::kPerspective, ast::InterpolationSampling::kUndefined,
+            builtin::InterpolationType::kPerspective, builtin::InterpolationSampling::kUndefined,
             InterpolationType::kPerspective, InterpolationSampling::kCenter},
         InspectorGetEntryPointInterpolateTestParams{
-            ast::InterpolationType::kLinear, ast::InterpolationSampling::kCenter,
+            builtin::InterpolationType::kLinear, builtin::InterpolationSampling::kCenter,
             InterpolationType::kLinear, InterpolationSampling::kCenter},
         InspectorGetEntryPointInterpolateTestParams{
-            ast::InterpolationType::kLinear, ast::InterpolationSampling::kCentroid,
+            builtin::InterpolationType::kLinear, builtin::InterpolationSampling::kCentroid,
             InterpolationType::kLinear, InterpolationSampling::kCentroid},
         InspectorGetEntryPointInterpolateTestParams{
-            ast::InterpolationType::kLinear, ast::InterpolationSampling::kSample,
+            builtin::InterpolationType::kLinear, builtin::InterpolationSampling::kSample,
             InterpolationType::kLinear, InterpolationSampling::kSample},
         InspectorGetEntryPointInterpolateTestParams{
-            ast::InterpolationType::kLinear, ast::InterpolationSampling::kUndefined,
+            builtin::InterpolationType::kLinear, builtin::InterpolationSampling::kUndefined,
             InterpolationType::kLinear, InterpolationSampling::kCenter},
         InspectorGetEntryPointInterpolateTestParams{
-            ast::InterpolationType::kFlat, ast::InterpolationSampling::kUndefined,
+            builtin::InterpolationType::kFlat, builtin::InterpolationSampling::kUndefined,
             InterpolationType::kFlat, InterpolationSampling::kNone}));
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {

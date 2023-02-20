@@ -352,8 +352,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Flat) {
     ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
-    EXPECT_EQ(interp->type, ast::InterpolationType::kFlat);
-    EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kUndefined);
+    EXPECT_EQ(interp->type, builtin::InterpolationType::kFlat);
+    EXPECT_EQ(interp->sampling, builtin::InterpolationSampling::kUndefined);
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Single_TrailingComma) {
@@ -368,8 +368,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Single_TrailingComma) {
     ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
-    EXPECT_EQ(interp->type, ast::InterpolationType::kFlat);
-    EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kUndefined);
+    EXPECT_EQ(interp->type, builtin::InterpolationType::kFlat);
+    EXPECT_EQ(interp->sampling, builtin::InterpolationSampling::kUndefined);
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Single_DoubleTrailingComma) {
@@ -395,8 +395,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Perspective_Center) {
     ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
-    EXPECT_EQ(interp->type, ast::InterpolationType::kPerspective);
-    EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kCenter);
+    EXPECT_EQ(interp->type, builtin::InterpolationType::kPerspective);
+    EXPECT_EQ(interp->sampling, builtin::InterpolationSampling::kCenter);
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Double_TrailingComma) {
@@ -411,8 +411,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Double_TrailingComma) {
     ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
-    EXPECT_EQ(interp->type, ast::InterpolationType::kPerspective);
-    EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kCenter);
+    EXPECT_EQ(interp->type, builtin::InterpolationType::kPerspective);
+    EXPECT_EQ(interp->sampling, builtin::InterpolationSampling::kCenter);
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Perspective_Centroid) {
@@ -427,8 +427,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Perspective_Centroid) {
     ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
-    EXPECT_EQ(interp->type, ast::InterpolationType::kPerspective);
-    EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kCentroid);
+    EXPECT_EQ(interp->type, builtin::InterpolationType::kPerspective);
+    EXPECT_EQ(interp->sampling, builtin::InterpolationSampling::kCentroid);
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Linear_Sample) {
@@ -443,8 +443,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Linear_Sample) {
     ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
-    EXPECT_EQ(interp->type, ast::InterpolationType::kLinear);
-    EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kSample);
+    EXPECT_EQ(interp->type, builtin::InterpolationType::kLinear);
+    EXPECT_EQ(interp->sampling, builtin::InterpolationSampling::kSample);
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_MissingLeftParen) {

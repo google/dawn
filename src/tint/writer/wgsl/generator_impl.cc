@@ -572,7 +572,7 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
             },
             [&](const ast::InterpolateAttribute* interpolate) {
                 out << "interpolate(" << interpolate->type;
-                if (interpolate->sampling != ast::InterpolationSampling::kUndefined) {
+                if (interpolate->sampling != builtin::InterpolationSampling::kUndefined) {
                     out << ", " << interpolate->sampling;
                 }
                 out << ")";

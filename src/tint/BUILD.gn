@@ -708,6 +708,10 @@ libtint_source_set("libtint_builtins_src") {
     "builtin/diagnostic_severity.h",
     "builtin/extension.cc",
     "builtin/extension.h",
+    "builtin/interpolation_sampling.cc",
+    "builtin/interpolation_sampling.h",
+    "builtin/interpolation_type.cc",
+    "builtin/interpolation_type.h",
     "builtin/texel_format.cc",
     "builtin/texel_format.h",
   ]
@@ -1306,6 +1310,8 @@ if (tint_build_unittests) {
       "builtin/diagnostic_rule_test.cc",
       "builtin/diagnostic_severity_test.cc",
       "builtin/extension_test.cc",
+      "builtin/interpolation_sampling_test.cc",
+      "builtin/interpolation_type_test.cc",
       "builtin/texel_format_test.cc",
     ]
     deps = [ ":libtint_builtins_src" ]

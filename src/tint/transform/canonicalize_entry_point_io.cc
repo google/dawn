@@ -222,8 +222,8 @@ struct CanonicalizeEntryPointIO::State {
                 !ast::HasAttribute<ast::InterpolateAttribute>(attributes) &&
                 (ast::HasAttribute<ast::LocationAttribute>(attributes) ||
                  cfg.shader_style == ShaderStyle::kSpirv)) {
-                attributes.Push(ctx.dst->Interpolate(ast::InterpolationType::kFlat,
-                                                     ast::InterpolationSampling::kUndefined));
+                attributes.Push(ctx.dst->Interpolate(builtin::InterpolationType::kFlat,
+                                                     builtin::InterpolationSampling::kUndefined));
             }
 
             // Disable validation for use of the `input` address space.
@@ -291,8 +291,8 @@ struct CanonicalizeEntryPointIO::State {
             type->is_integer_scalar_or_vector() &&
             ast::HasAttribute<ast::LocationAttribute>(attributes) &&
             !ast::HasAttribute<ast::InterpolateAttribute>(attributes)) {
-            attributes.Push(ctx.dst->Interpolate(ast::InterpolationType::kFlat,
-                                                 ast::InterpolationSampling::kUndefined));
+            attributes.Push(ctx.dst->Interpolate(builtin::InterpolationType::kFlat,
+                                                 builtin::InterpolationSampling::kUndefined));
         }
 
         // In GLSL, if it's a builtin, override the name with the

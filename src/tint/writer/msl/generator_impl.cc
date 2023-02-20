@@ -1939,33 +1939,34 @@ std::string GeneratorImpl::builtin_to_attribute(builtin::BuiltinValue builtin) c
     return "";
 }
 
-std::string GeneratorImpl::interpolation_to_attribute(ast::InterpolationType type,
-                                                      ast::InterpolationSampling sampling) const {
+std::string GeneratorImpl::interpolation_to_attribute(
+    builtin::InterpolationType type,
+    builtin::InterpolationSampling sampling) const {
     std::string attr;
     switch (sampling) {
-        case ast::InterpolationSampling::kCenter:
+        case builtin::InterpolationSampling::kCenter:
             attr = "center_";
             break;
-        case ast::InterpolationSampling::kCentroid:
+        case builtin::InterpolationSampling::kCentroid:
             attr = "centroid_";
             break;
-        case ast::InterpolationSampling::kSample:
+        case builtin::InterpolationSampling::kSample:
             attr = "sample_";
             break;
-        case ast::InterpolationSampling::kUndefined:
+        case builtin::InterpolationSampling::kUndefined:
             break;
     }
     switch (type) {
-        case ast::InterpolationType::kPerspective:
+        case builtin::InterpolationType::kPerspective:
             attr += "perspective";
             break;
-        case ast::InterpolationType::kLinear:
+        case builtin::InterpolationType::kLinear:
             attr += "no_perspective";
             break;
-        case ast::InterpolationType::kFlat:
+        case builtin::InterpolationType::kFlat:
             attr += "flat";
             break;
-        case ast::InterpolationType::kUndefined:
+        case builtin::InterpolationType::kUndefined:
             break;
     }
     return attr;

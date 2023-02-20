@@ -1115,18 +1115,18 @@ Expect<const ast::Parameter*> ParserImpl::expect_param() {
 //   : 'center'
 //   | 'centroid'
 //   | 'sample'
-Expect<ast::InterpolationSampling> ParserImpl::expect_interpolation_sample_name() {
-    return expect_enum("interpolation sampling", ast::ParseInterpolationSampling,
-                       ast::kInterpolationSamplingStrings);
+Expect<builtin::InterpolationSampling> ParserImpl::expect_interpolation_sample_name() {
+    return expect_enum("interpolation sampling", builtin::ParseInterpolationSampling,
+                       builtin::kInterpolationSamplingStrings);
 }
 
 // interpolation_type_name
 //   : 'perspective'
 //   | 'linear'
 //   | 'flat'
-Expect<ast::InterpolationType> ParserImpl::expect_interpolation_type_name() {
-    return expect_enum("interpolation type", ast::ParseInterpolationType,
-                       ast::kInterpolationTypeStrings);
+Expect<builtin::InterpolationType> ParserImpl::expect_interpolation_type_name() {
+    return expect_enum("interpolation type", builtin::ParseInterpolationType,
+                       builtin::kInterpolationTypeStrings);
 }
 
 // builtin_value_name
@@ -3091,7 +3091,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
                 return Failure::kErrored;
             }
 
-            ast::InterpolationSampling sampling = ast::InterpolationSampling::kUndefined;
+            builtin::InterpolationSampling sampling = builtin::InterpolationSampling::kUndefined;
             if (match(Token::Type::kComma)) {
                 if (!peek_is(Token::Type::kParenRight)) {
                     auto sample = expect_interpolation_sample_name();

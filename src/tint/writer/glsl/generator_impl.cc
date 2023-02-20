@@ -2191,21 +2191,21 @@ void GeneratorImpl::EmitInterpolationQualifiers(
     for (auto* attr : attributes) {
         if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
             switch (interpolate->type) {
-                case ast::InterpolationType::kPerspective:
-                case ast::InterpolationType::kLinear:
-                case ast::InterpolationType::kUndefined:
+                case builtin::InterpolationType::kPerspective:
+                case builtin::InterpolationType::kLinear:
+                case builtin::InterpolationType::kUndefined:
                     break;
-                case ast::InterpolationType::kFlat:
+                case builtin::InterpolationType::kFlat:
                     out << "flat ";
                     break;
             }
             switch (interpolate->sampling) {
-                case ast::InterpolationSampling::kCentroid:
+                case builtin::InterpolationSampling::kCentroid:
                     out << "centroid ";
                     break;
-                case ast::InterpolationSampling::kSample:
-                case ast::InterpolationSampling::kCenter:
-                case ast::InterpolationSampling::kUndefined:
+                case builtin::InterpolationSampling::kSample:
+                case builtin::InterpolationSampling::kCenter:
+                case builtin::InterpolationSampling::kUndefined:
                     break;
             }
         }
