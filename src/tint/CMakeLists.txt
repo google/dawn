@@ -174,6 +174,8 @@ list(APPEND TINT_LIB_SRCS
   ast/member_accessor_expression.h
   ast/module.cc
   ast/module.h
+  ast/must_use_attribute.cc
+  ast/must_use_attribute.h
   ast/node_id.h
   ast/node.cc
   ast/node.h
@@ -831,7 +833,6 @@ if(TINT_BUILD_TESTS)
     ast/index_accessor_expression_test.cc
     ast/int_literal_expression_test.cc
     ast/interpolate_attribute_test.cc
-    ast/invariant_attribute_test.cc
     ast/location_attribute_test.cc
     ast/loop_statement_test.cc
     ast/member_accessor_expression_test.cc

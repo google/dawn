@@ -56,6 +56,7 @@
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/member_accessor_expression.h"
 #include "src/tint/ast/module.h"
+#include "src/tint/ast/must_use_attribute.h"
 #include "src/tint/ast/override.h"
 #include "src/tint/ast/parameter.h"
 #include "src/tint/ast/phony_expression.h"
@@ -3503,6 +3504,17 @@ class ProgramBuilder {
     /// Creates an ast::InvariantAttribute
     /// @returns the invariant attribute pointer
     const ast::InvariantAttribute* Invariant() { return create<ast::InvariantAttribute>(source_); }
+
+    /// Creates an ast::MustUseAttribute
+    /// @param source the source information
+    /// @returns the invariant attribute pointer
+    const ast::MustUseAttribute* MustUse(const Source& source) {
+        return create<ast::MustUseAttribute>(source);
+    }
+
+    /// Creates an ast::MustUseAttribute
+    /// @returns the invariant attribute pointer
+    const ast::MustUseAttribute* MustUse() { return create<ast::MustUseAttribute>(source_); }
 
     /// Creates an ast::LocationAttribute
     /// @param source the source information

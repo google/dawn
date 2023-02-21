@@ -800,6 +800,9 @@ bool BuilderImpl::EmitAttribute(const ast::Attribute* attr) {
         // [&](const ast::InvariantAttribute* i) {
         // TODO(dsinclair): Implement
         // },
+        // [&](const ast::MustUseAttribute* i) {
+        // TODO(dsinclair): Implement
+        // },
         [&](const ast::IdAttribute*) {
             diagnostics_.add_warning(tint::diag::System::IR,
                                      "found an `Id` attribute. The SubstituteOverrides transform "

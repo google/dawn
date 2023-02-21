@@ -85,12 +85,12 @@ bool is_reserved(const Token& t) {
            t == "finally" || t == "friend" || t == "from" || t == "fxgroup" || t == "get" ||
            t == "goto" || t == "groupshared" || t == "handle" || t == "highp" || t == "impl" ||
            t == "implements" || t == "import" || t == "inline" || t == "inout" ||
-           t == "instanceof" || t == "interface" || t == "invariant" || t == "layout" ||
-           t == "lowp" || t == "macro" || t == "macro_rules" || t == "match" || t == "mediump" ||
-           t == "meta" || t == "mod" || t == "module" || t == "move" || t == "mut" ||
-           t == "mutable" || t == "namespace" || t == "new" || t == "nil" || t == "noexcept" ||
-           t == "noinline" || t == "nointerpolation" || t == "noperspective" || t == "null" ||
-           t == "nullptr" || t == "of" || t == "operator" || t == "package" || t == "packoffset" ||
+           t == "instanceof" || t == "interface" || t == "layout" || t == "lowp" || t == "macro" ||
+           t == "macro_rules" || t == "match" || t == "mediump" || t == "meta" || t == "mod" ||
+           t == "module" || t == "move" || t == "mut" || t == "mutable" || t == "namespace" ||
+           t == "new" || t == "nil" || t == "noexcept" || t == "noinline" ||
+           t == "nointerpolation" || t == "noperspective" || t == "null" || t == "nullptr" ||
+           t == "of" || t == "operator" || t == "package" || t == "packoffset" ||
            t == "partition" || t == "pass" || t == "patch" || t == "pixelfragment" ||
            t == "precise" || t == "precision" || t == "premerge" || t == "priv" ||
            t == "protected" || t == "pub" || t == "public" || t == "readonly" || t == "ref" ||

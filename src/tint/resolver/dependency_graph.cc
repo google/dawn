@@ -39,6 +39,7 @@
 #include "src/tint/ast/invariant_attribute.h"
 #include "src/tint/ast/location_attribute.h"
 #include "src/tint/ast/loop_statement.h"
+#include "src/tint/ast/must_use_attribute.h"
 #include "src/tint/ast/override.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/stage_attribute.h"
@@ -460,8 +461,9 @@ class DependencyScanner {
         }
 
         if (attr->IsAnyOf<ast::BuiltinAttribute, ast::DiagnosticAttribute, ast::InternalAttribute,
-                          ast::InterpolateAttribute, ast::InvariantAttribute, ast::StageAttribute,
-                          ast::StrideAttribute, ast::StructMemberOffsetAttribute>()) {
+                          ast::InterpolateAttribute, ast::InvariantAttribute, ast::MustUseAttribute,
+                          ast::StageAttribute, ast::StrideAttribute,
+                          ast::StructMemberOffsetAttribute>()) {
             return;
         }
 
