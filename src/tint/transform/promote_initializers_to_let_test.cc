@@ -61,7 +61,7 @@ fn f() {
   var f1 = 2.0;
   var f2 = 3.0;
   var f3 = 4.0;
-  let tint_symbol = array<f32, 4u>(f0, f1, f2, f3);
+  let tint_symbol : array<f32, 4u> = array<f32, 4u>(f0, f1, f2, f3);
   var i = tint_symbol[2];
 }
 )";
@@ -110,7 +110,7 @@ struct S {
 
 fn f() {
   let runtime_value = 1;
-  let tint_symbol = S(runtime_value, 2.0, vec3<f32>());
+  let tint_symbol : S = S(runtime_value, 2.0, vec3<f32>());
   var x = tint_symbol.b;
 }
 )";
@@ -137,7 +137,7 @@ struct S {
     auto* expect = R"(
 fn f() {
   let runtime_value = 1;
-  let tint_symbol = S(runtime_value, 2.0, vec3<f32>());
+  let tint_symbol : S = S(runtime_value, 2.0, vec3<f32>());
   var x = tint_symbol.b;
 }
 
@@ -209,7 +209,7 @@ const TRI_VERTICES = array(vec4(0.0, 0.0, 0.0, 1.0), vec4(0.0, 1.0, 0.0, 1.0), v
 
 @vertex
 fn vs_main(@builtin(vertex_index) in_vertex_index : u32) -> @builtin(position) vec4<f32> {
-  let tint_symbol = TRI_VERTICES;
+  let tint_symbol : array<vec4<f32>, 3u> = TRI_VERTICES;
   return tint_symbol[in_vertex_index];
 }
 )";
@@ -249,7 +249,7 @@ fn f() {
   const f1 = 2.0;
   const C = array<f32, 2u>(f0, f1);
   let runtime_value = 1;
-  let tint_symbol = C;
+  let tint_symbol : array<f32, 2u> = C;
   var i = tint_symbol[runtime_value];
 }
 )";
@@ -272,7 +272,7 @@ fn f() {
     auto* expect = R"(
 fn f() {
   var insert_after = 1;
-  let tint_symbol = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);
+  let tint_symbol : array<f32, 4u> = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);
   for(var i = tint_symbol[insert_after]; ; ) {
     break;
   }
@@ -301,7 +301,7 @@ fn f() {
   const arr = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);
   let runtime_value = 1;
   var insert_after = 1;
-  let tint_symbol = arr;
+  let tint_symbol : array<f32, 4u> = arr;
   for(var i = tint_symbol[runtime_value]; ; ) {
     break;
   }
@@ -332,7 +332,7 @@ const arr = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);
 fn f() {
   let runtime_value = 1;
   var insert_after = 1;
-  let tint_symbol = arr;
+  let tint_symbol : array<f32, 4u> = arr;
   for(var i = tint_symbol[runtime_value]; ; ) {
     break;
   }
@@ -377,7 +377,7 @@ fn get_b_runtime(s : S) -> f32 {
 
 fn f() {
   var insert_after = 1;
-  let tint_symbol = S(1, 2.0, vec3<f32>());
+  let tint_symbol : S = S(1, 2.0, vec3<f32>());
   for(var x = get_b_runtime(tint_symbol); ; ) {
     break;
   }
@@ -412,7 +412,7 @@ struct S {
     auto* expect = R"(
 fn f() {
   var insert_after = 1;
-  let tint_symbol = S(1, 2.0, vec3<f32>());
+  let tint_symbol : S = S(1, 2.0, vec3<f32>());
   for(var x = get_b_runtime(tint_symbol); ; ) {
     break;
   }
@@ -448,7 +448,7 @@ fn f() {
 fn f() {
   var f = 1.0;
   loop {
-    let tint_symbol = array<f32, 1u>(f);
+    let tint_symbol : array<f32, 1u> = array<f32, 1u>(f);
     if (!((f == tint_symbol[0]))) {
       break;
     }
@@ -488,7 +488,7 @@ fn f() {
   {
     var i = f;
     loop {
-      let tint_symbol = arr;
+      let tint_symbol : array<f32, 1u> = arr;
       if (!((i == tint_symbol[runtime_value]))) {
         break;
       }
@@ -533,7 +533,7 @@ fn F() {
   {
     var i = f;
     loop {
-      let tint_symbol = arr;
+      let tint_symbol : array<f32, 1u> = arr;
       if (!((i == tint_symbol[runtime_value]))) {
         break;
       }
@@ -578,7 +578,7 @@ fn f() {
     }
 
     continuing {
-      let tint_symbol = array<f32, 1u>(1.0);
+      let tint_symbol : array<f32, 1u> = array<f32, 1u>(1.0);
       f = (f + tint_symbol[runtime_value]);
     }
   }
@@ -616,7 +616,7 @@ fn f() {
     }
 
     continuing {
-      let tint_symbol = arr;
+      let tint_symbol : array<f32, 1u> = arr;
       f = (f + tint_symbol[runtime_value]);
     }
   }
@@ -656,7 +656,7 @@ fn f() {
     }
 
     continuing {
-      let tint_symbol = arr;
+      let tint_symbol : array<f32, 1u> = arr;
       f = (f + tint_symbol[runtime_value]);
     }
   }
@@ -683,11 +683,11 @@ fn f() {
     auto* expect = R"(
 fn f() {
   let runtime_value = 0;
-  let tint_symbol = array<f32, 1u>(0.0);
+  let tint_symbol : array<f32, 1u> = array<f32, 1u>(0.0);
   {
     var f = tint_symbol[runtime_value];
     loop {
-      let tint_symbol_1 = array<f32, 1u>(1.0);
+      let tint_symbol_1 : array<f32, 1u> = array<f32, 1u>(1.0);
       if (!((f < tint_symbol_1[runtime_value]))) {
         break;
       }
@@ -696,7 +696,7 @@ fn f() {
       }
 
       continuing {
-        let tint_symbol_2 = array<f32, 1u>(2.0);
+        let tint_symbol_2 : array<f32, 1u> = array<f32, 1u>(2.0);
         f = (f + tint_symbol_2[runtime_value]);
       }
     }
@@ -728,11 +728,11 @@ fn f() {
   const arr_a = array<f32, 1u>(0.0);
   const arr_b = array<f32, 1u>(1.0);
   const arr_c = array<f32, 1u>(2.0);
-  let tint_symbol = arr_a;
+  let tint_symbol : array<f32, 1u> = arr_a;
   {
     var f = tint_symbol[runtime_value];
     loop {
-      let tint_symbol_1 = arr_b;
+      let tint_symbol_1 : array<f32, 1u> = arr_b;
       if (!((f < tint_symbol_1[runtime_value]))) {
         break;
       }
@@ -741,7 +741,7 @@ fn f() {
       }
 
       continuing {
-        let tint_symbol_2 = arr_c;
+        let tint_symbol_2 : array<f32, 1u> = arr_c;
         f = (f + tint_symbol_2[runtime_value]);
       }
     }
@@ -772,7 +772,7 @@ fn f() {
   if (true) {
     var marker = 0;
   } else {
-    let tint_symbol = array<f32, 2u>(f, f);
+    let tint_symbol : array<f32, 2u> = array<f32, 2u>(f, f);
     if ((f == tint_symbol[0])) {
       var marker = 1;
     }
@@ -813,11 +813,11 @@ fn f() {
   } else if (true) {
     var marker = 1;
   } else {
-    let tint_symbol = array<f32, 2u>(f, f);
+    let tint_symbol : array<f32, 2u> = array<f32, 2u>(f, f);
     if ((f == tint_symbol[0])) {
       var marker = 2;
     } else {
-      let tint_symbol_1 = array<f32, 2u>(f, f);
+      let tint_symbol_1 : array<f32, 2u> = array<f32, 2u>(f, f);
       if ((f == tint_symbol_1[1])) {
         var marker = 3;
       } else if (true) {
@@ -867,11 +867,11 @@ fn f() {
   } else if (true) {
     var marker = 1;
   } else {
-    let tint_symbol = arr;
+    let tint_symbol : array<f32, 2u> = arr;
     if ((f == tint_symbol[runtime_value])) {
       var marker = 2;
     } else {
-      let tint_symbol_1 = arr;
+      let tint_symbol_1 : array<f32, 2u> = arr;
       if ((f == tint_symbol_1[(runtime_value + 1)])) {
         var marker = 3;
       } else if (true) {
@@ -925,11 +925,11 @@ fn F() {
   } else if (true) {
     var marker = 1;
   } else {
-    let tint_symbol = arr;
+    let tint_symbol : array<f32, 2u> = arr;
     if ((f == tint_symbol[runtime_value])) {
       var marker = 2;
     } else {
-      let tint_symbol_1 = arr;
+      let tint_symbol_1 : array<f32, 2u> = arr;
       if ((f == tint_symbol_1[(runtime_value + 1)])) {
         var marker = 3;
       } else if (true) {
@@ -968,7 +968,7 @@ fn f() {
     auto* expect = R"(
 fn f() {
   let runtime_value = 1;
-  let tint_symbol = array<array<f32, 2u>, 2u>(array<f32, 2u>(1.0, 2.0), array<f32, 2u>(3.0, 4.0));
+  let tint_symbol : array<array<f32, 2u>, 2u> = array<array<f32, 2u>, 2u>(array<f32, 2u>(1.0, 2.0), array<f32, 2u>(3.0, 4.0));
   var i = tint_symbol[runtime_value][(runtime_value + 1)];
 }
 )";
@@ -1008,7 +1008,7 @@ fn f() {
   const arr_0 = array<f32, 2u>(1.0, 2.0);
   const arr_1 = array<f32, 2u>(3.0, 4.0);
   const arr_2 = array<array<f32, 2u>, 2u>(arr_0, arr_1);
-  let tint_symbol = arr_2;
+  let tint_symbol : array<array<f32, 2u>, 2u> = arr_2;
   var i = tint_symbol[runtime_value][(runtime_value + 1)];
 }
 )";
@@ -1041,7 +1041,7 @@ const arr_2 = array<array<f32, 2u>, 2u>(arr_0, arr_1);
 
 fn f() {
   let runtime_value = 1;
-  let tint_symbol = arr_2;
+  let tint_symbol : array<array<f32, 2u>, 2u> = arr_2;
   var i = tint_symbol[runtime_value][(runtime_value + 1)];
 }
 )";
@@ -1096,7 +1096,7 @@ fn get_a(s : S3) -> S2 {
 }
 
 fn f() {
-  let tint_symbol = S3(S2(1, S1(2), 3));
+  let tint_symbol : S3 = S3(S2(1, S1(2), 3));
   var x = get_a(tint_symbol).b.a;
 }
 )";
@@ -1139,7 +1139,7 @@ fn get_a(s : S2) -> array<S1, 3u> {
 }
 
 fn f() {
-  let tint_symbol = S2(array<S1, 3u>(S1(1), S1(2), S1(3)));
+  let tint_symbol : S2 = S2(array<S1, 3u>(S1(1), S1(2), S1(3)));
   var x = get_a(tint_symbol)[1].a;
 }
 )";
@@ -1170,7 +1170,7 @@ struct S1 {
 
     auto* expect = R"(
 fn f() {
-  let tint_symbol = S2(array<S1, 3u>(S1(1), S1(2), S1(3)));
+  let tint_symbol : S2 = S2(array<S1, 3u>(S1(1), S1(2), S1(3)));
   var x = get_a(tint_symbol)[1].a;
 }
 
@@ -1272,7 +1272,7 @@ fn X() {
       }
 
       continuing {
-        let tint_symbol = array<i32, 1u>(i);
+        let tint_symbol : array<i32, 1u> = array<i32, 1u>(i);
         f = (f + tint_symbol[0]);
       }
     }
@@ -1284,7 +1284,7 @@ fn Y() {
   {
     var f = 0;
     loop {
-      let tint_symbol_1 = array<i32, 1u>(i);
+      let tint_symbol_1 : array<i32, 1u> = array<i32, 1u>(i);
       if (!((f < tint_symbol_1[0]))) {
         break;
       }
@@ -1301,10 +1301,32 @@ fn Y() {
 
 fn Z() {
   var i = 10;
-  let tint_symbol_2 = array<i32, 1u>(i);
+  let tint_symbol_2 : array<i32, 1u> = array<i32, 1u>(i);
   for(var f = tint_symbol_2[0]; (f < 10); f = (f + 1)) {
     var i = 20;
   }
+}
+)";
+
+    auto got = Run<PromoteInitializersToLet>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteInitializersToLetTest, AssignAbstractArray) {
+    // Test that hoisting an array with abstract type still materializes to the correct type.
+    auto* src = R"(
+fn f() {
+  var arr : array<f32, 4>;
+  arr = array(1, 2, 3, 4);
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  var arr : array<f32, 4>;
+  let tint_symbol : array<f32, 4u> = array(1, 2, 3, 4);
+  arr = tint_symbol;
 }
 )";
 

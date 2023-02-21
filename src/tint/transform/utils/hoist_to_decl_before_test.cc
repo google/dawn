@@ -51,7 +51,7 @@ TEST_F(HoistToDeclBeforeTest, VarInit) {
 
     auto* expect = R"(
 fn f() {
-  let tint_symbol = 1i;
+  let tint_symbol : i32 = 1i;
   var a = tint_symbol;
 }
 )";
@@ -82,7 +82,7 @@ TEST_F(HoistToDeclBeforeTest, ForLoopInit) {
 
     auto* expect = R"(
 fn f() {
-  var tint_symbol = 1i;
+  var tint_symbol : i32 = 1i;
   for(var a = tint_symbol; true; ) {
   }
 }
@@ -162,7 +162,7 @@ fn f() {
     }
 
     continuing {
-      let tint_symbol = 1i;
+      let tint_symbol : i32 = 1i;
       var a = tint_symbol;
     }
   }
@@ -199,7 +199,7 @@ TEST_F(HoistToDeclBeforeTest, WhileCond) {
 fn f() {
   var a : bool;
   loop {
-    var tint_symbol = a;
+    var tint_symbol : bool = a;
     if (!(tint_symbol)) {
       break;
     }
@@ -280,7 +280,7 @@ TEST_F(HoistToDeclBeforeTest, Array1D) {
     auto* expect = R"(
 fn f() {
   var a : array<i32, 10u>;
-  let tint_symbol = a[0i];
+  let tint_symbol : i32 = a[0i];
   var b = tint_symbol;
 }
 )";
@@ -314,7 +314,7 @@ TEST_F(HoistToDeclBeforeTest, Array2D) {
     auto* expect = R"(
 fn f() {
   var a : array<array<i32, 10u>, 10i>;
-  var tint_symbol = a[0i][0i];
+  var tint_symbol : i32 = a[0i][0i];
   var b = tint_symbol;
 }
 )";
@@ -787,6 +787,66 @@ fn f() {
     } else {
     }
   }
+}
+)";
+
+    EXPECT_EQ(expect, str(cloned));
+}
+
+TEST_F(HoistToDeclBeforeTest, AbstractArray_ToLet) {
+    // fn f() {
+    //     var a : array<f32, 1> = array(1);
+    // }
+    ProgramBuilder b;
+    auto* expr = b.Call(b.ty("array"), b.Expr(1_a));
+    auto* var = b.Decl(b.Var("a", b.ty.array(b.ty.f32(), 1_a), expr));
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var});
+
+    Program original(std::move(b));
+    ProgramBuilder cloned_b;
+    CloneContext ctx(&cloned_b, &original);
+
+    HoistToDeclBefore hoistToDeclBefore(ctx);
+    auto* sem_expr = ctx.src->Sem().Get(expr);
+    hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kLet);
+
+    ctx.Clone();
+    Program cloned(std::move(cloned_b));
+
+    auto* expect = R"(
+fn f() {
+  let tint_symbol : array<f32, 1u> = array(1);
+  var a : array<f32, 1> = tint_symbol;
+}
+)";
+
+    EXPECT_EQ(expect, str(cloned));
+}
+
+TEST_F(HoistToDeclBeforeTest, AbstractArray_ToVar) {
+    // fn f() {
+    //     var a : array<f32, 1> = array(1);
+    // }
+    ProgramBuilder b;
+    auto* expr = b.Call(b.ty("array"), b.Expr(1_a));
+    auto* var = b.Decl(b.Var("a", b.ty.array(b.ty.f32(), 1_a), expr));
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var});
+
+    Program original(std::move(b));
+    ProgramBuilder cloned_b;
+    CloneContext ctx(&cloned_b, &original);
+
+    HoistToDeclBefore hoistToDeclBefore(ctx);
+    auto* sem_expr = ctx.src->Sem().Get(expr);
+    hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kVar);
+
+    ctx.Clone();
+    Program cloned(std::move(cloned_b));
+
+    auto* expect = R"(
+fn f() {
+  var tint_symbol : array<f32, 1u> = array(1);
+  var a : array<f32, 1> = tint_symbol;
 }
 )";
 

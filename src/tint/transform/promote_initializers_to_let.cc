@@ -134,7 +134,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
         return expr_a->Declaration()->node_id < expr_b->Declaration()->node_id;
     });
 
-    // Hoist all the expression in to_hoist  to a constant variable, declared just before the
+    // Hoist all the expressions in to_hoist to a constant variable, declared just before the
     // statement of usage.
     HoistToDeclBefore hoist_to_decl_before(ctx);
     for (auto* expr : to_hoist) {

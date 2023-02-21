@@ -45,7 +45,9 @@ struct HoistToDeclBefore::State {
         switch (kind) {
             case VariableKind::kLet: {
                 auto builder = [this, expr, name] {
-                    return b.Decl(b.Let(name, ctx.CloneWithoutTransform(expr)));
+                    return b.Decl(b.Let(
+                        name, Transform::CreateASTTypeFor(ctx, ctx.src->Sem().GetVal(expr)->Type()),
+                        ctx.CloneWithoutTransform(expr)));
                 };
                 if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
                     return false;
@@ -55,7 +57,9 @@ struct HoistToDeclBefore::State {
 
             case VariableKind::kVar: {
                 auto builder = [this, expr, name] {
-                    return b.Decl(b.Var(name, ctx.CloneWithoutTransform(expr)));
+                    return b.Decl(b.Var(
+                        name, Transform::CreateASTTypeFor(ctx, ctx.src->Sem().GetVal(expr)->Type()),
+                        ctx.CloneWithoutTransform(expr)));
                 };
                 if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
                     return false;

@@ -44,7 +44,7 @@ fn f() {
 fn f() {
   var i : i32;
   let p = array<i32, 4>(1, 2, 3, 4);
-  var var_for_index = p;
+  var var_for_index : array<i32, 4u> = p;
   let x = var_for_index[i];
 }
 )";
@@ -68,7 +68,7 @@ fn f() {
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
-  var var_for_index = p;
+  var var_for_index : mat2x2<f32> = p;
   let x = var_for_index[i];
 }
 )";
@@ -99,8 +99,8 @@ fn f() {
   var i : i32;
   var j : i32;
   let p = array<array<i32, 2>, 2>(array<i32, 2>(1, 2), array<i32, 2>(3, 4));
-  var var_for_index = p;
-  var var_for_index_1 = var_for_index[i];
+  var var_for_index : array<array<i32, 2u>, 2u> = p;
+  var var_for_index_1 : array<i32, 2u> = var_for_index[i];
   let x = var_for_index_1[j];
 }
 )";
@@ -126,7 +126,7 @@ fn f() {
 fn f() {
   var i : i32;
   let p = array<array<i32, 2>, 2>(array<i32, 2>(1, 2), array<i32, 2>(3, 4));
-  var var_for_index = p;
+  var var_for_index : array<array<i32, 2u>, 2u> = p;
   for(let x = var_for_index[i]; ; ) {
     break;
   }
@@ -154,7 +154,7 @@ fn f() {
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
-  var var_for_index = p;
+  var var_for_index : mat2x2<f32> = p;
   for(let x = var_for_index[i]; ; ) {
     break;
   }
@@ -183,7 +183,7 @@ fn f() {
   var i : i32;
   let p = array<i32, 2>(1, 2);
   loop {
-    var var_for_index = p;
+    var var_for_index : array<i32, 2u> = p;
     if (!((var_for_index[i] < 3))) {
       break;
     }
@@ -216,7 +216,7 @@ fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
   loop {
-    var var_for_index = p;
+    var var_for_index : mat2x2<f32> = p;
     if (!((var_for_index[i].x < 3.0))) {
       break;
     }
@@ -252,12 +252,12 @@ fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
   loop {
-    var var_for_index = p;
+    var var_for_index : mat2x2<f32> = p;
     if (!((var_for_index[i].x < 3.0))) {
       break;
     }
     {
-      var var_for_index_1 = p;
+      var var_for_index_1 : mat2x2<f32> = p;
       if ((var_for_index_1[i].x < 1.0)) {
         var marker = 1;
       }
@@ -293,7 +293,7 @@ fn f() {
   if (false) {
     var marker = 0;
   } else {
-    var var_for_index = p;
+    var var_for_index : array<i32, 2u> = p;
     if ((var_for_index[i] < 3)) {
       var marker = 1;
     }
@@ -337,11 +337,11 @@ fn f() {
   } else if (true) {
     var marker = 1;
   } else {
-    var var_for_index = p;
+    var var_for_index : array<i32, 2u> = p;
     if ((var_for_index[i] < 3)) {
       var marker = 2;
     } else {
-      var var_for_index_1 = p;
+      var var_for_index_1 : array<i32, 2u> = p;
       if ((var_for_index_1[i] < 4)) {
         var marker = 3;
       } else if (true) {
@@ -380,7 +380,7 @@ fn f() {
   if (false) {
     var marker_if = 1;
   } else {
-    var var_for_index = p;
+    var var_for_index : mat2x2<f32> = p;
     if ((var_for_index[i].x < 3.0)) {
       var marker_else_if = 1;
     }
@@ -424,11 +424,11 @@ fn f() {
   } else if (true) {
     var marker = 1;
   } else {
-    var var_for_index = p;
+    var var_for_index : mat2x2<f32> = p;
     if ((var_for_index[i].x < 3.0)) {
       var marker = 2;
     } else {
-      var var_for_index_1 = p;
+      var var_for_index_1 : mat2x2<f32> = p;
       if ((var_for_index_1[i].y < 3.0)) {
         var marker = 3;
       } else if (true) {
