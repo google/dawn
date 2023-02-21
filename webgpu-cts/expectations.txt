@@ -62,7 +62,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2023-02-18 06:49:39AM
+# Last rolled: 2023-02-21 12:00:12PM
 
 ################################################################################
 # copyToTexture failures on Linux
@@ -347,6 +347,10 @@ crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,readbackFromWebGPUCa
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba8unorm";alphaMode="premultiplied";webgl="webgl2";upload="texImage2D" [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba8unorm";alphaMode="premultiplied";webgl="webgl2";upload="texSubImage2D" [ Failure ]
 
+# New flakes. Please triage:
+crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";srcDoFlipYDuringCopy=false;dstPremultiplied=false [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";srcDoFlipYDuringCopy=true;dstPremultiplied=false [ RetryOnFailure ]
+
 # New failures. Please triage:
 crbug.com/dawn/0000 webgpu:api,operation,labels:object_has_descriptor_label:name="createComputePipelineAsync" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,labels:object_has_descriptor_label:name="createRenderPipelineAsync" [ Failure ]
@@ -359,7 +363,6 @@ crbug.com/dawn/0000 webgpu:api,validation,buffer,mapping:getMappedRange,state,ma
 crbug.com/dawn/0000 webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,capability_checks,limits,maxBufferSize:* [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 ubuntu ] webgpu:api,validation,capability_checks,limits,maxVertexBufferArrayStride:createRenderPipelineAsync,at_over:limitTest="atMaximum" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,compute_pipeline:overrides,identifier:isAsync=false;constants={"s%C3%A9quen%C3%A7age":0} [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,compute_pipeline:overrides,identifier:isAsync=true;constants={"s%C3%A9quen%C3%A7age":0} [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,createBindGroupLayout:multisampled_validation:viewDimension="2d" [ Failure ]
@@ -410,16 +413,11 @@ crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,
 crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rgba8unorm" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rgba8unorm-srgb" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,unaligned:formats=["r32float","rgba8unorm","rgba32float","r8unorm","r8unorm"] [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 ubuntu ] webgpu:api,validation,render_pipeline,inter_stage:interpolation_type:isAsync=true;output="%40interpolate(linear,%20center)";input="%40interpolate(linear,%20center)" [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 ubuntu ] webgpu:api,validation,render_pipeline,inter_stage:interpolation_type:isAsync=true;output="%40interpolate(perspective)";input="%40interpolate(perspective)" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,overrides:identifier,fragment:isAsync=false;fragmentConstants={"s%C3%A9quen%C3%A7age":0} [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,overrides:identifier,fragment:isAsync=true;fragmentConstants={"s%C3%A9quen%C3%A7age":0} [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,overrides:identifier,vertex:isAsync=false;vertexConstants={"s%C3%A9quen%C3%A7age":0} [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,overrides:identifier,vertex:isAsync=true;vertexConstants={"s%C3%A9quen%C3%A7age":0} [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,texture,destroy:invalid_texture: [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition:inputSource="storage_rw";vectorize=2 [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 ] webgpu:shader,execution,expression,binary,f32_arithmetic:multiplication:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,parse,identifiers:identifiers:* [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:alpha_mode:* [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:defaults:* [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,configure:device:* [ Failure ]
@@ -474,9 +472,8 @@ crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,readbackFromWebGPUCa
 crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="display-p3";snapshotType="toBlob" [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="display-p3";snapshotType="toDataURL" [ Failure ]
 crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="display-p3";snapshotType="toDataURL" [ Failure ]
+crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";srcDoFlipYDuringCopy=false;dstPremultiplied=false [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";srcDoFlipYDuringCopy=false;dstPremultiplied=false [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";srcDoFlipYDuringCopy=false;dstPremultiplied=false [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";srcDoFlipYDuringCopy=true;dstPremultiplied=false [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="premultiply";orientation="none";srcDoFlipYDuringCopy=true;dstPremultiplied=false [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="premultiply";orientation="none";srcDoFlipYDuringCopy=true;dstPremultiplied=false [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=true;dstColorFormat="rgba8unorm";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ Failure ]
