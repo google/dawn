@@ -308,8 +308,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Flat) {
     ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
-    EXPECT_EQ(interp->type, builtin::InterpolationType::kFlat);
-    EXPECT_EQ(interp->sampling, builtin::InterpolationSampling::kUndefined);
+    ast::CheckIdentifier(p->builder().Symbols(), interp->type, "flat");
+    EXPECT_EQ(interp->sampling, nullptr);
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Single_TrailingComma) {
@@ -324,8 +324,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Single_TrailingComma) {
     ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
-    EXPECT_EQ(interp->type, builtin::InterpolationType::kFlat);
-    EXPECT_EQ(interp->sampling, builtin::InterpolationSampling::kUndefined);
+    ast::CheckIdentifier(p->builder().Symbols(), interp->type, "flat");
+    EXPECT_EQ(interp->sampling, nullptr);
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Single_DoubleTrailingComma) {
@@ -335,8 +335,7 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Single_DoubleTrailingComma) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), R"(1:18: expected interpolation sampling
-Possible values: 'center', 'centroid', 'sample')");
+    EXPECT_EQ(p->error(), R"(1:18: expected expression for interpolation sampling)");
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Perspective_Center) {
@@ -351,8 +350,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Perspective_Center) {
     ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
-    EXPECT_EQ(interp->type, builtin::InterpolationType::kPerspective);
-    EXPECT_EQ(interp->sampling, builtin::InterpolationSampling::kCenter);
+    ast::CheckIdentifier(p->builder().Symbols(), interp->type, "perspective");
+    ast::CheckIdentifier(p->builder().Symbols(), interp->sampling, "center");
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Double_TrailingComma) {
@@ -367,8 +366,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Double_TrailingComma) {
     ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
-    EXPECT_EQ(interp->type, builtin::InterpolationType::kPerspective);
-    EXPECT_EQ(interp->sampling, builtin::InterpolationSampling::kCenter);
+    ast::CheckIdentifier(p->builder().Symbols(), interp->type, "perspective");
+    ast::CheckIdentifier(p->builder().Symbols(), interp->sampling, "center");
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Perspective_Centroid) {
@@ -383,8 +382,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Perspective_Centroid) {
     ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
-    EXPECT_EQ(interp->type, builtin::InterpolationType::kPerspective);
-    EXPECT_EQ(interp->sampling, builtin::InterpolationSampling::kCentroid);
+    ast::CheckIdentifier(p->builder().Symbols(), interp->type, "perspective");
+    ast::CheckIdentifier(p->builder().Symbols(), interp->sampling, "centroid");
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Linear_Sample) {
@@ -399,8 +398,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Linear_Sample) {
     ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
-    EXPECT_EQ(interp->type, builtin::InterpolationType::kLinear);
-    EXPECT_EQ(interp->sampling, builtin::InterpolationSampling::kSample);
+    ast::CheckIdentifier(p->builder().Symbols(), interp->type, "linear");
+    ast::CheckIdentifier(p->builder().Symbols(), interp->sampling, "sample");
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_MissingLeftParen) {
@@ -430,31 +429,7 @@ TEST_F(ParserImplTest, Attribute_Interpolate_MissingFirstValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), R"(1:13: expected interpolation type
-Possible values: 'flat', 'linear', 'perspective')");
-}
-
-TEST_F(ParserImplTest, Attribute_Interpolate_InvalidFirstValue) {
-    auto p = parser("interpolate(other_thingy)");
-    auto attr = p->attribute();
-    EXPECT_FALSE(attr.matched);
-    EXPECT_TRUE(attr.errored);
-    EXPECT_EQ(attr.value, nullptr);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), R"(1:13: expected interpolation type
-Possible values: 'flat', 'linear', 'perspective')");
-}
-
-TEST_F(ParserImplTest, Attribute_Interpolate_InvalidSecondValue) {
-    auto p = parser("interpolate(perspective, nope)");
-    auto attr = p->attribute();
-    EXPECT_FALSE(attr.matched);
-    EXPECT_TRUE(attr.errored);
-    EXPECT_EQ(attr.value, nullptr);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), R"(1:26: expected interpolation sampling
-Did you mean 'sample'?
-Possible values: 'center', 'centroid', 'sample')");
+    EXPECT_EQ(p->error(), R"(1:13: expected expression for interpolation type)");
 }
 
 TEST_F(ParserImplTest, Attribute_Binding) {

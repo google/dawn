@@ -25,8 +25,8 @@ namespace tint::ast {
 InterpolateAttribute::InterpolateAttribute(ProgramID pid,
                                            NodeID nid,
                                            const Source& src,
-                                           builtin::InterpolationType ty,
-                                           builtin::InterpolationSampling smpl)
+                                           const Expression* ty,
+                                           const Expression* smpl)
     : Base(pid, nid, src), type(ty), sampling(smpl) {}
 
 InterpolateAttribute::~InterpolateAttribute() = default;
@@ -38,7 +38,9 @@ std::string InterpolateAttribute::Name() const {
 const InterpolateAttribute* InterpolateAttribute::Clone(CloneContext* ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx->Clone(source);
-    return ctx->dst->create<InterpolateAttribute>(src, type, sampling);
+    auto* ty = ctx->Clone(type);
+    auto* smpl = ctx->Clone(sampling);
+    return ctx->dst->create<InterpolateAttribute>(src, ty, smpl);
 }
 
 }  // namespace tint::ast

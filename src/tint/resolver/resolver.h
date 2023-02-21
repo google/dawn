@@ -163,6 +163,20 @@ class Resolver {
     /// diagnostic is raised and nullptr is returned.
     sem::BuiltinEnumExpression<builtin::Access>* AccessExpression(const ast::Expression* expr);
 
+    /// @returns the call of Expression() cast to a
+    /// sem::BuiltinEnumExpression<builtin::InterpolationSampling>*. If the sem::Expression is not a
+    /// sem::BuiltinEnumExpression<builtin::InterpolationSampling>*, then an error diagnostic is
+    /// raised and nullptr is returned.
+    sem::BuiltinEnumExpression<builtin::InterpolationSampling>* InterpolationSampling(
+        const ast::Expression* expr);
+
+    /// @returns the call of Expression() cast to a
+    /// sem::BuiltinEnumExpression<builtin::InterpolationType>*. If the sem::Expression is not a
+    /// sem::BuiltinEnumExpression<builtin::InterpolationType>*, then an error diagnostic is raised
+    /// and nullptr is returned.
+    sem::BuiltinEnumExpression<builtin::InterpolationType>* InterpolationType(
+        const ast::Expression* expr);
+
     /// Expression traverses the graph of expressions starting at `expr`, building a post-ordered
     /// list (leaf-first) of all the expression nodes. Each of the expressions are then resolved by
     /// dispatching to the appropriate expression handlers below.
@@ -303,6 +317,10 @@ class Resolver {
     /// Resolves the `@builtin` attribute @p attr
     /// @returns true on success, false on failure
     bool BuiltinAttribute(const ast::BuiltinAttribute* attr);
+
+    /// Resolves the `@interpolate` attribute @p attr
+    /// @returns true on success, false on failure
+    bool InterpolateAttribute(const ast::InterpolateAttribute* attr);
 
     /// @param control the diagnostic control
     /// @returns true on success, false on failure

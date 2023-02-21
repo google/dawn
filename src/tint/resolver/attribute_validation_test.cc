@@ -1649,8 +1649,7 @@ TEST_F(InterpolateTest, MissingLocationAttribute_Parameter) {
              Param("a", ty.vec4<f32>(),
                    utils::Vector{
                        Builtin(builtin::BuiltinValue::kPosition),
-                       Interpolate(Source{{12, 34}}, builtin::InterpolationType::kFlat,
-                                   builtin::InterpolationSampling::kUndefined),
+                       Interpolate(Source{{12, 34}}, builtin::InterpolationType::kFlat),
                    }),
          },
          ty.void_(), utils::Empty,
@@ -1673,8 +1672,7 @@ TEST_F(InterpolateTest, MissingLocationAttribute_ReturnType) {
          },
          utils::Vector{
              Builtin(builtin::BuiltinValue::kPosition),
-             Interpolate(Source{{12, 34}}, builtin::InterpolationType::kFlat,
-                         builtin::InterpolationSampling::kUndefined),
+             Interpolate(Source{{12, 34}}, builtin::InterpolationType::kFlat),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -1687,8 +1685,7 @@ TEST_F(InterpolateTest, MissingLocationAttribute_Struct) {
         "S",
         utils::Vector{
             Member("a", ty.f32(),
-                   utils::Vector{Interpolate(Source{{12, 34}}, builtin::InterpolationType::kFlat,
-                                             builtin::InterpolationSampling::kUndefined)}),
+                   utils::Vector{Interpolate(Source{{12, 34}}, builtin::InterpolationType::kFlat)}),
         });
 
     EXPECT_FALSE(r()->Resolve());

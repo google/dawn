@@ -575,9 +575,15 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
                 return EmitDiagnosticControl(out, diagnostic->control);
             },
             [&](const ast::InterpolateAttribute* interpolate) {
-                out << "interpolate(" << interpolate->type;
-                if (interpolate->sampling != builtin::InterpolationSampling::kUndefined) {
-                    out << ", " << interpolate->sampling;
+                out << "interpolate(";
+                if (!EmitExpression(out, interpolate->type)) {
+                    return false;
+                }
+                if (interpolate->sampling) {
+                    out << ", ";
+                    if (!EmitExpression(out, interpolate->sampling)) {
+                        return false;
+                    }
                 }
                 out << ")";
                 return true;

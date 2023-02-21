@@ -224,6 +224,13 @@ class Inspector {
     /// Constructs |sampler_targets_| if it hasn't already been instantiated.
     void GenerateSamplerTargets();
 
+    /// @param type the type of the parameter or structure member
+    /// @param attributes attributes associated with the parameter or structure member
+    /// @returns the interpolation type and sampling modes for the value
+    std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
+        const type::Type* type,
+        utils::VectorRef<const ast::Attribute*> attributes) const;
+
     /// For a N-uple of expressions, resolve to the appropriate global resources
     /// and call 'cb'.
     /// 'cb' may be called multiple times.

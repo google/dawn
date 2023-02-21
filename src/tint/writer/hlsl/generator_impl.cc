@@ -4219,8 +4219,21 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
                         }
                         post += " : " + name;
                     } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
-                        auto mod =
-                            interpolation_to_modifiers(interpolate->type, interpolate->sampling);
+                        auto& sem = program_->Sem();
+                        auto i_type =
+                            sem.Get<sem::BuiltinEnumExpression<builtin::InterpolationType>>(
+                                   interpolate->type)
+                                ->Value();
+
+                        auto i_smpl = builtin::InterpolationSampling::kUndefined;
+                        if (interpolate->sampling) {
+                            i_smpl =
+                                sem.Get<sem::BuiltinEnumExpression<builtin::InterpolationSampling>>(
+                                       interpolate->sampling)
+                                    ->Value();
+                        }
+
+                        auto mod = interpolation_to_modifiers(i_type, i_smpl);
                         if (mod.empty()) {
                             diagnostics_.add_error(diag::System::Writer,
                                                    "unsupported interpolation");

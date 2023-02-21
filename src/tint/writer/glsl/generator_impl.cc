@@ -2191,7 +2191,11 @@ void GeneratorImpl::EmitInterpolationQualifiers(
     utils::VectorRef<const ast::Attribute*> attributes) {
     for (auto* attr : attributes) {
         if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
-            switch (interpolate->type) {
+            auto& sem = program_->Sem();
+            auto i_type =
+                sem.Get<sem::BuiltinEnumExpression<builtin::InterpolationType>>(interpolate->type)
+                    ->Value();
+            switch (i_type) {
                 case builtin::InterpolationType::kPerspective:
                 case builtin::InterpolationType::kLinear:
                 case builtin::InterpolationType::kUndefined:
@@ -2200,14 +2204,20 @@ void GeneratorImpl::EmitInterpolationQualifiers(
                     out << "flat ";
                     break;
             }
-            switch (interpolate->sampling) {
-                case builtin::InterpolationSampling::kCentroid:
-                    out << "centroid ";
-                    break;
-                case builtin::InterpolationSampling::kSample:
-                case builtin::InterpolationSampling::kCenter:
-                case builtin::InterpolationSampling::kUndefined:
-                    break;
+
+            if (interpolate->sampling) {
+                auto i_smpl = sem.Get<sem::BuiltinEnumExpression<builtin::InterpolationSampling>>(
+                                     interpolate->sampling)
+                                  ->Value();
+                switch (i_smpl) {
+                    case builtin::InterpolationSampling::kCentroid:
+                        out << "centroid ";
+                        break;
+                    case builtin::InterpolationSampling::kSample:
+                    case builtin::InterpolationSampling::kCenter:
+                    case builtin::InterpolationSampling::kUndefined:
+                        break;
+                }
             }
         }
     }

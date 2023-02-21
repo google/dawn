@@ -30,6 +30,8 @@
 #include "src/tint/ast/var.h"
 #include "src/tint/builtin/builtin_value.h"
 #include "src/tint/builtin/extension.h"
+#include "src/tint/builtin/interpolation_sampling.h"
+#include "src/tint/builtin/interpolation_type.h"
 #include "src/tint/sem/builtin_enum_expression.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
@@ -115,59 +117,6 @@ std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
     }
 
     return {componentType, compositionType};
-}
-
-std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
-    const type::Type* type,
-    utils::VectorRef<const ast::Attribute*> attributes) {
-    auto* interpolation_attribute = ast::GetAttribute<ast::InterpolateAttribute>(attributes);
-    if (type->is_integer_scalar_or_vector()) {
-        return {InterpolationType::kFlat, InterpolationSampling::kNone};
-    }
-
-    if (!interpolation_attribute) {
-        return {InterpolationType::kPerspective, InterpolationSampling::kCenter};
-    }
-
-    auto ast_interpolation_type = interpolation_attribute->type;
-    auto ast_sampling_type = interpolation_attribute->sampling;
-    if (ast_interpolation_type != builtin::InterpolationType::kFlat &&
-        ast_sampling_type == builtin::InterpolationSampling::kUndefined) {
-        ast_sampling_type = builtin::InterpolationSampling::kCenter;
-    }
-
-    auto interpolation_type = InterpolationType::kUnknown;
-    switch (ast_interpolation_type) {
-        case builtin::InterpolationType::kPerspective:
-            interpolation_type = InterpolationType::kPerspective;
-            break;
-        case builtin::InterpolationType::kLinear:
-            interpolation_type = InterpolationType::kLinear;
-            break;
-        case builtin::InterpolationType::kFlat:
-            interpolation_type = InterpolationType::kFlat;
-            break;
-        case builtin::InterpolationType::kUndefined:
-            break;
-    }
-
-    auto sampling_type = InterpolationSampling::kUnknown;
-    switch (ast_sampling_type) {
-        case builtin::InterpolationSampling::kUndefined:
-            sampling_type = InterpolationSampling::kNone;
-            break;
-        case builtin::InterpolationSampling::kCenter:
-            sampling_type = InterpolationSampling::kCenter;
-            break;
-        case builtin::InterpolationSampling::kCentroid:
-            sampling_type = InterpolationSampling::kCentroid;
-            break;
-        case builtin::InterpolationSampling::kSample:
-            sampling_type = InterpolationSampling::kSample;
-            break;
-    }
-
-    return {interpolation_type, sampling_type};
 }
 
 }  // namespace
@@ -885,6 +834,70 @@ void Inspector::GenerateSamplerTargets() {
                                     }
                                 });
     }
+}
+
+std::tuple<InterpolationType, InterpolationSampling> Inspector::CalculateInterpolationData(
+    const type::Type* type,
+    utils::VectorRef<const ast::Attribute*> attributes) const {
+    auto* interpolation_attribute = ast::GetAttribute<ast::InterpolateAttribute>(attributes);
+    if (type->is_integer_scalar_or_vector()) {
+        return {InterpolationType::kFlat, InterpolationSampling::kNone};
+    }
+
+    if (!interpolation_attribute) {
+        return {InterpolationType::kPerspective, InterpolationSampling::kCenter};
+    }
+
+    auto& sem = program_->Sem();
+
+    auto ast_interpolation_type = sem.Get<sem::BuiltinEnumExpression<builtin::InterpolationType>>(
+                                         interpolation_attribute->type)
+                                      ->Value();
+
+    auto ast_sampling_type = builtin::InterpolationSampling::kUndefined;
+    if (interpolation_attribute->sampling) {
+        ast_sampling_type = sem.Get<sem::BuiltinEnumExpression<builtin::InterpolationSampling>>(
+                                   interpolation_attribute->sampling)
+                                ->Value();
+    }
+
+    if (ast_interpolation_type != builtin::InterpolationType::kFlat &&
+        ast_sampling_type == builtin::InterpolationSampling::kUndefined) {
+        ast_sampling_type = builtin::InterpolationSampling::kCenter;
+    }
+
+    auto interpolation_type = InterpolationType::kUnknown;
+    switch (ast_interpolation_type) {
+        case builtin::InterpolationType::kPerspective:
+            interpolation_type = InterpolationType::kPerspective;
+            break;
+        case builtin::InterpolationType::kLinear:
+            interpolation_type = InterpolationType::kLinear;
+            break;
+        case builtin::InterpolationType::kFlat:
+            interpolation_type = InterpolationType::kFlat;
+            break;
+        case builtin::InterpolationType::kUndefined:
+            break;
+    }
+
+    auto sampling_type = InterpolationSampling::kUnknown;
+    switch (ast_sampling_type) {
+        case builtin::InterpolationSampling::kUndefined:
+            sampling_type = InterpolationSampling::kNone;
+            break;
+        case builtin::InterpolationSampling::kCenter:
+            sampling_type = InterpolationSampling::kCenter;
+            break;
+        case builtin::InterpolationSampling::kCentroid:
+            sampling_type = InterpolationSampling::kCentroid;
+            break;
+        case builtin::InterpolationSampling::kSample:
+            sampling_type = InterpolationSampling::kSample;
+            break;
+    }
+
+    return {interpolation_type, sampling_type};
 }
 
 template <size_t N, typename F>

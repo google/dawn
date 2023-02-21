@@ -985,14 +985,19 @@ bool Validator::InterpolateAttribute(const ast::InterpolateAttribute* attr,
                                      const type::Type* storage_ty) const {
     auto* type = storage_ty->UnwrapRef();
 
-    if (type->is_integer_scalar_or_vector() && attr->type != builtin::InterpolationType::kFlat) {
+    auto i_type = sem_.AsInterpolationType(sem_.Get(attr->type));
+    if (TINT_UNLIKELY(!i_type)) {
+        return false;
+    }
+
+    if (type->is_integer_scalar_or_vector() &&
+        i_type->Value() != builtin::InterpolationType::kFlat) {
         AddError("interpolation type must be 'flat' for integral user-defined IO types",
                  attr->source);
         return false;
     }
 
-    if (attr->type == builtin::InterpolationType::kFlat &&
-        attr->sampling != builtin::InterpolationSampling::kUndefined) {
+    if (attr->sampling && i_type->Value() == builtin::InterpolationType::kFlat) {
         AddError("flat interpolation attribute must not have a sampling parameter", attr->source);
         return false;
     }

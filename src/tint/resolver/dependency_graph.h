@@ -22,6 +22,8 @@
 #include "src/tint/builtin/access.h"
 #include "src/tint/builtin/builtin.h"
 #include "src/tint/builtin/builtin_value.h"
+#include "src/tint/builtin/interpolation_sampling.h"
+#include "src/tint/builtin/interpolation_type.h"
 #include "src/tint/builtin/texel_format.h"
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/sem/builtin_type.h"
@@ -40,6 +42,8 @@ namespace tint::resolver {
 /// - builtin::AddressSpace
 /// - builtin::Builtin
 /// - builtin::BuiltinValue
+/// - builtin::InterpolationSampling
+/// - builtin::InterpolationType
 /// - builtin::TexelFormat
 class ResolvedIdentifier {
   public:
@@ -106,6 +110,24 @@ class ResolvedIdentifier {
         return builtin::BuiltinValue::kUndefined;
     }
 
+    /// @return the texel format if the ResolvedIdentifier holds type::InterpolationSampling,
+    /// otherwise type::InterpolationSampling::kUndefined
+    builtin::InterpolationSampling InterpolationSampling() const {
+        if (auto n = std::get_if<builtin::InterpolationSampling>(&value_)) {
+            return *n;
+        }
+        return builtin::InterpolationSampling::kUndefined;
+    }
+
+    /// @return the texel format if the ResolvedIdentifier holds type::InterpolationType,
+    /// otherwise type::InterpolationType::kUndefined
+    builtin::InterpolationType InterpolationType() const {
+        if (auto n = std::get_if<builtin::InterpolationType>(&value_)) {
+            return *n;
+        }
+        return builtin::InterpolationType::kUndefined;
+    }
+
     /// @return the texel format if the ResolvedIdentifier holds type::TexelFormat, otherwise
     /// type::TexelFormat::kUndefined
     builtin::TexelFormat TexelFormat() const {
@@ -145,6 +167,8 @@ class ResolvedIdentifier {
                  builtin::AddressSpace,
                  builtin::Builtin,
                  builtin::BuiltinValue,
+                 builtin::InterpolationSampling,
+                 builtin::InterpolationType,
                  builtin::TexelFormat>
         value_;
 };

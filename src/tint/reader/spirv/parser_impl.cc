@@ -1821,7 +1821,7 @@ bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
         sampling == builtin::InterpolationSampling::kUndefined) {
         // This is the default. Don't add a decoration.
     } else {
-        attributes.Add(create<ast::InterpolateAttribute>(type, sampling));
+        attributes.Add(builder_.Interpolate(type, sampling));
     }
 
     return success();

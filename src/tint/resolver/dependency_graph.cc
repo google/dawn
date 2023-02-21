@@ -438,6 +438,11 @@ class DependencyScanner {
                 TraverseValueExpression(id->expr);
                 return true;
             },
+            [&](const ast::InterpolateAttribute* interpolate) {
+                TraverseExpression(interpolate->type, "interpolation type", "references");
+                TraverseExpression(interpolate->sampling, "interpolation sampling", "references");
+                return true;
+            },
             [&](const ast::LocationAttribute* loc) {
                 TraverseValueExpression(loc->expr);
                 return true;
@@ -503,6 +508,16 @@ class DependencyScanner {
             }
             if (auto access = builtin::ParseAccess(s); access != builtin::Access::kUndefined) {
                 graph_.resolved_identifiers.Add(from, ResolvedIdentifier(access));
+                return;
+            }
+            if (auto i_type = builtin::ParseInterpolationType(s);
+                i_type != builtin::InterpolationType::kUndefined) {
+                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(i_type));
+                return;
+            }
+            if (auto i_smpl = builtin::ParseInterpolationSampling(s);
+                i_smpl != builtin::InterpolationSampling::kUndefined) {
+                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(i_smpl));
                 return;
             }
 
@@ -883,6 +898,12 @@ std::string ResolvedIdentifier::String(const SymbolTable& symbols, diag::List& d
     }
     if (auto addr = AddressSpace(); addr != builtin::AddressSpace::kUndefined) {
         return "address space '" + utils::ToString(addr) + "'";
+    }
+    if (auto type = InterpolationType(); type != builtin::InterpolationType::kUndefined) {
+        return "interpolation type '" + utils::ToString(type) + "'";
+    }
+    if (auto smpl = InterpolationSampling(); smpl != builtin::InterpolationSampling::kUndefined) {
+        return "interpolation sampling '" + utils::ToString(smpl) + "'";
     }
     if (auto fmt = TexelFormat(); fmt != builtin::TexelFormat::kUndefined) {
         return "texel format '" + utils::ToString(fmt) + "'";

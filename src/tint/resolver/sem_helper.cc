@@ -89,6 +89,16 @@ void SemHelper::ErrorUnexpectedExprKind(const sem::Expression* expr,
                          std::string(wanted),
                      builtin->Declaration()->source);
         },
+        [&](const sem::BuiltinEnumExpression<builtin::InterpolationSampling>* fmt) {
+            AddError("cannot use interpolation sampling '" + utils::ToString(fmt->Value()) +
+                         "' as " + std::string(wanted),
+                     fmt->Declaration()->source);
+        },
+        [&](const sem::BuiltinEnumExpression<builtin::InterpolationType>* fmt) {
+            AddError("cannot use interpolation type '" + utils::ToString(fmt->Value()) + "' as " +
+                         std::string(wanted),
+                     fmt->Declaration()->source);
+        },
         [&](const sem::BuiltinEnumExpression<builtin::TexelFormat>* fmt) {
             AddError("cannot use texel format '" + utils::ToString(fmt->Value()) + "' as " +
                          std::string(wanted),

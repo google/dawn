@@ -25,10 +25,10 @@ namespace {
 using InterpolateAttributeTest = TestHelper;
 
 TEST_F(InterpolateAttributeTest, Creation) {
-    auto* d = create<InterpolateAttribute>(builtin::InterpolationType::kLinear,
-                                           builtin::InterpolationSampling::kCenter);
-    EXPECT_EQ(builtin::InterpolationType::kLinear, d->type);
-    EXPECT_EQ(builtin::InterpolationSampling::kCenter, d->sampling);
+    auto* d =
+        Interpolate(builtin::InterpolationType::kLinear, builtin::InterpolationSampling::kCenter);
+    CheckIdentifier(Symbols(), d->type, "linear");
+    CheckIdentifier(Symbols(), d->sampling, "center");
 }
 
 }  // namespace

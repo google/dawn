@@ -90,6 +90,8 @@
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::Access>);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::AddressSpace>);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::BuiltinValue>);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::InterpolationSampling>);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::InterpolationType>);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::TexelFormat>);
 
 namespace tint::resolver {
@@ -1519,6 +1521,16 @@ sem::BuiltinEnumExpression<builtin::TexelFormat>* Resolver::TexelFormatExpressio
 sem::BuiltinEnumExpression<builtin::Access>* Resolver::AccessExpression(
     const ast::Expression* expr) {
     return sem_.AsAccess(Expression(expr));
+}
+
+sem::BuiltinEnumExpression<builtin::InterpolationSampling>* Resolver::InterpolationSampling(
+    const ast::Expression* expr) {
+    return sem_.AsInterpolationSampling(Expression(expr));
+}
+
+sem::BuiltinEnumExpression<builtin::InterpolationType>* Resolver::InterpolationType(
+    const ast::Expression* expr) {
+    return sem_.AsInterpolationType(Expression(expr));
 }
 
 void Resolver::RegisterStore(const sem::ValueExpression* expr) {
@@ -3001,6 +3013,18 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
             expr, current_statement_, builtin);
     }
 
+    if (auto i_smpl = resolved->InterpolationSampling();
+        i_smpl != builtin::InterpolationSampling::kUndefined) {
+        return builder_->create<sem::BuiltinEnumExpression<builtin::InterpolationSampling>>(
+            expr, current_statement_, i_smpl);
+    }
+
+    if (auto i_type = resolved->InterpolationType();
+        i_type != builtin::InterpolationType::kUndefined) {
+        return builder_->create<sem::BuiltinEnumExpression<builtin::InterpolationType>>(
+            expr, current_statement_, i_type);
+    }
+
     if (auto fmt = resolved->TexelFormat(); fmt != builtin::TexelFormat::kUndefined) {
         return builder_->create<sem::BuiltinEnumExpression<builtin::TexelFormat>>(
             expr, current_statement_, fmt);
@@ -3326,7 +3350,8 @@ bool Resolver::Attribute(const ast::Attribute* attr) {
     return Switch(
         attr,  //
         [&](const ast::BuiltinAttribute* b) { return BuiltinAttribute(b); },
-        [&](const ast::DiagnosticAttribute* dc) { return DiagnosticControl(dc->control); },
+        [&](const ast::DiagnosticAttribute* d) { return DiagnosticControl(d->control); },
+        [&](const ast::InterpolateAttribute* i) { return InterpolateAttribute(i); },
         [&](Default) { return true; });
 }
 
@@ -3338,6 +3363,16 @@ bool Resolver::BuiltinAttribute(const ast::BuiltinAttribute* attr) {
     // Apply the resolved tint::sem::BuiltinEnumExpression<tint::builtin::BuiltinValue> to the
     // attribute.
     builder_->Sem().Add(attr, builtin_expr);
+    return true;
+}
+
+bool Resolver::InterpolateAttribute(const ast::InterpolateAttribute* attr) {
+    if (!InterpolationType(attr->type)) {
+        return false;
+    }
+    if (attr->sampling && !InterpolationSampling(attr->sampling)) {
+        return false;
+    }
     return true;
 }
 

@@ -75,6 +75,8 @@
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/builtin/extension.h"
+#include "src/tint/builtin/interpolation_sampling.h"
+#include "src/tint/builtin/interpolation_type.h"
 #include "src/tint/constant/composite.h"
 #include "src/tint/constant/splat.h"
 #include "src/tint/constant/value.h"
@@ -3460,25 +3462,48 @@ class ProgramBuilder {
     }
 
     /// Creates an ast::InterpolateAttribute
+    /// @param type the interpolation type
+    /// @returns the interpolate attribute pointer
+    template <typename TYPE, typename = DisableIfSource<TYPE>>
+    const ast::InterpolateAttribute* Interpolate(TYPE&& type) {
+        return Interpolate(source_, std::forward<TYPE>(type));
+    }
+
+    /// Creates an ast::InterpolateAttribute
     /// @param source the source information
     /// @param type the interpolation type
-    /// @param sampling the interpolation sampling
     /// @returns the interpolate attribute pointer
-    const ast::InterpolateAttribute* Interpolate(
-        const Source& source,
-        builtin::InterpolationType type,
-        builtin::InterpolationSampling sampling = builtin::InterpolationSampling::kUndefined) {
-        return create<ast::InterpolateAttribute>(source, type, sampling);
+    template <typename TYPE>
+    const ast::InterpolateAttribute* Interpolate(const Source& source, TYPE&& type) {
+        return create<ast::InterpolateAttribute>(source, Expr(std::forward<TYPE>(type)), nullptr);
     }
 
     /// Creates an ast::InterpolateAttribute
     /// @param type the interpolation type
     /// @param sampling the interpolation sampling
     /// @returns the interpolate attribute pointer
-    const ast::InterpolateAttribute* Interpolate(
-        builtin::InterpolationType type,
-        builtin::InterpolationSampling sampling = builtin::InterpolationSampling::kUndefined) {
-        return create<ast::InterpolateAttribute>(source_, type, sampling);
+    template <typename TYPE, typename SAMPLING, typename = DisableIfSource<TYPE>>
+    const ast::InterpolateAttribute* Interpolate(TYPE&& type, SAMPLING&& sampling) {
+        return Interpolate(source_, std::forward<TYPE>(type), std::forward<SAMPLING>(sampling));
+    }
+
+    /// Creates an ast::InterpolateAttribute
+    /// @param source the source information
+    /// @param type the interpolation type
+    /// @param sampling the interpolation sampling
+    /// @returns the interpolate attribute pointer
+    template <typename TYPE, typename SAMPLING>
+    const ast::InterpolateAttribute* Interpolate(const Source& source,
+                                                 TYPE&& type,
+                                                 SAMPLING&& sampling) {
+        if constexpr (std::is_same_v<std::decay_t<SAMPLING>, builtin::InterpolationSampling>) {
+            if (sampling == builtin::InterpolationSampling::kUndefined) {
+                return create<ast::InterpolateAttribute>(source, Expr(std::forward<TYPE>(type)),
+                                                         nullptr);
+            }
+        }
+        return create<ast::InterpolateAttribute>(source, Expr(std::forward<TYPE>(type)),
+                                                 Expr(std::forward<SAMPLING>(sampling)));
     }
 
     /// Creates an ast::InterpolateAttribute using flat interpolation

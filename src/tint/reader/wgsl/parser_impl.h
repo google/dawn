@@ -454,14 +454,6 @@ class ParserImpl {
     /// not match a stage name.
     /// @returns the pipeline stage.
     Expect<ast::PipelineStage> expect_pipeline_stage();
-    /// Parses an interpolation sample name identifier, erroring if the next token does not match a
-    /// valid sample name.
-    /// @returns the parsed sample name.
-    Expect<builtin::InterpolationSampling> expect_interpolation_sample_name();
-    /// Parses an interpolation type name identifier, erroring if the next token does not match a
-    /// value type name.
-    /// @returns the parsed type name
-    Expect<builtin::InterpolationType> expect_interpolation_type_name();
     /// Parses a `compound_statement` grammar element, erroring on parse failure.
     /// @param use a description of what was being parsed if an error was raised
     /// @returns the parsed statements

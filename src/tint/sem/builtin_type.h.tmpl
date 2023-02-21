@@ -41,10 +41,17 @@ const char* str(BuiltinType i);
 /// matches the name in the WGSL spec.
 std::ostream& operator<<(std::ostream& out, BuiltinType i);
 
-/// All builtin types
+/// All builtin function
 constexpr BuiltinType kBuiltinTypes[] = {
 {{- range Sem.Builtins }}
     BuiltinType::k{{PascalCase .Name}},
+{{- end }}
+};
+
+/// All builtin function names
+constexpr const char* kBuiltinStrings[] = {
+{{- range Sem.Builtins }}
+    "{{.Name}}",
 {{- end }}
 };
 
