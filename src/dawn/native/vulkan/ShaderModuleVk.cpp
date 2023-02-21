@@ -285,6 +285,14 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                 transformManager.Add<tint::transform::Renamer>();
             }
 
+            if (r.substituteOverrideConfig) {
+                // This needs to run after SingleEntryPoint transform which removes unused overrides
+                // for current entry point.
+                transformManager.Add<tint::transform::SubstituteOverride>();
+                transformInputs.Add<tint::transform::SubstituteOverride::Config>(
+                    std::move(r.substituteOverrideConfig).value());
+            }
+
             if (r.isRobustnessEnabled) {
                 transformManager.append(std::make_unique<tint::transform::Robustness>());
             }
@@ -299,13 +307,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                 transformManager.Add<tint::transform::MultiplanarExternalTexture>();
                 transformInputs.Add<tint::transform::MultiplanarExternalTexture::NewBindingPoints>(
                     r.newBindingsMap);
-            }
-            if (r.substituteOverrideConfig) {
-                // This needs to run after SingleEntryPoint transform which removes unused overrides
-                // for current entry point.
-                transformManager.Add<tint::transform::SubstituteOverride>();
-                transformInputs.Add<tint::transform::SubstituteOverride::Config>(
-                    std::move(r.substituteOverrideConfig).value());
             }
 
             if (r.clampFragDepth) {

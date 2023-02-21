@@ -322,12 +322,6 @@ ResultOrError<std::string> TranslateToHLSL(
             r.firstIndexOffsetShaderRegister, r.firstIndexOffsetRegisterSpace);
     }
 
-    if (r.isRobustnessEnabled) {
-        transformManager.Add<tint::transform::Robustness>();
-    }
-
-    transformManager.Add<tint::transform::BindingRemapper>();
-
     if (r.substituteOverrideConfig) {
         // This needs to run after SingleEntryPoint transform which removes unused overrides for
         // current entry point.
@@ -335,6 +329,12 @@ ResultOrError<std::string> TranslateToHLSL(
         transformInputs.Add<tint::transform::SubstituteOverride::Config>(
             std::move(r.substituteOverrideConfig).value());
     }
+
+    if (r.isRobustnessEnabled) {
+        transformManager.Add<tint::transform::Robustness>();
+    }
+
+    transformManager.Add<tint::transform::BindingRemapper>();
 
     // D3D12 registers like `t3` and `c3` have the same bindingOffset number in
     // the remapping but should not be considered a collision because they have
