@@ -567,7 +567,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     const uint32_t maxInterStageShaderComponents = limits.v1.maxInterStageShaderComponents;
     if (metadata->stage == SingleShaderStage::Vertex) {
         for (const auto& inputVar : entryPoint.input_variables) {
-            uint32_t unsanitizedLocation = inputVar.location_decoration;
+            uint32_t unsanitizedLocation = inputVar.location_attribute;
             if (DelayedInvalidIf(unsanitizedLocation >= maxVertexAttributes,
                                  "Vertex input variable \"%s\" has a location (%u) that "
                                  "exceeds the maximum (%u)",
@@ -595,7 +595,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                                 outputVar.interpolation_sampling));
             totalInterStageShaderComponents += variable.componentCount;
 
-            uint32_t location = outputVar.location_decoration;
+            uint32_t location = outputVar.location_attribute;
             if (DelayedInvalidIf(location >= maxInterStageShaderVariables,
                                  "Vertex output variable \"%s\" has a location (%u) that "
                                  "is greater than or equal to (%u).",
@@ -628,7 +628,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                                 inputVar.interpolation_sampling));
             totalInterStageShaderComponents += variable.componentCount;
 
-            uint32_t location = inputVar.location_decoration;
+            uint32_t location = inputVar.location_attribute;
             if (DelayedInvalidIf(location >= maxInterStageShaderVariables,
                                  "Fragment input variable \"%s\" has a location (%u) that "
                                  "is greater than or equal to (%u).",
@@ -666,7 +666,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                                                          outputVar.composition_type));
             ASSERT(variable.componentCount <= 4);
 
-            uint32_t unsanitizedAttachment = outputVar.location_decoration;
+            uint32_t unsanitizedAttachment = outputVar.location_attribute;
             if (DelayedInvalidIf(unsanitizedAttachment >= maxColorAttachments,
                                  "Fragment output variable \"%s\" has a location (%u) that "
                                  "exceeds the maximum (%u).",

@@ -127,16 +127,15 @@ class Inspector {
     /// @param entry_point name of the entry point to get information about.
     /// @returns vector of all of the sampler/texture sampling pairs that are used
     /// by that entry point.
-    utils::VectorRef<sem::SamplerTexturePair> GetSamplerTextureUses(const std::string& entry_point);
+    utils::VectorRef<SamplerTexturePair> GetSamplerTextureUses(const std::string& entry_point);
 
     /// @param entry_point name of the entry point to get information about.
     /// @param placeholder the sampler binding point to use for texture-only
     /// access (e.g., textureLoad)
     /// @returns vector of all of the sampler/texture sampling pairs that are used
     /// by that entry point.
-    std::vector<sem::SamplerTexturePair> GetSamplerTextureUses(
-        const std::string& entry_point,
-        const sem::BindingPoint& placeholder);
+    std::vector<SamplerTexturePair> GetSamplerTextureUses(const std::string& entry_point,
+                                                          const sem::BindingPoint& placeholder);
 
     /// @param entry_point name of the entry point to get information about.
     /// @returns the total size in bytes of all Workgroup storage-class storage
@@ -158,8 +157,7 @@ class Inspector {
   private:
     const Program* program_;
     diag::List diagnostics_;
-    std::unique_ptr<
-        std::unordered_map<std::string, utils::UniqueVector<sem::SamplerTexturePair, 4>>>
+    std::unique_ptr<std::unordered_map<std::string, utils::UniqueVector<SamplerTexturePair, 4>>>
         sampler_targets_;
 
     /// @param name name of the entry point to find

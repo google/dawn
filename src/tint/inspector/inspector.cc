@@ -492,7 +492,7 @@ std::vector<ResourceBinding> Inspector::GetExternalTextureResourceBindings(
                                       ResourceBinding::ResourceType::kExternalTexture);
 }
 
-utils::VectorRef<sem::SamplerTexturePair> Inspector::GetSamplerTextureUses(
+utils::VectorRef<SamplerTexturePair> Inspector::GetSamplerTextureUses(
     const std::string& entry_point) {
     auto* func = FindEntryPointByName(entry_point);
     if (!func) {
@@ -508,7 +508,7 @@ utils::VectorRef<sem::SamplerTexturePair> Inspector::GetSamplerTextureUses(
     return it->second;
 }
 
-std::vector<sem::SamplerTexturePair> Inspector::GetSamplerTextureUses(
+std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(
     const std::string& entry_point,
     const sem::BindingPoint& placeholder) {
     auto* func = FindEntryPointByName(entry_point);
@@ -517,7 +517,7 @@ std::vector<sem::SamplerTexturePair> Inspector::GetSamplerTextureUses(
     }
     auto* func_sem = program_->Sem().Get(func);
 
-    std::vector<sem::SamplerTexturePair> new_pairs;
+    std::vector<SamplerTexturePair> new_pairs;
     for (auto pair : func_sem->TextureSamplerPairs()) {
         auto* texture = pair.first->As<sem::GlobalVariable>();
         auto* sampler = pair.second ? pair.second->As<sem::GlobalVariable>() : nullptr;
@@ -775,7 +775,7 @@ void Inspector::GenerateSamplerTargets() {
     }
 
     sampler_targets_ = std::make_unique<
-        std::unordered_map<std::string, utils::UniqueVector<sem::SamplerTexturePair, 4>>>();
+        std::unordered_map<std::string, utils::UniqueVector<SamplerTexturePair, 4>>>();
 
     auto& sem = program_->Sem();
 

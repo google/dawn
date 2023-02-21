@@ -68,13 +68,6 @@ struct StageVariable {
     /// Value of the location attribute, only valid if #has_location_attribute is
     /// true.
     uint32_t location_attribute;
-    /// Is Location attribute present
-    /// [DEPRECATED]: Use #has_location_attribute
-    bool& has_location_decoration = has_location_attribute;
-    /// Value of Location Decoration, only valid if #has_location_decoration is
-    /// true.
-    /// [DEPRECATED]: Use #location_attribute
-    uint32_t& location_decoration = location_attribute;
     /// Scalar type that the variable is composed of.
     ComponentType component_type = ComponentType::kUnknown;
     /// How the scalars are composed for the variable.
