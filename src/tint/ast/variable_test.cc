@@ -16,6 +16,7 @@
 
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/test_helper.h"
+#include "src/tint/builtin/builtin_value.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

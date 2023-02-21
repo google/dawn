@@ -15,7 +15,7 @@
                OpMemberName %S_atomic 2 "y"
                OpName %wg "wg"
                OpName %compute_main_inner "compute_main_inner"
-               OpName %local_invocation_index "local_invocation_index"
+               OpName %local_invocation_index_2 "local_invocation_index_2"
                OpName %idx "idx"
                OpName %compute_main_1 "compute_main_1"
                OpName %compute_main_inner_1 "compute_main_inner_1"
@@ -54,7 +54,7 @@
       %int_4 = OpConstant %int 4
          %51 = OpTypeFunction %void
 %compute_main_inner = OpFunction %void None %13
-%local_invocation_index = OpFunctionParameter %uint
+%local_invocation_index_2 = OpFunctionParameter %uint
          %17 = OpLabel
         %idx = OpVariable %_ptr_Function_uint Function %6
                OpStore %idx %6
@@ -62,7 +62,7 @@
                OpStore %22 %23
          %26 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_2
                OpStore %26 %6
-               OpStore %idx %local_invocation_index
+               OpStore %idx %local_invocation_index_2
                OpBranch %27
          %27 = OpLabel
                OpLoopMerge %28 %29 None

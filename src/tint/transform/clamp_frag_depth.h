@@ -65,6 +65,9 @@ class ClampFragDepth final : public Castable<ClampFragDepth, Transform> {
     ApplyResult Apply(const Program* program,
                       const DataMap& inputs,
                       DataMap& outputs) const override;
+
+  private:
+    struct State;
 };
 
 }  // namespace tint::transform

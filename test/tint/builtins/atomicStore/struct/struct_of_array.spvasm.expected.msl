@@ -26,11 +26,11 @@ struct S {
   uint y;
 };
 
-void compute_main_inner(uint local_invocation_index, threadgroup S_atomic* const tint_symbol) {
+void compute_main_inner(uint local_invocation_index_2, threadgroup S_atomic* const tint_symbol) {
   uint idx = 0u;
   (*(tint_symbol)).x = 0;
   (*(tint_symbol)).y = 0u;
-  idx = local_invocation_index;
+  idx = local_invocation_index_2;
   while (true) {
     uint const x_30 = idx;
     if (!((x_30 < 10u))) {

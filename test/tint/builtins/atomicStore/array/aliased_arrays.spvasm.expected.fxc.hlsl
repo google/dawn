@@ -9,9 +9,9 @@ uint tint_mod(uint lhs, uint rhs) {
   return (lhs % ((rhs == 0u) ? 1u : rhs));
 }
 
-void compute_main_inner(uint local_invocation_index) {
+void compute_main_inner(uint local_invocation_index_2) {
   uint idx = 0u;
-  idx = local_invocation_index;
+  idx = local_invocation_index_2;
   while (true) {
     const uint x_25 = idx;
     if (!((x_25 < 6u))) {

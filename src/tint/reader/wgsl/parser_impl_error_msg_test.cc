@@ -969,25 +969,6 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBuiltinMissingRParen) {
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBuiltinInvalidIdentifer) {
-    EXPECT("@builtin(1) var i : i32;",
-           R"(test.wgsl:1:10 error: expected builtin
-Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id'
-@builtin(1) var i : i32;
-         ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBuiltinInvalidValue) {
-    EXPECT("@builtin(frag_d3pth) var i : i32;",
-           R"(test.wgsl:1:10 error: expected builtin
-Did you mean 'frag_depth'?
-Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id'
-@builtin(frag_d3pth) var i : i32;
-         ^^^^^^^^^^
-)");
-}
-
 TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBindingMissingLParen) {
     EXPECT("@binding 1) var i : i32;",
            R"(test.wgsl:1:10 error: expected '(' for binding attribute

@@ -462,10 +462,6 @@ class ParserImpl {
     /// value type name.
     /// @returns the parsed type name
     Expect<builtin::InterpolationType> expect_interpolation_type_name();
-    /// Parses a builtin identifier, erroring if the next token does not match a
-    /// valid builtin name.
-    /// @returns the parsed builtin.
-    Expect<builtin::BuiltinValue> expect_builtin();
     /// Parses a `compound_statement` grammar element, erroring on parse failure.
     /// @param use a description of what was being parsed if an error was raised
     /// @returns the parsed statements

@@ -1501,6 +1501,91 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 }  // namespace resolve_to_address_space
 
 ////////////////////////////////////////////////////////////////////////////////
+// Resolve to builtin::BuiltinValue tests
+////////////////////////////////////////////////////////////////////////////////
+namespace resolve_to_builtin_value {
+
+using ResolverDependencyGraphResolveToBuiltinValue =
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, const char*>>;
+
+TEST_P(ResolverDependencyGraphResolveToBuiltinValue, Resolve) {
+    const auto use = std::get<0>(GetParam());
+    const auto name = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(name);
+
+    SymbolTestHelper helper(this);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->BuiltinValue(), builtin::ParseBuiltinValue(name))
+        << resolved->String(Symbols(), Diagnostics());
+}
+
+TEST_P(ResolverDependencyGraphResolveToBuiltinValue, ShadowedByGlobalConst) {
+    const auto use = std::get<0>(GetParam());
+    const auto builtin = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(utils::ToString(builtin));
+
+    SymbolTestHelper helper(this);
+    auto* decl = helper.Add(SymbolDeclKind::GlobalConst, symbol);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
+}
+
+TEST_P(ResolverDependencyGraphResolveToBuiltinValue, ShadowedByStruct) {
+    const auto use = std::get<0>(GetParam());
+    const auto builtin = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(utils::ToString(builtin));
+
+    SymbolTestHelper helper(this);
+    auto* decl = helper.Add(SymbolDeclKind::Struct, symbol);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
+}
+
+TEST_P(ResolverDependencyGraphResolveToBuiltinValue, ShadowedByFunc) {
+    const auto use = std::get<0>(GetParam());
+    const auto builtin = std::get<1>(GetParam());
+    const auto symbol = Symbols().New(utils::ToString(builtin));
+
+    SymbolTestHelper helper(this);
+    auto* decl = helper.Add(SymbolDeclKind::Function, symbol);
+    auto* ident = helper.Add(use, symbol);
+    helper.Build();
+
+    auto resolved = Build().resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved->Node(), decl) << resolved->String(Symbols(), Diagnostics());
+}
+
+INSTANTIATE_TEST_SUITE_P(Types,
+                         ResolverDependencyGraphResolveToBuiltinValue,
+                         testing::Combine(testing::ValuesIn(kTypeUseKinds),
+                                          testing::ValuesIn(builtin::kBuiltinValueStrings)));
+
+INSTANTIATE_TEST_SUITE_P(Values,
+                         ResolverDependencyGraphResolveToBuiltinValue,
+                         testing::Combine(testing::ValuesIn(kValueUseKinds),
+                                          testing::ValuesIn(builtin::kBuiltinValueStrings)));
+
+INSTANTIATE_TEST_SUITE_P(Functions,
+                         ResolverDependencyGraphResolveToBuiltinValue,
+                         testing::Combine(testing::ValuesIn(kFuncUseKinds),
+                                          testing::ValuesIn(builtin::kBuiltinValueStrings)));
+
+}  // namespace resolve_to_builtin_value
+
+////////////////////////////////////////////////////////////////////////////////
 // Resolve to builtin::TexelFormat tests
 ////////////////////////////////////////////////////////////////////////////////
 namespace resolve_to_texel_format {
@@ -1686,6 +1771,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
              Param(Sym(), T,
                    utils::Vector{
                        Location(V),  // Parameter attributes
+                       Builtin(V),
                    }),
          },
          T,  // Return type

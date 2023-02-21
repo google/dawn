@@ -9,7 +9,7 @@ void atomicLoad_361bf1() {
   return;
 }
 
-void compute_main_inner(uint local_invocation_index) {
+void compute_main_inner(uint local_invocation_index_2) {
   atomicExchange(arg_0, 0u);
   barrier();
   atomicLoad_361bf1();

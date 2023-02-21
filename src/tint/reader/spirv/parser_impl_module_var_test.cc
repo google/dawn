@@ -2861,7 +2861,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_Direct) {
     const auto module_str = test::ToString(p->program());
     const std::string expected = R"(var<private> x_1 : i32;
 
-var<private> position : vec4<f32>;
+var<private> position_1 : vec4<f32>;
 
 fn main_1() {
   let x_2 : i32 = x_1;
@@ -2870,14 +2870,14 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  position_1 : vec4<f32>,
+  position_1_1 : vec4<f32>,
 }
 
 @vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = bitcast<i32>(x_1_param);
   main_1();
-  return main_out(position);
+  return main_out(position_1);
 }
 )";
     EXPECT_EQ(module_str, expected) << module_str;
@@ -2898,7 +2898,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_CopyObject) {
     const auto module_str = test::ToString(p->program());
     const std::string expected = R"(var<private> x_1 : i32;
 
-var<private> position : vec4<f32>;
+var<private> position_1 : vec4<f32>;
 
 fn main_1() {
   let x_14 : ptr<private, i32> = &(x_1);
@@ -2908,14 +2908,14 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  position_1 : vec4<f32>,
+  position_1_1 : vec4<f32>,
 }
 
 @vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = bitcast<i32>(x_1_param);
   main_1();
-  return main_out(position);
+  return main_out(position_1);
 }
 )";
     EXPECT_EQ(module_str, expected) << module_str;
@@ -2936,7 +2936,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_AccessChain) {
     const auto module_str = test::ToString(p->program());
     const std::string expected = R"(var<private> x_1 : i32;
 
-var<private> position : vec4<f32>;
+var<private> position_1 : vec4<f32>;
 
 fn main_1() {
   let x_2 : i32 = x_1;
@@ -2945,14 +2945,14 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  position_1 : vec4<f32>,
+  position_1_1 : vec4<f32>,
 }
 
 @vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = bitcast<i32>(x_1_param);
   main_1();
-  return main_out(position);
+  return main_out(position_1);
 }
 )";
     EXPECT_EQ(module_str, expected) << module_str;
@@ -2995,7 +2995,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_Direct) {
     const auto module_str = test::ToString(p->program());
     const std::string expected = R"(var<private> x_1 : u32;
 
-var<private> position : vec4<f32>;
+var<private> position_1 : vec4<f32>;
 
 fn main_1() {
   let x_2 : u32 = x_1;
@@ -3004,14 +3004,14 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  position_1 : vec4<f32>,
+  position_1_1 : vec4<f32>,
 }
 
 @vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = x_1_param;
   main_1();
-  return main_out(position);
+  return main_out(position_1);
 }
 )";
     EXPECT_EQ(module_str, expected);
@@ -3032,7 +3032,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
     const auto module_str = test::ToString(p->program());
     const std::string expected = R"(var<private> x_1 : u32;
 
-var<private> position : vec4<f32>;
+var<private> position_1 : vec4<f32>;
 
 fn main_1() {
   let x_14 : ptr<private, u32> = &(x_1);
@@ -3042,14 +3042,14 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  position_1 : vec4<f32>,
+  position_1_1 : vec4<f32>,
 }
 
 @vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = x_1_param;
   main_1();
-  return main_out(position);
+  return main_out(position_1);
 }
 )";
     EXPECT_EQ(module_str, expected);
@@ -3070,7 +3070,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_AccessChain) {
     const auto module_str = test::ToString(p->program());
     const std::string expected = R"(var<private> x_1 : u32;
 
-var<private> position : vec4<f32>;
+var<private> position_1 : vec4<f32>;
 
 fn main_1() {
   let x_2 : u32 = x_1;
@@ -3079,14 +3079,14 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  position_1 : vec4<f32>,
+  position_1_1 : vec4<f32>,
 }
 
 @vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = x_1_param;
   main_1();
-  return main_out(position);
+  return main_out(position_1);
 }
 )";
     EXPECT_EQ(module_str, expected);

@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/dependency_graph.h"
@@ -120,8 +121,23 @@ class SemHelper {
 
     /// @param expr the semantic node
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to
-    /// sem::BuiltinEnumExpression<builtin::TexelFormat> if the cast is successful, otherwise an
+    /// sem::BuiltinEnumExpression<builtin::BuiltinValue> if the cast is successful, otherwise an
     /// error diagnostic is raised.
+    sem::BuiltinEnumExpression<builtin::BuiltinValue>* AsBuiltinValue(sem::Expression* expr) const {
+        if (TINT_LIKELY(expr)) {
+            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::BuiltinValue>>();
+            if (TINT_LIKELY(enum_expr)) {
+                return enum_expr;
+            }
+            ErrorUnexpectedExprKind(expr, "builtin value");
+        }
+        return nullptr;
+    }
+
+    /// @param expr the semantic node
+    /// @returns nullptr if @p expr is nullptr, or @p expr cast to
+    /// sem::BuiltinEnumExpression<type::TexelFormat> if the cast is successful, otherwise an error
+    /// diagnostic is raised.
     sem::BuiltinEnumExpression<builtin::TexelFormat>* AsTexelFormat(sem::Expression* expr) const {
         if (TINT_LIKELY(expr)) {
             auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::TexelFormat>>();

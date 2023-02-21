@@ -548,8 +548,9 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
              Operand(wgsize[0].value()), Operand(wgsize[1].value()), Operand(wgsize[2].value())});
     }
 
-    for (auto builtin : func_sem->TransitivelyReferencedBuiltinVariables()) {
-        if (builtin.second->builtin == builtin::BuiltinValue::kFragDepth) {
+    for (auto it : func_sem->TransitivelyReferencedBuiltinVariables()) {
+        auto builtin = builder_.Sem().Get(it.second)->Value();
+        if (builtin == builtin::BuiltinValue::kFragDepth) {
             push_execution_mode(spv::Op::OpExecutionMode,
                                 {Operand(id), U32Operand(SpvExecutionModeDepthReplacing)});
         }
@@ -837,10 +838,11 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
     for (auto* attr : v->attributes) {
         bool ok = Switch(
             attr,
-            [&](const ast::BuiltinAttribute* builtin) {
+            [&](const ast::BuiltinAttribute* builtin_attr) {
+                auto builtin = builder_.Sem().Get(builtin_attr)->Value();
                 push_annot(spv::Op::OpDecorate,
                            {Operand(var_id), U32Operand(SpvDecorationBuiltIn),
-                            U32Operand(ConvertBuiltin(builtin->builtin, sem->AddressSpace()))});
+                            U32Operand(ConvertBuiltin(builtin, sem->AddressSpace()))});
                 return true;
             },
             [&](const ast::LocationAttribute*) {

@@ -756,15 +756,6 @@ struct LoopStatementBuilder final : public Castable<LoopStatementBuilder, Statem
     mutable const ast::BlockStatement* continuing = nullptr;
 };
 
-/// @param decos a list of parsed decorations
-/// @returns true if the decorations include a SampleMask builtin
-bool HasBuiltinSampleMask(utils::VectorRef<const ast::Attribute*> decos) {
-    if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(decos)) {
-        return builtin->builtin == builtin::BuiltinValue::kSampleMask;
-    }
-    return false;
-}
-
 }  // namespace
 
 BlockInfo::BlockInfo(const spvtools::opt::BasicBlock& bb) : basic_block(&bb), id(bb.id()) {}
@@ -956,7 +947,7 @@ bool FunctionEmitter::Emit() {
         }
 
         builder_.Func(decl.source, decl.name, std::move(decl.params),
-                      decl.return_type->Build(builder_), body, std::move(decl.attributes));
+                      decl.return_type->Build(builder_), body, std::move(decl.attributes.list));
     }
 
     if (ep_info_ && !ep_info_->inner_name.empty()) {
@@ -994,12 +985,12 @@ const ast::BlockStatement* FunctionEmitter::MakeFunctionBody() {
 
 bool FunctionEmitter::EmitPipelineInput(std::string var_name,
                                         const Type* var_type,
-                                        AttributeList* attrs,
                                         utils::Vector<int, 8> index_prefix,
                                         const Type* tip_type,
                                         const Type* forced_param_type,
-                                        ParameterList* params,
-                                        StatementList* statements) {
+                                        Attributes& attrs,
+                                        ParameterList& params,
+                                        StatementList& statements) {
     // TODO(dneto): Handle structs where the locations are annotated on members.
     tip_type = tip_type->UnwrapAlias();
     if (auto* ref_type = tip_type->As<Reference>()) {
@@ -1015,8 +1006,8 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
             const Type* vec_ty = ty_.Vector(matrix_type->type, matrix_type->rows);
             for (int col = 0; col < num_columns; col++) {
                 index_prefix.Back() = col;
-                if (!EmitPipelineInput(var_name, var_type, attrs, index_prefix, vec_ty,
-                                       forced_param_type, params, statements)) {
+                if (!EmitPipelineInput(var_name, var_type, index_prefix, vec_ty, forced_param_type,
+                                       attrs, params, statements)) {
                     return false;
                 }
             }
@@ -1030,8 +1021,8 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
             const Type* elem_ty = array_type->type;
             for (int i = 0; i < static_cast<int>(array_type->size); i++) {
                 index_prefix.Back() = i;
-                if (!EmitPipelineInput(var_name, var_type, attrs, index_prefix, elem_ty,
-                                       forced_param_type, params, statements)) {
+                if (!EmitPipelineInput(var_name, var_type, index_prefix, elem_ty, forced_param_type,
+                                       attrs, params, statements)) {
                     return false;
                 }
             }
@@ -1042,38 +1033,36 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
             index_prefix.Push(0);
             for (size_t i = 0; i < members.size(); ++i) {
                 index_prefix.Back() = static_cast<int>(i);
-                AttributeList member_attrs(*attrs);
+                Attributes member_attrs(attrs);
                 if (!parser_impl_.ConvertPipelineDecorations(
                         struct_type,
                         parser_impl_.GetMemberPipelineDecorations(*struct_type,
                                                                   static_cast<int>(i)),
-                        &member_attrs)) {
+                        member_attrs)) {
                     return false;
                 }
-                if (!EmitPipelineInput(var_name, var_type, &member_attrs, index_prefix, members[i],
-                                       forced_param_type, params, statements)) {
+                if (!EmitPipelineInput(var_name, var_type, index_prefix, members[i],
+                                       forced_param_type, member_attrs, params, statements)) {
                     return false;
                 }
                 // Copy the location as updated by nested expansion of the member.
-                parser_impl_.SetLocation(attrs,
-                                         ast::GetAttribute<ast::LocationAttribute>(member_attrs));
+                parser_impl_.SetLocation(attrs, member_attrs.Get<ast::LocationAttribute>());
             }
             return success();
         },
         [&](Default) {
-            const bool is_builtin = ast::HasAttribute<ast::BuiltinAttribute>(*attrs);
+            const bool is_builtin = attrs.Has<ast::BuiltinAttribute>();
 
             const Type* param_type = is_builtin ? forced_param_type : tip_type;
 
             const auto param_name = namer_.MakeDerivedName(var_name + "_param");
             // Create the parameter.
-            // TODO(dneto): Note: If the parameter has non-location decorations,
-            // then those decoration AST nodes will be reused between multiple
-            // elements of a matrix, array, or structure.  Normally that's
-            // disallowed but currently the SPIR-V reader will make duplicates when
-            // the entire AST is cloned at the top level of the SPIR-V reader flow.
+            // TODO(dneto): Note: If the parameter has non-location decorations, then those
+            // decoration AST nodes will be reused between multiple elements of a matrix, array, or
+            // structure.  Normally that's disallowed but currently the SPIR-V reader will make
+            // duplicates when the entire AST is cloned at the top level of the SPIR-V reader flow.
             // Consider rewriting this to avoid this node-sharing.
-            params->Push(builder_.Param(param_name, param_type->Build(builder_), *attrs));
+            params.Push(builder_.Param(param_name, param_type->Build(builder_), attrs.list));
 
             // Add a body statement to copy the parameter to the corresponding
             // private variable.
@@ -1101,27 +1090,25 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
             }
 
             if (is_builtin && (tip_type != forced_param_type)) {
-                // The parameter will have the WGSL type, but we need bitcast to
-                // the variable store type.
+                // The parameter will have the WGSL type, but we need bitcast to the variable store
+                // type.
                 param_value = builder_.Bitcast(tip_type->Build(builder_), param_value);
             }
 
-            statements->Push(builder_.Assign(store_dest, param_value));
+            statements.Push(builder_.Assign(store_dest, param_value));
 
-            // Increment the location attribute, in case more parameters will
-            // follow.
+            // Increment the location attribute, in case more parameters will follow.
             IncrementLocation(attrs);
 
             return success();
         });
 }
 
-void FunctionEmitter::IncrementLocation(AttributeList* attributes) {
-    for (auto*& attr : *attributes) {
+void FunctionEmitter::IncrementLocation(Attributes& attributes) {
+    for (auto*& attr : attributes.list) {
         if (auto* loc_attr = attr->As<ast::LocationAttribute>()) {
             // Replace this location attribute with a new one with one higher index.
-            // The old one doesn't leak because it's kept in the builder's AST node
-            // list.
+            // The old one doesn't leak because it's kept in the builder's AST node list.
             attr = builder_.Location(
                 loc_attr->source, AInt(loc_attr->expr->As<ast::IntLiteralExpression>()->value + 1));
         }
@@ -1130,12 +1117,12 @@ void FunctionEmitter::IncrementLocation(AttributeList* attributes) {
 
 bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
                                          const Type* var_type,
-                                         AttributeList* decos,
                                          utils::Vector<int, 8> index_prefix,
                                          const Type* tip_type,
                                          const Type* forced_member_type,
-                                         StructMemberList* return_members,
-                                         ExpressionList* return_exprs) {
+                                         Attributes& attrs,
+                                         StructMemberList& return_members,
+                                         ExpressionList& return_exprs) {
     tip_type = tip_type->UnwrapAlias();
     if (auto* ref_type = tip_type->As<Reference>()) {
         tip_type = ref_type->type;
@@ -1150,8 +1137,8 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
             const Type* vec_ty = ty_.Vector(matrix_type->type, matrix_type->rows);
             for (int col = 0; col < num_columns; col++) {
                 index_prefix.Back() = col;
-                if (!EmitPipelineOutput(var_name, var_type, std::move(decos), index_prefix, vec_ty,
-                                        forced_member_type, return_members, return_exprs)) {
+                if (!EmitPipelineOutput(var_name, var_type, index_prefix, vec_ty,
+                                        forced_member_type, attrs, return_members, return_exprs)) {
                     return false;
                 }
             }
@@ -1165,8 +1152,8 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
             const Type* elem_ty = array_type->type;
             for (int i = 0; i < static_cast<int>(array_type->size); i++) {
                 index_prefix.Back() = i;
-                if (!EmitPipelineOutput(var_name, var_type, std::move(decos), index_prefix, elem_ty,
-                                        forced_member_type, return_members, return_exprs)) {
+                if (!EmitPipelineOutput(var_name, var_type, index_prefix, elem_ty,
+                                        forced_member_type, attrs, return_members, return_exprs)) {
                     return false;
                 }
             }
@@ -1177,39 +1164,37 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
             index_prefix.Push(0);
             for (int i = 0; i < static_cast<int>(members.size()); ++i) {
                 index_prefix.Back() = i;
-                AttributeList member_attrs(*decos);
+                Attributes member_attrs(attrs);
                 if (!parser_impl_.ConvertPipelineDecorations(
                         struct_type, parser_impl_.GetMemberPipelineDecorations(*struct_type, i),
-                        &member_attrs)) {
+                        member_attrs)) {
                     return false;
                 }
-                if (!EmitPipelineOutput(var_name, var_type, &member_attrs, index_prefix,
+                if (!EmitPipelineOutput(var_name, var_type, index_prefix,
                                         members[static_cast<size_t>(i)], forced_member_type,
-                                        return_members, return_exprs)) {
+                                        member_attrs, return_members, return_exprs)) {
                     return false;
                 }
                 // Copy the location as updated by nested expansion of the member.
-                parser_impl_.SetLocation(decos,
-                                         ast::GetAttribute<ast::LocationAttribute>(member_attrs));
+                parser_impl_.SetLocation(attrs, member_attrs.Get<ast::LocationAttribute>());
             }
             return success();
         },
         [&](Default) {
-            const bool is_builtin = ast::HasAttribute<ast::BuiltinAttribute>(*decos);
+            const bool is_builtin = attrs.Has<ast::BuiltinAttribute>();
 
             const Type* member_type = is_builtin ? forced_member_type : tip_type;
             // Derive the member name directly from the variable name.  They can't
             // collide.
             const auto member_name = namer_.MakeDerivedName(var_name);
             // Create the member.
-            // TODO(dneto): Note: If the parameter has non-location decorations,
-            // then those decoration AST nodes  will be reused between multiple
-            // elements of a matrix, array, or structure.  Normally that's
-            // disallowed but currently the SPIR-V reader will make duplicates when
-            // the entire AST is cloned at the top level of the SPIR-V reader flow.
+            // TODO(dneto): Note: If the parameter has non-location decorations, then those
+            // decoration AST nodes  will be reused between multiple elements of a matrix, array, or
+            // structure.  Normally that's disallowed but currently the SPIR-V reader will make
+            // duplicates when the entire AST is cloned at the top level of the SPIR-V reader flow.
             // Consider rewriting this to avoid this node-sharing.
-            return_members->Push(
-                builder_.Member(member_name, member_type->Build(builder_), *decos));
+            return_members.Push(
+                builder_.Member(member_name, member_type->Build(builder_), attrs.list));
 
             // Create an expression to evaluate the part of the variable indexed by
             // the index_prefix.
@@ -1240,11 +1225,10 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
                 // the variable store type.
                 load_source = builder_.Bitcast(forced_member_type->Build(builder_), load_source);
             }
-            return_exprs->Push(load_source);
+            return_exprs.Push(load_source);
 
-            // Increment the location attribute, in case more parameters will
-            // follow.
-            IncrementLocation(decos);
+            // Increment the location attribute, in case more parameters will follow.
+            IncrementLocation(attrs);
 
             return success();
         });
@@ -1270,8 +1254,8 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         TINT_ASSERT(Reader, opcode(var) == spv::Op::OpVariable);
         auto* store_type = GetVariableStoreType(*var);
         auto* forced_param_type = store_type;
-        AttributeList param_decos;
-        if (!parser_impl_.ConvertDecorationsForVariable(var_id, &forced_param_type, &param_decos,
+        Attributes param_attrs;
+        if (!parser_impl_.ConvertDecorationsForVariable(var_id, &forced_param_type, param_attrs,
                                                         true)) {
             // This occurs, and is not an error, for the PointSize builtin.
             if (!success()) {
@@ -1287,18 +1271,17 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         const auto var_name = namer_.GetName(var_id);
 
         bool ok = true;
-        if (HasBuiltinSampleMask(param_decos)) {
+        if (param_attrs.flags.Contains(Attributes::Flags::kHasBuiltinSampleMask)) {
             // In Vulkan SPIR-V, the sample mask is an array. In WGSL it's a scalar.
             // Use the first element only.
             auto* sample_mask_array_type = store_type->UnwrapRef()->UnwrapAlias()->As<Array>();
             TINT_ASSERT(Reader, sample_mask_array_type);
-            ok = EmitPipelineInput(var_name, store_type, &param_decos, {0},
-                                   sample_mask_array_type->type, forced_param_type, &decl.params,
-                                   &stmts);
+            ok = EmitPipelineInput(var_name, store_type, {0}, sample_mask_array_type->type,
+                                   forced_param_type, param_attrs, decl.params, stmts);
         } else {
             // The normal path.
-            ok = EmitPipelineInput(var_name, store_type, &param_decos, {}, store_type,
-                                   forced_param_type, &decl.params, &stmts);
+            ok = EmitPipelineInput(var_name, store_type, {}, store_type, forced_param_type,
+                                   param_attrs, decl.params, stmts);
         }
         if (!ok) {
             return false;
@@ -1330,12 +1313,12 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
                 // The SPIR-V gl_PerVertex variable has already been remapped to
                 // a gl_Position variable.  Substitute the type.
                 const Type* param_type = ty_.Vector(ty_.F32(), 4);
-                AttributeList out_decos{
-                    create<ast::BuiltinAttribute>(source, builtin::BuiltinValue::kPosition)};
-
                 const auto var_name = namer_.GetName(var_id);
                 return_members.Push(
-                    builder_.Member(var_name, param_type->Build(builder_), out_decos));
+                    builder_.Member(var_name, param_type->Build(builder_),
+                                    utils::Vector{
+                                        builder_.Builtin(source, builtin::BuiltinValue::kPosition),
+                                    }));
                 return_exprs.Push(builder_.Expr(var_name));
 
             } else {
@@ -1344,9 +1327,9 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
                 TINT_ASSERT(Reader, opcode(var) == spv::Op::OpVariable);
                 const Type* store_type = GetVariableStoreType(*var);
                 const Type* forced_member_type = store_type;
-                AttributeList out_decos;
+                Attributes out_attrs;
                 if (!parser_impl_.ConvertDecorationsForVariable(var_id, &forced_member_type,
-                                                                &out_decos, true)) {
+                                                                out_attrs, true)) {
                     // This occurs, and is not an error, for the PointSize builtin.
                     if (!success()) {
                         // But exit early if an error was logged.
@@ -1357,19 +1340,20 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
 
                 const auto var_name = namer_.GetName(var_id);
                 bool ok = true;
-                if (HasBuiltinSampleMask(out_decos)) {
+                if (out_attrs.flags.Contains(Attributes::Flags::kHasBuiltinSampleMask)) {
                     // In Vulkan SPIR-V, the sample mask is an array. In WGSL it's a
                     // scalar. Use the first element only.
                     auto* sample_mask_array_type =
                         store_type->UnwrapRef()->UnwrapAlias()->As<Array>();
                     TINT_ASSERT(Reader, sample_mask_array_type);
-                    ok = EmitPipelineOutput(var_name, store_type, &out_decos, {0},
-                                            sample_mask_array_type->type, forced_member_type,
-                                            &return_members, &return_exprs);
+                    ok = EmitPipelineOutput(var_name, store_type, {0}, sample_mask_array_type->type,
+                                            forced_member_type, out_attrs, return_members,
+                                            return_exprs);
                 } else {
                     // The normal path.
-                    ok = EmitPipelineOutput(var_name, store_type, &out_decos, {}, store_type,
-                                            forced_member_type, &return_members, &return_exprs);
+                    ok =
+                        EmitPipelineOutput(var_name, store_type, {}, store_type, forced_member_type,
+                                           out_attrs, return_members, return_exprs);
                 }
                 if (!ok) {
                     return false;
@@ -1384,7 +1368,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         } else {
             // Create and register the result type.
             auto* str = create<ast::Struct>(Source{}, builder_.Ident(return_struct_sym),
-                                            return_members, AttributeList{});
+                                            return_members, utils::Empty);
             parser_impl_.AddTypeDecl(return_struct_sym, str);
             return_type = builder_.ty.Of(str);
 
@@ -1394,8 +1378,9 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         }
     }
 
-    AttributeList fn_attrs;
-    fn_attrs.Push(create<ast::StageAttribute>(source, ep_info_->stage));
+    utils::Vector<const ast::Attribute*, 2> fn_attrs{
+        create<ast::StageAttribute>(source, ep_info_->stage),
+    };
 
     if (ep_info_->stage == ast::PipelineStage::kCompute) {
         auto& size = ep_info_->workgroup_size;
@@ -1442,7 +1427,7 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
                                      : parser_impl_.ConvertType(param->type_id());
 
         if (type != nullptr) {
-            auto* ast_param = parser_impl_.MakeParameter(param->result_id(), type, AttributeList{});
+            auto* ast_param = parser_impl_.MakeParameter(param->result_id(), type, Attributes{});
             // Parameters are treated as const declarations.
             ast_params.Push(ast_param);
             // The value is accessible by name.
@@ -1458,7 +1443,7 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
     decl->name = name;
     decl->params = std::move(ast_params);
     decl->return_type = ret_ty;
-    decl->attributes.Clear();
+    decl->attributes = {};
 
     return success();
 }
@@ -2523,7 +2508,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
         }
         auto* var = parser_impl_.MakeVar(inst.result_id(), builtin::AddressSpace::kUndefined,
                                          builtin::Access::kUndefined, var_store_type, initializer,
-                                         AttributeList{});
+                                         Attributes{});
         auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
         AddStatement(var_decl_stmt);
         auto* var_type = ty_.Reference(var_store_type, builtin::AddressSpace::kUndefined);
@@ -3370,7 +3355,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         AddStatement(create<ast::VariableDeclStatement>(
             Source{},
             parser_impl_.MakeVar(id, builtin::AddressSpace::kUndefined, builtin::Access::kUndefined,
-                                 store_type, nullptr, AttributeList{})));
+                                 store_type, nullptr, Attributes{})));
         auto* type = ty_.Reference(store_type, builtin::AddressSpace::kUndefined);
         identifier_types_.emplace(id, type);
     }

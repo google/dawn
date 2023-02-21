@@ -44,7 +44,7 @@ struct S2 {
 
 uint local_invocation_index_1 = 0u;
 shared S2_atomic wg;
-void compute_main_inner(uint local_invocation_index) {
+void compute_main_inner(uint local_invocation_index_2) {
   wg.x = 0;
   wg.y = 0;
   wg.z = 0;

@@ -26,7 +26,7 @@
                OpMemberName %S1_atomic 3 "z"
                OpName %wg "wg"
                OpName %compute_main_inner "compute_main_inner"
-               OpName %local_invocation_index "local_invocation_index"
+               OpName %local_invocation_index_2 "local_invocation_index_2"
                OpName %compute_main_1 "compute_main_1"
                OpName %compute_main_inner_1 "compute_main_inner_1"
                OpName %local_invocation_index_1_param "local_invocation_index_1_param"
@@ -68,7 +68,7 @@
    %uint_264 = OpConstant %uint 264
          %42 = OpTypeFunction %void
 %compute_main_inner = OpFunction %void None %13
-%local_invocation_index = OpFunctionParameter %uint
+%local_invocation_index_2 = OpFunctionParameter %uint
          %17 = OpLabel
          %20 = OpAccessChain %_ptr_Workgroup_int %wg %uint_0
                OpStore %20 %21

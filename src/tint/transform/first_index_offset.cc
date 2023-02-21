@@ -18,6 +18,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/member_accessor_expression.h"
@@ -88,7 +89,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
         if (auto* var = node->As<ast::Variable>()) {
             for (auto* attr : var->attributes) {
                 if (auto* builtin_attr = attr->As<ast::BuiltinAttribute>()) {
-                    builtin::BuiltinValue builtin = builtin_attr->builtin;
+                    builtin::BuiltinValue builtin = src->Sem().Get(builtin_attr)->Value();
                     if (builtin == builtin::BuiltinValue::kVertexIndex) {
                         auto* sem_var = ctx.src->Sem().Get(var);
                         builtin_vars.emplace(sem_var, kFirstVertexName);
@@ -105,7 +106,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
         if (auto* member = node->As<ast::StructMember>()) {
             for (auto* attr : member->attributes) {
                 if (auto* builtin_attr = attr->As<ast::BuiltinAttribute>()) {
-                    builtin::BuiltinValue builtin = builtin_attr->builtin;
+                    builtin::BuiltinValue builtin = src->Sem().Get(builtin_attr)->Value();
                     if (builtin == builtin::BuiltinValue::kVertexIndex) {
                         auto* sem_mem = ctx.src->Sem().Get(member);
                         builtin_members.emplace(sem_mem, kFirstVertexName);

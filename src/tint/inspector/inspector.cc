@@ -28,7 +28,9 @@
 #include "src/tint/ast/module.h"
 #include "src/tint/ast/override.h"
 #include "src/tint/ast/var.h"
+#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/builtin/extension.h"
+#include "src/tint/sem/builtin_enum_expression.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/module.h"
@@ -698,11 +700,10 @@ bool Inspector::ContainsBuiltin(builtin::BuiltinValue builtin,
 
     // Base case: check for builtin
     auto* builtin_declaration = ast::GetAttribute<ast::BuiltinAttribute>(attributes);
-    if (!builtin_declaration || builtin_declaration->builtin != builtin) {
+    if (!builtin_declaration) {
         return false;
     }
-
-    return true;
+    return program_->Sem().Get(builtin_declaration)->Value() == builtin;
 }
 
 std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(

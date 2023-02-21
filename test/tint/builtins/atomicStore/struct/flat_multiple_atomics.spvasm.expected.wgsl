@@ -20,7 +20,7 @@ var<private> local_invocation_index_1 : u32;
 
 var<workgroup> wg : S_atomic;
 
-fn compute_main_inner(local_invocation_index : u32) {
+fn compute_main_inner(local_invocation_index_2 : u32) {
   wg.x = 0i;
   atomicStore(&(wg.a), 0u);
   atomicStore(&(wg.b), 0u);

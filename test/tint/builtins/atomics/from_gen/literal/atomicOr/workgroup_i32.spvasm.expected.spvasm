@@ -13,7 +13,7 @@
                OpName %atomicOr_d09248 "atomicOr_d09248"
                OpName %res "res"
                OpName %compute_main_inner "compute_main_inner"
-               OpName %local_invocation_index "local_invocation_index"
+               OpName %local_invocation_index_2 "local_invocation_index_2"
                OpName %compute_main_1 "compute_main_1"
                OpName %compute_main_inner_1 "compute_main_inner_1"
                OpName %local_invocation_index_1_param "local_invocation_index_1_param"
@@ -46,7 +46,7 @@
                OpReturn
                OpFunctionEnd
 %compute_main_inner = OpFunction %void None %22
-%local_invocation_index = OpFunctionParameter %uint
+%local_invocation_index_2 = OpFunctionParameter %uint
          %25 = OpLabel
                OpAtomicStore %arg_0 %uint_2 %uint_0 %14
                OpControlBarrier %uint_2 %uint_2 %uint_264

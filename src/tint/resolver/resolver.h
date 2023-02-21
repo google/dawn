@@ -146,9 +146,15 @@ class Resolver {
         const ast::Expression* expr);
 
     /// @returns the call of Expression() cast to a
-    /// sem::BuiltinEnumExpression<builtin::TexelFormat>. If the sem::Expression is not a
-    /// sem::BuiltinEnumExpression<builtin::TexelFormat>, then an error diagnostic is raised and
+    /// sem::BuiltinEnumExpression<builtin::BuiltinValue>. If the sem::Expression is not a
+    /// sem::BuiltinEnumExpression<builtin::BuiltinValue>, then an error diagnostic is raised and
     /// nullptr is returned.
+    sem::BuiltinEnumExpression<builtin::BuiltinValue>* BuiltinValueExpression(
+        const ast::Expression* expr);
+
+    /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<type::TexelFormat>.
+    /// If the sem::Expression is not a sem::BuiltinEnumExpression<type::TexelFormat>, then an error
+    /// diagnostic is raised and nullptr is returned.
     sem::BuiltinEnumExpression<builtin::TexelFormat>* TexelFormatExpression(
         const ast::Expression* expr);
 
@@ -289,6 +295,14 @@ class Resolver {
     /// Resolves the WorkgroupSize for the given function, assigning it to
     /// current_function_
     bool WorkgroupSize(const ast::Function*);
+
+    /// Resolves the attribute @p attr
+    /// @returns true on success, false on failure
+    bool Attribute(const ast::Attribute* attr);
+
+    /// Resolves the `@builtin` attribute @p attr
+    /// @returns true on success, false on failure
+    bool BuiltinAttribute(const ast::BuiltinAttribute* attr);
 
     /// @param control the diagnostic control
     /// @returns true on success, false on failure

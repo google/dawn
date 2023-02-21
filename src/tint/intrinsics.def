@@ -37,7 +37,7 @@ enum builtin_value {
   num_workgroups
   sample_index
   sample_mask
-  @internal point_size
+  __point_size
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#filterable-triggering-rules

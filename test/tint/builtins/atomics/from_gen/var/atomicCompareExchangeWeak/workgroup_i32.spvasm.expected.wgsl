@@ -23,7 +23,7 @@ fn atomicCompareExchangeWeak_e88938() {
   return;
 }
 
-fn compute_main_inner(local_invocation_index : u32) {
+fn compute_main_inner(local_invocation_index_2 : u32) {
   atomicStore(&(arg_0), 0i);
   workgroupBarrier();
   atomicCompareExchangeWeak_e88938();

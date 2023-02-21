@@ -2155,9 +2155,10 @@ bool GeneratorImpl::EmitWorkgroupVariable(const sem::Variable* var) {
 bool GeneratorImpl::EmitIOVariable(const sem::GlobalVariable* var) {
     auto* decl = var->Declaration();
 
-    if (auto* b = ast::GetAttribute<ast::BuiltinAttribute>(decl->attributes)) {
+    if (auto* attr = ast::GetAttribute<ast::BuiltinAttribute>(decl->attributes)) {
+        auto builtin = program_->Sem().Get(attr)->Value();
         // Use of gl_SampleID requires the GL_OES_sample_variables extension
-        if (RequiresOESSampleVariables(b->builtin)) {
+        if (RequiresOESSampleVariables(builtin)) {
             requires_oes_sample_variables_ = true;
         }
         // Do not emit builtin (gl_) variables.

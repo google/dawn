@@ -68,7 +68,7 @@ var<private> local_invocation_index_1 : u32;
 
 var<workgroup> wg : S2_atomic;
 
-fn compute_main_inner(local_invocation_index : u32) {
+fn compute_main_inner(local_invocation_index_2 : u32) {
   wg.x = 0i;
   wg.y = 0i;
   wg.z = 0i;

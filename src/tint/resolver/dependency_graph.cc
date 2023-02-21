@@ -55,6 +55,7 @@
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/builtin/builtin.h"
+#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/scope_stack.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/symbol_table.h"
@@ -424,6 +425,10 @@ class DependencyScanner {
                 TraverseValueExpression(binding->expr);
                 return true;
             },
+            [&](const ast::BuiltinAttribute* builtin) {
+                TraverseExpression(builtin->builtin, "builtin", "references");
+                return true;
+            },
             [&](const ast::GroupAttribute* group) {
                 TraverseValueExpression(group->expr);
                 return true;
@@ -478,6 +483,11 @@ class DependencyScanner {
             if (auto builtin_ty = builtin::ParseBuiltin(s);
                 builtin_ty != builtin::Builtin::kUndefined) {
                 graph_.resolved_identifiers.Add(from, ResolvedIdentifier(builtin_ty));
+                return;
+            }
+            if (auto builtin_val = builtin::ParseBuiltinValue(s);
+                builtin_val != builtin::BuiltinValue::kUndefined) {
+                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(builtin_val));
                 return;
             }
             if (auto addr = builtin::ParseAddressSpace(s);
@@ -862,6 +872,9 @@ std::string ResolvedIdentifier::String(const SymbolTable& symbols, diag::List& d
     }
     if (auto builtin_ty = BuiltinType(); builtin_ty != builtin::Builtin::kUndefined) {
         return "builtin type '" + utils::ToString(builtin_ty) + "'";
+    }
+    if (auto builtin_val = BuiltinValue(); builtin_val != builtin::BuiltinValue::kUndefined) {
+        return "builtin value '" + utils::ToString(builtin_val) + "'";
     }
     if (auto access = Access(); access != builtin::Access::kUndefined) {
         return "access '" + utils::ToString(access) + "'";

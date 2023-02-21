@@ -20,6 +20,7 @@
 #include "src/tint/ast/assignment_statement.h"
 #include "src/tint/ast/bitcast_expression.h"
 #include "src/tint/ast/variable_decl_statement.h"
+#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/utils/compiler_macros.h"
@@ -773,17 +774,18 @@ struct VertexPulling::State {
             }
             location_info[sem->Location().value()] = info;
         } else {
-            auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(param->attributes);
-            if (TINT_UNLIKELY(!builtin)) {
+            auto* builtin_attr = ast::GetAttribute<ast::BuiltinAttribute>(param->attributes);
+            if (TINT_UNLIKELY(!builtin_attr)) {
                 TINT_ICE(Transform, b.Diagnostics()) << "Invalid entry point parameter";
                 return;
             }
+            auto builtin = src->Sem().Get(builtin_attr)->Value();
             // Check for existing vertex_index and instance_index builtins.
-            if (builtin->builtin == builtin::BuiltinValue::kVertexIndex) {
+            if (builtin == builtin::BuiltinValue::kVertexIndex) {
                 vertex_index_expr = [this, param]() {
                     return b.Expr(ctx.Clone(param->name->symbol));
                 };
-            } else if (builtin->builtin == builtin::BuiltinValue::kInstanceIndex) {
+            } else if (builtin == builtin::BuiltinValue::kInstanceIndex) {
                 instance_index_expr = [this, param]() {
                     return b.Expr(ctx.Clone(param->name->symbol));
                 };
@@ -826,15 +828,16 @@ struct VertexPulling::State {
                 location_info[sem->Location().value()] = info;
                 has_locations = true;
             } else {
-                auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(member->attributes);
-                if (TINT_UNLIKELY(!builtin)) {
+                auto* builtin_attr = ast::GetAttribute<ast::BuiltinAttribute>(member->attributes);
+                if (TINT_UNLIKELY(!builtin_attr)) {
                     TINT_ICE(Transform, b.Diagnostics()) << "Invalid entry point parameter";
                     return;
                 }
+                auto builtin = src->Sem().Get(builtin_attr)->Value();
                 // Check for existing vertex_index and instance_index builtins.
-                if (builtin->builtin == builtin::BuiltinValue::kVertexIndex) {
+                if (builtin == builtin::BuiltinValue::kVertexIndex) {
                     vertex_index_expr = member_expr;
-                } else if (builtin->builtin == builtin::BuiltinValue::kInstanceIndex) {
+                } else if (builtin == builtin::BuiltinValue::kInstanceIndex) {
                     instance_index_expr = member_expr;
                 }
                 members_to_clone.Push(member);

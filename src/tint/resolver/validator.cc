@@ -114,15 +114,11 @@ bool IsValidStorageTextureTexelFormat(builtin::TexelFormat format) {
 }
 
 // Helper to stringify a pipeline IO attribute.
-std::string attr_to_str(const ast::Attribute* attr,
-                        std::optional<uint32_t> location = std::nullopt) {
-    std::stringstream str;
-    if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
-        str << "builtin(" << builtin->builtin << ")";
-    } else if (attr->Is<ast::LocationAttribute>()) {
-        str << "location(" << location.value() << ")";
-    }
-    return str.str();
+std::string AttrToStr(const ast::Attribute* attr) {
+    return Switch(
+        attr,  //
+        [&](const ast::BuiltinAttribute*) { return "@builtin"; },
+        [&](const ast::LocationAttribute*) { return "@location"; });
 }
 
 template <typename CALLBACK>
@@ -868,7 +864,8 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
     stage_name << stage;
     bool is_stage_mismatch = false;
     bool is_output = !is_input;
-    switch (attr->builtin) {
+    auto builtin = sem_.Get(attr)->Value();
+    switch (builtin) {
         case builtin::BuiltinValue::kPosition:
             if (stage != ast::PipelineStage::kNone &&
                 !((is_input && stage == ast::PipelineStage::kFragment) ||
@@ -876,8 +873,9 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!(type->is_float_vector() && type->As<type::Vector>()->Width() == 4)) {
-                AddError("store type of " + attr_to_str(attr) + " must be 'vec4<f32>'",
-                         attr->source);
+                std::stringstream err;
+                err << "store type of @builtin(" << builtin << ") must be 'vec4<f32>'";
+                AddError(err.str(), attr->source);
                 return false;
             }
             break;
@@ -890,8 +888,9 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!(type->is_unsigned_integer_vector() && type->As<type::Vector>()->Width() == 3)) {
-                AddError("store type of " + attr_to_str(attr) + " must be 'vec3<u32>'",
-                         attr->source);
+                std::stringstream err;
+                err << "store type of @builtin(" << builtin << ") must be 'vec3<u32>'";
+                AddError(err.str(), attr->source);
                 return false;
             }
             break;
@@ -901,7 +900,9 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!type->Is<type::F32>()) {
-                AddError("store type of " + attr_to_str(attr) + " must be 'f32'", attr->source);
+                std::stringstream err;
+                err << "store type of @builtin(" << builtin << ") must be 'f32'";
+                AddError(err.str(), attr->source);
                 return false;
             }
             break;
@@ -911,7 +912,9 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!type->Is<type::Bool>()) {
-                AddError("store type of " + attr_to_str(attr) + " must be 'bool'", attr->source);
+                std::stringstream err;
+                err << "store type of @builtin(" << builtin << ") must be 'bool'";
+                AddError(err.str(), attr->source);
                 return false;
             }
             break;
@@ -921,7 +924,9 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!type->Is<type::U32>()) {
-                AddError("store type of " + attr_to_str(attr) + " must be 'u32'", attr->source);
+                std::stringstream err;
+                err << "store type of @builtin(" << builtin << ") must be 'u32'";
+                AddError(err.str(), attr->source);
                 return false;
             }
             break;
@@ -932,7 +937,9 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!type->Is<type::U32>()) {
-                AddError("store type of " + attr_to_str(attr) + " must be 'u32'", attr->source);
+                std::stringstream err;
+                err << "store type of @builtin(" << builtin << ") must be 'u32'";
+                AddError(err.str(), attr->source);
                 return false;
             }
             break;
@@ -941,7 +948,9 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!type->Is<type::U32>()) {
-                AddError("store type of " + attr_to_str(attr) + " must be 'u32'", attr->source);
+                std::stringstream err;
+                err << "store type of @builtin(" << builtin << ") must be 'u32'";
+                AddError(err.str(), attr->source);
                 return false;
             }
             break;
@@ -951,7 +960,9 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!type->Is<type::U32>()) {
-                AddError("store type of " + attr_to_str(attr) + " must be 'u32'", attr->source);
+                std::stringstream err;
+                err << "store type of @builtin(" << builtin << ") must be 'u32'";
+                AddError(err.str(), attr->source);
                 return false;
             }
             break;
@@ -960,9 +971,10 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
     }
 
     if (is_stage_mismatch) {
-        AddError(attr_to_str(attr) + " cannot be used in " +
-                     (is_input ? "input of " : "output of ") + stage_name.str() + " pipeline stage",
-                 attr->source);
+        std::stringstream err;
+        err << "@builtin(" << builtin << ") cannot be used in "
+            << (is_input ? "input of " : "output of ") << stage_name.str() << " pipeline stage";
+        AddError(err.str(), attr->source);
         return false;
     }
 
@@ -1098,32 +1110,34 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
         for (auto* attr : attrs) {
             auto is_invalid_compute_shader_attribute = false;
 
-            if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
+            if (auto* builtin_attr = attr->As<ast::BuiltinAttribute>()) {
+                auto builtin = sem_.Get(builtin_attr)->Value();
+
                 if (pipeline_io_attribute) {
                     AddError("multiple entry point IO attributes", attr->source);
-                    AddNote("previously consumed " + attr_to_str(pipeline_io_attribute, location),
+                    AddNote("previously consumed " + AttrToStr(pipeline_io_attribute),
                             pipeline_io_attribute->source);
                     return false;
                 }
                 pipeline_io_attribute = attr;
 
-                if (builtins.Contains(builtin->builtin)) {
-                    AddError(attr_to_str(builtin) +
-                                 " attribute appears multiple times as pipeline " +
-                                 (param_or_ret == ParamOrRetType::kParameter ? "input" : "output"),
-                             decl->source);
+                if (builtins.Contains(builtin)) {
+                    std::stringstream err;
+                    err << "@builtin(" << builtin << ") appears multiple times as pipeline "
+                        << (param_or_ret == ParamOrRetType::kParameter ? "input" : "output");
+                    AddError(err.str(), decl->source);
                     return false;
                 }
 
-                if (!BuiltinAttribute(builtin, ty, stage,
+                if (!BuiltinAttribute(builtin_attr, ty, stage,
                                       /* is_input */ param_or_ret == ParamOrRetType::kParameter)) {
                     return false;
                 }
-                builtins.Add(builtin->builtin);
+                builtins.Add(builtin);
             } else if (auto* loc_attr = attr->As<ast::LocationAttribute>()) {
                 if (pipeline_io_attribute) {
                     AddError("multiple entry point IO attributes", attr->source);
-                    AddNote("previously consumed " + attr_to_str(pipeline_io_attribute),
+                    AddNote("previously consumed " + AttrToStr(pipeline_io_attribute),
                             pipeline_io_attribute->source);
                     return false;
                 }
@@ -1183,16 +1197,16 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                     if (decl->PipelineStage() == ast::PipelineStage::kVertex &&
                         param_or_ret == ParamOrRetType::kReturnType) {
                         AddError(
-                            "integral user-defined vertex outputs must have a flat "
-                            "interpolation attribute",
+                            "integral user-defined vertex outputs must have a flat interpolation "
+                            "attribute",
                             source);
                         return false;
                     }
                     if (decl->PipelineStage() == ast::PipelineStage::kFragment &&
                         param_or_ret == ParamOrRetType::kParameter) {
                         AddError(
-                            "integral user-defined fragment inputs must have a flat "
-                            "interpolation attribute",
+                            "integral user-defined fragment inputs must have a flat interpolation "
+                            "attribute",
                             source);
                         return false;
                     }
@@ -1211,15 +1225,14 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
             if (invariant_attribute) {
                 bool has_position = false;
                 if (pipeline_io_attribute) {
-                    if (auto* builtin = pipeline_io_attribute->As<ast::BuiltinAttribute>()) {
-                        has_position = (builtin->builtin == builtin::BuiltinValue::kPosition);
+                    if (auto* builtin_attr = pipeline_io_attribute->As<ast::BuiltinAttribute>()) {
+                        auto builtin = sem_.Get(builtin_attr)->Value();
+                        has_position = (builtin == builtin::BuiltinValue::kPosition);
                     }
                 }
                 if (!has_position) {
-                    AddError(
-                        "invariant attribute must only be applied to a position "
-                        "builtin",
-                        invariant_attribute->source);
+                    AddError("invariant attribute must only be applied to a position builtin",
+                             invariant_attribute->source);
                     return false;
                 }
             }
@@ -1280,9 +1293,10 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
         // Check module-scope variables, as the SPIR-V sanitizer generates these.
         bool found = false;
         for (auto* global : func->TransitivelyReferencedGlobals()) {
-            if (auto* builtin =
+            if (auto* builtin_attr =
                     ast::GetAttribute<ast::BuiltinAttribute>(global->Declaration()->attributes)) {
-                if (builtin->builtin == builtin::BuiltinValue::kPosition) {
+                auto builtin = sem_.Get(builtin_attr)->Value();
+                if (builtin == builtin::BuiltinValue::kPosition) {
                     found = true;
                     break;
                 }
@@ -2120,12 +2134,13 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                     }
                     return true;
                 },
-                [&](const ast::BuiltinAttribute* builtin) {
-                    if (!BuiltinAttribute(builtin, member->Type(), stage,
+                [&](const ast::BuiltinAttribute* builtin_attr) {
+                    if (!BuiltinAttribute(builtin_attr, member->Type(), stage,
                                           /* is_input */ false)) {
                         return false;
                     }
-                    if (builtin->builtin == builtin::BuiltinValue::kPosition) {
+                    auto builtin = sem_.Get(builtin_attr)->Value();
+                    if (builtin == builtin::BuiltinValue::kPosition) {
                         has_position = true;
                     }
                     return true;
@@ -2208,18 +2223,18 @@ bool Validator::LocationAttribute(const ast::LocationAttribute* loc_attr,
 
     if (!type->is_numeric_scalar_or_vector()) {
         std::string invalid_type = sem_.TypeNameOf(type);
-        AddError("cannot apply 'location' attribute to declaration of type '" + invalid_type + "'",
-                 source);
+        AddError("cannot apply @location to declaration of type '" + invalid_type + "'", source);
         AddNote(
-            "'location' attribute must only be applied to declarations of numeric scalar or "
-            "numeric vector type",
+            "@location must only be applied to declarations of numeric scalar or numeric vector "
+            "type",
             loc_attr->source);
         return false;
     }
 
     if (!locations.Add(location)) {
-        AddError(attr_to_str(loc_attr, location) + " attribute appears multiple times",
-                 loc_attr->source);
+        std::stringstream err;
+        err << "@location(" << location << ") appears multiple times";
+        AddError(err.str(), loc_attr->source);
         return false;
     }
 

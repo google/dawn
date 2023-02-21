@@ -9,7 +9,7 @@ void atomicXor_75dc95() {
   return;
 }
 
-void compute_main_inner(uint local_invocation_index) {
+void compute_main_inner(uint local_invocation_index_2) {
   atomicExchange(arg_0, 0);
   barrier();
   atomicXor_75dc95();

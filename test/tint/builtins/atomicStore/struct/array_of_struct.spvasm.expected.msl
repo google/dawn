@@ -26,9 +26,9 @@ struct S {
   uint y;
 };
 
-void compute_main_inner(uint local_invocation_index, threadgroup tint_array<S_atomic, 10>* const tint_symbol) {
+void compute_main_inner(uint local_invocation_index_2, threadgroup tint_array<S_atomic, 10>* const tint_symbol) {
   uint idx = 0u;
-  idx = local_invocation_index;
+  idx = local_invocation_index_2;
   while (true) {
     uint const x_23 = idx;
     if (!((x_23 < 10u))) {

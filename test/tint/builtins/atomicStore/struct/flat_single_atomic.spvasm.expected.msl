@@ -13,7 +13,7 @@ struct S {
   uint y;
 };
 
-void compute_main_inner(uint local_invocation_index, threadgroup S_atomic* const tint_symbol) {
+void compute_main_inner(uint local_invocation_index_2, threadgroup S_atomic* const tint_symbol) {
   (*(tint_symbol)).x = 0;
   atomic_store_explicit(&((*(tint_symbol)).a), 0u, memory_order_relaxed);
   (*(tint_symbol)).y = 0u;

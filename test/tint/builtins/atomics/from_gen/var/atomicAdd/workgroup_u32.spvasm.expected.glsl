@@ -12,7 +12,7 @@ void atomicAdd_d5db1d() {
   return;
 }
 
-void compute_main_inner(uint local_invocation_index) {
+void compute_main_inner(uint local_invocation_index_2) {
   atomicExchange(arg_0, 0u);
   barrier();
   atomicAdd_d5db1d();

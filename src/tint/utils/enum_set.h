@@ -192,14 +192,14 @@ struct EnumSet {
     };
 
     /// @returns an read-only iterator to the beginning of the set
-    Iterator begin() {
+    Iterator begin() const {
         auto it = Iterator{set, -1};
         ++it;  // Move to first set bit
         return it;
     }
 
     /// @returns an iterator to the beginning of the set
-    Iterator end() { return Iterator{set, Iterator::kEnd}; }
+    Iterator end() const { return Iterator{set, Iterator::kEnd}; }
 
   private:
     static constexpr uint64_t Bit(Enum value) {

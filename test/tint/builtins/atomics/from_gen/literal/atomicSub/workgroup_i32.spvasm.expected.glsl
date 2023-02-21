@@ -9,7 +9,7 @@ void atomicSub_77883a() {
   return;
 }
 
-void compute_main_inner(uint local_invocation_index) {
+void compute_main_inner(uint local_invocation_index_2) {
   atomicExchange(arg_0, 0);
   barrier();
   atomicSub_77883a();

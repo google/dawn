@@ -12,7 +12,7 @@ fn atomicOr_d09248() {
   return;
 }
 
-fn compute_main_inner(local_invocation_index : u32) {
+fn compute_main_inner(local_invocation_index_2 : u32) {
   atomicStore(&(arg_0), 0i);
   workgroupBarrier();
   atomicOr_d09248();

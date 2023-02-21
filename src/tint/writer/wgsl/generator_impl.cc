@@ -564,7 +564,11 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
                 return true;
             },
             [&](const ast::BuiltinAttribute* builtin) {
-                out << "builtin(" << builtin->builtin << ")";
+                out << "builtin(";
+                if (!EmitExpression(out, builtin->builtin)) {
+                    return false;
+                }
+                out << ")";
                 return true;
             },
             [&](const ast::DiagnosticAttribute* diagnostic) {

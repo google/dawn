@@ -18,7 +18,7 @@ struct LeftOver {
   test : Arr_1,
 }
 
-var<private> position : vec3<f32>;
+var<private> position_1 : vec3<f32>;
 
 @group(2) @binding(2) var<uniform> x_14 : LeftOver;
 
@@ -33,13 +33,13 @@ var<private> gl_Position : vec4<f32>;
 fn main_1() {
   var q : vec4<f32>;
   var p : vec3<f32>;
-  let x_13 : vec3<f32> = position;
+  let x_13 : vec3<f32> = position_1;
   q = vec4<f32>(x_13.x, x_13.y, x_13.z, 1.0f);
   let x_21 : vec4<f32> = q;
   p = vec3<f32>(x_21.x, x_21.y, x_21.z);
   let x_27 : f32 = p.x;
   let x_41 : f32 = x_14.test[0i].el;
-  let x_45 : f32 = position.y;
+  let x_45 : f32 = position_1.y;
   let x_49 : f32 = x_14.time;
   p.x = (x_27 + sin(((x_41 * x_45) + x_49)));
   let x_55 : f32 = p.y;
@@ -63,8 +63,8 @@ struct main_out {
 }
 
 @vertex
-fn main(@location(0) position_param : vec3<f32>, @location(2) uv_param : vec2<f32>, @location(1) normal_param : vec3<f32>) -> main_out {
-  position = position_param;
+fn main(@location(0) position_1_param : vec3<f32>, @location(2) uv_param : vec2<f32>, @location(1) normal_param : vec3<f32>) -> main_out {
+  position_1 = position_1_param;
   uv = uv_param;
   normal = normal_param;
   main_1();

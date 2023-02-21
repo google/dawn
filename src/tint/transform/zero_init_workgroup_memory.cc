@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/variable.h"
@@ -159,8 +160,9 @@ struct ZeroInitWorkgroupMemory::State {
         // parameter
         std::function<const ast::Expression*()> local_index;
         for (auto* param : fn->params) {
-            if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(param->attributes)) {
-                if (builtin->builtin == builtin::BuiltinValue::kLocalInvocationIndex) {
+            if (auto* builtin_attr = ast::GetAttribute<ast::BuiltinAttribute>(param->attributes)) {
+                auto builtin = sem.Get(builtin_attr)->Value();
+                if (builtin == builtin::BuiltinValue::kLocalInvocationIndex) {
                     local_index = [=] { return b.Expr(ctx.Clone(param->name->symbol)); };
                     break;
                 }
@@ -168,9 +170,10 @@ struct ZeroInitWorkgroupMemory::State {
 
             if (auto* str = sem.Get(param)->Type()->As<sem::Struct>()) {
                 for (auto* member : str->Members()) {
-                    if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(
+                    if (auto* builtin_attr = ast::GetAttribute<ast::BuiltinAttribute>(
                             member->Declaration()->attributes)) {
-                        if (builtin->builtin == builtin::BuiltinValue::kLocalInvocationIndex) {
+                        auto builtin = sem.Get(builtin_attr)->Value();
+                        if (builtin == builtin::BuiltinValue::kLocalInvocationIndex) {
                             local_index = [=] {
                                 auto* param_expr = b.Expr(ctx.Clone(param->name->symbol));
                                 auto* member_name = ctx.Clone(member->Declaration()->name);
@@ -184,10 +187,9 @@ struct ZeroInitWorkgroupMemory::State {
         }
         if (!local_index) {
             // No existing local index parameter. Append one to the entry point.
-            auto* param = b.Param(b.Symbols().New("local_invocation_index"), b.ty.u32(),
-                                  utils::Vector{
-                                      b.Builtin(builtin::BuiltinValue::kLocalInvocationIndex),
-                                  });
+            auto param_name = b.Symbols().New("local_invocation_index");
+            auto* local_invocation_index = b.Builtin(builtin::BuiltinValue::kLocalInvocationIndex);
+            auto* param = b.Param(param_name, b.ty.u32(), utils::Vector{local_invocation_index});
             ctx.InsertBack(fn->params, param);
             local_index = [=] { return b.Expr(param->name->symbol); };
         }

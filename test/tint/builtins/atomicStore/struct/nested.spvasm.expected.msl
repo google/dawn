@@ -43,7 +43,7 @@ struct S2 {
   S1 a;
 };
 
-void compute_main_inner(uint local_invocation_index, threadgroup S2_atomic* const tint_symbol) {
+void compute_main_inner(uint local_invocation_index_2, threadgroup S2_atomic* const tint_symbol) {
   (*(tint_symbol)).x = 0;
   (*(tint_symbol)).y = 0;
   (*(tint_symbol)).z = 0;

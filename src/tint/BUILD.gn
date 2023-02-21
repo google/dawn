@@ -825,6 +825,7 @@ libtint_source_set("libtint_reader_src") {
 
 libtint_source_set("libtint_spv_reader_src") {
   sources = [
+    "reader/spirv/attributes.h",
     "reader/spirv/construct.cc",
     "reader/spirv/construct.h",
     "reader/spirv/entry_point_info.cc",
@@ -916,6 +917,7 @@ libtint_source_set("libtint_spv_writer_src") {
   deps = [
     ":libtint_ast_src",
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_constant_src",
     ":libtint_program_src",
     ":libtint_sem_src",
@@ -981,6 +983,7 @@ libtint_source_set("libtint_msl_writer_src") {
   deps = [
     ":libtint_ast_src",
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_constant_src",
     ":libtint_program_src",
     ":libtint_sem_src",
@@ -1001,6 +1004,7 @@ libtint_source_set("libtint_hlsl_writer_src") {
   deps = [
     ":libtint_ast_src",
     ":libtint_base_src",
+    ":libtint_builtins_src",
     ":libtint_constant_src",
     ":libtint_program_src",
     ":libtint_sem_src",
@@ -1740,6 +1744,7 @@ if (tint_build_unittests) {
 
     deps = [
       ":libtint_base_src",
+      ":libtint_builtins_src",
       ":libtint_unittests_ast_helper",
       ":libtint_wgsl_reader_src",
     ]
@@ -1781,6 +1786,7 @@ if (tint_build_unittests) {
     ]
 
     deps = [
+      ":libtint_builtins_src",
       ":libtint_wgsl_writer_src",
       ":tint_unittests_ast_src",
     ]

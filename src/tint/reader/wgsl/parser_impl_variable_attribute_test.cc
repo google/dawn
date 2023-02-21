@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ast/test_helper.h"
+#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {
@@ -215,20 +217,11 @@ TEST_F(ParserImplTest, Attribute_Location_MissingInvalid) {
     EXPECT_EQ(p->error(), "1:10: expected location expression");
 }
 
-struct BuiltinData {
-    const char* input;
-    builtin::BuiltinValue result;
-};
-inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
-    out << std::string(data.input);
-    return out;
-}
-
-class BuiltinTest : public ParserImplTestWithParam<BuiltinData> {};
+class BuiltinTest : public ParserImplTestWithParam<builtin::BuiltinValue> {};
 
 TEST_P(BuiltinTest, Attribute_Builtin) {
-    auto params = GetParam();
-    auto p = parser(std::string("builtin(") + params.input + ")");
+    auto str = utils::ToString(GetParam());
+    auto p = parser("builtin(" + str + ")");
 
     auto attr = p->attribute();
     EXPECT_TRUE(attr.matched);
@@ -240,11 +233,11 @@ TEST_P(BuiltinTest, Attribute_Builtin) {
     ASSERT_TRUE(var_attr->Is<ast::BuiltinAttribute>());
 
     auto* builtin = var_attr->As<ast::BuiltinAttribute>();
-    EXPECT_EQ(builtin->builtin, params.result);
+    ast::CheckIdentifier(p->builder().Symbols(), builtin->builtin, str);
 }
 TEST_P(BuiltinTest, Attribute_Builtin_TrailingComma) {
-    auto params = GetParam();
-    auto p = parser(std::string("builtin(") + params.input + ",)");
+    auto str = utils::ToString(GetParam());
+    auto p = parser("builtin(" + str + ",)");
 
     auto attr = p->attribute();
     EXPECT_TRUE(attr.matched);
@@ -256,24 +249,22 @@ TEST_P(BuiltinTest, Attribute_Builtin_TrailingComma) {
     ASSERT_TRUE(var_attr->Is<ast::BuiltinAttribute>());
 
     auto* builtin = var_attr->As<ast::BuiltinAttribute>();
-    EXPECT_EQ(builtin->builtin, params.result);
+    ast::CheckIdentifier(p->builder().Symbols(), builtin->builtin, str);
 }
-INSTANTIATE_TEST_SUITE_P(
-    ParserImplTest,
-    BuiltinTest,
-    testing::Values(BuiltinData{"position", builtin::BuiltinValue::kPosition},
-                    BuiltinData{"vertex_index", builtin::BuiltinValue::kVertexIndex},
-                    BuiltinData{"instance_index", builtin::BuiltinValue::kInstanceIndex},
-                    BuiltinData{"front_facing", builtin::BuiltinValue::kFrontFacing},
-                    BuiltinData{"frag_depth", builtin::BuiltinValue::kFragDepth},
-                    BuiltinData{"local_invocation_id", builtin::BuiltinValue::kLocalInvocationId},
-                    BuiltinData{"local_invocation_index",
-                                builtin::BuiltinValue::kLocalInvocationIndex},
-                    BuiltinData{"global_invocation_id", builtin::BuiltinValue::kGlobalInvocationId},
-                    BuiltinData{"workgroup_id", builtin::BuiltinValue::kWorkgroupId},
-                    BuiltinData{"num_workgroups", builtin::BuiltinValue::kNumWorkgroups},
-                    BuiltinData{"sample_index", builtin::BuiltinValue::kSampleIndex},
-                    BuiltinData{"sample_mask", builtin::BuiltinValue::kSampleMask}));
+INSTANTIATE_TEST_SUITE_P(ParserImplTest,
+                         BuiltinTest,
+                         testing::Values(builtin::BuiltinValue::kPosition,
+                                         builtin::BuiltinValue::kVertexIndex,
+                                         builtin::BuiltinValue::kInstanceIndex,
+                                         builtin::BuiltinValue::kFrontFacing,
+                                         builtin::BuiltinValue::kFragDepth,
+                                         builtin::BuiltinValue::kLocalInvocationId,
+                                         builtin::BuiltinValue::kLocalInvocationIndex,
+                                         builtin::BuiltinValue::kGlobalInvocationId,
+                                         builtin::BuiltinValue::kWorkgroupId,
+                                         builtin::BuiltinValue::kNumWorkgroups,
+                                         builtin::BuiltinValue::kSampleIndex,
+                                         builtin::BuiltinValue::kSampleMask));
 
 TEST_F(ParserImplTest, Attribute_Builtin_MissingLeftParen) {
     auto p = parser("builtin position)");
@@ -302,42 +293,7 @@ TEST_F(ParserImplTest, Attribute_Builtin_MissingValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), R"(1:9: expected builtin
-Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id')");
-}
-
-TEST_F(ParserImplTest, Attribute_Builtin_InvalidValue) {
-    auto p = parser("builtin(other_thingy)");
-    auto attr = p->attribute();
-    EXPECT_FALSE(attr.matched);
-    EXPECT_TRUE(attr.errored);
-    EXPECT_EQ(attr.value, nullptr);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), R"(1:9: expected builtin
-Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id')");
-}
-
-TEST_F(ParserImplTest, Attribute_Builtin_InvalidValueSuggest) {
-    auto p = parser("builtin(front_face)");
-    auto attr = p->attribute();
-    EXPECT_FALSE(attr.matched);
-    EXPECT_TRUE(attr.errored);
-    EXPECT_EQ(attr.value, nullptr);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), R"(1:9: expected builtin
-Did you mean 'front_facing'?
-Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id')");
-}
-
-TEST_F(ParserImplTest, Attribute_Builtin_MissingInvalid) {
-    auto p = parser("builtin(3)");
-    auto attr = p->attribute();
-    EXPECT_FALSE(attr.matched);
-    EXPECT_TRUE(attr.errored);
-    EXPECT_EQ(attr.value, nullptr);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), R"(1:9: expected builtin
-Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id')");
+    EXPECT_EQ(p->error(), R"(1:9: expected expression for builtin name)");
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Flat) {

@@ -22,9 +22,9 @@ uint tint_mod(uint lhs, uint rhs) {
   return (lhs % select(rhs, 1u, (rhs == 0u)));
 }
 
-void compute_main_inner(uint local_invocation_index, threadgroup tint_array<tint_array<tint_array<atomic_uint, 1>, 2>, 3>* const tint_symbol_3) {
+void compute_main_inner(uint local_invocation_index_2, threadgroup tint_array<tint_array<tint_array<atomic_uint, 1>, 2>, 3>* const tint_symbol_3) {
   uint idx = 0u;
-  idx = local_invocation_index;
+  idx = local_invocation_index_2;
   while (true) {
     uint const x_25 = idx;
     if (!((x_25 < 6u))) {

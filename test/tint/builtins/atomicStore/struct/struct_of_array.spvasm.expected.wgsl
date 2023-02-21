@@ -22,11 +22,11 @@ var<private> local_invocation_index_1 : u32;
 
 var<workgroup> wg : S_atomic;
 
-fn compute_main_inner(local_invocation_index : u32) {
+fn compute_main_inner(local_invocation_index_2 : u32) {
   var idx : u32 = 0u;
   wg.x = 0i;
   wg.y = 0u;
-  idx = local_invocation_index;
+  idx = local_invocation_index_2;
   loop {
     let x_30 : u32 = idx;
     if (!((x_30 < 10u))) {

@@ -1,6 +1,6 @@
 #version 310 es
 
-layout(location = 0) in vec3 position_param_1;
+layout(location = 0) in vec3 position_1_param_1;
 layout(location = 2) in vec2 uv_param_1;
 layout(location = 1) in vec3 normal_param_1;
 layout(location = 0) out vec2 vUV_1_1;
@@ -21,7 +21,7 @@ struct LeftOver {
   strided_arr test[4];
 };
 
-vec3 position = vec3(0.0f, 0.0f, 0.0f);
+vec3 position_1 = vec3(0.0f, 0.0f, 0.0f);
 layout(binding = 2, std140) uniform x_14_block_ubo {
   LeftOver inner;
 } x_14;
@@ -33,13 +33,13 @@ vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 void main_1() {
   vec4 q = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   vec3 p = vec3(0.0f, 0.0f, 0.0f);
-  vec3 x_13 = position;
+  vec3 x_13 = position_1;
   q = vec4(x_13.x, x_13.y, x_13.z, 1.0f);
   vec4 x_21 = q;
   p = vec3(x_21.x, x_21.y, x_21.z);
   float x_27 = p.x;
   float x_41 = x_14.inner.test[0].el;
-  float x_45 = position.y;
+  float x_45 = position_1.y;
   float x_49 = x_14.inner.time;
   p.x = (x_27 + sin(((x_41 * x_45) + x_49)));
   float x_55 = p.y;
@@ -60,8 +60,8 @@ struct main_out {
   vec2 vUV_1;
 };
 
-main_out tint_symbol_1(vec3 position_param, vec2 uv_param, vec3 normal_param) {
-  position = position_param;
+main_out tint_symbol_1(vec3 position_1_param, vec2 uv_param, vec3 normal_param) {
+  position_1 = position_1_param;
   uv = uv_param;
   normal = normal_param;
   main_1();
@@ -71,7 +71,7 @@ main_out tint_symbol_1(vec3 position_param, vec2 uv_param, vec3 normal_param) {
 
 void main() {
   gl_PointSize = 1.0;
-  main_out inner_result = tint_symbol_1(position_param_1, uv_param_1, normal_param_1);
+  main_out inner_result = tint_symbol_1(position_1_param_1, uv_param_1, normal_param_1);
   gl_Position = inner_result.tint_symbol;
   vUV_1_1 = inner_result.vUV_1;
   gl_Position.y = -(gl_Position.y);

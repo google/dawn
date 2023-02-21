@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/ast/disable_validation_attribute.h"
+#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/transform/add_block_attribute.h"
@@ -221,9 +222,9 @@ TEST_P(ComputeShaderParameterAttributeTest, IsValid) {
     } else {
         EXPECT_FALSE(r()->Resolve());
         if (params.kind == AttributeKind::kBuiltin) {
-            EXPECT_EQ(r()->error(),
-                      "12:34 error: builtin(position) cannot be used in input of "
-                      "compute pipeline stage");
+            EXPECT_EQ(
+                r()->error(),
+                R"(12:34 error: @builtin(position) cannot be used in input of compute pipeline stage)");
         } else if (params.kind == AttributeKind::kInterpolate ||
                    params.kind == AttributeKind::kLocation ||
                    params.kind == AttributeKind::kInvariant) {
@@ -314,9 +315,9 @@ TEST_P(VertexShaderParameterAttributeTest, IsValid) {
     } else {
         EXPECT_FALSE(r()->Resolve());
         if (params.kind == AttributeKind::kBuiltin) {
-            EXPECT_EQ(r()->error(),
-                      "12:34 error: builtin(position) cannot be used in input of "
-                      "vertex pipeline stage");
+            EXPECT_EQ(
+                r()->error(),
+                R"(12:34 error: @builtin(position) cannot be used in input of vertex pipeline stage)");
         } else if (params.kind == AttributeKind::kInvariant) {
             EXPECT_EQ(r()->error(),
                       "12:34 error: invariant attribute must only be applied to a "
@@ -362,9 +363,9 @@ TEST_P(ComputeShaderReturnTypeAttributeTest, IsValid) {
     } else {
         EXPECT_FALSE(r()->Resolve());
         if (params.kind == AttributeKind::kBuiltin) {
-            EXPECT_EQ(r()->error(),
-                      "12:34 error: builtin(position) cannot be used in output of "
-                      "compute pipeline stage");
+            EXPECT_EQ(
+                r()->error(),
+                R"(12:34 error: @builtin(position) cannot be used in output of compute pipeline stage)");
         } else if (params.kind == AttributeKind::kInterpolate ||
                    params.kind == AttributeKind::kLocation ||
                    params.kind == AttributeKind::kInvariant) {
@@ -411,21 +412,20 @@ TEST_P(FragmentShaderReturnTypeAttributeTest, IsValid) {
     } else {
         EXPECT_FALSE(r()->Resolve());
         if (params.kind == AttributeKind::kBuiltin) {
-            EXPECT_EQ(r()->error(),
-                      "12:34 error: builtin(position) cannot be used in output of "
-                      "fragment pipeline stage");
+            EXPECT_EQ(
+                r()->error(),
+                R"(12:34 error: @builtin(position) cannot be used in output of fragment pipeline stage)");
         } else if (params.kind == AttributeKind::kInvariant) {
-            EXPECT_EQ(r()->error(),
-                      "12:34 error: invariant attribute must only be applied to a "
-                      "position builtin");
+            EXPECT_EQ(
+                r()->error(),
+                R"(12:34 error: invariant attribute must only be applied to a position builtin)");
         } else if (params.kind == AttributeKind::kLocation) {
             EXPECT_EQ(r()->error(),
-                      "34:56 error: duplicate location attribute\n"
-                      "12:34 note: first attribute declared here");
+                      R"(34:56 error: duplicate location attribute
+12:34 note: first attribute declared here)");
         } else {
             EXPECT_EQ(r()->error(),
-                      "12:34 error: attribute is not valid for entry point return "
-                      "types");
+                      R"(12:34 error: attribute is not valid for entry point return types)");
         }
     }
 }
@@ -470,12 +470,11 @@ TEST_P(VertexShaderReturnTypeAttributeTest, IsValid) {
         EXPECT_FALSE(r()->Resolve());
         if (params.kind == AttributeKind::kLocation) {
             EXPECT_EQ(r()->error(),
-                      "34:56 error: multiple entry point IO attributes\n"
-                      "12:34 note: previously consumed location(1)");
+                      R"(34:56 error: multiple entry point IO attributes
+12:34 note: previously consumed @location)");
         } else {
             EXPECT_EQ(r()->error(),
-                      "12:34 error: attribute is not valid for entry point return "
-                      "types");
+                      R"(12:34 error: attribute is not valid for entry point return types)");
         }
     }
 }

@@ -3445,15 +3445,17 @@ class ProgramBuilder {
     /// @param source the source information
     /// @param builtin the builtin value
     /// @returns the builtin attribute pointer
-    const ast::BuiltinAttribute* Builtin(const Source& source, builtin::BuiltinValue builtin) {
-        return create<ast::BuiltinAttribute>(source, builtin);
+    template <typename BUILTIN>
+    const ast::BuiltinAttribute* Builtin(const Source& source, BUILTIN&& builtin) {
+        return create<ast::BuiltinAttribute>(source, Expr(std::forward<BUILTIN>(builtin)));
     }
 
     /// Creates an ast::BuiltinAttribute
     /// @param builtin the builtin value
     /// @returns the builtin attribute pointer
-    const ast::BuiltinAttribute* Builtin(builtin::BuiltinValue builtin) {
-        return create<ast::BuiltinAttribute>(source_, builtin);
+    template <typename BUILTIN>
+    const ast::BuiltinAttribute* Builtin(BUILTIN&& builtin) {
+        return create<ast::BuiltinAttribute>(source_, Expr(std::forward<BUILTIN>(builtin)));
     }
 
     /// Creates an ast::InterpolateAttribute

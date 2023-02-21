@@ -14,11 +14,11 @@ struct S {
 
 uint local_invocation_index_1 = 0u;
 shared S_atomic wg;
-void compute_main_inner(uint local_invocation_index) {
+void compute_main_inner(uint local_invocation_index_2) {
   uint idx = 0u;
   wg.x = 0;
   wg.y = 0u;
-  idx = local_invocation_index;
+  idx = local_invocation_index_2;
   while (true) {
     uint x_30 = idx;
     if (!((x_30 < 10u))) {

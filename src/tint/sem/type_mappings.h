@@ -17,6 +17,8 @@
 
 #include <type_traits>
 
+#include "src/tint/sem/builtin_enum_expression.h"
+
 // Forward declarations
 namespace tint {
 class CastableBase;
@@ -25,6 +27,7 @@ namespace tint::ast {
 class AccessorExpression;
 class BinaryExpression;
 class BitcastExpression;
+class BuiltinAttribute;
 class CallExpression;
 class Expression;
 class ForLoopStatement;
@@ -43,6 +46,9 @@ class Variable;
 class WhileStatement;
 class UnaryOpExpression;
 }  // namespace tint::ast
+namespace tint::builtin {
+enum class BuiltinValue;
+}
 namespace tint::sem {
 class Expression;
 class ForLoopStatement;
@@ -71,21 +77,22 @@ namespace tint::sem {
 /// rules will be used to infer the return type based on the argument type.
 struct TypeMappings {
     //! @cond Doxygen_Suppress
+    BuiltinEnumExpression<builtin::BuiltinValue>* operator()(ast::BuiltinAttribute*);
+    CastableBase* operator()(ast::Node*);
+    Expression* operator()(ast::Expression*);
     ForLoopStatement* operator()(ast::ForLoopStatement*);
     Function* operator()(ast::Function*);
-    IfStatement* operator()(ast::IfStatement*);
-    CastableBase* operator()(ast::Node*);
     GlobalVariable* operator()(ast::Override*);
+    IfStatement* operator()(ast::IfStatement*);
     Statement* operator()(ast::Statement*);
     Struct* operator()(ast::Struct*);
     StructMember* operator()(ast::StructMember*);
     SwitchStatement* operator()(ast::SwitchStatement*);
     type::Type* operator()(ast::TypeDecl*);
-    Expression* operator()(ast::Expression*);
     ValueExpression* operator()(ast::AccessorExpression*);
-    ValueExpression* operator()(ast::CallExpression*);
     ValueExpression* operator()(ast::BinaryExpression*);
     ValueExpression* operator()(ast::BitcastExpression*);
+    ValueExpression* operator()(ast::CallExpression*);
     ValueExpression* operator()(ast::LiteralExpression*);
     ValueExpression* operator()(ast::PhonyExpression*);
     ValueExpression* operator()(ast::UnaryOpExpression*);

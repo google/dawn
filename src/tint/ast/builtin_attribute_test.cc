@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
+
 #include "src/tint/ast/test_helper.h"
+#include "src/tint/builtin/builtin_value.h"
 
 namespace tint::ast {
 namespace {
@@ -20,8 +23,27 @@ namespace {
 using BuiltinAttributeTest = TestHelper;
 
 TEST_F(BuiltinAttributeTest, Creation) {
-    auto* d = create<BuiltinAttribute>(builtin::BuiltinValue::kFragDepth);
-    EXPECT_EQ(builtin::BuiltinValue::kFragDepth, d->builtin);
+    auto* d = Builtin(builtin::BuiltinValue::kFragDepth);
+    CheckIdentifier(Symbols(), d->builtin, "frag_depth");
+}
+
+TEST_F(BuiltinAttributeTest, Assert_Null_Builtin) {
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.Builtin(nullptr);
+        },
+        "internal compiler error");
+}
+
+TEST_F(BuiltinAttributeTest, Assert_DifferentProgramID_Builtin) {
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.Builtin(b2.Expr("bang"));
+        },
+        "internal compiler error");
 }
 
 }  // namespace

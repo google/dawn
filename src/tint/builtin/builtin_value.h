@@ -30,6 +30,7 @@ namespace tint::builtin {
 /// Builtin value defined with `@builtin(<name>)`.
 enum class BuiltinValue {
     kUndefined,
+    kPointSize,
     kFragDepth,
     kFrontFacing,
     kGlobalInvocationId,
@@ -37,7 +38,6 @@ enum class BuiltinValue {
     kLocalInvocationId,
     kLocalInvocationIndex,
     kNumWorkgroups,
-    kPointSize,  // Tint-internal enum entry - not parsed
     kPosition,
     kSampleIndex,
     kSampleMask,
@@ -56,12 +56,11 @@ std::ostream& operator<<(std::ostream& out, BuiltinValue value);
 BuiltinValue ParseBuiltinValue(std::string_view str);
 
 constexpr const char* kBuiltinValueStrings[] = {
-    "frag_depth",           "front_facing",
-    "global_invocation_id", "instance_index",
-    "local_invocation_id",  "local_invocation_index",
-    "num_workgroups",       "position",
-    "sample_index",         "sample_mask",
-    "vertex_index",         "workgroup_id",
+    "__point_size",           "frag_depth",     "front_facing",
+    "global_invocation_id",   "instance_index", "local_invocation_id",
+    "local_invocation_index", "num_workgroups", "position",
+    "sample_index",           "sample_mask",    "vertex_index",
+    "workgroup_id",
 };
 
 }  // namespace tint::builtin

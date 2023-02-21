@@ -2077,14 +2077,15 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                     auto& attrs = param->attributes;
                     bool builtin_found = false;
                     for (auto* attr : attrs) {
-                        auto* builtin = attr->As<ast::BuiltinAttribute>();
-                        if (!builtin) {
+                        auto* builtin_attr = attr->As<ast::BuiltinAttribute>();
+                        if (!builtin_attr) {
                             continue;
                         }
+                        auto builtin = program_->Sem().Get(builtin_attr)->Value();
 
                         builtin_found = true;
 
-                        auto name = builtin_to_attribute(builtin->builtin);
+                        auto name = builtin_to_attribute(builtin);
                         if (name.empty()) {
                             diagnostics_.add_error(diag::System::Writer, "unknown builtin");
                             return false;
@@ -2854,8 +2855,9 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
             for (auto* attr : decl->attributes) {
                 bool ok = Switch(
                     attr,
-                    [&](const ast::BuiltinAttribute* builtin) {
-                        auto name = builtin_to_attribute(builtin->builtin);
+                    [&](const ast::BuiltinAttribute* builtin_attr) {
+                        auto builtin = program_->Sem().Get(builtin_attr)->Value();
+                        auto name = builtin_to_attribute(builtin);
                         if (name.empty()) {
                             diagnostics_.add_error(diag::System::Writer, "unknown builtin");
                             return false;

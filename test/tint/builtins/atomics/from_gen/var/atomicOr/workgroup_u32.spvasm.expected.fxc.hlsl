@@ -13,7 +13,7 @@ void atomicOr_5e3d61() {
   return;
 }
 
-void compute_main_inner(uint local_invocation_index) {
+void compute_main_inner(uint local_invocation_index_2) {
   uint atomic_result_1 = 0u;
   InterlockedExchange(arg_0, 0u, atomic_result_1);
   GroupMemoryBarrierWithGroupSync();

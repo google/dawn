@@ -17,7 +17,7 @@
                OpName %lhs_0 "lhs"
                OpName %rhs_0 "rhs"
                OpName %compute_main_inner "compute_main_inner"
-               OpName %local_invocation_index "local_invocation_index"
+               OpName %local_invocation_index_2 "local_invocation_index_2"
                OpName %idx "idx"
                OpName %compute_main_1 "compute_main_1"
                OpName %compute_main_inner_1 "compute_main_inner_1"
@@ -75,11 +75,11 @@
                OpReturnValue %30
                OpFunctionEnd
 %compute_main_inner = OpFunction %void None %31
-%local_invocation_index = OpFunctionParameter %uint
+%local_invocation_index_2 = OpFunctionParameter %uint
          %35 = OpLabel
         %idx = OpVariable %_ptr_Function_uint Function %6
                OpStore %idx %6
-               OpStore %idx %local_invocation_index
+               OpStore %idx %local_invocation_index_2
                OpBranch %38
          %38 = OpLabel
                OpLoopMerge %39 %40 None

@@ -2,9 +2,9 @@
 
 uint local_invocation_index_1 = 0u;
 shared uint wg[4];
-void compute_main_inner(uint local_invocation_index) {
+void compute_main_inner(uint local_invocation_index_2) {
   uint idx = 0u;
-  idx = local_invocation_index;
+  idx = local_invocation_index_2;
   while (true) {
     uint x_21 = idx;
     if (!((x_21 < 4u))) {

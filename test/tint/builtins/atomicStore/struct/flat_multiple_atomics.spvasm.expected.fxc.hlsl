@@ -7,7 +7,7 @@ struct S_atomic {
 static uint local_invocation_index_1 = 0u;
 groupshared S_atomic wg;
 
-void compute_main_inner(uint local_invocation_index) {
+void compute_main_inner(uint local_invocation_index_2) {
   wg.x = 0;
   uint atomic_result = 0u;
   InterlockedExchange(wg.a, 0u, atomic_result);

@@ -19,6 +19,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
@@ -33,7 +34,7 @@ namespace {
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
         if (auto* attr = node->As<ast::BuiltinAttribute>()) {
-            if (attr->builtin == builtin::BuiltinValue::kNumWorkgroups) {
+            if (program->Sem().Get(attr)->Value() == builtin::BuiltinValue::kNumWorkgroups) {
                 return true;
             }
         }
@@ -100,7 +101,8 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
             for (auto* member : str->Members()) {
                 auto* builtin =
                     ast::GetAttribute<ast::BuiltinAttribute>(member->Declaration()->attributes);
-                if (!builtin || builtin->builtin != builtin::BuiltinValue::kNumWorkgroups) {
+                if (!builtin ||
+                    src->Sem().Get(builtin)->Value() != builtin::BuiltinValue::kNumWorkgroups) {
                     continue;
                 }
 

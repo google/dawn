@@ -33,7 +33,7 @@ void atomicCompareExchangeWeak_83580d(threadgroup atomic_uint* const tint_symbol
   return;
 }
 
-void compute_main_inner(uint local_invocation_index, threadgroup atomic_uint* const tint_symbol_3) {
+void compute_main_inner(uint local_invocation_index_2, threadgroup atomic_uint* const tint_symbol_3) {
   atomic_store_explicit(tint_symbol_3, 0u, memory_order_relaxed);
   threadgroup_barrier(mem_flags::mem_threadgroup);
   atomicCompareExchangeWeak_83580d(tint_symbol_3);

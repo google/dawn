@@ -10,7 +10,7 @@ fn atomicStore_726882() {
   return;
 }
 
-fn compute_main_inner(local_invocation_index : u32) {
+fn compute_main_inner(local_invocation_index_2 : u32) {
   atomicStore(&(arg_0), 0u);
   workgroupBarrier();
   atomicStore_726882();
