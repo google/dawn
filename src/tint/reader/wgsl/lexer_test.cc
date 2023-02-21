@@ -1082,7 +1082,6 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          TokenData{"struct", Token::Type::kStruct},
                                          TokenData{"switch", Token::Type::kSwitch},
                                          TokenData{"true", Token::Type::kTrue},
-                                         TokenData{"type", Token::Type::kType},
                                          TokenData{"var", Token::Type::kVar},
                                          TokenData{"while", Token::Type::kWhile}));
 

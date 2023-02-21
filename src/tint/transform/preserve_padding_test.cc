@@ -373,7 +373,7 @@ fn foo() {
 
 TEST_F(PreservePaddingTest, ArrayOfArray) {
     auto* src = R"(
-type Array = array<array<vec3<u32>, 4>, 3>;
+alias Array = array<array<vec3<u32>, 4>, 3>;
 
 @group(0) @binding(0) var<storage, read_write> v : Array;
 

@@ -232,7 +232,7 @@ fn main() -> vec4<f32> {
 TEST_F(CombineSamplersTest, AliasedTypes) {
     auto* src = R"(
 
-type Tex2d = texture_2d<f32>;
+alias Tex2d = texture_2d<f32>;
 
 @group(0) @binding(0) var t : Tex2d;
 
@@ -282,7 +282,7 @@ fn sample(t : Tex2d, s : sampler, coords : vec2<f32>) -> vec4<f32> {
 @group(0) @binding(0) var t : Tex2d;
 @group(0) @binding(1) var s : sampler;
 
-type Tex2d = texture_2d<f32>;
+alias Tex2d = texture_2d<f32>;
 )";
     auto* expect = R"(
 @group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t_s : texture_2d<f32>;

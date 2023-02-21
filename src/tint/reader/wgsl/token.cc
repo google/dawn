@@ -189,8 +189,6 @@ std::string_view Token::TypeToName(Type type) {
             return "switch";
         case Token::Type::kTrue:
             return "true";
-        case Token::Type::kType:
-            return "type";
         case Token::Type::kVar:
             return "var";
         case Token::Type::kWhile:

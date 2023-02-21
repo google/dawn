@@ -32,7 +32,7 @@ TEST_F(MultiplanarExternalTextureTest, ShouldRunEmptyModule) {
 
 TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureAlias) {
     auto* src = R"(
-type ET = texture_external;
+alias ET = texture_external;
 )";
 
     DataMap data;
@@ -1616,7 +1616,7 @@ fn f(ext_tex : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_param
 // Tests that the the transform handles aliases to external textures
 TEST_F(MultiplanarExternalTextureTest, ExternalTextureAlias) {
     auto* src = R"(
-type ET = texture_external;
+alias ET = texture_external;
 
 fn f(t : ET, s : sampler) {
   textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
@@ -1724,7 +1724,7 @@ fn f(t : ET, s : sampler) {
 @group(0) @binding(0) var ext_tex : ET;
 @group(0) @binding(1) var smp : sampler;
 
-type ET = texture_external;
+alias ET = texture_external;
 )";
 
     auto* expect = R"(

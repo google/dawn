@@ -19,7 +19,7 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, TypeDecl_ParsesType) {
-    auto p = parser("type a = i32");
+    auto p = parser("alias a = i32");
 
     auto t = p->type_alias_decl();
     EXPECT_FALSE(p->has_error());
@@ -29,11 +29,11 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
     ASSERT_TRUE(t->Is<ast::Alias>());
     auto* alias = t->As<ast::Alias>();
     ast::CheckIdentifier(p->builder().Symbols(), alias->type, "i32");
-    EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 13u}}));
+    EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 14u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Parses_Ident) {
-    auto p = parser("type a = B");
+    auto p = parser("alias a = B");
 
     auto t = p->type_alias_decl();
     EXPECT_FALSE(p->has_error());
@@ -44,7 +44,7 @@ TEST_F(ParserImplTest, TypeDecl_Parses_Ident) {
     auto* alias = t.value->As<ast::Alias>();
     ast::CheckIdentifier(p->builder().Symbols(), alias->name, "a");
     ast::CheckIdentifier(p->builder().Symbols(), alias->type, "B");
-    EXPECT_EQ(alias->source.range, (Source::Range{{1u, 1u}, {1u, 11u}}));
+    EXPECT_EQ(alias->source.range, (Source::Range{{1u, 1u}, {1u, 12u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Unicode_Parses_Ident) {
@@ -52,7 +52,7 @@ TEST_F(ParserImplTest, TypeDecl_Unicode_Parses_Ident) {
         "\xf0\x9d\x93\xb6\xf0\x9d\x94\x82\x5f\xf0\x9d\x93\xbd\xf0\x9d\x94\x82\xf0"
         "\x9d\x93\xb9\xf0\x9d\x93\xae";
 
-    auto p = parser("type " + ident + " = i32");
+    auto p = parser("alias " + ident + " = i32");
 
     auto t = p->type_alias_decl();
     EXPECT_FALSE(p->has_error());
@@ -63,43 +63,37 @@ TEST_F(ParserImplTest, TypeDecl_Unicode_Parses_Ident) {
     auto* alias = t.value->As<ast::Alias>();
     ast::CheckIdentifier(p->builder().Symbols(), alias->name, ident);
     ast::CheckIdentifier(p->builder().Symbols(), alias->type, "i32");
-    EXPECT_EQ(alias->source.range, (Source::Range{{1u, 1u}, {1u, 37u}}));
+    EXPECT_EQ(alias->source.range, (Source::Range{{1u, 1u}, {1u, 38u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingIdent) {
-    auto p = parser("type = i32");
+    auto p = parser("alias = i32");
     auto t = p->type_alias_decl();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(t.value, nullptr);
-    EXPECT_EQ(p->error(),
-              R"(1:1: use of deprecated language feature: 'type' has been renamed to 'alias'
-1:6: expected identifier for type alias)");
+    EXPECT_EQ(p->error(), R"(1:7: expected identifier for type alias)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidIdent) {
-    auto p = parser("type 123 = i32");
+    auto p = parser("alias 123 = i32");
     auto t = p->type_alias_decl();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(t.value, nullptr);
-    EXPECT_EQ(p->error(),
-              R"(1:1: use of deprecated language feature: 'type' has been renamed to 'alias'
-1:6: expected identifier for type alias)");
+    EXPECT_EQ(p->error(), R"(1:7: expected identifier for type alias)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingEqual) {
-    auto p = parser("type a i32");
+    auto p = parser("alias a i32");
     auto t = p->type_alias_decl();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(t.value, nullptr);
-    EXPECT_EQ(p->error(),
-              R"(1:1: use of deprecated language feature: 'type' has been renamed to 'alias'
-1:8: expected '=' for type alias)");
+    EXPECT_EQ(p->error(), R"(1:9: expected '=' for type alias)");
 }
 
 }  // namespace

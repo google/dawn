@@ -605,7 +605,7 @@ fn foo(@internal(disable_validation__ignore_address_space) @internal(disable_val
 
 TEST_F(ModuleScopeVarToEntryPointParamTest, Buffer_RuntimeArray_Alias) {
     auto* src = R"(
-type myarray = array<f32>;
+alias myarray = array<f32>;
 
 @group(0) @binding(0)
 var<storage> buffer : myarray;
@@ -643,7 +643,7 @@ fn main() {
 
 @group(0) @binding(0) var<storage> buffer : myarray;
 
-type myarray = array<f32>;
+alias myarray = array<f32>;
 )";
 
     auto* expect = R"(

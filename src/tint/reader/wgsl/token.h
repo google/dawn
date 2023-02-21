@@ -201,8 +201,6 @@ class Token {
         kSwitch,
         /// A 'true'
         kTrue,
-        /// A 'type'
-        kType,
         /// A 'var'
         kVar,
         /// A 'while'

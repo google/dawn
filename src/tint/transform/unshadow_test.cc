@@ -50,7 +50,7 @@ fn F(c : i32) {
 
 TEST_F(UnshadowTest, LocalShadowsAlias) {
     auto* src = R"(
-type a = i32;
+alias a = i32;
 
 fn X() {
   var a = false;
@@ -100,7 +100,7 @@ fn Z() {
   const a = true;
 }
 
-type a = i32;
+alias a = i32;
 )";
 
     auto* expect = R"(
@@ -691,7 +691,7 @@ const a : i32 = 1;
 
 TEST_F(UnshadowTest, ParamShadowsAlias) {
     auto* src = R"(
-type a = i32;
+alias a = i32;
 
 fn F(a : a) {
   {
@@ -732,7 +732,7 @@ fn F(a : a) {
   }
 }
 
-type a = i32;
+alias a = i32;
 )";
 
     auto* expect = R"(

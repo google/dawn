@@ -818,7 +818,7 @@ struct Inner {
   mat : mat3x4<f32>,
 };
 
-type InnerArr = array<Inner, 4>;
+alias InnerArr = array<Inner, 4>;
 
 struct Outer {
   arr : InnerArr,
@@ -1112,7 +1112,7 @@ struct Inner {
   mat : mat3x4<f32>,
 };
 
-type InnerArr = array<Inner, 4>;
+alias InnerArr = array<Inner, 4>;
 
 struct Outer {
   arr : InnerArr,
@@ -1356,7 +1356,7 @@ struct Inner {
   mat : mat3x4<f32>,
 };
 
-type InnerArr = array<Inner, 4>;
+alias InnerArr = array<Inner, 4>;
 
 struct Outer {
   arr : InnerArr,
@@ -1828,7 +1828,7 @@ struct Inner {
   mat : mat3x4<f32>,
 };
 
-type InnerArr = array<Inner, 4>;
+alias InnerArr = array<Inner, 4>;
 
 struct Outer {
   arr : InnerArr,

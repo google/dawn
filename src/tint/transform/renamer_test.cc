@@ -1856,7 +1856,7 @@ TEST_P(RenamerBuiltinTypeTest, RenameShadowedByAlias) {
     };
 
     auto src = expand(R"(
-type $name = $other_type;
+alias $name = $other_type;
 
 @fragment
 fn f() {

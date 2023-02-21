@@ -210,13 +210,13 @@ fn f() {
 
 TEST_F(SpirvAtomicTest, AliasedArraysOfU32) {
     auto* src = R"(
-type A0 = u32;
+alias A0 = u32;
 
-type A1 = array<A0, 1>;
+alias A1 = array<A0, 1>;
 
-type A2 = array<A1, 2>;
+alias A2 = array<A1, 2>;
 
-type A3 = array<A2, 3>;
+alias A3 = array<A2, 3>;
 
 var<workgroup> wg : A3;
 

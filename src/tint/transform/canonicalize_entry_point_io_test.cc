@@ -164,7 +164,7 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 
 TEST_F(CanonicalizeEntryPointIOTest, Parameter_TypeAlias) {
     auto* src = R"(
-type myf32 = f32;
+alias myf32 = f32;
 
 @fragment
 fn frag_main(@location(1) loc1 : myf32) {
@@ -204,7 +204,7 @@ fn frag_main(@location(1) loc1 : myf32) {
   var x : myf32 = loc1;
 }
 
-type myf32 = f32;
+alias myf32 = f32;
 )";
 
     auto* expect = R"(
@@ -1561,7 +1561,7 @@ struct FragmentInput {
 
 TEST_F(CanonicalizeEntryPointIOTest, Struct_TypeAliases) {
     auto* src = R"(
-type myf32 = f32;
+alias myf32 = f32;
 
 struct FragmentInput {
   @location(0) col1 : myf32,
@@ -1573,9 +1573,9 @@ struct FragmentOutput {
   @location(1) col2 : myf32,
 };
 
-type MyFragmentInput = FragmentInput;
+alias MyFragmentInput = FragmentInput;
 
-type MyFragmentOutput = FragmentOutput;
+alias MyFragmentOutput = FragmentOutput;
 
 fn foo(x : MyFragmentInput) -> myf32 {
   return x.col1;
@@ -1653,9 +1653,9 @@ fn frag_main(inputs : MyFragmentInput) -> MyFragmentOutput {
   return MyFragmentOutput(x, inputs.col2);
 }
 
-type MyFragmentInput = FragmentInput;
+alias MyFragmentInput = FragmentInput;
 
-type MyFragmentOutput = FragmentOutput;
+alias MyFragmentOutput = FragmentOutput;
 
 fn foo(x : MyFragmentInput) -> myf32 {
   return x.col1;
@@ -1671,7 +1671,7 @@ struct FragmentOutput {
   @location(1) col2 : myf32,
 };
 
-type myf32 = f32;
+alias myf32 = f32;
 )";
 
     auto* expect = R"(

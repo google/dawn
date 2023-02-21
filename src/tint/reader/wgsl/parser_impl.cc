@@ -99,10 +99,11 @@ bool is_reserved(const Token& t) {
            t == "signed" || t == "sizeof" || t == "smooth" || t == "snorm" || t == "static" ||
            t == "static_cast" || t == "std" || t == "subroutine" || t == "super" || t == "target" ||
            t == "template" || t == "this" || t == "thread_local" || t == "throw" || t == "trait" ||
-           t == "try" || t == "typedef" || t == "typeid" || t == "typename" || t == "typeof" ||
-           t == "union" || t == "unless" || t == "unorm" || t == "unsafe" || t == "unsized" ||
-           t == "use" || t == "using" || t == "varying" || t == "virtual" || t == "volatile" ||
-           t == "wgsl" || t == "where" || t == "with" || t == "writeonly" || t == "yield";
+           t == "try" || t == "type" || t == "typedef" || t == "typeid" || t == "typename" ||
+           t == "typeof" || t == "union" || t == "unless" || t == "unorm" || t == "unsafe" ||
+           t == "unsized" || t == "use" || t == "using" || t == "varying" || t == "virtual" ||
+           t == "volatile" || t == "wgsl" || t == "where" || t == "with" || t == "writeonly" ||
+           t == "yield";
 }
 
 /// Enter-exit counters for block token types.
@@ -774,12 +775,7 @@ Maybe<ParserImpl::VariableQualifier> ParserImpl::variable_qualifier() {
 //   : ALIAS IDENT EQUAL type_specifier
 Maybe<const ast::Alias*> ParserImpl::type_alias_decl() {
     Source source;
-    if (match(Token::Type::kAlias, &source)) {
-        // matched.
-    } else if (match(Token::Type::kType, &source)) {
-        // TODO(crbug.com/tint/1812): DEPRECATED
-        deprecated(source, "'type' has been renamed to 'alias'");
-    } else {
+    if (!match(Token::Type::kAlias, &source)) {
         return Failure::kNoMatch;
     }
 

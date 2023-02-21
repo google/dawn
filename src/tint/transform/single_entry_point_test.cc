@@ -416,7 +416,7 @@ TEST_F(SingleEntryPointTest, OverridableConstants_UnusedAliasForOverrideSizedArr
 
 // This is all unused by the target entry point.
 @id(1) override c1 : u32;
-type arr_ty = array<i32, c1>;
+alias arr_ty = array<i32, c1>;
 var<workgroup> arr : arr_ty;
 
 @compute @workgroup_size(64)

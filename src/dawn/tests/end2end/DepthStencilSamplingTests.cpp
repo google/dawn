@@ -79,7 +79,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                                 const std::vector<uint32_t> components,
                                 std::ostringstream& shaderSource,
                                 std::ostringstream& shaderBody) {
-        shaderSource << "type StencilValues = array<u32, " << components.size() << ">;\n";
+        shaderSource << "alias StencilValues = array<u32, " << components.size() << ">;\n";
         shaderSource << R"(
             struct DepthResult {
                 value : f32

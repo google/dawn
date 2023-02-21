@@ -132,7 +132,7 @@ fn main() {
 
 TEST_F(AddBlockAttributeTest, BasicArray_Alias) {
     auto* src = R"(
-type Numbers = array<vec4<f32>, 4u>;
+alias Numbers = array<vec4<f32>, 4u>;
 
 @group(0) @binding(0)
 var<uniform> u : Numbers;
@@ -693,13 +693,13 @@ struct Inner {
   f : f32,
 };
 
-type MyInner = Inner;
+alias MyInner = Inner;
 
 struct Outer {
   i : MyInner,
 };
 
-type MyOuter = Outer;
+alias MyOuter = Outer;
 
 @group(0) @binding(0)
 var<uniform> u0 : MyOuter;
@@ -763,12 +763,12 @@ fn main() {
 @group(0) @binding(1)
 var<uniform> u1 : MyInner;
 
-type MyInner = Inner;
+alias MyInner = Inner;
 
 @group(0) @binding(0)
 var<uniform> u0 : MyOuter;
 
-type MyOuter = Outer;
+alias MyOuter = Outer;
 
 struct Outer {
   i : MyInner,
