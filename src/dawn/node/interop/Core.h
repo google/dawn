@@ -41,8 +41,10 @@
 
 // A helper macro for constructing a PromiseInfo with the current file, function and line.
 // See PromiseInfo
-#define PROMISE_INFO \
-    ::wgpu::interop::PromiseInfo { __FILE__, __FUNCTION__, __LINE__ }
+#define PROMISE_INFO                     \
+    ::wgpu::interop::PromiseInfo {       \
+        __FILE__, __FUNCTION__, __LINE__ \
+    }
 
 namespace wgpu::interop {
 

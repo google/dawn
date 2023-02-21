@@ -19,7 +19,7 @@
 
 namespace dawn::wire {
 
-enum class [[nodiscard]] WireResult{
+enum class [[nodiscard]] WireResult {
     Success,
     FatalError,
 };
