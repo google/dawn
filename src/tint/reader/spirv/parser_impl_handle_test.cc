@@ -3886,7 +3886,6 @@ TEST_F(SpvParserHandleTest, SamplerLoadedInEnclosingConstruct_DontGenerateVar) {
            OpFunctionEnd
   )";
     auto p = parser(test::Assemble(assembly));
-    std::cout << assembly;
     EXPECT_TRUE(p->BuildAndParseInternalModule()) << assembly;
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
