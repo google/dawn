@@ -1111,5 +1111,13 @@ TEST_F(ParserImplErrorTest, InvalidUTF8) {
            "fn fu\xD0nc() {}\n");
 }
 
+TEST_F(ParserImplErrorTest, Bug_Chromium_1417465) {
+    EXPECT("var<workgroup> vec4_data: array<mat4x4<f@32>, 256>;",
+           R"(test.wgsl:1:41 error: expected ',' for template argument list
+var<workgroup> vec4_data: array<mat4x4<f@32>, 256>;
+                                        ^
+)");
+}
+
 }  // namespace
 }  // namespace tint::reader::wgsl

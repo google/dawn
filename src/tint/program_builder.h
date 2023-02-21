@@ -1496,23 +1496,24 @@ class ProgramBuilder {
 
     /// @param identifier the identifier symbol
     /// @param args the templated identifier arguments
-    /// @return an ast::TemplatedIdentifier with the given symbol and template arguments
+    /// @return an ast::Identifier with the given symbol and template arguments
     template <typename IDENTIFIER, typename... ARGS, typename = DisableIfSource<IDENTIFIER>>
-    const ast::TemplatedIdentifier* Ident(IDENTIFIER&& identifier, ARGS&&... args) {
+    const ast::Identifier* Ident(IDENTIFIER&& identifier, ARGS&&... args) {
         return Ident(source_, std::forward<IDENTIFIER>(identifier), std::forward<ARGS>(args)...);
     }
 
     /// @param source the source information
     /// @param identifier the identifier symbol
     /// @param args the templated identifier arguments
-    /// @return an ast::TemplatedIdentifier with the given symbol and template arguments
+    /// @return an ast::Identifier with the given symbol and template arguments
     template <typename IDENTIFIER, typename... ARGS>
-    const ast::TemplatedIdentifier* Ident(const Source& source,
-                                          IDENTIFIER&& identifier,
-                                          ARGS&&... args) {
+    const ast::Identifier* Ident(const Source& source, IDENTIFIER&& identifier, ARGS&&... args) {
+        auto arg_exprs = ExprList(std::forward<ARGS>(args)...);
+        if (arg_exprs.IsEmpty()) {
+            return create<ast::Identifier>(source, Sym(std::forward<IDENTIFIER>(identifier)));
+        }
         return create<ast::TemplatedIdentifier>(source, Sym(std::forward<IDENTIFIER>(identifier)),
-                                                ExprList(std::forward<ARGS>(args)...),
-                                                utils::Empty);
+                                                std::move(arg_exprs), utils::Empty);
     }
 
     /// @param expr the expression
