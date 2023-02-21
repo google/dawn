@@ -97,13 +97,13 @@ bool is_reserved(const Token& t) {
            t == "regardless" || t == "register" || t == "reinterpret_cast" || t == "requires" ||
            t == "resource" || t == "restrict" || t == "self" || t == "set" || t == "shared" ||
            t == "signed" || t == "sizeof" || t == "smooth" || t == "snorm" || t == "static" ||
-           t == "static_cast" || t == "std" || t == "subroutine" || t == "super" || t == "target" ||
-           t == "template" || t == "this" || t == "thread_local" || t == "throw" || t == "trait" ||
-           t == "try" || t == "type" || t == "typedef" || t == "typeid" || t == "typename" ||
-           t == "typeof" || t == "union" || t == "unless" || t == "unorm" || t == "unsafe" ||
-           t == "unsized" || t == "use" || t == "using" || t == "varying" || t == "virtual" ||
-           t == "volatile" || t == "wgsl" || t == "where" || t == "with" || t == "writeonly" ||
-           t == "yield";
+           t == "static_assert" || t == "static_cast" || t == "std" || t == "subroutine" ||
+           t == "super" || t == "target" || t == "template" || t == "this" || t == "thread_local" ||
+           t == "throw" || t == "trait" || t == "try" || t == "type" || t == "typedef" ||
+           t == "typeid" || t == "typename" || t == "typeof" || t == "union" || t == "unless" ||
+           t == "unorm" || t == "unsafe" || t == "unsized" || t == "use" || t == "using" ||
+           t == "varying" || t == "virtual" || t == "volatile" || t == "wgsl" || t == "where" ||
+           t == "with" || t == "writeonly" || t == "yield";
 }
 
 /// Enter-exit counters for block token types.
@@ -946,11 +946,7 @@ Expect<const ast::StructMember*> ParserImpl::expect_struct_member() {
 //   : STATIC_ASSERT expression
 Maybe<const ast::ConstAssert*> ParserImpl::const_assert_statement() {
     Source start;
-    if (match(Token::Type::kConstAssert, &start)) {
-        // matched
-    } else if (match(Token::Type::kStaticAssert, &start)) {
-        deprecated(start, "'static_assert' has been renamed to 'const_assert'");
-    } else {
+    if (!match(Token::Type::kConstAssert, &start)) {
         return Failure::kNoMatch;
     }
 

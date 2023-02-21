@@ -7,6 +7,7 @@
 * The `sig` member of the return type of `frexp()` has been renamed to `fract`. [tint:1766](crbug.com/tint/1766)
 * Calling a function with multiple pointer arguments that alias each other is now a error. [tint:1675](crbug.com/tint/1675)
 * `type` deprecation has been removed. `alias` must be used now. [tint:1812](crbug.com/tint/1812)
+* `static_assert` deprecation has been removed. `const_assert` must now be used. [tint:1807](crbug.com/tint/1807)
 
 ## Changes for M111
 
