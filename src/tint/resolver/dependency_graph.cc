@@ -878,6 +878,9 @@ std::string ResolvedIdentifier::String(const SymbolTable& symbols, diag::List& d
             [&](const ast::Function* n) {  //
                 return "function '" + symbols.NameFor(n->name->symbol) + "'";
             },
+            [&](const ast::Parameter* n) {  //
+                return "parameter '" + symbols.NameFor(n->name->symbol) + "'";
+            },
             [&](Default) {
                 TINT_UNREACHABLE(Resolver, diagnostics)
                     << "unhandled ast::Node: " << node->TypeInfo().name;

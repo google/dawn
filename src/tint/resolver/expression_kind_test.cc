@@ -31,6 +31,7 @@ enum class Def {
     kFunction,
     kInterpolationSampling,
     kInterpolationType,
+    kParameter,
     kStruct,
     kTexelFormat,
     kTypeAlias,
@@ -55,6 +56,8 @@ std::ostream& operator<<(std::ostream& out, Def def) {
             return out << "Def::kInterpolationSampling";
         case Def::kInterpolationType:
             return out << "Def::kInterpolationType";
+        case Def::kParameter:
+            return out << "Def::kParameter";
         case Def::kStruct:
             return out << "Def::kStruct";
         case Def::kTexelFormat:
@@ -138,6 +141,11 @@ using ResolverExpressionKindTest = ResolverTestWithParam<Case>;
 TEST_P(ResolverExpressionKindTest, Test) {
     Symbol sym;
     std::function<void(const sem::Expression*)> check_expr;
+
+    utils::Vector<const ast::Parameter*, 2> fn_params;
+    utils::Vector<const ast::Statement*, 2> fn_stmts;
+    utils::Vector<const ast::Attribute*, 2> fn_attrs;
+
     switch (GetParam().def) {
         case Def::kAccess: {
             sym = Sym("write");
@@ -185,8 +193,8 @@ TEST_P(ResolverExpressionKindTest, Test) {
             break;
         }
         case Def::kFunction: {
-            auto* fn = Func(kDefSource, "FUNCTION", utils::Empty, ty.i32(), Return(1_i));
             sym = Sym("FUNCTION");
+            auto* fn = Func(kDefSource, sym, utils::Empty, ty.i32(), Return(1_i));
             check_expr = [fn](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
                 auto* fn_expr = expr->As<sem::FunctionExpression>();
@@ -217,9 +225,21 @@ TEST_P(ResolverExpressionKindTest, Test) {
             };
             break;
         }
+        case Def::kParameter: {
+            sym = Sym("PARAMETER");
+            auto* param = Param(kDefSource, sym, ty.i32());
+            fn_params.Push(param);
+            check_expr = [param](const sem::Expression* expr) {
+                ASSERT_NE(expr, nullptr);
+                auto* user = expr->As<sem::VariableUser>();
+                ASSERT_NE(user, nullptr);
+                EXPECT_EQ(user->Variable()->Declaration(), param);
+            };
+            break;
+        }
         case Def::kStruct: {
-            auto* s = Structure(kDefSource, "STRUCT", utils::Vector{Member("m", ty.i32())});
             sym = Sym("STRUCT");
+            auto* s = Structure(kDefSource, sym, utils::Vector{Member("m", ty.i32())});
             check_expr = [s](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
                 auto* ty_expr = expr->As<sem::TypeExpression>();
@@ -241,8 +261,8 @@ TEST_P(ResolverExpressionKindTest, Test) {
             break;
         }
         case Def::kTypeAlias: {
-            Alias(kDefSource, "ALIAS", ty.i32());
             sym = Sym("ALIAS");
+            Alias(kDefSource, sym, ty.i32());
             check_expr = [](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
                 auto* ty_expr = expr->As<sem::TypeExpression>();
@@ -252,8 +272,8 @@ TEST_P(ResolverExpressionKindTest, Test) {
             break;
         }
         case Def::kVariable: {
-            auto* c = GlobalConst(kDefSource, "VARIABLE", Expr(1_i));
             sym = Sym("VARIABLE");
+            auto* c = GlobalConst(kDefSource, sym, Expr(1_i));
             check_expr = [c](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
                 auto* var_expr = expr->As<sem::VariableUser>();
@@ -271,60 +291,65 @@ TEST_P(ResolverExpressionKindTest, Test) {
             break;
         case Use::kAddressSpace:
             Enable(builtin::Extension::kChromiumExperimentalFullPtrParameters);
-            Func("f", utils::Vector{Param("p", ty("ptr", expr, ty.f32()))}, ty.void_(),
+            Func(Symbols().New(), utils::Vector{Param("p", ty("ptr", expr, ty.f32()))}, ty.void_(),
                  utils::Empty);
             break;
         case Use::kCallExpr:
-            Func("f", utils::Empty, ty.void_(), Decl(Var("v", Call(expr))));
+            fn_stmts.Push(Decl(Var("v", Call(expr))));
             break;
         case Use::kCallStmt:
-            Func("f", utils::Empty, ty.void_(), CallStmt(Call(expr)));
+            fn_stmts.Push(CallStmt(Call(expr)));
             break;
         case Use::kBinaryOp:
-            GlobalVar("v", builtin::AddressSpace::kPrivate, Mul(1_a, expr));
+            fn_stmts.Push(Decl(Var("v", Mul(1_a, expr))));
             break;
         case Use::kBuiltinValue:
-            Func("f", utils::Vector{Param("p", ty.vec4<f32>(), utils::Vector{Builtin(expr)})},
+            Func(Symbols().New(),
+                 utils::Vector{Param("p", ty.vec4<f32>(), utils::Vector{Builtin(expr)})},
                  ty.void_(), utils::Empty, utils::Vector{Stage(ast::PipelineStage::kFragment)});
             break;
         case Use::kFunctionReturnType:
-            Func("f", utils::Empty, ty(expr), Return(Call(sym)));
+            Func(Symbols().New(), utils::Empty, ty(expr), Return(Call(sym)));
             break;
         case Use::kInterpolationSampling: {
-            Func("f",
-                 utils::Vector{Param("p", ty.vec4<f32>(),
-                                     utils::Vector{
-                                         Location(0_a),
-                                         Interpolate(builtin::InterpolationType::kLinear, expr),
-                                     })},
-                 ty.void_(), utils::Empty, utils::Vector{Stage(ast::PipelineStage::kFragment)});
+            fn_params.Push(Param("p", ty.vec4<f32>(),
+                                 utils::Vector{
+                                     Location(0_a),
+                                     Interpolate(builtin::InterpolationType::kLinear, expr),
+                                 }));
+            fn_attrs.Push(Stage(ast::PipelineStage::kFragment));
             break;
         }
         case Use::kInterpolationType: {
-            Func("f",
-                 utils::Vector{Param("p", ty.vec4<f32>(),
-                                     utils::Vector{
-                                         Location(0_a),
-                                         Interpolate(expr, builtin::InterpolationSampling::kCenter),
-                                     })},
-                 ty.void_(), utils::Empty, utils::Vector{Stage(ast::PipelineStage::kFragment)});
+            fn_params.Push(Param("p", ty.vec4<f32>(),
+                                 utils::Vector{
+                                     Location(0_a),
+                                     Interpolate(expr, builtin::InterpolationSampling::kCenter),
+                                 }));
+            fn_attrs.Push(Stage(ast::PipelineStage::kFragment));
             break;
         }
         case Use::kMemberType:
-            Structure("s", utils::Vector{Member("m", ty(expr))});
+            Structure(Symbols().New(), utils::Vector{Member("m", ty(expr))});
             break;
         case Use::kTexelFormat:
-            GlobalVar("v", ty("texture_storage_2d", ty(expr), "write"), Group(0_u), Binding(0_u));
+            GlobalVar(Symbols().New(), ty("texture_storage_2d", ty(expr), "write"), Group(0_u),
+                      Binding(0_u));
             break;
         case Use::kValueExpression:
-            GlobalVar("v", builtin::AddressSpace::kPrivate, expr);
+            fn_stmts.Push(Decl(Var("v", expr)));
             break;
         case Use::kVariableType:
-            GlobalVar("v", builtin::AddressSpace::kPrivate, ty(expr));
+            fn_stmts.Push(Decl(Var("v", ty(expr))));
             break;
         case Use::kUnaryOp:
-            GlobalVar("v", builtin::AddressSpace::kPrivate, Negation(expr));
+            fn_stmts.Push(Assign(Phony(), Negation(expr)));
             break;
+    }
+
+    if (!fn_params.IsEmpty() || !fn_stmts.IsEmpty()) {
+        Func(Symbols().New(), std::move(fn_params), ty.void_(), std::move(fn_stmts),
+             std::move(fn_attrs));
     }
 
     if (GetParam().error == kPass) {
@@ -559,6 +584,19 @@ INSTANTIATE_TEST_SUITE_P(
          R"(5:6 error: cannot use interpolation type 'linear' as type)"},
         {Def::kInterpolationType, Use::kUnaryOp,
          R"(5:6 error: cannot use interpolation type 'linear' as value)"},
+
+        {Def::kParameter, Use::kBinaryOp, kPass},
+        {Def::kParameter, Use::kCallStmt,
+         R"(5:6 error: cannot use parameter 'PARAMETER' as call target
+1:2 note: parameter 'PARAMETER' declared here)"},
+        {Def::kParameter, Use::kCallExpr,
+         R"(5:6 error: cannot use parameter 'PARAMETER' as call target
+1:2 note: parameter 'PARAMETER' declared here)"},
+        {Def::kParameter, Use::kValueExpression, kPass},
+        {Def::kParameter, Use::kVariableType,
+         R"(5:6 error: cannot use parameter 'PARAMETER' as type
+1:2 note: parameter 'PARAMETER' declared here)"},
+        {Def::kParameter, Use::kUnaryOp, kPass},
 
         {Def::kStruct, Use::kAccess, R"(5:6 error: cannot use type 'STRUCT' as access)"},
         {Def::kStruct, Use::kAddressSpace,
