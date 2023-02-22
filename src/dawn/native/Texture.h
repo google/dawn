@@ -118,7 +118,6 @@ class TextureBase : public ApiObjectBase {
   private:
     TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, ObjectBase::ErrorTag tag);
 
-    MaybeError ValidateDestroy() const;
     wgpu::TextureDimension mDimension;
     const Format& mFormat;
     FormatSet mViewFormats;

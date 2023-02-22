@@ -807,10 +807,6 @@ TextureViewBase* TextureBase::APICreateView(const TextureViewDescriptor* descrip
 }
 
 void TextureBase::APIDestroy() {
-    if (GetDevice()->ConsumedError(ValidateDestroy(), "calling %s.Destroy().", this)) {
-        return;
-    }
-    ASSERT(!IsError());
     Destroy();
 }
 
@@ -843,11 +839,6 @@ wgpu::TextureFormat TextureBase::APIGetFormat() const {
 
 wgpu::TextureUsage TextureBase::APIGetUsage() const {
     return mUsage;
-}
-
-MaybeError TextureBase::ValidateDestroy() const {
-    DAWN_TRY(GetDevice()->ValidateObject(this));
-    return {};
 }
 
 // TextureViewBase

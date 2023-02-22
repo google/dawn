@@ -165,9 +165,6 @@ MaybeError QuerySetBase::ValidateCanUseInSubmitNow() const {
 }
 
 void QuerySetBase::APIDestroy() {
-    if (GetDevice()->ConsumedError(ValidateDestroy())) {
-        return;
-    }
     Destroy();
 }
 
@@ -177,11 +174,6 @@ wgpu::QueryType QuerySetBase::APIGetType() const {
 
 uint32_t QuerySetBase::APIGetCount() const {
     return mQueryCount;
-}
-
-MaybeError QuerySetBase::ValidateDestroy() const {
-    DAWN_TRY(GetDevice()->ValidateObject(this));
-    return {};
 }
 
 }  // namespace dawn::native

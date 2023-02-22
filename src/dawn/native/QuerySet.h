@@ -59,8 +59,6 @@ class QuerySetBase : public ApiObjectBase {
     ~QuerySetBase() override;
 
   private:
-    MaybeError ValidateDestroy() const;
-
     wgpu::QueryType mQueryType;
     uint32_t mQueryCount;
     std::vector<wgpu::PipelineStatisticName> mPipelineStatistics;
