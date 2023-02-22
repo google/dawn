@@ -86,6 +86,27 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize) {
 )");
 }
 
+TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_MustUse) {
+    auto* func = Func("my_func", utils::Empty, ty.void_(),
+                      utils::Vector{
+                          Return(),
+                      },
+                      utils::Vector{
+                          MustUse(),
+                      });
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.EmitFunction(func));
+    EXPECT_EQ(gen.result(), R"(  @must_use
+  fn my_func() {
+    return;
+  }
+)");
+}
+
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize_WithIdent) {
     GlobalConst("height", ty.i32(), Expr(2_i));
     auto* func = Func("my_func", utils::Empty, ty.void_(),

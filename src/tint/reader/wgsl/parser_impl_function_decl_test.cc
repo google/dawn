@@ -262,6 +262,23 @@ TEST_F(ParserImplTest, FunctionDecl_ReturnTypeAttributeList) {
     EXPECT_TRUE(body->statements[0]->Is<ast::ReturnStatement>());
 }
 
+TEST_F(ParserImplTest, FunctionDecl_MustUse) {
+    auto p = parser("@must_use fn main() { return; }");
+    auto attrs = p->attribute_list();
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_FALSE(attrs.errored);
+    ASSERT_TRUE(attrs.matched);
+    auto f = p->function_decl(attrs.value);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    EXPECT_FALSE(f.errored);
+    EXPECT_TRUE(f.matched);
+    ASSERT_NE(f.value, nullptr);
+
+    auto& attributes = f->attributes;
+    ASSERT_EQ(attributes.Length(), 1u);
+    ASSERT_TRUE(attributes[0]->Is<ast::MustUseAttribute>());
+}
+
 TEST_F(ParserImplTest, FunctionDecl_InvalidHeader) {
     auto p = parser("fn main() -> { }");
     auto attrs = p->attribute_list();

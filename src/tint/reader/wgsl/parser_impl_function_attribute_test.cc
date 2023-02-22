@@ -435,5 +435,17 @@ TEST_F(ParserImplTest, Attribute_Fragment) {
     EXPECT_EQ(func_attr->As<ast::StageAttribute>()->stage, ast::PipelineStage::kFragment);
 }
 
+TEST_F(ParserImplTest, Attribute_MustUse) {
+    auto p = parser("must_use");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr) << p->error();
+    ASSERT_FALSE(p->has_error());
+    auto* func_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(func_attr, nullptr);
+    EXPECT_TRUE(func_attr->Is<ast::MustUseAttribute>());
+}
+
 }  // namespace
 }  // namespace tint::reader::wgsl

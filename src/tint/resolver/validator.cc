@@ -1016,7 +1016,7 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
                 return false;
             }
         } else if (!attr->IsAnyOf<ast::DiagnosticAttribute, ast::StageAttribute,
-                                  ast::InternalAttribute>()) {
+                                  ast::MustUseAttribute, ast::InternalAttribute>()) {
             AddError("attribute is not valid for functions", attr->source);
             return false;
         }
@@ -2544,8 +2544,7 @@ bool Validator::CheckTypeAccessAddressSpace(
     }
 
     if (address_space == builtin::AddressSpace::kStorage && access == builtin::Access::kWrite) {
-        // The access mode for the storage address space can only be 'read' or
-        // 'read_write'.
+        // The access mode for the storage address space can only be 'read' or 'read_write'.
         AddError("access mode 'write' is not valid for the 'storage' address space", source);
         return false;
     }

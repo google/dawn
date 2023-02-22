@@ -2931,6 +2931,7 @@ Expect<const ast::Attribute*> ParserImpl::expect_attribute() {
 //                                   interpolation_sample_name COMMA? PAREN_RIGHT
 //   | ATTR 'invariant'
 //   | ATTR 'location' PAREN_LEFT expression COMMA? PAREN_RIGHT
+//   | ATTR 'must_use'
 //   | ATTR 'size' PAREN_LEFT expression COMMA? PAREN_RIGHT
 //   | ATTR 'workgroup_size' PAREN_LEFT expression COMMA? PAREN_RIGHT
 //   | ATTR 'workgroup_size' PAREN_LEFT expression COMMA expression COMMA? PAREN_RIGHT
@@ -3083,6 +3084,10 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
 
             return builder_.Location(t.source(), expr.value);
         });
+    }
+
+    if (t == "must_use") {
+        return create<ast::MustUseAttribute>(t.source());
     }
 
     if (t == "size") {
