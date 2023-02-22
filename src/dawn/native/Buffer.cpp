@@ -222,11 +222,6 @@ BufferBase::BufferBase(DeviceBase* device,
     }
 }
 
-BufferBase::BufferBase(DeviceBase* device, BufferState state)
-    : ApiObjectBase(device, kLabelNotImplemented), mState(state) {
-    GetObjectTrackingList()->Track(this);
-}
-
 BufferBase::~BufferBase() {
     ASSERT(mState == BufferState::Unmapped || mState == BufferState::Destroyed);
 }

@@ -37,7 +37,7 @@ size_t CachedObject::GetContentHash() const {
 }
 
 void CachedObject::SetContentHash(size_t contentHash) {
-    ASSERT(!mIsContentHashInitialized);
+    ASSERT(!mIsContentHashInitialized || contentHash == mContentHash);
     mContentHash = contentHash;
     mIsContentHashInitialized = true;
 }

@@ -111,10 +111,6 @@ QuerySetBase::QuerySetBase(DeviceBase* device, const QuerySetDescriptor* descrip
     GetObjectTrackingList()->Track(this);
 }
 
-QuerySetBase::QuerySetBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
-    GetObjectTrackingList()->Track(this);
-}
-
 QuerySetBase::QuerySetBase(DeviceBase* device,
                            const QuerySetDescriptor* descriptor,
                            ObjectBase::ErrorTag tag)

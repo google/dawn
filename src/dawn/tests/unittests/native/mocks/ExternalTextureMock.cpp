@@ -16,12 +16,26 @@
 
 namespace dawn::native {
 
-ExternalTextureMock::ExternalTextureMock(DeviceBase* device) : ExternalTextureBase(device) {
+using ::testing::NiceMock;
+
+ExternalTextureMock::ExternalTextureMock(DeviceMock* device,
+                                         const ExternalTextureDescriptor* descriptor)
+    : ExternalTextureBase(device, descriptor) {
     ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
         this->ExternalTextureBase::DestroyImpl();
     });
 }
 
 ExternalTextureMock::~ExternalTextureMock() = default;
+
+// static
+Ref<ExternalTextureMock> ExternalTextureMock::Create(DeviceMock* device,
+                                                     const ExternalTextureDescriptor* descriptor) {
+    Ref<ExternalTextureMock> externalTexture =
+        AcquireRef(new NiceMock<ExternalTextureMock>(device, descriptor));
+
+    externalTexture->Initialize(device, descriptor).AcquireSuccess();
+    return externalTexture;
+}
 
 }  // namespace dawn::native

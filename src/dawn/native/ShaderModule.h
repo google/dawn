@@ -286,8 +286,6 @@ class ShaderModuleBase : public ApiObjectBase, public CachedObject {
     OwnedCompilationMessages* GetCompilationMessages() const;
 
   protected:
-    // Constructor used only for mocking and testing.
-    explicit ShaderModuleBase(DeviceBase* device);
     void DestroyImpl() override;
 
     MaybeError InitializeBase(ShaderModuleParseResult* parseResult,

@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn Authors
+// Copyright 2023 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_COMMANDBUFFERMOCK_H_
-#define SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_COMMANDBUFFERMOCK_H_
+#include "dawn/tests/unittests/native/mocks/QueueMock.h"
 
-#include "gmock/gmock.h"
-
-#include "dawn/native/CommandBuffer.h"
 #include "dawn/tests/unittests/native/mocks/DeviceMock.h"
 
 namespace dawn::native {
 
-class CommandBufferMock : public CommandBufferBase {
-  public:
-    CommandBufferMock(DeviceMock* device,
-                      CommandEncoder* encoder,
-                      const CommandBufferDescriptor* descriptor);
-    ~CommandBufferMock() override;
+QueueMock::QueueMock(DeviceMock* device, const QueueDescriptor* descriptor)
+    : QueueBase(device, descriptor) {
+    ON_CALL(*this, DestroyImpl).WillByDefault([this]() { this->QueueBase::DestroyImpl(); });
+}
 
-    MOCK_METHOD(void, DestroyImpl, (), (override));
-};
+QueueMock::~QueueMock() = default;
 
 }  // namespace dawn::native
-
-#endif  // SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_COMMANDBUFFERMOCK_H_

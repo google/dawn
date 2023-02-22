@@ -197,8 +197,6 @@ PipelineBase::PipelineBase(DeviceBase* device,
     }
 }
 
-PipelineBase::PipelineBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {}
-
 PipelineBase::PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
     : ApiObjectBase(device, tag) {}
 

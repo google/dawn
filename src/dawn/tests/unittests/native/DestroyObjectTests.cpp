@@ -14,15 +14,22 @@
 
 #include <gtest/gtest.h>
 
+#include <utility>
+#include <vector>
+
 #include "dawn/native/Toggles.h"
+#include "dawn/native/utils/WGPUHelpers.h"
 #include "dawn/tests/DawnNativeTest.h"
+#include "dawn/tests/MockCallback.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "dawn/webgpu_cpp.h"
 #include "mocks/BindGroupLayoutMock.h"
 #include "mocks/BindGroupMock.h"
 #include "mocks/BufferMock.h"
 #include "mocks/CommandBufferMock.h"
 #include "mocks/ComputePipelineMock.h"
+#include "mocks/DawnMockTest.h"
 #include "mocks/DeviceMock.h"
 #include "mocks/ExternalTextureMock.h"
 #include "mocks/PipelineLayoutMock.h"
@@ -39,720 +46,12 @@ namespace {
 using ::testing::_;
 using ::testing::ByMove;
 using ::testing::InSequence;
+using ::testing::Mock;
+using testing::MockCallback;
+using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::StrictMock;
 using ::testing::Test;
-
-class DestroyObjectTests : public Test {
-  public:
-    DestroyObjectTests() : Test() {
-        // Skipping validation on descriptors as coverage for validation is already present.
-        mDevice.ForceSetToggleForTesting(Toggle::SkipValidation, true);
-    }
-
-    Ref<TextureMock> GetTexture() {
-        if (mTexture != nullptr) {
-            return mTexture;
-        }
-        mTexture = AcquireRef(new TextureMock(&mDevice, TextureBase::TextureState::OwnedInternal));
-        EXPECT_CALL(*mTexture.Get(), DestroyImpl).Times(1);
-        return mTexture;
-    }
-
-    Ref<PipelineLayoutMock> GetPipelineLayout() {
-        if (mPipelineLayout != nullptr) {
-            return mPipelineLayout;
-        }
-        mPipelineLayout = AcquireRef(new PipelineLayoutMock(&mDevice));
-        EXPECT_CALL(*mPipelineLayout.Get(), DestroyImpl).Times(1);
-        return mPipelineLayout;
-    }
-
-    Ref<ShaderModuleMock> GetVertexShaderModule() {
-        if (mVsModule != nullptr) {
-            return mVsModule;
-        }
-        DAWN_TRY_ASSIGN_WITH_CLEANUP(
-            mVsModule, ShaderModuleMock::Create(&mDevice, R"(
-            @vertex fn main() -> @builtin(position) vec4f {
-                return vec4f(0.0, 0.0, 0.0, 1.0);
-            })"),
-            { ASSERT(false); }, mVsModule);
-        EXPECT_CALL(*mVsModule.Get(), DestroyImpl).Times(1);
-        return mVsModule;
-    }
-
-    Ref<ShaderModuleMock> GetComputeShaderModule() {
-        if (mCsModule != nullptr) {
-            return mCsModule;
-        }
-        DAWN_TRY_ASSIGN_WITH_CLEANUP(
-            mCsModule, ShaderModuleMock::Create(&mDevice, R"(
-            @compute @workgroup_size(1) fn main() {
-            })"),
-            { ASSERT(false); }, mCsModule);
-        EXPECT_CALL(*mCsModule.Get(), DestroyImpl).Times(1);
-        return mCsModule;
-    }
-
-  protected:
-    DeviceMock mDevice;
-
-    // The following lazy-initialized objects are used to facilitate creation of dependent
-    // objects under test.
-    Ref<TextureMock> mTexture;
-    Ref<PipelineLayoutMock> mPipelineLayout;
-    Ref<ShaderModuleMock> mVsModule;
-    Ref<ShaderModuleMock> mCsModule;
-};
-
-TEST_F(DestroyObjectTests, BindGroupExplicit) {
-    BindGroupMock bindGroupMock(&mDevice);
-    EXPECT_CALL(bindGroupMock, DestroyImpl).Times(1);
-
-    EXPECT_TRUE(bindGroupMock.IsAlive());
-    bindGroupMock.Destroy();
-    EXPECT_FALSE(bindGroupMock.IsAlive());
-}
-
-// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-// will also complain if there is a memory leak.
-TEST_F(DestroyObjectTests, BindGroupImplicit) {
-    BindGroupMock* bindGroupMock = new BindGroupMock(&mDevice);
-    EXPECT_CALL(*bindGroupMock, DestroyImpl).Times(1);
-    {
-        BindGroupDescriptor desc = {};
-        Ref<BindGroupBase> bindGroup;
-        EXPECT_CALL(mDevice, CreateBindGroupImpl)
-            .WillOnce(Return(ByMove(AcquireRef(bindGroupMock))));
-        DAWN_ASSERT_AND_ASSIGN(bindGroup, mDevice.CreateBindGroup(&desc));
-
-        EXPECT_TRUE(bindGroup->IsAlive());
-    }
-}
-
-TEST_F(DestroyObjectTests, BindGroupLayoutExplicit) {
-    BindGroupLayoutMock bindGroupLayoutMock(&mDevice);
-    EXPECT_CALL(bindGroupLayoutMock, DestroyImpl).Times(1);
-
-    EXPECT_TRUE(bindGroupLayoutMock.IsAlive());
-    bindGroupLayoutMock.Destroy();
-    EXPECT_FALSE(bindGroupLayoutMock.IsAlive());
-}
-
-// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-// will also complain if there is a memory leak.
-TEST_F(DestroyObjectTests, BindGroupLayoutImplicit) {
-    BindGroupLayoutMock* bindGroupLayoutMock = new BindGroupLayoutMock(&mDevice);
-    EXPECT_CALL(*bindGroupLayoutMock, DestroyImpl).Times(1);
-    {
-        BindGroupLayoutDescriptor desc = {};
-        Ref<BindGroupLayoutBase> bindGroupLayout;
-        EXPECT_CALL(mDevice, CreateBindGroupLayoutImpl)
-            .WillOnce(Return(ByMove(AcquireRef(bindGroupLayoutMock))));
-        DAWN_ASSERT_AND_ASSIGN(bindGroupLayout, mDevice.CreateBindGroupLayout(&desc));
-
-        EXPECT_TRUE(bindGroupLayout->IsAlive());
-        EXPECT_TRUE(bindGroupLayout->IsCachedReference());
-    }
-}
-
-TEST_F(DestroyObjectTests, BufferExplicit) {
-    {
-        BufferMock bufferMock(&mDevice, BufferBase::BufferState::Unmapped);
-        EXPECT_CALL(bufferMock, DestroyImpl).Times(1);
-
-        EXPECT_TRUE(bufferMock.IsAlive());
-        bufferMock.Destroy();
-        EXPECT_FALSE(bufferMock.IsAlive());
-    }
-    {
-        BufferMock bufferMock(&mDevice, BufferBase::BufferState::Mapped);
-        {
-            InSequence seq;
-            EXPECT_CALL(bufferMock, DestroyImpl).Times(1);
-            EXPECT_CALL(bufferMock, UnmapImpl).Times(1);
-        }
-
-        EXPECT_TRUE(bufferMock.IsAlive());
-        bufferMock.Destroy();
-        EXPECT_FALSE(bufferMock.IsAlive());
-    }
-}
-
-// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-// will also complain if there is a memory leak.
-TEST_F(DestroyObjectTests, BufferImplicit) {
-    {
-        BufferMock* bufferMock = new BufferMock(&mDevice, BufferBase::BufferState::Unmapped);
-        EXPECT_CALL(*bufferMock, DestroyImpl).Times(1);
-        {
-            BufferDescriptor desc = {};
-            Ref<BufferBase> buffer;
-            EXPECT_CALL(mDevice, CreateBufferImpl).WillOnce(Return(ByMove(AcquireRef(bufferMock))));
-            DAWN_ASSERT_AND_ASSIGN(buffer, mDevice.CreateBuffer(&desc));
-
-            EXPECT_TRUE(buffer->IsAlive());
-        }
-    }
-    {
-        BufferMock* bufferMock = new BufferMock(&mDevice, BufferBase::BufferState::Mapped);
-        {
-            InSequence seq;
-            EXPECT_CALL(*bufferMock, DestroyImpl).Times(1);
-            EXPECT_CALL(*bufferMock, UnmapImpl).Times(1);
-        }
-        {
-            BufferDescriptor desc = {};
-            Ref<BufferBase> buffer;
-            EXPECT_CALL(mDevice, CreateBufferImpl).WillOnce(Return(ByMove(AcquireRef(bufferMock))));
-            DAWN_ASSERT_AND_ASSIGN(buffer, mDevice.CreateBuffer(&desc));
-
-            EXPECT_TRUE(buffer->IsAlive());
-        }
-    }
-}
-
-TEST_F(DestroyObjectTests, CommandBufferExplicit) {
-    CommandBufferMock commandBufferMock(&mDevice);
-    EXPECT_CALL(commandBufferMock, DestroyImpl).Times(1);
-
-    EXPECT_TRUE(commandBufferMock.IsAlive());
-    commandBufferMock.Destroy();
-    EXPECT_FALSE(commandBufferMock.IsAlive());
-}
-
-// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-// will also complain if there is a memory leak.
-TEST_F(DestroyObjectTests, CommandBufferImplicit) {
-    CommandBufferMock* commandBufferMock = new CommandBufferMock(&mDevice);
-    EXPECT_CALL(*commandBufferMock, DestroyImpl).Times(1);
-    {
-        CommandBufferDescriptor desc = {};
-        Ref<CommandBufferBase> commandBuffer;
-        EXPECT_CALL(mDevice, CreateCommandBuffer)
-            .WillOnce(Return(ByMove(AcquireRef(commandBufferMock))));
-        DAWN_ASSERT_AND_ASSIGN(commandBuffer, mDevice.CreateCommandBuffer(nullptr, &desc));
-
-        EXPECT_TRUE(commandBuffer->IsAlive());
-    }
-}
-
-TEST_F(DestroyObjectTests, ComputePipelineExplicit) {
-    ComputePipelineMock computePipelineMock(&mDevice);
-    EXPECT_CALL(computePipelineMock, DestroyImpl).Times(1);
-
-    EXPECT_TRUE(computePipelineMock.IsAlive());
-    computePipelineMock.Destroy();
-    EXPECT_FALSE(computePipelineMock.IsAlive());
-}
-
-// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-// will also complain if there is a memory leak.
-TEST_F(DestroyObjectTests, ComputePipelineImplicit) {
-    // ComputePipelines usually set their hash values at construction, but the mock does not, so
-    // we set it here.
-    constexpr size_t hash = 0x12345;
-    ComputePipelineMock* computePipelineMock = new ComputePipelineMock(&mDevice);
-    computePipelineMock->SetContentHash(hash);
-    ON_CALL(*computePipelineMock, ComputeContentHash).WillByDefault(Return(hash));
-
-    // Compute pipelines are initialized during their creation via the device.
-    EXPECT_CALL(*computePipelineMock, Initialize).Times(1);
-    EXPECT_CALL(*computePipelineMock, DestroyImpl).Times(1);
-
-    {
-        ComputePipelineDescriptor desc = {};
-        desc.layout = GetPipelineLayout().Get();
-        desc.compute.module = GetComputeShaderModule().Get();
-
-        Ref<ComputePipelineBase> computePipeline;
-        EXPECT_CALL(mDevice, CreateUninitializedComputePipelineImpl)
-            .WillOnce(Return(ByMove(AcquireRef(computePipelineMock))));
-        DAWN_ASSERT_AND_ASSIGN(computePipeline, mDevice.CreateComputePipeline(&desc));
-
-        EXPECT_TRUE(computePipeline->IsAlive());
-        EXPECT_TRUE(computePipeline->IsCachedReference());
-    }
-}
-
-TEST_F(DestroyObjectTests, ExternalTextureExplicit) {
-    ExternalTextureMock externalTextureMock(&mDevice);
-    EXPECT_CALL(externalTextureMock, DestroyImpl).Times(1);
-
-    EXPECT_TRUE(externalTextureMock.IsAlive());
-    externalTextureMock.Destroy();
-    EXPECT_FALSE(externalTextureMock.IsAlive());
-}
-
-TEST_F(DestroyObjectTests, ExternalTextureImplicit) {
-    ExternalTextureMock* externalTextureMock = new ExternalTextureMock(&mDevice);
-    EXPECT_CALL(*externalTextureMock, DestroyImpl).Times(1);
-    {
-        ExternalTextureDescriptor desc = {};
-        Ref<ExternalTextureBase> externalTexture;
-        EXPECT_CALL(mDevice, CreateExternalTextureImpl)
-            .WillOnce(Return(ByMove(AcquireRef(externalTextureMock))));
-        DAWN_ASSERT_AND_ASSIGN(externalTexture, mDevice.CreateExternalTextureImpl(&desc));
-
-        EXPECT_TRUE(externalTexture->IsAlive());
-    }
-}
-
-TEST_F(DestroyObjectTests, PipelineLayoutExplicit) {
-    PipelineLayoutMock pipelineLayoutMock(&mDevice);
-    EXPECT_CALL(pipelineLayoutMock, DestroyImpl).Times(1);
-
-    EXPECT_TRUE(pipelineLayoutMock.IsAlive());
-    pipelineLayoutMock.Destroy();
-    EXPECT_FALSE(pipelineLayoutMock.IsAlive());
-}
-
-// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-// will also complain if there is a memory leak.
-TEST_F(DestroyObjectTests, PipelineLayoutImplicit) {
-    PipelineLayoutMock* pipelineLayoutMock = new PipelineLayoutMock(&mDevice);
-    EXPECT_CALL(*pipelineLayoutMock, DestroyImpl).Times(1);
-    {
-        PipelineLayoutDescriptor desc = {};
-        Ref<PipelineLayoutBase> pipelineLayout;
-        EXPECT_CALL(mDevice, CreatePipelineLayoutImpl)
-            .WillOnce(Return(ByMove(AcquireRef(pipelineLayoutMock))));
-        DAWN_ASSERT_AND_ASSIGN(pipelineLayout, mDevice.CreatePipelineLayout(&desc));
-
-        EXPECT_TRUE(pipelineLayout->IsAlive());
-        EXPECT_TRUE(pipelineLayout->IsCachedReference());
-    }
-}
-
-TEST_F(DestroyObjectTests, QuerySetExplicit) {
-    QuerySetMock querySetMock(&mDevice);
-    EXPECT_CALL(querySetMock, DestroyImpl).Times(1);
-
-    EXPECT_TRUE(querySetMock.IsAlive());
-    querySetMock.Destroy();
-    EXPECT_FALSE(querySetMock.IsAlive());
-}
-
-// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-// will also complain if there is a memory leak.
-TEST_F(DestroyObjectTests, QuerySetImplicit) {
-    QuerySetMock* querySetMock = new QuerySetMock(&mDevice);
-    EXPECT_CALL(*querySetMock, DestroyImpl).Times(1);
-    {
-        QuerySetDescriptor desc = {};
-        Ref<QuerySetBase> querySet;
-        EXPECT_CALL(mDevice, CreateQuerySetImpl).WillOnce(Return(ByMove(AcquireRef(querySetMock))));
-        DAWN_ASSERT_AND_ASSIGN(querySet, mDevice.CreateQuerySet(&desc));
-
-        EXPECT_TRUE(querySet->IsAlive());
-    }
-}
-
-TEST_F(DestroyObjectTests, RenderPipelineExplicit) {
-    RenderPipelineMock renderPipelineMock(&mDevice);
-    EXPECT_CALL(renderPipelineMock, DestroyImpl).Times(1);
-
-    EXPECT_TRUE(renderPipelineMock.IsAlive());
-    renderPipelineMock.Destroy();
-    EXPECT_FALSE(renderPipelineMock.IsAlive());
-}
-
-// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-// will also complain if there is a memory leak.
-TEST_F(DestroyObjectTests, RenderPipelineImplicit) {
-    // RenderPipelines usually set their hash values at construction, but the mock does not, so
-    // we set it here.
-    constexpr size_t hash = 0x12345;
-    RenderPipelineMock* renderPipelineMock = new RenderPipelineMock(&mDevice);
-    renderPipelineMock->SetContentHash(hash);
-    ON_CALL(*renderPipelineMock, ComputeContentHash).WillByDefault(Return(hash));
-
-    // Render pipelines are initialized during their creation via the device.
-    EXPECT_CALL(*renderPipelineMock, Initialize).Times(1);
-    EXPECT_CALL(*renderPipelineMock, DestroyImpl).Times(1);
-
-    {
-        RenderPipelineDescriptor desc = {};
-        desc.layout = GetPipelineLayout().Get();
-        desc.vertex.module = GetVertexShaderModule().Get();
-
-        Ref<RenderPipelineBase> renderPipeline;
-        EXPECT_CALL(mDevice, CreateUninitializedRenderPipelineImpl)
-            .WillOnce(Return(ByMove(AcquireRef(renderPipelineMock))));
-        DAWN_ASSERT_AND_ASSIGN(renderPipeline, mDevice.CreateRenderPipeline(&desc));
-
-        EXPECT_TRUE(renderPipeline->IsAlive());
-        EXPECT_TRUE(renderPipeline->IsCachedReference());
-    }
-}
-
-TEST_F(DestroyObjectTests, SamplerExplicit) {
-    SamplerMock samplerMock(&mDevice);
-    EXPECT_CALL(samplerMock, DestroyImpl).Times(1);
-
-    EXPECT_TRUE(samplerMock.IsAlive());
-    samplerMock.Destroy();
-    EXPECT_FALSE(samplerMock.IsAlive());
-}
-
-// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-// will also complain if there is a memory leak.
-TEST_F(DestroyObjectTests, SamplerImplicit) {
-    SamplerMock* samplerMock = new SamplerMock(&mDevice);
-    EXPECT_CALL(*samplerMock, DestroyImpl).Times(1);
-    {
-        SamplerDescriptor desc = {};
-        Ref<SamplerBase> sampler;
-        EXPECT_CALL(mDevice, CreateSamplerImpl).WillOnce(Return(ByMove(AcquireRef(samplerMock))));
-        DAWN_ASSERT_AND_ASSIGN(sampler, mDevice.CreateSampler(&desc));
-
-        EXPECT_TRUE(sampler->IsAlive());
-        EXPECT_TRUE(sampler->IsCachedReference());
-    }
-}
-
-TEST_F(DestroyObjectTests, ShaderModuleExplicit) {
-    ShaderModuleMock shaderModuleMock(&mDevice);
-    EXPECT_CALL(shaderModuleMock, DestroyImpl).Times(1);
-
-    EXPECT_TRUE(shaderModuleMock.IsAlive());
-    shaderModuleMock.Destroy();
-    EXPECT_FALSE(shaderModuleMock.IsAlive());
-}
-
-// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-// will also complain if there is a memory leak.
-TEST_F(DestroyObjectTests, ShaderModuleImplicit) {
-    ShaderModuleMock* shaderModuleMock = new ShaderModuleMock(&mDevice);
-    EXPECT_CALL(*shaderModuleMock, DestroyImpl).Times(1);
-    {
-        ShaderModuleWGSLDescriptor wgslDesc;
-        wgslDesc.source = R"(
-                @compute @workgroup_size(1) fn main() {
-                }
-            )";
-        ShaderModuleDescriptor desc = {};
-        desc.nextInChain = &wgslDesc;
-        Ref<ShaderModuleBase> shaderModule;
-        EXPECT_CALL(mDevice, CreateShaderModuleImpl)
-            .WillOnce(Return(ByMove(AcquireRef(shaderModuleMock))));
-        DAWN_ASSERT_AND_ASSIGN(shaderModule, mDevice.CreateShaderModule(&desc));
-
-        EXPECT_TRUE(shaderModule->IsAlive());
-        EXPECT_TRUE(shaderModule->IsCachedReference());
-    }
-}
-
-TEST_F(DestroyObjectTests, SwapChainExplicit) {
-    SwapChainMock swapChainMock(&mDevice);
-    EXPECT_CALL(swapChainMock, DestroyImpl).Times(1);
-
-    EXPECT_TRUE(swapChainMock.IsAlive());
-    swapChainMock.Destroy();
-    EXPECT_FALSE(swapChainMock.IsAlive());
-}
-
-// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-// will also complain if there is a memory leak.
-TEST_F(DestroyObjectTests, SwapChainImplicit) {
-    SwapChainMock* swapChainMock = new SwapChainMock(&mDevice);
-    EXPECT_CALL(*swapChainMock, DestroyImpl).Times(1);
-    {
-        SwapChainDescriptor desc = {};
-        Ref<SwapChainBase> swapChain;
-        EXPECT_CALL(mDevice, CreateSwapChainImpl(_))
-            .WillOnce(Return(ByMove(AcquireRef(swapChainMock))));
-        DAWN_ASSERT_AND_ASSIGN(swapChain, mDevice.CreateSwapChain(nullptr, &desc));
-
-        EXPECT_TRUE(swapChain->IsAlive());
-    }
-}
-
-TEST_F(DestroyObjectTests, TextureExplicit) {
-    {
-        TextureMock textureMock(&mDevice, TextureBase::TextureState::OwnedInternal);
-        EXPECT_CALL(textureMock, DestroyImpl).Times(1);
-
-        EXPECT_TRUE(textureMock.IsAlive());
-        textureMock.Destroy();
-        EXPECT_FALSE(textureMock.IsAlive());
-    }
-    {
-        TextureMock textureMock(&mDevice, TextureBase::TextureState::OwnedExternal);
-        EXPECT_CALL(textureMock, DestroyImpl).Times(1);
-
-        EXPECT_TRUE(textureMock.IsAlive());
-        textureMock.Destroy();
-        EXPECT_FALSE(textureMock.IsAlive());
-    }
-}
-
-// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-// will also complain if there is a memory leak.
-TEST_F(DestroyObjectTests, TextureImplicit) {
-    {
-        TextureMock* textureMock =
-            new TextureMock(&mDevice, TextureBase::TextureState::OwnedInternal);
-        EXPECT_CALL(*textureMock, DestroyImpl).Times(1);
-        {
-            TextureDescriptor desc = {};
-            Ref<TextureBase> texture;
-            EXPECT_CALL(mDevice, CreateTextureImpl)
-                .WillOnce(Return(ByMove(AcquireRef(textureMock))));
-            DAWN_ASSERT_AND_ASSIGN(texture, mDevice.CreateTexture(&desc));
-
-            EXPECT_TRUE(texture->IsAlive());
-        }
-    }
-    {
-        TextureMock* textureMock =
-            new TextureMock(&mDevice, TextureBase::TextureState::OwnedExternal);
-        EXPECT_CALL(*textureMock, DestroyImpl).Times(1);
-        {
-            TextureDescriptor desc = {};
-            Ref<TextureBase> texture;
-            EXPECT_CALL(mDevice, CreateTextureImpl)
-                .WillOnce(Return(ByMove(AcquireRef(textureMock))));
-            DAWN_ASSERT_AND_ASSIGN(texture, mDevice.CreateTexture(&desc));
-
-            EXPECT_TRUE(texture->IsAlive());
-        }
-    }
-}
-
-TEST_F(DestroyObjectTests, TextureViewExplicit) {
-    TextureViewMock textureViewMock(GetTexture().Get());
-    EXPECT_CALL(textureViewMock, DestroyImpl).Times(1);
-
-    EXPECT_TRUE(textureViewMock.IsAlive());
-    textureViewMock.Destroy();
-    EXPECT_FALSE(textureViewMock.IsAlive());
-}
-
-// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-// will also complain if there is a memory leak.
-TEST_F(DestroyObjectTests, TextureViewImplicit) {
-    TextureViewMock* textureViewMock = new TextureViewMock(GetTexture().Get());
-    EXPECT_CALL(*textureViewMock, DestroyImpl).Times(1);
-    {
-        TextureViewDescriptor desc = {};
-        Ref<TextureViewBase> textureView;
-        EXPECT_CALL(mDevice, CreateTextureViewImpl)
-            .WillOnce(Return(ByMove(AcquireRef(textureViewMock))));
-        DAWN_ASSERT_AND_ASSIGN(textureView, mDevice.CreateTextureView(GetTexture().Get(), &desc));
-
-        EXPECT_TRUE(textureView->IsAlive());
-    }
-}
-
-// Destroying the objects on the mDevice should result in all created objects being destroyed in
-// order.
-TEST_F(DestroyObjectTests, DestroyObjects) {
-    BindGroupMock* bindGroupMock = new BindGroupMock(&mDevice);
-    BindGroupLayoutMock* bindGroupLayoutMock = new BindGroupLayoutMock(&mDevice);
-    BufferMock* bufferMock = new BufferMock(&mDevice, BufferBase::BufferState::Unmapped);
-    CommandBufferMock* commandBufferMock = new CommandBufferMock(&mDevice);
-    ComputePipelineMock* computePipelineMock = new ComputePipelineMock(&mDevice);
-    ExternalTextureMock* externalTextureMock = new ExternalTextureMock(&mDevice);
-    PipelineLayoutMock* pipelineLayoutMock = new PipelineLayoutMock(&mDevice);
-    QuerySetMock* querySetMock = new QuerySetMock(&mDevice);
-    RenderPipelineMock* renderPipelineMock = new RenderPipelineMock(&mDevice);
-    SamplerMock* samplerMock = new SamplerMock(&mDevice);
-    ShaderModuleMock* shaderModuleMock = new ShaderModuleMock(&mDevice);
-    SwapChainMock* swapChainMock = new SwapChainMock(&mDevice);
-    TextureMock* textureMock = new TextureMock(&mDevice, TextureBase::TextureState::OwnedInternal);
-    TextureViewMock* textureViewMock = new TextureViewMock(GetTexture().Get());
-    {
-        InSequence seq;
-        EXPECT_CALL(*commandBufferMock, DestroyImpl).Times(1);
-        EXPECT_CALL(*renderPipelineMock, DestroyImpl).Times(1);
-        EXPECT_CALL(*computePipelineMock, DestroyImpl).Times(1);
-        EXPECT_CALL(*pipelineLayoutMock, DestroyImpl).Times(1);
-        EXPECT_CALL(*swapChainMock, DestroyImpl).Times(1);
-        EXPECT_CALL(*bindGroupMock, DestroyImpl).Times(1);
-        EXPECT_CALL(*bindGroupLayoutMock, DestroyImpl).Times(1);
-        EXPECT_CALL(*shaderModuleMock, DestroyImpl).Times(1);
-        EXPECT_CALL(*externalTextureMock, DestroyImpl).Times(1);
-        EXPECT_CALL(*textureViewMock, DestroyImpl).Times(1);
-        EXPECT_CALL(*textureMock, DestroyImpl).Times(1);
-        EXPECT_CALL(*querySetMock, DestroyImpl).Times(1);
-        EXPECT_CALL(*samplerMock, DestroyImpl).Times(1);
-        EXPECT_CALL(*bufferMock, DestroyImpl).Times(1);
-    }
-
-    Ref<BindGroupBase> bindGroup;
-    {
-        BindGroupDescriptor desc = {};
-        EXPECT_CALL(mDevice, CreateBindGroupImpl)
-            .WillOnce(Return(ByMove(AcquireRef(bindGroupMock))));
-        DAWN_ASSERT_AND_ASSIGN(bindGroup, mDevice.CreateBindGroup(&desc));
-        EXPECT_TRUE(bindGroup->IsAlive());
-    }
-
-    Ref<BindGroupLayoutBase> bindGroupLayout;
-    {
-        BindGroupLayoutDescriptor desc = {};
-        EXPECT_CALL(mDevice, CreateBindGroupLayoutImpl)
-            .WillOnce(Return(ByMove(AcquireRef(bindGroupLayoutMock))));
-        DAWN_ASSERT_AND_ASSIGN(bindGroupLayout, mDevice.CreateBindGroupLayout(&desc));
-        EXPECT_TRUE(bindGroupLayout->IsAlive());
-        EXPECT_TRUE(bindGroupLayout->IsCachedReference());
-    }
-
-    Ref<BufferBase> buffer;
-    {
-        BufferDescriptor desc = {};
-        EXPECT_CALL(mDevice, CreateBufferImpl).WillOnce(Return(ByMove(AcquireRef(bufferMock))));
-        DAWN_ASSERT_AND_ASSIGN(buffer, mDevice.CreateBuffer(&desc));
-        EXPECT_TRUE(buffer->IsAlive());
-    }
-
-    Ref<CommandBufferBase> commandBuffer;
-    {
-        CommandBufferDescriptor desc = {};
-        EXPECT_CALL(mDevice, CreateCommandBuffer)
-            .WillOnce(Return(ByMove(AcquireRef(commandBufferMock))));
-        DAWN_ASSERT_AND_ASSIGN(commandBuffer, mDevice.CreateCommandBuffer(nullptr, &desc));
-        EXPECT_TRUE(commandBuffer->IsAlive());
-    }
-
-    Ref<ComputePipelineBase> computePipeline;
-    {
-        // Compute pipelines usually set their hash values at construction, but the mock does
-        // not, so we set it here.
-        constexpr size_t hash = 0x12345;
-        computePipelineMock->SetContentHash(hash);
-        ON_CALL(*computePipelineMock, ComputeContentHash).WillByDefault(Return(hash));
-
-        // Compute pipelines are initialized during their creation via the device.
-        EXPECT_CALL(*computePipelineMock, Initialize).Times(1);
-
-        ComputePipelineDescriptor desc = {};
-        desc.layout = GetPipelineLayout().Get();
-        desc.compute.module = GetComputeShaderModule().Get();
-        EXPECT_CALL(mDevice, CreateUninitializedComputePipelineImpl)
-            .WillOnce(Return(ByMove(AcquireRef(computePipelineMock))));
-        DAWN_ASSERT_AND_ASSIGN(computePipeline, mDevice.CreateComputePipeline(&desc));
-        EXPECT_TRUE(computePipeline->IsAlive());
-        EXPECT_TRUE(computePipeline->IsCachedReference());
-    }
-
-    Ref<ExternalTextureBase> externalTexture;
-    {
-        ExternalTextureDescriptor desc = {};
-        EXPECT_CALL(mDevice, CreateExternalTextureImpl)
-            .WillOnce(Return(ByMove(AcquireRef(externalTextureMock))));
-        DAWN_ASSERT_AND_ASSIGN(externalTexture, mDevice.CreateExternalTextureImpl(&desc));
-        EXPECT_TRUE(externalTexture->IsAlive());
-    }
-
-    Ref<PipelineLayoutBase> pipelineLayout;
-    {
-        PipelineLayoutDescriptor desc = {};
-        EXPECT_CALL(mDevice, CreatePipelineLayoutImpl)
-            .WillOnce(Return(ByMove(AcquireRef(pipelineLayoutMock))));
-        DAWN_ASSERT_AND_ASSIGN(pipelineLayout, mDevice.CreatePipelineLayout(&desc));
-        EXPECT_TRUE(pipelineLayout->IsAlive());
-        EXPECT_TRUE(pipelineLayout->IsCachedReference());
-    }
-
-    Ref<QuerySetBase> querySet;
-    {
-        QuerySetDescriptor desc = {};
-        EXPECT_CALL(mDevice, CreateQuerySetImpl).WillOnce(Return(ByMove(AcquireRef(querySetMock))));
-        DAWN_ASSERT_AND_ASSIGN(querySet, mDevice.CreateQuerySet(&desc));
-        EXPECT_TRUE(querySet->IsAlive());
-    }
-
-    Ref<RenderPipelineBase> renderPipeline;
-    {
-        // Render pipelines usually set their hash values at construction, but the mock does
-        // not, so we set it here.
-        constexpr size_t hash = 0x12345;
-        renderPipelineMock->SetContentHash(hash);
-        ON_CALL(*renderPipelineMock, ComputeContentHash).WillByDefault(Return(hash));
-
-        // Render pipelines are initialized during their creation via the device.
-        EXPECT_CALL(*renderPipelineMock, Initialize).Times(1);
-
-        RenderPipelineDescriptor desc = {};
-        desc.layout = GetPipelineLayout().Get();
-        desc.vertex.module = GetVertexShaderModule().Get();
-        EXPECT_CALL(mDevice, CreateUninitializedRenderPipelineImpl)
-            .WillOnce(Return(ByMove(AcquireRef(renderPipelineMock))));
-        DAWN_ASSERT_AND_ASSIGN(renderPipeline, mDevice.CreateRenderPipeline(&desc));
-        EXPECT_TRUE(renderPipeline->IsAlive());
-        EXPECT_TRUE(renderPipeline->IsCachedReference());
-    }
-
-    Ref<SamplerBase> sampler;
-    {
-        SamplerDescriptor desc = {};
-        EXPECT_CALL(mDevice, CreateSamplerImpl).WillOnce(Return(ByMove(AcquireRef(samplerMock))));
-        DAWN_ASSERT_AND_ASSIGN(sampler, mDevice.CreateSampler(&desc));
-        EXPECT_TRUE(sampler->IsAlive());
-        EXPECT_TRUE(sampler->IsCachedReference());
-    }
-
-    Ref<ShaderModuleBase> shaderModule;
-    {
-        ShaderModuleWGSLDescriptor wgslDesc;
-        wgslDesc.source = R"(
-                @compute @workgroup_size(1) fn main() {
-                }
-            )";
-        ShaderModuleDescriptor desc = {};
-        desc.nextInChain = &wgslDesc;
-
-        EXPECT_CALL(mDevice, CreateShaderModuleImpl)
-            .WillOnce(Return(ByMove(AcquireRef(shaderModuleMock))));
-        DAWN_ASSERT_AND_ASSIGN(shaderModule, mDevice.CreateShaderModule(&desc));
-        EXPECT_TRUE(shaderModule->IsAlive());
-        EXPECT_TRUE(shaderModule->IsCachedReference());
-    }
-
-    Ref<SwapChainBase> swapChain;
-    {
-        SwapChainDescriptor desc = {};
-        EXPECT_CALL(mDevice, CreateSwapChainImpl(_))
-            .WillOnce(Return(ByMove(AcquireRef(swapChainMock))));
-        DAWN_ASSERT_AND_ASSIGN(swapChain, mDevice.CreateSwapChain(nullptr, &desc));
-        EXPECT_TRUE(swapChain->IsAlive());
-    }
-
-    Ref<TextureBase> texture;
-    {
-        TextureDescriptor desc = {};
-        EXPECT_CALL(mDevice, CreateTextureImpl).WillOnce(Return(ByMove(AcquireRef(textureMock))));
-        DAWN_ASSERT_AND_ASSIGN(texture, mDevice.CreateTexture(&desc));
-        EXPECT_TRUE(texture->IsAlive());
-    }
-
-    Ref<TextureViewBase> textureView;
-    {
-        TextureViewDescriptor desc = {};
-        EXPECT_CALL(mDevice, CreateTextureViewImpl)
-            .WillOnce(Return(ByMove(AcquireRef(textureViewMock))));
-        DAWN_ASSERT_AND_ASSIGN(textureView, mDevice.CreateTextureView(GetTexture().Get(), &desc));
-        EXPECT_TRUE(textureView->IsAlive());
-    }
-
-    mDevice.DestroyObjects();
-    EXPECT_FALSE(bindGroup->IsAlive());
-    EXPECT_FALSE(bindGroupLayout->IsAlive());
-    EXPECT_FALSE(buffer->IsAlive());
-    EXPECT_FALSE(commandBuffer->IsAlive());
-    EXPECT_FALSE(computePipeline->IsAlive());
-    EXPECT_FALSE(externalTexture->IsAlive());
-    EXPECT_FALSE(pipelineLayout->IsAlive());
-    EXPECT_FALSE(querySet->IsAlive());
-    EXPECT_FALSE(renderPipeline->IsAlive());
-    EXPECT_FALSE(sampler->IsAlive());
-    EXPECT_FALSE(shaderModule->IsAlive());
-    EXPECT_FALSE(swapChain->IsAlive());
-    EXPECT_FALSE(texture->IsAlive());
-    EXPECT_FALSE(textureView->IsAlive());
-}
 
 static constexpr std::string_view kComputeShader = R"(
         @compute @workgroup_size(1) fn main() {}
@@ -768,6 +67,971 @@ static constexpr std::string_view kFragmentShader = R"(
         @fragment fn main() {}
     )";
 
+// Stores and scopes a raw mock object ptr expectation. This is particularly useful on objects that
+// are expected to be destroyed at the end of the scope. In most cases, when the validation in this
+// class's destructor is ran, the pointer is probably already freed.
+class ScopedRawPtrExpectation {
+  public:
+    explicit ScopedRawPtrExpectation(void* ptr) : mPtr(ptr) {}
+    ~ScopedRawPtrExpectation() { Mock::VerifyAndClearExpectations(mPtr); }
+
+  private:
+    void* mPtr = nullptr;
+};
+
+class DestroyObjectTests : public DawnMockTest {
+  public:
+    DestroyObjectTests() : DawnMockTest() {
+        // Skipping validation on descriptors as coverage for validation is already present.
+        mDeviceMock->ForceSetToggleForTesting(Toggle::SkipValidation, true);
+    }
+};
+
+TEST_F(DestroyObjectTests, BindGroupNativeExplicit) {
+    BindGroupDescriptor desc = {};
+    desc.layout = mDeviceMock->GetEmptyBindGroupLayoutMock();
+    desc.entryCount = 0;
+    desc.entries = nullptr;
+
+    Ref<BindGroupMock> bindGroupMock = AcquireRef(new BindGroupMock(mDeviceMock, &desc));
+    EXPECT_CALL(*bindGroupMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_TRUE(bindGroupMock->IsAlive());
+    bindGroupMock->Destroy();
+    EXPECT_FALSE(bindGroupMock->IsAlive());
+}
+
+// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+// will also complain if there is a memory leak.
+TEST_F(DestroyObjectTests, BindGroupImplicit) {
+    BindGroupDescriptor desc = {};
+    desc.layout = mDeviceMock->GetEmptyBindGroupLayoutMock();
+    desc.entryCount = 0;
+    desc.entries = nullptr;
+
+    Ref<BindGroupMock> bindGroupMock = AcquireRef(new BindGroupMock(mDeviceMock, &desc));
+    EXPECT_CALL(*bindGroupMock.Get(), DestroyImpl).Times(1);
+    {
+        ScopedRawPtrExpectation scoped(bindGroupMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreateBindGroupImpl)
+            .WillOnce(Return(ByMove(std::move(bindGroupMock))));
+        wgpu::BindGroup bindGroup = device.CreateBindGroup(ToCppAPI(&desc));
+
+        EXPECT_TRUE(FromAPI(bindGroup.Get())->IsAlive());
+    }
+}
+
+TEST_F(DestroyObjectTests, BindGroupLayoutNativeExplicit) {
+    // Use an non-empty bind group layout to avoid hitting the internal empty layout in the cache.
+    BindGroupLayoutDescriptor desc = {};
+    std::vector<BindGroupLayoutEntry> entries;
+    entries.push_back(utils::BindingLayoutEntryInitializationHelper(
+        0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform));
+    desc.entryCount = static_cast<uint32_t>(entries.size());
+    desc.entries = entries.data();
+
+    Ref<BindGroupLayoutMock> bindGroupLayoutMock =
+        AcquireRef(new BindGroupLayoutMock(mDeviceMock, &desc));
+    EXPECT_CALL(*bindGroupLayoutMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_TRUE(bindGroupLayoutMock->IsAlive());
+    bindGroupLayoutMock->Destroy();
+    EXPECT_FALSE(bindGroupLayoutMock->IsAlive());
+}
+
+// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+// will also complain if there is a memory leak.
+TEST_F(DestroyObjectTests, BindGroupLayoutImplicit) {
+    // Use an non-empty bind group layout to avoid hitting the internal empty layout in the cache.
+    BindGroupLayoutDescriptor desc = {};
+    std::vector<BindGroupLayoutEntry> entries;
+    entries.push_back(utils::BindingLayoutEntryInitializationHelper(
+        0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform));
+    desc.entryCount = static_cast<uint32_t>(entries.size());
+    desc.entries = entries.data();
+
+    Ref<BindGroupLayoutMock> bindGroupLayoutMock =
+        AcquireRef(new BindGroupLayoutMock(mDeviceMock, &desc));
+    EXPECT_CALL(*bindGroupLayoutMock.Get(), DestroyImpl).Times(1);
+    {
+        ScopedRawPtrExpectation scoped(bindGroupLayoutMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreateBindGroupLayoutImpl)
+            .WillOnce(Return(ByMove(std::move(bindGroupLayoutMock))));
+        wgpu::BindGroupLayout bindGroupLayout = device.CreateBindGroupLayout(ToCppAPI(&desc));
+
+        EXPECT_TRUE(FromAPI(bindGroupLayout.Get())->IsAlive());
+        EXPECT_TRUE(FromAPI(bindGroupLayout.Get())->IsCachedReference());
+    }
+}
+
+TEST_F(DestroyObjectTests, BufferNativeExplicit) {
+    BufferDescriptor desc = {};
+    desc.size = 16;
+    desc.usage = wgpu::BufferUsage::Uniform;
+
+    Ref<BufferMock> bufferMock = AcquireRef(new BufferMock(mDeviceMock, &desc));
+    EXPECT_CALL(*bufferMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_TRUE(bufferMock->IsAlive());
+    bufferMock->Destroy();
+    EXPECT_FALSE(bufferMock->IsAlive());
+}
+
+TEST_F(DestroyObjectTests, BufferApiExplicit) {
+    BufferDescriptor desc = {};
+    desc.size = 16;
+    desc.usage = wgpu::BufferUsage::Uniform;
+
+    Ref<BufferMock> bufferMock = AcquireRef(new BufferMock(mDeviceMock, &desc));
+    EXPECT_CALL(*bufferMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_CALL(*mDeviceMock, CreateBufferImpl).WillOnce(Return(ByMove(std::move(bufferMock))));
+    wgpu::Buffer buffer = device.CreateBuffer(ToCppAPI(&desc));
+
+    EXPECT_TRUE(FromAPI(buffer.Get())->IsAlive());
+    buffer.Destroy();
+    EXPECT_FALSE(FromAPI(buffer.Get())->IsAlive());
+}
+
+// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+// will also complain if there is a memory leak.
+TEST_F(DestroyObjectTests, BufferImplicit) {
+    BufferDescriptor desc = {};
+    desc.size = 16;
+    desc.usage = wgpu::BufferUsage::Uniform;
+
+    Ref<BufferMock> bufferMock = AcquireRef(new BufferMock(mDeviceMock, &desc));
+    EXPECT_CALL(*bufferMock.Get(), DestroyImpl).Times(1);
+    {
+        ScopedRawPtrExpectation scoped(bufferMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreateBufferImpl).WillOnce(Return(ByMove(std::move(bufferMock))));
+        wgpu::Buffer buffer = device.CreateBuffer(ToCppAPI(&desc));
+
+        EXPECT_TRUE(FromAPI(buffer.Get())->IsAlive());
+    }
+}
+
+TEST_F(DestroyObjectTests, MappedBufferApiExplicit) {
+    BufferDescriptor desc = {};
+    desc.size = 16;
+    desc.usage = wgpu::BufferUsage::MapRead;
+
+    StrictMock<MockCallback<wgpu::BufferMapCallback>> cb;
+    EXPECT_CALL(cb, Call).Times(1);
+    Ref<BufferMock> bufferMock = AcquireRef(new BufferMock(mDeviceMock, &desc));
+    {
+        InSequence seq;
+        EXPECT_CALL(*bufferMock.Get(), MapAsyncImpl).WillOnce([]() -> MaybeError { return {}; });
+        EXPECT_CALL(*bufferMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*bufferMock.Get(), UnmapImpl).Times(1);
+    }
+    {
+        EXPECT_CALL(*mDeviceMock, CreateBufferImpl).WillOnce(Return(ByMove(std::move(bufferMock))));
+        wgpu::Buffer buffer = device.CreateBuffer(ToCppAPI(&desc));
+        buffer.MapAsync(wgpu::MapMode::Read, 0, 16, cb.Callback(), cb.MakeUserdata(this));
+        device.Tick();
+
+        EXPECT_TRUE(FromAPI(buffer.Get())->IsAlive());
+        buffer.Destroy();
+        EXPECT_FALSE(FromAPI(buffer.Get())->IsAlive());
+    }
+}
+
+// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+// will also complain if there is a memory leak.
+TEST_F(DestroyObjectTests, MappedBufferImplicit) {
+    BufferDescriptor desc = {};
+    desc.size = 16;
+    desc.usage = wgpu::BufferUsage::MapRead;
+
+    StrictMock<MockCallback<wgpu::BufferMapCallback>> cb;
+    EXPECT_CALL(cb, Call).Times(1);
+    Ref<BufferMock> bufferMock = AcquireRef(new BufferMock(mDeviceMock, &desc));
+    {
+        InSequence seq;
+        EXPECT_CALL(*bufferMock.Get(), MapAsyncImpl).WillOnce([]() -> MaybeError { return {}; });
+        EXPECT_CALL(*bufferMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*bufferMock.Get(), UnmapImpl).Times(1);
+    }
+    {
+        ScopedRawPtrExpectation scoped(bufferMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreateBufferImpl).WillOnce(Return(ByMove(std::move(bufferMock))));
+        wgpu::Buffer buffer = device.CreateBuffer(ToCppAPI(&desc));
+        buffer.MapAsync(wgpu::MapMode::Read, 0, 16, cb.Callback(), cb.MakeUserdata(this));
+        device.Tick();
+
+        EXPECT_TRUE(FromAPI(buffer.Get())->IsAlive());
+    }
+}
+
+TEST_F(DestroyObjectTests, CommandBufferNativeExplicit) {
+    CommandEncoderDescriptor commandEncoderDesc = {};
+    Ref<CommandEncoder> commandEncoder = CommandEncoder::Create(mDeviceMock, &commandEncoderDesc);
+
+    CommandBufferDescriptor commandBufferDesc = {};
+
+    Ref<CommandBufferMock> commandBufferMock =
+        AcquireRef(new CommandBufferMock(mDeviceMock, commandEncoder.Get(), &commandBufferDesc));
+    EXPECT_CALL(*commandBufferMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_TRUE(commandBufferMock->IsAlive());
+    commandBufferMock->Destroy();
+    EXPECT_FALSE(commandBufferMock->IsAlive());
+}
+
+// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+// will also complain if there is a memory leak.
+TEST_F(DestroyObjectTests, CommandBufferImplicit) {
+    CommandEncoderDescriptor commandEncoderDesc = {};
+    wgpu::CommandEncoder commandEncoder =
+        device.CreateCommandEncoder(ToCppAPI(&commandEncoderDesc));
+
+    CommandBufferDescriptor commandBufferDesc = {};
+
+    Ref<CommandBufferMock> commandBufferMock = AcquireRef(
+        new CommandBufferMock(mDeviceMock, FromAPI(commandEncoder.Get()), &commandBufferDesc));
+    EXPECT_CALL(*commandBufferMock.Get(), DestroyImpl).Times(1);
+    {
+        ScopedRawPtrExpectation scoped(commandBufferMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreateCommandBuffer)
+            .WillOnce(Return(ByMove(std::move(commandBufferMock))));
+        wgpu::CommandBuffer commandBuffer = commandEncoder.Finish(ToCppAPI(&commandBufferDesc));
+
+        EXPECT_TRUE(FromAPI(commandBuffer.Get())->IsAlive());
+    }
+}
+
+TEST_F(DestroyObjectTests, ComputePipelineNativeExplicit) {
+    Ref<ShaderModuleMock> csModuleMock =
+        ShaderModuleMock::Create(mDeviceMock, kComputeShader.data());
+    ComputePipelineDescriptor desc = {};
+    desc.compute.module = csModuleMock.Get();
+    desc.compute.entryPoint = "main";
+
+    Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
+    EXPECT_CALL(*computePipelineMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_TRUE(computePipelineMock->IsAlive());
+    computePipelineMock->Destroy();
+    EXPECT_FALSE(computePipelineMock->IsAlive());
+}
+
+// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+// will also complain if there is a memory leak.
+TEST_F(DestroyObjectTests, ComputePipelineImplicit) {
+    Ref<ShaderModuleMock> csModuleMock =
+        ShaderModuleMock::Create(mDeviceMock, kComputeShader.data());
+    ComputePipelineDescriptor desc = {};
+    desc.compute.module = csModuleMock.Get();
+    desc.compute.entryPoint = "main";
+
+    // Compute pipelines are initialized during their creation via the device.
+    Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
+    EXPECT_CALL(*computePipelineMock.Get(), Initialize).Times(1);
+    EXPECT_CALL(*computePipelineMock.Get(), DestroyImpl).Times(1);
+
+    {
+        ScopedRawPtrExpectation scoped(computePipelineMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
+            .WillOnce(Return(ByMove(std::move(computePipelineMock))));
+        wgpu::ComputePipeline computePipeline = device.CreateComputePipeline(ToCppAPI(&desc));
+
+        EXPECT_TRUE(FromAPI(computePipeline.Get())->IsAlive());
+        EXPECT_TRUE(FromAPI(computePipeline.Get())->IsCachedReference());
+    }
+}
+
+TEST_F(DestroyObjectTests, ExternalTextureNativeExplicit) {
+    TextureDescriptor textureDesc = {};
+    textureDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    textureDesc.size.width = 1;
+    textureDesc.size.height = 1;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &textureDesc));
+
+    TextureViewDescriptor textureViewDesc = {};
+    textureViewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    Ref<TextureViewMock> textureViewMock =
+        AcquireRef(new NiceMock<TextureViewMock>(textureMock.Get(), &textureViewDesc));
+
+    ExternalTextureDescriptor desc = {};
+    std::array<float, 12> placeholderConstantArray;
+    desc.yuvToRgbConversionMatrix = placeholderConstantArray.data();
+    desc.gamutConversionMatrix = placeholderConstantArray.data();
+    desc.srcTransferFunctionParameters = placeholderConstantArray.data();
+    desc.dstTransferFunctionParameters = placeholderConstantArray.data();
+    desc.visibleSize = {1, 1};
+    desc.plane0 = textureViewMock.Get();
+
+    Ref<ExternalTextureMock> externalTextureMock = ExternalTextureMock::Create(mDeviceMock, &desc);
+    EXPECT_CALL(*externalTextureMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_TRUE(externalTextureMock->IsAlive());
+    externalTextureMock->Destroy();
+    EXPECT_FALSE(externalTextureMock->IsAlive());
+}
+
+TEST_F(DestroyObjectTests, ExternalTextureApiExplicit) {
+    TextureDescriptor textureDesc = {};
+    textureDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    textureDesc.size.width = 1;
+    textureDesc.size.height = 1;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &textureDesc));
+
+    TextureViewDescriptor textureViewDesc = {};
+    textureViewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    Ref<TextureViewMock> textureViewMock =
+        AcquireRef(new NiceMock<TextureViewMock>(textureMock.Get(), &textureViewDesc));
+
+    ExternalTextureDescriptor desc = {};
+    std::array<float, 12> placeholderConstantArray;
+    desc.yuvToRgbConversionMatrix = placeholderConstantArray.data();
+    desc.gamutConversionMatrix = placeholderConstantArray.data();
+    desc.srcTransferFunctionParameters = placeholderConstantArray.data();
+    desc.dstTransferFunctionParameters = placeholderConstantArray.data();
+    desc.visibleSize = {1, 1};
+    desc.plane0 = textureViewMock.Get();
+
+    Ref<ExternalTextureMock> externalTextureMock = ExternalTextureMock::Create(mDeviceMock, &desc);
+    EXPECT_CALL(*externalTextureMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_CALL(*mDeviceMock, CreateExternalTextureImpl)
+        .WillOnce(Return(ByMove(std::move(externalTextureMock))));
+    wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(ToCppAPI(&desc));
+
+    EXPECT_TRUE(FromAPI(externalTexture.Get())->IsAlive());
+    externalTexture.Destroy();
+    EXPECT_FALSE(FromAPI(externalTexture.Get())->IsAlive());
+}
+
+TEST_F(DestroyObjectTests, ExternalTextureImplicit) {
+    TextureDescriptor textureDesc = {};
+    textureDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    textureDesc.size.width = 1;
+    textureDesc.size.height = 1;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &textureDesc));
+
+    TextureViewDescriptor textureViewDesc = {};
+    textureViewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    Ref<TextureViewMock> textureViewMock =
+        AcquireRef(new NiceMock<TextureViewMock>(textureMock.Get(), &textureViewDesc));
+
+    ExternalTextureDescriptor desc = {};
+    std::array<float, 12> placeholderConstantArray;
+    desc.yuvToRgbConversionMatrix = placeholderConstantArray.data();
+    desc.gamutConversionMatrix = placeholderConstantArray.data();
+    desc.srcTransferFunctionParameters = placeholderConstantArray.data();
+    desc.dstTransferFunctionParameters = placeholderConstantArray.data();
+    desc.visibleSize = {1, 1};
+    desc.plane0 = textureViewMock.Get();
+
+    Ref<ExternalTextureMock> externalTextureMock = ExternalTextureMock::Create(mDeviceMock, &desc);
+    EXPECT_CALL(*externalTextureMock.Get(), DestroyImpl).Times(1);
+    {
+        ScopedRawPtrExpectation scoped(externalTextureMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreateExternalTextureImpl)
+            .WillOnce(Return(ByMove(std::move(externalTextureMock))));
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(ToCppAPI(&desc));
+
+        EXPECT_TRUE(FromAPI(externalTexture.Get())->IsAlive());
+    }
+}
+
+TEST_F(DestroyObjectTests, PipelineLayoutNativeExplicit) {
+    PipelineLayoutDescriptor desc = {};
+    std::vector<BindGroupLayoutBase*> bindGroupLayouts;
+    bindGroupLayouts.push_back(mDeviceMock->GetEmptyBindGroupLayoutMock());
+    desc.bindGroupLayoutCount = static_cast<uint32_t>(bindGroupLayouts.size());
+    desc.bindGroupLayouts = bindGroupLayouts.data();
+
+    Ref<PipelineLayoutMock> pipelineLayoutMock =
+        AcquireRef(new PipelineLayoutMock(mDeviceMock, &desc));
+    EXPECT_CALL(*pipelineLayoutMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_TRUE(pipelineLayoutMock->IsAlive());
+    pipelineLayoutMock->Destroy();
+    EXPECT_FALSE(pipelineLayoutMock->IsAlive());
+}
+
+// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+// will also complain if there is a memory leak.
+TEST_F(DestroyObjectTests, PipelineLayoutImplicit) {
+    PipelineLayoutDescriptor desc = {};
+    std::vector<BindGroupLayoutBase*> bindGroupLayouts;
+    bindGroupLayouts.push_back(mDeviceMock->GetEmptyBindGroupLayoutMock());
+    desc.bindGroupLayoutCount = static_cast<uint32_t>(bindGroupLayouts.size());
+    desc.bindGroupLayouts = bindGroupLayouts.data();
+
+    Ref<PipelineLayoutMock> pipelineLayoutMock =
+        AcquireRef(new PipelineLayoutMock(mDeviceMock, &desc));
+    EXPECT_CALL(*pipelineLayoutMock.Get(), DestroyImpl).Times(1);
+    {
+        ScopedRawPtrExpectation scoped(pipelineLayoutMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreatePipelineLayoutImpl)
+            .WillOnce(Return(ByMove(std::move(pipelineLayoutMock))));
+        wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(ToCppAPI(&desc));
+
+        EXPECT_TRUE(FromAPI(pipelineLayout.Get())->IsAlive());
+        EXPECT_TRUE(FromAPI(pipelineLayout.Get())->IsCachedReference());
+    }
+}
+
+TEST_F(DestroyObjectTests, QuerySetNativeExplicit) {
+    QuerySetDescriptor desc = {};
+    desc.type = wgpu::QueryType::Occlusion;
+    desc.count = 1;
+
+    Ref<QuerySetMock> querySetMock = AcquireRef(new QuerySetMock(mDeviceMock, &desc));
+    EXPECT_CALL(*querySetMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_TRUE(querySetMock->IsAlive());
+    querySetMock->Destroy();
+    EXPECT_FALSE(querySetMock->IsAlive());
+}
+
+TEST_F(DestroyObjectTests, QuerySetApiExplicit) {
+    QuerySetDescriptor desc = {};
+    desc.type = wgpu::QueryType::Occlusion;
+    desc.count = 1;
+
+    Ref<QuerySetMock> querySetMock = AcquireRef(new QuerySetMock(mDeviceMock, &desc));
+    EXPECT_CALL(*querySetMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_CALL(*mDeviceMock, CreateQuerySetImpl).WillOnce(Return(ByMove(std::move(querySetMock))));
+    wgpu::QuerySet querySet = device.CreateQuerySet(ToCppAPI(&desc));
+
+    EXPECT_TRUE(FromAPI(querySet.Get())->IsAlive());
+    querySet.Destroy();
+    EXPECT_FALSE(FromAPI(querySet.Get())->IsAlive());
+}
+
+// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+// will also complain if there is a memory leak.
+TEST_F(DestroyObjectTests, QuerySetImplicit) {
+    QuerySetDescriptor desc = {};
+    desc.type = wgpu::QueryType::Occlusion;
+    desc.count = 1;
+
+    Ref<QuerySetMock> querySetMock = AcquireRef(new QuerySetMock(mDeviceMock, &desc));
+    EXPECT_CALL(*querySetMock.Get(), DestroyImpl).Times(1);
+    {
+        ScopedRawPtrExpectation scoped(querySetMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreateQuerySetImpl)
+            .WillOnce(Return(ByMove(std::move(querySetMock))));
+        wgpu::QuerySet querySet = device.CreateQuerySet(ToCppAPI(&desc));
+
+        EXPECT_TRUE(FromAPI(querySet.Get())->IsAlive());
+    }
+}
+
+TEST_F(DestroyObjectTests, RenderPipelineNativeExplicit) {
+    Ref<ShaderModuleMock> vsModuleMock =
+        ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
+    RenderPipelineDescriptor desc = {};
+    desc.vertex.module = vsModuleMock.Get();
+    desc.vertex.entryPoint = "main";
+
+    Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
+    EXPECT_CALL(*renderPipelineMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_TRUE(renderPipelineMock->IsAlive());
+    renderPipelineMock->Destroy();
+    EXPECT_FALSE(renderPipelineMock->IsAlive());
+}
+
+// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+// will also complain if there is a memory leak.
+TEST_F(DestroyObjectTests, RenderPipelineImplicit) {
+    Ref<ShaderModuleMock> vsModuleMock =
+        ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
+    RenderPipelineDescriptor desc = {};
+    desc.vertex.module = vsModuleMock.Get();
+    desc.vertex.entryPoint = "main";
+
+    // Render pipelines are initialized during their creation via the device.
+    Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
+    EXPECT_CALL(*renderPipelineMock.Get(), Initialize).Times(1);
+    EXPECT_CALL(*renderPipelineMock.Get(), DestroyImpl).Times(1);
+
+    {
+        ScopedRawPtrExpectation scoped(renderPipelineMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
+            .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
+        wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(ToCppAPI(&desc));
+
+        EXPECT_TRUE(FromAPI(renderPipeline.Get())->IsAlive());
+        EXPECT_TRUE(FromAPI(renderPipeline.Get())->IsCachedReference());
+    }
+}
+
+TEST_F(DestroyObjectTests, SamplerNativeExplicit) {
+    SamplerDescriptor desc = {};
+
+    Ref<SamplerMock> samplerMock = AcquireRef(new SamplerMock(mDeviceMock, &desc));
+    EXPECT_CALL(*samplerMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_TRUE(samplerMock->IsAlive());
+    samplerMock->Destroy();
+    EXPECT_FALSE(samplerMock->IsAlive());
+}
+
+// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+// will also complain if there is a memory leak.
+TEST_F(DestroyObjectTests, SamplerImplicit) {
+    SamplerDescriptor desc = {};
+
+    Ref<SamplerMock> samplerMock = AcquireRef(new SamplerMock(mDeviceMock, &desc));
+    EXPECT_CALL(*samplerMock.Get(), DestroyImpl).Times(1);
+    {
+        ScopedRawPtrExpectation scoped(samplerMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreateSamplerImpl)
+            .WillOnce(Return(ByMove(std::move(samplerMock))));
+        wgpu::Sampler sampler = device.CreateSampler(ToCppAPI(&desc));
+
+        EXPECT_TRUE(FromAPI(sampler.Get())->IsAlive());
+        EXPECT_TRUE(FromAPI(sampler.Get())->IsCachedReference());
+    }
+}
+
+TEST_F(DestroyObjectTests, ShaderModuleNativeExplicit) {
+    Ref<ShaderModuleMock> shaderModuleMock =
+        ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
+    EXPECT_CALL(*shaderModuleMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_TRUE(shaderModuleMock->IsAlive());
+    shaderModuleMock->Destroy();
+    EXPECT_FALSE(shaderModuleMock->IsAlive());
+}
+
+TEST_F(DestroyObjectTests, ShaderModuleImplicit) {
+    ShaderModuleWGSLDescriptor wgslDesc = {};
+    wgslDesc.source = kVertexShader.data();
+    ShaderModuleDescriptor desc = {};
+    desc.nextInChain = &wgslDesc;
+
+    Ref<ShaderModuleMock> shaderModuleMock = ShaderModuleMock::Create(mDeviceMock, &desc);
+    EXPECT_CALL(*shaderModuleMock.Get(), DestroyImpl).Times(1);
+    {
+        ScopedRawPtrExpectation scoped(shaderModuleMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreateShaderModuleImpl)
+            .WillOnce(Return(ByMove(std::move(shaderModuleMock))));
+        wgpu::ShaderModule shaderModule = device.CreateShaderModule(ToCppAPI(&desc));
+
+        EXPECT_TRUE(FromAPI(shaderModule.Get())->IsAlive());
+    }
+}
+
+TEST_F(DestroyObjectTests, TextureNativeExplicit) {
+    TextureDescriptor desc = {};
+    desc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    desc.size.width = 1;
+    desc.size.height = 1;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+    Ref<TextureMock> textureMock = AcquireRef(new TextureMock(mDeviceMock, &desc));
+    EXPECT_CALL(*textureMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_TRUE(textureMock->IsAlive());
+    textureMock->Destroy();
+    EXPECT_FALSE(textureMock->IsAlive());
+}
+
+TEST_F(DestroyObjectTests, TextureApiExplicit) {
+    TextureDescriptor desc = {};
+    desc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    desc.size.width = 1;
+    desc.size.height = 1;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+    Ref<TextureMock> textureMock = AcquireRef(new TextureMock(mDeviceMock, &desc));
+    EXPECT_CALL(*textureMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_CALL(*mDeviceMock, CreateTextureImpl).WillOnce(Return(ByMove(std::move(textureMock))));
+    wgpu::Texture texture = device.CreateTexture(ToCppAPI(&desc));
+
+    EXPECT_TRUE(FromAPI(texture.Get())->IsAlive());
+    texture.Destroy();
+    EXPECT_FALSE(FromAPI(texture.Get())->IsAlive());
+}
+
+// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+// will also complain if there is a memory leak.
+TEST_F(DestroyObjectTests, TextureImplicit) {
+    TextureDescriptor desc = {};
+    desc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    desc.size.width = 1;
+    desc.size.height = 1;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+    Ref<TextureMock> textureMock = AcquireRef(new TextureMock(mDeviceMock, &desc));
+    EXPECT_CALL(*textureMock.Get(), DestroyImpl).Times(1);
+    {
+        ScopedRawPtrExpectation scoped(textureMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreateTextureImpl)
+            .WillOnce(Return(ByMove(std::move(textureMock))));
+        wgpu::Texture texture = device.CreateTexture(ToCppAPI(&desc));
+
+        EXPECT_TRUE(FromAPI(texture.Get())->IsAlive());
+    }
+}
+
+TEST_F(DestroyObjectTests, TextureViewNativeExplicit) {
+    TextureDescriptor textureDesc = {};
+    textureDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    textureDesc.size.width = 1;
+    textureDesc.size.height = 1;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &textureDesc));
+
+    TextureViewDescriptor desc = {};
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    {
+        // Explicitly destroy the texture view.
+        Ref<TextureViewMock> textureViewMock =
+            AcquireRef(new TextureViewMock(textureMock.Get(), &desc));
+        EXPECT_CALL(*textureViewMock.Get(), DestroyImpl).Times(1);
+
+        EXPECT_TRUE(textureViewMock->IsAlive());
+        textureViewMock->Destroy();
+        EXPECT_FALSE(textureViewMock->IsAlive());
+    }
+    {
+        // Destroying the owning texture should cause the view to be destroyed as well.
+        Ref<TextureViewMock> textureViewMock =
+            AcquireRef(new TextureViewMock(textureMock.Get(), &desc));
+        EXPECT_CALL(*textureViewMock.Get(), DestroyImpl).Times(1);
+
+        EXPECT_TRUE(textureViewMock->IsAlive());
+        textureMock->Destroy();
+        EXPECT_FALSE(textureViewMock->IsAlive());
+    }
+}
+
+TEST_F(DestroyObjectTests, TextureViewApiExplicit) {
+    TextureDescriptor textureDesc = {};
+    textureDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    textureDesc.size.width = 1;
+    textureDesc.size.height = 1;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &textureDesc));
+
+    TextureViewDescriptor viewDesc = {};
+    viewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    Ref<TextureViewMock> textureViewMock =
+        AcquireRef(new TextureViewMock(textureMock.Get(), &viewDesc));
+    EXPECT_CALL(*textureViewMock.Get(), DestroyImpl).Times(1);
+
+    EXPECT_CALL(*mDeviceMock, CreateTextureViewImpl(textureMock.Get(), _))
+        .WillOnce(Return(ByMove(std::move(textureViewMock))));
+    EXPECT_CALL(*mDeviceMock, CreateTextureImpl).WillOnce(Return(ByMove(std::move(textureMock))));
+    wgpu::Texture texture = device.CreateTexture(ToCppAPI(&textureDesc));
+    wgpu::TextureView textureView = texture.CreateView(ToCppAPI(&viewDesc));
+
+    EXPECT_TRUE(FromAPI(textureView.Get())->IsAlive());
+    texture.Destroy();
+    EXPECT_FALSE(FromAPI(textureView.Get())->IsAlive());
+}
+
+// If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+// will also complain if there is a memory leak.
+TEST_F(DestroyObjectTests, TextureViewImplicit) {
+    TextureDescriptor textureDesc = {};
+    textureDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    textureDesc.size.width = 1;
+    textureDesc.size.height = 1;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &textureDesc));
+
+    TextureViewDescriptor viewDesc = {};
+    viewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+    Ref<TextureViewMock> textureViewMock =
+        AcquireRef(new TextureViewMock(textureMock.Get(), &viewDesc));
+    EXPECT_CALL(*textureViewMock.Get(), DestroyImpl).Times(1);
+    {
+        ScopedRawPtrExpectation scoped(textureViewMock.Get());
+
+        EXPECT_CALL(*mDeviceMock, CreateTextureViewImpl(textureMock.Get(), _))
+            .WillOnce(Return(ByMove(std::move(textureViewMock))));
+        EXPECT_CALL(*mDeviceMock, CreateTextureImpl)
+            .WillOnce(Return(ByMove(std::move(textureMock))));
+        wgpu::Texture texture = device.CreateTexture(ToCppAPI(&textureDesc));
+        wgpu::TextureView textureView = texture.CreateView(ToCppAPI(&viewDesc));
+
+        EXPECT_TRUE(FromAPI(textureView.Get())->IsAlive());
+    }
+}
+
+// Destroying the objects on the device explicitly should result in all created objects being
+// destroyed in order.
+TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
+    Ref<BindGroupMock> bindGroupMock;
+    wgpu::BindGroup bindGroup;
+    {
+        BindGroupDescriptor desc = {};
+        desc.layout = mDeviceMock->GetEmptyBindGroupLayoutMock();
+        desc.entryCount = 0;
+        desc.entries = nullptr;
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        bindGroupMock = AcquireRef(new BindGroupMock(mDeviceMock, &desc));
+        EXPECT_CALL(*mDeviceMock, CreateBindGroupImpl).WillOnce(Return(bindGroupMock));
+        bindGroup = device.CreateBindGroup(ToCppAPI(&desc));
+    }
+
+    Ref<BindGroupLayoutMock> bindGroupLayoutMock;
+    wgpu::BindGroupLayout bindGroupLayout;
+    {
+        // Use an non-empty bind group layout to avoid hitting the internal empty layout in the
+        // cache.
+        BindGroupLayoutDescriptor desc = {};
+        std::vector<BindGroupLayoutEntry> entries;
+        entries.push_back(utils::BindingLayoutEntryInitializationHelper(
+            0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform));
+        desc.entryCount = static_cast<uint32_t>(entries.size());
+        desc.entries = entries.data();
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        bindGroupLayoutMock = AcquireRef(new BindGroupLayoutMock(mDeviceMock, &desc));
+        EXPECT_CALL(*mDeviceMock, CreateBindGroupLayoutImpl).WillOnce(Return(bindGroupLayoutMock));
+        bindGroupLayout = device.CreateBindGroupLayout(ToCppAPI(&desc));
+    }
+
+    Ref<ShaderModuleMock> csModuleMock;
+    wgpu::ShaderModule csModule;
+    {
+        ShaderModuleWGSLDescriptor wgslDesc = {};
+        wgslDesc.source = kComputeShader.data();
+        ShaderModuleDescriptor desc = {};
+        desc.nextInChain = &wgslDesc;
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        csModuleMock = ShaderModuleMock::Create(mDeviceMock, &desc);
+        EXPECT_CALL(*mDeviceMock, CreateShaderModuleImpl).WillOnce(Return(csModuleMock));
+        csModule = device.CreateShaderModule(ToCppAPI(&desc));
+    }
+
+    Ref<ShaderModuleMock> vsModuleMock;
+    wgpu::ShaderModule vsModule;
+    {
+        ShaderModuleWGSLDescriptor wgslDesc = {};
+        wgslDesc.source = kVertexShader.data();
+        ShaderModuleDescriptor desc = {};
+        desc.nextInChain = &wgslDesc;
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        vsModuleMock = ShaderModuleMock::Create(mDeviceMock, &desc);
+        EXPECT_CALL(*mDeviceMock, CreateShaderModuleImpl).WillOnce(Return(vsModuleMock));
+        vsModule = device.CreateShaderModule(ToCppAPI(&desc));
+    }
+
+    Ref<BufferMock> bufferMock;
+    wgpu::Buffer buffer;
+    {
+        BufferDescriptor desc = {};
+        desc.size = 16;
+        desc.usage = wgpu::BufferUsage::Uniform;
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        bufferMock = AcquireRef(new BufferMock(mDeviceMock, &desc));
+        EXPECT_CALL(*mDeviceMock, CreateBufferImpl).WillOnce(Return(bufferMock));
+        buffer = device.CreateBuffer(ToCppAPI(&desc));
+    }
+
+    Ref<CommandBufferMock> commandBufferMock;
+    wgpu::CommandBuffer commandBuffer;
+    {
+        CommandEncoderDescriptor commandEncoderDesc = {};
+        wgpu::CommandEncoder commandEncoder =
+            device.CreateCommandEncoder(ToCppAPI(&commandEncoderDesc));
+
+        CommandBufferDescriptor commandBufferDesc = {};
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        commandBufferMock = AcquireRef(
+            new CommandBufferMock(mDeviceMock, FromAPI(commandEncoder.Get()), &commandBufferDesc));
+        EXPECT_CALL(*mDeviceMock, CreateCommandBuffer).WillOnce(Return(commandBufferMock));
+        commandBuffer = commandEncoder.Finish(ToCppAPI(&commandBufferDesc));
+    }
+
+    Ref<ComputePipelineMock> computePipelineMock;
+    wgpu::ComputePipeline computePipeline;
+    {
+        ComputePipelineDescriptor desc = {};
+        desc.compute.module = csModuleMock.Get();
+        desc.compute.entryPoint = "main";
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
+        EXPECT_CALL(*computePipelineMock.Get(), Initialize).Times(1);
+        EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
+            .WillOnce(Return(computePipelineMock));
+        computePipeline = device.CreateComputePipeline(ToCppAPI(&desc));
+    }
+
+    Ref<PipelineLayoutMock> pipelineLayoutMock;
+    wgpu::PipelineLayout pipelineLayout;
+    {
+        PipelineLayoutDescriptor desc = {};
+        std::vector<BindGroupLayoutBase*> bindGroupLayouts;
+        bindGroupLayouts.push_back(mDeviceMock->GetEmptyBindGroupLayoutMock());
+        desc.bindGroupLayoutCount = static_cast<uint32_t>(bindGroupLayouts.size());
+        desc.bindGroupLayouts = bindGroupLayouts.data();
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        pipelineLayoutMock = AcquireRef(new PipelineLayoutMock(mDeviceMock, &desc));
+        EXPECT_CALL(*mDeviceMock, CreatePipelineLayoutImpl).WillOnce(Return(pipelineLayoutMock));
+        pipelineLayout = device.CreatePipelineLayout(ToCppAPI(&desc));
+    }
+
+    Ref<QuerySetMock> querySetMock;
+    wgpu::QuerySet querySet;
+    {
+        QuerySetDescriptor desc = {};
+        desc.type = wgpu::QueryType::Occlusion;
+        desc.count = 1;
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        querySetMock = AcquireRef(new QuerySetMock(mDeviceMock, &desc));
+        EXPECT_CALL(*mDeviceMock, CreateQuerySetImpl).WillOnce(Return(querySetMock));
+        querySet = device.CreateQuerySet(ToCppAPI(&desc));
+    }
+
+    Ref<RenderPipelineMock> renderPipelineMock;
+    wgpu::RenderPipeline renderPipeline;
+    {
+        RenderPipelineDescriptor desc = {};
+        desc.vertex.module = vsModuleMock.Get();
+        desc.vertex.entryPoint = "main";
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
+        EXPECT_CALL(*renderPipelineMock.Get(), Initialize).Times(1);
+        EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
+            .WillOnce(Return(renderPipelineMock));
+        renderPipeline = device.CreateRenderPipeline(ToCppAPI(&desc));
+    }
+
+    Ref<SamplerMock> samplerMock;
+    wgpu::Sampler sampler;
+    {
+        SamplerDescriptor desc = {};
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        samplerMock = AcquireRef(new SamplerMock(mDeviceMock, &desc));
+        EXPECT_CALL(*mDeviceMock, CreateSamplerImpl).WillOnce(Return(samplerMock));
+        sampler = device.CreateSampler(ToCppAPI(&desc));
+    }
+
+    Ref<TextureMock> textureMock;
+    wgpu::Texture texture;
+    {
+        TextureDescriptor desc = {};
+        desc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+        desc.size.width = 1;
+        desc.size.height = 1;
+        desc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &desc));
+        EXPECT_CALL(*mDeviceMock, CreateTextureImpl).WillOnce(Return(textureMock));
+        texture = device.CreateTexture(ToCppAPI(&desc));
+    }
+
+    Ref<TextureViewMock> textureViewMock;
+    wgpu::TextureView textureView;
+    {
+        TextureViewDescriptor desc = {};
+        desc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        textureViewMock = AcquireRef(new TextureViewMock(textureMock.Get(), &desc));
+        EXPECT_CALL(*mDeviceMock, CreateTextureViewImpl).WillOnce(Return(textureViewMock));
+        textureView = texture.CreateView(ToCppAPI(&desc));
+    }
+
+    Ref<ExternalTextureMock> externalTextureMock;
+    wgpu::ExternalTexture externalTexture;
+    {
+        ExternalTextureDescriptor desc = {};
+        std::array<float, 12> placeholderConstantArray;
+        desc.yuvToRgbConversionMatrix = placeholderConstantArray.data();
+        desc.gamutConversionMatrix = placeholderConstantArray.data();
+        desc.srcTransferFunctionParameters = placeholderConstantArray.data();
+        desc.dstTransferFunctionParameters = placeholderConstantArray.data();
+        desc.visibleSize = {1, 1};
+        desc.plane0 = textureViewMock.Get();
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        externalTextureMock = ExternalTextureMock::Create(mDeviceMock, &desc);
+        EXPECT_CALL(*mDeviceMock, CreateExternalTextureImpl).WillOnce(Return(externalTextureMock));
+        externalTexture = device.CreateExternalTexture(ToCppAPI(&desc));
+    }
+
+    {
+        InSequence seq;
+        EXPECT_CALL(*commandBufferMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*renderPipelineMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*computePipelineMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*pipelineLayoutMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*bindGroupMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*bindGroupLayoutMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*vsModuleMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*csModuleMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*externalTextureMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*textureMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*textureViewMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*querySetMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*samplerMock.Get(), DestroyImpl).Times(1);
+        EXPECT_CALL(*bufferMock.Get(), DestroyImpl).Times(1);
+    }
+
+    EXPECT_TRUE(FromAPI(bindGroup.Get())->IsAlive());
+    EXPECT_TRUE(FromAPI(bindGroupLayout.Get())->IsAlive());
+    EXPECT_TRUE(FromAPI(buffer.Get())->IsAlive());
+    EXPECT_TRUE(FromAPI(commandBuffer.Get())->IsAlive());
+    EXPECT_TRUE(FromAPI(computePipeline.Get())->IsAlive());
+    EXPECT_TRUE(FromAPI(externalTexture.Get())->IsAlive());
+    EXPECT_TRUE(FromAPI(pipelineLayout.Get())->IsAlive());
+    EXPECT_TRUE(FromAPI(querySet.Get())->IsAlive());
+    EXPECT_TRUE(FromAPI(renderPipeline.Get())->IsAlive());
+    EXPECT_TRUE(FromAPI(sampler.Get())->IsAlive());
+    EXPECT_TRUE(FromAPI(vsModule.Get())->IsAlive());
+    EXPECT_TRUE(FromAPI(csModule.Get())->IsAlive());
+    EXPECT_TRUE(FromAPI(texture.Get())->IsAlive());
+    EXPECT_TRUE(FromAPI(textureView.Get())->IsAlive());
+    device.Destroy();
+    EXPECT_FALSE(FromAPI(bindGroup.Get())->IsAlive());
+    EXPECT_FALSE(FromAPI(bindGroupLayout.Get())->IsAlive());
+    EXPECT_FALSE(FromAPI(buffer.Get())->IsAlive());
+    EXPECT_FALSE(FromAPI(commandBuffer.Get())->IsAlive());
+    EXPECT_FALSE(FromAPI(computePipeline.Get())->IsAlive());
+    EXPECT_FALSE(FromAPI(externalTexture.Get())->IsAlive());
+    EXPECT_FALSE(FromAPI(pipelineLayout.Get())->IsAlive());
+    EXPECT_FALSE(FromAPI(querySet.Get())->IsAlive());
+    EXPECT_FALSE(FromAPI(renderPipeline.Get())->IsAlive());
+    EXPECT_FALSE(FromAPI(sampler.Get())->IsAlive());
+    EXPECT_FALSE(FromAPI(vsModule.Get())->IsAlive());
+    EXPECT_FALSE(FromAPI(csModule.Get())->IsAlive());
+    EXPECT_FALSE(FromAPI(texture.Get())->IsAlive());
+    EXPECT_FALSE(FromAPI(textureView.Get())->IsAlive());
+}
+
 class DestroyObjectRegressionTests : public DawnNativeTest {};
 
 // LastRefInCommand* tests are regression test(s) for https://crbug.com/chromium/1318792. The
@@ -780,17 +1044,17 @@ class DestroyObjectRegressionTests : public DawnNativeTest {};
 // CommandEncoder, that destroying the device still works as expected (and does not cause
 // double-free).
 TEST_F(DestroyObjectRegressionTests, LastRefInCommandRenderPipeline) {
-    utils::BasicRenderPass pass = utils::CreateBasicRenderPass(device, 1, 1);
+    ::utils::BasicRenderPass pass = ::utils::CreateBasicRenderPass(device, 1, 1);
 
-    utils::ComboRenderPassDescriptor passDesc{};
+    ::utils::ComboRenderPassDescriptor passDesc{};
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder renderEncoder = encoder.BeginRenderPass(&pass.renderPassInfo);
 
-    utils::ComboRenderPipelineDescriptor pipelineDesc;
+    ::utils::ComboRenderPipelineDescriptor pipelineDesc;
     pipelineDesc.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
-    pipelineDesc.vertex.module = utils::CreateShaderModule(device, kVertexShader.data());
+    pipelineDesc.vertex.module = ::utils::CreateShaderModule(device, kVertexShader.data());
     pipelineDesc.vertex.entryPoint = "main";
-    pipelineDesc.cFragment.module = utils::CreateShaderModule(device, kFragmentShader.data());
+    pipelineDesc.cFragment.module = ::utils::CreateShaderModule(device, kFragmentShader.data());
     pipelineDesc.cFragment.entryPoint = "main";
     renderEncoder.SetPipeline(device.CreateRenderPipeline(&pipelineDesc));
 
@@ -805,7 +1069,7 @@ TEST_F(DestroyObjectRegressionTests, LastRefInCommandComputePipeline) {
     wgpu::ComputePassEncoder computeEncoder = encoder.BeginComputePass();
 
     wgpu::ComputePipelineDescriptor pipelineDesc;
-    pipelineDesc.compute.module = utils::CreateShaderModule(device, kComputeShader.data());
+    pipelineDesc.compute.module = ::utils::CreateShaderModule(device, kComputeShader.data());
     pipelineDesc.compute.entryPoint = "main";
     computeEncoder.SetPipeline(device.CreateComputePipeline(&pipelineDesc));
 

@@ -456,10 +456,6 @@ BindGroupBase::BindGroupBase(DeviceBase* device,
     GetObjectTrackingList()->Track(this);
 }
 
-BindGroupBase::BindGroupBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
-    GetObjectTrackingList()->Track(this);
-}
-
 BindGroupBase::~BindGroupBase() = default;
 
 void BindGroupBase::DestroyImpl() {

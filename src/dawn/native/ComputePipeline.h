@@ -42,8 +42,6 @@ class ComputePipelineBase : public PipelineBase {
     };
 
   protected:
-    // Constructor used only for mocking and testing.
-    explicit ComputePipelineBase(DeviceBase* device);
     void DestroyImpl() override;
 
   private:

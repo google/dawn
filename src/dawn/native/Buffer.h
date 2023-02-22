@@ -96,8 +96,6 @@ class BufferBase : public ApiObjectBase {
   protected:
     BufferBase(DeviceBase* device, const BufferDescriptor* descriptor);
     BufferBase(DeviceBase* device, const BufferDescriptor* descriptor, ObjectBase::ErrorTag tag);
-    // Constructor used only for mocking and testing.
-    BufferBase(DeviceBase* device, BufferState state);
 
     void DestroyImpl() override;
 

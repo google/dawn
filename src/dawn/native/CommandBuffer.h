@@ -45,8 +45,6 @@ class CommandBufferBase : public ApiObjectBase {
     CommandIterator* GetCommandIteratorForTesting();
 
   protected:
-    // Constructor used only for mocking and testing.
-    explicit CommandBufferBase(DeviceBase* device);
     void DestroyImpl() override;
 
     CommandIterator mCommands;

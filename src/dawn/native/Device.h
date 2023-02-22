@@ -139,7 +139,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     MaybeError ValidateObject(const ApiObjectBase* object) const;
 
     AdapterBase* GetAdapter() const;
-    dawn::platform::Platform* GetPlatform() const;
+    virtual dawn::platform::Platform* GetPlatform() const;
 
     // Returns the Format corresponding to the wgpu::TextureFormat or an error if the format
     // isn't a valid wgpu::TextureFormat or isn't supported by this device.
@@ -581,6 +581,16 @@ class DeviceBase : public RefCountedWithExternalCount {
     std::string mLabel;
     CacheKey mDeviceCacheKey;
 };
+
+ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetComputePipelineDescriptorWithDefaults(
+    DeviceBase* device,
+    const ComputePipelineDescriptor& descriptor,
+    ComputePipelineDescriptor* outDescriptor);
+
+ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetRenderPipelineDescriptorWithDefaults(
+    DeviceBase* device,
+    const RenderPipelineDescriptor& descriptor,
+    RenderPipelineDescriptor* outDescriptor);
 
 class IgnoreLazyClearCountScope : public NonMovable {
   public:

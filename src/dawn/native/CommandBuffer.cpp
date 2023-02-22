@@ -33,11 +33,6 @@ CommandBufferBase::CommandBufferBase(CommandEncoder* encoder,
     GetObjectTrackingList()->Track(this);
 }
 
-CommandBufferBase::CommandBufferBase(DeviceBase* device)
-    : ApiObjectBase(device, kLabelNotImplemented) {
-    GetObjectTrackingList()->Track(this);
-}
-
 CommandBufferBase::CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag)
     : ApiObjectBase(device, tag) {}
 

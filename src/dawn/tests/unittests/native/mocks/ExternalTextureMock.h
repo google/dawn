@@ -17,17 +17,23 @@
 
 #include "gmock/gmock.h"
 
-#include "dawn/native/Device.h"
 #include "dawn/native/ExternalTexture.h"
+#include "dawn/tests/unittests/native/mocks/DeviceMock.h"
 
 namespace dawn::native {
 
 class ExternalTextureMock : public ExternalTextureBase {
   public:
-    explicit ExternalTextureMock(DeviceBase* device);
+    // Creates an external texture mock based on a descriptor.
+    static Ref<ExternalTextureMock> Create(DeviceMock* device,
+                                           const ExternalTextureDescriptor* descriptor);
+
     ~ExternalTextureMock() override;
 
     MOCK_METHOD(void, DestroyImpl, (), (override));
+
+  protected:
+    ExternalTextureMock(DeviceMock* device, const ExternalTextureDescriptor* descriptor);
 };
 
 }  // namespace dawn::native

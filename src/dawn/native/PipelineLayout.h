@@ -84,8 +84,6 @@ class PipelineLayoutBase : public ApiObjectBase, public CachedObject {
     };
 
   protected:
-    // Constructor used only for mocking and testing.
-    explicit PipelineLayoutBase(DeviceBase* device);
     PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
     void DestroyImpl() override;
 

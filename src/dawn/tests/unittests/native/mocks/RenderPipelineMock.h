@@ -17,19 +17,24 @@
 
 #include "gmock/gmock.h"
 
-#include "dawn/native/Device.h"
 #include "dawn/native/RenderPipeline.h"
+#include "dawn/tests/unittests/native/mocks/DeviceMock.h"
 
 namespace dawn::native {
 
 class RenderPipelineMock : public RenderPipelineBase {
   public:
-    explicit RenderPipelineMock(DeviceBase* device);
+    // Creates a compute pipeline given the descriptor.
+    static Ref<RenderPipelineMock> Create(DeviceMock* device,
+                                          const RenderPipelineDescriptor* descriptor);
+
     ~RenderPipelineMock() override;
 
     MOCK_METHOD(MaybeError, Initialize, (), (override));
-    MOCK_METHOD(size_t, ComputeContentHash, (), (override));
     MOCK_METHOD(void, DestroyImpl, (), (override));
+
+  protected:
+    RenderPipelineMock(DeviceMock* device, const RenderPipelineDescriptor* descriptor);
 };
 
 }  // namespace dawn::native

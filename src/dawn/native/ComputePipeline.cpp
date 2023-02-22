@@ -56,10 +56,6 @@ ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
     StreamIn(&mCacheKey, CacheKey::Type::ComputePipeline, device->GetCacheKey());
 }
 
-ComputePipelineBase::ComputePipelineBase(DeviceBase* device) : PipelineBase(device) {
-    GetObjectTrackingList()->Track(this);
-}
-
 ComputePipelineBase::ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
     : PipelineBase(device, tag) {}
 

@@ -1111,11 +1111,6 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescrip
     GetObjectTrackingList()->Track(this);
 }
 
-ShaderModuleBase::ShaderModuleBase(DeviceBase* device)
-    : ApiObjectBase(device, kLabelNotImplemented) {
-    GetObjectTrackingList()->Track(this);
-}
-
 ShaderModuleBase::ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag)
     : ApiObjectBase(device, tag), mType(Type::Undefined) {}
 

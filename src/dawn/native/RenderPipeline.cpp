@@ -672,10 +672,6 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
     StreamIn(&mCacheKey, CacheKey::Type::RenderPipeline, device->GetCacheKey());
 }
 
-RenderPipelineBase::RenderPipelineBase(DeviceBase* device) : PipelineBase(device) {
-    GetObjectTrackingList()->Track(this);
-}
-
 RenderPipelineBase::RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
     : PipelineBase(device, tag) {}
 

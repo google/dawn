@@ -113,8 +113,6 @@ class RenderPipelineBase : public PipelineBase {
     };
 
   protected:
-    // Constructor used only for mocking and testing.
-    explicit RenderPipelineBase(DeviceBase* device);
     void DestroyImpl() override;
 
   private:

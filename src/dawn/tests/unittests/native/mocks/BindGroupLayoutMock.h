@@ -18,13 +18,16 @@
 #include "gmock/gmock.h"
 
 #include "dawn/native/BindGroupLayout.h"
-#include "dawn/native/Device.h"
+#include "dawn/tests/unittests/native/mocks/DeviceMock.h"
 
 namespace dawn::native {
 
-class BindGroupLayoutMock final : public BindGroupLayoutBase {
+class BindGroupLayoutMock : public BindGroupLayoutBase {
   public:
-    explicit BindGroupLayoutMock(DeviceBase* device);
+    BindGroupLayoutMock(
+        DeviceMock* device,
+        const BindGroupLayoutDescriptor* descriptor,
+        PipelineCompatibilityToken pipelineCompatibilityToken = PipelineCompatibilityToken(0));
     ~BindGroupLayoutMock() override;
 
     MOCK_METHOD(void, DestroyImpl, (), (override));

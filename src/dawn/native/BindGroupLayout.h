@@ -135,8 +135,6 @@ class BindGroupLayoutBase : public ApiObjectBase, public CachedObject {
     std::string EntriesToString() const;
 
   protected:
-    // Constructor used only for mocking and testing.
-    explicit BindGroupLayoutBase(DeviceBase* device);
     void DestroyImpl() override;
 
     template <typename BindGroup>

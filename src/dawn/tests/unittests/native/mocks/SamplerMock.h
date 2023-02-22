@@ -17,14 +17,14 @@
 
 #include "gmock/gmock.h"
 
-#include "dawn/native/Device.h"
 #include "dawn/native/Sampler.h"
+#include "dawn/tests/unittests/native/mocks/DeviceMock.h"
 
 namespace dawn::native {
 
 class SamplerMock : public SamplerBase {
   public:
-    explicit SamplerMock(DeviceBase* device);
+    SamplerMock(DeviceMock* device, const SamplerDescriptor* descriptor);
     ~SamplerMock() override;
 
     MOCK_METHOD(void, DestroyImpl, (), (override));

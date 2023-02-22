@@ -52,8 +52,6 @@ class QuerySetBase : public ApiObjectBase {
                  const QuerySetDescriptor* descriptor,
                  ObjectBase::ErrorTag tag);
 
-    // Constructor used only for mocking and testing.
-    explicit QuerySetBase(DeviceBase* device);
     void DestroyImpl() override;
 
     ~QuerySetBase() override;

@@ -16,12 +16,27 @@
 
 namespace dawn::native {
 
-RenderPipelineMock::RenderPipelineMock(DeviceBase* device) : RenderPipelineBase(device) {
+using ::testing::NiceMock;
+
+RenderPipelineMock::RenderPipelineMock(DeviceMock* device,
+                                       const RenderPipelineDescriptor* descriptor)
+    : RenderPipelineBase(device, descriptor) {
+    ON_CALL(*this, Initialize).WillByDefault([]() -> MaybeError { return {}; });
     ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
         this->RenderPipelineBase::DestroyImpl();
     });
 }
 
 RenderPipelineMock::~RenderPipelineMock() = default;
+
+// static
+Ref<RenderPipelineMock> RenderPipelineMock::Create(DeviceMock* device,
+                                                   const RenderPipelineDescriptor* descriptor) {
+    RenderPipelineDescriptor appliedDescriptor;
+    Ref<PipelineLayoutBase> layoutRef = ValidateLayoutAndGetRenderPipelineDescriptorWithDefaults(
+                                            device, *descriptor, &appliedDescriptor)
+                                            .AcquireSuccess();
+    return AcquireRef(new NiceMock<RenderPipelineMock>(device, &appliedDescriptor));
+}
 
 }  // namespace dawn::native

@@ -191,6 +191,7 @@ source_set("native_mocks_sources") {
 
   deps = [
     ":gmock_and_gtest",
+    "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/native:sources",
     "${dawn_root}/src/dawn/native:static",
     "${dawn_root}/src/dawn/utils",
@@ -210,6 +211,9 @@ source_set("native_mocks_sources") {
     "unittests/native/mocks/CommandBufferMock.h",
     "unittests/native/mocks/ComputePipelineMock.cpp",
     "unittests/native/mocks/ComputePipelineMock.h",
+    "unittests/native/mocks/DawnMockTest.cpp",
+    "unittests/native/mocks/DawnMockTest.h",
+    "unittests/native/mocks/DeviceMock.cpp",
     "unittests/native/mocks/DeviceMock.h",
     "unittests/native/mocks/ExternalTextureMock.cpp",
     "unittests/native/mocks/ExternalTextureMock.h",
@@ -217,6 +221,8 @@ source_set("native_mocks_sources") {
     "unittests/native/mocks/PipelineLayoutMock.h",
     "unittests/native/mocks/QuerySetMock.cpp",
     "unittests/native/mocks/QuerySetMock.h",
+    "unittests/native/mocks/QueueMock.cpp",
+    "unittests/native/mocks/QueueMock.h",
     "unittests/native/mocks/RenderPipelineMock.cpp",
     "unittests/native/mocks/RenderPipelineMock.h",
     "unittests/native/mocks/SamplerMock.cpp",

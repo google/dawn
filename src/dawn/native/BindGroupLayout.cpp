@@ -493,11 +493,6 @@ BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
 BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
     : ApiObjectBase(device, tag) {}
 
-BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device)
-    : ApiObjectBase(device, kLabelNotImplemented) {
-    GetObjectTrackingList()->Track(this);
-}
-
 BindGroupLayoutBase::~BindGroupLayoutBase() = default;
 
 void BindGroupLayoutBase::DestroyImpl() {

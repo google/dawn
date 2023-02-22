@@ -74,11 +74,6 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
     GetObjectTrackingList()->Track(this);
 }
 
-PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device)
-    : ApiObjectBase(device, kLabelNotImplemented) {
-    GetObjectTrackingList()->Track(this);
-}
-
 PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
     : ApiObjectBase(device, tag) {}
 

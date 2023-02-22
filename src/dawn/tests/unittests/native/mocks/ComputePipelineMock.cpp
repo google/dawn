@@ -16,12 +16,27 @@
 
 namespace dawn::native {
 
-ComputePipelineMock::ComputePipelineMock(DeviceBase* device) : ComputePipelineBase(device) {
+using ::testing::NiceMock;
+
+ComputePipelineMock::ComputePipelineMock(DeviceBase* device,
+                                         const ComputePipelineDescriptor* descriptor)
+    : ComputePipelineBase(device, descriptor) {
+    ON_CALL(*this, Initialize).WillByDefault([]() -> MaybeError { return {}; });
     ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
         this->ComputePipelineBase::DestroyImpl();
     });
 }
 
 ComputePipelineMock::~ComputePipelineMock() = default;
+
+// static
+Ref<ComputePipelineMock> ComputePipelineMock::Create(DeviceMock* device,
+                                                     const ComputePipelineDescriptor* descriptor) {
+    ComputePipelineDescriptor appliedDescriptor;
+    Ref<PipelineLayoutBase> layoutRef = ValidateLayoutAndGetComputePipelineDescriptorWithDefaults(
+                                            device, *descriptor, &appliedDescriptor)
+                                            .AcquireSuccess();
+    return AcquireRef(new NiceMock<ComputePipelineMock>(device, &appliedDescriptor));
+}
 
 }  // namespace dawn::native

@@ -53,8 +53,6 @@ class SamplerBase : public ApiObjectBase, public CachedObject {
     uint16_t GetMaxAnisotropy() const { return mMaxAnisotropy; }
 
   protected:
-    // Constructor used only for mocking and testing.
-    explicit SamplerBase(DeviceBase* device);
     void DestroyImpl() override;
 
   private:

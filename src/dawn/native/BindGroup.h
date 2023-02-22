@@ -76,8 +76,6 @@ class BindGroupBase : public ApiObjectBase {
         static_assert(std::is_base_of<BindGroupBase, Derived>::value);
     }
 
-    // Constructor used only for mocking and testing.
-    explicit BindGroupBase(DeviceBase* device);
     void DestroyImpl() override;
 
     ~BindGroupBase() override;

@@ -16,8 +16,8 @@
 
 namespace dawn::native {
 
-BufferMock::BufferMock(DeviceBase* device, BufferBase::BufferState state)
-    : BufferBase(device, state) {
+BufferMock::BufferMock(DeviceMock* device, const BufferDescriptor* descriptor)
+    : BufferBase(device, descriptor) {
     ON_CALL(*this, DestroyImpl).WillByDefault([this]() { this->BufferBase::DestroyImpl(); });
 }
 

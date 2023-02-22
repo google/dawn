@@ -137,11 +137,6 @@ ExternalTextureBase::ExternalTextureBase(DeviceBase* device,
     GetObjectTrackingList()->Track(this);
 }
 
-ExternalTextureBase::ExternalTextureBase(DeviceBase* device)
-    : ApiObjectBase(device, kLabelNotImplemented), mState(ExternalTextureState::Alive) {
-    GetObjectTrackingList()->Track(this);
-}
-
 // Error external texture cannot be used in bind group.
 ExternalTextureBase::ExternalTextureBase(DeviceBase* device, ObjectBase::ErrorTag tag)
     : ApiObjectBase(device, tag), mState(ExternalTextureState::Destroyed) {}

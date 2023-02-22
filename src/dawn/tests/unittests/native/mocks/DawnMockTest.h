@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn Authors
+// Copyright 2023 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_COMMANDBUFFERMOCK_H_
-#define SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_COMMANDBUFFERMOCK_H_
+#include <gtest/gtest.h>
 
-#include "gmock/gmock.h"
-
-#include "dawn/native/CommandBuffer.h"
 #include "dawn/tests/unittests/native/mocks/DeviceMock.h"
+#include "dawn/webgpu_cpp.h"
 
 namespace dawn::native {
 
-class CommandBufferMock : public CommandBufferBase {
+class DawnMockTest : public ::testing::Test {
   public:
-    CommandBufferMock(DeviceMock* device,
-                      CommandEncoder* encoder,
-                      const CommandBufferDescriptor* descriptor);
-    ~CommandBufferMock() override;
+    DawnMockTest();
+    ~DawnMockTest() override;
 
-    MOCK_METHOD(void, DestroyImpl, (), (override));
+  protected:
+    ::testing::NiceMock<DeviceMock>* mDeviceMock;
+    wgpu::Device device;
 };
 
 }  // namespace dawn::native
-
-#endif  // SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_COMMANDBUFFERMOCK_H_

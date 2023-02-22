@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn Authors
+// Copyright 2023 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/unittests/native/mocks/PipelineLayoutMock.h"
+#include "dawn/tests/unittests/native/mocks/DawnMockTest.h"
+
+#include "dawn/dawn_proc.h"
 
 namespace dawn::native {
 
-PipelineLayoutMock::PipelineLayoutMock(DeviceMock* device,
-                                       const PipelineLayoutDescriptor* descriptor)
-    : PipelineLayoutBase(device, descriptor) {
-    ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
-        this->PipelineLayoutBase::DestroyImpl();
-    });
+DawnMockTest::DawnMockTest() {
+    dawnProcSetProcs(&dawn::native::GetProcs());
 
-    SetContentHash(ComputeContentHash());
+    mDeviceMock = new ::testing::NiceMock<DeviceMock>();
+    device = wgpu::Device::Acquire(ToAPI(mDeviceMock));
 }
 
-PipelineLayoutMock::~PipelineLayoutMock() = default;
+DawnMockTest::~DawnMockTest() {
+    device = wgpu::Device();
+    dawnProcSetProcs(nullptr);
+}
 
 }  // namespace dawn::native

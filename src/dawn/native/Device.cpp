@@ -125,6 +125,7 @@ struct LoggingCallbackTask : CallbackTask {
     std::string mMessage;
     void* mUserdata;
 };
+}  // anonymous namespace
 
 ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetComputePipelineDescriptorWithDefaults(
     DeviceBase* device,
@@ -167,8 +168,6 @@ ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetRenderPipelineDescrip
     return layoutRef;
 }
 
-}  // anonymous namespace
-
 // DeviceBase
 
 DeviceBase::DeviceBase(AdapterBase* adapter,
@@ -210,7 +209,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
 }
 
 DeviceBase::DeviceBase() : mState(State::Alive), mToggles(ToggleStage::Device) {
-    mCaches = std::make_unique<DeviceBase::Caches>();
+    mFormatTable = BuildFormatTable(this);
 }
 
 DeviceBase::~DeviceBase() {

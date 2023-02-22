@@ -16,7 +16,9 @@
 
 namespace dawn::native {
 
-BindGroupMock::BindGroupMock(DeviceBase* device) : BindGroupBase(device) {
+BindGroupMock::BindGroupMock(DeviceMock* device, const BindGroupDescriptor* descriptor)
+    : BindGroupDataHolder(descriptor->layout->GetBindingDataSize()),
+      BindGroupBase(device, descriptor, mBindingDataAllocation) {
     ON_CALL(*this, DestroyImpl).WillByDefault([this]() { this->BindGroupBase::DestroyImpl(); });
 }
 

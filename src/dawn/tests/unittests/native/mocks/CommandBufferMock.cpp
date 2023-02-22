@@ -14,9 +14,18 @@
 
 #include "dawn/tests/unittests/native/mocks/CommandBufferMock.h"
 
+#include "dawn/native/CommandEncoder.h"
+
 namespace dawn::native {
 
-CommandBufferMock::CommandBufferMock(DeviceBase* device) : CommandBufferBase(device) {
+CommandBufferMock::CommandBufferMock(DeviceMock* device,
+                                     CommandEncoder* encoder,
+                                     const CommandBufferDescriptor* descriptor)
+    : CommandBufferBase(encoder, descriptor) {
+    // Make sure that the command encoder was also created using the mock device since it is not
+    // directly passed in.
+    ASSERT(device == encoder->GetDevice());
+
     ON_CALL(*this, DestroyImpl).WillByDefault([this]() { this->CommandBufferBase::DestroyImpl(); });
 }
 

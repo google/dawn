@@ -83,9 +83,6 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
                  std::vector<StageAndDescriptor> stages);
     PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-    // Constructor used only for mocking and testing.
-    explicit PipelineBase(DeviceBase* device);
-
   private:
     MaybeError ValidateGetBindGroupLayout(BindGroupIndex group);
 

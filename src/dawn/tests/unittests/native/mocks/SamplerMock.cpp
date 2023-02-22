@@ -16,8 +16,11 @@
 
 namespace dawn::native {
 
-SamplerMock::SamplerMock(DeviceBase* device) : SamplerBase(device) {
+SamplerMock::SamplerMock(DeviceMock* device, const SamplerDescriptor* descriptor)
+    : SamplerBase(device, descriptor) {
     ON_CALL(*this, DestroyImpl).WillByDefault([this]() { this->SamplerBase::DestroyImpl(); });
+
+    SetContentHash(ComputeContentHash());
 }
 
 SamplerMock::~SamplerMock() = default;

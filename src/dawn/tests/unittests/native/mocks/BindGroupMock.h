@@ -18,13 +18,14 @@
 #include "gmock/gmock.h"
 
 #include "dawn/native/BindGroup.h"
-#include "dawn/native/Device.h"
+#include "dawn/native/null/DeviceNull.h"
+#include "dawn/tests/unittests/native/mocks/DeviceMock.h"
 
 namespace dawn::native {
 
-class BindGroupMock : public BindGroupBase {
+class BindGroupMock : private null::BindGroupDataHolder, public BindGroupBase {
   public:
-    explicit BindGroupMock(DeviceBase* device);
+    BindGroupMock(DeviceMock* device, const BindGroupDescriptor* descriptor);
     ~BindGroupMock() override;
 
     MOCK_METHOD(void, DestroyImpl, (), (override));

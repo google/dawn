@@ -17,14 +17,14 @@
 
 #include "gmock/gmock.h"
 
-#include "dawn/native/Device.h"
 #include "dawn/native/QuerySet.h"
+#include "dawn/tests/unittests/native/mocks/DeviceMock.h"
 
 namespace dawn::native {
 
 class QuerySetMock : public QuerySetBase {
   public:
-    explicit QuerySetMock(DeviceBase* device);
+    QuerySetMock(DeviceMock* device, const QuerySetDescriptor* descriptor);
     ~QuerySetMock() override;
 
     MOCK_METHOD(void, DestroyImpl, (), (override));

@@ -89,10 +89,6 @@ SamplerBase::SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor
     GetObjectTrackingList()->Track(this);
 }
 
-SamplerBase::SamplerBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
-    GetObjectTrackingList()->Track(this);
-}
-
 SamplerBase::SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag)
     : ApiObjectBase(device, tag) {}
 
