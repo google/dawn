@@ -1181,6 +1181,9 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "return") {
         return {Token::Type::kReturn, source, "return"};
     }
+    if (str == "requires") {
+        return {Token::Type::kRequires, source, "requires"};
+    }
     if (str == "struct") {
         return {Token::Type::kStruct, source, "struct"};
     }

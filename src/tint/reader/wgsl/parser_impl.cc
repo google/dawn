@@ -94,9 +94,9 @@ bool is_reserved(const Token& t) {
            t == "partition" || t == "pass" || t == "patch" || t == "pixelfragment" ||
            t == "precise" || t == "precision" || t == "premerge" || t == "priv" ||
            t == "protected" || t == "pub" || t == "public" || t == "readonly" || t == "ref" ||
-           t == "regardless" || t == "register" || t == "reinterpret_cast" || t == "requires" ||
-           t == "resource" || t == "restrict" || t == "self" || t == "set" || t == "shared" ||
-           t == "signed" || t == "sizeof" || t == "smooth" || t == "snorm" || t == "static" ||
+           t == "regardless" || t == "register" || t == "reinterpret_cast" || t == "resource" ||
+           t == "restrict" || t == "self" || t == "set" || t == "shared" || t == "signed" ||
+           t == "sizeof" || t == "smooth" || t == "snorm" || t == "static" ||
            t == "static_assert" || t == "static_cast" || t == "std" || t == "subroutine" ||
            t == "super" || t == "target" || t == "template" || t == "this" || t == "thread_local" ||
            t == "throw" || t == "trait" || t == "try" || t == "type" || t == "typedef" ||
@@ -341,12 +341,16 @@ void ParserImpl::translation_unit() {
 
 // global_directive
 //  : diagnostic_directive
+//  | requires_directive
 //  | enable_directive
 Maybe<Void> ParserImpl::global_directive(bool have_parsed_decl) {
     auto& p = peek();
     Maybe<Void> result = diagnostic_directive();
     if (!result.errored && !result.matched) {
         result = enable_directive();
+    }
+    if (!result.errored && !result.matched) {
+        result = requires_directive();
     }
 
     if (result.matched && have_parsed_decl) {
@@ -416,6 +420,67 @@ Maybe<Void> ParserImpl::enable_directive() {
         }
         builder_.AST().AddEnable(create<ast::Enable>(t.source(), ext.value));
         return kSuccess;
+    });
+
+    if (decl.errored) {
+        return Failure::kErrored;
+    }
+    if (decl.matched) {
+        return kSuccess;
+    }
+
+    return Failure::kNoMatch;
+}
+
+// requires_directive
+//  : require identifier (COMMA identifier)? SEMICLON
+Maybe<Void> ParserImpl::requires_directive() {
+    auto decl = sync(Token::Type::kSemicolon, [&]() -> Maybe<Void> {
+        if (!match(Token::Type::kRequires)) {
+            return Failure::kNoMatch;
+        }
+
+        // Match the require name.
+        auto& t = peek();
+        if (handle_error(t)) {
+            // The token might itself be an error.
+            return Failure::kErrored;
+        }
+
+        if (t.Is(Token::Type::kParenLeft)) {
+            // A common error case is writing `require(foo);` instead of `require foo;`.
+            synchronized_ = false;
+            return add_error(t.source(), "requires directives don't take parenthesis");
+        }
+
+        while (continue_parsing()) {
+            auto& t2 = peek();
+
+            // Match the require name.
+            if (handle_error(t2)) {
+                // The token might itself be an error.
+                return Failure::kErrored;
+            }
+
+            if (t2.IsIdentifier()) {
+                // TODO(dsinclair): When there are actual values for a requires directive they
+                // should be checked here.
+
+                // Any identifer is a valid feature name, so we correctly handle new feature
+                // names getting added in the future, they just all get flagged as not supported.
+                return add_error(t2.source(), "feature '" + t2.to_str() + "' is not supported");
+            }
+            if (t2.Is(Token::Type::kSemicolon)) {
+                break;
+            }
+            if (!match(Token::Type::kComma)) {
+                return add_error(t2.source(), "invalid feature name for requires");
+            }
+        }
+        // TODO(dsinclair): When there are actual values for a requires directive then the
+        // `while` will need to keep track if any were seen, and this needs to become
+        // conditional.
+        return add_error(t.source(), "missing feature names in requires directive");
     });
 
     if (decl.errored) {

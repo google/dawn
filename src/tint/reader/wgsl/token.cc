@@ -181,6 +181,8 @@ std::string_view Token::TypeToName(Type type) {
             return "override";
         case Token::Type::kReturn:
             return "return";
+        case Token::Type::kRequires:
+            return "requires";
         case Token::Type::kStruct:
             return "struct";
         case Token::Type::kSwitch:

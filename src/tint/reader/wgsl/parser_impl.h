@@ -381,6 +381,9 @@ class ParserImpl {
     /// Parses the `enable_directive` grammar element, erroring on parse failure.
     /// @return true on parse success, otherwise an error or no-match.
     Maybe<Void> enable_directive();
+    /// Parses the `requires_directive` grammar element, erroring on parse failure.
+    /// @return true on parse success, otherwise an error or no-match.
+    Maybe<Void> requires_directive();
     /// Parses the `global_decl` grammar element, erroring on parse failure.
     /// @return true on parse success, otherwise an error or no-match.
     Maybe<Void> global_decl();

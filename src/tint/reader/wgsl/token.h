@@ -193,6 +193,8 @@ class Token {
         kOverride,
         /// A 'return'
         kReturn,
+        /// A 'requires'
+        kRequires,
         /// A 'struct'
         kStruct,
         /// A 'switch'
