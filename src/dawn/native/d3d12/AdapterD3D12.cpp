@@ -554,6 +554,7 @@ void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
         deviceToggles->ForceSet(Toggle::NoWorkaroundDstAlphaBlendDoesNotWork, true);
     }
 
+#if D3D12_SDK_VERSION >= 602
     D3D12_FEATURE_DATA_D3D12_OPTIONS13 featureData13;
     if (FAILED(mD3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS13, &featureData13,
                                                  sizeof(featureData13)))) {
@@ -561,8 +562,9 @@ void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
         // struct to set all features to false.
         featureData13 = {};
     }
-
-    if (!featureData13.TextureCopyBetweenDimensionsSupported) {
+    if (!featureData13.TextureCopyBetweenDimensionsSupported)
+#endif
+    {
         deviceToggles->ForceSet(
             Toggle::D3D12UseTempBufferInTextureToTextureCopyBetweenDifferentDimensions, true);
     }
