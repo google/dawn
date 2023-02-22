@@ -114,7 +114,7 @@ void SemHelper::ErrorExpectedValueExpr(const sem::Expression* expr) const {
     ErrorUnexpectedExprKind(expr, "value");
     if (auto* ty_expr = expr->As<sem::TypeExpression>()) {
         if (auto* ident = ty_expr->Declaration()->As<ast::IdentifierExpression>()) {
-            AddNote("are you missing '()' for type initializer?",
+            AddNote("are you missing '()' for value constructor?",
                     Source{{ident->source.range.end}});
         }
         if (auto* str = ty_expr->Type()->As<type::Struct>()) {

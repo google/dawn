@@ -445,7 +445,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(5:6 error: cannot use type 'vec4<f32>' as address space)"},
         {Def::kBuiltinType, Use::kBinaryOp,
          R"(5:6 error: cannot use type 'vec4<f32>' as value
-7:8 note: are you missing '()' for type initializer?)"},
+7:8 note: are you missing '()' for value constructor?)"},
         {Def::kBuiltinType, Use::kBuiltinValue,
          R"(5:6 error: cannot use type 'vec4<f32>' as builtin value)"},
         {Def::kBuiltinType, Use::kCallExpr, kPass},
@@ -459,11 +459,11 @@ INSTANTIATE_TEST_SUITE_P(
          R"(5:6 error: cannot use type 'vec4<f32>' as texel format)"},
         {Def::kBuiltinType, Use::kValueExpression,
          R"(5:6 error: cannot use type 'vec4<f32>' as value
-7:8 note: are you missing '()' for type initializer?)"},
+7:8 note: are you missing '()' for value constructor?)"},
         {Def::kBuiltinType, Use::kVariableType, kPass},
         {Def::kBuiltinType, Use::kUnaryOp,
          R"(5:6 error: cannot use type 'vec4<f32>' as value
-7:8 note: are you missing '()' for type initializer?)"},
+7:8 note: are you missing '()' for value constructor?)"},
 
         {Def::kBuiltinValue, Use::kAccess,
          R"(5:6 error: cannot use builtin value 'position' as access)"},
@@ -602,7 +602,7 @@ INSTANTIATE_TEST_SUITE_P(
         {Def::kStruct, Use::kAddressSpace,
          R"(5:6 error: cannot use type 'STRUCT' as address space)"},
         {Def::kStruct, Use::kBinaryOp, R"(5:6 error: cannot use type 'STRUCT' as value
-7:8 note: are you missing '()' for type initializer?
+7:8 note: are you missing '()' for value constructor?
 1:2 note: struct 'STRUCT' declared here)"},
         {Def::kStruct, Use::kBuiltinValue,
          R"(5:6 error: cannot use type 'STRUCT' as builtin value)"},
@@ -615,12 +615,12 @@ INSTANTIATE_TEST_SUITE_P(
         {Def::kStruct, Use::kTexelFormat, R"(5:6 error: cannot use type 'STRUCT' as texel format)"},
         {Def::kStruct, Use::kValueExpression,
          R"(5:6 error: cannot use type 'STRUCT' as value
-7:8 note: are you missing '()' for type initializer?
+7:8 note: are you missing '()' for value constructor?
 1:2 note: struct 'STRUCT' declared here)"},
         {Def::kStruct, Use::kVariableType, kPass},
         {Def::kStruct, Use::kUnaryOp,
          R"(5:6 error: cannot use type 'STRUCT' as value
-7:8 note: are you missing '()' for type initializer?
+7:8 note: are you missing '()' for value constructor?
 1:2 note: struct 'STRUCT' declared here)"},
 
         {Def::kTexelFormat, Use::kAccess,
@@ -656,7 +656,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(5:6 error: cannot use type 'i32' as address space)"},
         {Def::kTypeAlias, Use::kBinaryOp,
          R"(5:6 error: cannot use type 'i32' as value
-7:8 note: are you missing '()' for type initializer?)"},
+7:8 note: are you missing '()' for value constructor?)"},
         {Def::kTypeAlias, Use::kBuiltinValue,
          R"(5:6 error: cannot use type 'i32' as builtin value)"},
         {Def::kTypeAlias, Use::kCallExpr, kPass},
@@ -669,11 +669,11 @@ INSTANTIATE_TEST_SUITE_P(
         {Def::kTypeAlias, Use::kTexelFormat, R"(5:6 error: cannot use type 'i32' as texel format)"},
         {Def::kTypeAlias, Use::kValueExpression,
          R"(5:6 error: cannot use type 'i32' as value
-7:8 note: are you missing '()' for type initializer?)"},
+7:8 note: are you missing '()' for value constructor?)"},
         {Def::kTypeAlias, Use::kVariableType, kPass},
         {Def::kTypeAlias, Use::kUnaryOp,
          R"(5:6 error: cannot use type 'i32' as value
-7:8 note: are you missing '()' for type initializer?)"},
+7:8 note: are you missing '()' for value constructor?)"},
 
         {Def::kVariable, Use::kAccess, R"(5:6 error: cannot use const 'VARIABLE' as access
 1:2 note: const 'VARIABLE' declared here)"},

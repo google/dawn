@@ -60,9 +60,9 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
-#include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_expression.h"
-#include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_constructor.h"
+#include "src/tint/sem/value_conversion.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/while_statement.h"
 #include "src/tint/type/abstract_float.h"
@@ -1939,8 +1939,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     // A CallExpression can resolve to one of:
     // * A function call.
     // * A builtin call.
-    // * A type initializer.
-    // * A type conversion.
+    // * A value constructor.
+    // * A value conversion.
     auto* target = expr->target;
     Mark(target);
 
@@ -1967,42 +1967,41 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     bool has_side_effects =
         std::any_of(args.begin(), args.end(), [](auto* e) { return e->HasSideEffects(); });
 
-    // init_or_conv is a helper for building either a sem::TypeInitializer or
-    // sem::TypeConversion call for a InitConvIntrinsic with an optional template argument type.
-    auto init_or_conv = [&](InitConvIntrinsic ty, const type::Type* template_arg) -> sem::Call* {
+    // ctor_or_conv is a helper for building either a sem::ValueConstructor or
+    // sem::ValueConversion call for a CtorConvIntrinsic with an optional template argument type.
+    auto ctor_or_conv = [&](CtorConvIntrinsic ty, const type::Type* template_arg) -> sem::Call* {
         auto arg_tys = utils::Transform(args, [](auto* arg) { return arg->Type(); });
-        auto ctor_or_conv =
-            intrinsic_table_->Lookup(ty, template_arg, arg_tys, args_stage, expr->source);
-        if (!ctor_or_conv.target) {
+        auto entry = intrinsic_table_->Lookup(ty, template_arg, arg_tys, args_stage, expr->source);
+        if (!entry.target) {
             return nullptr;
         }
-        if (!MaybeMaterializeAndLoadArguments(args, ctor_or_conv.target)) {
+        if (!MaybeMaterializeAndLoadArguments(args, entry.target)) {
             return nullptr;
         }
 
         const constant::Value* value = nullptr;
-        auto stage = sem::EarliestStage(ctor_or_conv.target->Stage(), args_stage);
+        auto stage = sem::EarliestStage(entry.target->Stage(), args_stage);
         if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
             stage = sem::EvaluationStage::kNotEvaluated;
         }
         if (stage == sem::EvaluationStage::kConstant) {
-            auto const_args = ConvertArguments(args, ctor_or_conv.target);
+            auto const_args = ConvertArguments(args, entry.target);
             if (!const_args) {
                 return nullptr;
             }
-            if (auto r = (const_eval_.*ctor_or_conv.const_eval_fn)(
-                    ctor_or_conv.target->ReturnType(), const_args.Get(), expr->source)) {
+            if (auto r = (const_eval_.*entry.const_eval_fn)(entry.target->ReturnType(),
+                                                            const_args.Get(), expr->source)) {
                 value = r.Get();
             } else {
                 return nullptr;
             }
         }
-        return builder_->create<sem::Call>(expr, ctor_or_conv.target, stage, std::move(args),
+        return builder_->create<sem::Call>(expr, entry.target, stage, std::move(args),
                                            current_statement_, value, has_side_effects);
     };
 
-    // arr_or_str_init is a helper for building a sem::TypeInitializer for an array or structure
-    // initializer call target.
+    // arr_or_str_init is a helper for building a sem::ValueConstructor for an array or structure
+    // constructor call target.
     auto arr_or_str_init = [&](const type::Type* ty,
                                const sem::CallTarget* call_target) -> sem::Call* {
         if (!MaybeMaterializeAndLoadArguments(args, call_target)) {
@@ -2012,7 +2011,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         auto stage = args_stage;                 // The evaluation stage of the call
         const constant::Value* value = nullptr;  // The constant value for the call
         if (stage == sem::EvaluationStage::kConstant) {
-            if (auto r = const_eval_.ArrayOrStructInit(ty, args)) {
+            if (auto r = const_eval_.ArrayOrStructCtor(ty, args)) {
                 value = r.Get();
             } else {
                 return nullptr;
@@ -2021,7 +2020,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 // Constant evaluation failed.
                 // Can happen for expressions that will fail validation (later).
                 // Use the kRuntime EvaluationStage, as kConstant will trigger an assertion in
-                // the sem::ValueExpression initializer, which checks that kConstant is paired
+                // the sem::ValueExpression constructor, which checks that kConstant is paired
                 // with a constant value.
                 stage = sem::EvaluationStage::kRuntime;
             }
@@ -2034,25 +2033,25 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     auto ty_init_or_conv = [&](const type::Type* type) {
         return Switch(
             type,  //
-            [&](const type::I32*) { return init_or_conv(InitConvIntrinsic::kI32, nullptr); },
-            [&](const type::U32*) { return init_or_conv(InitConvIntrinsic::kU32, nullptr); },
+            [&](const type::I32*) { return ctor_or_conv(CtorConvIntrinsic::kI32, nullptr); },
+            [&](const type::U32*) { return ctor_or_conv(CtorConvIntrinsic::kU32, nullptr); },
             [&](const type::F16*) {
                 return validator_.CheckF16Enabled(expr->source)
-                           ? init_or_conv(InitConvIntrinsic::kF16, nullptr)
+                           ? ctor_or_conv(CtorConvIntrinsic::kF16, nullptr)
                            : nullptr;
             },
-            [&](const type::F32*) { return init_or_conv(InitConvIntrinsic::kF32, nullptr); },
-            [&](const type::Bool*) { return init_or_conv(InitConvIntrinsic::kBool, nullptr); },
+            [&](const type::F32*) { return ctor_or_conv(CtorConvIntrinsic::kF32, nullptr); },
+            [&](const type::Bool*) { return ctor_or_conv(CtorConvIntrinsic::kBool, nullptr); },
             [&](const type::Vector* v) {
-                return init_or_conv(VectorInitConvIntrinsic(v->Width()), v->type());
+                return ctor_or_conv(VectorCtorConvIntrinsic(v->Width()), v->type());
             },
             [&](const type::Matrix* m) {
-                return init_or_conv(MatrixInitConvIntrinsic(m->columns(), m->rows()), m->type());
+                return ctor_or_conv(MatrixCtorConvIntrinsic(m->columns(), m->rows()), m->type());
             },
             [&](const type::Array* arr) -> sem::Call* {
-                auto* call_target = array_inits_.GetOrCreate(
-                    ArrayInitializerSig{{arr, args.Length(), args_stage}},
-                    [&]() -> sem::TypeInitializer* {
+                auto* call_target = array_ctors_.GetOrCreate(
+                    ArrayConstructorSig{{arr, args.Length(), args_stage}},
+                    [&]() -> sem::ValueConstructor* {
                         auto params = utils::Transform(args, [&](auto, size_t i) {
                             return builder_->create<sem::Parameter>(
                                 nullptr,                            // declaration
@@ -2061,8 +2060,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                                 builtin::AddressSpace::kUndefined,  // address_space
                                 builtin::Access::kUndefined);
                         });
-                        return builder_->create<sem::TypeInitializer>(arr, std::move(params),
-                                                                      args_stage);
+                        return builder_->create<sem::ValueConstructor>(arr, std::move(params),
+                                                                       args_stage);
                     });
 
                 auto* call = arr_or_str_init(arr, call_target);
@@ -2071,15 +2070,15 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 }
 
                 // Validation must occur after argument materialization in arr_or_str_init().
-                if (!validator_.ArrayInitializer(expr, arr)) {
+                if (!validator_.ArrayConstructor(expr, arr)) {
                     return nullptr;
                 }
                 return call;
             },
             [&](const sem::Struct* str) -> sem::Call* {
-                auto* call_target = struct_inits_.GetOrCreate(
-                    StructInitializerSig{{str, args.Length(), args_stage}},
-                    [&]() -> sem::TypeInitializer* {
+                auto* call_target = struct_ctors_.GetOrCreate(
+                    StructConstructorSig{{str, args.Length(), args_stage}},
+                    [&]() -> sem::ValueConstructor* {
                         utils::Vector<const sem::Parameter*, 8> params;
                         params.Resize(std::min(args.Length(), str->Members().Length()));
                         for (size_t i = 0, n = params.Length(); i < n; i++) {
@@ -2090,8 +2089,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                                 builtin::AddressSpace::kUndefined,  // address_space
                                 builtin::Access::kUndefined);       // access
                         }
-                        return builder_->create<sem::TypeInitializer>(str, std::move(params),
-                                                                      args_stage);
+                        return builder_->create<sem::ValueConstructor>(str, std::move(params),
+                                                                       args_stage);
                     });
 
                 auto* call = arr_or_str_init(str, call_target);
@@ -2117,7 +2116,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         auto arg_tys = utils::Transform(args, [](auto* arg) { return arg->Type()->UnwrapRef(); });
         auto el_ty = type::Type::Common(arg_tys);
         if (!el_ty) {
-            AddError("cannot infer common array element type from initializer arguments",
+            AddError("cannot infer common array element type from constructor arguments",
                      expr->source);
             utils::Hashset<const type::Type*, 8> types;
             for (size_t i = 0; i < args.Length(); i++) {
@@ -2172,29 +2171,29 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     case builtin::Builtin::kArray:
                         return inferred_array();
                     case builtin::Builtin::kVec2:
-                        return init_or_conv(InitConvIntrinsic::kVec2, nullptr);
+                        return ctor_or_conv(CtorConvIntrinsic::kVec2, nullptr);
                     case builtin::Builtin::kVec3:
-                        return init_or_conv(InitConvIntrinsic::kVec3, nullptr);
+                        return ctor_or_conv(CtorConvIntrinsic::kVec3, nullptr);
                     case builtin::Builtin::kVec4:
-                        return init_or_conv(InitConvIntrinsic::kVec4, nullptr);
+                        return ctor_or_conv(CtorConvIntrinsic::kVec4, nullptr);
                     case builtin::Builtin::kMat2X2:
-                        return init_or_conv(InitConvIntrinsic::kMat2x2, nullptr);
+                        return ctor_or_conv(CtorConvIntrinsic::kMat2x2, nullptr);
                     case builtin::Builtin::kMat2X3:
-                        return init_or_conv(InitConvIntrinsic::kMat2x3, nullptr);
+                        return ctor_or_conv(CtorConvIntrinsic::kMat2x3, nullptr);
                     case builtin::Builtin::kMat2X4:
-                        return init_or_conv(InitConvIntrinsic::kMat2x4, nullptr);
+                        return ctor_or_conv(CtorConvIntrinsic::kMat2x4, nullptr);
                     case builtin::Builtin::kMat3X2:
-                        return init_or_conv(InitConvIntrinsic::kMat3x2, nullptr);
+                        return ctor_or_conv(CtorConvIntrinsic::kMat3x2, nullptr);
                     case builtin::Builtin::kMat3X3:
-                        return init_or_conv(InitConvIntrinsic::kMat3x3, nullptr);
+                        return ctor_or_conv(CtorConvIntrinsic::kMat3x3, nullptr);
                     case builtin::Builtin::kMat3X4:
-                        return init_or_conv(InitConvIntrinsic::kMat3x4, nullptr);
+                        return ctor_or_conv(CtorConvIntrinsic::kMat3x4, nullptr);
                     case builtin::Builtin::kMat4X2:
-                        return init_or_conv(InitConvIntrinsic::kMat4x2, nullptr);
+                        return ctor_or_conv(CtorConvIntrinsic::kMat4x2, nullptr);
                     case builtin::Builtin::kMat4X3:
-                        return init_or_conv(InitConvIntrinsic::kMat4x3, nullptr);
+                        return ctor_or_conv(CtorConvIntrinsic::kMat4x3, nullptr);
                     case builtin::Builtin::kMat4X4:
-                        return init_or_conv(InitConvIntrinsic::kMat4x4, nullptr);
+                        return ctor_or_conv(CtorConvIntrinsic::kMat4x4, nullptr);
                     default:
                         break;
                 }
@@ -2219,7 +2218,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         return nullptr;
     }
 
-    if (call->Target()->IsAnyOf<sem::TypeInitializer, sem::TypeConversion>()) {
+    if (call->Target()->IsAnyOf<sem::ValueConstructor, sem::ValueConversion>()) {
         // The target of the call was a type.
         // Associate the target identifier expression with the resolved type.
         auto* ty_expr =

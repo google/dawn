@@ -838,7 +838,7 @@ class ParserImpl {
 
     /// Creates a new `ast::Node` owned by the Module. When the Module is
     /// destructed, the `ast::Node` will also be destructed.
-    /// @param args the arguments to pass to the type constructor
+    /// @param args the arguments to pass to the constructor
     /// @returns the node pointer
     template <typename T, typename... ARGS>
     T* create(ARGS&&... args) {

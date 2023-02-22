@@ -1792,7 +1792,7 @@ fn tint_symbol() {
 
 TEST_P(RenamerBuiltinTypeTest, PreserveTypeConversion) {
     if (std::string_view(GetParam()) == "array") {
-        return;  // Cannot type convert arrays.
+        return;  // Cannot value convert arrays.
     }
 
     auto expand = [&](const char* source) {

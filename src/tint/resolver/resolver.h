@@ -67,7 +67,6 @@ class LoopStatement;
 class Statement;
 class StructMember;
 class SwitchStatement;
-class TypeInitializer;
 class WhileStatement;
 }  // namespace tint::sem
 namespace tint::type {
@@ -497,15 +496,15 @@ class Resolver {
     /// @note: Will raise an ICE if @p symbol is not a builtin type.
     type::Type* BuiltinType(builtin::Builtin builtin_ty, const ast::Identifier* ident);
 
-    // ArrayInitializerSig represents a unique array initializer signature.
+    // ArrayConstructorSig represents a unique array constructor signature.
     // It is a tuple of the array type, number of arguments provided and earliest evaluation stage.
-    using ArrayInitializerSig =
+    using ArrayConstructorSig =
         utils::UnorderedKeyWrapper<std::tuple<const type::Array*, size_t, sem::EvaluationStage>>;
 
-    // StructInitializerSig represents a unique structure initializer signature.
+    // StructConstructorSig represents a unique structure constructor signature.
     // It is a tuple of the structure type, number of arguments provided and earliest evaluation
     // stage.
-    using StructInitializerSig =
+    using StructConstructorSig =
         utils::UnorderedKeyWrapper<std::tuple<const sem::Struct*, size_t, sem::EvaluationStage>>;
 
     /// ExprEvalStageConstraint describes a constraint on when expressions can be evaluated.
@@ -555,8 +554,8 @@ class Resolver {
     ExprEvalStageConstraint expr_eval_stage_constraint_;
     std::unordered_map<const sem::Function*, AliasAnalysisInfo> alias_analysis_infos_;
     utils::Hashmap<OverrideId, const sem::Variable*, 8> override_ids_;
-    utils::Hashmap<ArrayInitializerSig, sem::CallTarget*, 8> array_inits_;
-    utils::Hashmap<StructInitializerSig, sem::CallTarget*, 8> struct_inits_;
+    utils::Hashmap<ArrayConstructorSig, sem::CallTarget*, 8> array_ctors_;
+    utils::Hashmap<StructConstructorSig, sem::CallTarget*, 8> struct_ctors_;
     sem::Function* current_function_ = nullptr;
     sem::Statement* current_statement_ = nullptr;
     sem::CompoundStatement* current_compound_statement_ = nullptr;

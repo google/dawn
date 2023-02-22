@@ -33,8 +33,8 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
-#include "src/tint/sem/type_conversion.h"
-#include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_constructor.h"
+#include "src/tint/sem/value_conversion.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/transform/add_block_attribute.h"
 #include "src/tint/type/array.h"
@@ -770,7 +770,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
 
     uint32_t init_id = 0;
     if (auto* ctor = v->initializer) {
-        init_id = GenerateInitializerExpression(v, ctor);
+        init_id = GenerateConstructorExpression(v, ctor);
         if (init_id == 0) {
             return false;
         }
@@ -1247,7 +1247,7 @@ uint32_t Builder::GetGLSLstd450Import() {
     return id;
 }
 
-uint32_t Builder::GenerateInitializerExpression(const ast::Variable* var,
+uint32_t Builder::GenerateConstructorExpression(const ast::Variable* var,
                                                 const ast::Expression* expr) {
     if (auto* sem = builder_.Sem().GetVal(expr)) {
         if (auto constant = sem->ConstantValue()) {
@@ -1255,15 +1255,15 @@ uint32_t Builder::GenerateInitializerExpression(const ast::Variable* var,
         }
     }
     if (auto* call = builder_.Sem().Get<sem::Call>(expr)) {
-        if (call->Target()->IsAnyOf<sem::TypeInitializer, sem::TypeConversion>()) {
-            return GenerateTypeInitializerOrConversion(call, var);
+        if (call->Target()->IsAnyOf<sem::ValueConstructor, sem::ValueConversion>()) {
+            return GenerateValueConstructorOrConversion(call, var);
         }
     }
-    error_ = "unknown initializer expression";
+    error_ = "unknown constructor expression";
     return 0;
 }
 
-bool Builder::IsInitializerConst(const ast::Expression* expr) {
+bool Builder::IsConstructorConst(const ast::Expression* expr) {
     bool is_const = true;
     ast::TraverseExpressions(expr, builder_.Diagnostics(), [&](const ast::Expression* e) {
         if (e->Is<ast::LiteralExpression>()) {
@@ -1277,7 +1277,7 @@ bool Builder::IsInitializerConst(const ast::Expression* expr) {
                 return ast::TraverseAction::Skip;
             }
             auto* call = sem->As<sem::Call>();
-            if (call->Target()->Is<sem::TypeInitializer>()) {
+            if (call->Target()->Is<sem::ValueConstructor>()) {
                 return ast::TraverseAction::Descend;
             }
         }
@@ -1288,19 +1288,19 @@ bool Builder::IsInitializerConst(const ast::Expression* expr) {
     return is_const;
 }
 
-uint32_t Builder::GenerateTypeInitializerOrConversion(const sem::Call* call,
-                                                      const ast::Variable* var) {
+uint32_t Builder::GenerateValueConstructorOrConversion(const sem::Call* call,
+                                                       const ast::Variable* var) {
     auto& args = call->Arguments();
     auto* global_var = builder_.Sem().Get<sem::GlobalVariable>(var);
     auto* result_type = call->Type();
 
-    // Generate the zero initializer if there are no values provided.
+    // Generate the zero constructor if there are no values provided.
     if (args.IsEmpty()) {
         return GenerateConstantNullIfNeeded(result_type->UnwrapRef());
     }
 
     result_type = result_type->UnwrapRef();
-    bool initializer_is_const = IsInitializerConst(call->Declaration());
+    bool constructor_is_const = IsConstructorConst(call->Declaration());
     if (has_error()) {
         return 0;
     }
@@ -1335,7 +1335,7 @@ uint32_t Builder::GenerateTypeInitializerOrConversion(const sem::Call* call,
         return 0;
     }
 
-    bool result_is_constant_composite = initializer_is_const;
+    bool result_is_constant_composite = constructor_is_const;
     bool result_is_spec_composite = false;
 
     if (auto* vec = result_type->As<type::Vector>()) {
@@ -2243,13 +2243,14 @@ uint32_t Builder::GenerateCallExpression(const ast::CallExpression* expr) {
     auto* call = builder_.Sem().Get<sem::Call>(expr);
     auto* target = call->Target();
     return Switch(
-        target, [&](const sem::Function* func) { return GenerateFunctionCall(call, func); },
+        target,  //
+        [&](const sem::Function* func) { return GenerateFunctionCall(call, func); },
         [&](const sem::Builtin* builtin) { return GenerateBuiltinCall(call, builtin); },
-        [&](const sem::TypeConversion*) {
-            return GenerateTypeInitializerOrConversion(call, nullptr);
+        [&](const sem::ValueConversion*) {
+            return GenerateValueConstructorOrConversion(call, nullptr);
         },
-        [&](const sem::TypeInitializer*) {
-            return GenerateTypeInitializerOrConversion(call, nullptr);
+        [&](const sem::ValueConstructor*) {
+            return GenerateValueConstructorOrConversion(call, nullptr);
         },
         [&](Default) {
             TINT_ICE(Writer, builder_.Diagnostics())

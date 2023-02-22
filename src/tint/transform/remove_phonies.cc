@@ -61,8 +61,8 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
                     if (!ast::TraverseExpressions(
                             stmt->rhs, b.Diagnostics(), [&](const ast::CallExpression* expr) {
                                 // ast::CallExpression may map to a function or builtin call
-                                // (both may have side-effects), or a type initializer or
-                                // type conversion (both do not have side effects).
+                                // (both may have side-effects), or a value constructor or value
+                                // conversion (both do not have side effects).
                                 auto* call = sem.Get<sem::Call>(expr);
                                 if (!call) {
                                     // Semantic node must be a Materialize, in which case the

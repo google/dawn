@@ -3950,7 +3950,7 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
 
     if (ext_opcode == GLSLstd450Ldexp) {
         // WGSL requires the second argument to be signed.
-        // Use a type initializer to convert it, which is the same as a bitcast.
+        // Use a value constructor to convert it, which is the same as a bitcast.
         // If the value would go from very large positive to negative, then the
         // original result would have been infinity.  And since WGSL
         // implementations may assume that infinities are not present, then we

@@ -45,8 +45,8 @@
 namespace tint::sem {
 class Call;
 class Load;
-class TypeInitializer;
-class TypeConversion;
+class ValueConstructor;
+class ValueConversion;
 }  // namespace tint::sem
 namespace tint::type {
 class Reference;
@@ -338,11 +338,11 @@ class Builder {
     /// instruction set, if one doesn't exist yet, and returns the import ID.
     /// @returns the import ID, or 0 on error.
     uint32_t GetGLSLstd450Import();
-    /// Generates a initializer expression
+    /// Generates a constructor expression
     /// @param var the variable generated for, nullptr if no variable associated.
     /// @param expr the expression to generate
     /// @returns the ID of the expression or 0 on failure.
-    uint32_t GenerateInitializerExpression(const ast::Variable* var, const ast::Expression* expr);
+    uint32_t GenerateConstructorExpression(const ast::Variable* var, const ast::Expression* expr);
     /// Generates a literal constant if needed
     /// @param lit the literal to generate
     /// @returns the ID on success or 0 on failure
@@ -373,11 +373,11 @@ class Builder {
     /// @param builtin the builtin being called
     /// @returns the expression ID on success or 0 otherwise
     uint32_t GenerateBuiltinCall(const sem::Call* call, const sem::Builtin* builtin);
-    /// Handles generating a type initializer or type conversion expression
+    /// Handles generating a value constructor or value conversion expression
     /// @param call the call expression
     /// @param var the variable that is being initialized. May be null.
     /// @returns the expression ID on success or 0 otherwise
-    uint32_t GenerateTypeInitializerOrConversion(const sem::Call* call, const ast::Variable* var);
+    uint32_t GenerateValueConstructorOrConversion(const sem::Call* call, const ast::Variable* var);
     /// Generates a texture builtin call. Emits an error and returns false if
     /// we're currently outside a function.
     /// @param call the call expression
@@ -538,10 +538,10 @@ class Builder {
     /// @returns SPIR-V image format type
     SpvImageFormat convert_texel_format_to_spv(const builtin::TexelFormat format);
 
-    /// Determines if the given type initializer is created from constant values
+    /// Determines if the given value constructor is created from constant values
     /// @param expr the expression to check
-    /// @returns true if the initializer is constant
-    bool IsInitializerConst(const ast::Expression* expr);
+    /// @returns true if the constructor is constant
+    bool IsConstructorConst(const ast::Expression* expr);
 
   private:
     /// @returns an Operand with a new result ID in it. Increments the next_id_

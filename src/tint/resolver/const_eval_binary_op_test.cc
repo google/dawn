@@ -1876,7 +1876,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Bitcast) {
 }
 
 ////////////////////////////////////////////////
-// Short-Circuit Type Init/Convert
+// Short-Circuit value construction / conversion
 ////////////////////////////////////////////////
 
 // NOTE: Cannot demonstrate short-circuiting an invalid init/convert as const eval of init/convert
@@ -1892,9 +1892,9 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Init) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: no matching initializer for vec2<f32>(abstract-float, bool)
+              R"(12:34 error: no matching constructor for vec2<f32>(abstract-float, bool)
 
-4 candidate initializers:
+4 candidate constructors:
   vec2(x: T, y: T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec2(T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec2(vec2<T>) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
@@ -1919,9 +1919,9 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Init) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: no matching initializer for vec2<f32>(abstract-float, bool)
+              R"(12:34 error: no matching constructor for vec2<f32>(abstract-float, bool)
 
-4 candidate initializers:
+4 candidate constructors:
   vec2(x: T, y: T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec2(T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec2(vec2<T>) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
@@ -1958,7 +1958,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_StructInit) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: type in struct initializer does not match struct member type: "
+              "12:34 error: type in structure constructor does not match struct member type: "
               "expected 'f32', found 'bool'");
 }
 
@@ -1977,7 +1977,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_StructInit) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: type in struct initializer does not match struct member type: "
+              "12:34 error: type in structure constructor does not match struct member type: "
               "expected 'f32', found 'bool'");
 }
 

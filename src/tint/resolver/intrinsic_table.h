@@ -21,7 +21,7 @@
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/ast/unary_op.h"
 #include "src/tint/resolver/const_eval.h"
-#include "src/tint/resolver/init_conv_intrinsic.h"
+#include "src/tint/resolver/ctor_conv_intrinsic.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/utils/vector.h"
 
@@ -72,9 +72,9 @@ class IntrinsicTable {
         ConstEval::Function const_eval_fn = nullptr;
     };
 
-    /// InitOrConv describes a resolved type initializer or type conversion
-    struct InitOrConv {
-        /// The result type of the type initializer or type conversion
+    /// CtorOrConv describes a resolved value constructor or conversion
+    struct CtorOrConv {
+        /// The result type of the value constructor or conversion
         const sem::CallTarget* target = nullptr;
         /// The constant evaluation function
         ConstEval::Function const_eval_fn = nullptr;
@@ -137,20 +137,20 @@ class IntrinsicTable {
                                   const Source& source,
                                   bool is_compound) = 0;
 
-    /// Lookup looks for the type initializer or conversion overload for the given
-    /// InitConvIntrinsic.
+    /// Lookup looks for the value constructor or conversion overload for the given
+    /// CtorConvIntrinsic.
     /// @param type the type being constructed or converted
     /// @param template_arg the optional template argument
-    /// @param args the argument types passed to the initializer / conversion call
+    /// @param args the argument types passed to the constructor / conversion call
     /// @param earliest_eval_stage the the earliest evaluation stage that a call to
-    ///        the initializer or conversion can be made. This can alter the overloads considered.
+    ///        the constructor or conversion can be made. This can alter the overloads considered.
     ///        For example, if the earliest evaluation stage is
     ///        `sem::EvaluationStage::kRuntime`, then only overloads with concrete argument types
     ///        will be considered, as all abstract-numerics will have been materialized
     ///        after shader creation time (sem::EvaluationStage::kConstant).
     /// @param source the source of the call
-    /// @return a sem::TypeInitializer, sem::TypeConversion or nullptr if nothing matched
-    virtual InitOrConv Lookup(InitConvIntrinsic type,
+    /// @return a sem::ValueConstructor, sem::ValueConversion or nullptr if nothing matched
+    virtual CtorOrConv Lookup(CtorConvIntrinsic type,
                               const type::Type* template_arg,
                               utils::VectorRef<const type::Type*> args,
                               sem::EvaluationStage earliest_eval_stage,

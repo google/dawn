@@ -210,7 +210,7 @@ class BlockAllocator {
 
     /// Creates a new `TYPE` owned by the BlockAllocator.
     /// When the BlockAllocator is destructed the object will be destructed and freed.
-    /// @param args the arguments to pass to the type constructor
+    /// @param args the arguments to pass to the constructor
     /// @returns the pointer to the constructed object
     template <typename TYPE = T, typename... ARGS>
     TYPE* Create(ARGS&&... args) {

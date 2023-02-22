@@ -820,118 +820,118 @@ fn textureStore(texture: texture_storage_3d<u32_texel_format, write>, coords: ve
 @stage("fragment", "compute") fn atomicCompareExchangeWeak<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T, T) -> __atomic_compare_exchange_result<T>
 
 ////////////////////////////////////////////////////////////////////////////////
-// Type initializers                                                          //
+// Value constructors                                                         //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Zero value initializers
-@must_use @const("Zero") init i32() -> i32
-@must_use @const("Zero") init u32() -> u32
-@must_use @const("Zero") init f32() -> f32
-@must_use @const("Zero") init f16() -> f16
-@must_use @const("Zero") init bool() -> bool
-@must_use @const("Zero") init vec2<T: concrete_scalar>() -> vec2<T>
-@must_use @const("Zero") init vec3<T: concrete_scalar>() -> vec3<T>
-@must_use @const("Zero") init vec4<T: concrete_scalar>() -> vec4<T>
-@must_use @const("Zero") init mat2x2<T: f32_f16>() -> mat2x2<T>
-@must_use @const("Zero") init mat2x3<T: f32_f16>() -> mat2x3<T>
-@must_use @const("Zero") init mat2x4<T: f32_f16>() -> mat2x4<T>
-@must_use @const("Zero") init mat3x2<T: f32_f16>() -> mat3x2<T>
-@must_use @const("Zero") init mat3x3<T: f32_f16>() -> mat3x3<T>
-@must_use @const("Zero") init mat3x4<T: f32_f16>() -> mat3x4<T>
-@must_use @const("Zero") init mat4x2<T: f32_f16>() -> mat4x2<T>
-@must_use @const("Zero") init mat4x3<T: f32_f16>() -> mat4x3<T>
-@must_use @const("Zero") init mat4x4<T: f32_f16>() -> mat4x4<T>
+// Zero value constructors
+@must_use @const("Zero") ctor i32() -> i32
+@must_use @const("Zero") ctor u32() -> u32
+@must_use @const("Zero") ctor f32() -> f32
+@must_use @const("Zero") ctor f16() -> f16
+@must_use @const("Zero") ctor bool() -> bool
+@must_use @const("Zero") ctor vec2<T: concrete_scalar>() -> vec2<T>
+@must_use @const("Zero") ctor vec3<T: concrete_scalar>() -> vec3<T>
+@must_use @const("Zero") ctor vec4<T: concrete_scalar>() -> vec4<T>
+@must_use @const("Zero") ctor mat2x2<T: f32_f16>() -> mat2x2<T>
+@must_use @const("Zero") ctor mat2x3<T: f32_f16>() -> mat2x3<T>
+@must_use @const("Zero") ctor mat2x4<T: f32_f16>() -> mat2x4<T>
+@must_use @const("Zero") ctor mat3x2<T: f32_f16>() -> mat3x2<T>
+@must_use @const("Zero") ctor mat3x3<T: f32_f16>() -> mat3x3<T>
+@must_use @const("Zero") ctor mat3x4<T: f32_f16>() -> mat3x4<T>
+@must_use @const("Zero") ctor mat4x2<T: f32_f16>() -> mat4x2<T>
+@must_use @const("Zero") ctor mat4x3<T: f32_f16>() -> mat4x3<T>
+@must_use @const("Zero") ctor mat4x4<T: f32_f16>() -> mat4x4<T>
 
-// Identity initializers
-@must_use @const("Identity") init i32(i32) -> i32
-@must_use @const("Identity") init u32(u32) -> u32
-@must_use @const("Identity") init f32(f32) -> f32
-@must_use @const("Identity") init f16(f16) -> f16
-@must_use @const("Identity") init bool(bool) -> bool
-@must_use @const("Identity") init vec2<T: scalar>(vec2<T>) -> vec2<T>
-@must_use @const("Identity") init vec3<T: scalar>(vec3<T>) -> vec3<T>
-@must_use @const("Identity") init vec4<T: scalar>(vec4<T>) -> vec4<T>
-@must_use @const("Identity") init mat2x2<T: f32_f16>(mat2x2<T>) -> mat2x2<T>
-@must_use @const("Identity") init mat2x3<T: f32_f16>(mat2x3<T>) -> mat2x3<T>
-@must_use @const("Identity") init mat2x4<T: f32_f16>(mat2x4<T>) -> mat2x4<T>
-@must_use @const("Identity") init mat3x2<T: f32_f16>(mat3x2<T>) -> mat3x2<T>
-@must_use @const("Identity") init mat3x3<T: f32_f16>(mat3x3<T>) -> mat3x3<T>
-@must_use @const("Identity") init mat3x4<T: f32_f16>(mat3x4<T>) -> mat3x4<T>
-@must_use @const("Identity") init mat4x2<T: f32_f16>(mat4x2<T>) -> mat4x2<T>
-@must_use @const("Identity") init mat4x3<T: f32_f16>(mat4x3<T>) -> mat4x3<T>
-@must_use @const("Identity") init mat4x4<T: f32_f16>(mat4x4<T>) -> mat4x4<T>
+// Identity constructors
+@must_use @const("Identity") ctor i32(i32) -> i32
+@must_use @const("Identity") ctor u32(u32) -> u32
+@must_use @const("Identity") ctor f32(f32) -> f32
+@must_use @const("Identity") ctor f16(f16) -> f16
+@must_use @const("Identity") ctor bool(bool) -> bool
+@must_use @const("Identity") ctor vec2<T: scalar>(vec2<T>) -> vec2<T>
+@must_use @const("Identity") ctor vec3<T: scalar>(vec3<T>) -> vec3<T>
+@must_use @const("Identity") ctor vec4<T: scalar>(vec4<T>) -> vec4<T>
+@must_use @const("Identity") ctor mat2x2<T: f32_f16>(mat2x2<T>) -> mat2x2<T>
+@must_use @const("Identity") ctor mat2x3<T: f32_f16>(mat2x3<T>) -> mat2x3<T>
+@must_use @const("Identity") ctor mat2x4<T: f32_f16>(mat2x4<T>) -> mat2x4<T>
+@must_use @const("Identity") ctor mat3x2<T: f32_f16>(mat3x2<T>) -> mat3x2<T>
+@must_use @const("Identity") ctor mat3x3<T: f32_f16>(mat3x3<T>) -> mat3x3<T>
+@must_use @const("Identity") ctor mat3x4<T: f32_f16>(mat3x4<T>) -> mat3x4<T>
+@must_use @const("Identity") ctor mat4x2<T: f32_f16>(mat4x2<T>) -> mat4x2<T>
+@must_use @const("Identity") ctor mat4x3<T: f32_f16>(mat4x3<T>) -> mat4x3<T>
+@must_use @const("Identity") ctor mat4x4<T: f32_f16>(mat4x4<T>) -> mat4x4<T>
 
-// Vector initializers (splat)
-@must_use @const("VecSplat") init vec2<T: scalar>(T) -> vec2<T>
-@must_use @const("VecSplat") init vec3<T: scalar>(T) -> vec3<T>
-@must_use @const("VecSplat") init vec4<T: scalar>(T) -> vec4<T>
+// Vector constructors (splat)
+@must_use @const("VecSplat") ctor vec2<T: scalar>(T) -> vec2<T>
+@must_use @const("VecSplat") ctor vec3<T: scalar>(T) -> vec3<T>
+@must_use @const("VecSplat") ctor vec4<T: scalar>(T) -> vec4<T>
 
-// Vector initializers (scalar)
-@must_use @const("VecInitS") init vec2<T: scalar>(x: T, y: T) -> vec2<T>
-@must_use @const("VecInitS") init vec3<T: scalar>(x: T, y: T, z: T) -> vec3<T>
-@must_use @const("VecInitS") init vec4<T: scalar>(x: T, y: T, z: T, w: T) -> vec4<T>
+// Vector constructors (scalar)
+@must_use @const("VecInitS") ctor vec2<T: scalar>(x: T, y: T) -> vec2<T>
+@must_use @const("VecInitS") ctor vec3<T: scalar>(x: T, y: T, z: T) -> vec3<T>
+@must_use @const("VecInitS") ctor vec4<T: scalar>(x: T, y: T, z: T, w: T) -> vec4<T>
 
-// Vector initializers (mixed)
-@must_use @const("VecInitM") init vec3<T: scalar>(xy: vec2<T>, z: T) -> vec3<T>
-@must_use @const("VecInitM") init vec3<T: scalar>(x: T, yz: vec2<T>) -> vec3<T>
-@must_use @const("VecInitM") init vec4<T: scalar>(xy: vec2<T>, z: T, w: T) -> vec4<T>
-@must_use @const("VecInitM") init vec4<T: scalar>(x: T, yz: vec2<T>, w: T) -> vec4<T>
-@must_use @const("VecInitM") init vec4<T: scalar>(x: T, y: T, zw: vec2<T>) -> vec4<T>
-@must_use @const("VecInitM") init vec4<T: scalar>(xy: vec2<T>, zw: vec2<T>) -> vec4<T>
-@must_use @const("VecInitM") init vec4<T: scalar>(xyz: vec3<T>, w: T) -> vec4<T>
-@must_use @const("VecInitM") init vec4<T: scalar>(x: T, zyw: vec3<T>) -> vec4<T>
+// Vector constructors (mixed)
+@must_use @const("VecInitM") ctor vec3<T: scalar>(xy: vec2<T>, z: T) -> vec3<T>
+@must_use @const("VecInitM") ctor vec3<T: scalar>(x: T, yz: vec2<T>) -> vec3<T>
+@must_use @const("VecInitM") ctor vec4<T: scalar>(xy: vec2<T>, z: T, w: T) -> vec4<T>
+@must_use @const("VecInitM") ctor vec4<T: scalar>(x: T, yz: vec2<T>, w: T) -> vec4<T>
+@must_use @const("VecInitM") ctor vec4<T: scalar>(x: T, y: T, zw: vec2<T>) -> vec4<T>
+@must_use @const("VecInitM") ctor vec4<T: scalar>(xy: vec2<T>, zw: vec2<T>) -> vec4<T>
+@must_use @const("VecInitM") ctor vec4<T: scalar>(xyz: vec3<T>, w: T) -> vec4<T>
+@must_use @const("VecInitM") ctor vec4<T: scalar>(x: T, zyw: vec3<T>) -> vec4<T>
 
-// Matrix initializers (scalar)
+// Matrix constructors (scalar)
 @must_use @const("MatInitS")
-init mat2x2<T: fa_f32_f16>(T, T,
+ctor mat2x2<T: fa_f32_f16>(T, T,
                            T, T) -> mat2x2<T>
 @must_use @const("MatInitS")
-init mat2x3<T: fa_f32_f16>(T, T, T,
+ctor mat2x3<T: fa_f32_f16>(T, T, T,
                            T, T, T) -> mat2x3<T>
 @must_use @const("MatInitS")
-init mat2x4<T: fa_f32_f16>(T, T, T, T,
+ctor mat2x4<T: fa_f32_f16>(T, T, T, T,
                            T, T, T, T) -> mat2x4<T>
 @must_use @const("MatInitS")
-init mat3x2<T: fa_f32_f16>(T, T,
+ctor mat3x2<T: fa_f32_f16>(T, T,
                            T, T,
                            T, T) -> mat3x2<T>
 @must_use @const("MatInitS")
-init mat3x3<T: fa_f32_f16>(T, T, T,
+ctor mat3x3<T: fa_f32_f16>(T, T, T,
                            T, T, T,
                            T, T, T) -> mat3x3<T>
 @must_use @const("MatInitS")
-init mat3x4<T: fa_f32_f16>(T, T, T, T,
+ctor mat3x4<T: fa_f32_f16>(T, T, T, T,
                            T, T, T, T,
                            T, T, T, T) -> mat3x4<T>
 @must_use @const("MatInitS")
-init mat4x2<T: fa_f32_f16>(T, T,
+ctor mat4x2<T: fa_f32_f16>(T, T,
                            T, T,
                            T, T,
                            T, T) -> mat4x2<T>
 @must_use @const("MatInitS")
-init mat4x3<T: fa_f32_f16>(T, T, T,
+ctor mat4x3<T: fa_f32_f16>(T, T, T,
                            T, T, T,
                            T, T, T,
                            T, T, T) -> mat4x3<T>
 @must_use @const("MatInitS")
-init mat4x4<T: fa_f32_f16>(T, T, T, T,
+ctor mat4x4<T: fa_f32_f16>(T, T, T, T,
                            T, T, T, T,
                            T, T, T, T,
                            T, T, T, T) -> mat4x4<T>
 
-// Matrix initializers (column vectors)
-@must_use @const("MatInitV") init mat2x2<T: fa_f32_f16>(vec2<T>, vec2<T>) -> mat2x2<T>
-@must_use @const("MatInitV") init mat2x3<T: fa_f32_f16>(vec3<T>, vec3<T>) -> mat2x3<T>
-@must_use @const("MatInitV") init mat2x4<T: fa_f32_f16>(vec4<T>, vec4<T>) -> mat2x4<T>
-@must_use @const("MatInitV") init mat3x2<T: fa_f32_f16>(vec2<T>, vec2<T>, vec2<T>) -> mat3x2<T>
-@must_use @const("MatInitV") init mat3x3<T: fa_f32_f16>(vec3<T>, vec3<T>, vec3<T>) -> mat3x3<T>
-@must_use @const("MatInitV") init mat3x4<T: fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>) -> mat3x4<T>
-@must_use @const("MatInitV") init mat4x2<T: fa_f32_f16>(vec2<T>, vec2<T>, vec2<T>, vec2<T>) -> mat4x2<T>
-@must_use @const("MatInitV") init mat4x3<T: fa_f32_f16>(vec3<T>, vec3<T>, vec3<T>, vec3<T>) -> mat4x3<T>
-@must_use @const("MatInitV") init mat4x4<T: fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T>
+// Matrix constructors (column vectors)
+@must_use @const("MatInitV") ctor mat2x2<T: fa_f32_f16>(vec2<T>, vec2<T>) -> mat2x2<T>
+@must_use @const("MatInitV") ctor mat2x3<T: fa_f32_f16>(vec3<T>, vec3<T>) -> mat2x3<T>
+@must_use @const("MatInitV") ctor mat2x4<T: fa_f32_f16>(vec4<T>, vec4<T>) -> mat2x4<T>
+@must_use @const("MatInitV") ctor mat3x2<T: fa_f32_f16>(vec2<T>, vec2<T>, vec2<T>) -> mat3x2<T>
+@must_use @const("MatInitV") ctor mat3x3<T: fa_f32_f16>(vec3<T>, vec3<T>, vec3<T>) -> mat3x3<T>
+@must_use @const("MatInitV") ctor mat3x4<T: fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>) -> mat3x4<T>
+@must_use @const("MatInitV") ctor mat4x2<T: fa_f32_f16>(vec2<T>, vec2<T>, vec2<T>, vec2<T>) -> mat4x2<T>
+@must_use @const("MatInitV") ctor mat4x3<T: fa_f32_f16>(vec3<T>, vec3<T>, vec3<T>, vec3<T>) -> mat4x3<T>
+@must_use @const("MatInitV") ctor mat4x4<T: fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T>
 
 ////////////////////////////////////////////////////////////////////////////////
-// Type conversions                                                           //
+// Value conversions                                                          //
 ////////////////////////////////////////////////////////////////////////////////
 @must_use @const conv f32<T: scalar_no_f32>(T) -> f32
 @must_use @const conv f16<T: scalar_no_f16>(T) -> f16

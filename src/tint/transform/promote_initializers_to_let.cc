@@ -20,7 +20,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/statement.h"
-#include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_constructor.h"
 #include "src/tint/transform/utils/hoist_to_decl_before.h"
 #include "src/tint/type/struct.h"
 #include "src/tint/utils/hashset.h"
@@ -58,8 +58,8 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
             }
 
             auto* ctor = root_expr->UnwrapMaterialize()->As<sem::Call>();
-            if (!ctor || !ctor->Target()->Is<sem::TypeInitializer>()) {
-                // Root expression is not a type constructor. Not interested in this.
+            if (!ctor || !ctor->Target()->Is<sem::ValueConstructor>()) {
+                // Root expression is not a value constructor. Not interested in this.
                 return false;
             }
         }

@@ -37,8 +37,8 @@
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
-#include "src/tint/sem/type_conversion.h"
-#include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_constructor.h"
+#include "src/tint/sem/value_conversion.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/transform/array_length_from_uniform.h"
 #include "src/tint/transform/builtin_polyfill.h"
@@ -640,8 +640,8 @@ bool GeneratorImpl::EmitCall(std::ostream& out, const ast::CallExpression* expr)
     return Switch(
         target, [&](const sem::Function* func) { return EmitFunctionCall(out, call, func); },
         [&](const sem::Builtin* builtin) { return EmitBuiltinCall(out, call, builtin); },
-        [&](const sem::TypeConversion* conv) { return EmitTypeConversion(out, call, conv); },
-        [&](const sem::TypeInitializer* ctor) { return EmitTypeInitializer(out, call, ctor); },
+        [&](const sem::ValueConversion* conv) { return EmitTypeConversion(out, call, conv); },
+        [&](const sem::ValueConstructor* ctor) { return EmitTypeInitializer(out, call, ctor); },
         [&](Default) {
             TINT_ICE(Writer, diagnostics_) << "unhandled call target: " << target->TypeInfo().name;
             return false;
@@ -785,7 +785,7 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
 
 bool GeneratorImpl::EmitTypeConversion(std::ostream& out,
                                        const sem::Call* call,
-                                       const sem::TypeConversion* conv) {
+                                       const sem::ValueConversion* conv) {
     if (!EmitType(out, conv->Target(), "")) {
         return false;
     }
@@ -801,7 +801,7 @@ bool GeneratorImpl::EmitTypeConversion(std::ostream& out,
 
 bool GeneratorImpl::EmitTypeInitializer(std::ostream& out,
                                         const sem::Call* call,
-                                        const sem::TypeInitializer* ctor) {
+                                        const sem::ValueConstructor* ctor) {
     auto* type = ctor->ReturnType();
 
     const char* terminator = ")";

@@ -49,8 +49,8 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
-#include "src/tint/sem/type_conversion.h"
-#include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_constructor.h"
+#include "src/tint/sem/value_conversion.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/while_statement.h"
 #include "src/tint/type/abstract_numeric.h"
@@ -1507,11 +1507,11 @@ bool Validator::Call(const sem::Call* call, sem::Statement* current_statement) c
                 AddError("ignoring return value of builtin '" + utils::ToString(b->Type()) + "'",
                          call->Declaration()->source);
             },
-            [&](const sem::TypeConversion*) {
-                AddError("type conversion evaluated but not used", call->Declaration()->source);
+            [&](const sem::ValueConversion*) {
+                AddError("value conversion evaluated but not used", call->Declaration()->source);
             },
-            [&](const sem::TypeInitializer*) {
-                AddError("type initializer evaluated but not used", call->Declaration()->source);
+            [&](const sem::ValueConstructor*) {
+                AddError("value constructor evaluated but not used", call->Declaration()->source);
             },
             [&](Default) {
                 AddError("return value of call not used", call->Declaration()->source);
@@ -1825,14 +1825,14 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
 bool Validator::StructureInitializer(const ast::CallExpression* ctor,
                                      const sem::Struct* struct_type) const {
     if (!struct_type->IsConstructible()) {
-        AddError("struct initializer has non-constructible type", ctor->source);
+        AddError("structure constructor has non-constructible type", ctor->source);
         return false;
     }
 
     if (ctor->args.Length() > 0) {
         if (ctor->args.Length() != struct_type->Members().Length()) {
             std::string fm = ctor->args.Length() < struct_type->Members().Length() ? "few" : "many";
-            AddError("struct initializer has too " + fm + " inputs: expected " +
+            AddError("structure constructor has too " + fm + " inputs: expected " +
                          std::to_string(struct_type->Members().Length()) + ", found " +
                          std::to_string(ctor->args.Length()),
                      ctor->source);
@@ -1843,7 +1843,7 @@ bool Validator::StructureInitializer(const ast::CallExpression* ctor,
             auto* value_ty = sem_.TypeOf(value);
             if (member->Type() != value_ty->UnwrapRef()) {
                 AddError(
-                    "type in struct initializer does not match struct member type: expected '" +
+                    "type in structure constructor does not match struct member type: expected '" +
                         sem_.TypeNameOf(member->Type()) + "', found '" + sem_.TypeNameOf(value_ty) +
                         "'",
                     value->source);
@@ -1854,7 +1854,7 @@ bool Validator::StructureInitializer(const ast::CallExpression* ctor,
     return true;
 }
 
-bool Validator::ArrayInitializer(const ast::CallExpression* ctor,
+bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
                                  const type::Array* array_type) const {
     auto& values = ctor->args;
     auto* elem_ty = array_type->ElemType();
@@ -1881,7 +1881,7 @@ bool Validator::ArrayInitializer(const ast::CallExpression* ctor,
     }
 
     if (!elem_ty->IsConstructible()) {
-        AddError("array initializer has non-constructible element type", ctor->source);
+        AddError("array constructor has non-constructible element type", ctor->source);
         return false;
     }
 
@@ -1893,7 +1893,7 @@ bool Validator::ArrayInitializer(const ast::CallExpression* ctor,
     const auto count = c->As<type::ConstantArrayCount>()->value;
     if (!values.IsEmpty() && (values.Length() != count)) {
         std::string fm = values.Length() < count ? "few" : "many";
-        AddError("array initializer has too " + fm + " elements: expected " +
+        AddError("array constructor has too " + fm + " elements: expected " +
                      std::to_string(count) + ", found " + std::to_string(values.Length()),
                  ctor->source);
         return false;

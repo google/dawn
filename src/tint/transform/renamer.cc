@@ -21,9 +21,9 @@
 #include "src/tint/sem/builtin_enum_expression.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/member_accessor_expression.h"
-#include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_expression.h"
-#include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_constructor.h"
+#include "src/tint/sem/value_conversion.h"
 #include "src/tint/text/unicode.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer);
@@ -1309,10 +1309,10 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
                     [&](const sem::Builtin*) {
                         preserved_identifiers.Add(call->target->identifier);
                     },
-                    [&](const sem::TypeConversion*) {
+                    [&](const sem::ValueConversion*) {
                         preserve_if_builtin_type(call->target->identifier);
                     },
-                    [&](const sem::TypeInitializer*) {
+                    [&](const sem::ValueConstructor*) {
                         preserve_if_builtin_type(call->target->identifier);
                     });
             });

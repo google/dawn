@@ -80,7 +80,7 @@ class ConstEval {
     /// @param ty the target type - must be an array or initializer
     /// @param args the input arguments
     /// @return the constructed value, or null if the value cannot be calculated
-    Result ArrayOrStructInit(const type::Type* ty,
+    Result ArrayOrStructCtor(const type::Type* ty,
                              utils::VectorRef<const sem::ValueExpression*> args);
 
     /// @param ty the target type
@@ -127,7 +127,7 @@ class ConstEval {
     // Constant value evaluation methods, to be indirectly called via the intrinsic table
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /// Type conversion
+    /// Value conversion
     /// @param ty the result type
     /// @param args the input arguments
     /// @param source the source location
@@ -136,7 +136,7 @@ class ConstEval {
                 utils::VectorRef<const constant::Value*> args,
                 const Source& source);
 
-    /// Zero value type initializer
+    /// Zero value constructor
     /// @param ty the result type
     /// @param args the input arguments (no arguments provided)
     /// @param source the source location
@@ -145,7 +145,7 @@ class ConstEval {
                 utils::VectorRef<const constant::Value*> args,
                 const Source& source);
 
-    /// Identity value type initializer
+    /// Identity value constructor
     /// @param ty the result type
     /// @param args the input arguments
     /// @param source the source location
@@ -154,7 +154,7 @@ class ConstEval {
                     utils::VectorRef<const constant::Value*> args,
                     const Source& source);
 
-    /// Vector splat initializer
+    /// Vector splat constructor
     /// @param ty the vector type
     /// @param args the input arguments
     /// @param source the source location
@@ -163,7 +163,7 @@ class ConstEval {
                     utils::VectorRef<const constant::Value*> args,
                     const Source& source);
 
-    /// Vector initializer using scalars
+    /// Vector constructor using scalars
     /// @param ty the vector type
     /// @param args the input arguments
     /// @param source the source location
@@ -172,7 +172,7 @@ class ConstEval {
                     utils::VectorRef<const constant::Value*> args,
                     const Source& source);
 
-    /// Vector initializer using a mix of scalars and smaller vectors
+    /// Vector constructor using a mix of scalars and smaller vectors
     /// @param ty the vector type
     /// @param args the input arguments
     /// @param source the source location
@@ -181,7 +181,7 @@ class ConstEval {
                     utils::VectorRef<const constant::Value*> args,
                     const Source& source);
 
-    /// Matrix initializer using scalar values
+    /// Matrix constructor using scalar values
     /// @param ty the matrix type
     /// @param args the input arguments
     /// @param source the source location
@@ -190,7 +190,7 @@ class ConstEval {
                     utils::VectorRef<const constant::Value*> args,
                     const Source& source);
 
-    /// Matrix initializer using column vectors
+    /// Matrix constructor using column vectors
     /// @param ty the matrix type
     /// @param args the input arguments
     /// @param source the source location

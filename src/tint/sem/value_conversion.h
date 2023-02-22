@@ -12,24 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_TYPE_CONVERSION_H_
-#define SRC_TINT_SEM_TYPE_CONVERSION_H_
+#ifndef SRC_TINT_SEM_VALUE_CONVERSION_H_
+#define SRC_TINT_SEM_VALUE_CONVERSION_H_
 
 #include "src/tint/sem/call_target.h"
 
 namespace tint::sem {
 
-/// TypeConversion is the CallTarget for a type conversion (cast).
-class TypeConversion final : public Castable<TypeConversion, CallTarget> {
+/// ValueConversion is the CallTarget for a value conversion (cast).
+class ValueConversion final : public Castable<ValueConversion, CallTarget> {
   public:
     /// Constructor
     /// @param type the target type of the cast
     /// @param parameter the type cast parameter
     /// @param stage the earliest evaluation stage for the expression
-    TypeConversion(const type::Type* type, const sem::Parameter* parameter, EvaluationStage stage);
+    ValueConversion(const type::Type* type, const sem::Parameter* parameter, EvaluationStage stage);
 
     /// Destructor
-    ~TypeConversion() override;
+    ~ValueConversion() override;
 
     /// @returns the cast source type
     const type::Type* Source() const { return Parameters()[0]->Type(); }
@@ -40,4 +40,4 @@ class TypeConversion final : public Castable<TypeConversion, CallTarget> {
 
 }  // namespace tint::sem
 
-#endif  // SRC_TINT_SEM_TYPE_CONVERSION_H_
+#endif  // SRC_TINT_SEM_VALUE_CONVERSION_H_

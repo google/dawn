@@ -62,8 +62,8 @@ struct CallTargetSignature {
     }
 };
 
-/// CallTarget is the base for callable functions, builtins, type initializers
-/// and type casts.
+/// CallTarget is the base for callable functions, builtins, value constructors and value
+/// conversions.
 class CallTarget : public Castable<CallTarget, Node> {
   public:
     /// Constructor

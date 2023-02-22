@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/type_conversion.h"
+#include "src/tint/sem/value_constructor.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::TypeConversion);
+#include <utility>
+
+TINT_INSTANTIATE_TYPEINFO(tint::sem::ValueConstructor);
 
 namespace tint::sem {
 
-TypeConversion::TypeConversion(const type::Type* type,
-                               const sem::Parameter* parameter,
-                               EvaluationStage stage)
-    : Base(type, utils::Vector<const sem::Parameter*, 1>{parameter}, stage, /* must_use */ true) {}
+ValueConstructor::ValueConstructor(const type::Type* type,
+                                   utils::VectorRef<const Parameter*> parameters,
+                                   EvaluationStage stage)
+    : Base(type, std::move(parameters), stage, /* must_use */ true) {}
 
-TypeConversion::~TypeConversion() = default;
+ValueConstructor::~ValueConstructor() = default;
 
 }  // namespace tint::sem

@@ -1,0 +1,76 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/src/cmd/gen to generate ctor_conv_intrinsic.h
+
+To update the generated file, run:
+    ./tools/run gen
+
+See:
+* tools/src/cmd/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+#ifndef SRC_TINT_RESOLVER_CTOR_CONV_INTRINSIC_H_
+#define SRC_TINT_RESOLVER_CTOR_CONV_INTRINSIC_H_
+
+#include <cstdint>
+
+namespace tint::resolver {
+
+/// CtorConvIntrinsic is an enumerator of types that have a constructor or converter overload
+/// declared in the intrinsic table.
+enum class CtorConvIntrinsic {
+    kNone = -1,
+{{- range Sem.ConstructorsAndConverters }}
+    k{{Title .Name}},
+{{- end }}
+};
+
+/// @returns the name of the type.
+const char* str(CtorConvIntrinsic i);
+
+/// @param n the width of the vector
+/// @return the CtorConvIntrinsic for a vector of width `n`
+inline CtorConvIntrinsic VectorCtorConvIntrinsic(uint32_t n) {
+    switch (n) {
+        case 2:
+            return CtorConvIntrinsic::kVec2;
+        case 3:
+            return CtorConvIntrinsic::kVec3;
+        case 4:
+            return CtorConvIntrinsic::kVec4;
+    }
+    return CtorConvIntrinsic::kNone;
+}
+
+/// @param c the number of columns in the matrix
+/// @param r the number of rows in the matrix
+/// @return the CtorConvIntrinsic for a matrix with `c` columns and `r` rows
+inline CtorConvIntrinsic MatrixCtorConvIntrinsic(uint32_t c, uint32_t r) {
+    switch ((c - 2) * 3 + (r - 2)) {
+        case 0:
+            return CtorConvIntrinsic::kMat2x2;
+        case 1:
+            return CtorConvIntrinsic::kMat2x3;
+        case 2:
+            return CtorConvIntrinsic::kMat2x4;
+        case 3:
+            return CtorConvIntrinsic::kMat3x2;
+        case 4:
+            return CtorConvIntrinsic::kMat3x3;
+        case 5:
+            return CtorConvIntrinsic::kMat3x4;
+        case 6:
+            return CtorConvIntrinsic::kMat4x2;
+        case 7:
+            return CtorConvIntrinsic::kMat4x3;
+        case 8:
+            return CtorConvIntrinsic::kMat4x4;
+    }
+    return CtorConvIntrinsic::kNone;
+}
+
+}  // namespace tint::resolver
+
+#endif  // SRC_TINT_RESOLVER_CTOR_CONV_INTRINSIC_H_

@@ -29,7 +29,7 @@
 #include "src/tint/number.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/member_accessor_expression.h"
-#include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_constructor.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
 #include "src/tint/type/array.h"
@@ -1228,18 +1228,18 @@ ConstEval::Result ConstEval::Literal(const type::Type* ty, const ast::LiteralExp
         });
 }
 
-ConstEval::Result ConstEval::ArrayOrStructInit(const type::Type* ty,
+ConstEval::Result ConstEval::ArrayOrStructCtor(const type::Type* ty,
                                                utils::VectorRef<const sem::ValueExpression*> args) {
     if (args.IsEmpty()) {
         return ZeroValue(ty);
     }
 
     if (args.Length() == 1 && args[0]->Type() == ty) {
-        // Identity initializer.
+        // Identity constructor.
         return args[0]->ConstantValue();
     }
 
-    // Multiple arguments. Must be a type initializer.
+    // Multiple arguments. Must be a value constructor.
     utils::Vector<const constant::Value*, 4> els;
     els.Reserve(args.Length());
     for (auto* arg : args) {

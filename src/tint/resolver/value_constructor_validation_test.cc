@@ -14,8 +14,8 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/type_conversion.h"
-#include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_constructor.h"
+#include "src/tint/sem/value_conversion.h"
 #include "src/tint/type/reference.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -42,7 +42,7 @@ using builder::vec2;
 using builder::vec3;
 using builder::vec4;
 
-class ResolverTypeInitializerValidationTest : public resolver::TestHelper, public testing::Test {};
+class ResolverValueConstructorValidationTest : public resolver::TestHelper, public testing::Test {};
 
 namespace InferTypeTest {
 struct Params {
@@ -56,7 +56,7 @@ constexpr Params ParamsFor() {
     return Params{DataType<T>::AST, DataType<T>::ExprFromDouble, DataType<T>::Sem};
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferTypeTest_Simple) {
+TEST_F(ResolverValueConstructorValidationTest, InferTypeTest_Simple) {
     // var a = 1i;
     // var b = a;
     auto* a = Var("a", Expr(1_i));
@@ -77,8 +77,8 @@ TEST_F(ResolverTypeInitializerValidationTest, InferTypeTest_Simple) {
               builtin::AddressSpace::kFunction);
 }
 
-using InferTypeTest_FromInitializerExpression = ResolverTestWithParam<Params>;
-TEST_P(InferTypeTest_FromInitializerExpression, All) {
+using InferTypeTest_FromConstructorExpression = ResolverTestWithParam<Params>;
+TEST_P(InferTypeTest_FromConstructorExpression, All) {
     // e.g. for vec3<f32>
     // {
     //   var a = vec3<f32>(0.0, 0.0, 0.0)
@@ -104,7 +104,7 @@ TEST_P(InferTypeTest_FromInitializerExpression, All) {
                              << "expected: " << FriendlyName(expected) << "\n";
 }
 
-static constexpr Params from_initializer_expression_cases[] = {
+static constexpr Params from_constructor_expression_cases[] = {
     ParamsFor<bool>(),
     ParamsFor<i32>(),
     ParamsFor<u32>(),
@@ -128,9 +128,9 @@ static constexpr Params from_initializer_expression_cases[] = {
     ParamsFor<alias<mat3x3<f32>>>(),
     ParamsFor<alias<mat3x3<f16>>>(),
 };
-INSTANTIATE_TEST_SUITE_P(ResolverTypeInitializerValidationTest,
-                         InferTypeTest_FromInitializerExpression,
-                         testing::ValuesIn(from_initializer_expression_cases));
+INSTANTIATE_TEST_SUITE_P(ResolverValueConstructorValidationTest,
+                         InferTypeTest_FromConstructorExpression,
+                         testing::ValuesIn(from_constructor_expression_cases));
 
 using InferTypeTest_FromArithmeticExpression = ResolverTestWithParam<Params>;
 TEST_P(InferTypeTest_FromArithmeticExpression, All) {
@@ -170,7 +170,7 @@ static constexpr Params from_arithmetic_expression_cases[] = {
     ParamsFor<alias<vec3<f32>>>(),
     ParamsFor<alias<mat3x3<f32>>>(),
 };
-INSTANTIATE_TEST_SUITE_P(ResolverTypeInitializerValidationTest,
+INSTANTIATE_TEST_SUITE_P(ResolverValueConstructorValidationTest,
                          InferTypeTest_FromArithmeticExpression,
                          testing::ValuesIn(from_arithmetic_expression_cases));
 
@@ -231,7 +231,7 @@ static constexpr Params from_call_expression_cases[] = {
     ParamsFor<alias<mat3x3<f32>>>(),
     ParamsFor<alias<mat3x3<f16>>>(),
 };
-INSTANTIATE_TEST_SUITE_P(ResolverTypeInitializerValidationTest,
+INSTANTIATE_TEST_SUITE_P(ResolverValueConstructorValidationTest,
                          InferTypeTest_FromCallExpression,
                          testing::ValuesIn(from_call_expression_cases));
 
@@ -342,8 +342,8 @@ static constexpr Params valid_cases[] = {
     ParamsFor<mat3x2<f32>, mat3x2<f16>>(Kind::Conversion),  //
 };
 
-using ConversionInitializerValidTest = ResolverTestWithParam<Params>;
-TEST_P(ConversionInitializerValidTest, All) {
+using ConversionConstructorValidTest = ResolverTestWithParam<Params>;
+TEST_P(ConversionConstructorValidTest, All) {
     auto& params = GetParam();
 
     Enable(builtin::Extension::kF16);
@@ -374,7 +374,7 @@ TEST_P(ConversionInitializerValidTest, All) {
     ASSERT_NE(call, nullptr);
     switch (params.kind) {
         case Kind::Construct: {
-            auto* ctor = call->Target()->As<sem::TypeInitializer>();
+            auto* ctor = call->Target()->As<sem::ValueConstructor>();
             ASSERT_NE(ctor, nullptr);
             EXPECT_EQ(call->Type(), ctor->ReturnType());
             ASSERT_EQ(ctor->Parameters().Length(), 1u);
@@ -382,7 +382,7 @@ TEST_P(ConversionInitializerValidTest, All) {
             break;
         }
         case Kind::Conversion: {
-            auto* conv = call->Target()->As<sem::TypeConversion>();
+            auto* conv = call->Target()->As<sem::ValueConversion>();
             ASSERT_NE(conv, nullptr);
             EXPECT_EQ(call->Type(), conv->ReturnType());
             ASSERT_EQ(conv->Parameters().Length(), 1u);
@@ -391,8 +391,8 @@ TEST_P(ConversionInitializerValidTest, All) {
         }
     }
 }
-INSTANTIATE_TEST_SUITE_P(ResolverTypeInitializerValidationTest,
-                         ConversionInitializerValidTest,
+INSTANTIATE_TEST_SUITE_P(ResolverValueConstructorValidationTest,
+                         ConversionConstructorValidTest,
                          testing::ValuesIn(valid_cases));
 
 constexpr CreatePtrs all_types[] = {
@@ -420,10 +420,10 @@ constexpr CreatePtrs all_types[] = {
     CreatePtrsFor<mat3x2<f16>>(),  //
 };
 
-using ConversionInitializerInvalidTest = ResolverTestWithParam<std::tuple<CreatePtrs,  // lhs
+using ConversionConstructorInvalidTest = ResolverTestWithParam<std::tuple<CreatePtrs,  // lhs
                                                                           CreatePtrs   // rhs
                                                                           >>;
-TEST_P(ConversionInitializerInvalidTest, All) {
+TEST_P(ConversionConstructorInvalidTest, All) {
     auto& params = GetParam();
 
     auto& lhs_params = std::get<0>(params);
@@ -463,33 +463,33 @@ TEST_P(ConversionInitializerInvalidTest, All) {
 
     ASSERT_FALSE(r()->Resolve());
 }
-INSTANTIATE_TEST_SUITE_P(ResolverTypeInitializerValidationTest,
-                         ConversionInitializerInvalidTest,
+INSTANTIATE_TEST_SUITE_P(ResolverValueConstructorValidationTest,
+                         ConversionConstructorInvalidTest,
                          testing::Combine(testing::ValuesIn(all_types),
                                           testing::ValuesIn(all_types)));
 
-TEST_F(ResolverTypeInitializerValidationTest, ConversionInitializerInvalid_TooManyInitializers) {
+TEST_F(ResolverValueConstructorValidationTest, ConversionConstructorInvalid_TooManyConstructors) {
     auto* a = Var("a", ty.f32(), Call(Source{{12, 34}}, ty.f32(), Expr(1_f), Expr(2_f)));
     WrapInFunction(a);
 
     ASSERT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for f32(f32, f32)"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for f32(f32, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, ConversionInitializerInvalid_InvalidInitializer) {
+TEST_F(ResolverValueConstructorValidationTest, ConversionConstructorInvalid_InvalidConstructor) {
     auto* a = Var("a", ty.f32(), Call(Source{{12, 34}}, ty.f32(), Call(ty.array<f32, 4>())));
     WrapInFunction(a);
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for f32(array<f32, 4>)"));
+                HasSubstr("12:34 error: no matching constructor for f32(array<f32, 4>)"));
 }
 
 }  // namespace ConversionConstructTest
 
-namespace ArrayInitializer {
+namespace ArrayConstructor {
 
-TEST_F(ResolverTypeInitializerValidationTest, Array_ZeroValue_Pass) {
+TEST_F(ResolverValueConstructorValidationTest, Array_ZeroValue_Pass) {
     // array<u32, 10u>();
     auto* tc = array<u32, 10>();
     WrapInFunction(tc);
@@ -499,13 +499,13 @@ TEST_F(ResolverTypeInitializerValidationTest, Array_ZeroValue_Pass) {
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     EXPECT_TRUE(call->Type()->Is<type::Array>());
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 0u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Array_U32U32U32) {
+TEST_F(ResolverValueConstructorValidationTest, Array_U32U32U32) {
     // array<u32, 3u>(0u, 10u, 20u);
     auto* tc = array<u32, 3>(0_u, 10_u, 20_u);
     WrapInFunction(tc);
@@ -515,7 +515,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Array_U32U32U32) {
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     EXPECT_TRUE(call->Type()->Is<type::Array>());
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -524,7 +524,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Array_U32U32U32) {
     EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<type::U32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArray_U32U32U32) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArray_U32U32U32) {
     // array(0u, 10u, 20u);
     auto* tc = array<Infer>(Source{{12, 34}}, 0_u, 10_u, 20_u);
     WrapInFunction(tc);
@@ -534,7 +534,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArray_U32U32U32) {
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     EXPECT_TRUE(call->Type()->Is<type::Array>());
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -543,7 +543,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArray_U32U32U32) {
     EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<type::U32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Array_U32AIU32) {
+TEST_F(ResolverValueConstructorValidationTest, Array_U32AIU32) {
     // array<u32, 3u>(0u, 10, 20u);
     auto* tc = array<u32, 3>(0_u, 10_a, 20_u);
     WrapInFunction(tc);
@@ -553,7 +553,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Array_U32AIU32) {
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     EXPECT_TRUE(call->Type()->Is<type::Array>());
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -562,7 +562,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Array_U32AIU32) {
     EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<type::U32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArray_U32AIU32) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArray_U32AIU32) {
     // array(0u, 10u, 20u);
     auto* tc = array<Infer>(Source{{12, 34}}, 0_u, 10_a, 20_u);
     WrapInFunction(tc);
@@ -572,7 +572,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArray_U32AIU32) {
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     EXPECT_TRUE(call->Type()->Is<type::Array>());
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -581,7 +581,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArray_U32AIU32) {
     EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<type::U32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, ArrayU32_AIAIAI) {
+TEST_F(ResolverValueConstructorValidationTest, ArrayU32_AIAIAI) {
     // array<u32, 3u>(0, 10, 20);
     auto* tc = array<u32, 3>(0_a, 10_a, 20_a);
     WrapInFunction(tc);
@@ -591,7 +591,7 @@ TEST_F(ResolverTypeInitializerValidationTest, ArrayU32_AIAIAI) {
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     EXPECT_TRUE(call->Type()->Is<type::Array>());
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -600,7 +600,7 @@ TEST_F(ResolverTypeInitializerValidationTest, ArrayU32_AIAIAI) {
     EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<type::U32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArray_AIAIAI) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArray_AIAIAI) {
     // const c = array(0, 10, 20);
     auto* tc = array<Infer>(Source{{12, 34}}, 0_a, 10_a, 20_a);
     WrapInFunction(Decl(Const("C", tc)));
@@ -610,7 +610,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArray_AIAIAI) {
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     EXPECT_TRUE(call->Type()->Is<type::Array>());
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -619,7 +619,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArray_AIAIAI) {
     EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<type::AbstractInt>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArrayU32_VecI32_VecAI) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArrayU32_VecI32_VecAI) {
     // array(vec2(10i), vec2(20));
     auto* tc = array<Infer>(Source{{12, 34}},              //
                             Call(ty.vec<Infer>(2), 20_i),  //
@@ -631,7 +631,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArrayU32_VecI32_VecAI) {
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     EXPECT_TRUE(call->Type()->Is<type::Array>());
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -641,7 +641,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArrayU32_VecI32_VecAI) {
     EXPECT_TRUE(ctor->Parameters()[1]->Type()->As<type::Vector>()->type()->Is<type::I32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArrayU32_VecAI_VecF32) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArrayU32_VecAI_VecF32) {
     // array(vec2(20), vec2(10f));
     auto* tc = array<Infer>(Source{{12, 34}},              //
                             Call(ty.vec<Infer>(2), 20_a),  //
@@ -653,7 +653,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArrayU32_VecAI_VecF32) {
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     EXPECT_TRUE(call->Type()->Is<type::Array>());
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -663,7 +663,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferredArrayU32_VecAI_VecF32) {
     EXPECT_TRUE(ctor->Parameters()[1]->Type()->As<type::Vector>()->type()->Is<type::F32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, ArrayArgumentTypeMismatch_U32F32) {
+TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_U32F32) {
     // array<u32, 3u>(0u, 1.0f, 20u);
     auto* tc = array<u32, 3>(0_u, Expr(Source{{12, 34}}, 1_f), 20_u);
     WrapInFunction(tc);
@@ -672,19 +672,19 @@ TEST_F(ResolverTypeInitializerValidationTest, ArrayArgumentTypeMismatch_U32F32) 
     EXPECT_EQ(r()->error(), R"(12:34 error: 'f32' cannot be used to construct an array of 'u32')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArrayArgumentTypeMismatch_U32F32) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_U32F32) {
     // array(0u, 1.0f, 20u);
     auto* tc = array<Infer>(Source{{12, 34}}, 0_u, 1_f, 20_u);
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot infer common array element type from initializer arguments
+              R"(12:34 error: cannot infer common array element type from constructor arguments
 note: argument 0 is of type 'u32'
 note: argument 1 is of type 'f32')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, ArrayArgumentTypeMismatch_F32I32) {
+TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_F32I32) {
     // array<f32, 1u>(1i);
     auto* tc = array<f32, 1>(Expr(Source{{12, 34}}, 1_i));
     WrapInFunction(tc);
@@ -693,19 +693,19 @@ TEST_F(ResolverTypeInitializerValidationTest, ArrayArgumentTypeMismatch_F32I32) 
     EXPECT_EQ(r()->error(), R"(12:34 error: 'i32' cannot be used to construct an array of 'f32')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArrayArgumentTypeMismatch_F32I32) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_F32I32) {
     // array(1f, 1i);
     auto* tc = array<Infer>(Source{{12, 34}}, 1_f, 1_i);
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot infer common array element type from initializer arguments
+              R"(12:34 error: cannot infer common array element type from constructor arguments
 note: argument 0 is of type 'f32'
 note: argument 1 is of type 'i32')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, ArrayArgumentTypeMismatch_U32I32) {
+TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_U32I32) {
     // array<u32, 1u>(1i, 0u, 0u, 0u, 0u, 0u);
     auto* tc = array<u32, 1>(Expr(Source{{12, 34}}, 1_i), 0_u, 0_u, 0_u, 0_u);
     WrapInFunction(tc);
@@ -714,19 +714,19 @@ TEST_F(ResolverTypeInitializerValidationTest, ArrayArgumentTypeMismatch_U32I32) 
     EXPECT_EQ(r()->error(), R"(12:34 error: 'i32' cannot be used to construct an array of 'u32')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArrayArgumentTypeMismatch_U32I32) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_U32I32) {
     // array(1i, 0u, 0u, 0u, 0u, 0u);
     auto* tc = array<Infer>(Source{{12, 34}}, 1_i, 0_u, 0_u, 0_u, 0_u);
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot infer common array element type from initializer arguments
+              R"(12:34 error: cannot infer common array element type from constructor arguments
 note: argument 0 is of type 'i32'
 note: argument 1 is of type 'u32')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, ArrayArgumentTypeMismatch_I32Vec2) {
+TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_I32Vec2) {
     // array<i32, 3u>(1i, vec2<i32>());
     auto* tc = array<i32, 3>(1_i, vec2<i32>(Source{{12, 34}}));
     WrapInFunction(tc);
@@ -735,18 +735,18 @@ TEST_F(ResolverTypeInitializerValidationTest, ArrayArgumentTypeMismatch_I32Vec2)
               R"(12:34 error: 'vec2<i32>' cannot be used to construct an array of 'i32')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArrayArgumentTypeMismatch_I32Vec2) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_I32Vec2) {
     // array(1i, vec2<i32>());
     auto* tc = array<Infer>(Source{{12, 34}}, 1_i, vec2<i32>());
     WrapInFunction(tc);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot infer common array element type from initializer arguments
+              R"(12:34 error: cannot infer common array element type from constructor arguments
 note: argument 0 is of type 'i32'
 note: argument 1 is of type 'vec2<i32>')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, ArrayArgumentTypeMismatch_Vec3i32_Vec3u32) {
+TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_Vec3i32_Vec3u32) {
     // array<vec3<i32>, 2u>(vec3<u32>(), vec3<u32>());
     auto* t = array(ty.vec3<i32>(), 2_u, vec3<u32>(Source{{12, 34}}), vec3<u32>());
     WrapInFunction(t);
@@ -756,31 +756,31 @@ TEST_F(ResolverTypeInitializerValidationTest, ArrayArgumentTypeMismatch_Vec3i32_
               R"(12:34 error: 'vec3<u32>' cannot be used to construct an array of 'vec3<i32>')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArrayArgumentTypeMismatch_Vec3i32_Vec3u32) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_Vec3i32_Vec3u32) {
     // array(vec3<i32>(), vec3<u32>());
     auto* t = array<Infer>(Source{{12, 34}}, vec3<i32>(), vec3<u32>());
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot infer common array element type from initializer arguments
+              R"(12:34 error: cannot infer common array element type from constructor arguments
 note: argument 0 is of type 'vec3<i32>'
 note: argument 1 is of type 'vec3<u32>')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArrayArgumentTypeMismatch_Vec3i32_Vec3AF) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_Vec3i32_Vec3AF) {
     // array(vec3<i32>(), vec3(1.0));
     auto* t = array<Infer>(Source{{12, 34}}, vec3<i32>(), Call("vec3", 1._a));
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot infer common array element type from initializer arguments
+              R"(12:34 error: cannot infer common array element type from constructor arguments
 note: argument 0 is of type 'vec3<i32>'
 note: argument 1 is of type 'vec3<abstract-float>')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, ArrayArgumentTypeMismatch_Vec3i32_Vec3bool) {
+TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_Vec3i32_Vec3bool) {
     // array<vec3<i32>, 2u>(vec3<i32>(), vec3<bool>());
     auto* t = array(ty.vec3<i32>(), 2_u, vec3<i32>(), vec3<bool>());
     WrapInFunction(t);
@@ -790,19 +790,19 @@ TEST_F(ResolverTypeInitializerValidationTest, ArrayArgumentTypeMismatch_Vec3i32_
               R"(error: 'vec3<bool>' cannot be used to construct an array of 'vec3<i32>')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArrayArgumentTypeMismatch_Vec3i32_Vec3bool) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_Vec3i32_Vec3bool) {
     // array(vec3<i32>(), vec3<bool>());
     auto* t = array<Infer>(Source{{12, 34}}, vec3<i32>(), vec3<bool>());
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot infer common array element type from initializer arguments
+              R"(12:34 error: cannot infer common array element type from constructor arguments
 note: argument 0 is of type 'vec3<i32>'
 note: argument 1 is of type 'vec3<bool>')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, ArrayOfArray_SubElemSizeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, ArrayOfArray_SubElemSizeMismatch) {
     // array<array<i32, 2u>, 2u>(array<i32, 3u>(), array<i32, 2u>());
     auto* t = array(Source{{12, 34}}, ty.array<i32, 2>(), 2_i, array<i32, 3>(), array<i32, 2>());
     WrapInFunction(t);
@@ -812,19 +812,19 @@ TEST_F(ResolverTypeInitializerValidationTest, ArrayOfArray_SubElemSizeMismatch) 
               R"(error: 'array<i32, 3>' cannot be used to construct an array of 'array<i32, 2>')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArrayOfArray_SubElemSizeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArrayOfArray_SubElemSizeMismatch) {
     // array<array<i32, 2u>, 2u>(array<i32, 3u>(), array<i32, 2u>());
     auto* t = array<Infer>(Source{{12, 34}}, array<i32, 3>(), array<i32, 2>());
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot infer common array element type from initializer arguments
+              R"(12:34 error: cannot infer common array element type from constructor arguments
 note: argument 0 is of type 'array<i32, 3>'
 note: argument 1 is of type 'array<i32, 2>')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, ArrayOfArray_SubElemTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, ArrayOfArray_SubElemTypeMismatch) {
     // array<array<i32, 2u>, 2u>(array<i32, 2u>(), array<u32, 2u>());
     auto* t = array(Source{{12, 34}}, ty.array<i32, 2>(), 2_i, array<i32, 2>(), array<u32, 2>());
     WrapInFunction(t);
@@ -834,19 +834,19 @@ TEST_F(ResolverTypeInitializerValidationTest, ArrayOfArray_SubElemTypeMismatch) 
               R"(error: 'array<u32, 2>' cannot be used to construct an array of 'array<i32, 2>')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferredArrayOfArray_SubElemTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, InferredArrayOfArray_SubElemTypeMismatch) {
     // array<array<i32, 2u>, 2u>(array<i32, 2u>(), array<u32, 2u>());
     auto* t = array<Infer>(Source{{12, 34}}, array<i32, 2>(), array<u32, 2>());
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot infer common array element type from initializer arguments
+              R"(12:34 error: cannot infer common array element type from constructor arguments
 note: argument 0 is of type 'array<i32, 2>'
 note: argument 1 is of type 'array<u32, 2>')");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Array_TooFewElements) {
+TEST_F(ResolverValueConstructorValidationTest, Array_TooFewElements) {
     // array<i32, 4u>(1i, 2i, 3i);
     SetSource(Source::Location({12, 34}));
     auto* tc = array<i32, 4>(Expr(1_i), Expr(2_i), Expr(3_i));
@@ -854,10 +854,10 @@ TEST_F(ResolverTypeInitializerValidationTest, Array_TooFewElements) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array initializer has too few elements: expected 4, found 3");
+              "12:34 error: array constructor has too few elements: expected 4, found 3");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Array_TooManyElements) {
+TEST_F(ResolverValueConstructorValidationTest, Array_TooManyElements) {
     // array<i32, 4u>(1i, 2i, 3i, 4i, 5i);
     SetSource(Source::Location({12, 34}));
     auto* tc = array<i32, 4>(Expr(1_i), Expr(2_i), Expr(3_i), Expr(4_i), Expr(5_i));
@@ -865,12 +865,12 @@ TEST_F(ResolverTypeInitializerValidationTest, Array_TooManyElements) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array initializer has too many "
+              "12:34 error: array constructor has too many "
               "elements: expected 4, "
               "found 5");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Array_Runtime) {
+TEST_F(ResolverValueConstructorValidationTest, Array_Runtime) {
     // array<i32>(1i);
     auto* tc = array<i32>(Source{{12, 34}}, Expr(1_i));
     WrapInFunction(tc);
@@ -879,7 +879,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Array_Runtime) {
     EXPECT_EQ(r()->error(), "12:34 error: cannot construct a runtime-sized array");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Array_RuntimeZeroValue) {
+TEST_F(ResolverValueConstructorValidationTest, Array_RuntimeZeroValue) {
     // array<i32>();
     auto* tc = array<i32>(Source{{12, 34}});
     WrapInFunction(tc);
@@ -888,11 +888,11 @@ TEST_F(ResolverTypeInitializerValidationTest, Array_RuntimeZeroValue) {
     EXPECT_EQ(r()->error(), "12:34 error: cannot construct a runtime-sized array");
 }
 
-}  // namespace ArrayInitializer
+}  // namespace ArrayConstructor
 
-namespace ScalarInitializer {
+namespace ScalarConstructor {
 
-TEST_F(ResolverTypeInitializerValidationTest, I32_Success) {
+TEST_F(ResolverValueConstructorValidationTest, I32_Success) {
     auto* expr = Call<i32>(Expr(123_i));
     WrapInFunction(expr);
 
@@ -903,14 +903,14 @@ TEST_F(ResolverTypeInitializerValidationTest, I32_Success) {
 
     auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 1u);
     EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<type::I32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, U32_Success) {
+TEST_F(ResolverValueConstructorValidationTest, U32_Success) {
     auto* expr = Call<u32>(Expr(123_u));
     WrapInFunction(expr);
 
@@ -921,14 +921,14 @@ TEST_F(ResolverTypeInitializerValidationTest, U32_Success) {
 
     auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 1u);
     EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<type::U32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, F32_Success) {
+TEST_F(ResolverValueConstructorValidationTest, F32_Success) {
     auto* expr = Call<f32>(Expr(1.23_f));
     WrapInFunction(expr);
 
@@ -939,14 +939,14 @@ TEST_F(ResolverTypeInitializerValidationTest, F32_Success) {
 
     auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 1u);
     EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<type::F32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, F16_Success) {
+TEST_F(ResolverValueConstructorValidationTest, F16_Success) {
     Enable(builtin::Extension::kF16);
 
     auto* expr = Call<f16>(Expr(1.5_h));
@@ -959,14 +959,14 @@ TEST_F(ResolverTypeInitializerValidationTest, F16_Success) {
 
     auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 1u);
     EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<type::F16>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Convert_f32_to_i32_Success) {
+TEST_F(ResolverValueConstructorValidationTest, Convert_f32_to_i32_Success) {
     auto* expr = Call<i32>(1.23_f);
     WrapInFunction(expr);
 
@@ -977,14 +977,14 @@ TEST_F(ResolverTypeInitializerValidationTest, Convert_f32_to_i32_Success) {
 
     auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeConversion>();
+    auto* ctor = call->Target()->As<sem::ValueConversion>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 1u);
     EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<type::F32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Convert_i32_to_u32_Success) {
+TEST_F(ResolverValueConstructorValidationTest, Convert_i32_to_u32_Success) {
     auto* expr = Call<u32>(123_i);
     WrapInFunction(expr);
 
@@ -995,14 +995,14 @@ TEST_F(ResolverTypeInitializerValidationTest, Convert_i32_to_u32_Success) {
 
     auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeConversion>();
+    auto* ctor = call->Target()->As<sem::ValueConversion>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 1u);
     EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<type::I32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Convert_u32_to_f16_Success) {
+TEST_F(ResolverValueConstructorValidationTest, Convert_u32_to_f16_Success) {
     Enable(builtin::Extension::kF16);
 
     auto* expr = Call<f16>(123_u);
@@ -1015,14 +1015,14 @@ TEST_F(ResolverTypeInitializerValidationTest, Convert_u32_to_f16_Success) {
 
     auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeConversion>();
+    auto* ctor = call->Target()->As<sem::ValueConversion>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 1u);
     EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<type::U32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Convert_f16_to_f32_Success) {
+TEST_F(ResolverValueConstructorValidationTest, Convert_f16_to_f32_Success) {
     Enable(builtin::Extension::kF16);
 
     auto* expr = Call<f32>(123_h);
@@ -1035,109 +1035,109 @@ TEST_F(ResolverTypeInitializerValidationTest, Convert_f16_to_f32_Success) {
 
     auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeConversion>();
+    auto* ctor = call->Target()->As<sem::ValueConversion>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 1u);
     EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<type::F16>());
 }
 
-}  // namespace ScalarInitializer
+}  // namespace ScalarConstructor
 
-namespace VectorInitializer {
+namespace VectorConstructor {
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2F32_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2F32_Error_ScalarArgumentTypeMismatch) {
     WrapInFunction(vec2<f32>(Source{{12, 34}}, 1_i, 2_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec2<f32>(i32, f32)"));
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(i32, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2F16_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2F16_Error_ScalarArgumentTypeMismatch) {
     Enable(builtin::Extension::kF16);
 
     WrapInFunction(vec2<f16>(Source{{12, 34}}, 1_h, 2_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec2<f16>(f16, f32)"));
+                HasSubstr("12:34 error: no matching constructor for vec2<f16>(f16, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2U32_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2U32_Error_ScalarArgumentTypeMismatch) {
     WrapInFunction(vec2<u32>(Source{{12, 34}}, 1_u, 2_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec2<u32>(u32, i32)"));
+                HasSubstr("12:34 error: no matching constructor for vec2<u32>(u32, i32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2I32_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2I32_Error_ScalarArgumentTypeMismatch) {
     WrapInFunction(vec2<i32>(Source{{12, 34}}, 1_u, 2_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec2<i32>(u32, i32)"));
+                HasSubstr("12:34 error: no matching constructor for vec2<i32>(u32, i32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2Bool_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2Bool_Error_ScalarArgumentTypeMismatch) {
     WrapInFunction(vec2<bool>(Source{{12, 34}}, true, 1_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec2<bool>(bool, i32)"));
+                HasSubstr("12:34 error: no matching constructor for vec2<bool>(bool, i32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2_Error_Vec3ArgumentCardinalityTooLarge) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_Vec3ArgumentCardinalityTooLarge) {
     WrapInFunction(vec2<f32>(Source{{12, 34}}, vec3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec2<f32>(vec3<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(vec3<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2_Error_Vec4ArgumentCardinalityTooLarge) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_Vec4ArgumentCardinalityTooLarge) {
     WrapInFunction(vec2<f32>(Source{{12, 34}}, vec4<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec2<f32>(vec4<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(vec4<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2_Error_TooManyArgumentsScalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsScalar) {
     WrapInFunction(vec2<f32>(Source{{12, 34}}, 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec2<f32>(f32, f32, f32)"));
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(f32, f32, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2_Error_TooManyArgumentsVector) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsVector) {
     WrapInFunction(vec2<f32>(Source{{12, 34}}, vec2<f32>(), vec2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec2<f32>(vec2<f32>, vec2<f32>)"));
+        HasSubstr("12:34 error: no matching constructor for vec2<f32>(vec2<f32>, vec2<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2_Error_TooManyArgumentsVectorAndScalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsVectorAndScalar) {
     WrapInFunction(vec2<f32>(Source{{12, 34}}, vec2<f32>(), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec2<f32>(vec2<f32>, f32)"));
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(vec2<f32>, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2_Error_InvalidArgumentType) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_InvalidArgumentType) {
     WrapInFunction(vec2<f32>(Source{{12, 34}}, mat2x2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec2<f32>(mat2x2<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(mat2x2<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2_Success_ZeroValue) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2_Success_ZeroValue) {
     auto* tc = vec2<f32>();
     WrapInFunction(tc);
 
@@ -1150,13 +1150,13 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2_Success_ZeroValue) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 0u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2F32_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2F32_Success_Scalar) {
     auto* tc = vec2<f32>(1_f, 1_f);
     WrapInFunction(tc);
 
@@ -1169,7 +1169,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2F32_Success_Scalar) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -1177,7 +1177,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2F32_Success_Scalar) {
     EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<type::F32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2F16_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2F16_Success_Scalar) {
     Enable(builtin::Extension::kF16);
 
     auto* tc = vec2<f16>(1_h, 1_h);
@@ -1192,7 +1192,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2F16_Success_Scalar) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -1200,7 +1200,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2F16_Success_Scalar) {
     EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<type::F16>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2U32_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2U32_Success_Scalar) {
     auto* tc = vec2<u32>(1_u, 1_u);
     WrapInFunction(tc);
 
@@ -1213,7 +1213,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2U32_Success_Scalar) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -1221,7 +1221,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2U32_Success_Scalar) {
     EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<type::U32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2I32_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2I32_Success_Scalar) {
     auto* tc = vec2<i32>(1_i, 1_i);
     WrapInFunction(tc);
 
@@ -1234,7 +1234,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2I32_Success_Scalar) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -1242,7 +1242,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2I32_Success_Scalar) {
     EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<type::I32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2Bool_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2Bool_Success_Scalar) {
     auto* tc = vec2<bool>(true, false);
     WrapInFunction(tc);
 
@@ -1255,7 +1255,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2Bool_Success_Scalar) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -1263,7 +1263,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2Bool_Success_Scalar) {
     EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<type::Bool>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2_Success_Identity) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2_Success_Identity) {
     auto* tc = vec2<f32>(vec2<f32>());
     WrapInFunction(tc);
 
@@ -1276,14 +1276,14 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2_Success_Identity) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 1u);
     EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<type::Vector>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec2_Success_Vec2TypeConversion) {
+TEST_F(ResolverValueConstructorValidationTest, Vec2_Success_Vec2TypeConversion) {
     auto* tc = vec2<f32>(vec2<i32>());
     WrapInFunction(tc);
 
@@ -1296,123 +1296,123 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec2_Success_Vec2TypeConversion) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeConversion>();
+    auto* ctor = call->Target()->As<sem::ValueConversion>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 1u);
     EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<type::Vector>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3F32_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3F32_Error_ScalarArgumentTypeMismatch) {
     WrapInFunction(vec3<f32>(Source{{12, 34}}, 1_f, 2_f, 3_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec3<f32>(f32, f32, i32)"));
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(f32, f32, i32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3F16_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3F16_Error_ScalarArgumentTypeMismatch) {
     Enable(builtin::Extension::kF16);
 
     WrapInFunction(vec3<f16>(Source{{12, 34}}, 1_h, 2_h, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec3<f16>(f16, f16, f32)"));
+                HasSubstr("12:34 error: no matching constructor for vec3<f16>(f16, f16, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3U32_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3U32_Error_ScalarArgumentTypeMismatch) {
     WrapInFunction(vec3<u32>(Source{{12, 34}}, 1_u, 2_i, 3_u));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec3<u32>(u32, i32, u32)"));
+                HasSubstr("12:34 error: no matching constructor for vec3<u32>(u32, i32, u32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3I32_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3I32_Error_ScalarArgumentTypeMismatch) {
     WrapInFunction(vec3<i32>(Source{{12, 34}}, 1_i, 2_u, 3_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec3<i32>(i32, u32, i32)"));
+                HasSubstr("12:34 error: no matching constructor for vec3<i32>(i32, u32, i32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3Bool_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3Bool_Error_ScalarArgumentTypeMismatch) {
     WrapInFunction(vec3<bool>(Source{{12, 34}}, false, 1_i, true));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec3<bool>(bool, i32, bool)"));
+                HasSubstr("12:34 error: no matching constructor for vec3<bool>(bool, i32, bool)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3_Error_Vec4ArgumentCardinalityTooLarge) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_Vec4ArgumentCardinalityTooLarge) {
     WrapInFunction(vec3<f32>(Source{{12, 34}}, vec4<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec3<f32>(vec4<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec4<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3_Error_TooFewArgumentsScalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooFewArgumentsScalar) {
     WrapInFunction(vec3<f32>(Source{{12, 34}}, 1_f, 2_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec3<f32>(f32, f32)"));
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(f32, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3_Error_TooManyArgumentsScalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsScalar) {
     WrapInFunction(vec3<f32>(Source{{12, 34}}, 1_f, 2_f, 3_f, 4_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec3<f32>(f32, f32, f32, f32)"));
+        HasSubstr("12:34 error: no matching constructor for vec3<f32>(f32, f32, f32, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3_Error_TooFewArgumentsVec2) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooFewArgumentsVec2) {
     WrapInFunction(vec3<f32>(Source{{12, 34}}, vec2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec3<f32>(vec2<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec2<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3_Error_TooManyArgumentsVec2) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec2) {
     WrapInFunction(vec3<f32>(Source{{12, 34}}, vec2<f32>(), vec2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec3<f32>(vec2<f32>, vec2<f32>)"));
+        HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec2<f32>, vec2<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3_Error_TooManyArgumentsVec2AndScalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec2AndScalar) {
     WrapInFunction(vec3<f32>(Source{{12, 34}}, vec2<f32>(), 1_f, 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec3<f32>(vec2<f32>, f32, f32)"));
+        HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec2<f32>, f32, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3_Error_TooManyArgumentsVec3) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec3) {
     WrapInFunction(vec3<f32>(Source{{12, 34}}, vec3<f32>(), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec3<f32>(vec3<f32>, f32)"));
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec3<f32>, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3_Error_InvalidArgumentType) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_InvalidArgumentType) {
     WrapInFunction(vec3<f32>(Source{{12, 34}}, mat2x2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec3<f32>(mat2x2<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(mat2x2<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3_Success_ZeroValue) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_ZeroValue) {
     auto* tc = vec3<f32>();
     WrapInFunction(tc);
 
@@ -1425,13 +1425,13 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3_Success_ZeroValue) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 0u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3F32_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3F32_Success_Scalar) {
     auto* tc = vec3<f32>(1_f, 1_f, 1_f);
     WrapInFunction(tc);
 
@@ -1444,7 +1444,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3F32_Success_Scalar) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -1453,7 +1453,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3F32_Success_Scalar) {
     EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<type::F32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3F16_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3F16_Success_Scalar) {
     Enable(builtin::Extension::kF16);
 
     auto* tc = vec3<f16>(1_h, 1_h, 1_h);
@@ -1468,7 +1468,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3F16_Success_Scalar) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -1477,7 +1477,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3F16_Success_Scalar) {
     EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<type::F16>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3U32_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3U32_Success_Scalar) {
     auto* tc = vec3<u32>(1_u, 1_u, 1_u);
     WrapInFunction(tc);
 
@@ -1490,7 +1490,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3U32_Success_Scalar) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -1499,7 +1499,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3U32_Success_Scalar) {
     EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<type::U32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3I32_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3I32_Success_Scalar) {
     auto* tc = vec3<i32>(1_i, 1_i, 1_i);
     WrapInFunction(tc);
 
@@ -1512,7 +1512,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3I32_Success_Scalar) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -1521,7 +1521,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3I32_Success_Scalar) {
     EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<type::I32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3Bool_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3Bool_Success_Scalar) {
     auto* tc = vec3<bool>(true, false, true);
     WrapInFunction(tc);
 
@@ -1534,7 +1534,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3Bool_Success_Scalar) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -1543,7 +1543,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3Bool_Success_Scalar) {
     EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<type::Bool>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3_Success_Vec2AndScalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_Vec2AndScalar) {
     auto* tc = vec3<f32>(vec2<f32>(), 1_f);
     WrapInFunction(tc);
 
@@ -1556,7 +1556,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3_Success_Vec2AndScalar) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -1564,7 +1564,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3_Success_Vec2AndScalar) {
     EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<type::F32>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3_Success_ScalarAndVec2) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_ScalarAndVec2) {
     auto* tc = vec3<f32>(1_f, vec2<f32>());
     WrapInFunction(tc);
 
@@ -1577,7 +1577,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3_Success_ScalarAndVec2) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -1585,7 +1585,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3_Success_ScalarAndVec2) {
     EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<type::Vector>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3_Success_Identity) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_Identity) {
     auto* tc = vec3<f32>(vec3<f32>());
     WrapInFunction(tc);
 
@@ -1598,14 +1598,14 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3_Success_Identity) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeInitializer>();
+    auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 1u);
     EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<type::Vector>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec3_Success_Vec3TypeConversion) {
+TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_Vec3TypeConversion) {
     auto* tc = vec3<f32>(vec3<i32>());
     WrapInFunction(tc);
 
@@ -1618,23 +1618,23 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec3_Success_Vec3TypeConversion) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    auto* ctor = call->Target()->As<sem::TypeConversion>();
+    auto* ctor = call->Target()->As<sem::ValueConversion>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
     ASSERT_EQ(ctor->Parameters().Length(), 1u);
     EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<type::Vector>());
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4F32_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4F32_Error_ScalarArgumentTypeMismatch) {
     WrapInFunction(vec4<f32>(Source{{12, 34}}, 1_f, 1_f, 1_i, 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec4<f32>(f32, f32, i32, f32)"));
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(f32, f32, i32, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4F16_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4F16_Error_ScalarArgumentTypeMismatch) {
     Enable(builtin::Extension::kF16);
 
     WrapInFunction(vec4<f16>(Source{{12, 34}}, 1_h, 1_h, 1_f, 1_h));
@@ -1642,142 +1642,142 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4F16_Error_ScalarArgumentTypeMi
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec4<f16>(f16, f16, f32, f16)"));
+        HasSubstr("12:34 error: no matching constructor for vec4<f16>(f16, f16, f32, f16)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4U32_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4U32_Error_ScalarArgumentTypeMismatch) {
     WrapInFunction(vec4<u32>(Source{{12, 34}}, 1_u, 1_u, 1_i, 1_u));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec4<u32>(u32, u32, i32, u32)"));
+        HasSubstr("12:34 error: no matching constructor for vec4<u32>(u32, u32, i32, u32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4I32_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4I32_Error_ScalarArgumentTypeMismatch) {
     WrapInFunction(vec4<i32>(Source{{12, 34}}, 1_i, 1_i, 1_u, 1_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec4<i32>(i32, i32, u32, i32)"));
+        HasSubstr("12:34 error: no matching constructor for vec4<i32>(i32, i32, u32, i32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4Bool_Error_ScalarArgumentTypeMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4Bool_Error_ScalarArgumentTypeMismatch) {
     WrapInFunction(vec4<bool>(Source{{12, 34}}, true, false, 1_i, true));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec4<bool>(bool, bool, i32, bool)"));
+        HasSubstr("12:34 error: no matching constructor for vec4<bool>(bool, bool, i32, bool)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Error_TooFewArgumentsScalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsScalar) {
     WrapInFunction(vec4<f32>(Source{{12, 34}}, 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec4<f32>(f32, f32, f32)"));
+                HasSubstr("12:34 error: no matching constructor for vec4<f32>(f32, f32, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Error_TooManyArgumentsScalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsScalar) {
     WrapInFunction(vec4<f32>(Source{{12, 34}}, 1_f, 2_f, 3_f, 4_f, 5_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec4<f32>(f32, f32, f32, f32, f32)"));
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(f32, f32, f32, f32, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Error_TooFewArgumentsVec2AndScalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsVec2AndScalar) {
     WrapInFunction(vec4<f32>(Source{{12, 34}}, vec2<f32>(), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec4<f32>(vec2<f32>, f32)"));
+                HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec2<f32>, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Error_TooManyArgumentsVec2AndScalars) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2AndScalars) {
     WrapInFunction(vec4<f32>(Source{{12, 34}}, vec2<f32>(), 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec4<f32>(vec2<f32>, f32, f32, f32)"));
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec2<f32>, f32, f32, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Error_TooManyArgumentsVec2Vec2Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2Vec2Scalar) {
     WrapInFunction(vec4<f32>(Source{{12, 34}}, vec2<f32>(), vec2<f32>(), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec4<f32>(vec2<f32>, vec2<f32>, f32)"));
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec2<f32>, vec2<f32>, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Error_TooManyArgumentsVec2Vec2Vec2) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2Vec2Vec2) {
     WrapInFunction(vec4<f32>(Source{{12, 34}}, vec2<f32>(), vec2<f32>(), vec2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
         HasSubstr(
-            "12:34 error: no matching initializer for vec4<f32>(vec2<f32>, vec2<f32>, vec2<f32>)"));
+            "12:34 error: no matching constructor for vec4<f32>(vec2<f32>, vec2<f32>, vec2<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Error_TooFewArgumentsVec3) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsVec3) {
     WrapInFunction(vec4<f32>(Source{{12, 34}}, vec3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec4<f32>(vec3<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec3<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Error_TooManyArgumentsVec3AndScalars) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3AndScalars) {
     WrapInFunction(vec4<f32>(Source{{12, 34}}, vec3<f32>(), 1_f, 2_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec4<f32>(vec3<f32>, f32, f32)"));
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec3<f32>, f32, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Error_TooManyArgumentsVec3AndVec2) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3AndVec2) {
     WrapInFunction(vec4<f32>(Source{{12, 34}}, vec3<f32>(), vec2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec4<f32>(vec3<f32>, vec2<f32>)"));
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec3<f32>, vec2<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Error_TooManyArgumentsVec2AndVec3) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2AndVec3) {
     WrapInFunction(vec4<f32>(Source{{12, 34}}, vec2<f32>(), vec3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec4<f32>(vec2<f32>, vec3<f32>)"));
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec2<f32>, vec3<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Error_TooManyArgumentsVec3AndVec3) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3AndVec3) {
     WrapInFunction(vec4<f32>(Source{{12, 34}}, vec3<f32>(), vec3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for vec4<f32>(vec3<f32>, vec3<f32>)"));
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec3<f32>, vec3<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Error_InvalidArgumentType) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_InvalidArgumentType) {
     WrapInFunction(vec4<f32>(Source{{12, 34}}, mat2x2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec4<f32>(mat2x2<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for vec4<f32>(mat2x2<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_ZeroValue) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ZeroValue) {
     auto* tc = vec4<f32>();
     WrapInFunction(tc);
 
@@ -1789,7 +1789,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_ZeroValue) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4F32_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4F32_Success_Scalar) {
     auto* tc = vec4<f32>(1_f, 1_f, 1_f, 1_f);
     WrapInFunction(tc);
 
@@ -1801,7 +1801,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4F32_Success_Scalar) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4F16_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4F16_Success_Scalar) {
     Enable(builtin::Extension::kF16);
 
     auto* tc = vec4<f16>(1_h, 1_h, 1_h, 1_h);
@@ -1815,7 +1815,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4F16_Success_Scalar) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4U32_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4U32_Success_Scalar) {
     auto* tc = vec4<u32>(1_u, 1_u, 1_u, 1_u);
     WrapInFunction(tc);
 
@@ -1827,7 +1827,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4U32_Success_Scalar) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4I32_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4I32_Success_Scalar) {
     auto* tc = vec4<i32>(1_i, 1_i, 1_i, 1_i);
     WrapInFunction(tc);
 
@@ -1839,7 +1839,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4I32_Success_Scalar) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4Bool_Success_Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4Bool_Success_Scalar) {
     auto* tc = vec4<bool>(true, false, true, false);
     WrapInFunction(tc);
 
@@ -1851,7 +1851,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4Bool_Success_Scalar) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_Vec2ScalarScalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec2ScalarScalar) {
     auto* tc = vec4<f32>(vec2<f32>(), 1_f, 1_f);
     WrapInFunction(tc);
 
@@ -1863,7 +1863,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_Vec2ScalarScalar) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_ScalarVec2Scalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ScalarVec2Scalar) {
     auto* tc = vec4<f32>(1_f, vec2<f32>(), 1_f);
     WrapInFunction(tc);
 
@@ -1875,7 +1875,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_ScalarVec2Scalar) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_ScalarScalarVec2) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ScalarScalarVec2) {
     auto* tc = vec4<f32>(1_f, 1_f, vec2<f32>());
     WrapInFunction(tc);
 
@@ -1887,7 +1887,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_ScalarScalarVec2) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_Vec2AndVec2) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec2AndVec2) {
     auto* tc = vec4<f32>(vec2<f32>(), vec2<f32>());
     WrapInFunction(tc);
 
@@ -1899,7 +1899,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_Vec2AndVec2) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_Vec3AndScalar) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec3AndScalar) {
     auto* tc = vec4<f32>(vec3<f32>(), 1_f);
     WrapInFunction(tc);
 
@@ -1911,7 +1911,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_Vec3AndScalar) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_ScalarAndVec3) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ScalarAndVec3) {
     auto* tc = vec4<f32>(1_f, vec3<f32>());
     WrapInFunction(tc);
 
@@ -1923,7 +1923,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_ScalarAndVec3) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_Identity) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Identity) {
     auto* tc = vec4<f32>(vec4<f32>());
     WrapInFunction(tc);
 
@@ -1935,7 +1935,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_Identity) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_Vec4TypeConversion) {
+TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec4TypeConversion) {
     auto* tc = vec4<f32>(vec4<i32>());
     WrapInFunction(tc);
 
@@ -1947,17 +1947,17 @@ TEST_F(ResolverTypeInitializerValidationTest, Vec4_Success_Vec4TypeConversion) {
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, NestedVectorInitializers_InnerError) {
+TEST_F(ResolverValueConstructorValidationTest, NestedVectorConstructors_InnerError) {
     WrapInFunction(vec4<f32>(vec4<f32>(1_f, 1_f,  //
                                        vec3<f32>(Source{{12, 34}}, 1_f, 1_f)),
                              1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec3<f32>(f32, f32)"));
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(f32, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, NestedVectorInitializers_Success) {
+TEST_F(ResolverValueConstructorValidationTest, NestedVectorConstructors_Success) {
     auto* tc = vec4<f32>(vec3<f32>(vec2<f32>(1_f, 1_f), 1_f), 1_f);
     WrapInFunction(tc);
 
@@ -1969,7 +1969,7 @@ TEST_F(ResolverTypeInitializerValidationTest, NestedVectorInitializers_Success) 
     EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vector_Alias_Argument_Error) {
+TEST_F(ResolverValueConstructorValidationTest, Vector_Alias_Argument_Error) {
     auto* alias = Alias("UnsignedInt", ty.u32());
     GlobalVar("uint_var", ty.Of(alias), builtin::AddressSpace::kPrivate);
 
@@ -1977,10 +1977,10 @@ TEST_F(ResolverTypeInitializerValidationTest, Vector_Alias_Argument_Error) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for vec2<f32>(u32)"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for vec2<f32>(u32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vector_Alias_Argument_Success) {
+TEST_F(ResolverValueConstructorValidationTest, Vector_Alias_Argument_Success) {
     auto* f32_alias = Alias("Float32", ty.f32());
     auto* vec2_alias = Alias("VectorFloat2", ty.vec2<f32>());
     GlobalVar("my_f32", ty.Of(f32_alias), builtin::AddressSpace::kPrivate);
@@ -1991,7 +1991,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vector_Alias_Argument_Success) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vector_ElementTypeAlias_Error) {
+TEST_F(ResolverValueConstructorValidationTest, Vector_ElementTypeAlias_Error) {
     auto* f32_alias = Alias("Float32", ty.f32());
 
     // vec2<Float32>(1.0f, 1u)
@@ -2000,10 +2000,10 @@ TEST_F(ResolverTypeInitializerValidationTest, Vector_ElementTypeAlias_Error) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec2<f32>(f32, u32)"));
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(f32, u32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vector_ElementTypeAlias_Success) {
+TEST_F(ResolverValueConstructorValidationTest, Vector_ElementTypeAlias_Success) {
     auto* f32_alias = Alias("Float32", ty.f32());
 
     // vec2<Float32>(1.0f, 1.0f)
@@ -2014,7 +2014,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vector_ElementTypeAlias_Success) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vector_ArgumentElementTypeAlias_Error) {
+TEST_F(ResolverValueConstructorValidationTest, Vector_ArgumentElementTypeAlias_Error) {
     auto* f32_alias = Alias("Float32", ty.f32());
 
     // vec3<u32>(vec<Float32>(), 1.0f)
@@ -2023,10 +2023,10 @@ TEST_F(ResolverTypeInitializerValidationTest, Vector_ArgumentElementTypeAlias_Er
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching initializer for vec3<u32>(vec2<f32>, f32)"));
+                HasSubstr("12:34 error: no matching constructor for vec3<u32>(vec2<f32>, f32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Vector_ArgumentElementTypeAlias_Success) {
+TEST_F(ResolverValueConstructorValidationTest, Vector_ArgumentElementTypeAlias_Success) {
     auto* f32_alias = Alias("Float32", ty.f32());
 
     // vec3<f32>(vec<Float32>(), 1.0f)
@@ -2037,7 +2037,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Vector_ArgumentElementTypeAlias_Su
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferVec2ElementTypeFromScalars) {
+TEST_F(ResolverValueConstructorValidationTest, InferVec2ElementTypeFromScalars) {
     Enable(builtin::Extension::kF16);
 
     auto* vec2_bool = vec2<Infer>(true, false);
@@ -2066,7 +2066,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec2ElementTypeFromScalars) {
     EXPECT_EQ(TypeOf(vec2_f16)->As<type::Vector>()->Width(), 2u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferVec2ElementTypeFromVec2) {
+TEST_F(ResolverValueConstructorValidationTest, InferVec2ElementTypeFromVec2) {
     Enable(builtin::Extension::kF16);
 
     auto* vec2_bool = vec2<Infer>(vec2<bool>(true, false));
@@ -2095,7 +2095,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec2ElementTypeFromVec2) {
     EXPECT_EQ(TypeOf(vec2_f16)->As<type::Vector>()->Width(), 2u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromScalars) {
+TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromScalars) {
     Enable(builtin::Extension::kF16);
 
     auto* vec3_bool = vec3<Infer>(Expr(true), Expr(false), Expr(true));
@@ -2124,7 +2124,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromScalars) {
     EXPECT_EQ(TypeOf(vec3_f16)->As<type::Vector>()->Width(), 3u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromVec3) {
+TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromVec3) {
     Enable(builtin::Extension::kF16);
 
     auto* vec3_bool = vec3<Infer>(vec3<bool>(true, false, true));
@@ -2153,7 +2153,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromVec3) {
     EXPECT_EQ(TypeOf(vec3_f16)->As<type::Vector>()->Width(), 3u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromScalarAndVec2) {
+TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromScalarAndVec2) {
     Enable(builtin::Extension::kF16);
 
     auto* vec3_bool = vec3<Infer>(Expr(true), vec2<bool>(false, true));
@@ -2182,7 +2182,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec3ElementTypeFromScalarAndV
     EXPECT_EQ(TypeOf(vec3_f16)->As<type::Vector>()->Width(), 3u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromScalars) {
+TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromScalars) {
     Enable(builtin::Extension::kF16);
 
     auto* vec4_bool = vec4<Infer>(Expr(true), Expr(false), Expr(true), Expr(false));
@@ -2211,7 +2211,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromScalars) {
     EXPECT_EQ(TypeOf(vec4_f16)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromVec4) {
+TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromVec4) {
     Enable(builtin::Extension::kF16);
 
     auto* vec4_bool = vec4<Infer>(vec4<bool>(true, false, true, false));
@@ -2240,7 +2240,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromVec4) {
     EXPECT_EQ(TypeOf(vec4_f16)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromScalarAndVec3) {
+TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromScalarAndVec3) {
     Enable(builtin::Extension::kF16);
 
     auto* vec4_bool = vec4<Infer>(Expr(true), vec3<bool>(false, true, false));
@@ -2269,7 +2269,7 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromScalarAndV
     EXPECT_EQ(TypeOf(vec4_f16)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromVec2AndVec2) {
+TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromVec2AndVec2) {
     Enable(builtin::Extension::kF16);
 
     auto* vec4_bool = vec4<Infer>(vec2<bool>(true, false), vec2<bool>(true, false));
@@ -2298,23 +2298,23 @@ TEST_F(ResolverTypeInitializerValidationTest, InferVec4ElementTypeFromVec2AndVec
     EXPECT_EQ(TypeOf(vec4_f16)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, CannotInferVectorElementTypeWithoutArgs) {
+TEST_F(ResolverValueConstructorValidationTest, CannotInferVectorElementTypeWithoutArgs) {
     WrapInFunction(Call(Source{{12, 34}}, "vec3"));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for vec3()"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for vec3()"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec2ElementTypeFromScalarsMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, CannotInferVec2ElementTypeFromScalarsMismatch) {
     WrapInFunction(Call(Source{{1, 1}}, "vec2",     //
                         Expr(Source{{1, 2}}, 1_i),  //
                         Expr(Source{{1, 3}}, 2_u)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("1:1 error: no matching initializer for vec2(i32, u32)"));
+    EXPECT_THAT(r()->error(), HasSubstr("1:1 error: no matching constructor for vec2(i32, u32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec3ElementTypeFromScalarsMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, CannotInferVec3ElementTypeFromScalarsMismatch) {
     WrapInFunction(Call(Source{{1, 1}}, "vec3",     //
                         Expr(Source{{1, 2}}, 1_i),  //
                         Expr(Source{{1, 3}}, 2_u),  //
@@ -2322,20 +2322,21 @@ TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec3ElementTypeFromScal
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("1:1 error: no matching initializer for vec3(i32, u32, i32)"));
+                HasSubstr("1:1 error: no matching constructor for vec3(i32, u32, i32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec3ElementTypeFromScalarAndVec2Mismatch) {
+TEST_F(ResolverValueConstructorValidationTest,
+       CannotInferVec3ElementTypeFromScalarAndVec2Mismatch) {
     WrapInFunction(Call(Source{{1, 1}}, "vec3",     //
                         Expr(Source{{1, 2}}, 1_i),  //
                         Call(Source{{1, 3}}, ty.vec2<f32>(), 2_f, 3_f)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("1:1 error: no matching initializer for vec3(i32, vec2<f32>)"));
+                HasSubstr("1:1 error: no matching constructor for vec3(i32, vec2<f32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec4ElementTypeFromScalarsMismatch) {
+TEST_F(ResolverValueConstructorValidationTest, CannotInferVec4ElementTypeFromScalarsMismatch) {
     WrapInFunction(Call(Source{{1, 1}}, "vec4",     //
                         Expr(Source{{1, 2}}, 1_i),  //
                         Expr(Source{{1, 3}}, 2_i),  //
@@ -2344,32 +2345,33 @@ TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec4ElementTypeFromScal
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("1:1 error: no matching initializer for vec4(i32, i32, f32, i32)"));
+                HasSubstr("1:1 error: no matching constructor for vec4(i32, i32, f32, i32)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec4ElementTypeFromScalarAndVec3Mismatch) {
+TEST_F(ResolverValueConstructorValidationTest,
+       CannotInferVec4ElementTypeFromScalarAndVec3Mismatch) {
     WrapInFunction(Call(Source{{1, 1}}, "vec4",     //
                         Expr(Source{{1, 2}}, 1_i),  //
                         Call(Source{{1, 3}}, ty.vec3<u32>(), 2_u, 3_u, 4_u)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("1:1 error: no matching initializer for vec4(i32, vec3<u32>)"));
+                HasSubstr("1:1 error: no matching constructor for vec4(i32, vec3<u32>)"));
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, CannotInferVec4ElementTypeFromVec2AndVec2Mismatch) {
+TEST_F(ResolverValueConstructorValidationTest, CannotInferVec4ElementTypeFromVec2AndVec2Mismatch) {
     WrapInFunction(Call(Source{{1, 1}}, "vec4",                          //
                         Call(Source{{1, 2}}, ty.vec2<i32>(), 3_i, 4_i),  //
                         Call(Source{{1, 3}}, ty.vec2<u32>(), 3_u, 4_u)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("1:1 error: no matching initializer for vec4(vec2<i32>, vec2<u32>)"));
+                HasSubstr("1:1 error: no matching constructor for vec4(vec2<i32>, vec2<u32>)"));
 }
 
-}  // namespace VectorInitializer
+}  // namespace VectorConstructor
 
-namespace MatrixInitializer {
+namespace MatrixConstructor {
 
 struct MatrixParams {
     using name_func_ptr = std::string (*)();
@@ -2401,9 +2403,9 @@ static std::string MatrixStr(const MatrixParams& param) {
            param.get_element_type_name() + ">";
 }
 
-using MatrixInitializerTest = ResolverTestWithParam<MatrixParams>;
+using MatrixConstructorTest = ResolverTestWithParam<MatrixParams>;
 
-TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooFewArguments) {
+TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooFewArguments) {
     // matNxM<f32>(vecM<f32>(), ...); with N - 1 arguments
     // matNxM<f16>(vecM<f16>(), ...); with N - 1 arguments
 
@@ -2428,11 +2430,11 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooFewArguments) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for " +
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
                                         MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
-TEST_P(MatrixInitializerTest, ElementInitializer_Error_TooFewArguments) {
+TEST_P(MatrixConstructorTest, ElementConstructor_Error_TooFewArguments) {
     // matNxM<f32>(f32,...,f32); with N*M - 1 arguments
     // matNxM<f16>(f16,...,f16); with N*M - 1 arguments
 
@@ -2456,11 +2458,11 @@ TEST_P(MatrixInitializerTest, ElementInitializer_Error_TooFewArguments) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for " +
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
                                         MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
-TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooManyArguments) {
+TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooManyArguments) {
     // matNxM<f32>(vecM<f32>(), ...); with N + 1 arguments
     // matNxM<f16>(vecM<f16>(), ...); with N + 1 arguments
 
@@ -2485,11 +2487,11 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooManyArguments) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for " +
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
                                         MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
-TEST_P(MatrixInitializerTest, ElementInitializer_Error_TooManyArguments) {
+TEST_P(MatrixConstructorTest, ElementConstructor_Error_TooManyArguments) {
     // matNxM<f32>(f32,...,f32); with N*M + 1 arguments
     // matNxM<f16>(f16,...,f16); with N*M + 1 arguments
 
@@ -2513,11 +2515,11 @@ TEST_P(MatrixInitializerTest, ElementInitializer_Error_TooManyArguments) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for " +
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
                                         MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
-TEST_P(MatrixInitializerTest, ColumnInitializer_Error_InvalidArgumentType) {
+TEST_P(MatrixConstructorTest, ColumnConstructor_Error_InvalidArgumentType) {
     // matNxM<f32>(vec<u32>, vec<u32>, ...); N arguments
     // matNxM<f16>(vec<u32>, vec<u32>, ...); N arguments
 
@@ -2541,11 +2543,11 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_InvalidArgumentType) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for " +
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
                                         MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
-TEST_P(MatrixInitializerTest, ElementInitializer_Error_InvalidArgumentType) {
+TEST_P(MatrixConstructorTest, ElementConstructor_Error_InvalidArgumentType) {
     // matNxM<f32>(u32, u32, ...); N*M arguments
     // matNxM<f16>(u32, u32, ...); N*M arguments
 
@@ -2568,11 +2570,11 @@ TEST_P(MatrixInitializerTest, ElementInitializer_Error_InvalidArgumentType) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for " +
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
                                         MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
-TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooFewRowsInVectorArgument) {
+TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooFewRowsInVectorArgument) {
     // matNxM<f32>(vecM<f32>(),...,vecM-1<f32>());
     // matNxM<f16>(vecM<f16>(),...,vecM-1<f32>());
 
@@ -2606,11 +2608,11 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooFewRowsInVectorArgument
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for " +
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
                                         MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
-TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooManyRowsInVectorArgument) {
+TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooManyRowsInVectorArgument) {
     // matNxM<f32>(vecM<f32>(),...,vecM+1<f32>());
     // matNxM<f16>(vecM<f16>(),...,vecM+1<f16>());
 
@@ -2643,11 +2645,11 @@ TEST_P(MatrixInitializerTest, ColumnInitializer_Error_TooManyRowsInVectorArgumen
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for " +
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
                                         MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
-TEST_P(MatrixInitializerTest, ZeroValue_Success) {
+TEST_P(MatrixConstructorTest, ZeroValue_Success) {
     // matNxM<f32>();
     // matNxM<f16>();
 
@@ -2662,7 +2664,7 @@ TEST_P(MatrixInitializerTest, ZeroValue_Success) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_P(MatrixInitializerTest, WithColumns_Success) {
+TEST_P(MatrixConstructorTest, WithColumns_Success) {
     // matNxM<f32>(vecM<f32>(), ...); with N arguments
     // matNxM<f16>(vecM<f16>(), ...); with N arguments
 
@@ -2683,7 +2685,7 @@ TEST_P(MatrixInitializerTest, WithColumns_Success) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_P(MatrixInitializerTest, WithElements_Success) {
+TEST_P(MatrixConstructorTest, WithElements_Success) {
     // matNxM<f32>(f32,...,f32); with N*M arguments
     // matNxM<f16>(f16,...,f16); with N*M arguments
 
@@ -2703,7 +2705,7 @@ TEST_P(MatrixInitializerTest, WithElements_Success) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_P(MatrixInitializerTest, ElementTypeAlias_Error) {
+TEST_P(MatrixConstructorTest, ElementTypeAlias_Error) {
     // matNxM<Float32>(vecM<u32>(), ...); with N arguments
     // matNxM<Float16>(vecM<u32>(), ...); with N arguments
 
@@ -2729,11 +2731,11 @@ TEST_P(MatrixInitializerTest, ElementTypeAlias_Error) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for " +
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
                                         MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
-TEST_P(MatrixInitializerTest, ElementTypeAlias_Success) {
+TEST_P(MatrixConstructorTest, ElementTypeAlias_Success) {
     // matNxM<Float32>(vecM<f32>(), ...); with N arguments
     // matNxM<Float16>(vecM<f16>(), ...); with N arguments
 
@@ -2756,7 +2758,7 @@ TEST_P(MatrixInitializerTest, ElementTypeAlias_Success) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, MatrixInitializer_ArgumentTypeAlias_Error) {
+TEST_F(ResolverValueConstructorValidationTest, MatrixConstructor_ArgumentTypeAlias_Error) {
     auto* alias = Alias("VectorUnsigned2", ty.vec2<u32>());
     auto* tc = Call(Source{{12, 34}}, ty.mat2x2<f32>(), Call(ty.Of(alias)), vec2<f32>());
     WrapInFunction(tc);
@@ -2764,10 +2766,10 @@ TEST_F(ResolverTypeInitializerValidationTest, MatrixInitializer_ArgumentTypeAlia
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching initializer for mat2x2<f32>(vec2<u32>, vec2<f32>)"));
+        HasSubstr("12:34 error: no matching constructor for mat2x2<f32>(vec2<u32>, vec2<f32>)"));
 }
 
-TEST_P(MatrixInitializerTest, ArgumentTypeAlias_Success) {
+TEST_P(MatrixConstructorTest, ArgumentTypeAlias_Success) {
     const auto param = GetParam();
 
     Enable(builtin::Extension::kF16);
@@ -2787,7 +2789,7 @@ TEST_P(MatrixInitializerTest, ArgumentTypeAlias_Success) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_P(MatrixInitializerTest, ArgumentElementTypeAlias_Error) {
+TEST_P(MatrixConstructorTest, ArgumentElementTypeAlias_Error) {
     const auto param = GetParam();
 
     Enable(builtin::Extension::kF16);
@@ -2810,11 +2812,11 @@ TEST_P(MatrixInitializerTest, ArgumentElementTypeAlias_Error) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching initializer for " +
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
                                         MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
-TEST_P(MatrixInitializerTest, ArgumentElementTypeAlias_Success) {
+TEST_P(MatrixConstructorTest, ArgumentElementTypeAlias_Success) {
     const auto param = GetParam();
 
     Enable(builtin::Extension::kF16);
@@ -2834,7 +2836,7 @@ TEST_P(MatrixInitializerTest, ArgumentElementTypeAlias_Success) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_P(MatrixInitializerTest, InferElementTypeFromVectors) {
+TEST_P(MatrixConstructorTest, InferElementTypeFromVectors) {
     const auto param = GetParam();
 
     Enable(builtin::Extension::kF16);
@@ -2851,7 +2853,7 @@ TEST_P(MatrixInitializerTest, InferElementTypeFromVectors) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_P(MatrixInitializerTest, InferElementTypeFromScalars) {
+TEST_P(MatrixConstructorTest, InferElementTypeFromScalars) {
     const auto param = GetParam();
 
     Enable(builtin::Extension::kF16);
@@ -2867,13 +2869,13 @@ TEST_P(MatrixInitializerTest, InferElementTypeFromScalars) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_P(MatrixInitializerTest, CannotInferElementTypeFromVectors_Mismatch) {
+TEST_P(MatrixConstructorTest, CannotInferElementTypeFromVectors_Mismatch) {
     const auto param = GetParam();
 
     Enable(builtin::Extension::kF16);
 
     std::stringstream err;
-    err << "12:34 error: no matching initializer for mat" << param.columns << "x" << param.rows
+    err << "12:34 error: no matching constructor for mat" << param.columns << "x" << param.rows
         << "(";
 
     utils::Vector<const ast::Expression*, 8> args;
@@ -2898,13 +2900,13 @@ TEST_P(MatrixInitializerTest, CannotInferElementTypeFromVectors_Mismatch) {
     EXPECT_THAT(r()->error(), HasSubstr(err.str()));
 }
 
-TEST_P(MatrixInitializerTest, CannotInferElementTypeFromScalars_Mismatch) {
+TEST_P(MatrixConstructorTest, CannotInferElementTypeFromScalars_Mismatch) {
     const auto param = GetParam();
 
     Enable(builtin::Extension::kF16);
 
     std::stringstream err;
-    err << "12:34 error: no matching initializer for mat" << param.columns << "x" << param.rows
+    err << "12:34 error: no matching constructor for mat" << param.columns << "x" << param.rows
         << "(";
 
     utils::Vector<const ast::Expression*, 16> args;
@@ -2930,8 +2932,8 @@ TEST_P(MatrixInitializerTest, CannotInferElementTypeFromScalars_Mismatch) {
     EXPECT_THAT(r()->error(), HasSubstr(err.str()));
 }
 
-INSTANTIATE_TEST_SUITE_P(ResolverTypeInitializerValidationTest,
-                         MatrixInitializerTest,
+INSTANTIATE_TEST_SUITE_P(ResolverValueConstructorValidationTest,
+                         MatrixConstructorTest,
                          testing::Values(MatrixParamsFor<f32, 2, 2>(),
                                          MatrixParamsFor<f32, 3, 2>(),
                                          MatrixParamsFor<f32, 4, 2>(),
@@ -2950,9 +2952,9 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeInitializerValidationTest,
                                          MatrixParamsFor<f16, 2, 4>(),
                                          MatrixParamsFor<f16, 3, 4>(),
                                          MatrixParamsFor<f16, 4, 4>()));
-}  // namespace MatrixInitializer
+}  // namespace MatrixConstructor
 
-namespace StructInitializer {
+namespace StructConstructor {
 using builder::CreatePtrs;
 using builder::CreatePtrsFor;
 using builder::mat2x2;
@@ -2983,10 +2985,10 @@ constexpr CreatePtrs all_types[] = {
 
 auto number_of_members = testing::Values(2u, 32u, 64u);
 
-using StructInitializerInputsTest =
+using StructConstructorInputsTest =
     ResolverTestWithParam<std::tuple<CreatePtrs,  // struct member type
                                      uint32_t>>;  // number of struct members
-TEST_P(StructInitializerInputsTest, TooFew) {
+TEST_P(StructConstructorInputsTest, TooFew) {
     auto& param = GetParam();
     auto& str_params = std::get<0>(param);
     uint32_t N = std::get<1>(param);
@@ -3007,11 +3009,11 @@ TEST_P(StructInitializerInputsTest, TooFew) {
     auto* tc = Call(Source{{12, 34}}, ty.Of(s), values);
     WrapInFunction(tc);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: struct initializer has too few inputs: expected " +
+    EXPECT_EQ(r()->error(), "12:34 error: structure constructor has too few inputs: expected " +
                                 std::to_string(N) + ", found " + std::to_string(N - 1));
 }
 
-TEST_P(StructInitializerInputsTest, TooMany) {
+TEST_P(StructConstructorInputsTest, TooMany) {
     auto& param = GetParam();
     auto& str_params = std::get<0>(param);
     uint32_t N = std::get<1>(param);
@@ -3032,18 +3034,18 @@ TEST_P(StructInitializerInputsTest, TooMany) {
     auto* tc = Call(Source{{12, 34}}, ty.Of(s), values);
     WrapInFunction(tc);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: struct initializer has too many inputs: expected " +
+    EXPECT_EQ(r()->error(), "12:34 error: structure constructor has too many inputs: expected " +
                                 std::to_string(N) + ", found " + std::to_string(N + 1));
 }
 
-INSTANTIATE_TEST_SUITE_P(ResolverTypeInitializerValidationTest,
-                         StructInitializerInputsTest,
+INSTANTIATE_TEST_SUITE_P(ResolverValueConstructorValidationTest,
+                         StructConstructorInputsTest,
                          testing::Combine(testing::ValuesIn(all_types), number_of_members));
-using StructInitializerTypeTest =
+using StructConstructorTypeTest =
     ResolverTestWithParam<std::tuple<CreatePtrs,  // struct member type
-                                     CreatePtrs,  // initializer value type
+                                     CreatePtrs,  // constructor value type
                                      uint32_t>>;  // number of struct members
-TEST_P(StructInitializerTypeTest, AllTypes) {
+TEST_P(StructConstructorTypeTest, AllTypes) {
     auto& param = GetParam();
     auto& str_params = std::get<0>(param);
     auto& ctor_params = std::get<1>(param);
@@ -3057,12 +3059,12 @@ TEST_P(StructInitializerTypeTest, AllTypes) {
 
     utils::Vector<const ast::StructMember*, 16> members;
     utils::Vector<const ast::Expression*, 8> values;
-    // make the last value of the initializer to have a different type
-    uint32_t initializer_value_with_different_type = N - 1;
+    // make the last value of the constructor to have a different type
+    uint32_t constructor_value_with_different_type = N - 1;
     for (uint32_t i = 0; i < N; i++) {
         ast::Type struct_type = str_params.ast(*this);
         members.Push(Member("member_" + std::to_string(i), struct_type));
-        auto* ctor_value_expr = (i == initializer_value_with_different_type)
+        auto* ctor_value_expr = (i == constructor_value_with_different_type)
                                     ? ctor_params.expr_from_double(*this, 0)
                                     : str_params.expr_from_double(*this, 0);
         values.Push(ctor_value_expr);
@@ -3072,19 +3074,19 @@ TEST_P(StructInitializerTypeTest, AllTypes) {
     WrapInFunction(tc);
 
     std::stringstream err;
-    err << "error: type in struct initializer does not match struct member ";
+    err << "error: type in structure constructor does not match struct member ";
     err << "type: expected '" << str_params.name() << "', found '" << ctor_params.name() << "'";
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), err.str());
 }
 
-INSTANTIATE_TEST_SUITE_P(ResolverTypeInitializerValidationTest,
-                         StructInitializerTypeTest,
+INSTANTIATE_TEST_SUITE_P(ResolverValueConstructorValidationTest,
+                         StructConstructorTypeTest,
                          testing::Combine(testing::ValuesIn(all_types),
                                           testing::ValuesIn(all_types),
                                           number_of_members));
 
-TEST_F(ResolverTypeInitializerValidationTest, Struct_Nested) {
+TEST_F(ResolverValueConstructorValidationTest, Struct_Nested) {
     auto* inner_m = Member("m", ty.i32());
     auto* inner_s = Structure("inner_s", utils::Vector{inner_m});
 
@@ -3097,11 +3099,11 @@ TEST_F(ResolverTypeInitializerValidationTest, Struct_Nested) {
     WrapInFunction(tc);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "error: type in struct initializer does not match struct member "
+              "error: type in structure constructor does not match struct member "
               "type: expected 'inner_s', found 'i32'");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Struct) {
+TEST_F(ResolverValueConstructorValidationTest, Struct) {
     auto* m = Member("m", ty.i32());
     auto* s = Structure("MyInputs", utils::Vector{m});
     auto* tc = Call(Source{{12, 34}}, ty.Of(s));
@@ -3109,7 +3111,7 @@ TEST_F(ResolverTypeInitializerValidationTest, Struct) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, Struct_Empty) {
+TEST_F(ResolverValueConstructorValidationTest, Struct_Empty) {
     auto* str = Structure("S", utils::Vector{
                                    Member("a", ty.i32()),
                                    Member("b", ty.f32()),
@@ -3119,31 +3121,31 @@ TEST_F(ResolverTypeInitializerValidationTest, Struct_Empty) {
     WrapInFunction(Call(ty.Of(str)));
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
-}  // namespace StructInitializer
+}  // namespace StructConstructor
 
-TEST_F(ResolverTypeInitializerValidationTest, NonConstructibleType_Atomic) {
+TEST_F(ResolverValueConstructorValidationTest, NonConstructibleType_Atomic) {
     WrapInFunction(Assign(Phony(), Call(Source{{12, 34}}, ty.atomic(ty.i32()))));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: type is not constructible");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, NonConstructibleType_AtomicArray) {
+TEST_F(ResolverValueConstructorValidationTest, NonConstructibleType_AtomicArray) {
     WrapInFunction(Assign(Phony(), Call(Source{{12, 34}}, ty.array(ty.atomic(ty.i32()), 4_i))));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array initializer has non-constructible element type");
+    EXPECT_EQ(r()->error(), "12:34 error: array constructor has non-constructible element type");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, NonConstructibleType_AtomicStructMember) {
+TEST_F(ResolverValueConstructorValidationTest, NonConstructibleType_AtomicStructMember) {
     auto* str = Structure("S", utils::Vector{Member("a", ty.atomic(ty.i32()))});
     WrapInFunction(Assign(Phony(), Call(Source{{12, 34}}, ty.Of(str))));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: struct initializer has non-constructible type");
+    EXPECT_EQ(r()->error(), "12:34 error: structure constructor has non-constructible type");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, NonConstructibleType_Sampler) {
+TEST_F(ResolverValueConstructorValidationTest, NonConstructibleType_Sampler) {
     WrapInFunction(
         Assign(Phony(), Call(Source{{12, 34}}, ty.sampler(type::SamplerKind::kSampler))));
 
@@ -3151,42 +3153,42 @@ TEST_F(ResolverTypeInitializerValidationTest, NonConstructibleType_Sampler) {
     EXPECT_EQ(r()->error(), "12:34 error: type is not constructible");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, BuilinTypeInitializerAsStatement) {
+TEST_F(ResolverValueConstructorValidationTest, BuilinTypeConstructorAsStatement) {
     WrapInFunction(CallStmt(vec2<f32>(Source{{12, 34}}, 1_f, 2_f)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: type initializer evaluated but not used");
+    EXPECT_EQ(r()->error(), "12:34 error: value constructor evaluated but not used");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, StructInitializerAsStatement) {
+TEST_F(ResolverValueConstructorValidationTest, StructConstructorAsStatement) {
     Structure("S", utils::Vector{Member("m", ty.i32())});
     WrapInFunction(CallStmt(Call(Source{{12, 34}}, "S", 1_a)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: type initializer evaluated but not used");
+    EXPECT_EQ(r()->error(), "12:34 error: value constructor evaluated but not used");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, AliasInitializerAsStatement) {
+TEST_F(ResolverValueConstructorValidationTest, AliasConstructorAsStatement) {
     Alias("A", ty.i32());
     WrapInFunction(CallStmt(Call(Source{{12, 34}}, "A", 1_i)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: type initializer evaluated but not used");
+    EXPECT_EQ(r()->error(), "12:34 error: value constructor evaluated but not used");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, BuilinTypeConversionAsStatement) {
+TEST_F(ResolverValueConstructorValidationTest, BuilinTypeConversionAsStatement) {
     WrapInFunction(CallStmt(Call(Source{{12, 34}}, ty.f32(), 1_i)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: type conversion evaluated but not used");
+    EXPECT_EQ(r()->error(), "12:34 error: value conversion evaluated but not used");
 }
 
-TEST_F(ResolverTypeInitializerValidationTest, AliasConversionAsStatement) {
+TEST_F(ResolverValueConstructorValidationTest, AliasConversionAsStatement) {
     Alias("A", ty.i32());
     WrapInFunction(CallStmt(Call(Source{{12, 34}}, "A", 1_f)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: type conversion evaluated but not used");
+    EXPECT_EQ(r()->error(), "12:34 error: value conversion evaluated but not used");
 }
 
 }  // namespace

@@ -19,7 +19,7 @@
 
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/call.h"
-#include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_constructor.h"
 #include "src/tint/sem/value_expression.h"
 #include "src/tint/type/abstract_numeric.h"
 #include "src/tint/utils/map.h"
@@ -32,7 +32,7 @@ namespace {
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
         if (auto* call = program->Sem().Get<sem::Call>(node)) {
-            if (call->Target()->Is<sem::TypeInitializer>() && call->Type()->Is<type::Matrix>()) {
+            if (call->Target()->Is<sem::ValueConstructor>() && call->Type()->Is<type::Matrix>()) {
                 auto& args = call->Arguments();
                 if (!args.IsEmpty() && args[0]->Type()->UnwrapRef()->is_scalar()) {
                     return true;
@@ -63,7 +63,7 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
 
     ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::CallExpression* {
         auto* call = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
-        auto* ty_init = call->Target()->As<sem::TypeInitializer>();
+        auto* ty_init = call->Target()->As<sem::ValueConstructor>();
         if (!ty_init) {
             return nullptr;
         }

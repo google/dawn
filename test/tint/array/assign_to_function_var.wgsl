@@ -22,7 +22,7 @@ fn foo(src_param : ArrayType) {
 
   var dst : ArrayType;
 
-  // Assign from type constructor.
+  // Assign from value constructor.
   dst = ArrayType(vec4(1), vec4(2), vec4(3), vec4(3));
 
   // Assign from parameter.

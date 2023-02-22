@@ -473,7 +473,7 @@ class ProgramBuilder {
     /// Creates a new ast::Node owned by the ProgramBuilder. When the
     /// ProgramBuilder is destructed, the ast::Node will also be destructed.
     /// @param source the Source of the node
-    /// @param args the arguments to pass to the type constructor
+    /// @param args the arguments to pass to the constructor
     /// @returns the node pointer
     template <typename T, typename... ARGS>
     traits::EnableIfIsType<T, ast::Node>* create(const Source& source, ARGS&&... args) {
@@ -498,8 +498,8 @@ class ProgramBuilder {
     /// constructor.
     /// When the ProgramBuilder is destructed, the ast::Node will also be
     /// destructed.
-    /// @param arg0 the first arguments to pass to the type constructor
-    /// @param args the remaining arguments to pass to the type constructor
+    /// @param arg0 the first arguments to pass to the constructor
+    /// @param args the remaining arguments to pass to the constructor
     /// @returns the node pointer
     template <typename T, typename ARG0, typename... ARGS>
     traits::EnableIf</* T is ast::Node and ARG0 is not Source */
@@ -1706,7 +1706,7 @@ class ProgramBuilder {
 
     /// @param type the vector type
     /// @param size the vector size
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a `size`-element vector of
     /// type `type`, constructed with the values @p args.
     template <typename... ARGS>
@@ -1717,7 +1717,7 @@ class ProgramBuilder {
     /// @param source the source of the call
     /// @param type the vector type
     /// @param size the vector size
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a `size`-element vector of
     /// type `type`, constructed with the values @p args.
     template <typename... ARGS>
@@ -1728,7 +1728,7 @@ class ProgramBuilder {
         return Call(source, ty.vec(type, size), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 2-element vector of type `T`, constructed with the
     /// values @p args.
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -1737,7 +1737,7 @@ class ProgramBuilder {
     }
 
     /// @param source the vector source
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 2-element vector of type `T`, constructed with the
     /// values @p args.
     template <typename T, typename... ARGS>
@@ -1746,7 +1746,7 @@ class ProgramBuilder {
     }
 
     /// @param type the element type of the vector
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 2-element vector of type @p type, constructed with the
     /// values @p args.
     template <typename... ARGS>
@@ -1756,7 +1756,7 @@ class ProgramBuilder {
 
     /// @param source the vector source
     /// @param type the element type of the vector
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 2-element vector of type @p type, constructed with the
     /// values @p args.
     template <typename... ARGS>
@@ -1764,7 +1764,7 @@ class ProgramBuilder {
         return Call(source, ty.vec2(type), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 3-element vector of type `T`, constructed with the
     /// values @p args.
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -1773,7 +1773,7 @@ class ProgramBuilder {
     }
 
     /// @param source the vector source
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 3-element vector of type `T`, constructed with the
     /// values @p args.
     template <typename T, typename... ARGS>
@@ -1782,7 +1782,7 @@ class ProgramBuilder {
     }
 
     /// @param type the element type of the vector
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 3-element vector of type @p type, constructed with the
     /// values @p args.
     template <typename... ARGS>
@@ -1792,7 +1792,7 @@ class ProgramBuilder {
 
     /// @param source the vector source
     /// @param type the element type of the vector
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 3-element vector of type @p type, constructed with the
     /// values @p args.
     template <typename... ARGS>
@@ -1800,7 +1800,7 @@ class ProgramBuilder {
         return Call(source, ty.vec3(type), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 4-element vector of type `T`, constructed with the
     /// values @p args.
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -1809,7 +1809,7 @@ class ProgramBuilder {
     }
 
     /// @param source the vector source
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 4-element vector of type `T`, constructed with the
     /// values @p args.
     template <typename T, typename... ARGS>
@@ -1818,7 +1818,7 @@ class ProgramBuilder {
     }
 
     /// @param type the element type of the vector
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 4-element vector of type @p type, constructed with the
     /// values @p args.
     template <typename... ARGS>
@@ -1828,7 +1828,7 @@ class ProgramBuilder {
 
     /// @param source the vector source
     /// @param type the element type of the vector
-    /// @param args the arguments for the vector initializer
+    /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 4-element vector of type @p type, constructed with the
     /// values @p args.
     template <typename... ARGS>
@@ -1836,7 +1836,7 @@ class ProgramBuilder {
         return Call(source, ty.vec4(type), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 2x2 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -1845,7 +1845,7 @@ class ProgramBuilder {
     }
 
     /// @param source the matrix source
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 2x2 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS>
@@ -1853,7 +1853,7 @@ class ProgramBuilder {
         return Call(source, ty.mat2x2<T>(), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 2x3 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -1862,7 +1862,7 @@ class ProgramBuilder {
     }
 
     /// @param source the matrix source
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 2x3 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS>
@@ -1870,7 +1870,7 @@ class ProgramBuilder {
         return Call(source, ty.mat2x3<T>(), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 2x4 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -1879,7 +1879,7 @@ class ProgramBuilder {
     }
 
     /// @param source the matrix source
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 2x4 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS>
@@ -1887,7 +1887,7 @@ class ProgramBuilder {
         return Call(source, ty.mat2x4<T>(), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 3x2 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -1896,7 +1896,7 @@ class ProgramBuilder {
     }
 
     /// @param source the matrix source
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 3x2 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS>
@@ -1904,7 +1904,7 @@ class ProgramBuilder {
         return Call(source, ty.mat3x2<T>(), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 3x3 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -1913,7 +1913,7 @@ class ProgramBuilder {
     }
 
     /// @param source the matrix source
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 3x3 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS>
@@ -1921,7 +1921,7 @@ class ProgramBuilder {
         return Call(source, ty.mat3x3<T>(), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 3x4 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -1930,7 +1930,7 @@ class ProgramBuilder {
     }
 
     /// @param source the matrix source
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 3x4 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS>
@@ -1938,7 +1938,7 @@ class ProgramBuilder {
         return Call(source, ty.mat3x4<T>(), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 4x2 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -1947,7 +1947,7 @@ class ProgramBuilder {
     }
 
     /// @param source the matrix source
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 4x2 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS>
@@ -1955,7 +1955,7 @@ class ProgramBuilder {
         return Call(source, ty.mat4x2<T>(), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 4x3 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -1964,7 +1964,7 @@ class ProgramBuilder {
     }
 
     /// @param source the matrix source
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 4x3 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS>
@@ -1972,7 +1972,7 @@ class ProgramBuilder {
         return Call(source, ty.mat4x3<T>(), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 4x4 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -1981,7 +1981,7 @@ class ProgramBuilder {
     }
 
     /// @param source the matrix source
-    /// @param args the arguments for the matrix initializer
+    /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 4x4 matrix of type
     /// `T`, constructed with the values @p args.
     template <typename T, typename... ARGS>
@@ -1989,7 +1989,7 @@ class ProgramBuilder {
         return Call(source, ty.mat4x4<T>(), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the array initializer
+    /// @param args the arguments for the array constructor
     /// @return an `ast::CallExpression` of an array with element type `T`, constructed with the
     /// values @p args.
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -1998,7 +1998,7 @@ class ProgramBuilder {
     }
 
     /// @param source the array source
-    /// @param args the arguments for the array initializer
+    /// @param args the arguments for the array constructor
     /// @return an `ast::CallExpression` of an array with element type `T`, constructed with the
     /// values @p args.
     template <typename T, typename... ARGS>
@@ -2006,7 +2006,7 @@ class ProgramBuilder {
         return Call(source, ty.array<T>(), std::forward<ARGS>(args)...);
     }
 
-    /// @param args the arguments for the array initializer
+    /// @param args the arguments for the array constructor
     /// @return an `ast::CallExpression` of an array with element type `T` and size `N`, constructed
     /// with the values @p args.
     template <typename T, int N, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -2015,7 +2015,7 @@ class ProgramBuilder {
     }
 
     /// @param source the array source
-    /// @param args the arguments for the array initializer
+    /// @param args the arguments for the array constructor
     /// @return an `ast::CallExpression` of an array with element type `T` and size `N`, constructed
     /// with the values @p args.
     template <typename T, int N, typename... ARGS>
@@ -2025,7 +2025,7 @@ class ProgramBuilder {
 
     /// @param subtype the array element type
     /// @param n the array size. nullptr represents a runtime-array.
-    /// @param args the arguments for the array initializer
+    /// @param args the arguments for the array constructor
     /// @return an `ast::CallExpression` of an array with element type
     /// `subtype`, constructed with the values @p args.
     template <typename EXPR, typename... ARGS>
@@ -2036,7 +2036,7 @@ class ProgramBuilder {
     /// @param source the array source
     /// @param subtype the array element type
     /// @param n the array size. nullptr represents a runtime-array.
-    /// @param args the arguments for the array initializer
+    /// @param args the arguments for the array constructor
     /// @return an `ast::CallExpression` of an array with element type
     /// `subtype`, constructed with the values @p args.
     template <typename EXPR, typename... ARGS>
@@ -2069,11 +2069,11 @@ class ProgramBuilder {
     /// @param name the variable name
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
-    ///   * ast::Type           - specifies the variable's type
+    ///   * ast::Type              - specifies the variable's type
     ///   * builtin::AddressSpace  - specifies the variable's address space
     ///   * builtin::Access        - specifies the variable's access control
-    ///   * ast::Expression*    - specifies the variable's initializer expression
-    ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
+    ///   * ast::Expression*       - specifies the variable's initializer expression
+    ///   * ast::Attribute*        - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns a `ast::Var` with the given name, type and additional
     /// options
@@ -2086,11 +2086,11 @@ class ProgramBuilder {
     /// @param name the variable name
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
-    ///   * ast::Type           - specifies the variable's type
+    ///   * ast::Type              - specifies the variable's type
     ///   * builtin::AddressSpace  - specifies the variable's address space
     ///   * builtin::Access        - specifies the variable's access control
-    ///   * ast::Expression*    - specifies the variable's initializer expression
-    ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
+    ///   * ast::Expression*       - specifies the variable's initializer expression
+    ///   * ast::Attribute*        - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns a `ast::Var` with the given name, address_space and type
     template <typename NAME, typename... OPTIONS>
@@ -2390,7 +2390,7 @@ class ProgramBuilder {
                                               Expr(std::forward<EXPR>(expr)));
     }
 
-    /// @param args the arguments for the type constructor
+    /// @param args the arguments for the constructor
     /// @returns an ast::CallExpression to the type `T`, with the arguments of @p args converted to
     /// `ast::Expression`s using Expr().
     template <typename T, typename... ARGS, typename = DisableIfSource<ARGS...>>
@@ -2399,7 +2399,7 @@ class ProgramBuilder {
     }
 
     /// @param source the source of the call
-    /// @param args the arguments for the type constructor
+    /// @param args the arguments for the constructor
     /// @returns an ast::CallExpression to the type `T` with the arguments of @p args converted to
     /// `ast::Expression`s using Expr().
     template <typename T, typename... ARGS>

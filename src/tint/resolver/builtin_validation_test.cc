@@ -16,7 +16,7 @@
 
 #include "src/tint/ast/builtin_texture_helper_test.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_constructor.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -147,9 +147,9 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsFunction) {
     WrapInFunction(Call(Source{{56, 78}}, "mix", 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: no matching initializer for i32(f32, f32, f32)
+    EXPECT_EQ(r()->error(), R"(56:78 error: no matching constructor for i32(f32, f32, f32)
 
-2 candidate initializers:
+2 candidate constructors:
   i32(i32) -> i32
   i32() -> i32
 
@@ -177,7 +177,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStructUsedAsFunction) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: struct initializer has too many inputs: expected 1, found 3)");
+              R"(12:34 error: structure constructor has too many inputs: expected 1, found 3)");
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStructUsedAsType) {
@@ -309,8 +309,8 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, Immediate) {
     auto args = overload.args(this);
     auto*& arg_to_replace = (param.position == Position::kFirst) ? args.Front() : args.Back();
 
-    // BuildTextureVariable() uses a Literal for scalars, and a CallExpression for
-    // a vector initializer.
+    // BuildTextureVariable() uses a Literal for scalars, and a CallExpression for a vector
+    // constructor.
     bool is_vector = arg_to_replace->Is<ast::CallExpression>();
 
     // Make the expression to be replaced, reachable. This keeps the resolver happy.
@@ -366,8 +366,8 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalConst) {
     auto args = overload.args(this);
     auto*& arg_to_replace = (param.position == Position::kFirst) ? args.Front() : args.Back();
 
-    // BuildTextureVariable() uses a Literal for scalars, and a CallExpression for
-    // a vector initializer.
+    // BuildTextureVariable() uses a Literal for scalars, and a CallExpression for a vector
+    // constructor.
     bool is_vector = arg_to_replace->Is<ast::CallExpression>();
 
     // Make the expression to be replaced, reachable. This keeps the resolver happy.

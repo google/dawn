@@ -20,7 +20,7 @@
 
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/call.h"
-#include "src/tint/sem/type_conversion.h"
+#include "src/tint/sem/value_conversion.h"
 #include "src/tint/sem/value_expression.h"
 #include "src/tint/type/abstract_numeric.h"
 #include "src/tint/utils/hash.h"
@@ -36,7 +36,8 @@ bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
         if (auto* sem = program->Sem().GetVal(node)) {
             if (auto* call = sem->UnwrapMaterialize()->As<sem::Call>()) {
-                if (call->Target()->Is<sem::TypeConversion>() && call->Type()->Is<type::Matrix>()) {
+                if (call->Target()->Is<sem::ValueConversion>() &&
+                    call->Type()->Is<type::Matrix>()) {
                     auto& args = call->Arguments();
                     if (args.Length() == 1 && args[0]->Type()->UnwrapRef()->is_float_matrix()) {
                         return true;
@@ -71,7 +72,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
 
     ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::CallExpression* {
         auto* call = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
-        auto* ty_conv = call->Target()->As<sem::TypeConversion>();
+        auto* ty_conv = call->Target()->As<sem::ValueConversion>();
         if (!ty_conv) {
             return nullptr;
         }

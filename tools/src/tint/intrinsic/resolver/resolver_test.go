@@ -157,13 +157,13 @@ op +(T<f32>, T<f32>)`,
 		}, {
 			`
 type f32
-init f32(f32)`,
+ctor f32(f32)`,
 			success,
 		}, {
 			`
 type f32
 type T<x>
-init f32(T<f32>)`,
+ctor f32(T<f32>)`,
 			success,
 		}, {
 			`
@@ -392,57 +392,57 @@ op << <M: m>(P<M>)`,
 			`
 type i
 enum e { a }
-init F(i) -> e`,
+ctor F(i) -> e`,
 			`file.txt:3:14 cannot use 'e' as return type. Must be a type or template type`,
 		}, {
 			`
 type T<x>
-init F(T<u>)`,
+ctor F(T<u>)`,
 			`file.txt:2:10 cannot resolve 'u'`,
 		}, {
 			`
 type x
-init F<T>(T<x>)`,
+ctor F<T>(T<x>)`,
 			`file.txt:2:11 'T' template parameters do not accept template arguments`,
 		}, {
 			`
 type A<N: num>
 type B
-init F(A<B>)`,
+ctor F(A<B>)`,
 			`file.txt:3:10 cannot use type 'B' as template number`,
 		}, {
 			`
 type A<N>
 enum E { b }
 match M: E.b
-init F(A<M>)`,
+ctor F(A<M>)`,
 			`file.txt:4:10 cannot use enum matcher 'M' as template type`,
 		}, {
 			`
 type T
 type P<N: num>
 match m: T
-init F(P<m>)`,
+ctor F(P<m>)`,
 			`file.txt:4:10 cannot use type matcher 'm' as template number`,
 		}, {
 			`
 type P<N: num>
 enum E { b }
-init F(P<E>)`,
+ctor F(P<E>)`,
 			`file.txt:3:10 cannot use enum 'E' as template number`,
 		}, {
 			`
 type P<N: num>
 enum E { a b }
 match m: E.a | E.b
-init F(P<m>)`,
+ctor F(P<m>)`,
 			`file.txt:4:10 cannot use enum matcher 'm' as template number`,
 		}, {
 			`
 type P<N: num>
 enum E { a b }
 match m: E.a | E.b
-init F<M: m>(P<M>)`,
+ctor F<M: m>(P<M>)`,
 			`file.txt:4:16 cannot use template enum 'E' as template number`,
 		}, {
 			`

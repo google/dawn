@@ -2937,7 +2937,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     // When SPIR-V wants the result type to be unsigned, we have to
-    // insert a type initializer or bitcast for WGSL to do the type
+    // insert a value constructor or bitcast for WGSL to do the type
     // coercion. But the algorithm already does that as a matter
     // of course.
     ImageQuerySizeLod_NonArrayed_UnsignedResult_SignedLevel,
@@ -3002,8 +3002,7 @@ INSTANTIATE_TEST_SUITE_P(ImageQueryLevels_SignedResult,
                               R"(let x_99 : i32 = i32(textureNumLevels(x_20));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
-    // Spot check that a type conversion is inserted when SPIR-V asks for
-    // an unsigned int result.
+    // Spot check that a value conversion is inserted when SPIR-V asks for an unsigned int result.
     ImageQueryLevels_UnsignedResult,
     SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{

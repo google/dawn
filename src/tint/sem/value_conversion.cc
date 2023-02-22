@@ -12,19 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_conversion.h"
 
-#include <utility>
-
-TINT_INSTANTIATE_TYPEINFO(tint::sem::TypeInitializer);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::ValueConversion);
 
 namespace tint::sem {
 
-TypeInitializer::TypeInitializer(const type::Type* type,
-                                 utils::VectorRef<const Parameter*> parameters,
+ValueConversion::ValueConversion(const type::Type* type,
+                                 const sem::Parameter* parameter,
                                  EvaluationStage stage)
-    : Base(type, std::move(parameters), stage, /* must_use */ true) {}
+    : Base(type, utils::Vector<const sem::Parameter*, 1>{parameter}, stage, /* must_use */ true) {}
 
-TypeInitializer::~TypeInitializer() = default;
+ValueConversion::~ValueConversion() = default;
 
 }  // namespace tint::sem

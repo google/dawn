@@ -50,7 +50,7 @@ type IntrinsicTable struct {
 	Builtins                  []Intrinsic      // kBuiltins table content
 	UnaryOperators            []Intrinsic      // kUnaryOperators table content
 	BinaryOperators           []Intrinsic      // kBinaryOperators table content
-	InitializersAndConverters []Intrinsic      // kInitializersAndConverters table content
+	ConstructorsAndConverters []Intrinsic      // kInitializersAndConverters table content
 }
 
 // TemplateType is used to create the C++ TemplateTypeInfo structure
@@ -387,7 +387,7 @@ func BuildIntrinsicTable(s *sem.Sem) (*IntrinsicTable, error) {
 		{s.Builtins, &b.Builtins},
 		{s.UnaryOperators, &b.UnaryOperators},
 		{s.BinaryOperators, &b.BinaryOperators},
-		{s.InitializersAndConverters, &b.InitializersAndConverters},
+		{s.ConstructorsAndConverters, &b.ConstructorsAndConverters},
 	} {
 		out := make([]Intrinsic, len(intrinsics.in))
 		for i, f := range intrinsics.in {

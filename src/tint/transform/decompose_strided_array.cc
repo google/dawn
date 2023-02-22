@@ -22,7 +22,7 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/type_expression.h"
-#include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_constructor.h"
 #include "src/tint/sem/value_expression.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/utils/hash.h"
@@ -134,18 +134,16 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
         return nullptr;
     });
 
-    // Find all array type initializer expressions for array types that have had
-    // their element changed to a single field structure. These initializers are
-    // adjusted to wrap each of the arguments with an additional initializer for
-    // the new element structure type.
-    // Example:
+    // Find all constructor expressions for array types that have had their element changed to a
+    // single field structure. These constructors are adjusted to wrap each of the arguments with an
+    // additional initializer for the new element structure type. Example:
     //   `@stride(32) array<i32, 3>(1, 2, 3)`
     // ->
     //   `array<strided_arr, 3>(strided_arr(1), strided_arr(2), strided_arr(3))`
     ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::Expression* {
         if (!expr->args.IsEmpty()) {
             if (auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>()) {
-                if (auto* ctor = call->Target()->As<sem::TypeInitializer>()) {
+                if (auto* ctor = call->Target()->As<sem::ValueConstructor>()) {
                     if (auto* arr = ctor->ReturnType()->As<type::Array>()) {
                         // Begin by cloning the array initializer type or name
                         // If this is an unaliased array, this may add a new entry to

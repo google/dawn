@@ -18,8 +18,8 @@
 #include <vector>
 
 #include "src/tint/sem/call.h"
-#include "src/tint/sem/type_conversion.h"
-#include "src/tint/sem/type_initializer.h"
+#include "src/tint/sem/value_constructor.h"
+#include "src/tint/sem/value_conversion.h"
 #include "src/tint/sem/value_expression.h"
 #include "src/tint/utils/transform.h"
 
@@ -28,14 +28,14 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::writer {
 namespace {
 
-struct VectorInitializerInfo {
+struct VectorConstructorInfo {
     const sem::Call* call = nullptr;
-    const sem::TypeInitializer* ctor = nullptr;
+    const sem::ValueConstructor* ctor = nullptr;
     operator bool() const { return call != nullptr; }
 };
-VectorInitializerInfo AsVectorInitializer(const sem::ValueExpression* expr) {
+VectorConstructorInfo AsVectorConstructor(const sem::ValueExpression* expr) {
     if (auto* call = expr->As<sem::Call>()) {
-        if (auto* ctor = call->Target()->As<sem::TypeInitializer>()) {
+        if (auto* ctor = call->Target()->As<sem::ValueConstructor>()) {
             if (ctor->ReturnType()->Is<type::Vector>()) {
                 return {call, ctor};
             }
@@ -103,20 +103,20 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     auto packed_ast_ty = b->ty.vec(packed_el_ast_ty, packed_size);
     auto* packed_sem_ty = b->create<type::Vector>(packed_el_sem_ty, packed_size);
 
-    // If the coordinates are already passed in a vector initializer, with only
+    // If the coordinates are already passed in a vector constructor, with only
     // scalar components supplied, extract the elements into the new vector
     // instead of nesting a vector-in-vector.
-    // If the coordinates are a zero-initializer of the vector, then expand that
+    // If the coordinates are a zero-constructor of the vector, then expand that
     // to scalar zeros.
-    // The other cases for a nested vector initializer are when it is used
+    // The other cases for a nested vector constructor are when it is used
     // to convert a vector of a different type, e.g. vec2<i32>(vec2<u32>()).
     // In that case, preserve the original argument, or you'll get a type error.
 
     utils::Vector<const sem::ValueExpression*, 4> packed;
-    if (auto vc = AsVectorInitializer(vector_sem)) {
+    if (auto vc = AsVectorConstructor(vector_sem)) {
         const auto num_supplied = vc.call->Arguments().Length();
         if (num_supplied == 0) {
-            // Zero-value vector initializer. Populate with zeros
+            // Zero-value vector constructor. Populate with zeros
             for (uint32_t i = 0; i < packed_size - 1; i++) {
                 auto* zero = Zero(*b, packed_el_sem_ty, statement);
                 packed.Push(zero);
@@ -134,7 +134,7 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     if (packed_el_sem_ty != scalar_sem->Type()->UnwrapRef()) {
         // Cast scalar to the vector element type
         auto* scalar_cast_ast = b->Call(packed_el_ast_ty, scalar_ast);
-        auto* scalar_cast_target = b->create<sem::TypeConversion>(
+        auto* scalar_cast_target = b->create<sem::ValueConversion>(
             packed_el_sem_ty,
             b->create<sem::Parameter>(nullptr, 0u, scalar_sem->Type()->UnwrapRef(),
                                       builtin::AddressSpace::kUndefined,
@@ -150,11 +150,11 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         packed.Push(scalar_sem);
     }
 
-    auto* initializer_ast =
+    auto* ctor_ast =
         b->Call(packed_ast_ty, utils::Transform(packed, [&](const sem::ValueExpression* expr) {
                     return expr->Declaration();
                 }));
-    auto* initializer_target = b->create<sem::TypeInitializer>(
+    auto* ctor_target = b->create<sem::ValueConstructor>(
         packed_sem_ty,
         utils::Transform(
             packed,
@@ -164,13 +164,12 @@ const sem::Call* AppendVector(ProgramBuilder* b,
                     builtin::AddressSpace::kUndefined, builtin::Access::kUndefined);
             }),
         sem::EvaluationStage::kRuntime);
-    auto* initializer_sem =
-        b->create<sem::Call>(initializer_ast, initializer_target, sem::EvaluationStage::kRuntime,
-                             std::move(packed), statement,
-                             /* constant_value */ nullptr,
-                             /* has_side_effects */ false);
-    b->Sem().Add(initializer_ast, initializer_sem);
-    return initializer_sem;
+    auto* ctor_sem = b->create<sem::Call>(ctor_ast, ctor_target, sem::EvaluationStage::kRuntime,
+                                          std::move(packed), statement,
+                                          /* constant_value */ nullptr,
+                                          /* has_side_effects */ false);
+    b->Sem().Add(ctor_ast, ctor_sem);
+    return ctor_sem;
 }
 
 }  // namespace tint::writer

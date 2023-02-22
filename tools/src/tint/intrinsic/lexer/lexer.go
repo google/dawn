@@ -104,8 +104,8 @@ func (l *lexer) lex() error {
 					l.tok(n, tok.Enum)
 				case "type":
 					l.tok(n, tok.Type)
-				case "init":
-					l.tok(n, tok.Initializer)
+				case "ctor":
+					l.tok(n, tok.Constructor)
 				case "conv":
 					l.tok(n, tok.Converter)
 				case "match":
