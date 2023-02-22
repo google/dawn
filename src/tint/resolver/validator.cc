@@ -1009,15 +1009,32 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
     auto* decl = func->Declaration();
 
     for (auto* attr : decl->attributes) {
-        if (attr->Is<ast::WorkgroupAttribute>()) {
-            if (decl->PipelineStage() != ast::PipelineStage::kCompute) {
-                AddError("the workgroup_size attribute is only valid for compute stages",
-                         attr->source);
-                return false;
-            }
-        } else if (!attr->IsAnyOf<ast::DiagnosticAttribute, ast::StageAttribute,
-                                  ast::MustUseAttribute, ast::InternalAttribute>()) {
-            AddError("attribute is not valid for functions", attr->source);
+        bool ok = Switch(
+            attr,  //
+            [&](const ast::WorkgroupAttribute*) {
+                if (decl->PipelineStage() != ast::PipelineStage::kCompute) {
+                    AddError("@workgroup_size is only valid for compute stages", attr->source);
+                    return false;
+                }
+                return true;
+            },
+            [&](const ast::MustUseAttribute*) {
+                if (func->ReturnType()->Is<type::Void>()) {
+                    AddError("@must_use can only be applied to functions that return a value",
+                             attr->source);
+                    return false;
+                }
+                return true;
+            },
+            [&](Default) {
+                if (!attr->IsAnyOf<ast::DiagnosticAttribute, ast::StageAttribute,
+                                   ast::InternalAttribute>()) {
+                    AddError("attribute is not valid for functions", attr->source);
+                    return false;
+                }
+                return true;
+            });
+        if (!ok) {
             return false;
         }
     }
@@ -1467,22 +1484,39 @@ bool Validator::ContinueStatement(const sem::Statement* stmt,
 }
 
 bool Validator::Call(const sem::Call* call, sem::Statement* current_statement) const {
+    if (!call->Target()->MustUse()) {
+        return true;
+    }
+
     auto* expr = call->Declaration();
     bool is_call_stmt =
         current_statement && Is<ast::CallStatement>(current_statement->Declaration(),
                                                     [&](auto* stmt) { return stmt->expr == expr; });
     if (is_call_stmt) {
-        return Switch(
+        // Call target is annotated with @must_use, but was used as a call statement.
+        Switch(
             call->Target(),  //
+            [&](const sem::Function* fn) {
+                AddError("ignoring return value of function '" +
+                             symbols_.NameFor(fn->Declaration()->name->symbol) +
+                             "' annotated with @must_use",
+                         call->Declaration()->source);
+                sem_.NoteDeclarationSource(fn->Declaration());
+            },
+            [&](const sem::Builtin* b) {
+                AddError("ignoring return value of builtin '" + utils::ToString(b->Type()) + "'",
+                         call->Declaration()->source);
+            },
             [&](const sem::TypeConversion*) {
                 AddError("type conversion evaluated but not used", call->Declaration()->source);
-                return false;
             },
             [&](const sem::TypeInitializer*) {
                 AddError("type initializer evaluated but not used", call->Declaration()->source);
-                return false;
             },
-            [&](Default) { return true; });
+            [&](Default) {
+                AddError("return value of call not used", call->Declaration()->source);
+            });
+        return false;
     }
 
     return true;

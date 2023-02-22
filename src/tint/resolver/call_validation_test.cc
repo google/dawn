@@ -457,5 +457,26 @@ TEST_F(ResolverCallValidationTest, ComplexPointerChain_NotWholeVar_WithFullPtrPa
     EXPECT_TRUE(r()->Resolve());
 }
 
+TEST_F(ResolverCallValidationTest, MustUseFunction) {
+    Func(Source{{56, 78}}, "fn_must_use", utils::Empty, ty.i32(), utils::Vector{Return(1_i)},
+         utils::Vector{MustUse()});
+    Func("f", utils::Empty, ty.void_(),
+         utils::Vector{CallStmt(Call(Source{{12, 34}}, "fn_must_use"))});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: ignoring return value of function 'fn_must_use' annotated with @must_use
+56:78 note: function 'fn_must_use' declared here)");
+}
+
+TEST_F(ResolverCallValidationTest, MustUseBuiltin) {
+    Func("f", utils::Empty, ty.void_(),
+         utils::Vector{CallStmt(Call(Source{{12, 34}}, "max", 1_a, 2_a))});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: ignoring return value of builtin 'max'");
+}
+
 }  // namespace
 }  // namespace tint::resolver

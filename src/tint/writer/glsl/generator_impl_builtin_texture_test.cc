@@ -254,9 +254,9 @@ ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverloa
         case ValidTextureOverload::kLoadMultisampled2dI32:
             return R"(texelFetch(Texture_1, ivec2(uvec2(1u, 2u)), int(3u));)";
         case ValidTextureOverload::kLoadDepth2dLevelF32:
-            return R"(texelFetch(Texture_1, ivec2(1, 2), 3);)";
+            return R"(texelFetch(Texture_1, ivec2(1, 2), 3).x;)";
         case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
-            return R"(texelFetch(Texture_1, ivec3(uvec3(1u, 2u, 3u)), int(4u));)";
+            return R"(texelFetch(Texture_1, ivec3(uvec3(1u, 2u, 3u)), int(4u)).x;)";
         case ValidTextureOverload::kLoadDepthMultisampled2dF32:
             return R"(texelFetch(Texture_1, ivec2(uvec2(1u, 2u)), int(3u)).x;)";
         case ValidTextureOverload::kStoreWO1dRgba32float:
@@ -281,7 +281,8 @@ TEST_P(GlslGeneratorBuiltinTextureTest, Call) {
     param.BuildSamplerVariable(this);
 
     auto* call = Call(param.function, param.args(this));
-    auto* stmt = CallStmt(call);
+    auto* stmt = param.returns_value ? static_cast<const ast::Statement*>(Decl(Var("v", call)))
+                                     : static_cast<const ast::Statement*>(CallStmt(call));
 
     Func("main", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});

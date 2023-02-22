@@ -42,7 +42,7 @@ TEST_F(ResolverBuiltinValidationTest, InvalidPipelineStageDirect) {
     auto* dpdx = Call(Source{{3, 4}}, "dpdx", 1_f);
     Func(Source{{1, 2}}, "func", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(dpdx),
+             Assign(Phony(), dpdx),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
@@ -62,7 +62,7 @@ TEST_F(ResolverBuiltinValidationTest, InvalidPipelineStageIndirect) {
     auto* dpdx = Call(Source{{3, 4}}, "dpdx", 1_f);
     Func(Source{{1, 2}}, "f0", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(dpdx),
+             Assign(Phony(), dpdx),
          });
 
     Func(Source{{3, 4}}, "f1", utils::Empty, ty.void_(),
@@ -318,10 +318,14 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, Immediate) {
 
     arg_to_replace = expr(Source{{12, 34}}, *this);
 
+    auto* call = Call(overload.function, args);
+    auto* stmt = overload.returns_value ? static_cast<const ast::Statement*>(Assign(Phony(), call))
+                                        : static_cast<const ast::Statement*>(CallStmt(call));
+
     // Call the builtin with the constexpr argument replaced
     Func("func", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call(overload.function, args)),
+             stmt,
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -371,10 +375,14 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalConst) {
 
     arg_to_replace = Expr(Source{{12, 34}}, "G");
 
+    auto* call = Call(overload.function, args);
+    auto* stmt = overload.returns_value ? static_cast<const ast::Statement*>(Assign(Phony(), call))
+                                        : static_cast<const ast::Statement*>(CallStmt(call));
+
     // Call the builtin with the constant-expression argument replaced
     Func("func", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call(overload.function, args)),
+             stmt,
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -420,10 +428,14 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalVar) {
 
     arg_to_replace = Expr(Source{{12, 34}}, "G");
 
+    auto* call = Call(overload.function, args);
+    auto* stmt = overload.returns_value ? static_cast<const ast::Statement*>(Assign(Phony(), call))
+                                        : static_cast<const ast::Statement*>(CallStmt(call));
+
     // Call the builtin with the constant-expression argument replaced
     Func("func", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call(overload.function, args)),
+             stmt,
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),

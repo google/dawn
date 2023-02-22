@@ -67,12 +67,15 @@ struct CallTargetSignature {
 class CallTarget : public Castable<CallTarget, Node> {
   public:
     /// Constructor
-    /// @param stage the earliest evaluation stage for a call to this target
     /// @param return_type the return type of the call target
     /// @param parameters the parameters for the call target
+    /// @param stage the earliest evaluation stage for a call to this target
+    /// @param must_use the result of the call target must be used, i.e. it cannot be used as a call
+    /// statement.
     CallTarget(const type::Type* return_type,
                utils::VectorRef<const Parameter*> parameters,
-               EvaluationStage stage);
+               EvaluationStage stage,
+               bool must_use);
 
     /// Copy constructor
     CallTarget(const CallTarget&);
@@ -92,9 +95,14 @@ class CallTarget : public Castable<CallTarget, Node> {
     /// @return the earliest evaluation stage for a call to this target
     EvaluationStage Stage() const { return stage_; }
 
+    /// @returns true if the result of the call target must be used, i.e. it cannot be used as a
+    /// call statement.
+    bool MustUse() const { return must_use_; }
+
   private:
     CallTargetSignature signature_;
     EvaluationStage stage_;
+    const bool must_use_;
 };
 
 }  // namespace tint::sem

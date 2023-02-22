@@ -330,7 +330,7 @@ TEST_P(GlslDepthTexturesTest, Emit) {
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call("textureDimensions", "tex")),
+             Decl(Var("v", Call("textureDimensions", "tex"))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -358,7 +358,7 @@ TEST_F(GlslDepthMultisampledTexturesTest, Emit) {
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call("textureDimensions", "tex")),
+             Decl(Var("v", Call("textureDimensions", "tex"))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -402,7 +402,7 @@ TEST_P(GlslSampledTexturesTest, Emit) {
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call("textureDimensions", "tex")),
+             Decl(Var("v", Call("textureDimensions", "tex"))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -538,7 +538,7 @@ TEST_P(GlslStorageTexturesTest, Emit) {
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call("textureDimensions", "tex")),
+             Decl(Var("v", Call("textureDimensions", "tex"))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),

@@ -110,8 +110,9 @@ Builtin::Builtin(BuiltinType type,
                  utils::VectorRef<Parameter*> parameters,
                  EvaluationStage eval_stage,
                  PipelineStageSet supported_stages,
-                 bool is_deprecated)
-    : Base(return_type, SetOwner(std::move(parameters), this), eval_stage),
+                 bool is_deprecated,
+                 bool must_use)
+    : Base(return_type, SetOwner(std::move(parameters), this), eval_stage, must_use),
       type_(type),
       supported_stages_(supported_stages),
       is_deprecated_(is_deprecated) {}

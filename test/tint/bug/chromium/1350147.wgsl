@@ -1,5 +1,5 @@
 fn original_clusterfuzz_code() {
-    atan2(1,.1);
+    _ = atan2(1,.1);
 }
 
 fn more_tests_that_would_fail() {
@@ -19,7 +19,7 @@ fn more_tests_that_would_fail() {
     // abstract constant value is not handled by backends. These should be removed by RemovePhonies
     // transform.
     {
-        atan2(1, 0.1);
-        atan2(0.1, 1);
+        _ = atan2(1, 0.1);
+        _ = atan2(0.1, 1);
     }
 }

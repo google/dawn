@@ -2,5 +2,5 @@
 
 fn n() {
   let p = &(G);
-  arrayLength(p);
+  _ = arrayLength(p);
 }

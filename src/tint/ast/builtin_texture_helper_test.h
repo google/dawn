@@ -196,7 +196,8 @@ struct TextureOverloadCase {
                         type::TextureDimension,
                         TextureDataType,
                         const char*,
-                        std::function<Args(ProgramBuilder*)>);
+                        std::function<Args(ProgramBuilder*)>,
+                        bool /* returns_value */);
     /// Constructor for textureLoad() functions with non-storage textures
     TextureOverloadCase(ValidTextureOverload,
                         const char*,
@@ -204,7 +205,8 @@ struct TextureOverloadCase {
                         type::TextureDimension,
                         TextureDataType,
                         const char*,
-                        std::function<Args(ProgramBuilder*)>);
+                        std::function<Args(ProgramBuilder*)>,
+                        bool /* returns_value */);
     /// Constructor for textureLoad() with storage textures
     TextureOverloadCase(ValidTextureOverload,
                         const char*,
@@ -213,7 +215,8 @@ struct TextureOverloadCase {
                         type::TextureDimension,
                         TextureDataType,
                         const char*,
-                        std::function<Args(ProgramBuilder*)>);
+                        std::function<Args(ProgramBuilder*)>,
+                        bool /* returns_value */);
     /// Copy constructor
     TextureOverloadCase(const TextureOverloadCase&);
     /// Destructor
@@ -258,6 +261,8 @@ struct TextureOverloadCase {
     const char* const function;
     /// A function that builds the AST arguments for the overload
     std::function<Args(ProgramBuilder*)> const args;
+    /// True if the function returns a value
+    const bool returns_value;
 };
 
 std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data);

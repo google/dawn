@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 18
+; Bound: 13
 ; Schema: 0
                OpCapability Shader
                OpCapability Sampled1D
@@ -19,9 +19,6 @@
       %arg_0 = OpVariable %_ptr_UniformConstant_3 UniformConstant
        %void = OpTypeVoid
           %5 = OpTypeFunction %void
-      %v4int = OpTypeVector %int 4
-      %int_1 = OpConstant %int 1
-         %15 = OpConstantNull %int
       %float = OpTypeFloat 32
 %float_0_141120002 = OpConstant %float 0.141120002
 %unused_entry_point = OpFunction %void None %5
@@ -30,7 +27,5 @@
                OpFunctionEnd
           %d = OpFunction %void None %5
          %10 = OpLabel
-         %13 = OpLoad %3 %arg_0
-         %11 = OpImageFetch %v4int %13 %int_1 Lod %15
                OpReturn
                OpFunctionEnd

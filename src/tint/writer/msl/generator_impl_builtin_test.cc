@@ -374,7 +374,7 @@ TEST_F(MslGeneratorImplTest, Builtin_Call) {
     GlobalVar("param2", ty.vec2<f32>(), builtin::AddressSpace::kPrivate);
 
     auto* call = Call("dot", "param1", "param2");
-    WrapInFunction(CallStmt(call));
+    WrapInFunction(Decl(Var("r", call)));
 
     GeneratorImpl& gen = Build();
 
@@ -1048,7 +1048,7 @@ kernel void test_function() {
 TEST_F(MslGeneratorImplTest, Pack2x16Float) {
     auto* call = Call("pack2x16float", "p1");
     GlobalVar("p1", ty.vec2<f32>(), builtin::AddressSpace::kPrivate);
-    WrapInFunction(CallStmt(call));
+    WrapInFunction(Decl(Var("r", call)));
 
     GeneratorImpl& gen = Build();
 
@@ -1060,7 +1060,7 @@ TEST_F(MslGeneratorImplTest, Pack2x16Float) {
 TEST_F(MslGeneratorImplTest, Unpack2x16Float) {
     auto* call = Call("unpack2x16float", "p1");
     GlobalVar("p1", ty.u32(), builtin::AddressSpace::kPrivate);
-    WrapInFunction(CallStmt(call));
+    WrapInFunction(Decl(Var("r", call)));
 
     GeneratorImpl& gen = Build();
 
@@ -1071,7 +1071,7 @@ TEST_F(MslGeneratorImplTest, Unpack2x16Float) {
 
 TEST_F(MslGeneratorImplTest, DotI32) {
     GlobalVar("v", ty.vec3<i32>(), builtin::AddressSpace::kPrivate);
-    WrapInFunction(CallStmt(Call("dot", "v", "v")));
+    WrapInFunction(Decl(Var("r", Call("dot", "v", "v"))));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -1086,7 +1086,7 @@ T tint_dot3(vec<T,3> a, vec<T,3> b) {
 }
 kernel void test_function() {
   thread int3 tint_symbol = 0;
-  tint_dot3(tint_symbol, tint_symbol);
+  int r = tint_dot3(tint_symbol, tint_symbol);
   return;
 }
 

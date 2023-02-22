@@ -3,5 +3,5 @@ var<storage> G : array<i32>;
 
 fn n() {
     let p = &G;
-    arrayLength(p);
+    _ = arrayLength(p);
 }

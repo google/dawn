@@ -792,14 +792,14 @@ fn idx_signed() {
   var level_idx : i32;
   var sample_idx : i32;
 
-  textureLoad(tex_1d, 1i, level_idx);
-  textureLoad(tex_2d, vec2<i32>(1, 2), level_idx);
-  textureLoad(tex_2d_arr, vec2<i32>(1, 2), array_idx, level_idx);
-  textureLoad(tex_3d, vec3<i32>(1, 2, 3), level_idx);
-  textureLoad(tex_ms_2d, vec2<i32>(1, 2), sample_idx);
-  textureLoad(tex_depth_2d, vec2<i32>(1, 2), level_idx);
-  textureLoad(tex_depth_2d_arr, vec2<i32>(1, 2), array_idx, level_idx);
-  textureLoad(tex_external, vec2<i32>(1, 2));
+  _ = textureLoad(tex_1d, 1i, level_idx);
+  _ = textureLoad(tex_2d, vec2<i32>(1, 2), level_idx);
+  _ = textureLoad(tex_2d_arr, vec2<i32>(1, 2), array_idx, level_idx);
+  _ = textureLoad(tex_3d, vec3<i32>(1, 2, 3), level_idx);
+  _ = textureLoad(tex_ms_2d, vec2<i32>(1, 2), sample_idx);
+  _ = textureLoad(tex_depth_2d, vec2<i32>(1, 2), level_idx);
+  _ = textureLoad(tex_depth_2d_arr, vec2<i32>(1, 2), array_idx, level_idx);
+  _ = textureLoad(tex_external, vec2<i32>(1, 2));
 }
 
 fn idx_unsigned() {
@@ -807,14 +807,14 @@ fn idx_unsigned() {
   var level_idx : u32;
   var sample_idx : u32;
 
-  textureLoad(tex_1d, 1u, level_idx);
-  textureLoad(tex_2d, vec2<u32>(1, 2), level_idx);
-  textureLoad(tex_2d_arr, vec2<u32>(1, 2), array_idx, level_idx);
-  textureLoad(tex_3d, vec3<u32>(1, 2, 3), level_idx);
-  textureLoad(tex_ms_2d, vec2<u32>(1, 2), sample_idx);
-  textureLoad(tex_depth_2d, vec2<u32>(1, 2), level_idx);
-  textureLoad(tex_depth_2d_arr, vec2<u32>(1, 2), array_idx, level_idx);
-  textureLoad(tex_external, vec2<u32>(1, 2));
+  _ = textureLoad(tex_1d, 1u, level_idx);
+  _ = textureLoad(tex_2d, vec2<u32>(1, 2), level_idx);
+  _ = textureLoad(tex_2d_arr, vec2<u32>(1, 2), array_idx, level_idx);
+  _ = textureLoad(tex_3d, vec3<u32>(1, 2, 3), level_idx);
+  _ = textureLoad(tex_ms_2d, vec2<u32>(1, 2), sample_idx);
+  _ = textureLoad(tex_depth_2d, vec2<u32>(1, 2), level_idx);
+  _ = textureLoad(tex_depth_2d_arr, vec2<u32>(1, 2), array_idx, level_idx);
+  _ = textureLoad(tex_external, vec2<u32>(1, 2));
 }
 )";
 
@@ -840,28 +840,28 @@ fn idx_signed() {
   var array_idx : i32;
   var level_idx : i32;
   var sample_idx : i32;
-  textureLoad(tex_1d, clamp(1i, 0, i32((u32(textureDimensions(tex_1d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_1d)) - 1))))) - 1))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_1d)) - 1))));
-  textureLoad(tex_2d, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_2d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d)) - 1))))) - vec2(1)))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d)) - 1))));
-  textureLoad(tex_2d_arr, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_2d_arr, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d_arr)) - 1))))) - vec2(1)))), clamp(array_idx, 0, i32((u32(textureNumLayers(tex_2d_arr)) - 1))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d_arr)) - 1))));
-  textureLoad(tex_3d, clamp(vec3<i32>(1, 2, 3), vec3(0), vec3<i32>((vec3<u32>(textureDimensions(tex_3d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_3d)) - 1))))) - vec3(1)))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_3d)) - 1))));
-  textureLoad(tex_ms_2d, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_ms_2d)) - vec2(1)))), sample_idx);
-  textureLoad(tex_depth_2d, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_depth_2d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d)) - 1))))) - vec2(1)))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d)) - 1))));
-  textureLoad(tex_depth_2d_arr, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_depth_2d_arr, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d_arr)) - 1))))) - vec2(1)))), clamp(array_idx, 0, i32((u32(textureNumLayers(tex_depth_2d_arr)) - 1))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d_arr)) - 1))));
-  textureLoad(tex_external, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_external)) - vec2(1)))));
+  _ = textureLoad(tex_1d, clamp(1i, 0, i32((u32(textureDimensions(tex_1d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_1d)) - 1))))) - 1))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_1d)) - 1))));
+  _ = textureLoad(tex_2d, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_2d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d)) - 1))))) - vec2(1)))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d)) - 1))));
+  _ = textureLoad(tex_2d_arr, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_2d_arr, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d_arr)) - 1))))) - vec2(1)))), clamp(array_idx, 0, i32((u32(textureNumLayers(tex_2d_arr)) - 1))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d_arr)) - 1))));
+  _ = textureLoad(tex_3d, clamp(vec3<i32>(1, 2, 3), vec3(0), vec3<i32>((vec3<u32>(textureDimensions(tex_3d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_3d)) - 1))))) - vec3(1)))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_3d)) - 1))));
+  _ = textureLoad(tex_ms_2d, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_ms_2d)) - vec2(1)))), sample_idx);
+  _ = textureLoad(tex_depth_2d, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_depth_2d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d)) - 1))))) - vec2(1)))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d)) - 1))));
+  _ = textureLoad(tex_depth_2d_arr, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_depth_2d_arr, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d_arr)) - 1))))) - vec2(1)))), clamp(array_idx, 0, i32((u32(textureNumLayers(tex_depth_2d_arr)) - 1))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d_arr)) - 1))));
+  _ = textureLoad(tex_external, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_external)) - vec2(1)))));
 }
 
 fn idx_unsigned() {
   var array_idx : u32;
   var level_idx : u32;
   var sample_idx : u32;
-  textureLoad(tex_1d, min(1u, (u32(textureDimensions(tex_1d, min(level_idx, (u32(textureNumLevels(tex_1d)) - 1)))) - 1)), min(level_idx, (u32(textureNumLevels(tex_1d)) - 1)));
-  textureLoad(tex_2d, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_2d, min(level_idx, (u32(textureNumLevels(tex_2d)) - 1)))) - vec2(1))), min(level_idx, (u32(textureNumLevels(tex_2d)) - 1)));
-  textureLoad(tex_2d_arr, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_2d_arr, min(level_idx, (u32(textureNumLevels(tex_2d_arr)) - 1)))) - vec2(1))), min(array_idx, (u32(textureNumLayers(tex_2d_arr)) - 1)), min(level_idx, (u32(textureNumLevels(tex_2d_arr)) - 1)));
-  textureLoad(tex_3d, min(vec3<u32>(1, 2, 3), (vec3<u32>(textureDimensions(tex_3d, min(level_idx, (u32(textureNumLevels(tex_3d)) - 1)))) - vec3(1))), min(level_idx, (u32(textureNumLevels(tex_3d)) - 1)));
-  textureLoad(tex_ms_2d, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_ms_2d)) - vec2(1))), sample_idx);
-  textureLoad(tex_depth_2d, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_depth_2d, min(level_idx, (u32(textureNumLevels(tex_depth_2d)) - 1)))) - vec2(1))), min(level_idx, (u32(textureNumLevels(tex_depth_2d)) - 1)));
-  textureLoad(tex_depth_2d_arr, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_depth_2d_arr, min(level_idx, (u32(textureNumLevels(tex_depth_2d_arr)) - 1)))) - vec2(1))), min(array_idx, (u32(textureNumLayers(tex_depth_2d_arr)) - 1)), min(level_idx, (u32(textureNumLevels(tex_depth_2d_arr)) - 1)));
-  textureLoad(tex_external, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_external)) - vec2(1))));
+  _ = textureLoad(tex_1d, min(1u, (u32(textureDimensions(tex_1d, min(level_idx, (u32(textureNumLevels(tex_1d)) - 1)))) - 1)), min(level_idx, (u32(textureNumLevels(tex_1d)) - 1)));
+  _ = textureLoad(tex_2d, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_2d, min(level_idx, (u32(textureNumLevels(tex_2d)) - 1)))) - vec2(1))), min(level_idx, (u32(textureNumLevels(tex_2d)) - 1)));
+  _ = textureLoad(tex_2d_arr, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_2d_arr, min(level_idx, (u32(textureNumLevels(tex_2d_arr)) - 1)))) - vec2(1))), min(array_idx, (u32(textureNumLayers(tex_2d_arr)) - 1)), min(level_idx, (u32(textureNumLevels(tex_2d_arr)) - 1)));
+  _ = textureLoad(tex_3d, min(vec3<u32>(1, 2, 3), (vec3<u32>(textureDimensions(tex_3d, min(level_idx, (u32(textureNumLevels(tex_3d)) - 1)))) - vec3(1))), min(level_idx, (u32(textureNumLevels(tex_3d)) - 1)));
+  _ = textureLoad(tex_ms_2d, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_ms_2d)) - vec2(1))), sample_idx);
+  _ = textureLoad(tex_depth_2d, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_depth_2d, min(level_idx, (u32(textureNumLevels(tex_depth_2d)) - 1)))) - vec2(1))), min(level_idx, (u32(textureNumLevels(tex_depth_2d)) - 1)));
+  _ = textureLoad(tex_depth_2d_arr, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_depth_2d_arr, min(level_idx, (u32(textureNumLevels(tex_depth_2d_arr)) - 1)))) - vec2(1))), min(array_idx, (u32(textureNumLayers(tex_depth_2d_arr)) - 1)), min(level_idx, (u32(textureNumLevels(tex_depth_2d_arr)) - 1)));
+  _ = textureLoad(tex_external, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_external)) - vec2(1))));
 }
 )";
 
@@ -878,14 +878,14 @@ fn idx_signed() {
   var level_idx : i32;
   var sample_idx : i32;
 
-  textureLoad(tex_1d, 1i, level_idx);
-  textureLoad(tex_2d, vec2<i32>(1, 2), level_idx);
-  textureLoad(tex_2d_arr, vec2<i32>(1, 2), array_idx, level_idx);
-  textureLoad(tex_3d, vec3<i32>(1, 2, 3), level_idx);
-  textureLoad(tex_ms_2d, vec2<i32>(1, 2), sample_idx);
-  textureLoad(tex_depth_2d, vec2<i32>(1, 2), level_idx);
-  textureLoad(tex_depth_2d_arr, vec2<i32>(1, 2), array_idx, level_idx);
-  textureLoad(tex_external, vec2<i32>(1, 2));
+  _ = textureLoad(tex_1d, 1i, level_idx);
+  _ = textureLoad(tex_2d, vec2<i32>(1, 2), level_idx);
+  _ = textureLoad(tex_2d_arr, vec2<i32>(1, 2), array_idx, level_idx);
+  _ = textureLoad(tex_3d, vec3<i32>(1, 2, 3), level_idx);
+  _ = textureLoad(tex_ms_2d, vec2<i32>(1, 2), sample_idx);
+  _ = textureLoad(tex_depth_2d, vec2<i32>(1, 2), level_idx);
+  _ = textureLoad(tex_depth_2d_arr, vec2<i32>(1, 2), array_idx, level_idx);
+  _ = textureLoad(tex_external, vec2<i32>(1, 2));
 }
 
 fn idx_unsigned() {
@@ -893,14 +893,14 @@ fn idx_unsigned() {
   var level_idx : u32;
   var sample_idx : u32;
 
-  textureLoad(tex_1d, 1u, level_idx);
-  textureLoad(tex_2d, vec2<u32>(1, 2), level_idx);
-  textureLoad(tex_2d_arr, vec2<u32>(1, 2), array_idx, level_idx);
-  textureLoad(tex_3d, vec3<u32>(1, 2, 3), level_idx);
-  textureLoad(tex_ms_2d, vec2<u32>(1, 2), sample_idx);
-  textureLoad(tex_depth_2d, vec2<u32>(1, 2), level_idx);
-  textureLoad(tex_depth_2d_arr, vec2<u32>(1, 2), array_idx, level_idx);
-  textureLoad(tex_external, vec2<u32>(1, 2));
+  _ = textureLoad(tex_1d, 1u, level_idx);
+  _ = textureLoad(tex_2d, vec2<u32>(1, 2), level_idx);
+  _ = textureLoad(tex_2d_arr, vec2<u32>(1, 2), array_idx, level_idx);
+  _ = textureLoad(tex_3d, vec3<u32>(1, 2, 3), level_idx);
+  _ = textureLoad(tex_ms_2d, vec2<u32>(1, 2), sample_idx);
+  _ = textureLoad(tex_depth_2d, vec2<u32>(1, 2), level_idx);
+  _ = textureLoad(tex_depth_2d_arr, vec2<u32>(1, 2), array_idx, level_idx);
+  _ = textureLoad(tex_external, vec2<u32>(1, 2));
 }
 
 @group(0) @binding(0) var tex_1d : texture_1d<f32>;
@@ -919,28 +919,28 @@ fn idx_signed() {
   var array_idx : i32;
   var level_idx : i32;
   var sample_idx : i32;
-  textureLoad(tex_1d, clamp(1i, 0, i32((u32(textureDimensions(tex_1d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_1d)) - 1))))) - 1))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_1d)) - 1))));
-  textureLoad(tex_2d, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_2d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d)) - 1))))) - vec2(1)))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d)) - 1))));
-  textureLoad(tex_2d_arr, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_2d_arr, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d_arr)) - 1))))) - vec2(1)))), clamp(array_idx, 0, i32((u32(textureNumLayers(tex_2d_arr)) - 1))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d_arr)) - 1))));
-  textureLoad(tex_3d, clamp(vec3<i32>(1, 2, 3), vec3(0), vec3<i32>((vec3<u32>(textureDimensions(tex_3d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_3d)) - 1))))) - vec3(1)))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_3d)) - 1))));
-  textureLoad(tex_ms_2d, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_ms_2d)) - vec2(1)))), sample_idx);
-  textureLoad(tex_depth_2d, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_depth_2d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d)) - 1))))) - vec2(1)))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d)) - 1))));
-  textureLoad(tex_depth_2d_arr, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_depth_2d_arr, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d_arr)) - 1))))) - vec2(1)))), clamp(array_idx, 0, i32((u32(textureNumLayers(tex_depth_2d_arr)) - 1))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d_arr)) - 1))));
-  textureLoad(tex_external, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_external)) - vec2(1)))));
+  _ = textureLoad(tex_1d, clamp(1i, 0, i32((u32(textureDimensions(tex_1d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_1d)) - 1))))) - 1))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_1d)) - 1))));
+  _ = textureLoad(tex_2d, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_2d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d)) - 1))))) - vec2(1)))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d)) - 1))));
+  _ = textureLoad(tex_2d_arr, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_2d_arr, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d_arr)) - 1))))) - vec2(1)))), clamp(array_idx, 0, i32((u32(textureNumLayers(tex_2d_arr)) - 1))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_2d_arr)) - 1))));
+  _ = textureLoad(tex_3d, clamp(vec3<i32>(1, 2, 3), vec3(0), vec3<i32>((vec3<u32>(textureDimensions(tex_3d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_3d)) - 1))))) - vec3(1)))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_3d)) - 1))));
+  _ = textureLoad(tex_ms_2d, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_ms_2d)) - vec2(1)))), sample_idx);
+  _ = textureLoad(tex_depth_2d, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_depth_2d, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d)) - 1))))) - vec2(1)))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d)) - 1))));
+  _ = textureLoad(tex_depth_2d_arr, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_depth_2d_arr, clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d_arr)) - 1))))) - vec2(1)))), clamp(array_idx, 0, i32((u32(textureNumLayers(tex_depth_2d_arr)) - 1))), clamp(level_idx, 0, i32((u32(textureNumLevels(tex_depth_2d_arr)) - 1))));
+  _ = textureLoad(tex_external, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_external)) - vec2(1)))));
 }
 
 fn idx_unsigned() {
   var array_idx : u32;
   var level_idx : u32;
   var sample_idx : u32;
-  textureLoad(tex_1d, min(1u, (u32(textureDimensions(tex_1d, min(level_idx, (u32(textureNumLevels(tex_1d)) - 1)))) - 1)), min(level_idx, (u32(textureNumLevels(tex_1d)) - 1)));
-  textureLoad(tex_2d, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_2d, min(level_idx, (u32(textureNumLevels(tex_2d)) - 1)))) - vec2(1))), min(level_idx, (u32(textureNumLevels(tex_2d)) - 1)));
-  textureLoad(tex_2d_arr, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_2d_arr, min(level_idx, (u32(textureNumLevels(tex_2d_arr)) - 1)))) - vec2(1))), min(array_idx, (u32(textureNumLayers(tex_2d_arr)) - 1)), min(level_idx, (u32(textureNumLevels(tex_2d_arr)) - 1)));
-  textureLoad(tex_3d, min(vec3<u32>(1, 2, 3), (vec3<u32>(textureDimensions(tex_3d, min(level_idx, (u32(textureNumLevels(tex_3d)) - 1)))) - vec3(1))), min(level_idx, (u32(textureNumLevels(tex_3d)) - 1)));
-  textureLoad(tex_ms_2d, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_ms_2d)) - vec2(1))), sample_idx);
-  textureLoad(tex_depth_2d, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_depth_2d, min(level_idx, (u32(textureNumLevels(tex_depth_2d)) - 1)))) - vec2(1))), min(level_idx, (u32(textureNumLevels(tex_depth_2d)) - 1)));
-  textureLoad(tex_depth_2d_arr, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_depth_2d_arr, min(level_idx, (u32(textureNumLevels(tex_depth_2d_arr)) - 1)))) - vec2(1))), min(array_idx, (u32(textureNumLayers(tex_depth_2d_arr)) - 1)), min(level_idx, (u32(textureNumLevels(tex_depth_2d_arr)) - 1)));
-  textureLoad(tex_external, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_external)) - vec2(1))));
+  _ = textureLoad(tex_1d, min(1u, (u32(textureDimensions(tex_1d, min(level_idx, (u32(textureNumLevels(tex_1d)) - 1)))) - 1)), min(level_idx, (u32(textureNumLevels(tex_1d)) - 1)));
+  _ = textureLoad(tex_2d, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_2d, min(level_idx, (u32(textureNumLevels(tex_2d)) - 1)))) - vec2(1))), min(level_idx, (u32(textureNumLevels(tex_2d)) - 1)));
+  _ = textureLoad(tex_2d_arr, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_2d_arr, min(level_idx, (u32(textureNumLevels(tex_2d_arr)) - 1)))) - vec2(1))), min(array_idx, (u32(textureNumLayers(tex_2d_arr)) - 1)), min(level_idx, (u32(textureNumLevels(tex_2d_arr)) - 1)));
+  _ = textureLoad(tex_3d, min(vec3<u32>(1, 2, 3), (vec3<u32>(textureDimensions(tex_3d, min(level_idx, (u32(textureNumLevels(tex_3d)) - 1)))) - vec3(1))), min(level_idx, (u32(textureNumLevels(tex_3d)) - 1)));
+  _ = textureLoad(tex_ms_2d, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_ms_2d)) - vec2(1))), sample_idx);
+  _ = textureLoad(tex_depth_2d, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_depth_2d, min(level_idx, (u32(textureNumLevels(tex_depth_2d)) - 1)))) - vec2(1))), min(level_idx, (u32(textureNumLevels(tex_depth_2d)) - 1)));
+  _ = textureLoad(tex_depth_2d_arr, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_depth_2d_arr, min(level_idx, (u32(textureNumLevels(tex_depth_2d_arr)) - 1)))) - vec2(1))), min(array_idx, (u32(textureNumLayers(tex_depth_2d_arr)) - 1)), min(level_idx, (u32(textureNumLevels(tex_depth_2d_arr)) - 1)));
+  _ = textureLoad(tex_external, min(vec2<u32>(1, 2), (vec2<u32>(textureDimensions(tex_external)) - vec2(1))));
 }
 
 @group(0) @binding(0) var tex_1d : texture_1d<f32>;

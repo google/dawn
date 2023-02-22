@@ -1280,20 +1280,22 @@ Impl::Builtin Impl::Lookup(sem::BuiltinType builtin_type,
                 builtin::AddressSpace::kUndefined, builtin::Access::kUndefined, p.usage));
         }
         sem::PipelineStageSet supported_stages;
-        if (match.overload->flags.Contains(OverloadFlag::kSupportsVertexPipeline)) {
+        auto& overload = *match.overload;
+        if (overload.flags.Contains(OverloadFlag::kSupportsVertexPipeline)) {
             supported_stages.Add(ast::PipelineStage::kVertex);
         }
-        if (match.overload->flags.Contains(OverloadFlag::kSupportsFragmentPipeline)) {
+        if (overload.flags.Contains(OverloadFlag::kSupportsFragmentPipeline)) {
             supported_stages.Add(ast::PipelineStage::kFragment);
         }
-        if (match.overload->flags.Contains(OverloadFlag::kSupportsComputePipeline)) {
+        if (overload.flags.Contains(OverloadFlag::kSupportsComputePipeline)) {
             supported_stages.Add(ast::PipelineStage::kCompute);
         }
-        auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
-                                                        : sem::EvaluationStage::kRuntime;
-        return builder.create<sem::Builtin>(
-            builtin_type, match.return_type, std::move(params), eval_stage, supported_stages,
-            match.overload->flags.Contains(OverloadFlag::kIsDeprecated));
+        auto eval_stage = overload.const_eval_fn ? sem::EvaluationStage::kConstant
+                                                 : sem::EvaluationStage::kRuntime;
+        return builder.create<sem::Builtin>(builtin_type, match.return_type, std::move(params),
+                                            eval_stage, supported_stages,
+                                            overload.flags.Contains(OverloadFlag::kIsDeprecated),
+                                            overload.flags.Contains(OverloadFlag::kMustUse));
     });
     return Builtin{sem, match.overload->const_eval_fn};
 }

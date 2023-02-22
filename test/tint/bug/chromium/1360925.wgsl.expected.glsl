@@ -9,6 +9,5 @@ layout(binding = 0, std430) buffer G_block_ssbo {
 } G;
 
 void n() {
-  uint(G.inner.length());
 }
 

@@ -558,7 +558,7 @@ TEST_P(Use, Read_UnaryMinus) {
 
 TEST_P(Use, Read_FunctionCallArg) {
     // abs(*p2);
-    Run(CallStmt(Call("abs", Deref("p2"))), R"(56:78 error: invalid aliased pointer argument
+    Run(Assign(Phony(), Call("abs", Deref("p2"))), R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 

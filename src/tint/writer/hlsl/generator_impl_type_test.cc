@@ -325,7 +325,7 @@ TEST_P(HlslDepthTexturesTest, Emit) {
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call("textureDimensions", "tex")),
+             Decl(Var("v", Call("textureDimensions", "tex"))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -356,7 +356,7 @@ TEST_F(HlslDepthMultisampledTexturesTest, Emit) {
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call("textureDimensions", "tex")),
+             Decl(Var("v", Call("textureDimensions", "tex"))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -400,7 +400,7 @@ TEST_P(HlslSampledTexturesTest, Emit) {
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call("textureDimensions", "tex")),
+             Decl(Var("v", Call("textureDimensions", "tex"))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -541,7 +541,7 @@ TEST_P(HlslStorageTexturesTest, Emit) {
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call("textureDimensions", "tex")),
+             Decl(Var("v", Call("textureDimensions", "tex"))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),

@@ -1,8 +1,7 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void d(texture1d<int, access::sample> tint_symbol) {
-  tint_symbol.read(uint(1), 0);
+void d() {
   float const l = 0.141120002f;
 }
 

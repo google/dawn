@@ -887,7 +887,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParam) {
     auto* src = R"(
 fn f(t : texture_external, s : sampler) {
-  textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
+  _ = textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
 }
 
 @group(0) @binding(0) var ext_tex : texture_external;
@@ -955,7 +955,7 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
-  textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
+  _ = textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
 }
 
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
@@ -985,7 +985,7 @@ fn main() {
 }
 
 fn f(t : texture_external, s : sampler) {
-  textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
+  _ = textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
 }
 
 @group(0) @binding(0) var ext_tex : texture_external;
@@ -1053,7 +1053,7 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
-  textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
+  _ = textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
 }
 
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
@@ -1073,7 +1073,7 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 
 TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsSecondParam) {
     auto* src = R"(
 fn f(s : sampler, t : texture_external) {
-  textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
+  _ = textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
 }
 
 @group(0) @binding(0) var ext_tex : texture_external;
@@ -1141,7 +1141,7 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
 }
 
 fn f(s : sampler, t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams) {
-  textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
+  _ = textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
 }
 
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
@@ -1166,8 +1166,8 @@ fn main() {
 TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParamMultiple) {
     auto* src = R"(
 fn f(t : texture_external, s : sampler, t2 : texture_external) {
-  textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
-  textureSampleBaseClampToEdge(t2, s, vec2<f32>(1.0, 2.0));
+  _ = textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
+  _ = textureSampleBaseClampToEdge(t2, s, vec2<f32>(1.0, 2.0));
 }
 
 @group(0) @binding(0) var ext_tex : texture_external;
@@ -1240,8 +1240,8 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_2 : texture_2d<f32>, ext_tex_params_2 : ExternalTextureParams, s : sampler, t2 : texture_2d<f32>, ext_tex_plane_1_3 : texture_2d<f32>, ext_tex_params_3 : ExternalTextureParams) {
-  textureSampleExternal(t, ext_tex_plane_1_2, s, vec2<f32>(1.0, 2.0), ext_tex_params_2);
-  textureSampleExternal(t2, ext_tex_plane_1_3, s, vec2<f32>(1.0, 2.0), ext_tex_params_3);
+  _ = textureSampleExternal(t, ext_tex_plane_1_2, s, vec2<f32>(1.0, 2.0), ext_tex_params_2);
+  _ = textureSampleExternal(t2, ext_tex_plane_1_3, s, vec2<f32>(1.0, 2.0), ext_tex_params_3);
 }
 
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
@@ -1274,8 +1274,8 @@ fn main() {
 }
 
 fn f(t : texture_external, s : sampler, t2 : texture_external) {
-  textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
-  textureSampleBaseClampToEdge(t2, s, vec2<f32>(1.0, 2.0));
+  _ = textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
+  _ = textureSampleBaseClampToEdge(t2, s, vec2<f32>(1.0, 2.0));
 }
 
 @group(0) @binding(0) var ext_tex : texture_external;
@@ -1349,8 +1349,8 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_2 : texture_2d<f32>, ext_tex_params_2 : ExternalTextureParams, s : sampler, t2 : texture_2d<f32>, ext_tex_plane_1_3 : texture_2d<f32>, ext_tex_params_3 : ExternalTextureParams) {
-  textureSampleExternal(t, ext_tex_plane_1_2, s, vec2<f32>(1.0, 2.0), ext_tex_params_2);
-  textureSampleExternal(t2, ext_tex_plane_1_3, s, vec2<f32>(1.0, 2.0), ext_tex_params_3);
+  _ = textureSampleExternal(t, ext_tex_plane_1_2, s, vec2<f32>(1.0, 2.0), ext_tex_params_2);
+  _ = textureSampleExternal(t2, ext_tex_plane_1_3, s, vec2<f32>(1.0, 2.0), ext_tex_params_3);
 }
 
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
@@ -1373,7 +1373,7 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_2 : texture_2d<f32>, ext_tex_params_2 
 TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParamNested) {
     auto* src = R"(
 fn nested(t : texture_external, s : sampler) {
-  textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
+  _ = textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
 }
 
 fn f(t : texture_external, s : sampler) {
@@ -1445,7 +1445,7 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
 }
 
 fn nested(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
-  textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
+  _ = textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_2 : texture_2d<f32>, ext_tex_params_2 : ExternalTextureParams, s : sampler) {
@@ -1474,7 +1474,7 @@ fn main() {
 TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParamNested_OutOfOrder) {
     auto* src = R"(
 fn nested(t : texture_external, s : sampler) {
-  textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
+  _ = textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
 }
 
 fn f(t : texture_external, s : sampler) {
@@ -1546,7 +1546,7 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
 }
 
 fn nested(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
-  textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
+  _ = textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_2 : texture_2d<f32>, ext_tex_params_2 : ExternalTextureParams, s : sampler) {
@@ -1619,7 +1619,7 @@ TEST_F(MultiplanarExternalTextureTest, ExternalTextureAlias) {
 alias ET = texture_external;
 
 fn f(t : ET, s : sampler) {
-  textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
+  _ = textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
 }
 
 @group(0) @binding(0) var ext_tex : ET;
@@ -1689,7 +1689,7 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
-  textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
+  _ = textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
 }
 
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
@@ -1718,7 +1718,7 @@ fn main() {
 }
 
 fn f(t : ET, s : sampler) {
-  textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
+  _ = textureSampleBaseClampToEdge(t, s, vec2<f32>(1.0, 2.0));
 }
 
 @group(0) @binding(0) var ext_tex : ET;
@@ -1788,7 +1788,7 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
-  textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
+  _ = textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
 }
 
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;

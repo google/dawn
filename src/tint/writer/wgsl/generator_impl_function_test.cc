@@ -87,9 +87,9 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_MustUse) {
-    auto* func = Func("my_func", utils::Empty, ty.void_(),
+    auto* func = Func("my_func", utils::Empty, ty.i32(),
                       utils::Vector{
-                          Return(),
+                          Return(1_i),
                       },
                       utils::Vector{
                           MustUse(),
@@ -101,8 +101,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_MustUse) {
 
     ASSERT_TRUE(gen.EmitFunction(func));
     EXPECT_EQ(gen.result(), R"(  @must_use
-  fn my_func() {
-    return;
+  fn my_func() -> i32 {
+    return 1i;
   }
 )");
 }

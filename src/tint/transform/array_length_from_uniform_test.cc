@@ -514,43 +514,5 @@ struct SB {
               got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
 }
 
-TEST_F(ArrayLengthFromUniformTest, CallStatement) {
-    auto* src = R"(
-struct SB {
-  arr : array<i32>,
-}
-
-@group(0) @binding(0) var<storage, read> a : SB;
-
-@compute @workgroup_size(1)
-fn main() {
-  arrayLength(&a.arr);
-}
-)";
-
-    auto* expect =
-        R"(
-struct SB {
-  arr : array<i32>,
-}
-
-@group(0) @binding(0) var<storage, read> a : SB;
-
-@compute @workgroup_size(1)
-fn main() {
-}
-)";
-
-    ArrayLengthFromUniform::Config cfg({0, 30u});
-    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 0}, 0);
-
-    DataMap data;
-    data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
-
-    auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
-
-    EXPECT_EQ(expect, str(got));
-}
-
 }  // namespace
 }  // namespace tint::transform

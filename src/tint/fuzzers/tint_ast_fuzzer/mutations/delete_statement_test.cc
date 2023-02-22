@@ -214,7 +214,7 @@ fn main() {
 TEST(DeleteStatementTest, DeleteCall) {
     auto original = R"(
 fn main() {
-  sin(1.0);
+  workgroupBarrier();
 })";
     auto expected = R"(
 fn main() {

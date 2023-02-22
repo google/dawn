@@ -1161,7 +1161,7 @@ TEST_P(FloatAllMatching, Scalar) {
     auto* builtin = Call(name, params);
     Func("func", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(builtin),
+             Assign(Phony(), builtin),
          },
          utils::Vector{
              create<ast::StageAttribute>(ast::PipelineStage::kFragment),
@@ -1182,7 +1182,7 @@ TEST_P(FloatAllMatching, Vec2) {
     auto* builtin = Call(name, params);
     Func("func", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(builtin),
+             Assign(Phony(), builtin),
          },
          utils::Vector{
              create<ast::StageAttribute>(ast::PipelineStage::kFragment),
@@ -1203,7 +1203,7 @@ TEST_P(FloatAllMatching, Vec3) {
     auto* builtin = Call(name, params);
     Func("func", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(builtin),
+             Assign(Phony(), builtin),
          },
          utils::Vector{
              create<ast::StageAttribute>(ast::PipelineStage::kFragment),
@@ -1224,7 +1224,7 @@ TEST_P(FloatAllMatching, Vec4) {
     auto* builtin = Call(name, params);
     Func("func", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(builtin),
+             Assign(Phony(), builtin),
          },
          utils::Vector{
              create<ast::StageAttribute>(ast::PipelineStage::kFragment),

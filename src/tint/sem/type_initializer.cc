@@ -23,7 +23,7 @@ namespace tint::sem {
 TypeInitializer::TypeInitializer(const type::Type* type,
                                  utils::VectorRef<const Parameter*> parameters,
                                  EvaluationStage stage)
-    : Base(type, std::move(parameters), stage) {}
+    : Base(type, std::move(parameters), stage, /* must_use */ true) {}
 
 TypeInitializer::~TypeInitializer() = default;
 

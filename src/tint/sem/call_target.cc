@@ -25,8 +25,9 @@ namespace tint::sem {
 
 CallTarget::CallTarget(const type::Type* return_type,
                        utils::VectorRef<const Parameter*> parameters,
-                       EvaluationStage stage)
-    : signature_{return_type, std::move(parameters)}, stage_(stage) {
+                       EvaluationStage stage,
+                       bool must_use)
+    : signature_{return_type, std::move(parameters)}, stage_(stage), must_use_(must_use) {
     TINT_ASSERT(Semantic, return_type);
 }
 

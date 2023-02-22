@@ -16,6 +16,7 @@
 
 #include "src/tint/ast/function.h"
 #include "src/tint/ast/identifier.h"
+#include "src/tint/ast/must_use_attribute.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/external_texture.h"
@@ -43,7 +44,10 @@ Function::Function(const ast::Function* declaration,
                    type::Type* return_type,
                    std::optional<uint32_t> return_location,
                    utils::VectorRef<Parameter*> parameters)
-    : Base(return_type, SetOwner(std::move(parameters), this), EvaluationStage::kRuntime),
+    : Base(return_type,
+           SetOwner(std::move(parameters), this),
+           EvaluationStage::kRuntime,
+           ast::HasAttribute<ast::MustUseAttribute>(declaration->attributes)),
       declaration_(declaration),
       workgroup_size_{1, 1, 1},
       return_location_(return_location) {}

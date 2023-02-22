@@ -1482,9 +1482,7 @@ TEST_F(WorkgroupAttribute, NotAnEntryPoint) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: the workgroup_size attribute is only valid for "
-              "compute stages");
+    EXPECT_EQ(r()->error(), "12:34 error: @workgroup_size is only valid for compute stages");
 }
 
 TEST_F(WorkgroupAttribute, NotAComputeShader) {
@@ -1495,9 +1493,7 @@ TEST_F(WorkgroupAttribute, NotAComputeShader) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: the workgroup_size attribute is only valid for "
-              "compute stages");
+    EXPECT_EQ(r()->error(), "12:34 error: @workgroup_size is only valid for compute stages");
 }
 
 TEST_F(WorkgroupAttribute, DuplicateAttribute) {
@@ -1963,5 +1959,21 @@ INSTANTIATE_TEST_SUITE_P(LocationTest,
 
 }  // namespace
 }  // namespace InterpolateTests
+
+namespace MustUseTests {
+namespace {
+
+using MustUseAttributeTest = ResolverTest;
+TEST_F(MustUseAttributeTest, UsedOnFnWithNoReturnValue) {
+    Func("fn_must_use", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{MustUse(Source{{12, 34}})});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: @must_use can only be applied to functions that return a value)");
+}
+
+}  // namespace
+}  // namespace MustUseTests
 
 }  // namespace tint::resolver

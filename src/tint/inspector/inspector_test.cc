@@ -2899,7 +2899,7 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam, textureLoad
 
     Func("ep", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call("textureLoad", "foo_texture", "foo_coords", "foo_sample_index")),
+             Assign(Phony(), Call("textureLoad", "foo_texture", "foo_coords", "foo_sample_index")),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -3083,7 +3083,7 @@ TEST_P(InspectorGetDepthTextureResourceBindingsTestWithParam, textureDimensions)
 
     Func("ep", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call("textureDimensions", "dt")),
+             Assign(Phony(), Call("textureDimensions", "dt")),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -3120,7 +3120,7 @@ TEST_F(InspectorGetDepthMultisampledTextureResourceBindingsTest, textureDimensio
 
     Func("ep", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call("textureDimensions", "tex")),
+             Assign(Phony(), Call("textureDimensions", "tex")),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -3144,7 +3144,7 @@ TEST_F(InspectorGetExternalTextureResourceBindingsTest, Simple) {
 
     Func("ep", utils::Empty, ty.void_(),
          utils::Vector{
-             CallStmt(Call("textureDimensions", "et")),
+             Assign(Phony(), Call("textureDimensions", "et")),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),

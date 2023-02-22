@@ -3717,7 +3717,8 @@ TEST_P(BuiltinTextureTest, Call) {
     auto* sampler = param.BuildSamplerVariable(this);
 
     auto* call = Call(param.function, param.args(this));
-    auto* stmt = CallStmt(call);
+    auto* stmt = param.returns_value ? static_cast<const ast::Statement*>(Assign(Phony(), call))
+                                     : static_cast<const ast::Statement*>(CallStmt(call));
     Func("func", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -3745,8 +3746,9 @@ TEST_P(BuiltinTextureTest, ValidateSPIRV) {
     param.BuildSamplerVariable(this);
 
     auto* call = Call(param.function, param.args(this));
+    auto* stmt = param.returns_value ? static_cast<const ast::Statement*>(Assign(Phony(), call))
+                                     : static_cast<const ast::Statement*>(CallStmt(call));
 
-    auto* stmt = CallStmt(call);
     Func("main", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -3769,7 +3771,9 @@ TEST_P(BuiltinTextureTest, OutsideFunction_IsError) {
     auto* sampler = param.BuildSamplerVariable(this);
 
     auto* call = Call(param.function, param.args(this));
-    auto* stmt = CallStmt(call);
+    auto* stmt = param.returns_value ? static_cast<const ast::Statement*>(Assign(Phony(), call))
+                                     : static_cast<const ast::Statement*>(CallStmt(call));
+
     Func("func", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
