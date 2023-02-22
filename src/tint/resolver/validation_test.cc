@@ -168,7 +168,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariable_Fail) {
     WrapInFunction(assign);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: unknown identifier: 'b')");
+    EXPECT_EQ(r()->error(), R"(12:34 error: unresolved identifier 'b')");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableInBlockStatement_Fail) {
@@ -183,7 +183,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInBlockStatement_Fail) {
     WrapInFunction(body);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: unknown identifier: 'b')");
+    EXPECT_EQ(r()->error(), R"(12:34 error: unresolved identifier 'b')");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
@@ -223,7 +223,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInnerScope_Fail) {
     WrapInFunction(outer_body);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: unknown identifier: 'a')");
+    EXPECT_EQ(r()->error(), R"(12:34 error: unresolved identifier 'a')");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableOuterScope_Pass) {
@@ -263,7 +263,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableDifferentScope_Fail) {
     WrapInFunction(outer_body);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: unknown identifier: 'a')");
+    EXPECT_EQ(r()->error(), R"(12:34 error: unresolved identifier 'a')");
 }
 
 TEST_F(ResolverValidationTest, AddressSpace_FunctionVariableWorkgroupClass) {

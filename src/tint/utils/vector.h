@@ -19,14 +19,14 @@
 #include <stdint.h>
 #include <algorithm>
 #include <iterator>
+#include <new>
 #include <ostream>
 #include <utility>
 #include <vector>
 
-#include "src/tint/castable.h"
-#include "src/tint/traits.h"
 #include "src/tint/utils/bitcast.h"
 #include "src/tint/utils/compiler_macros.h"
+#include "src/tint/utils/slice.h"
 #include "src/tint/utils/string.h"
 
 namespace tint::utils {
@@ -40,137 +40,6 @@ class VectorRef;
 }  // namespace tint::utils
 
 namespace tint::utils {
-
-/// A type used to indicate an empty array.
-struct EmptyType {};
-
-/// An instance of the EmptyType.
-static constexpr EmptyType Empty;
-
-/// A slice represents a contigious array of elements of type T.
-template <typename T>
-struct Slice {
-    /// The pointer to the first element in the slice
-    T* data = nullptr;
-
-    /// The total number of elements in the slice
-    size_t len = 0;
-
-    /// The total capacity of the backing store for the slice
-    size_t cap = 0;
-
-    /// Index operator
-    /// @param i the element index. Must be less than `len`.
-    /// @returns a reference to the i'th element.
-    T& operator[](size_t i) { return data[i]; }
-
-    /// Index operator
-    /// @param i the element index. Must be less than `len`.
-    /// @returns a reference to the i'th element.
-    const T& operator[](size_t i) const { return data[i]; }
-
-    /// @returns a reference to the first element in the vector
-    T& Front() { return data[0]; }
-
-    /// @returns a reference to the first element in the vector
-    const T& Front() const { return data[0]; }
-
-    /// @returns a reference to the last element in the vector
-    T& Back() { return data[len - 1]; }
-
-    /// @returns a reference to the last element in the vector
-    const T& Back() const { return data[len - 1]; }
-
-    /// @returns a pointer to the first element in the vector
-    T* begin() { return data; }
-
-    /// @returns a pointer to the first element in the vector
-    const T* begin() const { return data; }
-
-    /// @returns a pointer to one past the last element in the vector
-    T* end() { return data + len; }
-
-    /// @returns a pointer to one past the last element in the vector
-    const T* end() const { return data + len; }
-
-    /// @returns a reverse iterator starting with the last element in the vector
-    auto rbegin() { return std::reverse_iterator<T*>(end()); }
-
-    /// @returns a reverse iterator starting with the last element in the vector
-    auto rbegin() const { return std::reverse_iterator<const T*>(end()); }
-
-    /// @returns the end for a reverse iterator
-    auto rend() { return std::reverse_iterator<T*>(begin()); }
-
-    /// @returns the end for a reverse iterator
-    auto rend() const { return std::reverse_iterator<const T*>(begin()); }
-};
-
-/// Mode enumerator for ReinterpretSlice
-enum class ReinterpretMode {
-    /// Only upcasts of pointers are permitted
-    kSafe,
-    /// Potentially unsafe downcasts of pointers are also permitted
-    kUnsafe,
-};
-
-namespace detail {
-
-/// Private implementation of tint::utils::CanReinterpretSlice.
-/// Specialized for the case of TO equal to FROM, which is the common case, and avoids inspection of
-/// the base classes, which can be troublesome if the slice is of an incomplete type.
-template <ReinterpretMode MODE, typename TO, typename FROM>
-struct CanReinterpretSlice {
-    /// True if a slice of FROM can be reinterpreted as a slice of TO
-    static constexpr bool value =
-        // Both TO and FROM are pointers
-        (std::is_pointer_v<TO> && std::is_pointer_v<FROM>)&&  //
-        // const can only be applied, not removed
-        (std::is_const_v<std::remove_pointer_t<TO>> ||
-         !std::is_const_v<std::remove_pointer_t<FROM>>)&&  //
-        // TO and FROM are both Castable
-        IsCastable<std::remove_pointer_t<FROM>, std::remove_pointer_t<TO>> &&  //
-        // MODE is kUnsafe, or FROM is of, or derives from TO
-        (MODE == ReinterpretMode::kUnsafe ||
-         traits::IsTypeOrDerived<std::remove_pointer_t<FROM>, std::remove_pointer_t<TO>>);
-};
-
-/// Specialization of 'CanReinterpretSlice' for when TO and FROM are equal types.
-template <typename T, ReinterpretMode MODE>
-struct CanReinterpretSlice<MODE, T, T> {
-    /// Always `true` as TO and FROM are the same type.
-    static constexpr bool value = true;
-};
-
-}  // namespace detail
-
-/// Evaluates whether a `vector<FROM>` and be reinterpreted as a `vector<TO>`.
-/// Vectors can be reinterpreted if both `FROM` and `TO` are pointers to a type that derives from
-/// CastableBase, and the pointee type of `TO` is of the same type as, or is an ancestor of the
-/// pointee type of `FROM`. Vectors of non-`const` Castable pointers can be converted to a vector of
-/// `const` Castable pointers.
-template <ReinterpretMode MODE, typename TO, typename FROM>
-static constexpr bool CanReinterpretSlice = detail::CanReinterpretSlice<MODE, TO, FROM>::value;
-
-/// Reinterprets `const Slice<FROM>*` as `const Slice<TO>*`
-/// @param slice a pointer to the slice to reinterpret
-/// @returns the reinterpreted slice
-/// @see CanReinterpretSlice
-template <ReinterpretMode MODE, typename TO, typename FROM>
-const Slice<TO>* ReinterpretSlice(const Slice<FROM>* slice) {
-    static_assert(CanReinterpretSlice<MODE, TO, FROM>);
-    return Bitcast<const Slice<TO>*>(slice);
-}
-
-/// Reinterprets `Slice<FROM>*` as `Slice<TO>*`
-/// @param slice a pointer to the slice to reinterpret
-/// @returns the reinterpreted slice
-/// @see CanReinterpretSlice
-template <ReinterpretMode MODE, typename TO, typename FROM>
-Slice<TO>* ReinterpretSlice(Slice<FROM>* slice) {
-    static_assert(CanReinterpretSlice<MODE, TO, FROM>);
-    return Bitcast<Slice<TO>*>(slice);
-}
 
 /// Vector is a small-object-optimized, dynamically-sized vector of contigious elements of type T.
 ///
@@ -244,7 +113,7 @@ class Vector {
               ReinterpretMode MODE,
               typename = std::enable_if_t<CanReinterpretSlice<MODE, T, U>>>
     Vector(const Vector<U, N2>& other) {  // NOLINT(runtime/explicit)
-        Copy(*ReinterpretSlice<MODE, T>(&other.impl_.slice));
+        Copy(other.impl_.slice.template Reinterpret<T, MODE>);
     }
 
     /// Move constructor with covariance / const conversion
@@ -518,6 +387,9 @@ class Vector {
         return !(*this == other);
     }
 
+    /// @returns the internal slice of the vector
+    utils::Slice<T> Slice() { return impl_.slice; }
+
   private:
     /// Friend class (differing specializations of this class)
     template <typename, size_t>
@@ -530,9 +402,6 @@ class Vector {
     /// Friend class
     template <typename>
     friend class VectorRef;
-
-    /// The slice type used by this vector
-    using Slice = utils::Slice<T>;
 
     template <typename... Ts>
     void AppendVariadic(Ts&&... args) {
@@ -555,7 +424,7 @@ class Vector {
 
     /// Copies all the elements from `other` to this vector, replacing the content of this vector.
     /// @param other the
-    void Copy(const Slice& other) {
+    void Copy(const utils::Slice<T>& other) {
         if (impl_.slice.cap < other.len) {
             ClearAndFree();
             impl_.Allocate(other.len);
@@ -592,7 +461,7 @@ class Vector {
     /// The internal structure for the vector with a small array.
     struct ImplWithSmallArray {
         TStorage small_arr[N];
-        Slice slice = {small_arr[0].Get(), 0, N};
+        utils::Slice<T> slice = {small_arr[0].Get(), 0, N};
 
         /// Allocates a new vector of `T` either from #small_arr, or from the heap, then assigns the
         /// pointer it to #slice.data, and updates #slice.cap.
@@ -620,7 +489,7 @@ class Vector {
 
     /// The internal structure for the vector without a small array.
     struct ImplWithoutSmallArray {
-        Slice slice = {nullptr, 0, 0};
+        utils::Slice<T> slice = Empty;
 
         /// Allocates a new vector of `T` and assigns it to #slice.data, and updates #slice.cap.
         void Allocate(size_t new_cap) {
@@ -759,15 +628,14 @@ class VectorRef {
     template <typename U,
               typename = std::enable_if_t<CanReinterpretSlice<ReinterpretMode::kSafe, T, U>>>
     VectorRef(const VectorRef<U>& other)  // NOLINT(runtime/explicit)
-        : slice_(*ReinterpretSlice<ReinterpretMode::kSafe, T>(&other.slice_)) {}
+        : slice_(other.slice_.template Reinterpret<T>()) {}
 
     /// Move constructor with covariance / const conversion
     /// @param other the vector reference
     template <typename U,
               typename = std::enable_if_t<CanReinterpretSlice<ReinterpretMode::kSafe, T, U>>>
     VectorRef(VectorRef<U>&& other)  // NOLINT(runtime/explicit)
-        : slice_(*ReinterpretSlice<ReinterpretMode::kSafe, T>(&other.slice_)),
-          can_move_(other.can_move_) {}
+        : slice_(other.slice_.template Reinterpret<T>()), can_move_(other.can_move_) {}
 
     /// Constructor from a Vector with covariance / const conversion
     /// @param vector the vector to create a reference of
@@ -776,7 +644,7 @@ class VectorRef {
               size_t N,
               typename = std::enable_if_t<CanReinterpretSlice<ReinterpretMode::kSafe, T, U>>>
     VectorRef(Vector<U, N>& vector)  // NOLINT(runtime/explicit)
-        : slice_(*ReinterpretSlice<ReinterpretMode::kSafe, T>(&vector.impl_.slice)) {}
+        : slice_(vector.impl_.slice.template Reinterpret<T>()) {}
 
     /// Constructor from a moved Vector with covariance / const conversion
     /// @param vector the vector to create a reference of
@@ -785,8 +653,7 @@ class VectorRef {
               size_t N,
               typename = std::enable_if_t<CanReinterpretSlice<ReinterpretMode::kSafe, T, U>>>
     VectorRef(Vector<U, N>&& vector)  // NOLINT(runtime/explicit)
-        : slice_(*ReinterpretSlice<ReinterpretMode::kSafe, T>(&vector.impl_.slice)),
-          can_move_(vector.impl_.CanMove()) {}
+        : slice_(vector.impl_.slice.template Reinterpret<T>()), can_move_(vector.impl_.CanMove()) {}
 
     /// Index operator
     /// @param i the element index. Must be less than `len`.
@@ -805,7 +672,7 @@ class VectorRef {
     /// this is a safe operation.
     template <typename U>
     VectorRef<U> ReinterpretCast() const {
-        return {*ReinterpretSlice<ReinterpretMode::kUnsafe, U>(&slice_)};
+        return {slice_.template Reinterpret<U, ReinterpretMode::kUnsafe>()};
     }
 
     /// @returns true if the vector is empty.

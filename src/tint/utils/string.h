@@ -19,6 +19,8 @@
 #include <string>
 #include <variant>
 
+#include "src/tint/utils/slice.h"
+
 namespace tint::utils {
 
 /// @param str the string to apply replacements to
@@ -66,42 +68,13 @@ inline size_t HasPrefix(std::string_view str, std::string_view prefix) {
 /// @returns the Levenshtein distance between @p a and @p b
 size_t Distance(std::string_view a, std::string_view b);
 
-/// Suggest alternatives for an unrecognized string from a list of expected values.
+/// Suggest alternatives for an unrecognized string from a list of possible values.
 /// @param got the unrecognized string
-/// @param strings the list of expected values
+/// @param strings the list of possible values
 /// @param ss the stream to write the suggest and list of possible values to
-template <size_t N>
 void SuggestAlternatives(std::string_view got,
-                         const char* const (&strings)[N],
-                         std::ostringstream& ss) {
-    // If the string typed was within kSuggestionDistance of one of the possible enum values,
-    // suggest that. Don't bother with suggestions if the string was extremely long.
-    constexpr size_t kSuggestionDistance = 5;
-    constexpr size_t kSuggestionMaxLength = 64;
-    if (!got.empty() && got.size() < kSuggestionMaxLength) {
-        size_t candidate_dist = kSuggestionDistance;
-        const char* candidate = nullptr;
-        for (auto* str : strings) {
-            auto dist = utils::Distance(str, got);
-            if (dist < candidate_dist) {
-                candidate = str;
-                candidate_dist = dist;
-            }
-        }
-        if (candidate) {
-            ss << "Did you mean '" << candidate << "'?\n";
-        }
-    }
-
-    // List all the possible enumerator values
-    ss << "Possible values: ";
-    for (auto* str : strings) {
-        if (str != strings[0]) {
-            ss << ", ";
-        }
-        ss << "'" << str << "'";
-    }
-}
+                         Slice<char const* const> strings,
+                         std::ostringstream& ss);
 
 }  // namespace tint::utils
 

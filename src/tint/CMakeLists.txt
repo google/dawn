@@ -527,6 +527,7 @@ list(APPEND TINT_LIB_SRCS
   utils/map.h
   utils/math.h
   utils/scoped_assignment.h
+  utils/slice.h
   utils/string.cc
   utils/string.h
   utils/unique_allocator.h
@@ -927,6 +928,7 @@ if(TINT_BUILD_TESTS)
     resolver/struct_address_space_use_test.cc
     resolver/type_initializer_validation_test.cc
     resolver/type_validation_test.cc
+    resolver/unresolved_identifier_test.cc
     resolver/validation_test.cc
     resolver/validator_is_storeable_test.cc
     resolver/variable_test.cc
@@ -981,6 +983,7 @@ if(TINT_BUILD_TESTS)
     utils/result_test.cc
     utils/reverse_test.cc
     utils/scoped_assignment_test.cc
+    utils/slice_test.cc
     utils/string_test.cc
     utils/transform_test.cc
     utils/unique_allocator_test.cc

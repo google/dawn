@@ -79,31 +79,6 @@ static_assert(std::is_same_v<VectorCommonType<const C2a*, C2b*>, const C1*>);
 static_assert(std::is_same_v<VectorCommonType<C2a*, const C2b*>, const C1*>);
 static_assert(std::is_same_v<VectorCommonType<const C2a*, const C2b*>, const C1*>);
 
-static_assert(CanReinterpretSlice<ReinterpretMode::kSafe, const C0*, C0*>, "apply const");
-static_assert(!CanReinterpretSlice<ReinterpretMode::kSafe, C0*, const C0*>, "remove const");
-static_assert(CanReinterpretSlice<ReinterpretMode::kSafe, C0*, C1*>, "up cast");
-static_assert(CanReinterpretSlice<ReinterpretMode::kSafe, const C0*, const C1*>, "up cast");
-static_assert(CanReinterpretSlice<ReinterpretMode::kSafe, const C0*, C1*>, "up cast, apply const");
-static_assert(!CanReinterpretSlice<ReinterpretMode::kSafe, C0*, const C1*>,
-              "up cast, remove const");
-static_assert(!CanReinterpretSlice<ReinterpretMode::kSafe, C1*, C0*>, "down cast");
-static_assert(!CanReinterpretSlice<ReinterpretMode::kSafe, const C1*, const C0*>, "down cast");
-static_assert(!CanReinterpretSlice<ReinterpretMode::kSafe, const C1*, C0*>,
-              "down cast, apply const");
-static_assert(!CanReinterpretSlice<ReinterpretMode::kSafe, C1*, const C0*>,
-              "down cast, remove const");
-static_assert(!CanReinterpretSlice<ReinterpretMode::kSafe, const C1*, C0*>,
-              "down cast, apply const");
-static_assert(!CanReinterpretSlice<ReinterpretMode::kSafe, C1*, const C0*>,
-              "down cast, remove const");
-static_assert(!CanReinterpretSlice<ReinterpretMode::kSafe, C2a*, C2b*>, "sideways cast");
-static_assert(!CanReinterpretSlice<ReinterpretMode::kSafe, const C2a*, const C2b*>,
-              "sideways cast");
-static_assert(!CanReinterpretSlice<ReinterpretMode::kSafe, const C2a*, C2b*>,
-              "sideways cast, apply const");
-static_assert(!CanReinterpretSlice<ReinterpretMode::kSafe, C2a*, const C2b*>,
-              "sideways cast, remove const");
-
 ////////////////////////////////////////////////////////////////////////////////
 // TintVectorTest
 ////////////////////////////////////////////////////////////////////////////////

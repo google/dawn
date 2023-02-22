@@ -1083,7 +1083,7 @@ TEST_P(StorageTextureDimensionTest, All) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: unknown type: '" + std::string(params.name) + "'");
+        EXPECT_EQ(r()->error(), "12:34 error: unresolved type '" + std::string(params.name) + "'");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,

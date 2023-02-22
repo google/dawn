@@ -530,6 +530,17 @@ class Resolver {
         std::unordered_set<const sem::Variable*> parameter_reads;
     };
 
+    /// A hint for the usage of an identifier expression.
+    /// Used to provide more informative error diagnostics on resolution failure.
+    struct IdentifierResolveHint {
+        /// The expression this hint applies to
+        const ast::Expression* expression = nullptr;
+        /// The usage of the identifier.
+        const char* usage = "identifier";
+        /// Suggested strings if the identifier failed to resolve
+        utils::Slice<char const* const> suggestions = utils::Empty;
+    };
+
     ProgramBuilder* const builder_;
     diag::List& diagnostics_;
     ConstEval const_eval_;
@@ -555,6 +566,7 @@ class Resolver {
     utils::Hashmap<const ast::Expression*, const ast::BinaryExpression*, 8>
         logical_binary_lhs_to_parent_;
     utils::Hashset<const ast::Expression*, 8> skip_const_eval_;
+    IdentifierResolveHint identifier_resolve_hint_;
 };
 
 }  // namespace tint::resolver

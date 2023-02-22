@@ -309,47 +309,6 @@ std::ostream& operator<<(std::ostream& out, SymbolUseKind kind) {
     return out << "<unknown>";
 }
 
-/// @returns the the diagnostic message name used for the given use
-std::string DiagString(SymbolUseKind kind) {
-    switch (kind) {
-        case SymbolUseKind::GlobalVarType:
-        case SymbolUseKind::GlobalConstType:
-        case SymbolUseKind::AliasType:
-        case SymbolUseKind::StructMemberType:
-        case SymbolUseKind::ParameterType:
-        case SymbolUseKind::LocalVarType:
-        case SymbolUseKind::LocalLetType:
-        case SymbolUseKind::NestedLocalVarType:
-        case SymbolUseKind::NestedLocalLetType:
-            return "type";
-        case SymbolUseKind::GlobalVarArrayElemType:
-        case SymbolUseKind::GlobalVarVectorElemType:
-        case SymbolUseKind::GlobalVarMatrixElemType:
-        case SymbolUseKind::GlobalVarSampledTexElemType:
-        case SymbolUseKind::GlobalVarMultisampledTexElemType:
-        case SymbolUseKind::GlobalConstArrayElemType:
-        case SymbolUseKind::GlobalConstVectorElemType:
-        case SymbolUseKind::GlobalConstMatrixElemType:
-        case SymbolUseKind::LocalVarArrayElemType:
-        case SymbolUseKind::LocalVarVectorElemType:
-        case SymbolUseKind::LocalVarMatrixElemType:
-        case SymbolUseKind::GlobalVarValue:
-        case SymbolUseKind::GlobalVarArraySizeValue:
-        case SymbolUseKind::GlobalConstValue:
-        case SymbolUseKind::GlobalConstArraySizeValue:
-        case SymbolUseKind::LocalVarValue:
-        case SymbolUseKind::LocalVarArraySizeValue:
-        case SymbolUseKind::LocalLetValue:
-        case SymbolUseKind::NestedLocalVarValue:
-        case SymbolUseKind::NestedLocalLetValue:
-        case SymbolUseKind::WorkgroupSizeValue:
-            return "identifier";
-        case SymbolUseKind::CallFunction:
-            return "function";
-    }
-    return "<unknown>";
-}
-
 /// @returns the declaration scope depth for the symbol declaration kind.
 ///          Globals are at depth 0, parameters and locals are at depth 1,
 ///          nested locals are at depth 2.
@@ -783,10 +742,16 @@ TEST_P(ResolverDependencyGraphUndeclaredSymbolTest, Test) {
 
     // Build a use of a non-existent symbol
     SymbolTestHelper helper(this);
-    helper.Add(use_kind, symbol, Source{{56, 78}});
+    auto* ident = helper.Add(use_kind, symbol, Source{{56, 78}});
     helper.Build();
 
-    Build("56:78 error: unknown " + DiagString(use_kind) + ": 'SYMBOL'");
+    auto graph = Build();
+
+    auto resolved_identifier = graph.resolved_identifiers.Find(ident);
+    ASSERT_NE(resolved_identifier, nullptr);
+    auto* unresolved = resolved_identifier->Unresolved();
+    ASSERT_NE(unresolved, nullptr);
+    EXPECT_EQ(unresolved->name, "SYMBOL");
 }
 
 INSTANTIATE_TEST_SUITE_P(Types,
@@ -826,14 +791,28 @@ TEST_F(ResolverDependencyGraphDeclSelfUse, GlobalConst) {
 
 TEST_F(ResolverDependencyGraphDeclSelfUse, LocalVar) {
     const Symbol symbol = Sym("SYMBOL");
-    WrapInFunction(Decl(Var(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123_i))));
-    Build("12:34 error: unknown identifier: 'SYMBOL'");
+    auto* ident = Ident(Source{{12, 34}}, symbol);
+    WrapInFunction(Decl(Var(symbol, ty.i32(), Mul(Expr(ident), 123_i))));
+    auto graph = Build();
+
+    auto resolved_identifier = graph.resolved_identifiers.Find(ident);
+    ASSERT_TRUE(resolved_identifier);
+    auto* unresolved = resolved_identifier->Unresolved();
+    ASSERT_NE(unresolved, nullptr);
+    EXPECT_EQ(unresolved->name, "SYMBOL");
 }
 
 TEST_F(ResolverDependencyGraphDeclSelfUse, LocalLet) {
     const Symbol symbol = Sym("SYMBOL");
-    WrapInFunction(Decl(Let(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123_i))));
-    Build("12:34 error: unknown identifier: 'SYMBOL'");
+    auto* ident = Ident(Source{{12, 34}}, symbol);
+    WrapInFunction(Decl(Let(symbol, ty.i32(), Mul(Expr(ident), 123_i))));
+    auto graph = Build();
+
+    auto resolved_identifier = graph.resolved_identifiers.Find(ident);
+    ASSERT_TRUE(resolved_identifier);
+    auto* unresolved = resolved_identifier->Unresolved();
+    ASSERT_NE(unresolved, nullptr);
+    EXPECT_EQ(unresolved->name, "SYMBOL");
 }
 
 }  // namespace undeclared_tests
@@ -852,7 +831,7 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, DirectCall) {
          utils::Vector{CallStmt(Call(Ident(Source{{56, 78}}, "main")))});
 
     Build(R"(12:34 error: cyclic dependency found: 'main' -> 'main'
-56:78 note: function 'main' calls function 'main' here)");
+56:78 note: function 'main' references function 'main' here)");
 }
 
 TEST_F(ResolverDependencyGraphCyclicRefTest, IndirectCall) {
@@ -876,9 +855,9 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, IndirectCall) {
          utils::Vector{CallStmt(Call(Ident(Source{{5, 10}}, "c")))});
 
     Build(R"(5:1 error: cyclic dependency found: 'b' -> 'c' -> 'd' -> 'b'
-5:10 note: function 'b' calls function 'c' here
-4:10 note: function 'c' calls function 'd' here
-3:10 note: function 'd' calls function 'b' here)");
+5:10 note: function 'b' references function 'c' here
+4:10 note: function 'c' references function 'd' here
+3:10 note: function 'd' references function 'b' here)");
 }
 
 TEST_F(ResolverDependencyGraphCyclicRefTest, Alias_Direct) {
@@ -1160,17 +1139,22 @@ TEST_P(ResolverDependencyGraphResolveToUserDeclTest, Test) {
 
     // If the declaration is visible to the use, then we expect the analysis to
     // succeed.
-    bool expect_pass = ScopeDepth(decl_kind) <= ScopeDepth(use_kind);
-    auto graph = Build(expect_pass ? "" : "56:78 error: unknown identifier: 'SYMBOL'");
+    bool expect_resolved = ScopeDepth(decl_kind) <= ScopeDepth(use_kind);
+    auto graph = Build();
 
-    if (expect_pass) {
+    auto resolved_identifier = graph.resolved_identifiers.Find(use);
+    ASSERT_TRUE(resolved_identifier);
+
+    if (expect_resolved) {
         // Check that the use resolves to the declaration
-        auto resolved_identifier = graph.resolved_identifiers.Find(use);
-        ASSERT_TRUE(resolved_identifier);
         auto* resolved_node = resolved_identifier->Node();
         EXPECT_EQ(resolved_node, decl)
             << "resolved: " << (resolved_node ? resolved_node->TypeInfo().name : "<null>") << "\n"
             << "decl:     " << decl->TypeInfo().name;
+    } else {
+        auto* unresolved = resolved_identifier->Unresolved();
+        ASSERT_NE(unresolved, nullptr);
+        EXPECT_EQ(unresolved->name, "SYMBOL");
     }
 }
 

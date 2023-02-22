@@ -60,14 +60,16 @@ TEST(StringTest, Distance) {
 
 TEST(StringTest, SuggestAlternatives) {
     {
+        const char* alternatives[] = {"hello world", "Hello World"};
         std::ostringstream ss;
-        SuggestAlternatives("hello wordl", {"hello world", "Hello World"}, ss);
+        SuggestAlternatives("hello wordl", alternatives, ss);
         EXPECT_EQ(ss.str(), R"(Did you mean 'hello world'?
 Possible values: 'hello world', 'Hello World')");
     }
     {
+        const char* alternatives[] = {"foobar", "something else"};
         std::ostringstream ss;
-        SuggestAlternatives("hello world", {"foobar", "something else"}, ss);
+        SuggestAlternatives("hello world", alternatives, ss);
         EXPECT_EQ(ss.str(), R"(Possible values: 'foobar', 'something else')");
     }
 }

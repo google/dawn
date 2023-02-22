@@ -1418,7 +1418,8 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
 
     for (auto* expr : utils::Reverse(sorted)) {
         auto* sem_expr = Switch(
-            expr, [&](const ast::IndexAccessorExpression* array) { return IndexAccessor(array); },
+            expr,  //
+            [&](const ast::IndexAccessorExpression* array) { return IndexAccessor(array); },
             [&](const ast::BinaryExpression* bin_op) { return Binary(bin_op); },
             [&](const ast::BitcastExpression* bitcast) { return Bitcast(bitcast); },
             [&](const ast::CallExpression* call) { return Call(call); },
@@ -1488,10 +1489,12 @@ sem::ValueExpression* Resolver::ValueExpression(const ast::Expression* expr) {
 }
 
 sem::TypeExpression* Resolver::TypeExpression(const ast::Expression* expr) {
+    identifier_resolve_hint_ = {expr, "type"};
     return sem_.AsTypeExpression(Expression(expr));
 }
 
 sem::FunctionExpression* Resolver::FunctionExpression(const ast::Expression* expr) {
+    identifier_resolve_hint_ = {expr, "call target"};
     return sem_.AsFunctionExpression(Expression(expr));
 }
 
@@ -1505,31 +1508,38 @@ type::Type* Resolver::Type(const ast::Expression* ast) {
 
 sem::BuiltinEnumExpression<builtin::AddressSpace>* Resolver::AddressSpaceExpression(
     const ast::Expression* expr) {
+    identifier_resolve_hint_ = {expr, "address space", builtin::kAddressSpaceStrings};
     return sem_.AsAddressSpace(Expression(expr));
 }
 
 sem::BuiltinEnumExpression<builtin::BuiltinValue>* Resolver::BuiltinValueExpression(
     const ast::Expression* expr) {
+    identifier_resolve_hint_ = {expr, "builtin value", builtin::kBuiltinValueStrings};
     return sem_.AsBuiltinValue(Expression(expr));
 }
 
 sem::BuiltinEnumExpression<builtin::TexelFormat>* Resolver::TexelFormatExpression(
     const ast::Expression* expr) {
+    identifier_resolve_hint_ = {expr, "texel format", builtin::kTexelFormatStrings};
     return sem_.AsTexelFormat(Expression(expr));
 }
 
 sem::BuiltinEnumExpression<builtin::Access>* Resolver::AccessExpression(
     const ast::Expression* expr) {
+    identifier_resolve_hint_ = {expr, "access", builtin::kAccessStrings};
     return sem_.AsAccess(Expression(expr));
 }
 
 sem::BuiltinEnumExpression<builtin::InterpolationSampling>* Resolver::InterpolationSampling(
     const ast::Expression* expr) {
+    identifier_resolve_hint_ = {expr, "interpolation sampling",
+                                builtin::kInterpolationSamplingStrings};
     return sem_.AsInterpolationSampling(Expression(expr));
 }
 
 sem::BuiltinEnumExpression<builtin::InterpolationType>* Resolver::InterpolationType(
     const ast::Expression* expr) {
+    identifier_resolve_hint_ = {expr, "interpolation type", builtin::kInterpolationTypeStrings};
     return sem_.AsInterpolationType(Expression(expr));
 }
 
@@ -2196,6 +2206,11 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             return ty_init_or_conv(ty);
         }
 
+        if (auto* unresolved = resolved->Unresolved()) {
+            AddError("unresolved call target '" + unresolved->name + "'", expr->source);
+            return nullptr;
+        }
+
         ErrorMismatchedResolvedIdentifier(ident->source, *resolved, "call target");
         return nullptr;
     }();
@@ -2541,11 +2556,11 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
             return nullptr;
         }
 
-        auto* format = sem_.AsTexelFormat(Expression(tmpl_ident->arguments[0]));
+        auto* format = TexelFormatExpression(tmpl_ident->arguments[0]);
         if (TINT_UNLIKELY(!format)) {
             return nullptr;
         }
-        auto* access = sem_.AsAccess(Expression(tmpl_ident->arguments[1]));
+        auto* access = AccessExpression(tmpl_ident->arguments[1]);
         if (TINT_UNLIKELY(!access)) {
             return nullptr;
         }
@@ -3028,6 +3043,30 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
     if (auto fmt = resolved->TexelFormat(); fmt != builtin::TexelFormat::kUndefined) {
         return builder_->create<sem::BuiltinEnumExpression<builtin::TexelFormat>>(
             expr, current_statement_, fmt);
+    }
+
+    if (auto* unresolved = resolved->Unresolved()) {
+        if (identifier_resolve_hint_.expression == expr) {
+            AddError("unresolved " + std::string(identifier_resolve_hint_.usage) + " '" +
+                         unresolved->name + "'",
+                     expr->source);
+            if (!identifier_resolve_hint_.suggestions.IsEmpty()) {
+                // Filter out suggestions that have a leading underscore.
+                utils::Vector<const char*, 8> filtered;
+                for (auto* str : identifier_resolve_hint_.suggestions) {
+                    if (str[0] != '_') {
+                        filtered.Push(str);
+                    }
+                }
+                std::ostringstream msg;
+                utils::SuggestAlternatives(unresolved->name,
+                                           filtered.Slice().Reinterpret<char const* const>(), msg);
+                AddNote(msg.str(), expr->source);
+            }
+        } else {
+            AddError("unresolved identifier '" + unresolved->name + "'", expr->source);
+        }
+        return nullptr;
     }
 
     TINT_UNREACHABLE(Resolver, diagnostics_)

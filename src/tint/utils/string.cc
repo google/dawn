@@ -48,4 +48,36 @@ size_t Distance(std::string_view str_a, std::string_view str_b) {
     return at(len_a, len_b);
 }
 
+void SuggestAlternatives(std::string_view got,
+                         Slice<char const* const> strings,
+                         std::ostringstream& ss) {
+    // If the string typed was within kSuggestionDistance of one of the possible enum values,
+    // suggest that. Don't bother with suggestions if the string was extremely long.
+    constexpr size_t kSuggestionDistance = 5;
+    constexpr size_t kSuggestionMaxLength = 64;
+    if (!got.empty() && got.size() < kSuggestionMaxLength) {
+        size_t candidate_dist = kSuggestionDistance;
+        const char* candidate = nullptr;
+        for (auto* str : strings) {
+            auto dist = utils::Distance(str, got);
+            if (dist < candidate_dist) {
+                candidate = str;
+                candidate_dist = dist;
+            }
+        }
+        if (candidate) {
+            ss << "Did you mean '" << candidate << "'?\n";
+        }
+    }
+
+    // List all the possible enumerator values
+    ss << "Possible values: ";
+    for (auto* str : strings) {
+        if (str != strings[0]) {
+            ss << ", ";
+        }
+        ss << "'" << str << "'";
+    }
+}
+
 }  // namespace tint::utils
