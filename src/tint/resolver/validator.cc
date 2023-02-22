@@ -546,9 +546,10 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
                         "attribute.";
                 }
                 AddError(
-                    "uniform storage requires that array elements be aligned to 16 "
-                    "bytes, but array element alignment is currently " +
-                        std::to_string(arr->Stride()) + ". " + hint,
+                    "uniform storage requires that array elements are aligned to 16 bytes, but "
+                    "array element of type '" +
+                        arr->ElemType()->FriendlyName(symbols_) + "' has a stride of " +
+                        std::to_string(arr->Stride()) + " bytes. " + hint,
                     source);
                 return false;
             }
