@@ -255,13 +255,15 @@ class MinBufferSizeTestsBase : public ValidationTest {
                                     const std::vector<BindingDescriptor>& bindings,
                                     const std::vector<uint64_t>& bindingSizes) {
         ASSERT(bindings.size() == bindingSizes.size());
-        wgpu::Buffer buffer =
-            CreateBuffer(1024, wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage);
 
         std::vector<wgpu::BindGroupEntry> entries;
         entries.reserve(bindingSizes.size());
 
         for (uint32_t i = 0; i < bindingSizes.size(); ++i) {
+            // Create separate buffer for each bindings to avoid potential binding aliasing.
+            wgpu::Buffer buffer =
+                CreateBuffer(1024, wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage);
+
             wgpu::BindGroupEntry entry = {};
             entry.binding = bindings[i].binding;
             entry.buffer = buffer;
