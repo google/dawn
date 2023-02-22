@@ -30,7 +30,7 @@ class BindingAttribute final : public Castable<BindingAttribute, Attribute> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param expr the binding expression
-    BindingAttribute(ProgramID pid, NodeID nid, const Source& src, const ast::Expression* expr);
+    BindingAttribute(ProgramID pid, NodeID nid, const Source& src, const Expression* expr);
     ~BindingAttribute() override;
 
     /// @returns the WGSL name for the attribute
@@ -43,7 +43,7 @@ class BindingAttribute final : public Castable<BindingAttribute, Attribute> {
     const BindingAttribute* Clone(CloneContext* ctx) const override;
 
     /// the binding expression
-    const ast::Expression* const expr;
+    const Expression* const expr;
 };
 
 }  // namespace tint::ast

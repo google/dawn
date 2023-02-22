@@ -42,7 +42,7 @@ class StructMemberOffsetAttribute final : public Castable<StructMemberOffsetAttr
     StructMemberOffsetAttribute(ProgramID pid,
                                 NodeID nid,
                                 const Source& src,
-                                const ast::Expression* expr);
+                                const Expression* expr);
     ~StructMemberOffsetAttribute() override;
 
     /// @returns the WGSL name for the attribute
@@ -55,7 +55,7 @@ class StructMemberOffsetAttribute final : public Castable<StructMemberOffsetAttr
     const StructMemberOffsetAttribute* Clone(CloneContext* ctx) const override;
 
     /// The offset expression
-    const ast::Expression* const expr;
+    const Expression* const expr;
 };
 
 }  // namespace tint::ast

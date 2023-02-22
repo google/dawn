@@ -66,8 +66,8 @@ class Variable : public Castable<Variable, Node> {
 
     /// @returns true if the variable has both group and binding attributes
     bool HasBindingPoint() const {
-        return ast::GetAttribute<ast::BindingAttribute>(attributes) != nullptr &&
-               ast::GetAttribute<ast::GroupAttribute>(attributes) != nullptr;
+        return HasAttribute<BindingAttribute>(attributes) &&
+               HasAttribute<GroupAttribute>(attributes);
     }
 
     /// @returns the kind of the variable, which can be used in diagnostics

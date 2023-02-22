@@ -65,23 +65,23 @@ TEST_F(FunctionTest, Creation_Body_Vector) {
     auto* f = Func("func", utils::Empty, ty.void_(), utils::Vector{Discard(), Return()});
     ASSERT_NE(f->body, nullptr);
     ASSERT_EQ(f->body->statements.Length(), 2u);
-    EXPECT_TRUE(f->body->statements[0]->Is<ast::DiscardStatement>());
-    EXPECT_TRUE(f->body->statements[1]->Is<ast::ReturnStatement>());
+    EXPECT_TRUE(f->body->statements[0]->Is<DiscardStatement>());
+    EXPECT_TRUE(f->body->statements[1]->Is<ReturnStatement>());
 }
 
 TEST_F(FunctionTest, Creation_Body_Block) {
     auto* f = Func("func", utils::Empty, ty.void_(), Block(Discard(), Return()));
     ASSERT_NE(f->body, nullptr);
     ASSERT_EQ(f->body->statements.Length(), 2u);
-    EXPECT_TRUE(f->body->statements[0]->Is<ast::DiscardStatement>());
-    EXPECT_TRUE(f->body->statements[1]->Is<ast::ReturnStatement>());
+    EXPECT_TRUE(f->body->statements[0]->Is<DiscardStatement>());
+    EXPECT_TRUE(f->body->statements[1]->Is<ReturnStatement>());
 }
 
 TEST_F(FunctionTest, Creation_Body_Stmt) {
     auto* f = Func("func", utils::Empty, ty.void_(), Return());
     ASSERT_NE(f->body, nullptr);
     ASSERT_EQ(f->body->statements.Length(), 1u);
-    EXPECT_TRUE(f->body->statements[0]->Is<ast::ReturnStatement>());
+    EXPECT_TRUE(f->body->statements[0]->Is<ReturnStatement>());
 }
 
 TEST_F(FunctionTest, Creation_Body_Nullptr) {
@@ -117,7 +117,7 @@ TEST_F(FunctionTest, Assert_TemplatedName) {
 }
 
 TEST_F(FunctionTest, Assert_NullParam) {
-    using ParamList = utils::Vector<const ast::Parameter*, 2>;
+    using ParamList = utils::Vector<const Parameter*, 2>;
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;

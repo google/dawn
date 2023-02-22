@@ -128,13 +128,13 @@ std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data) {
     return out;
 }
 
-ast::Type TextureOverloadCase::BuildResultVectorComponentType(ProgramBuilder* b) const {
+Type TextureOverloadCase::BuildResultVectorComponentType(ProgramBuilder* b) const {
     switch (texture_data_type) {
-        case ast::builtin::test::TextureDataType::kF32:
+        case builtin::test::TextureDataType::kF32:
             return b->ty.f32();
-        case ast::builtin::test::TextureDataType::kU32:
+        case builtin::test::TextureDataType::kU32:
             return b->ty.u32();
-        case ast::builtin::test::TextureDataType::kI32:
+        case builtin::test::TextureDataType::kI32:
             return b->ty.i32();
     }
 
@@ -142,31 +142,31 @@ ast::Type TextureOverloadCase::BuildResultVectorComponentType(ProgramBuilder* b)
     return {};
 }
 
-const ast::Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b) const {
+const Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b) const {
     utils::Vector attrs{
         b->Group(0_u),
         b->Binding(0_a),
     };
     switch (texture_kind) {
-        case ast::builtin::test::TextureKind::kRegular:
+        case builtin::test::TextureKind::kRegular:
             return b->GlobalVar(
                 kTextureName,
                 b->ty.sampled_texture(texture_dimension, BuildResultVectorComponentType(b)), attrs);
 
-        case ast::builtin::test::TextureKind::kDepth:
+        case builtin::test::TextureKind::kDepth:
             return b->GlobalVar(kTextureName, b->ty.depth_texture(texture_dimension), attrs);
 
-        case ast::builtin::test::TextureKind::kDepthMultisampled:
+        case builtin::test::TextureKind::kDepthMultisampled:
             return b->GlobalVar(kTextureName, b->ty.depth_multisampled_texture(texture_dimension),
                                 attrs);
 
-        case ast::builtin::test::TextureKind::kMultisampled:
+        case builtin::test::TextureKind::kMultisampled:
             return b->GlobalVar(
                 kTextureName,
                 b->ty.multisampled_texture(texture_dimension, BuildResultVectorComponentType(b)),
                 attrs);
 
-        case ast::builtin::test::TextureKind::kStorage: {
+        case builtin::test::TextureKind::kStorage: {
             auto st = b->ty.storage_texture(texture_dimension, texel_format, access);
             return b->GlobalVar(kTextureName, st, attrs);
         }
@@ -176,7 +176,7 @@ const ast::Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b
     return nullptr;
 }
 
-const ast::Variable* TextureOverloadCase::BuildSamplerVariable(ProgramBuilder* b) const {
+const Variable* TextureOverloadCase::BuildSamplerVariable(ProgramBuilder* b) const {
     utils::Vector attrs = {b->Group(0_a), b->Binding(1_a)};
     return b->GlobalVar(kSamplerName, b->ty.sampler(sampler_kind), attrs);
 }

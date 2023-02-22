@@ -98,14 +98,14 @@ TEST_F(VariableTest, WithAttributes) {
                     Builtin(builtin::BuiltinValue::kPosition), Id(1200_u));
 
     auto& attributes = var->attributes;
-    EXPECT_TRUE(ast::HasAttribute<ast::LocationAttribute>(attributes));
-    EXPECT_TRUE(ast::HasAttribute<ast::BuiltinAttribute>(attributes));
-    EXPECT_TRUE(ast::HasAttribute<ast::IdAttribute>(attributes));
+    EXPECT_TRUE(ast::HasAttribute<LocationAttribute>(attributes));
+    EXPECT_TRUE(ast::HasAttribute<BuiltinAttribute>(attributes));
+    EXPECT_TRUE(ast::HasAttribute<IdAttribute>(attributes));
 
-    auto* location = ast::GetAttribute<ast::LocationAttribute>(attributes);
+    auto* location = GetAttribute<LocationAttribute>(attributes);
     ASSERT_NE(nullptr, location);
     ASSERT_NE(nullptr, location->expr);
-    EXPECT_TRUE(location->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_TRUE(location->expr->Is<IntLiteralExpression>());
 }
 
 TEST_F(VariableTest, HasBindingPoint_BothProvided) {

@@ -26,7 +26,7 @@ namespace tint::ast {
 DiagnosticAttribute::DiagnosticAttribute(ProgramID pid,
                                          NodeID nid,
                                          const Source& src,
-                                         ast::DiagnosticControl&& dc)
+                                         DiagnosticControl&& dc)
     : Base(pid, nid, src), control(std::move(dc)) {}
 
 DiagnosticAttribute::~DiagnosticAttribute() = default;

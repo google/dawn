@@ -83,7 +83,7 @@ TEST_F(AstStructTest, Assert_Null_Attribute) {
         {
             ProgramBuilder b;
             b.Structure(b.Sym("S"), utils::Vector{b.Member("a", b.ty.i32())},
-                        utils::Vector<const ast::Attribute*, 1>{nullptr});
+                        utils::Vector<const Attribute*, 1>{nullptr});
         },
         "internal compiler error");
 }

@@ -28,8 +28,8 @@ TEST_F(DiagnosticControlTest, Assert_RuleNotTemplated) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            ast::DiagnosticControl control(builtin::DiagnosticSeverity::kWarning,
-                                           b.Ident("name", "a", "b", "c"));
+            DiagnosticControl control(builtin::DiagnosticSeverity::kWarning,
+                                      b.Ident("name", "a", "b", "c"));
         },
         "internal compiler error");
 }

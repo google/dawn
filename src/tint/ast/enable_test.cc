@@ -22,7 +22,7 @@ namespace {
 using EnableTest = TestHelper;
 
 TEST_F(EnableTest, Creation) {
-    auto* ext = create<ast::Enable>(Source{{{20, 2}, {20, 5}}}, builtin::Extension::kF16);
+    auto* ext = Enable(Source{{{20, 2}, {20, 5}}}, builtin::Extension::kF16);
     EXPECT_EQ(ext->source.range.begin.line, 20u);
     EXPECT_EQ(ext->source.range.begin.column, 2u);
     EXPECT_EQ(ext->source.range.end.line, 20u);

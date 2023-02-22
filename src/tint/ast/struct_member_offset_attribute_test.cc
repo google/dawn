@@ -22,8 +22,8 @@ using StructMemberOffsetAttributeTest = TestHelper;
 
 TEST_F(StructMemberOffsetAttributeTest, Creation) {
     auto* d = MemberOffset(2_u);
-    ASSERT_TRUE(d->expr->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(2u, d->expr->As<ast::IntLiteralExpression>()->value);
+    ASSERT_TRUE(d->expr->Is<IntLiteralExpression>());
+    EXPECT_EQ(2u, d->expr->As<IntLiteralExpression>()->value);
 }
 
 }  // namespace

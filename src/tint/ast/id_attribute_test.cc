@@ -24,7 +24,7 @@ using IdAttributeTest = TestHelper;
 
 TEST_F(IdAttributeTest, Creation) {
     auto* d = Id(12_a);
-    EXPECT_TRUE(d->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_TRUE(d->expr->Is<IntLiteralExpression>());
 }
 
 }  // namespace

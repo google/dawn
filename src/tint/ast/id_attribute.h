@@ -30,7 +30,7 @@ class IdAttribute final : public Castable<IdAttribute, Attribute> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param expr the numeric id expression
-    IdAttribute(ProgramID pid, NodeID nid, const Source& src, const ast::Expression* expr);
+    IdAttribute(ProgramID pid, NodeID nid, const Source& src, const Expression* expr);
     ~IdAttribute() override;
 
     /// @returns the WGSL name for the attribute
@@ -43,7 +43,7 @@ class IdAttribute final : public Castable<IdAttribute, Attribute> {
     const IdAttribute* Clone(CloneContext* ctx) const override;
 
     /// The id expression
-    const ast::Expression* const expr;
+    const Expression* const expr;
 };
 
 }  // namespace tint::ast

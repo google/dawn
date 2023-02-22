@@ -26,7 +26,7 @@ namespace tint::ast {
 StructMemberSizeAttribute::StructMemberSizeAttribute(ProgramID pid,
                                                      NodeID nid,
                                                      const Source& src,
-                                                     const ast::Expression* exp)
+                                                     const Expression* exp)
     : Base(pid, nid, src), expr(exp) {}
 
 StructMemberSizeAttribute::~StructMemberSizeAttribute() = default;

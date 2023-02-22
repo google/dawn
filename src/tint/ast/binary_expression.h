@@ -127,11 +127,11 @@ class BinaryExpression final : public Castable<BinaryExpression, Expression> {
 /// @returns true if the op is an arithmetic operation
 inline bool IsArithmetic(BinaryOp op) {
     switch (op) {
-        case ast::BinaryOp::kAdd:
-        case ast::BinaryOp::kSubtract:
-        case ast::BinaryOp::kMultiply:
-        case ast::BinaryOp::kDivide:
-        case ast::BinaryOp::kModulo:
+        case BinaryOp::kAdd:
+        case BinaryOp::kSubtract:
+        case BinaryOp::kMultiply:
+        case BinaryOp::kDivide:
+        case BinaryOp::kModulo:
             return true;
         default:
             return false;
@@ -142,12 +142,12 @@ inline bool IsArithmetic(BinaryOp op) {
 /// @returns true if the op is a comparison operation
 inline bool IsComparison(BinaryOp op) {
     switch (op) {
-        case ast::BinaryOp::kEqual:
-        case ast::BinaryOp::kNotEqual:
-        case ast::BinaryOp::kLessThan:
-        case ast::BinaryOp::kLessThanEqual:
-        case ast::BinaryOp::kGreaterThan:
-        case ast::BinaryOp::kGreaterThanEqual:
+        case BinaryOp::kEqual:
+        case BinaryOp::kNotEqual:
+        case BinaryOp::kLessThan:
+        case BinaryOp::kLessThanEqual:
+        case BinaryOp::kGreaterThan:
+        case BinaryOp::kGreaterThanEqual:
             return true;
         default:
             return false;
@@ -158,9 +158,9 @@ inline bool IsComparison(BinaryOp op) {
 /// @returns true if the op is a bitwise operation
 inline bool IsBitwise(BinaryOp op) {
     switch (op) {
-        case ast::BinaryOp::kAnd:
-        case ast::BinaryOp::kOr:
-        case ast::BinaryOp::kXor:
+        case BinaryOp::kAnd:
+        case BinaryOp::kOr:
+        case BinaryOp::kXor:
             return true;
         default:
             return false;
@@ -171,8 +171,8 @@ inline bool IsBitwise(BinaryOp op) {
 /// @returns true if the op is a bit shift operation
 inline bool IsBitshift(BinaryOp op) {
     switch (op) {
-        case ast::BinaryOp::kShiftLeft:
-        case ast::BinaryOp::kShiftRight:
+        case BinaryOp::kShiftLeft:
+        case BinaryOp::kShiftRight:
             return true;
         default:
             return false;
@@ -181,8 +181,8 @@ inline bool IsBitshift(BinaryOp op) {
 
 inline bool BinaryExpression::IsLogical() const {
     switch (op) {
-        case ast::BinaryOp::kLogicalAnd:
-        case ast::BinaryOp::kLogicalOr:
+        case BinaryOp::kLogicalAnd:
+        case BinaryOp::kLogicalOr:
             return true;
         default:
             return false;

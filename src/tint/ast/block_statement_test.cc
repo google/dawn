@@ -63,8 +63,7 @@ TEST_F(BlockStatementTest, Assert_Null_Statement) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<BlockStatement>(utils::Vector<const ast::Statement*, 1>{nullptr},
-                                     utils::Empty);
+            b.create<BlockStatement>(utils::Vector<const Statement*, 1>{nullptr}, utils::Empty);
         },
         "internal compiler error");
 }

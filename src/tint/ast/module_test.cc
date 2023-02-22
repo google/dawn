@@ -61,9 +61,8 @@ TEST_F(ModuleTest, Assert_DifferentProgramID_Function) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.AST().AddFunction(b2.create<ast::Function>(b2.Ident("func"), utils::Empty,
-                                                          b2.ty.f32(), b2.Block(), utils::Empty,
-                                                          utils::Empty));
+            b1.AST().AddFunction(b2.create<Function>(b2.Ident("func"), utils::Empty, b2.ty.f32(),
+                                                     b2.Block(), utils::Empty, utils::Empty));
         },
         "internal compiler error");
 }
@@ -102,7 +101,7 @@ TEST_F(ModuleTest, CloneOrder) {
     // declaration that triggered the ReplaceAll().
     ProgramBuilder cloned;
     CloneContext ctx(&cloned, &p);
-    ctx.ReplaceAll([&](const ast::Function*) -> const ast::Function* {
+    ctx.ReplaceAll([&](const Function*) -> const Function* {
         ctx.dst->Alias("inserted_before_F", cloned.ty.u32());
         return nullptr;
     });
@@ -110,7 +109,7 @@ TEST_F(ModuleTest, CloneOrder) {
         ctx.dst->Alias("inserted_before_A", cloned.ty.u32());
         return nullptr;
     });
-    ctx.ReplaceAll([&](const ast::Variable*) -> const ast::Variable* {
+    ctx.ReplaceAll([&](const Variable*) -> const Variable* {
         ctx.dst->Alias("inserted_before_V", cloned.ty.u32());
         return nullptr;
     });
@@ -118,9 +117,9 @@ TEST_F(ModuleTest, CloneOrder) {
 
     auto& decls = cloned.AST().GlobalDeclarations();
     ASSERT_EQ(decls.Length(), 6u);
-    EXPECT_TRUE(decls[1]->Is<ast::Function>());
+    EXPECT_TRUE(decls[1]->Is<Function>());
     EXPECT_TRUE(decls[3]->Is<ast::Alias>());
-    EXPECT_TRUE(decls[5]->Is<ast::Variable>());
+    EXPECT_TRUE(decls[5]->Is<Variable>());
 
     ASSERT_TRUE(decls[0]->Is<ast::Alias>());
     ASSERT_TRUE(decls[2]->Is<ast::Alias>());

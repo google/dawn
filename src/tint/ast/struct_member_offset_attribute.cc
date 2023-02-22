@@ -25,7 +25,7 @@ namespace tint::ast {
 StructMemberOffsetAttribute::StructMemberOffsetAttribute(ProgramID pid,
                                                          NodeID nid,
                                                          const Source& src,
-                                                         const ast::Expression* exp)
+                                                         const Expression* exp)
     : Base(pid, nid, src), expr(exp) {}
 
 StructMemberOffsetAttribute::~StructMemberOffsetAttribute() = default;

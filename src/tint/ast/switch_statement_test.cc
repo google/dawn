@@ -53,7 +53,7 @@ TEST_F(SwitchStatementTest, IsSwitch) {
 }
 
 TEST_F(SwitchStatementTest, Assert_Null_Condition) {
-    using CaseStatementList = utils::Vector<const ast::CaseStatement*, 2>;
+    using CaseStatementList = utils::Vector<const CaseStatement*, 2>;
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
@@ -66,7 +66,7 @@ TEST_F(SwitchStatementTest, Assert_Null_Condition) {
 }
 
 TEST_F(SwitchStatementTest, Assert_Null_CaseStatement) {
-    using CaseStatementList = utils::Vector<const ast::CaseStatement*, 2>;
+    using CaseStatementList = utils::Vector<const CaseStatement*, 2>;
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;

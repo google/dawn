@@ -46,7 +46,7 @@ class Module final : public Castable<Module, Node> {
     Module(ProgramID pid,
            NodeID nid,
            const Source& src,
-           utils::VectorRef<const ast::Node*> global_decls);
+           utils::VectorRef<const Node*> global_decls);
 
     /// Destructor
     ~Module() override;
@@ -80,7 +80,7 @@ class Module final : public Castable<Module, Node> {
     auto& GlobalVariables() { return global_variables_; }
 
     /// @returns the global variable declarations of kind 'T' for the module
-    template <typename T, typename = traits::EnableIfIsType<T, ast::Variable>>
+    template <typename T, typename = traits::EnableIfIsType<T, Variable>>
     auto Globals() const {
         utils::Vector<const T*, 32> out;
         out.Reserve(global_variables_.Length());

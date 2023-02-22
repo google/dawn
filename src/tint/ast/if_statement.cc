@@ -33,7 +33,7 @@ IfStatement::IfStatement(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
     if (else_statement) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, else_statement, program_id);
-        TINT_ASSERT(AST, (else_statement->IsAnyOf<ast::IfStatement, ast::BlockStatement>()));
+        TINT_ASSERT(AST, (else_statement->IsAnyOf<IfStatement, BlockStatement>()));
     }
 }
 

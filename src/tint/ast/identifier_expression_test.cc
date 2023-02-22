@@ -30,10 +30,10 @@ TEST_F(IdentifierExpressionTest, Creation) {
 TEST_F(IdentifierExpressionTest, CreationTemplated) {
     auto* i = Expr(Ident("ident", true));
     EXPECT_EQ(i->identifier->symbol, Symbol(1, ID()));
-    auto* tmpl_ident = i->identifier->As<ast::TemplatedIdentifier>();
+    auto* tmpl_ident = i->identifier->As<TemplatedIdentifier>();
     ASSERT_NE(tmpl_ident, nullptr);
     EXPECT_EQ(tmpl_ident->arguments.Length(), 1_u);
-    EXPECT_TRUE(tmpl_ident->arguments[0]->Is<ast::BoolLiteralExpression>());
+    EXPECT_TRUE(tmpl_ident->arguments[0]->Is<BoolLiteralExpression>());
 }
 
 TEST_F(IdentifierExpressionTest, Creation_WithSource) {

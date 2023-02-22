@@ -26,7 +26,7 @@ namespace tint::ast {
 StructMemberAlignAttribute::StructMemberAlignAttribute(ProgramID pid,
                                                        NodeID nid,
                                                        const Source& src,
-                                                       const ast::Expression* a)
+                                                       const Expression* a)
     : Base(pid, nid, src), expr(a) {}
 
 StructMemberAlignAttribute::~StructMemberAlignAttribute() = default;

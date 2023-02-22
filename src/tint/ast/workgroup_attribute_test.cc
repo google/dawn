@@ -28,8 +28,8 @@ TEST_F(WorkgroupAttributeTest, Creation_1param) {
     auto* d = WorkgroupSize(2_i);
     auto values = d->Values();
 
-    ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 2);
+    ASSERT_TRUE(values[0]->Is<IntLiteralExpression>());
+    EXPECT_EQ(values[0]->As<IntLiteralExpression>()->value, 2);
 
     EXPECT_EQ(values[1], nullptr);
     EXPECT_EQ(values[2], nullptr);
@@ -38,11 +38,11 @@ TEST_F(WorkgroupAttributeTest, Creation_2param) {
     auto* d = WorkgroupSize(2_i, 4_i);
     auto values = d->Values();
 
-    ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 2);
+    ASSERT_TRUE(values[0]->Is<IntLiteralExpression>());
+    EXPECT_EQ(values[0]->As<IntLiteralExpression>()->value, 2);
 
-    ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->value, 4);
+    ASSERT_TRUE(values[1]->Is<IntLiteralExpression>());
+    EXPECT_EQ(values[1]->As<IntLiteralExpression>()->value, 4);
 
     EXPECT_EQ(values[2], nullptr);
 }
@@ -51,27 +51,27 @@ TEST_F(WorkgroupAttributeTest, Creation_3param) {
     auto* d = WorkgroupSize(2_i, 4_i, 6_i);
     auto values = d->Values();
 
-    ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 2);
+    ASSERT_TRUE(values[0]->Is<IntLiteralExpression>());
+    EXPECT_EQ(values[0]->As<IntLiteralExpression>()->value, 2);
 
-    ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->value, 4);
+    ASSERT_TRUE(values[1]->Is<IntLiteralExpression>());
+    EXPECT_EQ(values[1]->As<IntLiteralExpression>()->value, 4);
 
-    ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->value, 6);
+    ASSERT_TRUE(values[2]->Is<IntLiteralExpression>());
+    EXPECT_EQ(values[2]->As<IntLiteralExpression>()->value, 6);
 }
 
 TEST_F(WorkgroupAttributeTest, Creation_WithIdentifier) {
     auto* d = WorkgroupSize(2_i, 4_i, "depth");
     auto values = d->Values();
 
-    ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 2);
+    ASSERT_TRUE(values[0]->Is<IntLiteralExpression>());
+    EXPECT_EQ(values[0]->As<IntLiteralExpression>()->value, 2);
 
-    ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->value, 4);
+    ASSERT_TRUE(values[1]->Is<IntLiteralExpression>());
+    EXPECT_EQ(values[1]->As<IntLiteralExpression>()->value, 4);
 
-    auto* z_ident = As<ast::IdentifierExpression>(values[2]);
+    auto* z_ident = As<IdentifierExpression>(values[2]);
     ASSERT_TRUE(z_ident);
     EXPECT_EQ(Symbols().NameFor(z_ident->identifier->symbol), "depth");
 }

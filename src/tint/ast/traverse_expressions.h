@@ -57,24 +57,22 @@ enum class TraverseOrder {
 /// @param diags the diagnostics used for error messages
 /// @param callback the callback function. Must be of the signature:
 ///        `TraverseAction(const T* expr)` or `TraverseAction(const T* expr, size_t depth)` where T
-///        is an ast::Expression type.
+///        is an Expression type.
 /// @return true on success, false on error
 template <TraverseOrder ORDER = TraverseOrder::LeftToRight, typename CALLBACK>
-bool TraverseExpressions(const ast::Expression* root, diag::List& diags, CALLBACK&& callback) {
+bool TraverseExpressions(const Expression* root, diag::List& diags, CALLBACK&& callback) {
     using EXPR_TYPE = std::remove_pointer_t<traits::ParameterType<CALLBACK, 0>>;
     constexpr static bool kHasDepthArg = traits::SignatureOfT<CALLBACK>::parameter_count == 2;
 
     struct Pending {
-        const ast::Expression* expr;
+        const Expression* expr;
         size_t depth;
     };
 
     utils::Vector<Pending, 32> to_visit{{root, 0}};
 
-    auto push_single = [&](const ast::Expression* expr, size_t depth) {
-        to_visit.Push({expr, depth});
-    };
-    auto push_pair = [&](const ast::Expression* left, const ast::Expression* right, size_t depth) {
+    auto push_single = [&](const Expression* expr, size_t depth) { to_visit.Push({expr, depth}); };
+    auto push_pair = [&](const Expression* left, const Expression* right, size_t depth) {
         if (ORDER == TraverseOrder::LeftToRight) {
             to_visit.Push({right, depth});
             to_visit.Push({left, depth});
@@ -83,7 +81,7 @@ bool TraverseExpressions(const ast::Expression* root, diag::List& diags, CALLBAC
             to_visit.Push({right, depth});
         }
     };
-    auto push_list = [&](utils::VectorRef<const ast::Expression*> exprs, size_t depth) {
+    auto push_list = [&](utils::VectorRef<const Expression*> exprs, size_t depth) {
         if (ORDER == TraverseOrder::LeftToRight) {
             for (auto* expr : utils::Reverse(exprs)) {
                 to_visit.Push({expr, depth});
@@ -97,7 +95,7 @@ bool TraverseExpressions(const ast::Expression* root, diag::List& diags, CALLBAC
 
     while (!to_visit.IsEmpty()) {
         auto p = to_visit.Pop();
-        const ast::Expression* expr = p.expr;
+        const Expression* expr = p.expr;
 
         if (auto* filtered = expr->template As<EXPR_TYPE>()) {
             TraverseAction result;

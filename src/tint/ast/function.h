@@ -68,7 +68,7 @@ class Function final : public Castable<Function, Node> {
     ast::PipelineStage PipelineStage() const;
 
     /// @returns true if this function is an entry point
-    bool IsEntryPoint() const { return PipelineStage() != PipelineStage::kNone; }
+    bool IsEntryPoint() const { return PipelineStage() != ast::PipelineStage::kNone; }
 
     /// Clones this node and all transitive child nodes using the `CloneContext`
     /// `ctx`.
@@ -111,12 +111,12 @@ class FunctionList : public utils::Vector<const Function*, 8> {
     /// @param sym the function symbol to search for
     /// @param stage the pipeline stage
     /// @returns the associated function or nullptr if none exists
-    const Function* Find(Symbol sym, PipelineStage stage) const;
+    const Function* Find(Symbol sym, ast::PipelineStage stage) const;
 
     /// @param stage the pipeline stage
     /// @returns true if the Builder contains an entrypoint function with
     /// the given stage
-    bool HasStage(PipelineStage stage) const;
+    bool HasStage(ast::PipelineStage stage) const;
 };
 
 }  // namespace tint::ast

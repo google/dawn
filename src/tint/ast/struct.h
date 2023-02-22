@@ -39,8 +39,8 @@ class Struct final : public Castable<Struct, TypeDecl> {
            NodeID nid,
            const Source& src,
            const Identifier* name,
-           utils::VectorRef<const ast::StructMember*> members,
-           utils::VectorRef<const ast::Attribute*> attributes);
+           utils::VectorRef<const StructMember*> members,
+           utils::VectorRef<const Attribute*> attributes);
     /// Move constructor
     Struct(Struct&&);
 
@@ -53,10 +53,10 @@ class Struct final : public Castable<Struct, TypeDecl> {
     const Struct* Clone(CloneContext* ctx) const override;
 
     /// The members
-    const utils::Vector<const ast::StructMember*, 8> members;
+    const utils::Vector<const StructMember*, 8> members;
 
     /// The struct attributes
-    const utils::Vector<const ast::Attribute*, 4> attributes;
+    const utils::Vector<const Attribute*, 4> attributes;
 };
 
 }  // namespace tint::ast
