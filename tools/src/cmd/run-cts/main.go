@@ -234,7 +234,7 @@ func run() error {
 		flags = append(flags, "disable-dawn-features=disallow_unsafe_apis")
 	}
 	if dumpShaders {
-		flags = append(flags, "enable-dawn-features=dump_shaders")
+		flags = append(flags, "enable-dawn-features=dump_shaders,disable_symbol_renaming")
 		verbose = true
 	}
 
