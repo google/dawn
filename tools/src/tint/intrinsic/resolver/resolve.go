@@ -345,6 +345,15 @@ func (r *resolver) intrinsic(
 			Compute:  true,
 		}
 	}
+	if mustUse := a.Attributes.Take("must_use"); mustUse != nil {
+		if len(mustUse.Values) > 0 {
+			return fmt.Errorf("%v @must_use does not accept any arguments", mustUse.Source)
+		}
+		if a.ReturnType == nil {
+			return fmt.Errorf("%v @must_use can only be used on a function with a return type", mustUse.Source)
+		}
+		overload.MustUse = true
+	}
 	if constEvalFn := a.Attributes.Take("const"); constEvalFn != nil {
 		switch len(constEvalFn.Values) {
 		case 0:

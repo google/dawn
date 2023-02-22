@@ -104,7 +104,9 @@ constexpr OverloadInfo kOverloads[] = {
 {{-   range $i, $u := $o.CanBeUsedInStage.List -}}
         , OverloadFlag::kSupports{{Title $u}}Pipeline
 {{-   end }}
-{{-   if $o.IsDeprecated}}, OverloadFlag::kIsDeprecated{{end }}),
+{{-   if $o.MustUse}}, OverloadFlag::kMustUse{{end}}
+{{-   if $o.IsDeprecated}}, OverloadFlag::kIsDeprecated{{end -}}
+    ),
     /* const eval */
 {{-   if $o.ConstEvalFunction }} {{template "ConstEvalFn" $o}},
 {{-   else                    }} nullptr,

@@ -178,6 +178,11 @@ type T<x>
 conv f32(T<f32>)`,
 			success,
 		}, {
+			`
+type f32
+@must_use fn f() -> f32`,
+			success,
+		}, {
 			`enum E {A A}`,
 			`
 file.txt:1:11 duplicate enum entry 'A'
@@ -518,6 +523,10 @@ type P<T>
 match m: f32
 fn f(P<m>)`,
 			`file.txt:4:8 type matcher cannot be used directly here. Use a matcher constrained template argument`,
+		}, {
+			`
+@must_use fn f()`,
+			`file.txt:1:2 @must_use can only be used on a function with a return type`,
 		},
 	} {
 

@@ -343,6 +343,7 @@ enum class OverloadFlag {
     kSupportsVertexPipeline,    // The overload can be used in vertex shaders
     kSupportsFragmentPipeline,  // The overload can be used in fragment shaders
     kSupportsComputePipeline,   // The overload can be used in compute shaders
+    kMustUse,                   // The overload cannot be called as a statement
     kIsDeprecated,              // The overload is deprecated
 };
 

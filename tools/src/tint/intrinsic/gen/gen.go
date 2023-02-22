@@ -106,6 +106,8 @@ type Overload struct {
 	ReturnMatcherIndicesOffset *int
 	// StageUses describes the stages an overload can be used in
 	CanBeUsedInStage sem.StageUses
+	// True if the overload is marked as @must_use
+	MustUse bool
 	// True if the overload is marked as deprecated
 	IsDeprecated bool
 	// The kind of overload
@@ -211,6 +213,7 @@ func (b *IntrinsicTableBuilder) buildOverload(o *sem.Overload) (Overload, error)
 		ParametersOffset:           b.lut.parameters.Add(ob.parameters),
 		ReturnMatcherIndicesOffset: ob.returnTypeMatcherIndicesOffset,
 		CanBeUsedInStage:           o.CanBeUsedInStage,
+		MustUse:                    o.MustUse,
 		IsDeprecated:               o.IsDeprecated,
 		Kind:                       string(o.Decl.Kind),
 		ConstEvalFunction:          o.ConstEvalFunction,

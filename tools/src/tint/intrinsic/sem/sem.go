@@ -182,6 +182,7 @@ type Overload struct {
 	ReturnType        *FullyQualifiedName
 	Parameters        []Parameter
 	CanBeUsedInStage  StageUses
+	MustUse           bool   // True if function cannot be used as a statement
 	IsDeprecated      bool   // True if this overload is deprecated
 	ConstEvalFunction string // Name of the function used to evaluate the intrinsic at shader creation time
 }
