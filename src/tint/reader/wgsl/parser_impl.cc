@@ -34,6 +34,7 @@
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/builtin/attribute.h"
 #include "src/tint/reader/wgsl/classify_template_args.h"
 #include "src/tint/reader/wgsl/lexer.h"
 #include "src/tint/type/depth_texture.h"
@@ -2988,9 +2989,12 @@ Expect<const ast::Attribute*> ParserImpl::expect_attribute() {
 Maybe<const ast::Attribute*> ParserImpl::attribute() {
     // Note, the ATTR is matched by the called `attribute_list` in this case, so it is not matched
     // here and this has to be an attribute.
-    auto& t = next();
+    auto& t = peek();
 
-    if (t.Is(Token::Type::kDiagnostic)) {
+    if (match(Token::Type::kConst)) {
+        return add_error(t.source(), "const attribute may not appear in shaders");
+    }
+    if (match(Token::Type::kDiagnostic)) {
         auto control = expect_diagnostic_control();
         if (control.errored) {
             return Failure::kErrored;
@@ -2998,21 +3002,41 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
         return create<ast::DiagnosticAttribute>(t.source(), std::move(control.value));
     }
 
-    if (!t.IsIdentifier()) {
-        return Failure::kNoMatch;
+    auto attr = expect_enum("attribute", builtin::ParseAttribute, builtin::kAttributeStrings);
+    if (attr.errored) {
+        return Failure::kErrored;
     }
 
-    utils::Vector<const ast::Expression*, 2> exprs;
-    auto parse = [&](uint32_t min, uint32_t max) -> Maybe<bool> {
-        // Handle no parameter items which should have no parens
-        if (min == 0) {
-            auto& p = peek();
-            if (p.Is(Token::Type::kParenLeft)) {
-                return add_error(p.source(), t.to_str() + " attribute doesn't take parenthesis");
-            }
-            return true;
-        }
+    uint32_t min = 1;
+    uint32_t max = 1;
+    switch (attr.value) {
+        case builtin::Attribute::kCompute:
+        case builtin::Attribute::kFragment:
+        case builtin::Attribute::kInvariant:
+        case builtin::Attribute::kMustUse:
+        case builtin::Attribute::kVertex:
+            min = 0;
+            max = 0;
+            break;
+        case builtin::Attribute::kInterpolate:
+            max = 2;
+            break;
+        case builtin::Attribute::kWorkgroupSize:
+            max = 3;
+            break;
+        default:
+            break;
+    }
 
+    utils::Vector<const ast::Expression*, 2> args;
+
+    // Handle no parameter items which should have no parens
+    if (min == 0) {
+        auto& t2 = peek();
+        if (match(Token::Type::kParenLeft)) {
+            return add_error(t2.source(), t.to_str() + " attribute doesn't take parenthesis");
+        }
+    } else {
         auto res = expect_paren_block(t.to_str() + " attribute", [&]() -> Expect<bool> {
             while (continue_parsing()) {
                 if (peek().Is(Token::Type::kParenRight)) {
@@ -3023,7 +3047,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
                 if (expr.errored) {
                     return Failure::kErrored;
                 }
-                exprs.Push(expr.value);
+                args.Push(expr.value);
 
                 if (!match(Token::Type::kComma)) {
                     break;
@@ -3035,138 +3059,54 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             return Failure::kErrored;
         }
 
-        if (exprs.IsEmpty() || exprs.Length() < min) {
+        if (args.IsEmpty() || args.Length() < min) {
             return add_error(t.source(),
                              t.to_str() + " expects" + (min != max ? " at least " : " ") +
-                                 std::to_string(min) + " argument" + (min > 1 ? "s" : ""));
+                                 std::to_string(min) + " argument" + (min != 1 ? "s" : ""));
         }
-
-        if (exprs.Length() > max) {
+        if (args.Length() > max) {
             return add_error(t.source(),
                              t.to_str() + " expects" + (min != max ? " at most " : " ") +
-                                 std::to_string(max) + " argument" + (max > 1 ? "s" : "") +
-                                 ", got " + std::to_string(exprs.Length()));
+                                 std::to_string(max) + " argument" + (max != 1 ? "s" : "") +
+                                 ", got " + std::to_string(args.Length()));
         }
-        return true;
-    };
-
-    if (t == "align") {
-        auto res = parse(1, 1);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return create<ast::StructMemberAlignAttribute>(t.source(), exprs[0]);
     }
 
-    if (t == "binding") {
-        auto res = parse(1, 1);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return create<ast::BindingAttribute>(t.source(), exprs[0]);
+    switch (attr.value) {
+        case builtin::Attribute::kAlign:
+            return create<ast::StructMemberAlignAttribute>(t.source(), args[0]);
+        case builtin::Attribute::kBinding:
+            return create<ast::BindingAttribute>(t.source(), args[0]);
+        case builtin::Attribute::kBuiltin:
+            return create<ast::BuiltinAttribute>(t.source(), args[0]);
+        case builtin::Attribute::kCompute:
+            return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kCompute);
+        case builtin::Attribute::kFragment:
+            return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kFragment);
+        case builtin::Attribute::kGroup:
+            return create<ast::GroupAttribute>(t.source(), args[0]);
+        case builtin::Attribute::kId:
+            return create<ast::IdAttribute>(t.source(), args[0]);
+        case builtin::Attribute::kInterpolate:
+            return create<ast::InterpolateAttribute>(t.source(), args[0],
+                                                     args.Length() == 2 ? args[1] : nullptr);
+        case builtin::Attribute::kInvariant:
+            return create<ast::InvariantAttribute>(t.source());
+        case builtin::Attribute::kLocation:
+            return builder_.Location(t.source(), args[0]);
+        case builtin::Attribute::kMustUse:
+            return create<ast::MustUseAttribute>(t.source());
+        case builtin::Attribute::kSize:
+            return builder_.MemberSize(t.source(), args[0]);
+        case builtin::Attribute::kVertex:
+            return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kVertex);
+        case builtin::Attribute::kWorkgroupSize:
+            return create<ast::WorkgroupAttribute>(t.source(), args[0],
+                                                   args.Length() > 1 ? args[1] : nullptr,
+                                                   args.Length() > 2 ? args[2] : nullptr);
+        default:
+            return Failure::kNoMatch;
     }
-
-    if (t == "builtin") {
-        auto res = parse(1, 1);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return create<ast::BuiltinAttribute>(t.source(), exprs[0]);
-    }
-
-    if (t == "compute") {
-        auto res = parse(0, 0);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kCompute);
-    }
-
-    // Note, `const` is not valid in a WGSL source file, it's internal only
-
-    if (t == "fragment") {
-        auto res = parse(0, 0);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kFragment);
-    }
-
-    if (t == "group") {
-        auto res = parse(1, 1);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return create<ast::GroupAttribute>(t.source(), exprs[0]);
-    }
-
-    if (t == "id") {
-        auto res = parse(1, 1);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return create<ast::IdAttribute>(t.source(), exprs[0]);
-    }
-
-    if (t == "interpolate") {
-        auto res = parse(1, 2);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return create<ast::InterpolateAttribute>(t.source(), exprs[0],
-                                                 exprs.Length() == 2 ? exprs[1] : nullptr);
-    }
-
-    if (t == "invariant") {
-        auto res = parse(0, 0);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return create<ast::InvariantAttribute>(t.source());
-    }
-
-    if (t == "location") {
-        auto res = parse(1, 1);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return builder_.Location(t.source(), exprs[0]);
-    }
-
-    if (t == "must_use") {
-        auto res = parse(0, 0);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return create<ast::MustUseAttribute>(t.source());
-    }
-
-    if (t == "size") {
-        auto res = parse(1, 1);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return builder_.MemberSize(t.source(), exprs[0]);
-    }
-
-    if (t == "vertex") {
-        auto res = parse(0, 0);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kVertex);
-    }
-
-    if (t == "workgroup_size") {
-        auto res = parse(1, 3);
-        if (res.errored) {
-            return Failure::kErrored;
-        }
-        return create<ast::WorkgroupAttribute>(t.source(), exprs[0],
-                                               exprs.Length() > 1 ? exprs[1] : nullptr,
-                                               exprs.Length() > 2 ? exprs[2] : nullptr);
-    }
-    return Failure::kNoMatch;
 }
 
 bool ParserImpl::expect_attributes_consumed(utils::VectorRef<const ast::Attribute*> in) {

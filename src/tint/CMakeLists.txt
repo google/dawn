@@ -555,6 +555,7 @@ list(APPEND TINT_LIB_SRCS
 
 tint_generated(builtin/access BENCH TEST)
 tint_generated(builtin/address_space BENCH TEST)
+tint_generated(builtin/attribute BENCH TEST)
 tint_generated(builtin/builtin BENCH TEST)
 tint_generated(builtin/builtin_value BENCH TEST)
 tint_generated(builtin/diagnostic_rule BENCH TEST)

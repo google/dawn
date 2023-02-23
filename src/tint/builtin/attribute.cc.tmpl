@@ -1,0 +1,25 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/src/cmd/gen to generate attribute.cc
+
+To update the generated file, run:
+    ./tools/run gen
+
+See:
+* tools/src/cmd/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+{{- Import "src/tint/templates/enums.tmpl.inc" -}}
+{{- $enum := (Sem.Enum "attribute") -}}
+
+#include "src/tint/builtin/attribute.h"
+
+namespace tint::builtin {
+
+{{ Eval "ParseEnum" $enum}}
+
+{{ Eval "EnumOStream" $enum}}
+
+}  // namespace tint::builtin

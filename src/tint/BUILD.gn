@@ -701,6 +701,8 @@ libtint_source_set("libtint_builtins_src") {
     "builtin/access.h",
     "builtin/address_space.cc",
     "builtin/address_space.h",
+    "builtin/attribute.cc",
+    "builtin/attribute.h",
     "builtin/builtin.cc",
     "builtin/builtin.h",
     "builtin/builtin_value.cc",
@@ -1311,6 +1313,7 @@ if (tint_build_unittests) {
     sources = [
       "builtin/access_test.cc",
       "builtin/address_space_test.cc",
+      "builtin/attribute_test.cc",
       "builtin/builtin_test.cc",
       "builtin/builtin_value_test.cc",
       "builtin/diagnostic_rule_test.cc",

@@ -59,6 +59,14 @@ TEST_F(ParserImplErrorTest, AliasDeclInvalidAttribute) {
 )");
 }
 
+TEST_F(ParserImplErrorTest, ConstAttributeInvalid) {
+    EXPECT("@const fn main() { }",
+           R"(test.wgsl:1:2 error: const attribute may not appear in shaders
+@const fn main() { }
+ ^^^^^
+)");
+}
+
 TEST_F(ParserImplErrorTest, IndexExprInvalidExpr) {
     EXPECT("fn f() { x = y[^]; }",
            R"(test.wgsl:1:16 error: unable to parse expression inside []

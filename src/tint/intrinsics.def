@@ -211,6 +211,29 @@ enum builtin_type {
   texture_external
 }
 
+// https://gpuweb.github.io/gpuweb/wgsl/#attributes
+// Notes:
+//  * `diagnostic` is listed, even though it is a keyword, so it appears in suggested alternatives
+//  * `const` is not listed here as it can not be written in user programs and should not show up
+//     in error messages
+enum attribute {
+  align
+  binding
+  builtin
+  compute
+  diagnostic
+  fragment
+  group
+  id
+  interpolate
+  invariant
+  location
+  must_use
+  size
+  vertex
+  workgroup_size
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // WGSL primitive types                                                       //
 // Types may be decorated with @precedence(N) to prioritize which type        //
