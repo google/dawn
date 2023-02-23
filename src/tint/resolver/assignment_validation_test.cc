@@ -143,17 +143,6 @@ TEST_F(ResolverAssignmentValidationTest, AssignIncompatibleTypesInNestedBlockSta
     EXPECT_EQ(r()->error(), "12:34 error: cannot assign 'f32' to 'i32'");
 }
 
-TEST_F(ResolverAssignmentValidationTest, AssignToScalar_Fail) {
-    // var my_var : i32 = 2i;
-    // 1 = my_var;
-
-    WrapInFunction(Var("my_var", ty.i32(), Expr(2_i)),  //
-                   Assign(Expr(Source{{12, 34}}, 1_i), "my_var"));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: cannot assign to value of type 'i32'");
-}
-
 TEST_F(ResolverAssignmentValidationTest, AssignCompatibleTypes_Pass) {
     // var a : i32 = 1i;
     // a = 2i;
@@ -213,16 +202,87 @@ TEST_F(ResolverAssignmentValidationTest, AssignMaterializedThroughPointer_Pass) 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverAssignmentValidationTest, AssignToScalar_Fail) {
+    // var my_var : i32 = 2i;
+    // 1 = my_var;
+
+    WrapInFunction(Var("my_var", ty.i32(), Expr(2_i)),  //
+                   Assign(Expr(Source{{12, 34}}, 1_i), "my_var"));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot assign to value expression of type 'i32')");
+}
+
+TEST_F(ResolverAssignmentValidationTest, AssignToOverride_Fail) {
+    // override a : i32 = 2i;
+    // {
+    //  a = 2i
+    // }
+    Override(Source{{56, 78}}, "a", ty.i32(), Expr(2_i));
+    WrapInFunction(Assign(Expr(Source{{12, 34}}, "a"), 2_i));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot assign to override 'a'
+12:34 note: 'override' variables are immutable
+56:78 note: override 'a' declared here)");
+}
+
 TEST_F(ResolverAssignmentValidationTest, AssignToLet_Fail) {
     // {
     //  let a : i32 = 2i;
     //  a = 2i
     // }
-    auto* var = Let("a", ty.i32(), Expr(2_i));
-    WrapInFunction(var, Assign(Expr(Source{{12, 34}}, "a"), 2_i));
+    WrapInFunction(Let(Source{{56, 78}}, "a", ty.i32(), Expr(2_i)),  //
+                   Assign(Expr(Source{{12, 34}}, "a"), 2_i));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: cannot assign to 'let'\nnote: 'a' is declared here:");
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot assign to let 'a'
+12:34 note: 'let' variables are immutable
+56:78 note: let 'a' declared here)");
+}
+
+TEST_F(ResolverAssignmentValidationTest, AssignToConst_Fail) {
+    // {
+    //  const a : i32 = 2i;
+    //  a = 2i
+    // }
+    WrapInFunction(Const(Source{{56, 78}}, "a", ty.i32(), Expr(2_i)),  //
+                   Assign(Expr(Source{{12, 34}}, "a"), 2_i));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot assign to const 'a'
+12:34 note: 'const' variables are immutable
+56:78 note: const 'a' declared here)");
+}
+
+TEST_F(ResolverAssignmentValidationTest, AssignToParam_Fail) {
+    Func("foo", utils::Vector{Param(Source{{56, 78}}, "arg", ty.i32())}, ty.void_(),
+         utils::Vector{
+             Assign(Expr(Source{{12, 34}}, "arg"), Expr(1_i)),
+             Return(),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: cannot assign to parameter 'arg'
+12:34 note: parameters are immutable
+56:78 note: parameter 'arg' declared here)");
+}
+
+TEST_F(ResolverAssignmentValidationTest, AssignToLetMember_Fail) {
+    // struct S { i : i32 }
+    // {
+    //  let a : S;
+    //  a.i = 2i
+    // }
+    Structure("S", utils::Vector{Member("i", ty.i32())});
+    WrapInFunction(Let(Source{{98, 76}}, "a", ty("S"), Call("S")),  //
+                   Assign(MemberAccessor(Source{{12, 34}}, Expr(Source{{56, 78}}, "a"), "i"), 2_i));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot assign to value expression of type 'i32'
+56:78 note: 'let' variables are immutable
+98:76 note: let 'a' declared here)");
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Handle) {

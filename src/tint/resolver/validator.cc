@@ -2391,26 +2391,47 @@ bool Validator::Assignment(const ast::Statement* a, const type::Type* rhs_ty) co
     }
 
     // https://gpuweb.github.io/gpuweb/wgsl/#assignment-statement
-    auto const* lhs_ty = sem_.TypeOf(lhs);
-
-    if (auto* var_user = sem_.Get<sem::VariableUser>(lhs)) {
-        auto* v = var_user->Variable()->Declaration();
-        const char* err = Switch(
-            v,  //
-            [&](const ast::Parameter*) { return "cannot assign to function parameter"; },
-            [&](const ast::Let*) { return "cannot assign to 'let'"; },
-            [&](const ast::Override*) { return "cannot assign to 'override'"; });
-        if (err) {
-            AddError(err, lhs->source);
-            AddNote("'" + symbols_.NameFor(v->name->symbol) + "' is declared here:", v->source);
-            return false;
-        }
-    }
+    auto const* lhs_sem = sem_.GetVal(lhs);
+    auto const* lhs_ty = lhs_sem->Type();
 
     auto* lhs_ref = lhs_ty->As<type::Reference>();
     if (!lhs_ref) {
         // LHS is not a reference, so it has no storage.
-        AddError("cannot assign to value of type '" + sem_.TypeNameOf(lhs_ty) + "'", lhs->source);
+        AddError("cannot assign to " + sem_.Describe(lhs_sem), lhs->source);
+
+        auto* expr = lhs;
+        while (expr) {
+            expr = Switch(
+                expr,  //
+                [&](const ast::AccessorExpression* e) { return e->object; },
+                [&](const ast::IdentifierExpression* i) {
+                    if (auto user = sem_.Get<sem::VariableUser>(i)) {
+                        Switch(
+                            user->Variable()->Declaration(),  //
+                            [&](const ast::Let* v) {
+                                AddNote("'let' variables are immutable",
+                                        user->Declaration()->source);
+                                sem_.NoteDeclarationSource(v);
+                            },
+                            [&](const ast::Const* v) {
+                                AddNote("'const' variables are immutable",
+                                        user->Declaration()->source);
+                                sem_.NoteDeclarationSource(v);
+                            },
+                            [&](const ast::Override* v) {
+                                AddNote("'override' variables are immutable",
+                                        user->Declaration()->source);
+                                sem_.NoteDeclarationSource(v);
+                            },
+                            [&](const ast::Parameter* v) {
+                                AddNote("parameters are immutable", user->Declaration()->source);
+                                sem_.NoteDeclarationSource(v);
+                            });
+                    }
+                    return nullptr;
+                });
+        }
+
         return false;
     }
 

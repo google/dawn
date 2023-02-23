@@ -598,30 +598,36 @@ INSTANTIATE_TEST_SUITE_P(
 1:2 note: parameter 'PARAMETER' declared here)"},
         {Def::kParameter, Use::kUnaryOp, kPass},
 
-        {Def::kStruct, Use::kAccess, R"(5:6 error: cannot use type 'STRUCT' as access)"},
-        {Def::kStruct, Use::kAddressSpace,
-         R"(5:6 error: cannot use type 'STRUCT' as address space)"},
-        {Def::kStruct, Use::kBinaryOp, R"(5:6 error: cannot use type 'STRUCT' as value
-7:8 note: are you missing '()' for value constructor?
+        {Def::kStruct, Use::kAccess, R"(5:6 error: cannot use type 'STRUCT' as access
 1:2 note: struct 'STRUCT' declared here)"},
+        {Def::kStruct, Use::kAddressSpace,
+         R"(5:6 error: cannot use type 'STRUCT' as address space
+1:2 note: struct 'STRUCT' declared here)"},
+        {Def::kStruct, Use::kBinaryOp, R"(5:6 error: cannot use type 'STRUCT' as value
+1:2 note: struct 'STRUCT' declared here
+7:8 note: are you missing '()' for value constructor?)"},
         {Def::kStruct, Use::kBuiltinValue,
-         R"(5:6 error: cannot use type 'STRUCT' as builtin value)"},
+         R"(5:6 error: cannot use type 'STRUCT' as builtin value
+1:2 note: struct 'STRUCT' declared here)"},
         {Def::kStruct, Use::kFunctionReturnType, kPass},
         {Def::kStruct, Use::kInterpolationSampling,
-         R"(5:6 error: cannot use type 'STRUCT' as interpolation sampling)"},
+         R"(5:6 error: cannot use type 'STRUCT' as interpolation sampling
+1:2 note: struct 'STRUCT' declared here)"},
         {Def::kStruct, Use::kInterpolationType,
-         R"(5:6 error: cannot use type 'STRUCT' as interpolation type)"},
+         R"(5:6 error: cannot use type 'STRUCT' as interpolation type
+1:2 note: struct 'STRUCT' declared here)"},
         {Def::kStruct, Use::kMemberType, kPass},
-        {Def::kStruct, Use::kTexelFormat, R"(5:6 error: cannot use type 'STRUCT' as texel format)"},
+        {Def::kStruct, Use::kTexelFormat, R"(5:6 error: cannot use type 'STRUCT' as texel format
+1:2 note: struct 'STRUCT' declared here)"},
         {Def::kStruct, Use::kValueExpression,
          R"(5:6 error: cannot use type 'STRUCT' as value
-7:8 note: are you missing '()' for value constructor?
-1:2 note: struct 'STRUCT' declared here)"},
+1:2 note: struct 'STRUCT' declared here
+7:8 note: are you missing '()' for value constructor?)"},
         {Def::kStruct, Use::kVariableType, kPass},
         {Def::kStruct, Use::kUnaryOp,
          R"(5:6 error: cannot use type 'STRUCT' as value
-7:8 note: are you missing '()' for value constructor?
-1:2 note: struct 'STRUCT' declared here)"},
+1:2 note: struct 'STRUCT' declared here
+7:8 note: are you missing '()' for value constructor?)"},
 
         {Def::kTexelFormat, Use::kAccess,
          R"(5:6 error: cannot use texel format 'rgba8unorm' as access)"},

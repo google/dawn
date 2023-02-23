@@ -226,6 +226,10 @@ class SemHelper {
     /// @param node the AST node.
     void NoteDeclarationSource(const ast::Node* node) const;
 
+    /// @param expr the expression to describe
+    /// @return a string that describes @p expr. Useful for diagnostics.
+    std::string Describe(const sem::Expression* expr) const;
+
   private:
     /// Adds the given error message to the diagnostics
     void AddError(const std::string& msg, const Source& source) const;

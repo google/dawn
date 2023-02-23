@@ -242,15 +242,16 @@ TEST_F(ResolverCompoundAssignmentValidationTest, ReadOnlyBuffer) {
               "56:78 error: cannot store into a read-only type 'ref<storage, i32, read>'");
 }
 
-TEST_F(ResolverCompoundAssignmentValidationTest, LhsConstant) {
+TEST_F(ResolverCompoundAssignmentValidationTest, LhsLet) {
     // let a = 1i;
     // a += 1i;
     auto* a = Let(Source{{12, 34}}, "a", Expr(1_i));
     WrapInFunction(a, CompoundAssign(Expr(Source{{56, 78}}, "a"), 1_i, ast::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: cannot assign to 'let'
-12:34 note: 'a' is declared here:)");
+    EXPECT_EQ(r()->error(), R"(56:78 error: cannot assign to let 'a'
+56:78 note: 'let' variables are immutable
+12:34 note: let 'a' declared here)");
 }
 
 TEST_F(ResolverCompoundAssignmentValidationTest, LhsLiteral) {
@@ -258,7 +259,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, LhsLiteral) {
     WrapInFunction(CompoundAssign(Expr(Source{{56, 78}}, 1_i), 1_i, ast::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "56:78 error: cannot assign to value of type 'i32'");
+    EXPECT_EQ(r()->error(), R"(56:78 error: cannot assign to value expression of type 'i32')");
 }
 
 TEST_F(ResolverCompoundAssignmentValidationTest, LhsAtomic) {

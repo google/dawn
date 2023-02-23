@@ -487,18 +487,6 @@ TEST_F(ResolverFunctionValidationTest, FunctionConstInitWithParam) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverFunctionValidationTest, FunctionParamsConst) {
-    Func("foo", utils::Vector{Param(Sym("arg"), ty.i32())}, ty.void_(),
-         utils::Vector{
-             Assign(Expr(Source{{12, 34}}, "arg"), Expr(1_i)),
-             Return(),
-         });
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: cannot assign to function parameter\nnote: 'arg' is declared here:");
-}
-
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_ConstU32) {
     // const x = 4u;
     // const y = 8u;
