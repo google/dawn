@@ -129,7 +129,7 @@ TEST_F(SideEffectsTest, Call_Builtin_SE) {
     EXPECT_TRUE(sem->HasSideEffects());
 }
 
-namespace builtin {
+namespace builtin_tests {
 struct Case {
     const char* name;
     utils::Vector<const char*, 3> args;
@@ -368,7 +368,7 @@ INSTANTIATE_TEST_SUITE_P(
         // C("saturate", utils::Vector{"f"}, false), //
     }));
 
-}  // namespace builtin
+}  // namespace builtin_tests
 
 TEST_F(SideEffectsTest, Call_Function) {
     Func("f", utils::Empty, ty.i32(), utils::Vector{Return(1_i)});
