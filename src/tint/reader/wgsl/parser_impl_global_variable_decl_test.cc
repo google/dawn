@@ -138,7 +138,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidAttribute) {
     EXPECT_NE(e.value, nullptr);
 
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:10: expected binding expression");
+    EXPECT_EQ(p->error(), "1:2: binding expects 1 argument");
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {

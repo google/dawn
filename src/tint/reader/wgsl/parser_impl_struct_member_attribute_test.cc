@@ -104,7 +104,7 @@ TEST_F(ParserImplTest, Attribute_Size_MissingValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:6: expected size expression");
+    EXPECT_EQ(p->error(), "1:1: size expects 1 argument");
 }
 
 TEST_F(ParserImplTest, Attribute_Size_MissingInvalid) {
@@ -114,7 +114,7 @@ TEST_F(ParserImplTest, Attribute_Size_MissingInvalid) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:6: expected size expression");
+    EXPECT_EQ(p->error(), "1:6: expected expression for size");
 }
 
 TEST_F(ParserImplTest, Attribute_Align) {
@@ -209,7 +209,7 @@ TEST_F(ParserImplTest, Attribute_Align_MissingValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:7: expected align expression");
+    EXPECT_EQ(p->error(), "1:1: align expects 1 argument");
 }
 
 TEST_F(ParserImplTest, Attribute_Align_ExpressionInvalid) {

@@ -115,7 +115,7 @@ TEST_F(ParserImplTest, StructMember_InvalidAttribute) {
     ASSERT_EQ(m.value, nullptr);
 
     ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:7: expected size expression");
+    EXPECT_EQ(p->error(), "1:7: expected expression for size");
 }
 
 }  // namespace

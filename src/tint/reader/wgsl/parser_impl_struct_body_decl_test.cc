@@ -66,7 +66,7 @@ TEST_F(ParserImplTest, StructBodyDecl_InvalidAlign) {
     auto m = p->expect_struct_body_decl();
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(m.errored);
-    EXPECT_EQ(p->error(), "3:10: expected align expression");
+    EXPECT_EQ(p->error(), "3:10: expected expression for align");
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_InvalidSize) {
@@ -77,7 +77,7 @@ TEST_F(ParserImplTest, StructBodyDecl_InvalidSize) {
     auto m = p->expect_struct_body_decl();
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(m.errored);
-    EXPECT_EQ(p->error(), "3:9: expected size expression");
+    EXPECT_EQ(p->error(), "3:9: expected expression for size");
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_MissingClosingBracket) {

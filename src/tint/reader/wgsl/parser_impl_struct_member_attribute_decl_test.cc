@@ -44,7 +44,7 @@ TEST_F(ParserImplTest, AttributeDecl_InvalidAttribute) {
     EXPECT_TRUE(p->has_error()) << p->error();
     EXPECT_TRUE(attrs.errored);
     EXPECT_FALSE(attrs.matched);
-    EXPECT_EQ(p->error(), "1:7: expected size expression");
+    EXPECT_EQ(p->error(), "1:7: expected expression for size");
 }
 
 }  // namespace

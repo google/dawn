@@ -2984,84 +2984,11 @@ Expect<const ast::Attribute*> ParserImpl::expect_attribute() {
 }
 
 // attribute
-//   : ATTR 'align' PAREN_LEFT expression COMMA? PAREN_RIGHT
-//   | ATTR 'binding' PAREN_LEFT expression COMMA? PAREN_RIGHT
-//   | ATTR 'builtin' PAREN_LEFT builtin_value_name COMMA? PAREN_RIGHT
-//   | ATTR 'const'
-//   | ATTR 'diagnostic' diagnostic_control
-//   | ATTR 'group' PAREN_LEFT expression COMMA? PAREN_RIGHT
-//   | ATTR 'id' PAREN_LEFT expression COMMA? PAREN_RIGHT
-//   | ATTR 'interpolate' PAREN_LEFT interpolation_type_name COMMA? PAREN_RIGHT
-//   | ATTR 'interpolate' PAREN_LEFT interpolation_type_name COMMA
-//                                   interpolation_sample_name COMMA? PAREN_RIGHT
-//   | ATTR 'invariant'
-//   | ATTR 'location' PAREN_LEFT expression COMMA? PAREN_RIGHT
-//   | ATTR 'must_use'
-//   | ATTR 'size' PAREN_LEFT expression COMMA? PAREN_RIGHT
-//   | ATTR 'workgroup_size' PAREN_LEFT expression COMMA? PAREN_RIGHT
-//   | ATTR 'workgroup_size' PAREN_LEFT expression COMMA expression COMMA? PAREN_RIGHT
-//   | ATTR 'workgroup_size' PAREN_LEFT expression COMMA expression COMMA
-//                                      expression COMMA? PAREN_RIGHT
-//   | ATTR 'vertex'
-//   | ATTR 'fragment'
-//   | ATTR 'compute'
+//   : ATTR identifier ( PAREN_LEFT expression ( COMMA expression )? COMMA? PAREN_RIGHT )?
 Maybe<const ast::Attribute*> ParserImpl::attribute() {
-    using Result = Maybe<const ast::Attribute*>;
+    // Note, the ATTR is matched by the called `attribute_list` in this case, so it is not matched
+    // here and this has to be an attribute.
     auto& t = next();
-
-    if (!t.IsIdentifier() && !(t.Is(Token::Type::kDiagnostic))) {
-        return Failure::kNoMatch;
-    }
-
-    if (t == "align") {
-        const char* use = "align attribute";
-        return expect_paren_block(use, [&]() -> Result {
-            auto expr = expression();
-            if (expr.errored) {
-                return Failure::kErrored;
-            }
-            if (!expr.matched) {
-                return add_error(peek(), "expected align expression");
-            }
-            match(Token::Type::kComma);
-
-            return create<ast::StructMemberAlignAttribute>(t.source(), expr.value);
-        });
-    }
-
-    if (t == "binding") {
-        const char* use = "binding attribute";
-        return expect_paren_block(use, [&]() -> Result {
-            auto expr = expression();
-            if (expr.errored) {
-                return Failure::kErrored;
-            }
-            if (!expr.matched) {
-                return add_error(peek(), "expected binding expression");
-            }
-            match(Token::Type::kComma);
-
-            return create<ast::BindingAttribute>(t.source(), expr.value);
-        });
-    }
-
-    if (t == "builtin") {
-        return expect_paren_block("builtin attribute", [&]() -> Result {
-            auto builtin = expect_expression("builtin name");
-            if (builtin.errored) {
-                return Failure::kErrored;
-            }
-            match(Token::Type::kComma);
-
-            return create<ast::BuiltinAttribute>(t.source(), builtin.value);
-        });
-    }
-
-    if (t == "compute") {
-        return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kCompute);
-    }
-
-    // Note, `const` is not valid in a WGSL source file, it's internal only
 
     if (t.Is(Token::Type::kDiagnostic)) {
         auto control = expect_diagnostic_control();
@@ -3071,152 +2998,173 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
         return create<ast::DiagnosticAttribute>(t.source(), std::move(control.value));
     }
 
+    if (!t.IsIdentifier()) {
+        return Failure::kNoMatch;
+    }
+
+    utils::Vector<const ast::Expression*, 2> exprs;
+    auto parse = [&](uint32_t min, uint32_t max) -> Maybe<bool> {
+        // Handle no parameter items which should have no parens
+        if (min == 0) {
+            auto& p = peek();
+            if (p.Is(Token::Type::kParenLeft)) {
+                return add_error(p.source(), t.to_str() + " attribute doesn't take parenthesis");
+            }
+            return true;
+        }
+
+        auto res = expect_paren_block(t.to_str() + " attribute", [&]() -> Expect<bool> {
+            while (continue_parsing()) {
+                if (peek().Is(Token::Type::kParenRight)) {
+                    break;
+                }
+
+                auto expr = expect_expression(t.to_str());
+                if (expr.errored) {
+                    return Failure::kErrored;
+                }
+                exprs.Push(expr.value);
+
+                if (!match(Token::Type::kComma)) {
+                    break;
+                }
+            }
+            return true;
+        });
+        if (res.errored) {
+            return Failure::kErrored;
+        }
+
+        if (exprs.IsEmpty() || exprs.Length() < min) {
+            return add_error(t.source(),
+                             t.to_str() + " expects" + (min != max ? " at least " : " ") +
+                                 std::to_string(min) + " argument" + (min > 1 ? "s" : ""));
+        }
+
+        if (exprs.Length() > max) {
+            return add_error(t.source(),
+                             t.to_str() + " expects" + (min != max ? " at most " : " ") +
+                                 std::to_string(max) + " argument" + (max > 1 ? "s" : "") +
+                                 ", got " + std::to_string(exprs.Length()));
+        }
+        return true;
+    };
+
+    if (t == "align") {
+        auto res = parse(1, 1);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
+        return create<ast::StructMemberAlignAttribute>(t.source(), exprs[0]);
+    }
+
+    if (t == "binding") {
+        auto res = parse(1, 1);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
+        return create<ast::BindingAttribute>(t.source(), exprs[0]);
+    }
+
+    if (t == "builtin") {
+        auto res = parse(1, 1);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
+        return create<ast::BuiltinAttribute>(t.source(), exprs[0]);
+    }
+
+    if (t == "compute") {
+        auto res = parse(0, 0);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
+        return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kCompute);
+    }
+
+    // Note, `const` is not valid in a WGSL source file, it's internal only
+
     if (t == "fragment") {
+        auto res = parse(0, 0);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
         return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kFragment);
     }
 
     if (t == "group") {
-        const char* use = "group attribute";
-        return expect_paren_block(use, [&]() -> Result {
-            auto expr = expression();
-            if (expr.errored) {
-                return Failure::kErrored;
-            }
-            if (!expr.matched) {
-                return add_error(peek(), "expected group expression");
-            }
-            match(Token::Type::kComma);
-
-            return create<ast::GroupAttribute>(t.source(), expr.value);
-        });
+        auto res = parse(1, 1);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
+        return create<ast::GroupAttribute>(t.source(), exprs[0]);
     }
 
     if (t == "id") {
-        const char* use = "id attribute";
-        return expect_paren_block(use, [&]() -> Result {
-            auto expr = expression();
-            if (expr.errored) {
-                return Failure::kErrored;
-            }
-            if (!expr.matched) {
-                return add_error(peek(), "expected id expression");
-            }
-            match(Token::Type::kComma);
-
-            return create<ast::IdAttribute>(t.source(), expr.value);
-        });
+        auto res = parse(1, 1);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
+        return create<ast::IdAttribute>(t.source(), exprs[0]);
     }
 
     if (t == "interpolate") {
-        return expect_paren_block("interpolate attribute", [&]() -> Result {
-            auto type = expect_expression("interpolation type");
-            if (type.errored) {
-                return Failure::kErrored;
-            }
-
-            const ast::Expression* sampling = nullptr;
-            if (match(Token::Type::kComma)) {
-                if (!peek_is(Token::Type::kParenRight)) {
-                    auto sample = expect_expression("interpolation sampling");
-                    if (sample.errored) {
-                        return Failure::kErrored;
-                    }
-
-                    sampling = sample.value;
-                    match(Token::Type::kComma);
-                }
-            }
-
-            return create<ast::InterpolateAttribute>(t.source(), type.value, sampling);
-        });
+        auto res = parse(1, 2);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
+        return create<ast::InterpolateAttribute>(t.source(), exprs[0],
+                                                 exprs.Length() == 2 ? exprs[1] : nullptr);
     }
 
     if (t == "invariant") {
+        auto res = parse(0, 0);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
         return create<ast::InvariantAttribute>(t.source());
     }
 
     if (t == "location") {
-        const char* use = "location attribute";
-        return expect_paren_block(use, [&]() -> Result {
-            auto expr = expression();
-            if (expr.errored) {
-                return Failure::kErrored;
-            }
-            if (!expr.matched) {
-                return add_error(peek(), "expected location expression");
-            }
-            match(Token::Type::kComma);
-
-            return builder_.Location(t.source(), expr.value);
-        });
+        auto res = parse(1, 1);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
+        return builder_.Location(t.source(), exprs[0]);
     }
 
     if (t == "must_use") {
+        auto res = parse(0, 0);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
         return create<ast::MustUseAttribute>(t.source());
     }
 
     if (t == "size") {
-        const char* use = "size attribute";
-        return expect_paren_block(use, [&]() -> Result {
-            auto expr = expression();
-            if (expr.errored) {
-                return Failure::kErrored;
-            }
-            if (!expr.matched) {
-                return add_error(peek(), "expected size expression");
-            }
-            match(Token::Type::kComma);
-
-            return builder_.MemberSize(t.source(), expr.value);
-        });
+        auto res = parse(1, 1);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
+        return builder_.MemberSize(t.source(), exprs[0]);
     }
 
     if (t == "vertex") {
+        auto res = parse(0, 0);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
         return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kVertex);
     }
 
     if (t == "workgroup_size") {
-        return expect_paren_block("workgroup_size attribute", [&]() -> Result {
-            const ast::Expression* x = nullptr;
-            const ast::Expression* y = nullptr;
-            const ast::Expression* z = nullptr;
-
-            auto expr = expression();
-            if (expr.errored) {
-                return Failure::kErrored;
-            } else if (!expr.matched) {
-                return add_error(peek(), "expected workgroup_size x parameter");
-            }
-            x = std::move(expr.value);
-
-            if (match(Token::Type::kComma)) {
-                if (!peek_is(Token::Type::kParenRight)) {
-                    expr = expression();
-                    if (expr.errored) {
-                        return Failure::kErrored;
-                    } else if (!expr.matched) {
-                        return add_error(peek(), "expected workgroup_size y parameter");
-                    }
-                    y = std::move(expr.value);
-
-                    if (match(Token::Type::kComma)) {
-                        if (!peek_is(Token::Type::kParenRight)) {
-                            expr = expression();
-                            if (expr.errored) {
-                                return Failure::kErrored;
-                            } else if (!expr.matched) {
-                                return add_error(peek(), "expected workgroup_size z parameter");
-                            }
-                            z = std::move(expr.value);
-
-                            match(Token::Type::kComma);
-                        }
-                    }
-                }
-            }
-
-            return create<ast::WorkgroupAttribute>(t.source(), x, y, z);
-        });
+        auto res = parse(1, 3);
+        if (res.errored) {
+            return Failure::kErrored;
+        }
+        return create<ast::WorkgroupAttribute>(t.source(), exprs[0],
+                                               exprs.Length() > 1 ? exprs[1] : nullptr,
+                                               exprs.Length() > 2 ? exprs[2] : nullptr);
     }
     return Failure::kNoMatch;
 }
