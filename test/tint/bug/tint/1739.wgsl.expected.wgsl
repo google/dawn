@@ -35,11 +35,12 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<i32>, params : ExternalTextureParams) -> vec4<f32> {
+  let coord1 = (coord >> vec2<u32>(1));
   var color : vec3<f32>;
   if ((params.numPlanes == 1)) {
     color = textureLoad(plane0, coord, 0).rgb;
   } else {
-    color = (vec4<f32>(textureLoad(plane0, coord, 0).r, textureLoad(plane1, coord, 0).rg, 1) * params.yuvToRgbConversionMatrix);
+    color = (vec4<f32>(textureLoad(plane0, coord, 0).r, textureLoad(plane1, coord1, 0).rg, 1) * params.yuvToRgbConversionMatrix);
   }
   if ((params.doYuvToRgbConversionOnly == 0)) {
     color = gammaCorrection(color, params.gammaDecodeParams);

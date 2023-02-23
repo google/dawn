@@ -45,11 +45,12 @@ float3 gammaCorrection(float3 v, GammaTransferParams params) {
 }
 
 float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<float, access::sample> plane1, uint2 coord, ExternalTextureParams params) {
+  uint2 const coord1 = (coord >> uint2(1u));
   float3 color = 0.0f;
   if ((params.numPlanes == 1u)) {
     color = float4(plane0.read(uint2(coord), 0)).rgb;
   } else {
-    color = (float4(plane0.read(uint2(coord), 0)[0], float4(plane1.read(uint2(coord), 0)).rg, 1.0f) * params.yuvToRgbConversionMatrix);
+    color = (float4(plane0.read(uint2(coord), 0)[0], float4(plane1.read(uint2(coord1), 0)).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
     color = gammaCorrection(color, params.gammaDecodeParams);
