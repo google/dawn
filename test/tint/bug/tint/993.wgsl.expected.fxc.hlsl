@@ -6,15 +6,15 @@ RWByteAddressBuffer result : register(u1, space1);
 
 RWByteAddressBuffer s : register(u0, space0);
 
-int tint_atomicLoad(RWByteAddressBuffer buffer, uint offset) {
+int satomicLoad(uint offset) {
   int value = 0;
-  buffer.InterlockedOr(offset, 0, value);
+  s.InterlockedOr(offset, 0, value);
   return value;
 }
 
 
 int runTest() {
-  return tint_atomicLoad(s, (4u * (0u + uint(constants[0].x))));
+  return satomicLoad((4u * (0u + uint(constants[0].x))));
 }
 
 [numthreads(1, 1, 1)]

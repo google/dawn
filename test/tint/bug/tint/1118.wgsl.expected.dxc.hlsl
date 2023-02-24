@@ -104,8 +104,8 @@ main_out main_inner(float fClipDistance3_param, float fClipDistance4_param) {
   fClipDistance3 = fClipDistance3_param;
   fClipDistance4 = fClipDistance4_param;
   main_1();
-  const main_out tint_symbol_8 = {glFragColor};
-  return tint_symbol_8;
+  const main_out tint_symbol_3 = {glFragColor};
+  return tint_symbol_3;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {

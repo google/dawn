@@ -1,15 +1,15 @@
 RWByteAddressBuffer sb_rw : register(u0, space0);
 
-int tint_atomicAdd(RWByteAddressBuffer buffer, uint offset, int value) {
+int sb_rwatomicAdd(uint offset, int value) {
   int original_value = 0;
-  buffer.InterlockedAdd(offset, value, original_value);
+  sb_rw.InterlockedAdd(offset, value, original_value);
   return original_value;
 }
 
 
 void atomicAdd_d32fe4() {
   int res = 0;
-  const int x_9 = tint_atomicAdd(sb_rw, 0u, 1);
+  const int x_9 = sb_rwatomicAdd(0u, 1);
   res = x_9;
   return;
 }

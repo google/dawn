@@ -209,35 +209,35 @@ Mat4x3_ x_Mat4x3_1(Mat4x4_ m20) {
   return x_e12;
 }
 
-Mat4x3_ tint_symbol_3(uint4 buffer[96], uint offset) {
+Mat4x3_ global2_load(uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
   const uint scalar_offset_1 = ((offset + 16u)) / 4;
   const uint scalar_offset_2 = ((offset + 32u)) / 4;
-  const Mat4x3_ tint_symbol_9 = {asfloat(buffer[scalar_offset / 4]), asfloat(buffer[scalar_offset_1 / 4]), asfloat(buffer[scalar_offset_2 / 4])};
-  return tint_symbol_9;
+  const Mat4x3_ tint_symbol_3 = {asfloat(global2[scalar_offset / 4]), asfloat(global2[scalar_offset_1 / 4]), asfloat(global2[scalar_offset_2 / 4])};
+  return tint_symbol_3;
 }
 
-Mat4x4_ tint_symbol_5(uint4 buffer[4], uint offset) {
+Mat4x4_ global_load(uint offset) {
   const uint scalar_offset_3 = ((offset + 0u)) / 4;
   const uint scalar_offset_4 = ((offset + 16u)) / 4;
   const uint scalar_offset_5 = ((offset + 32u)) / 4;
   const uint scalar_offset_6 = ((offset + 48u)) / 4;
-  const Mat4x4_ tint_symbol_10 = {asfloat(buffer[scalar_offset_3 / 4]), asfloat(buffer[scalar_offset_4 / 4]), asfloat(buffer[scalar_offset_5 / 4]), asfloat(buffer[scalar_offset_6 / 4])};
-  return tint_symbol_10;
+  const Mat4x4_ tint_symbol_4 = {asfloat(global[scalar_offset_3 / 4]), asfloat(global[scalar_offset_4 / 4]), asfloat(global[scalar_offset_5 / 4]), asfloat(global[scalar_offset_6 / 4])};
+  return tint_symbol_4;
 }
 
-Mat4x2_ tint_symbol_8(uint4 buffer[3], uint offset) {
+Mat4x2_ global1_load_1(uint offset) {
   const uint scalar_offset_7 = ((offset + 0u)) / 4;
   const uint scalar_offset_8 = ((offset + 16u)) / 4;
-  const Mat4x2_ tint_symbol_11 = {asfloat(buffer[scalar_offset_7 / 4]), asfloat(buffer[scalar_offset_8 / 4])};
-  return tint_symbol_11;
+  const Mat4x2_ tint_symbol_5 = {asfloat(global1[scalar_offset_7 / 4]), asfloat(global1[scalar_offset_8 / 4])};
+  return tint_symbol_5;
 }
 
 void main1() {
   Mat4x3_ t_PosMtx = (Mat4x3_)0;
   float2 t_TexSpaceCoord = float2(0.0f, 0.0f);
   const float x_e15 = a_PosMtxIdx1;
-  const Mat4x3_ x_e18 = tint_symbol_3(global2, (48u * uint(int(x_e15))));
+  const Mat4x3_ x_e18 = global2_load((48u * uint(int(x_e15))));
   t_PosMtx = x_e18;
   const Mat4x3_ x_e23 = t_PosMtx;
   const Mat4x4_ x_e24 = x_Mat4x4_1(x_e23);
@@ -246,7 +246,7 @@ void main1() {
   const Mat4x4_ x_e30 = x_Mat4x4_1(x_e29);
   const float3 x_e31 = a_Position1;
   const float4 x_e34 = Mul(x_e30, float4(x_e31, 1.0f));
-  const Mat4x4_ x_e35 = tint_symbol_5(global, 0u);
+  const Mat4x4_ x_e35 = global_load(0u);
   const Mat4x3_ x_e37 = t_PosMtx;
   const Mat4x4_ x_e38 = x_Mat4x4_1(x_e37);
   const float3 x_e39 = a_Position1;
@@ -262,7 +262,7 @@ void main1() {
   if ((x_e52.x == 2.0f)) {
     {
       const float3 x_e59 = a_Normal1;
-      const Mat4x2_ x_e64 = tint_symbol_8(global1, 0u);
+      const Mat4x2_ x_e64 = global1_load_1(0u);
       const float3 x_e65 = a_Normal1;
       const float2 x_e68 = Mul2(x_e64, float4(x_e65, 1.0f));
       v_TexCoord = x_e68.xy;
@@ -271,7 +271,7 @@ void main1() {
   } else {
     {
       const float2 x_e73 = a_UV1;
-      const Mat4x2_ x_e79 = tint_symbol_8(global1, 0u);
+      const Mat4x2_ x_e79 = global1_load_1(0u);
       const float2 x_e80 = a_UV1;
       const float2 x_e84 = Mul2(x_e79, float4(x_e80, 1.0f, 1.0f));
       v_TexCoord = x_e84.xy;
@@ -303,8 +303,8 @@ VertexOutput main_inner(float3 a_Position, float2 a_UV, float4 a_Color, float3 a
   const float4 x_e11 = v_Color;
   const float2 x_e13 = v_TexCoord;
   const float4 x_e15 = gl_Position;
-  const VertexOutput tint_symbol_12 = {x_e11, x_e13, x_e15};
-  return tint_symbol_12;
+  const VertexOutput tint_symbol_6 = {x_e11, x_e13, x_e15};
+  return tint_symbol_6;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {

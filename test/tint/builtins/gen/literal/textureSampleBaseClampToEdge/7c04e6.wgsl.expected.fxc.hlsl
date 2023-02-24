@@ -58,14 +58,14 @@ float4 textureSampleExternal(Texture2D<float4> plane0, Texture2D<float4> plane1,
   return float4(color, 1.0f);
 }
 
-float3x4 tint_symbol_3(uint4 buffer[13], uint offset) {
+float3x4 ext_tex_params_load_2(uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
   const uint scalar_offset_1 = ((offset + 16u)) / 4;
   const uint scalar_offset_2 = ((offset + 32u)) / 4;
-  return float3x4(asfloat(buffer[scalar_offset / 4]), asfloat(buffer[scalar_offset_1 / 4]), asfloat(buffer[scalar_offset_2 / 4]));
+  return float3x4(asfloat(ext_tex_params[scalar_offset / 4]), asfloat(ext_tex_params[scalar_offset_1 / 4]), asfloat(ext_tex_params[scalar_offset_2 / 4]));
 }
 
-GammaTransferParams tint_symbol_5(uint4 buffer[13], uint offset) {
+GammaTransferParams ext_tex_params_load_4(uint offset) {
   const uint scalar_offset_3 = ((offset + 0u)) / 4;
   const uint scalar_offset_4 = ((offset + 4u)) / 4;
   const uint scalar_offset_5 = ((offset + 8u)) / 4;
@@ -74,36 +74,36 @@ GammaTransferParams tint_symbol_5(uint4 buffer[13], uint offset) {
   const uint scalar_offset_8 = ((offset + 20u)) / 4;
   const uint scalar_offset_9 = ((offset + 24u)) / 4;
   const uint scalar_offset_10 = ((offset + 28u)) / 4;
-  const GammaTransferParams tint_symbol_11 = {asfloat(buffer[scalar_offset_3 / 4][scalar_offset_3 % 4]), asfloat(buffer[scalar_offset_4 / 4][scalar_offset_4 % 4]), asfloat(buffer[scalar_offset_5 / 4][scalar_offset_5 % 4]), asfloat(buffer[scalar_offset_6 / 4][scalar_offset_6 % 4]), asfloat(buffer[scalar_offset_7 / 4][scalar_offset_7 % 4]), asfloat(buffer[scalar_offset_8 / 4][scalar_offset_8 % 4]), asfloat(buffer[scalar_offset_9 / 4][scalar_offset_9 % 4]), buffer[scalar_offset_10 / 4][scalar_offset_10 % 4]};
-  return tint_symbol_11;
+  const GammaTransferParams tint_symbol_1 = {asfloat(ext_tex_params[scalar_offset_3 / 4][scalar_offset_3 % 4]), asfloat(ext_tex_params[scalar_offset_4 / 4][scalar_offset_4 % 4]), asfloat(ext_tex_params[scalar_offset_5 / 4][scalar_offset_5 % 4]), asfloat(ext_tex_params[scalar_offset_6 / 4][scalar_offset_6 % 4]), asfloat(ext_tex_params[scalar_offset_7 / 4][scalar_offset_7 % 4]), asfloat(ext_tex_params[scalar_offset_8 / 4][scalar_offset_8 % 4]), asfloat(ext_tex_params[scalar_offset_9 / 4][scalar_offset_9 % 4]), ext_tex_params[scalar_offset_10 / 4][scalar_offset_10 % 4]};
+  return tint_symbol_1;
 }
 
-float3x3 tint_symbol_7(uint4 buffer[13], uint offset) {
+float3x3 ext_tex_params_load_6(uint offset) {
   const uint scalar_offset_11 = ((offset + 0u)) / 4;
   const uint scalar_offset_12 = ((offset + 16u)) / 4;
   const uint scalar_offset_13 = ((offset + 32u)) / 4;
-  return float3x3(asfloat(buffer[scalar_offset_11 / 4].xyz), asfloat(buffer[scalar_offset_12 / 4].xyz), asfloat(buffer[scalar_offset_13 / 4].xyz));
+  return float3x3(asfloat(ext_tex_params[scalar_offset_11 / 4].xyz), asfloat(ext_tex_params[scalar_offset_12 / 4].xyz), asfloat(ext_tex_params[scalar_offset_13 / 4].xyz));
 }
 
-float3x2 tint_symbol_9(uint4 buffer[13], uint offset) {
+float3x2 ext_tex_params_load_8(uint offset) {
   const uint scalar_offset_14 = ((offset + 0u)) / 4;
-  uint4 ubo_load = buffer[scalar_offset_14 / 4];
+  uint4 ubo_load = ext_tex_params[scalar_offset_14 / 4];
   const uint scalar_offset_15 = ((offset + 8u)) / 4;
-  uint4 ubo_load_1 = buffer[scalar_offset_15 / 4];
+  uint4 ubo_load_1 = ext_tex_params[scalar_offset_15 / 4];
   const uint scalar_offset_16 = ((offset + 16u)) / 4;
-  uint4 ubo_load_2 = buffer[scalar_offset_16 / 4];
+  uint4 ubo_load_2 = ext_tex_params[scalar_offset_16 / 4];
   return float3x2(asfloat(((scalar_offset_14 & 2) ? ubo_load.zw : ubo_load.xy)), asfloat(((scalar_offset_15 & 2) ? ubo_load_1.zw : ubo_load_1.xy)), asfloat(((scalar_offset_16 & 2) ? ubo_load_2.zw : ubo_load_2.xy)));
 }
 
-ExternalTextureParams tint_symbol_1(uint4 buffer[13], uint offset) {
+ExternalTextureParams ext_tex_params_load(uint offset) {
   const uint scalar_offset_17 = ((offset + 0u)) / 4;
   const uint scalar_offset_18 = ((offset + 4u)) / 4;
-  const ExternalTextureParams tint_symbol_12 = {buffer[scalar_offset_17 / 4][scalar_offset_17 % 4], buffer[scalar_offset_18 / 4][scalar_offset_18 % 4], tint_symbol_3(buffer, (offset + 16u)), tint_symbol_5(buffer, (offset + 64u)), tint_symbol_5(buffer, (offset + 96u)), tint_symbol_7(buffer, (offset + 128u)), tint_symbol_9(buffer, (offset + 176u))};
-  return tint_symbol_12;
+  const ExternalTextureParams tint_symbol_2 = {ext_tex_params[scalar_offset_17 / 4][scalar_offset_17 % 4], ext_tex_params[scalar_offset_18 / 4][scalar_offset_18 % 4], ext_tex_params_load_2((offset + 16u)), ext_tex_params_load_4((offset + 64u)), ext_tex_params_load_4((offset + 96u)), ext_tex_params_load_6((offset + 128u)), ext_tex_params_load_8((offset + 176u))};
+  return tint_symbol_2;
 }
 
 void textureSampleBaseClampToEdge_7c04e6() {
-  float4 res = textureSampleExternal(arg_0, ext_tex_plane_1, arg_1, (1.0f).xx, tint_symbol_1(ext_tex_params, 0u));
+  float4 res = textureSampleExternal(arg_0, ext_tex_plane_1, arg_1, (1.0f).xx, ext_tex_params_load(0u));
 }
 
 struct tint_symbol {

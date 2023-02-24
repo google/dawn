@@ -152,8 +152,8 @@ main_out main_inner(bool sk_Clockwise_param, float4 vcolor_S0_param) {
   sk_Clockwise = sk_Clockwise_param;
   vcolor_S0 = vcolor_S0_param;
   main_1();
-  const main_out tint_symbol_6 = {sk_FragColor};
-  return tint_symbol_6;
+  const main_out tint_symbol_4 = {sk_FragColor};
+  return tint_symbol_4;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {

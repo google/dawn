@@ -2,17 +2,17 @@ cbuffer cbuffer_u : register(b0, space0) {
   uint4 u[1];
 };
 
-matrix<float16_t, 2, 2> tint_symbol(uint4 buffer[1], uint offset) {
+matrix<float16_t, 2, 2> u_load(uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
-  uint ubo_load = buffer[scalar_offset / 4][scalar_offset % 4];
+  uint ubo_load = u[scalar_offset / 4][scalar_offset % 4];
   const uint scalar_offset_1 = ((offset + 4u)) / 4;
-  uint ubo_load_1 = buffer[scalar_offset_1 / 4][scalar_offset_1 % 4];
+  uint ubo_load_1 = u[scalar_offset_1 / 4][scalar_offset_1 % 4];
   return matrix<float16_t, 2, 2>(vector<float16_t, 2>(float16_t(f16tof32(ubo_load & 0xFFFF)), float16_t(f16tof32(ubo_load >> 16))), vector<float16_t, 2>(float16_t(f16tof32(ubo_load_1 & 0xFFFF)), float16_t(f16tof32(ubo_load_1 >> 16))));
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  const matrix<float16_t, 2, 2> t = transpose(tint_symbol(u, 0u));
+  const matrix<float16_t, 2, 2> t = transpose(u_load(0u));
   uint ubo_load_2 = u[0].y;
   const float16_t l = length(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_2 & 0xFFFF)), float16_t(f16tof32(ubo_load_2 >> 16))));
   uint ubo_load_3 = u[0].x;

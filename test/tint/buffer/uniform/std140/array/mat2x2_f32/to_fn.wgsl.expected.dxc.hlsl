@@ -14,20 +14,20 @@ void c(float2 v) {
 void d(float f_1) {
 }
 
-float2x2 tint_symbol_1(uint4 buffer[4], uint offset) {
+float2x2 u_load_1(uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
-  uint4 ubo_load = buffer[scalar_offset / 4];
+  uint4 ubo_load = u[scalar_offset / 4];
   const uint scalar_offset_1 = ((offset + 8u)) / 4;
-  uint4 ubo_load_1 = buffer[scalar_offset_1 / 4];
+  uint4 ubo_load_1 = u[scalar_offset_1 / 4];
   return float2x2(asfloat(((scalar_offset & 2) ? ubo_load.zw : ubo_load.xy)), asfloat(((scalar_offset_1 & 2) ? ubo_load_1.zw : ubo_load_1.xy)));
 }
 
-typedef float2x2 tint_symbol_ret[4];
-tint_symbol_ret tint_symbol(uint4 buffer[4], uint offset) {
+typedef float2x2 u_load_ret[4];
+u_load_ret u_load(uint offset) {
   float2x2 arr[4] = (float2x2[4])0;
   {
     for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = tint_symbol_1(buffer, (offset + (i * 16u)));
+      arr[i] = u_load_1((offset + (i * 16u)));
     }
   }
   return arr;
@@ -35,8 +35,8 @@ tint_symbol_ret tint_symbol(uint4 buffer[4], uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  a(tint_symbol(u, 0u));
-  b(tint_symbol_1(u, 16u));
+  a(u_load(0u));
+  b(u_load_1(16u));
   c(asfloat(u[1].xy).yx);
   d(asfloat(u[1].xy).yx.x);
   return;

@@ -5,16 +5,16 @@ struct atomic_compare_exchange_weak_ret_type {
   bool exchanged;
 };
 
-atomic_compare_exchange_weak_ret_type tint_atomicCompareExchangeWeak(RWByteAddressBuffer buffer, uint offset, int compare, int value) {
+atomic_compare_exchange_weak_ret_type sb_rwatomicCompareExchangeWeak(uint offset, int compare, int value) {
   atomic_compare_exchange_weak_ret_type result=(atomic_compare_exchange_weak_ret_type)0;
-  buffer.InterlockedCompareExchange(offset, compare, value, result.old_value);
+  sb_rw.InterlockedCompareExchange(offset, compare, value, result.old_value);
   result.exchanged = result.old_value == compare;
   return result;
 }
 
 
 void atomicCompareExchangeWeak_1bd40a() {
-  atomic_compare_exchange_weak_ret_type res = tint_atomicCompareExchangeWeak(sb_rw, 0u, 1, 1);
+  atomic_compare_exchange_weak_ret_type res = sb_rwatomicCompareExchangeWeak(0u, 1, 1);
 }
 
 void fragment_main() {

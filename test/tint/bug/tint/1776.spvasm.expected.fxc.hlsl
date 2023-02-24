@@ -5,13 +5,13 @@ struct S {
 
 RWByteAddressBuffer sb : register(u0, space0);
 
-S tint_symbol(RWByteAddressBuffer buffer, uint offset) {
-  const S tint_symbol_3 = {asfloat(buffer.Load4((offset + 0u))), asint(buffer.Load((offset + 16u)))};
-  return tint_symbol_3;
+S sb_load(uint offset) {
+  const S tint_symbol = {asfloat(sb.Load4((offset + 0u))), asint(sb.Load((offset + 16u)))};
+  return tint_symbol;
 }
 
 void main_1() {
-  const S x_18 = tint_symbol(sb, 32u);
+  const S x_18 = sb_load(32u);
   return;
 }
 

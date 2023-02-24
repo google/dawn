@@ -16,12 +16,12 @@ struct tint_symbol_1 {
   float4 v : SV_Position;
 };
 
-void tint_symbol_2(RWByteAddressBuffer buffer, uint offset, S value) {
-  buffer.Store((offset + 0u), asuint(value.f));
-  buffer.Store((offset + 4u), asuint(value.u));
-  buffer.Store4((offset + 128u), asuint(value.v));
-  buffer.Store<float16_t>((offset + 160u), value.x);
-  buffer.Store<vector<float16_t, 3> >((offset + 192u), value.y);
+void output_store(uint offset, S value) {
+  output.Store((offset + 0u), asuint(value.f));
+  output.Store((offset + 4u), asuint(value.u));
+  output.Store4((offset + 128u), asuint(value.v));
+  output.Store<float16_t>((offset + 160u), value.x);
+  output.Store<vector<float16_t, 3> >((offset + 192u), value.y);
 }
 
 void frag_main_inner(S input) {
@@ -30,11 +30,11 @@ void frag_main_inner(S input) {
   const float4 v = input.v;
   const float16_t x = input.x;
   const vector<float16_t, 3> y = input.y;
-  tint_symbol_2(output, 0u, input);
+  output_store(0u, input);
 }
 
 void frag_main(tint_symbol_1 tint_symbol) {
-  const S tint_symbol_8 = {tint_symbol.f, tint_symbol.u, tint_symbol.v, tint_symbol.x, tint_symbol.y};
-  frag_main_inner(tint_symbol_8);
+  const S tint_symbol_2 = {tint_symbol.f, tint_symbol.u, tint_symbol.v, tint_symbol.x, tint_symbol.y};
+  frag_main_inner(tint_symbol_2);
   return;
 }

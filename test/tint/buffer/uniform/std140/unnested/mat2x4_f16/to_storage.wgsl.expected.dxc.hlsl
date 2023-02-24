@@ -3,19 +3,19 @@ cbuffer cbuffer_u : register(b0, space0) {
 };
 RWByteAddressBuffer s : register(u1, space0);
 
-void tint_symbol(RWByteAddressBuffer buffer, uint offset, matrix<float16_t, 2, 4> value) {
-  buffer.Store<vector<float16_t, 4> >((offset + 0u), value[0u]);
-  buffer.Store<vector<float16_t, 4> >((offset + 8u), value[1u]);
+void s_store(uint offset, matrix<float16_t, 2, 4> value) {
+  s.Store<vector<float16_t, 4> >((offset + 0u), value[0u]);
+  s.Store<vector<float16_t, 4> >((offset + 8u), value[1u]);
 }
 
-matrix<float16_t, 2, 4> tint_symbol_2(uint4 buffer[1], uint offset) {
+matrix<float16_t, 2, 4> u_load(uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
-  uint4 ubo_load_1 = buffer[scalar_offset / 4];
+  uint4 ubo_load_1 = u[scalar_offset / 4];
   uint2 ubo_load = ((scalar_offset & 2) ? ubo_load_1.zw : ubo_load_1.xy);
   vector<float16_t, 2> ubo_load_xz = vector<float16_t, 2>(f16tof32(ubo_load & 0xFFFF));
   vector<float16_t, 2> ubo_load_yw = vector<float16_t, 2>(f16tof32(ubo_load >> 16));
   const uint scalar_offset_1 = ((offset + 8u)) / 4;
-  uint4 ubo_load_3 = buffer[scalar_offset_1 / 4];
+  uint4 ubo_load_3 = u[scalar_offset_1 / 4];
   uint2 ubo_load_2 = ((scalar_offset_1 & 2) ? ubo_load_3.zw : ubo_load_3.xy);
   vector<float16_t, 2> ubo_load_2_xz = vector<float16_t, 2>(f16tof32(ubo_load_2 & 0xFFFF));
   vector<float16_t, 2> ubo_load_2_yw = vector<float16_t, 2>(f16tof32(ubo_load_2 >> 16));
@@ -24,7 +24,7 @@ matrix<float16_t, 2, 4> tint_symbol_2(uint4 buffer[1], uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  tint_symbol(s, 0u, tint_symbol_2(u, 0u));
+  s_store(0u, u_load(0u));
   uint2 ubo_load_4 = u[0].xy;
   vector<float16_t, 2> ubo_load_4_xz = vector<float16_t, 2>(f16tof32(ubo_load_4 & 0xFFFF));
   vector<float16_t, 2> ubo_load_4_yw = vector<float16_t, 2>(f16tof32(ubo_load_4 >> 16));

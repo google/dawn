@@ -419,8 +419,8 @@ main_out main_inner(float2 vMainuv_param, float4 v_output1_param, bool gl_FrontF
   v_uv = v_uv_param;
   v_output2 = v_output2_param;
   main_1();
-  const main_out tint_symbol_8 = {glFragColor};
-  return tint_symbol_8;
+  const main_out tint_symbol_3 = {glFragColor};
+  return tint_symbol_3;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {

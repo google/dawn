@@ -11,9 +11,9 @@ struct tint_symbol_3 {
   int value : SV_Target0;
 };
 
-int tint_atomicAdd(RWByteAddressBuffer buffer, uint offset, int value) {
+int aatomicAdd(uint offset, int value) {
   int original_value = 0;
-  buffer.InterlockedAdd(offset, value, original_value);
+  a.InterlockedAdd(offset, value, original_value);
   return original_value;
 }
 
@@ -35,7 +35,7 @@ int foo_inner(float tint_symbol, float2 coord) {
       {
         int tint_symbol_4 = 0;
         if (!(tint_discarded)) {
-          tint_symbol_4 = tint_atomicAdd(a, 0u, 1);
+          tint_symbol_4 = aatomicAdd(0u, 1);
         }
         i = tint_symbol_4;
       }

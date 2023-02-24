@@ -9,27 +9,27 @@ cbuffer cbuffer_u : register(b0, space0) {
 };
 static S p[4] = (S[4])0;
 
-matrix<float16_t, 2, 2> tint_symbol_3(uint4 buffer[32], uint offset) {
+matrix<float16_t, 2, 2> u_load_3(uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
-  uint ubo_load = buffer[scalar_offset / 4][scalar_offset % 4];
+  uint ubo_load = u[scalar_offset / 4][scalar_offset % 4];
   const uint scalar_offset_1 = ((offset + 4u)) / 4;
-  uint ubo_load_1 = buffer[scalar_offset_1 / 4][scalar_offset_1 % 4];
+  uint ubo_load_1 = u[scalar_offset_1 / 4][scalar_offset_1 % 4];
   return matrix<float16_t, 2, 2>(vector<float16_t, 2>(float16_t(f16tof32(ubo_load & 0xFFFF)), float16_t(f16tof32(ubo_load >> 16))), vector<float16_t, 2>(float16_t(f16tof32(ubo_load_1 & 0xFFFF)), float16_t(f16tof32(ubo_load_1 >> 16))));
 }
 
-S tint_symbol_1(uint4 buffer[32], uint offset) {
+S u_load_1(uint offset) {
   const uint scalar_offset_2 = ((offset + 0u)) / 4;
   const uint scalar_offset_3 = ((offset + 64u)) / 4;
-  const S tint_symbol_5 = {asint(buffer[scalar_offset_2 / 4][scalar_offset_2 % 4]), tint_symbol_3(buffer, (offset + 4u)), asint(buffer[scalar_offset_3 / 4][scalar_offset_3 % 4])};
-  return tint_symbol_5;
+  const S tint_symbol = {asint(u[scalar_offset_2 / 4][scalar_offset_2 % 4]), u_load_3((offset + 4u)), asint(u[scalar_offset_3 / 4][scalar_offset_3 % 4])};
+  return tint_symbol;
 }
 
-typedef S tint_symbol_ret[4];
-tint_symbol_ret tint_symbol(uint4 buffer[32], uint offset) {
+typedef S u_load_ret[4];
+u_load_ret u_load(uint offset) {
   S arr[4] = (S[4])0;
   {
     for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = tint_symbol_1(buffer, (offset + (i * 128u)));
+      arr[i] = u_load_1((offset + (i * 128u)));
     }
   }
   return arr;
@@ -37,9 +37,9 @@ tint_symbol_ret tint_symbol(uint4 buffer[32], uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  p = tint_symbol(u, 0u);
-  p[1] = tint_symbol_1(u, 256u);
-  p[3].m = tint_symbol_3(u, 260u);
+  p = u_load(0u);
+  p[1] = u_load_1(256u);
+  p[3].m = u_load_3(260u);
   uint ubo_load_2 = u[0].z;
   p[1].m[0] = vector<float16_t, 2>(float16_t(f16tof32(ubo_load_2 & 0xFFFF)), float16_t(f16tof32(ubo_load_2 >> 16))).yx;
   return;

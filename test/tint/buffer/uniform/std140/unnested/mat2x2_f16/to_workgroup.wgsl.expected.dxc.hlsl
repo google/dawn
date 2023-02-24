@@ -7,11 +7,11 @@ struct tint_symbol_1 {
   uint local_invocation_index : SV_GroupIndex;
 };
 
-matrix<float16_t, 2, 2> tint_symbol_2(uint4 buffer[1], uint offset) {
+matrix<float16_t, 2, 2> u_load(uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
-  uint ubo_load = buffer[scalar_offset / 4][scalar_offset % 4];
+  uint ubo_load = u[scalar_offset / 4][scalar_offset % 4];
   const uint scalar_offset_1 = ((offset + 4u)) / 4;
-  uint ubo_load_1 = buffer[scalar_offset_1 / 4][scalar_offset_1 % 4];
+  uint ubo_load_1 = u[scalar_offset_1 / 4][scalar_offset_1 % 4];
   return matrix<float16_t, 2, 2>(vector<float16_t, 2>(float16_t(f16tof32(ubo_load & 0xFFFF)), float16_t(f16tof32(ubo_load >> 16))), vector<float16_t, 2>(float16_t(f16tof32(ubo_load_1 & 0xFFFF)), float16_t(f16tof32(ubo_load_1 >> 16))));
 }
 
@@ -20,7 +20,7 @@ void f_inner(uint local_invocation_index) {
     w = matrix<float16_t, 2, 2>((float16_t(0.0h)).xx, (float16_t(0.0h)).xx);
   }
   GroupMemoryBarrierWithGroupSync();
-  w = tint_symbol_2(u, 0u);
+  w = u_load(0u);
   uint ubo_load_2 = u[0].x;
   w[1] = vector<float16_t, 2>(float16_t(f16tof32(ubo_load_2 & 0xFFFF)), float16_t(f16tof32(ubo_load_2 >> 16)));
   uint ubo_load_3 = u[0].x;

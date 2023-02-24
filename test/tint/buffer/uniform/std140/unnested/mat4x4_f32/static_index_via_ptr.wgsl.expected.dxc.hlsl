@@ -8,17 +8,17 @@ int i() {
   return counter;
 }
 
-float4x4 tint_symbol(uint4 buffer[4], uint offset) {
+float4x4 m_load(uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
   const uint scalar_offset_1 = ((offset + 16u)) / 4;
   const uint scalar_offset_2 = ((offset + 32u)) / 4;
   const uint scalar_offset_3 = ((offset + 48u)) / 4;
-  return float4x4(asfloat(buffer[scalar_offset / 4]), asfloat(buffer[scalar_offset_1 / 4]), asfloat(buffer[scalar_offset_2 / 4]), asfloat(buffer[scalar_offset_3 / 4]));
+  return float4x4(asfloat(m[scalar_offset / 4]), asfloat(m[scalar_offset_1 / 4]), asfloat(m[scalar_offset_2 / 4]), asfloat(m[scalar_offset_3 / 4]));
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  const float4x4 l_m = tint_symbol(m, 0u);
+  const float4x4 l_m = m_load(0u);
   const float4 l_m_1 = asfloat(m[1]);
   return;
 }

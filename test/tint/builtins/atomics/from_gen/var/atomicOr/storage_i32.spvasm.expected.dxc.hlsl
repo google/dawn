@@ -1,8 +1,8 @@
 RWByteAddressBuffer sb_rw : register(u0, space0);
 
-int tint_atomicOr(RWByteAddressBuffer buffer, uint offset, int value) {
+int sb_rwatomicOr(uint offset, int value) {
   int original_value = 0;
-  buffer.InterlockedOr(offset, value, original_value);
+  sb_rw.InterlockedOr(offset, value, original_value);
   return original_value;
 }
 
@@ -12,7 +12,7 @@ void atomicOr_8d96a0() {
   int res = 0;
   arg_1 = 1;
   const int x_20 = arg_1;
-  const int x_13 = tint_atomicOr(sb_rw, 0u, x_20);
+  const int x_13 = sb_rwatomicOr(0u, x_20);
   res = x_13;
   return;
 }

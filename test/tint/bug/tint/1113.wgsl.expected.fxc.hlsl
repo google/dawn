@@ -44,16 +44,16 @@ float3 loadPosition(uint vertexIndex) {
   return position;
 }
 
-uint tint_atomicLoad(RWByteAddressBuffer buffer, uint offset) {
+uint countersatomicLoad(uint offset) {
   uint value = 0;
-  buffer.InterlockedOr(offset, 0, value);
+  counters.InterlockedOr(offset, 0, value);
   return value;
 }
 
 
-int tint_atomicLoad_1(RWByteAddressBuffer buffer, uint offset) {
+int LUTatomicLoad(uint offset) {
   int value = 0;
-  buffer.InterlockedOr(offset, 0, value);
+  LUT.InterlockedOr(offset, 0, value);
   return value;
 }
 
@@ -61,19 +61,19 @@ int tint_atomicLoad_1(RWByteAddressBuffer buffer, uint offset) {
 void doIgnore() {
   uint g42 = uniforms[0].x;
   uint kj6 = dbg.Load(20u);
-  uint b53 = tint_atomicLoad(counters, 0u);
+  uint b53 = countersatomicLoad(0u);
   uint rwg = indices.Load(0u);
   float rb5 = asfloat(positions.Load(0u));
-  int g55 = tint_atomicLoad_1(LUT, 0u);
+  int g55 = LUTatomicLoad(0u);
 }
 
 struct tint_symbol_1 {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
 
-uint tint_atomicAdd(RWByteAddressBuffer buffer, uint offset, uint value) {
+uint countersatomicAdd(uint offset, uint value) {
   uint original_value = 0;
-  buffer.InterlockedAdd(offset, value, original_value);
+  counters.InterlockedAdd(offset, value, original_value);
   return original_value;
 }
 
@@ -93,7 +93,7 @@ void main_count_inner(uint3 GlobalInvocationID) {
   float3 center = (((p0 + p1) + p2) / 3.0f);
   float3 voxelPos = toVoxelPos(center);
   uint voxelIndex = toIndex1D(uniforms[0].y, voxelPos);
-  uint acefg = tint_atomicAdd(counters, (4u * voxelIndex), 1u);
+  uint acefg = countersatomicAdd((4u * voxelIndex), 1u);
   if ((triangleIndex == 0u)) {
     dbg.Store(16u, asuint(uniforms[0].y));
     dbg.Store(32u, asuint(center.x));
@@ -112,16 +112,16 @@ struct tint_symbol_3 {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
 
-uint tint_atomicAdd_1(RWByteAddressBuffer buffer, uint offset, uint value) {
+uint dbgatomicAdd(uint offset, uint value) {
   uint original_value = 0;
-  buffer.InterlockedAdd(offset, value, original_value);
+  dbg.InterlockedAdd(offset, value, original_value);
   return original_value;
 }
 
 
-void tint_atomicStore(RWByteAddressBuffer buffer, uint offset, int value) {
+void LUTatomicStore(uint offset, int value) {
   int ignored;
-  buffer.InterlockedExchange(offset, value, ignored);
+  LUT.InterlockedExchange(offset, value, ignored);
 }
 
 
@@ -132,13 +132,13 @@ void main_create_lut_inner(uint3 GlobalInvocationID) {
   if ((voxelIndex >= maxVoxels)) {
     return;
   }
-  uint numTriangles = tint_atomicLoad(counters, (4u * voxelIndex));
+  uint numTriangles = countersatomicLoad((4u * voxelIndex));
   int offset = -1;
   if ((numTriangles > 0u)) {
-    const uint tint_symbol_6 = tint_atomicAdd_1(dbg, 0u, numTriangles);
+    const uint tint_symbol_6 = dbgatomicAdd(0u, numTriangles);
     offset = int(tint_symbol_6);
   }
-  tint_atomicStore(LUT, (4u * voxelIndex), offset);
+  LUTatomicStore((4u * voxelIndex), offset);
 }
 
 [numthreads(128, 1, 1)]
@@ -151,9 +151,9 @@ struct tint_symbol_5 {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
 
-int tint_atomicAdd_2(RWByteAddressBuffer buffer, uint offset, int value) {
+int LUTatomicAdd(uint offset, int value) {
   int original_value = 0;
-  buffer.InterlockedAdd(offset, value, original_value);
+  LUT.InterlockedAdd(offset, value, original_value);
   return original_value;
 }
 
@@ -173,7 +173,7 @@ void main_sort_triangles_inner(uint3 GlobalInvocationID) {
   float3 center = (((p0 + p1) + p2) / 3.0f);
   float3 voxelPos = toVoxelPos(center);
   uint voxelIndex = toIndex1D(uniforms[0].y, voxelPos);
-  int triangleOffset = tint_atomicAdd_2(LUT, (4u * voxelIndex), 1);
+  int triangleOffset = LUTatomicAdd((4u * voxelIndex), 1);
 }
 
 [numthreads(128, 1, 1)]

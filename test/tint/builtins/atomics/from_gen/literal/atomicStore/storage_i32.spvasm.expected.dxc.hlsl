@@ -1,13 +1,13 @@
 RWByteAddressBuffer sb_rw : register(u0, space0);
 
-void tint_atomicStore(RWByteAddressBuffer buffer, uint offset, int value) {
+void sb_rwatomicStore(uint offset, int value) {
   int ignored;
-  buffer.InterlockedExchange(offset, value, ignored);
+  sb_rw.InterlockedExchange(offset, value, ignored);
 }
 
 
 void atomicStore_d1e9a6() {
-  tint_atomicStore(sb_rw, 0u, 1);
+  sb_rwatomicStore(0u, 1);
   return;
 }
 

@@ -1,8 +1,8 @@
 RWByteAddressBuffer sb_rw : register(u0, space0);
 
-int tint_atomicMax(RWByteAddressBuffer buffer, uint offset, int value) {
+int sb_rwatomicMax(uint offset, int value) {
   int original_value = 0;
-  buffer.InterlockedMax(offset, value, original_value);
+  sb_rw.InterlockedMax(offset, value, original_value);
   return original_value;
 }
 
@@ -12,7 +12,7 @@ void atomicMax_92aa72() {
   int res = 0;
   arg_1 = 1;
   const int x_20 = arg_1;
-  const int x_13 = tint_atomicMax(sb_rw, 0u, x_20);
+  const int x_13 = sb_rwatomicMax(0u, x_20);
   res = x_13;
   return;
 }

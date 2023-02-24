@@ -1,14 +1,14 @@
 RWByteAddressBuffer sb_rw : register(u0, space0);
 
-int tint_atomicSub(RWByteAddressBuffer buffer, uint offset, int value) {
+int sb_rwatomicSub(uint offset, int value) {
   int original_value = 0;
-  buffer.InterlockedAdd(offset, -value, original_value);
+  sb_rw.InterlockedAdd(offset, -value, original_value);
   return original_value;
 }
 
 
 void atomicSub_051100() {
-  int res = tint_atomicSub(sb_rw, 0u, 1);
+  int res = sb_rwatomicSub(0u, 1);
 }
 
 void fragment_main() {

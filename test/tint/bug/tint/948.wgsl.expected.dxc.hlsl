@@ -210,8 +210,8 @@ main_out main_inner(float2 tUV_param, float2 tileID_1_param, float2 levelUnits_p
   vPosition = vPosition_param;
   vUV = vUV_param;
   main_1();
-  const main_out tint_symbol_6 = {glFragColor};
-  return tint_symbol_6;
+  const main_out tint_symbol_3 = {glFragColor};
+  return tint_symbol_3;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {

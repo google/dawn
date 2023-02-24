@@ -15,9 +15,9 @@ struct atomic_compare_exchange_weak_ret_type {
   bool exchanged;
 };
 
-atomic_compare_exchange_weak_ret_type tint_atomicCompareExchangeWeak(RWByteAddressBuffer buffer, uint offset, int compare, int value) {
+atomic_compare_exchange_weak_ret_type aatomicCompareExchangeWeak(uint offset, int compare, int value) {
   atomic_compare_exchange_weak_ret_type result=(atomic_compare_exchange_weak_ret_type)0;
-  buffer.InterlockedCompareExchange(offset, compare, value, result.old_value);
+  a.InterlockedCompareExchange(offset, compare, value, result.old_value);
   result.exchanged = result.old_value == compare;
   return result;
 }
@@ -28,7 +28,7 @@ int foo_inner() {
   int x = 0;
   tint_symbol_2 tint_symbol_1 = (tint_symbol_2)0;
   if (!(tint_discarded)) {
-    const atomic_compare_exchange_weak_ret_type tint_symbol_3 = tint_atomicCompareExchangeWeak(a, 0u, 0, 1);
+    const atomic_compare_exchange_weak_ret_type tint_symbol_3 = aatomicCompareExchangeWeak(0u, 0, 1);
     tint_symbol_1.old_value = tint_symbol_3.old_value;
     tint_symbol_1.exchanged = tint_symbol_3.exchanged;
   }

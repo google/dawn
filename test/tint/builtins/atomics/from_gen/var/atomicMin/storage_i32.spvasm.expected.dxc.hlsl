@@ -1,8 +1,8 @@
 RWByteAddressBuffer sb_rw : register(u0, space0);
 
-int tint_atomicMin(RWByteAddressBuffer buffer, uint offset, int value) {
+int sb_rwatomicMin(uint offset, int value) {
   int original_value = 0;
-  buffer.InterlockedMin(offset, value, original_value);
+  sb_rw.InterlockedMin(offset, value, original_value);
   return original_value;
 }
 
@@ -12,7 +12,7 @@ void atomicMin_8e38dc() {
   int res = 0;
   arg_1 = 1;
   const int x_20 = arg_1;
-  const int x_13 = tint_atomicMin(sb_rw, 0u, x_20);
+  const int x_13 = sb_rwatomicMin(0u, x_20);
   res = x_13;
   return;
 }

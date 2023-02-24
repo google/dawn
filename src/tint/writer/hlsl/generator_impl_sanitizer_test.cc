@@ -159,10 +159,10 @@ ByteAddressBuffer b : register(t1, space2);
 ByteAddressBuffer c : register(t2, space2);
 
 void a_func() {
-  uint tint_symbol_4 = 0u;
-  b.GetDimensions(tint_symbol_4);
-  const uint tint_symbol_5 = ((tint_symbol_4 - 0u) / 4u);
-  uint len = (tint_symbol_5 + ((tint_symbol_1[1].w - 0u) / 4u));
+  uint tint_symbol_3 = 0u;
+  b.GetDimensions(tint_symbol_3);
+  const uint tint_symbol_4 = ((tint_symbol_3 - 0u) / 4u);
+  uint len = (tint_symbol_4 + ((tint_symbol_1[1].w - 0u) / 4u));
   return;
 }
 )";
