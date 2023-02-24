@@ -562,7 +562,14 @@ void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     // Currently this toggle is only needed on Intel Gen9 and Gen9.5 GPUs.
     // See http://crbug.com/dawn/1579 for more information.
     if (gpu_info::IsIntelGen9(vendorId, deviceId)) {
-        deviceToggles->ForceSet(Toggle::NoWorkaroundDstAlphaBlendDoesNotWork, true);
+        // We can add workaround when the blending operation is "Add", DstFactor is "Zero" and
+        // SrcFactor is "DstAlpha".
+        deviceToggles->ForceSet(
+            Toggle::D3D12ReplaceAddWithMinusWhenDstFactorIsZeroAndSrcFactorIsDstAlpha, true);
+
+        // Unfortunately we cannot add workaround for other cases.
+        deviceToggles->ForceSet(
+            Toggle::NoWorkaroundDstAlphaAsSrcBlendFactorForBothColorAndAlphaDoesNotWork, true);
     }
 
 #if D3D12_SDK_VERSION >= 602

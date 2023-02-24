@@ -1173,6 +1173,21 @@ TEST_P(ColorStateTest, SparseAttachmentsDifferentColorMask) {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, attachment3, 0, 0);
 }
 
+// This is a regression test against an Intel driver issue about using DstAlpha as
+// SrcBlendFactor for both color and alpha blend factors.
+TEST_P(ColorStateTest, SrcBlendFactorDstAlphaDstBlendFactorZero) {
+    utils::RGBA8 base(32, 64, 128, 192);
+    std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
+    std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
+                   [&](const utils::RGBA8& color) {
+                       utils::RGBA8 fac(base.a, base.a, base.a, base.a);
+                       utils::RGBA8 expected = mix(utils::RGBA8(0, 0, 0, 0), color, fac);
+                       return std::make_pair(TriangleSpec({{color}}), expected);
+                   });
+    CheckBlendFactor(base, wgpu::BlendFactor::DstAlpha, wgpu::BlendFactor::Zero,
+                     wgpu::BlendFactor::DstAlpha, wgpu::BlendFactor::Zero, tests);
+}
+
 DAWN_INSTANTIATE_TEST(ColorStateTest,
                       D3D12Backend(),
                       MetalBackend(),
