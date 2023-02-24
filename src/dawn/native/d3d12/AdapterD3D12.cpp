@@ -536,6 +536,17 @@ void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
         }
     }
 
+    // This workaround is needed on Intel Gen12LP GPUs with driver >= 30.0.101.4091.
+    // See http://crbug.com/dawn/1083 for more information.
+    if (gpu_info::IsIntelGen12LP(vendorId, deviceId)) {
+        const gpu_info::DriverVersion kDriverVersion = {30, 0, 101, 4091};
+        if (gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(), kDriverVersion) !=
+            -1) {
+            deviceToggles->Default(Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource,
+                                   true);
+        }
+    }
+
     // Currently these workarounds are only needed on Intel Gen9.5 and Gen11 GPUs.
     // See http://crbug.com/1237175 and http://crbug.com/dawn/1628 for more information.
     if ((gpu_info::IsIntelGen9(vendorId, deviceId) && !gpu_info::IsSkylake(deviceId)) ||
