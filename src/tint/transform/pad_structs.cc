@@ -18,6 +18,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/parameter.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/call.h"
@@ -36,7 +37,10 @@ void CreatePadding(utils::Vector<const ast::StructMember*, 8>* new_members,
                    utils::Hashset<const ast::StructMember*, 8>* padding_members,
                    ProgramBuilder* b,
                    uint32_t bytes) {
-    for (uint32_t i = 0; i < bytes / 4u; ++i) {
+    const size_t count = bytes / 4u;
+    padding_members->Reserve(count);
+    new_members->Reserve(count);
+    for (uint32_t i = 0; i < count; ++i) {
         auto name = b->Symbols().New("pad");
         auto* member = b->Member(name, b->ty.u32());
         padding_members->Add(member);
@@ -99,8 +103,15 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
         if (offset < struct_size && !has_runtime_sized_array) {
             CreatePadding(&new_members, &padding_members, ctx.dst, struct_size - offset);
         }
-        auto* new_struct =
-            b.create<ast::Struct>(ctx.Clone(ast_str->name), std::move(new_members), utils::Empty);
+
+        utils::Vector<const ast::Attribute*, 1> struct_attribs;
+        if (!padding_members.IsEmpty()) {
+            struct_attribs =
+                utils::Vector{b.Disable(ast::DisabledValidation::kIgnoreStructMemberLimit)};
+        }
+
+        auto* new_struct = b.create<ast::Struct>(ctx.Clone(ast_str->name), std::move(new_members),
+                                                 std::move(struct_attribs));
         replaced_structs[ast_str] = new_struct;
         return new_struct;
     });
