@@ -16,7 +16,7 @@
 #define SRC_TINT_SYMBOL_TABLE_H_
 
 #include <string>
-#include <unordered_map>
+#include "utils/hashmap.h"
 
 #include "src/tint/symbol.h"
 
@@ -74,7 +74,7 @@ class SymbolTable {
     template <typename F>
     void Foreach(F&& callback) const {
         for (auto it : symbol_to_name_) {
-            callback(it.first, it.second);
+            callback(it.key, it.value);
         }
     }
 
@@ -85,8 +85,9 @@ class SymbolTable {
     // The value to be associated to the next registered symbol table entry.
     uint32_t next_symbol_ = 1;
 
-    std::unordered_map<Symbol, std::string> symbol_to_name_;
-    std::unordered_map<std::string, Symbol> name_to_symbol_;
+    utils::Hashmap<Symbol, std::string, 0> symbol_to_name_;
+    utils::Hashmap<std::string, Symbol, 0> name_to_symbol_;
+    utils::Hashmap<std::string, size_t, 0> last_prefix_to_index_;
     tint::ProgramID program_id_;
 };
 

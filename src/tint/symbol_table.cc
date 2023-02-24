@@ -33,9 +33,9 @@ SymbolTable& SymbolTable::operator=(SymbolTable&&) = default;
 Symbol SymbolTable::Register(const std::string& name) {
     TINT_ASSERT(Symbol, !name.empty());
 
-    auto it = name_to_symbol_.find(name);
-    if (it != name_to_symbol_.end()) {
-        return it->second;
+    auto it = name_to_symbol_.Find(name);
+    if (it) {
+        return *it;
     }
 
 #if TINT_SYMBOL_STORE_DEBUG_NAME
@@ -45,40 +45,54 @@ Symbol SymbolTable::Register(const std::string& name) {
 #endif
     ++next_symbol_;
 
-    name_to_symbol_[name] = sym;
-    symbol_to_name_[sym] = name;
+    name_to_symbol_.Add(name, sym);
+    symbol_to_name_.Add(sym, name);
 
     return sym;
 }
 
 Symbol SymbolTable::Get(const std::string& name) const {
-    auto it = name_to_symbol_.find(name);
-    return it != name_to_symbol_.end() ? it->second : Symbol();
+    auto it = name_to_symbol_.Find(name);
+    return it ? *it : Symbol();
 }
 
 std::string SymbolTable::NameFor(const Symbol symbol) const {
     TINT_ASSERT_PROGRAM_IDS_EQUAL(Symbol, program_id_, symbol);
-    auto it = symbol_to_name_.find(symbol);
-    if (it == symbol_to_name_.end()) {
+    auto it = symbol_to_name_.Find(symbol);
+    if (!it) {
         return symbol.to_str();
     }
 
-    return it->second;
+    return *it;
 }
 
 Symbol SymbolTable::New(std::string prefix /* = "" */) {
     if (prefix.empty()) {
         prefix = "tint_symbol";
     }
-    auto it = name_to_symbol_.find(prefix);
-    if (it == name_to_symbol_.end()) {
+    auto it = name_to_symbol_.Find(prefix);
+    if (!it) {
         return Register(prefix);
     }
+
+    size_t i = 0;
+    auto last_prefix = last_prefix_to_index_.Find(prefix);
+    if (last_prefix) {
+        i = *last_prefix;
+    }
+
     std::string name;
-    size_t i = 1;
     do {
-        name = prefix + "_" + std::to_string(i++);
-    } while (name_to_symbol_.count(name));
+        ++i;
+        name = prefix + "_" + std::to_string(i);
+    } while (name_to_symbol_.Contains(name));
+
+    if (last_prefix) {
+        *last_prefix = i;
+    } else {
+        last_prefix_to_index_.Add(prefix, i);
+    }
+
     return Register(name);
 }
 
