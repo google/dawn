@@ -15,7 +15,9 @@
 #include "dawn/native/metal/ComputePipelineMTL.h"
 
 #include "dawn/common/Math.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/CreatePipelineAsyncTask.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/ShaderModuleMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
@@ -84,9 +86,17 @@ bool ComputePipeline::RequiresStorageBufferLength() const {
 void ComputePipeline::InitializeAsync(Ref<ComputePipelineBase> computePipeline,
                                       WGPUCreateComputePipelineAsyncCallback callback,
                                       void* userdata) {
+    AdapterBase* adapter = computePipeline->GetDevice()->GetAdapter();
     std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
         std::make_unique<CreateComputePipelineAsyncTask>(std::move(computePipeline), callback,
                                                          userdata);
+    // Workaround a crash where the validation layers on AMD crash with partition alloc.
+    // See crbug.com/dawn/1200.
+    if (adapter->GetInstance()->IsBackendValidationEnabled() &&
+        gpu_info::IsAMD(adapter->GetVendorId())) {
+        asyncTask->Run();
+        return;
+    }
     CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
 }
 

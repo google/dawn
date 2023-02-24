@@ -14,7 +14,9 @@
 
 #include "dawn/native/metal/RenderPipelineMTL.h"
 
+#include "dawn/native/Adapter.h"
 #include "dawn/native/CreatePipelineAsyncTask.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/VertexFormat.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/PipelineLayoutMTL.h"
@@ -508,9 +510,17 @@ NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() {
 void RenderPipeline::InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
                                      WGPUCreateRenderPipelineAsyncCallback callback,
                                      void* userdata) {
+    AdapterBase* adapter = renderPipeline->GetDevice()->GetAdapter();
     std::unique_ptr<CreateRenderPipelineAsyncTask> asyncTask =
         std::make_unique<CreateRenderPipelineAsyncTask>(std::move(renderPipeline), callback,
                                                         userdata);
+    // Workaround a crash where the validation layers on AMD crash with partition alloc.
+    // See crbug.com/dawn/1200.
+    if (adapter->GetInstance()->IsBackendValidationEnabled() &&
+        gpu_info::IsAMD(adapter->GetVendorId())) {
+        asyncTask->Run();
+        return;
+    }
     CreateRenderPipelineAsyncTask::RunAsync(std::move(asyncTask));
 }
 
