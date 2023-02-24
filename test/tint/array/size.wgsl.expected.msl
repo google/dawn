@@ -19,8 +19,11 @@ fragment void tint_symbol() {
   tint_array<float, 4> unsigned_literal = {};
   tint_array<float, 4> signed_constant = {};
   tint_array<float, 4> unsigned_constant = {};
-  signed_literal = unsigned_constant;
-  signed_constant = unsigned_literal;
+  tint_array<float, 4> shr_const_expr = {};
+  unsigned_literal = signed_literal;
+  signed_constant = signed_literal;
+  unsigned_constant = signed_literal;
+  shr_const_expr = signed_literal;
   return;
 }
 

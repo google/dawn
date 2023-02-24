@@ -2354,37 +2354,6 @@ Expect<const ast::Expression*> ParserImpl::expect_math_expression_post_unary_exp
     return expect_additive_expression_post_unary_expression(rhs.value);
 }
 
-// element_count_expression
-//   : unary_expression math_expression.post.unary_expression
-//   | unary_expression bitwise_expression.post.unary_expression
-//
-// Note, this moves the `( multiplicative_operator unary_expression )* ( additive_operator
-// unary_expression ( multiplicative_operator unary_expression )* )*` expression for the first
-// branch out into helper methods.
-Maybe<const ast::Expression*> ParserImpl::element_count_expression() {
-    auto lhs = unary_expression();
-    if (lhs.errored) {
-        return Failure::kErrored;
-    }
-    if (!lhs.matched) {
-        return Failure::kNoMatch;
-    }
-
-    auto bitwise = bitwise_expression_post_unary_expression(lhs.value);
-    if (bitwise.errored) {
-        return Failure::kErrored;
-    }
-    if (bitwise.matched) {
-        return bitwise.value;
-    }
-
-    auto math = expect_math_expression_post_unary_expression(lhs.value);
-    if (math.errored) {
-        return Failure::kErrored;
-    }
-    return math.value;
-}
-
 // shift_expression
 //   : unary_expression shift_expression.post.unary_expression
 Maybe<const ast::Expression*> ParserImpl::shift_expression() {

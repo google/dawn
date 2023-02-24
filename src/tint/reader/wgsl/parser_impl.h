@@ -587,9 +587,6 @@ class ParserImpl {
     /// @returns the parsed expression or `lhs` if no match
     Expect<const ast::Expression*> expect_math_expression_post_unary_expression(
         const ast::Expression* lhs);
-    /// Parses an `element_count_expression` grammar element
-    /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> element_count_expression();
     /// Parses a `unary_expression shift.post.unary_expression`
     /// @returns the parsed expression or nullptr
     Maybe<const ast::Expression*> shift_expression();
