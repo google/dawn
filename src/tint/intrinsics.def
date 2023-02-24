@@ -661,8 +661,8 @@ match workgroup
 @must_use @const("select_boolvec") fn select<N: num, T: scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T>
 @must_use @const fn sign<T: fia_fi32_f16>(T) -> T
 @must_use @const fn sign<N: num, T: fia_fi32_f16>(vec<N, T>) -> vec<N, T>
-@must_use @const fn sin<T: fa_f32_f16>(T) -> T
-@must_use @const fn sin<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn sin<T: fa_f32_f16>(@test_value(1.57079632679) T) -> T
+@must_use @const fn sin<N: num, T: fa_f32_f16>(@test_value(1.57079632679) vec<N, T>) -> vec<N, T>
 @must_use @const fn sinh<T: fa_f32_f16>(T) -> T
 @must_use @const fn sinh<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 @must_use @const fn smoothstep<T: fa_f32_f16>(@test_value(2) T, @test_value(4) T, @test_value(3) T) -> T

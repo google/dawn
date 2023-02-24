@@ -23,7 +23,7 @@
 
 // fn sin(vec<3, f32>) -> vec<3, f32>
 fn sin_01f241() {
-  var arg_0 = vec3<f32>(1.f);
+  var arg_0 = vec3<f32>(1.57079632679f);
   var res: vec3<f32> = sin(arg_0);
 }
 

@@ -23,7 +23,7 @@
 
 // fn sin(f32) -> f32
 fn sin_b78c91() {
-  var res: f32 = sin(1.f);
+  var res: f32 = sin(1.57079632679f);
 }
 
 @vertex

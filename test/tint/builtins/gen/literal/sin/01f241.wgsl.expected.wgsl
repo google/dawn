@@ -1,5 +1,5 @@
 fn sin_01f241() {
-  var res : vec3<f32> = sin(vec3<f32>(1.0f));
+  var res : vec3<f32> = sin(vec3<f32>(1.570796371f));
 }
 
 @vertex

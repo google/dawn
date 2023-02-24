@@ -1,7 +1,7 @@
 enable f16;
 
 fn sin_5c0712() {
-  var arg_0 = vec4<f16>(1.0h);
+  var arg_0 = vec4<f16>(1.5703125h);
   var res : vec4<f16> = sin(arg_0);
 }
 

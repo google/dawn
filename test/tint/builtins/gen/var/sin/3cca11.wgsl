@@ -25,7 +25,7 @@ enable f16;
 
 // fn sin(vec<2, f16>) -> vec<2, f16>
 fn sin_3cca11() {
-  var arg_0 = vec2<f16>(1.h);
+  var arg_0 = vec2<f16>(1.57079632679h);
   var res: vec2<f16> = sin(arg_0);
 }
 

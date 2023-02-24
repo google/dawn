@@ -1,5 +1,5 @@
 void sin_01f241() {
-  float3 res = (0.841470957f).xxx;
+  float3 res = (1.0f).xxx;
 }
 
 struct tint_symbol {

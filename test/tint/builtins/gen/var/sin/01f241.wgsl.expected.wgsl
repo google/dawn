@@ -1,5 +1,5 @@
 fn sin_01f241() {
-  var arg_0 = vec3<f32>(1.0f);
+  var arg_0 = vec3<f32>(1.570796371f);
   var res : vec3<f32> = sin(arg_0);
 }
 

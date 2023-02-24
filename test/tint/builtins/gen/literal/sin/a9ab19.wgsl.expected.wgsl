@@ -1,5 +1,5 @@
 fn sin_a9ab19() {
-  var res = sin(1.0);
+  var res = sin(1.57079632679);
 }
 
 @vertex

@@ -1,5 +1,5 @@
 void sin_b78c91() {
-  float res = 0.841470957f;
+  float res = 1.0f;
 }
 
 struct tint_symbol {

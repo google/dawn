@@ -2,7 +2,7 @@
 
 using namespace metal;
 void sin_66a59f() {
-  half arg_0 = 1.0h;
+  half arg_0 = 1.5703125h;
   half res = sin(arg_0);
 }
 

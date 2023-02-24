@@ -23,7 +23,7 @@
 
 // fn sin(fa) -> fa
 fn sin_a9ab19() {
-  const arg_0 = 1.;
+  const arg_0 = 1.57079632679;
   var res = sin(arg_0);
 }
 

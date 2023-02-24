@@ -1,7 +1,7 @@
 #version 310 es
 
 void sin_b78c91() {
-  float arg_0 = 1.0f;
+  float arg_0 = 1.570796371f;
   float res = sin(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void sin_b78c91() {
-  float arg_0 = 1.0f;
+  float arg_0 = 1.570796371f;
   float res = sin(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void sin_b78c91() {
-  float arg_0 = 1.0f;
+  float arg_0 = 1.570796371f;
   float res = sin(arg_0);
 }
 

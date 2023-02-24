@@ -2,7 +2,7 @@
 
 using namespace metal;
 void sin_66a59f() {
-  half res = 0.841308594h;
+  half res = 0.999511719h;
 }
 
 struct tint_symbol {

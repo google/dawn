@@ -1,5 +1,5 @@
 fn sin_15b2c6() {
-  const arg_0 = vec4(1.0);
+  const arg_0 = vec4(1.57079632679);
   var res = sin(arg_0);
 }
 

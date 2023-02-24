@@ -1,7 +1,7 @@
 enable f16;
 
 fn sin_66a59f() {
-  var res : f16 = sin(1.0h);
+  var res : f16 = sin(1.5703125h);
 }
 
 @vertex

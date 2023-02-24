@@ -14502,8 +14502,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [70] */
-    /* fn sin<T : fa_f32_f16>(T) -> T */
-    /* fn sin<N : num, T : fa_f32_f16>(vec<N, T>) -> vec<N, T> */
+    /* fn sin<T : fa_f32_f16>(@test_value(1.57079632679) T) -> T */
+    /* fn sin<N : num, T : fa_f32_f16>(@test_value(1.57079632679) vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[389],
   },

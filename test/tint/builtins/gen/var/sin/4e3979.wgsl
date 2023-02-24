@@ -23,7 +23,7 @@
 
 // fn sin(vec<4, f32>) -> vec<4, f32>
 fn sin_4e3979() {
-  var arg_0 = vec4<f32>(1.f);
+  var arg_0 = vec4<f32>(1.57079632679f);
   var res: vec4<f32> = sin(arg_0);
 }
 

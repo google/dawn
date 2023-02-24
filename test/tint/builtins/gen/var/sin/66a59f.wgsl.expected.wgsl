@@ -1,7 +1,7 @@
 enable f16;
 
 fn sin_66a59f() {
-  var arg_0 = 1.0h;
+  var arg_0 = 1.5703125h;
   var res : f16 = sin(arg_0);
 }
 

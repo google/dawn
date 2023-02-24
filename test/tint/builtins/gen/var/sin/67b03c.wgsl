@@ -23,7 +23,7 @@
 
 // fn sin(vec<3, fa>) -> vec<3, fa>
 fn sin_67b03c() {
-  const arg_0 = vec3(1.);
+  const arg_0 = vec3(1.57079632679);
   var res = sin(arg_0);
 }
 

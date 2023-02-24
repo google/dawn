@@ -1,5 +1,5 @@
 void sin_01f241() {
-  float3 arg_0 = (1.0f).xxx;
+  float3 arg_0 = (1.570796371f).xxx;
   float3 res = sin(arg_0);
 }
 

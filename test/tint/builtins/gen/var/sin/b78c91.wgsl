@@ -23,7 +23,7 @@
 
 // fn sin(f32) -> f32
 fn sin_b78c91() {
-  var arg_0 = 1.f;
+  var arg_0 = 1.57079632679f;
   var res: f32 = sin(arg_0);
 }
 

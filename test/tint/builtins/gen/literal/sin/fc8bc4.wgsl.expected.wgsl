@@ -1,5 +1,5 @@
 fn sin_fc8bc4() {
-  var res : vec2<f32> = sin(vec2<f32>(1.0f));
+  var res : vec2<f32> = sin(vec2<f32>(1.570796371f));
 }
 
 @vertex

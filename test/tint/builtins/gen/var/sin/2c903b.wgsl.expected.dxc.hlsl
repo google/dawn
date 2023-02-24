@@ -1,5 +1,5 @@
 void sin_2c903b() {
-  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.5703125h)).xxx;
   vector<float16_t, 3> res = sin(arg_0);
 }
 

@@ -25,7 +25,7 @@ enable f16;
 
 // fn sin(vec<3, f16>) -> vec<3, f16>
 fn sin_2c903b() {
-  var arg_0 = vec3<f16>(1.h);
+  var arg_0 = vec3<f16>(1.57079632679h);
   var res: vec3<f16> = sin(arg_0);
 }
 
