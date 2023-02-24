@@ -133,7 +133,7 @@ ExternalTextureBase::ExternalTextureBase(DeviceBase* device,
     : ApiObjectBase(device, descriptor->label),
       mVisibleOrigin(descriptor->visibleOrigin),
       mVisibleSize(descriptor->visibleSize),
-      mState(ExternalTextureState::Alive) {
+      mState(ExternalTextureState::Active) {
     GetObjectTrackingList()->Track(this);
 }
 
@@ -324,8 +324,8 @@ const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& ExternalTextureBase
 
 MaybeError ExternalTextureBase::ValidateCanUseInSubmitNow() const {
     ASSERT(!IsError());
-    DAWN_INVALID_IF(mState == ExternalTextureState::Destroyed,
-                    "Destroyed external texture %s is used in a submit.", this);
+    DAWN_INVALID_IF(mState != ExternalTextureState::Active,
+                    "External texture %s used in a submit is not active.", this);
 
     for (uint32_t i = 0; i < kMaxPlanesPerFormat; ++i) {
         if (mTextureViews[i] != nullptr) {
@@ -336,10 +336,33 @@ MaybeError ExternalTextureBase::ValidateCanUseInSubmitNow() const {
     return {};
 }
 
-void ExternalTextureBase::APIDestroy() {
-    if (GetDevice()->ConsumedError(GetDevice()->ValidateObject(this))) {
+MaybeError ExternalTextureBase::ValidateRefresh() {
+    DAWN_TRY(GetDevice()->ValidateObject(this));
+    DAWN_INVALID_IF(mState == ExternalTextureState::Destroyed, "%s is destroyed.", this);
+    return {};
+}
+
+MaybeError ExternalTextureBase::ValidateExpire() {
+    DAWN_TRY(GetDevice()->ValidateObject(this));
+    DAWN_INVALID_IF(mState != ExternalTextureState::Active, "%s is not active.", this);
+    return {};
+}
+
+void ExternalTextureBase::APIRefresh() {
+    if (GetDevice()->ConsumedError(ValidateRefresh(), "calling %s.Refresh()", this)) {
         return;
     }
+    mState = ExternalTextureState::Active;
+}
+
+void ExternalTextureBase::APIExpire() {
+    if (GetDevice()->ConsumedError(ValidateExpire(), "calling %s.Expire()", this)) {
+        return;
+    }
+    mState = ExternalTextureState::Expired;
+}
+
+void ExternalTextureBase::APIDestroy() {
     Destroy();
 }
 
