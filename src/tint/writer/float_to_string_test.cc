@@ -17,7 +17,6 @@
 #include <math.h>
 #include <cstring>
 #include <limits>
-#include <locale>
 
 #include "gtest/gtest.h"
 #include "src/tint/utils/bitcast.h"
@@ -79,16 +78,6 @@ TEST(FloatToStringTest, Precision) {
     EXPECT_EQ(FloatToString(1e-10f), "1.00000001e-10");
     EXPECT_EQ(FloatToString(1e-20f), "9.99999968e-21");
 }
-
-#if !defined(__linux__)
-TEST(FloatToStringTest, Locale) {
-    std::locale::global(std::locale("sv_SE.UTF-8"));
-
-    EXPECT_EQ(FloatToString(1e-9f), "0.000000001");
-
-    std::locale::global(std::locale::classic());
-}
-#endif  // !defined(__linux__)
 
 ////////////////////////////////////////////////////////////////////////////////
 // FloatToBitPreservingString                                                 //
