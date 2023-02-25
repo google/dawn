@@ -269,36 +269,45 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     //    CBVs/UAVs/SRVs for bind group are a root descriptor table
     //  - (maxBindGroups)
     //    Samplers for each bind group are a root descriptor table
-    //  - (2 * maxDynamicBuffers)
-    //    Each dynamic buffer is a root descriptor
+    //  - dynamic uniform buffers - root descriptor
+    //  - dynamic storage buffers - root descriptor plus a root constant for the size
     //  RESERVED:
     //  - 3 = max of:
     //    - 2 root constants for the baseVertex/baseInstance constants.
     //    - 3 root constants for num workgroups X, Y, Z
-    //  - 4 root constants (kMaxDynamicStorageBuffersPerPipelineLayout) for dynamic storage
-    //  buffer lengths.
-    static constexpr uint32_t kReservedSlots = 7;
+    static constexpr uint32_t kReservedSlots = 3;
+
+    // Costs:
+    //  - bind group: 2 = 1 cbv/uav/srv table + 1 sampler table
+    //  - dynamic uniform buffer: 2 slots for a root descriptor
+    //  - dynamic storage buffer: 3 slots for a root descriptor + root constant
 
     // Available slots after base limits considered.
     uint32_t availableRootSignatureSlots =
-        kMaxRootSignatureSize - kReservedSlots -
-        2 * (limits->v1.maxBindGroups + limits->v1.maxDynamicUniformBuffersPerPipelineLayout +
-             limits->v1.maxDynamicStorageBuffersPerPipelineLayout);
+        kMaxRootSignatureSize - kReservedSlots - 2 * limits->v1.maxBindGroups -
+        2 * limits->v1.maxDynamicUniformBuffersPerPipelineLayout -
+        3 * limits->v1.maxDynamicStorageBuffersPerPipelineLayout;
 
-    // Because we need either:
-    //  - 1 cbv/uav/srv table + 1 sampler table
-    //  - 2 slots for a root descriptor
-    uint32_t availableDynamicBufferOrBindGroup = availableRootSignatureSlots / 2;
+    while (availableRootSignatureSlots >= 2) {
+        // Start by incrementing maxDynamicStorageBuffersPerPipelineLayout since the
+        // default is just 4 and developers likely want more. This scheme currently
+        // gets us to 8.
+        if (availableRootSignatureSlots >= 3) {
+            limits->v1.maxDynamicStorageBuffersPerPipelineLayout += 1;
+            availableRootSignatureSlots -= 3;
+        }
+        if (availableRootSignatureSlots >= 2) {
+            limits->v1.maxBindGroups += 1;
+            availableRootSignatureSlots -= 2;
+        }
+        if (availableRootSignatureSlots >= 2) {
+            limits->v1.maxDynamicUniformBuffersPerPipelineLayout += 1;
+            availableRootSignatureSlots -= 2;
+        }
+    }
 
-    // We can either have a bind group, a dyn uniform buffer or a dyn storage buffer.
-    // Distribute evenly.
-    limits->v1.maxBindGroups += availableDynamicBufferOrBindGroup / 3;
-    limits->v1.maxDynamicUniformBuffersPerPipelineLayout += availableDynamicBufferOrBindGroup / 3;
-    limits->v1.maxDynamicStorageBuffersPerPipelineLayout +=
-        (availableDynamicBufferOrBindGroup - 2 * (availableDynamicBufferOrBindGroup / 3));
-
-    ASSERT(2 * (limits->v1.maxBindGroups + limits->v1.maxDynamicUniformBuffersPerPipelineLayout +
-                limits->v1.maxDynamicStorageBuffersPerPipelineLayout) <=
+    ASSERT(2 * limits->v1.maxBindGroups + 2 * limits->v1.maxDynamicUniformBuffersPerPipelineLayout +
+               3 * limits->v1.maxDynamicStorageBuffersPerPipelineLayout <=
            kMaxRootSignatureSize - kReservedSlots);
 
     // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/sm5-attributes-numthreads

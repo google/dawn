@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_BINDGROUPTRACKER_H_
 #define SRC_DAWN_NATIVE_BINDGROUPTRACKER_H_
 
+#include <algorithm>
 #include <array>
 #include <bitset>
 
@@ -54,8 +55,9 @@ class BindGroupTrackerBase {
         }
 
         mBindGroups[index] = bindGroup;
-        mDynamicOffsetCounts[index] = dynamicOffsetCount;
-        SetDynamicOffsets(mDynamicOffsets[index].data(), dynamicOffsetCount, dynamicOffsets);
+        mDynamicOffsets[index].resize(BindingIndex(dynamicOffsetCount));
+        std::copy(dynamicOffsets, dynamicOffsets + dynamicOffsetCount,
+                  mDynamicOffsets[index].begin());
     }
 
     void OnSetPipeline(PipelineBase* pipeline) { mPipelineLayout = pipeline->GetLayout(); }
@@ -105,10 +107,7 @@ class BindGroupTrackerBase {
     BindGroupLayoutMask mDirtyBindGroupsObjectChangedOrIsDynamic = 0;
     BindGroupLayoutMask mBindGroupLayoutsMask = 0;
     ityp::array<BindGroupIndex, BindGroupBase*, kMaxBindGroups> mBindGroups = {};
-    ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups> mDynamicOffsetCounts = {};
-    ityp::array<BindGroupIndex,
-                std::array<DynamicOffset, kMaxDynamicBuffersPerPipelineLayout>,
-                kMaxBindGroups>
+    ityp::array<BindGroupIndex, ityp::vector<BindingIndex, DynamicOffset>, kMaxBindGroups>
         mDynamicOffsets = {};
 
     // |mPipelineLayout| is the current pipeline layout set on the command buffer.
@@ -116,25 +115,6 @@ class BindGroupTrackerBase {
     // to the bind group bindings.
     PipelineLayoutBase* mPipelineLayout = nullptr;
     PipelineLayoutBase* mLastAppliedPipelineLayout = nullptr;
-
-  private:
-    // We have two overloads here because offsets in Vulkan are uint32_t but uint64_t
-    // in other backends.
-    static void SetDynamicOffsets(uint64_t* data,
-                                  uint32_t dynamicOffsetCount,
-                                  uint32_t* dynamicOffsets) {
-        for (uint32_t i = 0; i < dynamicOffsetCount; ++i) {
-            data[i] = static_cast<uint64_t>(dynamicOffsets[i]);
-        }
-    }
-
-    static void SetDynamicOffsets(uint32_t* data,
-                                  uint32_t dynamicOffsetCount,
-                                  uint32_t* dynamicOffsets) {
-        if (dynamicOffsetCount > 0) {
-            memcpy(data, dynamicOffsets, sizeof(uint32_t) * dynamicOffsetCount);
-        }
-    }
 };
 
 }  // namespace dawn::native

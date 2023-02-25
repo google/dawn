@@ -1476,22 +1476,24 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
     std::vector<wgpu::BindGroupLayoutEntry> maxStorageDB;
     std::vector<wgpu::BindGroupLayoutEntry> maxReadonlyStorageDB;
 
+    wgpu::Limits limits = GetSupportedLimits().limits;
+
     // In this test, we use all the same shader stage. Ensure that this does not exceed the
     // per-stage limit.
-    static_assert(kMaxDynamicUniformBuffersPerPipelineLayout <= kMaxUniformBuffersPerShaderStage);
-    static_assert(kMaxDynamicStorageBuffersPerPipelineLayout <= kMaxStorageBuffersPerShaderStage);
+    ASSERT(limits.maxDynamicUniformBuffersPerPipelineLayout <= kMaxUniformBuffersPerShaderStage);
+    ASSERT(limits.maxDynamicStorageBuffersPerPipelineLayout <= kMaxStorageBuffersPerShaderStage);
 
-    for (uint32_t i = 0; i < kMaxDynamicUniformBuffersPerPipelineLayout; ++i) {
+    for (uint32_t i = 0; i < limits.maxDynamicUniformBuffersPerPipelineLayout; ++i) {
         maxUniformDB.push_back(utils::BindingLayoutEntryInitializationHelper(
             i, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform, true));
     }
 
-    for (uint32_t i = 0; i < kMaxDynamicStorageBuffersPerPipelineLayout; ++i) {
+    for (uint32_t i = 0; i < limits.maxDynamicStorageBuffersPerPipelineLayout; ++i) {
         maxStorageDB.push_back(utils::BindingLayoutEntryInitializationHelper(
             i, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage, true));
     }
 
-    for (uint32_t i = 0; i < kMaxDynamicStorageBuffersPerPipelineLayout; ++i) {
+    for (uint32_t i = 0; i < limits.maxDynamicStorageBuffersPerPipelineLayout; ++i) {
         maxReadonlyStorageDB.push_back(utils::BindingLayoutEntryInitializationHelper(
             i, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage, true));
     }
@@ -1561,7 +1563,7 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
     // Check dynamic uniform buffers exceed maximum in bind group layout.
     {
         maxUniformDB.push_back(utils::BindingLayoutEntryInitializationHelper(
-            kMaxDynamicUniformBuffersPerPipelineLayout, wgpu::ShaderStage::Fragment,
+            limits.maxDynamicUniformBuffersPerPipelineLayout, wgpu::ShaderStage::Fragment,
             wgpu::BufferBindingType::Uniform, true));
         TestCreateBindGroupLayout(maxUniformDB.data(), maxUniformDB.size(), false);
     }
@@ -1569,7 +1571,7 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
     // Check dynamic storage buffers exceed maximum in bind group layout.
     {
         maxStorageDB.push_back(utils::BindingLayoutEntryInitializationHelper(
-            kMaxDynamicStorageBuffersPerPipelineLayout, wgpu::ShaderStage::Fragment,
+            limits.maxDynamicStorageBuffersPerPipelineLayout, wgpu::ShaderStage::Fragment,
             wgpu::BufferBindingType::Storage, true));
         TestCreateBindGroupLayout(maxStorageDB.data(), maxStorageDB.size(), false);
     }
@@ -1577,7 +1579,7 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
     // Check dynamic readonly storage buffers exceed maximum in bind group layout.
     {
         maxReadonlyStorageDB.push_back(utils::BindingLayoutEntryInitializationHelper(
-            kMaxDynamicStorageBuffersPerPipelineLayout, wgpu::ShaderStage::Fragment,
+            limits.maxDynamicStorageBuffersPerPipelineLayout, wgpu::ShaderStage::Fragment,
             wgpu::BufferBindingType::ReadOnlyStorage, true));
         TestCreateBindGroupLayout(maxReadonlyStorageDB.data(), maxReadonlyStorageDB.size(), false);
     }

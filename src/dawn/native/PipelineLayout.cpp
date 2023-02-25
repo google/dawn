@@ -50,7 +50,7 @@ MaybeError ValidatePipelineLayoutDescriptor(DeviceBase* device,
                                 descriptor->bindGroupLayouts[i]->GetBindingCountInfo());
     }
 
-    DAWN_TRY(ValidateBindingCounts(bindingCounts));
+    DAWN_TRY(ValidateBindingCounts(device->GetLimits(), bindingCounts));
     return {};
 }
 

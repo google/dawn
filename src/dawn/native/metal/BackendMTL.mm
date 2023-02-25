@@ -716,10 +716,10 @@ class Adapter : public AdapterBase {
         //   buffers, 128 textures, and 16 samplers. Mac GPU families
         //   with tier 2 argument buffers support 500000 buffers and
         //   textures, and 1024 unique samplers
-        limits->v1.maxDynamicUniformBuffersPerPipelineLayout =
-            limits->v1.maxUniformBuffersPerShaderStage;
-        limits->v1.maxDynamicStorageBuffersPerPipelineLayout =
-            limits->v1.maxStorageBuffersPerShaderStage;
+        // Without argument buffers, we have slots [0 -> 29], inclusive, which is 30 total.
+        // 8 are used by maxVertexBuffers.
+        limits->v1.maxDynamicUniformBuffersPerPipelineLayout = 11u;
+        limits->v1.maxDynamicStorageBuffersPerPipelineLayout = 11u;
 
         // The WebGPU limit is the limit across all vertex buffers, combined.
         limits->v1.maxVertexAttributes =

@@ -70,12 +70,6 @@ MaybeError AdapterBase::Initialize() {
         std::min(mLimits.v1.maxStorageTexturesPerShaderStage, kMaxStorageTexturesPerShaderStage);
     mLimits.v1.maxUniformBuffersPerShaderStage =
         std::min(mLimits.v1.maxUniformBuffersPerShaderStage, kMaxUniformBuffersPerShaderStage);
-    mLimits.v1.maxDynamicUniformBuffersPerPipelineLayout =
-        std::min(mLimits.v1.maxDynamicUniformBuffersPerPipelineLayout,
-                 kMaxDynamicUniformBuffersPerPipelineLayout);
-    mLimits.v1.maxDynamicStorageBuffersPerPipelineLayout =
-        std::min(mLimits.v1.maxDynamicStorageBuffersPerPipelineLayout,
-                 kMaxDynamicStorageBuffersPerPipelineLayout);
 
     return {};
 }

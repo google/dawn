@@ -442,7 +442,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
         for (BindGroupIndex index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
             BindGroup* group = ToBackend(mBindGroups[index]);
             ApplyBindGroup(commandList, ToBackend(mPipelineLayout), index, group,
-                           mDynamicOffsetCounts[index], mDynamicOffsets[index].data());
+                           mDynamicOffsets[index]);
         }
 
         AfterApply();
@@ -484,10 +484,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
                         const PipelineLayout* pipelineLayout,
                         BindGroupIndex index,
                         BindGroup* group,
-                        uint32_t dynamicOffsetCountIn,
-                        const uint64_t* dynamicOffsetsIn) {
-        ityp::span<BindingIndex, const uint64_t> dynamicOffsets(dynamicOffsetsIn,
-                                                                BindingIndex(dynamicOffsetCountIn));
+                        const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets) {
         ASSERT(dynamicOffsets.size() == group->GetLayout()->GetDynamicBufferCount());
 
         // Usually, the application won't set the same offsets many times,

@@ -32,6 +32,13 @@
 #define LIMITS_MAX_BUFFER_SIZE(X)                                             \
     X(Maximum, maxBufferSize, 0x10000000, 0x40000000, 0x80000000)
 
+// Tiers for limits related to resource bindings.
+// TODO(crbug.com/dawn/685): Define these better. For now, use two tiers where one
+// offers slightly better than default limits.
+#define LIMITS_RESOURCE_BINDINGS(X)                                                \
+    X(Maximum,   maxDynamicUniformBuffersPerPipelineLayout,         8,         10) \
+    X(Maximum,   maxDynamicStorageBuffersPerPipelineLayout,         4,          8) \
+
 // TODO(crbug.com/dawn/685):
 // These limits don't have tiers yet. Define two tiers with the same values since the macros
 // in this file expect more than one tier.
@@ -42,8 +49,6 @@
     X(Maximum,                       maxTextureArrayLayers,       256,        256) \
     X(Maximum,                               maxBindGroups,         4,          4) \
     X(Maximum,                     maxBindingsPerBindGroup,       640,        640) \
-    X(Maximum,   maxDynamicUniformBuffersPerPipelineLayout,         8,          8) \
-    X(Maximum,   maxDynamicStorageBuffersPerPipelineLayout,         4,          4) \
     X(Maximum,            maxSampledTexturesPerShaderStage,        16,         16) \
     X(Maximum,                   maxSamplersPerShaderStage,        16,         16) \
     X(Maximum,             maxStorageBuffersPerShaderStage,         8,          8) \
@@ -71,12 +76,14 @@
     X(LIMITS_WORKGROUP_STORAGE_SIZE)      \
     X(LIMITS_STORAGE_BUFFER_BINDING_SIZE) \
     X(LIMITS_MAX_BUFFER_SIZE)             \
+    X(LIMITS_RESOURCE_BINDINGS)           \
     X(LIMITS_OTHER)
 
 #define LIMITS(X)                         \
     LIMITS_WORKGROUP_STORAGE_SIZE(X)      \
     LIMITS_STORAGE_BUFFER_BINDING_SIZE(X) \
     LIMITS_MAX_BUFFER_SIZE(X)             \
+    LIMITS_RESOURCE_BINDINGS(X)           \
     LIMITS_OTHER(X)
 
 namespace dawn::native {

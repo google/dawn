@@ -15,6 +15,7 @@
 #include "dawn/native/BindingInfo.h"
 
 #include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/Limits.h"
 
 namespace dawn::native {
 
@@ -93,18 +94,22 @@ void AccumulateBindingCounts(BindingCounts* bindingCounts, const BindingCounts& 
     }
 }
 
-MaybeError ValidateBindingCounts(const BindingCounts& bindingCounts) {
+MaybeError ValidateBindingCounts(const CombinedLimits& limits, const BindingCounts& bindingCounts) {
     DAWN_INVALID_IF(
-        bindingCounts.dynamicUniformBufferCount > kMaxDynamicUniformBuffersPerPipelineLayout,
+        bindingCounts.dynamicUniformBufferCount >
+            limits.v1.maxDynamicUniformBuffersPerPipelineLayout,
         "The number of dynamic uniform buffers (%u) exceeds the maximum per-pipeline-layout "
         "limit (%u).",
-        bindingCounts.dynamicUniformBufferCount, kMaxDynamicUniformBuffersPerPipelineLayout);
+        bindingCounts.dynamicUniformBufferCount,
+        limits.v1.maxDynamicUniformBuffersPerPipelineLayout);
 
     DAWN_INVALID_IF(
-        bindingCounts.dynamicStorageBufferCount > kMaxDynamicStorageBuffersPerPipelineLayout,
+        bindingCounts.dynamicStorageBufferCount >
+            limits.v1.maxDynamicStorageBuffersPerPipelineLayout,
         "The number of dynamic storage buffers (%u) exceeds the maximum per-pipeline-layout "
         "limit (%u).",
-        bindingCounts.dynamicStorageBufferCount, kMaxDynamicStorageBuffersPerPipelineLayout);
+        bindingCounts.dynamicStorageBufferCount,
+        limits.v1.maxDynamicStorageBuffersPerPipelineLayout);
 
     for (SingleShaderStage stage : IterateStages(kAllStages)) {
         DAWN_INVALID_IF(

@@ -47,8 +47,7 @@ class BindGroup final : public BindGroupBase, public PlacementAllocated {
 
     void SetSamplerAllocationEntry(Ref<SamplerHeapCacheEntry> entry);
 
-    using DynamicStorageBufferLengths =
-        ityp::stack_vec<uint32_t, uint32_t, kMaxDynamicStorageBuffersPerPipelineLayout>;
+    using DynamicStorageBufferLengths = ityp::stack_vec<uint32_t, uint32_t, 4u>;
     const DynamicStorageBufferLengths& GetDynamicStorageBufferLengths() const;
 
   private:

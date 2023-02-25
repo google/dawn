@@ -141,12 +141,12 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true, uint32_t> {
         BeforeApply();
         for (BindGroupIndex dirtyIndex : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
             VkDescriptorSet set = ToBackend(mBindGroups[dirtyIndex])->GetHandle();
+            uint32_t count = static_cast<uint32_t>(mDynamicOffsets[dirtyIndex].size());
             const uint32_t* dynamicOffset =
-                mDynamicOffsetCounts[dirtyIndex] > 0 ? mDynamicOffsets[dirtyIndex].data() : nullptr;
-            device->fn.CmdBindDescriptorSets(recordingContext->commandBuffer, bindPoint,
-                                             ToBackend(mPipelineLayout)->GetHandle(),
-                                             static_cast<uint32_t>(dirtyIndex), 1, &*set,
-                                             mDynamicOffsetCounts[dirtyIndex], dynamicOffset);
+                count > 0 ? mDynamicOffsets[dirtyIndex].data() : nullptr;
+            device->fn.CmdBindDescriptorSets(
+                recordingContext->commandBuffer, bindPoint, ToBackend(mPipelineLayout)->GetHandle(),
+                static_cast<uint32_t>(dirtyIndex), 1, &*set, count, dynamicOffset);
         }
         AfterApply();
     }

@@ -271,7 +271,8 @@ MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
         bindingsSet.insert(bindingNumber);
     }
 
-    DAWN_TRY_CONTEXT(ValidateBindingCounts(bindingCounts), "validating binding counts");
+    DAWN_TRY_CONTEXT(ValidateBindingCounts(device->GetLimits(), bindingCounts),
+                     "validating binding counts");
 
     return {};
 }

@@ -442,8 +442,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
     void Apply(Encoder encoder) {
         BeforeApply();
         for (BindGroupIndex index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
-            ApplyBindGroup(encoder, index, ToBackend(mBindGroups[index]),
-                           mDynamicOffsetCounts[index], mDynamicOffsets[index].data(),
+            ApplyBindGroup(encoder, index, ToBackend(mBindGroups[index]), mDynamicOffsets[index],
                            ToBackend(mPipelineLayout));
         }
         AfterApply();
@@ -458,11 +457,8 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                             id<MTLComputeCommandEncoder> compute,
                             BindGroupIndex index,
                             BindGroup* group,
-                            uint32_t dynamicOffsetCount,
-                            uint64_t* dynamicOffsets,
+                            const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets,
                             PipelineLayout* pipelineLayout) {
-        uint32_t currentDynamicBufferIndex = 0;
-
         // TODO(crbug.com/dawn/854): Maintain buffers and offsets arrays in BindGroup
         // so that we only have to do one setVertexBuffers and one setFragmentBuffers
         // call here.
@@ -504,8 +500,8 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                     // TODO(crbug.com/dawn/854): Record bound buffer status to use
                     // setBufferOffset to achieve better performance.
                     if (bindingInfo.buffer.hasDynamicOffset) {
-                        offset += dynamicOffsets[currentDynamicBufferIndex];
-                        currentDynamicBufferIndex++;
+                        // Dynamic buffers are packed at the front of BindingIndices.
+                        offset += dynamicOffsets[bindingIndex];
                     }
 
                     if (hasVertStage) {
