@@ -26,7 +26,7 @@ void f_inner(uint local_invocation_index, threadgroup tint_array<float4x4, 4>* c
   threadgroup_barrier(mem_flags::mem_threadgroup);
   *(tint_symbol) = *(tint_symbol_1);
   (*(tint_symbol))[1] = (*(tint_symbol_1))[2];
-  (*(tint_symbol))[1][0] = float4((*(tint_symbol_1))[0][1]).ywxz;
+  (*(tint_symbol))[1][0] = (*(tint_symbol_1))[0][1].ywxz;
   (*(tint_symbol))[1][0][0] = (*(tint_symbol_1))[0][1][0];
 }
 

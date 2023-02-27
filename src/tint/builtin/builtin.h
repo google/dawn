@@ -30,6 +30,7 @@ namespace tint::builtin {
 /// An enumerator of builtin builtin.
 enum class Builtin {
     kUndefined,
+    kPackedVec3,
     kArray,
     kAtomic,
     kBool,
@@ -112,6 +113,7 @@ std::ostream& operator<<(std::ostream& out, Builtin value);
 Builtin ParseBuiltin(std::string_view str);
 
 constexpr const char* kBuiltinStrings[] = {
+    "__packed_vec3",
     "array",
     "atomic",
     "bool",

@@ -29,8 +29,8 @@ void d(float f_1) {
 kernel void f(const constant tint_array<float3x4, 4>* tint_symbol [[buffer(0)]]) {
   a(*(tint_symbol));
   b((*(tint_symbol))[1]);
-  c(float4((*(tint_symbol))[1][0]).ywxz);
-  d(float4((*(tint_symbol))[1][0]).ywxz[0]);
+  c((*(tint_symbol))[1][0].ywxz);
+  d((*(tint_symbol))[1][0].ywxz[0]);
   return;
 }
 

@@ -14,12 +14,7 @@ struct tint_array {
     T elements[N];
 };
 
-struct lightingInfo {
-  float3 diffuse;
-  float3 specular;
-};
-
-struct LeftOver {
+struct LeftOver_tint_packed_vec3 {
   /* 0x0000 */ float4x4 u_World;
   /* 0x0040 */ float4x4 u_ViewProjection;
   /* 0x0080 */ float u_bumpStrength;
@@ -32,7 +27,7 @@ struct LeftOver {
   /* 0x00a8 */ float2 tangentSpaceParameter0;
 };
 
-struct Light0 {
+struct Light0_tint_packed_vec3 {
   /* 0x0000 */ float4 vLightData;
   /* 0x0010 */ float4 vLightDiffuse;
   /* 0x0020 */ float4 vLightSpecular;
@@ -41,6 +36,33 @@ struct Light0 {
   /* 0x0040 */ float4 shadowsInfo;
   /* 0x0050 */ float2 depthValues;
   /* 0x0058 */ tint_array<int8_t, 8> tint_pad_1;
+};
+
+struct lightingInfo {
+  float3 diffuse;
+  float3 specular;
+};
+
+struct LeftOver {
+  float4x4 u_World;
+  float4x4 u_ViewProjection;
+  float u_bumpStrength;
+  uint padding;
+  float3 u_cameraPosition;
+  float u_parallaxScale;
+  float textureInfoName;
+  uint padding_1;
+  float2 tangentSpaceParameter0;
+};
+
+struct Light0 {
+  float4 vLightData;
+  float4 vLightDiffuse;
+  float4 vLightSpecular;
+  float3 vLightGround;
+  uint padding_2;
+  float4 shadowsInfo;
+  float2 depthValues;
 };
 
 float3x3 cotangent_frame_vf3_vf3_vf2_vf2_(thread float3* const normal_1, thread float3* const p, thread float2* const uv, thread float2* const tangentSpaceParams) {
@@ -174,7 +196,7 @@ lightingInfo computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(thread float
   return x_245;
 }
 
-void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample> tint_symbol_8, sampler tint_symbol_9, const constant LeftOver* const tint_symbol_10, thread float4* const tint_symbol_11, thread bool* const tint_symbol_12, thread float2* const tint_symbol_13, thread float4* const tint_symbol_14, texture2d<float, access::sample> tint_symbol_15, sampler tint_symbol_16, const constant Light0* const tint_symbol_17, thread float4* const tint_symbol_18) {
+void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample> tint_symbol_8, sampler tint_symbol_9, const constant LeftOver_tint_packed_vec3* const tint_symbol_10, thread float4* const tint_symbol_11, thread bool* const tint_symbol_12, thread float2* const tint_symbol_13, thread float4* const tint_symbol_14, texture2d<float, access::sample> tint_symbol_15, sampler tint_symbol_16, const constant Light0_tint_packed_vec3* const tint_symbol_17, thread float4* const tint_symbol_18) {
   thread float tint_symbol_5 = 0.0f;
   thread float3 tint_symbol_6 = 0.0f;
   float4 tempTextureRead = 0.0f;
@@ -434,7 +456,7 @@ struct tint_symbol_3 {
   float4 glFragColor_1 [[color(0)]];
 };
 
-main_out tint_symbol_inner(float2 vMainuv_param, float4 v_output1_param, bool gl_FrontFacing_param, float2 v_uv_param, float4 v_output2_param, thread float2* const tint_symbol_19, thread float4* const tint_symbol_20, thread bool* const tint_symbol_21, thread float2* const tint_symbol_22, thread float4* const tint_symbol_23, texture2d<float, access::sample> tint_symbol_24, sampler tint_symbol_25, const constant LeftOver* const tint_symbol_26, texture2d<float, access::sample> tint_symbol_27, sampler tint_symbol_28, const constant Light0* const tint_symbol_29, thread float4* const tint_symbol_30) {
+main_out tint_symbol_inner(float2 vMainuv_param, float4 v_output1_param, bool gl_FrontFacing_param, float2 v_uv_param, float4 v_output2_param, thread float2* const tint_symbol_19, thread float4* const tint_symbol_20, thread bool* const tint_symbol_21, thread float2* const tint_symbol_22, thread float4* const tint_symbol_23, texture2d<float, access::sample> tint_symbol_24, sampler tint_symbol_25, const constant LeftOver_tint_packed_vec3* const tint_symbol_26, texture2d<float, access::sample> tint_symbol_27, sampler tint_symbol_28, const constant Light0_tint_packed_vec3* const tint_symbol_29, thread float4* const tint_symbol_30) {
   *(tint_symbol_19) = vMainuv_param;
   *(tint_symbol_20) = v_output1_param;
   *(tint_symbol_21) = gl_FrontFacing_param;
@@ -445,7 +467,7 @@ main_out tint_symbol_inner(float2 vMainuv_param, float4 v_output1_param, bool gl
   return tint_symbol_4;
 }
 
-fragment tint_symbol_3 tint_symbol(texture2d<float, access::sample> tint_symbol_36 [[texture(0)]], sampler tint_symbol_37 [[sampler(0)]], const constant LeftOver* tint_symbol_38 [[buffer(0)]], texture2d<float, access::sample> tint_symbol_39 [[texture(1)]], sampler tint_symbol_40 [[sampler(1)]], const constant Light0* tint_symbol_41 [[buffer(1)]], bool gl_FrontFacing_param [[front_facing]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+fragment tint_symbol_3 tint_symbol(texture2d<float, access::sample> tint_symbol_36 [[texture(0)]], sampler tint_symbol_37 [[sampler(0)]], const constant LeftOver_tint_packed_vec3* tint_symbol_38 [[buffer(0)]], texture2d<float, access::sample> tint_symbol_39 [[texture(1)]], sampler tint_symbol_40 [[sampler(1)]], const constant Light0_tint_packed_vec3* tint_symbol_41 [[buffer(1)]], bool gl_FrontFacing_param [[front_facing]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
   thread float2 tint_symbol_31 = 0.0f;
   thread float4 tint_symbol_32 = 0.0f;
   thread bool tint_symbol_33 = false;

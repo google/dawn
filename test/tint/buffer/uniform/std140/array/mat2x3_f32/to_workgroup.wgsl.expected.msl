@@ -18,19 +18,40 @@ struct tint_symbol_5 {
   tint_array<float2x3, 4> w;
 };
 
-void f_inner(uint local_invocation_index, threadgroup tint_array<float2x3, 4>* const tint_symbol, const constant tint_array<float2x3, 4>* const tint_symbol_1) {
+struct tint_packed_vec3_f32_array_element {
+  /* 0x0000 */ packed_float3 elements;
+  /* 0x000c */ tint_array<int8_t, 4> tint_pad;
+};
+
+float2x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 2> in) {
+  float2x3 result = float2x3(0.0f);
+  for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+    result[i] = float3(in[i].elements);
+  }
+  return result;
+}
+
+tint_array<float2x3, 4> tint_unpack_vec3_in_composite_1(tint_array<tint_array<tint_packed_vec3_f32_array_element, 2>, 4> in) {
+  tint_array<float2x3, 4> result = {};
+  for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    result[i] = tint_unpack_vec3_in_composite(in[i]);
+  }
+  return result;
+}
+
+void f_inner(uint local_invocation_index, threadgroup tint_array<float2x3, 4>* const tint_symbol, const constant tint_array<tint_array<tint_packed_vec3_f32_array_element, 2>, 4>* const tint_symbol_1) {
   for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
     uint const i = idx;
     (*(tint_symbol))[i] = float2x3(float3(0.0f), float3(0.0f));
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  *(tint_symbol) = *(tint_symbol_1);
-  (*(tint_symbol))[1] = (*(tint_symbol_1))[2];
-  (*(tint_symbol))[1][0] = float3((*(tint_symbol_1))[0][1]).zxy;
-  (*(tint_symbol))[1][0][0] = (*(tint_symbol_1))[0][1][0];
+  *(tint_symbol) = tint_unpack_vec3_in_composite_1(*(tint_symbol_1));
+  (*(tint_symbol))[1] = tint_unpack_vec3_in_composite((*(tint_symbol_1))[2]);
+  (*(tint_symbol))[1][0] = float3((*(tint_symbol_1))[0][1].elements).zxy;
+  (*(tint_symbol))[1][0][0] = (*(tint_symbol_1))[0][1].elements[0];
 }
 
-kernel void f(const constant tint_array<float2x3, 4>* tint_symbol_4 [[buffer(0)]], threadgroup tint_symbol_5* tint_symbol_3 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
+kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f32_array_element, 2>, 4>* tint_symbol_4 [[buffer(0)]], threadgroup tint_symbol_5* tint_symbol_3 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
   threadgroup tint_array<float2x3, 4>* const tint_symbol_2 = &((*(tint_symbol_3)).w);
   f_inner(local_invocation_index, tint_symbol_2, tint_symbol_4);
   return;

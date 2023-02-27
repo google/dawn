@@ -14,12 +14,16 @@ struct tint_array {
     T elements[N];
 };
 
-struct S {
+struct S_tint_packed_vec3 {
   /* 0x0000 */ packed_int3 v;
   /* 0x000c */ tint_array<int8_t, 4> tint_pad;
 };
 
-void f(const constant S* const tint_symbol) {
+struct S {
+  int3 v;
+};
+
+void f(const constant S_tint_packed_vec3* const tint_symbol) {
   int3 v = int3((*(tint_symbol)).v);
   int x = (*(tint_symbol)).v[0];
   int y = (*(tint_symbol)).v[1];

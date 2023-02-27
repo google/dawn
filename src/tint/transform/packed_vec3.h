@@ -15,42 +15,31 @@
 #ifndef SRC_TINT_TRANSFORM_PACKED_VEC3_H_
 #define SRC_TINT_TRANSFORM_PACKED_VEC3_H_
 
-#include <string>
-
-#include "src/tint/ast/internal_attribute.h"
 #include "src/tint/transform/transform.h"
 
 namespace tint::transform {
 
 /// A transform to be used by the MSL backend which will:
-/// * Apply the `@internal('packed_vector')` attribute (PackedVec3::Attribute) to all host-sharable
-///   structure members that have a vec3<T> type.
+/// * Replace `vec3<T>` types with an internal `__packed_vec3` type when they are used in
+///   host-shareable address spaces.
+/// * Wrap generated `__packed_vec3` types in a structure when they are used in arrays, so that we
+///   ensure that the array has the correct element stride.
+/// * Multi-version structures that contain `vec3<T>` types when they are used in host-shareable
+///   memory, to avoid modifying uses in other address spaces.
+/// * Rewrite matrix types that have three rows into arrays of column vectors.
+/// * Insert calls to helper functions to convert expressions that use these types to or from the
+///   regular vec3 types when accessing host-shareable memory.
 /// * Cast all direct (not sub-accessed) loads of these packed vectors to the 'unpacked' vec3<T>
 ///   type before usage.
 ///
-/// This transform papers over overload holes in the MSL standard library where an MSL
-/// `packed_vector` type cannot be interchangable used as a regular `vec` type.
+/// This transform is necessary in order to emit vec3 types with the correct size (so that scalars
+/// can follow them in structures), and also to ensure that padding bytes are preserved when writing
+/// to a vec3, an array of vec3 elements, or a matrix with vec3 column type.
+///
+/// @note Depends on the following transforms to have been run first:
+/// * ExpandCompoundAssignment
 class PackedVec3 final : public Castable<PackedVec3, Transform> {
   public:
-    /// Attribute is the attribute applied to padded vector structure members.
-    class Attribute final : public Castable<Attribute, ast::InternalAttribute> {
-      public:
-        /// Constructor
-        /// @param pid the identifier of the program that owns this node
-        /// @param nid the unique node identifier
-        Attribute(ProgramID pid, ast::NodeID nid);
-        /// Destructor
-        ~Attribute() override;
-
-        /// @returns "packed_vector".
-        std::string InternalName() const override;
-
-        /// Performs a deep clone of this object using the CloneContext `ctx`.
-        /// @param ctx the clone context
-        /// @return the newly cloned object
-        const Attribute* Clone(CloneContext* ctx) const override;
-    };
-
     /// Constructor
     PackedVec3();
     /// Destructor

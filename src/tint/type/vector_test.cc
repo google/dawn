@@ -34,6 +34,21 @@ TEST_F(VectorTest, Creation) {
     EXPECT_NE(a, d);
 }
 
+TEST_F(VectorTest, Creation_Packed) {
+    auto* v = create<Vector>(create<F32>(), 3u);
+    auto* p1 = create<Vector>(create<F32>(), 3u, true);
+    auto* p2 = create<Vector>(create<F32>(), 3u, true);
+
+    EXPECT_FALSE(v->Packed());
+
+    EXPECT_EQ(p1->type(), create<F32>());
+    EXPECT_EQ(p1->Width(), 3u);
+    EXPECT_TRUE(p1->Packed());
+
+    EXPECT_NE(v, p1);
+    EXPECT_EQ(p1, p2);
+}
+
 TEST_F(VectorTest, Hash) {
     auto* a = create<Vector>(create<I32>(), 2u);
     auto* b = create<Vector>(create<I32>(), 2u);
@@ -59,6 +74,12 @@ TEST_F(VectorTest, FriendlyName) {
     EXPECT_EQ(v->FriendlyName(Symbols()), "vec3<f32>");
 }
 
+TEST_F(VectorTest, FriendlyName_Packed) {
+    auto* f32 = create<F32>();
+    auto* v = create<Vector>(f32, 3u, true);
+    EXPECT_EQ(v->FriendlyName(Symbols()), "__packed_vec3<f32>");
+}
+
 TEST_F(VectorTest, Clone) {
     auto* a = create<Vector>(create<I32>(), 2u);
 
@@ -68,6 +89,19 @@ TEST_F(VectorTest, Clone) {
     auto* vec = a->Clone(ctx);
     EXPECT_TRUE(vec->type()->Is<I32>());
     EXPECT_EQ(vec->Width(), 2u);
+    EXPECT_FALSE(vec->Packed());
+}
+
+TEST_F(VectorTest, Clone_Packed) {
+    auto* a = create<Vector>(create<I32>(), 3u, true);
+
+    type::Manager mgr;
+    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* vec = a->Clone(ctx);
+    EXPECT_TRUE(vec->type()->Is<I32>());
+    EXPECT_EQ(vec->Width(), 3u);
+    EXPECT_TRUE(vec->Packed());
 }
 
 }  // namespace

@@ -48,6 +48,7 @@ enum class CtorConvIntrinsic {
     kMat4x2,
     kMat4x3,
     kMat4x4,
+    kPackedVec3,
 };
 
 /// @returns the name of the type.

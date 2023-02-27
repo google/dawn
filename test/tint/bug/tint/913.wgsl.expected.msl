@@ -33,7 +33,7 @@ bool aboutEqual(float value, float expect) {
 void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample> tint_symbol_7, texture2d<float, access::sample> tint_symbol_8, const constant Uniforms* const tint_symbol_9, device OutputBuf* const tint_symbol_10) {
   uint2 const srcSize = uint2(tint_symbol_7.get_width(), tint_symbol_7.get_height());
   uint2 const dstSize = uint2(tint_symbol_8.get_width(), tint_symbol_8.get_height());
-  uint2 const dstTexCoord = uint2(uint3(GlobalInvocationID).xy);
+  uint2 const dstTexCoord = uint2(GlobalInvocationID.xy);
   float4 const nonCoveredColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
   if (((((dstTexCoord[0] < (*(tint_symbol_9)).dstCopyOrigin[0]) || (dstTexCoord[1] < (*(tint_symbol_9)).dstCopyOrigin[1])) || (dstTexCoord[0] >= ((*(tint_symbol_9)).dstCopyOrigin[0] + (*(tint_symbol_9)).copySize[0]))) || (dstTexCoord[1] >= ((*(tint_symbol_9)).dstCopyOrigin[1] + (*(tint_symbol_9)).copySize[1])))) {

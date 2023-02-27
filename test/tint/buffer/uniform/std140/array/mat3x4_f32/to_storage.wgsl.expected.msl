@@ -17,7 +17,7 @@ struct tint_array {
 kernel void f(device tint_array<float3x4, 4>* tint_symbol [[buffer(1)]], const constant tint_array<float3x4, 4>* tint_symbol_1 [[buffer(0)]]) {
   *(tint_symbol) = *(tint_symbol_1);
   (*(tint_symbol))[1] = (*(tint_symbol_1))[2];
-  (*(tint_symbol))[1][0] = float4((*(tint_symbol_1))[0][1]).ywxz;
+  (*(tint_symbol))[1][0] = (*(tint_symbol_1))[0][1].ywxz;
   (*(tint_symbol))[1][0][0] = (*(tint_symbol_1))[0][1][0];
   return;
 }

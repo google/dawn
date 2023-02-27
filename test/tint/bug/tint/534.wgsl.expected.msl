@@ -31,7 +31,7 @@ uint ConvertToFp16FloatValue(float fp32) {
 
 void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample> tint_symbol_2, const constant Uniforms* const tint_symbol_3, texture2d<float, access::sample> tint_symbol_4, device OutputBuf* const tint_symbol_5) {
   uint2 size = uint2(tint_symbol_2.get_width(), tint_symbol_2.get_height());
-  uint2 dstTexCoord = uint3(GlobalInvocationID).xy;
+  uint2 dstTexCoord = GlobalInvocationID.xy;
   uint2 srcTexCoord = dstTexCoord;
   if (((*(tint_symbol_3)).dstTextureFlipY == 1u)) {
     srcTexCoord[1] = ((size[1] - dstTexCoord[1]) - 1u);

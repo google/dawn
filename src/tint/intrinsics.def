@@ -211,6 +211,9 @@ enum builtin_type {
   texture_storage_3d
   // https://www.w3.org/TR/WGSL/#external-texture-type
   texture_external
+
+  // Internal types.
+  __packed_vec3
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#attributes
@@ -289,6 +292,7 @@ type texture_storage_2d<F: texel_format, A: access>
 type texture_storage_2d_array<F: texel_format, A: access>
 type texture_storage_3d<F: texel_format, A: access>
 type texture_external
+type packedVec3<T>
 
 @display("__modf_result_{T}")        type __modf_result<T>
 @display("__modf_result_vec{N}_{T}") type __modf_result_vec<N: num, T>
@@ -1000,6 +1004,9 @@ ctor mat4x4<T: fa_f32_f16>(T, T, T, T,
 @must_use @const conv mat4x3<T: f32>(mat4x3<f16>) -> mat4x3<f32>
 @must_use @const conv mat4x4<T: f16>(mat4x4<f32>) -> mat4x4<f16>
 @must_use @const conv mat4x4<T: f32>(mat4x4<f16>) -> mat4x4<f32>
+
+// Conversion from vec3 to internal __packed_vec3 type.
+@must_use @const conv packedVec3<T: concrete_scalar>(vec3<T>) -> packedVec3<T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Operators                                                                  //

@@ -1,6 +1,11 @@
 #include <metal_stdlib>
 
 using namespace metal;
+struct S_tint_packed_vec3 {
+  /* 0x0000 */ packed_float3 v;
+  /* 0x000c */ uint i;
+};
+
 float3 Bad(uint index, float3 rd) {
   float3 normal = float3(0.0f);
   normal[index] = -(sign(rd[index]));
@@ -8,16 +13,16 @@ float3 Bad(uint index, float3 rd) {
 }
 
 struct S {
-  /* 0x0000 */ packed_float3 v;
-  /* 0x000c */ uint i;
+  float3 v;
+  uint i;
 };
 
-void tint_symbol_inner(uint idx, device S* const tint_symbol_2) {
+void tint_symbol_inner(uint idx, device S_tint_packed_vec3* const tint_symbol_2) {
   float3 const tint_symbol_1 = Bad((*(tint_symbol_2)).i, float3((*(tint_symbol_2)).v));
-  (*(tint_symbol_2)).v = tint_symbol_1;
+  (*(tint_symbol_2)).v = packed_float3(tint_symbol_1);
 }
 
-kernel void tint_symbol(device S* tint_symbol_3 [[buffer(0)]], uint idx [[thread_index_in_threadgroup]]) {
+kernel void tint_symbol(device S_tint_packed_vec3* tint_symbol_3 [[buffer(0)]], uint idx [[thread_index_in_threadgroup]]) {
   tint_symbol_inner(idx, tint_symbol_3);
   return;
 }

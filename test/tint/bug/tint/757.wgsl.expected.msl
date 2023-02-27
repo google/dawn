@@ -25,7 +25,7 @@ struct Result {
 void tint_symbol_inner(uint3 GlobalInvocationID, texture2d_array<float, access::sample> tint_symbol_1, device Result* const tint_symbol_2) {
   uint flatIndex = (((4u * GlobalInvocationID[2]) + (2u * GlobalInvocationID[1])) + GlobalInvocationID[0]);
   flatIndex = (flatIndex * 1u);
-  float4 texel = tint_symbol_1.read(uint2(int2(uint3(GlobalInvocationID).xy)), 0, 0);
+  float4 texel = tint_symbol_1.read(uint2(int2(GlobalInvocationID.xy)), 0, 0);
   for(uint i = 0u; (i < 1u); i = (i + 1u)) {
     (*(tint_symbol_2)).values[(flatIndex + i)] = texel[0];
   }

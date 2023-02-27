@@ -89,8 +89,8 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, device Particles* const tint_s
     if ((i == index)) {
       continue;
     }
-    pos = float2((*(tint_symbol_4)).particles[i].pos).xy;
-    vel = float2((*(tint_symbol_4)).particles[i].vel).xy;
+    pos = (*(tint_symbol_4)).particles[i].pos.xy;
+    vel = (*(tint_symbol_4)).particles[i].vel.xy;
     if ((distance(pos, vPos) < (*(tint_symbol_5)).rule1Distance)) {
       cMass = (cMass + pos);
       cMassCount = as_type<int>((as_type<uint>(cMassCount) + as_type<uint>(1)));

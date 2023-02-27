@@ -1,8 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-kernel void tint_symbol(const constant uint3* tint_symbol_1 [[buffer(0)]]) {
-  uint3 const x = *(tint_symbol_1);
+kernel void tint_symbol(const constant packed_uint3* tint_symbol_1 [[buffer(0)]]) {
+  uint3 const x = uint3(*(tint_symbol_1));
   return;
 }
 

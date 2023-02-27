@@ -14,14 +14,32 @@ struct tint_array {
     T elements[N];
 };
 
-struct S {
-  /* 0x0000 */ float3x3 tint_symbol;
-  /* 0x0030 */ packed_float3 vector;
-  /* 0x003c */ tint_array<int8_t, 4> tint_pad;
+struct tint_packed_vec3_f32_array_element {
+  /* 0x0000 */ packed_float3 elements;
+  /* 0x000c */ tint_array<int8_t, 4> tint_pad;
 };
 
-fragment void tint_symbol_1(const constant S* tint_symbol_2 [[buffer(0)]]) {
-  float3 const x = ((*(tint_symbol_2)).tint_symbol * float3((*(tint_symbol_2)).vector));
+struct S_tint_packed_vec3 {
+  /* 0x0000 */ tint_array<tint_packed_vec3_f32_array_element, 3> tint_symbol;
+  /* 0x0030 */ packed_float3 vector;
+  /* 0x003c */ tint_array<int8_t, 4> tint_pad_1;
+};
+
+float3x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 3> in) {
+  float3x3 result = float3x3(0.0f);
+  for(uint i = 0u; (i < 3u); i = (i + 1u)) {
+    result[i] = float3(in[i].elements);
+  }
+  return result;
+}
+
+struct S {
+  float3x3 tint_symbol;
+  float3 vector;
+};
+
+fragment void tint_symbol_1(const constant S_tint_packed_vec3* tint_symbol_2 [[buffer(0)]]) {
+  float3 const x = (tint_unpack_vec3_in_composite((*(tint_symbol_2)).tint_symbol) * float3((*(tint_symbol_2)).vector));
   return;
 }
 

@@ -14,13 +14,17 @@ struct tint_array {
     T elements[N];
 };
 
-struct S {
+struct S_tint_packed_vec3 {
   /* 0x0000 */ packed_half3 v;
   /* 0x0006 */ tint_array<int8_t, 2> tint_pad;
 };
 
-void f(device S* const tint_symbol) {
-  (*(tint_symbol)).v = half3(1.0h, 2.0h, 3.0h);
+struct S {
+  half3 v;
+};
+
+void f(device S_tint_packed_vec3* const tint_symbol) {
+  (*(tint_symbol)).v = packed_half3(1.0h, 2.0h, 3.0h);
   (*(tint_symbol)).v[0] = 1.0h;
   (*(tint_symbol)).v[1] = 2.0h;
   (*(tint_symbol)).v[2] = 3.0h;

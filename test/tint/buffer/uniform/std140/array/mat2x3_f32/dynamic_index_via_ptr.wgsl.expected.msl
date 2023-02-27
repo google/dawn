@@ -14,20 +14,41 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_packed_vec3_f32_array_element {
+  /* 0x0000 */ packed_float3 elements;
+  /* 0x000c */ tint_array<int8_t, 4> tint_pad;
+};
+
+float2x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 2> in) {
+  float2x3 result = float2x3(0.0f);
+  for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+    result[i] = float3(in[i].elements);
+  }
+  return result;
+}
+
+tint_array<float2x3, 4> tint_unpack_vec3_in_composite_1(tint_array<tint_array<tint_packed_vec3_f32_array_element, 2>, 4> in) {
+  tint_array<float2x3, 4> result = {};
+  for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    result[i] = tint_unpack_vec3_in_composite(in[i]);
+  }
+  return result;
+}
+
 int i() {
   thread int tint_symbol_2 = 0;
   tint_symbol_2 = as_type<int>((as_type<uint>(tint_symbol_2) + as_type<uint>(1)));
   return tint_symbol_2;
 }
 
-kernel void f(const constant tint_array<float2x3, 4>* tint_symbol_3 [[buffer(0)]]) {
+kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f32_array_element, 2>, 4>* tint_symbol_3 [[buffer(0)]]) {
   int const tint_symbol = i();
   int const p_a_i_save = tint_symbol;
   int const tint_symbol_1 = i();
   int const p_a_i_i_save = tint_symbol_1;
-  tint_array<float2x3, 4> const l_a = *(tint_symbol_3);
-  float2x3 const l_a_i = (*(tint_symbol_3))[p_a_i_save];
-  float3 const l_a_i_i = (*(tint_symbol_3))[p_a_i_save][p_a_i_i_save];
+  tint_array<float2x3, 4> const l_a = tint_unpack_vec3_in_composite_1(*(tint_symbol_3));
+  float2x3 const l_a_i = tint_unpack_vec3_in_composite((*(tint_symbol_3))[p_a_i_save]);
+  float3 const l_a_i_i = float3((*(tint_symbol_3))[p_a_i_save][p_a_i_i_save].elements);
   return;
 }
 

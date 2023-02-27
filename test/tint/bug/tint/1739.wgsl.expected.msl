@@ -14,9 +14,10 @@ struct tint_array {
     T elements[N];
 };
 
-int2 tint_clamp(int2 e, int2 low, int2 high) {
-  return min(max(e, low), high);
-}
+struct tint_packed_vec3_f32_array_element {
+  /* 0x0000 */ packed_float3 elements;
+  /* 0x000c */ tint_array<int8_t, 4> tint_pad;
+};
 
 struct GammaTransferParams {
   /* 0x0000 */ float G;
@@ -29,17 +30,51 @@ struct GammaTransferParams {
   /* 0x001c */ uint padding;
 };
 
-struct ExternalTextureParams {
+struct ExternalTextureParams_tint_packed_vec3 {
   /* 0x0000 */ uint numPlanes;
   /* 0x0004 */ uint doYuvToRgbConversionOnly;
-  /* 0x0008 */ tint_array<int8_t, 8> tint_pad;
+  /* 0x0008 */ tint_array<int8_t, 8> tint_pad_1;
   /* 0x0010 */ float3x4 yuvToRgbConversionMatrix;
   /* 0x0040 */ GammaTransferParams gammaDecodeParams;
   /* 0x0060 */ GammaTransferParams gammaEncodeParams;
-  /* 0x0080 */ float3x3 gamutConversionMatrix;
+  /* 0x0080 */ tint_array<tint_packed_vec3_f32_array_element, 3> gamutConversionMatrix;
   /* 0x00b0 */ float3x2 coordTransformationMatrix;
-  /* 0x00c8 */ tint_array<int8_t, 8> tint_pad_1;
+  /* 0x00c8 */ tint_array<int8_t, 8> tint_pad_2;
 };
+
+float3x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 3> in) {
+  float3x3 result = float3x3(0.0f);
+  for(uint i = 0u; (i < 3u); i = (i + 1u)) {
+    result[i] = float3(in[i].elements);
+  }
+  return result;
+}
+
+struct ExternalTextureParams {
+  uint numPlanes;
+  uint doYuvToRgbConversionOnly;
+  float3x4 yuvToRgbConversionMatrix;
+  GammaTransferParams gammaDecodeParams;
+  GammaTransferParams gammaEncodeParams;
+  float3x3 gamutConversionMatrix;
+  float3x2 coordTransformationMatrix;
+};
+
+ExternalTextureParams tint_unpack_vec3_in_composite_1(ExternalTextureParams_tint_packed_vec3 in) {
+  ExternalTextureParams result = {};
+  result.numPlanes = in.numPlanes;
+  result.doYuvToRgbConversionOnly = in.doYuvToRgbConversionOnly;
+  result.yuvToRgbConversionMatrix = in.yuvToRgbConversionMatrix;
+  result.gammaDecodeParams = in.gammaDecodeParams;
+  result.gammaEncodeParams = in.gammaEncodeParams;
+  result.gamutConversionMatrix = tint_unpack_vec3_in_composite(in.gamutConversionMatrix);
+  result.coordTransformationMatrix = in.coordTransformationMatrix;
+  return result;
+}
+
+int2 tint_clamp(int2 e, int2 low, int2 high) {
+  return min(max(e, low), high);
+}
 
 float3 gammaCorrection(float3 v, GammaTransferParams params) {
   bool3 const cond = (fabs(v) < float3(params.D));
@@ -52,9 +87,9 @@ float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<fl
   int2 const coord1 = (coord >> uint2(1u));
   float3 color = 0.0f;
   if ((params.numPlanes == 1u)) {
-    color = float4(plane0.read(uint2(coord), 0)).rgb;
+    color = plane0.read(uint2(coord), 0).rgb;
   } else {
-    color = (float4(plane0.read(uint2(coord), 0)[0], float4(plane1.read(uint2(coord1), 0)).rg, 1.0f) * params.yuvToRgbConversionMatrix);
+    color = (float4(plane0.read(uint2(coord), 0)[0], plane1.read(uint2(coord1), 0).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
     color = gammaCorrection(color, params.gammaDecodeParams);
@@ -64,13 +99,13 @@ float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<fl
   return float4(color, 1.0f);
 }
 
-kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_5 [[texture(0)]], texture2d<float, access::sample> tint_symbol_6 [[texture(1)]], const constant ExternalTextureParams* tint_symbol_7 [[buffer(0)]], texture2d<float, access::write> tint_symbol_8 [[texture(2)]]) {
+kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_5 [[texture(0)]], texture2d<float, access::sample> tint_symbol_6 [[texture(1)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_7 [[buffer(0)]], texture2d<float, access::write> tint_symbol_8 [[texture(2)]]) {
   int2 const tint_symbol_1 = tint_clamp(int2(10), int2(0), int2((uint2(uint2(tint_symbol_5.get_width(), tint_symbol_5.get_height())) - uint2(1u))));
-  float4 red = textureLoadExternal(tint_symbol_5, tint_symbol_6, tint_symbol_1, *(tint_symbol_7));
+  float4 red = textureLoadExternal(tint_symbol_5, tint_symbol_6, tint_symbol_1, tint_unpack_vec3_in_composite_1(*(tint_symbol_7)));
   int2 const tint_symbol_2 = tint_clamp(int2(0), int2(0), int2((uint2(uint2(tint_symbol_8.get_width(), tint_symbol_8.get_height())) - uint2(1u))));
   tint_symbol_8.write(red, uint2(tint_symbol_2));
   int2 const tint_symbol_3 = tint_clamp(int2(70, 118), int2(0), int2((uint2(uint2(tint_symbol_5.get_width(), tint_symbol_5.get_height())) - uint2(1u))));
-  float4 green = textureLoadExternal(tint_symbol_5, tint_symbol_6, tint_symbol_3, *(tint_symbol_7));
+  float4 green = textureLoadExternal(tint_symbol_5, tint_symbol_6, tint_symbol_3, tint_unpack_vec3_in_composite_1(*(tint_symbol_7)));
   int2 const tint_symbol_4 = tint_clamp(int2(1, 0), int2(0), int2((uint2(uint2(tint_symbol_8.get_width(), tint_symbol_8.get_height())) - uint2(1u))));
   tint_symbol_8.write(green, uint2(tint_symbol_4));
   return;

@@ -28,6 +28,9 @@ namespace tint::builtin {
 /// @param str the string to parse
 /// @returns the parsed enum, or Builtin::kUndefined if the string could not be parsed.
 Builtin ParseBuiltin(std::string_view str) {
+    if (str == "__packed_vec3") {
+        return Builtin::kPackedVec3;
+    }
     if (str == "array") {
         return Builtin::kArray;
     }
@@ -242,6 +245,8 @@ std::ostream& operator<<(std::ostream& out, Builtin value) {
     switch (value) {
         case Builtin::kUndefined:
             return out << "undefined";
+        case Builtin::kPackedVec3:
+            return out << "__packed_vec3";
         case Builtin::kArray:
             return out << "array";
         case Builtin::kAtomic:

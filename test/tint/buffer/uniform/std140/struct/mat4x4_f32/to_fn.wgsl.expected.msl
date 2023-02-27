@@ -42,8 +42,8 @@ kernel void f(const constant tint_array<S, 4>* tint_symbol [[buffer(0)]]) {
   a(*(tint_symbol));
   b((*(tint_symbol))[2]);
   c((*(tint_symbol))[2].m);
-  d(float4((*(tint_symbol))[0].m[1]).ywxz);
-  e(float4((*(tint_symbol))[0].m[1]).ywxz[0]);
+  d((*(tint_symbol))[0].m[1].ywxz);
+  e((*(tint_symbol))[0].m[1].ywxz[0]);
   return;
 }
 

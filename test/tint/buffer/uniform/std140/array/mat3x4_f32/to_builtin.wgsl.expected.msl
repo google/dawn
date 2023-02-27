@@ -16,8 +16,8 @@ struct tint_array {
 
 kernel void f(const constant tint_array<float3x4, 4>* tint_symbol [[buffer(0)]]) {
   float4x3 const t = transpose((*(tint_symbol))[2]);
-  float const l = length(float4((*(tint_symbol))[0][1]).ywxz);
-  float const a = fabs(float4((*(tint_symbol))[0][1]).ywxz[0]);
+  float const l = length((*(tint_symbol))[0][1].ywxz);
+  float const a = fabs((*(tint_symbol))[0][1].ywxz[0]);
   return;
 }
 

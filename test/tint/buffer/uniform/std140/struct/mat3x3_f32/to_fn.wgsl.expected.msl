@@ -14,13 +14,48 @@ struct tint_array {
     T elements[N];
 };
 
-struct S {
-  /* 0x0000 */ int before;
-  /* 0x0004 */ tint_array<int8_t, 12> tint_pad;
-  /* 0x0010 */ float3x3 m;
-  /* 0x0040 */ int after;
-  /* 0x0044 */ tint_array<int8_t, 60> tint_pad_1;
+struct tint_packed_vec3_f32_array_element {
+  /* 0x0000 */ packed_float3 elements;
+  /* 0x000c */ tint_array<int8_t, 4> tint_pad;
 };
+
+struct S_tint_packed_vec3 {
+  /* 0x0000 */ int before;
+  /* 0x0004 */ tint_array<int8_t, 12> tint_pad_1;
+  /* 0x0010 */ tint_array<tint_packed_vec3_f32_array_element, 3> m;
+  /* 0x0040 */ int after;
+  /* 0x0044 */ tint_array<int8_t, 60> tint_pad_2;
+};
+
+float3x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 3> in) {
+  float3x3 result = float3x3(0.0f);
+  for(uint i = 0u; (i < 3u); i = (i + 1u)) {
+    result[i] = float3(in[i].elements);
+  }
+  return result;
+}
+
+struct S {
+  int before;
+  float3x3 m;
+  int after;
+};
+
+S tint_unpack_vec3_in_composite_1(S_tint_packed_vec3 in) {
+  S result = {};
+  result.before = in.before;
+  result.m = tint_unpack_vec3_in_composite(in.m);
+  result.after = in.after;
+  return result;
+}
+
+tint_array<S, 4> tint_unpack_vec3_in_composite_2(tint_array<S_tint_packed_vec3, 4> in) {
+  tint_array<S, 4> result = {};
+  for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    result[i] = tint_unpack_vec3_in_composite_1(in[i]);
+  }
+  return result;
+}
 
 void a(tint_array<S, 4> a_1) {
 }
@@ -37,12 +72,12 @@ void d(float3 v) {
 void e(float f_1) {
 }
 
-kernel void f(const constant tint_array<S, 4>* tint_symbol [[buffer(0)]]) {
-  a(*(tint_symbol));
-  b((*(tint_symbol))[2]);
-  c((*(tint_symbol))[2].m);
-  d(float3((*(tint_symbol))[0].m[1]).zxy);
-  e(float3((*(tint_symbol))[0].m[1]).zxy[0]);
+kernel void f(const constant tint_array<S_tint_packed_vec3, 4>* tint_symbol [[buffer(0)]]) {
+  a(tint_unpack_vec3_in_composite_2(*(tint_symbol)));
+  b(tint_unpack_vec3_in_composite_1((*(tint_symbol))[2]));
+  c(tint_unpack_vec3_in_composite((*(tint_symbol))[2].m));
+  d(float3((*(tint_symbol))[0].m[1].elements).zxy);
+  e(float3((*(tint_symbol))[0].m[1].elements).zxy[0]);
   return;
 }
 

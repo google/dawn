@@ -4,7 +4,7 @@ using namespace metal;
 kernel void f(const constant half4x4* tint_symbol [[buffer(0)]]) {
   half4x4 const t = transpose(*(tint_symbol));
   half const l = length((*(tint_symbol))[1]);
-  half const a = fabs(half4((*(tint_symbol))[0]).ywxz[0]);
+  half const a = fabs((*(tint_symbol))[0].ywxz[0]);
   return;
 }
 

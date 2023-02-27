@@ -14,7 +14,7 @@ struct tint_array {
     T elements[N];
 };
 
-struct Inner {
+struct Inner_tint_packed_vec3 {
   /* 0x0000 */ float scalar_f32;
   /* 0x0004 */ tint_array<int8_t, 12> tint_pad;
   /* 0x0010 */ packed_float3 vec3_f32;
@@ -22,12 +22,36 @@ struct Inner {
   /* 0x0020 */ float2x4 mat2x4_f32;
 };
 
-struct S {
-  /* 0x0000 */ Inner inner;
+struct S_tint_packed_vec3 {
+  /* 0x0000 */ Inner_tint_packed_vec3 inner;
 };
 
-kernel void tint_symbol(const constant S* tint_symbol_1 [[buffer(0)]]) {
-  S const x = *(tint_symbol_1);
+struct Inner {
+  float scalar_f32;
+  float3 vec3_f32;
+  float2x4 mat2x4_f32;
+};
+
+Inner tint_unpack_vec3_in_composite(Inner_tint_packed_vec3 in) {
+  Inner result = {};
+  result.scalar_f32 = in.scalar_f32;
+  result.vec3_f32 = float3(in.vec3_f32);
+  result.mat2x4_f32 = in.mat2x4_f32;
+  return result;
+}
+
+struct S {
+  Inner inner;
+};
+
+S tint_unpack_vec3_in_composite_1(S_tint_packed_vec3 in) {
+  S result = {};
+  result.inner = tint_unpack_vec3_in_composite(in.inner);
+  return result;
+}
+
+kernel void tint_symbol(const constant S_tint_packed_vec3* tint_symbol_1 [[buffer(0)]]) {
+  S const x = tint_unpack_vec3_in_composite_1(*(tint_symbol_1));
   return;
 }
 

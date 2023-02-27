@@ -14,14 +14,24 @@ struct tint_array {
     T elements[N];
 };
 
-struct LightData {
+struct LightData_tint_packed_vec3 {
   /* 0x0000 */ float4 position;
   /* 0x0010 */ packed_float3 color;
   /* 0x001c */ float radius;
 };
 
+struct LightsBuffer_tint_packed_vec3 {
+  /* 0x0000 */ tint_array<LightData_tint_packed_vec3, 1> lights;
+};
+
+struct LightData {
+  float4 position;
+  float3 color;
+  float radius;
+};
+
 struct LightsBuffer {
-  /* 0x0000 */ tint_array<LightData, 1> lights;
+  tint_array<LightData, 1> lights;
 };
 
 struct TileLightIdData {
@@ -50,7 +60,7 @@ struct Uniforms {
   /* 0x00a0 */ float4 fullScreenSize;
 };
 
-void tint_symbol_inner(uint3 GlobalInvocationID, const constant Config* const tint_symbol_1, device LightsBuffer* const tint_symbol_2, const constant Uniforms* const tint_symbol_3, device Tiles* const tint_symbol_4) {
+void tint_symbol_inner(uint3 GlobalInvocationID, const constant Config* const tint_symbol_1, device LightsBuffer_tint_packed_vec3* const tint_symbol_2, const constant Uniforms* const tint_symbol_3, device Tiles* const tint_symbol_4) {
   uint index = GlobalInvocationID[0];
   if ((index >= (*(tint_symbol_1)).numLights)) {
     return;
@@ -77,8 +87,8 @@ void tint_symbol_inner(uint3 GlobalInvocationID, const constant Config* const ti
   for(int y = 0; (y < TILE_COUNT_Y); y = as_type<int>((as_type<uint>(y) + as_type<uint>(1)))) {
     for(int x = 0; (x < TILE_COUNT_X); x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)))) {
       int2 tilePixel0Idx = int2(as_type<int>((as_type<uint>(x) * as_type<uint>(TILE_SIZE))), as_type<int>((as_type<uint>(y) * as_type<uint>(TILE_SIZE))));
-      float2 floorCoord = (((2.0f * float2(tilePixel0Idx)) / float4((*(tint_symbol_3)).fullScreenSize).xy) - float2(1.0f));
-      float2 ceilCoord = (((2.0f * float2(as_type<int2>((as_type<uint2>(tilePixel0Idx) + as_type<uint2>(int2(TILE_SIZE)))))) / float4((*(tint_symbol_3)).fullScreenSize).xy) - float2(1.0f));
+      float2 floorCoord = (((2.0f * float2(tilePixel0Idx)) / (*(tint_symbol_3)).fullScreenSize.xy) - float2(1.0f));
+      float2 ceilCoord = (((2.0f * float2(as_type<int2>((as_type<uint2>(tilePixel0Idx) + as_type<uint2>(int2(TILE_SIZE)))))) / (*(tint_symbol_3)).fullScreenSize.xy) - float2(1.0f));
       float2 viewFloorCoord = float2((((-(viewNear) * floorCoord[0]) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * floorCoord[1]) - (M[2][1] * viewNear)) / M[1][1]));
       float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord[0]) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * ceilCoord[1]) - (M[2][1] * viewNear)) / M[1][1]));
       frustumPlanes[0] = float4(1.0f, 0.0f, (-(viewFloorCoord[0]) / viewNear), 0.0f);
@@ -121,7 +131,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, const constant Config* const ti
   }
 }
 
-kernel void tint_symbol(const constant Config* tint_symbol_5 [[buffer(0)]], device LightsBuffer* tint_symbol_6 [[buffer(2)]], const constant Uniforms* tint_symbol_7 [[buffer(1)]], device Tiles* tint_symbol_8 [[buffer(3)]], uint3 GlobalInvocationID [[thread_position_in_grid]]) {
+kernel void tint_symbol(const constant Config* tint_symbol_5 [[buffer(0)]], device LightsBuffer_tint_packed_vec3* tint_symbol_6 [[buffer(2)]], const constant Uniforms* tint_symbol_7 [[buffer(1)]], device Tiles* tint_symbol_8 [[buffer(3)]], uint3 GlobalInvocationID [[thread_position_in_grid]]) {
   tint_symbol_inner(GlobalInvocationID, tint_symbol_5, tint_symbol_6, tint_symbol_7, tint_symbol_8);
   return;
 }

@@ -36,7 +36,7 @@ void f_inner(uint local_invocation_index, threadgroup tint_array<S, 4>* const ti
   *(tint_symbol_1) = *(tint_symbol_2);
   (*(tint_symbol_1))[1] = (*(tint_symbol_2))[2];
   (*(tint_symbol_1))[3].m = (*(tint_symbol_2))[2].m;
-  (*(tint_symbol_1))[1].m[0] = float4((*(tint_symbol_2))[0].m[1]).ywxz;
+  (*(tint_symbol_1))[1].m[0] = (*(tint_symbol_2))[0].m[1].ywxz;
 }
 
 kernel void f(const constant tint_array<S, 4>* tint_symbol_5 [[buffer(0)]], threadgroup tint_symbol_6* tint_symbol_4 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {

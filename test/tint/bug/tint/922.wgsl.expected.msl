@@ -255,7 +255,7 @@ void main1(thread float* const tint_symbol_5, const constant ub_PacketParams* co
       Mat4x2_ const x_e64 = (*(tint_symbol_12)).u_TexMtx[0];
       float3 const x_e65 = *(tint_symbol_13);
       float2 const x_e68 = Mul2(x_e64, float4(x_e65, 1.0f));
-      *(tint_symbol_14) = float2(x_e68).xy;
+      *(tint_symbol_14) = x_e68.xy;
       return;
     }
   } else {
@@ -264,7 +264,7 @@ void main1(thread float* const tint_symbol_5, const constant ub_PacketParams* co
       Mat4x2_ const x_e79 = (*(tint_symbol_12)).u_TexMtx[0];
       float2 const x_e80 = *(tint_symbol_15);
       float2 const x_e84 = Mul2(x_e79, float4(x_e80, 1.0f, 1.0f));
-      *(tint_symbol_14) = float2(x_e84).xy;
+      *(tint_symbol_14) = x_e84.xy;
       return;
     }
   }

@@ -456,6 +456,25 @@ constexpr auto build_vec2 = build_vec<2>;
 constexpr auto build_vec3 = build_vec<3>;
 constexpr auto build_vec4 = build_vec<4>;
 
+bool match_packedVec3(MatchState&, const type::Type* ty, const type::Type*& T) {
+    if (ty->Is<Any>()) {
+        T = ty;
+        return true;
+    }
+
+    if (auto* v = ty->As<type::Vector>()) {
+        if (v->Packed()) {
+            T = v->type();
+            return true;
+        }
+    }
+    return false;
+}
+
+const type::Vector* build_packedVec3(MatchState& state, const type::Type* el) {
+    return state.builder.create<type::Vector>(el, 3u, /* packed */ true);
+}
+
 bool match_mat(MatchState&, const type::Type* ty, Number& M, Number& N, const type::Type*& T) {
     if (ty->Is<Any>()) {
         M = Number::any;

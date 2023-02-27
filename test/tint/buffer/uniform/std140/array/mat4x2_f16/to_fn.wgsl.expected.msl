@@ -29,8 +29,8 @@ void d(half f_1) {
 kernel void f(const constant tint_array<half4x2, 4>* tint_symbol [[buffer(0)]]) {
   a(*(tint_symbol));
   b((*(tint_symbol))[1]);
-  c(half2((*(tint_symbol))[1][0]).yx);
-  d(half2((*(tint_symbol))[1][0]).yx[0]);
+  c((*(tint_symbol))[1][0].yx);
+  d((*(tint_symbol))[1][0].yx[0]);
   return;
 }
 

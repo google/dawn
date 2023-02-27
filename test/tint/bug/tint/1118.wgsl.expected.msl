@@ -1,11 +1,7 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct Scene {
-  /* 0x0000 */ float4 vEyePosition;
-};
-
-struct Material {
+struct Material_tint_packed_vec3 {
   /* 0x0000 */ float4 vDiffuseColor;
   /* 0x0010 */ packed_float3 vAmbientColor;
   /* 0x001c */ float placeholder;
@@ -13,11 +9,23 @@ struct Material {
   /* 0x002c */ float placeholder2;
 };
 
+struct Scene {
+  /* 0x0000 */ float4 vEyePosition;
+};
+
+struct Material {
+  float4 vDiffuseColor;
+  float3 vAmbientColor;
+  float placeholder;
+  float3 vEmissiveColor;
+  float placeholder2;
+};
+
 struct Mesh {
   /* 0x0000 */ float visibility;
 };
 
-void main_1(thread float* const tint_symbol_5, thread bool* const tint_symbol_6, thread float* const tint_symbol_7, const constant Scene* const tint_symbol_8, const constant Material* const tint_symbol_9, const constant Mesh* const tint_symbol_10, thread float4* const tint_symbol_11) {
+void main_1(thread float* const tint_symbol_5, thread bool* const tint_symbol_6, thread float* const tint_symbol_7, const constant Scene* const tint_symbol_8, const constant Material_tint_packed_vec3* const tint_symbol_9, const constant Mesh* const tint_symbol_10, thread float4* const tint_symbol_11) {
   float3 viewDirectionW = 0.0f;
   float4 baseColor = 0.0f;
   float3 diffuseColor = 0.0f;
@@ -106,7 +114,7 @@ struct tint_symbol_3 {
   float4 glFragColor_1 [[color(0)]];
 };
 
-main_out tint_symbol_inner(float fClipDistance3_param, float fClipDistance4_param, thread float* const tint_symbol_12, thread float* const tint_symbol_13, thread bool* const tint_symbol_14, const constant Scene* const tint_symbol_15, const constant Material* const tint_symbol_16, const constant Mesh* const tint_symbol_17, thread float4* const tint_symbol_18) {
+main_out tint_symbol_inner(float fClipDistance3_param, float fClipDistance4_param, thread float* const tint_symbol_12, thread float* const tint_symbol_13, thread bool* const tint_symbol_14, const constant Scene* const tint_symbol_15, const constant Material_tint_packed_vec3* const tint_symbol_16, const constant Mesh* const tint_symbol_17, thread float4* const tint_symbol_18) {
   *(tint_symbol_12) = fClipDistance3_param;
   *(tint_symbol_13) = fClipDistance4_param;
   main_1(tint_symbol_12, tint_symbol_14, tint_symbol_13, tint_symbol_15, tint_symbol_16, tint_symbol_17, tint_symbol_18);
@@ -114,7 +122,7 @@ main_out tint_symbol_inner(float fClipDistance3_param, float fClipDistance4_para
   return tint_symbol_4;
 }
 
-fragment tint_symbol_3 tint_symbol(const constant Scene* tint_symbol_22 [[buffer(0)]], const constant Material* tint_symbol_23 [[buffer(1)]], const constant Mesh* tint_symbol_24 [[buffer(2)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+fragment tint_symbol_3 tint_symbol(const constant Scene* tint_symbol_22 [[buffer(0)]], const constant Material_tint_packed_vec3* tint_symbol_23 [[buffer(1)]], const constant Mesh* tint_symbol_24 [[buffer(2)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
   thread float tint_symbol_19 = 0.0f;
   thread float tint_symbol_20 = 0.0f;
   thread bool tint_symbol_21 = false;

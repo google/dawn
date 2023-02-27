@@ -1714,7 +1714,7 @@ std::vector<const char*> ConstructableTypes() {
     for (auto* ty : builtin::kBuiltinStrings) {
         std::string_view type(ty);
         if (type != "ptr" && type != "atomic" && !utils::HasPrefix(type, "sampler") &&
-            !utils::HasPrefix(type, "texture")) {
+            !utils::HasPrefix(type, "texture") && !utils::HasPrefix(type, "__")) {
             out.push_back(ty);
         }
     }
@@ -1924,7 +1924,9 @@ INSTANTIATE_TEST_SUITE_P(RenamerBuiltinTypeTest,
 std::vector<const char*> Identifiers() {
     std::vector<const char*> out;
     for (auto* ident : builtin::kBuiltinStrings) {
-        out.push_back(ident);
+        if (!utils::HasPrefix(ident, "__")) {
+            out.push_back(ident);
+        }
     }
     for (auto* ident : builtin::kAddressSpaceStrings) {
         if (!utils::HasPrefix(ident, "_")) {

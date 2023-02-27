@@ -2045,6 +2045,10 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             [&](const type::F32*) { return ctor_or_conv(CtorConvIntrinsic::kF32, nullptr); },
             [&](const type::Bool*) { return ctor_or_conv(CtorConvIntrinsic::kBool, nullptr); },
             [&](const type::Vector* v) {
+                if (v->Packed()) {
+                    TINT_ASSERT(Resolver, v->Width() == 3u);
+                    return ctor_or_conv(CtorConvIntrinsic::kPackedVec3, v->type());
+                }
                 return ctor_or_conv(VectorCtorConvIntrinsic(v->Width()), v->type());
             },
             [&](const type::Matrix* m) {
@@ -2574,6 +2578,24 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
         }
         return tex;
     };
+    auto packed_vec3_t = [&]() -> type::Vector* {
+        auto* tmpl_ident = templated_identifier(1);
+        if (TINT_UNLIKELY(!tmpl_ident)) {
+            return nullptr;
+        }
+        auto* el_ty = Type(tmpl_ident->arguments[0]);
+        if (TINT_UNLIKELY(!el_ty)) {
+            return nullptr;
+        }
+
+        if (TINT_UNLIKELY(!el_ty)) {
+            return nullptr;
+        }
+        if (TINT_UNLIKELY(!validator_.Vector(el_ty, ident->source))) {
+            return nullptr;
+        }
+        return b.create<type::Vector>(el_ty, 3u, true);
+    };
 
     switch (builtin_ty) {
         case builtin::Builtin::kBool:
@@ -2720,6 +2742,9 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
             return storage_texture(type::TextureDimension::k2dArray);
         case builtin::Builtin::kTextureStorage3D:
             return storage_texture(type::TextureDimension::k3d);
+        case builtin::Builtin::kPackedVec3: {
+            return packed_vec3_t();
+        }
         case builtin::Builtin::kUndefined:
             break;
     }

@@ -14,6 +14,15 @@ struct tint_array {
     T elements[N];
 };
 
+struct Light_tint_packed_vec3 {
+  packed_float3 position;
+  packed_float3 colour;
+};
+
+struct Lights_tint_packed_vec3 {
+  tint_array<Light_tint_packed_vec3, 1> light;
+};
+
 struct Light {
   float3 position;
   float3 colour;

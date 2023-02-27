@@ -245,8 +245,9 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     // ArrayLengthFromUniform must come after SimplifyPointers, as
     // it assumes that the form of the array length argument is &var.array.
     manager.Add<transform::ArrayLengthFromUniform>();
-    manager.Add<transform::ModuleScopeVarToEntryPointParam>();
+    // PackedVec3 must come after ExpandCompoundAssignment.
     manager.Add<transform::PackedVec3>();
+    manager.Add<transform::ModuleScopeVarToEntryPointParam>();
     data.Add<transform::ArrayLengthFromUniform::Config>(std::move(array_length_from_uniform_cfg));
     data.Add<transform::CanonicalizeEntryPointIO::Config>(std::move(entry_point_io_cfg));
     auto out = manager.Run(in, data);
@@ -273,6 +274,7 @@ bool GeneratorImpl::Generate() {
                                       builtin::Extension::kChromiumDisableUniformityAnalysis,
                                       builtin::Extension::kChromiumExperimentalFullPtrParameters,
                                       builtin::Extension::kChromiumExperimentalPushConstant,
+                                      builtin::Extension::kChromiumInternalRelaxedUniformLayout,
                                       builtin::Extension::kF16,
                                   })) {
         return false;
@@ -2374,25 +2376,20 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
     return Switch(
         sem,
         [&](const sem::Swizzle* swizzle) {
-            // Metal 1.x does not support swizzling of packed vector types.
-            // For single element swizzles, we can use the index operator.
-            // For multi-element swizzles, we need to cast to a regular vector type
-            // first. Note that we do not currently allow assignments to swizzles, so
-            // the casting which will convert the l-value to r-value is fine.
+            // Metal did not add support for swizzle syntax with packed vector types until
+            // Metal 2.1, so we need to use the index operator for single-element selection instead.
+            // For multi-component swizzles, the PackedVec3 transform will have inserted casts to
+            // the non-packed types, so we can safely use swizzle syntax here.
             if (swizzle->Indices().Length() == 1) {
                 if (!write_lhs()) {
                     return false;
                 }
                 out << "[" << swizzle->Indices()[0] << "]";
             } else {
-                if (!EmitType(out, swizzle->Object()->Type()->UnwrapRef(), "")) {
-                    return false;
-                }
-                out << "(";
                 if (!write_lhs()) {
                     return false;
                 }
-                out << ")." << program_->Symbols().NameFor(expr->member->symbol);
+                out << "." << program_->Symbols().NameFor(expr->member->symbol);
             }
             return true;
         },
@@ -2731,6 +2728,9 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             return true;
         },
         [&](const type::Vector* vec) {
+            if (vec->Packed()) {
+                out << "packed_";
+            }
             if (!EmitType(out, vec->type(), "")) {
                 return false;
             }
@@ -2838,11 +2838,6 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
             add_byte_offset_comment(out, msl_offset);
         }
 
-        if (auto* decl = mem->Declaration()) {
-            if (ast::HasAttribute<transform::PackedVec3::Attribute>(decl->attributes)) {
-                out << "packed_";
-            }
-        }
         if (!EmitType(out, mem->Type(), mem_name)) {
             return false;
         }
@@ -2924,7 +2919,6 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
                     [&](const ast::StructMemberOffsetAttribute*) { return true; },
                     [&](const ast::StructMemberAlignAttribute*) { return true; },
                     [&](const ast::StructMemberSizeAttribute*) { return true; },
-                    [&](const transform::PackedVec3::Attribute*) { return true; },
                     [&](Default) {
                         TINT_ICE(Writer, diagnostics_)
                             << "unhandled struct member attribute: " << attr->Name();

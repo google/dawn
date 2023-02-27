@@ -14,12 +14,16 @@ struct tint_array {
     T elements[N];
 };
 
-struct UniformBuffer {
+struct UniformBuffer_tint_packed_vec3 {
   /* 0x0000 */ packed_int3 d;
   /* 0x000c */ tint_array<int8_t, 4> tint_pad;
 };
 
-kernel void tint_symbol(const constant UniformBuffer* tint_symbol_1 [[buffer(0)]]) {
+struct UniformBuffer {
+  int3 d;
+};
+
+kernel void tint_symbol(const constant UniformBuffer_tint_packed_vec3* tint_symbol_1 [[buffer(0)]]) {
   int3 const temp = as_type<int3>((as_type<uint3>(int3((*(tint_symbol_1)).d)) << uint3(0u)));
   return;
 }
