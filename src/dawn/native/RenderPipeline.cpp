@@ -157,9 +157,20 @@ MaybeError ValidateVertexState(DeviceBase* device,
     // attribute number never exceed kMaxVertexAttributes.
     ASSERT(totalAttributesNum <= kMaxVertexAttributes);
 
-    // TODO(dawn:563): Specify which inputs were not used in error message.
-    DAWN_INVALID_IF(!IsSubset(vertexMetadata.usedVertexInputs, attributesSetMask),
-                    "Pipeline vertex stage uses vertex buffers not in the vertex state");
+    // Validate that attributes used by the VertexState are in the shader using bitmask operations
+    // but try to be helpful by finding one missing attribute to surface in the error message
+    if (!IsSubset(vertexMetadata.usedVertexInputs, attributesSetMask)) {
+        const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> missingAttributes =
+            vertexMetadata.usedVertexInputs & ~attributesSetMask;
+        ASSERT(missingAttributes.any());
+
+        VertexAttributeLocation firstMissing = ityp::Sub(
+            GetHighestBitIndexPlusOne(missingAttributes), VertexAttributeLocation(uint8_t(1)));
+        return DAWN_VALIDATION_ERROR(
+            "Vertex attribute slot %u used in (%s, entryPoint: %s) is not present in the "
+            "VertexState.",
+            uint8_t(firstMissing), descriptor->module, descriptor->entryPoint);
+    }
 
     return {};
 }

@@ -425,6 +425,7 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
     }
 
     if (aspects[VALIDATION_ASPECT_VERTEX_BUFFERS]) {
+        // Try to be helpful by finding one missing vertex buffer to surface in the error message.
         const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> missingVertexBuffers =
             GetRenderPipeline()->GetVertexBufferSlotsUsed() & ~mVertexBufferSlotsUsed;
         ASSERT(missingVertexBuffers.any());
