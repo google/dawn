@@ -153,15 +153,20 @@ bool Converter::Convert(wgpu::ImageCopyBuffer& out, const interop::GPUImageCopyB
 bool Converter::Convert(BufferSource& out, interop::BufferSource in) {
     out = {};
     if (auto* view = std::get_if<interop::ArrayBufferView>(&in)) {
-        std::visit(
+        return std::visit(
             [&](auto&& v) {
                 auto arr = v.ArrayBuffer();
-                out.data = arr.Data();
-                out.size = arr.ByteLength();
+                if (v.ByteOffset() + v.ByteLength() > arr.ByteLength()) {
+                    Napi::Error::New(env, "offset + length exceeds underlying buffer size")
+                        .ThrowAsJavaScriptException();
+                    return false;
+                }
+                out.data = static_cast<uint8_t*>(arr.Data()) + v.ByteOffset();
+                out.size = v.ByteLength();
                 out.bytesPerElement = v.ElementSize();
+                return true;
             },
             *view);
-        return true;
     }
     if (auto* arr = std::get_if<interop::ArrayBuffer>(&in)) {
         out.data = arr->Data();
