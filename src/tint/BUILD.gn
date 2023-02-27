@@ -2051,6 +2051,12 @@ if (tint_build_unittests) {
       configs += [ "//build/config/compiler:no_chromium_code" ]
     }
 
+    if (is_win && is_debug) {
+      # TODO(crbug.com/tint/1749): both msvc and clang builds stack overflow on debug builds.
+      # Increase the initial stack size to 4 MB (default is 1MB).
+      ldflags = [ "/STACK:4194304" ]
+    }
+
     testonly = true
   }
 }

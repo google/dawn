@@ -349,6 +349,7 @@ class Resolver {
 
     /// Builds and returns the semantic information for an array.
     /// @returns the semantic Array information, or nullptr if an error is raised.
+    /// @param array_source the source of the array
     /// @param el_source the source of the array element, or the array if the array does not have a
     ///        locally-declared element AST node.
     /// @param count_source the source of the array count, or the array if the array does not have a
@@ -356,7 +357,8 @@ class Resolver {
     /// @param el_ty the Array element type
     /// @param el_count the number of elements in the array.
     /// @param explicit_stride the explicit byte stride of the array. Zero means implicit stride.
-    type::Array* Array(const Source& el_source,
+    type::Array* Array(const Source& array_source,
+                       const Source& el_source,
                        const Source& count_source,
                        const type::Type* el_ty,
                        const type::ArrayCount* el_count,
@@ -496,6 +498,10 @@ class Resolver {
     /// @note: Will raise an ICE if @p symbol is not a builtin type.
     type::Type* BuiltinType(builtin::Builtin builtin_ty, const ast::Identifier* ident);
 
+    /// @returns the nesting depth of @ty as defined in
+    /// https://gpuweb.github.io/gpuweb/wgsl/#composite-types
+    size_t NestDepth(const type::Type* ty) const;
+
     // ArrayConstructorSig represents a unique array constructor signature.
     // It is a tuple of the array type, number of arguments provided and earliest evaluation stage.
     using ArrayConstructorSig =
@@ -566,6 +572,7 @@ class Resolver {
         logical_binary_lhs_to_parent_;
     utils::Hashset<const ast::Expression*, 8> skip_const_eval_;
     IdentifierResolveHint identifier_resolve_hint_;
+    utils::Hashmap<const type::Type*, size_t, 8> nest_depth_;
 };
 
 }  // namespace tint::resolver

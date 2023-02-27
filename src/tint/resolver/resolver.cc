@@ -99,6 +99,7 @@ namespace {
 
 constexpr int64_t kMaxArrayElementCount = 65536;
 constexpr uint32_t kMaxStatementDepth = 127;
+constexpr size_t kMaxNestDepthOfCompositeType = 255;
 
 }  // namespace
 
@@ -1697,7 +1698,7 @@ const type::Type* Resolver::ConcreteType(const type::Type* ty,
                 target_el_ty = target_arr_ty->ElemType();
             }
             if (auto* el_ty = ConcreteType(a->ElemType(), target_el_ty, source)) {
-                return Array(source, source, el_ty, a->Count(), /* explicit_stride */ 0);
+                return Array(source, source, source, el_ty, a->Count(), /* explicit_stride */ 0);
             }
             return nullptr;
         },
@@ -2129,7 +2130,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             }
             return nullptr;
         }
-        auto* arr = Array(expr->source, expr->source, el_ty, el_count, /* explicit_stride */ 0);
+        auto* arr = Array(expr->source, expr->source, expr->source, el_ty, el_count,
+                          /* explicit_stride */ 0);
         if (!arr) {
             return nullptr;
         }
@@ -2446,7 +2448,8 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
             return nullptr;
         }
 
-        auto* out = Array(ast_el_ty->source,                              //
+        auto* out = Array(tmpl_ident->source,                             //
+                          ast_el_ty->source,                              //
                           ast_count ? ast_count->source : ident->source,  //
                           el_ty, el_count, explicit_stride);
         if (!out) {
@@ -2724,6 +2727,19 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
     auto name = builder_->Symbols().NameFor(ident->symbol);
     TINT_ICE(Resolver, diagnostics_) << ident->source << " unhandled builtin type '" << name << "'";
     return nullptr;
+}
+
+size_t Resolver::NestDepth(const type::Type* ty) const {
+    return Switch(
+        ty,  //
+        [](const type::Vector*) { return size_t{1}; },
+        [](const type::Matrix*) { return size_t{2}; },
+        [&](Default) {
+            if (auto d = nest_depth_.Get(ty)) {
+                return *d;
+            }
+            return size_t{0};
+        });
 }
 
 void Resolver::CollectTextureSamplerPairs(
@@ -3528,7 +3544,8 @@ bool Resolver::ArrayAttributes(utils::VectorRef<const ast::Attribute*> attribute
     return true;
 }
 
-type::Array* Resolver::Array(const Source& el_source,
+type::Array* Resolver::Array(const Source& array_source,
+                             const Source& el_source,
                              const Source& count_source,
                              const type::Type* el_ty,
                              const type::ArrayCount* el_count,
@@ -3555,6 +3572,17 @@ type::Array* Resolver::Array(const Source& el_source,
         el_ty, el_count, el_align, static_cast<uint32_t>(size), static_cast<uint32_t>(stride),
         static_cast<uint32_t>(implicit_stride));
 
+    // Maximum nesting depth of composite types
+    //  https://gpuweb.github.io/gpuweb/wgsl/#limits
+    const size_t nest_depth = 1 + NestDepth(el_ty);
+    if (nest_depth > kMaxNestDepthOfCompositeType) {
+        AddError("array has nesting depth of " + std::to_string(nest_depth) + ", maximum is " +
+                     std::to_string(kMaxNestDepthOfCompositeType),
+                 array_source);
+        return nullptr;
+    }
+    nest_depth_.Add(out, nest_depth);
+
     if (!validator_.Array(out, el_source)) {
         return nullptr;
     }
@@ -3574,15 +3602,18 @@ type::Type* Resolver::Alias(const ast::Alias* alias) {
 }
 
 sem::Struct* Resolver::Structure(const ast::Struct* str) {
+    auto struct_name = [&] {  //
+        return builder_->Symbols().NameFor(str->name->symbol);
+    };
+
     if (validator_.IsValidationEnabled(str->attributes,
                                        ast::DisabledValidation::kIgnoreStructMemberLimit)) {
         // Maximum number of members in a structure type
         // https://gpuweb.github.io/gpuweb/wgsl/#limits
         const size_t kMaxNumStructMembers = 16383;
         if (str->members.Length() > kMaxNumStructMembers) {
-            AddError("struct '" + builder_->Symbols().NameFor(str->name->symbol) + "' has " +
-                         std::to_string(str->members.Length()) + " members, maximum is " +
-                         std::to_string(kMaxNumStructMembers),
+            AddError("struct '" + struct_name() + "' has " + std::to_string(str->members.Length()) +
+                         " members, maximum is " + std::to_string(kMaxNumStructMembers),
                      str->source);
             return nullptr;
         }
@@ -3608,6 +3639,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     uint64_t struct_align = 1;
     utils::Hashmap<Symbol, const ast::StructMember*, 8> member_map;
 
+    size_t members_nest_depth = 0;
     for (auto* member : str->members) {
         Mark(member);
         Mark(member->name);
@@ -3623,6 +3655,8 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         if (!type) {
             return nullptr;
         }
+
+        members_nest_depth = std::max(members_nest_depth, NestDepth(type));
 
         // validator_.Validate member type
         if (!validator_.IsPlain(type)) {
@@ -3820,6 +3854,18 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     if (!validator_.Structure(out, stage)) {
         return nullptr;
     }
+
+    // Maximum nesting depth of composite types
+    //  https://gpuweb.github.io/gpuweb/wgsl/#limits
+    const size_t nest_depth = 1 + members_nest_depth;
+    if (nest_depth > kMaxNestDepthOfCompositeType) {
+        AddError("struct '" + struct_name() + "' has nesting depth of " +
+                     std::to_string(nest_depth) + ", maximum is " +
+                     std::to_string(kMaxNestDepthOfCompositeType),
+                 str->source);
+        return nullptr;
+    }
+    nest_depth_.Add(out, nest_depth);
 
     return out;
 }
