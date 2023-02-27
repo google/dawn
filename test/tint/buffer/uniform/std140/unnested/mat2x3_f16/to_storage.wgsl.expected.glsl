@@ -10,12 +10,17 @@ layout(binding = 1, std430) buffer u_block_ssbo {
   f16mat2x3 inner;
 } s;
 
+void assign_and_preserve_padding_s(f16mat2x3 value) {
+  s.inner[0] = value[0u];
+  s.inner[1] = value[1u];
+}
+
 f16mat2x3 load_u_inner() {
   return f16mat2x3(u.inner_0, u.inner_1);
 }
 
 void f() {
-  s.inner = load_u_inner();
+  assign_and_preserve_padding_s(load_u_inner());
   s.inner[1] = u.inner_0;
   s.inner[1] = u.inner_0.zxy;
   s.inner[0][1] = u.inner_1[0u];

@@ -1,8 +1,15 @@
 #include <metal_stdlib>
 
 using namespace metal;
+void assign_and_preserve_padding(device half4x3* const dest, half4x3 value) {
+  (*(dest))[0u] = value[0u];
+  (*(dest))[1u] = value[1u];
+  (*(dest))[2u] = value[2u];
+  (*(dest))[3u] = value[3u];
+}
+
 kernel void f(device half4x3* tint_symbol [[buffer(1)]], const constant half4x3* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol) = *(tint_symbol_1);
+  assign_and_preserve_padding(tint_symbol, *(tint_symbol_1));
   (*(tint_symbol))[1] = (*(tint_symbol_1))[0];
   (*(tint_symbol))[1] = half3((*(tint_symbol_1))[0]).zxy;
   (*(tint_symbol))[0][1] = (*(tint_symbol_1))[1][0];

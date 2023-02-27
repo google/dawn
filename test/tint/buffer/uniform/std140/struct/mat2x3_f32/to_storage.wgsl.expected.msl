@@ -23,9 +23,14 @@ struct S {
   /* 0x0044 */ tint_array<int8_t, 60> tint_pad_2;
 };
 
+void assign_and_preserve_padding_2(device float2x3* const dest, float2x3 value) {
+  (*(dest))[0u] = value[0u];
+  (*(dest))[1u] = value[1u];
+}
+
 void assign_and_preserve_padding_1(device S* const dest, S value) {
   (*(dest)).before = value.before;
-  (*(dest)).m = value.m;
+  assign_and_preserve_padding_2(&((*(dest)).m), value.m);
   (*(dest)).after = value.after;
 }
 
@@ -38,7 +43,7 @@ void assign_and_preserve_padding(device tint_array<S, 4>* const dest, tint_array
 kernel void f(device tint_array<S, 4>* tint_symbol [[buffer(1)]], const constant tint_array<S, 4>* tint_symbol_1 [[buffer(0)]]) {
   assign_and_preserve_padding(tint_symbol, *(tint_symbol_1));
   assign_and_preserve_padding_1(&((*(tint_symbol))[1]), (*(tint_symbol_1))[2]);
-  (*(tint_symbol))[3].m = (*(tint_symbol_1))[2].m;
+  assign_and_preserve_padding_2(&((*(tint_symbol))[3].m), (*(tint_symbol_1))[2].m);
   (*(tint_symbol))[1].m[0] = float3((*(tint_symbol_1))[0].m[1]).zxy;
   return;
 }

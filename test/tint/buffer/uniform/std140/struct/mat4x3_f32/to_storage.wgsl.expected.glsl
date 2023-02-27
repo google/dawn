@@ -44,26 +44,35 @@ layout(binding = 1, std430) buffer u_block_ssbo {
   S inner[4];
 } s;
 
+void assign_and_preserve_padding_2_s_X_m(uint dest[1], mat4x3 value) {
+  s.inner[dest[0]].m[0] = value[0u];
+  s.inner[dest[0]].m[1] = value[1u];
+  s.inner[dest[0]].m[2] = value[2u];
+  s.inner[dest[0]].m[3] = value[3u];
+}
+
 void assign_and_preserve_padding_1_s_X(uint dest[1], S value) {
   s.inner[dest[0]].before = value.before;
-  s.inner[dest[0]].m = value.m;
+  uint tint_symbol[1] = uint[1](dest[0u]);
+  assign_and_preserve_padding_2_s_X_m(tint_symbol, value.m);
   s.inner[dest[0]].after = value.after;
 }
 
 void assign_and_preserve_padding_s(S value[4]) {
   {
     for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      uint tint_symbol[1] = uint[1](i);
-      assign_and_preserve_padding_1_s_X(tint_symbol, value[i]);
+      uint tint_symbol_1[1] = uint[1](i);
+      assign_and_preserve_padding_1_s_X(tint_symbol_1, value[i]);
     }
   }
 }
 
 void f() {
   assign_and_preserve_padding_s(u.inner);
-  uint tint_symbol_1[1] = uint[1](1u);
-  assign_and_preserve_padding_1_s_X(tint_symbol_1, u.inner[2]);
-  s.inner[3].m = u.inner[2].m;
+  uint tint_symbol_2[1] = uint[1](1u);
+  assign_and_preserve_padding_1_s_X(tint_symbol_2, u.inner[2]);
+  uint tint_symbol_3[1] = uint[1](3u);
+  assign_and_preserve_padding_2_s_X_m(tint_symbol_3, u.inner[2].m);
   s.inner[1].m[0] = u.inner[0].m[1].zxy;
 }
 

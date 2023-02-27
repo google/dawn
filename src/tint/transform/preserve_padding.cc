@@ -147,6 +147,18 @@ struct PreservePadding::State {
                     return body;
                 });
             },
+            [&](const type::Matrix* mat) {
+                // Call a helper function that assigns each column separately.
+                return call_helper([&]() {
+                    utils::Vector<const ast::Statement*, 4> body;
+                    for (uint32_t i = 0; i < mat->columns(); i++) {
+                        body.Push(MakeAssignment(mat->ColumnType(),
+                                                 b.IndexAccessor(b.Deref(kDestParamName), u32(i)),
+                                                 b.IndexAccessor(kValueParamName, u32(i))));
+                    }
+                    return body;
+                });
+            },
             [&](const sem::Struct* str) {
                 // Call a helper function that assigns each member separately.
                 return call_helper([&]() {
@@ -178,6 +190,13 @@ struct PreservePadding::State {
                     return true;
                 }
                 return HasPadding(elem_ty);
+            },
+            [&](const type::Matrix* mat) {
+                auto* col_ty = mat->ColumnType();
+                if (mat->ColumnStride() > col_ty->Size()) {
+                    return true;
+                }
+                return HasPadding(col_ty);
             },
             [&](const sem::Struct* str) {
                 uint32_t current_offset = 0;

@@ -8,8 +8,14 @@ layout(binding = 1, std430) buffer u_block_ssbo {
   mat3 inner;
 } s;
 
+void assign_and_preserve_padding_s(mat3 value) {
+  s.inner[0] = value[0u];
+  s.inner[1] = value[1u];
+  s.inner[2] = value[2u];
+}
+
 void f() {
-  s.inner = u.inner;
+  assign_and_preserve_padding_s(u.inner);
   s.inner[1] = u.inner[0];
   s.inner[1] = u.inner[0].zxy;
   s.inner[0][1] = u.inner[1][0];

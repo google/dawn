@@ -466,6 +466,125 @@ fn foo() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(PreservePaddingTest, Mat3x3) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read_write> m : mat3x3<f32>;
+
+@compute @workgroup_size(1)
+fn foo() {
+  m = mat3x3<f32>();
+}
+)";
+
+    auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+@group(0) @binding(0) var<storage, read_write> m : mat3x3<f32>;
+
+fn assign_and_preserve_padding(dest : ptr<storage, mat3x3<f32>, read_write>, value : mat3x3<f32>) {
+  (*(dest))[0u] = value[0u];
+  (*(dest))[1u] = value[1u];
+  (*(dest))[2u] = value[2u];
+}
+
+@compute @workgroup_size(1)
+fn foo() {
+  assign_and_preserve_padding(&(m), mat3x3<f32>());
+}
+)";
+
+    auto got = Run<PreservePadding>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PreservePaddingTest, Mat3x3_InStruct) {
+    auto* src = R"(
+struct S {
+  a : u32,
+  m : mat3x3<f32>,
+}
+
+@group(0) @binding(0) var<storage, read_write> buffer : S;
+
+@compute @workgroup_size(1)
+fn foo() {
+  buffer = S();
+}
+)";
+
+    auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+struct S {
+  a : u32,
+  m : mat3x3<f32>,
+}
+
+@group(0) @binding(0) var<storage, read_write> buffer : S;
+
+fn assign_and_preserve_padding_1(dest : ptr<storage, mat3x3<f32>, read_write>, value : mat3x3<f32>) {
+  (*(dest))[0u] = value[0u];
+  (*(dest))[1u] = value[1u];
+  (*(dest))[2u] = value[2u];
+}
+
+fn assign_and_preserve_padding(dest : ptr<storage, S, read_write>, value : S) {
+  (*(dest)).a = value.a;
+  assign_and_preserve_padding_1(&((*(dest)).m), value.m);
+}
+
+@compute @workgroup_size(1)
+fn foo() {
+  assign_and_preserve_padding(&(buffer), S());
+}
+)";
+
+    auto got = Run<PreservePadding>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PreservePaddingTest, ArrayOfMat3x3) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read_write> arr_m : array<mat3x3<f32>, 4>;
+
+@compute @workgroup_size(1)
+fn foo() {
+  arr_m = array<mat3x3<f32>, 4>();
+  arr_m[0] = mat3x3<f32>();
+}
+)";
+
+    auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+@group(0) @binding(0) var<storage, read_write> arr_m : array<mat3x3<f32>, 4>;
+
+fn assign_and_preserve_padding_1(dest : ptr<storage, mat3x3<f32>, read_write>, value : mat3x3<f32>) {
+  (*(dest))[0u] = value[0u];
+  (*(dest))[1u] = value[1u];
+  (*(dest))[2u] = value[2u];
+}
+
+fn assign_and_preserve_padding(dest : ptr<storage, array<mat3x3<f32>, 4u>, read_write>, value : array<mat3x3<f32>, 4u>) {
+  for(var i = 0u; (i < 4u); i = (i + 1u)) {
+    assign_and_preserve_padding_1(&((*(dest))[i]), value[i]);
+  }
+}
+
+@compute @workgroup_size(1)
+fn foo() {
+  assign_and_preserve_padding(&(arr_m), array<mat3x3<f32>, 4>());
+  assign_and_preserve_padding_1(&(arr_m[0]), mat3x3<f32>());
+}
+)";
+
+    auto got = Run<PreservePadding>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(PreservePaddingTest, NoModify_Vec3) {
     auto* src = R"(
 @group(0) @binding(0) var<storage, read_write> v : vec3<u32>;
@@ -518,23 +637,6 @@ fn foo() {
   assign_and_preserve_padding(&(v), S());
 }
 )";
-
-    auto got = Run<PreservePadding>(src);
-
-    EXPECT_EQ(expect, str(got));
-}
-
-TEST_F(PreservePaddingTest, NoModify_Mat3x3) {
-    auto* src = R"(
-@group(0) @binding(0) var<storage, read_write> v : mat3x3<f32>;
-
-@compute @workgroup_size(1)
-fn foo() {
-  v = mat3x3<f32>();
-}
-)";
-
-    auto* expect = src;
 
     auto got = Run<PreservePadding>(src);
 

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 18
+; Bound: 32
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -11,6 +11,8 @@
                OpMemberName %in_block 0 "inner"
                OpName %in "in"
                OpName %out "out"
+               OpName %assign_and_preserve_padding_out "assign_and_preserve_padding_out"
+               OpName %value "value"
                OpName %main "main"
                OpDecorate %in_block Block
                OpMemberDecorate %in_block 0 Offset 0
@@ -29,15 +31,32 @@
          %in = OpVariable %_ptr_StorageBuffer_in_block StorageBuffer
         %out = OpVariable %_ptr_StorageBuffer_in_block StorageBuffer
        %void = OpTypeVoid
-          %8 = OpTypeFunction %void
+          %8 = OpTypeFunction %void %mat2v3float
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
+        %int = OpTypeInt 32 1
+         %16 = OpConstantNull %int
+%_ptr_StorageBuffer_v3float = OpTypePointer StorageBuffer %v3float
+         %19 = OpConstantNull %uint
+      %int_1 = OpConstant %int 1
+     %uint_1 = OpConstant %uint 1
+         %25 = OpTypeFunction %void
 %_ptr_StorageBuffer_mat2v3float = OpTypePointer StorageBuffer %mat2v3float
-       %main = OpFunction %void None %8
-         %11 = OpLabel
-         %15 = OpAccessChain %_ptr_StorageBuffer_mat2v3float %out %uint_0
-         %16 = OpAccessChain %_ptr_StorageBuffer_mat2v3float %in %uint_0
-         %17 = OpLoad %mat2v3float %16
-               OpStore %15 %17
+%assign_and_preserve_padding_out = OpFunction %void None %8
+      %value = OpFunctionParameter %mat2v3float
+         %12 = OpLabel
+         %18 = OpAccessChain %_ptr_StorageBuffer_v3float %out %uint_0 %16
+         %20 = OpCompositeExtract %v3float %value 0
+               OpStore %18 %20
+         %22 = OpAccessChain %_ptr_StorageBuffer_v3float %out %uint_0 %int_1
+         %24 = OpCompositeExtract %v3float %value 1
+               OpStore %22 %24
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %25
+         %27 = OpLabel
+         %30 = OpAccessChain %_ptr_StorageBuffer_mat2v3float %in %uint_0
+         %31 = OpLoad %mat2v3float %30
+         %28 = OpFunctionCall %void %assign_and_preserve_padding_out %31
                OpReturn
                OpFunctionEnd

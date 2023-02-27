@@ -8,9 +8,24 @@ layout(binding = 1, std430) buffer u_block_ssbo {
   mat2x3 inner[4];
 } s;
 
+void assign_and_preserve_padding_1_s_X(uint dest[1], mat2x3 value) {
+  s.inner[dest[0]][0] = value[0u];
+  s.inner[dest[0]][1] = value[1u];
+}
+
+void assign_and_preserve_padding_s(mat2x3 value[4]) {
+  {
+    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+      uint tint_symbol[1] = uint[1](i);
+      assign_and_preserve_padding_1_s_X(tint_symbol, value[i]);
+    }
+  }
+}
+
 void f() {
-  s.inner = u.inner;
-  s.inner[1] = u.inner[2];
+  assign_and_preserve_padding_s(u.inner);
+  uint tint_symbol_1[1] = uint[1](1u);
+  assign_and_preserve_padding_1_s_X(tint_symbol_1, u.inner[2]);
   s.inner[1][0] = u.inner[0][1].zxy;
   s.inner[1][0].x = u.inner[0][1].x;
 }

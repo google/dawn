@@ -73,21 +73,57 @@ struct S {
   /* 0x035c */ tint_array<int8_t, 4> tint_pad_11;
 };
 
-void assign_and_preserve_padding(device tint_array<float3, 2>* const dest, tint_array<float3, 2> value) {
+void assign_and_preserve_padding(device float2x3* const dest, float2x3 value) {
+  (*(dest))[0u] = value[0u];
+  (*(dest))[1u] = value[1u];
+}
+
+void assign_and_preserve_padding_1(device float3x3* const dest, float3x3 value) {
+  (*(dest))[0u] = value[0u];
+  (*(dest))[1u] = value[1u];
+  (*(dest))[2u] = value[2u];
+}
+
+void assign_and_preserve_padding_2(device float4x3* const dest, float4x3 value) {
+  (*(dest))[0u] = value[0u];
+  (*(dest))[1u] = value[1u];
+  (*(dest))[2u] = value[2u];
+  (*(dest))[3u] = value[3u];
+}
+
+void assign_and_preserve_padding_3(device half2x3* const dest, half2x3 value) {
+  (*(dest))[0u] = value[0u];
+  (*(dest))[1u] = value[1u];
+}
+
+void assign_and_preserve_padding_4(device half3x3* const dest, half3x3 value) {
+  (*(dest))[0u] = value[0u];
+  (*(dest))[1u] = value[1u];
+  (*(dest))[2u] = value[2u];
+}
+
+void assign_and_preserve_padding_5(device half4x3* const dest, half4x3 value) {
+  (*(dest))[0u] = value[0u];
+  (*(dest))[1u] = value[1u];
+  (*(dest))[2u] = value[2u];
+  (*(dest))[3u] = value[3u];
+}
+
+void assign_and_preserve_padding_6(device tint_array<float3, 2>* const dest, tint_array<float3, 2> value) {
   for(uint i = 0u; (i < 2u); i = (i + 1u)) {
     (*(dest))[i] = value[i];
   }
 }
 
-void assign_and_preserve_padding_1(device Inner* const dest, Inner value) {
+void assign_and_preserve_padding_7(device Inner* const dest, Inner value) {
   (*(dest)).scalar_i32 = value.scalar_i32;
   (*(dest)).scalar_f32 = value.scalar_f32;
   (*(dest)).scalar_f16 = value.scalar_f16;
 }
 
-void assign_and_preserve_padding_2(device tint_array<Inner, 4>* const dest, tint_array<Inner, 4> value) {
+void assign_and_preserve_padding_8(device tint_array<Inner, 4>* const dest, tint_array<Inner, 4> value) {
   for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-    assign_and_preserve_padding_1(&((*(dest))[i]), value[i]);
+    assign_and_preserve_padding_7(&((*(dest))[i]), value[i]);
   }
 }
 
@@ -109,31 +145,31 @@ kernel void tint_symbol(device S* tint_symbol_5 [[buffer(0)]]) {
   (*(tint_symbol_5)).vec4_u32 = uint4(0u);
   (*(tint_symbol_5)).vec4_f16 = half4(0.0h);
   (*(tint_symbol_5)).mat2x2_f32 = float2x2(float2(0.0f), float2(0.0f));
-  (*(tint_symbol_5)).mat2x3_f32 = float2x3(float3(0.0f), float3(0.0f));
+  assign_and_preserve_padding(&((*(tint_symbol_5)).mat2x3_f32), float2x3(float3(0.0f), float3(0.0f)));
   (*(tint_symbol_5)).mat2x4_f32 = float2x4(float4(0.0f), float4(0.0f));
   (*(tint_symbol_5)).mat3x2_f32 = float3x2(float2(0.0f), float2(0.0f), float2(0.0f));
-  (*(tint_symbol_5)).mat3x3_f32 = float3x3(float3(0.0f), float3(0.0f), float3(0.0f));
+  assign_and_preserve_padding_1(&((*(tint_symbol_5)).mat3x3_f32), float3x3(float3(0.0f), float3(0.0f), float3(0.0f)));
   (*(tint_symbol_5)).mat3x4_f32 = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
   (*(tint_symbol_5)).mat4x2_f32 = float4x2(float2(0.0f), float2(0.0f), float2(0.0f), float2(0.0f));
-  (*(tint_symbol_5)).mat4x3_f32 = float4x3(float3(0.0f), float3(0.0f), float3(0.0f), float3(0.0f));
+  assign_and_preserve_padding_2(&((*(tint_symbol_5)).mat4x3_f32), float4x3(float3(0.0f), float3(0.0f), float3(0.0f), float3(0.0f)));
   (*(tint_symbol_5)).mat4x4_f32 = float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f));
   (*(tint_symbol_5)).mat2x2_f16 = half2x2(half2(0.0h), half2(0.0h));
-  (*(tint_symbol_5)).mat2x3_f16 = half2x3(half3(0.0h), half3(0.0h));
+  assign_and_preserve_padding_3(&((*(tint_symbol_5)).mat2x3_f16), half2x3(half3(0.0h), half3(0.0h)));
   (*(tint_symbol_5)).mat2x4_f16 = half2x4(half4(0.0h), half4(0.0h));
   (*(tint_symbol_5)).mat3x2_f16 = half3x2(half2(0.0h), half2(0.0h), half2(0.0h));
-  (*(tint_symbol_5)).mat3x3_f16 = half3x3(half3(0.0h), half3(0.0h), half3(0.0h));
+  assign_and_preserve_padding_4(&((*(tint_symbol_5)).mat3x3_f16), half3x3(half3(0.0h), half3(0.0h), half3(0.0h)));
   (*(tint_symbol_5)).mat3x4_f16 = half3x4(half4(0.0h), half4(0.0h), half4(0.0h));
   (*(tint_symbol_5)).mat4x2_f16 = half4x2(half2(0.0h), half2(0.0h), half2(0.0h), half2(0.0h));
-  (*(tint_symbol_5)).mat4x3_f16 = half4x3(half3(0.0h), half3(0.0h), half3(0.0h), half3(0.0h));
+  assign_and_preserve_padding_5(&((*(tint_symbol_5)).mat4x3_f16), half4x3(half3(0.0h), half3(0.0h), half3(0.0h), half3(0.0h)));
   (*(tint_symbol_5)).mat4x4_f16 = half4x4(half4(0.0h), half4(0.0h), half4(0.0h), half4(0.0h));
   tint_array<float3, 2> const tint_symbol_1 = tint_array<float3, 2>{};
-  assign_and_preserve_padding(&((*(tint_symbol_5)).arr2_vec3_f32), tint_symbol_1);
+  assign_and_preserve_padding_6(&((*(tint_symbol_5)).arr2_vec3_f32), tint_symbol_1);
   tint_array<half4x2, 2> const tint_symbol_4 = tint_array<half4x2, 2>{};
   (*(tint_symbol_5)).arr2_mat4x2_f16 = tint_symbol_4;
   Inner const tint_symbol_2 = Inner{};
-  assign_and_preserve_padding_1(&((*(tint_symbol_5)).struct_inner), tint_symbol_2);
+  assign_and_preserve_padding_7(&((*(tint_symbol_5)).struct_inner), tint_symbol_2);
   tint_array<Inner, 4> const tint_symbol_3 = tint_array<Inner, 4>{};
-  assign_and_preserve_padding_2(&((*(tint_symbol_5)).array_struct_inner), tint_symbol_3);
+  assign_and_preserve_padding_8(&((*(tint_symbol_5)).array_struct_inner), tint_symbol_3);
   return;
 }
 
