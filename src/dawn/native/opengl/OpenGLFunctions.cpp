@@ -26,24 +26,7 @@ MaybeError OpenGLFunctions::Initialize(GetProcAddress getProc) {
         DAWN_TRY(LoadDesktopGLProcs(getProc, mVersion.GetMajor(), mVersion.GetMinor()));
     }
 
-    InitializeSupportedGLExtensions();
-
     return {};
-}
-
-void OpenGLFunctions::InitializeSupportedGLExtensions() {
-    int32_t numExtensions;
-    GetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
-
-    for (int32_t i = 0; i < numExtensions; ++i) {
-        const char* extensionName = reinterpret_cast<const char*>(GetStringi(GL_EXTENSIONS, i));
-        mSupportedGLExtensionsSet.insert(extensionName);
-    }
-}
-
-bool OpenGLFunctions::IsGLExtensionSupported(const char* extension) const {
-    ASSERT(extension != nullptr);
-    return mSupportedGLExtensionsSet.count(extension) != 0;
 }
 
 const OpenGLVersion& OpenGLFunctions::GetVersion() const {
