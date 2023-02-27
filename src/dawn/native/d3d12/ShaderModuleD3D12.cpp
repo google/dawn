@@ -95,6 +95,7 @@ enum class Compiler { FXC, DXC };
     X(bool, disableSymbolRenaming)                                                          \
     X(bool, isRobustnessEnabled)                                                            \
     X(bool, disableWorkgroupInit)                                                           \
+    X(bool, polyfillReflectVec2F32)                                                         \
     X(bool, dumpShaders)
 
 #define D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS(X) \
@@ -401,6 +402,8 @@ ResultOrError<std::string> TranslateToHLSL(
         options.interstage_locations = r.interstageLocations;
     }
 
+    options.polyfill_reflect_vec2_f32 = r.polyfillReflectVec2F32;
+
     TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "tint::writer::hlsl::Generate");
     auto result = tint::writer::hlsl::Generate(&transformedProgram, options);
     DAWN_INVALID_IF(!result.success, "An error occured while generating HLSL: %s", result.error);
@@ -605,6 +608,8 @@ ResultOrError<CompiledShader> ShaderModule::Compile(
     req.hlsl.newBindingsMap = BuildExternalTextureTransformBindings(layout);
     req.hlsl.arrayLengthFromUniform = std::move(arrayLengthFromUniform);
     req.hlsl.substituteOverrideConfig = std::move(substituteOverrideConfig);
+
+    req.hlsl.polyfillReflectVec2F32 = device->IsToggleEnabled(Toggle::D3D12PolyfillReflectVec2F32);
 
     const CombinedLimits& limits = device->GetLimits();
     req.hlsl.limits = LimitsForCompilationRequest::Create(limits.v1);

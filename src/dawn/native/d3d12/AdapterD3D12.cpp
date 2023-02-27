@@ -595,6 +595,12 @@ void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
         deviceToggles->ForceSet(
             Toggle::D3D12UseTempBufferInTextureToTextureCopyBetweenDifferentDimensions, true);
     }
+
+    // Polyfill reflect builtin for vec2<f32> on Intel device in usng FXC.
+    // See https://crbug.com/tint/1798 for more information.
+    if (gpu_info::IsIntel(vendorId) && !deviceToggles->IsEnabled(Toggle::UseDXC)) {
+        deviceToggles->Default(Toggle::D3D12PolyfillReflectVec2F32, true);
+    }
 }
 
 ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor,

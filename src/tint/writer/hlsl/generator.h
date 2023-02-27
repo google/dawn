@@ -61,6 +61,8 @@ struct Options {
     /// Interstage locations actually used as inputs in the next stage of the pipeline.
     /// This is potentially used for truncating unused interstage outputs at current shader stage.
     std::bitset<16> interstage_locations;
+    /// Set to `true` to generate polyfill for `reflect` builtin for vec2<f32>
+    bool polyfill_reflect_vec2_f32 = false;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(root_constant_binding_point,

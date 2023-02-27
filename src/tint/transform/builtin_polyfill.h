@@ -70,6 +70,8 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         bool int_div_mod = false;
         /// Should float modulos be polyfilled to emit a precise modulo operation as per the spec?
         bool precise_float_mod = false;
+        /// Should `reflect()` be polyfilled for vec2<f32>?
+        bool reflect_vec2_f32 = false;
         /// Should `saturate()` be polyfilled?
         bool saturate = false;
         /// Should `sign()` be polyfilled for integer types?

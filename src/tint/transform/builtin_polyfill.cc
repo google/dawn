@@ -582,6 +582,33 @@ struct BuiltinPolyfill::State {
         return name;
     }
 
+    /// Builds the polyfill function for the `reflect` builtin
+    /// @param ty the parameter and return type for the function
+    /// @return the polyfill function name
+    Symbol reflect(const type::Type* ty) {
+        auto name = b.Symbols().New("tint_reflect");
+
+        // WGSL polyfill function:
+        //      fn tint_reflect(e1 : T, e2 : T) -> T {
+        //          let factor = (-2.0 * dot(e1, e2));
+        //          return (e1 + (factor * e2));
+        //      }
+        // Using -2.0 instead of 2.0 in factor to prevent the optimization that cause wrong result.
+        // See https://crbug.com/tint/1798 for more details.
+        auto body = utils::Vector{
+            b.Decl(b.Let("factor", b.Mul(-2.0_a, b.Call("dot", "e1", "e2")))),
+            b.Return(b.Add("e1", b.Mul("factor", "e2"))),
+        };
+        b.Func(name,
+               utils::Vector{
+                   b.Param("e1", T(ty)),
+                   b.Param("e2", T(ty)),
+               },
+               T(ty), body);
+
+        return name;
+    }
+
     /// Builds the polyfill function for the `saturate` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
@@ -1005,6 +1032,18 @@ Transform::ApplyResult BuiltinPolyfill::Apply(const Program* src,
                         if (polyfill.insert_bits != Level::kNone) {
                             fn = builtin_polyfills.GetOrCreate(
                                 builtin, [&] { return s.insertBits(builtin->ReturnType()); });
+                        }
+                        break;
+                    case sem::BuiltinType::kReflect:
+                        // Only polyfill for vec2<f32>. See https://crbug.com/tint/1798 for more
+                        // details.
+                        if (polyfill.reflect_vec2_f32) {
+                            auto& sig = builtin->Signature();
+                            auto* vec = sig.return_type->As<type::Vector>();
+                            if (vec && vec->Width() == 2 && vec->type()->Is<type::F32>()) {
+                                fn = builtin_polyfills.GetOrCreate(
+                                    builtin, [&] { return s.reflect(builtin->ReturnType()); });
+                            }
                         }
                         break;
                     case sem::BuiltinType::kSaturate:
