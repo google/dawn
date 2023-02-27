@@ -309,19 +309,18 @@ class Field {
 
     bool IsStorageBufferOnly() const { return mStorageBufferOnly; }
 
-    // Call the DataMatcherCallback `callback` for continious or strided data bytes, based on the
+    // Call the DataMatcherCallback `callback` for continuous or strided data bytes, based on the
     // strided information of this field. The callback may be called once or multiple times. Note
-    // that padding bytes introduced by @size attribute are not tested.
+    // that padding bytes are tested as well, as they must be preserved by the implementation.
     void CheckData(DataMatcherCallback callback) const {
-        // Calls `callback` with the strided intervals of length mStrideDataBytes, skipping
-        // mStridePaddingBytes. For example, for a field of mSize = 18, mStrideDataBytes = 2,
-        // and mStridePaddingBytes = 4, calls `callback` with the intervals: [0, 2), [6, 8),
-        // [12, 14). If the data is continious, i.e. mStrideDataBytes = 18 and
-        // mStridePaddingBytes = 0, `callback` would be called only once with the whole interval
-        // [0, 18).
+        // Calls `callback` with the strided intervals of length mStrideDataBytes +
+        // mStridePaddingBytes. For example, for a field of mSize = 18, mStrideDataBytes = 2, and
+        // mStridePaddingBytes = 4, calls `callback` with the intervals: [0, 6), [6, 12), [12, 18).
+        // If the data is continuous, i.e. mStrideDataBytes = 18 and mStridePaddingBytes = 0,
+        // `callback` would be called only once with the whole interval [0, 18).
         size_t offset = 0;
         while (offset < mSize) {
-            callback(offset, mStrideDataBytes);
+            callback(offset, mStrideDataBytes + mStridePaddingBytes);
             offset += mStrideDataBytes + mStridePaddingBytes;
         }
     }
