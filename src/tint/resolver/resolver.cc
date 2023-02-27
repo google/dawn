@@ -2011,7 +2011,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         auto stage = args_stage;                 // The evaluation stage of the call
         const constant::Value* value = nullptr;  // The constant value for the call
         if (stage == sem::EvaluationStage::kConstant) {
-            if (auto r = const_eval_.ArrayOrStructCtor(ty, args)) {
+            auto els = utils::Transform(args, [&](auto* arg) { return arg->ConstantValue(); });
+            if (auto r = const_eval_.ArrayOrStructCtor(ty, std::move(els))) {
                 value = r.Get();
             } else {
                 return nullptr;

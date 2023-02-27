@@ -77,11 +77,10 @@ class ConstEval {
     // Constant value evaluation methods, to be called directly from Resolver
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /// @param ty the target type - must be an array or initializer
+    /// @param ty the target type - must be an array or struct
     /// @param args the input arguments
     /// @return the constructed value, or null if the value cannot be calculated
-    Result ArrayOrStructCtor(const type::Type* ty,
-                             utils::VectorRef<const sem::ValueExpression*> args);
+    Result ArrayOrStructCtor(const type::Type* ty, utils::VectorRef<const constant::Value*> args);
 
     /// @param ty the target type
     /// @param value the value being converted
