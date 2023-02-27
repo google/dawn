@@ -240,6 +240,10 @@ class OpenGLLoaderGenerator(Generator):
                             required=True,
                             type=str,
                             help='The Khronos gl.xml to use.')
+        parser.add_argument('--gl-angle-ext-xml',
+                            required=True,
+                            type=str,
+                            help='The ANGLE gl_angle_ext.xml to use.')
         parser.add_argument(
             '--supported-extensions',
             required=True,
@@ -250,13 +254,23 @@ class OpenGLLoaderGenerator(Generator):
 
     def get_file_renders(self, args):
         supported_extensions = []
+        supported_angle_extensions = []
         with open(args.supported_extensions) as f:
             supported_extensions_json = json.loads(f.read())
             supported_extensions = supported_extensions_json[
                 'supported_extensions']
+            supported_angle_extensions = supported_extensions_json[
+                'supported_angle_extensions']
 
         params = compute_params(
             etree.parse(args.gl_xml).getroot(), supported_extensions)
+
+        angle_params = compute_params(
+            etree.parse(args.gl_angle_ext_xml).getroot(),
+            supported_angle_extensions)
+
+        for key, value in params.items():
+            params[key] += angle_params[key]
 
         return [
             FileRender(
@@ -274,6 +288,7 @@ class OpenGLLoaderGenerator(Generator):
     def get_dependencies(self, args):
         return [
             os.path.abspath(args.gl_xml),
+            os.path.abspath(args.gl_angle_ext_xml),
             os.path.abspath(args.supported_extensions)
         ]
 

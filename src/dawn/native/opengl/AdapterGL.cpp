@@ -194,6 +194,11 @@ void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     //     (gl.IsAtLeastGLES(3, 1) && gl.IsGLExtensionSupported("EXT_base_instance")) ||
     //     (gl.IsAtLeastGL(3, 1) && gl.IsGLExtensionSupported("ARB_base_instance"));
 
+    if (gl.IsAtLeastGLES(3, 1) && gl.IsGLExtensionSupported("GL_ANGLE_base_vertex_base_instance")) {
+        supportsBaseVertex = true;
+        supportsBaseInstance = true;
+    }
+
     // TODO(crbug.com/dawn/343): Investigate emulation.
     deviceToggles->Default(Toggle::DisableBaseVertex, !supportsBaseVertex);
     deviceToggles->Default(Toggle::DisableBaseInstance, !supportsBaseInstance);

@@ -413,6 +413,8 @@ if (DAWN_ENABLE_OPENGL)
         PRINT_NAME "OpenGL function loader"
         ARGS "--gl-xml"
              "${Dawn_SOURCE_DIR}/third_party/khronos/gl.xml"
+             "--gl-angle-ext-xml"
+             "${Dawn_SOURCE_DIR}/third_party/angle/scripts/gl_angle_ext.xml"
              "--supported-extensions"
              "${Dawn_SOURCE_DIR}/src/dawn/native/opengl/supported_extensions.json"
         RESULT_VARIABLE "DAWN_NATIVE_OPENGL_AUTOGEN_SOURCES"
