@@ -479,5 +479,198 @@ INSTANTIATE_TEST_SUITE_P(Template,
                              },
                          }));
 
+INSTANTIATE_TEST_SUITE_P(TreesitterScannerSeparatingCases,
+                         ClassifyTemplateArgsTest,
+                         testing::ValuesIn(std::vector<Case>{
+                             // Treesitter had trouble missing '=' in its lookahead
+                             {
+                                 "a<b>=c",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kIdentifier,         // b
+                                     T::kTemplateArgsRight,  // >
+                                     T::kEqual,              // =
+                                     T::kIdentifier,         // c
+                                     T::kEOF,
+                                 },
+                             },
+                             {
+                                 "a<b>>=c",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kIdentifier,         // b
+                                     T::kTemplateArgsRight,  // >
+                                     T::kGreaterThanEqual,   // >=
+                                     T::kPlaceholder,        // <placeholder>
+                                     T::kIdentifier,         // c
+                                     T::kEOF,
+                                 },
+                             },
+                             {
+                                 "a<b==c>",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kIdentifier,         // b
+                                     T::kEqualEqual,         // ==
+                                     T::kIdentifier,         // c
+                                     T::kTemplateArgsRight,  // >
+                                     T::kEOF,
+                                 },
+                             },
+                             {
+                                 "a<(b==c)>",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kParenLeft,          // (
+                                     T::kIdentifier,         // b
+                                     T::kEqualEqual,         // ==
+                                     T::kIdentifier,         // c
+                                     T::kParenRight,         // )
+                                     T::kTemplateArgsRight,  // >
+                                     T::kEOF,
+                                 },
+                             },
+                             {
+                                 "a<b<=c>",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kIdentifier,         // b
+                                     T::kLessThanEqual,      // <=
+                                     T::kIdentifier,         // c
+                                     T::kTemplateArgsRight,  // >
+                                     T::kEOF,
+                                 },
+                             },
+                             {
+                                 "a<(b<=c)>",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kParenLeft,          // (
+                                     T::kIdentifier,         // b
+                                     T::kLessThanEqual,      // <=
+                                     T::kIdentifier,         // c
+                                     T::kParenRight,         // )
+                                     T::kTemplateArgsRight,  // >
+                                     T::kEOF,
+                                 },
+                             },
+                             {
+                                 "a<b>=c>",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kIdentifier,         // b
+                                     T::kTemplateArgsRight,  // >
+                                     T::kEqual,              // =
+                                     T::kIdentifier,         // c
+                                     T::kGreaterThan,        // >
+                                     T::kEOF,
+                                 },
+                             },
+                             {
+                                 "a<(b<=c)>",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kParenLeft,          // (
+                                     T::kIdentifier,         // b
+                                     T::kLessThanEqual,      // <=
+                                     T::kIdentifier,         // c
+                                     T::kParenRight,         // )
+                                     T::kTemplateArgsRight,  // >
+                                     T::kEOF,
+                                 },
+                             },
+                             {
+                                 "a<b>>c>",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kIdentifier,         // b
+                                     T::kTemplateArgsRight,  // >
+                                     T::kGreaterThan,        // >
+                                     T::kIdentifier,         // c
+                                     T::kGreaterThan,        // >
+                                     T::kEOF,
+                                 },
+                             },
+                             {
+                                 "a<b<<c>",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kIdentifier,         // b
+                                     T::kShiftLeft,          // <<
+                                     T::kIdentifier,         // c
+                                     T::kTemplateArgsRight,  // >
+                                     T::kEOF,
+                                 },
+                             },
+                             {
+                                 "a<(b<<c)>",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kParenLeft,          // (
+                                     T::kIdentifier,         // b
+                                     T::kShiftLeft,          // <<
+                                     T::kIdentifier,         // c
+                                     T::kParenRight,         // )
+                                     T::kTemplateArgsRight,  // >
+                                     T::kEOF,
+                                 },
+                             },
+                             {
+                                 "a<(b>>c)>",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kParenLeft,          // (
+                                     T::kIdentifier,         // b
+                                     T::kShiftRight,         // >>
+                                     T::kPlaceholder,        // <placeholder>
+                                     T::kIdentifier,         // c
+                                     T::kParenRight,         // )
+                                     T::kTemplateArgsRight,  // >
+                                     T::kEOF,
+                                 },
+                             },
+                             {
+                                 "a<1<<c>",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kIntLiteral,         // 1
+                                     T::kShiftLeft,          // <<
+                                     T::kIdentifier,         // c
+                                     T::kTemplateArgsRight,  // >
+                                     T::kEOF,
+                                 },
+                             },
+                             {
+                                 "a<1<<c<d>()>",
+                                 {
+                                     T::kIdentifier,         // a
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kIntLiteral,         // 1
+                                     T::kShiftLeft,          // <<
+                                     T::kIdentifier,         // c
+                                     T::kTemplateArgsLeft,   // <
+                                     T::kIdentifier,         // d
+                                     T::kTemplateArgsRight,  // >
+                                     T::kParenLeft,          // (
+                                     T::kParenRight,         // )
+                                     T::kTemplateArgsRight,  // >
+                                     T::kEOF,
+                                 },
+                             },
+                         }));
+
 }  // namespace
 }  // namespace tint::reader::wgsl
