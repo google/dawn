@@ -714,7 +714,7 @@ utils::Result<NumberT> ConstEval::Mod(const Source& source, NumberT a, NumberT b
         } else {
             AddError(OverflowErrorMessage(a, "%", b), source);
             if (use_runtime_semantics_) {
-                return a;
+                return NumberT{0};
             } else {
                 return utils::Failure;
             }
@@ -727,7 +727,7 @@ utils::Result<NumberT> ConstEval::Mod(const Source& source, NumberT a, NumberT b
             // lhs % 0 is an error
             AddError(OverflowErrorMessage(a, "%", b), source);
             if (use_runtime_semantics_) {
-                return a;
+                return NumberT{0};
             } else {
                 return utils::Failure;
             }
@@ -738,7 +738,7 @@ utils::Result<NumberT> ConstEval::Mod(const Source& source, NumberT a, NumberT b
             if (rhs == -1 && lhs == std::numeric_limits<T>::min()) {
                 AddError(OverflowErrorMessage(a, "%", b), source);
                 if (use_runtime_semantics_) {
-                    return a;
+                    return NumberT{0};
                 } else {
                     return utils::Failure;
                 }

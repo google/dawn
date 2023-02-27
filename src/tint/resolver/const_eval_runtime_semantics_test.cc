@@ -212,7 +212,7 @@ TEST_F(ResolverConstEvalRuntimeSemanticsTest, Mod_AInt_ZeroDenominator) {
     auto* b = Scalar(AInt(0));
     auto result = const_eval.OpModulo(a->Type(), utils::Vector{a, b}, {});
     ASSERT_TRUE(result);
-    EXPECT_EQ(result.Get()->ValueAs<AInt>(), 42);
+    EXPECT_EQ(result.Get()->ValueAs<AInt>(), 0);
     EXPECT_EQ(error(), R"(warning: '42 % 0' cannot be represented as 'abstract-int')");
 }
 
@@ -221,7 +221,7 @@ TEST_F(ResolverConstEvalRuntimeSemanticsTest, Mod_I32_ZeroDenominator) {
     auto* b = Scalar(i32(0));
     auto result = const_eval.OpModulo(a->Type(), utils::Vector{a, b}, {});
     ASSERT_TRUE(result);
-    EXPECT_EQ(result.Get()->ValueAs<i32>(), 42);
+    EXPECT_EQ(result.Get()->ValueAs<i32>(), 0);
     EXPECT_EQ(error(), R"(warning: '42 % 0' cannot be represented as 'i32')");
 }
 
@@ -230,7 +230,7 @@ TEST_F(ResolverConstEvalRuntimeSemanticsTest, Mod_U32_ZeroDenominator) {
     auto* b = Scalar(u32(0));
     auto result = const_eval.OpModulo(a->Type(), utils::Vector{a, b}, {});
     ASSERT_TRUE(result);
-    EXPECT_EQ(result.Get()->ValueAs<u32>(), 42);
+    EXPECT_EQ(result.Get()->ValueAs<u32>(), 0);
     EXPECT_EQ(error(), R"(warning: '42 % 0' cannot be represented as 'u32')");
 }
 
@@ -239,7 +239,7 @@ TEST_F(ResolverConstEvalRuntimeSemanticsTest, Mod_AFloat_ZeroDenominator) {
     auto* b = Scalar(AFloat(0));
     auto result = const_eval.OpModulo(a->Type(), utils::Vector{a, b}, {});
     ASSERT_TRUE(result);
-    EXPECT_EQ(result.Get()->ValueAs<AFloat>(), 42.f);
+    EXPECT_EQ(result.Get()->ValueAs<AFloat>(), 0.f);
     EXPECT_EQ(error(), R"(warning: '42 % 0' cannot be represented as 'abstract-float')");
 }
 
@@ -248,7 +248,7 @@ TEST_F(ResolverConstEvalRuntimeSemanticsTest, Mod_F32_ZeroDenominator) {
     auto* b = Scalar(f32(0));
     auto result = const_eval.OpModulo(a->Type(), utils::Vector{a, b}, {});
     ASSERT_TRUE(result);
-    EXPECT_EQ(result.Get()->ValueAs<f32>(), 42.f);
+    EXPECT_EQ(result.Get()->ValueAs<f32>(), 0.f);
     EXPECT_EQ(error(), R"(warning: '42 % 0' cannot be represented as 'f32')");
 }
 
@@ -257,7 +257,7 @@ TEST_F(ResolverConstEvalRuntimeSemanticsTest, Mod_I32_MostNegativeByMinInt) {
     auto* b = Scalar(i32(-1));
     auto result = const_eval.OpModulo(a->Type(), utils::Vector{a, b}, {});
     ASSERT_TRUE(result);
-    EXPECT_EQ(result.Get()->ValueAs<i32>(), i32::Lowest());
+    EXPECT_EQ(result.Get()->ValueAs<i32>(), 0);
     EXPECT_EQ(error(), R"(warning: '-2147483648 % -1' cannot be represented as 'i32')");
 }
 
