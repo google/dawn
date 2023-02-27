@@ -979,7 +979,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterStoreType_NonAtomicFree) {
     EXPECT_EQ(r()->error(), "12:34 error: type of function parameter must be constructible");
 }
 
-TEST_F(ResolverFunctionValidationTest, ParameterSotreType_AtomicFree) {
+TEST_F(ResolverFunctionValidationTest, ParameterStoreType_AtomicFree) {
     Structure("S", utils::Vector{
                        Member("m", ty.i32()),
                    });
@@ -1008,7 +1008,7 @@ TEST_F(ResolverFunctionValidationTest, ParametersOverLimit) {
     Func(Source{{12, 34}}, "f", params, ty.void_(), utils::Empty);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: functions may declare at most 255 parameters");
+    EXPECT_EQ(r()->error(), "12:34 error: function declares 256 parameters, maximum is 255");
 }
 
 TEST_F(ResolverFunctionValidationTest, ParameterVectorNoType) {

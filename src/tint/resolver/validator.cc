@@ -76,6 +76,8 @@
 namespace tint::resolver {
 namespace {
 
+constexpr size_t kMaxFunctionParameters = 255;
+
 bool IsValidStorageTextureDimension(type::TextureDimension dim) {
     switch (dim) {
         case type::TextureDimension::k1d:
@@ -1046,8 +1048,10 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
         }
     }
 
-    if (decl->params.Length() > 255) {
-        AddError("functions may declare at most 255 parameters", decl->source);
+    if (decl->params.Length() > kMaxFunctionParameters) {
+        AddError("function declares " + std::to_string(decl->params.Length()) +
+                     " parameters, maximum is " + std::to_string(kMaxFunctionParameters),
+                 decl->source);
         return false;
     }
 
