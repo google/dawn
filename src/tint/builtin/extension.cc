@@ -40,6 +40,9 @@ Extension ParseExtension(std::string_view str) {
     if (str == "chromium_experimental_push_constant") {
         return Extension::kChromiumExperimentalPushConstant;
     }
+    if (str == "chromium_internal_relaxed_uniform_layout") {
+        return Extension::kChromiumInternalRelaxedUniformLayout;
+    }
     if (str == "f16") {
         return Extension::kF16;
     }
@@ -58,6 +61,8 @@ std::ostream& operator<<(std::ostream& out, Extension value) {
             return out << "chromium_experimental_full_ptr_parameters";
         case Extension::kChromiumExperimentalPushConstant:
             return out << "chromium_experimental_push_constant";
+        case Extension::kChromiumInternalRelaxedUniformLayout:
+            return out << "chromium_internal_relaxed_uniform_layout";
         case Extension::kF16:
             return out << "f16";
     }

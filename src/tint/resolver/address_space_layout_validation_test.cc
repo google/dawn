@@ -603,5 +603,150 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_Aligned) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_StructMemberOffset_Struct) {
+    // enable chromium_internal_relaxed_uniform_layout;
+    //
+    // struct Inner {
+    //   scalar : i32;
+    // };
+    //
+    // struct Outer {
+    //   scalar : f32;
+    //   inner : Inner;
+    // };
+    //
+    // @group(0) @binding(0)
+    // var<uniform> a : Outer;
+
+    Enable(builtin::Extension::kChromiumInternalRelaxedUniformLayout);
+
+    Structure(Source{{12, 34}}, "Inner",
+              utils::Vector{
+                  Member("scalar", ty.i32()),
+              });
+
+    Structure(Source{{34, 56}}, "Outer",
+              utils::Vector{
+                  Member("scalar", ty.f32()),
+                  Member(Source{{56, 78}}, "inner", ty("Inner")),
+              });
+
+    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), builtin::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_StructMemberOffset_Array) {
+    // enable chromium_internal_relaxed_uniform_layout;
+    //
+    // type Inner = @stride(16) array<f32, 10u>;
+    //
+    // struct Outer {
+    //   scalar : f32;
+    //   inner : Inner;
+    // };
+    //
+    // @group(0) @binding(0)
+    // var<uniform> a : Outer;
+
+    Enable(builtin::Extension::kChromiumInternalRelaxedUniformLayout);
+
+    Alias("Inner", ty.array<f32, 10>(utils::Vector{Stride(16)}));
+
+    Structure(Source{{12, 34}}, "Outer",
+              utils::Vector{
+                  Member("scalar", ty.f32()),
+                  Member(Source{{56, 78}}, "inner", ty("Inner")),
+              });
+
+    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), builtin::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_MemberOffsetNotMutipleOf16) {
+    // enable chromium_internal_relaxed_uniform_layout;
+    //
+    // struct Inner {
+    //   @align(1) @size(5) scalar : i32;
+    // };
+    //
+    // struct Outer {
+    //   inner : Inner;
+    //   scalar : i32;
+    // };
+    //
+    // @group(0) @binding(0)
+    // var<uniform> a : Outer;
+
+    Enable(builtin::Extension::kChromiumInternalRelaxedUniformLayout);
+
+    Structure(Source{{12, 34}}, "Inner",
+              utils::Vector{
+                  Member("scalar", ty.i32(), utils::Vector{MemberAlign(1_i), MemberSize(5_a)}),
+              });
+
+    Structure(Source{{34, 56}}, "Outer",
+              utils::Vector{
+                  Member(Source{{56, 78}}, "inner", ty("Inner")),
+                  Member(Source{{78, 90}}, "scalar", ty.i32()),
+              });
+
+    GlobalVar(Source{{22, 24}}, "a", ty("Outer"), builtin::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_ArrayStride_Scalar) {
+    // enable chromium_internal_relaxed_uniform_layout;
+    //
+    // struct Outer {
+    //   arr : array<f32, 10u>;
+    // };
+    //
+    // @group(0) @binding(0)
+    // var<uniform> a : Outer;
+
+    Enable(builtin::Extension::kChromiumInternalRelaxedUniformLayout);
+
+    Structure(Source{{12, 34}}, "Outer",
+              utils::Vector{
+                  Member("arr", ty.array<f32, 10>()),
+              });
+
+    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), builtin::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_ArrayStride_Vech) {
+    // enable f16;
+    // enable chromium_internal_relaxed_uniform_layout;
+    //
+    // struct Outer {
+    //   arr : array<vec3<f16>, 10u>;
+    // };
+    //
+    // @group(0) @binding(0)
+    // var<uniform> a : Outer;
+
+    Enable(builtin::Extension::kF16);
+    Enable(builtin::Extension::kChromiumInternalRelaxedUniformLayout);
+
+    Structure(Source{{12, 34}}, "Outer",
+              utils::Vector{
+                  Member("arr", ty.array(ty.vec3<f16>(), 10_u)),
+              });
+
+    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), builtin::AddressSpace::kUniform, Group(0_a),
+              Binding(0_a));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 }  // namespace
 }  // namespace tint::resolver
