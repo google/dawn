@@ -51,6 +51,9 @@ class ObjectBase : public LinkNode<ObjectBase> {
     // object.
     [[nodiscard]] bool Release();
 
+  protected:
+    uint32_t GetRefcount() const { return mRefcount; }
+
   private:
     Client* const mClient;
     const ObjectHandle mHandle;

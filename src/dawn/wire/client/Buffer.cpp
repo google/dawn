@@ -183,6 +183,8 @@ void Buffer::MapAsync(WGPUMapModeFlags mode,
                       size_t size,
                       WGPUBufferMapCallback callback,
                       void* userdata) {
+    ASSERT(GetRefcount() != 0);
+
     if (mPendingMap) {
         return callback(WGPUBufferMapAsyncStatus_Error, userdata);
     }
