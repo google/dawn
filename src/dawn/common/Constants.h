@@ -31,11 +31,11 @@ static constexpr uint32_t kMaxInterStageShaderVariables = 16u;
 static constexpr uint64_t kAssumedMaxBufferSize =
     0x80000000u;  // Use 2 GB when the limit is unavailable
 
-// Per stage limits
+// Per stage maximum limits used to optimized Dawn internals.
 static constexpr uint32_t kMaxSampledTexturesPerShaderStage = 16;
 static constexpr uint32_t kMaxSamplersPerShaderStage = 16;
 static constexpr uint32_t kMaxStorageBuffersPerShaderStage = 8;
-static constexpr uint32_t kMaxStorageTexturesPerShaderStage = 4;
+static constexpr uint32_t kMaxStorageTexturesPerShaderStage = 8;
 static constexpr uint32_t kMaxUniformBuffersPerShaderStage = 12;
 
 // Indirect command sizes

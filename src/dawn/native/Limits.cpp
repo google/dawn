@@ -38,6 +38,11 @@
 #define LIMITS_RESOURCE_BINDINGS(X)                                                \
     X(Maximum,   maxDynamicUniformBuffersPerPipelineLayout,         8,         10) \
     X(Maximum,   maxDynamicStorageBuffersPerPipelineLayout,         4,          8) \
+    X(Maximum,            maxSampledTexturesPerShaderStage,        16,         16) \
+    X(Maximum,                   maxSamplersPerShaderStage,        16,         16) \
+    X(Maximum,             maxStorageBuffersPerShaderStage,         8,          8) \
+    X(Maximum,            maxStorageTexturesPerShaderStage,         4,          8) \
+    X(Maximum,             maxUniformBuffersPerShaderStage,        12,         12)
 
 // TODO(crbug.com/dawn/685):
 // These limits don't have tiers yet. Define two tiers with the same values since the macros
@@ -49,11 +54,6 @@
     X(Maximum,                       maxTextureArrayLayers,       256,        256) \
     X(Maximum,                               maxBindGroups,         4,          4) \
     X(Maximum,                     maxBindingsPerBindGroup,       640,        640) \
-    X(Maximum,            maxSampledTexturesPerShaderStage,        16,         16) \
-    X(Maximum,                   maxSamplersPerShaderStage,        16,         16) \
-    X(Maximum,             maxStorageBuffersPerShaderStage,         8,          8) \
-    X(Maximum,            maxStorageTexturesPerShaderStage,         4,          4) \
-    X(Maximum,             maxUniformBuffersPerShaderStage,        12,         12) \
     X(Maximum,                 maxUniformBufferBindingSize,     65536,      65536) \
     X(Alignment,           minUniformBufferOffsetAlignment,       256,        256) \
     X(Alignment,           minStorageBufferOffsetAlignment,       256,        256) \

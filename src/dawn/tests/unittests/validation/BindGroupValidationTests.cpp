@@ -1293,25 +1293,32 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
         wgpu::BindGroupLayoutEntry otherEntry;
     };
 
+    wgpu::Limits limits = GetSupportedLimits().limits;
+
     std::array<TestInfo, 7> kTestInfos = {
-        TestInfo{kMaxSampledTexturesPerShaderStage, BGLEntryType(wgpu::TextureSampleType::Float),
+        TestInfo{limits.maxSampledTexturesPerShaderStage,
+                 BGLEntryType(wgpu::TextureSampleType::Float),
                  BGLEntryType(wgpu::BufferBindingType::Uniform)},
-        TestInfo{kMaxSamplersPerShaderStage, BGLEntryType(wgpu::SamplerBindingType::Filtering),
+        TestInfo{limits.maxSamplersPerShaderStage,
+                 BGLEntryType(wgpu::SamplerBindingType::Filtering),
                  BGLEntryType(wgpu::BufferBindingType::Uniform)},
-        TestInfo{kMaxSamplersPerShaderStage, BGLEntryType(wgpu::SamplerBindingType::Comparison),
+        TestInfo{limits.maxSamplersPerShaderStage,
+                 BGLEntryType(wgpu::SamplerBindingType::Comparison),
                  BGLEntryType(wgpu::BufferBindingType::Uniform)},
-        TestInfo{kMaxStorageBuffersPerShaderStage, BGLEntryType(wgpu::BufferBindingType::Storage),
+        TestInfo{limits.maxStorageBuffersPerShaderStage,
+                 BGLEntryType(wgpu::BufferBindingType::Storage),
                  BGLEntryType(wgpu::BufferBindingType::Uniform)},
         TestInfo{
-            kMaxStorageTexturesPerShaderStage,
+            limits.maxStorageTexturesPerShaderStage,
             BGLEntryType(wgpu::StorageTextureAccess::WriteOnly, wgpu::TextureFormat::RGBA8Unorm),
             BGLEntryType(wgpu::BufferBindingType::Uniform)},
-        TestInfo{kMaxUniformBuffersPerShaderStage, BGLEntryType(wgpu::BufferBindingType::Uniform),
+        TestInfo{limits.maxUniformBuffersPerShaderStage,
+                 BGLEntryType(wgpu::BufferBindingType::Uniform),
                  BGLEntryType(wgpu::TextureSampleType::Float)},
         // External textures use multiple bindings (3 sampled textures, 1 sampler, 1 uniform buffer)
         // that count towards the per stage binding limits. The number of external textures are
         // currently restricted by the maximum number of sampled textures.
-        TestInfo{kMaxSampledTexturesPerShaderStage / kSampledTexturesPerExternalTexture,
+        TestInfo{limits.maxSampledTexturesPerShaderStage / kSampledTexturesPerExternalTexture,
                  BGLEntryType(&utils::kExternalTextureBindingLayout),
                  BGLEntryType(wgpu::BufferBindingType::Uniform)}};
 
@@ -1388,14 +1395,16 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimitsWithExternalTexture) {
         wgpu::BindGroupLayoutEntry otherEntry;
     };
 
+    wgpu::Limits limits = GetSupportedLimits().limits;
+
     std::array<TestInfo, 3> kTestInfos = {
-        TestInfo{kMaxSampledTexturesPerShaderStage, kSampledTexturesPerExternalTexture,
+        TestInfo{limits.maxSampledTexturesPerShaderStage, kSampledTexturesPerExternalTexture,
                  BGLEntryType(wgpu::TextureSampleType::Float),
                  BGLEntryType(wgpu::BufferBindingType::Uniform)},
-        TestInfo{kMaxSamplersPerShaderStage, kSamplersPerExternalTexture,
+        TestInfo{limits.maxSamplersPerShaderStage, kSamplersPerExternalTexture,
                  BGLEntryType(wgpu::SamplerBindingType::Filtering),
                  BGLEntryType(wgpu::BufferBindingType::Uniform)},
-        TestInfo{kMaxUniformBuffersPerShaderStage, kUniformsPerExternalTexture,
+        TestInfo{limits.maxUniformBuffersPerShaderStage, kUniformsPerExternalTexture,
                  BGLEntryType(wgpu::BufferBindingType::Uniform),
                  BGLEntryType(wgpu::TextureSampleType::Float)},
     };
@@ -1480,8 +1489,10 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
 
     // In this test, we use all the same shader stage. Ensure that this does not exceed the
     // per-stage limit.
-    ASSERT(limits.maxDynamicUniformBuffersPerPipelineLayout <= kMaxUniformBuffersPerShaderStage);
-    ASSERT(limits.maxDynamicStorageBuffersPerPipelineLayout <= kMaxStorageBuffersPerShaderStage);
+    ASSERT(limits.maxDynamicUniformBuffersPerPipelineLayout <=
+           limits.maxUniformBuffersPerShaderStage);
+    ASSERT(limits.maxDynamicStorageBuffersPerPipelineLayout <=
+           limits.maxStorageBuffersPerShaderStage);
 
     for (uint32_t i = 0; i < limits.maxDynamicUniformBuffersPerPipelineLayout; ++i) {
         maxUniformDB.push_back(utils::BindingLayoutEntryInitializationHelper(
