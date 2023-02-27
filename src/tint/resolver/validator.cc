@@ -77,6 +77,7 @@ namespace tint::resolver {
 namespace {
 
 constexpr size_t kMaxFunctionParameters = 255;
+constexpr size_t kMaxSwitchCaseSelectors = 16383;
 
 bool IsValidStorageTextureDimension(type::TextureDimension dim) {
     switch (dim) {
@@ -2315,6 +2316,13 @@ bool Validator::Return(const ast::ReturnStatement* ret,
 }
 
 bool Validator::SwitchStatement(const ast::SwitchStatement* s) {
+    if (s->body.Length() > kMaxSwitchCaseSelectors) {
+        AddError("switch statement has " + std::to_string(s->body.Length()) +
+                     " case selectors, max is " + std::to_string(kMaxSwitchCaseSelectors),
+                 s->source);
+        return false;
+    }
+
     auto* cond_ty = sem_.TypeOf(s->condition);
     if (!cond_ty->is_integer_scalar()) {
         AddError("switch statement selector expression must be of a scalar integer type",

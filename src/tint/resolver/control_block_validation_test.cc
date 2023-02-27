@@ -561,5 +561,36 @@ TEST_F(ResolverControlBlockValidationTest, Switch_OverrideCondition_Fail) {
     EXPECT_EQ(r()->error(), "12:34 error: case selector must be a constant expression");
 }
 
+constexpr size_t kMaxSwitchCaseSelectors = 16383;
+
+TEST_F(ResolverControlBlockValidationTest, Switch_MaxSelectors_Valid) {
+    utils::Vector<const ast::CaseStatement*, 0> cases;
+    for (size_t i = 0; i < kMaxSwitchCaseSelectors - 1; ++i) {
+        cases.Push(Case(CaseSelector(Expr(i32(i)))));
+    }
+    cases.Push(DefaultCase());
+
+    auto* var = Var("a", ty.i32());
+    auto* s = Switch("a", std::move(cases));
+    WrapInFunction(var, s);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverControlBlockValidationTest, Switch_MaxSelectors_Invalid) {
+    utils::Vector<const ast::CaseStatement*, 0> cases;
+    for (size_t i = 0; i < kMaxSwitchCaseSelectors; ++i) {
+        cases.Push(Case(CaseSelector(Expr(i32(i)))));
+    }
+    cases.Push(DefaultCase());
+
+    auto* var = Var("a", ty.i32());
+    auto* s = Switch(Source{{12, 34}}, "a", std::move(cases));
+    WrapInFunction(var, s);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: switch statement has 16384 case selectors, max is 16383");
+}
+
 }  // namespace
 }  // namespace tint::resolver
