@@ -25,6 +25,16 @@
 #define LIMITS_WORKGROUP_STORAGE_SIZE(X)                                  \
     X(Maximum, maxComputeWorkgroupStorageSize, 16384, 32768, 49152, 65536)
 
+// Tiers for limits related to workgroup size.
+// TODO(crbug.com/dawn/685): Define these better. For now, use two tiers where one
+// is available on nearly all desktop platforms.
+#define LIMITS_WORKGROUP_SIZE(X)                                                   \
+    X(Maximum,           maxComputeInvocationsPerWorkgroup,       256,       1024) \
+    X(Maximum,                    maxComputeWorkgroupSizeX,       256,       1024) \
+    X(Maximum,                    maxComputeWorkgroupSizeY,       256,       1024) \
+    X(Maximum,                    maxComputeWorkgroupSizeZ,        64,         64) \
+    X(Maximum,            maxComputeWorkgroupsPerDimension,     65535,      65535)
+
 #define LIMITS_STORAGE_BUFFER_BINDING_SIZE(X)                                             \
     X(Maximum, maxStorageBufferBindingSize, 134217728, 1073741824, 2147483647, 4294967295)
 
@@ -64,16 +74,12 @@
     X(Maximum,               maxInterStageShaderComponents,        60,         60) \
     X(Maximum,               maxInterStageShaderVariables,         16,         16) \
     X(Maximum,                         maxColorAttachments,         8,          8) \
-    X(Maximum,            maxColorAttachmentBytesPerSample,        32,         32) \
-    X(Maximum,           maxComputeInvocationsPerWorkgroup,       256,        256) \
-    X(Maximum,                    maxComputeWorkgroupSizeX,       256,        256) \
-    X(Maximum,                    maxComputeWorkgroupSizeY,       256,        256) \
-    X(Maximum,                    maxComputeWorkgroupSizeZ,        64,         64) \
-    X(Maximum,            maxComputeWorkgroupsPerDimension,     65535,      65535)
+    X(Maximum,            maxColorAttachmentBytesPerSample,        32,         32)
 // clang-format on
 
 #define LIMITS_EACH_GROUP(X)              \
     X(LIMITS_WORKGROUP_STORAGE_SIZE)      \
+    X(LIMITS_WORKGROUP_SIZE)              \
     X(LIMITS_STORAGE_BUFFER_BINDING_SIZE) \
     X(LIMITS_MAX_BUFFER_SIZE)             \
     X(LIMITS_RESOURCE_BINDINGS)           \
@@ -81,6 +87,7 @@
 
 #define LIMITS(X)                         \
     LIMITS_WORKGROUP_STORAGE_SIZE(X)      \
+    LIMITS_WORKGROUP_SIZE(X)              \
     LIMITS_STORAGE_BUFFER_BINDING_SIZE(X) \
     LIMITS_MAX_BUFFER_SIZE(X)             \
     LIMITS_RESOURCE_BINDINGS(X)           \
