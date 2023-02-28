@@ -49,6 +49,7 @@
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/append_vector.h"
 #include "src/tint/writer/check_supported_extensions.h"
 
@@ -4138,7 +4139,7 @@ SpvImageFormat Builder::convert_texel_format_to_spv(const builtin::TexelFormat f
 
 bool Builder::push_function_inst(spv::Op op, const OperandList& operands) {
     if (functions_.empty()) {
-        std::ostringstream ss;
+        utils::StringStream ss;
         ss << "Internal error: trying to add SPIR-V instruction " << int(op)
            << " outside a function";
         error_ = ss.str();
