@@ -2012,6 +2012,9 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
         auto stage = args_stage;                 // The evaluation stage of the call
         const constant::Value* value = nullptr;  // The constant value for the call
+        if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+            stage = sem::EvaluationStage::kNotEvaluated;
+        }
         if (stage == sem::EvaluationStage::kConstant) {
             auto els = utils::Transform(args, [&](auto* arg) { return arg->ConstantValue(); });
             if (auto r = const_eval_.ArrayOrStructCtor(ty, std::move(els))) {

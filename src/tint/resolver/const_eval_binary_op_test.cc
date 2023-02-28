@@ -2008,6 +2008,42 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_StructInit) {
               "expected 'f32', found 'bool'");
 }
 
+TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_ArrayInit) {
+    // const one = 1;
+    // const result = (one == 0) && array(4) == 0;
+    GlobalConst("one", Expr(1_a));
+    auto* lhs = Equal("one", 0_a);
+    auto* rhs = Equal(Call("array", Expr(4_a)), 0_a);
+    GlobalConst("result", LogicalAnd(lhs, rhs));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: no matching overload for operator == (array<abstract-int, 1>, abstract-int)
+
+2 candidate operators:
+  operator == (T, T) -> bool  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  operator == (vecN<T>, vecN<T>) -> vecN<bool>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+)");
+}
+
+TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_ArrayInit) {
+    // const one = 1;
+    // const result = (one == 1) || array(4) == 0;
+    GlobalConst("one", Expr(1_a));
+    auto* lhs = Equal("one", 1_a);
+    auto* rhs = Equal(Call("array", Expr(4_a)), 0_a);
+    GlobalConst("result", LogicalOr(lhs, rhs));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: no matching overload for operator == (array<abstract-int, 1>, abstract-int)
+
+2 candidate operators:
+  operator == (T, T) -> bool  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  operator == (vecN<T>, vecN<T>) -> vecN<bool>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+)");
+}
+
 ////////////////////////////////////////////////
 // Short-Circuit Builtin Call
 ////////////////////////////////////////////////
