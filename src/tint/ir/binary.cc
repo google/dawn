@@ -29,7 +29,7 @@ Binary::Binary(Kind kind, Value* result, Value* lhs, Value* rhs)
 
 Binary::~Binary() = default;
 
-std::ostream& Binary::ToString(std::ostream& out, const SymbolTable& st) const {
+utils::StringStream& Binary::ToString(utils::StringStream& out, const SymbolTable& st) const {
     Result()->ToString(out, st) << " = ";
     lhs_->ToString(out, st) << " ";
 

@@ -16,6 +16,7 @@
 
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/test_helper.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 namespace {
@@ -47,7 +48,7 @@ TEST_F(IR_InstructionTest, CreateAnd) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 & 2");
 }
@@ -74,7 +75,7 @@ TEST_F(IR_InstructionTest, CreateOr) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 | 2");
 }
@@ -101,7 +102,7 @@ TEST_F(IR_InstructionTest, CreateXor) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 ^ 2");
 }
@@ -128,7 +129,7 @@ TEST_F(IR_InstructionTest, CreateLogicalAnd) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 && 2");
 }
@@ -155,7 +156,7 @@ TEST_F(IR_InstructionTest, CreateLogicalOr) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 || 2");
 }
@@ -182,7 +183,7 @@ TEST_F(IR_InstructionTest, CreateEqual) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 == 2");
 }
@@ -209,7 +210,7 @@ TEST_F(IR_InstructionTest, CreateNotEqual) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 != 2");
 }
@@ -236,7 +237,7 @@ TEST_F(IR_InstructionTest, CreateLessThan) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 < 2");
 }
@@ -263,7 +264,7 @@ TEST_F(IR_InstructionTest, CreateGreaterThan) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 > 2");
 }
@@ -290,7 +291,7 @@ TEST_F(IR_InstructionTest, CreateLessThanEqual) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 <= 2");
 }
@@ -317,7 +318,7 @@ TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 >= 2");
 }
@@ -344,7 +345,7 @@ TEST_F(IR_InstructionTest, CreateShiftLeft) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 << 2");
 }
@@ -371,7 +372,7 @@ TEST_F(IR_InstructionTest, CreateShiftRight) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 >> 2");
 }
@@ -398,7 +399,7 @@ TEST_F(IR_InstructionTest, CreateAdd) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 + 2");
 }
@@ -425,7 +426,7 @@ TEST_F(IR_InstructionTest, CreateSubtract) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 - 2");
 }
@@ -452,7 +453,7 @@ TEST_F(IR_InstructionTest, CreateMultiply) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 * 2");
 }
@@ -479,7 +480,7 @@ TEST_F(IR_InstructionTest, CreateDivide) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 / 2");
 }
@@ -506,7 +507,7 @@ TEST_F(IR_InstructionTest, CreateModulo) {
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
-    std::stringstream str;
+    utils::StringStream str;
     instr->ToString(str, b.builder.ir.symbols);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 % 2");
 }

@@ -23,6 +23,7 @@
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/terminator.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
@@ -33,7 +34,7 @@ std::string Debug::AsDotGraph(const Module* mod) {
     std::unordered_set<const FlowNode*> visited;
     std::unordered_set<const FlowNode*> merge_nodes;
     std::unordered_map<const FlowNode*, std::string> node_to_name;
-    std::stringstream out;
+    utils::StringStream out;
 
     auto name_for = [&](const FlowNode* node) -> std::string {
         if (node_to_name.count(node) > 0) {

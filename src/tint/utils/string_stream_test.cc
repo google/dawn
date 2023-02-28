@@ -25,12 +25,6 @@ namespace {
 
 using StringStreamTest = testing::Test;
 
-TEST_F(StringStreamTest, Endl) {
-    StringStream s;
-    s << std::endl;
-    EXPECT_EQ(s.str(), "\n");
-}
-
 TEST_F(StringStreamTest, Zero) {
     StringStream s;
     s << 0.0f;

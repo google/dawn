@@ -22,6 +22,7 @@
 
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
@@ -45,12 +46,12 @@ class Disassembler {
     std::string AsString() const { return out_.str(); }
 
   private:
-    std::ostream& Indent();
+    utils::StringStream& Indent();
     void Walk(const FlowNode* node);
     size_t GetIdForNode(const FlowNode* node);
 
     const Module& mod_;
-    std::stringstream out_;
+    utils::StringStream out_;
     std::unordered_set<const FlowNode*> visited_;
     std::unordered_set<const FlowNode*> stop_nodes_;
     std::unordered_map<const FlowNode*, size_t> flow_node_to_id_;

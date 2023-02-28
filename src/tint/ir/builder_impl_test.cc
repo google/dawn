@@ -1836,8 +1836,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
     EXPECT_EQ(d.AsString(), R"(%1 (u32) = 3 >> 4
 %2 (u32) = %1 (u32) + 9
 %3 (bool) = 1 < %2 (u32)
-%4 (f32) = 2.3 * 5.5
-%5 (f32) = 6.7 / %4 (f32)
+%4 (f32) = 2.299999952 * 5.5
+%5 (f32) = 6.699999809 / %4 (f32)
 %6 (bool) = 2.5 > %5 (f32)
 %7 (bool) = %3 (bool) && %6 (bool)
 )");

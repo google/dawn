@@ -16,6 +16,7 @@
 
 #include "src/tint/ir/test_helper.h"
 #include "src/tint/ir/value.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 namespace {
@@ -27,13 +28,13 @@ using IR_ConstantTest = TestHelper;
 TEST_F(IR_ConstantTest, f32) {
     auto& b = CreateEmptyBuilder();
 
-    std::stringstream str;
+    utils::StringStream str;
 
     auto* c = b.builder.Constant(1.2_f);
     EXPECT_EQ(1.2_f, c->value->As<constant::Scalar<f32>>()->ValueAs<f32>());
 
     c->ToString(str, b.builder.ir.symbols);
-    EXPECT_EQ("1.2", str.str());
+    EXPECT_EQ("1.200000048", str.str());
 
     EXPECT_TRUE(c->value->Is<constant::Scalar<f32>>());
     EXPECT_FALSE(c->value->Is<constant::Scalar<f16>>());
@@ -45,13 +46,13 @@ TEST_F(IR_ConstantTest, f32) {
 TEST_F(IR_ConstantTest, f16) {
     auto& b = CreateEmptyBuilder();
 
-    std::stringstream str;
+    utils::StringStream str;
 
     auto* c = b.builder.Constant(1.1_h);
     EXPECT_EQ(1.1_h, c->value->As<constant::Scalar<f16>>()->ValueAs<f16>());
 
     c->ToString(str, b.builder.ir.symbols);
-    EXPECT_EQ("1.09961", str.str());
+    EXPECT_EQ("1.099609375", str.str());
 
     EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());
     EXPECT_TRUE(c->value->Is<constant::Scalar<f16>>());
@@ -63,7 +64,7 @@ TEST_F(IR_ConstantTest, f16) {
 TEST_F(IR_ConstantTest, i32) {
     auto& b = CreateEmptyBuilder();
 
-    std::stringstream str;
+    utils::StringStream str;
 
     auto* c = b.builder.Constant(1_i);
     EXPECT_EQ(1_i, c->value->As<constant::Scalar<i32>>()->ValueAs<i32>());
@@ -81,7 +82,7 @@ TEST_F(IR_ConstantTest, i32) {
 TEST_F(IR_ConstantTest, u32) {
     auto& b = CreateEmptyBuilder();
 
-    std::stringstream str;
+    utils::StringStream str;
 
     auto* c = b.builder.Constant(2_u);
     EXPECT_EQ(2_u, c->value->As<constant::Scalar<u32>>()->ValueAs<u32>());
@@ -99,26 +100,30 @@ TEST_F(IR_ConstantTest, u32) {
 TEST_F(IR_ConstantTest, bool) {
     auto& b = CreateEmptyBuilder();
 
-    std::stringstream str;
+    {
+        utils::StringStream str;
 
-    auto* c = b.builder.Constant(false);
-    EXPECT_FALSE(c->value->As<constant::Scalar<bool>>()->ValueAs<bool>());
+        auto* c = b.builder.Constant(false);
+        EXPECT_FALSE(c->value->As<constant::Scalar<bool>>()->ValueAs<bool>());
 
-    c->ToString(str, b.builder.ir.symbols);
-    EXPECT_EQ("false", str.str());
+        c->ToString(str, b.builder.ir.symbols);
+        EXPECT_EQ("false", str.str());
+    }
 
-    str.str("");
-    c = b.builder.Constant(true);
-    EXPECT_TRUE(c->value->As<constant::Scalar<bool>>()->ValueAs<bool>());
+    {
+        utils::StringStream str;
+        auto c = b.builder.Constant(true);
+        EXPECT_TRUE(c->value->As<constant::Scalar<bool>>()->ValueAs<bool>());
 
-    c->ToString(str, b.builder.ir.symbols);
-    EXPECT_EQ("true", str.str());
+        c->ToString(str, b.builder.ir.symbols);
+        EXPECT_EQ("true", str.str());
 
-    EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());
-    EXPECT_FALSE(c->value->Is<constant::Scalar<f16>>());
-    EXPECT_FALSE(c->value->Is<constant::Scalar<i32>>());
-    EXPECT_FALSE(c->value->Is<constant::Scalar<u32>>());
-    EXPECT_TRUE(c->value->Is<constant::Scalar<bool>>());
+        EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());
+        EXPECT_FALSE(c->value->Is<constant::Scalar<f16>>());
+        EXPECT_FALSE(c->value->Is<constant::Scalar<i32>>());
+        EXPECT_FALSE(c->value->Is<constant::Scalar<u32>>());
+        EXPECT_TRUE(c->value->Is<constant::Scalar<bool>>());
+    }
 }
 
 }  // namespace

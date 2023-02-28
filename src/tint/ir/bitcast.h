@@ -21,6 +21,7 @@
 #include "src/tint/ir/instruction.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/type.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
@@ -45,13 +46,11 @@ class Bitcast : public Castable<Bitcast, Instruction> {
     /// @param out the stream to write to
     /// @param st the symbol table
     /// @returns the stream
-    std::ostream& ToString(std::ostream& out, const SymbolTable& st) const override;
+    utils::StringStream& ToString(utils::StringStream& out, const SymbolTable& st) const override;
 
   private:
     Value* val_ = nullptr;
 };
-
-std::ostream& operator<<(std::ostream& out, const Bitcast&);
 
 }  // namespace tint::ir
 

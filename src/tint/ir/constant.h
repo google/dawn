@@ -20,6 +20,7 @@
 #include "src/tint/constant/value.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/symbol_table.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
@@ -38,7 +39,7 @@ class Constant : public Castable<Constant, Value> {
     /// @param out the stream to write to
     /// @param st the symbol table
     /// @returns the stream
-    std::ostream& ToString(std::ostream& out, const SymbolTable& st) const override;
+    utils::StringStream& ToString(utils::StringStream& out, const SymbolTable& st) const override;
 
     /// The constants value
     const constant::Value* const value;

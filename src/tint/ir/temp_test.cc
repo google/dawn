@@ -16,6 +16,7 @@
 
 #include "src/tint/ir/temp.h"
 #include "src/tint/ir/test_helper.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 namespace {
@@ -27,7 +28,7 @@ using IR_TempTest = TestHelper;
 TEST_F(IR_TempTest, id) {
     auto& b = CreateEmptyBuilder();
 
-    std::stringstream str;
+    utils::StringStream str;
 
     b.builder.next_temp_id = Temp::Id(4);
     auto* val = b.builder.Temp(b.builder.ir.types.Get<type::I32>());

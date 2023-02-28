@@ -26,7 +26,7 @@ Bitcast::Bitcast(Value* result, Value* val) : Base(result), val_(val) {
 
 Bitcast::~Bitcast() = default;
 
-std::ostream& Bitcast::ToString(std::ostream& out, const SymbolTable& st) const {
+utils::StringStream& Bitcast::ToString(utils::StringStream& out, const SymbolTable& st) const {
     Result()->ToString(out, st);
     out << " = bitcast(";
     val_->ToString(out, st);
