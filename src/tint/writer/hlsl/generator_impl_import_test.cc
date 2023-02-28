@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -39,7 +40,7 @@ TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1.0f)");
 }
@@ -77,7 +78,7 @@ TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1)");
 }
@@ -94,7 +95,7 @@ TEST_P(HlslImportData_SingleVectorParamTest, FloatVector) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(),
               std::string(param.hlsl_name) + "(float3(0.100000001f, 0.200000003f, 0.300000012f))");
@@ -134,7 +135,7 @@ TEST_P(HlslImportData_DualParam_ScalarTest, Float) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1.0f, 2.0f)");
 }
@@ -156,7 +157,7 @@ TEST_P(HlslImportData_DualParam_VectorTest, Float) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) +
                              "(float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f))");
@@ -181,7 +182,7 @@ TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1, 2)");
 }
@@ -199,7 +200,7 @@ TEST_P(HlslImportData_TripleParam_ScalarTest, Float) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1.0f, 2.0f, 3.0f)");
 }
@@ -220,7 +221,7 @@ TEST_P(HlslImportData_TripleParam_VectorTest, Float) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(
         out.str(),
@@ -243,7 +244,7 @@ TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1, 2, 3)");
 }
@@ -259,7 +260,7 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string("determinant(var)"));
 }
@@ -272,7 +273,7 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_QuantizeToF16_Scalar) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string("float(min16float(v))"));
 }
@@ -285,7 +286,7 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_QuantizeToF16_Vector) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string("float3(min16float3(v))"));
 }

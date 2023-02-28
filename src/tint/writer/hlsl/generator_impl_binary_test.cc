@@ -14,6 +14,7 @@
 
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/variable_decl_statement.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -62,7 +63,7 @@ TEST_P(HlslBinaryTest, Emit_f32) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -94,7 +95,7 @@ TEST_P(HlslBinaryTest, Emit_f16) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -117,7 +118,7 @@ TEST_P(HlslBinaryTest, Emit_u32) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -145,7 +146,7 @@ TEST_P(HlslBinaryTest, Emit_i32) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -182,7 +183,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar_f32) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "(1.0f).xxx");
 }
@@ -199,7 +200,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar_f16) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "(float16_t(1.0h)).xxx");
 }
@@ -214,7 +215,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector_f32) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "(1.0f).xxx");
 }
@@ -231,7 +232,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector_f16) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "(float16_t(1.0h)).xxx");
 }
@@ -246,7 +247,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar_f32) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "(mat * 1.0f)");
 }
@@ -263,7 +264,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar_f16) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "(mat * float16_t(1.0h))");
 }
@@ -278,7 +279,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix_f32) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "(1.0f * mat)");
 }
@@ -295,7 +296,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix_f16) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "(float16_t(1.0h) * mat)");
 }
@@ -310,7 +311,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector_f32) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "mul((1.0f).xxx, mat)");
 }
@@ -327,7 +328,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector_f16) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "mul((float16_t(1.0h)).xxx, mat)");
 }
@@ -342,7 +343,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix_f32) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "mul(mat, (1.0f).xxx)");
 }
@@ -359,7 +360,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix_f16) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "mul(mat, (float16_t(1.0h)).xxx)");
 }
@@ -373,7 +374,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix_f32) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "mul(rhs, lhs)");
 }
@@ -389,7 +390,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix_f16) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "mul(rhs, lhs)");
 }
@@ -403,7 +404,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "(tint_tmp)");
     EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
@@ -428,7 +429,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "(tint_tmp)");
     EXPECT_EQ(gen.result(), R"(bool tint_tmp_1 = a;
@@ -455,7 +456,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "(tint_tmp)");
     EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
