@@ -16,6 +16,7 @@
 #include "src/tint/reader/spirv/function.h"
 #include "src/tint/reader/spirv/parser_impl_test_helper.h"
 #include "src/tint/reader/spirv/spirv_tools_helpers_test.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::reader::spirv {
 namespace {
@@ -26,7 +27,7 @@ using ::testing::HasSubstr;
 /// @returns a SPIR-V assembly segment which assigns debug names
 /// to particular IDs.
 std::string Names(std::vector<std::string> ids) {
-    std::ostringstream outs;
+    utils::StringStream outs;
     for (auto& id : ids) {
         outs << "    OpName %" << id << " \"" << id << "\"\n";
     }

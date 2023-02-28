@@ -17,6 +17,7 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/reader/spirv/parser_impl_test_helper.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::reader::spirv {
 namespace {
@@ -38,7 +39,7 @@ TEST_F(SpvParserTest, Usage_Trivial_Properties) {
 }
 
 TEST_F(SpvParserTest, Usage_Trivial_Output) {
-    std::ostringstream ss;
+    utils::StringStream ss;
     Usage u;
     ss << u;
     EXPECT_THAT(ss.str(), Eq("Usage()"));
@@ -89,13 +90,13 @@ TEST_F(SpvParserTest, Usage_Add) {
     EXPECT_TRUE(a.IsStorageReadTexture());
     EXPECT_FALSE(a.IsStorageWriteTexture());
 
-    std::ostringstream ss;
+    utils::StringStream ss;
     ss << a;
     EXPECT_THAT(ss.str(), Eq("Usage(Sampler( comparison )Texture( read ))"));
 }
 
 TEST_F(SpvParserTest, Usage_AddSampler) {
-    std::ostringstream ss;
+    utils::StringStream ss;
     Usage u;
     u.AddSampler();
 
@@ -120,7 +121,7 @@ TEST_F(SpvParserTest, Usage_AddSampler) {
 }
 
 TEST_F(SpvParserTest, Usage_AddComparisonSampler) {
-    std::ostringstream ss;
+    utils::StringStream ss;
     Usage u;
     u.AddComparisonSampler();
 
@@ -144,7 +145,7 @@ TEST_F(SpvParserTest, Usage_AddComparisonSampler) {
 }
 
 TEST_F(SpvParserTest, Usage_AddTexture) {
-    std::ostringstream ss;
+    utils::StringStream ss;
     Usage u;
     u.AddTexture();
 
@@ -168,7 +169,7 @@ TEST_F(SpvParserTest, Usage_AddTexture) {
 }
 
 TEST_F(SpvParserTest, Usage_AddSampledTexture) {
-    std::ostringstream ss;
+    utils::StringStream ss;
     Usage u;
     u.AddSampledTexture();
 
@@ -192,7 +193,7 @@ TEST_F(SpvParserTest, Usage_AddSampledTexture) {
 }
 
 TEST_F(SpvParserTest, Usage_AddMultisampledTexture) {
-    std::ostringstream ss;
+    utils::StringStream ss;
     Usage u;
     u.AddMultisampledTexture();
 
@@ -216,7 +217,7 @@ TEST_F(SpvParserTest, Usage_AddMultisampledTexture) {
 }
 
 TEST_F(SpvParserTest, Usage_AddDepthTexture) {
-    std::ostringstream ss;
+    utils::StringStream ss;
     Usage u;
     u.AddDepthTexture();
 
@@ -240,7 +241,7 @@ TEST_F(SpvParserTest, Usage_AddDepthTexture) {
 }
 
 TEST_F(SpvParserTest, Usage_AddStorageReadTexture) {
-    std::ostringstream ss;
+    utils::StringStream ss;
     Usage u;
     u.AddStorageReadTexture();
 
@@ -264,7 +265,7 @@ TEST_F(SpvParserTest, Usage_AddStorageReadTexture) {
 }
 
 TEST_F(SpvParserTest, Usage_AddStorageWriteTexture) {
-    std::ostringstream ss;
+    utils::StringStream ss;
     Usage u;
     u.AddStorageWriteTexture();
 

@@ -16,6 +16,7 @@
 #include "src/tint/reader/spirv/function.h"
 #include "src/tint/reader/spirv/parser_impl_test_helper.h"
 #include "src/tint/reader/spirv/spirv_tools_helpers_test.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::reader::spirv {
 namespace {
@@ -27,7 +28,7 @@ using ::testing::HasSubstr;
 using SpvParserCFGTest = SpvParserTest;
 
 std::string Dump(const std::vector<uint32_t>& v) {
-    std::ostringstream o;
+    utils::StringStream o;
     o << "{";
     for (auto a : v) {
         o << a << " ";

@@ -19,6 +19,7 @@
 #include <sstream>
 #include <string>
 
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/utils/vector.h"
 
 namespace tint::reader::spirv {
@@ -173,7 +174,7 @@ inline std::string ToString(Construct::Kind kind) {
 /// @returns a short summary string
 inline std::string ToStringBrief(const Construct* c) {
     if (c) {
-        std::stringstream ss;
+        utils::StringStream ss;
         ss << ToString(c->kind) << "@" << c->begin_id;
         return ss.str();
     }
@@ -184,7 +185,7 @@ inline std::string ToStringBrief(const Construct* c) {
 /// @param o the stream
 /// @param c the structured construct
 /// @returns the stream
-inline std::ostream& operator<<(std::ostream& o, const Construct& c) {
+inline utils::StringStream& operator<<(utils::StringStream& o, const Construct& c) {
     o << "Construct{ " << ToString(c.kind) << " [" << c.begin_pos << "," << c.end_pos << ")"
       << " begin_id:" << c.begin_id << " end_id:" << c.end_id << " depth:" << c.depth;
 
@@ -215,7 +216,8 @@ inline std::ostream& operator<<(std::ostream& o, const Construct& c) {
 /// @param o the stream
 /// @param c the structured construct
 /// @returns the stream
-inline std::ostream& operator<<(std::ostream& o, const std::unique_ptr<Construct>& c) {
+inline utils::StringStream& operator<<(utils::StringStream& o,
+                                       const std::unique_ptr<Construct>& c) {
     return o << *(c.get());
 }
 
@@ -223,7 +225,7 @@ inline std::ostream& operator<<(std::ostream& o, const std::unique_ptr<Construct
 /// @param c the construct
 /// @returns the string representation
 inline std::string ToString(const Construct& c) {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << c;
     return ss.str();
 }
@@ -246,7 +248,7 @@ inline std::string ToString(const std::unique_ptr<Construct>& c) {
 /// @param o the stream
 /// @param cl the construct list
 /// @returns the stream
-inline std::ostream& operator<<(std::ostream& o, const ConstructList& cl) {
+inline utils::StringStream& operator<<(utils::StringStream& o, const ConstructList& cl) {
     o << "ConstructList{\n";
     for (const auto& c : cl) {
         o << "  " << c << "\n";
@@ -259,7 +261,7 @@ inline std::ostream& operator<<(std::ostream& o, const ConstructList& cl) {
 /// @param cl the construct list
 /// @returns the string representation
 inline std::string ToString(const ConstructList& cl) {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << cl;
     return ss.str();
 }

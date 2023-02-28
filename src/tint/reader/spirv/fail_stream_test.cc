@@ -15,6 +15,7 @@
 #include "src/tint/reader/spirv/fail_stream.h"
 
 #include "gmock/gmock.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::reader::spirv {
 namespace {
@@ -56,7 +57,7 @@ TEST_F(FailStreamTest, FailMethodReturnsSelf) {
 
 TEST_F(FailStreamTest, ShiftOperatorAccumulatesValues) {
     bool flag = true;
-    std::stringstream ss;
+    utils::StringStream ss;
     FailStream fs(&flag, &ss);
 
     ss << "prefix ";

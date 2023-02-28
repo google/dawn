@@ -16,6 +16,8 @@
 
 #include <sstream>
 
+#include "src/tint/utils/string_stream.h"
+
 namespace tint::reader::spirv {
 
 Usage::Usage() {}
@@ -179,7 +181,7 @@ void Usage::AddDepthTexture() {
 }
 
 std::string Usage::to_str() const {
-    std::ostringstream ss;
+    utils::StringStream ss;
     ss << *this;
     return ss.str();
 }

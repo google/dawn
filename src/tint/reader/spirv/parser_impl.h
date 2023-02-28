@@ -24,6 +24,7 @@
 
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/hashmap.h"
+#include "src/tint/utils/string_stream.h"
 
 TINT_BEGIN_DISABLE_WARNING(NEWLINE_EOF);
 TINT_BEGIN_DISABLE_WARNING(OLD_STYLE_CAST);
@@ -819,7 +820,7 @@ class ParserImpl : Reader {
     // Is the parse successful?
     bool success_ = true;
     // Collector for diagnostic messages.
-    std::stringstream errors_;
+    utils::StringStream errors_;
     FailStream fail_stream_;
     spvtools::MessageConsumer message_consumer_;
 

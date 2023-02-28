@@ -15,6 +15,7 @@
 #include "src/tint/reader/spirv/namer.h"
 
 #include "gmock/gmock.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::reader::spirv {
 namespace {
@@ -29,7 +30,7 @@ class SpvNamerTest : public testing::Test {
     std::string error() { return errors_.str(); }
 
   protected:
-    std::stringstream errors_;
+    utils::StringStream errors_;
     bool success_ = true;
     FailStream fail_stream_;
 };
@@ -351,7 +352,7 @@ using SpvNamerReservedWordTest = ::testing::TestWithParam<std::string>;
 
 TEST_P(SpvNamerReservedWordTest, ReservedWordsAreUsed) {
     bool success;
-    std::stringstream errors;
+    utils::StringStream errors;
     FailStream fail_stream(&success, &errors);
     Namer namer(fail_stream);
     const std::string reserved = GetParam();

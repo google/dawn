@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/type/texture_dimension.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::reader::spirv {
 namespace {
@@ -45,7 +46,7 @@ class SpvPipelineStageTest : public testing::TestWithParam<PipelineStageCase> {
 
   protected:
     bool success_ = true;
-    std::stringstream errors_;
+    utils::StringStream errors_;
     FailStream fail_stream_;
     EnumConverter converter_;
 };
@@ -103,7 +104,7 @@ class SpvStorageClassTest : public testing::TestWithParam<StorageClassCase> {
 
   protected:
     bool success_ = true;
-    std::stringstream errors_;
+    utils::StringStream errors_;
     FailStream fail_stream_;
     EnumConverter converter_;
 };
@@ -164,7 +165,7 @@ class SpvBuiltinTest : public testing::TestWithParam<BuiltinCase> {
 
   protected:
     bool success_ = true;
-    std::stringstream errors_;
+    utils::StringStream errors_;
     FailStream fail_stream_;
     EnumConverter converter_;
 };
@@ -239,7 +240,7 @@ class SpvDimTest : public testing::TestWithParam<DimCase> {
 
   protected:
     bool success_ = true;
-    std::stringstream errors_;
+    utils::StringStream errors_;
     FailStream fail_stream_;
     EnumConverter converter_;
 };
@@ -311,7 +312,7 @@ class SpvImageFormatTest : public testing::TestWithParam<TexelFormatCase> {
 
   protected:
     bool success_ = true;
-    std::stringstream errors_;
+    utils::StringStream errors_;
     FailStream fail_stream_;
     EnumConverter converter_;
 };

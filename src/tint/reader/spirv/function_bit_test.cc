@@ -15,6 +15,7 @@
 #include "src/tint/reader/spirv/function.h"
 #include "src/tint/reader/spirv/parser_impl_test_helper.h"
 #include "src/tint/reader/spirv/spirv_tools_helpers_test.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::reader::spirv {
 namespace {
@@ -125,7 +126,7 @@ TEST_P(SpvBinaryBitTest, EmitExpression) {
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
-    std::ostringstream ss;
+    utils::StringStream ss;
     ss << "let x_1 : " << GetParam().ast_type << " = (" << GetParam().ast_lhs << " "
        << GetParam().ast_op << " " << GetParam().ast_rhs << ");";
     auto ast_body = fe.ast_body();
@@ -163,7 +164,7 @@ TEST_P(SpvBinaryBitGeneralTest, EmitExpression) {
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error() << assembly;
-    std::ostringstream ss;
+    utils::StringStream ss;
     ss << "let x_1 : " << GetParam().wgsl_type << " = " << GetParam().expected << ";\nreturn;\n";
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);

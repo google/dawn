@@ -18,6 +18,7 @@
 #include "src/tint/reader/spirv/function.h"
 #include "src/tint/reader/spirv/parser_impl_test_helper.h"
 #include "src/tint/reader/spirv/spirv_tools_helpers_test.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::reader::spirv {
 namespace {
@@ -235,7 +236,7 @@ std::string CommonTypes() {
 }
 
 std::string Bindings(std::vector<uint32_t> ids) {
-    std::ostringstream os;
+    utils::StringStream os;
     int binding = 0;
     for (auto id : ids) {
         os << "  OpDecorate %" << id << " DescriptorSet 0\n"

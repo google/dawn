@@ -23,6 +23,7 @@
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/string.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/utils/unique_allocator.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Type);
@@ -557,31 +558,31 @@ std::string I32::String() const {
 }
 
 std::string Pointer::String() const {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "ptr<" << utils::ToString(address_space) << ", " << type->String() + ">";
     return ss.str();
 }
 
 std::string Reference::String() const {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "ref<" + utils::ToString(address_space) << ", " << type->String() << ">";
     return ss.str();
 }
 
 std::string Vector::String() const {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "vec" << size << "<" << type->String() << ">";
     return ss.str();
 }
 
 std::string Matrix::String() const {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "mat" << columns << "x" << rows << "<" << type->String() << ">";
     return ss.str();
 }
 
 std::string Array::String() const {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "array<" << type->String() << ", " << size << ", " << stride << ">";
     return ss.str();
 }
@@ -597,31 +598,31 @@ std::string Sampler::String() const {
 }
 
 std::string DepthTexture::String() const {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "depth_" << dims;
     return ss.str();
 }
 
 std::string DepthMultisampledTexture::String() const {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "depth_multisampled_" << dims;
     return ss.str();
 }
 
 std::string MultisampledTexture::String() const {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "texture_multisampled_" << dims << "<" << type << ">";
     return ss.str();
 }
 
 std::string SampledTexture::String() const {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "texture_" << dims << "<" << type << ">";
     return ss.str();
 }
 
 std::string StorageTexture::String() const {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "texture_storage_" << dims << "<" << format << ", " << access << ">";
     return ss.str();
 }
