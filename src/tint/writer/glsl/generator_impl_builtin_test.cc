@@ -16,6 +16,7 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/sem/call.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
 using ::testing::HasSubstr;
@@ -65,8 +66,8 @@ const ast::CallExpression* GenerateCall(BuiltinType builtin,
                                         CallParamType type,
                                         ProgramBuilder* builder) {
     std::string name;
-    std::ostringstream str(name);
-    str << builtin;
+    utils::StringStream str;
+    str << name << builtin;
     switch (builtin) {
         case BuiltinType::kAcos:
         case BuiltinType::kAsin:
@@ -350,7 +351,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Builtin_Call) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
     EXPECT_EQ(out.str(), "dot(param1, param2)");
 }
@@ -363,7 +364,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Select_Scalar) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
     EXPECT_EQ(out.str(), "(true ? b : a)");
 }
@@ -376,7 +377,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Select_Vector) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
     EXPECT_EQ(out.str(), "mix(a, b, bvec2(true, false))");
 }
@@ -393,7 +394,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, FMA_f32) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
     EXPECT_EQ(out.str(), "((a) * (b) + (c))");
 }
@@ -411,7 +412,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, FMA_f16) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
     EXPECT_EQ(out.str(), "((a) * (b) + (c))");
 }
@@ -931,7 +932,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Scalar_f32) {
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 float tint_degrees(float param_0) {
-  return param_0 * 57.295779513082322865f;
+  return param_0 * 57.295779513082323f;
 }
 
 
@@ -959,7 +960,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Vector_f32) {
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 vec3 tint_degrees(vec3 param_0) {
-  return param_0 * 57.295779513082322865f;
+  return param_0 * 57.295779513082323f;
 }
 
 
@@ -990,7 +991,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Scalar_f16) {
 #extension GL_AMD_gpu_shader_half_float : require
 
 float16_t tint_degrees(float16_t param_0) {
-  return param_0 * 57.295779513082322865hf;
+  return param_0 * 57.295779513082323hf;
 }
 
 
@@ -1021,7 +1022,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Vector_f16) {
 #extension GL_AMD_gpu_shader_half_float : require
 
 f16vec3 tint_degrees(f16vec3 param_0) {
-  return param_0 * 57.295779513082322865hf;
+  return param_0 * 57.295779513082323hf;
 }
 
 
@@ -1049,7 +1050,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Scalar_f32) {
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 float tint_radians(float param_0) {
-  return param_0 * 0.017453292519943295474f;
+  return param_0 * 0.017453292519943295f;
 }
 
 
@@ -1077,7 +1078,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Vector_f32) {
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 vec3 tint_radians(vec3 param_0) {
-  return param_0 * 0.017453292519943295474f;
+  return param_0 * 0.017453292519943295f;
 }
 
 
@@ -1108,7 +1109,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Scalar_f16) {
 #extension GL_AMD_gpu_shader_half_float : require
 
 float16_t tint_radians(float16_t param_0) {
-  return param_0 * 0.017453292519943295474hf;
+  return param_0 * 0.017453292519943295hf;
 }
 
 
@@ -1139,7 +1140,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Vector_f16) {
 #extension GL_AMD_gpu_shader_half_float : require
 
 f16vec3 tint_radians(f16vec3 param_0) {
-  return param_0 * 0.017453292519943295474hf;
+  return param_0 * 0.017453292519943295hf;
 }
 
 

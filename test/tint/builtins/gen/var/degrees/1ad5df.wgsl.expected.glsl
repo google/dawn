@@ -1,7 +1,7 @@
 #version 310 es
 
 vec2 tint_degrees(vec2 param_0) {
-  return param_0 * 57.295779513082322865f;
+  return param_0 * 57.295779513082323f;
 }
 
 
@@ -27,7 +27,7 @@ void main() {
 precision mediump float;
 
 vec2 tint_degrees(vec2 param_0) {
-  return param_0 * 57.295779513082322865f;
+  return param_0 * 57.295779513082323f;
 }
 
 
@@ -47,7 +47,7 @@ void main() {
 #version 310 es
 
 vec2 tint_degrees(vec2 param_0) {
-  return param_0 * 57.295779513082322865f;
+  return param_0 * 57.295779513082323f;
 }
 
 

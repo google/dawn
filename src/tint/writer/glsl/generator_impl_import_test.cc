@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -39,7 +40,7 @@ TEST_P(GlslImportData_SingleParamTest, FloatScalar) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1.0f)");
 }
@@ -78,7 +79,7 @@ TEST_P(GlslImportData_SingleIntParamTest, IntScalar) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1)");
 }
@@ -95,7 +96,7 @@ TEST_P(GlslImportData_SingleVectorParamTest, FloatVector) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(),
               std::string(param.glsl_name) + "(vec3(0.100000001f, 0.200000003f, 0.300000012f))");
@@ -136,7 +137,7 @@ TEST_P(GlslImportData_DualParam_ScalarTest, Float) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1.0f, 2.0f)");
 }
@@ -158,7 +159,7 @@ TEST_P(GlslImportData_DualParam_VectorTest, Float) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(),
               std::string(param.glsl_name) + "(vec3(1.0f, 2.0f, 3.0f), vec3(4.0f, 5.0f, 6.0f))");
@@ -183,7 +184,7 @@ TEST_P(GlslImportData_DualParam_Int_Test, IntScalar) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1, 2)");
 }
@@ -201,7 +202,7 @@ TEST_P(GlslImportData_TripleParam_ScalarTest, Float) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1.0f, 2.0f, 3.0f)");
 }
@@ -221,7 +222,7 @@ TEST_P(GlslImportData_TripleParam_VectorTest, Float) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(),
               std::string(param.glsl_name) +
@@ -242,7 +243,7 @@ TEST_P(GlslImportData_TripleParam_Int_Test, IntScalar) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1, 2, 3)");
 }
@@ -258,7 +259,7 @@ TEST_F(GlslGeneratorImplTest_Import, GlslImportData_Determinant) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), std::string("determinant(var)"));
 }

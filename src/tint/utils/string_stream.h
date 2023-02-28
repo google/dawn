@@ -96,6 +96,10 @@ class StringStream {
     /// @returns the string contents of the stream
     std::string str() const { return sstream_.str(); }
 
+    /// [DEPRECATED] This should not be called.
+    /// @returns the underlying stream
+    std::ostream& stream() { return sstream_; }
+
   private:
     std::stringstream sstream_;
 };

@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/glsl/test_helper.h"
 
+#include "src/tint/utils/string_stream.h"
+
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::writer::glsl {
@@ -28,7 +30,7 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
     EXPECT_EQ(out.str(), "intBitsToFloat(a)");
 }
@@ -40,7 +42,7 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
     EXPECT_EQ(out.str(), "int(a)");
 }
@@ -52,7 +54,7 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
     EXPECT_EQ(out.str(), "uint(a)");
 }

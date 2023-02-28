@@ -37,6 +37,7 @@
 #include "src/tint/scope_stack.h"
 #include "src/tint/transform/decompose_memory_access.h"
 #include "src/tint/utils/hash.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/glsl/generator.h"
 #include "src/tint/writer/glsl/version.h"
 #include "src/tint/writer/text_generator.h"
@@ -93,7 +94,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the expression to emit
     /// @returns true if the index accessor was emitted
-    bool EmitIndexAccessor(std::ostream& out, const ast::IndexAccessorExpression* expr);
+    bool EmitIndexAccessor(utils::StringStream& out, const ast::IndexAccessorExpression* expr);
     /// Handles an assignment statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
@@ -102,27 +103,27 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the binary expression
     /// @returns true if the expression was emitted, false otherwise
-    bool EmitBitwiseBoolOp(std::ostream& out, const ast::BinaryExpression* expr);
+    bool EmitBitwiseBoolOp(utils::StringStream& out, const ast::BinaryExpression* expr);
     /// Handles generating a binary expression
     /// @param out the output of the expression stream
     /// @param expr the binary expression
     /// @returns true if the expression was emitted, false otherwise
-    bool EmitFloatModulo(std::ostream& out, const ast::BinaryExpression* expr);
+    bool EmitFloatModulo(utils::StringStream& out, const ast::BinaryExpression* expr);
     /// Handles generating the modulo operator on float vector operands
     /// @param out the output of the expression stream
     /// @param expr the binary expression
     /// @returns true if the expression was emitted, false otherwise
-    bool EmitBinary(std::ostream& out, const ast::BinaryExpression* expr);
+    bool EmitBinary(utils::StringStream& out, const ast::BinaryExpression* expr);
     /// Handles generating a bitcast expression
     /// @param out the output of the expression stream
     /// @param expr the expression
     /// @returns true if the binary expression was emitted
-    bool EmitVectorRelational(std::ostream& out, const ast::BinaryExpression* expr);
+    bool EmitVectorRelational(utils::StringStream& out, const ast::BinaryExpression* expr);
     /// Handles generating a vector relational expression
     /// @param out the output of the expression stream
     /// @param expr the expression
     /// @returns true if the vector relational expression was emitted
-    bool EmitBitcast(std::ostream& out, const ast::BitcastExpression* expr);
+    bool EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr);
     /// Emits a list of statements
     /// @param stmts the statement list
     /// @returns true if the statements were emitted successfully
@@ -147,25 +148,27 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @returns true if the call expression is emitted
-    bool EmitCall(std::ostream& out, const ast::CallExpression* expr);
+    bool EmitCall(utils::StringStream& out, const ast::CallExpression* expr);
     /// Handles generating a function call expression
     /// @param out the output of the expression stream
     /// @param call the call expression
     /// @param fn the function being called
     /// @returns true if the expression is emitted
-    bool EmitFunctionCall(std::ostream& out, const sem::Call* call, const sem::Function* fn);
+    bool EmitFunctionCall(utils::StringStream& out, const sem::Call* call, const sem::Function* fn);
     /// Handles generating a builtin call expression
     /// @param out the output of the expression stream
     /// @param call the call expression
     /// @param builtin the builtin being called
     /// @returns true if the expression is emitted
-    bool EmitBuiltinCall(std::ostream& out, const sem::Call* call, const sem::Builtin* builtin);
+    bool EmitBuiltinCall(utils::StringStream& out,
+                         const sem::Call* call,
+                         const sem::Builtin* builtin);
     /// Handles generating a value conversion expression
     /// @param out the output of the expression stream
     /// @param call the call expression
     /// @param conv the value conversion
     /// @returns true if the expression is emitted
-    bool EmitValueConversion(std::ostream& out,
+    bool EmitValueConversion(utils::StringStream& out,
                              const sem::Call* call,
                              const sem::ValueConversion* conv);
     /// Handles generating a value constructor expression
@@ -173,42 +176,42 @@ class GeneratorImpl : public TextGenerator {
     /// @param call the call expression
     /// @param ctor the value constructor
     /// @returns true if the expression is emitted
-    bool EmitValueConstructor(std::ostream& out,
+    bool EmitValueConstructor(utils::StringStream& out,
                               const sem::Call* call,
                               const sem::ValueConstructor* ctor);
     /// Handles generating a barrier builtin call
     /// @param out the output of the expression stream
     /// @param builtin the semantic information for the barrier builtin
     /// @returns true if the call expression is emitted
-    bool EmitBarrierCall(std::ostream& out, const sem::Builtin* builtin);
+    bool EmitBarrierCall(utils::StringStream& out, const sem::Builtin* builtin);
     /// Handles generating an atomic builtin call for a workgroup variable
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @param builtin the semantic information for the atomic builtin
     /// @returns true if the call expression is emitted
-    bool EmitWorkgroupAtomicCall(std::ostream& out,
+    bool EmitWorkgroupAtomicCall(utils::StringStream& out,
                                  const ast::CallExpression* expr,
                                  const sem::Builtin* builtin);
     /// Handles generating an array.length() call
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @returns true if the array length expression is emitted
-    bool EmitArrayLength(std::ostream& out, const ast::CallExpression* expr);
+    bool EmitArrayLength(utils::StringStream& out, const ast::CallExpression* expr);
     /// Handles generating a call to `bitfieldExtract`
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @returns true if the expression is emitted
-    bool EmitExtractBits(std::ostream& out, const ast::CallExpression* expr);
+    bool EmitExtractBits(utils::StringStream& out, const ast::CallExpression* expr);
     /// Handles generating a call to `bitfieldInsert`
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @returns true if the expression is emitted
-    bool EmitInsertBits(std::ostream& out, const ast::CallExpression* expr);
+    bool EmitInsertBits(utils::StringStream& out, const ast::CallExpression* expr);
     /// Emulates 'fma' on GLSL ES, where it is unsupported.
     /// @param out the output of the expression stream
     /// @param expr the fma() expression
     /// @returns true if the expression is emitted
-    bool EmitEmulatedFMA(std::ostream& out, const ast::CallExpression* expr);
+    bool EmitEmulatedFMA(utils::StringStream& out, const ast::CallExpression* expr);
     /// Create a float literal zero AST node, and associated semantic nodes.
     /// @param stmt the statement which will own the semantic expression node
     /// @returns an AST expression representing 0.0f
@@ -220,23 +223,25 @@ class GeneratorImpl : public TextGenerator {
     /// @param call the call expression
     /// @param builtin the semantic information for the texture builtin
     /// @returns true if the call expression is emitted
-    bool EmitTextureCall(std::ostream& out, const sem::Call* call, const sem::Builtin* builtin);
+    bool EmitTextureCall(utils::StringStream& out,
+                         const sem::Call* call,
+                         const sem::Builtin* builtin);
     /// Handles generating a call to the `select()` builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @returns true if the call expression is emitted
-    bool EmitCountOneBitsCall(std::ostream& out, const ast::CallExpression* expr);
+    bool EmitCountOneBitsCall(utils::StringStream& out, const ast::CallExpression* expr);
     /// Handles generating a call to the `countOneBits()` builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @returns true if the call expression is emitted
-    bool EmitSelectCall(std::ostream& out, const ast::CallExpression* expr);
+    bool EmitSelectCall(utils::StringStream& out, const ast::CallExpression* expr);
     /// Handles generating a call to the `dot()` builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitDotCall(std::ostream& out,
+    bool EmitDotCall(utils::StringStream& out,
                      const ast::CallExpression* expr,
                      const sem::Builtin* builtin);
     /// Handles generating a call to the `modf()` builtin
@@ -244,7 +249,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitModfCall(std::ostream& out,
+    bool EmitModfCall(utils::StringStream& out,
                       const ast::CallExpression* expr,
                       const sem::Builtin* builtin);
     /// Handles generating a call to the `frexp()` builtin
@@ -252,7 +257,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitFrexpCall(std::ostream& out,
+    bool EmitFrexpCall(utils::StringStream& out,
                        const ast::CallExpression* expr,
                        const sem::Builtin* builtin);
     /// Handles generating a call to the `degrees()` builtin
@@ -260,7 +265,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitDegreesCall(std::ostream& out,
+    bool EmitDegreesCall(utils::StringStream& out,
                          const ast::CallExpression* expr,
                          const sem::Builtin* builtin);
     /// Handles generating a call to the `radians()` builtin
@@ -268,7 +273,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitRadiansCall(std::ostream& out,
+    bool EmitRadiansCall(utils::StringStream& out,
                          const ast::CallExpression* expr,
                          const sem::Builtin* builtin);
     /// Handles generating a call to the `quantizeToF16()` intrinsic
@@ -276,7 +281,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitQuantizeToF16Call(std::ostream& out,
+    bool EmitQuantizeToF16Call(utils::StringStream& out,
                                const ast::CallExpression* expr,
                                const sem::Builtin* builtin);
     /// Handles a case statement
@@ -295,7 +300,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the expression
     /// @returns true if the expression was emitted
-    bool EmitExpression(std::ostream& out, const ast::Expression* expr);
+    bool EmitExpression(utils::StringStream& out, const ast::Expression* expr);
     /// Handles generating a function
     /// @param func the function to generate
     /// @returns true if the function was emitted
@@ -342,14 +347,14 @@ class GeneratorImpl : public TextGenerator {
     /// Handles emitting interpolation qualifiers
     /// @param out the output of the expression stream
     /// @param attrs the attributes
-    void EmitInterpolationQualifiers(std::ostream& out,
+    void EmitInterpolationQualifiers(utils::StringStream& out,
                                      utils::VectorRef<const ast::Attribute*> attrs);
     /// Handles emitting attributes
     /// @param out the output of the expression stream
     /// @param var the global variable semantics
     /// @param attrs the attributes
     /// @returns true if the attributes were emitted
-    bool EmitAttributes(std::ostream& out,
+    bool EmitAttributes(utils::StringStream& out,
                         const sem::GlobalVariable* var,
                         utils::VectorRef<const ast::Attribute*> attrs);
     /// Handles emitting the entry point function
@@ -364,12 +369,12 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream
     /// @param constant the constant value to emit
     /// @returns true if the constant value was successfully emitted
-    bool EmitConstant(std::ostream& out, const constant::Value* constant);
+    bool EmitConstant(utils::StringStream& out, const constant::Value* constant);
     /// Handles a literal
     /// @param out the output stream
     /// @param lit the literal to emit
     /// @returns true if the literal was successfully emitted
-    bool EmitLiteral(std::ostream& out, const ast::LiteralExpression* lit);
+    bool EmitLiteral(utils::StringStream& out, const ast::LiteralExpression* lit);
     /// Handles a loop statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted
@@ -386,12 +391,12 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the identifier expression
     /// @returns true if the identifier was emitted
-    bool EmitIdentifier(std::ostream& out, const ast::IdentifierExpression* expr);
+    bool EmitIdentifier(utils::StringStream& out, const ast::IdentifierExpression* expr);
     /// Handles a member accessor expression
     /// @param out the output of the expression stream
     /// @param expr the member accessor expression
     /// @returns true if the member accessor was emitted
-    bool EmitMemberAccessor(std::ostream& out, const ast::MemberAccessorExpression* expr);
+    bool EmitMemberAccessor(utils::StringStream& out, const ast::MemberAccessorExpression* expr);
     /// Handles return statements
     /// @param stmt the statement to emit
     /// @returns true if the statement was successfully emitted
@@ -413,7 +418,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param name_printed (optional) if not nullptr and an array was printed
     /// then the boolean is set to true.
     /// @returns true if the type is emitted
-    bool EmitType(std::ostream& out,
+    bool EmitType(utils::StringStream& out,
                   const type::Type* type,
                   builtin::AddressSpace address_space,
                   builtin::Access access,
@@ -426,7 +431,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param access the access control type of the variable
     /// @param name the name to emit
     /// @returns true if the type is emitted
-    bool EmitTypeAndName(std::ostream& out,
+    bool EmitTypeAndName(utils::StringStream& out,
                          const type::Type* type,
                          builtin::AddressSpace address_space,
                          builtin::Access access,
@@ -446,12 +451,12 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the expression to emit
     /// @returns true if the expression was emitted
-    bool EmitUnaryOp(std::ostream& out, const ast::UnaryOpExpression* expr);
+    bool EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpression* expr);
     /// Emits the zero value for the given type
     /// @param out the output stream
     /// @param type the type to emit the value for
     /// @returns true if the zero value was successfully emitted.
-    bool EmitZeroValue(std::ostream& out, const type::Type* type);
+    bool EmitZeroValue(utils::StringStream& out, const type::Type* type);
     /// Handles generating a 'var' declaration
     /// @param var the variable to generate
     /// @returns true if the variable was emitted
@@ -504,7 +509,7 @@ class GeneratorImpl : public TextGenerator {
     ///          `params` is the name of all the generated function parameters
     /// @returns true if the call expression is emitted
     template <typename F>
-    bool CallBuiltinHelper(std::ostream& out,
+    bool CallBuiltinHelper(utils::StringStream& out,
                            const ast::CallExpression* call,
                            const sem::Builtin* builtin,
                            F&& build);

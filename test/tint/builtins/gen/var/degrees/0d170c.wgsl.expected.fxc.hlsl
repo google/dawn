@@ -1,5 +1,5 @@
 float4 tint_degrees(float4 param_0) {
-  return param_0 * 57.295779513082322865;
+  return param_0 * 57.295779513082323;
 }
 
 void degrees_0d170c() {

@@ -1,5 +1,5 @@
 float3 tint_radians(float3 param_0) {
-  return param_0 * 0.017453292519943295474;
+  return param_0 * 0.017453292519943295;
 }
 
 void radians_f96258() {

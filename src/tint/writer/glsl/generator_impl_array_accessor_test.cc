@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/glsl/test_helper.h"
 
+#include "src/tint/utils/string_stream.h"
+
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::writer::glsl {
@@ -28,7 +30,7 @@ TEST_F(GlslGeneratorImplTest_Expression, IndexAccessor) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "ary[5]");
 }

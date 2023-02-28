@@ -1,5 +1,5 @@
 vector<float16_t, 2> tint_degrees(vector<float16_t, 2> param_0) {
-  return param_0 * 57.295779513082322865;
+  return param_0 * 57.295779513082323;
 }
 
 void degrees_f59715() {

@@ -130,6 +130,7 @@ std::string TextGenerator::TextBuffer::String(uint32_t indent /* = 0 */) const {
 TextGenerator::ScopedParen::ScopedParen(std::ostream& stream) : s(stream) {
     s << "(";
 }
+
 TextGenerator::ScopedParen::~ScopedParen() {
     s << ")";
 }

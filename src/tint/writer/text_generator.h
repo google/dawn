@@ -23,6 +23,7 @@
 
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/program_builder.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::writer {
 
@@ -139,13 +140,16 @@ class TextGenerator {
         /// Destructor
         ~LineWriter();
 
-        /// @returns the ostringstream
-        operator std::ostream&() { return os; }
+        /// [DEPRECATED] Remove when utils::StringStream conversion is done
+        /// @returns the utils::StringStream
+        operator std::ostream&() { return os.stream(); }
+        /// @returns the utils::StringStream
+        operator utils::StringStream&() { return os; }
 
         /// @param rhs the value to write to the line
-        /// @returns the ostream so calls can be chained
+        /// @returns the utils::StringStream so calls can be chained
         template <typename T>
-        std::ostream& operator<<(T&& rhs) {
+        utils::StringStream& operator<<(T&& rhs) {
             return os << std::forward<T>(rhs);
         }
 
@@ -153,13 +157,14 @@ class TextGenerator {
         LineWriter(const LineWriter&) = delete;
         LineWriter& operator=(const LineWriter&) = delete;
 
-        std::ostringstream os;
+        utils::StringStream os;
         TextBuffer* buffer;
     };
 
     /// Helper for writing a '(' on construction and a ')' destruction.
     struct ScopedParen {
         /// Constructor
+        /// [DEPRECATED] This should be utils::StringStream when conversion is done
         /// @param stream the std::ostream that will be written to
         explicit ScopedParen(std::ostream& stream);
         /// Destructor
