@@ -1353,14 +1353,14 @@ class UniformityGraph {
         // To determine if we're dereferencing a partial pointer, unwrap *&
         // chains; if the final expression is an identifier, see if it's a
         // partial pointer. If it's not an identifier, then it must be an
-        // index/accessor expression, and thus a partial pointer.
+        // index/member accessor expression, and thus a partial pointer.
         auto* e = UnwrapIndirectAndAddressOfChain(u);
         if (auto* var_user = sem_.Get<sem::VariableUser>(e)) {
             if (current_function_->partial_ptrs.Contains(var_user->Variable())) {
                 return true;
             }
         } else {
-            TINT_ASSERT(Resolver, e->Is<ast::IndexAccessorExpression>());
+            TINT_ASSERT(Resolver, e->Is<ast::AccessorExpression>());
             return true;
         }
         return false;
