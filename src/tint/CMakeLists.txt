@@ -530,6 +530,8 @@ list(APPEND TINT_LIB_SRCS
   utils/slice.h
   utils/string.cc
   utils/string.h
+  utils/string_stream.cc
+  utils/string_stream.h
   utils/unique_allocator.h
   utils/unique_vector.h
   utils/vector.h
@@ -985,6 +987,7 @@ if(TINT_BUILD_TESTS)
     utils/reverse_test.cc
     utils/scoped_assignment_test.cc
     utils/slice_test.cc
+    utils/string_stream_test.cc
     utils/string_test.cc
     utils/transform_test.cc
     utils/unique_allocator_test.cc

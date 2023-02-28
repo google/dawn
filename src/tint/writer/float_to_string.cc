@@ -22,6 +22,7 @@
 #include <sstream>
 
 #include "src/tint/debug.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::writer {
 
@@ -52,35 +53,9 @@ struct Traits<double> {
 
 template <typename F>
 std::string ToString(F f) {
-    // Try printing the float in fixed point, with a smallish limit on the precision
-    std::stringstream fixed;
-    fixed.flags(fixed.flags() | std::ios_base::showpoint | std::ios_base::fixed);
-    fixed.imbue(std::locale::classic());
-    fixed.precision(9);
-    fixed << f;
-    std::string str = fixed.str();
-
-    // If this string can be parsed without loss of information, use it.
-    // (Use double here to dodge a bug in older libc++ versions which would incorrectly read back
-    // FLT_MAX as INF.)
-    double roundtripped;
-    fixed >> roundtripped;
-
-    auto float_equal_no_warning = std::equal_to<F>();
-    if (float_equal_no_warning(f, static_cast<F>(roundtripped))) {
-        while (str.length() >= 2 && str[str.size() - 1] == '0' && str[str.size() - 2] != '.') {
-            str.pop_back();
-        }
-
-        return str;
-    }
-
-    // Resort to scientific, with the minimum precision needed to preserve the whole float
-    std::stringstream sci;
-    sci.imbue(std::locale::classic());
-    sci.precision(std::numeric_limits<F>::max_digits10);
-    sci << f;
-    return sci.str();
+    utils::StringStream s;
+    s << f;
+    return s.str();
 }
 
 template <typename F>
