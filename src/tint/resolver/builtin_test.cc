@@ -38,6 +38,7 @@
 #include "src/tint/type/test_helper.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/string.h"
+#include "src/tint/utils/string_stream.h"
 
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
@@ -2185,7 +2186,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
 
 static std::string to_str(const std::string& function,
                           utils::VectorRef<const sem::Parameter*> params) {
-    std::stringstream out;
+    utils::StringStream out;
     out << function << "(";
     bool first = true;
     for (auto* param : params) {

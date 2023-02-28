@@ -431,7 +431,8 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
     WrapInFunction(expr);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: value 10000000000 cannot be represented as 'f16'");
+    EXPECT_EQ(r()->error(),
+              "12:34 error: value 10000000000.000000000 cannot be represented as 'f16'");
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Small_f32_to_f16) {

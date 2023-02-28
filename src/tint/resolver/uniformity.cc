@@ -40,6 +40,7 @@
 #include "src/tint/sem/while_statement.h"
 #include "src/tint/utils/block_allocator.h"
 #include "src/tint/utils/map.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/utils/unique_vector.h"
 
 // Set to `1` to dump the uniformity graph for each function in graphviz format.
@@ -1778,7 +1779,7 @@ class UniformityGraph {
             non_uniform_source->ast,
             [&](const ast::IdentifierExpression* ident) {
                 auto* var = sem_.GetVal(ident)->UnwrapLoad()->As<sem::VariableUser>()->Variable();
-                std::ostringstream ss;
+                utils::StringStream ss;
                 if (auto* param = var->As<sem::Parameter>()) {
                     auto* func = param->Owner()->As<sem::Function>();
                     ss << param_type(param) << "'" << NameFor(ident) << "' of '" << NameFor(func)
@@ -1791,7 +1792,7 @@ class UniformityGraph {
             },
             [&](const ast::Variable* v) {
                 auto* var = sem_.Get(v);
-                std::ostringstream ss;
+                utils::StringStream ss;
                 ss << "reading from " << var_type(var) << "'" << NameFor(v)
                    << "' may result in a non-uniform value";
                 diagnostics_.add_note(diag::System::Resolver, ss.str(), v->source);
@@ -1808,7 +1809,7 @@ class UniformityGraph {
                     case Node::kFunctionCallArgumentContents: {
                         auto* arg = c->args[non_uniform_source->arg_index];
                         auto* var = sem_.GetVal(arg)->RootIdentifier();
-                        std::ostringstream ss;
+                        utils::StringStream ss;
                         ss << "reading from " << var_type(var) << "'" << NameFor(var)
                            << "' may result in a non-uniform value";
                         diagnostics_.add_note(diag::System::Resolver, ss.str(),
@@ -1895,7 +1896,7 @@ class UniformityGraph {
 
             // Show the place where the non-uniform argument was passed.
             // If this is a builtin, this will be the trigger location for the failure.
-            std::ostringstream ss;
+            utils::StringStream ss;
             ss << "possibly non-uniform value passed" << (is_value ? "" : " via pointer")
                << " here";
             report(call->args[cause->arg_index]->source, ss.str(), /* note */ user_func != nullptr);
@@ -1907,7 +1908,7 @@ class UniformityGraph {
             {
                 // Show a builtin was reachable from this call (which may be the call itself).
                 // This will be the trigger location for the failure.
-                std::ostringstream ss;
+                utils::StringStream ss;
                 ss << "'" << NameFor(builtin_call->target)
                    << "' must only be called from uniform control flow";
                 report(builtin_call->source, ss.str(), /* note */ false);
@@ -1915,7 +1916,7 @@ class UniformityGraph {
 
             if (builtin_call != call) {
                 // The call was to a user function, so show that call too.
-                std::ostringstream ss;
+                utils::StringStream ss;
                 ss << "called ";
                 if (target->As<sem::Function>() != SemCall(builtin_call)->Stmt()->Function()) {
                     ss << "indirectly ";

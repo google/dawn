@@ -46,6 +46,7 @@
 #include "src/tint/type/reference.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/texture_dimension.h"
+#include "src/tint/utils/string_stream.h"
 
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
@@ -1647,7 +1648,7 @@ TEST_P(Expr_Binary_Test_Valid, All) {
     ast::Type rhs_type = params.create_rhs_type(*this);
     auto* result_type = params.create_result_type(*this);
 
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << FriendlyName(lhs_type) << " " << params.op << " " << FriendlyName(rhs_type);
     SCOPED_TRACE(ss.str());
 
@@ -1679,7 +1680,7 @@ TEST_P(Expr_Binary_Test_WithAlias_Valid, All) {
     ast::Type lhs_type = create_lhs_type(*this);
     ast::Type rhs_type = create_rhs_type(*this);
 
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << FriendlyName(lhs_type) << " " << params.op << " " << FriendlyName(rhs_type);
 
     ss << ", After aliasing: " << FriendlyName(lhs_type) << " " << params.op << " "
@@ -1728,7 +1729,7 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
     ast::Type lhs_type = lhs_create_type_func(*this);
     ast::Type rhs_type = rhs_create_type_func(*this);
 
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << FriendlyName(lhs_type) << " " << op << " " << FriendlyName(rhs_type);
     SCOPED_TRACE(ss.str());
 

@@ -71,6 +71,7 @@
 #include "src/tint/utils/reverse.h"
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/utils/string.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/utils/transform.h"
 
 namespace tint::resolver {
@@ -380,7 +381,7 @@ bool Validator::VariableInitializer(const ast::Variable* v,
 
     // Value type has to match storage type
     if (storage_ty != value_type) {
-        std::stringstream s;
+        utils::StringStream s;
         s << "cannot initialize " << v->Kind() << " of type '" << sem_.TypeNameOf(storage_ty)
           << "' with value of type '" << sem_.TypeNameOf(initializer_ty) << "'";
         AddError(s.str(), v->source);
@@ -842,7 +843,7 @@ bool Validator::Parameter(const ast::Function* func, const sem::Variable* var) c
                     break;
             }
             if (!ok) {
-                std::stringstream ss;
+                utils::StringStream ss;
                 ss << "function parameter of pointer type cannot be in '" << sc
                    << "' address space";
                 AddError(ss.str(), decl->source);
@@ -870,7 +871,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                                  ast::PipelineStage stage,
                                  const bool is_input) const {
     auto* type = storage_ty->UnwrapRef();
-    std::stringstream stage_name;
+    utils::StringStream stage_name;
     stage_name << stage;
     bool is_stage_mismatch = false;
     bool is_output = !is_input;
@@ -883,7 +884,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!(type->is_float_vector() && type->As<type::Vector>()->Width() == 4)) {
-                std::stringstream err;
+                utils::StringStream err;
                 err << "store type of @builtin(" << builtin << ") must be 'vec4<f32>'";
                 AddError(err.str(), attr->source);
                 return false;
@@ -898,7 +899,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!(type->is_unsigned_integer_vector() && type->As<type::Vector>()->Width() == 3)) {
-                std::stringstream err;
+                utils::StringStream err;
                 err << "store type of @builtin(" << builtin << ") must be 'vec3<u32>'";
                 AddError(err.str(), attr->source);
                 return false;
@@ -910,7 +911,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!type->Is<type::F32>()) {
-                std::stringstream err;
+                utils::StringStream err;
                 err << "store type of @builtin(" << builtin << ") must be 'f32'";
                 AddError(err.str(), attr->source);
                 return false;
@@ -922,7 +923,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!type->Is<type::Bool>()) {
-                std::stringstream err;
+                utils::StringStream err;
                 err << "store type of @builtin(" << builtin << ") must be 'bool'";
                 AddError(err.str(), attr->source);
                 return false;
@@ -934,7 +935,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!type->Is<type::U32>()) {
-                std::stringstream err;
+                utils::StringStream err;
                 err << "store type of @builtin(" << builtin << ") must be 'u32'";
                 AddError(err.str(), attr->source);
                 return false;
@@ -947,7 +948,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!type->Is<type::U32>()) {
-                std::stringstream err;
+                utils::StringStream err;
                 err << "store type of @builtin(" << builtin << ") must be 'u32'";
                 AddError(err.str(), attr->source);
                 return false;
@@ -958,7 +959,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!type->Is<type::U32>()) {
-                std::stringstream err;
+                utils::StringStream err;
                 err << "store type of @builtin(" << builtin << ") must be 'u32'";
                 AddError(err.str(), attr->source);
                 return false;
@@ -970,7 +971,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             if (!type->Is<type::U32>()) {
-                std::stringstream err;
+                utils::StringStream err;
                 err << "store type of @builtin(" << builtin << ") must be 'u32'";
                 AddError(err.str(), attr->source);
                 return false;
@@ -981,7 +982,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
     }
 
     if (is_stage_mismatch) {
-        std::stringstream err;
+        utils::StringStream err;
         err << "@builtin(" << builtin << ") cannot be used in "
             << (is_input ? "input of " : "output of ") << stage_name.str() << " pipeline stage";
         AddError(err.str(), attr->source);
@@ -1156,7 +1157,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                 pipeline_io_attribute = attr;
 
                 if (builtins.Contains(builtin)) {
-                    std::stringstream err;
+                    utils::StringStream err;
                     err << "@builtin(" << builtin << ") appears multiple times as pipeline "
                         << (param_or_ret == ParamOrRetType::kParameter ? "input" : "output");
                     AddError(err.str(), decl->source);
@@ -1949,7 +1950,7 @@ bool Validator::PipelineStages(utils::VectorRef<sem::Function*> entry_points) co
         if (stage != ast::PipelineStage::kCompute) {
             for (auto* var : func->DirectlyReferencedGlobals()) {
                 if (var->AddressSpace() == builtin::AddressSpace::kWorkgroup) {
-                    std::stringstream stage_name;
+                    utils::StringStream stage_name;
                     stage_name << stage;
                     for (auto* user : var->Users()) {
                         if (func == user->Stmt()->Function()) {
@@ -1973,7 +1974,7 @@ bool Validator::PipelineStages(utils::VectorRef<sem::Function*> entry_points) co
         for (auto* builtin : func->DirectlyCalledBuiltins()) {
             if (!builtin->SupportedStages().Contains(stage)) {
                 auto* call = func->FindDirectCallTo(builtin);
-                std::stringstream err;
+                utils::StringStream err;
                 err << "built-in cannot be used by " << stage << " pipeline stage";
                 AddError(err.str(),
                          call ? call->Declaration()->source : func->Declaration()->source);
@@ -1987,7 +1988,7 @@ bool Validator::PipelineStages(utils::VectorRef<sem::Function*> entry_points) co
     auto check_no_discards = [&](const sem::Function* func, const sem::Function* entry_point) {
         if (auto* discard = func->DiscardStatement()) {
             auto stage = entry_point->Declaration()->PipelineStage();
-            std::stringstream err;
+            utils::StringStream err;
             err << "discard statement cannot be used in " << stage << " pipeline stage";
             AddError(err.str(), discard->Declaration()->source);
             backtrace(func, entry_point);
@@ -2283,7 +2284,7 @@ bool Validator::LocationAttribute(const ast::LocationAttribute* loc_attr,
     }
 
     if (!locations.Add(location)) {
-        std::stringstream err;
+        utils::StringStream err;
         err << "@location(" << location << ") appears multiple times";
         AddError(err.str(), loc_attr->source);
         return false;
@@ -2543,12 +2544,12 @@ bool Validator::DiagnosticControls(utils::VectorRef<const ast::DiagnosticControl
         auto diag_added = diagnostics.Add(dc->rule_name->symbol, dc);
         if (!diag_added && (*diag_added.value)->severity != dc->severity) {
             {
-                std::ostringstream ss;
+                utils::StringStream ss;
                 ss << "conflicting diagnostic " << use;
                 AddError(ss.str(), dc->rule_name->source);
             }
             {
-                std::ostringstream ss;
+                utils::StringStream ss;
                 ss << "severity of '" << symbols_.NameFor(dc->rule_name->symbol) << "' set to '"
                    << dc->severity << "' here";
                 AddNote(ss.str(), (*diag_added.value)->rule_name->source);

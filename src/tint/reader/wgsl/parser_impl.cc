@@ -44,6 +44,7 @@
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/reverse.h"
 #include "src/tint/utils/string.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::reader::wgsl {
 namespace {
@@ -911,7 +912,7 @@ Expect<ENUM> ParserImpl::expect_enum(std::string_view name,
     }
 
     /// Create a sensible error message
-    std::ostringstream err;
+    utils::StringStream err;
     err << "expected " << name;
 
     if (!use.empty()) {

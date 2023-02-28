@@ -221,7 +221,7 @@ std::string {{$class}}::String(MatchState*{{if .TemplateParams}} state{{end}}) c
 {{- end  }}
 
 {{- if .DisplayName }}
-  std::stringstream ss;
+  utils::StringStream ss;
   ss{{range SplitDisplayName .DisplayName}} << {{.}}{{end}};
   return ss.str();
 {{- else if .TemplateParams }}
@@ -264,7 +264,7 @@ const type::Type* {{$class}}::Match(MatchState& state, const type::Type* ty) con
 }
 
 std::string {{$class}}::String(MatchState*) const {
-  std::stringstream ss;
+  utils::StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss

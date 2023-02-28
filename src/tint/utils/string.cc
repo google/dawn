@@ -50,7 +50,7 @@ size_t Distance(std::string_view str_a, std::string_view str_b) {
 
 void SuggestAlternatives(std::string_view got,
                          Slice<char const* const> strings,
-                         std::ostringstream& ss) {
+                         utils::StringStream& ss) {
     // If the string typed was within kSuggestionDistance of one of the possible enum values,
     // suggest that. Don't bother with suggestions if the string was extremely long.
     constexpr size_t kSuggestionDistance = 5;

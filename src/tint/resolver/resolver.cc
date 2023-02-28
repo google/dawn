@@ -84,6 +84,7 @@
 #include "src/tint/utils/reverse.h"
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/utils/string.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/utils/transform.h"
 #include "src/tint/utils/vector.h"
 
@@ -3099,7 +3100,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                         filtered.Push(str);
                     }
                 }
-                std::ostringstream msg;
+                utils::StringStream msg;
                 utils::SuggestAlternatives(unresolved->name,
                                            filtered.Slice().Reinterpret<char const* const>(), msg);
                 AddNote(msg.str(), expr->source);
@@ -3464,7 +3465,7 @@ bool Resolver::DiagnosticControl(const ast::DiagnosticControl& control) {
     if (rule != builtin::DiagnosticRule::kUndefined) {
         validator_.DiagnosticFilters().Set(rule, control.severity);
     } else {
-        std::ostringstream ss;
+        utils::StringStream ss;
         ss << "unrecognized diagnostic rule '" << rule_name << "'\n";
         utils::SuggestAlternatives(rule_name, builtin::kDiagnosticRuleStrings, ss);
         AddWarning(ss.str(), control.rule_name->source);
@@ -3584,7 +3585,7 @@ type::Array* Resolver::Array(const Source& array_source,
     if (auto const_count = el_count->As<type::ConstantArrayCount>()) {
         size = const_count->value * stride;
         if (size > std::numeric_limits<uint32_t>::max()) {
-            std::stringstream msg;
+            utils::StringStream msg;
             msg << "array byte size (0x" << std::hex << size
                 << ") must not exceed 0xffffffff bytes";
             AddError(msg.str(), count_source);
@@ -3822,7 +3823,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
 
         offset = utils::RoundUp(align, offset);
         if (offset > std::numeric_limits<uint32_t>::max()) {
-            std::stringstream msg;
+            utils::StringStream msg;
             msg << "struct member offset (0x" << std::hex << offset << ") must not exceed 0x"
                 << std::hex << std::numeric_limits<uint32_t>::max() << " bytes";
             AddError(msg.str(), member->source);
@@ -3844,7 +3845,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     struct_size = utils::RoundUp(struct_align, struct_size);
 
     if (struct_size > std::numeric_limits<uint32_t>::max()) {
-        std::stringstream msg;
+        utils::StringStream msg;
         msg << "struct size (0x" << std::hex << struct_size << ") must not exceed 0xffffffff bytes";
         AddError(msg.str(), str->source);
         return nullptr;
@@ -4192,7 +4193,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(builtin::AddressSpace address_space,
             if (decl &&
                 !ApplyAddressSpaceUsageToType(
                     address_space, const_cast<type::Type*>(member->Type()), decl->type->source)) {
-                std::stringstream err;
+                utils::StringStream err;
                 err << "while analyzing structure member " << sem_.TypeNameOf(str) << "."
                     << builder_->Symbols().NameFor(member->Name());
                 AddNote(err.str(), member->Source());
@@ -4223,7 +4224,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(builtin::AddressSpace address_space,
     }
 
     if (builtin::IsHostShareable(address_space) && !validator_.IsHostShareable(ty)) {
-        std::stringstream err;
+        utils::StringStream err;
         err << "Type '" << sem_.TypeNameOf(ty) << "' cannot be used in address space '"
             << address_space << "' as it is non-host-shareable";
         AddError(err.str(), usage);
@@ -4248,7 +4249,7 @@ SEM* Resolver::StatementScope(const ast::Statement* ast, SEM* sem, F&& callback)
                     return false;
                 }
             } else {
-                std::ostringstream ss;
+                utils::StringStream ss;
                 ss << "attribute is not valid for " << use;
                 AddError(ss.str(), attr->source);
                 return false;

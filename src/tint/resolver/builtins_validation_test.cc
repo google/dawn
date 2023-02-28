@@ -15,6 +15,7 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/builtin/builtin_value.h"
 #include "src/tint/resolver/resolver_test_helper.h"
+#include "src/tint/utils/string_stream.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -145,7 +146,7 @@ TEST_P(ResolverBuiltinsStageTest, All_input) {
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
-        std::stringstream err;
+        utils::StringStream err;
         err << "12:34 error: @builtin(" << params.builtin << ")";
         err << " cannot be used in input of " << params.stage << " pipeline stage";
         EXPECT_FALSE(r()->Resolve());

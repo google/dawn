@@ -65,6 +65,7 @@
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/utils/unique_vector.h"
 
 #define TINT_DUMP_DEPENDENCY_GRAPH 0
@@ -711,7 +712,7 @@ struct DependencyAnalysis {
     /// found in `stack`.
     /// @param stack is the global dependency stack that contains a loop.
     void CyclicDependencyFound(const Global* root, utils::VectorRef<const Global*> stack) {
-        std::stringstream msg;
+        utils::StringStream msg;
         msg << "cyclic dependency found: ";
         constexpr size_t kLoopNotStarted = ~0u;
         size_t loop_start = kLoopNotStarted;

@@ -20,6 +20,7 @@
 #include <variant>
 
 #include "src/tint/utils/slice.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::utils {
 
@@ -74,7 +75,7 @@ size_t Distance(std::string_view a, std::string_view b);
 /// @param ss the stream to write the suggest and list of possible values to
 void SuggestAlternatives(std::string_view got,
                          Slice<char const* const> strings,
-                         std::ostringstream& ss);
+                         utils::StringStream& ss);
 
 }  // namespace tint::utils
 

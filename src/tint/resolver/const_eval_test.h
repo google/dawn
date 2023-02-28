@@ -24,6 +24,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/type/test_helper.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::resolver {
 
@@ -218,8 +219,7 @@ inline void ConcatIntoIf([[maybe_unused]] Vec& v1, [[maybe_unused]] Vecs&&... vs
 /// Returns the overflow error message for binary ops
 template <typename NumberT>
 inline std::string OverflowErrorMessage(NumberT lhs, const char* op, NumberT rhs) {
-    std::stringstream ss;
-    ss << std::setprecision(20);
+    utils::StringStream ss;
     ss << "'" << lhs.value << " " << op << " " << rhs.value << "' cannot be represented as '"
        << FriendlyName<NumberT>() << "'";
     return ss.str();
@@ -228,8 +228,7 @@ inline std::string OverflowErrorMessage(NumberT lhs, const char* op, NumberT rhs
 /// Returns the overflow error message for conversions
 template <typename VALUE_TY>
 std::string OverflowErrorMessage(VALUE_TY value, std::string_view target_ty) {
-    std::stringstream ss;
-    ss << std::setprecision(20);
+    utils::StringStream ss;
     ss << "value " << value << " cannot be represented as "
        << "'" << target_ty << "'";
     return ss.str();
@@ -238,8 +237,7 @@ std::string OverflowErrorMessage(VALUE_TY value, std::string_view target_ty) {
 /// Returns the overflow error message for exponentiation
 template <typename NumberT>
 std::string OverflowExpErrorMessage(std::string_view base, NumberT exp) {
-    std::stringstream ss;
-    ss << std::setprecision(20);
+    utils::StringStream ss;
     ss << base << "^" << exp << " cannot be represented as "
        << "'" << FriendlyName<NumberT>() << "'";
     return ss.str();

@@ -18,6 +18,7 @@
 #include "src/tint/builtin/builtin_value.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
+#include "src/tint/utils/string_stream.h"
 
 #include "gmock/gmock.h"
 
@@ -1054,7 +1055,7 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceNoExtension) {
     if (param.expectation == Expectation::kAlwaysPass) {
         ASSERT_TRUE(r()->Resolve()) << r()->error();
     } else {
-        std::stringstream ss;
+        utils::StringStream ss;
         ss << param.address_space;
         EXPECT_FALSE(r()->Resolve());
         if (param.expectation == Expectation::kInvalid) {

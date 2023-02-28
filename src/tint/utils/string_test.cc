@@ -15,6 +15,7 @@
 #include "src/tint/utils/string.h"
 
 #include "gtest/gtest.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::utils {
 namespace {
@@ -61,14 +62,14 @@ TEST(StringTest, Distance) {
 TEST(StringTest, SuggestAlternatives) {
     {
         const char* alternatives[] = {"hello world", "Hello World"};
-        std::ostringstream ss;
+        utils::StringStream ss;
         SuggestAlternatives("hello wordl", alternatives, ss);
         EXPECT_EQ(ss.str(), R"(Did you mean 'hello world'?
 Possible values: 'hello world', 'Hello World')");
     }
     {
         const char* alternatives[] = {"foobar", "something else"};
-        std::ostringstream ss;
+        utils::StringStream ss;
         SuggestAlternatives("hello world", alternatives, ss);
         EXPECT_EQ(ss.str(), R"(Possible values: 'foobar', 'something else')");
     }

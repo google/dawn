@@ -17,6 +17,7 @@
 #include "src/tint/ast/builtin_texture_helper_test.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/value_constructor.h"
+#include "src/tint/utils/string_stream.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -335,7 +336,7 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, Immediate) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        std::stringstream err;
+        utils::StringStream err;
         if (is_vector) {
             err << "12:34 error: each component of the " << param.name
                 << " argument must be at least " << param.min << " and at most " << param.max
@@ -392,7 +393,7 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalConst) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        std::stringstream err;
+        utils::StringStream err;
         if (is_vector) {
             err << "12:34 error: each component of the " << param.name
                 << " argument must be at least " << param.min << " and at most " << param.max
@@ -442,7 +443,7 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalVar) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    std::stringstream err;
+    utils::StringStream err;
     err << "12:34 error: the " << param.name << " argument must be a const-expression";
     EXPECT_EQ(r()->error(), err.str());
 }

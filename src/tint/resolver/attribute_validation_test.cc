@@ -18,6 +18,7 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/transform/add_block_attribute.h"
 #include "src/tint/type/texture_dimension.h"
+#include "src/tint/utils/string_stream.h"
 
 #include "gmock/gmock.h"
 
@@ -1164,7 +1165,7 @@ TEST_P(ArrayStrideTest, All) {
     auto& params = GetParam();
     ast::Type el_ty = params.create_el_type(*this);
 
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "el_ty: " << FriendlyName(el_ty) << ", stride: " << params.stride
        << ", should_pass: " << params.should_pass;
     SCOPED_TRACE(ss.str());
