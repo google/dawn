@@ -35,7 +35,7 @@ TextureBase* SwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) 
     DawnSwapChainNextTexture next = {};
     DawnSwapChainError error = im.GetNextTexture(im.userData, &next);
     if (error) {
-        GetDevice()->HandleError(InternalErrorType::Internal, error);
+        GetDevice()->HandleError(DAWN_INTERNAL_ERROR(error));
         return nullptr;
     }
     GLuint nativeTexture = next.texture.u32;

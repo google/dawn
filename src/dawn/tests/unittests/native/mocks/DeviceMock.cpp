@@ -17,6 +17,7 @@
 #include "dawn/tests/unittests/native/mocks/BindGroupLayoutMock.h"
 #include "dawn/tests/unittests/native/mocks/BindGroupMock.h"
 #include "dawn/tests/unittests/native/mocks/BufferMock.h"
+#include "dawn/tests/unittests/native/mocks/CommandBufferMock.h"
 #include "dawn/tests/unittests/native/mocks/ComputePipelineMock.h"
 #include "dawn/tests/unittests/native/mocks/ExternalTextureMock.h"
 #include "dawn/tests/unittests/native/mocks/PipelineLayoutMock.h"
@@ -52,6 +53,12 @@ DeviceMock::DeviceMock() {
         .WillByDefault(WithArgs<0>(
             [this](const BufferDescriptor* descriptor) -> ResultOrError<Ref<BufferBase>> {
                 return AcquireRef(new NiceMock<BufferMock>(this, descriptor));
+            }));
+    ON_CALL(*this, CreateCommandBuffer)
+        .WillByDefault(WithArgs<0, 1>(
+            [this](CommandEncoder* encoder, const CommandBufferDescriptor* descriptor)
+                -> ResultOrError<Ref<CommandBufferBase>> {
+                return AcquireRef(new NiceMock<CommandBufferMock>(this, encoder, descriptor));
             }));
     ON_CALL(*this, CreateExternalTextureImpl)
         .WillByDefault(WithArgs<0>([this](const ExternalTextureDescriptor* descriptor)

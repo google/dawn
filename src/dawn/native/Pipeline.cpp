@@ -141,6 +141,8 @@ MaybeError ValidateProgrammableStage(DeviceBase* device,
 
 WGPUCreatePipelineAsyncStatus CreatePipelineAsyncStatusFromErrorType(InternalErrorType error) {
     switch (error) {
+        case InternalErrorType::None:
+            return WGPUCreatePipelineAsyncStatus_Success;
         case InternalErrorType::Validation:
             return WGPUCreatePipelineAsyncStatus_ValidationError;
         case InternalErrorType::DeviceLost:

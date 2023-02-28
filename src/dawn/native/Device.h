@@ -69,23 +69,28 @@ class DeviceBase : public RefCountedWithExternalCount {
     // Handles the error, causing a device loss if applicable. Almost always when a device loss
     // occurs because of an error, we want to call the device loss callback with an undefined
     // reason, but the ForceLoss API allows for an injection of the reason, hence the default
-    // argument.
-    void HandleError(InternalErrorType type,
-                     const char* message,
+    // argument. The `additionalAllowedErrors` mask allows specifying additional errors are allowed
+    // (on top of validation and device loss errors). Note that "allowed" is defined as surfacing to
+    // users as the respective error rather than causing a device loss instead.
+    void HandleError(std::unique_ptr<ErrorData> error,
+                     InternalErrorType additionalAllowedErrors = InternalErrorType::None,
                      WGPUDeviceLostReason lost_reason = WGPUDeviceLostReason_Undefined);
 
-    bool ConsumedError(MaybeError maybeError) {
+    bool ConsumedError(MaybeError maybeError,
+                       InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
         if (DAWN_UNLIKELY(maybeError.IsError())) {
-            ConsumeError(maybeError.AcquireError());
+            ConsumeError(maybeError.AcquireError(), additionalAllowedErrors);
             return true;
         }
         return false;
     }
 
     template <typename T>
-    bool ConsumedError(ResultOrError<T> resultOrError, T* result) {
+    bool ConsumedError(ResultOrError<T> resultOrError,
+                       T* result,
+                       InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
         if (DAWN_UNLIKELY(resultOrError.IsError())) {
-            ConsumeError(resultOrError.AcquireError());
+            ConsumeError(resultOrError.AcquireError(), additionalAllowedErrors);
             return true;
         }
         *result = resultOrError.AcquireSuccess();
@@ -93,22 +98,42 @@ class DeviceBase : public RefCountedWithExternalCount {
     }
 
     template <typename... Args>
-    bool ConsumedError(MaybeError maybeError, const char* formatStr, const Args&... args) {
+    bool ConsumedError(MaybeError maybeError,
+                       InternalErrorType additionalAllowedErrors,
+                       const char* formatStr,
+                       const Args&... args) {
         if (DAWN_UNLIKELY(maybeError.IsError())) {
             std::unique_ptr<ErrorData> error = maybeError.AcquireError();
             if (error->GetType() == InternalErrorType::Validation) {
-                std::string out;
-                absl::UntypedFormatSpec format(formatStr);
-                if (absl::FormatUntyped(&out, format, {absl::FormatArg(args)...})) {
-                    error->AppendContext(std::move(out));
-                } else {
-                    error->AppendContext(
-                        absl::StrFormat("[Failed to format error: \"%s\"]", formatStr));
-                }
+                error->AppendContext(formatStr, args...);
             }
-            ConsumeError(std::move(error));
+            ConsumeError(std::move(error), additionalAllowedErrors);
             return true;
         }
+        return false;
+    }
+
+    template <typename... Args>
+    bool ConsumedError(MaybeError maybeError, const char* formatStr, Args&&... args) {
+        return ConsumedError(std::move(maybeError), InternalErrorType::None, formatStr,
+                             std::forward<Args>(args)...);
+    }
+
+    template <typename T, typename... Args>
+    bool ConsumedError(ResultOrError<T> resultOrError,
+                       T* result,
+                       InternalErrorType additionalAllowedErrors,
+                       const char* formatStr,
+                       const Args&... args) {
+        if (DAWN_UNLIKELY(resultOrError.IsError())) {
+            std::unique_ptr<ErrorData> error = resultOrError.AcquireError();
+            if (error->GetType() == InternalErrorType::Validation) {
+                error->AppendContext(formatStr, args...);
+            }
+            ConsumeError(std::move(error), additionalAllowedErrors);
+            return true;
+        }
+        *result = resultOrError.AcquireSuccess();
         return false;
     }
 
@@ -116,24 +141,9 @@ class DeviceBase : public RefCountedWithExternalCount {
     bool ConsumedError(ResultOrError<T> resultOrError,
                        T* result,
                        const char* formatStr,
-                       const Args&... args) {
-        if (DAWN_UNLIKELY(resultOrError.IsError())) {
-            std::unique_ptr<ErrorData> error = resultOrError.AcquireError();
-            if (error->GetType() == InternalErrorType::Validation) {
-                std::string out;
-                absl::UntypedFormatSpec format(formatStr);
-                if (absl::FormatUntyped(&out, format, {absl::FormatArg(args)...})) {
-                    error->AppendContext(std::move(out));
-                } else {
-                    error->AppendContext(
-                        absl::StrFormat("[Failed to format error: \"%s\"]", formatStr));
-                }
-            }
-            ConsumeError(std::move(error));
-            return true;
-        }
-        *result = resultOrError.AcquireSuccess();
-        return false;
+                       Args&&... args) {
+        return ConsumedError(std::move(resultOrError), result, InternalErrorType::None, formatStr,
+                             std::forward<Args>(args)...);
     }
 
     MaybeError ValidateObject(const ApiObjectBase* object) const;
@@ -489,7 +499,8 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     void SetWGSLExtensionAllowList();
 
-    void ConsumeError(std::unique_ptr<ErrorData> error);
+    void ConsumeError(std::unique_ptr<ErrorData> error,
+                      InternalErrorType additionalAllowedErrors = InternalErrorType::None);
 
     // Each backend should implement to check their passed fences if there are any and return a
     // completed serial. Return 0 should indicate no fences to check.

@@ -30,7 +30,7 @@ thread_local DeviceBase* tlDevice = nullptr;
 
 void TintICEReporter(const tint::diag::List& diagnostics) {
     if (tlDevice) {
-        tlDevice->HandleError(InternalErrorType::Internal, diagnostics.str().c_str());
+        tlDevice->HandleError(DAWN_INTERNAL_ERROR(diagnostics.str()));
 #if DAWN_ENABLE_ASSERTS
         for (const tint::diag::Diagnostic& diag : diagnostics) {
             if (diag.severity >= tint::diag::Severity::InternalCompilerError) {

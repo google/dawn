@@ -19,7 +19,6 @@
 #include <string>
 #include <utility>
 
-#include "absl/strings/str_format.h"
 #include "dawn/common/Result.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/Toggles.h"
@@ -27,7 +26,13 @@
 
 namespace dawn::native {
 
-enum class InternalErrorType : uint32_t { Validation, DeviceLost, Internal, OutOfMemory };
+enum class InternalErrorType : uint32_t {
+    None = 0,
+    Validation = 1,
+    DeviceLost = 2,
+    Internal = 4,
+    OutOfMemory = 8
+};
 
 // MaybeError and ResultOrError are meant to be used as return value for function that are not
 // expected to, but might fail. The handling of error is potentially much slower than successes.
@@ -204,6 +209,22 @@ void IgnoreErrors(MaybeError maybeError);
 wgpu::ErrorType ToWGPUErrorType(InternalErrorType type);
 InternalErrorType FromWGPUErrorType(wgpu::ErrorType type);
 
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString |
+                          absl::FormatConversionCharSet::kIntegral>
+AbslFormatConvert(InternalErrorType value,
+                  const absl::FormatConversionSpec& spec,
+                  absl::FormatSink* s);
+
 }  // namespace dawn::native
+
+// Enable dawn enum bitmask for error types.
+namespace dawn {
+
+template <>
+struct IsDawnBitmask<native::InternalErrorType> {
+    static constexpr bool enable = true;
+};
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_NATIVE_ERROR_H_

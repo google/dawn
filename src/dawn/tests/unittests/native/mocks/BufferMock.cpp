@@ -16,9 +16,18 @@
 
 namespace dawn::native {
 
+using ::testing::Return;
+
 BufferMock::BufferMock(DeviceMock* device, const BufferDescriptor* descriptor)
     : BufferBase(device, descriptor) {
+    mBackingData = std::unique_ptr<uint8_t[]>(new uint8_t[GetSize()]);
+    mAllocatedSize = GetSize();
+
     ON_CALL(*this, DestroyImpl).WillByDefault([this]() { this->BufferBase::DestroyImpl(); });
+    ON_CALL(*this, GetMappedPointer).WillByDefault(Return(mBackingData.get()));
+    ON_CALL(*this, IsCPUWritableAtCreation).WillByDefault([this]() {
+        return (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) != 0;
+    });
 }
 
 BufferMock::~BufferMock() = default;

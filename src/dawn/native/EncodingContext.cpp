@@ -87,7 +87,7 @@ void EncodingContext::HandleError(std::unique_ptr<ErrorData> error) {
             mError = std::move(error);
         }
     } else {
-        mDevice->HandleError(error->GetType(), error->GetFormattedMessage().c_str());
+        mDevice->HandleError(std::move(error));
     }
 }
 
