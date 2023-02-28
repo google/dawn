@@ -19,6 +19,8 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/utils/string_stream.h"
+
 namespace tint::bench {
 namespace {
 
@@ -44,7 +46,7 @@ std::variant<std::vector<T>, Error> ReadFile(const std::string& input_file) {
     fseek(file, 0, SEEK_END);
     const auto file_size = static_cast<size_t>(ftell(file));
     if (0 != (file_size % sizeof(T))) {
-        std::stringstream err;
+        utils::StringStream err;
         err << "File " << input_file
             << " does not contain an integral number of objects: " << file_size
             << " bytes in the file, require " << sizeof(T) << " bytes per object";

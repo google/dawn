@@ -19,6 +19,7 @@
 #include "src/tint/type/manager.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/utils/hash.h"
+#include "src/tint/utils/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Atomic);
 
@@ -42,7 +43,7 @@ bool Atomic::Equals(const type::UniqueNode& other) const {
 }
 
 std::string Atomic::FriendlyName(const SymbolTable& symbols) const {
-    std::ostringstream out;
+    utils::StringStream out;
     out << "atomic<" << subtype_->FriendlyName(symbols) << ">";
     return out.str();
 }

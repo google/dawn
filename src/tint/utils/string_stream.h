@@ -16,9 +16,11 @@
 #define SRC_TINT_UTILS_STRING_STREAM_H_
 
 #include <functional>
+#include <iterator>
 #include <limits>
 #include <sstream>
 #include <string>
+#include <utility>
 
 namespace tint::utils {
 
@@ -88,6 +90,15 @@ class StringStream {
 
         return *this;
     }
+
+    /// Swaps streams
+    /// @param other stream to swap too
+    void swap(StringStream& other) { sstream_.swap(other.sstream_); }
+
+    /// repeat queues the character c to be written to the printer n times.
+    /// @param c the character to print `n` times
+    /// @param n the number of times to print character `c`
+    void repeat(char c, size_t n) { std::fill_n(std::ostream_iterator<char>(sstream_), n, c); }
 
     /// The callback to emit a `endl` to the stream
     using StdEndl = std::ostream& (*)(std::ostream&);

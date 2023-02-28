@@ -36,6 +36,7 @@
 #include "src/tint/utils/block_allocator.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
+#include "src/tint/utils/string_stream.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -695,7 +696,7 @@ DecomposeMemoryAccess::Intrinsic::Intrinsic(ProgramID pid,
     : Base(pid, nid), op(o), type(ty), address_space(as), buffer(buf) {}
 DecomposeMemoryAccess::Intrinsic::~Intrinsic() = default;
 std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
-    std::stringstream ss;
+    utils::StringStream ss;
     switch (op) {
         case Op::kLoad:
             ss << "intrinsic_load_";

@@ -18,6 +18,8 @@
 #include <sstream>
 #include <string>
 
+#include "src/tint/utils/string_stream.h"
+
 namespace tint::utils {
 
 /// TmpFile constructs a temporary file that can be written to, and is
@@ -55,7 +57,7 @@ class TmpFile {
     /// @return a reference to this TmpFile
     template <typename T>
     inline TmpFile& operator<<(T&& data) {
-        std::stringstream ss;
+        utils::StringStream ss;
         ss << data;
         std::string str = ss.str();
         Append(str.data(), str.size());

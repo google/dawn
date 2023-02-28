@@ -19,6 +19,7 @@
 #include "src/tint/type/manager.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/utils/hash.h"
+#include "src/tint/utils/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Matrix);
 
@@ -51,7 +52,7 @@ bool Matrix::Equals(const UniqueNode& other) const {
 }
 
 std::string Matrix::FriendlyName(const SymbolTable& symbols) const {
-    std::ostringstream out;
+    utils::StringStream out;
     out << "mat" << columns_ << "x" << rows_ << "<" << subtype_->FriendlyName(symbols) << ">";
     return out.str();
 }

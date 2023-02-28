@@ -43,7 +43,7 @@ namespace tint::utils {
 /// @returns value printed as a string via the std::ostream `<<` operator
 template <typename T>
 std::string ToString(const T& value) {
-    std::stringstream s;
+    utils::StringStream s;
     s << value;
     return s.str();
 }
@@ -52,7 +52,7 @@ std::string ToString(const T& value) {
 /// @returns value printed as a string via the std::ostream `<<` operator
 template <typename... TYs>
 std::string ToString(const std::variant<TYs...>& value) {
-    std::stringstream s;
+    utils::StringStream s;
     s << std::visit([&](auto& v) { return ToString(v); }, value);
     return s.str();
 }

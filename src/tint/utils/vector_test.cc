@@ -20,6 +20,7 @@
 #include "gmock/gmock.h"
 
 #include "src/tint/utils/bitcast.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::utils {
 namespace {
@@ -1788,7 +1789,7 @@ TEST(TintVectorTest, Equality) {
 }
 
 TEST(TintVectorTest, ostream) {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << Vector{1, 2, 3};
     EXPECT_EQ(ss.str(), "[1, 2, 3]");
 }
@@ -2065,7 +2066,7 @@ TEST(TintVectorRefTest, BeginEnd) {
 }
 
 TEST(TintVectorRefTest, ostream) {
-    std::stringstream ss;
+    utils::StringStream ss;
     Vector vec{1, 2, 3};
     const VectorRef<int> vec_ref(vec);
     ss << vec_ref;

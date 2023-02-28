@@ -22,6 +22,7 @@
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/manager.h"
 #include "src/tint/utils/hash.h"
+#include "src/tint/utils/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Struct);
 TINT_INSTANTIATE_TYPEINFO(tint::type::StructMember);
@@ -96,7 +97,7 @@ std::string Struct::FriendlyName(const SymbolTable& symbols) const {
 }
 
 std::string Struct::Layout(const tint::SymbolTable& symbols) const {
-    std::stringstream ss;
+    utils::StringStream ss;
 
     auto member_name_of = [&](const StructMember* sm) { return symbols.NameFor(sm->Name()); };
 

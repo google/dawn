@@ -18,6 +18,7 @@
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/type/manager.h"
 #include "src/tint/utils/hash.h"
+#include "src/tint/utils/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Reference);
 
@@ -44,7 +45,7 @@ bool Reference::Equals(const UniqueNode& other) const {
 }
 
 std::string Reference::FriendlyName(const SymbolTable& symbols) const {
-    std::ostringstream out;
+    utils::StringStream out;
     out << "ref<";
     if (address_space_ != builtin::AddressSpace::kUndefined) {
         out << address_space_ << ", ";

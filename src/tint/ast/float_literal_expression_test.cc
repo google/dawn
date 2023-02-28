@@ -14,6 +14,8 @@
 
 #include "src/tint/ast/test_helper.h"
 
+#include "src/tint/utils/string_stream.h"
+
 namespace tint::ast {
 namespace {
 
@@ -42,7 +44,7 @@ TEST_F(FloatLiteralExpressionTest, SuffixH) {
 
 TEST_F(FloatLiteralExpressionTest, SuffixStringStream) {
     auto to_str = [](FloatLiteralExpression::Suffix suffix) {
-        std::stringstream ss;
+        utils::StringStream ss;
         ss << suffix;
         return ss.str();
     };

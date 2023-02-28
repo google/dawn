@@ -26,6 +26,7 @@
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/math.h"
+#include "src/tint/utils/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling::Config);
@@ -59,7 +60,7 @@ enum class VertexDataType {
 /// @param out the std::ostream to write to
 /// @param format the VertexFormat to write
 /// @returns out so calls can be chained
-std::ostream& operator<<(std::ostream& out, VertexFormat format) {
+utils::StringStream& operator<<(utils::StringStream& out, VertexFormat format) {
     switch (format) {
         case VertexFormat::kUint8x2:
             return out << "uint8x2";
@@ -379,7 +380,7 @@ struct VertexPulling::State {
 
                 // Base types must match between the vertex stream and the WGSL variable
                 if (!IsTypeCompatible(var_dt, fmt_dt)) {
-                    std::stringstream err;
+                    utils::StringStream err;
                     err << "VertexAttributeDescriptor for location "
                         << std::to_string(attribute_desc.shader_location) << " has format "
                         << attribute_desc.format << " but shader expects "

@@ -293,7 +293,10 @@ libtint_source_set("libtint_demangler_src") {
     "demangler.cc",
     "demangler.h",
   ]
-  deps = [ ":libtint_program_src" ]
+  deps = [
+    ":libtint_base_src",
+    ":libtint_program_src",
+  ]
 }
 
 libtint_source_set("libtint_initializer_src") {

@@ -19,6 +19,8 @@
 #include <sstream>
 #include <string>
 
+#include "src/tint/utils/string_stream.h"
+
 namespace tint::diag {
 
 class List;
@@ -73,7 +75,7 @@ class StringPrinter : public Printer {
     void write(const std::string& str, const Style&) override;
 
   private:
-    std::stringstream stream;
+    utils::StringStream stream;
 };
 
 }  // namespace tint::diag

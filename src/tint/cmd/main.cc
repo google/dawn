@@ -37,6 +37,7 @@
 #include "src/tint/cmd/helper.h"
 #include "src/tint/utils/io/command.h"
 #include "src/tint/utils/string.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/utils/transform.h"
 #include "src/tint/val/val.h"
 #include "tint/tint.h"
@@ -245,7 +246,7 @@ Format infer_format(const std::string& filename) {
 std::vector<std::string> split_on_char(std::string list, char c) {
     std::vector<std::string> res;
 
-    std::stringstream str(list);
+    std::istringstream str(list);
     while (str.good()) {
         std::string substr;
         getline(str, substr, c);
@@ -1034,7 +1035,7 @@ int main(int argc, const char** argv) {
          }},
     };
     auto transform_names = [&] {
-        std::stringstream names;
+        tint::utils::StringStream names;
         for (auto& t : transforms) {
             names << "   " << t.name << std::endl;
         }

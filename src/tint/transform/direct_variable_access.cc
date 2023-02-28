@@ -32,6 +32,7 @@
 #include "src/tint/type/abstract_int.h"
 #include "src/tint/utils/reverse.h"
 #include "src/tint/utils/scoped_assignment.h"
+#include "src/tint/utils/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DirectVariableAccess);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DirectVariableAccess::Config);
@@ -687,7 +688,7 @@ struct DirectVariableAccess::State {
                 // Build an appropriate variant function name.
                 // This is derived from the original function name and the pointer parameter
                 // chains.
-                std::stringstream ss;
+                utils::StringStream ss;
                 ss << ctx.src->Symbols().NameFor(target->Declaration()->name->symbol);
                 for (auto* param : target->Parameters()) {
                     if (auto indices = target_signature.Find(param)) {
@@ -1080,7 +1081,7 @@ struct DirectVariableAccess::State {
 
     /// @returns a name describing the given shape
     std::string AccessShapeName(const AccessShape& shape) {
-        std::stringstream ss;
+        utils::StringStream ss;
 
         if (IsPrivateOrFunction(shape.root.address_space)) {
             ss << "F";

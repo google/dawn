@@ -15,6 +15,7 @@
 #include "src/tint/demangler.h"
 
 #include "src/tint/program.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint {
 namespace {
@@ -29,7 +30,7 @@ Demangler::Demangler() = default;
 Demangler::~Demangler() = default;
 
 std::string Demangler::Demangle(const SymbolTable& symbols, const std::string& str) const {
-    std::stringstream out;
+    utils::StringStream out;
 
     size_t pos = 0;
     for (;;) {

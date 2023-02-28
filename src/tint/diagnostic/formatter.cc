@@ -20,6 +20,7 @@
 
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/diagnostic/printer.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::diag {
 namespace {
@@ -41,7 +42,7 @@ const char* to_str(Severity severity) {
 }
 
 std::string to_str(const Source::Location& location) {
-    std::stringstream ss;
+    utils::StringStream ss;
     if (location.line > 0) {
         ss << location.line;
         if (location.column > 0) {
@@ -75,7 +76,7 @@ struct Formatter::State {
         auto str = stream.str();
         if (str.length() > 0) {
             printer->write(str, style);
-            std::stringstream reset;
+            utils::StringStream reset;
             stream.swap(reset);
         }
     }
@@ -95,12 +96,12 @@ struct Formatter::State {
     /// repeat queues the character c to be written to the printer n times.
     /// @param c the character to print `n` times
     /// @param n the number of times to print character `c`
-    void repeat(char c, size_t n) { std::fill_n(std::ostream_iterator<char>(stream), n, c); }
+    void repeat(char c, size_t n) { stream.repeat(c, n); }
 
   private:
     Printer* printer;
     diag::Style style;
-    std::stringstream stream;
+    utils::StringStream stream;
 };
 
 Formatter::Formatter() {}

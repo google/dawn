@@ -21,6 +21,7 @@
 #include "src/tint/type/manager.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/hash.h"
+#include "src/tint/utils/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Array);
 
@@ -81,7 +82,7 @@ bool Array::Equals(const UniqueNode& other) const {
 }
 
 std::string Array::FriendlyName(const SymbolTable& symbols) const {
-    std::ostringstream out;
+    utils::StringStream out;
     if (!IsStrideImplicit()) {
         out << "@stride(" << stride_ << ") ";
     }

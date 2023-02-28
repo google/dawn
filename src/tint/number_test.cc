@@ -19,6 +19,7 @@
 
 #include "src/tint/program_builder.h"
 #include "src/tint/utils/compiler_macros.h"
+#include "src/tint/utils/string_stream.h"
 
 #include "gtest/gtest.h"
 
@@ -254,7 +255,7 @@ TEST_P(NumberF16Test, QuantizeF16) {
     float input_value = GetParam().input_value;
     float quantized_value = GetParam().quantized_value;
 
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "input value = " << input_value << ", expected quantized value = " << quantized_value;
     SCOPED_TRACE(ss.str());
 
@@ -269,7 +270,7 @@ TEST_P(NumberF16Test, BitsRepresentation) {
     float input_value = GetParam().input_value;
     uint16_t representation = GetParam().f16_bit_pattern;
 
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "input value = " << input_value
        << ", expected binary16 bits representation = " << std::hex << std::showbase
        << representation;
@@ -282,7 +283,7 @@ TEST_P(NumberF16Test, FromBits) {
     float input_value = GetParam().quantized_value;
     uint16_t representation = GetParam().f16_bit_pattern;
 
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << "binary16 bits representation = " << std::hex << std::showbase << representation
        << " expected value = " << input_value;
     SCOPED_TRACE(ss.str());

@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::utils {
 namespace {
@@ -232,7 +233,7 @@ TEST(EnumSetTest, Loop) {
 }
 
 TEST(EnumSetTest, Ostream) {
-    std::stringstream ss;
+    utils::StringStream ss;
     ss << EnumSet<E>(E::A, E::C);
     EXPECT_EQ(ss.str(), "{A, C}");
 }

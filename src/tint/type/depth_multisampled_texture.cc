@@ -19,6 +19,7 @@
 #include "src/tint/type/manager.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/hash.h"
+#include "src/tint/utils/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::DepthMultisampledTexture);
 
@@ -46,7 +47,7 @@ bool DepthMultisampledTexture::Equals(const UniqueNode& other) const {
 }
 
 std::string DepthMultisampledTexture::FriendlyName(const SymbolTable&) const {
-    std::ostringstream out;
+    utils::StringStream out;
     out << "texture_depth_multisampled_" << dim();
     return out.str();
 }

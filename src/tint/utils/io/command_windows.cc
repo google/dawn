@@ -21,6 +21,7 @@
 #include <string>
 
 #include "src/tint/utils/defer.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::utils {
 
@@ -197,7 +198,7 @@ Command::Output Command::Exec(std::initializer_list<std::string> arguments) cons
     si.hStdError = stderr_pipe.write;
     si.hStdInput = stdin_pipe.read;
 
-    std::stringstream args;
+    utils::StringStream args;
     args << path_;
     for (auto& arg : arguments) {
         if (!arg.empty()) {

@@ -19,6 +19,7 @@
 #include "src/tint/type/manager.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/hash.h"
+#include "src/tint/utils/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::SampledTexture);
 
@@ -39,7 +40,7 @@ bool SampledTexture::Equals(const UniqueNode& other) const {
 }
 
 std::string SampledTexture::FriendlyName(const SymbolTable& symbols) const {
-    std::ostringstream out;
+    utils::StringStream out;
     out << "texture_" << dim() << "<" << type_->FriendlyName(symbols) << ">";
     return out.str();
 }

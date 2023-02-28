@@ -19,6 +19,7 @@
 #include "src/tint/type/manager.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/utils/hash.h"
+#include "src/tint/utils/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::StorageTexture);
 
@@ -43,7 +44,7 @@ bool StorageTexture::Equals(const UniqueNode& other) const {
 }
 
 std::string StorageTexture::FriendlyName(const SymbolTable&) const {
-    std::ostringstream out;
+    utils::StringStream out;
     out << "texture_storage_" << dim() << "<" << texel_format_ << ", " << access_ << ">";
     return out.str();
 }
