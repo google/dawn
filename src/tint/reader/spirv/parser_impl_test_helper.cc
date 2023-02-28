@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/reader/spirv/parser_impl_test_helper.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/wgsl/generator_impl.h"
 
 namespace tint::reader::spirv::test {
@@ -54,7 +55,7 @@ std::string ToString(const Program& program, const ast::Node* node) {
     return Switch(
         node,
         [&](const ast::Expression* expr) {
-            std::stringstream out;
+            utils::StringStream out;
             if (!writer.EmitExpression(out, expr)) {
                 return "WGSL writer error: " + writer.error();
             }

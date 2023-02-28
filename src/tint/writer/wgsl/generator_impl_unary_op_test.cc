@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
 namespace tint::writer::wgsl {
@@ -26,7 +27,7 @@ TEST_F(WgslUnaryOpTest, AddressOf) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
     EXPECT_EQ(out.str(), "&(expr)");
 }
@@ -38,7 +39,7 @@ TEST_F(WgslUnaryOpTest, Complement) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
     EXPECT_EQ(out.str(), "~(expr)");
 }
@@ -51,7 +52,7 @@ TEST_F(WgslUnaryOpTest, Indirection) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
     EXPECT_EQ(out.str(), "*(expr)");
 }
@@ -63,7 +64,7 @@ TEST_F(WgslUnaryOpTest, Not) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
     EXPECT_EQ(out.str(), "!(expr)");
 }
@@ -75,7 +76,7 @@ TEST_F(WgslUnaryOpTest, Negation) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
     EXPECT_EQ(out.str(), "-(expr)");
 }

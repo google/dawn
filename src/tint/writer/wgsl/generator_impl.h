@@ -35,6 +35,7 @@
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/program.h"
 #include "src/tint/sem/struct.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/text_generator.h"
 
 namespace tint::writer::wgsl {
@@ -55,7 +56,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream
     /// @param diagnostic the diagnostic control node
     /// @returns true if the diagnostic control was emitted
-    bool EmitDiagnosticControl(std::ostream& out, const ast::DiagnosticControl& diagnostic);
+    bool EmitDiagnosticControl(utils::StringStream& out, const ast::DiagnosticControl& diagnostic);
     /// Handles generating an enable directive
     /// @param enable the enable node
     /// @returns true if the enable directive was emitted
@@ -68,7 +69,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream
     /// @param expr the expression to emit
     /// @returns true if the index accessor was emitted
-    bool EmitIndexAccessor(std::ostream& out, const ast::IndexAccessorExpression* expr);
+    bool EmitIndexAccessor(utils::StringStream& out, const ast::IndexAccessorExpression* expr);
     /// Handles an assignment statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
@@ -77,17 +78,17 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream
     /// @param expr the binary expression
     /// @returns true if the expression was emitted, false otherwise
-    bool EmitBinary(std::ostream& out, const ast::BinaryExpression* expr);
+    bool EmitBinary(utils::StringStream& out, const ast::BinaryExpression* expr);
     /// Handles generating a binary operator
     /// @param out the output stream
     /// @param op the binary operator
     /// @returns true if the operator was emitted, false otherwise
-    bool EmitBinaryOp(std::ostream& out, const ast::BinaryOp op);
+    bool EmitBinaryOp(utils::StringStream& out, const ast::BinaryOp op);
     /// Handles generating a bitcast expression
     /// @param out the output stream
     /// @param expr the bitcast expression
     /// @returns true if the bitcast was emitted
-    bool EmitBitcast(std::ostream& out, const ast::BitcastExpression* expr);
+    bool EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr);
     /// Handles a block statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
@@ -96,7 +97,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream to write the header to
     /// @param stmt the block statement to emit the header for
     /// @returns true if the statement was emitted successfully
-    bool EmitBlockHeader(std::ostream& out, const ast::BlockStatement* stmt);
+    bool EmitBlockHeader(utils::StringStream& out, const ast::BlockStatement* stmt);
     /// Handles a break statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
@@ -109,7 +110,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream
     /// @param expr the call expression
     /// @returns true if the call expression is emitted
-    bool EmitCall(std::ostream& out, const ast::CallExpression* expr);
+    bool EmitCall(utils::StringStream& out, const ast::CallExpression* expr);
     /// Handles a case statement
     /// @param stmt the statement
     /// @returns true if the statment was emitted successfully
@@ -122,7 +123,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream
     /// @param expr the literal expression expression
     /// @returns true if the literal expression is emitted
-    bool EmitLiteral(std::ostream& out, const ast::LiteralExpression* expr);
+    bool EmitLiteral(utils::StringStream& out, const ast::LiteralExpression* expr);
     /// Handles a continue statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
@@ -131,7 +132,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream
     /// @param expr the expression
     /// @returns true if the expression was emitted
-    bool EmitExpression(std::ostream& out, const ast::Expression* expr);
+    bool EmitExpression(utils::StringStream& out, const ast::Expression* expr);
     /// Handles generating a function
     /// @param func the function to generate
     /// @returns true if the function was emitted
@@ -140,12 +141,12 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream
     /// @param expr the identifier expression
     /// @returns true if the identifier was emitted
-    bool EmitIdentifier(std::ostream& out, const ast::IdentifierExpression* expr);
+    bool EmitIdentifier(utils::StringStream& out, const ast::IdentifierExpression* expr);
     /// Handles generating an identifier
     /// @param out the output of the expression stream
     /// @param ident the identifier
     /// @returns true if the identifier was emitted
-    bool EmitIdentifier(std::ostream& out, const ast::Identifier* ident);
+    bool EmitIdentifier(utils::StringStream& out, const ast::Identifier* ident);
     /// Handles an if statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was successfully emitted
@@ -174,7 +175,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream
     /// @param expr the member accessor expression
     /// @returns true if the member accessor was emitted
-    bool EmitMemberAccessor(std::ostream& out, const ast::MemberAccessorExpression* expr);
+    bool EmitMemberAccessor(utils::StringStream& out, const ast::MemberAccessorExpression* expr);
     /// Handles return statements
     /// @param stmt the statement to emit
     /// @returns true if the statement was successfully emitted
@@ -207,22 +208,22 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream
     /// @param fmt the format to generate
     /// @returns true if the format is emitted
-    bool EmitImageFormat(std::ostream& out, const builtin::TexelFormat fmt);
+    bool EmitImageFormat(utils::StringStream& out, const builtin::TexelFormat fmt);
     /// Handles a unary op expression
     /// @param out the output stream
     /// @param expr the expression to emit
     /// @returns true if the expression was emitted
-    bool EmitUnaryOp(std::ostream& out, const ast::UnaryOpExpression* expr);
+    bool EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpression* expr);
     /// Handles generating a variable
     /// @param out the output stream
     /// @param var the variable to generate
     /// @returns true if the variable was emitted
-    bool EmitVariable(std::ostream& out, const ast::Variable* var);
+    bool EmitVariable(utils::StringStream& out, const ast::Variable* var);
     /// Handles generating a attribute list
     /// @param out the output stream
     /// @param attrs the attribute list
     /// @returns true if the attributes were emitted
-    bool EmitAttributes(std::ostream& out, utils::VectorRef<const ast::Attribute*> attrs);
+    bool EmitAttributes(utils::StringStream& out, utils::VectorRef<const ast::Attribute*> attrs);
 };
 
 }  // namespace tint::writer::wgsl

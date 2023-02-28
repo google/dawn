@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -27,7 +28,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Bitcast) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
     EXPECT_EQ(out.str(), "bitcast<f32>(1i)");
 }

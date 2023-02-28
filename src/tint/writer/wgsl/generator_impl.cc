@@ -89,7 +89,7 @@ bool GeneratorImpl::Generate() {
     return true;
 }
 
-bool GeneratorImpl::EmitDiagnosticControl(std::ostream& out,
+bool GeneratorImpl::EmitDiagnosticControl(utils::StringStream& out,
                                           const ast::DiagnosticControl& diagnostic) {
     out << "diagnostic(" << diagnostic.severity << ", "
         << program_->Symbols().NameFor(diagnostic.rule_name->symbol) << ")";
@@ -124,7 +124,7 @@ bool GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
         });
 }
 
-bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* expr) {
+bool GeneratorImpl::EmitExpression(utils::StringStream& out, const ast::Expression* expr) {
     return Switch(
         expr,
         [&](const ast::IndexAccessorExpression* a) {  //
@@ -161,7 +161,8 @@ bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* exp
         });
 }
 
-bool GeneratorImpl::EmitIndexAccessor(std::ostream& out, const ast::IndexAccessorExpression* expr) {
+bool GeneratorImpl::EmitIndexAccessor(utils::StringStream& out,
+                                      const ast::IndexAccessorExpression* expr) {
     bool paren_lhs =
         !expr->object
              ->IsAnyOf<ast::AccessorExpression, ast::CallExpression, ast::IdentifierExpression>();
@@ -184,7 +185,7 @@ bool GeneratorImpl::EmitIndexAccessor(std::ostream& out, const ast::IndexAccesso
     return true;
 }
 
-bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
+bool GeneratorImpl::EmitMemberAccessor(utils::StringStream& out,
                                        const ast::MemberAccessorExpression* expr) {
     bool paren_lhs =
         !expr->object
@@ -203,7 +204,7 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
     return true;
 }
 
-bool GeneratorImpl::EmitBitcast(std::ostream& out, const ast::BitcastExpression* expr) {
+bool GeneratorImpl::EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr) {
     out << "bitcast<";
     if (!EmitExpression(out, expr->type)) {
         return false;
@@ -218,7 +219,7 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out, const ast::BitcastExpression*
     return true;
 }
 
-bool GeneratorImpl::EmitCall(std::ostream& out, const ast::CallExpression* expr) {
+bool GeneratorImpl::EmitCall(utils::StringStream& out, const ast::CallExpression* expr) {
     if (!EmitExpression(out, expr->target)) {
         return false;
     }
@@ -242,7 +243,7 @@ bool GeneratorImpl::EmitCall(std::ostream& out, const ast::CallExpression* expr)
     return true;
 }
 
-bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression* lit) {
+bool GeneratorImpl::EmitLiteral(utils::StringStream& out, const ast::LiteralExpression* lit) {
     return Switch(
         lit,
         [&](const ast::BoolLiteralExpression* l) {  //
@@ -271,11 +272,12 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
         });
 }
 
-bool GeneratorImpl::EmitIdentifier(std::ostream& out, const ast::IdentifierExpression* expr) {
+bool GeneratorImpl::EmitIdentifier(utils::StringStream& out,
+                                   const ast::IdentifierExpression* expr) {
     return EmitIdentifier(out, expr->identifier);
 }
 
-bool GeneratorImpl::EmitIdentifier(std::ostream& out, const ast::Identifier* ident) {
+bool GeneratorImpl::EmitIdentifier(utils::StringStream& out, const ast::Identifier* ident) {
     if (auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>()) {
         if (!tmpl_ident->attributes.IsEmpty()) {
             EmitAttributes(out, tmpl_ident->attributes);
@@ -363,7 +365,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
     return true;
 }
 
-bool GeneratorImpl::EmitImageFormat(std::ostream& out, const builtin::TexelFormat fmt) {
+bool GeneratorImpl::EmitImageFormat(utils::StringStream& out, const builtin::TexelFormat fmt) {
     switch (fmt) {
         case builtin::TexelFormat::kUndefined:
             diagnostics_.add_error(diag::System::Writer, "unknown image format");
@@ -441,7 +443,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
     return true;
 }
 
-bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* v) {
+bool GeneratorImpl::EmitVariable(utils::StringStream& out, const ast::Variable* v) {
     if (!v->attributes.IsEmpty()) {
         if (!EmitAttributes(out, v->attributes)) {
             return false;
@@ -508,7 +510,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* v) {
     return true;
 }
 
-bool GeneratorImpl::EmitAttributes(std::ostream& out,
+bool GeneratorImpl::EmitAttributes(utils::StringStream& out,
                                    utils::VectorRef<const ast::Attribute*> attrs) {
     bool first = true;
     for (auto* attr : attrs) {
@@ -650,7 +652,7 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
     return true;
 }
 
-bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* expr) {
+bool GeneratorImpl::EmitBinary(utils::StringStream& out, const ast::BinaryExpression* expr) {
     out << "(";
 
     if (!EmitExpression(out, expr->lhs)) {
@@ -670,7 +672,7 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
     return true;
 }
 
-bool GeneratorImpl::EmitBinaryOp(std::ostream& out, const ast::BinaryOp op) {
+bool GeneratorImpl::EmitBinaryOp(utils::StringStream& out, const ast::BinaryOp op) {
     switch (op) {
         case ast::BinaryOp::kAnd:
             out << "&";
@@ -733,7 +735,7 @@ bool GeneratorImpl::EmitBinaryOp(std::ostream& out, const ast::BinaryOp op) {
     return true;
 }
 
-bool GeneratorImpl::EmitUnaryOp(std::ostream& out, const ast::UnaryOpExpression* expr) {
+bool GeneratorImpl::EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpression* expr) {
     switch (expr->op) {
         case ast::UnaryOp::kAddressOf:
             out << "&";
@@ -777,7 +779,7 @@ bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
     return true;
 }
 
-bool GeneratorImpl::EmitBlockHeader(std::ostream& out, const ast::BlockStatement* stmt) {
+bool GeneratorImpl::EmitBlockHeader(utils::StringStream& out, const ast::BlockStatement* stmt) {
     if (!stmt->attributes.IsEmpty()) {
         if (!EmitAttributes(out, stmt->attributes)) {
             return false;

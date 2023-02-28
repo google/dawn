@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/ast/call_statement.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -33,7 +34,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
     EXPECT_EQ(out.str(), "my_func()");
 }
@@ -56,7 +57,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
     EXPECT_EQ(out.str(), "my_func(param1, param2)");
 }

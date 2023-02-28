@@ -14,6 +14,7 @@
 
 #include <cstring>
 
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -114,7 +115,7 @@ TEST_P(WgslGenerator_F32LiteralTest, Emit) {
     SetResolveOnBuild(false);
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitLiteral(out, v)) << gen.error();
     EXPECT_EQ(out.str(), GetParam().expected);
 }
@@ -162,7 +163,7 @@ TEST_P(WgslGenerator_F16LiteralTest, Emit) {
     SetResolveOnBuild(false);
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitLiteral(out, v)) << gen.error();
     EXPECT_EQ(out.str(), GetParam().expected);
 }
