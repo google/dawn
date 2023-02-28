@@ -140,9 +140,6 @@ class TextGenerator {
         /// Destructor
         ~LineWriter();
 
-        /// [DEPRECATED] Remove when utils::StringStream conversion is done
-        /// @returns the utils::StringStream
-        operator std::ostream&() { return os.stream(); }
         /// @returns the utils::StringStream
         operator utils::StringStream&() { return os; }
 
@@ -164,9 +161,8 @@ class TextGenerator {
     /// Helper for writing a '(' on construction and a ')' destruction.
     struct ScopedParen {
         /// Constructor
-        /// [DEPRECATED] This should be utils::StringStream when conversion is done
-        /// @param stream the std::ostream that will be written to
-        explicit ScopedParen(std::ostream& stream);
+        /// @param stream the utils::StringStream that will be written to
+        explicit ScopedParen(utils::StringStream& stream);
         /// Destructor
         ~ScopedParen();
 
@@ -174,7 +170,7 @@ class TextGenerator {
         ScopedParen(ScopedParen&& rhs) = delete;
         ScopedParen(const ScopedParen&) = delete;
         ScopedParen& operator=(const ScopedParen&) = delete;
-        std::ostream& s;
+        utils::StringStream& s;
     };
 
     /// Helper for incrementing indentation on construction and decrementing

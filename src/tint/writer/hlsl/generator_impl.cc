@@ -757,7 +757,7 @@ bool GeneratorImpl::EmitBinary(utils::StringStream& out, const ast::BinaryExpres
         return true;
     }
 
-    ScopedParen sp(out.stream());
+    ScopedParen sp(out);
 
     if (!EmitExpression(out, expr->lhs)) {
         return false;
@@ -1419,7 +1419,7 @@ bool GeneratorImpl::EmitStorageBufferAccess(
                 if (n > 1) {
                     out << n;
                 }
-                ScopedParen sp(out.stream());
+                ScopedParen sp(out);
                 if (!EmitExpression(out, offset)) {
                     return false;
                 }
@@ -1433,7 +1433,7 @@ bool GeneratorImpl::EmitStorageBufferAccess(
             // to emit `buffer.Load<float16_t>(offset)`.
             auto templated_load = [&](const char* type) {
                 out << buffer << ".Load<" << type << ">";  // templated load
-                ScopedParen sp(out.stream());
+                ScopedParen sp(out);
                 if (!EmitExpression(out, offset)) {
                     return false;
                 }
@@ -1485,12 +1485,12 @@ bool GeneratorImpl::EmitStorageBufferAccess(
                 if (n > 1) {
                     out << n;
                 }
-                ScopedParen sp1(out.stream());
+                ScopedParen sp1(out);
                 if (!EmitExpression(out, offset)) {
                     return false;
                 }
                 out << ", asuint";
-                ScopedParen sp2(out.stream());
+                ScopedParen sp2(out);
                 if (!EmitExpression(out, value)) {
                     return false;
                 }
@@ -1501,7 +1501,7 @@ bool GeneratorImpl::EmitStorageBufferAccess(
             // to emit `buffer.Store<float16_t>(offset)`.
             auto templated_store = [&](const char* type) {
                 out << buffer << ".Store<" << type << ">";  // templated store
-                ScopedParen sp1(out.stream());
+                ScopedParen sp1(out);
                 if (!EmitExpression(out, offset)) {
                     return false;
                 }
@@ -1849,7 +1849,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(utils::StringStream& out,
 
             out << "InterlockedExchange";
             {
-                ScopedParen sp(out.stream());
+                ScopedParen sp(out);
                 if (!EmitExpression(out, expr->args[0])) {
                     return false;
                 }
@@ -1944,7 +1944,7 @@ bool GeneratorImpl::EmitSelectCall(utils::StringStream& out, const ast::CallExpr
     auto* expr_false = expr->args[0];
     auto* expr_true = expr->args[1];
     auto* expr_cond = expr->args[2];
-    ScopedParen paren(out.stream());
+    ScopedParen paren(out);
     if (!EmitExpression(out, expr_cond)) {
         return false;
     }
@@ -3312,7 +3312,7 @@ bool GeneratorImpl::EmitConstant(utils::StringStream& out,
         [&](const type::Vector* v) {
             if (constant->AllEqual()) {
                 {
-                    ScopedParen sp(out.stream());
+                    ScopedParen sp(out);
                     if (!EmitConstant(out, constant->Index(0), is_variable_initializer)) {
                         return false;
                     }
@@ -3329,7 +3329,7 @@ bool GeneratorImpl::EmitConstant(utils::StringStream& out,
                 return false;
             }
 
-            ScopedParen sp(out.stream());
+            ScopedParen sp(out);
 
             for (size_t i = 0; i < v->Width(); i++) {
                 if (i > 0) {
@@ -3347,7 +3347,7 @@ bool GeneratorImpl::EmitConstant(utils::StringStream& out,
                 return false;
             }
 
-            ScopedParen sp(out.stream());
+            ScopedParen sp(out);
 
             for (size_t i = 0; i < m->columns(); i++) {
                 if (i > 0) {
@@ -3507,7 +3507,7 @@ bool GeneratorImpl::EmitValue(utils::StringStream& out, const type::Type* type, 
                           "")) {
                 return false;
             }
-            ScopedParen sp(out.stream());
+            ScopedParen sp(out);
             for (uint32_t i = 0; i < vec->Width(); i++) {
                 if (i != 0) {
                     out << ", ";
@@ -3523,7 +3523,7 @@ bool GeneratorImpl::EmitValue(utils::StringStream& out, const type::Type* type, 
                           "")) {
                 return false;
             }
-            ScopedParen sp(out.stream());
+            ScopedParen sp(out);
             for (uint32_t i = 0; i < (mat->rows() * mat->columns()); i++) {
                 if (i != 0) {
                     out << ", ";
@@ -4382,7 +4382,7 @@ bool GeneratorImpl::CallBuiltinHelper(utils::StringStream& out,
     // Call the helper
     out << fn;
     {
-        ScopedParen sp(out.stream());
+        ScopedParen sp(out);
         bool first = true;
         for (auto* arg : call->args) {
             if (!first) {

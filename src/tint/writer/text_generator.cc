@@ -114,7 +114,7 @@ void TextGenerator::TextBuffer::Insert(const TextBuffer& tb, size_t before, uint
 }
 
 std::string TextGenerator::TextBuffer::String(uint32_t indent /* = 0 */) const {
-    std::stringstream ss;
+    utils::StringStream ss;
     for (auto& line : lines) {
         if (!line.content.empty()) {
             for (uint32_t i = 0; i < indent + line.indent; i++) {
@@ -127,7 +127,7 @@ std::string TextGenerator::TextBuffer::String(uint32_t indent /* = 0 */) const {
     return ss.str();
 }
 
-TextGenerator::ScopedParen::ScopedParen(std::ostream& stream) : s(stream) {
+TextGenerator::ScopedParen::ScopedParen(utils::StringStream& stream) : s(stream) {
     s << "(";
 }
 

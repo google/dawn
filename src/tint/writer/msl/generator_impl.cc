@@ -525,7 +525,7 @@ bool GeneratorImpl::EmitBinary(utils::StringStream& out, const ast::BinaryExpres
     // Handle fmod
     if (expr->op == ast::BinaryOp::kModulo && lhs_type->is_float_scalar_or_vector()) {
         out << "fmod";
-        ScopedParen sp(out.stream());
+        ScopedParen sp(out);
         if (!EmitExpression(out, expr->lhs)) {
             return false;
         }
@@ -549,7 +549,7 @@ bool GeneratorImpl::EmitBinary(utils::StringStream& out, const ast::BinaryExpres
         // WGSL defines behaviour for signed overflow, MSL does not. For these
         // cases, bitcast operands to unsigned, then cast result to signed.
         ScopedBitCast outer_int_cast(this, out, target_type, signed_type_of(target_type));
-        ScopedParen sp(out.stream());
+        ScopedParen sp(out);
         {
             ScopedBitCast lhs_uint_cast(this, out, lhs_type, unsigned_type_of(target_type));
             if (!EmitExpression(out, expr->lhs)) {
@@ -576,7 +576,7 @@ bool GeneratorImpl::EmitBinary(utils::StringStream& out, const ast::BinaryExpres
         // Shift left: discards top bits, so convert first operand to unsigned
         // first, then convert result back to signed
         ScopedBitCast outer_int_cast(this, out, lhs_type, signed_type_of(lhs_type));
-        ScopedParen sp(out.stream());
+        ScopedParen sp(out);
         {
             ScopedBitCast lhs_uint_cast(this, out, lhs_type, unsigned_type_of(lhs_type));
             if (!EmitExpression(out, expr->lhs)) {
@@ -595,7 +595,7 @@ bool GeneratorImpl::EmitBinary(utils::StringStream& out, const ast::BinaryExpres
     // Handle '&' and '|' of booleans.
     if ((expr->IsAnd() || expr->IsOr()) && lhs_type->Is<type::Bool>()) {
         out << "bool";
-        ScopedParen sp(out.stream());
+        ScopedParen sp(out);
         if (!EmitExpression(out, expr->lhs)) {
             return false;
         }
@@ -609,7 +609,7 @@ bool GeneratorImpl::EmitBinary(utils::StringStream& out, const ast::BinaryExpres
     }
 
     // Emit as usual
-    ScopedParen sp(out.stream());
+    ScopedParen sp(out);
     if (!EmitExpression(out, expr->lhs)) {
         return false;
     }
@@ -748,7 +748,7 @@ bool GeneratorImpl::EmitBuiltinCall(utils::StringStream& out,
             if (sem->Type()->UnwrapRef()->is_scalar()) {
                 // Emulate scalar overload using fabs(x - y);
                 out << "fabs";
-                ScopedParen sp(out.stream());
+                ScopedParen sp(out);
                 if (!EmitExpression(out, expr->args[0])) {
                     return false;
                 }
@@ -866,7 +866,7 @@ bool GeneratorImpl::EmitAtomicCall(utils::StringStream& out,
     auto call = [&](const std::string& name, bool append_memory_order_relaxed) {
         out << name;
         {
-            ScopedParen sp(out.stream());
+            ScopedParen sp(out);
             for (size_t i = 0; i < expr->args.Length(); i++) {
                 auto* arg = expr->args[i];
                 if (i > 0) {
@@ -1646,7 +1646,7 @@ bool GeneratorImpl::EmitZeroValue(utils::StringStream& out, const type::Type* ty
             if (!EmitType(out, mat, "")) {
                 return false;
             }
-            ScopedParen sp(out.stream());
+            ScopedParen sp(out);
             return EmitZeroValue(out, mat->type());
         },
         [&](const type::Array*) {
@@ -1693,7 +1693,7 @@ bool GeneratorImpl::EmitConstant(utils::StringStream& out, const constant::Value
                 return false;
             }
 
-            ScopedParen sp(out.stream());
+            ScopedParen sp(out);
 
             if (constant->AllEqual()) {
                 if (!EmitConstant(out, constant->Index(0))) {
@@ -1717,7 +1717,7 @@ bool GeneratorImpl::EmitConstant(utils::StringStream& out, const constant::Value
                 return false;
             }
 
-            ScopedParen sp(out.stream());
+            ScopedParen sp(out);
 
             for (size_t i = 0; i < m->columns(); i++) {
                 if (i > 0) {
@@ -3286,7 +3286,7 @@ bool GeneratorImpl::CallBuiltinHelper(utils::StringStream& out,
     // Call the helper
     out << fn;
     {
-        ScopedParen sp(out.stream());
+        ScopedParen sp(out);
         bool first = true;
         for (auto* arg : call->args) {
             if (!first) {
