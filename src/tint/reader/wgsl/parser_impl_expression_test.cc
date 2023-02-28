@@ -14,6 +14,8 @@
 
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
+#include "src/tint/utils/string_stream.h"
+
 namespace tint::reader::wgsl {
 namespace {
 
@@ -486,7 +488,7 @@ static std::vector<Case> Cases() {
 using ParserImplMixedBinaryOpTest = ParserImplTestWithParam<Case>;
 
 TEST_P(ParserImplMixedBinaryOpTest, Test) {
-    std::stringstream wgsl;
+    utils::StringStream wgsl;
     wgsl << GetParam();
     auto p = parser(wgsl.str());
     auto e = p->expression();
@@ -498,7 +500,7 @@ TEST_P(ParserImplMixedBinaryOpTest, Test) {
         EXPECT_TRUE(e.errored);
         EXPECT_EQ(e.value, nullptr);
         EXPECT_TRUE(p->has_error());
-        std::stringstream expected;
+        utils::StringStream expected;
         expected << "1:3: mixing '" << GetParam().lhs_op.symbol << "' and '"
                  << GetParam().rhs_op.symbol << "' requires parenthesis";
         EXPECT_EQ(p->error(), expected.str());

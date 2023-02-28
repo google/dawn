@@ -214,7 +214,7 @@ ParserImpl::~ParserImpl() = default;
 ParserImpl::Failure::Errored ParserImpl::add_error(const Source& source,
                                                    std::string_view err,
                                                    std::string_view use) {
-    std::stringstream msg;
+    utils::StringStream msg;
     msg << err;
     if (!use.empty()) {
         msg << " for " << use;
@@ -3165,7 +3165,7 @@ bool ParserImpl::expect(std::string_view use, Token::Type tok) {
         return false;
     }
 
-    std::stringstream err;
+    utils::StringStream err;
     if (tok == Token::Type::kTemplateArgsLeft && t.type() == Token::Type::kLessThan) {
         err << "missing closing '>'";
     } else {

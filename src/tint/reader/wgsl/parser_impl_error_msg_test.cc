@@ -14,6 +14,8 @@
 
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
+#include "src/tint/utils/string_stream.h"
+
 namespace tint::reader::wgsl {
 namespace {
 
@@ -513,8 +515,8 @@ const i : vec2<i32> = vec2<i32>(!);
 TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
     uint32_t kMaxDepth = 128;
 
-    std::stringstream src;
-    std::stringstream mkr;
+    utils::StringStream src;
+    utils::StringStream mkr;
     src << "const i : i32 = ";
     mkr << "                ";
     for (size_t i = 0; i < kMaxDepth + 8; i++) {
@@ -530,7 +532,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
         src << ")";
     }
     src << ";";
-    std::stringstream err;
+    utils::StringStream err;
     err << "test.wgsl:1:529 error: maximum parser recursive depth reached\n"
         << src.str() << "\n"
         << mkr.str() << "\n";
