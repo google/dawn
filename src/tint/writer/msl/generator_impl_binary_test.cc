@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/msl/test_helper.h"
 
 namespace tint::writer::msl {
@@ -44,7 +45,7 @@ TEST_P(MslBinaryTest, Emit) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -88,7 +89,7 @@ TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour, Emit) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -122,7 +123,7 @@ TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour_Chained, Emit) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr2)) << gen.error();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -149,7 +150,7 @@ TEST_F(MslBinaryTest, ModF32) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
@@ -164,7 +165,7 @@ TEST_F(MslBinaryTest, ModF16) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
@@ -177,7 +178,7 @@ TEST_F(MslBinaryTest, ModVec3F32) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
@@ -192,7 +193,7 @@ TEST_F(MslBinaryTest, ModVec3F16) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
@@ -205,7 +206,7 @@ TEST_F(MslBinaryTest, BoolAnd) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "bool(left & right)");
 }
@@ -218,7 +219,7 @@ TEST_F(MslBinaryTest, BoolOr) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), "bool(left | right)");
 }

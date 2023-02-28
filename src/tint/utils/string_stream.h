@@ -31,6 +31,13 @@ class StringStream {
     /// Destructor
     ~StringStream();
 
+    /// @returns the format flags for the stream
+    std::ios_base::fmtflags flags() const { return sstream_.flags(); }
+
+    /// @param flags the flags to set
+    /// @returns the original format flags
+    std::ios_base::fmtflags flags(std::ios_base::fmtflags flags) { return sstream_.flags(flags); }
+
     /// Emit `value` to the stream
     /// @param value the value to emit
     /// @returns a reference to this

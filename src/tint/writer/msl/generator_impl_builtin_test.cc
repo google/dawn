@@ -14,6 +14,7 @@
 
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/sem/call.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/msl/test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -61,8 +62,8 @@ const ast::CallExpression* GenerateCall(BuiltinType builtin,
                                         CallParamType type,
                                         ProgramBuilder* builder) {
     std::string name;
-    std::ostringstream str(name);
-    str << builtin;
+    utils::StringStream str;
+    str << name << builtin;
     switch (builtin) {
         case BuiltinType::kAcos:
         case BuiltinType::kAsin:
@@ -378,7 +379,7 @@ TEST_F(MslGeneratorImplTest, Builtin_Call) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
     EXPECT_EQ(out.str(), "dot(param1, param2)");
 }
@@ -389,7 +390,7 @@ TEST_F(MslGeneratorImplTest, StorageBarrier) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
     EXPECT_EQ(out.str(), "threadgroup_barrier(mem_flags::mem_device)");
 }
@@ -400,7 +401,7 @@ TEST_F(MslGeneratorImplTest, WorkgroupBarrier) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
     EXPECT_EQ(out.str(), "threadgroup_barrier(mem_flags::mem_threadgroup)");
 }
@@ -1052,7 +1053,7 @@ TEST_F(MslGeneratorImplTest, Pack2x16Float) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
     EXPECT_EQ(out.str(), "as_type<uint>(half2(p1))");
 }
@@ -1064,7 +1065,7 @@ TEST_F(MslGeneratorImplTest, Unpack2x16Float) {
 
     GeneratorImpl& gen = Build();
 
-    std::stringstream out;
+    utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
     EXPECT_EQ(out.str(), "float2(as_type<half2>(p1))");
 }
