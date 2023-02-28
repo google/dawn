@@ -498,7 +498,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
 
         // Fill the buffer with clear color
         memset(srcBuffer->GetMappedRange(0, bufferSize), clearColor, bufferSize);
-        srcBuffer->Unmap();
+        DAWN_TRY(srcBuffer->Unmap());
 
         gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, srcBuffer->GetHandle());
         for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;

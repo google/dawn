@@ -53,7 +53,7 @@ ResultOrError<Ref<BufferBase>> CreateBufferFromData(DeviceBase* device,
     Ref<BufferBase> buffer;
     DAWN_TRY_ASSIGN(buffer, device->CreateBuffer(&descriptor));
     memcpy(buffer->GetMappedRange(0, size), data, size);
-    buffer->Unmap();
+    DAWN_TRY(buffer->Unmap());
     return buffer;
 }
 

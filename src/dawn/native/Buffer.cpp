@@ -506,29 +506,36 @@ void BufferBase::APIUnmap() {
     if (GetDevice()->ConsumedError(ValidateUnmap(), "calling %s.Unmap().", this)) {
         return;
     }
-    Unmap();
-}
-
-void BufferBase::Unmap() {
-    if (mState == BufferState::Destroyed) {
+    if (GetDevice()->ConsumedError(Unmap(), "calling %s.Unmap().", this)) {
         return;
     }
+}
+
+MaybeError BufferBase::Unmap() {
+    if (mState == BufferState::Destroyed) {
+        return {};
+    }
+
+    // Make sure writes are now visibile to the GPU if we used a staging buffer.
+    if (mState == BufferState::MappedAtCreation && mStagingBuffer != nullptr) {
+        DAWN_TRY(CopyFromStagingBuffer());
+    }
     UnmapInternal(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback).Call();
+    return {};
 }
 
 BufferBase::PendingMappingCallback BufferBase::UnmapInternal(
     WGPUBufferMapAsyncStatus callbackStatus) {
     PendingMappingCallback toCall;
 
+    // Unmaps resources on the backend and returns the callback.
     if (mState == BufferState::PendingMap) {
         toCall = WillCallMappingCallback(mLastMapID, callbackStatus);
         UnmapImpl();
     } else if (mState == BufferState::Mapped) {
         UnmapImpl();
     } else if (mState == BufferState::MappedAtCreation) {
-        if (mStagingBuffer != nullptr) {
-            GetDevice()->ConsumedError(CopyFromStagingBuffer());
-        } else if (mSize != 0) {
+        if (!IsError() && mSize != 0 && IsCPUWritableAtCreation()) {
             UnmapImpl();
         }
     }

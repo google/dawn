@@ -268,7 +268,7 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
                 static_cast<uint32_t*>(paramsBuffer->GetMappedRange(0, bufferDesc.size));
             params[0] = dst.origin.x;
             params[1] = dst.origin.y;
-            paramsBuffer->Unmap();
+            DAWN_TRY(paramsBuffer->Unmap());
         }
 
         Ref<BindGroupBase> bindGroup;
@@ -357,7 +357,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         uint32_t* params = static_cast<uint32_t*>(paramsBuffer->GetMappedRange(0, bufferDesc.size));
         params[0] = dst.origin.x;
         params[1] = dst.origin.y;
-        paramsBuffer->Unmap();
+        DAWN_TRY(paramsBuffer->Unmap());
     }
 
     // For each layer, blit the stencil data.

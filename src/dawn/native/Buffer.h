@@ -77,7 +77,7 @@ class BufferBase : public ApiObjectBase {
 
     virtual void* GetMappedPointer() = 0;
     void* GetMappedRange(size_t offset, size_t size, bool writable = true);
-    void Unmap();
+    MaybeError Unmap();
 
     // Dawn API
     void APIMapAsync(wgpu::MapMode mode,
