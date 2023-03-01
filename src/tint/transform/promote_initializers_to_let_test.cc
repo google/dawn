@@ -1335,5 +1335,17 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(PromoteInitializersToLetTest, AssignAbstractArray_ToPhony) {
+    // Test that we do not try to hoist an abstract array expression that is the RHS of a phony
+    // assignment, as its type will not be materialized.
+    auto* src = R"(
+fn f() {
+  _ = array(1, 2, 3, 4);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<PromoteInitializersToLet>(src));
+}
+
 }  // namespace
 }  // namespace tint::transform

@@ -52,6 +52,11 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
             // Follow const-chains
             auto* root_expr = expr;
             if (expr->Stage() == sem::EvaluationStage::kConstant) {
+                if (expr->Type()->HoldsAbstract()) {
+                    // Do not hoist expressions that are not materialized, as doing so would cause
+                    // premature materialization.
+                    return false;
+                }
                 while (auto* user = root_expr->UnwrapMaterialize()->As<sem::VariableUser>()) {
                     root_expr = user->Variable()->Initializer();
                 }

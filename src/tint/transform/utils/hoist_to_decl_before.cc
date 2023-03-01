@@ -44,10 +44,11 @@ struct HoistToDeclBefore::State {
 
         switch (kind) {
             case VariableKind::kLet: {
-                auto builder = [this, expr, name] {
-                    return b.Decl(b.Let(
-                        name, Transform::CreateASTTypeFor(ctx, ctx.src->Sem().GetVal(expr)->Type()),
-                        ctx.CloneWithoutTransform(expr)));
+                auto* ty = ctx.src->Sem().GetVal(expr)->Type();
+                TINT_ASSERT(Transform, !ty->HoldsAbstract());
+                auto builder = [this, expr, name, ty] {
+                    return b.Decl(b.Let(name, Transform::CreateASTTypeFor(ctx, ty),
+                                        ctx.CloneWithoutTransform(expr)));
                 };
                 if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
                     return false;
@@ -56,10 +57,11 @@ struct HoistToDeclBefore::State {
             }
 
             case VariableKind::kVar: {
-                auto builder = [this, expr, name] {
-                    return b.Decl(b.Var(
-                        name, Transform::CreateASTTypeFor(ctx, ctx.src->Sem().GetVal(expr)->Type()),
-                        ctx.CloneWithoutTransform(expr)));
+                auto* ty = ctx.src->Sem().GetVal(expr)->Type();
+                TINT_ASSERT(Transform, !ty->HoldsAbstract());
+                auto builder = [this, expr, name, ty] {
+                    return b.Decl(b.Var(name, Transform::CreateASTTypeFor(ctx, ty),
+                                        ctx.CloneWithoutTransform(expr)));
                 };
                 if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
                     return false;
@@ -78,7 +80,7 @@ struct HoistToDeclBefore::State {
             }
         }
 
-        // Replace the initializer expression with a reference to the let
+        // Replace the source expression with a reference to the hoisted declaration.
         ctx.Replace(expr, b.Expr(name));
         return true;
     }
