@@ -113,6 +113,8 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
 
     // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/1683) Fails on MacBook Pro 2019
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsAMD());
 
     for (wgpu::BufferUsage usage : {wgpu::BufferUsage::Storage, wgpu::BufferUsage::Uniform}) {
         uint64_t maxBufferBindingSize;
