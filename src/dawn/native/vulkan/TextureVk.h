@@ -84,8 +84,8 @@ class Texture final : public TextureBase {
     void TransitionEagerlyForExport(CommandRecordingContext* recordingContext);
     std::vector<VkSemaphore> AcquireWaitRequirements();
 
-    void EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
-                                             const SubresourceRange& range);
+    MaybeError EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
+                                                   const SubresourceRange& range);
 
     VkImageLayout GetCurrentLayoutForSwapChain() const;
 

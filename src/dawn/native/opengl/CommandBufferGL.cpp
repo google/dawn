@@ -451,24 +451,26 @@ CommandBuffer::CommandBuffer(CommandEncoder* encoder, const CommandBufferDescrip
 MaybeError CommandBuffer::Execute() {
     const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
 
-    auto LazyClearSyncScope = [](const SyncScopeResourceUsage& scope) {
+    auto LazyClearSyncScope = [](const SyncScopeResourceUsage& scope) -> MaybeError {
         for (size_t i = 0; i < scope.textures.size(); i++) {
             Texture* texture = ToBackend(scope.textures[i]);
 
             // Clear subresources that are not render attachments. Render attachments will be
             // cleared in RecordBeginRenderPass by setting the loadop to clear when the texture
             // subresource has not been initialized before the render pass.
-            scope.textureUsages[i].Iterate(
-                [&](const SubresourceRange& range, wgpu::TextureUsage usage) {
+            DAWN_TRY(scope.textureUsages[i].Iterate(
+                [&](const SubresourceRange& range, wgpu::TextureUsage usage) -> MaybeError {
                     if (usage & ~wgpu::TextureUsage::RenderAttachment) {
-                        texture->EnsureSubresourceContentInitialized(range);
+                        DAWN_TRY(texture->EnsureSubresourceContentInitialized(range));
                     }
-                });
+                    return {};
+                }));
         }
 
         for (BufferBase* bufferBase : scope.buffers) {
             ToBackend(bufferBase)->EnsureDataInitialized();
         }
+        return {};
     };
 
     size_t nextComputePassNumber = 0;
@@ -481,7 +483,7 @@ MaybeError CommandBuffer::Execute() {
                 mCommands.NextCommand<BeginComputePassCmd>();
                 for (const SyncScopeResourceUsage& scope :
                      GetResourceUsages().computePasses[nextComputePassNumber].dispatchUsages) {
-                    LazyClearSyncScope(scope);
+                    DAWN_TRY(LazyClearSyncScope(scope));
                 }
                 DAWN_TRY(ExecuteComputePass());
 
@@ -491,7 +493,8 @@ MaybeError CommandBuffer::Execute() {
 
             case Command::BeginRenderPass: {
                 auto* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
-                LazyClearSyncScope(GetResourceUsages().renderPasses[nextRenderPassNumber]);
+                DAWN_TRY(
+                    LazyClearSyncScope(GetResourceUsages().renderPasses[nextRenderPassNumber]));
                 LazyClearRenderPassAttachments(cmd);
                 DAWN_TRY(ExecuteRenderPass(cmd));
 
@@ -546,7 +549,7 @@ MaybeError CommandBuffer::Execute() {
                                                   dst.mipLevel)) {
                     dst.texture->SetIsSubresourceContentInitialized(true, range);
                 } else {
-                    ToBackend(dst.texture)->EnsureSubresourceContentInitialized(range);
+                    DAWN_TRY(ToBackend(dst.texture)->EnsureSubresourceContentInitialized(range));
                 }
 
                 gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->GetHandle());
@@ -593,7 +596,7 @@ MaybeError CommandBuffer::Execute() {
                 buffer->EnsureDataInitializedAsDestination(copy);
 
                 SubresourceRange subresources = GetSubresourcesAffectedByCopy(src, copy->copySize);
-                texture->EnsureSubresourceContentInitialized(subresources);
+                DAWN_TRY(texture->EnsureSubresourceContentInitialized(subresources));
                 // The only way to move data from a texture to a buffer in GL is via
                 // glReadPixels with a pack buffer. Create a temporary FBO for the copy.
                 gl.BindTexture(target, texture->GetHandle());
@@ -694,11 +697,11 @@ MaybeError CommandBuffer::Execute() {
                 SubresourceRange srcRange = GetSubresourcesAffectedByCopy(src, copy->copySize);
                 SubresourceRange dstRange = GetSubresourcesAffectedByCopy(dst, copy->copySize);
 
-                srcTexture->EnsureSubresourceContentInitialized(srcRange);
+                DAWN_TRY(srcTexture->EnsureSubresourceContentInitialized(srcRange));
                 if (IsCompleteSubresourceCopiedTo(dstTexture, copySize, dst.mipLevel)) {
                     dstTexture->SetIsSubresourceContentInitialized(true, dstRange);
                 } else {
-                    dstTexture->EnsureSubresourceContentInitialized(dstRange);
+                    DAWN_TRY(dstTexture->EnsureSubresourceContentInitialized(dstRange));
                 }
                 CopyImageSubData(gl, src.aspect, srcTexture->GetHandle(), srcTexture->GetGLTarget(),
                                  src.mipLevel, src.origin, dstTexture->GetHandle(),

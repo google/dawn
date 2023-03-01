@@ -12,13 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <memory>
+#include <string>
 #include <vector>
 
 #include "dawn/common/Log.h"
 #include "dawn/native/SubresourceStorage.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace dawn::native {
+
+using ::testing::HasSubstr;
 
 // A fake class that replicates the behavior of SubresourceStorage but without any compression
 // and is used to compare the results of operations on SubresourceStorage against the "ground
@@ -209,6 +214,31 @@ struct SmallData {
 
 bool operator==(const SmallData& a, const SmallData& b) {
     return a.value == b.value;
+}
+
+// Tests that the MaybeError version of Iterate returns the first error that it encounters.
+TEST(SubresourceStorageTest, IterateMaybeError) {
+    // Create a resource with multiple layers of different data so that we can ensure that the
+    // iterate function runs more than once.
+    constexpr uint32_t kLayers = 4;
+    SubresourceStorage<uint32_t> s(Aspect::Color, kLayers, 1);
+    for (uint32_t layer = 0; layer < kLayers; layer++) {
+        s.Update(SubresourceRange::MakeSingle(Aspect::Color, layer, 0),
+                 [&](const SubresourceRange&, uint32_t* data) { *data = layer + 1; });
+    }
+
+    // Make sure that the first error is returned.
+    uint32_t errorLayer = 0;
+    MaybeError maybeError =
+        s.Iterate([&](const SubresourceRange& range, const uint32_t& layer) -> MaybeError {
+            if (!errorLayer) {
+                errorLayer = layer;
+            }
+            return DAWN_VALIDATION_ERROR("Errored at layer: %d", layer);
+        });
+    ASSERT_TRUE(maybeError.IsError());
+    std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+    EXPECT_THAT(error->GetFormattedMessage(), HasSubstr(std::to_string(errorLayer)));
 }
 
 // Test that the default value is correctly set.

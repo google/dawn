@@ -1212,17 +1212,17 @@ void Texture::SetLabelImpl() {
     SetLabelHelper("Dawn_InternalTexture");
 }
 
-void Texture::EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
-                                                  const SubresourceRange& range) {
+MaybeError Texture::EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
+                                                        const SubresourceRange& range) {
     if (!ToBackend(GetDevice())->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
-        return;
+        return {};
     }
     if (!IsSubresourceContentInitialized(range)) {
         // If subresource has not been initialized, clear it to black as it could contain
         // dirty bits from recycled memory
-        GetDevice()->ConsumedError(
-            ClearTexture(commandContext, range, TextureBase::ClearValue::Zero));
+        DAWN_TRY(ClearTexture(commandContext, range, TextureBase::ClearValue::Zero));
     }
+    return {};
 }
 
 bool Texture::StateAndDecay::operator==(const Texture::StateAndDecay& other) const {

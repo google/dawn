@@ -77,8 +77,8 @@ class Texture final : public TextureBase {
                                                    bool depthReadOnly,
                                                    bool stencilReadOnly) const;
 
-    void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
-                                             const SubresourceRange& range);
+    MaybeError EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
+                                                   const SubresourceRange& range);
 
     MaybeError SynchronizeImportedTextureBeforeUse();
     MaybeError SynchronizeImportedTextureAfterUse();

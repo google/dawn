@@ -735,23 +735,25 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
     size_t nextRenderPassNumber = 0;
 
     auto LazyClearSyncScope = [](const SyncScopeResourceUsage& scope,
-                                 CommandRecordingContext* commandContext) {
+                                 CommandRecordingContext* commandContext) -> MaybeError {
         for (size_t i = 0; i < scope.textures.size(); ++i) {
             Texture* texture = ToBackend(scope.textures[i]);
 
             // Clear subresources that are not render attachments. Render attachments will be
             // cleared in RecordBeginRenderPass by setting the loadop to clear when the texture
             // subresource has not been initialized before the render pass.
-            scope.textureUsages[i].Iterate(
-                [&](const SubresourceRange& range, wgpu::TextureUsage usage) {
-                    if (usage & ~wgpu::TextureUsage::RenderAttachment) {
-                        texture->EnsureSubresourceContentInitialized(commandContext, range);
-                    }
-                });
+            DAWN_TRY(scope.textureUsages[i].Iterate([&](const SubresourceRange& range,
+                                                        wgpu::TextureUsage usage) -> MaybeError {
+                if (usage & ~wgpu::TextureUsage::RenderAttachment) {
+                    DAWN_TRY(texture->EnsureSubresourceContentInitialized(commandContext, range));
+                }
+                return {};
+            }));
         }
         for (BufferBase* bufferBase : scope.buffers) {
             ToBackend(bufferBase)->EnsureDataInitialized(commandContext);
         }
+        return {};
     };
 
     Command type;
@@ -766,7 +768,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 }
                 for (const SyncScopeResourceUsage& scope :
                      GetResourceUsages().computePasses[nextComputePassNumber].dispatchUsages) {
-                    LazyClearSyncScope(scope, commandContext);
+                    DAWN_TRY(LazyClearSyncScope(scope, commandContext));
                 }
                 commandContext->EndBlit();
 
@@ -793,8 +795,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                         }
                     }
                 }
-                LazyClearSyncScope(GetResourceUsages().renderPasses[nextRenderPassNumber],
-                                   commandContext);
+                DAWN_TRY(LazyClearSyncScope(GetResourceUsages().renderPasses[nextRenderPassNumber],
+                                            commandContext));
                 commandContext->EndBlit();
 
                 LazyClearRenderPassAttachments(cmd);
@@ -858,7 +860,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 Texture* texture = ToBackend(dst.texture.Get());
 
                 buffer->EnsureDataInitialized(commandContext);
-                EnsureDestinationTextureInitialized(commandContext, texture, dst, copySize);
+                DAWN_TRY(
+                    EnsureDestinationTextureInitialized(commandContext, texture, dst, copySize));
 
                 buffer->TrackUsage();
                 texture->SynchronizeTextureBeforeUse(commandContext);
@@ -884,8 +887,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 buffer->EnsureDataInitializedAsDestination(commandContext, copy);
 
                 texture->SynchronizeTextureBeforeUse(commandContext);
-                texture->EnsureSubresourceContentInitialized(
-                    commandContext, GetSubresourcesAffectedByCopy(src, copySize));
+                DAWN_TRY(texture->EnsureSubresourceContentInitialized(
+                    commandContext, GetSubresourcesAffectedByCopy(src, copySize)));
                 buffer->TrackUsage();
 
                 TextureBufferCopySplit splitCopies = ComputeTextureBufferCopySplit(
@@ -975,10 +978,10 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
 
                 srcTexture->SynchronizeTextureBeforeUse(commandContext);
                 dstTexture->SynchronizeTextureBeforeUse(commandContext);
-                srcTexture->EnsureSubresourceContentInitialized(
-                    commandContext, GetSubresourcesAffectedByCopy(copy->source, copy->copySize));
-                EnsureDestinationTextureInitialized(commandContext, dstTexture, copy->destination,
-                                                    copy->copySize);
+                DAWN_TRY(srcTexture->EnsureSubresourceContentInitialized(
+                    commandContext, GetSubresourcesAffectedByCopy(copy->source, copy->copySize)));
+                DAWN_TRY(EnsureDestinationTextureInitialized(commandContext, dstTexture,
+                                                             copy->destination, copy->copySize));
 
                 const MTLSize sizeOneSlice =
                     MTLSizeMake(copy->copySize.width, copy->copySize.height, 1);

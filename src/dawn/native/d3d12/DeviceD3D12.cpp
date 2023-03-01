@@ -530,7 +530,7 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
     if (IsCompleteSubresourceCopiedTo(texture, copySizePixels, dst.mipLevel)) {
         texture->SetIsSubresourceContentInitialized(true, range);
     } else {
-        texture->EnsureSubresourceContentInitialized(commandContext, range);
+        DAWN_TRY(texture->EnsureSubresourceContentInitialized(commandContext, range));
     }
 
     texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopyDst, range);

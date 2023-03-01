@@ -816,7 +816,8 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
         // Since texture has been overwritten, it has been "initialized"
         dst.texture->SetIsSubresourceContentInitialized(true, range);
     } else {
-        ToBackend(dst.texture)->EnsureSubresourceContentInitialized(recordingContext, range);
+        DAWN_TRY(
+            ToBackend(dst.texture)->EnsureSubresourceContentInitialized(recordingContext, range));
     }
     // Insert pipeline barrier to ensure correct ordering with previous memory operations on the
     // texture.

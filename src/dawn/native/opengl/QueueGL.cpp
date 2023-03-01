@@ -69,7 +69,7 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
     if (IsCompleteSubresourceCopiedTo(destination.texture, writeSizePixel, destination.mipLevel)) {
         destination.texture->SetIsSubresourceContentInitialized(true, range);
     } else {
-        ToBackend(destination.texture)->EnsureSubresourceContentInitialized(range);
+        DAWN_TRY(ToBackend(destination.texture)->EnsureSubresourceContentInitialized(range));
     }
     DoTexSubImage(ToBackend(GetDevice())->GetGL(), textureCopy, data, dataLayout, writeSizePixel);
     ToBackend(destination.texture)->Touch();

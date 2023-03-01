@@ -55,18 +55,18 @@ MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
     // combination of readonly usages.
     for (size_t i = 0; i < scope.textureUsages.size(); ++i) {
         const TextureSubresourceUsage& textureUsage = scope.textureUsages[i];
-        MaybeError error = {};
-        textureUsage.Iterate([&](const SubresourceRange&, const wgpu::TextureUsage& usage) {
-            bool readOnly = IsSubset(usage, kReadOnlyTextureUsages);
-            bool singleUse = wgpu::HasZeroOrOneBits(usage);
-            if (!readOnly && !singleUse && !error.IsError()) {
-                error = DAWN_VALIDATION_ERROR(
-                    "%s usage (%s) includes writable usage and another usage in the same "
-                    "synchronization scope.",
-                    scope.textures[i], usage);
-            }
-        });
-        DAWN_TRY(std::move(error));
+        DAWN_TRY(textureUsage.Iterate(
+            [&](const SubresourceRange&, const wgpu::TextureUsage& usage) -> MaybeError {
+                bool readOnly = IsSubset(usage, kReadOnlyTextureUsages);
+                bool singleUse = wgpu::HasZeroOrOneBits(usage);
+                if (!readOnly && !singleUse) {
+                    return DAWN_VALIDATION_ERROR(
+                        "%s usage (%s) includes writable usage and another usage in the same "
+                        "synchronization scope.",
+                        scope.textures[i], usage);
+                }
+                return {};
+            }));
     }
     return {};
 }

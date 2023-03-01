@@ -344,17 +344,18 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
     return copy;
 }
 
-void EnsureDestinationTextureInitialized(CommandRecordingContext* commandContext,
-                                         Texture* texture,
-                                         const TextureCopy& dst,
-                                         const Extent3D& size) {
+MaybeError EnsureDestinationTextureInitialized(CommandRecordingContext* commandContext,
+                                               Texture* texture,
+                                               const TextureCopy& dst,
+                                               const Extent3D& size) {
     ASSERT(texture == dst.texture.Get());
     SubresourceRange range = GetSubresourcesAffectedByCopy(dst, size);
     if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), size, dst.mipLevel)) {
         texture->SetIsSubresourceContentInitialized(true, range);
     } else {
-        texture->EnsureSubresourceContentInitialized(commandContext, range);
+        DAWN_TRY(texture->EnsureSubresourceContentInitialized(commandContext, range));
     }
+    return {};
 }
 
 MaybeError EncodeMetalRenderPass(Device* device,

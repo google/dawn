@@ -75,10 +75,10 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
                                                      uint32_t rowsPerImage,
                                                      Aspect aspect);
 
-void EnsureDestinationTextureInitialized(CommandRecordingContext* commandContext,
-                                         Texture* texture,
-                                         const TextureCopy& dst,
-                                         const Extent3D& size);
+MaybeError EnsureDestinationTextureInitialized(CommandRecordingContext* commandContext,
+                                               Texture* texture,
+                                               const TextureCopy& dst,
+                                               const Extent3D& size);
 
 // Allow use MTLStoreActionStoreAndMultismapleResolve because the logic in the backend is
 // first to compute what the "best" Metal render pass descriptor is, then fix it up if we

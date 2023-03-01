@@ -154,9 +154,9 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true, uint32_t> {
 
 // Records the necessary barriers for a synchronization scope using the resource usage
 // data pre-computed in the frontend. Also performs lazy initialization if required.
-void TransitionAndClearForSyncScope(Device* device,
-                                    CommandRecordingContext* recordingContext,
-                                    const SyncScopeResourceUsage& scope) {
+MaybeError TransitionAndClearForSyncScope(Device* device,
+                                          CommandRecordingContext* recordingContext,
+                                          const SyncScopeResourceUsage& scope) {
     std::vector<VkBufferMemoryBarrier> bufferBarriers;
     std::vector<VkImageMemoryBarrier> imageBarriers;
     VkPipelineStageFlags srcStages = 0;
@@ -179,12 +179,13 @@ void TransitionAndClearForSyncScope(Device* device,
         // Clear subresources that are not render attachments. Render attachments will be
         // cleared in RecordBeginRenderPass by setting the loadop to clear when the texture
         // subresource has not been initialized before the render pass.
-        scope.textureUsages[i].Iterate(
-            [&](const SubresourceRange& range, wgpu::TextureUsage usage) {
+        DAWN_TRY(scope.textureUsages[i].Iterate(
+            [&](const SubresourceRange& range, wgpu::TextureUsage usage) -> MaybeError {
                 if (usage & ~wgpu::TextureUsage::RenderAttachment) {
-                    texture->EnsureSubresourceContentInitialized(recordingContext, range);
+                    DAWN_TRY(texture->EnsureSubresourceContentInitialized(recordingContext, range));
                 }
-            });
+                return {};
+            }));
         texture->TransitionUsageForPass(recordingContext, scope.textureUsages[i], &imageBarriers,
                                         &srcStages, &dstStages);
     }
@@ -194,6 +195,7 @@ void TransitionAndClearForSyncScope(Device* device,
                                       nullptr, bufferBarriers.size(), bufferBarriers.data(),
                                       imageBarriers.size(), imageBarriers.data());
     }
+    return {};
 }
 
 MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
@@ -512,8 +514,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
     // And resets the used query sets which are rewritten on the render pass.
     auto PrepareResourcesForRenderPass = [](Device* device,
                                             CommandRecordingContext* recordingContext,
-                                            const RenderPassResourceUsage& usages) {
-        TransitionAndClearForSyncScope(device, recordingContext, usages);
+                                            const RenderPassResourceUsage& usages) -> MaybeError {
+        DAWN_TRY(TransitionAndClearForSyncScope(device, recordingContext, usages));
 
         // Reset all query set used on current render pass together before beginning render pass
         // because the reset command must be called outside render pass
@@ -521,6 +523,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
             ResetUsedQuerySetsOnRenderPass(device, recordingContext->commandBuffer,
                                            usages.querySets[i], usages.queryAvailabilities[i]);
         }
+        return {};
     };
 
     size_t nextComputePassNumber = 0;
@@ -580,8 +583,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                     // Since texture has been overwritten, it has been "initialized"
                     dst.texture->SetIsSubresourceContentInitialized(true, range);
                 } else {
-                    ToBackend(dst.texture)
-                        ->EnsureSubresourceContentInitialized(recordingContext, range);
+                    DAWN_TRY(ToBackend(dst.texture)
+                                 ->EnsureSubresourceContentInitialized(recordingContext, range));
                 }
                 ToBackend(src.buffer)
                     ->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopySrc);
@@ -614,8 +617,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                 SubresourceRange range =
                     GetSubresourcesAffectedByCopy(copy->source, copy->copySize);
 
-                ToBackend(src.texture)
-                    ->EnsureSubresourceContentInitialized(recordingContext, range);
+                DAWN_TRY(ToBackend(src.texture)
+                             ->EnsureSubresourceContentInitialized(recordingContext, range));
 
                 ToBackend(src.texture)
                     ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopySrc, range);
@@ -642,15 +645,15 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                 SubresourceRange srcRange = GetSubresourcesAffectedByCopy(src, copy->copySize);
                 SubresourceRange dstRange = GetSubresourcesAffectedByCopy(dst, copy->copySize);
 
-                ToBackend(src.texture)
-                    ->EnsureSubresourceContentInitialized(recordingContext, srcRange);
+                DAWN_TRY(ToBackend(src.texture)
+                             ->EnsureSubresourceContentInitialized(recordingContext, srcRange));
                 if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize,
                                                   dst.mipLevel)) {
                     // Since destination texture has been overwritten, it has been "initialized"
                     dst.texture->SetIsSubresourceContentInitialized(true, dstRange);
                 } else {
-                    ToBackend(dst.texture)
-                        ->EnsureSubresourceContentInitialized(recordingContext, dstRange);
+                    DAWN_TRY(ToBackend(dst.texture)
+                                 ->EnsureSubresourceContentInitialized(recordingContext, dstRange));
                 }
 
                 if (src.texture.Get() == dst.texture.Get() && src.mipLevel == dst.mipLevel) {
@@ -730,9 +733,9 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
             case Command::BeginRenderPass: {
                 BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
 
-                PrepareResourcesForRenderPass(
+                DAWN_TRY(PrepareResourcesForRenderPass(
                     device, recordingContext,
-                    GetResourceUsages().renderPasses[nextRenderPassNumber]);
+                    GetResourceUsages().renderPasses[nextRenderPassNumber]));
 
                 LazyClearRenderPassAttachments(cmd);
                 DAWN_TRY(RecordRenderPass(recordingContext, cmd));
@@ -935,8 +938,8 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
             case Command::Dispatch: {
                 DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
 
-                TransitionAndClearForSyncScope(device, recordingContext,
-                                               resourceUsages.dispatchUsages[currentDispatch]);
+                DAWN_TRY(TransitionAndClearForSyncScope(
+                    device, recordingContext, resourceUsages.dispatchUsages[currentDispatch]));
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_COMPUTE);
 
                 device->fn.CmdDispatch(commands, dispatch->x, dispatch->y, dispatch->z);
@@ -948,8 +951,8 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
                 DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
                 VkBuffer indirectBuffer = ToBackend(dispatch->indirectBuffer)->GetHandle();
 
-                TransitionAndClearForSyncScope(device, recordingContext,
-                                               resourceUsages.dispatchUsages[currentDispatch]);
+                DAWN_TRY(TransitionAndClearForSyncScope(
+                    device, recordingContext, resourceUsages.dispatchUsages[currentDispatch]));
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_COMPUTE);
 
                 device->fn.CmdDispatchIndirect(commands, indirectBuffer,

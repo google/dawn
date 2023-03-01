@@ -58,8 +58,8 @@ class Texture final : public TextureBase {
     bool ShouldKeepInitialized() const;
 
     MTLBlitOption ComputeMTLBlitOption(Aspect aspect) const;
-    void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
-                                             const SubresourceRange& range);
+    MaybeError EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
+                                                   const SubresourceRange& range);
 
     void SynchronizeTextureBeforeUse(CommandRecordingContext* commandContext);
     void IOSurfaceEndAccess(ExternalImageIOSurfaceEndAccessDescriptor* descriptor);

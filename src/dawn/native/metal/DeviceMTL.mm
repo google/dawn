@@ -395,8 +395,8 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
                                                 const Extent3D& copySizePixels) {
     Texture* texture = ToBackend(dst.texture.Get());
     texture->SynchronizeTextureBeforeUse(GetPendingCommandContext());
-    EnsureDestinationTextureInitialized(GetPendingCommandContext(DeviceBase::SubmitMode::Passive),
-                                        texture, dst, copySizePixels);
+    DAWN_TRY(EnsureDestinationTextureInitialized(
+        GetPendingCommandContext(DeviceBase::SubmitMode::Passive), texture, dst, copySizePixels));
 
     RecordCopyBufferToTexture(GetPendingCommandContext(DeviceBase::SubmitMode::Passive),
                               ToBackend(source)->GetMTLBuffer(), source->GetSize(),
