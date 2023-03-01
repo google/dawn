@@ -2705,6 +2705,7 @@
     },
     "texture component type": {
         "category": "enum",
+        "tags": ["dawn"],
         "values": [
             {"value": 0, "name": "float"},
             {"value": 1, "name": "sint"},
