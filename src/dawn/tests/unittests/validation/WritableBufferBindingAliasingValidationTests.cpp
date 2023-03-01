@@ -89,7 +89,6 @@ std::string GenerateReferenceString(const BindingDescriptorGroups& bindingsGroup
 }
 
 // Creates a compute shader with given bindings
-// std::string CreateComputeShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
 std::string CreateComputeShaderWithBindings(const BindingDescriptorGroups& bindingsGroups) {
     return GenerateBindingString(bindingsGroups) + "@compute @workgroup_size(1,1,1) fn main() {\n" +
            GenerateReferenceString(bindingsGroups, wgpu::ShaderStage::Compute) + "}";
@@ -137,11 +136,6 @@ class WritableBufferBindingAliasingValidationTests : public ValidationTest {
         return device.CreateComputePipeline(&csDesc);
     }
 
-    // Creates compute pipeline with default layout
-    wgpu::ComputePipeline CreateComputePipelineWithDefaultLayout(const std::string& shader) {
-        return CreateComputePipeline({}, shader);
-    }
-
     // Creates render pipeline given layouts and shaders
     wgpu::RenderPipeline CreateRenderPipeline(const std::vector<wgpu::BindGroupLayout>& layouts,
                                               const std::string& vertexShader,
@@ -163,12 +157,6 @@ class WritableBufferBindingAliasingValidationTests : public ValidationTest {
         }
 
         return device.CreateRenderPipeline(&pipelineDescriptor);
-    }
-
-    // Creates render pipeline with default layout
-    wgpu::RenderPipeline CreateRenderPipelineWithDefaultLayout(const std::string& vertexShader,
-                                                               const std::string& fragShader) {
-        return CreateRenderPipeline({}, vertexShader, fragShader);
     }
 
     // Creates bind group layout with given minimum sizes for each binding
@@ -413,17 +401,9 @@ TEST_F(WritableBufferBindingAliasingValidationTests, SetBindGroupLazyAspect) {
         {{0, bufferStorage, 0, 16}, wgpu::BufferBindingType::Storage},
         {{1, bufferStorage, 0, 8}, wgpu::BufferBindingType::Storage},
     };
-    // no overlap, but has dynamic offset
-    std::vector<BindingDescriptor> bindingDescriptorDynamicOffset = {
-        {{0, bufferStorage, 256, 16}, wgpu::BufferBindingType::Storage, true},
-        {{1, bufferStorage, 0, 8}, wgpu::BufferBindingType::Storage, true},
-    };
 
     // bindingDescriptor0 and 1 share the same bind group layout, shader and pipeline
     wgpu::BindGroupLayout layout = CreateBindGroupLayout(bindingDescriptor0);
-
-    wgpu::BindGroupLayout layoutHasDynamicOffset =
-        CreateBindGroupLayout(bindingDescriptorDynamicOffset);
 
     std::string computeShader = CreateComputeShaderWithBindings({bindingDescriptor0});
     wgpu::ComputePipeline computePipeline = CreateComputePipeline({layout}, computeShader);

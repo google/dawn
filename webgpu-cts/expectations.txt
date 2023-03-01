@@ -259,6 +259,11 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,memory_model,* [ Failure ]
 crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="comment" [ Failure ]
 
 ################################################################################
+# Storage texture binding validation failures
+################################################################################
+crbug.com/dawn/1642 webgpu:api,validation,resource_usages,texture,in_pass_encoder:subresources_and_binding_types_combination_for_color:compute=true;type0="writeonly-storage-texture";type1="writeonly-storage-texture" [ Failure ]
+
+################################################################################
 # Flaky on Intel Mac
 # KEEP
 ################################################################################

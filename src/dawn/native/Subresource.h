@@ -21,7 +21,7 @@
 namespace dawn::native {
 
 // Note: Subresource indices are computed by iterating the aspects in increasing order.
-// D3D12 uses these directly, so the order much match D3D12's indices.
+// D3D12 uses these directly, so the order must match D3D12's indices.
 //  - Depth/Stencil textures have Depth as Plane 0, and Stencil as Plane 1.
 enum class Aspect : uint8_t {
     None = 0x0,
