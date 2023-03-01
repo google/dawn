@@ -371,12 +371,18 @@ MaybeError ValidateRenderPassDepthStencilAttachment(
                         depthStencilAttachment->stencilReadOnly);
     }
 
-    if (depthStencilAttachment->depthLoadOp == wgpu::LoadOp::Clear) {
-        DAWN_INVALID_IF(std::isnan(depthStencilAttachment->depthClearValue),
-                        "depthClearValue is NaN.");
+    if (depthStencilAttachment->depthLoadOp == wgpu::LoadOp::Clear &&
+        IsSubset(Aspect::Depth, attachment->GetAspects())) {
+        DAWN_INVALID_IF(
+            std::isnan(depthStencilAttachment->depthClearValue),
+            "depthClearValue (%f) must be set and must not be a NaN value if the attachment "
+            "(%s) has a depth aspect and depthLoadOp is clear.",
+            depthStencilAttachment->depthClearValue, attachment);
         DAWN_INVALID_IF(depthStencilAttachment->depthClearValue < 0.0f ||
                             depthStencilAttachment->depthClearValue > 1.0f,
-                        "depthClearValue is not between 0.0 and 1.0");
+                        "depthClearValue (%f) must be between 0.0 and 1.0 if the attachment (%s) "
+                        "has a depth aspect and depthLoadOp is clear.",
+                        depthStencilAttachment->depthClearValue, attachment);
     }
 
     // *sampleCount == 0 must only happen when there is no color attachment. In that case we

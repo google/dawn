@@ -75,6 +75,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateDepthBlitPipeline(DeviceBase* 
     DepthStencilState dsState = {};
     dsState.format = format;
     dsState.depthWriteEnabled = true;
+    dsState.depthCompare = wgpu::CompareFunction::Always;
 
     RenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule.Get();
@@ -203,6 +204,7 @@ MaybeError BlitDepthToDepth(DeviceBase* device,
 
         RenderPassDepthStencilAttachment dsAttachment = {};
         dsAttachment.view = dstView.Get();
+        dsAttachment.depthClearValue = 0.0;
         dsAttachment.depthLoadOp = wgpu::LoadOp::Load;
         dsAttachment.depthStoreOp = wgpu::StoreOp::Store;
         if (dst.texture->GetFormat().HasStencil()) {

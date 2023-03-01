@@ -137,6 +137,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRG8ToDepth16UnormPipeline(Devi
     DepthStencilState dsState = {};
     dsState.format = wgpu::TextureFormat::Depth16Unorm;
     dsState.depthWriteEnabled = true;
+    dsState.depthCompare = wgpu::CompareFunction::Always;
 
     RenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule.Get();
@@ -186,6 +187,7 @@ ResultOrError<InternalPipelineStore::BlitR8ToStencilPipelines> GetOrCreateR8ToSt
     DepthStencilState dsState = {};
     dsState.format = format;
     dsState.depthWriteEnabled = false;
+    dsState.depthCompare = wgpu::CompareFunction::Always;
     dsState.stencilFront.passOp = wgpu::StencilOperation::Replace;
 
     RenderPipelineDescriptor renderPipelineDesc = {};
@@ -288,6 +290,7 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
 
         RenderPassDepthStencilAttachment dsAttachment;
         dsAttachment.view = dstView.Get();
+        dsAttachment.depthClearValue = 0.0;
         dsAttachment.depthLoadOp = wgpu::LoadOp::Load;
         dsAttachment.depthStoreOp = wgpu::StoreOp::Store;
 
@@ -400,6 +403,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         }
 
         RenderPassDepthStencilAttachment dsAttachment;
+        dsAttachment.depthClearValue = 0.0;
         dsAttachment.view = dstView.Get();
         if (format.HasDepth()) {
             dsAttachment.depthLoadOp = wgpu::LoadOp::Load;

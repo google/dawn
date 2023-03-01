@@ -781,6 +781,8 @@ TEST_P(DepthStencilStateTest, CreatePipelineWithAllFormats) {
 // Test that the front and back stencil states are set correctly (and take frontFace into account)
 TEST_P(DepthStencilStateTest, StencilFrontAndBackFace) {
     wgpu::DepthStencilState state;
+    state.depthWriteEnabled = false;
+    state.depthCompare = wgpu::CompareFunction::Always;
     state.stencilFront.compare = wgpu::CompareFunction::Always;
     state.stencilBack.compare = wgpu::CompareFunction::Never;
 
@@ -794,12 +796,16 @@ TEST_P(DepthStencilStateTest, StencilFrontAndBackFace) {
 // Test that the depth reference of a new render pass is initialized to default value 0
 TEST_P(DepthStencilStateTest, StencilReferenceInitialized) {
     wgpu::DepthStencilState stencilAlwaysReplaceState;
+    stencilAlwaysReplaceState.depthWriteEnabled = false;
+    stencilAlwaysReplaceState.depthCompare = wgpu::CompareFunction::Always;
     stencilAlwaysReplaceState.stencilFront.compare = wgpu::CompareFunction::Always;
     stencilAlwaysReplaceState.stencilFront.passOp = wgpu::StencilOperation::Replace;
     stencilAlwaysReplaceState.stencilBack.compare = wgpu::CompareFunction::Always;
     stencilAlwaysReplaceState.stencilBack.passOp = wgpu::StencilOperation::Replace;
 
     wgpu::DepthStencilState stencilEqualKeepState;
+    stencilEqualKeepState.depthWriteEnabled = false;
+    stencilEqualKeepState.depthCompare = wgpu::CompareFunction::Always;
     stencilEqualKeepState.stencilFront.compare = wgpu::CompareFunction::Equal;
     stencilEqualKeepState.stencilFront.passOp = wgpu::StencilOperation::Keep;
     stencilEqualKeepState.stencilBack.compare = wgpu::CompareFunction::Equal;

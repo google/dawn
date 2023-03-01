@@ -1052,6 +1052,7 @@ TEST_F(RenderPassDescriptorValidationTest, UseNaNOrINFINITYAsColorOrDepthClearVa
         wgpu::TextureView depth =
             Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24Plus);
         utils::ComboRenderPassDescriptor renderPass({color}, depth);
+        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
         renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
         renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
         renderPass.cDepthStencilAttachmentInfo.depthClearValue = NAN;
@@ -1063,6 +1064,7 @@ TEST_F(RenderPassDescriptorValidationTest, UseNaNOrINFINITYAsColorOrDepthClearVa
         wgpu::TextureView depth =
             Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24Plus);
         utils::ComboRenderPassDescriptor renderPass({color}, depth);
+        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
         renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
         renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
         renderPass.cDepthStencilAttachmentInfo.depthClearValue = INFINITY;
@@ -1124,6 +1126,45 @@ TEST_F(RenderPassDescriptorValidationTest, ValidateDepthClearValueRange) {
 
     renderPass.cDepthStencilAttachmentInfo.depthClearValue = 1.001;
     AssertBeginRenderPassSuccess(&renderPass);
+}
+
+// Tests that default depthClearValue is required if attachment has a depth aspect and depthLoadOp
+// is clear.
+TEST_F(RenderPassDescriptorValidationTest, DefaultDepthClearValue) {
+    wgpu::TextureView depthView =
+        Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24Plus);
+    wgpu::TextureView stencilView = Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Stencil8);
+
+    wgpu::RenderPassDepthStencilAttachment depthStencilAttachment;
+
+    wgpu::RenderPassDescriptor renderPassDescriptor;
+    renderPassDescriptor.colorAttachmentCount = 0;
+    renderPassDescriptor.colorAttachments = nullptr;
+    renderPassDescriptor.depthStencilAttachment = &depthStencilAttachment;
+
+    // Default depthClearValue should be accepted if attachment doesn't have
+    // a depth aspect.
+    depthStencilAttachment.view = stencilView;
+    depthStencilAttachment.stencilLoadOp = wgpu::LoadOp::Load;
+    depthStencilAttachment.stencilStoreOp = wgpu::StoreOp::Store;
+    AssertBeginRenderPassSuccess(&renderPassDescriptor);
+
+    // Default depthClearValue should be accepted if depthLoadOp is not clear.
+    depthStencilAttachment.view = depthView;
+    depthStencilAttachment.stencilLoadOp = wgpu::LoadOp::Undefined;
+    depthStencilAttachment.stencilStoreOp = wgpu::StoreOp::Undefined;
+    depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Load;
+    depthStencilAttachment.depthStoreOp = wgpu::StoreOp::Store;
+    AssertBeginRenderPassSuccess(&renderPassDescriptor);
+
+    // Default depthClearValue should fail the validation
+    // if attachment has a depth aspect and depthLoadOp is clear.
+    depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Clear;
+    AssertBeginRenderPassError(&renderPassDescriptor);
+
+    // The validation should pass if valid depthClearValue is provided.
+    depthStencilAttachment.depthClearValue = 0.0f;
+    AssertBeginRenderPassSuccess(&renderPassDescriptor);
 }
 
 TEST_F(RenderPassDescriptorValidationTest, ValidateDepthStencilReadOnly) {
