@@ -495,9 +495,10 @@ VkImageUsageFlags VulkanImageUsage(wgpu::TextureUsage usage, const Format& forma
             flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
         }
     }
-    if (usage & kReadOnlyRenderAttachment) {
-        flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-    }
+
+    // Choosing Vulkan image usages should not know about kReadOnlyRenderAttachment because that's
+    // a property of when the image is used, not of the creation.
+    ASSERT(!(usage & kReadOnlyRenderAttachment));
 
     return flags;
 }
