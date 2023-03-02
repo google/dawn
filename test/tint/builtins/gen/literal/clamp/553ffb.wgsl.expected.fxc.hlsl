@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void clamp_553ffb() {
-  float16_t res = float16_t(0.0h);
+  float16_t res = float16_t(1.0h);
 }
 
 struct tint_symbol {

@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void exp_c18fe9() {
-  float16_t arg_0 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(1.0h);
   float16_t res = exp(arg_0);
 }
 

@@ -1,4 +1,4 @@
-SKIP: FAILED - crbug.com/tint/1375
+SKIP: FAILED
 
 void set_scalar_float2x3(inout float2x3 mat, int col, int row, float val) {
   switch (col) {
@@ -447,36 +447,33 @@ void main_1() {
                                                                                 x_GLF_global_loop_count = (x_371 + 1);
                                                                                 {
                                                                                   const int x_373 = x_GLF_global_loop_count;
-                                                                                  if ((x_373 < 98)) {
-                                                                                  } else {
-                                                                                    break;
-                                                                                  }
+                                                                                  if (!((x_373 < 98))) { break; }
                                                                                 }
                                                                               }
                                                                               const int x_375 = i_37;
                                                                               const int x_376 = i_37;
-                                                                              set_scalar_float2x3(m23, x_376, x_375, 1.0f);
+                                                                              set_scalar_float2x3(m23, x_375, x_376, 1.0f);
                                                                               const int x_378 = i_37;
                                                                               const int x_379 = i_37;
-                                                                              set_scalar_float2x4(m24, x_379, x_378, 1.0f);
+                                                                              set_scalar_float2x4(m24, x_378, x_379, 1.0f);
                                                                               const int x_381 = i_37;
                                                                               const int x_382 = i_37;
-                                                                              set_scalar_float3x2(m32, x_382, x_381, 1.0f);
+                                                                              set_scalar_float3x2(m32, x_381, x_382, 1.0f);
                                                                               const int x_384 = i_37;
                                                                               const int x_385 = i_37;
-                                                                              set_scalar_float3x3(m33, x_385, x_384, 1.0f);
+                                                                              set_scalar_float3x3(m33, x_384, x_385, 1.0f);
                                                                               const int x_387 = i_37;
                                                                               const int x_388 = i_37;
-                                                                              set_scalar_float3x4(m34, x_388, x_387, 1.0f);
+                                                                              set_scalar_float3x4(m34, x_387, x_388, 1.0f);
                                                                               const int x_390 = i_37;
                                                                               const int x_391 = i_37;
-                                                                              set_scalar_float4x2(m42, x_391, x_390, 1.0f);
+                                                                              set_scalar_float4x2(m42, x_390, x_391, 1.0f);
                                                                               const int x_393 = i_37;
                                                                               const int x_394 = i_37;
-                                                                              set_scalar_float4x3(m43, x_394, x_393, 1.0f);
+                                                                              set_scalar_float4x3(m43, x_393, x_394, 1.0f);
                                                                               const int x_396 = i_37;
                                                                               const int x_397 = i_37;
-                                                                              set_scalar_float4x4(m44, x_397, x_396, 1.0f);
+                                                                              set_scalar_float4x4(m44, x_396, x_397, 1.0f);
                                                                               {
                                                                                 const int x_399 = i_37;
                                                                                 i_37 = (x_399 + 1);
@@ -742,6 +739,3 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-FXC validation failure:
-C:\src\dawn\test\tint\Shader@0x000001B05F850BC0(409,76-87): error X3531: can't unroll loops marked with loop attribute
-

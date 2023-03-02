@@ -37,6 +37,3 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\shader_io\Shader@0x0000014EC0050950(6,3-11): error X3000: unrecognized identifier 'float16_t'
-

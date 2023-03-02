@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void atan_1e1764() {
-  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
   vector<float16_t, 2> res = atan(arg_0);
 }
 

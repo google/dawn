@@ -16,6 +16,3 @@ void f() {
   const vector<float16_t, 2> tint_symbol = m();
   float2 v = float2(tint_symbol);
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\expressions\type_conv\Shader@0x0000028C31298CE0(6,8-16): error X3000: unrecognized identifier 'float16_t'
-

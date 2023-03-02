@@ -1,11 +1,11 @@
 SKIP: FAILED
 
 vector<float16_t, 3> tint_radians(vector<float16_t, 3> param_0) {
-  return param_0 * 0.017453292519943295474;
+  return param_0 * 0.017453292519943295;
 }
 
 void radians_7ea4c7() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
   vector<float16_t, 3> res = tint_radians(arg_0);
 }
 

@@ -226,8 +226,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:75: 'textureQueryLevels' : no matching overloaded function found
-ERROR: 0:75: '' : compilation terminated
+ERROR: 0:75: 'textureQueryLevels' : no matching overloaded function found 
+ERROR: 0:75: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -350,13 +350,13 @@ void export_level(uvec3 coord) {
   if (all(lessThan(coord.xy, uvec2(uvec2(imageSize(tex_out)))))) {
     uint dst_offset = (coord.x + (coord.y * ubo.inner.width));
     uint src_offset = ((coord.x * 2u) + ((coord.y * 2u) * ubo.inner.width));
-    float a_1 = buf_in.weights[(src_offset + 0u)];
+    float a = buf_in.weights[(src_offset + 0u)];
     float b = buf_in.weights[(src_offset + 1u)];
     float c = buf_in.weights[((src_offset + 0u) + ubo.inner.width)];
     float d = buf_in.weights[((src_offset + 1u) + ubo.inner.width)];
-    float sum = dot(vec4(a_1, b, c, d), vec4(1.0f));
+    float sum = dot(vec4(a, b, c, d), vec4(1.0f));
     buf_out.weights[dst_offset] = (sum / 4.0f);
-    vec4 probabilities = (vec4(a_1, (a_1 + b), ((a_1 + b) + c), sum) / max(sum, 0.0001f));
+    vec4 probabilities = (vec4(a, (a + b), ((a + b) + c), sum) / max(sum, 0.0001f));
     imageStore(tex_out, ivec2(coord.xy), probabilities);
   }
 }

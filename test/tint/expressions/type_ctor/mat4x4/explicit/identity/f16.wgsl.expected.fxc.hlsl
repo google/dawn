@@ -11,6 +11,3 @@ matrix<float16_t, 4, 4> f() {
   const matrix<float16_t, 4, 4> m_1 = matrix<float16_t, 4, 4>(m);
   return m_1;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\expressions\Shader@0x00000288ADE91440(6,15-23): error X3000: syntax error: unexpected token 'float16_t'
-

@@ -1,11 +1,11 @@
 SKIP: FAILED
 
 vector<float16_t, 3> tint_degrees(vector<float16_t, 3> param_0) {
-  return param_0 * 57.295779513082322865;
+  return param_0 * 57.295779513082323;
 }
 
 void degrees_dfe8f4() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
   vector<float16_t, 3> res = tint_degrees(arg_0);
 }
 

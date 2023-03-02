@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void saturate_cd2028() {
-  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(2.0h)).xx;
   vector<float16_t, 2> res = saturate(arg_0);
 }
 

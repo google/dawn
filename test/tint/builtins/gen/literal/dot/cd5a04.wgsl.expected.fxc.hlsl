@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void dot_cd5a04() {
-  float16_t res = dot((float16_t(0.0h)).xx, (float16_t(0.0h)).xx);
+  float16_t res = float16_t(2.0h);
 }
 
 struct tint_symbol {

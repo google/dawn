@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void tanh_6d105a() {
-  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
   vector<float16_t, 2> res = tanh(arg_0);
 }
 

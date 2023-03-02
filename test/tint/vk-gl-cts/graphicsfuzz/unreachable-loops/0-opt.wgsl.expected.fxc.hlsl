@@ -13,10 +13,7 @@ void main_1() {
   if ((x_30 > x_32)) {
     while (true) {
       {
-        if (false) {
-        } else {
-          break;
-        }
+        if (true) { break; }
       }
     }
     m = 1;
@@ -40,8 +37,8 @@ struct tint_symbol {
 
 main_out main_inner() {
   main_1();
-  const main_out tint_symbol_2 = {x_GLF_color};
-  return tint_symbol_2;
+  const main_out tint_symbol_1 = {x_GLF_color};
+  return tint_symbol_1;
 }
 
 tint_symbol main() {
@@ -50,8 +47,3 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-FXC validation failure:
-C:\src\dawn\test\tint\Shader@0x0000024C845840A0(12,12-23): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-C:\src\dawn\test\tint\Shader@0x0000024C845840A0(12,12-23): warning X3557: loop doesn't seem to do anything, consider removing [loop]
-C:\src\dawn\test\tint\Shader@0x0000024C845840A0(21,19-22): error X3696: infinite loop detected - loop never exits
-

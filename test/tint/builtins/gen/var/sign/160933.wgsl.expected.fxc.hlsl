@@ -1,8 +1,8 @@
 SKIP: FAILED
 
 void sign_160933() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
-  vector<float16_t, 4> res = sign(arg_0);
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> res = vector<float16_t, 4>(sign(arg_0));
 }
 
 struct tint_symbol {

@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void max_34956e() {
-  vector<float16_t, 2> res = max((float16_t(0.0h)).xx, (float16_t(0.0h)).xx);
+  vector<float16_t, 2> res = (float16_t(1.0h)).xx;
 }
 
 struct tint_symbol {

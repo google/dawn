@@ -21,10 +21,7 @@ void main_1() {
       {
         const int x_50 = asint(x_5[1].x);
         const int x_52 = asint(x_5[0].x);
-        if ((x_50 > x_52)) {
-        } else {
-          break;
-        }
+        if (!((x_50 > x_52))) { break; }
       }
     }
     return;
@@ -41,8 +38,8 @@ struct tint_symbol {
 
 main_out main_inner() {
   main_1();
-  const main_out tint_symbol_2 = {x_GLF_color};
-  return tint_symbol_2;
+  const main_out tint_symbol_1 = {x_GLF_color};
+  return tint_symbol_1;
 }
 
 tint_symbol main() {
@@ -51,6 +48,3 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-FXC validation failure:
-C:\src\dawn\test\tint\Shader@0x000002846F515BE0(15,19-22): error X3696: infinite loop detected - loop never exits
-

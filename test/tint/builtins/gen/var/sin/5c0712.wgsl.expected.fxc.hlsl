@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void sin_5c0712() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(1.5703125h)).xxxx;
   vector<float16_t, 4> res = sin(arg_0);
 }
 

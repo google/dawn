@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void normalize_7990f3() {
-  vector<float16_t, 2> res = normalize((float16_t(0.0h)).xx);
+  vector<float16_t, 2> res = (float16_t(0.70703125h)).xx;
 }
 
 struct tint_symbol {

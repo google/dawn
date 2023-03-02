@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void sin_66a59f() {
-  float16_t res = sin(float16_t(0.0h));
+  float16_t res = float16_t(0.999511719h);
 }
 
 struct tint_symbol {

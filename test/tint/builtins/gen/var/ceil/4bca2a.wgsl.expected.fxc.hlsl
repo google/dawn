@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void ceil_4bca2a() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(1.5h)).xxxx;
   vector<float16_t, 4> res = ceil(arg_0);
 }
 

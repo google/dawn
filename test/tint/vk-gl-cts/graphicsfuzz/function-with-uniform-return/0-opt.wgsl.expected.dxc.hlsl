@@ -31,15 +31,18 @@ void main_1() {
   const float x_34 = fx_();
   x_GLF_color = float4(x_34, 0.0f, 0.0f, 1.0f);
   while (true) {
-    if ((x2 > 2.0f)) {
+    const float x_40 = x2;
+    if ((x_40 > 2.0f)) {
     } else {
       break;
     }
     const float x_43 = fx_();
     const float x_44 = fx_();
     k0 = (x_43 - x_44);
-    B = k0;
-    x2 = B;
+    const float x_46 = k0;
+    B = x_46;
+    const float x_47 = B;
+    x2 = x_47;
   }
   return;
 }
@@ -57,8 +60,8 @@ struct tint_symbol_2 {
 main_out main_inner(float4 gl_FragCoord_param) {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
-  const main_out tint_symbol_4 = {x_GLF_color};
-  return tint_symbol_4;
+  const main_out tint_symbol_3 = {x_GLF_color};
+  return tint_symbol_3;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
@@ -68,10 +71,10 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   return wrapper_result;
 }
 DXC validation failure:
-warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
+warning: DXIL signing library (dxil.dll,libdxil.so) not found.  Resulting DXIL will not be signed for use in release environments.
 
 error: validation errors
-shader.hlsl:62: error: Loop must have break.
+shader.hlsl:65: error: Loop must have break.
 Validation failed.
 
 

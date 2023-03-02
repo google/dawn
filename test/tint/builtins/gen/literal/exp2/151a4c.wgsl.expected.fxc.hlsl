@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void exp2_151a4c() {
-  vector<float16_t, 2> res = exp2((float16_t(0.0h)).xx);
+  vector<float16_t, 2> res = (float16_t(2.0h)).xx;
 }
 
 struct tint_symbol {

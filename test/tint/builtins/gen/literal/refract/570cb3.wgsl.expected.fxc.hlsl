@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void refract_570cb3() {
-  vector<float16_t, 2> res = refract((float16_t(0.0h)).xx, (float16_t(0.0h)).xx, float16_t(0.0h));
+  vector<float16_t, 2> res = (float16_t(-3.0h)).xx;
 }
 
 struct tint_symbol {

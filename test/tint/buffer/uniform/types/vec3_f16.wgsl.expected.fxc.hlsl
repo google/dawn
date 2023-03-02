@@ -12,8 +12,3 @@ void main() {
   const vector<float16_t, 3> x = vector<float16_t, 3>(ubo_load_xz[0], ubo_load_y, ubo_load_xz[1]);
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\buffer\Shader@0x000001734B456BC0(8,10-18): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\buffer\Shader@0x000001734B456BC0(9,3-11): error X3000: unrecognized identifier 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\buffer\Shader@0x000001734B456BC0(9,13-22): error X3000: unrecognized identifier 'ubo_load_y'
-

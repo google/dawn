@@ -1,8 +1,8 @@
 SKIP: FAILED
 
 void step_630d07() {
-  float16_t arg_0 = float16_t(0.0h);
-  float16_t arg_1 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(1.0h);
+  float16_t arg_1 = float16_t(1.0h);
   float16_t res = step(arg_0, arg_1);
 }
 

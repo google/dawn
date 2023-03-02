@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void cosh_43b672() {
-  vector<float16_t, 2> res = cosh((float16_t(0.0h)).xx);
+  vector<float16_t, 2> res = (float16_t(1.0h)).xx;
 }
 
 struct tint_symbol {

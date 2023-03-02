@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void round_e1bba2() {
-  vector<float16_t, 3> res = round((float16_t(0.0h)).xxx);
+  vector<float16_t, 3> res = (float16_t(3.0h)).xxx;
 }
 
 struct tint_symbol {

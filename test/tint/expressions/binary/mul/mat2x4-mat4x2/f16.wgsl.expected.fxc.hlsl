@@ -7,8 +7,3 @@ void f() {
   const matrix<float16_t, 4, 4> r = mul(b, a);
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\expressions\Shader@0x0000029C36D606A0(3,16-24): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\expressions\Shader@0x0000029C36D606A0(4,16-24): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\expressions\Shader@0x0000029C36D606A0(5,16-24): error X3000: syntax error: unexpected token 'float16_t'
-

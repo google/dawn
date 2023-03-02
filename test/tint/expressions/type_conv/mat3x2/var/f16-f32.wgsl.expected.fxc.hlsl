@@ -10,6 +10,3 @@ static matrix<float16_t, 3, 2> u = matrix<float16_t, 3, 2>(vector<float16_t, 2>(
 void f() {
   float3x2 v = float3x2(u);
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\expressions\type_conv\Shader@0x000002B0F3EB5B60(6,15-23): error X3000: syntax error: unexpected token 'float16_t'
-

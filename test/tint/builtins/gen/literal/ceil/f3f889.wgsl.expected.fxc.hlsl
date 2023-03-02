@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void ceil_f3f889() {
-  float16_t res = ceil(float16_t(0.0h));
+  float16_t res = float16_t(2.0h);
 }
 
 struct tint_symbol {

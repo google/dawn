@@ -1,4 +1,4 @@
-SKIP: FAILED - TIMEOUT
+SKIP: FAILED
 
 static int x_GLF_global_loop_count = 0;
 cbuffer cbuffer_x_7 : register(b0, space0) {
@@ -33,117 +33,106 @@ void main_1() {
   f = x_53;
   const int x_55 = asint(x_10[1].x);
   i = x_55;
-  [loop] while (true) {
+  while (true) {
     const int x_60 = i;
-    const uint scalar_offset = ((16u * 0u)) / 4;
-    const int x_62 = asint(x_10[scalar_offset / 4][scalar_offset % 4]);
+    const int x_62 = asint(x_10[0].x);
     if ((x_60 < x_62)) {
     } else {
       break;
     }
     const int x_66 = asint(x_10[1].x);
     i_1 = x_66;
-    [loop] while (true) {
+    while (true) {
       const int x_71 = i_1;
-      const uint scalar_offset_1 = ((16u * 0u)) / 4;
-      const int x_73 = asint(x_10[scalar_offset_1 / 4][scalar_offset_1 % 4]);
+      const int x_73 = asint(x_10[0].x);
       if ((x_71 < x_73)) {
       } else {
         break;
       }
       const int x_77 = asint(x_10[1].x);
       i_2 = x_77;
-      [loop] while (true) {
+      while (true) {
         const int x_82 = i_2;
-        const uint scalar_offset_2 = ((16u * 0u)) / 4;
-        const int x_84 = asint(x_10[scalar_offset_2 / 4][scalar_offset_2 % 4]);
+        const int x_84 = asint(x_10[0].x);
         if ((x_82 < x_84)) {
         } else {
           break;
         }
         const int x_88 = asint(x_10[1].x);
         i_3 = x_88;
-        [loop] while (true) {
+        while (true) {
           const int x_93 = i_3;
-          const uint scalar_offset_3 = ((16u * 0u)) / 4;
-          const int x_95 = asint(x_10[scalar_offset_3 / 4][scalar_offset_3 % 4]);
+          const int x_95 = asint(x_10[0].x);
           if ((x_93 < x_95)) {
           } else {
             break;
           }
           const int x_99 = asint(x_10[1].x);
           i_4 = x_99;
-          [loop] while (true) {
+          while (true) {
             const int x_104 = i_4;
-            const uint scalar_offset_4 = ((16u * 0u)) / 4;
-            const int x_106 = asint(x_10[scalar_offset_4 / 4][scalar_offset_4 % 4]);
+            const int x_106 = asint(x_10[0].x);
             if ((x_104 < x_106)) {
             } else {
               break;
             }
             const int x_110 = asint(x_10[1].x);
             i_5 = x_110;
-            [loop] while (true) {
+            while (true) {
               const int x_115 = i_5;
-              const uint scalar_offset_5 = ((16u * 0u)) / 4;
-              const int x_117 = asint(x_10[scalar_offset_5 / 4][scalar_offset_5 % 4]);
+              const int x_117 = asint(x_10[0].x);
               if ((x_115 < x_117)) {
               } else {
                 break;
               }
               const int x_121 = asint(x_10[1].x);
               i_6 = x_121;
-              [loop] while (true) {
+              while (true) {
                 const int x_126 = i_6;
-                const uint scalar_offset_6 = ((16u * 0u)) / 4;
-                const int x_128 = asint(x_10[scalar_offset_6 / 4][scalar_offset_6 % 4]);
+                const int x_128 = asint(x_10[0].x);
                 if ((x_126 < x_128)) {
                 } else {
                   break;
                 }
                 const int x_132 = asint(x_10[1].x);
                 i_7 = x_132;
-                [loop] while (true) {
+                while (true) {
                   const int x_137 = i_7;
-                  const uint scalar_offset_7 = ((16u * 0u)) / 4;
-                  const int x_139 = asint(x_10[scalar_offset_7 / 4][scalar_offset_7 % 4]);
+                  const int x_139 = asint(x_10[0].x);
                   if ((x_137 < x_139)) {
                   } else {
                     break;
                   }
                   const int x_143 = asint(x_10[1].x);
                   i_8 = x_143;
-                  [loop] while (true) {
+                  while (true) {
                     const int x_148 = i_8;
-                    const uint scalar_offset_8 = ((16u * 0u)) / 4;
-                    const int x_150 = asint(x_10[scalar_offset_8 / 4][scalar_offset_8 % 4]);
+                    const int x_150 = asint(x_10[0].x);
                     if ((x_148 < x_150)) {
                     } else {
                       break;
                     }
                     const int x_154 = asint(x_10[1].x);
                     i_9 = x_154;
-                    [loop] while (true) {
+                    while (true) {
                       const int x_159 = i_9;
-                      const uint scalar_offset_9 = ((16u * 0u)) / 4;
-                      const int x_161 = asint(x_10[scalar_offset_9 / 4][scalar_offset_9 % 4]);
+                      const int x_161 = asint(x_10[0].x);
                       if ((x_159 < x_161)) {
                       } else {
                         break;
                       }
                       const int x_165 = asint(x_10[1].x);
                       i_10 = x_165;
-                      [loop] while (true) {
+                      while (true) {
                         const int x_170 = i_10;
-                        const uint scalar_offset_10 = ((16u * 0u)) / 4;
-                        const int x_172 = asint(x_10[scalar_offset_10 / 4][scalar_offset_10 % 4]);
+                        const int x_172 = asint(x_10[0].x);
                         if ((x_170 < x_172)) {
                         } else {
                           break;
                         }
                         const int x_176 = asint(x_10[1].x);
                         i_11 = x_176;
-                        [loop] while (true) {
+                        while (true) {
                           const int x_181 = i_11;
                           const int x_183 = asint(x_10[2].x);
                           if ((x_181 < x_183)) {
@@ -152,126 +141,145 @@ void main_1() {
                           }
                           const int x_187 = asint(x_10[1].x);
                           i_12 = x_187;
-                          [loop] while (true) {
+                          while (true) {
                             const int x_192 = i_12;
-                            const uint scalar_offset_11 = ((16u * 0u)) / 4;
-                            const int x_194 = asint(x_10[scalar_offset_11 / 4][scalar_offset_11 % 4]);
+                            const int x_194 = asint(x_10[0].x);
                             if ((x_192 < x_194)) {
                             } else {
                               break;
                             }
                             const int x_198 = asint(x_10[1].x);
                             i_13 = x_198;
-                            [loop] while (true) {
+                            while (true) {
                               const int x_203 = i_13;
-                              const uint scalar_offset_12 = ((16u * 0u)) / 4;
-                              const int x_205 = asint(x_10[scalar_offset_12 / 4][scalar_offset_12 % 4]);
+                              const int x_205 = asint(x_10[0].x);
                               if ((x_203 < x_205)) {
                               } else {
                                 break;
                               }
                               const int x_209 = asint(x_10[1].x);
                               i_14 = x_209;
-                              [loop] while (true) {
+                              while (true) {
                                 const int x_214 = i_14;
                                 const int x_216 = asint(x_10[2].x);
                                 if ((x_214 < x_216)) {
                                 } else {
                                   break;
                                 }
-                                [loop] while (true) {
-                                  x_GLF_global_loop_count = (x_GLF_global_loop_count + 1);
+                                while (true) {
+                                  const int x_223 = x_GLF_global_loop_count;
+                                  x_GLF_global_loop_count = (x_223 + 1);
                                   {
                                     const int x_225 = x_GLF_global_loop_count;
                                     const int x_227 = asint(x_10[3].x);
-                                    if ((x_225 < (100 - x_227))) {
-                                    } else {
-                                      break;
-                                    }
+                                    if (!((x_225 < (100 - x_227)))) { break; }
                                   }
                                 }
-                                const uint scalar_offset_13 = ((16u * 0u)) / 4;
-                                const float x_231 = asfloat(x_7[scalar_offset_13 / 4][scalar_offset_13 % 4]);
-                                f = (f + x_231);
+                                const float x_231 = asfloat(x_7[0].x);
+                                const float x_232 = f;
+                                f = (x_232 + x_231);
                                 {
-                                  i_14 = (i_14 + 1);
+                                  const int x_234 = i_14;
+                                  i_14 = (x_234 + 1);
                                 }
                               }
                               {
-                                i_13 = (i_13 + 1);
+                                const int x_236 = i_13;
+                                i_13 = (x_236 + 1);
                               }
                             }
                             {
-                              i_12 = (i_12 + 1);
+                              const int x_238 = i_12;
+                              i_12 = (x_238 + 1);
                             }
                           }
                           {
-                            i_11 = (i_11 + 1);
+                            const int x_240 = i_11;
+                            i_11 = (x_240 + 1);
                           }
                         }
                         {
-                          i_10 = (i_10 + 1);
+                          const int x_242 = i_10;
+                          i_10 = (x_242 + 1);
                         }
                       }
                       {
-                        i_9 = (i_9 + 1);
+                        const int x_244 = i_9;
+                        i_9 = (x_244 + 1);
                       }
                     }
                     {
-                      i_8 = (i_8 + 1);
+                      const int x_246 = i_8;
+                      i_8 = (x_246 + 1);
                     }
                   }
                   {
-                    i_7 = (i_7 + 1);
+                    const int x_248 = i_7;
+                    i_7 = (x_248 + 1);
                   }
                 }
                 {
-                  i_6 = (i_6 + 1);
+                  const int x_250 = i_6;
+                  i_6 = (x_250 + 1);
                 }
               }
               {
-                i_5 = (i_5 + 1);
+                const int x_252 = i_5;
+                i_5 = (x_252 + 1);
               }
             }
             {
-              i_4 = (i_4 + 1);
+              const int x_254 = i_4;
+              i_4 = (x_254 + 1);
             }
           }
           {
-            i_3 = (i_3 + 1);
+            const int x_256 = i_3;
+            i_3 = (x_256 + 1);
           }
         }
         {
-          i_2 = (i_2 + 1);
+          const int x_258 = i_2;
+          i_2 = (x_258 + 1);
         }
       }
       {
-        i_1 = (i_1 + 1);
+        const int x_260 = i_1;
+        i_1 = (x_260 + 1);
       }
     }
     {
-      i = (i + 1);
+      const int x_262 = i;
+      i = (x_262 + 1);
     }
   }
   const float x_265 = asfloat(x_7[1].x);
   sum = x_265;
   const int x_267 = asint(x_10[1].x);
   r = x_267;
-  {
-    [loop] for(; (x_GLF_global_loop_count < 100); r = (r + 1)) {
-      x_GLF_global_loop_count = (x_GLF_global_loop_count + 1);
-      sum = (sum + f);
+  while (true) {
+    const int x_272 = x_GLF_global_loop_count;
+    if ((x_272 < 100)) {
+    } else {
+      break;
+    }
+    const int x_275 = x_GLF_global_loop_count;
+    x_GLF_global_loop_count = (x_275 + 1);
+    const float x_277 = f;
+    const float x_278 = sum;
+    sum = (x_278 + x_277);
+    {
+      const int x_280 = r;
+      r = (x_280 + 1);
     }
   }
   const float x_282 = sum;
   const float x_284 = asfloat(x_7[2].x);
   if ((x_282 == x_284)) {
-    const uint scalar_offset_14 = ((16u * 0u)) / 4;
-    const int x_290 = asint(x_10[scalar_offset_14 / 4][scalar_offset_14 % 4]);
+    const int x_290 = asint(x_10[0].x);
     const int x_293 = asint(x_10[1].x);
     const int x_296 = asint(x_10[1].x);
-    const uint scalar_offset_15 = ((16u * 0u)) / 4;
-    const int x_299 = asint(x_10[scalar_offset_15 / 4][scalar_offset_15 % 4]);
+    const int x_299 = asint(x_10[0].x);
     x_GLF_color = float4(float(x_290), float(x_293), float(x_296), float(x_299));
   } else {
     const int x_303 = asint(x_10[1].x);
@@ -290,8 +298,8 @@ struct tint_symbol {
 
 main_out main_inner() {
   main_1();
-  const main_out tint_symbol_3 = {x_GLF_color};
-  return tint_symbol_3;
+  const main_out tint_symbol_1 = {x_GLF_color};
+  return tint_symbol_1;
 }
 
 tint_symbol main() {

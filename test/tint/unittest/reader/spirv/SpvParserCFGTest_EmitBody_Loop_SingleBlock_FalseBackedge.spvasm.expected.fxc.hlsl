@@ -18,6 +18,3 @@ void main() {
   main_1();
   return;
 }
-FXC validation failure:
-C:\src\dawn\test\tint\Shader@0x000002B299653E40(5,17-20): error X3696: infinite loop detected - loop never exits
-

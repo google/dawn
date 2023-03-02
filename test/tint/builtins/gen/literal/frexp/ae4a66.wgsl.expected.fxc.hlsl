@@ -1,18 +1,11 @@
 SKIP: FAILED
 
 struct frexp_result_vec3_f16 {
-  vector<float16_t, 3> sig;
+  vector<float16_t, 3> fract;
   int3 exp;
 };
-frexp_result_vec3_f16 tint_frexp(vector<float16_t, 3> param_0) {
-  vector<float16_t, 3> exp;
-  vector<float16_t, 3> sig = frexp(param_0, exp);
-  frexp_result_vec3_f16 result = {sig, int3(exp)};
-  return result;
-}
-
 void frexp_ae4a66() {
-  frexp_result_vec3_f16 res = tint_frexp((float16_t(0.0h)).xxx);
+  frexp_result_vec3_f16 res = {(float16_t(0.5h)).xxx, (1).xxx};
 }
 
 struct tint_symbol {

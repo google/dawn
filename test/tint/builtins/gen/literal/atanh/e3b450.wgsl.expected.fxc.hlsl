@@ -1,11 +1,7 @@
 SKIP: FAILED
 
-vector<float16_t, 4> tint_atanh(vector<float16_t, 4> x) {
-  return (log(((float16_t(1.0h) + x) / (float16_t(1.0h) - x))) * float16_t(0.5h));
-}
-
 void atanh_e3b450() {
-  vector<float16_t, 4> res = tint_atanh((float16_t(0.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(0.548828125h)).xxxx;
 }
 
 struct tint_symbol {

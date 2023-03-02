@@ -1,9 +1,9 @@
 SKIP: FAILED
 
 void clamp_2c251b() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
-  vector<float16_t, 4> arg_1 = (float16_t(0.0h)).xxxx;
-  vector<float16_t, 4> arg_2 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> arg_1 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> arg_2 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> res = clamp(arg_0, arg_1, arg_2);
 }
 

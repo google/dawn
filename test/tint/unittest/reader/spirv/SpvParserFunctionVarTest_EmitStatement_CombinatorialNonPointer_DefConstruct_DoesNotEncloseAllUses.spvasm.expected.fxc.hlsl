@@ -19,9 +19,7 @@ void main_1() {
     x_1 = x_2;
     {
       x_1 = 4u;
-      if (false) {
-        break;
-      }
+      if (false) { break; }
     }
   }
   x_1 = 5u;
@@ -32,6 +30,3 @@ void main() {
   main_1();
   return;
 }
-FXC validation failure:
-C:\src\dawn\test\tint\Shader@0x00000292BFA3C190(5,17-20): error X3696: infinite loop detected - loop never exits
-

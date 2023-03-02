@@ -1,18 +1,18 @@
 SKIP: FAILED
 
 struct frexp_result_f16 {
-  float16_t sig;
+  float16_t fract;
   int exp;
 };
 frexp_result_f16 tint_frexp(float16_t param_0) {
   float16_t exp;
-  float16_t sig = frexp(param_0, exp);
-  frexp_result_f16 result = {sig, int(exp)};
+  float16_t fract = frexp(param_0, exp);
+  frexp_result_f16 result = {fract, int(exp)};
   return result;
 }
 
 void frexp_5257dd() {
-  float16_t arg_0 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(1.0h);
   frexp_result_f16 res = tint_frexp(arg_0);
 }
 

@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void fract_eb38ce() {
-  float16_t arg_0 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(1.25h);
   float16_t res = frac(arg_0);
 }
 

@@ -12,8 +12,3 @@ void main() {
   const vector<float16_t, 4> x = vector<float16_t, 4>(ubo_load_xz[0], ubo_load_yw[0], ubo_load_xz[1], ubo_load_yw[1]);
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\buffer\Shader@0x000001D83CC52880(8,10-18): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\buffer\Shader@0x000001D83CC52880(9,10-18): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\buffer\Shader@0x000001D83CC52880(10,16-24): error X3000: syntax error: unexpected token 'float16_t'
-

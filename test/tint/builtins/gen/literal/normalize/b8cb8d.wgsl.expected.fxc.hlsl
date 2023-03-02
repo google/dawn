@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void normalize_b8cb8d() {
-  vector<float16_t, 4> res = normalize((float16_t(0.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(0.5h)).xxxx;
 }
 
 struct tint_symbol {

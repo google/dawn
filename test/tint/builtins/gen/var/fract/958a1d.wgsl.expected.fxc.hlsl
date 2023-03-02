@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void fract_958a1d() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.25h)).xxx;
   vector<float16_t, 3> res = frac(arg_0);
 }
 

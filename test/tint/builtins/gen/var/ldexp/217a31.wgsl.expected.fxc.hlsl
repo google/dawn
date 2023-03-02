@@ -31,7 +31,3 @@ void compute_main() {
   ldexp_217a31();
   return;
 }
-FXC validation failure:
-C:\src\dawn\test\tint\Shader@0x000002B2A1EB5A40(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
-C:\src\dawn\test\tint\Shader@0x000002B2A1EB5A40(3,10-18): error X3000: syntax error: unexpected token 'float16_t'
-

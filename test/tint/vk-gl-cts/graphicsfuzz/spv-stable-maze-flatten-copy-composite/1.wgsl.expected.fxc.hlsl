@@ -1,4 +1,4 @@
-SKIP: FAILED - TIMEOUT
+SKIP: FAILED
 
 static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);
 cbuffer cbuffer_x_7 : register(b0, space0) {
@@ -6,6 +6,15 @@ cbuffer cbuffer_x_7 : register(b0, space0) {
 };
 static int map[256] = (int[256])0;
 static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+int tint_mod(int lhs, int rhs) {
+  const int rhs_or_one = (((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))) ? 1 : rhs);
+  if (any(((uint((lhs | rhs_or_one)) & 2147483648u) != 0u))) {
+    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
+  } else {
+    return (lhs % rhs_or_one);
+  }
+}
 
 void main_1() {
   float2 pos = float2(0.0f, 0.0f);
@@ -24,9 +33,17 @@ void main_1() {
   const float x_69 = pos.y;
   ipos = int2(int((x_65 * 16.0f)), int((x_69 * 16.0f)));
   i = 0;
-  {
-    for(; (i < 256); i = (i + 1)) {
-      map[i] = 0;
+  while (true) {
+    const int x_77 = i;
+    if ((x_77 < 256)) {
+    } else {
+      break;
+    }
+    const int x_80 = i;
+    map[x_80] = 0;
+    {
+      const int x_82 = i;
+      i = (x_82 + 1);
     }
   }
   p = (0).xx;
@@ -41,7 +58,8 @@ void main_1() {
     bool x_125_phi = false;
     bool x_145_phi = false;
     bool x_165_phi = false;
-    v = (v + 1);
+    const int x_88 = v;
+    v = (x_88 + 1);
     directions = 0;
     const int x_91 = p.x;
     const bool x_92 = (x_91 > 0);
@@ -53,8 +71,10 @@ void main_1() {
       x_104 = (x_103 == 0);
       x_105_phi = x_104;
     }
-    if (x_105_phi) {
-      directions = (directions + 1);
+    const bool x_105 = x_105_phi;
+    if (x_105) {
+      const int x_108 = directions;
+      directions = (x_108 + 1);
     }
     const int x_111 = p.y;
     const bool x_112 = (x_111 > 0);
@@ -66,8 +86,10 @@ void main_1() {
       x_124 = (x_123 == 0);
       x_125_phi = x_124;
     }
-    if (x_125_phi) {
-      directions = (directions + 1);
+    const bool x_125 = x_125_phi;
+    if (x_125) {
+      const int x_128 = directions;
+      directions = (x_128 + 1);
     }
     const int x_131 = p.x;
     const bool x_132 = (x_131 < 14);
@@ -79,8 +101,10 @@ void main_1() {
       x_144 = (x_143 == 0);
       x_145_phi = x_144;
     }
-    if (x_145_phi) {
-      directions = (directions + 1);
+    const bool x_145 = x_145_phi;
+    if (x_145) {
+      const int x_148 = directions;
+      directions = (x_148 + 1);
     }
     const int x_151 = p.y;
     const bool x_152 = (x_151 < 14);
@@ -92,8 +116,10 @@ void main_1() {
       x_164 = (x_163 == 0);
       x_165_phi = x_164;
     }
-    if (x_165_phi) {
-      directions = (directions + 1);
+    const bool x_165 = x_165_phi;
+    if (x_165) {
+      const int x_168 = directions;
+      directions = (x_168 + 1);
     }
     bool x_229 = false;
     bool x_242 = false;
@@ -121,31 +147,55 @@ void main_1() {
     bool x_373_phi = false;
     bool x_412_phi = false;
     bool x_425_phi = false;
-    if ((directions == 0)) {
+    const int x_170 = directions;
+    if ((x_170 == 0)) {
       canwalk = false;
       i = 0;
-      {
-        for(; (i < 8); i = (i + 1)) {
-          j = 0;
-          {
-            for(; (j < 8); j = (j + 1)) {
-              const int x_196 = map[((j * 2) + ((i * 2) * 16))];
-              if ((x_196 == 0)) {
-                p.x = (j * 2);
-                p.y = (i * 2);
-                canwalk = true;
-              }
-            }
+      while (true) {
+        const int x_179 = i;
+        if ((x_179 < 8)) {
+        } else {
+          break;
+        }
+        j = 0;
+        while (true) {
+          const int x_186 = j;
+          if ((x_186 < 8)) {
+          } else {
+            break;
           }
+          const int x_189 = j;
+          const int x_191 = i;
+          const int x_196 = map[((x_189 * 2) + ((x_191 * 2) * 16))];
+          if ((x_196 == 0)) {
+            const int x_200 = j;
+            p.x = (x_200 * 2);
+            const int x_203 = i;
+            p.y = (x_203 * 2);
+            canwalk = true;
+          }
+          {
+            const int x_206 = j;
+            j = (x_206 + 1);
+          }
+        }
+        {
+          const int x_208 = i;
+          i = (x_208 + 1);
         }
       }
       const int x_211 = p.x;
       const int x_213 = p.y;
       map[(x_211 + (x_213 * 16))] = 1;
     } else {
-      d = (v % (directions == 0 ? 1 : directions));
-      v = (v + directions);
-      const bool x_224 = (d >= 0);
+      const int x_217 = v;
+      const int x_218 = directions;
+      d = tint_mod(x_217, x_218);
+      const int x_220 = directions;
+      const int x_221 = v;
+      v = (x_221 + x_220);
+      const int x_223 = d;
+      const bool x_224 = (x_223 >= 0);
       x_230_phi = x_224;
       if (x_224) {
         const int x_228 = p.x;
@@ -161,8 +211,10 @@ void main_1() {
         x_242 = (x_241 == 0);
         x_243_phi = x_242;
       }
-      if (x_243_phi) {
-        d = (d - 1);
+      const bool x_243 = x_243_phi;
+      if (x_243) {
+        const int x_246 = d;
+        d = (x_246 - 1);
         const int x_249 = p.x;
         const int x_251 = p.y;
         map[(x_249 + (x_251 * 16))] = 1;
@@ -175,7 +227,8 @@ void main_1() {
         const int x_272 = p.x;
         p.x = (x_272 - 2);
       }
-      const bool x_276 = (d >= 0);
+      const int x_275 = d;
+      const bool x_276 = (x_275 >= 0);
       x_282_phi = x_276;
       if (x_276) {
         const int x_280 = p.y;
@@ -198,19 +251,20 @@ void main_1() {
         x_296 = 0;
         x_297_phi = x_296;
       }
-      const int x_299 = ((x_297_phi - 2) * 16);
+      const int x_297 = x_297_phi;
+      const int x_299 = ((x_297 - 2) * 16);
       if (x_282) {
         x_303 = map;
         x_305_phi = x_303;
       } else {
-        const int tint_symbol_4[256] = (int[256])0;
-        x_304 = tint_symbol_4;
+        const int tint_symbol_3[256] = (int[256])0;
+        x_304 = tint_symbol_3;
         x_305_phi = x_304;
       }
       const int x_305[256] = x_305_phi;
       if (x_282) {
-        const int tint_symbol_5[256] = (int[256])0;
-        map = tint_symbol_5;
+        const int tint_symbol_4[256] = (int[256])0;
+        map = tint_symbol_4;
       }
       if (x_282) {
         map = x_305;
@@ -222,9 +276,11 @@ void main_1() {
         x_316 = 0;
         x_317_phi = x_316;
       }
-      const bool x_318 = (x_317_phi == 0);
+      const int x_317 = x_317_phi;
+      const bool x_318 = (x_317 == 0);
       if ((x_282 ? x_318 : x_282)) {
-        d = (d - 1);
+        const int x_323 = d;
+        d = (x_323 - 1);
         const int x_326 = p.x;
         const int x_328 = p.y;
         map[(x_326 + (x_328 * 16))] = 1;
@@ -234,14 +290,15 @@ void main_1() {
         const int x_341 = p.x;
         const int x_343 = p.y;
         const int x_345[256] = map;
-        const int tint_symbol_6[256] = (int[256])0;
-        map = tint_symbol_6;
+        const int tint_symbol_5[256] = (int[256])0;
+        map = tint_symbol_5;
         map = x_345;
         map[(x_341 + ((x_343 - 2) * 16))] = 1;
         const int x_350 = p.y;
         p.y = (x_350 - 2);
       }
-      const bool x_354 = (d >= 0);
+      const int x_353 = d;
+      const bool x_354 = (x_353 >= 0);
       x_360_phi = x_354;
       if (x_354) {
         const int x_358 = p.x;
@@ -257,8 +314,10 @@ void main_1() {
         x_372 = (x_371 == 0);
         x_373_phi = x_372;
       }
-      if (x_373_phi) {
-        d = (d - 1);
+      const bool x_373 = x_373_phi;
+      if (x_373) {
+        const int x_376 = d;
+        d = (x_376 - 1);
         const int x_379 = p.x;
         const int x_381 = p.y;
         map[(x_379 + (x_381 * 16))] = 1;
@@ -271,7 +330,8 @@ void main_1() {
         const int x_402 = p.x;
         p.x = (x_402 + 2);
       }
-      const bool x_406 = (d >= 0);
+      const int x_405 = d;
+      const bool x_406 = (x_405 >= 0);
       x_412_phi = x_406;
       if (x_406) {
         const int x_410 = p.y;
@@ -287,8 +347,10 @@ void main_1() {
         x_424 = (x_423 == 0);
         x_425_phi = x_424;
       }
-      if (x_425_phi) {
-        d = (d - 1);
+      const bool x_425 = x_425_phi;
+      if (x_425) {
+        const int x_428 = d;
+        d = (x_428 - 1);
         const int x_431 = p.x;
         const int x_433 = p.y;
         map[(x_431 + (x_433 * 16))] = 1;
@@ -310,10 +372,8 @@ void main_1() {
       return;
     }
     {
-      if (canwalk) {
-      } else {
-        break;
-      }
+      const bool x_468 = canwalk;
+      if (!(x_468)) { break; }
     }
   }
   x_GLF_color = float4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -333,8 +393,8 @@ struct tint_symbol_2 {
 main_out main_inner(float4 gl_FragCoord_param) {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
-  const main_out tint_symbol_7 = {x_GLF_color};
-  return tint_symbol_7;
+  const main_out tint_symbol_6 = {x_GLF_color};
+  return tint_symbol_6;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {

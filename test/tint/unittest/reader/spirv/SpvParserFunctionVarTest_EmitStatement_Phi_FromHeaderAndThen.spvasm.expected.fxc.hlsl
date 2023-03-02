@@ -8,25 +8,25 @@ void main_1() {
   const bool x_101 = x_7;
   const bool x_102 = x_8;
   while (true) {
-    uint x_2_phi = 0u;
+    uint x_2 = 0u;
     if (x_101) {
       break;
     }
-    x_2_phi = 0u;
+    x_2 = 0u;
     if (x_102) {
-      x_2_phi = 1u;
+      x_2 = 1u;
       {
-        x_1 = x_2_phi;
+        x_1 = x_2;
       }
       continue;
     } else {
       {
-        x_1 = x_2_phi;
+        x_1 = x_2;
       }
       continue;
     }
     {
-      x_1 = x_2_phi;
+      x_1 = x_2;
     }
   }
   return;
@@ -36,6 +36,3 @@ void main() {
   main_1();
   return;
 }
-FXC validation failure:
-C:\src\dawn\test\tint\Shader@0x0000025611B16C90(8,17-20): error X3696: infinite loop detected - loop never exits
-

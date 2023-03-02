@@ -18,9 +18,11 @@ void main_1() {
       } else {
         break;
       }
-      const int x_10 = donor_replacementGLF_dead6tree[GLF_dead6index];
+      const int x_9 = GLF_dead6index;
+      const int x_10 = donor_replacementGLF_dead6tree[x_9];
       GLF_dead6currentNode = x_10;
-      GLF_dead6index = GLF_dead6currentNode;
+      const int x_11 = GLF_dead6currentNode;
+      GLF_dead6index = x_11;
     }
   }
   return;
@@ -35,8 +37,8 @@ struct tint_symbol {
 
 main_out main_inner() {
   main_1();
-  const main_out tint_symbol_2 = {x_GLF_color};
-  return tint_symbol_2;
+  const main_out tint_symbol_1 = {x_GLF_color};
+  return tint_symbol_1;
 }
 
 tint_symbol main() {
@@ -46,10 +48,10 @@ tint_symbol main() {
   return wrapper_result;
 }
 DXC validation failure:
-warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
+warning: DXIL signing library (dxil.dll,libdxil.so) not found.  Resulting DXIL will not be signed for use in release environments.
 
 error: validation errors
-shader.hlsl:40: error: Loop must have break.
+shader.hlsl:42: error: Loop must have break.
 Validation failed.
 
 

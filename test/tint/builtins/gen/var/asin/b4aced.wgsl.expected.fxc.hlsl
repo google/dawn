@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void asin_b4aced() {
-  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(0.479248047h)).xx;
   vector<float16_t, 2> res = asin(arg_0);
 }
 

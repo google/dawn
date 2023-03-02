@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void atan_a7ba61() {
-  float16_t res = atan(float16_t(0.0h));
+  float16_t res = float16_t(0.78515625h);
 }
 
 struct tint_symbol {

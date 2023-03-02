@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void transpose_5edd96() {
-  matrix<float16_t, 4, 2> arg_0 = matrix<float16_t, 4, 2>((float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx);
+  matrix<float16_t, 4, 2> arg_0 = matrix<float16_t, 4, 2>((float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx);
   matrix<float16_t, 2, 4> res = transpose(arg_0);
 }
 

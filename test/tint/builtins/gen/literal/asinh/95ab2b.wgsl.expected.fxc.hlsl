@@ -1,11 +1,7 @@
 SKIP: FAILED
 
-vector<float16_t, 4> tint_sinh(vector<float16_t, 4> x) {
-  return log((x + sqrt(((x * x) + float16_t(1.0h)))));
-}
-
 void asinh_95ab2b() {
-  vector<float16_t, 4> res = tint_sinh((float16_t(0.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(0.881347656h)).xxxx;
 }
 
 struct tint_symbol {

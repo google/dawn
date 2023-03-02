@@ -22,10 +22,7 @@ void main_1() {
       const float x_53 = asfloat(x_5[1].x);
       x_GLF_color = float4(x_53, x_53, x_53, x_53);
       {
-        if (true) {
-        } else {
-          break;
-        }
+        if (false) { break; }
       }
     }
   } else {
@@ -50,7 +47,8 @@ void main_1() {
           const float x_79 = asfloat(x_5[1].x);
           x_GLF_color = float4(x_73, x_75, x_77, x_79);
           {
-            i = (i + 1);
+            const int x_16 = i;
+            i = (x_16 + 1);
           }
         }
         break;
@@ -58,10 +56,7 @@ void main_1() {
       {
         const float x_82 = asfloat(x_7[0].x);
         const float x_84 = asfloat(x_5[0].x);
-        if ((x_82 > x_84)) {
-        } else {
-          break;
-        }
+        if (!((x_82 > x_84))) { break; }
       }
     }
   }
@@ -77,8 +72,8 @@ struct tint_symbol {
 
 main_out main_inner() {
   main_1();
-  const main_out tint_symbol_4 = {x_GLF_color};
-  return tint_symbol_4;
+  const main_out tint_symbol_1 = {x_GLF_color};
+  return tint_symbol_1;
 }
 
 tint_symbol main() {
@@ -87,6 +82,3 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-FXC validation failure:
-C:\src\dawn\test\tint\Shader@0x000001315FE521C0(19,19-22): error X3696: infinite loop detected - loop never exits
-

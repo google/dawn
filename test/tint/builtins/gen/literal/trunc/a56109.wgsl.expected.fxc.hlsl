@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void trunc_a56109() {
-  vector<float16_t, 2> res = trunc((float16_t(0.0h)).xx);
+  vector<float16_t, 2> res = (float16_t(1.0h)).xx;
 }
 
 struct tint_symbol {

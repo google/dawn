@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void tan_d4d491() {
-  float16_t arg_0 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(1.0h);
   float16_t res = tan(arg_0);
 }
 

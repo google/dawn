@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void log2_8c10b3() {
-  float16_t res = log2(float16_t(0.0h));
+  float16_t res = float16_t(0.0h);
 }
 
 struct tint_symbol {

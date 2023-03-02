@@ -5,7 +5,7 @@ vector<float16_t, 3> tint_atanh(vector<float16_t, 3> x) {
 }
 
 void atanh_ec4b06() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(0.5h)).xxx;
   vector<float16_t, 3> res = tint_atanh(arg_0);
 }
 

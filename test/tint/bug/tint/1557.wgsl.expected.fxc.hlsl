@@ -40,6 +40,3 @@ void main() {
   }
   return;
 }
-FXC validation failure:
-internal error: no storage type for block output
-

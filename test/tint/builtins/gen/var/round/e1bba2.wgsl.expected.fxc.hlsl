@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void round_e1bba2() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(3.3984375h)).xxx;
   vector<float16_t, 3> res = round(arg_0);
 }
 

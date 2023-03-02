@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void tanh_5b19af() {
-  float16_t res = tanh(float16_t(0.0h));
+  float16_t res = float16_t(0.761230469h);
 }
 
 struct tint_symbol {

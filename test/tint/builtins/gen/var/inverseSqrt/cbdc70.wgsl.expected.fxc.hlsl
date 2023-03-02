@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void inverseSqrt_cbdc70() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> res = rsqrt(arg_0);
 }
 

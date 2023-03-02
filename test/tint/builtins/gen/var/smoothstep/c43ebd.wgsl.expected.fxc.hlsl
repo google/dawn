@@ -1,9 +1,9 @@
 SKIP: FAILED
 
 void smoothstep_c43ebd() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
-  vector<float16_t, 4> arg_1 = (float16_t(0.0h)).xxxx;
-  vector<float16_t, 4> arg_2 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(2.0h)).xxxx;
+  vector<float16_t, 4> arg_1 = (float16_t(4.0h)).xxxx;
+  vector<float16_t, 4> arg_2 = (float16_t(3.0h)).xxxx;
   vector<float16_t, 4> res = smoothstep(arg_0, arg_1, arg_2);
 }
 

@@ -7,8 +7,3 @@ void f() {
   const vector<float16_t, 3> r = (a / b);
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\expressions\Shader@0x000001C9783D4180(3,10-18): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\expressions\Shader@0x000001C9783D4180(4,3-11): error X3000: unrecognized identifier 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\expressions\Shader@0x000001C9783D4180(4,13): error X3000: unrecognized identifier 'b'
-

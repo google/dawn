@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void sinh_ba7e25() {
-  vector<float16_t, 4> res = sinh((float16_t(0.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(1.174804688h)).xxxx;
 }
 
 struct tint_symbol {

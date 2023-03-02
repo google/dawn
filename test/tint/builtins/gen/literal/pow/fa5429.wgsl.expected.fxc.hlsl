@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void pow_fa5429() {
-  vector<float16_t, 3> res = pow((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
+  vector<float16_t, 3> res = (float16_t(1.0h)).xxx;
 }
 
 struct tint_symbol {

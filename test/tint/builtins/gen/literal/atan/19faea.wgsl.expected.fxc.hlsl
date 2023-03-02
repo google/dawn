@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void atan_19faea() {
-  vector<float16_t, 4> res = atan((float16_t(0.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(0.78515625h)).xxxx;
 }
 
 struct tint_symbol {

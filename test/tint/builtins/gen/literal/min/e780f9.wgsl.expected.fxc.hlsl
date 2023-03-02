@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void min_e780f9() {
-  vector<float16_t, 2> res = min((float16_t(0.0h)).xx, (float16_t(0.0h)).xx);
+  vector<float16_t, 2> res = (float16_t(1.0h)).xx;
 }
 
 struct tint_symbol {

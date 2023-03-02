@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void sqrt_ec33e9() {
-  float16_t res = sqrt(float16_t(0.0h));
+  float16_t res = float16_t(1.0h);
 }
 
 struct tint_symbol {

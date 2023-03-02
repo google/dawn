@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void length_5b1a9b() {
-  float16_t res = length((float16_t(0.0h)).xxxx);
+  float16_t res = float16_t(0.0h);
 }
 
 struct tint_symbol {

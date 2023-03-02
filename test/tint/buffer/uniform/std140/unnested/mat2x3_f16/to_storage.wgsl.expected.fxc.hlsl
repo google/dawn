@@ -5,19 +5,19 @@ cbuffer cbuffer_u : register(b0, space0) {
 };
 RWByteAddressBuffer s : register(u1, space0);
 
-void tint_symbol(RWByteAddressBuffer buffer, uint offset, matrix<float16_t, 2, 3> value) {
-  buffer.Store<vector<float16_t, 3> >((offset + 0u), value[0u]);
-  buffer.Store<vector<float16_t, 3> >((offset + 8u), value[1u]);
+void s_store(uint offset, matrix<float16_t, 2, 3> value) {
+  s.Store<vector<float16_t, 3> >((offset + 0u), value[0u]);
+  s.Store<vector<float16_t, 3> >((offset + 8u), value[1u]);
 }
 
-matrix<float16_t, 2, 3> tint_symbol_2(uint4 buffer[1], uint offset) {
+matrix<float16_t, 2, 3> u_load(uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
-  uint4 ubo_load_1 = buffer[scalar_offset / 4];
+  uint4 ubo_load_1 = u[scalar_offset / 4];
   uint2 ubo_load = ((scalar_offset & 2) ? ubo_load_1.zw : ubo_load_1.xy);
   vector<float16_t, 2> ubo_load_xz = vector<float16_t, 2>(f16tof32(ubo_load & 0xFFFF));
   float16_t ubo_load_y = f16tof32(ubo_load[0] >> 16);
   const uint scalar_offset_1 = ((offset + 8u)) / 4;
-  uint4 ubo_load_3 = buffer[scalar_offset_1 / 4];
+  uint4 ubo_load_3 = u[scalar_offset_1 / 4];
   uint2 ubo_load_2 = ((scalar_offset_1 & 2) ? ubo_load_3.zw : ubo_load_3.xy);
   vector<float16_t, 2> ubo_load_2_xz = vector<float16_t, 2>(f16tof32(ubo_load_2 & 0xFFFF));
   float16_t ubo_load_2_y = f16tof32(ubo_load_2[0] >> 16);
@@ -26,7 +26,7 @@ matrix<float16_t, 2, 3> tint_symbol_2(uint4 buffer[1], uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  tint_symbol(s, 0u, tint_symbol_2(u, 0u));
+  s_store(0u, u_load(0u));
   uint2 ubo_load_4 = u[0].xy;
   vector<float16_t, 2> ubo_load_4_xz = vector<float16_t, 2>(f16tof32(ubo_load_4 & 0xFFFF));
   float16_t ubo_load_4_y = f16tof32(ubo_load_4[0] >> 16);
@@ -38,7 +38,3 @@ void f() {
   s.Store<float16_t>(2u, float16_t(f16tof32(((u[0].z) & 0xFFFF))));
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\buffer\Shader@0x0000015012B07F20(6,66-74): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\buffer\Shader@0x0000015012B07F20(7,3-14): error X3018: invalid subscript 'Store'
-

@@ -13,10 +13,7 @@ void main_1() {
   if ((x_30 > x_32)) {
     while (true) {
       {
-        if (false) {
-        } else {
-          break;
-        }
+        if (true) { break; }
       }
     }
     m = 1;
@@ -40,8 +37,8 @@ struct tint_symbol {
 
 main_out main_inner() {
   main_1();
-  const main_out tint_symbol_2 = {x_GLF_color};
-  return tint_symbol_2;
+  const main_out tint_symbol_1 = {x_GLF_color};
+  return tint_symbol_1;
 }
 
 tint_symbol main() {
@@ -51,10 +48,10 @@ tint_symbol main() {
   return wrapper_result;
 }
 DXC validation failure:
-warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
+warning: DXIL signing library (dxil.dll,libdxil.so) not found.  Resulting DXIL will not be signed for use in release environments.
 
 error: validation errors
-shader.hlsl:45: error: Loop must have break.
+shader.hlsl:42: error: Loop must have break.
 Validation failed.
 
 

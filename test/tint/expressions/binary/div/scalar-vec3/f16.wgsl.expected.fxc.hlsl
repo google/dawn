@@ -7,6 +7,3 @@ void f() {
   const vector<float16_t, 3> r = (a / b);
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\expressions\Shader@0x000001DE5F7F2A90(3,9-17): error X3000: unrecognized identifier 'float16_t'
-

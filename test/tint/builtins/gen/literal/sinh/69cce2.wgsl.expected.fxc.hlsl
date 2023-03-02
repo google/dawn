@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void sinh_69cce2() {
-  float16_t res = sinh(float16_t(0.0h));
+  float16_t res = float16_t(1.174804688h);
 }
 
 struct tint_symbol {

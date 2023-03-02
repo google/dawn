@@ -1,8 +1,8 @@
 SKIP: FAILED
 
 void atan2_ca698e() {
-  float16_t arg_0 = float16_t(0.0h);
-  float16_t arg_1 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(1.0h);
+  float16_t arg_1 = float16_t(1.0h);
   float16_t res = atan2(arg_0, arg_1);
 }
 

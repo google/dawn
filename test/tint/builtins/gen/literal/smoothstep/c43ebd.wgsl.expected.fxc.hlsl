@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void smoothstep_c43ebd() {
-  vector<float16_t, 4> res = smoothstep((float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(0.5h)).xxxx;
 }
 
 struct tint_symbol {

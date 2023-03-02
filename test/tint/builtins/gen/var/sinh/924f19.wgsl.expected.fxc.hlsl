@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void sinh_924f19() {
-  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
   vector<float16_t, 2> res = sinh(arg_0);
 }
 

@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void sign_ccdb3c() {
-  vector<float16_t, 2> res = sign((float16_t(0.0h)).xx);
+  vector<float16_t, 2> res = (float16_t(1.0h)).xx;
 }
 
 struct tint_symbol {

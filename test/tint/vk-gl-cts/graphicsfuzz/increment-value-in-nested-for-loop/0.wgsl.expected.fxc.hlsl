@@ -166,7 +166,8 @@ void main_1() {
       }
     }
     const int x_111 = x_111_phi;
-    if (x_112_phi) {
+    const bool x_112 = x_112_phi;
+    if (x_112) {
       break;
     }
     x_115_phi = x_111;
@@ -248,7 +249,8 @@ void main_1() {
         x_120_phi = x_121;
       }
     }
-    if ((x_161_phi == 4)) {
+    const int x_161 = x_161_phi;
+    if ((x_161 == 4)) {
       x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
     } else {
       x_GLF_color = (0.0f).xxxx;
@@ -271,8 +273,8 @@ struct tint_symbol_2 {
 main_out main_inner(float4 gl_FragCoord_param) {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
-  const main_out tint_symbol_4 = {x_GLF_color};
-  return tint_symbol_4;
+  const main_out tint_symbol_3 = {x_GLF_color};
+  return tint_symbol_3;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
@@ -281,9 +283,3 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-FXC validation failure:
-C:\src\dawn\test\tint\Shader@0x000001E775162FA0(8,10-21): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-C:\src\dawn\test\tint\Shader@0x000001E775162FA0(71,16-27): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-C:\src\dawn\test\tint\Shader@0x000001E775162FA0(186,14-25): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-C:\src\dawn\test\tint\Shader@0x000001E775162FA0(123,18-29): error X4029: infinite loop detected - loop never exits
-

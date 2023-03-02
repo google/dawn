@@ -5,7 +5,7 @@ float16_t tint_sinh(float16_t x) {
 }
 
 void asinh_468a48() {
-  float16_t arg_0 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(1.0h);
   float16_t res = tint_sinh(arg_0);
 }
 

@@ -18,9 +18,11 @@ void main_1() {
       } else {
         break;
       }
-      const int x_10 = donor_replacementGLF_dead6tree[GLF_dead6index];
+      const int x_9 = GLF_dead6index;
+      const int x_10 = donor_replacementGLF_dead6tree[x_9];
       GLF_dead6currentNode = x_10;
-      GLF_dead6index = GLF_dead6currentNode;
+      const int x_11 = GLF_dead6currentNode;
+      GLF_dead6index = x_11;
     }
   }
   return;
@@ -35,8 +37,8 @@ struct tint_symbol {
 
 main_out main_inner() {
   main_1();
-  const main_out tint_symbol_2 = {x_GLF_color};
-  return tint_symbol_2;
+  const main_out tint_symbol_1 = {x_GLF_color};
+  return tint_symbol_1;
 }
 
 tint_symbol main() {
@@ -45,6 +47,3 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-FXC validation failure:
-C:\src\dawn\test\tint\Shader@0x00000263B76FE810(14,19-22): error X3696: infinite loop detected - loop never exits
-

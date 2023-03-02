@@ -16,6 +16,3 @@ void f() {
   const float2x3 tint_symbol = m();
   matrix<float16_t, 2, 3> v = matrix<float16_t, 2, 3>(tint_symbol);
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\expressions\type_conv\Shader@0x0000029F80D27980(15,10-18): error X3000: syntax error: unexpected token 'float16_t'
-

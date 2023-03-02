@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void step_630d07() {
-  float16_t res = step(float16_t(0.0h), float16_t(0.0h));
+  float16_t res = float16_t(1.0h);
 }
 
 struct tint_symbol {

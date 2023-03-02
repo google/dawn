@@ -5,19 +5,19 @@ cbuffer cbuffer_u : register(b0, space0) {
 };
 static matrix<float16_t, 3, 4> p = matrix<float16_t, 3, 4>(float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h));
 
-matrix<float16_t, 3, 4> tint_symbol(uint4 buffer[2], uint offset) {
+matrix<float16_t, 3, 4> u_load(uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
-  uint4 ubo_load_1 = buffer[scalar_offset / 4];
+  uint4 ubo_load_1 = u[scalar_offset / 4];
   uint2 ubo_load = ((scalar_offset & 2) ? ubo_load_1.zw : ubo_load_1.xy);
   vector<float16_t, 2> ubo_load_xz = vector<float16_t, 2>(f16tof32(ubo_load & 0xFFFF));
   vector<float16_t, 2> ubo_load_yw = vector<float16_t, 2>(f16tof32(ubo_load >> 16));
   const uint scalar_offset_1 = ((offset + 8u)) / 4;
-  uint4 ubo_load_3 = buffer[scalar_offset_1 / 4];
+  uint4 ubo_load_3 = u[scalar_offset_1 / 4];
   uint2 ubo_load_2 = ((scalar_offset_1 & 2) ? ubo_load_3.zw : ubo_load_3.xy);
   vector<float16_t, 2> ubo_load_2_xz = vector<float16_t, 2>(f16tof32(ubo_load_2 & 0xFFFF));
   vector<float16_t, 2> ubo_load_2_yw = vector<float16_t, 2>(f16tof32(ubo_load_2 >> 16));
   const uint scalar_offset_2 = ((offset + 16u)) / 4;
-  uint4 ubo_load_5 = buffer[scalar_offset_2 / 4];
+  uint4 ubo_load_5 = u[scalar_offset_2 / 4];
   uint2 ubo_load_4 = ((scalar_offset_2 & 2) ? ubo_load_5.zw : ubo_load_5.xy);
   vector<float16_t, 2> ubo_load_4_xz = vector<float16_t, 2>(f16tof32(ubo_load_4 & 0xFFFF));
   vector<float16_t, 2> ubo_load_4_yw = vector<float16_t, 2>(f16tof32(ubo_load_4 >> 16));
@@ -26,7 +26,7 @@ matrix<float16_t, 3, 4> tint_symbol(uint4 buffer[2], uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  p = tint_symbol(u, 0u);
+  p = u_load(0u);
   uint2 ubo_load_6 = u[0].xy;
   vector<float16_t, 2> ubo_load_6_xz = vector<float16_t, 2>(f16tof32(ubo_load_6 & 0xFFFF));
   vector<float16_t, 2> ubo_load_6_yw = vector<float16_t, 2>(f16tof32(ubo_load_6 >> 16));
@@ -38,6 +38,3 @@ void f() {
   p[0][1] = float16_t(f16tof32(((u[0].z) & 0xFFFF)));
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\buffer\Shader@0x000002EEEBC7D430(4,15-23): error X3000: syntax error: unexpected token 'float16_t'
-

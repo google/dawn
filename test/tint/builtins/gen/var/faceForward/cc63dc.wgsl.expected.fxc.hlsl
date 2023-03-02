@@ -1,9 +1,9 @@
 SKIP: FAILED
 
 void faceForward_cc63dc() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
-  vector<float16_t, 4> arg_1 = (float16_t(0.0h)).xxxx;
-  vector<float16_t, 4> arg_2 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> arg_1 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> arg_2 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> res = faceforward(arg_0, arg_1, arg_2);
 }
 

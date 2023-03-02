@@ -6,6 +6,3 @@ void unused_entry_point() {
 }
 
 static float16_t u = float16_t(1.0h);
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\expressions\type_conv\Shader@0x00000142B88027F0(6,8-16): error X3000: unrecognized identifier 'float16_t'
-

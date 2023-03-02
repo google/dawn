@@ -42,6 +42,3 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\shader_io\Shader@0x0000026E46098A20(8,10-18): error X3000: syntax error: unexpected token 'float16_t'
-

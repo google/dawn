@@ -1,4 +1,4 @@
-SKIP: FAILED - crbug.com/tint/1666
+SKIP: FAILED
 
 void tint_symbol() {
   const int idx = 3;
@@ -31,5 +31,3 @@ void f() {
   runtime_size_array();
   return;
 }
-FXC validation failure:
-T:\tmp\dawn-temp\dawn-src\test\tint\Shader@0x0000019913EB4550(3,17-31): error X3030: array index out of bounds

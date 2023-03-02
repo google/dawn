@@ -1,8 +1,8 @@
 SKIP: FAILED
 
 void sign_7c85ea() {
-  float16_t arg_0 = float16_t(0.0h);
-  float16_t res = sign(arg_0);
+  float16_t arg_0 = float16_t(1.0h);
+  float16_t res = float16_t(sign(arg_0));
 }
 
 struct tint_symbol {

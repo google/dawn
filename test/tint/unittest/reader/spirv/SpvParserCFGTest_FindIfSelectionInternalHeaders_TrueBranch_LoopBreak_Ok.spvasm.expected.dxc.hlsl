@@ -16,7 +16,7 @@ void main() {
   return;
 }
 DXC validation failure:
-warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
+warning: DXIL signing library (dxil.dll,libdxil.so) not found.  Resulting DXIL will not be signed for use in release environments.
 
 error: validation errors
 shader.hlsl:12: error: Loop must have break.

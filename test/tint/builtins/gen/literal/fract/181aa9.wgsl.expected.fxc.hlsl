@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void fract_181aa9() {
-  vector<float16_t, 2> res = frac((float16_t(0.0h)).xx);
+  vector<float16_t, 2> res = (float16_t(0.25h)).xx;
 }
 
 struct tint_symbol {

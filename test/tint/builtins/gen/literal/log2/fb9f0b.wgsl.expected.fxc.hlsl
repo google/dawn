@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void log2_fb9f0b() {
-  vector<float16_t, 2> res = log2((float16_t(0.0h)).xx);
+  vector<float16_t, 2> res = (float16_t(0.0h)).xx;
 }
 
 struct tint_symbol {

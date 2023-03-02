@@ -7,8 +7,3 @@ void f() {
   const vector<float16_t, 3> r = (a / (b + b));
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\expressions\Shader@0x0000022203DE1EB0(3,10-18): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\expressions\Shader@0x0000022203DE1EB0(4,10-18): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\expressions\Shader@0x0000022203DE1EB0(5,16-24): error X3000: syntax error: unexpected token 'float16_t'
-

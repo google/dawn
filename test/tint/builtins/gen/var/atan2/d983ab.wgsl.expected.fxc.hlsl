@@ -1,8 +1,8 @@
 SKIP: FAILED
 
 void atan2_d983ab() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
-  vector<float16_t, 4> arg_1 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> arg_1 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> res = atan2(arg_0, arg_1);
 }
 

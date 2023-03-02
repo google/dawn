@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void asin_11dfda() {
-  float16_t arg_0 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(0.479248047h);
   float16_t res = asin(arg_0);
 }
 

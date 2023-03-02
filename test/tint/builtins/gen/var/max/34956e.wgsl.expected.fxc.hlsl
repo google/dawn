@@ -1,8 +1,8 @@
 SKIP: FAILED
 
 void max_34956e() {
-  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
-  vector<float16_t, 2> arg_1 = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
+  vector<float16_t, 2> arg_1 = (float16_t(1.0h)).xx;
   vector<float16_t, 2> res = max(arg_0, arg_1);
 }
 

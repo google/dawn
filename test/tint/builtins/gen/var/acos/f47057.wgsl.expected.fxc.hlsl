@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void acos_f47057() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(0.96875h)).xxx;
   vector<float16_t, 3> res = acos(arg_0);
 }
 

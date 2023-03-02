@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void sqrt_d9ab4d() {
-  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
   vector<float16_t, 2> res = sqrt(arg_0);
 }
 

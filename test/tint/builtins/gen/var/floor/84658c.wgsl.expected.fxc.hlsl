@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void floor_84658c() {
-  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(1.5h)).xx;
   vector<float16_t, 2> res = floor(arg_0);
 }
 

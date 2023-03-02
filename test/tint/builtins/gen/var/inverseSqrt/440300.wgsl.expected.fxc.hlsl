@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void inverseSqrt_440300() {
-  float16_t arg_0 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(1.0h);
   float16_t res = rsqrt(arg_0);
 }
 

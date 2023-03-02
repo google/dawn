@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void sin_2c903b() {
-  vector<float16_t, 3> res = sin((float16_t(0.0h)).xxx);
+  vector<float16_t, 3> res = (float16_t(0.999511719h)).xxx;
 }
 
 struct tint_symbol {

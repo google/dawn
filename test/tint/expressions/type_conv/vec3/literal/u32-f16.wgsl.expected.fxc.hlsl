@@ -6,6 +6,3 @@ void unused_entry_point() {
 }
 
 static vector<float16_t, 3> u = (float16_t(1.0h)).xxx;
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\expressions\type_conv\Shader@0x000001986DBC29D0(6,15-23): error X3000: syntax error: unexpected token 'float16_t'
-

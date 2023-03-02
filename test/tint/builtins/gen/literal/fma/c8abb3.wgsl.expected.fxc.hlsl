@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void fma_c8abb3() {
-  float16_t res = mad(float16_t(0.0h), float16_t(0.0h), float16_t(0.0h));
+  float16_t res = float16_t(2.0h);
 }
 
 struct tint_symbol {

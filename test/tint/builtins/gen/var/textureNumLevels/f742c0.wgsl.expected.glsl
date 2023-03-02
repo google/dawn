@@ -21,8 +21,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'textureQueryLevels' : no matching overloaded function found
-ERROR: 0:5: '' : compilation terminated
+ERROR: 0:5: 'textureQueryLevels' : no matching overloaded function found 
+ERROR: 0:5: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -44,8 +44,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:6: 'textureQueryLevels' : no matching overloaded function found
-ERROR: 0:6: '' : compilation terminated
+ERROR: 0:6: 'textureQueryLevels' : no matching overloaded function found 
+ERROR: 0:6: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -67,8 +67,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'textureQueryLevels' : no matching overloaded function found
-ERROR: 0:5: '' : compilation terminated
+ERROR: 0:5: 'textureQueryLevels' : no matching overloaded function found 
+ERROR: 0:5: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

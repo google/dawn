@@ -30,6 +30,3 @@ void compute_main(tint_symbol_1 tint_symbol) {
   compute_main_inner(tint_symbol.local_invocation_index);
   return;
 }
-
-FXC validation failure:
-T:\tmp\dawn-temp\dawn-src\test\tint\Shader@0x000001D6A00D1F90(1,13-21): error X3000: unrecognized identifier 'float16_t'

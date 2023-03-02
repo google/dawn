@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void log2_776088() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> res = log2(arg_0);
 }
 

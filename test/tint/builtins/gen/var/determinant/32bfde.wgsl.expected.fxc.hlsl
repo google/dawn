@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void determinant_32bfde() {
-  matrix<float16_t, 4, 4> arg_0 = matrix<float16_t, 4, 4>((float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx);
+  matrix<float16_t, 4, 4> arg_0 = matrix<float16_t, 4, 4>((float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx);
   float16_t res = determinant(arg_0);
 }
 

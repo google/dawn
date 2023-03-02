@@ -28,7 +28,7 @@ void main() {
 }
 Error parsing GLSL shader:
 ERROR: 0:13: 'image load-store format' : not supported with this profile: es
-ERROR: 0:13: '' : compilation terminated
+ERROR: 0:13: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

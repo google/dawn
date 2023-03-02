@@ -41,6 +41,3 @@ void frag_main(tint_symbol_2 tint_symbol_1) {
   frag_main_inner(tint_symbol_4);
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\shader_io\Shader@0x0000019F5A370630(3,3-11): error X3000: unrecognized identifier 'float16_t'
-

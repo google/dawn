@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void mix_f1a543() {
-  vector<float16_t, 4> res = lerp((float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, float16_t(0.0h));
+  vector<float16_t, 4> res = (float16_t(1.0h)).xxxx;
 }
 
 struct tint_symbol {
