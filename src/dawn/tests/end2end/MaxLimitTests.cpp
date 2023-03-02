@@ -113,8 +113,6 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
 
     // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
-    // TODO(crbug.com/dawn/1683) Fails on MacBook Pro 2019
-    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsAMD());
 
     for (wgpu::BufferUsage usage : {wgpu::BufferUsage::Storage, wgpu::BufferUsage::Uniform}) {
         uint64_t maxBufferBindingSize;
@@ -136,6 +134,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                     maxBufferBindingSize =
                         std::min(maxBufferBindingSize, uint64_t(512) * 1024 * 1024);
                 }
+                maxBufferBindingSize = Align(maxBufferBindingSize - 3u, 4);
                 shader = R"(
                   struct Buf {
                       values : array<u32>
@@ -162,6 +161,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                 // Clamp to not exceed the maximum i32 value for the WGSL @size(x) annotation.
                 maxBufferBindingSize = std::min(maxBufferBindingSize,
                                                 uint64_t(std::numeric_limits<int32_t>::max()) + 8);
+                maxBufferBindingSize = Align(maxBufferBindingSize - 3u, 4);
 
                 shader = R"(
                   struct Buf {
@@ -194,8 +194,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
         device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
 
         wgpu::BufferDescriptor bufDesc;
-        uint64_t bufferSize = Align(maxBufferBindingSize - 3u, 4);
-        bufDesc.size = bufferSize;
+        bufDesc.size = maxBufferBindingSize;
         bufDesc.usage = usage | wgpu::BufferUsage::CopyDst;
         wgpu::Buffer buffer = device.CreateBuffer(&bufDesc);
 
@@ -216,7 +215,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
         queue.WriteBuffer(buffer, 0, &value0, sizeof(value0));
 
         uint32_t value1 = 234;
-        uint64_t value1Offset = Align(bufferSize - sizeof(value1), 4);
+        uint64_t value1Offset = Align(maxBufferBindingSize - sizeof(value1), 4);
         queue.WriteBuffer(buffer, value1Offset, &value1, sizeof(value1));
 
         wgpu::ComputePipelineDescriptor csDesc;
@@ -237,9 +236,10 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
         queue.Submit(1, &commands);
 
         EXPECT_BUFFER_U32_EQ(value0, resultBuffer, 0)
-            << "maxBufferBindingSize=" << bufferSize << "; offset=" << 0 << "; usage=" << usage;
+            << "maxBufferBindingSize=" << maxBufferBindingSize << "; offset=" << 0
+            << "; usage=" << usage;
         EXPECT_BUFFER_U32_EQ(value1, resultBuffer, 4)
-            << "maxBufferBindingSize=" << bufferSize << "; offset=" << value1Offset
+            << "maxBufferBindingSize=" << maxBufferBindingSize << "; offset=" << value1Offset
             << "; usage=" << usage;
     }
 }
@@ -538,6 +538,23 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
     queue.Submit(1, &commands);
 
     EXPECT_BUFFER_U32_EQ(1, result, 0);
+}
+
+// Verifies that supported buffer limits do not exceed maxBufferSize.
+TEST_P(MaxLimitTests, MaxBufferSizes) {
+    // Base limits without tiering.
+    wgpu::Limits baseLimits = GetAdapterLimits().limits;
+    EXPECT_LE(baseLimits.maxStorageBufferBindingSize, baseLimits.maxBufferSize);
+    EXPECT_LE(baseLimits.maxUniformBufferBindingSize, baseLimits.maxBufferSize);
+
+    // Base limits eith tiering.
+    GetAdapter().SetUseTieredLimits(true);
+    wgpu::Limits tieredLimits = GetAdapterLimits().limits;
+    EXPECT_LE(tieredLimits.maxStorageBufferBindingSize, tieredLimits.maxBufferSize);
+    EXPECT_LE(tieredLimits.maxUniformBufferBindingSize, tieredLimits.maxBufferSize);
+
+    // Unset tiered limit usage to avoid affecting other tests.
+    GetAdapter().SetUseTieredLimits(false);
 }
 
 DAWN_INSTANTIATE_TEST(MaxLimitTests,

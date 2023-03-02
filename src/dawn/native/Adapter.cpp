@@ -71,6 +71,12 @@ MaybeError AdapterBase::Initialize() {
     mLimits.v1.maxUniformBuffersPerShaderStage =
         std::min(mLimits.v1.maxUniformBuffersPerShaderStage, kMaxUniformBuffersPerShaderStage);
 
+    // Additional enforcement for dependent limits.
+    mLimits.v1.maxStorageBufferBindingSize =
+        std::min(mLimits.v1.maxStorageBufferBindingSize, mLimits.v1.maxBufferSize);
+    mLimits.v1.maxUniformBufferBindingSize =
+        std::min(mLimits.v1.maxUniformBufferBindingSize, mLimits.v1.maxBufferSize);
+
     return {};
 }
 

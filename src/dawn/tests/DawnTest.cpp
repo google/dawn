@@ -815,6 +815,12 @@ const wgpu::AdapterProperties& DawnTestBase::GetAdapterProperties() const {
     return mParam.adapterProperties;
 }
 
+wgpu::SupportedLimits DawnTestBase::GetAdapterLimits() {
+    wgpu::SupportedLimits supportedLimits = {};
+    mAdapter.GetLimits(&supportedLimits);
+    return supportedLimits;
+}
+
 wgpu::SupportedLimits DawnTestBase::GetSupportedLimits() {
     wgpu::SupportedLimits supportedLimits = {};
     device.GetLimits(&supportedLimits);

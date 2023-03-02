@@ -564,6 +564,7 @@ class DawnTestBase {
 
     const wgpu::AdapterProperties& GetAdapterProperties() const;
 
+    wgpu::SupportedLimits GetAdapterLimits();
     wgpu::SupportedLimits GetSupportedLimits();
 
   private:
