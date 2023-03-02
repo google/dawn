@@ -96,10 +96,10 @@
          %48 = OpLoad %uint %idx
          %49 = OpLoad %uint %idx
          %50 = OpLoad %uint %idx
-         %51 = OpFunctionCall %uint %tint_div %48 %uint_2
-         %52 = OpFunctionCall %uint %tint_mod %49 %uint_2
-         %53 = OpFunctionCall %uint %tint_mod %50 %uint_1
-         %58 = OpAccessChain %_ptr_Workgroup_uint %wg %51 %52 %53
+         %54 = OpFunctionCall %uint %tint_div %48 %uint_2
+         %55 = OpFunctionCall %uint %tint_mod %49 %uint_2
+         %56 = OpFunctionCall %uint %tint_mod %50 %uint_1
+         %58 = OpAccessChain %_ptr_Workgroup_uint %wg %54 %55 %56
                OpAtomicStore %58 %uint_2 %uint_0 %6
                OpBranch %40
          %40 = OpLabel

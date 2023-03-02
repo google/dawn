@@ -17,7 +17,6 @@ int tint_div(int lhs, int rhs) {
 }
 
 void foo() {
-  int tint_symbol = tint_div(v.inner.a, 2);
-  v.inner.a = tint_symbol;
+  v.inner.a = tint_div(v.inner.a, 2);
 }
 

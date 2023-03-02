@@ -9,7 +9,7 @@ bool aboutEqual(float value, float expect) {
   return (abs((value - expect)) < 0.001f);
 }
 
-struct tint_symbol_2 {
+struct tint_symbol_8 {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
 
@@ -49,33 +49,33 @@ void main_inner(uint3 GlobalInvocationID) {
     const float4 srcColor = src.Load(int3(int2(srcTexCoord), 0));
     const float4 dstColor = tint_symbol.Load(int3(int2(dstTexCoord), 0));
     if ((uniforms[0].y == 2u)) {
-      bool tint_symbol_4 = success;
-      if (tint_symbol_4) {
-        tint_symbol_4 = aboutEqual(dstColor.r, srcColor.r);
+      bool tint_symbol_2 = success;
+      if (tint_symbol_2) {
+        tint_symbol_2 = aboutEqual(dstColor.r, srcColor.r);
       }
-      bool tint_symbol_3 = tint_symbol_4;
-      if (tint_symbol_3) {
-        tint_symbol_3 = aboutEqual(dstColor.g, srcColor.g);
+      bool tint_symbol_1 = tint_symbol_2;
+      if (tint_symbol_1) {
+        tint_symbol_1 = aboutEqual(dstColor.g, srcColor.g);
       }
-      success = tint_symbol_3;
+      success = tint_symbol_1;
     } else {
-      bool tint_symbol_8 = success;
-      if (tint_symbol_8) {
-        tint_symbol_8 = aboutEqual(dstColor.r, srcColor.r);
-      }
-      bool tint_symbol_7 = tint_symbol_8;
-      if (tint_symbol_7) {
-        tint_symbol_7 = aboutEqual(dstColor.g, srcColor.g);
-      }
-      bool tint_symbol_6 = tint_symbol_7;
+      bool tint_symbol_6 = success;
       if (tint_symbol_6) {
-        tint_symbol_6 = aboutEqual(dstColor.b, srcColor.b);
+        tint_symbol_6 = aboutEqual(dstColor.r, srcColor.r);
       }
       bool tint_symbol_5 = tint_symbol_6;
       if (tint_symbol_5) {
-        tint_symbol_5 = aboutEqual(dstColor.a, srcColor.a);
+        tint_symbol_5 = aboutEqual(dstColor.g, srcColor.g);
       }
-      success = tint_symbol_5;
+      bool tint_symbol_4 = tint_symbol_5;
+      if (tint_symbol_4) {
+        tint_symbol_4 = aboutEqual(dstColor.b, srcColor.b);
+      }
+      bool tint_symbol_3 = tint_symbol_4;
+      if (tint_symbol_3) {
+        tint_symbol_3 = aboutEqual(dstColor.a, srcColor.a);
+      }
+      success = tint_symbol_3;
     }
   }
   const uint outputIndex = ((GlobalInvocationID.y * dstSize.x) + GlobalInvocationID.x);
@@ -87,7 +87,7 @@ void main_inner(uint3 GlobalInvocationID) {
 }
 
 [numthreads(1, 1, 1)]
-void main(tint_symbol_2 tint_symbol_1) {
-  main_inner(tint_symbol_1.GlobalInvocationID);
+void main(tint_symbol_8 tint_symbol_7) {
+  main_inner(tint_symbol_7.GlobalInvocationID);
   return;
 }

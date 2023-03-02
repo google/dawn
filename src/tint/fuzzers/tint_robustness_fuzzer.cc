@@ -15,6 +15,7 @@
 #include "src/tint/fuzzers/fuzzer_init.h"
 #include "src/tint/fuzzers/tint_common_fuzzer.h"
 #include "src/tint/fuzzers/transform_builder.h"
+#include "src/tint/transform/robustness.h"
 
 namespace tint::fuzzers {
 

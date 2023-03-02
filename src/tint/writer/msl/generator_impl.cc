@@ -53,6 +53,7 @@
 #include "src/tint/transform/promote_initializers_to_let.h"
 #include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_phonies.h"
+#include "src/tint/transform/robustness.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
@@ -171,24 +172,6 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     // ExpandCompoundAssignment must come before BuiltinPolyfill
     manager.Add<transform::ExpandCompoundAssignment>();
 
-    {  // Builtin polyfills
-        transform::BuiltinPolyfill::Builtins polyfills;
-        polyfills.acosh = transform::BuiltinPolyfill::Level::kRangeCheck;
-        polyfills.atanh = transform::BuiltinPolyfill::Level::kRangeCheck;
-        polyfills.bitshift_modulo = true;  // crbug.com/tint/1543
-        polyfills.clamp_int = true;
-        polyfills.extract_bits = transform::BuiltinPolyfill::Level::kClampParameters;
-        polyfills.first_leading_bit = true;
-        polyfills.first_trailing_bit = true;
-        polyfills.insert_bits = transform::BuiltinPolyfill::Level::kClampParameters;
-        polyfills.int_div_mod = true;
-        polyfills.sign_int = true;
-        polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
-        polyfills.workgroup_uniform_load = true;
-        data.Add<transform::BuiltinPolyfill::Config>(polyfills);
-        manager.Add<transform::BuiltinPolyfill>();
-    }
-
     // Build the config for the internal ArrayLengthFromUniform transform.
     auto& array_length_from_uniform = options.array_length_from_uniform;
     transform::ArrayLengthFromUniform::Config array_length_from_uniform_cfg(
@@ -217,23 +200,51 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         transform::CanonicalizeEntryPointIO::ShaderStyle::kMsl, options.fixed_sample_mask,
         options.emit_vertex_point_size);
 
-    if (options.generate_external_texture_bindings) {
-        auto new_bindings_map = GenerateExternalTextureBindings(in);
-        data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(new_bindings_map);
-    }
-    manager.Add<transform::MultiplanarExternalTexture>();
-
     manager.Add<transform::PreservePadding>();
 
     manager.Add<transform::Unshadow>();
+
+    manager.Add<transform::PromoteSideEffectsToDecl>();
+
+    if (!options.disable_robustness) {
+        // Robustness must come before BuiltinPolyfill
+        manager.Add<transform::Robustness>();
+    }
+
+    {  // Builtin polyfills
+        transform::BuiltinPolyfill::Builtins polyfills;
+        polyfills.acosh = transform::BuiltinPolyfill::Level::kRangeCheck;
+        polyfills.atanh = transform::BuiltinPolyfill::Level::kRangeCheck;
+        polyfills.bitshift_modulo = true;  // crbug.com/tint/1543
+        polyfills.clamp_int = true;
+        polyfills.extract_bits = transform::BuiltinPolyfill::Level::kClampParameters;
+        polyfills.first_leading_bit = true;
+        polyfills.first_trailing_bit = true;
+        polyfills.insert_bits = transform::BuiltinPolyfill::Level::kClampParameters;
+        polyfills.int_div_mod = true;
+        polyfills.sign_int = true;
+        polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
+        polyfills.workgroup_uniform_load = true;
+        data.Add<transform::BuiltinPolyfill::Config>(polyfills);
+        manager.Add<transform::BuiltinPolyfill>();
+    }
+
+    if (options.generate_external_texture_bindings) {
+        // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
+        auto new_bindings_map = GenerateExternalTextureBindings(in);
+        data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(new_bindings_map);
+        manager.Add<transform::MultiplanarExternalTexture>();
+    }
 
     if (!options.disable_workgroup_init) {
         // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
         // ZeroInitWorkgroupMemory may inject new builtin parameters.
         manager.Add<transform::ZeroInitWorkgroupMemory>();
     }
+
+    // CanonicalizeEntryPointIO must come after Robustness
     manager.Add<transform::CanonicalizeEntryPointIO>();
-    manager.Add<transform::PromoteSideEffectsToDecl>();
+
     manager.Add<transform::PromoteInitializersToLet>();
 
     // DemoteToHelper must come after PromoteSideEffectsToDecl and ExpandCompoundAssignment.

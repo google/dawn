@@ -161,11 +161,11 @@
                OpSelectionMerge %68 None
                OpBranchConditional %true %69 %68
          %69 = OpLabel
-         %71 = OpCompositeConstruct %v4int %66 %66 %66 %66
-         %70 = OpFunctionCall %v4int %tint_div %31 %71
-         %73 = OpIEqual %v4bool %70 %31
-         %72 = OpAll %bool %73
-               OpStore %x_40 %72
+         %72 = OpCompositeConstruct %v4int %66 %66 %66 %66
+         %71 = OpFunctionCall %v4int %tint_div %31 %72
+         %73 = OpIEqual %v4bool %71 %31
+         %70 = OpAll %bool %73
+               OpStore %x_40 %70
          %74 = OpLoad %bool %x_40
                OpStore %x_41 %74
                OpBranch %68

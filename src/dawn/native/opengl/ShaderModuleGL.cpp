@@ -228,6 +228,9 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
             tintOptions.version = tint::writer::glsl::Version(ToTintGLStandard(r.glVersionStandard),
                                                               r.glVersionMajor, r.glVersionMinor);
 
+            // TODO(crbug.com/dawn/1686): Robustness causes shader compilation failures.
+            tintOptions.disable_robustness = true;
+
             // When textures are accessed without a sampler (e.g., textureLoad()),
             // GetSamplerTextureUses() will return this sentinel value.
             BindingPoint placeholderBindingPoint{static_cast<uint32_t>(kMaxBindGroupsTyped), 0};

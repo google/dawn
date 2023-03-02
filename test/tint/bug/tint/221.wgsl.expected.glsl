@@ -20,8 +20,7 @@ void tint_symbol() {
       break;
     }
     uint p_save = i;
-    uint tint_symbol_1 = tint_mod(i, 2u);
-    if ((tint_symbol_1 == 0u)) {
+    if ((tint_mod(i, 2u) == 0u)) {
       {
         b.inner.data[p_save] = (b.inner.data[p_save] * 2u);
         i = (i + 1u);

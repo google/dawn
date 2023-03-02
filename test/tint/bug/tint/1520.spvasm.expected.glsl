@@ -44,8 +44,7 @@ bool test_int_S1_c0_b() {
   ok = true;
   x_41 = false;
   if (true) {
-    ivec4 tint_symbol_1 = tint_div(ivec4(0), ivec4(x_27, x_27, x_27, x_27));
-    x_40 = all(equal(tint_symbol_1, ivec4(0)));
+    x_40 = all(equal(tint_div(ivec4(0), ivec4(x_27, x_27, x_27, x_27)), ivec4(0)));
     x_41 = x_40;
   }
   ok = x_41;
@@ -164,8 +163,8 @@ main_out tint_symbol(bool sk_Clockwise_param, vec4 vcolor_S0_param) {
   sk_Clockwise = sk_Clockwise_param;
   vcolor_S0 = vcolor_S0_param;
   main_1();
-  main_out tint_symbol_2 = main_out(sk_FragColor);
-  return tint_symbol_2;
+  main_out tint_symbol_1 = main_out(sk_FragColor);
+  return tint_symbol_1;
 }
 
 void main() {

@@ -9,8 +9,7 @@ int tint_div(int lhs, int rhs) {
   return (lhs / select(rhs, 1, bool((rhs == 0) | bool((lhs == (-2147483647 - 1)) & (rhs == -1)))));
 }
 
-void foo(device S* const tint_symbol_1) {
-  int const tint_symbol = tint_div((*(tint_symbol_1)).a, 2);
-  (*(tint_symbol_1)).a = tint_symbol;
+void foo(device S* const tint_symbol) {
+  (*(tint_symbol)).a = tint_div((*(tint_symbol)).a, 2);
 }
 

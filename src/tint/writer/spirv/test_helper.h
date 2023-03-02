@@ -33,6 +33,14 @@ class TestHelperBase : public ProgramBuilder, public BASE {
     TestHelperBase() = default;
     ~TestHelperBase() override = default;
 
+    /// @returns the default generator options for SanitizeAndBuild(), if no explicit options are
+    /// provided.
+    static Options DefaultOptions() {
+        Options opts;
+        opts.disable_robustness = true;
+        return opts;
+    }
+
     /// Builds and returns a spirv::Builder from the program.
     /// @note The spirv::Builder is only built once. Multiple calls to Build()
     /// will return the same spirv::Builder without rebuilding.
@@ -59,7 +67,7 @@ class TestHelperBase : public ProgramBuilder, public BASE {
     /// @note The spirv::Builder is only built once. Multiple calls to Build()
     /// will return the same spirv::Builder without rebuilding.
     /// @return the built spirv::Builder
-    spirv::Builder& SanitizeAndBuild(const Options& options = {}) {
+    spirv::Builder& SanitizeAndBuild(const Options& options = DefaultOptions()) {
         if (spirv_builder) {
             return *spirv_builder;
         }

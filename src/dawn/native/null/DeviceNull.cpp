@@ -391,8 +391,6 @@ MaybeError ComputePipeline::Initialize() {
     tint::transform::Manager transformManager;
     tint::transform::DataMap transformInputs;
 
-    transformManager.Add<tint::transform::Robustness>();
-
     if (!computeStage.metadata->overrides.empty()) {
         transformManager.Add<tint::transform::SingleEntryPoint>();
         transformInputs.Add<tint::transform::SingleEntryPoint::Config>(

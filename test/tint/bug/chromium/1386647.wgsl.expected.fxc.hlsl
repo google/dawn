@@ -7,9 +7,7 @@ struct tint_symbol_1 {
 };
 
 void f_inner(uint3 v) {
-  const uint tint_symbol_2 = v.x;
-  const uint tint_symbol_3 = tint_mod(v.y, 1u);
-  const uint l = (tint_symbol_2 << (tint_symbol_3 & 31u));
+  const uint l = (v.x << (tint_mod(v.y, 1u) & 31u));
 }
 
 [numthreads(1, 1, 1)]

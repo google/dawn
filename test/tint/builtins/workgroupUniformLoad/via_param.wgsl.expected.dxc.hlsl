@@ -3,21 +3,20 @@ void unused_entry_point() {
   return;
 }
 
-groupshared int v[4];
-
-int tint_workgroupUniformLoad_v_X(uint p[1]) {
+int tint_workgroupUniformLoad(inout int p) {
   GroupMemoryBarrierWithGroupSync();
-  const int result = v[p[0]];
+  const int result = p;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }
 
+groupshared int v[4];
+
 int foo_v_X(uint p[1]) {
-  const uint tint_symbol[1] = {p[0u]};
-  return tint_workgroupUniformLoad_v_X(tint_symbol);
+  return tint_workgroupUniformLoad(v[p[0]]);
 }
 
 int bar() {
-  const uint tint_symbol_1[1] = (uint[1])0;
-  return foo_v_X(tint_symbol_1);
+  const uint tint_symbol[1] = (uint[1])0;
+  return foo_v_X(tint_symbol);
 }

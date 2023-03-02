@@ -14,16 +14,22 @@ struct GammaTransferParams {
 struct ExternalTextureParams {
   uint numPlanes;
   uint doYuvToRgbConversionOnly;
+  uint pad;
+  uint pad_1;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   mat3 gamutConversionMatrix;
   mat3x2 coordTransformationMatrix;
+  uint pad_2;
+  uint pad_3;
 };
 
 struct ExternalTextureParams_std140 {
   uint numPlanes;
   uint doYuvToRgbConversionOnly;
+  uint pad;
+  uint pad_1;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -31,6 +37,8 @@ struct ExternalTextureParams_std140 {
   vec2 coordTransformationMatrix_0;
   vec2 coordTransformationMatrix_1;
   vec2 coordTransformationMatrix_2;
+  uint pad_2;
+  uint pad_3;
 };
 
 layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
@@ -63,7 +71,7 @@ vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, uve
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D ext_tex_plane_1_1;
 ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 val) {
-  return ExternalTextureParams(val.numPlanes, val.doYuvToRgbConversionOnly, val.yuvToRgbConversionMatrix, val.gammaDecodeParams, val.gammaEncodeParams, val.gamutConversionMatrix, mat3x2(val.coordTransformationMatrix_0, val.coordTransformationMatrix_1, val.coordTransformationMatrix_2));
+  return ExternalTextureParams(val.numPlanes, val.doYuvToRgbConversionOnly, val.pad, val.pad_1, val.yuvToRgbConversionMatrix, val.gammaDecodeParams, val.gammaEncodeParams, val.gamutConversionMatrix, mat3x2(val.coordTransformationMatrix_0, val.coordTransformationMatrix_1, val.coordTransformationMatrix_2), val.pad_2, val.pad_3);
 }
 
 void textureLoad_1bfdfb() {
@@ -101,16 +109,22 @@ struct GammaTransferParams {
 struct ExternalTextureParams {
   uint numPlanes;
   uint doYuvToRgbConversionOnly;
+  uint pad;
+  uint pad_1;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   mat3 gamutConversionMatrix;
   mat3x2 coordTransformationMatrix;
+  uint pad_2;
+  uint pad_3;
 };
 
 struct ExternalTextureParams_std140 {
   uint numPlanes;
   uint doYuvToRgbConversionOnly;
+  uint pad;
+  uint pad_1;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -118,6 +132,8 @@ struct ExternalTextureParams_std140 {
   vec2 coordTransformationMatrix_0;
   vec2 coordTransformationMatrix_1;
   vec2 coordTransformationMatrix_2;
+  uint pad_2;
+  uint pad_3;
 };
 
 layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
@@ -150,7 +166,7 @@ vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, uve
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D ext_tex_plane_1_1;
 ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 val) {
-  return ExternalTextureParams(val.numPlanes, val.doYuvToRgbConversionOnly, val.yuvToRgbConversionMatrix, val.gammaDecodeParams, val.gammaEncodeParams, val.gamutConversionMatrix, mat3x2(val.coordTransformationMatrix_0, val.coordTransformationMatrix_1, val.coordTransformationMatrix_2));
+  return ExternalTextureParams(val.numPlanes, val.doYuvToRgbConversionOnly, val.pad, val.pad_1, val.yuvToRgbConversionMatrix, val.gammaDecodeParams, val.gammaEncodeParams, val.gamutConversionMatrix, mat3x2(val.coordTransformationMatrix_0, val.coordTransformationMatrix_1, val.coordTransformationMatrix_2), val.pad_2, val.pad_3);
 }
 
 void textureLoad_1bfdfb() {
@@ -182,16 +198,22 @@ struct GammaTransferParams {
 struct ExternalTextureParams {
   uint numPlanes;
   uint doYuvToRgbConversionOnly;
+  uint pad;
+  uint pad_1;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   mat3 gamutConversionMatrix;
   mat3x2 coordTransformationMatrix;
+  uint pad_2;
+  uint pad_3;
 };
 
 struct ExternalTextureParams_std140 {
   uint numPlanes;
   uint doYuvToRgbConversionOnly;
+  uint pad;
+  uint pad_1;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -199,6 +221,8 @@ struct ExternalTextureParams_std140 {
   vec2 coordTransformationMatrix_0;
   vec2 coordTransformationMatrix_1;
   vec2 coordTransformationMatrix_2;
+  uint pad_2;
+  uint pad_3;
 };
 
 layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
@@ -231,7 +255,7 @@ vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, uve
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D ext_tex_plane_1_1;
 ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 val) {
-  return ExternalTextureParams(val.numPlanes, val.doYuvToRgbConversionOnly, val.yuvToRgbConversionMatrix, val.gammaDecodeParams, val.gammaEncodeParams, val.gamutConversionMatrix, mat3x2(val.coordTransformationMatrix_0, val.coordTransformationMatrix_1, val.coordTransformationMatrix_2));
+  return ExternalTextureParams(val.numPlanes, val.doYuvToRgbConversionOnly, val.pad, val.pad_1, val.yuvToRgbConversionMatrix, val.gammaDecodeParams, val.gammaEncodeParams, val.gamutConversionMatrix, mat3x2(val.coordTransformationMatrix_0, val.coordTransformationMatrix_1, val.coordTransformationMatrix_2), val.pad_2, val.pad_3);
 }
 
 void textureLoad_1bfdfb() {

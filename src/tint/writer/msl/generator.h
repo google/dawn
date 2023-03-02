@@ -44,6 +44,9 @@ struct Options {
     /// @returns this Options
     Options& operator=(const Options&);
 
+    /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
+    bool disable_robustness = false;
+
     /// The index to use when generating a UBO to receive storage buffer sizes.
     /// Defaults to 30, which is the last valid buffer slot.
     uint32_t buffer_size_ubo_index = 30;
@@ -67,7 +70,8 @@ struct Options {
     ArrayLengthFromUniformOptions array_length_from_uniform = {};
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(buffer_size_ubo_index,
+    TINT_REFLECT(disable_robustness,
+                 buffer_size_ubo_index,
                  fixed_sample_mask,
                  emit_vertex_point_size,
                  disable_workgroup_init,

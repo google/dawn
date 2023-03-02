@@ -43,16 +43,14 @@ class ReaderWriterFuzzer : public CommonFuzzer {
         CommonFuzzer::SetTransformManager(tm, inputs);
     }
 
-    /// Pass through to the CommonFuzzer implementation, but will setup a
-    /// robustness transform, if no other transforms have been set.
-    /// @param data buffer of data that will interpreted as a byte array or string
-    ///             depending on the shader input format.
+    /// Pass through to the CommonFuzzer implementation.
+    /// @param data buffer of data that will interpreted as a byte array or string depending on the
+    /// shader input format.
     /// @param size number of elements in buffer
     /// @returns 0, this is what libFuzzer expects
     int Run(const uint8_t* data, size_t size) {
         if (!tm_set_) {
             tb_ = std::make_unique<TransformBuilder>(data, size);
-            tb_->AddTransform<tint::transform::Robustness>();
             SetTransformManager(tb_->manager(), tb_->data_map());
         }
 

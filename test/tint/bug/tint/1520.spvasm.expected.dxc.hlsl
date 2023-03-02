@@ -25,8 +25,7 @@ bool test_int_S1_c0_b() {
   ok = true;
   x_41 = false;
   if (true) {
-    const int4 tint_symbol_3 = tint_div((0).xxxx, int4(x_27, x_27, x_27, x_27));
-    x_40 = all((tint_symbol_3 == (0).xxxx));
+    x_40 = all((tint_div((0).xxxx, int4(x_27, x_27, x_27, x_27)) == (0).xxxx));
     x_41 = x_40;
   }
   ok = x_41;
@@ -152,8 +151,8 @@ main_out main_inner(bool sk_Clockwise_param, float4 vcolor_S0_param) {
   sk_Clockwise = sk_Clockwise_param;
   vcolor_S0 = vcolor_S0_param;
   main_1();
-  const main_out tint_symbol_4 = {sk_FragColor};
-  return tint_symbol_4;
+  const main_out tint_symbol_3 = {sk_FragColor};
+  return tint_symbol_3;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {

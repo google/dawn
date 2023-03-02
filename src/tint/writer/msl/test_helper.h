@@ -33,6 +33,14 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     TestHelperBase() = default;
     ~TestHelperBase() override = default;
 
+    /// @returns the default generator options for SanitizeAndBuild(), if no explicit options are
+    /// provided.
+    static Options DefaultOptions() {
+        Options opts;
+        opts.disable_robustness = true;
+        return opts;
+    }
+
     /// Builds and returns a GeneratorImpl from the program.
     /// @note The generator is only built once. Multiple calls to Build() will
     /// return the same GeneratorImpl without rebuilding.
@@ -59,7 +67,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     /// @note The generator is only built once. Multiple calls to Build() will
     /// return the same GeneratorImpl without rebuilding.
     /// @return the built generator
-    GeneratorImpl& SanitizeAndBuild(const Options& options = {}) {
+    GeneratorImpl& SanitizeAndBuild(const Options& options = DefaultOptions()) {
         if (gen_) {
             return *gen_;
         }

@@ -12,15 +12,15 @@ struct Outer {
   Inner a[4];
 };
 
-groupshared Outer v;
-
-Outer tint_workgroupUniformLoad_v() {
+Outer tint_workgroupUniformLoad(inout Outer p) {
   GroupMemoryBarrierWithGroupSync();
-  const Outer result = v;
+  const Outer result = p;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }
 
+groupshared Outer v;
+
 Outer foo() {
-  return tint_workgroupUniformLoad_v();
+  return tint_workgroupUniformLoad(v);
 }

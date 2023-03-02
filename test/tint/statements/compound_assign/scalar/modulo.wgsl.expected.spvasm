@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 57
+; Bound: 50
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -16,8 +16,6 @@
                OpName %tint_mod "tint_mod"
                OpName %lhs "lhs"
                OpName %rhs "rhs"
-               OpName %tint_return_flag "tint_return_flag"
-               OpName %tint_return_value "tint_return_value"
                OpName %foo "foo"
                OpDecorate %v_block Block
                OpMemberDecorate %v_block 0 Offset 0
@@ -32,18 +30,14 @@
        %void = OpTypeVoid
           %6 = OpTypeFunction %void
          %10 = OpTypeFunction %int %int %int
+         %16 = OpConstantNull %int
        %bool = OpTypeBool
-%_ptr_Function_bool = OpTypePointer Function %bool
-         %18 = OpConstantNull %bool
-%_ptr_Function_int = OpTypePointer Function %int
-         %21 = OpConstantNull %int
 %int_n2147483648 = OpConstant %int -2147483648
      %int_n1 = OpConstant %int -1
       %int_1 = OpConstant %int 1
        %uint = OpTypeInt 32 0
 %uint_2147483648 = OpConstant %uint 2147483648
-         %37 = OpConstantNull %uint
-       %true = OpConstantTrue %bool
+         %32 = OpConstantNull %uint
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
       %int_2 = OpConstant %int 2
@@ -55,42 +49,35 @@
         %lhs = OpFunctionParameter %int
         %rhs = OpFunctionParameter %int
          %14 = OpLabel
-%tint_return_flag = OpVariable %_ptr_Function_bool Function %18
-%tint_return_value = OpVariable %_ptr_Function_int Function %21
-         %23 = OpIEqual %bool %rhs %21
-         %25 = OpIEqual %bool %lhs %int_n2147483648
-         %27 = OpIEqual %bool %rhs %int_n1
-         %28 = OpLogicalAnd %bool %25 %27
-         %29 = OpLogicalOr %bool %23 %28
-         %22 = OpSelect %int %29 %int_1 %rhs
-         %34 = OpBitwiseOr %int %lhs %22
-         %32 = OpBitcast %uint %34
-         %36 = OpBitwiseAnd %uint %32 %uint_2147483648
-         %38 = OpINotEqual %bool %36 %37
-               OpSelectionMerge %39 None
-               OpBranchConditional %38 %40 %41
-         %40 = OpLabel
-               OpStore %tint_return_flag %true
-         %43 = OpSDiv %int %lhs %22
-         %44 = OpIMul %int %43 %22
-         %45 = OpISub %int %lhs %44
-               OpStore %tint_return_value %45
-               OpBranch %39
-         %41 = OpLabel
-               OpStore %tint_return_flag %true
-         %46 = OpSRem %int %lhs %22
-               OpStore %tint_return_value %46
-               OpBranch %39
-         %39 = OpLabel
-         %47 = OpLoad %int %tint_return_value
-               OpReturnValue %47
+         %17 = OpIEqual %bool %rhs %16
+         %20 = OpIEqual %bool %lhs %int_n2147483648
+         %22 = OpIEqual %bool %rhs %int_n1
+         %23 = OpLogicalAnd %bool %20 %22
+         %24 = OpLogicalOr %bool %17 %23
+         %15 = OpSelect %int %24 %int_1 %rhs
+         %29 = OpBitwiseOr %int %lhs %15
+         %27 = OpBitcast %uint %29
+         %31 = OpBitwiseAnd %uint %27 %uint_2147483648
+         %33 = OpINotEqual %bool %31 %32
+               OpSelectionMerge %34 None
+               OpBranchConditional %33 %35 %36
+         %35 = OpLabel
+         %37 = OpSDiv %int %lhs %15
+         %38 = OpIMul %int %37 %15
+         %39 = OpISub %int %lhs %38
+               OpReturnValue %39
+         %36 = OpLabel
+         %40 = OpSRem %int %lhs %15
+               OpReturnValue %40
+         %34 = OpLabel
+               OpReturnValue %16
                OpFunctionEnd
         %foo = OpFunction %void None %6
-         %49 = OpLabel
-         %53 = OpAccessChain %_ptr_StorageBuffer_int %v %uint_0 %uint_0
-         %54 = OpLoad %int %53
-         %50 = OpFunctionCall %int %tint_mod %54 %int_2
-         %56 = OpAccessChain %_ptr_StorageBuffer_int %v %uint_0 %uint_0
-               OpStore %56 %50
+         %42 = OpLabel
+         %45 = OpAccessChain %_ptr_StorageBuffer_int %v %uint_0 %uint_0
+         %47 = OpAccessChain %_ptr_StorageBuffer_int %v %uint_0 %uint_0
+         %48 = OpLoad %int %47
+         %46 = OpFunctionCall %int %tint_mod %48 %int_2
+               OpStore %45 %46
                OpReturn
                OpFunctionEnd

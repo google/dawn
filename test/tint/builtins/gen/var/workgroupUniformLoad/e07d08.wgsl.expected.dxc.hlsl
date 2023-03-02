@@ -1,14 +1,14 @@
-groupshared float16_t arg_0;
-
-float16_t tint_workgroupUniformLoad_arg_0() {
+float16_t tint_workgroupUniformLoad(inout float16_t p) {
   GroupMemoryBarrierWithGroupSync();
-  const float16_t result = arg_0;
+  const float16_t result = p;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }
 
+groupshared float16_t arg_0;
+
 void workgroupUniformLoad_e07d08() {
-  float16_t res = tint_workgroupUniformLoad_arg_0();
+  float16_t res = tint_workgroupUniformLoad(arg_0);
 }
 
 struct tint_symbol_1 {

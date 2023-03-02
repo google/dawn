@@ -16,6 +16,5 @@ int4 tint_mod(int4 lhs, int rhs) {
 }
 
 void foo() {
-  const int4 tint_symbol = tint_mod(asint(v.Load4(0u)), 2);
-  v.Store4(0u, asuint(tint_symbol));
+  v.Store4(0u, asuint(tint_mod(asint(v.Load4(0u)), 2)));
 }

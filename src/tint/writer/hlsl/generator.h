@@ -49,23 +49,32 @@ struct Options {
     /// @returns this Options
     Options& operator=(const Options&);
 
+    /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
+    bool disable_robustness = false;
+
     /// The binding point to use for information passed via root constants.
     std::optional<sem::BindingPoint> root_constant_binding_point;
+
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
+
     /// Set to 'true' to generates binding mappings for external textures
     bool generate_external_texture_bindings = false;
+
     /// Options used to specify a mapping of binding points to indices into a UBO
     /// from which to load buffer sizes.
     ArrayLengthFromUniformOptions array_length_from_uniform = {};
+
     /// Interstage locations actually used as inputs in the next stage of the pipeline.
     /// This is potentially used for truncating unused interstage outputs at current shader stage.
     std::bitset<16> interstage_locations;
+
     /// Set to `true` to generate polyfill for `reflect` builtin for vec2<f32>
     bool polyfill_reflect_vec2_f32 = false;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(root_constant_binding_point,
+    TINT_REFLECT(disable_robustness,
+                 root_constant_binding_point,
                  disable_workgroup_init,
                  generate_external_texture_bindings,
                  array_length_from_uniform);

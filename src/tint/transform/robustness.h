@@ -31,6 +31,7 @@ namespace tint::transform {
 /// the bounds of the array. Any access before the start of the array will clamp
 /// to zero and any access past the end of the array will clamp to
 /// (array length - 1).
+/// @note This transform must come before the BuiltinPolyfill transform
 class Robustness final : public Castable<Robustness, Transform> {
   public:
     /// Address space to be skipped in the transform

@@ -222,9 +222,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                     std::move(r.substituteOverrideConfig).value());
             }
 
-            if (r.isRobustnessEnabled) {
-                transformManager.Add<tint::transform::Robustness>();
-            }
             transformManager.Add<BindingRemapper>();
             transformInputs.Add<BindingRemapper::Remappings>(std::move(r.bindingPoints),
                                                              BindingRemapper::AccessControls{},
@@ -262,6 +259,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             }
 
             tint::writer::msl::Options options;
+            options.disable_robustness = !r.isRobustnessEnabled;
             options.buffer_size_ubo_index = kBufferLengthBufferSlot;
             options.fixed_sample_mask = r.sampleMask;
             options.disable_workgroup_init = r.disableWorkgroupInit;

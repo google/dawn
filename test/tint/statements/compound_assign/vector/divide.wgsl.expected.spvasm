@@ -44,7 +44,7 @@
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_v4int = OpTypePointer StorageBuffer %v4int
       %int_2 = OpConstant %int 2
-         %41 = OpConstantComposite %v4int %int_2 %int_2 %int_2 %int_2
+         %42 = OpConstantComposite %v4int %int_2 %int_2 %int_2 %int_2
 %unused_entry_point = OpFunction %void None %7
          %10 = OpLabel
                OpReturn
@@ -64,10 +64,10 @@
                OpFunctionEnd
         %foo = OpFunction %void None %7
          %33 = OpLabel
-         %38 = OpAccessChain %_ptr_StorageBuffer_v4int %v %uint_0 %uint_0
-         %39 = OpLoad %v4int %38
-         %34 = OpFunctionCall %v4int %tint_div %39 %41
-         %42 = OpAccessChain %_ptr_StorageBuffer_v4int %v %uint_0 %uint_0
-               OpStore %42 %34
+         %37 = OpAccessChain %_ptr_StorageBuffer_v4int %v %uint_0 %uint_0
+         %39 = OpAccessChain %_ptr_StorageBuffer_v4int %v %uint_0 %uint_0
+         %40 = OpLoad %v4int %39
+         %38 = OpFunctionCall %v4int %tint_div %40 %42
+               OpStore %37 %38
                OpReturn
                OpFunctionEnd

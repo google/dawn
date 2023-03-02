@@ -293,10 +293,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                     std::move(r.substituteOverrideConfig).value());
             }
 
-            if (r.isRobustnessEnabled) {
-                transformManager.append(std::make_unique<tint::transform::Robustness>());
-            }
-
             // Run the binding remapper after SingleEntryPoint to avoid collisions with
             // unused entryPoints.
             transformManager.append(std::make_unique<tint::transform::BindingRemapper>());
@@ -344,6 +340,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             }
 
             tint::writer::spirv::Options options;
+            options.disable_robustness = !r.isRobustnessEnabled;
             options.emit_vertex_point_size = true;
             options.disable_workgroup_init = r.disableWorkgroupInit;
             options.use_zero_initialize_workgroup_memory_extension =

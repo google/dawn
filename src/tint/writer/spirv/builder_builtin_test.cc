@@ -2107,7 +2107,7 @@ OpEntryPoint Fragment %24 "a_func"
 OpExecutionMode %24 OriginUpperLeft
 OpName %5 "v"
 OpName %8 "tint_quantizeToF16"
-OpName %9 "v_1"
+OpName %9 "v"
 OpName %24 "a_func"
 %2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3

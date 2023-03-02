@@ -1,7 +1,7 @@
 fn foo() -> f32 {
   let oob = 99;
-  let b = vec4<f32>()[min(u32(oob), 3u)];
+  let b = vec4<f32>()[oob];
   var v : vec4<f32>;
-  v[min(u32(oob), 3u)] = b;
+  v[oob] = b;
   return b;
 }

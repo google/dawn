@@ -23,7 +23,6 @@ ivec4 tint_mod(ivec4 lhs, int rhs) {
 }
 
 void foo() {
-  ivec4 tint_symbol = tint_mod(v.inner.a, 2);
-  v.inner.a = tint_symbol;
+  v.inner.a = tint_mod(v.inner.a, 2);
 }
 

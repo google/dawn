@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 59
+; Bound: 52
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -10,76 +10,63 @@
                OpName %tint_mod "tint_mod"
                OpName %lhs "lhs"
                OpName %rhs "rhs"
-               OpName %tint_return_flag "tint_return_flag"
-               OpName %tint_return_value "tint_return_value"
                OpName %f "f"
         %int = OpTypeInt 32 1
       %v3int = OpTypeVector %int 3
           %1 = OpTypeFunction %v3int %v3int %v3int
+          %9 = OpConstantNull %v3int
        %bool = OpTypeBool
-%_ptr_Function_bool = OpTypePointer Function %bool
-         %11 = OpConstantNull %bool
-%_ptr_Function_v3int = OpTypePointer Function %v3int
-         %14 = OpConstantNull %v3int
      %v3bool = OpTypeVector %bool 3
 %int_n2147483648 = OpConstant %int -2147483648
-         %19 = OpConstantComposite %v3int %int_n2147483648 %int_n2147483648 %int_n2147483648
+         %14 = OpConstantComposite %v3int %int_n2147483648 %int_n2147483648 %int_n2147483648
      %int_n1 = OpConstant %int -1
-         %22 = OpConstantComposite %v3int %int_n1 %int_n1 %int_n1
+         %17 = OpConstantComposite %v3int %int_n1 %int_n1 %int_n1
       %int_1 = OpConstant %int 1
-         %27 = OpConstantComposite %v3int %int_1 %int_1 %int_1
+         %22 = OpConstantComposite %v3int %int_1 %int_1 %int_1
        %uint = OpTypeInt 32 0
      %v3uint = OpTypeVector %uint 3
 %uint_2147483648 = OpConstant %uint 2147483648
-         %34 = OpConstantComposite %v3uint %uint_2147483648 %uint_2147483648 %uint_2147483648
-         %36 = OpConstantNull %v3uint
-       %true = OpConstantTrue %bool
+         %29 = OpConstantComposite %v3uint %uint_2147483648 %uint_2147483648 %uint_2147483648
+         %31 = OpConstantNull %v3uint
        %void = OpTypeVoid
-         %47 = OpTypeFunction %void
+         %40 = OpTypeFunction %void
       %int_2 = OpConstant %int 2
       %int_3 = OpConstant %int 3
-         %53 = OpConstantComposite %v3int %int_1 %int_2 %int_3
+         %46 = OpConstantComposite %v3int %int_1 %int_2 %int_3
       %int_4 = OpConstant %int 4
       %int_5 = OpConstant %int 5
       %int_6 = OpConstant %int 6
-         %57 = OpConstantComposite %v3int %int_4 %int_5 %int_6
+         %50 = OpConstantComposite %v3int %int_4 %int_5 %int_6
    %tint_mod = OpFunction %v3int None %1
         %lhs = OpFunctionParameter %v3int
         %rhs = OpFunctionParameter %v3int
           %7 = OpLabel
-%tint_return_flag = OpVariable %_ptr_Function_bool Function %11
-%tint_return_value = OpVariable %_ptr_Function_v3int Function %14
-         %16 = OpIEqual %v3bool %rhs %14
-         %20 = OpIEqual %v3bool %lhs %19
-         %23 = OpIEqual %v3bool %rhs %22
-         %24 = OpLogicalAnd %v3bool %20 %23
-         %25 = OpLogicalOr %v3bool %16 %24
-         %15 = OpSelect %v3int %25 %27 %rhs
-         %32 = OpBitwiseOr %v3int %lhs %15
-         %29 = OpBitcast %v3uint %32
-         %35 = OpBitwiseAnd %v3uint %29 %34
-         %37 = OpINotEqual %v3bool %35 %36
-         %28 = OpAny %bool %37
-               OpSelectionMerge %38 None
-               OpBranchConditional %28 %39 %40
-         %39 = OpLabel
-               OpStore %tint_return_flag %true
-         %42 = OpSDiv %v3int %lhs %15
-         %43 = OpIMul %v3int %42 %15
-         %44 = OpISub %v3int %lhs %43
-               OpStore %tint_return_value %44
-               OpBranch %38
-         %40 = OpLabel
-               OpStore %tint_return_flag %true
-         %45 = OpSRem %v3int %lhs %15
-               OpStore %tint_return_value %45
-               OpBranch %38
-         %38 = OpLabel
-         %46 = OpLoad %v3int %tint_return_value
-               OpReturnValue %46
+         %10 = OpIEqual %v3bool %rhs %9
+         %15 = OpIEqual %v3bool %lhs %14
+         %18 = OpIEqual %v3bool %rhs %17
+         %19 = OpLogicalAnd %v3bool %15 %18
+         %20 = OpLogicalOr %v3bool %10 %19
+          %8 = OpSelect %v3int %20 %22 %rhs
+         %27 = OpBitwiseOr %v3int %lhs %8
+         %24 = OpBitcast %v3uint %27
+         %30 = OpBitwiseAnd %v3uint %24 %29
+         %32 = OpINotEqual %v3bool %30 %31
+         %23 = OpAny %bool %32
+               OpSelectionMerge %33 None
+               OpBranchConditional %23 %34 %35
+         %34 = OpLabel
+         %36 = OpSDiv %v3int %lhs %8
+         %37 = OpIMul %v3int %36 %8
+         %38 = OpISub %v3int %lhs %37
+               OpReturnValue %38
+         %35 = OpLabel
+         %39 = OpSRem %v3int %lhs %8
+               OpReturnValue %39
+         %33 = OpLabel
+               OpReturnValue %9
                OpFunctionEnd
-          %f = OpFunction %void None %47
-         %50 = OpLabel
-         %58 = OpFunctionCall %v3int %tint_mod %53 %57
+          %f = OpFunction %void None %40
+         %43 = OpLabel
+         %51 = OpFunctionCall %v3int %tint_mod %46 %50
                OpReturn
                OpFunctionEnd

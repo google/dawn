@@ -22,8 +22,8 @@ void atomicCompareExchangeWeak_e88938() {
   int atomic_compare_value = x_23;
   InterlockedCompareExchange(arg_0, atomic_compare_value, x_22, atomic_result.old_value);
   atomic_result.exchanged = atomic_result.old_value == atomic_compare_value;
-  const atomic_compare_exchange_resulti32 tint_symbol_2 = atomic_result;
-  const int old_value_1 = tint_symbol_2.old_value;
+  const atomic_compare_exchange_resulti32 tint_symbol = atomic_result;
+  const int old_value_1 = tint_symbol.old_value;
   const int x_24 = old_value_1;
   const x__atomic_compare_exchange_resulti32 tint_symbol_3 = {x_24, (x_24 == x_22)};
   res = tint_symbol_3;
@@ -44,7 +44,7 @@ void compute_main_1() {
   return;
 }
 
-struct tint_symbol_1 {
+struct tint_symbol_2 {
   uint local_invocation_index_1_param : SV_GroupIndex;
 };
 
@@ -59,7 +59,7 @@ void compute_main_inner_1(uint local_invocation_index_1_param) {
 }
 
 [numthreads(1, 1, 1)]
-void compute_main(tint_symbol_1 tint_symbol) {
-  compute_main_inner_1(tint_symbol.local_invocation_index_1_param);
+void compute_main(tint_symbol_2 tint_symbol_1) {
+  compute_main_inner_1(tint_symbol_1.local_invocation_index_1_param);
   return;
 }

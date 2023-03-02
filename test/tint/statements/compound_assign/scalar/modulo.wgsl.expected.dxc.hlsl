@@ -15,6 +15,5 @@ int tint_mod(int lhs, int rhs) {
 }
 
 void foo() {
-  const int tint_symbol = tint_mod(asint(v.Load(0u)), 2);
-  v.Store(0u, asuint(tint_symbol));
+  v.Store(0u, asuint(tint_mod(asint(v.Load(0u)), 2)));
 }

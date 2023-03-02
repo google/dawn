@@ -22,6 +22,7 @@
 
 #include "src/tint/fuzzers/data_builder.h"
 #include "src/tint/fuzzers/shuffle_transform.h"
+#include "src/tint/transform/robustness.h"
 
 namespace tint::fuzzers {
 
@@ -61,7 +62,6 @@ class TransformBuilder {
     /// Helper that invokes Add*Transform for all of the platform independent
     /// passes.
     void AddPlatformIndependentPasses() {
-        AddTransform<transform::Robustness>();
         AddTransform<transform::FirstIndexOffset>();
         AddTransform<transform::BindingRemapper>();
         AddTransform<transform::Renamer>();

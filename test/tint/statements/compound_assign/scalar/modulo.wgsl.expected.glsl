@@ -22,7 +22,6 @@ int tint_mod(int lhs, int rhs) {
 }
 
 void foo() {
-  int tint_symbol = tint_mod(v.inner.a, 2);
-  v.inner.a = tint_symbol;
+  v.inner.a = tint_mod(v.inner.a, 2);
 }
 

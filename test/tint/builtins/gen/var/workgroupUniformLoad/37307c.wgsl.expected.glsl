@@ -1,15 +1,15 @@
 #version 310 es
 
-shared uint arg_0;
-uint tint_workgroupUniformLoad_arg_0() {
+uint tint_workgroupUniformLoad(inout uint p) {
   barrier();
-  uint result = arg_0;
+  uint result = p;
   barrier();
   return result;
 }
 
+shared uint arg_0;
 void workgroupUniformLoad_37307c() {
-  uint res = tint_workgroupUniformLoad_arg_0();
+  uint res = tint_workgroupUniformLoad(arg_0);
 }
 
 void compute_main(uint local_invocation_index) {

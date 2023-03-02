@@ -3,15 +3,15 @@ void unused_entry_point() {
   return;
 }
 
-groupshared float3x3 v;
-
-float3x3 tint_workgroupUniformLoad_v() {
+float3x3 tint_workgroupUniformLoad(inout float3x3 p) {
   GroupMemoryBarrierWithGroupSync();
-  const float3x3 result = v;
+  const float3x3 result = p;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }
 
+groupshared float3x3 v;
+
 float3x3 foo() {
-  return tint_workgroupUniformLoad_v();
+  return tint_workgroupUniformLoad(v);
 }

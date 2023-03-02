@@ -10,17 +10,17 @@ float3 Bad(uint index, float3 rd) {
 
 RWByteAddressBuffer io : register(u0, space0);
 
-struct tint_symbol_1 {
+struct tint_symbol_2 {
   uint idx : SV_GroupIndex;
 };
 
 void main_inner(uint idx) {
-  const float3 tint_symbol_2 = Bad(io.Load(12u), asfloat(io.Load3(0u)));
-  io.Store3(0u, asuint(tint_symbol_2));
+  const float3 tint_symbol = Bad(io.Load(12u), asfloat(io.Load3(0u)));
+  io.Store3(0u, asuint(tint_symbol));
 }
 
 [numthreads(1, 1, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  main_inner(tint_symbol.idx);
+void main(tint_symbol_2 tint_symbol_1) {
+  main_inner(tint_symbol_1.idx);
   return;
 }

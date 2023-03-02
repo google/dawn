@@ -19,15 +19,15 @@ struct str {
 };
 
 void func(threadgroup str* const pointer) {
-  str const tint_symbol_1 = str{};
-  *(pointer) = tint_symbol_1;
+  str const tint_symbol_2 = str{};
+  *(pointer) = tint_symbol_2;
 }
 
 void tint_symbol_inner(uint local_invocation_index, threadgroup tint_array<str, 4>* const tint_symbol_3) {
   for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
     uint const i_1 = idx;
-    str const tint_symbol_2 = str{};
-    (*(tint_symbol_3))[i_1] = tint_symbol_2;
+    str const tint_symbol_1 = str{};
+    (*(tint_symbol_3))[i_1] = tint_symbol_1;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
   func(&((*(tint_symbol_3))[2]));

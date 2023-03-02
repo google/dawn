@@ -10,6 +10,5 @@ int tint_div(int lhs, int rhs) {
 }
 
 void foo() {
-  const int tint_symbol = tint_div(asint(v.Load(0u)), 2);
-  v.Store(0u, asuint(tint_symbol));
+  v.Store(0u, asuint(tint_div(asint(v.Load(0u)), 2)));
 }

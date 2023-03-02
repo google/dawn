@@ -52,9 +52,9 @@ fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord
 
 @compute @workgroup_size(1)
 fn main() {
-  var red : vec4<f32> = textureLoadExternal(t, ext_tex_plane_1, clamp(vec2<i32>(10, 10), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(t)) - vec2(1)))), ext_tex_params);
-  textureStore(outImage, clamp(vec2<i32>(0, 0), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(outImage)) - vec2(1)))), red);
-  var green : vec4<f32> = textureLoadExternal(t, ext_tex_plane_1, clamp(vec2<i32>(70, 118), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(t)) - vec2(1)))), ext_tex_params);
-  textureStore(outImage, clamp(vec2<i32>(1, 0), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(outImage)) - vec2(1)))), green);
+  var red : vec4<f32> = textureLoadExternal(t, ext_tex_plane_1, vec2<i32>(10, 10), ext_tex_params);
+  textureStore(outImage, vec2<i32>(0, 0), red);
+  var green : vec4<f32> = textureLoadExternal(t, ext_tex_plane_1, vec2<i32>(70, 118), ext_tex_params);
+  textureStore(outImage, vec2<i32>(1, 0), green);
   return;
 }

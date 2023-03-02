@@ -47,7 +47,7 @@ uint tint_div(uint lhs, uint rhs) {
   return (lhs / ((rhs == 0u) ? 1u : rhs));
 }
 
-struct tint_symbol_1 {
+struct tint_symbol_3 {
   uint3 local_id : SV_GroupThreadID;
   uint local_invocation_index : SV_GroupIndex;
   uint3 global_id : SV_DispatchThreadID;
@@ -67,8 +67,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
   const uint tileCol = (local_id.x * 4u);
   const uint globalRow = (global_id.y * 4u);
   const uint globalCol = (global_id.x * 4u);
-  const uint tint_symbol_2 = tint_div((uniforms[0].y - 1u), 64u);
-  const uint numTiles = (tint_symbol_2 + 1u);
+  const uint numTiles = (tint_div((uniforms[0].y - 1u), 64u) + 1u);
   float acc[16] = (float[16])0;
   float ACached = 0.0f;
   float BCached[4] = (float[4])0;
@@ -89,8 +88,8 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
             for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRow + innerRow);
               const uint inputCol = (tileColA + innerCol);
-              const float tint_symbol_3 = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
-              mm_Asub[inputRow][inputCol] = tint_symbol_3;
+              const float tint_symbol = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
+              mm_Asub[inputRow][inputCol] = tint_symbol;
             }
           }
         }
@@ -101,8 +100,8 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
             for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRowB + innerRow);
               const uint inputCol = (tileCol + innerCol);
-              const float tint_symbol_4 = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
-              mm_Bsub[innerCol][inputCol] = tint_symbol_4;
+              const float tint_symbol_1 = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
+              mm_Bsub[innerCol][inputCol] = tint_symbol_1;
             }
           }
         }
@@ -144,7 +143,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
 }
 
 [numthreads(16, 16, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  main_inner(tint_symbol.local_id, tint_symbol.global_id, tint_symbol.local_invocation_index);
+void main(tint_symbol_3 tint_symbol_2) {
+  main_inner(tint_symbol_2.local_id, tint_symbol_2.global_id, tint_symbol_2.local_invocation_index);
   return;
 }

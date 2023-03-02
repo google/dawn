@@ -23,24 +23,23 @@ uint tint_mod(uint lhs, uint rhs) {
   return (lhs % select(rhs, 1u, (rhs == 0u)));
 }
 
-kernel void tint_symbol(device Buf* tint_symbol_2 [[buffer(0)]]) {
+kernel void tint_symbol(device Buf* tint_symbol_1 [[buffer(0)]]) {
   uint i = 0u;
   while (true) {
-    if ((i >= (*(tint_symbol_2)).count)) {
+    if ((i >= (*(tint_symbol_1)).count)) {
       break;
     }
     uint const p_save = i;
-    uint const tint_symbol_1 = tint_mod(i, 2u);
-    if ((tint_symbol_1 == 0u)) {
+    if ((tint_mod(i, 2u) == 0u)) {
       {
-        (*(tint_symbol_2)).data[p_save] = ((*(tint_symbol_2)).data[p_save] * 2u);
+        (*(tint_symbol_1)).data[p_save] = ((*(tint_symbol_1)).data[p_save] * 2u);
         i = (i + 1u);
       }
       continue;
     }
-    (*(tint_symbol_2)).data[p_save] = 0u;
+    (*(tint_symbol_1)).data[p_save] = 0u;
     {
-      (*(tint_symbol_2)).data[p_save] = ((*(tint_symbol_2)).data[p_save] * 2u);
+      (*(tint_symbol_1)).data[p_save] = ((*(tint_symbol_1)).data[p_save] * 2u);
       i = (i + 1u);
     }
   }

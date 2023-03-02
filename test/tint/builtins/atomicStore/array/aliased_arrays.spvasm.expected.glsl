@@ -21,10 +21,7 @@ void compute_main_inner(uint local_invocation_index_2) {
     uint x_31 = idx;
     uint x_33 = idx;
     uint x_35 = idx;
-    uint tint_symbol = tint_div(x_31, 2u);
-    uint tint_symbol_1 = tint_mod(x_33, 2u);
-    uint tint_symbol_2 = tint_mod(x_35, 1u);
-    atomicExchange(wg[tint_symbol][tint_symbol_1][tint_symbol_2], 0u);
+    atomicExchange(wg[tint_div(x_31, 2u)][tint_mod(x_33, 2u)][tint_mod(x_35, 1u)], 0u);
     {
       uint x_42 = idx;
       idx = (x_42 + 1u);

@@ -1,14 +1,14 @@
-groupshared uint arg_0;
-
-uint tint_workgroupUniformLoad_arg_0() {
+uint tint_workgroupUniformLoad(inout uint p) {
   GroupMemoryBarrierWithGroupSync();
-  const uint result = arg_0;
+  const uint result = p;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }
 
+groupshared uint arg_0;
+
 void workgroupUniformLoad_37307c() {
-  uint res = tint_workgroupUniformLoad_arg_0();
+  uint res = tint_workgroupUniformLoad(arg_0);
 }
 
 struct tint_symbol_1 {

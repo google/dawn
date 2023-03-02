@@ -67,7 +67,7 @@ void doIgnore() {
   int g55 = LUTatomicLoad(0u);
 }
 
-struct tint_symbol_1 {
+struct tint_symbol_2 {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
 
@@ -103,12 +103,12 @@ void main_count_inner(uint3 GlobalInvocationID) {
 }
 
 [numthreads(128, 1, 1)]
-void main_count(tint_symbol_1 tint_symbol) {
-  main_count_inner(tint_symbol.GlobalInvocationID);
+void main_count(tint_symbol_2 tint_symbol_1) {
+  main_count_inner(tint_symbol_1.GlobalInvocationID);
   return;
 }
 
-struct tint_symbol_3 {
+struct tint_symbol_4 {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
 
@@ -135,19 +135,19 @@ void main_create_lut_inner(uint3 GlobalInvocationID) {
   uint numTriangles = countersatomicLoad((4u * voxelIndex));
   int offset = -1;
   if ((numTriangles > 0u)) {
-    const uint tint_symbol_6 = dbgatomicAdd(0u, numTriangles);
-    offset = int(tint_symbol_6);
+    const uint tint_symbol = dbgatomicAdd(0u, numTriangles);
+    offset = int(tint_symbol);
   }
   LUTatomicStore((4u * voxelIndex), offset);
 }
 
 [numthreads(128, 1, 1)]
-void main_create_lut(tint_symbol_3 tint_symbol_2) {
-  main_create_lut_inner(tint_symbol_2.GlobalInvocationID);
+void main_create_lut(tint_symbol_4 tint_symbol_3) {
+  main_create_lut_inner(tint_symbol_3.GlobalInvocationID);
   return;
 }
 
-struct tint_symbol_5 {
+struct tint_symbol_6 {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
 
@@ -177,7 +177,7 @@ void main_sort_triangles_inner(uint3 GlobalInvocationID) {
 }
 
 [numthreads(128, 1, 1)]
-void main_sort_triangles(tint_symbol_5 tint_symbol_4) {
-  main_sort_triangles_inner(tint_symbol_4.GlobalInvocationID);
+void main_sort_triangles(tint_symbol_6 tint_symbol_5) {
+  main_sort_triangles_inner(tint_symbol_5.GlobalInvocationID);
   return;
 }

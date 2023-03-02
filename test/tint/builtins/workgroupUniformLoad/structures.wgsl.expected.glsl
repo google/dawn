@@ -14,15 +14,15 @@ struct Outer {
   Inner a[4];
 };
 
-shared Outer v;
-Outer tint_workgroupUniformLoad_v() {
+Outer tint_workgroupUniformLoad(inout Outer p) {
   barrier();
-  Outer result = v;
+  Outer result = p;
   barrier();
   return result;
 }
 
+shared Outer v;
 Outer foo() {
-  return tint_workgroupUniformLoad_v();
+  return tint_workgroupUniformLoad(v);
 }
 

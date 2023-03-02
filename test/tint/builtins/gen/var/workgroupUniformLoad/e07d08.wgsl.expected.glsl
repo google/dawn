@@ -1,16 +1,16 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-shared float16_t arg_0;
-float16_t tint_workgroupUniformLoad_arg_0() {
+float16_t tint_workgroupUniformLoad(inout float16_t p) {
   barrier();
-  float16_t result = arg_0;
+  float16_t result = p;
   barrier();
   return result;
 }
 
+shared float16_t arg_0;
 void workgroupUniformLoad_e07d08() {
-  float16_t res = tint_workgroupUniformLoad_arg_0();
+  float16_t res = tint_workgroupUniformLoad(arg_0);
 }
 
 void compute_main(uint local_invocation_index) {

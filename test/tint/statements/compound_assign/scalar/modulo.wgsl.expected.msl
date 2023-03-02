@@ -14,8 +14,7 @@ int tint_mod(int lhs, int rhs) {
   }
 }
 
-void foo(device S* const tint_symbol_1) {
-  int const tint_symbol = tint_mod((*(tint_symbol_1)).a, 2);
-  (*(tint_symbol_1)).a = tint_symbol;
+void foo(device S* const tint_symbol) {
+  (*(tint_symbol)).a = tint_mod((*(tint_symbol)).a, 2);
 }
 

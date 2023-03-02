@@ -57,6 +57,7 @@
 #include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_phonies.h"
 #include "src/tint/transform/renamer.h"
+#include "src/tint/transform/robustness.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/single_entry_point.h"
 #include "src/tint/transform/std140.h"
@@ -149,6 +150,33 @@ SanitizedResult Sanitize(const Program* in,
     // ExpandCompoundAssignment must come before BuiltinPolyfill
     manager.Add<transform::ExpandCompoundAssignment>();
 
+    if (!entry_point.empty()) {
+        manager.Add<transform::SingleEntryPoint>();
+        data.Add<transform::SingleEntryPoint::Config>(entry_point);
+    }
+    manager.Add<transform::Renamer>();
+    data.Add<transform::Renamer::Config>(transform::Renamer::Target::kGlslKeywords,
+                                         /* preserve_unicode */ false);
+
+    manager.Add<transform::PreservePadding>();  // Must come before DirectVariableAccess
+
+    manager.Add<transform::Unshadow>();  // Must come before DirectVariableAccess
+    manager.Add<transform::DirectVariableAccess>();
+
+    manager.Add<transform::PromoteSideEffectsToDecl>();
+
+    if (!options.disable_robustness) {
+        // Robustness must come before BuiltinPolyfill
+        manager.Add<transform::Robustness>();
+    }
+
+    if (options.generate_external_texture_bindings) {
+        // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
+        auto new_bindings_map = writer::GenerateExternalTextureBindings(in);
+        data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(new_bindings_map);
+        manager.Add<transform::MultiplanarExternalTexture>();
+    }
+
     {  // Builtin polyfills
         transform::BuiltinPolyfill::Builtins polyfills;
         polyfills.acosh = transform::BuiltinPolyfill::Level::kRangeCheck;
@@ -169,38 +197,22 @@ SanitizedResult Sanitize(const Program* in,
         manager.Add<transform::BuiltinPolyfill>();
     }
 
-    if (!entry_point.empty()) {
-        manager.Add<transform::SingleEntryPoint>();
-        data.Add<transform::SingleEntryPoint::Config>(entry_point);
-    }
-    manager.Add<transform::Renamer>();
-    data.Add<transform::Renamer::Config>(transform::Renamer::Target::kGlslKeywords,
-                                         /* preserve_unicode */ false);
-
-    manager.Add<transform::PreservePadding>();  // Must come before DirectVariableAccess
-
-    manager.Add<transform::Unshadow>();  // Must come before DirectVariableAccess
-    manager.Add<transform::DirectVariableAccess>();
-
     if (!options.disable_workgroup_init) {
         // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
         // ZeroInitWorkgroupMemory may inject new builtin parameters.
         manager.Add<transform::ZeroInitWorkgroupMemory>();
     }
+
+    // CanonicalizeEntryPointIO must come after Robustness
     manager.Add<transform::CanonicalizeEntryPointIO>();
-    manager.Add<transform::PromoteSideEffectsToDecl>();
+
+    // PadStructs must come after CanonicalizeEntryPointIO
     manager.Add<transform::PadStructs>();
 
     // DemoteToHelper must come after PromoteSideEffectsToDecl and ExpandCompoundAssignment.
     manager.Add<transform::DemoteToHelper>();
 
     manager.Add<transform::RemovePhonies>();
-
-    if (options.generate_external_texture_bindings) {
-        auto new_bindings_map = writer::GenerateExternalTextureBindings(in);
-        data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(new_bindings_map);
-    }
-    manager.Add<transform::MultiplanarExternalTexture>();
 
     data.Add<transform::CombineSamplers::BindingInfo>(options.binding_map,
                                                       options.placeholder_binding_point);
