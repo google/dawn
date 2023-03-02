@@ -127,5 +127,24 @@ TEST_F(CreateASTTypeForTest, Struct) {
     ast::CheckIdentifier(ast_type_builder.Symbols(), str, "S");
 }
 
+TEST_F(CreateASTTypeForTest, PrivatePointer) {
+    auto ptr = create([](ProgramBuilder& b) {
+        return b.create<type::Pointer>(b.create<type::I32>(), builtin::AddressSpace::kPrivate,
+                                       builtin::Access::kReadWrite);
+    });
+
+    ast::CheckIdentifier(ast_type_builder.Symbols(), ptr, ast::Template("ptr", "private", "i32"));
+}
+
+TEST_F(CreateASTTypeForTest, StorageReadWritePointer) {
+    auto ptr = create([](ProgramBuilder& b) {
+        return b.create<type::Pointer>(b.create<type::I32>(), builtin::AddressSpace::kStorage,
+                                       builtin::Access::kReadWrite);
+    });
+
+    ast::CheckIdentifier(ast_type_builder.Symbols(), ptr,
+                         ast::Template("ptr", "storage", "i32", "read_write"));
+}
+
 }  // namespace
 }  // namespace tint::transform
