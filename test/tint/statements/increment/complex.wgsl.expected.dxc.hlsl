@@ -37,10 +37,10 @@ int idx6() {
 }
 
 void main() {
-  const int tint_symbol_save = idx1();
-  const int tint_symbol_save_1 = idx2();
-  const int tint_symbol_1 = idx3();
   {
+    const int tint_symbol_save = idx1();
+    const int tint_symbol_save_1 = idx2();
+    const int tint_symbol_1 = idx3();
     buffer.Store((((64u * uint(tint_symbol_save)) + (16u * uint(tint_symbol_save_1))) + (4u * uint(tint_symbol_1))), asuint((asint(buffer.Load((((64u * uint(tint_symbol_save)) + (16u * uint(tint_symbol_save_1))) + (4u * uint(tint_symbol_1))))) + 1)));
     while (true) {
       if (!((v < 10u))) {

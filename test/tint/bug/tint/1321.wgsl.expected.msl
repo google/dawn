@@ -20,11 +20,15 @@ int foo() {
 
 fragment void tint_symbol() {
   tint_array<float, 4> arr = tint_array<float, 4>{};
-  int const tint_symbol_1 = foo();
-  int const a_save = tint_symbol_1;
-  for(; ; ) {
-    float const x = arr[a_save];
-    break;
+  {
+    int const tint_symbol_1 = foo();
+    int const a_save = tint_symbol_1;
+    while (true) {
+      {
+        float const x = arr[a_save];
+        break;
+      }
+    }
   }
   return;
 }

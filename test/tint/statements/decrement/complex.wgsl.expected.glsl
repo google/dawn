@@ -44,12 +44,12 @@ int idx6() {
 }
 
 void tint_symbol_1() {
-  int tint_symbol_6 = idx1();
-  int tint_symbol_7 = idx2();
-  int tint_symbol_2_save = tint_symbol_6;
-  int tint_symbol_2_save_1 = tint_symbol_7;
-  int tint_symbol_3 = idx3();
   {
+    int tint_symbol_6 = idx1();
+    int tint_symbol_7 = idx2();
+    int tint_symbol_2_save = tint_symbol_6;
+    int tint_symbol_2_save_1 = tint_symbol_7;
+    int tint_symbol_3 = idx3();
     tint_symbol.inner[tint_symbol_2_save].a[tint_symbol_2_save_1][tint_symbol_3] = (tint_symbol.inner[tint_symbol_2_save].a[tint_symbol_2_save_1][tint_symbol_3] - 1);
     while (true) {
       if (!((v < 10u))) {

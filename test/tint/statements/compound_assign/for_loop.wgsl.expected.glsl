@@ -35,9 +35,9 @@ int idx3() {
 
 void foo() {
   float a[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
-  int tint_symbol_2 = idx1();
-  int tint_symbol_save = tint_symbol_2;
   {
+    int tint_symbol_2 = idx1();
+    int tint_symbol_save = tint_symbol_2;
     a[tint_symbol_save] = (a[tint_symbol_save] * 2.0f);
     while (true) {
       int tint_symbol_3 = idx2();

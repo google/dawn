@@ -848,10 +848,15 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = 1;
-  let tint_symbol = a(0);
-  for(var r = (tint_symbol + b); ; ) {
-    var marker = 0;
-    break;
+  {
+    let tint_symbol = a(0);
+    var r = (tint_symbol + b);
+    loop {
+      {
+        var marker = 0;
+        break;
+      }
+    }
   }
 }
 )";
@@ -2169,13 +2174,18 @@ fn a(i : i32) -> bool {
 
 fn f() {
   var b = true;
-  var tint_symbol = a(0);
-  if (tint_symbol) {
-    tint_symbol = b;
-  }
-  for(var r = tint_symbol; ; ) {
-    var marker = 0;
-    break;
+  {
+    var tint_symbol = a(0);
+    if (tint_symbol) {
+      tint_symbol = b;
+    }
+    var r = tint_symbol;
+    loop {
+      {
+        var marker = 0;
+        break;
+      }
+    }
   }
 }
 )";

@@ -49,12 +49,12 @@ int idx6(thread uint* const tint_symbol_15) {
 }
 
 void tint_symbol_1(thread uint* const tint_symbol_16, device tint_array<S, 1>* const tint_symbol_17) {
-  int const tint_symbol_6 = idx1(tint_symbol_16);
-  int const tint_symbol_7 = idx2(tint_symbol_16);
-  int const tint_symbol_2_save = tint_symbol_6;
-  int const tint_symbol_2_save_1 = tint_symbol_7;
-  int const tint_symbol_3 = idx3(tint_symbol_16);
   {
+    int const tint_symbol_6 = idx1(tint_symbol_16);
+    int const tint_symbol_7 = idx2(tint_symbol_16);
+    int const tint_symbol_2_save = tint_symbol_6;
+    int const tint_symbol_2_save_1 = tint_symbol_7;
+    int const tint_symbol_3 = idx3(tint_symbol_16);
     (*(tint_symbol_17))[tint_symbol_2_save].a[tint_symbol_2_save_1][tint_symbol_3] = as_type<int>((as_type<uint>((*(tint_symbol_17))[tint_symbol_2_save].a[tint_symbol_2_save_1][tint_symbol_3]) - as_type<uint>(1)));
     while (true) {
       if (!((*(tint_symbol_16) < 10u))) {

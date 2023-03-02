@@ -126,9 +126,14 @@ fn f() {
 fn f() {
   var i : i32;
   let p = array<array<i32, 2>, 2>(array<i32, 2>(1, 2), array<i32, 2>(3, 4));
-  var var_for_index : array<array<i32, 2u>, 2u> = p;
-  for(let x = var_for_index[i]; ; ) {
-    break;
+  {
+    var var_for_index : array<array<i32, 2u>, 2u> = p;
+    let x = var_for_index[i];
+    loop {
+      {
+        break;
+      }
+    }
   }
 }
 )";
@@ -154,9 +159,14 @@ fn f() {
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
-  var var_for_index : mat2x2<f32> = p;
-  for(let x = var_for_index[i]; ; ) {
-    break;
+  {
+    var var_for_index : mat2x2<f32> = p;
+    let x = var_for_index[i];
+    loop {
+      {
+        break;
+      }
+    }
   }
 }
 )";

@@ -436,16 +436,32 @@ fn a_U_X_X(pre : i32, p : U_X_X, post : i32) -> vec4<i32> {
 }
 
 fn b() {
-  let ptr_index_save = first();
-  for(let p1 = &(U[ptr_index_save]); true; ) {
-    a_U_X_X(10, U_X_X(u32(ptr_index_save), u32(second())), 20);
+  {
+    let ptr_index_save = first();
+    let p1 = &(U[ptr_index_save]);
+    loop {
+      if (!(true)) {
+        break;
+      }
+      {
+        a_U_X_X(10, U_X_X(u32(ptr_index_save), u32(second())), 20);
+      }
+    }
   }
 }
 
 fn c_U() {
-  let ptr_index_save_1 = first();
-  for(let p1 = &(U[ptr_index_save_1]); true; ) {
-    a_U_X_X(10, U_X_X(u32(ptr_index_save_1), u32(second())), 20);
+  {
+    let ptr_index_save_1 = first();
+    let p1 = &(U[ptr_index_save_1]);
+    loop {
+      if (!(true)) {
+        break;
+      }
+      {
+        a_U_X_X(10, U_X_X(u32(ptr_index_save_1), u32(second())), 20);
+      }
+    }
   }
 }
 

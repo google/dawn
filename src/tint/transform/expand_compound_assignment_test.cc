@@ -391,10 +391,15 @@ fn idx2() -> i32 {
 }
 
 fn main() {
-  let tint_symbol = &(a[idx1()]);
-  let tint_symbol_1 = idx2();
-  for((*(tint_symbol))[tint_symbol_1] = ((*(tint_symbol))[tint_symbol_1] + 1); ; ) {
-    break;
+  {
+    let tint_symbol = &(a[idx1()]);
+    let tint_symbol_1 = idx2();
+    (*(tint_symbol))[tint_symbol_1] = ((*(tint_symbol))[tint_symbol_1] + 1);
+    loop {
+      {
+        break;
+      }
+    }
   }
 }
 )";
