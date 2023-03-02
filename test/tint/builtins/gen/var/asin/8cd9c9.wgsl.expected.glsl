@@ -1,7 +1,7 @@
 #version 310 es
 
 void asin_8cd9c9() {
-  vec3 arg_0 = vec3(0.47942555f);
+  vec3 arg_0 = vec3(0.47942554950714111328f);
   vec3 res = asin(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void asin_8cd9c9() {
-  vec3 arg_0 = vec3(0.47942555f);
+  vec3 arg_0 = vec3(0.47942554950714111328f);
   vec3 res = asin(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void asin_8cd9c9() {
-  vec3 arg_0 = vec3(0.47942555f);
+  vec3 arg_0 = vec3(0.47942554950714111328f);
   vec3 res = asin(arg_0);
 }
 

@@ -1,7 +1,7 @@
 #version 310 es
 
 void asinh_157447() {
-  float res = 0.881373584f;
+  float res = 0.88137358427047729492f;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void asinh_157447() {
-  float res = 0.881373584f;
+  float res = 0.88137358427047729492f;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void asinh_157447() {
-  float res = 0.881373584f;
+  float res = 0.88137358427047729492f;
 }
 
 void compute_main() {

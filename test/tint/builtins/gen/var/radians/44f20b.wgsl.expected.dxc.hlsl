@@ -1,5 +1,5 @@
 vector<float16_t, 4> tint_radians(vector<float16_t, 4> param_0) {
-  return param_0 * 0.017453292519943295;
+  return param_0 * 0.01745329251994329547;
 }
 
 void radians_44f20b() {

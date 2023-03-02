@@ -8,7 +8,7 @@ struct tint_symbol {
 float4 main_inner() {
   float2 a = (0.0f).xx;
   bar();
-  return float4(0.400000006f, 0.400000006f, 0.800000012f, 1.0f);
+  return float4(0.40000000596046447754f, 0.40000000596046447754f, 0.80000001192092895508f, 1.0f);
 }
 
 tint_symbol main() {

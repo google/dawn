@@ -22,8 +22,9 @@
 
 #include "src/tint/builtin/diagnostic_rule.h"
 
-#include <ostream>
 #include <string>
+
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::builtin {
 
@@ -40,7 +41,7 @@ DiagnosticRule ParseDiagnosticRule(std::string_view str) {
     return DiagnosticRule::kUndefined;
 }
 
-std::ostream& operator<<(std::ostream& out, DiagnosticRule value) {
+utils::StringStream& operator<<(utils::StringStream& out, DiagnosticRule value) {
     switch (value) {
         case DiagnosticRule::kUndefined:
             return out << "undefined";

@@ -1,5 +1,5 @@
 fn asin_7b6a44() {
-  var res : vec2<f32> = asin(vec2<f32>(0.47942555f));
+  var res : vec2<f32> = asin(vec2<f32>(0.47942554950714111328f));
 }
 
 @vertex

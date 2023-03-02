@@ -17,10 +17,10 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
-#include <ostream>
 
 #include "src/tint/debug.h"
 #include "src/tint/utils/bitcast.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint {
 namespace {
@@ -50,7 +50,7 @@ constexpr uint32_t kMinF32BiasedExpForF16SubnormalNumber = 103;
 
 }  // namespace
 
-std::ostream& operator<<(std::ostream& out, ConversionFailure failure) {
+utils::StringStream& operator<<(utils::StringStream& out, ConversionFailure failure) {
     switch (failure) {
         case ConversionFailure::kExceedsPositiveLimit:
             return out << "value exceeds positive limit for type";

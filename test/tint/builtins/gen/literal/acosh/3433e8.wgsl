@@ -23,7 +23,7 @@
 
 // fn acosh(fa) -> fa
 fn acosh_3433e8() {
-  var res = acosh(2.);
+  var res = acosh(1.5430806348);
 }
 
 @vertex

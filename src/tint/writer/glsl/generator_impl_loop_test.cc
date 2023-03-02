@@ -134,7 +134,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
 
 TEST_F(GlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
     // loop {
-    //   var lhs : f32 = 2.4;
+    //   var lhs : f32 = 2.5;
     //   var other : f32;
     //   break;
     //   continuing {
@@ -144,7 +144,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
 
     GlobalVar("rhs", ty.f32(), builtin::AddressSpace::kPrivate);
 
-    auto* body = Block(Decl(Var("lhs", ty.f32(), Expr(2.4_f))),  //
+    auto* body = Block(Decl(Var("lhs", ty.f32(), Expr(2.5_f))),  //
                        Decl(Var("other", ty.f32())),             //
                        Break());
     auto* continuing = Block(Assign("lhs", "rhs"));
@@ -157,7 +157,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
 
     ASSERT_TRUE(gen.EmitStatement(outer)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  while (true) {
-    float lhs = 2.400000095f;
+    float lhs = 2.5f;
     float other = 0.0f;
     break;
     {

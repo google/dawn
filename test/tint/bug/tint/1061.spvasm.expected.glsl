@@ -22,7 +22,7 @@ void main_1() {
   v = vec4(sin(x_33), cos(x_35), exp2(x_37), log(x_39));
   vec4 x_42 = v;
   vec4 x_44 = x_7.inner.r;
-  if ((distance(x_42, x_44) < 0.100000001f)) {
+  if ((distance(x_42, x_44) < 0.10000000149011611938f)) {
     x_GLF_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
     x_GLF_color = vec4(0.0f);

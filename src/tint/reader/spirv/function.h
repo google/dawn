@@ -28,6 +28,7 @@
 #include "src/tint/reader/spirv/attributes.h"
 #include "src/tint/reader/spirv/construct.h"
 #include "src/tint/reader/spirv/parser_impl.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::reader::spirv {
 
@@ -178,11 +179,11 @@ struct BlockInfo {
     utils::Vector<uint32_t, 4> phis_needing_state_vars;
 };
 
-/// Writes the BlockInfo to the ostream
-/// @param o the ostream
+/// Writes the BlockInfo to the stream
+/// @param o the stream
 /// @param bi the BlockInfo
-/// @returns the ostream so calls can be chained
-inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
+/// @returns the stream so calls can be chained
+inline utils::StringStream& operator<<(utils::StringStream& o, const BlockInfo& bi) {
     o << "BlockInfo{"
       << " id: " << bi.id << " pos: " << bi.pos << " merge_for_header: " << bi.merge_for_header
       << " continue_for_header: " << bi.continue_for_header
@@ -353,11 +354,11 @@ struct DefInfo {
     SkipReason skip = SkipReason::kDontSkip;
 };
 
-/// Writes the DefInfo to the ostream
-/// @param o the ostream
+/// Writes the DefInfo to the stream
+/// @param o the stream
 /// @param di the DefInfo
-/// @returns the ostream so calls can be chained
-inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
+/// @returns the stream so calls can be chained
+inline utils::StringStream& operator<<(utils::StringStream& o, const DefInfo& di) {
     o << "DefInfo{"
       << " inst.result_id: " << di.inst.result_id();
     if (di.local.has_value()) {

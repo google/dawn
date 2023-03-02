@@ -2,7 +2,7 @@
 
 using namespace metal;
 void acos_dfc915() {
-  float2 arg_0 = float2(0.968912423f);
+  float2 arg_0 = float2(0.96891242265701293945f);
   float2 res = acos(arg_0);
 }
 

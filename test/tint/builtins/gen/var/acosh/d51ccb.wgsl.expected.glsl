@@ -5,7 +5,7 @@ vec4 tint_acosh(vec4 x) {
 }
 
 void acosh_d51ccb() {
-  vec4 arg_0 = vec4(2.0f);
+  vec4 arg_0 = vec4(1.54308068752288818359f);
   vec4 res = tint_acosh(arg_0);
 }
 
@@ -30,7 +30,7 @@ vec4 tint_acosh(vec4 x) {
 }
 
 void acosh_d51ccb() {
-  vec4 arg_0 = vec4(2.0f);
+  vec4 arg_0 = vec4(1.54308068752288818359f);
   vec4 res = tint_acosh(arg_0);
 }
 
@@ -49,7 +49,7 @@ vec4 tint_acosh(vec4 x) {
 }
 
 void acosh_d51ccb() {
-  vec4 arg_0 = vec4(2.0f);
+  vec4 arg_0 = vec4(1.54308068752288818359f);
   vec4 res = tint_acosh(arg_0);
 }
 

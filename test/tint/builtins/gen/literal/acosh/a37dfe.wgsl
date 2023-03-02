@@ -25,7 +25,7 @@ enable f16;
 
 // fn acosh(f16) -> f16
 fn acosh_a37dfe() {
-  var res: f16 = acosh(2.h);
+  var res: f16 = acosh(1.5430806348h);
 }
 
 @vertex

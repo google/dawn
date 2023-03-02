@@ -17,7 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <ostream>
+#include <string_view>
 #include <utility>
 
 namespace tint::text {
@@ -53,12 +53,6 @@ struct CodePoint {
     /// The code point value
     uint32_t value = 0;
 };
-
-/// Writes the CodePoint to the std::ostream.
-/// @param out the std::ostream to write to
-/// @param codepoint the CodePoint to write
-/// @returns out so calls can be chained
-std::ostream& operator<<(std::ostream& out, CodePoint codepoint);
 
 namespace utf8 {
 

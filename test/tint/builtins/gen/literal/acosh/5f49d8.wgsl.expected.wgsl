@@ -1,7 +1,7 @@
 enable f16;
 
 fn acosh_5f49d8() {
-  var res : vec2<f16> = acosh(vec2<f16>(2.0h));
+  var res : vec2<f16> = acosh(vec2<f16>(1.54296875h));
 }
 
 @vertex

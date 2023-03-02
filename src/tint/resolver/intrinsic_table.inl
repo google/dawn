@@ -14092,8 +14092,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [2] */
-    /* fn acosh<T : fa_f32_f16>(@test_value(2) T) -> T */
-    /* fn acosh<N : num, T : fa_f32_f16>(@test_value(2) vec<N, T>) -> vec<N, T> */
+    /* fn acosh<T : fa_f32_f16>(@test_value(1.5430806348) T) -> T */
+    /* fn acosh<N : num, T : fa_f32_f16>(@test_value(1.5430806348) vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[287],
   },
@@ -14526,8 +14526,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [66] */
-    /* fn round<T : fa_f32_f16>(@test_value(3.4) T) -> T */
-    /* fn round<N : num, T : fa_f32_f16>(@test_value(3.4) vec<N, T>) -> vec<N, T> */
+    /* fn round<T : fa_f32_f16>(@test_value(3.5) T) -> T */
+    /* fn round<N : num, T : fa_f32_f16>(@test_value(3.5) vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[383],
   },

@@ -13,14 +13,14 @@
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
       %float = OpTypeFloat 32
-%float_1_23000002 = OpConstant %float 1.23000002
+%float_1_24000001 = OpConstant %float 1.24000001
 %float_1_17549435en38 = OpConstant %float 1.17549435e-38
 %_ptr_Function_float = OpTypePointer Function %float
          %12 = OpConstantNull %float
 %compute_main = OpFunction %void None %1
           %4 = OpLabel
           %b = OpVariable %_ptr_Function_float Function %12
-          %7 = OpExtInst %float %8 NMax %float_1_23000002 %float_1_17549435en38
+          %7 = OpExtInst %float %8 NMax %float_1_24000001 %float_1_17549435en38
                OpStore %b %7
                OpReturn
                OpFunctionEnd

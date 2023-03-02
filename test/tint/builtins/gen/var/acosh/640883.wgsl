@@ -23,7 +23,7 @@
 
 // fn acosh(vec<2, f32>) -> vec<2, f32>
 fn acosh_640883() {
-  var arg_0 = vec2<f32>(2.f);
+  var arg_0 = vec2<f32>(1.5430806348f);
   var res: vec2<f32> = acosh(arg_0);
 }
 

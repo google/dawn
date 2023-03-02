@@ -1,5 +1,5 @@
 void round_e1bba2() {
-  vector<float16_t, 3> res = (float16_t(3.0h)).xxx;
+  vector<float16_t, 3> res = (float16_t(4.0h)).xxx;
 }
 
 struct tint_symbol {

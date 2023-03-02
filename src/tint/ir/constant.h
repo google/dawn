@@ -15,8 +15,6 @@
 #ifndef SRC_TINT_IR_CONSTANT_H_
 #define SRC_TINT_IR_CONSTANT_H_
 
-#include <ostream>
-
 #include "src/tint/constant/value.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/symbol_table.h"

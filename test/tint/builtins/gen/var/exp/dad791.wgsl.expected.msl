@@ -2,7 +2,7 @@
 
 using namespace metal;
 void exp_dad791() {
-  float4 res = float4(2.718281746f);
+  float4 res = float4(2.71828174591064453125f);
 }
 
 struct tint_symbol {

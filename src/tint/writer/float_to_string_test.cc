@@ -73,10 +73,10 @@ TEST(FloatToStringTest, Lowest) {
 }
 
 TEST(FloatToStringTest, Precision) {
-    EXPECT_EQ(FloatToString(1e-8f), "0.00000001");
-    EXPECT_EQ(FloatToString(1e-9f), "0.000000001");
-    EXPECT_EQ(FloatToString(1e-10f), "1.00000001e-10");
-    EXPECT_EQ(FloatToString(1e-20f), "9.99999968e-21");
+    EXPECT_EQ(FloatToString(1e-8f), "0.00000000999999993923");
+    EXPECT_EQ(FloatToString(1e-9f), "0.00000000099999997172");
+    EXPECT_EQ(FloatToString(1e-10f), "0.00000000010000000134");
+    EXPECT_EQ(FloatToString(1e-20f), "0.00000000000000000001");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -179,15 +179,15 @@ TEST(FloatToBitPreservingStringTest, NaN) {
 ////////////////////////////////////////////////////////////////////////////////
 
 TEST(DoubleToStringTest, Zero) {
-    EXPECT_EQ(DoubleToString(0.0), "0.0");
+    EXPECT_EQ(DoubleToString(0.000000000), "0.0");
 }
 
 TEST(DoubleToStringTest, One) {
-    EXPECT_EQ(DoubleToString(1.0), "1.0");
+    EXPECT_EQ(DoubleToString(1.000000000), "1.0");
 }
 
 TEST(DoubleToStringTest, MinusOne) {
-    EXPECT_EQ(DoubleToString(-1.0), "-1.0");
+    EXPECT_EQ(DoubleToString(-1.000000000), "-1.0");
 }
 
 TEST(DoubleToStringTest, Billion) {
@@ -231,8 +231,8 @@ TEST(DoubleToStringTest, Lowest) {
 TEST(DoubleToStringTest, Precision) {
     EXPECT_EQ(DoubleToString(1e-8), "0.00000001");
     EXPECT_EQ(DoubleToString(1e-9), "0.000000001");
-    EXPECT_EQ(DoubleToString(1e-10), "1e-10");
-    EXPECT_EQ(DoubleToString(1e-15), "1.0000000000000001e-15");
+    EXPECT_EQ(DoubleToString(1e-10), "0.0000000001");
+    EXPECT_EQ(DoubleToString(1e-15), "0.000000000000001");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

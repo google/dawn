@@ -1,5 +1,5 @@
 fn sin_68d3ab() {
-  var res = sin(vec2(1.57079632679));
+  var res = sin(vec2(1.57079632679000003037));
 }
 
 @vertex

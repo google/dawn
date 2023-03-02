@@ -20,11 +20,11 @@
 #include <functional>
 #include <limits>
 #include <optional>
-#include <ostream>
 
 #include "src/tint/traits.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/result.h"
+#include "src/tint/utils/string_stream.h"
 
 // Forward declaration
 namespace tint {
@@ -175,11 +175,11 @@ struct Number : NumberBase<Number<T>> {
 };
 
 /// Writes the number to the ostream.
-/// @param out the std::ostream to write to
+/// @param out the stream to write to
 /// @param num the Number
-/// @return the std::ostream so calls can be chained
+/// @return the stream so calls can be chained
 template <typename T>
-inline std::ostream& operator<<(std::ostream& out, Number<T> num) {
+inline utils::StringStream& operator<<(utils::StringStream& out, Number<T> num) {
     return out << num.value;
 }
 
@@ -314,10 +314,10 @@ enum class ConversionFailure {
 };
 
 /// Writes the conversion failure message to the ostream.
-/// @param out the std::ostream to write to
+/// @param out the stream to write to
 /// @param failure the ConversionFailure
-/// @return the std::ostream so calls can be chained
-std::ostream& operator<<(std::ostream& out, ConversionFailure failure);
+/// @return the stream so calls can be chained
+utils::StringStream& operator<<(utils::StringStream& out, ConversionFailure failure);
 
 /// Converts a number from one type to another, checking that the value fits in the target type.
 /// @returns the resulting value of the conversion, or a failure reason.

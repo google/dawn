@@ -468,7 +468,7 @@ struct Case {
 static bool ParsedAsTemplateArgumentList(BinaryOperatorInfo lhs_op, BinaryOperatorInfo rhs_op) {
     return lhs_op.bit == kOpLt && rhs_op.bit & (kOpGt | kOpGe | kOpShr);
 }
-static std::ostream& operator<<(std::ostream& o, const Case& c) {
+static utils::StringStream& operator<<(utils::StringStream& o, const Case& c) {
     return o << "a " << c.lhs_op.symbol << " b " << c.rhs_op.symbol << " c ";
 }
 

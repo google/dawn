@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <sstream>
-
 #include "src/tint/ir/test_helper.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/utils/string_stream.h"
@@ -34,7 +32,7 @@ TEST_F(IR_ConstantTest, f32) {
     EXPECT_EQ(1.2_f, c->value->As<constant::Scalar<f32>>()->ValueAs<f32>());
 
     c->ToString(str, b.builder.ir.symbols);
-    EXPECT_EQ("1.200000048", str.str());
+    EXPECT_EQ("1.20000004768371582031", str.str());
 
     EXPECT_TRUE(c->value->Is<constant::Scalar<f32>>());
     EXPECT_FALSE(c->value->Is<constant::Scalar<f16>>());

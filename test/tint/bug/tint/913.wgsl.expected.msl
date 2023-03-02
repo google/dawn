@@ -27,7 +27,7 @@ struct OutputBuf {
 };
 
 bool aboutEqual(float value, float expect) {
-  return (fabs((value - expect)) < 0.001f);
+  return (fabs((value - expect)) < 0.00100000004749745131f);
 }
 
 void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample> tint_symbol_7, texture2d<float, access::sample> tint_symbol_8, const constant Uniforms* const tint_symbol_9, device OutputBuf* const tint_symbol_10) {

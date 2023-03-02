@@ -1,5 +1,5 @@
 fn round_184d5a() {
-  const arg_0 = vec4(3.4);
+  const arg_0 = vec4(3.5);
   var res = round(arg_0);
 }
 

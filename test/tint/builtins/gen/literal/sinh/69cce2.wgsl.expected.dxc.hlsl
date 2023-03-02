@@ -1,5 +1,5 @@
 void sinh_69cce2() {
-  float16_t res = float16_t(1.174804688h);
+  float16_t res = float16_t(1.1748046875h);
 }
 
 struct tint_symbol {

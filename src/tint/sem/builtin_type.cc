@@ -22,8 +22,6 @@
 
 #include "src/tint/sem/builtin_type.h"
 
-#include <sstream>
-
 namespace tint::sem {
 
 BuiltinType ParseBuiltinType(const std::string& name) {
@@ -608,7 +606,7 @@ const char* str(BuiltinType i) {
     return "<unknown>";
 }
 
-std::ostream& operator<<(std::ostream& out, BuiltinType i) {
+utils::StringStream& operator<<(utils::StringStream& out, BuiltinType i) {
     out << str(i);
     return out;
 }

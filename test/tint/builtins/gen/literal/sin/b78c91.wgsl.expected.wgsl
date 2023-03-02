@@ -1,5 +1,5 @@
 fn sin_b78c91() {
-  var res : f32 = sin(1.570796371f);
+  var res : f32 = sin(1.57079637050628662109f);
 }
 
 @vertex

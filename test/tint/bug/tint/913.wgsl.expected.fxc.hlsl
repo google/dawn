@@ -6,7 +6,7 @@ cbuffer cbuffer_uniforms : register(b3, space0) {
 };
 
 bool aboutEqual(float value, float expect) {
-  return (abs((value - expect)) < 0.001f);
+  return (abs((value - expect)) < 0.00100000004749745131f);
 }
 
 struct tint_symbol_8 {

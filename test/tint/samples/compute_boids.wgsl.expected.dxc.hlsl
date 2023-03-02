@@ -86,7 +86,7 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
     cVel = (cVel / float2(float(cVelCount), float(cVelCount)));
   }
   vVel = (((vVel + (cMass * asfloat(params[1].x))) + (colVel * asfloat(params[1].y))) + (cVel * asfloat(params[1].z)));
-  vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.100000001f));
+  vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.10000000149011611938f));
   vPos = (vPos + (vVel * asfloat(params[0].x)));
   if ((vPos.x < -1.0f)) {
     vPos.x = 1.0f;

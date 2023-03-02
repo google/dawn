@@ -1,5 +1,5 @@
 void acosh_e38f5c() {
-  float3 res = (1.316957951f).xxx;
+  float3 res = (1.0f).xxx;
 }
 
 struct tint_symbol {

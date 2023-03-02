@@ -25,3 +25,31 @@ StringStream::StringStream() {
 StringStream::~StringStream() = default;
 
 }  // namespace tint::utils
+
+namespace tint::text {
+
+utils::StringStream& operator<<(utils::StringStream& out, CodePoint code_point) {
+    if (code_point < 0x7f) {
+        // See https://en.cppreference.com/w/cpp/language/escape
+        switch (code_point) {
+            case '\a':
+                return out << R"('\a')";
+            case '\b':
+                return out << R"('\b')";
+            case '\f':
+                return out << R"('\f')";
+            case '\n':
+                return out << R"('\n')";
+            case '\r':
+                return out << R"('\r')";
+            case '\t':
+                return out << R"('\t')";
+            case '\v':
+                return out << R"('\v')";
+        }
+        return out << "'" << static_cast<char>(code_point) << "'";
+    }
+    return out << "'U+" << std::hex << code_point.value << "'";
+}
+
+}  // namespace tint::text

@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void radians_44f20b() {
-  f16vec4 res = f16vec4(0.017440796hf);
+  f16vec4 res = f16vec4(0.0174407958984375hf);
 }
 
 vec4 vertex_main() {
@@ -23,7 +23,7 @@ void main() {
 precision mediump float;
 
 void radians_44f20b() {
-  f16vec4 res = f16vec4(0.017440796hf);
+  f16vec4 res = f16vec4(0.0174407958984375hf);
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void radians_44f20b() {
-  f16vec4 res = f16vec4(0.017440796hf);
+  f16vec4 res = f16vec4(0.0174407958984375hf);
 }
 
 void compute_main() {

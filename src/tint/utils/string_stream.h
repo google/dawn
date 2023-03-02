@@ -16,11 +16,14 @@
 #define SRC_TINT_UTILS_STRING_STREAM_H_
 
 #include <functional>
+#include <iomanip>
 #include <iterator>
 #include <limits>
 #include <sstream>
 #include <string>
 #include <utility>
+
+#include "src/tint/text/unicode.h"
 
 namespace tint::utils {
 
@@ -44,23 +47,57 @@ class StringStream {
     /// @param value the value to emit
     /// @returns a reference to this
     template <typename T,
-              typename std::enable_if<!std::is_floating_point<T>::value>::type* = nullptr>
-    StringStream& operator<<(const T& value) {
-        sstream_ << value;
+              typename std::enable_if_t<std::is_integral_v<std::decay_t<T>>, bool> = true>
+    StringStream& operator<<(T&& value) {
+        return EmitValue(std::forward<T>(value));
+    }
+
+    /// Emit `value` to the stream
+    /// @param value the value to emit
+    /// @returns a reference to this
+    StringStream& operator<<(const char* value) { return EmitValue(value); }
+    /// Emit `value` to the stream
+    /// @param value the value to emit
+    /// @returns a reference to this
+    StringStream& operator<<(const std::string& value) { return EmitValue(value); }
+    /// Emit `value` to the stream
+    /// @param value the value to emit
+    /// @returns a reference to this
+    StringStream& operator<<(std::string_view value) { return EmitValue(value); }
+
+    /// Emit `value` to the stream
+    /// @param value the value to emit
+    /// @returns a reference to this
+    StringStream& operator<<(const void* value) { return EmitValue(value); }
+
+    /// Emit `value` to the stream
+    /// @param value the value to emit
+    /// @returns a reference to this
+    template <typename T,
+              typename std::enable_if_t<std::is_floating_point_v<std::decay_t<T>>, bool> = true>
+    StringStream& operator<<(T&& value) {
+        return EmitFloat(std::forward<T>(value));
+    }
+
+    /// Emit `value` to the stream
+    /// @param value the value to emit
+    /// @returns a reference to this
+    template <typename T>
+    StringStream& EmitValue(T&& value) {
+        sstream_ << std::forward<T>(value);
         return *this;
     }
 
     /// Emit `value` to the stream
     /// @param value the value to emit
     /// @returns a reference to this
-    template <typename T,
-              typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
-    StringStream& operator<<(const T& value) {
+    template <typename T>
+    StringStream& EmitFloat(const T& value) {
         // Try printing the float in fixed point, with a smallish limit on the precision
         std::stringstream fixed;
         fixed.flags(fixed.flags() | std::ios_base::showpoint | std::ios_base::fixed);
         fixed.imbue(std::locale::classic());
-        fixed.precision(9);
+        fixed.precision(20);
         fixed << value;
 
         std::string str = fixed.str();
@@ -71,6 +108,7 @@ class StringStream {
         double roundtripped;
         fixed >> roundtripped;
 
+        // Strip trailing zeros from the number.
         auto float_equal_no_warning = std::equal_to<T>();
         if (float_equal_no_warning(value, static_cast<T>(roundtripped))) {
             while (str.length() >= 2 && str[str.size() - 1] == '0' && str[str.size() - 2] != '.') {
@@ -111,6 +149,57 @@ class StringStream {
         return *this;
     }
 
+    /// The callback to emit a `std::hex` to the stream
+    using StdHex = std::ios_base& (*)(std::ios_base&);
+
+    /// @param manipulator the callback to emit too
+    /// @returns a reference to this
+    StringStream& operator<<(StdHex manipulator) {
+        // call the function, and return it's value
+        manipulator(sstream_);
+        return *this;
+    }
+
+    /// @param value the value to emit
+    /// @returns a reference to this
+    template <typename T,
+              typename std::enable_if<std::is_same<decltype(std::setw(std::declval<int>())),
+                                                   typename std::decay<T>::type>::value,
+                                      int>::type = 0>
+    StringStream& operator<<(T&& value) {
+        // call the function, and return it's value
+        sstream_ << std::forward<T>(value);
+        return *this;
+    }
+
+    // On MSVC the type of `std::setw` and `std::setprecision` are the same. Can't check for
+    // _MSC_VER because this is also set by clang-cl on windows.
+#if defined(__GNUC__) || defined(__clang__)
+    /// @param value the value to emit
+    /// @returns a reference to this
+    template <typename T,
+              typename std::enable_if<std::is_same<decltype(std::setprecision(std::declval<int>())),
+                                                   typename std::decay<T>::type>::value,
+                                      int>::type = 0>
+    StringStream& operator<<(T&& value) {
+        // call the function, and return it's value
+        sstream_ << std::forward<T>(value);
+        return *this;
+    }
+#endif  // defined(_MSC_VER)
+
+    /// @param value the value to emit
+    /// @returns a reference to this
+    template <typename T,
+              typename std::enable_if<std::is_same<decltype(std::setfill(std::declval<char>())),
+                                                   typename std::decay<T>::type>::value,
+                                      char>::type = 0>
+    StringStream& operator<<(T&& value) {
+        // call the function, and return it's value
+        sstream_ << std::forward<T>(value);
+        return *this;
+    }
+
     /// @returns the string contents of the stream
     std::string str() const { return sstream_.str(); }
 
@@ -119,5 +208,15 @@ class StringStream {
 };
 
 }  // namespace tint::utils
+
+namespace tint::text {
+
+/// Writes the CodePoint to the stream.
+/// @param out the stream to write to
+/// @param codepoint the CodePoint to write
+/// @returns out so calls can be chained
+utils::StringStream& operator<<(utils::StringStream& out, CodePoint codepoint);
+
+}  // namespace tint::text
 
 #endif  // SRC_TINT_UTILS_STRING_STREAM_H_

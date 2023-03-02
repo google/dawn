@@ -25,7 +25,7 @@ enable f16;
 
 // fn acosh(f16) -> f16
 fn acosh_a37dfe() {
-  var arg_0 = 2.h;
+  var arg_0 = 1.5430806348h;
   var res: f16 = acosh(arg_0);
 }
 

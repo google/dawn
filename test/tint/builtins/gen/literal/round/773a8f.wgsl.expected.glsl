@@ -1,7 +1,7 @@
 #version 310 es
 
 void round_773a8f() {
-  float res = 3.0f;
+  float res = 4.0f;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void round_773a8f() {
-  float res = 3.0f;
+  float res = 4.0f;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void round_773a8f() {
-  float res = 3.0f;
+  float res = 4.0f;
 }
 
 void compute_main() {

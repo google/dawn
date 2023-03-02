@@ -1,7 +1,7 @@
 #version 310 es
 
 void asin_c0c272() {
-  float arg_0 = 0.47942555f;
+  float arg_0 = 0.47942554950714111328f;
   float res = asin(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void asin_c0c272() {
-  float arg_0 = 0.47942555f;
+  float arg_0 = 0.47942554950714111328f;
   float res = asin(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void asin_c0c272() {
-  float arg_0 = 0.47942555f;
+  float arg_0 = 0.47942554950714111328f;
   float res = asin(arg_0);
 }
 

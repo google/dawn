@@ -1,5 +1,5 @@
 fn acosh_e38f5c() {
-  var res : vec3<f32> = acosh(vec3<f32>(2.0f));
+  var res : vec3<f32> = acosh(vec3<f32>(1.54308068752288818359f));
 }
 
 @vertex

@@ -313,7 +313,9 @@ struct HlslDepthTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, HlslDepthTextureData data) {
-    out << data.dim;
+    utils::StringStream str;
+    str << data.dim;
+    out << str.str();
     return out;
 }
 using HlslDepthTexturesTest = TestParamHelper<HlslDepthTextureData>;
@@ -376,7 +378,9 @@ struct HlslSampledTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, HlslSampledTextureData data) {
-    out << data.dim;
+    utils::StringStream str;
+    str << data.dim;
+    out << str.str();
     return out;
 }
 using HlslSampledTexturesTest = TestParamHelper<HlslSampledTextureData>;
@@ -525,7 +529,9 @@ struct HlslStorageTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, HlslStorageTextureData data) {
-    out << data.dim;
+    utils::StringStream str;
+    str << data.dim;
+    out << str.str();
     return out;
 }
 using HlslStorageTexturesTest = TestParamHelper<HlslStorageTextureData>;

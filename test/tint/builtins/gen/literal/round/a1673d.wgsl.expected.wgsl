@@ -1,5 +1,5 @@
 fn round_a1673d() {
-  var res = round(vec3(3.4));
+  var res = round(vec3(3.5));
 }
 
 @vertex

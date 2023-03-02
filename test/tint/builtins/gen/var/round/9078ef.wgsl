@@ -25,7 +25,7 @@ enable f16;
 
 // fn round(f16) -> f16
 fn round_9078ef() {
-  var arg_0 = 3.4h;
+  var arg_0 = 3.5h;
   var res: f16 = round(arg_0);
 }
 

@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void acosh_a37dfe() {
-  float16_t res = 1.31640625hf;
+  float16_t res = 0.99951171875hf;
 }
 
 vec4 vertex_main() {
@@ -23,7 +23,7 @@ void main() {
 precision mediump float;
 
 void acosh_a37dfe() {
-  float16_t res = 1.31640625hf;
+  float16_t res = 0.99951171875hf;
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void acosh_a37dfe() {
-  float16_t res = 1.31640625hf;
+  float16_t res = 0.99951171875hf;
 }
 
 void compute_main() {

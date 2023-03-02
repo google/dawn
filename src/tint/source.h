@@ -16,11 +16,12 @@
 #ifndef SRC_TINT_SOURCE_H_
 #define SRC_TINT_SOURCE_H_
 
-#include <iostream>
 #include <string>
 #include <string_view>
 #include <tuple>
 #include <vector>
+
+#include "src/tint/utils/string_stream.h"
 
 namespace tint {
 
@@ -191,35 +192,36 @@ class Source {
     const File* file = nullptr;
 };
 
-/// Writes the Source::Location to the std::ostream.
-/// @param out the std::ostream to write to
+/// Writes the Source::Location to the stream.
+/// @param out the stream to write to
 /// @param loc the location to write
 /// @returns out so calls can be chained
-inline std::ostream& operator<<(std::ostream& out, const Source::Location& loc) {
+inline utils::StringStream& operator<<(utils::StringStream& out, const Source::Location& loc) {
     out << loc.line << ":" << loc.column;
     return out;
 }
 
-/// Writes the Source::Range to the std::ostream.
-/// @param out the std::ostream to write to
+/// Writes the Source::Range to the stream.
+/// @param out the stream to write to
 /// @param range the range to write
 /// @returns out so calls can be chained
-inline std::ostream& operator<<(std::ostream& out, const Source::Range& range) {
+inline utils::StringStream& operator<<(utils::StringStream& out, const Source::Range& range) {
     out << "[" << range.begin << ", " << range.end << "]";
     return out;
 }
 
-/// Writes the Source to the std::ostream.
-/// @param out the std::ostream to write to
+/// Writes the Source to the stream.
+/// @param out the stream to write to
 /// @param source the source to write
 /// @returns out so calls can be chained
-std::ostream& operator<<(std::ostream& out, const Source& source);
+utils::StringStream& operator<<(utils::StringStream& out, const Source& source);
 
-/// Writes the Source::FileContent to the std::ostream.
-/// @param out the std::ostream to write to
+/// Writes the Source::FileContent to the stream.
+/// @param out the stream to write to
 /// @param content the file content to write
 /// @returns out so calls can be chained
-inline std::ostream& operator<<(std::ostream& out, const Source::FileContent& content) {
+inline utils::StringStream& operator<<(utils::StringStream& out,
+                                       const Source::FileContent& content) {
     out << content.data;
     return out;
 }

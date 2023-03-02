@@ -9,7 +9,7 @@ struct Interface {
 
 @vertex
 fn vert_main() -> Interface {
-  return Interface(0.4, 0.6, vec4<f32>());
+  return Interface(0.4000000000000000222, 0.5999999999999999778, vec4<f32>());
 }
 
 @fragment

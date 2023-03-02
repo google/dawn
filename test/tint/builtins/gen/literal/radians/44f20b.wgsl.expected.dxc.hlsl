@@ -1,5 +1,5 @@
 void radians_44f20b() {
-  vector<float16_t, 4> res = (float16_t(0.017440796h)).xxxx;
+  vector<float16_t, 4> res = (float16_t(0.0174407958984375h)).xxxx;
 }
 
 struct tint_symbol {

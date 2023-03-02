@@ -256,7 +256,9 @@ struct BuiltinData {
     SpvBuiltIn result;
 };
 inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
-    out << data.builtin;
+    utils::StringStream str;
+    str << data.builtin;
+    out << str.str();
     return out;
 }
 using BuiltinDataTest = TestParamHelper<BuiltinData>;

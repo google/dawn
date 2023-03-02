@@ -31,11 +31,11 @@ enum class Behavior {
 /// Behaviors is a set of Behavior
 using Behaviors = utils::EnumSet<Behavior>;
 
-/// Writes the Behavior to the std::ostream.
-/// @param out the std::ostream to write to
+/// Writes the Behavior to the stream.
+/// @param out the stream to write to
 /// @param behavior the Behavior to write
 /// @returns out so calls can be chained
-std::ostream& operator<<(std::ostream& out, Behavior behavior);
+utils::StringStream& operator<<(utils::StringStream& out, Behavior behavior);
 
 }  // namespace tint::sem
 

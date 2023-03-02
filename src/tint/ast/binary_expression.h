@@ -297,10 +297,10 @@ constexpr const char* Operator(BinaryOp op) {
     return "<invalid>";
 }
 
-/// @param out the std::ostream to write to
+/// @param out the stream to write to
 /// @param op the BinaryOp
-/// @return the std::ostream so calls can be chained
-inline std::ostream& operator<<(std::ostream& out, BinaryOp op) {
+/// @return the stream so calls can be chained
+inline utils::StringStream& operator<<(utils::StringStream& out, BinaryOp op) {
     out << FriendlyName(op);
     return out;
 }

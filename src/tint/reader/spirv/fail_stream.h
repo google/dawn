@@ -19,7 +19,7 @@
 
 namespace tint::reader::spirv {
 
-/// A FailStream object accumulates values onto a given std::ostream,
+/// A FailStream object accumulates values onto a given stream,
 /// and can be used to record failure by writing the false value
 /// to given a pointer-to-bool.
 class FailStream {

@@ -1,5 +1,5 @@
 fn acosh_3433e8() {
-  var res = acosh(2.0);
+  var res = acosh(1.54308063479999990619);
 }
 
 @vertex

@@ -15,7 +15,6 @@
 #include "src/tint/reader/spirv/namer.h"
 
 #include <algorithm>
-#include <sstream>
 #include <unordered_set>
 
 #include "src/tint/debug.h"

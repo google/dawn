@@ -79,7 +79,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_F32) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("f32(-0.000012f)"));
+    EXPECT_THAT(gen.result(), HasSubstr("f32(-0.00001200000042445026f)"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_F16) {
@@ -90,7 +90,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_F16) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("f16(-1.19805336e-05h)"));
+    EXPECT_THAT(gen.result(), HasSubstr("f16(-0.00001198053359985352h)"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_Bool) {

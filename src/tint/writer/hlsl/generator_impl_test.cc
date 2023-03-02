@@ -53,7 +53,9 @@ struct HlslBuiltinData {
     const char* attribute_name;
 };
 inline std::ostream& operator<<(std::ostream& out, HlslBuiltinData data) {
-    out << data.builtin;
+    utils::StringStream str;
+    str << data.builtin;
+    out << str.str();
     return out;
 }
 using HlslBuiltinConversionTest = TestParamHelper<HlslBuiltinData>;

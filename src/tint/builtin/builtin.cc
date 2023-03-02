@@ -241,7 +241,7 @@ Builtin ParseBuiltin(std::string_view str) {
     return Builtin::kUndefined;
 }
 
-std::ostream& operator<<(std::ostream& out, Builtin value) {
+utils::StringStream& operator<<(utils::StringStream& out, Builtin value) {
     switch (value) {
         case Builtin::kUndefined:
             return out << "undefined";

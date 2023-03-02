@@ -20,7 +20,6 @@
 #include <algorithm>
 #include <iterator>
 #include <new>
-#include <ostream>
 #include <utility>
 #include <vector>
 
@@ -28,6 +27,7 @@
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/slice.h"
 #include "src/tint/utils/string.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::utils {
 
@@ -740,11 +740,11 @@ Vector<T, N> ToVector(const std::vector<T>& vector) {
 }
 
 /// Prints the vector @p vec to @p o
-/// @param o the std::ostream to write to
+/// @param o the stream to write to
 /// @param vec the vector
-/// @return the std::ostream so calls can be chained
+/// @return the stream so calls can be chained
 template <typename T, size_t N>
-inline std::ostream& operator<<(std::ostream& o, const utils::Vector<T, N>& vec) {
+inline utils::StringStream& operator<<(utils::StringStream& o, const utils::Vector<T, N>& vec) {
     o << "[";
     bool first = true;
     for (auto& el : vec) {
@@ -759,11 +759,11 @@ inline std::ostream& operator<<(std::ostream& o, const utils::Vector<T, N>& vec)
 }
 
 /// Prints the vector @p vec to @p o
-/// @param o the std::ostream to write to
+/// @param o the stream to write to
 /// @param vec the vector reference
-/// @return the std::ostream so calls can be chained
+/// @return the stream so calls can be chained
 template <typename T>
-inline std::ostream& operator<<(std::ostream& o, utils::VectorRef<T> vec) {
+inline utils::StringStream& operator<<(utils::StringStream& o, utils::VectorRef<T> vec) {
     o << "[";
     bool first = true;
     for (auto& el : vec) {

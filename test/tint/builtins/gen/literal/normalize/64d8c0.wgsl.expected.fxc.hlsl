@@ -1,5 +1,5 @@
 void normalize_64d8c0() {
-  float3 res = (0.577350259f).xxx;
+  float3 res = (0.57735025882720947266f).xxx;
 }
 
 struct tint_symbol {

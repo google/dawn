@@ -23,7 +23,9 @@ struct BinaryData {
     ast::BinaryOp op;
 };
 inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
-    out << data.op;
+    utils::StringStream str;
+    str << data.op;
+    out << str.str();
     return out;
 }
 using MslBinaryTest = TestParamHelper<BinaryData>;

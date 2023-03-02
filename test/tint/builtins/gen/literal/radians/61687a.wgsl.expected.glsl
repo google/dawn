@@ -1,7 +1,7 @@
 #version 310 es
 
 void radians_61687a() {
-  vec2 res = vec2(0.017453292f);
+  vec2 res = vec2(0.01745329238474369049f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void radians_61687a() {
-  vec2 res = vec2(0.017453292f);
+  vec2 res = vec2(0.01745329238474369049f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void radians_61687a() {
-  vec2 res = vec2(0.017453292f);
+  vec2 res = vec2(0.01745329238474369049f);
 }
 
 void compute_main() {

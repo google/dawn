@@ -1,5 +1,5 @@
 fn sin_15b2c6() {
-  var res = sin(vec4(1.57079632679));
+  var res = sin(vec4(1.57079632679000003037));
 }
 
 @vertex

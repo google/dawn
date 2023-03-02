@@ -1,7 +1,7 @@
 #version 310 es
 
 void tanh_313aa1() {
-  float res = 0.761594176f;
+  float res = 0.76159417629241943359f;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void tanh_313aa1() {
-  float res = 0.761594176f;
+  float res = 0.76159417629241943359f;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void tanh_313aa1() {
-  float res = 0.761594176f;
+  float res = 0.76159417629241943359f;
 }
 
 void compute_main() {

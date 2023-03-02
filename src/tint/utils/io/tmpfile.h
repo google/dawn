@@ -15,7 +15,6 @@
 #ifndef SRC_TINT_UTILS_IO_TMPFILE_H_
 #define SRC_TINT_UTILS_IO_TMPFILE_H_
 
-#include <sstream>
 #include <string>
 
 #include "src/tint/utils/string_stream.h"

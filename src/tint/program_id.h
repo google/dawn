@@ -16,10 +16,10 @@
 #define SRC_TINT_PROGRAM_ID_H_
 
 #include <stdint.h>
-#include <iostream>
 #include <utility>
 
 #include "src/tint/debug.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint {
 
@@ -71,11 +71,11 @@ inline ProgramID ProgramIDOf(ProgramID id) {
     return id;
 }
 
-/// Writes the ProgramID to the std::ostream.
-/// @param out the std::ostream to write to
+/// Writes the ProgramID to the stream.
+/// @param out the stream to write to
 /// @param id the program identifier to write
 /// @returns out so calls can be chained
-inline std::ostream& operator<<(std::ostream& out, ProgramID id) {
+inline utils::StringStream& operator<<(utils::StringStream& out, ProgramID id) {
     out << "Program<" << id.Value() << ">";
     return out;
 }

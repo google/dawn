@@ -15,7 +15,6 @@
 #ifndef SRC_TINT_UTILS_MATH_H_
 #define SRC_TINT_UTILS_MATH_H_
 
-#include <sstream>
 #include <string>
 #include <type_traits>
 

@@ -75,7 +75,7 @@ fn comp_main(@builtin(global_invocation_id) gl_GlobalInvocationID : vec3<u32>) {
     cVel = (cVel / vec2<f32>(f32(cVelCount), f32(cVelCount)));
   }
   vVel = (((vVel + (cMass * params.rule1Scale)) + (colVel * params.rule2Scale)) + (cVel * params.rule3Scale));
-  vVel = (normalize(vVel) * clamp(length(vVel), 0.0, 0.1));
+  vVel = (normalize(vVel) * clamp(length(vVel), 0.0, 0.10000000000000000555));
   vPos = (vPos + (vVel * params.deltaT));
   if ((vPos.x < -(1.0))) {
     vPos.x = 1.0;

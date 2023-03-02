@@ -1,5 +1,5 @@
 void degrees_d43a49() {
-  float4 res = (57.295780182f).xxxx;
+  float4 res = (57.295780181884765625f).xxxx;
 }
 
 struct tint_symbol {

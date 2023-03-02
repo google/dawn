@@ -2,7 +2,7 @@
 
 using namespace metal;
 void acosh_de60d8() {
-  half4 res = half4(1.31640625h);
+  half4 res = half4(0.99951171875h);
 }
 
 struct tint_symbol {

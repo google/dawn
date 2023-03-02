@@ -15,11 +15,11 @@
 #ifndef SRC_TINT_UTILS_RESULT_H_
 #define SRC_TINT_UTILS_RESULT_H_
 
-#include <ostream>
 #include <utility>
 #include <variant>
 
 #include "src/tint/debug.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::utils {
 
@@ -145,12 +145,12 @@ struct [[nodiscard]] Result {
     std::variant<std::monostate, SUCCESS_TYPE, FAILURE_TYPE> value;
 };
 
-/// Writes the result to the ostream.
-/// @param out the std::ostream to write to
+/// Writes the result to the stream.
+/// @param out the stream to write to
 /// @param res the result
-/// @return the std::ostream so calls can be chained
+/// @return the stream so calls can be chained
 template <typename SUCCESS, typename FAILURE>
-inline std::ostream& operator<<(std::ostream& out, Result<SUCCESS, FAILURE> res) {
+inline utils::StringStream& operator<<(utils::StringStream& out, Result<SUCCESS, FAILURE> res) {
     return res ? (out << "success: " << res.Get()) : (out << "failure: " << res.Failure());
 }
 

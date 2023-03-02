@@ -1,5 +1,5 @@
 fn sin_4e3979() {
-  var arg_0 = vec4<f32>(1.570796371f);
+  var arg_0 = vec4<f32>(1.57079637050628662109f);
   var res : vec4<f32> = sin(arg_0);
 }
 

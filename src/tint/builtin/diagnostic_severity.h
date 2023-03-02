@@ -23,12 +23,12 @@
 #ifndef SRC_TINT_BUILTIN_DIAGNOSTIC_SEVERITY_H_
 #define SRC_TINT_BUILTIN_DIAGNOSTIC_SEVERITY_H_
 
-#include <ostream>
 #include <string>
 #include <unordered_map>
 
 #include "src/tint/builtin/diagnostic_rule.h"
 #include "src/tint/diagnostic/diagnostic.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::builtin {
 
@@ -41,10 +41,10 @@ enum class DiagnosticSeverity {
     kWarning,
 };
 
-/// @param out the std::ostream to write to
+/// @param out the stream to write to
 /// @param value the DiagnosticSeverity
 /// @returns `out` so calls can be chained
-std::ostream& operator<<(std::ostream& out, DiagnosticSeverity value);
+utils::StringStream& operator<<(utils::StringStream& out, DiagnosticSeverity value);
 
 /// ParseDiagnosticSeverity parses a DiagnosticSeverity from a string.
 /// @param str the string to parse

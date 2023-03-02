@@ -6,7 +6,7 @@ f16vec2 tint_acosh(f16vec2 x) {
 }
 
 void acosh_5f49d8() {
-  f16vec2 arg_0 = f16vec2(2.0hf);
+  f16vec2 arg_0 = f16vec2(1.54296875hf);
   f16vec2 res = tint_acosh(arg_0);
 }
 
@@ -32,7 +32,7 @@ f16vec2 tint_acosh(f16vec2 x) {
 }
 
 void acosh_5f49d8() {
-  f16vec2 arg_0 = f16vec2(2.0hf);
+  f16vec2 arg_0 = f16vec2(1.54296875hf);
   f16vec2 res = tint_acosh(arg_0);
 }
 
@@ -52,7 +52,7 @@ f16vec2 tint_acosh(f16vec2 x) {
 }
 
 void acosh_5f49d8() {
-  f16vec2 arg_0 = f16vec2(2.0hf);
+  f16vec2 arg_0 = f16vec2(1.54296875hf);
   f16vec2 res = tint_acosh(arg_0);
 }
 

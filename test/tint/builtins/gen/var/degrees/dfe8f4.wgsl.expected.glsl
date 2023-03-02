@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 f16vec3 tint_degrees(f16vec3 param_0) {
-  return param_0 * 57.295779513082323hf;
+  return param_0 * 57.29577951308232286465hf;
 }
 
 
@@ -29,7 +29,7 @@ void main() {
 precision mediump float;
 
 f16vec3 tint_degrees(f16vec3 param_0) {
-  return param_0 * 57.295779513082323hf;
+  return param_0 * 57.29577951308232286465hf;
 }
 
 
@@ -50,7 +50,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 f16vec3 tint_degrees(f16vec3 param_0) {
-  return param_0 * 57.295779513082323hf;
+  return param_0 * 57.29577951308232286465hf;
 }
 
 

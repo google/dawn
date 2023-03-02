@@ -19,7 +19,7 @@ struct OutputBuf {
 @group(0) @binding(3) var<uniform> uniforms : Uniforms;
 
 fn aboutEqual(value : f32, expect : f32) -> bool {
-  return (abs((value - expect)) < 0.001);
+  return (abs((value - expect)) < 0.00100000000000000002);
 }
 
 @compute @workgroup_size(1, 1, 1)

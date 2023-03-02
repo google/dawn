@@ -544,8 +544,8 @@ match workgroup
 @must_use @const fn abs<N: num, T: fia_fiu32_f16>(vec<N, T>) -> vec<N, T>
 @must_use @const fn acos<T: fa_f32_f16>(@test_value(0.96891242171) T) -> T
 @must_use @const fn acos<N: num, T: fa_f32_f16>(@test_value(0.96891242171) vec<N, T>) -> vec<N, T>
-@must_use @const fn acosh<T: fa_f32_f16>(@test_value(2.0) T) -> T
-@must_use @const fn acosh<N: num, T: fa_f32_f16>(@test_value(2.0) vec<N, T>) -> vec<N, T>
+@must_use @const fn acosh<T: fa_f32_f16>(@test_value(1.5430806348) T) -> T
+@must_use @const fn acosh<N: num, T: fa_f32_f16>(@test_value(1.5430806348) vec<N, T>) -> vec<N, T>
 @must_use @const fn all(bool) -> bool
 @must_use @const fn all<N: num>(vec<N, bool>) -> bool
 @must_use @const fn any(bool) -> bool
@@ -658,8 +658,8 @@ match workgroup
 @must_use @const fn refract<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>, T) -> vec<N, T>
 @must_use @const fn reverseBits<T: iu32>(T) -> T
 @must_use @const fn reverseBits<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
-@must_use @const fn round<T: fa_f32_f16>(@test_value(3.4) T) -> T
-@must_use @const fn round<N: num, T: fa_f32_f16>(@test_value(3.4) vec<N, T>) -> vec<N, T>
+@must_use @const fn round<T: fa_f32_f16>(@test_value(3.5) T) -> T
+@must_use @const fn round<N: num, T: fa_f32_f16>(@test_value(3.5) vec<N, T>) -> vec<N, T>
 @must_use @const fn saturate<T: fa_f32_f16>(@test_value(2) T) -> T
 @must_use @const fn saturate<T: fa_f32_f16, N: num>(@test_value(2) vec<N, T>) -> vec<N, T>
 @must_use @const("select_bool") fn select<T: scalar>(T, T, bool) -> T

@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <utility>
 #include <vector>
 
 #include "src/tint/diagnostic/diagnostic.h"
@@ -85,8 +86,8 @@ struct Formatter::State {
     /// @param msg the value or string to write to the printer
     /// @returns this State so that calls can be chained
     template <typename T>
-    State& operator<<(const T& msg) {
-        stream << msg;
+    State& operator<<(T&& msg) {
+        stream << std::forward<T>(msg);
         return *this;
     }
 

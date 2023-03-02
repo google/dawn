@@ -1,7 +1,7 @@
 #version 310 es
 
 void atanh_e431bb() {
-  vec4 res = vec4(0.549306154f);
+  vec4 res = vec4(0.54930615425109863281f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void atanh_e431bb() {
-  vec4 res = vec4(0.549306154f);
+  vec4 res = vec4(0.54930615425109863281f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void atanh_e431bb() {
-  vec4 res = vec4(0.549306154f);
+  vec4 res = vec4(0.54930615425109863281f);
 }
 
 void compute_main() {

@@ -1,7 +1,7 @@
 #version 310 es
 
 void exp_bda5bb() {
-  vec3 res = vec3(2.718281746f);
+  vec3 res = vec3(2.71828174591064453125f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void exp_bda5bb() {
-  vec3 res = vec3(2.718281746f);
+  vec3 res = vec3(2.71828174591064453125f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void exp_bda5bb() {
-  vec3 res = vec3(2.718281746f);
+  vec3 res = vec3(2.71828174591064453125f);
 }
 
 void compute_main() {

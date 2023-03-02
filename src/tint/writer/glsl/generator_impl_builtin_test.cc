@@ -932,7 +932,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Scalar_f32) {
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 float tint_degrees(float param_0) {
-  return param_0 * 57.295779513082323f;
+  return param_0 * 57.29577951308232286465f;
 }
 
 
@@ -960,7 +960,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Vector_f32) {
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 vec3 tint_degrees(vec3 param_0) {
-  return param_0 * 57.295779513082323f;
+  return param_0 * 57.29577951308232286465f;
 }
 
 
@@ -991,7 +991,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Scalar_f16) {
 #extension GL_AMD_gpu_shader_half_float : require
 
 float16_t tint_degrees(float16_t param_0) {
-  return param_0 * 57.295779513082323hf;
+  return param_0 * 57.29577951308232286465hf;
 }
 
 
@@ -1022,7 +1022,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Vector_f16) {
 #extension GL_AMD_gpu_shader_half_float : require
 
 f16vec3 tint_degrees(f16vec3 param_0) {
-  return param_0 * 57.295779513082323hf;
+  return param_0 * 57.29577951308232286465hf;
 }
 
 
@@ -1050,7 +1050,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Scalar_f32) {
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 float tint_radians(float param_0) {
-  return param_0 * 0.017453292519943295f;
+  return param_0 * 0.01745329251994329547f;
 }
 
 
@@ -1078,7 +1078,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Vector_f32) {
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 vec3 tint_radians(vec3 param_0) {
-  return param_0 * 0.017453292519943295f;
+  return param_0 * 0.01745329251994329547f;
 }
 
 
@@ -1109,7 +1109,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Scalar_f16) {
 #extension GL_AMD_gpu_shader_half_float : require
 
 float16_t tint_radians(float16_t param_0) {
-  return param_0 * 0.017453292519943295hf;
+  return param_0 * 0.01745329251994329547hf;
 }
 
 
@@ -1140,7 +1140,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Vector_f16) {
 #extension GL_AMD_gpu_shader_half_float : require
 
 f16vec3 tint_radians(f16vec3 param_0) {
-  return param_0 * 0.017453292519943295hf;
+  return param_0 * 0.01745329251994329547hf;
 }
 
 

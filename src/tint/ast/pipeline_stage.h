@@ -15,17 +15,17 @@
 #ifndef SRC_TINT_AST_PIPELINE_STAGE_H_
 #define SRC_TINT_AST_PIPELINE_STAGE_H_
 
-#include <ostream>
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::ast {
 
 /// The pipeline stage
 enum class PipelineStage { kNone = -1, kVertex, kFragment, kCompute };
 
-/// @param out the std::ostream to write to
+/// @param out the stream to write to
 /// @param stage the PipelineStage
-/// @return the std::ostream so calls can be chained
-std::ostream& operator<<(std::ostream& out, PipelineStage stage);
+/// @return the stream so calls can be chained
+utils::StringStream& operator<<(utils::StringStream& out, PipelineStage stage);
 
 }  // namespace tint::ast
 

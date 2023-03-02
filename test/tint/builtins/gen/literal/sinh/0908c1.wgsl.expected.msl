@@ -2,7 +2,7 @@
 
 using namespace metal;
 void sinh_0908c1() {
-  half3 res = half3(1.174804688h);
+  half3 res = half3(1.1748046875h);
 }
 
 struct tint_symbol {

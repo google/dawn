@@ -15,7 +15,6 @@
 #ifndef SRC_TINT_AST_INTERPOLATE_ATTRIBUTE_H_
 #define SRC_TINT_AST_INTERPOLATE_ATTRIBUTE_H_
 
-#include <ostream>
 #include <string>
 
 #include "src/tint/ast/attribute.h"

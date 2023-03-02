@@ -35,7 +35,7 @@ const IntLiteralExpression* IntLiteralExpression::Clone(CloneContext* ctx) const
     return ctx->dst->create<IntLiteralExpression>(src, value, suffix);
 }
 
-std::ostream& operator<<(std::ostream& out, IntLiteralExpression::Suffix suffix) {
+utils::StringStream& operator<<(utils::StringStream& out, IntLiteralExpression::Suffix suffix) {
     switch (suffix) {
         default:
             return out;

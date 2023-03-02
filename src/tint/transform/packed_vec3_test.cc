@@ -289,7 +289,7 @@ enable chromium_internal_relaxed_uniform_layout;
 @group(0) @binding(0) var<storage, read_write> v : __packed_vec3<f32>;
 
 fn f() {
-  v = __packed_vec3<f32>(vec3(1.23));
+  v = __packed_vec3<f32>(vec3(1.22999999999999998224));
 }
 )";
 
@@ -342,7 +342,7 @@ enable chromium_internal_relaxed_uniform_layout;
 @group(0) @binding(0) var<storage, read_write> v : __packed_vec3<f32>;
 
 fn f() {
-  v.y = 1.23;
+  v.y = 1.22999999999999998224;
 }
 )";
 
@@ -367,7 +367,7 @@ enable chromium_internal_relaxed_uniform_layout;
 @group(0) @binding(0) var<storage, read_write> v : __packed_vec3<f32>;
 
 fn f() {
-  v[1] = 1.23;
+  v[1] = 1.22999999999999998224;
 }
 )";
 
@@ -596,7 +596,7 @@ struct tint_packed_vec3_f32_array_element {
 @group(0) @binding(0) var<storage, read_write> arr : array<tint_packed_vec3_f32_array_element, 4u>;
 
 fn f() {
-  arr[0].elements = __packed_vec3<f32>(vec3(1.23));
+  arr[0].elements = __packed_vec3<f32>(vec3(1.22999999999999998224));
 }
 )";
 
@@ -664,7 +664,7 @@ struct tint_packed_vec3_f32_array_element {
 @group(0) @binding(0) var<storage, read_write> arr : array<tint_packed_vec3_f32_array_element, 4u>;
 
 fn f() {
-  arr[0].elements.y = 1.23;
+  arr[0].elements.y = 1.22999999999999998224;
 }
 )";
 
@@ -694,7 +694,7 @@ struct tint_packed_vec3_f32_array_element {
 @group(0) @binding(0) var<storage, read_write> arr : array<tint_packed_vec3_f32_array_element, 4u>;
 
 fn f() {
-  arr[0].elements[1] = 1.23;
+  arr[0].elements[1] = 1.22999999999999998224;
 }
 )";
 
@@ -923,7 +923,7 @@ struct tint_packed_vec3_f32_array_element {
 @group(0) @binding(0) var<storage, read_write> m : array<tint_packed_vec3_f32_array_element, 3u>;
 
 fn f() {
-  m[1].elements = __packed_vec3<f32>(vec3(1.23));
+  m[1].elements = __packed_vec3<f32>(vec3(1.22999999999999998224));
 }
 )";
 
@@ -991,7 +991,7 @@ struct tint_packed_vec3_f32_array_element {
 @group(0) @binding(0) var<storage, read_write> m : array<tint_packed_vec3_f32_array_element, 3u>;
 
 fn f() {
-  m[1].elements.y = 1.23;
+  m[1].elements.y = 1.22999999999999998224;
 }
 )";
 
@@ -1021,7 +1021,7 @@ struct tint_packed_vec3_f32_array_element {
 @group(0) @binding(0) var<storage, read_write> m : array<tint_packed_vec3_f32_array_element, 3u>;
 
 fn f() {
-  m[1].elements[2] = 1.23;
+  m[1].elements[2] = 1.22999999999999998224;
 }
 )";
 
@@ -1312,7 +1312,7 @@ fn tint_pack_vec3_in_composite(in : mat3x3<f32>) -> array<tint_packed_vec3_f32_a
 @group(0) @binding(0) var<storage, read_write> arr : array<array<tint_packed_vec3_f32_array_element, 3u>, 4u>;
 
 fn f() {
-  arr[0] = tint_pack_vec3_in_composite(mat3x3(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9));
+  arr[0] = tint_pack_vec3_in_composite(mat3x3(1.10000000000000008882, 2.20000000000000017764, 3.29999999999999982236, 4.40000000000000035527, 5.5, 6.59999999999999964473, 7.70000000000000017764, 8.80000000000000071054, 9.90000000000000035527));
 }
 )";
 
@@ -1380,7 +1380,7 @@ struct tint_packed_vec3_f32_array_element {
 @group(0) @binding(0) var<storage, read_write> arr : array<array<tint_packed_vec3_f32_array_element, 3u>, 4u>;
 
 fn f() {
-  arr[0][1].elements = __packed_vec3<f32>(vec3(1.23));
+  arr[0][1].elements = __packed_vec3<f32>(vec3(1.22999999999999998224));
 }
 )";
 
@@ -1453,7 +1453,7 @@ struct tint_packed_vec3_f32_array_element {
 @group(0) @binding(0) var<storage, read_write> arr : array<array<tint_packed_vec3_f32_array_element, 3u>, 4u>;
 
 fn f() {
-  arr[0][1].elements.y = 1.23;
+  arr[0][1].elements.y = 1.22999999999999998224;
 }
 )";
 
@@ -1483,7 +1483,7 @@ struct tint_packed_vec3_f32_array_element {
 @group(0) @binding(0) var<storage, read_write> arr : array<array<tint_packed_vec3_f32_array_element, 3u>, 4u>;
 
 fn f() {
-  arr[0][1].elements[2] = 1.23;
+  arr[0][1].elements[2] = 1.22999999999999998224;
 }
 )";
 
@@ -1685,7 +1685,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> P : S_tint_packed_vec3;
 
 fn f() {
-  P = tint_pack_vec3_in_composite(S(vec3(1.23)));
+  P = tint_pack_vec3_in_composite(S(vec3(1.22999999999999998224)));
 }
 )";
 
@@ -1764,7 +1764,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> P : S_tint_packed_vec3;
 
 fn f() {
-  P.v = __packed_vec3<f32>(vec3(1.23));
+  P.v = __packed_vec3<f32>(vec3(1.22999999999999998224));
 }
 )";
 
@@ -1852,7 +1852,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> P : S_tint_packed_vec3;
 
 fn f() {
-  P.v.y = 1.23;
+  P.v.y = 1.22999999999999998224;
 }
 )";
 
@@ -1890,7 +1890,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> P : S_tint_packed_vec3;
 
 fn f() {
-  P.v[1] = 1.23;
+  P.v[1] = 1.22999999999999998224;
 }
 )";
 
@@ -2380,7 +2380,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> P : S_tint_packed_vec3;
 
 fn f() {
-  P.arr[0].elements = __packed_vec3<f32>(vec3(1.23));
+  P.arr[0].elements = __packed_vec3<f32>(vec3(1.22999999999999998224));
 }
 )";
 
@@ -2479,7 +2479,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> P : S_tint_packed_vec3;
 
 fn f() {
-  P.arr[0].elements.y = 1.23;
+  P.arr[0].elements.y = 1.22999999999999998224;
 }
 )";
 
@@ -2522,7 +2522,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> P : S_tint_packed_vec3;
 
 fn f() {
-  P.arr[0].elements[1] = 1.23;
+  P.arr[0].elements[1] = 1.22999999999999998224;
 }
 )";
 
@@ -3012,7 +3012,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> P : S_tint_packed_vec3;
 
 fn f() {
-  P.m[1].elements = __packed_vec3<f32>(vec3(1.23));
+  P.m[1].elements = __packed_vec3<f32>(vec3(1.22999999999999998224));
 }
 )";
 
@@ -3111,7 +3111,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> P : S_tint_packed_vec3;
 
 fn f() {
-  P.m[1].elements.y = 1.23;
+  P.m[1].elements.y = 1.22999999999999998224;
 }
 )";
 
@@ -3154,7 +3154,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> P : S_tint_packed_vec3;
 
 fn f() {
-  P.m[1].elements[2] = 1.23;
+  P.m[1].elements[2] = 1.22999999999999998224;
 }
 )";
 
@@ -3834,7 +3834,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> P : S_tint_packed_vec3;
 
 fn f() {
-  P.arr[0][1].elements = __packed_vec3<f32>(vec3(1.23));
+  P.arr[0][1].elements = __packed_vec3<f32>(vec3(1.22999999999999998224));
 }
 )";
 
@@ -3938,7 +3938,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> P : S_tint_packed_vec3;
 
 fn f() {
-  P.arr[0][1].elements.y = 1.23;
+  P.arr[0][1].elements.y = 1.22999999999999998224;
 }
 )";
 
@@ -3981,7 +3981,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> P : S_tint_packed_vec3;
 
 fn f() {
-  P.arr[0][1].elements[2] = 1.23;
+  P.arr[0][1].elements[2] = 1.22999999999999998224;
 }
 )";
 

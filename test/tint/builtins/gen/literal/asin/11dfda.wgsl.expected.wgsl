@@ -1,7 +1,7 @@
 enable f16;
 
 fn asin_11dfda() {
-  var res : f16 = asin(0.479248047h);
+  var res : f16 = asin(0.479248046875h);
 }
 
 @vertex

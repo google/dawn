@@ -2070,7 +2070,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
 namespace texture_builtin_tests {
 
 enum class Texture { kF32, kI32, kU32 };
-inline std::ostream& operator<<(std::ostream& out, Texture data) {
+inline utils::StringStream& operator<<(utils::StringStream& out, Texture data) {
     if (data == Texture::kF32) {
         out << "f32";
     } else if (data == Texture::kI32) {
@@ -2087,7 +2087,9 @@ struct TextureTestParams {
     builtin::TexelFormat format = builtin::TexelFormat::kR32Float;
 };
 inline std::ostream& operator<<(std::ostream& out, TextureTestParams data) {
-    out << data.dim << "_" << data.type;
+    utils::StringStream str;
+    str << data.dim << "_" << data.type;
+    out << str.str();
     return out;
 }
 
@@ -2110,7 +2112,11 @@ class ResolverBuiltinTest_TextureOperation : public ResolverTestWithParam<Textur
             case type::TextureDimension::kCubeArray:
                 return ty.vec3(scalar);
             default:
-                [=]() { FAIL() << "Unsupported texture dimension: " << dim; }();
+                [=]() {
+                    utils::StringStream str;
+                    str << dim;
+                    FAIL() << "Unsupported texture dimension: " << str.str();
+                }();
         }
         return ast::Type{};
     }
@@ -2448,8 +2454,11 @@ TEST_P(ResolverBuiltinTest_Texture, Call) {
 
     if (std::string(param.function) == "textureDimensions") {
         switch (param.texture_dimension) {
-            default:
-                FAIL() << "invalid texture dimensions: " << param.texture_dimension;
+            default: {
+                utils::StringStream str;
+                str << param.texture_dimension;
+                FAIL() << "invalid texture dimensions: " << str.str();
+            }
             case type::TextureDimension::k1d:
                 EXPECT_TRUE(TypeOf(call)->Is<type::U32>());
                 break;

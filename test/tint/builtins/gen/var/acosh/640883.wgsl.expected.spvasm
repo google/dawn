@@ -41,8 +41,8 @@
          %20 = OpConstantNull %v2float
        %void = OpTypeVoid
          %23 = OpTypeFunction %void
-    %float_2 = OpConstant %float 2
-         %28 = OpConstantComposite %v2float %float_2 %float_2
+%float_1_54308069 = OpConstant %float 1.54308069
+         %28 = OpConstantComposite %v2float %float_1_54308069 %float_1_54308069
 %_ptr_Function_v2float = OpTypePointer Function %v2float
          %34 = OpTypeFunction %v4float
  %tint_acosh = OpFunction %v2float None %9

@@ -37,7 +37,7 @@
        %bool = OpTypeBool
        %void = OpTypeVoid
          %19 = OpTypeFunction %void
-    %float_2 = OpConstant %float 2
+%float_1_54308069 = OpConstant %float 1.54308069
 %_ptr_Function_float = OpTypePointer Function %float
          %29 = OpTypeFunction %v4float
  %tint_acosh = OpFunction %float None %9
@@ -52,7 +52,7 @@
          %22 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_float Function %8
         %res = OpVariable %_ptr_Function_float Function %8
-               OpStore %arg_0 %float_2
+               OpStore %arg_0 %float_1_54308069
          %27 = OpLoad %float %arg_0
          %26 = OpFunctionCall %float %tint_acosh %27
                OpStore %res %26

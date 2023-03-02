@@ -1,5 +1,5 @@
 fn acos_dfc915() {
-  var res : vec2<f32> = acos(vec2<f32>(0.968912423f));
+  var res : vec2<f32> = acos(vec2<f32>(0.96891242265701293945f));
 }
 
 @vertex

@@ -110,9 +110,9 @@ const i_width : i32 = 42i;
 
 const i_height = 11i;
 
-const f_width : f32 = 22.299999237f;
+const f_width : f32 = 22.299999237060546875f;
 
-const f_height = 12.399999619f;
+const f_height = 12.3999996185302734375f;
 
 const b_width : bool = true;
 
@@ -175,9 +175,9 @@ const i_width : i32 = 42i;
 
 const i_height = 11i;
 
-const f_width : f32 = 22.299999237f;
+const f_width : f32 = 22.299999237060546875f;
 
-const f_height = 12.399999619f;
+const f_height = 12.3999996185302734375f;
 
 const b_width : bool = true;
 

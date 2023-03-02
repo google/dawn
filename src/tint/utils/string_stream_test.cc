@@ -88,22 +88,22 @@ TEST_F(StringStreamTest, Precision) {
     {
         StringStream s;
         s << 1e-8f;
-        EXPECT_EQ(s.str(), "0.00000001");
+        EXPECT_EQ(s.str(), "0.00000000999999993923");
     }
     {
         StringStream s;
         s << 1e-9f;
-        EXPECT_EQ(s.str(), "0.000000001");
+        EXPECT_EQ(s.str(), "0.00000000099999997172");
     }
     {
         StringStream s;
         s << 1e-10f;
-        EXPECT_EQ(s.str(), "1.00000001e-10");
+        EXPECT_EQ(s.str(), "0.00000000010000000134");
     }
     {
         StringStream s;
         s << 1e-20f;
-        EXPECT_EQ(s.str(), "9.99999968e-21");
+        EXPECT_EQ(s.str(), "0.00000000000000000001");
     }
 }
 

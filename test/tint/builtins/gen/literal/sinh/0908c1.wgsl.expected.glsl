@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void sinh_0908c1() {
-  f16vec3 res = f16vec3(1.174804688hf);
+  f16vec3 res = f16vec3(1.1748046875hf);
 }
 
 vec4 vertex_main() {
@@ -23,7 +23,7 @@ void main() {
 precision mediump float;
 
 void sinh_0908c1() {
-  f16vec3 res = f16vec3(1.174804688hf);
+  f16vec3 res = f16vec3(1.1748046875hf);
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void sinh_0908c1() {
-  f16vec3 res = f16vec3(1.174804688hf);
+  f16vec3 res = f16vec3(1.1748046875hf);
 }
 
 void compute_main() {

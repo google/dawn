@@ -1,5 +1,5 @@
 void asinh_8d2e51() {
-  float4 res = (0.881373584f).xxxx;
+  float4 res = (0.88137358427047729492f).xxxx;
 }
 
 struct tint_symbol {

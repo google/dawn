@@ -2,7 +2,7 @@
 
 using namespace metal;
 void radians_208fd9() {
-  half res = 0.017440796h;
+  half res = 0.0174407958984375h;
 }
 
 struct tint_symbol {

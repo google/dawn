@@ -23,6 +23,45 @@
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::ast::builtin::test {
+namespace {
+
+utils::StringStream& operator<<(utils::StringStream& out, const TextureKind& kind) {
+    switch (kind) {
+        case TextureKind::kRegular:
+            out << "regular";
+            break;
+        case TextureKind::kDepth:
+            out << "depth";
+            break;
+        case TextureKind::kDepthMultisampled:
+            out << "depth-multisampled";
+            break;
+        case TextureKind::kMultisampled:
+            out << "multisampled";
+            break;
+        case TextureKind::kStorage:
+            out << "storage";
+            break;
+    }
+    return out;
+}
+
+utils::StringStream& operator<<(utils::StringStream& out, const TextureDataType& ty) {
+    switch (ty) {
+        case TextureDataType::kF32:
+            out << "f32";
+            break;
+        case TextureDataType::kU32:
+            out << "u32";
+            break;
+        case TextureDataType::kI32:
+            out << "i32";
+            break;
+    }
+    return out;
+}
+
+}  // namespace
 
 TextureOverloadCase::TextureOverloadCase(ValidTextureOverload o,
                                          const char* desc,
@@ -80,57 +119,24 @@ TextureOverloadCase::TextureOverloadCase(ValidTextureOverload o,
 TextureOverloadCase::TextureOverloadCase(const TextureOverloadCase&) = default;
 TextureOverloadCase::~TextureOverloadCase() = default;
 
-std::ostream& operator<<(std::ostream& out, const TextureKind& kind) {
-    switch (kind) {
-        case TextureKind::kRegular:
-            out << "regular";
-            break;
-        case TextureKind::kDepth:
-            out << "depth";
-            break;
-        case TextureKind::kDepthMultisampled:
-            out << "depth-multisampled";
-            break;
-        case TextureKind::kMultisampled:
-            out << "multisampled";
-            break;
-        case TextureKind::kStorage:
-            out << "storage";
-            break;
-    }
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const TextureDataType& ty) {
-    switch (ty) {
-        case TextureDataType::kF32:
-            out << "f32";
-            break;
-        case TextureDataType::kU32:
-            out << "u32";
-            break;
-        case TextureDataType::kI32:
-            out << "i32";
-            break;
-    }
-    return out;
-}
-
 std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data) {
-    out << "TextureOverloadCase " << static_cast<int>(data.overload) << "\n";
-    out << data.description << "\n";
-    out << "texture_kind:      " << data.texture_kind << "\n";
-    out << "sampler_kind:      ";
+    utils::StringStream str;
+    str << "TextureOverloadCase " << static_cast<int>(data.overload) << "\n";
+    str << data.description << "\n";
+    str << "texture_kind:      " << data.texture_kind << "\n";
+    str << "sampler_kind:      ";
     if (data.texture_kind != TextureKind::kStorage) {
-        out << data.sampler_kind;
+        str << data.sampler_kind;
     } else {
-        out << "<unused>";
+        str << "<unused>";
     }
-    out << "\n";
-    out << "access:            " << data.access << "\n";
-    out << "texel_format:      " << data.texel_format << "\n";
-    out << "texture_dimension: " << data.texture_dimension << "\n";
-    out << "texture_data_type: " << data.texture_data_type << "\n";
+    str << "\n";
+    str << "access:            " << data.access << "\n";
+    str << "texel_format:      " << data.texel_format << "\n";
+    str << "texture_dimension: " << data.texture_dimension << "\n";
+    str << "texture_data_type: " << data.texture_data_type << "\n";
+
+    out << str.str();
     return out;
 }
 

@@ -1,5 +1,5 @@
 void asin_7b6a44() {
-  float2 arg_0 = (0.47942555f).xx;
+  float2 arg_0 = (0.47942554950714111328f).xx;
   float2 res = asin(arg_0);
 }
 

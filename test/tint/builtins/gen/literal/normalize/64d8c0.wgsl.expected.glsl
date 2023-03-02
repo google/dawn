@@ -1,7 +1,7 @@
 #version 310 es
 
 void normalize_64d8c0() {
-  vec3 res = vec3(0.577350259f);
+  vec3 res = vec3(0.57735025882720947266f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void normalize_64d8c0() {
-  vec3 res = vec3(0.577350259f);
+  vec3 res = vec3(0.57735025882720947266f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void normalize_64d8c0() {
-  vec3 res = vec3(0.577350259f);
+  vec3 res = vec3(0.57735025882720947266f);
 }
 
 void compute_main() {

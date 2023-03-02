@@ -1,5 +1,5 @@
 fn acosh_17260e() {
-  const arg_0 = vec2(2.0);
+  const arg_0 = vec2(1.54308063479999990619);
   var res = acosh(arg_0);
 }
 

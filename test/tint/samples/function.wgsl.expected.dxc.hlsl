@@ -1,5 +1,5 @@
 float main() {
-  return 0.400000006f;
+  return 0.40000000596046447754f;
 }
 
 [numthreads(2, 1, 1)]

@@ -1,7 +1,7 @@
 #version 310 es
 
 void atanh_7997d8() {
-  float res = 0.549306154f;
+  float res = 0.54930615425109863281f;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void atanh_7997d8() {
-  float res = 0.549306154f;
+  float res = 0.54930615425109863281f;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void atanh_7997d8() {
-  float res = 0.549306154f;
+  float res = 0.54930615425109863281f;
 }
 
 void compute_main() {

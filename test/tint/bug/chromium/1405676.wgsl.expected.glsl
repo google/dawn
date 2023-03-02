@@ -5,6 +5,6 @@ void unused_entry_point() {
   return;
 }
 void d() {
-  float l = 0.141120002f;
+  float l = 0.14112000167369842529f;
 }
 

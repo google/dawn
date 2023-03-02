@@ -15,8 +15,6 @@
 #ifndef SRC_TINT_IR_BITCAST_H_
 #define SRC_TINT_IR_BITCAST_H_
 
-#include <ostream>
-
 #include "src/tint/castable.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/symbol_table.h"

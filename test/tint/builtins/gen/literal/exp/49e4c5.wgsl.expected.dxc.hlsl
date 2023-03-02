@@ -1,5 +1,5 @@
 void exp_49e4c5() {
-  float res = 2.718281746f;
+  float res = 2.71828174591064453125f;
 }
 
 struct tint_symbol {

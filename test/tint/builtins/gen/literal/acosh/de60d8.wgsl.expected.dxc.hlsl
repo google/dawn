@@ -1,5 +1,5 @@
 void acosh_de60d8() {
-  vector<float16_t, 4> res = (float16_t(1.31640625h)).xxxx;
+  vector<float16_t, 4> res = (float16_t(0.99951171875h)).xxxx;
 }
 
 struct tint_symbol {

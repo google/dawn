@@ -82,7 +82,7 @@ TexelFormat ParseTexelFormat(std::string_view str) {
     return TexelFormat::kUndefined;
 }
 
-std::ostream& operator<<(std::ostream& out, TexelFormat value) {
+utils::StringStream& operator<<(utils::StringStream& out, TexelFormat value) {
     switch (value) {
         case TexelFormat::kUndefined:
             return out << "undefined";

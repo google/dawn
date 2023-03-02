@@ -91,12 +91,12 @@ struct KeyValueRef {
     operator KeyValue<KEY, VALUE>() const { return {key, value}; }
 };
 
-/// Writes the KeyValue to the std::ostream.
-/// @param out the std::ostream to write to
+/// Writes the KeyValue to the stream.
+/// @param out the stream to write to
 /// @param key_value the KeyValue to write
 /// @returns out so calls can be chained
 template <typename KEY, typename VALUE>
-std::ostream& operator<<(std::ostream& out, const KeyValue<KEY, VALUE>& key_value) {
+utils::StringStream& operator<<(utils::StringStream& out, const KeyValue<KEY, VALUE>& key_value) {
     return out << "[" << key_value.key << ": " << key_value.value << "]";
 }
 

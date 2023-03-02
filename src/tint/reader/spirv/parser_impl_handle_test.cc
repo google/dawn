@@ -1645,7 +1645,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
 @group(2) @binding(1) var x_20 : texture_depth_2d;)",
-                        "textureGatherCompare(x_20, x_10, coords12, 0.200000003f)"},
+                        "textureGatherCompare(x_20, x_10, coords12, 0.20000000298023223877f)"},
         // OpImageDrefGather 2DDepth ConstOffset signed
         ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
                         "%result = OpImageDrefGather "
@@ -1653,7 +1653,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
 @group(2) @binding(1) var x_20 : texture_depth_2d;)",
-                        "textureGatherCompare(x_20, x_10, coords12, 0.200000003f, "
+                        "textureGatherCompare(x_20, x_10, coords12, 0.20000000298023223877f, "
                         "vec2<i32>(3i, 4i))"},
         // OpImageDrefGather 2DDepth ConstOffset unsigned
         ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
@@ -1663,7 +1663,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
 @group(2) @binding(1) var x_20 : texture_depth_2d;)",
-                        "textureGatherCompare(x_20, x_10, coords12, 0.200000003f, "
+                        "textureGatherCompare(x_20, x_10, coords12, 0.20000000298023223877f, "
                         "vec2<i32>(vec2<u32>(3u, 4u)))"},
         // OpImageDrefGather 2DDepth Array
         ImageAccessCase{"%float 2D 1 1 0 1 Unknown",
@@ -1673,7 +1673,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 @group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
                         "textureGatherCompare(x_20, x_10, coords123.xy, "
-                        "i32(round(coords123.z)), 0.200000003f)"},
+                        "i32(round(coords123.z)), 0.20000000298023223877f)"},
         // OpImageDrefGather 2DDepth Array ConstOffset signed
         ImageAccessCase{"%float 2D 1 1 0 1 Unknown",
                         "%result = OpImageDrefGather "
@@ -1682,7 +1682,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 @group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
                         "textureGatherCompare(x_20, x_10, coords123.xy, "
-                        "i32(round(coords123.z)), 0.200000003f, vec2<i32>(3i, 4i))"},
+                        "i32(round(coords123.z)), 0.20000000298023223877f, vec2<i32>(3i, 4i))"},
         // OpImageDrefGather 2DDepth Array ConstOffset unsigned
         ImageAccessCase{"%float 2D 1 1 0 1 Unknown",
                         "%result = OpImageDrefGather "
@@ -1692,7 +1692,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 @group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
                         "textureGatherCompare(x_20, x_10, coords123.xy, "
-                        "i32(round(coords123.z)), 0.200000003f, "
+                        "i32(round(coords123.z)), 0.20000000298023223877f, "
                         "vec2<i32>(vec2<u32>(3u, 4u)))"},
         // OpImageDrefGather DepthCube
         ImageAccessCase{"%float Cube 1 0 0 1 Unknown",
@@ -1701,7 +1701,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
 @group(2) @binding(1) var x_20 : texture_depth_cube;)",
-                        "textureGatherCompare(x_20, x_10, coords123, 0.200000003f)"},
+                        "textureGatherCompare(x_20, x_10, coords123, 0.20000000298023223877f)"},
         // OpImageDrefGather DepthCube Array
         ImageAccessCase{"%float Cube 1 1 0 1 Unknown",
                         "%result = OpImageDrefGather "
@@ -1710,7 +1710,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 @group(2) @binding(1) var x_20 : texture_depth_cube_array;)",
                         "textureGatherCompare(x_20, x_10, coords1234.xyz, "
-                        "i32(round(coords1234.w)), 0.200000003f)"}}));
+                        "i32(round(coords1234.w)), 0.20000000298023223877f)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleImplicitLod,
@@ -1829,7 +1829,7 @@ INSTANTIATE_TEST_SUITE_P(
 )",
                         R"(
   let x_200 : vec4<f32> = vec4<f32>(textureSample(x_20, x_10, coords12), 0.0f, 0.0f, 0.0f);
-  let x_210 : f32 = textureSampleCompare(x_20, x_30, coords12, 0.200000003f);
+  let x_210 : f32 = textureSampleCompare(x_20, x_30, coords12, 0.20000000298023223877f);
 )"}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -1844,7 +1844,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 @group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
-                        R"(textureSampleCompare(x_20, x_10, coords12, 0.200000003f))"},
+                        R"(textureSampleCompare(x_20, x_10, coords12, 0.20000000298023223877f))"},
         // ImageSampleDrefImplicitLod - arrayed
         ImageAccessCase{
             "%float 2D 0 1 0 1 Unknown",
@@ -1853,7 +1853,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
 @group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
-            R"(textureSampleCompare(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.200000003f))"},
+            R"(textureSampleCompare(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.20000000298023223877f))"},
         // ImageSampleDrefImplicitLod with ConstOffset
         ImageAccessCase{
             "%float 2D 0 0 0 1 Unknown",
@@ -1863,7 +1863,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 @group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
-            R"(textureSampleCompare(x_20, x_10, coords12, 0.200000003f, vec2<i32>(3i, 4i)))"},
+            R"(textureSampleCompare(x_20, x_10, coords12, 0.20000000298023223877f, vec2<i32>(3i, 4i)))"},
         // ImageSampleDrefImplicitLod arrayed with ConstOffset
         ImageAccessCase{
             "%float 2D 0 1 0 1 Unknown",
@@ -1872,7 +1872,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
 @group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
-            R"(textureSampleCompare(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.200000003f, vec2<i32>(3i, 4i)))"}));
+            R"(textureSampleCompare(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.20000000298023223877f, vec2<i32>(3i, 4i)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleDrefExplicitLod,
@@ -1881,14 +1881,15 @@ INSTANTIATE_TEST_SUITE_P(
     // Another test checks cases where the Lod is not float constant 0.
     ::testing::Values(
         // 2D
-        ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
-                        "%result = OpImageSampleDrefExplicitLod "
-                        "%float %sampled_image %coords12 %depth Lod %float_0",
-                        R"(@group(0) @binding(0) var x_10 : sampler_comparison;
+        ImageAccessCase{
+            "%float 2D 1 0 0 1 Unknown",
+            "%result = OpImageSampleDrefExplicitLod "
+            "%float %sampled_image %coords12 %depth Lod %float_0",
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
 @group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
-                        R"(textureSampleCompareLevel(x_20, x_10, coords12, 0.200000003f))"},
+            R"(textureSampleCompareLevel(x_20, x_10, coords12, 0.20000000298023223877f))"},
         // 2D array
         ImageAccessCase{
             "%float 2D 1 1 0 1 Unknown",
@@ -1897,7 +1898,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
 @group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
-            R"(textureSampleCompareLevel(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.200000003f))"},
+            R"(textureSampleCompareLevel(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.20000000298023223877f))"},
         // 2D, ConstOffset
         ImageAccessCase{
             "%float 2D 1 0 0 1 Unknown",
@@ -1908,7 +1909,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 @group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
-            R"(textureSampleCompareLevel(x_20, x_10, coords12, 0.200000003f, vec2<i32>(3i, 4i)))"},
+            R"(textureSampleCompareLevel(x_20, x_10, coords12, 0.20000000298023223877f, vec2<i32>(3i, 4i)))"},
         // 2D array, ConstOffset
         ImageAccessCase{
             "%float 2D 1 1 0 1 Unknown",
@@ -1918,15 +1919,16 @@ INSTANTIATE_TEST_SUITE_P(
             R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
 @group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
-            R"(textureSampleCompareLevel(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.200000003f, vec2<i32>(3i, 4i)))"},
+            R"(textureSampleCompareLevel(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.20000000298023223877f, vec2<i32>(3i, 4i)))"},
         // Cube
-        ImageAccessCase{"%float Cube 1 0 0 1 Unknown",
-                        "%result = OpImageSampleDrefExplicitLod "
-                        "%float %sampled_image %coords123 %depth Lod %float_0",
-                        R"(@group(0) @binding(0) var x_10 : sampler_comparison;
+        ImageAccessCase{
+            "%float Cube 1 0 0 1 Unknown",
+            "%result = OpImageSampleDrefExplicitLod "
+            "%float %sampled_image %coords123 %depth Lod %float_0",
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
 @group(2) @binding(1) var x_20 : texture_depth_cube;)",
-                        R"(textureSampleCompareLevel(x_20, x_10, coords123, 0.200000003f))"},
+            R"(textureSampleCompareLevel(x_20, x_10, coords123, 0.20000000298023223877f))"},
         // Cube array
         ImageAccessCase{
             "%float Cube 1 1 0 1 Unknown",
@@ -1935,7 +1937,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
 @group(2) @binding(1) var x_20 : texture_depth_cube_array;)",
-            R"(textureSampleCompareLevel(x_20, x_10, coords1234.xyz, i32(round(coords1234.w)), 0.200000003f))"}));
+            R"(textureSampleCompareLevel(x_20, x_10, coords1234.xyz, i32(round(coords1234.w)), 0.20000000298023223877f))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleExplicitLod_UsingLod,
@@ -2308,7 +2310,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 @group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
-            R"(textureSampleCompare(x_20, x_10, (coords123.xy / coords123.z), 0.200000003f, 0.0f))"},
+            R"(textureSampleCompare(x_20, x_10, (coords123.xy / coords123.z), 0.20000000298023223877f, 0.0f))"},
 
         // OpImageSampleProjDrefImplicitLod 2D depth-texture, Lod ConstOffset
         ImageAccessCase{
@@ -2320,7 +2322,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 @group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
-            R"(textureSampleCompareLevel(x_20, x_10, (coords123.xy / coords123.z), 0.200000003f, 0.0f, vec2<i32>(3i, 4i)))"}));
+            R"(textureSampleCompareLevel(x_20, x_10, (coords123.xy / coords123.z), 0.20000000298023223877f, 0.0f, vec2<i32>(3i, 4i)))"}));
 
 /////
 // End projection sampling

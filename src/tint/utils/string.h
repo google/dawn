@@ -15,7 +15,6 @@
 #ifndef SRC_TINT_UTILS_STRING_H_
 #define SRC_TINT_UTILS_STRING_H_
 
-#include <sstream>
 #include <string>
 #include <variant>
 
@@ -40,7 +39,7 @@ namespace tint::utils {
 }
 
 /// @param value the value to be printed as a string
-/// @returns value printed as a string via the std::ostream `<<` operator
+/// @returns value printed as a string via the stream `<<` operator
 template <typename T>
 std::string ToString(const T& value) {
     utils::StringStream s;
@@ -49,7 +48,7 @@ std::string ToString(const T& value) {
 }
 
 /// @param value the variant to be printed as a string
-/// @returns value printed as a string via the std::ostream `<<` operator
+/// @returns value printed as a string via the stream `<<` operator
 template <typename... TYs>
 std::string ToString(const std::variant<TYs...>& value) {
     utils::StringStream s;

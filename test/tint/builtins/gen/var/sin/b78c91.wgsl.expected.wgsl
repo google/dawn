@@ -1,5 +1,5 @@
 fn sin_b78c91() {
-  var arg_0 = 1.570796371f;
+  var arg_0 = 1.57079637050628662109f;
   var res : f32 = sin(arg_0);
 }
 

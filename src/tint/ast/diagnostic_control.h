@@ -15,7 +15,6 @@
 #ifndef SRC_TINT_AST_DIAGNOSTIC_CONTROL_H_
 #define SRC_TINT_AST_DIAGNOSTIC_CONTROL_H_
 
-#include <ostream>
 #include <string>
 #include <unordered_map>
 

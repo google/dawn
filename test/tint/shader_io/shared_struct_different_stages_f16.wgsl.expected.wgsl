@@ -11,7 +11,7 @@ struct Interface {
 
 @vertex
 fn vert_main() -> Interface {
-  return Interface(0.4, 0.599609375h, vec4<f32>());
+  return Interface(0.4000000000000000222, 0.599609375h, vec4<f32>());
 }
 
 @fragment

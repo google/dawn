@@ -1,5 +1,5 @@
 fn acosh_d51ccb() {
-  var arg_0 = vec4<f32>(2.0f);
+  var arg_0 = vec4<f32>(1.54308068752288818359f);
   var res : vec4<f32> = acosh(arg_0);
 }
 

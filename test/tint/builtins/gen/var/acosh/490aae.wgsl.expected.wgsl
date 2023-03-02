@@ -1,5 +1,5 @@
 fn acosh_490aae() {
-  const arg_0 = vec4(2.0);
+  const arg_0 = vec4(1.54308063479999990619);
   var res = acosh(arg_0);
 }
 

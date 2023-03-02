@@ -1,5 +1,5 @@
 void tanh_06a4fe() {
-  vector<float16_t, 3> res = (float16_t(0.761230469h)).xxx;
+  vector<float16_t, 3> res = (float16_t(0.76123046875h)).xxx;
 }
 
 struct tint_symbol {

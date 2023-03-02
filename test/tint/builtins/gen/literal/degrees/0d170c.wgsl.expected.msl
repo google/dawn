@@ -2,7 +2,7 @@
 
 using namespace metal;
 void degrees_0d170c() {
-  float4 res = float4(57.295776367f);
+  float4 res = float4(57.2957763671875f);
 }
 
 struct tint_symbol {

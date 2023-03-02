@@ -1,5 +1,5 @@
 void asin_11dfda() {
-  float16_t res = float16_t(0.499755859h);
+  float16_t res = float16_t(0.499755859375h);
 }
 
 struct tint_symbol {

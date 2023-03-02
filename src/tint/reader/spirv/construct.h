@@ -16,7 +16,6 @@
 #define SRC_TINT_READER_SPIRV_CONSTRUCT_H_
 
 #include <memory>
-#include <sstream>
 #include <string>
 
 #include "src/tint/utils/string_stream.h"

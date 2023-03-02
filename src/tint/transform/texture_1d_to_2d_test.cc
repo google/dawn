@@ -226,7 +226,7 @@ fn main() -> vec4<f32> {
 @group(0) @binding(1) var samp : sampler;
 
 fn f(t : texture_2d<f32>, s : sampler) -> vec4<f32> {
-  return textureSample(t, s, vec2<f32>(0.7, 0.5));
+  return textureSample(t, s, vec2<f32>(0.69999999999999995559, 0.5));
 }
 
 fn main() -> vec4<f32> {

@@ -43,7 +43,9 @@ struct FunctionStageData {
     SpvExecutionModel model;
 };
 inline std::ostream& operator<<(std::ostream& out, FunctionStageData data) {
-    out << data.stage;
+    utils::StringStream str;
+    str << data.stage;
+    out << str.str();
     return out;
 }
 using Attribute_StageTest = TestParamHelper<FunctionStageData>;

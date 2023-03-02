@@ -1,5 +1,5 @@
 void exp_dad791() {
-  float4 res = (2.718281746f).xxxx;
+  float4 res = (2.71828174591064453125f).xxxx;
 }
 
 struct tint_symbol {

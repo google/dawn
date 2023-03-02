@@ -15,7 +15,6 @@
 #ifndef SRC_TINT_WRITER_TEXT_GENERATOR_H_
 #define SRC_TINT_WRITER_TEXT_GENERATOR_H_
 
-#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <utility>

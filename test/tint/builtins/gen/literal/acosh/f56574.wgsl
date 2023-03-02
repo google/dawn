@@ -25,7 +25,7 @@ enable f16;
 
 // fn acosh(vec<3, f16>) -> vec<3, f16>
 fn acosh_f56574() {
-  var res: vec3<f16> = acosh(vec3<f16>(2.h));
+  var res: vec3<f16> = acosh(vec3<f16>(1.5430806348h));
 }
 
 @vertex

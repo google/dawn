@@ -1,5 +1,5 @@
 void asinh_2265ee() {
-  float3 res = (0.881373584f).xxx;
+  float3 res = (0.88137358427047729492f).xxx;
 }
 
 struct tint_symbol {

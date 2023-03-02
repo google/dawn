@@ -6,8 +6,8 @@ void original_clusterfuzz_code() {
 
 void more_tests_that_would_fail() {
   {
-    float const a = 1.471127629f;
-    float const b = 0.099668652f;
+    float const a = 1.47112762928009033203f;
+    float const b = 0.09966865181922912598f;
   }
   {
     float const a = 2.5f;

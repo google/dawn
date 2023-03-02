@@ -23,7 +23,7 @@
 #ifndef SRC_TINT_BUILTIN_BUILTIN_H_
 #define SRC_TINT_BUILTIN_BUILTIN_H_
 
-#include <ostream>
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::builtin {
 
@@ -102,10 +102,10 @@ enum class Builtin {
     kVec4U,
 };
 
-/// @param out the std::ostream to write to
+/// @param out the stream to write to
 /// @param value the Builtin
 /// @returns `out` so calls can be chained
-std::ostream& operator<<(std::ostream& out, Builtin value);
+utils::StringStream& operator<<(utils::StringStream& out, Builtin value);
 
 /// ParseBuiltin parses a Builtin from a string.
 /// @param str the string to parse

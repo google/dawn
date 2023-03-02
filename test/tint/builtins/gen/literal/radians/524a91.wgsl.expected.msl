@@ -2,7 +2,7 @@
 
 using namespace metal;
 void radians_524a91() {
-  float4 res = float4(0.017453292f);
+  float4 res = float4(0.01745329238474369049f);
 }
 
 struct tint_symbol {

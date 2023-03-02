@@ -9,8 +9,8 @@ void original_clusterfuzz_code() {
 
 void more_tests_that_would_fail() {
   {
-    float a = 1.471127629f;
-    float b = 0.099668652f;
+    float a = 1.47112762928009033203f;
+    float b = 0.09966865181922912598f;
   }
   {
     float a = 2.5f;

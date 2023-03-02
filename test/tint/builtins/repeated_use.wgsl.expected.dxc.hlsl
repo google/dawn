@@ -1,17 +1,17 @@
 float4 tint_degrees(float4 param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
 
 float3 tint_degrees_1(float3 param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
 
 float2 tint_degrees_2(float2 param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
 
 float tint_degrees_3(float param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
 
 [numthreads(1, 1, 1)]

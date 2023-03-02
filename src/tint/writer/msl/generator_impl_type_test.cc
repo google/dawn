@@ -763,7 +763,9 @@ struct MslDepthTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, MslDepthTextureData data) {
-    out << data.dim;
+    utils::StringStream str;
+    str << data.dim;
+    out << str.str();
     return out;
 }
 using MslDepthTexturesTest = TestParamHelper<MslDepthTextureData>;
@@ -805,7 +807,9 @@ struct MslTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, MslTextureData data) {
-    out << data.dim;
+    utils::StringStream str;
+    str << data.dim;
+    out << str.str();
     return out;
 }
 using MslSampledtexturesTest = TestParamHelper<MslTextureData>;
@@ -849,7 +853,9 @@ struct MslStorageTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, MslStorageTextureData data) {
-    return out << data.dim;
+    utils::StringStream str;
+    str << data.dim;
+    return out << str.str();
 }
 using MslStorageTexturesTest = TestParamHelper<MslStorageTextureData>;
 TEST_P(MslStorageTexturesTest, Emit) {

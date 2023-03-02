@@ -1,7 +1,7 @@
 #version 310 es
 
 void atan2_ae713e() {
-  vec4 res = vec4(0.785398185f);
+  vec4 res = vec4(0.78539818525314331055f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void atan2_ae713e() {
-  vec4 res = vec4(0.785398185f);
+  vec4 res = vec4(0.78539818525314331055f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void atan2_ae713e() {
-  vec4 res = vec4(0.785398185f);
+  vec4 res = vec4(0.78539818525314331055f);
 }
 
 void compute_main() {

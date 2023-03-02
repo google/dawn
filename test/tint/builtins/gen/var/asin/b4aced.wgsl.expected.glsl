@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void asin_b4aced() {
-  f16vec2 arg_0 = f16vec2(0.479248047hf);
+  f16vec2 arg_0 = f16vec2(0.479248046875hf);
   f16vec2 res = asin(arg_0);
 }
 
@@ -24,7 +24,7 @@ void main() {
 precision mediump float;
 
 void asin_b4aced() {
-  f16vec2 arg_0 = f16vec2(0.479248047hf);
+  f16vec2 arg_0 = f16vec2(0.479248046875hf);
   f16vec2 res = asin(arg_0);
 }
 
@@ -40,7 +40,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void asin_b4aced() {
-  f16vec2 arg_0 = f16vec2(0.479248047hf);
+  f16vec2 arg_0 = f16vec2(0.479248046875hf);
   f16vec2 res = asin(arg_0);
 }
 

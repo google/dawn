@@ -1,7 +1,7 @@
 #version 310 es
 
 vec4 tint_radians(vec4 param_0) {
-  return param_0 * 0.017453292519943295f;
+  return param_0 * 0.01745329251994329547f;
 }
 
 
@@ -27,7 +27,7 @@ void main() {
 precision mediump float;
 
 vec4 tint_radians(vec4 param_0) {
-  return param_0 * 0.017453292519943295f;
+  return param_0 * 0.01745329251994329547f;
 }
 
 
@@ -47,7 +47,7 @@ void main() {
 #version 310 es
 
 vec4 tint_radians(vec4 param_0) {
-  return param_0 * 0.017453292519943295f;
+  return param_0 * 0.01745329251994329547f;
 }
 
 

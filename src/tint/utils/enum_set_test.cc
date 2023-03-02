@@ -14,7 +14,6 @@
 
 #include "src/tint/utils/enum_set.h"
 
-#include <sstream>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -27,7 +26,7 @@ using ::testing::ElementsAre;
 
 enum class E { A = 0, B = 3, C = 7 };
 
-std::ostream& operator<<(std::ostream& out, E e) {
+utils::StringStream& operator<<(utils::StringStream& out, E e) {
     switch (e) {
         case E::A:
             return out << "A";

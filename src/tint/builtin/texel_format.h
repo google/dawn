@@ -23,7 +23,7 @@
 #ifndef SRC_TINT_BUILTIN_TEXEL_FORMAT_H_
 #define SRC_TINT_BUILTIN_TEXEL_FORMAT_H_
 
-#include <ostream>
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::builtin {
 
@@ -49,10 +49,10 @@ enum class TexelFormat {
     kRgba8Unorm,
 };
 
-/// @param out the std::ostream to write to
+/// @param out the stream to write to
 /// @param value the TexelFormat
 /// @returns `out` so calls can be chained
-std::ostream& operator<<(std::ostream& out, TexelFormat value);
+utils::StringStream& operator<<(utils::StringStream& out, TexelFormat value);
 
 /// ParseTexelFormat parses a TexelFormat from a string.
 /// @param str the string to parse

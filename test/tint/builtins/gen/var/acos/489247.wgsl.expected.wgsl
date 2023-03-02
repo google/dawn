@@ -1,5 +1,5 @@
 fn acos_489247() {
-  var arg_0 = 0.968912423f;
+  var arg_0 = 0.96891242265701293945f;
   var res : f32 = acos(arg_0);
 }
 

@@ -7,7 +7,7 @@ struct frexp_result_f32 {
 
 
 void tint_symbol() {
-  frexp_result_f32 res = frexp_result_f32(0.61500001f, 1);
+  frexp_result_f32 res = frexp_result_f32(0.61500000953674316406f, 1);
   int tint_symbol_1 = res.exp;
   float tint_symbol_2 = res.fract;
 }

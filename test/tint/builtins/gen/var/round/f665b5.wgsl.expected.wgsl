@@ -1,7 +1,7 @@
 enable f16;
 
 fn round_f665b5() {
-  var arg_0 = vec4<f16>(3.3984375h);
+  var arg_0 = vec4<f16>(3.5h);
   var res : vec4<f16> = round(arg_0);
 }
 

@@ -1,5 +1,5 @@
 void exp_bda5bb() {
-  float3 res = (2.718281746f).xxx;
+  float3 res = (2.71828174591064453125f).xxx;
 }
 
 struct tint_symbol {

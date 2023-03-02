@@ -851,7 +851,7 @@ TEST_F(MslGeneratorImplTest, Degrees_Scalar_f32) {
 using namespace metal;
 
 float tint_degrees(float param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
 
 kernel void test_function() {
@@ -876,7 +876,7 @@ TEST_F(MslGeneratorImplTest, Degrees_Vector_f32) {
 using namespace metal;
 
 float3 tint_degrees(float3 param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
 
 kernel void test_function() {
@@ -903,7 +903,7 @@ TEST_F(MslGeneratorImplTest, Degrees_Scalar_f16) {
 using namespace metal;
 
 half tint_degrees(half param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
 
 kernel void test_function() {
@@ -930,7 +930,7 @@ TEST_F(MslGeneratorImplTest, Degrees_Vector_f16) {
 using namespace metal;
 
 half3 tint_degrees(half3 param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
 
 kernel void test_function() {
@@ -955,7 +955,7 @@ TEST_F(MslGeneratorImplTest, Radians_Scalar_f32) {
 using namespace metal;
 
 float tint_radians(float param_0) {
-  return param_0 * 0.017453292519943295;
+  return param_0 * 0.01745329251994329547;
 }
 
 kernel void test_function() {
@@ -980,7 +980,7 @@ TEST_F(MslGeneratorImplTest, Radians_Vector_f32) {
 using namespace metal;
 
 float3 tint_radians(float3 param_0) {
-  return param_0 * 0.017453292519943295;
+  return param_0 * 0.01745329251994329547;
 }
 
 kernel void test_function() {
@@ -1007,7 +1007,7 @@ TEST_F(MslGeneratorImplTest, Radians_Scalar_f16) {
 using namespace metal;
 
 half tint_radians(half param_0) {
-  return param_0 * 0.017453292519943295;
+  return param_0 * 0.01745329251994329547;
 }
 
 kernel void test_function() {
@@ -1034,7 +1034,7 @@ TEST_F(MslGeneratorImplTest, Radians_Vector_f16) {
 using namespace metal;
 
 half3 tint_radians(half3 param_0) {
-  return param_0 * 0.017453292519943295;
+  return param_0 * 0.01745329251994329547;
 }
 
 kernel void test_function() {

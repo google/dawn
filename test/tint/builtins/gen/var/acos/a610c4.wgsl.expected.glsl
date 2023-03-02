@@ -1,7 +1,7 @@
 #version 310 es
 
 void acos_a610c4() {
-  vec3 arg_0 = vec3(0.968912423f);
+  vec3 arg_0 = vec3(0.96891242265701293945f);
   vec3 res = acos(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void acos_a610c4() {
-  vec3 arg_0 = vec3(0.968912423f);
+  vec3 arg_0 = vec3(0.96891242265701293945f);
   vec3 res = acos(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void acos_a610c4() {
-  vec3 arg_0 = vec3(0.968912423f);
+  vec3 arg_0 = vec3(0.96891242265701293945f);
   vec3 res = acos(arg_0);
 }
 

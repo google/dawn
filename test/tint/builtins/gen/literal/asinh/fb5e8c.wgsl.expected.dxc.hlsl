@@ -1,5 +1,5 @@
 void asinh_fb5e8c() {
-  vector<float16_t, 3> res = (float16_t(0.881347656h)).xxx;
+  vector<float16_t, 3> res = (float16_t(0.88134765625h)).xxx;
 }
 
 struct tint_symbol {

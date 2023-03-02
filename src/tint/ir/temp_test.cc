@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <sstream>
-
 #include "src/tint/ir/temp.h"
 #include "src/tint/ir/test_helper.h"
 #include "src/tint/utils/string_stream.h"

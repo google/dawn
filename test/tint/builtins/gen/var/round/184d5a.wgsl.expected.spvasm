@@ -30,8 +30,8 @@
 %vertex_point_size = OpVariable %_ptr_Output_float Output %8
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
-    %float_3 = OpConstant %float 3
-         %14 = OpConstantComposite %v4float %float_3 %float_3 %float_3 %float_3
+    %float_4 = OpConstant %float 4
+         %14 = OpConstantComposite %v4float %float_4 %float_4 %float_4 %float_4
 %_ptr_Function_v4float = OpTypePointer Function %v4float
          %17 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1

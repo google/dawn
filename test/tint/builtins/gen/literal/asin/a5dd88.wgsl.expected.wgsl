@@ -1,5 +1,5 @@
 fn asin_a5dd88() {
-  var res = asin(vec2(0.479425538604));
+  var res = asin(vec2(0.4794255386040000011));
 }
 
 @vertex

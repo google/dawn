@@ -25,7 +25,7 @@ struct tint_symbol_1 {
 };
 
 Output tint_symbol_inner(uint VertexIndex, uint InstanceIndex) {
-  tint_array<float2, 4> const zv = tint_array<float2, 4>{float2(0.200000003f), float2(0.300000012f), float2(-0.100000001f), float2(1.100000024f)};
+  tint_array<float2, 4> const zv = tint_array<float2, 4>{float2(0.20000000298023223877f), float2(0.30000001192092895508f), float2(-0.10000000149011611938f), float2(1.10000002384185791016f)};
   float const z = zv[InstanceIndex][0];
   Output output = {};
   output.Position = float4(0.5f, 0.5f, z, 1.0f);

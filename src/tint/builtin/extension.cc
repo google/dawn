@@ -49,7 +49,7 @@ Extension ParseExtension(std::string_view str) {
     return Extension::kUndefined;
 }
 
-std::ostream& operator<<(std::ostream& out, Extension value) {
+utils::StringStream& operator<<(utils::StringStream& out, Extension value) {
     switch (value) {
         case Extension::kUndefined:
             return out << "undefined";

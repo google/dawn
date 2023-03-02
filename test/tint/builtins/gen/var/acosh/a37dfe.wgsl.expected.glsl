@@ -6,7 +6,7 @@ float16_t tint_acosh(float16_t x) {
 }
 
 void acosh_a37dfe() {
-  float16_t arg_0 = 2.0hf;
+  float16_t arg_0 = 1.54296875hf;
   float16_t res = tint_acosh(arg_0);
 }
 
@@ -32,7 +32,7 @@ float16_t tint_acosh(float16_t x) {
 }
 
 void acosh_a37dfe() {
-  float16_t arg_0 = 2.0hf;
+  float16_t arg_0 = 1.54296875hf;
   float16_t res = tint_acosh(arg_0);
 }
 
@@ -52,7 +52,7 @@ float16_t tint_acosh(float16_t x) {
 }
 
 void acosh_a37dfe() {
-  float16_t arg_0 = 2.0hf;
+  float16_t arg_0 = 1.54296875hf;
   float16_t res = tint_acosh(arg_0);
 }
 

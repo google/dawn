@@ -15,7 +15,7 @@
 #include "src/tint/bench/benchmark.h"
 
 #include <filesystem>
-#include <sstream>
+#include <iostream>
 #include <utility>
 #include <vector>
 

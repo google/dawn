@@ -15,7 +15,6 @@
 #include "src/tint/source.h"
 
 #include <algorithm>
-#include <sstream>
 #include <string_view>
 #include <utility>
 
@@ -122,7 +121,7 @@ Source::FileContent::~FileContent() = default;
 
 Source::File::~File() = default;
 
-std::ostream& operator<<(std::ostream& out, const Source& source) {
+utils::StringStream& operator<<(utils::StringStream& out, const Source& source) {
     auto rng = source.range;
 
     if (source.file) {

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void asin_7b6a44() {
-  float2 arg_0 = float2(0.47942555f);
+  float2 arg_0 = float2(0.47942554950714111328f);
   float2 res = asin(arg_0);
 }
 

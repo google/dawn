@@ -7,7 +7,7 @@ struct frexp_result_f32 {
   int exp;
 };
 kernel void tint_symbol() {
-  frexp_result_f32 const res = frexp_result_f32{.fract=0.61500001f, .exp=1};
+  frexp_result_f32 const res = frexp_result_f32{.fract=0.61500000953674316406f, .exp=1};
   int const exp = res.exp;
   float const fract = res.fract;
   return;

@@ -812,7 +812,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Degrees_Scalar_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(float tint_degrees(float param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
 
 [numthreads(1, 1, 1)]
@@ -833,7 +833,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Degrees_Vector_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(float3 tint_degrees(float3 param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
 
 [numthreads(1, 1, 1)]
@@ -856,7 +856,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Degrees_Scalar_f16) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(float16_t tint_degrees(float16_t param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
 
 [numthreads(1, 1, 1)]
@@ -879,7 +879,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Degrees_Vector_f16) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(vector<float16_t, 3> tint_degrees(vector<float16_t, 3> param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
 
 [numthreads(1, 1, 1)]
@@ -900,7 +900,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Radians_Scalar_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(float tint_radians(float param_0) {
-  return param_0 * 0.017453292519943295;
+  return param_0 * 0.01745329251994329547;
 }
 
 [numthreads(1, 1, 1)]
@@ -921,7 +921,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Radians_Vector_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(float3 tint_radians(float3 param_0) {
-  return param_0 * 0.017453292519943295;
+  return param_0 * 0.01745329251994329547;
 }
 
 [numthreads(1, 1, 1)]
@@ -944,7 +944,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Radians_Scalar_f16) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(float16_t tint_radians(float16_t param_0) {
-  return param_0 * 0.017453292519943295;
+  return param_0 * 0.01745329251994329547;
 }
 
 [numthreads(1, 1, 1)]
@@ -967,7 +967,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Radians_Vector_f16) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(vector<float16_t, 3> tint_radians(vector<float16_t, 3> param_0) {
-  return param_0 * 0.017453292519943295;
+  return param_0 * 0.01745329251994329547;
 }
 
 [numthreads(1, 1, 1)]

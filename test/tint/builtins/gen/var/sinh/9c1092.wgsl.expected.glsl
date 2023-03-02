@@ -1,7 +1,7 @@
 #version 310 es
 
 void sinh_9c1092() {
-  vec2 res = vec2(1.175201178f);
+  vec2 res = vec2(1.17520117759704589844f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void sinh_9c1092() {
-  vec2 res = vec2(1.175201178f);
+  vec2 res = vec2(1.17520117759704589844f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void sinh_9c1092() {
-  vec2 res = vec2(1.175201178f);
+  vec2 res = vec2(1.17520117759704589844f);
 }
 
 void compute_main() {

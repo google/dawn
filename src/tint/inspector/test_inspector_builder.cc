@@ -273,7 +273,11 @@ ast::Type InspectorBuilder::GetCoordsType(type::TextureDimension dim, ast::Type 
         case type::TextureDimension::kCubeArray:
             return ty.vec3(scalar);
         default:
-            [=]() { FAIL() << "Unsupported texture dimension: " << dim; }();
+            [=]() {
+                utils::StringStream str;
+                str << dim;
+                FAIL() << "Unsupported texture dimension: " << str.str();
+            }();
     }
     return ast::Type{};
 }

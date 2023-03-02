@@ -1,5 +1,5 @@
 void unpack4x8unorm_750c74() {
-  float4 res = float4(0.003921569f, 0.0f, 0.0f, 0.0f);
+  float4 res = float4(0.0039215688593685627f, 0.0f, 0.0f, 0.0f);
 }
 
 struct tint_symbol {

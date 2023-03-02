@@ -24,7 +24,9 @@ struct TestData {
     bool extended_format = false;
 };
 inline std::ostream& operator<<(std::ostream& out, TestData data) {
-    out << data.ast_format;
+    utils::StringStream str;
+    str << data.ast_format;
+    out << str.str();
     return out;
 }
 using ImageFormatConversionTest = TestParamHelper<TestData>;

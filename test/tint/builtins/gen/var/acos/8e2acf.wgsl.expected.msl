@@ -2,7 +2,7 @@
 
 using namespace metal;
 void acos_8e2acf() {
-  float4 arg_0 = float4(0.968912423f);
+  float4 arg_0 = float4(0.96891242265701293945f);
   float4 res = acos(arg_0);
 }
 

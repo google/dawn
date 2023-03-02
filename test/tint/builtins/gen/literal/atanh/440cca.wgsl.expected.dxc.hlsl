@@ -1,5 +1,5 @@
 void atanh_440cca() {
-  float3 res = (0.549306154f).xxx;
+  float3 res = (0.54930615425109863281f).xxx;
 }
 
 struct tint_symbol {

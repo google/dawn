@@ -611,7 +611,9 @@ struct PtrData {
     SpvStorageClass result;
 };
 inline std::ostream& operator<<(std::ostream& out, PtrData data) {
-    out << data.ast_class;
+    utils::StringStream str;
+    str << data.ast_class;
+    out << str.str();
     return out;
 }
 using PtrDataTest = TestParamHelper<PtrData>;

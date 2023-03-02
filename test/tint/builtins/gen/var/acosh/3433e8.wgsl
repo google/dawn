@@ -23,7 +23,7 @@
 
 // fn acosh(fa) -> fa
 fn acosh_3433e8() {
-  const arg_0 = 2.;
+  const arg_0 = 1.5430806348;
   var res = acosh(arg_0);
 }
 

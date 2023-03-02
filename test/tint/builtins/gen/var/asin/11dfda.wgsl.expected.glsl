@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void asin_11dfda() {
-  float16_t arg_0 = 0.479248047hf;
+  float16_t arg_0 = 0.479248046875hf;
   float16_t res = asin(arg_0);
 }
 
@@ -24,7 +24,7 @@ void main() {
 precision mediump float;
 
 void asin_11dfda() {
-  float16_t arg_0 = 0.479248047hf;
+  float16_t arg_0 = 0.479248046875hf;
   float16_t res = asin(arg_0);
 }
 
@@ -40,7 +40,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void asin_11dfda() {
-  float16_t arg_0 = 0.479248047hf;
+  float16_t arg_0 = 0.479248046875hf;
   float16_t res = asin(arg_0);
 }
 

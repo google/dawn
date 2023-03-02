@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_AST_UNARY_OP_H_
 #define SRC_TINT_AST_UNARY_OP_H_
 
-#include <ostream>
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::ast {
 
@@ -28,10 +28,10 @@ enum class UnaryOp {
     kNot,          // !EXPR
 };
 
-/// @param out the std::ostream to write to
+/// @param out the stream to write to
 /// @param mod the UnaryOp
-/// @return the std::ostream so calls can be chained
-std::ostream& operator<<(std::ostream& out, UnaryOp mod);
+/// @return the stream so calls can be chained
+utils::StringStream& operator<<(utils::StringStream& out, UnaryOp mod);
 
 }  // namespace tint::ast
 

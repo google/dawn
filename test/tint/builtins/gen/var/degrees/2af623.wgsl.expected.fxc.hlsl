@@ -1,5 +1,5 @@
 float3 tint_degrees(float3 param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
 
 void degrees_2af623() {

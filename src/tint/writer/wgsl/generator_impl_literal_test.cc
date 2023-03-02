@@ -183,16 +183,16 @@ INSTANTIATE_TEST_SUITE_P(Normal,
 INSTANTIATE_TEST_SUITE_P(Subnormal,
                          WgslGenerator_F16LiteralTest,
                          ::testing::ValuesIn(std::vector<F16Data>{
-                             {MakeF16(0, 0, 1), "5.96046448e-08h"},  // Smallest
-                             {MakeF16(1, 0, 1), "-5.96046448e-08h"},
-                             {MakeF16(0, 0, 2), "1.1920929e-07h"},
-                             {MakeF16(1, 0, 2), "-1.1920929e-07h"},
-                             {MakeF16(0, 0, 0x3ffu), "6.09755516e-05h"},   // Largest
-                             {MakeF16(1, 0, 0x3ffu), "-6.09755516e-05h"},  // Largest
-                             {MakeF16(0, 0, 0x3afu), "5.620718e-05h"},     // Scattered bits
-                             {MakeF16(1, 0, 0x3afu), "-5.620718e-05h"},    // Scattered bits
-                             {MakeF16(0, 0, 0x2c7u), "4.23789024e-05h"},   // Scattered bits
-                             {MakeF16(1, 0, 0x2c7u), "-4.23789024e-05h"},  // Scattered bits
+                             {MakeF16(0, 0, 1), "0.00000005960464477539h"},  // Smallest
+                             {MakeF16(1, 0, 1), "-0.00000005960464477539h"},
+                             {MakeF16(0, 0, 2), "0.00000011920928955078h"},
+                             {MakeF16(1, 0, 2), "-0.00000011920928955078h"},
+                             {MakeF16(0, 0, 0x3ffu), "0.00006097555160522461h"},   // Largest
+                             {MakeF16(1, 0, 0x3ffu), "-0.00006097555160522461h"},  // Largest
+                             {MakeF16(0, 0, 0x3afu), "0.00005620718002319336h"},   // Scattered bits
+                             {MakeF16(1, 0, 0x3afu), "-0.00005620718002319336h"},  // Scattered bits
+                             {MakeF16(0, 0, 0x2c7u), "0.00004237890243530273h"},   // Scattered bits
+                             {MakeF16(1, 0, 0x2c7u), "-0.00004237890243530273h"},  // Scattered bits
                          }));
 
 }  // namespace

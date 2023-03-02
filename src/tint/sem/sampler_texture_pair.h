@@ -17,9 +17,9 @@
 
 #include <cstdint>
 #include <functional>
-#include <ostream>
 
 #include "src/tint/sem/binding_point.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::sem {
 
@@ -45,10 +45,10 @@ struct SamplerTexturePair {
 };
 
 /// Prints the SamplerTexturePair @p stp to @p o
-/// @param o the std::ostream to write to
+/// @param o the stream to write to
 /// @param stp the SamplerTexturePair
-/// @return the std::ostream so calls can be chained
-inline std::ostream& operator<<(std::ostream& o, const SamplerTexturePair& stp) {
+/// @return the stream so calls can be chained
+inline utils::StringStream& operator<<(utils::StringStream& o, const SamplerTexturePair& stp) {
     return o << "[sampler: " << stp.sampler_binding_point
              << ", texture: " << stp.sampler_binding_point << "]";
 }

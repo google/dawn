@@ -56,11 +56,11 @@ class FloatLiteralExpression final : public Castable<FloatLiteralExpression, Lit
     const Suffix suffix;
 };
 
-/// Writes the float literal suffix to the std::ostream.
-/// @param out the std::ostream to write to
+/// Writes the float literal suffix to the stream.
+/// @param out the stream to write to
 /// @param suffix the suffix to write
 /// @returns out so calls can be chained
-std::ostream& operator<<(std::ostream& out, FloatLiteralExpression::Suffix suffix);
+utils::StringStream& operator<<(utils::StringStream& out, FloatLiteralExpression::Suffix suffix);
 
 }  // namespace tint::ast
 

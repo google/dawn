@@ -34,7 +34,7 @@ void main_inner(uint3 GlobalInvocationID) {
   if ((index >= config[0].x)) {
     return;
   }
-  lightsBuffer.Store(((32u * index) + 4u), asuint(((asfloat(lightsBuffer.Load(((32u * index) + 4u))) - 0.100000001f) + (0.001f * (float(index) - (64.0f * floor((float(index) / 64.0f))))))));
+  lightsBuffer.Store(((32u * index) + 4u), asuint(((asfloat(lightsBuffer.Load(((32u * index) + 4u))) - 0.10000000149011611938f) + (0.00100000004749745131f * (float(index) - (64.0f * floor((float(index) / 64.0f))))))));
   if ((asfloat(lightsBuffer.Load(((32u * index) + 4u))) < asfloat(uniforms[0].y))) {
     lightsBuffer.Store(((32u * index) + 4u), asuint(asfloat(uniforms[1].y)));
   }

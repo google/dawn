@@ -1,5 +1,5 @@
 fn sin_fc8bc4() {
-  var arg_0 = vec2<f32>(1.570796371f);
+  var arg_0 = vec2<f32>(1.57079637050628662109f);
   var res : vec2<f32> = sin(arg_0);
 }
 

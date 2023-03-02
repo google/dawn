@@ -1,5 +1,5 @@
 fn acos_4dac75() {
-  const arg_0 = vec4(0.96891242171000003);
+  const arg_0 = vec4(0.96891242171000002692);
   var res = acos(arg_0);
 }
 

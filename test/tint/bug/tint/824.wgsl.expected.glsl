@@ -7,7 +7,7 @@ struct Output {
 };
 
 Output tint_symbol(uint VertexIndex, uint InstanceIndex) {
-  vec2 zv[4] = vec2[4](vec2(0.200000003f), vec2(0.300000012f), vec2(-0.100000001f), vec2(1.100000024f));
+  vec2 zv[4] = vec2[4](vec2(0.20000000298023223877f), vec2(0.30000001192092895508f), vec2(-0.10000000149011611938f), vec2(1.10000002384185791016f));
   float z = zv[InstanceIndex].x;
   Output tint_symbol_1 = Output(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
   tint_symbol_1.Position = vec4(0.5f, 0.5f, z, 1.0f);

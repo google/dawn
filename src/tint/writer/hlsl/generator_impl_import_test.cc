@@ -97,8 +97,10 @@ TEST_P(HlslImportData_SingleVectorParamTest, FloatVector) {
 
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(),
-              std::string(param.hlsl_name) + "(float3(0.100000001f, 0.200000003f, 0.300000012f))");
+    EXPECT_EQ(
+        out.str(),
+        std::string(param.hlsl_name) +
+            "(float3(0.10000000149011611938f, 0.20000000298023223877f, 0.30000001192092895508f))");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_SingleVectorParamTest,

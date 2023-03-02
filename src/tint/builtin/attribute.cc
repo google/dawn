@@ -76,7 +76,7 @@ Attribute ParseAttribute(std::string_view str) {
     return Attribute::kUndefined;
 }
 
-std::ostream& operator<<(std::ostream& out, Attribute value) {
+utils::StringStream& operator<<(utils::StringStream& out, Attribute value) {
     switch (value) {
         case Attribute::kUndefined:
             return out << "undefined";

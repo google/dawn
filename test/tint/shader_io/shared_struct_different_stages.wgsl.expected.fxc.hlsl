@@ -10,7 +10,7 @@ struct tint_symbol {
 };
 
 Interface vert_main_inner() {
-  const Interface tint_symbol_3 = {0.400000006f, 0.600000024f, (0.0f).xxxx};
+  const Interface tint_symbol_3 = {0.40000000596046447754f, 0.60000002384185791016f, (0.0f).xxxx};
   return tint_symbol_3;
 }
 

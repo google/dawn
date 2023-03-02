@@ -1,5 +1,5 @@
 void normalize_fc2ef1() {
-  float2 res = (0.707106769f).xx;
+  float2 res = (0.70710676908493041992f).xx;
 }
 
 struct tint_symbol {

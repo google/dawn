@@ -23,8 +23,9 @@
 #ifndef SRC_TINT_SEM_BUILTIN_TYPE_H_
 #define SRC_TINT_SEM_BUILTIN_TYPE_H_
 
-#include <sstream>
 #include <string>
+
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::sem {
 
@@ -159,7 +160,7 @@ const char* str(BuiltinType i);
 
 /// Emits the name of the builtin function type. The spelling, including case,
 /// matches the name in the WGSL spec.
-std::ostream& operator<<(std::ostream& out, BuiltinType i);
+utils::StringStream& operator<<(utils::StringStream& out, BuiltinType i);
 
 /// All builtin function
 constexpr BuiltinType kBuiltinTypes[] = {

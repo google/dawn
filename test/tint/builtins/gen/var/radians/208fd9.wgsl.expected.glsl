@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 float16_t tint_radians(float16_t param_0) {
-  return param_0 * 0.017453292519943295hf;
+  return param_0 * 0.01745329251994329547hf;
 }
 
 
@@ -29,7 +29,7 @@ void main() {
 precision mediump float;
 
 float16_t tint_radians(float16_t param_0) {
-  return param_0 * 0.017453292519943295hf;
+  return param_0 * 0.01745329251994329547hf;
 }
 
 
@@ -50,7 +50,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 float16_t tint_radians(float16_t param_0) {
-  return param_0 * 0.017453292519943295hf;
+  return param_0 * 0.01745329251994329547hf;
 }
 
 

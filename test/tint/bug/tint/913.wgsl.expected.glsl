@@ -17,7 +17,7 @@ layout(binding = 3, std140) uniform uniforms_block_ubo {
 } uniforms;
 
 bool aboutEqual(float value, float expect) {
-  return (abs((value - expect)) < 0.001f);
+  return (abs((value - expect)) < 0.00100000004749745131f);
 }
 
 uniform highp sampler2D src_1;

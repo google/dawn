@@ -23,8 +23,9 @@
 #ifndef SRC_TINT_BUILTIN_INTERPOLATION_TYPE_H_
 #define SRC_TINT_BUILTIN_INTERPOLATION_TYPE_H_
 
-#include <ostream>
 #include <string>
+
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::builtin {
 
@@ -36,10 +37,10 @@ enum class InterpolationType {
     kPerspective,
 };
 
-/// @param out the std::ostream to write to
+/// @param out the stream to write to
 /// @param value the InterpolationType
 /// @returns `out` so calls can be chained
-std::ostream& operator<<(std::ostream& out, InterpolationType value);
+utils::StringStream& operator<<(utils::StringStream& out, InterpolationType value);
 
 /// ParseInterpolationType parses a InterpolationType from a string.
 /// @param str the string to parse

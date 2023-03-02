@@ -25,6 +25,8 @@
 
 #include <string>
 
+#include "src/tint/utils/string_stream.h"
+
 namespace tint::builtin {
 
 /// The diagnostic rule.
@@ -34,10 +36,10 @@ enum class DiagnosticRule {
     kDerivativeUniformity,
 };
 
-/// @param out the std::ostream to write to
+/// @param out the stream to write to
 /// @param value the DiagnosticRule
 /// @returns `out` so calls can be chained
-std::ostream& operator<<(std::ostream& out, DiagnosticRule value);
+utils::StringStream& operator<<(utils::StringStream& out, DiagnosticRule value);
 
 /// ParseDiagnosticRule parses a DiagnosticRule from a string.
 /// @param str the string to parse

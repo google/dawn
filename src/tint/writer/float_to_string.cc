@@ -19,7 +19,6 @@
 #include <functional>
 #include <iomanip>
 #include <limits>
-#include <sstream>
 
 #include "src/tint/debug.h"
 #include "src/tint/utils/string_stream.h"

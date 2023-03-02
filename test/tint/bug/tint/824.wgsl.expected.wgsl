@@ -7,7 +7,7 @@ struct Output {
 
 @vertex
 fn main(@builtin(vertex_index) VertexIndex : u32, @builtin(instance_index) InstanceIndex : u32) -> Output {
-  let zv : array<vec2<f32>, 4> = array<vec2<f32>, 4>(vec2<f32>(0.2, 0.2), vec2<f32>(0.3, 0.3), vec2<f32>(-(0.1), -(0.1)), vec2<f32>(1.1, 1.1));
+  let zv : array<vec2<f32>, 4> = array<vec2<f32>, 4>(vec2<f32>(0.2000000000000000111, 0.2000000000000000111), vec2<f32>(0.2999999999999999889, 0.2999999999999999889), vec2<f32>(-(0.10000000000000000555), -(0.10000000000000000555)), vec2<f32>(1.10000000000000008882, 1.10000000000000008882));
   let z : f32 = zv[InstanceIndex].x;
   var output : Output;
   output.Position = vec4<f32>(0.5, 0.5, z, 1.0);

@@ -1,5 +1,5 @@
 void unpack2x16unorm_7699c0() {
-  float2 res = float2(1.52590219e-05f, 0.0f);
+  float2 res = float2(0.00001525902189314365f, 0.0f);
 }
 
 struct tint_symbol {

@@ -14,7 +14,6 @@
 
 #include "src/tint/ir/debug.h"
 
-#include <sstream>
 #include <unordered_map>
 #include <unordered_set>
 

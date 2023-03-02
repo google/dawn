@@ -18,10 +18,10 @@
 #include <stdint.h>
 
 #include <functional>
-#include <ostream>
 
 #include "src/tint/reflection.h"
 #include "src/tint/utils/hash.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::sem {
 
@@ -49,10 +49,10 @@ struct BindingPoint {
 };
 
 /// Prints the BindingPoint @p bp to @p o
-/// @param o the std::ostream to write to
+/// @param o the stream to write to
 /// @param bp the BindingPoint
-/// @return the std::ostream so calls can be chained
-inline std::ostream& operator<<(std::ostream& o, const BindingPoint& bp) {
+/// @return the stream so calls can be chained
+inline utils::StringStream& operator<<(utils::StringStream& o, const BindingPoint& bp) {
     return o << "[group: " << bp.group << ", binding: " << bp.binding << "]";
 }
 

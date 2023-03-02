@@ -14,7 +14,7 @@ struct tint_symbol {
 };
 
 Interface vert_main_inner() {
-  Interface const tint_symbol_3 = Interface{.col1=0.400000006f, .col2=0.600000024f, .pos=float4(0.0f)};
+  Interface const tint_symbol_3 = Interface{.col1=0.40000000596046447754f, .col2=0.60000002384185791016f, .pos=float4(0.0f)};
   return tint_symbol_3;
 }
 

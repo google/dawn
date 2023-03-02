@@ -1,5 +1,5 @@
 fn acosh_3433e8() {
-  const arg_0 = 2.0;
+  const arg_0 = 1.54308063479999990619;
   var res = acosh(arg_0);
 }
 

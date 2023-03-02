@@ -1,5 +1,5 @@
 void atanh_e431bb() {
-  float4 res = (0.549306154f).xxxx;
+  float4 res = (0.54930615425109863281f).xxxx;
 }
 
 struct tint_symbol {

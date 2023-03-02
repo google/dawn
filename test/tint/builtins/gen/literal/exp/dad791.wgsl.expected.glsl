@@ -1,7 +1,7 @@
 #version 310 es
 
 void exp_dad791() {
-  vec4 res = vec4(2.718281746f);
+  vec4 res = vec4(2.71828174591064453125f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void exp_dad791() {
-  vec4 res = vec4(2.718281746f);
+  vec4 res = vec4(2.71828174591064453125f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void exp_dad791() {
-  vec4 res = vec4(2.718281746f);
+  vec4 res = vec4(2.71828174591064453125f);
 }
 
 void compute_main() {

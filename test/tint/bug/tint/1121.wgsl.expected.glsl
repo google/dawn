@@ -55,7 +55,7 @@ void tint_symbol_2(uvec3 GlobalInvocationID) {
   if ((index >= config.inner.numLights)) {
     return;
   }
-  lightsBuffer.lights[index].position.y = ((lightsBuffer.lights[index].position.y - 0.100000001f) + (0.001f * (float(index) - (64.0f * floor((float(index) / 64.0f))))));
+  lightsBuffer.lights[index].position.y = ((lightsBuffer.lights[index].position.y - 0.10000000149011611938f) + (0.00100000004749745131f * (float(index) - (64.0f * floor((float(index) / 64.0f))))));
   if ((lightsBuffer.lights[index].position.y < uniforms.inner.tint_symbol.y)) {
     lightsBuffer.lights[index].position.y = uniforms.inner.tint_symbol_1.y;
   }

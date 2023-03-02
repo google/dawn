@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_TYPE_TEXTURE_DIMENSION_H_
 #define SRC_TINT_TYPE_TEXTURE_DIMENSION_H_
 
-#include <ostream>
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::type {
 
@@ -37,10 +37,10 @@ enum class TextureDimension {
     kCubeArray,
 };
 
-/// @param out the std::ostream to write to
+/// @param out the stream to write to
 /// @param dim the type::TextureDimension
-/// @return the std::ostream so calls can be chained
-std::ostream& operator<<(std::ostream& out, type::TextureDimension dim);
+/// @return the stream so calls can be chained
+utils::StringStream& operator<<(utils::StringStream& out, type::TextureDimension dim);
 
 }  // namespace tint::type
 

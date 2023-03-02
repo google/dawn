@@ -143,7 +143,7 @@ void comp_main(uvec3 tint_symbol) {
     cVel = (cVel / vec2(float(cVelCount), float(cVelCount)));
   }
   vVel = (((vVel + (cMass * params.inner.rule1Scale)) + (colVel * params.inner.rule2Scale)) + (cVel * params.inner.rule3Scale));
-  vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.100000001f));
+  vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.10000000149011611938f));
   vPos = (vPos + (vVel * params.inner.deltaT));
   if ((vPos.x < -1.0f)) {
     vPos.x = 1.0f;

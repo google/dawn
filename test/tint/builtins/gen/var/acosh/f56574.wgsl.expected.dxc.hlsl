@@ -3,7 +3,7 @@ vector<float16_t, 3> tint_acosh(vector<float16_t, 3> x) {
 }
 
 void acosh_f56574() {
-  vector<float16_t, 3> arg_0 = (float16_t(2.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.54296875h)).xxx;
   vector<float16_t, 3> res = tint_acosh(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn acosh_490aae() {
-  var res = acosh(vec4(2.0));
+  var res = acosh(vec4(1.54308063479999990619));
 }
 
 @vertex

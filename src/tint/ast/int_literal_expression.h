@@ -55,11 +55,11 @@ class IntLiteralExpression final : public Castable<IntLiteralExpression, Literal
     const Suffix suffix;
 };
 
-/// Writes the integer literal suffix to the std::ostream.
-/// @param out the std::ostream to write to
+/// Writes the integer literal suffix to the stream.
+/// @param out the stream to write to
 /// @param suffix the suffix to write
 /// @returns out so calls can be chained
-std::ostream& operator<<(std::ostream& out, IntLiteralExpression::Suffix suffix);
+utils::StringStream& operator<<(utils::StringStream& out, IntLiteralExpression::Suffix suffix);
 
 }  // namespace tint::ast
 

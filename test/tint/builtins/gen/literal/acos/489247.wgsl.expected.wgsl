@@ -1,5 +1,5 @@
 fn acos_489247() {
-  var res : f32 = acos(0.968912423f);
+  var res : f32 = acos(0.96891242265701293945f);
 }
 
 @vertex

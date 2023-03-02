@@ -1,5 +1,5 @@
 void acosh_a37dfe() {
-  float16_t res = float16_t(1.31640625h);
+  float16_t res = float16_t(0.99951171875h);
 }
 
 struct tint_symbol {

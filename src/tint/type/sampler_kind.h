@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_TYPE_SAMPLER_KIND_H_
 #define SRC_TINT_TYPE_SAMPLER_KIND_H_
 
-#include <ostream>
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::type {
 
@@ -27,10 +27,10 @@ enum class SamplerKind {
     kComparisonSampler
 };
 
-/// @param out the std::ostream to write to
+/// @param out the stream to write to
 /// @param kind the SamplerKind
-/// @return the std::ostream so calls can be chained
-std::ostream& operator<<(std::ostream& out, SamplerKind kind);
+/// @return the stream so calls can be chained
+utils::StringStream& operator<<(utils::StringStream& out, SamplerKind kind);
 
 }  // namespace tint::type
 

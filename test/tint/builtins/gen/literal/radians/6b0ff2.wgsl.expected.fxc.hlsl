@@ -1,5 +1,5 @@
 void radians_6b0ff2() {
-  float res = 0.017453292f;
+  float res = 0.01745329238474369049f;
 }
 
 struct tint_symbol {

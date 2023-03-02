@@ -1,5 +1,5 @@
 fn sin_a9ab19() {
-  const arg_0 = 1.57079632679;
+  const arg_0 = 1.57079632679000003037;
   var res = sin(arg_0);
 }
 

@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include "src/tint/utils/string_stream.h"
+
 namespace tint::reader::spirv {
 
 /// Records the properties of a sampler or texture based on how it's used
@@ -73,7 +75,7 @@ class Usage {
     /// Emits this usage to the given stream
     /// @param out the output stream.
     /// @returns the modified stream.
-    std::ostream& operator<<(std::ostream& out) const;
+    utils::StringStream& operator<<(utils::StringStream& out) const;
 
     /// Equality operator
     /// @param other the RHS of the equality test.
@@ -122,11 +124,11 @@ class Usage {
     bool is_storage_write_ = false;
 };
 
-/// Writes the Usage to the ostream
-/// @param out the ostream
+/// Writes the Usage to the stream
+/// @param out the stream
 /// @param u the Usage
-/// @returns the ostream so calls can be chained
-inline std::ostream& operator<<(std::ostream& out, const Usage& u) {
+/// @returns the stream so calls can be chained
+inline utils::StringStream& operator<<(utils::StringStream& out, const Usage& u) {
     return u.operator<<(out);
 }
 

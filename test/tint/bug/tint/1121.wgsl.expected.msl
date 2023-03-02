@@ -65,7 +65,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, const constant Config* const ti
   if ((index >= (*(tint_symbol_1)).numLights)) {
     return;
   }
-  (*(tint_symbol_2)).lights[index].position[1] = (((*(tint_symbol_2)).lights[index].position[1] - 0.100000001f) + (0.001f * (float(index) - (64.0f * floor((float(index) / 64.0f))))));
+  (*(tint_symbol_2)).lights[index].position[1] = (((*(tint_symbol_2)).lights[index].position[1] - 0.10000000149011611938f) + (0.00100000004749745131f * (float(index) - (64.0f * floor((float(index) / 64.0f))))));
   if (((*(tint_symbol_2)).lights[index].position[1] < (*(tint_symbol_3)).min[1])) {
     (*(tint_symbol_2)).lights[index].position[1] = (*(tint_symbol_3)).max[1];
   }

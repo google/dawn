@@ -1,5 +1,5 @@
 void sin_fc8bc4() {
-  float2 arg_0 = (1.570796371f).xx;
+  float2 arg_0 = (1.57079637050628662109f).xx;
   float2 res = sin(arg_0);
 }
 

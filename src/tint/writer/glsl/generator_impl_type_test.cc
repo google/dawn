@@ -318,7 +318,9 @@ struct GlslDepthTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, GlslDepthTextureData data) {
-    out << data.dim;
+    utils::StringStream s;
+    s << data.dim;
+    out << s.str();
     return out;
 }
 using GlslDepthTexturesTest = TestParamHelper<GlslDepthTextureData>;
@@ -378,7 +380,9 @@ struct GlslSampledTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, GlslSampledTextureData data) {
-    out << data.dim;
+    utils::StringStream str;
+    str << data.dim;
+    out << str.str();
     return out;
 }
 using GlslSampledTexturesTest = TestParamHelper<GlslSampledTextureData>;
@@ -527,7 +531,9 @@ struct GlslStorageTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, GlslStorageTextureData data) {
-    return out << data.dim;
+    utils::StringStream str;
+    str << data.dim;
+    return out << str.str();
 }
 using GlslStorageTexturesTest = TestParamHelper<GlslStorageTextureData>;
 TEST_P(GlslStorageTexturesTest, Emit) {

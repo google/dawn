@@ -30,14 +30,14 @@
 %vertex_point_size = OpVariable %_ptr_Output_float Output %8
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
-    %float_3 = OpConstant %float 3
+    %float_4 = OpConstant %float 4
 %_ptr_Function_float = OpTypePointer Function %float
          %16 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %round_773a8f = OpFunction %void None %9
          %12 = OpLabel
         %res = OpVariable %_ptr_Function_float Function %8
-               OpStore %res %float_3
+               OpStore %res %float_4
                OpReturn
                OpFunctionEnd
 %vertex_main_inner = OpFunction %v4float None %16

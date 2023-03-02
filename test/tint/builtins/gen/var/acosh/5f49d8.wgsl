@@ -25,7 +25,7 @@ enable f16;
 
 // fn acosh(vec<2, f16>) -> vec<2, f16>
 fn acosh_5f49d8() {
-  var arg_0 = vec2<f16>(2.h);
+  var arg_0 = vec2<f16>(1.5430806348h);
   var res: vec2<f16> = acosh(arg_0);
 }
 

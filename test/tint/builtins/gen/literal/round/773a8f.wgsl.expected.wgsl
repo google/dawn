@@ -1,5 +1,5 @@
 fn round_773a8f() {
-  var res = round(3.4);
+  var res = round(3.5);
 }
 
 @vertex

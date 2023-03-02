@@ -35,7 +35,7 @@
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
        %half = OpTypeFloat 16
-%half_0x1_8p_1 = OpConstant %half 0x1.8p+1
+%half_0x1p_2 = OpConstant %half 0x1p+2
 %_ptr_Function_half = OpTypePointer Function %half
          %17 = OpConstantNull %half
          %18 = OpTypeFunction %v4float
@@ -43,7 +43,7 @@
 %round_9078ef = OpFunction %void None %9
          %12 = OpLabel
         %res = OpVariable %_ptr_Function_half Function %17
-               OpStore %res %half_0x1_8p_1
+               OpStore %res %half_0x1p_2
                OpReturn
                OpFunctionEnd
 %vertex_main_inner = OpFunction %v4float None %18

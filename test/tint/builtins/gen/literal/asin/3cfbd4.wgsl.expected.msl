@@ -2,7 +2,7 @@
 
 using namespace metal;
 void asin_3cfbd4() {
-  half4 res = half4(0.499755859h);
+  half4 res = half4(0.499755859375h);
 }
 
 struct tint_symbol {

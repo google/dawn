@@ -47,10 +47,10 @@ enum class {{$enum}} {
 {{-   end }}
 };
 
-/// @param out the std::ostream to write to
+/// @param out the stream to write to
 /// @param value the {{$enum}}
 /// @returns `out` so calls can be chained
-std::ostream& operator<<(std::ostream& out, {{$enum}} value);
+utils::StringStream& operator<<(utils::StringStream& out, {{$enum}} value);
 
 /// Parse{{$enum}} parses a {{$enum}} from a string.
 /// @param str the string to parse
@@ -90,11 +90,11 @@ constexpr const char* k{{$enum}}Strings[] = {
 
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                         define "EnumOStream"                             -}}
-{{- /* Implements the std::ostream 'operator<<()' function to print the   */ -}}
+{{- /* Implements the stream 'operator<<()' function to print the         */ -}}
 {{- /* provided sem.Enum.                                                 */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{- $enum := Eval "EnumName" $ -}}
-std::ostream& operator<<(std::ostream& out, {{$enum}} value) {
+    utils::StringStream& operator<<(utils::StringStream& out, {{$enum}} value) {
     switch (value) {
         case {{$enum}}::kUndefined:
             return out << "undefined";

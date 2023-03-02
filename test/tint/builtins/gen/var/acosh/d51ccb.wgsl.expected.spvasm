@@ -39,8 +39,8 @@
      %v4bool = OpTypeVector %bool 4
        %void = OpTypeVoid
          %21 = OpTypeFunction %void
-    %float_2 = OpConstant %float 2
-         %26 = OpConstantComposite %v4float %float_2 %float_2 %float_2 %float_2
+%float_1_54308069 = OpConstant %float 1.54308069
+         %26 = OpConstantComposite %v4float %float_1_54308069 %float_1_54308069 %float_1_54308069 %float_1_54308069
 %_ptr_Function_v4float = OpTypePointer Function %v4float
          %32 = OpTypeFunction %v4float
  %tint_acosh = OpFunction %v4float None %9

@@ -1,5 +1,5 @@
 void acos_8e2acf() {
-  float4 arg_0 = (0.968912423f).xxxx;
+  float4 arg_0 = (0.96891242265701293945f).xxxx;
   float4 res = acos(arg_0);
 }
 

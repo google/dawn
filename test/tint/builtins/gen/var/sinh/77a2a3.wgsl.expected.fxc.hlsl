@@ -1,5 +1,5 @@
 void sinh_77a2a3() {
-  float3 res = (1.175201178f).xxx;
+  float3 res = (1.17520117759704589844f).xxx;
 }
 
 struct tint_symbol {

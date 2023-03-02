@@ -23,7 +23,7 @@
 
 // fn acosh(vec<3, f32>) -> vec<3, f32>
 fn acosh_e38f5c() {
-  var res: vec3<f32> = acosh(vec3<f32>(2.f));
+  var res: vec3<f32> = acosh(vec3<f32>(1.5430806348f));
 }
 
 @vertex

@@ -1,7 +1,7 @@
 #version 310 es
 
 float tint_degrees(float param_0) {
-  return param_0 * 57.295779513082323f;
+  return param_0 * 57.29577951308232286465f;
 }
 
 

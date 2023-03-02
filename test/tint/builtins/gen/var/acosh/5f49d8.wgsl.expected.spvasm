@@ -46,8 +46,8 @@
          %21 = OpConstantNull %v2half
        %void = OpTypeVoid
          %24 = OpTypeFunction %void
-%half_0x1p_1 = OpConstant %half 0x1p+1
-         %29 = OpConstantComposite %v2half %half_0x1p_1 %half_0x1p_1
+%half_0x1_8bp_0 = OpConstant %half 0x1.8bp+0
+         %29 = OpConstantComposite %v2half %half_0x1_8bp_0 %half_0x1_8bp_0
 %_ptr_Function_v2half = OpTypePointer Function %v2half
          %35 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1

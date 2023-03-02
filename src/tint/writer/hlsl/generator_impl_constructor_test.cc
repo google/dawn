@@ -79,7 +79,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Float) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("-0.000012f"));
+    EXPECT_THAT(gen.result(), HasSubstr("-0.00001200000042445026f"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_F16) {
@@ -90,7 +90,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_F16) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("float16_t(-0.00119972229h)"));
+    EXPECT_THAT(gen.result(), HasSubstr("float16_t(-0.0011997222900390625h)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Bool) {
@@ -402,8 +402,10 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Array) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("{float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f),"
-                                        " float3(7.0f, 8.0f, 9.0f)}"));
+    EXPECT_THAT(
+        gen.result(),
+        HasSubstr(
+            "{float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f), float3(7.0f, 8.0f, 9.0f)}"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Array_Empty) {

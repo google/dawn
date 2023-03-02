@@ -5,7 +5,7 @@ float tint_acosh(float x) {
 }
 
 void acosh_ecf2d1() {
-  float arg_0 = 2.0f;
+  float arg_0 = 1.54308068752288818359f;
   float res = tint_acosh(arg_0);
 }
 
@@ -30,7 +30,7 @@ float tint_acosh(float x) {
 }
 
 void acosh_ecf2d1() {
-  float arg_0 = 2.0f;
+  float arg_0 = 1.54308068752288818359f;
   float res = tint_acosh(arg_0);
 }
 
@@ -49,7 +49,7 @@ float tint_acosh(float x) {
 }
 
 void acosh_ecf2d1() {
-  float arg_0 = 2.0f;
+  float arg_0 = 1.54308068752288818359f;
   float res = tint_acosh(arg_0);
 }
 

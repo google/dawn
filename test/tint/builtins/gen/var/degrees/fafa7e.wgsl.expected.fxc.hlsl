@@ -1,5 +1,5 @@
 void degrees_fafa7e() {
-  float res = 57.295780182f;
+  float res = 57.295780181884765625f;
 }
 
 struct tint_symbol {

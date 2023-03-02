@@ -2,7 +2,7 @@
 
 using namespace metal;
 void radians_44f20b() {
-  half4 res = half4(0.017440796h);
+  half4 res = half4(0.0174407958984375h);
 }
 
 struct tint_symbol {

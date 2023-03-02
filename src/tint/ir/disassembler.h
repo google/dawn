@@ -15,7 +15,6 @@
 #ifndef SRC_TINT_IR_DISASSEMBLER_H_
 #define SRC_TINT_IR_DISASSEMBLER_H_
 
-#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>

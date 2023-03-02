@@ -79,7 +79,7 @@ TEST_F(MslGeneratorImplTest_Constructor, Type_Float) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("-0.000012f"));
+    EXPECT_THAT(gen.result(), HasSubstr("-0.00001200000042445026f"));
 }
 
 TEST_F(MslGeneratorImplTest_Constructor, Type_F16) {
@@ -90,7 +90,7 @@ TEST_F(MslGeneratorImplTest_Constructor, Type_F16) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("-0.00119972229h"));
+    EXPECT_THAT(gen.result(), HasSubstr("-0.0011997222900390625h"));
 }
 
 TEST_F(MslGeneratorImplTest_Constructor, Type_Bool) {

@@ -23,7 +23,7 @@
 
 // fn acosh(vec<4, fa>) -> vec<4, fa>
 fn acosh_490aae() {
-  var res = acosh(vec4(2.));
+  var res = acosh(vec4(1.5430806348));
 }
 
 @vertex
