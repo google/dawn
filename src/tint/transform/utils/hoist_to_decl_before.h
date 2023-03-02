@@ -76,6 +76,20 @@ class HoistToDeclBefore {
     /// @return true on success
     bool InsertBefore(const sem::Statement* before_stmt, const StmtBuilder& builder);
 
+    /// Replaces the statement @p what with the statement @p stmt, possibly converting 'for-loop's
+    /// to 'loop's if necessary.
+    /// @param what the statement to replace
+    /// @param with the replacement statement
+    /// @return true on success
+    bool Replace(const sem::Statement* what, const ast::Statement* with);
+
+    /// Replaces the statement @p what with the statement returned by @p stmt, possibly converting
+    /// 'for-loop's to 'loop's if necessary.
+    /// @param what the statement to replace
+    /// @param with the replacement statement builder
+    /// @return true on success
+    bool Replace(const sem::Statement* what, const StmtBuilder& with);
+
     /// Use to signal that we plan on hoisting a decl before `before_expr`. This
     /// will convert 'for-loop's to 'loop's and 'else-if's to 'else {if}'s if
     /// needed.
