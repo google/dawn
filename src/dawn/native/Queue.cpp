@@ -281,7 +281,7 @@ void QueueBase::APIWriteBuffer(BufferBase* buffer,
                                uint64_t bufferOffset,
                                const void* data,
                                size_t size) {
-    GetDevice()->ConsumedError(WriteBuffer(buffer, bufferOffset, data, size));
+    DAWN_UNUSED(GetDevice()->ConsumedError(WriteBuffer(buffer, bufferOffset, data, size)));
 }
 
 MaybeError QueueBase::WriteBuffer(BufferBase* buffer,
@@ -322,8 +322,8 @@ void QueueBase::APIWriteTexture(const ImageCopyTexture* destination,
                                 size_t dataSize,
                                 const TextureDataLayout* dataLayout,
                                 const Extent3D* writeSize) {
-    GetDevice()->ConsumedError(
-        WriteTextureInternal(destination, data, dataSize, *dataLayout, writeSize));
+    DAWN_UNUSED(GetDevice()->ConsumedError(
+        WriteTextureInternal(destination, data, dataSize, *dataLayout, writeSize)));
 }
 
 MaybeError QueueBase::WriteTextureInternal(const ImageCopyTexture* destination,
@@ -389,16 +389,16 @@ void QueueBase::APICopyTextureForBrowser(const ImageCopyTexture* source,
                                          const ImageCopyTexture* destination,
                                          const Extent3D* copySize,
                                          const CopyTextureForBrowserOptions* options) {
-    GetDevice()->ConsumedError(
-        CopyTextureForBrowserInternal(source, destination, copySize, options));
+    DAWN_UNUSED(GetDevice()->ConsumedError(
+        CopyTextureForBrowserInternal(source, destination, copySize, options)));
 }
 
 void QueueBase::APICopyExternalTextureForBrowser(const ImageCopyExternalTexture* source,
                                                  const ImageCopyTexture* destination,
                                                  const Extent3D* copySize,
                                                  const CopyTextureForBrowserOptions* options) {
-    GetDevice()->ConsumedError(
-        CopyExternalTextureForBrowserInternal(source, destination, copySize, options));
+    DAWN_UNUSED(GetDevice()->ConsumedError(
+        CopyExternalTextureForBrowserInternal(source, destination, copySize, options)));
 }
 
 MaybeError QueueBase::CopyTextureForBrowserInternal(const ImageCopyTexture* source,

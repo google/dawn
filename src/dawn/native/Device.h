@@ -76,8 +76,12 @@ class DeviceBase : public RefCountedWithExternalCount {
                      InternalErrorType additionalAllowedErrors = InternalErrorType::None,
                      WGPUDeviceLostReason lost_reason = WGPUDeviceLostReason_Undefined);
 
-    bool ConsumedError(MaybeError maybeError,
-                       InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
+    // Variants of ConsumedError must use the returned boolean to handle failure cases since an
+    // error may cause a device loss and further execution may be undefined. This is especially
+    // true for the ResultOrError variants.
+    [[nodiscard]] bool ConsumedError(
+        MaybeError maybeError,
+        InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
         if (DAWN_UNLIKELY(maybeError.IsError())) {
             ConsumeError(maybeError.AcquireError(), additionalAllowedErrors);
             return true;
@@ -86,9 +90,10 @@ class DeviceBase : public RefCountedWithExternalCount {
     }
 
     template <typename T>
-    bool ConsumedError(ResultOrError<T> resultOrError,
-                       T* result,
-                       InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
+    [[nodiscard]] bool ConsumedError(
+        ResultOrError<T> resultOrError,
+        T* result,
+        InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
         if (DAWN_UNLIKELY(resultOrError.IsError())) {
             ConsumeError(resultOrError.AcquireError(), additionalAllowedErrors);
             return true;
@@ -98,10 +103,10 @@ class DeviceBase : public RefCountedWithExternalCount {
     }
 
     template <typename... Args>
-    bool ConsumedError(MaybeError maybeError,
-                       InternalErrorType additionalAllowedErrors,
-                       const char* formatStr,
-                       const Args&... args) {
+    [[nodiscard]] bool ConsumedError(MaybeError maybeError,
+                                     InternalErrorType additionalAllowedErrors,
+                                     const char* formatStr,
+                                     const Args&... args) {
         if (DAWN_UNLIKELY(maybeError.IsError())) {
             std::unique_ptr<ErrorData> error = maybeError.AcquireError();
             if (error->GetType() == InternalErrorType::Validation) {
@@ -114,17 +119,18 @@ class DeviceBase : public RefCountedWithExternalCount {
     }
 
     template <typename... Args>
-    bool ConsumedError(MaybeError maybeError, const char* formatStr, Args&&... args) {
-        return ConsumedError(std::move(maybeError), InternalErrorType::None, formatStr,
-                             std::forward<Args>(args)...);
+    [[nodiscard]] bool ConsumedError(MaybeError maybeError,
+                                     const char* formatStr,
+                                     const Args&... args) {
+        return ConsumedError(std::move(maybeError), InternalErrorType::None, formatStr, args...);
     }
 
     template <typename T, typename... Args>
-    bool ConsumedError(ResultOrError<T> resultOrError,
-                       T* result,
-                       InternalErrorType additionalAllowedErrors,
-                       const char* formatStr,
-                       const Args&... args) {
+    [[nodiscard]] bool ConsumedError(ResultOrError<T> resultOrError,
+                                     T* result,
+                                     InternalErrorType additionalAllowedErrors,
+                                     const char* formatStr,
+                                     const Args&... args) {
         if (DAWN_UNLIKELY(resultOrError.IsError())) {
             std::unique_ptr<ErrorData> error = resultOrError.AcquireError();
             if (error->GetType() == InternalErrorType::Validation) {
@@ -138,12 +144,12 @@ class DeviceBase : public RefCountedWithExternalCount {
     }
 
     template <typename T, typename... Args>
-    bool ConsumedError(ResultOrError<T> resultOrError,
-                       T* result,
-                       const char* formatStr,
-                       Args&&... args) {
+    [[nodiscard]] bool ConsumedError(ResultOrError<T> resultOrError,
+                                     T* result,
+                                     const char* formatStr,
+                                     const Args&... args) {
         return ConsumedError(std::move(resultOrError), result, InternalErrorType::None, formatStr,
-                             std::forward<Args>(args)...);
+                             args...);
     }
 
     MaybeError ValidateObject(const ApiObjectBase* object) const;

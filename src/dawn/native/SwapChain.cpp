@@ -35,16 +35,16 @@ class ErrorSwapChain final : public SwapChainBase {
                       wgpu::TextureUsage allowedUsage,
                       uint32_t width,
                       uint32_t height) override {
-        GetDevice()->ConsumedError(DAWN_VALIDATION_ERROR("%s is an error swapchain.", this));
+        GetDevice()->HandleError(DAWN_VALIDATION_ERROR("%s is an error swapchain.", this));
     }
 
     TextureViewBase* APIGetCurrentTextureView() override {
-        GetDevice()->ConsumedError(DAWN_VALIDATION_ERROR("%s is an error swapchain.", this));
+        GetDevice()->HandleError(DAWN_VALIDATION_ERROR("%s is an error swapchain.", this));
         return TextureViewBase::MakeError(GetDevice());
     }
 
     void APIPresent() override {
-        GetDevice()->ConsumedError(DAWN_VALIDATION_ERROR("%s is an error swapchain.", this));
+        GetDevice()->HandleError(DAWN_VALIDATION_ERROR("%s is an error swapchain.", this));
     }
 };
 
@@ -300,7 +300,7 @@ void NewSwapChainBase::APIConfigure(wgpu::TextureFormat format,
                                     wgpu::TextureUsage allowedUsage,
                                     uint32_t width,
                                     uint32_t height) {
-    GetDevice()->ConsumedError(
+    GetDevice()->HandleError(
         DAWN_VALIDATION_ERROR("Configure is invalid for surface-based swapchains."));
 }
 

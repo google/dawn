@@ -469,6 +469,7 @@ void DeviceBase::APIDestroy() {
 void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
                              InternalErrorType additionalAllowedErrors,
                              WGPUDeviceLostReason lost_reason) {
+    AppendDebugLayerMessages(error.get());
     InternalErrorType allowedErrors =
         InternalErrorType::Validation | InternalErrorType::DeviceLost | additionalAllowedErrors;
     InternalErrorType type = error->GetType();
@@ -545,7 +546,6 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
 void DeviceBase::ConsumeError(std::unique_ptr<ErrorData> error,
                               InternalErrorType additionalAllowedErrors) {
     ASSERT(error != nullptr);
-    AppendDebugLayerMessages(error.get());
     HandleError(std::move(error), additionalAllowedErrors);
 }
 
@@ -1203,21 +1203,24 @@ BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
     // The validation errors on BufferDescriptor should be prior to any OOM errors when
     // MapppedAtCreation == false.
     MaybeError maybeError = ValidateBufferDescriptor(this, &fakeDescriptor);
-    if (maybeError.IsError()) {
-        ConsumedError(maybeError.AcquireError(), InternalErrorType::OutOfMemory,
-                      "calling %s.CreateBuffer(%s).", this, desc);
-    } else {
-        const DawnBufferDescriptorErrorInfoFromWireClient* clientErrorInfo = nullptr;
-        FindInChain(desc->nextInChain, &clientErrorInfo);
-        if (clientErrorInfo != nullptr && clientErrorInfo->outOfMemory) {
-            ConsumedError(DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer mapping"),
-                          InternalErrorType::OutOfMemory);
-        }
-    }
 
     // Set the size of the error buffer to 0 as this function is called only when an OOM happens at
     // the client side.
     fakeDescriptor.size = 0;
+
+    if (maybeError.IsError()) {
+        std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+        error->AppendContext("calling %s.CreateBuffer(%s).", this, desc);
+        HandleError(std::move(error), InternalErrorType::OutOfMemory);
+    } else {
+        const DawnBufferDescriptorErrorInfoFromWireClient* clientErrorInfo = nullptr;
+        FindInChain(desc->nextInChain, &clientErrorInfo);
+        if (clientErrorInfo != nullptr && clientErrorInfo->outOfMemory) {
+            HandleError(DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer mapping"),
+                        InternalErrorType::OutOfMemory);
+        }
+    }
+
     return BufferBase::MakeError(this, &fakeDescriptor);
 }
 
@@ -1401,7 +1404,7 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, const char* message) {
 }
 
 void DeviceBase::APIValidateTextureDescriptor(const TextureDescriptor* desc) {
-    ConsumedError(ValidateTextureDescriptor(this, desc));
+    DAWN_UNUSED(ConsumedError(ValidateTextureDescriptor(this, desc)));
 }
 
 QueueBase* DeviceBase::GetQueue() const {
