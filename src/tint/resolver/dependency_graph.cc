@@ -37,6 +37,7 @@
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/invariant_attribute.h"
+#include "src/tint/ast/let.h"
 #include "src/tint/ast/location_attribute.h"
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/must_use_attribute.h"
@@ -809,6 +810,9 @@ std::string ResolvedIdentifier::String(const SymbolTable& symbols, diag::List& d
             },
             [&](const ast::Var* n) {  //
                 return "var '" + symbols.NameFor(n->name->symbol) + "'";
+            },
+            [&](const ast::Let* n) {  //
+                return "let '" + symbols.NameFor(n->name->symbol) + "'";
             },
             [&](const ast::Const* n) {  //
                 return "const '" + symbols.NameFor(n->name->symbol) + "'";
