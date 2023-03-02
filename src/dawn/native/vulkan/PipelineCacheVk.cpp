@@ -14,7 +14,8 @@
 
 #include "dawn/native/vulkan/PipelineCacheVk.h"
 
-#include "dawn/common/Assert.h"
+#include <memory>
+
 #include "dawn/native/Device.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/vulkan/DeviceVk.h"
@@ -83,9 +84,17 @@ void PipelineCache::Initialize() {
 
     Device* device = ToBackend(GetDevice());
     mHandle = VK_NULL_HANDLE;
-    GetDevice()->ConsumedError(CheckVkSuccess(
+
+    // Attempts to create the pipeline cache but does not bubble the error, instead only logging.
+    // This should be fine because the handle will be left as null and pipeline creation should
+    // continue as if there was no cache.
+    MaybeError maybeError = CheckVkSuccess(
         device->fn.CreatePipelineCache(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
-        "CreatePipelineCache"));
+        "CreatePipelineCache");
+    if (maybeError.IsError()) {
+        std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+        GetDevice()->EmitLog(WGPULoggingType_Info, error->GetFormattedMessage().c_str());
+    }
 }
 
 }  // namespace dawn::native::vulkan
