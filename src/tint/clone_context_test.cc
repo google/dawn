@@ -339,6 +339,45 @@ TEST_F(CloneContextNodeTest, CloneWithReplacePointer) {
     EXPECT_EQ(cloned_root->c->name, cloned.Symbols().Get("c"));
 }
 
+TEST_F(CloneContextNodeTest, CloneWithRepeatedImmediateReplacePointer) {
+    Allocator a;
+
+    ProgramBuilder builder;
+    auto* original_root = a.Create<Node>(builder.Symbols().New("root"));
+    original_root->a = a.Create<Node>(builder.Symbols().New("a"));
+    original_root->b = a.Create<Node>(builder.Symbols().New("b"));
+    original_root->c = a.Create<Node>(builder.Symbols().New("c"));
+    Program original(std::move(builder));
+
+    ProgramBuilder cloned;
+
+    CloneContext ctx(&cloned, &original);
+
+    // Demonstrate that ctx.Replace() can be called multiple times to update the replacement of a
+    // node.
+
+    auto* replacement_x =
+        a.Create<Node>(cloned.Symbols().New("replacement_x"), ctx.Clone(original_root->b));
+    ctx.Replace(original_root->b, replacement_x);
+
+    auto* replacement_y =
+        a.Create<Node>(cloned.Symbols().New("replacement_y"), ctx.Clone(original_root->b));
+    ctx.Replace(original_root->b, replacement_y);
+
+    auto* replacement_z =
+        a.Create<Node>(cloned.Symbols().New("replacement_z"), ctx.Clone(original_root->b));
+    ctx.Replace(original_root->b, replacement_z);
+
+    auto* cloned_root = ctx.Clone(original_root);
+
+    EXPECT_NE(cloned_root->a, replacement_z);
+    EXPECT_EQ(cloned_root->b, replacement_z);
+    EXPECT_NE(cloned_root->c, replacement_z);
+
+    EXPECT_EQ(replacement_z->a, replacement_y);
+    EXPECT_EQ(replacement_y->a, replacement_x);
+}
+
 TEST_F(CloneContextNodeTest, CloneWithReplaceFunction) {
     Allocator a;
 
@@ -369,6 +408,45 @@ TEST_F(CloneContextNodeTest, CloneWithReplaceFunction) {
     EXPECT_EQ(cloned_root->a->name, cloned.Symbols().Get("a"));
     EXPECT_EQ(cloned_root->b->name, cloned.Symbols().Get("replacement"));
     EXPECT_EQ(cloned_root->c->name, cloned.Symbols().Get("c"));
+}
+
+TEST_F(CloneContextNodeTest, CloneWithRepeatedImmediateReplaceFunction) {
+    Allocator a;
+
+    ProgramBuilder builder;
+    auto* original_root = a.Create<Node>(builder.Symbols().New("root"));
+    original_root->a = a.Create<Node>(builder.Symbols().New("a"));
+    original_root->b = a.Create<Node>(builder.Symbols().New("b"));
+    original_root->c = a.Create<Node>(builder.Symbols().New("c"));
+    Program original(std::move(builder));
+
+    ProgramBuilder cloned;
+
+    CloneContext ctx(&cloned, &original);
+
+    // Demonstrate that ctx.Replace() can be called multiple times to update the replacement of a
+    // node.
+
+    Node* replacement_x =
+        a.Create<Node>(cloned.Symbols().New("replacement_x"), ctx.Clone(original_root->b));
+    ctx.Replace(original_root->b, [&] { return replacement_x; });
+
+    Node* replacement_y =
+        a.Create<Node>(cloned.Symbols().New("replacement_y"), ctx.Clone(original_root->b));
+    ctx.Replace(original_root->b, [&] { return replacement_y; });
+
+    Node* replacement_z =
+        a.Create<Node>(cloned.Symbols().New("replacement_z"), ctx.Clone(original_root->b));
+    ctx.Replace(original_root->b, [&] { return replacement_z; });
+
+    auto* cloned_root = ctx.Clone(original_root);
+
+    EXPECT_NE(cloned_root->a, replacement_z);
+    EXPECT_EQ(cloned_root->b, replacement_z);
+    EXPECT_NE(cloned_root->c, replacement_z);
+
+    EXPECT_EQ(replacement_z->a, replacement_y);
+    EXPECT_EQ(replacement_y->a, replacement_x);
 }
 
 TEST_F(CloneContextNodeTest, CloneWithRemove) {

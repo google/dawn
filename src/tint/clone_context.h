@@ -359,7 +359,7 @@ class CloneContext {
     CloneContext& Replace(const WHAT* what, const WITH* with) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, what);
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, with);
-        replacements_.Add(what, [with]() -> const Cloneable* { return with; });
+        replacements_.Replace(what, [with]() -> const Cloneable* { return with; });
         return *this;
     }
 
@@ -379,7 +379,7 @@ class CloneContext {
     template <typename WHAT, typename WITH, typename = std::invoke_result_t<WITH>>
     CloneContext& Replace(const WHAT* what, WITH&& with) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, what);
-        replacements_.Add(what, with);
+        replacements_.Replace(what, with);
         return *this;
     }
 
