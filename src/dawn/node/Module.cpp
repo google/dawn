@@ -91,9 +91,6 @@ struct Coverage {
 // types into the global object, and adding the 'create' function on the exported
 // object.
 Napi::Object Initialize(Napi::Env env, Napi::Object exports) {
-    // Initialize Tint
-    tint::Initialize();
-
     // Set all the Dawn procedure function pointers.
     dawnProcSetProcs(&dawn::native::GetProcs());
 
