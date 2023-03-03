@@ -132,6 +132,7 @@ if (build_with_chromium && is_win &&
   assert(defined(windows_sdk_path))
   assert(defined(windows_sdk_version))
   assert(windows_sdk_path != "")
+  assert(windows_sdk_version != "")
 
   # Declare a copy target to copy DXC binary from Windows SDK for running Dawn
   # end-to-end test in Chromium.
