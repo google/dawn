@@ -21,7 +21,10 @@ source_set("tint_cmd_helper") {
     "helper.h",
   ]
 
-  deps = [ "${tint_root_dir}/src/tint:libtint" ]
+  deps = [
+    "${tint_root_dir}/src/tint:libtint",
+    "${tint_spirv_tools_dir}/:spvtools_headers",
+  ]
 }
 
 executable("tint") {

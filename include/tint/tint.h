@@ -48,7 +48,6 @@
 #endif  // TINT_BUILD_WGSL_READER
 
 #if TINT_BUILD_SPV_WRITER
-#include "spirv-tools/libspirv.hpp"
 #include "src/tint/writer/spirv/generator.h"
 #endif  // TINT_BUILD_SPV_WRITER
 
