@@ -213,6 +213,8 @@ src/webgpu/api/validation/createView.spec.ts
 src/webgpu/api/validation/debugMarker.spec.ts
 src/webgpu/api/validation/error_scope.spec.ts
 src/webgpu/api/validation/getBindGroupLayout.spec.ts
+src/webgpu/web_platform/util.ts
+src/webgpu/api/validation/gpu_external_texture_expiration.spec.ts
 src/webgpu/api/validation/layout_shader_compat.spec.ts
 src/webgpu/api/validation/buffer/create.spec.ts
 src/webgpu/api/validation/buffer/destroy.spec.ts
@@ -225,6 +227,12 @@ src/webgpu/api/validation/capability_checks/limits/limit_utils.ts
 src/webgpu/api/validation/capability_checks/limits/maxBindGroups.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxBindingsPerBindGroup.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxBufferSize.spec.ts
+src/webgpu/api/validation/capability_checks/limits/maxColorAttachmentBytesPerSample.spec.ts
+src/webgpu/api/validation/capability_checks/limits/maxColorAttachments.spec.ts
+src/webgpu/api/validation/capability_checks/limits/maxDynamicStorageBuffersPerPipelineLayout.spec.ts
+src/webgpu/api/validation/capability_checks/limits/maxDynamicUniformBuffersPerPipelineLayout.spec.ts
+src/webgpu/api/validation/capability_checks/limits/maxInterStageShaderComponents.spec.ts
+src/webgpu/api/validation/capability_checks/limits/maxInterStageShaderVariables.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxSampledTexturesPerShaderStage.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxSamplersPerShaderStage.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxStorageBufferBindingSize.spec.ts
@@ -239,6 +247,8 @@ src/webgpu/api/validation/capability_checks/limits/maxUniformBuffersPerShaderSta
 src/webgpu/api/validation/capability_checks/limits/maxVertexAttributes.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxVertexBufferArrayStride.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxVertexBuffers.spec.ts
+src/webgpu/api/validation/capability_checks/limits/minStorageBufferOffsetAlignment.spec.ts
+src/webgpu/api/validation/capability_checks/limits/minUniformBufferOffsetAlignment.spec.ts
 src/webgpu/api/validation/encoding/beginComputePass.spec.ts
 src/webgpu/api/validation/encoding/beginRenderPass.spec.ts
 src/webgpu/api/validation/encoding/createRenderBundleEncoder.spec.ts
@@ -484,7 +494,6 @@ src/webgpu/util/color_space_conversion.ts
 src/webgpu/util/copy_to_texture.ts
 src/webgpu/util/texture/texel_data.spec.ts
 src/webgpu/util/texture/texture_ok.spec.ts
-src/webgpu/web_platform/util.ts
 src/webgpu/web_platform/canvas/configure.spec.ts
 src/webgpu/web_platform/canvas/context_creation.spec.ts
 src/webgpu/web_platform/canvas/getCurrentTexture.spec.ts
