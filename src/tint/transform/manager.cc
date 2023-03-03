@@ -19,6 +19,7 @@
 #define TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM 0
 
 #if TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
+#include <iostream>
 #define TINT_IF_PRINT_PROGRAM(x) x
 #else  // TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
 #define TINT_IF_PRINT_PROGRAM(x)
@@ -52,9 +53,9 @@ Transform::ApplyResult Manager::Apply(const Program* program,
 
     std::optional<Program> output;
 
-    for (const auto& transform : transforms_) {
-        TINT_IF_PRINT_PROGRAM(print_program("Input to", transform.get()));
+    TINT_IF_PRINT_PROGRAM(print_program("Input of", this));
 
+    for (const auto& transform : transforms_) {
         if (auto result = transform->Apply(program, inputs, outputs)) {
             output.emplace(std::move(result.value()));
             program = &output.value();
@@ -64,14 +65,14 @@ Transform::ApplyResult Manager::Apply(const Program* program,
                 break;
             }
 
-            if (transform == transforms_.back()) {
-                TINT_IF_PRINT_PROGRAM(print_program("Output of", transform.get()));
-            }
+            TINT_IF_PRINT_PROGRAM(print_program("Output of", transform.get()));
         } else {
             TINT_IF_PRINT_PROGRAM(std::cout << "Skipped " << transform->TypeInfo().name
                                             << std::endl);
         }
     }
+
+    TINT_IF_PRINT_PROGRAM(print_program("Final output of", this));
 
     return output;
 }
