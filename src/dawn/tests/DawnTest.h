@@ -187,6 +187,10 @@ class DawnTestEnvironment : public testing::Environment {
     void SelectPreferredAdapterProperties(const dawn::native::Instance* instance);
     void PrintTestConfigurationAndAdapterInfo(dawn::native::Instance* instance) const;
 
+    /// @returns true if all the toggles are recognised, otherwise prints an error and returns
+    /// false.
+    bool ValidateToggles(dawn::native::Instance* instance) const;
+
     bool mUseWire = false;
     dawn::native::BackendValidationLevel mBackendValidationLevel =
         dawn::native::BackendValidationLevel::Disabled;

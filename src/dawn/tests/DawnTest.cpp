@@ -133,6 +133,10 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
     std::unique_ptr<dawn::native::Instance> instance = CreateInstanceAndDiscoverAdapters();
     ASSERT(instance);
 
+    if (!ValidateToggles(instance.get())) {
+        return;
+    }
+
     SelectPreferredAdapterProperties(instance.get());
     PrintTestConfigurationAndAdapterInfo(instance.get());
 }
@@ -413,6 +417,23 @@ std::vector<AdapterTestParam> DawnTestEnvironment::GetAvailableAdapterTestParams
         }
     }
     return testParams;
+}
+
+bool DawnTestEnvironment::ValidateToggles(dawn::native::Instance* instance) const {
+    dawn::LogMessage err = dawn::ErrorLog();
+    for (const std::string& toggle : GetEnabledToggles()) {
+        if (!instance->GetToggleInfo(toggle.c_str())) {
+            err << "unrecognized toggle: '" << toggle << "'\n";
+            return false;
+        }
+    }
+    for (const std::string& toggle : GetDisabledToggles()) {
+        if (!instance->GetToggleInfo(toggle.c_str())) {
+            err << "unrecognized toggle: '" << toggle << "'\n";
+            return false;
+        }
+    }
+    return true;
 }
 
 void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo(
