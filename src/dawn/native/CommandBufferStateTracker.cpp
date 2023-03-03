@@ -598,33 +598,35 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
         if (std::holds_alternative<BufferAliasing>(result)) {
             const auto& a = std::get<BufferAliasing>(result);
             return DAWN_VALIDATION_ERROR(
-                "Writable storage buffer binding aliasing found between bind group index %u, "
-                "binding index "
-                "%u, and bind group index %u, binding index %u, with overlapping ranges "
-                "(offset: "
-                "%u, size: %u) and (offset: %u, size: %u).",
-                static_cast<uint32_t>(a.e0.bindGroupIndex),
-                static_cast<uint32_t>(a.e0.bindingIndex),
+                "Writable storage buffer binding aliasing found between %s set at bind group index "
+                "%u, binding index %u, and %s set at bind group index %u, binding index %u, with "
+                "overlapping ranges (offset: %u, size: %u) and (offset: %u, size: %u) in %s.",
+                mBindgroups[a.e0.bindGroupIndex], static_cast<uint32_t>(a.e0.bindGroupIndex),
+                static_cast<uint32_t>(a.e0.bindingIndex), mBindgroups[a.e1.bindGroupIndex],
                 static_cast<uint32_t>(a.e1.bindGroupIndex),
                 static_cast<uint32_t>(a.e1.bindingIndex), a.e0.offset, a.e0.size, a.e1.offset,
-                a.e1.size);
+                a.e1.size,
+                mBindgroups[a.e0.bindGroupIndex]
+                    ->GetBindingAsBufferBinding(a.e0.bindingIndex)
+                    .buffer);
         } else {
             ASSERT(std::holds_alternative<TextureAliasing>(result));
             const auto& a = std::get<TextureAliasing>(result);
             return DAWN_VALIDATION_ERROR(
-                "Writable storage texture binding aliasing found between bind group "
-                "index %u, binding index "
-                "%u, and bind group index %u, binding index %u, with subresources "
-                "(base mipmap level: "
-                "%u, mip level count: %u, base array layer: %u, array layer count: %u) and "
-                "(base mipmap level: %u, mip level count: "
-                "%u, base array layer: %u, array layer count: %u).",
-                static_cast<uint32_t>(a.e0.bindGroupIndex),
-                static_cast<uint32_t>(a.e0.bindingIndex),
+                "Writable storage texture binding aliasing found between %s set at bind group "
+                "index %u, binding index %u, and %s set at bind group index %u, binding index %u, "
+                "with subresources (base mipmap level: %u, mip level count: %u, base array layer: "
+                "%u, array layer count: %u) and (base mipmap level: %u, mip level count: %u, base "
+                "array layer: %u, array layer count: %u) in %s.",
+                mBindgroups[a.e0.bindGroupIndex], static_cast<uint32_t>(a.e0.bindGroupIndex),
+                static_cast<uint32_t>(a.e0.bindingIndex), mBindgroups[a.e1.bindGroupIndex],
                 static_cast<uint32_t>(a.e1.bindGroupIndex),
                 static_cast<uint32_t>(a.e1.bindingIndex), a.e0.baseMipLevel, a.e0.mipLevelCount,
                 a.e0.baseArrayLayer, a.e0.arrayLayerCount, a.e1.baseMipLevel, a.e1.mipLevelCount,
-                a.e1.baseArrayLayer, a.e1.arrayLayerCount);
+                a.e1.baseArrayLayer, a.e1.arrayLayerCount,
+                mBindgroups[a.e0.bindGroupIndex]
+                    ->GetBindingAsTextureView(a.e0.bindingIndex)
+                    ->GetTexture());
         }
 
         // The chunk of code above should be similar to the one in |RecomputeLazyAspects|.
