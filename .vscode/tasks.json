@@ -73,70 +73,14 @@
         // A symbolic link to this build directory is created at 'out/active'
         // which is used to track the active build directory.
         {
-            "label": "gn gen",
+            "label": "setup build",
             "type": "shell",
-            "linux": {
-                "command": "./tools/setup-build",
-                "args": [
-                    "gn",
-                    "${input:buildType}",
-                    "${input:buildArch}",
-                ],
-            },
-            "osx": {
-                "command": "./tools/setup-build",
-                "args": [
-                    "gn",
-                    "${input:buildType}",
-                    "${input:buildArch}",
-                ],
-            },
-            "windows": {
-                "command": "/C",
-                "args": [
-                    "(IF \"${input:buildType}\" == \"Debug\" ( gn gen \"out\\${input:buildType}\" --args=is_debug=true ) ELSE ( gn gen \"out\\${input:buildType}\" --args=is_debug=false )) && (IF EXIST \"out\\active\" rmdir \"out\\active\" /q /s) && (mklink /j \"out\\active\" \"out\\${input:buildType}\")",
-                ],
-                "options": {
-                    "shell": {
-                        "executable": "cmd"
-                    },
-                }
-            },
-            "options": {
-                "cwd": "${workspaceRoot}"
-            },
-            "problemMatcher": [],
-        },
-        {
-            "label": "cmake gen",
-            "type": "shell",
-            "linux": {
-                "command": "./tools/setup-build",
-                "args": [
-                    "cmake",
-                    "${input:buildType}",
-                    "${input:buildArch}",
-                ],
-            },
-            "osx": {
-                "command": "./tools/setup-build",
-                "args": [
-                    "cmake",
-                    "${input:buildType}",
-                    "${input:buildArch}",
-                ],
-            },
-            "windows": {
-                "command": "/C",
-                "args": [
-                    "echo TODO",
-                ],
-                "options": {
-                    "shell": {
-                        "executable": "cmd"
-                    },
-                }
-            },
+            "command": "./tools/setup-build",
+            "args": [
+                "${input:buildSystem}",
+                "${input:buildType}",
+                "${input:buildArch}",
+            ],
             "options": {
                 "cwd": "${workspaceRoot}"
             },
@@ -194,6 +138,16 @@
         }
     ],
     "inputs": [
+        {
+            "id": "buildSystem",
+            "type": "pickString",
+            "options": [
+                "cmake",
+                "gn",
+            ],
+            "default": "gn",
+            "description": "The build system",
+        },
         {
             "id": "buildType",
             "type": "pickString",
