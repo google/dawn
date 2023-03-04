@@ -90,9 +90,7 @@ std::string expected_texture_overload(ast::builtin::test::ValidTextureOverload o
         case ValidTextureOverload::kGatherCompareDepthCubeArrayF32:
             return R"(Texture.gather_compare(Sampler, float3(1.0f, 2.0f, 3.0f), 4u, 5.0f))";
         case ValidTextureOverload::kNumLayers2dArray:
-        case ValidTextureOverload::kNumLayersCubeArray:
         case ValidTextureOverload::kNumLayersDepth2dArray:
-        case ValidTextureOverload::kNumLayersDepthCubeArray:
         case ValidTextureOverload::kNumLayersStorageWO2dArray:
             return R"(Texture.get_array_size())";
         case ValidTextureOverload::kNumLevels2d:

@@ -739,9 +739,7 @@ match workgroup
 @must_use fn textureGatherCompare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> vec4<f32>
 @must_use fn textureGatherCompare<A: iu32>(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: A, depth_ref: f32) -> vec4<f32>
 @must_use fn textureNumLayers<T: fiu32>(texture: texture_2d_array<T>) -> u32
-@must_use fn textureNumLayers<T: fiu32>(texture: texture_cube_array<T>) -> u32
 @must_use fn textureNumLayers(texture: texture_depth_2d_array) -> u32
-@must_use fn textureNumLayers(texture: texture_depth_cube_array) -> u32
 @must_use fn textureNumLayers<F: texel_format, A: write>(texture: texture_storage_2d_array<F, A>) -> u32
 @must_use fn textureNumLevels<T: fiu32>(texture: texture_1d<T>) -> u32
 @must_use fn textureNumLevels<T: fiu32>(texture: texture_2d<T>) -> u32

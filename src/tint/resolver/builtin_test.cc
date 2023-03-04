@@ -2263,9 +2263,7 @@ static const char* expected_texture_overload(ast::builtin::test::ValidTextureOve
         case ValidTextureOverload::kGatherCompareDepthCubeArrayF32:
             return R"(textureGatherCompare(texture, sampler, coords, array_index, depth_ref))";
         case ValidTextureOverload::kNumLayers2dArray:
-        case ValidTextureOverload::kNumLayersCubeArray:
         case ValidTextureOverload::kNumLayersDepth2dArray:
-        case ValidTextureOverload::kNumLayersDepthCubeArray:
         case ValidTextureOverload::kNumLayersStorageWO2dArray:
             return R"(textureNumLayers(texture))";
         case ValidTextureOverload::kNumLevels2d:

@@ -1132,29 +1132,6 @@ OpCapability SampledCubeArray
                     R"(
 OpCapability ImageQuery
 )"};
-        case ValidTextureOverload::kNumLayersCubeArray:
-            return {R"(
-%4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%7 = OpTypeSampler
-%6 = OpTypePointer UniformConstant %7
-%5 = OpVariable %6 UniformConstant
-%9 = OpTypeInt 32 0
-%11 = OpTypeVector %9 3
-%13 = OpTypeInt 32 1
-%14 = OpConstant %13 0
-)",
-                    R"(
-%12 = OpLoad %3 %1
-%10 = OpImageQuerySizeLod %11 %12 %14
-%8 = OpCompositeExtract %9 %10 2
-)",
-                    R"(
-OpCapability SampledCubeArray
-OpCapability ImageQuery
-)"};
         case ValidTextureOverload::kNumLayersDepth2dArray:
             return {R"(
 %4 = OpTypeFloat 32
@@ -1175,29 +1152,6 @@ OpCapability ImageQuery
 %8 = OpCompositeExtract %9 %10 2
 )",
                     R"(
-OpCapability ImageQuery
-)"};
-        case ValidTextureOverload::kNumLayersDepthCubeArray:
-            return {R"(
-%4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%7 = OpTypeSampler
-%6 = OpTypePointer UniformConstant %7
-%5 = OpVariable %6 UniformConstant
-%9 = OpTypeInt 32 0
-%11 = OpTypeVector %9 3
-%13 = OpTypeInt 32 1
-%14 = OpConstant %13 0
-)",
-                    R"(
-%12 = OpLoad %3 %1
-%10 = OpImageQuerySizeLod %11 %12 %14
-%8 = OpCompositeExtract %9 %10 2
-)",
-                    R"(
-OpCapability SampledCubeArray
 OpCapability ImageQuery
 )"};
         case ValidTextureOverload::kNumLayersStorageWO2dArray:

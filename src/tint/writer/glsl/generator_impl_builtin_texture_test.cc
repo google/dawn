@@ -98,8 +98,6 @@ ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverloa
             return R"(textureGather(Texture_Sampler, vec4(1.0f, 2.0f, 3.0f, float(4u)), 5.0f))";
         case ValidTextureOverload::kNumLayers2dArray:
         case ValidTextureOverload::kNumLayersDepth2dArray:
-        case ValidTextureOverload::kNumLayersCubeArray:
-        case ValidTextureOverload::kNumLayersDepthCubeArray:
             return {"textureSize"};
         case ValidTextureOverload::kNumLayersStorageWO2dArray:
             return {"imageSize"};
