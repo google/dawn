@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void textureStore_3fb31f(texture3d<uint, access::write> tint_symbol_1) {
+  tint_symbol_1.write(uint4(1u), uint3(uint3(1u)));
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner(texture3d<uint, access::write> tint_symbol_2) {
+  textureStore_3fb31f(tint_symbol_2);
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main(texture3d<uint, access::write> tint_symbol_3 [[texture(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main(texture3d<uint, access::write> tint_symbol_4 [[texture(0)]]) {
+  textureStore_3fb31f(tint_symbol_4);
+  return;
+}
+
+kernel void compute_main(texture3d<uint, access::write> tint_symbol_5 [[texture(0)]]) {
+  textureStore_3fb31f(tint_symbol_5);
+  return;
+}
+

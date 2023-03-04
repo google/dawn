@@ -5843,7 +5843,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [550] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[148],
+    /* matcher indices */ &kMatcherIndices[106],
   },
   {
     /* [551] */
@@ -9540,9 +9540,9 @@ constexpr OverloadInfo kOverloads[] = {
   {
     /* [94] */
     /* num parameters */ 3,
-    /* num template types */ 0,
+    /* num template types */ 1,
     /* num template numbers */ 0,
-    /* template types */ &kTemplateTypes[38],
+    /* template types */ &kTemplateTypes[1],
     /* template numbers */ &kTemplateNumbers[10],
     /* parameters */ &kParameters[549],
     /* return matcher indices */ nullptr,
@@ -14862,7 +14862,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn textureStore<C : iu32>(texture: texture_storage_1d<u32_texel_format, write>, coords: C, value: vec4<u32>) */
     /* fn textureStore<C : iu32>(texture: texture_storage_2d<u32_texel_format, write>, coords: vec2<C>, value: vec4<u32>) */
     /* fn textureStore<C : iu32, A : iu32>(texture: texture_storage_2d_array<u32_texel_format, write>, coords: vec2<C>, array_index: A, value: vec4<u32>) */
-    /* fn textureStore(texture: texture_storage_3d<u32_texel_format, write>, coords: vec3<i32>, value: vec4<u32>) */
+    /* fn textureStore<C : iu32>(texture: texture_storage_3d<u32_texel_format, write>, coords: vec3<C>, value: vec4<u32>) */
     /* num overloads */ 12,
     /* overloads */ &kOverloads[83],
   },
