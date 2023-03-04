@@ -30,6 +30,16 @@ namespace tint::utils {
 /// Stringstream wrapper which automatically resets the locale and sets floating point emission
 /// settings needed for Tint.
 class StringStream {
+    using SetWRetTy = decltype(std::setw(std::declval<int>()));
+    using SetPrecisionRetTy = decltype(std::setprecision(std::declval<int>()));
+    using SetFillRetTy = decltype(std::setfill(std::declval<char>()));
+
+    /// Evaluates to true if `T` is the return type of std::setw, std:setprecision or std::setfill.
+    template <typename T>
+    static constexpr bool IsSetType = std::is_same_v<SetWRetTy, std::decay_t<T>> ||
+                                      std::is_same_v<SetPrecisionRetTy, std::decay_t<T>> ||
+                                      std::is_same_v<SetFillRetTy, std::decay_t<T>>;
+
   public:
     /// Constructor
     StringStream();
@@ -149,12 +159,9 @@ class StringStream {
         return *this;
     }
 
-    /// The callback to emit a `std::hex` to the stream
-    using StdHex = std::ios_base& (*)(std::ios_base&);
-
     /// @param manipulator the callback to emit too
     /// @returns a reference to this
-    StringStream& operator<<(StdHex manipulator) {
+    StringStream& operator<<(decltype(std::hex) manipulator) {
         // call the function, and return it's value
         manipulator(sstream_);
         return *this;
@@ -162,38 +169,7 @@ class StringStream {
 
     /// @param value the value to emit
     /// @returns a reference to this
-    template <typename T,
-              typename std::enable_if<std::is_same<decltype(std::setw(std::declval<int>())),
-                                                   typename std::decay<T>::type>::value,
-                                      int>::type = 0>
-    StringStream& operator<<(T&& value) {
-        // call the function, and return it's value
-        sstream_ << std::forward<T>(value);
-        return *this;
-    }
-
-    // On MSVC the type of `std::setw` and `std::setprecision` are the same. Can't check for
-    // _MSC_VER because this is also set by clang-cl on windows.
-#if defined(__GNUC__) || defined(__clang__)
-    /// @param value the value to emit
-    /// @returns a reference to this
-    template <typename T,
-              typename std::enable_if<std::is_same<decltype(std::setprecision(std::declval<int>())),
-                                                   typename std::decay<T>::type>::value,
-                                      int>::type = 0>
-    StringStream& operator<<(T&& value) {
-        // call the function, and return it's value
-        sstream_ << std::forward<T>(value);
-        return *this;
-    }
-#endif  // defined(_MSC_VER)
-
-    /// @param value the value to emit
-    /// @returns a reference to this
-    template <typename T,
-              typename std::enable_if<std::is_same<decltype(std::setfill(std::declval<char>())),
-                                                   typename std::decay<T>::type>::value,
-                                      char>::type = 0>
+    template <typename T, typename std::enable_if_t<IsSetType<T>, int> = 0>
     StringStream& operator<<(T&& value) {
         // call the function, and return it's value
         sstream_ << std::forward<T>(value);
