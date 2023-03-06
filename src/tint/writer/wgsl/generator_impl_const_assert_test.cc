@@ -27,7 +27,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalConstAssert) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_EQ(gen.result(), R"(static_assert true;
+    EXPECT_EQ(gen.result(), R"(const_assert true;
 )");
 }
 
@@ -38,7 +38,7 @@ TEST_F(WgslGeneratorImplTest, Emit_FunctionConstAssert) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(fn f() {
-  static_assert true;
+  const_assert true;
 }
 )");
 }

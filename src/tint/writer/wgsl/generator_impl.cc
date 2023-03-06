@@ -1149,7 +1149,7 @@ bool GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
 
 bool GeneratorImpl::EmitConstAssert(const ast::ConstAssert* stmt) {
     auto out = line();
-    out << "static_assert ";
+    out << "const_assert ";
     if (!EmitExpression(out, stmt->condition)) {
         return false;
     }
