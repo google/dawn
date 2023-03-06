@@ -23,16 +23,24 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::CallTarget);
 
 namespace tint::sem {
 
+CallTarget::CallTarget(EvaluationStage stage, bool must_use) : stage_(stage), must_use_(must_use) {}
+
 CallTarget::CallTarget(const type::Type* return_type,
-                       utils::VectorRef<const Parameter*> parameters,
+                       utils::VectorRef<Parameter*> parameters,
                        EvaluationStage stage,
                        bool must_use)
-    : signature_{return_type, std::move(parameters)}, stage_(stage), must_use_(must_use) {
+    : stage_(stage), must_use_(must_use) {
+    SetReturnType(return_type);
+    for (auto* param : parameters) {
+        AddParameter(param);
+    }
     TINT_ASSERT(Semantic, return_type);
 }
 
 CallTarget::CallTarget(const CallTarget&) = default;
 CallTarget::~CallTarget() = default;
+
+CallTargetSignature::CallTargetSignature() = default;
 
 CallTargetSignature::CallTargetSignature(const type::Type* ret_ty,
                                          utils::VectorRef<const sem::Parameter*> params)

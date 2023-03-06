@@ -414,12 +414,18 @@ class DependencyScanner {
                 TraverseExpression(wg->y);
                 TraverseExpression(wg->z);
                 return true;
+            },
+            [&](const ast::InternalAttribute* i) {
+                for (auto* dep : i->dependencies) {
+                    TraverseExpression(dep);
+                }
+                return true;
             });
         if (handled) {
             return;
         }
 
-        if (attr->IsAnyOf<ast::BuiltinAttribute, ast::DiagnosticAttribute, ast::InternalAttribute,
+        if (attr->IsAnyOf<ast::BuiltinAttribute, ast::DiagnosticAttribute,
                           ast::InterpolateAttribute, ast::InvariantAttribute, ast::MustUseAttribute,
                           ast::StageAttribute, ast::StrideAttribute,
                           ast::StructMemberOffsetAttribute>()) {

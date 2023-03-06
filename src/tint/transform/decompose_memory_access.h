@@ -80,13 +80,13 @@ class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Trans
         /// @param o the op of the intrinsic
         /// @param type the data type of the intrinsic
         /// @param address_space the address space of the buffer
-        /// @param buffer the storage or uniform buffer name
+        /// @param buffer the storage or uniform buffer identifier
         Intrinsic(ProgramID pid,
                   ast::NodeID nid,
                   Op o,
                   DataType type,
                   builtin::AddressSpace address_space,
-                  const Symbol& buffer);
+                  const ast::IdentifierExpression* buffer);
         /// Destructor
         ~Intrinsic() override;
 
@@ -102,6 +102,9 @@ class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Trans
         /// @return true if op is atomic
         bool IsAtomic() const;
 
+        /// @return the buffer that this intrinsic operates on
+        const ast::IdentifierExpression* Buffer() const;
+
         /// The op of the intrinsic
         const Op op;
 
@@ -110,9 +113,6 @@ class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Trans
 
         /// The address space of the buffer this intrinsic operates on
         const builtin::AddressSpace address_space;
-
-        /// The buffer name
-        const Symbol buffer;
     };
 
     /// Constructor

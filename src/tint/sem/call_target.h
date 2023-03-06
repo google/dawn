@@ -28,6 +28,9 @@ namespace tint::sem {
 /// CallTargetSignature holds the return type and parameters for a call target
 struct CallTargetSignature {
     /// Constructor
+    CallTargetSignature();
+
+    /// Constructor
     /// @param ret_ty the call target return type
     /// @param params the call target parameters
     CallTargetSignature(const type::Type* ret_ty, utils::VectorRef<const Parameter*> params);
@@ -39,9 +42,9 @@ struct CallTargetSignature {
     ~CallTargetSignature();
 
     /// The type of the call target return value
-    const type::Type* const return_type = nullptr;
+    const type::Type* return_type = nullptr;
     /// The parameters of the call target
-    const utils::Vector<const sem::Parameter*, 8> parameters;
+    utils::Vector<const sem::Parameter*, 8> parameters;
 
     /// Equality operator
     /// @param other the signature to compare this to
@@ -67,13 +70,19 @@ struct CallTargetSignature {
 class CallTarget : public Castable<CallTarget, Node> {
   public:
     /// Constructor
+    /// @param stage the earliest evaluation stage for a call to this target
+    /// @param must_use the result of the call target must be used, i.e. it cannot be used as a call
+    /// statement.
+    CallTarget(EvaluationStage stage, bool must_use);
+
+    /// Constructor
     /// @param return_type the return type of the call target
     /// @param parameters the parameters for the call target
     /// @param stage the earliest evaluation stage for a call to this target
     /// @param must_use the result of the call target must be used, i.e. it cannot be used as a call
     /// statement.
     CallTarget(const type::Type* return_type,
-               utils::VectorRef<const Parameter*> parameters,
+               utils::VectorRef<Parameter*> parameters,
                EvaluationStage stage,
                bool must_use);
 
@@ -83,8 +92,19 @@ class CallTarget : public Castable<CallTarget, Node> {
     /// Destructor
     ~CallTarget() override;
 
+    /// Sets the call target's return type
+    /// @param ty the parameter
+    void SetReturnType(const type::Type* ty) { signature_.return_type = ty; }
+
     /// @return the return type of the call target
     const type::Type* ReturnType() const { return signature_.return_type; }
+
+    /// Adds a parameter to the call target
+    /// @param parameter the parameter
+    void AddParameter(Parameter* parameter) {
+        parameter->SetOwner(this);
+        signature_.parameters.Push(parameter);
+    }
 
     /// @return the parameters of the call target
     auto& Parameters() const { return signature_.parameters; }

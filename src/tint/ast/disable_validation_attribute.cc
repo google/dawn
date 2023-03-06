@@ -23,7 +23,7 @@ namespace tint::ast {
 DisableValidationAttribute::DisableValidationAttribute(ProgramID pid,
                                                        NodeID nid,
                                                        DisabledValidation val)
-    : Base(pid, nid), validation(val) {}
+    : Base(pid, nid, utils::Empty), validation(val) {}
 
 DisableValidationAttribute::~DisableValidationAttribute() = default;
 

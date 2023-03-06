@@ -294,7 +294,7 @@ SpirvAtomic::SpirvAtomic() = default;
 SpirvAtomic::~SpirvAtomic() = default;
 
 SpirvAtomic::Stub::Stub(ProgramID pid, ast::NodeID nid, sem::BuiltinType b)
-    : Base(pid, nid), builtin(b) {}
+    : Base(pid, nid, utils::Empty), builtin(b) {}
 SpirvAtomic::Stub::~Stub() = default;
 std::string SpirvAtomic::Stub::InternalName() const {
     return "@internal(spirv-atomic " + std::string(sem::str(builtin)) + ")";

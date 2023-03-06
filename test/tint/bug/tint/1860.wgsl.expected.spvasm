@@ -1,0 +1,58 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 28
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %value %vertex_point_size
+               OpName %value "value"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %declared_after_usage_block "declared_after_usage_block"
+               OpMemberName %declared_after_usage_block 0 "inner"
+               OpName %DeclaredAfterUsage "DeclaredAfterUsage"
+               OpMemberName %DeclaredAfterUsage 0 "f"
+               OpName %declared_after_usage "declared_after_usage"
+               OpName %main_inner "main_inner"
+               OpName %main "main"
+               OpDecorate %value BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+               OpDecorate %declared_after_usage_block Block
+               OpMemberDecorate %declared_after_usage_block 0 Offset 0
+               OpMemberDecorate %DeclaredAfterUsage 0 Offset 0
+               OpDecorate %declared_after_usage NonWritable
+               OpDecorate %declared_after_usage DescriptorSet 0
+               OpDecorate %declared_after_usage Binding 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+      %value = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Output_float = OpTypePointer Output %float
+          %8 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %8
+%DeclaredAfterUsage = OpTypeStruct %float
+%declared_after_usage_block = OpTypeStruct %DeclaredAfterUsage
+%_ptr_Uniform_declared_after_usage_block = OpTypePointer Uniform %declared_after_usage_block
+%declared_after_usage = OpVariable %_ptr_Uniform_declared_after_usage_block Uniform
+         %13 = OpTypeFunction %v4float
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform_float = OpTypePointer Uniform %float
+       %void = OpTypeVoid
+         %22 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+ %main_inner = OpFunction %v4float None %13
+         %15 = OpLabel
+         %19 = OpAccessChain %_ptr_Uniform_float %declared_after_usage %uint_0 %uint_0
+         %20 = OpLoad %float %19
+         %21 = OpCompositeConstruct %v4float %20 %20 %20 %20
+               OpReturnValue %21
+               OpFunctionEnd
+       %main = OpFunction %void None %22
+         %25 = OpLabel
+         %26 = OpFunctionCall %v4float %main_inner
+               OpStore %value %26
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd

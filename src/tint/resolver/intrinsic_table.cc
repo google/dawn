@@ -1495,7 +1495,7 @@ IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
 
     // Was this overload a constructor or conversion?
     if (match.overload->flags.Contains(OverloadFlag::kIsConstructor)) {
-        utils::Vector<const sem::Parameter*, 8> params;
+        utils::Vector<sem::Parameter*, 8> params;
         params.Reserve(match.parameters.Length());
         for (auto& p : match.parameters) {
             params.Push(builder.create<sem::Parameter>(

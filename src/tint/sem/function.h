@@ -54,16 +54,14 @@ class Function final : public Castable<Function, CallTarget> {
 
     /// Constructor
     /// @param declaration the ast::Function
-    /// @param return_type the return type of the function
-    /// @param return_location the location value for the return, if provided
-    /// @param parameters the parameters to the function
-    Function(const ast::Function* declaration,
-             type::Type* return_type,
-             std::optional<uint32_t> return_location,
-             utils::VectorRef<Parameter*> parameters);
+    explicit Function(const ast::Function* declaration);
 
     /// Destructor
     ~Function() override;
+
+    /// Sets the function's return location
+    /// @param return_location the location value
+    void SetReturnLocation(uint32_t return_location) { return_location_ = return_location; }
 
     /// @returns the ast::Function declaration
     const ast::Function* Declaration() const { return declaration_; }

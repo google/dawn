@@ -19,9 +19,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::ValueConversion);
 namespace tint::sem {
 
 ValueConversion::ValueConversion(const type::Type* type,
-                                 const sem::Parameter* parameter,
+                                 sem::Parameter* parameter,
                                  EvaluationStage stage)
-    : Base(type, utils::Vector<const sem::Parameter*, 1>{parameter}, stage, /* must_use */ true) {}
+    : Base(type, utils::Vector<sem::Parameter*, 1>{parameter}, stage, /* must_use */ true) {}
 
 ValueConversion::~ValueConversion() = default;
 

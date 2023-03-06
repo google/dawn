@@ -156,13 +156,12 @@ const sem::Call* AppendVector(ProgramBuilder* b,
                 }));
     auto* ctor_target = b->create<sem::ValueConstructor>(
         packed_sem_ty,
-        utils::Transform(
-            packed,
-            [&](const tint::sem::ValueExpression* arg, size_t i) -> const sem::Parameter* {
-                return b->create<sem::Parameter>(
-                    nullptr, static_cast<uint32_t>(i), arg->Type()->UnwrapRef(),
-                    builtin::AddressSpace::kUndefined, builtin::Access::kUndefined);
-            }),
+        utils::Transform(packed,
+                         [&](const tint::sem::ValueExpression* arg, size_t i) {
+                             return b->create<sem::Parameter>(
+                                 nullptr, static_cast<uint32_t>(i), arg->Type()->UnwrapRef(),
+                                 builtin::AddressSpace::kUndefined, builtin::Access::kUndefined);
+                         }),
         sem::EvaluationStage::kRuntime);
     auto* ctor_sem = b->create<sem::Call>(ctor_ast, ctor_target, sem::EvaluationStage::kRuntime,
                                           std::move(packed), statement,

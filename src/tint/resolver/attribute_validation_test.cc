@@ -1977,4 +1977,40 @@ TEST_F(MustUseAttributeTest, UsedOnFnWithNoReturnValue) {
 }  // namespace
 }  // namespace MustUseTests
 
+namespace InternalAttributeDeps {
+namespace {
+
+class TestAttribute : public Castable<TestAttribute, ast::InternalAttribute> {
+  public:
+    TestAttribute(ProgramID pid, ast::NodeID nid, const ast::IdentifierExpression* dep)
+        : Base(pid, nid, utils::Vector{dep}) {}
+    std::string InternalName() const override { return "test_attribute"; }
+    const Cloneable* Clone(CloneContext*) const override { return nullptr; }
+};
+
+using InternalAttributeDepsTest = ResolverTest;
+TEST_F(InternalAttributeDepsTest, Dependency) {
+    auto* ident = Expr("v");
+    auto* attr = ASTNodes().Create<TestAttribute>(ID(), AllocateNodeID(), ident);
+    auto* f = Func("f", utils::Empty, ty.void_(), utils::Empty, utils::Vector{attr});
+    auto* v = GlobalVar("v", ty.i32(), builtin::AddressSpace::kPrivate);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* user = As<sem::VariableUser>(Sem().Get(ident));
+    ASSERT_NE(user, nullptr);
+
+    auto* var = Sem().Get(v);
+    EXPECT_EQ(user->Variable(), var);
+
+    auto* fn = Sem().Get(f);
+    EXPECT_THAT(fn->DirectlyReferencedGlobals(), testing::ElementsAre(var));
+    EXPECT_THAT(fn->TransitivelyReferencedGlobals(), testing::ElementsAre(var));
+}
+
+}  // namespace
+}  // namespace InternalAttributeDeps
+
 }  // namespace tint::resolver
+
+TINT_INSTANTIATE_TYPEINFO(tint::resolver::InternalAttributeDeps::TestAttribute);

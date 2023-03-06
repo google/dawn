@@ -321,6 +321,10 @@ class Resolver {
     /// @returns true on success, false on failure
     bool InterpolateAttribute(const ast::InterpolateAttribute* attr);
 
+    /// Resolves the internal attribute @p attr
+    /// @returns true on success, false on failure
+    bool InternalAttribute(const ast::InternalAttribute* attr);
+
     /// @param control the diagnostic control
     /// @returns true on success, false on failure
     bool DiagnosticControl(const ast::DiagnosticControl& control);

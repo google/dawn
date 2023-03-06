@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::ValueConstructor);
 namespace tint::sem {
 
 ValueConstructor::ValueConstructor(const type::Type* type,
-                                   utils::VectorRef<const Parameter*> parameters,
+                                   utils::VectorRef<Parameter*> parameters,
                                    EvaluationStage stage)
     : Base(type, std::move(parameters), stage, /* must_use */ true) {}
 

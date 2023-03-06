@@ -1125,7 +1125,7 @@ bool GeneratorImpl::EmitUniformBufferAccess(
     utils::StringStream& out,
     const ast::CallExpression* expr,
     const transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
-    auto const buffer = program_->Symbols().NameFor(intrinsic->buffer);
+    auto const buffer = program_->Symbols().NameFor(intrinsic->Buffer()->identifier->symbol);
     auto* const offset = expr->args[0];
 
     // offset in bytes
@@ -1413,7 +1413,7 @@ bool GeneratorImpl::EmitStorageBufferAccess(
     utils::StringStream& out,
     const ast::CallExpression* expr,
     const transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
-    auto const buffer = program_->Symbols().NameFor(intrinsic->buffer);
+    auto const buffer = program_->Symbols().NameFor(intrinsic->Buffer()->identifier->symbol);
     auto* const offset = expr->args[0];
     auto* const value = expr->args[1];
 
@@ -1581,7 +1581,7 @@ bool GeneratorImpl::EmitStorageAtomicIntrinsic(
     const auto name = builder_.Symbols().NameFor(func->name->symbol);
     auto& buf = *current_buffer_;
 
-    auto const buffer = program_->Symbols().NameFor(intrinsic->buffer);
+    auto const buffer = program_->Symbols().NameFor(intrinsic->Buffer()->identifier->symbol);
 
     auto rmw = [&](const char* hlsl) -> bool {
         {

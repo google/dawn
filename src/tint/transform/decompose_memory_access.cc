@@ -228,7 +228,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
     }
     return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
         builder->ID(), builder->AllocateNodeID(), DecomposeMemoryAccess::Intrinsic::Op::kLoad, type,
-        address_space, buffer);
+        address_space, builder->Expr(buffer));
 }
 
 /// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied to a stub function to
@@ -242,7 +242,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(ProgramBuilder* builder,
     }
     return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
         builder->ID(), builder->AllocateNodeID(), DecomposeMemoryAccess::Intrinsic::Op::kStore,
-        type, builtin::AddressSpace::kStorage, buffer);
+        type, builtin::AddressSpace::kStorage, builder->Expr(buffer));
 }
 
 /// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied to a stub function for
@@ -299,7 +299,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
     }
     return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
         builder->ID(), builder->AllocateNodeID(), op, type, builtin::AddressSpace::kStorage,
-        buffer);
+        builder->Expr(buffer));
 }
 
 /// BufferAccess describes a single storage or uniform buffer access
@@ -692,8 +692,8 @@ DecomposeMemoryAccess::Intrinsic::Intrinsic(ProgramID pid,
                                             Op o,
                                             DataType ty,
                                             builtin::AddressSpace as,
-                                            const Symbol& buf)
-    : Base(pid, nid), op(o), type(ty), address_space(as), buffer(buf) {}
+                                            const ast::IdentifierExpression* buf)
+    : Base(pid, nid, utils::Vector{buf}), op(o), type(ty), address_space(as) {}
 DecomposeMemoryAccess::Intrinsic::~Intrinsic() = default;
 std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
     utils::StringStream ss;
@@ -794,13 +794,17 @@ std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
 
 const DecomposeMemoryAccess::Intrinsic* DecomposeMemoryAccess::Intrinsic::Clone(
     CloneContext* ctx) const {
-    auto buf = ctx->Clone(buffer);
+    auto buf = ctx->Clone(Buffer());
     return ctx->dst->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
         ctx->dst->ID(), ctx->dst->AllocateNodeID(), op, type, address_space, buf);
 }
 
 bool DecomposeMemoryAccess::Intrinsic::IsAtomic() const {
     return op != Op::kLoad && op != Op::kStore;
+}
+
+const ast::IdentifierExpression* DecomposeMemoryAccess::Intrinsic::Buffer() const {
+    return dependencies[0];
 }
 
 DecomposeMemoryAccess::DecomposeMemoryAccess() = default;

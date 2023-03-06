@@ -26,7 +26,7 @@ class ValueConversion final : public Castable<ValueConversion, CallTarget> {
     /// @param type the target type of the cast
     /// @param parameter the type cast parameter
     /// @param stage the earliest evaluation stage for the expression
-    ValueConversion(const type::Type* type, const sem::Parameter* parameter, EvaluationStage stage);
+    ValueConversion(const type::Type* type, sem::Parameter* parameter, EvaluationStage stage);
 
     /// Destructor
     ~ValueConversion() override;

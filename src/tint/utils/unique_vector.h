@@ -30,6 +30,9 @@ namespace tint::utils {
 /// Attempting to add a duplicate is a no-op.
 template <typename T, size_t N, typename HASH = std::hash<T>, typename EQUAL = std::equal_to<T>>
 struct UniqueVector {
+    /// STL-friendly alias to T. Used by gmock.
+    using value_type = T;
+
     /// Constructor
     UniqueVector() = default;
 
