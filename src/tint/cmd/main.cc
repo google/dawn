@@ -29,10 +29,6 @@
 #include "glslang/Public/ShaderLang.h"
 #endif  // TINT_BUILD_GLSL_WRITER
 
-#if TINT_BUILD_SYNTAX_TREE_WRITER
-#include "src/tint/writer/syntax_tree/generator.h"
-#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
-
 #if TINT_BUILD_SPV_READER
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER
@@ -110,10 +106,6 @@ struct Options {
     bool dump_ir = false;
     bool dump_ir_graph = false;
 #endif  // TINT_BUILD_IR
-
-#if TINT_BUILD_SYNTAX_TREE_WRITER
-    bool dump_syntax_tree = false;
-#endif  // TINB_BUILD_SYNTAX_TREE_WRITER
 };
 
 const char kUsage[] = R"(Usage: tint [options] <input-file>
@@ -391,10 +383,6 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
         } else if (arg == "--dump-ir-graph") {
             opts->dump_ir_graph = true;
 #endif  // TINT_BUILD_IR
-#if TINT_BUILD_SYNTAX_TREE_WRITER
-        } else if (arg == "--dump-ast") {
-            opts->dump_syntax_tree = true;
-#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
         } else if (arg == "--xcrun") {
             ++i;
             if (i >= args.size()) {
@@ -1067,9 +1055,6 @@ int main(int argc, const char** argv) {
             "  --dump-ir                 -- Writes the IR to stdout\n"
             "  --dump-ir-graph           -- Writes the IR graph to 'tint.dot' as a dot graph\n";
 #endif  // TINT_BUILD_IR
-#if TINT_BUILD_SYNTAX_TREE_WRITER
-        usage += "  --dump-ast                -- Writes the AST to stdout\n";
-#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 
         std::cout << usage << std::endl;
         return 0;
@@ -1106,18 +1091,6 @@ int main(int argc, const char** argv) {
     if (options.parse_only) {
         return 1;
     }
-
-#if TINT_BUILD_SYNTAX_TREE_WRITER
-    if (options.dump_syntax_tree) {
-        tint::writer::syntax_tree::Options gen_options;
-        auto result = tint::writer::syntax_tree::Generate(program.get(), gen_options);
-        if (!result.success) {
-            std::cerr << "Failed to dump AST: " << result.error << std::endl;
-        } else {
-            std::cout << result.ast << std::endl;
-        }
-    }
-#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 
 #if TINT_BUILD_IR
     if (options.dump_ir || options.dump_ir_graph) {
