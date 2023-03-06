@@ -15,6 +15,7 @@
 #include "src/tint/reader/wgsl/lexer.h"
 
 #include <cctype>
+#include <charconv>
 #include <cmath>
 #include <cstring>
 #include <functional>
@@ -804,41 +805,48 @@ Token Lexer::try_hex_float() {
     return {Token::Type::kFloatLiteral, source, result_f64};
 }
 
-Token Lexer::build_token_from_int_if_possible(Source source, size_t start, int32_t base) {
+Token Lexer::build_token_from_int_if_possible(Source source,
+                                              size_t start,
+                                              size_t prefix_count,
+                                              int32_t base) {
     const char* start_ptr = &at(start);
-    char* end_ptr = nullptr;
+    // The call to `from_chars` will return the pointer to just after the last parsed character.
+    // We also need to tell it the maximum end character to parse. So, instead of walking all the
+    // characters to find the last possible and using that, we just provide the end of the string.
+    // We then calculate the count based off the provided end pointer and the start pointer. The
+    // extra `prefix_count` is to handle a `0x` which is not included in the `start` value.
+    const char* end_ptr = &at(length() - 1) + 1;
 
-    errno = 0;
-    int64_t res = strtoll(start_ptr, &end_ptr, base);
-    const bool overflow = errno == ERANGE;
-
-    if (end_ptr) {
-        advance(static_cast<size_t>(end_ptr - start_ptr));
-    }
+    int64_t value = 0;
+    auto res = std::from_chars(start_ptr, end_ptr, value, base);
+    const bool overflow = res.ec != std::errc();
+    advance(static_cast<size_t>(res.ptr - start_ptr) + prefix_count);
 
     if (matches(pos(), 'u')) {
-        if (!overflow && CheckedConvert<u32>(AInt(res))) {
+        if (!overflow && CheckedConvert<u32>(AInt(value))) {
             advance(1);
             end_source(source);
-            return {Token::Type::kIntLiteral_U, source, res};
+            return {Token::Type::kIntLiteral_U, source, value};
         }
         return {Token::Type::kError, source, "value cannot be represented as 'u32'"};
     }
 
     if (matches(pos(), 'i')) {
-        if (!overflow && CheckedConvert<i32>(AInt(res))) {
+        if (!overflow && CheckedConvert<i32>(AInt(value))) {
             advance(1);
             end_source(source);
-            return {Token::Type::kIntLiteral_I, source, res};
+            return {Token::Type::kIntLiteral_I, source, value};
         }
         return {Token::Type::kError, source, "value cannot be represented as 'i32'"};
     }
 
-    end_source(source);
+    // Check this last in order to get the more specific sized error messages
     if (overflow) {
         return {Token::Type::kError, source, "value cannot be represented as 'abstract-int'"};
     }
-    return {Token::Type::kIntLiteral, source, res};
+
+    end_source(source);
+    return {Token::Type::kIntLiteral, source, value};
 }
 
 Token Lexer::try_hex_integer() {
@@ -858,7 +866,7 @@ Token Lexer::try_hex_integer() {
                 "integer or float hex literal has no significant digits"};
     }
 
-    return build_token_from_int_if_possible(source, start, 16);
+    return build_token_from_int_if_possible(source, curr, curr - start, 16);
 }
 
 Token Lexer::try_integer() {
@@ -879,7 +887,7 @@ Token Lexer::try_integer() {
         }
     }
 
-    return build_token_from_int_if_possible(source, start, 10);
+    return build_token_from_int_if_possible(source, start, 0, 10);
 }
 
 Token Lexer::try_ident() {
