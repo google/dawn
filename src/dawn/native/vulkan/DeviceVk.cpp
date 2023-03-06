@@ -310,7 +310,7 @@ MaybeError Device::SubmitPendingCommands() {
     if (!mRecordingContext.mappableBuffersForEagerTransition.empty()) {
         // Transition mappable buffers back to map usages with the submit.
         Buffer::TransitionMappableBuffersEagerly(
-            fn, &mRecordingContext, std::move(mRecordingContext.mappableBuffersForEagerTransition));
+            fn, &mRecordingContext, mRecordingContext.mappableBuffersForEagerTransition);
     }
 
     ScopedSignalSemaphore scopedSignalSemaphore(this, VK_NULL_HANDLE);

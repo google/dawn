@@ -110,6 +110,8 @@ class RefBase {
     const T operator->() const { return mValue; }
     T operator->() { return mValue; }
 
+    bool operator<(const RefBase<T, Traits>& other) const { return mValue < other.mValue; }
+
     // Smart pointer methods.
     const T& Get() const { return mValue; }
     T& Get() { return mValue; }

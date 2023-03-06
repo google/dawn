@@ -534,6 +534,24 @@ TEST_P(BufferMappingTests, MapWrite_ZeroSizedTwice) {
     MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, wgpu::kWholeMapSize);
 }
 
+// Regression test for crbug.com/1421170 where dropping a buffer which needs
+// padding bytes initialization resulted in a use-after-free.
+TEST_P(BufferMappingTests, RegressChromium1421170) {
+    // Create a mappable buffer of size 7. It will be internally
+    // aligned such that the padding bytes need to be zero initialized.
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 7;
+    descriptor.usage = wgpu::BufferUsage::MapWrite;
+    descriptor.mappedAtCreation = false;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    // Drop the buffer. The pending commands to zero initialize the
+    // padding bytes should stay valid.
+    buffer = nullptr;
+    // Flush pending commands.
+    device.Tick();
+}
+
 DAWN_INSTANTIATE_TEST(BufferMappingTests,
                       D3D12Backend(),
                       MetalBackend(),

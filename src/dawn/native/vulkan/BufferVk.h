@@ -58,7 +58,7 @@ class Buffer final : public BufferBase {
 
     static void TransitionMappableBuffersEagerly(const VulkanFunctions& fn,
                                                  CommandRecordingContext* recordingContext,
-                                                 std::set<Buffer*> buffers);
+                                                 const std::set<Ref<Buffer>>& buffers);
 
   private:
     ~Buffer() override;
