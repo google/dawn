@@ -1,7 +1,17 @@
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  mat2x3 inner;
+} prevent_dce;
+
+void assign_and_preserve_padding_prevent_dce(mat2x3 value) {
+  prevent_dce.inner[0] = value[0u];
+  prevent_dce.inner[1] = value[1u];
+}
+
 void transpose_ed4bdc() {
   mat2x3 res = mat2x3(vec3(1.0f), vec3(1.0f));
+  assign_and_preserve_padding_prevent_dce(res);
 }
 
 vec4 vertex_main() {
@@ -20,8 +30,18 @@ void main() {
 #version 310 es
 precision mediump float;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  mat2x3 inner;
+} prevent_dce;
+
+void assign_and_preserve_padding_prevent_dce(mat2x3 value) {
+  prevent_dce.inner[0] = value[0u];
+  prevent_dce.inner[1] = value[1u];
+}
+
 void transpose_ed4bdc() {
   mat2x3 res = mat2x3(vec3(1.0f), vec3(1.0f));
+  assign_and_preserve_padding_prevent_dce(res);
 }
 
 void fragment_main() {
@@ -34,8 +54,18 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  mat2x3 inner;
+} prevent_dce;
+
+void assign_and_preserve_padding_prevent_dce(mat2x3 value) {
+  prevent_dce.inner[0] = value[0u];
+  prevent_dce.inner[1] = value[1u];
+}
+
 void transpose_ed4bdc() {
   mat2x3 res = mat2x3(vec3(1.0f), vec3(1.0f));
+  assign_and_preserve_padding_prevent_dce(res);
 }
 
 void compute_main() {

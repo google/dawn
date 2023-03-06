@@ -9,8 +9,13 @@ layout(binding = 0, std430) buffer sb_rw_block_ssbo {
   SB_RW inner;
 } sb_rw;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void atomicAdd_8a199a() {
   uint res = atomicAdd(sb_rw.inner.arg_0, 1u);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -31,8 +36,13 @@ layout(binding = 0, std430) buffer sb_rw_block_ssbo {
   SB_RW inner;
 } sb_rw;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void atomicAdd_8a199a() {
   uint res = atomicAdd(sb_rw.inner.arg_0, 1u);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

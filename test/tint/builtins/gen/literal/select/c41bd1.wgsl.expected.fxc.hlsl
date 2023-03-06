@@ -1,5 +1,8 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void select_c41bd1() {
   bool4 res = (true).xxxx;
+  prevent_dce.Store(0u, asuint((all((res == (false).xxxx)) ? 1 : 0)));
 }
 
 struct tint_symbol {

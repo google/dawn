@@ -25,7 +25,9 @@
 fn transpose_31d679() {
   var arg_0 = mat2x2<f32>(1.f, 1.f, 1.f, 1.f);
   var res: mat2x2<f32> = transpose(arg_0);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : mat2x2<f32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

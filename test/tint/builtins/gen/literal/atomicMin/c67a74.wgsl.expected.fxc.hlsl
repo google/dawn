@@ -7,8 +7,11 @@ uint sb_rwatomicMin(uint offset, uint value) {
 }
 
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void atomicMin_c67a74() {
   uint res = sb_rwatomicMin(0u, 1u);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 void fragment_main() {

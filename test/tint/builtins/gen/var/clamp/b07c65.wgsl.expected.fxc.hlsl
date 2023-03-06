@@ -2,11 +2,14 @@ int tint_clamp(int e, int low, int high) {
   return min(max(e, low), high);
 }
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void clamp_b07c65() {
   int arg_0 = 1;
   int arg_1 = 1;
   int arg_2 = 1;
   int res = tint_clamp(arg_0, arg_1, arg_2);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

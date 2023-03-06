@@ -25,7 +25,9 @@
 fn sin_b78c91() {
   var arg_0 = 1.57079632679f;
   var res: f32 = sin(arg_0);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

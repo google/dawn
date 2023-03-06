@@ -1,6 +1,9 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void asin_c0c272() {
   float arg_0 = 0.47942554950714111328f;
   float res = asin(arg_0);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

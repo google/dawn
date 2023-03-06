@@ -1,8 +1,13 @@
 #version 310 es
 
 shared int arg_0;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 void atomicLoad_afcc03() {
   int res = atomicOr(arg_0, 0);
+  prevent_dce.inner = res;
 }
 
 void compute_main(uint local_invocation_index) {

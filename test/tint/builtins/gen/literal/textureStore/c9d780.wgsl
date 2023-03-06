@@ -26,7 +26,6 @@
 fn textureStore_c9d780() {
   textureStore(arg_0, 1u, vec4<f32>(1.f));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureStore_c9d780();

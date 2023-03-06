@@ -2,8 +2,13 @@
 
 uniform highp sampler2DArray arg_0_arg_1;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void textureSampleLevel_faa6d7() {
   vec4 res = textureLodOffset(arg_0_arg_1, vec3(vec2(1.0f), float(1u)), 1.0f, ivec2(1));
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -24,8 +29,13 @@ precision mediump float;
 
 uniform highp sampler2DArray arg_0_arg_1;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void textureSampleLevel_faa6d7() {
   vec4 res = textureLodOffset(arg_0_arg_1, vec3(vec2(1.0f), float(1u)), 1.0f, ivec2(1));
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -40,8 +50,13 @@ void main() {
 
 uniform highp sampler2DArray arg_0_arg_1;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void textureSampleLevel_faa6d7() {
   vec4 res = textureLodOffset(arg_0_arg_1, vec3(vec2(1.0f), float(1u)), 1.0f, ivec2(1));
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

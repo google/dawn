@@ -95,34 +95,35 @@ float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<fl
   return float4(color, 1.0f);
 }
 
-void textureLoad_8acf41(texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_3) {
+void textureLoad_8acf41(texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_3, device float4* const tint_symbol_4) {
   int2 arg_1 = int2(1);
   float4 res = textureLoadExternal(tint_symbol_1, tint_symbol_2, arg_1, tint_unpack_vec3_in_composite_1(*(tint_symbol_3)));
+  *(tint_symbol_4) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner(texture2d<float, access::sample> tint_symbol_4, texture2d<float, access::sample> tint_symbol_5, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_6) {
-  textureLoad_8acf41(tint_symbol_4, tint_symbol_5, tint_symbol_6);
+float4 vertex_main_inner(texture2d<float, access::sample> tint_symbol_5, texture2d<float, access::sample> tint_symbol_6, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_7, device float4* const tint_symbol_8) {
+  textureLoad_8acf41(tint_symbol_5, tint_symbol_6, tint_symbol_7, tint_symbol_8);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main(texture2d<float, access::sample> tint_symbol_7 [[texture(0)]], texture2d<float, access::sample> tint_symbol_8 [[texture(1)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_9 [[buffer(2)]]) {
-  float4 const inner_result = vertex_main_inner(tint_symbol_7, tint_symbol_8, tint_symbol_9);
+vertex tint_symbol vertex_main(texture2d<float, access::sample> tint_symbol_9 [[texture(0)]], texture2d<float, access::sample> tint_symbol_10 [[texture(1)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_11 [[buffer(2)]], device float4* tint_symbol_12 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_9, tint_symbol_10, tint_symbol_11, tint_symbol_12);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main(texture2d<float, access::sample> tint_symbol_10 [[texture(0)]], texture2d<float, access::sample> tint_symbol_11 [[texture(1)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_12 [[buffer(2)]]) {
-  textureLoad_8acf41(tint_symbol_10, tint_symbol_11, tint_symbol_12);
+fragment void fragment_main(texture2d<float, access::sample> tint_symbol_13 [[texture(0)]], texture2d<float, access::sample> tint_symbol_14 [[texture(1)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_15 [[buffer(2)]], device float4* tint_symbol_16 [[buffer(0)]]) {
+  textureLoad_8acf41(tint_symbol_13, tint_symbol_14, tint_symbol_15, tint_symbol_16);
   return;
 }
 
-kernel void compute_main(texture2d<float, access::sample> tint_symbol_13 [[texture(0)]], texture2d<float, access::sample> tint_symbol_14 [[texture(1)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_15 [[buffer(2)]]) {
-  textureLoad_8acf41(tint_symbol_13, tint_symbol_14, tint_symbol_15);
+kernel void compute_main(texture2d<float, access::sample> tint_symbol_17 [[texture(0)]], texture2d<float, access::sample> tint_symbol_18 [[texture(1)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_19 [[buffer(2)]], device float4* tint_symbol_20 [[buffer(0)]]) {
+  textureLoad_8acf41(tint_symbol_17, tint_symbol_18, tint_symbol_19, tint_symbol_20);
   return;
 }
 

@@ -2,11 +2,16 @@
 
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void textureGatherCompare_144a9a() {
   vec2 arg_2 = vec2(1.0f);
   uint arg_3 = 1u;
   float arg_4 = 1.0f;
   vec4 res = textureGatherOffset(arg_0_arg_1, vec3(arg_2, float(arg_3)), arg_4, ivec2(1));
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -27,11 +32,16 @@ precision mediump float;
 
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void textureGatherCompare_144a9a() {
   vec2 arg_2 = vec2(1.0f);
   uint arg_3 = 1u;
   float arg_4 = 1.0f;
   vec4 res = textureGatherOffset(arg_0_arg_1, vec3(arg_2, float(arg_3)), arg_4, ivec2(1));
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -46,11 +56,16 @@ void main() {
 
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void textureGatherCompare_144a9a() {
   vec2 arg_2 = vec2(1.0f);
   uint arg_3 = 1u;
   float arg_4 = 1.0f;
   vec4 res = textureGatherOffset(arg_0_arg_1, vec3(arg_2, float(arg_3)), arg_4, ivec2(1));
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

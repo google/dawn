@@ -15,9 +15,14 @@ uvec2 tint_count_leading_zeros(uvec2 v) {
   return uvec2((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void countLeadingZeros_70783f() {
   uvec2 arg_0 = uvec2(1u);
   uvec2 res = tint_count_leading_zeros(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -51,9 +56,14 @@ uvec2 tint_count_leading_zeros(uvec2 v) {
   return uvec2((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void countLeadingZeros_70783f() {
   uvec2 arg_0 = uvec2(1u);
   uvec2 res = tint_count_leading_zeros(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -81,9 +91,14 @@ uvec2 tint_count_leading_zeros(uvec2 v) {
   return uvec2((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void countLeadingZeros_70783f() {
   uvec2 arg_0 = uvec2(1u);
   uvec2 res = tint_count_leading_zeros(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

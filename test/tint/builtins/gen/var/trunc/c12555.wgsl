@@ -26,7 +26,6 @@ fn trunc_c12555() {
   const arg_0 = vec2(1.5);
   var res = trunc(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   trunc_c12555();

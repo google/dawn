@@ -1,6 +1,9 @@
 fn firstTrailingBit_110f2c() {
   var res : vec4<u32> = firstTrailingBit(vec4<u32>(1u));
+  prevent_dce = res;
 }
+
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

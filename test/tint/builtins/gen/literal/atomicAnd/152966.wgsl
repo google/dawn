@@ -28,7 +28,9 @@ struct SB_RW {
 // fn atomicAnd(ptr<storage, atomic<i32>, read_write>, i32) -> i32
 fn atomicAnd_152966() {
   var res: i32 = atomicAnd(&sb_rw.arg_0, 1i);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {

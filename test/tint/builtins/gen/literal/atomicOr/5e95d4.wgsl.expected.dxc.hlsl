@@ -7,8 +7,11 @@ uint sb_rwatomicOr(uint offset, uint value) {
 }
 
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void atomicOr_5e95d4() {
   uint res = sb_rwatomicOr(0u, 1u);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 void fragment_main() {

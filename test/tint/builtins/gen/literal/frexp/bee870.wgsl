@@ -25,7 +25,6 @@
 fn frexp_bee870() {
   var res = frexp(1.);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   frexp_bee870();

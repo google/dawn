@@ -2,9 +2,12 @@ float4 tint_acosh(float4 x) {
   return log((x + sqrt(((x * x) - 1.0f))));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void acosh_d51ccb() {
   float4 arg_0 = (1.54308068752288818359f).xxxx;
   float4 res = tint_acosh(arg_0);
+  prevent_dce.Store4(0u, asuint(res));
 }
 
 struct tint_symbol {

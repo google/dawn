@@ -15,9 +15,14 @@ ivec2 tint_first_leading_bit(ivec2 v) {
   return ivec2((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec2 inner;
+} prevent_dce;
+
 void firstLeadingBit_a622c2() {
   ivec2 arg_0 = ivec2(1);
   ivec2 res = tint_first_leading_bit(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -51,9 +56,14 @@ ivec2 tint_first_leading_bit(ivec2 v) {
   return ivec2((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec2 inner;
+} prevent_dce;
+
 void firstLeadingBit_a622c2() {
   ivec2 arg_0 = ivec2(1);
   ivec2 res = tint_first_leading_bit(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -81,9 +91,14 @@ ivec2 tint_first_leading_bit(ivec2 v) {
   return ivec2((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec2 inner;
+} prevent_dce;
+
 void firstLeadingBit_a622c2() {
   ivec2 arg_0 = ivec2(1);
   ivec2 res = tint_first_leading_bit(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

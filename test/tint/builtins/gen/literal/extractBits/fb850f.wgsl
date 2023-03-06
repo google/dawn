@@ -24,7 +24,9 @@
 // fn extractBits(vec<4, i32>, u32, u32) -> vec<4, i32>
 fn extractBits_fb850f() {
   var res: vec4<i32> = extractBits(vec4<i32>(1i), 1u, 1u);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<i32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

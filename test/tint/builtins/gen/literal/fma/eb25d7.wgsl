@@ -25,7 +25,6 @@
 fn fma_eb25d7() {
   var res = fma(vec3(1.), vec3(1.), vec3(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   fma_eb25d7();

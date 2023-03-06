@@ -1,10 +1,13 @@
 SKIP: FAILED
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void clamp_235b29() {
   vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
   vector<float16_t, 2> arg_1 = (float16_t(1.0h)).xx;
   vector<float16_t, 2> arg_2 = (float16_t(1.0h)).xx;
   vector<float16_t, 2> res = clamp(arg_0, arg_1, arg_2);
+  prevent_dce.Store<vector<float16_t, 2> >(0u, res);
 }
 
 struct tint_symbol {

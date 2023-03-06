@@ -1,10 +1,12 @@
 groupshared int arg_0;
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void atomicMax_a89cc3() {
   int arg_1 = 1;
   int atomic_result = 0;
   InterlockedMax(arg_0, arg_1, atomic_result);
   int res = atomic_result;
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol_1 {

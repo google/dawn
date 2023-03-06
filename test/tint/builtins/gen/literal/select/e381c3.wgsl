@@ -25,7 +25,6 @@
 fn select_e381c3() {
   var res = select(vec4(1), vec4(1), true);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   select_e381c3();

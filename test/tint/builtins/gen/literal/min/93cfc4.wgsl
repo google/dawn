@@ -24,7 +24,9 @@
 // fn min(vec<3, f32>, vec<3, f32>) -> vec<3, f32>
 fn min_93cfc4() {
   var res: vec3<f32> = min(vec3<f32>(1.f), vec3<f32>(1.f));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

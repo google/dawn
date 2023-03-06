@@ -13,9 +13,12 @@ uint tint_first_leading_bit(uint v) {
   return uint((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void firstLeadingBit_f0779d() {
   uint arg_0 = 1u;
   uint res = tint_first_leading_bit(arg_0);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

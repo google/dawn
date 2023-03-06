@@ -30,7 +30,6 @@ fn atomicStore_d1e9a6() {
   var arg_1 = 1i;
   atomicStore(&sb_rw.arg_0, arg_1);
 }
-
 @fragment
 fn fragment_main() {
   atomicStore_d1e9a6();

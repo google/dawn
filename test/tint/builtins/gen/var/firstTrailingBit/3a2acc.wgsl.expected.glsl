@@ -15,9 +15,14 @@ int tint_first_trailing_bit(int v) {
   return int((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 void firstTrailingBit_3a2acc() {
   int arg_0 = 1;
   int res = tint_first_trailing_bit(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -51,9 +56,14 @@ int tint_first_trailing_bit(int v) {
   return int((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 void firstTrailingBit_3a2acc() {
   int arg_0 = 1;
   int res = tint_first_trailing_bit(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -81,9 +91,14 @@ int tint_first_trailing_bit(int v) {
   return int((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 void firstTrailingBit_3a2acc() {
   int arg_0 = 1;
   int res = tint_first_trailing_bit(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

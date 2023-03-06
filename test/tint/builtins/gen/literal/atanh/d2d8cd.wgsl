@@ -26,7 +26,9 @@ enable f16;
 // fn atanh(f16) -> f16
 fn atanh_d2d8cd() {
   var res: f16 = atanh(0.5h);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : f16;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

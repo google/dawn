@@ -1,36 +1,52 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 18
+; Bound: 26
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
                OpExecutionMode %fragment_main OriginUpperLeft
+               OpName %prevent_dce_block "prevent_dce_block"
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce "prevent_dce"
                OpName %fwidth_d2ab9a "fwidth_d2ab9a"
                OpName %arg_0 "arg_0"
                OpName %res "res"
                OpName %fragment_main "fragment_main"
-       %void = OpTypeVoid
-          %1 = OpTypeFunction %void
+               OpDecorate %prevent_dce_block Block
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce DescriptorSet 2
+               OpDecorate %prevent_dce Binding 0
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
+%prevent_dce_block = OpTypeStruct %v4float
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+%prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+       %void = OpTypeVoid
+          %6 = OpTypeFunction %void
     %float_1 = OpConstant %float 1
-          %8 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+         %11 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-         %11 = OpConstantNull %v4float
-%fwidth_d2ab9a = OpFunction %void None %1
-          %4 = OpLabel
-      %arg_0 = OpVariable %_ptr_Function_v4float Function %11
-        %res = OpVariable %_ptr_Function_v4float Function %11
-               OpStore %arg_0 %8
-         %13 = OpLoad %v4float %arg_0
-         %12 = OpFwidth %v4float %13
-               OpStore %res %12
+         %14 = OpConstantNull %v4float
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
+%fwidth_d2ab9a = OpFunction %void None %6
+          %9 = OpLabel
+      %arg_0 = OpVariable %_ptr_Function_v4float Function %14
+        %res = OpVariable %_ptr_Function_v4float Function %14
+               OpStore %arg_0 %11
+         %16 = OpLoad %v4float %arg_0
+         %15 = OpFwidth %v4float %16
+               OpStore %res %15
+         %21 = OpAccessChain %_ptr_StorageBuffer_v4float %prevent_dce %uint_0
+         %22 = OpLoad %v4float %res
+               OpStore %21 %22
                OpReturn
                OpFunctionEnd
-%fragment_main = OpFunction %void None %1
-         %16 = OpLabel
-         %17 = OpFunctionCall %void %fwidth_d2ab9a
+%fragment_main = OpFunction %void None %6
+         %24 = OpLabel
+         %25 = OpFunctionCall %void %fwidth_d2ab9a
                OpReturn
                OpFunctionEnd

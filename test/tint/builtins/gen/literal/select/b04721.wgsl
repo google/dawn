@@ -24,7 +24,9 @@
 // fn select(vec<3, u32>, vec<3, u32>, bool) -> vec<3, u32>
 fn select_b04721() {
   var res: vec3<u32> = select(vec3<u32>(1u), vec3<u32>(1u), true);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

@@ -1,8 +1,13 @@
 #version 310 es
 
 uniform highp usampler2D arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void textureDimensions_9c7a00() {
   uint res = uvec2(textureSize(arg_0_1, int(1u))).x;
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -22,8 +27,13 @@ void main() {
 precision mediump float;
 
 uniform highp usampler2D arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void textureDimensions_9c7a00() {
   uint res = uvec2(textureSize(arg_0_1, int(1u))).x;
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -37,8 +47,13 @@ void main() {
 #version 310 es
 
 uniform highp usampler2D arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void textureDimensions_9c7a00() {
   uint res = uvec2(textureSize(arg_0_1, int(1u))).x;
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

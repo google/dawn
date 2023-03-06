@@ -26,7 +26,9 @@ enable f16;
 // fn fma(vec<3, f16>, vec<3, f16>, vec<3, f16>) -> vec<3, f16>
 fn fma_e7abdc() {
   var res: vec3<f16> = fma(vec3<f16>(1.h), vec3<f16>(1.h), vec3<f16>(1.h));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

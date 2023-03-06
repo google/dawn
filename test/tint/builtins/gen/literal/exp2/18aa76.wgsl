@@ -25,7 +25,6 @@
 fn exp2_18aa76() {
   var res = exp2(vec2(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   exp2_18aa76();

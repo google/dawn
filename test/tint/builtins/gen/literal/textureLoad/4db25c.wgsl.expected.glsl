@@ -1,8 +1,13 @@
 #version 310 es
 
 uniform highp sampler2DMS arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void textureLoad_4db25c() {
   float res = texelFetch(arg_0_1, ivec2(uvec2(1u)), int(1u)).x;
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -22,8 +27,13 @@ void main() {
 precision mediump float;
 
 uniform highp sampler2DMS arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void textureLoad_4db25c() {
   float res = texelFetch(arg_0_1, ivec2(uvec2(1u)), int(1u)).x;
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -37,8 +47,13 @@ void main() {
 #version 310 es
 
 uniform highp sampler2DMS arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void textureLoad_4db25c() {
   float res = texelFetch(arg_0_1, ivec2(uvec2(1u)), int(1u)).x;
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

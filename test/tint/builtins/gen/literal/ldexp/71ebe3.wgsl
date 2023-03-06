@@ -25,7 +25,6 @@
 fn ldexp_71ebe3() {
   var res = ldexp(1., 1i);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   ldexp_71ebe3();

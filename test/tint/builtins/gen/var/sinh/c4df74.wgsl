@@ -26,7 +26,6 @@ fn sinh_c4df74() {
   const arg_0 = 1.;
   var res = sinh(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   sinh_c4df74();

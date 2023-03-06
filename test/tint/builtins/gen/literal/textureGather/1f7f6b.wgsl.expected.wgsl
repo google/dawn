@@ -4,7 +4,10 @@
 
 fn textureGather_1f7f6b() {
   var res : vec4<f32> = textureGather(arg_0, arg_1, vec2<f32>(1.0f), vec2<i32>(1i));
+  prevent_dce = res;
 }
+
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

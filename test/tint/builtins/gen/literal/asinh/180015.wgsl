@@ -25,7 +25,6 @@
 fn asinh_180015() {
   var res = asinh(1.);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   asinh_180015();

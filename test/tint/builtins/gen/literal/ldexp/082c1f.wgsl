@@ -26,7 +26,9 @@ enable f16;
 // fn ldexp(f16, ia) -> f16
 fn ldexp_082c1f() {
   var res: f16 = ldexp(1.h, 1);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : f16;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

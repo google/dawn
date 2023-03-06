@@ -7,9 +7,12 @@ uint sb_rwatomicMax(uint offset, uint value) {
 }
 
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void atomicMax_51b9be() {
   uint arg_1 = 1u;
   uint res = sb_rwatomicMax(0u, arg_1);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 void fragment_main() {

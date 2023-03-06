@@ -25,7 +25,6 @@
 fn degrees_810467() {
   var res = degrees(vec2(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   degrees_810467();

@@ -6,12 +6,17 @@ ivec4 tint_insert_bits(ivec4 v, ivec4 n, uint offset, uint count) {
   return bitfieldInsert(v, n, int(s), int((e - s)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 void insertBits_d86978() {
   ivec4 arg_0 = ivec4(1);
   ivec4 arg_1 = ivec4(1);
   uint arg_2 = 1u;
   uint arg_3 = 1u;
   ivec4 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -36,12 +41,17 @@ ivec4 tint_insert_bits(ivec4 v, ivec4 n, uint offset, uint count) {
   return bitfieldInsert(v, n, int(s), int((e - s)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 void insertBits_d86978() {
   ivec4 arg_0 = ivec4(1);
   ivec4 arg_1 = ivec4(1);
   uint arg_2 = 1u;
   uint arg_3 = 1u;
   ivec4 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -60,12 +70,17 @@ ivec4 tint_insert_bits(ivec4 v, ivec4 n, uint offset, uint count) {
   return bitfieldInsert(v, n, int(s), int((e - s)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 void insertBits_d86978() {
   ivec4 arg_0 = ivec4(1);
   ivec4 arg_1 = ivec4(1);
   uint arg_2 = 1u;
   uint arg_3 = 1u;
   ivec4 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

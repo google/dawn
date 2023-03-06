@@ -7,8 +7,11 @@ uint sb_rwatomicSub(uint offset, uint value) {
 }
 
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void atomicSub_15bfc9() {
   uint res = sb_rwatomicSub(0u, 1u);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 void fragment_main() {

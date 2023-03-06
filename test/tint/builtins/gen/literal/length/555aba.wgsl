@@ -25,7 +25,6 @@
 fn length_555aba() {
   var res = length(vec3(0.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   length_555aba();

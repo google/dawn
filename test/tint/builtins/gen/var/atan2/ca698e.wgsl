@@ -28,7 +28,9 @@ fn atan2_ca698e() {
   var arg_0 = 1.h;
   var arg_1 = 1.h;
   var res: f16 = atan2(arg_0, arg_1);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : f16;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

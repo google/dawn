@@ -7,37 +7,38 @@ uint3 tint_insert_bits(uint3 v, uint3 n, uint offset, uint count) {
   return insert_bits(v, n, s, (e - s));
 }
 
-void insertBits_87826b() {
+void insertBits_87826b(device packed_uint3* const tint_symbol_1) {
   uint3 arg_0 = uint3(1u);
   uint3 arg_1 = uint3(1u);
   uint arg_2 = 1u;
   uint arg_3 = 1u;
   uint3 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
+  *(tint_symbol_1) = packed_uint3(res);
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner() {
-  insertBits_87826b();
+float4 vertex_main_inner(device packed_uint3* const tint_symbol_2) {
+  insertBits_87826b(tint_symbol_2);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
+vertex tint_symbol vertex_main(device packed_uint3* tint_symbol_3 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main() {
-  insertBits_87826b();
+fragment void fragment_main(device packed_uint3* tint_symbol_4 [[buffer(0)]]) {
+  insertBits_87826b(tint_symbol_4);
   return;
 }
 
-kernel void compute_main() {
-  insertBits_87826b();
+kernel void compute_main(device packed_uint3* tint_symbol_5 [[buffer(0)]]) {
+  insertBits_87826b(tint_symbol_5);
   return;
 }
 

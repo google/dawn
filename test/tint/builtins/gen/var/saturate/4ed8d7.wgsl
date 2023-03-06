@@ -26,7 +26,6 @@ fn saturate_4ed8d7() {
   const arg_0 = vec4(2.);
   var res = saturate(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   saturate_4ed8d7();

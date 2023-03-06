@@ -25,7 +25,6 @@
 fn max_caa3d7() {
   var res = max(1, 1);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   max_caa3d7();

@@ -25,7 +25,6 @@
 fn mix_275cac() {
   var res = mix(vec4(1.), vec4(1.), 1.);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   mix_275cac();

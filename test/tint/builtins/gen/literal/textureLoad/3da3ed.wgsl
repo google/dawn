@@ -25,7 +25,9 @@
 // fn textureLoad(texture: texture_1d<f32>, coords: i32, level: u32) -> vec4<f32>
 fn textureLoad_3da3ed() {
   var res: vec4<f32> = textureLoad(arg_0, 1i, 1u);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

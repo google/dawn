@@ -26,7 +26,6 @@ fn acos_4dac75() {
   const arg_0 = vec4(0.96891242171);
   var res = acos(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   acos_4dac75();

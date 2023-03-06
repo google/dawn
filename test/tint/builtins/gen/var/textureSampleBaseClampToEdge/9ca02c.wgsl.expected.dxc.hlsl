@@ -9,10 +9,12 @@ float4 tint_textureSampleBaseClampToEdge(Texture2D<float4> t, SamplerState s, fl
 
 Texture2D<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureSampleBaseClampToEdge_9ca02c() {
   float2 arg_2 = (1.0f).xx;
   float4 res = tint_textureSampleBaseClampToEdge(arg_0, arg_1, arg_2);
+  prevent_dce.Store4(0u, asuint(res));
 }
 
 struct tint_symbol {

@@ -25,7 +25,6 @@
 fn sign_c8289c() {
   var res = sign(1.);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   sign_c8289c();

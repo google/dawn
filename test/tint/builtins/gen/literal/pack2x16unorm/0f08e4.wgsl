@@ -24,7 +24,9 @@
 // fn pack2x16unorm(vec2<f32>) -> u32
 fn pack2x16unorm_0f08e4() {
   var res: u32 = pack2x16unorm(vec2<f32>(1.f));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

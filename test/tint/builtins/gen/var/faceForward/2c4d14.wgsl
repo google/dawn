@@ -28,7 +28,6 @@ fn faceForward_2c4d14() {
   const arg_2 = vec4(1.);
   var res = faceForward(arg_0, arg_1, arg_2);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   faceForward_2c4d14();

@@ -1,5 +1,6 @@
 Texture2DArray<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureSampleGrad_a09131() {
   float2 arg_2 = (1.0f).xx;
@@ -7,6 +8,7 @@ void textureSampleGrad_a09131() {
   float2 arg_4 = (1.0f).xx;
   float2 arg_5 = (1.0f).xx;
   float4 res = arg_0.SampleGrad(arg_1, float3(arg_2, float(arg_3)), arg_4, arg_5);
+  prevent_dce.Store4(0u, asuint(res));
 }
 
 struct tint_symbol {

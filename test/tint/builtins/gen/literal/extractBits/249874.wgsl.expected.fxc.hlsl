@@ -1,5 +1,8 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void extractBits_249874() {
   int res = 0;
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

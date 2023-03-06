@@ -4,10 +4,15 @@ int tint_int_dot(ivec2 a, ivec2 b) {
   return a[0]*b[0] + a[1]*b[1];
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 void dot_fc5f7c() {
   ivec2 arg_0 = ivec2(1);
   ivec2 arg_1 = ivec2(1);
   int res = tint_int_dot(arg_0, arg_1);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -30,10 +35,15 @@ int tint_int_dot(ivec2 a, ivec2 b) {
   return a[0]*b[0] + a[1]*b[1];
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 void dot_fc5f7c() {
   ivec2 arg_0 = ivec2(1);
   ivec2 arg_1 = ivec2(1);
   int res = tint_int_dot(arg_0, arg_1);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -50,10 +60,15 @@ int tint_int_dot(ivec2 a, ivec2 b) {
   return a[0]*b[0] + a[1]*b[1];
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 void dot_fc5f7c() {
   ivec2 arg_0 = ivec2(1);
   ivec2 arg_1 = ivec2(1);
   int res = tint_int_dot(arg_0, arg_1);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

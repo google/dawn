@@ -27,7 +27,6 @@ fn reflect_a8baf2() {
   const arg_1 = vec3(1.);
   var res = reflect(arg_0, arg_1);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   reflect_a8baf2();

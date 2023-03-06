@@ -26,7 +26,6 @@ fn asin_0bac07() {
   const arg_0 = vec3(0.479425538604);
   var res = asin(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   asin_0bac07();

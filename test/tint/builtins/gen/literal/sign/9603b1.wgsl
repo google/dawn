@@ -24,7 +24,9 @@
 // fn sign(vec<3, i32>) -> vec<3, i32>
 fn sign_9603b1() {
   var res: vec3<i32> = sign(vec3<i32>(1i));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<i32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

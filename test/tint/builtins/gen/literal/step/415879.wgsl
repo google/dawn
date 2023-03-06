@@ -25,7 +25,6 @@
 fn step_415879() {
   var res = step(vec3(1.), vec3(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   step_415879();

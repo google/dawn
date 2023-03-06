@@ -1,9 +1,11 @@
 RWTexture3D<int4> arg_0 : register(u0, space1);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureDimensions_591981() {
   int3 tint_tmp;
   arg_0.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
   uint3 res = tint_tmp;
+  prevent_dce.Store3(0u, asuint(res));
 }
 
 struct tint_symbol {

@@ -15,9 +15,14 @@ uint tint_first_leading_bit(uint v) {
   return uint((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void firstLeadingBit_f0779d() {
   uint arg_0 = 1u;
   uint res = tint_first_leading_bit(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -51,9 +56,14 @@ uint tint_first_leading_bit(uint v) {
   return uint((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void firstLeadingBit_f0779d() {
   uint arg_0 = 1u;
   uint res = tint_first_leading_bit(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -81,9 +91,14 @@ uint tint_first_leading_bit(uint v) {
   return uint((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void firstLeadingBit_f0779d() {
   uint arg_0 = 1u;
   uint res = tint_first_leading_bit(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

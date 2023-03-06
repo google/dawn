@@ -25,7 +25,6 @@
 fn modf_bbf7f7() {
   var res = modf(-1.5f);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   modf_bbf7f7();

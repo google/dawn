@@ -25,7 +25,6 @@
 fn clamp_23aa4f() {
   var res = clamp(1., 1., 1.);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   clamp_23aa4f();

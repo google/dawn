@@ -1,5 +1,13 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
+void prevent_dce_store(uint offset, float2x4 value) {
+  prevent_dce.Store4((offset + 0u), asuint(value[0u]));
+  prevent_dce.Store4((offset + 16u), asuint(value[1u]));
+}
+
 void transpose_31e37e() {
   float2x4 res = float2x4((1.0f).xxxx, (1.0f).xxxx);
+  prevent_dce_store(0u, res);
 }
 
 struct tint_symbol {

@@ -5,34 +5,35 @@ float2 tint_atanh(float2 x) {
   return select(atanh(x), float2(0.0f), (x >= float2(1.0f)));
 }
 
-void atanh_c0e634() {
+void atanh_c0e634(device float2* const tint_symbol_1) {
   float2 arg_0 = float2(0.5f);
   float2 res = tint_atanh(arg_0);
+  *(tint_symbol_1) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner() {
-  atanh_c0e634();
+float4 vertex_main_inner(device float2* const tint_symbol_2) {
+  atanh_c0e634(tint_symbol_2);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
+vertex tint_symbol vertex_main(device float2* tint_symbol_3 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main() {
-  atanh_c0e634();
+fragment void fragment_main(device float2* tint_symbol_4 [[buffer(0)]]) {
+  atanh_c0e634(tint_symbol_4);
   return;
 }
 
-kernel void compute_main() {
-  atanh_c0e634();
+kernel void compute_main(device float2* tint_symbol_5 [[buffer(0)]]) {
+  atanh_c0e634(tint_symbol_5);
   return;
 }
 

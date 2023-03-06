@@ -1,6 +1,16 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
+void prevent_dce_store(uint offset, matrix<float16_t, 4, 2> value) {
+  prevent_dce.Store<vector<float16_t, 2> >((offset + 0u), value[0u]);
+  prevent_dce.Store<vector<float16_t, 2> >((offset + 4u), value[1u]);
+  prevent_dce.Store<vector<float16_t, 2> >((offset + 8u), value[2u]);
+  prevent_dce.Store<vector<float16_t, 2> >((offset + 12u), value[3u]);
+}
+
 void transpose_faeb05() {
   matrix<float16_t, 2, 4> arg_0 = matrix<float16_t, 2, 4>((float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx);
   matrix<float16_t, 4, 2> res = transpose(arg_0);
+  prevent_dce_store(0u, res);
 }
 
 struct tint_symbol {

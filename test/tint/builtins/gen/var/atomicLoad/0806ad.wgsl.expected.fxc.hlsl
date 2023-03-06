@@ -7,8 +7,11 @@ int sb_rwatomicLoad(uint offset) {
 }
 
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void atomicLoad_0806ad() {
   int res = sb_rwatomicLoad(0u);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 void fragment_main() {

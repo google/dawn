@@ -27,7 +27,6 @@ fn distance_f9c9ee() {
   const arg_1 = 1.;
   var res = distance(arg_0, arg_1);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   distance_f9c9ee();

@@ -145,8 +145,23 @@ fn {{$permutation}}() {
 {{-     if $i -}}, {{end}}{{$args.Get $i -}}
 {{-   end -}}
   );
+{{- /* Ensure the call isn't dead-code eliminated */ -}}
+{{-   if and $overload.ReturnType (IsDeclarable $overload.ReturnType)}}
+{{-     if IsHostShareable $overload.ReturnType}}
+  prevent_dce = res;
+{{-     else}}
+  prevent_dce = select(0, 1, all(res == {{template "Type" $overload.ReturnType}}()));
+{{-     end}}
+{{-   end}}
 }
-{{/*new line*/ -}}
+
+{{-   if and $overload.ReturnType (IsDeclarable $overload.ReturnType)}}
+{{-     if IsHostShareable $overload.ReturnType}}
+@group(2) @binding(0) var<storage, read_write> prevent_dce : {{template "Type" $overload.ReturnType}};
+{{-     else}}
+@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
+{{      end}}
+{{    end}}
 
 {{- if $overload.CanBeUsedInStage.Vertex }}
 @vertex

@@ -24,7 +24,9 @@
 // fn transpose(mat<4, 4, f32>) -> mat<4, 4, f32>
 fn transpose_c1b600() {
   var res: mat4x4<f32> = transpose(mat4x4<f32>(1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : mat4x4<f32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

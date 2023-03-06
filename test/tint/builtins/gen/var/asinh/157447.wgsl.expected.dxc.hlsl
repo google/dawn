@@ -2,9 +2,12 @@ float tint_sinh(float x) {
   return log((x + sqrt(((x * x) + 1.0f))));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void asinh_157447() {
   float arg_0 = 1.0f;
   float res = tint_sinh(arg_0);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

@@ -27,7 +27,6 @@ fn step_f9b70c() {
   const arg_1 = 1.;
   var res = step(arg_0, arg_1);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   step_f9b70c();

@@ -26,7 +26,6 @@ fn radians_bff231() {
   const arg_0 = 1.;
   var res = radians(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   radians_bff231();

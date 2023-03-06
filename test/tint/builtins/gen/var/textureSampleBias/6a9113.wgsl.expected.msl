@@ -1,14 +1,15 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void textureSampleBias_6a9113(texture2d<float, access::sample> tint_symbol, sampler tint_symbol_1) {
+void textureSampleBias_6a9113(texture2d<float, access::sample> tint_symbol, sampler tint_symbol_1, device float4* const tint_symbol_2) {
   float2 arg_2 = float2(1.0f);
   float arg_3 = 1.0f;
   float4 res = tint_symbol.sample(tint_symbol_1, arg_2, bias(arg_3));
+  *(tint_symbol_2) = res;
 }
 
-fragment void fragment_main(texture2d<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(0)]]) {
-  textureSampleBias_6a9113(tint_symbol_2, tint_symbol_3);
+fragment void fragment_main(texture2d<float, access::sample> tint_symbol_3 [[texture(0)]], sampler tint_symbol_4 [[sampler(0)]], device float4* tint_symbol_5 [[buffer(0)]]) {
+  textureSampleBias_6a9113(tint_symbol_3, tint_symbol_4, tint_symbol_5);
   return;
 }
 

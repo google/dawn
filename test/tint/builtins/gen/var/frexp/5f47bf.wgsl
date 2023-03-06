@@ -28,7 +28,6 @@ fn frexp_5f47bf() {
   var arg_0 = vec2<f16>(1.h);
   var res = frexp(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   frexp_5f47bf();

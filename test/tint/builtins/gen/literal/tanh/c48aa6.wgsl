@@ -25,7 +25,6 @@
 fn tanh_c48aa6() {
   var res = tanh(vec2(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   tanh_c48aa6();

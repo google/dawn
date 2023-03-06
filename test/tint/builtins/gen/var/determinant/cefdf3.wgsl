@@ -26,7 +26,6 @@ fn determinant_cefdf3() {
   const arg_0 = mat4x4(1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.);
   var res = determinant(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   determinant_cefdf3();

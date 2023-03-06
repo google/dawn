@@ -26,7 +26,6 @@
 fn textureStore_dffb13() {
   textureStore(arg_0, vec2<i32>(1i), 1u, vec4<u32>(1u));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureStore_dffb13();

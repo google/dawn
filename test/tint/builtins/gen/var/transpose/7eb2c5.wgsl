@@ -26,7 +26,6 @@ fn transpose_7eb2c5() {
   const arg_0 = mat2x2(1., 1., 1., 1.);
   var res = transpose(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   transpose_7eb2c5();

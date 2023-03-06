@@ -24,7 +24,9 @@
 // fn cos(f32) -> f32
 fn cos_c5c28e() {
   var res: f32 = cos(0.f);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

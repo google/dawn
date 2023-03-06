@@ -1,9 +1,14 @@
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec3 inner;
+} prevent_dce;
+
 void atan2_a70d0d() {
   vec3 arg_0 = vec3(1.0f);
   vec3 arg_1 = vec3(1.0f);
   vec3 res = atan(arg_0, arg_1);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -22,10 +27,15 @@ void main() {
 #version 310 es
 precision mediump float;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec3 inner;
+} prevent_dce;
+
 void atan2_a70d0d() {
   vec3 arg_0 = vec3(1.0f);
   vec3 arg_1 = vec3(1.0f);
   vec3 res = atan(arg_0, arg_1);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -38,10 +48,15 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec3 inner;
+} prevent_dce;
+
 void atan2_a70d0d() {
   vec3 arg_0 = vec3(1.0f);
   vec3 arg_1 = vec3(1.0f);
   vec3 res = atan(arg_0, arg_1);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

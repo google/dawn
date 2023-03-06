@@ -25,7 +25,6 @@
 fn log_655989() {
   var res = log(1.);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   log_655989();

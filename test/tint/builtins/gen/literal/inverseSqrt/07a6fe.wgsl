@@ -25,7 +25,6 @@
 fn inverseSqrt_07a6fe() {
   var res = inverseSqrt(vec4(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   inverseSqrt_07a6fe();

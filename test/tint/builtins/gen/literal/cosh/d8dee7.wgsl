@@ -25,7 +25,6 @@
 fn cosh_d8dee7() {
   var res = cosh(vec4(0.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   cosh_d8dee7();

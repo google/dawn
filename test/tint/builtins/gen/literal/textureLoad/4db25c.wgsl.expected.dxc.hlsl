@@ -1,7 +1,9 @@
 Texture2DMS<float4> arg_0 : register(t0, space1);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureLoad_4db25c() {
   float res = arg_0.Load(uint3((1u).xx, uint(0)), 1u).x;
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

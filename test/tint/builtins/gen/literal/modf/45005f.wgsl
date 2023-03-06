@@ -27,7 +27,6 @@ enable f16;
 fn modf_45005f() {
   var res = modf(vec3<f16>(-1.5h));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   modf_45005f();

@@ -13,9 +13,12 @@ uint3 tint_first_trailing_bit(uint3 v) {
   return uint3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void firstTrailingBit_cb51ce() {
   uint3 arg_0 = (1u).xxx;
   uint3 res = tint_first_trailing_bit(arg_0);
+  prevent_dce.Store3(0u, asuint(res));
 }
 
 struct tint_symbol {

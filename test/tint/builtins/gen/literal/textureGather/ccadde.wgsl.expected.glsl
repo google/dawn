@@ -2,8 +2,13 @@
 
 uniform highp isampler2D arg_1_arg_2;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 void textureGather_ccadde() {
   ivec4 res = textureGather(arg_1_arg_2, vec2(1.0f), int(1u));
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -24,8 +29,13 @@ precision mediump float;
 
 uniform highp isampler2D arg_1_arg_2;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 void textureGather_ccadde() {
   ivec4 res = textureGather(arg_1_arg_2, vec2(1.0f), int(1u));
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -40,8 +50,13 @@ void main() {
 
 uniform highp isampler2D arg_1_arg_2;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 void textureGather_ccadde() {
   ivec4 res = textureGather(arg_1_arg_2, vec2(1.0f), int(1u));
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

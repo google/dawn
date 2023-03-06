@@ -1,13 +1,14 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void dpdx_c487fa() {
+void dpdx_c487fa(device float4* const tint_symbol) {
   float4 arg_0 = float4(1.0f);
   float4 res = dfdx(arg_0);
+  *(tint_symbol) = res;
 }
 
-fragment void fragment_main() {
-  dpdx_c487fa();
+fragment void fragment_main(device float4* tint_symbol_1 [[buffer(0)]]) {
+  dpdx_c487fa(tint_symbol_1);
   return;
 }
 

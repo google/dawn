@@ -26,7 +26,6 @@ fn ceil_bb2ca2() {
   const arg_0 = vec2(1.5);
   var res = ceil(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   ceil_bb2ca2();

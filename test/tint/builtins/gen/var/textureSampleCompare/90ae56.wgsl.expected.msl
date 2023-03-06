@@ -1,15 +1,16 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void textureSampleCompare_90ae56(depth2d_array<float, access::sample> tint_symbol, sampler tint_symbol_1) {
+void textureSampleCompare_90ae56(depth2d_array<float, access::sample> tint_symbol, sampler tint_symbol_1, device float* const tint_symbol_2) {
   float2 arg_2 = float2(1.0f);
   uint arg_3 = 1u;
   float arg_4 = 1.0f;
   float res = tint_symbol.sample_compare(tint_symbol_1, arg_2, arg_3, arg_4);
+  *(tint_symbol_2) = res;
 }
 
-fragment void fragment_main(depth2d_array<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(0)]]) {
-  textureSampleCompare_90ae56(tint_symbol_2, tint_symbol_3);
+fragment void fragment_main(depth2d_array<float, access::sample> tint_symbol_3 [[texture(0)]], sampler tint_symbol_4 [[sampler(0)]], device float* tint_symbol_5 [[buffer(0)]]) {
+  textureSampleCompare_90ae56(tint_symbol_3, tint_symbol_4, tint_symbol_5);
   return;
 }
 

@@ -26,7 +26,6 @@ fn log2_0fbd39() {
   const arg_0 = vec3(1.);
   var res = log2(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   log2_0fbd39();

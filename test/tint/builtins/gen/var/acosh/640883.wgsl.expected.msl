@@ -5,34 +5,35 @@ float2 tint_acosh(float2 x) {
   return select(acosh(x), float2(0.0f), (x < float2(1.0f)));
 }
 
-void acosh_640883() {
+void acosh_640883(device float2* const tint_symbol_1) {
   float2 arg_0 = float2(1.54308068752288818359f);
   float2 res = tint_acosh(arg_0);
+  *(tint_symbol_1) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner() {
-  acosh_640883();
+float4 vertex_main_inner(device float2* const tint_symbol_2) {
+  acosh_640883(tint_symbol_2);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
+vertex tint_symbol vertex_main(device float2* tint_symbol_3 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main() {
-  acosh_640883();
+fragment void fragment_main(device float2* tint_symbol_4 [[buffer(0)]]) {
+  acosh_640883(tint_symbol_4);
   return;
 }
 
-kernel void compute_main() {
-  acosh_640883();
+kernel void compute_main(device float2* tint_symbol_5 [[buffer(0)]]) {
+  acosh_640883(tint_symbol_5);
   return;
 }
 

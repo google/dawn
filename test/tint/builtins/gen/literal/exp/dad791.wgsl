@@ -25,7 +25,6 @@
 fn exp_dad791() {
   var res = exp(vec4(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   exp_dad791();

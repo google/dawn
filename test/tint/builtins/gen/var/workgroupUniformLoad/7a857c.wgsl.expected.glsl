@@ -8,8 +8,13 @@ float tint_workgroupUniformLoad(inout float p) {
 }
 
 shared float arg_0;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void workgroupUniformLoad_7a857c() {
   float res = tint_workgroupUniformLoad(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main(uint local_invocation_index) {

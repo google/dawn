@@ -26,7 +26,9 @@ enable f16;
 // fn select(vec<4, f16>, vec<4, f16>, bool) -> vec<4, f16>
 fn select_830dd9() {
   var res: vec4<f16> = select(vec4<f16>(1.h), vec4<f16>(1.h), true);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f16>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

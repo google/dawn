@@ -24,7 +24,9 @@
 // fn extractBits(i32, u32, u32) -> i32
 fn extractBits_249874() {
   var res: i32 = extractBits(1i, 1u, 1u);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

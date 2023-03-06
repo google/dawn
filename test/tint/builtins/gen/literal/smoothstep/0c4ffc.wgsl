@@ -25,7 +25,6 @@
 fn smoothstep_0c4ffc() {
   var res = smoothstep(vec4(2.), vec4(4.), vec4(3.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   smoothstep_0c4ffc();

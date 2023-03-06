@@ -2,7 +2,10 @@ enable f16;
 
 fn normalize_b8cb8d() {
   var res : vec4<f16> = normalize(vec4<f16>(1.0h));
+  prevent_dce = res;
 }
+
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f16>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

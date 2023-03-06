@@ -74,8 +74,13 @@ ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 va
   return ExternalTextureParams(val.numPlanes, val.doYuvToRgbConversionOnly, val.pad, val.pad_1, val.yuvToRgbConversionMatrix, val.gammaDecodeParams, val.gammaEncodeParams, val.gamutConversionMatrix, mat3x2(val.coordTransformationMatrix_0, val.coordTransformationMatrix_1, val.coordTransformationMatrix_2), val.pad_2, val.pad_3);
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void textureLoad_8acf41() {
   vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, ivec2(1), conv_ExternalTextureParams(ext_tex_params.inner));
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -168,8 +173,13 @@ ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 va
   return ExternalTextureParams(val.numPlanes, val.doYuvToRgbConversionOnly, val.pad, val.pad_1, val.yuvToRgbConversionMatrix, val.gammaDecodeParams, val.gammaEncodeParams, val.gamutConversionMatrix, mat3x2(val.coordTransformationMatrix_0, val.coordTransformationMatrix_1, val.coordTransformationMatrix_2), val.pad_2, val.pad_3);
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void textureLoad_8acf41() {
   vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, ivec2(1), conv_ExternalTextureParams(ext_tex_params.inner));
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -256,8 +266,13 @@ ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 va
   return ExternalTextureParams(val.numPlanes, val.doYuvToRgbConversionOnly, val.pad, val.pad_1, val.yuvToRgbConversionMatrix, val.gammaDecodeParams, val.gammaEncodeParams, val.gamutConversionMatrix, mat3x2(val.coordTransformationMatrix_0, val.coordTransformationMatrix_1, val.coordTransformationMatrix_2), val.pad_2, val.pad_3);
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void textureLoad_8acf41() {
   vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, ivec2(1), conv_ExternalTextureParams(ext_tex_params.inner));
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

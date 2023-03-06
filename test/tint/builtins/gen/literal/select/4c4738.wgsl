@@ -25,7 +25,6 @@
 fn select_4c4738() {
   var res = select(vec4(1), vec4(1), vec4<bool>(true));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   select_4c4738();

@@ -26,7 +26,6 @@ fn ceil_e0b70a() {
   const arg_0 = 1.5;
   var res = ceil(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   ceil_e0b70a();

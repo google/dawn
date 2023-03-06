@@ -25,7 +25,6 @@
 fn transpose_ace596() {
   var res = transpose(mat3x2(1., 1., 1., 1., 1., 1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   transpose_ace596();

@@ -1,36 +1,37 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void select_51b047() {
+void select_51b047(device uint2* const tint_symbol_1) {
   uint2 arg_0 = uint2(1u);
   uint2 arg_1 = uint2(1u);
   bool arg_2 = true;
   uint2 res = select(arg_0, arg_1, arg_2);
+  *(tint_symbol_1) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner() {
-  select_51b047();
+float4 vertex_main_inner(device uint2* const tint_symbol_2) {
+  select_51b047(tint_symbol_2);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
+vertex tint_symbol vertex_main(device uint2* tint_symbol_3 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main() {
-  select_51b047();
+fragment void fragment_main(device uint2* tint_symbol_4 [[buffer(0)]]) {
+  select_51b047(tint_symbol_4);
   return;
 }
 
-kernel void compute_main() {
-  select_51b047();
+kernel void compute_main(device uint2* tint_symbol_5 [[buffer(0)]]) {
+  select_51b047(tint_symbol_5);
   return;
 }
 

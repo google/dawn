@@ -25,7 +25,6 @@
 fn sign_0799fd() {
   var res = sign(vec2(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   sign_0799fd();

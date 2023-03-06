@@ -1,8 +1,13 @@
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec2 inner;
+} prevent_dce;
+
 void unpack2x16unorm_7699c0() {
   uint arg_0 = 1u;
   vec2 res = unpackUnorm2x16(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -21,9 +26,14 @@ void main() {
 #version 310 es
 precision mediump float;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec2 inner;
+} prevent_dce;
+
 void unpack2x16unorm_7699c0() {
   uint arg_0 = 1u;
   vec2 res = unpackUnorm2x16(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -36,9 +46,14 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec2 inner;
+} prevent_dce;
+
 void unpack2x16unorm_7699c0() {
   uint arg_0 = 1u;
   vec2 res = unpackUnorm2x16(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

@@ -4,7 +4,10 @@ fn insertBits_428b0b() {
   var arg_2 = 1u;
   var arg_3 = 1u;
   var res : vec3<i32> = insertBits(arg_0, arg_1, arg_2, arg_3);
+  prevent_dce = res;
 }
+
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<i32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

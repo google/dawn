@@ -26,7 +26,6 @@ fn tanh_6289fd() {
   const arg_0 = vec3(1.);
   var res = tanh(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   tanh_6289fd();

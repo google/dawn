@@ -1,7 +1,9 @@
 Texture2D arg_0 : register(t0, space1);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureLoad_8ccbe3() {
   float res = arg_0.Load(int3((1).xx, int(1u))).x;
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

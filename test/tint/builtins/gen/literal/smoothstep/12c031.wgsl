@@ -26,7 +26,9 @@ enable f16;
 // fn smoothstep(vec<2, f16>, vec<2, f16>, vec<2, f16>) -> vec<2, f16>
 fn smoothstep_12c031() {
   var res: vec2<f16> = smoothstep(vec2<f16>(2.h), vec2<f16>(4.h), vec2<f16>(3.h));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

@@ -28,7 +28,6 @@ fn select_1f4d93() {
   var arg_2 = vec2<bool>(true);
   var res = select(arg_0, arg_1, arg_2);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   select_1f4d93();

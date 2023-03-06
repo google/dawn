@@ -2,9 +2,14 @@
 
 uniform highp usampler2D arg_1_arg_2;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec4 inner;
+} prevent_dce;
+
 void textureGather_49b07f() {
   vec2 arg_3 = vec2(1.0f);
   uvec4 res = textureGatherOffset(arg_1_arg_2, arg_3, ivec2(1), 1);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -25,9 +30,14 @@ precision mediump float;
 
 uniform highp usampler2D arg_1_arg_2;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec4 inner;
+} prevent_dce;
+
 void textureGather_49b07f() {
   vec2 arg_3 = vec2(1.0f);
   uvec4 res = textureGatherOffset(arg_1_arg_2, arg_3, ivec2(1), 1);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -42,9 +52,14 @@ void main() {
 
 uniform highp usampler2D arg_1_arg_2;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec4 inner;
+} prevent_dce;
+
 void textureGather_49b07f() {
   vec2 arg_3 = vec2(1.0f);
   uvec4 res = textureGatherOffset(arg_1_arg_2, arg_3, ivec2(1), 1);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

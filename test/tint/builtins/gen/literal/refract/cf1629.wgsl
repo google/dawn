@@ -25,7 +25,6 @@
 fn refract_cf1629() {
   var res = refract(vec2(1.), vec2(1.), 1.);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   refract_cf1629();

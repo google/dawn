@@ -101,34 +101,35 @@ float4 textureSampleExternal(texture2d<float, access::sample> plane0, texture2d<
   return float4(color, 1.0f);
 }
 
-void textureSampleBaseClampToEdge_7c04e6(texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, sampler tint_symbol_3, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_4) {
+void textureSampleBaseClampToEdge_7c04e6(texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, sampler tint_symbol_3, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_4, device float4* const tint_symbol_5) {
   float2 arg_2 = float2(1.0f);
   float4 res = textureSampleExternal(tint_symbol_1, tint_symbol_2, tint_symbol_3, arg_2, tint_unpack_vec3_in_composite_1(*(tint_symbol_4)));
+  *(tint_symbol_5) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner(texture2d<float, access::sample> tint_symbol_5, texture2d<float, access::sample> tint_symbol_6, sampler tint_symbol_7, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_8) {
-  textureSampleBaseClampToEdge_7c04e6(tint_symbol_5, tint_symbol_6, tint_symbol_7, tint_symbol_8);
+float4 vertex_main_inner(texture2d<float, access::sample> tint_symbol_6, texture2d<float, access::sample> tint_symbol_7, sampler tint_symbol_8, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_9, device float4* const tint_symbol_10) {
+  textureSampleBaseClampToEdge_7c04e6(tint_symbol_6, tint_symbol_7, tint_symbol_8, tint_symbol_9, tint_symbol_10);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main(texture2d<float, access::sample> tint_symbol_9 [[texture(0)]], texture2d<float, access::sample> tint_symbol_10 [[texture(1)]], sampler tint_symbol_11 [[sampler(0)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_12 [[buffer(2)]]) {
-  float4 const inner_result = vertex_main_inner(tint_symbol_9, tint_symbol_10, tint_symbol_11, tint_symbol_12);
+vertex tint_symbol vertex_main(texture2d<float, access::sample> tint_symbol_11 [[texture(0)]], texture2d<float, access::sample> tint_symbol_12 [[texture(1)]], sampler tint_symbol_13 [[sampler(0)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_14 [[buffer(2)]], device float4* tint_symbol_15 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_11, tint_symbol_12, tint_symbol_13, tint_symbol_14, tint_symbol_15);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main(texture2d<float, access::sample> tint_symbol_13 [[texture(0)]], texture2d<float, access::sample> tint_symbol_14 [[texture(1)]], sampler tint_symbol_15 [[sampler(0)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_16 [[buffer(2)]]) {
-  textureSampleBaseClampToEdge_7c04e6(tint_symbol_13, tint_symbol_14, tint_symbol_15, tint_symbol_16);
+fragment void fragment_main(texture2d<float, access::sample> tint_symbol_16 [[texture(0)]], texture2d<float, access::sample> tint_symbol_17 [[texture(1)]], sampler tint_symbol_18 [[sampler(0)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_19 [[buffer(2)]], device float4* tint_symbol_20 [[buffer(0)]]) {
+  textureSampleBaseClampToEdge_7c04e6(tint_symbol_16, tint_symbol_17, tint_symbol_18, tint_symbol_19, tint_symbol_20);
   return;
 }
 
-kernel void compute_main(texture2d<float, access::sample> tint_symbol_17 [[texture(0)]], texture2d<float, access::sample> tint_symbol_18 [[texture(1)]], sampler tint_symbol_19 [[sampler(0)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_20 [[buffer(2)]]) {
-  textureSampleBaseClampToEdge_7c04e6(tint_symbol_17, tint_symbol_18, tint_symbol_19, tint_symbol_20);
+kernel void compute_main(texture2d<float, access::sample> tint_symbol_21 [[texture(0)]], texture2d<float, access::sample> tint_symbol_22 [[texture(1)]], sampler tint_symbol_23 [[sampler(0)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_24 [[buffer(2)]], device float4* tint_symbol_25 [[buffer(0)]]) {
+  textureSampleBaseClampToEdge_7c04e6(tint_symbol_21, tint_symbol_22, tint_symbol_23, tint_symbol_24, tint_symbol_25);
   return;
 }
 

@@ -26,7 +26,9 @@
 // fn textureSampleGrad(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, ddx: vec2<f32>, ddy: vec2<f32>) -> vec4<f32>
 fn textureSampleGrad_2ecd8f() {
   var res: vec4<f32> = textureSampleGrad(arg_0, arg_1, vec2<f32>(1.f), 1i, vec2<f32>(1.f), vec2<f32>(1.f));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

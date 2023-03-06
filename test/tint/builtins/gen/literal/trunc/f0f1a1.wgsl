@@ -25,7 +25,6 @@
 fn trunc_f0f1a1() {
   var res = trunc(vec4(1.5));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   trunc_f0f1a1();

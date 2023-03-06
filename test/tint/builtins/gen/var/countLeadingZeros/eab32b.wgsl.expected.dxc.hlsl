@@ -13,9 +13,12 @@ int4 tint_count_leading_zeros(int4 v) {
   return int4((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void countLeadingZeros_eab32b() {
   int4 arg_0 = (1).xxxx;
   int4 res = tint_count_leading_zeros(arg_0);
+  prevent_dce.Store4(0u, asuint(res));
 }
 
 struct tint_symbol {

@@ -29,7 +29,6 @@ struct SB_RW {
 fn atomicCompareExchangeWeak_1bd40a() {
   var res = atomicCompareExchangeWeak(&sb_rw.arg_0, 1i, 1i);
 }
-
 @fragment
 fn fragment_main() {
   atomicCompareExchangeWeak_1bd40a();

@@ -5,9 +5,14 @@ vec4 tint_radians(vec4 param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void radians_09b7fc() {
   vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_radians(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -31,9 +36,14 @@ vec4 tint_radians(vec4 param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void radians_09b7fc() {
   vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_radians(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -51,9 +61,14 @@ vec4 tint_radians(vec4 param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void radians_09b7fc() {
   vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_radians(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

@@ -30,7 +30,6 @@ fn atomicStore_cdc29e() {
   var arg_1 = 1u;
   atomicStore(&sb_rw.arg_0, arg_1);
 }
-
 @fragment
 fn fragment_main() {
   atomicStore_cdc29e();

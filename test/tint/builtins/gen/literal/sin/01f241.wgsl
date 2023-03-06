@@ -24,7 +24,9 @@
 // fn sin(vec<3, f32>) -> vec<3, f32>
 fn sin_01f241() {
   var res: vec3<f32> = sin(vec3<f32>(1.57079632679f));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

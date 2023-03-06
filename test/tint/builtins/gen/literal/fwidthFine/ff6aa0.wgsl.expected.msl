@@ -1,12 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void fwidthFine_ff6aa0() {
+void fwidthFine_ff6aa0(device float2* const tint_symbol) {
   float2 res = fwidth(float2(1.0f));
+  *(tint_symbol) = res;
 }
 
-fragment void fragment_main() {
-  fwidthFine_ff6aa0();
+fragment void fragment_main(device float2* tint_symbol_1 [[buffer(0)]]) {
+  fwidthFine_ff6aa0(tint_symbol_1);
   return;
 }
 

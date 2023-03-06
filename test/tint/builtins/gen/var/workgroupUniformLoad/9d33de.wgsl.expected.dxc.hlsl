@@ -6,9 +6,11 @@ int tint_workgroupUniformLoad(inout int p) {
 }
 
 groupshared int arg_0;
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void workgroupUniformLoad_9d33de() {
   int res = tint_workgroupUniformLoad(arg_0);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol_1 {

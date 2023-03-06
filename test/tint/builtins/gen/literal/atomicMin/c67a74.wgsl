@@ -28,7 +28,9 @@ struct SB_RW {
 // fn atomicMin(ptr<storage, atomic<u32>, read_write>, u32) -> u32
 fn atomicMin_c67a74() {
   var res: u32 = atomicMin(&sb_rw.arg_0, 1u);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @fragment
 fn fragment_main() {

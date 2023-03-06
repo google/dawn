@@ -1,9 +1,11 @@
 TextureCubeArray<uint4> arg_0 : register(t0, space1);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureDimensions_a1598a() {
   int3 tint_tmp;
   arg_0.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
   uint2 res = tint_tmp.xy;
+  prevent_dce.Store2(0u, asuint(res));
 }
 
 struct tint_symbol {

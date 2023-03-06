@@ -4,8 +4,13 @@ layout(binding = 0, std430) buffer SB_RW_ssbo {
   float arg_0[];
 } sb_rw;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void arrayLength_cdd123() {
   uint res = uint(sb_rw.arg_0.length());
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -28,8 +33,13 @@ layout(binding = 0, std430) buffer SB_RW_ssbo {
   float arg_0[];
 } sb_rw;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void arrayLength_cdd123() {
   uint res = uint(sb_rw.arg_0.length());
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -46,8 +56,13 @@ layout(binding = 0, std430) buffer SB_RW_ssbo {
   float arg_0[];
 } sb_rw;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void arrayLength_cdd123() {
   uint res = uint(sb_rw.arg_0.length());
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

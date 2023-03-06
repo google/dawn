@@ -6,7 +6,10 @@ struct SB_RW {
 
 fn arrayLength_cdd123() {
   var res : u32 = arrayLength(&(sb_rw.arg_0));
+  prevent_dce = res;
 }
+
+@group(2) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

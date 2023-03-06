@@ -2,9 +2,14 @@
 
 uniform highp isamplerCube arg_1_arg_2;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 void textureGather_0166ec() {
   vec3 arg_3 = vec3(1.0f);
   ivec4 res = textureGather(arg_1_arg_2, arg_3, int(1u));
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -25,9 +30,14 @@ precision mediump float;
 
 uniform highp isamplerCube arg_1_arg_2;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 void textureGather_0166ec() {
   vec3 arg_3 = vec3(1.0f);
   ivec4 res = textureGather(arg_1_arg_2, arg_3, int(1u));
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -42,9 +52,14 @@ void main() {
 
 uniform highp isamplerCube arg_1_arg_2;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 void textureGather_0166ec() {
   vec3 arg_3 = vec3(1.0f);
   ivec4 res = textureGather(arg_1_arg_2, arg_3, int(1u));
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

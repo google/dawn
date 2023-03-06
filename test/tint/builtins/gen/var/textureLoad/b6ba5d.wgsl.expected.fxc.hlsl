@@ -1,10 +1,12 @@
 Texture2DArray arg_0 : register(t0, space1);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureLoad_b6ba5d() {
   uint2 arg_1 = (1u).xx;
   int arg_2 = 1;
   int arg_3 = 1;
   float res = arg_0.Load(uint4(uint3(arg_1, uint(arg_2)), uint(arg_3))).x;
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

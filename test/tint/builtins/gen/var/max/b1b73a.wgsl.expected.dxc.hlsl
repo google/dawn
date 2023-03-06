@@ -1,7 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void max_b1b73a() {
   uint3 arg_0 = (1u).xxx;
   uint3 arg_1 = (1u).xxx;
   uint3 res = max(arg_0, arg_1);
+  prevent_dce.Store3(0u, asuint(res));
 }
 
 struct tint_symbol {

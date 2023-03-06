@@ -25,7 +25,6 @@
 fn ldexp_cb0faf() {
   var res = ldexp(vec4(1.), vec4(1));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   ldexp_cb0faf();

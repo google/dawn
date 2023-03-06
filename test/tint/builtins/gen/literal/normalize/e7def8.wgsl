@@ -25,7 +25,6 @@
 fn normalize_e7def8() {
   var res = normalize(vec3(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   normalize_e7def8();

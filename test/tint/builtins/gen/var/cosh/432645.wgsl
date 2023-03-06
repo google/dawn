@@ -26,7 +26,6 @@ fn cosh_432645() {
   const arg_0 = vec2(0.);
   var res = cosh(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   cosh_432645();

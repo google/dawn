@@ -25,7 +25,6 @@
 fn select_4e60da() {
   var res = select(vec2(1.), vec2(1.), true);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   select_4e60da();

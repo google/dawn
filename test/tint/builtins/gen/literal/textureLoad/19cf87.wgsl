@@ -25,7 +25,9 @@
 // fn textureLoad(texture: texture_depth_2d, coords: vec2<i32>, level: i32) -> f32
 fn textureLoad_19cf87() {
   var res: f32 = textureLoad(arg_0, vec2<i32>(1i), 1i);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

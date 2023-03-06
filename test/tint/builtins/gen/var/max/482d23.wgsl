@@ -27,7 +27,6 @@ fn max_482d23() {
   const arg_1 = vec3(1);
   var res = max(arg_0, arg_1);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   max_482d23();

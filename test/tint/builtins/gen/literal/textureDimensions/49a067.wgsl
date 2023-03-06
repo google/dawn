@@ -25,7 +25,9 @@
 // fn textureDimensions(texture: texture_cube<f32>, level: i32) -> vec2<u32>
 fn textureDimensions_49a067() {
   var res: vec2<u32> = textureDimensions(arg_0, 1i);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

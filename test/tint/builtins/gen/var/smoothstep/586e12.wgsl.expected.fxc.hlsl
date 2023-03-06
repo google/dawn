@@ -1,10 +1,13 @@
 SKIP: FAILED
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void smoothstep_586e12() {
   float16_t arg_0 = float16_t(2.0h);
   float16_t arg_1 = float16_t(4.0h);
   float16_t arg_2 = float16_t(3.0h);
   float16_t res = smoothstep(arg_0, arg_1, arg_2);
+  prevent_dce.Store<float16_t>(0u, res);
 }
 
 struct tint_symbol {

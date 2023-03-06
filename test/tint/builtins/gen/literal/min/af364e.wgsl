@@ -25,7 +25,6 @@
 fn min_af364e() {
   var res = min(vec4(1), vec4(1));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   min_af364e();

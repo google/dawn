@@ -27,7 +27,6 @@ enable f16;
 fn modf_8dbbbf() {
   var res = modf(-1.5h);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   modf_8dbbbf();

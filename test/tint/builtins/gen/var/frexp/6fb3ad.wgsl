@@ -26,7 +26,6 @@ fn frexp_6fb3ad() {
   const arg_0 = vec2(1.);
   var res = frexp(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   frexp_6fb3ad();

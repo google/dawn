@@ -1,34 +1,35 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void countOneBits_0f7980() {
+void countOneBits_0f7980(device int4* const tint_symbol_1) {
   int4 arg_0 = int4(1);
   int4 res = popcount(arg_0);
+  *(tint_symbol_1) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner() {
-  countOneBits_0f7980();
+float4 vertex_main_inner(device int4* const tint_symbol_2) {
+  countOneBits_0f7980(tint_symbol_2);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
+vertex tint_symbol vertex_main(device int4* tint_symbol_3 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main() {
-  countOneBits_0f7980();
+fragment void fragment_main(device int4* tint_symbol_4 [[buffer(0)]]) {
+  countOneBits_0f7980(tint_symbol_4);
   return;
 }
 
-kernel void compute_main() {
-  countOneBits_0f7980();
+kernel void compute_main(device int4* tint_symbol_5 [[buffer(0)]]) {
+  countOneBits_0f7980(tint_symbol_5);
   return;
 }
 

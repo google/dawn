@@ -5,9 +5,14 @@ f16vec4 tint_atanh(f16vec4 x) {
   return mix(atanh(x), f16vec4(0.0hf), greaterThanEqual(x, f16vec4(1.0hf)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16vec4 inner;
+} prevent_dce;
+
 void atanh_e3b450() {
   f16vec4 arg_0 = f16vec4(0.5hf);
   f16vec4 res = tint_atanh(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -31,9 +36,14 @@ f16vec4 tint_atanh(f16vec4 x) {
   return mix(atanh(x), f16vec4(0.0hf), greaterThanEqual(x, f16vec4(1.0hf)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16vec4 inner;
+} prevent_dce;
+
 void atanh_e3b450() {
   f16vec4 arg_0 = f16vec4(0.5hf);
   f16vec4 res = tint_atanh(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -51,9 +61,14 @@ f16vec4 tint_atanh(f16vec4 x) {
   return mix(atanh(x), f16vec4(0.0hf), greaterThanEqual(x, f16vec4(1.0hf)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16vec4 inner;
+} prevent_dce;
+
 void atanh_e3b450() {
   f16vec4 arg_0 = f16vec4(0.5hf);
   f16vec4 res = tint_atanh(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

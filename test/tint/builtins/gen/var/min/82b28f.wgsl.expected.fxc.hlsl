@@ -1,7 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void min_82b28f() {
   uint2 arg_0 = (1u).xx;
   uint2 arg_1 = (1u).xx;
   uint2 res = min(arg_0, arg_1);
+  prevent_dce.Store2(0u, asuint(res));
 }
 
 struct tint_symbol {

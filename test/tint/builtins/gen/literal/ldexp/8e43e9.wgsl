@@ -26,7 +26,9 @@ enable f16;
 // fn ldexp(vec<3, f16>, vec<3, ia>) -> vec<3, f16>
 fn ldexp_8e43e9() {
   var res: vec3<f16> = ldexp(vec3<f16>(1.h), vec3(1));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

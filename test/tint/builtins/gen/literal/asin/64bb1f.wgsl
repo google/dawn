@@ -25,7 +25,6 @@
 fn asin_64bb1f() {
   var res = asin(vec4(0.479425538604));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   asin_64bb1f();

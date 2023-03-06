@@ -1,8 +1,13 @@
 #version 310 es
 
 shared uint arg_0;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void atomicXor_c8e6be() {
   uint res = atomicXor(arg_0, 1u);
+  prevent_dce.inner = res;
 }
 
 void compute_main(uint local_invocation_index) {

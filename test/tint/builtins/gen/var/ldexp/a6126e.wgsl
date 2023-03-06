@@ -27,7 +27,6 @@ fn ldexp_a6126e() {
   var arg_1 = vec3<i32>(1i);
   var res = ldexp(arg_0, arg_1);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   ldexp_a6126e();

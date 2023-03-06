@@ -26,7 +26,6 @@ fn sqrt_8da177() {
   const arg_0 = 1.;
   var res = sqrt(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   sqrt_8da177();

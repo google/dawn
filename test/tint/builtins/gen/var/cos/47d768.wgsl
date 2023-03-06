@@ -26,7 +26,6 @@ fn cos_47d768() {
   const arg_0 = vec4(0.);
   var res = cos(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   cos_47d768();

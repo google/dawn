@@ -25,7 +25,6 @@
 fn refract_8c192a() {
   var res = refract(vec4(1.), vec4(1.), 1.);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   refract_8c192a();

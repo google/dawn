@@ -5,10 +5,13 @@ uint tint_dot4U8Packed(uint param_0, uint param_1) {
   return dot4add_u8packed(param_0, param_1, accumulator);
 }
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void dot4U8Packed_fbed7b() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
   uint res = tint_dot4U8Packed(arg_0, arg_1);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

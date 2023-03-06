@@ -25,7 +25,6 @@
 fn asinh_16b543() {
   var res = asinh(vec2(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   asinh_16b543();

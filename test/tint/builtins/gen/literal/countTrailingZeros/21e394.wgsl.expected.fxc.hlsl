@@ -1,5 +1,8 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void countTrailingZeros_21e394() {
   uint res = 0u;
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

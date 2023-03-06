@@ -1,13 +1,14 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void dpdyFine_df33aa() {
+void dpdyFine_df33aa(device float2* const tint_symbol) {
   float2 arg_0 = float2(1.0f);
   float2 res = dfdy(arg_0);
+  *(tint_symbol) = res;
 }
 
-fragment void fragment_main() {
-  dpdyFine_df33aa();
+fragment void fragment_main(device float2* tint_symbol_1 [[buffer(0)]]) {
+  dpdyFine_df33aa(tint_symbol_1);
   return;
 }
 

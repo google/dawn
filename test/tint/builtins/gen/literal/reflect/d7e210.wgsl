@@ -25,7 +25,6 @@
 fn reflect_d7e210() {
   var res = reflect(vec4(1.), vec4(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   reflect_d7e210();

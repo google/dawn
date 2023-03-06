@@ -25,7 +25,6 @@
 fn atan2_c19683() {
   var res = atan2(vec2(1.), vec2(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   atan2_c19683();

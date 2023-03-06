@@ -6,7 +6,10 @@ struct SB_RW {
 
 fn atomicSub_051100() {
   var res : i32 = atomicSub(&(sb_rw.arg_0), 1i);
+  prevent_dce = res;
 }
+
+@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {

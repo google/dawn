@@ -1,7 +1,15 @@
 SKIP: FAILED
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
+void prevent_dce_store(uint offset, matrix<float16_t, 2, 4> value) {
+  prevent_dce.Store<vector<float16_t, 4> >((offset + 0u), value[0u]);
+  prevent_dce.Store<vector<float16_t, 4> >((offset + 8u), value[1u]);
+}
+
 void transpose_5edd96() {
   matrix<float16_t, 2, 4> res = matrix<float16_t, 2, 4>((float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx);
+  prevent_dce_store(0u, res);
 }
 
 struct tint_symbol {

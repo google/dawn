@@ -1,34 +1,35 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void determinant_e19305() {
+void determinant_e19305(device float* const tint_symbol_1) {
   float2x2 arg_0 = float2x2(float2(1.0f), float2(1.0f));
   float res = determinant(arg_0);
+  *(tint_symbol_1) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner() {
-  determinant_e19305();
+float4 vertex_main_inner(device float* const tint_symbol_2) {
+  determinant_e19305(tint_symbol_2);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
+vertex tint_symbol vertex_main(device float* tint_symbol_3 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main() {
-  determinant_e19305();
+fragment void fragment_main(device float* tint_symbol_4 [[buffer(0)]]) {
+  determinant_e19305(tint_symbol_4);
   return;
 }
 
-kernel void compute_main() {
-  determinant_e19305();
+kernel void compute_main(device float* tint_symbol_5 [[buffer(0)]]) {
+  determinant_e19305(tint_symbol_5);
   return;
 }
 

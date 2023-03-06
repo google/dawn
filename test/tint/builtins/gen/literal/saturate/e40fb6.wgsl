@@ -25,7 +25,6 @@
 fn saturate_e40fb6() {
   var res = saturate(vec2(2.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   saturate_e40fb6();

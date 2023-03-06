@@ -26,7 +26,6 @@ fn abs_e28785() {
   const arg_0 = vec4(1.);
   var res = abs(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   abs_e28785();

@@ -26,7 +26,9 @@
 // fn textureSample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32, @const offset: vec2<i32>) -> f32
 fn textureSample_60bf45() {
   var res: f32 = textureSample(arg_0, arg_1, vec2<f32>(1.f), 1i, vec2<i32>(1i));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @fragment
 fn fragment_main() {

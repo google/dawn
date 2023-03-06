@@ -29,7 +29,6 @@ struct SB_RW {
 fn atomicStore_cdc29e() {
   atomicStore(&sb_rw.arg_0, 1u);
 }
-
 @fragment
 fn fragment_main() {
   atomicStore_cdc29e();

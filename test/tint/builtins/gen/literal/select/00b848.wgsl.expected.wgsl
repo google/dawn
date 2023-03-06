@@ -1,6 +1,9 @@
 fn select_00b848() {
   var res : vec2<i32> = select(vec2<i32>(1i), vec2<i32>(1i), vec2<bool>(true));
+  prevent_dce = res;
 }
+
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec2<i32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

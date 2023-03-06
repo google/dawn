@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 34
+; Bound: 48
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -12,6 +12,9 @@
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpName %value "value"
                OpName %vertex_point_size "vertex_point_size"
+               OpName %prevent_dce_block "prevent_dce_block"
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce "prevent_dce"
                OpName %select_e3e028 "select_e3e028"
                OpName %res "res"
                OpName %vertex_main_inner "vertex_main_inner"
@@ -20,6 +23,10 @@
                OpName %compute_main "compute_main"
                OpDecorate %value BuiltIn Position
                OpDecorate %vertex_point_size BuiltIn PointSize
+               OpDecorate %prevent_dce_block Block
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce DescriptorSet 2
+               OpDecorate %prevent_dce Binding 0
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
@@ -28,41 +35,56 @@
 %_ptr_Output_float = OpTypePointer Output %float
           %8 = OpConstantNull %float
 %vertex_point_size = OpVariable %_ptr_Output_float Output %8
+        %int = OpTypeInt 32 1
+%prevent_dce_block = OpTypeStruct %int
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+%prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
        %void = OpTypeVoid
-          %9 = OpTypeFunction %void
+         %13 = OpTypeFunction %void
        %bool = OpTypeBool
      %v4bool = OpTypeVector %bool 4
        %true = OpConstantTrue %bool
-         %16 = OpConstantComposite %v4bool %true %true %true %true
+         %20 = OpConstantComposite %v4bool %true %true %true %true
 %_ptr_Function_v4bool = OpTypePointer Function %v4bool
-         %19 = OpConstantNull %v4bool
-         %20 = OpTypeFunction %v4float
+         %23 = OpConstantNull %v4bool
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+      %int_1 = OpConstant %int 1
+         %33 = OpConstantNull %int
+         %34 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
-%select_e3e028 = OpFunction %void None %9
-         %12 = OpLabel
-        %res = OpVariable %_ptr_Function_v4bool Function %19
-               OpStore %res %16
+%select_e3e028 = OpFunction %void None %13
+         %16 = OpLabel
+        %res = OpVariable %_ptr_Function_v4bool Function %23
+               OpStore %res %20
+         %27 = OpAccessChain %_ptr_StorageBuffer_int %prevent_dce %uint_0
+         %30 = OpLoad %v4bool %res
+         %31 = OpLogicalEqual %v4bool %30 %23
+         %29 = OpAll %bool %31
+         %28 = OpSelect %int %29 %int_1 %33
+               OpStore %27 %28
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %20
-         %22 = OpLabel
-         %23 = OpFunctionCall %void %select_e3e028
+%vertex_main_inner = OpFunction %v4float None %34
+         %36 = OpLabel
+         %37 = OpFunctionCall %void %select_e3e028
                OpReturnValue %5
                OpFunctionEnd
-%vertex_main = OpFunction %void None %9
-         %25 = OpLabel
-         %26 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %26
+%vertex_main = OpFunction %void None %13
+         %39 = OpLabel
+         %40 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %40
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
-%fragment_main = OpFunction %void None %9
-         %29 = OpLabel
-         %30 = OpFunctionCall %void %select_e3e028
+%fragment_main = OpFunction %void None %13
+         %43 = OpLabel
+         %44 = OpFunctionCall %void %select_e3e028
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %9
-         %32 = OpLabel
-         %33 = OpFunctionCall %void %select_e3e028
+%compute_main = OpFunction %void None %13
+         %46 = OpLabel
+         %47 = OpFunctionCall %void %select_e3e028
                OpReturn
                OpFunctionEnd

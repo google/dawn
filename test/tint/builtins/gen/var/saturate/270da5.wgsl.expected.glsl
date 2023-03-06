@@ -4,9 +4,14 @@ float tint_saturate(float v) {
   return clamp(v, 0.0f, 1.0f);
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void saturate_270da5() {
   float arg_0 = 2.0f;
   float res = tint_saturate(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -29,9 +34,14 @@ float tint_saturate(float v) {
   return clamp(v, 0.0f, 1.0f);
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void saturate_270da5() {
   float arg_0 = 2.0f;
   float res = tint_saturate(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -48,9 +58,14 @@ float tint_saturate(float v) {
   return clamp(v, 0.0f, 1.0f);
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void saturate_270da5() {
   float arg_0 = 2.0f;
   float res = tint_saturate(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

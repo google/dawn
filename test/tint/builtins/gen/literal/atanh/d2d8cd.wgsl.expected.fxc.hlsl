@@ -1,7 +1,10 @@
 SKIP: FAILED
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void atanh_d2d8cd() {
   float16_t res = float16_t(0.548828125h);
+  prevent_dce.Store<float16_t>(0u, res);
 }
 
 struct tint_symbol {

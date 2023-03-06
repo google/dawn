@@ -6,11 +6,16 @@ ivec2 tint_extract_bits(ivec2 v, uint offset, uint count) {
   return bitfieldExtract(v, int(s), int((e - s)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec2 inner;
+} prevent_dce;
+
 void extractBits_a99a8d() {
   ivec2 arg_0 = ivec2(1);
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   ivec2 res = tint_extract_bits(arg_0, arg_1, arg_2);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -35,11 +40,16 @@ ivec2 tint_extract_bits(ivec2 v, uint offset, uint count) {
   return bitfieldExtract(v, int(s), int((e - s)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec2 inner;
+} prevent_dce;
+
 void extractBits_a99a8d() {
   ivec2 arg_0 = ivec2(1);
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   ivec2 res = tint_extract_bits(arg_0, arg_1, arg_2);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -58,11 +68,16 @@ ivec2 tint_extract_bits(ivec2 v, uint offset, uint count) {
   return bitfieldExtract(v, int(s), int((e - s)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec2 inner;
+} prevent_dce;
+
 void extractBits_a99a8d() {
   ivec2 arg_0 = ivec2(1);
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   ivec2 res = tint_extract_bits(arg_0, arg_1, arg_2);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

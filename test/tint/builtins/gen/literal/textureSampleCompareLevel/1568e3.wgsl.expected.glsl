@@ -2,8 +2,13 @@
 
 uniform highp samplerCubeShadow arg_0_arg_1;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void textureSampleCompareLevel_1568e3() {
   float res = texture(arg_0_arg_1, vec4(vec3(1.0f), 1.0f));
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -24,8 +29,13 @@ precision mediump float;
 
 uniform highp samplerCubeShadow arg_0_arg_1;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void textureSampleCompareLevel_1568e3() {
   float res = texture(arg_0_arg_1, vec4(vec3(1.0f), 1.0f));
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -40,8 +50,13 @@ void main() {
 
 uniform highp samplerCubeShadow arg_0_arg_1;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void textureSampleCompareLevel_1568e3() {
   float res = texture(arg_0_arg_1, vec4(vec3(1.0f), 1.0f));
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

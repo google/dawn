@@ -25,7 +25,6 @@
 fn cos_af7447() {
   var res = cos(vec2(0.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   cos_af7447();

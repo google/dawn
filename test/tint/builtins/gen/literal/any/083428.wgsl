@@ -24,7 +24,10 @@
 // fn any(vec<4, bool>) -> bool
 fn any_083428() {
   var res: bool = any(vec4<bool>(true));
+  prevent_dce = select(0, 1, all(res == bool()));
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
+
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

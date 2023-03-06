@@ -1,9 +1,14 @@
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec3 inner;
+} prevent_dce;
+
 void max_25eafe() {
   ivec3 arg_0 = ivec3(1);
   ivec3 arg_1 = ivec3(1);
   ivec3 res = max(arg_0, arg_1);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -22,10 +27,15 @@ void main() {
 #version 310 es
 precision mediump float;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec3 inner;
+} prevent_dce;
+
 void max_25eafe() {
   ivec3 arg_0 = ivec3(1);
   ivec3 arg_1 = ivec3(1);
   ivec3 res = max(arg_0, arg_1);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -38,10 +48,15 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec3 inner;
+} prevent_dce;
+
 void max_25eafe() {
   ivec3 arg_0 = ivec3(1);
   ivec3 arg_1 = ivec3(1);
   ivec3 res = max(arg_0, arg_1);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

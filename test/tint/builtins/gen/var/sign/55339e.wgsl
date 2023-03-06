@@ -26,7 +26,6 @@ fn sign_55339e() {
   const arg_0 = vec3(1);
   var res = sign(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   sign_55339e();

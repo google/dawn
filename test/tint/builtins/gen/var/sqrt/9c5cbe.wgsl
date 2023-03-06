@@ -26,7 +26,6 @@ fn sqrt_9c5cbe() {
   const arg_0 = vec2(1.);
   var res = sqrt(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   sqrt_9c5cbe();

@@ -26,7 +26,6 @@ fn transpose_dc671a() {
   const arg_0 = mat4x4(1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.);
   var res = transpose(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   transpose_dc671a();

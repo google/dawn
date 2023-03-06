@@ -1,10 +1,15 @@
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 void select_3c25ce() {
   bvec3 arg_0 = bvec3(true);
   bvec3 arg_1 = bvec3(true);
   bool arg_2 = true;
   bvec3 res = (arg_2 ? arg_1 : arg_0);
+  prevent_dce.inner = (all(equal(res, bvec3(false))) ? 1 : 0);
 }
 
 vec4 vertex_main() {
@@ -23,11 +28,16 @@ void main() {
 #version 310 es
 precision mediump float;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 void select_3c25ce() {
   bvec3 arg_0 = bvec3(true);
   bvec3 arg_1 = bvec3(true);
   bool arg_2 = true;
   bvec3 res = (arg_2 ? arg_1 : arg_0);
+  prevent_dce.inner = (all(equal(res, bvec3(false))) ? 1 : 0);
 }
 
 void fragment_main() {
@@ -40,11 +50,16 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 void select_3c25ce() {
   bvec3 arg_0 = bvec3(true);
   bvec3 arg_1 = bvec3(true);
   bool arg_2 = true;
   bvec3 res = (arg_2 ? arg_1 : arg_0);
+  prevent_dce.inner = (all(equal(res, bvec3(false))) ? 1 : 0);
 }
 
 void compute_main() {

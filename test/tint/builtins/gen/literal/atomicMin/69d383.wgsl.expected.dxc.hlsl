@@ -1,9 +1,11 @@
 groupshared uint arg_0;
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void atomicMin_69d383() {
   uint atomic_result = 0u;
   InterlockedMin(arg_0, 1u, atomic_result);
   uint res = atomic_result;
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol_1 {

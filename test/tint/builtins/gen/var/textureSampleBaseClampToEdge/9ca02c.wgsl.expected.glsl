@@ -10,9 +10,14 @@ vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_1, highp sampler2D t_s,
 
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D arg_0_arg_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void textureSampleBaseClampToEdge_9ca02c() {
   vec2 arg_2 = vec2(1.0f);
   vec4 res = tint_textureSampleBaseClampToEdge(arg_0_1, arg_0_arg_1, arg_2);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -41,9 +46,14 @@ vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_1, highp sampler2D t_s,
 
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D arg_0_arg_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void textureSampleBaseClampToEdge_9ca02c() {
   vec2 arg_2 = vec2(1.0f);
   vec4 res = tint_textureSampleBaseClampToEdge(arg_0_1, arg_0_arg_1, arg_2);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -66,9 +76,14 @@ vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_1, highp sampler2D t_s,
 
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D arg_0_arg_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void textureSampleBaseClampToEdge_9ca02c() {
   vec2 arg_2 = vec2(1.0f);
   vec4 res = tint_textureSampleBaseClampToEdge(arg_0_1, arg_0_arg_1, arg_2);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

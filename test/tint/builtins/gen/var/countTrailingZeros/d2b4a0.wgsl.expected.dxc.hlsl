@@ -13,9 +13,12 @@ uint4 tint_count_trailing_zeros(uint4 v) {
   return uint4((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void countTrailingZeros_d2b4a0() {
   uint4 arg_0 = (1u).xxxx;
   uint4 res = tint_count_trailing_zeros(arg_0);
+  prevent_dce.Store4(0u, asuint(res));
 }
 
 struct tint_symbol {

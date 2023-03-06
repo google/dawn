@@ -24,7 +24,10 @@
 // fn select(vec<4, bool>, vec<4, bool>, vec<4, bool>) -> vec<4, bool>
 fn select_e3e028() {
   var res: vec4<bool> = select(vec4<bool>(true), vec4<bool>(true), vec4<bool>(true));
+  prevent_dce = select(0, 1, all(res == vec4<bool>()));
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
+
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

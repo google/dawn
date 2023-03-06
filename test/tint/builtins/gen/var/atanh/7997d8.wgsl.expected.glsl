@@ -4,9 +4,14 @@ float tint_atanh(float x) {
   return ((x >= 1.0f) ? 0.0f : atanh(x));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void atanh_7997d8() {
   float arg_0 = 0.5f;
   float res = tint_atanh(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -29,9 +34,14 @@ float tint_atanh(float x) {
   return ((x >= 1.0f) ? 0.0f : atanh(x));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void atanh_7997d8() {
   float arg_0 = 0.5f;
   float res = tint_atanh(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -48,9 +58,14 @@ float tint_atanh(float x) {
   return ((x >= 1.0f) ? 0.0f : atanh(x));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void atanh_7997d8() {
   float arg_0 = 0.5f;
   float res = tint_atanh(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

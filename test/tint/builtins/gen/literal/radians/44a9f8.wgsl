@@ -25,7 +25,6 @@
 fn radians_44a9f8() {
   var res = radians(vec2(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   radians_44a9f8();

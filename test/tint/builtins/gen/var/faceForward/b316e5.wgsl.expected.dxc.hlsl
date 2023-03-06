@@ -1,8 +1,11 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void faceForward_b316e5() {
   float4 arg_0 = (1.0f).xxxx;
   float4 arg_1 = (1.0f).xxxx;
   float4 arg_2 = (1.0f).xxxx;
   float4 res = faceforward(arg_0, arg_1, arg_2);
+  prevent_dce.Store4(0u, asuint(res));
 }
 
 struct tint_symbol {

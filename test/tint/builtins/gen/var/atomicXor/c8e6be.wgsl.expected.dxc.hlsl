@@ -1,10 +1,12 @@
 groupshared uint arg_0;
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void atomicXor_c8e6be() {
   uint arg_1 = 1u;
   uint atomic_result = 0u;
   InterlockedXor(arg_0, arg_1, atomic_result);
   uint res = atomic_result;
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol_1 {

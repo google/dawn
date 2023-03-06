@@ -1,9 +1,11 @@
 Texture3D<float4> arg_0 : register(t0, space1);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureDimensions_0890c6() {
   int4 tint_tmp;
   arg_0.GetDimensions(1u, tint_tmp.x, tint_tmp.y, tint_tmp.z, tint_tmp.w);
   uint3 res = tint_tmp.xyz;
+  prevent_dce.Store3(0u, asuint(res));
 }
 
 struct tint_symbol {

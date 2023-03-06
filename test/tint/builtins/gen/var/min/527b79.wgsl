@@ -27,7 +27,6 @@ fn min_527b79() {
   const arg_1 = vec2(1);
   var res = min(arg_0, arg_1);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   min_527b79();

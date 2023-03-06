@@ -1,7 +1,10 @@
 SKIP: FAILED
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void normalize_39d5ec() {
-  vector<float16_t, 3> res = (float16_t(0.577148438h)).xxx;
+  vector<float16_t, 3> res = (float16_t(0.5771484375h)).xxx;
+  prevent_dce.Store<vector<float16_t, 3> >(0u, res);
 }
 
 struct tint_symbol {

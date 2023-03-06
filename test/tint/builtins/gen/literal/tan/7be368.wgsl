@@ -25,7 +25,6 @@
 fn tan_7be368() {
   var res = tan(vec2(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   tan_7be368();

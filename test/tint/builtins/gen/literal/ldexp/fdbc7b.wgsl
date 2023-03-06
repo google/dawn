@@ -25,7 +25,6 @@
 fn ldexp_fdbc7b() {
   var res = ldexp(1., 1);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   ldexp_fdbc7b();

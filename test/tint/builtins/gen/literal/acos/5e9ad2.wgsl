@@ -25,7 +25,6 @@
 fn acos_5e9ad2() {
   var res = acos(0.96891242171);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   acos_5e9ad2();

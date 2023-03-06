@@ -1,9 +1,11 @@
 Texture1D<int4> arg_0 : register(t0, space1);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureLoad_62d1de() {
   int arg_1 = 1;
   uint arg_2 = 1u;
   int4 res = arg_0.Load(int2(arg_1, int(arg_2)));
+  prevent_dce.Store4(0u, asuint(res));
 }
 
 struct tint_symbol {

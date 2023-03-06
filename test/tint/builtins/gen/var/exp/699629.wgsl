@@ -26,7 +26,6 @@ fn exp_699629() {
   const arg_0 = vec2(1.);
   var res = exp(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   exp_699629();

@@ -16,34 +16,35 @@ uint tint_first_trailing_bit(uint v) {
   return uint((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
-void firstTrailingBit_47d475() {
+void firstTrailingBit_47d475(device uint* const tint_symbol_1) {
   uint arg_0 = 1u;
   uint res = tint_first_trailing_bit(arg_0);
+  *(tint_symbol_1) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner() {
-  firstTrailingBit_47d475();
+float4 vertex_main_inner(device uint* const tint_symbol_2) {
+  firstTrailingBit_47d475(tint_symbol_2);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
+vertex tint_symbol vertex_main(device uint* tint_symbol_3 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main() {
-  firstTrailingBit_47d475();
+fragment void fragment_main(device uint* tint_symbol_4 [[buffer(0)]]) {
+  firstTrailingBit_47d475(tint_symbol_4);
   return;
 }
 
-kernel void compute_main() {
-  firstTrailingBit_47d475();
+kernel void compute_main(device uint* tint_symbol_5 [[buffer(0)]]) {
+  firstTrailingBit_47d475(tint_symbol_5);
   return;
 }
 

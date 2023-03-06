@@ -1,34 +1,35 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void floor_84658c() {
+void floor_84658c(device half2* const tint_symbol_1) {
   half2 arg_0 = half2(1.5h);
   half2 res = floor(arg_0);
+  *(tint_symbol_1) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner() {
-  floor_84658c();
+float4 vertex_main_inner(device half2* const tint_symbol_2) {
+  floor_84658c(tint_symbol_2);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
+vertex tint_symbol vertex_main(device half2* tint_symbol_3 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main() {
-  floor_84658c();
+fragment void fragment_main(device half2* tint_symbol_4 [[buffer(0)]]) {
+  floor_84658c(tint_symbol_4);
   return;
 }
 
-kernel void compute_main() {
-  floor_84658c();
+kernel void compute_main(device half2* tint_symbol_5 [[buffer(0)]]) {
+  floor_84658c(tint_symbol_5);
   return;
 }
 

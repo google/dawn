@@ -1,8 +1,20 @@
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  mat4x3 inner;
+} prevent_dce;
+
+void assign_and_preserve_padding_prevent_dce(mat4x3 value) {
+  prevent_dce.inner[0] = value[0u];
+  prevent_dce.inner[1] = value[1u];
+  prevent_dce.inner[2] = value[2u];
+  prevent_dce.inner[3] = value[3u];
+}
+
 void transpose_d8f8ba() {
   mat3x4 arg_0 = mat3x4(vec4(1.0f), vec4(1.0f), vec4(1.0f));
   mat4x3 res = transpose(arg_0);
+  assign_and_preserve_padding_prevent_dce(res);
 }
 
 vec4 vertex_main() {
@@ -21,9 +33,21 @@ void main() {
 #version 310 es
 precision mediump float;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  mat4x3 inner;
+} prevent_dce;
+
+void assign_and_preserve_padding_prevent_dce(mat4x3 value) {
+  prevent_dce.inner[0] = value[0u];
+  prevent_dce.inner[1] = value[1u];
+  prevent_dce.inner[2] = value[2u];
+  prevent_dce.inner[3] = value[3u];
+}
+
 void transpose_d8f8ba() {
   mat3x4 arg_0 = mat3x4(vec4(1.0f), vec4(1.0f), vec4(1.0f));
   mat4x3 res = transpose(arg_0);
+  assign_and_preserve_padding_prevent_dce(res);
 }
 
 void fragment_main() {
@@ -36,9 +60,21 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  mat4x3 inner;
+} prevent_dce;
+
+void assign_and_preserve_padding_prevent_dce(mat4x3 value) {
+  prevent_dce.inner[0] = value[0u];
+  prevent_dce.inner[1] = value[1u];
+  prevent_dce.inner[2] = value[2u];
+  prevent_dce.inner[3] = value[3u];
+}
+
 void transpose_d8f8ba() {
   mat3x4 arg_0 = mat3x4(vec4(1.0f), vec4(1.0f), vec4(1.0f));
   mat4x3 res = transpose(arg_0);
+  assign_and_preserve_padding_prevent_dce(res);
 }
 
 void compute_main() {

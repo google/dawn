@@ -25,7 +25,6 @@
 fn acosh_3433e8() {
   var res = acosh(1.5430806348);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   acosh_3433e8();

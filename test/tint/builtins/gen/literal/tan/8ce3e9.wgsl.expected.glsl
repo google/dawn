@@ -1,7 +1,12 @@
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec2 inner;
+} prevent_dce;
+
 void tan_8ce3e9() {
   vec2 res = vec2(1.55740773677825927734f);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -20,8 +25,13 @@ void main() {
 #version 310 es
 precision mediump float;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec2 inner;
+} prevent_dce;
+
 void tan_8ce3e9() {
   vec2 res = vec2(1.55740773677825927734f);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -34,8 +44,13 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec2 inner;
+} prevent_dce;
+
 void tan_8ce3e9() {
   vec2 res = vec2(1.55740773677825927734f);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

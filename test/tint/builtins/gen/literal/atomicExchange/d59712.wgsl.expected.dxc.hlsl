@@ -7,8 +7,11 @@ uint sb_rwatomicExchange(uint offset, uint value) {
 }
 
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void atomicExchange_d59712() {
   uint res = sb_rwatomicExchange(0u, 1u);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 void fragment_main() {

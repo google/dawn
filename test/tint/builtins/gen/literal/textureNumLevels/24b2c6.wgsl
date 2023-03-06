@@ -25,7 +25,9 @@
 // fn textureNumLevels(texture: texture_2d<f32>) -> u32
 fn textureNumLevels_24b2c6() {
   var res: u32 = textureNumLevels(arg_0);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

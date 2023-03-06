@@ -28,7 +28,9 @@ struct SB_RW {
 // fn atomicLoad(ptr<storage, atomic<u32>, read_write>) -> u32
 fn atomicLoad_fe6cc3() {
   var res: u32 = atomicLoad(&sb_rw.arg_0);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @fragment
 fn fragment_main() {

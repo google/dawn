@@ -26,7 +26,6 @@ fn sinh_a3da7c() {
   const arg_0 = vec4(1.);
   var res = sinh(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   sinh_a3da7c();

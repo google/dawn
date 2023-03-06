@@ -25,7 +25,6 @@
 fn length_936ad5() {
   var res = length(0.);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   length_936ad5();

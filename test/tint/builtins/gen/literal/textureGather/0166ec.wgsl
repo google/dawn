@@ -26,7 +26,9 @@
 // fn textureGather(@const component: u32, texture: texture_cube<i32>, sampler: sampler, coords: vec3<f32>) -> vec4<i32>
 fn textureGather_0166ec() {
   var res: vec4<i32> = textureGather(1u, arg_1, arg_2, vec3<f32>(1.f));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<i32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

@@ -7,7 +7,10 @@ struct SB_RW {
 fn atomicAnd_85a8d9() {
   var arg_1 = 1u;
   var res : u32 = atomicAnd(&(sb_rw.arg_0), arg_1);
+  prevent_dce = res;
 }
+
+@group(2) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @fragment
 fn fragment_main() {

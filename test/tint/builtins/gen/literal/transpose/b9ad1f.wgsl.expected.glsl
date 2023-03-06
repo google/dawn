@@ -1,8 +1,18 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16mat2x3 inner;
+} prevent_dce;
+
+void assign_and_preserve_padding_prevent_dce(f16mat2x3 value) {
+  prevent_dce.inner[0] = value[0u];
+  prevent_dce.inner[1] = value[1u];
+}
+
 void transpose_b9ad1f() {
   f16mat2x3 res = f16mat2x3(f16vec3(1.0hf), f16vec3(1.0hf));
+  assign_and_preserve_padding_prevent_dce(res);
 }
 
 vec4 vertex_main() {
@@ -22,8 +32,18 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 precision mediump float;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16mat2x3 inner;
+} prevent_dce;
+
+void assign_and_preserve_padding_prevent_dce(f16mat2x3 value) {
+  prevent_dce.inner[0] = value[0u];
+  prevent_dce.inner[1] = value[1u];
+}
+
 void transpose_b9ad1f() {
   f16mat2x3 res = f16mat2x3(f16vec3(1.0hf), f16vec3(1.0hf));
+  assign_and_preserve_padding_prevent_dce(res);
 }
 
 void fragment_main() {
@@ -37,8 +57,18 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16mat2x3 inner;
+} prevent_dce;
+
+void assign_and_preserve_padding_prevent_dce(f16mat2x3 value) {
+  prevent_dce.inner[0] = value[0u];
+  prevent_dce.inner[1] = value[1u];
+}
+
 void transpose_b9ad1f() {
   f16mat2x3 res = f16mat2x3(f16vec3(1.0hf), f16vec3(1.0hf));
+  assign_and_preserve_padding_prevent_dce(res);
 }
 
 void compute_main() {

@@ -1,7 +1,12 @@
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec3 inner;
+} prevent_dce;
+
 void sign_9603b1() {
   ivec3 res = ivec3(1);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -20,8 +25,13 @@ void main() {
 #version 310 es
 precision mediump float;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec3 inner;
+} prevent_dce;
+
 void sign_9603b1() {
   ivec3 res = ivec3(1);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -34,8 +44,13 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec3 inner;
+} prevent_dce;
+
 void sign_9603b1() {
   ivec3 res = ivec3(1);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

@@ -1,8 +1,13 @@
 #version 310 es
 
 layout(rgba16ui) uniform highp writeonly uimage2DArray arg_0;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void textureDimensions_40ecf4() {
   uvec2 res = uvec2(imageSize(arg_0).xy);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -22,8 +27,13 @@ void main() {
 precision mediump float;
 
 layout(rgba16ui) uniform highp writeonly uimage2DArray arg_0;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void textureDimensions_40ecf4() {
   uvec2 res = uvec2(imageSize(arg_0).xy);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -37,8 +47,13 @@ void main() {
 #version 310 es
 
 layout(rgba16ui) uniform highp writeonly uimage2DArray arg_0;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void textureDimensions_40ecf4() {
   uvec2 res = uvec2(imageSize(arg_0).xy);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

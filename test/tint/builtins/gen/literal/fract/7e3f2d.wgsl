@@ -25,7 +25,6 @@
 fn fract_7e3f2d() {
   var res = fract(vec4(1.25));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   fract_7e3f2d();

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 35
+; Bound: 43
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -9,6 +9,9 @@
                OpExecutionMode %fragment_main OriginUpperLeft
                OpName %arg_0 "arg_0"
                OpName %arg_1 "arg_1"
+               OpName %prevent_dce_block "prevent_dce_block"
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce "prevent_dce"
                OpName %textureSampleBias_53b9f7 "textureSampleBias_53b9f7"
                OpName %arg_2 "arg_2"
                OpName %arg_3 "arg_3"
@@ -18,6 +21,10 @@
                OpDecorate %arg_0 Binding 0
                OpDecorate %arg_1 DescriptorSet 1
                OpDecorate %arg_1 Binding 1
+               OpDecorate %prevent_dce_block Block
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce DescriptorSet 2
+               OpDecorate %prevent_dce Binding 0
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float Cube 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
@@ -25,37 +32,46 @@
           %7 = OpTypeSampler
 %_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
       %arg_1 = OpVariable %_ptr_UniformConstant_7 UniformConstant
+    %v4float = OpTypeVector %float 4
+%prevent_dce_block = OpTypeStruct %v4float
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+%prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
        %void = OpTypeVoid
-          %8 = OpTypeFunction %void
+         %12 = OpTypeFunction %void
     %v3float = OpTypeVector %float 3
     %float_1 = OpConstant %float 1
-         %14 = OpConstantComposite %v3float %float_1 %float_1 %float_1
+         %18 = OpConstantComposite %v3float %float_1 %float_1 %float_1
 %_ptr_Function_v3float = OpTypePointer Function %v3float
-         %17 = OpConstantNull %v3float
+         %21 = OpConstantNull %v3float
 %_ptr_Function_float = OpTypePointer Function %float
-         %20 = OpConstantNull %float
-    %v4float = OpTypeVector %float 4
-         %25 = OpTypeSampledImage %3
+         %24 = OpConstantNull %float
+         %28 = OpTypeSampledImage %3
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-         %31 = OpConstantNull %v4float
-%textureSampleBias_53b9f7 = OpFunction %void None %8
-         %11 = OpLabel
-      %arg_2 = OpVariable %_ptr_Function_v3float Function %17
-      %arg_3 = OpVariable %_ptr_Function_float Function %20
-        %res = OpVariable %_ptr_Function_v4float Function %31
-               OpStore %arg_2 %14
+         %34 = OpConstantNull %v4float
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
+%textureSampleBias_53b9f7 = OpFunction %void None %12
+         %15 = OpLabel
+      %arg_2 = OpVariable %_ptr_Function_v3float Function %21
+      %arg_3 = OpVariable %_ptr_Function_float Function %24
+        %res = OpVariable %_ptr_Function_v4float Function %34
+               OpStore %arg_2 %18
                OpStore %arg_3 %float_1
-         %23 = OpLoad %7 %arg_1
-         %24 = OpLoad %3 %arg_0
-         %26 = OpSampledImage %25 %24 %23
-         %27 = OpLoad %v3float %arg_2
-         %28 = OpLoad %float %arg_3
-         %21 = OpImageSampleImplicitLod %v4float %26 %27 Bias %28
-               OpStore %res %21
+         %26 = OpLoad %7 %arg_1
+         %27 = OpLoad %3 %arg_0
+         %29 = OpSampledImage %28 %27 %26
+         %30 = OpLoad %v3float %arg_2
+         %31 = OpLoad %float %arg_3
+         %25 = OpImageSampleImplicitLod %v4float %29 %30 Bias %31
+               OpStore %res %25
+         %38 = OpAccessChain %_ptr_StorageBuffer_v4float %prevent_dce %uint_0
+         %39 = OpLoad %v4float %res
+               OpStore %38 %39
                OpReturn
                OpFunctionEnd
-%fragment_main = OpFunction %void None %8
-         %33 = OpLabel
-         %34 = OpFunctionCall %void %textureSampleBias_53b9f7
+%fragment_main = OpFunction %void None %12
+         %41 = OpLabel
+         %42 = OpFunctionCall %void %textureSampleBias_53b9f7
                OpReturn
                OpFunctionEnd

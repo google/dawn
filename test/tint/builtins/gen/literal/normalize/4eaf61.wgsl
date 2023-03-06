@@ -25,7 +25,6 @@
 fn normalize_4eaf61() {
   var res = normalize(vec4(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   normalize_4eaf61();

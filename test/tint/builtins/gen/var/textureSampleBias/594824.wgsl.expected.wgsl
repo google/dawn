@@ -7,7 +7,10 @@ fn textureSampleBias_594824() {
   var arg_3 = 1.0f;
   const arg_4 = vec3<i32>(1i);
   var res : vec4<f32> = textureSampleBias(arg_0, arg_1, arg_2, arg_3, arg_4);
+  prevent_dce = res;
 }
+
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {

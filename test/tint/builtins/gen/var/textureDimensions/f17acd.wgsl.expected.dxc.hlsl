@@ -1,10 +1,12 @@
 Texture1D<float4> arg_0 : register(t0, space1);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureDimensions_f17acd() {
   int arg_1 = 1;
   int2 tint_tmp;
   arg_0.GetDimensions(arg_1, tint_tmp.x, tint_tmp.y);
   uint res = tint_tmp.x;
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

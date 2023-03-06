@@ -26,7 +26,6 @@ fn length_c2c544() {
   const arg_0 = vec4(0.);
   var res = length(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   length_c2c544();

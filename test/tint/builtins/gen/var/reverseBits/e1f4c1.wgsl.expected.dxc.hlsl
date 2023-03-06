@@ -1,6 +1,9 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void reverseBits_e1f4c1() {
   uint2 arg_0 = (1u).xx;
   uint2 res = reversebits(arg_0);
+  prevent_dce.Store2(0u, asuint(res));
 }
 
 struct tint_symbol {

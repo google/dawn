@@ -26,7 +26,6 @@ fn sign_3bdab6() {
   const arg_0 = vec4(1);
   var res = sign(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   sign_3bdab6();

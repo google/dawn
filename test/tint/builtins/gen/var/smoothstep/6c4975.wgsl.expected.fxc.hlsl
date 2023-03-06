@@ -1,8 +1,11 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void smoothstep_6c4975() {
   float arg_0 = 2.0f;
   float arg_1 = 4.0f;
   float arg_2 = 3.0f;
   float res = smoothstep(arg_0, arg_1, arg_2);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

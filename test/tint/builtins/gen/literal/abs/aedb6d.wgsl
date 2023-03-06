@@ -25,7 +25,6 @@
 fn abs_aedb6d() {
   var res = abs(1.);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   abs_aedb6d();

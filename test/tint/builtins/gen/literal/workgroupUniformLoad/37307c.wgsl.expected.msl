@@ -8,21 +8,22 @@ uint tint_workgroupUniformLoad(threadgroup uint* const p) {
   return result;
 }
 
-void workgroupUniformLoad_37307c(threadgroup uint* const tint_symbol) {
+void workgroupUniformLoad_37307c(threadgroup uint* const tint_symbol, device uint* const tint_symbol_1) {
   uint res = tint_workgroupUniformLoad(tint_symbol);
+  *(tint_symbol_1) = res;
 }
 
-void compute_main_inner(uint local_invocation_index, threadgroup uint* const tint_symbol_1) {
+void compute_main_inner(uint local_invocation_index, threadgroup uint* const tint_symbol_2, device uint* const tint_symbol_3) {
   {
-    *(tint_symbol_1) = 0u;
+    *(tint_symbol_2) = 0u;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  workgroupUniformLoad_37307c(tint_symbol_1);
+  workgroupUniformLoad_37307c(tint_symbol_2, tint_symbol_3);
 }
 
-kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup uint tint_symbol_2;
-  compute_main_inner(local_invocation_index, &(tint_symbol_2));
+kernel void compute_main(device uint* tint_symbol_5 [[buffer(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup uint tint_symbol_4;
+  compute_main_inner(local_invocation_index, &(tint_symbol_4), tint_symbol_5);
   return;
 }
 

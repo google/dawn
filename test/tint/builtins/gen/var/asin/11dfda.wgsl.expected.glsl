@@ -1,9 +1,14 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 void asin_11dfda() {
   float16_t arg_0 = 0.479248046875hf;
   float16_t res = asin(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -23,9 +28,14 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 precision mediump float;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 void asin_11dfda() {
   float16_t arg_0 = 0.479248046875hf;
   float16_t res = asin(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -39,9 +49,14 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 void asin_11dfda() {
   float16_t arg_0 = 0.479248046875hf;
   float16_t res = asin(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

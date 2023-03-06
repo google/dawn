@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 29
+; Bound: 35
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -14,6 +14,9 @@
                OpName %SB_RW "SB_RW"
                OpMemberName %SB_RW 0 "arg_0"
                OpName %sb_rw "sb_rw"
+               OpName %prevent_dce_block "prevent_dce_block"
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce "prevent_dce"
                OpName %atomicMax_92aa72 "atomicMax_92aa72"
                OpName %arg_1 "arg_1"
                OpName %res "res"
@@ -24,38 +27,49 @@
                OpMemberDecorate %SB_RW 0 Offset 0
                OpDecorate %sb_rw DescriptorSet 0
                OpDecorate %sb_rw Binding 0
+               OpDecorate %prevent_dce_block Block
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce DescriptorSet 2
+               OpDecorate %prevent_dce Binding 0
         %int = OpTypeInt 32 1
       %SB_RW = OpTypeStruct %int
 %sb_rw_block = OpTypeStruct %SB_RW
 %_ptr_StorageBuffer_sb_rw_block = OpTypePointer StorageBuffer %sb_rw_block
       %sb_rw = OpVariable %_ptr_StorageBuffer_sb_rw_block StorageBuffer
+%prevent_dce_block = OpTypeStruct %int
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+%prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
        %void = OpTypeVoid
-          %6 = OpTypeFunction %void
+          %9 = OpTypeFunction %void
       %int_1 = OpConstant %int 1
 %_ptr_Function_int = OpTypePointer Function %int
-         %13 = OpConstantNull %int
+         %16 = OpConstantNull %int
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
-%atomicMax_92aa72 = OpFunction %void None %6
-          %9 = OpLabel
-      %arg_1 = OpVariable %_ptr_Function_int Function %13
-        %res = OpVariable %_ptr_Function_int Function %13
+%_ptr_StorageBuffer_int_0 = OpTypePointer StorageBuffer %int
+%atomicMax_92aa72 = OpFunction %void None %9
+         %12 = OpLabel
+      %arg_1 = OpVariable %_ptr_Function_int Function %16
+        %res = OpVariable %_ptr_Function_int Function %16
                OpStore %arg_1 %int_1
-         %20 = OpAccessChain %_ptr_StorageBuffer_int %sb_rw %uint_0 %uint_0
-         %21 = OpLoad %int %arg_1
-         %14 = OpAtomicSMax %int %20 %uint_1 %uint_0 %21
-               OpStore %res %14
+         %23 = OpAccessChain %_ptr_StorageBuffer_int %sb_rw %uint_0 %uint_0
+         %24 = OpLoad %int %arg_1
+         %17 = OpAtomicSMax %int %23 %uint_1 %uint_0 %24
+               OpStore %res %17
+         %27 = OpAccessChain %_ptr_StorageBuffer_int_0 %prevent_dce %uint_0
+         %28 = OpLoad %int %res
+               OpStore %27 %28
                OpReturn
                OpFunctionEnd
-%fragment_main = OpFunction %void None %6
-         %24 = OpLabel
-         %25 = OpFunctionCall %void %atomicMax_92aa72
+%fragment_main = OpFunction %void None %9
+         %30 = OpLabel
+         %31 = OpFunctionCall %void %atomicMax_92aa72
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %6
-         %27 = OpLabel
-         %28 = OpFunctionCall %void %atomicMax_92aa72
+%compute_main = OpFunction %void None %9
+         %33 = OpLabel
+         %34 = OpFunctionCall %void %atomicMax_92aa72
                OpReturn
                OpFunctionEnd

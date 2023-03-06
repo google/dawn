@@ -1,34 +1,35 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void atan_02979a() {
+void atan_02979a(device float* const tint_symbol_1) {
   float arg_0 = 1.0f;
   float res = atan(arg_0);
+  *(tint_symbol_1) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner() {
-  atan_02979a();
+float4 vertex_main_inner(device float* const tint_symbol_2) {
+  atan_02979a(tint_symbol_2);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
+vertex tint_symbol vertex_main(device float* tint_symbol_3 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main() {
-  atan_02979a();
+fragment void fragment_main(device float* tint_symbol_4 [[buffer(0)]]) {
+  atan_02979a(tint_symbol_4);
   return;
 }
 
-kernel void compute_main() {
-  atan_02979a();
+kernel void compute_main(device float* tint_symbol_5 [[buffer(0)]]) {
+  atan_02979a(tint_symbol_5);
   return;
 }
 

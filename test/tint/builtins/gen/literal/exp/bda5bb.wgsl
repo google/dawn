@@ -25,7 +25,6 @@
 fn exp_bda5bb() {
   var res = exp(vec3(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   exp_bda5bb();

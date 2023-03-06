@@ -1,13 +1,14 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void fwidth_df38ef() {
+void fwidth_df38ef(device float* const tint_symbol) {
   float arg_0 = 1.0f;
   float res = fwidth(arg_0);
+  *(tint_symbol) = res;
 }
 
-fragment void fragment_main() {
-  fwidth_df38ef();
+fragment void fragment_main(device float* tint_symbol_1 [[buffer(0)]]) {
+  fwidth_df38ef(tint_symbol_1);
   return;
 }
 

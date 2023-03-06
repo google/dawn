@@ -26,7 +26,6 @@
 fn textureStore_9f5318() {
   textureStore(arg_0, vec2<u32>(1u), vec4<i32>(1i));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureStore_9f5318();

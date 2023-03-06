@@ -360,6 +360,7 @@ func generate(tmpl string, cache *genCache, w io.Writer, writeFile WriteFile) er
 		"DeepestElementType":    gen.DeepestElementType,
 		"IsAbstract":            gen.IsAbstract,
 		"IsDeclarable":          gen.IsDeclarable,
+		"IsHostShareable":       gen.IsHostShareable,
 		"OverloadUsesF16":       gen.OverloadUsesF16,
 		"IsFirstIn":             isFirstIn,
 		"IsLastIn":              isLastIn,

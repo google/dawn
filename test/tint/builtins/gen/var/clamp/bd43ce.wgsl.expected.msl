@@ -5,36 +5,37 @@ uint4 tint_clamp(uint4 e, uint4 low, uint4 high) {
   return min(max(e, low), high);
 }
 
-void clamp_bd43ce() {
+void clamp_bd43ce(device uint4* const tint_symbol_1) {
   uint4 arg_0 = uint4(1u);
   uint4 arg_1 = uint4(1u);
   uint4 arg_2 = uint4(1u);
   uint4 res = tint_clamp(arg_0, arg_1, arg_2);
+  *(tint_symbol_1) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner() {
-  clamp_bd43ce();
+float4 vertex_main_inner(device uint4* const tint_symbol_2) {
+  clamp_bd43ce(tint_symbol_2);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
+vertex tint_symbol vertex_main(device uint4* tint_symbol_3 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main() {
-  clamp_bd43ce();
+fragment void fragment_main(device uint4* tint_symbol_4 [[buffer(0)]]) {
+  clamp_bd43ce(tint_symbol_4);
   return;
 }
 
-kernel void compute_main() {
-  clamp_bd43ce();
+kernel void compute_main(device uint4* tint_symbol_5 [[buffer(0)]]) {
+  clamp_bd43ce(tint_symbol_5);
   return;
 }
 

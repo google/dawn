@@ -25,7 +25,6 @@
 fn pow_749c42() {
   var res = pow(1., 1.);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   pow_749c42();

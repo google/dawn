@@ -1,6 +1,9 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void all_bd2dba() {
   bool3 arg_0 = (true).xxx;
   bool res = all(arg_0);
+  prevent_dce.Store(0u, asuint((all((res == false)) ? 1 : 0)));
 }
 
 struct tint_symbol {

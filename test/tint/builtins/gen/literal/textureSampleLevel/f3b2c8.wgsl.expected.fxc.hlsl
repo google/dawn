@@ -1,8 +1,10 @@
 Texture2D arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureSampleLevel_f3b2c8() {
   float res = arg_0.SampleLevel(arg_1, (1.0f).xx, 1u, (1).xx).x;
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

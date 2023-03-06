@@ -25,7 +25,6 @@
 fn select_3a14be() {
   var res = select(vec2(1), vec2(1), true);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   select_3a14be();

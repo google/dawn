@@ -26,7 +26,6 @@ fn acosh_9f213e() {
   const arg_0 = vec3(1.5430806348);
   var res = acosh(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   acosh_9f213e();

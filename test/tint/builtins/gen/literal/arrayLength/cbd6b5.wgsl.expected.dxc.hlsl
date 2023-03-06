@@ -1,10 +1,12 @@
 RWByteAddressBuffer sb_rw : register(u0, space0);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void arrayLength_cbd6b5() {
   uint tint_symbol_2 = 0u;
   sb_rw.GetDimensions(tint_symbol_2);
   const uint tint_symbol_3 = ((tint_symbol_2 - 0u) / 2u);
   uint res = tint_symbol_3;
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

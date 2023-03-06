@@ -1,8 +1,11 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void mix_ee2468() {
   vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> arg_1 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> arg_2 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> res = lerp(arg_0, arg_1, arg_2);
+  prevent_dce.Store<vector<float16_t, 4> >(0u, res);
 }
 
 struct tint_symbol {

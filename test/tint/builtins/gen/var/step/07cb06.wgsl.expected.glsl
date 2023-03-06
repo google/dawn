@@ -1,10 +1,15 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16vec2 inner;
+} prevent_dce;
+
 void step_07cb06() {
   f16vec2 arg_0 = f16vec2(1.0hf);
   f16vec2 arg_1 = f16vec2(1.0hf);
   f16vec2 res = step(arg_0, arg_1);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -24,10 +29,15 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 precision mediump float;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16vec2 inner;
+} prevent_dce;
+
 void step_07cb06() {
   f16vec2 arg_0 = f16vec2(1.0hf);
   f16vec2 arg_1 = f16vec2(1.0hf);
   f16vec2 res = step(arg_0, arg_1);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -41,10 +51,15 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16vec2 inner;
+} prevent_dce;
+
 void step_07cb06() {
   f16vec2 arg_0 = f16vec2(1.0hf);
   f16vec2 arg_1 = f16vec2(1.0hf);
   f16vec2 res = step(arg_0, arg_1);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

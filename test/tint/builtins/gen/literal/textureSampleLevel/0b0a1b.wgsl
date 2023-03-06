@@ -26,7 +26,9 @@
 // fn textureSampleLevel(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, level: f32, @const offset: vec2<i32>) -> vec4<f32>
 fn textureSampleLevel_0b0a1b() {
   var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec2<f32>(1.f), 1.f, vec2<i32>(1i));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

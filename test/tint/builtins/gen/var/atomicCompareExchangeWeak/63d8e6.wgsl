@@ -31,7 +31,6 @@ fn atomicCompareExchangeWeak_63d8e6() {
   var arg_2 = 1u;
   var res = atomicCompareExchangeWeak(&sb_rw.arg_0, arg_1, arg_2);
 }
-
 @fragment
 fn fragment_main() {
   atomicCompareExchangeWeak_63d8e6();

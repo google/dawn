@@ -26,7 +26,6 @@ fn acos_5e9ad2() {
   const arg_0 = 0.96891242171;
   var res = acos(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   acos_5e9ad2();

@@ -25,7 +25,6 @@
 fn max_c023dd() {
   var res = max(1., 1.);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   max_c023dd();

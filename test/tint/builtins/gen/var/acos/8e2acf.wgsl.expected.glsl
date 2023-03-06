@@ -1,8 +1,13 @@
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void acos_8e2acf() {
   vec4 arg_0 = vec4(0.96891242265701293945f);
   vec4 res = acos(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -21,9 +26,14 @@ void main() {
 #version 310 es
 precision mediump float;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void acos_8e2acf() {
   vec4 arg_0 = vec4(0.96891242265701293945f);
   vec4 res = acos(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -36,9 +46,14 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void acos_8e2acf() {
   vec4 arg_0 = vec4(0.96891242265701293945f);
   vec4 res = acos(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

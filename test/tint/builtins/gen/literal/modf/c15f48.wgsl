@@ -25,7 +25,6 @@
 fn modf_c15f48() {
   var res = modf(-1.5);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   modf_c15f48();

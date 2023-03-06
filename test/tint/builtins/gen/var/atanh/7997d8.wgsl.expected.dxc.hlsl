@@ -2,9 +2,12 @@ float tint_atanh(float x) {
   return (log(((1.0f + x) / (1.0f - x))) * 0.5f);
 }
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void atanh_7997d8() {
   float arg_0 = 0.5f;
   float res = tint_atanh(arg_0);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

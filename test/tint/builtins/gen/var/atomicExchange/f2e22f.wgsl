@@ -29,7 +29,9 @@ struct SB_RW {
 fn atomicExchange_f2e22f() {
   var arg_1 = 1i;
   var res: i32 = atomicExchange(&sb_rw.arg_0, arg_1);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {

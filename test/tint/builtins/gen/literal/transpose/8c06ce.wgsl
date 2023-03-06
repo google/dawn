@@ -26,7 +26,9 @@ enable f16;
 // fn transpose(mat<3, 4, f16>) -> mat<4, 3, f16>
 fn transpose_8c06ce() {
   var res: mat4x3<f16> = transpose(mat3x4<f16>(1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : mat4x3<f16>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

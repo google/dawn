@@ -46,8 +46,13 @@ layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
 } ext_tex_params;
 
 uniform highp sampler2D arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void textureDimensions_cdc6c9() {
   uvec2 res = uvec2(textureSize(arg_0_1, 0));
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -112,8 +117,13 @@ layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
 } ext_tex_params;
 
 uniform highp sampler2D arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void textureDimensions_cdc6c9() {
   uvec2 res = uvec2(textureSize(arg_0_1, 0));
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -172,8 +182,13 @@ layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
 } ext_tex_params;
 
 uniform highp sampler2D arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void textureDimensions_cdc6c9() {
   uvec2 res = uvec2(textureSize(arg_0_1, 0));
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

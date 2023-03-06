@@ -25,7 +25,6 @@
 fn atanh_c5dc32() {
   var res = atanh(0.5);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   atanh_c5dc32();

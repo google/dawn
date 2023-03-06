@@ -25,7 +25,6 @@
 fn mix_30de36() {
   var res = mix(1., 1., 1.);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   mix_30de36();

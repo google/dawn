@@ -26,7 +26,9 @@
 // fn textureGather(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: u32) -> vec4<f32>
 fn textureGather_2a4f40() {
   var res: vec4<f32> = textureGather(arg_0, arg_1, vec2<f32>(1.f), 1u);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

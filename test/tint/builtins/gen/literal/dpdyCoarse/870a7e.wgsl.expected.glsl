@@ -1,8 +1,13 @@
 #version 310 es
 precision mediump float;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void dpdyCoarse_870a7e() {
   float res = dFdy(1.0f);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {

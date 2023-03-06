@@ -25,7 +25,6 @@
 fn determinant_1bf6e7() {
   var res = determinant(mat2x2(1., 1., 1., 1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   determinant_1bf6e7();

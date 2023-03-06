@@ -3,9 +3,12 @@ uint tint_pack4x8snorm(float4 param_0) {
   return asuint(i.x | i.y << 8 | i.z << 16 | i.w << 24);
 }
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void pack4x8snorm_4d22e7() {
   float4 arg_0 = (1.0f).xxxx;
   uint res = tint_pack4x8snorm(arg_0);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

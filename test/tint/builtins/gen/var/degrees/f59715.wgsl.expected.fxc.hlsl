@@ -1,12 +1,15 @@
 SKIP: FAILED
 
 vector<float16_t, 2> tint_degrees(vector<float16_t, 2> param_0) {
-  return param_0 * 57.295779513082323;
+  return param_0 * 57.29577951308232286465;
 }
+
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void degrees_f59715() {
   vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
   vector<float16_t, 2> res = tint_degrees(arg_0);
+  prevent_dce.Store<vector<float16_t, 2> >(0u, res);
 }
 
 struct tint_symbol {

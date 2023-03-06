@@ -25,7 +25,6 @@
 fn select_b93806() {
   var res = select(vec3(1), vec3(1), vec3<bool>(true));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   select_b93806();

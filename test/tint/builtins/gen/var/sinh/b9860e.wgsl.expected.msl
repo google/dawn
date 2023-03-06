@@ -1,34 +1,35 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void sinh_b9860e() {
+void sinh_b9860e(device float2* const tint_symbol_1) {
   float2 arg_0 = float2(1.0f);
   float2 res = sinh(arg_0);
+  *(tint_symbol_1) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner() {
-  sinh_b9860e();
+float4 vertex_main_inner(device float2* const tint_symbol_2) {
+  sinh_b9860e(tint_symbol_2);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
+vertex tint_symbol vertex_main(device float2* tint_symbol_3 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main() {
-  sinh_b9860e();
+fragment void fragment_main(device float2* tint_symbol_4 [[buffer(0)]]) {
+  sinh_b9860e(tint_symbol_4);
   return;
 }
 
-kernel void compute_main() {
-  sinh_b9860e();
+kernel void compute_main(device float2* tint_symbol_5 [[buffer(0)]]) {
+  sinh_b9860e(tint_symbol_5);
   return;
 }
 

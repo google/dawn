@@ -26,7 +26,6 @@ fn log_697e1d() {
   const arg_0 = vec4(1.);
   var res = log(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   log_697e1d();

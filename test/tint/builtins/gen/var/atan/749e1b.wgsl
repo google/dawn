@@ -26,7 +26,6 @@ fn atan_749e1b() {
   const arg_0 = vec3(1.);
   var res = atan(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   atan_749e1b();

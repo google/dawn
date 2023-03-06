@@ -25,7 +25,6 @@
 fn ceil_11b1dc() {
   var res = ceil(vec4(1.5));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   ceil_11b1dc();

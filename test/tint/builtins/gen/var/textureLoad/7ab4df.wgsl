@@ -28,7 +28,9 @@ fn textureLoad_7ab4df() {
   var arg_2 = 1u;
   var arg_3 = 1i;
   var res: vec4<u32> = textureLoad(arg_0, arg_1, arg_2, arg_3);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

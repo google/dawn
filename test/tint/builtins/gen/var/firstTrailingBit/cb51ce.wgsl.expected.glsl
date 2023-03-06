@@ -15,9 +15,14 @@ uvec3 tint_first_trailing_bit(uvec3 v) {
   return uvec3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec3 inner;
+} prevent_dce;
+
 void firstTrailingBit_cb51ce() {
   uvec3 arg_0 = uvec3(1u);
   uvec3 res = tint_first_trailing_bit(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -51,9 +56,14 @@ uvec3 tint_first_trailing_bit(uvec3 v) {
   return uvec3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec3 inner;
+} prevent_dce;
+
 void firstTrailingBit_cb51ce() {
   uvec3 arg_0 = uvec3(1u);
   uvec3 res = tint_first_trailing_bit(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -81,9 +91,14 @@ uvec3 tint_first_trailing_bit(uvec3 v) {
   return uvec3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec3 inner;
+} prevent_dce;
+
 void firstTrailingBit_cb51ce() {
   uvec3 arg_0 = uvec3(1u);
   uvec3 res = tint_first_trailing_bit(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

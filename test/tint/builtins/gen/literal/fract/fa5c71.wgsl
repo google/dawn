@@ -24,7 +24,9 @@
 // fn fract(f32) -> f32
 fn fract_fa5c71() {
   var res: f32 = fract(1.25f);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

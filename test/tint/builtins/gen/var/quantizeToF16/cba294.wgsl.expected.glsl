@@ -7,9 +7,14 @@ vec4 tint_quantizeToF16(vec4 param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void quantizeToF16_cba294() {
   vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_quantizeToF16(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -35,9 +40,14 @@ vec4 tint_quantizeToF16(vec4 param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void quantizeToF16_cba294() {
   vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_quantizeToF16(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -57,9 +67,14 @@ vec4 tint_quantizeToF16(vec4 param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 void quantizeToF16_cba294() {
   vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_quantizeToF16(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

@@ -25,7 +25,6 @@
 fn sinh_77a2a3() {
   var res = sinh(vec3(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   sinh_77a2a3();

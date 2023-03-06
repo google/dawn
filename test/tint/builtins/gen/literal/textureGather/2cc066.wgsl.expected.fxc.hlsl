@@ -1,8 +1,10 @@
 Texture2DArray<uint4> arg_1 : register(t1, space1);
 SamplerState arg_2 : register(s2, space1);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureGather_2cc066() {
   uint4 res = arg_1.GatherGreen(arg_2, float3((1.0f).xx, float(1)));
+  prevent_dce.Store4(0u, asuint(res));
 }
 
 struct tint_symbol {

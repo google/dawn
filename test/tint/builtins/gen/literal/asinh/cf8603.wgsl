@@ -25,7 +25,6 @@
 fn asinh_cf8603() {
   var res = asinh(vec4(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   asinh_cf8603();

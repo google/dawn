@@ -4,9 +4,14 @@ vec2 tint_acosh(vec2 x) {
   return mix(acosh(x), vec2(0.0f), lessThan(x, vec2(1.0f)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec2 inner;
+} prevent_dce;
+
 void acosh_640883() {
   vec2 arg_0 = vec2(1.54308068752288818359f);
   vec2 res = tint_acosh(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -29,9 +34,14 @@ vec2 tint_acosh(vec2 x) {
   return mix(acosh(x), vec2(0.0f), lessThan(x, vec2(1.0f)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec2 inner;
+} prevent_dce;
+
 void acosh_640883() {
   vec2 arg_0 = vec2(1.54308068752288818359f);
   vec2 res = tint_acosh(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -48,9 +58,14 @@ vec2 tint_acosh(vec2 x) {
   return mix(acosh(x), vec2(0.0f), lessThan(x, vec2(1.0f)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec2 inner;
+} prevent_dce;
+
 void acosh_640883() {
   vec2 arg_0 = vec2(1.54308068752288818359f);
   vec2 res = tint_acosh(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

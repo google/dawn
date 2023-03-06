@@ -1,6 +1,9 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void saturate_dcde71() {
   vector<float16_t, 4> arg_0 = (float16_t(2.0h)).xxxx;
   vector<float16_t, 4> res = saturate(arg_0);
+  prevent_dce.Store<vector<float16_t, 4> >(0u, res);
 }
 
 struct tint_symbol {

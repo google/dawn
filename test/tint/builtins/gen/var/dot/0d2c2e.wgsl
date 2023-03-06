@@ -27,7 +27,6 @@ fn dot_0d2c2e() {
   const arg_1 = vec2(1.);
   var res = dot(arg_0, arg_1);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   dot_0d2c2e();

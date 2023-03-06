@@ -26,7 +26,6 @@ fn floor_e585ef() {
   const arg_0 = vec2(1.5);
   var res = floor(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   floor_e585ef();

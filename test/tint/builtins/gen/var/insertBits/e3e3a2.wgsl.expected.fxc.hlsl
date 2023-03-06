@@ -4,12 +4,15 @@ uint tint_insert_bits(uint v, uint n, uint offset, uint count) {
   return ((((offset < 32u) ? (n << offset) : 0u) & mask) | (v & ~(mask)));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void insertBits_e3e3a2() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   uint arg_3 = 1u;
   uint res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

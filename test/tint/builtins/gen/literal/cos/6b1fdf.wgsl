@@ -25,7 +25,6 @@
 fn cos_6b1fdf() {
   var res = cos(vec3(0.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   cos_6b1fdf();

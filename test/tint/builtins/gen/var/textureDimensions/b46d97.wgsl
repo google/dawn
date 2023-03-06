@@ -26,7 +26,9 @@
 fn textureDimensions_b46d97() {
   var arg_1 = 1i;
   var res: u32 = textureDimensions(arg_0, arg_1);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

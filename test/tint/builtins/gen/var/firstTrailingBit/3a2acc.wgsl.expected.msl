@@ -16,34 +16,35 @@ int tint_first_trailing_bit(int v) {
   return int((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
-void firstTrailingBit_3a2acc() {
+void firstTrailingBit_3a2acc(device int* const tint_symbol_1) {
   int arg_0 = 1;
   int res = tint_first_trailing_bit(arg_0);
+  *(tint_symbol_1) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner() {
-  firstTrailingBit_3a2acc();
+float4 vertex_main_inner(device int* const tint_symbol_2) {
+  firstTrailingBit_3a2acc(tint_symbol_2);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
+vertex tint_symbol vertex_main(device int* tint_symbol_3 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main() {
-  firstTrailingBit_3a2acc();
+fragment void fragment_main(device int* tint_symbol_4 [[buffer(0)]]) {
+  firstTrailingBit_3a2acc(tint_symbol_4);
   return;
 }
 
-kernel void compute_main() {
-  firstTrailingBit_3a2acc();
+kernel void compute_main(device int* tint_symbol_5 [[buffer(0)]]) {
+  firstTrailingBit_3a2acc(tint_symbol_5);
   return;
 }
 

@@ -1,33 +1,34 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void textureSampleLevel_2974eb(depth2d_array<float, access::sample> tint_symbol_1, sampler tint_symbol_2) {
+void textureSampleLevel_2974eb(depth2d_array<float, access::sample> tint_symbol_1, sampler tint_symbol_2, device float* const tint_symbol_3) {
   float res = tint_symbol_1.sample(tint_symbol_2, float2(1.0f), 1, level(1u));
+  *(tint_symbol_3) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner(depth2d_array<float, access::sample> tint_symbol_3, sampler tint_symbol_4) {
-  textureSampleLevel_2974eb(tint_symbol_3, tint_symbol_4);
+float4 vertex_main_inner(depth2d_array<float, access::sample> tint_symbol_4, sampler tint_symbol_5, device float* const tint_symbol_6) {
+  textureSampleLevel_2974eb(tint_symbol_4, tint_symbol_5, tint_symbol_6);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main(depth2d_array<float, access::sample> tint_symbol_5 [[texture(0)]], sampler tint_symbol_6 [[sampler(0)]]) {
-  float4 const inner_result = vertex_main_inner(tint_symbol_5, tint_symbol_6);
+vertex tint_symbol vertex_main(depth2d_array<float, access::sample> tint_symbol_7 [[texture(0)]], sampler tint_symbol_8 [[sampler(0)]], device float* tint_symbol_9 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_7, tint_symbol_8, tint_symbol_9);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main(depth2d_array<float, access::sample> tint_symbol_7 [[texture(0)]], sampler tint_symbol_8 [[sampler(0)]]) {
-  textureSampleLevel_2974eb(tint_symbol_7, tint_symbol_8);
+fragment void fragment_main(depth2d_array<float, access::sample> tint_symbol_10 [[texture(0)]], sampler tint_symbol_11 [[sampler(0)]], device float* tint_symbol_12 [[buffer(0)]]) {
+  textureSampleLevel_2974eb(tint_symbol_10, tint_symbol_11, tint_symbol_12);
   return;
 }
 
-kernel void compute_main(depth2d_array<float, access::sample> tint_symbol_9 [[texture(0)]], sampler tint_symbol_10 [[sampler(0)]]) {
-  textureSampleLevel_2974eb(tint_symbol_9, tint_symbol_10);
+kernel void compute_main(depth2d_array<float, access::sample> tint_symbol_13 [[texture(0)]], sampler tint_symbol_14 [[sampler(0)]], device float* tint_symbol_15 [[buffer(0)]]) {
+  textureSampleLevel_2974eb(tint_symbol_13, tint_symbol_14, tint_symbol_15);
   return;
 }
 

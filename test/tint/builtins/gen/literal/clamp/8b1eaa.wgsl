@@ -25,7 +25,6 @@
 fn clamp_8b1eaa() {
   var res = clamp(vec3(1), vec3(1), vec3(1));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   clamp_8b1eaa();

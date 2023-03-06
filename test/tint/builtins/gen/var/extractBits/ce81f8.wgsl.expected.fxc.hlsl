@@ -7,11 +7,14 @@ uint tint_extract_bits(uint v, uint offset, uint count) {
   return ((shr < 32u) ? (shl_result >> shr) : ((shl_result >> 31u) >> 1u));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void extractBits_ce81f8() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   uint res = tint_extract_bits(arg_0, arg_1, arg_2);
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

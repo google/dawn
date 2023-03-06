@@ -24,7 +24,9 @@
 // fn asin(vec<3, f32>) -> vec<3, f32>
 fn asin_8cd9c9() {
   var res: vec3<f32> = asin(vec3<f32>(0.479425538604f));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

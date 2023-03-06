@@ -5,17 +5,18 @@ struct SB_RW {
   /* 0x0000 */ atomic_int arg_0;
 };
 
-void atomicAdd_d32fe4(device SB_RW* const tint_symbol) {
+void atomicAdd_d32fe4(device SB_RW* const tint_symbol, device int* const tint_symbol_1) {
   int res = atomic_fetch_add_explicit(&((*(tint_symbol)).arg_0), 1, memory_order_relaxed);
+  *(tint_symbol_1) = res;
 }
 
-fragment void fragment_main(device SB_RW* tint_symbol_1 [[buffer(0)]]) {
-  atomicAdd_d32fe4(tint_symbol_1);
+fragment void fragment_main(device SB_RW* tint_symbol_2 [[buffer(0)]], device int* tint_symbol_3 [[buffer(1)]]) {
+  atomicAdd_d32fe4(tint_symbol_2, tint_symbol_3);
   return;
 }
 
-kernel void compute_main(device SB_RW* tint_symbol_2 [[buffer(0)]]) {
-  atomicAdd_d32fe4(tint_symbol_2);
+kernel void compute_main(device SB_RW* tint_symbol_4 [[buffer(0)]], device int* tint_symbol_5 [[buffer(1)]]) {
+  atomicAdd_d32fe4(tint_symbol_4, tint_symbol_5);
   return;
 }
 

@@ -25,7 +25,9 @@
 // fn textureNumLayers(texture: texture_2d_array<u32>) -> u32
 fn textureNumLayers_8ac32a() {
   var res: u32 = textureNumLayers(arg_0);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

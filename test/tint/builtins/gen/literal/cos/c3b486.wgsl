@@ -24,7 +24,9 @@
 // fn cos(vec<2, f32>) -> vec<2, f32>
 fn cos_c3b486() {
   var res: vec2<f32> = cos(vec2<f32>(0.f));
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

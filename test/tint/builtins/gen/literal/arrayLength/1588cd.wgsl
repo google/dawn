@@ -28,7 +28,9 @@ struct SB_RO {
 // fn arrayLength(ptr<storage, array<i32>, read>) -> u32
 fn arrayLength_1588cd() {
   var res: u32 = arrayLength(&sb_ro.arg_0);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

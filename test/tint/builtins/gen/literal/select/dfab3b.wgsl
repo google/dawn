@@ -25,7 +25,6 @@
 fn select_dfab3b() {
   var res = select(vec3(1), vec3(1), true);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   select_dfab3b();

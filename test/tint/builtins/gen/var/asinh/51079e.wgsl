@@ -26,7 +26,6 @@ fn asinh_51079e() {
   const arg_0 = vec3(1.);
   var res = asinh(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   asinh_51079e();

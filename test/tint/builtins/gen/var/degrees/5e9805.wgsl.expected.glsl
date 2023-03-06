@@ -6,9 +6,14 @@ float16_t tint_degrees(float16_t param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 void degrees_5e9805() {
   float16_t arg_0 = 1.0hf;
   float16_t res = tint_degrees(arg_0);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -33,9 +38,14 @@ float16_t tint_degrees(float16_t param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 void degrees_5e9805() {
   float16_t arg_0 = 1.0hf;
   float16_t res = tint_degrees(arg_0);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -54,9 +64,14 @@ float16_t tint_degrees(float16_t param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 void degrees_5e9805() {
   float16_t arg_0 = 1.0hf;
   float16_t res = tint_degrees(arg_0);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

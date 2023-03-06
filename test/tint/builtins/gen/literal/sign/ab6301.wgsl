@@ -25,7 +25,6 @@
 fn sign_ab6301() {
   var res = sign(vec3(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   sign_ab6301();

@@ -24,7 +24,9 @@
 // fn pow(f32, f32) -> f32
 fn pow_46e029() {
   var res: f32 = pow(1.f, 1.f);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

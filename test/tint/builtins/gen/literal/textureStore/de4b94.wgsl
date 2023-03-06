@@ -26,7 +26,6 @@
 fn textureStore_de4b94() {
   textureStore(arg_0, 1u, vec4<i32>(1i));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureStore_de4b94();

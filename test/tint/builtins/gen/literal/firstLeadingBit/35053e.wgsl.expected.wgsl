@@ -1,6 +1,9 @@
 fn firstLeadingBit_35053e() {
   var res : vec3<i32> = firstLeadingBit(vec3<i32>(1i));
+  prevent_dce = res;
 }
+
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<i32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

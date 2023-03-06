@@ -26,7 +26,6 @@ fn trunc_7d6ded() {
   const arg_0 = 1.5;
   var res = trunc(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   trunc_7d6ded();

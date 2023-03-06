@@ -1,6 +1,9 @@
 fn atanh_f3e01b() {
   var res : vec4<f32> = atanh(vec4<f32>(0.5f));
+  prevent_dce = res;
 }
+
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

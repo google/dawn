@@ -25,7 +25,6 @@
 fn radians_524a91() {
   var res = radians(vec4(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   radians_524a91();

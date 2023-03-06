@@ -26,7 +26,9 @@
 // fn textureSampleBias(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32, bias: f32) -> vec4<f32>
 fn textureSampleBias_eed7c4() {
   var res: vec4<f32> = textureSampleBias(arg_0, arg_1, vec3<f32>(1.f), 1i, 1.f);
+  prevent_dce = res;
 }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {

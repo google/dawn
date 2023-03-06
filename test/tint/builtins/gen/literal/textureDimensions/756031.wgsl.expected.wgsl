@@ -2,7 +2,10 @@
 
 fn textureDimensions_756031() {
   var res : vec3<u32> = textureDimensions(arg_0, 1i);
+  prevent_dce = res;
 }
+
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {

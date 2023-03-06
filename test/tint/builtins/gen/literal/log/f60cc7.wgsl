@@ -25,7 +25,6 @@
 fn log_f60cc7() {
   var res = log(vec2(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   log_f60cc7();

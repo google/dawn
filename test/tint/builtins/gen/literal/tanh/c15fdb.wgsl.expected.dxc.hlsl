@@ -1,5 +1,8 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void tanh_c15fdb() {
   float res = 0.76159417629241943359f;
+  prevent_dce.Store(0u, asuint(res));
 }
 
 struct tint_symbol {

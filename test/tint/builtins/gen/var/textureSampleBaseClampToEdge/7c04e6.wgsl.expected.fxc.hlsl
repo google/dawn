@@ -102,9 +102,12 @@ ExternalTextureParams ext_tex_params_load(uint offset) {
   return tint_symbol_2;
 }
 
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void textureSampleBaseClampToEdge_7c04e6() {
   float2 arg_2 = (1.0f).xx;
   float4 res = textureSampleExternal(arg_0, ext_tex_plane_1, arg_1, arg_2, ext_tex_params_load(0u));
+  prevent_dce.Store4(0u, asuint(res));
 }
 
 struct tint_symbol {

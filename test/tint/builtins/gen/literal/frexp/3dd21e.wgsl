@@ -27,7 +27,6 @@ enable f16;
 fn frexp_3dd21e() {
   var res = frexp(vec4<f16>(1.h));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   frexp_3dd21e();

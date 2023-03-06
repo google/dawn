@@ -1,13 +1,14 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void dpdyFine_1fb7ab() {
+void dpdyFine_1fb7ab(device packed_float3* const tint_symbol) {
   float3 arg_0 = float3(1.0f);
   float3 res = dfdy(arg_0);
+  *(tint_symbol) = packed_float3(res);
 }
 
-fragment void fragment_main() {
-  dpdyFine_1fb7ab();
+fragment void fragment_main(device packed_float3* tint_symbol_1 [[buffer(0)]]) {
+  dpdyFine_1fb7ab(tint_symbol_1);
   return;
 }
 

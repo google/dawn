@@ -26,7 +26,6 @@ fn transpose_66fce8() {
   const arg_0 = mat3x3(1., 1., 1., 1., 1., 1., 1., 1., 1.);
   var res = transpose(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   transpose_66fce8();

@@ -26,7 +26,6 @@ fn tan_a0966f() {
   const arg_0 = vec4(1.);
   var res = tan(arg_0);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   tan_a0966f();

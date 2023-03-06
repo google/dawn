@@ -25,7 +25,6 @@
 fn frexp_979800() {
   var res = frexp(vec3<f32>(1.f));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   frexp_979800();

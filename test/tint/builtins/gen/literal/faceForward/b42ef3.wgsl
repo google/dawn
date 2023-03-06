@@ -25,7 +25,6 @@
 fn faceForward_b42ef3() {
   var res = faceForward(vec2(1.), vec2(1.), vec2(1.));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   faceForward_b42ef3();

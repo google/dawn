@@ -1,8 +1,11 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void select_a2860e() {
   int4 arg_0 = (1).xxxx;
   int4 arg_1 = (1).xxxx;
   bool4 arg_2 = (true).xxxx;
   int4 res = (arg_2 ? arg_1 : arg_0);
+  prevent_dce.Store4(0u, asuint(res));
 }
 
 struct tint_symbol {

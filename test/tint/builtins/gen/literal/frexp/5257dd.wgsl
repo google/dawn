@@ -27,7 +27,6 @@ enable f16;
 fn frexp_5257dd() {
   var res = frexp(1.h);
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   frexp_5257dd();

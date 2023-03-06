@@ -26,7 +26,6 @@
 fn textureStore_ac67aa() {
   textureStore(arg_0, vec3<i32>(1i), vec4<u32>(1u));
 }
-
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureStore_ac67aa();

@@ -1,6 +1,9 @@
+RWByteAddressBuffer prevent_dce : register(u0, space2);
+
 void sin_2c903b() {
   vector<float16_t, 3> arg_0 = (float16_t(1.5703125h)).xxx;
   vector<float16_t, 3> res = sin(arg_0);
+  prevent_dce.Store<vector<float16_t, 3> >(0u, res);
 }
 
 struct tint_symbol {

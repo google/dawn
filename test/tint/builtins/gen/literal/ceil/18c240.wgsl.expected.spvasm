@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 34
+; Bound: 42
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -16,6 +16,9 @@
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpName %value "value"
                OpName %vertex_point_size "vertex_point_size"
+               OpName %prevent_dce_block "prevent_dce_block"
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce "prevent_dce"
                OpName %ceil_18c240 "ceil_18c240"
                OpName %res "res"
                OpName %vertex_main_inner "vertex_main_inner"
@@ -24,6 +27,10 @@
                OpName %compute_main "compute_main"
                OpDecorate %value BuiltIn Position
                OpDecorate %vertex_point_size BuiltIn PointSize
+               OpDecorate %prevent_dce_block Block
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce DescriptorSet 2
+               OpDecorate %prevent_dce Binding 0
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
@@ -32,41 +39,50 @@
 %_ptr_Output_float = OpTypePointer Output %float
           %8 = OpConstantNull %float
 %vertex_point_size = OpVariable %_ptr_Output_float Output %8
-       %void = OpTypeVoid
-          %9 = OpTypeFunction %void
        %half = OpTypeFloat 16
      %v2half = OpTypeVector %half 2
+%prevent_dce_block = OpTypeStruct %v2half
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+%prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+       %void = OpTypeVoid
+         %14 = OpTypeFunction %void
 %half_0x1p_1 = OpConstant %half 0x1p+1
-         %16 = OpConstantComposite %v2half %half_0x1p_1 %half_0x1p_1
+         %19 = OpConstantComposite %v2half %half_0x1p_1 %half_0x1p_1
 %_ptr_Function_v2half = OpTypePointer Function %v2half
-         %19 = OpConstantNull %v2half
-         %20 = OpTypeFunction %v4float
+         %22 = OpConstantNull %v2half
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_v2half = OpTypePointer StorageBuffer %v2half
+         %28 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
-%ceil_18c240 = OpFunction %void None %9
-         %12 = OpLabel
-        %res = OpVariable %_ptr_Function_v2half Function %19
-               OpStore %res %16
+%ceil_18c240 = OpFunction %void None %14
+         %17 = OpLabel
+        %res = OpVariable %_ptr_Function_v2half Function %22
+               OpStore %res %19
+         %26 = OpAccessChain %_ptr_StorageBuffer_v2half %prevent_dce %uint_0
+         %27 = OpLoad %v2half %res
+               OpStore %26 %27
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %20
-         %22 = OpLabel
-         %23 = OpFunctionCall %void %ceil_18c240
+%vertex_main_inner = OpFunction %v4float None %28
+         %30 = OpLabel
+         %31 = OpFunctionCall %void %ceil_18c240
                OpReturnValue %5
                OpFunctionEnd
-%vertex_main = OpFunction %void None %9
-         %25 = OpLabel
-         %26 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %26
+%vertex_main = OpFunction %void None %14
+         %33 = OpLabel
+         %34 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %34
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
-%fragment_main = OpFunction %void None %9
-         %29 = OpLabel
-         %30 = OpFunctionCall %void %ceil_18c240
+%fragment_main = OpFunction %void None %14
+         %37 = OpLabel
+         %38 = OpFunctionCall %void %ceil_18c240
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %9
-         %32 = OpLabel
-         %33 = OpFunctionCall %void %ceil_18c240
+%compute_main = OpFunction %void None %14
+         %40 = OpLabel
+         %41 = OpFunctionCall %void %ceil_18c240
                OpReturn
                OpFunctionEnd

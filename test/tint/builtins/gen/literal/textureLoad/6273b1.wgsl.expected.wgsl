@@ -2,7 +2,10 @@
 
 fn textureLoad_6273b1() {
   var res : f32 = textureLoad(arg_0, vec2<i32>(1i), 1i);
+  prevent_dce = res;
 }
+
+@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
