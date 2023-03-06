@@ -55,19 +55,19 @@ CreateComputePipelineAsyncCallbackTask::CreateComputePipelineAsyncCallbackTask(
 
 CreateComputePipelineAsyncCallbackTask::~CreateComputePipelineAsyncCallbackTask() = default;
 
-void CreateComputePipelineAsyncCallbackTask::Finish() {
+void CreateComputePipelineAsyncCallbackTask::FinishImpl() {
     ASSERT(mCreateComputePipelineAsyncCallback != nullptr);
     mCreateComputePipelineAsyncCallback(mStatus, ToAPI(mPipeline.Detach()), mErrorMessage.c_str(),
                                         mUserData);
 }
 
-void CreateComputePipelineAsyncCallbackTask::HandleShutDown() {
+void CreateComputePipelineAsyncCallbackTask::HandleShutDownImpl() {
     ASSERT(mCreateComputePipelineAsyncCallback != nullptr);
     mCreateComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_DeviceDestroyed, nullptr,
                                         "Device destroyed before callback", mUserData);
 }
 
-void CreateComputePipelineAsyncCallbackTask::HandleDeviceLoss() {
+void CreateComputePipelineAsyncCallbackTask::HandleDeviceLossImpl() {
     ASSERT(mCreateComputePipelineAsyncCallback != nullptr);
     mCreateComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_DeviceLost, nullptr,
                                         "Device lost before callback", mUserData);
@@ -91,19 +91,19 @@ CreateRenderPipelineAsyncCallbackTask::CreateRenderPipelineAsyncCallbackTask(
 
 CreateRenderPipelineAsyncCallbackTask::~CreateRenderPipelineAsyncCallbackTask() = default;
 
-void CreateRenderPipelineAsyncCallbackTask::Finish() {
+void CreateRenderPipelineAsyncCallbackTask::FinishImpl() {
     ASSERT(mCreateRenderPipelineAsyncCallback != nullptr);
     mCreateRenderPipelineAsyncCallback(mStatus, ToAPI(mPipeline.Detach()), mErrorMessage.c_str(),
                                        mUserData);
 }
 
-void CreateRenderPipelineAsyncCallbackTask::HandleShutDown() {
+void CreateRenderPipelineAsyncCallbackTask::HandleShutDownImpl() {
     ASSERT(mCreateRenderPipelineAsyncCallback != nullptr);
     mCreateRenderPipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_DeviceDestroyed, nullptr,
                                        "Device destroyed before callback", mUserData);
 }
 
-void CreateRenderPipelineAsyncCallbackTask::HandleDeviceLoss() {
+void CreateRenderPipelineAsyncCallbackTask::HandleDeviceLossImpl() {
     ASSERT(mCreateRenderPipelineAsyncCallback != nullptr);
     mCreateRenderPipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_DeviceLost, nullptr,
                                        "Device lost before callback", mUserData);

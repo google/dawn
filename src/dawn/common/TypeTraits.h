@@ -30,5 +30,17 @@ struct HasEqualityOperator<
         std::is_same<decltype(std::declval<LHS>() == std::declval<RHS>()), bool>::value>> {
     static constexpr const bool value = true;
 };
+template <typename T>
+struct IsCString {
+    static constexpr bool Eval() {
+        using Tp = std::decay_t<T>;
+        if (!std::is_pointer_v<Tp>) {
+            return false;
+        }
+        return std::is_same_v<std::remove_cv_t<std::remove_pointer_t<Tp>>, char>;
+    }
+
+    static constexpr const bool value = Eval();
+};
 
 #endif  // SRC_DAWN_COMMON_TYPETRAITS_H_

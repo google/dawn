@@ -16,7 +16,51 @@
 
 #include <utility>
 
+#include "dawn/common/Assert.h"
+
 namespace dawn::native {
+
+namespace {
+struct GenericFunctionTask : CallbackTask {
+  public:
+    explicit GenericFunctionTask(std::function<void()> func) : mFunction(std::move(func)) {}
+
+  private:
+    void FinishImpl() override { mFunction(); }
+    void HandleShutDownImpl() override { mFunction(); }
+    void HandleDeviceLossImpl() override { mFunction(); }
+
+    std::function<void()> mFunction;
+};
+}  // namespace
+
+void CallbackTask::Execute() {
+    switch (mState) {
+        case State::HandleDeviceLoss:
+            HandleDeviceLossImpl();
+            break;
+        case State::HandleShutDown:
+            HandleShutDownImpl();
+            break;
+        default:
+            FinishImpl();
+    }
+}
+
+void CallbackTask::OnShutDown() {
+    // Only first state change will have effects in final Execute().
+    if (mState != State::Normal) {
+        return;
+    }
+    mState = State::HandleShutDown;
+}
+
+void CallbackTask::OnDeviceLoss() {
+    if (mState != State::Normal) {
+        return;
+    }
+    mState = State::HandleDeviceLoss;
+}
 
 CallbackTaskManager::CallbackTaskManager() = default;
 
@@ -38,6 +82,24 @@ std::vector<std::unique_ptr<CallbackTask>> CallbackTaskManager::AcquireCallbackT
 void CallbackTaskManager::AddCallbackTask(std::unique_ptr<CallbackTask> callbackTask) {
     std::lock_guard<std::mutex> lock(mCallbackTaskQueueMutex);
     mCallbackTaskQueue.push_back(std::move(callbackTask));
+}
+
+void CallbackTaskManager::AddCallbackTask(std::function<void()> callback) {
+    AddCallbackTask(std::make_unique<GenericFunctionTask>(std::move(callback)));
+}
+
+void CallbackTaskManager::HandleDeviceLoss() {
+    std::lock_guard<std::mutex> lock(mCallbackTaskQueueMutex);
+    for (auto& task : mCallbackTaskQueue) {
+        task->OnDeviceLoss();
+    }
+}
+
+void CallbackTaskManager::HandleShutDown() {
+    std::lock_guard<std::mutex> lock(mCallbackTaskQueueMutex);
+    for (auto& task : mCallbackTaskQueue) {
+        task->OnShutDown();
+    }
 }
 
 }  // namespace dawn::native

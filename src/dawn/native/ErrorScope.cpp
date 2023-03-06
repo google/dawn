@@ -43,8 +43,8 @@ wgpu::ErrorType ErrorScope::GetErrorType() const {
     return mCapturedError;
 }
 
-const char* ErrorScope::GetErrorMessage() const {
-    return mErrorMessage.c_str();
+const std::string& ErrorScope::GetErrorMessage() const {
+    return mErrorMessage;
 }
 
 ErrorScopeStack::ErrorScopeStack() = default;

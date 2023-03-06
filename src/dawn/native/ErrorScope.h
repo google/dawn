@@ -25,7 +25,7 @@ namespace dawn::native {
 class ErrorScope {
   public:
     wgpu::ErrorType GetErrorType() const;
-    const char* GetErrorMessage() const;
+    const std::string& GetErrorMessage() const;
 
   private:
     friend class ErrorScopeStack;

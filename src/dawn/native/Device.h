@@ -515,6 +515,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     // and waiting on a serial that doesn't have a corresponding fence enqueued. Fake serials to
     // make all commands look completed.
     void AssumeCommandsComplete();
+    bool HasPendingTasks();
     bool IsDeviceIdle();
 
     // mCompletedSerial tracks the last completed command serial that the fence has returned.

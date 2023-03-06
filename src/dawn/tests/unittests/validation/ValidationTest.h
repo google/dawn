@@ -47,6 +47,7 @@
 #define ASSERT_DEVICE_ERROR_IMPL_1_(statement)                  \
     StartExpectDeviceError();                                   \
     statement;                                                  \
+    device.Tick();                                              \
     FlushWire();                                                \
     if (!EndExpectDeviceError()) {                              \
         FAIL() << "Expected device error in:\n " << #statement; \
@@ -57,6 +58,7 @@
 #define ASSERT_DEVICE_ERROR_IMPL_2_(statement, matcher)         \
     StartExpectDeviceError(matcher);                            \
     statement;                                                  \
+    device.Tick();                                              \
     FlushWire();                                                \
     if (!EndExpectDeviceError()) {                              \
         FAIL() << "Expected device error in:\n " << #statement; \

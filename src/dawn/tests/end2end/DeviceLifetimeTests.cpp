@@ -189,7 +189,10 @@ TEST_P(DeviceLifetimeTests, DroppedBeforeMappedAtCreationBuffer) {
 
 // Test that the device can be dropped before a buffer created from it, then mapping the buffer
 // fails.
-TEST_P(DeviceLifetimeTests, DroppedThenMapBuffer) {
+// TODO(crbug.com/dawn/752): Re-enable this test once we implement Instance.ProcessEvents().
+// Currently the callbacks are called inside Device.Tick() only. However, since we drop the device,
+// there is no way to call Device.Tick() anymore.
+TEST_P(DeviceLifetimeTests, DISABLED_DroppedThenMapBuffer) {
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;

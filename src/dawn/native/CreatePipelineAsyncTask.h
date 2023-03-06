@@ -55,11 +55,11 @@ struct CreateComputePipelineAsyncCallbackTask : CreatePipelineAsyncCallbackTaskB
                                            void* userdata);
     ~CreateComputePipelineAsyncCallbackTask() override;
 
-    void Finish() override;
-    void HandleShutDown() final;
-    void HandleDeviceLoss() final;
-
   protected:
+    void FinishImpl() override;
+    void HandleShutDownImpl() final;
+    void HandleDeviceLossImpl() final;
+
     Ref<ComputePipelineBase> mPipeline;
     WGPUCreateComputePipelineAsyncCallback mCreateComputePipelineAsyncCallback;
 };
@@ -74,11 +74,11 @@ struct CreateRenderPipelineAsyncCallbackTask : CreatePipelineAsyncCallbackTaskBa
                                           void* userdata);
     ~CreateRenderPipelineAsyncCallbackTask() override;
 
-    void Finish() override;
-    void HandleShutDown() final;
-    void HandleDeviceLoss() final;
-
   protected:
+    void FinishImpl() override;
+    void HandleShutDownImpl() final;
+    void HandleDeviceLossImpl() final;
+
     Ref<RenderPipelineBase> mPipeline;
     WGPUCreateRenderPipelineAsyncCallback mCreateRenderPipelineAsyncCallback;
 };

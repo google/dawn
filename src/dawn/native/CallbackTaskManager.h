@@ -15,18 +15,36 @@
 #ifndef SRC_DAWN_NATIVE_CALLBACKTASKMANAGER_H_
 #define SRC_DAWN_NATIVE_CALLBACKTASKMANAGER_H_
 
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <vector>
+
+#include "dawn/common/TypeTraits.h"
 
 namespace dawn::native {
 
 struct CallbackTask {
   public:
     virtual ~CallbackTask() = default;
-    virtual void Finish() = 0;
-    virtual void HandleShutDown() = 0;
-    virtual void HandleDeviceLoss() = 0;
+
+    void Execute();
+    void OnShutDown();
+    void OnDeviceLoss();
+
+  protected:
+    virtual void FinishImpl() = 0;
+    virtual void HandleShutDownImpl() = 0;
+    virtual void HandleDeviceLossImpl() = 0;
+
+  private:
+    enum class State {
+        Normal,
+        HandleShutDown,
+        HandleDeviceLoss,
+    };
+
+    State mState = State::Normal;
 };
 
 class CallbackTaskManager {
@@ -35,7 +53,16 @@ class CallbackTaskManager {
     ~CallbackTaskManager();
 
     void AddCallbackTask(std::unique_ptr<CallbackTask> callbackTask);
+    void AddCallbackTask(std::function<void()> callback);
+    template <typename... Args>
+    void AddCallbackTask(void (*callback)(Args... args), Args... args) {
+        static_assert((!IsCString<Args>::value && ...), "passing C string argument is not allowed");
+
+        AddCallbackTask([=] { callback(args...); });
+    }
     bool IsEmpty();
+    void HandleDeviceLoss();
+    void HandleShutDown();
     std::vector<std::unique_ptr<CallbackTask>> AcquireCallbackTasks();
 
   private:

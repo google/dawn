@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_BUFFER_H_
 #define SRC_DAWN_NATIVE_BUFFER_H_
 
+#include <functional>
 #include <memory>
 
 #include "dawn/common/NonCopyable.h"
@@ -65,7 +66,7 @@ class BufferBase : public ApiObjectBase {
     wgpu::BufferUsage GetUsageExternalOnly() const;
 
     MaybeError MapAtCreation();
-    void OnMapRequestCompleted(MapRequestID mapID, WGPUBufferMapAsyncStatus status);
+    void CallbackOnMapRequestCompleted(MapRequestID mapID, WGPUBufferMapAsyncStatus status);
 
     MaybeError ValidateCanUseOnQueueNow() const;
 
@@ -108,24 +109,8 @@ class BufferBase : public ApiObjectBase {
     ExecutionSerial mLastUsageSerial = ExecutionSerial(0);
 
   private:
-    // A helper structure to enforce that the mapAsync callback is called only at the very end of
-    // methods that might trigger callbacks. Non-copyable but movable for the assertion in the
-    // destructor to ensure not to forget to call the callback
-    struct [[nodiscard]] PendingMappingCallback : public NonCopyable {
-        WGPUBufferMapCallback callback;
-        void* userdata;
-        WGPUBufferMapAsyncStatus status;
-
-        PendingMappingCallback();
-        ~PendingMappingCallback();
-
-        PendingMappingCallback(PendingMappingCallback&& other);
-        PendingMappingCallback& operator=(PendingMappingCallback&& other);
-
-        void Call();
-    };
-    PendingMappingCallback WillCallMappingCallback(MapRequestID mapID,
-                                                   WGPUBufferMapAsyncStatus status);
+    std::function<void()> PrepareMappingCallback(MapRequestID mapID,
+                                                 WGPUBufferMapAsyncStatus status);
 
     virtual MaybeError MapAtCreationImpl() = 0;
     virtual MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) = 0;
@@ -140,7 +125,7 @@ class BufferBase : public ApiObjectBase {
                                 WGPUBufferMapAsyncStatus* status) const;
     MaybeError ValidateUnmap() const;
     bool CanGetMappedRange(bool writable, size_t offset, size_t size) const;
-    PendingMappingCallback UnmapInternal(WGPUBufferMapAsyncStatus callbackStatus);
+    void UnmapInternal(WGPUBufferMapAsyncStatus callbackStatus);
 
     uint64_t mSize = 0;
     wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;

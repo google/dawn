@@ -218,14 +218,3 @@ TEST_F(DeviceTickValidationTest, DestroyDeviceBeforeAPITick) {
     device.Destroy();
     device.Tick();
 }
-
-// Device destroy before an internal Tick should return an error.
-TEST_F(DeviceTickValidationTest, DestroyDeviceBeforeInternalTick) {
-    DAWN_SKIP_TEST_IF(UsesWire());
-
-    ExpectDeviceDestruction();
-    device.Destroy();
-    dawn::native::DeviceBase* nativeDevice = dawn::native::FromAPI(device.Get());
-    ASSERT_DEVICE_ERROR(EXPECT_TRUE(nativeDevice->ConsumedError(nativeDevice->Tick())),
-                        HasSubstr("[Device] is lost."));
-}
