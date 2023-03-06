@@ -677,6 +677,15 @@ if(${TINT_BUILD_HLSL_WRITER})
   )
 endif()
 
+if(${TINT_BUILD_SYNTAX_TREE_WRITER})
+    list(APPEND TINT_LIB_SRCS
+      writer/syntax_tree/generator.cc
+      writer/syntax_tree/generator.h
+      writer/syntax_tree/generator_impl.cc
+      writer/syntax_tree/generator_impl.h
+    )
+endif()
+
 if(${TINT_BUILD_IR})
   list(APPEND TINT_LIB_SRCS
     ir/binary.cc
