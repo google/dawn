@@ -28,8 +28,10 @@
 
 namespace dawn::native::d3d12 {
 
-Adapter::Adapter(Backend* backend, ComPtr<IDXGIAdapter3> hardwareAdapter)
-    : AdapterBase(backend->GetInstance(), wgpu::BackendType::D3D12),
+Adapter::Adapter(Backend* backend,
+                 ComPtr<IDXGIAdapter3> hardwareAdapter,
+                 const TogglesState& adapterToggles)
+    : AdapterBase(backend->GetInstance(), wgpu::BackendType::D3D12, adapterToggles),
       mHardwareAdapter(hardwareAdapter),
       mBackend(backend) {}
 

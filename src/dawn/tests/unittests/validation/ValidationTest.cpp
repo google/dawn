@@ -84,11 +84,14 @@ ValidationTest::ValidationTest() {
     gCurrentTest = this;
 
     DawnProcTable procs = dawn::native::GetProcs();
-    // Override procs to provide harness-specific behavior to always select the null adapter,
-    // and to allow fixture-specific overriding of the test device with CreateTestDevice.
+
+    // Override procs to provide harness-specific behavior to always select the null adapter, with
+    // adapter toggles inherited from instance toggles state. WGPURequestAdapterOptions is ignored
+    // here.
     procs.instanceRequestAdapter = [](WGPUInstance instance, const WGPURequestAdapterOptions*,
                                       WGPURequestAdapterCallback callback, void* userdata) {
         ASSERT(gCurrentTest);
+
         std::vector<dawn::native::Adapter> adapters = gCurrentTest->mDawnInstance->GetAdapters();
         // Validation tests run against the null backend, find the corresponding adapter
         for (auto& adapter : adapters) {
@@ -121,7 +124,21 @@ ValidationTest::ValidationTest() {
 }
 
 void ValidationTest::SetUp() {
-    mDawnInstance = std::make_unique<dawn::native::Instance>();
+    // Create an instance with toggle DisallowUnsafeApis disabled, which would be inherited to
+    // adapter and device toggles and allow us to test unsafe apis (including experimental
+    // features). To test device of DisallowUnsafeApis enabled, require it in device toggles
+    // descriptor to override the inheritance.
+    const char* disallowUnsafeApisToggle = "disallow_unsafe_apis";
+    WGPUDawnTogglesDescriptor instanceToggles = {};
+    instanceToggles.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
+    instanceToggles.disabledTogglesCount = 1;
+    instanceToggles.disabledToggles = &disallowUnsafeApisToggle;
+
+    WGPUInstanceDescriptor instanceDesc = {};
+    instanceDesc.nextInChain = &instanceToggles.chain;
+
+    mDawnInstance = std::make_unique<dawn::native::Instance>(&instanceDesc);
+
     mDawnInstance->DiscoverDefaultAdapters();
     mInstance = mWireHelper->RegisterInstance(mDawnInstance->Get());
 
@@ -130,7 +147,8 @@ void ValidationTest::SetUp() {
         "_" + ::testing::UnitTest::GetInstance()->current_test_info()->name();
     mWireHelper->BeginWireTrace(traceName.c_str());
 
-    // These options are unused since validation tests always select the null adapter
+    // RequestAdapter is overriden to ignore RequestAdapterOptions and always select the null
+    // adapter.
     wgpu::RequestAdapterOptions options = {};
     mInstance.RequestAdapter(
         &options,
@@ -263,9 +281,8 @@ dawn::native::Adapter& ValidationTest::GetBackendAdapter() {
 }
 
 WGPUDevice ValidationTest::CreateTestDevice(dawn::native::Adapter dawnAdapter) {
-    // Disabled disallowing unsafe APIs so we can test them.
     std::vector<const char*> enabledToggles;
-    std::vector<const char*> disabledToggles = {"disallow_unsafe_apis"};
+    std::vector<const char*> disabledToggles;
 
     for (const std::string& toggle : gToggleParser->GetEnabledToggles()) {
         enabledToggles.push_back(toggle.c_str());

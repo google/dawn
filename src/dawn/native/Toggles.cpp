@@ -176,7 +176,7 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"disallow_unsafe_apis",
       "Produces validation errors on API entry points or parameter combinations that aren't "
       "considered secure yet.",
-      "http://crbug.com/1138528", ToggleStage::Device}},
+      "http://crbug.com/1138528", ToggleStage::Instance}},
     {Toggle::FlushBeforeClientWaitSync,
      {"flush_before_client_wait_sync",
       "Call glFlush before glClientWaitSync to work around bugs in the latter",
@@ -447,7 +447,9 @@ TogglesState TogglesState::CreateFromTogglesDescriptor(const DawnTogglesDescript
         Toggle toggle = togglesInfo.ToggleNameToEnum(togglesDesc->enabledToggles[i]);
         if (toggle != Toggle::InvalidEnum) {
             const ToggleInfo* toggleInfo = togglesInfo.GetToggleInfo(toggle);
-            if (toggleInfo->stage == requiredStage) {
+            // Accept the required toggles of current and earlier stage to allow override
+            // inheritance.
+            if (toggleInfo->stage <= requiredStage) {
                 togglesState.mTogglesSet.Set(toggle, true);
                 togglesState.mEnabledToggles.Set(toggle, true);
             }
@@ -457,7 +459,9 @@ TogglesState TogglesState::CreateFromTogglesDescriptor(const DawnTogglesDescript
         Toggle toggle = togglesInfo.ToggleNameToEnum(togglesDesc->disabledToggles[i]);
         if (toggle != Toggle::InvalidEnum) {
             const ToggleInfo* toggleInfo = togglesInfo.GetToggleInfo(toggle);
-            if (toggleInfo->stage == requiredStage) {
+            // Accept the required toggles of current and earlier stage to allow override
+            // inheritance.
+            if (toggleInfo->stage <= requiredStage) {
                 togglesState.mTogglesSet.Set(toggle, true);
                 togglesState.mEnabledToggles.Set(toggle, false);
             }
@@ -465,6 +469,30 @@ TogglesState TogglesState::CreateFromTogglesDescriptor(const DawnTogglesDescript
     }
 
     return togglesState;
+}
+
+TogglesState& TogglesState::InheritFrom(const TogglesState& inheritedToggles) {
+    ASSERT(inheritedToggles.GetStage() < mStage);
+
+    // Do inheritance. All toggles that are force-set in the inherited toggles states would
+    // be force-set in the result toggles state, and all toggles that are set in the inherited
+    // toggles states and not required in current toggles state would be set in the result toggles
+    // state.
+    for (uint32_t i : inheritedToggles.mTogglesSet.Iterate()) {
+        const Toggle& toggle = static_cast<Toggle>(i);
+        ASSERT(TogglesInfo::GetToggleInfo(toggle)->stage < mStage);
+        bool isEnabled = inheritedToggles.mEnabledToggles.Has(toggle);
+        bool isForced = inheritedToggles.mForcedToggles.Has(toggle);
+        // Only inherit a toggle if it is not set by user requirement or is forced in earlier stage.
+        // In this way we allow user requirement override the inheritance if not forced.
+        if (!mTogglesSet.Has(toggle) || isForced) {
+            mTogglesSet.Set(toggle, true);
+            mEnabledToggles.Set(toggle, isEnabled);
+            mForcedToggles.Set(toggle, isForced);
+        }
+    }
+
+    return *this;
 }
 
 // Set a toggle to given state, if the toggle has not been already set. Do nothing otherwise.
@@ -490,6 +518,15 @@ void TogglesState::ForceSet(Toggle toggle, bool enabled) {
     mTogglesSet.Set(toggle, true);
     mEnabledToggles.Set(toggle, enabled);
     mForcedToggles.Set(toggle, true);
+}
+
+TogglesState& TogglesState::SetForTesting(Toggle toggle, bool enabled, bool forced) {
+    ASSERT(toggle != Toggle::InvalidEnum);
+    mTogglesSet.Set(toggle, true);
+    mEnabledToggles.Set(toggle, enabled);
+    mForcedToggles.Set(toggle, forced);
+
+    return *this;
 }
 
 bool TogglesState::IsSet(Toggle toggle) const {

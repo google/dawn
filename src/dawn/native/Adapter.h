@@ -34,7 +34,9 @@ class DeviceBase;
 
 class AdapterBase : public RefCounted {
   public:
-    AdapterBase(InstanceBase* instance, wgpu::BackendType backend);
+    AdapterBase(InstanceBase* instance,
+                wgpu::BackendType backend,
+                const TogglesState& adapterToggles);
     ~AdapterBase() override;
 
     MaybeError Initialize();
@@ -64,6 +66,9 @@ class AdapterBase : public RefCounted {
     bool GetLimits(SupportedLimits* limits) const;
 
     void SetUseTieredLimits(bool useTieredLimits);
+
+    // Get the actual toggles state of the adapter.
+    const TogglesState& GetTogglesState() const;
 
     virtual bool SupportsExternalImages() const = 0;
 
@@ -113,6 +118,10 @@ class AdapterBase : public RefCounted {
     virtual MaybeError ResetInternalDeviceForTestingImpl();
     Ref<InstanceBase> mInstance;
     wgpu::BackendType mBackend;
+
+    // Adapter toggles state, currently only inherited from instance toggles state.
+    TogglesState mTogglesState;
+
     CombinedLimits mLimits;
     bool mUseTieredLimits = false;
 };

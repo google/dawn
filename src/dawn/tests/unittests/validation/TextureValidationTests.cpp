@@ -729,14 +729,6 @@ class CompressedTextureFormatsValidationTests : public TextureValidationTest {
         descriptor.requiredFeatures = requiredFeatures;
         descriptor.requiredFeaturesCount = 3;
 
-        // TODO(dawn:814): Remove when 1D texture support is complete.
-        const char* kDisallowUnsafeApis = "disallow_unsafe_apis";
-        wgpu::DawnTogglesDescriptor deviceTogglesDesc;
-        deviceTogglesDesc.disabledToggles = &kDisallowUnsafeApis;
-        deviceTogglesDesc.disabledTogglesCount = 1;
-
-        descriptor.nextInChain = &deviceTogglesDesc;
-
         return dawnAdapter.CreateDevice(&descriptor);
     }
 

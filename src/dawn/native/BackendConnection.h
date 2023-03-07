@@ -20,6 +20,7 @@
 
 #include "dawn/native/Adapter.h"
 #include "dawn/native/DawnNative.h"
+#include "dawn/native/Toggles.h"
 
 namespace dawn::native {
 
@@ -35,11 +36,13 @@ class BackendConnection {
 
     // Returns all the adapters for the system that can be created by the backend, without extra
     // options (such as debug adapters, custom driver libraries, etc.)
-    virtual std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters() = 0;
+    virtual std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters(
+        const TogglesState& adapterToggles) = 0;
 
     // Returns new adapters created with the backend-specific options.
     virtual ResultOrError<std::vector<Ref<AdapterBase>>> DiscoverAdapters(
-        const AdapterDiscoveryOptionsBase* options);
+        const AdapterDiscoveryOptionsBase* options,
+        const TogglesState& adapterToggles);
 
   private:
     InstanceBase* mInstance = nullptr;

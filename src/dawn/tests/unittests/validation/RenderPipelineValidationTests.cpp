@@ -26,21 +26,10 @@
 class RenderPipelineValidationTest : public ValidationTest {
   protected:
     WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
-        // Disabled disallowing unsafe APIs so we can test ShaderF16 feature.
-        const char* disabledToggle[] = {"disallow_unsafe_apis"};
-
         wgpu::DeviceDescriptor descriptor;
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::ShaderF16};
         descriptor.requiredFeatures = requiredFeatures;
         descriptor.requiredFeaturesCount = 1;
-
-        wgpu::DawnTogglesDescriptor deviceTogglesDesc;
-        descriptor.nextInChain = &deviceTogglesDesc;
-
-        deviceTogglesDesc.enabledToggles = nullptr;
-        deviceTogglesDesc.enabledTogglesCount = 0;
-        deviceTogglesDesc.disabledToggles = disabledToggle;
-        deviceTogglesDesc.disabledTogglesCount = 1;
 
         return dawnAdapter.CreateDevice(&descriptor);
     }

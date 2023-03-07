@@ -26,7 +26,9 @@ class Backend;
 
 class Adapter : public AdapterBase {
   public:
-    Adapter(Backend* backend, ComPtr<IDXGIAdapter3> hardwareAdapter);
+    Adapter(Backend* backend,
+            ComPtr<IDXGIAdapter3> hardwareAdapter,
+            const TogglesState& adapterToggles);
     ~Adapter() override;
 
     // AdapterBase Implementation

@@ -58,8 +58,9 @@ gpu_info::DriverVersion DecodeVulkanDriverVersion(uint32_t vendorID, uint32_t ve
 
 Adapter::Adapter(InstanceBase* instance,
                  VulkanInstance* vulkanInstance,
-                 VkPhysicalDevice physicalDevice)
-    : AdapterBase(instance, wgpu::BackendType::Vulkan),
+                 VkPhysicalDevice physicalDevice,
+                 const TogglesState& adapterToggles)
+    : AdapterBase(instance, wgpu::BackendType::Vulkan, adapterToggles),
       mPhysicalDevice(physicalDevice),
       mVulkanInstance(vulkanInstance) {}
 

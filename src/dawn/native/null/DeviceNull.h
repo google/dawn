@@ -171,7 +171,10 @@ class Device final : public DeviceBase {
 
 class Adapter : public AdapterBase {
   public:
+    // Create null adapter without providing toggles state for testing, only inherit instance's
+    // toggles state
     explicit Adapter(InstanceBase* instance);
+    Adapter(InstanceBase* instance, const TogglesState& adapterToggles);
     ~Adapter() override;
 
     // AdapterBase Implementation

@@ -309,6 +309,7 @@ dawn_test("dawn_unittests") {
     "unittests/SubresourceStorageTests.cpp",
     "unittests/SystemUtilsTests.cpp",
     "unittests/ToBackendTests.cpp",
+    "unittests/ToggleTests.cpp",
     "unittests/TypedIntegerTests.cpp",
     "unittests/UnicodeTests.cpp",
     "unittests/native/AllowedErrorTests.cpp",

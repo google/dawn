@@ -23,6 +23,7 @@
 #include "dawn/native/ChainUtils_autogen.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/Surface.h"
+#include "dawn/native/Toggles.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
 
@@ -110,18 +111,30 @@ InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor) {
 
 // static
 Ref<InstanceBase> InstanceBase::Create(const InstanceDescriptor* descriptor) {
-    Ref<InstanceBase> instance = AcquireRef(new InstanceBase);
     static constexpr InstanceDescriptor kDefaultDesc = {};
     if (descriptor == nullptr) {
         descriptor = &kDefaultDesc;
     }
+
+    const DawnTogglesDescriptor* instanceTogglesDesc = nullptr;
+    FindInChain(descriptor->nextInChain, &instanceTogglesDesc);
+
+    // Set up the instance toggle state from toggles descriptor
+    TogglesState instanceToggles =
+        TogglesState::CreateFromTogglesDescriptor(instanceTogglesDesc, ToggleStage::Instance);
+    // By default enable the DisallowUnsafeAPIs instance toggle, it will be inherited to adapters
+    // and devices created by this instance if not overriden.
+    // TODO(dawn:1685): Rename DisallowUnsafeAPIs to AllowUnsafeAPIs, and change relating logic.
+    instanceToggles.Default(Toggle::DisallowUnsafeAPIs, true);
+
+    Ref<InstanceBase> instance = AcquireRef(new InstanceBase(instanceToggles));
     if (instance->ConsumedError(instance->Initialize(descriptor))) {
         return nullptr;
     }
     return instance;
 }
 
-InstanceBase::InstanceBase() = default;
+InstanceBase::InstanceBase(const TogglesState& instanceToggles) : mToggles(instanceToggles) {}
 
 InstanceBase::~InstanceBase() = default;
 
@@ -138,7 +151,9 @@ void InstanceBase::WillDropLastExternalRef() {
 
 // TODO(crbug.com/dawn/832): make the platform an initialization parameter of the instance.
 MaybeError InstanceBase::Initialize(const InstanceDescriptor* descriptor) {
-    DAWN_TRY(ValidateSingleSType(descriptor->nextInChain, wgpu::SType::DawnInstanceDescriptor));
+    DAWN_TRY(ValidateSTypes(descriptor->nextInChain, {{wgpu::SType::DawnInstanceDescriptor},
+                                                      {wgpu::SType::DawnTogglesDescriptor}}));
+
     const DawnInstanceDescriptor* dawnDesc = nullptr;
     FindInChain(descriptor->nextInChain, &dawnDesc);
     if (dawnDesc != nullptr) {
@@ -280,7 +295,14 @@ void InstanceBase::DiscoverDefaultAdapters() {
 
     // Query and merge all default adapters for all backends
     for (std::unique_ptr<BackendConnection>& backend : mBackends) {
-        std::vector<Ref<AdapterBase>> backendAdapters = backend->DiscoverDefaultAdapters();
+        // Set up toggles state for default adapters, currently adapter don't have a toggles
+        // descriptor so just inherit from instance toggles.
+        // TODO(dawn:1495): Handle the adapter toggles descriptor after implemented.
+        TogglesState adapterToggles = TogglesState(ToggleStage::Adapter);
+        adapterToggles.InheritFrom(mToggles);
+
+        std::vector<Ref<AdapterBase>> backendAdapters =
+            backend->DiscoverDefaultAdapters(adapterToggles);
 
         for (Ref<AdapterBase>& adapter : backendAdapters) {
             ASSERT(adapter->GetBackendType() == backend->GetType());
@@ -304,6 +326,10 @@ bool InstanceBase::DiscoverAdapters(const AdapterDiscoveryOptionsBase* options) 
     }
 
     return true;
+}
+
+const TogglesState& InstanceBase::GetTogglesState() const {
+    return mToggles;
 }
 
 const ToggleInfo* InstanceBase::GetToggleInfo(const char* toggleName) {
@@ -397,8 +423,14 @@ MaybeError InstanceBase::DiscoverAdaptersInternal(const AdapterDiscoveryOptionsB
         }
         foundBackend = true;
 
+        // Set up toggles state for default adapters, currently adapter don't have a toggles
+        // descriptor so just inherit from instance toggles.
+        // TODO(dawn:1495): Handle the adapter toggles descriptor after implemented.
+        TogglesState adapterToggles = TogglesState(ToggleStage::Adapter);
+        adapterToggles.InheritFrom(mToggles);
+
         std::vector<Ref<AdapterBase>> newAdapters;
-        DAWN_TRY_ASSIGN(newAdapters, backend->DiscoverAdapters(options));
+        DAWN_TRY_ASSIGN(newAdapters, backend->DiscoverAdapters(options, adapterToggles));
 
         for (Ref<AdapterBase>& adapter : newAdapters) {
             ASSERT(adapter->GetBackendType() == backend->GetType());

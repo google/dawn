@@ -51,9 +51,7 @@ struct DAWN_NATIVE_EXPORT DawnDeviceDescriptor {
 
 // Each toggle is assigned with a TogglesStage, indicating the validation and earliest usage
 // time of the toggle.
-// TODO(dawn:1495): Currently all toggles are device toggles, i.e. of Device toggle stage. Add
-// instance and adapter stages after instance and adapter toggles implemented.
-enum class ToggleStage { Device };
+enum class ToggleStage { Instance, Adapter, Device };
 
 // A struct to record the information of a toggle. A toggle is a code path in Dawn device that
 // can be manually configured to run or not outside Dawn, including workarounds, special

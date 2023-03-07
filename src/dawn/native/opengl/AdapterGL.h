@@ -23,7 +23,9 @@ namespace dawn::native::opengl {
 
 class Adapter : public AdapterBase {
   public:
-    Adapter(InstanceBase* instance, wgpu::BackendType backendType);
+    Adapter(InstanceBase* instance,
+            wgpu::BackendType backendType,
+            const TogglesState& adapterToggle);
 
     MaybeError InitializeGLFunctions(void* (*getProc)(const char*));
 

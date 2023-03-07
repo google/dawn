@@ -26,7 +26,11 @@ using testing::HasSubstr;
 
 class UnsafeAPIValidationTest : public ValidationTest {
   protected:
+    // UnsafeAPIValidationTest create the device with toggle DisallowUnsafeApis explicitly enabled,
+    // which overrides the inheritance.
     WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
+        // Enable the DisallowUnsafeAPIs toggles in device toggles descriptor to override the
+        // inheritance and create a device disallowing unsafe apis.
         wgpu::DeviceDescriptor descriptor;
         wgpu::DawnTogglesDescriptor deviceTogglesDesc;
         descriptor.nextInChain = &deviceTogglesDesc;
