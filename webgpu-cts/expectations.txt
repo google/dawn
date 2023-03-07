@@ -124,26 +124,26 @@ crbug.com/dawn/0000 webgpu:util,texture,texel_data:unorm_texel_data_in_shader:fo
 ################################################################################
 # depth_clip_clamp failures
 ################################################################################
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";unclippedDepth="_undef_";writeDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";unclippedDepth="_undef_";writeDepth=true;multisampled=true [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";unclippedDepth=false;writeDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus";unclippedDepth="_undef_";writeDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus";unclippedDepth="_undef_";writeDepth=true;multisampled=true [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus";unclippedDepth=false;writeDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth="_undef_";writeDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth="_undef_";writeDepth=true;multisampled=true [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=false;writeDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float";unclippedDepth="_undef_";writeDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float";unclippedDepth="_undef_";writeDepth=true;multisampled=true [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float";unclippedDepth=false;writeDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth="_undef_";writeDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth="_undef_";writeDepth=true;multisampled=true [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=false;writeDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";unclippedDepth="_undef_";writeDepth=true;multisampled=false [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";unclippedDepth="_undef_";writeDepth=true;multisampled=true [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";unclippedDepth=false;writeDepth=true;multisampled=false [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus";unclippedDepth="_undef_";writeDepth=true;multisampled=false [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus";unclippedDepth="_undef_";writeDepth=true;multisampled=true [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus";unclippedDepth=false;writeDepth=true;multisampled=false [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth="_undef_";writeDepth=true;multisampled=false [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth="_undef_";writeDepth=true;multisampled=true [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=false;writeDepth=true;multisampled=false [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float";unclippedDepth="_undef_";writeDepth=true;multisampled=false [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float";unclippedDepth="_undef_";writeDepth=true;multisampled=true [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float";unclippedDepth=false;writeDepth=true;multisampled=false [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth="_undef_";writeDepth=true;multisampled=false [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth="_undef_";writeDepth=true;multisampled=true [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=false;writeDepth=true;multisampled=false [ Failure ]
+#crbug.com/dawn/1125 [ monterey ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=false;writeDepth=true;multisampled=true [ Failure ]
 
 ################################################################################
 # shader execution failures
@@ -339,6 +339,29 @@ crbug.com/dawn/1677 webgpu:api,validation,render_pipeline,fragment_state:limits,
 crbug.com/dawn/1677 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rgba8unorm" [ Failure ]
 crbug.com/dawn/1677 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,aligned:format="rgba8unorm-srgb" [ Failure ]
 crbug.com/dawn/1677 webgpu:api,validation,render_pipeline,fragment_state:limits,maxColorAttachmentBytesPerSample,unaligned:formats=["r32float","rgba8unorm","rgba32float","r8unorm","r8unorm"] [ Failure ]
+
+################################################################################
+# Temporary suppressions for some depth-stencil CTS tests that the
+# dawn implementations goes ahead of. The supporessions should be
+# removed when the CTS will be updated and rolled.
+# Commented out the depth_clip_clamp failures above because they
+# are duplicated with these suppressions.
+# KEEP
+################################################################################
+crbug.com/dawn/1669 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:* [ Failure ]
+crbug.com/dawn/1669 webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:* [ Failure ]
+crbug.com/dawn/1669 webgpu:api,operation,render_pass,clear_value:stencil_clear_value:* [ Failure ]
+crbug.com/dawn/1669 webgpu:api,operation,rendering,depth:depth_disabled: [ Failure ]
+crbug.com/dawn/1669 webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:* [ Failure ]
+crbug.com/dawn/1669 webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:* [ Failure ]
+crbug.com/dawn/1669 webgpu:api,operation,rendering,stencil:stencil_reference_initialized:* [ Failure ]
+crbug.com/dawn/1669 webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";* [ Failure ]
+crbug.com/dawn/1669 webgpu:api,validation,capability_checks,features,texture_formats:depth_stencil_state:format="depth32float-stencil8";enable_required_feature=true [ Failure ]
+crbug.com/dawn/1669 webgpu:api,validation,render_pass,attachment_compatibility:render_pass_or_bundle_and_pipeline,* [ Failure ]
+crbug.com/dawn/1669 webgpu:api,validation,render_pass,render_pass_descriptor:depth_stencil_attachment:* [ Failure ]
+crbug.com/dawn/1669 webgpu:api,validation,render_pipeline,depth_stencil_state:depth_test:* [ Failure ]
+crbug.com/dawn/1669 webgpu:api,validation,render_pipeline,depth_stencil_state:depth_write* [ Failure ]
+crbug.com/dawn/1669 webgpu:api,validation,render_pipeline,misc:vertex_state_only:isAsync=* [ Failure ]
 
 ################################################################################
 # Untriaged canvas issues, potentially colorspace related.
