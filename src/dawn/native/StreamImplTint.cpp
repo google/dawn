@@ -15,7 +15,7 @@
 #include "dawn/native/stream/Stream.h"
 
 #include "dawn/native/TintUtils.h"
-#include "tint/writer/array_length_from_uniform_options.h"
+#include "tint/tint.h"
 
 namespace dawn::native {
 
