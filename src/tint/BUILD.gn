@@ -14,6 +14,7 @@
 
 import("//build_overrides/build.gni")
 
+import("../../scripts/dawn_overrides_with_defaults.gni")
 import("../../tint_overrides_with_defaults.gni")
 
 if (tint_build_unittests) {
@@ -89,6 +90,17 @@ config("tint_config") {
   include_dirs = []
   if (tint_build_spv_reader || tint_build_spv_writer) {
     include_dirs += [ "${tint_spirv_tools_dir}/include/" ]
+  }
+}
+
+group("abseil") {
+  # When build_with_chromium=true we need to include "//third_party/abseil-cpp:absl" while
+  # it's beneficial to be more specific with standalone Dawn, especially when it comes to
+  # including it as a dependency in other projects (such as Skia).
+  if (build_with_chromium) {
+    public_deps = [ "$dawn_abseil_dir:absl" ]
+  } else {
+    public_deps = [ "${dawn_root}/third_party/gn/abseil-cpp:strings" ]
   }
 }
 
@@ -953,6 +965,7 @@ libtint_source_set("libtint_wgsl_reader_src") {
   ]
 
   deps = [
+    ":abseil",
     ":libtint_ast_src",
     ":libtint_base_src",
     ":libtint_builtins_src",

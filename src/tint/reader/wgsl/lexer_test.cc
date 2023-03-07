@@ -397,7 +397,7 @@ TEST_P(FloatTest, Parse) {
     Lexer l(&file);
 
     auto list = l.Lex();
-    ASSERT_EQ(2u, list.size());
+    ASSERT_EQ(2u, list.size()) << "Got: " << list[0].to_str();
 
     {
         auto& t = list[0];

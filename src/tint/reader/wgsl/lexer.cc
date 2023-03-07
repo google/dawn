@@ -25,6 +25,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "absl/strings/charconv.h"
 #include "src/tint/debug.h"
 #include "src/tint/number.h"
 #include "src/tint/text/unicode.h"
@@ -352,9 +353,11 @@ Token Lexer::try_float() {
 
     // Parse the exponent if one exists
     bool has_exponent = false;
+    bool negative_exponent = false;
     if (end < length() && (matches(end, 'e') || matches(end, 'E'))) {
         end++;
         if (end < length() && (matches(end, '+') || matches(end, '-'))) {
+            negative_exponent = matches(end, '-');
             end++;
         }
 
@@ -374,10 +377,8 @@ Token Lexer::try_float() {
     bool has_f_suffix = false;
     bool has_h_suffix = false;
     if (end < length() && matches(end, 'f')) {
-        end++;
         has_f_suffix = true;
     } else if (end < length() && matches(end, 'h')) {
-        end++;
         has_h_suffix = true;
     }
 
@@ -386,29 +387,51 @@ Token Lexer::try_float() {
         return {};
     }
 
-    advance(end - start);
-    end_source(source);
+    // Note, the `at` method will return a static `0` if the provided position is >= length. We
+    // actually need the end pointer to point to the correct memory location to use `from_chars`.
+    // So, handle the case where we point past the length specially.
+    auto* end_ptr = &at(end);
+    if (end >= length()) {
+        end_ptr = &at(length() - 1) + 1;
+    }
 
-    double value = std::strtod(&at(start), nullptr);
+    double value = 0;
+    auto ret = absl::from_chars(&at(start), end_ptr, value);
+    bool overflow = ret.ec != std::errc();
+
+    // The provided value did not fit in a double and has a negative exponent, so treat it as a 0.
+    if (negative_exponent && ret.ec == std::errc::result_out_of_range) {
+        overflow = false;
+        value = 0.0;
+    }
+
+    TINT_ASSERT(Reader, end_ptr == ret.ptr);
+    advance(end - start);
 
     if (has_f_suffix) {
-        if (auto f = CheckedConvert<f32>(AFloat(value))) {
+        auto f = CheckedConvert<f32>(AFloat(value));
+        if (!overflow && f) {
+            advance(1);
+            end_source(source);
             return {Token::Type::kFloatLiteral_F, source, static_cast<double>(f.Get())};
-        } else {
-            return {Token::Type::kError, source, "value cannot be represented as 'f32'"};
         }
+        return {Token::Type::kError, source, "value cannot be represented as 'f32'"};
     }
 
     if (has_h_suffix) {
-        if (auto f = CheckedConvert<f16>(AFloat(value))) {
+        auto f = CheckedConvert<f16>(AFloat(value));
+        if (!overflow && f) {
+            advance(1);
+            end_source(source);
             return {Token::Type::kFloatLiteral_H, source, static_cast<double>(f.Get())};
-        } else {
-            return {Token::Type::kError, source, "value cannot be represented as 'f16'"};
         }
+        return {Token::Type::kError, source, "value cannot be represented as 'f16'"};
     }
 
+    end_source(source);
+
     TINT_BEGIN_DISABLE_WARNING(FLOAT_EQUAL);
-    if (value == HUGE_VAL || -value == HUGE_VAL) {
+    if (overflow || value == HUGE_VAL || -value == HUGE_VAL) {
         return {Token::Type::kError, source, "value cannot be represented as 'abstract-float'"};
     } else {
         return {Token::Type::kFloatLiteral, source, value};
