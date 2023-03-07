@@ -24,9 +24,9 @@
 #include <utility>
 #include <vector>
 
-#if TINT_BUILD_SPV_READER
+#if TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 #include "spirv-tools/libspirv.hpp"
-#endif  // TINT_BUILD_SPV_READER
+#endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 
 #include "src/tint/ast/module.h"
 #include "src/tint/diagnostic/formatter.h"
