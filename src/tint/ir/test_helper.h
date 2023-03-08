@@ -40,6 +40,8 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     /// return the same builder without rebuilding.
     /// @return the builder
     BuilderImpl& CreateBuilder() {
+        SetResolveOnBuild(true);
+
         if (gen_) {
             return *gen_;
         }

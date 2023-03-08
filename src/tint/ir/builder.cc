@@ -177,4 +177,20 @@ ir::Bitcast* Builder::Bitcast(const type::Type* type, Value* val) {
     return ir.instructions.Create<ir::Bitcast>(Temp(type), val);
 }
 
+ir::UserCall* Builder::UserCall(const type::Type* type,
+                                Symbol name,
+                                utils::VectorRef<Value*> args) {
+    return ir.instructions.Create<ir::UserCall>(Temp(type), name, std::move(args));
+}
+
+ir::Convert* Builder::Convert(const type::Type* to,
+                              const type::Type* from,
+                              utils::VectorRef<Value*> args) {
+    return ir.instructions.Create<ir::Convert>(Temp(to), from, std::move(args));
+}
+
+ir::Construct* Builder::Construct(const type::Type* to, utils::VectorRef<Value*> args) {
+    return ir.instructions.Create<ir::Construct>(Temp(to), std::move(args));
+}
+
 }  // namespace tint::ir

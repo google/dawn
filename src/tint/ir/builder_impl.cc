@@ -14,6 +14,8 @@
 
 #include "src/tint/ir/builder_impl.h"
 
+#include <iostream>
+
 #include "src/tint/ast/alias.h"
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/ast/bitcast_expression.h"
@@ -21,6 +23,8 @@
 #include "src/tint/ast/bool_literal_expression.h"
 #include "src/tint/ast/break_if_statement.h"
 #include "src/tint/ast/break_statement.h"
+#include "src/tint/ast/call_expression.h"
+#include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/const_assert.h"
 #include "src/tint/ast/continue_statement.h"
 #include "src/tint/ast/float_literal_expression.h"
@@ -28,6 +32,7 @@
 #include "src/tint/ast/function.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/identifier.h"
+#include "src/tint/ast/identifier_expression.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/int_literal_expression.h"
 #include "src/tint/ast/literal_expression.h"
@@ -39,6 +44,7 @@
 #include "src/tint/ast/struct_member_align_attribute.h"
 #include "src/tint/ast/struct_member_size_attribute.h"
 #include "src/tint/ast/switch_statement.h"
+#include "src/tint/ast/templated_identifier.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ir/function.h"
@@ -48,8 +54,12 @@
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/terminator.h"
 #include "src/tint/program.h"
+#include "src/tint/sem/builtin.h"
+#include "src/tint/sem/call.h"
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/switch_statement.h"
+#include "src/tint/sem/value_constructor.h"
+#include "src/tint/sem/value_conversion.h"
 #include "src/tint/sem/value_expression.h"
 #include "src/tint/type/void.h"
 
@@ -237,9 +247,7 @@ bool BuilderImpl::EmitStatement(const ast::Statement* stmt) {
         [&](const ast::BlockStatement* b) { return EmitBlock(b); },
         [&](const ast::BreakStatement* b) { return EmitBreak(b); },
         [&](const ast::BreakIfStatement* b) { return EmitBreakIf(b); },
-        // [&](const ast::CallStatement* c) {
-        // TODO(dsinclair): Implement
-        // },
+        [&](const ast::CallStatement* c) { return EmitCall(c); },
         // [&](const ast::CompoundAssignmentStatement* c) {
         // TODO(dsinclair): Implement
         // },
@@ -593,9 +601,7 @@ utils::Result<Value*> BuilderImpl::EmitExpression(const ast::Expression* expr) {
         // },
         [&](const ast::BinaryExpression* b) { return EmitBinary(b); },
         [&](const ast::BitcastExpression* b) { return EmitBitcast(b); },
-        // [&](const ast::CallExpression* c) {
-        // TODO(dsinclair): Implement
-        // },
+        [&](const ast::CallExpression* c) { return EmitCall(c); },
         // [&](const ast::IdentifierExpression* i) {
         // TODO(dsinclair): Implement
         // },
@@ -739,6 +745,63 @@ utils::Result<Value*> BuilderImpl::EmitBitcast(const ast::BitcastExpression* exp
     auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
     auto* instr = builder.Bitcast(ty, val.Get());
 
+    current_flow_block->instructions.Push(instr);
+    return instr->Result();
+}
+
+utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallStatement* stmt) {
+    return EmitCall(stmt->expr);
+}
+
+utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallExpression* expr) {
+    utils::Vector<Value*, 8> args;
+    args.Reserve(expr->args.Length());
+
+    // Emit the arguments
+    for (const auto* arg : expr->args) {
+        auto value = EmitExpression(arg);
+        if (!value) {
+            diagnostics_.add_error(tint::diag::System::IR, "Failed to convert arguments",
+                                   arg->source);
+            return utils::Failure;
+        }
+        args.Push(value.Get());
+    }
+
+    auto* sem = program_->Sem().Get<sem::Call>(expr);
+    if (!sem) {
+        diagnostics_.add_error(
+            tint::diag::System::IR,
+            "Failed to get semantic information for call " + std::string(expr->TypeInfo().name),
+            expr->source);
+        return utils::Failure;
+    }
+
+    auto* ty = sem->Target()->ReturnType()->Clone(clone_ctx_.type_ctx);
+
+    Instruction* instr = nullptr;
+
+    // If this is a builtin function, emit the specific builtin value
+    if (sem->Target()->As<sem::Builtin>()) {
+        // TODO(dsinclair): .. something ...
+        diagnostics_.add_error(tint::diag::System::IR, "Missing builtin function support",
+                               expr->source);
+    } else if (sem->Target()->As<sem::ValueConstructor>()) {
+        instr = builder.Construct(ty, std::move(args));
+    } else if (auto* conv = sem->Target()->As<sem::ValueConversion>()) {
+        auto* from = conv->Source()->Clone(clone_ctx_.type_ctx);
+        instr = builder.Convert(ty, from, std::move(args));
+    } else if (expr->target->identifier->Is<ast::TemplatedIdentifier>()) {
+        TINT_UNIMPLEMENTED(IR, diagnostics_) << "Missing templated ident support";
+        return utils::Failure;
+    } else {
+        // Not a builtin and not a templated call, so this is a user function.
+        auto name = CloneSymbol(expr->target->identifier->symbol);
+        instr = builder.UserCall(ty, name, std::move(args));
+    }
+    if (instr == nullptr) {
+        return utils::Failure;
+    }
     current_flow_block->instructions.Push(instr);
     return instr->Result();
 }
