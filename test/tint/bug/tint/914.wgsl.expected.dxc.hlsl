@@ -47,7 +47,7 @@ uint tint_div(uint lhs, uint rhs) {
   return (lhs / ((rhs == 0u) ? 1u : rhs));
 }
 
-struct tint_symbol_3 {
+struct tint_symbol_5 {
   uint3 local_id : SV_GroupThreadID;
   uint local_invocation_index : SV_GroupIndex;
   uint3 global_id : SV_DispatchThreadID;
@@ -88,8 +88,9 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
             for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRow + innerRow);
               const uint inputCol = (tileColA + innerCol);
-              const float tint_symbol = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
-              mm_Asub[inputRow][inputCol] = tint_symbol;
+              const uint tint_symbol = inputRow;
+              const uint tint_symbol_1 = inputCol;
+              mm_Asub[tint_symbol][tint_symbol_1] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
             }
           }
         }
@@ -100,8 +101,9 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
             for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRowB + innerRow);
               const uint inputCol = (tileCol + innerCol);
-              const float tint_symbol_1 = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
-              mm_Bsub[innerCol][inputCol] = tint_symbol_1;
+              const uint tint_symbol_2 = innerCol;
+              const uint tint_symbol_3 = inputCol;
+              mm_Bsub[tint_symbol_2][tint_symbol_3] = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
             }
           }
         }
@@ -143,7 +145,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
 }
 
 [numthreads(16, 16, 1)]
-void main(tint_symbol_3 tint_symbol_2) {
-  main_inner(tint_symbol_2.local_id, tint_symbol_2.global_id, tint_symbol_2.local_invocation_index);
+void main(tint_symbol_5 tint_symbol_4) {
+  main_inner(tint_symbol_4.local_id, tint_symbol_4.global_id, tint_symbol_4.local_invocation_index);
   return;
 }

@@ -17,13 +17,12 @@ struct S {
   uint i;
 };
 
-void tint_symbol_inner(uint idx, device S_tint_packed_vec3* const tint_symbol_2) {
-  float3 const tint_symbol_1 = Bad((*(tint_symbol_2)).i, float3((*(tint_symbol_2)).v));
-  (*(tint_symbol_2)).v = packed_float3(tint_symbol_1);
+void tint_symbol_inner(uint idx, device S_tint_packed_vec3* const tint_symbol_1) {
+  (*(tint_symbol_1)).v = packed_float3(Bad((*(tint_symbol_1)).i, float3((*(tint_symbol_1)).v)));
 }
 
-kernel void tint_symbol(device S_tint_packed_vec3* tint_symbol_3 [[buffer(0)]], uint idx [[thread_index_in_threadgroup]]) {
-  tint_symbol_inner(idx, tint_symbol_3);
+kernel void tint_symbol(device S_tint_packed_vec3* tint_symbol_2 [[buffer(0)]], uint idx [[thread_index_in_threadgroup]]) {
+  tint_symbol_inner(idx, tint_symbol_2);
   return;
 }
 

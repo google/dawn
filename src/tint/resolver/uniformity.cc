@@ -45,6 +45,10 @@
 // Set to `1` to dump the uniformity graph for each function in graphviz format.
 #define TINT_DUMP_UNIFORMITY_GRAPH 0
 
+#if TINT_DUMP_UNIFORMITY_GRAPH
+#include <iostream>
+#endif
+
 namespace tint::resolver {
 
 namespace {
@@ -123,7 +127,7 @@ struct Node {
     const ast::Node* ast = nullptr;
 
     /// The function call argument index, if applicable.
-    uint32_t arg_index;
+    uint32_t arg_index = 0xffffffffu;
 
     /// The set of edges from this node to other nodes in the graph.
     utils::UniqueVector<Node*, 4> edges;
@@ -547,14 +551,15 @@ class UniformityGraph {
             stmt,
 
             [&](const ast::AssignmentStatement* a) {
-                auto [cf1, v1] = ProcessExpression(cf, a->rhs);
                 if (a->lhs->Is<ast::PhonyExpression>()) {
-                    return cf1;
-                } else {
-                    auto [cf2, l2] = ProcessLValueExpression(cf1, a->lhs);
-                    l2->AddEdge(v1);
-                    return cf2;
+                    auto [cf_r, _] = ProcessExpression(cf, a->rhs);
+                    return cf_r;
                 }
+                auto [cf_l, v_l, apply] = ProcessLValueExpression(cf, a->lhs);
+                auto [cf_r, v_r] = ProcessExpression(cf_l, a->rhs);
+                v_l->AddEdge(v_r);
+                apply();
+                return cf_r;
             },
 
             [&](const ast::BlockStatement* b) {
@@ -696,17 +701,20 @@ class UniformityGraph {
             },
 
             [&](const ast::CompoundAssignmentStatement* c) {
-                // The compound assignment statement `a += b` is equivalent to `a = a + b`.
-                // Note: we set load_rule=true when evaluating the LHS the first time, as the
-                // resolver does not add a load node for it.
-                auto [cf1, v1] = ProcessExpression(cf, c->lhs, /* load_rule */ true);
-                auto [cf2, v2] = ProcessExpression(cf1, c->rhs);
+                // The compound assignment statement `a += b` is equivalent to:
+                //   let p = &a;
+                //   *p = *p + b;
+                // Note: we set load_rule=true when evaluating the LHS, as the resolver does not add
+                // a load node for it.
+                auto [cf1, l1, apply] = ProcessLValueExpression(cf, c->lhs);
+                auto [cf2, v2] = ProcessExpression(cf1, c->lhs, /* load_rule */ true);
+                auto [cf3, v3] = ProcessExpression(cf2, c->rhs);
                 auto* result = CreateNode({"binary_expr_result"});
-                result->AddEdge(v1);
                 result->AddEdge(v2);
+                result->AddEdge(v3);
 
-                auto [cf3, l3] = ProcessLValueExpression(cf2, c->lhs);
-                l3->AddEdge(result);
+                l1->AddEdge(result);
+                apply();
                 return cf3;
             },
 
@@ -965,8 +973,9 @@ class UniformityGraph {
                 result->AddEdge(v1);
                 result->AddEdge(cf1);
 
-                auto [cf2, l2] = ProcessLValueExpression(cf1, i->lhs);
+                auto [cf2, l2, apply] = ProcessLValueExpression(cf1, i->lhs);
                 l2->AddEdge(result);
+                apply();
                 return cf2;
             },
 
@@ -1365,48 +1374,62 @@ class UniformityGraph {
         return false;
     }
 
+    /// LValue holds the Nodes returned by ProcessLValueExpression()
+    struct LValue {
+        /// The control-flow node for an LValue expression
+        Node* cf = nullptr;
+
+        /// The new value node for an LValue expression
+        Node* new_val = nullptr;
+
+        /// Updates the value node of the LValue expression to be #new_val.
+        std::function<void()> apply;
+    };
+
     /// Process an LValue expression.
     /// @param cf the input control flow node
     /// @param expr the expression to process
     /// @returns a pair of (control flow node, variable node)
-    std::pair<Node*, Node*> ProcessLValueExpression(Node* cf,
-                                                    const ast::Expression* expr,
-                                                    bool is_partial_reference = false) {
+    LValue ProcessLValueExpression(Node* cf,
+                                   const ast::Expression* expr,
+                                   bool is_partial_reference = false) {
         return Switch(
             expr,
 
             [&](const ast::IdentifierExpression* i) {
                 auto* sem = sem_.GetVal(i)->UnwrapLoad()->As<sem::VariableUser>();
                 if (sem->Variable()->Is<sem::GlobalVariable>()) {
-                    return std::make_pair(cf, current_function_->may_be_non_uniform);
+                    return LValue{cf, current_function_->may_be_non_uniform, [] {}};
                 } else if (auto* local = sem->Variable()->As<sem::LocalVariable>()) {
                     // Create a new value node for this variable.
                     auto* value = CreateNode({NameFor(i), "_lvalue"});
-                    auto* old_value = current_function_->variables.Set(local, value);
+
+                    auto apply = [=] { current_function_->variables.Set(local, value); };
 
                     // If i is part of an expression that is a partial reference to a variable (e.g.
                     // index or member access), we link back to the variable's previous value. If
                     // the previous value was non-uniform, a partial assignment will not make it
                     // uniform.
+                    auto* old_value = current_function_->variables.Get(local);
                     if (is_partial_reference && old_value) {
                         value->AddEdge(old_value);
                     }
 
-                    return std::make_pair(cf, value);
+                    return LValue{cf, value, apply};
                 } else {
                     TINT_ICE(Resolver, diagnostics_)
                         << "unknown lvalue identifier expression type: "
                         << std::string(sem->Variable()->TypeInfo().name);
-                    return std::pair<Node*, Node*>(nullptr, nullptr);
+                    return LValue{};
                 }
             },
 
             [&](const ast::IndexAccessorExpression* i) {
-                auto [cf1, l1] =
+                auto [cf1, l1, apply] =
                     ProcessLValueExpression(cf, i->object, /*is_partial_reference*/ true);
                 auto [cf2, v2] = ProcessExpression(cf1, i->index);
                 l1->AddEdge(v2);
-                return std::pair<Node*, Node*>(cf2, l1);
+                return LValue{cf2, l1, apply};
             },
 
             [&](const ast::MemberAccessorExpression* m) {
@@ -1419,17 +1442,18 @@ class UniformityGraph {
                     // that is being written to.
                     auto* root_ident = sem_.Get(u)->RootIdentifier();
                     auto* deref = CreateNode({NameFor(root_ident), "_deref"});
-                    auto* old_value = current_function_->variables.Set(root_ident, deref);
 
-                    if (old_value) {
-                        // If derefercing a partial reference or partial pointer, we link back to
+                    auto apply = [=] { current_function_->variables.Set(root_ident, deref); };
+
+                    if (auto* old_value = current_function_->variables.Get(root_ident)) {
+                        // If dereferencing a partial reference or partial pointer, we link back to
                         // the variable's previous value. If the previous value was non-uniform, a
                         // partial assignment will not make it uniform.
                         if (is_partial_reference || IsDerefOfPartialPointer(u)) {
                             deref->AddEdge(old_value);
                         }
                     }
-                    return std::pair<Node*, Node*>(cf, deref);
+                    return LValue{cf, deref, apply};
                 }
                 return ProcessLValueExpression(cf, u->expr, is_partial_reference);
             },
@@ -1437,7 +1461,7 @@ class UniformityGraph {
             [&](Default) {
                 TINT_ICE(Resolver, diagnostics_)
                     << "unknown lvalue expression type: " << std::string(expr->TypeInfo().name);
-                return std::pair<Node*, Node*>(nullptr, nullptr);
+                return LValue{};
             });
     }
 

@@ -42,8 +42,8 @@ void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample
   uint4 srcColorBits = 0u;
   uint4 dstColorBits = uint4(dstColor);
   for(uint i = 0u; (i < (*(tint_symbol_3)).channelCount); i = (i + 1u)) {
-    uint const tint_symbol_1 = ConvertToFp16FloatValue(srcColor[i]);
-    srcColorBits[i] = tint_symbol_1;
+    uint const tint_symbol_1 = i;
+    srcColorBits[tint_symbol_1] = ConvertToFp16FloatValue(srcColor[i]);
     success = (success && (srcColorBits[i] == dstColorBits[i]));
   }
   uint outputIndex = ((GlobalInvocationID[1] * uint(size[0])) + GlobalInvocationID[0]);

@@ -16,8 +16,7 @@ layout(binding = 0, std430) buffer io_block_ssbo {
 } io;
 
 void tint_symbol(uint idx) {
-  vec3 tint_symbol_1 = Bad(io.inner.i, io.inner.v);
-  io.inner.v = tint_symbol_1;
+  io.inner.v = Bad(io.inner.i, io.inner.v);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

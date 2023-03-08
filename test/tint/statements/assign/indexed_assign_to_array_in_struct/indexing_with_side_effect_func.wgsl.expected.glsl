@@ -32,9 +32,8 @@ layout(binding = 4, std140) uniform uniforms_block_ubo {
 void tint_symbol() {
   InnerS v = InnerS(0);
   OuterS s = OuterS(S1[8](S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0)))));
-  InnerS tint_symbol_1 = v;
-  uint tint_symbol_2 = getNextIndex();
-  s.a1[tint_symbol_2].a2[uniforms.inner.j] = tint_symbol_1;
+  uint tint_symbol_1 = getNextIndex();
+  s.a1[tint_symbol_1].a2[uniforms.inner.j] = v;
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

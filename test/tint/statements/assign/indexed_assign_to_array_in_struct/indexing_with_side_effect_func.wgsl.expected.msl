@@ -32,17 +32,16 @@ struct OuterS {
 };
 
 uint getNextIndex() {
-  thread uint tint_symbol_3 = 0u;
-  tint_symbol_3 = (tint_symbol_3 + 1u);
-  return tint_symbol_3;
+  thread uint tint_symbol_2 = 0u;
+  tint_symbol_2 = (tint_symbol_2 + 1u);
+  return tint_symbol_2;
 }
 
-kernel void tint_symbol(const constant Uniforms* tint_symbol_4 [[buffer(0)]]) {
+kernel void tint_symbol(const constant Uniforms* tint_symbol_3 [[buffer(0)]]) {
   InnerS v = {};
   OuterS s = {};
-  InnerS const tint_symbol_1 = v;
-  uint const tint_symbol_2 = getNextIndex();
-  s.a1[tint_symbol_2].a2[(*(tint_symbol_4)).j] = tint_symbol_1;
+  uint const tint_symbol_1 = getNextIndex();
+  s.a1[tint_symbol_1].a2[(*(tint_symbol_3)).j] = v;
   return;
 }
 

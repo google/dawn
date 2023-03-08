@@ -114,9 +114,9 @@
                OpStore %46 %53
          %54 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0 %uint_0
                OpStore %54 %src_param
-         %55 = OpFunctionCall %_arr_v4int_uint_4 %ret_arr
-         %56 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0 %uint_0
-               OpStore %56 %55
+         %55 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0 %uint_0
+         %56 = OpFunctionCall %_arr_v4int_uint_4 %ret_arr
+               OpStore %55 %56
          %57 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0 %uint_0
                OpStore %57 %8
          %58 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0 %uint_0

@@ -8503,5 +8503,151 @@ test:11:7 note: reading from read_write storage buffer 'non_uniform' may result 
 )");
 }
 
+TEST_F(UniformityAnalysisTest, AssignmentEval_LHS_Then_RHS_Pass) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn b(p : ptr<function, i32>) -> i32 {
+  *p = non_uniform;
+  return 0;
+}
+
+fn a(p : ptr<function, i32>) -> i32 {
+  if (*p == 0) {
+    workgroupBarrier();
+  }
+  return 0;
+}
+
+fn foo() {
+  var i = 0;
+  var arr : array<i32, 4>;
+  arr[a(&i)] = arr[b(&i)];
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, AssignmentEval_LHS_Then_RHS_Fail) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn a(p : ptr<function, i32>) -> i32 {
+  *p = non_uniform;
+  return 0;
+}
+
+fn b(p : ptr<function, i32>) -> i32 {
+  if (*p == 0) {
+    workgroupBarrier();
+  }
+  return 0;
+}
+
+fn foo() {
+  var i = 0;
+  var arr : array<i32, 4>;
+  arr[a(&i)] = arr[b(&i)];
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:11:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:10:3 note: control flow depends on possibly non-uniform value
+  if (*p == 0) {
+  ^^
+
+test:10:8 note: parameter 'p' of 'b' may be non-uniform
+  if (*p == 0) {
+       ^
+
+test:19:22 note: possibly non-uniform value passed via pointer here
+  arr[a(&i)] = arr[b(&i)];
+                     ^
+
+test:19:9 note: contents of pointer may become non-uniform after calling 'a'
+  arr[a(&i)] = arr[b(&i)];
+        ^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, CompoundAssignmentEval_LHS_Then_RHS_Pass) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn b(p : ptr<function, i32>) -> i32 {
+  *p = non_uniform;
+  return 0;
+}
+
+fn a(p : ptr<function, i32>) -> i32 {
+  if (*p == 0) {
+    workgroupBarrier();
+  }
+  return 0;
+}
+
+fn foo() {
+  var i = 0;
+  var arr : array<i32, 4>;
+  arr[a(&i)] += arr[b(&i)];
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, CompoundAssignmentEval_LHS_Then_RHS_Fail) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn a(p : ptr<function, i32>) -> i32 {
+  *p = non_uniform;
+  return 0;
+}
+
+fn b(p : ptr<function, i32>) -> i32 {
+  if (*p == 0) {
+    workgroupBarrier();
+  }
+  return 0;
+}
+
+fn foo() {
+  var i = 0;
+  var arr : array<i32, 4>;
+  arr[a(&i)] += arr[b(&i)];
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:11:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:10:3 note: control flow depends on possibly non-uniform value
+  if (*p == 0) {
+  ^^
+
+test:10:8 note: parameter 'p' of 'b' may be non-uniform
+  if (*p == 0) {
+       ^
+
+test:19:23 note: possibly non-uniform value passed via pointer here
+  arr[a(&i)] += arr[b(&i)];
+                      ^
+
+test:19:9 note: contents of pointer may become non-uniform after calling 'a'
+  arr[a(&i)] += arr[b(&i)];
+        ^
+)");
+}
+
 }  // namespace
 }  // namespace tint::resolver

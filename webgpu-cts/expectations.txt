@@ -69,6 +69,11 @@
 # Last rolled: 2023-03-03 12:32:02AM
 
 ################################################################################
+# Evaluation order for assignments is changing
+################################################################################
+crbug.com/tint/1867 webgpu:shader,execution,evaluation_order:assignment:* [ Failure ]
+
+################################################################################
 # copyToTexture failures on Linux
 # Skipped instead of just Crash because of the number of failures
 # KEEP

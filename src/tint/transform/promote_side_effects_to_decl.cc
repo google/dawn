@@ -337,40 +337,14 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
             });
     }
 
-    // Starts the recursive processing of a statement's expression(s) to hoist
-    // side-effects to lets.
-    void ProcessStatement(const ast::Expression* expr) {
+    // Starts the recursive processing of a statement's expression(s) to hoist side-effects to lets.
+    void ProcessExpression(const ast::Expression* expr) {
         if (!expr) {
             return;
         }
 
         tint::utils::Vector<const ast::Expression*, 8> maybe_hoist;
         ProcessExpression(expr, maybe_hoist);
-    }
-
-    // Special case for processing assignment statement expressions, as we must
-    // evaluate the rhs before the lhs, and possibly hoist the rhs expression.
-    void ProcessAssignment(const ast::Expression* lhs, const ast::Expression* rhs) {
-        // Evaluate rhs before lhs
-        tint::utils::Vector<const ast::Expression*, 8> maybe_hoist;
-        if (ProcessExpression(rhs, maybe_hoist)) {
-            maybe_hoist.Push(rhs);
-        }
-
-        // If the rhs has side-effects, it may affect the lhs, so hoist it right
-        // away. e.g. "b[c] = a(0);"
-        if (HasSideEffects(rhs)) {
-            // Technically, we can always hoist rhs, but don't bother doing so when
-            // the lhs is just a variable or phony.
-            if (!lhs->IsAnyOf<ast::IdentifierExpression, ast::PhonyExpression>()) {
-                Flush(maybe_hoist);
-            }
-        }
-
-        // If maybe_hoist still has values, it means they are potential side-effect
-        // receivers. We pass this in while processing the lhs, in which case they
-        // may get hoisted if the lhs has side-effects. E.g. "b[a(0)] = c;".
-        ProcessExpression(lhs, maybe_hoist);
     }
 
   public:
@@ -386,21 +360,26 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
             }
 
             Switch(
-                stmt, [&](const ast::AssignmentStatement* s) { ProcessAssignment(s->lhs, s->rhs); },
-                [&](const ast::CallStatement* s) {  //
-                    ProcessStatement(s->expr);
+                stmt,  //
+                [&](const ast::AssignmentStatement* s) {
+                    tint::utils::Vector<const ast::Expression*, 8> maybe_hoist;
+                    ProcessExpression(s->lhs, maybe_hoist);
+                    ProcessExpression(s->rhs, maybe_hoist);
                 },
-                [&](const ast::ForLoopStatement* s) { ProcessStatement(s->condition); },
-                [&](const ast::WhileStatement* s) { ProcessStatement(s->condition); },
+                [&](const ast::CallStatement* s) {  //
+                    ProcessExpression(s->expr);
+                },
+                [&](const ast::ForLoopStatement* s) { ProcessExpression(s->condition); },
+                [&](const ast::WhileStatement* s) { ProcessExpression(s->condition); },
                 [&](const ast::IfStatement* s) {  //
-                    ProcessStatement(s->condition);
+                    ProcessExpression(s->condition);
                 },
                 [&](const ast::ReturnStatement* s) {  //
-                    ProcessStatement(s->value);
+                    ProcessExpression(s->value);
                 },
-                [&](const ast::SwitchStatement* s) { ProcessStatement(s->condition); },
+                [&](const ast::SwitchStatement* s) { ProcessExpression(s->condition); },
                 [&](const ast::VariableDeclStatement* s) {
-                    ProcessStatement(s->variable->initializer);
+                    ProcessExpression(s->variable->initializer);
                 });
         }
 
@@ -563,10 +542,10 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                     !sem.GetVal(s->rhs)->HasSideEffects()) {
                     return nullptr;
                 }
-                // rhs before lhs
+                // lhs before rhs
                 tint::utils::Vector<const ast::Statement*, 8> stmts;
-                ctx.Replace(s->rhs, Decompose(s->rhs, &stmts));
                 ctx.Replace(s->lhs, Decompose(s->lhs, &stmts));
+                ctx.Replace(s->rhs, Decompose(s->rhs, &stmts));
                 InsertBefore(stmts, s);
                 return ctx.CloneWithoutTransform(s);
             },

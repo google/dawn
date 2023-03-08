@@ -45,9 +45,9 @@
        %void = OpTypeVoid
          %26 = OpTypeFunction %void %uint
      %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_v3float = OpTypePointer StorageBuffer %v3float
      %uint_1 = OpConstant %uint 1
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
-%_ptr_StorageBuffer_v3float = OpTypePointer StorageBuffer %v3float
          %41 = OpTypeFunction %void
         %Bad = OpFunction %v3float None %10
       %index = OpFunctionParameter %uint
@@ -67,13 +67,13 @@
  %main_inner = OpFunction %void None %26
         %idx = OpFunctionParameter %uint
          %30 = OpLabel
-         %35 = OpAccessChain %_ptr_StorageBuffer_uint %io %uint_0 %uint_1
-         %36 = OpLoad %uint %35
-         %38 = OpAccessChain %_ptr_StorageBuffer_v3float %io %uint_0 %uint_0
-         %39 = OpLoad %v3float %38
-         %31 = OpFunctionCall %v3float %Bad %36 %39
-         %40 = OpAccessChain %_ptr_StorageBuffer_v3float %io %uint_0 %uint_0
-               OpStore %40 %31
+         %33 = OpAccessChain %_ptr_StorageBuffer_v3float %io %uint_0 %uint_0
+         %37 = OpAccessChain %_ptr_StorageBuffer_uint %io %uint_0 %uint_1
+         %38 = OpLoad %uint %37
+         %39 = OpAccessChain %_ptr_StorageBuffer_v3float %io %uint_0 %uint_0
+         %40 = OpLoad %v3float %39
+         %34 = OpFunctionCall %v3float %Bad %38 %40
+               OpStore %33 %34
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %41

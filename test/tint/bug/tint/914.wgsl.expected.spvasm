@@ -406,14 +406,14 @@
         %228 = OpIAdd %uint %157 %227
         %229 = OpLoad %uint %innerCol
         %230 = OpIAdd %uint %194 %229
-        %232 = OpLoad %uint %innerRow
-        %233 = OpIAdd %uint %161 %232
-        %234 = OpLoad %uint %t
-        %235 = OpIMul %uint %234 %uint_64
-        %236 = OpIAdd %uint %235 %230
-        %231 = OpFunctionCall %float %mm_readA %233 %236
-        %237 = OpAccessChain %_ptr_Workgroup_float %mm_Asub %228 %230
-               OpStore %237 %231
+        %231 = OpAccessChain %_ptr_Workgroup_float %mm_Asub %228 %230
+        %233 = OpLoad %uint %innerRow
+        %234 = OpIAdd %uint %161 %233
+        %235 = OpLoad %uint %t
+        %236 = OpIMul %uint %235 %uint_64
+        %237 = OpIAdd %uint %236 %230
+        %232 = OpFunctionCall %float %mm_readA %234 %237
+               OpStore %231 %232
                OpBranch %220
         %220 = OpLabel
         %238 = OpLoad %uint %innerCol
@@ -460,15 +460,15 @@
         %263 = OpIAdd %uint %196 %262
         %264 = OpLoad %uint %innerCol_0
         %265 = OpIAdd %uint %159 %264
-        %267 = OpLoad %uint %t
-        %268 = OpIMul %uint %267 %uint_64
-        %269 = OpIAdd %uint %268 %263
-        %270 = OpLoad %uint %innerCol_0
-        %271 = OpIAdd %uint %163 %270
-        %266 = OpFunctionCall %float %mm_readB %269 %271
+        %266 = OpLoad %uint %innerCol_0
+        %267 = OpAccessChain %_ptr_Workgroup_float %mm_Bsub %266 %265
+        %269 = OpLoad %uint %t
+        %270 = OpIMul %uint %269 %uint_64
+        %271 = OpIAdd %uint %270 %263
         %272 = OpLoad %uint %innerCol_0
-        %273 = OpAccessChain %_ptr_Workgroup_float %mm_Bsub %272 %265
-               OpStore %273 %266
+        %273 = OpIAdd %uint %163 %272
+        %268 = OpFunctionCall %float %mm_readB %271 %273
+               OpStore %267 %268
                OpBranch %255
         %255 = OpLabel
         %274 = OpLoad %uint %innerCol_0
