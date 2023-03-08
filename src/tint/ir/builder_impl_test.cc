@@ -1876,9 +1876,12 @@ TEST_F(IR_BuilderImplTest, EmitStatement_UserFunction) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_ConstructEmpty) {
+// TODO(dsinclair): This needs assignment in order to output correctly. The empty constructor ends
+// up materializing, so there is no expression to emit until there is a usage. When assigment is
+// implemented this can be enabled (and the output updated).
+TEST_F(IR_BuilderImplTest, DISABLED_EmitExpression_ConstructEmpty) {
     auto* expr = vec3(ty.f32());
-    WrapInFunction(expr);
+    GlobalVar("i", builtin::AddressSpace::kPrivate, expr);
 
     auto& b = CreateBuilder();
     InjectFlowBlock();
@@ -1920,6 +1923,23 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
     EXPECT_EQ(d.AsString(), R"(%2 (f32) = convert(f32, i32, %1 (void))
+)");
+}
+
+TEST_F(IR_BuilderImplTest, EmitExpression_MaterializedCall) {
+    auto* expr = Return(Call("trunc", 2.5_f));
+
+    Func("test_function", {}, ty.f32(), expr, utils::Empty);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%bb0 = Function test_function
+  %bb1 = Block
+  Return (2.0)
+FunctionEnd
+
 )");
 }
 

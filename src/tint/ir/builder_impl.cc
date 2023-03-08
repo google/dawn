@@ -56,6 +56,7 @@
 #include "src/tint/program.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/call.h"
+#include "src/tint/sem/materialize.h"
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/switch_statement.h"
 #include "src/tint/sem/value_constructor.h"
@@ -751,6 +752,19 @@ utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallStatement* stmt) {
 }
 
 utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallExpression* expr) {
+    // If this is a materialized semantic node, just use the constant value.
+    if (auto* mat = program_->Sem().Get(expr)) {
+        if (mat->ConstantValue()) {
+            auto* cv = mat->ConstantValue()->Clone(clone_ctx_);
+            if (!cv) {
+                add_error(expr->source, "failed to get constant value for call " +
+                                            std::string(expr->TypeInfo().name));
+                return utils::Failure;
+            }
+            return builder.Constant(cv);
+        }
+    }
+
     utils::Vector<Value*, 8> args;
     args.Reserve(expr->args.Length());
 
@@ -758,7 +772,7 @@ utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallExpression* expr) {
     for (const auto* arg : expr->args) {
         auto value = EmitExpression(arg);
         if (!value) {
-            add_error(arg->source, "Failed to convert arguments");
+            add_error(arg->source, "failed to convert arguments");
             return utils::Failure;
         }
         args.Push(value.Get());
@@ -766,7 +780,7 @@ utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallExpression* expr) {
 
     auto* sem = program_->Sem().Get<sem::Call>(expr);
     if (!sem) {
-        add_error(expr->source, "Failed to get semantic information for call " +
+        add_error(expr->source, "failed to get semantic information for call " +
                                     std::string(expr->TypeInfo().name));
         return utils::Failure;
     }
@@ -778,14 +792,14 @@ utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallExpression* expr) {
     // If this is a builtin function, emit the specific builtin value
     if (sem->Target()->As<sem::Builtin>()) {
         // TODO(dsinclair): .. something ...
-        add_error(expr->source, "Missing builtin function support");
+        add_error(expr->source, "missing builtin function support");
     } else if (sem->Target()->As<sem::ValueConstructor>()) {
         instr = builder.Construct(ty, std::move(args));
     } else if (auto* conv = sem->Target()->As<sem::ValueConversion>()) {
         auto* from = conv->Source()->Clone(clone_ctx_.type_ctx);
         instr = builder.Convert(ty, from, std::move(args));
     } else if (expr->target->identifier->Is<ast::TemplatedIdentifier>()) {
-        TINT_UNIMPLEMENTED(IR, diagnostics_) << "Missing templated ident support";
+        TINT_UNIMPLEMENTED(IR, diagnostics_) << "missing templated ident support";
         return utils::Failure;
     } else {
         // Not a builtin and not a templated call, so this is a user function.
@@ -802,7 +816,7 @@ utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallExpression* expr) {
 utils::Result<Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {
     auto* sem = program_->Sem().Get(lit);
     if (!sem) {
-        add_error(lit->source, "Failed to get semantic information for node " +
+        add_error(lit->source, "failed to get semantic information for node " +
                                    std::string(lit->TypeInfo().name));
         return utils::Failure;
     }
@@ -810,7 +824,7 @@ utils::Result<Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit
     auto* cv = sem->ConstantValue()->Clone(clone_ctx_);
     if (!cv) {
         add_error(lit->source,
-                  "Failed to get constant value for node " + std::string(lit->TypeInfo().name));
+                  "failed to get constant value for node " + std::string(lit->TypeInfo().name));
         return utils::Failure;
     }
     return builder.Constant(cv);
