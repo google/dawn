@@ -326,6 +326,8 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
                                maxUniformBuffersPerShaderStage);
     CHECK_AND_SET_V1_MAX_LIMIT(maxUniformBufferRange, maxUniformBufferBindingSize);
     CHECK_AND_SET_V1_MAX_LIMIT(maxStorageBufferRange, maxStorageBufferBindingSize);
+    CHECK_AND_SET_V1_MAX_LIMIT(maxFragmentCombinedOutputResources,
+                               maxFragmentCombinedOutputResources);
 
     CHECK_AND_SET_V1_MIN_LIMIT(minUniformBufferOffsetAlignment, minUniformBufferOffsetAlignment);
     CHECK_AND_SET_V1_MIN_LIMIT(minStorageBufferOffsetAlignment, minStorageBufferOffsetAlignment);
@@ -380,58 +382,6 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
         }
     } else {
         limits->v1.maxBufferSize = kAssumedMaxBufferSize;
-    }
-
-    // Only check maxFragmentCombinedOutputResources on mobile GPUs. Desktop GPUs drivers seem
-    // to put incorrect values for this limit with things like 8 or 16 when they can do bindless
-    // storage buffers. Mesa llvmpipe driver also puts 8 here.
-    uint32_t vendorId = mDeviceInfo.properties.vendorID;
-    if (!gpu_info::IsAMD(vendorId) && !gpu_info::IsIntel(vendorId) && !gpu_info::IsMesa(vendorId) &&
-        !gpu_info::IsNvidia(vendorId)) {
-        if (vkLimits.maxFragmentCombinedOutputResources <
-            kMaxColorAttachments + baseLimits.v1.maxStorageTexturesPerShaderStage +
-                baseLimits.v1.maxStorageBuffersPerShaderStage) {
-            return DAWN_INTERNAL_ERROR(
-                "Insufficient Vulkan maxFragmentCombinedOutputResources limit");
-        }
-
-        uint32_t maxFragmentCombinedOutputResources = kMaxColorAttachments +
-                                                      limits->v1.maxStorageTexturesPerShaderStage +
-                                                      limits->v1.maxStorageBuffersPerShaderStage;
-
-        if (maxFragmentCombinedOutputResources > vkLimits.maxFragmentCombinedOutputResources) {
-            // WebGPU's maxFragmentCombinedOutputResources exceeds the Vulkan limit.
-            // Decrease |maxStorageTexturesPerShaderStage| and |maxStorageBuffersPerShaderStage|
-            // to fit within the Vulkan limit.
-            uint32_t countOverLimit =
-                maxFragmentCombinedOutputResources - vkLimits.maxFragmentCombinedOutputResources;
-
-            uint32_t maxStorageTexturesOverBase = limits->v1.maxStorageTexturesPerShaderStage -
-                                                  baseLimits.v1.maxStorageTexturesPerShaderStage;
-            uint32_t maxStorageBuffersOverBase = limits->v1.maxStorageBuffersPerShaderStage -
-                                                 baseLimits.v1.maxStorageBuffersPerShaderStage;
-
-            // Reduce the number of resources by half the overage count, but clamp to
-            // to ensure we don't go below the base limits.
-            uint32_t numFewerStorageTextures =
-                std::min(countOverLimit / 2, maxStorageTexturesOverBase);
-            uint32_t numFewerStorageBuffers =
-                std::min((countOverLimit + 1) / 2, maxStorageBuffersOverBase);
-
-            if (numFewerStorageTextures == maxStorageTexturesOverBase) {
-                // If |numFewerStorageTextures| was clamped, subtract the remaining
-                // from the storage buffers.
-                numFewerStorageBuffers = countOverLimit - numFewerStorageTextures;
-                ASSERT(numFewerStorageBuffers <= maxStorageBuffersOverBase);
-            } else if (numFewerStorageBuffers == maxStorageBuffersOverBase) {
-                // If |numFewerStorageBuffers| was clamped, subtract the remaining
-                // from the storage textures.
-                numFewerStorageTextures = countOverLimit - numFewerStorageBuffers;
-                ASSERT(numFewerStorageTextures <= maxStorageTexturesOverBase);
-            }
-            limits->v1.maxStorageTexturesPerShaderStage -= numFewerStorageTextures;
-            limits->v1.maxStorageBuffersPerShaderStage -= numFewerStorageBuffers;
-        }
     }
 
     // Using base limits for:
