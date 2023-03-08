@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/program_builder.h"
+#include "src/tint/writer/binding_point.h"
 #include "src/tint/writer/generate_external_texture_bindings.h"
 
 namespace tint::writer {
@@ -45,7 +46,7 @@ TEST_F(GenerateExternalTextureBindingsTest, One) {
     auto bindings = GenerateExternalTextureBindings(&program);
     ASSERT_EQ(bindings.size(), 1u);
 
-    auto to = bindings[transform::BindingPoint{0, 0}];
+    auto to = bindings[writer::BindingPoint{0, 0}];
     ASSERT_EQ(to.plane_1.group, 0u);
     ASSERT_EQ(to.params.group, 0u);
     ASSERT_EQ(to.plane_1.binding, 1u);
@@ -62,13 +63,13 @@ TEST_F(GenerateExternalTextureBindingsTest, Two_SameGroup) {
     auto bindings = GenerateExternalTextureBindings(&program);
     ASSERT_EQ(bindings.size(), 2u);
 
-    auto to0 = bindings[transform::BindingPoint{0, 0}];
+    auto to0 = bindings[writer::BindingPoint{0, 0}];
     ASSERT_EQ(to0.plane_1.group, 0u);
     ASSERT_EQ(to0.params.group, 0u);
     ASSERT_EQ(to0.plane_1.binding, 2u);
     ASSERT_EQ(to0.params.binding, 3u);
 
-    auto to1 = bindings[transform::BindingPoint{0, 1}];
+    auto to1 = bindings[writer::BindingPoint{0, 1}];
     ASSERT_EQ(to1.plane_1.group, 0u);
     ASSERT_EQ(to1.params.group, 0u);
     ASSERT_EQ(to1.plane_1.binding, 4u);
@@ -85,13 +86,13 @@ TEST_F(GenerateExternalTextureBindingsTest, Two_DifferentGroup) {
     auto bindings = GenerateExternalTextureBindings(&program);
     ASSERT_EQ(bindings.size(), 2u);
 
-    auto to0 = bindings[transform::BindingPoint{0, 0}];
+    auto to0 = bindings[writer::BindingPoint{0, 0}];
     ASSERT_EQ(to0.plane_1.group, 0u);
     ASSERT_EQ(to0.params.group, 0u);
     ASSERT_EQ(to0.plane_1.binding, 1u);
     ASSERT_EQ(to0.params.binding, 2u);
 
-    auto to1 = bindings[transform::BindingPoint{1, 0}];
+    auto to1 = bindings[writer::BindingPoint{1, 0}];
     ASSERT_EQ(to1.plane_1.group, 1u);
     ASSERT_EQ(to1.params.group, 1u);
     ASSERT_EQ(to1.plane_1.binding, 1u);
@@ -111,13 +112,13 @@ TEST_F(GenerateExternalTextureBindingsTest, Two_WithOtherBindingsInSameGroup) {
     auto bindings = GenerateExternalTextureBindings(&program);
     ASSERT_EQ(bindings.size(), 2u);
 
-    auto to0 = bindings[transform::BindingPoint{0, 1}];
+    auto to0 = bindings[writer::BindingPoint{0, 1}];
     ASSERT_EQ(to0.plane_1.group, 0u);
     ASSERT_EQ(to0.params.group, 0u);
     ASSERT_EQ(to0.plane_1.binding, 5u);
     ASSERT_EQ(to0.params.binding, 6u);
 
-    auto to1 = bindings[transform::BindingPoint{0, 3}];
+    auto to1 = bindings[writer::BindingPoint{0, 3}];
     ASSERT_EQ(to1.plane_1.group, 0u);
     ASSERT_EQ(to1.params.group, 0u);
     ASSERT_EQ(to1.plane_1.binding, 7u);

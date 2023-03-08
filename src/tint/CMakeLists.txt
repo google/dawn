@@ -539,6 +539,7 @@ list(APPEND TINT_LIB_SRCS
   writer/append_vector.h
   writer/array_length_from_uniform_options.cc
   writer/array_length_from_uniform_options.h
+  writer/binding_point.h
   writer/check_supported_extensions.cc
   writer/check_supported_extensions.h
   writer/flatten_bindings.cc

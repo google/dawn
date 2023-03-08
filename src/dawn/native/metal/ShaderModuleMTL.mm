@@ -111,7 +111,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
     // Remap BindingNumber to BindingIndex in WGSL shader
     using BindingRemapper = tint::transform::BindingRemapper;
-    using BindingPoint = tint::transform::BindingPoint;
+    using BindingPoint = tint::writer::BindingPoint;
     BindingRemapper::BindingPoints bindingPoints;
 
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {

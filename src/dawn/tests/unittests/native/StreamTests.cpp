@@ -253,9 +253,9 @@ TEST(SerializeTests, StdUnorderedMap) {
     EXPECT_CACHE_KEY_EQ(m, expected);
 }
 
-// Test that ByteVectorSink serializes tint::sem::BindingPoint as expected.
+// Test that ByteVectorSink serializes tint::writer::BindingPoint as expected.
 TEST(SerializeTests, TintSemBindingPoint) {
-    tint::sem::BindingPoint bp{3, 6};
+    tint::writer::BindingPoint bp{3, 6};
 
     ByteVectorSink expected;
     StreamIn(&expected, uint32_t(3), uint32_t(6));
@@ -263,11 +263,12 @@ TEST(SerializeTests, TintSemBindingPoint) {
     EXPECT_CACHE_KEY_EQ(bp, expected);
 }
 
-// Test that ByteVectorSink serializes tint::transform::BindingPoints as expected.
+// Test that ByteVectorSink serializes tint::transform::MultiplanarExternalTexture::BindingPoints
+// as expected.
 TEST(SerializeTests, TintTransformBindingPoints) {
     tint::transform::MultiplanarExternalTexture::BindingPoints points{
-        tint::sem::BindingPoint{1, 4},
-        tint::sem::BindingPoint{3, 7},
+        tint::writer::BindingPoint{1, 4},
+        tint::writer::BindingPoint{3, 7},
     };
 
     ByteVectorSink expected;

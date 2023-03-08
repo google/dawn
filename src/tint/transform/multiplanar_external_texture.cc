@@ -121,7 +121,7 @@ struct MultiplanarExternalTexture::State {
             // The binding points for the newly introduced bindings must have been provided to this
             // transform. We fetch the new binding points by providing the original texture_external
             // binding points into the passed map.
-            BindingPoint bp = sem_var->BindingPoint();
+            sem::BindingPoint bp = sem_var->BindingPoint();
 
             BindingsMap::const_iterator it = new_binding_points->bindings_map.find(bp);
             if (it == new_binding_points->bindings_map.end()) {
@@ -494,6 +494,7 @@ struct MultiplanarExternalTexture::State {
 
 MultiplanarExternalTexture::NewBindingPoints::NewBindingPoints(BindingsMap inputBindingsMap)
     : bindings_map(std::move(inputBindingsMap)) {}
+
 MultiplanarExternalTexture::NewBindingPoints::~NewBindingPoints() = default;
 
 MultiplanarExternalTexture::MultiplanarExternalTexture() = default;

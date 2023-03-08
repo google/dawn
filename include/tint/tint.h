@@ -37,6 +37,7 @@
 #include "src/tint/transform/vertex_pulling.h"
 #include "src/tint/type/manager.h"
 #include "src/tint/writer/array_length_from_uniform_options.h"
+#include "src/tint/writer/binding_point.h"
 #include "src/tint/writer/flatten_bindings.h"
 #include "src/tint/writer/writer.h"
 

@@ -1016,7 +1016,7 @@ int main(int argc, const char** argv) {
              std::unordered_set<uint32_t> group0_bindings_in_use;
              auto allocate_binding = [&] {
                  for (uint32_t idx = 0;; idx++) {
-                     auto binding = tint::transform::BindingPoint{0u, idx};
+                     auto binding = tint::writer::BindingPoint{0u, idx};
                      if (group0_bindings_in_use.emplace(idx).second) {
                          return binding;
                      }
@@ -1034,7 +1034,7 @@ int main(int argc, const char** argv) {
              MET::BindingsMap met_bindings;
              for (auto ep : inspector.GetEntryPoints()) {
                  for (auto ext_tex : inspector.GetExternalTextureResourceBindings(ep.name)) {
-                     auto binding = tint::transform::BindingPoint{
+                     auto binding = tint::writer::BindingPoint{
                          ext_tex.bind_group,
                          ext_tex.binding,
                      };

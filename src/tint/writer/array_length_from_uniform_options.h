@@ -17,7 +17,7 @@
 
 #include <unordered_map>
 
-#include "src/tint/sem/binding_point.h"
+#include "src/tint/writer/binding_point.h"
 
 namespace tint::writer {
 
@@ -38,10 +38,10 @@ struct ArrayLengthFromUniformOptions {
 
     /// The binding point to use to generate a uniform buffer from which to read
     /// buffer sizes.
-    sem::BindingPoint ubo_binding;
+    BindingPoint ubo_binding;
     /// The mapping from storage buffer binding points to the index into the
     /// uniform buffer where the length of the buffer is stored.
-    std::unordered_map<sem::BindingPoint, uint32_t> bindpoint_to_size_index;
+    std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(ubo_binding, bindpoint_to_size_index);

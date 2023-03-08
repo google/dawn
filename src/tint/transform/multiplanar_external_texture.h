@@ -25,9 +25,6 @@
 
 namespace tint::transform {
 
-/// BindingPoint is an alias to sem::BindingPoint
-using BindingPoint = sem::BindingPoint;
-
 /// Within the MultiplanarExternalTexture transform, each instance of a
 /// texture_external binding is unpacked into two texture_2d<f32> bindings
 /// representing two possible planes of a texture and a uniform buffer binding
@@ -46,10 +43,10 @@ class MultiplanarExternalTexture final : public Castable<MultiplanarExternalText
     struct BindingPoints {
         /// The desired binding location of the texture_2d representing plane #1 when
         /// a texture_external binding is expanded.
-        BindingPoint plane_1;
+        sem::BindingPoint plane_1;
         /// The desired binding location of the ExternalTextureParams uniform when a
         /// texture_external binding is expanded.
-        BindingPoint params;
+        sem::BindingPoint params;
 
         /// Reflect the fields of this class so that it can be used by tint::ForeachField()
         TINT_REFLECT(plane_1, params);
@@ -58,7 +55,7 @@ class MultiplanarExternalTexture final : public Castable<MultiplanarExternalText
     /// BindingsMap is a map where the key is the binding location of a
     /// texture_external and the value is a struct containing the desired
     /// locations for new bindings expanded from the texture_external instance.
-    using BindingsMap = std::unordered_map<BindingPoint, BindingPoints>;
+    using BindingsMap = std::unordered_map<sem::BindingPoint, BindingPoints>;
 
     /// NewBindingPoints is consumed by the MultiplanarExternalTexture transform.
     /// Data holds information about location of each texture_external binding and

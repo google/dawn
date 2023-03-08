@@ -383,7 +383,7 @@ ResultOrError<std::string> TranslateToHLSL(
     options.disable_workgroup_init = r.disableWorkgroupInit;
     if (r.usesNumWorkgroups) {
         options.root_constant_binding_point =
-            tint::sem::BindingPoint{r.numWorkgroupsRegisterSpace, r.numWorkgroupsShaderRegister};
+            tint::writer::BindingPoint{r.numWorkgroupsRegisterSpace, r.numWorkgroupsShaderRegister};
     }
     // TODO(dawn:549): HLSL generation outputs the indices into the
     // array_length_from_uniform buffer that were actually used. When the blob cache can
@@ -523,8 +523,8 @@ ResultOrError<CompiledShader> ShaderModule::Compile(
         }
     }
 
-    using tint::transform::BindingPoint;
     using tint::transform::BindingRemapper;
+    using tint::writer::BindingPoint;
 
     BindingRemapper::BindingPoints remappedBindingPoints;
     BindingRemapper::AccessControls remappedAccessControls;

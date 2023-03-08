@@ -19,11 +19,12 @@
 #include "src/tint/inspector/inspector.h"
 #include "src/tint/transform/binding_remapper.h"
 #include "src/tint/transform/manager.h"
+#include "src/tint/writer/binding_point.h"
 
 namespace tint::writer {
+
 std::optional<Program> FlattenBindings(const Program* program) {
     // TODO(crbug.com/tint/1101): Make this more robust for multiple entry points.
-    using BindingPoint = tint::transform::BindingPoint;
     tint::transform::BindingRemapper::BindingPoints binding_points;
     uint32_t next_buffer_idx = 0;
     uint32_t next_sampler_idx = 0;
@@ -76,4 +77,5 @@ std::optional<Program> FlattenBindings(const Program* program) {
 
     return {};
 }
+
 }  // namespace tint::writer
