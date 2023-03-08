@@ -109,6 +109,10 @@ BuilderImpl::BuilderImpl(const Program* program)
 
 BuilderImpl::~BuilderImpl() = default;
 
+void BuilderImpl::add_error(const Source& s, const std::string& err) {
+    diagnostics_.add_error(tint::diag::System::IR, err, s);
+}
+
 void BuilderImpl::BranchTo(FlowNode* node, utils::VectorRef<Value*> args) {
     TINT_ASSERT(IR, current_flow_block);
     TINT_ASSERT(IR, !IsBranched(current_flow_block));
@@ -171,9 +175,7 @@ ResultType BuilderImpl::Build() {
                 return true;
             },
             [&](Default) {
-                diagnostics_.add_warning(tint::diag::System::IR,
-                                         "unknown type: " + std::string(decl->TypeInfo().name),
-                                         decl->source);
+                add_error(decl->source, "unknown type: " + std::string(decl->TypeInfo().name));
                 return true;
             });
         if (!ok) {
@@ -266,9 +268,8 @@ bool BuilderImpl::EmitStatement(const ast::Statement* stmt) {
             return true;  // Not emitted
         },
         [&](Default) {
-            diagnostics_.add_warning(
-                tint::diag::System::IR,
-                "unknown statement type: " + std::string(stmt->TypeInfo().name), stmt->source);
+            add_error(stmt->source,
+                      "unknown statement type: " + std::string(stmt->TypeInfo().name));
             // TODO(dsinclair): This should return `false`, switch back when all
             // the cases are handled.
             return true;
@@ -616,9 +617,8 @@ utils::Result<Value*> BuilderImpl::EmitExpression(const ast::Expression* expr) {
         // TODO(dsinclair): Implement
         // },
         [&](Default) {
-            diagnostics_.add_warning(
-                tint::diag::System::IR,
-                "unknown expression type: " + std::string(expr->TypeInfo().name), expr->source);
+            add_error(expr->source,
+                      "unknown expression type: " + std::string(expr->TypeInfo().name));
             // TODO(dsinclair): This should return utils::Failure; Switch back
             // once all the above cases are handled.
             auto* v = builder.ir.types.Get<type::Void>();
@@ -636,19 +636,16 @@ bool BuilderImpl::EmitVariable(const ast::Variable* var) {
         // TODO(dsinclair): Implement
         // },
         [&](const ast::Override*) {
-            diagnostics_.add_warning(tint::diag::System::IR,
-                                     "found an `Override` variable. The SubstituteOverrides "
-                                     "transform must be run before converting to IR",
-                                     var->source);
+            add_error(var->source,
+                      "found an `Override` variable. The SubstituteOverrides "
+                      "transform must be run before converting to IR");
             return false;
         },
         // [&](const ast::Const* c) {
         // TODO(dsinclair): Implement
         // },
         [&](Default) {
-            diagnostics_.add_warning(tint::diag::System::IR,
-                                     "unknown variable: " + std::string(var->TypeInfo().name),
-                                     var->source);
+            add_error(var->source, "unknown variable: " + std::string(var->TypeInfo().name));
 
             // TODO(dsinclair): This should return `false`, switch back when all
             // the cases are handled.
@@ -761,8 +758,7 @@ utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallExpression* expr) {
     for (const auto* arg : expr->args) {
         auto value = EmitExpression(arg);
         if (!value) {
-            diagnostics_.add_error(tint::diag::System::IR, "Failed to convert arguments",
-                                   arg->source);
+            add_error(arg->source, "Failed to convert arguments");
             return utils::Failure;
         }
         args.Push(value.Get());
@@ -770,10 +766,8 @@ utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallExpression* expr) {
 
     auto* sem = program_->Sem().Get<sem::Call>(expr);
     if (!sem) {
-        diagnostics_.add_error(
-            tint::diag::System::IR,
-            "Failed to get semantic information for call " + std::string(expr->TypeInfo().name),
-            expr->source);
+        add_error(expr->source, "Failed to get semantic information for call " +
+                                    std::string(expr->TypeInfo().name));
         return utils::Failure;
     }
 
@@ -784,8 +778,7 @@ utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallExpression* expr) {
     // If this is a builtin function, emit the specific builtin value
     if (sem->Target()->As<sem::Builtin>()) {
         // TODO(dsinclair): .. something ...
-        diagnostics_.add_error(tint::diag::System::IR, "Missing builtin function support",
-                               expr->source);
+        add_error(expr->source, "Missing builtin function support");
     } else if (sem->Target()->As<sem::ValueConstructor>()) {
         instr = builder.Construct(ty, std::move(args));
     } else if (auto* conv = sem->Target()->As<sem::ValueConversion>()) {
@@ -809,19 +802,15 @@ utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallExpression* expr) {
 utils::Result<Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {
     auto* sem = program_->Sem().Get(lit);
     if (!sem) {
-        diagnostics_.add_error(
-            tint::diag::System::IR,
-            "Failed to get semantic information for node " + std::string(lit->TypeInfo().name),
-            lit->source);
+        add_error(lit->source, "Failed to get semantic information for node " +
+                                   std::string(lit->TypeInfo().name));
         return utils::Failure;
     }
 
     auto* cv = sem->ConstantValue()->Clone(clone_ctx_);
     if (!cv) {
-        diagnostics_.add_error(
-            tint::diag::System::IR,
-            "Failed to get constant value for node " + std::string(lit->TypeInfo().name),
-            lit->source);
+        add_error(lit->source,
+                  "Failed to get constant value for node " + std::string(lit->TypeInfo().name));
         return utils::Failure;
     }
     return builder.Constant(cv);
@@ -867,10 +856,9 @@ bool BuilderImpl::EmitAttribute(const ast::Attribute* attr) {
         // TODO(dsinclair): Implement
         // },
         [&](const ast::IdAttribute*) {
-            diagnostics_.add_warning(tint::diag::System::IR,
-                                     "found an `Id` attribute. The SubstituteOverrides transform "
-                                     "must be run before converting to IR",
-                                     attr->source);
+            add_error(attr->source,
+                      "found an `Id` attribute. The SubstituteOverrides transform "
+                      "must be run before converting to IR");
             return false;
         },
         [&](const ast::StructMemberSizeAttribute*) {
@@ -890,9 +878,7 @@ bool BuilderImpl::EmitAttribute(const ast::Attribute* attr) {
         // TODO(dsinclair): Implement
         // },
         [&](Default) {
-            diagnostics_.add_warning(tint::diag::System::IR,
-                                     "unknown attribute: " + std::string(attr->TypeInfo().name),
-                                     attr->source);
+            add_error(attr->source, "unknown attribute: " + std::string(attr->TypeInfo().name));
             return false;
         });
 }

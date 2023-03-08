@@ -222,6 +222,8 @@ class BuilderImpl {
 
     FlowNode* FindEnclosingControl(ControlFlags flags);
 
+    void add_error(const Source& s, const std::string& err);
+
     const Program* program_ = nullptr;
 
     Symbol CloneSymbol(Symbol sym) const;
