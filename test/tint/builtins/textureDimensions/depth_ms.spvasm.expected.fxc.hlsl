@@ -3,7 +3,7 @@ static float4 tint_symbol_1 = (0.0f).xxxx;
 
 void textureDimensions_f60bdb() {
   int2 res = (0).xx;
-  int3 tint_tmp;
+  uint3 tint_tmp;
   arg_0.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
   const int2 x_16 = int2(tint_tmp.xy);
   res = x_16;

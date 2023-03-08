@@ -2,7 +2,7 @@ TextureCube<int4> arg_0 : register(t0, space1);
 RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureNumLevels_2267d8() {
-  int3 tint_tmp;
+  uint3 tint_tmp;
   arg_0.GetDimensions(0, tint_tmp.x, tint_tmp.y, tint_tmp.z);
   uint res = tint_tmp.z;
   prevent_dce.Store(0u, asuint(res));

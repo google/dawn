@@ -18,7 +18,7 @@ struct tint_symbol_3 {
 };
 
 void main_inner(uint3 GlobalInvocationID) {
-  int2 tint_tmp;
+  uint2 tint_tmp;
   src.GetDimensions(tint_tmp.x, tint_tmp.y);
   uint2 size = tint_tmp;
   uint2 dstTexCoord = GlobalInvocationID.xy;

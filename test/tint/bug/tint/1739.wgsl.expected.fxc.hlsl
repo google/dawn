@@ -40,22 +40,22 @@ float4 textureLoadExternal(Texture2D<float4> plane0, Texture2D<float4> plane1, i
   const int2 coord1 = (coord >> (1u).xx);
   float3 color = float3(0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    int3 tint_tmp;
+    uint3 tint_tmp;
     plane0.GetDimensions(0, tint_tmp.x, tint_tmp.y, tint_tmp.z);
     const uint level_idx = min(0u, (tint_tmp.z - 1u));
-    int3 tint_tmp_1;
+    uint3 tint_tmp_1;
     plane0.GetDimensions(level_idx, tint_tmp_1.x, tint_tmp_1.y, tint_tmp_1.z);
     color = plane0.Load(int3(tint_clamp(coord, (0).xx, int2((tint_tmp_1.xy - (1u).xx))), int(level_idx))).rgb;
   } else {
-    int3 tint_tmp_2;
+    uint3 tint_tmp_2;
     plane0.GetDimensions(0, tint_tmp_2.x, tint_tmp_2.y, tint_tmp_2.z);
     const uint level_idx_1 = min(0u, (tint_tmp_2.z - 1u));
-    int3 tint_tmp_3;
+    uint3 tint_tmp_3;
     plane1.GetDimensions(0, tint_tmp_3.x, tint_tmp_3.y, tint_tmp_3.z);
     const uint level_idx_2 = min(0u, (tint_tmp_3.z - 1u));
-    int3 tint_tmp_4;
+    uint3 tint_tmp_4;
     plane0.GetDimensions(level_idx_1, tint_tmp_4.x, tint_tmp_4.y, tint_tmp_4.z);
-    int3 tint_tmp_5;
+    uint3 tint_tmp_5;
     plane1.GetDimensions(level_idx_2, tint_tmp_5.x, tint_tmp_5.y, tint_tmp_5.z);
     color = mul(params.yuvToRgbConversionMatrix, float4(plane0.Load(int3(tint_clamp(coord, (0).xx, int2((tint_tmp_4.xy - (1u).xx))), int(level_idx_1))).r, plane1.Load(int3(tint_clamp(coord1, (0).xx, int2((tint_tmp_5.xy - (1u).xx))), int(level_idx_2))).rg, 1.0f));
   }
@@ -114,11 +114,11 @@ ExternalTextureParams ext_tex_params_load(uint offset) {
 [numthreads(1, 1, 1)]
 void main() {
   float4 red = textureLoadExternal(t, ext_tex_plane_1, (10).xx, ext_tex_params_load(0u));
-  int2 tint_tmp_6;
+  uint2 tint_tmp_6;
   outImage.GetDimensions(tint_tmp_6.x, tint_tmp_6.y);
   outImage[tint_clamp((0).xx, (0).xx, int2((tint_tmp_6 - (1u).xx)))] = red;
   float4 green = textureLoadExternal(t, ext_tex_plane_1, int2(70, 118), ext_tex_params_load(0u));
-  int2 tint_tmp_7;
+  uint2 tint_tmp_7;
   outImage.GetDimensions(tint_tmp_7.x, tint_tmp_7.y);
   outImage[tint_clamp(int2(1, 0), (0).xx, int2((tint_tmp_7 - (1u).xx)))] = green;
   return;

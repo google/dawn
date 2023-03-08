@@ -3,7 +3,7 @@ RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureDimensions_9e0794() {
   int arg_1 = 1;
-  int4 tint_tmp;
+  uint4 tint_tmp;
   arg_0.GetDimensions(arg_1, tint_tmp.x, tint_tmp.y, tint_tmp.z, tint_tmp.w);
   uint2 res = tint_tmp.xy;
   prevent_dce.Store2(0u, asuint(res));

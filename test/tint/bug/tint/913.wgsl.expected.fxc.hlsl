@@ -14,10 +14,10 @@ struct tint_symbol_8 {
 };
 
 void main_inner(uint3 GlobalInvocationID) {
-  int2 tint_tmp;
+  uint2 tint_tmp;
   src.GetDimensions(tint_tmp.x, tint_tmp.y);
   const uint2 srcSize = tint_tmp;
-  int2 tint_tmp_1;
+  uint2 tint_tmp_1;
   tint_symbol.GetDimensions(tint_tmp_1.x, tint_tmp_1.y);
   const uint2 dstSize = tint_tmp_1;
   const uint2 dstTexCoord = uint2(GlobalInvocationID.xy);

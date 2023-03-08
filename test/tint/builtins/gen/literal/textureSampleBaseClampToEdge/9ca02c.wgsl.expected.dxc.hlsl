@@ -1,5 +1,5 @@
 float4 tint_textureSampleBaseClampToEdge(Texture2D<float4> t, SamplerState s, float2 coord) {
-  int3 tint_tmp;
+  uint3 tint_tmp;
   t.GetDimensions(0, tint_tmp.x, tint_tmp.y, tint_tmp.z);
   const float2 dims = float2(tint_tmp.xy);
   const float2 half_texel = ((0.5f).xx / dims);

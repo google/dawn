@@ -170,6 +170,8 @@ ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverloa
             return R"(tint_symbol.GatherCmp(tint_symbol_1, float4(1.0f, 2.0f, 3.0f, float(4u)), 5.0f))";
         case ValidTextureOverload::kNumLayers2dArray:
         case ValidTextureOverload::kNumLayersDepth2dArray:
+        case ValidTextureOverload::kNumLayersCubeArray:
+        case ValidTextureOverload::kNumLayersDepthCubeArray:
         case ValidTextureOverload::kNumLayersStorageWO2dArray:
             return {
                 R"(int3 tint_tmp;

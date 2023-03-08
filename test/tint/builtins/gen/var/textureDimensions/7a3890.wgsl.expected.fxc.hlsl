@@ -2,7 +2,7 @@ Texture3D<uint4> arg_0 : register(t0, space1);
 RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureDimensions_7a3890() {
-  int3 tint_tmp;
+  uint3 tint_tmp;
   arg_0.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
   uint3 res = tint_tmp;
   prevent_dce.Store3(0u, asuint(res));

@@ -2427,9 +2427,9 @@ bool GeneratorImpl::EmitTextureCall(utils::StringStream& out,
             // Declare a variable to hold the queried texture info
             auto dims = UniqueIdentifier(kTempNamePrefix);
             if (num_dimensions == 1) {
-                line() << "int " << dims << ";";
+                line() << "uint " << dims << ";";
             } else {
-                line() << "int" << num_dimensions << " " << dims << ";";
+                line() << "uint" << num_dimensions << " " << dims << ";";
             }
 
             {  // texture.GetDimensions(...)
