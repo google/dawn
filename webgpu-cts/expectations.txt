@@ -485,6 +485,11 @@ crbug.com/1410936 [ monterey ] webgpu:web_platform,canvas,configure:viewFormats:
 crbug.com/1410936 [ monterey ] webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
 
 ################################################################################
+# New maxFragmentCombinedOutputResources limit breaking dependent limit tests.
+################################################################################
+crbug.com/dawn/1665 webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="atMaximum" [ Failure ]
+
+################################################################################
 # untriaged failures
 ################################################################################
 crbug.com/dawn/0000 [ dawn-backend-validation win10 ] webgpu:api,operation,render_pass,resolve:* [ Failure ]
@@ -507,8 +512,6 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 ubuntu ] webgpu:a
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createBindGroupLayout,at_over:limitTest="underDefault" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="atDefault" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="atDefault" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="atMaximum" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="atMaximum" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="underDefault" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipelineLayout,at_over:limitTest="atDefault" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipelineLayout,at_over:limitTest="atMaximum" [ RetryOnFailure ]

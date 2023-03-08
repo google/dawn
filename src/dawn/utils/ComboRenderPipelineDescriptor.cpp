@@ -142,4 +142,8 @@ wgpu::DepthStencilState* ComboRenderPipelineDescriptor::EnableDepthStencil(
     return &cDepthStencil;
 }
 
+void ComboRenderPipelineDescriptor::DisableDepthStencil() {
+    this->depthStencil = nullptr;
+}
+
 }  // namespace utils

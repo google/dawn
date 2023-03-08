@@ -48,6 +48,7 @@ class ComboRenderPipelineDescriptor : public wgpu::RenderPipelineDescriptor {
 
     wgpu::DepthStencilState* EnableDepthStencil(
         wgpu::TextureFormat format = wgpu::TextureFormat::Depth24PlusStencil8);
+    void DisableDepthStencil();
 
     std::array<wgpu::VertexBufferLayout, kMaxVertexBuffers> cBuffers;
     std::array<wgpu::VertexAttribute, kMaxVertexAttributes> cAttributes;

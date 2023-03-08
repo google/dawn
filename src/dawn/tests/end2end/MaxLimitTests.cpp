@@ -548,11 +548,26 @@ TEST_P(MaxLimitTests, MaxBufferSizes) {
     EXPECT_LE(baseLimits.maxStorageBufferBindingSize, baseLimits.maxBufferSize);
     EXPECT_LE(baseLimits.maxUniformBufferBindingSize, baseLimits.maxBufferSize);
 
-    // Base limits eith tiering.
+    // Base limits with tiering.
     GetAdapter().SetUseTieredLimits(true);
     wgpu::Limits tieredLimits = GetAdapterLimits().limits;
     EXPECT_LE(tieredLimits.maxStorageBufferBindingSize, tieredLimits.maxBufferSize);
     EXPECT_LE(tieredLimits.maxUniformBufferBindingSize, tieredLimits.maxBufferSize);
+
+    // Unset tiered limit usage to avoid affecting other tests.
+    GetAdapter().SetUseTieredLimits(false);
+}
+
+// Verifies that supported fragment combined output resource limits meet base requirements.
+TEST_P(MaxLimitTests, MaxFragmentCombinedOutputResources) {
+    // Base limits without tiering.
+    wgpu::Limits baseLimits = GetAdapterLimits().limits;
+    EXPECT_LE(baseLimits.maxColorAttachments, baseLimits.maxFragmentCombinedOutputResources);
+
+    // Base limits with tiering.
+    GetAdapter().SetUseTieredLimits(true);
+    wgpu::Limits tieredLimits = GetAdapterLimits().limits;
+    EXPECT_LE(tieredLimits.maxColorAttachments, tieredLimits.maxFragmentCombinedOutputResources);
 
     // Unset tiered limit usage to avoid affecting other tests.
     GetAdapter().SetUseTieredLimits(false);
