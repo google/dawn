@@ -1,8 +1,13 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
+f16vec3 tint_select(f16vec3 param_0, f16vec3 param_1, bvec3 param_2) {
+    return f16vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
+}
+
+
 f16vec3 tint_atanh(f16vec3 x) {
-  return mix(atanh(x), f16vec3(0.0hf), greaterThanEqual(x, f16vec3(1.0hf)));
+  return tint_select(atanh(x), f16vec3(0.0hf), greaterThanEqual(x, f16vec3(1.0hf)));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -32,8 +37,13 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 precision mediump float;
 
+f16vec3 tint_select(f16vec3 param_0, f16vec3 param_1, bvec3 param_2) {
+    return f16vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
+}
+
+
 f16vec3 tint_atanh(f16vec3 x) {
-  return mix(atanh(x), f16vec3(0.0hf), greaterThanEqual(x, f16vec3(1.0hf)));
+  return tint_select(atanh(x), f16vec3(0.0hf), greaterThanEqual(x, f16vec3(1.0hf)));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -57,8 +67,13 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
+f16vec3 tint_select(f16vec3 param_0, f16vec3 param_1, bvec3 param_2) {
+    return f16vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
+}
+
+
 f16vec3 tint_atanh(f16vec3 x) {
-  return mix(atanh(x), f16vec3(0.0hf), greaterThanEqual(x, f16vec3(1.0hf)));
+  return tint_select(atanh(x), f16vec3(0.0hf), greaterThanEqual(x, f16vec3(1.0hf)));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {

@@ -1,7 +1,12 @@
 #version 310 es
 
+vec4 tint_select(vec4 param_0, vec4 param_1, bvec4 param_2) {
+    return vec4(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2], param_2[3] ? param_1[3] : param_0[3]);
+}
+
+
 vec4 tint_atanh(vec4 x) {
-  return mix(atanh(x), vec4(0.0f), greaterThanEqual(x, vec4(1.0f)));
+  return tint_select(atanh(x), vec4(0.0f), greaterThanEqual(x, vec4(1.0f)));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -30,8 +35,13 @@ void main() {
 #version 310 es
 precision mediump float;
 
+vec4 tint_select(vec4 param_0, vec4 param_1, bvec4 param_2) {
+    return vec4(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2], param_2[3] ? param_1[3] : param_0[3]);
+}
+
+
 vec4 tint_atanh(vec4 x) {
-  return mix(atanh(x), vec4(0.0f), greaterThanEqual(x, vec4(1.0f)));
+  return tint_select(atanh(x), vec4(0.0f), greaterThanEqual(x, vec4(1.0f)));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -54,8 +64,13 @@ void main() {
 }
 #version 310 es
 
+vec4 tint_select(vec4 param_0, vec4 param_1, bvec4 param_2) {
+    return vec4(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2], param_2[3] ? param_1[3] : param_0[3]);
+}
+
+
 vec4 tint_atanh(vec4 x) {
-  return mix(atanh(x), vec4(0.0f), greaterThanEqual(x, vec4(1.0f)));
+  return tint_select(atanh(x), vec4(0.0f), greaterThanEqual(x, vec4(1.0f)));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {

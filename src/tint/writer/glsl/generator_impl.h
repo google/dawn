@@ -234,8 +234,11 @@ class GeneratorImpl : public TextGenerator {
     /// Handles generating a call to the `countOneBits()` builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
+    /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitSelectCall(utils::StringStream& out, const ast::CallExpression* expr);
+    bool EmitSelectCall(utils::StringStream& out,
+                        const ast::CallExpression* expr,
+                        const sem::Builtin* builtin);
     /// Handles generating a call to the `dot()` builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression

@@ -379,7 +379,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Select_Vector) {
     gen.increment_indent();
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-    EXPECT_EQ(out.str(), "mix(a, b, bvec2(true, false))");
+    EXPECT_EQ(out.str(), "tint_select(a, b, bvec2(true, false))");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, FMA_f32) {

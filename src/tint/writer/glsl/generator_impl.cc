@@ -780,7 +780,7 @@ bool GeneratorImpl::EmitBuiltinCall(utils::StringStream& out,
         return EmitCountOneBitsCall(out, expr);
     }
     if (builtin->Type() == sem::BuiltinType::kSelect) {
-        return EmitSelectCall(out, expr);
+        return EmitSelectCall(out, expr, builtin);
     }
     if (builtin->Type() == sem::BuiltinType::kDot) {
         return EmitDotCall(out, expr, builtin);
@@ -1100,28 +1100,39 @@ bool GeneratorImpl::EmitCountOneBitsCall(utils::StringStream& out,
     return true;
 }
 
-bool GeneratorImpl::EmitSelectCall(utils::StringStream& out, const ast::CallExpression* expr) {
+bool GeneratorImpl::EmitSelectCall(utils::StringStream& out,
+                                   const ast::CallExpression* expr,
+                                   const sem::Builtin* builtin) {
+    // GLSL does not support ternary expressions with a bool vector conditional,
+    // so polyfill with a helper.
+    if (auto* vec = builtin->Parameters()[2]->Type()->As<type::Vector>()) {
+        return CallBuiltinHelper(
+            out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
+                auto l = line(b);
+                l << "  return ";
+                if (!EmitType(l, builtin->ReturnType(), builtin::AddressSpace::kUndefined,
+                              builtin::Access::kUndefined, "")) {
+                    return false;
+                }
+                {
+                    ScopedParen sp(l);
+                    for (uint32_t i = 0; i < vec->Width(); i++) {
+                        if (i > 0) {
+                            l << ", ";
+                        }
+                        l << params[2] << "[" << i << "] ? " << params[1] << "[" << i
+                          << "] : " << params[0] << "[" << i << "]";
+                    }
+                }
+                l << ";";
+                return true;
+            });
+    }
+
     auto* expr_false = expr->args[0];
     auto* expr_true = expr->args[1];
     auto* expr_cond = expr->args[2];
-    // GLSL does not support ternary expressions with a bool vector conditional,
-    // but it does support mix() with same.
-    if (TypeOf(expr_cond)->UnwrapRef()->is_bool_vector()) {
-        out << "mix(";
-        if (!EmitExpression(out, expr_false)) {
-            return false;
-        }
-        out << ", ";
-        if (!EmitExpression(out, expr_true)) {
-            return false;
-        }
-        out << ", ";
-        if (!EmitExpression(out, expr_cond)) {
-            return false;
-        }
-        out << ")";
-        return true;
-    }
+
     ScopedParen paren(out);
     if (!EmitExpression(out, expr_cond)) {
         return false;

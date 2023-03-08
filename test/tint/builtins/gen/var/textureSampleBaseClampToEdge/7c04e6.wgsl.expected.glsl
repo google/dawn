@@ -1,5 +1,10 @@
 #version 310 es
 
+vec3 tint_select(vec3 param_0, vec3 param_1, bvec3 param_2) {
+    return vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
+}
+
+
 struct GammaTransferParams {
   float G;
   float A;
@@ -49,7 +54,7 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
   bvec3 cond = lessThan(abs(v), vec3(params.D));
   vec3 t = (sign(v) * ((params.C * abs(v)) + params.F));
   vec3 f = (sign(v) * (pow(((params.A * abs(v)) + params.B), vec3(params.G)) + params.E));
-  return mix(f, t, cond);
+  return tint_select(f, t, cond);
 }
 
 
@@ -109,6 +114,11 @@ void main() {
 #version 310 es
 precision mediump float;
 
+vec3 tint_select(vec3 param_0, vec3 param_1, bvec3 param_2) {
+    return vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
+}
+
+
 struct GammaTransferParams {
   float G;
   float A;
@@ -158,7 +168,7 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
   bvec3 cond = lessThan(abs(v), vec3(params.D));
   vec3 t = (sign(v) * ((params.C * abs(v)) + params.F));
   vec3 f = (sign(v) * (pow(((params.A * abs(v)) + params.B), vec3(params.G)) + params.E));
-  return mix(f, t, cond);
+  return tint_select(f, t, cond);
 }
 
 
@@ -212,6 +222,11 @@ void main() {
 }
 #version 310 es
 
+vec3 tint_select(vec3 param_0, vec3 param_1, bvec3 param_2) {
+    return vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
+}
+
+
 struct GammaTransferParams {
   float G;
   float A;
@@ -261,7 +276,7 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
   bvec3 cond = lessThan(abs(v), vec3(params.D));
   vec3 t = (sign(v) * ((params.C * abs(v)) + params.F));
   vec3 f = (sign(v) * (pow(((params.A * abs(v)) + params.B), vec3(params.G)) + params.E));
-  return mix(f, t, cond);
+  return tint_select(f, t, cond);
 }
 
 

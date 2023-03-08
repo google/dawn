@@ -1,8 +1,13 @@
 #version 310 es
 
+vec4 tint_select(vec4 param_0, vec4 param_1, bvec4 param_2) {
+    return vec4(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2], param_2[3] ? param_1[3] : param_0[3]);
+}
+
+
 void select_43741e() {
   bvec4 arg_2 = bvec4(true);
-  vec4 res = mix(vec4(1.0f), vec4(1.0f), arg_2);
+  vec4 res = tint_select(vec4(1.0f), vec4(1.0f), arg_2);
 }
 
 vec4 vertex_main() {
@@ -21,9 +26,14 @@ void main() {
 #version 310 es
 precision mediump float;
 
+vec4 tint_select(vec4 param_0, vec4 param_1, bvec4 param_2) {
+    return vec4(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2], param_2[3] ? param_1[3] : param_0[3]);
+}
+
+
 void select_43741e() {
   bvec4 arg_2 = bvec4(true);
-  vec4 res = mix(vec4(1.0f), vec4(1.0f), arg_2);
+  vec4 res = tint_select(vec4(1.0f), vec4(1.0f), arg_2);
 }
 
 void fragment_main() {
@@ -36,9 +46,14 @@ void main() {
 }
 #version 310 es
 
+vec4 tint_select(vec4 param_0, vec4 param_1, bvec4 param_2) {
+    return vec4(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2], param_2[3] ? param_1[3] : param_0[3]);
+}
+
+
 void select_43741e() {
   bvec4 arg_2 = bvec4(true);
-  vec4 res = mix(vec4(1.0f), vec4(1.0f), arg_2);
+  vec4 res = tint_select(vec4(1.0f), vec4(1.0f), arg_2);
 }
 
 void compute_main() {
