@@ -2,7 +2,7 @@
 
 ivec3 tint_div(ivec3 lhs, int rhs) {
   ivec3 r = ivec3(rhs);
-  return (lhs / mix(r, ivec3(1), bvec3(uvec3(equal(r, ivec3(0))) | uvec3(bvec3(uvec3(equal(lhs, ivec3(-2147483648))) & uvec3(equal(r, ivec3(-1))))))));
+  return (lhs / mix(r, ivec3(1), bvec3(uvec3(equal(r, ivec3(0))) | uvec3(bvec3(uvec3(equal(lhs, ivec3((-2147483647 - 1)))) & uvec3(equal(r, ivec3(-1))))))));
 }
 
 void f() {

@@ -13,7 +13,7 @@ layout(binding = 0, std430) buffer v_block_ssbo {
 } v;
 
 int tint_mod(int lhs, int rhs) {
-  int rhs_or_one = (bool(uint((rhs == 0)) | uint(bool(uint((lhs == -2147483648)) & uint((rhs == -1))))) ? 1 : rhs);
+  int rhs_or_one = (bool(uint((rhs == 0)) | uint(bool(uint((lhs == (-2147483647 - 1))) & uint((rhs == -1))))) ? 1 : rhs);
   if (((uint((lhs | rhs_or_one)) & 2147483648u) != 0u)) {
     return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
   } else {

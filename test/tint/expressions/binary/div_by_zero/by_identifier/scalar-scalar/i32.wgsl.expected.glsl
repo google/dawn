@@ -1,7 +1,7 @@
 #version 310 es
 
 int tint_div(int lhs, int rhs) {
-  return (lhs / (bool(uint((rhs == 0)) | uint(bool(uint((lhs == -2147483648)) & uint((rhs == -1))))) ? 1 : rhs));
+  return (lhs / (bool(uint((rhs == 0)) | uint(bool(uint((lhs == (-2147483647 - 1))) & uint((rhs == -1))))) ? 1 : rhs));
 }
 
 void f() {

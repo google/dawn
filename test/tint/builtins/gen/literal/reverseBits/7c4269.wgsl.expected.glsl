@@ -5,7 +5,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void reverseBits_7c4269() {
-  int res = -2147483648;
+  int res = (-2147483647 - 1);
   prevent_dce.inner = res;
 }
 
@@ -30,7 +30,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void reverseBits_7c4269() {
-  int res = -2147483648;
+  int res = (-2147483647 - 1);
   prevent_dce.inner = res;
 }
 
@@ -49,7 +49,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void reverseBits_7c4269() {
-  int res = -2147483648;
+  int res = (-2147483647 - 1);
   prevent_dce.inner = res;
 }
 

@@ -80,5 +80,17 @@ TEST_F(GlslUnaryOpTest, Negation) {
     ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
     EXPECT_EQ(out.str(), "-(expr)");
 }
+
+TEST_F(GlslUnaryOpTest, IntMin) {
+    auto* op = Expr(i32(std::numeric_limits<int32_t>::min()));
+    WrapInFunction(op);
+
+    GeneratorImpl& gen = Build();
+
+    utils::StringStream out;
+    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
+    EXPECT_EQ(out.str(), "(-2147483647 - 1)");
+}
+
 }  // namespace
 }  // namespace tint::writer::glsl

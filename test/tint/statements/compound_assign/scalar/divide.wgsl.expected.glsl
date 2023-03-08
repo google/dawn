@@ -13,7 +13,7 @@ layout(binding = 0, std430) buffer v_block_ssbo {
 } v;
 
 int tint_div(int lhs, int rhs) {
-  return (lhs / (bool(uint((rhs == 0)) | uint(bool(uint((lhs == -2147483648)) & uint((rhs == -1))))) ? 1 : rhs));
+  return (lhs / (bool(uint((rhs == 0)) | uint(bool(uint((lhs == (-2147483647 - 1))) & uint((rhs == -1))))) ? 1 : rhs));
 }
 
 void foo() {

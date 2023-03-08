@@ -25,7 +25,7 @@ vec4 sk_FragColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 bool sk_Clockwise = false;
 vec4 vcolor_S0 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 ivec4 tint_div(ivec4 lhs, ivec4 rhs) {
-  return (lhs / mix(rhs, ivec4(1), bvec4(uvec4(equal(rhs, ivec4(0))) | uvec4(bvec4(uvec4(equal(lhs, ivec4(-2147483648))) & uvec4(equal(rhs, ivec4(-1))))))));
+  return (lhs / mix(rhs, ivec4(1), bvec4(uvec4(equal(rhs, ivec4(0))) | uvec4(bvec4(uvec4(equal(lhs, ivec4((-2147483647 - 1)))) & uvec4(equal(rhs, ivec4(-1))))))));
 }
 
 bool test_int_S1_c0_b() {

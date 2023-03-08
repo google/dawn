@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
+#include <limits>
 #include <set>
 #include <utility>
 #include <vector>
@@ -83,7 +84,14 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
+namespace tint::writer::glsl {
 namespace {
+
+const char kTempNamePrefix[] = "tint_tmp";
+
+bool last_is_break(const ast::BlockStatement* stmts) {
+    return IsAnyOf<ast::BreakStatement>(stmts->Last());
+}
 
 bool IsRelational(tint::ast::BinaryOp op) {
     return op == tint::ast::BinaryOp::kEqual || op == tint::ast::BinaryOp::kNotEqual ||
@@ -102,15 +110,15 @@ bool RequiresOESSampleVariables(tint::builtin::BuiltinValue builtin) {
     }
 }
 
-}  // namespace
-
-namespace tint::writer::glsl {
-namespace {
-
-const char kTempNamePrefix[] = "tint_tmp";
-
-bool last_is_break(const ast::BlockStatement* stmts) {
-    return IsAnyOf<ast::BreakStatement>(stmts->Last());
+void PrintI32(utils::StringStream& out, int32_t value) {
+    // GLSL parses `-2147483648` as a unary minus and `2147483648` as separate tokens, and the
+    // latter doesn't fit into an (32-bit) `int`. Emit `(-2147483647 - 1)` instead, which ensures
+    // the expression type is `int`.
+    if (auto int_min = std::numeric_limits<int32_t>::min(); value == int_min) {
+        out << "(" << int_min + 1 << " - 1)";
+    } else {
+        out << value;
+    }
 }
 
 void PrintF32(utils::StringStream& out, float value) {
@@ -2367,7 +2375,7 @@ bool GeneratorImpl::EmitConstant(utils::StringStream& out, const constant::Value
             return true;
         },
         [&](const type::I32*) {
-            out << constant->ValueAs<AInt>();
+            PrintI32(out, constant->ValueAs<i32>());
             return true;
         },
         [&](const type::U32*) {
@@ -2483,12 +2491,20 @@ bool GeneratorImpl::EmitLiteral(utils::StringStream& out, const ast::LiteralExpr
             }
             return true;
         },
-        [&](const ast::IntLiteralExpression* l) {
-            out << l->value;
-            if (l->suffix == ast::IntLiteralExpression::Suffix::kU) {
-                out << "u";
+        [&](const ast::IntLiteralExpression* i) {
+            switch (i->suffix) {
+                case ast::IntLiteralExpression::Suffix::kNone:
+                case ast::IntLiteralExpression::Suffix::kI: {
+                    PrintI32(out, static_cast<int32_t>(i->value));
+                    return true;
+                }
+                case ast::IntLiteralExpression::Suffix::kU: {
+                    out << i->value << "u";
+                    return true;
+                }
             }
-            return true;
+            diagnostics_.add_error(diag::System::Writer, "unknown integer literal suffix type");
+            return false;
         },
         [&](Default) {
             diagnostics_.add_error(diag::System::Writer, "unknown literal type");
