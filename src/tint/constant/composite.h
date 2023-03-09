@@ -25,31 +25,40 @@
 namespace tint::constant {
 
 /// Composite holds a number of mixed child values.
-/// Composite may be of a vector, matrix or array type.
+/// Composite may be of a vector, matrix, array or structure type.
 /// If each element is the same type and value, then a Splat would be a more efficient constant
 /// implementation. Use CreateComposite() to create the appropriate type.
-class Composite : public Castable<Composite, constant::Value> {
+class Composite : public Castable<Composite, Value> {
   public:
     /// Constructor
     /// @param t the compsite type
     /// @param els the composite elements
     /// @param all_0 true if all elements are 0
     /// @param any_0 true if any element is 0
-    Composite(const type::Type* t,
-              utils::VectorRef<const constant::Value*> els,
-              bool all_0,
-              bool any_0);
+    Composite(const type::Type* t, utils::VectorRef<const Value*> els, bool all_0, bool any_0);
     ~Composite() override;
 
+    /// @copydoc Value::Type()
     const type::Type* Type() const override { return type; }
 
-    const constant::Value* Index(size_t i) const override {
+    /// @copydoc Value::Index()
+    const Value* Index(size_t i) const override {
         return i < elements.Length() ? elements[i] : nullptr;
     }
 
+    /// @copydoc Value::NumElements()
+    size_t NumElements() const override { return elements.Length(); }
+
+    /// @copydoc Value::AllZero()
     bool AllZero() const override { return all_zero; }
+
+    /// @copydoc Value::AnyZero()
     bool AnyZero() const override { return any_zero; }
+
+    /// @copydoc Value::AllEqual()
     bool AllEqual() const override { return false; }
+
+    /// @copydoc Value::Hash()
     size_t Hash() const override { return hash; }
 
     /// Clones the constant into the provided context
@@ -60,7 +69,7 @@ class Composite : public Castable<Composite, constant::Value> {
     /// The composite type
     type::Type const* const type;
     /// The composite elements
-    const utils::Vector<const constant::Value*, 4> elements;
+    const utils::Vector<const Value*, 4> elements;
     /// True if all elements are zero
     const bool all_zero;
     /// True if any element is zero
@@ -69,6 +78,7 @@ class Composite : public Castable<Composite, constant::Value> {
     const size_t hash;
 
   protected:
+    /// @copydoc Value::InternalValue()
     std::variant<std::monostate, AInt, AFloat> InternalValue() const override { return {}; }
 
   private:

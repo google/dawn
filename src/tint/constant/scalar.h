@@ -25,7 +25,7 @@ namespace tint::constant {
 
 /// Scalar holds a single scalar or abstract-numeric value.
 template <typename T>
-class Scalar : public Castable<Scalar<T>, constant::Value> {
+class Scalar : public Castable<Scalar<T>, Value> {
   public:
     static_assert(!std::is_same_v<UnwrapNumber<T>, T> || std::is_same_v<T, bool>,
                   "T must be a Number or bool");
@@ -40,13 +40,25 @@ class Scalar : public Castable<Scalar<T>, constant::Value> {
     }
     ~Scalar() override = default;
 
+    /// @copydoc Value::Type()
     const type::Type* Type() const override { return type; }
 
-    const constant::Value* Index(size_t) const override { return nullptr; }
+    /// @return nullptr, as Scalar does not hold any elements.
+    const Value* Index(size_t) const override { return nullptr; }
 
+    /// @copydoc Value::NumElements()
+    size_t NumElements() const override { return 1; }
+
+    /// @copydoc Value::AllZero()
     bool AllZero() const override { return IsPositiveZero(); }
+
+    /// @copydoc Value::AnyZero()
     bool AnyZero() const override { return IsPositiveZero(); }
+
+    /// @copydoc Value::AllEqual()
     bool AllEqual() const override { return true; }
+
+    /// @copydoc Value::Hash()
     size_t Hash() const override { return utils::Hash(type, ValueOf()); }
 
     /// Clones the constant into the provided context
@@ -79,6 +91,7 @@ class Scalar : public Castable<Scalar<T>, constant::Value> {
     const T value;
 
   protected:
+    /// @copydoc Value::InternalValue()
     std::variant<std::monostate, AInt, AFloat> InternalValue() const override {
         if constexpr (IsFloatingPoint<UnwrapNumber<T>>) {
             return static_cast<AFloat>(value);

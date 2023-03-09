@@ -326,35 +326,20 @@ ConstEval::Result ConvertInternal(const constant::Value* c,
                                   const Source& source,
                                   bool use_runtime_semantics);
 
-ConstEval::Result SplatConvert(const constant::Splat* splat,
-                               ProgramBuilder& builder,
-                               const type::Type* target_ty,
-                               const Source& source,
-                               bool use_runtime_semantics) {
-    // Convert the single splatted element type.
-    auto conv_el = ConvertInternal(splat->el, builder, type::Type::ElementOf(target_ty), source,
-                                   use_runtime_semantics);
-    if (!conv_el) {
-        return utils::Failure;
-    }
-    if (!conv_el.Get()) {
-        return nullptr;
-    }
-    return builder.create<constant::Splat>(target_ty, conv_el.Get(), splat->count);
-}
-
-ConstEval::Result CompositeConvert(const constant::Composite* composite,
+ConstEval::Result CompositeConvert(const constant::Value* value,
                                    ProgramBuilder& builder,
                                    const type::Type* target_ty,
                                    const Source& source,
                                    bool use_runtime_semantics) {
+    const size_t el_count = value->NumElements();
+
     // Convert each of the composite element types.
     utils::Vector<const constant::Value*, 4> conv_els;
-    conv_els.Reserve(composite->elements.Length());
+    conv_els.Reserve(el_count);
 
     std::function<const type::Type*(size_t idx)> target_el_ty;
     if (auto* str = target_ty->As<type::Struct>()) {
-        if (TINT_UNLIKELY(str->Members().Length() != composite->elements.Length())) {
+        if (TINT_UNLIKELY(str->Members().Length() != el_count)) {
             TINT_ICE(Resolver, builder.Diagnostics())
                 << "const-eval conversion of structure has mismatched element counts";
             return utils::Failure;
@@ -365,7 +350,8 @@ ConstEval::Result CompositeConvert(const constant::Composite* composite,
         target_el_ty = [el_ty](size_t) { return el_ty; };
     }
 
-    for (auto* el : composite->elements) {
+    for (size_t i = 0; i < el_count; i++) {
+        auto* el = value->Index(i);
         auto conv_el = ConvertInternal(el, builder, target_el_ty(conv_els.Length()), source,
                                        use_runtime_semantics);
         if (!conv_el) {
@@ -377,6 +363,40 @@ ConstEval::Result CompositeConvert(const constant::Composite* composite,
         conv_els.Push(conv_el.Get());
     }
     return builder.create<constant::Composite>(target_ty, std::move(conv_els));
+}
+
+ConstEval::Result SplatConvert(const constant::Splat* splat,
+                               ProgramBuilder& builder,
+                               const type::Type* target_ty,
+                               const Source& source,
+                               bool use_runtime_semantics) {
+    const type::Type* target_el_ty = nullptr;
+    if (auto* str = target_ty->As<type::Struct>()) {
+        // Structure conversion.
+        auto members = str->Members();
+        target_el_ty = members[0]->Type();
+
+        // Structures can only be converted during materialization. The user cannot declare the
+        // target structure type, so each member type must be the same default materialization type.
+        for (size_t i = 1; i < members.Length(); i++) {
+            if (members[i]->Type() != target_el_ty) {
+                TINT_ICE(Resolver, builder.Diagnostics())
+                    << "inconsistent target struct member types for SplatConvert";
+                return utils::Failure;
+            }
+        }
+    } else {
+        target_el_ty = type::Type::ElementOf(target_ty);
+    }
+    // Convert the single splatted element type.
+    auto conv_el = ConvertInternal(splat->el, builder, target_el_ty, source, use_runtime_semantics);
+    if (!conv_el) {
+        return utils::Failure;
+    }
+    if (!conv_el.Get()) {
+        return nullptr;
+    }
+    return builder.create<constant::Splat>(target_ty, conv_el.Get(), splat->count);
 }
 
 ConstEval::Result ConvertInternal(const constant::Value* c,
