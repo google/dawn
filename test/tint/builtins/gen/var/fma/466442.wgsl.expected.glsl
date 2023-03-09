@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void fma_466442() {
   float res = 2.0f;

@@ -33,7 +33,7 @@ void main() {
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
-precision mediump float;
+precision highp float;
 
 struct modf_result_vec4_f16 {
   f16vec4 fract;

@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void max_19070a() {
   ivec4 res = ivec4(1);

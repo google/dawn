@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void determinant_1bf6e7() {
   float res = 0.0f;

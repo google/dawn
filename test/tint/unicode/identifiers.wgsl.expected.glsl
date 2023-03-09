@@ -1,5 +1,5 @@
 #version 310 es
-precision mediump float;
+precision highp float;
 
 float tint_symbol_2(int tint_symbol_3) {
   return float(tint_symbol_3);

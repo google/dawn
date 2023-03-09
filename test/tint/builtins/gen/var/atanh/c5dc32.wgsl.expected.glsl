@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void atanh_c5dc32() {
   float res = 0.54930615425109863281f;

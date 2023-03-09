@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void inverseSqrt_f60c1c() {
   vec2 res = vec2(1.0f);

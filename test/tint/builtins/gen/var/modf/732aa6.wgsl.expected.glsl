@@ -24,7 +24,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 struct modf_result_vec2_f32 {
   vec2 fract;

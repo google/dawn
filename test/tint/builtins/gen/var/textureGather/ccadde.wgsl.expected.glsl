@@ -26,7 +26,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uniform highp isampler2D arg_1_arg_2;
 

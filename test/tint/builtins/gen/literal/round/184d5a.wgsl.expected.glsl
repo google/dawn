@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void round_184d5a() {
   vec4 res = vec4(4.0f);

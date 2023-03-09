@@ -1,5 +1,5 @@
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void tint_symbol() {
   float signed_literal[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);

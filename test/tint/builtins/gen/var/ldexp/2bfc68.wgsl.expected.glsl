@@ -19,7 +19,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void ldexp_2bfc68() {
   ivec2 arg_1 = ivec2(1);

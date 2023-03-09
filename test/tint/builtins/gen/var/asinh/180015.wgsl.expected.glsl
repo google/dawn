@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void asinh_180015() {
   float res = 0.88137358427047729492f;

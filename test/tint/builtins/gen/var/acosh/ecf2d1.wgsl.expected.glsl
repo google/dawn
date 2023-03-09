@@ -28,7 +28,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 float tint_acosh(float x) {
   return ((x < 1.0f) ? 0.0f : acosh(x));

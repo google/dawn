@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void atanh_e431bb() {
   vec4 res = vec4(0.54930615425109863281f);

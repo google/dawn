@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void exp2_303753() {
   vec3 res = vec3(2.0f);

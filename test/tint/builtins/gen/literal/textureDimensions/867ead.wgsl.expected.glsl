@@ -24,7 +24,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(rgba8_snorm) uniform highp writeonly image2DArray arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {

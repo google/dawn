@@ -11,7 +11,7 @@ diagnostic_filtering/for_loop_body_attribute.wgsl:8:9 note: return value of 'tex
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 0) in float x_1;
 uniform highp sampler2D t_s;

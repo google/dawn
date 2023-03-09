@@ -29,7 +29,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 vec4 tint_radians(vec4 param_0) {
   return param_0 * 0.01745329251994329547f;

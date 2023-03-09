@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void inverseSqrt_4ca6d6() {
   float res = 1.0f;

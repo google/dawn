@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void smoothstep_66e4bd() {
   vec3 res = vec3(0.5f);

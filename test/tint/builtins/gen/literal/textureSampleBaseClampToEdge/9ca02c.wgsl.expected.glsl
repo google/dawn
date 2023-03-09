@@ -33,7 +33,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 
 vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_1, highp sampler2D t_s, vec2 coord) {

@@ -11,7 +11,7 @@ diagnostic_filtering/directive.wgsl:8:7 note: user-defined input 'x' of 'main' m
       ^
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 0) in float x_1;
 void tint_symbol(float x) {

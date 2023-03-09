@@ -32,7 +32,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 ivec3 tint_extract_bits(ivec3 v, uint offset, uint count) {
   uint s = min(offset, 32u);

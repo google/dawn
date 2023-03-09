@@ -24,7 +24,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 vec2 tint_select(vec2 param_0, vec2 param_1, bvec2 param_2) {
     return vec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);

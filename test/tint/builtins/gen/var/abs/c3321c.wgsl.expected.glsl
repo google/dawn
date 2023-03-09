@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void abs_c3321c() {
   ivec3 res = ivec3(1);

@@ -29,7 +29,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 vec2 tint_quantizeToF16(vec2 param_0) {
   return unpackHalf2x16(packHalf2x16(param_0));

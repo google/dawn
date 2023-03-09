@@ -1,5 +1,5 @@
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 0) out int value;
 int main0() {
@@ -12,7 +12,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 1) out uint value;
 uint main1() {
@@ -25,7 +25,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 2) out float value;
 float main2() {
@@ -38,7 +38,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 3) out vec4 value;
 vec4 main3() {

@@ -37,7 +37,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 0) out vec4 value;
 struct Particle {

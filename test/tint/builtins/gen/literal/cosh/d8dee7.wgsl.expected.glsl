@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void cosh_d8dee7() {
   vec4 res = vec4(1.0f);

@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void asin_0bac07() {
   vec3 res = vec3(0.5f);

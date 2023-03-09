@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void tanh_313aa1() {
   float res = 0.76159417629241943359f;

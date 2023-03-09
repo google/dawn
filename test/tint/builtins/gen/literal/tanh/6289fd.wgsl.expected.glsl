@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void tanh_6289fd() {
   vec3 res = vec3(0.76159417629241943359f);

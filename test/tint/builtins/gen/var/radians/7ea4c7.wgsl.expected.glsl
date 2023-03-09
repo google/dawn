@@ -31,7 +31,7 @@ void main() {
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
-precision mediump float;
+precision highp float;
 
 f16vec3 tint_radians(f16vec3 param_0) {
   return param_0 * 0.01745329251994329547hf;

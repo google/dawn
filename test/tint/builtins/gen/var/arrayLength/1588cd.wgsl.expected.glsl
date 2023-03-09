@@ -27,7 +27,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(binding = 1, std430) buffer SB_RO_ssbo {
   int arg_0[];

@@ -1,6 +1,6 @@
 #version 310 es
 #extension GL_OES_sample_variables : require
-precision mediump float;
+precision highp float;
 
 layout(location = 0) in float a_1;
 layout(location = 1) in float b_1;

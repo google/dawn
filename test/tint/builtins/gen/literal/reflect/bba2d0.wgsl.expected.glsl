@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void reflect_bba2d0() {
   vec2 res = vec2(-3.0f);

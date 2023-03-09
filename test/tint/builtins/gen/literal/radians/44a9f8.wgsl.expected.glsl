@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void radians_44a9f8() {
   vec2 res = vec2(0.01745329238474369049f);

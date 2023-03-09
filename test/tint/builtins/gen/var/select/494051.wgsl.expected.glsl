@@ -19,7 +19,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void select_494051() {
   bool arg_2 = true;

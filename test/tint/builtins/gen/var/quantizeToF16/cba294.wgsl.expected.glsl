@@ -31,7 +31,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 vec4 tint_quantizeToF16(vec4 param_0) {
   return vec4(

@@ -32,7 +32,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uvec4 tint_extract_bits(uvec4 v, uint offset, uint count) {
   uint s = min(offset, 32u);

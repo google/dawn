@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void faceForward_fe522b() {
   vec3 res = vec3(-1.0f);

@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void sinh_77a2a3() {
   vec3 res = vec3(1.17520117759704589844f);

@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void clamp_9d731c() {
   vec2 res = vec2(1.0f);

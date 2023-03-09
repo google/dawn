@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void atan_5ca7b8() {
   vec2 res = vec2(0.78539818525314331055f);

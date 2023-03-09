@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void atan_7a2a75() {
   float res = 0.78539818525314331055f;

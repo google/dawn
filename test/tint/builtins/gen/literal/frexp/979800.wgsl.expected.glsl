@@ -24,7 +24,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 struct frexp_result_vec3_f32 {
   vec3 fract;

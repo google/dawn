@@ -31,7 +31,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 ivec3 tint_select(ivec3 param_0, ivec3 param_1, bvec3 param_2) {
     return ivec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);

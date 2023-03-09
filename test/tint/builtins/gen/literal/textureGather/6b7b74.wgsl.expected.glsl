@@ -25,7 +25,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uniform highp usampler2DArray arg_1_arg_2;
 

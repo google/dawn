@@ -39,7 +39,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 int tint_count_trailing_zeros(int v) {
   uint x = uint(v);

@@ -1,5 +1,5 @@
 #version 310 es
-precision mediump float;
+precision highp float;
 
 struct SB_RW_atomic {
   uint arg_0;

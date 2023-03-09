@@ -19,7 +19,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(rgba16i) uniform highp writeonly iimage2DArray arg_0;
 void textureStore_0cc825() {

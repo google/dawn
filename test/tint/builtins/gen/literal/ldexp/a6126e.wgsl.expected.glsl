@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void ldexp_a6126e() {
   vec3 res = vec3(2.0f);

@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void transpose_7eb2c5() {
   mat2 res = mat2(vec2(1.0f), vec2(1.0f));

@@ -1,6 +1,6 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
-precision mediump float;
+precision highp float;
 
 layout(location = 0) out int value;
 int main0() {
@@ -14,7 +14,7 @@ void main() {
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
-precision mediump float;
+precision highp float;
 
 layout(location = 1) out uint value;
 uint main1() {
@@ -28,7 +28,7 @@ void main() {
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
-precision mediump float;
+precision highp float;
 
 layout(location = 2) out float value;
 float main2() {
@@ -42,7 +42,7 @@ void main() {
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
-precision mediump float;
+precision highp float;
 
 layout(location = 3) out vec4 value;
 vec4 main3() {
@@ -56,7 +56,7 @@ void main() {
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
-precision mediump float;
+precision highp float;
 
 layout(location = 4) out float16_t value;
 float16_t main4() {
@@ -70,7 +70,7 @@ void main() {
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
-precision mediump float;
+precision highp float;
 
 layout(location = 5) out f16vec3 value;
 f16vec3 main5() {

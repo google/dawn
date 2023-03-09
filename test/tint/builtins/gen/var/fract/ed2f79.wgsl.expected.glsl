@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void fract_ed2f79() {
   vec3 res = vec3(0.25f);

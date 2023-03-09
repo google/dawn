@@ -1,5 +1,5 @@
 #version 310 es
-precision mediump float;
+precision highp float;
 
 struct atomic_compare_exchange_resulti32 {
   int old_value;

@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void acos_069188() {
   vec3 res = vec3(0.25f);

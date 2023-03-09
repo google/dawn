@@ -1,5 +1,5 @@
 #version 310 es
-precision mediump float;
+precision highp float;
 
 int A[4] = int[4](0, 0, 0, 0);
 void f() {

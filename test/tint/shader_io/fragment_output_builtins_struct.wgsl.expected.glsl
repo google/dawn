@@ -1,6 +1,6 @@
 #version 310 es
 #extension GL_OES_sample_variables : require
-precision mediump float;
+precision highp float;
 
 struct FragmentOutputs {
   float frag_depth;

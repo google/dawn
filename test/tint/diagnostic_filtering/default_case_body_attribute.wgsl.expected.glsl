@@ -11,7 +11,7 @@ diagnostic_filtering/default_case_body_attribute.wgsl:6:15 note: user-defined in
               ^
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 0) in float x_1;
 void tint_symbol(float x) {

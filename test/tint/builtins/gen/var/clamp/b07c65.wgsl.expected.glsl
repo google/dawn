@@ -26,7 +26,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   int inner;

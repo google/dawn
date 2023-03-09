@@ -1,5 +1,5 @@
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 2) in vec2 vUv_1;
 layout(location = 0) out vec4 color_1;

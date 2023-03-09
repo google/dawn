@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void fma_1f5084() {
   vec2 res = vec2(2.0f);

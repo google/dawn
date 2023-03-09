@@ -26,7 +26,7 @@ void main() {
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
-precision mediump float;
+precision highp float;
 
 layout(location = 1) in float col1_1;
 layout(location = 2) in float16_t col2_1;

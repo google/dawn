@@ -24,7 +24,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 1) in float col1_1;
 layout(location = 2) in float col2_1;

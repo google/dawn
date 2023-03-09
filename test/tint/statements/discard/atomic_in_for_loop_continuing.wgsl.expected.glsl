@@ -1,5 +1,5 @@
 #version 310 es
-precision mediump float;
+precision highp float;
 
 bool tint_discarded = false;
 layout(location = 0) in float tint_symbol_1;

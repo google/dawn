@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void transpose_dc671a() {
   mat4 res = mat4(vec4(1.0f), vec4(1.0f), vec4(1.0f), vec4(1.0f));

@@ -281,7 +281,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     auto* expected =
         R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Data {
   int a;
@@ -334,7 +334,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_Matrix_Single_El
     ASSERT_TRUE(gen.Generate()) << gen.error();
     auto* expected =
         R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Data {
   float z;
@@ -382,7 +382,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
     ASSERT_TRUE(gen.Generate()) << gen.error();
     auto* expected =
         R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Data {
   float z;
@@ -430,7 +430,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
     ASSERT_TRUE(gen.Generate()) << gen.error();
     auto* expected =
         R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Data {
   float z;
@@ -477,7 +477,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     auto* expected =
         R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Data {
   float z;
@@ -530,7 +530,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     auto* expected =
         R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Inner {
   vec3 a;
@@ -591,7 +591,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel_Swizz
     ASSERT_TRUE(gen.Generate()) << gen.error();
     auto* expected =
         R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Inner {
   vec3 a;
@@ -653,7 +653,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
     ASSERT_TRUE(gen.Generate()) << gen.error();
     auto* expected =
         R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Inner {
   vec3 a;
@@ -714,7 +714,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel_Index
     ASSERT_TRUE(gen.Generate()) << gen.error();
     auto* expected =
         R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Inner {
   vec3 a;
@@ -774,7 +774,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     auto* expected =
         R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Inner {
   vec3 a;
@@ -835,7 +835,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Swizzle_SingleL
     ASSERT_TRUE(gen.Generate()) << gen.error();
     auto* expected =
         R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Inner {
   ivec3 a;

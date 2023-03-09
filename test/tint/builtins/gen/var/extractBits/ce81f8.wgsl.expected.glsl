@@ -32,7 +32,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uint tint_extract_bits(uint v, uint offset, uint count) {
   uint s = min(offset, 32u);

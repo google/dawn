@@ -39,7 +39,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uint tint_first_trailing_bit(uint v) {
   uint x = uint(v);

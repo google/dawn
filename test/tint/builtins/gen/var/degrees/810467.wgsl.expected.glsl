@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void degrees_810467() {
   vec2 res = vec2(57.295780181884765625f);

@@ -24,7 +24,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uniform highp usampler2DMS arg_0_1;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {

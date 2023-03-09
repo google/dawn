@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void select_e381c3() {
   ivec4 res = ivec4(1);

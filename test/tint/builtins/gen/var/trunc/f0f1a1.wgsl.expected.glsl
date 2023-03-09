@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void trunc_f0f1a1() {
   vec4 res = vec4(1.0f);

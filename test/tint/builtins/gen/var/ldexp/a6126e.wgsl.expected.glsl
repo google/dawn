@@ -19,7 +19,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void ldexp_a6126e() {
   ivec3 arg_1 = ivec3(1);

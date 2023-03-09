@@ -1,5 +1,5 @@
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 0) in float f_1;
 layout(location = 1) flat in uint u_1;

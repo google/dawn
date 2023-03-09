@@ -11,7 +11,7 @@ diagnostic_filtering/else_if_body_attribute.wgsl:6:7 note: user-defined input 'x
       ^
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 0) in float x_1;
 void tint_symbol(float x) {

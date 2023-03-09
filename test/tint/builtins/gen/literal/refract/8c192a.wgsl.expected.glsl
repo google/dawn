@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void refract_8c192a() {
   vec4 res = vec4(-7.0f);

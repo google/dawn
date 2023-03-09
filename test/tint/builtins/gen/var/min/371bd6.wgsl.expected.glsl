@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void min_371bd6() {
   ivec3 res = ivec3(1);

@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void normalize_e7def8() {
   vec3 res = vec3(0.57735025882720947266f);

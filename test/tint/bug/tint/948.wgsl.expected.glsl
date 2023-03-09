@@ -1,5 +1,5 @@
 #version 310 es
-precision mediump float;
+precision highp float;
 
 float tint_float_modulo(float lhs, float rhs) {
   return (lhs - rhs * trunc(lhs / rhs));

@@ -30,7 +30,7 @@ void main() {
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
-precision mediump float;
+precision highp float;
 
 float16_t tint_saturate(float16_t v) {
   return clamp(v, 0.0hf, 1.0hf);

@@ -98,7 +98,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_NoReturn_Void) 
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 void func() {
   return;
@@ -145,7 +145,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_WithInOutVars) 
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 0) in float foo_1;
 layout(location = 1) out float value;
@@ -186,7 +186,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_WithInOut_Built
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 float frag_main(vec4 coord) {
   return coord.x;
@@ -239,7 +239,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_SharedStruct_Di
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 1) out float col1_1;
 layout(location = 2) out float col2_1;
@@ -378,7 +378,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_Uniform) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct UBO {
   vec4 coord;
@@ -419,7 +419,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_UniformStr
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Uniforms {
   vec4 coord;
@@ -460,7 +460,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RW_Storage
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Data {
   int a;
@@ -508,7 +508,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RO_Storage
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(),
               R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Data {
   int a;
@@ -553,7 +553,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_WO_Storage
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Data {
   int a;
@@ -598,7 +598,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_StorageBuf
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct Data {
   int a;
@@ -645,7 +645,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct S {
   float x;
@@ -692,7 +692,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(),
               R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 struct S {
   float x;
@@ -728,7 +728,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_WithNameCollisi
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
+precision highp float;
 
 void tint_symbol() {
 }

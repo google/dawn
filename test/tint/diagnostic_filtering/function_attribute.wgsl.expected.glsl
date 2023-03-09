@@ -11,7 +11,7 @@ diagnostic_filtering/function_attribute.wgsl:6:7 note: user-defined input 'x' of
       ^
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 0) in float x_1;
 void tint_symbol(float x) {

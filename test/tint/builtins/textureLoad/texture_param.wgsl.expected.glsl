@@ -23,7 +23,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 ivec4 textureLoad2d(highp isampler2D tint_symbol_1, ivec2 coords, int level) {
   return texelFetch(tint_symbol_1, coords, level);

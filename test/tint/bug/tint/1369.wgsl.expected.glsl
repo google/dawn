@@ -1,5 +1,5 @@
 #version 310 es
-precision mediump float;
+precision highp float;
 
 bool tint_discarded = false;
 bool call_discard() {

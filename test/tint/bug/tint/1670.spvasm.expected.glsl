@@ -1,5 +1,5 @@
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void main_1() {
   mat2 m2i = mat2(0.0f, 0.0f, 0.0f, 0.0f);

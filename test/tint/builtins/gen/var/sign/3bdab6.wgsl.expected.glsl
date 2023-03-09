@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void sign_3bdab6() {
   ivec4 res = ivec4(1);

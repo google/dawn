@@ -21,7 +21,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(rgba16f) uniform highp writeonly image2D arg_0;
 void textureStore_a4c338() {

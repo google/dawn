@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void log2_a52bbb() {
   vec4 res = vec4(0.0f);

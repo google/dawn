@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void asinh_16b543() {
   vec2 res = vec2(0.88137358427047729492f);

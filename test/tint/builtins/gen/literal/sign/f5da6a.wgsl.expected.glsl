@@ -18,7 +18,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 void sign_f5da6a() {
   vec4 res = vec4(1.0f);
