@@ -42,6 +42,7 @@
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/texture_dimension.h"
+#include "src/tint/utils/defer.h"
 #include "src/tint/utils/reverse.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/utils/string_stream.h"

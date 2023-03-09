@@ -21,9 +21,7 @@
 #include <utility>
 
 #include "src/tint/traits.h"
-#include "src/tint/utils/bitcast.h"
 #include "src/tint/utils/crc32.h"
-#include "src/tint/utils/defer.h"
 
 #if defined(__clang__)
 /// Temporarily disable certain warnings when using Castable API

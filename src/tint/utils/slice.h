@@ -20,6 +20,7 @@
 
 #include "src/tint/castable.h"
 #include "src/tint/traits.h"
+#include "src/tint/utils/bitcast.h"
 
 namespace tint::utils {
 
