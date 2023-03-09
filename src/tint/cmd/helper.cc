@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-#if TINT_BUILD_SPV_WRITER
+#if TINT_BUILD_SPV_READER
 #include "spirv-tools/libspirv.hpp"
 #endif
 
