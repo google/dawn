@@ -26,6 +26,7 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/switch.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/utils/hash.h"

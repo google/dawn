@@ -20,6 +20,7 @@
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/type_expression.h"
+#include "src/tint/switch.h"
 #include "src/tint/type/texture_dimension.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Texture1DTo2D);

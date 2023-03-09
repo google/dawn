@@ -25,6 +25,7 @@
 #include "src/tint/ast/member_accessor_expression.h"
 #include "src/tint/ast/phony_expression.h"
 #include "src/tint/ast/unary_op_expression.h"
+#include "src/tint/switch.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/reverse.h"
 #include "src/tint/utils/vector.h"

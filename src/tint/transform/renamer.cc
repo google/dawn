@@ -24,6 +24,7 @@
 #include "src/tint/sem/type_expression.h"
 #include "src/tint/sem/value_constructor.h"
 #include "src/tint/sem/value_conversion.h"
+#include "src/tint/switch.h"
 #include "src/tint/text/unicode.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer);

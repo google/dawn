@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/reader/spirv/parser_impl_test_helper.h"
+#include "src/tint/switch.h"
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/wgsl/generator_impl.h"
 

@@ -22,6 +22,7 @@
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/terminator.h"
+#include "src/tint/switch.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {

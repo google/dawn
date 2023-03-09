@@ -16,7 +16,7 @@
 
 #include "benchmark/benchmark.h"
 
-#include "src/tint/castable.h"
+#include "src/tint/switch.h"
 
 namespace tint {
 namespace {

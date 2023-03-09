@@ -14,6 +14,7 @@
 
 #include "src/tint/type/type.h"
 
+#include "src/tint/switch.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
 #include "src/tint/type/array.h"

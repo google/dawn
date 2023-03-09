@@ -19,6 +19,7 @@
 #include "src/tint/constant/composite.h"
 #include "src/tint/constant/scalar.h"
 #include "src/tint/constant/splat.h"
+#include "src/tint/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Constant);
 

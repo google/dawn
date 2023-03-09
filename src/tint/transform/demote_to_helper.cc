@@ -23,6 +23,7 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/statement.h"
+#include "src/tint/switch.h"
 #include "src/tint/transform/utils/hoist_to_decl_before.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/utils/map.h"

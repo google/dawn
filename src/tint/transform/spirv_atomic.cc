@@ -26,6 +26,7 @@
 #include "src/tint/sem/index_accessor_expression.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/statement.h"
+#include "src/tint/switch.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/unique_vector.h"

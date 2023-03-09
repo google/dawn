@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "src/tint/program_builder.h"
+#include "src/tint/switch.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"

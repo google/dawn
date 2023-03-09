@@ -18,6 +18,7 @@
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/value_expression.h"
+#include "src/tint/switch.h"
 
 namespace tint::sem {
 

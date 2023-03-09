@@ -37,6 +37,7 @@
 #include "src/tint/sem/value_conversion.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/while_statement.h"
+#include "src/tint/switch.h"
 #include "src/tint/utils/block_allocator.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/string_stream.h"

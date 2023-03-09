@@ -22,6 +22,7 @@
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/index_accessor_expression.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::SubstituteOverride);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::SubstituteOverride::Config);

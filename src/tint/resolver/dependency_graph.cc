@@ -60,6 +60,7 @@
 #include "src/tint/builtin/builtin_value.h"
 #include "src/tint/scope_stack.h"
 #include "src/tint/sem/builtin.h"
+#include "src/tint/switch.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/utils/block_allocator.h"
 #include "src/tint/utils/compiler_macros.h"

@@ -19,6 +19,7 @@
 
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/struct.h"
+#include "src/tint/switch.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/vector.h"

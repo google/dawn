@@ -18,6 +18,7 @@
 
 #include "src/tint/sem/load.h"
 #include "src/tint/sem/materialize.h"
+#include "src/tint/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::ValueExpression);
 

@@ -16,6 +16,7 @@
 #include "src/tint/debug.h"
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/sem/for_loop_statement.h"
+#include "src/tint/switch.h"
 
 namespace tint::transform::utils {
 

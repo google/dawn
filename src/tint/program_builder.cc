@@ -21,6 +21,7 @@
 #include "src/tint/sem/type_expression.h"
 #include "src/tint/sem/value_expression.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/switch.h"
 #include "src/tint/utils/compiler_macros.h"
 
 using namespace tint::number_suffixes;  // NOLINT

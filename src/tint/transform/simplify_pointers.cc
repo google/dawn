@@ -24,6 +24,7 @@
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/switch.h"
 #include "src/tint/transform/unshadow.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::SimplifyPointers);
