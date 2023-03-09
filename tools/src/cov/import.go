@@ -48,12 +48,6 @@ type Env struct {
 	TurboCov string // path to the turbo-cov tool (one of Cov or TurboCov must be supplied)
 }
 
-// RuntimeEnv returns the environment variable key=value pair for setting
-// LLVM_PROFILE_FILE to coverageFile
-func RuntimeEnv(env []string, coverageFile string) string {
-	return "LLVM_PROFILE_FILE=" + coverageFile
-}
-
 // AllSourceFiles returns a *Coverage containing all the source files without
 // coverage data. This populates the coverage view with files even if they
 // didn't get compiled.

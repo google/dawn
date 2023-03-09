@@ -850,16 +850,10 @@ func (r *runner) runParallelIsolated(ctx context.Context) error {
 	for i := 0; i < r.numRunners; i++ {
 		wg.Add(1)
 
-		profraw := ""
-		if r.covEnv != nil {
-			profraw = filepath.Join(r.tmpDir, fmt.Sprintf("cts-%v.profraw", i))
-			defer os.Remove(profraw)
-		}
-
 		go func() {
 			defer wg.Done()
 			for idx := range caseIndices {
-				res := r.runTestcase(ctx, r.testcases[idx], profraw)
+				res := r.runTestcase(ctx, r.testcases[idx])
 				res.index = idx
 				results <- res
 
@@ -1053,17 +1047,11 @@ func (r *runner) streamResults(ctx context.Context, wg *sync.WaitGroup, results 
 	return nil
 }
 
-// runSerially() calls the CTS test runner to run the test query in a single
-// process.
+// runSerially() calls the CTS test runner to run the test query in a single process.
 // TODO(bclayton): Support comparing against r.expectations
 func (r *runner) runSerially(ctx context.Context, query string) error {
-	profraw := ""
-	if r.covEnv != nil {
-		profraw = filepath.Join(r.tmpDir, "cts.profraw")
-	}
-
 	start := time.Now()
-	result := r.runTestcase(ctx, query, profraw)
+	result := r.runTestcase(ctx, query)
 	timeTaken := time.Since(start)
 
 	if r.verbose {
@@ -1115,7 +1103,7 @@ type result struct {
 
 // runTestcase() runs the CTS testcase with the given query, returning the test
 // result.
-func (r *runner) runTestcase(ctx context.Context, query string, profraw string) result {
+func (r *runner) runTestcase(ctx context.Context, query string) result {
 	ctx, cancel := context.WithTimeout(ctx, testTimeout)
 	defer cancel()
 
@@ -1134,6 +1122,9 @@ func (r *runner) runTestcase(ctx context.Context, query string, profraw string) 
 	if r.verbose {
 		args = append(args, "--gpu-provider-flag", "verbose=1")
 	}
+	if r.covEnv != nil {
+		args = append(args, "--coverage")
+	}
 	if r.colors {
 		args = append(args, "--colors")
 	}
@@ -1148,11 +1139,6 @@ func (r *runner) runTestcase(ctx context.Context, query string, profraw string) 
 	cmd := exec.CommandContext(ctx, r.node, args...)
 	cmd.Dir = r.cts
 
-	if profraw != "" {
-		cmd.Env = os.Environ()
-		cmd.Env = append(cmd.Env, cov.RuntimeEnv(cmd.Env, profraw))
-	}
-
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
 	cmd.Stderr = &buf
@@ -1160,18 +1146,33 @@ func (r *runner) runTestcase(ctx context.Context, query string, profraw string) 
 	err := cmd.Run()
 
 	msg := buf.String()
-	res := result{testcase: query,
-		status:  pass,
-		message: msg,
-		error:   err,
+	res := result{
+		testcase: query,
+		status:   pass,
+		message:  msg,
+		error:    err,
 	}
 
-	if r.covEnv != nil {
-		coverage, covErr := r.covEnv.Import(profraw)
-		if covErr != nil {
-			err = fmt.Errorf("could not import coverage data: %v", err)
+	if err == nil && r.covEnv != nil {
+		const header = "Code-coverage: [["
+		const footer = "]]"
+		if headerStart := strings.Index(msg, header); headerStart >= 0 {
+			if footerStart := strings.Index(msg[headerStart:], footer); footerStart >= 0 {
+				footerStart += headerStart
+				path := msg[headerStart+len(header) : footerStart]
+				res.message = msg[:headerStart] + msg[footerStart+len(footer):] // Strip out the coverage from the message
+				coverage, covErr := r.covEnv.Import(path)
+				os.Remove(path)
+				if covErr == nil {
+					res.coverage = coverage
+				} else {
+					err = fmt.Errorf("could not import coverage data from '%v': %v", path, covErr)
+				}
+			}
 		}
-		res.coverage = coverage
+		if err == nil && res.coverage == nil {
+			err = fmt.Errorf("failed to parse code coverage from output")
+		}
 	}
 
 	switch {
