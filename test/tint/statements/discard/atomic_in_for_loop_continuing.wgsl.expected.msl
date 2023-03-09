@@ -1,6 +1,10 @@
 #include <metal_stdlib>
 
 using namespace metal;
+int tint_ftoi(float v) {
+  return select(2147483647, select(int(v), (-2147483647 - 1), (v < -2147483648.0f)), (v < 2147483520.0f));
+}
+
 struct tint_symbol_1 {
   float in [[user(locn0)]];
   float2 coord [[user(locn1)]];
@@ -14,7 +18,7 @@ int foo_inner(float in, float2 coord, thread bool* const tint_symbol_4, texture2
   if ((in == 0.0f)) {
     *(tint_symbol_4) = true;
   }
-  int result = int(tint_symbol_5.sample(tint_symbol_6, coord)[0]);
+  int result = tint_ftoi(tint_symbol_5.sample(tint_symbol_6, coord)[0]);
   {
     int i = 0;
     while (true) {

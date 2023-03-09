@@ -28,6 +28,10 @@ struct UniformBuffer_tint_packed_vec3 {
   /* 0x0040 */ tint_array<tint_packed_vec3_f32_array_element, 3> umatrix_S1;
 };
 
+int tint_ftoi(float v) {
+  return select(2147483647, select(int(v), (-2147483647 - 1), (v < -2147483648.0f)), (v < 2147483520.0f));
+}
+
 struct UniformBuffer {
   float unknownInput_S1_c0;
   float4 ucolorRed_S1_c0;
@@ -50,7 +54,7 @@ bool test_int_S1_c0_b(const constant UniformBuffer_tint_packed_vec3* const tint_
   bool x_65 = false;
   bool x_66 = false;
   float const x_26 = (*(tint_symbol_5)).unknownInput_S1_c0;
-  int const x_27 = int(x_26);
+  int const x_27 = tint_ftoi(x_26);
   unknown = x_27;
   ok = true;
   x_41 = false;

@@ -3,6 +3,10 @@ void unused_entry_point() {
   return;
 }
 
+int4 tint_ftoi(float4 v) {
+  return ((v < (2147483520.0f).xxxx) ? ((v < (-2147483648.0f).xxxx) ? (-2147483648).xxxx : int4(v)) : (2147483647).xxxx);
+}
+
 static float t = 0.0f;
 
 float4 m() {
@@ -12,5 +16,5 @@ float4 m() {
 
 void f() {
   const float4 tint_symbol = m();
-  int4 v = int4(tint_symbol);
+  int4 v = tint_ftoi(tint_symbol);
 }

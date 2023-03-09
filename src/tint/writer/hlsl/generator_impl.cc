@@ -204,6 +204,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         polyfills.clamp_int = true;
         // TODO(crbug.com/tint/1449): Some of these can map to HLSL's `firstbitlow`
         // and `firstbithigh`.
+        polyfills.conv_f32_to_iu32 = true;
         polyfills.count_leading_zeros = true;
         polyfills.count_trailing_zeros = true;
         polyfills.extract_bits = transform::BuiltinPolyfill::Level::kFull;

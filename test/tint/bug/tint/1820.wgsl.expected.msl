@@ -1,8 +1,12 @@
 #include <metal_stdlib>
 
 using namespace metal;
+int tint_ftoi(float v) {
+  return select(2147483647, select(int(v), (-2147483647 - 1), (v < -2147483648.0f)), (v < 2147483520.0f));
+}
+
 void foo(float x) {
-  switch(int(x)) {
+  switch(tint_ftoi(x)) {
     default: {
       break;
     }
@@ -16,7 +20,7 @@ int baz(int x) {
 }
 
 void bar(float x) {
-  switch(baz(int(x))) {
+  switch(baz(tint_ftoi(x))) {
     default: {
       break;
     }

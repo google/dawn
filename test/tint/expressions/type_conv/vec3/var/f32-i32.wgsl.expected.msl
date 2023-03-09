@@ -1,8 +1,12 @@
 #include <metal_stdlib>
 
 using namespace metal;
+int3 tint_ftoi(float3 v) {
+  return select(int3(2147483647), select(int3(v), int3((-2147483647 - 1)), (v < float3(-2147483648.0f))), (v < float3(2147483520.0f)));
+}
+
 void f() {
   thread float3 tint_symbol = float3(1.0f);
-  int3 const v = int3(tint_symbol);
+  int3 const v = tint_ftoi(tint_symbol);
 }
 

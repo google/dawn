@@ -23,6 +23,7 @@
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/type_expression.h"
+#include "src/tint/sem/value_conversion.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/texture_dimension.h"
@@ -134,6 +135,28 @@ struct BuiltinPolyfill::State {
         ctx.Clone();
         return Program(std::move(b));
     }
+
+  private:
+    /// The source program
+    Program const* const src;
+    /// The transform config
+    const Config& cfg;
+    /// The destination program builder
+    ProgramBuilder b;
+    /// The clone context
+    CloneContext ctx{&b, src};
+    /// The source clone context
+    const sem::Info& sem = src->Sem();
+    /// Polyfill functions for binary operators.
+    utils::Hashmap<BinaryOpSignature, Symbol, 8> binary_op_polyfills;
+    /// Polyfill builtins.
+    utils::Hashmap<const sem::Builtin*, Symbol, 8> builtin_polyfills;
+    /// Polyfill f32 conversion to i32 or u32 (or vectors of)
+    utils::Hashmap<const type::Type*, Symbol, 2> f32_conv_polyfills;
+    // Tracks whether the chromium_experimental_full_ptr_parameters extension has been enabled.
+    bool has_full_ptr_params = false;
+    /// True if the transform has made changes (i.e. the program needs cloning)
+    bool made_changes = false;
 
     ////////////////////////////////////////////////////////////////////////////
     // Function polyfills
@@ -802,6 +825,52 @@ struct BuiltinPolyfill::State {
         return name;
     }
 
+    /// Builds the polyfill function to value convert a scalar or vector of f32 to an i32 or u32 (or
+    /// vector of).
+    /// @param source the type of the value being converted
+    /// @param target the target conversion type
+    /// @return the polyfill function name
+    Symbol ConvF32ToIU32(const type::Type* source, const type::Type* target) {
+        struct Limits {
+            AFloat low_condition;
+            AInt low_limit;
+            AFloat high_condition;
+            AInt high_limit;
+        };
+        const bool is_signed = target->is_signed_integer_scalar_or_vector();
+        const Limits limits = is_signed ? Limits{
+                                              /* low_condition   */ -AFloat(0x80000000),
+                                              /* low_limit  */ -AInt(0x80000000),
+                                              /* high_condition  */ AFloat(0x7fffff80),
+                                              /* high_limit */ AInt(0x7fffffff),
+                                          }
+                                        : Limits{
+                                              /* low_condition   */ AFloat(0),
+                                              /* low_limit  */ AInt(0),
+                                              /* high_condition  */ AFloat(0xffffff00),
+                                              /* high_limit */ AInt(0xffffffff),
+                                          };
+
+        const uint32_t width = WidthOf(target);
+
+        // select(target(v), low_limit, v < low_condition)
+        auto* select_low = b.Call(builtin::Function::kSelect,               //
+                                  b.Call(T(target), "v"),                   //
+                                  ScalarOrVector(width, limits.low_limit),  //
+                                  b.LessThan("v", ScalarOrVector(width, limits.low_condition)));
+
+        // select(high_limit, select_low, v < high_condition)
+        auto* select_high = b.Call(builtin::Function::kSelect,                //
+                                   ScalarOrVector(width, limits.high_limit),  //
+                                   select_low,                                //
+                                   b.LessThan("v", ScalarOrVector(width, limits.high_condition)));
+
+        auto name = b.Symbols().New(is_signed ? "tint_ftoi" : "tint_ftou");
+        b.Func(name, utils::Vector{b.Param("v", T(source))}, T(target),
+               utils::Vector{b.Return(select_high)});
+        return name;
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     // Inline polyfills
     ////////////////////////////////////////////////////////////////////////////
@@ -970,26 +1039,6 @@ struct BuiltinPolyfill::State {
         auto* rhs = ctx.Clone(bin_op->rhs);
         return b.Call(fn, lhs, rhs);
     }
-
-  private:
-    /// The source program
-    Program const* const src;
-    /// The transform config
-    const Config& cfg;
-    /// The destination program builder
-    ProgramBuilder b;
-    /// The clone context
-    CloneContext ctx{&b, src};
-    /// The source clone context
-    const sem::Info& sem = src->Sem();
-    /// Polyfill functions for binary operators.
-    utils::Hashmap<BinaryOpSignature, Symbol, 8> binary_op_polyfills;
-    /// Polyfill builtins.
-    utils::Hashmap<const sem::Builtin*, Symbol, 8> builtin_polyfills;
-    // Tracks whether the chromium_experimental_full_ptr_parameters extension has been enabled.
-    bool has_full_ptr_params = false;
-    /// True if the transform has made changes (i.e. the program needs cloning)
-    bool made_changes = false;
 
     /// @returns the AST type for the given sem type
     ast::Type T(const type::Type* ty) { return CreateASTTypeFor(ctx, ty); }
@@ -1195,6 +1244,20 @@ struct BuiltinPolyfill::State {
                     default:
                         return Symbol{};
                 }
+            },
+            [&](const sem::ValueConversion* conv) {
+                if (cfg.builtins.conv_f32_to_iu32) {
+                    auto* src_ty = conv->Source();
+                    if (tint::Is<type::F32>(type::Type::ElementOf(src_ty))) {
+                        auto* dst_ty = conv->Target();
+                        if (tint::IsAnyOf<type::I32, type::U32>(type::Type::ElementOf(dst_ty))) {
+                            return f32_conv_polyfills.GetOrCreate(dst_ty, [&] {  //
+                                return ConvF32ToIU32(src_ty, dst_ty);
+                            });
+                        }
+                    }
+                }
+                return Symbol{};
             });
 
         if (fn.IsValid()) {

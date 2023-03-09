@@ -1,6 +1,10 @@
 #include <metal_stdlib>
 
 using namespace metal;
+int4 tint_ftoi(float4 v) {
+  return select(int4(2147483647), select(int4(v), int4((-2147483647 - 1)), (v < float4(-2147483648.0f))), (v < float4(2147483520.0f)));
+}
+
 float4 m() {
   thread float tint_symbol_1 = 0.0f;
   tint_symbol_1 = 1.0f;
@@ -9,6 +13,6 @@ float4 m() {
 
 void f() {
   float4 const tint_symbol = m();
-  int4 v = int4(tint_symbol);
+  int4 v = tint_ftoi(tint_symbol);
 }
 

@@ -219,6 +219,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         polyfills.atanh = transform::BuiltinPolyfill::Level::kRangeCheck;
         polyfills.bitshift_modulo = true;  // crbug.com/tint/1543
         polyfills.clamp_int = true;
+        polyfills.conv_f32_to_iu32 = true;
         polyfills.extract_bits = transform::BuiltinPolyfill::Level::kClampParameters;
         polyfills.first_leading_bit = true;
         polyfills.first_trailing_bit = true;

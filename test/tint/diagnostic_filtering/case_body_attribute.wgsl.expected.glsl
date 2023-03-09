@@ -14,8 +14,12 @@ diagnostic_filtering/case_body_attribute.wgsl:6:15 note: user-defined input 'x' 
 precision highp float;
 
 layout(location = 0) in float x_1;
+int tint_ftoi(float v) {
+  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
+}
+
 void tint_symbol(float x) {
-  switch(int(x)) {
+  switch(tint_ftoi(x)) {
     case 0: {
       break;
     }

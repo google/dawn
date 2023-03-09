@@ -815,6 +815,157 @@ fn f() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// conv_f32_to_iu32
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillConvF32ToIU32() {
+    BuiltinPolyfill::Builtins builtins;
+    builtins.conv_f32_to_iu32 = true;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+    return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunConvF32ToI32) {
+    auto* src = R"(
+fn f() {
+  let f = 42.0;
+  _ = i32(f);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillConvF32ToIU32()));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunConvF32ToU32) {
+    auto* src = R"(
+fn f() {
+  let f = 42.0;
+  _ = u32(f);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillConvF32ToIU32()));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunConvVec3F32ToVec3I32) {
+    auto* src = R"(
+fn f() {
+  let f = vec3(42.0);
+  _ = vec3<i32>(f);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillConvF32ToIU32()));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunConvVec3F32ToVec3U32) {
+    auto* src = R"(
+fn f() {
+  let f = vec3(42.0);
+  _ = vec3<u32>(f);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillConvF32ToIU32()));
+}
+
+TEST_F(BuiltinPolyfillTest, ConvF32ToI32) {
+    auto* src = R"(
+fn f() {
+  let f = 42.0;
+  _ = i32(f);
+}
+)";
+    auto* expect = R"(
+fn tint_ftoi(v : f32) -> i32 {
+  return select(2147483647, select(i32(v), -2147483648, (v < -2147483648.0)), (v < 2147483520.0));
+}
+
+fn f() {
+  let f = 42.0;
+  _ = tint_ftoi(f);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillConvF32ToIU32());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ConvF32ToU32) {
+    auto* src = R"(
+fn f() {
+  let f = 42.0;
+  _ = u32(f);
+}
+)";
+    auto* expect = R"(
+fn tint_ftou(v : f32) -> u32 {
+  return select(4294967295, select(u32(v), 0, (v < 0.0)), (v < 4294967040.0));
+}
+
+fn f() {
+  let f = 42.0;
+  _ = tint_ftou(f);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillConvF32ToIU32());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ConvVec3F32ToVec3I32) {
+    auto* src = R"(
+fn f() {
+  let f = vec3(42.0);
+  _ = vec3<i32>(f);
+}
+)";
+    auto* expect = R"(
+fn tint_ftoi(v : vec3<f32>) -> vec3<i32> {
+  return select(vec3(2147483647), select(vec3<i32>(v), vec3(-2147483648), (v < vec3(-2147483648.0))), (v < vec3(2147483520.0)));
+}
+
+fn f() {
+  let f = vec3(42.0);
+  _ = tint_ftoi(f);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillConvF32ToIU32());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ConvVec3F32ToVec3U32) {
+    auto* src = R"(
+fn f() {
+  let f = vec3(42.0);
+  _ = vec3<u32>(f);
+}
+)";
+    auto* expect = R"(
+fn tint_ftou(v : vec3<f32>) -> vec3<u32> {
+  return select(vec3(4294967295), select(vec3<u32>(v), vec3(0), (v < vec3(0.0))), (v < vec3(4294967040.0)));
+}
+
+fn f() {
+  let f = vec3(42.0);
+  _ = tint_ftou(f);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillConvF32ToIU32());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // countLeadingZeros
 ////////////////////////////////////////////////////////////////////////////////
 DataMap polyfillCountLeadingZeros() {

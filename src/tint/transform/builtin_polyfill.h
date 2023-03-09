@@ -57,6 +57,8 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         bool count_leading_zeros = false;
         /// Should `countTrailingZeros()` be polyfilled?
         bool count_trailing_zeros = false;
+        /// Should converting f32 to i32 or u32 be polyfilled?
+        bool conv_f32_to_iu32 = false;
         /// What level should `extractBits()` be polyfilled?
         Level extract_bits = Level::kNone;
         /// Should `firstLeadingBit()` be polyfilled?

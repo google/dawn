@@ -10,6 +10,10 @@ diagnostic_filtering/case_body_attribute.wgsl:6:15 note: user-defined input 'x' 
   switch (i32(x)) {
               ^
 
+int tint_ftoi(float v) {
+  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? -2147483648 : int(v)) : 2147483647);
+}
+
 Texture2D<float4> t : register(t1, space0);
 SamplerState s : register(s2, space0);
 
@@ -18,7 +22,7 @@ struct tint_symbol_1 {
 };
 
 void main_inner(float x) {
-  switch(int(x)) {
+  switch(tint_ftoi(x)) {
     case 0: {
       break;
     }

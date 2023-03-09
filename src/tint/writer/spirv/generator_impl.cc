@@ -89,6 +89,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         polyfills.bgra8unorm = true;
         polyfills.bitshift_modulo = true;
         polyfills.clamp_int = true;
+        polyfills.conv_f32_to_iu32 = true;
         polyfills.count_leading_zeros = true;
         polyfills.count_trailing_zeros = true;
         polyfills.extract_bits = transform::BuiltinPolyfill::Level::kClampParameters;

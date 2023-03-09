@@ -14,6 +14,10 @@ struct tint_array {
     T elements[N];
 };
 
+int tint_ftoi(float v) {
+  return select(2147483647, select(int(v), (-2147483647 - 1), (v < -2147483648.0f)), (v < 2147483520.0f));
+}
+
 struct Mat4x4_ {
   /* 0x0000 */ float4 mx;
   /* 0x0010 */ float4 my;
@@ -227,7 +231,7 @@ void main1(thread float* const tint_symbol_5, const constant ub_PacketParams* co
   Mat4x3_ t_PosMtx = {};
   float2 t_TexSpaceCoord = 0.0f;
   float const x_e15 = *(tint_symbol_5);
-  Mat4x3_ const x_e18 = (*(tint_symbol_6)).u_PosMtx[int(x_e15)];
+  Mat4x3_ const x_e18 = (*(tint_symbol_6)).u_PosMtx[tint_ftoi(x_e15)];
   t_PosMtx = x_e18;
   Mat4x3_ const x_e23 = t_PosMtx;
   Mat4x4_ const x_e24 = x_Mat4x4_1(x_e23);

@@ -193,6 +193,7 @@ SanitizedResult Sanitize(const Program* in,
         polyfills.atanh = transform::BuiltinPolyfill::Level::kRangeCheck;
         polyfills.bgra8unorm = true;
         polyfills.bitshift_modulo = true;
+        polyfills.conv_f32_to_iu32 = true;
         polyfills.count_leading_zeros = true;
         polyfills.count_trailing_zeros = true;
         polyfills.extract_bits = transform::BuiltinPolyfill::Level::kClampParameters;

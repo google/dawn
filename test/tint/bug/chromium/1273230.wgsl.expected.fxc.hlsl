@@ -1,3 +1,7 @@
+uint3 tint_ftou(float3 v) {
+  return ((v < (4294967040.0f).xxx) ? ((v < (0.0f).xxx) ? (0u).xxx : uint3(v)) : (4294967295u).xxx);
+}
+
 void marg8uintin() {
 }
 
@@ -23,7 +27,7 @@ float3 toVoxelPos(float3 position) {
 }
 
 uint toIndex1D(uint gridSize, float3 voxelPos) {
-  uint3 icoord = uint3(voxelPos);
+  uint3 icoord = tint_ftou(voxelPos);
   return ((icoord.x + (gridSize * icoord.y)) + ((gridSize * gridSize) * icoord.z));
 }
 

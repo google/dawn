@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 17
+; Bound: 36
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -9,6 +9,8 @@
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
                OpName %u "u"
                OpName %unused_entry_point "unused_entry_point"
+               OpName %tint_ftoi "tint_ftoi"
+               OpName %v "v"
                OpName %f "f"
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
@@ -20,13 +22,34 @@
           %7 = OpTypeFunction %void
         %int = OpTypeInt 32 1
       %v4int = OpTypeVector %int 4
+         %11 = OpTypeFunction %v4int %v4float
+%float_2_14748352e_09 = OpConstant %float 2.14748352e+09
+         %19 = OpConstantComposite %v4float %float_2_14748352e_09 %float_2_14748352e_09 %float_2_14748352e_09 %float_2_14748352e_09
+       %bool = OpTypeBool
+     %v4bool = OpTypeVector %bool 4
+%float_n2_14748365e_09 = OpConstant %float -2.14748365e+09
+         %25 = OpConstantComposite %v4float %float_n2_14748365e_09 %float_n2_14748365e_09 %float_n2_14748365e_09 %float_n2_14748365e_09
+%int_n2147483648 = OpConstant %int -2147483648
+         %28 = OpConstantComposite %v4int %int_n2147483648 %int_n2147483648 %int_n2147483648 %int_n2147483648
+%int_2147483647 = OpConstant %int 2147483647
+         %31 = OpConstantComposite %v4int %int_2147483647 %int_2147483647 %int_2147483647 %int_2147483647
 %unused_entry_point = OpFunction %void None %7
          %10 = OpLabel
                OpReturn
                OpFunctionEnd
+  %tint_ftoi = OpFunction %v4int None %11
+          %v = OpFunctionParameter %v4float
+         %16 = OpLabel
+         %20 = OpFOrdLessThan %v4bool %v %19
+         %26 = OpFOrdLessThan %v4bool %v %25
+         %29 = OpConvertFToS %v4int %v
+         %23 = OpSelect %v4int %26 %28 %29
+         %17 = OpSelect %v4int %20 %23 %31
+               OpReturnValue %17
+               OpFunctionEnd
           %f = OpFunction %void None %7
-         %12 = OpLabel
-         %16 = OpLoad %v4float %u
-         %13 = OpConvertFToS %v4int %16
+         %33 = OpLabel
+         %35 = OpLoad %v4float %u
+         %34 = OpFunctionCall %v4int %tint_ftoi %35
                OpReturn
                OpFunctionEnd

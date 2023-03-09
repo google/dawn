@@ -1,3 +1,7 @@
+int tint_ftoi(float v) {
+  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? -2147483648 : int(v)) : 2147483647);
+}
+
 struct Mat4x4_ {
   float4 mx;
   float4 my;
@@ -237,7 +241,7 @@ void main1() {
   Mat4x3_ t_PosMtx = (Mat4x3_)0;
   float2 t_TexSpaceCoord = float2(0.0f, 0.0f);
   const float x_e15 = a_PosMtxIdx1;
-  const Mat4x3_ x_e18 = global2_load((48u * uint(int(x_e15))));
+  const Mat4x3_ x_e18 = global2_load((48u * uint(tint_ftoi(x_e15))));
   t_PosMtx = x_e18;
   const Mat4x3_ x_e23 = t_PosMtx;
   const Mat4x4_ x_e24 = x_Mat4x4_1(x_e23);

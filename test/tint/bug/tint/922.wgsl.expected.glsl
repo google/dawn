@@ -7,6 +7,10 @@ layout(location = 3) in vec3 a_Normal_1;
 layout(location = 4) in float a_PosMtxIdx_1;
 layout(location = 0) out vec4 v_Color_1;
 layout(location = 1) out vec2 v_TexCoord_1;
+int tint_ftoi(float v) {
+  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
+}
+
 struct Mat4x4_ {
   vec4 mx;
   vec4 my;
@@ -128,7 +132,7 @@ void main1() {
   Mat4x3_ t_PosMtx = Mat4x3_(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
   vec2 t_TexSpaceCoord = vec2(0.0f, 0.0f);
   float x_e15 = a_PosMtxIdx1;
-  Mat4x3_ x_e18 = global2.inner.u_PosMtx[int(x_e15)];
+  Mat4x3_ x_e18 = global2.inner.u_PosMtx[tint_ftoi(x_e15)];
   t_PosMtx = x_e18;
   Mat4x3_ x_e23 = t_PosMtx;
   Mat4x4_ x_e24 = x_Mat4x4_1(x_e23);

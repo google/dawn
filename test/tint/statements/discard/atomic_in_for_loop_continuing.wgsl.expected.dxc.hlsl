@@ -1,4 +1,9 @@
 static bool tint_discarded = false;
+
+int tint_ftoi(float v) {
+  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? -2147483648 : int(v)) : 2147483647);
+}
+
 Texture2D<float4> t : register(t0, space0);
 SamplerState s : register(s1, space0);
 RWByteAddressBuffer a : register(u2, space0);
@@ -22,7 +27,7 @@ int foo_inner(float tint_symbol, float2 coord) {
   if ((tint_symbol == 0.0f)) {
     tint_discarded = true;
   }
-  int result = int(t.Sample(s, coord).x);
+  int result = tint_ftoi(t.Sample(s, coord).x);
   {
     int i = 0;
     while (true) {

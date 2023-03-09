@@ -2,6 +2,10 @@ void set_uint4(inout uint4 vec, int idx, uint val) {
   vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;
 }
 
+uint4 tint_ftou(float4 v) {
+  return ((v < (4294967040.0f).xxxx) ? ((v < (0.0f).xxxx) ? (0u).xxxx : uint4(v)) : (4294967295u).xxxx);
+}
+
 Texture2D<float4> src : register(t0, space0);
 Texture2D<float4> tint_symbol : register(t1, space0);
 RWByteAddressBuffer output : register(u2, space0);
@@ -30,7 +34,7 @@ void main_inner(uint3 GlobalInvocationID) {
   float4 dstColor = tint_symbol.Load(uint3(dstTexCoord, uint(0)));
   bool success = true;
   uint4 srcColorBits = uint4(0u, 0u, 0u, 0u);
-  uint4 dstColorBits = uint4(dstColor);
+  uint4 dstColorBits = tint_ftou(dstColor);
   {
     for(uint i = 0u; (i < uniforms[0].w); i = (i + 1u)) {
       const uint tint_symbol_1 = i;

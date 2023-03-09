@@ -14,6 +14,10 @@ struct tint_array {
     T elements[N];
 };
 
+uint4 tint_ftou(float4 v) {
+  return select(uint4(4294967295u), select(uint4(v), uint4(0u), (v < float4(0.0f))), (v < float4(4294967040.0f)));
+}
+
 struct Uniforms {
   /* 0x0000 */ uint dstTextureFlipY;
   /* 0x0004 */ uint isFloat16;
@@ -40,7 +44,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample
   float4 dstColor = tint_symbol_4.read(uint2(dstTexCoord), 0);
   bool success = true;
   uint4 srcColorBits = 0u;
-  uint4 dstColorBits = uint4(dstColor);
+  uint4 dstColorBits = tint_ftou(dstColor);
   for(uint i = 0u; (i < (*(tint_symbol_3)).channelCount); i = (i + 1u)) {
     uint const tint_symbol_1 = i;
     srcColorBits[tint_symbol_1] = ConvertToFp16FloatValue(srcColor[i]);

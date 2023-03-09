@@ -3,6 +3,10 @@ void unused_entry_point() {
   return;
 }
 
+uint tint_ftou(float v) {
+  return ((v < 4294967040.0f) ? ((v < 0.0f) ? 0u : uint(v)) : 4294967295u);
+}
+
 static float t = 0.0f;
 
 float m() {
@@ -12,5 +16,5 @@ float m() {
 
 void f() {
   const float tint_symbol = m();
-  uint v = uint(tint_symbol);
+  uint v = tint_ftou(tint_symbol);
 }
