@@ -1538,12 +1538,12 @@ class UniformityGraph {
                 // some texture sampling builtins, and atomics.
                 if (builtin->IsBarrier()) {
                     callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, default_severity};
-                } else if (builtin->Type() == sem::BuiltinType::kWorkgroupUniformLoad) {
+                } else if (builtin->Type() == builtin::Function::kWorkgroupUniformLoad) {
                     callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, default_severity};
                 } else if (builtin->IsDerivative() ||
-                           builtin->Type() == sem::BuiltinType::kTextureSample ||
-                           builtin->Type() == sem::BuiltinType::kTextureSampleBias ||
-                           builtin->Type() == sem::BuiltinType::kTextureSampleCompare) {
+                           builtin->Type() == builtin::Function::kTextureSample ||
+                           builtin->Type() == builtin::Function::kTextureSampleBias ||
+                           builtin->Type() == builtin::Function::kTextureSampleCompare) {
                     // Get the severity of derivative uniformity violations in this context.
                     auto severity = sem_.DiagnosticSeverity(
                         call, builtin::DiagnosticRule::kDerivativeUniformity);
@@ -1650,7 +1650,7 @@ class UniformityGraph {
                 }
             } else {
                 auto* builtin = sem->Target()->As<sem::Builtin>();
-                if (builtin && builtin->Type() == sem::BuiltinType::kWorkgroupUniformLoad) {
+                if (builtin && builtin->Type() == builtin::Function::kWorkgroupUniformLoad) {
                     // The workgroupUniformLoad builtin requires its parameter to be uniform.
                     current_function_->RequiredToBeUniform(default_severity)->AddEdge(args[i]);
                 } else {

@@ -1,6 +1,6 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate builtin_type.cc
+Template file for use with tools/src/cmd/gen to generate function.cc
 
 To update the generated file, run:
     ./tools/run gen
@@ -11,34 +11,34 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
-#include "src/tint/sem/builtin_type.h"
+#include "src/tint/builtin/function.h"
 
-namespace tint::sem {
+namespace tint::builtin {
 
-BuiltinType ParseBuiltinType(const std::string& name) {
+Function ParseFunction(const std::string& name) {
 {{- range Sem.Builtins  }}
     if (name == "{{.Name}}") {
-        return BuiltinType::k{{PascalCase .Name}};
+        return Function::k{{PascalCase .Name}};
     }
 {{- end  }}
-    return BuiltinType::kNone;
+    return Function::kNone;
 }
 
-const char* str(BuiltinType i) {
+const char* str(Function i) {
     switch (i) {
-        case BuiltinType::kNone:
+        case Function::kNone:
             return "<none>";
 {{- range Sem.Builtins  }}
-        case BuiltinType::k{{PascalCase .Name}}:
+        case Function::k{{PascalCase .Name}}:
             return "{{.Name}}";
 {{- end  }}
     }
     return "<unknown>";
 }
 
-utils::StringStream& operator<<(utils::StringStream& out, BuiltinType i) {
+utils::StringStream& operator<<(utils::StringStream& out, Function i) {
     out << str(i);
     return out;
 }
 
-}  // namespace tint::sem
+}  // namespace tint::builtin

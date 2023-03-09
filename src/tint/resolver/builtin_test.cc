@@ -50,13 +50,11 @@ namespace {
 
 using ExpressionList = utils::Vector<const ast::Expression*, 8>;
 
-using BuiltinType = sem::BuiltinType;
-
 using ResolverBuiltinTest = ResolverTest;
 
 struct BuiltinData {
     const char* name;
-    BuiltinType builtin;
+    builtin::Function builtin;
 };
 
 inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
@@ -253,7 +251,7 @@ namespace float_builtin_tests {
 struct BuiltinDataWithParamNum {
     uint32_t args_number;
     const char* name;
-    BuiltinType builtin;
+    builtin::Function builtin;
 };
 
 inline std::ostream& operator<<(std::ostream& out, BuiltinDataWithParamNum data) {
@@ -680,55 +678,55 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Vector_f16) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_FloatBuiltin_IdenticalType,
-    testing::Values(BuiltinDataWithParamNum{1, "abs", BuiltinType::kAbs},
-                    BuiltinDataWithParamNum{1, "acos", BuiltinType::kAcos},
-                    BuiltinDataWithParamNum{1, "acosh", BuiltinType::kAcos},
-                    BuiltinDataWithParamNum{1, "asin", BuiltinType::kAsin},
-                    BuiltinDataWithParamNum{1, "asinh", BuiltinType::kAsin},
-                    BuiltinDataWithParamNum{1, "atan", BuiltinType::kAtan},
-                    BuiltinDataWithParamNum{1, "atanh", BuiltinType::kAtan},
-                    BuiltinDataWithParamNum{2, "atan2", BuiltinType::kAtan2},
-                    BuiltinDataWithParamNum{1, "ceil", BuiltinType::kCeil},
-                    BuiltinDataWithParamNum{3, "clamp", BuiltinType::kClamp},
-                    BuiltinDataWithParamNum{1, "cos", BuiltinType::kCos},
-                    BuiltinDataWithParamNum{1, "cosh", BuiltinType::kCosh},
+    testing::Values(BuiltinDataWithParamNum{1, "abs", builtin::Function::kAbs},
+                    BuiltinDataWithParamNum{1, "acos", builtin::Function::kAcos},
+                    BuiltinDataWithParamNum{1, "acosh", builtin::Function::kAcos},
+                    BuiltinDataWithParamNum{1, "asin", builtin::Function::kAsin},
+                    BuiltinDataWithParamNum{1, "asinh", builtin::Function::kAsin},
+                    BuiltinDataWithParamNum{1, "atan", builtin::Function::kAtan},
+                    BuiltinDataWithParamNum{1, "atanh", builtin::Function::kAtan},
+                    BuiltinDataWithParamNum{2, "atan2", builtin::Function::kAtan2},
+                    BuiltinDataWithParamNum{1, "ceil", builtin::Function::kCeil},
+                    BuiltinDataWithParamNum{3, "clamp", builtin::Function::kClamp},
+                    BuiltinDataWithParamNum{1, "cos", builtin::Function::kCos},
+                    BuiltinDataWithParamNum{1, "cosh", builtin::Function::kCosh},
                     // cross: (vec3<T>, vec3<T>) -> vec3<T>
-                    BuiltinDataWithParamNum{1, "degrees", BuiltinType::kDegrees},
+                    BuiltinDataWithParamNum{1, "degrees", builtin::Function::kDegrees},
                     // distance: (T, T) -> T, (vecN<T>, vecN<T>) -> T
-                    BuiltinDataWithParamNum{1, "exp", BuiltinType::kExp},
-                    BuiltinDataWithParamNum{1, "exp2", BuiltinType::kExp2},
+                    BuiltinDataWithParamNum{1, "exp", builtin::Function::kExp},
+                    BuiltinDataWithParamNum{1, "exp2", builtin::Function::kExp2},
                     // faceForward: (vecN<T>, vecN<T>, vecN<T>) -> vecN<T>
-                    BuiltinDataWithParamNum{1, "floor", BuiltinType::kFloor},
-                    BuiltinDataWithParamNum{3, "fma", BuiltinType::kFma},
-                    BuiltinDataWithParamNum{1, "fract", BuiltinType::kFract},
+                    BuiltinDataWithParamNum{1, "floor", builtin::Function::kFloor},
+                    BuiltinDataWithParamNum{3, "fma", builtin::Function::kFma},
+                    BuiltinDataWithParamNum{1, "fract", builtin::Function::kFract},
                     // frexp
-                    BuiltinDataWithParamNum{1, "inverseSqrt", BuiltinType::kInverseSqrt},
+                    BuiltinDataWithParamNum{1, "inverseSqrt", builtin::Function::kInverseSqrt},
                     // ldexp: (T, i32) -> T, (vecN<T>, vecN<i32>) -> vecN<T>
                     // length: (vecN<T>) -> T
-                    BuiltinDataWithParamNum{1, "log", BuiltinType::kLog},
-                    BuiltinDataWithParamNum{1, "log2", BuiltinType::kLog2},
-                    BuiltinDataWithParamNum{2, "max", BuiltinType::kMax},
-                    BuiltinDataWithParamNum{2, "min", BuiltinType::kMin},
+                    BuiltinDataWithParamNum{1, "log", builtin::Function::kLog},
+                    BuiltinDataWithParamNum{1, "log2", builtin::Function::kLog2},
+                    BuiltinDataWithParamNum{2, "max", builtin::Function::kMax},
+                    BuiltinDataWithParamNum{2, "min", builtin::Function::kMin},
                     // Note that `mix(vecN<f32>, vecN<f32>, f32) -> vecN<f32>` is not tested here.
-                    BuiltinDataWithParamNum{3, "mix", BuiltinType::kMix},
+                    BuiltinDataWithParamNum{3, "mix", builtin::Function::kMix},
                     // modf
                     // normalize: (vecN<T>) -> vecN<T>
-                    BuiltinDataWithParamNum{2, "pow", BuiltinType::kPow},
+                    BuiltinDataWithParamNum{2, "pow", builtin::Function::kPow},
                     // quantizeToF16 is not implemented yet.
-                    BuiltinDataWithParamNum{1, "radians", BuiltinType::kRadians},
+                    BuiltinDataWithParamNum{1, "radians", builtin::Function::kRadians},
                     // reflect: (vecN<T>, vecN<T>) -> vecN<T>
                     // refract: (vecN<T>, vecN<T>, T) -> vecN<T>
-                    BuiltinDataWithParamNum{1, "round", BuiltinType::kRound},
+                    BuiltinDataWithParamNum{1, "round", builtin::Function::kRound},
                     // saturate not implemented yet.
-                    BuiltinDataWithParamNum{1, "sign", BuiltinType::kSign},
-                    BuiltinDataWithParamNum{1, "sin", BuiltinType::kSin},
-                    BuiltinDataWithParamNum{1, "sinh", BuiltinType::kSinh},
-                    BuiltinDataWithParamNum{3, "smoothstep", BuiltinType::kSmoothstep},
-                    BuiltinDataWithParamNum{1, "sqrt", BuiltinType::kSqrt},
-                    BuiltinDataWithParamNum{2, "step", BuiltinType::kStep},
-                    BuiltinDataWithParamNum{1, "tan", BuiltinType::kTan},
-                    BuiltinDataWithParamNum{1, "tanh", BuiltinType::kTanh},
-                    BuiltinDataWithParamNum{1, "trunc", BuiltinType::kTrunc}));
+                    BuiltinDataWithParamNum{1, "sign", builtin::Function::kSign},
+                    BuiltinDataWithParamNum{1, "sin", builtin::Function::kSin},
+                    BuiltinDataWithParamNum{1, "sinh", builtin::Function::kSinh},
+                    BuiltinDataWithParamNum{3, "smoothstep", builtin::Function::kSmoothstep},
+                    BuiltinDataWithParamNum{1, "sqrt", builtin::Function::kSqrt},
+                    BuiltinDataWithParamNum{2, "step", builtin::Function::kStep},
+                    BuiltinDataWithParamNum{1, "tan", builtin::Function::kTan},
+                    BuiltinDataWithParamNum{1, "tanh", builtin::Function::kTanh},
+                    BuiltinDataWithParamNum{1, "trunc", builtin::Function::kTrunc}));
 
 using ResolverBuiltinFloatTest = ResolverTest;
 
@@ -1409,7 +1407,7 @@ namespace integer_builtin_tests {
 struct BuiltinDataWithParamNum {
     uint32_t args_number;
     const char* name;
-    BuiltinType builtin;
+    builtin::Function builtin;
 };
 
 inline std::ostream& operator<<(std::ostream& out, BuiltinDataWithParamNum data) {
@@ -1805,18 +1803,18 @@ INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_IntegerBuiltin_IdenticalType,
     testing::Values(
-        BuiltinDataWithParamNum{1, "abs", BuiltinType::kAbs},
-        BuiltinDataWithParamNum{3, "clamp", BuiltinType::kClamp},
-        BuiltinDataWithParamNum{1, "countLeadingZeros", BuiltinType::kCountLeadingZeros},
-        BuiltinDataWithParamNum{1, "countOneBits", BuiltinType::kCountOneBits},
-        BuiltinDataWithParamNum{1, "countTrailingZeros", BuiltinType::kCountTrailingZeros},
+        BuiltinDataWithParamNum{1, "abs", builtin::Function::kAbs},
+        BuiltinDataWithParamNum{3, "clamp", builtin::Function::kClamp},
+        BuiltinDataWithParamNum{1, "countLeadingZeros", builtin::Function::kCountLeadingZeros},
+        BuiltinDataWithParamNum{1, "countOneBits", builtin::Function::kCountOneBits},
+        BuiltinDataWithParamNum{1, "countTrailingZeros", builtin::Function::kCountTrailingZeros},
         // extractBits: (T, u32, u32) -> T
-        BuiltinDataWithParamNum{1, "firstLeadingBit", BuiltinType::kFirstLeadingBit},
-        BuiltinDataWithParamNum{1, "firstTrailingBit", BuiltinType::kFirstTrailingBit},
+        BuiltinDataWithParamNum{1, "firstLeadingBit", builtin::Function::kFirstLeadingBit},
+        BuiltinDataWithParamNum{1, "firstTrailingBit", builtin::Function::kFirstTrailingBit},
         // insertBits: (T, T, u32, u32) -> T
-        BuiltinDataWithParamNum{2, "max", BuiltinType::kMax},
-        BuiltinDataWithParamNum{2, "min", BuiltinType::kMin},
-        BuiltinDataWithParamNum{1, "reverseBits", BuiltinType::kReverseBits}));
+        BuiltinDataWithParamNum{2, "max", builtin::Function::kMax},
+        BuiltinDataWithParamNum{2, "min", builtin::Function::kMin},
+        BuiltinDataWithParamNum{1, "reverseBits", builtin::Function::kReverseBits}));
 
 }  // namespace integer_builtin_tests
 
@@ -2555,8 +2553,8 @@ using ResolverBuiltinTest_DataPacking = ResolverTestWithParam<BuiltinData>;
 TEST_P(ResolverBuiltinTest_DataPacking, InferType) {
     auto param = GetParam();
 
-    bool pack4 =
-        param.builtin == BuiltinType::kPack4X8Snorm || param.builtin == BuiltinType::kPack4X8Unorm;
+    bool pack4 = param.builtin == builtin::Function::kPack4X8Snorm ||
+                 param.builtin == builtin::Function::kPack4X8Unorm;
 
     auto* call = pack4 ? Call(param.name, vec4<f32>(1_f, 2_f, 3_f, 4_f))
                        : Call(param.name, vec2<f32>(1_f, 2_f));
@@ -2570,8 +2568,8 @@ TEST_P(ResolverBuiltinTest_DataPacking, InferType) {
 TEST_P(ResolverBuiltinTest_DataPacking, Error_IncorrectParamType) {
     auto param = GetParam();
 
-    bool pack4 =
-        param.builtin == BuiltinType::kPack4X8Snorm || param.builtin == BuiltinType::kPack4X8Unorm;
+    bool pack4 = param.builtin == builtin::Function::kPack4X8Snorm ||
+                 param.builtin == builtin::Function::kPack4X8Unorm;
 
     auto* call = pack4 ? Call(param.name, vec4<i32>(1_i, 2_i, 3_i, 4_i))
                        : Call(param.name, vec2<i32>(1_i, 2_i));
@@ -2596,8 +2594,8 @@ TEST_P(ResolverBuiltinTest_DataPacking, Error_NoParams) {
 TEST_P(ResolverBuiltinTest_DataPacking, Error_TooManyParams) {
     auto param = GetParam();
 
-    bool pack4 =
-        param.builtin == BuiltinType::kPack4X8Snorm || param.builtin == BuiltinType::kPack4X8Unorm;
+    bool pack4 = param.builtin == builtin::Function::kPack4X8Snorm ||
+                 param.builtin == builtin::Function::kPack4X8Unorm;
 
     auto* call = pack4 ? Call(param.name, vec4<f32>(1_f, 2_f, 3_f, 4_f), 1_f)
                        : Call(param.name, vec2<f32>(1_f, 2_f), 1_f);
@@ -2608,14 +2606,14 @@ TEST_P(ResolverBuiltinTest_DataPacking, Error_TooManyParams) {
     EXPECT_THAT(r()->error(), HasSubstr("error: no matching call to " + std::string(param.name)));
 }
 
-INSTANTIATE_TEST_SUITE_P(ResolverTest,
-                         ResolverBuiltinTest_DataPacking,
-                         testing::Values(BuiltinData{"pack4x8snorm", BuiltinType::kPack4X8Snorm},
-                                         BuiltinData{"pack4x8unorm", BuiltinType::kPack4X8Unorm},
-                                         BuiltinData{"pack2x16snorm", BuiltinType::kPack2X16Snorm},
-                                         BuiltinData{"pack2x16unorm", BuiltinType::kPack2X16Unorm},
-                                         BuiltinData{"pack2x16float",
-                                                     BuiltinType::kPack2X16Float}));
+INSTANTIATE_TEST_SUITE_P(
+    ResolverTest,
+    ResolverBuiltinTest_DataPacking,
+    testing::Values(BuiltinData{"pack4x8snorm", builtin::Function::kPack4X8Snorm},
+                    BuiltinData{"pack4x8unorm", builtin::Function::kPack4X8Unorm},
+                    BuiltinData{"pack2x16snorm", builtin::Function::kPack2X16Snorm},
+                    BuiltinData{"pack2x16unorm", builtin::Function::kPack2X16Unorm},
+                    BuiltinData{"pack2x16float", builtin::Function::kPack2X16Float}));
 
 }  // namespace data_packing_builtin_tests
 
@@ -2626,8 +2624,8 @@ using ResolverBuiltinTest_DataUnpacking = ResolverTestWithParam<BuiltinData>;
 TEST_P(ResolverBuiltinTest_DataUnpacking, InferType) {
     auto param = GetParam();
 
-    bool pack4 = param.builtin == BuiltinType::kUnpack4X8Snorm ||
-                 param.builtin == BuiltinType::kUnpack4X8Unorm;
+    bool pack4 = param.builtin == builtin::Function::kUnpack4X8Snorm ||
+                 param.builtin == builtin::Function::kUnpack4X8Unorm;
 
     auto* call = Call(param.name, 1_u);
     WrapInFunction(call);
@@ -2645,11 +2643,11 @@ TEST_P(ResolverBuiltinTest_DataUnpacking, InferType) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_DataUnpacking,
-    testing::Values(BuiltinData{"unpack4x8snorm", BuiltinType::kUnpack4X8Snorm},
-                    BuiltinData{"unpack4x8unorm", BuiltinType::kUnpack4X8Unorm},
-                    BuiltinData{"unpack2x16snorm", BuiltinType::kUnpack2X16Snorm},
-                    BuiltinData{"unpack2x16unorm", BuiltinType::kUnpack2X16Unorm},
-                    BuiltinData{"unpack2x16float", BuiltinType::kUnpack2X16Float}));
+    testing::Values(BuiltinData{"unpack4x8snorm", builtin::Function::kUnpack4X8Snorm},
+                    BuiltinData{"unpack4x8unorm", builtin::Function::kUnpack4X8Unorm},
+                    BuiltinData{"unpack2x16snorm", builtin::Function::kUnpack2X16Snorm},
+                    BuiltinData{"unpack2x16unorm", builtin::Function::kUnpack2X16Unorm},
+                    BuiltinData{"unpack2x16float", builtin::Function::kUnpack2X16Float}));
 
 }  // namespace data_unpacking_builtin_tests
 
@@ -2682,8 +2680,8 @@ TEST_P(ResolverBuiltinTest_Barrier, Error_TooManyParams) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_Barrier,
-    testing::Values(BuiltinData{"storageBarrier", BuiltinType::kStorageBarrier},
-                    BuiltinData{"workgroupBarrier", BuiltinType::kWorkgroupBarrier}));
+    testing::Values(BuiltinData{"storageBarrier", builtin::Function::kStorageBarrier},
+                    BuiltinData{"workgroupBarrier", builtin::Function::kWorkgroupBarrier}));
 
 }  // namespace synchronization_builtin_tests
 

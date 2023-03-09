@@ -440,7 +440,8 @@ class DependencyScanner {
         auto* resolved = scope_stack_.Get(to);
         if (!resolved) {
             auto s = symbols_.NameFor(to);
-            if (auto builtin_fn = sem::ParseBuiltinType(s); builtin_fn != sem::BuiltinType::kNone) {
+            if (auto builtin_fn = builtin::ParseFunction(s);
+                builtin_fn != builtin::Function::kNone) {
                 graph_.resolved_identifiers.Add(from, ResolvedIdentifier(builtin_fn));
                 return;
             }
@@ -838,7 +839,7 @@ std::string ResolvedIdentifier::String(const SymbolTable& symbols, diag::List& d
                 return "<unknown>";
             });
     }
-    if (auto builtin_fn = BuiltinFunction(); builtin_fn != sem::BuiltinType::kNone) {
+    if (auto builtin_fn = BuiltinFunction(); builtin_fn != builtin::Function::kNone) {
         return "builtin function '" + utils::ToString(builtin_fn) + "'";
     }
     if (auto builtin_ty = BuiltinType(); builtin_ty != builtin::Builtin::kUndefined) {

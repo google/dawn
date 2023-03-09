@@ -152,13 +152,13 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                     return;
                 }
 
-                if (builtin->Type() == sem::BuiltinType::kTextureStore) {
+                if (builtin->Type() == builtin::Function::kTextureStore) {
                     // A call to textureStore() will always be a statement.
                     // Wrap it inside a conditional block.
                     auto* masked_call = b.If(b.Not(flag), b.Block(ctx.Clone(stmt->Declaration())));
                     ctx.Replace(stmt->Declaration(), masked_call);
                 } else if (builtin->IsAtomic() &&
-                           builtin->Type() != sem::BuiltinType::kAtomicLoad) {
+                           builtin->Type() != builtin::Function::kAtomicLoad) {
                     // A call to an atomic builtin can be a statement or an expression.
                     if (auto* call_stmt = stmt->Declaration()->As<ast::CallStatement>();
                         call_stmt && call_stmt->expr == call) {
@@ -179,7 +179,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                         auto result = b.Sym();
                         ast::Type result_ty;
                         const ast::Statement* masked_call = nullptr;
-                        if (builtin->Type() == sem::BuiltinType::kAtomicCompareExchangeWeak) {
+                        if (builtin->Type() == builtin::Function::kAtomicCompareExchangeWeak) {
                             // Special case for atomicCompareExchangeWeak as we cannot name its
                             // result type. We have to declare an equivalent struct and copy the
                             // original member values over to it.

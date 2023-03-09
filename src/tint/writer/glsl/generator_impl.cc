@@ -776,48 +776,49 @@ bool GeneratorImpl::EmitBuiltinCall(utils::StringStream& out,
     if (builtin->IsTexture()) {
         return EmitTextureCall(out, call, builtin);
     }
-    if (builtin->Type() == sem::BuiltinType::kCountOneBits) {
+    if (builtin->Type() == builtin::Function::kCountOneBits) {
         return EmitCountOneBitsCall(out, expr);
     }
-    if (builtin->Type() == sem::BuiltinType::kSelect) {
+    if (builtin->Type() == builtin::Function::kSelect) {
         return EmitSelectCall(out, expr, builtin);
     }
-    if (builtin->Type() == sem::BuiltinType::kDot) {
+    if (builtin->Type() == builtin::Function::kDot) {
         return EmitDotCall(out, expr, builtin);
     }
-    if (builtin->Type() == sem::BuiltinType::kModf) {
+    if (builtin->Type() == builtin::Function::kModf) {
         return EmitModfCall(out, expr, builtin);
     }
-    if (builtin->Type() == sem::BuiltinType::kFrexp) {
+    if (builtin->Type() == builtin::Function::kFrexp) {
         return EmitFrexpCall(out, expr, builtin);
     }
-    if (builtin->Type() == sem::BuiltinType::kDegrees) {
+    if (builtin->Type() == builtin::Function::kDegrees) {
         return EmitDegreesCall(out, expr, builtin);
     }
-    if (builtin->Type() == sem::BuiltinType::kRadians) {
+    if (builtin->Type() == builtin::Function::kRadians) {
         return EmitRadiansCall(out, expr, builtin);
     }
-    if (builtin->Type() == sem::BuiltinType::kQuantizeToF16) {
+    if (builtin->Type() == builtin::Function::kQuantizeToF16) {
         return EmitQuantizeToF16Call(out, expr, builtin);
     }
-    if (builtin->Type() == sem::BuiltinType::kArrayLength) {
+    if (builtin->Type() == builtin::Function::kArrayLength) {
         return EmitArrayLength(out, expr);
     }
-    if (builtin->Type() == sem::BuiltinType::kExtractBits) {
+    if (builtin->Type() == builtin::Function::kExtractBits) {
         return EmitExtractBits(out, expr);
     }
-    if (builtin->Type() == sem::BuiltinType::kInsertBits) {
+    if (builtin->Type() == builtin::Function::kInsertBits) {
         return EmitInsertBits(out, expr);
     }
-    if (builtin->Type() == sem::BuiltinType::kFma && version_.IsES()) {
+    if (builtin->Type() == builtin::Function::kFma && version_.IsES()) {
         return EmitEmulatedFMA(out, expr);
     }
-    if (builtin->Type() == sem::BuiltinType::kAbs &&
+    if (builtin->Type() == builtin::Function::kAbs &&
         TypeOf(expr->args[0])->UnwrapRef()->is_unsigned_integer_scalar_or_vector()) {
         // GLSL does not support abs() on unsigned arguments. However, it's a no-op.
         return EmitExpression(out, expr->args[0]);
     }
-    if ((builtin->Type() == sem::BuiltinType::kAny || builtin->Type() == sem::BuiltinType::kAll) &&
+    if ((builtin->Type() == builtin::Function::kAny ||
+         builtin->Type() == builtin::Function::kAll) &&
         TypeOf(expr->args[0])->UnwrapRef()->is_scalar()) {
         // GLSL does not support any() or all() on scalar arguments. It's a no-op.
         return EmitExpression(out, expr->args[0]);
@@ -919,7 +920,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(utils::StringStream& out,
     };
 
     switch (builtin->Type()) {
-        case sem::BuiltinType::kAtomicLoad: {
+        case builtin::Function::kAtomicLoad: {
             // GLSL does not have an atomicLoad, so we emulate it with
             // atomicOr using 0 as the OR value
             out << "atomicOr";
@@ -935,7 +936,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(utils::StringStream& out,
             }
             return true;
         }
-        case sem::BuiltinType::kAtomicCompareExchangeWeak: {
+        case builtin::Function::kAtomicCompareExchangeWeak: {
             if (!EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
                 return false;
             }
@@ -986,27 +987,27 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(utils::StringStream& out,
             return true;
         }
 
-        case sem::BuiltinType::kAtomicAdd:
-        case sem::BuiltinType::kAtomicSub:
+        case builtin::Function::kAtomicAdd:
+        case builtin::Function::kAtomicSub:
             return call("atomicAdd");
 
-        case sem::BuiltinType::kAtomicMax:
+        case builtin::Function::kAtomicMax:
             return call("atomicMax");
 
-        case sem::BuiltinType::kAtomicMin:
+        case builtin::Function::kAtomicMin:
             return call("atomicMin");
 
-        case sem::BuiltinType::kAtomicAnd:
+        case builtin::Function::kAtomicAnd:
             return call("atomicAnd");
 
-        case sem::BuiltinType::kAtomicOr:
+        case builtin::Function::kAtomicOr:
             return call("atomicOr");
 
-        case sem::BuiltinType::kAtomicXor:
+        case builtin::Function::kAtomicXor:
             return call("atomicXor");
 
-        case sem::BuiltinType::kAtomicExchange:
-        case sem::BuiltinType::kAtomicStore:
+        case builtin::Function::kAtomicExchange:
+        case builtin::Function::kAtomicStore:
             // GLSL does not have an atomicStore, so we emulate it with
             // atomicExchange.
             return call("atomicExchange");
@@ -1339,13 +1340,13 @@ bool GeneratorImpl::EmitQuantizeToF16Call(utils::StringStream& out,
 bool GeneratorImpl::EmitBarrierCall(utils::StringStream& out, const sem::Builtin* builtin) {
     // TODO(crbug.com/tint/661): Combine sequential barriers to a single
     // instruction.
-    if (builtin->Type() == sem::BuiltinType::kWorkgroupBarrier) {
+    if (builtin->Type() == builtin::Function::kWorkgroupBarrier) {
         out << "barrier()";
-    } else if (builtin->Type() == sem::BuiltinType::kStorageBarrier) {
+    } else if (builtin->Type() == builtin::Function::kStorageBarrier) {
         out << "{ barrier(); memoryBarrierBuffer(); }";
     } else {
         TINT_UNREACHABLE(Writer, diagnostics_)
-            << "unexpected barrier builtin type " << sem::str(builtin->Type());
+            << "unexpected barrier builtin type " << builtin::str(builtin->Type());
         return false;
     }
     return true;
@@ -1415,7 +1416,7 @@ bool GeneratorImpl::EmitTextureCall(utils::StringStream& out,
     };
 
     switch (builtin->Type()) {
-        case sem::BuiltinType::kTextureDimensions: {
+        case builtin::Function::kTextureDimensions: {
             // textureDimensions() returns an unsigned scalar / vector in WGSL.
             // textureSize() / imageSize() returns a signed scalar / vector in GLSL.
             // Cast.
@@ -1454,7 +1455,7 @@ bool GeneratorImpl::EmitTextureCall(utils::StringStream& out,
             }
             return true;
         }
-        case sem::BuiltinType::kTextureNumLayers: {
+        case builtin::Function::kTextureNumLayers: {
             // textureNumLayers() returns an unsigned scalar in WGSL.
             // textureSize() / imageSize() returns a signed scalar / vector in GLSL.
             // Cast.
@@ -1488,7 +1489,7 @@ bool GeneratorImpl::EmitTextureCall(utils::StringStream& out,
             out << ").z";
             return true;
         }
-        case sem::BuiltinType::kTextureNumLevels: {
+        case builtin::Function::kTextureNumLevels: {
             // textureNumLevels() returns an unsigned scalar in WGSL.
             // textureQueryLevels() returns a signed scalar in GLSL.
             // Cast.
@@ -1502,7 +1503,7 @@ bool GeneratorImpl::EmitTextureCall(utils::StringStream& out,
             out << ")";
             return true;
         }
-        case sem::BuiltinType::kTextureNumSamples: {
+        case builtin::Function::kTextureNumSamples: {
             // textureNumSamples() returns an unsigned scalar in WGSL.
             // textureSamples() returns a signed scalar in GLSL.
             // Cast.
@@ -1525,36 +1526,36 @@ bool GeneratorImpl::EmitTextureCall(utils::StringStream& out,
     bool is_depth = texture_type->Is<type::DepthTexture>();
 
     switch (builtin->Type()) {
-        case sem::BuiltinType::kTextureSample:
-        case sem::BuiltinType::kTextureSampleBias:
+        case builtin::Function::kTextureSample:
+        case builtin::Function::kTextureSampleBias:
             out << "texture";
             if (is_depth) {
                 glsl_ret_width = 1u;
             }
             break;
-        case sem::BuiltinType::kTextureSampleLevel:
+        case builtin::Function::kTextureSampleLevel:
             out << "textureLod";
             if (is_depth) {
                 glsl_ret_width = 1u;
             }
             break;
-        case sem::BuiltinType::kTextureGather:
-        case sem::BuiltinType::kTextureGatherCompare:
+        case builtin::Function::kTextureGather:
+        case builtin::Function::kTextureGatherCompare:
             out << "textureGather";
             append_depth_ref_to_coords = false;
             break;
-        case sem::BuiltinType::kTextureSampleGrad:
+        case builtin::Function::kTextureSampleGrad:
             out << "textureGrad";
             break;
-        case sem::BuiltinType::kTextureSampleCompare:
-        case sem::BuiltinType::kTextureSampleCompareLevel:
+        case builtin::Function::kTextureSampleCompare:
+        case builtin::Function::kTextureSampleCompareLevel:
             out << "texture";
             glsl_ret_width = 1;
             break;
-        case sem::BuiltinType::kTextureLoad:
+        case builtin::Function::kTextureLoad:
             out << "texelFetch";
             break;
-        case sem::BuiltinType::kTextureStore:
+        case builtin::Function::kTextureStore:
             out << "imageStore";
             break;
         default:
@@ -1633,7 +1634,7 @@ bool GeneratorImpl::EmitTextureCall(utils::StringStream& out,
     }
 
     // GLSL's textureGather always requires a refZ parameter.
-    if (is_depth && builtin->Type() == sem::BuiltinType::kTextureGather) {
+    if (is_depth && builtin->Type() == builtin::Function::kTextureGather) {
         out << ", 0.0";
     }
 
@@ -1644,7 +1645,7 @@ bool GeneratorImpl::EmitTextureCall(utils::StringStream& out,
             if (!EmitExpression(out, e)) {
                 return false;
             }
-        } else if (builtin->Type() == sem::BuiltinType::kTextureSample) {
+        } else if (builtin->Type() == builtin::Function::kTextureSample) {
             out << ", 0.0f";
         }
     }
@@ -1688,114 +1689,114 @@ bool GeneratorImpl::EmitTextureCall(utils::StringStream& out,
 
 std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
     switch (builtin->Type()) {
-        case sem::BuiltinType::kAbs:
-        case sem::BuiltinType::kAcos:
-        case sem::BuiltinType::kAcosh:
-        case sem::BuiltinType::kAll:
-        case sem::BuiltinType::kAny:
-        case sem::BuiltinType::kAsin:
-        case sem::BuiltinType::kAsinh:
-        case sem::BuiltinType::kAtan:
-        case sem::BuiltinType::kAtanh:
-        case sem::BuiltinType::kCeil:
-        case sem::BuiltinType::kClamp:
-        case sem::BuiltinType::kCos:
-        case sem::BuiltinType::kCosh:
-        case sem::BuiltinType::kCross:
-        case sem::BuiltinType::kDeterminant:
-        case sem::BuiltinType::kDistance:
-        case sem::BuiltinType::kDot:
-        case sem::BuiltinType::kExp:
-        case sem::BuiltinType::kExp2:
-        case sem::BuiltinType::kFloor:
-        case sem::BuiltinType::kFrexp:
-        case sem::BuiltinType::kLdexp:
-        case sem::BuiltinType::kLength:
-        case sem::BuiltinType::kLog:
-        case sem::BuiltinType::kLog2:
-        case sem::BuiltinType::kMax:
-        case sem::BuiltinType::kMin:
-        case sem::BuiltinType::kModf:
-        case sem::BuiltinType::kNormalize:
-        case sem::BuiltinType::kPow:
-        case sem::BuiltinType::kReflect:
-        case sem::BuiltinType::kRefract:
-        case sem::BuiltinType::kRound:
-        case sem::BuiltinType::kSign:
-        case sem::BuiltinType::kSin:
-        case sem::BuiltinType::kSinh:
-        case sem::BuiltinType::kSqrt:
-        case sem::BuiltinType::kStep:
-        case sem::BuiltinType::kTan:
-        case sem::BuiltinType::kTanh:
-        case sem::BuiltinType::kTranspose:
-        case sem::BuiltinType::kTrunc:
+        case builtin::Function::kAbs:
+        case builtin::Function::kAcos:
+        case builtin::Function::kAcosh:
+        case builtin::Function::kAll:
+        case builtin::Function::kAny:
+        case builtin::Function::kAsin:
+        case builtin::Function::kAsinh:
+        case builtin::Function::kAtan:
+        case builtin::Function::kAtanh:
+        case builtin::Function::kCeil:
+        case builtin::Function::kClamp:
+        case builtin::Function::kCos:
+        case builtin::Function::kCosh:
+        case builtin::Function::kCross:
+        case builtin::Function::kDeterminant:
+        case builtin::Function::kDistance:
+        case builtin::Function::kDot:
+        case builtin::Function::kExp:
+        case builtin::Function::kExp2:
+        case builtin::Function::kFloor:
+        case builtin::Function::kFrexp:
+        case builtin::Function::kLdexp:
+        case builtin::Function::kLength:
+        case builtin::Function::kLog:
+        case builtin::Function::kLog2:
+        case builtin::Function::kMax:
+        case builtin::Function::kMin:
+        case builtin::Function::kModf:
+        case builtin::Function::kNormalize:
+        case builtin::Function::kPow:
+        case builtin::Function::kReflect:
+        case builtin::Function::kRefract:
+        case builtin::Function::kRound:
+        case builtin::Function::kSign:
+        case builtin::Function::kSin:
+        case builtin::Function::kSinh:
+        case builtin::Function::kSqrt:
+        case builtin::Function::kStep:
+        case builtin::Function::kTan:
+        case builtin::Function::kTanh:
+        case builtin::Function::kTranspose:
+        case builtin::Function::kTrunc:
             return builtin->str();
-        case sem::BuiltinType::kAtan2:
+        case builtin::Function::kAtan2:
             return "atan";
-        case sem::BuiltinType::kCountOneBits:
+        case builtin::Function::kCountOneBits:
             return "bitCount";
-        case sem::BuiltinType::kDpdx:
+        case builtin::Function::kDpdx:
             return "dFdx";
-        case sem::BuiltinType::kDpdxCoarse:
+        case builtin::Function::kDpdxCoarse:
             if (version_.IsES()) {
                 return "dFdx";
             }
             return "dFdxCoarse";
-        case sem::BuiltinType::kDpdxFine:
+        case builtin::Function::kDpdxFine:
             if (version_.IsES()) {
                 return "dFdx";
             }
             return "dFdxFine";
-        case sem::BuiltinType::kDpdy:
+        case builtin::Function::kDpdy:
             return "dFdy";
-        case sem::BuiltinType::kDpdyCoarse:
+        case builtin::Function::kDpdyCoarse:
             if (version_.IsES()) {
                 return "dFdy";
             }
             return "dFdyCoarse";
-        case sem::BuiltinType::kDpdyFine:
+        case builtin::Function::kDpdyFine:
             if (version_.IsES()) {
                 return "dFdy";
             }
             return "dFdyFine";
-        case sem::BuiltinType::kFaceForward:
+        case builtin::Function::kFaceForward:
             return "faceforward";
-        case sem::BuiltinType::kFract:
+        case builtin::Function::kFract:
             return "fract";
-        case sem::BuiltinType::kFma:
+        case builtin::Function::kFma:
             return "fma";
-        case sem::BuiltinType::kFwidth:
-        case sem::BuiltinType::kFwidthCoarse:
-        case sem::BuiltinType::kFwidthFine:
+        case builtin::Function::kFwidth:
+        case builtin::Function::kFwidthCoarse:
+        case builtin::Function::kFwidthFine:
             return "fwidth";
-        case sem::BuiltinType::kInverseSqrt:
+        case builtin::Function::kInverseSqrt:
             return "inversesqrt";
-        case sem::BuiltinType::kMix:
+        case builtin::Function::kMix:
             return "mix";
-        case sem::BuiltinType::kPack2X16Float:
+        case builtin::Function::kPack2X16Float:
             return "packHalf2x16";
-        case sem::BuiltinType::kPack2X16Snorm:
+        case builtin::Function::kPack2X16Snorm:
             return "packSnorm2x16";
-        case sem::BuiltinType::kPack2X16Unorm:
+        case builtin::Function::kPack2X16Unorm:
             return "packUnorm2x16";
-        case sem::BuiltinType::kPack4X8Snorm:
+        case builtin::Function::kPack4X8Snorm:
             return "packSnorm4x8";
-        case sem::BuiltinType::kPack4X8Unorm:
+        case builtin::Function::kPack4X8Unorm:
             return "packUnorm4x8";
-        case sem::BuiltinType::kReverseBits:
+        case builtin::Function::kReverseBits:
             return "bitfieldReverse";
-        case sem::BuiltinType::kSmoothstep:
+        case builtin::Function::kSmoothstep:
             return "smoothstep";
-        case sem::BuiltinType::kUnpack2X16Float:
+        case builtin::Function::kUnpack2X16Float:
             return "unpackHalf2x16";
-        case sem::BuiltinType::kUnpack2X16Snorm:
+        case builtin::Function::kUnpack2X16Snorm:
             return "unpackSnorm2x16";
-        case sem::BuiltinType::kUnpack2X16Unorm:
+        case builtin::Function::kUnpack2X16Unorm:
             return "unpackUnorm2x16";
-        case sem::BuiltinType::kUnpack4X8Snorm:
+        case builtin::Function::kUnpack4X8Snorm:
             return "unpackSnorm4x8";
-        case sem::BuiltinType::kUnpack4X8Unorm:
+        case builtin::Function::kUnpack4X8Unorm:
             return "unpackUnorm4x8";
         default:
             diagnostics_.add_error(diag::System::Writer,
@@ -3236,7 +3237,7 @@ bool GeneratorImpl::CallBuiltinHelper(utils::StringStream& out,
         TextBuffer b;
         TINT_DEFER(helpers_.Append(b));
 
-        auto fn_name = UniqueIdentifier(std::string("tint_") + sem::str(builtin->Type()));
+        auto fn_name = UniqueIdentifier(std::string("tint_") + builtin::str(builtin->Type()));
         std::vector<std::string> parameter_names;
         {
             auto decl = line(&b);

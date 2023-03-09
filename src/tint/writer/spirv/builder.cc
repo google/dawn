@@ -56,8 +56,6 @@
 namespace tint::writer::spirv {
 namespace {
 
-using BuiltinType = sem::BuiltinType;
-
 const char kGLSLstd450[] = "GLSL.std.450";
 
 uint32_t size_of(const InstructionList& instructions) {
@@ -102,23 +100,23 @@ const type::Matrix* GetNestedMatrixType(const type::Type* type) {
 
 uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
     switch (builtin->Type()) {
-        case BuiltinType::kAcos:
+        case builtin::Function::kAcos:
             return GLSLstd450Acos;
-        case BuiltinType::kAcosh:
+        case builtin::Function::kAcosh:
             return GLSLstd450Acosh;
-        case BuiltinType::kAsin:
+        case builtin::Function::kAsin:
             return GLSLstd450Asin;
-        case BuiltinType::kAsinh:
+        case builtin::Function::kAsinh:
             return GLSLstd450Asinh;
-        case BuiltinType::kAtan:
+        case builtin::Function::kAtan:
             return GLSLstd450Atan;
-        case BuiltinType::kAtan2:
+        case builtin::Function::kAtan2:
             return GLSLstd450Atan2;
-        case BuiltinType::kAtanh:
+        case builtin::Function::kAtanh:
             return GLSLstd450Atanh;
-        case BuiltinType::kCeil:
+        case builtin::Function::kCeil:
             return GLSLstd450Ceil;
-        case BuiltinType::kClamp:
+        case builtin::Function::kClamp:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 return GLSLstd450NClamp;
             } else if (builtin->ReturnType()->is_unsigned_integer_scalar_or_vector()) {
@@ -126,43 +124,43 @@ uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
             } else {
                 return GLSLstd450SClamp;
             }
-        case BuiltinType::kCos:
+        case builtin::Function::kCos:
             return GLSLstd450Cos;
-        case BuiltinType::kCosh:
+        case builtin::Function::kCosh:
             return GLSLstd450Cosh;
-        case BuiltinType::kCross:
+        case builtin::Function::kCross:
             return GLSLstd450Cross;
-        case BuiltinType::kDegrees:
+        case builtin::Function::kDegrees:
             return GLSLstd450Degrees;
-        case BuiltinType::kDeterminant:
+        case builtin::Function::kDeterminant:
             return GLSLstd450Determinant;
-        case BuiltinType::kDistance:
+        case builtin::Function::kDistance:
             return GLSLstd450Distance;
-        case BuiltinType::kExp:
+        case builtin::Function::kExp:
             return GLSLstd450Exp;
-        case BuiltinType::kExp2:
+        case builtin::Function::kExp2:
             return GLSLstd450Exp2;
-        case BuiltinType::kFaceForward:
+        case builtin::Function::kFaceForward:
             return GLSLstd450FaceForward;
-        case BuiltinType::kFloor:
+        case builtin::Function::kFloor:
             return GLSLstd450Floor;
-        case BuiltinType::kFma:
+        case builtin::Function::kFma:
             return GLSLstd450Fma;
-        case BuiltinType::kFract:
+        case builtin::Function::kFract:
             return GLSLstd450Fract;
-        case BuiltinType::kFrexp:
+        case builtin::Function::kFrexp:
             return GLSLstd450FrexpStruct;
-        case BuiltinType::kInverseSqrt:
+        case builtin::Function::kInverseSqrt:
             return GLSLstd450InverseSqrt;
-        case BuiltinType::kLdexp:
+        case builtin::Function::kLdexp:
             return GLSLstd450Ldexp;
-        case BuiltinType::kLength:
+        case builtin::Function::kLength:
             return GLSLstd450Length;
-        case BuiltinType::kLog:
+        case builtin::Function::kLog:
             return GLSLstd450Log;
-        case BuiltinType::kLog2:
+        case builtin::Function::kLog2:
             return GLSLstd450Log2;
-        case BuiltinType::kMax:
+        case builtin::Function::kMax:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 return GLSLstd450NMax;
             } else if (builtin->ReturnType()->is_unsigned_integer_scalar_or_vector()) {
@@ -170,7 +168,7 @@ uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
             } else {
                 return GLSLstd450SMax;
             }
-        case BuiltinType::kMin:
+        case builtin::Function::kMin:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 return GLSLstd450NMin;
             } else if (builtin->ReturnType()->is_unsigned_integer_scalar_or_vector()) {
@@ -178,63 +176,63 @@ uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
             } else {
                 return GLSLstd450SMin;
             }
-        case BuiltinType::kMix:
+        case builtin::Function::kMix:
             return GLSLstd450FMix;
-        case BuiltinType::kModf:
+        case builtin::Function::kModf:
             return GLSLstd450ModfStruct;
-        case BuiltinType::kNormalize:
+        case builtin::Function::kNormalize:
             return GLSLstd450Normalize;
-        case BuiltinType::kPack4X8Snorm:
+        case builtin::Function::kPack4X8Snorm:
             return GLSLstd450PackSnorm4x8;
-        case BuiltinType::kPack4X8Unorm:
+        case builtin::Function::kPack4X8Unorm:
             return GLSLstd450PackUnorm4x8;
-        case BuiltinType::kPack2X16Snorm:
+        case builtin::Function::kPack2X16Snorm:
             return GLSLstd450PackSnorm2x16;
-        case BuiltinType::kPack2X16Unorm:
+        case builtin::Function::kPack2X16Unorm:
             return GLSLstd450PackUnorm2x16;
-        case BuiltinType::kPack2X16Float:
+        case builtin::Function::kPack2X16Float:
             return GLSLstd450PackHalf2x16;
-        case BuiltinType::kPow:
+        case builtin::Function::kPow:
             return GLSLstd450Pow;
-        case BuiltinType::kRadians:
+        case builtin::Function::kRadians:
             return GLSLstd450Radians;
-        case BuiltinType::kReflect:
+        case builtin::Function::kReflect:
             return GLSLstd450Reflect;
-        case BuiltinType::kRefract:
+        case builtin::Function::kRefract:
             return GLSLstd450Refract;
-        case BuiltinType::kRound:
+        case builtin::Function::kRound:
             return GLSLstd450RoundEven;
-        case BuiltinType::kSign:
+        case builtin::Function::kSign:
             if (builtin->ReturnType()->is_signed_integer_scalar_or_vector()) {
                 return GLSLstd450SSign;
             } else {
                 return GLSLstd450FSign;
             }
-        case BuiltinType::kSin:
+        case builtin::Function::kSin:
             return GLSLstd450Sin;
-        case BuiltinType::kSinh:
+        case builtin::Function::kSinh:
             return GLSLstd450Sinh;
-        case BuiltinType::kSmoothstep:
+        case builtin::Function::kSmoothstep:
             return GLSLstd450SmoothStep;
-        case BuiltinType::kSqrt:
+        case builtin::Function::kSqrt:
             return GLSLstd450Sqrt;
-        case BuiltinType::kStep:
+        case builtin::Function::kStep:
             return GLSLstd450Step;
-        case BuiltinType::kTan:
+        case builtin::Function::kTan:
             return GLSLstd450Tan;
-        case BuiltinType::kTanh:
+        case builtin::Function::kTanh:
             return GLSLstd450Tanh;
-        case BuiltinType::kTrunc:
+        case builtin::Function::kTrunc:
             return GLSLstd450Trunc;
-        case BuiltinType::kUnpack4X8Snorm:
+        case builtin::Function::kUnpack4X8Snorm:
             return GLSLstd450UnpackSnorm4x8;
-        case BuiltinType::kUnpack4X8Unorm:
+        case builtin::Function::kUnpack4X8Unorm:
             return GLSLstd450UnpackUnorm4x8;
-        case BuiltinType::kUnpack2X16Snorm:
+        case builtin::Function::kUnpack2X16Snorm:
             return GLSLstd450UnpackSnorm2x16;
-        case BuiltinType::kUnpack2X16Unorm:
+        case builtin::Function::kUnpack2X16Unorm:
             return GLSLstd450UnpackUnorm2x16;
-        case BuiltinType::kUnpack2X16Float:
+        case builtin::Function::kUnpack2X16Float:
             return GLSLstd450UnpackHalf2x16;
         default:
             break;
@@ -2363,21 +2361,21 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
     };
 
     switch (builtin->Type()) {
-        case BuiltinType::kAny:
+        case builtin::Function::kAny:
             if (builtin->Parameters()[0]->Type()->Is<type::Bool>()) {
                 // any(v: bool) just resolves to v.
                 return get_arg_as_value_id(0);
             }
             op = spv::Op::OpAny;
             break;
-        case BuiltinType::kAll:
+        case builtin::Function::kAll:
             if (builtin->Parameters()[0]->Type()->Is<type::Bool>()) {
                 // all(v: bool) just resolves to v.
                 return get_arg_as_value_id(0);
             }
             op = spv::Op::OpAll;
             break;
-        case BuiltinType::kArrayLength: {
+        case builtin::Function::kArrayLength: {
             auto* address_of = call->Arguments()[0]->Declaration()->As<ast::UnaryOpExpression>();
             if (!address_of || address_of->op != ast::UnaryOp::kAddressOf) {
                 error_ = "arrayLength() expected pointer to member access, got " +
@@ -2414,10 +2412,10 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             }
             return result_id;
         }
-        case BuiltinType::kCountOneBits:
+        case builtin::Function::kCountOneBits:
             op = spv::Op::OpBitCount;
             break;
-        case BuiltinType::kDot: {
+        case builtin::Function::kDot: {
             op = spv::Op::OpDot;
             auto* vec_ty = builtin->Parameters()[0]->Type()->As<type::Vector>();
             if (vec_ty->type()->is_integer_scalar()) {
@@ -2458,42 +2456,42 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             }
             break;
         }
-        case BuiltinType::kDpdx:
+        case builtin::Function::kDpdx:
             op = spv::Op::OpDPdx;
             break;
-        case BuiltinType::kDpdxCoarse:
+        case builtin::Function::kDpdxCoarse:
             op = spv::Op::OpDPdxCoarse;
             break;
-        case BuiltinType::kDpdxFine:
+        case builtin::Function::kDpdxFine:
             op = spv::Op::OpDPdxFine;
             break;
-        case BuiltinType::kDpdy:
+        case builtin::Function::kDpdy:
             op = spv::Op::OpDPdy;
             break;
-        case BuiltinType::kDpdyCoarse:
+        case builtin::Function::kDpdyCoarse:
             op = spv::Op::OpDPdyCoarse;
             break;
-        case BuiltinType::kDpdyFine:
+        case builtin::Function::kDpdyFine:
             op = spv::Op::OpDPdyFine;
             break;
-        case BuiltinType::kExtractBits:
+        case builtin::Function::kExtractBits:
             op = builtin->Parameters()[0]->Type()->is_unsigned_integer_scalar_or_vector()
                      ? spv::Op::OpBitFieldUExtract
                      : spv::Op::OpBitFieldSExtract;
             break;
-        case BuiltinType::kFwidth:
+        case builtin::Function::kFwidth:
             op = spv::Op::OpFwidth;
             break;
-        case BuiltinType::kFwidthCoarse:
+        case builtin::Function::kFwidthCoarse:
             op = spv::Op::OpFwidthCoarse;
             break;
-        case BuiltinType::kFwidthFine:
+        case builtin::Function::kFwidthFine:
             op = spv::Op::OpFwidthFine;
             break;
-        case BuiltinType::kInsertBits:
+        case builtin::Function::kInsertBits:
             op = spv::Op::OpBitFieldInsert;
             break;
-        case BuiltinType::kMix: {
+        case builtin::Function::kMix: {
             auto std450 = Operand(GetGLSLstd450Import());
 
             auto a_id = get_arg_as_value_id(0);
@@ -2520,13 +2518,13 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             }
             return result_id;
         }
-        case BuiltinType::kQuantizeToF16:
+        case builtin::Function::kQuantizeToF16:
             op = spv::Op::OpQuantizeToF16;
             break;
-        case BuiltinType::kReverseBits:
+        case builtin::Function::kReverseBits:
             op = spv::Op::OpBitReverse;
             break;
-        case BuiltinType::kSelect: {
+        case builtin::Function::kSelect: {
             // Note: Argument order is different in WGSL and SPIR-V
             auto cond_id = get_arg_as_value_id(2);
             auto true_id = get_arg_as_value_id(1);
@@ -2558,10 +2556,10 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             }
             return result_id;
         }
-        case BuiltinType::kTranspose:
+        case builtin::Function::kTranspose:
             op = spv::Op::OpTranspose;
             break;
-        case BuiltinType::kAbs:
+        case builtin::Function::kAbs:
             if (builtin->ReturnType()->is_unsigned_integer_scalar_or_vector()) {
                 // abs() only operates on *signed* integers.
                 // This is a no-op for unsigned integers.
@@ -2573,7 +2571,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
                 glsl_std450(GLSLstd450SAbs);
             }
             break;
-        case BuiltinType::kDot4I8Packed: {
+        case builtin::Function::kDot4I8Packed: {
             auto first_param_id = get_arg_as_value_id(0);
             auto second_param_id = get_arg_as_value_id(1);
             if (!push_function_inst(spv::Op::OpSDotKHR,
@@ -2585,7 +2583,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             }
             return result_id;
         }
-        case BuiltinType::kDot4U8Packed: {
+        case builtin::Function::kDot4U8Packed: {
             auto first_param_id = get_arg_as_value_id(0);
             auto second_param_id = get_arg_as_value_id(1);
             if (!push_function_inst(spv::Op::OpUDotKHR,
@@ -2788,7 +2786,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     };
 
     switch (builtin->Type()) {
-        case BuiltinType::kTextureDimensions: {
+        case builtin::Function::kTextureDimensions: {
             // Number of returned elements from OpImageQuerySize[Lod] may not match
             // those of textureDimensions().
             // This might be due to an extra vector scalar describing the number of
@@ -2833,7 +2831,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             }
             break;
         }
-        case BuiltinType::kTextureNumLayers: {
+        case builtin::Function::kTextureNumLayers: {
             uint32_t spirv_dims = 0;
             switch (texture_type->dim()) {
                 default:
@@ -2863,19 +2861,19 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             }
             break;
         }
-        case BuiltinType::kTextureNumLevels: {
+        case builtin::Function::kTextureNumLevels: {
             op = spv::Op::OpImageQueryLevels;
             append_result_type_and_id_to_spirv_params();
             spirv_params.emplace_back(gen_arg(Usage::kTexture));
             break;
         }
-        case BuiltinType::kTextureNumSamples: {
+        case builtin::Function::kTextureNumSamples: {
             op = spv::Op::OpImageQuerySamples;
             append_result_type_and_id_to_spirv_params();
             spirv_params.emplace_back(gen_arg(Usage::kTexture));
             break;
         }
-        case BuiltinType::kTextureLoad: {
+        case builtin::Function::kTextureLoad: {
             op = texture_type->Is<type::StorageTexture>() ? spv::Op::OpImageRead
                                                           : spv::Op::OpImageFetch;
             append_result_type_and_id_to_spirv_params_for_read();
@@ -2895,7 +2893,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
 
             break;
         }
-        case BuiltinType::kTextureStore: {
+        case builtin::Function::kTextureStore: {
             op = spv::Op::OpImageWrite;
             spirv_params.emplace_back(gen_arg(Usage::kTexture));
             if (!append_coords_to_spirv_params()) {
@@ -2904,7 +2902,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             spirv_params.emplace_back(gen_arg(Usage::kValue));
             break;
         }
-        case BuiltinType::kTextureGather: {
+        case builtin::Function::kTextureGather: {
             op = spv::Op::OpImageGather;
             append_result_type_and_id_to_spirv_params();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2918,7 +2916,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             }
             break;
         }
-        case BuiltinType::kTextureGatherCompare: {
+        case builtin::Function::kTextureGatherCompare: {
             op = spv::Op::OpImageDrefGather;
             append_result_type_and_id_to_spirv_params();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2927,7 +2925,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             spirv_params.emplace_back(gen_arg(Usage::kDepthRef));
             break;
         }
-        case BuiltinType::kTextureSample: {
+        case builtin::Function::kTextureSample: {
             op = spv::Op::OpImageSampleImplicitLod;
             append_result_type_and_id_to_spirv_params_for_read();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2935,7 +2933,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             }
             break;
         }
-        case BuiltinType::kTextureSampleBias: {
+        case builtin::Function::kTextureSampleBias: {
             op = spv::Op::OpImageSampleImplicitLod;
             append_result_type_and_id_to_spirv_params_for_read();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2945,7 +2943,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
                 ImageOperand{SpvImageOperandsBiasMask, gen_arg(Usage::kBias)});
             break;
         }
-        case BuiltinType::kTextureSampleLevel: {
+        case builtin::Function::kTextureSampleLevel: {
             op = spv::Op::OpImageSampleExplicitLod;
             append_result_type_and_id_to_spirv_params_for_read();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2970,7 +2968,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             image_operands.emplace_back(ImageOperand{SpvImageOperandsLodMask, level});
             break;
         }
-        case BuiltinType::kTextureSampleGrad: {
+        case builtin::Function::kTextureSampleGrad: {
             op = spv::Op::OpImageSampleExplicitLod;
             append_result_type_and_id_to_spirv_params_for_read();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2982,7 +2980,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
                 ImageOperand{SpvImageOperandsGradMask, gen_arg(Usage::kDdy)});
             break;
         }
-        case BuiltinType::kTextureSampleCompare: {
+        case builtin::Function::kTextureSampleCompare: {
             op = spv::Op::OpImageSampleDrefImplicitLod;
             append_result_type_and_id_to_spirv_params();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2991,7 +2989,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             spirv_params.emplace_back(gen_arg(Usage::kDepthRef));
             break;
         }
-        case BuiltinType::kTextureSampleCompareLevel: {
+        case builtin::Function::kTextureSampleCompareLevel: {
             op = spv::Op::OpImageSampleDrefExplicitLod;
             append_result_type_and_id_to_spirv_params();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -3046,19 +3044,19 @@ bool Builder::GenerateControlBarrierBuiltin(const sem::Builtin* builtin) {
 
     // TODO(crbug.com/tint/661): Combine sequential barriers to a single
     // instruction.
-    if (builtin->Type() == sem::BuiltinType::kWorkgroupBarrier) {
+    if (builtin->Type() == builtin::Function::kWorkgroupBarrier) {
         execution = static_cast<uint32_t>(spv::Scope::Workgroup);
         memory = static_cast<uint32_t>(spv::Scope::Workgroup);
         semantics = static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease) |
                     static_cast<uint32_t>(spv::MemorySemanticsMask::WorkgroupMemory);
-    } else if (builtin->Type() == sem::BuiltinType::kStorageBarrier) {
+    } else if (builtin->Type() == builtin::Function::kStorageBarrier) {
         execution = static_cast<uint32_t>(spv::Scope::Workgroup);
         memory = static_cast<uint32_t>(spv::Scope::Workgroup);
         semantics = static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease) |
                     static_cast<uint32_t>(spv::MemorySemanticsMask::UniformMemory);
     } else {
         error_ = "unexpected barrier builtin type ";
-        error_ += sem::str(builtin->Type());
+        error_ += builtin::str(builtin->Type());
         return false;
     }
 
@@ -3128,7 +3126,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
     Operand semantics = Operand(semantics_id);
 
     switch (builtin->Type()) {
-        case sem::BuiltinType::kAtomicLoad:
+        case builtin::Function::kAtomicLoad:
             return push_function_inst(spv::Op::OpAtomicLoad, {
                                                                  result_type,
                                                                  result_id,
@@ -3136,14 +3134,14 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                  memory,
                                                                  semantics,
                                                              });
-        case sem::BuiltinType::kAtomicStore:
+        case builtin::Function::kAtomicStore:
             return push_function_inst(spv::Op::OpAtomicStore, {
                                                                   pointer,
                                                                   memory,
                                                                   semantics,
                                                                   value,
                                                               });
-        case sem::BuiltinType::kAtomicAdd:
+        case builtin::Function::kAtomicAdd:
             return push_function_inst(spv::Op::OpAtomicIAdd, {
                                                                  result_type,
                                                                  result_id,
@@ -3152,7 +3150,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                  semantics,
                                                                  value,
                                                              });
-        case sem::BuiltinType::kAtomicSub:
+        case builtin::Function::kAtomicSub:
             return push_function_inst(spv::Op::OpAtomicISub, {
                                                                  result_type,
                                                                  result_id,
@@ -3161,7 +3159,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                  semantics,
                                                                  value,
                                                              });
-        case sem::BuiltinType::kAtomicMax:
+        case builtin::Function::kAtomicMax:
             return push_function_inst(
                 is_value_signed() ? spv::Op::OpAtomicSMax : spv::Op::OpAtomicUMax, {
                                                                                        result_type,
@@ -3171,7 +3169,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                                        semantics,
                                                                                        value,
                                                                                    });
-        case sem::BuiltinType::kAtomicMin:
+        case builtin::Function::kAtomicMin:
             return push_function_inst(
                 is_value_signed() ? spv::Op::OpAtomicSMin : spv::Op::OpAtomicUMin, {
                                                                                        result_type,
@@ -3181,7 +3179,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                                        semantics,
                                                                                        value,
                                                                                    });
-        case sem::BuiltinType::kAtomicAnd:
+        case builtin::Function::kAtomicAnd:
             return push_function_inst(spv::Op::OpAtomicAnd, {
                                                                 result_type,
                                                                 result_id,
@@ -3190,7 +3188,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                 semantics,
                                                                 value,
                                                             });
-        case sem::BuiltinType::kAtomicOr:
+        case builtin::Function::kAtomicOr:
             return push_function_inst(spv::Op::OpAtomicOr, {
                                                                result_type,
                                                                result_id,
@@ -3199,7 +3197,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                semantics,
                                                                value,
                                                            });
-        case sem::BuiltinType::kAtomicXor:
+        case builtin::Function::kAtomicXor:
             return push_function_inst(spv::Op::OpAtomicXor, {
                                                                 result_type,
                                                                 result_id,
@@ -3208,7 +3206,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                 semantics,
                                                                 value,
                                                             });
-        case sem::BuiltinType::kAtomicExchange:
+        case builtin::Function::kAtomicExchange:
             return push_function_inst(spv::Op::OpAtomicExchange, {
                                                                      result_type,
                                                                      result_id,
@@ -3217,7 +3215,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                      semantics,
                                                                      value,
                                                                  });
-        case sem::BuiltinType::kAtomicCompareExchangeWeak: {
+        case builtin::Function::kAtomicCompareExchangeWeak: {
             auto comparator = GenerateExpression(call->Arguments()[1]);
             if (comparator == 0) {
                 return false;

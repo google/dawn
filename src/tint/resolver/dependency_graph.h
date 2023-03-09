@@ -22,11 +22,11 @@
 #include "src/tint/builtin/access.h"
 #include "src/tint/builtin/builtin.h"
 #include "src/tint/builtin/builtin_value.h"
+#include "src/tint/builtin/function.h"
 #include "src/tint/builtin/interpolation_sampling.h"
 #include "src/tint/builtin/interpolation_type.h"
 #include "src/tint/builtin/texel_format.h"
 #include "src/tint/diagnostic/diagnostic.h"
-#include "src/tint/sem/builtin_type.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/utils/hashmap.h"
 
@@ -44,7 +44,7 @@ struct UnresolvedIdentifier {
 /// - const ast::TypeDecl*  (as const ast::Node*)
 /// - const ast::Variable*  (as const ast::Node*)
 /// - const ast::Function*  (as const ast::Node*)
-/// - sem::BuiltinType
+/// - builtin::Function
 /// - builtin::Access
 /// - builtin::AddressSpace
 /// - builtin::Builtin
@@ -75,13 +75,13 @@ class ResolvedIdentifier {
         return nullptr;
     }
 
-    /// @return the builtin function if the ResolvedIdentifier holds sem::BuiltinType, otherwise
-    /// sem::BuiltinType::kNone
-    sem::BuiltinType BuiltinFunction() const {
-        if (auto n = std::get_if<sem::BuiltinType>(&value_)) {
+    /// @return the builtin function if the ResolvedIdentifier holds builtin::Function, otherwise
+    /// builtin::Function::kNone
+    builtin::Function BuiltinFunction() const {
+        if (auto n = std::get_if<builtin::Function>(&value_)) {
             return *n;
         }
-        return sem::BuiltinType::kNone;
+        return builtin::Function::kNone;
     }
 
     /// @return the access if the ResolvedIdentifier holds builtin::Access, otherwise
@@ -172,7 +172,7 @@ class ResolvedIdentifier {
   private:
     std::variant<UnresolvedIdentifier,
                  const ast::Node*,
-                 sem::BuiltinType,
+                 builtin::Function,
                  builtin::Access,
                  builtin::AddressSpace,
                  builtin::Builtin,

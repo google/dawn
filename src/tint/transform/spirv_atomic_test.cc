@@ -36,14 +36,14 @@ class SpirvAtomicTest : public TransformTest {
 
         auto& b = parser.builder();
 
-        sem::BuiltinType two_params[] = {
-            sem::BuiltinType::kAtomicExchange, sem::BuiltinType::kAtomicAdd,
-            sem::BuiltinType::kAtomicSub,      sem::BuiltinType::kAtomicMin,
-            sem::BuiltinType::kAtomicMax,      sem::BuiltinType::kAtomicAnd,
-            sem::BuiltinType::kAtomicOr,       sem::BuiltinType::kAtomicXor,
+        builtin::Function two_params[] = {
+            builtin::Function::kAtomicExchange, builtin::Function::kAtomicAdd,
+            builtin::Function::kAtomicSub,      builtin::Function::kAtomicMin,
+            builtin::Function::kAtomicMax,      builtin::Function::kAtomicAnd,
+            builtin::Function::kAtomicOr,       builtin::Function::kAtomicXor,
         };
         for (auto& a : two_params) {
-            b.Func(std::string{"stub_"} + sem::str(a) + "_u32",
+            b.Func(std::string{"stub_"} + builtin::str(a) + "_u32",
                    utils::Vector{
                        b.Param("p0", b.ty.u32()),
                        b.Param("p1", b.ty.u32()),
@@ -55,7 +55,7 @@ class SpirvAtomicTest : public TransformTest {
                    utils::Vector{
                        b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(), a),
                    });
-            b.Func(std::string{"stub_"} + sem::str(a) + "_i32",
+            b.Func(std::string{"stub_"} + builtin::str(a) + "_i32",
                    utils::Vector{
                        b.Param("p0", b.ty.i32()),
                        b.Param("p1", b.ty.i32()),
@@ -79,7 +79,7 @@ class SpirvAtomicTest : public TransformTest {
                },
                utils::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
-                                                          sem::BuiltinType::kAtomicLoad),
+                                                          builtin::Function::kAtomicLoad),
                });
         b.Func("stub_atomicLoad_i32",
                utils::Vector{
@@ -91,7 +91,7 @@ class SpirvAtomicTest : public TransformTest {
                },
                utils::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
-                                                          sem::BuiltinType::kAtomicLoad),
+                                                          builtin::Function::kAtomicLoad),
                });
 
         b.Func("stub_atomicStore_u32",
@@ -102,7 +102,7 @@ class SpirvAtomicTest : public TransformTest {
                b.ty.void_(), utils::Empty,
                utils::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
-                                                          sem::BuiltinType::kAtomicStore),
+                                                          builtin::Function::kAtomicStore),
                });
         b.Func("stub_atomicStore_i32",
                utils::Vector{
@@ -112,7 +112,7 @@ class SpirvAtomicTest : public TransformTest {
                b.ty.void_(), utils::Empty,
                utils::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
-                                                          sem::BuiltinType::kAtomicStore),
+                                                          builtin::Function::kAtomicStore),
                });
 
         b.Func("stub_atomic_compare_exchange_weak_u32",
@@ -127,7 +127,7 @@ class SpirvAtomicTest : public TransformTest {
                },
                utils::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(
-                       b.ID(), b.AllocateNodeID(), sem::BuiltinType::kAtomicCompareExchangeWeak),
+                       b.ID(), b.AllocateNodeID(), builtin::Function::kAtomicCompareExchangeWeak),
                });
         b.Func("stub_atomic_compare_exchange_weak_i32",
                utils::Vector{b.Param("p0", b.ty.i32()), b.Param("p1", b.ty.i32()),
@@ -138,7 +138,7 @@ class SpirvAtomicTest : public TransformTest {
                },
                utils::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(
-                       b.ID(), b.AllocateNodeID(), sem::BuiltinType::kAtomicCompareExchangeWeak),
+                       b.ID(), b.AllocateNodeID(), builtin::Function::kAtomicCompareExchangeWeak),
                });
 
         // Keep this pointer alive after Transform() returns

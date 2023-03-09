@@ -276,7 +276,7 @@ struct CombineSamplers::State {
                         }
                     }
                     const ast::Expression* value = ctx.dst->Call(ctx.Clone(expr->target), args);
-                    if (builtin->Type() == sem::BuiltinType::kTextureLoad &&
+                    if (builtin->Type() == builtin::Function::kTextureLoad &&
                         texture_var->Type()->UnwrapRef()->Is<type::DepthTexture>() &&
                         !call->Stmt()->Declaration()->Is<ast::CallStatement>()) {
                         value = ctx.dst->MemberAccessor(value, "x");

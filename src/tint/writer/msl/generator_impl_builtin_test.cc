@@ -22,8 +22,6 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::writer::msl {
 namespace {
 
-using BuiltinType = sem::BuiltinType;
-
 using MslGeneratorImplTest = TestHelper;
 
 enum class CallParamType {
@@ -34,7 +32,7 @@ enum class CallParamType {
 };
 
 struct BuiltinData {
-    BuiltinType builtin;
+    builtin::Function builtin;
     CallParamType type;
     const char* msl_name;
 };
@@ -58,88 +56,88 @@ inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
     return out;
 }
 
-const ast::CallExpression* GenerateCall(BuiltinType builtin,
+const ast::CallExpression* GenerateCall(builtin::Function builtin,
                                         CallParamType type,
                                         ProgramBuilder* builder) {
     std::string name;
     utils::StringStream str;
     str << name << builtin;
     switch (builtin) {
-        case BuiltinType::kAcos:
-        case BuiltinType::kAsin:
-        case BuiltinType::kAtan:
-        case BuiltinType::kCeil:
-        case BuiltinType::kCos:
-        case BuiltinType::kCosh:
-        case BuiltinType::kDpdx:
-        case BuiltinType::kDpdxCoarse:
-        case BuiltinType::kDpdxFine:
-        case BuiltinType::kDpdy:
-        case BuiltinType::kDpdyCoarse:
-        case BuiltinType::kDpdyFine:
-        case BuiltinType::kExp:
-        case BuiltinType::kExp2:
-        case BuiltinType::kFloor:
-        case BuiltinType::kFract:
-        case BuiltinType::kFwidth:
-        case BuiltinType::kFwidthCoarse:
-        case BuiltinType::kFwidthFine:
-        case BuiltinType::kInverseSqrt:
-        case BuiltinType::kLength:
-        case BuiltinType::kLog:
-        case BuiltinType::kLog2:
-        case BuiltinType::kNormalize:
-        case BuiltinType::kRound:
-        case BuiltinType::kSin:
-        case BuiltinType::kSinh:
-        case BuiltinType::kSqrt:
-        case BuiltinType::kTan:
-        case BuiltinType::kTanh:
-        case BuiltinType::kTrunc:
-        case BuiltinType::kSign:
+        case builtin::Function::kAcos:
+        case builtin::Function::kAsin:
+        case builtin::Function::kAtan:
+        case builtin::Function::kCeil:
+        case builtin::Function::kCos:
+        case builtin::Function::kCosh:
+        case builtin::Function::kDpdx:
+        case builtin::Function::kDpdxCoarse:
+        case builtin::Function::kDpdxFine:
+        case builtin::Function::kDpdy:
+        case builtin::Function::kDpdyCoarse:
+        case builtin::Function::kDpdyFine:
+        case builtin::Function::kExp:
+        case builtin::Function::kExp2:
+        case builtin::Function::kFloor:
+        case builtin::Function::kFract:
+        case builtin::Function::kFwidth:
+        case builtin::Function::kFwidthCoarse:
+        case builtin::Function::kFwidthFine:
+        case builtin::Function::kInverseSqrt:
+        case builtin::Function::kLength:
+        case builtin::Function::kLog:
+        case builtin::Function::kLog2:
+        case builtin::Function::kNormalize:
+        case builtin::Function::kRound:
+        case builtin::Function::kSin:
+        case builtin::Function::kSinh:
+        case builtin::Function::kSqrt:
+        case builtin::Function::kTan:
+        case builtin::Function::kTanh:
+        case builtin::Function::kTrunc:
+        case builtin::Function::kSign:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2");
             } else {
                 return builder->Call(str.str(), "f2");
             }
-        case BuiltinType::kLdexp:
+        case builtin::Function::kLdexp:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2", "i2");
             } else {
                 return builder->Call(str.str(), "f2", "i2");
             }
-        case BuiltinType::kAtan2:
-        case BuiltinType::kDot:
-        case BuiltinType::kDistance:
-        case BuiltinType::kPow:
-        case BuiltinType::kReflect:
-        case BuiltinType::kStep:
+        case builtin::Function::kAtan2:
+        case builtin::Function::kDot:
+        case builtin::Function::kDistance:
+        case builtin::Function::kPow:
+        case builtin::Function::kReflect:
+        case builtin::Function::kStep:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2", "h2");
             } else {
                 return builder->Call(str.str(), "f2", "f2");
             }
-        case BuiltinType::kStorageBarrier:
+        case builtin::Function::kStorageBarrier:
             return builder->Call(str.str());
-        case BuiltinType::kCross:
+        case builtin::Function::kCross:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h3", "h3");
             } else {
                 return builder->Call(str.str(), "f3", "f3");
             }
-        case BuiltinType::kFma:
-        case BuiltinType::kMix:
-        case BuiltinType::kFaceForward:
-        case BuiltinType::kSmoothstep:
+        case builtin::Function::kFma:
+        case builtin::Function::kMix:
+        case builtin::Function::kFaceForward:
+        case builtin::Function::kSmoothstep:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2", "h2", "h2");
             } else {
                 return builder->Call(str.str(), "f2", "f2", "f2");
             }
-        case BuiltinType::kAll:
-        case BuiltinType::kAny:
+        case builtin::Function::kAll:
+        case builtin::Function::kAny:
             return builder->Call(str.str(), "b2");
-        case BuiltinType::kAbs:
+        case builtin::Function::kAbs:
             if (type == CallParamType::kF32) {
                 return builder->Call(str.str(), "f2");
             } else if (type == CallParamType::kF16) {
@@ -147,17 +145,17 @@ const ast::CallExpression* GenerateCall(BuiltinType builtin,
             } else {
                 return builder->Call(str.str(), "u2");
             }
-        case BuiltinType::kCountLeadingZeros:
-        case BuiltinType::kCountOneBits:
-        case BuiltinType::kCountTrailingZeros:
-        case BuiltinType::kReverseBits:
+        case builtin::Function::kCountLeadingZeros:
+        case builtin::Function::kCountOneBits:
+        case builtin::Function::kCountTrailingZeros:
+        case builtin::Function::kReverseBits:
             return builder->Call(str.str(), "u2");
-        case BuiltinType::kExtractBits:
+        case builtin::Function::kExtractBits:
             return builder->Call(str.str(), "u2", "u1", "u1");
-        case BuiltinType::kInsertBits:
+        case builtin::Function::kInsertBits:
             return builder->Call(str.str(), "u2", "u2", "u1", "u1");
-        case BuiltinType::kMax:
-        case BuiltinType::kMin:
+        case builtin::Function::kMax:
+        case builtin::Function::kMin:
             if (type == CallParamType::kF32) {
                 return builder->Call(str.str(), "f2", "f2");
             } else if (type == CallParamType::kF16) {
@@ -165,7 +163,7 @@ const ast::CallExpression* GenerateCall(BuiltinType builtin,
             } else {
                 return builder->Call(str.str(), "u2", "u2");
             }
-        case BuiltinType::kClamp:
+        case builtin::Function::kClamp:
             if (type == CallParamType::kF32) {
                 return builder->Call(str.str(), "f2", "f2", "f2");
             } else if (type == CallParamType::kF16) {
@@ -173,32 +171,32 @@ const ast::CallExpression* GenerateCall(BuiltinType builtin,
             } else {
                 return builder->Call(str.str(), "u2", "u2", "u2");
             }
-        case BuiltinType::kSelect:
+        case builtin::Function::kSelect:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2", "h2", "b2");
             } else {
                 return builder->Call(str.str(), "f2", "f2", "b2");
             }
-        case BuiltinType::kDeterminant:
+        case builtin::Function::kDeterminant:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "hm2x2");
             } else {
                 return builder->Call(str.str(), "m2x2");
             }
-        case BuiltinType::kPack2X16Snorm:
-        case BuiltinType::kPack2X16Unorm:
+        case builtin::Function::kPack2X16Snorm:
+        case builtin::Function::kPack2X16Unorm:
             return builder->Call(str.str(), "f2");
-        case BuiltinType::kPack4X8Snorm:
-        case BuiltinType::kPack4X8Unorm:
+        case builtin::Function::kPack4X8Snorm:
+        case builtin::Function::kPack4X8Unorm:
             return builder->Call(str.str(), "f4");
-        case BuiltinType::kUnpack4X8Snorm:
-        case BuiltinType::kUnpack4X8Unorm:
-        case BuiltinType::kUnpack2X16Snorm:
-        case BuiltinType::kUnpack2X16Unorm:
+        case builtin::Function::kUnpack4X8Snorm:
+        case builtin::Function::kUnpack4X8Unorm:
+        case builtin::Function::kUnpack2X16Snorm:
+        case builtin::Function::kUnpack2X16Unorm:
             return builder->Call(str.str(), "u1");
-        case BuiltinType::kWorkgroupBarrier:
+        case builtin::Function::kWorkgroupBarrier:
             return builder->Call(str.str());
-        case BuiltinType::kTranspose:
+        case builtin::Function::kTranspose:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "hm3x2");
             } else {
@@ -254,120 +252,126 @@ INSTANTIATE_TEST_SUITE_P(
     MslBuiltinTest,
     testing::Values(
         /* Logical built-in */
-        BuiltinData{BuiltinType::kAll, CallParamType::kBool, "all"},
-        BuiltinData{BuiltinType::kAny, CallParamType::kBool, "any"},
-        BuiltinData{BuiltinType::kSelect, CallParamType::kF32, "select"},
+        BuiltinData{builtin::Function::kAll, CallParamType::kBool, "all"},
+        BuiltinData{builtin::Function::kAny, CallParamType::kBool, "any"},
+        BuiltinData{builtin::Function::kSelect, CallParamType::kF32, "select"},
         /* Float built-in */
-        BuiltinData{BuiltinType::kAbs, CallParamType::kF32, "fabs"},
-        BuiltinData{BuiltinType::kAbs, CallParamType::kF16, "fabs"},
-        BuiltinData{BuiltinType::kAcos, CallParamType::kF32, "acos"},
-        BuiltinData{BuiltinType::kAcos, CallParamType::kF16, "acos"},
-        BuiltinData{BuiltinType::kAsin, CallParamType::kF32, "asin"},
-        BuiltinData{BuiltinType::kAsin, CallParamType::kF16, "asin"},
-        BuiltinData{BuiltinType::kAtan, CallParamType::kF32, "atan"},
-        BuiltinData{BuiltinType::kAtan, CallParamType::kF16, "atan"},
-        BuiltinData{BuiltinType::kAtan2, CallParamType::kF32, "atan2"},
-        BuiltinData{BuiltinType::kAtan2, CallParamType::kF16, "atan2"},
-        BuiltinData{BuiltinType::kCeil, CallParamType::kF32, "ceil"},
-        BuiltinData{BuiltinType::kCeil, CallParamType::kF16, "ceil"},
-        BuiltinData{BuiltinType::kClamp, CallParamType::kF32, "clamp"},
-        BuiltinData{BuiltinType::kClamp, CallParamType::kF16, "clamp"},
-        BuiltinData{BuiltinType::kCos, CallParamType::kF32, "cos"},
-        BuiltinData{BuiltinType::kCos, CallParamType::kF16, "cos"},
-        BuiltinData{BuiltinType::kCosh, CallParamType::kF32, "cosh"},
-        BuiltinData{BuiltinType::kCosh, CallParamType::kF16, "cosh"},
-        BuiltinData{BuiltinType::kCross, CallParamType::kF32, "cross"},
-        BuiltinData{BuiltinType::kCross, CallParamType::kF16, "cross"},
-        BuiltinData{BuiltinType::kDistance, CallParamType::kF32, "distance"},
-        BuiltinData{BuiltinType::kDistance, CallParamType::kF16, "distance"},
-        BuiltinData{BuiltinType::kExp, CallParamType::kF32, "exp"},
-        BuiltinData{BuiltinType::kExp, CallParamType::kF16, "exp"},
-        BuiltinData{BuiltinType::kExp2, CallParamType::kF32, "exp2"},
-        BuiltinData{BuiltinType::kExp2, CallParamType::kF16, "exp2"},
-        BuiltinData{BuiltinType::kFaceForward, CallParamType::kF32, "faceforward"},
-        BuiltinData{BuiltinType::kFaceForward, CallParamType::kF16, "faceforward"},
-        BuiltinData{BuiltinType::kFloor, CallParamType::kF32, "floor"},
-        BuiltinData{BuiltinType::kFloor, CallParamType::kF16, "floor"},
-        BuiltinData{BuiltinType::kFma, CallParamType::kF32, "fma"},
-        BuiltinData{BuiltinType::kFma, CallParamType::kF16, "fma"},
-        BuiltinData{BuiltinType::kFract, CallParamType::kF32, "fract"},
-        BuiltinData{BuiltinType::kFract, CallParamType::kF16, "fract"},
-        BuiltinData{BuiltinType::kInverseSqrt, CallParamType::kF32, "rsqrt"},
-        BuiltinData{BuiltinType::kInverseSqrt, CallParamType::kF16, "rsqrt"},
-        BuiltinData{BuiltinType::kLdexp, CallParamType::kF32, "ldexp"},
-        BuiltinData{BuiltinType::kLdexp, CallParamType::kF16, "ldexp"},
-        BuiltinData{BuiltinType::kLength, CallParamType::kF32, "length"},
-        BuiltinData{BuiltinType::kLength, CallParamType::kF16, "length"},
-        BuiltinData{BuiltinType::kLog, CallParamType::kF32, "log"},
-        BuiltinData{BuiltinType::kLog, CallParamType::kF16, "log"},
-        BuiltinData{BuiltinType::kLog2, CallParamType::kF32, "log2"},
-        BuiltinData{BuiltinType::kLog2, CallParamType::kF16, "log2"},
-        BuiltinData{BuiltinType::kMax, CallParamType::kF32, "fmax"},
-        BuiltinData{BuiltinType::kMax, CallParamType::kF16, "fmax"},
-        BuiltinData{BuiltinType::kMin, CallParamType::kF32, "fmin"},
-        BuiltinData{BuiltinType::kMin, CallParamType::kF16, "fmin"},
-        BuiltinData{BuiltinType::kNormalize, CallParamType::kF32, "normalize"},
-        BuiltinData{BuiltinType::kNormalize, CallParamType::kF16, "normalize"},
-        BuiltinData{BuiltinType::kPow, CallParamType::kF32, "pow"},
-        BuiltinData{BuiltinType::kPow, CallParamType::kF16, "pow"},
-        BuiltinData{BuiltinType::kReflect, CallParamType::kF32, "reflect"},
-        BuiltinData{BuiltinType::kReflect, CallParamType::kF16, "reflect"},
-        BuiltinData{BuiltinType::kSign, CallParamType::kF32, "sign"},
-        BuiltinData{BuiltinType::kSign, CallParamType::kF16, "sign"},
-        BuiltinData{BuiltinType::kSin, CallParamType::kF32, "sin"},
-        BuiltinData{BuiltinType::kSin, CallParamType::kF16, "sin"},
-        BuiltinData{BuiltinType::kSinh, CallParamType::kF32, "sinh"},
-        BuiltinData{BuiltinType::kSinh, CallParamType::kF16, "sinh"},
-        BuiltinData{BuiltinType::kSmoothstep, CallParamType::kF32, "smoothstep"},
-        BuiltinData{BuiltinType::kSmoothstep, CallParamType::kF16, "smoothstep"},
-        BuiltinData{BuiltinType::kSqrt, CallParamType::kF32, "sqrt"},
-        BuiltinData{BuiltinType::kSqrt, CallParamType::kF16, "sqrt"},
-        BuiltinData{BuiltinType::kStep, CallParamType::kF32, "step"},
-        BuiltinData{BuiltinType::kStep, CallParamType::kF16, "step"},
-        BuiltinData{BuiltinType::kTan, CallParamType::kF32, "tan"},
-        BuiltinData{BuiltinType::kTan, CallParamType::kF16, "tan"},
-        BuiltinData{BuiltinType::kTanh, CallParamType::kF32, "tanh"},
-        BuiltinData{BuiltinType::kTanh, CallParamType::kF16, "tanh"},
-        BuiltinData{BuiltinType::kTrunc, CallParamType::kF32, "trunc"},
-        BuiltinData{BuiltinType::kTrunc, CallParamType::kF16, "trunc"},
+        BuiltinData{builtin::Function::kAbs, CallParamType::kF32, "fabs"},
+        BuiltinData{builtin::Function::kAbs, CallParamType::kF16, "fabs"},
+        BuiltinData{builtin::Function::kAcos, CallParamType::kF32, "acos"},
+        BuiltinData{builtin::Function::kAcos, CallParamType::kF16, "acos"},
+        BuiltinData{builtin::Function::kAsin, CallParamType::kF32, "asin"},
+        BuiltinData{builtin::Function::kAsin, CallParamType::kF16, "asin"},
+        BuiltinData{builtin::Function::kAtan, CallParamType::kF32, "atan"},
+        BuiltinData{builtin::Function::kAtan, CallParamType::kF16, "atan"},
+        BuiltinData{builtin::Function::kAtan2, CallParamType::kF32, "atan2"},
+        BuiltinData{builtin::Function::kAtan2, CallParamType::kF16, "atan2"},
+        BuiltinData{builtin::Function::kCeil, CallParamType::kF32, "ceil"},
+        BuiltinData{builtin::Function::kCeil, CallParamType::kF16, "ceil"},
+        BuiltinData{builtin::Function::kClamp, CallParamType::kF32, "clamp"},
+        BuiltinData{builtin::Function::kClamp, CallParamType::kF16, "clamp"},
+        BuiltinData{builtin::Function::kCos, CallParamType::kF32, "cos"},
+        BuiltinData{builtin::Function::kCos, CallParamType::kF16, "cos"},
+        BuiltinData{builtin::Function::kCosh, CallParamType::kF32, "cosh"},
+        BuiltinData{builtin::Function::kCosh, CallParamType::kF16, "cosh"},
+        BuiltinData{builtin::Function::kCross, CallParamType::kF32, "cross"},
+        BuiltinData{builtin::Function::kCross, CallParamType::kF16, "cross"},
+        BuiltinData{builtin::Function::kDistance, CallParamType::kF32, "distance"},
+        BuiltinData{builtin::Function::kDistance, CallParamType::kF16, "distance"},
+        BuiltinData{builtin::Function::kExp, CallParamType::kF32, "exp"},
+        BuiltinData{builtin::Function::kExp, CallParamType::kF16, "exp"},
+        BuiltinData{builtin::Function::kExp2, CallParamType::kF32, "exp2"},
+        BuiltinData{builtin::Function::kExp2, CallParamType::kF16, "exp2"},
+        BuiltinData{builtin::Function::kFaceForward, CallParamType::kF32, "faceforward"},
+        BuiltinData{builtin::Function::kFaceForward, CallParamType::kF16, "faceforward"},
+        BuiltinData{builtin::Function::kFloor, CallParamType::kF32, "floor"},
+        BuiltinData{builtin::Function::kFloor, CallParamType::kF16, "floor"},
+        BuiltinData{builtin::Function::kFma, CallParamType::kF32, "fma"},
+        BuiltinData{builtin::Function::kFma, CallParamType::kF16, "fma"},
+        BuiltinData{builtin::Function::kFract, CallParamType::kF32, "fract"},
+        BuiltinData{builtin::Function::kFract, CallParamType::kF16, "fract"},
+        BuiltinData{builtin::Function::kInverseSqrt, CallParamType::kF32, "rsqrt"},
+        BuiltinData{builtin::Function::kInverseSqrt, CallParamType::kF16, "rsqrt"},
+        BuiltinData{builtin::Function::kLdexp, CallParamType::kF32, "ldexp"},
+        BuiltinData{builtin::Function::kLdexp, CallParamType::kF16, "ldexp"},
+        BuiltinData{builtin::Function::kLength, CallParamType::kF32, "length"},
+        BuiltinData{builtin::Function::kLength, CallParamType::kF16, "length"},
+        BuiltinData{builtin::Function::kLog, CallParamType::kF32, "log"},
+        BuiltinData{builtin::Function::kLog, CallParamType::kF16, "log"},
+        BuiltinData{builtin::Function::kLog2, CallParamType::kF32, "log2"},
+        BuiltinData{builtin::Function::kLog2, CallParamType::kF16, "log2"},
+        BuiltinData{builtin::Function::kMax, CallParamType::kF32, "fmax"},
+        BuiltinData{builtin::Function::kMax, CallParamType::kF16, "fmax"},
+        BuiltinData{builtin::Function::kMin, CallParamType::kF32, "fmin"},
+        BuiltinData{builtin::Function::kMin, CallParamType::kF16, "fmin"},
+        BuiltinData{builtin::Function::kNormalize, CallParamType::kF32, "normalize"},
+        BuiltinData{builtin::Function::kNormalize, CallParamType::kF16, "normalize"},
+        BuiltinData{builtin::Function::kPow, CallParamType::kF32, "pow"},
+        BuiltinData{builtin::Function::kPow, CallParamType::kF16, "pow"},
+        BuiltinData{builtin::Function::kReflect, CallParamType::kF32, "reflect"},
+        BuiltinData{builtin::Function::kReflect, CallParamType::kF16, "reflect"},
+        BuiltinData{builtin::Function::kSign, CallParamType::kF32, "sign"},
+        BuiltinData{builtin::Function::kSign, CallParamType::kF16, "sign"},
+        BuiltinData{builtin::Function::kSin, CallParamType::kF32, "sin"},
+        BuiltinData{builtin::Function::kSin, CallParamType::kF16, "sin"},
+        BuiltinData{builtin::Function::kSinh, CallParamType::kF32, "sinh"},
+        BuiltinData{builtin::Function::kSinh, CallParamType::kF16, "sinh"},
+        BuiltinData{builtin::Function::kSmoothstep, CallParamType::kF32, "smoothstep"},
+        BuiltinData{builtin::Function::kSmoothstep, CallParamType::kF16, "smoothstep"},
+        BuiltinData{builtin::Function::kSqrt, CallParamType::kF32, "sqrt"},
+        BuiltinData{builtin::Function::kSqrt, CallParamType::kF16, "sqrt"},
+        BuiltinData{builtin::Function::kStep, CallParamType::kF32, "step"},
+        BuiltinData{builtin::Function::kStep, CallParamType::kF16, "step"},
+        BuiltinData{builtin::Function::kTan, CallParamType::kF32, "tan"},
+        BuiltinData{builtin::Function::kTan, CallParamType::kF16, "tan"},
+        BuiltinData{builtin::Function::kTanh, CallParamType::kF32, "tanh"},
+        BuiltinData{builtin::Function::kTanh, CallParamType::kF16, "tanh"},
+        BuiltinData{builtin::Function::kTrunc, CallParamType::kF32, "trunc"},
+        BuiltinData{builtin::Function::kTrunc, CallParamType::kF16, "trunc"},
         /* Integer built-in */
-        BuiltinData{BuiltinType::kAbs, CallParamType::kU32, "abs"},
-        BuiltinData{BuiltinType::kClamp, CallParamType::kU32, "clamp"},
-        BuiltinData{BuiltinType::kCountLeadingZeros, CallParamType::kU32, "clz"},
-        BuiltinData{BuiltinType::kCountOneBits, CallParamType::kU32, "popcount"},
-        BuiltinData{BuiltinType::kCountTrailingZeros, CallParamType::kU32, "ctz"},
-        BuiltinData{BuiltinType::kExtractBits, CallParamType::kU32, "extract_bits"},
-        BuiltinData{BuiltinType::kInsertBits, CallParamType::kU32, "insert_bits"},
-        BuiltinData{BuiltinType::kMax, CallParamType::kU32, "max"},
-        BuiltinData{BuiltinType::kMin, CallParamType::kU32, "min"},
-        BuiltinData{BuiltinType::kReverseBits, CallParamType::kU32, "reverse_bits"},
-        BuiltinData{BuiltinType::kRound, CallParamType::kU32, "rint"},
+        BuiltinData{builtin::Function::kAbs, CallParamType::kU32, "abs"},
+        BuiltinData{builtin::Function::kClamp, CallParamType::kU32, "clamp"},
+        BuiltinData{builtin::Function::kCountLeadingZeros, CallParamType::kU32, "clz"},
+        BuiltinData{builtin::Function::kCountOneBits, CallParamType::kU32, "popcount"},
+        BuiltinData{builtin::Function::kCountTrailingZeros, CallParamType::kU32, "ctz"},
+        BuiltinData{builtin::Function::kExtractBits, CallParamType::kU32, "extract_bits"},
+        BuiltinData{builtin::Function::kInsertBits, CallParamType::kU32, "insert_bits"},
+        BuiltinData{builtin::Function::kMax, CallParamType::kU32, "max"},
+        BuiltinData{builtin::Function::kMin, CallParamType::kU32, "min"},
+        BuiltinData{builtin::Function::kReverseBits, CallParamType::kU32, "reverse_bits"},
+        BuiltinData{builtin::Function::kRound, CallParamType::kU32, "rint"},
         /* Matrix built-in */
-        BuiltinData{BuiltinType::kDeterminant, CallParamType::kF32, "determinant"},
-        BuiltinData{BuiltinType::kTranspose, CallParamType::kF32, "transpose"},
+        BuiltinData{builtin::Function::kDeterminant, CallParamType::kF32, "determinant"},
+        BuiltinData{builtin::Function::kTranspose, CallParamType::kF32, "transpose"},
         /* Vector built-in */
-        BuiltinData{BuiltinType::kDot, CallParamType::kF32, "dot"},
+        BuiltinData{builtin::Function::kDot, CallParamType::kF32, "dot"},
         /* Derivate built-in */
-        BuiltinData{BuiltinType::kDpdx, CallParamType::kF32, "dfdx"},
-        BuiltinData{BuiltinType::kDpdxCoarse, CallParamType::kF32, "dfdx"},
-        BuiltinData{BuiltinType::kDpdxFine, CallParamType::kF32, "dfdx"},
-        BuiltinData{BuiltinType::kDpdy, CallParamType::kF32, "dfdy"},
-        BuiltinData{BuiltinType::kDpdyCoarse, CallParamType::kF32, "dfdy"},
-        BuiltinData{BuiltinType::kDpdyFine, CallParamType::kF32, "dfdy"},
-        BuiltinData{BuiltinType::kFwidth, CallParamType::kF32, "fwidth"},
-        BuiltinData{BuiltinType::kFwidthCoarse, CallParamType::kF32, "fwidth"},
-        BuiltinData{BuiltinType::kFwidthFine, CallParamType::kF32, "fwidth"},
+        BuiltinData{builtin::Function::kDpdx, CallParamType::kF32, "dfdx"},
+        BuiltinData{builtin::Function::kDpdxCoarse, CallParamType::kF32, "dfdx"},
+        BuiltinData{builtin::Function::kDpdxFine, CallParamType::kF32, "dfdx"},
+        BuiltinData{builtin::Function::kDpdy, CallParamType::kF32, "dfdy"},
+        BuiltinData{builtin::Function::kDpdyCoarse, CallParamType::kF32, "dfdy"},
+        BuiltinData{builtin::Function::kDpdyFine, CallParamType::kF32, "dfdy"},
+        BuiltinData{builtin::Function::kFwidth, CallParamType::kF32, "fwidth"},
+        BuiltinData{builtin::Function::kFwidthCoarse, CallParamType::kF32, "fwidth"},
+        BuiltinData{builtin::Function::kFwidthFine, CallParamType::kF32, "fwidth"},
         /* Data packing builtin */
-        BuiltinData{BuiltinType::kPack4X8Snorm, CallParamType::kF32, "pack_float_to_snorm4x8"},
-        BuiltinData{BuiltinType::kPack4X8Unorm, CallParamType::kF32, "pack_float_to_unorm4x8"},
-        BuiltinData{BuiltinType::kPack2X16Snorm, CallParamType::kF32, "pack_float_to_snorm2x16"},
-        BuiltinData{BuiltinType::kPack2X16Unorm, CallParamType::kF32, "pack_float_to_unorm2x16"},
+        BuiltinData{builtin::Function::kPack4X8Snorm, CallParamType::kF32,
+                    "pack_float_to_snorm4x8"},
+        BuiltinData{builtin::Function::kPack4X8Unorm, CallParamType::kF32,
+                    "pack_float_to_unorm4x8"},
+        BuiltinData{builtin::Function::kPack2X16Snorm, CallParamType::kF32,
+                    "pack_float_to_snorm2x16"},
+        BuiltinData{builtin::Function::kPack2X16Unorm, CallParamType::kF32,
+                    "pack_float_to_unorm2x16"},
         /* Data unpacking builtin */
-        BuiltinData{BuiltinType::kUnpack4X8Snorm, CallParamType::kU32, "unpack_snorm4x8_to_float"},
-        BuiltinData{BuiltinType::kUnpack4X8Unorm, CallParamType::kU32, "unpack_unorm4x8_to_float"},
-        BuiltinData{BuiltinType::kUnpack2X16Snorm, CallParamType::kU32,
+        BuiltinData{builtin::Function::kUnpack4X8Snorm, CallParamType::kU32,
+                    "unpack_snorm4x8_to_float"},
+        BuiltinData{builtin::Function::kUnpack4X8Unorm, CallParamType::kU32,
+                    "unpack_unorm4x8_to_float"},
+        BuiltinData{builtin::Function::kUnpack2X16Snorm, CallParamType::kU32,
                     "unpack_snorm2x16_to_float"},
-        BuiltinData{BuiltinType::kUnpack2X16Unorm, CallParamType::kU32,
+        BuiltinData{builtin::Function::kUnpack2X16Unorm, CallParamType::kU32,
                     "unpack_unorm2x16_to_float"}));
 
 TEST_F(MslGeneratorImplTest, Builtin_Call) {

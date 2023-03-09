@@ -92,7 +92,7 @@ class IntrinsicTable {
     ///        after shader creation time (sem::EvaluationStage::kConstant).
     /// @param source the source of the builtin call
     /// @return the semantic builtin if found, otherwise nullptr
-    virtual Builtin Lookup(sem::BuiltinType type,
+    virtual Builtin Lookup(builtin::Function type,
                            utils::VectorRef<const type::Type*> args,
                            sem::EvaluationStage earliest_eval_stage,
                            const Source& source) = 0;

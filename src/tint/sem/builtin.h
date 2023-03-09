@@ -19,7 +19,7 @@
 #include <vector>
 
 #include "src/tint/builtin/extension.h"
-#include "src/tint/sem/builtin_type.h"
+#include "src/tint/builtin/function.h"
 #include "src/tint/sem/call_target.h"
 #include "src/tint/sem/pipeline_stage_set.h"
 #include "src/tint/utils/hash.h"
@@ -29,52 +29,52 @@ namespace tint::sem {
 /// Determines if the given `i` is a coarse derivative
 /// @param i the builtin type
 /// @returns true if the given derivative is coarse.
-bool IsCoarseDerivativeBuiltin(BuiltinType i);
+bool IsCoarseDerivativeBuiltin(builtin::Function i);
 
 /// Determines if the given `i` is a fine derivative
 /// @param i the builtin type
 /// @returns true if the given derivative is fine.
-bool IsFineDerivativeBuiltin(BuiltinType i);
+bool IsFineDerivativeBuiltin(builtin::Function i);
 
 /// Determine if the given `i` is a derivative builtin
 /// @param i the builtin type
 /// @returns true if the given `i` is a derivative builtin
-bool IsDerivativeBuiltin(BuiltinType i);
+bool IsDerivativeBuiltin(builtin::Function i);
 
 /// Determines if the given `i` is a texture operation builtin
 /// @param i the builtin type
 /// @returns true if the given `i` is a texture operation builtin
-bool IsTextureBuiltin(BuiltinType i);
+bool IsTextureBuiltin(builtin::Function i);
 
 /// Determines if the given `i` is a image query builtin
 /// @param i the builtin type
 /// @returns true if the given `i` is a image query builtin
-bool IsImageQueryBuiltin(BuiltinType i);
+bool IsImageQueryBuiltin(builtin::Function i);
 
 /// Determines if the given `i` is a data packing builtin
 /// @param i the builtin
 /// @returns true if the given `i` is a data packing builtin
-bool IsDataPackingBuiltin(BuiltinType i);
+bool IsDataPackingBuiltin(builtin::Function i);
 
 /// Determines if the given `i` is a data unpacking builtin
 /// @param i the builtin
 /// @returns true if the given `i` is a data unpacking builtin
-bool IsDataUnpackingBuiltin(BuiltinType i);
+bool IsDataUnpackingBuiltin(builtin::Function i);
 
 /// Determines if the given `i` is a barrier builtin
 /// @param i the builtin
 /// @returns true if the given `i` is a barrier builtin
-bool IsBarrierBuiltin(BuiltinType i);
+bool IsBarrierBuiltin(builtin::Function i);
 
 /// Determines if the given `i` is a atomic builtin
 /// @param i the builtin
 /// @returns true if the given `i` is a atomic builtin
-bool IsAtomicBuiltin(BuiltinType i);
+bool IsAtomicBuiltin(builtin::Function i);
 
 /// Determins if the given `i` is a DP4a builtin
 /// @param i the builtin
 /// @returns true if the given `i` is a DP4a builtin
-bool IsDP4aBuiltin(BuiltinType i);
+bool IsDP4aBuiltin(builtin::Function i);
 
 /// Builtin holds the semantic information for a builtin function.
 class Builtin final : public Castable<Builtin, CallTarget> {
@@ -87,7 +87,7 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     /// @param supported_stages the pipeline stages that this builtin can be used in
     /// @param is_deprecated true if the particular overload is considered deprecated
     /// @param must_use true if the builtin was annotated with `@must_use`
-    Builtin(BuiltinType type,
+    Builtin(builtin::Function type,
             const type::Type* return_type,
             utils::VectorRef<Parameter*> parameters,
             EvaluationStage eval_stage,
@@ -99,7 +99,7 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     ~Builtin() override;
 
     /// @return the type of the builtin
-    BuiltinType Type() const { return type_; }
+    builtin::Function Type() const { return type_; }
 
     /// @return the pipeline stages that this builtin can be used in
     PipelineStageSet SupportedStages() const { return supported_stages_; }
@@ -151,7 +151,7 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     builtin::Extension RequiredExtension() const;
 
   private:
-    const BuiltinType type_;
+    const builtin::Function type_;
     const PipelineStageSet supported_stages_;
     const bool is_deprecated_;
 };

@@ -73,7 +73,7 @@ TEST_F(SpvParserTest, WorkgroupBarrier) {
     ASSERT_NE(sem_call, nullptr);
     auto* builtin = sem_call->Target()->As<sem::Builtin>();
     ASSERT_NE(builtin, nullptr);
-    EXPECT_EQ(builtin->Type(), sem::BuiltinType::kWorkgroupBarrier);
+    EXPECT_EQ(builtin->Type(), builtin::Function::kWorkgroupBarrier);
 }
 
 TEST_F(SpvParserTest, StorageBarrier) {
@@ -106,7 +106,7 @@ TEST_F(SpvParserTest, StorageBarrier) {
     ASSERT_NE(sem_call, nullptr);
     auto* builtin = sem_call->Target()->As<sem::Builtin>();
     ASSERT_NE(builtin, nullptr);
-    EXPECT_EQ(builtin->Type(), sem::BuiltinType::kStorageBarrier);
+    EXPECT_EQ(builtin->Type(), builtin::Function::kStorageBarrier);
 }
 
 TEST_F(SpvParserTest, ErrBarrierInvalidExecution) {

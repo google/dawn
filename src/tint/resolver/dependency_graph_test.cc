@@ -1181,7 +1181,7 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 namespace resolve_to_builtin_func {
 
 using ResolverDependencyGraphResolveToBuiltinFunc =
-    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, sem::BuiltinType>>;
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, builtin::Function>>;
 
 TEST_P(ResolverDependencyGraphResolveToBuiltinFunc, Resolve) {
     const auto use = std::get<0>(GetParam());
@@ -1200,17 +1200,17 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinFunc, Resolve) {
 INSTANTIATE_TEST_SUITE_P(Types,
                          ResolverDependencyGraphResolveToBuiltinFunc,
                          testing::Combine(testing::ValuesIn(kTypeUseKinds),
-                                          testing::ValuesIn(sem::kBuiltinTypes)));
+                                          testing::ValuesIn(builtin::kFunctions)));
 
 INSTANTIATE_TEST_SUITE_P(Values,
                          ResolverDependencyGraphResolveToBuiltinFunc,
                          testing::Combine(testing::ValuesIn(kValueUseKinds),
-                                          testing::ValuesIn(sem::kBuiltinTypes)));
+                                          testing::ValuesIn(builtin::kFunctions)));
 
 INSTANTIATE_TEST_SUITE_P(Functions,
                          ResolverDependencyGraphResolveToBuiltinFunc,
                          testing::Combine(testing::ValuesIn(kFuncUseKinds),
-                                          testing::ValuesIn(sem::kBuiltinTypes)));
+                                          testing::ValuesIn(builtin::kFunctions)));
 
 }  // namespace resolve_to_builtin_func
 

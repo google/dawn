@@ -18,7 +18,7 @@
 #include <string>
 
 #include "src/tint/ast/internal_attribute.h"
-#include "src/tint/sem/builtin_type.h"
+#include "src/tint/builtin/function.h"
 #include "src/tint/transform/transform.h"
 
 // Forward declarations
@@ -46,7 +46,7 @@ class SpirvAtomic final : public Castable<SpirvAtomic, Transform> {
         /// @param pid the identifier of the program that owns this node
         /// @param nid the unique node identifier
         /// @param builtin the atomic builtin this stub represents
-        Stub(ProgramID pid, ast::NodeID nid, sem::BuiltinType builtin);
+        Stub(ProgramID pid, ast::NodeID nid, builtin::Function builtin);
         /// Destructor
         ~Stub() override;
 
@@ -60,7 +60,7 @@ class SpirvAtomic final : public Castable<SpirvAtomic, Transform> {
         const Stub* Clone(CloneContext* ctx) const override;
 
         /// The type of the intrinsic
-        const sem::BuiltinType builtin;
+        const builtin::Function builtin;
     };
 
     /// @copydoc Transform::Apply

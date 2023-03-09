@@ -1030,28 +1030,28 @@ struct BuiltinPolyfill::State {
             call->Target(),  //
             [&](const sem::Builtin* builtin) {
                 switch (builtin->Type()) {
-                    case sem::BuiltinType::kAcosh:
+                    case builtin::Function::kAcosh:
                         if (cfg.builtins.acosh != Level::kNone) {
                             return builtin_polyfills.GetOrCreate(
                                 builtin, [&] { return acosh(builtin->ReturnType()); });
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kAsinh:
+                    case builtin::Function::kAsinh:
                         if (cfg.builtins.asinh) {
                             return builtin_polyfills.GetOrCreate(
                                 builtin, [&] { return asinh(builtin->ReturnType()); });
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kAtanh:
+                    case builtin::Function::kAtanh:
                         if (cfg.builtins.atanh != Level::kNone) {
                             return builtin_polyfills.GetOrCreate(
                                 builtin, [&] { return atanh(builtin->ReturnType()); });
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kClamp:
+                    case builtin::Function::kClamp:
                         if (cfg.builtins.clamp_int) {
                             auto& sig = builtin->Signature();
                             if (sig.parameters[0]->Type()->is_integer_scalar_or_vector()) {
@@ -1061,49 +1061,49 @@ struct BuiltinPolyfill::State {
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kCountLeadingZeros:
+                    case builtin::Function::kCountLeadingZeros:
                         if (cfg.builtins.count_leading_zeros) {
                             return builtin_polyfills.GetOrCreate(
                                 builtin, [&] { return countLeadingZeros(builtin->ReturnType()); });
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kCountTrailingZeros:
+                    case builtin::Function::kCountTrailingZeros:
                         if (cfg.builtins.count_trailing_zeros) {
                             return builtin_polyfills.GetOrCreate(
                                 builtin, [&] { return countTrailingZeros(builtin->ReturnType()); });
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kExtractBits:
+                    case builtin::Function::kExtractBits:
                         if (cfg.builtins.extract_bits != Level::kNone) {
                             return builtin_polyfills.GetOrCreate(
                                 builtin, [&] { return extractBits(builtin->ReturnType()); });
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kFirstLeadingBit:
+                    case builtin::Function::kFirstLeadingBit:
                         if (cfg.builtins.first_leading_bit) {
                             return builtin_polyfills.GetOrCreate(
                                 builtin, [&] { return firstLeadingBit(builtin->ReturnType()); });
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kFirstTrailingBit:
+                    case builtin::Function::kFirstTrailingBit:
                         if (cfg.builtins.first_trailing_bit) {
                             return builtin_polyfills.GetOrCreate(
                                 builtin, [&] { return firstTrailingBit(builtin->ReturnType()); });
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kInsertBits:
+                    case builtin::Function::kInsertBits:
                         if (cfg.builtins.insert_bits != Level::kNone) {
                             return builtin_polyfills.GetOrCreate(
                                 builtin, [&] { return insertBits(builtin->ReturnType()); });
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kReflect:
+                    case builtin::Function::kReflect:
                         // Only polyfill for vec2<f32>. See https://crbug.com/tint/1798 for
                         // more details.
                         if (cfg.builtins.reflect_vec2_f32) {
@@ -1116,14 +1116,14 @@ struct BuiltinPolyfill::State {
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kSaturate:
+                    case builtin::Function::kSaturate:
                         if (cfg.builtins.saturate) {
                             return builtin_polyfills.GetOrCreate(
                                 builtin, [&] { return saturate(builtin->ReturnType()); });
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kSign:
+                    case builtin::Function::kSign:
                         if (cfg.builtins.sign_int) {
                             auto* ty = builtin->ReturnType();
                             if (ty->is_signed_integer_scalar_or_vector()) {
@@ -1133,7 +1133,7 @@ struct BuiltinPolyfill::State {
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kTextureSampleBaseClampToEdge:
+                    case builtin::Function::kTextureSampleBaseClampToEdge:
                         if (cfg.builtins.texture_sample_base_clamp_to_edge_2d_f32) {
                             auto& sig = builtin->Signature();
                             auto* tex = sig.Parameter(sem::ParameterUsage::kTexture);
@@ -1147,7 +1147,7 @@ struct BuiltinPolyfill::State {
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kTextureStore:
+                    case builtin::Function::kTextureStore:
                         if (cfg.builtins.bgra8unorm) {
                             auto& sig = builtin->Signature();
                             auto* tex = sig.Parameter(sem::ParameterUsage::kTexture);
@@ -1165,7 +1165,7 @@ struct BuiltinPolyfill::State {
                                             args.Push(arg);
                                         }
                                         return ctx.dst->Call(
-                                            utils::ToString(sem::BuiltinType::kTextureStore),
+                                            utils::ToString(builtin::Function::kTextureStore),
                                             std::move(args));
                                     });
                                     made_changes = true;
@@ -1174,7 +1174,7 @@ struct BuiltinPolyfill::State {
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kQuantizeToF16:
+                    case builtin::Function::kQuantizeToF16:
                         if (cfg.builtins.quantize_to_vec_f16) {
                             if (auto* vec = builtin->ReturnType()->As<type::Vector>()) {
                                 return builtin_polyfills.GetOrCreate(
@@ -1183,7 +1183,7 @@ struct BuiltinPolyfill::State {
                         }
                         return Symbol{};
 
-                    case sem::BuiltinType::kWorkgroupUniformLoad:
+                    case builtin::Function::kWorkgroupUniformLoad:
                         if (cfg.builtins.workgroup_uniform_load) {
                             return builtin_polyfills.GetOrCreate(builtin, [&] {
                                 return workgroupUniformLoad(builtin->ReturnType());

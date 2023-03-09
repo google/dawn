@@ -196,7 +196,7 @@ struct MultiplanarExternalTexture::State {
 
             if (builtin && !builtin->Parameters().IsEmpty() &&
                 builtin->Parameters()[0]->Type()->Is<type::ExternalTexture>() &&
-                builtin->Type() != sem::BuiltinType::kTextureDimensions) {
+                builtin->Type() != builtin::Function::kTextureDimensions) {
                 if (auto* var_user =
                         sem.GetVal(expr->args[0])->UnwrapLoad()->As<sem::VariableUser>()) {
                     auto it = new_binding_symbols.find(var_user->Variable());
@@ -210,9 +210,9 @@ struct MultiplanarExternalTexture::State {
                     auto& syms = it->second;
 
                     switch (builtin->Type()) {
-                        case sem::BuiltinType::kTextureLoad:
+                        case builtin::Function::kTextureLoad:
                             return createTextureLoad(call, syms);
-                        case sem::BuiltinType::kTextureSampleBaseClampToEdge:
+                        case builtin::Function::kTextureSampleBaseClampToEdge:
                             return createTextureSampleBaseClampToEdge(expr, syms);
                         default:
                             break;
@@ -310,13 +310,13 @@ struct MultiplanarExternalTexture::State {
     /// builtin function.
     /// @param call_type determines which function body to generate
     /// @returns a statement list that makes of the body of the chosen function
-    auto buildTextureBuiltinBody(sem::BuiltinType call_type) {
+    auto buildTextureBuiltinBody(builtin::Function call_type) {
         utils::Vector<const ast::Statement*, 16> stmts;
         const ast::CallExpression* single_plane_call = nullptr;
         const ast::CallExpression* plane_0_call = nullptr;
         const ast::CallExpression* plane_1_call = nullptr;
         switch (call_type) {
-            case sem::BuiltinType::kTextureSampleBaseClampToEdge:
+            case builtin::Function::kTextureSampleBaseClampToEdge:
                 stmts.Push(b.Decl(b.Let(
                     "modifiedCoords", b.Mul(b.MemberAccessor("params", "coordTransformationMatrix"),
                                             b.vec3<f32>("coord", 1_a)))));
@@ -346,7 +346,7 @@ struct MultiplanarExternalTexture::State {
                 // textureSampleLevel(plane1, smp, plane1_clamped, 0.0);
                 plane_1_call = b.Call("textureSampleLevel", "plane1", "smp", "plane1_clamped", 0_a);
                 break;
-            case sem::BuiltinType::kTextureLoad:
+            case builtin::Function::kTextureLoad:
                 // textureLoad(plane0, coord, 0);
                 single_plane_call = b.Call("textureLoad", "plane0", "coord", 0_a);
                 // textureLoad(plane0, coord, 0);
@@ -433,7 +433,7 @@ struct MultiplanarExternalTexture::State {
                        b.Param("params", b.ty(params_struct_sym)),
                    },
                    b.ty.vec4(b.ty.f32()),
-                   buildTextureBuiltinBody(sem::BuiltinType::kTextureSampleBaseClampToEdge));
+                   buildTextureBuiltinBody(builtin::Function::kTextureSampleBaseClampToEdge));
         }
 
         return b.Call(texture_sample_external_sym, utils::Vector{
@@ -480,7 +480,7 @@ struct MultiplanarExternalTexture::State {
                        b.Param("params", b.ty(params_struct_sym)),
                    },
                    b.ty.vec4(b.ty.f32()),  //
-                   buildTextureBuiltinBody(sem::BuiltinType::kTextureLoad));
+                   buildTextureBuiltinBody(builtin::Function::kTextureLoad));
 
             return name;
         });

@@ -19,8 +19,8 @@
 #include <utility>
 
 #include "src/tint/ast/struct_member.h"
+#include "src/tint/builtin/function.h"
 #include "src/tint/sem/binding_point.h"
-#include "src/tint/sem/builtin_type.h"
 #include "src/tint/transform/transform.h"
 
 namespace tint::transform {

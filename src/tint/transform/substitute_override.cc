@@ -17,6 +17,7 @@
 #include <functional>
 #include <utility>
 
+#include "src/tint/builtin/function.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/index_accessor_expression.h"
@@ -105,7 +106,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program* src,
                 if (auto* access = sem->UnwrapMaterialize()->As<sem::IndexAccessorExpression>()) {
                     if (access->Object()->UnwrapMaterialize()->Type()->HoldsAbstract() &&
                         access->Index()->Stage() == sem::EvaluationStage::kOverride) {
-                        auto* obj = b.Call(sem::str(sem::BuiltinType::kTintMaterialize),
+                        auto* obj = b.Call(builtin::str(builtin::Function::kTintMaterialize),
                                            ctx.Clone(expr->object));
                         return b.IndexAccessor(obj, ctx.Clone(expr->index));
                     }
