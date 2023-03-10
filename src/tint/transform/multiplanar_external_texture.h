@@ -21,6 +21,7 @@
 #include "src/tint/ast/struct_member.h"
 #include "src/tint/builtin/function.h"
 #include "src/tint/sem/binding_point.h"
+#include "src/tint/sem/external_texture.h"
 #include "src/tint/transform/transform.h"
 
 namespace tint::transform {
@@ -40,22 +41,12 @@ class MultiplanarExternalTexture final : public Castable<MultiplanarExternalText
   public:
     /// This struct identifies the binding groups and locations for new bindings to
     /// use when transforming a texture_external instance.
-    struct BindingPoints {
-        /// The desired binding location of the texture_2d representing plane #1 when
-        /// a texture_external binding is expanded.
-        sem::BindingPoint plane_1;
-        /// The desired binding location of the ExternalTextureParams uniform when a
-        /// texture_external binding is expanded.
-        sem::BindingPoint params;
-
-        /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-        TINT_REFLECT(plane_1, params);
-    };
+    using BindingPoints = sem::external_texture::BindingPoints;
 
     /// BindingsMap is a map where the key is the binding location of a
     /// texture_external and the value is a struct containing the desired
     /// locations for new bindings expanded from the texture_external instance.
-    using BindingsMap = std::unordered_map<sem::BindingPoint, BindingPoints>;
+    using BindingsMap = sem::external_texture::BindingsMap;
 
     /// NewBindingPoints is consumed by the MultiplanarExternalTexture transform.
     /// Data holds information about location of each texture_external binding and

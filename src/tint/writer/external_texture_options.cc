@@ -1,4 +1,4 @@
-// Copyright 2021 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/writer/array_length_from_uniform_options.h"
+#include "src/tint/writer/external_texture_options.h"
 
 namespace tint::writer {
 
-ArrayLengthFromUniformOptions::ArrayLengthFromUniformOptions() = default;
+ExternalTextureOptions::ExternalTextureOptions() = default;
 
-ArrayLengthFromUniformOptions::~ArrayLengthFromUniformOptions() = default;
+ExternalTextureOptions::~ExternalTextureOptions() = default;
 
-ArrayLengthFromUniformOptions::ArrayLengthFromUniformOptions(const ArrayLengthFromUniformOptions&) =
-    default;
+ExternalTextureOptions::ExternalTextureOptions(const ExternalTextureOptions&) = default;
 
-ArrayLengthFromUniformOptions& ArrayLengthFromUniformOptions::operator=(
-    const ArrayLengthFromUniformOptions&) = default;
+ExternalTextureOptions& ExternalTextureOptions::operator=(const ExternalTextureOptions&) = default;
 
-ArrayLengthFromUniformOptions::ArrayLengthFromUniformOptions(ArrayLengthFromUniformOptions&&) =
-    default;
+ExternalTextureOptions::ExternalTextureOptions(ExternalTextureOptions&&) = default;
 
 }  // namespace tint::writer
