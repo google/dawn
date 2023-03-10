@@ -28,8 +28,8 @@ namespace wgpu::binding {
 GPUShaderModule::GPUShaderModule(wgpu::ShaderModule shader, std::shared_ptr<AsyncRunner> async)
     : shader_(std::move(shader)), async_(std::move(async)) {}
 
-interop::Promise<interop::Interface<interop::GPUCompilationInfo>> GPUShaderModule::compilationInfo(
-    Napi::Env env) {
+interop::Promise<interop::Interface<interop::GPUCompilationInfo>>
+GPUShaderModule::getCompilationInfo(Napi::Env env) {
     struct GPUCompilationMessage : public interop::GPUCompilationMessage {
         WGPUCompilationMessage message;
 

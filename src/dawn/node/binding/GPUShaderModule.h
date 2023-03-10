@@ -36,7 +36,7 @@ class GPUShaderModule final : public interop::GPUShaderModule {
     inline operator const wgpu::ShaderModule&() const { return shader_; }
 
     // interop::GPUShaderModule interface compliance
-    interop::Promise<interop::Interface<interop::GPUCompilationInfo>> compilationInfo(
+    interop::Promise<interop::Interface<interop::GPUCompilationInfo>> getCompilationInfo(
         Napi::Env) override;
     std::string getLabel(Napi::Env) override;
     void setLabel(Napi::Env, std::string value) override;

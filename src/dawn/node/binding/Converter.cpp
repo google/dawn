@@ -1659,6 +1659,9 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
         case interop::GPUFeatureName::kBgra8UnormStorage:
             out = wgpu::FeatureName::BGRA8UnormStorage;
             return true;
+        case interop::GPUFeatureName::kFloat32Filterable:
+            UNIMPLEMENTED("TODO(crbug.com/dawn/1687)");
+            return false;
     }
     return false;
 }

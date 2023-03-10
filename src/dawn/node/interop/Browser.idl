@@ -87,4 +87,6 @@ typedef(ArrayBufferView or ArrayBuffer) BufferSource;
 
 [LegacyNoInterfaceObject] interface EventHandler{};
 
+[LegacyNoInterfaceObject] interface DOMException {};
+
 enum PredefinedColorSpace { "srgb", "display-p3" };

@@ -135,7 +135,7 @@ wrapPromiseWithHeartbeat(GPUDevice.prototype, 'createComputePipelineAsync');
 wrapPromiseWithHeartbeat(GPUDevice.prototype, 'popErrorScope');
 wrapPromiseWithHeartbeat(GPUQueue.prototype, 'onSubmittedWorkDone');
 wrapPromiseWithHeartbeat(GPUBuffer.prototype, 'mapAsync');
-wrapPromiseWithHeartbeat(GPUShaderModule.prototype, 'compilationInfo');
+wrapPromiseWithHeartbeat(GPUShaderModule.prototype, 'getCompilationInfo');
 
 globalTestConfig.testHeartbeatCallback = sendHeartbeat;
 globalTestConfig.noRaceWithRejectOnTimeout = true;
