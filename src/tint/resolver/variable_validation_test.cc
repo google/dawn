@@ -58,6 +58,26 @@ TEST_F(ResolverVariableValidationTest, GlobalVarInitializerNoReturnValueBuiltin)
     EXPECT_EQ(r()->error(), "12:34 error: builtin 'storageBarrier' does not return a value");
 }
 
+TEST_F(ResolverVariableValidationTest, GlobalVarNoAddressSpace) {
+    // var a : i32;
+    GlobalVar(Source{{12, 34}}, "a", ty.i32());
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: module-scope 'var' declarations that are not of texture or sampler types must provide an address space)");
+}
+
+TEST_F(ResolverVariableValidationTest, GlobalVarWithInitializerNoAddressSpace) {
+    // var a = 1;
+    GlobalVar(Source{{12, 34}}, "a", Expr(1_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: module-scope 'var' declarations that are not of texture or sampler types must provide an address space)");
+}
+
 TEST_F(ResolverVariableValidationTest, GlobalVarUsedAtModuleScope) {
     // var<private> a : i32;
     // var<private> b : i32 = a;

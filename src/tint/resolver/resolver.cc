@@ -260,7 +260,7 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
         ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
     }
 
-    if (rhs && !validator_.VariableInitializer(v, builtin::AddressSpace::kUndefined, ty, rhs)) {
+    if (rhs && !validator_.VariableInitializer(v, ty, rhs)) {
         return nullptr;
     }
 
@@ -323,7 +323,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         return nullptr;
     }
 
-    if (rhs && !validator_.VariableInitializer(v, builtin::AddressSpace::kUndefined, ty, rhs)) {
+    if (rhs && !validator_.VariableInitializer(v, ty, rhs)) {
         return nullptr;
     }
 
@@ -417,7 +417,7 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
         ty = rhs->Type();
     }
 
-    if (!validator_.VariableInitializer(c, builtin::AddressSpace::kUndefined, ty, rhs)) {
+    if (!validator_.VariableInitializer(c, ty, rhs)) {
         return nullptr;
     }
 
@@ -516,7 +516,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         access = DefaultAccessForAddressSpace(address_space);
     }
 
-    if (rhs && !validator_.VariableInitializer(var, address_space, storage_ty, rhs)) {
+    if (rhs && !validator_.VariableInitializer(var, storage_ty, rhs)) {
         return nullptr;
     }
 

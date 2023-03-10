@@ -429,12 +429,10 @@ class Validator {
 
     /// Validates a variable initializer
     /// @param v the variable to validate
-    /// @param address_space the address space of the variable
     /// @param storage_type the type of the storage
     /// @param initializer the RHS initializer expression
     /// @returns true on succes, false otherwise
     bool VariableInitializer(const ast::Variable* v,
-                             builtin::AddressSpace address_space,
                              const type::Type* storage_type,
                              const sem::ValueExpression* initializer) const;
 

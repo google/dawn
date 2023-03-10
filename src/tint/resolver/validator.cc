@@ -373,7 +373,6 @@ bool Validator::Materialize(const type::Type* to,
 }
 
 bool Validator::VariableInitializer(const ast::Variable* v,
-                                    builtin::AddressSpace address_space,
                                     const type::Type* storage_ty,
                                     const sem::ValueExpression* initializer) const {
     auto* initializer_ty = initializer->Type();
@@ -386,23 +385,6 @@ bool Validator::VariableInitializer(const ast::Variable* v,
           << "' with value of type '" << sem_.TypeNameOf(initializer_ty) << "'";
         AddError(s.str(), v->source);
         return false;
-    }
-
-    if (v->Is<ast::Var>()) {
-        switch (address_space) {
-            case builtin::AddressSpace::kPrivate:
-            case builtin::AddressSpace::kFunction:
-                break;  // Allowed an initializer
-            default:
-                // https://gpuweb.github.io/gpuweb/wgsl/#var-and-let
-                // Optionally has an initializer expression, if the variable is in the private or
-                // function address spaces.
-                AddError("var of address space '" + utils::ToString(address_space) +
-                             "' cannot have an initializer. var initializers are only supported "
-                             "for the address spaces 'private' and 'function'",
-                         v->source);
-                return false;
-        }
     }
 
     return true;
@@ -725,6 +707,23 @@ bool Validator::Var(const sem::Variable* v) const {
             AddError("only variables in <storage> address space may specify an access mode",
                      var->source);
             return false;
+        }
+    }
+
+    if (var->initializer) {
+        switch (v->AddressSpace()) {
+            case builtin::AddressSpace::kPrivate:
+            case builtin::AddressSpace::kFunction:
+                break;  // Allowed an initializer
+            default:
+                // https://gpuweb.github.io/gpuweb/wgsl/#var-and-let
+                // Optionally has an initializer expression, if the variable is in the private or
+                // function address spaces.
+                AddError("var of address space '" + utils::ToString(v->AddressSpace()) +
+                             "' cannot have an initializer. var initializers are only supported "
+                             "for the address spaces 'private' and 'function'",
+                         var->source);
+                return false;
         }
     }
 
