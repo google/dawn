@@ -864,10 +864,6 @@ TEST_P(TimestampQueryTests, TimestampWritesOnRenderPassWithNoPipline) {
 TEST_P(TimestampQueryTests, TimestampWritesOnRenderPassWithOnlyVertexStage) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("use_placeholder_fragment_in_vertex_only_pipeline"));
 
-    // TODO(dawn:1696): VVL claims that this configuration is invalid without a fragment shader.
-    // Investigate and remove this suppression.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
     TestTimestampWritesOnRenderPass({{querySet, 0, wgpu::RenderPassTimestampLocation::Beginning},
                                      {querySet, 1, wgpu::RenderPassTimestampLocation::End}},

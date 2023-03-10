@@ -447,6 +447,12 @@ void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     // By default try to initialize workgroup memory with OpConstantNull according to the Vulkan
     // extension VK_KHR_zero_initialize_workgroup_memory.
     deviceToggles->Default(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension, true);
+
+    // Inject fragment shaders in all vertex-only pipelines.
+    // TODO(crbug.com/dawn/1698): relax this requirement where the Vulkan spec allows.
+    // In particular, enable rasterizer discard if the depth-stencil stage is a no-op, and skip
+    // insertion of the placeholder fragment shader.
+    deviceToggles->Default(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline, true);
 }
 
 ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor,

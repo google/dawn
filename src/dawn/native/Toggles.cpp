@@ -226,7 +226,8 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
     {Toggle::UsePlaceholderFragmentInVertexOnlyPipeline,
      {"use_placeholder_fragment_in_vertex_only_pipeline",
       "Use a placeholder empty fragment shader in vertex only render pipeline. This toggle must be "
-      "enabled for OpenGL ES backend, and serves as a workaround by default enabled on some Metal "
+      "enabled for OpenGL ES backend, the Vulkan Backend, and serves as a workaround by default "
+      "enabled on some Metal "
       "devices with Intel GPU to ensure the depth result is correct.",
       "https://crbug.com/dawn/136", ToggleStage::Device}},
     {Toggle::FxcOptimizations,
