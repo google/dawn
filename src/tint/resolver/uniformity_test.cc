@@ -7402,6 +7402,128 @@ test:5:11 note: reading from read_write storage buffer 'rw' may result in a non-
 )");
 }
 
+TEST_F(UniformityAnalysisTest, CompoundAssignment_Global) {
+    // Use compound assignment on a global variable.
+    // Tests that we do not assume there is always a variable node for the LHS, but we still process
+    // the expression.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> rw : i32;
+
+var<private> v : array<i32, 4>;
+
+fn bar(p : ptr<function, i32>) -> i32 {
+  if (*p == 0) {
+    workgroupBarrier();
+  }
+  return 0;
+}
+
+fn foo() {
+  var f = rw;
+  v[bar(&f)] += 1;
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:8:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on possibly non-uniform value
+  if (*p == 0) {
+  ^^
+
+test:7:8 note: parameter 'p' of 'bar' may be non-uniform
+  if (*p == 0) {
+       ^
+
+test:15:9 note: possibly non-uniform value passed via pointer here
+  v[bar(&f)] += 1;
+        ^
+
+test:14:11 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  var f = rw;
+          ^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, IncDec_StillNonUniform) {
+    // Use increment on a variable that is already non-uniform.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> rw : i32;
+
+fn foo() {
+  var v = rw;
+  v++;
+  if (v == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:8:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on possibly non-uniform value
+  if (v == 0) {
+  ^^
+
+test:5:11 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  var v = rw;
+          ^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, IncDec_Global) {
+    // Use increment on a global variable.
+    // Tests that we do not assume there is always a variable node for the LHS, but we still process
+    // the expression.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> rw : i32;
+
+var<private> v : array<i32, 4>;
+
+fn bar(p : ptr<function, i32>) -> i32 {
+  if (*p == 0) {
+    workgroupBarrier();
+  }
+  return 0;
+}
+
+fn foo() {
+  var f = rw;
+  v[bar(&f)]++;
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:8:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on possibly non-uniform value
+  if (*p == 0) {
+  ^^
+
+test:7:8 note: parameter 'p' of 'bar' may be non-uniform
+  if (*p == 0) {
+       ^
+
+test:15:9 note: possibly non-uniform value passed via pointer here
+  v[bar(&f)]++;
+        ^
+
+test:14:11 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  var f = rw;
+          ^^
+)");
+}
+
 TEST_F(UniformityAnalysisTest, ShortCircuiting_UniformLHS) {
     std::string src = R"(
 @group(0) @binding(0) var<storage, read> uniform_global : i32;
@@ -8647,6 +8769,109 @@ test:19:9 note: contents of pointer may become non-uniform after calling 'a'
   arr[a(&i)] += arr[b(&i)];
         ^
 )");
+}
+
+TEST_F(UniformityAnalysisTest, CompoundAssignmentEval_RHS_Makes_LHS_NonUniform_After_Load) {
+    // Test that the LHS is loaded from before the RHS makes is evaluated.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn bar(p : ptr<function, i32>) -> i32 {
+  *p = non_uniform;
+  return 0;
+}
+
+fn foo() {
+  var i = 0;
+  var arr : array<i32, 4>;
+  i += arr[bar(&i)];
+  if (i == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, CompoundAssignmentEval_RHS_Makes_LHS_Uniform_After_Load) {
+    // Test that the LHS is loaded from before the RHS makes is evaluated.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn bar(p : ptr<function, i32>) -> i32 {
+  *p = 0;
+  return 0;
+}
+
+fn foo() {
+  var i = non_uniform;
+  var arr : array<i32, 4>;
+  i += arr[bar(&i)];
+  if (i == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:14:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:13:3 note: control flow depends on possibly non-uniform value
+  if (i == 0) {
+  ^^
+
+test:10:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var i = non_uniform;
+          ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, CompoundAssignmentEval_LHS_OnlyOnce) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn bar(p : ptr<function, i32>) -> i32 {
+  if (*p == 0) {
+    workgroupBarrier();
+  }
+  *p = non_uniform;
+  return 0;
+}
+
+fn foo(){
+  var f : i32 = 0;
+  var arr : array<i32, 4>;
+  arr[bar(&f)] += 1;
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, IncDec_LHS_OnlyOnce) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn bar(p : ptr<function, i32>) -> i32 {
+  if (*p == 0) {
+    workgroupBarrier();
+  }
+  *p = non_uniform;
+  return 0;
+}
+
+fn foo(){
+  var f : i32 = 0;
+  var arr : array<i32, 4>;
+  arr[bar(&f)]++;
+}
+)";
+
+    RunTest(src, true);
 }
 
 }  // namespace
