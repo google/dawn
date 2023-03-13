@@ -55,9 +55,6 @@ class Scalar : public Castable<Scalar<T>, Value> {
     /// @copydoc Value::AnyZero()
     bool AnyZero() const override { return IsPositiveZero(); }
 
-    /// @copydoc Value::AllEqual()
-    bool AllEqual() const override { return true; }
-
     /// @copydoc Value::Hash()
     size_t Hash() const override { return utils::Hash(type, ValueOf()); }
 

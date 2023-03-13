@@ -46,13 +46,11 @@ TEST_F(ResolverConstEvalTest, StructMemberAccess) {
     EXPECT_EQ(str->Members().Length(), 2u);
     ASSERT_NE(outer->ConstantValue(), nullptr);
     EXPECT_TYPE(outer->ConstantValue()->Type(), outer->Type());
-    EXPECT_FALSE(outer->ConstantValue()->AllEqual());
     EXPECT_TRUE(outer->ConstantValue()->AnyZero());
     EXPECT_FALSE(outer->ConstantValue()->AllZero());
 
     auto* o1 = Sem().Get(o1_expr);
     ASSERT_NE(o1->ConstantValue(), nullptr);
-    EXPECT_FALSE(o1->ConstantValue()->AllEqual());
     EXPECT_FALSE(o1->ConstantValue()->AnyZero());
     EXPECT_FALSE(o1->ConstantValue()->AllZero());
     EXPECT_TRUE(o1->ConstantValue()->Type()->Is<sem::Struct>());
@@ -63,7 +61,6 @@ TEST_F(ResolverConstEvalTest, StructMemberAccess) {
 
     auto* i2 = Sem().Get(i2_expr);
     ASSERT_NE(i2->ConstantValue(), nullptr);
-    EXPECT_TRUE(i2->ConstantValue()->AllEqual());
     EXPECT_FALSE(i2->ConstantValue()->AnyZero());
     EXPECT_FALSE(i2->ConstantValue()->AllZero());
     EXPECT_TRUE(i2->ConstantValue()->Type()->Is<type::U32>());
@@ -85,7 +82,6 @@ TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
     EXPECT_TYPE(cv->Type(), sem->Type());
     EXPECT_TRUE(cv->Index(0)->Type()->Is<type::Vector>());
     EXPECT_TRUE(cv->Index(0)->Index(0)->Type()->Is<type::AbstractFloat>());
-    EXPECT_FALSE(cv->AllEqual());
     EXPECT_FALSE(cv->AnyZero());
     EXPECT_FALSE(cv->AllZero());
     auto* c0 = cv->Index(0);
@@ -124,7 +120,6 @@ TEST_F(ResolverConstEvalTest, MatrixMemberAccess_AFloat) {
     EXPECT_TYPE(cv->Type(), sem->Type());
     EXPECT_TRUE(cv->Index(0)->Type()->Is<type::Vector>());
     EXPECT_TRUE(cv->Index(0)->Index(0)->Type()->Is<type::AbstractFloat>());
-    EXPECT_FALSE(cv->AllEqual());
     EXPECT_FALSE(cv->AnyZero());
     EXPECT_FALSE(cv->AllZero());
 
@@ -201,7 +196,6 @@ TEST_F(ResolverConstEvalTest, MatrixMemberAccess_f32) {
     EXPECT_TYPE(cv->Type(), sem->Type());
     EXPECT_TRUE(cv->Index(0)->Type()->Is<type::Vector>());
     EXPECT_TRUE(cv->Index(0)->Index(0)->Type()->Is<type::F32>());
-    EXPECT_FALSE(cv->AllEqual());
     EXPECT_FALSE(cv->AnyZero());
     EXPECT_FALSE(cv->AllZero());
 

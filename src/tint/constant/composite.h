@@ -55,9 +55,6 @@ class Composite : public Castable<Composite, Value> {
     /// @copydoc Value::AnyZero()
     bool AnyZero() const override { return any_zero; }
 
-    /// @copydoc Value::AllEqual()
-    bool AllEqual() const override { return false; }
-
     /// @copydoc Value::Hash()
     size_t Hash() const override { return hash; }
 

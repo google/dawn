@@ -3323,10 +3323,10 @@ bool GeneratorImpl::EmitConstant(utils::StringStream& out,
             return true;
         },
         [&](const type::Vector* v) {
-            if (constant->AllEqual()) {
+            if (auto* splat = constant->As<constant::Splat>()) {
                 {
                     ScopedParen sp(out);
-                    if (!EmitConstant(out, constant->Index(0), is_variable_initializer)) {
+                    if (!EmitConstant(out, splat->el, is_variable_initializer)) {
                         return false;
                     }
                 }

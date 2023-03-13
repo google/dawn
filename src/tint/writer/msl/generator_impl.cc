@@ -1709,8 +1709,8 @@ bool GeneratorImpl::EmitConstant(utils::StringStream& out, const constant::Value
 
             ScopedParen sp(out);
 
-            if (constant->AllEqual()) {
-                if (!EmitConstant(out, constant->Index(0))) {
+            if (auto* splat = constant->As<constant::Splat>()) {
+                if (!EmitConstant(out, splat->el)) {
                     return false;
                 }
                 return true;

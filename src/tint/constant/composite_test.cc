@@ -56,20 +56,6 @@ TEST_F(ConstantTest_Composite, AnyZero) {
     EXPECT_FALSE(compositeNone->AnyZero());
 }
 
-TEST_F(ConstantTest_Composite, AllEqual) {
-    auto* f32 = create<type::F32>();
-
-    auto* fPos0 = create<Scalar<tint::f32>>(f32, 0_f);
-    auto* fNeg0 = create<Scalar<tint::f32>>(f32, -0_f);
-    auto* fPos1 = create<Scalar<tint::f32>>(f32, 1_f);
-
-    auto* compositeEq = create<Composite>(f32, utils::Vector{fPos0, fPos0});
-    auto* compositeNe = create<Composite>(f32, utils::Vector{fNeg0, fPos1, fPos0});
-
-    EXPECT_TRUE(compositeEq->AllEqual());
-    EXPECT_FALSE(compositeNe->AllZero());
-}
-
 TEST_F(ConstantTest_Composite, Index) {
     auto* f32 = create<type::F32>();
 

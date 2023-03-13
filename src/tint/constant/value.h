@@ -56,9 +56,6 @@ class Value : public Castable<Value, Node> {
     /// @returns true if any child elements are positive-zero valued.
     virtual bool AnyZero() const = 0;
 
-    /// @returns true if all child elements have the same value and type.
-    virtual bool AllEqual() const = 0;
-
     /// @returns a hash of the value.
     virtual size_t Hash() const = 0;
 
