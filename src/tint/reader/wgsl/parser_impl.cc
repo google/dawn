@@ -73,21 +73,19 @@ constexpr size_t const kMaxResynchronizeLookahead = 32;
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#reserved-keywords
 bool is_reserved(const Token& t) {
-    return t == "CompileShader" || t == "ComputeShader" || t == "DomainShader" ||
-           t == "GeometryShader" || t == "Hullshader" || t == "NULL" || t == "Self" ||
-           t == "abstract" || t == "active" || t == "alignas" || t == "alignof" || t == "as" ||
-           t == "asm" || t == "asm_fragment" || t == "async" || t == "attribute" || t == "auto" ||
-           t == "await" || t == "become" || t == "binding_array" || t == "cast" || t == "catch" ||
-           t == "class" || t == "co_await" || t == "co_return" || t == "co_yield" ||
-           t == "coherent" || t == "column_major" || t == "common" || t == "compile" ||
-           t == "compile_fragment" || t == "concept" || t == "const_cast" || t == "consteval" ||
-           t == "constexpr" || t == "constinit" || t == "crate" || t == "debugger" ||
-           t == "decltype" || t == "delete" || t == "demote" || t == "demote_to_helper" ||
-           t == "do" || t == "dynamic_cast" || t == "enum" || t == "explicit" || t == "export" ||
-           t == "extends" || t == "extern" || t == "external" || t == "filter" || t == "final" ||
-           t == "finally" || t == "friend" || t == "from" || t == "fxgroup" || t == "get" ||
-           t == "goto" || t == "groupshared" || t == "handle" || t == "highp" || t == "impl" ||
-           t == "implements" || t == "import" || t == "inline" || t == "inout" ||
+    return t == "NULL" || t == "Self" || t == "abstract" || t == "active" || t == "alignas" ||
+           t == "alignof" || t == "as" || t == "asm" || t == "asm_fragment" || t == "async" ||
+           t == "attribute" || t == "auto" || t == "await" || t == "become" ||
+           t == "binding_array" || t == "cast" || t == "catch" || t == "class" || t == "co_await" ||
+           t == "co_return" || t == "co_yield" || t == "coherent" || t == "column_major" ||
+           t == "common" || t == "compile" || t == "compile_fragment" || t == "concept" ||
+           t == "const_cast" || t == "consteval" || t == "constexpr" || t == "constinit" ||
+           t == "crate" || t == "debugger" || t == "decltype" || t == "delete" || t == "demote" ||
+           t == "demote_to_helper" || t == "do" || t == "dynamic_cast" || t == "enum" ||
+           t == "explicit" || t == "export" || t == "extends" || t == "extern" || t == "external" ||
+           t == "filter" || t == "final" || t == "finally" || t == "friend" || t == "from" ||
+           t == "fxgroup" || t == "get" || t == "goto" || t == "groupshared" || t == "highp" ||
+           t == "impl" || t == "implements" || t == "import" || t == "inline" ||
            t == "instanceof" || t == "interface" || t == "layout" || t == "lowp" || t == "macro" ||
            t == "macro_rules" || t == "match" || t == "mediump" || t == "meta" || t == "mod" ||
            t == "module" || t == "move" || t == "mut" || t == "mutable" || t == "namespace" ||
@@ -97,8 +95,8 @@ bool is_reserved(const Token& t) {
            t == "partition" || t == "pass" || t == "patch" || t == "pixelfragment" ||
            t == "precise" || t == "precision" || t == "premerge" || t == "priv" ||
            t == "protected" || t == "pub" || t == "public" || t == "readonly" || t == "ref" ||
-           t == "regardless" || t == "register" || t == "reinterpret_cast" || t == "resource" ||
-           t == "restrict" || t == "self" || t == "set" || t == "shared" || t == "signed" ||
+           t == "regardless" || t == "register" || t == "reinterpret_cast" || t == "require" ||
+           t == "resource" || t == "restrict" || t == "self" || t == "set" || t == "shared" ||
            t == "sizeof" || t == "smooth" || t == "snorm" || t == "static" ||
            t == "static_assert" || t == "static_cast" || t == "std" || t == "subroutine" ||
            t == "super" || t == "target" || t == "template" || t == "this" || t == "thread_local" ||

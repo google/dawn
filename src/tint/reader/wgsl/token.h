@@ -165,17 +165,19 @@ class Token {
         kContinue,
         /// A 'continuing'
         kContinuing,
+        /// A 'default'
+        kDefault,
         /// A 'diagnostic'
         kDiagnostic,
         /// A 'discard'
         kDiscard,
-        /// A 'default'
-        kDefault,
         /// A 'else'
         kElse,
         /// A 'enable'
         kEnable,
         /// A 'fallthrough'
+        // Note, this isn't a keyword, but a reserved word. We match it as a keyword in order to
+        // provide better diagnostics in case a `fallthrough` is added to a case body.
         kFallthrough,
         /// A 'false'
         kFalse,
@@ -191,10 +193,10 @@ class Token {
         kLoop,
         /// A 'override'
         kOverride,
-        /// A 'return'
-        kReturn,
         /// A 'requires'
         kRequires,
+        /// A 'return'
+        kReturn,
         /// A 'struct'
         kStruct,
         /// A 'switch'
