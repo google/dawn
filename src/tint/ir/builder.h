@@ -20,6 +20,7 @@
 #include "src/tint/constant/scalar.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/bitcast.h"
+#include "src/tint/ir/builtin.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/construct.h"
 #include "src/tint/ir/convert.h"
@@ -303,6 +304,15 @@ class Builder {
     /// @param args the arguments to be converted
     /// @returns the instruction
     ir::Construct* Construct(const type::Type* to, utils::VectorRef<Value*> args);
+
+    /// Creates a builtin call instruction
+    /// @param type the return type
+    /// @param func the builtin function
+    /// @param args the arguments to be converted
+    /// @returns the instruction
+    ir::Builtin* Builtin(const type::Type* type,
+                         builtin::Function func,
+                         utils::VectorRef<Value*> args);
 
     /// @returns a unique temp id
     Temp::Id AllocateTempId();

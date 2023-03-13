@@ -193,4 +193,10 @@ ir::Construct* Builder::Construct(const type::Type* to, utils::VectorRef<Value*>
     return ir.instructions.Create<ir::Construct>(Temp(to), std::move(args));
 }
 
+ir::Builtin* Builder::Builtin(const type::Type* type,
+                              builtin::Function func,
+                              utils::VectorRef<Value*> args) {
+    return ir.instructions.Create<ir::Builtin>(Temp(type), func, args);
+}
+
 }  // namespace tint::ir

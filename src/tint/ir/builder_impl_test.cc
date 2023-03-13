@@ -1943,5 +1943,21 @@ FunctionEnd
 )");
 }
 
+TEST_F(IR_BuilderImplTest, EmitExpression_Builtin) {
+    auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_f));
+    auto* expr = Call("asin", i);
+    WrapInFunction(expr);
+
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
+    d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
+    EXPECT_EQ(d.AsString(), R"(%2 (f32) = asin(%1 (void))
+)");
+}
+
 }  // namespace
 }  // namespace tint::ir

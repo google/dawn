@@ -703,6 +703,8 @@ if(${TINT_BUILD_IR})
     ir/builder.h
     ir/builder_impl.cc
     ir/builder_impl.h
+    ir/builtin.cc
+    ir/builtin.h
     ir/call.cc
     ir/call.h
     ir/constant.cc
