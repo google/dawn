@@ -229,6 +229,12 @@ src/webgpu/api/validation/capability_checks/limits/maxBindingsPerBindGroup.spec.
 src/webgpu/api/validation/capability_checks/limits/maxBufferSize.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxColorAttachmentBytesPerSample.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxColorAttachments.spec.ts
+src/webgpu/api/validation/capability_checks/limits/maxComputeInvocationsPerWorkgroup.spec.ts
+src/webgpu/api/validation/capability_checks/limits/maxComputeWorkgroupSizeX.spec.ts
+src/webgpu/api/validation/capability_checks/limits/maxComputeWorkgroupSizeY.spec.ts
+src/webgpu/api/validation/capability_checks/limits/maxComputeWorkgroupSizeZ.spec.ts
+src/webgpu/api/validation/capability_checks/limits/maxComputeWorkgroupStorageSize.spec.ts
+src/webgpu/api/validation/capability_checks/limits/maxComputeWorkgroupsPerDimension.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxDynamicStorageBuffersPerPipelineLayout.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxDynamicUniformBuffersPerPipelineLayout.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxInterStageShaderComponents.spec.ts
@@ -289,7 +295,9 @@ src/webgpu/api/validation/queue/submit.spec.ts
 src/webgpu/api/validation/queue/writeBuffer.spec.ts
 src/webgpu/api/validation/queue/writeTexture.spec.ts
 src/webgpu/api/validation/queue/copyToTexture/CopyExternalImageToTexture.spec.ts
+src/webgpu/api/validation/queue/destroyed/buffer.spec.ts
 src/webgpu/api/validation/queue/destroyed/query_set.spec.ts
+src/webgpu/api/validation/queue/destroyed/texture.spec.ts
 src/webgpu/api/validation/render_pass/attachment_compatibility.spec.ts
 src/webgpu/api/validation/render_pass/render_pass_descriptor.spec.ts
 src/webgpu/api/validation/render_pass/resolve.spec.ts
@@ -320,7 +328,6 @@ src/webgpu/idl/idl_test.ts
 src/webgpu/idl/constants/flags.spec.ts
 src/webgpu/shader/types.ts
 src/webgpu/shader/values.ts
-src/webgpu/shader/execution/evaluation_order.spec.ts
 src/webgpu/shader/execution/padding.spec.ts
 src/webgpu/shader/execution/robust_access.spec.ts
 src/webgpu/shader/execution/robust_access_vertex.spec.ts
@@ -445,11 +452,16 @@ src/webgpu/shader/execution/expression/call/builtin/unpack4x8snorm.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/unpack4x8unorm.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/workgroupBarrier.spec.ts
 src/webgpu/shader/execution/expression/unary/unary.ts
+src/webgpu/shader/execution/expression/unary/bool_conversion.spec.ts
 src/webgpu/shader/execution/expression/unary/bool_logical.spec.ts
 src/webgpu/shader/execution/expression/unary/f32_arithmetic.spec.ts
+src/webgpu/shader/execution/expression/unary/f32_conversion.spec.ts
 src/webgpu/shader/execution/expression/unary/i32_arithmetic.spec.ts
+src/webgpu/shader/execution/expression/unary/i32_conversion.spec.ts
+src/webgpu/shader/execution/expression/unary/u32_conversion.spec.ts
 src/webgpu/shader/execution/flow_control/harness.ts
 src/webgpu/shader/execution/flow_control/call.spec.ts
+src/webgpu/shader/execution/flow_control/eval_order.spec.ts
 src/webgpu/shader/execution/flow_control/for.spec.ts
 src/webgpu/shader/execution/flow_control/if.spec.ts
 src/webgpu/shader/execution/flow_control/loop.spec.ts
