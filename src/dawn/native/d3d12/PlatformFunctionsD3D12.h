@@ -15,22 +15,14 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_PLATFORMFUNCTIONS_H_
 #define SRC_DAWN_NATIVE_D3D12_PLATFORMFUNCTIONS_H_
 
-#include <d3dcompiler.h>
-
-#include <string>
-
 #include "dawn/native/d3d/PlatformFunctions.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
 
 #include "dawn/common/DynamicLib.h"
-#include "dawn/native/Error.h"
 
 namespace dawn::native::d3d12 {
 
-// Loads the functions required from the platform dynamically so that we don't need to rely on
-// them being present in the system. For example linking against d3d12.lib would prevent
-// dawn_native from loading on Windows 7 system where d3d12.dll doesn't exist.
-class PlatformFunctions : public d3d::PlatformFunctions {
+class PlatformFunctions final : public d3d::PlatformFunctions {
   public:
     PlatformFunctions();
     ~PlatformFunctions() override;

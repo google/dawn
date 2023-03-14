@@ -21,8 +21,6 @@
 #include <sstream>
 #include <utility>
 
-#include "dawn/common/DynamicLib.h"
-
 namespace dawn::native::d3d {
 namespace {
 // Extract Version from "10.0.{Version}.0" if possible, otherwise return 0.
