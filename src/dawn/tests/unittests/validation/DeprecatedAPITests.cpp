@@ -22,15 +22,6 @@
 
 WGPUDevice DeprecationTests::CreateTestDevice(dawn::native::Adapter dawnAdapter) {
     wgpu::DeviceDescriptor descriptor = {};
-
-    wgpu::DawnTogglesDescriptor deviceTogglesDesc = {};
-    const char* enabledToggles[1] = {kDisallowDeprecatedAPIsToggleName};
-    deviceTogglesDesc.enabledToggles = enabledToggles;
-    deviceTogglesDesc.enabledTogglesCount = 1;
-
-    if (GetParam()) {
-        descriptor.nextInChain = &deviceTogglesDesc;
-    }
     return dawnAdapter.CreateDevice(&descriptor);
 }
 

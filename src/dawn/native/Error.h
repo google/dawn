@@ -88,12 +88,12 @@ using ResultOrError = Result<T, ErrorData>;
     break
 
 // DAWN_MAKE_DEPRECATION_ERROR is used at deprecation paths. It returns a MaybeError.
-// When the disallow_deprecated_path toggle is on, it creates an internal validation error.
-// Otherwise it returns {} and emits a deprecation warning, and moves on.
-#define DAWN_MAKE_DEPRECATION_ERROR(device, ...)            \
-    device->IsToggleEnabled(Toggle::DisallowDeprecatedAPIs) \
-        ? MaybeError(DAWN_VALIDATION_ERROR(__VA_ARGS__))    \
-        : (device->EmitDeprecationWarning(absl::StrFormat(__VA_ARGS__)), MaybeError{})
+// When the allow_deprecated_apis toggle is disabled, it creates an internal validation error.
+// Otherwise it returns {}, emits a deprecation warning, and moves on.
+#define DAWN_MAKE_DEPRECATION_ERROR(device, ...)                                       \
+    device->IsToggleEnabled(Toggle::AllowDeprecatedAPIs)                               \
+        ? (device->EmitDeprecationWarning(absl::StrFormat(__VA_ARGS__)), MaybeError{}) \
+        : MaybeError(DAWN_VALIDATION_ERROR(__VA_ARGS__))
 
 // DAWN_DEPRECATED_IF is used analogous to DAWN_INVALID_IF at deprecation paths.
 #define DAWN_DEPRECATED_IF(device, EXPR, ...)                    \

@@ -1196,7 +1196,7 @@ TEST_F(RenderPassDescriptorValidationTest, ValidateDepthStencilReadOnly) {
         renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
         renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
         renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = false;
-        EXPECT_DEPRECATION_WARNING(AssertBeginRenderPassSuccess(&renderPass));
+        AssertBeginRenderPassError(&renderPass);
     }
 
     // Tests that a pass with mismatched depthReadOnly and stencilReadOnly values fails when

@@ -989,13 +989,11 @@ TEST_P(BufferTests, CreateBufferOOM) {
     descriptor.usage = wgpu::BufferUsage::CopyDst;
 
     descriptor.size = std::numeric_limits<uint64_t>::max();
-    // TODO(dawn:1525): remove warning expectation after the deprecation period.
-    ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(device.CreateBuffer(&descriptor)));
+    ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
 
     // UINT64_MAX may be special cased. Test a smaller, but really large buffer also fails
     descriptor.size = 1ull << 50;
-    // TODO(dawn:1525): remove warning expectation after the deprecation period.
-    ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(device.CreateBuffer(&descriptor)));
+    ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
 
     // Validation errors should always be prior to OOM.
     descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::Uniform;
@@ -1038,8 +1036,7 @@ TEST_P(BufferTests, BufferMappedAtCreationOOM) {
             wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
             ASSERT_EQ(nullptr, buffer.Get());
         } else {
-            // TODO(dawn:1525): remove warning expectation after the deprecation period.
-            ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(device.CreateBuffer(&descriptor)));
+            ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
         }
     }
 
@@ -1068,8 +1065,7 @@ TEST_P(BufferTests, BufferMappedAtCreationOOM) {
             wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
             ASSERT_EQ(nullptr, buffer.Get());
         } else {
-            // TODO(dawn:1525): remove warning expectation after the deprecation period.
-            ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(device.CreateBuffer(&descriptor)));
+            ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
         }
     }
 }
@@ -1083,8 +1079,7 @@ TEST_P(BufferTests, CreateBufferOOMMapAsync) {
 
     auto RunTest = [this](const wgpu::BufferDescriptor& descriptor) {
         wgpu::Buffer buffer;
-        // TODO(dawn:1525): remove warning expectation after the deprecation period.
-        ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(buffer = device.CreateBuffer(&descriptor)));
+        ASSERT_DEVICE_ERROR(buffer = device.CreateBuffer(&descriptor));
 
         bool done = false;
         ASSERT_DEVICE_ERROR(buffer.MapAsync(

@@ -24,33 +24,33 @@
 // scattered in other files as well for organizational purposes so that similar tests can live
 // together.
 
-static constexpr char kDisallowDeprecatedAPIsToggleName[] = "disallow_deprecated_apis";
+static constexpr char kAllowDeprecatedAPIsToggleName[] = "allow_deprecated_apis";
 
-#define EXPECT_DEPRECATION_ERROR_OR_WARNING(statement)         \
-    if (HasToggleEnabled(kDisallowDeprecatedAPIsToggleName)) { \
-        ASSERT_DEVICE_ERROR(statement);                        \
-    } else {                                                   \
-        EXPECT_DEPRECATION_WARNING(statement);                 \
-    }                                                          \
-    for (;;)                                                   \
+#define EXPECT_DEPRECATION_ERROR_OR_WARNING(statement)       \
+    if (!HasToggleEnabled(kAllowDeprecatedAPIsToggleName)) { \
+        ASSERT_DEVICE_ERROR(statement);                      \
+    } else {                                                 \
+        EXPECT_DEPRECATION_WARNING(statement);               \
+    }                                                        \
+    for (;;)                                                 \
     break
 
-#define EXPECT_DEPRECATION_WARNING_ONLY(statement)              \
-    if (!HasToggleEnabled(kDisallowDeprecatedAPIsToggleName)) { \
-        EXPECT_DEPRECATION_WARNING(statement);                  \
-    } else {                                                    \
-        statement;                                              \
-    }                                                           \
-    for (;;)                                                    \
+#define EXPECT_DEPRECATION_WARNING_ONLY(statement)          \
+    if (HasToggleEnabled(kAllowDeprecatedAPIsToggleName)) { \
+        EXPECT_DEPRECATION_WARNING(statement);              \
+    } else {                                                \
+        statement;                                          \
+    }                                                       \
+    for (;;)                                                \
     break
 
-#define EXPECT_DEPRECATION_ERROR_ONLY(statement)               \
-    if (HasToggleEnabled(kDisallowDeprecatedAPIsToggleName)) { \
-        ASSERT_DEVICE_ERROR(statement);                        \
-    } else {                                                   \
-        statement;                                             \
-    }                                                          \
-    for (;;)                                                   \
+#define EXPECT_DEPRECATION_ERROR_ONLY(statement)             \
+    if (!HasToggleEnabled(kAllowDeprecatedAPIsToggleName)) { \
+        ASSERT_DEVICE_ERROR(statement);                      \
+    } else {                                                 \
+        statement;                                           \
+    }                                                        \
+    for (;;)                                                 \
     break
 
 // Parameter is a single bool. When true, deprecated APIs are strictly disallowed (i.e. generate

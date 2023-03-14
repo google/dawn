@@ -381,12 +381,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "srcBlendFactor is 'DstAlpha'. Works around an Intel D3D12 driver issue about alpha "
       "blending.",
       "https://crbug.com/dawn/1579", ToggleStage::Device}},
-    {Toggle::DisallowDeprecatedAPIs,
-     {"disallow_deprecated_apis",
-      "Disallow all deprecated paths by changing the deprecation warnings to validation error for "
-      "these paths."
-      "This toggle is off by default. It is expected to turn on or get removed when WebGPU V1 "
-      "ships and stays stable.",
+    {Toggle::AllowDeprecatedAPIs,
+     {"allow_deprecated_apis",
+      "Allows deprecated paths by changing the validation errors to deprecation warnings. This "
+      "toggle is off by default and is expected to get removed when WebGPU V1 ships and stays "
+      "stable.",
       "https://crbug.com/dawn/1563", ToggleStage::Device}},
     {Toggle::D3D12PolyfillReflectVec2F32,
      {"d3d12_polyfill_reflect_vec2_f32",
