@@ -14,6 +14,7 @@
 
 #include "src/tint/ast/if_statement.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/test_helper.h"
@@ -29,6 +30,15 @@ TEST_F(IfStatementTest, Creation) {
     auto src = stmt->source;
     EXPECT_EQ(src.range.begin.line, 20u);
     EXPECT_EQ(src.range.begin.column, 2u);
+}
+
+TEST_F(IfStatementTest, Creation_WithAttributes) {
+    auto* attr1 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "foo");
+    auto* attr2 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "bar");
+    auto* cond = Expr("cond");
+    auto* stmt = If(cond, Block(), ElseStmt(), utils::Vector{attr1, attr2});
+
+    EXPECT_THAT(stmt->attributes, testing::ElementsAre(attr1, attr2));
 }
 
 TEST_F(IfStatementTest, IsIf) {

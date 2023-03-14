@@ -1264,7 +1264,7 @@ Maybe<const ast::Statement*> ParserImpl::statement() {
         return stmt;
     }
 
-    auto stmt_if = if_statement();
+    auto stmt_if = if_statement(attrs.value);
     if (stmt_if.errored) {
         return Failure::kErrored;
     }
@@ -1516,11 +1516,14 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
 }
 
 // if_statement
-//   : IF expression compound_stmt ( ELSE else_stmt ) ?
-// else_stmt
-//  : compound_statement
-//  | if_statement
-Maybe<const ast::IfStatement*> ParserImpl::if_statement() {
+//   : attribute* if_clause else_if_clause* else_clause?
+// if_clause:
+//   : IF expression compound_stmt
+// else_if_clause:
+//   : ELSE IF expression compound_stmt
+// else_clause
+//   : ELSE compound_statement
+Maybe<const ast::IfStatement*> ParserImpl::if_statement(AttributeList& attrs) {
     // Parse if-else chains iteratively instead of recursively, to avoid
     // stack-overflow for long chains of if-else statements.
 
@@ -1528,6 +1531,7 @@ Maybe<const ast::IfStatement*> ParserImpl::if_statement() {
         Source source;
         const ast::Expression* condition;
         const ast::BlockStatement* body;
+        AttributeList attributes;
     };
 
     // Parse an if statement, capturing the source, condition, and body statement.
@@ -1550,7 +1554,8 @@ Maybe<const ast::IfStatement*> ParserImpl::if_statement() {
             return Failure::kErrored;
         }
 
-        return IfInfo{source, condition.value, body.value};
+        TINT_DEFER(attrs.Clear());
+        return IfInfo{source, condition.value, body.value, std::move(attrs)};
     };
 
     std::vector<IfInfo> statements;
@@ -1591,7 +1596,8 @@ Maybe<const ast::IfStatement*> ParserImpl::if_statement() {
 
     // Now walk back through the statements to create their AST nodes.
     for (auto itr = statements.rbegin(); itr != statements.rend(); itr++) {
-        last_stmt = create<ast::IfStatement>(itr->source, itr->condition, itr->body, last_stmt);
+        last_stmt = create<ast::IfStatement>(itr->source, itr->condition, itr->body, last_stmt,
+                                             std::move(itr->attributes));
     }
 
     return last_stmt->As<ast::IfStatement>();

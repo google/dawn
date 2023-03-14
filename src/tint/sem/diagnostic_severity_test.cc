@@ -31,45 +31,64 @@ class DiagnosticSeverityTest : public TestHelper {
         // @diagnostic(off, chromium_unreachable_code)
         // fn foo() {
         //   @diagnostic(info, chromium_unreachable_code) {
+        //     @diagnostic(error, chromium_unreachable_code)
         //     if (true) @diagnostic(warning, chromium_unreachable_code) {
         //       return;
+        //     } else if (false) {
+        //       return;
+        //     } else @diagnostic(info, chromium_unreachable_code) {
+        //       return;
         //     }
+        //     return;
         //   }
         // }
         //
         // fn bar() {
-        //   {
-        //     if (true) {
-        //       return;
-        //     }
-        //   }
+        //   return;
         // }
         auto rule = builtin::DiagnosticRule::kChromiumUnreachableCode;
         auto func_severity = builtin::DiagnosticSeverity::kOff;
         auto block_severity = builtin::DiagnosticSeverity::kInfo;
-        auto if_severity = builtin::DiagnosticSeverity::kInfo;
+        auto if_severity = builtin::DiagnosticSeverity::kError;
+        auto if_body_severity = builtin::DiagnosticSeverity::kWarning;
+        auto else_body_severity = builtin::DiagnosticSeverity::kInfo;
         auto attr = [&](auto severity) {
             return utils::Vector{DiagnosticAttribute(severity, "chromium_unreachable_code")};
         };
 
-        auto* return_1 = Return();
-        auto* if_1 = If(Expr(true), Block(utils::Vector{return_1}, attr(if_severity)));
-        auto* block_1 = Block(utils::Vector{if_1}, attr(block_severity));
+        auto* return_foo_if = Return();
+        auto* return_foo_elseif = Return();
+        auto* return_foo_else = Return();
+        auto* return_foo_block = Return();
+        auto* else_stmt = Block(utils::Vector{return_foo_else}, attr(else_body_severity));
+        auto* elseif = If(Expr(false), Block(return_foo_elseif), Else(else_stmt));
+        auto* if_foo = If(Expr(true), Block(utils::Vector{return_foo_if}, attr(if_body_severity)),
+                          Else(elseif), attr(if_severity));
+        auto* block_1 = Block(utils::Vector{if_foo, return_foo_block}, attr(block_severity));
         auto* func_attr = DiagnosticAttribute(func_severity, "chromium_unreachable_code");
         auto* foo = Func("foo", {}, ty.void_(), utils::Vector{block_1}, utils::Vector{func_attr});
 
-        auto* return_2 = Return();
-        auto* bar = Func("bar", {}, ty.void_(), utils::Vector{return_2});
+        auto* return_bar = Return();
+        auto* bar = Func("bar", {}, ty.void_(), utils::Vector{return_bar});
 
         auto p = Build();
         EXPECT_TRUE(p.IsValid()) << p.Diagnostics().str();
 
         EXPECT_EQ(p.Sem().DiagnosticSeverity(foo, rule), func_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(block_1, rule), block_severity);
-        EXPECT_EQ(p.Sem().DiagnosticSeverity(if_1, rule), block_severity);
-        EXPECT_EQ(p.Sem().DiagnosticSeverity(return_1, rule), if_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(if_foo, rule), if_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(if_foo->condition, rule), if_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(if_foo->body, rule), if_body_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(return_foo_if, rule), if_body_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(elseif, rule), if_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(elseif->condition, rule), if_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(elseif->body, rule), if_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(return_foo_elseif, rule), if_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(else_stmt, rule), else_body_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(return_foo_else, rule), else_body_severity);
+
         EXPECT_EQ(p.Sem().DiagnosticSeverity(bar, rule), global_severity);
-        EXPECT_EQ(p.Sem().DiagnosticSeverity(return_2, rule), global_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(return_bar, rule), global_severity);
     }
 };
 

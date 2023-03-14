@@ -942,6 +942,14 @@ bool GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
 bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
     {
         auto out = line();
+
+        if (!stmt->attributes.IsEmpty()) {
+            if (!EmitAttributes(out, stmt->attributes)) {
+                return false;
+            }
+            out << " ";
+        }
+
         out << "if (";
         if (!EmitExpression(out, stmt->condition)) {
             return false;

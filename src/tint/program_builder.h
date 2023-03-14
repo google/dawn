@@ -3130,14 +3130,16 @@ class ProgramBuilder {
     /// @param condition the if statement condition expression
     /// @param body the if statement body
     /// @param else_stmt optional else statement
+    /// @param attributes optional attributes
     /// @returns the if statement pointer
     template <typename CONDITION>
     const ast::IfStatement* If(const Source& source,
                                CONDITION&& condition,
                                const ast::BlockStatement* body,
-                               const ElseStmt else_stmt = ElseStmt()) {
+                               const ElseStmt else_stmt = ElseStmt(),
+                               utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
         return create<ast::IfStatement>(source, Expr(std::forward<CONDITION>(condition)), body,
-                                        else_stmt.stmt);
+                                        else_stmt.stmt, std::move(attributes));
     }
 
     /// Creates a ast::IfStatement with input condition, body, and optional
@@ -3145,13 +3147,15 @@ class ProgramBuilder {
     /// @param condition the if statement condition expression
     /// @param body the if statement body
     /// @param else_stmt optional else statement
+    /// @param attributes optional attributes
     /// @returns the if statement pointer
     template <typename CONDITION>
     const ast::IfStatement* If(CONDITION&& condition,
                                const ast::BlockStatement* body,
-                               const ElseStmt else_stmt = ElseStmt()) {
+                               const ElseStmt else_stmt = ElseStmt(),
+                               utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
         return create<ast::IfStatement>(Expr(std::forward<CONDITION>(condition)), body,
-                                        else_stmt.stmt);
+                                        else_stmt.stmt, std::move(attributes));
     }
 
     /// Creates an Else object.

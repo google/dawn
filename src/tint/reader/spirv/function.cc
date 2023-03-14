@@ -726,7 +726,7 @@ struct IfStatementBuilder final : public Castable<IfStatementBuilder, StatementB
     /// @param builder the program builder
     /// @returns the built ast::IfStatement
     const ast::IfStatement* Build(ProgramBuilder* builder) const override {
-        return builder->create<ast::IfStatement>(Source{}, cond, body, else_stmt);
+        return builder->create<ast::IfStatement>(Source{}, cond, body, else_stmt, utils::Empty);
     }
 
     /// If-statement condition
@@ -3325,7 +3325,8 @@ const ast::Statement* FunctionEmitter::MakeSimpleIf(const ast::Expression* condi
         else_block = create<ast::BlockStatement>(StatementList{else_stmt}, utils::Empty);
     }
 
-    auto* if_stmt = create<ast::IfStatement>(Source{}, condition, if_block, else_block);
+    auto* if_stmt =
+        create<ast::IfStatement>(Source{}, condition, if_block, else_block, utils::Empty);
 
     return if_stmt;
 }

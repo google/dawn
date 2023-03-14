@@ -488,9 +488,10 @@ class ParserImpl {
     /// Parses a `variable_statement` grammar element
     /// @returns the parsed variable or nullptr
     Maybe<const ast::VariableDeclStatement*> variable_statement();
-    /// Parses a `if_statement` grammar element
+    /// Parses a `if_statement` grammar element, with the attribute list provided as `attrs`.
+    /// @param attrs the list of attributes for the statement
     /// @returns the parsed statement or nullptr
-    Maybe<const ast::IfStatement*> if_statement();
+    Maybe<const ast::IfStatement*> if_statement(AttributeList& attrs);
     /// Parses a `switch_statement` grammar element
     /// @returns the parsed statement or nullptr
     Maybe<const ast::SwitchStatement*> switch_statement();

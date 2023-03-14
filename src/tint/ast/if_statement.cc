@@ -25,8 +25,13 @@ IfStatement::IfStatement(ProgramID pid,
                          const Source& src,
                          const Expression* cond,
                          const BlockStatement* b,
-                         const Statement* else_stmt)
-    : Base(pid, nid, src), condition(cond), body(b), else_statement(else_stmt) {
+                         const Statement* else_stmt,
+                         utils::VectorRef<const Attribute*> attrs)
+    : Base(pid, nid, src),
+      condition(cond),
+      body(b),
+      else_statement(else_stmt),
+      attributes(std::move(attrs)) {
     TINT_ASSERT(AST, condition);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition, program_id);
     TINT_ASSERT(AST, body);
@@ -34,6 +39,10 @@ IfStatement::IfStatement(ProgramID pid,
     if (else_statement) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, else_statement, program_id);
         TINT_ASSERT(AST, (else_statement->IsAnyOf<IfStatement, BlockStatement>()));
+    }
+    for (auto* attr : attributes) {
+        TINT_ASSERT(AST, attr);
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
     }
 }
 
@@ -47,7 +56,8 @@ const IfStatement* IfStatement::Clone(CloneContext* ctx) const {
     auto* cond = ctx->Clone(condition);
     auto* b = ctx->Clone(body);
     auto* el = ctx->Clone(else_statement);
-    return ctx->dst->create<IfStatement>(src, cond, b, el);
+    auto attrs = ctx->Clone(attributes);
+    return ctx->dst->create<IfStatement>(src, cond, b, el, std::move(attrs));
 }
 
 }  // namespace tint::ast
