@@ -21,9 +21,9 @@
 #include "dawn/common/Assert.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Format.h"
+#include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d12/BufferD3D12.h"
 #include "dawn/native/d3d12/CommandRecordingContext.h"
-#include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 
 namespace dawn::native::d3d12 {

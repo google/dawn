@@ -15,24 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_D3D12_PLATFORM_H_
 #define SRC_DAWN_NATIVE_D3D12_D3D12_PLATFORM_H_
 
-// Pre-emptively include windows.h but remove its macros so that they aren't set when declaring the
-// COM interfaces. Otherwise ID3D12InfoQueue::GetMessage would be either GetMessageA or GetMessageW
-// which causes compilation errors.
-// NOLINTNEXTLINE(build/include_order)
-#include "dawn/common/windows_with_undefs.h"
+#include "dawn/native/d3d/d3d_platform.h"
 
-#include <d3d11_2.h>    // NOLINT(build/include_order)
 #include <d3d11on12.h>  // NOLINT(build/include_order)
 #include <d3d12.h>      // NOLINT(build/include_order)
-#include <dxcapi.h>     // NOLINT(build/include_order)
-#include <dxgi1_4.h>    // NOLINT(build/include_order)
-#include <wrl.h>        // NOLINT(build/include_order)
-
-// DXProgrammableCapture.h takes a dependency on other platform header
-// files, so it must be defined after them.
-#include <DXProgrammableCapture.h>  // NOLINT(build/include_order)
-#include <dxgidebug.h>              // NOLINT(build/include_order)
-
-using Microsoft::WRL::ComPtr;
 
 #endif  // SRC_DAWN_NATIVE_D3D12_D3D12_PLATFORM_H_

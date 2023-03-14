@@ -253,6 +253,18 @@ endif()
 
 if (DAWN_ENABLE_D3D12)
     target_sources(dawn_native PRIVATE
+        "d3d/BlobD3D.cpp"
+        "d3d/BlobD3D.h"
+        "d3d/D3DError.cpp"
+        "d3d/D3DError.h"
+        "d3d/PlatformFunctions.cpp"
+        "d3d/PlatformFunctions.h"
+        "d3d/d3d_platform.h"
+    )
+endif()
+
+if (DAWN_ENABLE_D3D12)
+    target_sources(dawn_native PRIVATE
         "${DAWN_INCLUDE_DIR}/dawn/native/D3D12Backend.h"
         "d3d12/AdapterD3D12.cpp"
         "d3d12/AdapterD3D12.h"
@@ -262,8 +274,6 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/BindGroupD3D12.h"
         "d3d12/BindGroupLayoutD3D12.cpp"
         "d3d12/BindGroupLayoutD3D12.h"
-        "d3d12/BlobD3D12.cpp"
-        "d3d12/BlobD3D12.h"
         "d3d12/BufferD3D12.cpp"
         "d3d12/BufferD3D12.h"
         "d3d12/CPUDescriptorHeapAllocationD3D12.cpp"
@@ -278,8 +288,6 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/ComputePipelineD3D12.h"
         "d3d12/D3D11on12Util.cpp"
         "d3d12/D3D11on12Util.h"
-        "d3d12/D3D12Error.cpp"
-        "d3d12/D3D12Error.h"
         "d3d12/D3D12Info.cpp"
         "d3d12/D3D12Info.h"
         "d3d12/DeviceD3D12.cpp"
@@ -302,8 +310,8 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/PageableD3D12.h"
         "d3d12/PipelineLayoutD3D12.cpp"
         "d3d12/PipelineLayoutD3D12.h"
-        "d3d12/PlatformFunctions.cpp"
-        "d3d12/PlatformFunctions.h"
+        "d3d12/PlatformFunctionsD3D12.cpp"
+        "d3d12/PlatformFunctionsD3D12.h"
         "d3d12/QuerySetD3D12.cpp"
         "d3d12/QuerySetD3D12.h"
         "d3d12/QueueD3D12.cpp"

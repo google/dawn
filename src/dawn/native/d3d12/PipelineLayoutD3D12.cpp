@@ -19,10 +19,10 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
-#include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
-#include "dawn/native/d3d12/PlatformFunctions.h"
+#include "dawn/native/d3d12/PlatformFunctionsD3D12.h"
 
 using Microsoft::WRL::ComPtr;
 

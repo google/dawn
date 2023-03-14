@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/d3d12/BlobD3D12.h"
+#include "dawn/native/d3d/BlobD3D.h"
 
 namespace dawn::native {
 

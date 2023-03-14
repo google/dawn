@@ -1,4 +1,4 @@
-// Copyright 2018 The Dawn Authors
+// Copyright 2023 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/d3d12/PlatformFunctions.h"
+#include "dawn/native/d3d/PlatformFunctions.h"
 
 #include <comdef.h>
 
@@ -23,7 +23,7 @@
 
 #include "dawn/common/DynamicLib.h"
 
-namespace dawn::native::d3d12 {
+namespace dawn::native::d3d {
 namespace {
 // Extract Version from "10.0.{Version}.0" if possible, otherwise return 0.
 uint32_t GetWindowsSDKVersionFromDirectoryName(const char* directoryName) {
@@ -101,53 +101,9 @@ PlatformFunctions::PlatformFunctions() = default;
 PlatformFunctions::~PlatformFunctions() = default;
 
 MaybeError PlatformFunctions::LoadFunctions() {
-    DAWN_TRY(LoadD3D12());
     DAWN_TRY(LoadDXGI());
     LoadDXCLibraries();
     DAWN_TRY(LoadFXCompiler());
-    DAWN_TRY(LoadD3D11());
-    LoadPIXRuntime();
-    return {};
-}
-
-MaybeError PlatformFunctions::LoadD3D12() {
-#if DAWN_PLATFORM_IS(WINUWP)
-    d3d12CreateDevice = &D3D12CreateDevice;
-    d3d12GetDebugInterface = &D3D12GetDebugInterface;
-    d3d12SerializeRootSignature = &D3D12SerializeRootSignature;
-    d3d12CreateRootSignatureDeserializer = &D3D12CreateRootSignatureDeserializer;
-    d3d12SerializeVersionedRootSignature = &D3D12SerializeVersionedRootSignature;
-    d3d12CreateVersionedRootSignatureDeserializer = &D3D12CreateVersionedRootSignatureDeserializer;
-#else
-    std::string error;
-    if (!mD3D12Lib.Open("d3d12.dll", &error) ||
-        !mD3D12Lib.GetProc(&d3d12CreateDevice, "D3D12CreateDevice", &error) ||
-        !mD3D12Lib.GetProc(&d3d12GetDebugInterface, "D3D12GetDebugInterface", &error) ||
-        !mD3D12Lib.GetProc(&d3d12SerializeRootSignature, "D3D12SerializeRootSignature", &error) ||
-        !mD3D12Lib.GetProc(&d3d12CreateRootSignatureDeserializer,
-                           "D3D12CreateRootSignatureDeserializer", &error) ||
-        !mD3D12Lib.GetProc(&d3d12SerializeVersionedRootSignature,
-                           "D3D12SerializeVersionedRootSignature", &error) ||
-        !mD3D12Lib.GetProc(&d3d12CreateVersionedRootSignatureDeserializer,
-                           "D3D12CreateVersionedRootSignatureDeserializer", &error)) {
-        return DAWN_INTERNAL_ERROR(error.c_str());
-    }
-#endif
-
-    return {};
-}
-
-MaybeError PlatformFunctions::LoadD3D11() {
-#if DAWN_PLATFORM_IS(WINUWP)
-    d3d11on12CreateDevice = &D3D11On12CreateDevice;
-#else
-    std::string error;
-    if (!mD3D11Lib.Open("d3d11.dll", &error) ||
-        !mD3D11Lib.GetProc(&d3d11on12CreateDevice, "D3D11On12CreateDevice", &error)) {
-        return DAWN_INTERNAL_ERROR(error.c_str());
-    }
-#endif
-
     return {};
 }
 
@@ -240,28 +196,10 @@ MaybeError PlatformFunctions::LoadFXCompiler() {
     return {};
 }
 
-bool PlatformFunctions::IsPIXEventRuntimeLoaded() const {
-    return mPIXEventRuntimeLib.Valid();
-}
-
 // Use Backend::IsDXCAvaliable if possible, which also check the DXC is no older than a given
 // version
 bool PlatformFunctions::IsDXCBinaryAvailable() const {
     return mDXILLib.Valid() && mDXCompilerLib.Valid();
 }
 
-void PlatformFunctions::LoadPIXRuntime() {
-    // TODO(dawn:766):
-    // In UWP PIX should be statically linked WinPixEventRuntime_UAP.lib
-    // So maybe we should put WinPixEventRuntime as a third party package
-    // Currently PIX is not going to be loaded in UWP since the following
-    // mPIXEventRuntimeLib.Open will fail.
-    if (!mPIXEventRuntimeLib.Open("WinPixEventRuntime.dll") ||
-        !mPIXEventRuntimeLib.GetProc(&pixBeginEventOnCommandList, "PIXBeginEventOnCommandList") ||
-        !mPIXEventRuntimeLib.GetProc(&pixEndEventOnCommandList, "PIXEndEventOnCommandList") ||
-        !mPIXEventRuntimeLib.GetProc(&pixSetMarkerOnCommandList, "PIXSetMarkerOnCommandList")) {
-        mPIXEventRuntimeLib.Close();
-    }
-}
-
-}  // namespace dawn::native::d3d12
+}  // namespace dawn::native::d3d

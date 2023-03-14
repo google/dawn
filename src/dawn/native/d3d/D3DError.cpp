@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/d3d12/D3D12Error.h"
+#include "dawn/native/d3d/D3DError.h"
 
 #include <iomanip>
 #include <sstream>
 #include <string>
 
-namespace dawn::native::d3d12 {
+namespace dawn::native::d3d {
 const char* HRESULTAsString(HRESULT result) {
     // There's a lot of possible HRESULTS, but these ones are the ones specifically listed as
-    // being returned from D3D12, in addition to fake codes used internally for testing.
+    // being returned from D3D11 and D3D12, in addition to fake codes used internally for testing.
     // https://docs.microsoft.com/en-us/windows/win32/direct3d12/d3d12-graphics-reference-returnvalues
     switch (result) {
         case S_OK:
@@ -83,4 +83,4 @@ MaybeError CheckOutOfMemoryHRESULTImpl(HRESULT result, const char* context) {
     return CheckHRESULTImpl(result, context);
 }
 
-}  // namespace dawn::native::d3d12
+}  // namespace dawn::native::d3d

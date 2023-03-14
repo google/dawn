@@ -28,7 +28,7 @@
 #include "dawn/native/d3d12/ComputePipelineD3D12.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/PipelineLayoutD3D12.h"
-#include "dawn/native/d3d12/PlatformFunctions.h"
+#include "dawn/native/d3d12/PlatformFunctionsD3D12.h"
 #include "dawn/native/d3d12/QuerySetD3D12.h"
 #include "dawn/native/d3d12/RenderPassBuilderD3D12.h"
 #include "dawn/native/d3d12/RenderPipelineD3D12.h"

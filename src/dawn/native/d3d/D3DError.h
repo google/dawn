@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NATIVE_D3D12_D3D12ERROR_H_
-#define SRC_DAWN_NATIVE_D3D12_D3D12ERROR_H_
+#ifndef SRC_DAWN_NATIVE_D3D_D3DERROR_H_
+#define SRC_DAWN_NATIVE_D3D_D3DERROR_H_
 
-#include <d3d12.h>
+#include <winerror.h>
 #include "dawn/native/Error.h"
 #include "dawn/native/ErrorInjector.h"
 
-namespace dawn::native::d3d12 {
+namespace dawn::native::d3d {
 
 constexpr HRESULT E_FAKE_ERROR_FOR_TESTING = MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0xFF);
 constexpr HRESULT E_FAKE_OUTOFMEMORY_ERROR_FOR_TESTING =
@@ -31,15 +31,15 @@ MaybeError CheckHRESULTImpl(HRESULT result, const char* context);
 // Uses CheckRESULT but returns OOM specific error when recoverable.
 MaybeError CheckOutOfMemoryHRESULTImpl(HRESULT result, const char* context);
 
-#define CheckHRESULT(resultIn, contextIn)    \
-    ::dawn::native::d3d12::CheckHRESULTImpl( \
-        INJECT_ERROR_OR_RUN(resultIn, E_FAKE_ERROR_FOR_TESTING), contextIn)
-#define CheckOutOfMemoryHRESULT(resultIn, contextIn)                        \
-    ::dawn::native::d3d12::CheckOutOfMemoryHRESULTImpl(                     \
-        INJECT_ERROR_OR_RUN(resultIn, E_FAKE_OUTOFMEMORY_ERROR_FOR_TESTING, \
-                            E_FAKE_ERROR_FOR_TESTING),                      \
+#define CheckHRESULT(resultIn, contextIn)  \
+    ::dawn::native::d3d::CheckHRESULTImpl( \
+        INJECT_ERROR_OR_RUN(resultIn, ::dawn::native::d3d::E_FAKE_ERROR_FOR_TESTING), contextIn)
+#define CheckOutOfMemoryHRESULT(resultIn, contextIn)                                             \
+    ::dawn::native::d3d::CheckOutOfMemoryHRESULTImpl(                                            \
+        INJECT_ERROR_OR_RUN(resultIn, ::dawn::native::d3d::E_FAKE_OUTOFMEMORY_ERROR_FOR_TESTING, \
+                            ::dawn::native::d3d::E_FAKE_ERROR_FOR_TESTING),                      \
         contextIn)
 
-}  // namespace dawn::native::d3d12
+}  // namespace dawn::native::d3d
 
-#endif  // SRC_DAWN_NATIVE_D3D12_D3D12ERROR_H_
+#endif  // SRC_DAWN_NATIVE_D3D_D3DERROR_H_

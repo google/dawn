@@ -24,7 +24,7 @@
 #include "dawn/common/Platform.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "dawn/native/d3d/d3d_platform.h"
 #endif  // DAWN_PLATFORM_IS(WINDOWS)
 
 // Forward declare IUnknown

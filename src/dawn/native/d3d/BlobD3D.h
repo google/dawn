@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef SRC_DAWN_NATIVE_D3D_BLOBD3D_H_
+#define SRC_DAWN_NATIVE_D3D_BLOBD3D_H_
+
 #include "dawn/native/Blob.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "dawn/native/d3d/d3d_platform.h"
 
 namespace dawn::native {
 
@@ -21,3 +24,5 @@ Blob CreateBlob(ComPtr<ID3DBlob> blob);
 Blob CreateBlob(ComPtr<IDxcBlob> blob);
 
 }  // namespace dawn::native
+
+#endif  // SRC_DAWN_NATIVE_D3D_BLOBD3D_H_

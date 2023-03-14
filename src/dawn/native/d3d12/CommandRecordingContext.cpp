@@ -20,8 +20,8 @@
 #include <string>
 #include <utility>
 
+#include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d12/CommandAllocatorManager.h"
-#include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/HeapD3D12.h"
 #include "dawn/native/d3d12/ResidencyManagerD3D12.h"
