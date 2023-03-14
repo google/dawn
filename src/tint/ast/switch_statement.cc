@@ -26,13 +26,18 @@ SwitchStatement::SwitchStatement(ProgramID pid,
                                  NodeID nid,
                                  const Source& src,
                                  const Expression* cond,
-                                 utils::VectorRef<const CaseStatement*> b)
-    : Base(pid, nid, src), condition(cond), body(std::move(b)) {
+                                 utils::VectorRef<const CaseStatement*> b,
+                                 utils::VectorRef<const Attribute*> attrs)
+    : Base(pid, nid, src), condition(cond), body(std::move(b)), attributes(std::move(attrs)) {
     TINT_ASSERT(AST, condition);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition, program_id);
     for (auto* stmt : body) {
         TINT_ASSERT(AST, stmt);
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, stmt, program_id);
+    }
+    for (auto* attr : attributes) {
+        TINT_ASSERT(AST, attr);
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
     }
 }
 
@@ -45,7 +50,8 @@ const SwitchStatement* SwitchStatement::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto* cond = ctx->Clone(condition);
     auto b = ctx->Clone(body);
-    return ctx->dst->create<SwitchStatement>(src, cond, std::move(b));
+    auto attrs = ctx->Clone(attributes);
+    return ctx->dst->create<SwitchStatement>(src, cond, std::move(b), std::move(attrs));
 }
 
 }  // namespace tint::ast

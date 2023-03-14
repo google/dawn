@@ -493,8 +493,9 @@ class ParserImpl {
     /// @returns the parsed statement or nullptr
     Maybe<const ast::IfStatement*> if_statement(AttributeList& attrs);
     /// Parses a `switch_statement` grammar element
+    /// @param attrs the list of attributes for the statement
     /// @returns the parsed statement or nullptr
-    Maybe<const ast::SwitchStatement*> switch_statement();
+    Maybe<const ast::SwitchStatement*> switch_statement(AttributeList& attrs);
     /// Parses a `switch_body` grammar element
     /// @returns the parsed statement or nullptr
     Maybe<const ast::CaseStatement*> switch_body();

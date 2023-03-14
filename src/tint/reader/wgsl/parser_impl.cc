@@ -1272,7 +1272,7 @@ Maybe<const ast::Statement*> ParserImpl::statement() {
         return stmt_if.value;
     }
 
-    auto sw = switch_statement();
+    auto sw = switch_statement(attrs.value);
     if (sw.errored) {
         return Failure::kErrored;
     }
@@ -1604,8 +1604,8 @@ Maybe<const ast::IfStatement*> ParserImpl::if_statement(AttributeList& attrs) {
 }
 
 // switch_statement
-//   : SWITCH expression BRACKET_LEFT switch_body+ BRACKET_RIGHT
-Maybe<const ast::SwitchStatement*> ParserImpl::switch_statement() {
+//   : attribute* SWITCH expression BRACKET_LEFT switch_body+ BRACKET_RIGHT
+Maybe<const ast::SwitchStatement*> ParserImpl::switch_statement(AttributeList& attrs) {
     Source source;
     if (!match(Token::Type::kSwitch, &source)) {
         return Failure::kNoMatch;
@@ -1643,7 +1643,8 @@ Maybe<const ast::SwitchStatement*> ParserImpl::switch_statement() {
         return Failure::kErrored;
     }
 
-    return create<ast::SwitchStatement>(source, condition.value, body.value);
+    TINT_DEFER(attrs.Clear());
+    return create<ast::SwitchStatement>(source, condition.value, body.value, std::move(attrs));
 }
 
 // switch_body

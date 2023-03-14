@@ -3352,14 +3352,15 @@ class ProgramBuilder {
     /// @param condition the condition expression initializer
     /// @param cases case statements
     /// @returns the switch statement pointer
-    template <typename ExpressionInit, typename... Cases>
+    template <typename ExpressionInit, typename... Cases, typename = DisableIfVectorLike<Cases...>>
     const ast::SwitchStatement* Switch(const Source& source,
                                        ExpressionInit&& condition,
                                        Cases&&... cases) {
         return create<ast::SwitchStatement>(
             source, Expr(std::forward<ExpressionInit>(condition)),
             utils::Vector<const ast::CaseStatement*, sizeof...(cases)>{
-                std::forward<Cases>(cases)...});
+                std::forward<Cases>(cases)...},
+            utils::Empty);
     }
 
     /// Creates a ast::SwitchStatement with input expression and cases
@@ -3368,12 +3369,44 @@ class ProgramBuilder {
     /// @returns the switch statement pointer
     template <typename ExpressionInit,
               typename... Cases,
-              typename = DisableIfSource<ExpressionInit>>
+              typename = DisableIfSource<ExpressionInit>,
+              typename = DisableIfVectorLike<Cases...>>
     const ast::SwitchStatement* Switch(ExpressionInit&& condition, Cases&&... cases) {
         return create<ast::SwitchStatement>(
             Expr(std::forward<ExpressionInit>(condition)),
             utils::Vector<const ast::CaseStatement*, sizeof...(cases)>{
-                std::forward<Cases>(cases)...});
+                std::forward<Cases>(cases)...},
+            utils::Empty);
+    }
+
+    /// Creates a ast::SwitchStatement with input expression, cases, and optional attributes
+    /// @param source the source information
+    /// @param condition the condition expression initializer
+    /// @param cases case statements
+    /// @param attributes optional attributes
+    /// @returns the switch statement pointer
+    template <typename ExpressionInit>
+    const ast::SwitchStatement* Switch(
+        const Source& source,
+        ExpressionInit&& condition,
+        utils::VectorRef<const ast::CaseStatement*> cases,
+        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
+        return create<ast::SwitchStatement>(source, Expr(std::forward<ExpressionInit>(condition)),
+                                            cases, std::move(attributes));
+    }
+
+    /// Creates a ast::SwitchStatement with input expression, cases, and optional attributes
+    /// @param condition the condition expression initializer
+    /// @param cases case statements
+    /// @param attributes optional attributes
+    /// @returns the switch statement pointer
+    template <typename ExpressionInit, typename = DisableIfSource<ExpressionInit>>
+    const ast::SwitchStatement* Switch(
+        ExpressionInit&& condition,
+        utils::VectorRef<const ast::CaseStatement*> cases,
+        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
+        return create<ast::SwitchStatement>(Expr(std::forward<ExpressionInit>(condition)), cases,
+                                            std::move(attributes));
     }
 
     /// Creates a ast::CaseStatement with input list of selectors, and body

@@ -1,0 +1,76 @@
+diagnostic_filtering/switch_statement_attribute.wgsl:7:27 warning: 'dpdx' must only be called from uniform control flow
+  switch (i32(x == 0.0 && dpdx(1.0) == 0.0)) {
+                          ^^^^^^^^^
+
+diagnostic_filtering/switch_statement_attribute.wgsl:7:24 note: control flow depends on possibly non-uniform value
+  switch (i32(x == 0.0 && dpdx(1.0) == 0.0)) {
+                       ^^
+
+diagnostic_filtering/switch_statement_attribute.wgsl:7:15 note: user-defined input 'x' of 'main' may be non-uniform
+  switch (i32(x == 0.0 && dpdx(1.0) == 0.0)) {
+              ^
+
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 35
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %x_1
+               OpExecutionMode %main OriginUpperLeft
+               OpName %x_1 "x_1"
+               OpName %t "t"
+               OpName %s "s"
+               OpName %main_inner "main_inner"
+               OpName %x "x"
+               OpName %main "main"
+               OpDecorate %x_1 Location 0
+               OpDecorate %t DescriptorSet 0
+               OpDecorate %t Binding 1
+               OpDecorate %s DescriptorSet 0
+               OpDecorate %s Binding 2
+      %float = OpTypeFloat 32
+%_ptr_Input_float = OpTypePointer Input %float
+        %x_1 = OpVariable %_ptr_Input_float Input
+          %6 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_6 = OpTypePointer UniformConstant %6
+          %t = OpVariable %_ptr_UniformConstant_6 UniformConstant
+          %9 = OpTypeSampler
+%_ptr_UniformConstant_9 = OpTypePointer UniformConstant %9
+          %s = OpVariable %_ptr_UniformConstant_9 UniformConstant
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void %float
+        %int = OpTypeInt 32 1
+         %18 = OpConstantNull %float
+       %bool = OpTypeBool
+    %float_1 = OpConstant %float 1
+      %int_0 = OpConstant %int 0
+      %int_1 = OpConstant %int 1
+         %30 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %10
+          %x = OpFunctionParameter %float
+         %14 = OpLabel
+         %19 = OpFOrdEqual %bool %x %18
+               OpSelectionMerge %21 None
+               OpBranchConditional %19 %22 %21
+         %22 = OpLabel
+         %23 = OpDPdx %float %float_1
+         %25 = OpFOrdEqual %bool %23 %18
+               OpBranch %21
+         %21 = OpLabel
+         %26 = OpPhi %bool %19 %14 %25 %22
+         %16 = OpSelect %int %26 %int_1 %int_0
+               OpSelectionMerge %15 None
+               OpSwitch %16 %29
+         %29 = OpLabel
+               OpBranch %15
+         %15 = OpLabel
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %30
+         %32 = OpLabel
+         %34 = OpLoad %float %x_1
+         %33 = OpFunctionCall %void %main_inner %34
+               OpReturn
+               OpFunctionEnd

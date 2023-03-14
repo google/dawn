@@ -14,6 +14,7 @@
 
 #include "src/tint/ast/switch_statement.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
 
@@ -29,7 +30,7 @@ TEST_F(SwitchStatementTest, Creation) {
     auto* ident = Expr("ident");
     utils::Vector body{case_stmt};
 
-    auto* stmt = create<SwitchStatement>(ident, body);
+    auto* stmt = create<SwitchStatement>(ident, body, utils::Empty);
     EXPECT_EQ(stmt->condition, ident);
     ASSERT_EQ(stmt->body.Length(), 1u);
     EXPECT_EQ(stmt->body[0], case_stmt);
@@ -37,10 +38,20 @@ TEST_F(SwitchStatementTest, Creation) {
 
 TEST_F(SwitchStatementTest, Creation_WithSource) {
     auto* ident = Expr("ident");
-    auto* stmt = create<SwitchStatement>(Source{Source::Location{20, 2}}, ident, utils::Empty);
+    auto* stmt =
+        create<SwitchStatement>(Source{Source::Location{20, 2}}, ident, utils::Empty, utils::Empty);
     auto src = stmt->source;
     EXPECT_EQ(src.range.begin.line, 20u);
     EXPECT_EQ(src.range.begin.column, 2u);
+}
+
+TEST_F(SwitchStatementTest, Creation_WithAttributes) {
+    auto* attr1 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "foo");
+    auto* attr2 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "bar");
+    auto* ident = Expr("ident");
+    auto* stmt = create<SwitchStatement>(ident, utils::Empty, utils::Vector{attr1, attr2});
+
+    EXPECT_THAT(stmt->attributes, testing::ElementsAre(attr1, attr2));
 }
 
 TEST_F(SwitchStatementTest, IsSwitch) {
@@ -48,7 +59,7 @@ TEST_F(SwitchStatementTest, IsSwitch) {
     auto* ident = Expr("ident");
     utils::Vector body{create<CaseStatement>(lit, Block())};
 
-    auto* stmt = create<SwitchStatement>(ident, body);
+    auto* stmt = create<SwitchStatement>(ident, body, utils::Empty);
     EXPECT_TRUE(stmt->Is<SwitchStatement>());
 }
 
@@ -60,7 +71,7 @@ TEST_F(SwitchStatementTest, Assert_Null_Condition) {
             CaseStatementList cases;
             cases.Push(
                 b.create<CaseStatement>(utils::Vector{b.CaseSelector(b.Expr(1_i))}, b.Block()));
-            b.create<SwitchStatement>(nullptr, cases);
+            b.create<SwitchStatement>(nullptr, cases, utils::Empty);
         },
         "internal compiler error");
 }
@@ -70,7 +81,7 @@ TEST_F(SwitchStatementTest, Assert_Null_CaseStatement) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<SwitchStatement>(b.Expr(true), CaseStatementList{nullptr});
+            b.create<SwitchStatement>(b.Expr(true), CaseStatementList{nullptr}, utils::Empty);
         },
         "internal compiler error");
 }
@@ -80,13 +91,15 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_Condition) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<SwitchStatement>(b2.Expr(true), utils::Vector{
-                                                          b1.create<CaseStatement>(
-                                                              utils::Vector{
-                                                                  b1.CaseSelector(b1.Expr(1_i)),
-                                                              },
-                                                              b1.Block()),
-                                                      });
+            b1.create<SwitchStatement>(b2.Expr(true),
+                                       utils::Vector{
+                                           b1.create<CaseStatement>(
+                                               utils::Vector{
+                                                   b1.CaseSelector(b1.Expr(1_i)),
+                                               },
+                                               b1.Block()),
+                                       },
+                                       utils::Empty);
         },
         "internal compiler error");
 }
@@ -96,13 +109,15 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_CaseStatement) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<SwitchStatement>(b1.Expr(true), utils::Vector{
-                                                          b2.create<CaseStatement>(
-                                                              utils::Vector{
-                                                                  b2.CaseSelector(b2.Expr(1_i)),
-                                                              },
-                                                              b2.Block()),
-                                                      });
+            b1.create<SwitchStatement>(b1.Expr(true),
+                                       utils::Vector{
+                                           b2.create<CaseStatement>(
+                                               utils::Vector{
+                                                   b2.CaseSelector(b2.Expr(1_i)),
+                                               },
+                                               b2.Block()),
+                                       },
+                                       utils::Empty);
         },
         "internal compiler error");
 }

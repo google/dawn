@@ -1170,6 +1170,14 @@ bool GeneratorImpl::EmitConstAssert(const ast::ConstAssert* stmt) {
 bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     {
         auto out = line();
+
+        if (!stmt->attributes.IsEmpty()) {
+            if (!EmitAttributes(out, stmt->attributes)) {
+                return false;
+            }
+            out << " ";
+        }
+
         out << "switch(";
         if (!EmitExpression(out, stmt->condition)) {
             return false;

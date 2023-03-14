@@ -1045,6 +1045,39 @@ TEST_F(OverrideAttributeTest, DuplicateAttribute) {
 12:34 note: first attribute declared here)");
 }
 
+using SwitchStatementAttributeTest = TestWithParams;
+TEST_P(SwitchStatementAttributeTest, IsValid) {
+    auto& params = GetParam();
+
+    WrapInFunction(Switch(Expr(0_a), utils::Vector{DefaultCase()},
+                          createAttributes(Source{{12, 34}}, *this, params.kind)));
+
+    if (params.should_pass) {
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for switch statements");
+    }
+}
+INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
+                         SwitchStatementAttributeTest,
+                         testing::Values(TestParams{AttributeKind::kAlign, false},
+                                         TestParams{AttributeKind::kBinding, false},
+                                         TestParams{AttributeKind::kBuiltin, false},
+                                         TestParams{AttributeKind::kDiagnostic, true},
+                                         TestParams{AttributeKind::kGroup, false},
+                                         TestParams{AttributeKind::kId, false},
+                                         TestParams{AttributeKind::kInterpolate, false},
+                                         TestParams{AttributeKind::kInvariant, false},
+                                         TestParams{AttributeKind::kLocation, false},
+                                         TestParams{AttributeKind::kMustUse, false},
+                                         TestParams{AttributeKind::kOffset, false},
+                                         TestParams{AttributeKind::kSize, false},
+                                         TestParams{AttributeKind::kStage, false},
+                                         TestParams{AttributeKind::kStride, false},
+                                         TestParams{AttributeKind::kWorkgroup, false},
+                                         TestParams{AttributeKind::kBindingAndGroup, false}));
+
 using IfStatementAttributeTest = TestWithParams;
 TEST_P(IfStatementAttributeTest, IsValid) {
     auto& params = GetParam();
