@@ -478,5 +478,34 @@ TEST_F(ResolverCallValidationTest, MustUseBuiltin) {
     EXPECT_EQ(r()->error(), "12:34 error: ignoring return value of builtin 'max'");
 }
 
+TEST_F(ResolverCallValidationTest, UnexpectedFunctionTemplateArgs) {
+    // fn a() {}
+    // fn b() {
+    //   a<i32>();
+    // }
+    Func(Source{{56, 78}}, "a", utils::Empty, ty.void_(), utils::Empty);
+    Func("b", utils::Empty, ty.void_(),
+         utils::Vector{
+             CallStmt(Call(Ident(Source{{12, 34}}, "a", "i32"))),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: function 'a' does not take template arguments
+56:78 note: function 'a' declared here)");
+}
+
+TEST_F(ResolverCallValidationTest, UnexpectedBuiltinTemplateArgs) {
+    // fn f() {
+    //   min<i32>(1, 2);
+    // }
+    Func("f", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Var("v", Call(Ident(Source{{12, 34}}, "min", "i32"), 1_a, 2_a))),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: builtin 'min' does not take template arguments)");
+}
+
 }  // namespace
 }  // namespace tint::resolver

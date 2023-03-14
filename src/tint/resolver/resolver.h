@@ -480,6 +480,11 @@ class Resolver {
     template <typename NODE>
     void ApplyDiagnosticSeverities(NODE* node);
 
+    /// Checks @p ident is not an ast::TemplatedIdentifier.
+    /// If @p ident is a ast::TemplatedIdentifier, then an error diagnostic is raised.
+    /// @returns true if @p ident is not a ast::TemplatedIdentifier.
+    bool CheckNotTemplated(const char* use, const ast::Identifier* ident);
+
     /// Raises an error diagnostic that the resolved identifier @p resolved was not of the expected
     /// kind.
     /// @param source the source of the error diagnostic

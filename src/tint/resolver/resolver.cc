@@ -2156,7 +2156,12 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             return Switch(
                 sem_.Get(ast_node),  //
                 [&](type::Type* t) { return ty_init_or_conv(t); },
-                [&](sem::Function* f) { return FunctionCall(expr, f, args, arg_behaviors); },
+                [&](sem::Function* f) -> sem::Call* {
+                    if (!TINT_LIKELY(CheckNotTemplated("function", ident))) {
+                        return nullptr;
+                    }
+                    return FunctionCall(expr, f, args, arg_behaviors);
+                },
                 [&](sem::Expression* e) {
                     sem_.ErrorUnexpectedExprKind(e, "call target");
                     return nullptr;
@@ -2168,6 +2173,9 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         }
 
         if (auto f = resolved->BuiltinFunction(); f != builtin::Function::kNone) {
+            if (!TINT_LIKELY(CheckNotTemplated("builtin", ident))) {
+                return nullptr;
+            }
             return BuiltinCall(expr, f, args);
         }
 
@@ -2331,13 +2339,7 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
     auto& b = *builder_;
 
     auto check_no_tmpl_args = [&](type::Type* ty) -> type::Type* {
-        if (TINT_UNLIKELY(ident->Is<ast::TemplatedIdentifier>())) {
-            AddError("type '" + b.Symbols().NameFor(ident->symbol) +
-                         "' does not take template arguments",
-                     ident->source);
-            return nullptr;
-        }
-        return ty;
+        return TINT_LIKELY(CheckNotTemplated("type", ident)) ? ty : nullptr;
     };
     auto f32 = [&] { return b.create<type::F32>(); };
     auto i32 = [&] { return b.create<type::I32>(); };
@@ -3019,25 +3021,15 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                 return user;
             },
             [&](const type::Type* ty) -> sem::TypeExpression* {
-                if (TINT_UNLIKELY(ident->Is<ast::TemplatedIdentifier>())) {
-                    AddError("type '" + builder_->Symbols().NameFor(ident->symbol) +
-                                 "' does not take template arguments",
-                             ident->source);
-                    sem_.NoteDeclarationSource(ast_node);
+                if (!TINT_LIKELY(CheckNotTemplated("type", ident))) {
                     return nullptr;
                 }
-
                 return builder_->create<sem::TypeExpression>(expr, current_statement_, ty);
             },
             [&](const sem::Function* fn) -> sem::FunctionExpression* {
-                if (TINT_UNLIKELY(ident->Is<ast::TemplatedIdentifier>())) {
-                    AddError("function '" + builder_->Symbols().NameFor(ident->symbol) +
-                                 "' does not take template arguments",
-                             ident->source);
-                    sem_.NoteDeclarationSource(ast_node);
+                if (!TINT_LIKELY(CheckNotTemplated("function", ident))) {
                     return nullptr;
                 }
-
                 return builder_->create<sem::FunctionExpression>(expr, current_statement_, fn);
             });
     }
@@ -4327,6 +4319,21 @@ void Resolver::ApplyDiagnosticSeverities(NODE* node) {
     for (auto itr : validator_.DiagnosticFilters().Top()) {
         node->SetDiagnosticSeverity(itr.key, itr.value);
     }
+}
+
+bool Resolver::CheckNotTemplated(const char* use, const ast::Identifier* ident) {
+    if (TINT_UNLIKELY(ident->Is<ast::TemplatedIdentifier>())) {
+        AddError(std::string(use) + " '" + builder_->Symbols().NameFor(ident->symbol) +
+                     "' does not take template arguments",
+                 ident->source);
+        if (auto resolved = dependencies_.resolved_identifiers.Get(ident)) {
+            if (auto* ast_node = resolved->Node()) {
+                sem_.NoteDeclarationSource(ast_node);
+            }
+        }
+        return false;
+    }
+    return true;
 }
 
 void Resolver::ErrorMismatchedResolvedIdentifier(const Source& source,
