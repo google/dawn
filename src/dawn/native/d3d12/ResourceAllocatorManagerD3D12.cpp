@@ -170,7 +170,7 @@ bool IsClearValueOptimizable(DeviceBase* device, const D3D12_RESOURCE_DESC& reso
     // textures, or typeless resources
     // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-createcommittedresource
     // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-createplacedresource
-    return !IsTypeless(resourceDescriptor.Format) &&
+    return !d3d::IsTypeless(resourceDescriptor.Format) &&
            resourceDescriptor.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER &&
            (resourceDescriptor.Flags & (D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET |
                                         D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)) != 0;

@@ -186,7 +186,7 @@ ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const D3DBytecodeCompilationReq
                           "DXC create blob"));
 
     std::wstring entryPointW;
-    DAWN_TRY_ASSIGN(entryPointW, ConvertStringToWstring(entryPointName));
+    DAWN_TRY_ASSIGN(entryPointW, d3d::ConvertStringToWstring(entryPointName));
 
     std::vector<const wchar_t*> arguments = GetDXCArguments(r.compileFlags, r.hasShaderF16Feature);
 
@@ -498,7 +498,7 @@ ResultOrError<CompiledShader> ShaderModule::Compile(
         // available.
         ASSERT(ToBackend(device->GetAdapter())->GetBackend()->IsDXCAvailable());
         // We can get the DXC version information since IsDXCAvailable() is true.
-        DxcVersionInfo dxcVersionInfo =
+        d3d::DxcVersionInfo dxcVersionInfo =
             ToBackend(device->GetAdapter())->GetBackend()->GetDxcVersion();
 
         req.bytecode.compiler = Compiler::DXC;

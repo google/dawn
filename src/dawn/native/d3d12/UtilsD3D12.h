@@ -18,6 +18,7 @@
 #include <string>
 
 #include "dawn/native/Commands.h"
+#include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/native/d3d12/BufferD3D12.h"
 #include "dawn/native/d3d12/TextureCopySplitter.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
@@ -25,8 +26,6 @@
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native::d3d12 {
-
-ResultOrError<std::wstring> ConvertStringToWstring(std::string_view s);
 
 D3D12_COMPARISON_FUNC ToD3D12ComparisonFunc(wgpu::CompareFunction func);
 
@@ -43,8 +42,6 @@ D3D12_TEXTURE_COPY_LOCATION ComputeBufferLocationForCopyTextureRegion(
     const uint32_t rowPitch,
     Aspect aspect);
 D3D12_BOX ComputeD3D12BoxFromOffsetAndSize(const Origin3D& offset, const Extent3D& copySize);
-
-bool IsTypeless(DXGI_FORMAT format);
 
 enum class BufferTextureCopyDirection {
     B2T,
@@ -67,8 +64,6 @@ void RecordBufferTextureCopy(BufferTextureCopyDirection direction,
                              const Extent3D& copySize);
 
 void SetDebugName(Device* device, ID3D12Object* object, const char* prefix, std::string label = "");
-
-uint64_t MakeDXCVersion(uint64_t majorVersion, uint64_t minorVersion);
 
 }  // namespace dawn::native::d3d12
 

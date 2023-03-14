@@ -81,25 +81,6 @@ bool NeedBufferSizeWorkaroundForBufferTextureCopyOnD3D12(const BufferCopy& buffe
 
 }  // anonymous namespace
 
-ResultOrError<std::wstring> ConvertStringToWstring(std::string_view s) {
-    size_t len = s.length();
-    if (len == 0) {
-        return std::wstring();
-    }
-    int numChars = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s.data(), len, nullptr, 0);
-    if (numChars == 0) {
-        return DAWN_INTERNAL_ERROR("Failed to convert string to wide string");
-    }
-    std::wstring result;
-    result.resize(numChars);
-    int numConvertedChars =
-        MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s.data(), len, &result[0], numChars);
-    if (numConvertedChars != numChars) {
-        return DAWN_INTERNAL_ERROR("Failed to convert string to wide string");
-    }
-    return std::move(result);
-}
-
 D3D12_COMPARISON_FUNC ToD3D12ComparisonFunc(wgpu::CompareFunction func) {
     switch (func) {
         case wgpu::CompareFunction::Never:
@@ -165,39 +146,6 @@ D3D12_BOX ComputeD3D12BoxFromOffsetAndSize(const Origin3D& offset, const Extent3
     sourceRegion.bottom = offset.y + copySize.height;
     sourceRegion.back = offset.z + copySize.depthOrArrayLayers;
     return sourceRegion;
-}
-
-bool IsTypeless(DXGI_FORMAT format) {
-    // List generated from <dxgiformat.h>
-    switch (format) {
-        case DXGI_FORMAT_R32G32B32A32_TYPELESS:
-        case DXGI_FORMAT_R32G32B32_TYPELESS:
-        case DXGI_FORMAT_R16G16B16A16_TYPELESS:
-        case DXGI_FORMAT_R32G32_TYPELESS:
-        case DXGI_FORMAT_R32G8X24_TYPELESS:
-        case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
-        case DXGI_FORMAT_R10G10B10A2_TYPELESS:
-        case DXGI_FORMAT_R8G8B8A8_TYPELESS:
-        case DXGI_FORMAT_R16G16_TYPELESS:
-        case DXGI_FORMAT_R32_TYPELESS:
-        case DXGI_FORMAT_R24G8_TYPELESS:
-        case DXGI_FORMAT_R24_UNORM_X8_TYPELESS:
-        case DXGI_FORMAT_R8G8_TYPELESS:
-        case DXGI_FORMAT_R16_TYPELESS:
-        case DXGI_FORMAT_R8_TYPELESS:
-        case DXGI_FORMAT_BC1_TYPELESS:
-        case DXGI_FORMAT_BC2_TYPELESS:
-        case DXGI_FORMAT_BC3_TYPELESS:
-        case DXGI_FORMAT_BC4_TYPELESS:
-        case DXGI_FORMAT_BC5_TYPELESS:
-        case DXGI_FORMAT_B8G8R8A8_TYPELESS:
-        case DXGI_FORMAT_B8G8R8X8_TYPELESS:
-        case DXGI_FORMAT_BC6H_TYPELESS:
-        case DXGI_FORMAT_BC7_TYPELESS:
-            return true;
-        default:
-            return false;
-    }
 }
 
 void RecordBufferTextureCopyFromSplits(BufferTextureCopyDirection direction,
@@ -384,10 +332,6 @@ void SetDebugName(Device* device, ID3D12Object* object, const char* prefix, std:
     objectName += "_";
     objectName += label;
     object->SetPrivateData(WKPDID_D3DDebugObjectName, objectName.length(), objectName.c_str());
-}
-
-uint64_t MakeDXCVersion(uint64_t majorVersion, uint64_t minorVersion) {
-    return (majorVersion << 32) + minorVersion;
 }
 
 }  // namespace dawn::native::d3d12
