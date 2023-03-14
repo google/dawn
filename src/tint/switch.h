@@ -215,13 +215,14 @@ inline auto Switch(T* object, CASES&&... cases) {
     auto try_case = [&](auto&& case_fn) {
         using CaseFunc = std::decay_t<decltype(case_fn)>;
         using CaseType = detail::SwitchCaseType<CaseFunc>;
+        bool success = false;
         if constexpr (std::is_same_v<CaseType, Default>) {
             if constexpr (kHasReturnType) {
                 new (result) ReturnType(static_cast<ReturnType>(case_fn(Default{})));
             } else {
                 case_fn(Default{});
             }
-            return true;
+            success = true;
         } else {
             if (type_info.Is<CaseType>()) {
                 auto* v = static_cast<CaseType*>(object);
@@ -230,10 +231,10 @@ inline auto Switch(T* object, CASES&&... cases) {
                 } else {
                     case_fn(v);
                 }
-                return true;
+                success = true;
             }
         }
-        return false;
+        return success;
     };
 
     // Use a logical-or fold expression to try each of the cases in turn, until one matches the
