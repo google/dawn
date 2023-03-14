@@ -17,6 +17,8 @@ import("../../../tint_overrides_with_defaults.gni")
 
 source_set("tint_cmd_helper") {
   sources = [
+    "generate_external_texture_bindings.cc",
+    "generate_external_texture_bindings.h",
     "helper.cc",
     "helper.h",
   ]

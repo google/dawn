@@ -15,6 +15,8 @@
 ## Tint executable
 add_executable(tint "")
 target_sources(tint PRIVATE
+  "generate_external_texture_bindings.cc"
+  "generate_external_texture_bindings.h"
   "helper.cc"
   "helper.h"
   "main.cc"

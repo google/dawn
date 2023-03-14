@@ -59,9 +59,6 @@ struct Options {
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
 
-    /// Set to 'true' to generates binding mappings for external textures
-    bool generate_external_texture_bindings = false;
-
     /// Options used in the binding mappings for external textures
     ExternalTextureOptions external_texture_options = {};
 
@@ -80,7 +77,6 @@ struct Options {
     TINT_REFLECT(disable_robustness,
                  root_constant_binding_point,
                  disable_workgroup_init,
-                 generate_external_texture_bindings,
                  external_texture_options,
                  array_length_from_uniform);
 };

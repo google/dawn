@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/writer/generate_external_texture_bindings.h"
+#include "src/tint/cmd/generate_external_texture_bindings.h"
 
 #include <algorithm>
 #include <unordered_map>
@@ -20,12 +20,13 @@
 
 #include "src/tint/ast/module.h"
 #include "src/tint/program.h"
+#include "src/tint/sem/binding_point.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/type/external_texture.h"
 
-namespace tint::writer {
+namespace tint::cmd {
 
-transform::MultiplanarExternalTexture::BindingsMap GenerateExternalTextureBindings(
+writer::ExternalTextureOptions::BindingsMap GenerateExternalTextureBindings(
     const Program* program) {
     // TODO(tint:1491): Use Inspector once we can get binding info for all
     // variables, not just those referenced by entry points.
@@ -45,15 +46,17 @@ transform::MultiplanarExternalTexture::BindingsMap GenerateExternalTextureBindin
         }
     }
 
-    transform::MultiplanarExternalTexture::BindingsMap new_bindings_map;
+    writer::ExternalTextureOptions::BindingsMap new_bindings_map;
     for (auto bp : ext_tex_bps) {
         uint32_t g = bp.group;
         uint32_t& next_num = group_to_next_binding_number[g];
         auto new_bps =
-            transform::MultiplanarExternalTexture::BindingPoints{{g, next_num++}, {g, next_num++}};
+            writer::ExternalTextureOptions::BindingPoints{{g, next_num++}, {g, next_num++}};
+
         new_bindings_map[bp] = new_bps;
     }
+
     return new_bindings_map;
 }
 
-}  // namespace tint::writer
+}  // namespace tint::cmd

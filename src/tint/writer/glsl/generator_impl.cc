@@ -53,6 +53,7 @@
 #include "src/tint/transform/disable_uniformity_analysis.h"
 #include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/manager.h"
+#include "src/tint/transform/multiplanar_external_texture.h"
 #include "src/tint/transform/pad_structs.h"
 #include "src/tint/transform/preserve_padding.h"
 #include "src/tint/transform/promote_initializers_to_let.h"
@@ -81,7 +82,6 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/append_vector.h"
 #include "src/tint/writer/float_to_string.h"
-#include "src/tint/writer/generate_external_texture_bindings.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -180,10 +180,10 @@ SanitizedResult Sanitize(const Program* in,
         manager.Add<transform::Robustness>();
     }
 
-    if (options.generate_external_texture_bindings) {
+    if (!options.external_texture_options.bindings_map.empty()) {
         // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
-        auto new_bindings_map = writer::GenerateExternalTextureBindings(in);
-        data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(new_bindings_map);
+        data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
+            options.external_texture_options.bindings_map);
         manager.Add<transform::MultiplanarExternalTexture>();
     }
 

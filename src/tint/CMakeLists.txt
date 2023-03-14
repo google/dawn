@@ -550,8 +550,6 @@ list(APPEND TINT_LIB_SRCS
   writer/flatten_bindings.h
   writer/float_to_string.cc
   writer/float_to_string.h
-  writer/generate_external_texture_bindings.cc
-  writer/generate_external_texture_bindings.h
   writer/text_generator.cc
   writer/text_generator.h
   writer/text.cc
@@ -1022,8 +1020,15 @@ if(TINT_BUILD_TESTS)
     writer/check_supported_extensions_test.cc
     writer/flatten_bindings_test.cc
     writer/float_to_string_test.cc
-    writer/generate_external_texture_bindings_test.cc
     writer/text_generator_test.cc
+  )
+
+  # Noet, the source files are included here otherwise the cmd sources would not be included in the
+  # test binary.
+  list(APPEND TINT_TEST_SRCS
+    cmd/generate_external_texture_bindings.cc
+    cmd/generate_external_texture_bindings.h
+    cmd/generate_external_texture_bindings_test.cc
   )
 
   # Uniformity analysis tests depend on WGSL reader

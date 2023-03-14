@@ -39,6 +39,7 @@
 #endif  // TINT_BUILD_SPV_READER
 
 #include "src/tint/ast/module.h"
+#include "src/tint/cmd/generate_external_texture_bindings.h"
 #include "src/tint/cmd/helper.h"
 #include "src/tint/utils/io/command.h"
 #include "src/tint/utils/string.h"
@@ -549,7 +550,8 @@ bool GenerateSpirv(const tint::Program* program, const Options& options) {
     tint::writer::spirv::Options gen_options;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
-    gen_options.generate_external_texture_bindings = true;
+    gen_options.external_texture_options.bindings_map =
+        tint::cmd::GenerateExternalTextureBindings(program);
     auto result = tint::writer::spirv::Generate(program, gen_options);
     if (!result.success) {
         tint::cmd::PrintWGSL(std::cerr, *program);
@@ -656,7 +658,8 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
     tint::writer::msl::Options gen_options;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
-    gen_options.generate_external_texture_bindings = true;
+    gen_options.external_texture_options.bindings_map =
+        tint::cmd::GenerateExternalTextureBindings(input_program);
     auto result = tint::writer::msl::Generate(input_program, gen_options);
     if (!result.success) {
         tint::cmd::PrintWGSL(std::cerr, *program);
@@ -717,7 +720,8 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
     tint::writer::hlsl::Options gen_options;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
-    gen_options.generate_external_texture_bindings = true;
+    gen_options.external_texture_options.bindings_map =
+        tint::cmd::GenerateExternalTextureBindings(program);
     gen_options.root_constant_binding_point = options.hlsl_root_constant_binding_point;
     auto result = tint::writer::hlsl::Generate(program, gen_options);
     if (!result.success) {
@@ -856,7 +860,8 @@ bool GenerateGlsl(const tint::Program* program, const Options& options) {
     auto generate = [&](const tint::Program* prg, const std::string entry_point_name) -> bool {
         tint::writer::glsl::Options gen_options;
         gen_options.disable_robustness = !options.enable_robustness;
-        gen_options.generate_external_texture_bindings = true;
+        gen_options.external_texture_options.bindings_map =
+            tint::cmd::GenerateExternalTextureBindings(prg);
         auto result = tint::writer::glsl::Generate(prg, gen_options, entry_point_name);
         if (!result.success) {
             tint::cmd::PrintWGSL(std::cerr, *prg);
@@ -1001,55 +1006,6 @@ int main(int argc, const char** argv) {
 
              i.Add<tint::transform::SubstituteOverride::Config>(cfg);
              m.Add<tint::transform::SubstituteOverride>();
-             return true;
-         }},
-        {"multiplaner_external_texture",
-         [](tint::inspector::Inspector& inspector, tint::transform::Manager& m,
-            tint::transform::DataMap& i) {
-             using MET = tint::transform::MultiplanarExternalTexture;
-
-             // Generate the MultiplanarExternalTexture::NewBindingPoints by finding two free
-             // binding points. We may wish to expose these binding points via a command line flag
-             // in the future.
-
-             // Set of all the group-0 bindings in use.
-             std::unordered_set<uint32_t> group0_bindings_in_use;
-             auto allocate_binding = [&] {
-                 for (uint32_t idx = 0;; idx++) {
-                     auto binding = tint::writer::BindingPoint{0u, idx};
-                     if (group0_bindings_in_use.emplace(idx).second) {
-                         return binding;
-                     }
-                 }
-             };
-             // Populate group0_bindings_in_use with the existing bindings across all entry points.
-             for (auto ep : inspector.GetEntryPoints()) {
-                 for (auto binding : inspector.GetResourceBindings(ep.name)) {
-                     if (binding.bind_group == 0) {
-                         group0_bindings_in_use.emplace(binding.binding);
-                     }
-                 }
-             }
-             // Allocate new binding points for the external texture's planes and parameters.
-             MET::BindingsMap met_bindings;
-             for (auto ep : inspector.GetEntryPoints()) {
-                 for (auto ext_tex : inspector.GetExternalTextureResourceBindings(ep.name)) {
-                     auto binding = tint::writer::BindingPoint{
-                         ext_tex.bind_group,
-                         ext_tex.binding,
-                     };
-                     if (met_bindings.count(binding)) {
-                         continue;
-                     }
-                     met_bindings.emplace(binding, MET::BindingPoints{
-                                                       /* plane_1 */ allocate_binding(),
-                                                       /* params */ allocate_binding(),
-                                                   });
-                 }
-             }
-
-             i.Add<MET::NewBindingPoints>(std::move(met_bindings));
-             m.Add<MET>();
              return true;
          }},
     };

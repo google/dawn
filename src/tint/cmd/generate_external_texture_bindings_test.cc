@@ -15,11 +15,11 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "src/tint/cmd/generate_external_texture_bindings.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/writer/binding_point.h"
-#include "src/tint/writer/generate_external_texture_bindings.h"
 
-namespace tint::writer {
+namespace tint::cmd {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -126,4 +126,4 @@ TEST_F(GenerateExternalTextureBindingsTest, Two_WithOtherBindingsInSameGroup) {
 }
 
 }  // namespace
-}  // namespace tint::writer
+}  // namespace tint::cmd

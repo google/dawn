@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_WRITER_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
-#define SRC_TINT_WRITER_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
+#ifndef SRC_TINT_CMD_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
+#define SRC_TINT_CMD_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
 
-#include "src/tint/transform/multiplanar_external_texture.h"
+#include "tint/tint.h"
 
-namespace tint::writer {
+namespace tint::cmd {
 
-transform::MultiplanarExternalTexture::BindingsMap GenerateExternalTextureBindings(
-    const Program* program);
+writer::ExternalTextureOptions::BindingsMap GenerateExternalTextureBindings(const Program* program);
 
-}  // namespace tint::writer
+}  // namespace tint::cmd
 
-#endif  // SRC_TINT_WRITER_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
+#endif  // SRC_TINT_CMD_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_

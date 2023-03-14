@@ -906,8 +906,6 @@ libtint_source_set("libtint_writer_src") {
     "writer/flatten_bindings.h",
     "writer/float_to_string.cc",
     "writer/float_to_string.h",
-    "writer/generate_external_texture_bindings.cc",
-    "writer/generate_external_texture_bindings.h",
     "writer/text.cc",
     "writer/text.h",
     "writer/text_generator.cc",
@@ -1627,13 +1625,22 @@ if (tint_build_unittests) {
       "writer/check_supported_extensions_test.cc",
       "writer/flatten_bindings_test.cc",
       "writer/float_to_string_test.cc",
-      "writer/generate_external_texture_bindings_test.cc",
       "writer/text_generator_test.cc",
     ]
     deps = [
       ":libtint_base_src",
       ":libtint_unittests_ast_helper",
       ":libtint_writer_src",
+    ]
+  }
+
+  # Note, this includes the source files along with the test as otherwise the cmd helpers wouldn't
+  # be included in the binary.
+  tint_unittests_source_set("tint_unittests_cmd_src") {
+    sources = [
+      "cmd/generate_external_texture_bindings.cc",
+      "cmd/generate_external_texture_bindings.h",
+      "cmd/generate_external_texture_bindings_test.cc",
     ]
   }
 
@@ -2033,6 +2040,7 @@ if (tint_build_unittests) {
       ":tint_unittests_ast_src",
       ":tint_unittests_base_src",
       ":tint_unittests_builtins_src",
+      ":tint_unittests_cmd_src",
       ":tint_unittests_constant_src",
       ":tint_unittests_core_src",
       ":tint_unittests_demangler_src",
