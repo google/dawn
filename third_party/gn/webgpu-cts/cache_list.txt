@@ -64,5 +64,7 @@ data/webgpu/shader/execution/case-cache/unary/bool_conversion.json
 data/webgpu/shader/execution/case-cache/unary/f32_arithmetic.json
 data/webgpu/shader/execution/case-cache/unary/f32_conversion.json
 data/webgpu/shader/execution/case-cache/unary/i32_arithmetic.json
+data/webgpu/shader/execution/case-cache/unary/i32_complement.json
 data/webgpu/shader/execution/case-cache/unary/i32_conversion.json
+data/webgpu/shader/execution/case-cache/unary/u32_complement.json
 data/webgpu/shader/execution/case-cache/unary/u32_conversion.json
