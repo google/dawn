@@ -21,6 +21,7 @@
 #include "src/tint/transform/add_empty_entry_point.h"
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
+#include "src/tint/transform/clamp_frag_depth.h"
 #include "src/tint/transform/demote_to_helper.h"
 #include "src/tint/transform/direct_variable_access.h"
 #include "src/tint/transform/disable_uniformity_analysis.h"
@@ -48,6 +49,10 @@ namespace tint::writer::spirv {
 SanitizedResult Sanitize(const Program* in, const Options& options) {
     transform::Manager manager;
     transform::DataMap data;
+
+    if (options.clamp_frag_depth) {
+        manager.Add<tint::transform::ClampFragDepth>();
+    }
 
     manager.Add<transform::DisableUniformityAnalysis>();
 

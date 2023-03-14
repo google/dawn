@@ -305,10 +305,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                     r.newBindingsMap);
             }
 
-            if (r.clampFragDepth) {
-                transformManager.Add<tint::transform::ClampFragDepth>();
-            }
-
             tint::Program program;
             tint::transform::DataMap transformOutputs;
             {
@@ -340,6 +336,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             }
 
             tint::writer::spirv::Options options;
+            options.clamp_frag_depth = r.clampFragDepth;
             options.disable_robustness = !r.isRobustnessEnabled;
             options.emit_vertex_point_size = true;
             options.disable_workgroup_init = r.disableWorkgroupInit;

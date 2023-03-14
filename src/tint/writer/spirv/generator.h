@@ -46,6 +46,9 @@ struct Options {
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
 
+    /// Set to `true` to clamp frag depth
+    bool clamp_frag_depth = false;
+
     /// Options used in the binding mappings for external textures
     ExternalTextureOptions external_texture_options = {};
 
