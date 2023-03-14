@@ -17,6 +17,8 @@
 
 #include <array>
 #include <memory>
+#include <mutex>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -37,6 +39,7 @@ class Platform;
 
 namespace dawn::native {
 
+class DeviceBase;
 class Surface;
 class XlibXcbFunctions;
 
@@ -103,8 +106,8 @@ class InstanceBase final : public RefCountedWithExternalCount {
     BlobCache* GetBlobCache(bool enabled = true);
 
     uint64_t GetDeviceCountForTesting() const;
-    void IncrementDeviceCountForTesting();
-    void DecrementDeviceCountForTesting();
+    void AddDevice(DeviceBase* device);
+    void RemoveDevice(DeviceBase* device);
 
     const std::vector<std::string>& GetRuntimeSearchPaths() const;
 
@@ -113,6 +116,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
 
     // Dawn API
     Surface* APICreateSurface(const SurfaceDescriptor* descriptor);
+    bool APIProcessEvents();
 
   private:
     explicit InstanceBase(const TogglesState& instanceToggles);
@@ -161,7 +165,8 @@ class InstanceBase final : public RefCountedWithExternalCount {
     std::unique_ptr<XlibXcbFunctions> mXlibXcbFunctions;
 #endif  // defined(DAWN_USE_X11)
 
-    std::atomic_uint64_t mDeviceCountForTesting{0};
+    std::set<DeviceBase*> mDevicesList;
+    mutable std::mutex mDevicesListMutex;
 };
 
 }  // namespace dawn::native

@@ -251,6 +251,10 @@ uint64_t Instance::GetDeviceCountForTesting() const {
     return mImpl->GetDeviceCountForTesting();
 }
 
+bool Instance::ProcessEvents() {
+    return mImpl->APIProcessEvents();
+}
+
 WGPUInstance Instance::Get() const {
     return ToAPI(mImpl);
 }

@@ -150,5 +150,6 @@ void WireTest::DeleteClient() {
 }
 
 void WireTest::SetupIgnoredCallExpectations() {
+    EXPECT_CALL(api, InstanceProcessEvents(_)).Times(AnyNumber());
     EXPECT_CALL(api, DeviceTick(_)).Times(AnyNumber());
 }

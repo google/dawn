@@ -1439,12 +1439,12 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
     return EXPECT_TEXTURE_EQ(colorData.data(), colorTexture, {0, 0}, {width, height});
 }
 
-void DawnTestBase::WaitABit(wgpu::Device targetDevice) {
-    if (targetDevice == nullptr) {
-        targetDevice = this->device;
+void DawnTestBase::WaitABit(wgpu::Instance targetInstance) {
+    if (targetInstance == nullptr) {
+        targetInstance = mInstance;
     }
-    if (targetDevice != nullptr) {
-        targetDevice.Tick();
+    if (targetInstance != nullptr) {
+        targetInstance.ProcessEvents();
     }
     FlushWire();
 
@@ -1498,8 +1498,6 @@ void DawnTestBase::MapSlotsSynchronously() {
     // immediately.
     mNumPendingMapOperations = mReadbackSlots.size();
 
-    std::vector<wgpu::Device> pendingDevices;
-
     // Map all readback slots
     for (size_t i = 0; i < mReadbackSlots.size(); ++i) {
         MapReadUserdata* userdata = new MapReadUserdata{this, i};
@@ -1507,15 +1505,11 @@ void DawnTestBase::MapSlotsSynchronously() {
         const ReadbackSlot& slot = mReadbackSlots[i];
         slot.buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize, SlotMapCallback,
                              userdata);
-
-        pendingDevices.push_back(slot.device);
     }
 
     // Busy wait until all map operations are done.
     while (mNumPendingMapOperations != 0) {
-        for (const wgpu::Device& device : pendingDevices) {
-            WaitABit(device);
-        }
+        WaitABit();
     }
 }
 

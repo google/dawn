@@ -174,7 +174,6 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
                        const DeviceDescriptor* descriptor,
                        const TogglesState& deviceToggles)
     : mAdapter(adapter), mToggles(deviceToggles), mNextPipelineCompatibilityToken(1) {
-    mAdapter->GetInstance()->IncrementDeviceCountForTesting();
     ASSERT(descriptor != nullptr);
 
     AdapterProperties adapterProperties;
@@ -218,8 +217,9 @@ DeviceBase::~DeviceBase() {
     // Queue does not get destroyed after the Device.
     mQueue = nullptr;
     // mAdapter is not set for mock test devices.
+    // TODO(crbug.com/dawn/1702): using a mock adapter could avoid the null checking.
     if (mAdapter != nullptr) {
-        mAdapter->GetInstance()->DecrementDeviceCountForTesting();
+        mAdapter->GetInstance()->RemoveDevice(this);
     }
 }
 
@@ -280,6 +280,11 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
 
         DAWN_TRY_ASSIGN(mInternalPipelineStore->placeholderFragmentShader,
                         CreateShaderModule(&descriptor));
+    }
+
+    // TODO(crbug.com/dawn/1702): using a mock adapter could avoid the null checking.
+    if (mAdapter != nullptr) {
+        mAdapter->GetInstance()->AddDevice(this);
     }
 
     return {};

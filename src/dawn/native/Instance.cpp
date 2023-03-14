@@ -21,6 +21,7 @@
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/Device.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/Surface.h"
 #include "dawn/native/Toggles.h"
@@ -504,15 +505,35 @@ BlobCache* InstanceBase::GetBlobCache(bool enabled) {
 }
 
 uint64_t InstanceBase::GetDeviceCountForTesting() const {
-    return mDeviceCountForTesting.load();
+    std::lock_guard<std::mutex> lg(mDevicesListMutex);
+    return mDevicesList.size();
 }
 
-void InstanceBase::IncrementDeviceCountForTesting() {
-    mDeviceCountForTesting++;
+void InstanceBase::AddDevice(DeviceBase* device) {
+    std::lock_guard<std::mutex> lg(mDevicesListMutex);
+    mDevicesList.insert(device);
 }
 
-void InstanceBase::DecrementDeviceCountForTesting() {
-    mDeviceCountForTesting--;
+void InstanceBase::RemoveDevice(DeviceBase* device) {
+    std::lock_guard<std::mutex> lg(mDevicesListMutex);
+    mDevicesList.erase(device);
+}
+
+bool InstanceBase::APIProcessEvents() {
+    std::vector<Ref<DeviceBase>> devices;
+    {
+        std::lock_guard<std::mutex> lg(mDevicesListMutex);
+        for (auto device : mDevicesList) {
+            devices.push_back(device);
+        }
+    }
+
+    bool hasMoreEvents = false;
+    for (auto device : devices) {
+        hasMoreEvents = device->APITick() || hasMoreEvents;
+    }
+
+    return hasMoreEvents;
 }
 
 const std::vector<std::string>& InstanceBase::GetRuntimeSearchPaths() const {

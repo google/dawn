@@ -189,10 +189,7 @@ TEST_P(DeviceLifetimeTests, DroppedBeforeMappedAtCreationBuffer) {
 
 // Test that the device can be dropped before a buffer created from it, then mapping the buffer
 // fails.
-// TODO(crbug.com/dawn/752): Re-enable this test once we implement Instance.ProcessEvents().
-// Currently the callbacks are called inside Device.Tick() only. However, since we drop the device,
-// there is no way to call Device.Tick() anymore.
-TEST_P(DeviceLifetimeTests, DISABLED_DroppedThenMapBuffer) {
+TEST_P(DeviceLifetimeTests, DroppedThenMapBuffer) {
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -477,6 +474,36 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncRaceCache) {
         if (data.device) {
             data.device.Tick();
         }
+        WaitABit();
+    }
+}
+
+// Tests that dropping 2nd device inside 1st device's callback triggered by instance.ProcessEvents
+// won't crash.
+TEST_P(DeviceLifetimeTests, DropDevice2InProcessEvents) {
+    wgpu::Device device2 = CreateDevice();
+
+    struct UserData {
+        wgpu::Device device2;
+        bool done = false;
+    } userdata;
+
+    userdata.device2 = std::move(device2);
+
+    device.PushErrorScope(wgpu::ErrorFilter::Validation);
+
+    // The following callback will drop the 2nd device. It won't be triggered until
+    // instance.ProcessEvents() is called.
+    device.PopErrorScope(
+        [](WGPUErrorType type, const char*, void* userdataPtr) {
+            auto userdata = static_cast<UserData*>(userdataPtr);
+
+            userdata->device2 = nullptr;
+            userdata->done = true;
+        },
+        &userdata);
+
+    while (!userdata.done) {
         WaitABit();
     }
 }

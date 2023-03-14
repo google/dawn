@@ -187,6 +187,8 @@ class DAWN_NATIVE_EXPORT Instance {
 
     uint64_t GetDeviceCountForTesting() const;
 
+    bool ProcessEvents();
+
     // Returns the underlying WGPUInstance object.
     WGPUInstance Get() const;
 

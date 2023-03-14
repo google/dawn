@@ -550,7 +550,7 @@ class DawnTestBase {
                                                     mipLevel, {}, &expectedStencil);
     }
 
-    void WaitABit(wgpu::Device = nullptr);
+    void WaitABit(wgpu::Instance = nullptr);
     void FlushWire();
     void WaitForAllOperations();
 
