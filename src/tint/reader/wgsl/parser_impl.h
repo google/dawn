@@ -509,9 +509,6 @@ class ParserImpl {
     /// Parses a `case_selector` grammar element
     /// @returns the selector
     Maybe<const ast::CaseSelector*> case_selector();
-    /// Parses a `case_body` grammar element
-    /// @returns the parsed statements
-    Maybe<const ast::BlockStatement*> case_body();
     /// Parses a `func_call_statement` grammar element
     /// @returns the parsed function call or nullptr
     Maybe<const ast::CallStatement*> func_call_statement();

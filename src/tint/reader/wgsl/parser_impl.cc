@@ -1730,36 +1730,6 @@ Maybe<const ast::CaseSelector*> ParserImpl::case_selector() {
     return create<ast::CaseSelector>(p.source(), expr.value);
 }
 
-// case_body
-//   :
-//   | statement case_body
-Maybe<const ast::BlockStatement*> ParserImpl::case_body() {
-    StatementList stmts;
-    while (continue_parsing()) {
-        Source source;
-        if (match(Token::Type::kFallthrough, &source)) {
-            return add_error(
-                source,
-                "fallthrough is not premitted in WGSL. "
-                "Case can accept multiple selectors if the existing case bodies are empty. "
-                "(e.g. `case 1, 2, 3:`) "
-                "`default` is a valid case selector value. (e.g. `case 1, default:`)");
-        }
-
-        auto stmt = statement();
-        if (stmt.errored) {
-            return Failure::kErrored;
-        }
-        if (!stmt.matched) {
-            break;
-        }
-
-        stmts.Push(stmt.value);
-    }
-
-    return create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
-}
-
 // loop_statement
 //   : LOOP BRACKET_LEFT statements continuing_statement? BRACKET_RIGHT
 Maybe<const ast::LoopStatement*> ParserImpl::loop_statement() {
