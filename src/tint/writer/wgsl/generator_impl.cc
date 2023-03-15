@@ -1120,6 +1120,14 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
 bool GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
     {
         auto out = line();
+
+        if (!stmt->attributes.IsEmpty()) {
+            if (!EmitAttributes(out, stmt->attributes)) {
+                return false;
+            }
+            out << " ";
+        }
+
         out << "while";
         {
             ScopedParen sp(out);

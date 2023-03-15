@@ -520,9 +520,10 @@ class ParserImpl {
     /// Parses a `for_statement` grammar element
     /// @returns the parsed for loop or nullptr
     Maybe<const ast::ForLoopStatement*> for_statement();
-    /// Parses a `while_statement` grammar element
+    /// Parses a `while_statement` grammar element, with the attribute list provided as `attrs`.
+    /// @param attrs the list of attributes for the statement
     /// @returns the parsed while loop or nullptr
-    Maybe<const ast::WhileStatement*> while_statement();
+    Maybe<const ast::WhileStatement*> while_statement(AttributeList& attrs);
     /// Parses a `break_if_statement` grammar element
     /// @returns the parsed statement or nullptr
     Maybe<const ast::Statement*> break_if_statement();

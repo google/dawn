@@ -3311,25 +3311,34 @@ class ProgramBuilder {
         return create<ast::ForLoopStatement>(init, Expr(std::forward<COND>(cond)), cont, body);
     }
 
-    /// Creates a ast::WhileStatement with input body and condition.
+    /// Creates a ast::WhileStatement with input body, condition, and optional attributes.
     /// @param source the source information
     /// @param cond the loop condition
     /// @param body the loop body
+    /// @param attributes optional attributes
     /// @returns the while statement pointer
     template <typename COND>
-    const ast::WhileStatement* While(const Source& source,
-                                     COND&& cond,
-                                     const ast::BlockStatement* body) {
-        return create<ast::WhileStatement>(source, Expr(std::forward<COND>(cond)), body);
+    const ast::WhileStatement* While(
+        const Source& source,
+        COND&& cond,
+        const ast::BlockStatement* body,
+        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
+        return create<ast::WhileStatement>(source, Expr(std::forward<COND>(cond)), body,
+                                           std::move(attributes));
     }
 
-    /// Creates a ast::WhileStatement with given condition and body.
+    /// Creates a ast::WhileStatement with input body, condition, and optional attributes.
     /// @param cond the condition
     /// @param body the loop body
+    /// @param attributes optional attributes
     /// @returns the while loop statement pointer
     template <typename COND>
-    const ast::WhileStatement* While(COND&& cond, const ast::BlockStatement* body) {
-        return create<ast::WhileStatement>(Expr(std::forward<COND>(cond)), body);
+    const ast::WhileStatement* While(
+        COND&& cond,
+        const ast::BlockStatement* body,
+        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
+        return create<ast::WhileStatement>(Expr(std::forward<COND>(cond)), body,
+                                           std::move(attributes));
     }
 
     /// Creates a ast::VariableDeclStatement for the input variable

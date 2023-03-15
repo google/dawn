@@ -14,6 +14,8 @@
 
 #include "src/tint/ast/while_statement.h"
 
+#include <utility>
+
 #include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::WhileStatement);
@@ -24,13 +26,18 @@ WhileStatement::WhileStatement(ProgramID pid,
                                NodeID nid,
                                const Source& src,
                                const Expression* cond,
-                               const BlockStatement* b)
-    : Base(pid, nid, src), condition(cond), body(b) {
+                               const BlockStatement* b,
+                               utils::VectorRef<const ast::Attribute*> attrs)
+    : Base(pid, nid, src), condition(cond), body(b), attributes(std::move(attrs)) {
     TINT_ASSERT(AST, cond);
     TINT_ASSERT(AST, body);
 
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition, program_id);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
+    for (auto* attr : attributes) {
+        TINT_ASSERT(AST, attr);
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
+    }
 }
 
 WhileStatement::WhileStatement(WhileStatement&&) = default;
@@ -43,7 +50,8 @@ const WhileStatement* WhileStatement::Clone(CloneContext* ctx) const {
 
     auto* cond = ctx->Clone(condition);
     auto* b = ctx->Clone(body);
-    return ctx->dst->create<WhileStatement>(src, cond, b);
+    auto attrs = ctx->Clone(attributes);
+    return ctx->dst->create<WhileStatement>(src, cond, b, std::move(attrs));
 }
 
 }  // namespace tint::ast

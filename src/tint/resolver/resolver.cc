@@ -4278,6 +4278,9 @@ SEM* Resolver::StatementScope(const ast::Statement* ast, SEM* sem, F&& callback)
             [&](const ast::SwitchStatement* s) {
                 return handle_attributes(s, sem, "switch statements");
             },
+            [&](const ast::WhileStatement* w) {
+                return handle_attributes(w, sem, "while statements");
+            },
             [&](Default) { return true; })) {
         return nullptr;
     }

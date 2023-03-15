@@ -24,7 +24,8 @@ using WhileStmtTest = ParserImplTest;
 // Test an empty while loop.
 TEST_F(WhileStmtTest, Empty) {
     auto p = parser("while true { }");
-    auto wl = p->while_statement();
+    ParserImpl::AttributeList attrs;
+    auto wl = p->while_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(wl.errored);
     ASSERT_TRUE(wl.matched);
@@ -35,7 +36,8 @@ TEST_F(WhileStmtTest, Empty) {
 // Test an empty while loop with parentheses.
 TEST_F(WhileStmtTest, EmptyWithParentheses) {
     auto p = parser("while (true) { }");
-    auto wl = p->while_statement();
+    ParserImpl::AttributeList attrs;
+    auto wl = p->while_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(wl.errored);
     ASSERT_TRUE(wl.matched);
@@ -46,7 +48,8 @@ TEST_F(WhileStmtTest, EmptyWithParentheses) {
 // Test a while loop with non-empty body.
 TEST_F(WhileStmtTest, Body) {
     auto p = parser("while (true) { discard; }");
-    auto wl = p->while_statement();
+    ParserImpl::AttributeList attrs;
+    auto wl = p->while_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(wl.errored);
     ASSERT_TRUE(wl.matched);
@@ -58,7 +61,8 @@ TEST_F(WhileStmtTest, Body) {
 // Test a while loop with complex condition.
 TEST_F(WhileStmtTest, ComplexCondition) {
     auto p = parser("while (a + 1 - 2) == 3 { }");
-    auto wl = p->while_statement();
+    ParserImpl::AttributeList attrs;
+    auto wl = p->while_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(wl.errored);
     ASSERT_TRUE(wl.matched);
@@ -69,7 +73,8 @@ TEST_F(WhileStmtTest, ComplexCondition) {
 // Test a while loop with complex condition, with parentheses.
 TEST_F(WhileStmtTest, ComplexConditionWithParentheses) {
     auto p = parser("while ((a + 1 - 2) == 3) { }");
-    auto wl = p->while_statement();
+    ParserImpl::AttributeList attrs;
+    auto wl = p->while_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(wl.errored);
     ASSERT_TRUE(wl.matched);
@@ -77,11 +82,26 @@ TEST_F(WhileStmtTest, ComplexConditionWithParentheses) {
     EXPECT_TRUE(wl->body->Empty());
 }
 
+// Test a while loop with attributes.
+TEST_F(WhileStmtTest, WithAttributes) {
+    auto p = parser("@diagnostic(off, derivative_uniformity) while true { }");
+    auto attrs = p->attribute_list();
+    auto wl = p->while_statement(attrs.value);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    EXPECT_FALSE(wl.errored);
+    ASSERT_TRUE(wl.matched);
+
+    EXPECT_TRUE(attrs->IsEmpty());
+    ASSERT_EQ(wl->attributes.Length(), 1u);
+    EXPECT_TRUE(wl->attributes[0]->Is<ast::DiagnosticAttribute>());
+}
+
 class WhileStmtErrorTest : public ParserImplTest {
   public:
     void TestWhileWithError(std::string for_str, std::string error_str) {
         auto p_for = parser(for_str);
-        auto e_for = p_for->while_statement();
+        ParserImpl::AttributeList attrs;
+        auto e_for = p_for->while_statement(attrs);
 
         EXPECT_FALSE(e_for.matched);
         EXPECT_TRUE(e_for.errored);

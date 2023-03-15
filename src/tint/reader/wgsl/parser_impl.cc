@@ -1296,7 +1296,7 @@ Maybe<const ast::Statement*> ParserImpl::statement() {
         return stmt_for.value;
     }
 
-    auto stmt_while = while_statement();
+    auto stmt_while = while_statement(attrs.value);
     if (stmt_while.errored) {
         return Failure::kErrored;
     }
@@ -1902,8 +1902,8 @@ Maybe<const ast::ForLoopStatement*> ParserImpl::for_statement() {
 }
 
 // while_statement
-//   :  WHILE expression compound_statement
-Maybe<const ast::WhileStatement*> ParserImpl::while_statement() {
+//   :  attribute* WHILE expression compound_statement
+Maybe<const ast::WhileStatement*> ParserImpl::while_statement(AttributeList& attrs) {
     Source source;
     if (!match(Token::Type::kWhile, &source)) {
         return Failure::kNoMatch;
@@ -1922,7 +1922,8 @@ Maybe<const ast::WhileStatement*> ParserImpl::while_statement() {
         return Failure::kErrored;
     }
 
-    return create<ast::WhileStatement>(source, condition.value, body.value);
+    TINT_DEFER(attrs.Clear());
+    return create<ast::WhileStatement>(source, condition.value, body.value, std::move(attrs));
 }
 
 // func_call_statement

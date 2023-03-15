@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/ast/test_helper.h"
@@ -39,6 +40,16 @@ TEST_F(WhileStatementTest, Creation_WithSource) {
     auto src = l->source;
     EXPECT_EQ(src.range.begin.line, 20u);
     EXPECT_EQ(src.range.begin.column, 2u);
+}
+
+TEST_F(WhileStatementTest, Creation_WithAttributes) {
+    auto* attr1 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "foo");
+    auto* attr2 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "bar");
+    auto* cond = create<BinaryExpression>(BinaryOp::kLessThan, Expr("i"), Expr(5_u));
+    auto* body = Block(Return());
+    auto* l = While(cond, body, utils::Vector{attr1, attr2});
+
+    EXPECT_THAT(l->attributes, testing::ElementsAre(attr1, attr2));
 }
 
 TEST_F(WhileStatementTest, Assert_Null_Cond) {

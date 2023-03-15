@@ -50,6 +50,11 @@ class DiagnosticSeverityTest : public TestHelper {
         //         return;
         //       }
         //     }
+        //
+        //     @diagnostic(error, chromium_unreachable_code)
+        //     while (false) @diagnostic(warning, chromium_unreachable_code) {
+        //       return;
+        //     }
         //   }
         // }
         //
@@ -64,6 +69,8 @@ class DiagnosticSeverityTest : public TestHelper {
         auto else_body_severity = builtin::DiagnosticSeverity::kInfo;
         auto switch_severity = builtin::DiagnosticSeverity::kError;
         auto case_severity = builtin::DiagnosticSeverity::kWarning;
+        auto while_severity = builtin::DiagnosticSeverity::kError;
+        auto while_body_severity = builtin::DiagnosticSeverity::kWarning;
         auto attr = [&](auto severity) {
             return utils::Vector{DiagnosticAttribute(severity, "chromium_unreachable_code")};
         };
@@ -74,6 +81,7 @@ class DiagnosticSeverityTest : public TestHelper {
         auto* return_foo_block = Return();
         auto* return_foo_case = Return();
         auto* return_foo_default = Return();
+        auto* return_foo_while = Return();
         auto* else_stmt = Block(utils::Vector{return_foo_else}, attr(else_body_severity));
         auto* elseif = If(Expr(false), Block(return_foo_elseif), Else(else_stmt));
         auto* if_foo = If(Expr(true), Block(utils::Vector{return_foo_if}, attr(if_body_severity)),
@@ -82,7 +90,10 @@ class DiagnosticSeverityTest : public TestHelper {
             Case(CaseSelector(0_a), Block(utils::Vector{return_foo_case}, attr(case_severity)));
         auto* swtch = Switch(42_a, utils::Vector{case_stmt, DefaultCase(Block(return_foo_default))},
                              attr(switch_severity));
-        auto* block_1 = Block(utils::Vector{if_foo, return_foo_block, swtch}, attr(block_severity));
+        auto* wl = While(false, Block(utils::Vector{return_foo_while}, attr(while_body_severity)),
+                         attr(while_severity));
+        auto* block_1 =
+            Block(utils::Vector{if_foo, return_foo_block, swtch, wl}, attr(block_severity));
         auto* func_attr = DiagnosticAttribute(func_severity, "chromium_unreachable_code");
         auto* foo = Func("foo", {}, ty.void_(), utils::Vector{block_1}, utils::Vector{func_attr});
 
@@ -110,6 +121,10 @@ class DiagnosticSeverityTest : public TestHelper {
         EXPECT_EQ(p.Sem().DiagnosticSeverity(case_stmt->body, rule), case_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(return_foo_case, rule), case_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(return_foo_default, rule), switch_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(wl, rule), while_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(wl->condition, rule), while_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(wl->body, rule), while_body_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(return_foo_while, rule), while_body_severity);
 
         EXPECT_EQ(p.Sem().DiagnosticSeverity(bar, rule), global_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(return_bar, rule), global_severity);

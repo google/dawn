@@ -350,6 +350,18 @@ TEST_F(ParserImplTest, Statement_ConsumedAttributes_Switch) {
     EXPECT_EQ(s->attributes.Length(), 1u);
 }
 
+TEST_F(ParserImplTest, Statement_ConsumedAttributes_While) {
+    auto p = parser("@diagnostic(off, derivative_uniformity) while (false) {}");
+    auto e = p->statement();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+
+    auto* s = As<ast::WhileStatement>(e.value);
+    ASSERT_NE(s, nullptr);
+    EXPECT_EQ(s->attributes.Length(), 1u);
+}
+
 TEST_F(ParserImplTest, Statement_UnexpectedAttributes) {
     auto p = parser("@diagnostic(off, derivative_uniformity) return;");
     auto e = p->statement();
