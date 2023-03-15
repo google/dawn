@@ -571,8 +571,10 @@ std::vector<std::pair<std::string, Source>> Inspector::GetEnableDirectives() {
     // Ast nodes for enable directive are stored within global declarations list
     auto global_decls = program_->AST().GlobalDeclarations();
     for (auto* node : global_decls) {
-        if (auto* ext = node->As<ast::Enable>()) {
-            result.push_back({utils::ToString(ext->extension), ext->source});
+        if (auto* enable = node->As<ast::Enable>()) {
+            for (auto* ext : enable->extensions) {
+                result.push_back({utils::ToString(ext->name), ext->source});
+            }
         }
     }
 

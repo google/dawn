@@ -22,7 +22,7 @@ namespace {
 using EnableDirectiveTest = ParserImplTest;
 
 // Test a valid enable directive.
-TEST_F(EnableDirectiveTest, Valid) {
+TEST_F(EnableDirectiveTest, Single) {
     auto p = parser("enable f16;");
     p->enable_directive();
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -30,13 +30,105 @@ TEST_F(EnableDirectiveTest, Valid) {
     auto& ast = program.AST();
     ASSERT_EQ(ast.Enables().Length(), 1u);
     auto* enable = ast.Enables()[0];
-    EXPECT_EQ(enable->extension, builtin::Extension::kF16);
+    EXPECT_EQ(enable->source.range.begin.line, 1u);
+    EXPECT_EQ(enable->source.range.begin.column, 1u);
+    EXPECT_EQ(enable->source.range.end.line, 1u);
+    EXPECT_EQ(enable->source.range.end.column, 12u);
+    ASSERT_EQ(enable->extensions.Length(), 1u);
+    EXPECT_EQ(enable->extensions[0]->name, builtin::Extension::kF16);
+    EXPECT_EQ(enable->extensions[0]->source.range.begin.line, 1u);
+    EXPECT_EQ(enable->extensions[0]->source.range.begin.column, 8u);
+    EXPECT_EQ(enable->extensions[0]->source.range.end.line, 1u);
+    EXPECT_EQ(enable->extensions[0]->source.range.end.column, 11u);
+    ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
+    EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
+}
+
+// Test a valid enable directive.
+TEST_F(EnableDirectiveTest, SingleTrailingComma) {
+    auto p = parser("enable f16, ;");
+    p->enable_directive();
+    EXPECT_FALSE(p->has_error()) << p->error();
+    auto program = p->program();
+    auto& ast = program.AST();
+    ASSERT_EQ(ast.Enables().Length(), 1u);
+    auto* enable = ast.Enables()[0];
+    EXPECT_EQ(enable->source.range.begin.line, 1u);
+    EXPECT_EQ(enable->source.range.begin.column, 1u);
+    EXPECT_EQ(enable->source.range.end.line, 1u);
+    EXPECT_EQ(enable->source.range.end.column, 14u);
+    ASSERT_EQ(enable->extensions.Length(), 1u);
+    EXPECT_EQ(enable->extensions[0]->name, builtin::Extension::kF16);
+    EXPECT_EQ(enable->extensions[0]->source.range.begin.line, 1u);
+    EXPECT_EQ(enable->extensions[0]->source.range.begin.column, 8u);
+    EXPECT_EQ(enable->extensions[0]->source.range.end.line, 1u);
+    EXPECT_EQ(enable->extensions[0]->source.range.end.column, 11u);
+    ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
+    EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
+}
+
+// Test a valid enable directive with multiple extensions.
+TEST_F(EnableDirectiveTest, Multiple) {
+    auto p =
+        parser("enable f16, chromium_disable_uniformity_analysis, chromium_experimental_dp4a;");
+    p->enable_directive();
+    EXPECT_FALSE(p->has_error()) << p->error();
+    auto program = p->program();
+    auto& ast = program.AST();
+    ASSERT_EQ(ast.Enables().Length(), 1u);
+    auto* enable = ast.Enables()[0];
+    ASSERT_EQ(enable->extensions.Length(), 3u);
+    EXPECT_EQ(enable->extensions[0]->name, builtin::Extension::kF16);
+    EXPECT_EQ(enable->extensions[0]->source.range.begin.line, 1u);
+    EXPECT_EQ(enable->extensions[0]->source.range.begin.column, 8u);
+    EXPECT_EQ(enable->extensions[0]->source.range.end.line, 1u);
+    EXPECT_EQ(enable->extensions[0]->source.range.end.column, 11u);
+    EXPECT_EQ(enable->extensions[1]->name, builtin::Extension::kChromiumDisableUniformityAnalysis);
+    EXPECT_EQ(enable->extensions[1]->source.range.begin.line, 1u);
+    EXPECT_EQ(enable->extensions[1]->source.range.begin.column, 13u);
+    EXPECT_EQ(enable->extensions[1]->source.range.end.line, 1u);
+    EXPECT_EQ(enable->extensions[1]->source.range.end.column, 49u);
+    EXPECT_EQ(enable->extensions[2]->name, builtin::Extension::kChromiumExperimentalDp4A);
+    EXPECT_EQ(enable->extensions[2]->source.range.begin.line, 1u);
+    EXPECT_EQ(enable->extensions[2]->source.range.begin.column, 51u);
+    EXPECT_EQ(enable->extensions[2]->source.range.end.line, 1u);
+    EXPECT_EQ(enable->extensions[2]->source.range.end.column, 77u);
+    ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
+    EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
+}
+
+// Test a valid enable directive with multiple extensions.
+TEST_F(EnableDirectiveTest, MultipleTrailingComma) {
+    auto p =
+        parser("enable f16, chromium_disable_uniformity_analysis, chromium_experimental_dp4a,;");
+    p->enable_directive();
+    EXPECT_FALSE(p->has_error()) << p->error();
+    auto program = p->program();
+    auto& ast = program.AST();
+    ASSERT_EQ(ast.Enables().Length(), 1u);
+    auto* enable = ast.Enables()[0];
+    ASSERT_EQ(enable->extensions.Length(), 3u);
+    EXPECT_EQ(enable->extensions[0]->name, builtin::Extension::kF16);
+    EXPECT_EQ(enable->extensions[0]->source.range.begin.line, 1u);
+    EXPECT_EQ(enable->extensions[0]->source.range.begin.column, 8u);
+    EXPECT_EQ(enable->extensions[0]->source.range.end.line, 1u);
+    EXPECT_EQ(enable->extensions[0]->source.range.end.column, 11u);
+    EXPECT_EQ(enable->extensions[1]->name, builtin::Extension::kChromiumDisableUniformityAnalysis);
+    EXPECT_EQ(enable->extensions[1]->source.range.begin.line, 1u);
+    EXPECT_EQ(enable->extensions[1]->source.range.begin.column, 13u);
+    EXPECT_EQ(enable->extensions[1]->source.range.end.line, 1u);
+    EXPECT_EQ(enable->extensions[1]->source.range.end.column, 49u);
+    EXPECT_EQ(enable->extensions[2]->name, builtin::Extension::kChromiumExperimentalDp4A);
+    EXPECT_EQ(enable->extensions[2]->source.range.begin.line, 1u);
+    EXPECT_EQ(enable->extensions[2]->source.range.begin.column, 51u);
+    EXPECT_EQ(enable->extensions[2]->source.range.end.line, 1u);
+    EXPECT_EQ(enable->extensions[2]->source.range.end.column, 77u);
     ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
     EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
 }
 
 // Test multiple enable directives for a same extension.
-TEST_F(EnableDirectiveTest, EnableMultipleTime) {
+TEST_F(EnableDirectiveTest, EnableSameLine) {
     auto p = parser(R"(
 enable f16;
 enable f16;
@@ -48,8 +140,18 @@ enable f16;
     ASSERT_EQ(ast.Enables().Length(), 2u);
     auto* enable_a = ast.Enables()[0];
     auto* enable_b = ast.Enables()[1];
-    EXPECT_EQ(enable_a->extension, builtin::Extension::kF16);
-    EXPECT_EQ(enable_b->extension, builtin::Extension::kF16);
+    ASSERT_EQ(enable_a->extensions.Length(), 1u);
+    EXPECT_EQ(enable_a->extensions[0]->name, builtin::Extension::kF16);
+    EXPECT_EQ(enable_a->extensions[0]->source.range.begin.line, 2u);
+    EXPECT_EQ(enable_a->extensions[0]->source.range.begin.column, 8u);
+    EXPECT_EQ(enable_a->extensions[0]->source.range.end.line, 2u);
+    EXPECT_EQ(enable_a->extensions[0]->source.range.end.column, 11u);
+    ASSERT_EQ(enable_b->extensions.Length(), 1u);
+    EXPECT_EQ(enable_b->extensions[0]->name, builtin::Extension::kF16);
+    EXPECT_EQ(enable_b->extensions[0]->source.range.begin.line, 3u);
+    EXPECT_EQ(enable_b->extensions[0]->source.range.begin.column, 8u);
+    EXPECT_EQ(enable_b->extensions[0]->source.range.end.line, 3u);
+    EXPECT_EQ(enable_b->extensions[0]->source.range.end.column, 11u);
     ASSERT_EQ(ast.GlobalDeclarations().Length(), 2u);
     EXPECT_EQ(ast.GlobalDeclarations()[0], enable_a);
     EXPECT_EQ(ast.GlobalDeclarations()[1], enable_b);
@@ -169,7 +271,12 @@ enable f16;
     // Accept the enable directive although it caused an error
     ASSERT_EQ(ast.Enables().Length(), 1u);
     auto* enable = ast.Enables()[0];
-    EXPECT_EQ(enable->extension, builtin::Extension::kF16);
+    ASSERT_EQ(enable->extensions.Length(), 1u);
+    EXPECT_EQ(enable->extensions[0]->name, builtin::Extension::kF16);
+    EXPECT_EQ(enable->extensions[0]->source.range.begin.line, 3u);
+    EXPECT_EQ(enable->extensions[0]->source.range.begin.column, 8u);
+    EXPECT_EQ(enable->extensions[0]->source.range.end.line, 3u);
+    EXPECT_EQ(enable->extensions[0]->source.range.end.column, 11u);
     ASSERT_EQ(ast.GlobalDeclarations().Length(), 2u);
     EXPECT_EQ(ast.GlobalDeclarations()[1], enable);
 }
@@ -189,7 +296,12 @@ enable f16;
     // Accept the enable directive although it cause an error
     ASSERT_EQ(ast.Enables().Length(), 1u);
     auto* enable = ast.Enables()[0];
-    EXPECT_EQ(enable->extension, builtin::Extension::kF16);
+    ASSERT_EQ(enable->extensions.Length(), 1u);
+    EXPECT_EQ(enable->extensions[0]->name, builtin::Extension::kF16);
+    EXPECT_EQ(enable->extensions[0]->source.range.begin.line, 3u);
+    EXPECT_EQ(enable->extensions[0]->source.range.begin.column, 8u);
+    EXPECT_EQ(enable->extensions[0]->source.range.end.line, 3u);
+    EXPECT_EQ(enable->extensions[0]->source.range.end.column, 11u);
     ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
     EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
 }

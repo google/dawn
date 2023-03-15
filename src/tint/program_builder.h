@@ -2048,20 +2048,22 @@ class ProgramBuilder {
     }
 
     /// Adds the extension to the list of enable directives at the top of the module.
-    /// @param ext the extension to enable
+    /// @param extension the extension to enable
     /// @return an `ast::Enable` enabling the given extension.
-    const ast::Enable* Enable(builtin::Extension ext) {
-        auto* enable = create<ast::Enable>(ext);
+    const ast::Enable* Enable(builtin::Extension extension) {
+        auto* ext = create<ast::Extension>(extension);
+        auto* enable = create<ast::Enable>(utils::Vector{ext});
         AST().AddEnable(enable);
         return enable;
     }
 
     /// Adds the extension to the list of enable directives at the top of the module.
     /// @param source the enable source
-    /// @param ext the extension to enable
+    /// @param extension the extension to enable
     /// @return an `ast::Enable` enabling the given extension.
-    const ast::Enable* Enable(const Source& source, builtin::Extension ext) {
-        auto* enable = create<ast::Enable>(source, ext);
+    const ast::Enable* Enable(const Source& source, builtin::Extension extension) {
+        auto* ext = create<ast::Extension>(source, extension);
+        auto* enable = create<ast::Enable>(source, utils::Vector{ext});
         AST().AddEnable(enable);
         return enable;
     }

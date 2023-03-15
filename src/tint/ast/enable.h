@@ -19,8 +19,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/ast/node.h"
-#include "src/tint/builtin/extension.h"
+#include "src/tint/ast/extension.h"
 
 namespace tint::ast {
 
@@ -35,21 +34,24 @@ class Enable final : public Castable<Enable, Node> {
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    /// @param ext the extension
-    Enable(ProgramID pid, NodeID nid, const Source& src, builtin::Extension ext);
+    /// @param exts the extensions being enabled by this directive
+    Enable(ProgramID pid, NodeID nid, const Source& src, utils::VectorRef<const Extension*> exts);
     /// Move constructor
     Enable(Enable&&);
 
     ~Enable() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
+    /// @param ext the extension to search for
+    /// @returns true if this Enable lists the given extension
+    bool HasExtension(builtin::Extension ext) const;
+
+    /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
     const Enable* Clone(CloneContext* ctx) const override;
 
-    /// The extension name
-    const builtin::Extension extension;
+    /// The extensions being enabled by this directive
+    const utils::Vector<const Extension*, 4> extensions;
 };
 
 }  // namespace tint::ast

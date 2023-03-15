@@ -3476,7 +3476,10 @@ bool Resolver::DiagnosticControl(const ast::DiagnosticControl& control) {
 }
 
 bool Resolver::Enable(const ast::Enable* enable) {
-    enabled_extensions_.Add(enable->extension);
+    for (auto* ext : enable->extensions) {
+        Mark(ext);
+        enabled_extensions_.Add(ext->name);
+    }
     return true;
 }
 

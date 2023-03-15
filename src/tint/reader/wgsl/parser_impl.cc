@@ -390,53 +390,52 @@ Maybe<Void> ParserImpl::diagnostic_directive() {
     return decl;
 }
 
-// enable_directive
-//  : enable name SEMICLON
+// enable_directive :
+// | 'enable' identifier (COMMA identifier)* COMMA? SEMICOLON
 Maybe<Void> ParserImpl::enable_directive() {
-    auto decl = sync(Token::Type::kSemicolon, [&]() -> Maybe<Void> {
+    return sync(Token::Type::kSemicolon, [&]() -> Maybe<Void> {
+        MultiTokenSource decl_source(this);
         if (!match(Token::Type::kEnable)) {
             return Failure::kNoMatch;
         }
 
-        // Match the extension name.
-        auto& t = peek();
-        if (handle_error(t)) {
-            // The token might itself be an error.
-            return Failure::kErrored;
-        }
-
-        if (t.Is(Token::Type::kParenLeft)) {
+        if (peek_is(Token::Type::kParenLeft)) {
             // A common error case is writing `enable(foo);` instead of `enable foo;`.
             synchronized_ = false;
-            return add_error(t.source(), "enable directives don't take parenthesis");
+            return add_error(peek().source(), "enable directives don't take parenthesis");
         }
 
-        auto ext = expect_enum("extension", builtin::ParseExtension, builtin::kExtensionStrings);
-        if (ext.errored) {
-            return Failure::kErrored;
+        utils::Vector<const ast::Extension*, 4> extensions;
+        while (continue_parsing()) {
+            Source ext_src = peek().source();
+            auto ext =
+                expect_enum("extension", builtin::ParseExtension, builtin::kExtensionStrings);
+            if (ext.errored) {
+                return Failure::kErrored;
+            }
+            extensions.Push(create<ast::Extension>(ext_src, ext.value));
+
+            if (!match(Token::Type::kComma)) {
+                break;
+            }
+            if (peek_is(Token::Type::kSemicolon)) {
+                break;
+            }
         }
 
         if (!expect("enable directive", Token::Type::kSemicolon)) {
             return Failure::kErrored;
         }
-        builder_.AST().AddEnable(create<ast::Enable>(t.source(), ext.value));
+
+        builder_.AST().AddEnable(create<ast::Enable>(decl_source.Source(), std::move(extensions)));
         return kSuccess;
     });
-
-    if (decl.errored) {
-        return Failure::kErrored;
-    }
-    if (decl.matched) {
-        return kSuccess;
-    }
-
-    return Failure::kNoMatch;
 }
 
 // requires_directive
-//  : require identifier (COMMA identifier)? SEMICLON
+//  : require identifier (COMMA identifier)* COMMA? SEMICOLON
 Maybe<Void> ParserImpl::requires_directive() {
-    auto decl = sync(Token::Type::kSemicolon, [&]() -> Maybe<Void> {
+    return sync(Token::Type::kSemicolon, [&]() -> Maybe<Void> {
         if (!match(Token::Type::kRequires)) {
             return Failure::kNoMatch;
         }
@@ -483,15 +482,6 @@ Maybe<Void> ParserImpl::requires_directive() {
         // conditional.
         return add_error(t.source(), "missing feature names in requires directive");
     });
-
-    if (decl.errored) {
-        return Failure::kErrored;
-    }
-    if (decl.matched) {
-        return kSuccess;
-    }
-
-    return Failure::kNoMatch;
 }
 
 // global_decl

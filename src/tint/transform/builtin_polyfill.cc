@@ -47,8 +47,9 @@ struct BuiltinPolyfill::State {
     State(const Program* program, const Config& config) : src(program), cfg(config) {
         has_full_ptr_params = false;
         for (auto* enable : src->AST().Enables()) {
-            if (enable->extension == builtin::Extension::kChromiumExperimentalFullPtrParameters) {
+            if (enable->HasExtension(builtin::Extension::kChromiumExperimentalFullPtrParameters)) {
                 has_full_ptr_params = true;
+                break;
             }
         }
     }

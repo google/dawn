@@ -100,7 +100,14 @@ bool GeneratorImpl::EmitDiagnosticControl(utils::StringStream& out,
 
 bool GeneratorImpl::EmitEnable(const ast::Enable* enable) {
     auto out = line();
-    out << "enable " << enable->extension << ";";
+    out << "enable ";
+    for (auto* ext : enable->extensions) {
+        if (ext != enable->extensions.Front()) {
+            out << ", ";
+        }
+        out << ext->name;
+    }
+    out << ";";
     return true;
 }
 

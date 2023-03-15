@@ -27,7 +27,14 @@ TEST_F(EnableTest, Creation) {
     EXPECT_EQ(ext->source.range.begin.column, 2u);
     EXPECT_EQ(ext->source.range.end.line, 20u);
     EXPECT_EQ(ext->source.range.end.column, 5u);
-    EXPECT_EQ(ext->extension, builtin::Extension::kF16);
+    ASSERT_EQ(ext->extensions.Length(), 1u);
+    EXPECT_EQ(ext->extensions[0]->name, builtin::Extension::kF16);
+}
+
+TEST_F(EnableTest, HasExtension) {
+    auto* ext = Enable(Source{{{20, 2}, {20, 5}}}, builtin::Extension::kF16);
+    EXPECT_TRUE(ext->HasExtension(builtin::Extension::kF16));
+    EXPECT_FALSE(ext->HasExtension(builtin::Extension::kChromiumDisableUniformityAnalysis));
 }
 
 }  // namespace

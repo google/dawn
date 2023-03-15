@@ -79,7 +79,15 @@ bool GeneratorImpl::EmitDiagnosticControl(const ast::DiagnosticControl& diagnost
 }
 
 bool GeneratorImpl::EmitEnable(const ast::Enable* enable) {
-    line() << "Enable [" << enable->extension << "]";
+    auto l = line();
+    l << "Enable [";
+    for (auto* ext : enable->extensions) {
+        if (ext != enable->extensions.Front()) {
+            l << ", ";
+        }
+        l << ext->name;
+    }
+    l << "]";
     return true;
 }
 

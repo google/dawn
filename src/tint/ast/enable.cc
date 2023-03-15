@@ -20,15 +20,29 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Enable);
 
 namespace tint::ast {
 
-Enable::Enable(ProgramID pid, NodeID nid, const Source& src, builtin::Extension ext)
-    : Base(pid, nid, src), extension(ext) {}
+Enable::Enable(ProgramID pid,
+               NodeID nid,
+               const Source& src,
+               utils::VectorRef<const Extension*> exts)
+    : Base(pid, nid, src), extensions(std::move(exts)) {}
 
 Enable::Enable(Enable&&) = default;
 
 Enable::~Enable() = default;
 
+bool Enable::HasExtension(builtin::Extension ext) const {
+    for (auto* e : extensions) {
+        if (e->name == ext) {
+            return true;
+        }
+    }
+    return false;
+}
+
 const Enable* Enable::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
-    return ctx->dst->create<Enable>(src, extension);
+    auto exts = ctx->Clone(extensions);
+    return ctx->dst->create<Enable>(src, std::move(exts));
 }
+
 }  // namespace tint::ast
