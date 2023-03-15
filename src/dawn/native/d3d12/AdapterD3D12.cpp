@@ -15,6 +15,7 @@
 #include "dawn/native/d3d12/AdapterD3D12.h"
 
 #include <string>
+#include <utility>
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/Platform.h"
@@ -31,9 +32,7 @@ namespace dawn::native::d3d12 {
 Adapter::Adapter(Backend* backend,
                  ComPtr<IDXGIAdapter3> hardwareAdapter,
                  const TogglesState& adapterToggles)
-    : AdapterBase(backend->GetInstance(), wgpu::BackendType::D3D12, adapterToggles),
-      mHardwareAdapter(hardwareAdapter),
-      mBackend(backend) {}
+    : Base(backend, std::move(hardwareAdapter), wgpu::BackendType::D3D12, adapterToggles) {}
 
 Adapter::~Adapter() {
     CleanUpDebugLayerFilters();
@@ -48,12 +47,8 @@ const D3D12DeviceInfo& Adapter::GetDeviceInfo() const {
     return mDeviceInfo;
 }
 
-IDXGIAdapter3* Adapter::GetHardwareAdapter() const {
-    return mHardwareAdapter.Get();
-}
-
 Backend* Adapter::GetBackend() const {
-    return mBackend;
+    return static_cast<Backend*>(Base::GetBackend());
 }
 
 ComPtr<ID3D12Device> Adapter::GetDevice() const {
@@ -73,7 +68,7 @@ MaybeError Adapter::InitializeImpl() {
     DAWN_TRY(InitializeDebugLayerFilters());
 
     DXGI_ADAPTER_DESC1 adapterDesc;
-    mHardwareAdapter->GetDesc1(&adapterDesc);
+    GetHardwareAdapter()->GetDesc1(&adapterDesc);
 
     mDeviceId = adapterDesc.DeviceId;
     mVendorId = adapterDesc.VendorId;
@@ -90,7 +85,7 @@ MaybeError Adapter::InitializeImpl() {
 
     // Convert the adapter's D3D12 driver version to a readable string like "24.21.13.9793".
     LARGE_INTEGER umdVersion;
-    if (mHardwareAdapter->CheckInterfaceSupport(__uuidof(IDXGIDevice), &umdVersion) !=
+    if (GetHardwareAdapter()->CheckInterfaceSupport(__uuidof(IDXGIDevice), &umdVersion) !=
         DXGI_ERROR_UNSUPPORTED) {
         uint64_t encodedVersion = umdVersion.QuadPart;
         uint16_t mask = 0xFFFF;
@@ -355,7 +350,7 @@ MaybeError Adapter::ValidateFeatureSupportedWithDeviceTogglesImpl(
     if (feature == wgpu::FeatureName::ShaderF16 ||
         feature == wgpu::FeatureName::ChromiumExperimentalDp4a) {
         DAWN_INVALID_IF(!(deviceTogglesState.IsEnabled(Toggle::UseDXC) &&
-                          mBackend->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4)),
+                          GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4)),
                         "Feature %s requires DXC for D3D12.",
                         GetInstance()->GetFeatureInfo(feature)->name);
     }

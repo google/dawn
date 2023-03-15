@@ -253,6 +253,8 @@ endif()
 
 if (DAWN_ENABLE_D3D12)
     target_sources(dawn_native PRIVATE
+        "d3d/AdapterD3D.cpp"
+        "d3d/AdapterD3D.h"
         "d3d/BackendD3D.cpp"
         "d3d/BackendD3D.h"
         "d3d/BlobD3D.cpp"

@@ -397,6 +397,8 @@ source_set("sources") {
 
   if (dawn_enable_d3d12) {
     sources += [
+      "d3d/AdapterD3D.cpp",
+      "d3d/AdapterD3D.h",
       "d3d/BackendD3D.cpp",
       "d3d/BackendD3D.h",
       "d3d/BlobD3D.cpp",

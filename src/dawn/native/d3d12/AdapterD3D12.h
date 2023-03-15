@@ -17,6 +17,7 @@
 
 #include "dawn/native/Adapter.h"
 
+#include "dawn/native/d3d/AdapterD3D.h"
 #include "dawn/native/d3d12/D3D12Info.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
 
@@ -24,7 +25,7 @@ namespace dawn::native::d3d12 {
 
 class Backend;
 
-class Adapter : public AdapterBase {
+class Adapter : public d3d::Adapter {
   public:
     Adapter(Backend* backend,
             ComPtr<IDXGIAdapter3> hardwareAdapter,
@@ -35,11 +36,12 @@ class Adapter : public AdapterBase {
     bool SupportsExternalImages() const override;
 
     const D3D12DeviceInfo& GetDeviceInfo() const;
-    IDXGIAdapter3* GetHardwareAdapter() const;
     Backend* GetBackend() const;
     ComPtr<ID3D12Device> GetDevice() const;
 
   private:
+    using Base = d3d::Adapter;
+
     void SetupBackendDeviceToggles(TogglesState* deviceToggles) const override;
 
     ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(const DeviceDescriptor* descriptor,
@@ -60,10 +62,8 @@ class Adapter : public AdapterBase {
     MaybeError InitializeDebugLayerFilters();
     void CleanUpDebugLayerFilters();
 
-    ComPtr<IDXGIAdapter3> mHardwareAdapter;
     ComPtr<ID3D12Device> mD3d12Device;
 
-    Backend* mBackend;
     D3D12DeviceInfo mDeviceInfo = {};
 };
 
