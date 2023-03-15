@@ -348,7 +348,7 @@ class ParserImpl {
     /// @param msg the error message
     /// @return `Failure::Errored::kError` so that you can combine an add_error()
     /// call and return on the same line.
-    Failure::Errored add_error(const Token& t, const std::string& msg);
+    Failure::Errored add_error(const Token& t, std::string_view msg);
     /// Appends an error raised when parsing `use` at `t` with the message
     /// `msg`
     /// @param source the source to associate the error with
@@ -363,12 +363,16 @@ class ParserImpl {
     /// @param msg the error message
     /// @return `Failure::Errored::kError` so that you can combine an add_error()
     /// call and return on the same line.
-    Failure::Errored add_error(const Source& source, const std::string& msg);
+    Failure::Errored add_error(const Source& source, std::string_view msg);
+    /// Appends a note at `source` with the message `msg`
+    /// @param source the source to associate the error with
+    /// @param msg the note message
+    void add_note(const Source& source, std::string_view msg);
     /// Appends a deprecated-language-feature warning at `source` with the message
     /// `msg`
     /// @param source the source to associate the error with
     /// @param msg the warning message
-    void deprecated(const Source& source, const std::string& msg);
+    void deprecated(const Source& source, std::string_view msg);
     /// Parses the `translation_unit` grammar element
     void translation_unit();
     /// Parses the `global_directive` grammar element, erroring on parse failure.
@@ -805,14 +809,13 @@ class ParserImpl {
         return synchronized_ && builder_.Diagnostics().error_count() < max_errors_;
     }
 
-    /// without_error() calls the function `func` muting any grammatical errors
-    /// found while executing the function. This can be used as a best-effort to
-    /// produce a meaningful error message when the parser is out of sync.
+    /// without_diag() calls the function `func` muting any diagnostics found while executing the
+    /// function. This can be used to silence spew when attempting to resynchronize the parser.
     /// @param func a function or lambda with the signature: `Expect<Result>()` or
     /// `Maybe<Result>()`.
     /// @return the value returned by `func`
     template <typename F, typename T = ReturnType<F>>
-    T without_error(F&& func);
+    T without_diag(F&& func);
 
     /// Reports an error if the attribute list `list` is not empty.
     /// Used to ensure that all attributes are consumed.
@@ -856,7 +859,7 @@ class ParserImpl {
     bool synchronized_ = true;
     uint32_t parse_depth_ = 0;
     std::vector<Token::Type> sync_tokens_;
-    int silence_errors_ = 0;
+    int silence_diags_ = 0;
     ProgramBuilder builder_;
     size_t max_errors_ = 25;
 };
