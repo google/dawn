@@ -23,8 +23,6 @@ namespace tint::ast {
 DiscardStatement::DiscardStatement(ProgramID pid, NodeID nid, const Source& src)
     : Base(pid, nid, src) {}
 
-DiscardStatement::DiscardStatement(DiscardStatement&&) = default;
-
 DiscardStatement::~DiscardStatement() = default;
 
 const DiscardStatement* DiscardStatement::Clone(CloneContext* ctx) const {

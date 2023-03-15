@@ -33,8 +33,8 @@ class IndexAccessorExpression final : public Castable<IndexAccessorExpression, A
                             const Source& source,
                             const Expression* obj,
                             const Expression* idx);
-    /// Move constructor
-    IndexAccessorExpression(IndexAccessorExpression&&);
+
+    /// Destructor
     ~IndexAccessorExpression() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

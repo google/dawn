@@ -26,8 +26,6 @@ DiagnosticDirective::DiagnosticDirective(ProgramID pid,
                                          DiagnosticControl&& dc)
     : Base(pid, nid, src), control(std::move(dc)) {}
 
-DiagnosticDirective::DiagnosticDirective(DiagnosticDirective&&) = default;
-
 DiagnosticDirective::~DiagnosticDirective() = default;
 
 const DiagnosticDirective* DiagnosticDirective::Clone(CloneContext* ctx) const {

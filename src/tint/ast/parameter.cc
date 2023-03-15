@@ -30,8 +30,6 @@ Parameter::Parameter(ProgramID pid,
                      utils::VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src, n, ty, nullptr, std::move(attrs)) {}
 
-Parameter::Parameter(Parameter&&) = default;
-
 Parameter::~Parameter() = default;
 
 const char* Parameter::Kind() const {

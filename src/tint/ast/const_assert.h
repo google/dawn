@@ -30,9 +30,6 @@ class ConstAssert final : public Castable<ConstAssert, Statement> {
     /// @param condition the assertion condition
     ConstAssert(ProgramID pid, NodeID nid, const Source& source, const Expression* condition);
 
-    /// Move constructor
-    ConstAssert(ConstAssert&&);
-
     /// Destructor
     ~ConstAssert() override;
 

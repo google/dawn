@@ -21,8 +21,6 @@ namespace tint::ast {
 Node::Node(ProgramID pid, NodeID nid, const Source& src)
     : program_id(pid), node_id(nid), source(src) {}
 
-Node::Node(Node&&) = default;
-
 Node::~Node() = default;
 
 }  // namespace tint::ast

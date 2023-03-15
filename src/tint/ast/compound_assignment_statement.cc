@@ -33,8 +33,6 @@ CompoundAssignmentStatement::CompoundAssignmentStatement(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, rhs, program_id);
 }
 
-CompoundAssignmentStatement::CompoundAssignmentStatement(CompoundAssignmentStatement&&) = default;
-
 CompoundAssignmentStatement::~CompoundAssignmentStatement() = default;
 
 const CompoundAssignmentStatement* CompoundAssignmentStatement::Clone(CloneContext* ctx) const {

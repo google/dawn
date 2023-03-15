@@ -58,9 +58,6 @@ class Variable : public Castable<Variable, Node> {
              const Expression* initializer,
              utils::VectorRef<const Attribute*> attributes);
 
-    /// Move constructor
-    Variable(Variable&&);
-
     /// Destructor
     ~Variable() override;
 

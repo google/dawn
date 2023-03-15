@@ -34,8 +34,6 @@ BinaryExpression::BinaryExpression(ProgramID pid,
     TINT_ASSERT(AST, op != BinaryOp::kNone);
 }
 
-BinaryExpression::BinaryExpression(BinaryExpression&&) = default;
-
 BinaryExpression::~BinaryExpression() = default;
 
 const BinaryExpression* BinaryExpression::Clone(CloneContext* ctx) const {

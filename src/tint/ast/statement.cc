@@ -31,8 +31,6 @@ namespace tint::ast {
 
 Statement::Statement(ProgramID pid, NodeID nid, const Source& src) : Base(pid, nid, src) {}
 
-Statement::Statement(Statement&&) = default;
-
 Statement::~Statement() = default;
 
 const char* Statement::Name() const {

@@ -57,8 +57,6 @@ Function::Function(ProgramID pid,
     }
 }
 
-Function::Function(Function&&) = default;
-
 Function::~Function() = default;
 
 PipelineStage Function::PipelineStage() const {

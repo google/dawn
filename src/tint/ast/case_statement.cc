@@ -37,8 +37,6 @@ CaseStatement::CaseStatement(ProgramID pid,
     }
 }
 
-CaseStatement::CaseStatement(CaseStatement&&) = default;
-
 CaseStatement::~CaseStatement() = default;
 
 bool CaseStatement::ContainsDefault() const {

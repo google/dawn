@@ -25,8 +25,6 @@ namespace tint::ast {
 CaseSelector::CaseSelector(ProgramID pid, NodeID nid, const Source& src, const Expression* e)
     : Base(pid, nid, src), expr(e) {}
 
-CaseSelector::CaseSelector(CaseSelector&&) = default;
-
 CaseSelector::~CaseSelector() = default;
 
 const CaseSelector* CaseSelector::Clone(CloneContext* ctx) const {

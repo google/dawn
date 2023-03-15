@@ -41,8 +41,6 @@ SwitchStatement::SwitchStatement(ProgramID pid,
     }
 }
 
-SwitchStatement::SwitchStatement(SwitchStatement&&) = default;
-
 SwitchStatement::~SwitchStatement() = default;
 
 const SwitchStatement* SwitchStatement::Clone(CloneContext* ctx) const {

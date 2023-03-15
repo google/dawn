@@ -39,8 +39,6 @@ StructMember::StructMember(ProgramID pid,
     }
 }
 
-StructMember::StructMember(StructMember&&) = default;
-
 StructMember::~StructMember() = default;
 
 const StructMember* StructMember::Clone(CloneContext* ctx) const {

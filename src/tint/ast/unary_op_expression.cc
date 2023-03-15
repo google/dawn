@@ -30,8 +30,6 @@ UnaryOpExpression::UnaryOpExpression(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, expr, program_id);
 }
 
-UnaryOpExpression::UnaryOpExpression(UnaryOpExpression&&) = default;
-
 UnaryOpExpression::~UnaryOpExpression() = default;
 
 const UnaryOpExpression* UnaryOpExpression::Clone(CloneContext* ctx) const {

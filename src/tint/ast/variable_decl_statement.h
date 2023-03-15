@@ -32,8 +32,8 @@ class VariableDeclStatement final : public Castable<VariableDeclStatement, State
                           NodeID nid,
                           const Source& source,
                           const Variable* variable);
-    /// Move constructor
-    VariableDeclStatement(VariableDeclStatement&&);
+
+    /// Destructor
     ~VariableDeclStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

@@ -59,9 +59,8 @@ class Function final : public Castable<Function, Node> {
              const BlockStatement* body,
              utils::VectorRef<const Attribute*> attributes,
              utils::VectorRef<const Attribute*> return_type_attributes);
-    /// Move constructor
-    Function(Function&&);
 
+    /// Destructor
     ~Function() override;
 
     /// @returns the functions pipeline stage or None if not set

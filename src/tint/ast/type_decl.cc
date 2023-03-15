@@ -28,8 +28,6 @@ TypeDecl::TypeDecl(ProgramID pid, NodeID nid, const Source& src, const Identifie
     }
 }
 
-TypeDecl::TypeDecl(TypeDecl&&) = default;
-
 TypeDecl::~TypeDecl() = default;
 
 }  // namespace tint::ast

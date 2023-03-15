@@ -29,8 +29,6 @@ BreakIfStatement::BreakIfStatement(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition, program_id);
 }
 
-BreakIfStatement::BreakIfStatement(BreakIfStatement&&) = default;
-
 BreakIfStatement::~BreakIfStatement() = default;
 
 const BreakIfStatement* BreakIfStatement::Clone(CloneContext* ctx) const {

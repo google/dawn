@@ -36,8 +36,8 @@ class IdentifierExpression final : public Castable<IdentifierExpression, Express
                          NodeID nid,
                          const Source& src,
                          const Identifier* identifier);
-    /// Move constructor
-    IdentifierExpression(IdentifierExpression&&);
+
+    /// Destructor
     ~IdentifierExpression() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

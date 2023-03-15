@@ -26,8 +26,6 @@ Identifier::Identifier(ProgramID pid, NodeID nid, const Source& src, Symbol sym)
     TINT_ASSERT(AST, symbol.IsValid());
 }
 
-Identifier::Identifier(Identifier&&) = default;
-
 Identifier::~Identifier() = default;
 
 const Identifier* Identifier::Clone(CloneContext* ctx) const {

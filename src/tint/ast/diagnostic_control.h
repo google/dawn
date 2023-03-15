@@ -32,12 +32,15 @@ namespace tint::ast {
 struct DiagnosticControl {
   public:
     /// Default constructor.
-    DiagnosticControl() {}
+    DiagnosticControl();
 
     /// Constructor
     /// @param sev the diagnostic severity
     /// @param rule the diagnostic rule name
     DiagnosticControl(builtin::DiagnosticSeverity sev, const Identifier* rule);
+
+    /// Move constructor
+    DiagnosticControl(DiagnosticControl&&);
 
     /// The diagnostic severity control.
     builtin::DiagnosticSeverity severity;

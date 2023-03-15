@@ -35,8 +35,6 @@ MemberAccessorExpression::MemberAccessorExpression(ProgramID pid,
     }
 }
 
-MemberAccessorExpression::MemberAccessorExpression(MemberAccessorExpression&&) = default;
-
 MemberAccessorExpression::~MemberAccessorExpression() = default;
 
 const MemberAccessorExpression* MemberAccessorExpression::Clone(CloneContext* ctx) const {

@@ -29,8 +29,6 @@ VariableDeclStatement::VariableDeclStatement(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, variable, program_id);
 }
 
-VariableDeclStatement::VariableDeclStatement(VariableDeclStatement&&) = default;
-
 VariableDeclStatement::~VariableDeclStatement() = default;
 
 const VariableDeclStatement* VariableDeclStatement::Clone(CloneContext* ctx) const {

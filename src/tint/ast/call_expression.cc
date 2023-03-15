@@ -36,8 +36,6 @@ CallExpression::CallExpression(ProgramID pid,
     }
 }
 
-CallExpression::CallExpression(CallExpression&&) = default;
-
 CallExpression::~CallExpression() = default;
 
 const CallExpression* CallExpression::Clone(CloneContext* ctx) const {

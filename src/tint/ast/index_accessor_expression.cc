@@ -30,8 +30,6 @@ IndexAccessorExpression::IndexAccessorExpression(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, idx, program_id);
 }
 
-IndexAccessorExpression::IndexAccessorExpression(IndexAccessorExpression&&) = default;
-
 IndexAccessorExpression::~IndexAccessorExpression() = default;
 
 const IndexAccessorExpression* IndexAccessorExpression::Clone(CloneContext* ctx) const {

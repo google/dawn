@@ -27,8 +27,8 @@ class DiscardStatement final : public Castable<DiscardStatement, Statement> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     DiscardStatement(ProgramID pid, NodeID nid, const Source& src);
-    /// Move constructor
-    DiscardStatement(DiscardStatement&&);
+
+    /// Destructor
     ~DiscardStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

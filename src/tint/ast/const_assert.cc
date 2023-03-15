@@ -26,8 +26,6 @@ ConstAssert::ConstAssert(ProgramID pid, NodeID nid, const Source& src, const Exp
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, cond, program_id);
 }
 
-ConstAssert::ConstAssert(ConstAssert&&) = default;
-
 ConstAssert::~ConstAssert() = default;
 
 const ConstAssert* ConstAssert::Clone(CloneContext* ctx) const {

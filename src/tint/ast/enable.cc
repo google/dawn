@@ -26,8 +26,6 @@ Enable::Enable(ProgramID pid,
                utils::VectorRef<const Extension*> exts)
     : Base(pid, nid, src), extensions(std::move(exts)) {}
 
-Enable::Enable(Enable&&) = default;
-
 Enable::~Enable() = default;
 
 bool Enable::HasExtension(builtin::Extension ext) const {

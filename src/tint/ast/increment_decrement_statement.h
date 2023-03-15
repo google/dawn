@@ -34,8 +34,8 @@ class IncrementDecrementStatement final : public Castable<IncrementDecrementStat
                                 const Source& src,
                                 const Expression* lhs,
                                 bool inc);
-    /// Move constructor
-    IncrementDecrementStatement(IncrementDecrementStatement&&);
+
+    /// Destructor
     ~IncrementDecrementStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

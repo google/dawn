@@ -37,8 +37,8 @@ class WhileStatement final : public Castable<WhileStatement, Statement> {
                    const Expression* condition,
                    const BlockStatement* body,
                    utils::VectorRef<const ast::Attribute*> attributes);
-    /// Move constructor
-    WhileStatement(WhileStatement&&);
+
+    /// Destructor
     ~WhileStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

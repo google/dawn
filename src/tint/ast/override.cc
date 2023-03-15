@@ -31,8 +31,6 @@ Override::Override(ProgramID pid,
                    utils::VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src, n, ty, init, std::move(attrs)) {}
 
-Override::Override(Override&&) = default;
-
 Override::~Override() = default;
 
 const char* Override::Kind() const {

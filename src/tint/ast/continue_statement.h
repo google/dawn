@@ -27,8 +27,8 @@ class ContinueStatement final : public Castable<ContinueStatement, Statement> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     ContinueStatement(ProgramID pid, NodeID nid, const Source& src);
-    /// Move constructor
-    ContinueStatement(ContinueStatement&&);
+
+    /// Destructor
     ~ContinueStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

@@ -46,8 +46,6 @@ IfStatement::IfStatement(ProgramID pid,
     }
 }
 
-IfStatement::IfStatement(IfStatement&&) = default;
-
 IfStatement::~IfStatement() = default;
 
 const IfStatement* IfStatement::Clone(CloneContext* ctx) const {

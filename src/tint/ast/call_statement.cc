@@ -29,8 +29,6 @@ CallStatement::CallStatement(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, expr, program_id);
 }
 
-CallStatement::CallStatement(CallStatement&&) = default;
-
 CallStatement::~CallStatement() = default;
 
 const CallStatement* CallStatement::Clone(CloneContext* ctx) const {

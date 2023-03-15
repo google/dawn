@@ -26,8 +26,6 @@ namespace tint::ast {
 Extension::Extension(ProgramID pid, NodeID nid, const Source& src, builtin::Extension ext)
     : Base(pid, nid, src), name(ext) {}
 
-Extension::Extension(Extension&&) = default;
-
 Extension::~Extension() = default;
 
 const Extension* Extension::Clone(CloneContext* ctx) const {

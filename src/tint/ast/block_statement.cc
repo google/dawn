@@ -36,8 +36,6 @@ BlockStatement::BlockStatement(ProgramID pid,
     }
 }
 
-BlockStatement::BlockStatement(BlockStatement&&) = default;
-
 BlockStatement::~BlockStatement() = default;
 
 const BlockStatement* BlockStatement::Clone(CloneContext* ctx) const {

@@ -47,9 +47,6 @@ class Parameter final : public Castable<Parameter, Variable> {
               Type type,
               utils::VectorRef<const Attribute*> attributes);
 
-    /// Move constructor
-    Parameter(Parameter&&);
-
     /// Destructor
     ~Parameter() override;
 

@@ -35,8 +35,8 @@ class ReturnStatement final : public Castable<ReturnStatement, Statement> {
     /// @param src the source of this node
     /// @param value the return value
     ReturnStatement(ProgramID pid, NodeID nid, const Source& src, const Expression* value);
-    /// Move constructor
-    ReturnStatement(ReturnStatement&&);
+
+    /// Destructor
     ~ReturnStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

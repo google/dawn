@@ -37,8 +37,8 @@ class CompoundAssignmentStatement final : public Castable<CompoundAssignmentStat
                                 const Expression* lhs,
                                 const Expression* rhs,
                                 BinaryOp op);
-    /// Move constructor
-    CompoundAssignmentStatement(CompoundAssignmentStatement&&);
+
+    /// Destructor
     ~CompoundAssignmentStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

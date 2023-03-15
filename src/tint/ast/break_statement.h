@@ -27,8 +27,8 @@ class BreakStatement final : public Castable<BreakStatement, Statement> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     BreakStatement(ProgramID pid, NodeID nid, const Source& src);
-    /// Move constructor
-    BreakStatement(BreakStatement&&);
+
+    /// Destructor
     ~BreakStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

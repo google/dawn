@@ -43,9 +43,8 @@ class StructMember final : public Castable<StructMember, Node> {
                  const Identifier* name,
                  Type type,
                  utils::VectorRef<const Attribute*> attributes);
-    /// Move constructor
-    StructMember(StructMember&&);
 
+    /// Destructor
     ~StructMember() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

@@ -35,8 +35,8 @@ class MemberAccessorExpression final
                              const Source& source,
                              const Expression* object,
                              const Identifier* member);
-    /// Move constructor
-    MemberAccessorExpression(MemberAccessorExpression&&);
+
+    /// Destructor
     ~MemberAccessorExpression() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

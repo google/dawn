@@ -28,8 +28,8 @@ class PhonyExpression final : public Castable<PhonyExpression, Expression> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     PhonyExpression(ProgramID pid, NodeID nid, const Source& src);
-    /// Move constructor
-    PhonyExpression(PhonyExpression&&);
+
+    /// Destructor
     ~PhonyExpression() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

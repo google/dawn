@@ -36,9 +36,8 @@ class Enable final : public Castable<Enable, Node> {
     /// @param src the source of this node
     /// @param exts the extensions being enabled by this directive
     Enable(ProgramID pid, NodeID nid, const Source& src, utils::VectorRef<const Extension*> exts);
-    /// Move constructor
-    Enable(Enable&&);
 
+    /// Destructor
     ~Enable() override;
 
     /// @param ext the extension to search for

@@ -29,8 +29,8 @@ class CallStatement final : public Castable<CallStatement, Statement> {
     /// @param src the source of this node for the statement
     /// @param call the function
     CallStatement(ProgramID pid, NodeID nid, const Source& src, const CallExpression* call);
-    /// Move constructor
-    CallStatement(CallStatement&&);
+
+    /// Destructor
     ~CallStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

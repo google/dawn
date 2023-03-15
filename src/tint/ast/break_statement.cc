@@ -23,8 +23,6 @@ namespace tint::ast {
 BreakStatement::BreakStatement(ProgramID pid, NodeID nid, const Source& src)
     : Base(pid, nid, src) {}
 
-BreakStatement::BreakStatement(BreakStatement&&) = default;
-
 BreakStatement::~BreakStatement() = default;
 
 const BreakStatement* BreakStatement::Clone(CloneContext* ctx) const {

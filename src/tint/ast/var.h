@@ -61,9 +61,6 @@ class Var final : public Castable<Var, Variable> {
         const Expression* initializer,
         utils::VectorRef<const Attribute*> attributes);
 
-    /// Move constructor
-    Var(Var&&);
-
     /// Destructor
     ~Var() override;
 

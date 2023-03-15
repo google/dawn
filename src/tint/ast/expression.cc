@@ -20,8 +20,6 @@ namespace tint::ast {
 
 Expression::Expression(ProgramID pid, NodeID nid, const Source& src) : Base(pid, nid, src) {}
 
-Expression::Expression(Expression&&) = default;
-
 Expression::~Expression() = default;
 
 }  // namespace tint::ast

@@ -33,8 +33,6 @@ class Expression : public Castable<Expression, Node> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     Expression(ProgramID pid, NodeID nid, const Source& src);
-    /// Move constructor
-    Expression(Expression&&);
 };
 
 }  // namespace tint::ast

@@ -33,8 +33,6 @@ Var::Var(ProgramID pid,
       declared_address_space(address_space),
       declared_access(access) {}
 
-Var::Var(Var&&) = default;
-
 Var::~Var() = default;
 
 const char* Var::Kind() const {

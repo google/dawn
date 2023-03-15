@@ -32,8 +32,6 @@ AssignmentStatement::AssignmentStatement(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, rhs, program_id);
 }
 
-AssignmentStatement::AssignmentStatement(AssignmentStatement&&) = default;
-
 AssignmentStatement::~AssignmentStatement() = default;
 
 const AssignmentStatement* AssignmentStatement::Clone(CloneContext* ctx) const {

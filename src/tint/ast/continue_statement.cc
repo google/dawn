@@ -23,8 +23,6 @@ namespace tint::ast {
 ContinueStatement::ContinueStatement(ProgramID pid, NodeID nid, const Source& src)
     : Base(pid, nid, src) {}
 
-ContinueStatement::ContinueStatement(ContinueStatement&&) = default;
-
 ContinueStatement::~ContinueStatement() = default;
 
 const ContinueStatement* ContinueStatement::Clone(CloneContext* ctx) const {

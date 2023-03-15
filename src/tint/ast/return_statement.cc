@@ -31,8 +31,6 @@ ReturnStatement::ReturnStatement(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, value, program_id);
 }
 
-ReturnStatement::ReturnStatement(ReturnStatement&&) = default;
-
 ReturnStatement::~ReturnStatement() = default;
 
 const ReturnStatement* ReturnStatement::Clone(CloneContext* ctx) const {

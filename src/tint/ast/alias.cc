@@ -25,8 +25,6 @@ Alias::Alias(ProgramID pid, NodeID nid, const Source& src, const Identifier* n, 
     TINT_ASSERT(AST, type);
 }
 
-Alias::Alias(Alias&&) = default;
-
 Alias::~Alias() = default;
 
 const Alias* Alias::Clone(CloneContext* ctx) const {

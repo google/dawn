@@ -29,8 +29,6 @@ AccessorExpression::AccessorExpression(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, object, program_id);
 }
 
-AccessorExpression::AccessorExpression(AccessorExpression&&) = default;
-
 AccessorExpression::~AccessorExpression() = default;
 
 }  // namespace tint::ast

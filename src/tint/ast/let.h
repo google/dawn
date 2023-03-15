@@ -45,9 +45,6 @@ class Let final : public Castable<Let, Variable> {
         const Expression* initializer,
         utils::VectorRef<const Attribute*> attributes);
 
-    /// Move constructor
-    Let(Let&&);
-
     /// Destructor
     ~Let() override;
 

@@ -34,8 +34,8 @@ class AssignmentStatement final : public Castable<AssignmentStatement, Statement
                         const Source& source,
                         const Expression* lhs,
                         const Expression* rhs);
-    /// Move constructor
-    AssignmentStatement(AssignmentStatement&&);
+
+    /// Destructor
     ~AssignmentStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

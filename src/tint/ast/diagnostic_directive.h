@@ -38,9 +38,6 @@ class DiagnosticDirective final : public Castable<DiagnosticDirective, Node> {
     /// @param dc the diagnostic control
     DiagnosticDirective(ProgramID pid, NodeID nid, const Source& src, DiagnosticControl&& dc);
 
-    /// Move constructor
-    DiagnosticDirective(DiagnosticDirective&&);
-
     /// Destructor
     ~DiagnosticDirective() override;
 

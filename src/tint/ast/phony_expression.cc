@@ -23,8 +23,6 @@ namespace tint::ast {
 PhonyExpression::PhonyExpression(ProgramID pid, NodeID nid, const Source& src)
     : Base(pid, nid, src) {}
 
-PhonyExpression::PhonyExpression(PhonyExpression&&) = default;
-
 PhonyExpression::~PhonyExpression() = default;
 
 const PhonyExpression* PhonyExpression::Clone(CloneContext* ctx) const {

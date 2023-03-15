@@ -32,8 +32,7 @@ class Alias final : public Castable<Alias, TypeDecl> {
     /// @param name the symbol for the alias
     /// @param subtype the alias'd type
     Alias(ProgramID pid, NodeID nid, const Source& src, const Identifier* name, Type subtype);
-    /// Move constructor
-    Alias(Alias&&);
+
     /// Destructor
     ~Alias() override;
 

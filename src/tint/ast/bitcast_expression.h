@@ -34,8 +34,8 @@ class BitcastExpression final : public Castable<BitcastExpression, Expression> {
                       const Source& source,
                       Type type,
                       const Expression* expr);
-    /// Move constructor
-    BitcastExpression(BitcastExpression&&);
+
+    /// Destructor
     ~BitcastExpression() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

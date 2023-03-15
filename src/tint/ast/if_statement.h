@@ -40,8 +40,8 @@ class IfStatement final : public Castable<IfStatement, Statement> {
                 const BlockStatement* body,
                 const Statement* else_stmt,
                 utils::VectorRef<const Attribute*> attributes);
-    /// Move constructor
-    IfStatement(IfStatement&&);
+
+    /// Destructor
     ~IfStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

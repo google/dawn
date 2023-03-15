@@ -22,6 +22,8 @@
 
 namespace tint::ast {
 
+DiagnosticControl::DiagnosticControl() = default;
+
 DiagnosticControl::DiagnosticControl(builtin::DiagnosticSeverity sev, const Identifier* rule)
     : severity(sev), rule_name(rule) {
     TINT_ASSERT(AST, rule != nullptr);
@@ -30,5 +32,7 @@ DiagnosticControl::DiagnosticControl(builtin::DiagnosticSeverity sev, const Iden
         TINT_ASSERT(AST, !rule->Is<TemplatedIdentifier>());
     }
 }
+
+DiagnosticControl::DiagnosticControl(DiagnosticControl&&) = default;
 
 }  // namespace tint::ast

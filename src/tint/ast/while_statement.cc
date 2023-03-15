@@ -40,8 +40,6 @@ WhileStatement::WhileStatement(ProgramID pid,
     }
 }
 
-WhileStatement::WhileStatement(WhileStatement&&) = default;
-
 WhileStatement::~WhileStatement() = default;
 
 const WhileStatement* WhileStatement::Clone(CloneContext* ctx) const {

@@ -48,8 +48,6 @@ ForLoopStatement::ForLoopStatement(ProgramID pid,
     }
 }
 
-ForLoopStatement::ForLoopStatement(ForLoopStatement&&) = default;
-
 ForLoopStatement::~ForLoopStatement() = default;
 
 const ForLoopStatement* ForLoopStatement::Clone(CloneContext* ctx) const {

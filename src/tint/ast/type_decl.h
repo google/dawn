@@ -33,9 +33,8 @@ class TypeDecl : public Castable<TypeDecl, Node> {
     /// @param src the source of this node for the import statement
     /// @param name The name of the type
     TypeDecl(ProgramID pid, NodeID nid, const Source& src, const Identifier* name);
-    /// Move constructor
-    TypeDecl(TypeDecl&&);
 
+    /// Destructor
     ~TypeDecl() override;
 
     /// The name of the type declaration

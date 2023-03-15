@@ -43,8 +43,7 @@ class CallExpression final : public Castable<CallExpression, Expression> {
                    const IdentifierExpression* target,
                    utils::VectorRef<const Expression*> args);
 
-    /// Move constructor
-    CallExpression(CallExpression&&);
+    /// Destructor
     ~CallExpression() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

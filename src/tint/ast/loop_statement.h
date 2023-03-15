@@ -33,8 +33,8 @@ class LoopStatement final : public Castable<LoopStatement, Statement> {
                   const Source& source,
                   const BlockStatement* body,
                   const BlockStatement* continuing);
-    /// Move constructor
-    LoopStatement(LoopStatement&&);
+
+    /// Destructor
     ~LoopStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

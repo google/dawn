@@ -33,8 +33,6 @@ Const::Const(ProgramID pid,
     TINT_ASSERT(AST, init != nullptr);
 }
 
-Const::Const(Const&&) = default;
-
 Const::~Const() = default;
 
 const char* Const::Kind() const {

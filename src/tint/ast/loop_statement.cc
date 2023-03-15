@@ -31,8 +31,6 @@ LoopStatement::LoopStatement(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, continuing, program_id);
 }
 
-LoopStatement::LoopStatement(LoopStatement&&) = default;
-
 LoopStatement::~LoopStatement() = default;
 
 const LoopStatement* LoopStatement::Clone(CloneContext* ctx) const {

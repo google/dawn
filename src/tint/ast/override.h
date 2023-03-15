@@ -48,9 +48,6 @@ class Override final : public Castable<Override, Variable> {
              const Expression* initializer,
              utils::VectorRef<const Attribute*> attributes);
 
-    /// Move constructor
-    Override(Override&&);
-
     /// Destructor
     ~Override() override;
 

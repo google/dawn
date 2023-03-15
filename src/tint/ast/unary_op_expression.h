@@ -34,8 +34,8 @@ class UnaryOpExpression final : public Castable<UnaryOpExpression, Expression> {
                       const Source& source,
                       UnaryOp op,
                       const Expression* expr);
-    /// Move constructor
-    UnaryOpExpression(UnaryOpExpression&&);
+
+    /// Destructor
     ~UnaryOpExpression() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

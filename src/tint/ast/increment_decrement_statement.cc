@@ -29,8 +29,6 @@ IncrementDecrementStatement::IncrementDecrementStatement(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, lhs, program_id);
 }
 
-IncrementDecrementStatement::IncrementDecrementStatement(IncrementDecrementStatement&&) = default;
-
 IncrementDecrementStatement::~IncrementDecrementStatement() = default;
 
 const IncrementDecrementStatement* IncrementDecrementStatement::Clone(CloneContext* ctx) const {

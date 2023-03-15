@@ -39,8 +39,6 @@ Struct::Struct(ProgramID pid,
     }
 }
 
-Struct::Struct(Struct&&) = default;
-
 Struct::~Struct() = default;
 
 const Struct* Struct::Clone(CloneContext* ctx) const {

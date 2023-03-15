@@ -219,6 +219,7 @@ struct TextureOverloadCase {
                         bool /* returns_value */);
     /// Copy constructor
     TextureOverloadCase(const TextureOverloadCase&);
+
     /// Destructor
     ~TextureOverloadCase();
 

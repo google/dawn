@@ -36,8 +36,6 @@ Variable::Variable(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, initializer, program_id);
 }
 
-Variable::Variable(Variable&&) = default;
-
 Variable::~Variable() = default;
 
 }  // namespace tint::ast

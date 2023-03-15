@@ -38,8 +38,6 @@ TemplatedIdentifier::TemplatedIdentifier(ProgramID pid,
     }
 }
 
-TemplatedIdentifier::TemplatedIdentifier(TemplatedIdentifier&&) = default;
-
 TemplatedIdentifier::~TemplatedIdentifier() = default;
 
 const TemplatedIdentifier* TemplatedIdentifier::Clone(CloneContext* ctx) const {

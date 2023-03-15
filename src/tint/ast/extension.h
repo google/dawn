@@ -32,9 +32,8 @@ class Extension final : public Castable<Extension, Node> {
     /// @param src the source of this node
     /// @param ext the extension
     Extension(ProgramID pid, NodeID nid, const Source& src, builtin::Extension ext);
-    /// Move constructor
-    Extension(Extension&&);
 
+    /// Destructor
     ~Extension() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

@@ -40,8 +40,8 @@ class BlockStatement final : public Castable<BlockStatement, Statement> {
                    const Source& source,
                    utils::VectorRef<const Statement*> statements,
                    utils::VectorRef<const Attribute*> attributes);
-    /// Move constructor
-    BlockStatement(BlockStatement&&);
+
+    /// Destructor
     ~BlockStatement() override;
 
     /// @returns true if the block has no statements

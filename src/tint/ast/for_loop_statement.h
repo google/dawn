@@ -41,8 +41,8 @@ class ForLoopStatement final : public Castable<ForLoopStatement, Statement> {
                      const Statement* continuing,
                      const BlockStatement* body,
                      utils::VectorRef<const ast::Attribute*> attributes);
-    /// Move constructor
-    ForLoopStatement(ForLoopStatement&&);
+
+    /// Destructor
     ~ForLoopStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

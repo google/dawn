@@ -48,9 +48,6 @@ class Const final : public Castable<Const, Variable> {
           const Expression* initializer,
           utils::VectorRef<const Attribute*> attributes);
 
-    /// Move constructor
-    Const(Const&&);
-
     /// Destructor
     ~Const() override;
 

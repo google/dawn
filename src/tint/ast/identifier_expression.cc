@@ -29,8 +29,6 @@ IdentifierExpression::IdentifierExpression(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL(AST, identifier, program_id);
 }
 
-IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;
-
 IdentifierExpression::~IdentifierExpression() = default;
 
 const IdentifierExpression* IdentifierExpression::Clone(CloneContext* ctx) const {

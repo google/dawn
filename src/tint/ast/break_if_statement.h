@@ -32,8 +32,7 @@ class BreakIfStatement final : public Castable<BreakIfStatement, Statement> {
     /// @param condition the if condition
     BreakIfStatement(ProgramID pid, NodeID nid, const Source& src, const Expression* condition);
 
-    /// Move constructor
-    BreakIfStatement(BreakIfStatement&&);
+    /// Destructor
     ~BreakIfStatement() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.

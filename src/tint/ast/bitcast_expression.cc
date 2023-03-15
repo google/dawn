@@ -31,7 +31,6 @@ BitcastExpression::BitcastExpression(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, expr, program_id);
 }
 
-BitcastExpression::BitcastExpression(BitcastExpression&&) = default;
 BitcastExpression::~BitcastExpression() = default;
 
 const BitcastExpression* BitcastExpression::Clone(CloneContext* ctx) const {
