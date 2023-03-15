@@ -945,6 +945,12 @@ class FunctionEmitter {
     /// @returns the value as an i32 value.
     TypedExpression ToI32(TypedExpression value);
 
+    /// Returns the given value as an u32. If it's already an u32 then simply returns @p value.
+    /// Otherwise, wrap the value in a TypeInitializer expression.
+    /// @param value the value to pass through or convert
+    /// @returns the value as an u32 value.
+    TypedExpression ToU32(TypedExpression value);
+
     /// Returns the given value as a signed integer type of the same shape if the value is unsigned
     /// scalar or vector, by wrapping the value with a TypeInitializer expression.  Returns the
     /// value itself if the value was already signed.
@@ -1034,6 +1040,18 @@ class FunctionEmitter {
     /// @param inst the SPIR-V instruction
     /// @returns an expression
     TypedExpression MakeBuiltinCall(const spvtools::opt::Instruction& inst);
+
+    /// Returns an expression for a SPIR-V instruction that maps to the extractBits WGSL
+    /// builtin function call, with special handling to cast offset and count to u32, if needed.
+    /// @param inst the SPIR-V instruction
+    /// @returns an expression
+    TypedExpression MakeExtractBitsCall(const spvtools::opt::Instruction& inst);
+
+    /// Returns an expression for a SPIR-V instruction that maps to the insertBits WGSL
+    /// builtin function call, with special handling to cast offset and count to u32, if needed.
+    /// @param inst the SPIR-V instruction
+    /// @returns an expression
+    TypedExpression MakeInsertBitsCall(const spvtools::opt::Instruction& inst);
 
     /// Returns an expression for a SPIR-V OpArrayLength instruction.
     /// @param inst the SPIR-V instruction

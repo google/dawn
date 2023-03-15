@@ -3819,7 +3819,14 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
 
     const auto builtin = GetBuiltin(op);
     if (builtin != builtin::Function::kNone) {
-        return MakeBuiltinCall(inst);
+        switch (builtin) {
+            case builtin::Function::kExtractBits:
+                return MakeExtractBitsCall(inst);
+            case builtin::Function::kInsertBits:
+                return MakeInsertBitsCall(inst);
+            default:
+                return MakeBuiltinCall(inst);
+        }
     }
 
     if (op == spv::Op::OpFMod) {
@@ -5274,6 +5281,42 @@ TypedExpression FunctionEmitter::MakeBuiltinCall(const spvtools::opt::Instructio
     return parser_impl_.RectifyForcedResultType(call, inst, first_operand_type);
 }
 
+TypedExpression FunctionEmitter::MakeExtractBitsCall(const spvtools::opt::Instruction& inst) {
+    const auto builtin = GetBuiltin(opcode(inst));
+    auto* name = builtin::str(builtin);
+    auto* ident = create<ast::Identifier>(Source{}, builder_.Symbols().Register(name));
+    auto e = MakeOperand(inst, 0);
+    auto offset = ToU32(MakeOperand(inst, 1));
+    auto count = ToU32(MakeOperand(inst, 2));
+    auto* call_expr = builder_.Call(ident, ExpressionList{e.expr, offset.expr, count.expr});
+    auto* result_type = parser_impl_.ConvertType(inst.type_id());
+    if (!result_type) {
+        Fail() << "internal error: no mapped type result of call: " << inst.PrettyPrint();
+        return {};
+    }
+    TypedExpression call{result_type, call_expr};
+    return parser_impl_.RectifyForcedResultType(call, inst, e.type);
+}
+
+TypedExpression FunctionEmitter::MakeInsertBitsCall(const spvtools::opt::Instruction& inst) {
+    const auto builtin = GetBuiltin(opcode(inst));
+    auto* name = builtin::str(builtin);
+    auto* ident = create<ast::Identifier>(Source{}, builder_.Symbols().Register(name));
+    auto e = MakeOperand(inst, 0);
+    auto newbits = MakeOperand(inst, 1);
+    auto offset = ToU32(MakeOperand(inst, 2));
+    auto count = ToU32(MakeOperand(inst, 3));
+    auto* call_expr =
+        builder_.Call(ident, ExpressionList{e.expr, newbits.expr, offset.expr, count.expr});
+    auto* result_type = parser_impl_.ConvertType(inst.type_id());
+    if (!result_type) {
+        Fail() << "internal error: no mapped type result of call: " << inst.PrettyPrint();
+        return {};
+    }
+    TypedExpression call{result_type, call_expr};
+    return parser_impl_.RectifyForcedResultType(call, inst, e.type);
+}
+
 TypedExpression FunctionEmitter::MakeSimpleSelect(const spvtools::opt::Instruction& inst) {
     auto condition = MakeOperand(inst, 0);
     auto true_value = MakeOperand(inst, 1);
@@ -6051,6 +6094,13 @@ TypedExpression FunctionEmitter::ToI32(TypedExpression value) {
         return value;
     }
     return {ty_.I32(), builder_.Call(builder_.ty.i32(), utils::Vector{value.expr})};
+}
+
+TypedExpression FunctionEmitter::ToU32(TypedExpression value) {
+    if (!value || value.type->Is<U32>()) {
+        return value;
+    }
+    return {ty_.U32(), builder_.Call(builder_.ty.u32(), utils::Vector{value.expr})};
 }
 
 TypedExpression FunctionEmitter::ToSignedIfUnsigned(TypedExpression value) {
