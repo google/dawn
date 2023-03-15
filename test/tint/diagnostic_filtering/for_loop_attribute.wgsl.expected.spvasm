@@ -1,0 +1,81 @@
+diagnostic_filtering/for_loop_attribute.wgsl:5:21 warning: 'dpdx' must only be called from uniform control flow
+  for (; x > v.x && dpdx(1.0) > 0.0; ) {
+                    ^^^^^^^^^
+
+diagnostic_filtering/for_loop_attribute.wgsl:5:3 note: control flow depends on possibly non-uniform value
+  for (; x > v.x && dpdx(1.0) > 0.0; ) {
+  ^^^
+
+diagnostic_filtering/for_loop_attribute.wgsl:5:21 note: return value of 'dpdx' may be non-uniform
+  for (; x > v.x && dpdx(1.0) > 0.0; ) {
+                    ^^^^^^^^^
+
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 39
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %x_1
+               OpExecutionMode %main OriginUpperLeft
+               OpName %x_1 "x_1"
+               OpName %main_inner "main_inner"
+               OpName %x "x"
+               OpName %v "v"
+               OpName %main "main"
+               OpDecorate %x_1 Location 0
+      %float = OpTypeFloat 32
+%_ptr_Input_float = OpTypePointer Input %float
+        %x_1 = OpVariable %_ptr_Input_float Input
+       %void = OpTypeVoid
+          %4 = OpTypeFunction %void %float
+    %v4float = OpTypeVector %float 4
+         %10 = OpConstantNull %v4float
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Function_float = OpTypePointer Function %float
+       %bool = OpTypeBool
+    %float_1 = OpConstant %float 1
+         %29 = OpConstantNull %float
+         %34 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %4
+          %x = OpFunctionParameter %float
+          %8 = OpLabel
+          %v = OpVariable %_ptr_Function_v4float Function %10
+               OpStore %v %10
+               OpBranch %13
+         %13 = OpLabel
+               OpLoopMerge %14 %15 None
+               OpBranch %16
+         %16 = OpLabel
+         %21 = OpAccessChain %_ptr_Function_float %v %uint_0
+         %22 = OpLoad %float %21
+         %23 = OpFOrdGreaterThan %bool %x %22
+               OpSelectionMerge %25 None
+               OpBranchConditional %23 %26 %25
+         %26 = OpLabel
+         %27 = OpDPdx %float %float_1
+         %30 = OpFOrdGreaterThan %bool %27 %29
+               OpBranch %25
+         %25 = OpLabel
+         %31 = OpPhi %bool %23 %16 %30 %26
+         %17 = OpLogicalNot %bool %31
+               OpSelectionMerge %32 None
+               OpBranchConditional %17 %33 %32
+         %33 = OpLabel
+               OpBranch %14
+         %32 = OpLabel
+               OpBranch %15
+         %15 = OpLabel
+               OpBranch %13
+         %14 = OpLabel
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %34
+         %36 = OpLabel
+         %38 = OpLoad %float %x_1
+         %37 = OpFunctionCall %void %main_inner %38
+               OpReturn
+               OpFunctionEnd

@@ -1288,7 +1288,7 @@ Maybe<const ast::Statement*> ParserImpl::statement() {
         return loop.value;
     }
 
-    auto stmt_for = for_statement();
+    auto stmt_for = for_statement(attrs.value);
     if (stmt_for.errored) {
         return Failure::kErrored;
     }
@@ -1881,7 +1881,7 @@ Expect<std::unique_ptr<ForHeader>> ParserImpl::expect_for_header() {
 
 // for_statement
 //   : FOR PAREN_LEFT for_header PAREN_RIGHT compound_statement
-Maybe<const ast::ForLoopStatement*> ParserImpl::for_statement() {
+Maybe<const ast::ForLoopStatement*> ParserImpl::for_statement(AttributeList& attrs) {
     Source source;
     if (!match(Token::Type::kFor, &source)) {
         return Failure::kNoMatch;
@@ -1897,8 +1897,9 @@ Maybe<const ast::ForLoopStatement*> ParserImpl::for_statement() {
         return Failure::kErrored;
     }
 
+    TINT_DEFER(attrs.Clear());
     return create<ast::ForLoopStatement>(source, header->initializer, header->condition,
-                                         header->continuing, body.value);
+                                         header->continuing, body.value, std::move(attrs));
 }
 
 // while_statement

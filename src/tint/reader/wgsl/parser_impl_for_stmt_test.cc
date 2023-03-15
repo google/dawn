@@ -24,7 +24,8 @@ using ForStmtTest = ParserImplTest;
 // Test an empty for loop.
 TEST_F(ForStmtTest, Empty) {
     auto p = parser("for (;;) { }");
-    auto fl = p->for_statement();
+    ParserImpl::AttributeList attrs;
+    auto fl = p->for_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(fl.errored);
     ASSERT_TRUE(fl.matched);
@@ -37,7 +38,8 @@ TEST_F(ForStmtTest, Empty) {
 // Test a for loop with non-empty body.
 TEST_F(ForStmtTest, Body) {
     auto p = parser("for (;;) { discard; }");
-    auto fl = p->for_statement();
+    ParserImpl::AttributeList attrs;
+    auto fl = p->for_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(fl.errored);
     ASSERT_TRUE(fl.matched);
@@ -51,7 +53,8 @@ TEST_F(ForStmtTest, Body) {
 // Test a for loop declaring a variable in the initializer statement.
 TEST_F(ForStmtTest, InitializerStatementDecl) {
     auto p = parser("for (var i: i32 ;;) { }");
-    auto fl = p->for_statement();
+    ParserImpl::AttributeList attrs;
+    auto fl = p->for_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(fl.errored);
     ASSERT_TRUE(fl.matched);
@@ -68,7 +71,8 @@ TEST_F(ForStmtTest, InitializerStatementDecl) {
 // statement.
 TEST_F(ForStmtTest, InitializerStatementDeclEqual) {
     auto p = parser("for (var i: i32 = 0 ;;) { }");
-    auto fl = p->for_statement();
+    ParserImpl::AttributeList attrs;
+    auto fl = p->for_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(fl.errored);
     ASSERT_TRUE(fl.matched);
@@ -84,7 +88,8 @@ TEST_F(ForStmtTest, InitializerStatementDeclEqual) {
 // Test a for loop declaring a const variable in the initializer statement.
 TEST_F(ForStmtTest, InitializerStatementConstDecl) {
     auto p = parser("for (let i: i32 = 0 ;;) { }");
-    auto fl = p->for_statement();
+    ParserImpl::AttributeList attrs;
+    auto fl = p->for_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(fl.errored);
     ASSERT_TRUE(fl.matched);
@@ -100,7 +105,8 @@ TEST_F(ForStmtTest, InitializerStatementConstDecl) {
 // Test a for loop assigning a variable in the initializer statement.
 TEST_F(ForStmtTest, InitializerStatementAssignment) {
     auto p = parser("for (i = 0 ;;) { }");
-    auto fl = p->for_statement();
+    ParserImpl::AttributeList attrs;
+    auto fl = p->for_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(fl.errored);
     ASSERT_TRUE(fl.matched);
@@ -113,7 +119,8 @@ TEST_F(ForStmtTest, InitializerStatementAssignment) {
 // Test a for loop incrementing a variable in the initializer statement.
 TEST_F(ForStmtTest, InitializerStatementIncrement) {
     auto p = parser("for (i++;;) { }");
-    auto fl = p->for_statement();
+    ParserImpl::AttributeList attrs;
+    auto fl = p->for_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(fl.errored);
     ASSERT_TRUE(fl.matched);
@@ -126,7 +133,8 @@ TEST_F(ForStmtTest, InitializerStatementIncrement) {
 // Test a for loop calling a function in the initializer statement.
 TEST_F(ForStmtTest, InitializerStatementFuncCall) {
     auto p = parser("for (a(b,c) ;;) { }");
-    auto fl = p->for_statement();
+    ParserImpl::AttributeList attrs;
+    auto fl = p->for_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(fl.errored);
     ASSERT_TRUE(fl.matched);
@@ -139,7 +147,8 @@ TEST_F(ForStmtTest, InitializerStatementFuncCall) {
 // Test a for loop with a break condition
 TEST_F(ForStmtTest, BreakCondition) {
     auto p = parser("for (; 0 == 1;) { }");
-    auto fl = p->for_statement();
+    ParserImpl::AttributeList attrs;
+    auto fl = p->for_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(fl.errored);
     ASSERT_TRUE(fl.matched);
@@ -152,7 +161,8 @@ TEST_F(ForStmtTest, BreakCondition) {
 // Test a for loop assigning a variable in the continuing statement.
 TEST_F(ForStmtTest, ContinuingAssignment) {
     auto p = parser("for (;; x = 2) { }");
-    auto fl = p->for_statement();
+    ParserImpl::AttributeList attrs;
+    auto fl = p->for_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(fl.errored);
     ASSERT_TRUE(fl.matched);
@@ -165,7 +175,8 @@ TEST_F(ForStmtTest, ContinuingAssignment) {
 // Test a for loop with an increment statement as the continuing statement.
 TEST_F(ForStmtTest, ContinuingIncrement) {
     auto p = parser("for (;; x++) { }");
-    auto fl = p->for_statement();
+    ParserImpl::AttributeList attrs;
+    auto fl = p->for_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(fl.errored);
     ASSERT_TRUE(fl.matched);
@@ -178,7 +189,8 @@ TEST_F(ForStmtTest, ContinuingIncrement) {
 // Test a for loop calling a function in the continuing statement.
 TEST_F(ForStmtTest, ContinuingFuncCall) {
     auto p = parser("for (;; a(b,c)) { }");
-    auto fl = p->for_statement();
+    ParserImpl::AttributeList attrs;
+    auto fl = p->for_statement(attrs);
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(fl.errored);
     ASSERT_TRUE(fl.matched);
@@ -188,11 +200,26 @@ TEST_F(ForStmtTest, ContinuingFuncCall) {
     EXPECT_TRUE(fl->body->Empty());
 }
 
+// Test a for loop with attributes.
+TEST_F(ForStmtTest, WithAttributes) {
+    auto p = parser("@diagnostic(off, derivative_uniformity) for (;;) { }");
+    auto attrs = p->attribute_list();
+    auto fl = p->for_statement(attrs.value);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    EXPECT_FALSE(fl.errored);
+    ASSERT_TRUE(fl.matched);
+
+    EXPECT_TRUE(attrs->IsEmpty());
+    ASSERT_EQ(fl->attributes.Length(), 1u);
+    EXPECT_TRUE(fl->attributes[0]->Is<ast::DiagnosticAttribute>());
+}
+
 class ForStmtErrorTest : public ParserImplTest {
   public:
     void TestForWithError(std::string for_str, std::string error_str) {
         auto p_for = parser(for_str);
-        auto e_for = p_for->for_statement();
+        ParserImpl::AttributeList attrs;
+        auto e_for = p_for->for_statement(attrs);
 
         EXPECT_FALSE(e_for.matched);
         EXPECT_TRUE(e_for.errored);

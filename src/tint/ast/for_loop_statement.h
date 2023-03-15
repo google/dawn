@@ -32,13 +32,15 @@ class ForLoopStatement final : public Castable<ForLoopStatement, Statement> {
     /// @param condition the optional loop condition expression
     /// @param continuing the optional continuing statement
     /// @param body the loop body
+    /// @param attributes the while statement attributes
     ForLoopStatement(ProgramID pid,
                      NodeID nid,
                      const Source& source,
                      const Statement* initializer,
                      const Expression* condition,
                      const Statement* continuing,
-                     const BlockStatement* body);
+                     const BlockStatement* body,
+                     utils::VectorRef<const ast::Attribute*> attributes);
     /// Move constructor
     ForLoopStatement(ForLoopStatement&&);
     ~ForLoopStatement() override;
@@ -60,6 +62,9 @@ class ForLoopStatement final : public Castable<ForLoopStatement, Statement> {
 
     /// The loop body block
     const BlockStatement* const body;
+
+    /// The attribute list
+    const utils::Vector<const Attribute*, 1> attributes;
 };
 
 }  // namespace tint::ast

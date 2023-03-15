@@ -3278,37 +3278,44 @@ class ProgramBuilder {
         return create<ast::LoopStatement>(body, continuing);
     }
 
-    /// Creates a ast::ForLoopStatement with input body and optional initializer,
-    /// condition and continuing.
+    /// Creates a ast::ForLoopStatement with input body and optional initializer, condition,
+    /// continuing, and attributes.
     /// @param source the source information
     /// @param init the optional loop initializer
     /// @param cond the optional loop condition
     /// @param cont the optional loop continuing
     /// @param body the loop body
+    /// @param attributes optional attributes
     /// @returns the for loop statement pointer
     template <typename COND>
-    const ast::ForLoopStatement* For(const Source& source,
-                                     const ast::Statement* init,
-                                     COND&& cond,
-                                     const ast::Statement* cont,
-                                     const ast::BlockStatement* body) {
+    const ast::ForLoopStatement* For(
+        const Source& source,
+        const ast::Statement* init,
+        COND&& cond,
+        const ast::Statement* cont,
+        const ast::BlockStatement* body,
+        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
         return create<ast::ForLoopStatement>(source, init, Expr(std::forward<COND>(cond)), cont,
-                                             body);
+                                             body, std::move(attributes));
     }
 
-    /// Creates a ast::ForLoopStatement with input body and optional initializer,
-    /// condition and continuing.
+    /// Creates a ast::ForLoopStatement with input body and optional initializer, condition,
+    /// continuing, and attributes.
     /// @param init the optional loop initializer
     /// @param cond the optional loop condition
     /// @param cont the optional loop continuing
     /// @param body the loop body
+    /// @param attributes optional attributes
     /// @returns the for loop statement pointer
     template <typename COND>
-    const ast::ForLoopStatement* For(const ast::Statement* init,
-                                     COND&& cond,
-                                     const ast::Statement* cont,
-                                     const ast::BlockStatement* body) {
-        return create<ast::ForLoopStatement>(init, Expr(std::forward<COND>(cond)), cont, body);
+    const ast::ForLoopStatement* For(
+        const ast::Statement* init,
+        COND&& cond,
+        const ast::Statement* cont,
+        const ast::BlockStatement* body,
+        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
+        return create<ast::ForLoopStatement>(init, Expr(std::forward<COND>(cond)), cont, body,
+                                             std::move(attributes));
     }
 
     /// Creates a ast::WhileStatement with input body, condition, and optional attributes.

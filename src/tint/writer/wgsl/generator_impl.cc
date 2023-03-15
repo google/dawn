@@ -1059,6 +1059,14 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
 
     {
         auto out = line();
+
+        if (!stmt->attributes.IsEmpty()) {
+            if (!EmitAttributes(out, stmt->attributes)) {
+                return false;
+            }
+            out << " ";
+        }
+
         out << "for";
         {
             ScopedParen sp(out);

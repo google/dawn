@@ -14,6 +14,8 @@
 
 #include "src/tint/ast/for_loop_statement.h"
 
+#include <utility>
+
 #include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ForLoopStatement);
@@ -26,14 +28,24 @@ ForLoopStatement::ForLoopStatement(ProgramID pid,
                                    const Statement* init,
                                    const Expression* cond,
                                    const Statement* cont,
-                                   const BlockStatement* b)
-    : Base(pid, nid, src), initializer(init), condition(cond), continuing(cont), body(b) {
+                                   const BlockStatement* b,
+                                   utils::VectorRef<const ast::Attribute*> attrs)
+    : Base(pid, nid, src),
+      initializer(init),
+      condition(cond),
+      continuing(cont),
+      body(b),
+      attributes(std::move(attrs)) {
     TINT_ASSERT(AST, body);
 
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, initializer, program_id);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition, program_id);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, continuing, program_id);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
+    for (auto* attr : attributes) {
+        TINT_ASSERT(AST, attr);
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
+    }
 }
 
 ForLoopStatement::ForLoopStatement(ForLoopStatement&&) = default;
@@ -48,7 +60,8 @@ const ForLoopStatement* ForLoopStatement::Clone(CloneContext* ctx) const {
     auto* cond = ctx->Clone(condition);
     auto* cont = ctx->Clone(continuing);
     auto* b = ctx->Clone(body);
-    return ctx->dst->create<ForLoopStatement>(src, init, cond, cont, b);
+    auto attrs = ctx->Clone(attributes);
+    return ctx->dst->create<ForLoopStatement>(src, init, cond, cont, b, std::move(attrs));
 }
 
 }  // namespace tint::ast

@@ -1,0 +1,30 @@
+diagnostic_filtering/for_loop_attribute.wgsl:5:21 warning: 'dpdx' must only be called from uniform control flow
+  for (; x > v.x && dpdx(1.0) > 0.0; ) {
+                    ^^^^^^^^^
+
+diagnostic_filtering/for_loop_attribute.wgsl:5:3 note: control flow depends on possibly non-uniform value
+  for (; x > v.x && dpdx(1.0) > 0.0; ) {
+  ^^^
+
+diagnostic_filtering/for_loop_attribute.wgsl:5:21 note: return value of 'dpdx' may be non-uniform
+  for (; x > v.x && dpdx(1.0) > 0.0; ) {
+                    ^^^^^^^^^
+
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_2 {
+  float x [[user(locn0)]];
+};
+
+void tint_symbol_inner(float x) {
+  float4 v = float4(0.0f);
+  for(; ((x > v[0]) && (dfdx(1.0f) > 0.0f)); ) {
+  }
+}
+
+fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  tint_symbol_inner(tint_symbol_1.x);
+  return;
+}
+

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/ast/test_helper.h"
@@ -48,6 +49,15 @@ TEST_F(ForLoopStatementTest, Creation_Null_InitCondCont) {
     auto* body = Block(Return());
     auto* l = For(nullptr, nullptr, nullptr, body);
     EXPECT_EQ(l->body, body);
+}
+
+TEST_F(ForLoopStatementTest, Creation_WithAttributes) {
+    auto* attr1 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "foo");
+    auto* attr2 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "bar");
+    auto* body = Block(Return());
+    auto* l = For(nullptr, nullptr, nullptr, body, utils::Vector{attr1, attr2});
+
+    EXPECT_THAT(l->attributes, testing::ElementsAre(attr1, attr2));
 }
 
 TEST_F(ForLoopStatementTest, Assert_Null_Body) {

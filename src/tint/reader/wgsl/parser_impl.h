@@ -517,9 +517,10 @@ class ParserImpl {
     /// Parses a `for_header` grammar element, erroring on parse failure.
     /// @returns the parsed for header or nullptr
     Expect<std::unique_ptr<ForHeader>> expect_for_header();
-    /// Parses a `for_statement` grammar element
+    /// Parses a `for_statement` grammar element, with the attribute list provided as `attrs`.
+    /// @param attrs the list of attributes for the statement
     /// @returns the parsed for loop or nullptr
-    Maybe<const ast::ForLoopStatement*> for_statement();
+    Maybe<const ast::ForLoopStatement*> for_statement(AttributeList& attrs);
     /// Parses a `while_statement` grammar element, with the attribute list provided as `attrs`.
     /// @param attrs the list of attributes for the statement
     /// @returns the parsed while loop or nullptr

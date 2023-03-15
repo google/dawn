@@ -326,6 +326,18 @@ TEST_F(ParserImplTest, Statement_ConsumedAttributes_Block) {
     EXPECT_EQ(s->attributes.Length(), 1u);
 }
 
+TEST_F(ParserImplTest, Statement_ConsumedAttributes_For) {
+    auto p = parser("@diagnostic(off, derivative_uniformity) for (;false;) {}");
+    auto e = p->statement();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+
+    auto* s = As<ast::ForLoopStatement>(e.value);
+    ASSERT_NE(s, nullptr);
+    EXPECT_EQ(s->attributes.Length(), 1u);
+}
+
 TEST_F(ParserImplTest, Statement_ConsumedAttributes_If) {
     auto p = parser("@diagnostic(off, derivative_uniformity) if true {}");
     auto e = p->statement();

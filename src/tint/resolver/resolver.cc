@@ -4274,6 +4274,9 @@ SEM* Resolver::StatementScope(const ast::Statement* ast, SEM* sem, F&& callback)
             [&](const ast::BlockStatement* block) {
                 return handle_attributes(block, sem, "block statements");
             },
+            [&](const ast::ForLoopStatement* f) {
+                return handle_attributes(f, sem, "for statements");
+            },
             [&](const ast::IfStatement* i) { return handle_attributes(i, sem, "if statements"); },
             [&](const ast::SwitchStatement* s) {
                 return handle_attributes(s, sem, "switch statements");
