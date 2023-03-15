@@ -173,29 +173,6 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     // ExpandCompoundAssignment must come before BuiltinPolyfill
     manager.Add<transform::ExpandCompoundAssignment>();
 
-    // Build the config for the internal ArrayLengthFromUniform transform.
-    auto& array_length_from_uniform = options.array_length_from_uniform;
-    transform::ArrayLengthFromUniform::Config array_length_from_uniform_cfg(
-        array_length_from_uniform.ubo_binding);
-    if (!array_length_from_uniform.bindpoint_to_size_index.empty()) {
-        // If |array_length_from_uniform| bindings are provided, use that config.
-        array_length_from_uniform_cfg.bindpoint_to_size_index =
-            array_length_from_uniform.bindpoint_to_size_index;
-    } else {
-        // If the binding map is empty, use the deprecated |buffer_size_ubo_index|
-        // and automatically choose indices using the binding numbers.
-        array_length_from_uniform_cfg = transform::ArrayLengthFromUniform::Config(
-            sem::BindingPoint{0, options.buffer_size_ubo_index});
-        // Use the SSBO binding numbers as the indices for the buffer size lookups.
-        for (auto* var : in->AST().GlobalVariables()) {
-            auto* global = in->Sem().Get<sem::GlobalVariable>(var);
-            if (global && global->AddressSpace() == builtin::AddressSpace::kStorage) {
-                array_length_from_uniform_cfg.bindpoint_to_size_index.emplace(
-                    global->BindingPoint(), global->BindingPoint().binding);
-            }
-        }
-    }
-
     // Build the configs for the internal CanonicalizeEntryPointIO transform.
     auto entry_point_io_cfg = transform::CanonicalizeEntryPointIO::Config(
         transform::CanonicalizeEntryPointIO::ShaderStyle::kMsl, options.fixed_sample_mask,
@@ -210,6 +187,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     if (!options.disable_robustness) {
         // Robustness must come after PromoteSideEffectsToDecl
         // Robustness must come before BuiltinPolyfill and CanonicalizeEntryPointIO
+        // Robustness must come before ArrayLengthFromUniform
         manager.Add<transform::Robustness>();
     }
 
@@ -260,10 +238,16 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     // ArrayLengthFromUniform must come after SimplifyPointers, as
     // it assumes that the form of the array length argument is &var.array.
     manager.Add<transform::ArrayLengthFromUniform>();
+
+    transform::ArrayLengthFromUniform::Config array_length_cfg(
+        std::move(options.array_length_from_uniform.ubo_binding));
+    array_length_cfg.bindpoint_to_size_index =
+        std::move(options.array_length_from_uniform.bindpoint_to_size_index);
+    data.Add<transform::ArrayLengthFromUniform::Config>(array_length_cfg);
+
     // PackedVec3 must come after ExpandCompoundAssignment.
     manager.Add<transform::PackedVec3>();
     manager.Add<transform::ModuleScopeVarToEntryPointParam>();
-    data.Add<transform::ArrayLengthFromUniform::Config>(std::move(array_length_from_uniform_cfg));
     data.Add<transform::CanonicalizeEntryPointIO::Config>(std::move(entry_point_io_cfg));
     auto out = manager.Run(in, data);
 

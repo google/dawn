@@ -38,6 +38,7 @@ using OptionalVertexPullingTransformConfig = std::optional<tint::transform::Vert
 #define MSL_COMPILATION_REQUEST_MEMBERS(X)                                                  \
     X(SingleShaderStage, stage)                                                             \
     X(const tint::Program*, inputProgram)                                                   \
+    X(tint::writer::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                  \
     X(tint::transform::BindingRemapper::BindingPoints, bindingPoints)                       \
     X(tint::transform::MultiplanarExternalTexture::BindingsMap, externalTextureBindings)    \
     X(OptionalVertexPullingTransformConfig, vertexPullingTransformConfig)                   \
@@ -114,6 +115,9 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     using BindingPoint = tint::writer::BindingPoint;
     BindingRemapper::BindingPoints bindingPoints;
 
+    tint::writer::ArrayLengthFromUniformOptions arrayLengthFromUniform;
+    arrayLengthFromUniform.ubo_binding = {0, kBufferLengthBufferSlot};
+
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
         const BindGroupLayoutBase::BindingMap& bindingMap =
             layout->GetBindGroupLayout(group)->GetBindingMap();
@@ -132,6 +136,16 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             BindingPoint dstBindingPoint{0, shaderIndex};
             if (srcBindingPoint != dstBindingPoint) {
                 bindingPoints.emplace(srcBindingPoint, dstBindingPoint);
+            }
+
+            // Use the ShaderIndex as the indices for the buffer size lookups in the array length
+            // uniform transform. This is used to compute the size of variable length arrays in
+            // storage buffers.
+            if (bindingInfo.buffer.type == wgpu::BufferBindingType::Storage ||
+                bindingInfo.buffer.type == wgpu::BufferBindingType::ReadOnlyStorage ||
+                bindingInfo.buffer.type == kInternalStorageBufferBinding) {
+                arrayLengthFromUniform.bindpoint_to_size_index.emplace(dstBindingPoint,
+                                                                       dstBindingPoint.binding);
             }
         }
     }
@@ -154,6 +168,11 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             if (srcBindingPoint != dstBindingPoint) {
                 bindingPoints.emplace(srcBindingPoint, dstBindingPoint);
             }
+
+            // Use the ShaderIndex as the indices for the buffer size lookups in the array
+            // length uniform transform.
+            arrayLengthFromUniform.bindpoint_to_size_index.emplace(dstBindingPoint,
+                                                                   dstBindingPoint.binding);
         }
     }
 
@@ -177,6 +196,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.isRobustnessEnabled = device->IsRobustnessEnabled();
     req.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.tracePlatform = UnsafeUnkeyedValue(device->GetPlatform());
+    req.arrayLengthFromUniform = std::move(arrayLengthFromUniform);
 
     const CombinedLimits& limits = device->GetLimits();
     req.limits = LimitsForCompilationRequest::Create(limits.v1);
@@ -264,6 +284,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             options.fixed_sample_mask = r.sampleMask;
             options.disable_workgroup_init = r.disableWorkgroupInit;
             options.emit_vertex_point_size = r.emitVertexPointSize;
+            options.array_length_from_uniform = r.arrayLengthFromUniform;
+
             TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "tint::writer::msl::Generate");
             auto result = tint::writer::msl::Generate(&program, options);
             DAWN_INVALID_IF(!result.success, "An error occured while generating MSL: %s.",

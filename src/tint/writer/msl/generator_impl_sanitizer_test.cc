@@ -39,7 +39,10 @@ TEST_F(MslSanitizerTest, Call_ArrayLength) {
              Stage(ast::PipelineStage::kFragment),
          });
 
-    GeneratorImpl& gen = SanitizeAndBuild();
+    Options opts = DefaultOptions();
+    opts.array_length_from_uniform.ubo_binding = sem::BindingPoint{0, 30};
+    opts.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{2, 1}, 1);
+    GeneratorImpl& gen = SanitizeAndBuild(opts);
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
 
@@ -93,7 +96,10 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
              Stage(ast::PipelineStage::kFragment),
          });
 
-    GeneratorImpl& gen = SanitizeAndBuild();
+    Options opts = DefaultOptions();
+    opts.array_length_from_uniform.ubo_binding = sem::BindingPoint{0, 30};
+    opts.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{2, 1}, 1);
+    GeneratorImpl& gen = SanitizeAndBuild(opts);
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
 
@@ -151,7 +157,10 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_ViaLets) {
              Stage(ast::PipelineStage::kFragment),
          });
 
-    GeneratorImpl& gen = SanitizeAndBuild();
+    Options opts = DefaultOptions();
+    opts.array_length_from_uniform.ubo_binding = sem::BindingPoint{0, 30};
+    opts.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{2, 1}, 1);
+    GeneratorImpl& gen = SanitizeAndBuild(opts);
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
 
