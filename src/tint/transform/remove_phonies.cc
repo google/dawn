@@ -88,10 +88,22 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
                     }
 
                     if (side_effects.size() == 1) {
-                        if (auto* call = side_effects[0]->As<ast::CallExpression>()) {
+                        if (auto* call_expr = side_effects[0]->As<ast::CallExpression>()) {
                             // Phony assignment with single call side effect.
-                            // Replace phony assignment with call.
-                            ctx.Replace(stmt, [&, call] { return b.CallStmt(ctx.Clone(call)); });
+                            auto* call = sem.Get(call_expr)->Unwrap()->As<sem::Call>();
+                            if (call->Target()->MustUse()) {
+                                // Replace phony assignment assignment to uniquely named let.
+                                ctx.Replace<ast::Statement>(stmt, [&, call_expr] {  //
+                                    auto name = b.Symbols().New("tint_phony");
+                                    auto* rhs = ctx.Clone(call_expr);
+                                    return b.Decl(b.Let(name, rhs));
+                                });
+                            } else {
+                                // Replace phony assignment with call statement.
+                                ctx.Replace(stmt, [&, call_expr] {  //
+                                    return b.CallStmt(ctx.Clone(call_expr));
+                                });
+                            }
                             return;
                         }
                     }

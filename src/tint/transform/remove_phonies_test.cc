@@ -131,6 +131,60 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(RemovePhoniesTest, SingleSideEffectsMustUse) {
+    auto* src = R"(
+@must_use
+fn neg(a : i32) -> i32 {
+  return -(a);
+}
+
+@must_use
+fn add(a : i32, b : i32) -> i32 {
+  return (a + b);
+}
+
+fn f() {
+  let tint_phony = 42;
+  _ = neg(1);
+  _ = 100 + add(2, 3) + 200;
+  _ = add(neg(4), neg(5)) + 6;
+  _ = u32(neg(6));
+  _ = f32(add(7, 8));
+  _ = vec2<f32>(f32(neg(9)));
+  _ = vec3<i32>(1, neg(10), 3);
+  _ = mat2x2<f32>(1.0, f32(add(11, 12)), 3.0, 4.0);
+}
+)";
+
+    auto* expect = R"(
+@must_use
+fn neg(a : i32) -> i32 {
+  return -(a);
+}
+
+@must_use
+fn add(a : i32, b : i32) -> i32 {
+  return (a + b);
+}
+
+fn f() {
+  let tint_phony = 42;
+  let tint_phony_1 = neg(1);
+  let tint_phony_2 = add(2, 3);
+  let tint_phony_3 = add(neg(4), neg(5));
+  let tint_phony_4 = neg(6);
+  let tint_phony_5 = add(7, 8);
+  let tint_phony_6 = neg(9);
+  let tint_phony_7 = neg(10);
+  let tint_phony_8 = add(11, 12);
+}
+)";
+
+    auto got = Run<RemovePhonies>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(RemovePhoniesTest, SingleSideEffects_OutOfOrder) {
     auto* src = R"(
 fn f() {
@@ -185,6 +239,7 @@ fn neg(a : i32) -> i32 {
   return -(a);
 }
 
+@must_use
 fn add(a : i32, b : i32) -> i32 {
   return (a + b);
 }
@@ -206,6 +261,7 @@ fn neg(a : i32) -> i32 {
   return -(a);
 }
 
+@must_use
 fn add(a : i32, b : i32) -> i32 {
   return (a + b);
 }
