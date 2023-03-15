@@ -263,10 +263,10 @@ TEST(SerializeTests, TintSemBindingPoint) {
     EXPECT_CACHE_KEY_EQ(bp, expected);
 }
 
-// Test that ByteVectorSink serializes tint::transform::MultiplanarExternalTexture::BindingPoints
+// Test that ByteVectorSink serializes tint::writer::ExternalTextureOptions::BindingPoints
 // as expected.
 TEST(SerializeTests, TintTransformBindingPoints) {
-    tint::transform::MultiplanarExternalTexture::BindingPoints points{
+    tint::writer::ExternalTextureOptions::BindingPoints points{
         tint::writer::BindingPoint{1, 4},
         tint::writer::BindingPoint{3, 7},
     };

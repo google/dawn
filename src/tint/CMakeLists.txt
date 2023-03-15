@@ -544,6 +544,8 @@ list(APPEND TINT_LIB_SRCS
   writer/array_length_from_uniform_options.cc
   writer/array_length_from_uniform_options.h
   writer/binding_point.h
+  writer/binding_remapper_options.cc
+  writer/binding_remapper_options.h
   writer/check_supported_extensions.cc
   writer/check_supported_extensions.h
   writer/external_texture_options.cc

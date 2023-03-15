@@ -19,6 +19,7 @@
 
 #include "src/tint/transform/add_block_attribute.h"
 #include "src/tint/transform/add_empty_entry_point.h"
+#include "src/tint/transform/binding_remapper.h"
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/clamp_frag_depth.h"
@@ -59,13 +60,18 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     // ExpandCompoundAssignment must come before BuiltinPolyfill
     manager.Add<transform::ExpandCompoundAssignment>();
 
-    manager.Add<transform::PreservePadding>();  // Must come before DirectVariableAccess
+    // Must come before DirectVariableAccess
+    manager.Add<transform::PreservePadding>();
 
-    manager.Add<transform::Unshadow>();  // Must come before DirectVariableAccess
+    // Must come before DirectVariableAccess
+    manager.Add<transform::Unshadow>();
 
     manager.Add<transform::RemoveUnreachableStatements>();
     manager.Add<transform::PromoteSideEffectsToDecl>();
-    manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
+
+    // Required for arrayLength()
+    manager.Add<transform::SimplifyPointers>();
+
     manager.Add<transform::RemovePhonies>();
     manager.Add<transform::VectorizeScalarMatrixInitializers>();
     manager.Add<transform::VectorizeMatrixConversions>();
@@ -77,6 +83,14 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         // Robustness must come before BuiltinPolyfill and CanonicalizeEntryPointIO
         manager.Add<transform::Robustness>();
     }
+
+    // BindingRemapper must come before MultiplanarExternalTexture. Note, this is flipped to the
+    // other generators which run Multiplanar first and then binding remapper.
+    manager.Add<transform::BindingRemapper>();
+    data.Add<transform::BindingRemapper::Remappings>(
+        options.binding_remapper_options.binding_points,
+        options.binding_remapper_options.access_controls,
+        options.binding_remapper_options.allow_collisions);
 
     if (!options.external_texture_options.bindings_map.empty()) {
         // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness

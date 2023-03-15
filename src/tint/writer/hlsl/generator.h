@@ -28,6 +28,7 @@
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/utils/bitset.h"
 #include "src/tint/writer/array_length_from_uniform_options.h"
+#include "src/tint/writer/binding_remapper_options.h"
 #include "src/tint/writer/external_texture_options.h"
 #include "src/tint/writer/text.h"
 
@@ -65,6 +66,9 @@ struct Options {
     /// Options used to specify a mapping of binding points to indices into a UBO
     /// from which to load buffer sizes.
     ArrayLengthFromUniformOptions array_length_from_uniform = {};
+
+    /// Options used in the bindings remapper
+    BindingRemapperOptions binding_remapper_options = {};
 
     /// Interstage locations actually used as inputs in the next stage of the pipeline.
     /// This is potentially used for truncating unused interstage outputs at current shader stage.

@@ -85,10 +85,9 @@ enum class Compiler { FXC, DXC };
     X(bool, usesNumWorkgroups)                                                              \
     X(uint32_t, numWorkgroupsShaderRegister)                                                \
     X(uint32_t, numWorkgroupsRegisterSpace)                                                 \
-    X(tint::transform::MultiplanarExternalTexture::BindingsMap, newBindingsMap)             \
+    X(tint::writer::ExternalTextureOptions, externalTextureOptions)                         \
     X(tint::writer::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                  \
-    X(tint::transform::BindingRemapper::BindingPoints, remappedBindingPoints)               \
-    X(tint::transform::BindingRemapper::AccessControls, remappedAccessControls)             \
+    X(tint::writer::BindingRemapperOptions, bindingRemapper)                                \
     X(std::optional<tint::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(std::bitset<kMaxInterStageShaderVariables>, interstageLocations)                      \
     X(LimitsForCompilationRequest, limits)                                                  \
@@ -311,12 +310,6 @@ ResultOrError<std::string> TranslateToHLSL(
             tint::transform::Renamer::Target::kHlslKeywords);
     }
 
-    if (!r.newBindingsMap.empty()) {
-        transformManager.Add<tint::transform::MultiplanarExternalTexture>();
-        transformInputs.Add<tint::transform::MultiplanarExternalTexture::NewBindingPoints>(
-            std::move(r.newBindingsMap));
-    }
-
     if (r.stage == SingleShaderStage::Vertex) {
         transformManager.Add<tint::transform::FirstIndexOffset>();
         transformInputs.Add<tint::transform::FirstIndexOffset::BindingPoint>(
@@ -330,15 +323,6 @@ ResultOrError<std::string> TranslateToHLSL(
         transformInputs.Add<tint::transform::SubstituteOverride::Config>(
             std::move(r.substituteOverrideConfig).value());
     }
-
-    transformManager.Add<tint::transform::BindingRemapper>();
-
-    // D3D12 registers like `t3` and `c3` have the same bindingOffset number in
-    // the remapping but should not be considered a collision because they have
-    // different types.
-    const bool mayCollide = true;
-    transformInputs.Add<tint::transform::BindingRemapper::Remappings>(
-        std::move(r.remappedBindingPoints), std::move(r.remappedAccessControls), mayCollide);
 
     tint::Program transformedProgram;
     tint::transform::DataMap transformOutputs;
@@ -381,6 +365,9 @@ ResultOrError<std::string> TranslateToHLSL(
     tint::writer::hlsl::Options options;
     options.disable_robustness = !r.isRobustnessEnabled;
     options.disable_workgroup_init = r.disableWorkgroupInit;
+    options.binding_remapper_options = r.bindingRemapper;
+    options.external_texture_options = r.externalTextureOptions;
+
     if (r.usesNumWorkgroups) {
         options.root_constant_binding_point =
             tint::writer::BindingPoint{r.numWorkgroupsRegisterSpace, r.numWorkgroupsShaderRegister};
@@ -523,11 +510,13 @@ ResultOrError<CompiledShader> ShaderModule::Compile(
         }
     }
 
-    using tint::transform::BindingRemapper;
     using tint::writer::BindingPoint;
 
-    BindingRemapper::BindingPoints remappedBindingPoints;
-    BindingRemapper::AccessControls remappedAccessControls;
+    tint::writer::BindingRemapperOptions bindingRemapper;
+    // D3D12 registers like `t3` and `c3` have the same bindingOffset number in
+    // the remapping but should not be considered a collision because they have
+    // different types.
+    bindingRemapper.allow_collisions = true;
 
     tint::writer::ArrayLengthFromUniformOptions arrayLengthFromUniform;
     arrayLengthFromUniform.ubo_binding = {layout->GetDynamicStorageBufferLengthsRegisterSpace(),
@@ -549,7 +538,7 @@ ResultOrError<CompiledShader> ShaderModule::Compile(
             BindingPoint dstBindingPoint{static_cast<uint32_t>(group),
                                          bgl->GetShaderRegister(bindingIndex)};
             if (srcBindingPoint != dstBindingPoint) {
-                remappedBindingPoints.emplace(srcBindingPoint, dstBindingPoint);
+                bindingRemapper.binding_points.emplace(srcBindingPoint, dstBindingPoint);
             }
 
             // Declaring a read-only storage buffer in HLSL but specifying a storage
@@ -562,7 +551,8 @@ ResultOrError<CompiledShader> ShaderModule::Compile(
                       wgpu::BufferBindingType::Storage ||
                   bgl->GetBindingInfo(bindingIndex).buffer.type == kInternalStorageBufferBinding));
             if (forceStorageBufferAsUAV) {
-                remappedAccessControls.emplace(srcBindingPoint, tint::builtin::Access::kReadWrite);
+                bindingRemapper.access_controls.emplace(srcBindingPoint,
+                                                        tint::builtin::Access::kReadWrite);
             }
         }
 
@@ -576,8 +566,8 @@ ResultOrError<CompiledShader> ShaderModule::Compile(
                 BindingPoint bindingPoint{static_cast<uint32_t>(group),
                                           static_cast<uint32_t>(binding)};
                 // Get the renamed binding point if it was remapped.
-                auto it = remappedBindingPoints.find(bindingPoint);
-                if (it != remappedBindingPoints.end()) {
+                auto it = bindingRemapper.binding_points.find(bindingPoint);
+                if (it != bindingRemapper.binding_points.end()) {
                     bindingPoint = it->second;
                 }
 
@@ -600,9 +590,8 @@ ResultOrError<CompiledShader> ShaderModule::Compile(
     req.hlsl.usesNumWorkgroups = entryPoint.usesNumWorkgroups;
     req.hlsl.numWorkgroupsShaderRegister = layout->GetNumWorkgroupsShaderRegister();
     req.hlsl.numWorkgroupsRegisterSpace = layout->GetNumWorkgroupsRegisterSpace();
-    req.hlsl.remappedBindingPoints = std::move(remappedBindingPoints);
-    req.hlsl.remappedAccessControls = std::move(remappedAccessControls);
-    req.hlsl.newBindingsMap = BuildExternalTextureTransformBindings(layout);
+    req.hlsl.bindingRemapper = std::move(bindingRemapper);
+    req.hlsl.externalTextureOptions = BuildExternalTextureTransformBindings(layout);
     req.hlsl.arrayLengthFromUniform = std::move(arrayLengthFromUniform);
     req.hlsl.substituteOverrideConfig = std::move(substituteOverrideConfig);
 

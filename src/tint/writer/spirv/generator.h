@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "src/tint/reflection.h"
+#include "src/tint/writer/binding_remapper_options.h"
 #include "src/tint/writer/external_texture_options.h"
 #include "src/tint/writer/writer.h"
 
@@ -51,6 +52,9 @@ struct Options {
 
     /// Options used in the binding mappings for external textures
     ExternalTextureOptions external_texture_options = {};
+
+    /// Options used in the bindings remapper
+    BindingRemapperOptions binding_remapper_options = {};
 
     /// Set to `true` to initialize workgroup memory with OpConstantNull when
     /// VK_KHR_zero_initialize_workgroup_memory is enabled.

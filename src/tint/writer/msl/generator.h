@@ -23,6 +23,7 @@
 
 #include "src/tint/reflection.h"
 #include "src/tint/writer/array_length_from_uniform_options.h"
+#include "src/tint/writer/binding_remapper_options.h"
 #include "src/tint/writer/external_texture_options.h"
 #include "src/tint/writer/text.h"
 
@@ -69,6 +70,9 @@ struct Options {
     /// Options used to specify a mapping of binding points to indices into a UBO
     /// from which to load buffer sizes.
     ArrayLengthFromUniformOptions array_length_from_uniform = {};
+
+    /// Options used in the bindings remapper
+    BindingRemapperOptions binding_remapper_options = {};
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(disable_robustness,

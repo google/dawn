@@ -22,6 +22,7 @@
 
 #include "src/tint/fuzzers/data_builder.h"
 #include "src/tint/fuzzers/shuffle_transform.h"
+#include "src/tint/transform/binding_remapper.h"
 #include "src/tint/transform/robustness.h"
 
 namespace tint::fuzzers {
