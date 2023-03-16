@@ -4,7 +4,7 @@ struct frexp_result_vec3_f16 {
 };
 frexp_result_vec3_f16 tint_frexp(vector<float16_t, 3> param_0) {
   vector<float16_t, 3> exp;
-  vector<float16_t, 3> fract = frexp(param_0, exp);
+  vector<float16_t, 3> fract = sign(param_0) * frexp(param_0, exp);
   frexp_result_vec3_f16 result = {fract, int3(exp)};
   return result;
 }

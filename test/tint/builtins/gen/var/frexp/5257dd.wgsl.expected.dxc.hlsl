@@ -4,7 +4,7 @@ struct frexp_result_f16 {
 };
 frexp_result_f16 tint_frexp(float16_t param_0) {
   float16_t exp;
-  float16_t fract = frexp(param_0, exp);
+  float16_t fract = sign(param_0) * frexp(param_0, exp);
   frexp_result_f16 result = {fract, int(exp)};
   return result;
 }

@@ -480,46 +480,6 @@ crbug.com/dawn/1677 webgpu:api,validation,resource_usages,texture,in_pass_encode
 crbug.com/dawn/1677 webgpu:api,validation,resource_usages,texture,in_render_common:subresources,depth_stencil_attachment_and_bind_group:* [ Failure ]
 
 ################################################################################
-# frexp failures on Windows
-################################################################################
-crbug.com/dawn/1876 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_fract:inputSource="storage_r" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_fract:inputSource="storage_r" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_fract:inputSource="storage_r" [ Failure ]
-crbug.com/dawn/1876 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/1876 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_fract:inputSource="uniform" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_fract:inputSource="uniform" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_fract:inputSource="uniform" [ Failure ]
-crbug.com/dawn/1876 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec2_fract:inputSource="storage_r" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec2_fract:inputSource="storage_r" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec2_fract:inputSource="storage_r" [ Failure ]
-crbug.com/dawn/1876 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec2_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec2_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec2_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/1876 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec2_fract:inputSource="uniform" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec2_fract:inputSource="uniform" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec2_fract:inputSource="uniform" [ Failure ]
-crbug.com/dawn/1876 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec3_fract:inputSource="storage_r" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec3_fract:inputSource="storage_r" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec3_fract:inputSource="storage_r" [ Failure ]
-crbug.com/dawn/1876 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec3_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec3_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec3_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/1876 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec3_fract:inputSource="uniform" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec3_fract:inputSource="uniform" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec3_fract:inputSource="uniform" [ Failure ]
-crbug.com/dawn/1876 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec4_fract:inputSource="storage_r" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec4_fract:inputSource="storage_r" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec4_fract:inputSource="storage_r" [ Failure ]
-crbug.com/dawn/1876 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec4_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec4_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec4_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/1876 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec4_fract:inputSource="uniform" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec4_fract:inputSource="uniform" [ Failure ]
-crbug.com/dawn/1876 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec4_fract:inputSource="uniform" [ Failure ]
-
-################################################################################
 # frexp failures on Linux Intel
 ################################################################################
 crbug.com/dawn/1877 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,frexp:f32_fract:inputSource="storage_r" [ Failure ]

@@ -4,7 +4,7 @@ struct frexp_result_vec2_f32 {
 };
 frexp_result_vec2_f32 tint_frexp(float2 param_0) {
   float2 exp;
-  float2 fract = frexp(param_0, exp);
+  float2 fract = sign(param_0) * frexp(param_0, exp);
   frexp_result_vec2_f32 result = {fract, int2(exp)};
   return result;
 }

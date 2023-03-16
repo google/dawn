@@ -2045,7 +2045,7 @@ bool GeneratorImpl::EmitFrexpCall(utils::StringStream& out,
             }
 
             line(b) << member_type << " exp;";
-            line(b) << member_type << " fract = frexp(" << in << ", exp);";
+            line(b) << member_type << " fract = sign(" << in << ") * frexp(" << in << ", exp);";
             {
                 auto l = line(b);
                 if (!EmitType(l, builtin->ReturnType(), builtin::AddressSpace::kUndefined,

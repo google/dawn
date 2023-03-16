@@ -606,7 +606,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Frexp_Scalar_f32) {
 };
 frexp_result_f32 tint_frexp(float param_0) {
   float exp;
-  float fract = frexp(param_0, exp);
+  float fract = sign(param_0) * frexp(param_0, exp);
   frexp_result_f32 result = {fract, int(exp)};
   return result;
 }
@@ -635,7 +635,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Frexp_Scalar_f16) {
 };
 frexp_result_f16 tint_frexp(float16_t param_0) {
   float16_t exp;
-  float16_t fract = frexp(param_0, exp);
+  float16_t fract = sign(param_0) * frexp(param_0, exp);
   frexp_result_f16 result = {fract, int(exp)};
   return result;
 }
@@ -662,7 +662,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Frexp_Vector_f32) {
 };
 frexp_result_vec3_f32 tint_frexp(float3 param_0) {
   float3 exp;
-  float3 fract = frexp(param_0, exp);
+  float3 fract = sign(param_0) * frexp(param_0, exp);
   frexp_result_vec3_f32 result = {fract, int3(exp)};
   return result;
 }
@@ -691,7 +691,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Frexp_Vector_f16) {
 };
 frexp_result_vec3_f16 tint_frexp(vector<float16_t, 3> param_0) {
   vector<float16_t, 3> exp;
-  vector<float16_t, 3> fract = frexp(param_0, exp);
+  vector<float16_t, 3> fract = sign(param_0) * frexp(param_0, exp);
   frexp_result_vec3_f16 result = {fract, int3(exp)};
   return result;
 }
