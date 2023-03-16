@@ -237,6 +237,19 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,memory_model,* [ Failure ]
 ################################################################################
 crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="comment" [ Failure ]
 
+crbug.com/tint/1875 [ monterey ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_decrement: [ Failure ]
+crbug.com/tint/1875 [ ventura ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_decrement: [ Failure ]
+crbug.com/tint/1875 [ monterey ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_increment: [ Failure ]
+crbug.com/tint/1875 [ ventura ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_increment: [ Failure ]
+crbug.com/tint/1875 [ monterey ] webgpu:shader,execution,statement,increment_decrement:scalar_u32_decrement: [ Failure ]
+crbug.com/tint/1875 [ ventura ] webgpu:shader,execution,statement,increment_decrement:scalar_u32_decrement: [ Failure ]
+crbug.com/tint/1875 [ monterey ] webgpu:shader,execution,statement,increment_decrement:scalar_u32_increment: [ Failure ]
+crbug.com/tint/1875 [ ventura ] webgpu:shader,execution,statement,increment_decrement:scalar_u32_increment: [ Failure ]
+crbug.com/tint/1875 [ monterey ] webgpu:shader,execution,statement,increment_decrement:vector_element_decrement: [ Failure ]
+crbug.com/tint/1875 [ ventura ] webgpu:shader,execution,statement,increment_decrement:vector_element_decrement: [ Failure ]
+crbug.com/tint/1875 [ monterey ] webgpu:shader,execution,statement,increment_decrement:vector_element_increment: [ Failure ]
+crbug.com/tint/1875 [ ventura ] webgpu:shader,execution,statement,increment_decrement:vector_element_increment: [ Failure ]
+
 ################################################################################
 # Flaky on Intel Mac
 # KEEP
@@ -707,18 +720,6 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:sh
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,unary,f32_conversion:f32:inputSource="const";vectorize=4 [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,expression,unary,f32_conversion:f32:inputSource="const";vectorize=4 [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:shader,execution,expression,unary,f32_conversion:f32:inputSource="const";vectorize=4 [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_decrement: [ Failure ]
-crbug.com/dawn/0000 [ ventura ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_decrement: [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_increment: [ Failure ]
-crbug.com/dawn/0000 [ ventura ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_increment: [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:shader,execution,statement,increment_decrement:scalar_u32_decrement: [ Failure ]
-crbug.com/dawn/0000 [ ventura ] webgpu:shader,execution,statement,increment_decrement:scalar_u32_decrement: [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:shader,execution,statement,increment_decrement:scalar_u32_increment: [ Failure ]
-crbug.com/dawn/0000 [ ventura ] webgpu:shader,execution,statement,increment_decrement:scalar_u32_increment: [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:shader,execution,statement,increment_decrement:vector_element_decrement: [ Failure ]
-crbug.com/dawn/0000 [ ventura ] webgpu:shader,execution,statement,increment_decrement:vector_element_decrement: [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:shader,execution,statement,increment_decrement:vector_element_increment: [ Failure ]
-crbug.com/dawn/0000 [ ventura ] webgpu:shader,execution,statement,increment_decrement:vector_element_increment: [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,parse,identifiers:identifiers:ident="bitcast" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";srcDoFlipYDuringCopy=false;dstPremultiplied=false [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";srcDoFlipYDuringCopy=false;dstPremultiplied=false [ Failure ]
