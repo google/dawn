@@ -95,7 +95,7 @@ TEST_F(ParserImplTest, SwitchStmt_WithParens) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_WithAttributes) {
-    auto p = parser(R"(@diagnostic(off, derivative_uniformity) switch a { default{} })");
+    auto p = parser("@diagnostic(off, derivative_uniformity) switch a { default{} }");
     auto a = p->attribute_list();
     auto e = p->switch_statement(a.value);
     EXPECT_TRUE(e.matched);
@@ -107,6 +107,21 @@ TEST_F(ParserImplTest, SwitchStmt_WithAttributes) {
     EXPECT_TRUE(a->IsEmpty());
     ASSERT_EQ(e->attributes.Length(), 1u);
     EXPECT_TRUE(e->attributes[0]->Is<ast::DiagnosticAttribute>());
+}
+
+TEST_F(ParserImplTest, SwitchStmt_WithBodyAttributes) {
+    auto p = parser("switch a @diagnostic(off, derivative_uniformity) { default{} }");
+    ParserImpl::AttributeList attrs;
+    auto e = p->switch_statement(attrs);
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::SwitchStatement>());
+
+    EXPECT_TRUE(e->attributes.IsEmpty());
+    ASSERT_EQ(e->body_attributes.Length(), 1u);
+    EXPECT_TRUE(e->body_attributes[0]->Is<ast::DiagnosticAttribute>());
 }
 
 TEST_F(ParserImplTest, SwitchStmt_InvalidExpression) {

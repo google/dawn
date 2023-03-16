@@ -706,8 +706,7 @@ struct SwitchStatementBuilder final : public Castable<SwitchStatementBuilder, St
         auto reversed_cases = cases;
         std::reverse(reversed_cases.begin(), reversed_cases.end());
 
-        return builder->create<ast::SwitchStatement>(Source{}, condition, std::move(reversed_cases),
-                                                     utils::Empty);
+        return builder->Switch(Source{}, condition, std::move(reversed_cases));
     }
 
     /// Switch statement condition

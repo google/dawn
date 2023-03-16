@@ -31,7 +31,7 @@ TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch) {
     auto* case_stmt = create<ast::CaseStatement>(utils::Vector{CaseSelector(5_i)}, case_body);
 
     auto* cond = Expr("cond");
-    auto* s = create<ast::SwitchStatement>(cond, utils::Vector{case_stmt, def}, utils::Empty);
+    auto* s = Switch(cond, utils::Vector{case_stmt, def});
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();
@@ -58,7 +58,7 @@ TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch_MixedDefault) {
                                            def_body);
 
     auto* cond = Expr("cond");
-    auto* s = create<ast::SwitchStatement>(cond, utils::Vector{def}, utils::Empty);
+    auto* s = Switch(cond, utils::Vector{def});
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();

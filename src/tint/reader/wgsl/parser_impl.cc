@@ -1620,6 +1620,11 @@ Maybe<const ast::SwitchStatement*> ParserImpl::switch_statement(AttributeList& a
         return add_error(peek(), "unable to parse selector expression");
     }
 
+    auto body_attrs = attribute_list();
+    if (body_attrs.errored) {
+        return Failure::kErrored;
+    }
+
     auto body = expect_brace_block("switch statement", [&]() -> Expect<CaseStatementList> {
         bool errored = false;
         CaseStatementList list;
@@ -1645,7 +1650,8 @@ Maybe<const ast::SwitchStatement*> ParserImpl::switch_statement(AttributeList& a
     }
 
     TINT_DEFER(attrs.Clear());
-    return create<ast::SwitchStatement>(source, condition.value, body.value, std::move(attrs));
+    return create<ast::SwitchStatement>(source, condition.value, body.value, std::move(attrs),
+                                        std::move(body_attrs.value));
 }
 
 // switch_body

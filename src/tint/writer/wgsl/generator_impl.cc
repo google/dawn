@@ -1229,7 +1229,16 @@ bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
         if (!EmitExpression(out, stmt->condition)) {
             return false;
         }
-        out << ") {";
+        out << ") ";
+
+        if (!stmt->body_attributes.IsEmpty()) {
+            if (!EmitAttributes(out, stmt->body_attributes)) {
+                return false;
+            }
+            out << " ";
+        }
+
+        out << "{";
     }
 
     {

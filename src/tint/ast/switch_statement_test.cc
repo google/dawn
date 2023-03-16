@@ -30,7 +30,7 @@ TEST_F(SwitchStatementTest, Creation) {
     auto* ident = Expr("ident");
     utils::Vector body{case_stmt};
 
-    auto* stmt = create<SwitchStatement>(ident, body, utils::Empty);
+    auto* stmt = create<SwitchStatement>(ident, body, utils::Empty, utils::Empty);
     EXPECT_EQ(stmt->condition, ident);
     ASSERT_EQ(stmt->body.Length(), 1u);
     EXPECT_EQ(stmt->body[0], case_stmt);
@@ -38,8 +38,8 @@ TEST_F(SwitchStatementTest, Creation) {
 
 TEST_F(SwitchStatementTest, Creation_WithSource) {
     auto* ident = Expr("ident");
-    auto* stmt =
-        create<SwitchStatement>(Source{Source::Location{20, 2}}, ident, utils::Empty, utils::Empty);
+    auto* stmt = create<SwitchStatement>(Source{Source::Location{20, 2}}, ident, utils::Empty,
+                                         utils::Empty, utils::Empty);
     auto src = stmt->source;
     EXPECT_EQ(src.range.begin.line, 20u);
     EXPECT_EQ(src.range.begin.column, 2u);
@@ -49,9 +49,20 @@ TEST_F(SwitchStatementTest, Creation_WithAttributes) {
     auto* attr1 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "foo");
     auto* attr2 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "bar");
     auto* ident = Expr("ident");
-    auto* stmt = create<SwitchStatement>(ident, utils::Empty, utils::Vector{attr1, attr2});
+    auto* stmt =
+        create<SwitchStatement>(ident, utils::Empty, utils::Vector{attr1, attr2}, utils::Empty);
 
     EXPECT_THAT(stmt->attributes, testing::ElementsAre(attr1, attr2));
+}
+
+TEST_F(SwitchStatementTest, Creation_WithBodyAttributes) {
+    auto* attr1 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "foo");
+    auto* attr2 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "bar");
+    auto* ident = Expr("ident");
+    auto* stmt =
+        create<SwitchStatement>(ident, utils::Empty, utils::Empty, utils::Vector{attr1, attr2});
+
+    EXPECT_THAT(stmt->body_attributes, testing::ElementsAre(attr1, attr2));
 }
 
 TEST_F(SwitchStatementTest, IsSwitch) {
@@ -59,7 +70,7 @@ TEST_F(SwitchStatementTest, IsSwitch) {
     auto* ident = Expr("ident");
     utils::Vector body{create<CaseStatement>(lit, Block())};
 
-    auto* stmt = create<SwitchStatement>(ident, body, utils::Empty);
+    auto* stmt = create<SwitchStatement>(ident, body, utils::Empty, utils::Empty);
     EXPECT_TRUE(stmt->Is<SwitchStatement>());
 }
 
@@ -71,7 +82,7 @@ TEST_F(SwitchStatementTest, Assert_Null_Condition) {
             CaseStatementList cases;
             cases.Push(
                 b.create<CaseStatement>(utils::Vector{b.CaseSelector(b.Expr(1_i))}, b.Block()));
-            b.create<SwitchStatement>(nullptr, cases, utils::Empty);
+            b.create<SwitchStatement>(nullptr, cases, utils::Empty, utils::Empty);
         },
         "internal compiler error");
 }
@@ -81,7 +92,8 @@ TEST_F(SwitchStatementTest, Assert_Null_CaseStatement) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<SwitchStatement>(b.Expr(true), CaseStatementList{nullptr}, utils::Empty);
+            b.create<SwitchStatement>(b.Expr(true), CaseStatementList{nullptr}, utils::Empty,
+                                      utils::Empty);
         },
         "internal compiler error");
 }
@@ -99,7 +111,7 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_Condition) {
                                                },
                                                b1.Block()),
                                        },
-                                       utils::Empty);
+                                       utils::Empty, utils::Empty);
         },
         "internal compiler error");
 }
@@ -117,7 +129,7 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_CaseStatement) {
                                                },
                                                b2.Block()),
                                        },
-                                       utils::Empty);
+                                       utils::Empty, utils::Empty);
         },
         "internal compiler error");
 }

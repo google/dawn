@@ -42,7 +42,7 @@ class DiagnosticSeverityTest : public TestHelper {
         //     return;
         //
         //     @diagnostic(error, chromium_unreachable_code)
-        //     switch (42) {
+        //     switch (42) @diagnostic(off, chromium_unreachable_code) {
         //       case 0 @diagnostic(warning, chromium_unreachable_code) {
         //         return;
         //       }
@@ -81,6 +81,7 @@ class DiagnosticSeverityTest : public TestHelper {
         auto if_body_severity = builtin::DiagnosticSeverity::kWarning;
         auto else_body_severity = builtin::DiagnosticSeverity::kInfo;
         auto switch_severity = builtin::DiagnosticSeverity::kError;
+        auto switch_body_severity = builtin::DiagnosticSeverity::kOff;
         auto case_severity = builtin::DiagnosticSeverity::kWarning;
         auto for_severity = builtin::DiagnosticSeverity::kError;
         auto for_body_severity = builtin::DiagnosticSeverity::kWarning;
@@ -109,8 +110,9 @@ class DiagnosticSeverityTest : public TestHelper {
                           Else(elseif), attr(if_severity));
         auto* case_stmt =
             Case(CaseSelector(0_a), Block(utils::Vector{return_foo_case}, attr(case_severity)));
-        auto* swtch = Switch(42_a, utils::Vector{case_stmt, DefaultCase(Block(return_foo_default))},
-                             attr(switch_severity));
+        auto* default_stmt = DefaultCase(Block(return_foo_default));
+        auto* swtch = Switch(42_a, utils::Vector{case_stmt, default_stmt}, attr(switch_severity),
+                             attr(switch_body_severity));
         auto* fl =
             For(Decl(Var("i", ty.i32())), false, Increment("i"),
                 Block(utils::Vector{return_foo_for}, attr(for_body_severity)), attr(for_severity));
@@ -144,10 +146,11 @@ class DiagnosticSeverityTest : public TestHelper {
         EXPECT_EQ(p.Sem().DiagnosticSeverity(return_foo_else, rule), else_body_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(swtch, rule), switch_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(swtch->condition, rule), switch_severity);
-        EXPECT_EQ(p.Sem().DiagnosticSeverity(case_stmt, rule), switch_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(case_stmt, rule), switch_body_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(case_stmt->body, rule), case_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(return_foo_case, rule), case_severity);
-        EXPECT_EQ(p.Sem().DiagnosticSeverity(return_foo_default, rule), switch_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(default_stmt, rule), switch_body_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(return_foo_default, rule), switch_body_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(fl, rule), while_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(fl->initializer, rule), for_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(fl->condition, rule), for_severity);
