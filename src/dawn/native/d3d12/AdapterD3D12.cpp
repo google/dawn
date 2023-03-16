@@ -135,26 +135,26 @@ bool Adapter::AreTimestampQueriesSupported() const {
 }
 
 void Adapter::InitializeSupportedFeaturesImpl() {
-    mSupportedFeatures.EnableFeature(Feature::TextureCompressionBC);
-    mSupportedFeatures.EnableFeature(Feature::MultiPlanarFormats);
-    mSupportedFeatures.EnableFeature(Feature::Depth32FloatStencil8);
-    mSupportedFeatures.EnableFeature(Feature::IndirectFirstInstance);
-    mSupportedFeatures.EnableFeature(Feature::RG11B10UfloatRenderable);
-    mSupportedFeatures.EnableFeature(Feature::DepthClipControl);
+    EnableFeature(Feature::TextureCompressionBC);
+    EnableFeature(Feature::MultiPlanarFormats);
+    EnableFeature(Feature::Depth32FloatStencil8);
+    EnableFeature(Feature::IndirectFirstInstance);
+    EnableFeature(Feature::RG11B10UfloatRenderable);
+    EnableFeature(Feature::DepthClipControl);
 
     if (AreTimestampQueriesSupported()) {
-        mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
-        mSupportedFeatures.EnableFeature(Feature::TimestampQueryInsidePasses);
+        EnableFeature(Feature::TimestampQuery);
+        EnableFeature(Feature::TimestampQueryInsidePasses);
     }
-    mSupportedFeatures.EnableFeature(Feature::PipelineStatisticsQuery);
+    EnableFeature(Feature::PipelineStatisticsQuery);
 
     // Both Dp4a and ShaderF16 features require DXC version being 1.4 or higher
     if (GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4)) {
         if (mDeviceInfo.supportsDP4a) {
-            mSupportedFeatures.EnableFeature(Feature::ChromiumExperimentalDp4a);
+            EnableFeature(Feature::ChromiumExperimentalDp4a);
         }
         if (mDeviceInfo.supportsShaderF16) {
-            mSupportedFeatures.EnableFeature(Feature::ShaderF16);
+            EnableFeature(Feature::ShaderF16);
         }
     }
 
@@ -164,7 +164,7 @@ void Adapter::InitializeSupportedFeaturesImpl() {
         D3D12_FEATURE_FORMAT_SUPPORT, &bgra8unormFormatInfo, sizeof(bgra8unormFormatInfo));
     if (SUCCEEDED(hr) &&
         (bgra8unormFormatInfo.Support1 & D3D12_FORMAT_SUPPORT1_TYPED_UNORDERED_ACCESS_VIEW)) {
-        mSupportedFeatures.EnableFeature(Feature::BGRA8UnormStorage);
+        EnableFeature(Feature::BGRA8UnormStorage);
     }
 }
 
@@ -342,16 +342,13 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     return {};
 }
 
-MaybeError Adapter::ValidateFeatureSupportedWithDeviceTogglesImpl(
-    wgpu::FeatureName feature,
-    const TogglesState& deviceTogglesState) {
+MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(wgpu::FeatureName feature,
+                                                            const TogglesState& toggles) const {
     // shader-f16 feature and chromium-experimental-dp4a feature require DXC 1.4 or higher for
-    // D3D12.
+    // D3D12. Note that DXC version is checked in InitializeSupportedFeaturesImpl.
     if (feature == wgpu::FeatureName::ShaderF16 ||
         feature == wgpu::FeatureName::ChromiumExperimentalDp4a) {
-        DAWN_INVALID_IF(!(deviceTogglesState.IsEnabled(Toggle::UseDXC) &&
-                          GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4)),
-                        "Feature %s requires DXC for D3D12.",
+        DAWN_INVALID_IF(!toggles.IsEnabled(Toggle::UseDXC), "Feature %s requires DXC for D3D12.",
                         GetInstance()->GetFeatureInfo(feature)->name);
     }
     return {};

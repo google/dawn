@@ -50,21 +50,15 @@ bool Adapter::SupportsExternalImages() const {
     return false;
 }
 
-// Used for the tests that intend to use an adapter without all features enabled.
-void Adapter::SetSupportedFeatures(const std::vector<wgpu::FeatureName>& requiredFeatures) {
-    mSupportedFeatures = {};
-    for (wgpu::FeatureName f : requiredFeatures) {
-        mSupportedFeatures.EnableFeature(f);
-    }
-}
-
 MaybeError Adapter::InitializeImpl() {
     return {};
 }
 
 void Adapter::InitializeSupportedFeaturesImpl() {
     // Enable all features by default for the convenience of tests.
-    mSupportedFeatures.featuresBitSet.set();
+    for (uint32_t i = 0; i < static_cast<uint32_t>(Feature::EnumCount); i++) {
+        EnableFeature(static_cast<Feature>(i));
+    }
 }
 
 MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
@@ -79,9 +73,8 @@ ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor*
     return Device::Create(this, descriptor, deviceToggles);
 }
 
-MaybeError Adapter::ValidateFeatureSupportedWithDeviceTogglesImpl(
-    wgpu::FeatureName feature,
-    const TogglesState& deviceToggles) {
+MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(wgpu::FeatureName feature,
+                                                            const TogglesState& toggles) const {
     return {};
 }
 

@@ -186,35 +186,35 @@ MaybeError Adapter::InitializeImpl() {
 void Adapter::InitializeSupportedFeaturesImpl() {
     // Initialize supported extensions
     if (mDeviceInfo.features.textureCompressionBC == VK_TRUE) {
-        mSupportedFeatures.EnableFeature(Feature::TextureCompressionBC);
+        EnableFeature(Feature::TextureCompressionBC);
     }
 
     if (mDeviceInfo.features.textureCompressionETC2 == VK_TRUE) {
-        mSupportedFeatures.EnableFeature(Feature::TextureCompressionETC2);
+        EnableFeature(Feature::TextureCompressionETC2);
     }
 
     if (mDeviceInfo.features.textureCompressionASTC_LDR == VK_TRUE) {
-        mSupportedFeatures.EnableFeature(Feature::TextureCompressionASTC);
+        EnableFeature(Feature::TextureCompressionASTC);
     }
 
     if (mDeviceInfo.features.pipelineStatisticsQuery == VK_TRUE) {
-        mSupportedFeatures.EnableFeature(Feature::PipelineStatisticsQuery);
+        EnableFeature(Feature::PipelineStatisticsQuery);
     }
 
     // TODO(dawn:1559) Resolving timestamp queries after a render pass is failing on Qualcomm-based
     // Android devices.
     if (mDeviceInfo.properties.limits.timestampComputeAndGraphics == VK_TRUE &&
         !IsAndroidQualcomm()) {
-        mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
-        mSupportedFeatures.EnableFeature(Feature::TimestampQueryInsidePasses);
+        EnableFeature(Feature::TimestampQuery);
+        EnableFeature(Feature::TimestampQueryInsidePasses);
     }
 
     if (IsDepthStencilFormatSupported(VK_FORMAT_D32_SFLOAT_S8_UINT)) {
-        mSupportedFeatures.EnableFeature(Feature::Depth32FloatStencil8);
+        EnableFeature(Feature::Depth32FloatStencil8);
     }
 
     if (mDeviceInfo.features.drawIndirectFirstInstance == VK_TRUE) {
-        mSupportedFeatures.EnableFeature(Feature::IndirectFirstInstance);
+        EnableFeature(Feature::IndirectFirstInstance);
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
@@ -223,7 +223,7 @@ void Adapter::InitializeSupportedFeaturesImpl() {
         mDeviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE &&
         mDeviceInfo._16BitStorageFeatures.storageInputOutput16 == VK_TRUE &&
         mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_TRUE) {
-        mSupportedFeatures.EnableFeature(Feature::ShaderF16);
+        EnableFeature(Feature::ShaderF16);
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::ShaderIntegerDotProduct) &&
@@ -231,14 +231,14 @@ void Adapter::InitializeSupportedFeaturesImpl() {
                 .integerDotProduct4x8BitPackedSignedAccelerated == VK_TRUE &&
         mDeviceInfo.shaderIntegerDotProductProperties
                 .integerDotProduct4x8BitPackedUnsignedAccelerated == VK_TRUE) {
-        mSupportedFeatures.EnableFeature(Feature::ChromiumExperimentalDp4a);
+        EnableFeature(Feature::ChromiumExperimentalDp4a);
     }
 
     // unclippedDepth=true translates to depthClipEnable=false, depthClamp=true
     if (mDeviceInfo.features.depthClamp == VK_TRUE &&
         mDeviceInfo.HasExt(DeviceExt::DepthClipEnable) &&
         mDeviceInfo.depthClipEnableFeatures.depthClipEnable == VK_TRUE) {
-        mSupportedFeatures.EnableFeature(Feature::DepthClipControl);
+        EnableFeature(Feature::DepthClipControl);
     }
 
     VkFormatProperties rg11b10Properties;
@@ -248,20 +248,20 @@ void Adapter::InitializeSupportedFeaturesImpl() {
     if (IsSubset(static_cast<VkFormatFeatureFlags>(VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT |
                                                    VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT),
                  rg11b10Properties.optimalTilingFeatures)) {
-        mSupportedFeatures.EnableFeature(Feature::RG11B10UfloatRenderable);
+        EnableFeature(Feature::RG11B10UfloatRenderable);
     }
 
     VkFormatProperties bgra8unormProperties;
     mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(
         mPhysicalDevice, VK_FORMAT_B8G8R8A8_UNORM, &bgra8unormProperties);
     if (bgra8unormProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT) {
-        mSupportedFeatures.EnableFeature(Feature::BGRA8UnormStorage);
+        EnableFeature(Feature::BGRA8UnormStorage);
     }
 
 #if DAWN_PLATFORM_IS(ANDROID) || DAWN_PLATFORM_IS(CHROMEOS)
     // TODO(chromium:1258986): Precisely enable the feature by querying the device's format
     // features.
-    mSupportedFeatures.EnableFeature(Feature::MultiPlanarFormats);
+    EnableFeature(Feature::MultiPlanarFormats);
 #endif  // DAWN_PLATFORM_IS(ANDROID) || DAWN_PLATFORM_IS(CHROMEOS)
 }
 
@@ -460,9 +460,8 @@ ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor*
     return Device::Create(this, descriptor, deviceToggles);
 }
 
-MaybeError Adapter::ValidateFeatureSupportedWithDeviceTogglesImpl(
-    wgpu::FeatureName feature,
-    const TogglesState& deviceToggles) {
+MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(wgpu::FeatureName feature,
+                                                            const TogglesState& toggles) const {
     return {};
 }
 

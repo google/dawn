@@ -40,8 +40,8 @@ MaybeError AdapterBase::Initialize() {
     DAWN_TRY_CONTEXT(InitializeImpl(), "initializing adapter (backend=%s)", mBackend);
     InitializeVendorArchitectureImpl();
 
-    mSupportedFeatures.EnableFeature(Feature::DawnNative);
-    mSupportedFeatures.EnableFeature(Feature::DawnInternalUsages);
+    EnableFeature(Feature::DawnNative);
+    EnableFeature(Feature::DawnInternalUsages);
     InitializeSupportedFeaturesImpl();
 
     DAWN_TRY_CONTEXT(
@@ -213,9 +213,12 @@ const TogglesState& AdapterBase::GetTogglesState() const {
     return mTogglesState;
 }
 
-MaybeError AdapterBase::ValidateFeatureSupportedWithDeviceToggles(
-    wgpu::FeatureName feature,
-    const TogglesState& deviceTogglesState) {
+void AdapterBase::EnableFeature(Feature feature) {
+    mSupportedFeatures.EnableFeature(feature);
+}
+
+MaybeError AdapterBase::ValidateFeatureSupportedWithToggles(wgpu::FeatureName feature,
+                                                            const TogglesState& toggles) const {
     DAWN_TRY(ValidateFeatureName(feature));
     DAWN_INVALID_IF(!mSupportedFeatures.IsEnabled(feature),
                     "Requested feature %s is not supported.", feature);
@@ -224,12 +227,20 @@ MaybeError AdapterBase::ValidateFeatureSupportedWithDeviceToggles(
     // Experimental features are guarded by toggle DisallowUnsafeAPIs.
     if (featureInfo->featureState == FeatureInfo::FeatureState::Experimental) {
         // DisallowUnsafeAPIs toggle is by default enabled if not explicitly disabled.
-        DAWN_INVALID_IF(deviceTogglesState.IsEnabled(Toggle::DisallowUnsafeAPIs),
+        DAWN_INVALID_IF(toggles.IsEnabled(Toggle::DisallowUnsafeAPIs),
                         "Feature %s is guarded by toggle disallow_unsafe_apis.", featureInfo->name);
     }
 
     // Do backend-specific validation.
-    return ValidateFeatureSupportedWithDeviceTogglesImpl(feature, deviceTogglesState);
+    return ValidateFeatureSupportedWithTogglesImpl(feature, toggles);
+}
+
+void AdapterBase::SetSupportedFeaturesForTesting(
+    const std::vector<wgpu::FeatureName>& requiredFeatures) {
+    mSupportedFeatures = {};
+    for (wgpu::FeatureName f : requiredFeatures) {
+        mSupportedFeatures.EnableFeature(f);
+    }
 }
 
 ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
@@ -285,7 +296,7 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     // supported features using adapter toggles or device toggles.
     for (uint32_t i = 0; i < descriptor->requiredFeaturesCount; ++i) {
         wgpu::FeatureName feature = descriptor->requiredFeatures[i];
-        DAWN_TRY(ValidateFeatureSupportedWithDeviceToggles(feature, deviceToggles));
+        DAWN_TRY(ValidateFeatureSupportedWithToggles(feature, deviceToggles));
     }
 
     if (descriptor->requiredLimits != nullptr) {

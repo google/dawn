@@ -64,7 +64,7 @@ TEST_F(FeatureTests, AdapterWithRequiredFeatureDisabled) {
 
         // Test that the adapter with unsafe apis disallowed validate features as expected.
         {
-            mAdapterBase.SetSupportedFeatures(featureNamesWithoutOne);
+            mAdapterBase.SetSupportedFeaturesForTesting(featureNamesWithoutOne);
             dawn::native::Adapter adapterWithoutFeature(&mAdapterBase);
 
             wgpu::DeviceDescriptor deviceDescriptor;
@@ -79,7 +79,7 @@ TEST_F(FeatureTests, AdapterWithRequiredFeatureDisabled) {
 
         // Test that the adapter with unsafe apis allowed validate features as expected.
         {
-            mUnsafeAdapterBase.SetSupportedFeatures(featureNamesWithoutOne);
+            mUnsafeAdapterBase.SetSupportedFeaturesForTesting(featureNamesWithoutOne);
             dawn::native::Adapter adapterWithoutFeature(&mUnsafeAdapterBase);
 
             wgpu::DeviceDescriptor deviceDescriptor;

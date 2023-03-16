@@ -55,9 +55,8 @@ class Adapter : public d3d::Adapter {
     void InitializeSupportedFeaturesImpl() override;
     MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
 
-    MaybeError ValidateFeatureSupportedWithDeviceTogglesImpl(
-        wgpu::FeatureName feature,
-        const TogglesState& deviceTogglesState) override;
+    MaybeError ValidateFeatureSupportedWithTogglesImpl(wgpu::FeatureName feature,
+                                                       const TogglesState& toggles) const override;
 
     MaybeError InitializeDebugLayerFilters();
     void CleanUpDebugLayerFilters();
