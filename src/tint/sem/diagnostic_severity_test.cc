@@ -59,6 +59,9 @@ class DiagnosticSeverityTest : public TestHelper {
         //     @diagnostic(warning, chromium_unreachable_code)
         //     loop @diagnostic(off, chromium_unreachable_code) {
         //       return;
+        //       continuing @diagnostic(info, chromium_unreachable_code) {
+        //         break if true;
+        //       }
         //     }
         //
         //     @diagnostic(error, chromium_unreachable_code)
@@ -83,6 +86,7 @@ class DiagnosticSeverityTest : public TestHelper {
         auto for_body_severity = builtin::DiagnosticSeverity::kWarning;
         auto loop_severity = builtin::DiagnosticSeverity::kWarning;
         auto loop_body_severity = builtin::DiagnosticSeverity::kOff;
+        auto continuing_severity = builtin::DiagnosticSeverity::kInfo;
         auto while_severity = builtin::DiagnosticSeverity::kError;
         auto while_body_severity = builtin::DiagnosticSeverity::kWarning;
         auto attr = [&](auto severity) {
@@ -98,6 +102,7 @@ class DiagnosticSeverityTest : public TestHelper {
         auto* return_foo_for = Return();
         auto* return_foo_loop = Return();
         auto* return_foo_while = Return();
+        auto* breakif_foo_continuing = BreakIf(Expr(true));
         auto* else_stmt = Block(utils::Vector{return_foo_else}, attr(else_body_severity));
         auto* elseif = If(Expr(false), Block(return_foo_elseif), Else(else_stmt));
         auto* if_foo = If(Expr(true), Block(utils::Vector{return_foo_if}, attr(if_body_severity)),
@@ -109,7 +114,8 @@ class DiagnosticSeverityTest : public TestHelper {
         auto* fl =
             For(Decl(Var("i", ty.i32())), false, Increment("i"),
                 Block(utils::Vector{return_foo_for}, attr(for_body_severity)), attr(for_severity));
-        auto* l = Loop(Block(utils::Vector{return_foo_loop}, attr(loop_body_severity)), Block(),
+        auto* l = Loop(Block(utils::Vector{return_foo_loop}, attr(loop_body_severity)),
+                       Block(utils::Vector{breakif_foo_continuing}, attr(continuing_severity)),
                        attr(loop_severity));
         auto* wl = While(false, Block(utils::Vector{return_foo_while}, attr(while_body_severity)),
                          attr(while_severity));
@@ -150,6 +156,8 @@ class DiagnosticSeverityTest : public TestHelper {
         EXPECT_EQ(p.Sem().DiagnosticSeverity(return_foo_for, rule), for_body_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(l, rule), loop_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(l->body, rule), loop_body_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(l->continuing, rule), continuing_severity);
+        EXPECT_EQ(p.Sem().DiagnosticSeverity(breakif_foo_continuing, rule), continuing_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(return_foo_loop, rule), loop_body_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(wl, rule), while_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(wl->condition, rule), while_severity);

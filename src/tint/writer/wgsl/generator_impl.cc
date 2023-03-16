@@ -1048,7 +1048,17 @@ bool GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
 
     if (stmt->continuing && !stmt->continuing->Empty()) {
         line();
-        line() << "continuing {";
+        {
+            auto out = line();
+            out << "continuing ";
+            if (!stmt->continuing->attributes.IsEmpty()) {
+                if (!EmitAttributes(out, stmt->continuing->attributes)) {
+                    return false;
+                }
+                out << " ";
+            }
+            out << "{";
+        }
         if (!EmitStatementsWithIndent(stmt->continuing->statements)) {
             return false;
         }

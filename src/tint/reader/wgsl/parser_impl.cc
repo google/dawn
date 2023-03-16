@@ -1975,8 +1975,13 @@ Maybe<const ast::Statement*> ParserImpl::break_if_statement() {
 }
 
 // continuing_compound_statement:
-//   brace_left statement* break_if_statement? brace_right
+//   attribute* BRACE_LEFT statement* break_if_statement? BRACE_RIGHT
 Maybe<const ast::BlockStatement*> ParserImpl::continuing_compound_statement() {
+    auto attrs = attribute_list();
+    if (attrs.errored) {
+        return Failure::kErrored;
+    }
+
     auto source_start = peek().source();
     auto body = expect_brace_block("", [&]() -> Expect<StatementList> {
         StatementList stmts;
@@ -2010,7 +2015,7 @@ Maybe<const ast::BlockStatement*> ParserImpl::continuing_compound_statement() {
     auto source_end = last_source();
 
     return create<ast::BlockStatement>(Source::Combine(source_start, source_end), body.value,
-                                       utils::Empty);
+                                       std::move(attrs.value));
 }
 
 // continuing_statement

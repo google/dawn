@@ -28,6 +28,16 @@ TEST_F(ParserImplTest, ContinuingStmt) {
     ASSERT_TRUE(e->statements[0]->Is<ast::DiscardStatement>());
 }
 
+TEST_F(ParserImplTest, ContinuingStmt_WithAttributes) {
+    auto p = parser("continuing @diagnostic(off, derivative_uniformity) { discard; }");
+    auto e = p->continuing_statement();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_EQ(e->attributes.Length(), 1u);
+    EXPECT_TRUE(e->attributes[0]->Is<ast::DiagnosticAttribute>());
+}
+
 TEST_F(ParserImplTest, ContinuingStmt_InvalidBody) {
     auto p = parser("continuing { discard }");
     auto e = p->continuing_statement();
