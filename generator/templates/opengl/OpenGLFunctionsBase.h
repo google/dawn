@@ -32,6 +32,14 @@ namespace dawn::native::opengl {
             {% endfor %}
 
         {% endfor%}
+
+        // GL_ANGLE_base_vertex_base_instance
+        // See crbug.com/dawn/1715 for why this is embedded
+        PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEANGLEPROC DrawArraysInstancedBaseInstanceANGLE = nullptr;
+        PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXBASEINSTANCEANGLEPROC DrawElementsInstancedBaseVertexBaseInstanceANGLE = nullptr;
+        PFNGLMULTIDRAWARRAYSINSTANCEDBASEINSTANCEANGLEPROC MultiDrawArraysInstancedBaseInstanceANGLE = nullptr;
+        PFNGLMULTIDRAWELEMENTSINSTANCEDBASEVERTEXBASEINSTANCEANGLEPROC MultiDrawElementsInstancedBaseVertexBaseInstanceANGLE = nullptr;
+
         bool IsGLExtensionSupported(const char* extension) const;
 
       protected:

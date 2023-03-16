@@ -47,6 +47,15 @@ MaybeError OpenGLFunctionsBase::LoadOpenGLESProcs(GetProcAddress getProc, int ma
         }
     {% endfor %}
 
+    // GL_ANGLE_base_vertex_base_instance
+    // See crbug.com/dawn/1715 for why this is embedded
+    if (IsGLExtensionSupported("GL_ANGLE_base_vertex_base_instance")) {
+        DAWN_TRY(LoadProc(getProc, &DrawArraysInstancedBaseInstanceANGLE, "glDrawArraysInstancedBaseInstanceANGLE"));
+        DAWN_TRY(LoadProc(getProc, &DrawElementsInstancedBaseVertexBaseInstanceANGLE, "glDrawElementsInstancedBaseVertexBaseInstanceANGLE"));
+        DAWN_TRY(LoadProc(getProc, &MultiDrawArraysInstancedBaseInstanceANGLE, "glMultiDrawArraysInstancedBaseInstanceANGLE"));
+        DAWN_TRY(LoadProc(getProc, &MultiDrawElementsInstancedBaseVertexBaseInstanceANGLE, "glMultiDrawElementsInstancedBaseVertexBaseInstanceANGLE"));
+    }
+
     return {};
 }
 
