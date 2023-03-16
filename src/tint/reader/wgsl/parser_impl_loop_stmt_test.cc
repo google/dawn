@@ -20,7 +20,8 @@ namespace {
 
 TEST_F(ParserImplTest, LoopStmt_BodyNoContinuing) {
     auto p = parser("loop { discard; }");
-    auto e = p->loop_statement();
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -39,7 +40,8 @@ TEST_F(ParserImplTest, LoopStmt_BodyNoContinuing) {
 
 TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
     auto p = parser("loop { discard; continuing { discard; }}");
-    auto e = p->loop_statement();
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -64,7 +66,8 @@ TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyNoContinuing) {
     auto p = parser("loop { }");
-    auto e = p->loop_statement();
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -75,7 +78,8 @@ TEST_F(ParserImplTest, LoopStmt_NoBodyNoContinuing) {
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyWithContinuing) {
     auto p = parser("loop { continuing { discard; }}");
-    auto e = p->loop_statement();
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -85,9 +89,35 @@ TEST_F(ParserImplTest, LoopStmt_NoBodyWithContinuing) {
     EXPECT_TRUE(e->continuing->statements[0]->Is<ast::DiscardStatement>());
 }
 
+TEST_F(ParserImplTest, LoopStmt_StmtAttributes) {
+    auto p = parser("@diagnostic(off, derivative_uniformity) loop { }");
+    auto attrs = p->attribute_list();
+    auto l = p->loop_statement(attrs.value);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    EXPECT_FALSE(l.errored);
+    ASSERT_TRUE(l.matched);
+
+    EXPECT_TRUE(attrs->IsEmpty());
+    ASSERT_EQ(l->attributes.Length(), 1u);
+    EXPECT_TRUE(l->attributes[0]->Is<ast::DiagnosticAttribute>());
+}
+
+TEST_F(ParserImplTest, LoopStmt_BodyAttributes) {
+    auto p = parser("loop @diagnostic(off, derivative_uniformity) { }");
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_EQ(e->body->attributes.Length(), 1u);
+    EXPECT_TRUE(e->body->attributes[0]->Is<ast::DiagnosticAttribute>());
+}
+
 TEST_F(ParserImplTest, LoopStmt_MissingBracketLeft) {
     auto p = parser("loop discard; }");
-    auto e = p->loop_statement();
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -97,7 +127,8 @@ TEST_F(ParserImplTest, LoopStmt_MissingBracketLeft) {
 
 TEST_F(ParserImplTest, LoopStmt_MissingBracketRight) {
     auto p = parser("loop { discard; ");
-    auto e = p->loop_statement();
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -107,7 +138,8 @@ TEST_F(ParserImplTest, LoopStmt_MissingBracketRight) {
 
 TEST_F(ParserImplTest, LoopStmt_InvalidStatements) {
     auto p = parser("loop { discard }");
-    auto e = p->loop_statement();
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -117,7 +149,8 @@ TEST_F(ParserImplTest, LoopStmt_InvalidStatements) {
 
 TEST_F(ParserImplTest, LoopStmt_InvalidContinuing) {
     auto p = parser("loop { continuing { discard }}");
-    auto e = p->loop_statement();
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -127,7 +160,8 @@ TEST_F(ParserImplTest, LoopStmt_InvalidContinuing) {
 
 TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf) {
     auto p = parser("loop { continuing { break if 1 + 2 < 5; }}");
-    auto e = p->loop_statement();
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -139,7 +173,8 @@ TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf) {
 
 TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf_MissingExpr) {
     auto p = parser("loop { continuing { break if; }}");
-    auto e = p->loop_statement();
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_TRUE(p->has_error());
@@ -149,7 +184,8 @@ TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf_MissingExpr) {
 
 TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf_InvalidExpr) {
     auto p = parser("loop { continuing { break if switch; }}");
-    auto e = p->loop_statement();
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_TRUE(p->has_error());
@@ -159,7 +195,8 @@ TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf_InvalidExpr) {
 
 TEST_F(ParserImplTest, LoopStmt_NoContinuing_BreakIf) {
     auto p = parser("loop { break if true; }");
-    auto e = p->loop_statement();
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_TRUE(p->has_error());
@@ -169,7 +206,8 @@ TEST_F(ParserImplTest, LoopStmt_NoContinuing_BreakIf) {
 
 TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf_MissingSemicolon) {
     auto p = parser("loop { continuing { break if 1 + 2 < 5 }}");
-    auto e = p->loop_statement();
+    ParserImpl::AttributeList attrs;
+    auto e = p->loop_statement(attrs);
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_TRUE(p->has_error());

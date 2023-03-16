@@ -1025,7 +1025,21 @@ bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
 }
 
 bool GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
-    line() << "loop {";
+    {
+        auto out = line();
+
+        if (!stmt->attributes.IsEmpty()) {
+            if (!EmitAttributes(out, stmt->attributes)) {
+                return false;
+            }
+            out << " ";
+        }
+
+        out << "loop ";
+        if (!EmitBlockHeader(out, stmt->body)) {
+            return false;
+        }
+    }
     increment_indent();
 
     if (!EmitStatements(stmt->body->statements)) {

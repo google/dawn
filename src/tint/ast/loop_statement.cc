@@ -14,6 +14,8 @@
 
 #include "src/tint/ast/loop_statement.h"
 
+#include <utility>
+
 #include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::LoopStatement);
@@ -24,11 +26,16 @@ LoopStatement::LoopStatement(ProgramID pid,
                              NodeID nid,
                              const Source& src,
                              const BlockStatement* b,
-                             const BlockStatement* cont)
-    : Base(pid, nid, src), body(b), continuing(cont) {
+                             const BlockStatement* cont,
+                             utils::VectorRef<const ast::Attribute*> attrs)
+    : Base(pid, nid, src), body(b), continuing(cont), attributes(std::move(attrs)) {
     TINT_ASSERT(AST, body);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, continuing, program_id);
+    for (auto* attr : attributes) {
+        TINT_ASSERT(AST, attr);
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
+    }
 }
 
 LoopStatement::~LoopStatement() = default;
@@ -38,7 +45,8 @@ const LoopStatement* LoopStatement::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto* b = ctx->Clone(body);
     auto* cont = ctx->Clone(continuing);
-    return ctx->dst->create<LoopStatement>(src, b, cont);
+    auto attrs = ctx->Clone(attributes);
+    return ctx->dst->create<LoopStatement>(src, b, cont, std::move(attrs));
 }
 
 }  // namespace tint::ast

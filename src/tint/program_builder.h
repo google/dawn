@@ -3264,20 +3264,26 @@ class ProgramBuilder {
     /// @param source the source information
     /// @param body the loop body
     /// @param continuing the optional continuing block
+    /// @param attributes optional attributes
     /// @returns the loop statement pointer
-    const ast::LoopStatement* Loop(const Source& source,
-                                   const ast::BlockStatement* body,
-                                   const ast::BlockStatement* continuing = nullptr) {
-        return create<ast::LoopStatement>(source, body, continuing);
+    const ast::LoopStatement* Loop(
+        const Source& source,
+        const ast::BlockStatement* body,
+        const ast::BlockStatement* continuing = nullptr,
+        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
+        return create<ast::LoopStatement>(source, body, continuing, std::move(attributes));
     }
 
     /// Creates a ast::LoopStatement with input body and optional continuing
     /// @param body the loop body
     /// @param continuing the optional continuing block
+    /// @param attributes optional attributes
     /// @returns the loop statement pointer
-    const ast::LoopStatement* Loop(const ast::BlockStatement* body,
-                                   const ast::BlockStatement* continuing = nullptr) {
-        return create<ast::LoopStatement>(body, continuing);
+    const ast::LoopStatement* Loop(
+        const ast::BlockStatement* body,
+        const ast::BlockStatement* continuing = nullptr,
+        utils::VectorRef<const ast::Attribute*> attributes = utils::Empty) {
+        return create<ast::LoopStatement>(body, continuing, std::move(attributes));
     }
 
     /// Creates a ast::ForLoopStatement with input body and optional initializer, condition,

@@ -743,7 +743,7 @@ struct LoopStatementBuilder final : public Castable<LoopStatementBuilder, Statem
     /// @param builder the program builder
     /// @returns the built ast::LoopStatement
     ast::LoopStatement* Build(ProgramBuilder* builder) const override {
-        return builder->create<ast::LoopStatement>(Source{}, body, continuing);
+        return builder->create<ast::LoopStatement>(Source{}, body, continuing, utils::Empty);
     }
 
     /// Loop-statement block body

@@ -8547,6 +8547,114 @@ fn foo() {
     }
 }
 
+TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnLoopStatement_CallInBody) {
+    auto& param = GetParam();
+    utils::StringStream ss;
+    ss << R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+fn foo() {
+  )"
+       << "@diagnostic(" << param << ", derivative_uniformity)"
+       << R"(loop {
+    _ = dpdx(1.0);
+    continuing {
+      break if non_uniform == 0;
+    }
+  }
+}
+)";
+
+    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
+    if (param == builtin::DiagnosticSeverity::kOff) {
+        EXPECT_TRUE(error_.empty());
+    } else {
+        utils::StringStream err;
+        err << ToStr(param) << ": 'dpdx' must only be called";
+        EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
+    }
+}
+
+TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnLoopStatement_CallInContinuing) {
+    auto& param = GetParam();
+    utils::StringStream ss;
+    ss << R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+fn foo() {
+  )"
+       << "@diagnostic(" << param << ", derivative_uniformity)"
+       << R"(loop {
+    continuing {
+      _ = dpdx(1.0);
+      break if non_uniform == 0;
+    }
+  }
+}
+)";
+
+    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
+    if (param == builtin::DiagnosticSeverity::kOff) {
+        EXPECT_TRUE(error_.empty());
+    } else {
+        utils::StringStream err;
+        err << ToStr(param) << ": 'dpdx' must only be called";
+        EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
+    }
+}
+
+TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnLoopBody_CallInBody) {
+    auto& param = GetParam();
+    utils::StringStream ss;
+    ss << R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+fn foo() {
+  loop )"
+       << "@diagnostic(" << param << ", derivative_uniformity)"
+       << R"( {
+    _ = dpdx(1.0);
+    continuing {
+      break if non_uniform == 0;
+    }
+  }
+}
+)";
+
+    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
+    if (param == builtin::DiagnosticSeverity::kOff) {
+        EXPECT_TRUE(error_.empty());
+    } else {
+        utils::StringStream err;
+        err << ToStr(param) << ": 'dpdx' must only be called";
+        EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
+    }
+}
+
+TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnLoopBody_CallInContinuing) {
+    auto& param = GetParam();
+    utils::StringStream ss;
+    ss << R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+fn foo() {
+  loop )"
+       << "@diagnostic(" << param << ", derivative_uniformity)"
+       << R"( {
+    continuing {
+      _ = dpdx(1.0);
+      break if non_uniform == 0;
+    }
+  }
+}
+)";
+
+    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
+    if (param == builtin::DiagnosticSeverity::kOff) {
+        EXPECT_TRUE(error_.empty());
+    } else {
+        utils::StringStream err;
+        err << ToStr(param) << ": 'dpdx' must only be called";
+        EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
+    }
+}
+
 TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnSwitchStatement_CallInCondition) {
     auto& param = GetParam();
     utils::StringStream ss;

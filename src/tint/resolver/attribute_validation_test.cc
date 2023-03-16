@@ -1144,6 +1144,39 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kWorkgroup, false},
                                          TestParams{AttributeKind::kBindingAndGroup, false}));
 
+using LoopStatementAttributeTest = TestWithParams;
+TEST_P(LoopStatementAttributeTest, IsValid) {
+    auto& params = GetParam();
+
+    WrapInFunction(
+        Loop(Block(Return()), Block(), createAttributes(Source{{12, 34}}, *this, params.kind)));
+
+    if (params.should_pass) {
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for loop statements");
+    }
+}
+INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
+                         LoopStatementAttributeTest,
+                         testing::Values(TestParams{AttributeKind::kAlign, false},
+                                         TestParams{AttributeKind::kBinding, false},
+                                         TestParams{AttributeKind::kBuiltin, false},
+                                         TestParams{AttributeKind::kDiagnostic, true},
+                                         TestParams{AttributeKind::kGroup, false},
+                                         TestParams{AttributeKind::kId, false},
+                                         TestParams{AttributeKind::kInterpolate, false},
+                                         TestParams{AttributeKind::kInvariant, false},
+                                         TestParams{AttributeKind::kLocation, false},
+                                         TestParams{AttributeKind::kMustUse, false},
+                                         TestParams{AttributeKind::kOffset, false},
+                                         TestParams{AttributeKind::kSize, false},
+                                         TestParams{AttributeKind::kStage, false},
+                                         TestParams{AttributeKind::kStride, false},
+                                         TestParams{AttributeKind::kWorkgroup, false},
+                                         TestParams{AttributeKind::kBindingAndGroup, false}));
+
 using WhileStatementAttributeTest = TestWithParams;
 TEST_P(WhileStatementAttributeTest, IsValid) {
     auto& params = GetParam();
@@ -1222,6 +1255,13 @@ TEST_P(BlockStatementTest, ForStatementBody) {
          utils::Vector{
              For(nullptr, Expr(true), nullptr,
                  Block(utils::Vector{Break()}, createAttributes({}, *this, GetParam().kind))),
+         });
+    Check();
+}
+TEST_P(BlockStatementTest, LoopStatementBody) {
+    Func("foo", utils::Empty, ty.void_(),
+         utils::Vector{
+             Loop(Block(utils::Vector{Break()}, createAttributes({}, *this, GetParam().kind))),
          });
     Check();
 }

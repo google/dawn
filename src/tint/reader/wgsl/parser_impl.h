@@ -512,9 +512,10 @@ class ParserImpl {
     /// Parses a `func_call_statement` grammar element
     /// @returns the parsed function call or nullptr
     Maybe<const ast::CallStatement*> func_call_statement();
-    /// Parses a `loop_statement` grammar element
+    /// Parses a `loop_statement` grammar element, with the attribute list provided as `attrs`.
+    /// @param attrs the list of attributes for the statement
     /// @returns the parsed loop or nullptr
-    Maybe<const ast::LoopStatement*> loop_statement();
+    Maybe<const ast::LoopStatement*> loop_statement(AttributeList& attrs);
     /// Parses a `for_header` grammar element, erroring on parse failure.
     /// @returns the parsed for header or nullptr
     Expect<std::unique_ptr<ForHeader>> expect_for_header();
