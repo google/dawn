@@ -331,18 +331,32 @@ Token Lexer::try_float() {
     auto source = begin_source();
     bool has_mantissa_digits = false;
 
+    std::optional<size_t> first_significant_digit_position;
     while (end < length() && is_digit(at(end))) {
+        if (!first_significant_digit_position.has_value() && (at(end) != '0')) {
+            first_significant_digit_position = end;
+        }
+
         has_mantissa_digits = true;
         end++;
     }
 
-    bool has_point = false;
+    std::optional<size_t> dot_position;
     if (end < length() && matches(end, '.')) {
-        has_point = true;
+        dot_position = end;
         end++;
     }
 
+    size_t zeros_before_digit = 0;
     while (end < length() && is_digit(at(end))) {
+        if (!first_significant_digit_position.has_value()) {
+            if (at(end) == '0') {
+                zeros_before_digit += 1;
+            } else {
+                first_significant_digit_position = end;
+            }
+        }
+
         has_mantissa_digits = true;
         end++;
     }
@@ -352,7 +366,7 @@ Token Lexer::try_float() {
     }
 
     // Parse the exponent if one exists
-    bool has_exponent = false;
+    std::optional<size_t> exponent_value_position;
     bool negative_exponent = false;
     if (end < length() && (matches(end, 'e') || matches(end, 'E'))) {
         end++;
@@ -360,14 +374,16 @@ Token Lexer::try_float() {
             negative_exponent = matches(end, '-');
             end++;
         }
+        exponent_value_position = end;
 
+        bool has_digits = false;
         while (end < length() && isdigit(at(end))) {
-            has_exponent = true;
+            has_digits = true;
             end++;
         }
 
         // If an 'e' or 'E' was present, then the number part must also be present.
-        if (!has_exponent) {
+        if (!has_digits) {
             const auto str = std::string{substr(start, end - start)};
             return {Token::Type::kError, source,
                     "incomplete exponent for floating point literal: " + str};
@@ -382,7 +398,8 @@ Token Lexer::try_float() {
         has_h_suffix = true;
     }
 
-    if (!has_point && !has_exponent && !has_f_suffix && !has_h_suffix) {
+    if (!dot_position.has_value() && !exponent_value_position.has_value() && !has_f_suffix &&
+        !has_h_suffix) {
         // If it only has digits then it's an integer.
         return {};
     }
@@ -399,10 +416,32 @@ Token Lexer::try_float() {
     auto ret = absl::from_chars(&at(start), end_ptr, value);
     bool overflow = ret.ec != std::errc();
 
-    // The provided value did not fit in a double and has a negative exponent, so treat it as a 0.
-    if (negative_exponent && ret.ec == std::errc::result_out_of_range) {
-        overflow = false;
-        value = 0.0;
+    // Value didn't fit in a double, check for underflow as that is 0.0 in WGSL and not an error.
+    if (ret.ec == std::errc::result_out_of_range) {
+        // The exponent is negative, so treat as underflow
+        if (negative_exponent) {
+            overflow = false;
+            value = 0.0;
+        } else if (dot_position.has_value() && first_significant_digit_position.has_value() &&
+                   first_significant_digit_position.value() > dot_position.value()) {
+            // Parse the exponent from the float if provided
+            size_t exp_value = 0;
+            bool exp_conversion_succeeded = true;
+            if (exponent_value_position.has_value()) {
+                auto exp_end_ptr = end_ptr - (has_f_suffix || has_h_suffix ? 1 : 0);
+                auto exp_ret = std::from_chars(&at(exponent_value_position.value()), exp_end_ptr,
+                                               exp_value, 10);
+
+                if (exp_ret.ec != std::errc{}) {
+                    exp_conversion_succeeded = false;
+                }
+            }
+            // If the exponent has gone negative, then this is an underflow case
+            if (exp_conversion_succeeded && exp_value < zeros_before_digit) {
+                overflow = false;
+                value = 0.0;
+            }
+        }
     }
 
     TINT_ASSERT(Reader, end_ptr == ret.ptr);
