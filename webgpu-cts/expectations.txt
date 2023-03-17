@@ -470,6 +470,12 @@ crbug.com/1410936 [ ventura ] webgpu:web_platform,canvas,getCurrentTexture:* [ F
 crbug.com/1421045 [ nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_checks,limits,* [ Skip ]
 
 ################################################################################
+# GPUDeviceLostReason test needs to be updated for spec change
+# KEEP
+################################################################################
+crbug.com/1424883 webgpu:api,operation,adapter,requestDevice:invalid: [ Failure ]
+
+################################################################################
 # Failures due to deprecated API usage in the CTS
 ################################################################################
 crbug.com/dawn/1677 webgpu:api,validation,render_pass,storeOp:store_op_and_read_only:readonly=true [ Failure ]
