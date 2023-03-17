@@ -187,6 +187,11 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     return {};
 }
 
+Device::Device(AdapterBase* adapter,
+               const DeviceDescriptor* descriptor,
+               const TogglesState& deviceToggles)
+    : Base(adapter, descriptor, deviceToggles) {}
+
 Device::~Device() {
     Destroy();
 
@@ -226,10 +231,6 @@ ComPtr<ID3D12CommandSignature> Device::GetDrawIndexedIndirectSignature() const {
     return mDrawIndexedIndirectSignature;
 }
 
-ComPtr<IDXGIFactory4> Device::GetFactory() const {
-    return ToBackend(GetAdapter())->GetBackend()->GetFactory();
-}
-
 // Ensure DXC if use_dxc toggles are set and validated.
 MaybeError Device::EnsureDXCIfRequired() {
     if (IsToggleEnabled(Toggle::UseDXC)) {
@@ -240,18 +241,6 @@ MaybeError Device::EnsureDXCIfRequired() {
     }
 
     return {};
-}
-
-ComPtr<IDxcLibrary> Device::GetDxcLibrary() const {
-    return ToBackend(GetAdapter())->GetBackend()->GetDxcLibrary();
-}
-
-ComPtr<IDxcCompiler> Device::GetDxcCompiler() const {
-    return ToBackend(GetAdapter())->GetBackend()->GetDxcCompiler();
-}
-
-ComPtr<IDxcValidator> Device::GetDxcValidator() const {
-    return ToBackend(GetAdapter())->GetBackend()->GetDxcValidator();
 }
 
 const PlatformFunctions* Device::GetFunctions() const {
