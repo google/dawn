@@ -43,7 +43,8 @@ class ResourceMemoryAllocator {
     ~ResourceMemoryAllocator();
 
     ResultOrError<ResourceMemoryAllocation> Allocate(const VkMemoryRequirements& requirements,
-                                                     MemoryKind kind);
+                                                     MemoryKind kind,
+                                                     bool forceDisableSubAllocation = false);
     void Deallocate(ResourceMemoryAllocation* allocation);
 
     void DestroyPool();

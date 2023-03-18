@@ -90,6 +90,16 @@ int CompareWindowsDriverVersion(PCIVendorID vendorId,
     return 0;
 }
 
+int CompareIntelMesaDriverVersion(const DriverVersion& version1, const DriverVersion& version2) {
+    for (uint32_t i = 0; i < 3; ++i) {
+        int diff = static_cast<int32_t>(version1[i]) - static_cast<int32_t>(version2[i]);
+        if (diff != 0) {
+            return diff;
+        }
+    }
+    return 0;
+}
+
 // Intel GPUs
 bool IsSkylake(PCIDeviceID deviceId) {
     return std::find(Skylake.cbegin(), Skylake.cend(), deviceId) != Skylake.cend();

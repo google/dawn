@@ -83,7 +83,7 @@ enum class Toggle {
     ApplyClearBigIntegerColorValueWithDraw,
     MetalUseMockBlitEncoderForWriteTimestamp,
     VulkanSplitCommandBufferOnDepthStencilComputeSampleAfterRenderPass,
-    D3D12Allocate2DTextureWithCopyDstOrRenderAttachmentAsCommittedResource,
+    DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment,
     MetalUseCombinedDepthStencilFormatForStencil8,
     MetalUseBothDepthAndStencilAttachmentsForCombinedDepthStencilFormats,
     MetalKeepMultisubresourceDepthStencilTexturesInitialized,

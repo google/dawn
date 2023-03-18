@@ -329,11 +329,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "default on Qualcomm GPUs, which have been observed experiencing a driver crash in this "
       "situation.",
       "https://crbug.com/dawn/1564", ToggleStage::Device}},
-    {Toggle::D3D12Allocate2DTextureWithCopyDstOrRenderAttachmentAsCommittedResource,
-     {"d3d12_allocate_2d_texture_with_copy_dst_or_render_attachment_as_committed_resource",
-      "Allocate each 2D texture with CopyDst or RenderAttachment usage as committed resources "
-      "instead of placed resources. This toggle is enabled by default on D3D12 backends using "
-      "Intel Gen9.5 and Gen11 GPUs due to a driver issue on Intel D3D12 driver.",
+    {Toggle::DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment,
+     {"disable_sub_allocation_for_2d_texture_with_copy_dst_or_render_attachment",
+      "Disable resource sub-allocation for the 2D texture with CopyDst or RenderAttachment usage. "
+      "This toggle is enabled by default on D3D12 backends using Intel Gen9.5 and Gen11 GPUs and "
+      "on Vulkan backends using Intel Gen12 GPUs due to Intel Mesa Vulkan and D3D12 driver issues.",
       "https://crbug.com/1237175", ToggleStage::Device}},
     {Toggle::MetalUseCombinedDepthStencilFormatForStencil8,
      {"metal_use_combined_depth_stencil_format_for_stencil8",

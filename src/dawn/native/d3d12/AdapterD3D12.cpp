@@ -558,7 +558,7 @@ void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     if ((gpu_info::IsIntelGen9(vendorId, deviceId) && !gpu_info::IsSkylake(deviceId)) ||
         gpu_info::IsIntelGen11(vendorId, deviceId)) {
         deviceToggles->Default(
-            Toggle::D3D12Allocate2DTextureWithCopyDstOrRenderAttachmentAsCommittedResource, true);
+            Toggle::DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment, true);
         // Now we don't need to force clearing depth stencil textures with CopyDst as all the depth
         // stencil textures (can only be 2D textures) will be created with CreateCommittedResource()
         // instead of CreatePlacedResource().

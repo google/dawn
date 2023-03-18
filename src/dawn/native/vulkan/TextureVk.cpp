@@ -730,8 +730,14 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
     VkMemoryRequirements requirements;
     device->fn.GetImageMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
 
-    DAWN_TRY_ASSIGN(mMemoryAllocation, device->GetResourceMemoryAllocator()->Allocate(
-                                           requirements, MemoryKind::Opaque));
+    bool forceDisableSubAllocation =
+        (device->IsToggleEnabled(
+            Toggle::DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment)) &&
+        GetDimension() == wgpu::TextureDimension::e2D &&
+        (GetInternalUsage() & (wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment));
+    DAWN_TRY_ASSIGN(mMemoryAllocation,
+                    device->GetResourceMemoryAllocator()->Allocate(requirements, MemoryKind::Opaque,
+                                                                   forceDisableSubAllocation));
 
     DAWN_TRY(CheckVkSuccess(
         device->fn.BindImageMemory(device->GetVkDevice(), mHandle,

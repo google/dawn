@@ -612,7 +612,7 @@ MaybeError Texture::InitializeAsInternalTexture() {
     }
     bool forceAllocateAsCommittedResource =
         (device->IsToggleEnabled(
-            Toggle::D3D12Allocate2DTextureWithCopyDstOrRenderAttachmentAsCommittedResource)) &&
+            Toggle::DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment)) &&
         GetDimension() == wgpu::TextureDimension::e2D &&
         (GetInternalUsage() & (wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment));
     DAWN_TRY_ASSIGN(mResourceAllocation,
