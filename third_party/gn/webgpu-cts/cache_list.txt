@@ -2,7 +2,9 @@ data/webgpu/shader/execution/case-cache/binary/f32_arithmetic.json
 data/webgpu/shader/execution/case-cache/binary/f32_logical.json
 data/webgpu/shader/execution/case-cache/binary/f32_matrix_arithmetic.json
 data/webgpu/shader/execution/case-cache/binary/i32_arithmetic.json
+data/webgpu/shader/execution/case-cache/binary/i32_comparison.json
 data/webgpu/shader/execution/case-cache/binary/u32_arithmetic.json
+data/webgpu/shader/execution/case-cache/binary/u32_comparison.json
 data/webgpu/shader/execution/case-cache/abs.json
 data/webgpu/shader/execution/case-cache/acos.json
 data/webgpu/shader/execution/case-cache/acosh.json
